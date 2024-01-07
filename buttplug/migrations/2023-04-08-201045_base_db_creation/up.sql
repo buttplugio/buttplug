@@ -4,24 +4,35 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE protocol (
   id INTEGER PRIMARY KEY NOT NULL,
+  -- name of the protocol that we'll use inside code
   protocol_name TEXT NOT NULL UNIQUE,
-  display_name TEXT NOT NULL
+  -- name of the protocol as it will be displayed to the user
+  protocol_display_name TEXT NOT NULL
 );
 
-CREATE TABLE protocol_bluetooth_name (
+CREATE TABLE comm_bluetooth_name (
   id INTEGER PRIMARY KEY NOT NULL,
   protocol_id INTEGER NOT NULL,
   bluetooth_name TEXT NOT NULL,
-  prefix INTEGER NOT NULL CHECK (prefix IN (0, 1)),
   FOREIGN KEY(protocol_id)
     REFERENCES protocol (id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 );
 
-CREATE UNIQUE INDEX protocol_bluetooth_name_unique ON protocol_bluetooth_name(protocol_id, bluetooth_name);
+CREATE TABLE comm_bluetooth_prefix (
+  id INTEGER PRIMARY KEY NOT NULL,
+  protocol_id INTEGER NOT NULL,
+  bluetooth_prefix TEXT NOT NULL,
+  FOREIGN KEY(protocol_id)
+    REFERENCES protocol (id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+);
 
-CREATE TABLE protocol_bluetooth_manufacturer_data (
+CREATE UNIQUE INDEX comm_bluetooth_name_unique ON comm_bluetooth_name(protocol_id, bluetooth_name);
+
+CREATE TABLE comm_bluetooth_manufacturer_data (
   id INTEGER PRIMARY KEY NOT NULL,
   protocol_id INTEGER NOT NULL,
   manufacturer_company INTEGER NOT NULL,
@@ -32,7 +43,7 @@ CREATE TABLE protocol_bluetooth_manufacturer_data (
       ON UPDATE NO ACTION
 );
 
-CREATE TABLE protocol_bluetooth_service (
+CREATE TABLE comm_bluetooth_service (
   id INTEGER PRIMARY KEY NOT NULL,
   protocol_id INTEGER NOT NULL,
   service_uuid TEXT NOT NULL,
@@ -42,18 +53,23 @@ CREATE TABLE protocol_bluetooth_service (
       ON UPDATE NO ACTION   
 );
 
-CREATE TABLE protocol_bluetooth_characteristic (
+CREATE UNIQUE INDEX comm_bluetooth_service_unique ON comm_bluetooth_service(protocol_id, service_uuid);
+
+CREATE TABLE comm_bluetooth_characteristic (
   id INTEGER PRIMARY KEY NOT NULL,
-  protocol_bluetooth_service_id INTEGER NOT NULL,
+  comm_bluetooth_service_id INTEGER NOT NULL,
   endpoint TEXT NOT NULL,
   characteristic_uuid TEXT NOT NULL,
-  FOREIGN KEY(protocol_bluetooth_service_id)
-    REFERENCES protocol_bluetooth_service (id)
+  FOREIGN KEY(comm_bluetooth_service_id)
+    REFERENCES comm_bluetooth_service (id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 );
 
-CREATE TABLE protocol_xinput (
+CREATE UNIQUE INDEX comm_bluetooth_characteristic_endpoint_unique ON comm_bluetooth_characteristic(comm_bluetooth_service_id, endpoint);
+CREATE UNIQUE INDEX comm_bluetooth_characteristic_uuid_unique ON comm_bluetooth_characteristic(comm_bluetooth_service_id, characteristic_uuid);
+
+CREATE TABLE comm_xinput (
   protocol_id INTEGER PRIMARY KEY NOT NULL,
   FOREIGN KEY(protocol_id)
     REFERENCES protocol (id)
@@ -61,52 +77,49 @@ CREATE TABLE protocol_xinput (
       ON UPDATE NO ACTION
 );
 
--- If protocol are in this table, it just means they are *capable* of serial use.
-CREATE TABLE protocol_serial (
-  protocol_id INTEGER PRIMARY KEY NOT NULL,
-  FOREIGN KEY(protocol_id)
-    REFERENCES protocol (id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
-);
-
-CREATE TABLE protocol_hid (
+CREATE TABLE comm_hid (
+  id INTEGER PRIMARY KEY NOT NULL,
   protocol_id INTEGER NOT NULL,
   hid_vendor_id INTEGER NOT NULL,
   hid_product_id INTEGER NOT NULL,
-  PRIMARY KEY(protocol_id, hid_vendor_id, hid_product_id),
   FOREIGN KEY(protocol_id)
     REFERENCES protocol (id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 );
 
-CREATE TABLE protocol_usb (
+CREATE UNIQUE INDEX comm_hid_unique ON comm_hid(protocol_id, hid_vendor_id, hid_product_id);
+
+CREATE TABLE comm_usb (
+  id INTEGER PRIMARY KEY NOT NULL,
   protocol_id INTEGER NOT NULL,
   usb_vendor_id INTEGER NOT NULL,
   usb_product_id INTEGER NOT NULL,
-  PRIMARY KEY(protocol_id, usb_vendor_id, usb_product_id),
   FOREIGN KEY(protocol_id)
     REFERENCES protocol (id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 );
 
-CREATE TABLE user_protocol_serial (
+CREATE UNIQUE INDEX comm_usb_unique ON comm_usb(protocol_id, usb_vendor_id, usb_product_id);
+
+CREATE TABLE user_comm_serial (
+  id INTEGER PRIMARY KEY NOT NULL,
   protocol_id INTEGER NOT NULL,
   port TEXT UNIQUE NOT NULL,
   baud INTEGER NOT NULL,
   data_bits INTEGER NOT NULL,
   stop_bits INTEGER NOT NULL,
   parity TEXT NOT NULL,
-  PRIMARY KEY(protocol_id, port),
   FOREIGN KEY(protocol_id)
     REFERENCES protocol (id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 );
 
-CREATE TABLE user_protocol_websocket_name (
+CREATE UNIQUE INDEX user_comm_serial_unique ON user_comm_serial(protocol_id, port);
+
+CREATE TABLE user_comm_websocket_name (
   id INTEGER PRIMARY KEY NOT NULL,
   protocol_id INTEGER NOT NULL,
   device_name TEXT NOT NULL,
@@ -116,15 +129,19 @@ CREATE TABLE user_protocol_websocket_name (
       ON UPDATE NO ACTION
 );
 
-CREATE TABLE user_protocol_websocket_prefix (
+CREATE UNIQUE INDEX user_comm_websocket_name_unique ON user_comm_websocket_name(protocol_id, device_name);
+
+CREATE TABLE user_comm_websocket_prefix (
   id INTEGER PRIMARY KEY NOT NULL,
   protocol_id INTEGER NOT NULL,
-  device_name TEXT NOT NULL,
+  device_prefix TEXT NOT NULL,
   FOREIGN KEY(protocol_id)
     REFERENCES protocol (id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 );
+
+CREATE UNIQUE INDEX user_comm_websocket_prefix_unique ON user_comm_websocket_prefix(protocol_id, device_prefix);
 
 CREATE TABLE device (
   id INTEGER PRIMARY KEY NOT NULL,
@@ -139,1967 +156,92 @@ CREATE TABLE device (
 
 CREATE UNIQUE INDEX device_protocol_identifier_index ON device (protocol_id, identifier);
 
-CREATE TABLE device_feature (
+CREATE TABLE user_device (
   id INTEGER PRIMARY KEY NOT NULL,
   device_id INTEGER NOT NULL,
-  descriptor TEXT,
+  display_name TEXT,
+  device_address TEXT,
+  allow INTEGER NOT NULL CHECK (allow IN (0, 1)),
+  deny INTEGER NOT NULL CHECK (deny IN (0, 1)),
   FOREIGN KEY(device_id)
     REFERENCES device (id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 );
 
-CREATE TABLE actuator_type (
+CREATE TABLE feature_type (
   id INTEGER PRIMARY KEY NOT NULL,
   typename TEXT NOT NULL
 );
 
-INSERT INTO actuator_type (id, typename) VALUES (1, "Unknown");
-INSERT INTO actuator_type (id, typename) VALUES (2, "Vibrate");
-INSERT INTO actuator_type (id, typename) VALUES (3, "Rotate");
-INSERT INTO actuator_type (id, typename) VALUES (4, "Oscillate");
-INSERT INTO actuator_type (id, typename) VALUES (5, "Constrict");
-INSERT INTO actuator_type (id, typename) VALUES (6, "Inflate");
-INSERT INTO actuator_type (id, typename) VALUES (7, "Position");
+INSERT INTO feature_type (id, typename) VALUES (1, "Unknown");
+INSERT INTO feature_type (id, typename) VALUES (2, "Vibrate");
+INSERT INTO feature_type (id, typename) VALUES (3, "Rotate");
+INSERT INTO feature_type (id, typename) VALUES (4, "Oscillate");
+INSERT INTO feature_type (id, typename) VALUES (5, "Constrict");
+INSERT INTO feature_type (id, typename) VALUES (6, "Inflate");
+INSERT INTO feature_type (id, typename) VALUES (7, "Position");
+INSERT INTO feature_type (id, typename) VALUES (8, "Battery");
+INSERT INTO feature_type (id, typename) VALUES (9, "RSSI");
+INSERT INTO feature_type (id, typename) VALUES (10, "Button");
+INSERT INTO feature_type (id, typename) VALUES (11, "Pressure");
 
-CREATE TABLE sensor_type (
+CREATE TABLE feature_message(
   id INTEGER PRIMARY KEY NOT NULL,
-  typename TEXT NOT NULL
+  message_name TEXT NOT NULL
 );
 
-INSERT INTO sensor_type (id, typename) VALUES (1, "Unknown");
-INSERT INTO sensor_type (id, typename) VALUES (2, "Battery");
-INSERT INTO sensor_type (id, typename) VALUES (3, "RSSI");
-INSERT INTO sensor_type (id, typename) VALUES (4, "Button");
-INSERT INTO sensor_type (id, typename) VALUES (5, "Pressure");
+INSERT INTO feature_message(id, message_name) VALUES(1, "ScalarCmd");
+INSERT INTO feature_message(id, message_name) VALUES(2, "RotateWithDirectionCmd");
+INSERT INTO feature_message(id, message_name) VALUES(3, "PositionWithDurationCmd");
+INSERT INTO feature_message(id, message_name) VALUES(4, "ReadCmd");
+INSERT INTO feature_message(id, message_name) VALUES(5, "SubscribeCmd");
 
-CREATE TABLE feature_scalarcmd (
+CREATE TABLE device_feature (
   id INTEGER PRIMARY KEY NOT NULL,
-  feature_id INTEGER NOT NULL,
-  actuator_type_id INTEGER NOT NULL,
-  description TEXT,
+  device_id INTEGER NOT NULL,
+  feature_type_id INTEGER NOT NULL,
+  descriptor TEXT,
   range_min INTEGER NOT NULL,
   range_max INTEGER NOT NULL,
-  FOREIGN KEY(feature_id)
-    REFERENCES device_feature (id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
-);
-
-CREATE TABLE feature_rotatecmd (
-  id INTEGER PRIMARY KEY NOT NULL,
-  feature_id INTEGER NOT NULL,
-  description TEXT NOT NULL,
-  range_min INTEGER NOT NULL,
-  range_max INTEGER NOT NULL,
-  FOREIGN KEY(feature_id)
-    REFERENCES device_feature (id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
-);
-
-CREATE TABLE feature_linearcmd (
-  id INTEGER PRIMARY KEY NOT NULL,
-  feature_id INTEGER NOT NULL,
-  description TEXT,
-  range_min INTEGER NOT NULL,
-  range_max INTEGER NOT NULL,
-  FOREIGN KEY(feature_id)
-    REFERENCES device_feature (id)
-      ON DELETE CASCADE
-      ON UPDATE NO ACTION
-);
-
-CREATE TABLE feature_sensorcmd (
-  id INTEGER PRIMARY KEY NOT NULL,
-  feature_id INTEGER NOT NULL,
-  sensor_type_id INTEGER NOT NULL,
-  description TEXT,
-  range_min INTEGER NOT NULL,
-  range_max INTEGER NOT NULL,
-  readable INTEGER NOT NULL CHECK (readable IN (0, 1)),
-  writable INTEGER NOT NULL CHECK (writable IN (0, 1)),
-  FOREIGN KEY(sensor_type_id)
-    REFERENCES sensor_type (id)
+  FOREIGN KEY(feature_type_id)
+    REFERENCES feature_type (id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION,
+  FOREIGN KEY(device_id)
+    REFERENCES device (id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+);
+
+CREATE TABLE device_feature_message (
+  feature_id INTEGER NOT NULL,
+  feature_message_id INTEGER NOT NULL,
+  PRIMARY KEY (feature_id, feature_message_id),
   FOREIGN KEY(feature_id)
+    REFERENCES device_feature (id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(feature_message_id)
+    REFERENCES feature_message (id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+);
+
+-- CREATE UNIQUE INDEX device_feature_message_unique ON device_feature_message(feature_id, feature_message_id);
+
+CREATE TABLE user_device_feature (
+  id INTEGER PRIMARY KEY NOT NULL,
+  user_device_id INTEGER NOT NULL,
+  device_feature_id INTEGER NOT NULL,
+  range_min INTEGER NOT NULL,
+  range_max INTEGER NOT NULL,
+  FOREIGN KEY(user_device_id)
+    REFERENCES user_device (id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION,
+  FOREIGN KEY(device_feature_id)
     REFERENCES device_feature (id)
       ON DELETE CASCADE
       ON UPDATE NO ACTION
 );
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (1, "kiiroo-v2-vibrator", "kiiroo-v2-vibrator");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (1, "Pearl2", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (1, "Virtual Rabbit", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (1, "Virtual Blowbot", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (1, "Fuse", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (1, "Titan", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (1, 1, "88f82580-0000-01e6-aace-0002a5d5c51b");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (1, 1, "tx", "88f82581-0000-01e6-aace-0002a5d5c51b");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (2, 1, "rxaccel", "88f82584-0000-01e6-aace-0002a5d5c51b");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (3, 1, "rxtouch", "88f82582-0000-01e6-aace-0002a5d5c51b");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (1, 1, "Fuse", "OhMiBod Fuse");
-INSERT INTO device_feature (id, device_id) VALUES (1, 1);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (1, 1, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (2, 1);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (2, 2, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (2, 1, NULL, "Kiiroo V2 Vibrator Device");
-INSERT INTO device_feature (id, device_id) VALUES (3, 2);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (3, 3, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (4, 2);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (4, 4, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (5, 2);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (5, 5, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (3, 1, "Pearl2", "Kiiroo Pearl 2");
-INSERT INTO device_feature (id, device_id) VALUES (6, 3);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (6, 6, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (4, 1, "Virtual Rabbit", "PornHub Virtual Rabit");
-INSERT INTO device_feature (id, device_id) VALUES (7, 4);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (7, 7, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (8, 4);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (8, 8, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (5, 1, "Virtual Blowbot", "PornHub Virtual Blowbot");
-INSERT INTO device_feature (id, device_id) VALUES (9, 5);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (9, 9, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (10, 5);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (10, 10, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (6, 1, "Titan", "Kiiroo Titan");
-INSERT INTO device_feature (id, device_id) VALUES (11, 6);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (11, 11, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (12, 6);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (12, 12, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (13, 6);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (13, 13, 2, NULL, 0, 100);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (2, "svakom-v3", "svakom-v3");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (2, "Phoenix Neo 2", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (2, "FK008A", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (2, "Hannes NEO", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (2, 2, "0000ffe0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (4, 2, "tx", "0000ffe1-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (5, 2, "rx", "0000ffe2-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (7, 2, "Phoenix Neo 2", "Svakom Phoenix Neo 2");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (8, 2, "Hannes NEO", "Svakom Hannes Neo");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (9, 2, NULL, "Svakom Device v3");
-INSERT INTO device_feature (id, device_id) VALUES (14, 9);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (14, 14, 2, NULL, 0, 10);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (10, 2, "FK008A", "Fantasy Cup Theodore");
-INSERT INTO device_feature (id, device_id) VALUES (15, 10);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (15, 15, 2, NULL, 0, 10);
-INSERT INTO device_feature (id, device_id) VALUES (16, 10);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (16, 16, 3, NULL, 0, 1);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (3, "tryfun", "tryfun");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (3, "TRYFUN-ONE", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (3, 3, "0000ff10-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (6, 3, "tx", "0000fff1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (11, 3, NULL, "TryFun Yuan Series");
-INSERT INTO device_feature (id, device_id) VALUES (17, 11);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (17, 17, 4, NULL, 0, 9);
-INSERT INTO device_feature (id, device_id) VALUES (18, 11);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (18, 18, 3, NULL, 0, 9);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (4, "kiiroo-v21-initialized", "kiiroo-v21-initialized");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (4, "Onyx2.1", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (4, "Rey", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (4, "Onyx+", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (4, "We-Vibe Rocketman", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (4, "KEON", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (4, "Keon R2", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (4, 4, "00001900-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (7, 4, "whitelist", "00001901-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (8, 4, "rx", "00001903-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (9, 4, "tx", "00001902-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (12, 4, "We-Vibe Rocketman", "Kiiroo Onyx+ Realm Edition");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (13, 4, "Onyx+", "Kiiroo Onyx+");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (14, 4, "Rey", "Kiiroo Onyx+ Realm Edition");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (15, 4, NULL, "Kiiroo V2.1 Initialized Device");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (16, 4, "Onyx2.1", "Kiiroo Onyx 2.1");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (17, 4, "Keon R2", "Kiiroo Keon");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (18, 4, "KEON", "Kiiroo Keon");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (5, "fox", "fox");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (5, "FoxM70Pro", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (5, "FOX M70 Pro", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (5, "FOX", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (5, 5, "0000ae00-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (10, 5, "tx", "0000ae01-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (19, 5, NULL, "Fox Device");
-INSERT INTO device_feature (id, device_id) VALUES (19, 19);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (19, 19, 2, NULL, 0, 3);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (6, "mysteryvibe", "mysteryvibe");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (6, "MV Poco     ", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (6, "MV Crescendo", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (6, "MV Tenuto   ", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (6, 6, "f0006900-110c-478b-b74b-6f403b364a9c");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (11, 6, "txmode", "f0006901-110c-478b-b74b-6f403b364a9c");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (12, 6, "txvibrate", "f0006903-110c-478b-b74b-6f403b364a9c");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (20, 6, "MV Crescendo", "MysteryVibe Crescendo");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (21, 6, "MV Poco     ", "MysteryVibe Poco");
-INSERT INTO device_feature (id, device_id) VALUES (20, 21);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (20, 20, 2, NULL, 0, 56);
-INSERT INTO device_feature (id, device_id) VALUES (21, 21);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (21, 21, 2, NULL, 0, 56);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (22, 6, NULL, "Mysteryvibe Device");
-INSERT INTO device_feature (id, device_id) VALUES (22, 22);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (22, 22, 2, NULL, 0, 56);
-INSERT INTO device_feature (id, device_id) VALUES (23, 22);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (23, 23, 2, NULL, 0, 56);
-INSERT INTO device_feature (id, device_id) VALUES (24, 22);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (24, 24, 2, NULL, 0, 56);
-INSERT INTO device_feature (id, device_id) VALUES (25, 22);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (25, 25, 2, NULL, 0, 56);
-INSERT INTO device_feature (id, device_id) VALUES (26, 22);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (26, 26, 2, NULL, 0, 56);
-INSERT INTO device_feature (id, device_id) VALUES (27, 22);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (27, 27, 2, NULL, 0, 56);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (23, 6, "MV Tenuto   ", "MysteryVibe Tenuto");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (7, "youou", "youou");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (7, "VX001_", 1);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (7, 7, "0000fff0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (13, 7, "tx", "0000fff6-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (24, 7, NULL, "Youou Wand Vibrator");
-INSERT INTO device_feature (id, device_id) VALUES (28, 24);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (28, 28, 2, NULL, 0, 255);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (8, "kiiroo-v1", "kiiroo-v1");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (8, "PEARL", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (8, "ONYX", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (8, 8, "49535343-fe7d-4ae5-8fa9-9fafd205e455");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (14, 8, "rx", "49535343-1e4d-4bd9-ba61-23c647249616");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (15, 8, "command", "49535343-aca3-481c-91ec-d85e28a60318");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (16, 8, "tx", "49535343-8841-43f4-a8d4-ecbe34729bb3");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (25, 8, NULL, "Kiiroo V1 Device");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (26, 8, "ONYX", "Kiiroo Onyx");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (27, 8, "PEARL", "Kiiroo Pearl");
-INSERT INTO device_feature (id, device_id) VALUES (29, 27);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (29, 29, 2, NULL, 0, 4);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (9, "synchro", "synchro");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (9, "Shinkuro", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (9, 9, "0000ffe0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (17, 9, "tx", "0000ffe1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (28, 9, NULL, "Synchro");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (10, "jejoue", "jejoue");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (10, "Je Joue", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (10, 10, "0000fff0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (18, 10, "tx", "0000fff1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (29, 10, NULL, "Je Joue Device");
-INSERT INTO device_feature (id, device_id) VALUES (30, 29);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (30, 30, 2, NULL, 0, 5);
-INSERT INTO device_feature (id, device_id) VALUES (31, 29);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (31, 31, 2, NULL, 0, 5);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (11, "muse", "muse");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (11, "WB-ZDB-WST", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (11, "WB-TDD", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (11, 11, "0000aaa0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (19, 11, "tx", "0000aaa1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (30, 11, NULL, "Muse Device");
-INSERT INTO device_feature (id, device_id) VALUES (32, 30);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (32, 32, 2, NULL, 0, 9);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (31, 11, "WB-TDD", "Galaku Panty Vib");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (32, 11, "WB-ZDB-WST", "Dream Lover Archer 2");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (12, "vibratissimo", "vibratissimo");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (12, "Vibratissimo", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (12, 12, "0000180a-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (20, 12, "rxblemodel", "00002a24-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (13, 12, "0000180f-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (21, 13, "rxblebattery", "00002a19-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (14, 12, "00001523-1212-efde-1523-785feabcd123");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (22, 14, "txmode", "00001524-1212-efde-1523-785feabcd123");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (23, 14, "txvibrate", "00001526-1212-efde-1523-785feabcd123");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (24, 14, "rx", "00001527-1212-efde-1523-785feabcd123");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (33, 12, "Rabbit", "Vibratissimo Rabbit");
-INSERT INTO device_feature (id, device_id) VALUES (33, 33);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (33, 33, 2, NULL, 0, 255);
-INSERT INTO device_feature (id, device_id) VALUES (34, 33);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (34, 34, 2, NULL, 0, 255);
-INSERT INTO device_feature (id, device_id) VALUES (35, 33);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (35, 35, 2, NULL, 0, 2);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (34, 12, "Licker", "Vibratissimo Licker");
-INSERT INTO device_feature (id, device_id) VALUES (36, 34);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (36, 36, 2, NULL, 0, 255);
-INSERT INTO device_feature (id, device_id) VALUES (37, 34);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (37, 37, 2, NULL, 0, 255);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (35, 12, "Womenizer", "Vibratissimo Licker");
-INSERT INTO device_feature (id, device_id) VALUES (38, 35);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (38, 38, 2, NULL, 0, 255);
-INSERT INTO device_feature (id, device_id) VALUES (39, 35);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (39, 39, 2, NULL, 0, 255);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (36, 12, "SecretKiss", "Vibratissimo Licker");
-INSERT INTO device_feature (id, device_id) VALUES (40, 36);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (40, 40, 2, NULL, 0, 255);
-INSERT INTO device_feature (id, device_id) VALUES (41, 36);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (41, 41, 2, NULL, 0, 255);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (37, 12, NULL, "Vibratissimo Device");
-INSERT INTO device_feature (id, device_id) VALUES (42, 37);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (42, 42, 2, NULL, 0, 255);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (13, "magic-motion-1", "magic-motion-1");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (13, "FM-LILAC-101", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (13, "Magic Cell", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (13, "Magic Wand", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (13, "Fugu", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (13, "Smart Bean3", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (13, "Smart Bean", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (13, "Smart Mini Vibe", 1);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (13, "Flamingo", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (13, "Gballs2", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (13, "GBalls3", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (15, 13, "0000180f-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (25, 15, "rxblebattery", "00002a19-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (16, 13, "78667579-7b48-43db-b8c5-7928a6b0a335");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (26, 16, "tx", "78667579-a914-49a4-8333-aa3c0cd8fedc");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (38, 13, "Smart Bean", "MagicMotion Smart Bean");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (39, 13, "Magic Bean", "MagicMotion Kegel");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (40, 13, NULL, "Magic Motion V1 Device");
-INSERT INTO device_feature (id, device_id) VALUES (43, 40);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (43, 43, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (41, 13, "Gballs2", "G Vibe Gballs 2");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (42, 13, "Flamingo", "MagicMotion Flamingo");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (43, 13, "FM-LILAC-101", "Femometer Lilac");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (44, 13, "Magic Fugu", "MagicMotion Fugu");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (45, 13, "Smart Mini Vibe", "MagicMotion Smart Mini Vibe");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (46, 13, "Smart Mini Vibe3", "MagicMotion Vini");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (47, 13, "Smart Bean3", "FitCute Kegel Rejuve");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (48, 13, "GBalls3", "G Vibe Gballs 3");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (49, 13, "Magic Wand", "MagicMotion Wand");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (50, 13, "Magic Cell", "MagicMotion Dante/Candy/Rise");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (14, "cueme", "cueme");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (14, "FUNCODE_", 1);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (17, 14, "0000fff0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (27, 17, "tx", "0000fff1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (51, 14, "1", "Cueme Mens");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (52, 14, "3", "Cueme Womans");
-INSERT INTO device_feature (id, device_id) VALUES (44, 52);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (44, 44, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (45, 52);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (45, 45, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (46, 52);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (46, 46, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (47, 52);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (47, 47, 2, NULL, 0, 15);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (53, 14, "2", "Cueme Bra");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (54, 14, NULL, "Cueme Device");
-INSERT INTO device_feature (id, device_id) VALUES (48, 54);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (48, 48, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (49, 54);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (49, 49, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (50, 54);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (50, 50, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (51, 54);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (51, 51, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (52, 54);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (52, 52, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (53, 54);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (53, 53, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (54, 54);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (54, 54, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (55, 54);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (55, 55, 2, NULL, 0, 15);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (15, "vorze-sa", "vorze-sa");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (15, "UFO-TW", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (15, "ROCKET", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (15, "VorzePiston", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (15, "UFOSA", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (15, "Bach smart", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (15, "CycSA", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (18, 15, "40ee1111-63ec-4b7f-8ce7-712efd55b90e");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (28, 18, "tx", "40ee2222-63ec-4b7f-8ce7-712efd55b90e");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (55, 15, "VorzePiston", "Vorze Piston");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (56, 15, "CycSA", "Vorze A10 Cyclone SA");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (57, 15, "Bach smart", "Vorze Bach");
-INSERT INTO device_feature (id, device_id) VALUES (56, 57);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (56, 56, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (58, 15, "UFO-TW", "Vorze UFO TW");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (59, 15, "UFOSA", "Vorze UFO SA");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (60, 15, "ROCKET", "Adult Festa Rocket");
-INSERT INTO device_feature (id, device_id) VALUES (57, 60);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (57, 57, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (61, 15, NULL, "Vorze Device");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (16, "lelo-harmony", "lelo-harmony");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (16, "TOR3", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (16, "Ida Wave", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (16, "TianiHarmony", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (16, "Tiani Harmony", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (16, "IdaWave", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (19, 16, "0000fff0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (29, 19, "whitelist", "00000a11-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (30, 19, "tx", "0000fff2-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (31, 19, "command", "0000fff1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (62, 16, NULL, "Lelo Tiani Harmony");
-INSERT INTO device_feature (id, device_id) VALUES (58, 62);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (58, 58, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (59, 62);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (59, 59, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (63, 16, "TOR3", "Lelo Tor 3");
-INSERT INTO device_feature (id, device_id) VALUES (60, 63);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (60, 60, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (64, 16, "IdaWave", "Lelo Ida Wave");
-INSERT INTO device_feature (id, device_id) VALUES (61, 64);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (61, 61, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (62, 64);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (62, 62, 3, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (65, 16, "Ida Wave", "Lelo Ida Wave");
-INSERT INTO device_feature (id, device_id) VALUES (63, 65);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (63, 63, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (64, 65);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (64, 64, 3, NULL, 0, 100);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (17, "fredorch", "fredorch");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (17, "YXlinksSPP", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (20, 17, "0000ffb0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (32, 20, "tx", "0000ffb1-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (33, 20, "rx", "0000ffb2-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (66, 17, NULL, "Fredorch Device");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (18, "wevibe-chorus", "wevibe-chorus");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (18, "skeena", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (18, "Sync 2", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (18, "Chorus", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (21, 18, "f000bb03-0451-4000-b000-000000000000");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (34, 21, "tx", "f000c000-0451-4000-b000-000000000000");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (35, 21, "rx", "f000b000-0451-4000-b000-000000000000");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (67, 18, "Sync 2", "WeVibe Sync 2");
-INSERT INTO device_feature (id, device_id) VALUES (65, 67);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (65, 65, 2, NULL, 0, 3);
-INSERT INTO device_feature (id, device_id) VALUES (66, 67);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (66, 66, 2, NULL, 0, 3);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (68, 18, NULL, "WeVibe Chorus");
-INSERT INTO device_feature (id, device_id) VALUES (67, 68);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (67, 67, 2, NULL, 0, 30);
-INSERT INTO device_feature (id, device_id) VALUES (68, 68);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (68, 68, 2, NULL, 0, 30);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (19, "vorze-cyclone-x", "vorze-cyclone-x");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (69, 19, NULL, "Vorze Cyclone X10 Device");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (20, "lovehoney-desire", "lovehoney-desire");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (20, "KNICKER VIBE", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (20, "PROSTATE VIBE", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (20, "LOVE EGG", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (22, 20, "0000ff00-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (36, 22, "tx", "0000ff01-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (70, 20, "PROSTATE VIBE", "Lovehoney Desire Prostate Vibrator");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (71, 20, "KNICKER VIBE", "Lovehoney Desire Knicker Vibrator");
-INSERT INTO device_feature (id, device_id) VALUES (69, 71);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (69, 69, 2, NULL, 0, 127);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (72, 20, "LOVE EGG", "Lovehoney Desire Love Egg");
-INSERT INTO device_feature (id, device_id) VALUES (70, 72);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (70, 70, 2, NULL, 0, 127);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (73, 20, NULL, "Lovehoney Device");
-INSERT INTO device_feature (id, device_id) VALUES (71, 73);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (71, 71, 2, NULL, 0, 127);
-INSERT INTO device_feature (id, device_id) VALUES (72, 73);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (72, 72, 2, NULL, 0, 127);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (21, "galaku-pump", "galaku-pump");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (21, "V415", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (23, 21, "00001000-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (37, 23, "tx", "00001001-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (74, 21, "V415", "Galaku Nebula");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (75, 21, NULL, "Galaku Device");
-INSERT INTO device_feature (id, device_id) VALUES (73, 75);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (73, 73, 4, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (74, 75);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (74, 74, 2, NULL, 0, 100);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (22, "svakom-v2", "svakom-v2");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (22, "Ella NEO", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (22, "116", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (22, "Viviana", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (24, 22, "0000ffe0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (38, 24, "tx", "0000ffe1-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (39, 24, "rx", "0000ffe2-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (76, 22, NULL, "Svakom Device v2");
-INSERT INTO device_feature (id, device_id) VALUES (75, 76);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (75, 75, 2, NULL, 0, 10);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (77, 22, "116", "Svakom Phoenix Neo");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (78, 22, "Ella NEO", "Svakom Ella Neo");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (79, 22, "Viviana", "Svakom Viviana");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (23, "realtouch", "realtouch");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (80, 23, NULL, "RealTouch");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (24, "wevibe-8bit", "wevibe-8bit");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (24, "Wand", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (24, "Nelson", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (24, "Nova_2", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (24, "Nova2", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (24, "Moxie", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (24, "Nova 2", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (24, "Bond", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (24, "Vector", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (24, "Melt", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (25, 24, "f000bb03-0451-4000-b000-000000000000");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (40, 25, "rx", "f000b000-0451-4000-b000-000000000000");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (41, 25, "tx", "f000c000-0451-4000-b000-000000000000");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (81, 24, "Nova 2", "WeVibe Nova 2");
-INSERT INTO device_feature (id, device_id) VALUES (76, 81);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (76, 76, 2, NULL, 0, 27);
-INSERT INTO device_feature (id, device_id) VALUES (77, 81);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (77, 77, 2, NULL, 0, 27);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (82, 24, "Bond", "WeVibe Bond");
-INSERT INTO device_feature (id, device_id) VALUES (78, 82);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (78, 78, 2, NULL, 0, 27);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (83, 24, "Nova2", "WeVibe Nova 2");
-INSERT INTO device_feature (id, device_id) VALUES (79, 83);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (79, 79, 2, NULL, 0, 27);
-INSERT INTO device_feature (id, device_id) VALUES (80, 83);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (80, 80, 2, NULL, 0, 27);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (84, 24, "Nova_2", "WeVibe Nova 2");
-INSERT INTO device_feature (id, device_id) VALUES (81, 84);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (81, 81, 2, NULL, 0, 27);
-INSERT INTO device_feature (id, device_id) VALUES (82, 84);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (82, 82, 2, NULL, 0, 27);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (85, 24, "Melt", "WeVibe Melt");
-INSERT INTO device_feature (id, device_id) VALUES (83, 85);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (83, 83, 2, NULL, 0, 22);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (86, 24, "Vector", "WeVibe Vector");
-INSERT INTO device_feature (id, device_id) VALUES (84, 86);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (84, 84, 2, NULL, 0, 12);
-INSERT INTO device_feature (id, device_id) VALUES (85, 86);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (85, 85, 2, NULL, 0, 12);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (87, 24, "Moxie", "WeVibe Moxie");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (88, 24, "Nelson", "WeVibe Bond");
-INSERT INTO device_feature (id, device_id) VALUES (86, 88);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (86, 86, 2, NULL, 0, 27);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (89, 24, NULL, "WeVibe 8-bit Device");
-INSERT INTO device_feature (id, device_id) VALUES (87, 89);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (87, 87, 2, NULL, 0, 12);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (90, 24, "Wand", "WeVibe Wand");
-INSERT INTO device_feature (id, device_id) VALUES (88, 90);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (88, 88, 2, NULL, 0, 22);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (25, "tcode-v03", "tcode-v03");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (91, 25, NULL, "TCode v0.3 (Single Linear Axis)");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (26, "wevibe-legacy", "wevibe-legacy");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (26, "Interactive Massager", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (26, "Reina", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (26, "03", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (26, "imassager", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (26, 26, "f000bb03-0451-4000-b000-000000000000");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (42, 26, "tx", "f000c000-0451-4000-b000-000000000000");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (43, 26, "rx", "f000b000-0451-4000-b000-000000000000");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (92, 26, NULL, "WeVibe Realm Reina");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (27, "libo-vibes", "libo-vibes");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (27, "Gugudai", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (27, "MonsterPub", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (27, "XiaoLu", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (27, "LuXiaoHan", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (27, "Yuyi", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (27, "LiBo", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (27, "Huohu", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (27, "BaiHu", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (27, "LuWuShuang", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (27, "Haima", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (27, "QingTing", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (27, 27, "00006000-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (44, 27, "tx", "00006001-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (45, 27, "txmode", "00006002-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (93, 27, "Haima", "Libo Selina");
-INSERT INTO device_feature (id, device_id) VALUES (89, 93);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (89, 89, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (90, 93);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (90, 90, 2, NULL, 0, 3);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (94, 27, "Huohu", "Libo Lara");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (95, 27, NULL, "Libo Vibes Device");
-INSERT INTO device_feature (id, device_id) VALUES (91, 95);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (91, 91, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (96, 27, "LuWuShuang", "Libo Adel");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (97, 27, "QingTing", "Libo Lucy");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (98, 27, "XiaoLu", "Libo Lottie");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (99, 27, "Gugudai", "Libo Carlos");
-INSERT INTO device_feature (id, device_id) VALUES (92, 99);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (92, 92, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (93, 99);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (93, 93, 2, NULL, 0, 3);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (100, 27, "MonsterPub", "Sistalk MonsterPub");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (101, 27, "LiBo", "Libo Lily");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (102, 27, "LuXiaoHan", "Libo LuLu");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (103, 27, "BaiHu", "Libo LaLa");
-INSERT INTO device_feature (id, device_id) VALUES (94, 103);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (94, 94, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (95, 103);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (95, 95, 2, NULL, 0, 3);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (104, 27, "Yuyi", "Libo Feather");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (28, "youcups", "youcups");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (28, "Youcups", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (28, 28, "0000fee9-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (46, 28, "tx", "d44bc439-abfd-45a2-b575-925416129600");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (105, 28, NULL, "Youcups Warrior II");
-INSERT INTO device_feature (id, device_id) VALUES (96, 105);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (96, 96, 2, NULL, 0, 8);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (29, "libo-karen", "libo-karen");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (29, "SuoYinQiu", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (29, 29, "00006000-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (47, 29, "txmode", "00006002-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (48, 29, "tx", "00006001-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (30, 29, "00006050-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (49, 30, "rxpressure", "00006051-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (106, 29, NULL, "Libo Karen");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (30, "wetoy", "wetoy");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (30, "WeToy", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (31, 30, "0000fff0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (50, 31, "tx", "0000fff3-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (107, 30, NULL, "WeToy MiNa");
-INSERT INTO device_feature (id, device_id) VALUES (97, 107);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (97, 97, 2, NULL, 0, 3);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (31, "svakom", "svakom");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (31, "Emma NEO", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (31, "Phoenix NEO", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (31, "Vick NEO", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (31, "Aogu SUV", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (31, "Aogu SCB", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (32, 31, "0000ffe0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (51, 32, "rx", "0000ffe2-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (52, 32, "tx", "0000ffe1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (108, 31, "Emma NEO", "Svakom Emma Neo");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (109, 31, NULL, "Svakom Device");
-INSERT INTO device_feature (id, device_id) VALUES (98, 109);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (98, 98, 2, NULL, 0, 19);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (110, 31, "Phoenix NEO", "Svakom Phoenix Neo");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (111, 31, "Aogu SCB", "Svakom Ella");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (112, 31, "Vick NEO", "Svakom Vick Neo");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (32, "mizzzee-v2", "mizzzee-v2");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (32, "XHT", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (33, 32, "0000eea0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (53, 33, "tx", "0000ee01-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (113, 32, NULL, "Mizz Zee Device");
-INSERT INTO device_feature (id, device_id) VALUES (99, 113);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (99, 99, 2, NULL, 0, 68);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (33, "lovenuts", "lovenuts");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (33, "Love_Nuts", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (34, 33, "0000fff0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (54, 34, "tx", "0000fff1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (114, 33, NULL, "Love Nut");
-INSERT INTO device_feature (id, device_id) VALUES (100, 114);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (100, 100, 2, NULL, 0, 15);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (34, "aneros", "aneros");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (34, "Massage Demo", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (35, 34, "0000ff00-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (55, 35, "tx", "0000ff01-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (115, 34, NULL, "Aneros Vivi");
-INSERT INTO device_feature (id, device_id) VALUES (101, 115);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (101, 101, 2, "Perineum Vibrator", 0, 127);
-INSERT INTO device_feature (id, device_id) VALUES (102, 115);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (102, 102, 2, "Internal Vibrator", 0, 127);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (35, "libo-elle", "libo-elle");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (35, "PiPiJing", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (35, "Shuidi", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (36, 35, "00006000-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (56, 36, "tx", "00006001-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (57, 36, "txmode", "00006002-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (116, 35, "PiPiJing", "LiBo Elle");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (117, 35, NULL, "Libo Elle Device");
-INSERT INTO device_feature (id, device_id) VALUES (103, 117);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (103, 103, 2, NULL, 0, 3);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (118, 35, "Shuidi", "Libo Elle 2");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (36, "kgoal-boost", "kgoal-boost");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (36, "Boost", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (37, 36, "0000180f-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (58, 37, "rxblebattery", "00002a19-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (38, 36, "8e7c6065-7656-17ad-1b41-b53d1a548e0d");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (59, 38, "rxpressure", "10c2be2d-d2d5-b7a8-5f42-e2468c9ebbf5");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (119, 36, NULL, "KGoal Boost");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (37, "lelo-f1sv2", "lelo-f1sv2");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (37, "F1SV2X", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (37, "F1SV2A", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (39, 37, "0000fff0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (60, 39, "tx", "0000fff1-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (61, 39, "rx", "00000a04-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (62, 39, "whitelist", "00000a10-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (120, 37, NULL, "Lelo F1s V2");
-INSERT INTO device_feature (id, device_id) VALUES (104, 120);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (104, 104, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (105, 120);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (105, 105, 2, NULL, 0, 100);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (38, "hismith-mini", "hismith-mini");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (38, "Auxfun-Box", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (38, "Sinloli", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (40, 38, "0000ffe5-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (63, 40, "tx", "0000ffe9-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (41, 38, "0000ff90-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (64, 41, "rxblemodel", "0000ff96-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (121, 38, NULL, "Hismith Mini device");
-INSERT INTO device_feature (id, device_id) VALUES (106, 121);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (106, 106, 4, "Fucking Machine Oscillation Speed", 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (122, 38, "4001", "Auxfun Sex Machine");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (123, 38, "2201", "Sinloli Automatic Sex Doll");
-INSERT INTO device_feature (id, device_id) VALUES (107, 123);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (107, 107, 5, "Air Pump", 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (108, 123);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (108, 108, 2, "Vibrator", 0, 100);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (39, "pink_punch", "pink_punch");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (39, "Pink_Punch", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (42, 39, "0000ffe0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (65, 42, "tx", "0000ffe1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (124, 39, NULL, "Pink Punch Sunset Mushroom");
-INSERT INTO device_feature (id, device_id) VALUES (109, 124);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (109, 109, 2, NULL, 0, 100);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (40, "realov", "realov");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (40, "REALOV_VIBE", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (43, 40, "0000ffe0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (66, 43, "tx", "0000ffe1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (125, 40, NULL, "Realov Device");
-INSERT INTO device_feature (id, device_id) VALUES (110, 125);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (110, 110, 2, NULL, 0, 50);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (41, "prettylove", "prettylove");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (41, "Aogu BLE ", 1);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (44, 41, "0000ffe5-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (67, 44, "tx", "0000ffe9-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (68, 44, "rx", "0000ffe2-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (126, 41, NULL, "Pretty Love Device");
-INSERT INTO device_feature (id, device_id) VALUES (111, 126);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (111, 111, 2, NULL, 0, 3);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (42, "maxpro", "maxpro");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (42, "M2", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (45, 42, "6e400001-b5a3-f393-e0a9-e50e24dcca9e");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (69, 45, "tx", "6e400002-b5a3-f393-e0a9-e50e24dcca9e");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (127, 42, NULL, "MaxPro 2");
-INSERT INTO device_feature (id, device_id) VALUES (112, 127);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (112, 112, 2, NULL, 0, 100);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (43, "libo-shark", "libo-shark");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (43, "ShaYu", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (46, 43, "00006000-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (70, 46, "txmode", "00006002-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (71, 46, "tx", "00006001-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (128, 43, NULL, "Libo Shark");
-INSERT INTO device_feature (id, device_id) VALUES (113, 128);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (113, 113, 2, NULL, 0, 3);
-INSERT INTO device_feature (id, device_id) VALUES (114, 128);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (114, 114, 2, NULL, 0, 3);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (44, "svakom-iker", "svakom-iker");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (44, "Iker", 1);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (47, 44, "00001800-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (72, 47, "rxblemodel", "00002a00-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (48, 44, "0000ffe0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (73, 48, "tx", "0000ffe1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (129, 44, NULL, "Svakom Iker");
-INSERT INTO device_feature (id, device_id) VALUES (115, 129);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (115, 115, 2, NULL, 0, 10);
-INSERT INTO device_feature (id, device_id) VALUES (116, 129);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (116, 116, 2, NULL, 0, 5);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (45, "wevibe", "wevibe");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (45, "Rave", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (45, "Cougar", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (45, "Pivot", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (45, "Nova", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (45, "4plus", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (45, "Bloom", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (45, "Classic", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (45, "4_Plus", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (45, "4 Plus", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (45, "Wish", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (45, "Gala", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (45, "Sync", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (45, "classic", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (45, "Ditto", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (45, "Jive", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (45, "Verge", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (49, 45, "f000bb03-0451-4000-b000-000000000000");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (74, 49, "tx", "f000c000-0451-4000-b000-000000000000");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (75, 49, "rx", "f000b000-0451-4000-b000-000000000000");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (130, 45, "4 Plus", "WeVibe 4 Plus");
-INSERT INTO device_feature (id, device_id) VALUES (117, 130);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (117, 117, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (118, 130);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (118, 118, 2, NULL, 0, 15);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (131, 45, "Nova", "WeVibe Nova");
-INSERT INTO device_feature (id, device_id) VALUES (119, 131);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (119, 119, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (120, 131);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (120, 120, 2, NULL, 0, 15);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (132, 45, "4_Plus", "WeVibe 4 Plus");
-INSERT INTO device_feature (id, device_id) VALUES (121, 132);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (121, 121, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (122, 132);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (122, 122, 2, NULL, 0, 15);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (133, 45, "Ditto", "WeVibe Ditto");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (134, 45, "Sync", "WeVibe Sync");
-INSERT INTO device_feature (id, device_id) VALUES (123, 134);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (123, 123, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (124, 134);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (124, 124, 2, NULL, 0, 15);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (135, 45, "classic", "WeVibe 4 Plus");
-INSERT INTO device_feature (id, device_id) VALUES (125, 135);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (125, 125, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (126, 135);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (126, 126, 2, NULL, 0, 15);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (136, 45, "4plus", "WeVibe 4 Plus");
-INSERT INTO device_feature (id, device_id) VALUES (127, 136);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (127, 127, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (128, 136);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (128, 128, 2, NULL, 0, 15);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (137, 45, NULL, "WeVibe Device");
-INSERT INTO device_feature (id, device_id) VALUES (129, 137);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (129, 129, 2, NULL, 0, 15);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (138, 45, "Classic", "WeVibe 4 Plus");
-INSERT INTO device_feature (id, device_id) VALUES (130, 138);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (130, 130, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (131, 138);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (131, 131, 2, NULL, 0, 15);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (139, 45, "Gala", "WeVibe Gala");
-INSERT INTO device_feature (id, device_id) VALUES (132, 139);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (132, 132, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (133, 139);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (133, 133, 2, NULL, 0, 15);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (140, 45, "Rave", "WeVibe Rave");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (141, 45, "Pivot", "WeVibe Pivot");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (142, 45, "Cougar", "WeVibe 4 Plus");
-INSERT INTO device_feature (id, device_id) VALUES (134, 142);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (134, 134, 2, NULL, 0, 15);
-INSERT INTO device_feature (id, device_id) VALUES (135, 142);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (135, 135, 2, NULL, 0, 15);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (143, 45, "Bloom", "WeVibe Bloom");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (144, 45, "Wish", "WeVibe Wish");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (145, 45, "Jive", "WeVibe Jive");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (146, 45, "Verge", "WeVibe Verge");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (46, "satisfyer", "satisfyer");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (46, "SF ", 1);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (50, 46, "51361500-c5e7-47c7-8a6e-47ebc99d80e8");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (76, 50, "command", "51361501-c5e7-47c7-8a6e-47ebc99d80e8");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (77, 50, "tx", "51361502-c5e7-47c7-8a6e-47ebc99d80e8");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (51, 46, "0000180a-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (78, 51, "rxblemodel", "00002a24-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (147, 46, "10169", "Satisfyer Top Secret");
-INSERT INTO device_feature (id, device_id) VALUES (136, 147);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (136, 136, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (137, 147);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (137, 137, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (148, 46, "10124", "Satisfyer Love Birds Vary");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (149, 46, "10100", "Satisfyer Plug-ilicious 1");
-INSERT INTO device_feature (id, device_id) VALUES (138, 149);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (138, 138, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (139, 149);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (139, 139, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (150, 46, "10173", "Satisfyer Top Secret+");
-INSERT INTO device_feature (id, device_id) VALUES (140, 150);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (140, 140, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (141, 150);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (141, 141, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (151, 46, "10146", "Satisfyer Deep Diver");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (152, 46, "10093", "Satisfyer Newcomer+");
-INSERT INTO device_feature (id, device_id) VALUES (142, 152);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (142, 142, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (153, 46, "10065", "Satisfyer Double Flex");
-INSERT INTO device_feature (id, device_id) VALUES (143, 153);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (143, 143, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (144, 153);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (144, 144, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (145, 153);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (145, 145, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (154, 46, "10051", "Satisfyer Double Fun");
-INSERT INTO device_feature (id, device_id) VALUES (146, 154);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (146, 146, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (147, 154);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (147, 147, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (155, 46, "10197", "Satisfyer Mini Wand-er+");
-INSERT INTO device_feature (id, device_id) VALUES (148, 155);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (148, 148, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (149, 155);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (149, 149, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (156, 46, "10164", "Satisfyer Double Lust");
-INSERT INTO device_feature (id, device_id) VALUES (150, 156);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (150, 150, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (151, 156);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (151, 151, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (157, 46, "10162", "Satisfyer Double Desire");
-INSERT INTO device_feature (id, device_id) VALUES (152, 157);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (152, 152, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (153, 157);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (153, 153, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (158, 46, "10110", "Satisfyer E-Love G-Spotter");
-INSERT INTO device_feature (id, device_id) VALUES (154, 158);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (154, 154, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (159, 46, "10203", "Satisfyer Twirling Pro+");
-INSERT INTO device_feature (id, device_id) VALUES (155, 159);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (155, 155, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (156, 159);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (156, 156, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (160, 46, "10193", "Satisfyer G-Spot Flex 5+");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (161, 46, "10185", "Satisfyer Power Masturbator");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (162, 46, "10208", "Satisfyer Booty Absolute Beginners 5");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (163, 46, "10030", "Satisfyer Curvy 2+");
-INSERT INTO device_feature (id, device_id) VALUES (157, 163);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (157, 157, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (158, 163);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (158, 158, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (164, 46, "10009", "Satisfyer Hot Bunny");
-INSERT INTO device_feature (id, device_id) VALUES (159, 164);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (159, 159, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (160, 164);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (160, 160, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (165, 46, "10196", "Satisfyer Pro+ Wave 4");
-INSERT INTO device_feature (id, device_id) VALUES (161, 165);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (161, 161, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (162, 165);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (162, 162, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (166, 46, "10141", "Satisfyer Power Plug");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (167, 46, "10109", "Satisfyer E-Love G-Hunter+");
-INSERT INTO device_feature (id, device_id) VALUES (163, 167);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (163, 163, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (164, 167);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (164, 164, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (168, 46, "10165", "Satisfyer Double Lust");
-INSERT INTO device_feature (id, device_id) VALUES (165, 168);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (165, 165, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (166, 168);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (166, 166, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (169, 46, "10161", "Satisfyer Double Desire");
-INSERT INTO device_feature (id, device_id) VALUES (167, 169);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (167, 167, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (168, 169);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (168, 168, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (170, 46, "10204", "Satisfyer Twirling Pro+");
-INSERT INTO device_feature (id, device_id) VALUES (169, 170);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (169, 169, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (170, 170);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (170, 170, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (171, 46, "10160", "Satisfyer Double Desire");
-INSERT INTO device_feature (id, device_id) VALUES (171, 171);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (171, 171, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (172, 171);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (172, 172, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (172, 46, "10052", "Satisfyer Double Love");
-INSERT INTO device_feature (id, device_id) VALUES (173, 172);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (173, 173, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (174, 172);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (174, 174, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (173, 46, "10148", "Satisfyer Sweet Seal");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (174, 46, "10142", "Satisfyer Rotator Plug 1+");
-INSERT INTO device_feature (id, device_id) VALUES (175, 174);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (175, 175, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (176, 174);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (176, 176, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (175, 46, "10143", "Satisfyer Rotator Plug 1+");
-INSERT INTO device_feature (id, device_id) VALUES (177, 175);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (177, 177, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (178, 175);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (178, 178, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (176, 46, "10073", "Satisfyer Sexy Secret");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (177, 46, "10103", "Satisfyer Plug-ilicious 2");
-INSERT INTO device_feature (id, device_id) VALUES (179, 177);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (179, 179, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (180, 177);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (180, 180, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (178, 46, "10150", "Satisfyer Trendsetter");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (179, 46, NULL, "Satisfyer Device");
-INSERT INTO device_feature (id, device_id) VALUES (181, 179);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (181, 181, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (180, 46, "10078", "Satisfyer Signet Ring");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (181, 46, "10179", "Satisfyer Sunray");
-INSERT INTO device_feature (id, device_id) VALUES (182, 181);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (182, 182, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (183, 181);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (183, 183, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (182, 46, "10187", "Satisfyer Hug me");
-INSERT INTO device_feature (id, device_id) VALUES (184, 182);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (184, 184, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (185, 182);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (185, 185, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (183, 46, "10207", "Satisfyer Booty Absolute Beginners 5");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (184, 46, "10069", "Satisfyer Heat Wave");
-INSERT INTO device_feature (id, device_id) VALUES (186, 184);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (186, 186, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (187, 184);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (187, 187, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (185, 46, "10194", "Satisfyer G-Spot Flex 5+");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (186, 46, "10135", "Satisfyer Smooth Petal");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (187, 46, "10167", "Satisfyer Epic Duo");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (188, 46, "10176", "Satisfyer Bullseye");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (189, 46, "10091", "Satisfyer Knight+");
-INSERT INTO device_feature (id, device_id) VALUES (188, 189);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (188, 188, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (190, 46, "10156", "Satisfyer Twirling Joy");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (191, 46, "10178", "Satisfyer Sunray");
-INSERT INTO device_feature (id, device_id) VALUES (189, 191);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (189, 189, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (190, 191);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (190, 190, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (192, 46, "10046", "Satisfyer Double Joy");
-INSERT INTO device_feature (id, device_id) VALUES (191, 192);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (191, 191, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (192, 192);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (192, 192, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (193, 46, "10200", "Satisfyer Tropical Tip");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (194, 46, "10015", "Satisfyer Pr├¬t-├á-porter+");
-INSERT INTO device_feature (id, device_id) VALUES (193, 194);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (193, 193, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (194, 194);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (194, 194, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (195, 46, "10061", "Satisfyer Hot Lover");
-INSERT INTO device_feature (id, device_id) VALUES (195, 195);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (195, 195, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (196, 195);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (196, 196, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (196, 46, "10145", "Satisfyer Rotator Plug 2+");
-INSERT INTO device_feature (id, device_id) VALUES (197, 196);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (197, 197, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (198, 196);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (198, 198, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (197, 46, "10127", "Satisfyer Ribbed Petal");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (198, 46, "10195", "Satisfyer Air Pump Booty 5+");
-INSERT INTO device_feature (id, device_id) VALUES (199, 198);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (199, 199, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (199, 46, "10092", "Satisfyer Newcomer+");
-INSERT INTO device_feature (id, device_id) VALUES (200, 199);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (200, 200, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (200, 46, "10168", "Satisfyer Pleasure Wand+");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (201, 46, "10191", "Satisfyer Threesome 4");
-INSERT INTO device_feature (id, device_id) VALUES (201, 201);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (201, 201, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (202, 201);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (202, 202, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (202, 46, "10190", "Satisfyer Threesome 4");
-INSERT INTO device_feature (id, device_id) VALUES (203, 202);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (203, 203, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (204, 202);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (204, 204, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (203, 46, "10184", "Satisfyer Intensity Plug");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (204, 46, "10063", "Satisfyer Mono Flex");
-INSERT INTO device_feature (id, device_id) VALUES (205, 204);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (205, 205, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (206, 204);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (206, 206, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (205, 46, "10055", "Satisfyer Curvy 3+");
-INSERT INTO device_feature (id, device_id) VALUES (207, 205);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (207, 207, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (208, 205);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (208, 208, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (206, 46, "10133", "Satisfyer Shiny Petal");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (207, 46, "10182", "Satisfyer Love Birds 1");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (208, 46, "10068", "Satisfyer Double Flex");
-INSERT INTO device_feature (id, device_id) VALUES (209, 208);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (209, 209, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (210, 208);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (210, 210, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (211, 208);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (211, 211, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (209, 46, "10171", "Satisfyer Top Secret");
-INSERT INTO device_feature (id, device_id) VALUES (212, 209);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (212, 212, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (213, 209);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (213, 213, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (210, 46, "10047", "Satisfyer Double Joy");
-INSERT INTO device_feature (id, device_id) VALUES (214, 210);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (214, 214, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (215, 210);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (215, 215, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (211, 46, "10101", "Satisfyer Plug-ilicious 1");
-INSERT INTO device_feature (id, device_id) VALUES (216, 211);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (216, 216, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (217, 211);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (217, 217, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (212, 46, "10005", "Satisfyer Hot Spot");
-INSERT INTO device_feature (id, device_id) VALUES (218, 212);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (218, 218, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (213, 46, "10126", "Satisfyer Love Birds Vary");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (214, 46, "10121", "Satisfyer Love Birds 2");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (215, 46, "10067", "Satisfyer Double Flex");
-INSERT INTO device_feature (id, device_id) VALUES (219, 215);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (219, 219, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (220, 215);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (220, 220, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (221, 215);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (221, 221, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (216, 46, "10151", "Satisfyer Trendsetter");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (217, 46, "10062", "Satisfyer Mono Flex");
-INSERT INTO device_feature (id, device_id) VALUES (222, 217);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (222, 222, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (223, 217);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (223, 223, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (218, 46, "10025", "Satisfyer Love Triangle");
-INSERT INTO device_feature (id, device_id) VALUES (224, 218);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (224, 224, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (225, 218);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (225, 225, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (219, 46, "10054", "Satisfyer Double Love");
-INSERT INTO device_feature (id, device_id) VALUES (226, 219);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (226, 226, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (227, 219);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (227, 227, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (220, 46, "10081", "Satisfyer Dual Pleasure");
-INSERT INTO device_feature (id, device_id) VALUES (228, 220);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (228, 228, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (229, 220);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (229, 229, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (221, 46, "10166", "Satisfyer Double Lust");
-INSERT INTO device_feature (id, device_id) VALUES (230, 221);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (230, 230, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (231, 221);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (231, 231, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (222, 46, "10199", "Satisfyer Tropical Tip");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (223, 46, "10140", "Satisfyer Men Vibration+");
-INSERT INTO device_feature (id, device_id) VALUES (232, 223);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (232, 232, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (233, 223);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (233, 233, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (224, 46, "10102", "Satisfyer Plug-ilicious 2");
-INSERT INTO device_feature (id, device_id) VALUES (234, 224);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (234, 234, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (235, 224);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (235, 235, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (225, 46, "10122", "Satisfyer Love Birds 2");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (226, 46, "10128", "Satisfyer Ribbed Petal");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (227, 46, "10174", "Satisfyer Top Secret+");
-INSERT INTO device_feature (id, device_id) VALUES (236, 227);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (236, 236, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (237, 227);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (237, 237, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (228, 46, "10186", "Satisfyer Hug me");
-INSERT INTO device_feature (id, device_id) VALUES (238, 228);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (238, 238, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (239, 228);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (239, 239, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (229, 46, "10123", "Satisfyer Love Birds 2");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (230, 46, "10177", "Satisfyer Sunray");
-INSERT INTO device_feature (id, device_id) VALUES (240, 230);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (240, 240, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (241, 230);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (241, 241, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (231, 46, "10080", "Satisfyer Dual Love");
-INSERT INTO device_feature (id, device_id) VALUES (242, 231);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (242, 242, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (243, 231);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (243, 243, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (232, 46, "10163", "Satisfyer Double Lust");
-INSERT INTO device_feature (id, device_id) VALUES (244, 232);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (244, 244, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (245, 232);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (245, 245, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (233, 46, "10188", "Satisfyer Air Pump Bunny 5+");
-INSERT INTO device_feature (id, device_id) VALUES (246, 233);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (246, 246, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (247, 233);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (247, 247, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (234, 46, "10071", "Satisfyer Heat Wave");
-INSERT INTO device_feature (id, device_id) VALUES (248, 234);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (248, 248, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (249, 234);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (249, 249, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (235, 46, "10024", "Satisfyer Love Triangle");
-INSERT INTO device_feature (id, device_id) VALUES (250, 235);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (250, 250, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (251, 235);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (251, 251, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (236, 46, "10112", "Satisfyer E-Love Story");
-INSERT INTO device_feature (id, device_id) VALUES (252, 236);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (252, 252, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (237, 46, "10075", "Satisfyer Mighty One");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (238, 46, "10053", "Satisfyer Double Love");
-INSERT INTO device_feature (id, device_id) VALUES (253, 238);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (253, 253, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (254, 238);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (254, 254, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (239, 46, "10104", "Satisfyer Plug-ilicious 2");
-INSERT INTO device_feature (id, device_id) VALUES (255, 239);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (255, 255, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (256, 239);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (256, 256, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (240, 46, "10111", "Satisfyer E-Love G-Spotter+");
-INSERT INTO device_feature (id, device_id) VALUES (257, 240);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (257, 257, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (258, 240);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (258, 258, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (241, 46, "10130", "Satisfyer Shiny Petal");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (242, 46, "10134", "Satisfyer Smooth Petal");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (243, 46, "10157", "Satisfyer Ultra Power Bullet 8");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (244, 46, "10172", "Satisfyer Top Secret+");
-INSERT INTO device_feature (id, device_id) VALUES (259, 244);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (259, 259, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (260, 244);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (260, 260, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (245, 46, "10181", "Satisfyer Curvy Trinity 5+");
-INSERT INTO device_feature (id, device_id) VALUES (261, 245);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (261, 261, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (262, 245);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (262, 262, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (246, 46, "10076", "Satisfyer Powerful One");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (247, 46, "10066", "Satisfyer Double Flex");
-INSERT INTO device_feature (id, device_id) VALUES (263, 247);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (263, 263, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (264, 247);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (264, 264, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (265, 247);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (265, 265, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (248, 46, "10175", "Satisfyer Bullseye");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (249, 46, "10180", "Satisfyer Curvy Trinity 5+");
-INSERT INTO device_feature (id, device_id) VALUES (266, 249);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (266, 266, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (267, 249);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (267, 267, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (250, 46, "10060", "Satisfyer Hot Lover");
-INSERT INTO device_feature (id, device_id) VALUES (268, 250);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (268, 268, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (269, 250);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (269, 269, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (251, 46, "10059", "Satisfyer Hot Lover");
-INSERT INTO device_feature (id, device_id) VALUES (270, 251);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (270, 270, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (271, 251);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (271, 271, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (252, 46, "10031", "Satisfyer Curvy 2+");
-INSERT INTO device_feature (id, device_id) VALUES (272, 252);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (272, 272, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (273, 252);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (273, 273, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (253, 46, "10170", "Satisfyer Top Secret");
-INSERT INTO device_feature (id, device_id) VALUES (274, 253);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (274, 274, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (275, 253);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (275, 275, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (254, 46, "10144", "Satisfyer Rotator Plug 2+");
-INSERT INTO device_feature (id, device_id) VALUES (276, 254);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (276, 276, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (277, 254);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (277, 277, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (255, 46, "10090", "Satisfyer Hero+");
-INSERT INTO device_feature (id, device_id) VALUES (278, 255);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (278, 278, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (256, 46, "10202", "Satisfyer Smooth Petal");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (257, 46, "10006", "Satisfyer Heated Affair");
-INSERT INTO device_feature (id, device_id) VALUES (279, 257);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (279, 279, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (280, 257);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (280, 280, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (258, 46, "10049", "Satisfyer Double Fun");
-INSERT INTO device_feature (id, device_id) VALUES (281, 258);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (281, 281, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (282, 258);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (282, 282, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (259, 46, "10192", "Satisfyer G-Spot Flex 4+");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (260, 46, "10079", "Satisfyer Dual Love");
-INSERT INTO device_feature (id, device_id) VALUES (283, 260);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (283, 283, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (284, 260);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (284, 284, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (261, 46, "10136", "Satisfyer Smooth Petal");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (262, 46, "10201", "Satisfyer Ribbed Petal");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (263, 46, "10129", "Satisfyer Ribbed Petal");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (264, 46, "10147", "Satisfyer Deep Diver");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (265, 46, "10206", "Satisfyer Booty Absolute Beginners 5");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (266, 46, "10082", "Satisfyer Dual Pleasure");
-INSERT INTO device_feature (id, device_id) VALUES (285, 266);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (285, 285, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (286, 266);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (286, 286, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (267, 46, "10012", "Satisfyer Hot Passion");
-INSERT INTO device_feature (id, device_id) VALUES (287, 267);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (287, 287, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (268, 46, "10119", "Satisfyer Love Birds 1");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (269, 46, "10011", "Satisfyer Heat Climax+");
-INSERT INTO device_feature (id, device_id) VALUES (288, 269);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (288, 288, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (289, 269);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (289, 289, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (270, 46, "10154", "Satisfyer Twirling Joy");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (271, 46, "10007", "Satisfyer Big Heat");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (272, 46, "10010", "Satisfyer Heat Climax");
-INSERT INTO device_feature (id, device_id) VALUES (290, 272);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (290, 290, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (273, 46, "10149", "Satisfyer Sweet Seal");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (274, 46, "10064", "Satisfyer Mono Flex");
-INSERT INTO device_feature (id, device_id) VALUES (291, 274);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (291, 291, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (292, 274);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (292, 292, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (275, 46, "10155", "Satisfyer Twirling Joy");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (276, 46, "10205", "Satisfyer Perfect Pair 4");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (277, 46, "10048", "Satisfyer Double Joy");
-INSERT INTO device_feature (id, device_id) VALUES (293, 277);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (293, 293, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (294, 277);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (294, 294, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (278, 46, "10072", "Satisfyer Little Secret");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (279, 46, "10032", "Satisfyer Double Wand-er");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (280, 46, "10070", "Satisfyer Heat Wave");
-INSERT INTO device_feature (id, device_id) VALUES (295, 280);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (295, 295, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (296, 280);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (296, 296, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (281, 46, "10074", "Satisfyer Strong One");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (282, 46, "10050", "Satisfyer Double Fun");
-INSERT INTO device_feature (id, device_id) VALUES (297, 282);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (297, 297, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (298, 282);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (298, 298, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (283, 46, "10189", "Satisfyer Air Pump Vibrator 5+");
-INSERT INTO device_feature (id, device_id) VALUES (299, 283);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (299, 299, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (284, 46, "10105", "Satisfyer E-Love Foreplay");
-INSERT INTO device_feature (id, device_id) VALUES (300, 284);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (300, 300, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (285, 46, "10125", "Satisfyer Love Birds Vary");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (286, 46, "10131", "Satisfyer Shiny Petal");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (287, 46, "10158", "Satisfyer Ultra Power Bullet 8");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (288, 46, "10132", "Satisfyer Shiny Petal");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (289, 46, "10108", "Satisfyer E-Love G-Hunter");
-INSERT INTO device_feature (id, device_id) VALUES (301, 289);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (301, 301, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (290, 46, "10242", "Satisfyer Rrrolling Sensation");
-INSERT INTO device_feature (id, device_id) VALUES (302, 290);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (302, 302, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (303, 290);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (303, 303, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (291, 46, "10028", "Satisfyer Curvy 1+");
-INSERT INTO device_feature (id, device_id) VALUES (304, 291);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (304, 304, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (305, 291);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (305, 305, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (292, 46, "10183", "Satisfyer Intensity Plug");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (293, 46, "10008", "Satisfyer Heated Thrill");
-INSERT INTO device_feature (id, device_id) VALUES (306, 293);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (306, 306, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (294, 46, "10198", "Satisfyer Mini Wand-er+");
-INSERT INTO device_feature (id, device_id) VALUES (307, 294);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (307, 307, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (308, 294);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (308, 308, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (295, 46, "10120", "Satisfyer Love Birds 1");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (296, 46, "10027", "Satisfyer Curvy 1+");
-INSERT INTO device_feature (id, device_id) VALUES (309, 296);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (309, 309, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (310, 296);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (310, 310, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (297, 46, "10077", "Satisfyer Royal One");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (298, 46, "10241", "Satisfyer Rrrolling Sensation");
-INSERT INTO device_feature (id, device_id) VALUES (311, 298);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (311, 311, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (312, 298);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (312, 312, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (299, 46, "10014", "Satisfyer High Fashion+");
-INSERT INTO device_feature (id, device_id) VALUES (313, 299);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (313, 313, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (314, 299);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (314, 314, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (300, 46, "10013", "Satisfyer Haute Couture+");
-INSERT INTO device_feature (id, device_id) VALUES (315, 300);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (315, 315, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (316, 300);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (316, 316, 2, NULL, 0, 100);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (47, "mizzzee", "mizzzee");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (47, "NFY008", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (52, 47, "0000eea0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (79, 52, "tx", "0000eea1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (301, 47, NULL, "Mizz Zee Device");
-INSERT INTO device_feature (id, device_id) VALUES (317, 301);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (317, 317, 2, NULL, 0, 68);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (48, "lovense-connect-service", "lovense-connect-service");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (302, 48, "Flexer", "Lovense Flexer");
-INSERT INTO device_feature (id, device_id) VALUES (318, 302);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (318, 318, 2, "Both Vibes", 0, 20);
-INSERT INTO device_feature (id, device_id) VALUES (319, 302);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (319, 319, 3, "Finger motion", 0, 20);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (303, 48, "Ferri", "Lovense Ferri");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (304, 48, "Domi", "Lovense Domi");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (305, 48, "Edge", "Lovense Edge");
-INSERT INTO device_feature (id, device_id) VALUES (320, 305);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (320, 320, 2, NULL, 0, 20);
-INSERT INTO device_feature (id, device_id) VALUES (321, 305);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (321, 321, 2, NULL, 0, 20);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (306, 48, "Gemini", "Lovense Gemini");
-INSERT INTO device_feature (id, device_id) VALUES (322, 306);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (322, 322, 2, NULL, 0, 20);
-INSERT INTO device_feature (id, device_id) VALUES (323, 306);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (323, 323, 2, NULL, 0, 20);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (307, 48, "ToyS", "Loveai Dolp");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (308, 48, "Dolce", "Lovense Dolce");
-INSERT INTO device_feature (id, device_id) VALUES (324, 308);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (324, 324, 2, NULL, 0, 20);
-INSERT INTO device_feature (id, device_id) VALUES (325, 308);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (325, 325, 2, NULL, 0, 20);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (309, 48, "XMachine", "Lovense Sex Machine");
-INSERT INTO device_feature (id, device_id) VALUES (326, 309);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (326, 326, 4, "Fucking Machine Oscillation Speed", 0, 20);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (310, 48, NULL, "Lovense Connect Service Device");
-INSERT INTO device_feature (id, device_id) VALUES (327, 310);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (327, 327, 2, NULL, 0, 20);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (311, 48, "Calor", "Lovense Calor");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (312, 48, "Lush", "Lovense Lush");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (313, 48, "Gush", "Lovense Gush");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (314, 48, "Max", "Lovense Max");
-INSERT INTO device_feature (id, device_id) VALUES (328, 314);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (328, 328, 2, "Vibrator", 0, 20);
-INSERT INTO device_feature (id, device_id) VALUES (329, 314);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (329, 329, 5, "Air Pump", 0, 3);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (315, 48, "Hush", "Lovense Hush");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (316, 48, "Diamo", "Lovense Diamo");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (317, 48, "Gravity", "Lovense Gravity");
-INSERT INTO device_feature (id, device_id) VALUES (330, 317);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (330, 330, 2, NULL, 0, 20);
-INSERT INTO device_feature (id, device_id) VALUES (331, 317);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (331, 331, 4, NULL, 0, 20);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (318, 48, "Hyphy", "Lovense Hyphy");
-INSERT INTO device_feature (id, device_id) VALUES (332, 318);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (332, 332, 2, NULL, 0, 20);
-INSERT INTO device_feature (id, device_id) VALUES (333, 318);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (333, 333, 2, NULL, 0, 20);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (319, 48, "Osci", "Lovense Osci");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (320, 48, "Ambi", "Lovense Ambi");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (321, 48, "Nora", "Lovense Nora");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (322, 48, "Mission", "Lovense Mission");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (49, "hgod", "hgod");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (49, "AMN NEO", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (53, 49, "0000ffe3-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (80, 53, "rx", "0000ffe2-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (81, 53, "tx", "0000ffe1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (323, 49, NULL, "Hgod Device");
-INSERT INTO device_feature (id, device_id) VALUES (334, 323);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (334, 334, 2, NULL, 0, 10);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (50, "svakom-sam", "svakom-sam");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (50, "Sam Neo", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (54, 50, "0000ae00-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (82, 54, "tx", "0000ae01-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (324, 50, NULL, "Svakom Sam Neo");
-INSERT INTO device_feature (id, device_id) VALUES (335, 324);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (335, 335, 2, NULL, 0, 10);
-INSERT INTO device_feature (id, device_id) VALUES (336, 324);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (336, 336, 2, NULL, 0, 1);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (51, "sensee", "sensee");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (51, "CTY222S4", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (55, 51, "0000fff0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (83, 55, "tx", "0000fff5-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (325, 51, NULL, "Sensee Diandou Rabbit");
-INSERT INTO device_feature (id, device_id) VALUES (337, 325);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (337, 337, 2, NULL, 0, 100);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (52, "metaxsire", "metaxsire");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (52, "Rex", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (52, "Olis", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (52, "Cali", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (56, 52, "0000ffe0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (84, 56, "tx", "0000ffe1-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (85, 56, "rx", "0000ffe2-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (326, 52, "Cali", "metaXsire Cali");
-INSERT INTO device_feature (id, device_id) VALUES (338, 326);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (338, 338, 2, NULL, 0, 255);
-INSERT INTO device_feature (id, device_id) VALUES (339, 326);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (339, 339, 5, NULL, 0, 255);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (327, 52, "Olis", "metaXsire Olis");
-INSERT INTO device_feature (id, device_id) VALUES (340, 327);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (340, 340, 2, NULL, 0, 255);
-INSERT INTO device_feature (id, device_id) VALUES (341, 327);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (341, 341, 2, NULL, 0, 255);
-INSERT INTO device_feature (id, device_id) VALUES (342, 327);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (342, 342, 3, NULL, 0, 255);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (328, 52, NULL, "metaXsire Device");
-INSERT INTO device_feature (id, device_id) VALUES (343, 328);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (343, 343, 2, NULL, 0, 255);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (329, 52, "Rex", "metaXsire Rex");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (53, "svakom-alex", "svakom-alex");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (53, "Alex NEO", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (57, 53, "0000ffe0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (86, 57, "tx", "0000ffe1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (330, 53, NULL, "Svakom Alex Neo");
-INSERT INTO device_feature (id, device_id) VALUES (344, 330);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (344, 344, 2, NULL, 0, 3);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (54, "kiiroo-v21", "kiiroo-v21");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (54, "Pearl2.1", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (54, "Cliona", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (54, "Pulse Interactive", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (54, "OhMiBod LUMEN", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (54, "OhMiBod NEX3", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (54, "OhMiBod 4.0", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (54, "Titan1.1", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (58, 54, "a0d70001-4c16-4ba7-977a-d394920e13a3");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (87, 58, "tx", "a0d70002-4c16-4ba7-977a-d394920e13a3");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (88, 58, "rx", "a0d70003-4c16-4ba7-977a-d394920e13a3");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (59, 54, "00001900-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (89, 59, "whitelist", "00001901-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (90, 59, "tx", "00001902-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (91, 59, "rx", "00001903-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (331, 54, "Cliona", "Kiiroo Cliona");
-INSERT INTO device_feature (id, device_id) VALUES (345, 331);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (345, 345, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (332, 54, "Pearl2.1", "Kiiroo Pearl 2.1");
-INSERT INTO device_feature (id, device_id) VALUES (346, 332);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (346, 346, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (333, 54, "OhMiBod 4.0", "OhMiBod Esca 2");
-INSERT INTO device_feature (id, device_id) VALUES (347, 333);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (347, 347, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (334, 54, "OhMiBod LUMEN", "OhMiBod Lumen");
-INSERT INTO device_feature (id, device_id) VALUES (348, 334);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (348, 348, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (335, 54, "Pulse Interactive", "Hot Octopuss Pulse Solo Interactive");
-INSERT INTO device_feature (id, device_id) VALUES (349, 335);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (349, 349, 2, NULL, 0, 6);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (336, 54, NULL, "Kiiroo V2.1 Device");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (337, 54, "OhMiBod NEX3", "hMiBod NEX|3");
-INSERT INTO device_feature (id, device_id) VALUES (350, 337);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (350, 350, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (338, 54, "Titan1.1", "Kiiroo Titan 1.1");
-INSERT INTO device_feature (id, device_id) VALUES (351, 338);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (351, 351, 2, NULL, 0, 100);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (55, "picobong", "picobong");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (55, "Picobong Ring", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (55, "Diver", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (55, "Picobong Egg", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (55, "Life guard", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (55, "Picobong Butt Plug", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (55, "Egg driver", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (55, "Blow hole", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (55, "Picobong Male Toy", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (55, "Surfer_plug", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (55, "Surfer", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (60, 55, "0000fff0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (92, 60, "tx", "0000fff1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (339, 55, "Picobong Butt Plug", "Picobong Surfer");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (340, 55, "Egg driver", "Picobong Surfer");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (341, 55, "Surfer_plug", "Picobong Surfer");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (342, 55, "Life guard", "Picobong Life guard");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (343, 55, "Picobong Egg", "Picobong Diver");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (344, 55, "Picobong Male Toy", "Picobong Blow hole");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (345, 55, "Surfer", "Picobong Surfer");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (346, 55, "Blow hole", "Picobong Blow hole");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (347, 55, "Diver", "Picobong Diver");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (348, 55, NULL, "Picobong Device");
-INSERT INTO device_feature (id, device_id) VALUES (352, 348);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (352, 352, 2, NULL, 0, 10);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (349, 55, "Picobong Ring", "Picobong Life guard");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (56, "motorbunny", "motorbunny");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (56, "MB Controller", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (56, "MB LINK 201", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (61, 56, "0000fff0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (93, 61, "tx", "0000fff6-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (350, 56, "MB Controller", "Motorbunny Classic");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (351, 56, "MB LINK 201", "Motorbunny Buck");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (352, 56, NULL, "Motorbunny Device");
-INSERT INTO device_feature (id, device_id) VALUES (353, 352);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (353, 353, 2, NULL, 0, 255);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (57, "thehandy", "thehandy");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (57, "The Handy", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (62, 57, "1775244d-6b43-439b-877c-060f2d9bed07");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (94, 62, "tx", "1775ff55-6b43-439b-877c-060f2d9bed07");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (95, 62, "firmware", "1775ff51-6b43-439b-877c-060f2d9bed07");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (353, 57, NULL, "The Handy");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (58, "nobra", "nobra");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (58, "NobraControl", 1);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (63, 58, "0000abf0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (96, 63, "tx", "0000abf1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (354, 58, NULL, "Nobra's Silicone Dreams Toy");
-INSERT INTO device_feature (id, device_id) VALUES (354, 354);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (354, 354, 2, NULL, 0, 15);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (59, "rez-trancevibrator", "rez-trancevibrator");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (355, 59, NULL, "Rez TranceVibrator");
-INSERT INTO device_feature (id, device_id) VALUES (355, 355);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (355, 355, 2, NULL, 0, 255);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (60, "lovedistance", "lovedistance");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (60, "SPAN", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (60, "RANGE", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (60, "REACH G", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (60, "REACH", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (60, "MAG", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (64, 60, "0000ff00-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (97, 64, "rx", "0000ff02-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (98, 64, "tx", "0000ff01-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (356, 60, "MAG", "Love Distance Mag");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (357, 60, "REACH", "Love Distance Reach");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (358, 60, NULL, "Love Distance Device");
-INSERT INTO device_feature (id, device_id) VALUES (356, 358);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (356, 356, 2, NULL, 0, 121);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (359, 60, "RANGE", "Love Distance Range");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (360, 60, "REACH G", "Love Distance Reach G");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (361, 60, "SPAN", "Love Distance Span");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (61, "sakuraneko", "sakuraneko");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (61, "sakuraneko-02", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (61, "sakuraneko-03", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (61, "sakuraneko-01", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (61, "sakuraneko-04", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (65, 61, "0000ffe0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (99, 65, "tx", "0000ffe1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (362, 61, "sakuraneko-02", "Sakuraneko Nukunuku");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (363, 61, "sakuraneko-04", "Sakuraneko Koikoi");
-INSERT INTO device_feature (id, device_id) VALUES (357, 363);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (357, 357, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (358, 363);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (358, 358, 3, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (364, 61, NULL, "Sakuraneko Device");
-INSERT INTO device_feature (id, device_id) VALUES (359, 364);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (359, 359, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (365, 61, "sakuraneko-01", "Sakuraneko Korokoro");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (366, 61, "sakuraneko-03", "Sakuraneko Dokidoki");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (62, "lovense", "lovense");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (62, "LVS-", 1);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (62, "LOVE-", 1);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (66, 62, "45420001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (100, 66, "tx", "45420002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (101, 66, "rx", "45420003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (67, 62, "45440001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (102, 67, "rx", "45440003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (103, 67, "tx", "45440002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (68, 62, "50300001-0024-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (104, 68, "tx", "50300002-0024-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (105, 68, "rx", "50300003-0024-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (69, 62, "0000fff0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (106, 69, "tx", "0000fff2-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (107, 69, "rx", "0000fff1-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (70, 62, "53300001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (108, 70, "tx", "53300002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (109, 70, "rx", "53300003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (71, 62, "5a300001-0024-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (110, 71, "rx", "5a300003-0024-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (111, 71, "tx", "5a300002-0024-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (72, 62, "43300001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (112, 72, "tx", "43300002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (113, 72, "rx", "43300003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (73, 62, "50300001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (114, 73, "rx", "50300003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (115, 73, "tx", "50300002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (74, 62, "42300001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (116, 74, "rx", "42300003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (117, 74, "tx", "42300002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (75, 62, "45410001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (118, 75, "rx", "45410003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (119, 75, "tx", "45410002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (76, 62, "46300001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (120, 76, "tx", "46300002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (121, 76, "rx", "46300003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (77, 62, "4c300001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (122, 77, "tx", "4c300002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (123, 77, "rx", "4c300003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (78, 62, "6e400001-b5a3-f393-e0a9-e50e24dcca9e");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (124, 78, "tx", "6e400002-b5a3-f393-e0a9-e50e24dcca9e");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (125, 78, "rx", "6e400003-b5a3-f393-e0a9-e50e24dcca9e");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (79, 62, "57300001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (126, 79, "tx", "57300002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (127, 79, "rx", "57300003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (80, 62, "4f300001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (128, 80, "rx", "4f300003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (129, 80, "tx", "4f300002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (81, 62, "56300001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (130, 81, "tx", "56300002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (131, 81, "rx", "56300003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (82, 62, "52300001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (132, 82, "tx", "52300002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (133, 82, "rx", "52300003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (83, 62, "50300011-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (134, 83, "rx", "50300013-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (135, 83, "tx", "50300012-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (84, 62, "4a300001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (136, 84, "tx", "4a300002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (137, 84, "rx", "4a300003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (85, 62, "54300001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (138, 85, "rx", "54300003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (139, 85, "tx", "54300002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (86, 62, "45490001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (140, 86, "rx", "45490003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (141, 86, "tx", "45490002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (87, 62, "58300001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (142, 87, "rx", "58300003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (143, 87, "tx", "58300002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (88, 62, "4e300001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (144, 88, "tx", "4e300002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (145, 88, "rx", "4e300003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (89, 62, "5a300001-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (146, 89, "rx", "5a300003-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (147, 89, "tx", "5a300002-0023-4bd4-bbd5-a6920e4c5653");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (367, 62, "EB", "Lovense Hyphy");
-INSERT INTO device_feature (id, device_id) VALUES (360, 367);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (360, 360, 2, NULL, 0, 20);
-INSERT INTO device_feature (id, device_id) VALUES (361, 367);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (361, 361, 2, NULL, 0, 20);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (368, 62, "B", "Lovense Max");
-INSERT INTO device_feature (id, device_id) VALUES (362, 368);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (362, 362, 2, "Vibrator", 0, 20);
-INSERT INTO device_feature (id, device_id) VALUES (363, 368);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (363, 363, 5, "Air Pump", 0, 3);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (369, 62, "O", "Lovense Osci");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (370, 62, "ED", "Lovense Gush");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (371, 62, "EA", "Lovense Gravity");
-INSERT INTO device_feature (id, device_id) VALUES (364, 371);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (364, 364, 2, NULL, 0, 20);
-INSERT INTO device_feature (id, device_id) VALUES (365, 371);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (365, 365, 4, NULL, 0, 20);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (372, 62, "ToyS", "Loveai Dolp");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (373, 62, "N", "Lovense Gemini");
-INSERT INTO device_feature (id, device_id) VALUES (366, 373);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (366, 366, 2, NULL, 0, 20);
-INSERT INTO device_feature (id, device_id) VALUES (367, 373);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (367, 367, 2, NULL, 0, 20);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (374, 62, "S", "Lovense Lush");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (375, 62, "J", "Lovense Dolce");
-INSERT INTO device_feature (id, device_id) VALUES (368, 375);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (368, 368, 2, NULL, 0, 20);
-INSERT INTO device_feature (id, device_id) VALUES (369, 375);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (369, 369, 2, NULL, 0, 20);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (376, 62, "X", "Lovense Ferri");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (377, 62, "F", "Lovense Sex Machine");
-INSERT INTO device_feature (id, device_id) VALUES (370, 377);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (370, 370, 4, "Fucking Machine Oscillation Speed", 0, 20);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (378, 62, "EI-FW3", "Lovense Flexer");
-INSERT INTO device_feature (id, device_id) VALUES (371, 378);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (371, 371, 2, "Internal Vibe", 0, 20);
-INSERT INTO device_feature (id, device_id) VALUES (372, 378);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (372, 372, 2, "External Vibe", 0, 20);
-INSERT INTO device_feature (id, device_id) VALUES (373, 378);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (373, 373, 3, "Finger motion", 0, 20);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (379, 62, "R", "Lovense Diamo");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (380, 62, NULL, "Lovense Device");
-INSERT INTO device_feature (id, device_id) VALUES (374, 380);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (374, 374, 2, NULL, 0, 20);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (381, 62, "Z", "Lovense Hush");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (382, 62, "EI", "Lovense Flexer (Firmware update needed)");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (383, 62, "A", "Lovense Nora");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (384, 62, "W", "Lovense Domi");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (385, 62, "C", "Lovense Nora");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (386, 62, "L", "Lovense Ambi");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (387, 62, "T", "Lovense Calor");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (388, 62, "V", "Lovense Mission");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (389, 62, "P", "Lovense Edge");
-INSERT INTO device_feature (id, device_id) VALUES (375, 389);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (375, 375, 2, NULL, 0, 20);
-INSERT INTO device_feature (id, device_id) VALUES (376, 389);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (376, 376, 2, NULL, 0, 20);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (63, "patoo", "patoo");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (63, "PCS", 1);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (63, "PTVEA", 1);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (63, "PBT", 1);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (63, "PHT", 1);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (90, 63, "f000aa64-0451-4000-b000-000000000000");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (148, 90, "txmode", "f000aa65-0451-4000-b000-000000000000");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (149, 90, "tx", "f000aa68-0451-4000-b000-000000000000");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (390, 63, "PTVEA", "Patoo Carrot");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (391, 63, NULL, "Patoo Device");
-INSERT INTO device_feature (id, device_id) VALUES (377, 391);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (377, 377, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (392, 63, "PBT", "Patoo Devil");
-INSERT INTO device_feature (id, device_id) VALUES (378, 392);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (378, 378, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (379, 392);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (379, 379, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (393, 63, "PHT", "Patoo Bean Sprout");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (394, 63, "PCS", "Patoo Vibrator");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (64, "magic-motion-4", "magic-motion-4");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (64, "nyx", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (64, "Kegel Coach", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (64, "umi", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (64, "Magic Sundi", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (64, "Magic Lotos", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (64, "funone", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (64, "bobi2", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (64, "funkegel", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (91, 64, "0000180f-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (150, 91, "rxblebattery", "00002a19-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (92, 64, "78667579-7b48-43db-b8c5-7928a6b0a335");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (151, 92, "tx", "78667579-a914-49a4-8333-aa3c0cd8fedc");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (395, 64, "funone", "MagicMotion Bunny");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (396, 64, NULL, "Magic Motion V4 Device");
-INSERT INTO device_feature (id, device_id) VALUES (380, 396);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (380, 380, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (397, 64, "Magic Lotos", "MagicMotion Lotos");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (398, 64, "Kegel Coach", "MagicMotion Kegel Coach");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (399, 64, "nyx", "MagicMotion Nyx");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (400, 64, "umi", "MagicMotion Umi");
-INSERT INTO device_feature (id, device_id) VALUES (381, 400);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (381, 381, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (382, 400);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (382, 382, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (401, 64, "Magic Sundi", "MagicMotion Sundae");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (402, 64, "bobi2", "MagicMotion Bobi");
-INSERT INTO device_feature (id, device_id) VALUES (383, 402);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (383, 383, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (384, 402);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (384, 384, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (403, 64, "funkegel", "MagicMotion Crystal");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (65, "xinput", "xinput");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (404, 65, NULL, "XBox (XInput) Compatible Gamepad");
-INSERT INTO device_feature (id, device_id) VALUES (385, 404);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (385, 385, 2, NULL, 0, 65535);
-INSERT INTO device_feature (id, device_id) VALUES (386, 404);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (386, 386, 2, NULL, 0, 65535);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (66, "hismith", "hismith");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (66, "HISMITH", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (66, "Wildolo", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (93, 66, "0000ffe5-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (152, 93, "tx", "0000ffe9-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (94, 66, "0000ff90-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (153, 94, "rxblemodel", "0000ff96-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (405, 66, "1002", "Hismith Pro Traveler");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (406, 66, "2001", "Hismith Thrusting Cup");
-INSERT INTO device_feature (id, device_id) VALUES (387, 406);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (387, 387, 4, "Stroker Oscillation Speed", 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (388, 406);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (388, 388, 2, NULL, 0, 1);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (407, 66, "1101", "Hismith Sex Machine");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (408, 66, "1005", "Hismith Mini Sex Machine");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (409, 66, "1003", "Hismith Capsule");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (410, 66, NULL, "Hismith device");
-INSERT INTO device_feature (id, device_id) VALUES (389, 410);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (389, 389, 4, "Fucking Machine Oscillation Speed", 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (411, 66, "1001", "Hismith Sex Machine");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (412, 66, "3001", "Wildolo Device");
-INSERT INTO device_feature (id, device_id) VALUES (390, 412);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (390, 390, 2, NULL, 0, 100);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (67, "lelo-f1s", "lelo-f1s");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (67, "F1s", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (95, 67, "0000fff0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (154, 95, "rx", "00000aa4-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (155, 95, "tx", "0000fff1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (413, 67, NULL, "Lelo F1s");
-INSERT INTO device_feature (id, device_id) VALUES (391, 413);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (391, 391, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (392, 413);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (392, 392, 2, NULL, 0, 100);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (68, "svakom-alex-v2", "svakom-alex-v2");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (68, "Alex NEO 2", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (96, 68, "0000ffe0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (156, 96, "tx", "0000ffe1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (414, 68, NULL, "Svakom Alex Neo 2");
-INSERT INTO device_feature (id, device_id) VALUES (393, 414);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (393, 393, 2, NULL, 0, 3);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (69, "svakom-pulse", "svakom-pulse");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (69, "SWK-SX013A", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (69, "Pulse Union", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (97, 69, "0000ffe0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (157, 97, "rx", "0000ffe2-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (158, 97, "tx", "0000ffe1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (415, 69, "Pulse Union", "Svakom Pulse Union");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (416, 69, "SWK-SX013A", "Svakom Pulse Lite Neo");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (417, 69, NULL, "Svakom Pulse Device");
-INSERT INTO device_feature (id, device_id) VALUES (394, 417);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (394, 394, 2, NULL, 0, 9);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (70, "kiiroo-v2", "kiiroo-v2");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (70, "Launch", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (70, "Onyx2", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (98, 70, "88f80580-0000-01e6-aace-0002a5d5c51b");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (159, 98, "firmware", "88f80583-0000-01e6-aace-0002a5d5c51b");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (160, 98, "tx", "88f80581-0000-01e6-aace-0002a5d5c51b");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (161, 98, "rx", "88f80582-0000-01e6-aace-0002a5d5c51b");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (99, 70, "f60402a6-0293-4bdb-9f20-6758133f7090");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (162, 99, "tx", "02962ac9-e86f-4094-989d-231d69995fc2");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (163, 99, "rx", "d44d0393-0731-43b3-a373-8fc70b1f3323");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (164, 99, "firmware", "c7b7a04b-2cc4-40ff-8b10-5d531d1161db");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (418, 70, NULL, "Kiiroo v2 Device");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (419, 70, "Launch", "Fleshlight Launch");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (420, 70, "Onyx2", "Kiiroo Onyx 2");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (71, "kizuna", "kizuna");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (421, 71, NULL, "Kizuna Smart");
-INSERT INTO device_feature (id, device_id) VALUES (395, 421);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (395, 395, 3, NULL, 0, 9);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (72, "twerkingbutt", "twerkingbutt");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (72, "TwerkingButt", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (72, "BODIKANG", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (72, "Twerking Butt", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (100, 72, "00000a60-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (165, 100, "tx", "00000a66-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (166, 100, "rx", "00000a67-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (422, 72, NULL, "Twerking Butt");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (73, "xibao", "xibao");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (73, "CCYB_", 1);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (101, 73, "0000fff0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (167, 101, "tx", "0000fff2-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (423, 73, NULL, "Xibao Smart Masturbation Cup");
-INSERT INTO device_feature (id, device_id) VALUES (396, 423);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (396, 396, 4, NULL, 0, 99);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (74, "cowgirl", "cowgirl");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (74, "THE UNICORN", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (74, "THE COWGIRL", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (102, 74, "0000fe00-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (168, 102, "tx", "0000fe01-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (424, 74, "THE COWGIRL", "The Cowgirl");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (425, 74, "THE UNICORN", "The Unicorn");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (426, 74, NULL, "The Cowgirl Device");
-INSERT INTO device_feature (id, device_id) VALUES (397, 426);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (397, 397, 2, NULL, 0, 255);
-INSERT INTO device_feature (id, device_id) VALUES (398, 426);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (398, 398, 3, NULL, 0, 255);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (75, "ankni", "ankni");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (75, "DSJM", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (103, 75, "0000180a-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (169, 103, "generic0", "00002a50-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (104, 75, "0000fe00-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (170, 104, "tx", "0000fe01-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (171, 104, "rx", "0000fe02-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (105, 75, "0000fffe-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (172, 105, "rx", "0000fe02-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (173, 105, "tx", "0000fe01-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (427, 75, NULL, "Roselex Device");
-INSERT INTO device_feature (id, device_id) VALUES (399, 427);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (399, 399, 2, NULL, 0, 3);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (76, "htk_bm", "htk_bm");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (76, "HTK-BLE-BM001", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (106, 76, "0000180f-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (174, 106, "rxblebattery", "00002a19-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (107, 76, "00001802-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (175, 107, "tx", "00002a06-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (428, 76, NULL, "HTK Breast Massager");
-INSERT INTO device_feature (id, device_id) VALUES (400, 428);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (400, 400, 2, NULL, 0, 1);
-INSERT INTO device_feature (id, device_id) VALUES (401, 428);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (401, 401, 2, NULL, 0, 1);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (77, "sayberx", "sayberx");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (77, "SayberX", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (77, "X-Ring ", 1);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (108, 77, "0000fff0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (176, 108, "rx", "0000fff8-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (177, 108, "tx", "0000fff6-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (429, 77, "X-Ring", "Sayber X-Ring");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (430, 77, NULL, "SayberX Device");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (431, 77, "SayberX", "SayberX");
-INSERT INTO device_feature (id, device_id) VALUES (402, 431);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (402, 402, 2, NULL, 0, 4);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (78, "magic-motion-3", "magic-motion-3");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (78, "Krush", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (109, 78, "78667579-7b48-43db-b8c5-7928a6b0a335");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (178, 109, "tx", "78667579-a914-49a4-8333-aa3c0cd8fedc");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (110, 78, "0000180f-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (179, 110, "rxblebattery", "00002a19-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (432, 78, NULL, "LoveLife Krush");
-INSERT INTO device_feature (id, device_id) VALUES (403, 432);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (403, 403, 2, NULL, 0, 77);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (79, "mannuo", "mannuo");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (79, "MANO PRODUCT", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (79, "Sex toys", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (79, "Sex Toys", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (79, "LXCDVP", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (111, 79, "0000fff0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (180, 111, "tx", "0000fff1-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (181, 111, "rx", "0000fff4-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (433, 79, NULL, "ManNuo Device");
-INSERT INTO device_feature (id, device_id) VALUES (404, 433);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (404, 404, 2, NULL, 0, 3);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (80, "cachito", "cachito");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (80, "CCTSK", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (80, "CCTXueGao", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (112, 80, "0000fff0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (182, 112, "tx", "0000fff2-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (434, 80, "CCTXueGao", "Cachito Ice Cream");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (435, 80, NULL, "Cachito Device");
-INSERT INTO device_feature (id, device_id) VALUES (405, 435);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (405, 405, 2, NULL, 0, 5);
-INSERT INTO device_feature (id, device_id) VALUES (406, 435);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (406, 406, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (436, 80, "CCTSK", "Cachito Lure Tao");
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (81, "meese", "meese");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (81, "Meese-V389", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (113, 81, "0000ffe0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (183, 113, "tx", "0000ffe1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (437, 81, NULL, "Meese Tera");
-INSERT INTO device_feature (id, device_id) VALUES (407, 437);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (407, 407, 2, NULL, 0, 10);
-INSERT INTO device_feature (id, device_id) VALUES (408, 437);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (408, 408, 2, NULL, 0, 3);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (82, "magic-motion-2", "magic-motion-2");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (82, "Curve", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (82, "Lipstick", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (82, "Sword", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (82, "Eidolon", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (114, 82, "78667579-7b48-43db-b8c5-7928a6b0a335");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (184, 114, "tx", "78667579-a914-49a4-8333-aa3c0cd8fedc");
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (115, 82, "0000180f-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (185, 115, "rxblebattery", "00002a19-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (438, 82, "Curve", "MagicMotion Solstice");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (439, 82, "Lipstick", "MagicMotion Awaken");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (440, 82, "Eidolon", "MagicMotion Eidolon");
-INSERT INTO device_feature (id, device_id) VALUES (409, 440);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (409, 409, 2, NULL, 0, 100);
-INSERT INTO device_feature (id, device_id) VALUES (410, 440);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (410, 410, 2, NULL, 0, 100);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (441, 82, "Sword", "MagicMotion Equinox");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (442, 82, NULL, "Magic Motion V2 Device");
-INSERT INTO device_feature (id, device_id) VALUES (411, 442);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (411, 411, 2, NULL, 0, 100);
-INSERT INTO protocol (id, protocol_name, display_name) VALUES (83, "zalo", "zalo");
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (83, "ZALO-Jeanne", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (83, "ZALO-Queen", 0);
-INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES (83, "ZALO-King", 0);
-INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES (116, 83, "0000fff0-0000-1000-8000-00805f9b34fb");
-INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES (186, 116, "tx", "0000fff1-0000-1000-8000-00805f9b34fb");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (443, 83, NULL, "Zalo Device");
-INSERT INTO device_feature (id, device_id) VALUES (412, 443);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (412, 412, 2, NULL, 0, 8);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (444, 83, "ZALO-King", "Zalo King");
-INSERT INTO device_feature (id, device_id) VALUES (413, 444);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (413, 413, 2, NULL, 0, 8);
-INSERT INTO device_feature (id, device_id) VALUES (414, 444);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (414, 414, 2, NULL, 0, 8);
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (445, 83, "ZALO-Jeanne", "Zalo Jeanne");
-INSERT INTO device (id, protocol_id, identifier, device_name) VALUES (446, 83, "ZALO-Queen", "Zalo Queen");
-INSERT INTO device_feature (id, device_id) VALUES (415, 446);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (415, 415, 2, NULL, 0, 8);
-INSERT INTO device_feature (id, device_id) VALUES (416, 446);
-INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES (416, 416, 2, NULL, 0, 8);
