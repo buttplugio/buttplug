@@ -25,6 +25,7 @@ use crate::{
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
+use std::sync::atomic::{AtomicU32, AtomicU8, Ordering};
 use std::{sync::Arc, time::Duration};
 use tokio::sync::RwLock;
 
@@ -80,30 +81,25 @@ fn scalar_to_vector(scalar: u32) -> Vec<u8> {
 
 async fn vibration_update_handler(
   device: Arc<Hardware>,
-  last_scalar_holder: Arc<RwLock<u32>>,
-  current_scalar_holder: Arc<RwLock<u32>>,
-  loops_skipped_holder: Arc<RwLock<u8>>,
+  loops_skipped_holder: Arc<AtomicU8>,
+  last_scalar_holder: Arc<AtomicU32>,
+  current_scalar_holder: Arc<AtomicU32>,
 ) {
   info!("Entering MizzZee2 Control Loop");
   loop {
     sleep(Duration::from_millis(MIZZZEE2_COMMAND_DELAY_MS)).await;
 
-    let last_scalar = last_scalar_holder.read().await.clone();
-    let current_scalar = current_scalar_holder.read().await.clone();
-    let loops_skipped = loops_skipped_holder.read().await.clone();
+    let loops_skipped = loops_skipped_holder.load(Ordering::Relaxed);
+    let last_scalar = last_scalar_holder.load(Ordering::Relaxed);
+    let current_scalar = current_scalar_holder.load(Ordering::Relaxed);
 
-    let loops_skipped_mutex = loops_skipped_holder.clone();
-
-    let mut skip_writer = loops_skipped_mutex.write().await;
     if last_scalar == current_scalar && loops_skipped < MIZZZEE2_COMMANDS_TO_SKIP {
-      *skip_writer += 1;
+      loops_skipped_holder.store(loops_skipped + 1, Ordering::Relaxed);
       continue;
     }
-    *skip_writer = 0;
 
-    let last_scalar_mutex = last_scalar_holder.clone();
-    let mut last_scalar_writer = last_scalar_mutex.write().await;
-    *last_scalar_writer = current_scalar;
+    loops_skipped_holder.store(0, Ordering::Relaxed);
+    last_scalar_holder.store(current_scalar, Ordering::Relaxed);
 
     if device
       .write_value(&HardwareWriteCmd::new(
@@ -121,22 +117,22 @@ async fn vibration_update_handler(
 
 #[derive(Default)]
 pub struct MizzZeeV2_1 {
-  current_scalar: Arc<RwLock<u32>>,
+  current_scalar: Arc<AtomicU32>,
 }
 
 impl MizzZeeV2_1 {
   fn new(device: Arc<Hardware>) -> Self {
-    let current_scalar = Arc::new(RwLock::new(0));
-    let current_scalar_clone = current_scalar.clone();
-
-    let last_scalar = Arc::new(RwLock::new(0));
-    let last_scalar_clone = last_scalar.clone();
-
-    let loops_skipped = Arc::new(RwLock::new(0));
+    let loops_skipped = Arc::new(AtomicU8::new(0));
     let loops_skipped_clone = loops_skipped.clone();
 
+    let last_scalar = Arc::new(AtomicU32::new(0));
+    let last_scalar_clone = last_scalar.clone();
+
+    let current_scalar = Arc::new(AtomicU32::new(0));
+    let current_scalar_clone = current_scalar.clone();
+
     async_manager::spawn( async move {
-      vibration_update_handler(device, last_scalar_clone, current_scalar_clone, loops_skipped_clone).await
+      vibration_update_handler(device, loops_skipped_clone, last_scalar_clone, current_scalar_clone).await
     });
     Self { current_scalar }
   }
@@ -154,9 +150,7 @@ impl ProtocolHandler for MizzZeeV2_1 {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_scalar = self.current_scalar.clone();
     async_manager::spawn(async move {
-      let write_mutex = current_scalar.clone();
-      let mut scalar_writer = write_mutex.write().await;
-      *scalar_writer = scalar;
+      current_scalar.store(scalar, Ordering::Relaxed);
     });
     Ok(vec![])
   }
