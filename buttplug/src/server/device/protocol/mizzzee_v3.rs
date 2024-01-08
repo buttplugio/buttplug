@@ -82,7 +82,7 @@ async fn vibration_update_handler(
     .write_value(&HardwareWriteCmd::new(
       Endpoint::Tx,
       scalar_to_vector(current_scalar),
-      false,
+      true,
     ))
     .await
     .is_ok()
