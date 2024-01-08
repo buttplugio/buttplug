@@ -40,6 +40,7 @@ pub mod kizuna;
 pub mod lelo_harmony;
 pub mod lelof1s;
 pub mod lelof1sv2;
+pub mod leten;
 pub mod libo_elle;
 pub mod libo_shark;
 pub mod libo_vibes;
@@ -268,6 +269,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     lelof1sv2::setup::LeloF1sV2IdentifierFactory::default(),
   );
+  add_to_protocol_map(&mut map, leten::setup::LetenIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     lelo_harmony::setup::LeloHarmonyIdentifierFactory::default(),

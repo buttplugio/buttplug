@@ -4238,3 +4238,21 @@ protocols:
         ScalarCmd:
           - StepRange: [ 0, 3 ]
             ActuatorType: Vibrate
+  leten:
+    btle:
+      names:
+        - T528-LT # antlers
+        - F537-LT # cup
+        - F520B-LT # clip + butterfly
+        - F520A-LT # long/butterfly
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff1-0000-1000-8000-00805f9b34fb
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          rx: 0000ffe1-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Leten Device
+      messages:
+        ScalarCmd:
+          - StepRange: [ 0, 25 ]
+            ActuatorType: Vibrate

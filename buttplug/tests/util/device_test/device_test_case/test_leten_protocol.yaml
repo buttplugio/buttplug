@@ -1,0 +1,55 @@
+devices:
+  - identifier: 
+      name: "F520A-LT"
+    expected_name: "Leten Device"
+device_init:
+  # Initialization
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [4,1]
+        write_with_response: true
+      - !Write
+        endpoint: tx
+        data: [2,0]
+        write_with_response: true
+device_commands:
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x02, 0x0d]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.75
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x02, 0x13]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages: 
+        - !Stop 
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            data: [0x02, 0x00]
+            write_with_response: true
