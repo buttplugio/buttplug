@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 23
+  minor: 24
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -4203,4 +4203,20 @@ protocols:
           - StepRange: [0, 255]
             ActuatorType: Oscillate
           - StepRange: [0, 255]
+            ActuatorType: Vibrate
+  vibcrafter:
+    btle:
+      names:
+        - be gentle
+      services:
+        53300051-0060-4bd4-bbe5-a6920e4c5663:
+          tx: 53300052-0060-4bd4-bbe5-a6920e4c5663
+          rx: 53300053-0060-4bd4-bbe5-a6920e4c5663
+    defaults:
+      name: VibCrafter Device
+      messages:
+        ScalarCmd:
+          - StepRange: [ 0, 99 ]
+            ActuatorType: Vibrate
+          - StepRange: [ 0, 99 ]
             ActuatorType: Vibrate

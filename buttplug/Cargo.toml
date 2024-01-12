@@ -94,6 +94,10 @@ instant = "0.1.12"
 regex = "1.10.2"
 tokio-tungstenite = { version = "0.21.0", features = ["rustls-tls-webpki-roots"], optional = true }
 rustls = { version = "0.22.1", optional = true }
+aes = { version = "0.8.3" }
+ecb = { version = "0.1.2", features = ["std"] }
+rand = { version = "0.8.5" }
+sha2 = { version = "0.10.8", features = ["std"] }
 
 [dev-dependencies]
 serde_yaml = "0.9.29"
