@@ -97,6 +97,7 @@ pub mod synchro;
 pub mod tcode_v03;
 pub mod thehandy;
 pub mod tryfun;
+pub mod vibcrafter;
 pub mod vibratissimo;
 pub mod vorze_sa;
 pub mod wetoy;
@@ -466,6 +467,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     tcode_v03::setup::TCodeV03IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    vibcrafter::setup::VibCrafterIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
