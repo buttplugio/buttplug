@@ -8511,7 +8511,10 @@
     "joyhub": {
       "btle": {
         "names": [
-          "J-Petalwish2"
+          "J-Petalwish2",
+          "J-VortexTongue",
+          "J-Velocity",
+          "JOYHUB-ROSELLA2"
         ],
         "services": {
           "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -8520,16 +8523,9 @@
         }
       },
       "defaults": {
-        "name": "JoyHub Petalwish 2",
+        "name": "JoyHub Device",
         "messages": {
           "ScalarCmd": [
-            {
-              "StepRange": [
-                0,
-                255
-              ],
-              "ActuatorType": "Oscillate"
-            },
             {
               "StepRange": [
                 0,
@@ -8539,7 +8535,77 @@
             }
           ]
         }
-      }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "JOYHUB-ROSELLA2"
+          ],
+          "name": "JoyHub Rosella 2"
+        },
+        {
+          "identifier": [
+            "J-Velocity"
+          ],
+          "name": "JoyHub Velocity"
+        },
+        {
+          "identifier": [
+            "J-Petalwish2"
+          ],
+          "name": "JoyHub Petalwish 2",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  255
+                ],
+                "ActuatorType": "Oscillate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  255
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "J-VortexTongue"
+          ],
+          "name": "JoyHub Vortex Tongue",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  255
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  3
+                ],
+                "FeatureDescriptor": "Air Pump",
+                "ActuatorType": "Constrict"
+              },
+              {
+                "StepRange": [
+                  0,
+                  255
+                ],
+                "ActuatorType": "Rotate"
+              }
+            ]
+          }
+        }
+      ]
     },
     "itoys": {
       "btle": {
