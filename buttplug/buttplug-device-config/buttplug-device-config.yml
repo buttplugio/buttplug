@@ -2096,6 +2096,24 @@ protocols:
         ScalarCmd:
           - StepRange: [0, 3]
             ActuatorType: Vibrate
+  svakom-dt250a:
+    btle:
+      names:
+        - DT250A
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Coleur Dor DT250A
+      messages:
+        ScalarCmd:
+          - StepRange: [ 0, 3 ]
+            ActuatorType: Vibrate
+          - StepRange: [ 0, 3 ]
+            ActuatorType: Vibrate
+          - StepRange: [ 0, 2 ]
+            ActuatorType: Constrict
   svakom-iker:
     btle:
       names:
