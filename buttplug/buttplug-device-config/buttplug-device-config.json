@@ -4724,7 +4724,8 @@
           "Ida Wave",
           "TianiHarmony",
           "Tiani Harmony",
-          "TOR3"
+          "TOR3",
+          "Hugo2"
         ],
         "services": {
           "0000fff0-0000-1000-8000-00805f9b34fb": {
@@ -4797,6 +4798,12 @@
               }
             ]
           }
+        },
+        {
+          "identifier": [
+            "Hugo2"
+          ],
+          "name": "Lelo Hugo 2"
         }
       ]
     },

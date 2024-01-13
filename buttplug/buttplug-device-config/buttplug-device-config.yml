@@ -2377,6 +2377,7 @@ protocols:
         - TianiHarmony
         - Tiani Harmony
         - TOR3
+        - Hugo2
       services:
         0000fff0-0000-1000-8000-00805f9b34fb:
           command: 0000fff1-0000-1000-8000-00805f9b34fb
@@ -2410,6 +2411,9 @@ protocols:
           ScalarCmd:
             - StepRange: [0, 100]
               ActuatorType: Vibrate
+      - identifier:
+          - Hugo2
+        name: Lelo Hugo 2
   aneros:
     btle:
       names:
