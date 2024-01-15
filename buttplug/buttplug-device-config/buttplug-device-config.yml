@@ -1586,6 +1586,7 @@ protocols:
         - OhMiBod ESCA
         - OhMiBod Foxy
         - OhMiBod Chill Panty Vibe
+        - OhMiBod Sphinx
         - Pulse Interactive
         - Fuse1.1
       services:
@@ -1686,6 +1687,13 @@ protocols:
       - identifier:
           - OhMiBod Chill Panty Vibe
         name: OhMiBod Chill
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 100]
+              ActuatorType: Vibrate
+      - identifier:
+          - OhMiBod Sphinx
+        name: OhMiBod Sphinx
         messages:
           ScalarCmd:
             - StepRange: [0, 100]
