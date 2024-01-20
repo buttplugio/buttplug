@@ -1,0 +1,51 @@
+devices:
+  - identifier: 
+      name: "XHTKJ"
+    expected_name: "Mizz Zee Device"
+device_commands:
+  # We'll get a stop packet first as the repeat task spins up.
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [3, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            write_with_response: true
+
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            data: [3, 18, 243, 0, 252, 0, 254, 64, 1, 60, 166, 0, 252, 0, 254, 64, 1, 60, 166, 0]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 1
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            data: [3, 18, 243, 0, 252, 0, 254, 64, 1, 252, 255, 0, 252, 0, 254, 64, 1, 252, 255, 0]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [3, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            write_with_response: true
