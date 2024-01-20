@@ -63,6 +63,7 @@ pub mod metaxsire_v2;
 pub mod metaxsire_v3;
 pub mod mizzzee;
 pub mod mizzzee_v2;
+pub mod mizzzee_v3;
 pub mod monsterpub;
 pub mod motorbunny;
 pub mod mysteryvibe;
@@ -351,6 +352,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     mizzzee_v2::setup::MizzZeeV2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    mizzzee_v3::setup::MizzZeeV3IdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
