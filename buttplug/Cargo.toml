@@ -43,8 +43,8 @@ lovense-connect-service-manager=["server","reqwest"]
 websocket-server-manager=["server", "websockets"]
 # Runtime managers
 tokio-runtime=[]
-wasm-bindgen-runtime=["wasm-bindgen", "wasm-bindgen-futures"]
-wasm = ["server", "wasm-bindgen-runtime", "serialize-json", "wasm-bindgen", "uuid/js", "wasmtimer"]
+wasm-bindgen-runtime=[]
+wasm = ["server", "wasm-bindgen-runtime", "serialize-json", "uuid/js"]
 dummy-runtime=[]
 # Compiler config
 unstable=[]
@@ -125,10 +125,10 @@ serialport = { version = "4.3.0", optional = true }
 # Other platforms are not affected by the feature changes.
 hidapi = { version = "2.4.1", default-features = false, features = ["linux-static-hidraw", "illumos-static-libusb"], optional = true }
 
-[target.'cfg(target = "wasm32-unknown-unknown")'.dependencies]
-wasm-bindgen = { version = "0.2.90", features = ["serde-serialize"], optional = true }
-wasm-bindgen-futures = { version = "0.4.40", optional = true }
-wasmtimer = { version = "0.2.0", optional = true }
+[target.wasm32-unknown-unknown.dependencies]
+wasm-bindgen = { version = "0.2.90", features = ["serde-serialize"] }
+wasm-bindgen-futures = { version = "0.4.40" }
+wasmtimer = { version = "0.2.0" }
 
 [dependencies.web-sys]
 version = "0.3.67"
