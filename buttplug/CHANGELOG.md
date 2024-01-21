@@ -1,9 +1,9 @@
-# 7.1.12 (In Development)
+# 7.1.12 (2024-01-21)
 
 ## Features
 
 - Move from async-tungstenite to tokio-tungstenite
-  - We only build for tokio at this point anyways
+  - We only build for tokio at this point anyways (outside of wasm)
   - Easier to integrate with rustls, removes OpenSSL requirement on some platforms
 - Added Device Support
   - Mysteryvibe Molto
@@ -12,6 +12,24 @@
   - Joyhub Petalwish 2
   - metaXsire Nolan
   - Cooxer Bullet Vibe
+  - iToys Seagull
+  - Coleur Dor VX045A
+  - Coleur Dor VX236A
+  - Coleur Dor DT250A
+  - Svakom Winni 2
+  - Svakom Magic Suitcase
+  - metaXsire Tay
+  - Leten devices (mostly legacy now they seem to have moved to MuSe)
+  - Lovense Ambi (new UUIDs)
+  - Svakom Alex Neo 2 (new identifier)
+  - JoyHub Vortex Tongue
+  - JoyHub Velocity
+  - JoyHub Rosella 2
+  - Lelo Hugo 2
+  - Svakom Magic Suitcase
+  - OhMiBod Sphinx
+  - MizzZee v3
+  - Vibcrafter (multiple devices)
 
 ## Bugfixes
 
@@ -21,7 +39,6 @@
 - Lovense Solace works via Lovense Connect
 - Fix mode flags on Foreo devices
 - Add new BLE name for Sinoli devices
-- 
 
 # 7.1.11 (2023-11-18)
 
