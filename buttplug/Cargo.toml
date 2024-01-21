@@ -44,7 +44,7 @@ websocket-server-manager=["server", "websockets"]
 # Runtime managers
 tokio-runtime=[]
 wasm-bindgen-runtime=["wasm-bindgen", "wasm-bindgen-futures"]
-wasm = ["server", "wasm-bindgen-runtime", "serialize-json", "wasm-bindgen", "uuid/wasm-bindgen", "wasmtimer"]
+wasm = ["server", "wasm-bindgen-runtime", "serialize-json", "wasm-bindgen", "uuid/js", "wasmtimer"]
 dummy-runtime=[]
 # Compiler config
 unstable=[]
@@ -54,13 +54,13 @@ buttplug_derive = "0.8.0"
 # buttplug_derive = { path = "../buttplug_derive" }
 futures = "0.3.30"
 futures-util = "0.3.30"
-async-trait = "0.1.76"
-serde = { version = "1.0.193", features = ["derive"] }
-serde_json = "1.0.109"
-serde_repr = "0.1.17"
-uuid = { version = "1.6.1", features = ["serde"] }
+async-trait = "0.1.77"
+serde = { version = "1.0.195", features = ["derive"] }
+serde_json = "1.0.111"
+serde_repr = "0.1.18"
+uuid = { version = "1.7.0", features = ["serde"] }
 url = "2.5.0"
-btleplug = { version = "0.11.4", optional = true }
+btleplug = { version = "0.11.5", optional = true }
 # btleplug = { path = "../../btleplug", optional = true}
 # btleplug = { git = 'https://github.com/deviceplug/btleplug', branch = 'master', optional = true }
 strum_macros = "0.25.3"
@@ -69,38 +69,35 @@ once_cell = "1.19.0"
 paste = "1.0.14"
 lazy_static = "1.4.0"
 byteorder = "1.5.0"
-thiserror = "1.0.53"
-wasm-bindgen-futures = { version = "0.4.39", optional = true }
+thiserror = "1.0.56"
 cfg-if = "1.0.0"
 tracing = "0.1.40"
 tracing-futures = "0.2.5"
 tracing-subscriber = { version = "0.3.18", features = ["json"] }
 dashmap = "5.5.3"
 displaydoc = "0.2.4"
-wasm-bindgen = { version = "0.2.89", features = ["serde-serialize"], optional = true }
 tokio = { version = "1.35.1", features = ["sync", "macros", "io-util"] }
 async-stream = "0.3.5"
 prost = "0.12.3"
 tokio-util = "0.7.10"
 reqwest = { version = "0.11.23", default-features = false, optional = true, features = ["rustls-tls"] }
-serde-aux = "4.3.1"
+serde-aux = "4.4.0"
 getset = "0.1.2"
 os_info = "3.7.0"
 jsonschema = { version = "0.17.1", default-features = false }
 derivative = "2.2.0"
 tokio-stream = "0.1.14"
-wasmtimer = { version = "0.2.0", optional = true }
 instant = "0.1.12"
-regex = "1.10.2"
+regex = "1.10.3"
 tokio-tungstenite = { version = "0.21.0", features = ["rustls-tls-webpki-roots"], optional = true }
-rustls = { version = "0.22.1", optional = true }
+rustls = { version = "0.22.2", optional = true }
 aes = { version = "0.8.3" }
 ecb = { version = "0.1.2", features = ["std"] }
 rand = { version = "0.8.5" }
 sha2 = { version = "0.10.8", features = ["std"] }
 
 [dev-dependencies]
-serde_yaml = "0.9.29"
+serde_yaml = "0.9.30"
 test-case = "3.3.1"
 tokio = { version = "1.35.1", features = ["io-std", "rt"] }
 tracing-log = { version = "0.2.0" }
@@ -128,8 +125,13 @@ serialport = { version = "4.3.0", optional = true }
 # Other platforms are not affected by the feature changes.
 hidapi = { version = "2.4.1", default-features = false, features = ["linux-static-hidraw", "illumos-static-libusb"], optional = true }
 
+[target.'cfg(target = "wasm32-unknown-unknown")'.dependencies]
+wasm-bindgen = { version = "0.2.90", features = ["serde-serialize"], optional = true }
+wasm-bindgen-futures = { version = "0.4.40", optional = true }
+wasmtimer = { version = "0.2.0", optional = true }
+
 [dependencies.web-sys]
-version = "0.3.66"
+version = "0.3.67"
 # path = "../../wasm-bindgen/crates/web-sys"
 #git = "https://github.com/rustwasm/wasm-bindgen"
 optional = true
