@@ -4298,6 +4298,7 @@
         "names": [
           "SWK-SX013A",
           "Pulse Union",
+          "Pulse Galaxie",
           "SX033APP",
           "BX288A",
           "QH-SX045A-B"
@@ -4335,6 +4336,12 @@
             "Pulse Union"
           ],
           "name": "Svakom Pulse Union"
+        },
+        {
+          "identifier": [
+            "Pulse Galaxie"
+          ],
+          "name": "Svakom Pulse Galaxie"
         },
         {
           "identifier": [
