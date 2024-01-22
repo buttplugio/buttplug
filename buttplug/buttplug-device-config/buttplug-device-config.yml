@@ -2145,6 +2145,7 @@ protocols:
       names:
         - SWK-SX013A # Pulse Lite Neo
         - Pulse Union
+        - Pulse Galaxie
         - SX033APP
         - BX288A
         - QH-SX045A-B
@@ -2165,6 +2166,9 @@ protocols:
       - identifier:
           - Pulse Union
         name: Svakom Pulse Union
+      - identifier:
+          - Pulse Galaxie
+        name: Svakom Pulse Galaxie
       - identifier:
           - SX033APP
         name: Svakom Mimiki
