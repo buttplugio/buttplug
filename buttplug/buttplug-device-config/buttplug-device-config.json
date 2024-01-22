@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 24
+    "minor": 25
   },
   "protocols": {
     "lovense": {
@@ -7732,8 +7732,7 @@
         "names": [
           "Rex",
           "Cali",
-          "Olis",
-          "LY199B01"
+          "Olis"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -7823,7 +7822,9 @@
     "metaxsire-repeat": {
       "btle": {
         "names": [
-          "LY199B01"
+          "LY199B01",
+          "LY234A01",
+          "LY271A01"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -7845,7 +7846,27 @@
             }
           ]
         }
-      }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "LY199B01"
+          ],
+          "name": "Cooxer Bullet Vibe"
+        },
+        {
+          "identifier": [
+            "LY234A01"
+          ],
+          "name": "metaXsire Tadpole"
+        },
+        {
+          "identifier": [
+            "LY271A01"
+          ],
+          "name": "metaXsire Upton"
+        }
+      ]
     },
     "metaxsire-v2": {
       "btle": {
@@ -8649,7 +8670,8 @@
           "J-Petalwish2",
           "J-VortexTongue",
           "J-Velocity",
-          "JOYHUB-ROSELLA2"
+          "JOYHUB-ROSELLA2",
+          "J-VibSiren"
         ],
         "services": {
           "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -8736,6 +8758,39 @@
                   255
                 ],
                 "ActuatorType": "Rotate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "J-VibSiren"
+          ],
+          "name": "JoyHub VibSiren",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  255
+                ],
+                "ActuatorType": "Vibrate",
+                "FeatureDescriptor": "External vibrator"
+              },
+              {
+                "StepRange": [
+                  0,
+                  255
+                ],
+                "ActuatorType": "Oscillate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  255
+                ],
+                "ActuatorType": "Vibrate",
+                "FeatureDescriptor": "Internal vibrator"
               }
             ]
           }
