@@ -70,6 +70,8 @@ fn lovense_model_resolver(type_response: String) -> String {
   let identifier = parts[0].to_owned();
   let version = parts[1].to_owned().parse::<i32>().unwrap_or(0);
 
+  info!("Identified device type {} version {}", identifier, version);
+
   // Flexer: version must be 3+ to control actuators separately
   if identifier == "EI" && version >= 3 {
     return "EI-FW3".to_string();
@@ -98,7 +100,7 @@ impl ProtocolIdentifier for LovenseIdentifier {
         event = event_receiver.recv().fuse() => {
           if let Ok(HardwareEvent::Notification(_, _, n)) = event {
             let type_response = std::str::from_utf8(&n).map_err(|_| ButtplugDeviceError::ProtocolSpecificError("lovense".to_owned(), "Lovense device init got back non-UTF8 string.".to_owned()))?.to_owned();
-            info!("Lovense Device Type Response: {}", type_response);
+            debug!("Lovense Device Type Response: {}", type_response);
             let ident = lovense_model_resolver(type_response);
             return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &ProtocolAttributesType::Identifier(ident.clone())), Box::new(LovenseInitializer::new(ident))));
           } else {
@@ -163,6 +165,12 @@ impl ProtocolInitializer for LovenseInitializer {
       }
     }
 
+    debug!(
+      "Device type {} initialized with {} vibrators {}using Mply",
+      protocol.device_type,
+      protocol.vibrator_count,
+      if protocol.use_mply { "" } else { "not " }
+    );
     Ok(Arc::new(protocol))
   }
 }
