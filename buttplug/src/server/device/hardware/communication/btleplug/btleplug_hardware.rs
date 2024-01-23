@@ -386,7 +386,15 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let data = msg.data.clone();
     async move {
       match device.write(&characteristic, &data, write_type).await {
-        Ok(()) => Ok(()),
+        Ok(()) => {
+          trace!(
+            "Sent write: {:?}, {:?} to {:?}",
+            data,
+            write_type,
+            characteristic
+          );
+          Ok(())
+        }
         Err(err) => {
           error!("BTLEPlug device write error: {:?}", err);
           Err(ButtplugDeviceError::DeviceSpecificError(
