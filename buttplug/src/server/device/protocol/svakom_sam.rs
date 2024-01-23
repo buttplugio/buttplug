@@ -40,7 +40,12 @@ impl ProtocolInitializer for SvakomSamInitializer {
     hardware
       .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
       .await?;
-    let gen2 = hardware.endpoints().contains(&Endpoint::TxMode);
+    let mut gen2 = hardware.endpoints().contains(&Endpoint::TxMode);
+    if !gen2 && hardware.endpoints().contains(&Endpoint::Firmware) {
+      gen2 = true;
+      warn!("Svakom Sam model without speed control detected - This device will only vibrate at 1 speed");
+    }
+
     Ok(Arc::new(SvakomSam::new(gen2)))
   }
 }
