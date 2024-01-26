@@ -3803,6 +3803,7 @@ protocols:
         - Rex
         - Cali
         - Olis
+        - LY213A01
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -3837,12 +3838,22 @@ protocols:
               ActuatorType: Vibrate
             - StepRange: [0, 255]
               ActuatorType: Rotate
+      - identifier:
+          - LY213A01
+        name: metaXsire BuCUE
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 255]
+              ActuatorType: Vibrate
+            - StepRange: [0, 255]
+              ActuatorType: Oscillate
   metaxsire-repeat:
     btle:
       names:
         - LY199B01
         - LY234A01
         - LY271A01
+        - LY270A01
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -3863,6 +3874,9 @@ protocols:
       - identifier:
           - LY271A01
         name: metaXsire Upton
+      - identifier:
+          - LY270A01
+        name: metaXsire Una
   metaxsire-v2:
     btle:
       names:
