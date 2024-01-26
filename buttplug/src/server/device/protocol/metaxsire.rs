@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::core::message::ActuatorType;
-use crate::core::message::ActuatorType::{Constrict, Rotate, Vibrate};
+use crate::core::message::ActuatorType::{Constrict, Oscillate, Rotate, Vibrate};
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -43,7 +43,7 @@ impl ProtocolHandler for MetaXSire {
       // motor type: 03=vibe 04=pump 06=rotate
       data.push(if cmd.0 == Rotate {
         0x06
-      } else if cmd.0 == Constrict {
+      } else if cmd.0 == Constrict || cmd.0 == Oscillate {
         0x04
       } else {
         0x03

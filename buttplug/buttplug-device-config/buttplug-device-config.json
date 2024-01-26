@@ -7742,7 +7742,8 @@
         "names": [
           "Rex",
           "Cali",
-          "Olis"
+          "Olis",
+          "LY213A01"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -7826,6 +7827,30 @@
               }
             ]
           }
+        },
+        {
+          "identifier": [
+            "LY213A01"
+          ],
+          "name": "metaXsire BuCUE",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  255
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  255
+                ],
+                "ActuatorType": "Oscillate"
+              }
+            ]
+          }
         }
       ]
     },
@@ -7834,7 +7859,8 @@
         "names": [
           "LY199B01",
           "LY234A01",
-          "LY271A01"
+          "LY271A01",
+          "LY270A01"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -7875,6 +7901,12 @@
             "LY271A01"
           ],
           "name": "metaXsire Upton"
+        },
+        {
+          "identifier": [
+            "LY270A01"
+          ],
+          "name": "metaXsire Una"
         }
       ]
     },
