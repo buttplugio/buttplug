@@ -55,8 +55,8 @@ buttplug_derive = "0.8.0"
 futures = "0.3.30"
 futures-util = "0.3.30"
 async-trait = "0.1.77"
-serde = { version = "1.0.195", features = ["derive"] }
-serde_json = "1.0.111"
+serde = { version = "1.0.196", features = ["derive"] }
+serde_json = "1.0.112"
 serde_repr = "0.1.18"
 uuid = { version = "1.7.0", features = ["serde"] }
 url = "2.5.0"
@@ -111,19 +111,19 @@ windows = { version = "0.52.0", features = ["Devices_Bluetooth", "Foundation"] }
 serialport = { version = "4.3.0", optional = true }
 # Linux hidraw is needed here in order to work with the lovense dongle. libusb breaks it on linux.
 # Other platforms are not affected by the feature changes.
-hidapi = { version = "2.4.1", default-features = false, features = ["linux-static-hidraw", "illumos-static-libusb"], optional = true }
+hidapi = { version = "2.5.0", default-features = false, features = ["linux-static-hidraw", "illumos-static-libusb"], optional = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 serialport = { version = "4.3.0", optional = true }
 # Linux hidraw is needed here in order to work with the lovense dongle. libusb breaks it on linux.
 # Other platforms are not affected by the feature changes.
-hidapi = { version = "2.4.1", default-features = false, features = ["linux-static-hidraw", "illumos-static-libusb"], optional = true }
+hidapi = { version = "2.5.0", default-features = false, features = ["linux-static-hidraw", "illumos-static-libusb"], optional = true }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 serialport = { version = "4.3.0", optional = true }
 # Linux hidraw is needed here in order to work with the lovense dongle. libusb breaks it on linux.
 # Other platforms are not affected by the feature changes.
-hidapi = { version = "2.4.1", default-features = false, features = ["linux-static-hidraw", "illumos-static-libusb"], optional = true }
+hidapi = { version = "2.5.0", default-features = false, features = ["linux-static-hidraw", "illumos-static-libusb"], optional = true }
 
 [target.wasm32-unknown-unknown.dependencies]
 wasm-bindgen = { version = "0.2.90", features = ["serde-serialize"] }
