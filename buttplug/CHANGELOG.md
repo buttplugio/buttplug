@@ -1,3 +1,18 @@
+# 7.1.13 (2024-01-27)
+
+## Features
+
+- Added Device Support
+  - metaXsire Upton, Tadpole
+  - Svakom Pulse Galaxie
+  - JoyHub VibSiren
+
+## Bugfixes
+
+- Warning log message on Svakom Sam known not to have speed control
+- Added more logging to bluetooth writes and device init
+  - In service of debugging issues with Lovense Solace w/ v31 firmware
+
 # 7.1.12 (2024-01-21)
 
 ## Features
