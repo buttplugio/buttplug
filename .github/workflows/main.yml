@@ -6,6 +6,10 @@ on:
       - dev
       - master
 
+concurrency:
+  group: ${{ github.head_ref ||  github.ref }}
+  cancel-in-progress: true
+      
 jobs:
   build-stable:
     runs-on: ${{ matrix.os }}
