@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 25
+    "minor": 26
   },
   "protocols": {
     "lovense": {
@@ -8105,6 +8105,39 @@
                 100
               ],
               "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      }
+    },
+    "sensee-capsule": {
+      "btle": {
+        "names": [
+          "CCPA10S2"
+        ],
+        "services": {
+          "0000fff0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000fff5-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Sensee Capsule",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                3
+              ],
+              "ActuatorType": "Vibrate"
+            },
+            {
+              "StepRange": [
+                0,
+                3
+              ],
+              "ActuatorType": "Constrict"
             }
           ]
         }
