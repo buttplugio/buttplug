@@ -1,0 +1,67 @@
+devices:
+  - identifier: 
+      name: "CCPA10S2"
+    expected_name: "Sensee Capsule"
+device_commands:
+  - !Messages
+    device_index: 0
+    messages:
+      - !Vibrate
+        - Index: 0
+          Speed: 0.5
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x55, 0xaa, 0xf0, 0x01, 0x00, 0x12, 0x66, 0xf9, 0xf2]
+        write_with_response: false
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 0.9
+          ActuatorType: Vibrate
+        - Index: 1
+          Scalar: 0.5
+          ActuatorType: Constrict
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x55, 0xaa, 0xf0, 0x01, 0x00, 0x12, 0x66, 0xf9, 0xf3]
+        write_with_response: false
+      - !Write
+        endpoint: tx
+        data: [0x55, 0xaa, 0xf0, 0x01, 0x00, 0x11, 0x66, 0xf2, 0xf2, 0x00, 0x00]
+        write_with_response: false
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 0
+          ActuatorType: Vibrate
+        - Index: 1
+          Scalar: 0.5
+          ActuatorType: Constrict
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x55, 0xaa, 0xf0, 0x01, 0x00, 0x12, 0x66, 0xf9, 0xf0]
+        write_with_response: false
+  - !Messages
+    device_index: 0
+    messages:
+      - !Stop
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x55, 0xaa, 0xf0, 0x01, 0x00, 0x11, 0x66, 0xf2, 0xf0, 0x00, 0x00]
+        write_with_response: false
