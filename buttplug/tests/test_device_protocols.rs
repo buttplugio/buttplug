@@ -80,6 +80,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_galaku_nebula.yaml" ; "Galaku Pump Protocol - Nebula")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
 #[test_case("test_sensee_protocol.yaml" ; "Sensee Diandou Protocol - Rabbit")]
+#[test_case("test_sensee_capsule.yaml" ; "Sensee Capsule Protocol")]
 #[test_case("test_svakom_pulse.yaml" ; "Svakom Pulse Protocol - Pulse Lite Neo")]
 #[test_case("test_svakom_ella.yaml" ; "Svakom V1 Protocol - Ella")]
 #[test_case("test_svakom_vivianna.yaml" ; "Svakom V2 Protocol - Vivianna")]
@@ -97,6 +98,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_joyhub_protocol.yaml" ; "JoyHub Protocol")]
 #[test_case("test_itoys_protocol.yaml" ; "iToys Protocol")]
 #[test_case("test_leten_protocol.yaml" ; "Leten Protocol")]
+#[test_case("test_loob_protocol.yaml" ; "Joyroid Loob Protocol")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
@@ -167,6 +169,7 @@ async fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_galaku_nebula.yaml" ; "Galaku Pump Protocol - Nebula")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
 #[test_case("test_sensee_protocol.yaml" ; "Sensee Diandou Protocol - Rabbit")]
+#[test_case("test_sensee_capsule.yaml" ; "Sensee Capsule Protocol")]
 #[test_case("test_svakom_pulse.yaml" ; "Svakom Pulse Protocol - Pulse Lite Neo")]
 #[test_case("test_svakom_ella.yaml" ; "Svakom V1 Protocol - Ella")]
 #[test_case("test_svakom_vivianna.yaml" ; "Svakom V2 Protocol - Vivianna")]
@@ -183,6 +186,7 @@ async fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_joyhub_protocol.yaml" ; "JoyHub Protocol")]
 #[test_case("test_itoys_protocol.yaml" ; "iToys Protocol")]
 #[test_case("test_leten_protocol.yaml" ; "Leten Protocol")]
+#[test_case("test_loob_protocol.yaml" ; "Joyroid Loob Protocol")]
 #[tokio::test]
 async fn test_device_protocols_json_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
@@ -248,6 +252,7 @@ async fn test_device_protocols_json_v3(test_file: &str) {
 #[test_case("test_foreo_protocol.yaml" ; "Foreo Protocol")]
 #[test_case("test_itoys_protocol.yaml" ; "iToys Protocol")]
 #[test_case("test_leten_protocol.yaml" ; "Leten Protocol")]
+#[test_case("test_loob_protocol.yaml" ; "Joyroid Loob Protocol")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v2(test_file: &str) {
   util::device_test::client::client_v2::run_embedded_test_case(&load_test_case(test_file).await)
@@ -312,6 +317,7 @@ async fn test_device_protocols_embedded_v2(test_file: &str) {
 #[test_case("test_foreo_protocol.yaml" ; "Foreo Protocol")]
 #[test_case("test_itoys_protocol.yaml" ; "iToys Protocol")]
 #[test_case("test_leten_protocol.yaml" ; "Leten Protocol")]
+#[test_case("test_loob_protocol.yaml" ; "Joyroid Loob Protocol")]
 #[tokio::test]
 async fn test_device_protocols_json_v2(test_file: &str) {
   util::device_test::client::client_v2::run_json_test_case(&load_test_case(test_file).await).await;

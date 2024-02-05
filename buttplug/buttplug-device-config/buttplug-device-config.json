@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 25
+    "minor": 27
   },
   "protocols": {
     "lovense": {
@@ -8110,6 +8110,39 @@
         }
       }
     },
+    "sensee-capsule": {
+      "btle": {
+        "names": [
+          "CCPA10S2"
+        ],
+        "services": {
+          "0000fff0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000fff5-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Sensee Capsule",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                3
+              ],
+              "ActuatorType": "Vibrate"
+            },
+            {
+              "StepRange": [
+                0,
+                3
+              ],
+              "ActuatorType": "Constrict"
+            }
+          ]
+        }
+      }
+    },
     "fox": {
       "btle": {
         "names": [
@@ -8926,6 +8959,32 @@
                 99
               ],
               "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      }
+    },
+    "loob": {
+      "btle": {
+        "names": [
+          "LOOB"
+        ],
+        "services": {
+          "b75c49d2-04a3-4071-a0b5-35853eb08307": {
+            "tx": "ba5c49d2-04a3-4071-a0b5-35853eb08307"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Joyroid Loob",
+        "messages": {
+          "LinearCmd": [
+            {
+              "StepRange": [
+                1,
+                1000
+              ],
+              "ActuatorType": "Position"
             }
           ]
         }

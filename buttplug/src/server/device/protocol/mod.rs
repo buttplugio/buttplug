@@ -45,6 +45,7 @@ pub mod libo_elle;
 pub mod libo_shark;
 pub mod libo_vibes;
 pub mod longlosttouch;
+pub mod loob;
 pub mod lovedistance;
 pub mod lovehoney_desire;
 pub mod lovense;
@@ -79,6 +80,7 @@ pub mod realov;
 pub mod sakuraneko;
 pub mod satisfyer;
 pub mod sensee;
+pub mod sensee_capsule;
 pub mod svakom;
 pub mod svakom_alex;
 pub mod svakom_alex_v2;
@@ -294,6 +296,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     longlosttouch::setup::LongLostTouchIdentifierFactory::default(),
   );
+  add_to_protocol_map(&mut map, loob::setup::LoobIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     lovehoney_desire::setup::LovehoneyDesireIdentifierFactory::default(),
@@ -406,6 +409,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     satisfyer::setup::SatisfyerIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, sensee::setup::SenseeIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    sensee_capsule::setup::SenseeCapsuleIdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, svakom::setup::SvakomIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
