@@ -2004,6 +2004,7 @@
           "6907 MV1",
           "6908 MV1",
           "6909 MV1",
+          "6914 MV1",
           "6915 MV1"
         ],
         "services": {
@@ -2105,6 +2106,44 @@
             "6909 MV1"
           ],
           "name": "MysteryVibe Tenuto 2",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  56
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  56
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  56
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  56
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "6914 MV1"
+          ],
+          "name": "MysteryVibe Legato",
           "messages": {
             "ScalarCmd": [
               {
