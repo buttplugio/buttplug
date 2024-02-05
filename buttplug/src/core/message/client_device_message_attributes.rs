@@ -392,7 +392,8 @@ impl From<ClientDeviceMessageAttributes> for ClientDeviceMessageAttributesV2 {
       vibrate_cmd: other
         .scalar_cmd()
         .as_ref()
-        .map(|x| GenericDeviceMessageAttributesV2::vibrate_cmd_from_scalar_cmd(x)),
+        .map(|x| GenericDeviceMessageAttributesV2::vibrate_cmd_from_scalar_cmd(x))
+        .filter(|x| x.feature_count != 0),
       rotate_cmd: other
         .rotate_cmd()
         .as_ref()
