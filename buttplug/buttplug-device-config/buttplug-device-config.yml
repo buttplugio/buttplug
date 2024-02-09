@@ -3564,17 +3564,29 @@ protocols:
     btle:
       names:
         - Meese-V389
+        - Meese-cd
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
     defaults:
-      name: Meese Tera
+      name: Meeese Device
       messages:
         ScalarCmd:
           - StepRange: [0, 10]
             ActuatorType: Vibrate
           - StepRange: [0, 3]
             ActuatorType: Vibrate
+    configurations:
+      - identifier:
+          - Meese-V389
+        name: Meeese Tera
+      - identifier:
+          - Meese-cd
+        name: Meeese Modo
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 10]
+              ActuatorType: Vibrate
   hismith:
     btle:
       names:
