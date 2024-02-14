@@ -4358,6 +4358,10 @@ protocols:
         - J-Velocity
         - JOYHUB-ROSELLA2
         - J-VibSiren
+        - J-ElixirEgg
+        - J-RetroGuard
+        - J-VibTrefoil
+        - J-Pearlconch
       services:
         0000ffa0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffa1-0000-1000-8000-00805f9b34fb
@@ -4374,6 +4378,12 @@ protocols:
       - identifier:
           - J-Velocity
         name: JoyHub Velocity
+      - identifier:
+          - J-ElixirEgg
+        name: JoyHub ElixirEgg
+      - identifier:
+          - J-RetroGuard
+        name: JoyHub Retro Guard
       - identifier:
           - J-Petalwish2
         name: JoyHub Petalwish 2
@@ -4405,6 +4415,34 @@ protocols:
               FeatureDescriptor: External vibrator
             - StepRange: [0, 255]
               ActuatorType: Oscillate
+            - StepRange: [0, 255]
+              ActuatorType: Vibrate
+              FeatureDescriptor: Internal vibrator
+      - identifier:
+          - J-VibTrefoil
+        name: JoyHub VibTrefoil
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 255]
+              ActuatorType: Vibrate
+              FeatureDescriptor: External vibrator
+            - StepRange: [0, 255]
+              ActuatorType: Vibrate
+              FeatureDescriptor: Placeholder
+            - StepRange: [0, 255]
+              ActuatorType: Vibrate
+              FeatureDescriptor: Internal vibrator
+      - identifier:
+          - J-Pearlconch
+        name: JoyHub Pearlconch
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 255]
+              ActuatorType: Rotate
+              FeatureDescriptor: External vibrator
+            - StepRange: [0, 255]
+              ActuatorType: Vibrate
+              FeatureDescriptor: Placeholder
             - StepRange: [0, 255]
               ActuatorType: Vibrate
               FeatureDescriptor: Internal vibrator
