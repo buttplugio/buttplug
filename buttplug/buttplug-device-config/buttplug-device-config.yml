@@ -1956,6 +1956,7 @@ protocols:
         - Ella NEO
         - S38A # Svakom Tammy Pro
         - Vick NEO
+        - Vick Neo
         - STG05A # Svakom Aravinda
         - QH-SJ007A # Svakom Winni 2
       services:
@@ -1993,6 +1994,7 @@ protocols:
         name: Svakom Tammy Pro
       - identifier:
           - Vick NEO
+          - Vick Neo
         name: Svakom Vick Neo
       - identifier:
           - STG05A
