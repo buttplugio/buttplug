@@ -3512,6 +3512,7 @@ protocols:
               ActuatorType: Vibrate
       - identifier:
           - "10307"
+          - "10308"
           - "10309"
         name: Satisfyer Pro 2 Gen 3
         messages:
