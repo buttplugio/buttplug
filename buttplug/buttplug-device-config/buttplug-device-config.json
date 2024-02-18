@@ -3927,6 +3927,7 @@
           "Ella NEO",
           "S38A",
           "Vick NEO",
+          "Vick Neo",
           "STG05A",
           "QH-SJ007A"
         ],
@@ -3984,7 +3985,8 @@
         },
         {
           "identifier": [
-            "Vick NEO"
+            "Vick NEO",
+            "Vick Neo"
           ],
           "name": "Svakom Vick Neo"
         },
