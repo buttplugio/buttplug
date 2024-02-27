@@ -4363,8 +4363,7 @@ protocols:
         - J-VibSiren
         - J-ElixirEgg
         - J-RetroGuard
-        - J-VibTrefoil
-        - J-Pearlconch
+        - J-TrueForm3
       services:
         0000ffa0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffa1-0000-1000-8000-00805f9b34fb
@@ -4387,6 +4386,9 @@ protocols:
       - identifier:
           - J-RetroGuard
         name: JoyHub Retro Guard
+      - identifier:
+          - J-TrueForm3
+        name: JoyHub TrueForm 3
       - identifier:
           - J-Petalwish2
         name: JoyHub Petalwish 2
@@ -4421,6 +4423,53 @@ protocols:
             - StepRange: [0, 255]
               ActuatorType: Vibrate
               FeatureDescriptor: Internal vibrator
+  joyhub-v2:
+    btle:
+      names:
+        - J-Pearlconch
+        - J-PetiteRose
+        - J-MoonHorn
+        - J-VibTrefoil
+      services:
+        0000ffa0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffa1-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: JoyHub Device
+      messages:
+        ScalarCmd:
+          - StepRange: [ 0, 255 ]
+            ActuatorType: Vibrate
+    configurations:
+      - identifier:
+          - J-Pearlconch
+        name: JoyHub Pearlconch
+        messages:
+          ScalarCmd:
+            - StepRange: [ 0, 255 ]
+              ActuatorType: Rotate
+            - StepRange: [ 0, 255 ]
+              ActuatorType: Vibrate
+      - identifier:
+          - J-PetiteRose
+        name: JoyHub Petite Rose
+        messages:
+          ScalarCmd:
+            - StepRange: [ 0, 255 ]
+              ActuatorType: Vibrate
+            - StepRange: [ 0, 255 ]
+              ActuatorType: Rotate
+      - identifier:
+          - J-MoonHorn
+        name: JoyHub Moon Horn
+        messages:
+          ScalarCmd:
+            - StepRange: [ 0, 255 ]
+              ActuatorType: Vibrate
+            - StepRange: [ 0, 9 ]
+              FeatureDescriptor: Suction
+              ActuatorType: Constrict
+          # - StepRange: [0, 1]
+          #   ActuatorType: Heater
       - identifier:
           - J-VibTrefoil
         name: JoyHub VibTrefoil
@@ -4429,23 +4478,6 @@ protocols:
             - StepRange: [0, 255]
               ActuatorType: Vibrate
               FeatureDescriptor: External vibrator
-            - StepRange: [0, 255]
-              ActuatorType: Vibrate
-              FeatureDescriptor: Placeholder
-            - StepRange: [0, 255]
-              ActuatorType: Vibrate
-              FeatureDescriptor: Internal vibrator
-      - identifier:
-          - J-Pearlconch
-        name: JoyHub Pearlconch
-        messages:
-          ScalarCmd:
-            - StepRange: [0, 255]
-              ActuatorType: Rotate
-              FeatureDescriptor: External vibrator
-            - StepRange: [0, 255]
-              ActuatorType: Vibrate
-              FeatureDescriptor: Placeholder
             - StepRange: [0, 255]
               ActuatorType: Vibrate
               FeatureDescriptor: Internal vibrator
