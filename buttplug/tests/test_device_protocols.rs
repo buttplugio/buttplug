@@ -98,6 +98,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_joyhub_protocol.yaml" ; "JoyHub Protocol")]
 #[test_case("test_itoys_protocol.yaml" ; "iToys Protocol")]
 #[test_case("test_leten_protocol.yaml" ; "Leten Protocol")]
+#[test_case("test_motorbunny_protocol.yaml" ; "Motorbunny Protocol")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
@@ -185,6 +186,7 @@ async fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_joyhub_protocol.yaml" ; "JoyHub Protocol")]
 #[test_case("test_itoys_protocol.yaml" ; "iToys Protocol")]
 #[test_case("test_leten_protocol.yaml" ; "Leten Protocol")]
+#[test_case("test_motorbunny_protocol.yaml" ; "Motorbunny Protocol")]
 #[tokio::test]
 async fn test_device_protocols_json_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
@@ -250,6 +252,7 @@ async fn test_device_protocols_json_v3(test_file: &str) {
 #[test_case("test_foreo_protocol.yaml" ; "Foreo Protocol")]
 #[test_case("test_itoys_protocol.yaml" ; "iToys Protocol")]
 #[test_case("test_leten_protocol.yaml" ; "Leten Protocol")]
+#[test_case("test_motorbunny_protocol.yaml" ; "Motorbunny Protocol")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v2(test_file: &str) {
   util::device_test::client::client_v2::run_embedded_test_case(&load_test_case(test_file).await)
@@ -314,6 +317,7 @@ async fn test_device_protocols_embedded_v2(test_file: &str) {
 #[test_case("test_foreo_protocol.yaml" ; "Foreo Protocol")]
 #[test_case("test_itoys_protocol.yaml" ; "iToys Protocol")]
 #[test_case("test_leten_protocol.yaml" ; "Leten Protocol")]
+#[test_case("test_motorbunny_protocol.yaml" ; "Motorbunny Protocol")]
 #[tokio::test]
 async fn test_device_protocols_json_v2(test_file: &str) {
   util::device_test::client::client_v2::run_json_test_case(&load_test_case(test_file).await).await;
