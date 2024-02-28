@@ -54,4 +54,29 @@ impl ProtocolHandler for Motorbunny {
     )
     .into()])
   }
+
+  fn handle_rotate_cmd(
+    &self,
+    commands: &[Option<(u32, bool)>],
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let rotate = commands[0].unwrap_or((0, false));
+    let mut command_vec: Vec<u8>;
+    if rotate.0 == 0 {
+      command_vec = vec![0xa0, 0x00, 0x00, 0x00, 0x00, 0xec];
+    } else {
+      command_vec = vec![0xfa];
+      let mut rotate_command = vec![if rotate.1 { 0x2a } else { 0x29 }, rotate.0 as u8].repeat(7);
+      let crc = rotate_command
+        .iter()
+        .fold(0u8, |a, b| a.overflowing_add(*b).0);
+      command_vec.append(&mut rotate_command);
+      command_vec.append(&mut vec![crc, 0xec]);
+    }
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      command_vec,
+      false,
+    )
+    .into()])
+  }
 }
