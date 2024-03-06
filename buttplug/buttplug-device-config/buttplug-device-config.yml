@@ -4430,6 +4430,9 @@ protocols:
         - J-PetiteRose
         - J-MoonHorn
         - J-VibTrefoil
+        - J-Panther
+        - J-Mecha
+        - J-Lagoon
       services:
         0000ffa0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffa1-0000-1000-8000-00805f9b34fb
@@ -4446,9 +4449,18 @@ protocols:
         messages:
           ScalarCmd:
             - StepRange: [ 0, 255 ]
+              ActuatorType: Vibrate
+            - StepRange: [ 0, 255 ]
               ActuatorType: Rotate
+      - identifier:
+          - J-Panther
+        name: JoyHub Panther
+        messages:
+          ScalarCmd:
             - StepRange: [ 0, 255 ]
               ActuatorType: Vibrate
+            - StepRange: [ 0, 255 ]
+              ActuatorType: Rotate
       - identifier:
           - J-PetiteRose
         name: JoyHub Petite Rose
@@ -4470,6 +4482,28 @@ protocols:
               ActuatorType: Constrict
           # - StepRange: [0, 1]
           #   ActuatorType: Heater
+      - identifier:
+          - J-Mecha
+        name: JoyHub Mecha
+        messages:
+          ScalarCmd:
+            - StepRange: [ 0, 255 ]
+              ActuatorType: Vibrate
+            - StepRange: [ 0, 7 ]
+              FeatureDescriptor: Suction
+              ActuatorType: Constrict
+          # - StepRange: [0, 1]
+          #   ActuatorType: Heater
+      - identifier:
+          - J-Lagoon
+        name: JoyHub Lagoon
+        messages:
+          ScalarCmd:
+            - StepRange: [ 0, 255 ]
+              ActuatorType: Vibrate
+            - StepRange: [ 0, 5 ]
+              FeatureDescriptor: Suction
+              ActuatorType: Constrict
       - identifier:
           - J-VibTrefoil
         name: JoyHub VibTrefoil
