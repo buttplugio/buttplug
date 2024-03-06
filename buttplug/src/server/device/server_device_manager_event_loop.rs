@@ -196,15 +196,13 @@ impl ServerDeviceManagerEventLoop {
         // device, due to how things like advertisements work. We'll filter this at the
         // DeviceManager level to make sure that even if a badly coded DCM throws multiple found
         // events, we only listen to the first one.
-        if self.connecting_devices.contains(&address) {
+        if !self.connecting_devices.insert(address.clone()) {
           info!(
             "Device {} currently trying to connect, ignoring new device event.",
             address
           );
           return;
         }
-
-        self.connecting_devices.insert(address.clone());
 
         let device_event_sender_clone = self.device_event_sender.clone();
 
