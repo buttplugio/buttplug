@@ -8967,7 +8967,10 @@
           "J-Pearlconch",
           "J-PetiteRose",
           "J-MoonHorn",
-          "J-VibTrefoil"
+          "J-VibTrefoil",
+          "J-Panther",
+          "J-Mecha",
+          "J-Lagoon"
         ],
         "services": {
           "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -9002,14 +9005,38 @@
                   0,
                   255
                 ],
-                "ActuatorType": "Rotate"
+                "ActuatorType": "Vibrate"
               },
               {
                 "StepRange": [
                   0,
                   255
                 ],
+                "ActuatorType": "Rotate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "J-Panther"
+          ],
+          "name": "JoyHub Panther",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  255
+                ],
                 "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  255
+                ],
+                "ActuatorType": "Rotate"
               }
             ]
           }
@@ -9056,6 +9083,56 @@
                 "StepRange": [
                   0,
                   9
+                ],
+                "FeatureDescriptor": "Suction",
+                "ActuatorType": "Constrict"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "J-Mecha"
+          ],
+          "name": "JoyHub Mecha",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  255
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  7
+                ],
+                "FeatureDescriptor": "Suction",
+                "ActuatorType": "Constrict"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "J-Lagoon"
+          ],
+          "name": "JoyHub Lagoon",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  255
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  5
                 ],
                 "FeatureDescriptor": "Suction",
                 "ActuatorType": "Constrict"
