@@ -110,6 +110,7 @@ pub(super) async fn build_server_device(
 
   // At this point, we know we've got hardware that is waiting to connect, and enough protocol
   // info to actually do something after we connect. So go ahead and connect.
+  trace!("Connecting to {:?}", hardware_connector);
   let mut hardware_specializer = hardware_connector.connect().await?;
 
   // We can't run these in parallel because we need to only accept one specializer.
