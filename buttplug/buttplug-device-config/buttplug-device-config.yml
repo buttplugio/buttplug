@@ -2467,6 +2467,30 @@ protocols:
       - identifier:
           - Hugo2
         name: Lelo Hugo 2
+  adamhealth:
+    btle:
+      names:
+        - Check.ED Sensor
+      services:
+        569a1902-b87f-490c-92cb-11ba5ea5167c:
+          rx: 569a2030-b87f-490c-92cb-11ba5ea5167c
+    defaults:
+      name: AdamHealth Sensor
+      messages:
+        SensorReadCmd:
+          - SensorType: Battery
+            FeatureDescriptor: Battery Level
+            SensorRange: [[0, 100]]
+          - SensorType: Pressure
+            FeatureDescriptor: Stretch (analog)
+            SensorRange: [[0, 500]]
+        SensorSubscribeCmd:
+          - SensorType: Battery
+            FeatureDescriptor: Battery Level
+            SensorRange: [[0, 100]]
+          - SensorType: Pressure
+            FeatureDescriptor: Stretch (analog)
+            SensorRange: [[0, 500]]
   aneros:
     btle:
       names:
