@@ -1,3 +1,21 @@
+# 7.1.14 (2024-03-16)
+
+## Features
+
+- Added Device Support
+  - Sensee Capsule
+  - MysteryVibe Legato
+  - Meese Modo
+  - JoyHub Elixir Egg, Retro Guard, Vib Trefoil, Pearl Conch, TrueForm 3, Petite Rose, Moon Horn,
+    PAnther, Mecha, Lagoon 
+
+# Bugfixes
+
+- Device Fixes
+  - New Satisfier Pro 2 Gen 3 identifier
+  - New Svakom Vick Neo identifier
+  - Correct Motorbunny rotation command
+
 # 7.1.13 (2024-01-27)
 
 ## Features
