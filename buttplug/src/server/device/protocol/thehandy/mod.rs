@@ -16,7 +16,7 @@ use crate::{
   },
   server::device::{
     configuration::ProtocolAttributesType,
-    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
       ProtocolHandler,
@@ -50,9 +50,14 @@ pub struct TheHandyInitializer {}
 impl ProtocolInitializer for TheHandyInitializer {
   async fn initialize(
     &mut self,
-    hardware: Arc<Hardware>,
+    _hardware: Arc<Hardware>,
     _: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
+    // Ok, somehow this whole function has been basically a no-op. The read/write lines never had an
+    // await on them, so they were never run. But only now, in Rust 1.75/Buttplug 7.1.15, have we
+    // gotten a complaint from the compiler. Going to comment this out for now and see what happens.
+    // If we don't get any complaints, I'm going to have to rewrite all of my snark here. :(
+
     // Ok, here we go. This is an overly-complex nightmare but apparently "protocomm makes the
     // firmware easier".
     //
@@ -67,17 +72,18 @@ impl ProtocolInitializer for TheHandyInitializer {
     // First we need to set up a session with The Handy. This will require sending the "security
     // initializer" to basically say we're sending plaintext. Due to pb3 making everything
     // optional, we have some Option<T> wrappers here.
-    let session_req = protocomm::SessionData {
-      sec_ver: protocomm::SecSchemeVersion::SecScheme0 as i32,
-      proto: Some(protocomm::session_data::Proto::Sec0(
-        protocomm::Sec0Payload {
-          msg: protocomm::Sec0MsgType::S0SessionCommand as i32,
-          payload: Some(protocomm::sec0_payload::Payload::Sc(
-            protocomm::S0SessionCmd {},
-          )),
-        },
-      )),
-    };
+    
+    // let session_req = protocomm::SessionData {
+    //   sec_ver: protocomm::SecSchemeVersion::SecScheme0 as i32,
+    //   proto: Some(protocomm::session_data::Proto::Sec0(
+    //     protocomm::Sec0Payload {
+    //       msg: protocomm::Sec0MsgType::S0SessionCommand as i32,
+    //       payload: Some(protocomm::sec0_payload::Payload::Sc(
+    //         protocomm::S0SessionCmd {},
+    //       )),
+    //     },
+    //   )),
+    // };
 
     // We need to shove this at what we're calling the "firmware" endpoint but is actually the
     // "prov-session" characteristic. These names are stored in characteristic descriptors, which
@@ -90,12 +96,8 @@ impl ProtocolInitializer for TheHandyInitializer {
     //
     // If they ever change this, I quit (or will just update the device config).
 
-    let mut sec_buf = vec![];
-    session_req
-      .encode(&mut sec_buf)
-      .expect("Infallible encode.");
-    hardware.write_value(&HardwareWriteCmd::new(Endpoint::Firmware, sec_buf, false));
-    let _ = hardware.read_value(&HardwareReadCmd::new(Endpoint::Firmware, 100, 500));
+    // hardware.write_value(&HardwareWriteCmd::new(Endpoint::Firmware, sec_buf, false));
+    // hardware.read_value(&HardwareReadCmd::new(Endpoint::Firmware, 100, 500));
 
     // At this point, the "handyplug" protocol does actually have both RequestServerInfo and Ping
     // messages that it can use. However, having removed these and still tried to run the system,
