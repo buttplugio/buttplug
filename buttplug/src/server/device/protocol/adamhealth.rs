@@ -140,9 +140,14 @@ impl ProtocolHandler for AdamHealth {
                     let mut data_tag = AdamDataTag::UNKNOWN;
                     while let Ok(info) = hardware_stream.recv().await {
                         // If we have no receivers, quit.
-                        if sender.receiver_count() == 0 || !keep_looping.load(SeqCst) {
-                            // todo btle unsubscribe
-                            debug!("No active listeners for AdamHealth sensor, returning from task");
+                        // receiver_count will always include 1 for our sender
+                        if sender.receiver_count() <= 1 || !keep_looping.load(SeqCst) {
+                            debug!("No active listeners for AdamHealth sensor, unsubscribing and returning from task.");
+                            // todo factor out to handle_sensor_unsubscribe_cmd
+                            keep_looping.store(false, SeqCst);
+                            let _ = device
+                                .unsubscribe(&HardwareUnsubscribeCmd::new(Endpoint::Rx))
+                                .await;
                             return;
                         }
                         if let HardwareEvent::Notification(_, endpoint, data) = info {
