@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 26
+    "minor": 27
   },
   "protocols": {
     "lovense": {
@@ -8970,7 +8970,8 @@
           "J-VibTrefoil",
           "J-Panther",
           "J-Mecha",
-          "J-Lagoon"
+          "J-Lagoon",
+          "J-Firedragon"
         ],
         "services": {
           "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -9162,6 +9163,30 @@
                 ],
                 "ActuatorType": "Vibrate",
                 "FeatureDescriptor": "Internal vibrator"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "J-Firedragon"
+          ],
+          "name": "JoyHub Firedragon",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  255
+                ],
+                "ActuatorType": "Oscillate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  255
+                ],
+                "ActuatorType": "Vibrate"
               }
             ]
           }

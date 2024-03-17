@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 26
+  minor: 27
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -4433,6 +4433,7 @@ protocols:
         - J-Panther
         - J-Mecha
         - J-Lagoon
+        - J-Firedragon
       services:
         0000ffa0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffa1-0000-1000-8000-00805f9b34fb
@@ -4515,6 +4516,15 @@ protocols:
             - StepRange: [0, 255]
               ActuatorType: Vibrate
               FeatureDescriptor: Internal vibrator
+      - identifier:
+          - J-Firedragon
+        name: JoyHub Firedragon
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 255]
+              ActuatorType: Oscillate
+            - StepRange: [0, 255]
+              ActuatorType: Vibrate
   itoys:
     btle:
       names:
