@@ -1,3 +1,16 @@
+# 7.1.15 (2024-03-17)
+
+## Features
+
+- Added Device Support
+  - Joyhub Firedragon
+
+## Bugfixes
+
+- Turn several .expect()'s into warn!() log messages
+  - Mostly in Lovense Dongle handling. A lot of people have this on without knowing it and it
+    doesn't react well to being shut down right now. We get several thousand sentry reports a week about this. God I fucking hate the Lovense Dongle.
+
 # 7.1.14 (2024-03-16)
 
 ## Features
