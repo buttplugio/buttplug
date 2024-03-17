@@ -139,11 +139,13 @@ impl ChannelHub {
   }
 
   pub async fn send_output(&self, msg: OutgoingLovenseData) {
-    self
+    if self
       .dongle_outgoing
       .send(msg)
       .await
-      .expect("Won't get here without owner being alive.");
+      .is_err() {
+        warn!("Dongle message sent without owner being alive, assuming shutdown.");
+      }
   }
 
   pub async fn send_event(&self, msg: HardwareCommunicationManagerEvent) {
@@ -254,11 +256,13 @@ impl LovenseDongleState for LovenseDongleWaitForDongle {
           self.is_scanning.store(false, Ordering::SeqCst);
           should_scan = false;
           // If we were requested to scan and then asked to stop, act like we at least tried.
-          self
+          if self
             .event_sender
             .send(HardwareCommunicationManagerEvent::ScanningFinished)
             .await
-            .expect("Won't get here without owner being alive.");
+            .is_err() {
+              warn!("Dongle message sent without owner being alive, assuming shutdown.");
+          }
         }
       }
     }
@@ -660,10 +664,14 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
                 }
               }
             }
-            _ => device_read_sender
+            _ => {
+              if device_read_sender
               .send(dongle_msg)
               .await
-              .expect("Won't get here if the parent isn't alive."),
+              .is_err() {
+                warn!("Dongle message sent without owner being alive, assuming shutdown.");
+              }
+            }
           }
         }
         IncomingMessage::CommMgr(comm_msg) => match comm_msg {

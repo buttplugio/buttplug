@@ -260,13 +260,15 @@ impl LovenseHIDDongleCommunicationManager {
 
       *(held_read_thread.lock().await) = Some(read_thread);
       *(held_write_thread.lock().await) = Some(write_thread);
-      machine_sender_clone
+      if machine_sender_clone
         .send(LovenseDeviceCommand::DongleFound(
           writer_sender,
           reader_receiver,
         ))
         .await
-        .expect("We've already spun up the state machine so we know this receiver exists.");
+        .is_err() {
+          warn!("We've already spun up the state machine, this receiver should exist, but if we're shutting down this will throw.");
+        }
       info!("Found Lovense HID Dongle");
       Ok(())
     }
