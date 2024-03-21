@@ -153,6 +153,37 @@ impl PartialEq for BluetoothLESpecifier {
   }
 }
 
+impl PartialEq<WebsocketSpecifier> for BluetoothLESpecifier {
+  fn eq(&self, other: &WebsocketSpecifier) -> bool {
+    // If names or manufacturer data are found, use those automatically.
+    if self.names.intersection(&other.names).count() > 0 {
+      return true;
+    }
+    // Otherwise, try wildcarded names.
+    for name in &self.names {
+      for other_name in &other.names {
+        let compare_name: &String;
+        let mut wildcard: String;
+        if name.ends_with('*') {
+          wildcard = name.clone();
+          compare_name = other_name;
+        } else if other_name.ends_with('*') {
+          wildcard = other_name.clone();
+          compare_name = name;
+        } else {
+          continue;
+        }
+        // Remove asterisk from the end of the wildcard
+        wildcard.pop();
+        if compare_name.starts_with(&wildcard) {
+          return true;
+        }
+      }
+    }
+    false
+  }
+}
+
 impl BluetoothLESpecifier {
   pub fn new(
     names: HashSet<String>,
@@ -385,6 +416,7 @@ impl PartialEq for ProtocolCommunicationSpecifier {
       (HID(self_spec), HID(other_spec)) => self_spec == other_spec,
       (XInput(self_spec), XInput(other_spec)) => self_spec == other_spec,
       (Websocket(self_spec), Websocket(other_spec)) => self_spec == other_spec,
+      (BluetoothLE(self_spec), Websocket(other_spec)) => self_spec == other_spec,
       (LovenseConnectService(self_spec), LovenseConnectService(other_spec)) => {
         self_spec == other_spec
       }
