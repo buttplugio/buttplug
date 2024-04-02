@@ -1,0 +1,74 @@
+devices:
+  - identifier: 
+      name: "GX21"
+    expected_name: "Galaku Device"
+device_commands:
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x23, 0x81, 0xBB, 0xAB, 0xD2, 0xEC, 0x3B, 0x23, 0xBB, 0xA3, 0x3B, 0x90]
+            write_with_response: true
+
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 1
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [ 0x23, 0x81, 0xBB, 0xAB, 0xD2, 0xEC, 0x57, 0x23, 0xBB, 0xA3, 0x3B, 0x44 ]
+            write_with_response: true
+
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 0
+            Scalar: 0
+            ActuatorType: Vibrate
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x23, 0x81, 0xBB, 0xAB, 0xD2, 0xEC, 0x3B, 0x23, 0xBB, 0xA3, 0x3B, 0x90]
+            write_with_response: true
+
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 0
+            Scalar: 1
+            ActuatorType: Vibrate
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [ 0x23, 0x81, 0xBB, 0xAB, 0xD2, 0xEC, 0x57, 0x23, 0xBB, 0xA3, 0x3B, 0x44 ]
+            write_with_response: true
+
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x23, 0x81, 0xBB, 0xAB, 0xD2, 0xEC, 0x3B, 0x23, 0xBB, 0xA3, 0x3B, 0x90]
+            write_with_response: true
