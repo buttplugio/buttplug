@@ -24,6 +24,7 @@ pub mod fox;
 pub mod fredorch;
 pub mod fredorch_rotary;
 pub mod galaku_pump;
+pub mod galaku_one_engine;
 pub mod hgod;
 pub mod hismith;
 pub mod hismith_mini;
@@ -245,6 +246,11 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     galaku_pump::setup::GalakuPumpIdentifierFactory::default(),
+  );
+
+  add_to_protocol_map(
+    &mut map,
+    galaku_one_engine::setup::GalakuOneEngineIdentifierFactory::default(),
   );
 
   add_to_protocol_map(&mut map, itoys::setup::IToysIdentifierFactory::default());
