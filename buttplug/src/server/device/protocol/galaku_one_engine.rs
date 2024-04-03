@@ -89,7 +89,7 @@ impl ProtocolHandler for GalakuOneEngine {
 
     fn handle_scalar_vibrate_cmd(&self, _index: u32, scalar: u32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
         let data: Vec<u32> = vec![90, 0, 0, 1, 49, scalar, 0, 0, 0, 0];
-        Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, send_bytes(data), true).into()])
+        Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, send_bytes(data), false).into()])
     }
 
     fn handle_sensor_subscribe_cmd(&self, device: Arc<Hardware>, message: SensorSubscribeCmd) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
