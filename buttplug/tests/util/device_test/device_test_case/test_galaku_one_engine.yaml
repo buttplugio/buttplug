@@ -16,7 +16,7 @@ device_commands:
         - !Write
             endpoint: tx
             data: [ 0x23, 0x81, 0xBB, 0xAB, 0xD2, 0xEC, 0x3B, 0x23, 0xBB, 0xA3, 0x3B, 0x90 ]
-            write_with_response: true
+            write_with_response: false
 
   # Vibrate 100%
   - !Messages
@@ -31,7 +31,7 @@ device_commands:
         - !Write
             endpoint: tx
             data: [ 0x23, 0x81, 0xBB, 0xAB, 0xD2, 0xEC, 0x57, 0x23, 0xBB, 0xA3, 0x3B, 0x44 ]
-            write_with_response: true
+            write_with_response: false
 
   # Scalar 0%
   - !Messages
@@ -47,7 +47,7 @@ device_commands:
         - !Write
             endpoint: tx
             data: [ 0x23, 0x81, 0xBB, 0xAB, 0xD2, 0xEC, 0x3B, 0x23, 0xBB, 0xA3, 0x3B, 0x90 ]
-            write_with_response: true
+            write_with_response: false
 
   # Scalar 100%
   - !Messages
@@ -63,7 +63,7 @@ device_commands:
         - !Write
             endpoint: tx
             data: [ 0x23, 0x81, 0xBB, 0xAB, 0xD2, 0xEC, 0x57, 0x23, 0xBB, 0xA3, 0x3B, 0x44 ]
-            write_with_response: true
+            write_with_response: false
 
   # Stop
   - !Messages
@@ -76,4 +76,4 @@ device_commands:
         - !Write
             endpoint: tx
             data: [ 0x23, 0x81, 0xBB, 0xAB, 0xD2, 0xEC, 0x3B, 0x23, 0xBB, 0xA3, 0x3B, 0x90 ]
-            write_with_response: true
+            write_with_response: false
