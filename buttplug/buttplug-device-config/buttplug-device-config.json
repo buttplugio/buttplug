@@ -8179,7 +8179,8 @@
         ],
         "services": {
           "00001000-0000-1000-8000-00805f9b34fb": {
-            "tx": "00001001-0000-1000-8000-00805f9b34fb"
+            "tx": "00001001-0000-1000-8000-00805f9b34fb",
+            "rxblebattery": "00001002-0000-1000-8000-00805f9b34fb"
           }
         }
       },
@@ -8194,6 +8195,18 @@
               ],
               "ActuatorType": "Vibrate",
               "FeatureDescriptor": "Vibrate"
+            }
+          ],
+          "SensorReadCmd": [
+            {
+              "FeatureDescriptor": "Battery Level",
+              "SensorType": "Battery",
+              "SensorRange": [
+                [
+                  0,
+                  100
+                ]
+              ]
             }
           ]
         }
