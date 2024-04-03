@@ -1,0 +1,420 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Buttplug Device Config Schema",
+  "version": 2,
+  "description": "JSON format for Buttplug Device Config Files.",
+  "components": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "endpoint": {
+      "type": "object",
+      "patternProperties": {
+        "^(command|firmware|rx|rxaccel|rxblebattery|rxblemodel|rxpressure|rxtouch|tx|txmode|txshock|txvibrate|txvendorcontrol|whitelist|generic[1-2]?[0-9]|generic3[0-1])$": {
+          "$ref": "#/components/uuid"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    },
+    "btle-definition": {
+      "type": "object",
+      "properties": {
+        "names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "manufacturer-data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "company": {
+                "type": "integer"
+              },
+              "expected-length": {
+                "type": "integer"
+              },
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            },
+            "required": [
+              "company"
+            ]
+          }
+        },
+        "advertised-services": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "$ref": "#/components/uuid"
+          }
+        },
+        "services": {
+          "type": "object",
+          "patternProperties": {
+            "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$": {
+              "$ref": "#/components/endpoint"
+            }
+          },
+          "minProperties": 1,
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "names",
+        "services"
+      ]
+    },
+    "websocket-definition": {
+      "type": "object",
+      "properties": {
+        "names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "names"
+      ]
+    },
+    "serial-definition": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "port": {
+            "type": "string"
+          },
+          "baud-rate": {
+            "type": "integer"
+          },
+          "data-bits": {
+            "type": "integer"
+          },
+          "parity": {
+            "type": "string"
+          },
+          "stop-bits": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "port",
+          "baud-rate",
+          "data-bits",
+          "parity",
+          "stop-bits"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "xinput-definition": {
+      "type": "object",
+      "properties": {
+        "exists": {
+          "type": "boolean"
+        }
+      }
+    },
+    "lovense-connect-service-definition": {
+      "type": "object",
+      "properties": {
+        "exists": {
+          "type": "boolean"
+        }
+      }
+    },
+    "usb-definition": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "vendor-id": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+          },
+          "product-id": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+          }
+        },
+        "required": [
+          "vendor-id",
+          "product-id"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "step-range": {
+      "description": "Specifies the range of steps to use for a device. Devices will use the low end value as a stop.",
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "features": {
+      "type": "array",
+      "description": "Attributes for device messages.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "feature-type": {
+            "type": "string",
+            "pattern": "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|Battery|RSSI|Pressure)$"
+          },
+          "actuator": {
+            "type": "object",
+            "properties": {
+              "step-range": {
+                "$ref": "#/components/step-range"
+              },
+              "messages": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^(ScalarCmd|RotateCmd|LinearCmd)$"
+                }
+              }
+            },
+            "required": [
+              "step-range",
+              "messages"
+            ]
+          },
+          "sensor": {
+            "type": "object",
+            "properties": {
+              "value-range": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/step-range"
+                },
+                "minItems": 1
+              },
+              "messages": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^(SensorReadCmd|SensorSubscribeCmd)$"
+                }
+              }
+            },
+            "required": [
+              "value-range",
+              "messages"
+            ]
+          },
+          "minItems": 1
+        },
+        "required": [
+          "description"
+        ],
+        "additionalProperties": false,
+        "minProperties": 1
+      },
+      "minItems": 1
+    },
+    "user-config": {
+      "type": "object",
+      "properties": {
+        "allow": {
+          "type": "boolean"
+        },
+        "deny": {
+          "type": "boolean"
+        },
+        "display-name": {
+          "type": "string"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "features": {
+          "$ref": "#/components/features"
+        }
+      },
+      "additionalProperties": false
+    },
+    "defaults-definition": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "features": {
+          "$ref": "#/components/features"
+        }
+      },
+      "required": [
+        "name",
+        "features"
+      ]
+    },
+    "configurations-definition": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "name": {
+            "type": "string"
+          },          
+          "features": {
+            "$ref": "#/components/features"
+          }
+        },
+        "required": [
+          "identifier"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    }
+  },
+  "type": "object",
+  "properties": {
+    "version": {
+      "description": "Version of the device configuration file.",
+      "type": "object",
+      "properties": {
+        "major": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minor": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "protocols": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "properties": {
+            "btle": {
+              "$ref": "#/components/btle-definition"
+            },
+            "serial": {
+              "$ref": "#/components/serial-definition"
+            },
+            "websocket": {
+              "$ref": "#/components/websocket-definition"
+            },
+            "usb": {
+              "$ref": "#/components/usb-definition"
+            },
+            "hid": {
+              "$ref": "#/components/usb-definition"
+            },
+            "xinput": {
+              "$ref": "#/components/xinput-definition"
+            },
+            "lovense-connect-service": {
+              "$ref": "#/components/lovense-connect-service-definition"
+            },
+            "defaults": {
+              "$ref": "#/components/defaults-definition"
+            },
+            "configurations": {
+              "$ref": "#/components/configurations-definition"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "user-configs": {
+      "type": "object",
+      "properties": {
+        "specifiers": {
+          "type": "object",
+          "patternProperties": {
+            "^.*$": {
+              "type": "object",
+              "properties": {
+                "btle": {
+                  "$ref": "#/components/btle-definition"
+                },
+                "serial": {
+                  "$ref": "#/components/serial-definition"
+                },
+                "websocket": {
+                  "$ref": "#/components/websocket-definition"
+                },
+                "usb": {
+                  "$ref": "#/components/usb-definition"
+                },
+                "hid": {
+                  "$ref": "#/components/usb-definition"
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "devices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "protocol": {
+                "type": "string"
+              },
+              "identifier": {
+                "type": "string"
+              },
+              "config": {
+                "$ref": "#/components/user-config"
+              }                  
+            },
+            "additionalProperties": false,
+            "required": [
+              "address",
+              "protocol",
+              "config"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "additionalProperties": false
+  },
+  "required": [
+    "version"
+  ],
+  "additionalProperties": false
+}

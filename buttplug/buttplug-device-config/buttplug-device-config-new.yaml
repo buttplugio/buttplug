@@ -1,0 +1,462 @@
+version:
+  major: 3
+  minor: 0
+protocols:
+  svakom-iker:
+    btle:
+      names:
+        - Iker*
+      manufacturer-data:
+        - company: 0x27
+          data: [0x53, 0x56, 0x41, 0x01, 0x0B, 0x12, 0x01, 0x33, 0x44, 0x55, 0xCA, 0x08]
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Svakom Iker
+      features:
+        - description: Prostate Vibrator
+          feature-type: Vibrate
+          actuator: 
+            step-range: [0, 10]
+            messages:
+              - ScalarCmd
+        - description: Perineum Vibrator
+          feature-type: Vibrate
+          actuator:
+            step-range: [0, 5]
+            messages:
+              - ScalarCmd
+  lovense:
+    # Lovense is special. Special in oh so many ways.
+    #
+    # Lovense have changed BLE name formats at least once. For this generic device, we just use the
+    # largest wildcard we can. We do our name and capabilities finding in the protocol
+    # implementation, because we have to query the device after connection.
+    #
+    # The service uuids change constantly. This list is overly exhaustive, because we have to
+    # specify services in WebBluetooth and can't wildcard them. We'll add more as we find them.
+    btle:
+      names:
+        - LVS-*
+        - LOVE-*
+        # This conflicts with Hismith, and we don't need this for identification anymore since we've moved to
+        # advertised-services:
+        # - 0000ffb0-0000-1000-8000-00805f9b34fb # Folove advertised service
+      manufacturer-data:
+        - company: 0x026c
+          data: [0xff, 0x21] # Folove manufacturer data (start of a pretty long array)
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff2-0000-1000-8000-00805f9b34fb
+          rx: 0000fff1-0000-1000-8000-00805f9b34fb
+        6e400001-b5a3-f393-e0a9-e50e24dcca9e:
+          tx: 6e400002-b5a3-f393-e0a9-e50e24dcca9e
+          rx: 6e400003-b5a3-f393-e0a9-e50e24dcca9e
+        50300001-0024-4bd4-bbd5-a6920e4c5653:
+          tx: 50300002-0024-4bd4-bbd5-a6920e4c5653
+          rx: 50300003-0024-4bd4-bbd5-a6920e4c5653
+        57300001-0023-4bd4-bbd5-a6920e4c5653:
+          tx: 57300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 57300003-0023-4bd4-bbd5-a6920e4c5653
+        5a300001-0024-4bd4-bbd5-a6920e4c5653:
+          tx: 5a300002-0024-4bd4-bbd5-a6920e4c5653
+          rx: 5a300003-0024-4bd4-bbd5-a6920e4c5653
+        50300001-0023-4bd4-bbd5-a6920e4c5653:
+          tx: 50300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 50300003-0023-4bd4-bbd5-a6920e4c5653
+        53300001-0023-4bd4-bbd5-a6920e4c5653:
+          tx: 53300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 53300003-0023-4bd4-bbd5-a6920e4c5653
+        5a300001-0023-4bd4-bbd5-a6920e4c5653:
+          tx: 5a300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 5a300003-0023-4bd4-bbd5-a6920e4c5653
+        4f300001-0023-4bd4-bbd5-a6920e4c5653:
+          tx: 4f300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 4f300003-0023-4bd4-bbd5-a6920e4c5653
+        42300001-0023-4bd4-bbd5-a6920e4c5653: # Max 2
+          tx: 42300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 42300003-0023-4bd4-bbd5-a6920e4c5653
+        43300001-0023-4bd4-bbd5-a6920e4c5653: # New Nora
+          tx: 43300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 43300003-0023-4bd4-bbd5-a6920e4c5653
+        4c300001-0023-4bd4-bbd5-a6920e4c5653: # Ambi
+          tx: 4c300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 4c300003-0023-4bd4-bbd5-a6920e4c5653
+        4c410001-0023-4bd4-bbd5-a6920e4c5653: # Ambi
+          tx: 4c410002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 4c410003-0023-4bd4-bbd5-a6920e4c5653
+        56300001-0023-4bd4-bbd5-a6920e4c5653: # Mission
+          tx: 56300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 56300003-0023-4bd4-bbd5-a6920e4c5653
+        58300001-0023-4bd4-bbd5-a6920e4c5653: # Ferri
+          tx: 58300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 58300003-0023-4bd4-bbd5-a6920e4c5653
+        52300001-0023-4bd4-bbd5-a6920e4c5653: # Diamo
+          tx: 52300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 52300003-0023-4bd4-bbd5-a6920e4c5653
+        46300001-0023-4bd4-bbd5-a6920e4c5653: # Blast/Ridge
+          tx: 46300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 46300003-0023-4bd4-bbd5-a6920e4c5653
+        50300011-0023-4bd4-bbd5-a6920e4c5653: # Edge2 paired
+          tx: 50300012-0023-4bd4-bbd5-a6920e4c5653
+          rx: 50300013-0023-4bd4-bbd5-a6920e4c5653
+        4a300001-0023-4bd4-bbd5-a6920e4c5653: # Quake/Dolce
+          tx: 4a300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 4a300003-0023-4bd4-bbd5-a6920e4c5653
+        45440001-0023-4bd4-bbd5-a6920e4c5653: # Gush
+          tx: 45440002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 45440003-0023-4bd4-bbd5-a6920e4c5653
+        45420001-0023-4bd4-bbd5-a6920e4c5653: # Hyphy
+          tx: 45420002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 45420003-0023-4bd4-bbd5-a6920e4c5653
+        54300001-0023-4bd4-bbd5-a6920e4c5653: # Calor
+          tx: 54300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 54300003-0023-4bd4-bbd5-a6920e4c5653
+        45490001-0023-4bd4-bbd5-a6920e4c5653: # Flexer
+          tx: 45490002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 45490003-0023-4bd4-bbd5-a6920e4c5653
+        4e300001-0023-4bd4-bbd5-a6920e4c5653: # Gemini
+          tx: 4e300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 4e300003-0023-4bd4-bbd5-a6920e4c5653
+        45410001-0023-4bd4-bbd5-a6920e4c5653: # Gravity
+          tx: 45410002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 45410003-0023-4bd4-bbd5-a6920e4c5653
+        51300001-0023-4bd4-bbd5-a6920e4c5653: # Tenera
+          tx: 51300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 51300003-0023-4bd4-bbd5-a6920e4c5653
+        45460001-0023-4bd4-bbd5-a6920e4c5653: # Exomoon
+          tx: 45460002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 45460003-0023-4bd4-bbd5-a6920e4c5653
+        454c0001-0023-4bd4-bbd5-a6920e4c5653: # Exomoon
+          tx: 454c0002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 454c0003-0023-4bd4-bbd5-a6920e4c5653
+        55300001-0023-4bd4-bbd5-a6920e4c5653: # Lapis
+          tx: 55300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 55300003-0023-4bd4-bbd5-a6920e4c5653
+        53440001-0023-4bd4-bbd5-a6920e4c5653: # Vulse
+          tx: 53440002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 53440003-0023-4bd4-bbd5-a6920e4c5653
+        48300001-0023-4bd4-bbd5-a6920e4c5653: # Solace
+          tx: 48300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 48300003-0023-4bd4-bbd5-a6920e4c5653
+    defaults:
+      name: Lovense Device
+      features:
+        - description: Vibrator
+          feature-type: Vibrate
+          actuator:
+            step-range: [0, 20]
+            messages:
+              - ScalarCmd
+        - description: Battery Level
+          feature-type: Battery
+          sensor:
+            value-range: [[0, 100]]
+            messages:
+              - SensorReadCmd
+    configurations:
+      # For lovense, our identifiers are the letters returned from the
+      # DeviceInfo query sent on initialization.
+      - identifier:
+          - B
+        name: Lovense Max
+        features:
+          - description: Air Pump
+            feature-type: Constrict
+            actuator:
+              step-range: [0, 3]
+              messages:
+                - ScalarCmd
+          - description: Vibrator
+            feature-type: Vibrate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd
+          - description: Battery Level
+            feature-type: Battery
+            sensor:
+              value-range: [[0, 100]]
+              messages:
+                - SensorReadCmd
+      - identifier:
+          - P
+        name: Lovense Edge
+        features:
+          - description: Perineum Vibrator
+            feature-type: Vibrate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd
+          - description: Internal Vibrator
+            feature-type: Vibrate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd
+          - description: Battery Level
+            feature-type: Battery
+            sensor:
+              value-range: [[0, 100]]
+              messages:
+                - SensorReadCmd
+      - identifier:
+          - A
+          - C
+        name: Lovense Nora
+        features:
+          - description: Clitoral Vibrator
+            feature-type: Vibrate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd
+          - description: Rotating Insertable
+            feature-type: Rotate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - RotateCmd
+          - description: Battery Level
+            feature-type: Battery
+            sensor:
+              value-range: [[0, 100]]
+              messages:
+                - SensorReadCmd
+      - identifier:
+          - L
+        name: Lovense Ambi
+      - identifier:
+          - S
+        name: Lovense Lush
+      - identifier:
+          - Z
+        name: Lovense Hush
+      - identifier:
+          - W
+        name: Lovense Domi
+      - identifier:
+          - O
+        name: Lovense Osci
+      - identifier:
+          - V
+        name: Lovense Mission
+      - identifier:
+          - X
+        name: Lovense Ferri
+      - identifier:
+          - R
+        name: Lovense Diamo
+      - identifier:
+          - ToyS
+        name: Loveai Dolp
+      - identifier:
+          - F
+        name: Lovense Sex Machine
+        features:
+          - description: Fucking Machine Oscillation Speed
+            feature-type: Oscillate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd
+          # No Battery for the machine
+      - identifier:
+          - J
+        name: Lovense Dolce
+        features:
+          - description: External Vibrator
+            feature-type: Vibrate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd
+          - description: Internal Vibrator
+            feature-type: Vibrate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd
+          - description: Battery Level
+            feature-type: Battery
+            sensor:
+              value-range: [[0, 100]]
+              messages:
+                - SensorReadCmd
+      - identifier:
+          - ED
+        name: Lovense Gush
+      - identifier:
+          - EB
+        name: Lovense Hyphy
+        features:
+          - description: Vibrator
+            feature-type: Vibrate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd
+          - description: Vibrator
+            feature-type: Vibrate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd
+          - description: Battery Level
+            feature-type: Battery
+            sensor:
+              value-range: [[0, 100]]
+              messages:
+                - SensorReadCmd
+      - identifier:
+          - T
+        name: Lovense Calor
+      - identifier:
+          - EI
+        name: Lovense Flexer (Firmware update needed)
+      - identifier:
+          - EI-FW3
+        name: Lovense Flexer
+        features:
+          - description: Vibrator
+            feature-type: Vibrate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd
+          - description: Vibrator
+            feature-type: Vibrate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd
+          - description: Battery Level
+            feature-type: Battery
+            sensor:
+              value-range: [[0, 100]]
+              messages:
+                - SensorReadCmd
+          - description: Finger Motion
+            feature-type: Rotate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - RotateCmd
+      - identifier:
+          - N
+        name: Lovense Gemini
+        features:
+          - description: Left Nipple Vibrator
+            feature-type: Vibrate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd
+          - description: Right Nipple Vibrator
+            feature-type: Vibrate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd
+          - description: Battery Level
+            feature-type: Battery
+            sensor:
+              value-range: [[0, 100]]
+              messages:
+                - SensorReadCmd
+      - identifier:
+          - EA
+        name: Lovense Gravity
+        features:
+          - description: Vibrator
+            feature-type: Vibrate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd
+          - description: Thrusting Oscillation Speed
+            feature-type: Oscillate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd
+          - description: Battery Level
+            feature-type: Battery
+            sensor:
+              value-range: [[0, 100]]
+              messages:
+                - SensorReadCmd
+      - identifier:
+          - Q
+        name: Lovense Tenera
+      - identifier:
+          - EL
+        name: Lovense Ridge
+        features:
+          - description: Vibrator
+            feature-type: Vibrate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd        
+          - description: Rotation Speed
+            feature-type: Rotate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - RotateCmd
+          - description: Battery Level
+            feature-type: Battery
+            sensor:
+              value-range: [[0, 100]]
+              messages:
+                - SensorReadCmd                
+      - identifier:
+          - U
+        name: Lovense Lapis
+        features:
+          - description: Tip Vibrator
+            feature-type: Vibrate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd
+          - description: Internal Vibrator
+            feature-type: Vibrate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd
+          - description: External Vibrator
+            feature-type: Vibrate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd              
+          - description: Battery Level
+            feature-type: Battery
+            sensor:
+              value-range: [[0, 100]]
+              messages:
+                - SensorReadCmd
+      - identifier:
+          - SD
+        name: Lovense Vulse
+      - identifier:
+          - H
+        name: Lovense Solace
+        features:
+          - description: Stroker Oscillation Speed
+            feature-type: Oscillate
+            actuator:
+              step-range: [0, 20]
+              messages:
+                - ScalarCmd
+          - description: Battery Level
+            feature-type: Battery
+            sensor:
+              value-range: [[0, 100]]
+              messages:
+                - SensorReadCmd              

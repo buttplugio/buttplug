@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "js-yaml buttplug-device-config.yml > buttplug-device-config.json && ajv validate --strict=false -s buttplug-device-config-schema.json -d buttplug-device-config.json",
+    "build:new": "js-yaml buttplug-device-config-new.yaml > buttplug-device-config-new.json && ajv validate --strict=false -s buttplug-device-config-schema-new.json -d buttplug-device-config-new.json",
     "export-version": "node ./export_version.js"
   },
   "repository": {
@@ -22,7 +23,7 @@
   },
   "homepage": "https://github.com/buttplugio/buttplug-device-config#readme",
   "devDependencies": {
-    "ajv": "^8.11.2",
+    "ajv": "^8.12.0",
     "ajv-cli": "^5.0.0",
     "js-yaml": "^4.1.0"
   },
