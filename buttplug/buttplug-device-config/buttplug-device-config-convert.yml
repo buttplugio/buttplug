@@ -152,7 +152,7 @@ protocols:
                 - - 0
                   - 100
               messages:
-                - SensorReadCmd                
+                - SensorReadCmd
       - identifier:
           - P
         name: Lovense Edge
@@ -178,19 +178,12 @@ protocols:
                 - - 0
                   - 100
               messages:
-                - SensorReadCmd 
+                - SensorReadCmd
       - identifier:
           - A
           - C
         name: Lovense Nora
         features:
-          - feature-type: Rotate
-            actuator:
-              step-range:
-                - 0
-                - 20
-              messages:
-                - RotateCmd
           - feature-type: Vibrate
             actuator:
               step-range:
@@ -198,6 +191,13 @@ protocols:
                 - 20
               messages:
                 - ScalarCmd
+          - feature-type: Rotate
+            actuator:
+              step-range:
+                - 0
+                - 20
+              messages:
+                - RotateCmd
           - feature-type: Battery
             description: Battery Level
             sensor:
@@ -205,7 +205,7 @@ protocols:
                 - - 0
                   - 100
               messages:
-                - SensorReadCmd                 
+                - SensorReadCmd
       - identifier:
           - L
         name: Lovense Ambi
@@ -245,6 +245,14 @@ protocols:
                 - 20
               messages:
                 - ScalarCmd
+          - feature-type: Battery
+            description: Battery Level
+            sensor:
+              value-range:
+                - - 0
+                  - 100
+              messages:
+                - SensorReadCmd
       - identifier:
           - J
         name: Lovense Dolce
@@ -270,7 +278,7 @@ protocols:
                 - - 0
                   - 100
               messages:
-                - SensorReadCmd                 
+                - SensorReadCmd
       - identifier:
           - ED
         name: Lovense Gush
@@ -299,7 +307,7 @@ protocols:
                 - - 0
                   - 100
               messages:
-                - SensorReadCmd                
+                - SensorReadCmd
       - identifier:
           - T
         name: Lovense Calor
@@ -401,6 +409,13 @@ protocols:
           - EL
         name: Lovense Ridge
         features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 20
+              messages:
+                - ScalarCmd
           - feature-type: Rotate
             actuator:
               step-range:
@@ -408,7 +423,6 @@ protocols:
                 - 20
               messages:
                 - RotateCmd
-                - ScalarCmd
           - feature-type: Battery
             description: Battery Level
             sensor:
@@ -416,7 +430,7 @@ protocols:
                 - - 0
                   - 100
               messages:
-                - SensorReadCmd                
+                - SensorReadCmd
       - identifier:
           - U
         name: Lovense Lapis
@@ -475,7 +489,7 @@ protocols:
                 - - 0
                   - 100
               messages:
-                - SensorReadCmd                
+                - SensorReadCmd
   lovense-connect-service:
     lovense-connect-service:
       exists: true
@@ -518,6 +532,14 @@ protocols:
                 - 3
               messages:
                 - ScalarCmd
+          - feature-type: Battery
+            description: Battery Level
+            sensor:
+              value-range:
+                - - 0
+                  - 100
+              messages:
+                - SensorReadCmd
       - identifier:
           - Edge
         name: Lovense Edge
@@ -548,6 +570,13 @@ protocols:
           - Nora
         name: Lovense Nora
         features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 20
+              messages:
+                - ScalarCmd
           - feature-type: Rotate
             actuator:
               step-range:
@@ -555,7 +584,6 @@ protocols:
                 - 20
               messages:
                 - RotateCmd
-                - ScalarCmd
           - feature-type: Battery
             description: Battery Level
             sensor:
@@ -603,6 +631,14 @@ protocols:
                 - 20
               messages:
                 - ScalarCmd
+          - feature-type: Battery
+            description: Battery Level
+            sensor:
+              value-range:
+                - - 0
+                  - 100
+              messages:
+                - SensorReadCmd
       - identifier:
           - Dolce
         name: Lovense Dolce
@@ -745,6 +781,13 @@ protocols:
           - Ridge
         name: Lovense Ridge
         features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 20
+              messages:
+                - ScalarCmd
           - feature-type: Rotate
             actuator:
               step-range:
@@ -752,7 +795,6 @@ protocols:
                 - 20
               messages:
                 - RotateCmd
-                - ScalarCmd
           - feature-type: Battery
             description: Battery Level
             sensor:
@@ -812,6 +854,14 @@ protocols:
                 - 20
               messages:
                 - ScalarCmd
+          - feature-type: Battery
+            description: Battery Level
+            sensor:
+              value-range:
+                - - 0
+                  - 100
+              messages:
+                - SensorReadCmd
   xinput:
     xinput:
       exists: true
@@ -1133,6 +1183,14 @@ protocols:
                 - 100
               messages:
                 - ScalarCmd
+          - feature-type: Battery
+            description: Battery Level
+            sensor:
+              value-range:
+                - - 0
+                  - 100
+              messages:
+                - SensorReadCmd
       - identifier:
           - CBT002
         name: FunTown Caleo
@@ -1197,6 +1255,14 @@ protocols:
                 - 100
               messages:
                 - ScalarCmd
+          - feature-type: Battery
+            description: Battery Level
+            sensor:
+              value-range:
+                - - 0
+                  - 100
+              messages:
+                - SensorReadCmd
       - identifier:
           - Solstice X
         name: MagicMotion Solstice X
@@ -1215,6 +1281,14 @@ protocols:
                 - 100
               messages:
                 - ScalarCmd
+          - feature-type: Battery
+            description: Battery Level
+            sensor:
+              value-range:
+                - - 0
+                  - 100
+              messages:
+                - SensorReadCmd
       - identifier:
           - funwand
         name: MagicMotion Zenith
@@ -1236,6 +1310,14 @@ protocols:
                 - 100
               messages:
                 - ScalarCmd
+          - feature-type: Battery
+            description: Battery Level
+            sensor:
+              value-range:
+                - - 0
+                  - 100
+              messages:
+                - SensorReadCmd
   magic-motion-3:
     btle:
       names:
@@ -1331,6 +1413,14 @@ protocols:
                 - 100
               messages:
                 - ScalarCmd
+          - feature-type: Battery
+            description: Battery Level
+            sensor:
+              value-range:
+                - - 0
+                  - 100
+              messages:
+                - SensorReadCmd
       - identifier:
           - funkegel
         name: MagicMotion Crystal
@@ -1352,6 +1442,14 @@ protocols:
                 - 100
               messages:
                 - ScalarCmd
+          - feature-type: Battery
+            description: Battery Level
+            sensor:
+              value-range:
+                - - 0
+                  - 100
+              messages:
+                - SensorReadCmd
   mysteryvibe:
     btle:
       names:
@@ -2543,7 +2641,6 @@ protocols:
               - 10
             messages:
               - RotateCmd
-              - ScalarCmd
   rez-trancevibrator:
     usb:
       - vendor-id: 2889
@@ -2643,7 +2740,6 @@ protocols:
                 - 99
               messages:
                 - RotateCmd
-                - ScalarCmd
       - identifier:
           - UFOSA
         name: Vorze UFO SA
@@ -2655,7 +2751,6 @@ protocols:
                 - 99
               messages:
                 - RotateCmd
-                - ScalarCmd
       - identifier:
           - UFO-TW
         name: Vorze UFO TW
@@ -2667,7 +2762,6 @@ protocols:
                 - 99
               messages:
                 - RotateCmd
-                - ScalarCmd
           - feature-type: Rotate
             actuator:
               step-range:
@@ -2675,7 +2769,6 @@ protocols:
                 - 99
               messages:
                 - RotateCmd
-                - ScalarCmd
       - identifier:
           - VorzePiston
         name: Vorze Piston
@@ -3247,7 +3340,6 @@ protocols:
               - 255
             messages:
               - RotateCmd
-              - ScalarCmd
     configurations:
       - identifier:
           - MB Controller
@@ -5413,7 +5505,6 @@ protocols:
               - 6
             messages:
               - RotateCmd
-              - ScalarCmd
     configurations:
       - identifier:
           - synchro EX

@@ -1,6 +1,21 @@
 const yaml = require('js-yaml');
 const fs   = require('fs');
 
+function moveDefaults(def, config) {
+  if (def["ScalarCmd"] !== undefined && config["ScalarCmd"] === undefined) {
+    config["ScalarCmd"] = JSON.parse(JSON.stringify(def["ScalarCmd"]))
+  }
+  if (def["RotateCmd"] !== undefined && config["RotateCmd"] === undefined) {
+    config["RotateCmd"] = JSON.parse(JSON.stringify(def["RotateCmd"]))
+  }
+  if (def["LinearCmd"] !== undefined && config["LinearCmd"] === undefined) {
+    config["LinearCmd"] = JSON.parse(JSON.stringify(def["LinearCmd"]))
+  }
+  if (def["SensorReadCmd"] !== undefined && config["SensorReadCmd"] === undefined) {
+    config["SensorReadCmd"] = JSON.parse(JSON.stringify(def["SensorReadCmd"]))
+  }
+}
+
 function convertMessagesObject(messages) {
   let features = [];
   console.log(messages["ScalarCmd"]);
@@ -32,7 +47,7 @@ if (messages["RotateCmd"] !== undefined) {
     if (scalarcmd["StepRange"] !== undefined) {
       featureObj["actuator"]["step-range"] = scalarcmd["StepRange"];
     }
-    featureObj["actuator"]["messages"] = ["RotateCmd", "ScalarCmd"];
+    featureObj["actuator"]["messages"] = ["RotateCmd"];
     features.push(featureObj);
   }
 }
@@ -78,13 +93,18 @@ for (var protocol in doc["protocols"]) {
   if (doc["protocols"][protocol]["defaults"] === undefined) {
     console.log("No defaults for protocol");
   }
+  let def = undefined;
   if (doc["protocols"][protocol]["defaults"]["messages"] !== undefined) {
+    def = doc["protocols"][protocol]["defaults"]["messages"];
     doc["protocols"][protocol]["defaults"]["features"] = convertMessagesObject(doc["protocols"][protocol]["defaults"]["messages"]);
     doc["protocols"][protocol]["defaults"]["messages"] = undefined;
   }
   if (doc["protocols"][protocol]["configurations"] !== undefined) {
     for (var config of doc["protocols"][protocol]["configurations"]) {
       if (config["messages"] !== undefined) {
+        if (def !== undefined) {
+          moveDefaults(def, config["messages"])
+        }
         config["features"] = convertMessagesObject(config["messages"]);
         config["messages"] = undefined;
       }

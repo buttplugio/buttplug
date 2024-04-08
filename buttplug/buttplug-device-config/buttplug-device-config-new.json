@@ -283,18 +283,6 @@
           "name": "Lovense Nora",
           "features": [
             {
-              "feature-type": "Rotate",
-              "actuator": {
-                "step-range": [
-                  0,
-                  20
-                ],
-                "messages": [
-                  "RotateCmd"
-                ]
-              }
-            },
-            {
               "feature-type": "Vibrate",
               "actuator": {
                 "step-range": [
@@ -303,6 +291,18 @@
                 ],
                 "messages": [
                   "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Rotate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  20
+                ],
+                "messages": [
+                  "RotateCmd"
                 ]
               }
             },
@@ -393,6 +393,21 @@
                 ],
                 "messages": [
                   "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
                 ]
               }
             }
@@ -679,6 +694,18 @@
           "name": "Lovense Ridge",
           "features": [
             {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  20
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
               "feature-type": "Rotate",
               "actuator": {
                 "step-range": [
@@ -686,8 +713,7 @@
                   20
                 ],
                 "messages": [
-                  "RotateCmd",
-                  "ScalarCmd"
+                  "RotateCmd"
                 ]
               }
             },
@@ -882,6 +908,21 @@
                   "ScalarCmd"
                 ]
               }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
             }
           ]
         },
@@ -939,6 +980,18 @@
           "name": "Lovense Nora",
           "features": [
             {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  20
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
               "feature-type": "Rotate",
               "actuator": {
                 "step-range": [
@@ -946,8 +999,7 @@
                   20
                 ],
                 "messages": [
-                  "RotateCmd",
-                  "ScalarCmd"
+                  "RotateCmd"
                 ]
               }
             },
@@ -1038,6 +1090,21 @@
                 ],
                 "messages": [
                   "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
                 ]
               }
             }
@@ -1299,6 +1366,18 @@
           "name": "Lovense Ridge",
           "features": [
             {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  20
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
               "feature-type": "Rotate",
               "actuator": {
                 "step-range": [
@@ -1306,8 +1385,7 @@
                   20
                 ],
                 "messages": [
-                  "RotateCmd",
-                  "ScalarCmd"
+                  "RotateCmd"
                 ]
               }
             },
@@ -1412,6 +1490,21 @@
                 ],
                 "messages": [
                   "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
                 ]
               }
             }
@@ -1963,6 +2056,21 @@
                   "ScalarCmd"
                 ]
               }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
             }
           ]
         },
@@ -2074,6 +2182,21 @@
                   "ScalarCmd"
                 ]
               }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
             }
           ]
         },
@@ -2104,6 +2227,21 @@
                 ],
                 "messages": [
                   "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
                 ]
               }
             }
@@ -2142,6 +2280,21 @@
                 ],
                 "messages": [
                   "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
                 ]
               }
             }
@@ -2309,6 +2462,21 @@
                   "ScalarCmd"
                 ]
               }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
             }
           ]
         },
@@ -2345,6 +2513,21 @@
                 ],
                 "messages": [
                   "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
                 ]
               }
             }
@@ -4378,8 +4561,7 @@
                 10
               ],
               "messages": [
-                "RotateCmd",
-                "ScalarCmd"
+                "RotateCmd"
               ]
             }
           }
@@ -4547,8 +4729,7 @@
                   99
                 ],
                 "messages": [
-                  "RotateCmd",
-                  "ScalarCmd"
+                  "RotateCmd"
                 ]
               }
             }
@@ -4568,8 +4749,7 @@
                   99
                 ],
                 "messages": [
-                  "RotateCmd",
-                  "ScalarCmd"
+                  "RotateCmd"
                 ]
               }
             }
@@ -4589,8 +4769,7 @@
                   99
                 ],
                 "messages": [
-                  "RotateCmd",
-                  "ScalarCmd"
+                  "RotateCmd"
                 ]
               }
             },
@@ -4602,8 +4781,7 @@
                   99
                 ],
                 "messages": [
-                  "RotateCmd",
-                  "ScalarCmd"
+                  "RotateCmd"
                 ]
               }
             }
@@ -5569,8 +5747,7 @@
                 255
               ],
               "messages": [
-                "RotateCmd",
-                "ScalarCmd"
+                "RotateCmd"
               ]
             }
           }
@@ -9303,8 +9480,7 @@
                 6
               ],
               "messages": [
-                "RotateCmd",
-                "ScalarCmd"
+                "RotateCmd"
               ]
             }
           }
