@@ -1,6 +1,6 @@
 {
   "version": {
-    "major": 2,
+    "major": 3,
     "minor": 999
   },
   "user-configs": {
@@ -12,16 +12,38 @@
           "identifier": "F"
         },
         "config": {
+          "name": "Lovense Sex Machine",
           "display-name": "Lovense Name Test",
-          "messages": {
-            "ScalarCmd": [
-              {
-                "StepRange": [0, 10],
-                "ActuatorType": "Oscillate",
-                "FeatureDescriptor": "Fucking Machine Oscillation Speed"
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "description": "Fucking Machine Oscillation Speed",
+              "actuator": {
+                "step-range": [
+                  0,
+                  10
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
               }
-            ]
-          }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
         }
       }
     ]
