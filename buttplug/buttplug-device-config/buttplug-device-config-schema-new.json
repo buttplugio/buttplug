@@ -236,6 +236,9 @@
     "user-config": {
       "type": "object",
       "properties": {
+        "name": {
+          "type": "string"
+        },
         "allow": {
           "type": "boolean"
         },
@@ -384,23 +387,32 @@
           "items": {
             "type": "object",
             "properties": {
-              "address": {
-                "type": "string"
-              },
-              "protocol": {
-                "type": "string"
-              },
               "identifier": {
-                "type": "string"
+                "type": "object",
+                "properties": {
+                  "address": {
+                    "type": "string"
+                  },
+                  "protocol": {
+                    "type": "string"
+                  },
+                  "identifier": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "address",
+                  "protocol"
+                ]
               },
               "config": {
                 "$ref": "#/components/user-config"
-              }                  
+              }
             },
             "additionalProperties": false,
             "required": [
-              "address",
-              "protocol",
+              "identifier",
               "config"
             ]
           }
