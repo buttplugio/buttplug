@@ -340,7 +340,9 @@ pub struct DeviceConfigurationManagerBuilder {
   skip_default_protocols: bool,
   allow_raw_messages: bool,
   communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
+  user_communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   protocol_attributes: HashMap<ProtocolAttributesIdentifier, ProtocolDeviceAttributes>,
+  user_protocol_attributes: HashMap<ProtocolAttributesIdentifier, ProtocolDeviceAttributes>,
   /// Map of protocol names to their respective protocol instance factories
   protocols: Vec<(String, Arc<dyn ProtocolIdentifierFactory>)>,
   /// Addresses of devices that we will only connect to, if this list is not empty. As these are
@@ -407,6 +409,28 @@ impl DeviceConfigurationManagerBuilder {
     self
   }
 
+  pub fn user_communication_specifier(
+    &mut self,
+    protocol_name: &str,
+    specifier: ProtocolCommunicationSpecifier,
+  ) -> &mut Self {
+    self
+      .user_communication_specifiers
+      .entry(protocol_name.to_owned())
+      .or_default()
+      .push(specifier);
+    self
+  }
+
+  pub fn user_protocol_attributes(
+    &mut self,
+    identifier: ProtocolAttributesIdentifier,
+    attributes: ProtocolDeviceAttributes,
+  ) -> &mut Self {
+    self.user_protocol_attributes.insert(identifier, attributes);
+    self
+  }
+
   /// Add a protocol instance factory for a [ButtplugProtocol]
   pub fn protocol_factory<T>(&mut self, factory: T) -> &mut Self
   where
@@ -462,9 +486,7 @@ impl DeviceConfigurationManagerBuilder {
     let mut attribute_tree_map = HashMap::new();
 
     // Add all the defaults first, they won't have parent attributes.
-    for (ident, attr) in self.protocol_attributes.iter().filter(|(ident, _)| {
-      ident.attributes_identifier == ProtocolAttributesType::Default && ident.address.is_none()
-    }) {
+    for (ident, attr) in &self.protocol_attributes {
       // If we don't have a protocol loaded for this configuration block, just drop it. We can't do
       // anything with it anyways.
       if !protocol_map.contains_key(&ident.protocol) {
@@ -473,21 +495,7 @@ impl DeviceConfigurationManagerBuilder {
       attribute_tree_map.insert(ident.clone(), Arc::new(attr.clone()));
     }
 
-    // Then add in everything that has a identifier but not an address, and possibly set their parents.
-    for (ident, attr) in self.protocol_attributes.iter().filter(|(ident, _)| {
-      matches!(
-        ident.attributes_identifier,
-        ProtocolAttributesType::Identifier(_)
-      ) && ident.address.is_none()
-    }) {
-      // If we don't have a protocol loaded for this configuration block, just drop it. We can't do
-      // anything with it anyways.
-      if !protocol_map.contains_key(&ident.protocol) {
-        continue;
-      }
-      attribute_tree_map.insert(ident.clone(), Arc::new(attr.clone()));
-    }
-
+    let mut user_attribute_tree_map = HashMap::new();
     // Finally, add in user configurations, which will have an address.
     for (ident, attr) in self
       .protocol_attributes
@@ -499,7 +507,7 @@ impl DeviceConfigurationManagerBuilder {
       if !protocol_map.contains_key(&ident.protocol) {
         continue;
       }
-      attribute_tree_map.insert(ident.clone(), Arc::new(attr.clone()));
+      user_attribute_tree_map.insert(ident.clone(), Arc::new(attr.clone()));
     }
 
     // Align the implementation, communication specifier, and attribute maps so we only keep what we
@@ -524,7 +532,9 @@ impl DeviceConfigurationManagerBuilder {
     Ok(DeviceConfigurationManager {
       allow_raw_messages: self.allow_raw_messages,
       communication_specifiers: self.communication_specifiers.clone(),
+      user_communication_specifiers: self.user_communication_specifiers.clone(),
       protocol_attributes: attribute_tree_map,
+      user_protocol_attributes: user_attribute_tree_map,
       protocol_map,
       allowed_addresses: self.allowed_addresses.clone(),
       denied_addresses: self.denied_addresses.clone(),
@@ -549,7 +559,9 @@ pub struct DeviceConfigurationManager {
   /// If true, add raw message support to connected devices
   allow_raw_messages: bool,
   communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
+  user_communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   protocol_attributes: HashMap<ProtocolAttributesIdentifier, Arc<ProtocolDeviceAttributes>>,
+  user_protocol_attributes: HashMap<ProtocolAttributesIdentifier, Arc<ProtocolDeviceAttributes>>,
   /// Map of protocol names to their respective protocol instance factories
   protocol_map: HashMap<String, Arc<dyn ProtocolIdentifierFactory>>,
   allowed_addresses: Vec<String>,
@@ -629,6 +641,27 @@ impl DeviceConfigurationManager {
       specifier
     );
     let mut specializers = vec![];
+    for (name, specifiers) in self.user_communication_specifiers.iter() {
+      if specifiers.contains(specifier) {
+        info!("Found protocol {:?} for user specifier {:?}.", name, specifier);
+
+        if !self.protocol_map.contains_key(name) {
+          warn!(
+            "No protocol implementation for {:?} found for user specifier {:?}.",
+            name, specifier
+          );
+          continue;
+        }
+        specializers.push(ProtocolSpecializer::new(
+          specifiers.clone(),
+          self
+            .protocol_map
+            .get(name)
+            .expect("already checked existence")
+            .create(),
+        ));
+      }
+    }
     for (name, specifiers) in self.communication_specifiers.iter() {
       if specifiers.contains(specifier) {
         info!("Found protocol {:?} for specifier {:?}.", name, specifier);
@@ -658,7 +691,7 @@ impl DeviceConfigurationManager {
     identifier: &ServerDeviceIdentifier,
     raw_endpoints: &[Endpoint],
   ) -> Option<ProtocolDeviceAttributes> {
-    let mut flat_attrs = if let Some(attrs) = self.protocol_attributes.get(&identifier.into()) {
+    let mut flat_attrs = if let Some(attrs) = self.user_protocol_attributes.get(&identifier.into()) {
       debug!("User device config found for {:?}", identifier);
       attrs.as_ref().clone()
     } else if let Some(attrs) = self.protocol_attributes.get(&ProtocolAttributesIdentifier {
