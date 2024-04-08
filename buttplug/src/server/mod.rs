@@ -52,7 +52,7 @@ use self::device::{
   configuration::{
     ProtocolAttributesIdentifier,
     ProtocolCommunicationSpecifier,
-    ProtocolDeviceAttributes,
+    ProtocolDeviceFeatures,
   },
   hardware::communication::HardwareCommunicationManagerBuilder,
   protocol::ProtocolIdentifierFactory,
@@ -228,14 +228,14 @@ impl ButtplugServerBuilder {
     self
   }
 
-  pub fn protocol_attributes(
+  pub fn protocol_features(
     &mut self,
     identifier: ProtocolAttributesIdentifier,
-    attributes: ProtocolDeviceAttributes,
+    features: ProtocolDeviceFeatures,
   ) -> &mut Self {
     self
       .device_manager_builder
-      .protocol_attributes(identifier, attributes);
+      .protocol_features(identifier, features);
     self
   }
 

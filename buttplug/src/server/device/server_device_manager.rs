@@ -8,7 +8,7 @@
 //! Buttplug Device Manager, manages Device Subtype (Platform/Communication bus
 //! specific) Managers
 
-use super::server_device_manager_event_loop::ServerDeviceManagerEventLoop;
+use super::{configuration::ProtocolDeviceFeatures, server_device_manager_event_loop::ServerDeviceManagerEventLoop};
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
@@ -30,7 +30,6 @@ use crate::{
         DeviceConfigurationManagerBuilder,
         ProtocolAttributesIdentifier,
         ProtocolCommunicationSpecifier,
-        ProtocolDeviceAttributes,
       },
       hardware::communication::{
         HardwareCommunicationManager,
@@ -133,14 +132,14 @@ impl ServerDeviceManagerBuilder {
     self
   }
 
-  pub fn protocol_attributes(
+  pub fn protocol_features(
     &mut self,
     identifier: ProtocolAttributesIdentifier,
-    attributes: ProtocolDeviceAttributes,
+    features: ProtocolDeviceFeatures,
   ) -> &mut Self {
     self
       .configuration_manager_builder
-      .protocol_attributes(identifier, attributes);
+      .protocol_features(identifier, features);
     self
   }
 

@@ -151,7 +151,7 @@ use super::protocol::{get_default_protocol_map, ProtocolIdentifierFactory, Proto
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ButtplugDeviceMessageType, Endpoint},
+    message::{ButtplugDeviceMessageType, DeviceFeature, Endpoint},
   },
   server::device::ServerDeviceIdentifier,
 };
@@ -222,6 +222,37 @@ impl PartialEq<ServerDeviceIdentifier> for ProtocolAttributesIdentifier {
   }
 }
 
+#[derive(Debug, Clone, Getters, Setters, MutGetters)]
+pub struct ProtocolDeviceFeatures {
+  #[getset(get = "pub")]
+  /// Identifies which type of attributes this instance represents for a protocol (Protocol default or device specific)
+  identifier: ProtocolAttributesType,
+  /// Given name of the device this instance represents.
+  name: Option<String>,
+  /// User configured name of the device this instance represents, assuming one exists.
+  #[getset(get = "pub")]
+  display_name: Option<String>,
+  /// Message attributes for this device instance.
+  features: Vec<DeviceFeature>
+}
+
+impl ProtocolDeviceFeatures {
+  /// Create a new instance
+  pub fn new(
+    identifier: ProtocolAttributesType,
+    name: Option<String>,
+    display_name: Option<String>,
+    features: Vec<DeviceFeature>,
+  ) -> Self {
+    Self {
+      identifier,
+      name,
+      display_name,
+      features,
+    }
+  }
+}
+
 /// Device attribute storage and handling
 ///
 /// ProtocolDeviceAttributes represent information about a device in relation to its protocol. This
@@ -259,6 +290,17 @@ pub struct ProtocolDeviceAttributes {
   display_name: Option<String>,
   /// Message attributes for this device instance.
   pub(super) message_attributes: ServerDeviceMessageAttributes,
+}
+
+impl From<ProtocolDeviceFeatures> for ProtocolDeviceAttributes {
+  fn from(value: ProtocolDeviceFeatures) -> Self {
+    Self {
+      identifier: value.identifier,
+      name: value.name,
+      display_name: value.display_name.clone(),
+      message_attributes: value.features.into()
+    }
+  }
 }
 
 impl ProtocolDeviceAttributes {
@@ -329,8 +371,8 @@ pub struct DeviceConfigurationManagerBuilder {
   allow_raw_messages: bool,
   communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   user_communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
-  protocol_attributes: HashMap<ProtocolAttributesIdentifier, ProtocolDeviceAttributes>,
-  user_protocol_attributes: HashMap<ProtocolAttributesIdentifier, ProtocolDeviceAttributes>,
+  protocol_attributes: HashMap<ProtocolAttributesIdentifier, ProtocolDeviceFeatures>,
+  user_protocol_attributes: HashMap<ProtocolAttributesIdentifier, ProtocolDeviceFeatures>,
   /// Map of protocol names to their respective protocol instance factories
   protocols: Vec<(String, Arc<dyn ProtocolIdentifierFactory>)>,
   /// Addresses of devices that we will only connect to, if this list is not empty. As these are
@@ -388,12 +430,12 @@ impl DeviceConfigurationManagerBuilder {
     self
   }
 
-  pub fn protocol_attributes(
+  pub fn protocol_features(
     &mut self,
     identifier: ProtocolAttributesIdentifier,
-    attributes: ProtocolDeviceAttributes,
+    features: ProtocolDeviceFeatures,
   ) -> &mut Self {
-    self.protocol_attributes.insert(identifier, attributes);
+    self.protocol_attributes.insert(identifier, features);
     self
   }
 
@@ -410,12 +452,12 @@ impl DeviceConfigurationManagerBuilder {
     self
   }
 
-  pub fn user_protocol_attributes(
+  pub fn user_protocol_features(
     &mut self,
     identifier: ProtocolAttributesIdentifier,
-    attributes: ProtocolDeviceAttributes,
+    features: ProtocolDeviceFeatures,
   ) -> &mut Self {
-    self.user_protocol_attributes.insert(identifier, attributes);
+    self.user_protocol_attributes.insert(identifier, features);
     self
   }
 
@@ -513,9 +555,11 @@ impl DeviceConfigurationManagerBuilder {
     }
 
     // Make sure it's all valid.
+    /*
     for attrs in attribute_tree_map.values() {
       attrs.is_valid()?;
     }
+    */
 
     Ok(DeviceConfigurationManager {
       allow_raw_messages: self.allow_raw_messages,
@@ -548,8 +592,8 @@ pub struct DeviceConfigurationManager {
   allow_raw_messages: bool,
   communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   user_communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
-  protocol_attributes: HashMap<ProtocolAttributesIdentifier, Arc<ProtocolDeviceAttributes>>,
-  user_protocol_attributes: HashMap<ProtocolAttributesIdentifier, Arc<ProtocolDeviceAttributes>>,
+  protocol_attributes: HashMap<ProtocolAttributesIdentifier, Arc<ProtocolDeviceFeatures>>,
+  user_protocol_attributes: HashMap<ProtocolAttributesIdentifier, Arc<ProtocolDeviceFeatures>>,
   /// Map of protocol names to their respective protocol instance factories
   protocol_map: HashMap<String, Arc<dyn ProtocolIdentifierFactory>>,
   allowed_addresses: Vec<String>,
@@ -679,7 +723,7 @@ impl DeviceConfigurationManager {
     identifier: &ServerDeviceIdentifier,
     raw_endpoints: &[Endpoint],
   ) -> Option<ProtocolDeviceAttributes> {
-    let mut flat_attrs = if let Some(attrs) = self.user_protocol_attributes.get(&identifier.into()) {
+    let features = if let Some(attrs) = self.user_protocol_attributes.get(&identifier.into()) {
       debug!("User device config found for {:?}", identifier);
       attrs.as_ref().clone()
     } else if let Some(attrs) = self.protocol_attributes.get(&ProtocolAttributesIdentifier {
@@ -703,11 +747,13 @@ impl DeviceConfigurationManager {
       return None;
     };
 
+    let mut attrs: ProtocolDeviceAttributes = features.into();
+
     if self.allow_raw_messages {
-      flat_attrs.add_raw_messages(raw_endpoints);
+      attrs.add_raw_messages(raw_endpoints);
     }
 
-    Some(flat_attrs)
+    Some(attrs)
   }
 }
 

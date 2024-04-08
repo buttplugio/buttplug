@@ -18,7 +18,7 @@ use crate::{
       ProtocolAttributesIdentifier,
       ProtocolAttributesType,
       ProtocolCommunicationSpecifier,
-      ProtocolDeviceAttributes,
+      ProtocolDeviceFeatures,
       SerialSpecifier,
       USBSpecifier,
       WebsocketSpecifier,
@@ -49,14 +49,14 @@ struct ProtocolDeviceConfiguration {
   specifiers: Vec<ProtocolCommunicationSpecifier>,
   /// Names and message attributes for all possible devices that use this protocol
   #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
-  configurations: HashMap<ProtocolAttributesType, ProtocolDeviceAttributes>,
+  configurations: HashMap<ProtocolAttributesType, ProtocolDeviceFeatures>,
 }
 
 impl ProtocolDeviceConfiguration {
   /// Create a new instance
   pub fn new(
     specifiers: Vec<ProtocolCommunicationSpecifier>,
-    configurations: HashMap<ProtocolAttributesType, ProtocolDeviceAttributes>,
+    configurations: HashMap<ProtocolAttributesType, ProtocolDeviceFeatures>,
   ) -> Self {
     Self {
       specifiers,
@@ -203,8 +203,8 @@ struct ExternalDeviceConfiguration {
   deny_list: Vec<String>,
   reserved_indexes: HashMap<u32, ServerDeviceIdentifier>,
   protocol_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
-  protocol_attributes: HashMap<ProtocolAttributesIdentifier, ProtocolDeviceAttributes>,
-  user_configs: HashMap<ServerDeviceIdentifier, ProtocolDeviceAttributes>,
+  protocol_features: HashMap<ProtocolAttributesIdentifier, ProtocolDeviceFeatures>,
+  user_configs: HashMap<ServerDeviceIdentifier, ProtocolDeviceFeatures>,
 }
 
 impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
@@ -245,21 +245,21 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
 
     // TODO We should probably make a From for ProtocolAttributes into ProtocolDeviceAttributes.
     if let Some(defaults) = protocol_def.defaults() {
-      let config_attrs = ProtocolDeviceAttributes::new(
+      let config_attrs = ProtocolDeviceFeatures::new(
         ProtocolAttributesType::Default,
         Some(defaults.name.as_ref().unwrap().to_owned()),
         None,
-        defaults.features.clone().unwrap_or_default().try_into().unwrap(),
+        defaults.features.clone().unwrap_or_default(),
       );
       configurations.insert(ProtocolAttributesType::Default, config_attrs);
       for config in &protocol_def.configurations {
         if let Some(identifiers) = &config.identifier {
           for identifier in identifiers {
-            let config_attrs = ProtocolDeviceAttributes::new(
+            let config_attrs = ProtocolDeviceFeatures::new(
               ProtocolAttributesType::Identifier(identifier.clone()),
               Some(config.name.as_ref().or(Some(defaults.name().as_ref().unwrap())).unwrap().to_owned()),
               None,
-              config.features.clone().or(Some(defaults.features.clone().unwrap_or_default())).unwrap().try_into().unwrap(),
+              config.features.clone().or(Some(defaults.features.clone().unwrap_or_default())).unwrap(),
             );
             configurations.insert(ProtocolAttributesType::Identifier(identifier.to_owned()), config_attrs);
           }
@@ -335,11 +335,11 @@ fn add_user_configs_to_protocol(
       let server_ident: ServerDeviceIdentifier = user_config.identifier.clone().into();
       debug!("Server Ident: {:?}", server_ident);
 
-      let config_attrs = ProtocolDeviceAttributes::new(
+      let config_attrs = ProtocolDeviceFeatures::new(
         server_ident.attributes_identifier().clone(),
         user_config.config().name.clone(),
         user_config.config().display_name.clone(),
-        user_config.config().features().clone().unwrap_or_default().try_into().unwrap(),
+        user_config.config().features().clone().unwrap_or_default(),
       );
       info!("Adding user config for {:?}", server_ident);
       external_config
@@ -465,7 +465,7 @@ fn load_protocol_configs_internal(
   //   what to do with allow/deny/index.
 
   let mut protocol_specifiers = HashMap::new();
-  let mut protocol_attributes = HashMap::new();
+  let mut protocol_features = HashMap::new();
 
   // Iterate through all of the protocols in the main config first and build up a map of protocol
   // name to ProtocolDeviceConfiguration structs.
@@ -477,13 +477,13 @@ fn load_protocol_configs_internal(
     );
     for (config_ident, config) in protocol_device_config.configurations() {
       let ident = ProtocolAttributesIdentifier::new(&protocol_name, config_ident, &None);
-      protocol_attributes.insert(ident, config.clone());
+      protocol_features.insert(ident, config.clone());
     }
   }
 
   let mut external_config = ExternalDeviceConfiguration {
     protocol_specifiers,
-    protocol_attributes,
+    protocol_features,
     ..Default::default()
   };
 
@@ -529,12 +529,12 @@ pub fn load_protocol_configs(
     }
   }
 
-  for (ident, attributes) in external_config.protocol_attributes() {
-    dcm_builder.protocol_attributes(ident.clone(), attributes.clone());
+  for (ident, features) in external_config.protocol_features() {
+    dcm_builder.protocol_features(ident.clone(), features.clone());
   }
 
-  for (ident, attributes) in external_config.user_configs() {
-    dcm_builder.protocol_attributes(ident.into(), attributes.clone());
+  for (ident, features) in external_config.user_configs() {
+    dcm_builder.protocol_features(ident.into(), features.clone());
   }
 
   Ok(dcm_builder)
@@ -559,8 +559,8 @@ pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
       builder.communication_specifier(&name, spec);
     }
   }
-  for (ident, def) in devices.protocol_attributes {
-    builder.protocol_attributes(ident, def);
+  for (ident, def) in devices.protocol_features {
+    builder.protocol_features(ident, def);
   }
   builder
     .finish()
