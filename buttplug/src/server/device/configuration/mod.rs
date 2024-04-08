@@ -251,9 +251,6 @@ impl PartialEq<ServerDeviceIdentifier> for ProtocolAttributesIdentifier {
 pub struct ProtocolDeviceAttributes {
   /// Identifies which type of attributes this instance represents for a protocol (Protocol default or device specific)
   identifier: ProtocolAttributesType,
-  /// Parent of this device attributes instance. If any attribute is missing from this instance,
-  /// we'll fall back to the parent to try and resolve it.
-  parent: Option<Arc<ProtocolDeviceAttributes>>,
   /// Given name of the device this instance represents.
   name: Option<String>,
   /// User configured name of the device this instance represents, assuming one exists.
@@ -269,37 +266,12 @@ impl ProtocolDeviceAttributes {
     name: Option<String>,
     display_name: Option<String>,
     message_attributes: ServerDeviceMessageAttributes,
-    parent: Option<Arc<ProtocolDeviceAttributes>>,
   ) -> Self {
     Self {
       identifier,
       name,
       display_name,
       message_attributes,
-      parent,
-    }
-  }
-
-  /// Create a new instance from an already created instance, compressing any call to parent nodes.
-  ///
-  /// We only need to preserve the tree encoding inside of the DeviceConfigurationManager. Once a
-  /// attributes struct is handed out to the world, it is considered static, so we can provide a
-  /// flattened representation.
-  pub fn flatten(&self) -> Self {
-    Self {
-      identifier: self.identifier().clone(),
-      parent: None,
-      name: Some(self.name().to_owned()),
-      display_name: self.display_name(),
-      message_attributes: self.message_attributes(),
-    }
-  }
-
-  /// Create a copy of an instance, but with a new parent.
-  pub fn new_with_parent(&self, parent: Arc<ProtocolDeviceAttributes>) -> Self {
-    Self {
-      parent: Some(parent),
-      ..self.clone()
     }
   }
 
@@ -312,8 +284,6 @@ impl ProtocolDeviceAttributes {
   pub fn name(&self) -> &str {
     if let Some(name) = &self.name {
       name
-    } else if let Some(parent) = &self.parent {
-      parent.name()
     } else {
       "Unknown Buttplug Device"
     }
@@ -323,8 +293,6 @@ impl ProtocolDeviceAttributes {
   pub fn display_name(&self) -> Option<String> {
     if let Some(name) = &self.display_name {
       Some(name.clone())
-    } else if let Some(parent) = &self.parent {
-      parent.display_name()
     } else {
       None
     }
@@ -357,11 +325,7 @@ impl ProtocolDeviceAttributes {
 
   /// Retreive a map of all message attributes for this instance.
   pub fn message_attributes(&self) -> ServerDeviceMessageAttributes {
-    if let Some(parent) = &self.parent {
-      parent.message_attributes().merge(&self.message_attributes)
-    } else {
-      self.message_attributes.clone()
-    }
+    self.message_attributes.clone()
   }
 
   /// Add raw message support to the attributes of this instance. Requires a list of all endpoints a
@@ -521,16 +485,7 @@ impl DeviceConfigurationManagerBuilder {
       if !protocol_map.contains_key(&ident.protocol) {
         continue;
       }
-      if let Some(parent) = attribute_tree_map.get(&ProtocolAttributesIdentifier {
-        address: None,
-        protocol: ident.protocol.clone(),
-        attributes_identifier: ProtocolAttributesType::Default,
-      }) {
-        let attr_with_parent = attr.new_with_parent(parent.clone());
-        attribute_tree_map.insert(ident.clone(), Arc::new(attr_with_parent));
-      } else {
-        attribute_tree_map.insert(ident.clone(), Arc::new(attr.clone()));
-      }
+      attribute_tree_map.insert(ident.clone(), Arc::new(attr.clone()));
     }
 
     // Finally, add in user configurations, which will have an address.
@@ -546,6 +501,7 @@ impl DeviceConfigurationManagerBuilder {
       }
 
       // The protocol and attribute identifier of a user config will be its parent. If that doesn't exist, error.
+      /*
       if let Some(parent) = attribute_tree_map.get(&ProtocolAttributesIdentifier {
         address: None,
         protocol: ident.protocol.clone(),
@@ -566,6 +522,7 @@ impl DeviceConfigurationManagerBuilder {
       } else {
         return Err(ButtplugDeviceError::DeviceConfigurationError(format!("User configuration {:?} does not have a parent type, cannot create configuration. Please remove this user configuration, or make sure it has a parent.", ident)));
       }
+      */
     }
 
     // Align the implementation, communication specifier, and attribute maps so we only keep what we
@@ -726,7 +683,7 @@ impl DeviceConfigurationManager {
   ) -> Option<ProtocolDeviceAttributes> {
     let mut flat_attrs = if let Some(attrs) = self.protocol_attributes.get(&identifier.into()) {
       debug!("User device config found for {:?}", identifier);
-      attrs.flatten()
+      attrs.as_ref().clone()
     } else if let Some(attrs) = self.protocol_attributes.get(&ProtocolAttributesIdentifier {
       address: None,
       attributes_identifier: identifier.attributes_identifier().clone(),
@@ -736,14 +693,14 @@ impl DeviceConfigurationManager {
         "Protocol + Identifier device config found for {:?}",
         identifier
       );
-      attrs.flatten()
+      attrs.as_ref().clone()
     } else if let Some(attrs) = self.protocol_attributes.get(&ProtocolAttributesIdentifier {
       address: None,
       attributes_identifier: ProtocolAttributesType::Default,
       protocol: identifier.protocol().clone(),
     }) {
       debug!("Protocol device config found for {:?}", identifier);
-      attrs.flatten()
+      attrs.as_ref().clone()
     } else {
       return None;
     };
@@ -806,7 +763,6 @@ mod test {
             ),
           ])
           .finish(),
-        None,
       ),
     );
     builder.finish().unwrap()

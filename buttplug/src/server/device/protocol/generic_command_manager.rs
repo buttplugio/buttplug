@@ -359,7 +359,6 @@ mod test {
       None,
       None,
       scalar_attributes,
-      None,
     );
     let mgr = GenericCommandManager::new(&device_attributes);
     let vibrate_msg = ScalarCmd::new(
@@ -427,7 +426,6 @@ mod test {
       None,
       None,
       scalar_attributes,
-      None,
     );
     let mgr = GenericCommandManager::new(&device_attributes);
     let vibrate_msg = ScalarCmd::new(
@@ -506,7 +504,6 @@ mod test {
       None,
       None,
       vibrate_attributes,
-      None,
     );
     let mgr = GenericCommandManager::new(&device_attributes);
     let vibrate_msg = ScalarCmd::new(
@@ -575,7 +572,6 @@ mod test {
       None,
       None,
       rotate_attributes,
-      None,
     );
     let mgr = GenericCommandManager::new(&device_attributes);
 
