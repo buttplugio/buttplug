@@ -6,16 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::core::{
   errors::ButtplugDeviceError,
   message::{
-    ActuatorType,
-    ButtplugDeviceMessageType,
-    ClientDeviceMessageAttributes,
-    ClientDeviceMessageAttributesBuilder,
-    ClientGenericDeviceMessageAttributes,
-    Endpoint,
-    NullDeviceMessageAttributes,
-    RawDeviceMessageAttributes,
-    SensorDeviceMessageAttributes,
-    SensorType,
+    ActuatorType, ButtplugDeviceMessageType, ClientDeviceMessageAttributes, ClientDeviceMessageAttributesBuilder, ClientGenericDeviceMessageAttributes, DeviceFeature, Endpoint, NullDeviceMessageAttributes, RawDeviceMessageAttributes, SensorDeviceMessageAttributes, SensorType
   },
 };
 
@@ -84,6 +75,64 @@ pub struct ServerDeviceMessageAttributes {
   #[serde(skip_serializing)]
   vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributes>,
 }
+
+
+impl From<Vec<DeviceFeature>> for ServerDeviceMessageAttributes {
+  fn from(features: Vec<DeviceFeature>) -> Self {
+
+    let actuator_filter = |message_type| {
+      let attrs: Vec<ServerGenericDeviceMessageAttributes> = features
+      .iter()
+      .filter(|x| {
+        if let Some(actuator) = x.actuator() {
+          actuator.messages().contains(message_type)
+        } else {
+          false
+        }
+      })
+      .map(|x| x.clone().try_into().unwrap())
+      .collect();
+      if !attrs.is_empty() {
+        Some(attrs)
+      } else {
+        None
+      }
+    };
+
+    let sensor_filter = |message_type| {
+      let attrs: Vec<SensorDeviceMessageAttributes> = features
+      .iter()
+      .filter(|x| {
+        if let Some(sensor) = x.sensor() {
+          sensor.messages().contains(message_type)
+        } else {
+          false
+        }
+      })
+      .map(|x| x.clone().try_into().unwrap())
+      .collect();
+      if !attrs.is_empty() {
+        Some(attrs)
+      } else {
+        None
+      }
+    };
+
+    // Raw messages
+
+    
+
+    Self {
+      scalar_cmd: actuator_filter(&ButtplugDeviceMessageType::ScalarCmd),
+      rotate_cmd: actuator_filter(&ButtplugDeviceMessageType::RotateCmd),
+      linear_cmd: actuator_filter(&ButtplugDeviceMessageType::LinearCmd),
+      sensor_read_cmd: sensor_filter(&ButtplugDeviceMessageType::SensorReadCmd),
+      sensor_subscribe_cmd: sensor_filter(&ButtplugDeviceMessageType::SensorSubscribeCmd),
+      ..Default::default()
+    }
+  }
+}
+
 
 impl ServerDeviceMessageAttributes {
   pub fn raw_unsubscribe_cmd(&self) -> &Option<RawDeviceMessageAttributes> {
@@ -302,6 +351,23 @@ impl From<ServerGenericDeviceMessageAttributes> for ClientGenericDeviceMessageAt
       attrs.step_count(),
       attrs.actuator_type,
     )
+  }
+}
+
+impl TryFrom<DeviceFeature> for ServerGenericDeviceMessageAttributes {
+  type Error = String;
+  fn try_from(value: DeviceFeature) -> Result<Self, Self::Error> {
+    if let Some(actuator) = value.actuator() {
+      let actuator_type = (*value.feature_type()).try_into()?;
+      let attrs = Self {
+        feature_descriptor: value.description().to_owned(),
+        actuator_type,
+        step_range: actuator.step_range().as_ref().unwrap().clone(),
+      };
+      Ok(attrs)
+    } else {
+      Err(format!("Cannot produce a GenericDeviceMessageAttribute from a feature with no actuator member"))
+    }
   }
 }
 
