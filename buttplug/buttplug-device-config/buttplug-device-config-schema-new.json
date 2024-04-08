@@ -225,16 +225,13 @@
               "value-range",
               "messages"
             ]
-          },
-          "minItems": 1
+          }
         },
         "required": [
-          "description"
+          "feature-type"
         ],
-        "additionalProperties": false,
-        "minProperties": 1
-      },
-      "minItems": 1
+        "additionalProperties": false
+      }
     },
     "user-config": {
       "type": "object",
