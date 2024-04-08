@@ -249,11 +249,13 @@ impl PartialEq<ServerDeviceIdentifier> for ProtocolAttributesIdentifier {
 ///  easier debugging, as well as the ability to serialize the structure back down to files.
 #[derive(Debug, Clone, Getters, Setters, MutGetters)]
 pub struct ProtocolDeviceAttributes {
+  #[getset(get = "pub")]
   /// Identifies which type of attributes this instance represents for a protocol (Protocol default or device specific)
   identifier: ProtocolAttributesType,
   /// Given name of the device this instance represents.
   name: Option<String>,
   /// User configured name of the device this instance represents, assuming one exists.
+  #[getset(get = "pub")]
   display_name: Option<String>,
   /// Message attributes for this device instance.
   pub(super) message_attributes: ServerDeviceMessageAttributes,
@@ -275,26 +277,12 @@ impl ProtocolDeviceAttributes {
     }
   }
 
-  /// Return the protocol identifier for this instance
-  pub fn identifier(&self) -> &ProtocolAttributesType {
-    &self.identifier
-  }
-
   /// Return the device name for this instance, or "Unknown Buttplug Device" if no name exists.
   pub fn name(&self) -> &str {
     if let Some(name) = &self.name {
       name
     } else {
       "Unknown Buttplug Device"
-    }
-  }
-
-  /// Return the user configured display name for this instance, assuming one exists.
-  pub fn display_name(&self) -> Option<String> {
-    if let Some(name) = &self.display_name {
-      Some(name.clone())
-    } else {
-      None
     }
   }
 

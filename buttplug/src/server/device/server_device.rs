@@ -298,7 +298,7 @@ impl ServerDevice {
 
   /// Get the user created display name for a device, if one exists.
   pub fn display_name(&self) -> Option<String> {
-    self.attributes.display_name()
+    self.attributes.display_name().clone()
   }
 
   /// Get the name of the device as set in the Device Configuration File.
