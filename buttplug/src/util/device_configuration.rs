@@ -78,6 +78,10 @@ struct GenericUserDeviceMessageAttributes {
 pub struct UserDeviceConfig {
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(default)]
+  #[serde(rename = "name")]
+  name: Option<String>,  
+  #[serde(skip_serializing_if = "Option::is_none")]
+  #[serde(default)]
   #[serde(rename = "display-name")]
   display_name: Option<String>,
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -86,9 +90,9 @@ pub struct UserDeviceConfig {
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(default)]
   deny: Option<bool>,
-  //#[serde(skip_serializing_if = "Option::is_none")]
-  //#[serde(default)]
-  //messages: Option<ServerDeviceMessageAttributes>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  #[serde(default)]
+  features: Option<Vec<DeviceFeature>>,
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(default)]
   index: Option<u32>,
@@ -269,7 +273,6 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
   }
 }
 
-/*
 fn add_user_configs_to_protocol(
   external_config: &mut ExternalDeviceConfiguration,
   user_config_def: UserConfigDefinition,
@@ -330,13 +333,13 @@ fn add_user_configs_to_protocol(
           .insert(*index, user_config.identifier().clone().into());
       }
       let server_ident: ServerDeviceIdentifier = user_config.identifier.clone().into();
+      debug!("Server Ident: {:?}", server_ident);
 
       let config_attrs = ProtocolDeviceAttributes::new(
         server_ident.attributes_identifier().clone(),
-        None,
+        user_config.config().name.clone(),
         user_config.config().display_name.clone(),
-        user_config.config().feature().clone().unwrap_or_default(),
-        None,
+        user_config.config().features().clone().unwrap_or_default().try_into().unwrap(),
       );
       info!("Adding user config for {:?}", server_ident);
       external_config
@@ -345,7 +348,6 @@ fn add_user_configs_to_protocol(
     }
   }
 }
-*/
 
 #[derive(Deserialize, Serialize, Debug, CopyGetters)]
 #[getset(get_copy = "pub", get_mut = "pub")]
@@ -489,11 +491,9 @@ fn load_protocol_configs_internal(
   if let Some(user_config) = user_config_str {
     info!("Loading user configuration from string.");
     let config = load_protocol_config_from_json(&user_config, skip_version_check)?;
-    /*
     if let Some(user_configs) = config.user_configs {
       add_user_configs_to_protocol(&mut external_config, user_configs);
     }
-    */
   } else {
     info!("No user configuration given.");
   }
