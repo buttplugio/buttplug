@@ -7,7 +7,7 @@
 
 use super::json::JSONValidator;
 use crate::{
-  core::errors::ButtplugDeviceError,
+  core::{errors::ButtplugDeviceError, message::DeviceFeature},
   server::device::{
     configuration::{
       BluetoothLESpecifier,
@@ -20,7 +20,6 @@ use crate::{
       ProtocolCommunicationSpecifier,
       ProtocolDeviceAttributes,
       SerialSpecifier,
-      ServerDeviceMessageAttributes,
       USBSpecifier,
       WebsocketSpecifier,
       XInputSpecifier,
@@ -33,9 +32,9 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fmt::Display, ops::RangeInclusive};
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
-  include_str!("../../buttplug-device-config/buttplug-device-config.json");
+  include_str!("../../buttplug-device-config/buttplug-device-config-new.json");
 static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
-  include_str!("../../buttplug-device-config/buttplug-device-config-schema.json");
+  include_str!("../../buttplug-device-config/buttplug-device-config-schema-new.json");
 
 /// The top level configuration for a protocol. Contains all data about devices that can use the
 /// protocol, as well as names, message attributes, etc... for different devices.
@@ -87,9 +86,9 @@ pub struct UserDeviceConfig {
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(default)]
   deny: Option<bool>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(default)]
-  messages: Option<ServerDeviceMessageAttributes>,
+  //#[serde(skip_serializing_if = "Option::is_none")]
+  //#[serde(default)]
+  //messages: Option<ServerDeviceMessageAttributes>,
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(default)]
   index: Option<u32>,
@@ -103,7 +102,7 @@ pub struct ProtocolAttributes {
   #[serde(skip_serializing_if = "Option::is_none")]
   name: Option<String>,
   #[serde(skip_serializing_if = "Option::is_none")]
-  messages: Option<ServerDeviceMessageAttributes>,
+  features: Option<Vec<DeviceFeature>>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
@@ -244,33 +243,33 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
     if let Some(defaults) = protocol_def.defaults() {
       let config_attrs = ProtocolDeviceAttributes::new(
         ProtocolAttributesType::Default,
-        defaults.name.clone(),
+        Some(defaults.name.as_ref().unwrap().to_owned()),
         None,
-        defaults.messages.clone().unwrap_or_default(),
-        None,
+        defaults.features.clone().unwrap_or_default().try_into().unwrap(),
       );
       configurations.insert(ProtocolAttributesType::Default, config_attrs);
-    }
-
-    for config in protocol_def.configurations {
-      if let Some(identifiers) = config.identifier {
-        for identifier in identifiers {
-          let config_attrs = ProtocolDeviceAttributes::new(
-            ProtocolAttributesType::Identifier(identifier.clone()),
-            config.name.clone(),
-            None,
-            config.messages.clone().unwrap_or_default(),
-            None,
-          );
-          configurations.insert(ProtocolAttributesType::Identifier(identifier), config_attrs);
+      for config in &protocol_def.configurations {
+        if let Some(identifiers) = &config.identifier {
+          for identifier in identifiers {
+            let config_attrs = ProtocolDeviceAttributes::new(
+              ProtocolAttributesType::Identifier(identifier.clone()),
+              Some(config.name.as_ref().or(Some(defaults.name().as_ref().unwrap())).unwrap().to_owned()),
+              None,
+              config.features.clone().or(Some(defaults.features.clone().unwrap_or_default())).unwrap().try_into().unwrap(),
+            );
+            configurations.insert(ProtocolAttributesType::Identifier(identifier.to_owned()), config_attrs);
+          }
         }
       }
     }
+
+
 
     Self::new(specifiers, configurations)
   }
 }
 
+/*
 fn add_user_configs_to_protocol(
   external_config: &mut ExternalDeviceConfiguration,
   user_config_def: UserConfigDefinition,
@@ -336,7 +335,7 @@ fn add_user_configs_to_protocol(
         server_ident.attributes_identifier().clone(),
         None,
         user_config.config().display_name.clone(),
-        user_config.config().messages.clone().unwrap_or_default(),
+        user_config.config().feature().clone().unwrap_or_default(),
         None,
       );
       info!("Adding user config for {:?}", server_ident);
@@ -346,6 +345,7 @@ fn add_user_configs_to_protocol(
     }
   }
 }
+*/
 
 #[derive(Deserialize, Serialize, Debug, CopyGetters)]
 #[getset(get_copy = "pub", get_mut = "pub")]
@@ -489,9 +489,11 @@ fn load_protocol_configs_internal(
   if let Some(user_config) = user_config_str {
     info!("Loading user configuration from string.");
     let config = load_protocol_config_from_json(&user_config, skip_version_check)?;
+    /*
     if let Some(user_configs) = config.user_configs {
       add_user_configs_to_protocol(&mut external_config, user_configs);
     }
+    */
   } else {
     info!("No user configuration given.");
   }
