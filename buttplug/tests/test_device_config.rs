@@ -59,7 +59,7 @@ const BASE_CONFIG_JSON: &str = r#"
 const BASE_VALID_VERSION_CONFIG_JSON: &str = r#"
 {
   "version": {
-    "major": 2,
+    "major": 3,
     "minor": 999
   }
 }
@@ -77,7 +77,7 @@ const BASE_INVALID_VERSION_CONFIG_JSON: &str = r#"
 const BASE_VALID_NULL_USER_CONFIG_JSON: &str = r#"
 {
   "version": {
-    "major": 2,
+    "major": 3,
     "minor": 999
   },
   "user-configs": {}
