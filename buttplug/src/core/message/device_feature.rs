@@ -100,13 +100,13 @@ pub struct DeviceFeature {
 }
 
 impl DeviceFeature {
-  pub fn new_raw(endpoints: &[Endpoint]) -> Self {
+  pub fn new(description: &str, feature_type: FeatureType, actuator: &Option<DeviceFeatureActuator>, sensor: &Option<DeviceFeatureSensor>, raw: &Option<DeviceFeatureRaw>) -> Self {
     Self {
-      description: "Raw Device I/O".to_owned(),
-      feature_type: FeatureType::Raw,
-      actuator: None,
-      sensor: None,
-      raw: Some(DeviceFeatureRaw::new(endpoints))
+      description: description.to_owned(),
+      feature_type,
+      actuator: actuator.clone(),
+      sensor: sensor.clone(),
+      raw: raw.clone(),
     }
   }
 }

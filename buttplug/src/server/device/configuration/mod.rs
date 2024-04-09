@@ -142,8 +142,7 @@ pub mod specifier;
 pub use specifier::*;
 
 pub use server_device_message_attributes::{
-  ServerDeviceMessageAttributes,
-  ServerDeviceMessageAttributesBuilder,
+  ServerDeviceMessageAttributes, ServerDeviceMessageAttributesBuilder,
   ServerGenericDeviceMessageAttributes,
 };
 
@@ -233,7 +232,7 @@ pub struct ProtocolDeviceFeatures {
   #[getset(get = "pub")]
   display_name: Option<String>,
   /// Message attributes for this device instance.
-  features: Vec<DeviceFeature>
+  features: Vec<DeviceFeature>,
 }
 
 impl ProtocolDeviceFeatures {
@@ -298,7 +297,7 @@ impl From<ProtocolDeviceFeatures> for ProtocolDeviceAttributes {
       identifier: value.identifier,
       name: value.name,
       display_name: value.display_name.clone(),
-      message_attributes: value.features.into()
+      message_attributes: value.features.into(),
     }
   }
 }
@@ -675,7 +674,10 @@ impl DeviceConfigurationManager {
     let mut specializers = vec![];
     for (name, specifiers) in self.user_communication_specifiers.iter() {
       if specifiers.contains(specifier) {
-        info!("Found protocol {:?} for user specifier {:?}.", name, specifier);
+        info!(
+          "Found protocol {:?} for user specifier {:?}.",
+          name, specifier
+        );
 
         if !self.protocol_map.contains_key(name) {
           warn!(
@@ -761,11 +763,11 @@ impl DeviceConfigurationManager {
 mod test {
   use super::{
     server_device_message_attributes::{
-      ServerDeviceMessageAttributesBuilder,
-      ServerGenericDeviceMessageAttributes,
+      ServerDeviceMessageAttributesBuilder, ServerGenericDeviceMessageAttributes,
     },
     *,
   };
+  use crate::core::message::{DeviceFeature, DeviceFeatureActuator, FeatureType, ScalarCmd};
   use std::{
     collections::{HashMap, HashSet},
     ops::RangeInclusive,
@@ -783,30 +785,38 @@ mod test {
       HashMap::new(),
     ));
     builder.communication_specifier("lovense", specifiers);
-    builder.protocol_attributes(
+    builder.protocol_features(
       ProtocolAttributesIdentifier::new(
         "lovense",
         &ProtocolAttributesType::Identifier("P".to_owned()),
         &None,
       ),
-      ProtocolDeviceAttributes::new(
+      ProtocolDeviceFeatures::new(
         ProtocolAttributesType::Identifier("P".to_owned()),
         Some("Lovense Edge".to_owned()),
         None,
-        ServerDeviceMessageAttributesBuilder::default()
-          .scalar_cmd(&vec![
-            ServerGenericDeviceMessageAttributes::new(
-              "Edge Vibrator 1",
+        vec![
+          DeviceFeature::new(
+            "Edge Vibration 1",
+            FeatureType::Vibrate,
+            &Some(DeviceFeatureActuator::new(
               &RangeInclusive::new(0, 20),
-              crate::core::message::ActuatorType::Vibrate,
-            ),
-            ServerGenericDeviceMessageAttributes::new(
-              "Edge Vibrator 2",
+              &HashSet::from_iter([ButtplugDeviceMessageType::ScalarCmd]),
+            )),
+            &None,
+            &None,
+          ),
+          DeviceFeature::new(
+            "Edge Vibration 2",
+            FeatureType::Vibrate,
+            &Some(DeviceFeatureActuator::new(
               &RangeInclusive::new(0, 20),
-              crate::core::message::ActuatorType::Vibrate,
-            ),
-          ])
-          .finish(),
+              &HashSet::from_iter([ButtplugDeviceMessageType::ScalarCmd]),
+            )),
+            &None,
+            &None,
+          ),
+        ],
       ),
     );
     builder.finish().unwrap()

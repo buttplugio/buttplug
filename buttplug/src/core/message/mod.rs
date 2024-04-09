@@ -75,7 +75,7 @@ pub use client_device_message_attributes::{
   SensorType,
 };
 pub use device_added::{DeviceAdded, DeviceAddedV0, DeviceAddedV1, DeviceAddedV2};
-pub use device_feature::{DeviceFeature, FeatureType};
+pub use device_feature::{DeviceFeature, DeviceFeatureActuator, DeviceFeatureSensor, DeviceFeatureRaw, FeatureType};
 pub use device_list::{DeviceList, DeviceListV0, DeviceListV1, DeviceListV2};
 pub use device_message_info::{
   DeviceMessageInfo,
