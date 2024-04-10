@@ -11,7 +11,7 @@ use crate::{
     message::{ActuatorType, Endpoint},
   },
   server::device::{
-    configuration::{ProtocolAttributesType, ProtocolDeviceAttributes},
+    configuration::ProtocolDeviceAttributes,
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     ServerDeviceIdentifier,
@@ -64,7 +64,7 @@ impl ProtocolIdentifier for MonsterPubIdentifier {
       ServerDeviceIdentifier::new(
         hardware.address(),
         "monsterpub",
-        &ProtocolAttributesType::Identifier(ident),
+        &Some(ident),
       ),
       Box::new(MonsterPubInitializer::default()),
     ));

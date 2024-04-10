@@ -12,7 +12,6 @@ use crate::{
     message::{ActuatorType, Endpoint},
   },
   server::device::{
-    configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     ServerDeviceIdentifier,
@@ -55,7 +54,7 @@ impl ProtocolIdentifier for VibratissimoIdentifier {
       ServerDeviceIdentifier::new(
         hardware.address(),
         "vibratissimo",
-        &ProtocolAttributesType::Identifier(ident),
+        &Some(ident),
       ),
       Box::new(VibratissimoInitializer::default()),
     ))

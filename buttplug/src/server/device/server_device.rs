@@ -40,7 +40,7 @@ use crate::{
   },
   server::{
     device::{
-      configuration::{DeviceConfigurationManager, ProtocolAttributesType},
+      configuration::DeviceConfigurationManager,
       hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent},
       protocol::ProtocolHandler,
     },
@@ -86,12 +86,12 @@ pub struct ServerDeviceIdentifier {
   /// Name of the protocol used
   protocol: String,
   /// Internal identifier for the protocol used
-  attributes_identifier: ProtocolAttributesType,
+  attributes_identifier: Option<String>,
 }
 
 impl ServerDeviceIdentifier {
   /// Creates a new instance
-  pub fn new(address: &str, protocol: &str, identifier: &ProtocolAttributesType) -> Self {
+  pub fn new(address: &str, protocol: &str, identifier: &Option<String>) -> Self {
     Self {
       address: address.to_owned(),
       protocol: protocol.to_owned(),

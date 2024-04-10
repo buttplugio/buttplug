@@ -16,7 +16,6 @@ use crate::{
       configuration::ProtocolDeviceAttributes,
       hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
       protocol::{
-        ProtocolAttributesType,
         ProtocolHandler,
         ProtocolIdentifier,
         ProtocolInitializer,

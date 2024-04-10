@@ -15,7 +15,6 @@ use crate::{
     message::{self, ButtplugDeviceMessage, Endpoint},
   },
   server::device::{
-    configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,

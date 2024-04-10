@@ -12,7 +12,6 @@ use crate::{
     message::{self, Endpoint},
   },
   server::device::{
-    configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,

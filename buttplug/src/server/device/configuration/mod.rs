@@ -166,17 +166,6 @@ use std::{
   },
 };
 
-/// Denotes what set of protocols attributes should be used: Default (generic) or device class
-/// specific.
-#[derive(Debug, Clone, Eq, Serialize, Deserialize, Derivative)]
-#[derivative(Hash, PartialEq)]
-pub enum ProtocolAttributesType {
-  /// Default for all devices supported by a protocol
-  Default,
-  /// Device class specific identification, with a string specific to the protocol.
-  Identifier(String),
-}
-
 /// A version of [ServerDeviceIdentifier] used for protocol lookup and matching.
 ///
 /// This mirrors [ServerDeviceIdentifier], except that address is optional, as we will have protocol
@@ -185,14 +174,15 @@ pub enum ProtocolAttributesType {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct ProtocolAttributesIdentifier {
   protocol: String,
-  attributes_identifier: ProtocolAttributesType,
+  /// Some([identifier]) if there's an identifier, otherwise None if default
+  attributes_identifier: Option<String>,
   address: Option<String>,
 }
 
 impl ProtocolAttributesIdentifier {
   pub fn new(
     protocol: &str,
-    attributes_identifier: &ProtocolAttributesType,
+    attributes_identifier: &Option<String>,
     address: &Option<String>,
   ) -> Self {
     Self {
@@ -223,9 +213,6 @@ impl PartialEq<ServerDeviceIdentifier> for ProtocolAttributesIdentifier {
 
 #[derive(Debug, Clone, Getters, Setters, MutGetters)]
 pub struct ProtocolDeviceFeatures {
-  #[getset(get = "pub")]
-  /// Identifies which type of attributes this instance represents for a protocol (Protocol default or device specific)
-  identifier: ProtocolAttributesType,
   /// Given name of the device this instance represents.
   name: Option<String>,
   /// User configured name of the device this instance represents, assuming one exists.
@@ -238,13 +225,11 @@ pub struct ProtocolDeviceFeatures {
 impl ProtocolDeviceFeatures {
   /// Create a new instance
   pub fn new(
-    identifier: ProtocolAttributesType,
     name: Option<String>,
     display_name: Option<String>,
     features: Vec<DeviceFeature>,
   ) -> Self {
     Self {
-      identifier,
       name,
       display_name,
       features,
@@ -279,9 +264,6 @@ impl ProtocolDeviceFeatures {
 ///  easier debugging, as well as the ability to serialize the structure back down to files.
 #[derive(Debug, Clone, Getters, Setters, MutGetters)]
 pub struct ProtocolDeviceAttributes {
-  #[getset(get = "pub")]
-  /// Identifies which type of attributes this instance represents for a protocol (Protocol default or device specific)
-  identifier: ProtocolAttributesType,
   /// Given name of the device this instance represents.
   name: Option<String>,
   /// User configured name of the device this instance represents, assuming one exists.
@@ -294,7 +276,6 @@ pub struct ProtocolDeviceAttributes {
 impl From<ProtocolDeviceFeatures> for ProtocolDeviceAttributes {
   fn from(value: ProtocolDeviceFeatures) -> Self {
     Self {
-      identifier: value.identifier,
       name: value.name,
       display_name: value.display_name.clone(),
       message_attributes: value.features.into(),
@@ -305,13 +286,11 @@ impl From<ProtocolDeviceFeatures> for ProtocolDeviceAttributes {
 impl ProtocolDeviceAttributes {
   /// Create a new instance
   pub fn new(
-    identifier: ProtocolAttributesType,
     name: Option<String>,
     display_name: Option<String>,
     message_attributes: ServerDeviceMessageAttributes,
   ) -> Self {
     Self {
-      identifier,
       name,
       display_name,
       message_attributes,
@@ -740,7 +719,7 @@ impl DeviceConfigurationManager {
       attrs.as_ref().clone()
     } else if let Some(attrs) = self.protocol_attributes.get(&ProtocolAttributesIdentifier {
       address: None,
-      attributes_identifier: ProtocolAttributesType::Default,
+      attributes_identifier: None,
       protocol: identifier.protocol().clone(),
     }) {
       debug!("Protocol device config found for {:?}", identifier);
@@ -785,7 +764,7 @@ mod test {
     builder.protocol_features(
       ProtocolAttributesIdentifier::new(
         "lovense",
-        &ProtocolAttributesType::Identifier("P".to_owned()),
+        &Some("P".to_owned()),
         &None,
       ),
       ProtocolDeviceFeatures::new(
@@ -852,7 +831,7 @@ mod test {
         &ServerDeviceIdentifier::new(
           "Whatever",
           "lovense",
-          &ProtocolAttributesType::Identifier("P".to_owned()),
+          &Some("P".to_owned()),
         ),
         &[],
       )
@@ -887,7 +866,7 @@ mod test {
         &ServerDeviceIdentifier::new(
           "Whatever",
           "lovense",
-          &ProtocolAttributesType::Identifier("P".to_owned()),
+          &Some("P".to_owned()),
         ),
         &[],
       )
@@ -915,7 +894,7 @@ mod test {
         &ServerDeviceIdentifier::new(
           "Whatever",
           "lovense",
-          &ProtocolAttributesType::Identifier("P".to_owned()),
+          &Some("P".to_owned()),
         ),
         &[],
       )

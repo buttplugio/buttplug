@@ -12,7 +12,6 @@ use crate::{
     message::{self, Endpoint},
   },
   server::device::{
-    configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     ServerDeviceIdentifier,
@@ -69,7 +68,7 @@ impl ProtocolIdentifier for SatisfyerIdentifier {
       ServerDeviceIdentifier::new(
         hardware.address(),
         "satisfyer",
-        &ProtocolAttributesType::Identifier(device_identifier),
+        &Some(device_identifier),
       ),
       Box::new(SatisfyerInitializer::default()),
     ));

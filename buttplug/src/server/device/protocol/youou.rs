@@ -9,7 +9,6 @@ use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-    configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     ServerDeviceIdentifier,
@@ -50,7 +49,7 @@ impl ProtocolIdentifier for YououIdentifier {
       ServerDeviceIdentifier::new(
         hardware.address(),
         "Youou",
-        &ProtocolAttributesType::Identifier("VX001_".to_owned()),
+        &Some("VX001_".to_owned()),
       ),
       Box::new(YououInitializer::default()),
     ))

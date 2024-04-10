@@ -133,7 +133,7 @@ use crate::{
     },
   },
   server::device::{
-    configuration::{ProtocolAttributesType, ProtocolCommunicationSpecifier},
+    configuration::ProtocolCommunicationSpecifier,
     hardware::{Hardware, HardwareCommand, HardwareReadCmd},
     ServerDeviceIdentifier,
   },
@@ -611,7 +611,7 @@ impl ProtocolIdentifier for GenericProtocolIdentifier {
     let device_identifier = ServerDeviceIdentifier::new(
       hardware.address(),
       &self.protocol_identifier,
-      &ProtocolAttributesType::Identifier(hardware.name().to_owned()),
+      &Some(hardware.name().to_owned()),
     );
     Ok((
       device_identifier,
@@ -932,7 +932,7 @@ macro_rules! generic_protocol_initializer_setup {
           &mut self,
           hardware: Arc<Hardware>,
         ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
-          Ok((ServerDeviceIdentifier::new(hardware.address(), $protocol_identifier, &ProtocolAttributesType::Identifier(hardware.name().to_owned())), Box::new([< $protocol_name Initializer >]::default())))
+          Ok((ServerDeviceIdentifier::new(hardware.address(), $protocol_identifier, &Some(hardware.name().to_owned())), Box::new([< $protocol_name Initializer >]::default())))
         }
       }
     }

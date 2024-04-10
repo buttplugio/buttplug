@@ -11,7 +11,6 @@ use crate::server::device::hardware::{HardwareEvent, HardwareSubscribeCmd};
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-    configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,

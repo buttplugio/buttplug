@@ -16,7 +16,6 @@ use crate::{
       HIDSpecifier,
       LovenseConnectServiceSpecifier,
       ProtocolAttributesIdentifier,
-      ProtocolAttributesType,
       ProtocolCommunicationSpecifier,
       ProtocolDeviceFeatures,
       SerialSpecifier,
@@ -49,14 +48,14 @@ struct ProtocolDeviceConfiguration {
   specifiers: Vec<ProtocolCommunicationSpecifier>,
   /// Names and message attributes for all possible devices that use this protocol
   #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
-  configurations: HashMap<ProtocolAttributesType, ProtocolDeviceFeatures>,
+  configurations: HashMap<Option<String>, ProtocolDeviceFeatures>,
 }
 
 impl ProtocolDeviceConfiguration {
   /// Create a new instance
   pub fn new(
     specifiers: Vec<ProtocolCommunicationSpecifier>,
-    configurations: HashMap<ProtocolAttributesType, ProtocolDeviceFeatures>,
+    configurations: HashMap<Option<String>, ProtocolDeviceFeatures>,
   ) -> Self {
     Self {
       specifiers,
@@ -172,9 +171,9 @@ pub struct UserConfigDeviceIdentifier {
 impl From<UserConfigDeviceIdentifier> for ServerDeviceIdentifier {
   fn from(ident: UserConfigDeviceIdentifier) -> Self {
     let server_identifier = if let Some(ident_string) = ident.identifier {
-      ProtocolAttributesType::Identifier(ident_string)
+      Some(ident_string)
     } else {
-      ProtocolAttributesType::Default
+      None
     };
     ServerDeviceIdentifier::new(&ident.address, &ident.protocol, &server_identifier)
   }
@@ -182,16 +181,10 @@ impl From<UserConfigDeviceIdentifier> for ServerDeviceIdentifier {
 
 impl From<ServerDeviceIdentifier> for UserConfigDeviceIdentifier {
   fn from(ident: ServerDeviceIdentifier) -> Self {
-    let server_identifier =
-      if let ProtocolAttributesType::Identifier(ident_string) = ident.attributes_identifier() {
-        Some(ident_string.clone())
-      } else {
-        None
-      };
     UserConfigDeviceIdentifier {
       address: ident.address().clone(),
       protocol: ident.protocol().clone(),
-      identifier: server_identifier,
+      identifier: ident.attributes_identifier().clone(),
     }
   }
 }
@@ -250,7 +243,7 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
         None,
         defaults.features.clone().unwrap_or_default(),
       );
-      configurations.insert(ProtocolAttributesType::Default, config_attrs);
+      configurations.insert(None, config_attrs);
       for config in &protocol_def.configurations {
         if let Some(identifiers) = &config.identifier {
           for identifier in identifiers {
@@ -259,7 +252,7 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
               None,
               config.features.clone().or(Some(defaults.features.clone().unwrap_or_default())).unwrap(),
             );
-            configurations.insert(ProtocolAttributesType::Identifier(identifier.to_owned()), config_attrs);
+            configurations.insert(Some(identifier.to_owned()), config_attrs);
           }
         }
       }
@@ -451,7 +444,8 @@ fn load_protocol_configs_internal(
   }
   // Start by loading the main config
   let main_config = load_protocol_config_from_json(
-    &main_config_str.unwrap_or_else(|| DEVICE_CONFIGURATION_JSON.to_owned()),
+    //&main_config_str.unwrap_or_else(|| DEVICE_CONFIGURATION_JSON.to_owned()),
+    DEVICE_CONFIGURATION_JSON,
     skip_version_check,
   )?;
 

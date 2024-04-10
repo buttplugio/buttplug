@@ -12,7 +12,6 @@ use crate::{
     message::{ActuatorType, Endpoint},
   },
   server::device::{
-    configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     ServerDeviceIdentifier,
@@ -58,7 +57,7 @@ impl ProtocolIdentifier for PatooIdentifier {
       ServerDeviceIdentifier::new(
         hardware.address(),
         "Patoo",
-        &ProtocolAttributesType::Identifier(name),
+        &Some(name),
       ),
       Box::new(PatooInitializer::default()),
     ))

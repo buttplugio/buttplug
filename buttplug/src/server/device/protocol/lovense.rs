@@ -12,7 +12,6 @@ use crate::{
     message::{self, ActuatorType, ButtplugDeviceMessage, ButtplugServerMessage, Endpoint},
   },
   server::device::{
-    configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     ServerDeviceIdentifier,
@@ -102,7 +101,7 @@ impl ProtocolIdentifier for LovenseIdentifier {
             let type_response = std::str::from_utf8(&n).map_err(|_| ButtplugDeviceError::ProtocolSpecificError("lovense".to_owned(), "Lovense device init got back non-UTF8 string.".to_owned()))?.to_owned();
             debug!("Lovense Device Type Response: {}", type_response);
             let ident = lovense_model_resolver(type_response);
-            return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &ProtocolAttributesType::Identifier(ident.clone())), Box::new(LovenseInitializer::new(ident))));
+            return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &Some(ident.clone())), Box::new(LovenseInitializer::new(ident))));
           } else {
             return Err(
               ButtplugDeviceError::ProtocolSpecificError(
@@ -119,9 +118,9 @@ impl ProtocolIdentifier for LovenseIdentifier {
             let re = Regex::new(r"LVS-([A-Z]+)\d+").expect("Static regex shouldn't fail");
             if let Some(caps) = re.captures(hardware.name()) {
               info!("Lovense Device identified by BLE name");
-              return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &ProtocolAttributesType::Identifier(caps[1].to_string())), Box::new(LovenseInitializer::new(caps[1].to_string()))));
+              return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &Some(caps[1].to_string())), Box::new(LovenseInitializer::new(caps[1].to_string()))));
             };
-            return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &ProtocolAttributesType::Default), Box::new(LovenseInitializer::new("".to_string()))));
+            return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &None), Box::new(LovenseInitializer::new("".to_string()))));
           }
         }
       }

@@ -10,7 +10,6 @@ use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-    configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     ServerDeviceIdentifier,
@@ -59,7 +58,7 @@ impl ProtocolIdentifier for HismithMiniIdentifier {
       ServerDeviceIdentifier::new(
         hardware.address(),
         "hismith-mini",
-        &ProtocolAttributesType::Identifier(identifier),
+        &Some(identifier),
       ),
       Box::new(HismithMiniInitializer::default()),
     ))

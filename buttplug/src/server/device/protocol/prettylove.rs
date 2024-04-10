@@ -9,7 +9,6 @@ use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-    configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     ServerDeviceIdentifier,
@@ -47,7 +46,7 @@ impl ProtocolIdentifier for PrettyLoveIdentifier {
       ServerDeviceIdentifier::new(
         hardware.address(),
         "prettylove",
-        &ProtocolAttributesType::Identifier("Aogu BLE".to_owned()),
+        &Some("Aogu BLE".to_owned()),
       ),
       Box::new(PrettyLoveInitializer::default()),
     ))
