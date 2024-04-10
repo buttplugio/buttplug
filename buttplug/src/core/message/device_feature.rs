@@ -94,34 +94,29 @@ pub struct DeviceFeature {
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(rename = "sensor")]
   sensor: Option<DeviceFeatureSensor>,
-  #[getset(get="pub")]
-  #[serde(rename = "raw")]
-  raw: Option<DeviceFeatureRaw>
 }
 
 impl DeviceFeature {
-  pub fn new(description: &str, feature_type: FeatureType, actuator: &Option<DeviceFeatureActuator>, sensor: &Option<DeviceFeatureSensor>, raw: &Option<DeviceFeatureRaw>) -> Self {
+  pub fn new(description: &str, feature_type: FeatureType, actuator: &Option<DeviceFeatureActuator>, sensor: &Option<DeviceFeatureSensor>) -> Self {
     Self {
       description: description.to_owned(),
       feature_type,
       actuator: actuator.clone(),
       sensor: sensor.clone(),
-      raw: raw.clone(),
     }
   }
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize)]
 pub struct DeviceFeatureActuator {
-  #[getset(get = "pub", get_mut = "pub(super)")]
-  #[serde(rename = "StepCount")]
-  #[serde(default)]
-  step_count: u32,
-  // Option in order to share this struct between server (where it will exist) and client (where it won't exist)
   #[getset(get = "pub")]
   #[serde(rename = "step-range")]
-  #[serde(skip_serializing)]
-  step_range: Option<RangeInclusive<u32>>,
+  step_range: RangeInclusive<u32>,
+  // This will only exist in user configs, therefore it's an Option<T>
+  #[getset(get = "pub")]
+  #[serde(rename = "step-limit")]
+  #[serde(skip_serializing_if = "Option::is_none")]
+  step_limit: Option<RangeInclusive<u32>>,
   #[getset(get = "pub")]
   #[serde(rename = "messages")]
   messages: HashSet<ButtplugDeviceMessageType>
@@ -130,16 +125,8 @@ pub struct DeviceFeatureActuator {
 impl DeviceFeatureActuator {
   pub fn new(step_range: &RangeInclusive<u32>, messages: &HashSet<ButtplugDeviceMessageType>) -> Self {
     Self {
-      step_count: step_range.end() - step_range.start(),
-      step_range: Some(step_range.clone()),
-      messages: messages.clone()
-    }
-  }
-
-  pub fn new_with_step_count(step_count: u32, messages: &HashSet<ButtplugDeviceMessageType>) -> Self {
-    Self {
-      step_count,
-      step_range: None,
+      step_range: step_range.clone(),
+      step_limit: None,
       messages: messages.clone()
     }
   }
@@ -177,43 +164,8 @@ pub struct DeviceFeatureRaw {
 impl DeviceFeatureRaw {
   pub fn new(endpoints: &[Endpoint]) -> Self {
     Self {
-      endpoints: endpoints.clone().into(),
+      endpoints: endpoints.into(),
       messages: HashSet::from_iter([ButtplugDeviceMessageType::RawReadCmd, ButtplugDeviceMessageType::RawWriteCmd, ButtplugDeviceMessageType::RawSubscribeCmd, ButtplugDeviceMessageType::RawUnsubscribeCmd].iter().cloned())
     }
-  }
-}
-
-pub struct DeviceFeatureBuilder {
-  feature: DeviceFeature
-}
-
-impl DeviceFeatureBuilder {
-  pub fn new(description: &str, feature_type: &FeatureType) -> DeviceFeatureBuilder {
-    Self {
-      feature: DeviceFeature {
-        description: description.to_owned(),
-        feature_type: feature_type.to_owned(),
-        ..Default::default()
-      }
-    }
-  }
-
-  pub fn actuator(&mut self, step_range: &RangeInclusive<u32>, messages: &HashSet<ButtplugDeviceMessageType>) -> &mut Self {
-    self.feature.actuator = Some(DeviceFeatureActuator::new(step_range, messages));
-    self
-  }
-
-  pub fn sensor(&mut self, value_range: &Vec<RangeInclusive<i32>>, messages: &HashSet<ButtplugDeviceMessageType>) -> &mut Self {
-    self.feature.sensor = Some(DeviceFeatureSensor::new(value_range, messages));
-    self
-  }
-
-  pub fn raw(&mut self, endpoints: &Vec<Endpoint>) -> &mut Self {
-    self.feature.raw = Some(DeviceFeatureRaw::new(endpoints));
-    self
-  }
-
-  pub fn finish(self) -> DeviceFeature {
-    self.feature
   }
 }

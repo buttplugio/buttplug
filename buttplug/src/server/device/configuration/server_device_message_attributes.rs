@@ -362,7 +362,7 @@ impl TryFrom<DeviceFeature> for ServerGenericDeviceMessageAttributes {
       let attrs = Self {
         feature_descriptor: value.description().to_owned(),
         actuator_type,
-        step_range: actuator.step_range().as_ref().unwrap().clone(),
+        step_range: actuator.step_range().clone(),
       };
       Ok(attrs)
     } else {

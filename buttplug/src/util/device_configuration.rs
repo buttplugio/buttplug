@@ -246,7 +246,6 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
     // TODO We should probably make a From for ProtocolAttributes into ProtocolDeviceAttributes.
     if let Some(defaults) = protocol_def.defaults() {
       let config_attrs = ProtocolDeviceFeatures::new(
-        ProtocolAttributesType::Default,
         Some(defaults.name.as_ref().unwrap().to_owned()),
         None,
         defaults.features.clone().unwrap_or_default(),
@@ -256,7 +255,6 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
         if let Some(identifiers) = &config.identifier {
           for identifier in identifiers {
             let config_attrs = ProtocolDeviceFeatures::new(
-              ProtocolAttributesType::Identifier(identifier.clone()),
               Some(config.name.as_ref().or(Some(defaults.name().as_ref().unwrap())).unwrap().to_owned()),
               None,
               config.features.clone().or(Some(defaults.features.clone().unwrap_or_default())).unwrap(),
@@ -336,7 +334,6 @@ fn add_user_configs_to_protocol(
       debug!("Server Ident: {:?}", server_ident);
 
       let config_attrs = ProtocolDeviceFeatures::new(
-        server_ident.attributes_identifier().clone(),
         user_config.config().name.clone(),
         user_config.config().display_name.clone(),
         user_config.config().features().clone().unwrap_or_default(),

@@ -762,12 +762,9 @@ impl DeviceConfigurationManager {
 #[cfg(test)]
 mod test {
   use super::{
-    server_device_message_attributes::{
-      ServerDeviceMessageAttributesBuilder, ServerGenericDeviceMessageAttributes,
-    },
     *,
   };
-  use crate::core::message::{DeviceFeature, DeviceFeatureActuator, FeatureType, ScalarCmd};
+  use crate::core::message::{DeviceFeature, DeviceFeatureActuator, FeatureType};
   use std::{
     collections::{HashMap, HashSet},
     ops::RangeInclusive,
@@ -792,7 +789,6 @@ mod test {
         &None,
       ),
       ProtocolDeviceFeatures::new(
-        ProtocolAttributesType::Identifier("P".to_owned()),
         Some("Lovense Edge".to_owned()),
         None,
         vec![
@@ -804,7 +800,6 @@ mod test {
               &HashSet::from_iter([ButtplugDeviceMessageType::ScalarCmd]),
             )),
             &None,
-            &None,
           ),
           DeviceFeature::new(
             "Edge Vibration 2",
@@ -813,7 +808,6 @@ mod test {
               &RangeInclusive::new(0, 20),
               &HashSet::from_iter([ButtplugDeviceMessageType::ScalarCmd]),
             )),
-            &None,
             &None,
           ),
         ],

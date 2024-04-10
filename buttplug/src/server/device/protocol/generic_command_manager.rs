@@ -332,12 +332,10 @@ impl GenericCommandManager {
 
 #[cfg(test)]
 mod test {
-
   use super::{GenericCommandManager, ProtocolDeviceAttributes};
   use crate::{
     core::message::{ActuatorType, RotateCmd, RotationSubcommand, ScalarCmd, ScalarSubcommand},
     server::device::configuration::{
-      ProtocolAttributesType,
       ServerDeviceMessageAttributesBuilder,
       ServerGenericDeviceMessageAttributes,
     },
@@ -355,7 +353,6 @@ mod test {
       .scalar_cmd(&vec![scalar_attrs.clone(), scalar_attrs])
       .finish();
     let device_attributes = ProtocolDeviceAttributes::new(
-      ProtocolAttributesType::Default,
       None,
       None,
       scalar_attributes,
@@ -422,7 +419,6 @@ mod test {
       .scalar_cmd(&vec![scalar_attrs.clone(), scalar_attrs])
       .finish();
     let device_attributes = ProtocolDeviceAttributes::new(
-      ProtocolAttributesType::Default,
       None,
       None,
       scalar_attributes,
@@ -500,7 +496,6 @@ mod test {
       .scalar_cmd(&vec![vibrate_attrs_1, vibrate_attrs_2])
       .finish();
     let device_attributes = ProtocolDeviceAttributes::new(
-      ProtocolAttributesType::Default,
       None,
       None,
       vibrate_attributes,
@@ -568,7 +563,6 @@ mod test {
       .rotate_cmd(&vec![rotate_attrs.clone(), rotate_attrs])
       .finish();
     let device_attributes = ProtocolDeviceAttributes::new(
-      ProtocolAttributesType::Default,
       None,
       None,
       rotate_attributes,
