@@ -87,7 +87,7 @@ if (messages["SensorReadCmd"] !== undefined) {
 }
 
 // Get document, or throw exception on error
-const doc = yaml.load(fs.readFileSync('./buttplug-device-config.yml', 'utf8'));
+const doc = yaml.load(fs.readFileSync('./device-config-v2/buttplug-device-config.yml', 'utf8'));
 for (var protocol in doc["protocols"]) {
   console.log(protocol);
   if (doc["protocols"][protocol]["defaults"] === undefined) {
@@ -112,4 +112,4 @@ for (var protocol in doc["protocols"]) {
   }
 }
 
-fs.writeFileSync("buttplug-device-config-convert.yml", yaml.dump(doc));
+fs.writeFileSync("device-config-v3/buttplug-device-config-v3.yml", yaml.dump(doc));

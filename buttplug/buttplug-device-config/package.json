@@ -4,10 +4,9 @@
   "description": "Buttplug Device Configuration File",
   "main": "index.js",
   "scripts": {
-    "build": "js-yaml buttplug-device-config.yml > buttplug-device-config.json && ajv validate --strict=false -s buttplug-device-config-schema.json -d buttplug-device-config.json",
-    "build:new": "js-yaml buttplug-device-config-convert.yml > buttplug-device-config-new.json && ajv validate --strict=false -s buttplug-device-config-schema-new.json -d buttplug-device-config-new.json",
-    "export-version": "node ./export_version.js",
-    "convert": "node ./convert.js"
+    "build": "js-yaml device-config-v2/buttplug-device-config.yml > buttplug-device-config.json && ajv validate --strict=false -s device-config-v2/buttplug-device-config-schema.json -d buttplug-device-config.json",
+    "build:v3": "js-yaml device-config-v3/buttplug-device-config-v3.yml > buttplug-device-config-v3.json && ajv validate --strict=false -s device-config-v3/buttplug-device-config-schema-v3.json -d buttplug-device-config-v3.json",
+    "convert": "node ./convert-v2-to-v3.js"
   },
   "repository": {
     "type": "git",
