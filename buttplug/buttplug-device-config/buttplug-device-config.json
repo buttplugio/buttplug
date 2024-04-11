@@ -9006,14 +9006,14 @@
                   0,
                   255
                 ],
-                "ActuatorType": "Vibrate"
+                "ActuatorType": "Rotate"
               },
               {
                 "StepRange": [
                   0,
                   255
                 ],
-                "ActuatorType": "Rotate"
+                "ActuatorType": "Vibrate"
               }
             ]
           }

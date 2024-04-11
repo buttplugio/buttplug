@@ -4450,9 +4450,9 @@ protocols:
         messages:
           ScalarCmd:
             - StepRange: [ 0, 255 ]
-              ActuatorType: Vibrate
-            - StepRange: [ 0, 255 ]
               ActuatorType: Rotate
+            - StepRange: [ 0, 255 ]
+              ActuatorType: Vibrate
       - identifier:
           - J-Panther
         name: JoyHub Panther
