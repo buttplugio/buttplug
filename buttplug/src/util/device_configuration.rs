@@ -31,9 +31,9 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fmt::Display, ops::RangeInclusive};
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
-  include_str!("../../buttplug-device-config/buttplug-device-config-new.json");
+  include_str!("../../buttplug-device-config/build-config/buttplug-device-config-v3.json");
 static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
-  include_str!("../../buttplug-device-config/buttplug-device-config-schema-new.json");
+  include_str!("../../buttplug-device-config/device-config-v3/buttplug-device-config-schema-v3.json");
 
 /// The top level configuration for a protocol. Contains all data about devices that can use the
 /// protocol, as well as names, message attributes, etc... for different devices.
