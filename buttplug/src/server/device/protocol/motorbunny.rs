@@ -64,7 +64,7 @@ impl ProtocolHandler for Motorbunny {
     if rotate.0 == 0 {
       command_vec = vec![0xa0, 0x00, 0x00, 0x00, 0x00, 0xec];
     } else {
-      command_vec = vec![0xfa];
+      command_vec = vec![0xaf];
       let mut rotate_command = vec![if rotate.1 { 0x2a } else { 0x29 }, rotate.0 as u8].repeat(7);
       let crc = rotate_command
         .iter()
