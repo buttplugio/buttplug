@@ -155,7 +155,6 @@ use crate::{
   server::device::ServerDeviceIdentifier,
 };
 use dashmap::DashMap;
-use derivative::Derivative;
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use std::{
