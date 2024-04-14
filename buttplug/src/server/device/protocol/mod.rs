@@ -32,6 +32,7 @@ pub mod itoys;
 pub mod jejoue;
 pub mod joyhub;
 pub mod joyhub_v2;
+pub mod joyhub_v3;
 pub mod kgoal_boost;
 pub mod kiiroo_v2;
 pub mod kiiroo_v21;
@@ -253,6 +254,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     joyhub_v2::setup::JoyHubV2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+  &mut map,
+  joyhub_v3::setup::JoyHubV3IdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
