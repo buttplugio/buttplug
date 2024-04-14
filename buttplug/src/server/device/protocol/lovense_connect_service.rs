@@ -19,7 +19,7 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-    ServerDeviceIdentifier,
+    configuration::UserDeviceIdentifier,
   },
 };
 use async_trait::async_trait;
@@ -43,7 +43,7 @@ impl ProtocolInitializer for LovenseConnectServiceInitializer {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut protocol = LovenseConnectService::new(hardware.address());
 
-    if let Some(scalars) = attributes.message_attributes.scalar_cmd() {
+    if let Some(scalars) = attributes.message_attributes().scalar_cmd() {
       protocol.vibrator_count = scalars
         .clone()
         .iter()

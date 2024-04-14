@@ -10,7 +10,7 @@ use crate::{
       ProtocolHandler,
       ProtocolIdentifier,
       ProtocolInitializer,
-      ServerDeviceIdentifier,
+      UserDeviceIdentifier,
     },
   },
   util::async_manager,

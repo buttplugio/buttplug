@@ -19,7 +19,7 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-    ServerDeviceIdentifier,
+    configuration::UserDeviceIdentifier,
   },
 };
 use async_trait::async_trait;

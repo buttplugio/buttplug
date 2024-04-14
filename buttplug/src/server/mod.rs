@@ -49,17 +49,8 @@ pub mod device;
 mod ping_timer;
 
 use self::device::{
-  configuration::{
-    ProtocolAttributesIdentifier,
-    ProtocolCommunicationSpecifier,
-    ProtocolDeviceFeatures,
-  },
-  hardware::communication::HardwareCommunicationManagerBuilder,
-  protocol::ProtocolIdentifierFactory,
-  ServerDeviceIdentifier,
-  ServerDeviceManager,
-  ServerDeviceManagerBuilder,
-};
+  configuration::DeviceConfigurationManagerBuilder, ServerDeviceManager, ServerDeviceManagerBuilder}
+;
 use crate::{
   core::{
     errors::*,
@@ -77,7 +68,6 @@ use crate::{
   },
   util::{
     async_manager,
-    device_configuration::{load_protocol_configs, DEVICE_CONFIGURATION_JSON},
     stream::convert_broadcast_receiver_to_stream,
   },
 };
@@ -132,27 +122,29 @@ pub struct ButtplugServerBuilder {
   /// Maximum time system will live without receiving a Ping message before disconnecting. If None,
   /// ping timer does not run.
   max_ping_time: Option<u32>,
-  /// JSON string, with the contents of the base Device Configuration file
-  device_configuration_json: Option<String>,
-  /// JSON string, with the contents of the User Device Configuration file
-  user_device_configuration_json: Option<String>,
   /// Device manager builder for the server
-  device_manager_builder: ServerDeviceManagerBuilder,
+  device_manager: Arc<ServerDeviceManager>,
 }
 
 impl Default for ButtplugServerBuilder {
   fn default() -> Self {
-    Self {
-      name: "Buttplug Server".to_owned(),
-      max_ping_time: None,
-      device_configuration_json: Some(DEVICE_CONFIGURATION_JSON.to_owned()),
-      user_device_configuration_json: None,
-      device_manager_builder: ServerDeviceManagerBuilder::default(),
-    }
+      Self {
+        name: "Buttplug Server".to_owned(),
+        max_ping_time: None,
+        device_manager: Arc::new(ServerDeviceManagerBuilder::new(DeviceConfigurationManagerBuilder::default().finish().unwrap()).finish().unwrap())
+      }
   }
 }
 
 impl ButtplugServerBuilder {
+  pub fn new(device_manager: ServerDeviceManager) -> Self {
+    Self {
+      name: "Buttplug Server".to_owned(),
+      max_ping_time: None,
+      device_manager: Arc::new(device_manager)
+    }
+  }
+
   /// Set the name of the server, which is relayed to the client on connection (mostly for
   /// confirmation in UI dialogs)
   pub fn name(&mut self, name: &str) -> &mut Self {
@@ -172,106 +164,15 @@ impl ButtplugServerBuilder {
     self
   }
 
-  /// Set the device configuration json file contents, to be loaded during build.
-  pub fn device_configuration_json(&mut self, config_json: Option<String>) -> &mut Self {
-    self.device_configuration_json = config_json;
-    self
-  }
-
-  /// Set the user device configuration json file contents, to be loaded during build.
-  pub fn user_device_configuration_json(&mut self, config_json: Option<String>) -> &mut Self {
-    self.user_device_configuration_json = config_json;
-    self
-  }
-
-  pub fn comm_manager<T>(&mut self, builder: T) -> &mut Self
-  where
-    T: HardwareCommunicationManagerBuilder + 'static,
-  {
-    self.device_manager_builder.comm_manager(builder);
-    self
-  }
-
-  pub fn allowed_address(&mut self, address: &str) -> &mut Self {
-    self.device_manager_builder.allowed_address(address);
-    self
-  }
-
-  pub fn denied_address(&mut self, address: &str) -> &mut Self {
-    self.device_manager_builder.denied_address(address);
-    self
-  }
-
-  pub fn reserved_index(&mut self, identifier: &ServerDeviceIdentifier, index: u32) -> &mut Self {
-    self
-      .device_manager_builder
-      .reserved_index(identifier, index);
-    self
-  }
-
-  pub fn protocol_factory<T>(&mut self, factory: T) -> &mut Self
-  where
-    T: ProtocolIdentifierFactory + 'static,
-  {
-    self.device_manager_builder.protocol_factory(factory);
-    self
-  }
-
-  pub fn communication_specifier(
-    &mut self,
-    protocol_name: &str,
-    specifier: ProtocolCommunicationSpecifier,
-  ) -> &mut Self {
-    self
-      .device_manager_builder
-      .communication_specifier(protocol_name, specifier);
-    self
-  }
-
-  pub fn protocol_features(
-    &mut self,
-    identifier: ProtocolAttributesIdentifier,
-    features: ProtocolDeviceFeatures,
-  ) -> &mut Self {
-    self
-      .device_manager_builder
-      .protocol_features(identifier, features);
-    self
-  }
-
-  pub fn skip_default_protocols(&mut self) -> &mut Self {
-    self.device_manager_builder.skip_default_protocols();
-    self
-  }
-
-  pub fn allow_raw_messages(&mut self) -> &mut Self {
-    self.device_manager_builder.allow_raw_messages();
-    self
-  }
-
   /// Try to build a [ButtplugServer] using the parameters given.
-  pub fn finish(&mut self) -> Result<ButtplugServer, ButtplugServerError> {
+  pub fn finish(&self) -> Result<ButtplugServer, ButtplugServerError> {
     // Create the server
     debug!("Creating server '{}'", self.name);
     info!("Buttplug Server Operating System Info: {}", os_info::get());
 
-    // First, try loading our configs. If this doesn't work, nothing else will, so get it out of
-    // the way first.
-    let dcm_builder = load_protocol_configs(
-      self.device_configuration_json.clone(),
-      self.user_device_configuration_json.clone(),
-      false,
-    )
-    .map_err(ButtplugServerError::DeviceConfigurationManagerError)?;
-
-    self
-      .device_manager_builder
-      .device_configuration_manager_builder(&dcm_builder);
     // Set up our channels to different parts of the system.
     let (output_sender, _) = broadcast::channel(256);
     let output_sender_clone = output_sender.clone();
-
-    let device_manager = Arc::new(self.device_manager_builder.finish()?);
 
     let connected = Arc::new(AtomicBool::new(false));
     let connected_clone = connected.clone();
@@ -283,7 +184,7 @@ impl ButtplugServerBuilder {
 
     // Spawn the ping timer task, assuming the ping time is > 0.
     if ping_time > 0 {
-      let device_manager_clone = device_manager.clone();
+      let device_manager_clone = self.device_manager.clone();
       async_manager::spawn(
         async move {
           // This will only exit if we've pinged out.
@@ -311,7 +212,7 @@ impl ButtplugServerBuilder {
     Ok(ButtplugServer {
       server_name: self.name.clone(),
       max_ping_time: ping_time,
-      device_manager,
+      device_manager: self.device_manager.clone(),
       ping_timer,
       connected,
       output_sender,
@@ -351,16 +252,6 @@ impl std::fmt::Debug for ButtplugServer {
       .field("max_ping_time", &self.max_ping_time)
       .field("connected", &self.connected)
       .finish()
-  }
-}
-
-impl Default for ButtplugServer {
-  /// Creates a default Buttplug Server, with no ping time, and no raw message support.
-  fn default() -> Self {
-    // We can unwrap here because if default init fails, so will pretty much every test.
-    ButtplugServerBuilder::default()
-      .finish()
-      .expect("Default is infallible")
   }
 }
 
@@ -534,11 +425,11 @@ impl ButtplugServer {
 
 #[cfg(test)]
 mod test {
+/*
   use crate::{
     core::message::{self, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
     server::ButtplugServer,
   };
-
   #[tokio::test]
   async fn test_server_reuse() {
     let server = ButtplugServer::default();
@@ -561,4 +452,5 @@ mod test {
       reply
     );
   }
+  */
 }

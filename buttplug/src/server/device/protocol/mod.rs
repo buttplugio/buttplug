@@ -133,9 +133,8 @@ use crate::{
     },
   },
   server::device::{
-    configuration::ProtocolCommunicationSpecifier,
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd},
-    ServerDeviceIdentifier,
   },
 };
 use async_trait::async_trait;
@@ -576,7 +575,7 @@ pub trait ProtocolIdentifier: Sync + Send {
   async fn identify(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError>;
+  ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError>;
 }
 
 #[async_trait]
@@ -607,8 +606,8 @@ impl ProtocolIdentifier for GenericProtocolIdentifier {
   async fn identify(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
-    let device_identifier = ServerDeviceIdentifier::new(
+  ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+    let device_identifier = UserDeviceIdentifier::new(
       hardware.address(),
       &self.protocol_identifier,
       &Some(hardware.name().to_owned()),
@@ -931,8 +930,8 @@ macro_rules! generic_protocol_initializer_setup {
         async fn identify(
           &mut self,
           hardware: Arc<Hardware>,
-        ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
-          Ok((ServerDeviceIdentifier::new(hardware.address(), $protocol_identifier, &Some(hardware.name().to_owned())), Box::new([< $protocol_name Initializer >]::default())))
+        ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+          Ok((UserDeviceIdentifier::new(hardware.address(), $protocol_identifier, &Some(hardware.name().to_owned())), Box::new([< $protocol_name Initializer >]::default())))
         }
       }
     }

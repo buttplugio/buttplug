@@ -8,7 +8,6 @@
 //! Buttplug Device Manager, manages Device Subtype (Platform/Communication bus
 //! specific) Managers
 
-use super::{configuration::ProtocolDeviceFeatures, server_device_manager_event_loop::ServerDeviceManagerEventLoop};
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
@@ -26,18 +25,13 @@ use crate::{
   },
   server::{
     device::{
-      configuration::{
-        DeviceConfigurationManagerBuilder,
-        ProtocolAttributesIdentifier,
-        ProtocolCommunicationSpecifier,
-      },
+      configuration::{DeviceConfigurationManager, UserDeviceIdentifier},
+      server_device_manager_event_loop::ServerDeviceManagerEventLoop,
       hardware::communication::{
         HardwareCommunicationManager,
         HardwareCommunicationManagerBuilder,
       },
-      protocol::ProtocolIdentifierFactory,
       ServerDevice,
-      ServerDeviceIdentifier,
     },
     ButtplugServerError,
     ButtplugServerResultFuture,
@@ -69,17 +63,23 @@ pub(super) enum DeviceManagerCommand {
 #[derive(Debug, Getters)]
 #[getset(get = "pub")]
 pub struct ServerDeviceInfo {
-  identifier: ServerDeviceIdentifier,
+  identifier: UserDeviceIdentifier,
   display_name: Option<String>,
 }
 
-#[derive(Default)]
 pub struct ServerDeviceManagerBuilder {
-  configuration_manager_builder: DeviceConfigurationManagerBuilder,
+  device_configuration_manager: Arc<DeviceConfigurationManager>,
   comm_managers: Vec<Box<dyn HardwareCommunicationManagerBuilder>>,
 }
 
 impl ServerDeviceManagerBuilder {
+  pub fn new(device_configuration_manager: DeviceConfigurationManager) -> Self {
+    Self {
+      device_configuration_manager: Arc::new(device_configuration_manager),
+      comm_managers: vec![]
+    }
+  }
+
   pub fn comm_manager<T>(&mut self, builder: T) -> &mut Self
   where
     T: HardwareCommunicationManagerBuilder + 'static,
@@ -88,77 +88,7 @@ impl ServerDeviceManagerBuilder {
     self
   }
 
-  pub fn device_configuration_manager_builder(
-    &mut self,
-    dcm_builder: &DeviceConfigurationManagerBuilder,
-  ) -> &mut Self {
-    self.configuration_manager_builder.merge(dcm_builder);
-    self
-  }
-
-  pub fn allowed_address(&mut self, address: &str) -> &mut Self {
-    self.configuration_manager_builder.allowed_address(address);
-    self
-  }
-
-  pub fn denied_address(&mut self, address: &str) -> &mut Self {
-    self.configuration_manager_builder.denied_address(address);
-    self
-  }
-
-  pub fn reserved_index(&mut self, identifier: &ServerDeviceIdentifier, index: u32) -> &mut Self {
-    self
-      .configuration_manager_builder
-      .reserved_index(identifier, index);
-    self
-  }
-
-  pub fn protocol_factory<T>(&mut self, factory: T) -> &mut Self
-  where
-    T: ProtocolIdentifierFactory + 'static,
-  {
-    self.configuration_manager_builder.protocol_factory(factory);
-    self
-  }
-
-  pub fn communication_specifier(
-    &mut self,
-    protocol_name: &str,
-    specifier: ProtocolCommunicationSpecifier,
-  ) -> &mut Self {
-    self
-      .configuration_manager_builder
-      .communication_specifier(protocol_name, specifier);
-    self
-  }
-
-  pub fn protocol_features(
-    &mut self,
-    identifier: ProtocolAttributesIdentifier,
-    features: ProtocolDeviceFeatures,
-  ) -> &mut Self {
-    self
-      .configuration_manager_builder
-      .protocol_features(identifier, features);
-    self
-  }
-
-  pub fn skip_default_protocols(&mut self) -> &mut Self {
-    self.configuration_manager_builder.skip_default_protocols();
-    self
-  }
-
-  pub fn allow_raw_messages(&mut self) -> &mut Self {
-    self.configuration_manager_builder.allow_raw_messages();
-    self
-  }
-
   pub fn finish(&mut self) -> Result<ServerDeviceManager, ButtplugServerError> {
-    let config_mgr = self
-      .configuration_manager_builder
-      .finish()
-      .map_err(ButtplugServerError::DeviceConfigurationManagerError)?;
-
     let (device_command_sender, device_command_receiver) = mpsc::channel(256);
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
     let mut comm_managers: Vec<Box<dyn HardwareCommunicationManager>> = Vec::new();
@@ -208,7 +138,7 @@ impl ServerDeviceManagerBuilder {
 
     let mut event_loop = ServerDeviceManagerEventLoop::new(
       comm_managers,
-      config_mgr,
+      self.device_configuration_manager.clone(),
       devices.clone(),
       loop_cancellation_token.child_token(),
       output_sender.clone(),
@@ -318,9 +248,9 @@ impl ServerDeviceManager {
             DeviceMessageInfo::new(
               *device.key(),
               &dev.name(),
-              &dev.display_name(),
+              &dev.definition().user_config().display_name(),
               &None,
-              dev.message_attributes().into(),
+              dev.message_attributes().clone().into(),
             )
           })
           .collect();
@@ -352,7 +282,7 @@ impl ServerDeviceManager {
   pub fn device_info(&self, index: u32) -> Option<ServerDeviceInfo> {
     self.devices.get(&index).map(|device| ServerDeviceInfo {
       identifier: device.value().identifier().clone(),
-      display_name: device.value().display_name(),
+      display_name: device.value().definition().user_config().display_name().clone(),
     })
   }
 

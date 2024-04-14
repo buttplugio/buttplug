@@ -15,6 +15,7 @@ use crate::{
     message::{self, ButtplugDeviceMessage, Endpoint},
   },
   server::device::{
+    configuration::UserDeviceIdentifier,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
@@ -22,7 +23,6 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-    ServerDeviceIdentifier,
   },
 };
 use async_trait::async_trait;

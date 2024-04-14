@@ -74,7 +74,7 @@ impl GenericCommandManager {
 
     let mut stop_commands = vec![];
 
-    if let Some(attrs) = attributes.message_attributes.scalar_cmd() {
+    if let Some(attrs) = attributes.message_attributes().scalar_cmd() {
       let mut subcommands = vec![];
       for (index, attr) in attrs.iter().enumerate() {
         scalars.push(ScalarGenericCommand::new(attr));
@@ -87,7 +87,7 @@ impl GenericCommandManager {
 
       stop_commands.push(ScalarCmd::new(0, subcommands).into());
     }
-    if let Some(attrs) = attributes.message_attributes.rotate_cmd() {
+    if let Some(attrs) = attributes.message_attributes().rotate_cmd() {
       rotations.resize_with(attrs.len(), || (AtomicU32::new(0), AtomicBool::new(false)));
       for attr in attrs {
         rotation_step_ranges.push(attr.step_range().clone());
@@ -103,7 +103,7 @@ impl GenericCommandManager {
       }
       stop_commands.push(RotateCmd::new(0, subcommands).into());
     }
-    if let Some(attrs) = attributes.message_attributes.linear_cmd() {
+    if let Some(attrs) = attributes.message_attributes().linear_cmd() {
       linears = vec![(0, 0); attrs.len()];
       for attr in attrs {
         linear_step_counts.push(attr.step_count());
@@ -353,9 +353,9 @@ mod test {
       .scalar_cmd(&vec![scalar_attrs.clone(), scalar_attrs])
       .finish();
     let device_attributes = ProtocolDeviceAttributes::new(
-      None,
-      None,
-      scalar_attributes,
+      "Whatever",
+      &None,
+      &scalar_attributes,
     );
     let mgr = GenericCommandManager::new(&device_attributes);
     let vibrate_msg = ScalarCmd::new(
@@ -419,9 +419,9 @@ mod test {
       .scalar_cmd(&vec![scalar_attrs.clone(), scalar_attrs])
       .finish();
     let device_attributes = ProtocolDeviceAttributes::new(
-      None,
-      None,
-      scalar_attributes,
+      "Whatever",
+      &None,
+      &scalar_attributes,
     );
     let mgr = GenericCommandManager::new(&device_attributes);
     let vibrate_msg = ScalarCmd::new(
@@ -496,9 +496,9 @@ mod test {
       .scalar_cmd(&vec![vibrate_attrs_1, vibrate_attrs_2])
       .finish();
     let device_attributes = ProtocolDeviceAttributes::new(
-      None,
-      None,
-      vibrate_attributes,
+      "Whatever",
+      &None,
+      &vibrate_attributes,
     );
     let mgr = GenericCommandManager::new(&device_attributes);
     let vibrate_msg = ScalarCmd::new(
@@ -563,9 +563,9 @@ mod test {
       .rotate_cmd(&vec![rotate_attrs.clone(), rotate_attrs])
       .finish();
     let device_attributes = ProtocolDeviceAttributes::new(
-      None,
-      None,
-      rotate_attributes,
+      "Whatever",
+      &None,
+      &rotate_attributes,
     );
     let mgr = GenericCommandManager::new(&device_attributes);
 

@@ -9,9 +9,9 @@ use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
+    configuration::UserDeviceIdentifier,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-    ServerDeviceIdentifier,
   },
 };
 use async_trait::async_trait;
@@ -41,9 +41,9 @@ impl ProtocolIdentifier for PrettyLoveIdentifier {
   async fn identify(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+  ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     Ok((
-      ServerDeviceIdentifier::new(
+      UserDeviceIdentifier::new(
         hardware.address(),
         "prettylove",
         &Some("Aogu BLE".to_owned()),

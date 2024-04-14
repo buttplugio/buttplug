@@ -13,7 +13,6 @@
         },
         "config": {
           "name": "Lovense Sex Machine",
-          "display-name": "Lovense Name Test",
           "features": [
             {
               "feature-type": "Oscillate",
@@ -43,7 +42,13 @@
                 ]
               }
             }
-          ]
+          ],
+          "user-config": {
+            "allow": false,
+            "deny": false,
+            "index": 0,
+            "display-name": "Lovense Name Test"
+          }
         }
       }
     ]

@@ -1,4 +1,7 @@
-use std::ops::RangeInclusive;
+//! A collection of legacy device definitions for the server portion of Buttplug. All structs in
+//! this module can be considered deprecated, and will be removed as we move toward Buttplug v4.
+
+use std::{mem, ops::RangeInclusive};
 
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
@@ -9,6 +12,100 @@ use crate::core::{
     ActuatorType, ButtplugDeviceMessageType, ClientDeviceMessageAttributes, ClientDeviceMessageAttributesBuilder, ClientGenericDeviceMessageAttributes, DeviceFeature, Endpoint, NullDeviceMessageAttributes, RawDeviceMessageAttributes, SensorDeviceMessageAttributes, SensorType
   },
 };
+
+use super::UserDeviceDefinition;
+
+/// Device attribute storage and handling
+///
+/// ProtocolDeviceAttributes represent information about a device in relation to its protocol. This
+/// includes the device name, its identifier (assuming it has one), its user created display name
+/// (if it has one), and its message attributes.
+///
+/// Device attributes can exist in 3 different forms for a protocol, as denoted by the
+/// [ProtocolAttributesIdentifier].
+///
+/// - Default: The basis for all message attributes for a protocol. Used when a protocol supports
+///   many different devices, all with at least one or more similar features. For instances, we can
+///   assume all Lovense devices have a single vibrator with a common power level count, so the
+///   Default identifier instance of the ProtocolDeviceAttributes for Lovense will have a
+///   message_attributes with VibrateCmd (assuming 1 vibration motor, as all Lovense devices have at
+///   least one motor) available.
+/// - Identifier: Specifies a specific device for a protocol, which may have its own attributes.
+///   Continuing with the Lovense Example, we know a Edge will have 2 motors. We can set the
+///   specific Identifier version of the ProtocolDeviceAttributes to have a VibrateCmd
+///   message_attributes entry which will override the Default identifier version.
+/// - User Configuration: Users may set configurations specific to their setup, like reducing the
+///   maximum power available on a device to a certain level. User configurations override the
+///   previous Identifier and Default configurations.
+///
+///  This type of tree/list encoding preserves the structure of configuration, which allows for
+///  easier debugging, as well as the ability to serialize the structure back down to files.
+#[derive(Debug, Clone, Getters, Setters, MutGetters)]
+#[getset(get = "pub")]
+pub struct ProtocolDeviceAttributes {
+  /// Given name of the device this instance represents.
+  name: String,
+  /// User configured name of the device this instance represents, assuming one exists.
+  display_name: Option<String>,
+  /// Message attributes for this device instance.
+  message_attributes: ServerDeviceMessageAttributes,
+}
+
+impl From<UserDeviceDefinition> for ProtocolDeviceAttributes {
+  fn from(mut value: UserDeviceDefinition) -> Self {
+    Self {
+      name: { mem::take(value.name_mut()) },
+      display_name: value.user_config_mut().display_name().clone(),
+      message_attributes: { mem::take(value.features_mut()).into() },
+    }
+  }
+}
+
+impl ProtocolDeviceAttributes {
+  /// Create a new instance
+  pub fn new(
+    name: &str,
+    display_name: &Option<String>,
+    message_attributes: &ServerDeviceMessageAttributes,
+  ) -> Self {
+    Self {
+      name: name.to_owned(),
+      display_name: display_name.clone(),
+      message_attributes: message_attributes.clone(),
+    }
+  }
+
+  /// Check to make sure the message attributes of an instance are valid.
+  fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
+    if let Some(attrs) = self.message_attributes.scalar_cmd() {
+      for attr in attrs {
+        attr.is_valid(&ButtplugDeviceMessageType::ScalarCmd)?;
+      }
+    }
+    if let Some(attrs) = self.message_attributes.rotate_cmd() {
+      for attr in attrs {
+        attr.is_valid(&ButtplugDeviceMessageType::RotateCmd)?;
+      }
+    }
+    if let Some(attrs) = self.message_attributes.linear_cmd() {
+      for attr in attrs {
+        attr.is_valid(&ButtplugDeviceMessageType::LinearCmd)?;
+      }
+    }
+    Ok(())
+  }
+
+  /// Check if a type of device message is supported by this instance.
+  pub fn allows_message(&self, message_type: &ButtplugDeviceMessageType) -> bool {
+    self.message_attributes.message_allowed(message_type)
+  }
+
+  /// Add raw message support to the attributes of this instance. Requires a list of all endpoints a
+  /// device supports.
+  pub fn add_raw_messages(&mut self, endpoints: &[Endpoint]) {
+    self.message_attributes.add_raw_messages(endpoints);
+  }
+}
 
 // Unlike other message components, MessageAttributes is always turned on for
 // serialization, because it's used by device configuration files also.

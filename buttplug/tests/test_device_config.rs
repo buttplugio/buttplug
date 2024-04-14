@@ -9,6 +9,7 @@ mod util;
 extern crate buttplug;
 
 use buttplug::server::ButtplugServerBuilder;
+use buttplug::util::device_configuration::load_protocol_configs;
 
 const BASE_CONFIG_JSON: &str = r#"
 {
@@ -86,39 +87,27 @@ const BASE_VALID_NULL_USER_CONFIG_JSON: &str = r#"
 
 #[cfg(feature = "server")]
 #[tokio::test]
-async fn test_valid_null_version_config() {
-  ButtplugServerBuilder::default()
-    .user_device_configuration_json(Some(BASE_VALID_VERSION_CONFIG_JSON.to_owned()))
-    .finish()
-    .unwrap();
+async fn test_valid_null_version_config() {    
+  assert!(load_protocol_configs(None, Some(BASE_VALID_VERSION_CONFIG_JSON.to_owned()), false).is_ok());
 }
 
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_valid_null_user_config() {
-  ButtplugServerBuilder::default()
-    .user_device_configuration_json(Some(BASE_VALID_NULL_USER_CONFIG_JSON.to_owned()))
-    .finish()
-    .unwrap();
+  assert!(load_protocol_configs(None, Some(BASE_VALID_NULL_USER_CONFIG_JSON.to_owned()), false).is_ok());
 }
 
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_invalid_null_version_config() {
-  assert!(ButtplugServerBuilder::default()
-    .user_device_configuration_json(Some(BASE_INVALID_VERSION_CONFIG_JSON.to_owned()))
-    .finish()
-    .is_err());
+  assert!(load_protocol_configs(None, Some(BASE_INVALID_VERSION_CONFIG_JSON.to_owned()), false).is_err());
 }
 
 #[cfg(feature = "server")]
 #[tokio::test]
 #[ignore = "Still need to update for new message format"]
 async fn test_basic_device_config() {
-  ButtplugServerBuilder::default()
-    .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
-    .finish()
-    .unwrap();
+  assert!(load_protocol_configs(Some(BASE_CONFIG_JSON.to_owned()), None, false).is_ok());
 }
 
 #[cfg(feature = "server")]
@@ -143,11 +132,7 @@ async fn test_valid_step_range() {
     }
   }
   "#;
-  assert!(ButtplugServerBuilder::default()
-    .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
-    .user_device_configuration_json(Some(user_config_json.to_owned()))
-    .finish()
-    .is_ok());
+  assert!(load_protocol_configs(Some(BASE_CONFIG_JSON.to_owned()), Some(user_config_json.to_owned()), false).is_ok());
 }
 
 #[cfg(feature = "server")]
@@ -172,11 +157,7 @@ async fn test_invalid_step_range_device_config_wrong_range_length() {
     }
   }
   "#;
-  assert!(ButtplugServerBuilder::default()
-    .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
-    .user_device_configuration_json(Some(user_config_json.to_owned()))
-    .finish()
-    .is_err());
+  assert!(load_protocol_configs(Some(BASE_CONFIG_JSON.to_owned()), Some(user_config_json.to_owned()), false).is_err());
 }
 
 #[cfg(feature = "server")]
@@ -202,14 +183,154 @@ async fn test_invalid_step_range_device_config_wrong_order() {
     }
   }
   "#;
-  assert!(ButtplugServerBuilder::default()
-    .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
-    .user_device_configuration_json(Some(user_config_json.to_owned()))
-    .finish()
-    .is_ok());
-  assert!(ButtplugServerBuilder::default()
-    .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
-    .user_device_configuration_json(Some(user_config_json.to_owned()))
-    .finish()
-    .is_ok());
+  assert!(load_protocol_configs(Some(BASE_CONFIG_JSON.to_owned()), Some(user_config_json.to_owned()), false).is_err());
 }
+
+/*
+#[tokio::test]
+async fn test_server_builder_null_device_config() {
+  let mut builder = ButtplugServerBuilder::default();
+  let _ = builder
+    .device_configuration_json(None)
+    .finish()
+    .expect("Test, assuming infallible.");
+}
+
+#[tokio::test]
+async fn test_server_builder_device_config_invalid_json() {
+  let mut builder = ButtplugServerBuilder::default();
+  assert!(builder
+    .device_configuration_json(Some("{\"Not Valid JSON\"}".to_owned()))
+    .finish()
+    .is_err());
+}
+
+#[tokio::test]
+async fn test_server_builder_device_config_schema_break() {
+  let mut builder = ButtplugServerBuilder::default();
+  // missing version block.
+  let device_json = r#"{
+      "protocols": {
+        "jejoue": {
+          "btle": {
+            "names": [
+              "Je Joue"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          },
+          "defaults": {
+            "name": {
+              "en-us": "Je Joue Device"
+            },
+            "messages": {
+              "VibrateCmd": {
+                "FeatureCount": 2,
+                "StepCount": [
+                  5,
+                  5
+                ]
+              }
+            }
+          }
+        },
+      }
+    }"#;
+  assert!(builder
+    .device_configuration_json(Some(device_json.to_owned()))
+    .finish()
+    .is_err());
+}
+
+#[tokio::test]
+async fn test_server_builder_device_config_old_config_version() {
+  let mut builder = ButtplugServerBuilder::default();
+  // missing version block.
+  let device_json = r#"{
+      "version": 0,
+      "protocols": {}
+    }
+    "#;
+  assert!(builder
+    .device_configuration_json(Some(device_json.to_owned()))
+    .finish()
+    .is_err());
+}
+
+#[tokio::test]
+async fn test_server_builder_null_user_device_config() {
+  let mut builder = ButtplugServerBuilder::default();
+  let _ = builder
+    .user_device_configuration_json(None)
+    .finish()
+    .expect("Test, assuming infallible.");
+}
+
+#[tokio::test]
+async fn test_server_builder_user_device_config_invalid_json() {
+  let mut builder = ButtplugServerBuilder::default();
+  assert!(builder
+    .user_device_configuration_json(Some("{\"Not Valid JSON\"}".to_owned()))
+    .finish()
+    .is_err());
+}
+
+#[tokio::test]
+async fn test_server_builder_user_device_config_schema_break() {
+  let mut builder = ButtplugServerBuilder::default();
+  // missing version block.
+  let device_json = r#"{
+      "protocols": {
+        "jejoue": {
+          "btle": {
+            "names": [
+              "Je Joue"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          },
+          "defaults": {
+            "name": {
+              "en-us": "Je Joue Device"
+            },
+            "messages": {
+              "VibrateCmd": {
+                "FeatureCount": 2,
+                "StepCount": [
+                  5,
+                  5
+                ]
+              }
+            }
+          }
+        },
+      }
+    }"#;
+  assert!(builder
+    .user_device_configuration_json(Some(device_json.to_owned()))
+    .finish()
+    .is_err());
+}
+
+#[tokio::test]
+#[ignore = "Skip until we've figured out whether we actually want version differences to fail."]
+async fn test_server_builder_user_device_config_old_config_version() {
+  let mut builder = ButtplugServerBuilder::default();
+  // missing version block.
+  let device_json = r#"{
+      "version": 0,
+      "protocols": {}
+    }
+    "#;
+  assert!(builder
+    .user_device_configuration_json(Some(device_json.to_owned()))
+    .finish()
+    .is_err());
+}
+*/

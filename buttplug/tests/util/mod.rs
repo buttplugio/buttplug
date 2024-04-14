@@ -16,7 +16,7 @@ mod channel_transport;
 use buttplug::{
   client::ButtplugClient,
   core::connector::ButtplugInProcessClientConnectorBuilder,
-  server::{ButtplugServer, ButtplugServerBuilder},
+  server::{device::{hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerBuilder}, ServerDeviceManager, ServerDeviceManagerBuilder}, ButtplugServer, ButtplugServerBuilder}, util::device_configuration::create_test_dcm,
 };
 pub use channel_transport::*;
 pub use test_device_manager::{
@@ -34,10 +34,14 @@ pub fn setup_logging() {
 }
 
 #[allow(dead_code)]
+pub fn test_server(allow_raw_messages: bool) -> ButtplugServer {
+  ButtplugServerBuilder::new(ServerDeviceManagerBuilder::new(create_test_dcm(allow_raw_messages)).finish().unwrap()).finish().unwrap()
+}
+
+#[allow(dead_code)]
 pub async fn test_client() -> ButtplugClient {
-  let mut server_builder = ButtplugServerBuilder::default();
   let connector = ButtplugInProcessClientConnectorBuilder::default()
-    .server(server_builder.finish().unwrap())
+    .server(test_server(false))
     .finish();
 
   let client = ButtplugClient::new("Test Client");
@@ -55,8 +59,11 @@ pub async fn test_client_with_device() -> (ButtplugClient, TestDeviceChannelHost
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
   let device = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
 
-  let mut server_builder = ButtplugServerBuilder::default();
-  server_builder.comm_manager(builder);
+  let mut dm_builder = ServerDeviceManagerBuilder::new(create_test_dcm(false));
+  dm_builder.comm_manager(builder);
+
+  let server_builder = ButtplugServerBuilder::new(dm_builder.finish().unwrap());
+  
   let connector = ButtplugInProcessClientConnectorBuilder::default()
     .server(server_builder.finish().unwrap())
     .finish();
@@ -75,8 +82,11 @@ pub async fn test_client_with_device() -> (ButtplugClient, TestDeviceChannelHost
 pub async fn test_client_with_delayed_device_manager() -> ButtplugClient {
   let builder = DelayDeviceCommunicationManagerBuilder::default();
 
-  let mut server_builder = ButtplugServerBuilder::default();
-  server_builder.comm_manager(builder);
+  let mut dm_builder = ServerDeviceManagerBuilder::new(create_test_dcm(false));
+  dm_builder.comm_manager(builder);
+
+  let server_builder = ButtplugServerBuilder::new(dm_builder.finish().unwrap());
+
   let connector = ButtplugInProcessClientConnectorBuilder::default()
     .server(server_builder.finish().unwrap())
     .finish();
@@ -91,19 +101,27 @@ pub async fn test_client_with_delayed_device_manager() -> ButtplugClient {
   client
 }
 
+
 #[allow(dead_code)]
-pub async fn test_server_with_device(
+pub fn test_server_with_comm_manager<T>(
+  dcm: T,
+  allow_raw_message: bool,
+) -> ButtplugServer where T: HardwareCommunicationManagerBuilder + 'static {
+  let mut dm_builder = ServerDeviceManagerBuilder::new(create_test_dcm(allow_raw_message));
+  dm_builder.comm_manager(dcm);
+  let server = ButtplugServerBuilder::new(dm_builder.finish().unwrap()).finish().unwrap();
+  server
+}
+
+
+#[allow(dead_code)]
+pub fn test_server_with_device(
   device_type: &str,
   allow_raw_message: bool,
 ) -> (ButtplugServer, TestDeviceChannelHost) {
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
   let device = builder.add_test_device(&TestDeviceIdentifier::new(device_type, None));
 
-  let mut server_builder = ButtplugServerBuilder::default();
-  if allow_raw_message {
-    server_builder.allow_raw_messages();
-  }
-  server_builder.comm_manager(builder);
-  let server = server_builder.finish().unwrap();
-  (server, device)
+  (test_server_with_comm_manager(builder, allow_raw_message), device)
 }
+

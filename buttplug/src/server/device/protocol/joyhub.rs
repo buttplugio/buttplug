@@ -20,8 +20,9 @@ use crate::{
         ProtocolIdentifier,
         ProtocolInitializer,
       },
+      configuration::UserDeviceIdentifier,
     },
-    ServerDeviceIdentifier,
+    
   },
   util::{async_manager, sleep},
 };

@@ -5,13 +5,10 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
-  },
+  core::{errors::ButtplugDeviceError, message::{ActuatorType, Endpoint}},
   server::device::{
+    configuration::{ProtocolDeviceAttributes, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
@@ -19,7 +16,6 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-    ServerDeviceIdentifier,
   },
 };
 use async_trait::async_trait;

@@ -5,16 +5,16 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
-  },
+  core::{errors::ButtplugDeviceError, message::{ActuatorType, Endpoint}},
   server::device::{
+    configuration::{ProtocolDeviceAttributes, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-    ServerDeviceIdentifier,
+    protocol::{
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+    },
   },
 };
 use async_trait::async_trait;
@@ -44,14 +44,14 @@ impl ProtocolIdentifier for VibratissimoIdentifier {
   async fn identify(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+  ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     let result = hardware
       .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
       .await?;
     let ident =
       String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| hardware.name().to_owned());
     Ok((
-      ServerDeviceIdentifier::new(
+      UserDeviceIdentifier::new(
         hardware.address(),
         "vibratissimo",
         &Some(ident),

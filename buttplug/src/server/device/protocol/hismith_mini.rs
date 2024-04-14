@@ -5,14 +5,16 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::ActuatorType::Vibrate;
-use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
+  core::{errors::ButtplugDeviceError, message::{ActuatorType, Endpoint}},
   server::device::{
+    configuration::{ProtocolDeviceAttributes, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-    ServerDeviceIdentifier,
+    protocol::{
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+    },
   },
 };
 use async_trait::async_trait;
@@ -42,7 +44,7 @@ impl ProtocolIdentifier for HismithMiniIdentifier {
   async fn identify(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+  ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     let result = hardware
       .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
       .await?;
@@ -55,7 +57,7 @@ impl ProtocolIdentifier for HismithMiniIdentifier {
     info!("Hismith Device Identifier: {}", identifier);
 
     Ok((
-      ServerDeviceIdentifier::new(
+      UserDeviceIdentifier::new(
         hardware.address(),
         "hismith-mini",
         &Some(identifier),
@@ -79,7 +81,7 @@ impl ProtocolInitializer for HismithMiniInitializer {
     if let Some(scalar) = attrs.message_attributes().scalar_cmd() {
       dual_vibes = scalar
         .iter()
-        .filter(|s| s.actuator_type() == &Vibrate)
+        .filter(|s| s.actuator_type() == &ActuatorType::Vibrate)
         .count()
         >= 2;
     }

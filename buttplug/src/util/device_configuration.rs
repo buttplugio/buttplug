@@ -8,27 +8,14 @@
 use super::json::JSONValidator;
 use crate::{
   core::{errors::ButtplugDeviceError, message::DeviceFeature},
-  server::device::{
+  server::device::
     configuration::{
-      BluetoothLESpecifier,
-      DeviceConfigurationManager,
-      DeviceConfigurationManagerBuilder,
-      HIDSpecifier,
-      LovenseConnectServiceSpecifier,
-      ProtocolAttributesIdentifier,
-      ProtocolCommunicationSpecifier,
-      ProtocolDeviceFeatures,
-      SerialSpecifier,
-      USBSpecifier,
-      WebsocketSpecifier,
-      XInputSpecifier,
+      BaseDeviceDefinition, BluetoothLESpecifier, BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder, HIDSpecifier, LovenseConnectServiceSpecifier, ProtocolCommunicationSpecifier, SerialSpecifier, USBSpecifier, UserDeviceCustomization, UserDeviceDefinition, UserDeviceIdentifier, WebsocketSpecifier, XInputSpecifier
     },
-    ServerDeviceIdentifier,
-  },
 };
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, fmt::Display, ops::RangeInclusive};
+use std::{collections::HashMap, fmt::Display};
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../buttplug-device-config/build-config/buttplug-device-config-v3.json");
@@ -48,14 +35,14 @@ struct ProtocolDeviceConfiguration {
   specifiers: Vec<ProtocolCommunicationSpecifier>,
   /// Names and message attributes for all possible devices that use this protocol
   #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
-  configurations: HashMap<Option<String>, ProtocolDeviceFeatures>,
+  configurations: HashMap<Option<String>, BaseDeviceDefinition>,
 }
 
 impl ProtocolDeviceConfiguration {
   /// Create a new instance
   pub fn new(
     specifiers: Vec<ProtocolCommunicationSpecifier>,
-    configurations: HashMap<Option<String>, ProtocolDeviceFeatures>,
+    configurations: HashMap<Option<String>, BaseDeviceDefinition>,
   ) -> Self {
     Self {
       specifiers,
@@ -64,53 +51,30 @@ impl ProtocolDeviceConfiguration {
   }
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize, Getters, Setters)]
-struct GenericUserDeviceMessageAttributes {
-  #[getset(get = "pub")]
-  #[serde(rename = "StepRange")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  step_range: Option<RangeInclusive<i32>>,
-}
-
 #[derive(Serialize, Deserialize, Debug, Getters, Setters, Default, Clone)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
-pub struct UserDeviceConfig {
-  #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(default)]
+struct UserDeviceConfig {
   #[serde(rename = "name")]
-  name: Option<String>,  
-  #[serde(skip_serializing_if = "Option::is_none")]
+  name: String,
   #[serde(default)]
-  #[serde(rename = "display-name")]
-  display_name: Option<String>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(default)]
-  allow: Option<bool>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(default)]
-  deny: Option<bool>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(default)]
-  features: Option<Vec<DeviceFeature>>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(default)]
-  index: Option<u32>,
+  features: Vec<DeviceFeature>,
+  #[serde(rename = "user-config")]
+  user_config: UserDeviceCustomization
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
-pub struct ProtocolAttributes {
+struct ProtocolAttributes {
   #[serde(skip_serializing_if = "Option::is_none")]
   identifier: Option<Vec<String>>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  name: Option<String>,
+  name: String,
   #[serde(skip_serializing_if = "Option::is_none")]
   features: Option<Vec<DeviceFeature>>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
-pub struct ProtocolDefinition {
+struct ProtocolDefinition {
   // Can't get serde flatten specifiers into a String/DeviceSpecifier map, so
   // they're kept separate here, and we return them in specifiers(). Feels
   // very clumsy, but we really don't do this a bunch during a session.
@@ -137,7 +101,7 @@ pub struct ProtocolDefinition {
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
-pub struct UserDeviceConfigPair {
+struct UserDeviceConfigPair {
   identifier: UserConfigDeviceIdentifier,
   config: UserDeviceConfig,
 }
@@ -150,7 +114,7 @@ impl UserDeviceConfigPair {
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
-pub struct UserConfigDefinition {
+struct UserConfigDefinition {
   #[serde(default, skip_serializing_if = "Option::is_none")]
   specifiers: Option<HashMap<String, ProtocolDefinition>>,
   #[serde(rename = "devices", default, skip_serializing_if = "Option::is_none")]
@@ -161,26 +125,26 @@ pub struct UserConfigDefinition {
   Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters, Eq, PartialEq, Hash,
 )]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
-pub struct UserConfigDeviceIdentifier {
+struct UserConfigDeviceIdentifier {
   pub address: String,
   pub protocol: String,
   #[serde(skip_serializing_if = "Option::is_none")]
   pub identifier: Option<String>,
 }
 
-impl From<UserConfigDeviceIdentifier> for ServerDeviceIdentifier {
+impl From<UserConfigDeviceIdentifier> for UserDeviceIdentifier {
   fn from(ident: UserConfigDeviceIdentifier) -> Self {
     let server_identifier = if let Some(ident_string) = ident.identifier {
       Some(ident_string)
     } else {
       None
     };
-    ServerDeviceIdentifier::new(&ident.address, &ident.protocol, &server_identifier)
+    UserDeviceIdentifier::new(&ident.address, &ident.protocol, &server_identifier)
   }
 }
 
-impl From<ServerDeviceIdentifier> for UserConfigDeviceIdentifier {
-  fn from(ident: ServerDeviceIdentifier) -> Self {
+impl From<UserDeviceIdentifier> for UserConfigDeviceIdentifier {
+  fn from(ident: UserDeviceIdentifier) -> Self {
     UserConfigDeviceIdentifier {
       address: ident.address().clone(),
       protocol: ident.protocol().clone(),
@@ -192,12 +156,9 @@ impl From<ServerDeviceIdentifier> for UserConfigDeviceIdentifier {
 #[derive(Default, Debug, Getters)]
 #[getset(get = "pub")]
 struct ExternalDeviceConfiguration {
-  allow_list: Vec<String>,
-  deny_list: Vec<String>,
-  reserved_indexes: HashMap<u32, ServerDeviceIdentifier>,
   protocol_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
-  protocol_features: HashMap<ProtocolAttributesIdentifier, ProtocolDeviceFeatures>,
-  user_configs: HashMap<ServerDeviceIdentifier, ProtocolDeviceFeatures>,
+  protocol_features: HashMap<BaseDeviceIdentifier, BaseDeviceDefinition>,
+  user_configs: HashMap<UserDeviceIdentifier, UserDeviceDefinition>,
 }
 
 impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
@@ -236,21 +197,19 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
 
     let mut configurations = HashMap::new();
 
-    // TODO We should probably make a From for ProtocolAttributes into ProtocolDeviceAttributes.
     if let Some(defaults) = protocol_def.defaults() {
-      let config_attrs = ProtocolDeviceFeatures::new(
-        Some(defaults.name.as_ref().unwrap().to_owned()),
-        None,
-        defaults.features.clone().unwrap_or_default(),
+      let config_attrs = BaseDeviceDefinition::new(
+        &defaults.name,
+        defaults.features.as_ref().expect("This is a default, therefore we'll always have features."),
       );
       configurations.insert(None, config_attrs);
       for config in &protocol_def.configurations {
         if let Some(identifiers) = &config.identifier {
           for identifier in identifiers {
-            let config_attrs = ProtocolDeviceFeatures::new(
-              Some(config.name.as_ref().or(Some(defaults.name().as_ref().unwrap())).unwrap().to_owned()),
-              None,
-              config.features.clone().or(Some(defaults.features.clone().unwrap_or_default())).unwrap(),
+            let config_attrs = BaseDeviceDefinition::new(
+              // Even subconfigurations always have names
+              &config.name,
+              config.features.as_ref().or(Some(defaults.features.as_ref().expect("Defaults always have features"))).unwrap(),
             );
             configurations.insert(Some(identifier.to_owned()), config_attrs);
           }
@@ -308,28 +267,13 @@ fn add_user_configs_to_protocol(
   }
   if let Some(user_device_configs) = user_config_def.user_device_configs() {
     for user_config in user_device_configs {
-      if *user_config.config().allow().as_ref().unwrap_or(&false) {
-        external_config
-          .allow_list
-          .push(user_config.identifier().address().clone());
-      }
-      if *user_config.config().deny().as_ref().unwrap_or(&false) {
-        external_config
-          .deny_list
-          .push(user_config.identifier().address().clone());
-      }
-      if let Some(index) = user_config.config().index().as_ref() {
-        external_config
-          .reserved_indexes
-          .insert(*index, user_config.identifier().clone().into());
-      }
-      let server_ident: ServerDeviceIdentifier = user_config.identifier.clone().into();
+      let server_ident: UserDeviceIdentifier = user_config.identifier.clone().into();
       debug!("Server Ident: {:?}", server_ident);
 
-      let config_attrs = ProtocolDeviceFeatures::new(
-        user_config.config().name.clone(),
-        user_config.config().display_name.clone(),
-        user_config.config().features().clone().unwrap_or_default(),
+      let config_attrs = UserDeviceDefinition::new(
+        user_config.config().name(),
+        user_config.config().features(),
+        user_config.config().user_config()
       );
       info!("Adding user config for {:?}", server_ident);
       external_config
@@ -339,9 +283,9 @@ fn add_user_configs_to_protocol(
   }
 }
 
-#[derive(Deserialize, Serialize, Debug, CopyGetters)]
+#[derive(Deserialize, Serialize, Debug, CopyGetters, Clone, Copy)]
 #[getset(get_copy = "pub", get_mut = "pub")]
-pub struct ConfigVersion {
+struct ConfigVersion {
   pub major: u32,
   pub minor: u32,
 }
@@ -352,18 +296,16 @@ impl Display for ConfigVersion {
   }
 }
 
+pub trait ConfigVersionGetter {
+  fn version(&self) -> ConfigVersion;
+}
+
 #[derive(Deserialize, Serialize, Debug, Getters)]
 #[getset(get = "pub", get_mut = "pub", set = "pub")]
 pub struct ProtocolConfiguration {
   pub version: ConfigVersion,
   #[serde(default, skip_serializing_if = "Option::is_none")]
   pub protocols: Option<HashMap<String, ProtocolDefinition>>,
-  #[serde(
-    rename = "user-configs",
-    default,
-    skip_serializing_if = "Option::is_none"
-  )]
-  pub user_configs: Option<UserConfigDefinition>,
 }
 
 impl Default for ProtocolConfiguration {
@@ -371,8 +313,13 @@ impl Default for ProtocolConfiguration {
     Self {
       version: get_internal_config_version(),
       protocols: Some(HashMap::new()),
-      user_configs: Some(UserConfigDefinition::default()),
     }
+  }
+}
+
+impl ConfigVersionGetter for ProtocolConfiguration {
+  fn version(&self) -> ConfigVersion {
+    self.version
   }
 }
 
@@ -384,6 +331,44 @@ impl ProtocolConfiguration {
         minor: minor_version,
       },
       protocols: None,
+    }
+  }
+}
+
+
+#[derive(Deserialize, Serialize, Debug, Getters)]
+#[getset(get = "pub", get_mut = "pub", set = "pub")]
+pub struct UserProtocolConfiguration {
+  pub version: ConfigVersion,
+  #[serde(
+    rename = "user-configs",
+    default,
+  )]
+  pub user_configs: Option<UserConfigDefinition>,
+}
+
+impl Default for UserProtocolConfiguration {
+  fn default() -> Self {
+    Self {
+      version: get_internal_config_version(),
+      user_configs: Some(UserConfigDefinition::default()),
+    }
+  }
+}
+
+impl ConfigVersionGetter for UserProtocolConfiguration {
+  fn version(&self) -> ConfigVersion {
+    self.version
+  }
+}
+
+impl UserProtocolConfiguration {
+  pub fn new(major_version: u32, minor_version: u32) -> Self {
+    Self {
+      version: ConfigVersion {
+        major: major_version,
+        minor: minor_version,
+      },
       user_configs: None,
     }
   }
@@ -401,19 +386,19 @@ fn get_internal_config_version() -> ConfigVersion {
   config.version
 }
 
-fn load_protocol_config_from_json(
-  config_str: &str,
+fn load_protocol_config_from_json<'a, T>(
+  config_str: &'a str,
   skip_version_check: bool,
-) -> Result<ProtocolConfiguration, ButtplugDeviceError> {
+) -> Result<T, ButtplugDeviceError> where T: ConfigVersionGetter + Deserialize<'a> {
   let config_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
   match config_validator.validate(config_str) {
-    Ok(_) => match serde_json::from_str::<ProtocolConfiguration>(config_str) {
+    Ok(_) => match serde_json::from_str::<T>(config_str) {
       Ok(protocol_config) => {
         let internal_config_version = get_internal_config_version();
-        if !skip_version_check && protocol_config.version.major != internal_config_version.major {
+        if !skip_version_check && protocol_config.version().major != internal_config_version.major {
           Err(ButtplugDeviceError::DeviceConfigurationError(format!(
             "Device configuration file major version {} is different than internal major version {}. Cannot load external files that do not have matching major version numbers.",
-            protocol_config.version,
+            protocol_config.version(),
             internal_config_version
           )))
         } else {
@@ -443,7 +428,7 @@ fn load_protocol_configs_internal(
     info!("Loading from internal base device configuration...")
   }
   // Start by loading the main config
-  let main_config = load_protocol_config_from_json(
+  let main_config = load_protocol_config_from_json::<ProtocolConfiguration>(
     //&main_config_str.unwrap_or_else(|| DEVICE_CONFIGURATION_JSON.to_owned()),
     DEVICE_CONFIGURATION_JSON,
     skip_version_check,
@@ -467,7 +452,7 @@ fn load_protocol_configs_internal(
       protocol_device_config.specifiers().clone(),
     );
     for (config_ident, config) in protocol_device_config.configurations() {
-      let ident = ProtocolAttributesIdentifier::new(&protocol_name, config_ident, &None);
+      let ident = BaseDeviceIdentifier::new(&protocol_name, config_ident);
       protocol_features.insert(ident, config.clone());
     }
   }
@@ -481,7 +466,7 @@ fn load_protocol_configs_internal(
   // Then load the user config
   if let Some(user_config) = user_config_str {
     info!("Loading user configuration from string.");
-    let config = load_protocol_config_from_json(&user_config, skip_version_check)?;
+    let config = load_protocol_config_from_json::<UserProtocolConfiguration>(&user_config, skip_version_check)?;
     if let Some(user_configs) = config.user_configs {
       add_user_configs_to_protocol(&mut external_config, user_configs);
     }
@@ -502,18 +487,6 @@ pub fn load_protocol_configs(
   let external_config =
     load_protocol_configs_internal(main_config_str, user_config_str, skip_version_check)?;
 
-  for address in external_config.allow_list() {
-    dcm_builder.allowed_address(address);
-  }
-
-  for address in external_config.deny_list() {
-    dcm_builder.denied_address(address);
-  }
-
-  for (index, address) in external_config.reserved_indexes() {
-    dcm_builder.reserved_index(address, *index);
-  }
-
   for (name, specifiers) in external_config.protocol_specifiers() {
     for spec in specifiers {
       dcm_builder.communication_specifier(name, spec.clone());
@@ -525,14 +498,14 @@ pub fn load_protocol_configs(
   }
 
   for (ident, features) in external_config.user_configs() {
-    dcm_builder.protocol_features(ident.into(), features.clone());
+    dcm_builder.user_protocol_features(ident.clone(), features.clone());
   }
 
   Ok(dcm_builder)
 }
 
 pub fn load_user_configs(user_config_str: &str) -> UserConfigDefinition {
-  load_protocol_config_from_json(user_config_str, true)
+  load_protocol_config_from_json::<UserProtocolConfiguration>(user_config_str, true)
     .unwrap()
     .user_configs
     .unwrap()

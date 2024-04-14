@@ -9,7 +9,7 @@ use crate::core::message::ActuatorType;
 use crate::core::message::ActuatorType::{Constrict, Rotate, Vibrate};
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::{
+  server::
     device::{
       hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
       protocol::{
@@ -19,9 +19,9 @@ use crate::{
         ProtocolIdentifier,
         ProtocolInitializer,
       },
+      configuration::UserDeviceIdentifier,
     },
-    ServerDeviceIdentifier,
-  },
+
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;

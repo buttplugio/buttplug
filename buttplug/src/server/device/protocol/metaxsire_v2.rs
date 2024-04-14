@@ -11,7 +11,7 @@ use crate::server::device::hardware::Hardware;
 use crate::server::device::protocol::ProtocolInitializer;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::{
+  server::
     device::{
       hardware::{HardwareCommand, HardwareWriteCmd},
       protocol::{
@@ -19,9 +19,8 @@ use crate::{
         ProtocolHandler,
         ProtocolIdentifier,
       },
+      configuration::UserDeviceIdentifier,
     },
-    ServerDeviceIdentifier,
-  },
 };
 use async_trait::async_trait;
 use std::sync::Arc;

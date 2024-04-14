@@ -5,20 +5,20 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
+    configuration::{ProtocolDeviceAttributes, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-    ServerDeviceIdentifier,
+    protocol::{
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+    },
   },
 };
 use async_trait::async_trait;
-use std::sync::{
-  atomic::{AtomicU8, Ordering},
-  Arc,
-};
+use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -44,9 +44,9 @@ impl ProtocolIdentifier for YououIdentifier {
   async fn identify(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+  ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     Ok((
-      ServerDeviceIdentifier::new(
+      UserDeviceIdentifier::new(
         hardware.address(),
         "Youou",
         &Some("VX001_".to_owned()),
@@ -92,7 +92,7 @@ impl ProtocolHandler for Youou {
     let mut data = vec![
       0xaa,
       0x55,
-      self.packet_id.load(Ordering::SeqCst),
+      self.packet_id.load(Ordering::Relaxed),
       0x02,
       0x03,
       0x01,
@@ -100,8 +100,8 @@ impl ProtocolHandler for Youou {
       state,
     ];
     self.packet_id.store(
-      self.packet_id.load(Ordering::SeqCst).wrapping_add(1),
-      Ordering::SeqCst,
+      self.packet_id.load(Ordering::Relaxed).wrapping_add(1),
+      Ordering::Relaxed,
     );
     let mut crc: u8 = 0;
 

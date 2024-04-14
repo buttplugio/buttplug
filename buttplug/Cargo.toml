@@ -74,7 +74,7 @@ cfg-if = "1.0.0"
 tracing = "0.1.40"
 tracing-futures = "0.2.5"
 tracing-subscriber = { version = "0.3.18", features = ["json"] }
-dashmap = "5.5.3"
+dashmap = { version = "5.5.3", features = ["serde"] }
 displaydoc = "0.2.4"
 tokio = { version = "1.36.0", features = ["sync", "macros", "io-util"] }
 async-stream = "0.3.5"

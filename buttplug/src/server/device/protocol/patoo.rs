@@ -14,7 +14,7 @@ use crate::{
   server::device::{
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-    ServerDeviceIdentifier,
+    configuration::UserDeviceIdentifier,
   },
 };
 use async_trait::async_trait;
@@ -44,7 +44,7 @@ impl ProtocolIdentifier for PatooIdentifier {
   async fn identify(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+  ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     // Patoo Love devices have wildcarded names of ([A-Z]+)\d*
     // Force the identifier lookup to the non-numeric portion
     let c: Vec<char> = hardware.name().chars().collect();
@@ -54,7 +54,7 @@ impl ProtocolIdentifier for PatooIdentifier {
     }
     let name: String = c[0..i].iter().collect();
     Ok((
-      ServerDeviceIdentifier::new(
+      UserDeviceIdentifier::new(
         hardware.address(),
         "Patoo",
         &Some(name),

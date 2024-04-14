@@ -12,9 +12,9 @@ use crate::{
     message::{self, Endpoint},
   },
   server::device::{
+    configuration::UserDeviceIdentifier,
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-    ServerDeviceIdentifier,
   },
   util::{async_manager, sleep},
 };
@@ -51,7 +51,7 @@ impl ProtocolIdentifier for SatisfyerIdentifier {
   async fn identify(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+  ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     let result = hardware
       .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
       .await?;
@@ -65,7 +65,7 @@ impl ProtocolIdentifier for SatisfyerIdentifier {
       device_identifier
     );
     return Ok((
-      ServerDeviceIdentifier::new(
+      UserDeviceIdentifier::new(
         hardware.address(),
         "satisfyer",
         &Some(device_identifier),
@@ -90,7 +90,7 @@ impl ProtocolInitializer for SatisfyerInitializer {
     info_fut.await?;
 
     let mut feature_count = 2; // fallback to 2
-    if let Some(attrs) = attributes.message_attributes.scalar_cmd() {
+    if let Some(attrs) = attributes.message_attributes().scalar_cmd() {
       feature_count = attrs.len();
     }
     Ok(Arc::new(Satisfyer::new(hardware, feature_count)))

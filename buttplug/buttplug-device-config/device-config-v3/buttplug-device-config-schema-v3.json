@@ -233,12 +233,74 @@
         "additionalProperties": false
       }
     },
-    "user-config": {
+    "user-config-features": {
+      "type": "array",
+      "description": "Attributes for device messages, with additional customization for user configs.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "feature-type": {
+            "type": "string",
+            "pattern": "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|Battery|RSSI|Pressure)$"
+          },
+          "actuator": {
+            "type": "object",
+            "properties": {
+              "step-range": {
+                "$ref": "#/components/step-range"
+              },
+              "step-limit": {
+                "$ref": "#/components/step-range"
+              },
+              "messages": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^(ScalarCmd|RotateCmd|LinearCmd)$"
+                }
+              }
+            },
+            "required": [
+              "step-range",
+              "messages"
+            ]
+          },
+          "sensor": {
+            "type": "object",
+            "properties": {
+              "value-range": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/step-range"
+                },
+                "minItems": 1
+              },
+              "messages": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^(SensorReadCmd|SensorSubscribeCmd)$"
+                }
+              }
+            },
+            "required": [
+              "value-range",
+              "messages"
+            ]
+          }
+        },
+        "required": [
+          "feature-type"
+        ],
+        "additionalProperties": false
+      }
+    },    
+    "user-config-customization": {
       "type": "object",
       "properties": {
-        "name": {
-          "type": "string"
-        },
         "allow": {
           "type": "boolean"
         },
@@ -250,9 +312,26 @@
         },
         "index": {
           "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "allow",
+        "deny",
+        "index"
+      ]
+    },
+    "user-config-definition": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
         },
         "features": {
-          "$ref": "#/components/features"
+          "$ref": "#/components/user-config-features"
+        },
+        "user-config": {
+          "$ref": "#/components/user-config-customization"
         }
       },
       "additionalProperties": false
@@ -292,6 +371,7 @@
           }
         },
         "required": [
+          "name",
           "identifier"
         ],
         "additionalProperties": false
@@ -407,7 +487,7 @@
                 ]
               },
               "config": {
-                "$ref": "#/components/user-config"
+                "$ref": "#/components/user-config-definition"
               }
             },
             "additionalProperties": false,

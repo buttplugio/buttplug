@@ -10,8 +10,8 @@ use crate::util::{
   TestDeviceChannelHost,
 };
 use buttplug::{
-  server::{ButtplugServer, ButtplugServerBuilder},
-  util::async_manager,
+  server::{device::ServerDeviceManagerBuilder, ButtplugServer, ButtplugServerBuilder},
+  util::{async_manager, device_configuration::load_protocol_configs},
 };
 use client::{ButtplugClient, ButtplugClientEvent};
 use device::{ButtplugClientDevice, LinearCommand, RotateCommand, VibrateCommand};
@@ -91,19 +91,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
 }
 
 fn build_server(test_case: &DeviceTestCase) -> (ButtplugServer, Vec<TestDeviceChannelHost>) {
-  // Create our TestDeviceManager with the device identifier we want to create
-  let mut builder = TestDeviceCommunicationManagerBuilder::default();
-  let mut device_channels = vec![];
-  for device in &test_case.devices {
-    info!("identifier: {:?}", device.identifier);
-    device_channels.push(builder.add_test_device(&device.identifier));
-  }
-
-  // Bring up a server with the TDM
-  let mut server_builder = ButtplugServerBuilder::default();
-  server_builder.comm_manager(builder);
-
-  if let Some(device_config_file) = &test_case.device_config_file {
+  let base_cfg = if let Some(device_config_file) = &test_case.device_config_file {
     let config_file_path = std::path::Path::new(
       &std::env::var("CARGO_MANIFEST_DIR").expect("Should have manifest path"),
     )
@@ -114,11 +102,13 @@ fn build_server(test_case: &DeviceTestCase) -> (ButtplugServer, Vec<TestDeviceCh
     .join("config")
     .join(device_config_file);
 
-    server_builder.device_configuration_json(Some(
+    Some(
       std::fs::read_to_string(config_file_path).expect("Should be able to load config"),
-    ));
-  }
-  if let Some(user_device_config_file) = &test_case.user_device_config_file {
+    )
+  } else {
+    None
+  };
+  let user_cfg = if let Some(user_device_config_file) = &test_case.user_device_config_file {
     let config_file_path = std::path::Path::new(
       &std::env::var("CARGO_MANIFEST_DIR").expect("Should have manifest path"),
     )
@@ -128,12 +118,25 @@ fn build_server(test_case: &DeviceTestCase) -> (ButtplugServer, Vec<TestDeviceCh
     .join("device_test_case")
     .join("config")
     .join(user_device_config_file);
-    server_builder.user_device_configuration_json(Some(
+    Some(
       std::fs::read_to_string(config_file_path).expect("Should be able to load config"),
-    ));
+    )
+  } else {
+    None
+  };
+
+  let dcm = load_protocol_configs(base_cfg, user_cfg, false).unwrap().finish().unwrap();
+  // Create our TestDeviceManager with the device identifier we want to create
+  let mut builder = TestDeviceCommunicationManagerBuilder::default();
+  let mut device_channels = vec![];
+  for device in &test_case.devices {
+    info!("identifier: {:?}", device.identifier);
+    device_channels.push(builder.add_test_device(&device.identifier));
   }
+  let dm = ServerDeviceManagerBuilder::new(dcm).comm_manager(builder).finish().unwrap();
+
   (
-    server_builder.finish().expect("Should always build"),
+    ButtplugServerBuilder::new(dm).finish().expect("Should always build"),
     device_channels,
   )
 }

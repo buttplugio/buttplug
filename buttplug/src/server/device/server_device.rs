@@ -51,13 +51,12 @@ use crate::{
 use core::hash::{Hash, Hasher};
 use dashmap::DashSet;
 use futures::future::{self, FutureExt};
-use getset::{Getters, MutGetters, Setters};
-use serde::{Deserialize, Serialize};
+use getset::Getters;
 use tokio::sync::RwLock;
 use tokio_stream::StreamExt;
 
 use super::{
-  configuration::{ProtocolDeviceAttributes, ServerDeviceMessageAttributes},
+  configuration::{ProtocolDeviceAttributes, ServerDeviceMessageAttributes, UserDeviceDefinition, UserDeviceIdentifier},
   hardware::HardwareWriteCmd,
   protocol::{
     generic_command_manager::GenericCommandManager,
@@ -69,35 +68,8 @@ use super::{
 #[derive(Debug)]
 pub enum ServerDeviceEvent {
   Connected(Arc<ServerDevice>),
-  Notification(ServerDeviceIdentifier, ButtplugServerDeviceMessage),
-  Disconnected(ServerDeviceIdentifier),
-}
-
-/// Identifying information for a connected devices
-///
-/// Contains the 3 fields needed to uniquely identify a device in the system.
-#[derive(
-  Debug, Eq, PartialEq, Hash, Clone, Getters, Setters, MutGetters, Serialize, Deserialize,
-)]
-#[getset(get = "pub(crate)", get_mut = "pub(crate)")]
-pub struct ServerDeviceIdentifier {
-  /// Address, as possibly serialized by whatever the managing library for the Device Communication Manager is.
-  address: String,
-  /// Name of the protocol used
-  protocol: String,
-  /// Internal identifier for the protocol used
-  attributes_identifier: Option<String>,
-}
-
-impl ServerDeviceIdentifier {
-  /// Creates a new instance
-  pub fn new(address: &str, protocol: &str, identifier: &Option<String>) -> Self {
-    Self {
-      address: address.to_owned(),
-      protocol: protocol.to_owned(),
-      attributes_identifier: identifier.clone(),
-    }
-  }
+  Notification(UserDeviceIdentifier, ButtplugServerDeviceMessage),
+  Disconnected(UserDeviceIdentifier),
 }
 
 pub(super) async fn build_server_device(
@@ -148,7 +120,7 @@ pub(super) async fn build_server_device(
   // Check in the DeviceConfigurationManager to make sure we have attributes
   // for this device.
   let attrs = if let Some(attrs) =
-    device_config_manager.protocol_device_attributes(&identifier, &hardware.endpoints())
+    device_config_manager.device_definition(&identifier, &hardware.endpoints())
   {
     attrs
   } else {
@@ -164,7 +136,7 @@ pub(super) async fn build_server_device(
   // Build the server device and return.
 
   let handler = protocol_initializer
-    .initialize(hardware.clone(), &attrs)
+    .initialize(hardware.clone(), &attrs.clone().into())
     .await?;
 
   let requires_keepalive = hardware.requires_keepalive();
@@ -191,13 +163,19 @@ pub(super) async fn build_server_device(
   Ok(device)
 }
 
+#[derive(Getters)]
 pub struct ServerDevice {
   hardware: Arc<Hardware>,
   handler: Arc<dyn ProtocolHandler>,
+  #[getset(get = "pub")]
+  definition: UserDeviceDefinition,
+  // Legacy, should be removed once we hit message spec v4, and message fallback to v3 handled
+  // within specific messages.
   attributes: ProtocolDeviceAttributes,
   generic_command_manager: GenericCommandManager,
   /// Unique identifier for the device
-  identifier: ServerDeviceIdentifier,
+  #[getset(get = "pub")]
+  identifier: UserDeviceIdentifier,
   raw_subscribed_endpoints: Arc<DashSet<Endpoint>>,
   keepalive_packet: Arc<RwLock<Option<HardwareWriteCmd>>>,
 }
@@ -228,13 +206,14 @@ impl PartialEq for ServerDevice {
 impl ServerDevice {
   /// Given a protocol and a device impl, create a new ButtplugDevice instance
   fn new(
-    identifier: ServerDeviceIdentifier,
+    identifier: UserDeviceIdentifier,
     handler: Arc<dyn ProtocolHandler>,
     hardware: Arc<Hardware>,
-    attributes: &ProtocolDeviceAttributes,
+    definition: &UserDeviceDefinition,
   ) -> Self {
     let keepalive_packet = Arc::new(RwLock::new(None));
-    let gcm = GenericCommandManager::new(attributes);
+    let attributes = definition.clone().into();
+    let gcm = GenericCommandManager::new(&attributes);
     // If we've gotten here, we know our hardware is connected. This means we can start the keepalive if it's required.
     if hardware.requires_keepalive()
       && !matches!(
@@ -286,19 +265,10 @@ impl ServerDevice {
       handler,
       hardware,
       keepalive_packet,
-      attributes: attributes.clone(),
+      attributes,
+      definition: definition.clone(),
       raw_subscribed_endpoints: Arc::new(DashSet::new()),
     }
-  }
-
-  /// Returns the device identifier
-  pub fn identifier(&self) -> &ServerDeviceIdentifier {
-    &self.identifier
-  }
-
-  /// Get the user created display name for a device, if one exists.
-  pub fn display_name(&self) -> Option<String> {
-    self.attributes.display_name().clone()
   }
 
   /// Get the name of the device as set in the Device Configuration File.
@@ -318,9 +288,9 @@ impl ServerDevice {
       ))
       .is_ok()
     {
-      format!("{} (Raw Messages Allowed)", self.attributes.name())
+      format!("{} (Raw Messages Allowed)", self.definition.name())
     } else {
-      self.attributes.name().to_owned()
+      self.definition.name().to_owned()
     }
   }
 
@@ -331,7 +301,7 @@ impl ServerDevice {
   }
 
   /// Retreive the message attributes for the device.
-  pub fn message_attributes(&self) -> ServerDeviceMessageAttributes {
+  pub fn message_attributes(&self) -> &ServerDeviceMessageAttributes {
     self.attributes.message_attributes()
   }
 

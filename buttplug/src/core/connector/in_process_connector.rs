@@ -91,11 +91,11 @@ impl<'a> ButtplugInProcessClientConnector {
     let (server_outbound_sender, _) = channel(256);
     Self {
       server_outbound_sender,
-      server: Arc::new(server.unwrap_or_else(|| {
+      server: Arc::new(server.unwrap()/*.unwrap_or_else(|| {
         ButtplugServerBuilder::default()
           .finish()
           .expect("Default server builder should always work.")
-      })),
+      })*/),
       connected: Arc::new(AtomicBool::new(false)),
     }
   }

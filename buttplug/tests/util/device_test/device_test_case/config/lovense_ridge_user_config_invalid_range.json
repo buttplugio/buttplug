@@ -12,6 +12,7 @@
           "identifier": "F"
         },
         "config": {
+          "name": "Lovense Ridge",
           "features": [
             {
               "feature-type": "Oscillate",
@@ -41,7 +42,12 @@
                 ]
               }
             }
-          ]
+          ],
+          "user-config": {
+            "allow": false,
+            "deny": false,
+            "index": 0
+          }
         }
       }
     ]

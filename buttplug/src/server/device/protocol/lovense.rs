@@ -14,7 +14,7 @@ use crate::{
   server::device::{
     hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-    ServerDeviceIdentifier,
+    configuration::UserDeviceIdentifier,
   },
   util::sleep,
 };
@@ -84,7 +84,7 @@ impl ProtocolIdentifier for LovenseIdentifier {
   async fn identify(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+  ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     let mut event_receiver = hardware.event_stream();
     let mut count = 0;
     hardware
@@ -101,7 +101,7 @@ impl ProtocolIdentifier for LovenseIdentifier {
             let type_response = std::str::from_utf8(&n).map_err(|_| ButtplugDeviceError::ProtocolSpecificError("lovense".to_owned(), "Lovense device init got back non-UTF8 string.".to_owned()))?.to_owned();
             debug!("Lovense Device Type Response: {}", type_response);
             let ident = lovense_model_resolver(type_response);
-            return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &Some(ident.clone())), Box::new(LovenseInitializer::new(ident))));
+            return Ok((UserDeviceIdentifier::new(hardware.address(), "lovense", &Some(ident.clone())), Box::new(LovenseInitializer::new(ident))));
           } else {
             return Err(
               ButtplugDeviceError::ProtocolSpecificError(
@@ -118,9 +118,9 @@ impl ProtocolIdentifier for LovenseIdentifier {
             let re = Regex::new(r"LVS-([A-Z]+)\d+").expect("Static regex shouldn't fail");
             if let Some(caps) = re.captures(hardware.name()) {
               info!("Lovense Device identified by BLE name");
-              return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &Some(caps[1].to_string())), Box::new(LovenseInitializer::new(caps[1].to_string()))));
+              return Ok((UserDeviceIdentifier::new(hardware.address(), "lovense", &Some(caps[1].to_string())), Box::new(LovenseInitializer::new(caps[1].to_string()))));
             };
-            return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &None), Box::new(LovenseInitializer::new("".to_string()))));
+            return Ok((UserDeviceIdentifier::new(hardware.address(), "lovense", &None), Box::new(LovenseInitializer::new("".to_string()))));
           }
         }
       }
@@ -147,7 +147,7 @@ impl ProtocolInitializer for LovenseInitializer {
     let mut protocol = Lovense::default();
     protocol.device_type = self.device_type.clone();
 
-    if let Some(scalars) = attributes.message_attributes.scalar_cmd() {
+    if let Some(scalars) = attributes.message_attributes().scalar_cmd() {
       protocol.vibrator_count = scalars
         .clone()
         .iter()

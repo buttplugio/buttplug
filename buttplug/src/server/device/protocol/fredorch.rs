@@ -5,22 +5,17 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::{self, Endpoint},
-  },
+  core::{errors::ButtplugDeviceError, message::{self, Endpoint}},
   server::device::{
+    configuration::{ProtocolDeviceAttributes, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{
-      fleshlight_launch_helper::calculate_speed,
       generic_protocol_initializer_setup,
       ProtocolHandler,
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-    ServerDeviceIdentifier,
   },
   util::sleep,
 };
@@ -33,6 +28,8 @@ use std::{
   },
   time::Duration,
 };
+
+use super::fleshlight_launch_helper::calculate_speed;
 
 const FREDORCH_COMMAND_TIMEOUT_MS: u64 = 500;
 
