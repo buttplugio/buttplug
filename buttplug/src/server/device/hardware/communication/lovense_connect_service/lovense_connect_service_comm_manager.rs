@@ -9,8 +9,10 @@ use super::lovense_connect_service_hardware::LovenseServiceHardwareConnector;
 use crate::{
   core::errors::ButtplugDeviceError,
   server::device::hardware::communication::{
-    HardwareCommunicationManager, HardwareCommunicationManagerBuilder,
-    HardwareCommunicationManagerEvent, TimedRetryCommunicationManager,
+    HardwareCommunicationManager,
+    HardwareCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent,
+    TimedRetryCommunicationManager,
     TimedRetryCommunicationManagerImpl,
   },
 };

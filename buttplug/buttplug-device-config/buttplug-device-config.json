@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 27
+    "minor": 28
   },
   "protocols": {
     "lovense": {
@@ -9679,6 +9679,36 @@
               "StepRange": [
                 0,
                 99
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      }
+    },
+    "lioness": {
+      "btle": {
+        "names": [
+          "Lioness",
+          "Lioness2"
+        ],
+        "services": {
+          "d973f2ed-b19e-11e2-9e96-0800200c9a66": {
+            "tx": "d973f2f4-b19e-11e2-9e96-0800200c9a66"
+          },
+          "d973f2e5-b19e-11e2-9e96-0800200c9a66": {
+            "rx": "d973f2e6-b19e-11e2-9e96-0800200c9a66"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Lioness",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                100
               ],
               "ActuatorType": "Vibrate"
             }
