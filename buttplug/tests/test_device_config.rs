@@ -110,227 +110,179 @@ async fn test_basic_device_config() {
   assert!(load_protocol_configs(Some(BASE_CONFIG_JSON.to_owned()), None, false).is_ok());
 }
 
-#[cfg(feature = "server")]
-#[tokio::test]
-#[ignore = "Still need to update for new message format"]
-async fn test_valid_step_range() {
-  let user_config_json = r#"
-  {
-    "version": 63,
-    "user-configs": {
-      "devices": {
-            "test-addr": {
-              "messages": {
-                "VibrateCmd": {
-                  "StepRange": [
-                    [50, 60]
-                  ]
-                }
-              }
-            }
-          }
-    }
-  }
-  "#;
-  assert!(load_protocol_configs(Some(BASE_CONFIG_JSON.to_owned()), Some(user_config_json.to_owned()), false).is_ok());
-}
 
 #[cfg(feature = "server")]
 #[tokio::test]
-#[ignore = "Still need to update for new message format"]
+async fn test_valid_user_config() {
+  let user_config_json = r#"
+  {
+    "version": {
+      major: 3,
+      minor: 0
+    },
+    "user-configs": {
+      "devices": [
+        {
+          "identifier": {
+            "address": "UserConfigTest",
+            "protocol": "lovense",
+            "identifier": "B"
+          },
+          "config": {
+            "name": "Lovense Test Device",
+            "features": [
+              {
+                "feature-type": "Vibrate",
+                "description": "Test Speed",
+                "actuator": {
+                  "step-range": [
+                    0,
+                    20
+                  ],
+                  "step-limit: [
+                    10,
+                    15
+                  ],
+                  "messages": [
+                    "ScalarCmd"
+                  ]
+                }
+              },
+              {
+                "feature-type": "Battery",
+                "description": "Battery Level",
+                "sensor": {
+                  "value-range": [
+                    [
+                      0,
+                      100
+                    ]
+                  ],
+                  "messages": [
+                    "SensorReadCmd"
+                  ]
+                }
+              }
+            ],
+            "user-config": {
+              "allow": false,
+              "deny": false,
+              "index": 0,
+              "display-name": "Lovense Name Test"
+            }
+          }
+        }
+      ]
+    }
+  }"#;
+  assert!(load_protocol_configs(Some(BASE_CONFIG_JSON.to_owned()), Some(user_config_json.to_owned()), false).is_err());
+}
+
+
+#[cfg(feature = "server")]
+#[tokio::test]
 async fn test_invalid_step_range_device_config_wrong_range_length() {
   let user_config_json = r#"
   {
-    "version": 63,
+    "version": {
+      major: 3,
+      minor: 0
+    },
     "user-configs": {
-      "devices": {
-            "test-addr": {
-              "messages": {
-                "VibrateCmd": {
-                  "StepRange": [
-                    [50]
+      "devices": [
+        {
+          "identifier": {
+            "address": "UserConfigTest",
+            "protocol": "lovense",
+            "identifier": "B"
+          },
+          "config": {
+            "name": "Lovense Test Device",
+            "features": [
+              {
+                "feature-type": "Vibrate",
+                "description": "Test Speed",
+                "actuator": {
+                  "step-range": [
+                    10
+                  ],
+                  "messages": [
+                    "ScalarCmd"
+                  ]
+                }
+              },
+              {
+                "feature-type": "Battery",
+                "description": "Battery Level",
+                "sensor": {
+                  "value-range": [
+                    [
+                      0,
+                      100
+                    ]
+                  ],
+                  "messages": [
+                    "SensorReadCmd"
                   ]
                 }
               }
-            }
-      }
-    }
-  }
-  "#;
-  assert!(load_protocol_configs(Some(BASE_CONFIG_JSON.to_owned()), Some(user_config_json.to_owned()), false).is_err());
-}
-
-#[cfg(feature = "server")]
-#[tokio::test]
-#[ignore = "Still need to update for new message format"]
-async fn test_invalid_step_range_device_config_wrong_order() {
-  let user_config_json = r#"
-  {
-    "version": 63,
-    "user-configs": {
-      "devices": {
-            "test-addr": {
-              "messages": {
-                "VibrateCmd": {
-                  "StepRange": [
-                    [60, 50]
-                  ]
-                }
-              }
+            ],
+            "user-config": {
+              "allow": false,
+              "deny": false,
+              "index": 0,
+              "display-name": "Lovense Name Test"
             }
           }
-
+        }
+      ]
     }
   }
   "#;
   assert!(load_protocol_configs(Some(BASE_CONFIG_JSON.to_owned()), Some(user_config_json.to_owned()), false).is_err());
 }
 
-/*
+
 #[tokio::test]
 async fn test_server_builder_null_device_config() {
-  let mut builder = ButtplugServerBuilder::default();
-  let _ = builder
-    .device_configuration_json(None)
-    .finish()
-    .expect("Test, assuming infallible.");
+  assert!(load_protocol_configs(None, None, false).is_ok())
 }
 
 #[tokio::test]
 async fn test_server_builder_device_config_invalid_json() {
-  let mut builder = ButtplugServerBuilder::default();
-  assert!(builder
-    .device_configuration_json(Some("{\"Not Valid JSON\"}".to_owned()))
-    .finish()
-    .is_err());
+  assert!(load_protocol_configs(Some("{\"Not Valid JSON\"}".to_owned()), None, false).is_err())
 }
 
 #[tokio::test]
-async fn test_server_builder_device_config_schema_break() {
-  let mut builder = ButtplugServerBuilder::default();
-  // missing version block.
-  let device_json = r#"{
-      "protocols": {
-        "jejoue": {
-          "btle": {
-            "names": [
-              "Je Joue"
-            ],
-            "services": {
-              "0000fff0-0000-1000-8000-00805f9b34fb": {
-                "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
-              }
-            }
-          },
-          "defaults": {
-            "name": {
-              "en-us": "Je Joue Device"
-            },
-            "messages": {
-              "VibrateCmd": {
-                "FeatureCount": 2,
-                "StepCount": [
-                  5,
-                  5
-                ]
-              }
-            }
-          }
-        },
-      }
-    }"#;
-  assert!(builder
-    .device_configuration_json(Some(device_json.to_owned()))
-    .finish()
-    .is_err());
-}
-
-#[tokio::test]
+#[ignore="Not testing the right thing"]
 async fn test_server_builder_device_config_old_config_version() {
-  let mut builder = ButtplugServerBuilder::default();
   // missing version block.
   let device_json = r#"{
-      "version": 0,
+      "version": {
+        "major": 1,
+        "minor": 0
+      },
       "protocols": {}
     }
     "#;
-  assert!(builder
-    .device_configuration_json(Some(device_json.to_owned()))
-    .finish()
-    .is_err());
+  assert!(load_protocol_configs(Some(device_json.to_owned()), None, false).is_err());
 }
 
 #[tokio::test]
-async fn test_server_builder_null_user_device_config() {
-  let mut builder = ButtplugServerBuilder::default();
-  let _ = builder
-    .user_device_configuration_json(None)
-    .finish()
-    .expect("Test, assuming infallible.");
+async fn test_server_builder_user_device_config_old_config_version() {
+  // missing version block.
+  let device_json = r#"{
+      "version": {
+        "major": 1,
+        "minor": 0
+      },
+      "protocols": {}
+    }
+    "#;
+  assert!(load_protocol_configs(None, Some(device_json.to_owned()), false).is_err());
 }
 
 #[tokio::test]
 async fn test_server_builder_user_device_config_invalid_json() {
-  let mut builder = ButtplugServerBuilder::default();
-  assert!(builder
-    .user_device_configuration_json(Some("{\"Not Valid JSON\"}".to_owned()))
-    .finish()
-    .is_err());
+  assert!(load_protocol_configs(None, Some("{\"Not Valid JSON\"}".to_owned()), false).is_err())
 }
-
-#[tokio::test]
-async fn test_server_builder_user_device_config_schema_break() {
-  let mut builder = ButtplugServerBuilder::default();
-  // missing version block.
-  let device_json = r#"{
-      "protocols": {
-        "jejoue": {
-          "btle": {
-            "names": [
-              "Je Joue"
-            ],
-            "services": {
-              "0000fff0-0000-1000-8000-00805f9b34fb": {
-                "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
-              }
-            }
-          },
-          "defaults": {
-            "name": {
-              "en-us": "Je Joue Device"
-            },
-            "messages": {
-              "VibrateCmd": {
-                "FeatureCount": 2,
-                "StepCount": [
-                  5,
-                  5
-                ]
-              }
-            }
-          }
-        },
-      }
-    }"#;
-  assert!(builder
-    .user_device_configuration_json(Some(device_json.to_owned()))
-    .finish()
-    .is_err());
-}
-
-#[tokio::test]
-#[ignore = "Skip until we've figured out whether we actually want version differences to fail."]
-async fn test_server_builder_user_device_config_old_config_version() {
-  let mut builder = ButtplugServerBuilder::default();
-  // missing version block.
-  let device_json = r#"{
-      "version": 0,
-      "protocols": {}
-    }
-    "#;
-  assert!(builder
-    .user_device_configuration_json(Some(device_json.to_owned()))
-    .finish()
-    .is_err());
-}
-*/

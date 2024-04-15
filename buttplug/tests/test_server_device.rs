@@ -45,7 +45,6 @@ async fn test_capabilities_exposure() {
 }
 
 #[tokio::test]
-#[ignore="Need to fix raw messages"]
 async fn test_server_raw_message() {
   let (server, _) = test_server_with_device("Massage Demo", true);
   let recv = server.event_stream();
