@@ -429,8 +429,7 @@ fn load_protocol_configs_internal(
   }
   // Start by loading the main config
   let main_config = load_protocol_config_from_json::<ProtocolConfiguration>(
-    //&main_config_str.unwrap_or_else(|| DEVICE_CONFIGURATION_JSON.to_owned()),
-    DEVICE_CONFIGURATION_JSON,
+    &main_config_str.unwrap_or_else(|| DEVICE_CONFIGURATION_JSON.to_owned()),
     skip_version_check,
   )?;
 
