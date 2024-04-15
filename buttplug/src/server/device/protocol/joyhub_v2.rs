@@ -156,7 +156,7 @@ impl ProtocolHandler for JoyHubV2 {
             vec![0xa0, 0x0d, 0x00, 0x00, cmd.1 as u8, 0xff],
             false,
           )
-              .into()]);
+          .into()]);
         }
       }
     }

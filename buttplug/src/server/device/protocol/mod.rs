@@ -46,6 +46,7 @@ pub mod leten;
 pub mod libo_elle;
 pub mod libo_shark;
 pub mod libo_vibes;
+pub mod lioness;
 pub mod longlosttouch;
 pub mod lovedistance;
 pub mod lovehoney_desire;
@@ -256,8 +257,8 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     joyhub_v2::setup::JoyHubV2IdentifierFactory::default(),
   );
   add_to_protocol_map(
-  &mut map,
-  joyhub_v3::setup::JoyHubV3IdentifierFactory::default(),
+    &mut map,
+    joyhub_v3::setup::JoyHubV3IdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
@@ -300,6 +301,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     libo_vibes::setup::LiboVibesIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    lioness::setup::LionessIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,

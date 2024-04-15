@@ -11,15 +11,9 @@ use crate::{
     message::{ActuatorType, Endpoint},
   },
   generic_protocol_setup,
-  server::{
-    device::{
-      hardware::{HardwareCommand, HardwareWriteCmd},
-      protocol::{
-        ProtocolHandler,
-        ProtocolIdentifier,
-        ProtocolInitializer,
-      },
-    },
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::ProtocolHandler,
   },
 };
 

@@ -72,7 +72,7 @@ impl ProtocolInitializer for TheHandyInitializer {
     // First we need to set up a session with The Handy. This will require sending the "security
     // initializer" to basically say we're sending plaintext. Due to pb3 making everything
     // optional, we have some Option<T> wrappers here.
-    
+
     // let session_req = protocomm::SessionData {
     //   sec_ver: protocomm::SecSchemeVersion::SecScheme0 as i32,
     //   proto: Some(protocomm::session_data::Proto::Sec0(
