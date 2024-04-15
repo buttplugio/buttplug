@@ -94,6 +94,9 @@ pub struct DeviceFeature {
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(rename = "sensor")]
   sensor: Option<DeviceFeatureSensor>,
+  #[getset(get="pub")]
+  #[serde(skip)]
+  raw: Option<DeviceFeatureRaw>,
 }
 
 impl DeviceFeature {
@@ -103,6 +106,17 @@ impl DeviceFeature {
       feature_type,
       actuator: actuator.clone(),
       sensor: sensor.clone(),
+      raw: None
+    }
+  }
+
+  pub fn new_raw_feature(endpoints: &[Endpoint]) -> Self {
+    Self {
+      description: "Raw Endpoints".to_owned(),
+      feature_type: FeatureType::Raw,
+      actuator: None,
+      sensor: None,
+      raw: Some(DeviceFeatureRaw::new(endpoints))
     }
   }
 }

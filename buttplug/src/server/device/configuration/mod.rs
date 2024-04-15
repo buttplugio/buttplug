@@ -489,7 +489,7 @@ impl DeviceConfigurationManager {
     identifier: &UserDeviceIdentifier,
     raw_endpoints: &[Endpoint],
   ) -> Option<UserDeviceDefinition> {
-    let features = if let Some(attrs) = self.user_protocol_attributes.get(identifier) {
+    let mut features = if let Some(attrs) = self.user_protocol_attributes.get(identifier) {
       debug!("User device config found for {:?}", identifier);
       attrs.as_ref().clone()
     } else if let Some(attrs) = self.protocol_attributes.get(&BaseDeviceIdentifier::new(&identifier.protocol(), &identifier.attributes_identifier())) {
@@ -504,11 +504,11 @@ impl DeviceConfigurationManager {
     } else {
       return None;
     };
-/*
+
     if self.allow_raw_messages {
       features.add_raw_messages(raw_endpoints);
     }
- */
+
     Some(features)
   }
 }
@@ -627,7 +627,6 @@ mod test {
   }
 
   #[test]
-  #[ignore="Need to fix raw device creation"]
   fn test_raw_device_config_creation() {
     let dcm = create_unit_test_dcm(true);
     let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(

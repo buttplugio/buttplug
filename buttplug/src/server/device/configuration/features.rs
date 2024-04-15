@@ -1,7 +1,7 @@
 use getset::{Getters, Setters, MutGetters, CopyGetters};
 use serde::{Serialize, Deserialize};
 
-use crate::core::message::DeviceFeature;
+use crate::core::message::{DeviceFeature, Endpoint};
 
 #[derive(Debug, Clone, Getters)]
 #[getset(get = "pub")]
@@ -65,6 +65,10 @@ impl UserDeviceDefinition {
       features: features.into(),
       user_config: user_config.clone()
     }
+  }
+
+  pub fn add_raw_messages(&mut self, endpoints: &[Endpoint]) {
+    self.features.push(DeviceFeature::new_raw_feature(endpoints));
   }
 }
 
