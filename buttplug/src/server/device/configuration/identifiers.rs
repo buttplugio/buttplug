@@ -1,4 +1,4 @@
-use getset::{Getters, MutGetters, Setters};
+use getset::{Getters, MutGetters};
 use serde::{Serialize, Deserialize};
 
 

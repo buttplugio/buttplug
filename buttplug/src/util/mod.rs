@@ -123,7 +123,7 @@ pub async fn in_process_client(client_name: &str, allow_raw_messages: bool) -> B
     use crate::server::device::hardware::communication::xinput::XInputDeviceCommunicationManagerBuilder;
     device_manager_builder.comm_manager(XInputDeviceCommunicationManagerBuilder::default());
   }
-  let mut server_builder = ButtplugServerBuilder::new(device_manager_builder.finish().unwrap());
+  let server_builder = ButtplugServerBuilder::new(device_manager_builder.finish().unwrap());
   let server = server_builder.finish().unwrap();
   let connector = ButtplugInProcessClientConnectorBuilder::default()
     .server(server)

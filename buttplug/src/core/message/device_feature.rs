@@ -12,8 +12,9 @@ use std::{collections::HashSet, ops::RangeInclusive};
 
 use super::{ActuatorType, SensorType};
 
-#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Default, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FeatureType {
+  #[default]
   Unknown,
   Vibrate,
   // Single Direction Rotation Speed
@@ -38,11 +39,6 @@ pub enum FeatureType {
   Raw,
 }
 
-impl Default for FeatureType {
-  fn default() -> Self {
-    FeatureType::Unknown
-  }
-}
 
 impl From<ActuatorType> for FeatureType {
   fn from(value: ActuatorType) -> Self {

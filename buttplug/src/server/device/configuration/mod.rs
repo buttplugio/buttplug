@@ -154,10 +154,7 @@ use dashmap::DashMap;
 use getset::Getters;
 use std::{
   collections::HashMap,
-  sync::{
-    atomic::AtomicU32,
-    Arc,
-  },
+  sync::Arc,
 };
 
 #[derive(Default, Clone)]

@@ -255,7 +255,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
       }
     };
 
-    async move { fut.await }.boxed()
+    fut.boxed()
   }
 
   fn disconnect(self) -> ButtplugConnectorResultFuture {

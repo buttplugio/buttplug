@@ -461,7 +461,7 @@ impl ButtplugClient {
     let ping_fut = self
       .message_sender
       .send_message_expect_ok(Ping::default().into());
-    async move { ping_fut.await }.boxed()
+    ping_fut.boxed()
   }
 
   pub fn server_name(&self) -> Option<String> {

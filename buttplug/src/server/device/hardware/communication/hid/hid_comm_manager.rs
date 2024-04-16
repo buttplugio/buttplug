@@ -56,7 +56,7 @@ impl TimedRetryCommunicationManagerImpl for HidCommunicationManager {
 
     let mut seen_addresses = vec![];
     for device in api.device_list() {
-      if let None = device.serial_number() {
+      if device.serial_number().is_none() {
         continue;
       }
       let serial_number = device.serial_number().unwrap().to_owned();

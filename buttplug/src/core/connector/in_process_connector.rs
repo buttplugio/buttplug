@@ -12,7 +12,7 @@ use crate::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
     message::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   },
-  server::{ButtplugServer, ButtplugServerBuilder},
+  server::ButtplugServer,
   util::async_manager,
 };
 use futures::{

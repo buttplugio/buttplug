@@ -249,17 +249,17 @@ impl ClientDeviceMessageAttributes {
 
   pub fn finalize(&mut self) {
     if let Some(scalar_attrs) = &mut self.scalar_cmd {
-      for (i, attr) in scalar_attrs.into_iter().enumerate() {
+      for (i, attr) in scalar_attrs.iter_mut().enumerate() {
         attr.index = i as u32;
       }
     }
     if let Some(sensor_read_attrs) = &mut self.sensor_read_cmd {
-      for (i, attr) in sensor_read_attrs.into_iter().enumerate() {
+      for (i, attr) in sensor_read_attrs.iter_mut().enumerate() {
         attr.index = i as u32;
       }
     }
     if let Some(sensor_subscribe_attrs) = &mut self.sensor_subscribe_cmd {
-      for (i, attr) in sensor_subscribe_attrs.into_iter().enumerate() {
+      for (i, attr) in sensor_subscribe_attrs.iter_mut().enumerate() {
         attr.index = i as u32;
       }
     }
