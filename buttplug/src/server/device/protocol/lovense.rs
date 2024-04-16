@@ -210,7 +210,12 @@ impl ProtocolHandler for Lovense {
         .collect::<Vec<_>>();
 
       if speeds.len() == 1 && self.device_type == "H" {
-        speeds.push("20".to_string()); // Max range
+        // Max range unless stopped
+        speeds.push(if speeds[0] == "0" {
+          "0".to_string()
+        } else {
+          "20".to_string()
+        });
       }
 
       let lovense_cmd = format!("Mply:{};", speeds.join(":")).as_bytes().to_vec();
