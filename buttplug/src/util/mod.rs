@@ -25,8 +25,8 @@ pub use wasmtimer::tokio::sleep;
 use crate::{
   client::ButtplugClient,
   core::connector::ButtplugInProcessClientConnectorBuilder,
+  server::device::{configuration::DeviceConfigurationManagerBuilder, ServerDeviceManagerBuilder},
   server::ButtplugServerBuilder,
-  server::device::{configuration::DeviceConfigurationManagerBuilder, ServerDeviceManagerBuilder}
 };
 
 /// Convenience function for creating in-process connectors.
@@ -65,13 +65,13 @@ use crate::{
 /// `run()` method to pass it in.
 #[cfg(all(feature = "server", feature = "client"))]
 pub async fn in_process_client(client_name: &str, allow_raw_messages: bool) -> ButtplugClient {
-
   let mut device_config_builder = DeviceConfigurationManagerBuilder::default();
   if allow_raw_messages {
     device_config_builder.allow_raw_messages();
   }
 
-  let mut device_manager_builder = ServerDeviceManagerBuilder::new(device_config_builder.finish().unwrap());
+  let mut device_manager_builder =
+    ServerDeviceManagerBuilder::new(device_config_builder.finish().unwrap());
   #[cfg(all(
     feature = "btleplug-manager",
     any(
@@ -104,7 +104,8 @@ pub async fn in_process_client(client_name: &str, allow_raw_messages: bool) -> B
   #[cfg(feature = "lovense-connect-service-manager")]
   {
     use crate::server::device::hardware::communication::lovense_connect_service::LovenseConnectServiceCommunicationManagerBuilder;
-    device_manager_builder.comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default());
+    device_manager_builder
+      .comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default());
   }
   #[cfg(all(
     feature = "lovense-dongle-manager",

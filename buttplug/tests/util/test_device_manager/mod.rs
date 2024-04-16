@@ -14,11 +14,7 @@ use buttplug::{
   util::stream::{iffy_is_empty_check, recv_now},
 };
 use std::sync::{Arc, Mutex};
-pub use test_device::{
-  TestDevice,
-  TestDeviceChannelHost,
-  TestHardwareEvent,
-};
+pub use test_device::{TestDevice, TestDeviceChannelHost, TestHardwareEvent};
 #[cfg(feature = "server")]
 pub use test_device_comm_manager::{
   //new_bluetoothle_test_device,

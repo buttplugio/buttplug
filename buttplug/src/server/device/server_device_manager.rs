@@ -26,11 +26,11 @@ use crate::{
   server::{
     device::{
       configuration::{DeviceConfigurationManager, UserDeviceIdentifier},
-      server_device_manager_event_loop::ServerDeviceManagerEventLoop,
       hardware::communication::{
         HardwareCommunicationManager,
         HardwareCommunicationManagerBuilder,
       },
+      server_device_manager_event_loop::ServerDeviceManagerEventLoop,
       ServerDevice,
     },
     ButtplugServerError,
@@ -76,7 +76,7 @@ impl ServerDeviceManagerBuilder {
   pub fn new(device_configuration_manager: DeviceConfigurationManager) -> Self {
     Self {
       device_configuration_manager: Arc::new(device_configuration_manager),
-      comm_managers: vec![]
+      comm_managers: vec![],
     }
   }
 
@@ -282,7 +282,12 @@ impl ServerDeviceManager {
   pub fn device_info(&self, index: u32) -> Option<ServerDeviceInfo> {
     self.devices.get(&index).map(|device| ServerDeviceInfo {
       identifier: device.value().identifier().clone(),
-      display_name: device.value().definition().user_config().display_name().clone(),
+      display_name: device
+        .value()
+        .definition()
+        .user_config()
+        .display_name()
+        .clone(),
     })
   }
 

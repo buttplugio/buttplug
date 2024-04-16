@@ -12,6 +12,7 @@ use crate::{
     message::{self, Endpoint},
   },
   server::device::{
+    configuration::UserDeviceIdentifier,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
       fleshlight_launch_helper::calculate_speed,
@@ -20,7 +21,6 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-    configuration::UserDeviceIdentifier,
   },
 };
 use async_trait::async_trait;

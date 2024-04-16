@@ -6,7 +6,10 @@
 // for full license information.
 
 use crate::{
-  core::{errors::ButtplugDeviceError, message::{ActuatorType, Endpoint}},
+  core::{
+    errors::ButtplugDeviceError,
+    message::{ActuatorType, Endpoint},
+  },
   server::device::{
     configuration::{ProtocolDeviceAttributes, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
@@ -17,7 +20,7 @@ use crate::{
       ProtocolInitializer,
     },
   },
-  util::{async_manager, sleep}
+  util::{async_manager, sleep},
 };
 use async_trait::async_trait;
 use std::{

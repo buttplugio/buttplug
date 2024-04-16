@@ -148,14 +148,15 @@ pub use features::*;
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::protocol::{get_default_protocol_map, ProtocolIdentifierFactory, ProtocolSpecializer}
+  server::device::protocol::{
+    get_default_protocol_map,
+    ProtocolIdentifierFactory,
+    ProtocolSpecializer,
+  },
 };
 use dashmap::DashMap;
 use getset::Getters;
-use std::{
-  collections::HashMap,
-  sync::Arc,
-};
+use std::{collections::HashMap, sync::Arc};
 
 #[derive(Default, Clone)]
 pub struct DeviceConfigurationManagerBuilder {
@@ -286,8 +287,7 @@ impl DeviceConfigurationManagerBuilder {
 
     let user_attribute_tree_map = DashMap::new();
     // Finally, add in user configurations, which will have an address.
-    for kv in &self.user_device_definitions
-    {
+    for kv in &self.user_device_definitions {
       // If we don't have a protocol loaded for this configuration block, just drop it. We can't do
       // anything with it anyways.
       if !protocol_map.contains_key(kv.key().protocol()) {
@@ -309,7 +309,7 @@ impl DeviceConfigurationManagerBuilder {
       user_communication_specifiers: self.user_communication_specifiers.clone(),
       protocol_attributes: attribute_tree_map,
       user_protocol_attributes: user_attribute_tree_map,
-      protocol_map
+      protocol_map,
     })
   }
 }
@@ -356,28 +356,23 @@ impl DeviceConfigurationManager {
     if self
       .user_protocol_attributes
       .iter()
-      .any(|kv| {
-        kv.key().address() == address
-        && kv.value().user_config().deny()
-      }) {
+      .any(|kv| kv.key().address() == address && kv.value().user_config().deny())
+    {
       // If device is outright denied, deny
       info!(
         "Device {} denied by configuration, not connecting.",
         address
       );
       false
-    } else if
-      self
+    } else if self
       .user_protocol_attributes
       .iter()
       .any(|kv| kv.value().user_config().allow())
       && !self
-      .user_protocol_attributes
-      .iter()
-      .any(|kv| {
-        kv.key().address() == address
-        && kv.value().user_config().allow()
-      }) {
+        .user_protocol_attributes
+        .iter()
+        .any(|kv| kv.key().address() == address && kv.value().user_config().allow())
+    {
       // If device is not on allow list and allow list isn't empty, deny
       info!(
         "Device {} not on allow list and allow list not empty, not connecting.",
@@ -393,7 +388,7 @@ impl DeviceConfigurationManager {
     // See if we have a reserved or reusable device index here.
     if let Some(config) = self.user_protocol_attributes.get(identifier) {
       return config.user_config().index();
-    } 
+    }
 
     let current_indexes: Vec<u32> = self
       .user_protocol_attributes
@@ -489,13 +484,19 @@ impl DeviceConfigurationManager {
     let mut features = if let Some(attrs) = self.user_protocol_attributes.get(identifier) {
       debug!("User device config found for {:?}", identifier);
       attrs.as_ref().clone()
-    } else if let Some(attrs) = self.protocol_attributes.get(&BaseDeviceIdentifier::new(&identifier.protocol(), &identifier.attributes_identifier())) {
+    } else if let Some(attrs) = self.protocol_attributes.get(&BaseDeviceIdentifier::new(
+      &identifier.protocol(),
+      &identifier.attributes_identifier(),
+    )) {
       debug!(
         "Protocol + Identifier device config found for {:?}",
         identifier
       );
       attrs.as_ref().clone().into()
-    } else if let Some(attrs) = self.protocol_attributes.get(&BaseDeviceIdentifier::new(&identifier.protocol(), &None)) {
+    } else if let Some(attrs) = self
+      .protocol_attributes
+      .get(&BaseDeviceIdentifier::new(&identifier.protocol(), &None))
+    {
       debug!("Protocol device config found for {:?}", identifier);
       attrs.as_ref().clone().into()
     } else {
@@ -512,10 +513,13 @@ impl DeviceConfigurationManager {
 
 #[cfg(test)]
 mod test {
-  use super::{
-    *,
+  use super::*;
+  use crate::core::message::{
+    ButtplugDeviceMessageType,
+    DeviceFeature,
+    DeviceFeatureActuator,
+    FeatureType,
   };
-  use crate::core::message::{ButtplugDeviceMessageType, DeviceFeature, DeviceFeatureActuator, FeatureType};
   use std::{
     collections::{HashMap, HashSet},
     ops::RangeInclusive,
@@ -534,10 +538,7 @@ mod test {
     ));
     builder.communication_specifier("lovense", specifiers);
     builder.protocol_features(
-      BaseDeviceIdentifier::new(
-        "lovense",
-        &Some("P".to_owned()),
-      ),
+      BaseDeviceIdentifier::new("lovense", &Some("P".to_owned())),
       BaseDeviceDefinition::new(
         "Lovense Edge",
         &vec![
@@ -598,11 +599,7 @@ mod test {
     assert!(!dcm.protocol_specializers(&spec).is_empty());
     let config: ProtocolDeviceAttributes = dcm
       .device_definition(
-        &UserDeviceIdentifier::new(
-          "Whatever",
-          "lovense",
-          &Some("P".to_owned()),
-        ),
+        &UserDeviceIdentifier::new("Whatever", "lovense", &Some("P".to_owned())),
         &[],
       )
       .expect("Should be found")
@@ -634,11 +631,7 @@ mod test {
     assert!(!dcm.protocol_specializers(&spec).is_empty());
     let config: ProtocolDeviceAttributes = dcm
       .device_definition(
-        &UserDeviceIdentifier::new(
-          "Whatever",
-          "lovense",
-          &Some("P".to_owned()),
-        ),
+        &UserDeviceIdentifier::new("Whatever", "lovense", &Some("P".to_owned())),
         &[],
       )
       .expect("Should be found")
@@ -663,11 +656,7 @@ mod test {
     assert!(!dcm.protocol_specializers(&spec).is_empty());
     let config: ProtocolDeviceAttributes = dcm
       .device_definition(
-        &UserDeviceIdentifier::new(
-          "Whatever",
-          "lovense",
-          &Some("P".to_owned()),
-        ),
+        &UserDeviceIdentifier::new("Whatever", "lovense", &Some("P".to_owned())),
         &[],
       )
       .expect("Should be found")

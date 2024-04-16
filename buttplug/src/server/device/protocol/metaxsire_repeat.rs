@@ -9,18 +9,17 @@ use crate::core::message::ActuatorType;
 use crate::core::message::ActuatorType::{Constrict, Rotate, Vibrate};
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::
-    device::{
-      hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-      protocol::{
-        generic_protocol_initializer_setup,
-        ProtocolDeviceAttributes,
-        ProtocolHandler,
-        ProtocolIdentifier,
-        ProtocolInitializer,
-      },
-      configuration::UserDeviceIdentifier,
+  server::device::{
+    configuration::UserDeviceIdentifier,
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{
+      generic_protocol_initializer_setup,
+      ProtocolDeviceAttributes,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
     },
+  },
 
   util::{async_manager, sleep},
 };

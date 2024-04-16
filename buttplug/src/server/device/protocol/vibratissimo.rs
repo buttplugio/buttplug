@@ -6,15 +6,14 @@
 // for full license information.
 
 use crate::{
-  core::{errors::ButtplugDeviceError, message::{ActuatorType, Endpoint}},
+  core::{
+    errors::ButtplugDeviceError,
+    message::{ActuatorType, Endpoint},
+  },
   server::device::{
     configuration::{ProtocolDeviceAttributes, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-    protocol::{
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
-    },
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
 };
 use async_trait::async_trait;
@@ -51,11 +50,7 @@ impl ProtocolIdentifier for VibratissimoIdentifier {
     let ident =
       String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| hardware.name().to_owned());
     Ok((
-      UserDeviceIdentifier::new(
-        hardware.address(),
-        "vibratissimo",
-        &Some(ident),
-      ),
+      UserDeviceIdentifier::new(hardware.address(), "vibratissimo", &Some(ident)),
       Box::new(VibratissimoInitializer::default()),
     ))
   }

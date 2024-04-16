@@ -49,8 +49,10 @@ pub mod device;
 mod ping_timer;
 
 use self::device::{
-  configuration::DeviceConfigurationManagerBuilder, ServerDeviceManager, ServerDeviceManagerBuilder}
-;
+  configuration::DeviceConfigurationManagerBuilder,
+  ServerDeviceManager,
+  ServerDeviceManagerBuilder,
+};
 use crate::{
   core::{
     errors::*,
@@ -66,10 +68,7 @@ use crate::{
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
-  util::{
-    async_manager,
-    stream::convert_broadcast_receiver_to_stream,
-  },
+  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use futures::{
   future::{self, BoxFuture, FutureExt},
@@ -128,11 +127,19 @@ pub struct ButtplugServerBuilder {
 
 impl Default for ButtplugServerBuilder {
   fn default() -> Self {
-      Self {
-        name: "Buttplug Server".to_owned(),
-        max_ping_time: None,
-        device_manager: Arc::new(ServerDeviceManagerBuilder::new(DeviceConfigurationManagerBuilder::default().finish().unwrap()).finish().unwrap())
-      }
+    Self {
+      name: "Buttplug Server".to_owned(),
+      max_ping_time: None,
+      device_manager: Arc::new(
+        ServerDeviceManagerBuilder::new(
+          DeviceConfigurationManagerBuilder::default()
+            .finish()
+            .unwrap(),
+        )
+        .finish()
+        .unwrap(),
+      ),
+    }
   }
 }
 
@@ -141,7 +148,7 @@ impl ButtplugServerBuilder {
     Self {
       name: "Buttplug Server".to_owned(),
       max_ping_time: None,
-      device_manager: Arc::new(device_manager)
+      device_manager: Arc::new(device_manager),
     }
   }
 
@@ -425,7 +432,7 @@ impl ButtplugServer {
 
 #[cfg(test)]
 mod test {
-/*
+  /*
   use crate::{
     core::message::{self, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
     server::ButtplugServer,

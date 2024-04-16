@@ -8,10 +8,23 @@
 use super::json::JSONValidator;
 use crate::{
   core::{errors::ButtplugDeviceError, message::DeviceFeature},
-  server::device::
-    configuration::{
-      BaseDeviceDefinition, BluetoothLESpecifier, BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder, HIDSpecifier, LovenseConnectServiceSpecifier, ProtocolCommunicationSpecifier, SerialSpecifier, USBSpecifier, UserDeviceCustomization, UserDeviceDefinition, UserDeviceIdentifier, WebsocketSpecifier, XInputSpecifier
-    },
+  server::device::configuration::{
+    BaseDeviceDefinition,
+    BaseDeviceIdentifier,
+    BluetoothLESpecifier,
+    DeviceConfigurationManager,
+    DeviceConfigurationManagerBuilder,
+    HIDSpecifier,
+    LovenseConnectServiceSpecifier,
+    ProtocolCommunicationSpecifier,
+    SerialSpecifier,
+    USBSpecifier,
+    UserDeviceCustomization,
+    UserDeviceDefinition,
+    UserDeviceIdentifier,
+    WebsocketSpecifier,
+    XInputSpecifier,
+  },
 };
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
@@ -19,8 +32,9 @@ use std::{collections::HashMap, fmt::Display};
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../buttplug-device-config/build-config/buttplug-device-config-v3.json");
-static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
-  include_str!("../../buttplug-device-config/device-config-v3/buttplug-device-config-schema-v3.json");
+static DEVICE_CONFIGURATION_JSON_SCHEMA: &str = include_str!(
+  "../../buttplug-device-config/device-config-v3/buttplug-device-config-schema-v3.json"
+);
 
 /// The top level configuration for a protocol. Contains all data about devices that can use the
 /// protocol, as well as names, message attributes, etc... for different devices.
@@ -59,7 +73,7 @@ struct UserDeviceConfig {
   #[serde(default)]
   features: Vec<DeviceFeature>,
   #[serde(rename = "user-config")]
-  user_config: UserDeviceCustomization
+  user_config: UserDeviceCustomization,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
@@ -200,7 +214,10 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
     if let Some(defaults) = protocol_def.defaults() {
       let config_attrs = BaseDeviceDefinition::new(
         &defaults.name,
-        defaults.features.as_ref().expect("This is a default, therefore we'll always have features."),
+        defaults
+          .features
+          .as_ref()
+          .expect("This is a default, therefore we'll always have features."),
       );
       configurations.insert(None, config_attrs);
       for config in &protocol_def.configurations {
@@ -209,15 +226,22 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
             let config_attrs = BaseDeviceDefinition::new(
               // Even subconfigurations always have names
               &config.name,
-              config.features.as_ref().or(Some(defaults.features.as_ref().expect("Defaults always have features"))).unwrap(),
+              config
+                .features
+                .as_ref()
+                .or(Some(
+                  defaults
+                    .features
+                    .as_ref()
+                    .expect("Defaults always have features"),
+                ))
+                .unwrap(),
             );
             configurations.insert(Some(identifier.to_owned()), config_attrs);
           }
         }
       }
     }
-
-
 
     Self::new(specifiers, configurations)
   }
@@ -273,7 +297,7 @@ fn add_user_configs_to_protocol(
       let config_attrs = UserDeviceDefinition::new(
         user_config.config().name(),
         user_config.config().features(),
-        user_config.config().user_config()
+        user_config.config().user_config(),
       );
       info!("Adding user config for {:?}", server_ident);
       external_config
@@ -335,15 +359,11 @@ impl ProtocolConfiguration {
   }
 }
 
-
 #[derive(Deserialize, Serialize, Debug, Getters)]
 #[getset(get = "pub", get_mut = "pub", set = "pub")]
 pub struct UserProtocolConfiguration {
   pub version: ConfigVersion,
-  #[serde(
-    rename = "user-configs",
-    default,
-  )]
+  #[serde(rename = "user-configs", default)]
   pub user_configs: Option<UserConfigDefinition>,
 }
 
@@ -389,7 +409,10 @@ fn get_internal_config_version() -> ConfigVersion {
 fn load_protocol_config_from_json<'a, T>(
   config_str: &'a str,
   skip_version_check: bool,
-) -> Result<T, ButtplugDeviceError> where T: ConfigVersionGetter + Deserialize<'a> {
+) -> Result<T, ButtplugDeviceError>
+where
+  T: ConfigVersionGetter + Deserialize<'a>,
+{
   let config_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
   match config_validator.validate(config_str) {
     Ok(_) => match serde_json::from_str::<T>(config_str) {
@@ -465,7 +488,10 @@ fn load_protocol_configs_internal(
   // Then load the user config
   if let Some(user_config) = user_config_str {
     info!("Loading user configuration from string.");
-    let config = load_protocol_config_from_json::<UserProtocolConfiguration>(&user_config, skip_version_check)?;
+    let config = load_protocol_config_from_json::<UserProtocolConfiguration>(
+      &user_config,
+      skip_version_check,
+    )?;
     if let Some(user_configs) = config.user_configs {
       add_user_configs_to_protocol(&mut external_config, user_configs);
     }

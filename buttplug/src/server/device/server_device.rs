@@ -56,7 +56,12 @@ use tokio::sync::RwLock;
 use tokio_stream::StreamExt;
 
 use super::{
-  configuration::{ProtocolDeviceAttributes, ServerDeviceMessageAttributes, UserDeviceDefinition, UserDeviceIdentifier},
+  configuration::{
+    ProtocolDeviceAttributes,
+    ServerDeviceMessageAttributes,
+    UserDeviceDefinition,
+    UserDeviceIdentifier,
+  },
   hardware::HardwareWriteCmd,
   protocol::{
     generic_command_manager::GenericCommandManager,

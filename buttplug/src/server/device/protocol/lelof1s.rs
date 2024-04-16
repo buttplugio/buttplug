@@ -12,6 +12,7 @@ use crate::{
     message::{ActuatorType, Endpoint},
   },
   server::device::{
+    configuration::UserDeviceIdentifier,
     hardware::{Hardware, HardwareCommand, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
@@ -19,7 +20,6 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-    configuration::UserDeviceIdentifier,
   },
 };
 use async_trait::async_trait;

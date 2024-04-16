@@ -1,5 +1,5 @@
-use getset::{Getters, Setters, MutGetters, CopyGetters};
-use serde::{Serialize, Deserialize};
+use getset::{CopyGetters, Getters, MutGetters, Setters};
+use serde::{Deserialize, Serialize};
 
 use crate::core::message::{DeviceFeature, Endpoint};
 
@@ -14,10 +14,7 @@ pub struct BaseDeviceDefinition {
 
 impl BaseDeviceDefinition {
   /// Create a new instance
-  pub fn new(
-    name: &str,
-    features: &[DeviceFeature],
-  ) -> Self {
+  pub fn new(name: &str, features: &[DeviceFeature]) -> Self {
     Self {
       name: name.to_owned(),
       features: features.into(),
@@ -50,7 +47,7 @@ pub struct UserDeviceDefinition {
   /// Message attributes for this device instance.
   features: Vec<DeviceFeature>,
   /// Per-user configurations specific to this device instance.
-  user_config: UserDeviceCustomization
+  user_config: UserDeviceCustomization,
 }
 
 impl UserDeviceDefinition {
@@ -58,22 +55,28 @@ impl UserDeviceDefinition {
   pub fn new(
     name: &str,
     features: &[DeviceFeature],
-    user_config: &UserDeviceCustomization
+    user_config: &UserDeviceCustomization,
   ) -> Self {
     Self {
       name: name.to_owned(),
       features: features.into(),
-      user_config: user_config.clone()
+      user_config: user_config.clone(),
     }
   }
 
   pub fn add_raw_messages(&mut self, endpoints: &[Endpoint]) {
-    self.features.push(DeviceFeature::new_raw_feature(endpoints));
+    self
+      .features
+      .push(DeviceFeature::new_raw_feature(endpoints));
   }
 }
 
 impl From<BaseDeviceDefinition> for UserDeviceDefinition {
   fn from(value: BaseDeviceDefinition) -> Self {
-    Self::new(value.name(), value.features(), &UserDeviceCustomization::default())
+    Self::new(
+      value.name(),
+      value.features(),
+      &UserDeviceCustomization::default(),
+    )
   }
 }

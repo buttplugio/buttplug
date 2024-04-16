@@ -40,7 +40,9 @@ impl TryFrom<FeatureType> for ActuatorType {
       FeatureType::Constrict => Ok(ActuatorType::Constrict),
       FeatureType::Inflate => Ok(ActuatorType::Inflate),
       FeatureType::Position => Ok(ActuatorType::Position),
-      _ => Err(format!("Feature type {value} not valid for ActuatorType conversion"))
+      _ => Err(format!(
+        "Feature type {value} not valid for ActuatorType conversion"
+      )),
     }
   }
 }
@@ -66,7 +68,9 @@ impl TryFrom<FeatureType> for SensorType {
       FeatureType::RSSI => Ok(SensorType::RSSI),
       FeatureType::Button => Ok(SensorType::Button),
       FeatureType::Pressure => Ok(SensorType::Pressure),
-      _ => Err(format!("Feature type {value} not valid for SensorType conversion"))
+      _ => Err(format!(
+        "Feature type {value} not valid for SensorType conversion"
+      )),
     }
   }
 }
@@ -144,19 +148,18 @@ pub struct ClientDeviceMessageAttributes {
 
 impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributes {
   fn from(features: Vec<DeviceFeature>) -> Self {
-
     let actuator_filter = |message_type| {
       let attrs: Vec<ClientGenericDeviceMessageAttributes> = features
-      .iter()
-      .filter(|x| {
-        if let Some(actuator) = x.actuator() {
-          actuator.messages().contains(message_type)
-        } else {
-          false
-        }
-      })
-      .map(|x| x.clone().try_into().unwrap())
-      .collect();
+        .iter()
+        .filter(|x| {
+          if let Some(actuator) = x.actuator() {
+            actuator.messages().contains(message_type)
+          } else {
+            false
+          }
+        })
+        .map(|x| x.clone().try_into().unwrap())
+        .collect();
       if !attrs.is_empty() {
         Some(attrs)
       } else {
@@ -166,16 +169,16 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributes {
 
     let sensor_filter = |message_type| {
       let attrs: Vec<SensorDeviceMessageAttributes> = features
-      .iter()
-      .filter(|x| {
-        if let Some(sensor) = x.sensor() {
-          sensor.messages().contains(message_type)
-        } else {
-          false
-        }
-      })
-      .map(|x| x.clone().try_into().unwrap())
-      .collect();
+        .iter()
+        .filter(|x| {
+          if let Some(sensor) = x.sensor() {
+            sensor.messages().contains(message_type)
+          } else {
+            false
+          }
+        })
+        .map(|x| x.clone().try_into().unwrap())
+        .collect();
       if !attrs.is_empty() {
         Some(attrs)
       } else {
@@ -184,8 +187,6 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributes {
     };
 
     // Raw messages
-
-    
 
     Self {
       scalar_cmd: actuator_filter(&ButtplugDeviceMessageType::ScalarCmd),
@@ -343,7 +344,6 @@ pub struct ClientGenericDeviceMessageAttributes {
   index: u32,
 }
 
-
 impl TryFrom<DeviceFeature> for ClientGenericDeviceMessageAttributes {
   type Error = String;
   fn try_from(value: DeviceFeature) -> Result<Self, Self::Error> {
@@ -359,7 +359,9 @@ impl TryFrom<DeviceFeature> for ClientGenericDeviceMessageAttributes {
       };
       Ok(attrs)
     } else {
-      Err(format!("Cannot produce a GenericDeviceMessageAttribute from a feature with no actuator member"))
+      Err(format!(
+        "Cannot produce a GenericDeviceMessageAttribute from a feature with no actuator member"
+      ))
     }
   }
 }
@@ -435,7 +437,7 @@ impl TryFrom<DeviceFeature> for SensorDeviceMessageAttributes {
         feature_descriptor: value.description().to_owned(),
         sensor_type: (*value.feature_type()).try_into()?,
         sensor_range: sensor.value_range().clone(),
-        index: 0
+        index: 0,
       })
     } else {
       Err("Device Feature does not expose a sensor.".to_owned())

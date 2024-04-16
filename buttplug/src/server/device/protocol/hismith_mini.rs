@@ -6,15 +6,14 @@
 // for full license information.
 
 use crate::{
-  core::{errors::ButtplugDeviceError, message::{ActuatorType, Endpoint}},
+  core::{
+    errors::ButtplugDeviceError,
+    message::{ActuatorType, Endpoint},
+  },
   server::device::{
     configuration::{ProtocolDeviceAttributes, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-    protocol::{
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
-    },
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
 };
 use async_trait::async_trait;
@@ -57,11 +56,7 @@ impl ProtocolIdentifier for HismithMiniIdentifier {
     info!("Hismith Device Identifier: {}", identifier);
 
     Ok((
-      UserDeviceIdentifier::new(
-        hardware.address(),
-        "hismith-mini",
-        &Some(identifier),
-      ),
+      UserDeviceIdentifier::new(hardware.address(), "hismith-mini", &Some(identifier)),
       Box::new(HismithMiniInitializer::default()),
     ))
   }

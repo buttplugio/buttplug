@@ -11,18 +11,11 @@ use crate::{
     message::{ActuatorType, Endpoint},
   },
   generic_protocol_initializer_setup,
-  server::{
-    device::{
-      configuration::ProtocolDeviceAttributes,
-      hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-      protocol::{
-        ProtocolHandler,
-        ProtocolIdentifier,
-        ProtocolInitializer,
-      },
-      configuration::UserDeviceIdentifier,
-    },
-    
+  server::device::{
+    configuration::ProtocolDeviceAttributes,
+    configuration::UserDeviceIdentifier,
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
   util::{async_manager, sleep},
 };

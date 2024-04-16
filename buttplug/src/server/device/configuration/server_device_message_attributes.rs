@@ -9,7 +9,17 @@ use serde::{Deserialize, Serialize};
 use crate::core::{
   errors::ButtplugDeviceError,
   message::{
-    ActuatorType, ButtplugDeviceMessageType, ClientDeviceMessageAttributes, ClientDeviceMessageAttributesBuilder, ClientGenericDeviceMessageAttributes, DeviceFeature, Endpoint, NullDeviceMessageAttributes, RawDeviceMessageAttributes, SensorDeviceMessageAttributes, SensorType
+    ActuatorType,
+    ButtplugDeviceMessageType,
+    ClientDeviceMessageAttributes,
+    ClientDeviceMessageAttributesBuilder,
+    ClientGenericDeviceMessageAttributes,
+    DeviceFeature,
+    Endpoint,
+    NullDeviceMessageAttributes,
+    RawDeviceMessageAttributes,
+    SensorDeviceMessageAttributes,
+    SensorType,
   },
 };
 
@@ -173,22 +183,20 @@ pub struct ServerDeviceMessageAttributes {
   vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributes>,
 }
 
-
 impl From<Vec<DeviceFeature>> for ServerDeviceMessageAttributes {
   fn from(features: Vec<DeviceFeature>) -> Self {
-
     let actuator_filter = |message_type| {
       let attrs: Vec<ServerGenericDeviceMessageAttributes> = features
-      .iter()
-      .filter(|x| {
-        if let Some(actuator) = x.actuator() {
-          actuator.messages().contains(message_type)
-        } else {
-          false
-        }
-      })
-      .map(|x| x.clone().try_into().unwrap())
-      .collect();
+        .iter()
+        .filter(|x| {
+          if let Some(actuator) = x.actuator() {
+            actuator.messages().contains(message_type)
+          } else {
+            false
+          }
+        })
+        .map(|x| x.clone().try_into().unwrap())
+        .collect();
       if !attrs.is_empty() {
         Some(attrs)
       } else {
@@ -198,16 +206,16 @@ impl From<Vec<DeviceFeature>> for ServerDeviceMessageAttributes {
 
     let sensor_filter = |message_type| {
       let attrs: Vec<SensorDeviceMessageAttributes> = features
-      .iter()
-      .filter(|x| {
-        if let Some(sensor) = x.sensor() {
-          sensor.messages().contains(message_type)
-        } else {
-          false
-        }
-      })
-      .map(|x| x.clone().try_into().unwrap())
-      .collect();
+        .iter()
+        .filter(|x| {
+          if let Some(sensor) = x.sensor() {
+            sensor.messages().contains(message_type)
+          } else {
+            false
+          }
+        })
+        .map(|x| x.clone().try_into().unwrap())
+        .collect();
       if !attrs.is_empty() {
         Some(attrs)
       } else {
@@ -216,10 +224,10 @@ impl From<Vec<DeviceFeature>> for ServerDeviceMessageAttributes {
     };
 
     // Raw messages
-    let raw_attrs = if let Some(raw_feature) = features
-      .iter()
-      .find(|x| x.raw().is_some()) {
-      Some(RawDeviceMessageAttributes::new(raw_feature.raw().as_ref().unwrap().endpoints()))
+    let raw_attrs = if let Some(raw_feature) = features.iter().find(|x| x.raw().is_some()) {
+      Some(RawDeviceMessageAttributes::new(
+        raw_feature.raw().as_ref().unwrap().endpoints(),
+      ))
     } else {
       None
     };
@@ -233,11 +241,10 @@ impl From<Vec<DeviceFeature>> for ServerDeviceMessageAttributes {
       raw_read_cmd: raw_attrs.clone(),
       raw_subscribe_cmd: raw_attrs.clone(),
       raw_write_cmd: raw_attrs.clone(),
-      .. Default::default()
+      ..Default::default()
     }
   }
 }
-
 
 impl ServerDeviceMessageAttributes {
   pub fn raw_unsubscribe_cmd(&self) -> &Option<RawDeviceMessageAttributes> {
@@ -471,7 +478,9 @@ impl TryFrom<DeviceFeature> for ServerGenericDeviceMessageAttributes {
       };
       Ok(attrs)
     } else {
-      Err(format!("Cannot produce a GenericDeviceMessageAttribute from a feature with no actuator member"))
+      Err(format!(
+        "Cannot produce a GenericDeviceMessageAttribute from a feature with no actuator member"
+      ))
     }
   }
 }

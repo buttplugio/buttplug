@@ -10,11 +10,7 @@ use crate::{
   server::device::{
     configuration::{ProtocolDeviceAttributes, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-    protocol::{
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
-    },
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
 };
 use async_trait::async_trait;
@@ -57,11 +53,7 @@ impl ProtocolIdentifier for HismithIdentifier {
     info!("Hismith Device Identifier: {}", identifier);
 
     Ok((
-      UserDeviceIdentifier::new(
-        hardware.address(),
-        "hismith",
-        &Some(identifier),
-      ),
+      UserDeviceIdentifier::new(hardware.address(), "hismith", &Some(identifier)),
       Box::new(HismithInitializer::default()),
     ))
   }

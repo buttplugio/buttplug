@@ -13,8 +13,8 @@ pub use util::{
     TestDeviceCommunicationManagerBuilder,
     TestDeviceIdentifier,
   },
-  test_server_with_device,
   test_server_with_comm_manager,
+  test_server_with_device,
 };
 
 use buttplug::{
@@ -29,10 +29,14 @@ use buttplug::{
     },
   },
   server::{
-    device::{hardware::{HardwareCommand, HardwareWriteCmd}, ServerDeviceManagerBuilder},
+    device::{
+      hardware::{HardwareCommand, HardwareWriteCmd},
+      ServerDeviceManagerBuilder,
+    },
     ButtplugServer,
     ButtplugServerBuilder,
-  }, util::device_configuration::create_test_dcm,
+  },
+  util::device_configuration::create_test_dcm,
 };
 use futures::{pin_mut, Stream, StreamExt};
 use std::time::Duration;
@@ -150,7 +154,10 @@ async fn test_device_stop_on_ping_timeout() {
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
   let mut device = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
 
-  let dm_builder = ServerDeviceManagerBuilder::new(create_test_dcm(false)).comm_manager(builder).finish().unwrap();
+  let dm_builder = ServerDeviceManagerBuilder::new(create_test_dcm(false))
+    .comm_manager(builder)
+    .finish()
+    .unwrap();
 
   let mut server_builder = ButtplugServerBuilder::new(dm_builder);
   server_builder.max_ping_time(100);
@@ -242,7 +249,7 @@ async fn test_device_index_generation() {
   let mut _device1 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
   let mut _device2 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
 
-    let server = test_server_with_comm_manager(builder, false);
+  let server = test_server_with_comm_manager(builder, false);
 
   let recv = server.event_stream();
   pin_mut!(recv);

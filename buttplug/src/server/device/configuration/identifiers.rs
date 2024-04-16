@@ -1,20 +1,17 @@
 use getset::{Getters, MutGetters};
-use serde::{Serialize, Deserialize};
-
+use serde::{Deserialize, Serialize};
 
 /// Identifying information for devices that are currently connected or have connected in the past.
 ///
 /// Contains the 3 fields needed to uniquely identify a device in the system. Unlike
 /// [ConfigurationDeviceIdentifier]s, [UserDeviceIdentifier] will always have a device address
 /// available.
-/// 
+///
 /// NOTE: UserDeviceIdentifiers are NOT portable across platforms. For instance, bluetooth addresses
 /// are used for the address field on bluetooth devices. These will differ between all platforms due
 /// to address formatting as well as available information (macOS/iOS and WebBluetooth obfuscate
 /// bluetooth addresses)
-#[derive(
-  Debug, Eq, PartialEq, Hash, Clone, Getters, MutGetters, Serialize, Deserialize,
-)]
+#[derive(Debug, Eq, PartialEq, Hash, Clone, Getters, MutGetters, Serialize, Deserialize)]
 #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
 pub struct UserDeviceIdentifier {
   /// Name of the protocol used
@@ -47,10 +44,7 @@ pub struct BaseDeviceIdentifier {
 }
 
 impl BaseDeviceIdentifier {
-  pub fn new(
-    protocol: &str,
-    attributes_identifier: &Option<String>,
-  ) -> Self {
+  pub fn new(protocol: &str, attributes_identifier: &Option<String>) -> Self {
     Self {
       protocol: protocol.to_owned(),
       attributes_identifier: attributes_identifier.clone(),

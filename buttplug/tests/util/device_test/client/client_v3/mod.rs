@@ -111,9 +111,7 @@ fn build_server(test_case: &DeviceTestCase) -> (ButtplugServer, Vec<TestDeviceCh
     .join("config")
     .join(device_config_file);
 
-    Some(
-      std::fs::read_to_string(config_file_path).expect("Should be able to load config"),
-    )
+    Some(std::fs::read_to_string(config_file_path).expect("Should be able to load config"))
   } else {
     None
   };
@@ -127,14 +125,15 @@ fn build_server(test_case: &DeviceTestCase) -> (ButtplugServer, Vec<TestDeviceCh
     .join("device_test_case")
     .join("config")
     .join(user_device_config_file);
-    Some(
-      std::fs::read_to_string(config_file_path).expect("Should be able to load config"),
-    )
+    Some(std::fs::read_to_string(config_file_path).expect("Should be able to load config"))
   } else {
     None
   };
 
-  let dcm = load_protocol_configs(base_cfg, user_cfg, false).unwrap().finish().unwrap();
+  let dcm = load_protocol_configs(base_cfg, user_cfg, false)
+    .unwrap()
+    .finish()
+    .unwrap();
   // Create our TestDeviceManager with the device identifier we want to create
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
   let mut device_channels = vec![];
@@ -142,10 +141,15 @@ fn build_server(test_case: &DeviceTestCase) -> (ButtplugServer, Vec<TestDeviceCh
     info!("identifier: {:?}", device.identifier);
     device_channels.push(builder.add_test_device(&device.identifier));
   }
-  let dm = ServerDeviceManagerBuilder::new(dcm).comm_manager(builder).finish().unwrap();
+  let dm = ServerDeviceManagerBuilder::new(dcm)
+    .comm_manager(builder)
+    .finish()
+    .unwrap();
 
   (
-    ButtplugServerBuilder::new(dm).finish().expect("Should always build"),
+    ButtplugServerBuilder::new(dm)
+      .finish()
+      .expect("Should always build"),
     device_channels,
   )
 }

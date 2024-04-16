@@ -125,9 +125,9 @@ pub struct ChannelClientTestHelper {
 }
 
 impl Default for ChannelClientTestHelper {
-    fn default() -> Self {
-        Self::new()
-    }
+  fn default() -> Self {
+    Self::new()
+  }
 }
 
 impl ChannelClientTestHelper {
@@ -278,9 +278,9 @@ pub struct ChannelServerTestHelper {
 }
 
 impl Default for ChannelServerTestHelper {
-    fn default() -> Self {
-        Self::new()
-    }
+  fn default() -> Self {
+    Self::new()
+  }
 }
 
 impl ChannelServerTestHelper {

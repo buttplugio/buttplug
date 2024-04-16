@@ -12,9 +12,9 @@ use crate::{
   },
   server::device::{
     configuration::ProtocolDeviceAttributes,
+    configuration::UserDeviceIdentifier,
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-    configuration::UserDeviceIdentifier,
   },
 };
 use async_trait::async_trait;
@@ -61,11 +61,7 @@ impl ProtocolIdentifier for MonsterPubIdentifier {
       Err(_) => "Unknown".to_string(),
     };
     return Ok((
-      UserDeviceIdentifier::new(
-        hardware.address(),
-        "monsterpub",
-        &Some(ident),
-      ),
+      UserDeviceIdentifier::new(hardware.address(), "monsterpub", &Some(ident)),
       Box::new(MonsterPubInitializer::default()),
     ));
   }

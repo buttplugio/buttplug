@@ -352,11 +352,7 @@ mod test {
     let scalar_attributes = ServerDeviceMessageAttributesBuilder::default()
       .scalar_cmd(&vec![scalar_attrs.clone(), scalar_attrs])
       .finish();
-    let device_attributes = ProtocolDeviceAttributes::new(
-      "Whatever",
-      &None,
-      &scalar_attributes,
-    );
+    let device_attributes = ProtocolDeviceAttributes::new("Whatever", &None, &scalar_attributes);
     let mgr = GenericCommandManager::new(&device_attributes);
     let vibrate_msg = ScalarCmd::new(
       0,
@@ -418,11 +414,7 @@ mod test {
     let scalar_attributes = ServerDeviceMessageAttributesBuilder::default()
       .scalar_cmd(&vec![scalar_attrs.clone(), scalar_attrs])
       .finish();
-    let device_attributes = ProtocolDeviceAttributes::new(
-      "Whatever",
-      &None,
-      &scalar_attributes,
-    );
+    let device_attributes = ProtocolDeviceAttributes::new("Whatever", &None, &scalar_attributes);
     let mgr = GenericCommandManager::new(&device_attributes);
     let vibrate_msg = ScalarCmd::new(
       0,
@@ -495,11 +487,7 @@ mod test {
     let vibrate_attributes = ServerDeviceMessageAttributesBuilder::default()
       .scalar_cmd(&vec![vibrate_attrs_1, vibrate_attrs_2])
       .finish();
-    let device_attributes = ProtocolDeviceAttributes::new(
-      "Whatever",
-      &None,
-      &vibrate_attributes,
-    );
+    let device_attributes = ProtocolDeviceAttributes::new("Whatever", &None, &vibrate_attributes);
     let mgr = GenericCommandManager::new(&device_attributes);
     let vibrate_msg = ScalarCmd::new(
       0,
@@ -562,11 +550,7 @@ mod test {
     let rotate_attributes = ServerDeviceMessageAttributesBuilder::default()
       .rotate_cmd(&vec![rotate_attrs.clone(), rotate_attrs])
       .finish();
-    let device_attributes = ProtocolDeviceAttributes::new(
-      "Whatever",
-      &None,
-      &rotate_attributes,
-    );
+    let device_attributes = ProtocolDeviceAttributes::new("Whatever", &None, &rotate_attributes);
     let mgr = GenericCommandManager::new(&device_attributes);
 
     let rotate_msg = RotateCmd::new(

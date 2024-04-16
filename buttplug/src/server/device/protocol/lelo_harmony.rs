@@ -12,6 +12,7 @@ use crate::{
     message::{ActuatorType, Endpoint},
   },
   server::device::{
+    configuration::UserDeviceIdentifier,
     hardware::{
       Hardware,
       HardwareCommand,
@@ -26,7 +27,6 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-    configuration::UserDeviceIdentifier,
   },
 };
 use async_trait::async_trait;

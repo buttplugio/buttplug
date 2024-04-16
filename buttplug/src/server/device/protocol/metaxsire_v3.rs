@@ -7,17 +7,16 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::
-    device::{
-      configuration::ProtocolDeviceAttributes,
-      hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-      protocol::{
-        generic_protocol_initializer_setup,
-        ProtocolHandler,
-        ProtocolIdentifier,
-        ProtocolInitializer,
-      },
-      configuration::UserDeviceIdentifier,
+  server::device::{
+    configuration::ProtocolDeviceAttributes,
+    configuration::UserDeviceIdentifier,
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+    },
   },
   util::{async_manager, sleep},
 };

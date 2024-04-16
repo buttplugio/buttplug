@@ -10,15 +10,14 @@ use crate::{
   server::device::{
     configuration::{ProtocolDeviceAttributes, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
-    },
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
 };
 use async_trait::async_trait;
-use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
+use std::sync::{
+  atomic::{AtomicU8, Ordering},
+  Arc,
+};
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -46,11 +45,7 @@ impl ProtocolIdentifier for YououIdentifier {
     hardware: Arc<Hardware>,
   ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     Ok((
-      UserDeviceIdentifier::new(
-        hardware.address(),
-        "Youou",
-        &Some("VX001_".to_owned()),
-      ),
+      UserDeviceIdentifier::new(hardware.address(), "Youou", &Some("VX001_".to_owned())),
       Box::new(YououInitializer::default()),
     ))
   }
