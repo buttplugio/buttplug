@@ -143,8 +143,8 @@ mod specifier;
 pub use specifier::*;
 mod identifiers;
 pub use identifiers::*;
-mod features;
-pub use features::*;
+mod device_definitions;
+pub use device_definitions::*;
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
@@ -282,7 +282,7 @@ impl DeviceConfigurationManagerBuilder {
       if !protocol_map.contains_key(ident.protocol()) {
         continue;
       }
-      attribute_tree_map.insert(ident.clone(), Arc::new(attr.clone()));
+      attribute_tree_map.insert(ident.clone(), attr.clone());
     }
 
     let user_attribute_tree_map = DashMap::new();
@@ -293,7 +293,7 @@ impl DeviceConfigurationManagerBuilder {
       if !protocol_map.contains_key(kv.key().protocol()) {
         continue;
       }
-      user_attribute_tree_map.insert(kv.key().clone(), Arc::new(kv.value().clone()));
+      user_attribute_tree_map.insert(kv.key().clone(), kv.value().clone());
     }
 
     // Make sure it's all valid.
@@ -305,10 +305,10 @@ impl DeviceConfigurationManagerBuilder {
 
     Ok(DeviceConfigurationManager {
       allow_raw_messages: self.allow_raw_messages,
-      communication_specifiers: self.communication_specifiers.clone(),
+      base_communication_specifiers: self.communication_specifiers.clone(),
       user_communication_specifiers: self.user_communication_specifiers.clone(),
-      protocol_attributes: attribute_tree_map,
-      user_protocol_attributes: user_attribute_tree_map,
+      base_device_definitions: attribute_tree_map,
+      user_device_definitions: user_attribute_tree_map,
       protocol_map,
     })
   }
@@ -329,14 +329,21 @@ impl DeviceConfigurationManagerBuilder {
 pub struct DeviceConfigurationManager {
   /// If true, add raw message support to connected devices
   allow_raw_messages: bool,
-  communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
-  #[getset(get = "pub")]
-  user_communication_specifiers: DashMap<String, Vec<ProtocolCommunicationSpecifier>>,
-  protocol_attributes: HashMap<BaseDeviceIdentifier, Arc<BaseDeviceDefinition>>,
-  #[getset(get = "pub")]
-  user_protocol_attributes: DashMap<UserDeviceIdentifier, Arc<UserDeviceDefinition>>,
   /// Map of protocol names to their respective protocol instance factories
   protocol_map: HashMap<String, Arc<dyn ProtocolIdentifierFactory>>,
+  /// Communication specifiers from the base device config, mapped from protocol name to vector of
+  /// specifiers. Should not change/update during a session.
+  base_communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
+  /// Device definitions from the base device config. Should not change/update during a session.
+  base_device_definitions: HashMap<BaseDeviceIdentifier, BaseDeviceDefinition>,
+  /// Communication specifiers provided by the user, mapped from protocol name to vector of
+  /// specifiers. Loaded at session start, may change over life of session.
+  #[getset(get = "pub")]
+  user_communication_specifiers: DashMap<String, Vec<ProtocolCommunicationSpecifier>>,
+  /// Device definitions from the base device config. Loaded at session start, may change over life
+  /// of session.
+  #[getset(get = "pub")]
+  user_device_definitions: DashMap<UserDeviceIdentifier, UserDeviceDefinition>,
 }
 
 impl Default for DeviceConfigurationManager {
@@ -354,7 +361,7 @@ impl DeviceConfigurationManager {
   pub fn address_allowed(&self, address: &str) -> bool {
     // Make sure the device isn't on the deny list
     if self
-      .user_protocol_attributes
+      .user_device_definitions
       .iter()
       .any(|kv| kv.key().address() == address && kv.value().user_config().deny())
     {
@@ -365,11 +372,11 @@ impl DeviceConfigurationManager {
       );
       false
     } else if self
-      .user_protocol_attributes
+      .user_device_definitions
       .iter()
       .any(|kv| kv.value().user_config().allow())
       && !self
-        .user_protocol_attributes
+        .user_device_definitions
         .iter()
         .any(|kv| kv.key().address() == address && kv.value().user_config().allow())
     {
@@ -386,12 +393,12 @@ impl DeviceConfigurationManager {
 
   fn device_index(&self, identifier: &UserDeviceIdentifier) -> u32 {
     // See if we have a reserved or reusable device index here.
-    if let Some(config) = self.user_protocol_attributes.get(identifier) {
+    if let Some(config) = self.user_device_definitions.get(identifier) {
       return config.user_config().index();
     }
 
     let current_indexes: Vec<u32> = self
-      .user_protocol_attributes
+      .user_device_definitions
       .iter()
       .map(|x| x.user_config().index())
       .collect();
@@ -414,7 +421,7 @@ impl DeviceConfigurationManager {
   pub fn protocol_device_configurations(
     &self,
   ) -> HashMap<String, Vec<ProtocolCommunicationSpecifier>> {
-    self.communication_specifiers.clone()
+    self.base_communication_specifiers.clone()
   }
 
   pub fn protocol_specializers(
@@ -426,52 +433,38 @@ impl DeviceConfigurationManager {
       specifier
     );
     let mut specializers = vec![];
-    for spec in self.user_communication_specifiers.iter() {
-      let name = spec.key();
-      let specifiers = spec.value();
+
+    let mut update_specializer_map = |name: &str, specifiers: &Vec<ProtocolCommunicationSpecifier>| {
       if specifiers.contains(specifier) {
         info!(
           "Found protocol {:?} for user specifier {:?}.",
           name, specifier
         );
 
-        if !self.protocol_map.contains_key(name) {
-          warn!(
-            "No protocol implementation for {:?} found for user specifier {:?}.",
-            name, specifier
-          );
-          continue;
-        }
-        specializers.push(ProtocolSpecializer::new(
-          specifiers.clone(),
-          self
-            .protocol_map
-            .get(name)
-            .expect("already checked existence")
-            .create(),
-        ));
-      }
-    }
-    for (name, specifiers) in self.communication_specifiers.iter() {
-      if specifiers.contains(specifier) {
-        info!("Found protocol {:?} for specifier {:?}.", name, specifier);
-
-        if !self.protocol_map.contains_key(name) {
+        if self.protocol_map.contains_key(name) {
+          specializers.push(ProtocolSpecializer::new(
+            specifiers.clone(),
+            self
+              .protocol_map
+              .get(name)
+              .expect("already checked existence")
+              .create(),
+          ));
+        } else {
           warn!(
             "No protocol implementation for {:?} found for specifier {:?}.",
             name, specifier
           );
-          continue;
         }
-        specializers.push(ProtocolSpecializer::new(
-          specifiers.clone(),
-          self
-            .protocol_map
-            .get(name)
-            .expect("already checked existence")
-            .create(),
-        ));
       }
+    };
+
+    // Loop through both maps, as chaining between DashMap and HashMap gets kinda gross.
+    for spec in self.user_communication_specifiers.iter() {
+      update_specializer_map(spec.key(), spec.value());
+    }
+    for (name, specifiers) in self.base_communication_specifiers.iter() {
+      update_specializer_map(name, specifiers);
     }
     specializers
   }
@@ -481,10 +474,10 @@ impl DeviceConfigurationManager {
     identifier: &UserDeviceIdentifier,
     raw_endpoints: &[Endpoint],
   ) -> Option<UserDeviceDefinition> {
-    let mut features = if let Some(attrs) = self.user_protocol_attributes.get(identifier) {
+    let mut features = if let Some(attrs) = self.user_device_definitions.get(identifier) {
       debug!("User device config found for {:?}", identifier);
-      attrs.as_ref().clone()
-    } else if let Some(attrs) = self.protocol_attributes.get(&BaseDeviceIdentifier::new(
+      attrs.clone()
+    } else if let Some(attrs) = self.base_device_definitions.get(&BaseDeviceIdentifier::new(
       &identifier.protocol(),
       &identifier.attributes_identifier(),
     )) {
@@ -492,16 +485,26 @@ impl DeviceConfigurationManager {
         "Protocol + Identifier device config found for {:?}",
         identifier
       );
-      attrs.as_ref().clone().into()
+      UserDeviceDefinition::new_from_base_definition(attrs, self.device_index(identifier))
     } else if let Some(attrs) = self
-      .protocol_attributes
+      .base_device_definitions
       .get(&BaseDeviceIdentifier::new(&identifier.protocol(), &None))
     {
       debug!("Protocol device config found for {:?}", identifier);
-      attrs.as_ref().clone().into()
+      UserDeviceDefinition::new_from_base_definition(attrs, self.device_index(identifier))
     } else {
       return None;
     };
+
+    // If this is a new device, it needs to be added to the user device definition map. Make sure we
+    // do this before we add raw message features.
+    //
+    // Device definitions are looked up before we fully initialize a device, mostly for algorithm
+    // preparation. There is a very small chance we may save the device config then error out when
+    // we connect to the device, but we'll assume we may connect successfully later.
+    if self.user_device_definitions.get(identifier).is_none() {
+      self.user_device_definitions.insert(identifier.clone(), features.clone());
+    }
 
     if self.allow_raw_messages {
       features.add_raw_messages(raw_endpoints);

@@ -64,19 +64,20 @@ impl UserDeviceDefinition {
     }
   }
 
+  pub fn new_from_base_definition(def: &BaseDeviceDefinition, index: u32) -> Self {
+    Self {
+      name: def.name().clone(),
+      features: def.features().clone(),
+      user_config: UserDeviceCustomization {
+        index: index,
+        .. Default::default()
+      }
+    }
+  }
+
   pub fn add_raw_messages(&mut self, endpoints: &[Endpoint]) {
     self
       .features
       .push(DeviceFeature::new_raw_feature(endpoints));
-  }
-}
-
-impl From<BaseDeviceDefinition> for UserDeviceDefinition {
-  fn from(value: BaseDeviceDefinition) -> Self {
-    Self::new(
-      value.name(),
-      value.features(),
-      &UserDeviceCustomization::default(),
-    )
   }
 }
