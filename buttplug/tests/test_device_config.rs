@@ -88,7 +88,7 @@ const BASE_VALID_NULL_USER_CONFIG_JSON: &str = r#"
 #[tokio::test]
 async fn test_valid_null_version_config() {
   assert!(
-    load_protocol_configs(None, Some(BASE_VALID_VERSION_CONFIG_JSON.to_owned()), false).is_ok()
+    load_protocol_configs(&None, &Some(BASE_VALID_VERSION_CONFIG_JSON.to_owned()), false).is_ok()
   );
 }
 
@@ -96,8 +96,8 @@ async fn test_valid_null_version_config() {
 #[tokio::test]
 async fn test_valid_null_user_config() {
   assert!(load_protocol_configs(
-    None,
-    Some(BASE_VALID_NULL_USER_CONFIG_JSON.to_owned()),
+    &None,
+    &Some(BASE_VALID_NULL_USER_CONFIG_JSON.to_owned()),
     false
   )
   .is_ok());
@@ -107,8 +107,8 @@ async fn test_valid_null_user_config() {
 #[tokio::test]
 async fn test_invalid_null_version_config() {
   assert!(load_protocol_configs(
-    None,
-    Some(BASE_INVALID_VERSION_CONFIG_JSON.to_owned()),
+    &None,
+    &Some(BASE_INVALID_VERSION_CONFIG_JSON.to_owned()),
     false
   )
   .is_err());
@@ -118,7 +118,7 @@ async fn test_invalid_null_version_config() {
 #[tokio::test]
 #[ignore = "Still need to update for new message format"]
 async fn test_basic_device_config() {
-  assert!(load_protocol_configs(Some(BASE_CONFIG_JSON.to_owned()), None, false).is_ok());
+  assert!(load_protocol_configs(&Some(BASE_CONFIG_JSON.to_owned()), &None, false).is_ok());
 }
 
 #[cfg(feature = "server")]
@@ -186,8 +186,8 @@ async fn test_valid_user_config() {
     }
   }"#;
   assert!(load_protocol_configs(
-    Some(BASE_CONFIG_JSON.to_owned()),
-    Some(user_config_json.to_owned()),
+    &Some(BASE_CONFIG_JSON.to_owned()),
+    &Some(user_config_json.to_owned()),
     false
   )
   .is_err());
@@ -254,8 +254,8 @@ async fn test_invalid_step_range_device_config_wrong_range_length() {
   }
   "#;
   assert!(load_protocol_configs(
-    Some(BASE_CONFIG_JSON.to_owned()),
-    Some(user_config_json.to_owned()),
+    &Some(BASE_CONFIG_JSON.to_owned()),
+    &Some(user_config_json.to_owned()),
     false
   )
   .is_err());
@@ -263,12 +263,12 @@ async fn test_invalid_step_range_device_config_wrong_range_length() {
 
 #[tokio::test]
 async fn test_server_builder_null_device_config() {
-  assert!(load_protocol_configs(None, None, false).is_ok())
+  assert!(load_protocol_configs(&None, &None, false).is_ok())
 }
 
 #[tokio::test]
 async fn test_server_builder_device_config_invalid_json() {
-  assert!(load_protocol_configs(Some("{\"Not Valid JSON\"}".to_owned()), None, false).is_err())
+  assert!(load_protocol_configs(&Some("{\"Not Valid JSON\"}".to_owned()), &None, false).is_err())
 }
 
 #[tokio::test]
@@ -283,7 +283,7 @@ async fn test_server_builder_device_config_old_config_version() {
       "protocols": {}
     }
     "#;
-  assert!(load_protocol_configs(Some(device_json.to_owned()), None, false).is_err());
+  assert!(load_protocol_configs(&Some(device_json.to_owned()), &None, false).is_err());
 }
 
 #[tokio::test]
@@ -297,10 +297,10 @@ async fn test_server_builder_user_device_config_old_config_version() {
       "protocols": {}
     }
     "#;
-  assert!(load_protocol_configs(None, Some(device_json.to_owned()), false).is_err());
+  assert!(load_protocol_configs(&None, &Some(device_json.to_owned()), false).is_err());
 }
 
 #[tokio::test]
 async fn test_server_builder_user_device_config_invalid_json() {
-  assert!(load_protocol_configs(None, Some("{\"Not Valid JSON\"}".to_owned()), false).is_err())
+  assert!(load_protocol_configs(&None, &Some("{\"Not Valid JSON\"}".to_owned()), false).is_err())
 }

@@ -435,8 +435,8 @@ where
 }
 
 fn load_protocol_configs_internal(
-  main_config_str: Option<String>,
-  user_config_str: Option<String>,
+  main_config_str: &Option<String>,
+  user_config_str: &Option<String>,
   skip_version_check: bool,
 ) -> Result<ExternalDeviceConfiguration, ButtplugDeviceError> {
   if main_config_str.is_some() {
@@ -446,7 +446,7 @@ fn load_protocol_configs_internal(
   }
   // Start by loading the main config
   let main_config = load_protocol_config_from_json::<ProtocolConfiguration>(
-    &main_config_str.unwrap_or_else(|| DEVICE_CONFIGURATION_JSON.to_owned()),
+    &main_config_str.as_ref().unwrap_or(&DEVICE_CONFIGURATION_JSON.to_owned()),
     skip_version_check,
   )?;
 
@@ -497,8 +497,8 @@ fn load_protocol_configs_internal(
 }
 
 pub fn load_protocol_configs(
-  main_config_str: Option<String>,
-  user_config_str: Option<String>,
+  main_config_str: &Option<String>,
+  user_config_str: &Option<String>,
   skip_version_check: bool,
 ) -> Result<DeviceConfigurationManagerBuilder, ButtplugDeviceError> {
   let mut dcm_builder = DeviceConfigurationManagerBuilder::default();
@@ -524,7 +524,7 @@ pub fn load_protocol_configs(
 }
 
 pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
-  let devices = load_protocol_configs_internal(None, None, false)
+  let devices = load_protocol_configs_internal(&None, &None, false)
     .expect("If this fails, the whole library goes with it.");
   let mut builder = DeviceConfigurationManagerBuilder::default();
   if allow_raw_messages {

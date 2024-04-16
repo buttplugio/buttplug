@@ -130,7 +130,7 @@ fn build_server(test_case: &DeviceTestCase) -> (ButtplugServer, Vec<TestDeviceCh
     None
   };
 
-  let dcm = load_protocol_configs(base_cfg, user_cfg, false)
+  let dcm = load_protocol_configs(&base_cfg, &user_cfg, false)
     .unwrap()
     .finish()
     .unwrap();
