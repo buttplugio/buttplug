@@ -1,7 +1,7 @@
 mod util;
 //use buttplug::util::async_manager;
 use test_case::test_case;
-use util::DeviceTestCase;
+use util::device_test::DeviceTestCase;
 
 async fn load_test_case(test_file: &str) -> DeviceTestCase {
   // Load the file list from the test cases directory

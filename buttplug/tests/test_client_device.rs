@@ -174,7 +174,7 @@ async fn test_client_device_invalid_command() {
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_client_repeated_deviceadded_message() {
-  let helper = Arc::new(util::ChannelClientTestHelper::new());
+  let helper = Arc::new(util::channel_transport::ChannelClientTestHelper::new());
   helper.simulate_successful_connect().await;
   let helper_clone = helper.clone();
   let mut event_stream = helper.client().event_stream();
@@ -222,7 +222,7 @@ async fn test_client_repeated_deviceadded_message() {
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_client_repeated_deviceremoved_message() {
-  let helper = Arc::new(util::ChannelClientTestHelper::new());
+  let helper = Arc::new(util::channel_transport::ChannelClientTestHelper::new());
   helper.simulate_successful_connect().await;
   let helper_clone = helper.clone();
   let mut event_stream = helper.client().event_stream();

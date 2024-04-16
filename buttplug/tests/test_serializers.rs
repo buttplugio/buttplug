@@ -24,7 +24,7 @@ use buttplug::{
 };
 use std::sync::Arc;
 use tokio::sync::Notify;
-use util::ChannelClientTestHelper;
+use util::channel_transport::ChannelClientTestHelper;
 
 #[tokio::test]
 async fn test_garbled_client_rsi_response() {

@@ -11,11 +11,11 @@ pub use test_server::ButtplugTestServer;
 pub mod device_test;
 pub mod test_device_manager;
 pub use delay_device_communication_manager::DelayDeviceCommunicationManagerBuilder;
-mod channel_transport;
+pub mod channel_transport;
 use buttplug::{
   client::ButtplugClient,
   core::connector::ButtplugInProcessClientConnectorBuilder,
-  server::{device::{hardware::communication::{HardwareCommunicationManagerBuilder}, ServerDeviceManagerBuilder}, ButtplugServer, ButtplugServerBuilder}, util::device_configuration::create_test_dcm,
+  server::{device::{hardware::communication::HardwareCommunicationManagerBuilder, ServerDeviceManagerBuilder}, ButtplugServer, ButtplugServerBuilder}, util::device_configuration::create_test_dcm,
 };
 pub use test_device_manager::{
   TestDeviceChannelHost,
