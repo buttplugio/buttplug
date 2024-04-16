@@ -7,8 +7,6 @@
 
 #![crate_type = "lib"]
 #![crate_name = "buttplug"]
-// Required for select! expansion in RemoteServer
-#![recursion_limit = "512"]
 #![doc = include_str!("../README.md")]
 
 //! # An Overview of Buttplug's Module System
