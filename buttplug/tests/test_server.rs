@@ -150,7 +150,7 @@ async fn test_device_stop_on_ping_timeout() {
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
   let mut device = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
 
-  let mut dm_builder = ServerDeviceManagerBuilder::new(create_test_dcm(false)).comm_manager(builder).finish().unwrap();
+  let dm_builder = ServerDeviceManagerBuilder::new(create_test_dcm(false)).comm_manager(builder).finish().unwrap();
 
   let mut server_builder = ButtplugServerBuilder::new(dm_builder);
   server_builder.max_ping_time(100);

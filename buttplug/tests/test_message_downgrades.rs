@@ -20,8 +20,7 @@ use buttplug::{
     Endpoint,
   },
   server::{
-    device::hardware::{HardwareCommand, HardwareWriteCmd},
-    ButtplugServer, ButtplugServerBuilder,
+    device::hardware::{HardwareCommand, HardwareWriteCmd}, ButtplugServerBuilder,
   },
 };
 use futures::{pin_mut, StreamExt};

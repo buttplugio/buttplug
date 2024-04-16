@@ -8,7 +8,6 @@
 mod util;
 extern crate buttplug;
 
-use buttplug::server::ButtplugServerBuilder;
 use buttplug::util::device_configuration::load_protocol_configs;
 
 const BASE_CONFIG_JSON: &str = r#"

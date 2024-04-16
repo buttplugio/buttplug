@@ -17,14 +17,11 @@ use std::sync::{Arc, Mutex};
 pub use test_device::{
   TestDevice,
   TestDeviceChannelHost,
-  TestHardwareConnector,
   TestHardwareEvent,
-  TestHardwareNotification,
 };
 #[cfg(feature = "server")]
 pub use test_device_comm_manager::{
   //new_bluetoothle_test_device,
-  TestDeviceCommunicationManager,
   TestDeviceCommunicationManagerBuilder,
   TestDeviceIdentifier,
 };

@@ -166,8 +166,7 @@ impl ButtplugConnector<ButtplugSpecV2ClientMessage, ButtplugSpecV2ServerMessage>
       return ButtplugConnectorError::ConnectorNotConnected.into();
     }
     let input = msg
-      .try_into()
-      .expect("This is in-process so message conversions will always work.");
+      .into();
     let output_fut = self.server.parse_message(input);
     let sender = self.server_outbound_sender.clone();
     async move {

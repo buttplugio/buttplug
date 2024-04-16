@@ -314,7 +314,7 @@ impl ButtplugClientDevice {
               .into(),
           );
         }
-        speed_vec = Vec::with_capacity(map.len() as usize);
+        speed_vec = Vec::with_capacity(map.len());
         for (idx, speed) in map {
           if idx > vibrator_count - 1 {
             return self.create_boxed_future_client_error(
@@ -331,7 +331,7 @@ impl ButtplugClientDevice {
               .into(),
           );
         }
-        speed_vec = Vec::with_capacity(vec.len() as usize);
+        speed_vec = Vec::with_capacity(vec.len());
         for (i, v) in vec.iter().enumerate() {
           speed_vec.push(VibrateSubcommand::new(i as u32, *v));
         }
@@ -364,7 +364,7 @@ impl ButtplugClientDevice {
             ButtplugDeviceError::DeviceFeatureCountMismatch(linear_count, map.len() as u32).into(),
           );
         }
-        linear_vec = Vec::with_capacity(map.len() as usize);
+        linear_vec = Vec::with_capacity(map.len());
         for (idx, (dur, pos)) in map {
           if idx > linear_count - 1 {
             return self.create_boxed_future_client_error(
@@ -380,7 +380,7 @@ impl ButtplugClientDevice {
             ButtplugDeviceError::DeviceFeatureCountMismatch(linear_count, vec.len() as u32).into(),
           );
         }
-        linear_vec = Vec::with_capacity(vec.len() as usize);
+        linear_vec = Vec::with_capacity(vec.len());
         for (i, v) in vec.iter().enumerate() {
           linear_vec.push(VectorSubcommand::new(i as u32, v.0, v.1));
         }
@@ -413,7 +413,7 @@ impl ButtplugClientDevice {
             ButtplugDeviceError::DeviceFeatureCountMismatch(rotate_count, map.len() as u32).into(),
           );
         }
-        rotate_vec = Vec::with_capacity(map.len() as usize);
+        rotate_vec = Vec::with_capacity(map.len());
         for (idx, (speed, clockwise)) in map {
           if idx > rotate_count - 1 {
             return self.create_boxed_future_client_error(
@@ -429,7 +429,7 @@ impl ButtplugClientDevice {
             ButtplugDeviceError::DeviceFeatureCountMismatch(rotate_count, vec.len() as u32).into(),
           );
         }
-        rotate_vec = Vec::with_capacity(vec.len() as usize);
+        rotate_vec = Vec::with_capacity(vec.len());
         for (i, v) in vec.iter().enumerate() {
           rotate_vec.push(RotationSubcommand::new(i as u32, v.0, v.1));
         }

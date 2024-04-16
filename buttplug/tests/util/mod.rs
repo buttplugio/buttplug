@@ -9,21 +9,18 @@ mod delay_device_communication_manager;
 pub mod test_server;
 pub use test_server::ButtplugTestServer;
 pub mod device_test;
-pub use device_test::DeviceTestCase;
 pub mod test_device_manager;
 pub use delay_device_communication_manager::DelayDeviceCommunicationManagerBuilder;
 mod channel_transport;
 use buttplug::{
   client::ButtplugClient,
   core::connector::ButtplugInProcessClientConnectorBuilder,
-  server::{device::{hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerBuilder}, ServerDeviceManager, ServerDeviceManagerBuilder}, ButtplugServer, ButtplugServerBuilder}, util::device_configuration::create_test_dcm,
+  server::{device::{hardware::communication::{HardwareCommunicationManagerBuilder}, ServerDeviceManagerBuilder}, ButtplugServer, ButtplugServerBuilder}, util::device_configuration::create_test_dcm,
 };
-pub use channel_transport::*;
 pub use test_device_manager::{
   TestDeviceChannelHost,
   TestDeviceCommunicationManagerBuilder,
   TestHardwareEvent,
-  TestHardwareNotification,
 };
 
 use crate::util::test_device_manager::TestDeviceIdentifier;
@@ -109,8 +106,8 @@ pub fn test_server_with_comm_manager<T>(
 ) -> ButtplugServer where T: HardwareCommunicationManagerBuilder + 'static {
   let mut dm_builder = ServerDeviceManagerBuilder::new(create_test_dcm(allow_raw_message));
   dm_builder.comm_manager(dcm);
-  let server = ButtplugServerBuilder::new(dm_builder.finish().unwrap()).finish().unwrap();
-  server
+  
+  ButtplugServerBuilder::new(dm_builder.finish().unwrap()).finish().unwrap()
 }
 
 
