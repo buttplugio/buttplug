@@ -120,12 +120,6 @@ struct UserDeviceConfigPair {
   config: UserDeviceConfig,
 }
 
-impl UserDeviceConfigPair {
-  pub fn new(identifier: UserConfigDeviceIdentifier, config: UserDeviceConfig) -> Self {
-    Self { identifier, config }
-  }
-}
-
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 struct UserConfigDefinition {
@@ -320,16 +314,16 @@ impl Display for ConfigVersion {
   }
 }
 
-pub trait ConfigVersionGetter {
+trait ConfigVersionGetter {
   fn version(&self) -> ConfigVersion;
 }
 
 #[derive(Deserialize, Serialize, Debug, Getters)]
 #[getset(get = "pub", get_mut = "pub", set = "pub")]
 pub struct ProtocolConfiguration {
-  pub version: ConfigVersion,
+  version: ConfigVersion,
   #[serde(default, skip_serializing_if = "Option::is_none")]
-  pub protocols: Option<HashMap<String, ProtocolDefinition>>,
+  protocols: Option<HashMap<String, ProtocolDefinition>>,
 }
 
 impl Default for ProtocolConfiguration {
@@ -361,10 +355,10 @@ impl ProtocolConfiguration {
 
 #[derive(Deserialize, Serialize, Debug, Getters)]
 #[getset(get = "pub", get_mut = "pub", set = "pub")]
-pub struct UserProtocolConfiguration {
-  pub version: ConfigVersion,
+struct UserProtocolConfiguration {
+  version: ConfigVersion,
   #[serde(rename = "user-configs", default)]
-  pub user_configs: Option<UserConfigDefinition>,
+  user_configs: Option<UserConfigDefinition>,
 }
 
 impl Default for UserProtocolConfiguration {
@@ -527,13 +521,6 @@ pub fn load_protocol_configs(
   }
 
   Ok(dcm_builder)
-}
-
-pub fn load_user_configs(user_config_str: &str) -> UserConfigDefinition {
-  load_protocol_config_from_json::<UserProtocolConfiguration>(user_config_str, true)
-    .unwrap()
-    .user_configs
-    .unwrap()
 }
 
 pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
