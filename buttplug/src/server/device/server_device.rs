@@ -77,97 +77,6 @@ pub enum ServerDeviceEvent {
   Disconnected(UserDeviceIdentifier),
 }
 
-pub(super) async fn build_server_device(
-  device_config_manager: Arc<DeviceConfigurationManager>,
-  mut hardware_connector: Box<dyn HardwareConnector>,
-  protocol_specializers: Vec<ProtocolSpecializer>,
-) -> Result<ServerDevice, ButtplugDeviceError> {
-  // We've already checked to make sure we have specializers in the server device manager event
-  // loop. That check used to be here for sake of continuity in building devices in this method, but
-  // having that done before we get here fixes issues with some device advertisement timing (See
-  // #462 for more info.)
-
-  // At this point, we know we've got hardware that is waiting to connect, and enough protocol
-  // info to actually do something after we connect. So go ahead and connect.
-  trace!("Connecting to {:?}", hardware_connector);
-  let mut hardware_specializer = hardware_connector.connect().await?;
-
-  // We can't run these in parallel because we need to only accept one specializer.
-  let mut protocol_identifier = None;
-  let mut hardware_out = None;
-  for protocol_specializer in protocol_specializers {
-    if let Ok(specialized_hardware) = hardware_specializer
-      .specialize(protocol_specializer.specifiers())
-      .await
-    {
-      protocol_identifier = Some(protocol_specializer.identify());
-      hardware_out = Some(specialized_hardware);
-      break;
-    }
-  }
-
-  if protocol_identifier.is_none() {
-    return Err(ButtplugDeviceError::DeviceConfigurationError(
-      "No protocols with viable communication matches for hardware.".to_owned(),
-    ));
-  }
-
-  let mut protocol_identifier_stage = protocol_identifier.unwrap();
-  let hardware = Arc::new(hardware_out.unwrap());
-
-  let (identifier, mut protocol_initializer) =
-    protocol_identifier_stage.identify(hardware.clone()).await?;
-
-  // Now we have an identifier. After this point, if anything fails, consider it a complete
-  // connection failure, as identify may have already run commands on the device, and therefore
-  // put it in an unknown state if anything fails.
-
-  // Check in the DeviceConfigurationManager to make sure we have attributes
-  // for this device.
-  let attrs = if let Some(attrs) =
-    device_config_manager.device_definition(&identifier, &hardware.endpoints())
-  {
-    attrs
-  } else {
-    return Err(ButtplugDeviceError::DeviceConfigurationError(format!(
-      "No protocols with viable protocol attributes for hardware {:?}.",
-      identifier
-    )));
-  };
-
-  // If we have attributes, go ahead and initialize, handing us back our hardware instance that
-  // is now ready to use with the protocol handler.
-
-  // Build the server device and return.
-
-  let handler = protocol_initializer
-    .initialize(hardware.clone(), &attrs.clone().into())
-    .await?;
-
-  let requires_keepalive = hardware.requires_keepalive();
-  let strategy = handler.keepalive_strategy();
-
-  // We now have fully initialized hardware, return a server device.
-  let device = ServerDevice::new(identifier, handler, hardware, &attrs);
-
-  // If we need a keepalive with a packet replay, set this up via stopping the device on connect.
-  if requires_keepalive
-    && matches!(
-      strategy,
-      ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-    )
-  {
-    if let Err(e) = device.handle_stop_device_cmd().await {
-      return Err(ButtplugDeviceError::DeviceConnectionError(format!(
-        "Error setting up keepalive: {}",
-        e
-      )));
-    }
-  }
-
-  Ok(device)
-}
-
 #[derive(Getters)]
 pub struct ServerDevice {
   hardware: Arc<Hardware>,
@@ -209,6 +118,95 @@ impl PartialEq for ServerDevice {
 }
 
 impl ServerDevice {
+  pub(super) async fn build(
+    device_config_manager: Arc<DeviceConfigurationManager>,
+    mut hardware_connector: Box<dyn HardwareConnector>,
+    protocol_specializers: Vec<ProtocolSpecializer>,
+  ) -> Result<Self, ButtplugDeviceError> {
+    // We've already checked to make sure we have specializers in the server device manager event
+    // loop. That check used to be here for sake of continuity in building devices in this method, but
+    // having that done before we get here fixes issues with some device advertisement timing (See
+    // #462 for more info.)
+  
+    // At this point, we know we've got hardware that is waiting to connect, and enough protocol
+    // info to actually do something after we connect. So go ahead and connect.
+    trace!("Connecting to {:?}", hardware_connector);
+    let mut hardware_specializer = hardware_connector.connect().await?;
+  
+    // We can't run these in parallel because we need to only accept one specializer.
+    let mut protocol_identifier = None;
+    let mut hardware_out = None;
+    for protocol_specializer in protocol_specializers {
+      if let Ok(specialized_hardware) = hardware_specializer
+        .specialize(protocol_specializer.specifiers())
+        .await
+      {
+        protocol_identifier = Some(protocol_specializer.identify());
+        hardware_out = Some(specialized_hardware);
+        break;
+      }
+    }
+  
+    if protocol_identifier.is_none() {
+      return Err(ButtplugDeviceError::DeviceConfigurationError(
+        "No protocols with viable communication matches for hardware.".to_owned(),
+      ));
+    }
+  
+    let mut protocol_identifier_stage = protocol_identifier.unwrap();
+    let hardware = Arc::new(hardware_out.unwrap());
+  
+    let (identifier, mut protocol_initializer) =
+      protocol_identifier_stage.identify(hardware.clone()).await?;
+  
+    // Now we have an identifier. After this point, if anything fails, consider it a complete
+    // connection failure, as identify may have already run commands on the device, and therefore
+    // put it in an unknown state if anything fails.
+  
+    // Check in the DeviceConfigurationManager to make sure we have attributes for this device.
+    let attrs = if let Some(attrs) =
+      device_config_manager.device_definition(&identifier, &hardware.endpoints())
+    {
+      attrs
+    } else {
+      return Err(ButtplugDeviceError::DeviceConfigurationError(format!(
+        "No protocols with viable protocol attributes for hardware {:?}.",
+        identifier
+      )));
+    };
+  
+    // If we have attributes, go ahead and initialize, handing us back our hardware instance that
+    // is now ready to use with the protocol handler.
+  
+    // Build the server device and return.
+    let handler = protocol_initializer
+      .initialize(hardware.clone(), &attrs.clone().into())
+      .await?;
+  
+    let requires_keepalive = hardware.requires_keepalive();
+    let strategy = handler.keepalive_strategy();
+  
+    // We now have fully initialized hardware, return a server device.
+    let device = Self::new(identifier, handler, hardware, &attrs);
+  
+    // If we need a keepalive with a packet replay, set this up via stopping the device on connect.
+    if requires_keepalive
+      && matches!(
+        strategy,
+        ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+      )
+    {
+      if let Err(e) = device.handle_stop_device_cmd().await {
+        return Err(ButtplugDeviceError::DeviceConnectionError(format!(
+          "Error setting up keepalive: {}",
+          e
+        )));
+      }
+    }
+  
+    Ok(device)
+  }
+
   /// Given a protocol and a device impl, create a new ButtplugDevice instance
   fn new(
     identifier: UserDeviceIdentifier,

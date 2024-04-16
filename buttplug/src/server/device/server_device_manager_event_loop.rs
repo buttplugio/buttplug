@@ -10,7 +10,6 @@ use crate::{
   server::device::{
     configuration::DeviceConfigurationManager,
     hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
-    server_device::build_server_device,
     ServerDevice,
     ServerDeviceEvent,
   },
@@ -215,7 +214,7 @@ impl ServerDeviceManagerEventLoop {
         );
 
         async_manager::spawn(async move {
-          match build_server_device(device_config_manager, creator, protocol_specializers).await {
+          match ServerDevice::build(device_config_manager, creator, protocol_specializers).await {
             Ok(device) => {
               if device_event_sender_clone
                 .send(ServerDeviceEvent::Connected(Arc::new(device)))
