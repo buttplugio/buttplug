@@ -171,27 +171,6 @@ pub struct DeviceConfigurationManagerBuilder {
 }
 
 impl DeviceConfigurationManagerBuilder {
-  pub fn merge(&mut self, other: &DeviceConfigurationManagerBuilder) -> &mut Self {
-    self.skip_default_protocols = self.skip_default_protocols || other.skip_default_protocols;
-    self.allow_raw_messages = self.allow_raw_messages || other.allow_raw_messages;
-    self.communication_specifiers.extend(
-      other
-        .communication_specifiers
-        .iter()
-        .map(|(k, v)| (k.clone(), v.clone())),
-    );
-    self.base_device_definitions.extend(
-      other
-        .base_device_definitions
-        .iter()
-        .map(|(k, v)| (k.clone(), v.clone())),
-    );
-    self
-      .protocols
-      .extend(other.protocols.iter().map(|v| (v.clone())));
-    self
-  }
-
   pub fn communication_specifier(
     &mut self,
     protocol_name: &str,

@@ -65,17 +65,6 @@ impl ProtocolDeviceConfiguration {
   }
 }
 
-#[derive(Serialize, Deserialize, Debug, Getters, Setters, Default, Clone)]
-#[getset(get = "pub", set = "pub", get_mut = "pub")]
-struct UserDeviceConfig {
-  #[serde(rename = "name")]
-  name: String,
-  #[serde(default)]
-  features: Vec<DeviceFeature>,
-  #[serde(rename = "user-config")]
-  user_config: UserDeviceCustomization,
-}
-
 #[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 struct ProtocolAttributes {
@@ -127,38 +116,6 @@ struct UserConfigDefinition {
   specifiers: Option<HashMap<String, ProtocolDefinition>>,
   #[serde(rename = "devices", default, skip_serializing_if = "Option::is_none")]
   user_device_configs: Option<Vec<UserDeviceConfigPair>>,
-}
-
-#[derive(
-  Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters, Eq, PartialEq, Hash,
-)]
-#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
-struct UserConfigDeviceIdentifier {
-  pub address: String,
-  pub protocol: String,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pub identifier: Option<String>,
-}
-
-impl From<UserConfigDeviceIdentifier> for UserDeviceIdentifier {
-  fn from(ident: UserConfigDeviceIdentifier) -> Self {
-    let server_identifier = if let Some(ident_string) = ident.identifier {
-      Some(ident_string)
-    } else {
-      None
-    };
-    UserDeviceIdentifier::new(&ident.address, &ident.protocol, &server_identifier)
-  }
-}
-
-impl From<UserDeviceIdentifier> for UserConfigDeviceIdentifier {
-  fn from(ident: UserDeviceIdentifier) -> Self {
-    UserConfigDeviceIdentifier {
-      address: ident.address().clone(),
-      protocol: ident.protocol().clone(),
-      identifier: ident.attributes_identifier().clone(),
-    }
-  }
 }
 
 #[derive(Default, Debug, Getters)]
@@ -320,13 +277,13 @@ trait ConfigVersionGetter {
 
 #[derive(Deserialize, Serialize, Debug, Getters)]
 #[getset(get = "pub", get_mut = "pub", set = "pub")]
-pub struct ProtocolConfiguration {
+pub struct BaseConfigFile {
   version: ConfigVersion,
   #[serde(default, skip_serializing_if = "Option::is_none")]
   protocols: Option<HashMap<String, ProtocolDefinition>>,
 }
 
-impl Default for ProtocolConfiguration {
+impl Default for BaseConfigFile {
   fn default() -> Self {
     Self {
       version: get_internal_config_version(),
@@ -335,13 +292,13 @@ impl Default for ProtocolConfiguration {
   }
 }
 
-impl ConfigVersionGetter for ProtocolConfiguration {
+impl ConfigVersionGetter for BaseConfigFile {
   fn version(&self) -> ConfigVersion {
     self.version
   }
 }
 
-impl ProtocolConfiguration {
+impl BaseConfigFile {
   pub fn new(major_version: u32, minor_version: u32) -> Self {
     Self {
       version: ConfigVersion {
@@ -355,13 +312,13 @@ impl ProtocolConfiguration {
 
 #[derive(Deserialize, Serialize, Debug, Getters)]
 #[getset(get = "pub", get_mut = "pub", set = "pub")]
-struct UserProtocolConfiguration {
+struct UserConfigFile {
   version: ConfigVersion,
   #[serde(rename = "user-configs", default)]
   user_configs: Option<UserConfigDefinition>,
 }
 
-impl Default for UserProtocolConfiguration {
+impl Default for UserConfigFile {
   fn default() -> Self {
     Self {
       version: get_internal_config_version(),
@@ -370,13 +327,13 @@ impl Default for UserProtocolConfiguration {
   }
 }
 
-impl ConfigVersionGetter for UserProtocolConfiguration {
+impl ConfigVersionGetter for UserConfigFile {
   fn version(&self) -> ConfigVersion {
     self.version
   }
 }
 
-impl UserProtocolConfiguration {
+impl UserConfigFile {
   pub fn new(major_version: u32, minor_version: u32) -> Self {
     Self {
       version: ConfigVersion {
@@ -395,7 +352,7 @@ impl UserProtocolConfiguration {
 }
 
 fn get_internal_config_version() -> ConfigVersion {
-  let config: ProtocolConfiguration = serde_json::from_str(DEVICE_CONFIGURATION_JSON)
+  let config: BaseConfigFile = serde_json::from_str(DEVICE_CONFIGURATION_JSON)
     .expect("If this fails, the whole library goes with it.");
   config.version
 }
@@ -445,7 +402,7 @@ fn load_protocol_configs_internal(
     info!("Loading from internal base device configuration...")
   }
   // Start by loading the main config
-  let main_config = load_protocol_config_from_json::<ProtocolConfiguration>(
+  let main_config = load_protocol_config_from_json::<BaseConfigFile>(
     &main_config_str.as_ref().unwrap_or(&DEVICE_CONFIGURATION_JSON.to_owned()),
     skip_version_check,
   )?;
@@ -482,7 +439,7 @@ fn load_protocol_configs_internal(
   // Then load the user config
   if let Some(user_config) = user_config_str {
     info!("Loading user configuration from string.");
-    let config = load_protocol_config_from_json::<UserProtocolConfiguration>(
+    let config = load_protocol_config_from_json::<UserConfigFile>(
       &user_config,
       skip_version_check,
     )?;
