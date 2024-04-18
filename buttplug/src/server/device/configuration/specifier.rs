@@ -256,35 +256,54 @@ impl PartialEq for XInputSpecifier {
   }
 }
 
-/// Specifier for HID (USB, Bluetooth) devices
-///
-/// Handles devices managed by the operating system's HID manager.
 #[derive(
   Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy, Getters, Setters, MutGetters,
 )]
-#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
-pub struct HIDSpecifier {
+pub struct VIDPIDPair {
   #[serde(rename = "vendor-id")]
   vendor_id: u16,
   #[serde(rename = "product-id")]
   product_id: u16,
 }
 
-impl HIDSpecifier {
+/// Specifier for HID (USB, Bluetooth) devices
+///
+/// Handles devices managed by the operating system's HID manager.
+#[derive(
+  Serialize, Deserialize, Debug, Eq, Clone, Getters, Setters, MutGetters,
+)]
+#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
+pub struct VIDPIDSpecifier {
+  pairs: Vec<VIDPIDPair>
+}
+
+impl VIDPIDSpecifier {
   pub fn new(vendor_id: u16, product_id: u16) -> Self {
     Self {
-      vendor_id,
-      product_id,
+      pairs: vec![VIDPIDPair {
+        vendor_id,
+        product_id,
+      }]
     }
   }
 }
 
-/// Specifier for Serial devices
-///
-/// Handles serial port device identification (via port names) and configuration.
+impl PartialEq for VIDPIDSpecifier {
+  fn eq(&self, other: &Self) -> bool {
+    for pair in &self.pairs {
+      for other_pair in &other.pairs {
+        if *pair == *other_pair {
+          return true;
+        }
+      }
+    }
+    false
+  }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
-pub struct SerialSpecifier {
+pub struct SerialPortInfo {
   #[serde(rename = "baud-rate")]
   baud_rate: u32,
   #[serde(rename = "data-bits")]
@@ -295,33 +314,45 @@ pub struct SerialSpecifier {
   port: String,
 }
 
+impl PartialEq for SerialPortInfo {
+  fn eq(&self, other: &Self) -> bool {
+    self.port == other.port
+  }
+}
+
+/// Specifier for Serial devices
+///
+/// Handles serial port device identification (via port names) and configuration.
+#[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
+#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
+pub struct SerialSpecifier {
+  ports: Vec<SerialPortInfo>
+}
+
 impl SerialSpecifier {
   /// Given a serial port name (the only identifier we have for this type of device), create a
   /// specifier instance.
   pub fn new_from_name(port: &str) -> Self {
-    SerialSpecifier {
-      port: port.to_owned(),
-      ..Default::default()
+    Self {
+      ports: vec![SerialPortInfo {
+        port: port.to_owned(),
+        ..Default::default()
+      }]
     }
   }
 }
 
 impl PartialEq for SerialSpecifier {
   fn eq(&self, other: &Self) -> bool {
-    self.port == other.port
+    for port in &self.ports {
+      for other_port in &other.ports {
+        if *port == *other_port {
+          return true;
+        }
+      }
+    }
+    false
   }
-}
-
-/// Specifier for USB devices
-#[derive(
-  Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy, Getters, Setters, MutGetters,
-)]
-#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
-pub struct USBSpecifier {
-  #[serde(rename = "vendor-id")]
-  vendor_id: u16,
-  #[serde(rename = "product-id")]
-  product_id: u16,
 }
 
 /// Specifier for Websocket Device Manager devices
@@ -366,12 +397,19 @@ impl WebsocketSpecifier {
 /// devices against the list of known devices for a protocol.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum ProtocolCommunicationSpecifier {
+  #[serde(rename="btle")]
   BluetoothLE(BluetoothLESpecifier),
-  HID(HIDSpecifier),
-  USB(USBSpecifier),
+  #[serde(rename="hid")]
+  HID(VIDPIDSpecifier),
+  #[serde(rename="usb")]
+  USB(VIDPIDSpecifier),
+  #[serde(rename="serial")]
   Serial(SerialSpecifier),
+  #[serde(rename="xinput")]
   XInput(XInputSpecifier),
+  #[serde(rename="lovense-connect-service")]
   LovenseConnectService(LovenseConnectServiceSpecifier),
+  #[serde(rename="websocket")]
   Websocket(WebsocketSpecifier),
 }
 

@@ -11,19 +11,11 @@ use crate::{
   server::device::configuration::{
     BaseDeviceDefinition,
     BaseDeviceIdentifier,
-    BluetoothLESpecifier,
     DeviceConfigurationManager,
     DeviceConfigurationManagerBuilder,
-    HIDSpecifier,
-    LovenseConnectServiceSpecifier,
     ProtocolCommunicationSpecifier,
-    SerialSpecifier,
-    USBSpecifier,
-    UserDeviceCustomization,
     UserDeviceDefinition,
     UserDeviceIdentifier,
-    WebsocketSpecifier,
-    XInputSpecifier,
   },
 };
 use getset::{CopyGetters, Getters, MutGetters, Setters};
@@ -78,35 +70,19 @@ struct ProtocolAttributes {
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 struct ProtocolDefinition {
-  // Can't get serde flatten specifiers into a String/DeviceSpecifier map, so
-  // they're kept separate here, and we return them in specifiers(). Feels
-  // very clumsy, but we really don't do this a bunch during a session.
   #[serde(skip_serializing_if = "Option::is_none")]
-  usb: Option<Vec<USBSpecifier>>,
+  pub communication: Option<Vec<ProtocolCommunicationSpecifier>>,
   #[serde(skip_serializing_if = "Option::is_none")]
-  btle: Option<BluetoothLESpecifier>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  serial: Option<Vec<SerialSpecifier>>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  hid: Option<Vec<HIDSpecifier>>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  xinput: Option<XInputSpecifier>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  websocket: Option<WebsocketSpecifier>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(rename = "lovense-connect-service")]
-  lovense_connect_service: Option<LovenseConnectServiceSpecifier>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  defaults: Option<ProtocolAttributes>,
+  pub defaults: Option<ProtocolAttributes>,
   #[serde(default)]
-  configurations: Vec<ProtocolAttributes>,
+  pub configurations: Vec<ProtocolAttributes>,
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
+#[derive(Deserialize, Serialize, Debug, Clone, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 struct UserDeviceConfigPair {
-  identifier: UserConfigDeviceIdentifier,
-  config: UserDeviceConfig,
+  identifier: UserDeviceIdentifier,
+  config: UserDeviceDefinition,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
@@ -128,38 +104,6 @@ struct ExternalDeviceConfiguration {
 
 impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
   fn from(protocol_def: ProtocolDefinition) -> Self {
-    // Make a vector out of the protocol definition specifiers
-    let mut specifiers = vec![];
-    if let Some(usb_vec) = &protocol_def.usb {
-      usb_vec
-        .iter()
-        .for_each(|spec| specifiers.push(ProtocolCommunicationSpecifier::USB(*spec)));
-    }
-    if let Some(serial_vec) = &protocol_def.serial {
-      serial_vec
-        .iter()
-        .for_each(|spec| specifiers.push(ProtocolCommunicationSpecifier::Serial(spec.clone())));
-    }
-    if let Some(hid_vec) = &protocol_def.hid {
-      hid_vec
-        .iter()
-        .for_each(|spec| specifiers.push(ProtocolCommunicationSpecifier::HID(*spec)));
-    }
-    if let Some(btle) = &protocol_def.btle {
-      specifiers.push(ProtocolCommunicationSpecifier::BluetoothLE(btle.clone()));
-    }
-    if let Some(xinput) = &protocol_def.xinput {
-      specifiers.push(ProtocolCommunicationSpecifier::XInput(*xinput));
-    }
-    if let Some(websocket) = &protocol_def.websocket {
-      specifiers.push(ProtocolCommunicationSpecifier::Websocket(websocket.clone()));
-    }
-    if let Some(lcs) = &protocol_def.lovense_connect_service {
-      specifiers.push(ProtocolCommunicationSpecifier::LovenseConnectService(
-        lcs.clone(),
-      ));
-    }
-
     let mut configurations = HashMap::new();
 
     if let Some(defaults) = protocol_def.defaults() {
@@ -194,7 +138,7 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
       }
     }
 
-    Self::new(specifiers, configurations)
+    Self::new(protocol_def.communication.unwrap_or_default(), configurations)
   }
 }
 
@@ -211,33 +155,11 @@ fn add_user_configs_to_protocol(
         continue;
       }
 
-      let base_protocol_def = external_config
+      external_config
         .protocol_specifiers
         .get_mut(user_config_protocol)
-        .unwrap();
-
-      // Make a vector out of the protocol definition specifiers
-      if let Some(usb_vec) = &protocol_def.usb {
-        usb_vec
-          .iter()
-          .for_each(|spec| base_protocol_def.push(ProtocolCommunicationSpecifier::USB(*spec)));
-      }
-      if let Some(serial_vec) = &protocol_def.serial {
-        serial_vec.iter().for_each(|spec| {
-          base_protocol_def.push(ProtocolCommunicationSpecifier::Serial(spec.clone()))
-        });
-      }
-      if let Some(hid_vec) = &protocol_def.hid {
-        hid_vec
-          .iter()
-          .for_each(|spec| base_protocol_def.push(ProtocolCommunicationSpecifier::HID(*spec)));
-      }
-      if let Some(btle) = &protocol_def.btle {
-        base_protocol_def.push(ProtocolCommunicationSpecifier::BluetoothLE(btle.clone()));
-      }
-      if let Some(websocket) = &protocol_def.websocket {
-        base_protocol_def.push(ProtocolCommunicationSpecifier::Websocket(websocket.clone()));
-      }
+        .unwrap()
+        .extend(protocol_def.communication.clone().unwrap_or_default().iter().cloned())
     }
   }
   if let Some(user_device_configs) = user_config_def.user_device_configs() {

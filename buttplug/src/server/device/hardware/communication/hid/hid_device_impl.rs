@@ -2,7 +2,7 @@ use super::hidapi_async::HidAsyncDevice;
 use crate::{
   core::errors::ButtplugDeviceError,
   server::device::{
-    configuration::{HIDSpecifier, ProtocolCommunicationSpecifier},
+    configuration::{VIDPIDSpecifier, ProtocolCommunicationSpecifier},
     hardware::{
       Endpoint,
       GenericHardwareSpecializer,
@@ -63,7 +63,7 @@ impl HardwareConnector for HidHardwareConnector {
       self.device_info.vendor_id(),
       self.device_info.product_id()
     );
-    ProtocolCommunicationSpecifier::HID(HIDSpecifier::new(
+    ProtocolCommunicationSpecifier::HID(VIDPIDSpecifier::new(
       self.device_info.vendor_id(),
       self.device_info.product_id(),
     ))

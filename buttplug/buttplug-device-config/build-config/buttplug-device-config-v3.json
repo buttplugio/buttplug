@@ -5,147 +5,6 @@
   },
   "protocols": {
     "lovense": {
-      "btle": {
-        "names": [
-          "LVS-*",
-          "LOVE-*"
-        ],
-        "manufacturer-data": [
-          {
-            "company": 620,
-            "data": [
-              255,
-              33
-            ]
-          }
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff2-0000-1000-8000-00805f9b34fb",
-            "rx": "0000fff1-0000-1000-8000-00805f9b34fb"
-          },
-          "6e400001-b5a3-f393-e0a9-e50e24dcca9e": {
-            "tx": "6e400002-b5a3-f393-e0a9-e50e24dcca9e",
-            "rx": "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
-          },
-          "50300001-0024-4bd4-bbd5-a6920e4c5653": {
-            "tx": "50300002-0024-4bd4-bbd5-a6920e4c5653",
-            "rx": "50300003-0024-4bd4-bbd5-a6920e4c5653"
-          },
-          "57300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "57300002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "57300003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "5a300001-0024-4bd4-bbd5-a6920e4c5653": {
-            "tx": "5a300002-0024-4bd4-bbd5-a6920e4c5653",
-            "rx": "5a300003-0024-4bd4-bbd5-a6920e4c5653"
-          },
-          "50300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "50300002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "50300003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "53300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "53300002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "53300003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "5a300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "5a300002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "5a300003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "4f300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "4f300002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "4f300003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "42300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "42300002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "42300003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "43300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "43300002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "43300003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "4c300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "4c300002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "4c300003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "4c410001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "4c410002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "4c410003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "56300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "56300002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "56300003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "58300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "58300002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "58300003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "52300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "52300002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "52300003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "46300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "46300002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "46300003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "50300011-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "50300012-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "50300013-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "4a300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "4a300002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "4a300003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "45440001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "45440002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "45440003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "45420001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "45420002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "45420003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "54300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "54300002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "54300003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "45490001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "45490002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "45490003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "4e300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "4e300002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "4e300003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "45410001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "45410002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "45410003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "51300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "51300002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "51300003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "45460001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "45460002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "45460003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "454c0001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "454c0002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "454c0003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "55300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "55300002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "55300003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "53440001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "53440002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "53440003-0023-4bd4-bbd5-a6920e4c5653"
-          },
-          "48300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "48300002-0023-4bd4-bbd5-a6920e4c5653",
-            "rx": "48300003-0023-4bd4-bbd5-a6920e4c5653"
-          }
-        }
-      },
       "defaults": {
         "name": "Lovense Device",
         "features": [
@@ -838,12 +697,154 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "LVS-*",
+              "LOVE-*"
+            ],
+            "manufacturer-data": [
+              {
+                "company": 620,
+                "data": [
+                  255,
+                  33
+                ]
+              }
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff2-0000-1000-8000-00805f9b34fb",
+                "rx": "0000fff1-0000-1000-8000-00805f9b34fb"
+              },
+              "6e400001-b5a3-f393-e0a9-e50e24dcca9e": {
+                "tx": "6e400002-b5a3-f393-e0a9-e50e24dcca9e",
+                "rx": "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
+              },
+              "50300001-0024-4bd4-bbd5-a6920e4c5653": {
+                "tx": "50300002-0024-4bd4-bbd5-a6920e4c5653",
+                "rx": "50300003-0024-4bd4-bbd5-a6920e4c5653"
+              },
+              "57300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "57300002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "57300003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "5a300001-0024-4bd4-bbd5-a6920e4c5653": {
+                "tx": "5a300002-0024-4bd4-bbd5-a6920e4c5653",
+                "rx": "5a300003-0024-4bd4-bbd5-a6920e4c5653"
+              },
+              "50300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "50300002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "50300003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "53300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "53300002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "53300003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "5a300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "5a300002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "5a300003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "4f300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "4f300002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "4f300003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "42300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "42300002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "42300003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "43300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "43300002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "43300003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "4c300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "4c300002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "4c300003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "4c410001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "4c410002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "4c410003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "56300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "56300002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "56300003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "58300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "58300002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "58300003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "52300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "52300002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "52300003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "46300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "46300002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "46300003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "50300011-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "50300012-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "50300013-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "4a300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "4a300002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "4a300003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "45440001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "45440002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "45440003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "45420001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "45420002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "45420003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "54300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "54300002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "54300003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "45490001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "45490002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "45490003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "4e300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "4e300002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "4e300003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "45410001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "45410002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "45410003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "51300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "51300002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "51300003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "45460001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "45460002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "45460003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "454c0001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "454c0002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "454c0003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "55300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "55300002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "55300003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "53440001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "53440002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "53440003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "48300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "48300002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "48300003-0023-4bd4-bbd5-a6920e4c5653"
+              }
+            }
+          }
+        }
       ]
     },
     "lovense-connect-service": {
-      "lovense-connect-service": {
-        "exists": true
-      },
       "defaults": {
         "name": "Lovense Connect Service Device",
         "features": [
@@ -1510,12 +1511,16 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "lovense-connect-service": {
+            "exists": true
+          }
+        }
       ]
     },
     "xinput": {
-      "xinput": {
-        "exists": true
-      },
       "defaults": {
         "name": "XBox (XInput) Compatible Gamepad",
         "features": [
@@ -1544,27 +1549,16 @@
             }
           }
         ]
-      }
-    },
-    "kiiroo-v2": {
-      "btle": {
-        "names": [
-          "Launch",
-          "Onyx2"
-        ],
-        "services": {
-          "88f80580-0000-01e6-aace-0002a5d5c51b": {
-            "tx": "88f80581-0000-01e6-aace-0002a5d5c51b",
-            "rx": "88f80582-0000-01e6-aace-0002a5d5c51b",
-            "firmware": "88f80583-0000-01e6-aace-0002a5d5c51b"
-          },
-          "f60402a6-0293-4bdb-9f20-6758133f7090": {
-            "tx": "02962ac9-e86f-4094-989d-231d69995fc2",
-            "rx": "d44d0393-0731-43b3-a373-8fc70b1f3323",
-            "firmware": "c7b7a04b-2cc4-40ff-8b10-5d531d1161db"
+      },
+      "communication": [
+        {
+          "xinput": {
+            "exists": true
           }
         }
-      },
+      ]
+    },
+    "kiiroo-v2": {
       "defaults": {
         "name": "Kiiroo v2 Device",
         "features": [
@@ -1595,21 +1589,31 @@
           ],
           "name": "Kiiroo Onyx 2"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Launch",
+              "Onyx2"
+            ],
+            "services": {
+              "88f80580-0000-01e6-aace-0002a5d5c51b": {
+                "tx": "88f80581-0000-01e6-aace-0002a5d5c51b",
+                "rx": "88f80582-0000-01e6-aace-0002a5d5c51b",
+                "firmware": "88f80583-0000-01e6-aace-0002a5d5c51b"
+              },
+              "f60402a6-0293-4bdb-9f20-6758133f7090": {
+                "tx": "02962ac9-e86f-4094-989d-231d69995fc2",
+                "rx": "d44d0393-0731-43b3-a373-8fc70b1f3323",
+                "firmware": "c7b7a04b-2cc4-40ff-8b10-5d531d1161db"
+              }
+            }
+          }
+        }
       ]
     },
     "libo-elle": {
-      "btle": {
-        "names": [
-          "PiPiJing",
-          "Shuidi"
-        ],
-        "services": {
-          "00006000-0000-1000-8000-00805f9b34fb": {
-            "tx": "00006001-0000-1000-8000-00805f9b34fb",
-            "txmode": "00006002-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Libo Elle Device",
         "features": [
@@ -1640,20 +1644,25 @@
           ],
           "name": "Libo Elle 2"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "PiPiJing",
+              "Shuidi"
+            ],
+            "services": {
+              "00006000-0000-1000-8000-00805f9b34fb": {
+                "tx": "00006001-0000-1000-8000-00805f9b34fb",
+                "txmode": "00006002-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "libo-shark": {
-      "btle": {
-        "names": [
-          "ShaYu"
-        ],
-        "services": {
-          "00006000-0000-1000-8000-00805f9b34fb": {
-            "tx": "00006001-0000-1000-8000-00805f9b34fb",
-            "txmode": "00006002-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Libo Shark",
         "features": [
@@ -1682,50 +1691,48 @@
             }
           }
         ]
-      }
-    },
-    "libo-karen": {
-      "btle": {
-        "names": [
-          "SuoYinQiu"
-        ],
-        "services": {
-          "00006000-0000-1000-8000-00805f9b34fb": {
-            "tx": "00006001-0000-1000-8000-00805f9b34fb",
-            "txmode": "00006002-0000-1000-8000-00805f9b34fb"
-          },
-          "00006050-0000-1000-8000-00805f9b34fb": {
-            "rxpressure": "00006051-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "ShaYu"
+            ],
+            "services": {
+              "00006000-0000-1000-8000-00805f9b34fb": {
+                "tx": "00006001-0000-1000-8000-00805f9b34fb",
+                "txmode": "00006002-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "libo-karen": {
       "defaults": {
         "name": "Libo Karen",
         "features": []
-      }
-    },
-    "libo-vibes": {
-      "btle": {
-        "names": [
-          "XiaoLu",
-          "LuXiaoHan",
-          "BaiHu",
-          "Gugudai",
-          "Yuyi",
-          "LuWuShuang",
-          "LiBo",
-          "QingTing",
-          "Huohu",
-          "Yuyi",
-          "Haima"
-        ],
-        "services": {
-          "00006000-0000-1000-8000-00805f9b34fb": {
-            "tx": "00006001-0000-1000-8000-00805f9b34fb",
-            "txmode": "00006002-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "SuoYinQiu"
+            ],
+            "services": {
+              "00006000-0000-1000-8000-00805f9b34fb": {
+                "tx": "00006001-0000-1000-8000-00805f9b34fb",
+                "txmode": "00006002-0000-1000-8000-00805f9b34fb"
+              },
+              "00006050-0000-1000-8000-00805f9b34fb": {
+                "rxpressure": "00006051-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "libo-vibes": {
       "defaults": {
         "name": "Libo Vibes Device",
         "features": [
@@ -1902,35 +1909,34 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "XiaoLu",
+              "LuXiaoHan",
+              "BaiHu",
+              "Gugudai",
+              "Yuyi",
+              "LuWuShuang",
+              "LiBo",
+              "QingTing",
+              "Huohu",
+              "Yuyi",
+              "Haima"
+            ],
+            "services": {
+              "00006000-0000-1000-8000-00805f9b34fb": {
+                "tx": "00006001-0000-1000-8000-00805f9b34fb",
+                "txmode": "00006002-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "magic-motion-1": {
-      "btle": {
-        "names": [
-          "Smart Mini Vibe*",
-          "Flamingo",
-          "Flamingo T",
-          "Smart Bean",
-          "Smart Bean3",
-          "Magic Cell",
-          "Magic Wand",
-          "Fugu",
-          "Fugu2",
-          "Gballs2",
-          "GBalls3",
-          "FM-LILAC-101",
-          "Xone",
-          "CBT002"
-        ],
-        "services": {
-          "78667579-7b48-43db-b8c5-7928a6b0a335": {
-            "tx": "78667579-a914-49a4-8333-aa3c0cd8fedc"
-          },
-          "0000180f-0000-1000-8000-00805f9b34fb": {
-            "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Magic Motion V1 Device",
         "features": [
@@ -2080,28 +2086,39 @@
           ],
           "name": "FunTown Caleo"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Smart Mini Vibe*",
+              "Flamingo",
+              "Flamingo T",
+              "Smart Bean",
+              "Smart Bean3",
+              "Magic Cell",
+              "Magic Wand",
+              "Fugu",
+              "Fugu2",
+              "Gballs2",
+              "GBalls3",
+              "FM-LILAC-101",
+              "Xone",
+              "CBT002"
+            ],
+            "services": {
+              "78667579-7b48-43db-b8c5-7928a6b0a335": {
+                "tx": "78667579-a914-49a4-8333-aa3c0cd8fedc"
+              },
+              "0000180f-0000-1000-8000-00805f9b34fb": {
+                "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "magic-motion-2": {
-      "btle": {
-        "names": [
-          "Eidolon",
-          "Lipstick",
-          "Sword",
-          "Curve",
-          "Solstice X",
-          "funwand",
-          "CBT001"
-        ],
-        "services": {
-          "78667579-7b48-43db-b8c5-7928a6b0a335": {
-            "tx": "78667579-a914-49a4-8333-aa3c0cd8fedc"
-          },
-          "0000180f-0000-1000-8000-00805f9b34fb": {
-            "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Magic Motion V2 Device",
         "features": [
@@ -2300,22 +2317,32 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Eidolon",
+              "Lipstick",
+              "Sword",
+              "Curve",
+              "Solstice X",
+              "funwand",
+              "CBT001"
+            ],
+            "services": {
+              "78667579-7b48-43db-b8c5-7928a6b0a335": {
+                "tx": "78667579-a914-49a4-8333-aa3c0cd8fedc"
+              },
+              "0000180f-0000-1000-8000-00805f9b34fb": {
+                "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "magic-motion-3": {
-      "btle": {
-        "names": [
-          "Krush"
-        ],
-        "services": {
-          "78667579-7b48-43db-b8c5-7928a6b0a335": {
-            "tx": "78667579-a914-49a4-8333-aa3c0cd8fedc"
-          },
-          "0000180f-0000-1000-8000-00805f9b34fb": {
-            "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "LoveLife Krush",
         "features": [
@@ -2347,29 +2374,26 @@
             }
           }
         ]
-      }
-    },
-    "magic-motion-4": {
-      "btle": {
-        "names": [
-          "funone",
-          "Magic Sundi",
-          "Kegel Coach",
-          "Magic Lotos",
-          "nyx",
-          "umi",
-          "funkegel",
-          "bobi2"
-        ],
-        "services": {
-          "78667579-7b48-43db-b8c5-7928a6b0a335": {
-            "tx": "78667579-a914-49a4-8333-aa3c0cd8fedc"
-          },
-          "0000180f-0000-1000-8000-00805f9b34fb": {
-            "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Krush"
+            ],
+            "services": {
+              "78667579-7b48-43db-b8c5-7928a6b0a335": {
+                "tx": "78667579-a914-49a4-8333-aa3c0cd8fedc"
+              },
+              "0000180f-0000-1000-8000-00805f9b34fb": {
+                "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "magic-motion-4": {
       "defaults": {
         "name": "Magic Motion V4 Device",
         "features": [
@@ -2533,22 +2557,33 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "funone",
+              "Magic Sundi",
+              "Kegel Coach",
+              "Magic Lotos",
+              "nyx",
+              "umi",
+              "funkegel",
+              "bobi2"
+            ],
+            "services": {
+              "78667579-7b48-43db-b8c5-7928a6b0a335": {
+                "tx": "78667579-a914-49a4-8333-aa3c0cd8fedc"
+              },
+              "0000180f-0000-1000-8000-00805f9b34fb": {
+                "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "mysteryvibe": {
-      "btle": {
-        "names": [
-          "MV Crescendo",
-          "MV Tenuto   ",
-          "MV Poco     "
-        ],
-        "services": {
-          "f0006900-110c-478b-b74b-6f403b364a9c": {
-            "txmode": "f0006901-110c-478b-b74b-6f403b364a9c",
-            "txvibrate": "f0006903-110c-478b-b74b-6f403b364a9c"
-          }
-        }
-      },
       "defaults": {
         "name": "Mysteryvibe Device",
         "features": [
@@ -2671,24 +2706,26 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "MV Crescendo",
+              "MV Tenuto   ",
+              "MV Poco     "
+            ],
+            "services": {
+              "f0006900-110c-478b-b74b-6f403b364a9c": {
+                "txmode": "f0006901-110c-478b-b74b-6f403b364a9c",
+                "txvibrate": "f0006903-110c-478b-b74b-6f403b364a9c"
+              }
+            }
+          }
+        }
       ]
     },
     "mysteryvibe-v2": {
-      "btle": {
-        "names": [
-          "6907 MV1",
-          "6908 MV1",
-          "6909 MV1",
-          "6914 MV1",
-          "6915 MV1"
-        ],
-        "services": {
-          "f0006900-110c-478b-b74b-6f403b364a9c": {
-            "txmode": "f0006901-110c-478b-b74b-6f403b364a9c",
-            "txvibrate": "f0006903-110c-478b-b74b-6f403b364a9c"
-          }
-        }
-      },
       "defaults": {
         "name": "Mysteryvibe V2 Device",
         "features": [
@@ -2949,28 +2986,28 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "6907 MV1",
+              "6908 MV1",
+              "6909 MV1",
+              "6914 MV1",
+              "6915 MV1"
+            ],
+            "services": {
+              "f0006900-110c-478b-b74b-6f403b364a9c": {
+                "txmode": "f0006901-110c-478b-b74b-6f403b364a9c",
+                "txvibrate": "f0006903-110c-478b-b74b-6f403b364a9c"
+              }
+            }
+          }
+        }
       ]
     },
     "picobong": {
-      "btle": {
-        "names": [
-          "Blow hole",
-          "Picobong Male Toy",
-          "Diver",
-          "Picobong Egg",
-          "Life guard",
-          "Picobong Ring",
-          "Surfer",
-          "Picobong Butt Plug",
-          "Egg driver",
-          "Surfer_plug"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Picobong Device",
         "features": [
@@ -3019,27 +3056,32 @@
           ],
           "name": "Picobong Surfer"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Blow hole",
+              "Picobong Male Toy",
+              "Diver",
+              "Picobong Egg",
+              "Life guard",
+              "Picobong Ring",
+              "Surfer",
+              "Picobong Butt Plug",
+              "Egg driver",
+              "Surfer_plug"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "vibratissimo": {
-      "btle": {
-        "names": [
-          "Vibratissimo"
-        ],
-        "services": {
-          "00001523-1212-efde-1523-785feabcd123": {
-            "txmode": "00001524-1212-efde-1523-785feabcd123",
-            "txvibrate": "00001526-1212-efde-1523-785feabcd123",
-            "rx": "00001527-1212-efde-1523-785feabcd123"
-          },
-          "0000180a-0000-1000-8000-00805f9b34fb": {
-            "rxblemodel": "00002a24-0000-1000-8000-00805f9b34fb"
-          },
-          "0000180f-0000-1000-8000-00805f9b34fb": {
-            "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Vibratissimo Device",
         "features": [
@@ -3181,35 +3223,31 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Vibratissimo"
+            ],
+            "services": {
+              "00001523-1212-efde-1523-785feabcd123": {
+                "txmode": "00001524-1212-efde-1523-785feabcd123",
+                "txvibrate": "00001526-1212-efde-1523-785feabcd123",
+                "rx": "00001527-1212-efde-1523-785feabcd123"
+              },
+              "0000180a-0000-1000-8000-00805f9b34fb": {
+                "rxblemodel": "00002a24-0000-1000-8000-00805f9b34fb"
+              },
+              "0000180f-0000-1000-8000-00805f9b34fb": {
+                "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "wevibe": {
-      "btle": {
-        "names": [
-          "Cougar",
-          "4 Plus",
-          "4_Plus",
-          "4plus",
-          "Bloom",
-          "classic",
-          "Classic",
-          "Ditto",
-          "Gala",
-          "Jive",
-          "Nova",
-          "Pivot",
-          "Rave",
-          "Sync",
-          "Verge",
-          "Wish"
-        ],
-        "services": {
-          "f000bb03-0451-4000-b000-000000000000": {
-            "tx": "f000c000-0451-4000-b000-000000000000",
-            "rx": "f000b000-0451-4000-b000-000000000000"
-          }
-        }
-      },
       "defaults": {
         "name": "WeVibe Device",
         "features": [
@@ -3403,28 +3441,39 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Cougar",
+              "4 Plus",
+              "4_Plus",
+              "4plus",
+              "Bloom",
+              "classic",
+              "Classic",
+              "Ditto",
+              "Gala",
+              "Jive",
+              "Nova",
+              "Pivot",
+              "Rave",
+              "Sync",
+              "Verge",
+              "Wish"
+            ],
+            "services": {
+              "f000bb03-0451-4000-b000-000000000000": {
+                "tx": "f000c000-0451-4000-b000-000000000000",
+                "rx": "f000b000-0451-4000-b000-000000000000"
+              }
+            }
+          }
+        }
       ]
     },
     "wevibe-8bit": {
-      "btle": {
-        "names": [
-          "Melt",
-          "Moxie",
-          "Vector",
-          "Wand",
-          "Bond",
-          "Nelson",
-          "Nova2",
-          "Nova_2",
-          "Nova 2"
-        ],
-        "services": {
-          "f000bb03-0451-4000-b000-000000000000": {
-            "tx": "f000c000-0451-4000-b000-000000000000",
-            "rx": "f000b000-0451-4000-b000-000000000000"
-          }
-        }
-      },
       "defaults": {
         "name": "WeVibe 8-bit Device",
         "features": [
@@ -3576,43 +3625,56 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Melt",
+              "Moxie",
+              "Vector",
+              "Wand",
+              "Bond",
+              "Nelson",
+              "Nova2",
+              "Nova_2",
+              "Nova 2"
+            ],
+            "services": {
+              "f000bb03-0451-4000-b000-000000000000": {
+                "tx": "f000c000-0451-4000-b000-000000000000",
+                "rx": "f000b000-0451-4000-b000-000000000000"
+              }
+            }
+          }
+        }
       ]
     },
     "wevibe-legacy": {
-      "btle": {
-        "names": [
-          "Reina",
-          "imassager",
-          "Interactive Massager",
-          "03"
-        ],
-        "services": {
-          "f000bb03-0451-4000-b000-000000000000": {
-            "tx": "f000c000-0451-4000-b000-000000000000",
-            "rx": "f000b000-0451-4000-b000-000000000000"
-          }
-        }
-      },
       "defaults": {
         "name": "WeVibe Realm Reina",
         "features": []
-      }
-    },
-    "wevibe-chorus": {
-      "btle": {
-        "names": [
-          "Chorus",
-          "skeena",
-          "Sync 2",
-          "Sync Lite"
-        ],
-        "services": {
-          "f000bb03-0451-4000-b000-000000000000": {
-            "tx": "f000c000-0451-4000-b000-000000000000",
-            "rx": "f000b000-0451-4000-b000-000000000000"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Reina",
+              "imassager",
+              "Interactive Massager",
+              "03"
+            ],
+            "services": {
+              "f000bb03-0451-4000-b000-000000000000": {
+                "tx": "f000c000-0451-4000-b000-000000000000",
+                "rx": "f000b000-0451-4000-b000-000000000000"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "wevibe-chorus": {
       "defaults": {
         "name": "WeVibe Chorus",
         "features": [
@@ -3695,19 +3757,27 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Chorus",
+              "skeena",
+              "Sync 2",
+              "Sync Lite"
+            ],
+            "services": {
+              "f000bb03-0451-4000-b000-000000000000": {
+                "tx": "f000c000-0451-4000-b000-000000000000",
+                "rx": "f000b000-0451-4000-b000-000000000000"
+              }
+            }
+          }
+        }
       ]
     },
     "youcups": {
-      "btle": {
-        "names": [
-          "Youcups"
-        ],
-        "services": {
-          "0000fee9-0000-1000-8000-00805f9b34fb": {
-            "tx": "d44bc439-abfd-45a2-b575-925416129600"
-          }
-        }
-      },
       "defaults": {
         "name": "Youcups Warrior II",
         "features": [
@@ -3724,19 +3794,23 @@
             }
           }
         ]
-      }
-    },
-    "cueme": {
-      "btle": {
-        "names": [
-          "FUNCODE_*"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Youcups"
+            ],
+            "services": {
+              "0000fee9-0000-1000-8000-00805f9b34fb": {
+                "tx": "d44bc439-abfd-45a2-b575-925416129600"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "cueme": {
       "defaults": {
         "name": "Cueme Device",
         "features": [
@@ -3907,26 +3981,23 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "FUNCODE_*"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "kiiroo-v2-vibrator": {
-      "btle": {
-        "names": [
-          "Pearl2",
-          "Pearl2+",
-          "Fuse",
-          "Virtual Blowbot",
-          "Titan",
-          "Virtual Rabbit"
-        ],
-        "services": {
-          "88f82580-0000-01e6-aace-0002a5d5c51b": {
-            "tx": "88f82581-0000-01e6-aace-0002a5d5c51b",
-            "rxtouch": "88f82582-0000-01e6-aace-0002a5d5c51b",
-            "rxaccel": "88f82584-0000-01e6-aace-0002a5d5c51b"
-          }
-        }
-      },
       "defaults": {
         "name": "Kiiroo V2 Vibrator Device",
         "features": [
@@ -4149,36 +4220,30 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Pearl2",
+              "Pearl2+",
+              "Fuse",
+              "Virtual Blowbot",
+              "Titan",
+              "Virtual Rabbit"
+            ],
+            "services": {
+              "88f82580-0000-01e6-aace-0002a5d5c51b": {
+                "tx": "88f82581-0000-01e6-aace-0002a5d5c51b",
+                "rxtouch": "88f82582-0000-01e6-aace-0002a5d5c51b",
+                "rxaccel": "88f82584-0000-01e6-aace-0002a5d5c51b"
+              }
+            }
+          }
+        }
       ]
     },
     "kiiroo-v21": {
-      "btle": {
-        "names": [
-          "Titan1.1",
-          "Cliona",
-          "Pearl2.1",
-          "OhMiBod 4.0",
-          "OhMiBod LUMEN",
-          "OhMiBod NEX3",
-          "OhMiBod ESCA",
-          "OhMiBod Foxy",
-          "OhMiBod Chill Panty Vibe",
-          "OhMiBod Sphinx",
-          "Pulse Interactive",
-          "Fuse1.1"
-        ],
-        "services": {
-          "00001900-0000-1000-8000-00805f9b34fb": {
-            "whitelist": "00001901-0000-1000-8000-00805f9b34fb",
-            "tx": "00001902-0000-1000-8000-00805f9b34fb",
-            "rx": "00001903-0000-1000-8000-00805f9b34fb"
-          },
-          "a0d70001-4c16-4ba7-977a-d394920e13a3": {
-            "tx": "a0d70002-4c16-4ba7-977a-d394920e13a3",
-            "rx": "a0d70003-4c16-4ba7-977a-d394920e13a3"
-          }
-        }
-      },
       "defaults": {
         "name": "Kiiroo V2.1 Device",
         "features": []
@@ -4432,27 +4497,40 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Titan1.1",
+              "Cliona",
+              "Pearl2.1",
+              "OhMiBod 4.0",
+              "OhMiBod LUMEN",
+              "OhMiBod NEX3",
+              "OhMiBod ESCA",
+              "OhMiBod Foxy",
+              "OhMiBod Chill Panty Vibe",
+              "OhMiBod Sphinx",
+              "Pulse Interactive",
+              "Fuse1.1"
+            ],
+            "services": {
+              "00001900-0000-1000-8000-00805f9b34fb": {
+                "whitelist": "00001901-0000-1000-8000-00805f9b34fb",
+                "tx": "00001902-0000-1000-8000-00805f9b34fb",
+                "rx": "00001903-0000-1000-8000-00805f9b34fb"
+              },
+              "a0d70001-4c16-4ba7-977a-d394920e13a3": {
+                "tx": "a0d70002-4c16-4ba7-977a-d394920e13a3",
+                "rx": "a0d70003-4c16-4ba7-977a-d394920e13a3"
+              }
+            }
+          }
+        }
       ]
     },
     "kiiroo-v21-initialized": {
-      "btle": {
-        "names": [
-          "Rey",
-          "We-Vibe Rocketman",
-          "Realm1.1",
-          "Onyx2.1",
-          "Onyx+",
-          "KEON",
-          "Keon R2"
-        ],
-        "services": {
-          "00001900-0000-1000-8000-00805f9b34fb": {
-            "whitelist": "00001901-0000-1000-8000-00805f9b34fb",
-            "tx": "00001902-0000-1000-8000-00805f9b34fb",
-            "rx": "00001903-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Kiiroo V2.1 Initialized Device",
         "features": []
@@ -4541,15 +4619,31 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Rey",
+              "We-Vibe Rocketman",
+              "Realm1.1",
+              "Onyx2.1",
+              "Onyx+",
+              "KEON",
+              "Keon R2"
+            ],
+            "services": {
+              "00001900-0000-1000-8000-00805f9b34fb": {
+                "whitelist": "00001901-0000-1000-8000-00805f9b34fb",
+                "tx": "00001902-0000-1000-8000-00805f9b34fb",
+                "rx": "00001903-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "vorze-cyclone-x": {
-      "hid": [
-        {
-          "vendor-id": 1155,
-          "product-id": 22352
-        }
-      ],
       "defaults": {
         "name": "Vorze Cyclone X10 Device",
         "features": [
@@ -4566,15 +4660,21 @@
             }
           }
         ]
-      }
+      },
+      "communication": [
+        {
+          "hid": {
+            "pairs": [
+              {
+                "vendor-id": 1155,
+                "product-id": 22352
+              }
+            ]
+          }
+        }
+      ]
     },
     "rez-trancevibrator": {
-      "usb": [
-        {
-          "vendor-id": 2889,
-          "product-id": 1615
-        }
-      ],
       "defaults": {
         "name": "Rez TranceVibrator",
         "features": [
@@ -4591,22 +4691,21 @@
             }
           }
         ]
-      }
-    },
-    "kiiroo-v1": {
-      "btle": {
-        "names": [
-          "ONYX",
-          "PEARL"
-        ],
-        "services": {
-          "49535343-fe7d-4ae5-8fa9-9fafd205e455": {
-            "rx": "49535343-1e4d-4bd9-ba61-23c647249616",
-            "tx": "49535343-8841-43f4-a8d4-ecbe34729bb3",
-            "command": "49535343-aca3-481c-91ec-d85e28a60318"
+      },
+      "communication": [
+        {
+          "usb": {
+            "pairs": [
+              {
+                "vendor-id": 2889,
+                "product-id": 1615
+              }
+            ]
           }
         }
-      },
+      ]
+    },
+    "kiiroo-v1": {
       "defaults": {
         "name": "Kiiroo V1 Device",
         "features": []
@@ -4652,24 +4751,26 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "ONYX",
+              "PEARL"
+            ],
+            "services": {
+              "49535343-fe7d-4ae5-8fa9-9fafd205e455": {
+                "rx": "49535343-1e4d-4bd9-ba61-23c647249616",
+                "tx": "49535343-8841-43f4-a8d4-ecbe34729bb3",
+                "command": "49535343-aca3-481c-91ec-d85e28a60318"
+              }
+            }
+          }
+        }
       ]
     },
     "vorze-sa": {
-      "btle": {
-        "names": [
-          "Bach smart",
-          "CycSA",
-          "UFOSA",
-          "UFO-TW",
-          "VorzePiston",
-          "ROCKET"
-        ],
-        "services": {
-          "40ee1111-63ec-4b7f-8ce7-712efd55b90e": {
-            "tx": "40ee2222-63ec-4b7f-8ce7-712efd55b90e"
-          }
-        }
-      },
       "defaults": {
         "name": "Vorze Device",
         "features": []
@@ -4807,19 +4908,28 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Bach smart",
+              "CycSA",
+              "UFOSA",
+              "UFO-TW",
+              "VorzePiston",
+              "ROCKET"
+            ],
+            "services": {
+              "40ee1111-63ec-4b7f-8ce7-712efd55b90e": {
+                "tx": "40ee2222-63ec-4b7f-8ce7-712efd55b90e"
+              }
+            }
+          }
+        }
       ]
     },
     "youou": {
-      "btle": {
-        "names": [
-          "VX001_*"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff6-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Youou Wand Vibrator",
         "features": [
@@ -4836,15 +4946,23 @@
             }
           }
         ]
-      }
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "VX001_*"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff6-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
     },
     "realtouch": {
-      "hid": [
-        {
-          "vendor-id": 8020,
-          "product-id": 1
-        }
-      ],
       "defaults": {
         "name": "RealTouch",
         "features": [
@@ -4861,20 +4979,21 @@
             }
           }
         ]
-      }
-    },
-    "prettylove": {
-      "btle": {
-        "names": [
-          "Aogu BLE *"
-        ],
-        "services": {
-          "0000ffe5-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe9-0000-1000-8000-00805f9b34fb",
-            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "hid": {
+            "pairs": [
+              {
+                "vendor-id": 8020,
+                "product-id": 1
+              }
+            ]
           }
         }
-      },
+      ]
+    },
+    "prettylove": {
       "defaults": {
         "name": "Pretty Love Device",
         "features": [
@@ -4891,23 +5010,24 @@
             }
           }
         ]
-      }
-    },
-    "svakom": {
-      "btle": {
-        "names": [
-          "Aogu SUV",
-          "Aogu SCB",
-          "Emma NEO",
-          "Phoenix NEO"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
-            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Aogu BLE *"
+            ],
+            "services": {
+              "0000ffe5-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe9-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "svakom": {
       "defaults": {
         "name": "Svakom Device",
         "features": [
@@ -4944,29 +5064,27 @@
           ],
           "name": "Svakom Emma Neo"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Aogu SUV",
+              "Aogu SCB",
+              "Emma NEO",
+              "Phoenix NEO"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "svakom-v2": {
-      "btle": {
-        "names": [
-          "116",
-          "117",
-          "118",
-          "Viviana",
-          "Ella NEO",
-          "S38A",
-          "Vick NEO",
-          "Vick Neo",
-          "STG05A",
-          "QH-SJ007A"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
-            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Svakom Device v2",
         "features": [
@@ -5040,23 +5158,33 @@
           ],
           "name": "Svakom Winni 2"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "116",
+              "117",
+              "118",
+              "Viviana",
+              "Ella NEO",
+              "S38A",
+              "Vick NEO",
+              "Vick Neo",
+              "STG05A",
+              "QH-SJ007A"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "svakom-v3": {
-      "btle": {
-        "names": [
-          "Phoenix Neo 2",
-          "FK008A",
-          "Hannes NEO",
-          "QH-SX007E"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
-            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Svakom Device v3",
         "features": [
@@ -5153,21 +5281,27 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Phoenix Neo 2",
+              "FK008A",
+              "Hannes NEO",
+              "QH-SX007E"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "svakom-v4": {
-      "btle": {
-        "names": [
-          "B2CM6",
-          "ERICA"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
-            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Svakom Device v4",
         "features": [
@@ -5210,24 +5344,25 @@
           ],
           "name": "Svakom Erica"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "B2CM6",
+              "ERICA"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "svakom-sam": {
-      "btle": {
-        "names": [
-          "Sam Neo"
-        ],
-        "services": {
-          "0000ae00-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ae01-0000-1000-8000-00805f9b34fb",
-            "rx": "0000ae02-0000-1000-8000-00805f9b34fb",
-            "txmode": "0000ae10-0000-1000-8000-00805f9b34fb"
-          },
-          "0000ffac-0000-1000-8000-00805f9b34fb": {
-            "firmware": "0000ffb4-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Svakom Sam Neo",
         "features": [
@@ -5256,20 +5391,28 @@
             }
           }
         ]
-      }
-    },
-    "svakom-alex": {
-      "btle": {
-        "names": [
-          "Alex NEO",
-          "S63E Alex NEO"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Sam Neo"
+            ],
+            "services": {
+              "0000ae00-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ae01-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ae02-0000-1000-8000-00805f9b34fb",
+                "txmode": "0000ae10-0000-1000-8000-00805f9b34fb"
+              },
+              "0000ffac-0000-1000-8000-00805f9b34fb": {
+                "firmware": "0000ffb4-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "svakom-alex": {
       "defaults": {
         "name": "Svakom Alex Neo",
         "features": [
@@ -5286,19 +5429,24 @@
             }
           }
         ]
-      }
-    },
-    "svakom-alex-v2": {
-      "btle": {
-        "names": [
-          "Alex NEO 2"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Alex NEO",
+              "S63E Alex NEO"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "svakom-alex-v2": {
       "defaults": {
         "name": "Svakom Alex Neo 2",
         "features": [
@@ -5315,20 +5463,23 @@
             }
           }
         ]
-      }
-    },
-    "svakom-dt250a": {
-      "btle": {
-        "names": [
-          "DT250A"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
-            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Alex NEO 2"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "svakom-dt250a": {
       "defaults": {
         "name": "Coleur Dor DT250A",
         "features": [
@@ -5369,38 +5520,24 @@
             }
           }
         ]
-      }
-    },
-    "svakom-iker": {
-      "btle": {
-        "names": [
-          "Iker*"
-        ],
-        "manufacturer-data": [
-          {
-            "company": 39,
-            "data": [
-              83,
-              86,
-              65,
-              1,
-              11,
-              18,
-              1,
-              51,
-              68,
-              85,
-              202,
-              8
-            ]
-          }
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "DT250A"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "svakom-iker": {
       "defaults": {
         "name": "Svakom Iker",
         "features": [
@@ -5429,25 +5566,42 @@
             }
           }
         ]
-      }
-    },
-    "svakom-pulse": {
-      "btle": {
-        "names": [
-          "SWK-SX013A",
-          "Pulse Union",
-          "Pulse Galaxie",
-          "SX033APP",
-          "BX288A",
-          "QH-SX045A-B"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
-            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Iker*"
+            ],
+            "manufacturer-data": [
+              {
+                "company": 39,
+                "data": [
+                  83,
+                  86,
+                  65,
+                  1,
+                  11,
+                  18,
+                  1,
+                  51,
+                  68,
+                  85,
+                  202,
+                  8
+                ]
+              }
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "svakom-pulse": {
       "defaults": {
         "name": "Svakom Pulse Device",
         "features": [
@@ -5502,21 +5656,29 @@
           ],
           "name": "Coleur Dor VX045A"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "SWK-SX013A",
+              "Pulse Union",
+              "Pulse Galaxie",
+              "SX033APP",
+              "BX288A",
+              "QH-SX045A-B"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "svakom-suitcase": {
-      "btle": {
-        "names": [
-          "VX357A-BLE-V1.0",
-          "VX236A-BLE-V1.0"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
-            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Svakom Magic Suitcase",
         "features": [
@@ -5553,20 +5715,25 @@
           ],
           "name": "Coleur Dor VX236A"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "VX357A-BLE-V1.0",
+              "VX236A-BLE-V1.0"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "svakom-tarax": {
-      "btle": {
-        "names": [
-          "SX218A"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
-            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "ToyCod Tara X",
         "features": [
@@ -5597,21 +5764,24 @@
             }
           }
         ]
-      }
-    },
-    "svakom-avaneo": {
-      "btle": {
-        "names": [
-          "SX218A",
-          "Ava Neo"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
-            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "SX218A"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "svakom-avaneo": {
       "defaults": {
         "name": "Svakom Ava Neo",
         "features": [
@@ -5640,19 +5810,25 @@
             }
           }
         ]
-      }
-    },
-    "svakom-barnard": {
-      "btle": {
-        "names": [
-          "DG239A"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "SX218A",
+              "Ava Neo"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "svakom-barnard": {
       "defaults": {
         "name": "Fantasy Cup Barnard",
         "features": [
@@ -5681,19 +5857,23 @@
             }
           }
         ]
-      }
-    },
-    "realov": {
-      "btle": {
-        "names": [
-          "REALOV_VIBE"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "DG239A"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "realov": {
       "defaults": {
         "name": "Realov Device",
         "features": [
@@ -5710,20 +5890,23 @@
             }
           }
         ]
-      }
-    },
-    "motorbunny": {
-      "btle": {
-        "names": [
-          "MB Controller",
-          "MB LINK 201"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff6-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "REALOV_VIBE"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "motorbunny": {
       "defaults": {
         "name": "Motorbunny Device",
         "features": [
@@ -5766,21 +5949,24 @@
           ],
           "name": "Motorbunny Buck"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "MB Controller",
+              "MB LINK 201"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff6-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "zalo": {
-      "btle": {
-        "names": [
-          "ZALO-Queen",
-          "ZALO-King",
-          "ZALO-Jeanne"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Zalo Device",
         "features": [
@@ -5869,21 +6055,25 @@
           ],
           "name": "Zalo Jeanne"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "ZALO-Queen",
+              "ZALO-King",
+              "ZALO-Jeanne"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "sayberx": {
-      "btle": {
-        "names": [
-          "SayberX",
-          "X-Ring *"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff6-0000-1000-8000-00805f9b34fb",
-            "rx": "0000fff8-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "SayberX Device",
         "features": []
@@ -5915,20 +6105,25 @@
           ],
           "name": "Sayber X-Ring"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "SayberX",
+              "X-Ring *"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff6-0000-1000-8000-00805f9b34fb",
+                "rx": "0000fff8-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "muse": {
-      "btle": {
-        "names": [
-          "WB-ZDB-WST",
-          "WB-TDD"
-        ],
-        "services": {
-          "0000aaa0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000aaa1-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Muse Device",
         "features": [
@@ -5959,20 +6154,24 @@
           ],
           "name": "Galaku Panty Vib"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "WB-ZDB-WST",
+              "WB-TDD"
+            ],
+            "services": {
+              "0000aaa0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000aaa1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "lelo-f1s": {
-      "btle": {
-        "names": [
-          "F1s"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff1-0000-1000-8000-00805f9b34fb",
-            "rx": "00000aa4-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Lelo F1s",
         "features": [
@@ -6001,22 +6200,24 @@
             }
           }
         ]
-      }
-    },
-    "lelo-f1sv2": {
-      "btle": {
-        "names": [
-          "F1SV2A",
-          "F1SV2X"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff1-0000-1000-8000-00805f9b34fb",
-            "whitelist": "00000a10-0000-1000-8000-00805f9b34fb",
-            "rx": "00000a04-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "F1s"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb",
+                "rx": "00000aa4-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "lelo-f1sv2": {
       "defaults": {
         "name": "Lelo F1s V2",
         "features": [
@@ -6045,26 +6246,26 @@
             }
           }
         ]
-      }
-    },
-    "lelo-harmony": {
-      "btle": {
-        "names": [
-          "IdaWave",
-          "Ida Wave",
-          "TianiHarmony",
-          "Tiani Harmony",
-          "TOR3",
-          "Hugo2"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "command": "0000fff1-0000-1000-8000-00805f9b34fb",
-            "tx": "0000fff2-0000-1000-8000-00805f9b34fb",
-            "whitelist": "00000a11-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "F1SV2A",
+              "F1SV2X"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb",
+                "whitelist": "00000a10-0000-1000-8000-00805f9b34fb",
+                "rx": "00000a04-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "lelo-harmony": {
       "defaults": {
         "name": "Lelo Tiani Harmony",
         "features": [
@@ -6154,19 +6355,30 @@
           ],
           "name": "Lelo Hugo 2"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "IdaWave",
+              "Ida Wave",
+              "TianiHarmony",
+              "Tiani Harmony",
+              "TOR3",
+              "Hugo2"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "command": "0000fff1-0000-1000-8000-00805f9b34fb",
+                "tx": "0000fff2-0000-1000-8000-00805f9b34fb",
+                "whitelist": "00000a11-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "aneros": {
-      "btle": {
-        "names": [
-          "Massage Demo"
-        ],
-        "services": {
-          "0000ff00-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ff01-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Aneros Vivi",
         "features": [
@@ -6197,21 +6409,23 @@
             }
           }
         ]
-      }
-    },
-    "lovehoney-desire": {
-      "btle": {
-        "names": [
-          "PROSTATE VIBE",
-          "KNICKER VIBE",
-          "LOVE EGG"
-        ],
-        "services": {
-          "0000ff00-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ff01-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Massage Demo"
+            ],
+            "services": {
+              "0000ff00-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ff01-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "lovehoney-desire": {
       "defaults": {
         "name": "Lovehoney Device",
         "features": [
@@ -6288,38 +6502,48 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "PROSTATE VIBE",
+              "KNICKER VIBE",
+              "LOVE EGG"
+            ],
+            "services": {
+              "0000ff00-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ff01-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "twerkingbutt": {
-      "btle": {
-        "names": [
-          "BODIKANG",
-          "Twerking Butt",
-          "TwerkingButt"
-        ],
-        "services": {
-          "00000a60-0000-1000-8000-00805f9b34fb": {
-            "tx": "00000a66-0000-1000-8000-00805f9b34fb",
-            "rx": "00000a67-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Twerking Butt",
         "features": []
-      }
-    },
-    "maxpro": {
-      "btle": {
-        "names": [
-          "M2"
-        ],
-        "services": {
-          "6e400001-b5a3-f393-e0a9-e50e24dcca9e": {
-            "tx": "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "BODIKANG",
+              "Twerking Butt",
+              "TwerkingButt"
+            ],
+            "services": {
+              "00000a60-0000-1000-8000-00805f9b34fb": {
+                "tx": "00000a66-0000-1000-8000-00805f9b34fb",
+                "rx": "00000a67-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "maxpro": {
       "defaults": {
         "name": "MaxPro 2",
         "features": [
@@ -6336,28 +6560,23 @@
             }
           }
         ]
-      }
-    },
-    "nobra": {
-      "btle": {
-        "names": [
-          "NobraControl*"
-        ],
-        "services": {
-          "0000abf0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000abf1-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "M2"
+            ],
+            "services": {
+              "6e400001-b5a3-f393-e0a9-e50e24dcca9e": {
+                "tx": "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
+              }
+            }
           }
         }
-      },
-      "serial": [
-        {
-          "port": "default",
-          "baud-rate": 19200,
-          "data-bits": 8,
-          "parity": "N",
-          "stop-bits": 1
-        }
-      ],
+      ]
+    },
+    "nobra": {
       "defaults": {
         "name": "Nobra's Silicone Dreams Toy",
         "features": [
@@ -6374,20 +6593,36 @@
             }
           }
         ]
-      }
-    },
-    "thehandy": {
-      "btle": {
-        "names": [
-          "The Handy"
-        ],
-        "services": {
-          "1775244d-6b43-439b-877c-060f2d9bed07": {
-            "firmware": "1775ff51-6b43-439b-877c-060f2d9bed07",
-            "tx": "1775ff55-6b43-439b-877c-060f2d9bed07"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "NobraControl*"
+            ],
+            "services": {
+              "0000abf0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000abf1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        },
+        {
+          "serial": {
+            "ports": [
+              {
+                "port": "default",
+                "baud-rate": 19200,
+                "data-bits": 8,
+                "parity": "N",
+                "stop-bits": 1
+              }
+            ]
           }
         }
-      },
+      ]
+    },
+    "thehandy": {
       "defaults": {
         "name": "The Handy",
         "features": [
@@ -6404,20 +6639,24 @@
             }
           }
         ]
-      }
-    },
-    "cachito": {
-      "btle": {
-        "names": [
-          "CCTSK",
-          "CCTXueGao"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff2-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "The Handy"
+            ],
+            "services": {
+              "1775244d-6b43-439b-877c-060f2d9bed07": {
+                "firmware": "1775ff51-6b43-439b-877c-060f2d9bed07",
+                "tx": "1775ff55-6b43-439b-877c-060f2d9bed07"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "cachito": {
       "defaults": {
         "name": "Cachito Device",
         "features": [
@@ -6460,19 +6699,24 @@
           ],
           "name": "Cachito Ice Cream"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "CCTSK",
+              "CCTXueGao"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff2-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "jejoue": {
-      "btle": {
-        "names": [
-          "Je Joue"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Je Joue Device",
         "features": [
@@ -6501,19 +6745,23 @@
             }
           }
         ]
-      }
-    },
-    "lovenuts": {
-      "btle": {
-        "names": [
-          "Love_Nuts"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Je Joue"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "lovenuts": {
       "defaults": {
         "name": "Love Nut",
         "features": [
@@ -6530,23 +6778,23 @@
             }
           }
         ]
-      }
-    },
-    "patoo": {
-      "btle": {
-        "names": [
-          "PTVEA*",
-          "PBT*",
-          "PCS*",
-          "PHT*"
-        ],
-        "services": {
-          "f000aa64-0451-4000-b000-000000000000": {
-            "txmode": "f000aa65-0451-4000-b000-000000000000",
-            "tx": "f000aa68-0451-4000-b000-000000000000"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Love_Nuts"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "patoo": {
       "defaults": {
         "name": "Patoo Device",
         "features": [
@@ -6615,18 +6863,27 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "PTVEA*",
+              "PBT*",
+              "PCS*",
+              "PHT*"
+            ],
+            "services": {
+              "f000aa64-0451-4000-b000-000000000000": {
+                "txmode": "f000aa65-0451-4000-b000-000000000000",
+                "tx": "f000aa68-0451-4000-b000-000000000000"
+              }
+            }
+          }
+        }
       ]
     },
     "tcode-v03": {
-      "serial": [
-        {
-          "port": "default",
-          "baud-rate": 115200,
-          "data-bits": 8,
-          "parity": "N",
-          "stop-bits": 1
-        }
-      ],
       "defaults": {
         "name": "TCode v0.3 (Single Linear Axis)",
         "features": [
@@ -6643,20 +6900,24 @@
             }
           }
         ]
-      }
-    },
-    "fredorch": {
-      "btle": {
-        "names": [
-          "YXlinksSPP"
-        ],
-        "services": {
-          "0000ffb0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffb1-0000-1000-8000-00805f9b34fb",
-            "rx": "0000ffb2-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "serial": {
+            "ports": [
+              {
+                "port": "default",
+                "baud-rate": 115200,
+                "data-bits": 8,
+                "parity": "N",
+                "stop-bits": 1
+              }
+            ]
           }
         }
-      },
+      ]
+    },
+    "fredorch": {
       "defaults": {
         "name": "Fredorch Device",
         "features": [
@@ -6673,20 +6934,24 @@
             }
           }
         ]
-      }
-    },
-    "fredorch-rotary": {
-      "btle": {
-        "names": [
-          "M1_*"
-        ],
-        "services": {
-          "0000ae10-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ae01-0000-1000-8000-00805f9b34fb",
-            "rx": "0000ae02-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "YXlinksSPP"
+            ],
+            "services": {
+              "0000ffb0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffb1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ffb2-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "fredorch-rotary": {
       "defaults": {
         "name": "Fredorch Rotary Device",
         "features": [
@@ -6704,19 +6969,24 @@
             }
           }
         ]
-      }
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "M1_*"
+            ],
+            "services": {
+              "0000ae10-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ae01-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ae02-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
     },
     "mizzzee": {
-      "btle": {
-        "names": [
-          "NFY008"
-        ],
-        "services": {
-          "0000eea0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000eea1-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Mizz Zee Device",
         "features": [
@@ -6733,19 +7003,23 @@
             }
           }
         ]
-      }
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "NFY008"
+            ],
+            "services": {
+              "0000eea0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000eea1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
     },
     "mizzzee-v2": {
-      "btle": {
-        "names": [
-          "XHT"
-        ],
-        "services": {
-          "0000eea0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ee01-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Mizz Zee Device",
         "features": [
@@ -6762,19 +7036,23 @@
             }
           }
         ]
-      }
-    },
-    "mizzzee-v3": {
-      "btle": {
-        "names": [
-          "XHTKJ"
-        ],
-        "services": {
-          "0000ff10-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ff12-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "XHT"
+            ],
+            "services": {
+              "0000eea0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ee01-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "mizzzee-v3": {
       "defaults": {
         "name": "Mizz Zee Device",
         "features": [
@@ -6791,22 +7069,23 @@
             }
           }
         ]
-      }
-    },
-    "htk_bm": {
-      "btle": {
-        "names": [
-          "HTK-BLE-BM001"
-        ],
-        "services": {
-          "0000180f-0000-1000-8000-00805f9b34fb": {
-            "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
-          },
-          "00001802-0000-1000-8000-00805f9b34fb": {
-            "tx": "00002a06-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "XHTKJ"
+            ],
+            "services": {
+              "0000ff10-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ff12-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "htk_bm": {
       "defaults": {
         "name": "HTK Breast Massager",
         "features": [
@@ -6835,25 +7114,26 @@
             }
           }
         ]
-      }
-    },
-    "ankni": {
-      "btle": {
-        "names": [
-          "DSJM"
-        ],
-        "services": {
-          "0000fe00-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fe01-0000-1000-8000-00805f9b34fb"
-          },
-          "0000fffe-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fe02-0000-1000-8000-00805f9b34fb"
-          },
-          "0000180a-0000-1000-8000-00805f9b34fb": {
-            "generic0": "00002a50-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "HTK-BLE-BM001"
+            ],
+            "services": {
+              "0000180f-0000-1000-8000-00805f9b34fb": {
+                "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
+              },
+              "00001802-0000-1000-8000-00805f9b34fb": {
+                "tx": "00002a06-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "ankni": {
       "defaults": {
         "name": "Roselex Device",
         "features": [
@@ -6870,20 +7150,29 @@
             }
           }
         ]
-      }
-    },
-    "hgod": {
-      "btle": {
-        "names": [
-          "AMN NEO"
-        ],
-        "services": {
-          "0000ffe3-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
-            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "DSJM"
+            ],
+            "services": {
+              "0000fe00-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fe01-0000-1000-8000-00805f9b34fb"
+              },
+              "0000fffe-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fe02-0000-1000-8000-00805f9b34fb"
+              },
+              "0000180a-0000-1000-8000-00805f9b34fb": {
+                "generic0": "00002a50-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "hgod": {
       "defaults": {
         "name": "Hgod Device",
         "features": [
@@ -6900,24 +7189,24 @@
             }
           }
         ]
-      }
-    },
-    "lovedistance": {
-      "btle": {
-        "names": [
-          "REACH G",
-          "REACH",
-          "MAG",
-          "SPAN",
-          "RANGE"
-        ],
-        "services": {
-          "0000ff00-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ff01-0000-1000-8000-00805f9b34fb",
-            "rx": "0000ff02-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "AMN NEO"
+            ],
+            "services": {
+              "0000ffe3-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "lovedistance": {
       "defaults": {
         "name": "Love Distance Device",
         "features": [
@@ -6966,41 +7255,28 @@
           ],
           "name": "Love Distance Range"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "REACH G",
+              "REACH",
+              "MAG",
+              "SPAN",
+              "RANGE"
+            ],
+            "services": {
+              "0000ff00-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ff01-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ff02-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "satisfyer": {
-      "btle": {
-        "names": [
-          "SF *"
-        ],
-        "manufacturer-data": [
-          {
-            "company": 93,
-            "data": [
-              0,
-              0,
-              39
-            ]
-          },
-          {
-            "company": 93,
-            "data": [
-              0,
-              0,
-              40
-            ]
-          }
-        ],
-        "services": {
-          "0000180a-0000-1000-8000-00805f9b34fb": {
-            "rxblemodel": "00002a24-0000-1000-8000-00805f9b34fb"
-          },
-          "51361500-c5e7-47c7-8a6e-47ebc99d80e8": {
-            "command": "51361501-c5e7-47c7-8a6e-47ebc99d80e8",
-            "tx": "51361502-c5e7-47c7-8a6e-47ebc99d80e8"
-          }
-        }
-      },
       "defaults": {
         "name": "Satisfyer Device",
         "features": [
@@ -8829,23 +9105,45 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "SF *"
+            ],
+            "manufacturer-data": [
+              {
+                "company": 93,
+                "data": [
+                  0,
+                  0,
+                  39
+                ]
+              },
+              {
+                "company": 93,
+                "data": [
+                  0,
+                  0,
+                  40
+                ]
+              }
+            ],
+            "services": {
+              "0000180a-0000-1000-8000-00805f9b34fb": {
+                "rxblemodel": "00002a24-0000-1000-8000-00805f9b34fb"
+              },
+              "51361500-c5e7-47c7-8a6e-47ebc99d80e8": {
+                "command": "51361501-c5e7-47c7-8a6e-47ebc99d80e8",
+                "tx": "51361502-c5e7-47c7-8a6e-47ebc99d80e8"
+              }
+            }
+          }
+        }
       ]
     },
     "mannuo": {
-      "btle": {
-        "names": [
-          "Sex toys",
-          "Sex Toys",
-          "LXCDVP",
-          "MANO PRODUCT"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff1-0000-1000-8000-00805f9b34fb",
-            "rx": "0000fff4-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "ManNuo Device",
         "features": [
@@ -8862,22 +9160,27 @@
             }
           }
         ]
-      }
-    },
-    "kgoal-boost": {
-      "btle": {
-        "names": [
-          "Boost"
-        ],
-        "services": {
-          "0000180f-0000-1000-8000-00805f9b34fb": {
-            "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
-          },
-          "8e7c6065-7656-17ad-1b41-b53d1a548e0d": {
-            "rxpressure": "10c2be2d-d2d5-b7a8-5f42-e2468c9ebbf5"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Sex toys",
+              "Sex Toys",
+              "LXCDVP",
+              "MANO PRODUCT"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000fff4-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "kgoal-boost": {
       "defaults": {
         "name": "KGoal Boost",
         "features": [
@@ -8897,20 +9200,26 @@
             }
           }
         ]
-      }
-    },
-    "meese": {
-      "btle": {
-        "names": [
-          "Meese-V389",
-          "Meese-cd"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Boost"
+            ],
+            "services": {
+              "0000180f-0000-1000-8000-00805f9b34fb": {
+                "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
+              },
+              "8e7c6065-7656-17ad-1b41-b53d1a548e0d": {
+                "rxpressure": "10c2be2d-d2d5-b7a8-5f42-e2468c9ebbf5"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "meese": {
       "defaults": {
         "name": "Meese Device",
         "features": [
@@ -8967,24 +9276,24 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Meese-V389",
+              "Meese-cd"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "hismith": {
-      "btle": {
-        "names": [
-          "HISMITH",
-          "Wildolo",
-          "\u0007HISMITH"
-        ],
-        "services": {
-          "0000ffe5-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe9-0000-1000-8000-00805f9b34fb"
-          },
-          "0000ff90-0000-1000-8000-00805f9b34fb": {
-            "rxblemodel": "0000ff96-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Hismith device",
         "features": [
@@ -9075,26 +9384,28 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "HISMITH",
+              "Wildolo",
+              "\u0007HISMITH"
+            ],
+            "services": {
+              "0000ffe5-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe9-0000-1000-8000-00805f9b34fb"
+              },
+              "0000ff90-0000-1000-8000-00805f9b34fb": {
+                "rxblemodel": "0000ff96-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "hismith-mini": {
-      "btle": {
-        "names": [
-          "Auxfun-Box",
-          "Sinloli",
-          "Sinloli-Sherry",
-          "Eropair *",
-          "HISMITH S1"
-        ],
-        "services": {
-          "0000ffe5-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe9-0000-1000-8000-00805f9b34fb"
-          },
-          "0000ff90-0000-1000-8000-00805f9b34fb": {
-            "rxblemodel": "0000ff96-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Hismith Mini device",
         "features": [
@@ -9262,22 +9573,30 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Auxfun-Box",
+              "Sinloli",
+              "Sinloli-Sherry",
+              "Eropair *",
+              "HISMITH S1"
+            ],
+            "services": {
+              "0000ffe5-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe9-0000-1000-8000-00805f9b34fb"
+              },
+              "0000ff90-0000-1000-8000-00805f9b34fb": {
+                "rxblemodel": "0000ff96-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "hismith-servo": {
-      "btle": {
-        "names": [
-          "HISMITH S2"
-        ],
-        "services": {
-          "0000ffe5-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe9-0000-1000-8000-00805f9b34fb"
-          },
-          "0000ff90-0000-1000-8000-00805f9b34fb": {
-            "rxblemodel": "0000ff96-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Hismith servo device",
         "features": [
@@ -9303,19 +9622,26 @@
           ],
           "name": "Hismith Servo"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "HISMITH S2"
+            ],
+            "services": {
+              "0000ffe5-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe9-0000-1000-8000-00805f9b34fb"
+              },
+              "0000ff90-0000-1000-8000-00805f9b34fb": {
+                "rxblemodel": "0000ff96-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "wetoy": {
-      "btle": {
-        "names": [
-          "WeToy"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff3-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "WeToy MiNa",
         "features": [
@@ -9332,20 +9658,23 @@
             }
           }
         ]
-      }
-    },
-    "pink_punch": {
-      "btle": {
-        "names": [
-          "Pink_Punch",
-          "PinkPunch_Peachu"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "WeToy"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff3-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "pink_punch": {
       "defaults": {
         "name": "Pink Punch Sunset Mushroom",
         "configurations": [
@@ -9370,22 +9699,24 @@
             }
           }
         ]
-      }
-    },
-    "sakuraneko": {
-      "btle": {
-        "names": [
-          "sakuraneko-01",
-          "sakuraneko-02",
-          "sakuraneko-03",
-          "sakuraneko-04"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Pink_Punch",
+              "PinkPunch_Peachu"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "sakuraneko": {
       "defaults": {
         "name": "Sakuraneko Device",
         "features": [
@@ -9454,21 +9785,26 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "sakuraneko-01",
+              "sakuraneko-02",
+              "sakuraneko-03",
+              "sakuraneko-04"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "synchro": {
-      "btle": {
-        "names": [
-          "Shinkuro",
-          "synchro2",
-          "synchro EX"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Synchro",
         "features": [
@@ -9493,19 +9829,25 @@
           ],
           "name": "Synchro Exchange"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Shinkuro",
+              "synchro2",
+              "synchro EX"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "tryfun": {
-      "btle": {
-        "names": [
-          "TRYFUN-ONE"
-        ],
-        "services": {
-          "0000ff10-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "TryFun Yuan Series",
         "features": [
@@ -9534,23 +9876,23 @@
             }
           }
         ]
-      }
-    },
-    "metaxsire": {
-      "btle": {
-        "names": [
-          "Rex",
-          "Cali",
-          "Olis",
-          "LY213A01"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
-            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "TRYFUN-ONE"
+            ],
+            "services": {
+              "0000ff10-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "metaxsire": {
       "defaults": {
         "name": "metaXsire Device",
         "features": [
@@ -9683,23 +10025,27 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Rex",
+              "Cali",
+              "Olis",
+              "LY213A01"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "metaxsire-repeat": {
-      "btle": {
-        "names": [
-          "LY199B01",
-          "LY234A01",
-          "LY271A01",
-          "LY270A01"
-        ],
-        "services": {
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
-            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Cooxer Bullet Vibe",
         "features": [
@@ -9742,19 +10088,27 @@
           ],
           "name": "metaXsire Una"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "LY199B01",
+              "LY234A01",
+              "LY271A01",
+              "LY270A01"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "metaxsire-v2": {
-      "btle": {
-        "names": [
-          "LY272A01"
-        ],
-        "services": {
-          "0000bae0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000bae1-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "metaXsire Nolan",
         "features": [
@@ -9783,19 +10137,23 @@
             }
           }
         ]
-      }
-    },
-    "metaxsire-v3": {
-      "btle": {
-        "names": [
-          "TAY001"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fe02-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "LY272A01"
+            ],
+            "services": {
+              "0000bae0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000bae1-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "metaxsire-v3": {
       "defaults": {
         "name": "metaXsire Tay",
         "features": [
@@ -9812,20 +10170,23 @@
             }
           }
         ]
-      }
-    },
-    "cowgirl": {
-      "btle": {
-        "names": [
-          "THE COWGIRL",
-          "THE UNICORN"
-        ],
-        "services": {
-          "0000fe00-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fe01-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "TAY001"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fe02-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "cowgirl": {
       "defaults": {
         "name": "The Cowgirl Device",
         "features": [
@@ -9868,19 +10229,24 @@
           ],
           "name": "The Unicorn"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "THE COWGIRL",
+              "THE UNICORN"
+            ],
+            "services": {
+              "0000fe00-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fe01-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "galaku-pump": {
-      "btle": {
-        "names": [
-          "V415"
-        ],
-        "services": {
-          "00001000-0000-1000-8000-00805f9b34fb": {
-            "tx": "00001001-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Galaku Device",
         "features": [
@@ -9917,19 +10283,23 @@
           ],
           "name": "Galaku Nebula"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "V415"
+            ],
+            "services": {
+              "00001000-0000-1000-8000-00805f9b34fb": {
+                "tx": "00001001-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "xibao": {
-      "btle": {
-        "names": [
-          "CCYB_*"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff2-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Xibao Smart Masturbation Cup",
         "features": [
@@ -9946,19 +10316,23 @@
             }
           }
         ]
-      }
-    },
-    "sensee": {
-      "btle": {
-        "names": [
-          "CTY222S4"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff5-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "CCYB_*"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff2-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "sensee": {
       "defaults": {
         "name": "Sensee Diandou Rabbit",
         "features": [
@@ -9975,19 +10349,23 @@
             }
           }
         ]
-      }
-    },
-    "sensee-capsule": {
-      "btle": {
-        "names": [
-          "CCPA10S2"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff5-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "CTY222S4"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff5-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "sensee-capsule": {
       "defaults": {
         "name": "Sensee Capsule",
         "features": [
@@ -10016,21 +10394,23 @@
             }
           }
         ]
-      }
-    },
-    "fox": {
-      "btle": {
-        "names": [
-          "FOX",
-          "FOX M70 Pro",
-          "FoxM70Pro"
-        ],
-        "services": {
-          "0000ae00-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ae01-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "CCPA10S2"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff5-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "fox": {
       "defaults": {
         "name": "Fox Device",
         "features": [
@@ -10047,18 +10427,25 @@
             }
           }
         ]
-      }
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "FOX",
+              "FOX M70 Pro",
+              "FoxM70Pro"
+            ],
+            "services": {
+              "0000ae00-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ae01-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
     },
     "kizuna": {
-      "serial": [
-        {
-          "port": "default",
-          "baud-rate": 19200,
-          "data-bits": 8,
-          "parity": "N",
-          "stop-bits": 1
-        }
-      ],
       "defaults": {
         "name": "Kizuna Smart",
         "features": [
@@ -10075,19 +10462,24 @@
             }
           }
         ]
-      }
-    },
-    "xiuxiuda": {
-      "btle": {
-        "names": [
-          "XXD-Lush*"
-        ],
-        "services": {
-          "53300001-0023-4bd4-bbd5-a6920e4c5653": {
-            "tx": "53300003-0023-4bd4-bbd5-a6920e4c5653"
+      },
+      "communication": [
+        {
+          "serial": {
+            "ports": [
+              {
+                "port": "default",
+                "baud-rate": 19200,
+                "data-bits": 8,
+                "parity": "N",
+                "stop-bits": 1
+              }
+            ]
           }
         }
-      },
+      ]
+    },
+    "xiuxiuda": {
       "defaults": {
         "name": "Xiuxiuda Device",
         "features": [
@@ -10104,20 +10496,23 @@
             }
           }
         ]
-      }
-    },
-    "longlosttouch": {
-      "btle": {
-        "names": [
-          "RS-KNW"
-        ],
-        "services": {
-          "0000cb60-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000cb61-0000-1000-8000-00805f9b34fb",
-            "rx": "0000cb62-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "XXD-Lush*"
+            ],
+            "services": {
+              "53300001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "53300003-0023-4bd4-bbd5-a6920e4c5653"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "longlosttouch": {
       "defaults": {
         "name": "Long Lost Touch Possible Kiss",
         "features": [
@@ -10146,22 +10541,24 @@
             }
           }
         ]
-      }
-    },
-    "adrienlastic": {
-      "btle": {
-        "names": [
-          "Placeholder to avoid conflict with bad attempt to clone a Lovense Lush"
-        ],
-        "advertised-services": [
-          "00001320-0000-1000-8000-00805f9b34fb"
-        ],
-        "services": {
-          "6e400001-b5a3-f393-e0a9-e50e24dcca9e": {
-            "tx": "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "RS-KNW"
+            ],
+            "services": {
+              "0000cb60-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000cb61-0000-1000-8000-00805f9b34fb",
+                "rx": "0000cb62-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "adrienlastic": {
       "defaults": {
         "name": "Adrien Lastic Device",
         "features": [
@@ -10192,23 +10589,26 @@
           ],
           "name": "Adrien Lastic Revelation"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Placeholder to avoid conflict with bad attempt to clone a Lovense Lush"
+            ],
+            "advertised-services": [
+              "00001320-0000-1000-8000-00805f9b34fb"
+            ],
+            "services": {
+              "6e400001-b5a3-f393-e0a9-e50e24dcca9e": {
+                "tx": "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
+              }
+            }
+          }
+        }
       ]
     },
     "nintendo-joycon": {
-      "hid": [
-        {
-          "vendor-id": 1406,
-          "product-id": 8199
-        },
-        {
-          "vendor-id": 1406,
-          "product-id": 8198
-        },
-        {
-          "vendor-id": 1406,
-          "product-id": 8201
-        }
-      ],
       "defaults": {
         "name": "Nintendo Joycon",
         "features": [
@@ -10225,73 +10625,29 @@
             }
           }
         ]
-      }
-    },
-    "foreo": {
-      "btle": {
-        "names": [
-          "FOFO",
-          "LUNA fofo",
-          "LUNA FOFO",
-          "LUNA PLAY SMART",
-          "LUNA PLAYSMART2",
-          "LUNA PLAY SMART2",
-          "LUNA play smart2",
-          "LUNA play smart 2",
-          "LUNA 3",
-          "LUNA3",
-          "LUNA3PLUS",
-          "LUNA3 PLUS",
-          "LUNA 3 PLUS",
-          "LUNA 3 plus",
-          "LUNA 3 MEN",
-          "LUNA3MEN",
-          "LUNA MINI3",
-          "LUNA MINI 3",
-          "LUNA mini 3",
-          "LUNA4PLUS",
-          "LUNA4",
-          "LUNA 4",
-          "LUNA4PLUS",
-          "LUNA4 PLUS",
-          "LUNA 4 plus",
-          "LUNA4MEN",
-          "LUNA 4 MEN",
-          "LUNA 4 FOR MEN",
-          "LUNA MINI4",
-          "LUNA MINI 4",
-          "LUNA mini 4",
-          "LUNA 4 mini",
-          "UFO",
-          "UFO mini",
-          "UFO MINI",
-          "UFO MIN",
-          "UFO2",
-          "UFO 2",
-          "UFOMINI2",
-          "UFO mini 2",
-          "UFO3",
-          "UFO3mini",
-          "UFO3go",
-          "UFO3led",
-          "BEAR",
-          "BEAR_MINI",
-          "BEAR MINI",
-          "BEAR mini",
-          "BEAR2",
-          "BEAR 2",
-          "BEAR2go",
-          "BEAR2body",
-          "BEAR2eyes",
-          "KIWI",
-          "KIWI derma"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "hid": {
+            "pairs": [
+              {
+                "vendor-id": 1406,
+                "product-id": 8199
+              },
+              {
+                "vendor-id": 1406,
+                "product-id": 8198
+              },
+              {
+                "vendor-id": 1406,
+                "product-id": 8201
+              }
+            ]
           }
         }
-      },
+      ]
+    },
+    "foreo": {
       "defaults": {
         "name": "Foreo Device",
         "features": [
@@ -10494,27 +10850,77 @@
           ],
           "name": "Foreo KIWI derma"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "FOFO",
+              "LUNA fofo",
+              "LUNA FOFO",
+              "LUNA PLAY SMART",
+              "LUNA PLAYSMART2",
+              "LUNA PLAY SMART2",
+              "LUNA play smart2",
+              "LUNA play smart 2",
+              "LUNA 3",
+              "LUNA3",
+              "LUNA3PLUS",
+              "LUNA3 PLUS",
+              "LUNA 3 PLUS",
+              "LUNA 3 plus",
+              "LUNA 3 MEN",
+              "LUNA3MEN",
+              "LUNA MINI3",
+              "LUNA MINI 3",
+              "LUNA mini 3",
+              "LUNA4PLUS",
+              "LUNA4",
+              "LUNA 4",
+              "LUNA4PLUS",
+              "LUNA4 PLUS",
+              "LUNA 4 plus",
+              "LUNA4MEN",
+              "LUNA 4 MEN",
+              "LUNA 4 FOR MEN",
+              "LUNA MINI4",
+              "LUNA MINI 4",
+              "LUNA mini 4",
+              "LUNA 4 mini",
+              "UFO",
+              "UFO mini",
+              "UFO MINI",
+              "UFO MIN",
+              "UFO2",
+              "UFO 2",
+              "UFOMINI2",
+              "UFO mini 2",
+              "UFO3",
+              "UFO3mini",
+              "UFO3go",
+              "UFO3led",
+              "BEAR",
+              "BEAR_MINI",
+              "BEAR MINI",
+              "BEAR mini",
+              "BEAR2",
+              "BEAR 2",
+              "BEAR2go",
+              "BEAR2body",
+              "BEAR2eyes",
+              "KIWI",
+              "KIWI derma"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "monsterpub": {
-      "btle": {
-        "names": [
-          "MonsterPub"
-        ],
-        "services": {
-          "00006000-0000-1000-8000-00805f9b34fb": {
-            "tx": "00006001-0000-1000-8000-00805f9b34fb",
-            "txmode": "00006002-0000-1000-8000-00805f9b34fb",
-            "txvibrate": "00006003-0000-1000-8000-00805f9b34fb"
-          },
-          "00006010-0000-1000-8000-00805f9b34fb": {
-            "rxblemodel": "00006014-0000-1000-8000-00805f9b34fb"
-          },
-          "00008000-0000-1000-8000-00805f9b34fb": {
-            "rx": "00008001-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "Sistalk MonsterPub Device",
         "features": [
@@ -10673,26 +11079,31 @@
           ],
           "name": "Sistalk MonsterPub BeatHeart"
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "MonsterPub"
+            ],
+            "services": {
+              "00006000-0000-1000-8000-00805f9b34fb": {
+                "tx": "00006001-0000-1000-8000-00805f9b34fb",
+                "txmode": "00006002-0000-1000-8000-00805f9b34fb",
+                "txvibrate": "00006003-0000-1000-8000-00805f9b34fb"
+              },
+              "00006010-0000-1000-8000-00805f9b34fb": {
+                "rxblemodel": "00006014-0000-1000-8000-00805f9b34fb"
+              },
+              "00008000-0000-1000-8000-00805f9b34fb": {
+                "rx": "00008001-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "joyhub": {
-      "btle": {
-        "names": [
-          "J-Petalwish2",
-          "J-VortexTongue",
-          "J-Velocity",
-          "JOYHUB-ROSELLA2",
-          "J-VibSiren",
-          "J-ElixirEgg",
-          "J-RetroGuard",
-          "J-TrueForm3"
-        ],
-        "services": {
-          "0000ffa0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "JoyHub Device",
         "features": [
@@ -10864,26 +11275,30 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "J-Petalwish2",
+              "J-VortexTongue",
+              "J-Velocity",
+              "JOYHUB-ROSELLA2",
+              "J-VibSiren",
+              "J-ElixirEgg",
+              "J-RetroGuard",
+              "J-TrueForm3"
+            ],
+            "services": {
+              "0000ffa0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "joyhub-v2": {
-      "btle": {
-        "names": [
-          "J-Pearlconch",
-          "J-PetiteRose",
-          "J-MoonHorn",
-          "J-VibTrefoil",
-          "J-Panther",
-          "J-Mecha",
-          "J-Lagoon",
-          "J-Firedragon"
-        ],
-        "services": {
-          "0000ffa0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "JoyHub Device",
         "features": [
@@ -11163,19 +11578,30 @@
             }
           ]
         }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "J-Pearlconch",
+              "J-PetiteRose",
+              "J-MoonHorn",
+              "J-VibTrefoil",
+              "J-Panther",
+              "J-Mecha",
+              "J-Lagoon",
+              "J-Firedragon"
+            ],
+            "services": {
+              "0000ffa0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
       ]
     },
     "itoys": {
-      "btle": {
-        "names": [
-          "26-021-B"
-        ],
-        "services": {
-          "0000ffa0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
       "defaults": {
         "name": "iToys Seagull",
         "features": [
@@ -11192,25 +11618,23 @@
             }
           }
         ]
-      }
-    },
-    "leten": {
-      "btle": {
-        "names": [
-          "T528-LT",
-          "F537-LT",
-          "F520B-LT",
-          "F520A-LT"
-        ],
-        "services": {
-          "0000fff0-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
-          },
-          "0000ffe0-0000-1000-8000-00805f9b34fb": {
-            "rx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "26-021-B"
+            ],
+            "services": {
+              "0000ffa0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "leten": {
       "defaults": {
         "name": "Leten Device",
         "features": [
@@ -11227,20 +11651,29 @@
             }
           }
         ]
-      }
-    },
-    "vibcrafter": {
-      "btle": {
-        "names": [
-          "be gentle"
-        ],
-        "services": {
-          "53300051-0060-4bd4-bbe5-a6920e4c5663": {
-            "tx": "53300052-0060-4bd4-bbe5-a6920e4c5663",
-            "rx": "53300053-0060-4bd4-bbe5-a6920e4c5663"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "T528-LT",
+              "F537-LT",
+              "F520B-LT",
+              "F520A-LT"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+              },
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "rx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+              }
+            }
           }
         }
-      },
+      ]
+    },
+    "vibcrafter": {
       "defaults": {
         "name": "VibCrafter Device",
         "features": [
@@ -11269,7 +11702,22 @@
             }
           }
         ]
-      }
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "be gentle"
+            ],
+            "services": {
+              "53300051-0060-4bd4-bbe5-a6920e4c5663": {
+                "tx": "53300052-0060-4bd4-bbe5-a6920e4c5663",
+                "rx": "53300053-0060-4bd4-bbe5-a6920e4c5663"
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }

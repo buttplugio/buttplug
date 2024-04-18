@@ -87,9 +87,27 @@ if (messages["SensorReadCmd"] !== undefined) {
 }
 
 // Get document, or throw exception on error
-const doc = yaml.load(fs.readFileSync('./device-config-v2/buttplug-device-config.yml', 'utf8'));
+const doc = yaml.load(fs.readFileSync('./device-config-v2/buttplug-device-config-v2.yml', 'utf8'));
 for (var protocol in doc["protocols"]) {
   console.log(protocol);
+  let comm_array = [];
+  for (var comm_type of ["btle", "hid", "usb", "serial", "xinput", "lovense-connect-service"])
+  if (doc["protocols"][protocol][comm_type]) {
+    let obj = {};
+    if (["serial"].includes(comm_type)) {
+      obj[comm_type] = {};
+      obj[comm_type]["ports"] = doc["protocols"][protocol][comm_type];
+    } else if (["hid", "usb"].includes(comm_type)) {
+      obj[comm_type] = {};
+      obj[comm_type]["pairs"] = doc["protocols"][protocol][comm_type];
+    } else {
+      obj[comm_type] = doc["protocols"][protocol][comm_type];
+    }
+    comm_array.push(obj);
+    doc["protocols"][protocol][comm_type] = undefined;
+  }
+  doc["protocols"][protocol]["communication"] = comm_array;
+
   if (doc["protocols"][protocol]["defaults"] === undefined) {
     console.log("No defaults for protocol");
   }
