@@ -458,7 +458,7 @@ impl DeviceConfigurationManager {
       attrs.clone()
     } else if let Some(attrs) = self.base_device_definitions.get(&BaseDeviceIdentifier::new(
       &identifier.protocol(),
-      &identifier.attributes_identifier(),
+      &identifier.identifier(),
     )) {
       debug!(
         "Protocol + Identifier device config found for {:?}",

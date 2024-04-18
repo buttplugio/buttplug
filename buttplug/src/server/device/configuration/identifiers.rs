@@ -17,7 +17,7 @@ pub struct UserDeviceIdentifier {
   /// Name of the protocol used
   protocol: String,
   /// Internal identifier for the protocol used
-  attributes_identifier: Option<String>,
+  identifier: Option<String>,
   /// Address, as possibly serialized by whatever the managing library for the Device Communication Manager is.
   address: String,
 }
@@ -28,7 +28,7 @@ impl UserDeviceIdentifier {
     Self {
       address: address.to_owned(),
       protocol: protocol.to_owned(),
-      attributes_identifier: identifier.clone(),
+      identifier: identifier.clone(),
     }
   }
 }
@@ -40,14 +40,14 @@ pub struct BaseDeviceIdentifier {
   /// Name of the protocol this device uses to communicate
   protocol: String,
   /// Some([identifier]) if there's an identifier, otherwise None if default
-  attributes_identifier: Option<String>,
+  identifier: Option<String>,
 }
 
 impl BaseDeviceIdentifier {
   pub fn new(protocol: &str, attributes_identifier: &Option<String>) -> Self {
     Self {
       protocol: protocol.to_owned(),
-      attributes_identifier: attributes_identifier.clone(),
+      identifier: attributes_identifier.clone(),
     }
   }
 }
@@ -56,7 +56,7 @@ impl From<&UserDeviceIdentifier> for BaseDeviceIdentifier {
   fn from(other: &UserDeviceIdentifier) -> Self {
     Self {
       protocol: other.protocol().clone(),
-      attributes_identifier: other.attributes_identifier().clone(),
+      identifier: other.identifier().clone(),
     }
   }
 }
@@ -64,6 +64,6 @@ impl From<&UserDeviceIdentifier> for BaseDeviceIdentifier {
 impl PartialEq<UserDeviceIdentifier> for BaseDeviceIdentifier {
   fn eq(&self, other: &UserDeviceIdentifier) -> bool {
     self.protocol == *other.protocol()
-      && self.attributes_identifier == *other.attributes_identifier()
+      && self.identifier == *other.identifier()
   }
 }

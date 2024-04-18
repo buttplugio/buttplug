@@ -39,7 +39,7 @@ pub struct UserDeviceCustomization {
   index: u32,
 }
 
-#[derive(Debug, Clone, Getters, Setters, MutGetters)]
+#[derive(Serialize, Deserialize, Debug, Clone, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct UserDeviceDefinition {
   /// Given name of the device this instance represents.
@@ -47,6 +47,7 @@ pub struct UserDeviceDefinition {
   /// Message attributes for this device instance.
   features: Vec<DeviceFeature>,
   /// Per-user configurations specific to this device instance.
+  #[serde(rename="user-config")]
   user_config: UserDeviceCustomization,
 }
 
