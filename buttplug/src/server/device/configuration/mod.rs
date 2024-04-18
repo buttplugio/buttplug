@@ -373,7 +373,9 @@ impl DeviceConfigurationManager {
   fn device_index(&self, identifier: &UserDeviceIdentifier) -> u32 {
     // See if we have a reserved or reusable device index here.
     if let Some(config) = self.user_device_definitions.get(identifier) {
-      return config.user_config().index();
+      let index = config.user_config().index();
+      debug!("Found index {index} for device {identifier:?}");
+      return index;
     }
 
     let current_indexes: Vec<u32> = self
@@ -391,6 +393,7 @@ impl DeviceConfigurationManager {
     while current_indexes.contains(&index) {
       index = index + 1;
     }
+    debug!("Generating and assigning index {index:?} for device {identifier:?}");
     index
   }
 
