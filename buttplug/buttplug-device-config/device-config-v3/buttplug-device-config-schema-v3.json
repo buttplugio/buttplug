@@ -126,7 +126,9 @@
           "minItems": 1
         }
       },
-      "required": ["ports"]
+      "required": [
+        "ports"
+      ]
     },
     "xinput-definition": {
       "type": "object",
@@ -169,10 +171,12 @@
             ],
             "additionalProperties": false
           },
-          "minItems": 1    
+          "minItems": 1
         }
       },
-      "required": ["pairs"]
+      "required": [
+        "pairs"
+      ]
     },
     "step-range": {
       "description": "Specifies the range of steps to use for a device. Devices will use the low end value as a stop.",
@@ -309,7 +313,7 @@
         ],
         "additionalProperties": false
       }
-    },    
+    },
     "user-config-customization": {
       "type": "object",
       "properties": {
@@ -377,7 +381,7 @@
           },
           "name": {
             "type": "string"
-          },          
+          },
           "features": {
             "$ref": "#/components/features"
           }
@@ -462,36 +466,48 @@
     "user-configs": {
       "type": "object",
       "properties": {
-        "communication": {
+        "protocols": {
           "type": "object",
           "patternProperties": {
             "^.*$": {
               "type": "object",
               "properties": {
                 "communication": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "btle": {
+                        "$ref": "#/components/btle-definition"
+                      },
+                      "serial": {
+                        "$ref": "#/components/serial-definition"
+                      },
+                      "websocket": {
+                        "$ref": "#/components/websocket-definition"
+                      },
+                      "usb": {
+                        "$ref": "#/components/usb-definition"
+                      },
+                      "hid": {
+                        "$ref": "#/components/usb-definition"
+                      }
+                    }
+                  },
+                  "maxProperties": 1
+                },
+                "devices": {
                   "type": "object",
                   "properties": {
-                    "btle": {
-                      "$ref": "#/components/btle-definition"
-                    },
-                    "serial": {
-                      "$ref": "#/components/serial-definition"
-                    },
-                    "websocket": {
-                      "$ref": "#/components/websocket-definition"
-                    },
-                    "usb": {
-                      "$ref": "#/components/usb-definition"
-                    },
-                    "hid": {
-                      "$ref": "#/components/usb-definition"
+                    "configurations": {
+                      "$ref": "#/components/configurations-definition"
                     }
                   }
                 }
               }
-            },
-            "additionalProperties": false
-          }
+            }
+          },
+          "additionalProperties": false
         },
         "devices": {
           "type": "array",
