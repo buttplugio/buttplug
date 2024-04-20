@@ -7,7 +7,7 @@
 
 use super::json::JSONValidator;
 use crate::{
-  core::{errors::ButtplugDeviceError, message::DeviceFeature},
+  core::{errors::{ButtplugDeviceError, ButtplugError}, message::DeviceFeature},
   server::device::configuration::{
     BaseDeviceDefinition,
     BaseDeviceIdentifier,
@@ -18,9 +18,10 @@ use crate::{
     UserDeviceIdentifier,
   },
 };
+use dashmap::DashMap;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, fmt::Display};
+use std::{collections::HashMap, fmt::Display, path::Path};
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../buttplug-device-config/build-config/buttplug-device-config-v3.json");
@@ -88,8 +89,8 @@ struct UserDeviceConfigPair {
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 struct UserConfigDefinition {
-  #[serde(default, skip_serializing_if = "Option::is_none")]
-  specifiers: Option<HashMap<String, ProtocolDefinition>>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  protocols: Option<DashMap<String, ProtocolDefinition>>,
   #[serde(rename = "devices", default, skip_serializing_if = "Option::is_none")]
   user_device_configs: Option<Vec<UserDeviceConfigPair>>,
 }
@@ -98,6 +99,7 @@ struct UserConfigDefinition {
 #[getset(get = "pub")]
 struct ExternalDeviceConfiguration {
   protocol_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
+  user_protocol_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   protocol_features: HashMap<BaseDeviceIdentifier, BaseDeviceDefinition>,
   user_configs: HashMap<UserDeviceIdentifier, UserDeviceDefinition>,
 }
@@ -146,20 +148,20 @@ fn add_user_configs_to_protocol(
   external_config: &mut ExternalDeviceConfiguration,
   user_config_def: UserConfigDefinition,
 ) {
-  if let Some(specifiers) = user_config_def.specifiers() {
-    for (user_config_protocol, protocol_def) in specifiers {
+  if let Some(specifiers) = user_config_def.protocols() {
+    for kv in specifiers {
       if !external_config
         .protocol_specifiers
-        .contains_key(user_config_protocol)
+        .contains_key(kv.key())
       {
         continue;
       }
 
       external_config
-        .protocol_specifiers
-        .get_mut(user_config_protocol)
-        .unwrap()
-        .extend(protocol_def.communication.clone().unwrap_or_default().iter().cloned())
+        .user_protocol_specifiers
+        .entry(kv.key().clone())
+        .or_default()
+        .extend(kv.value().communication().as_ref().unwrap_or(&vec![]).iter().cloned())
     }
   }
   if let Some(user_device_configs) = user_config_def.user_device_configs() {
@@ -395,6 +397,12 @@ pub fn load_protocol_configs(
     dcm_builder.protocol_features(ident.clone(), features.clone());
   }
 
+  for (name, specifiers) in external_config.user_protocol_specifiers() {
+    for spec in specifiers {
+      dcm_builder.user_communication_specifier(name, spec.clone());
+    }
+  }
+
   for (ident, features) in external_config.user_configs() {
     dcm_builder.user_protocol_features(ident.clone(), features.clone());
   }
@@ -420,4 +428,28 @@ pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
   builder
     .finish()
     .expect("If this fails, the whole library goes with it.")
+}
+
+pub fn save_user_config(dcm: &DeviceConfigurationManager, config_file_path: &Path) -> Result<(), ButtplugError> {
+  let user_specifiers = dcm.user_communication_specifiers();
+  let user_definitions = dcm.user_device_definitions();
+  let user_definitions_vec = dcm.user_device_definitions().iter().map(|kv| UserDeviceConfigPair {
+    identifier: kv.key().clone(),
+    config: kv.value().clone()
+  }).collect();
+  let user_protos = DashMap::new();
+  for spec in user_specifiers {
+    user_protos.insert(spec.key().clone(), ProtocolDefinition {
+      communication: Some(spec.value().clone()),
+      .. Default::default()
+    });
+  }
+  let user_config_definition = UserConfigDefinition {
+    protocols: Some(user_protos.clone()),
+    user_device_configs: Some(user_definitions_vec)
+  };
+  let mut user_config_file = UserConfigFile::new(3, 0);
+  user_config_file.user_configs = Some(user_config_definition);
+  std::fs::write(config_file_path, serde_json::to_string(&user_config_file).unwrap()).unwrap();
+  Ok(())
 }

@@ -7,7 +7,7 @@
 
 use crate::core::message::{ButtplugDeviceMessageType, Endpoint};
 use getset::{Getters, MutGetters, Setters};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeSeq};
 use std::{collections::HashSet, ops::RangeInclusive};
 
 use super::{ActuatorType, SensorType};
@@ -123,15 +123,44 @@ impl DeviceFeature {
   }
 }
 
+fn range_serialize<S>(
+  range: &RangeInclusive<u32>,
+  serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+  S: Serializer,
+{
+  let mut seq = serializer.serialize_seq(Some(2))?;
+  seq.serialize_element(&range.start())?;
+  seq.serialize_element(&range.end())?;
+  seq.end()
+}
+
+fn range_sequence_serialize<S>(
+  range_vec: &Vec<RangeInclusive<i32>>,
+  serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+  S: Serializer,
+{
+  let mut seq = serializer.serialize_seq(Some(range_vec.len()))?;
+  for range in range_vec {
+    seq.serialize_element(&vec![*range.start(), *range.end()])?;
+  }
+  seq.end()
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize)]
 pub struct DeviceFeatureActuator {
   #[getset(get = "pub")]
   #[serde(rename = "step-range")]
+  #[serde(serialize_with="range_serialize")]
   step_range: RangeInclusive<u32>,
   // This will only exist in user configs, therefore it's an Option<T>
   #[getset(get = "pub")]
   #[serde(rename = "step-limit")]
   #[serde(skip_serializing_if = "Option::is_none")]
+  //#[serde(serialize_with="range_serialize")]
   step_limit: Option<RangeInclusive<u32>>,
   #[getset(get = "pub")]
   #[serde(rename = "messages")]
@@ -157,6 +186,7 @@ impl DeviceFeatureActuator {
 pub struct DeviceFeatureSensor {
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(rename = "value-range")]
+  #[serde(serialize_with="range_sequence_serialize")]
   value_range: Vec<RangeInclusive<i32>>,
   #[getset(get = "pub")]
   #[serde(rename = "messages")]

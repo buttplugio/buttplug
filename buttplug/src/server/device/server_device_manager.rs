@@ -149,6 +149,7 @@ impl ServerDeviceManagerBuilder {
       event_loop.run().await;
     });
     Ok(ServerDeviceManager {
+      device_configuration_manager: self.device_configuration_manager.clone(),
       devices,
       device_command_sender,
       loop_cancellation_token,
@@ -158,7 +159,10 @@ impl ServerDeviceManagerBuilder {
   }
 }
 
+#[derive(Getters)]
 pub struct ServerDeviceManager {
+  #[getset(get = "pub")]
+  device_configuration_manager: Arc<DeviceConfigurationManager>,
   devices: Arc<DashMap<u32, Arc<ServerDevice>>>,
   device_command_sender: mpsc::Sender<DeviceManagerCommand>,
   loop_cancellation_token: CancellationToken,
