@@ -5,12 +5,12 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::{ButtplugDeviceMessageType, Endpoint};
+use crate::core::{errors::ButtplugDeviceError, message::{ButtplugDeviceMessageType, Endpoint}};
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeSeq};
 use std::{collections::HashSet, ops::RangeInclusive};
 
-use super::{ActuatorType, SensorType};
+use super::{ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugSensorFeatureMessageType, SensorType};
 
 #[derive(Debug, Default, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FeatureType {
@@ -112,6 +112,13 @@ impl DeviceFeature {
     }
   }
 
+  pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
+    if let Some(actuator) = &self.actuator {
+      actuator.is_valid()?;
+    }
+    Ok(())
+  }
+
   pub fn new_raw_feature(endpoints: &[Endpoint]) -> Self {
     Self {
       description: "Raw Endpoints".to_owned(),
@@ -164,18 +171,28 @@ pub struct DeviceFeatureActuator {
   step_limit: Option<RangeInclusive<u32>>,
   #[getset(get = "pub")]
   #[serde(rename = "messages")]
-  messages: HashSet<ButtplugDeviceMessageType>,
+  messages: HashSet<ButtplugActuatorFeatureMessageType>,
 }
 
 impl DeviceFeatureActuator {
   pub fn new(
     step_range: &RangeInclusive<u32>,
-    messages: &HashSet<ButtplugDeviceMessageType>,
+    messages: &HashSet<ButtplugActuatorFeatureMessageType>,
   ) -> Self {
     Self {
       step_range: step_range.clone(),
       step_limit: None,
       messages: messages.clone(),
+    }
+  }
+
+  pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
+    if self.step_range.is_empty() || self.step_range.start() > self.step_range.end() {
+      Err(ButtplugDeviceError::DeviceConfigurationError(format!("Step range out of order, must be start <= x <= end.")))
+    } else if self.step_limit.as_ref().is_some_and(|x| x.end() > x.start()) {
+      Err(ButtplugDeviceError::DeviceConfigurationError(format!("Step limit out of order, must be start <= x <= end.")))
+    } else {
+      Ok(())
     }
   }
 }
@@ -190,13 +207,13 @@ pub struct DeviceFeatureSensor {
   value_range: Vec<RangeInclusive<i32>>,
   #[getset(get = "pub")]
   #[serde(rename = "messages")]
-  messages: HashSet<ButtplugDeviceMessageType>,
+  messages: HashSet<ButtplugSensorFeatureMessageType>,
 }
 
 impl DeviceFeatureSensor {
   pub fn new(
     value_range: &Vec<RangeInclusive<i32>>,
-    messages: &HashSet<ButtplugDeviceMessageType>,
+    messages: &HashSet<ButtplugSensorFeatureMessageType>,
   ) -> Self {
     Self {
       value_range: value_range.clone(),

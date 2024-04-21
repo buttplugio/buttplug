@@ -13,7 +13,7 @@ use getset::{Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use std::ops::RangeInclusive;
 
-use super::{DeviceFeature, FeatureType};
+use super::{ButtplugActuatorFeatureMessageType, ButtplugSensorFeatureMessageType, DeviceFeature, FeatureType};
 
 #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ActuatorType {
@@ -189,11 +189,11 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributes {
     // Raw messages
 
     Self {
-      scalar_cmd: actuator_filter(&ButtplugDeviceMessageType::ScalarCmd),
-      rotate_cmd: actuator_filter(&ButtplugDeviceMessageType::RotateCmd),
-      linear_cmd: actuator_filter(&ButtplugDeviceMessageType::LinearCmd),
-      sensor_read_cmd: sensor_filter(&ButtplugDeviceMessageType::SensorReadCmd),
-      sensor_subscribe_cmd: sensor_filter(&ButtplugDeviceMessageType::SensorSubscribeCmd),
+      scalar_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::ScalarCmd),
+      rotate_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::RotateCmd),
+      linear_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::LinearCmd),
+      sensor_read_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorReadCmd),
+      sensor_subscribe_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorSubscribeCmd),
       ..Default::default()
     }
   }

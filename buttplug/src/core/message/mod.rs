@@ -264,6 +264,38 @@ impl Ord for ButtplugDeviceMessageType {
   }
 }
 
+#[derive(Copy, Debug, Clone, Hash, Display, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ButtplugActuatorFeatureMessageType {
+  ScalarCmd,
+  RotateCmd,
+  LinearCmd
+}
+
+impl From<ButtplugActuatorFeatureMessageType> for ButtplugDeviceMessageType {
+  fn from(value: ButtplugActuatorFeatureMessageType) -> Self {
+    match value {
+      ButtplugActuatorFeatureMessageType::LinearCmd => ButtplugDeviceMessageType::LinearCmd,
+      ButtplugActuatorFeatureMessageType::RotateCmd => ButtplugDeviceMessageType::RotateCmd,
+      ButtplugActuatorFeatureMessageType::ScalarCmd => ButtplugDeviceMessageType::ScalarCmd,
+    }
+  }
+}
+
+#[derive(Copy, Debug, Clone, Hash, Display, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ButtplugSensorFeatureMessageType {
+  SensorReadCmd,
+  SensorSubscribeCmd,
+}
+
+impl From<ButtplugSensorFeatureMessageType> for ButtplugDeviceMessageType {
+  fn from(value: ButtplugSensorFeatureMessageType) -> Self {
+    match value {
+      ButtplugSensorFeatureMessageType::SensorReadCmd => ButtplugDeviceMessageType::SensorReadCmd,
+      ButtplugSensorFeatureMessageType::SensorSubscribeCmd => ButtplugDeviceMessageType::SensorSubscribeCmd,
+    }
+  }
+}
+
 /// Represents all possible messages a
 /// [ButtplugClient][crate::client::ButtplugClient] can send to a
 /// [ButtplugServer][crate::server::ButtplugServer].

@@ -6,21 +6,8 @@ use std::{mem, ops::RangeInclusive};
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 
-use crate::core::{
-  errors::ButtplugDeviceError,
-  message::{
-    ActuatorType,
-    ButtplugDeviceMessageType,
-    ClientDeviceMessageAttributes,
-    ClientDeviceMessageAttributesBuilder,
-    ClientGenericDeviceMessageAttributes,
-    DeviceFeature,
-    Endpoint,
-    NullDeviceMessageAttributes,
-    RawDeviceMessageAttributes,
-    SensorDeviceMessageAttributes,
-    SensorType,
-  },
+use crate::core::message::{
+  ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugDeviceMessageType, ButtplugSensorFeatureMessageType, ClientDeviceMessageAttributes, ClientDeviceMessageAttributesBuilder, ClientGenericDeviceMessageAttributes, DeviceFeature, Endpoint, NullDeviceMessageAttributes, RawDeviceMessageAttributes, SensorDeviceMessageAttributes, SensorType
 };
 
 use super::UserDeviceDefinition;
@@ -83,26 +70,6 @@ impl ProtocolDeviceAttributes {
       display_name: display_name.clone(),
       message_attributes: message_attributes.clone(),
     }
-  }
-
-  /// Check to make sure the message attributes of an instance are valid.
-  fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
-    if let Some(attrs) = self.message_attributes.scalar_cmd() {
-      for attr in attrs {
-        attr.is_valid(&ButtplugDeviceMessageType::ScalarCmd)?;
-      }
-    }
-    if let Some(attrs) = self.message_attributes.rotate_cmd() {
-      for attr in attrs {
-        attr.is_valid(&ButtplugDeviceMessageType::RotateCmd)?;
-      }
-    }
-    if let Some(attrs) = self.message_attributes.linear_cmd() {
-      for attr in attrs {
-        attr.is_valid(&ButtplugDeviceMessageType::LinearCmd)?;
-      }
-    }
-    Ok(())
   }
 
   /// Check if a type of device message is supported by this instance.
@@ -233,11 +200,11 @@ impl From<Vec<DeviceFeature>> for ServerDeviceMessageAttributes {
     };
 
     Self {
-      scalar_cmd: actuator_filter(&ButtplugDeviceMessageType::ScalarCmd),
-      rotate_cmd: actuator_filter(&ButtplugDeviceMessageType::RotateCmd),
-      linear_cmd: actuator_filter(&ButtplugDeviceMessageType::LinearCmd),
-      sensor_read_cmd: sensor_filter(&ButtplugDeviceMessageType::SensorReadCmd),
-      sensor_subscribe_cmd: sensor_filter(&ButtplugDeviceMessageType::SensorSubscribeCmd),
+      scalar_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::ScalarCmd),
+      rotate_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::RotateCmd),
+      linear_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::LinearCmd),
+      sensor_read_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorReadCmd),
+      sensor_subscribe_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorSubscribeCmd),
       raw_read_cmd: raw_attrs.clone(),
       raw_subscribe_cmd: raw_attrs.clone(),
       raw_write_cmd: raw_attrs.clone(),
@@ -500,20 +467,6 @@ impl ServerGenericDeviceMessageAttributes {
 
   pub fn step_count(&self) -> u32 {
     self.step_range.end() - self.step_range.start()
-  }
-
-  pub fn is_valid(
-    &self,
-    message_type: &ButtplugDeviceMessageType,
-  ) -> Result<(), ButtplugDeviceError> {
-    if self.step_range.is_empty() {
-      Err(ButtplugDeviceError::DeviceConfigurationError(format!(
-        "Step range out of order for {}, must be start <= x <= end.",
-        message_type
-      )))
-    } else {
-      Ok(())
-    }
   }
 }
 
