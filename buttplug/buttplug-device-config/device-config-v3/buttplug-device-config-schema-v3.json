@@ -552,5 +552,6 @@
   "required": [
     "version"
   ],
+  "maxProperties": 2,
   "additionalProperties": false
 }
