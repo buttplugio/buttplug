@@ -150,11 +150,13 @@ impl ButtplugTestServer {
     }
   }
 
+  #[allow(dead_code)]
   pub async fn disconnect(&self) -> Result<(), ButtplugError> {
     self.disconnect_notifier.notify_waiters();
     Ok(())
   }
 
+  #[allow(dead_code)]
   pub async fn shutdown(&self) -> Result<(), ButtplugError> {
     self.server.shutdown().await?;
     Ok(())
