@@ -65,13 +65,13 @@ use crate::{
 /// `run()` method to pass it in.
 #[cfg(all(feature = "server", feature = "client"))]
 pub async fn in_process_client(client_name: &str, allow_raw_messages: bool) -> ButtplugClient {
-  let mut device_config_builder = DeviceConfigurationManagerBuilder::default();
-  if allow_raw_messages {
-    device_config_builder.allow_raw_messages();
-  }
+  let dcm = DeviceConfigurationManagerBuilder::default()
+    .allow_raw_messages(allow_raw_messages)
+    .finish()
+    .unwrap();
 
   let mut device_manager_builder =
-    ServerDeviceManagerBuilder::new(device_config_builder.finish().unwrap());
+    ServerDeviceManagerBuilder::new(dcm);
   #[cfg(all(
     feature = "btleplug-manager",
     any(

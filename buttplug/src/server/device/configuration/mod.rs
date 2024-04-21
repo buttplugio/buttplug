@@ -174,44 +174,44 @@ impl DeviceConfigurationManagerBuilder {
   pub fn communication_specifier(
     &mut self,
     protocol_name: &str,
-    specifier: ProtocolCommunicationSpecifier,
+    specifier: &[ProtocolCommunicationSpecifier],
   ) -> &mut Self {
     self
       .communication_specifiers
       .entry(protocol_name.to_owned())
       .or_default()
-      .push(specifier);
+      .extend(specifier.iter().cloned());
     self
   }
 
   pub fn protocol_features(
     &mut self,
-    identifier: BaseDeviceIdentifier,
-    features: BaseDeviceDefinition,
+    identifier: &BaseDeviceIdentifier,
+    features: &BaseDeviceDefinition,
   ) -> &mut Self {
-    self.base_device_definitions.insert(identifier, features);
+    self.base_device_definitions.insert(identifier.clone(), features.clone());
     self
   }
 
   pub fn user_communication_specifier(
     &mut self,
     protocol_name: &str,
-    specifier: ProtocolCommunicationSpecifier,
+    specifier: &[ProtocolCommunicationSpecifier],
   ) -> &mut Self {
     self
       .user_communication_specifiers
       .entry(protocol_name.to_owned())
       .or_default()
-      .push(specifier);
+      .extend(specifier.iter().cloned());
     self
   }
 
   pub fn user_protocol_features(
     &mut self,
-    identifier: UserDeviceIdentifier,
-    features: UserDeviceDefinition,
+    identifier: &UserDeviceIdentifier,
+    features: &UserDeviceDefinition,
   ) -> &mut Self {
-    self.user_device_definitions.insert(identifier, features);
+    self.user_device_definitions.insert(identifier.clone(), features.clone());
     self
   }
 
@@ -231,8 +231,8 @@ impl DeviceConfigurationManagerBuilder {
     self
   }
 
-  pub fn allow_raw_messages(&mut self) -> &mut Self {
-    self.allow_raw_messages = true;
+  pub fn allow_raw_messages(&mut self, allow: bool) -> &mut Self {
+    self.allow_raw_messages = allow;
     self
   }
 
@@ -500,7 +500,7 @@ impl DeviceConfigurationManager {
 mod test {
   use super::*;
   use crate::core::message::{
-    ButtplugDeviceMessageType,
+    ButtplugActuatorFeatureMessageType,
     DeviceFeature,
     DeviceFeatureActuator,
     FeatureType,
@@ -512,19 +512,18 @@ mod test {
 
   fn create_unit_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
     let mut builder = DeviceConfigurationManagerBuilder::default();
-    if allow_raw_messages {
-      builder.allow_raw_messages();
-    }
     let specifiers = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new(
       HashSet::from(["LVS-*".to_owned(), "LovenseDummyTestName".to_owned()]),
       vec![],
       HashSet::new(),
       HashMap::new(),
     ));
-    builder.communication_specifier("lovense", specifiers);
-    builder.protocol_features(
-      BaseDeviceIdentifier::new("lovense", &Some("P".to_owned())),
-      BaseDeviceDefinition::new(
+    builder
+    .allow_raw_messages(allow_raw_messages)
+    .communication_specifier("lovense", &[specifiers])
+    .protocol_features(
+      &BaseDeviceIdentifier::new("lovense", &Some("P".to_owned())),
+      &BaseDeviceDefinition::new(
         "Lovense Edge",
         &vec![
           DeviceFeature::new(
@@ -532,7 +531,7 @@ mod test {
             FeatureType::Vibrate,
             &Some(DeviceFeatureActuator::new(
               &RangeInclusive::new(0, 20),
-              &HashSet::from_iter([ButtplugDeviceMessageType::ScalarCmd]),
+              &HashSet::from_iter([ButtplugActuatorFeatureMessageType::ScalarCmd]),
             )),
             &None,
           ),
@@ -541,14 +540,15 @@ mod test {
             FeatureType::Vibrate,
             &Some(DeviceFeatureActuator::new(
               &RangeInclusive::new(0, 20),
-              &HashSet::from_iter([ButtplugDeviceMessageType::ScalarCmd]),
+              &HashSet::from_iter([ButtplugActuatorFeatureMessageType::ScalarCmd]),
             )),
             &None,
           ),
         ],
       ),
-    );
-    builder.finish().unwrap()
+    )
+    .finish()
+    .unwrap()
   }
 
   #[test]
