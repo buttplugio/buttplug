@@ -1,7 +1,7 @@
 {
   "version": {
-    "major": 3,
-    "minor": 0
+    "major": 2,
+    "minor": 28
   },
   "protocols": {
     "lovense": {
@@ -4062,26 +4062,6 @@
         },
         {
           "identifier": [
-            "Pearl2+"
-          ],
-          "name": "Kiiroo Pearl 2+",
-          "features": [
-            {
-              "feature-type": "Vibrate",
-              "actuator": {
-                "step-range": [
-                  0,
-                  100
-                ],
-                "messages": [
-                  "ScalarCmd"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "identifier": [
             "Fuse"
           ],
           "name": "OhMiBod Fuse",
@@ -4226,7 +4206,6 @@
           "btle": {
             "names": [
               "Pearl2",
-              "Pearl2+",
               "Fuse",
               "Virtual Blowbot",
               "Titan",
@@ -4496,6 +4475,48 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "Pearl2+",
+            "Pearl 2+"
+          ],
+          "name": "Kiiroo Pearl 2+",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "Pearl3",
+            "Pearl 3"
+          ],
+          "name": "Kiiroo Pearl 3",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -4505,6 +4526,10 @@
               "Titan1.1",
               "Cliona",
               "Pearl2.1",
+              "Pearl2+",
+              "Pearl 2+",
+              "Pearl3",
+              "Pearl 3",
               "OhMiBod 4.0",
               "OhMiBod LUMEN",
               "OhMiBod NEX3",
@@ -5655,6 +5680,12 @@
             "QH-SX045A-B"
           ],
           "name": "Coleur Dor VX045A"
+        },
+        {
+          "identifier": [
+            "SWK-SX067-B"
+          ],
+          "name": "Momonii Agatha"
         }
       ],
       "communication": [
@@ -5666,7 +5697,8 @@
               "Pulse Galaxie",
               "SX033APP",
               "BX288A",
-              "QH-SX045A-B"
+              "QH-SX045A-B",
+              "SWK-SX067-B"
             ],
             "services": {
               "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -11154,6 +11186,18 @@
         },
         {
           "identifier": [
+            "J-TrueForm"
+          ],
+          "name": "JoyHub TrueForm"
+        },
+        {
+          "identifier": [
+            "J-Rhythmic3"
+          ],
+          "name": "JoyHub Rhythmic 3"
+        },
+        {
+          "identifier": [
             "J-Petalwish2"
           ],
           "name": "JoyHub Petalwish 2",
@@ -11274,6 +11318,71 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-Mysticolor"
+          ],
+          "name": "JoyHub Mysticolor",
+          "features": [
+            {
+              "feature-type": "Rotate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Constrict",
+              "description": "Air Pump",
+              "actuator": {
+                "step-range": [
+                  0,
+                  7
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-VividWings"
+          ],
+          "name": "JoyHub Vivid Wings",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -11287,7 +11396,11 @@
               "J-VibSiren",
               "J-ElixirEgg",
               "J-RetroGuard",
-              "J-TrueForm3"
+              "J-TrueForm",
+              "J-TrueForm3",
+              "J-Rhythmic3",
+              "J-Mysticolor",
+              "J-VividWings"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -11324,7 +11437,7 @@
           "name": "JoyHub Pearlconch",
           "features": [
             {
-              "feature-type": "Vibrate",
+              "feature-type": "Rotate",
               "actuator": {
                 "step-range": [
                   0,
@@ -11336,7 +11449,7 @@
               }
             },
             {
-              "feature-type": "Rotate",
+              "feature-type": "Vibrate",
               "actuator": {
                 "step-range": [
                   0,
@@ -11577,6 +11690,355 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-Dina"
+          ],
+          "name": "JoyHub Deena",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Internal vibrator",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "External vibrator",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Vbarbie3f"
+          ],
+          "name": "JoyHub Cherly",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "External vibrator",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Internal vibrator",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-CHERLY2c"
+          ],
+          "name": "JoyHub Cherly 2c",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Internal vibrator",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Internal Whip",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "External vibrator",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Pathfinder2"
+          ],
+          "name": "JoyHub Pathfinder 2",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-VibRipple"
+          ],
+          "name": "JoyHub Angela",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "External vibrator",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Internal vibrator",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Verax"
+          ],
+          "name": "JoyHub Verax",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Internal Whip",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Internal vibrator",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Verax2"
+          ],
+          "name": "JoyHub Verax 2",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Rotate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Euphoric2"
+          ],
+          "name": "JoyHub Euphoric 2",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-ROSEBUD"
+          ],
+          "name": "JoyHub RoseBUD",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Rotate",
+              "description": "Flicker",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Constrict",
+              "description": "Suction",
+              "actuator": {
+                "step-range": [
+                  0,
+                  5
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -11590,7 +12052,64 @@
               "J-Panther",
               "J-Mecha",
               "J-Lagoon",
-              "J-Firedragon"
+              "J-Firedragon",
+              "J-Dina",
+              "J-Vbarbie3f",
+              "J-CHERLY2c",
+              "J-Pathfinder2",
+              "J-VibRipple",
+              "J-Verax",
+              "J-Verax2",
+              "J-Euphoric2",
+              "J-ROSEBUD"
+            ],
+            "services": {
+              "0000ffa0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "joyhub-v3": {
+      "defaults": {
+        "name": "JoyHub Device",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "J-Ringstar"
+          ],
+          "name": "JoyHub Starfish"
+        },
+        {
+          "identifier": [
+            "J-RapidTwist2"
+          ],
+          "name": "JoyHub Resi Ring 2"
+        }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "J-Ringstar",
+              "J-RapidTwist2"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -11713,6 +12232,43 @@
               "53300051-0060-4bd4-bbe5-a6920e4c5663": {
                 "tx": "53300052-0060-4bd4-bbe5-a6920e4c5663",
                 "rx": "53300053-0060-4bd4-bbe5-a6920e4c5663"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "lioness": {
+      "defaults": {
+        "name": "Lioness",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                100
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Lioness",
+              "Lioness2"
+            ],
+            "services": {
+              "d973f2ed-b19e-11e2-9e96-0800200c9a66": {
+                "tx": "d973f2f4-b19e-11e2-9e96-0800200c9a66"
+              },
+              "d973f2e5-b19e-11e2-9e96-0800200c9a66": {
+                "rx": "d973f2e6-b19e-11e2-9e96-0800200c9a66"
               }
             }
           }
