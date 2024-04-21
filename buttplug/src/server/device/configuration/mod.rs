@@ -259,7 +259,14 @@ impl DeviceConfigurationManagerBuilder {
       // If we don't have a protocol loaded for this configuration block, just drop it. We can't do
       // anything with it anyways.
       if !protocol_map.contains_key(ident.protocol()) {
+        warn!("Protocol {:?} in user configurations does not exist in system, discarding definition.", ident.protocol());
         continue;
+      }
+      for feature in attr.features() {
+        if let Err(e) = feature.is_valid() {
+          error!("Feature {attr:?} for ident {ident:?} is not valid, skipping addition: {e:?}");
+          continue;
+        }
       }
       attribute_tree_map.insert(ident.clone(), attr.clone());
     }
@@ -267,20 +274,21 @@ impl DeviceConfigurationManagerBuilder {
     let user_attribute_tree_map = DashMap::new();
     // Finally, add in user configurations, which will have an address.
     for kv in &self.user_device_definitions {
+      let (ident, attr) = (kv.key(), kv.value());
       // If we don't have a protocol loaded for this configuration block, just drop it. We can't do
       // anything with it anyways.
-      if !protocol_map.contains_key(kv.key().protocol()) {
+      if !protocol_map.contains_key(ident.protocol()) {
+        warn!("Protocol {:?} in user configurations does not exist in system, discarding definition.", ident.protocol());
         continue;
+      }
+      for feature in attr.features() {
+        if let Err(e) = feature.is_valid() {
+          error!("Feature {attr:?} for ident {ident:?} is not valid, skipping addition: {e:?}");
+          continue;
+        }
       }
       user_attribute_tree_map.insert(kv.key().clone(), kv.value().clone());
     }
-
-    // Make sure it's all valid.
-    /*
-    for attrs in attribute_tree_map.values() {
-      attrs.is_valid()?;
-    }
-    */
 
     Ok(DeviceConfigurationManager {
       allow_raw_messages: self.allow_raw_messages,
