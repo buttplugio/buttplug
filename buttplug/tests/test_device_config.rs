@@ -305,3 +305,70 @@ async fn test_server_builder_user_device_config_old_config_version() {
 async fn test_server_builder_user_device_config_invalid_json() {
   assert!(load_protocol_configs(&None, &Some("{\"Not Valid JSON\"}".to_owned()), false).is_err())
 }
+
+
+/*
+      #[tokio::test]
+      fn test_user_config_loading() {
+        // Assume we have a nobra's entry in the device config.
+        let mut config = create_test_dcm(false);
+        assert!(config.protocol_definitions().contains_key("nobra"));
+        assert!(config
+          .protocol_definitions()
+          .get("nobra")
+          .expect("Test, assuming infallible")
+          .serial
+          .as_ref()
+          .is_some());
+        assert_eq!(
+          config
+            .protocol_definitions()
+            .get("nobra")
+            .expect("Test, assuming infallible")
+            .serial
+            .as_ref()
+            .expect("Test, assuming infallible")
+            .len(),
+          1
+        );
+
+        // Now try overriding it, make sure we still only have 1.
+        config = create_test_dcm(false);
+        let mut nobra_def = ProtocolDefinition::default();
+        let mut serial_specifier = SerialSpecifier::default();
+        serial_specifier.port = "COM1".to_owned();
+        nobra_def.serial = Some(vec![serial_specifier]);
+        config.add_protocol_definition("nobra", nobra_def);
+        assert!(config.protocol_definitions().contains_key("nobra"));
+        assert!(config
+          .protocol_definitions()
+          .get("nobra")
+          .expect("Test, assuming infallible")
+          .serial
+          .as_ref()
+          .is_some());
+        assert_eq!(
+          config
+            .protocol_definitions()
+            .get("nobra")
+            .expect("Test, assuming infallible")
+            .serial
+            .as_ref()
+            .expect("Test, assuming infallible")
+            .len(),
+          1
+        );
+        assert!(config
+          .protocol_definitions()
+          .get("nobra")
+          .expect("Test, assuming infallible")
+          .serial
+          .as_ref()
+          .expect("Test, assuming infallible")
+          .iter()
+          .any(|x| x.port == "COM1"));
+      }
+  */
+  // TODO Test invalid config load (not json)
+
+  // TODO Test calculation/change of Step Count via Step Range
