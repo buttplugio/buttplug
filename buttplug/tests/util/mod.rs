@@ -17,13 +17,11 @@ use buttplug::{
   core::connector::ButtplugInProcessClientConnectorBuilder,
   server::{
     device::{
-      hardware::communication::HardwareCommunicationManagerBuilder,
-      ServerDeviceManagerBuilder,
+      configuration::DeviceConfigurationManager, hardware::communication::HardwareCommunicationManagerBuilder, ServerDeviceManagerBuilder
     },
     ButtplugServer,
     ButtplugServerBuilder,
-  },
-  util::device_configuration::create_test_dcm,
+  }, util::device_configuration::load_protocol_configs,
 };
 pub use test_device_manager::{
   TestDeviceChannelHost,
@@ -32,6 +30,14 @@ pub use test_device_manager::{
 };
 
 use crate::util::test_device_manager::TestDeviceIdentifier;
+
+pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
+  load_protocol_configs(&None, &None, false)
+  .expect("If this fails, the whole library goes with it.")
+  .allow_raw_messages(allow_raw_messages)
+  .finish()
+  .expect("If this fails, the whole library goes with it.")
+}
 
 #[allow(dead_code)]
 pub fn setup_logging() {

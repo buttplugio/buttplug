@@ -15,6 +15,7 @@ pub use util::{
   },
   test_server_with_comm_manager,
   test_server_with_device,
+  create_test_dcm
 };
 
 use buttplug::{
@@ -36,7 +37,6 @@ use buttplug::{
     ButtplugServer,
     ButtplugServerBuilder,
   },
-  util::device_configuration::create_test_dcm,
 };
 use futures::{pin_mut, Stream, StreamExt};
 use std::time::Duration;

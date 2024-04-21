@@ -9,6 +9,7 @@ mod util;
 extern crate buttplug;
 
 use buttplug::util::device_configuration::load_protocol_configs;
+use tokio_test::assert_ok;
 
 const BASE_CONFIG_JSON: &str = r#"
 {
@@ -87,20 +88,20 @@ const BASE_VALID_NULL_USER_CONFIG_JSON: &str = r#"
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_valid_null_version_config() {
-  assert!(
-    load_protocol_configs(&None, &Some(BASE_VALID_VERSION_CONFIG_JSON.to_owned()), false).is_ok()
+  assert_ok!(
+    load_protocol_configs(&Some(BASE_VALID_VERSION_CONFIG_JSON.to_owned()), &None, false)
   );
 }
 
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_valid_null_user_config() {
-  assert!(load_protocol_configs(
+  assert_ok!(load_protocol_configs(
     &None,
     &Some(BASE_VALID_NULL_USER_CONFIG_JSON.to_owned()),
     false
   )
-  .is_ok());
+  );
 }
 
 #[cfg(feature = "server")]

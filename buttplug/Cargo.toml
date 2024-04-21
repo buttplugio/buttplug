@@ -102,6 +102,7 @@ serde_yaml = "0.9.33"
 test-case = "3.3.1"
 tokio = { version = "1.36.0", features = ["io-std", "rt"] }
 tracing-log = { version = "0.2.0" }
+tokio-test = "0.4.4"
 
 [build-dependencies]
 prost-build = "0.12.3"
