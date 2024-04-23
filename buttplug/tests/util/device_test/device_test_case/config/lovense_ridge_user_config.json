@@ -22,6 +22,10 @@
                   0,
                   10
                 ],
+                "step-limit": [
+                  0,
+                  10
+                ],
                 "messages": [
                   "ScalarCmd"
                 ]
