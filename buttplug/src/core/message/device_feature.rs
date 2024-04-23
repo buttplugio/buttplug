@@ -158,30 +158,59 @@ where
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize)]
-pub struct DeviceFeatureActuator {
+pub struct DeviceFeatureActuatorSerialized {
   #[getset(get = "pub")]
   #[serde(rename = "step-range")]
   #[serde(serialize_with="range_serialize")]
   step_range: RangeInclusive<u32>,
-  // This will only exist in user configs, therefore it's an Option<T>
+  // This doesn't exist in base configs, so when we load these from the base config file, we'll just
+  // copy the step_range value.
   #[getset(get = "pub")]
   #[serde(rename = "step-limit")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  //#[serde(serialize_with="range_serialize")]
+  #[serde(default)]
   step_limit: Option<RangeInclusive<u32>>,
   #[getset(get = "pub")]
   #[serde(rename = "messages")]
   messages: HashSet<ButtplugActuatorFeatureMessageType>,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize)]
+#[serde(from="DeviceFeatureActuatorSerialized")]
+pub struct DeviceFeatureActuator {
+  #[getset(get = "pub")]
+  #[serde(rename = "step-range")]
+  #[serde(serialize_with="range_serialize")]
+  step_range: RangeInclusive<u32>,
+  // This doesn't exist in base configs, so when we load these from the base config file, we'll just
+  // copy the step_range value.
+  #[getset(get = "pub")]
+  #[serde(rename = "step-limit")]
+  #[serde(serialize_with="range_serialize")]
+  step_limit: RangeInclusive<u32>,
+  #[getset(get = "pub")]
+  #[serde(rename = "messages")]
+  messages: HashSet<ButtplugActuatorFeatureMessageType>,
+}
+
+impl From<DeviceFeatureActuatorSerialized> for DeviceFeatureActuator {
+  fn from(value: DeviceFeatureActuatorSerialized) -> Self {
+      Self {
+        step_range: value.step_range.clone(),
+        step_limit: value.step_limit.unwrap_or(value.step_range),
+        messages: value.messages
+      }
+  }
+}
+
 impl DeviceFeatureActuator {
   pub fn new(
     step_range: &RangeInclusive<u32>,
+    step_limit: &RangeInclusive<u32>,
     messages: &HashSet<ButtplugActuatorFeatureMessageType>,
   ) -> Self {
     Self {
       step_range: step_range.clone(),
-      step_limit: None,
+      step_limit: step_limit.clone(),
       messages: messages.clone(),
     }
   }
@@ -189,7 +218,7 @@ impl DeviceFeatureActuator {
   pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
     if self.step_range.is_empty() || self.step_range.start() > self.step_range.end() {
       Err(ButtplugDeviceError::DeviceConfigurationError(format!("Step range out of order, must be start <= x <= end.")))
-    } else if self.step_limit.as_ref().is_some_and(|x| x.end() > x.start()) {
+    } else if self.step_limit.is_empty() || self.step_limit.start() > self.step_limit.end() {
       Err(ButtplugDeviceError::DeviceConfigurationError(format!("Step limit out of order, must be start <= x <= end.")))
     } else {
       Ok(())

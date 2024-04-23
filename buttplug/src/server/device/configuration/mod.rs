@@ -539,6 +539,7 @@ mod test {
             FeatureType::Vibrate,
             &Some(DeviceFeatureActuator::new(
               &RangeInclusive::new(0, 20),
+              &RangeInclusive::new(0, 20),
               &HashSet::from_iter([ButtplugActuatorFeatureMessageType::ScalarCmd]),
             )),
             &None,
@@ -547,6 +548,7 @@ mod test {
             "Edge Vibration 2",
             FeatureType::Vibrate,
             &Some(DeviceFeatureActuator::new(
+              &RangeInclusive::new(0, 20),
               &RangeInclusive::new(0, 20),
               &HashSet::from_iter([ButtplugActuatorFeatureMessageType::ScalarCmd]),
             )),
