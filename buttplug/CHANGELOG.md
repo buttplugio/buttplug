@@ -1,3 +1,36 @@
+# 7.1.16 (2024-04-20)
+
+## Features
+
+- Added Device Support
+  - JoyHub TrueForm
+  - JoyHub Rhythmic 3
+  - JoyHub Mysticolor
+  - JoyHub Vivid Wings
+  - JoyHub Deena
+  - JoyHub Cherly
+  - JoyHub Cherly 2c
+  - JoyHub Pathfinder 2
+  - JoyHub Angela
+  - JoyHub Verax
+  - JoyHub Verax 2
+  - JoyHub Euphoric 2
+  - JoyHub RoseBUD
+  - JoyHub Starfish
+  - JoyHub Resi Ring 2
+  - Kiiroo Pearl 2+
+  - Kiiroo Pearl 3
+  - Momonii Agatha
+  - Lioness
+
+## Bugfixes
+
+- Correct the feature order for the JoyHub PearlConch
+- Fix the mode byte on the MotorBunny rotate command
+- Fix for Lovense Solace V31 stop command
+- Fix a RwLock timing issue
+- Miizzzee protocol implementation cleanup
+
 # 7.1.15 (2024-03-17)
 
 ## Features

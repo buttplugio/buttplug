@@ -139,13 +139,9 @@ impl ChannelHub {
   }
 
   pub async fn send_output(&self, msg: OutgoingLovenseData) {
-    if self
-      .dongle_outgoing
-      .send(msg)
-      .await
-      .is_err() {
-        warn!("Dongle message sent without owner being alive, assuming shutdown.");
-      }
+    if self.dongle_outgoing.send(msg).await.is_err() {
+      warn!("Dongle message sent without owner being alive, assuming shutdown.");
+    }
   }
 
   pub async fn send_event(&self, msg: HardwareCommunicationManagerEvent) {
@@ -260,8 +256,9 @@ impl LovenseDongleState for LovenseDongleWaitForDongle {
             .event_sender
             .send(HardwareCommunicationManagerEvent::ScanningFinished)
             .await
-            .is_err() {
-              warn!("Dongle message sent without owner being alive, assuming shutdown.");
+            .is_err()
+          {
+            warn!("Dongle message sent without owner being alive, assuming shutdown.");
           }
         }
       }
@@ -665,10 +662,7 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
               }
             }
             _ => {
-              if device_read_sender
-              .send(dongle_msg)
-              .await
-              .is_err() {
+              if device_read_sender.send(dongle_msg).await.is_err() {
                 warn!("Dongle message sent without owner being alive, assuming shutdown.");
               }
             }

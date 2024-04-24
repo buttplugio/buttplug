@@ -65,7 +65,7 @@ fn scalar_to_vector(scalar: u32) -> Vec<u8> {
   let scale: f32 = handle_scale(scalar as f32 / 1000.0) * 1023.0;
   let modded_scale: u16 = ((scale as u16) << 6) | 60;
 
-  let bytes = modded_scale.swap_bytes().to_be_bytes();
+  let bytes = modded_scale.to_le_bytes();
 
   let mut data: Vec<u8> = Vec::new();
   data.extend_from_slice(&HEADER);

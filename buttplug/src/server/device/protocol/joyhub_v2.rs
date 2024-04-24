@@ -50,7 +50,7 @@ fn vibes_changed(
   new_commands: &[Option<(ActuatorType, u32)>],
   exclude: Vec<usize>,
 ) -> bool {
-  let old_commands = old_commands_lock.try_read().expect("locks should work");
+  let old_commands = old_commands_lock.read().expect("locks should work");
   if old_commands.len() != new_commands.len() {
     return true;
   }
@@ -115,7 +115,7 @@ impl ProtocolHandler for JoyHubV2 {
     } else {
       None
     };
-    let cmd3 = if commands.len() > 2 {
+    let mut cmd3 = if commands.len() > 2 {
       commands[2]
     } else {
       None
@@ -128,7 +128,7 @@ impl ProtocolHandler for JoyHubV2 {
           async_manager::spawn(async move { delayed_constrict_handler(dev, cmd.1 as u8).await });
           cmd2 = None;
         } else {
-          let mut command_writer = self.last_cmds.try_write().expect("Locks should work");
+          let mut command_writer = self.last_cmds.write().expect("Locks should work");
           *command_writer = commands.to_vec();
 
           return Ok(vec![HardwareWriteCmd::new(
@@ -141,7 +141,27 @@ impl ProtocolHandler for JoyHubV2 {
       }
     }
 
-    let mut command_writer = self.last_cmds.try_write().expect("Locks should work");
+    if let Some(cmd) = cmd3 {
+      if cmd.0 == ActuatorType::Constrict {
+        if vibes_changed(&self.last_cmds, commands, vec![2usize]) {
+          let dev = self.device.clone();
+          async_manager::spawn(async move { delayed_constrict_handler(dev, cmd.1 as u8).await });
+          cmd3 = None;
+        } else {
+          let mut command_writer = self.last_cmds.write().expect("Locks should work");
+          *command_writer = commands.to_vec();
+
+          return Ok(vec![HardwareWriteCmd::new(
+            Endpoint::Tx,
+            vec![0xa0, 0x0d, 0x00, 0x00, cmd.1 as u8, 0xff],
+            false,
+          )
+          .into()]);
+        }
+      }
+    }
+
+    let mut command_writer = self.last_cmds.write().expect("Locks should work");
     *command_writer = commands.to_vec();
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,

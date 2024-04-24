@@ -33,6 +33,7 @@ pub mod itoys;
 pub mod jejoue;
 pub mod joyhub;
 pub mod joyhub_v2;
+pub mod joyhub_v3;
 pub mod kgoal_boost;
 pub mod kiiroo_v2;
 pub mod kiiroo_v21;
@@ -46,6 +47,7 @@ pub mod leten;
 pub mod libo_elle;
 pub mod libo_shark;
 pub mod libo_vibes;
+pub mod lioness;
 pub mod longlosttouch;
 pub mod lovedistance;
 pub mod lovehoney_desire;
@@ -262,6 +264,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
   add_to_protocol_map(
     &mut map,
+    joyhub_v3::setup::JoyHubV3IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
     kiiroo_v2::setup::KiirooV2IdentifierFactory::default(),
   );
   add_to_protocol_map(
@@ -301,6 +307,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     libo_vibes::setup::LiboVibesIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    lioness::setup::LionessIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
