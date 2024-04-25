@@ -1,0 +1,337 @@
+devices:
+  - identifier:
+      name: "D-LAB ESTIM01"
+    expected_name: "Dungeon Lab V2"
+device_commands:
+  # All A 0%, B 0%
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 0
+          ActuatorType: Vibrate
+        - Index: 1
+          Scalar: 0
+          ActuatorType: Vibrate
+        - Index: 2
+          Scalar: 0
+          ActuatorType: Oscillate
+        - Index: 3
+          Scalar: 0
+          ActuatorType: Oscillate
+        - Index: 4
+          Scalar: 0
+          ActuatorType: Inflate
+        - Index: 5
+          Scalar: 0
+          ActuatorType: Inflate
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [ 0x00, 0x00, 0x00 ]
+        write_with_response: false
+      - !Write
+        endpoint: generic0
+        data: [ 0x22, 0x01, 0x00 ]
+        write_with_response: false
+      - !Write
+        endpoint: generic1
+        data: [ 0x22, 0x01, 0x00 ]
+        write_with_response: false
+
+  # All A 100%, B 100%
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 1
+          ActuatorType: Vibrate
+        - Index: 1
+          Scalar: 1
+          ActuatorType: Vibrate
+        - Index: 2
+          Scalar: 1
+          ActuatorType: Oscillate
+        - Index: 3
+          Scalar: 1
+          ActuatorType: Oscillate
+        - Index: 4
+          Scalar: 1
+          ActuatorType: Inflate
+        - Index: 5
+          Scalar: 1
+          ActuatorType: Inflate
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [ 0xFF, 0xFF, 0x3F ]
+        write_with_response: false
+      - !Write
+        endpoint: generic0
+        data: [ 0x2F, 0xFB, 0x0F ]
+        write_with_response: false
+      - !Write
+        endpoint: generic1
+        data: [ 0x2F, 0xFB, 0x0F ]
+        write_with_response: false
+
+  # Vibrate A 100%
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 1
+          ActuatorType: Vibrate
+        - Index: 1
+          Scalar: 0
+          ActuatorType: Vibrate
+        - Index: 2
+          Scalar: 0
+          ActuatorType: Oscillate
+        - Index: 3
+          Scalar: 0
+          ActuatorType: Oscillate
+        - Index: 4
+          Scalar: 0
+          ActuatorType: Inflate
+        - Index: 5
+          Scalar: 0
+          ActuatorType: Inflate
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [ 0xFF, 0x07, 0x00 ]
+        write_with_response: false
+      - !Write
+        endpoint: generic0
+        data: [ 0x22, 0x01, 0x00 ]
+        write_with_response: false
+      - !Write
+        endpoint: generic1
+        data: [ 0x22, 0x01, 0x00 ]
+        write_with_response: false
+
+  # Vibrate B 100%
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 0
+          ActuatorType: Vibrate
+        - Index: 1
+          Scalar: 1
+          ActuatorType: Vibrate
+        - Index: 2
+          Scalar: 0
+          ActuatorType: Oscillate
+        - Index: 3
+          Scalar: 0
+          ActuatorType: Oscillate
+        - Index: 4
+          Scalar: 0
+          ActuatorType: Inflate
+        - Index: 5
+          Scalar: 0
+          ActuatorType: Inflate
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [ 0x00, 0xF8, 0x3F ]
+        write_with_response: false
+      - !Write
+        endpoint: generic0
+        data: [ 0x22, 0x01, 0x00 ]
+        write_with_response: false
+      - !Write
+        endpoint: generic1
+        data: [ 0x22, 0x01, 0x00 ]
+        write_with_response: false
+
+  # Oscillate A 100%
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 0
+          ActuatorType: Vibrate
+        - Index: 1
+          Scalar: 0
+          ActuatorType: Vibrate
+        - Index: 2
+          Scalar: 1
+          ActuatorType: Oscillate
+        - Index: 3
+          Scalar: 0
+          ActuatorType: Oscillate
+        - Index: 4
+          Scalar: 0
+          ActuatorType: Inflate
+        - Index: 5
+          Scalar: 0
+          ActuatorType: Inflate
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [ 0x00, 0x00, 0x00 ]
+        write_with_response: false
+      - !Write
+        endpoint: generic0
+        data: [ 0x2F, 0x7B, 0x00 ]
+        write_with_response: false
+      - !Write
+        endpoint: generic1
+        data: [ 0x22, 0x01, 0x00 ]
+        write_with_response: false
+
+  # Oscillate B 100%
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 0
+          ActuatorType: Vibrate
+        - Index: 1
+          Scalar: 0
+          ActuatorType: Vibrate
+        - Index: 2
+          Scalar: 0
+          ActuatorType: Oscillate
+        - Index: 3
+          Scalar: 1
+          ActuatorType: Oscillate
+        - Index: 4
+          Scalar: 0
+          ActuatorType: Inflate
+        - Index: 5
+          Scalar: 0
+          ActuatorType: Inflate
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [ 0x00, 0x00, 0x00 ]
+        write_with_response: false
+      - !Write
+        endpoint: generic0
+        data: [ 0x22, 0x01, 0x00 ]
+        write_with_response: false
+      - !Write
+        endpoint: generic1
+        data: [ 0x2F, 0x7B, 0x00 ]
+        write_with_response: false
+
+  # Inflate A 100%
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 0
+          ActuatorType: Vibrate
+        - Index: 1
+          Scalar: 0
+          ActuatorType: Vibrate
+        - Index: 2
+          Scalar: 0
+          ActuatorType: Oscillate
+        - Index: 3
+          Scalar: 0
+          ActuatorType: Oscillate
+        - Index: 4
+          Scalar: 1
+          ActuatorType: Inflate
+        - Index: 5
+          Scalar: 0
+          ActuatorType: Inflate
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [ 0x00, 0x00, 0x00 ]
+        write_with_response: false
+      - !Write
+        endpoint: generic0
+        data: [ 0x22, 0x81, 0x0F ]
+        write_with_response: false
+      - !Write
+        endpoint: generic1
+        data: [ 0x22, 0x01, 0x00 ]
+        write_with_response: false
+
+  # Inflate B 100%
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 0
+          ActuatorType: Vibrate
+        - Index: 1
+          Scalar: 0
+          ActuatorType: Vibrate
+        - Index: 2
+          Scalar: 0
+          ActuatorType: Oscillate
+        - Index: 3
+          Scalar: 0
+          ActuatorType: Oscillate
+        - Index: 4
+          Scalar: 0
+          ActuatorType: Inflate
+        - Index: 5
+          Scalar: 1
+          ActuatorType: Inflate
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [ 0x00, 0x00, 0x00 ]
+        write_with_response: false
+      - !Write
+        endpoint: generic0
+        data: [ 0x22, 0x01, 0x00 ]
+        write_with_response: false
+      - !Write
+        endpoint: generic1
+        data: [ 0x22, 0x81, 0x0F ]
+        write_with_response: false
+
+  # Stop
+  - !Messages
+    device_index: 0
+    messages:
+      - !Stop
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [ 0x00, 0x00, 0x00 ]
+        write_with_response: false
+      - !Write
+        endpoint: generic0
+        data: [ 0x22, 0x01, 0x00 ]
+        write_with_response: false
+      - !Write
+        endpoint: generic1
+        data: [ 0x22, 0x01, 0x00 ]
+        write_with_response: false
