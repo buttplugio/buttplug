@@ -84,18 +84,9 @@ impl ProtocolHandler for DGLabV2 {
         return match index {
             // Channel A
             0 => {
-                let power_b_scalar = self.power_b_scalar.read().unwrap().clone();
                 let mut power_a_scalar_writer = self.power_a_scalar.write().expect("");
                 *power_a_scalar_writer = scalar;
-                Ok(
-                    vec![
-                        HardwareWriteCmd::new(
-                            Endpoint::Tx,
-                            ab_power_to_byte(scalar, power_b_scalar),
-                            false,
-                        ).into()
-                    ]
-                )
+                Ok(vec![])
             }
             // Channel B
             1 => {
@@ -125,6 +116,9 @@ impl ProtocolHandler for DGLabV2 {
 
     /// Set frequency (X, Y)
     fn handle_scalar_oscillate_cmd(&self, index: u32, scalar: u32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+        if scalar == 0 {
+            return self.handle_scalar_oscillate_cmd(index, 10);
+        }
         if scalar < MINIMUM_FREQUENCY || scalar > MAXIMUM_FREQUENCY {
             return Err(
                 ProtocolSpecificError(
