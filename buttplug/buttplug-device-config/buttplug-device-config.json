@@ -9715,6 +9715,78 @@
           ]
         }
       }
+    },
+    "dg-lab-v2": {
+      "btle": {
+        "names": [
+          "D-LAB ESTIM01"
+        ],
+        "services": {
+          "955a180a-0fe2-f5aa-a094-84b8d4f3e8ad": {
+            "rxblebattery": "955a1500-0fe2-f5aa-a094-84b8d4f3e8ad"
+          },
+          "955a180b-0fe2-f5aa-a094-84b8d4f3e8ad": {
+            "tx": "955a1504-0fe2-f5aa-a094-84b8d4f3e8ad",
+            "generic0": "955a1505-0fe2-f5aa-a094-84b8d4f3e8ad",
+            "generic1": "955a1506-0fe2-f5aa-a094-84b8d4f3e8ad"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Dungeon Lab V2",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                2047
+              ],
+              "ActuatorType": "Vibrate",
+              "FeatureDescriptor": "Channel A Power"
+            },
+            {
+              "StepRange": [
+                0,
+                2047
+              ],
+              "ActuatorType": "Vibrate",
+              "FeatureDescriptor": "Channel B Power"
+            },
+            {
+              "StepRange": [
+                10,
+                1000
+              ],
+              "ActuatorType": "Oscillate",
+              "FeatureDescriptor": "Channel A Frequency"
+            },
+            {
+              "StepRange": [
+                10,
+                1000
+              ],
+              "ActuatorType": "Oscillate",
+              "FeatureDescriptor": "Channel B Frequency"
+            },
+            {
+              "StepRange": [
+                0,
+                31
+              ],
+              "ActuatorType": "Inflate",
+              "FeatureDescriptor": "Channel A Pulse Width"
+            },
+            {
+              "StepRange": [
+                0,
+                31
+              ],
+              "ActuatorType": "Inflate",
+              "FeatureDescriptor": "Channel B Pulse Width"
+            }
+          ]
+        }
+      }
     }
   }
 }
