@@ -29,8 +29,8 @@ fn ab_power_to_byte(a: u32, b: u32) -> Vec<u8> {
     let data = 0 | ((b & 0x7FF) << 11) | (a & 0x7FF);
     return vec![
         (data & 0xFF) as u8,
-        ((data << 8) & 0xFF) as u8,
-        ((data << 16) & 0xFF) as u8,
+        ((data >> 8) & 0xFF) as u8,
+        ((data >> 16) & 0xFF) as u8,
     ];
 }
 
@@ -38,8 +38,8 @@ fn xyz_to_byte(x: u32, y: u32, z: u32) -> Vec<u8> {
     let data = 0 | ((z & 0x1F) << 15) | ((y & 0x3FF) << 5) | (x & 0x1F);
     return vec![
         (data & 0xFF) as u8,
-        ((data << 8) & 0xFF) as u8,
-        ((data << 16) & 0xFF) as u8,
+        ((data >> 8) & 0xFF) as u8,
+        ((data >> 16) & 0xFF) as u8,
     ];
 }
 
