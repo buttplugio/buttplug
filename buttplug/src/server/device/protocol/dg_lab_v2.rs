@@ -5,17 +5,12 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use std::sync::{Arc, RwLock};
-
-use futures_util::future::BoxFuture;
-use futures_util::FutureExt;
-use serde::{Deserialize, Serialize};
+use std::sync::RwLock;
 
 use crate::{core::errors::ButtplugDeviceError, server::device::protocol::{generic_protocol_setup, ProtocolHandler}};
 use crate::core::errors::ButtplugDeviceError::ProtocolSpecificError;
-use crate::core::message::{ButtplugDeviceMessage, ButtplugMessage, ButtplugServerMessage, Endpoint, SensorReadCmd};
-use crate::server::device::hardware::{Hardware, HardwareCommand, HardwareWriteCmd};
-use crate::server::device::protocol::ProtocolInitializer;
+use crate::core::message::Endpoint;
+use crate::server::device::hardware::{HardwareCommand, HardwareWriteCmd};
 
 static MINIMUM_FREQUENCY: u32 = 10;
 static MAXIMUM_FREQUENCY: u32 = 1000;
@@ -69,18 +64,7 @@ pub struct DGLabV2 {
     pulse_width_b_scalar: RwLock<u32>,
 }
 
-impl DGLabV2 {
-    fn new() -> Self {
-        Self {
-            power_a_scalar: RwLock::new(0),
-            power_b_scalar: RwLock::new(0),
-            xy_a_scalar: RwLock::new((0, 0)),
-            xy_b_scalar: RwLock::new((0, 0)),
-            pulse_width_a_scalar: RwLock::new(0),
-            pulse_width_b_scalar: RwLock::new(0),
-        }
-    }
-}
+impl DGLabV2 {}
 
 impl ProtocolHandler for DGLabV2 {
     fn needs_full_command_set(&self) -> bool {
@@ -98,10 +82,10 @@ impl ProtocolHandler for DGLabV2 {
             );
         }
         return match index {
-            /// Channel A
+            // Channel A
             0 => {
                 let power_b_scalar = self.power_b_scalar.read().unwrap().clone();
-                let power_a_scalar_writer = self.power_a_scalar.write();
+                let mut power_a_scalar_writer = self.power_a_scalar.write().expect("");
                 *power_a_scalar_writer = scalar;
                 Ok(
                     vec![
@@ -113,10 +97,10 @@ impl ProtocolHandler for DGLabV2 {
                     ]
                 )
             }
-            /// Channel B
+            // Channel B
             1 => {
                 let power_a_scalar = self.power_a_scalar.read().unwrap().clone();
-                let power_b_scalar_writer = self.power_b_scalar.write();
+                let mut power_b_scalar_writer = self.power_b_scalar.write().expect("");
                 *power_b_scalar_writer = scalar;
                 Ok(
                     vec![
@@ -150,10 +134,10 @@ impl ProtocolHandler for DGLabV2 {
             );
         }
         return match index {
-            /// Channel A
+            // Channel A
             2 => {
                 let pulse_width_scalar = self.pulse_width_a_scalar.read().unwrap().clone();
-                let xy_scalar_writer = self.xy_a_scalar.write();
+                let mut xy_scalar_writer = self.xy_a_scalar.write().expect("");
                 let (x_scalar, y_scalar) = frequency_to_xy(scalar);
                 *xy_scalar_writer = (x_scalar, y_scalar);
                 Ok(
@@ -166,10 +150,10 @@ impl ProtocolHandler for DGLabV2 {
                     ]
                 )
             }
-            /// Channel B
+            // Channel B
             3 => {
                 let pulse_width_scalar = self.pulse_width_b_scalar.read().unwrap().clone();
-                let xy_scalar_writer = self.xy_b_scalar.write();
+                let mut xy_scalar_writer = self.xy_b_scalar.write().expect("");
                 let (x_scalar, y_scalar) = frequency_to_xy(scalar);
                 *xy_scalar_writer = (x_scalar, y_scalar);
                 Ok(
@@ -204,10 +188,10 @@ impl ProtocolHandler for DGLabV2 {
             );
         }
         return match index {
-            /// Channel A
+            // Channel A
             4 => {
                 let (x_scalar, y_scalar) = self.xy_a_scalar.read().unwrap().clone();
-                let pulse_width_writer = self.pulse_width_a_scalar.write();
+                let mut pulse_width_writer = self.pulse_width_a_scalar.write().expect("");
                 *pulse_width_writer = scalar;
                 Ok(
                     vec![
@@ -219,10 +203,10 @@ impl ProtocolHandler for DGLabV2 {
                     ]
                 )
             }
-            /// Channel B
+            // Channel B
             5 => {
                 let (x_scalar, y_scalar) = self.xy_b_scalar.read().unwrap().clone();
-                let pulse_width_writer = self.pulse_width_b_scalar.write();
+                let mut pulse_width_writer = self.pulse_width_b_scalar.write().expect("");
                 *pulse_width_writer = scalar;
                 Ok(
                     vec![
@@ -243,9 +227,5 @@ impl ProtocolHandler for DGLabV2 {
                 )
             }
         };
-    }
-
-    fn handle_battery_level_cmd(&self, device: Arc<Hardware>, message: SensorReadCmd) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
-        return ProtocolHandler::handle_battery_level_cmd(self, device, message);
     }
 }
