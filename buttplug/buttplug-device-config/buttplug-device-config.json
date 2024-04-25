@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 28
+    "minor": 29
   },
   "protocols": {
     "lovense": {
@@ -5653,7 +5653,12 @@
           "REACH",
           "MAG",
           "SPAN",
-          "RANGE"
+          "RANGE",
+          "ORBIT",
+          "JOIN G",
+          "LINK",
+          "GRASP",
+          "RECEIVE"
         ],
         "services": {
           "0000ff00-0000-1000-8000-00805f9b34fb": {
@@ -5706,6 +5711,36 @@
             "RANGE"
           ],
           "name": "Love Distance Range"
+        },
+        {
+          "identifier": [
+            "ORBIT"
+          ],
+          "name": "Love Distance Range"
+        },
+        {
+          "identifier": [
+            "JOIN G"
+          ],
+          "name": "Love Distance Join G"
+        },
+        {
+          "identifier": [
+            "LINK"
+          ],
+          "name": "Love Distance Link"
+        },
+        {
+          "identifier": [
+            "GRASP"
+          ],
+          "name": "Love Distance Grasp"
+        },
+        {
+          "identifier": [
+            "RECEIVE"
+          ],
+          "name": "Love Distance Receive"
         }
       ]
     },
