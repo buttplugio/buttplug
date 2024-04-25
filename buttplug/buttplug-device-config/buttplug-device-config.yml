@@ -4801,3 +4801,7 @@ protocols:
           - StepRange: [ 0, 31 ]
             ActuatorType: Inflate
             FeatureDescriptor: Channel B Pulse Width
+        SensorReadCmd:
+          - FeatureDescriptor: Battery Level
+            SensorType: Battery
+            SensorRange: [ [ 0, 100 ] ]
