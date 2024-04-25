@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 28
+  minor: 29
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -2843,6 +2843,11 @@ protocols:
         - MAG
         - SPAN
         - RANGE
+        - ORBIT
+        - JOIN G
+        - LINK
+        - GRASP
+        - RECEIVE
       services:
         0000ff00-0000-1000-8000-00805f9b34fb:
           tx: 0000ff01-0000-1000-8000-00805f9b34fb
@@ -2869,6 +2874,21 @@ protocols:
       - identifier:
           - RANGE
         name: Love Distance Range
+      - identifier:
+          - ORBIT
+        name: Love Distance Range
+      - identifier:
+          - JOIN G
+        name: Love Distance Join G
+      - identifier:
+          - LINK
+        name: Love Distance Link
+      - identifier:
+          - GRASP
+        name: Love Distance Grasp
+      - identifier:
+          - RECEIVE
+        name: Love Distance Receive
   satisfyer:
     btle:
       names:
