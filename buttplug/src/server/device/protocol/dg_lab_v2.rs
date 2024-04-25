@@ -5,11 +5,9 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use std::sync::RwLock;
-
 use crate::{core::errors::ButtplugDeviceError, server::device::protocol::{generic_protocol_setup, ProtocolHandler}};
 use crate::core::errors::ButtplugDeviceError::ProtocolSpecificError;
-use crate::core::message::Endpoint;
+use crate::core::message::{ActuatorType, Endpoint};
 use crate::server::device::hardware::{HardwareCommand, HardwareWriteCmd};
 
 static MINIMUM_FREQUENCY: u32 = 10;
@@ -29,7 +27,7 @@ fn ab_power_to_byte(a: u32, b: u32) -> Vec<u8> {
     ];
 }
 
-fn xyz_to_byte(x: u32, y: u32, z: u32) -> Vec<u8> {
+fn xyz_to_bytes(x: u32, y: u32, z: u32) -> Vec<u8> {
     let data = 0 | ((z & 0x1F) << 15) | ((y & 0x3FF) << 5) | (x & 0x1F);
     return vec![
         (data & 0xFF) as u8,
@@ -49,177 +47,131 @@ fn frequency_to_xy(frequency: u32) -> (u32, u32) {
 generic_protocol_setup!(DGLabV2, "dg-lab-v2");
 
 #[derive(Default)]
-pub struct DGLabV2 {
-    /// Power A (S)
-    power_a_scalar: RwLock<u32>,
-    /// Power B (S)
-    power_b_scalar: RwLock<u32>,
-    /// Frequency A (X, Y)
-    xy_a_scalar: RwLock<(u32, u32)>,
-    /// Frequency B (X, Y)
-    xy_b_scalar: RwLock<(u32, u32)>,
-    /// Pulse width A (Z)
-    pulse_width_a_scalar: RwLock<u32>,
-    /// Pulse width B (Z)
-    pulse_width_b_scalar: RwLock<u32>,
-}
-
-impl DGLabV2 {}
+pub struct DGLabV2 {}
 
 impl ProtocolHandler for DGLabV2 {
     fn needs_full_command_set(&self) -> bool {
         true
     }
 
-    /// Set power (S)
-    fn handle_scalar_vibrate_cmd(&self, index: u32, scalar: u32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-        if scalar > MAXIMUM_POWER {
-            return Err(
-                ProtocolSpecificError(
-                    "dg-lab-v2".to_owned(),
-                    format!("Power scalar {} not in [0, {}]", scalar, MAXIMUM_POWER),
-                )
-            );
+    fn handle_scalar_cmd(&self, commands: &[Option<(ActuatorType, u32)>]) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+        // Power A (S)
+        let mut power_a_scalar: u32 = 0;
+        // Power B (S)
+        let mut power_b_scalar: u32 = 0;
+        // Frequency A (X, Y)
+        let mut xy_a_scalar: (u32, u32) = (0, 0);
+        // Frequency B (X, Y)
+        let mut xy_b_scalar: (u32, u32) = (0, 0);
+        // Pulse width A (Z)
+        let mut pulse_width_a_scalar: u32 = 0;
+        // Pulse width B (Z)
+        let mut pulse_width_b_scalar: u32 = 0;
+        for (index, command) in commands.iter().enumerate().filter(|(_, x)| x.is_some()) {
+            let (actuator, mut scalar) = command.as_ref().expect("Already verified existence");
+            match *actuator {
+                // Set power (S)
+                ActuatorType::Vibrate => {
+                    if scalar > MAXIMUM_POWER {
+                        return Err(
+                            ProtocolSpecificError(
+                                "dg-lab-v2".to_owned(),
+                                format!("Power scalar {} not in [0, {}]", scalar, MAXIMUM_POWER),
+                            )
+                        );
+                    }
+                    match index {
+                        // Channel A
+                        0 => { power_a_scalar = scalar; }
+                        // Channel B
+                        1 => { power_b_scalar = scalar; }
+                        _ => {
+                            return Err(
+                                ProtocolSpecificError(
+                                    "dg-lab-v2".to_owned(),
+                                    format!("Vibrate command index {} is invalid", index),
+                                )
+                            );
+                        }
+                    }
+                }
+                // Set frequency (X, Y)
+                ActuatorType::Oscillate => {
+                    if scalar == 0 {
+                        scalar = MINIMUM_FREQUENCY;
+                    } else if scalar < MINIMUM_FREQUENCY || scalar > MAXIMUM_FREQUENCY {
+                        return Err(
+                            ProtocolSpecificError(
+                                "dg-lab-v2".to_owned(),
+                                format!("Frequency scalar {} not in [{}, {}]", scalar, MINIMUM_FREQUENCY, MAXIMUM_FREQUENCY),
+                            )
+                        );
+                    }
+                    match index {
+                        // Channel A
+                        2 => { xy_a_scalar = frequency_to_xy(scalar); }
+                        // Channel B
+                        3 => { xy_b_scalar = frequency_to_xy(scalar); }
+                        _ => {
+                            return Err(
+                                ProtocolSpecificError(
+                                    "dg-lab-v2".to_owned(),
+                                    format!("Oscillate command index {} is invalid", index),
+                                )
+                            );
+                        }
+                    }
+                }
+                // Set pulse width (Z)
+                ActuatorType::Inflate => {
+                    if scalar > MAXIMUM_PULSE_WIDTH {
+                        return Err(
+                            ProtocolSpecificError(
+                                "dg-lab-v2".to_owned(),
+                                format!("Pulse width scalar {} not in [0, {}]", scalar, MAXIMUM_PULSE_WIDTH),
+                            )
+                        );
+                    }
+                    match index {
+                        // Channel A
+                        4 => { pulse_width_a_scalar = scalar; }
+                        // Channel B
+                        5 => { pulse_width_b_scalar = scalar; }
+                        _ => {
+                            return Err(
+                                ProtocolSpecificError(
+                                    "dg-lab-v2".to_owned(),
+                                    format!("Inflate command index {} is invalid", index),
+                                )
+                            );
+                        }
+                    }
+                }
+                _ => {
+                    return Err(ButtplugDeviceError::UnhandledCommand(
+                        "Unknown actuator types are not controllable.".to_owned(),
+                    ));
+                }
+            }
         }
-        return match index {
-            // Channel A
-            0 => {
-                let mut power_a_scalar_writer = self.power_a_scalar.write().expect("");
-                *power_a_scalar_writer = scalar;
-                Ok(vec![])
-            }
-            // Channel B
-            1 => {
-                let power_a_scalar = self.power_a_scalar.read().unwrap().clone();
-                let mut power_b_scalar_writer = self.power_b_scalar.write().expect("");
-                *power_b_scalar_writer = scalar;
-                Ok(
-                    vec![
-                        HardwareWriteCmd::new(
-                            Endpoint::Tx,
-                            ab_power_to_byte(power_a_scalar, scalar),
-                            false,
-                        ).into()
-                    ]
-                )
-            }
-            _ => {
-                Err(
-                    ProtocolSpecificError(
-                        "dg-lab-v2".to_owned(),
-                        format!("Vibrate command index {} is invalid", index),
-                    )
-                )
-            }
-        };
-    }
-
-    /// Set frequency (X, Y)
-    fn handle_scalar_oscillate_cmd(&self, index: u32, scalar: u32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-        if scalar == 0 {
-            return self.handle_scalar_oscillate_cmd(index, 10);
-        }
-        if scalar < MINIMUM_FREQUENCY || scalar > MAXIMUM_FREQUENCY {
-            return Err(
-                ProtocolSpecificError(
-                    "dg-lab-v2".to_owned(),
-                    format!("Frequency scalar {} not in [{}, {}]", scalar, MINIMUM_FREQUENCY, MAXIMUM_FREQUENCY),
-                )
-            );
-        }
-        return match index {
-            // Channel A
-            2 => {
-                let pulse_width_scalar = self.pulse_width_a_scalar.read().unwrap().clone();
-                let mut xy_scalar_writer = self.xy_a_scalar.write().expect("");
-                let (x_scalar, y_scalar) = frequency_to_xy(scalar);
-                *xy_scalar_writer = (x_scalar, y_scalar);
-                Ok(
-                    vec![
-                        HardwareWriteCmd::new(
-                            Endpoint::Generic0,
-                            xyz_to_byte(x_scalar, y_scalar, pulse_width_scalar),
-                            false,
-                        ).into()
-                    ]
-                )
-            }
-            // Channel B
-            3 => {
-                let pulse_width_scalar = self.pulse_width_b_scalar.read().unwrap().clone();
-                let mut xy_scalar_writer = self.xy_b_scalar.write().expect("");
-                let (x_scalar, y_scalar) = frequency_to_xy(scalar);
-                *xy_scalar_writer = (x_scalar, y_scalar);
-                Ok(
-                    vec![
-                        HardwareWriteCmd::new(
-                            Endpoint::Generic1,
-                            xyz_to_byte(x_scalar, y_scalar, pulse_width_scalar),
-                            false,
-                        ).into()
-                    ]
-                )
-            }
-            _ => {
-                Err(
-                    ProtocolSpecificError(
-                        "dg-lab-v2".to_owned(),
-                        format!("Oscillate command index {} is invalid", index),
-                    )
-                )
-            }
-        };
-    }
-
-    /// Set pulse width (Z)
-    fn handle_scalar_inflate_cmd(&self, index: u32, scalar: u32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-        if scalar > MAXIMUM_PULSE_WIDTH {
-            return Err(
-                ProtocolSpecificError(
-                    "dg-lab-v2".to_owned(),
-                    format!("Pulse width scalar {} not in [0, {}]", scalar, MAXIMUM_PULSE_WIDTH),
-                )
-            );
-        }
-        return match index {
-            // Channel A
-            4 => {
-                let (x_scalar, y_scalar) = self.xy_a_scalar.read().unwrap().clone();
-                let mut pulse_width_writer = self.pulse_width_a_scalar.write().expect("");
-                *pulse_width_writer = scalar;
-                Ok(
-                    vec![
-                        HardwareWriteCmd::new(
-                            Endpoint::Generic0,
-                            xyz_to_byte(x_scalar, y_scalar, scalar),
-                            false,
-                        ).into()
-                    ]
-                )
-            }
-            // Channel B
-            5 => {
-                let (x_scalar, y_scalar) = self.xy_b_scalar.read().unwrap().clone();
-                let mut pulse_width_writer = self.pulse_width_b_scalar.write().expect("");
-                *pulse_width_writer = scalar;
-                Ok(
-                    vec![
-                        HardwareWriteCmd::new(
-                            Endpoint::Generic1,
-                            xyz_to_byte(x_scalar, y_scalar, scalar),
-                            false,
-                        ).into()
-                    ]
-                )
-            }
-            _ => {
-                Err(
-                    ProtocolSpecificError(
-                        "dg-lab-v2".to_owned(),
-                        format!("Inflate command index {} is invalid", index),
-                    )
-                )
-            }
-        };
+        Ok(
+            vec![
+                HardwareWriteCmd::new(
+                    Endpoint::Tx,
+                    ab_power_to_byte(power_a_scalar, power_b_scalar),
+                    false,
+                ).into(),
+                HardwareWriteCmd::new(
+                    Endpoint::Generic0,
+                    xyz_to_bytes(xy_a_scalar.0, xy_a_scalar.1, pulse_width_a_scalar),
+                    false,
+                ).into(),
+                HardwareWriteCmd::new(
+                    Endpoint::Generic1,
+                    xyz_to_bytes(xy_b_scalar.0, xy_b_scalar.1, pulse_width_b_scalar),
+                    false,
+                ).into(),
+            ]
+        )
     }
 }
