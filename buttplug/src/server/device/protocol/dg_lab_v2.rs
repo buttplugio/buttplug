@@ -18,6 +18,7 @@ static MAXIMUM_X: f32 = 31f32;
 static MAXIMUM_Y: f32 = 1023f32;
 
 
+/// AAAA AAAA AAAB BBBB BBBB BB00
 fn ab_power_to_byte(a: u32, b: u32) -> Vec<u8> {
     let data = 0 | ((b & 0x7FF) << 11) | (a & 0x7FF);
     return vec![
@@ -27,6 +28,7 @@ fn ab_power_to_byte(a: u32, b: u32) -> Vec<u8> {
     ];
 }
 
+/// XXXX XYYY YYYY YYYZ ZZZZ 0000
 fn xyz_to_bytes(x: u32, y: u32, z: u32) -> Vec<u8> {
     let data = 0 | ((z & 0x1F) << 15) | ((y & 0x3FF) << 5) | (x & 0x1F);
     return vec![
