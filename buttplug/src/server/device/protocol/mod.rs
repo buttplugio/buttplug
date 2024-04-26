@@ -252,7 +252,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
 
   add_to_protocol_map(
       &mut map,
-      galaku::setup::GalakuOneEngineIdentifierFactory::default(),
+      galaku::setup::GalakuIdentifierFactory::default(),
   );
 
   add_to_protocol_map(&mut map, itoys::setup::IToysIdentifierFactory::default());
