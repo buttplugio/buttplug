@@ -77,12 +77,12 @@ fn read_value(data: Vec<u8>) -> u32 {
     }
 }
 
-generic_protocol_setup!(GalakuOneEngine, "galaku-one-engine");
+generic_protocol_setup!(Galaku, "galaku");
 
 #[derive(Default)]
-pub struct GalakuOneEngine {}
+pub struct Galaku {}
 
-impl ProtocolHandler for GalakuOneEngine {
+impl ProtocolHandler for Galaku {
     fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
         super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
     }
@@ -146,14 +146,14 @@ impl ProtocolHandler for GalakuOneEngine {
                     }
                     HardwareEvent::Disconnected(_) => {
                         Err(ButtplugDeviceError::ProtocolSpecificError(
-                            "GalakuOneEngine".to_owned(),
+                            "Galaku".to_owned(),
                             "Galaku Device disconnected while getting Battery info.".to_owned(),
                         ))
                     }
                 };
             }
             Err(ButtplugDeviceError::ProtocolSpecificError(
-                "GalakuOneEngine".to_owned(),
+                "Galaku".to_owned(),
                 "Galaku Device disconnected while getting Battery info.".to_owned(),
             ))
         }

@@ -3992,7 +3992,7 @@ protocols:
       - identifier:
           - V415
         name: Galaku Nebula
-  galaku-one-engine:
+  galaku:
     btle:
       names:
         - EJX-Para
