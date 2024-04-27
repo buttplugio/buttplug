@@ -259,7 +259,7 @@ impl DeviceConfigurationManagerBuilder {
       // If we don't have a protocol loaded for this configuration block, just drop it. We can't do
       // anything with it anyways.
       if !protocol_map.contains_key(ident.protocol()) {
-        warn!("Protocol {:?} in user configurations does not exist in system, discarding definition.", ident.protocol());
+        debug!("Protocol {:?} in base configurations does not exist in system, discarding definition.", ident.protocol());
         continue;
       }
       for feature in attr.features() {
