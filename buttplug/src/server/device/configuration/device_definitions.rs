@@ -39,6 +39,17 @@ pub struct UserDeviceCustomization {
   index: u32,
 }
 
+impl UserDeviceCustomization {
+  pub fn new(display_name: &Option<String>, allow: bool, deny: bool, index: u32) -> Self {
+    Self {
+      display_name: display_name.clone(),
+      allow,
+      deny,
+      index
+    }
+  }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct UserDeviceDefinition {

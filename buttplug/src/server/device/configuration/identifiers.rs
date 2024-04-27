@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 /// to address formatting as well as available information (macOS/iOS and WebBluetooth obfuscate
 /// bluetooth addresses)
 #[derive(Debug, Eq, PartialEq, Hash, Clone, Getters, MutGetters, Serialize, Deserialize)]
-#[getset(get = "pub(crate)", get_mut = "pub(crate)")]
+#[getset(get = "pub", get_mut = "pub(crate)")]
 pub struct UserDeviceIdentifier {
   /// Name of the protocol used
   protocol: String,
