@@ -1,0 +1,102 @@
+devices:
+  - identifier: 
+      name: "Mora Neo"
+    expected_name: "Svakom Mora Neo"
+device_commands:
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x03, 0x01, 0x00, 0x01, 0x05]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x09, 0x00, 0x00, 0x00, 0x00]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.75
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x03, 0x01, 0x00, 0x01, 0x08]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 1
+            Speed: 0.75
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x03, 0x00, 0x00, 0x01, 0x08]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.1
+          - Index: 1
+            Speed: 0.8
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x03, 0x00, 0x00, 0x01, 0x08]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 0
+            Scalar: 0.0
+            ActuatorType: Vibrate
+          - Index: 1
+            Scalar: 1.0
+            ActuatorType: Vibrate
+          - Index: 2
+            Scalar: 0.5
+            ActuatorType: Oscillate
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [ 0x55, 0x03, 0x02, 0x00, 0x01, 0x0a ]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [ 0x55, 0x09, 0x00, 0x00, 0x02, 0x00 ]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x03, 0x00, 0x00, 0x00, 0x00]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [ 0x55, 0x09, 0x00, 0x00, 0x00, 0x00 ]
+            write_with_response: false
