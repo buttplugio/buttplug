@@ -84,6 +84,7 @@ reqwest = { version = "0.11.26", default-features = false, optional = true, feat
 serde-aux = "4.5.0"
 getset = "0.1.2"
 os_info = "3.8.1"
+ahash = "0.8.11"
 jsonschema = { version = "0.17.1", default-features = false }
 derivative = "2.2.0"
 tokio-stream = "0.1.15"
