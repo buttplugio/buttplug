@@ -2088,6 +2088,38 @@ protocols:
       - identifier:
           - ERICA
         name: Svakom Erica
+  svakom-v5:
+    btle:
+      names:
+        - Chika
+        - Mora Neo
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Svakom Device v5
+      messages:
+        ScalarCmd:
+          - StepRange: [ 0, 10 ]
+            ActuatorType: Vibrate
+          - StepRange: [ 0, 10 ]
+            ActuatorType: Vibrate
+    configurations:
+      - identifier:
+          - Chika
+        name: Svakom Chika
+      - identifier:
+          - Mora Neo
+        name: Svakom Mora Neo
+        messages:
+          ScalarCmd:
+            - StepRange: [ 0, 10 ]
+              ActuatorType: Vibrate
+            - StepRange: [ 0, 10 ]
+              ActuatorType: Vibrate
+            - StepRange: [ 0, 3 ]
+              ActuatorType: Oscillate
   svakom-sam:
     btle:
       names:
