@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 28
+  minor: 29
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -2125,6 +2125,7 @@ protocols:
     btle:
       names:
         - Alex NEO 2
+        - S63E Alex NEO 2
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
