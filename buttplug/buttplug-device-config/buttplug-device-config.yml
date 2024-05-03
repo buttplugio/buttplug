@@ -4498,9 +4498,13 @@ protocols:
         - J-RetroGuard
         - J-TrueForm
         - J-TrueForm3
+        - J-Rhythmic2
         - J-Rhythmic3
         - J-Mysticolor
         - J-VividWings
+        - J-Rainbow
+        - J-BlackBull
+        - J-Peacock
       services:
         0000ffa0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffa1-0000-1000-8000-00805f9b34fb
@@ -4530,8 +4534,20 @@ protocols:
           - J-TrueForm
         name: JoyHub TrueForm
       - identifier:
+          - J-Rhythmic2
+        name: JoyHub Rhythmic 2
+      - identifier:
           - J-Rhythmic3
         name: JoyHub Rhythmic 3
+      - identifier:
+          - J-Rainbow
+        name: JoyHub Rainbow
+      - identifier:
+          - J-BlackBull
+        name: JoyHub Black Bull
+      - identifier:
+          - J-Peacock
+        name: JoyHub Peacock
       - identifier:
           - J-Petalwish2
         name: JoyHub Petalwish 2
@@ -4608,6 +4624,8 @@ protocols:
         # - J-Verax3
         - J-Euphoric2
         - J-ROSEBUD
+        - J-Morningbuds2
+        - J-Rhythmic4
       services:
         0000ffa0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffa1-0000-1000-8000-00805f9b34fb
@@ -4801,6 +4819,24 @@ protocols:
             - StepRange: [0, 5]
               FeatureDescriptor: Suction
               ActuatorType: Constrict
+      - identifier:
+          - J-Morningbuds2
+        name: JoyHub Morningbuds
+        messages:
+          ScalarCmd:
+            - StepRange: [ 0, 255 ]
+              ActuatorType: Rotate
+            - StepRange: [ 0, 255 ]
+              ActuatorType: Vibrate
+      - identifier:
+          - J-Rhythmic4
+        name: JoyHub Rhythmic 4
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 255]
+              ActuatorType: Oscillate
+            - StepRange: [0, 255]
+              ActuatorType: Vibrate
   joyhub-v3:
     btle:
       names:
