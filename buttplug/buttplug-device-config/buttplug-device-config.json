@@ -9980,7 +9980,10 @@
     "vibcrafter": {
       "btle": {
         "names": [
-          "be gentle"
+          "be gentle",
+          "Janna",
+          "Hayden",
+          "Nidalee"
         ],
         "services": {
           "53300051-0060-4bd4-bbe5-a6920e4c5663": {
@@ -10009,7 +10012,44 @@
             }
           ]
         }
-      }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "be gentle"
+          ],
+          "name": "VibCrafter ?"
+        },
+        {
+          "identifier": [
+            "Hayden"
+          ],
+          "name": "VibCrafter Hayden"
+        },
+        {
+          "identifier": [
+            "Nidalee"
+          ],
+          "name": "VibCrafter Nidalee"
+        },
+        {
+          "identifier": [
+            "Janna"
+          ],
+          "name": "VibCrafter Janna",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  99
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        }
+      ]
     },
     "lioness": {
       "btle": {
