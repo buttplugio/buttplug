@@ -4002,6 +4002,19 @@ protocols:
         ScalarCmd:
           - StepRange: [0, 20]
             ActuatorType: Vibrate
+  metaxsire-v4:
+    btle:
+      names:
+        - CFG1 vibrator
+      services:
+        0000cfa2-0000-1000-8000-00805f9b34fb:
+          tx: 0000cf21-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: metaXsire G1 Vibrator
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 99]
+            ActuatorType: Vibrate
   cowgirl:
     btle:
       names:
