@@ -4505,6 +4505,7 @@ protocols:
         - J-Rainbow
         - J-BlackBull
         - J-Peacock
+        - J-Mariner
       services:
         0000ffa0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffa1-0000-1000-8000-00805f9b34fb
@@ -4601,6 +4602,16 @@ protocols:
               ActuatorType: Vibrate
             - StepRange: [0, 255]
               ActuatorType: Oscillate
+      - identifier:
+          - J-Mariner
+        name: JoyHub Mariner
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 255]
+              ActuatorType: Rotate
+            - StepRange: [0, 2]
+              FeatureDescriptor: Air Pump
+              ActuatorType: Constrict
   joyhub-v2:
     btle:
       names:
