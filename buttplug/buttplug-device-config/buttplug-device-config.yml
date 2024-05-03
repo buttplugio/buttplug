@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 29
+  minor: 30
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
