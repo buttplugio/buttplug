@@ -80,6 +80,15 @@ impl ServerDeviceManagerBuilder {
     }
   }
 
+  /// Use a prebuilt device configuration manager that needs to be shared with the outside world
+  /// (usually for serialization of user configurations to file)
+  pub fn new_with_arc(device_configuration_manager: Arc<DeviceConfigurationManager>) -> Self {
+    Self {
+      device_configuration_manager,
+      comm_managers: vec![],
+    }
+  }
+
   pub fn comm_manager<T>(&mut self, builder: T) -> &mut Self
   where
     T: HardwareCommunicationManagerBuilder + 'static,

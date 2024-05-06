@@ -156,7 +156,7 @@ use crate::{
 };
 use dashmap::DashMap;
 use getset::Getters;
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, sync::{Arc, atomic::{AtomicBool, Ordering}}, fmt::{self, Debug}};
 
 #[derive(Default, Clone)]
 pub struct DeviceConfigurationManagerBuilder {
@@ -291,7 +291,7 @@ impl DeviceConfigurationManagerBuilder {
     }
 
     Ok(DeviceConfigurationManager {
-      allow_raw_messages: self.allow_raw_messages,
+      allow_raw_messages: Arc::new(AtomicBool::new(self.allow_raw_messages)),
       base_communication_specifiers: self.communication_specifiers.clone(),
       user_communication_specifiers: self.user_communication_specifiers.clone(),
       base_device_definitions: attribute_tree_map,
@@ -315,7 +315,7 @@ impl DeviceConfigurationManagerBuilder {
 #[derive(Getters)]
 pub struct DeviceConfigurationManager {
   /// If true, add raw message support to connected devices
-  allow_raw_messages: bool,
+  allow_raw_messages: Arc<AtomicBool>,
   /// Map of protocol names to their respective protocol instance factories
   protocol_map: HashMap<String, Arc<dyn ProtocolIdentifierFactory>>,
   /// Communication specifiers from the base device config, mapped from protocol name to vector of
@@ -333,6 +333,13 @@ pub struct DeviceConfigurationManager {
   user_device_definitions: DashMap<UserDeviceIdentifier, UserDeviceDefinition>,
 }
 
+impl Debug for DeviceConfigurationManager {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_struct("DeviceConfigurationManager")
+     .finish()
+  }
+}
+
 impl Default for DeviceConfigurationManager {
   /// Create a new instance with Raw Message support turned off
   fn default() -> Self {
@@ -345,6 +352,37 @@ impl Default for DeviceConfigurationManager {
 }
 
 impl DeviceConfigurationManager {
+  pub fn set_allow_raw_messages(&self, allow: bool) {
+    self.allow_raw_messages.store(allow, Ordering::Relaxed)
+  }
+
+  pub fn add_user_communication_specifier(&self, protocol: &str, specifier: &ProtocolCommunicationSpecifier) -> Result<(), ButtplugDeviceError> {
+    if !self.protocol_map.contains_key(protocol) {
+
+    }
+    self.user_communication_specifiers.entry(protocol.to_owned()).or_default().push(specifier.clone());
+    Ok(())
+  }
+
+  pub fn remove_user_communication_specifier(&self, protocol: &str, specifier: &ProtocolCommunicationSpecifier) {
+    if let Some(mut specifiers) = self.user_communication_specifiers.get_mut(protocol) {
+      let specifier_vec = specifiers.value_mut();
+      *specifier_vec = specifier_vec.iter().filter(|s| *specifier != **s).cloned().collect();
+    }
+  }
+
+  pub fn add_user_device_definition(&self, identifier: &UserDeviceIdentifier, definition: &UserDeviceDefinition) -> Result<(), ButtplugDeviceError> {
+    if !self.protocol_map.contains_key(identifier.protocol()) {
+
+    }
+    self.user_device_definitions.entry(identifier.clone()).insert(definition.clone());
+    Ok(())
+  }
+
+  pub fn remove_user_device_definition(&self, identifier: &UserDeviceIdentifier) {
+    self.user_device_definitions.remove(identifier);
+  }
+
   pub fn address_allowed(&self, address: &str) -> bool {
     // Make sure the device isn't on the deny list
     if self
@@ -496,7 +534,7 @@ impl DeviceConfigurationManager {
       self.user_device_definitions.insert(identifier.clone(), features.clone());
     }
 
-    if self.allow_raw_messages {
+    if self.allow_raw_messages.load(Ordering::Relaxed) {
       features.add_raw_messages(raw_endpoints);
     }
 
