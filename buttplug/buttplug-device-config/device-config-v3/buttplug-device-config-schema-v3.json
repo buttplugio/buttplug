@@ -78,16 +78,13 @@
     "websocket-definition": {
       "type": "object",
       "properties": {
-        "names": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "name": {
+          "type": "string"
         }
       },
       "additionalProperties": false,
       "required": [
-        "names"
+        "name"
       ]
     },
     "serial-definition": {

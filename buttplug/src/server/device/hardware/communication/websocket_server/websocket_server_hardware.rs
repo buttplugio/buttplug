@@ -199,10 +199,9 @@ impl WebsocketServerHardwareConnector {
 #[async_trait]
 impl HardwareConnector for WebsocketServerHardwareConnector {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
-    ProtocolCommunicationSpecifier::Websocket(WebsocketSpecifier::new(&vec![self
+    ProtocolCommunicationSpecifier::Websocket(WebsocketSpecifier::new(self
       .info
-      .identifier()
-      .to_owned()]))
+      .identifier()))
   }
 
   async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {

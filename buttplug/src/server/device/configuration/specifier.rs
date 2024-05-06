@@ -362,19 +362,12 @@ impl PartialEq for SerialSpecifier {
 #[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub")]
 pub struct WebsocketSpecifier {
-  names: HashSet<String>,
-}
-
-impl WebsocketSpecifier {
-  pub fn merge(&mut self, other: WebsocketSpecifier) {
-    // Just add the new identifier names
-    self.names.extend(other.names);
-  }
+  name: String,
 }
 
 impl PartialEq for WebsocketSpecifier {
   fn eq(&self, other: &Self) -> bool {
-    if self.names.intersection(&other.names).count() > 0 {
+    if self.name == other.name {
       return true;
     }
     false
@@ -382,12 +375,10 @@ impl PartialEq for WebsocketSpecifier {
 }
 
 impl WebsocketSpecifier {
-  pub fn new(names: &Vec<String>) -> WebsocketSpecifier {
-    let mut set = HashSet::new();
-    for name in names {
-      set.insert(name.clone());
+  pub fn new(name: &str) -> WebsocketSpecifier {
+    Self {
+      name: name.to_owned()
     }
-    WebsocketSpecifier { names: set }
   }
 }
 
