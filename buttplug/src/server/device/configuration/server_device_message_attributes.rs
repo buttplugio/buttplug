@@ -4,7 +4,6 @@
 use std::{mem, ops::RangeInclusive};
 
 use getset::{Getters, MutGetters, Setters};
-use serde::{Deserialize, Serialize};
 
 use crate::core::message::{
   ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugDeviceMessageType, ButtplugSensorFeatureMessageType, ClientDeviceMessageAttributes, ClientDeviceMessageAttributesBuilder, ClientGenericDeviceMessageAttributes, DeviceFeature, Endpoint, NullDeviceMessageAttributes, RawDeviceMessageAttributes, SensorDeviceMessageAttributes, SensorType
@@ -87,66 +86,41 @@ impl ProtocolDeviceAttributes {
 // Unlike other message components, MessageAttributes is always turned on for
 // serialization, because it's used by device configuration files also.
 #[derive(
-  Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, Getters, MutGetters, Setters,
+  Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters,
 )]
 pub struct ServerDeviceMessageAttributes {
   // Generic commands
   #[getset(get = "pub", get_mut = "pub(super)")]
-  #[serde(rename = "ScalarCmd")]
-  #[serde(skip_serializing_if = "Option::is_none")]
   scalar_cmd: Option<Vec<ServerGenericDeviceMessageAttributes>>,
   #[getset(get = "pub", get_mut = "pub(super)")]
-  #[serde(rename = "RotateCmd")]
-  #[serde(skip_serializing_if = "Option::is_none")]
   rotate_cmd: Option<Vec<ServerGenericDeviceMessageAttributes>>,
   #[getset(get = "pub", get_mut = "pub(super)")]
-  #[serde(rename = "LinearCmd")]
-  #[serde(skip_serializing_if = "Option::is_none")]
   linear_cmd: Option<Vec<ServerGenericDeviceMessageAttributes>>,
 
   // Sensor Messages
   #[getset(get = "pub")]
-  #[serde(rename = "SensorReadCmd")]
-  #[serde(skip_serializing_if = "Option::is_none")]
   sensor_read_cmd: Option<Vec<SensorDeviceMessageAttributes>>,
   #[getset(get = "pub")]
-  #[serde(rename = "SensorSubscribeCmd")]
-  #[serde(skip_serializing_if = "Option::is_none")]
   sensor_subscribe_cmd: Option<Vec<SensorDeviceMessageAttributes>>,
 
   // StopDeviceCmd always exists
   #[getset(get = "pub")]
-  #[serde(rename = "StopDeviceCmd")]
-  #[serde(skip_deserializing)]
   stop_device_cmd: NullDeviceMessageAttributes,
 
   // Raw commands are only added post-serialization
   #[getset(get = "pub")]
-  #[serde(rename = "RawReadCmd")]
-  #[serde(skip_deserializing)]
-  #[serde(skip_serializing_if = "Option::is_none")]
   raw_read_cmd: Option<RawDeviceMessageAttributes>,
   // Raw commands are only added post-serialization
   #[getset(get = "pub")]
-  #[serde(rename = "RawWriteCmd")]
-  #[serde(skip_deserializing)]
-  #[serde(skip_serializing_if = "Option::is_none")]
   raw_write_cmd: Option<RawDeviceMessageAttributes>,
   // Raw commands are only added post-serialization
   #[getset(get = "pub")]
-  #[serde(rename = "RawSubscribeCmd")]
-  #[serde(skip_deserializing)]
-  #[serde(skip_serializing_if = "Option::is_none")]
   raw_subscribe_cmd: Option<RawDeviceMessageAttributes>,
 
   // Needed to load from config for fallback, but unused here.
   #[getset(get = "pub")]
-  #[serde(rename = "FleshlightLaunchFW12Cmd")]
-  #[serde(skip_serializing)]
   fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributes>,
   #[getset(get = "pub")]
-  #[serde(rename = "VorzeA10CycloneCmd")]
-  #[serde(skip_serializing)]
   vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributes>,
 }
 
@@ -404,23 +378,16 @@ impl ServerDeviceMessageAttributesBuilder {
   }
 }
 
-fn unspecified_feature() -> String {
-  "N/A".to_string()
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Getters, Setters)]
+#[derive(Clone, Debug, PartialEq, Eq, Getters, Setters)]
 pub struct ServerGenericDeviceMessageAttributes {
   #[getset(get = "pub")]
-  #[serde(rename = "FeatureDescriptor")]
-  #[serde(default = "unspecified_feature")]
   feature_descriptor: String,
   #[getset(get = "pub")]
-  #[serde(rename = "ActuatorType")]
   actuator_type: ActuatorType,
-  #[serde(rename = "StepRange")]
-  #[serde(skip_serializing)]
   #[getset(get = "pub", set = "pub")]
   step_range: RangeInclusive<u32>,
+  #[getset(get = "pub", set = "pub")]
+  step_limit: RangeInclusive<u32>,
 }
 
 impl From<ServerGenericDeviceMessageAttributes> for ClientGenericDeviceMessageAttributes {
@@ -442,6 +409,7 @@ impl TryFrom<DeviceFeature> for ServerGenericDeviceMessageAttributes {
         feature_descriptor: value.description().to_owned(),
         actuator_type,
         step_range: actuator.step_range().clone(),
+        step_limit: actuator.step_limit().clone(),
       };
       Ok(attrs)
     } else {
@@ -453,36 +421,36 @@ impl TryFrom<DeviceFeature> for ServerGenericDeviceMessageAttributes {
 }
 
 impl ServerGenericDeviceMessageAttributes {
-  pub fn new(
-    feature_descriptor: &str,
-    step_range: &RangeInclusive<u32>,
-    actuator_type: ActuatorType,
-  ) -> Self {
-    Self {
-      feature_descriptor: feature_descriptor.to_owned(),
-      actuator_type,
-      step_range: step_range.clone(),
-    }
-  }
-
   pub fn step_count(&self) -> u32 {
-    self.step_range.end() - self.step_range.start()
+    self.step_limit.end() - self.step_limit.start()
   }
 }
 
 #[cfg(test)]
 mod test {
-  use super::*;
+  use std::collections::HashSet;
+
+use crate::core::message::DeviceFeatureActuator;
+
+use super::*;
 
   #[test]
   pub fn test_step_count_calculation() {
-    let mut vibrate_attributes = ServerGenericDeviceMessageAttributes::new(
-      "test",
-      &RangeInclusive::new(0, 10),
-      ActuatorType::Vibrate,
-    );
+    let device_feature = DeviceFeature::new(
+      "test", 
+      crate::core::message::FeatureType::Vibrate, 
+      &Some(DeviceFeatureActuator::new(&RangeInclusive::new(0, 10), &RangeInclusive::new(0, 10), &HashSet::from([ButtplugActuatorFeatureMessageType::ScalarCmd]))), 
+      &None);
+
+    let vibrate_attributes: ServerGenericDeviceMessageAttributes = device_feature.try_into().unwrap();
     assert_eq!(vibrate_attributes.step_count(), 10);
-    vibrate_attributes.set_step_range(RangeInclusive::new(3u32, 7));
-    assert_eq!(vibrate_attributes.step_count(), 4);
+
+    let device_feature_2 = DeviceFeature::new(
+      "test", 
+      crate::core::message::FeatureType::Vibrate, 
+      &Some(DeviceFeatureActuator::new(&RangeInclusive::new(0, 10), &RangeInclusive::new(3, 7), &HashSet::from([ButtplugActuatorFeatureMessageType::ScalarCmd]))), 
+      &None);
+    let vibrate_attributes_2: ServerGenericDeviceMessageAttributes = device_feature_2.try_into().unwrap();
+    assert_eq!(vibrate_attributes_2.step_count(), 4);
   }
 }
