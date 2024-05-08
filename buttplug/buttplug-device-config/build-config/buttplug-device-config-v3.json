@@ -6641,15 +6641,11 @@
         },
         {
           "serial": {
-            "ports": [
-              {
-                "port": "default",
-                "baud-rate": 19200,
-                "data-bits": 8,
-                "parity": "N",
-                "stop-bits": 1
-              }
-            ]
+            "port": "default",
+            "baud-rate": 19200,
+            "data-bits": 8,
+            "parity": "N",
+            "stop-bits": 1
           }
         }
       ]
@@ -6936,15 +6932,11 @@
       "communication": [
         {
           "serial": {
-            "ports": [
-              {
-                "port": "default",
-                "baud-rate": 115200,
-                "data-bits": 8,
-                "parity": "N",
-                "stop-bits": 1
-              }
-            ]
+            "port": "default",
+            "baud-rate": 115200,
+            "data-bits": 8,
+            "parity": "N",
+            "stop-bits": 1
           }
         }
       ]
@@ -10498,15 +10490,11 @@
       "communication": [
         {
           "serial": {
-            "ports": [
-              {
-                "port": "default",
-                "baud-rate": 19200,
-                "data-bits": 8,
-                "parity": "N",
-                "stop-bits": 1
-              }
-            ]
+            "port": "default",
+            "baud-rate": 19200,
+            "data-bits": 8,
+            "parity": "N",
+            "stop-bits": 1
           }
         }
       ]

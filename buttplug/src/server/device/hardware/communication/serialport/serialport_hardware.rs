@@ -186,14 +186,9 @@ impl SerialPortHardware {
     // If we've gotten this far, we can expect we have a serial port definition.
     let mut port_def = None;
     for specifier in specifiers {
-      if let ProtocolCommunicationSpecifier::Serial(serial_list) = specifier {
-        for serial in serial_list.ports() {
-          if port_info.port_name == *serial.port() {
-            port_def = Some(serial.clone());
-            break;
-          }
-        }
-        if port_def.is_some() {
+      if let ProtocolCommunicationSpecifier::Serial(serial) = specifier {
+        if port_info.port_name == *serial.port() {
+          port_def = Some(serial.clone());
           break;
         }
       }

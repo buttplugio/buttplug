@@ -3783,12 +3783,11 @@ protocols:
             0000abf0-0000-1000-8000-00805f9b34fb:
               tx: 0000abf1-0000-1000-8000-00805f9b34fb
       - serial:
-          ports:
-            - port: default
-              baud-rate: 19200
-              data-bits: 8
-              parity: 'N'
-              stop-bits: 1
+          port: default
+          baud-rate: 19200
+          data-bits: 8
+          parity: 'N'
+          stop-bits: 1
   thehandy:
     defaults:
       name: The Handy
@@ -3947,12 +3946,11 @@ protocols:
               - LinearCmd
     communication:
       - serial:
-          ports:
-            - port: default
-              baud-rate: 115200
-              data-bits: 8
-              parity: 'N'
-              stop-bits: 1
+          port: default
+          baud-rate: 115200
+          data-bits: 8
+          parity: 'N'
+          stop-bits: 1
   fredorch:
     defaults:
       name: Fredorch Device
@@ -5965,12 +5963,11 @@ protocols:
               - ScalarCmd
     communication:
       - serial:
-          ports:
-            - port: default
-              baud-rate: 19200
-              data-bits: 8
-              parity: 'N'
-              stop-bits: 1
+          port: default
+          baud-rate: 19200
+          data-bits: 8
+          parity: 'N'
+          stop-bits: 1
   xiuxiuda:
     defaults:
       name: Xiuxiuda Device

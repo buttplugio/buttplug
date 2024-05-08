@@ -90,42 +90,33 @@
     "serial-definition": {
       "type": "object",
       "properties": {
-        "ports": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "port": {
-                "type": "string"
-              },
-              "baud-rate": {
-                "type": "integer"
-              },
-              "data-bits": {
-                "type": "integer"
-              },
-              "parity": {
-                "type": "string"
-              },
-              "stop-bits": {
-                "type": "integer"
-              }
-            },
-            "required": [
-              "port",
-              "baud-rate",
-              "data-bits",
-              "parity",
-              "stop-bits"
-            ],
-            "additionalProperties": false
+        "type": "object",
+        "properties": {
+          "port": {
+            "type": "string"
           },
-          "minItems": 1
-        }
-      },
-      "required": [
-        "ports"
-      ]
+          "baud-rate": {
+            "type": "integer"
+          },
+          "data-bits": {
+            "type": "integer"
+          },
+          "parity": {
+            "type": "string"
+          },
+          "stop-bits": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "port",
+          "baud-rate",
+          "data-bits",
+          "parity",
+          "stop-bits"
+        ],
+        "additionalProperties": false
+      }
     },
     "xinput-definition": {
       "type": "object",

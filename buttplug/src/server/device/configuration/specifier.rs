@@ -301,9 +301,12 @@ impl PartialEq for VIDPIDSpecifier {
   }
 }
 
+/// Specifier for Serial devices
+///
+/// Handles serial port device identification (via port names) and configuration.
 #[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
-pub struct SerialPortInfo {
+pub struct SerialSpecifier {
   #[serde(rename = "baud-rate")]
   baud_rate: u32,
   #[serde(rename = "data-bits")]
@@ -314,42 +317,31 @@ pub struct SerialPortInfo {
   port: String,
 }
 
-impl PartialEq for SerialPortInfo {
-  fn eq(&self, other: &Self) -> bool {
-    self.port == other.port
-  }
-}
-
-/// Specifier for Serial devices
-///
-/// Handles serial port device identification (via port names) and configuration.
-#[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
-#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
-pub struct SerialSpecifier {
-  ports: Vec<SerialPortInfo>
-}
-
 impl SerialSpecifier {
+  pub fn new(port: &str, baud_rate: u32, data_bits: u8, stop_bits: u8, parity: char) -> Self {
+    Self {
+      port: port.to_owned(),
+      baud_rate,
+      data_bits,
+      stop_bits,
+      parity
+    }
+  }
+
   /// Given a serial port name (the only identifier we have for this type of device), create a
   /// specifier instance.
   pub fn new_from_name(port: &str) -> Self {
     Self {
-      ports: vec![SerialPortInfo {
-        port: port.to_owned(),
-        ..Default::default()
-      }]
+      port: port.to_owned(),
+      ..Default::default()
     }
   }
 }
 
 impl PartialEq for SerialSpecifier {
   fn eq(&self, other: &Self) -> bool {
-    for port in &self.ports {
-      for other_port in &other.ports {
-        if *port == *other_port {
-          return true;
-        }
-      }
+    if *self.port == *other.port {
+      return true;
     }
     false
   }
