@@ -72,18 +72,3 @@ impl ButtplugMessageValidator for ScalarCmd {
     Ok(())
   }
 }
-
-impl From<VibrateCmd> for ScalarCmd {
-  fn from(vibrate_cmd: VibrateCmd) -> Self {
-    let subcommands: Vec<ScalarSubcommand> = vibrate_cmd
-      .speeds()
-      .iter()
-      .map(|x| ScalarSubcommand::new(x.index(), x.speed(), ActuatorType::Vibrate))
-      .collect();
-    Self {
-      id: vibrate_cmd.id(),
-      device_index: vibrate_cmd.device_index(),
-      scalars: subcommands,
-    }
-  }
-}
