@@ -11,6 +11,8 @@ use std::{
   time::Duration,
 };
 
+use crate::core::errors::ButtplugError::ButtplugMessageError;
+use crate::core::message::VibrateCmd;
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
@@ -530,9 +532,7 @@ impl ServerDevice {
         };
         self.handle_generic_command_result(self.handler.handle_rotate_cmd(&commands))
       }
-      ButtplugDeviceCommandMessageUnion::VibrateCmd(msg) => {
-        self.parse_message(ScalarCmd::from(msg).into())
-      }
+      ButtplugDeviceCommandMessageUnion::VibrateCmd(msg) => self.handle_vibrate_cmd(msg),
       ButtplugDeviceCommandMessageUnion::LinearCmd(msg) => {
         self.handle_generic_command_result(self.handler.handle_linear_cmd(msg))
       }
@@ -707,6 +707,53 @@ impl ServerDevice {
         .map_err(|e| e.into())
     }
     .boxed()
+  }
+
+  fn handle_vibrate_cmd(&self, message: VibrateCmd) -> ButtplugServerResultFuture {
+    if let Some(attr) = self.attributes.message_attributes().scalar_cmd() {
+      let mut indexes = Vec::new();
+      for (i, attr) in attr.iter().enumerate() {
+        if attr.actuator_type() == &ActuatorType::Vibrate {
+          indexes.push(i as u32);
+        }
+      }
+
+      let mut cmds: Vec<ScalarSubcommand> = Vec::new();
+      for s in message.speeds().iter() {
+        if s.index() >= indexes.len() as u32 {
+          return ButtplugDeviceError::ProtocolRequirementError(format!(
+            "{} has {} vibrating features; {} is out of range.",
+            self.name(),
+            indexes.len(),
+            s.index()
+          ))
+          .into();
+        }
+        cmds.push(ScalarSubcommand::new(
+          indexes[s.index() as usize],
+          s.speed(),
+          ActuatorType::Vibrate,
+        ));
+      }
+
+      if cmds.is_empty() {
+        ButtplugDeviceError::ProtocolRequirementError(format!(
+          "{} has no vibrating features.",
+          self.name()
+        ))
+        .into()
+      } else {
+        let mut vibrate_cmd = ScalarCmd::new(message.device_index(), cmds);
+        vibrate_cmd.set_id(message.id());
+        self.parse_message(vibrate_cmd.into())
+      }
+    } else {
+      ButtplugDeviceError::ProtocolRequirementError(format!(
+        "{} needs to support ScalarCmd to use SingleMotorVibrateCmd.",
+        self.name()
+      ))
+      .into()
+    }
   }
 
   fn handle_single_motor_vibrate_cmd(
