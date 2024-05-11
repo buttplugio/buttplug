@@ -11,7 +11,6 @@ use std::{
   time::Duration,
 };
 
-use crate::core::errors::ButtplugError::ButtplugMessageError;
 use crate::core::message::VibrateCmd;
 use crate::{
   core::{
