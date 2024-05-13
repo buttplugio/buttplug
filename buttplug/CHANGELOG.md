@@ -1,3 +1,28 @@
+# 8.0.0 (2024-05-12)
+
+## Breaking Changes
+
+- Device Config File Overhaul
+  - In order to make life suck less for saving user definitions of devices, I overhauled the device
+    config system. This involved removing the internal inheritance chains (which were never used), as well as making some communication definitions and configuration structures more flexible. We lose some of the duplication checking we had enforced by types (though very little if anything would break with duplication present), but gain a shitton of ergonomics. This configuration format will feed forward into the next protocol version, but we'll spend the v8 line making sure it's solid before the Buttplug Message Spec v4 update in the v9 library line.
+  - This pushes the device config version to v3 and changes some builder APIs, warrenting a library
+    major version bump.
+
+## Features
+
+- Config system sucks less to work with now.
+- Added Device Support
+  - metaXsire G1
+  - JoyHub Mariner, Black Bull, Peacock, Rainbow, Rhythmic 2, Rhythmic 4, MorningBuds
+  - Svakom Mora Neo, Chika
+  - Galaku devices
+  - More LoveDistance devices
+
+## Bugfixes
+
+- Fixed issue with backward compatibility of ScalarCmd actuator types
+- Fixed dependency error that caused compilation issues with Rust 1.77
+
 # 7.1.16 (2024-04-20)
 
 ## Features
