@@ -7269,3 +7269,22 @@ protocols:
               tx: d973f2f4-b19e-11e2-9e96-0800200c9a66
             d973f2e5-b19e-11e2-9e96-0800200c9a66:
               rx: d973f2e6-b19e-11e2-9e96-0800200c9a66
+  activejoy:
+    defaults:
+      name: IntoYou Remote Egg Vibrator
+      features:
+        - feature-type: Vibrate
+          actuator:
+            step-range:
+              - 0
+              - 255
+            messages:
+              - ScalarCmd
+    communication:
+      - btle:
+          names:
+            - SS-TD-YDTD-001
+          services:
+            0000f0b0-0000-1000-8000-00805f9b34fb:
+              tx: 0000f0b1-0000-1000-8000-00805f9b34fb
+              rx: 0000f0b2-0000-1000-8000-00805f9b34fb
