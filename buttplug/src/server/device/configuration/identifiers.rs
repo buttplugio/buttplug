@@ -63,7 +63,6 @@ impl From<&UserDeviceIdentifier> for BaseDeviceIdentifier {
 
 impl PartialEq<UserDeviceIdentifier> for BaseDeviceIdentifier {
   fn eq(&self, other: &UserDeviceIdentifier) -> bool {
-    self.protocol == *other.protocol()
-      && self.identifier == *other.identifier()
+    self.protocol == *other.protocol() && self.identifier == *other.identifier()
   }
 }

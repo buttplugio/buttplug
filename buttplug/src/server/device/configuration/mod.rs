@@ -156,7 +156,14 @@ use crate::{
 };
 use dashmap::DashMap;
 use getset::Getters;
-use std::{collections::HashMap, sync::{Arc, atomic::{AtomicBool, Ordering}}, fmt::{self, Debug}};
+use std::{
+  collections::HashMap,
+  fmt::{self, Debug},
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
+};
 
 #[derive(Default, Clone)]
 pub struct DeviceConfigurationManagerBuilder {
@@ -189,7 +196,9 @@ impl DeviceConfigurationManagerBuilder {
     identifier: &BaseDeviceIdentifier,
     features: &BaseDeviceDefinition,
   ) -> &mut Self {
-    self.base_device_definitions.insert(identifier.clone(), features.clone());
+    self
+      .base_device_definitions
+      .insert(identifier.clone(), features.clone());
     self
   }
 
@@ -211,7 +220,9 @@ impl DeviceConfigurationManagerBuilder {
     identifier: &UserDeviceIdentifier,
     features: &UserDeviceDefinition,
   ) -> &mut Self {
-    self.user_device_definitions.insert(identifier.clone(), features.clone());
+    self
+      .user_device_definitions
+      .insert(identifier.clone(), features.clone());
     self
   }
 
@@ -259,7 +270,10 @@ impl DeviceConfigurationManagerBuilder {
       // If we don't have a protocol loaded for this configuration block, just drop it. We can't do
       // anything with it anyways.
       if !protocol_map.contains_key(ident.protocol()) {
-        debug!("Protocol {:?} in base configurations does not exist in system, discarding definition.", ident.protocol());
+        debug!(
+          "Protocol {:?} in base configurations does not exist in system, discarding definition.",
+          ident.protocol()
+        );
         continue;
       }
       for feature in attr.features() {
@@ -278,7 +292,10 @@ impl DeviceConfigurationManagerBuilder {
       // If we don't have a protocol loaded for this configuration block, just drop it. We can't do
       // anything with it anyways.
       if !protocol_map.contains_key(ident.protocol()) {
-        warn!("Protocol {:?} in user configurations does not exist in system, discarding definition.", ident.protocol());
+        warn!(
+          "Protocol {:?} in user configurations does not exist in system, discarding definition.",
+          ident.protocol()
+        );
         continue;
       }
       for feature in attr.features() {
@@ -335,8 +352,7 @@ pub struct DeviceConfigurationManager {
 
 impl Debug for DeviceConfigurationManager {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("DeviceConfigurationManager")
-     .finish()
+    f.debug_struct("DeviceConfigurationManager").finish()
   }
 }
 
@@ -356,26 +372,45 @@ impl DeviceConfigurationManager {
     self.allow_raw_messages.store(allow, Ordering::Relaxed)
   }
 
-  pub fn add_user_communication_specifier(&self, protocol: &str, specifier: &ProtocolCommunicationSpecifier) -> Result<(), ButtplugDeviceError> {
-    if !self.protocol_map.contains_key(protocol) {
-
-    }
-    self.user_communication_specifiers.entry(protocol.to_owned()).or_default().push(specifier.clone());
+  pub fn add_user_communication_specifier(
+    &self,
+    protocol: &str,
+    specifier: &ProtocolCommunicationSpecifier,
+  ) -> Result<(), ButtplugDeviceError> {
+    if !self.protocol_map.contains_key(protocol) {}
+    self
+      .user_communication_specifiers
+      .entry(protocol.to_owned())
+      .or_default()
+      .push(specifier.clone());
     Ok(())
   }
 
-  pub fn remove_user_communication_specifier(&self, protocol: &str, specifier: &ProtocolCommunicationSpecifier) {
+  pub fn remove_user_communication_specifier(
+    &self,
+    protocol: &str,
+    specifier: &ProtocolCommunicationSpecifier,
+  ) {
     if let Some(mut specifiers) = self.user_communication_specifiers.get_mut(protocol) {
       let specifier_vec = specifiers.value_mut();
-      *specifier_vec = specifier_vec.iter().filter(|s| *specifier != **s).cloned().collect();
+      *specifier_vec = specifier_vec
+        .iter()
+        .filter(|s| *specifier != **s)
+        .cloned()
+        .collect();
     }
   }
 
-  pub fn add_user_device_definition(&self, identifier: &UserDeviceIdentifier, definition: &UserDeviceDefinition) -> Result<(), ButtplugDeviceError> {
-    if !self.protocol_map.contains_key(identifier.protocol()) {
-
-    }
-    self.user_device_definitions.entry(identifier.clone()).insert(definition.clone());
+  pub fn add_user_device_definition(
+    &self,
+    identifier: &UserDeviceIdentifier,
+    definition: &UserDeviceDefinition,
+  ) -> Result<(), ButtplugDeviceError> {
+    if !self.protocol_map.contains_key(identifier.protocol()) {}
+    self
+      .user_device_definitions
+      .entry(identifier.clone())
+      .insert(definition.clone());
     Ok(())
   }
 
@@ -462,30 +497,31 @@ impl DeviceConfigurationManager {
     );
     let mut specializers = vec![];
 
-    let mut update_specializer_map = |name: &str, specifiers: &Vec<ProtocolCommunicationSpecifier>| {
-      if specifiers.contains(specifier) {
-        info!(
-          "Found protocol {:?} for user specifier {:?}.",
-          name, specifier
-        );
-
-        if self.protocol_map.contains_key(name) {
-          specializers.push(ProtocolSpecializer::new(
-            specifiers.clone(),
-            self
-              .protocol_map
-              .get(name)
-              .expect("already checked existence")
-              .create(),
-          ));
-        } else {
-          warn!(
-            "No protocol implementation for {:?} found for specifier {:?}.",
+    let mut update_specializer_map =
+      |name: &str, specifiers: &Vec<ProtocolCommunicationSpecifier>| {
+        if specifiers.contains(specifier) {
+          info!(
+            "Found protocol {:?} for user specifier {:?}.",
             name, specifier
           );
+
+          if self.protocol_map.contains_key(name) {
+            specializers.push(ProtocolSpecializer::new(
+              specifiers.clone(),
+              self
+                .protocol_map
+                .get(name)
+                .expect("already checked existence")
+                .create(),
+            ));
+          } else {
+            warn!(
+              "No protocol implementation for {:?} found for specifier {:?}.",
+              name, specifier
+            );
+          }
         }
-      }
-    };
+      };
 
     // Loop through both maps, as chaining between DashMap and HashMap gets kinda gross.
     for spec in self.user_communication_specifiers.iter() {
@@ -531,7 +567,9 @@ impl DeviceConfigurationManager {
     // preparation. There is a very small chance we may save the device config then error out when
     // we connect to the device, but we'll assume we may connect successfully later.
     if self.user_device_definitions.get(identifier).is_none() {
-      self.user_device_definitions.insert(identifier.clone(), features.clone());
+      self
+        .user_device_definitions
+        .insert(identifier.clone(), features.clone());
     }
 
     if self.allow_raw_messages.load(Ordering::Relaxed) {
@@ -565,38 +603,38 @@ mod test {
       HashMap::new(),
     ));
     builder
-    .allow_raw_messages(allow_raw_messages)
-    .communication_specifier("lovense", &[specifiers])
-    .protocol_features(
-      &BaseDeviceIdentifier::new("lovense", &Some("P".to_owned())),
-      &BaseDeviceDefinition::new(
-        "Lovense Edge",
-        &vec![
-          DeviceFeature::new(
-            "Edge Vibration 1",
-            FeatureType::Vibrate,
-            &Some(DeviceFeatureActuator::new(
-              &RangeInclusive::new(0, 20),
-              &RangeInclusive::new(0, 20),
-              &HashSet::from_iter([ButtplugActuatorFeatureMessageType::ScalarCmd]),
-            )),
-            &None,
-          ),
-          DeviceFeature::new(
-            "Edge Vibration 2",
-            FeatureType::Vibrate,
-            &Some(DeviceFeatureActuator::new(
-              &RangeInclusive::new(0, 20),
-              &RangeInclusive::new(0, 20),
-              &HashSet::from_iter([ButtplugActuatorFeatureMessageType::ScalarCmd]),
-            )),
-            &None,
-          ),
-        ],
-      ),
-    )
-    .finish()
-    .unwrap()
+      .allow_raw_messages(allow_raw_messages)
+      .communication_specifier("lovense", &[specifiers])
+      .protocol_features(
+        &BaseDeviceIdentifier::new("lovense", &Some("P".to_owned())),
+        &BaseDeviceDefinition::new(
+          "Lovense Edge",
+          &vec![
+            DeviceFeature::new(
+              "Edge Vibration 1",
+              FeatureType::Vibrate,
+              &Some(DeviceFeatureActuator::new(
+                &RangeInclusive::new(0, 20),
+                &RangeInclusive::new(0, 20),
+                &HashSet::from_iter([ButtplugActuatorFeatureMessageType::ScalarCmd]),
+              )),
+              &None,
+            ),
+            DeviceFeature::new(
+              "Edge Vibration 2",
+              FeatureType::Vibrate,
+              &Some(DeviceFeatureActuator::new(
+                &RangeInclusive::new(0, 20),
+                &RangeInclusive::new(0, 20),
+                &HashSet::from_iter([ButtplugActuatorFeatureMessageType::ScalarCmd]),
+              )),
+              &None,
+            ),
+          ],
+        ),
+      )
+      .finish()
+      .unwrap()
   }
 
   #[test]

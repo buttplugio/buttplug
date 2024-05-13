@@ -15,7 +15,7 @@ use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_initializer_setup, UserDeviceIdentifier, ProtocolHandler},
+    protocol::{generic_protocol_initializer_setup, ProtocolHandler, UserDeviceIdentifier},
   },
 };
 use async_trait::async_trait;

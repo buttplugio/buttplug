@@ -269,12 +269,10 @@ pub struct VIDPIDPair {
 /// Specifier for HID (USB, Bluetooth) devices
 ///
 /// Handles devices managed by the operating system's HID manager.
-#[derive(
-  Serialize, Deserialize, Debug, Eq, Clone, Getters, Setters, MutGetters,
-)]
+#[derive(Serialize, Deserialize, Debug, Eq, Clone, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 pub struct VIDPIDSpecifier {
-  pairs: Vec<VIDPIDPair>
+  pairs: Vec<VIDPIDPair>,
 }
 
 impl VIDPIDSpecifier {
@@ -283,7 +281,7 @@ impl VIDPIDSpecifier {
       pairs: vec![VIDPIDPair {
         vendor_id,
         product_id,
-      }]
+      }],
     }
   }
 }
@@ -324,7 +322,7 @@ impl SerialSpecifier {
       baud_rate,
       data_bits,
       stop_bits,
-      parity
+      parity,
     }
   }
 
@@ -369,7 +367,7 @@ impl PartialEq for WebsocketSpecifier {
 impl WebsocketSpecifier {
   pub fn new(name: &str) -> WebsocketSpecifier {
     Self {
-      name: name.to_owned()
+      name: name.to_owned(),
     }
   }
 }
@@ -380,19 +378,19 @@ impl WebsocketSpecifier {
 /// devices against the list of known devices for a protocol.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum ProtocolCommunicationSpecifier {
-  #[serde(rename="btle")]
+  #[serde(rename = "btle")]
   BluetoothLE(BluetoothLESpecifier),
-  #[serde(rename="hid")]
+  #[serde(rename = "hid")]
   HID(VIDPIDSpecifier),
-  #[serde(rename="usb")]
+  #[serde(rename = "usb")]
   USB(VIDPIDSpecifier),
-  #[serde(rename="serial")]
+  #[serde(rename = "serial")]
   Serial(SerialSpecifier),
-  #[serde(rename="xinput")]
+  #[serde(rename = "xinput")]
   XInput(XInputSpecifier),
-  #[serde(rename="lovense-connect-service")]
+  #[serde(rename = "lovense-connect-service")]
   LovenseConnectService(LovenseConnectServiceSpecifier),
-  #[serde(rename="websocket")]
+  #[serde(rename = "websocket")]
   Websocket(WebsocketSpecifier),
 }
 

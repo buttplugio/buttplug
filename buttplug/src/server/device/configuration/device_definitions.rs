@@ -45,7 +45,7 @@ impl UserDeviceCustomization {
       display_name: display_name.clone(),
       allow,
       deny,
-      index
+      index,
     }
   }
 }
@@ -58,7 +58,7 @@ pub struct UserDeviceDefinition {
   /// Message attributes for this device instance.
   features: Vec<DeviceFeature>,
   /// Per-user configurations specific to this device instance.
-  #[serde(rename="user-config")]
+  #[serde(rename = "user-config")]
   user_config: UserDeviceCustomization,
 }
 
@@ -82,8 +82,8 @@ impl UserDeviceDefinition {
       features: def.features().clone(),
       user_config: UserDeviceCustomization {
         index: index,
-        .. Default::default()
-      }
+        ..Default::default()
+      },
     }
   }
 

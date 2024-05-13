@@ -8,6 +8,7 @@
 mod util;
 use util::test_server;
 pub use util::{
+  create_test_dcm,
   test_device_manager::{
     check_test_recv_value,
     TestDeviceCommunicationManagerBuilder,
@@ -15,7 +16,6 @@ pub use util::{
   },
   test_server_with_comm_manager,
   test_server_with_device,
-  create_test_dcm
 };
 
 use buttplug::{

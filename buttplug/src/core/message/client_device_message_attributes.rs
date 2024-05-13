@@ -13,7 +13,12 @@ use getset::{Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use std::ops::RangeInclusive;
 
-use super::{ButtplugActuatorFeatureMessageType, ButtplugSensorFeatureMessageType, DeviceFeature, FeatureType};
+use super::{
+  ButtplugActuatorFeatureMessageType,
+  ButtplugSensorFeatureMessageType,
+  DeviceFeature,
+  FeatureType,
+};
 
 #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ActuatorType {

@@ -5,12 +5,20 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::{errors::ButtplugDeviceError, message::{ButtplugDeviceMessageType, Endpoint}};
+use crate::core::{
+  errors::ButtplugDeviceError,
+  message::{ButtplugDeviceMessageType, Endpoint},
+};
 use getset::{Getters, MutGetters, Setters};
-use serde::{Deserialize, Serialize, Serializer, ser::SerializeSeq};
+use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use std::{collections::HashSet, ops::RangeInclusive};
 
-use super::{ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugSensorFeatureMessageType, SensorType};
+use super::{
+  ActuatorType,
+  ButtplugActuatorFeatureMessageType,
+  ButtplugSensorFeatureMessageType,
+  SensorType,
+};
 
 #[derive(Debug, Default, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FeatureType {
@@ -130,10 +138,7 @@ impl DeviceFeature {
   }
 }
 
-fn range_serialize<S>(
-  range: &RangeInclusive<u32>,
-  serializer: S,
-) -> Result<S::Ok, S::Error>
+fn range_serialize<S>(range: &RangeInclusive<u32>, serializer: S) -> Result<S::Ok, S::Error>
 where
   S: Serializer,
 {
@@ -161,7 +166,7 @@ where
 pub struct DeviceFeatureActuatorSerialized {
   #[getset(get = "pub")]
   #[serde(rename = "step-range")]
-  #[serde(serialize_with="range_serialize")]
+  #[serde(serialize_with = "range_serialize")]
   step_range: RangeInclusive<u32>,
   // This doesn't exist in base configs, so when we load these from the base config file, we'll just
   // copy the step_range value.
@@ -175,17 +180,17 @@ pub struct DeviceFeatureActuatorSerialized {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize)]
-#[serde(from="DeviceFeatureActuatorSerialized")]
+#[serde(from = "DeviceFeatureActuatorSerialized")]
 pub struct DeviceFeatureActuator {
   #[getset(get = "pub")]
   #[serde(rename = "step-range")]
-  #[serde(serialize_with="range_serialize")]
+  #[serde(serialize_with = "range_serialize")]
   step_range: RangeInclusive<u32>,
   // This doesn't exist in base configs, so when we load these from the base config file, we'll just
   // copy the step_range value.
   #[getset(get = "pub")]
   #[serde(rename = "step-limit")]
-  #[serde(serialize_with="range_serialize")]
+  #[serde(serialize_with = "range_serialize")]
   step_limit: RangeInclusive<u32>,
   #[getset(get = "pub")]
   #[serde(rename = "messages")]
@@ -194,11 +199,11 @@ pub struct DeviceFeatureActuator {
 
 impl From<DeviceFeatureActuatorSerialized> for DeviceFeatureActuator {
   fn from(value: DeviceFeatureActuatorSerialized) -> Self {
-      Self {
-        step_range: value.step_range.clone(),
-        step_limit: value.step_limit.unwrap_or(value.step_range),
-        messages: value.messages
-      }
+    Self {
+      step_range: value.step_range.clone(),
+      step_limit: value.step_limit.unwrap_or(value.step_range),
+      messages: value.messages,
+    }
   }
 }
 
@@ -217,9 +222,13 @@ impl DeviceFeatureActuator {
 
   pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
     if self.step_range.is_empty() || self.step_range.start() > self.step_range.end() {
-      Err(ButtplugDeviceError::DeviceConfigurationError(format!("Step range out of order, must be start <= x <= end.")))
+      Err(ButtplugDeviceError::DeviceConfigurationError(format!(
+        "Step range out of order, must be start <= x <= end."
+      )))
     } else if self.step_limit.is_empty() || self.step_limit.start() > self.step_limit.end() {
-      Err(ButtplugDeviceError::DeviceConfigurationError(format!("Step limit out of order, must be start <= x <= end.")))
+      Err(ButtplugDeviceError::DeviceConfigurationError(format!(
+        "Step limit out of order, must be start <= x <= end."
+      )))
     } else {
       Ok(())
     }
@@ -232,7 +241,7 @@ impl DeviceFeatureActuator {
 pub struct DeviceFeatureSensor {
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(rename = "value-range")]
-  #[serde(serialize_with="range_sequence_serialize")]
+  #[serde(serialize_with = "range_sequence_serialize")]
   value_range: Vec<RangeInclusive<i32>>,
   #[getset(get = "pub")]
   #[serde(rename = "messages")]

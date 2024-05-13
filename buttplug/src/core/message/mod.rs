@@ -268,7 +268,7 @@ impl Ord for ButtplugDeviceMessageType {
 pub enum ButtplugActuatorFeatureMessageType {
   ScalarCmd,
   RotateCmd,
-  LinearCmd
+  LinearCmd,
 }
 
 impl From<ButtplugActuatorFeatureMessageType> for ButtplugDeviceMessageType {
@@ -291,7 +291,9 @@ impl From<ButtplugSensorFeatureMessageType> for ButtplugDeviceMessageType {
   fn from(value: ButtplugSensorFeatureMessageType) -> Self {
     match value {
       ButtplugSensorFeatureMessageType::SensorReadCmd => ButtplugDeviceMessageType::SensorReadCmd,
-      ButtplugSensorFeatureMessageType::SensorSubscribeCmd => ButtplugDeviceMessageType::SensorSubscribeCmd,
+      ButtplugSensorFeatureMessageType::SensorSubscribeCmd => {
+        ButtplugDeviceMessageType::SensorSubscribeCmd
+      }
     }
   }
 }

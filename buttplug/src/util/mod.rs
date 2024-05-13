@@ -70,8 +70,7 @@ pub async fn in_process_client(client_name: &str, allow_raw_messages: bool) -> B
     .finish()
     .unwrap();
 
-  let mut device_manager_builder =
-    ServerDeviceManagerBuilder::new(dcm);
+  let mut device_manager_builder = ServerDeviceManagerBuilder::new(dcm);
   #[cfg(all(
     feature = "btleplug-manager",
     any(

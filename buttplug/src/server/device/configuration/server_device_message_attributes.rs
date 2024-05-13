@@ -6,7 +6,19 @@ use std::{mem, ops::RangeInclusive};
 use getset::{Getters, MutGetters, Setters};
 
 use crate::core::message::{
-  ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugDeviceMessageType, ButtplugSensorFeatureMessageType, ClientDeviceMessageAttributes, ClientDeviceMessageAttributesBuilder, ClientGenericDeviceMessageAttributes, DeviceFeature, Endpoint, NullDeviceMessageAttributes, RawDeviceMessageAttributes, SensorDeviceMessageAttributes, SensorType
+  ActuatorType,
+  ButtplugActuatorFeatureMessageType,
+  ButtplugDeviceMessageType,
+  ButtplugSensorFeatureMessageType,
+  ClientDeviceMessageAttributes,
+  ClientDeviceMessageAttributesBuilder,
+  ClientGenericDeviceMessageAttributes,
+  DeviceFeature,
+  Endpoint,
+  NullDeviceMessageAttributes,
+  RawDeviceMessageAttributes,
+  SensorDeviceMessageAttributes,
+  SensorType,
 };
 
 use super::UserDeviceDefinition;
@@ -85,9 +97,7 @@ impl ProtocolDeviceAttributes {
 
 // Unlike other message components, MessageAttributes is always turned on for
 // serialization, because it's used by device configuration files also.
-#[derive(
-  Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters,
-)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters)]
 pub struct ServerDeviceMessageAttributes {
   // Generic commands
   #[getset(get = "pub", get_mut = "pub(super)")]
@@ -430,27 +440,39 @@ impl ServerGenericDeviceMessageAttributes {
 mod test {
   use std::collections::HashSet;
 
-use crate::core::message::DeviceFeatureActuator;
+  use crate::core::message::DeviceFeatureActuator;
 
-use super::*;
+  use super::*;
 
   #[test]
   pub fn test_step_count_calculation() {
     let device_feature = DeviceFeature::new(
-      "test", 
-      crate::core::message::FeatureType::Vibrate, 
-      &Some(DeviceFeatureActuator::new(&RangeInclusive::new(0, 10), &RangeInclusive::new(0, 10), &HashSet::from([ButtplugActuatorFeatureMessageType::ScalarCmd]))), 
-      &None);
+      "test",
+      crate::core::message::FeatureType::Vibrate,
+      &Some(DeviceFeatureActuator::new(
+        &RangeInclusive::new(0, 10),
+        &RangeInclusive::new(0, 10),
+        &HashSet::from([ButtplugActuatorFeatureMessageType::ScalarCmd]),
+      )),
+      &None,
+    );
 
-    let vibrate_attributes: ServerGenericDeviceMessageAttributes = device_feature.try_into().unwrap();
+    let vibrate_attributes: ServerGenericDeviceMessageAttributes =
+      device_feature.try_into().unwrap();
     assert_eq!(vibrate_attributes.step_count(), 10);
 
     let device_feature_2 = DeviceFeature::new(
-      "test", 
-      crate::core::message::FeatureType::Vibrate, 
-      &Some(DeviceFeatureActuator::new(&RangeInclusive::new(0, 10), &RangeInclusive::new(3, 7), &HashSet::from([ButtplugActuatorFeatureMessageType::ScalarCmd]))), 
-      &None);
-    let vibrate_attributes_2: ServerGenericDeviceMessageAttributes = device_feature_2.try_into().unwrap();
+      "test",
+      crate::core::message::FeatureType::Vibrate,
+      &Some(DeviceFeatureActuator::new(
+        &RangeInclusive::new(0, 10),
+        &RangeInclusive::new(3, 7),
+        &HashSet::from([ButtplugActuatorFeatureMessageType::ScalarCmd]),
+      )),
+      &None,
+    );
+    let vibrate_attributes_2: ServerGenericDeviceMessageAttributes =
+      device_feature_2.try_into().unwrap();
     assert_eq!(vibrate_attributes_2.step_count(), 4);
   }
 }

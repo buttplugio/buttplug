@@ -7,7 +7,10 @@
 
 use super::json::JSONValidator;
 use crate::{
-  core::{errors::{ButtplugDeviceError, ButtplugError}, message::DeviceFeature},
+  core::{
+    errors::{ButtplugDeviceError, ButtplugError},
+    message::DeviceFeature,
+  },
   server::device::configuration::{
     BaseDeviceDefinition,
     BaseDeviceIdentifier,
@@ -131,7 +134,10 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
       }
     }
 
-    Self::new(protocol_def.communication.unwrap_or_default(), configurations)
+    Self::new(
+      protocol_def.communication.unwrap_or_default(),
+      configurations,
+    )
   }
 }
 
@@ -270,8 +276,8 @@ where
 
 fn load_main_config(
   main_config_str: &Option<String>,
-  skip_version_check: bool
-) -> Result <DeviceConfigurationManagerBuilder, ButtplugDeviceError> {
+  skip_version_check: bool,
+) -> Result<DeviceConfigurationManagerBuilder, ButtplugDeviceError> {
   if main_config_str.is_some() {
     info!("Loading from custom base device configuration...")
   } else {
@@ -279,7 +285,9 @@ fn load_main_config(
   }
   // Start by loading the main config
   let main_config = load_protocol_config_from_json::<BaseConfigFile>(
-    &main_config_str.as_ref().unwrap_or(&DEVICE_CONFIGURATION_JSON.to_owned()),
+    &main_config_str
+      .as_ref()
+      .unwrap_or(&DEVICE_CONFIGURATION_JSON.to_owned()),
     skip_version_check,
   )?;
 
@@ -312,7 +320,6 @@ fn load_main_config(
     dcm_builder.communication_specifier(name, specifiers);
   }
 
-  
   for (ident, features) in protocol_features {
     dcm_builder.protocol_features(&ident, &features);
   }
@@ -323,21 +330,20 @@ fn load_main_config(
 fn load_user_config(
   user_config_str: &str,
   skip_version_check: bool,
-  dcm_builder: &mut DeviceConfigurationManagerBuilder
+  dcm_builder: &mut DeviceConfigurationManagerBuilder,
 ) -> Result<(), ButtplugDeviceError> {
-
   info!("Loading user configuration from string.");
-  let user_config_file = load_protocol_config_from_json::<UserConfigFile>(
-    &user_config_str,
-    skip_version_check,
-  )?;
+  let user_config_file =
+    load_protocol_config_from_json::<UserConfigFile>(&user_config_str, skip_version_check)?;
 
   if user_config_file.user_configs.is_none() {
     info!("No user configurations provided in user config.");
     return Ok(());
   }
 
-  let user_config = user_config_file.user_configs.expect("Just checked validity");
+  let user_config = user_config_file
+    .user_configs
+    .expect("Just checked validity");
 
   for (protocol, specifier) in user_config.protocols.unwrap_or_default() {
     if let Some(comm_specifiers) = specifier.communication() {
@@ -346,7 +352,10 @@ fn load_user_config(
   }
 
   for user_device_config_pair in user_config.user_device_configs.unwrap_or_default() {
-    dcm_builder.user_protocol_features(user_device_config_pair.identifier(), user_device_config_pair.config());
+    dcm_builder.user_protocol_features(
+      user_device_config_pair.identifier(),
+      user_device_config_pair.config(),
+    );
   }
 
   Ok(())
@@ -357,7 +366,6 @@ pub fn load_protocol_configs(
   user_config_str: &Option<String>,
   skip_version_check: bool,
 ) -> Result<DeviceConfigurationManagerBuilder, ButtplugDeviceError> {
-
   let mut dcm_builder = load_main_config(main_config_str, skip_version_check)?;
 
   if let Some(config_str) = user_config_str {
@@ -371,24 +379,33 @@ pub fn load_protocol_configs(
 
 pub fn save_user_config(dcm: &DeviceConfigurationManager) -> Result<String, ButtplugError> {
   let user_specifiers = dcm.user_communication_specifiers();
-  let user_definitions_vec = dcm.user_device_definitions().iter().map(|kv| UserDeviceConfigPair {
-    identifier: kv.key().clone(),
-    config: kv.value().clone()
-  }).collect();
+  let user_definitions_vec = dcm
+    .user_device_definitions()
+    .iter()
+    .map(|kv| UserDeviceConfigPair {
+      identifier: kv.key().clone(),
+      config: kv.value().clone(),
+    })
+    .collect();
   let user_protos = DashMap::new();
   for spec in user_specifiers {
-    user_protos.insert(spec.key().clone(), ProtocolDefinition {
-      communication: Some(spec.value().clone()),
-      .. Default::default()
-    });
+    user_protos.insert(
+      spec.key().clone(),
+      ProtocolDefinition {
+        communication: Some(spec.value().clone()),
+        ..Default::default()
+      },
+    );
   }
   let user_config_definition = UserConfigDefinition {
     protocols: Some(user_protos.clone()),
-    user_device_configs: Some(user_definitions_vec)
+    user_device_configs: Some(user_definitions_vec),
   };
   let mut user_config_file = UserConfigFile::new(3, 0);
   user_config_file.user_configs = Some(user_config_definition);
-  Ok(serde_json::to_string(&user_config_file).map_err(|e| ButtplugError::from(ButtplugDeviceError::DeviceConfigurationError(format!(
-    "Cannot save device configuration file: {e:?}",
-  ))))?)
+  Ok(serde_json::to_string(&user_config_file).map_err(|e| {
+    ButtplugError::from(ButtplugDeviceError::DeviceConfigurationError(format!(
+      "Cannot save device configuration file: {e:?}",
+    )))
+  })?)
 }
