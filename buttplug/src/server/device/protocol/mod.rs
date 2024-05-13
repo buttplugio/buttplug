@@ -13,6 +13,7 @@ pub mod generic_command_manager;
 pub mod fleshlight_launch_helper;
 
 // Since users can pick and choose protocols, we need all of these to be public.
+pub mod activejoy;
 pub mod adrienlastic;
 pub mod aneros;
 pub mod ankni;
@@ -197,6 +198,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     map.insert(factory.identifier().to_owned(), factory);
   }
 
+  add_to_protocol_map(
+    &mut map,
+    activejoy::setup::ActiveJoyIdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     adrienlastic::setup::AdrienLasticIdentifierFactory::default(),
