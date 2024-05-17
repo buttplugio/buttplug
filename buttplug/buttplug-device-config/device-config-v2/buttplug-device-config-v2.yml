@@ -3950,9 +3950,9 @@ protocols:
         messages:
           ScalarCmd:
             - StepRange: [0, 255]
-              ActuatorType: Vibrate
-            - StepRange: [0, 255]
               ActuatorType: Oscillate
+            - StepRange: [0, 255]
+              ActuatorType: Vibrate
   metaxsire-repeat:
     btle:
       names:

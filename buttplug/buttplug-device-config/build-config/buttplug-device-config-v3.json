@@ -10194,7 +10194,7 @@
           "name": "metaXsire BuCUE",
           "features": [
             {
-              "feature-type": "Vibrate",
+              "feature-type": "Oscillate",
               "actuator": {
                 "step-range": [
                   0,
@@ -10206,7 +10206,7 @@
               }
             },
             {
-              "feature-type": "Oscillate",
+              "feature-type": "Vibrate",
               "actuator": {
                 "step-range": [
                   0,
