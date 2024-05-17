@@ -5800,14 +5800,14 @@ protocols:
           - LY213A01
         name: metaXsire BuCUE
         features:
-          - feature-type: Vibrate
+          - feature-type: Oscillate
             actuator:
               step-range:
                 - 0
                 - 255
               messages:
                 - ScalarCmd
-          - feature-type: Oscillate
+          - feature-type: Vibrate
             actuator:
               step-range:
                 - 0

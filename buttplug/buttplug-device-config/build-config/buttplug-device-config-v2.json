@@ -8065,14 +8065,14 @@
                   0,
                   255
                 ],
-                "ActuatorType": "Vibrate"
+                "ActuatorType": "Oscillate"
               },
               {
                 "StepRange": [
                   0,
                   255
                 ],
-                "ActuatorType": "Oscillate"
+                "ActuatorType": "Vibrate"
               }
             ]
           }
