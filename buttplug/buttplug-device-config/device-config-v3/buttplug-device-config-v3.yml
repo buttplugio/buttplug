@@ -151,6 +151,26 @@ protocols:
               messages:
                 - SensorReadCmd
       - identifier:
+          - Z
+        name: Lovense Mini Sex Machine
+        features:
+          - feature-type: Oscillate
+            description: Fucking Machine Oscillation Speed
+            actuator:
+              step-range:
+                - 0
+                - 20
+              messages:
+                - ScalarCmd
+          - feature-type: Battery
+            description: Battery Level
+            sensor:
+              value-range:
+                - - 0
+                  - 100
+              messages:
+                - SensorReadCmd
+      - identifier:
           - J
         name: Lovense Dolce
         features:
