@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 3,
-    "minor": 0
+    "minor": 1
   },
   "protocols": {
     "lovense": {
@@ -274,7 +274,7 @@
         },
         {
           "identifier": [
-            "Z"
+            "FS"
           ],
           "name": "Lovense Mini Sex Machine",
           "features": [
