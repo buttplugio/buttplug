@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 30
+    "minor": 31
   },
   "protocols": {
     "lovense": {
@@ -315,7 +315,7 @@
         },
         {
           "identifier": [
-            "Z"
+            "FS"
           ],
           "name": "Lovense Mini Sex Machine",
           "messages": {

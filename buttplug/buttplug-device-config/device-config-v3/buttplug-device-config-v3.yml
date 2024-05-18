@@ -1,6 +1,6 @@
 version:
   major: 3
-  minor: 0
+  minor: 1
 protocols:
   lovense:
     defaults:
@@ -151,7 +151,7 @@ protocols:
               messages:
                 - SensorReadCmd
       - identifier:
-          - Z
+          - FS
         name: Lovense Mini Sex Machine
         features:
           - feature-type: Oscillate
