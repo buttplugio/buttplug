@@ -5,7 +5,10 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::configuration::ProtocolDeviceAttributes;
+use crate::server::device::configuration::{
+  ProtocolCommunicationSpecifier,
+  ProtocolDeviceAttributes,
+};
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -41,6 +44,7 @@ impl ProtocolIdentifier for PrettyLoveIdentifier {
   async fn identify(
     &mut self,
     hardware: Arc<Hardware>,
+    _: ProtocolCommunicationSpecifier,
   ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     Ok((
       UserDeviceIdentifier::new(

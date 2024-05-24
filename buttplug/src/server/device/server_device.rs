@@ -155,8 +155,9 @@ impl ServerDevice {
     let mut protocol_identifier_stage = protocol_identifier.unwrap();
     let hardware = Arc::new(hardware_out.unwrap());
 
-    let (identifier, mut protocol_initializer) =
-      protocol_identifier_stage.identify(hardware.clone()).await?;
+    let (identifier, mut protocol_initializer) = protocol_identifier_stage
+      .identify(hardware.clone(), hardware_connector.specifier())
+      .await?;
 
     // Now we have an identifier. After this point, if anything fails, consider it a complete
     // connection failure, as identify may have already run commands on the device, and therefore

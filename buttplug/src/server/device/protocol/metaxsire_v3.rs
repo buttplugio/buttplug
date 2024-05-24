@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::server::device::configuration::ProtocolCommunicationSpecifier;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{

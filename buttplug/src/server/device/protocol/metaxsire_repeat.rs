@@ -7,6 +7,7 @@
 
 use crate::core::message::ActuatorType;
 use crate::core::message::ActuatorType::{Constrict, Rotate, Vibrate};
+use crate::server::device::configuration::ProtocolCommunicationSpecifier;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
