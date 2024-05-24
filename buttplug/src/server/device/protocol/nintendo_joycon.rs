@@ -1,3 +1,4 @@
+use crate::server::device::configuration::ProtocolCommunicationSpecifier;
 #[cfg(feature = "wasm")]
 use crate::util;
 use crate::{

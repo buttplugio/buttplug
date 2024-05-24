@@ -27,6 +27,7 @@ use ecb::cipher::block_padding::Pkcs7;
 use ecb::cipher::{BlockDecryptMut, BlockEncryptMut, KeyInit};
 use std::sync::Arc;
 
+use crate::server::device::configuration::ProtocolCommunicationSpecifier;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use regex::Regex;

@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::server::device::configuration::ProtocolCommunicationSpecifier;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -43,6 +44,7 @@ impl ProtocolIdentifier for VibratissimoIdentifier {
   async fn identify(
     &mut self,
     hardware: Arc<Hardware>,
+    _: ProtocolCommunicationSpecifier,
   ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     let result = hardware
       .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))

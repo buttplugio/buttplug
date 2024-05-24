@@ -5,7 +5,10 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::configuration::ProtocolDeviceAttributes;
+use crate::server::device::configuration::{
+  ProtocolCommunicationSpecifier,
+  ProtocolDeviceAttributes,
+};
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -51,7 +54,28 @@ impl ProtocolIdentifier for SatisfyerIdentifier {
   async fn identify(
     &mut self,
     hardware: Arc<Hardware>,
+    specifier: ProtocolCommunicationSpecifier,
   ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+    if let ProtocolCommunicationSpecifier::BluetoothLE(s) = specifier {
+      for md in s.manufacturer_data().iter() {
+        if let Some(data) = md.data() {
+          let device_identifier = format!(
+            "{}",
+            u32::from_be_bytes(data.to_vec().try_into().unwrap_or([0; 4]))
+          );
+          info!(
+            "Satisfyer Device Identifier (from advertisement): {:?} {}",
+            data, device_identifier
+          );
+
+          return Ok((
+            UserDeviceIdentifier::new(hardware.address(), "satisfyer", &Some(device_identifier)),
+            Box::new(SatisfyerInitializer::default()),
+          ));
+        }
+      }
+    }
+
     let result = hardware
       .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
       .await?;
@@ -60,7 +84,7 @@ impl ProtocolIdentifier for SatisfyerIdentifier {
       u32::from_be_bytes(result.data().to_vec().try_into().unwrap_or([0; 4]))
     );
     info!(
-      "Satisfyer Device Identifier: {:?} {}",
+      "Satisfyer Device Identifier (from RxBLEModel): {:?} {}",
       result.data(),
       device_identifier
     );

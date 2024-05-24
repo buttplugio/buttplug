@@ -6,7 +6,10 @@
 // for full license information.
 
 use crate::core::message::ActuatorType;
-use crate::server::device::configuration::ProtocolDeviceAttributes;
+use crate::server::device::configuration::{
+  ProtocolCommunicationSpecifier,
+  ProtocolDeviceAttributes,
+};
 use crate::server::device::hardware::Hardware;
 use crate::server::device::protocol::ProtocolInitializer;
 use crate::{

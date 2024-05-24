@@ -8,7 +8,10 @@
 use self::handyplug::Ping;
 
 use super::fleshlight_launch_helper;
-use crate::server::device::configuration::ProtocolDeviceAttributes;
+use crate::server::device::configuration::{
+  ProtocolCommunicationSpecifier,
+  ProtocolDeviceAttributes,
+};
 use crate::{
   core::{
     errors::ButtplugDeviceError,

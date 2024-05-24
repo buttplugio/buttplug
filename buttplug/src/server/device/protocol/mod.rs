@@ -597,6 +597,7 @@ pub trait ProtocolIdentifier: Sync + Send {
   async fn identify(
     &mut self,
     hardware: Arc<Hardware>,
+    specifier: ProtocolCommunicationSpecifier,
   ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError>;
 }
 
@@ -628,6 +629,7 @@ impl ProtocolIdentifier for GenericProtocolIdentifier {
   async fn identify(
     &mut self,
     hardware: Arc<Hardware>,
+    _: ProtocolCommunicationSpecifier,
   ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     let device_identifier = UserDeviceIdentifier::new(
       hardware.address(),
@@ -952,6 +954,7 @@ macro_rules! generic_protocol_initializer_setup {
         async fn identify(
           &mut self,
           hardware: Arc<Hardware>,
+          _: ProtocolCommunicationSpecifier,
         ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
           Ok((UserDeviceIdentifier::new(hardware.address(), $protocol_identifier, &Some(hardware.name().to_owned())), Box::new([< $protocol_name Initializer >]::default())))
         }
