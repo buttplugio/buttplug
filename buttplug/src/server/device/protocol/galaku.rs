@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use async_trait::async_trait;
 use std::sync::Arc;
 
 use futures_util::future::BoxFuture;
@@ -12,6 +13,7 @@ use futures_util::{future, FutureExt};
 
 use crate::core::message;
 use crate::core::message::{
+  ActuatorType,
   ButtplugDeviceMessage,
   ButtplugMessage,
   ButtplugServerMessage,
@@ -21,17 +23,26 @@ use crate::core::message::{
   SensorType,
   SensorUnsubscribeCmd,
 };
-use crate::server::device::hardware::{
-  Hardware,
-  HardwareEvent,
-  HardwareSubscribeCmd,
-  HardwareUnsubscribeCmd,
-};
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
+  generic_protocol_initializer_setup,
   server::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+    configuration::ProtocolDeviceAttributes,
+    configuration::UserDeviceIdentifier,
+    hardware::{
+      Hardware,
+      HardwareCommand,
+      HardwareEvent,
+      HardwareSubscribeCmd,
+      HardwareUnsubscribeCmd,
+      HardwareWriteCmd,
+    },
+    protocol::{
+      ProtocolCommunicationSpecifier,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+    },
   },
 };
 
@@ -91,14 +102,39 @@ fn read_value(data: Vec<u8>) -> u32 {
   }
 }
 
-generic_protocol_setup!(Galaku, "galaku");
+generic_protocol_initializer_setup!(Galaku, "galaku");
 
 #[derive(Default)]
-pub struct Galaku {}
+pub struct GalakuInitializer {}
+
+#[async_trait]
+impl ProtocolInitializer for GalakuInitializer {
+  async fn initialize(
+    &mut self,
+    hardware: Arc<Hardware>,
+    _: &ProtocolDeviceAttributes,
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
+    let mut protocol = Galaku::default();
+    protocol.is_caiping_pump_device = false;
+    if hardware.name() == "AC695X_1(BLE)" {
+      protocol.is_caiping_pump_device = true;
+    }
+    Ok(Arc::new(protocol))
+  }
+}
+
+#[derive(Default)]
+pub struct Galaku {
+  is_caiping_pump_device: bool,
+}
 
 impl ProtocolHandler for Galaku {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
+  fn needs_full_command_set(&self) -> bool {
+    true
   }
 
   fn handle_scalar_vibrate_cmd(
@@ -113,6 +149,57 @@ impl ProtocolHandler for Galaku {
       false,
     )
     .into()])
+  }
+
+  fn handle_scalar_cmd(
+    &self,
+    commands: &[Option<(ActuatorType, u32)>],
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    if commands.len() == 1 {
+      if let Some(cmd) = commands[0] {
+        if self.is_caiping_pump_device {
+          let data: Vec<u8> = vec![
+            0xAA,
+            1,
+            10,
+            3,
+            cmd.1 as u8,
+            if cmd.1 == 0 { 0 } else { 1 },
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+          ];
+          return Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()]);
+        } else {
+          let data: Vec<u32> = vec![90, 0, 0, 1, 49, cmd.1, 0, 0, 0, 0];
+          return Ok(vec![HardwareWriteCmd::new(
+            Endpoint::Tx,
+            send_bytes(data),
+            false,
+          )
+          .into()]);
+        }
+      }
+    } else {
+      let cmd0 = commands[0].unwrap_or((ActuatorType::Vibrate, 0));
+      let cmd1 = commands[1].unwrap_or((ActuatorType::Vibrate, 0));
+
+      let data: Vec<u32> = vec![90, 0, 0, 1, 64, 3, cmd0.1, cmd1.1, 0, 0];
+      return Ok(vec![HardwareWriteCmd::new(
+        Endpoint::Tx,
+        send_bytes(data),
+        false,
+      )
+      .into()]);
+    }
+    Ok(vec![])
   }
 
   fn handle_sensor_subscribe_cmd(

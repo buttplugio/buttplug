@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 3,
-    "minor": 1
+    "minor": 2
   },
   "protocols": {
     "lovense": {
@@ -10365,11 +10365,26 @@
           }
         ]
       },
+      "configurations": [
+        {
+          "identifier": [
+            "TAY001"
+          ],
+          "name": "metaXsire Tay 1"
+        },
+        {
+          "identifier": [
+            "TAY009"
+          ],
+          "name": "metaXsire Tay 9"
+        }
+      ],
       "communication": [
         {
           "btle": {
             "names": [
-              "TAY001"
+              "TAY001",
+              "TAY009"
             ],
             "services": {
               "0000fff0-0000-1000-8000-00805f9b34fb": {
@@ -10560,57 +10575,2175 @@
           }
         ]
       },
+      "configurations": [
+        {
+          "identifier": [
+            "V415"
+          ],
+          "name": "Galaku Nebula"
+        },
+        {
+          "identifier": [
+            "GX85"
+          ],
+          "name": "Galaku Shana"
+        },
+        {
+          "identifier": [
+            "GX07"
+          ],
+          "name": "Galaku Miya"
+        },
+        {
+          "identifier": [
+            "GX17"
+          ],
+          "name": "Galaku Capsule lipstick"
+        },
+        {
+          "identifier": [
+            "GX21"
+          ],
+          "name": "Galaku Vitality Cat"
+        },
+        {
+          "identifier": [
+            "GX22"
+          ],
+          "name": "Galaku Phantom X"
+        },
+        {
+          "identifier": [
+            "GX16"
+          ],
+          "name": "Galaku Vitality Strawberry"
+        },
+        {
+          "identifier": [
+            "GX29"
+          ],
+          "name": "Galaku Little Magic Box"
+        },
+        {
+          "identifier": [
+            "GX23"
+          ],
+          "name": "Galaku Little Whale"
+        },
+        {
+          "identifier": [
+            "GX25"
+          ],
+          "name": "Galaku Happy Vibrator"
+        },
+        {
+          "identifier": [
+            "GX26"
+          ],
+          "name": "Galaku Xiaobao Beans"
+        },
+        {
+          "identifier": [
+            "GK03"
+          ],
+          "name": "Galaku Capsule Vibrator"
+        },
+        {
+          "identifier": [
+            "GX39"
+          ],
+          "name": "Galaku Ice cone miniAV stick"
+        },
+        {
+          "identifier": [
+            "G321"
+          ],
+          "name": "Galaku mini ice cream cone"
+        },
+        {
+          "identifier": [
+            "G304"
+          ],
+          "name": "Galaku Shia's Collar"
+        },
+        {
+          "identifier": [
+            "G336"
+          ],
+          "name": "Galaku The Second Generation of Vitality Bird"
+        },
+        {
+          "identifier": [
+            "G331"
+          ],
+          "name": "Galaku Octopus glans massager"
+        },
+        {
+          "identifier": [
+            "G326"
+          ],
+          "name": "Galaku Alice"
+        },
+        {
+          "identifier": [
+            "G335"
+          ],
+          "name": "Galaku Unicorn Butt Plug"
+        },
+        {
+          "identifier": [
+            "G341"
+          ],
+          "name": "Galaku Ace"
+        },
+        {
+          "identifier": [
+            "G355"
+          ],
+          "name": "Galaku Little cute turtle"
+        },
+        {
+          "identifier": [
+            "G349"
+          ],
+          "name": "Galaku Little Bullet"
+        },
+        {
+          "identifier": [
+            "G407"
+          ],
+          "name": "Galaku Joy Vibrator"
+        },
+        {
+          "identifier": [
+            "G204"
+          ],
+          "name": "Galaku Bowling"
+        },
+        {
+          "identifier": [
+            "G171"
+          ],
+          "name": "Galaku Mixin Controller"
+        },
+        {
+          "identifier": [
+            "G12D"
+          ],
+          "name": "Galaku Hua Chao Brush"
+        },
+        {
+          "identifier": [
+            "G123"
+          ],
+          "name": "Galaku 花sai"
+        },
+        {
+          "identifier": [
+            "G23A"
+          ],
+          "name": "Galaku Dream Vibration"
+        },
+        {
+          "identifier": [
+            "G336"
+          ],
+          "name": "Galaku The Second Generation of Vitality Bird"
+        },
+        {
+          "identifier": [
+            "G23A"
+          ],
+          "name": "Galaku Dream Vibration"
+        },
+        {
+          "identifier": [
+            "A073"
+          ],
+          "name": "Galaku Joy Vibrator"
+        },
+        {
+          "identifier": [
+            "GLMT"
+          ],
+          "name": "Galaku Rogue Rabbit"
+        },
+        {
+          "identifier": [
+            "G901"
+          ],
+          "name": "Galaku Suck the vibrator"
+        },
+        {
+          "identifier": [
+            "G912"
+          ],
+          "name": "Galaku Donut"
+        },
+        {
+          "identifier": [
+            "G901"
+          ],
+          "name": "Galaku Suck the vibrator"
+        },
+        {
+          "identifier": [
+            "G20B"
+          ],
+          "name": "Galaku Ballet Vibrator"
+        },
+        {
+          "identifier": [
+            "K112"
+          ],
+          "name": "Galaku Donut"
+        },
+        {
+          "identifier": [
+            "G202"
+          ],
+          "name": "Galaku Flirting Pen"
+        },
+        {
+          "identifier": [
+            "K118"
+          ],
+          "name": "Galaku Ball vibrator"
+        },
+        {
+          "identifier": [
+            "K107"
+          ],
+          "name": "Galaku Cyberpunk Airplane Cup"
+        },
+        {
+          "identifier": [
+            "G203"
+          ],
+          "name": "Galaku Vitality Cute Pet"
+        },
+        {
+          "identifier": [
+            "TXHL"
+          ],
+          "name": "Galaku Little gourd vibrating egg"
+        },
+        {
+          "identifier": [
+            "TXMM"
+          ],
+          "name": "Galaku little kitten"
+        },
+        {
+          "identifier": [
+            "TXKL"
+          ],
+          "name": "Galaku Little Dinosaur"
+        },
+        {
+          "identifier": [
+            "K108"
+          ],
+          "name": "Galaku Bell sucking"
+        },
+        {
+          "identifier": [
+            "K109"
+          ],
+          "name": "Galaku Ring vibration"
+        },
+        {
+          "identifier": [
+            "KWL2"
+          ],
+          "name": "Galaku Erection Booster"
+        },
+        {
+          "identifier": [
+            "TFHL"
+          ],
+          "name": "Galaku Gyoyo-G (meaning Yue-little gourd)"
+        },
+        {
+          "identifier": [
+            "TFMM"
+          ],
+          "name": "Galaku Gyoyo (meaning joy)"
+        },
+        {
+          "identifier": [
+            "TFKL"
+          ],
+          "name": "Galaku Gyoyo (meaning joy)"
+        },
+        {
+          "identifier": [
+            "K120"
+          ],
+          "name": "Galaku Pinky stick"
+        },
+        {
+          "identifier": [
+            "K12A"
+          ],
+          "name": "Galaku Little Turtle Stick"
+        },
+        {
+          "identifier": [
+            "K12C"
+          ],
+          "name": "Galaku Xiao Xian Wan"
+        },
+        {
+          "identifier": [
+            "LL18"
+          ],
+          "name": "Galaku Mitang"
+        },
+        {
+          "identifier": [
+            "G317"
+          ],
+          "name": "Galaku Zaku Aircraft Cup",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G312"
+          ],
+          "name": "Galaku Mecha-Original Owner's Aircraft Cup",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "description": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G302"
+          ],
+          "name": "Galaku Little Devil",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G320"
+          ],
+          "name": "Galaku Athena",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "description": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G314"
+          ],
+          "name": "Galaku Vitality Octopus II",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G228"
+          ],
+          "name": "Galaku Little Dolphin",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G315"
+          ],
+          "name": "Galaku Unicorn",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G307"
+          ],
+          "name": "Galaku Queen Bee Gun",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "description": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "K311"
+          ],
+          "name": "Galaku Freya",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G339"
+          ],
+          "name": "Galaku Rhino Prostate Massager",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G354"
+          ],
+          "name": "Galaku Double-A Aircraft Cup",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G12B"
+          ],
+          "name": "Galaku Flower Season",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G29C"
+          ],
+          "name": "Galaku Little Rubik's Cube",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G29D"
+          ],
+          "name": "Galaku Small powder cake",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "GKML"
+          ],
+          "name": "Galaku Milly",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G348"
+          ],
+          "name": "Galaku Rhinoceros Back Court",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G913"
+          ],
+          "name": "Galaku Unicorn II",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G213"
+          ],
+          "name": "Galaku Phantom",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "TFF1"
+          ],
+          "name": "Galaku F1 Aircraft Cup",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "description": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G310"
+          ],
+          "name": "Galaku Scepter AV Stick",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "K113"
+          ],
+          "name": "Galaku Unicorn II",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G228"
+          ],
+          "name": "Galaku Little Dolphin",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G310"
+          ],
+          "name": "Galaku Scepter AV Stick",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "TFF1"
+          ],
+          "name": "Galaku F1 Aircraft Cup",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "D358"
+          ],
+          "name": "Galaku Classic vibration-absorbing AV state",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G322"
+          ],
+          "name": "Galaku Unicorn",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "D402"
+          ],
+          "name": "Galaku New series of vibrators",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G40A"
+          ],
+          "name": "Galaku New series of vibrators",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G403"
+          ],
+          "name": "Galaku New series of vibrators",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "G43A"
+          ],
+          "name": "Galaku New series of vibrators",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "K12B"
+          ],
+          "name": "Galaku Little Turtle Stick",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "TFG1"
+          ],
+          "name": "Galaku Aurora Aircraft Cup",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Constrict",
+              "description": "Suction Pump",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "GK27"
+          ],
+          "name": "Galaku Cannon-GT",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "GK25"
+          ],
+          "name": "Galaku Phantom PLUS",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "AC695X_1(BLE)"
+          ],
+          "name": "Galaku Vision",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "GX33"
+          ],
+          "name": "Galaku Dimension No. 1",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "WSXK"
+          ],
+          "name": "Galaku Starry Sky CUP",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        }
+      ],
       "communication": [
         {
           "btle": {
             "names": [
-              "EJX-Para",
-              "GK03",
-              "GK10085",
-              "GS03",
-              "GS07",
-              "GS85",
-              "GS02",
-              "GS10",
-              "GS01",
-              "GS04",
-              "GS17",
-              "GS21",
-              "GS23",
-              "GS22",
-              "GS16",
-              "GS19",
-              "AK04",
-              "AS67",
-              "AS90",
-              "K020",
-              "GS25",
-              "GH28",
-              "GS28",
-              "LL18",
-              "GK23",
-              "GK27",
-              "G29B",
-              "GA23",
-              "L26H",
-              "GA25",
-              "GA26",
-              "GK22",
+              "V415",
               "GX85",
               "GX07",
               "GX17",
               "GX21",
-              "GX33",
               "GX22",
               "GX16",
               "GX29",
               "GX23",
-              "GX26",
-              "GX36",
-              "GX39",
               "GX25",
+              "GX26",
+              "GK03",
+              "GX39",
+              "G321",
+              "G304",
+              "G336",
+              "G331",
               "G326",
-              "G335"
+              "G335",
+              "G341",
+              "G355",
+              "G349",
+              "G407",
+              "G204",
+              "G171",
+              "G12D",
+              "G123",
+              "G23A",
+              "G336",
+              "G23A",
+              "A073",
+              "GLMT",
+              "G901",
+              "G912",
+              "G901",
+              "G20B",
+              "K112",
+              "G202",
+              "K118",
+              "K107",
+              "G203",
+              "TXHL",
+              "TXMM",
+              "TXKL",
+              "K108",
+              "K109",
+              "KWL2",
+              "TFHL",
+              "TFMM",
+              "TFKL",
+              "K120",
+              "K12A",
+              "K12C",
+              "LL18",
+              "G317",
+              "G312",
+              "G302",
+              "G320",
+              "G314",
+              "G228",
+              "G315",
+              "G307",
+              "K311",
+              "G339",
+              "G354",
+              "G12B",
+              "G29C",
+              "G29D",
+              "GKML",
+              "G348",
+              "G913",
+              "G213",
+              "TFF1",
+              "G310",
+              "K113",
+              "G228",
+              "G310",
+              "TFF1",
+              "D358",
+              "G322",
+              "D402",
+              "G40A",
+              "G403",
+              "G43A",
+              "K12B",
+              "TFG1",
+              "GK27",
+              "GK25",
+              "AC695X_1(BLE)",
+              "GX33",
+              "WSXK"
             ],
             "services": {
               "00001000-0000-1000-8000-00805f9b34fb": {
