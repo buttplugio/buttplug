@@ -5,6 +5,7 @@ on:
     branches:
       - dev
       - master
+      - protocol-work**
 
 concurrency:
   group: ${{ github.head_ref ||  github.ref }}
