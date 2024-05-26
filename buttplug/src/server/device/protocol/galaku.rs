@@ -38,7 +38,6 @@ use crate::{
       HardwareWriteCmd,
     },
     protocol::{
-      ProtocolCommunicationSpecifier,
       ProtocolHandler,
       ProtocolIdentifier,
       ProtocolInitializer,

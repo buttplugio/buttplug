@@ -1,7 +1,7 @@
 devices:
   - identifier: 
       name: "GX21"
-    expected_name: "Galaku Device"
+    expected_name: "Galaku Vitality Cat"
 device_commands:
   # Vibrate 0%
   - !Messages
