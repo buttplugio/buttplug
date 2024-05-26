@@ -7180,7 +7180,7 @@ protocols:
       - btle:
           names:
             # Type 0
-            - V415
+            # - V415 see galaku-pump
             - GX85
             - GX07
             - GX17
