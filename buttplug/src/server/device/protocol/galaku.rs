@@ -37,11 +37,7 @@ use crate::{
       HardwareUnsubscribeCmd,
       HardwareWriteCmd,
     },
-    protocol::{
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
-    },
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
 };
 

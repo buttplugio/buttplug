@@ -1,6 +1,6 @@
 version:
   major: 3
-  minor: 2
+  minor: 3
 protocols:
   lovense:
     defaults:
@@ -7797,6 +7797,9 @@ protocols:
           - J-Peacock
         name: JoyHub Peacock
       - identifier:
+          - J-Mace
+        name: JoyHub Mace
+      - identifier:
           - J-Petalwish2
         name: JoyHub Petalwish 2
         features:
@@ -7943,6 +7946,7 @@ protocols:
             - J-BlackBull
             - J-Peacock
             - J-Mariner
+            - J-Mace
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
@@ -8346,6 +8350,50 @@ protocols:
                 - 255
               messages:
                 - ScalarCmd
+      - identifier:
+          - J-Virtuoso2
+        name: JoyHub Virtuoso 2
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Rotate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Constrict
+            description: Suction
+            actuator:
+              step-range:
+                - 0
+                - 3
+              messages:
+                - ScalarCmd
+      - identifier:
+          - J-Dyllis
+        name: JoyHub Dyllis
+        features:
+          - feature-type: Oscillate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
@@ -8368,6 +8416,8 @@ protocols:
             - J-ROSEBUD
             - J-Morningbuds2
             - J-Rhythmic4
+            - J-Virtuoso2
+            - J-Dyllis
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
@@ -8394,6 +8444,43 @@ protocols:
           names:
             - J-Ringstar
             - J-RapidTwist2
+          services:
+            0000ffa0-0000-1000-8000-00805f9b34fb:
+              tx: 0000ffa1-0000-1000-8000-00805f9b34fb
+  joyhub-v4:
+    defaults:
+      name: JoyHub Device
+      features:
+        - feature-type: Vibrate
+          actuator:
+            step-range:
+              - 0
+              - 255
+            messages:
+              - ScalarCmd
+        - feature-type: Rotate
+          actuator:
+            step-range:
+              - 0
+              - 255
+            messages:
+              - ScalarCmd
+        - feature-type: Constrict
+          description: Suction
+          actuator:
+            step-range:
+              - 0
+              - 4
+            messages:
+              - ScalarCmd
+    configurations:
+      - identifier:
+          - J-RoseLin
+        name: JoyHub RoseLin
+    communication:
+      - btle:
+          names:
+            - J-RoseLin
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
