@@ -13645,6 +13645,12 @@
         },
         {
           "identifier": [
+            "J-Mace"
+          ],
+          "name": "JoyHub Mace"
+        },
+        {
+          "identifier": [
             "J-Petalwish2"
           ],
           "name": "JoyHub Petalwish 2",
@@ -13885,7 +13891,8 @@
               "J-Rainbow",
               "J-BlackBull",
               "J-Peacock",
-              "J-Mariner"
+              "J-Mariner",
+              "J-Mace"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -14588,6 +14595,83 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-Virtuoso2"
+          ],
+          "name": "JoyHub Virtuoso 2",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Rotate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Constrict",
+              "description": "Suction",
+              "actuator": {
+                "step-range": [
+                  0,
+                  3
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Dyllis"
+          ],
+          "name": "JoyHub Dyllis",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -14612,7 +14696,9 @@
               "J-Euphoric2",
               "J-ROSEBUD",
               "J-Morningbuds2",
-              "J-Rhythmic4"
+              "J-Rhythmic4",
+              "J-Virtuoso2",
+              "J-Dyllis"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -14661,6 +14747,72 @@
             "names": [
               "J-Ringstar",
               "J-RapidTwist2"
+            ],
+            "services": {
+              "0000ffa0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "joyhub-v4": {
+      "defaults": {
+        "name": "JoyHub Device",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Rotate",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Constrict",
+            "description": "Suction",
+            "actuator": {
+              "step-range": [
+                0,
+                4
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "J-RoseLin"
+          ],
+          "name": "JoyHub RoseLin"
+        }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "J-RoseLin"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
