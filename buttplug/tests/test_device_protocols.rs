@@ -72,6 +72,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_magic_motion_4_nyx.yaml" ; "MagicMotion Protocol 4 - Nyx")]
 #[test_case("test_hgod_protocol.yaml" ; "Hgod Protocol")]
 #[test_case("test_tryfun_protocol.yaml" ; "TryFun Protocol")]
+#[test_case("test_tryfun_surge.yaml" ; "TryFun Protocol - Surge Pro")]
 #[test_case("test_metaxsire_rex.yaml" ; "metaXsire Protocol - Rex")]
 #[test_case("test_metaxsire_olis.yaml" ; "metaXsire Protocol - Olis")]
 #[test_case("test_metaxsire_cali.yaml" ; "metaXsire Protocol - Cali")]
@@ -166,6 +167,7 @@ async fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_magic_motion_4_nyx.yaml" ; "MagicMotion Protocol 4 - Nyx")]
 #[test_case("test_hgod_protocol.yaml" ; "Hgod Protocol")]
 #[test_case("test_tryfun_protocol.yaml" ; "TryFun Protocol")]
+#[test_case("test_tryfun_surge.yaml" ; "TryFun Protocol - Surge Pro")]
 #[test_case("test_metaxsire_rex.yaml" ; "metaXsire Protocol - Rex")]
 #[test_case("test_metaxsire_olis.yaml" ; "metaXsire Protocol - Olis")]
 #[test_case("test_metaxsire_cali.yaml" ; "metaXsire Protocol - Cali")]
@@ -265,6 +267,7 @@ async fn test_device_protocols_json_v3(test_file: &str) {
 #[test_case("test_leten_protocol.yaml" ; "Leten Protocol")]
 #[test_case("test_motorbunny_protocol.yaml" ; "Motorbunny Protocol")]
 #[test_case("test_activejoy_protocol.yaml" ; "ActiveJoy Protocol")]
+#[test_case("test_tryfun_surge.yaml" ; "TryFun Protocol - Surge Pro")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v2(test_file: &str) {
   util::device_test::client::client_v2::run_embedded_test_case(&load_test_case(test_file).await)
@@ -332,6 +335,7 @@ async fn test_device_protocols_embedded_v2(test_file: &str) {
 #[test_case("test_leten_protocol.yaml" ; "Leten Protocol")]
 #[test_case("test_motorbunny_protocol.yaml" ; "Motorbunny Protocol")]
 #[test_case("test_activejoy_protocol.yaml" ; "ActiveJoy Protocol")]
+#[test_case("test_tryfun_surge.yaml" ; "TryFun Protocol - Surge Pro")]
 #[tokio::test]
 async fn test_device_protocols_json_v2(test_file: &str) {
   util::device_test::client::client_v2::run_json_test_case(&load_test_case(test_file).await).await;

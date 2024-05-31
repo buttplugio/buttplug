@@ -1,0 +1,43 @@
+devices:
+  - identifier: 
+      name: "TF-SPRAY"
+    expected_name: "TryFun Surge Pro"
+device_commands:
+  # Commands
+  - !Messages
+    device_index: 0
+    messages:
+      - !Vibrate
+        - Index: 0
+          Speed: 0.5
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x00, 0x02, 0x00, 0x05, 0x02, 0x02, 0x01, 0x00, 0xfb]
+        write_with_response: true
+  - !Messages
+    device_index: 0
+    messages:
+      - !Vibrate
+        - Index: 0
+          Speed: 1.0
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x00, 0x02, 0x00, 0x05, 0x02, 0x04, 0x01, 0x00, 0xf9]
+        write_with_response: true
+  - !Messages
+    device_index: 0
+    messages:
+      - !Stop
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x00, 0x02, 0x00, 0x05, 0x01, 0x02, 0x01, 0x01, 0xfc]
+        write_with_response: true
