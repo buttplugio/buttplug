@@ -59,4 +59,27 @@ impl ProtocolHandler for TryFun {
 
     Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, true).into()])
   }
+
+  fn handle_scalar_vibrate_cmd(
+    &self,
+    _index: u32,
+    scalar: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![
+        0x00,
+        0x02,
+        0x00,
+        0x05,
+        if scalar == 0 { 1u8 } else { 2u8 },
+        if scalar == 0 { 2u8 } else { scalar as u8 },
+        0x01,
+        if scalar == 0 { 1u8 } else { 0u8 },
+        0xfd - (scalar as u8).max(1),
+      ],
+      true,
+    )
+    .into()])
+  }
 }

@@ -5734,13 +5734,28 @@ protocols:
               - 9
             messages:
               - ScalarCmd
+    configurations:
+      - identifier:
+          - TF-SPRAY
+        name: TryFun Surge Pro
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 4
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
             - TRYFUN-ONE
+            - TF-SPRAY
           services:
             0000ff10-0000-1000-8000-00805f9b34fb:
               tx: 0000fff1-0000-1000-8000-00805f9b34fb
+            0000ffac-0000-1000-8000-00805f9b34fb:
+              tx: 0000ffb5-0000-1000-8000-00805f9b34fb
   metaxsire:
     defaults:
       name: metaXsire Device
