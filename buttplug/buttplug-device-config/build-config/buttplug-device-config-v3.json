@@ -5643,6 +5643,40 @@
         }
       ]
     },
+    "svakom-dice": {
+      "defaults": {
+        "name": "Zemalia Dice for Love",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "ZhiAi"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
     "svakom-dt250a": {
       "defaults": {
         "name": "Coleur Dor DT250A",
