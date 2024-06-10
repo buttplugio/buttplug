@@ -98,6 +98,7 @@ aes = { version = "0.8.4" }
 ecb = { version = "0.1.2", features = ["std"] }
 rand = { version = "0.8.5" }
 sha2 = { version = "0.10.8", features = ["std"] }
+minicbor = { version = "=0.24.0", features = ["std", "derive"] }
 
 [dev-dependencies]
 serde_yaml = "0.9.34"

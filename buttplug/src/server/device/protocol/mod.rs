@@ -25,6 +25,7 @@ pub mod fredorch;
 pub mod fredorch_rotary;
 pub mod galaku;
 pub mod galaku_pump;
+pub mod generic_btle;
 pub mod hgod;
 pub mod hismith;
 pub mod hismith_mini;
@@ -133,7 +134,7 @@ use crate::{
     },
   },
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceIdentifier},
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd},
   },
 };
@@ -538,6 +539,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     kgoal_boost::setup::KGoalBoostIdentifierFactory::default(),
   );
+  add_to_protocol_map(
+    &mut map,
+    generic_btle::setup::GenericBtleIdentifierFactory::default(),
+  );
   map
 }
 
@@ -576,6 +581,13 @@ pub trait ProtocolIdentifier: Sync + Send {
     &mut self,
     hardware: Arc<Hardware>,
   ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError>;
+
+  async fn define(
+    &mut self,
+    _hardware: Arc<Hardware>,
+    _identifier: &UserDeviceIdentifier,
+    _raw_endpoints: &[Endpoint],
+  ) -> Result<Option<UserDeviceDefinition>, ButtplugDeviceError> { Ok(None) }
 }
 
 #[async_trait]

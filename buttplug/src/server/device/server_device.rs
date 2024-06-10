@@ -163,11 +163,18 @@ impl ServerDevice {
     // put it in an unknown state if anything fails.
 
     // Check in the DeviceConfigurationManager to make sure we have attributes for this device.
-    let attrs = if let Some(attrs) =
-      device_config_manager.device_definition(&identifier, &hardware.endpoints())
-    {
-      attrs
-    } else {
+    let mut attrs = device_config_manager.device_definition(&identifier, &hardware.endpoints());
+
+    if attrs.is_none() {
+      attrs = match protocol_identifier_stage.define(hardware.clone(), &identifier, &hardware.endpoints()).await {
+        Ok(attrs) => attrs,
+        Err(err) => {
+          return Err(err);
+        }
+      }
+    }
+
+    let Some(attrs) = attrs else {
       return Err(ButtplugDeviceError::DeviceConfigurationError(format!(
         "No protocols with viable protocol attributes for hardware {:?}.",
         identifier
