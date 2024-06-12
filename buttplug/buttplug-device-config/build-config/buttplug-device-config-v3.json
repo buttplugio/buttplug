@@ -5859,6 +5859,12 @@
             "SWK-SX067-B"
           ],
           "name": "Momonii Agatha"
+        },
+        {
+          "identifier": [
+            "QH-HX029A-B"
+          ],
+          "name": "Coleur Dor HX029A"
         }
       ],
       "communication": [
@@ -5871,7 +5877,8 @@
               "SX033APP",
               "BX288A",
               "QH-SX045A-B",
-              "SWK-SX067-B"
+              "SWK-SX067-B",
+              "QH-HX029A-B"
             ],
             "services": {
               "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -14732,6 +14739,38 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-Flamewing"
+          ],
+          "name": "JoyHub PhoenixGP",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -14758,7 +14797,8 @@
               "J-Morningbuds2",
               "J-Rhythmic4",
               "J-Virtuoso2",
-              "J-Dyllis"
+              "J-Dyllis",
+              "J-Flamewing"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -14873,6 +14913,60 @@
           "btle": {
             "names": [
               "J-RoseLin"
+            ],
+            "services": {
+              "0000ffa0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "joyhub-v5": {
+      "defaults": {
+        "name": "JoyHub Device",
+        "features": [
+          {
+            "feature-type": "Rotate",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Constrict",
+            "description": "Suction",
+            "actuator": {
+              "step-range": [
+                0,
+                1
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "J-Virtuoso"
+          ],
+          "name": "JoyHub Virtuoso"
+        }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "J-Virtuoso"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
