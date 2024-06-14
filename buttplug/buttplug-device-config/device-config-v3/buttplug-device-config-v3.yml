@@ -7838,6 +7838,9 @@ protocols:
           - J-Mace
         name: JoyHub Mace
       - identifier:
+          - J-Tarian
+        name: JoyHub Tarian
+      - identifier:
           - J-Petalwish2
         name: JoyHub Petalwish 2
         features:
@@ -7964,6 +7967,25 @@ protocols:
                 - 2
               messages:
                 - ScalarCmd
+      - identifier:
+          - J-MarsLion
+        name: JoyHub MarsLion
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Constrict
+            description: Air Pump
+            actuator:
+              step-range:
+                - 0
+                - 4
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
@@ -7985,6 +8007,8 @@ protocols:
             - J-Peacock
             - J-Mariner
             - J-Mace
+            - J-MarsLion
+            - J-Tarian
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
