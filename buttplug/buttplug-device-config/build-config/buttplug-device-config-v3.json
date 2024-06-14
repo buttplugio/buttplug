@@ -13718,6 +13718,12 @@
         },
         {
           "identifier": [
+            "J-Tarian"
+          ],
+          "name": "JoyHub Tarian"
+        },
+        {
+          "identifier": [
             "J-Petalwish2"
           ],
           "name": "JoyHub Petalwish 2",
@@ -13936,6 +13942,39 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-MarsLion"
+          ],
+          "name": "JoyHub MarsLion",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Constrict",
+              "description": "Air Pump",
+              "actuator": {
+                "step-range": [
+                  0,
+                  4
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -13959,7 +13998,9 @@
               "J-BlackBull",
               "J-Peacock",
               "J-Mariner",
-              "J-Mace"
+              "J-Mace",
+              "J-MarsLion",
+              "J-Tarian"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
