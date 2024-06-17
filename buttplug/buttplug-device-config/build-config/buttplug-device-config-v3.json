@@ -14812,6 +14812,38 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-VelvetRabbit"
+          ],
+          "name": "JoyHub Velvet Rabbit",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -14839,7 +14871,8 @@
               "J-Rhythmic4",
               "J-Virtuoso2",
               "J-Dyllis",
-              "J-Flamewing"
+              "J-Flamewing",
+              "J-VelvetRabbit"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
