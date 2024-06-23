@@ -8492,6 +8492,42 @@ protocols:
                 - 255
               messages:
                 - ScalarCmd
+      - identifier:
+          - J-VividPulse
+        name: JoyHub Vivid Pulse
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Oscillate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+      - identifier:
+          - J-VioletVine
+        name: JoyHub Violet Vine
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
@@ -8518,6 +8554,8 @@ protocols:
             - J-Dyllis
             - J-Flamewing
             - J-VelvetRabbit
+            - J-VividPulse
+            - J-VioletVine
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
