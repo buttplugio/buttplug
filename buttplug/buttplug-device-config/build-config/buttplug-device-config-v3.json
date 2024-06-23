@@ -14844,6 +14844,70 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-VividPulse"
+          ],
+          "name": "JoyHub Vivid Pulse",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-VioletVine"
+          ],
+          "name": "JoyHub Violet Vine",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -14872,7 +14936,9 @@
               "J-Virtuoso2",
               "J-Dyllis",
               "J-Flamewing",
-              "J-VelvetRabbit"
+              "J-VelvetRabbit",
+              "J-VividPulse",
+              "J-VioletVine"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
