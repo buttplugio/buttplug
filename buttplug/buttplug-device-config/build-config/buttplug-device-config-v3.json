@@ -15348,6 +15348,40 @@
           }
         }
       ]
+    },
+    "cupido": {
+      "defaults": {
+        "name": "Cupido Device",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "MY2607-BLE-V1.0"
+            ],
+            "services": {
+              "0000f0b0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000f0b1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000f0b2-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }

@@ -20,6 +20,7 @@ pub mod ankni;
 pub mod buttplug_passthru;
 pub mod cachito;
 pub mod cowgirl;
+pub mod cupido;
 pub mod foreo;
 pub mod fox;
 pub mod fredorch;
@@ -222,6 +223,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     cowgirl::setup::CowgirlIdentifierFactory::default(),
   );
+  add_to_protocol_map(&mut map, cupido::setup::CupidoIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     lovense::setup::LovenseIdentifierFactory::default(),
