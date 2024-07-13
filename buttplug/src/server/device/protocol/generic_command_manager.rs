@@ -215,6 +215,7 @@ impl GenericCommandManager {
 
   // Test method
   #[cfg(test)]
+  #[allow(dead_code)]
   pub(super) fn scalars(&self) -> Vec<Option<(ActuatorType, u32)>> {
     self
       .scalars
