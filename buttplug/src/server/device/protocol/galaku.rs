@@ -27,7 +27,10 @@ use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_initializer_setup,
   server::device::{
-    configuration::ProtocolDeviceAttributes,
+    configuration::{
+      ProtocolCommunicationSpecifier,
+      ProtocolDeviceAttributes,
+    },
     configuration::UserDeviceIdentifier,
     hardware::{
       Hardware,
