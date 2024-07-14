@@ -5,122 +5,182 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
+use crate::
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     message::{
-      ActuatorType,
-      ButtplugDeviceCommandMessageUnion,
-      LinearCmd,
-      RotateCmd,
-      RotationSubcommand,
-      ScalarCmd,
-      ScalarSubcommand,
+      ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugDeviceCommandMessageUnion, DeviceFeature, DeviceFeatureActuator, RotateCmd, RotationSubcommand, ScalarCmd, ScalarSubcommand
     },
-  },
-  server::device::configuration::{ProtocolDeviceAttributes, ServerGenericDeviceMessageAttributes},
-};
+  };
 use getset::Getters;
 use std::{
-  ops::RangeInclusive,
-  sync::atomic::{AtomicBool, AtomicU32, Ordering::SeqCst},
+  collections::HashSet, sync::atomic::{AtomicBool, AtomicU32, Ordering::Relaxed}
 };
 
+// As of the last rewrite of the command manager, we're currently only tracking values of scalar and
+// rotation commands. We can just use the rotation (AtomicU32, AtomicBool) pair for storage, and
+// ignore the direction bool for Scalars.
 #[derive(Getters)]
 #[getset(get = "pub")]
-struct ScalarGenericCommand {
-  actuator: ActuatorType,
-  step_range: RangeInclusive<u32>,
-  value: AtomicU32,
+struct FeatureStatus {
+  actuator_type: ActuatorType,
+  actuator: DeviceFeatureActuator,
+  sent: AtomicBool,
+  value: (AtomicU32, AtomicBool)
 }
 
-impl ScalarGenericCommand {
-  pub fn new(attributes: &ServerGenericDeviceMessageAttributes) -> Self {
+impl FeatureStatus {
+  pub fn new(actuator_type: &ActuatorType, actuator: &DeviceFeatureActuator) -> Self {
     Self {
-      actuator: *attributes.actuator_type(),
-      step_range: attributes.step_limit().clone(),
-      value: AtomicU32::new(0),
+      actuator_type: *actuator_type,
+      actuator: actuator.clone(),
+      sent: AtomicBool::new(false),
+      value: (AtomicU32::new(0), AtomicBool::new(false))
     }
+  }
+
+  pub fn current(&self) -> (ActuatorType, (u32, bool)) {
+    (self.actuator_type, (self.value.0.load(Relaxed), self.value.1.load(Relaxed)))
+  }
+
+  pub fn messages(&self) -> &HashSet<ButtplugActuatorFeatureMessageType> {
+    self.actuator.messages()
+  }
+
+  pub fn update(&self, value: &(f64, bool)) -> Option<(u32, bool)> {
+    let mut result = None;
+    let range_start = *self.actuator.step_range().start();
+    let range = self.actuator.step_range().end() - range_start;
+    let scalar_modifier = value.0 * range as f64;
+    let scalar = if scalar_modifier < 0.0001 {
+      0
+    } else {
+      // When calculating speeds, round up. This follows how we calculated
+      // things in buttplug-js and buttplug-csharp, so it's more for history
+      // than anything, but it's what users will expect.
+      (scalar_modifier + range_start as f64).ceil() as u32
+    };
+    trace!(
+      "{:?} {} {} {}",
+      self.actuator.step_range(),
+      range,
+      scalar_modifier,
+      scalar
+    );
+    // If we've already sent commands, we don't want to send them again,
+    // because some of our communication busses are REALLY slow. Make sure
+    // these values get None in our return vector.
+    let current = self.value.0.load(Relaxed);
+    let clockwise = self.value.1.load(Relaxed);
+    let sent = self.sent.load(Relaxed);
+    if !sent || scalar != current || clockwise != value.1 {
+      self.value.0.store(scalar, Relaxed);
+      self.value.1.store(value.1, Relaxed);
+      if !sent {
+        self.sent.store(true, Relaxed);
+      }
+      result = Some((scalar, value.1));
+    }
+    result
   }
 }
 
 // In order to make our lives easier, we make some assumptions about what's internally mutable in
-// the GenericCommandManager (GCM). Once the GCM is configured for a device, it won't change sizes,
+// the ActuatorCommandManager (ACM). Once the ACM is configured for a device, it won't change sizes,
 // because we don't support things like adding motors to devices randomly while Buttplug is running.
 // Therefore we know that we'll just be storing values like vibration/rotation speeds. We can assume
 // our storage of those can stay immutable (the vec sizes won't change) and make their internals
 // mutable. While this could be RefCell'd or whatever, they're also always atomic types (until the
 // horrible day some sex toy decides to use floats in its protocol), so we can just use atomics and
 // call it done.
-pub struct GenericCommandManager {
-  sent_scalar: AtomicBool,
-  sent_rotation: AtomicBool,
-  _sent_linear: bool,
-  scalars: Vec<ScalarGenericCommand>,
-  rotations: Vec<(AtomicU32, AtomicBool)>,
-  rotation_step_ranges: Vec<RangeInclusive<u32>>,
-  _linears: Vec<(u32, u32)>,
-  _linear_step_counts: Vec<u32>,
+pub struct ActuatorCommandManager {
+  feature_status: Vec<FeatureStatus>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
 
-impl GenericCommandManager {
-  pub fn new(attributes: &ProtocolDeviceAttributes) -> Self {
-    let mut scalars = vec![];
-    let mut rotations = vec![];
-    let mut rotation_step_ranges = vec![];
-    let mut linears = vec![];
-    let mut linear_step_counts = vec![];
-
+impl ActuatorCommandManager {
+  pub fn new(features: &Vec<DeviceFeature>) -> Self {
     let mut stop_commands = vec![];
 
-    if let Some(attrs) = attributes.message_attributes().scalar_cmd() {
-      let mut subcommands = vec![];
-      for (index, attr) in attrs.iter().enumerate() {
-        scalars.push(ScalarGenericCommand::new(attr));
-        subcommands.push(ScalarSubcommand::new(
-          index as u32,
-          0.0,
-          *attr.actuator_type(),
-        ));
+    let mut statuses = vec!();
+    let mut scalar_subcommands = vec![];
+    let mut rotate_subcommands = vec![];
+    for (index, feature) in features.iter().enumerate() {
+      if let Some(actuator) = feature.actuator() {
+        let actuator_type: ActuatorType = feature.feature_type().clone().try_into().unwrap();
+        statuses.push(FeatureStatus::new(&actuator_type, actuator));
+        if actuator.messages().contains(&crate::core::message::ButtplugActuatorFeatureMessageType::RotateCmd) {
+          rotate_subcommands.push(RotationSubcommand::new(
+            index as u32,
+            0.0, 
+            false,
+          ));
+        } else if actuator.messages().contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ScalarCmd) {
+          scalar_subcommands.push(ScalarSubcommand::new(
+            index as u32,
+            0.0,
+            actuator_type
+          ));
+        }
       }
+    }
+    if !scalar_subcommands.is_empty() {
+      stop_commands.push(ScalarCmd::new(0, scalar_subcommands).into());
+    }
+    if !rotate_subcommands.is_empty() {
+      stop_commands.push(RotateCmd::new(0, rotate_subcommands).into());
+    }
 
-      stop_commands.push(ScalarCmd::new(0, subcommands).into());
-    }
-    if let Some(attrs) = attributes.message_attributes().rotate_cmd() {
-      rotations.resize_with(attrs.len(), || (AtomicU32::new(0), AtomicBool::new(false)));
-      for attr in attrs {
-        rotation_step_ranges.push(attr.step_range().clone());
-      }
-
-      // TODO Can we assume clockwise is false here? We might send extra
-      // messages on Lovense since it'll require both a speed and change
-      // direction command, but is that really a big deal? We can just
-      // have it ignore the direction difference on a 0.0 speed?
-      let mut subcommands = vec![];
-      for i in 0..rotations.len() {
-        subcommands.push(RotationSubcommand::new(i as u32, 0.0, false));
-      }
-      stop_commands.push(RotateCmd::new(0, subcommands).into());
-    }
-    if let Some(attrs) = attributes.message_attributes().linear_cmd() {
-      linears = vec![(0, 0); attrs.len()];
-      for attr in attrs {
-        linear_step_counts.push(attr.step_count());
-      }
-    }
+    error!("{:?}", stop_commands);
 
     Self {
-      sent_scalar: AtomicBool::new(false),
-      sent_rotation: AtomicBool::new(false),
-      _sent_linear: false,
-      scalars,
-      rotations,
-      _linears: linears,
-      rotation_step_ranges,
-      _linear_step_counts: linear_step_counts,
+      feature_status: statuses,
       stop_commands,
     }
+  }
+
+  fn update(
+    &self,
+    msg_type: ButtplugActuatorFeatureMessageType,
+    commands: &Vec<(u32, ActuatorType, (f64, bool))>,
+    match_all: bool
+  ) -> Result<Vec<(u32, ActuatorType, (u32, bool))>, ButtplugError> {
+    // Convert from the generic 0.0-1.0 range to the StepCount attribute given by the device config.
+
+    // If we've already sent commands before, we should check against our old values. Otherwise, we
+    // should always send whatever command we're going to send.
+    let mut result: Vec<(u32, ActuatorType, (u32, bool))> = vec!();
+
+    for command in commands {
+      if command.0 >= self.feature_status.len().try_into().unwrap() {
+        return Err(
+          ButtplugDeviceError::ProtocolRequirementError(format!(
+            "Command requests feature index {}, which does not exist.",
+            command.0,
+          ))
+          .into(),
+        );
+      }
+    }
+
+    for (index, cmd) in self.feature_status.iter().enumerate() {
+      let u32_index: u32 = index.try_into().unwrap();
+      if let Some((_, cmd_actuator, cmd_value)) = commands.iter().find(|x| x.0 == u32_index) {
+        // By this point, we should have already checked whether the feature takes the message type.
+        if let Some(updated_value) = self.feature_status[index].update(cmd_value) {
+          result.push((u32_index, *cmd_actuator, updated_value));
+        } else if match_all {
+          result.push((u32_index, *cmd.actuator_type(), cmd.current().1));
+        }
+      } else if match_all {
+        if cmd.messages().contains(&msg_type) {
+          result.push((u32_index, *cmd.actuator_type(), cmd.current().1));
+        }
+      }
+    }
+    error!("RETURNING: {:?}", result);
+    // Return the command vector for the protocol to turn into proprietary commands
+    Ok(result)
   }
 
   pub fn update_scalar(
@@ -128,6 +188,8 @@ impl GenericCommandManager {
     msg: &ScalarCmd,
     match_all: bool,
   ) -> Result<Vec<Option<(ActuatorType, u32)>>, ButtplugError> {
+    error!("UPDATING SCALAR");
+    error!("Match all: {}", match_all);
     // First, make sure this is a valid command, that contains at least one
     // subcommand.
     if msg.scalars().is_empty() {
@@ -139,89 +201,16 @@ impl GenericCommandManager {
       );
     }
 
-    // Now we convert from the generic 0.0-1.0 range to the StepCount
-    // attribute given by the device config.
+    let mut final_result: Vec<Option<(ActuatorType, u32)>> = vec![None; self.feature_status.iter().filter(|x| x.messages().contains(&ButtplugActuatorFeatureMessageType::ScalarCmd)).count()];
 
-    // If we've already sent commands before, we should check against our
-    // old values. Otherwise, we should always send whatever command we're
-    // going to send.
-    let mut result: Vec<Option<(ActuatorType, u32)>> = vec![None; self.scalars.len()];
-
-    for scalar_command in msg.scalars() {
-      let index = scalar_command.index() as usize;
-      // Since we're going to iterate here anyways, we do our index check
-      // here instead of in a filter above.
-      if index >= self.scalars.len() {
-        return Err(
-          ButtplugDeviceError::ProtocolRequirementError(format!(
-            "ScalarCmd has {} commands, device has {} features.",
-            msg.scalars().len(),
-            self.scalars.len()
-          ))
-          .into(),
-        );
-      }
-
-      let range_start = self.scalars[index].step_range().start();
-      let range = self.scalars[index].step_range().end() - range_start;
-      let scalar_modifier = scalar_command.scalar() * range as f64;
-      let scalar = if scalar_modifier < 0.0001 {
-        0
-      } else {
-        // When calculating speeds, round up. This follows how we calculated
-        // things in buttplug-js and buttplug-csharp, so it's more for history
-        // than anything, but it's what users will expect.
-        (scalar_modifier + *range_start as f64).ceil() as u32
-      };
-      trace!(
-        "{:?} {} {} {}",
-        self.scalars[index].step_range(),
-        range,
-        scalar_modifier,
-        scalar
-      );
-      // If we've already sent commands, we don't want to send them again,
-      // because some of our communication busses are REALLY slow. Make sure
-      // these values get None in our return vector.
-      let current_scalar = self.scalars[index].value().load(SeqCst);
-      let sent_scalar = self.sent_scalar.load(SeqCst);
-      if !sent_scalar || scalar != current_scalar {
-        self.scalars[index].value().store(scalar, SeqCst);
-        result[index] = Some((*self.scalars[index].actuator(), scalar));
-      }
-
-      if !sent_scalar {
-        self.sent_scalar.store(true, SeqCst);
-      }
-    }
-
-    // If we have no changes to the device, just send back an empty command array. We have nothing
-    // to do.
-    if result.iter().all(|x| x.is_none()) {
-      result.clear();
-    } else if match_all {
-      // If we're in a match all situation, set up the array with all prior
-      // values before switching them out.
-      for (index, cmd) in self.scalars.iter().enumerate() {
-        if result[index].is_none() {
-          result[index] = Some((*cmd.actuator(), cmd.value.load(SeqCst)));
-        }
-      }
-    }
-
-    // Return the command vector for the protocol to turn into proprietary commands
-    Ok(result)
-  }
-
-  // Test method
-  #[cfg(test)]
-  #[allow(dead_code)]
-  pub(super) fn scalars(&self) -> Vec<Option<(ActuatorType, u32)>> {
-    self
-      .scalars
-      .iter()
-      .map(|x| Some((*x.actuator(), x.value().load(SeqCst))))
-      .collect()
+    let mut commands: Vec<(u32, ActuatorType, (f64, bool))> = vec!();
+    msg.scalars().iter().for_each(|x| commands.push((x.index(), x.actuator_type(), (x.scalar(), false))));
+    let mut result = self
+      .update(ButtplugActuatorFeatureMessageType::ScalarCmd, &commands, match_all)?;
+    result.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+    result.iter().for_each(|(index, actuator, value)| final_result[*index as usize] = Some((*actuator, value.0)));
+    error!("{:?}", final_result);
+    Ok(final_result)
   }
 
   pub fn update_rotation(
@@ -240,90 +229,15 @@ impl GenericCommandManager {
       );
     }
 
-    // Now we convert from the generic 0.0-1.0 range to the StepCount
-    // attribute given by the device config.
+    let mut final_result: Vec<Option<(u32, bool)>> = vec![None; self.feature_status.iter().filter(|x| x.messages().contains(&ButtplugActuatorFeatureMessageType::RotateCmd)).count()];
 
-    // If we've already sent commands before, we should check against our
-    // old values. Otherwise, we should always send whatever command we're
-    // going to send.
-    let mut result: Vec<Option<(u32, bool)>> = vec![None; self.rotations.len()];
-    for rotate_command in msg.rotations() {
-      let index = rotate_command.index() as usize;
-      // Since we're going to iterate here anyways, we do our index check
-      // here instead of in a filter above.
-      if index >= self.rotations.len() {
-        return Err(
-          ButtplugDeviceError::ProtocolRequirementError(format!(
-            "RotateCmd has {} commands, device has {} rotators.",
-            msg.rotations().len(),
-            self.rotations.len()
-          ))
-          .into(),
-        );
-      }
-
-      // When calculating speeds, round up. This follows how we calculated
-      // things in buttplug-js and buttplug-csharp, so it's more for history
-      // than anything, but it's what users will expect.
-      let range = self.rotation_step_ranges[index].end() - self.rotation_step_ranges[index].start();
-      let speed_modifier = rotate_command.speed() * range as f64;
-      let speed = if speed_modifier < 0.0001 {
-        0
-      } else {
-        // When calculating speeds, round up. This follows how we calculated
-        // things in buttplug-js and buttplug-csharp, so it's more for history
-        // than anything, but it's what users will expect.
-        (speed_modifier + *self.rotation_step_ranges[index].start() as f64).ceil() as u32
-      };
-      let clockwise = rotate_command.clockwise();
-      // If we've already sent commands, we don't want to send them again,
-      // because some of our communication busses are REALLY slow. Make sure
-      // these values get None in our return vector.
-      let sent_rotation = self.sent_rotation.load(SeqCst);
-      if !sent_rotation
-        || speed != self.rotations[index].0.load(SeqCst)
-        || clockwise != self.rotations[index].1.load(SeqCst)
-      {
-        self.rotations[index].0.store(speed, SeqCst);
-        self.rotations[index].1.store(clockwise, SeqCst);
-        result[index] = Some((speed, clockwise));
-      }
-      if !sent_rotation {
-        self.sent_rotation.store(true, SeqCst);
-      }
-    }
-
-    // If we're in a match all situation, set up the array with all prior
-    // values before switching them out.
-    if match_all && !result.iter().all(|x| x.is_none()) {
-      for (index, rotation) in self.rotations.iter().enumerate() {
-        if result[index].is_none() {
-          result[index] = Some((rotation.0.load(SeqCst), rotation.1.load(SeqCst)));
-        }
-      }
-    }
-
-    // Return the command vector for the protocol to turn into proprietary commands
-    Ok(result)
-  }
-
-  pub fn _update_linear(&self, _msg: &LinearCmd) -> Result<Option<Vec<(u32, u32)>>, ButtplugError> {
-    // First, make sure this is a valid command, that doesn't contain an
-    // index we can't reach.
-
-    // If we've already sent commands before, we should check against our
-    // old values. Otherwise, we should always send whatever command we're
-    // going to send.
-
-    // Now we convert from the generic 0.0-1.0 range to the StepCount
-    // attribute given by the device config.
-
-    // If we've already sent commands, we don't want to send them again,
-    // because some of our communication busses are REALLY slow. Make sure
-    // these values get None in our return vector.
-
-    // Return the command vector for the protocol to turn into proprietary commands
-    Ok(None)
+    let mut commands: Vec<(u32, ActuatorType, (f64, bool))> = vec!();
+    msg.rotations().iter().for_each(|x| commands.push((x.index(), ActuatorType::Rotate, (x.speed(), x.clockwise()))));
+    let mut result = self
+      .update(ButtplugActuatorFeatureMessageType::RotateCmd, &commands, match_all)?;
+    result.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+    result.iter().enumerate().for_each(|(array_index, (_, _, value))| final_result[array_index] = Some(*value));
+    Ok(final_result)
   }
 
   pub fn stop_commands(&self) -> Vec<ButtplugDeviceCommandMessageUnion> {

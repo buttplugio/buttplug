@@ -7,7 +7,7 @@
 
 //! Implementations of communication protocols for hardware supported by Buttplug
 
-pub mod generic_command_manager;
+pub mod actuator_command_manager;
 
 // Utility mods
 pub mod fleshlight_launch_helper;

@@ -63,7 +63,7 @@ use super::{
   },
   hardware::HardwareWriteCmd,
   protocol::{
-    generic_command_manager::GenericCommandManager,
+    actuator_command_manager::ActuatorCommandManager,
     ProtocolKeepaliveStrategy,
     ProtocolSpecializer,
   },
@@ -85,7 +85,7 @@ pub struct ServerDevice {
   // Legacy, should be removed once we hit message spec v4, and message fallback to v3 handled
   // within specific messages.
   attributes: ProtocolDeviceAttributes,
-  generic_command_manager: GenericCommandManager,
+  actuator_command_manager: ActuatorCommandManager,
   /// Unique identifier for the device
   #[getset(get = "pub")]
   identifier: UserDeviceIdentifier,
@@ -216,7 +216,7 @@ impl ServerDevice {
   ) -> Self {
     let keepalive_packet = Arc::new(RwLock::new(None));
     let attributes = definition.clone().into();
-    let gcm = GenericCommandManager::new(&attributes);
+    let acm = ActuatorCommandManager::new(definition.features());
     // If we've gotten here, we know our hardware is connected. This means we can start the keepalive if it's required.
     if hardware.requires_keepalive()
       && !matches!(
@@ -264,7 +264,7 @@ impl ServerDevice {
 
     Self {
       identifier,
-      generic_command_manager: gcm,
+      actuator_command_manager: acm,
       handler,
       hardware,
       keepalive_packet,
@@ -479,7 +479,7 @@ impl ServerDevice {
         }
 
         let commands = match self
-          .generic_command_manager
+          .actuator_command_manager
           .update_scalar(&msg, self.handler.needs_full_command_set())
         {
           Ok(values) => values,
@@ -497,7 +497,7 @@ impl ServerDevice {
       }
       ButtplugDeviceCommandMessageUnion::RotateCmd(msg) => {
         let commands = match self
-          .generic_command_manager
+          .actuator_command_manager
           .update_rotation(&msg, self.handler.needs_full_command_set())
         {
           Ok(values) => values,
@@ -572,7 +572,7 @@ impl ServerDevice {
   }
 
   fn handle_stop_device_cmd(&self) -> ButtplugServerResultFuture {
-    let commands = self.generic_command_manager.stop_commands();
+    let commands = self.actuator_command_manager.stop_commands();
     let mut fut_vec = vec![];
     commands
       .iter()
