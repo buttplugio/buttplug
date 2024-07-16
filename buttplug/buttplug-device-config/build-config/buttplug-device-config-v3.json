@@ -6566,6 +6566,38 @@
             "Hugo2"
           ],
           "name": "Lelo Hugo 2"
+        },
+        {
+          "identifier": [
+            "DoubleSonic"
+          ],
+          "name": "Lelo Enigma Double Sonic",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Rotate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -6577,7 +6609,8 @@
               "TianiHarmony",
               "Tiani Harmony",
               "TOR3",
-              "Hugo2"
+              "Hugo2",
+              "DoubleSonic"
             ],
             "services": {
               "0000fff0-0000-1000-8000-00805f9b34fb": {
