@@ -2975,6 +2975,9 @@ protocols:
       - identifier:
           - QH-SJ007A
         name: Svakom Winni 2
+      - identifier:
+          - Cici 2
+        name: Svakom Cici 2
     communication:
       - btle:
           names:
@@ -2988,6 +2991,7 @@ protocols:
             - Vick Neo
             - STG05A
             - QH-SJ007A
+            - Cici 2
           services:
             0000ffe0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -3140,11 +3144,37 @@ protocols:
                 - 3
               messages:
                 - ScalarCmd
+      - identifier:
+          - Trysta Neo
+        name: Svakom Trysta Neo
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 10
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 10
+              messages:
+                - ScalarCmd
+          - feature-type: Oscillate
+            actuator:
+              step-range:
+                - 0
+                - 3
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
             - Chika
             - Mora Neo
+            - Trysta Neo
           services:
             0000ffe0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -3469,6 +3499,32 @@ protocols:
           services:
             0000ffe0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+  svakom-trystaneo:
+    defaults:
+      name: Svakom Trysta Neo
+      features:
+        - feature-type: Vibrate
+          actuator:
+            step-range:
+              - 0
+              - 10
+            messages:
+              - ScalarCmd
+        - feature-type: Rotate
+          actuator:
+            step-range:
+              - 0
+              - 3
+            messages:
+              - ScalarCmd
+    communication:
+      - btle:
+          names:
+            - Trysta Neo
+          services:
+            0000ffe0-0000-1000-8000-00805f9b34fb:
+              tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+              rx: 0000ffe2-0000-1000-8000-00805f9b34fb
   realov:
     defaults:
       name: Realov Device
