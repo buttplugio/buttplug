@@ -62,9 +62,9 @@ impl ProtocolHandler for KGoalBoost {
   fn handle_sensor_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: message::SensorSubscribeCmd,
+    message: message::SensorSubscribeCmdV4,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
-    if self.subscribed_sensors.contains(message.sensor_index()) {
+    if self.subscribed_sensors.contains(message.feature_index()) {
       return future::ready(Ok(message::Ok::new(message.id()).into())).boxed();
     }
     let sensors = self.subscribed_sensors.clone();
@@ -133,7 +133,7 @@ impl ProtocolHandler for KGoalBoost {
           }
         });
       }
-      sensors.insert(*message.sensor_index());
+      sensors.insert(*message.feature_index());
       Ok(message::Ok::new(message.id()).into())
     }
     .boxed()
@@ -142,16 +142,16 @@ impl ProtocolHandler for KGoalBoost {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: message::SensorUnsubscribeCmd,
+    message: message::SensorUnsubscribeCmdV4,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
-    if !self.subscribed_sensors.contains(message.sensor_index()) {
+    if !self.subscribed_sensors.contains(message.feature_index()) {
       return future::ready(Ok(message::Ok::new(message.id()).into())).boxed();
     }
     let sensors = self.subscribed_sensors.clone();
     async move {
       // If we have no sensors we're currently subscribed to, we'll need to bring up our BLE
       // characteristic subscription.
-      sensors.remove(message.sensor_index());
+      sensors.remove(message.feature_index());
       if sensors.is_empty() {
         device
           .unsubscribe(&HardwareUnsubscribeCmd::new(Endpoint::RxPressure))

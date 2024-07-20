@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::core::message::SensorReadingV4;
 use crate::server::device::configuration::{
   ProtocolCommunicationSpecifier,
   ProtocolDeviceAttributes,
@@ -12,7 +13,7 @@ use crate::server::device::configuration::{
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{self, ActuatorType, ButtplugDeviceMessage, ButtplugServerMessage, Endpoint},
+    message::{self, ActuatorType, ButtplugDeviceMessage, Endpoint},
   },
   server::device::{
     configuration::UserDeviceIdentifier,
@@ -298,8 +299,8 @@ impl ProtocolHandler for LovenseConnectService {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    msg: message::SensorReadCmd,
-  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+    msg: message::SensorReadCmdV4,
+  ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     async move {
       // This is a dummy read. We just store the battery level in the device
       // implementation and it's the only thing read will return.
@@ -308,9 +309,9 @@ impl ProtocolHandler for LovenseConnectService {
         .await?;
       debug!("Battery level: {}", reading.data()[0]);
       Ok(
-        message::SensorReading::new(
+        message::SensorReadingV4::new(
           msg.device_index(),
-          *msg.sensor_index(),
+          *msg.feature_index(),
           *msg.sensor_type(),
           vec![reading.data()[0] as i32],
         )

@@ -9,7 +9,7 @@ use crate::
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     message::{
-      ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugDeviceCommandMessageUnion, DeviceFeature, DeviceFeatureActuator, RotateCmd, RotationSubcommand, ScalarCmd, ScalarSubcommand
+      ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugDeviceCommandMessageUnion, DeviceFeature, DeviceFeatureActuator, RotateCmd, RotationSubcommand, ScalarCmd, ScalarCmdV4, ScalarSubcommand
     },
   };
 use getset::Getters;
@@ -178,18 +178,15 @@ impl ActuatorCommandManager {
         }
       }
     }
-    error!("RETURNING: {:?}", result);
     // Return the command vector for the protocol to turn into proprietary commands
     Ok(result)
   }
 
   pub fn update_scalar(
     &self,
-    msg: &ScalarCmd,
+    msg: &ScalarCmdV4,
     match_all: bool,
   ) -> Result<Vec<Option<(ActuatorType, u32)>>, ButtplugError> {
-    error!("UPDATING SCALAR");
-    error!("Match all: {}", match_all);
     // First, make sure this is a valid command, that contains at least one
     // subcommand.
     if msg.scalars().is_empty() {
@@ -204,7 +201,7 @@ impl ActuatorCommandManager {
     let mut final_result: Vec<Option<(ActuatorType, u32)>> = vec![None; self.feature_status.iter().filter(|x| x.messages().contains(&ButtplugActuatorFeatureMessageType::ScalarCmd)).count()];
 
     let mut commands: Vec<(u32, ActuatorType, (f64, bool))> = vec!();
-    msg.scalars().iter().for_each(|x| commands.push((x.index(), x.actuator_type(), (x.scalar(), false))));
+    msg.scalars().iter().for_each(|x| commands.push((x.feature_index(), x.actuator_type(), (x.scalar(), false))));
     let mut result = self
       .update(ButtplugActuatorFeatureMessageType::ScalarCmd, &commands, match_all)?;
     result.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());

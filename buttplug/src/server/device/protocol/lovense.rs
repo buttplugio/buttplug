@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::core::message::SensorReadingV4;
 use crate::server::device::configuration::{
   ProtocolCommunicationSpecifier,
   ProtocolDeviceAttributes,
@@ -12,7 +13,7 @@ use crate::server::device::configuration::{
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{self, ActuatorType, ButtplugDeviceMessage, ButtplugServerMessage, Endpoint},
+    message::{self, ActuatorType, ButtplugDeviceMessage, Endpoint},
   },
   server::device::{
     configuration::UserDeviceIdentifier,
@@ -332,8 +333,8 @@ impl ProtocolHandler for Lovense {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: message::SensorReadCmd,
-  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+    message: message::SensorReadCmdV4,
+  ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     let mut device_notification_receiver = device.event_stream();
     async move {
       let write_fut = device.write_value(&HardwareWriteCmd::new(
@@ -359,9 +360,9 @@ impl ProtocolHandler for Lovense {
               let start_pos = usize::from(data_str.contains('s'));
               if let Ok(level) = data_str[start_pos..(len - 1)].parse::<u8>() {
                 return Ok(
-                  message::SensorReading::new(
+                  message::SensorReadingV4::new(
                     message.device_index(),
-                    0,
+                    *message.feature_index(),
                     message::SensorType::Battery,
                     vec![level as i32],
                   )

@@ -12,7 +12,40 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct SensorUnsubscribeCmd {
+pub struct SensorUnsubscribeCmdV4 {
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  id: u32,
+  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  device_index: u32,
+  #[cfg_attr(feature = "serialize-json", serde(rename = "SensorIndex"))]
+  #[getset(get = "pub")]
+  feature_index: u32,
+  #[cfg_attr(feature = "serialize-json", serde(rename = "SensorType"))]
+  #[getset(get = "pub")]
+  sensor_type: SensorType,
+}
+
+impl SensorUnsubscribeCmdV4 {
+  pub fn new(device_index: u32, feature_index: u32, sensor_type: SensorType) -> Self {
+    Self {
+      id: 1,
+      device_index,
+      feature_index,
+      sensor_type,
+    }
+  }
+}
+
+impl ButtplugMessageValidator for SensorUnsubscribeCmdV4 {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)
+  }
+}
+
+
+#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters)]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+pub struct SensorUnsubscribeCmdV3 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
@@ -25,7 +58,7 @@ pub struct SensorUnsubscribeCmd {
   sensor_type: SensorType,
 }
 
-impl SensorUnsubscribeCmd {
+impl SensorUnsubscribeCmdV3 {
   pub fn new(device_index: u32, sensor_index: u32, sensor_type: SensorType) -> Self {
     Self {
       id: 1,
@@ -36,7 +69,7 @@ impl SensorUnsubscribeCmd {
   }
 }
 
-impl ButtplugMessageValidator for SensorUnsubscribeCmd {
+impl ButtplugMessageValidator for SensorUnsubscribeCmdV3 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
   }

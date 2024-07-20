@@ -11,17 +11,13 @@ use std::sync::Arc;
 use futures_util::future::BoxFuture;
 use futures_util::{future, FutureExt};
 
-use crate::core::message;
+use crate::core::message::{self, SensorReadCmdV4, SensorReadingV4, SensorSubscribeCmdV4, SensorUnsubscribeCmdV4};
 use crate::core::message::{
   ActuatorType,
   ButtplugDeviceMessage,
   ButtplugMessage,
   ButtplugServerMessage,
-  SensorReadCmd,
-  SensorReading,
-  SensorSubscribeCmd,
   SensorType,
-  SensorUnsubscribeCmd,
 };
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
@@ -203,7 +199,7 @@ impl ProtocolHandler for Galaku {
   fn handle_sensor_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: SensorSubscribeCmd,
+    message: SensorSubscribeCmdV4,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     match message.sensor_type() {
       SensorType::Battery => {
@@ -225,7 +221,7 @@ impl ProtocolHandler for Galaku {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: SensorUnsubscribeCmd,
+    message: SensorUnsubscribeCmdV4,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     match message.sensor_type() {
       SensorType::Battery => {
@@ -247,8 +243,8 @@ impl ProtocolHandler for Galaku {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: SensorReadCmd,
-  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+    message: SensorReadCmdV4,
+  ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     let data: Vec<u32> = vec![90, 0, 0, 1, 19, 0, 0, 0, 0, 0];
     let mut device_notification_receiver = device.event_stream();
     async move {
@@ -264,9 +260,9 @@ impl ProtocolHandler for Galaku {
             if endpoint != Endpoint::RxBLEBattery {
               continue;
             }
-            let battery_reading = SensorReading::new(
+            let battery_reading = SensorReadingV4::new(
               message.device_index(),
-              *message.sensor_index(),
+              *message.feature_index(),
               *message.sensor_type(),
               vec![read_value(data) as i32],
             );

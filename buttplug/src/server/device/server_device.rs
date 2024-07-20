@@ -5,35 +5,54 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+//! Server Device Implementation
+//!
+//! This struct manages the trip from buttplug protocol actuator/sensor/raw message to hardware
+//! communication. This involves:
+//!
+//! - Taking buttplug device command messages from the exposed server
+//! - Converting older spec version messages to the newest spec version, which usually requires
+//!   device information for actuation/sensor messages.
+//! - Validity checking the messages to make sure they match the capabilities of the hardware
+//! - Turning the buttplug messages into hardware commands via the associated protocol
+//! - Sending them to the hardware
+//! - Possibly receiving back information (in the case of sensors), possibly firing and forgetting
+//!   (in terms of almost everything else)
+//!
+//! We make a lot of assumptions in here based on the devices we support right now, including:
+//!
+//! - Devices will only ever have one directional rotation actuator (we have no device that supports
+//!   two rotational components currently)
+//! - Devices will only ever have one linear actuator (we have no device that supports multiple
+//!   linear actuators currently)
+//! - Devices scalar command ordering is explicitly set by the device config file
+//!   - This means that we rely on the config file to know which vibrator is which on a device with
+//!     multiple vibrators. In protocols, especially for toy brands that release a large line of
+//!     different toys all using the same protocols (lovense, wevibe, etc), the order of features in
+//!     the config file MATTERS and needs to be tested against an actual device to make sure we're
+//!     controlling the actuator we think we are.
+//!   - This situation sucks and we should have better definitions, a problem outlined at
+//!     https://github.com/buttplugio/buttplug/issues/646
+//!
+//! In order to handle multiple message spec versions
+
 use std::{
   fmt::{self, Debug},
   sync::Arc,
   time::Duration,
 };
 
-use crate::core::message::VibrateCmd;
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     message::{
-      self,
-      ActuatorType,
-      BatteryLevelReading,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceMessage,
-      ButtplugDeviceMessageType,
-      ButtplugMessage,
-      ButtplugServerDeviceMessage,
-      ButtplugServerMessage,
-      Endpoint,
-      RSSILevelReading,
-      RawReading,
-      RawSubscribeCmd,
-      ScalarCmd,
-      ScalarSubcommand,
-      SensorDeviceMessageAttributes,
-      SensorReadCmd,
-      SensorType,
+      self, ActuatorType, BatteryLevelReading, ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessage, ButtplugDeviceMessageType, ButtplugMessage,
+      ButtplugServerDeviceMessage, ButtplugServerMessage, 
+      Endpoint, FeatureType, RSSILevelReading, RawReading, RawSubscribeCmd, ScalarCmd, ScalarCmdV4,
+      ScalarSubcommandV4, SensorReadCmd,
+      SensorReadCmdV4, SensorSubscribeCmd, SensorSubscribeCmdV4, SensorType,
+      SensorUnsubscribeCmdV4, VibrateCmd,
     },
     ButtplugResultFuture,
   },
@@ -56,15 +75,12 @@ use tokio_stream::StreamExt;
 
 use super::{
   configuration::{
-    ProtocolDeviceAttributes,
-    ServerDeviceMessageAttributes,
     UserDeviceDefinition,
     UserDeviceIdentifier,
   },
   hardware::HardwareWriteCmd,
   protocol::{
-    actuator_command_manager::ActuatorCommandManager,
-    ProtocolKeepaliveStrategy,
+    actuator_command_manager::ActuatorCommandManager, ProtocolKeepaliveStrategy,
     ProtocolSpecializer,
   },
 };
@@ -82,9 +98,6 @@ pub struct ServerDevice {
   handler: Arc<dyn ProtocolHandler>,
   #[getset(get = "pub")]
   definition: UserDeviceDefinition,
-  // Legacy, should be removed once we hit message spec v4, and message fallback to v3 handled
-  // within specific messages.
-  attributes: ProtocolDeviceAttributes,
   actuator_command_manager: ActuatorCommandManager,
   /// Unique identifier for the device
   #[getset(get = "pub")]
@@ -107,8 +120,7 @@ impl Hash for ServerDevice {
   }
 }
 
-impl Eq for ServerDevice {
-}
+impl Eq for ServerDevice {}
 
 impl PartialEq for ServerDevice {
   fn eq(&self, other: &Self) -> bool {
@@ -215,7 +227,6 @@ impl ServerDevice {
     definition: &UserDeviceDefinition,
   ) -> Self {
     let keepalive_packet = Arc::new(RwLock::new(None));
-    let attributes = definition.clone().into();
     let acm = ActuatorCommandManager::new(definition.features());
     // If we've gotten here, we know our hardware is connected. This means we can start the keepalive if it's required.
     if hardware.requires_keepalive()
@@ -268,7 +279,6 @@ impl ServerDevice {
       handler,
       hardware,
       keepalive_packet,
-      attributes,
       definition: definition.clone(),
       raw_subscribed_endpoints: Arc::new(DashSet::new()),
     }
@@ -301,11 +311,6 @@ impl ServerDevice {
   pub fn disconnect(&self) -> ButtplugResultFuture {
     let fut = self.hardware.disconnect();
     async move { fut.await.map_err(|err| err.into()) }.boxed()
-  }
-
-  /// Retreive the message attributes for the device.
-  pub fn message_attributes(&self) -> &ServerDeviceMessageAttributes {
-    self.attributes.message_attributes()
   }
 
   /// Retreive the event stream for the device.
@@ -349,7 +354,7 @@ impl ServerDevice {
     // TODO This should be generated by a macro, as should the types enum.
     let check_msg = |msg_type| {
       self
-        .attributes
+        .definition
         .allows_message(&msg_type)
         .then_some(())
         .ok_or(ButtplugDeviceError::MessageNotSupported(msg_type))
@@ -357,7 +362,8 @@ impl ServerDevice {
 
     match message {
       ButtplugDeviceCommandMessageUnion::BatteryLevelCmd(_) => {
-        check_msg(ButtplugDeviceMessageType::BatteryLevelCmd)
+        //check_msg(ButtplugDeviceMessageType::BatteryLevelCmd)
+        check_msg(ButtplugDeviceMessageType::SensorReadCmd)
       }
       ButtplugDeviceCommandMessageUnion::FleshlightLaunchFW12Cmd(_) => {
         check_msg(ButtplugDeviceMessageType::FleshlightLaunchFW12Cmd)
@@ -391,13 +397,14 @@ impl ServerDevice {
       }
       // We translate SingleMotorVibrateCmd into Vibrate, so this one is special.
       ButtplugDeviceCommandMessageUnion::SingleMotorVibrateCmd(_) => {
-        check_msg(ButtplugDeviceMessageType::VibrateCmd)
+        check_msg(ButtplugDeviceMessageType::ScalarCmd)
       }
       ButtplugDeviceCommandMessageUnion::StopDeviceCmd(_) => {
-        check_msg(ButtplugDeviceMessageType::StopDeviceCmd)
+        //check_msg(ButtplugDeviceMessageType::StopDeviceCmd)
+        Ok(())
       }
       ButtplugDeviceCommandMessageUnion::VibrateCmd(_) => {
-        check_msg(ButtplugDeviceMessageType::VibrateCmd)
+        check_msg(ButtplugDeviceMessageType::ScalarCmd)
       }
       ButtplugDeviceCommandMessageUnion::VorzeA10CycloneCmd(_) => {
         check_msg(ButtplugDeviceMessageType::VorzeA10CycloneCmd)
@@ -434,67 +441,23 @@ impl ServerDevice {
     }
 
     match command_message {
-      // messages we can handle in this struct
+      // Raw messages
       ButtplugDeviceCommandMessageUnion::RawReadCmd(msg) => self.handle_raw_read_cmd(msg),
       ButtplugDeviceCommandMessageUnion::RawWriteCmd(msg) => self.handle_raw_write_cmd(msg),
       ButtplugDeviceCommandMessageUnion::RawSubscribeCmd(msg) => self.handle_raw_subscribe_cmd(msg),
       ButtplugDeviceCommandMessageUnion::RawUnsubscribeCmd(msg) => {
         self.handle_raw_unsubscribe_cmd(msg)
       }
-      ButtplugDeviceCommandMessageUnion::StopDeviceCmd(_) => self.handle_stop_device_cmd(),
-      ButtplugDeviceCommandMessageUnion::SingleMotorVibrateCmd(msg) => {
-        self.handle_single_motor_vibrate_cmd(msg)
+      // Sensor messages
+      ButtplugDeviceCommandMessageUnion::SensorReadCmd(msg) => self.handle_sensor_read_cmd_v3(msg),
+      ButtplugDeviceCommandMessageUnion::SensorSubscribeCmd(msg) => {
+        self.handle_sensor_subscribe_cmd_v3(msg)
       }
-      ButtplugDeviceCommandMessageUnion::BatteryLevelCmd(_) => self.handle_battery_level_cmd(),
-      ButtplugDeviceCommandMessageUnion::RSSILevelCmd(_) => self.handle_rssi_level_cmd(),
-      // Message that return lists of hardware commands which we'll handle sending to the devices
-      // here, in order to reduce boilerplate in the implementations. Generic messages that we can
-      // use the generic command manager for, but still need protocol level translation.
-      ButtplugDeviceCommandMessageUnion::ScalarCmd(msg) => {
-        // TODO Add ability to turn off actuator matching
-        let attributes = self.attributes.message_attributes();
-        let attrs = attributes
-          .scalar_cmd()
-          .as_ref()
-          .expect("Already checked existence");
-        for command in msg.scalars() {
-          if command.index() > attrs.len() as u32 {
-            return future::ready(Err(
-              ButtplugDeviceError::DeviceFeatureIndexError(attrs.len() as u32, command.index())
-                .into(),
-            ))
-            .boxed();
-          }
-          if *attrs[command.index() as usize].actuator_type() != command.actuator_type() {
-            return future::ready(Err(
-              ButtplugDeviceError::DeviceActuatorTypeMismatch(
-                self.name(),
-                command.actuator_type(),
-                *attrs[command.index() as usize].actuator_type(),
-              )
-              .into(),
-            ))
-            .boxed();
-          }
-        }
-
-        let commands = match self
-          .actuator_command_manager
-          .update_scalar(&msg, self.handler.needs_full_command_set())
-        {
-          Ok(values) => values,
-          Err(err) => return future::ready(Err(err)).boxed(),
-        };
-
-        if commands.is_empty() {
-          trace!(
-            "No commands generated for incoming device packet, skipping and returning success."
-          );
-          return future::ready(Ok(message::Ok::default().into())).boxed();
-        }
-
-        self.handle_generic_command_result(self.handler.handle_scalar_cmd(&commands))
+      ButtplugDeviceCommandMessageUnion::SensorUnsubscribeCmd(msg) => {
+        self.handle_sensor_unsubscribe_cmd_v3(msg)
       }
+      // Actuator messages
+      ButtplugDeviceCommandMessageUnion::ScalarCmd(msg) => self.handle_scalarcmd_v3(&msg),
       ButtplugDeviceCommandMessageUnion::RotateCmd(msg) => {
         let commands = match self
           .actuator_command_manager
@@ -505,9 +468,20 @@ impl ServerDevice {
         };
         self.handle_generic_command_result(self.handler.handle_rotate_cmd(&commands))
       }
-      ButtplugDeviceCommandMessageUnion::VibrateCmd(msg) => self.handle_vibrate_cmd(msg),
       ButtplugDeviceCommandMessageUnion::LinearCmd(msg) => {
         self.handle_generic_command_result(self.handler.handle_linear_cmd(msg))
+      }
+      // Other generic messages
+      ButtplugDeviceCommandMessageUnion::StopDeviceCmd(_) => self.handle_stop_device_cmd(),
+
+      // V2 Message compatibility
+      ButtplugDeviceCommandMessageUnion::VibrateCmd(msg) => self.handle_vibrate_cmd(msg),
+      ButtplugDeviceCommandMessageUnion::BatteryLevelCmd(_) => self.handle_battery_level_cmd(),
+      ButtplugDeviceCommandMessageUnion::RSSILevelCmd(_) => self.handle_rssi_level_cmd(),
+
+      // V1 Message compatibility
+      ButtplugDeviceCommandMessageUnion::SingleMotorVibrateCmd(msg) => {
+        self.handle_single_motor_vibrate_cmd(msg)
       }
       ButtplugDeviceCommandMessageUnion::FleshlightLaunchFW12Cmd(msg) => {
         self.handle_generic_command_result(self.handler.handle_fleshlight_launch_fw12_cmd(msg))
@@ -515,19 +489,85 @@ impl ServerDevice {
       ButtplugDeviceCommandMessageUnion::VorzeA10CycloneCmd(msg) => {
         self.handle_generic_command_result(self.handler.handle_vorze_a10_cyclone_cmd(msg))
       }
-      ButtplugDeviceCommandMessageUnion::SensorReadCmd(msg) => self.handle_sensor_read_cmd(msg),
-      ButtplugDeviceCommandMessageUnion::SensorSubscribeCmd(msg) => {
-        self.handle_sensor_subscribe_cmd(msg)
-      }
-      ButtplugDeviceCommandMessageUnion::SensorUnsubscribeCmd(msg) => {
-        self.handle_sensor_unsubscribe_cmd(msg)
-      }
-      // Everything else, which is mostly older messages, or special things that require reads.
       ButtplugDeviceCommandMessageUnion::KiirooCmd(_) => future::ready(Err(
         ButtplugDeviceError::ProtocolNotImplemented("Being Lazy".to_owned()).into(),
       ))
-      .boxed(), //self.handler.handle_kiiroo_cmd( msg),
+      .boxed(),
     }
+  }
+
+  fn handle_scalarcmd_v3(&self, scalar_cmd: &ScalarCmd) -> ButtplugServerResultFuture {
+    let scalar_features: Vec<usize> = self
+      .definition
+      .features()
+      .iter()
+      .enumerate()
+      .filter(|(_, x)| {
+        x.actuator().as_ref().is_some_and(|y| {
+          y.messages()
+            .contains(&message::ButtplugActuatorFeatureMessageType::ScalarCmd)
+        })
+      })
+      .map(|(index, _)| index)
+      .collect();
+
+    let scalars_v4: Vec<ScalarSubcommandV4> = scalar_cmd
+      .scalars()
+      .iter()
+      .map(|x| {
+        ScalarSubcommandV4::new(
+          scalar_features[x.index() as usize] as u32,
+          x.scalar().clone(),
+          x.actuator_type().clone(),
+        )
+      })
+      .collect();
+
+    let scalarcmd_v4 = ScalarCmdV4::new(scalar_cmd.device_index(), scalars_v4);
+    self.handle_scalarcmd_v4(&scalarcmd_v4)
+  }
+
+  fn handle_scalarcmd_v4(&self, msg: &ScalarCmdV4) -> ButtplugServerResultFuture {
+    for command in msg.scalars() {
+      if command.feature_index() > self.definition.features().len() as u32 {
+        return future::ready(Err(
+          ButtplugDeviceError::DeviceFeatureIndexError(
+            self.definition.features().len() as u32,
+            command.feature_index(),
+          )
+          .into(),
+        ))
+        .boxed();
+      }
+      let feature_type =
+        self.definition.features()[command.feature_index() as usize].feature_type();
+      if *feature_type != command.actuator_type().into() {
+        return future::ready(Err(
+          ButtplugDeviceError::DeviceActuatorTypeMismatch(
+            self.name(),
+            command.actuator_type(),
+            *feature_type,
+          )
+          .into(),
+        ))
+        .boxed();
+      }
+    }
+
+    let commands = match self
+      .actuator_command_manager
+      .update_scalar(&msg, self.handler.needs_full_command_set())
+    {
+      Ok(values) => values,
+      Err(err) => return future::ready(Err(err)).boxed(),
+    };
+
+    if commands.is_empty() {
+      trace!("No commands generated for incoming device packet, skipping and returning success.");
+      return future::ready(Ok(message::Ok::default().into())).boxed();
+    }
+
+    self.handle_generic_command_result(self.handler.handle_scalar_cmd(&commands))
   }
 
   fn handle_hardware_commands(&self, commands: Vec<HardwareCommand>) -> ButtplugServerResultFuture {
@@ -588,38 +628,56 @@ impl ServerDevice {
 
   fn check_sensor_command(
     &self,
-    attributes: &Vec<SensorDeviceMessageAttributes>,
-    sensor_index: &u32,
+    feature_index: &u32,
     sensor_type: &SensorType,
   ) -> Result<(), ButtplugDeviceError> {
-    if let Some(sensor_info) = attributes.get(*sensor_index as usize) {
-      if *sensor_info.sensor_type() == *sensor_type {
-        Ok(())
-      } else {
-        Err(ButtplugDeviceError::DeviceSensorTypeMismatch(
-          *sensor_index,
-          *sensor_type,
-          *sensor_info.sensor_type(),
-        ))
-      }
-    } else {
-      Err(ButtplugDeviceError::DeviceSensorIndexError(
-        attributes.len() as u32,
-        *sensor_index,
+    if *feature_index > self.definition.features().len() as u32 {
+      return Err(ButtplugDeviceError::DeviceSensorIndexError(
+        self.definition.features().len() as u32,
+        *feature_index,
+      ));
+    }
+    let feature_type = self.definition.features()[*feature_index as usize].feature_type();
+    if *feature_type != FeatureType::from(*sensor_type) {
+      Err(ButtplugDeviceError::DeviceSensorTypeMismatch(
+        *feature_index,
+        *sensor_type,
+        *feature_type,
       ))
+    } else {
+      Ok(())
     }
   }
 
-  fn handle_sensor_read_cmd(&self, message: message::SensorReadCmd) -> ButtplugServerResultFuture {
-    let result = self.check_sensor_command(
-      self
-        .message_attributes()
-        .sensor_read_cmd()
-        .as_ref()
-        .expect("Already checked validity"),
-      message.sensor_index(),
-      message.sensor_type(),
+  fn handle_sensor_read_cmd_v3(&self, message: SensorReadCmd) -> ButtplugServerResultFuture {
+    let sensor_features: Vec<usize> = self
+      .definition
+      .features()
+      .iter()
+      .enumerate()
+      .filter(|(_, x)| {
+        x.sensor().as_ref().is_some_and(|y| {
+          y.messages()
+            .contains(&message::ButtplugSensorFeatureMessageType::SensorReadCmd)
+        })
+      })
+      .map(|(index, _)| index)
+      .collect();
+    let sensor_feature_index = sensor_features[*message.sensor_index() as usize] as u32;
+
+    let sensor_read_v4 = SensorReadCmdV4::new(
+      message.device_index(),
+      sensor_feature_index,
+      *message.sensor_type(),
     );
+    self.handle_sensor_read_cmd_v4(sensor_read_v4)
+  }
+
+  fn handle_sensor_read_cmd_v4(
+    &self,
+    message: message::SensorReadCmdV4,
+  ) -> ButtplugServerResultFuture {
+    let result = self.check_sensor_command(message.feature_index(), message.sensor_type());
     let device = self.hardware.clone();
     let handler = self.handler.clone();
     async move {
@@ -632,19 +690,38 @@ impl ServerDevice {
     .boxed()
   }
 
-  fn handle_sensor_subscribe_cmd(
+  fn handle_sensor_subscribe_cmd_v3(
     &self,
-    message: message::SensorSubscribeCmd,
+    message: SensorSubscribeCmd,
   ) -> ButtplugServerResultFuture {
-    let result = self.check_sensor_command(
-      self
-        .message_attributes()
-        .sensor_subscribe_cmd()
-        .as_ref()
-        .expect("Already checked validity"),
-      message.sensor_index(),
-      message.sensor_type(),
+    let sensor_features: Vec<usize> = self
+      .definition
+      .features()
+      .iter()
+      .enumerate()
+      .filter(|(_, x)| {
+        x.sensor().as_ref().is_some_and(|y| {
+          y.messages()
+            .contains(&message::ButtplugSensorFeatureMessageType::SensorSubscribeCmd)
+        })
+      })
+      .map(|(index, _)| index)
+      .collect();
+    let sensor_feature_index = sensor_features[*message.sensor_index() as usize] as u32;
+
+    let sensor_subscribe_v4 = SensorSubscribeCmdV4::new(
+      message.device_index(),
+      sensor_feature_index,
+      *message.sensor_type(),
     );
+    self.handle_sensor_subscribe_cmd_v4(sensor_subscribe_v4)
+  }
+
+  fn handle_sensor_subscribe_cmd_v4(
+    &self,
+    message: message::SensorSubscribeCmdV4,
+  ) -> ButtplugServerResultFuture {
+    let result = self.check_sensor_command(message.feature_index(), message.sensor_type());
     let device = self.hardware.clone();
     let handler = self.handler.clone();
     async move {
@@ -657,19 +734,38 @@ impl ServerDevice {
     .boxed()
   }
 
-  fn handle_sensor_unsubscribe_cmd(
+  fn handle_sensor_unsubscribe_cmd_v3(
     &self,
     message: message::SensorUnsubscribeCmd,
   ) -> ButtplugServerResultFuture {
-    let result = self.check_sensor_command(
-      self
-        .message_attributes()
-        .sensor_subscribe_cmd()
-        .as_ref()
-        .expect("Already checked validity"),
-      message.sensor_index(),
-      message.sensor_type(),
+    let sensor_features: Vec<usize> = self
+      .definition
+      .features()
+      .iter()
+      .enumerate()
+      .filter(|(_, x)| {
+        x.sensor().as_ref().is_some_and(|y| {
+          y.messages()
+            .contains(&message::ButtplugSensorFeatureMessageType::SensorSubscribeCmd)
+        })
+      })
+      .map(|(index, _)| index)
+      .collect();
+    let sensor_feature_index = sensor_features[*message.sensor_index() as usize] as u32;
+
+    let sensor_unsubscribe_v4 = SensorUnsubscribeCmdV4::new(
+      message.device_index(),
+      sensor_feature_index,
+      *message.sensor_type(),
     );
+    self.handle_sensor_unsubscribe_cmd_v4(sensor_unsubscribe_v4)
+  }
+
+  fn handle_sensor_unsubscribe_cmd_v4(
+    &self,
+    message: message::SensorUnsubscribeCmdV4,
+  ) -> ButtplugServerResultFuture {
+    let result = self.check_sensor_command(message.feature_index(), message.sensor_type());
     let device = self.hardware.clone();
     let handler = self.handler.clone();
     async move {
@@ -683,49 +779,43 @@ impl ServerDevice {
   }
 
   fn handle_vibrate_cmd(&self, message: VibrateCmd) -> ButtplugServerResultFuture {
-    if let Some(attr) = self.attributes.message_attributes().scalar_cmd() {
-      let mut indexes = Vec::new();
-      for (i, attr) in attr.iter().enumerate() {
-        if attr.actuator_type() == &ActuatorType::Vibrate {
-          indexes.push(i as u32);
-        }
-      }
+    let vibrate_features: Vec<usize> = self
+      .definition
+      .features()
+      .iter()
+      .enumerate()
+      .filter(|(_, x)| {
+        *x.feature_type() == FeatureType::Vibrate
+          && x.actuator().as_ref().is_some_and(|y| {
+            y.messages()
+              .contains(&message::ButtplugActuatorFeatureMessageType::ScalarCmd)
+          })
+      })
+      .map(|(index, _)| index)
+      .collect();
 
-      let mut cmds: Vec<ScalarSubcommand> = Vec::new();
-      for s in message.speeds().iter() {
-        if s.index() >= indexes.len() as u32 {
-          return ButtplugDeviceError::ProtocolRequirementError(format!(
-            "{} has {} vibrating features; {} is out of range.",
-            self.name(),
-            indexes.len(),
-            s.index()
-          ))
-          .into();
-        }
-        cmds.push(ScalarSubcommand::new(
-          indexes[s.index() as usize],
-          s.speed(),
+    let cmds: Vec<ScalarSubcommandV4> = message
+      .speeds()
+      .iter()
+      .map(|x| {
+        ScalarSubcommandV4::new(
+          vibrate_features[x.index() as usize] as u32,
+          x.speed(),
           ActuatorType::Vibrate,
-        ));
-      }
+        )
+      })
+      .collect();
 
-      if cmds.is_empty() {
-        ButtplugDeviceError::ProtocolRequirementError(format!(
-          "{} has no vibrating features.",
-          self.name()
-        ))
-        .into()
-      } else {
-        let mut vibrate_cmd = ScalarCmd::new(message.device_index(), cmds);
-        vibrate_cmd.set_id(message.id());
-        self.parse_message(vibrate_cmd.into())
-      }
-    } else {
+    if cmds.is_empty() {
       ButtplugDeviceError::ProtocolRequirementError(format!(
-        "{} needs to support ScalarCmd to use SingleMotorVibrateCmd.",
+        "{} has no vibrating features.",
         self.name()
       ))
       .into()
+    } else {
+      let mut vibrate_cmd = ScalarCmdV4::new(message.device_index(), cmds);
+      vibrate_cmd.set_id(message.id());
+      self.handle_scalarcmd_v4(&vibrate_cmd)
     }
   }
 
@@ -733,31 +823,36 @@ impl ServerDevice {
     &self,
     message: message::SingleMotorVibrateCmd,
   ) -> ButtplugServerResultFuture {
-    if let Some(attr) = self.attributes.message_attributes().scalar_cmd() {
-      let speed = message.speed();
-      let cmds: Vec<ScalarSubcommand> = attr
-        .iter()
-        .enumerate()
-        .filter(|(_, x)| *x.actuator_type() == ActuatorType::Vibrate)
-        .map(|(index, _)| ScalarSubcommand::new(index as u32, speed, ActuatorType::Vibrate))
-        .collect();
-      if cmds.is_empty() {
-        ButtplugDeviceError::ProtocolRequirementError(format!(
-          "{} has no vibrating features.",
-          self.name()
-        ))
-        .into()
-      } else {
-        let mut vibrate_cmd = ScalarCmd::new(message.device_index(), cmds);
-        vibrate_cmd.set_id(message.id());
-        self.parse_message(vibrate_cmd.into())
-      }
-    } else {
+    let vibrate_features: Vec<usize> = self
+      .definition
+      .features()
+      .iter()
+      .enumerate()
+      .filter(|(_, x)| {
+        *x.feature_type() == FeatureType::Vibrate
+          && x.actuator().as_ref().is_some_and(|y| {
+            y.messages()
+              .contains(&message::ButtplugActuatorFeatureMessageType::ScalarCmd)
+          })
+      })
+      .map(|(index, _)| index)
+      .collect();
+
+    let cmds: Vec<ScalarSubcommandV4> = vibrate_features
+      .iter()
+      .map(|x| ScalarSubcommandV4::new(*x as u32, message.speed(), ActuatorType::Vibrate))
+      .collect();
+
+    if cmds.is_empty() {
       ButtplugDeviceError::ProtocolRequirementError(format!(
-        "{} needs to support ScalarCmd to use SingleMotorVibrateCmd.",
+        "{} has no vibrating features.",
         self.name()
       ))
       .into()
+    } else {
+      let mut vibrate_cmd = ScalarCmdV4::new(message.device_index(), cmds);
+      vibrate_cmd.set_id(message.id());
+      self.handle_scalarcmd_v4(&vibrate_cmd)
     }
   }
 
@@ -834,35 +929,43 @@ impl ServerDevice {
   }
 
   fn handle_battery_level_cmd(&self) -> ButtplugServerResultFuture {
-    // See if we have a battery sensor.
-    if let Some(sensor_attributes) = self.message_attributes().sensor_read_cmd() {
-      for (index, sensor) in sensor_attributes.iter().enumerate() {
-        if *sensor.sensor_type() == SensorType::Battery {
-          let sensor_read_msg = SensorReadCmd::new(0, index as u32, SensorType::Battery);
-          let sensor_read = self.handle_sensor_read_cmd(sensor_read_msg);
-          let sensor_range_end = *sensor.sensor_range()[0].end();
-          return async move {
-            let return_msg = sensor_read.await?;
-            if let ButtplugServerMessage::SensorReading(reading) = return_msg {
-              if reading.sensor_type() == SensorType::Battery {
-                Ok(
-                  BatteryLevelReading::new(0, reading.data()[0] as f64 / sensor_range_end as f64)
-                    .into(),
-                )
-              } else {
-                Err(ButtplugError::ButtplugDeviceError(
-                  ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::Battery),
-                ))
-              }
-            } else {
-              Err(ButtplugError::ButtplugDeviceError(
-                ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::Battery),
-              ))
-            }
+    if let Some((index, battery_feature)) =
+      self
+        .definition
+        .features()
+        .iter()
+        .enumerate()
+        .find(|(_, x)| {
+          *x.feature_type() == FeatureType::Battery
+            && x.sensor().as_ref().is_some_and(|y| {
+              y.messages()
+                .contains(&message::ButtplugSensorFeatureMessageType::SensorReadCmd)
+            })
+        })
+    {
+      let sensor_read_msg = SensorReadCmdV4::new(0, index as u32, SensorType::Battery);
+      let sensor_read = self.handle_sensor_read_cmd_v4(sensor_read_msg);
+      let sensor_range_end = *battery_feature.sensor().as_ref().unwrap().value_range()[0].end();
+      return async move {
+        let return_msg = sensor_read.await?;
+        if let ButtplugServerMessage::SensorReading(reading) = return_msg {
+          if reading.sensor_type() == SensorType::Battery {
+            Ok(
+              BatteryLevelReading::new(0, reading.data()[0] as f64 / sensor_range_end as f64)
+                .into(),
+            )
+          } else {
+            Err(ButtplugError::ButtplugDeviceError(
+              ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::Battery),
+            ))
           }
-          .boxed();
+        } else {
+          Err(ButtplugError::ButtplugDeviceError(
+            ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::Battery),
+          ))
         }
       }
+      .boxed();
     }
     future::ready(Err(ButtplugError::ButtplugDeviceError(
       ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::Battery),
@@ -871,31 +974,42 @@ impl ServerDevice {
   }
 
   fn handle_rssi_level_cmd(&self) -> ButtplugServerResultFuture {
-    // See if we have a battery sensor.
-    if let Some(sensor_attributes) = self.message_attributes().sensor_read_cmd() {
-      for (index, sensor) in sensor_attributes.iter().enumerate() {
-        if *sensor.sensor_type() == SensorType::RSSI {
-          let sensor_read_msg = SensorReadCmd::new(0, index as u32, SensorType::RSSI);
-          let sensor_read = self.handle_sensor_read_cmd(sensor_read_msg);
-          return async move {
-            let return_msg = sensor_read.await?;
-            if let ButtplugServerMessage::SensorReading(reading) = return_msg {
-              if reading.sensor_type() == SensorType::RSSI {
-                Ok(RSSILevelReading::new(0, reading.data()[0]).into())
-              } else {
-                Err(ButtplugError::ButtplugDeviceError(
-                  ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::RSSI),
-                ))
-              }
-            } else {
-              Err(ButtplugError::ButtplugDeviceError(
-                ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::RSSI),
-              ))
-            }
+    if let Some((index, _)) =
+      self
+        .definition
+        .features()
+        .iter()
+        .enumerate()
+        .find(|(_, x)| {
+          *x.feature_type() == FeatureType::RSSI
+            && x.sensor().as_ref().is_some_and(|y| {
+              y.messages()
+                .contains(&message::ButtplugSensorFeatureMessageType::SensorReadCmd)
+            })
+        })
+    {
+      let sensor_read_msg = SensorReadCmdV4::new(0, index as u32, SensorType::RSSI);
+      let sensor_read = self.handle_sensor_read_cmd_v4(sensor_read_msg);
+      return async move {
+        let return_msg = sensor_read.await?;
+        if let ButtplugServerMessage::SensorReading(reading) = return_msg {
+          if reading.sensor_type() == SensorType::RSSI {
+            Ok(
+              RSSILevelReading::new(0, reading.data()[0])
+                .into(),
+            )
+          } else {
+            Err(ButtplugError::ButtplugDeviceError(
+              ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::RSSI),
+            ))
           }
-          .boxed();
+        } else {
+          Err(ButtplugError::ButtplugDeviceError(
+            ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::RSSI),
+          ))
         }
       }
+      .boxed();
     }
     future::ready(Err(ButtplugError::ButtplugDeviceError(
       ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::RSSI),

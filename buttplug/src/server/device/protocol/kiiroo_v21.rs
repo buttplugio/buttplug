@@ -10,14 +10,7 @@ use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{
-      self,
-      ButtplugDeviceMessage,
-      ButtplugMessage,
-      ButtplugServerDeviceMessage,
-      ButtplugServerMessage,
-      Endpoint,
-      SensorReading,
-      SensorType,
+      self, ButtplugDeviceMessage, ButtplugMessage, ButtplugServerDeviceMessage, ButtplugServerMessage, Endpoint, SensorReading, SensorReadingV4, SensorType
     },
   },
   server::device::{
@@ -119,8 +112,8 @@ impl ProtocolHandler for KiirooV21 {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: message::SensorReadCmd,
-  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+    message: message::SensorReadCmdV4,
+  ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     debug!("Trying to get battery reading.");
     // Reading the "whitelist" endpoint for this device retrieves the battery level,
     // which is byte 5. All other bytes of the 20-byte result are unknown.
@@ -136,14 +129,14 @@ impl ProtocolHandler for KiirooV21 {
         ));
       }
       let battery_level = data[5] as i32;
-      let battery_reading = message::SensorReading::new(
+      let battery_reading = message::SensorReadingV4::new(
         message.device_index(),
-        *message.sensor_index(),
+        *message.feature_index(),
         *message.sensor_type(),
         vec![battery_level],
       );
       debug!("Got battery reading: {}", battery_level);
-      Ok(battery_reading.into())
+      Ok(battery_reading)
     }
     .boxed()
   }
@@ -157,9 +150,9 @@ impl ProtocolHandler for KiirooV21 {
   fn handle_sensor_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: message::SensorSubscribeCmd,
+    message: message::SensorSubscribeCmdV4,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
-    if self.subscribed_sensors.contains(message.sensor_index()) {
+    if self.subscribed_sensors.contains(message.feature_index()) {
       return future::ready(Ok(message::Ok::new(message.id()).into())).boxed();
     }
     let sensors = self.subscribed_sensors.clone();
@@ -233,7 +226,7 @@ impl ProtocolHandler for KiirooV21 {
           }
         });
       }
-      sensors.insert(*message.sensor_index());
+      sensors.insert(*message.feature_index());
       Ok(message::Ok::new(message.id()).into())
     }
     .boxed()
@@ -242,16 +235,16 @@ impl ProtocolHandler for KiirooV21 {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: message::SensorUnsubscribeCmd,
+    message: message::SensorUnsubscribeCmdV4,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
-    if !self.subscribed_sensors.contains(message.sensor_index()) {
+    if !self.subscribed_sensors.contains(message.feature_index()) {
       return future::ready(Ok(message::Ok::new(message.id()).into())).boxed();
     }
     let sensors = self.subscribed_sensors.clone();
     async move {
       // If we have no sensors we're currently subscribed to, we'll need to end our BLE
       // characteristic subscription.
-      sensors.remove(message.sensor_index());
+      sensors.remove(message.feature_index());
       if sensors.is_empty() {
         device
           .unsubscribe(&HardwareUnsubscribeCmd::new(Endpoint::Rx))

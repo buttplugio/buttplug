@@ -263,7 +263,7 @@ impl ServerDeviceManager {
               &dev.name(),
               &dev.definition().user_config().display_name(),
               &None,
-              dev.message_attributes().clone().into(),
+              dev.definition().features().clone().into(),
             )
           })
           .collect();
