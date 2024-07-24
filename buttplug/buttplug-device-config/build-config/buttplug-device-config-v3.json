@@ -6557,12 +6557,28 @@
           }
         ]
       },
+      "configurations": [
+        {
+          "identifier": [
+            "F1SV2A",
+            "F1SV2X"
+          ],
+          "name": "Lelo F1s V2"
+        },
+        {
+          "identifier": [
+            "F1SV3"
+          ],
+          "name": "Lelo F1s V3"
+        }
+      ],
       "communication": [
         {
           "btle": {
             "names": [
               "F1SV2A",
-              "F1SV2X"
+              "F1SV2X",
+              "F1SV3"
             ],
             "services": {
               "0000fff0-0000-1000-8000-00805f9b34fb": {
