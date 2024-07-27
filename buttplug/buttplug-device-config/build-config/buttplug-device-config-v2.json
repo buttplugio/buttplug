@@ -8965,7 +8965,30 @@
           ]
         }
       },
-      "configurations": [
+      "configurations": [{
+        "identifier": [
+          "MP2_JK_N0_P1"
+        ],
+        "name": "Sistalk MonsterPub 2 Doctor Whale 2",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                100
+              ],
+              "ActuatorType": "Vibrate"
+            },
+            {
+              "StepRange": [
+                0,
+                100
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      },
         {
           "identifier": [
             "MP2_JK_N_P1"

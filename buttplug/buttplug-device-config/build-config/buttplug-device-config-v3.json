@@ -13463,6 +13463,68 @@
       "configurations": [
         {
           "identifier": [
+            "MP2_JK_N0_P1"
+          ],
+          "name": "Sistalk MonsterPub 2 Doctor Whale Premium",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Pressure",
+              "description": "Pressure sensor",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    2047
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
             "MP2_JK_N_P1"
           ],
           "name": "Sistalk MonsterPub 2 Doctor Whale",
@@ -13559,6 +13621,53 @@
         },
         {
           "identifier": [
+            "MP2_QC_N_P1"
+          ],
+          "name": "Sistalk MonsterPub 2 Master Godkilla",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
             "MP_BABY_QC_N_P4"
           ],
           "name": "Sistalk MonsterPub Baby Youth Health",
@@ -13599,7 +13708,36 @@
           "identifier": [
             "MP1N_QC_TL_P2"
           ],
-          "name": "Sistalk MonsterPub BeatHeart"
+          "name": "Sistalk MonsterPub BeatHeart",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -13619,6 +13757,12 @@
               },
               "00008000-0000-1000-8000-00805f9b34fb": {
                 "rx": "00008001-0000-1000-8000-00805f9b34fb"
+              },
+              "00006050-0000-1000-8000-00805f9b34fb": {
+                "rxblebattery": "00006051-0000-1000-8000-00805f9b34fb"
+              },
+              "00006030-0000-1000-8000-00805f9b34fb": {
+                "rxpressure": "00006031-0000-1000-8000-00805f9b34fb"
               }
             }
           }

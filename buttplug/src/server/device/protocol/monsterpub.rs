@@ -5,7 +5,12 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::configuration::ProtocolCommunicationSpecifier;
+use std::sync::Arc;
+
+use async_trait::async_trait;
+use futures_util::{future, FutureExt};
+use futures_util::future::BoxFuture;
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -18,11 +23,14 @@ use crate::{
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
 };
-use async_trait::async_trait;
-use std::sync::Arc;
+use crate::core::message;
+use crate::core::message::{ButtplugDeviceMessage, ButtplugServerMessage, SensorReadCmd, SensorType};
+use crate::server::device::configuration::ProtocolCommunicationSpecifier;
+use crate::server::device::hardware::{HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd};
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
+
   #[derive(Default)]
   pub struct MonsterPubIdentifierFactory {}
 
@@ -131,8 +139,50 @@ pub struct MonsterPub {
 }
 
 impl MonsterPub {
-  pub fn new(tx: Endpoint) -> Self {
-    Self { tx }
+  pub fn new(tx: Endpoint) -> Self { Self { tx } }
+
+  // pressure endpoint is notify-only and subscriptions are gonna be reworked in v4
+  fn handle_pressure_read_cmd(&self, device: Arc<Hardware>, message: SensorReadCmd) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+    let mut device_notification_receiver = device.event_stream();
+    async move {
+      device.subscribe(&HardwareSubscribeCmd::new(Endpoint::RxPressure)).await?;
+      while let Ok(event) = device_notification_receiver.recv().await {
+        return match event {
+          HardwareEvent::Notification(_, endpoint, data) => {
+            if endpoint != Endpoint::RxPressure { continue; }
+            if data.len() < 2 {
+              return Err(ButtplugDeviceError::ProtocolSpecificError(
+                "monsterpub".to_owned(),
+                "MonsterPub device returned unexpected data while getting pressure info.".to_owned(),
+              ));
+            }
+            device.unsubscribe(&HardwareUnsubscribeCmd::new(Endpoint::RxPressure)).await?;
+
+            // value is u32 LE, but real value is in range from 0 to about 1000 (0x4ff) (i was scared to squeeze it harder)
+            let pressure_level = [data[0], data[1], 0, 0];
+            let pressure_reading = message::SensorReading::new(
+              message.device_index(),
+              *message.sensor_index(),
+              SensorType::Pressure,
+              vec![i32::from_le_bytes(pressure_level)],
+            );
+
+            Ok(pressure_reading.into())
+          }
+          HardwareEvent::Disconnected(_) => {
+            Err(ButtplugDeviceError::ProtocolSpecificError(
+              "monsterpub".to_owned(),
+              "MonsterPub device disconnected while getting pressure info.".to_owned(),
+            ))
+          }
+        }
+      }
+      Err(ButtplugDeviceError::ProtocolSpecificError(
+        "monsterpub".to_owned(),
+        "MonsterPub device disconnected while getting pressure info.".to_owned(),
+      ))
+    }
+      .boxed()
   }
 }
 
@@ -170,5 +220,15 @@ impl ProtocolHandler for MonsterPub {
       tx == Endpoint::TxMode,
     )
     .into()])
+  }
+
+  fn handle_sensor_read_cmd(&self, device: Arc<Hardware>, message: SensorReadCmd) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+    match message.sensor_type() {
+      SensorType::Battery => self.handle_battery_level_cmd(device, message),
+      SensorType::Pressure => self.handle_pressure_read_cmd(device, message),
+      _ => future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+        "Command not implemented for this protocol: SensorReadCmd".to_string(),
+      ))).boxed(),
+    }
   }
 }
