@@ -13463,9 +13463,10 @@
       "configurations": [
         {
           "identifier": [
+            "MP2_JK_N_P1",
             "MP2_JK_N0_P1"
           ],
-          "name": "Sistalk MonsterPub 2 Doctor Whale Premium",
+          "name": "Sistalk MonsterPub 2 Doctor Whale",
           "features": [
             {
               "feature-type": "Vibrate",
@@ -13518,38 +13519,6 @@
                 ],
                 "messages": [
                   "SensorReadCmd"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "identifier": [
-            "MP2_JK_N_P1"
-          ],
-          "name": "Sistalk MonsterPub 2 Doctor Whale",
-          "features": [
-            {
-              "feature-type": "Vibrate",
-              "actuator": {
-                "step-range": [
-                  0,
-                  100
-                ],
-                "messages": [
-                  "ScalarCmd"
-                ]
-              }
-            },
-            {
-              "feature-type": "Vibrate",
-              "actuator": {
-                "step-range": [
-                  0,
-                  100
-                ],
-                "messages": [
-                  "ScalarCmd"
                 ]
               }
             }
@@ -13623,7 +13592,7 @@
           "identifier": [
             "MP2_QC_N_P1"
           ],
-          "name": "Sistalk MonsterPub 2 Master Godkilla",
+          "name": "Sistalk MonsterPub 2 Master Godzilla",
           "features": [
             {
               "feature-type": "Vibrate",

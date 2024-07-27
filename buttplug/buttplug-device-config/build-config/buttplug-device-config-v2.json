@@ -8948,6 +8948,9 @@
           },
           "00008000-0000-1000-8000-00805f9b34fb": {
             "rx": "00008001-0000-1000-8000-00805f9b34fb"
+          },
+          "00006050-0000-1000-8000-00805f9b34fb": {
+            "rxblebattery": "00006051-0000-1000-8000-00805f9b34fb"
           }
         }
       },
@@ -8965,30 +8968,7 @@
           ]
         }
       },
-      "configurations": [{
-        "identifier": [
-          "MP2_JK_N0_P1"
-        ],
-        "name": "Sistalk MonsterPub 2 Doctor Whale 2",
-        "messages": {
-          "ScalarCmd": [
-            {
-              "StepRange": [
-                0,
-                100
-              ],
-              "ActuatorType": "Vibrate"
-            },
-            {
-              "StepRange": [
-                0,
-                100
-              ],
-              "ActuatorType": "Vibrate"
-            }
-          ]
-        }
-      },
+      "configurations": [
         {
           "identifier": [
             "MP2_JK_N_P1"
@@ -9009,6 +8989,18 @@
                   100
                 ],
                 "ActuatorType": "Vibrate"
+              }
+            ],
+            "SensorReadCmd": [
+              {
+                "FeatureDescriptor": "Battery Level",
+                "SensorType": "Battery",
+                "SensorRange": [
+                  [
+                    0,
+                    100
+                  ]
+                ]
               }
             ]
           }
@@ -9095,7 +9087,30 @@
           "identifier": [
             "MP1N_QC_TL_P2"
           ],
-          "name": "Sistalk MonsterPub BeatHeart"
+          "name": "Sistalk MonsterPub BeatHeart",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ],
+            "SensorReadCmd": [
+              {
+                "FeatureDescriptor": "Battery Level",
+                "SensorType": "Battery",
+                "SensorRange": [
+                  [
+                    0,
+                    100
+                  ]
+                ]
+              }
+            ]
+          }
         }
       ]
     },
