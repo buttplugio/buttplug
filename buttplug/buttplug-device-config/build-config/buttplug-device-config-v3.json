@@ -13078,16 +13078,16 @@
         }
       ]
     },
-    "sensee-capsule": {
+    "sensee-v2": {
       "defaults": {
-        "name": "Sensee Capsule",
+        "name": "Sensee Device",
         "features": [
           {
             "feature-type": "Vibrate",
             "actuator": {
               "step-range": [
                 0,
-                3
+                100
               ],
               "messages": [
                 "ScalarCmd"
@@ -13099,7 +13099,7 @@
             "actuator": {
               "step-range": [
                 0,
-                3
+                100
               ],
               "messages": [
                 "ScalarCmd"
@@ -13108,15 +13108,163 @@
           }
         ]
       },
+      "configurations": [
+        {
+          "identifier": [
+            "CCPA10S2"
+          ],
+          "name": "Sensee Capsule"
+        },
+        {
+          "identifier": [
+            "CCPA18S5"
+          ],
+          "name": "Sensee Astronaut"
+        },
+        {
+          "identifier": [
+            "Easylive NO8 Cup"
+          ],
+          "name": "Sensee No8",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "CTY508S5"
+          ],
+          "name": "Sensee Voice-Interactive Female Vibrator",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "PTYB22S2"
+          ],
+          "name": "Sensee Moonlight",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Constrict",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "CTY916S4"
+          ],
+          "name": "Sensee Dream Stick",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        }
+      ],
       "communication": [
         {
           "btle": {
             "names": [
-              "CCPA10S2"
+              "CCPA10S2",
+              "CCPA18S5",
+              "Easylive NO8 Cup",
+              "CTY508S5",
+              "CTY916S4",
+              "PTYB22S2"
             ],
             "services": {
               "0000fff0-0000-1000-8000-00805f9b34fb": {
-                "tx": "0000fff5-0000-1000-8000-00805f9b34fb"
+                "tx": "0000fff5-0000-1000-8000-00805f9b34fb",
+                "rx": "0000fff4-0000-1000-8000-00805f9b34fb"
               }
             }
           }
