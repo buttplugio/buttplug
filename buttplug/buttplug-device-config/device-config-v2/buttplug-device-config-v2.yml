@@ -4459,6 +4459,8 @@ protocols:
           rxblemodel: 00006014-0000-1000-8000-00805f9b34fb
         00008000-0000-1000-8000-00805f9b34fb:
           rx: 00008001-0000-1000-8000-00805f9b34fb
+        00006050-0000-1000-8000-00805f9b34fb:
+          rxblebattery: 00006051-0000-1000-8000-00805f9b34fb
     defaults:
       name: Sistalk MonsterPub Device
       messages:
@@ -4468,6 +4470,7 @@ protocols:
     configurations:
       - identifier:
           - MP2_JK_N_P1
+          - MP2_JK_N0_P1
         name: Sistalk MonsterPub 2 Doctor Whale
         messages:
           ScalarCmd:
@@ -4475,6 +4478,10 @@ protocols:
               ActuatorType: Vibrate
             - StepRange: [0, 100]
               ActuatorType: Vibrate
+          SensorReadCmd:
+            - FeatureDescriptor: Battery Level
+              SensorType: Battery
+              SensorRange: [ [ 0, 100 ] ]
       - identifier:
           - MP_MW_TL_P2
         name: Sistalk MonsterPub Magic Kiss
@@ -4508,6 +4515,14 @@ protocols:
       - identifier:
           - MP1N_QC_TL_P2
         name: Sistalk MonsterPub BeatHeart
+        messages:
+          ScalarCmd:
+            - StepRange: [ 0, 100 ]
+              ActuatorType: Vibrate
+          SensorReadCmd:
+            - FeatureDescriptor: Battery Level
+              SensorType: Battery
+              SensorRange: [ [ 0, 100 ] ]
   joyhub:
     btle:
       names:
