@@ -4942,7 +4942,8 @@
       "btle": {
         "names": [
           "F1SV2A",
-          "F1SV2X"
+          "F1SV2X",
+          "F1SV3"
         ],
         "services": {
           "0000fff0-0000-1000-8000-00805f9b34fb": {
