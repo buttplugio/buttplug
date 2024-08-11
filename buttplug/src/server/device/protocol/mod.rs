@@ -681,13 +681,15 @@ pub trait ProtocolHandler: Sync + Send {
     self.command_unimplemented(print_type_of(&message))
   }
 
+  // Allow here since this changes between debug/release
+  #[allow(unused_variables)]
   fn command_unimplemented(
     &self,
     command: &str,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    #[cfg(build = "debug")]
+    #[cfg(debug_assertions)]
     unimplemented!("Command not implemented for this protocol");
-    #[cfg(not(build = "debug"))]
+    #[cfg(not(debug_assertions))]
     Err(ButtplugDeviceError::UnhandledCommand(format!(
       "Command not implemented for this protocol: {}",
       command
