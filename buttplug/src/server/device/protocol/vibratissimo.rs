@@ -12,7 +12,7 @@ use crate::{
     message::{ActuatorType, Endpoint},
   },
   server::device::{
-    configuration::{ProtocolDeviceAttributes, UserDeviceIdentifier},
+    configuration::{UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
@@ -66,7 +66,7 @@ impl ProtocolInitializer for VibratissimoInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes,
+    _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(Vibratissimo::default()))
   }

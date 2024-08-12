@@ -11,7 +11,7 @@ use crate::{
     message::{ActuatorType, Endpoint},
   },
   server::device::{
-    configuration::{ProtocolDeviceAttributes, UserDeviceIdentifier},
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
@@ -27,7 +27,6 @@ use ecb::cipher::block_padding::Pkcs7;
 use ecb::cipher::{BlockDecryptMut, BlockEncryptMut, KeyInit};
 use std::sync::Arc;
 
-use crate::server::device::configuration::ProtocolCommunicationSpecifier;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use regex::Regex;
@@ -64,7 +63,7 @@ impl ProtocolInitializer for VibCrafterInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes,
+    _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut event_receiver = hardware.event_stream();
     hardware

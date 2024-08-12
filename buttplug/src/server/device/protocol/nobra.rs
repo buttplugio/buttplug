@@ -5,14 +5,10 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::configuration::{
-  ProtocolCommunicationSpecifier,
-  ProtocolDeviceAttributes,
-};
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-    configuration::UserDeviceIdentifier,
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
@@ -35,7 +31,7 @@ impl ProtocolInitializer for NobraInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes,
+    _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
       .write_value(&HardwareWriteCmd::new(Endpoint::Tx, vec![0x70], false))

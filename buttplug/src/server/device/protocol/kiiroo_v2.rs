@@ -5,17 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::configuration::{
-  ProtocolCommunicationSpecifier,
-  ProtocolDeviceAttributes,
-};
 use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{self, Endpoint},
   },
   server::device::{
-    configuration::UserDeviceIdentifier,
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceIdentifier, UserDeviceDefinition},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
       fleshlight_launch_helper::calculate_speed,
@@ -42,7 +38,7 @@ impl ProtocolInitializer for KiirooV2Initializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes,
+    _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareWriteCmd::new(Endpoint::Firmware, vec![0x0u8], true);
     hardware.write_value(&msg).await?;

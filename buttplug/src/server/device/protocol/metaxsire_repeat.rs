@@ -5,17 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::ActuatorType;
-use crate::core::message::ActuatorType::{Constrict, Rotate, Vibrate};
-use crate::server::device::configuration::ProtocolCommunicationSpecifier;
 use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
+  core::{errors::ButtplugDeviceError, message::{ActuatorType::{self, Constrict, Rotate, Vibrate}, Endpoint}},
   server::device::{
-    configuration::UserDeviceIdentifier,
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
-      ProtocolDeviceAttributes,
       ProtocolHandler,
       ProtocolIdentifier,
       ProtocolInitializer,
@@ -38,7 +34,7 @@ impl ProtocolInitializer for MetaXSireRepeatInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes,
+    _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(MetaXSireRepeat::new(hardware)))
   }

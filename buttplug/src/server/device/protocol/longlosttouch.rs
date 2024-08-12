@@ -5,15 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::configuration::{
-  ProtocolCommunicationSpecifier,
-  ProtocolDeviceAttributes,
-};
 use crate::util::async_manager;
 use crate::{
   core::{errors::ButtplugDeviceError, message, message::Endpoint},
   server::device::{
-    configuration::UserDeviceIdentifier,
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
@@ -39,7 +35,7 @@ impl ProtocolInitializer for LongLostTouchInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _attributes: &ProtocolDeviceAttributes,
+    _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(LongLostTouch::new(hardware)))
   }

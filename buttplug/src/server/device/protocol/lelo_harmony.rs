@@ -5,17 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::configuration::{
-  ProtocolCommunicationSpecifier,
-  ProtocolDeviceAttributes,
-};
 use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{ActuatorType, Endpoint},
   },
   server::device::{
-    configuration::UserDeviceIdentifier,
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceIdentifier, UserDeviceDefinition},
     hardware::{
       Hardware,
       HardwareCommand,
@@ -45,7 +41,7 @@ impl ProtocolInitializer for LeloHarmonyInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes,
+    _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     // The Lelo Harmony has a very specific pairing flow:
     // * First the device is turned on in BLE mode (long press)

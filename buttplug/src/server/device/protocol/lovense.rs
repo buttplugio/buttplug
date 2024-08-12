@@ -5,18 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::SensorReadingV4;
-use crate::server::device::configuration::{
-  ProtocolCommunicationSpecifier,
-  ProtocolDeviceAttributes,
-};
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{self, ActuatorType, ButtplugDeviceMessage, Endpoint},
+    message::{self, ActuatorType, ButtplugDeviceMessage, Endpoint, FeatureType, SensorReadingV4},
   },
   server::device::{
-    configuration::UserDeviceIdentifier,
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
@@ -147,30 +142,34 @@ impl ProtocolInitializer for LovenseInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    attributes: &ProtocolDeviceAttributes,
+    device_definition: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut protocol = Lovense::default();
     protocol.device_type = self.device_type.clone();
 
-    if let Some(scalars) = attributes.message_attributes().scalar_cmd() {
-      protocol.vibrator_count = scalars
-        .clone()
-        .iter()
-        .filter(|x| [ActuatorType::Vibrate, ActuatorType::Oscillate].contains(x.actuator_type()))
-        .count();
+    protocol.vibrator_count = device_definition
+      .features()
+      .iter()
+      .filter(|x| [FeatureType::Vibrate, FeatureType::Oscillate].contains(x.feature_type()))
+      .count();
 
-      // This might need better tuning if other complex Lovenses are released
-      // Currently this only applies to the Flexer/Lapis/Solace
-      if (protocol.vibrator_count == 2 && scalars.len() > 2)
-        || protocol.vibrator_count > 2
-        || protocol.device_type == "H"
-      {
-        protocol.use_mply = true;
-      }
+    let actuator_count = device_definition
+      .features()
+      .iter()
+      .filter(|x| x.actuator().is_some())
+      .count();
+
+    // This might need better tuning if other complex Lovenses are released
+    // Currently this only applies to the Flexer/Lapis/Solace
+    if (protocol.vibrator_count == 2 && actuator_count > 2)
+      || protocol.vibrator_count > 2
+      || protocol.device_type == "H"
+    {
+      protocol.use_mply = true;
     }
-
+    
     debug!(
-      "Device type {} initialized with {} vibrators {}using Mply",
+      "Device type {} initialized with {} vibrators {} using Mply",
       protocol.device_type,
       protocol.vibrator_count,
       if protocol.use_mply { "" } else { "not " }

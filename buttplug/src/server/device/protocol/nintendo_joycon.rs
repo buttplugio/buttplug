@@ -1,13 +1,19 @@
-use crate::server::device::configuration::ProtocolCommunicationSpecifier;
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
 #[cfg(feature = "wasm")]
 use crate::util;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_initializer_setup,
   server::device::{
-    configuration::ProtocolDeviceAttributes,
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, UserDeviceIdentifier},
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
   util::async_manager,
 };
@@ -226,7 +232,7 @@ impl ProtocolInitializer for NintendoJoyconInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes,
+    _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     send_sub_command(hardware.clone(), 0, 72, &[0x01])
       .await

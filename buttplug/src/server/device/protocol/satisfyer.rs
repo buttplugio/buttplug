@@ -5,17 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::configuration::{
-  ProtocolCommunicationSpecifier,
-  ProtocolDeviceAttributes,
-};
 use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{self, Endpoint},
   },
   server::device::{
-    configuration::UserDeviceIdentifier,
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
@@ -103,16 +99,17 @@ impl ProtocolInitializer for SatisfyerInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    attributes: &ProtocolDeviceAttributes,
+    device_definition: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareWriteCmd::new(Endpoint::Command, vec![0x01], true);
     let info_fut = hardware.write_value(&msg);
     info_fut.await?;
 
-    let mut feature_count = 2; // fallback to 2
-    if let Some(attrs) = attributes.message_attributes().scalar_cmd() {
-      feature_count = attrs.len();
-    }
+    let feature_count = device_definition
+      .features()
+      .iter()
+      .filter(|x| x.actuator().is_some())
+      .count();
     Ok(Arc::new(Satisfyer::new(hardware, feature_count)))
   }
 }

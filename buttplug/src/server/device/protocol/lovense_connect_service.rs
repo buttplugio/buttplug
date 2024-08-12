@@ -5,18 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::SensorReadingV4;
-use crate::server::device::configuration::{
-  ProtocolCommunicationSpecifier,
-  ProtocolDeviceAttributes,
-};
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{self, ActuatorType, ButtplugDeviceMessage, Endpoint},
+    message::{self, ActuatorType, ButtplugDeviceMessage, Endpoint, FeatureType, SensorReadingV4},
   },
   server::device::{
-    configuration::UserDeviceIdentifier,
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
@@ -43,29 +38,27 @@ impl ProtocolInitializer for LovenseConnectServiceInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    attributes: &ProtocolDeviceAttributes,
+    device_definition: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut protocol = LovenseConnectService::new(hardware.address());
 
-    if let Some(scalars) = attributes.message_attributes().scalar_cmd() {
-      protocol.vibrator_count = scalars
-        .clone()
-        .iter()
-        .filter(|x| [ActuatorType::Vibrate].contains(x.actuator_type()))
-        .count();
-      protocol.thusting_count = scalars
-        .clone()
-        .iter()
-        .filter(|x| [ActuatorType::Oscillate].contains(x.actuator_type()))
-        .count();
+    protocol.vibrator_count = device_definition
+      .features()
+      .iter()
+      .filter(|x| *x.feature_type() == FeatureType::Vibrate)
+      .count();
+    protocol.thusting_count = device_definition
+      .features()
+      .iter()
+      .filter(|x| *x.feature_type() == FeatureType::Oscillate)
+      .count();
 
-      // The Ridge and Gravity both oscillate, but the Ridge only oscillates but takes
-      // the vibrate command... The Gravity has a vibe as well, and uses a Thrusting
-      // command for that oscillator.
-      if protocol.vibrator_count == 0 && protocol.thusting_count != 0 {
-        protocol.vibrator_count = protocol.thusting_count;
-        protocol.thusting_count = 0;
-      }
+    // The Ridge and Gravity both oscillate, but the Ridge only oscillates but takes
+    // the vibrate command... The Gravity has a vibe as well, and uses a Thrusting
+    // command for that oscillator.
+    if protocol.vibrator_count == 0 && protocol.thusting_count != 0 {
+      protocol.vibrator_count = protocol.thusting_count;
+      protocol.thusting_count = 0;
     }
 
     if hardware.name() == "Solace" {

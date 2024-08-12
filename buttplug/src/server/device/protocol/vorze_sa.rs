@@ -12,7 +12,7 @@ use crate::{
     message::{self, Endpoint},
   },
   server::device::{
-    configuration::{ProtocolDeviceAttributes, UserDeviceIdentifier},
+    configuration::{UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
@@ -38,7 +38,7 @@ impl ProtocolInitializer for VorzeSAInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes,
+    _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let hwname = hardware.name().to_ascii_lowercase();
     let device_type = if hwname.contains("cycsa") {

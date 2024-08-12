@@ -5,14 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::configuration::ProtocolCommunicationSpecifier;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::{Endpoint, FeatureType},
   },
   server::device::{
-    configuration::{ProtocolDeviceAttributes, UserDeviceIdentifier},
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
@@ -72,18 +71,14 @@ impl ProtocolInitializer for HismithMiniInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    attrs: &ProtocolDeviceAttributes,
+    device_definition: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let mut dual_vibes = false;
-    if let Some(scalar) = attrs.message_attributes().scalar_cmd() {
-      dual_vibes = scalar
-        .iter()
-        .filter(|s| s.actuator_type() == &ActuatorType::Vibrate)
-        .count()
-        >= 2;
-    }
     Ok(Arc::new(HismithMini {
-      dual_vibe: dual_vibes,
+      dual_vibe: device_definition
+        .features()
+        .iter()
+        .filter(|x| *x.feature_type() == FeatureType::Vibrate)
+        .count() >= 2
     }))
   }
 }

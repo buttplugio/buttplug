@@ -7,18 +7,12 @@
 
 use crate::core::message::ActuatorType;
 use crate::core::message::ActuatorType::{Oscillate, Vibrate};
-use crate::server::device::configuration::{
-  ProtocolCommunicationSpecifier,
-  ProtocolDeviceAttributes,
-};
-use crate::server::device::hardware::Hardware;
-use crate::server::device::protocol::ProtocolIdentifier;
-use crate::server::device::protocol::ProtocolInitializer;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_initializer_setup, ProtocolHandler, UserDeviceIdentifier},
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
 };
 use async_trait::async_trait;
@@ -33,7 +27,7 @@ impl ProtocolInitializer for SvakomV5Initializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes,
+    _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(SvakomV5::new()))
   }

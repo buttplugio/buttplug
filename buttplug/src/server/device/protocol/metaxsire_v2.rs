@@ -6,16 +6,12 @@
 // for full license information.
 
 use crate::core::message::ActuatorType;
-use crate::server::device::configuration::{
-  ProtocolCommunicationSpecifier,
-  ProtocolDeviceAttributes,
-};
 use crate::server::device::hardware::Hardware;
 use crate::server::device::protocol::ProtocolInitializer;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-    configuration::UserDeviceIdentifier,
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier},
   },
@@ -33,7 +29,7 @@ impl ProtocolInitializer for MetaXSireV2Initializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes,
+    _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
       .write_value(&HardwareWriteCmd::new(Endpoint::Tx, vec![0xaa, 0x04], true))

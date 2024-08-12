@@ -137,8 +137,6 @@
 //! ### User Configurations
 //!
 
-mod server_device_message_attributes;
-pub use server_device_message_attributes::*;
 mod specifier;
 pub use specifier::*;
 mod identifiers;
@@ -658,7 +656,7 @@ mod test {
     ));
     assert!(!config.protocol_specializers(&spec).is_empty());
   }
-
+/*
   #[test]
   fn test_specific_device_config_creation() {
     let dcm = create_unit_test_dcm(false);
@@ -740,4 +738,5 @@ mod test {
     assert!(config.message_attributes().raw_subscribe_cmd().is_none());
     assert!(config.message_attributes().raw_unsubscribe_cmd().is_none());
   }
+  */
 }

@@ -8,17 +8,13 @@
 use self::handyplug::Ping;
 
 use super::fleshlight_launch_helper;
-use crate::server::device::configuration::{
-  ProtocolCommunicationSpecifier,
-  ProtocolDeviceAttributes,
-};
 use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{self, ButtplugDeviceMessage, Endpoint},
   },
   server::device::{
-    configuration::UserDeviceIdentifier,
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceIdentifier, UserDeviceDefinition},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
@@ -53,7 +49,7 @@ impl ProtocolInitializer for TheHandyInitializer {
   async fn initialize(
     &mut self,
     _hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes,
+    _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     // Ok, somehow this whole function has been basically a no-op. The read/write lines never had an
     // await on them, so they were never run. But only now, in Rust 1.75/Buttplug 7.1.15, have we

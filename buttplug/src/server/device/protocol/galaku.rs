@@ -25,7 +25,7 @@ use crate::{
   server::device::{
     configuration::{
       ProtocolCommunicationSpecifier,
-      ProtocolDeviceAttributes,
+      UserDeviceDefinition,
     },
     configuration::UserDeviceIdentifier,
     hardware::{
@@ -106,7 +106,7 @@ impl ProtocolInitializer for GalakuInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes,
+    _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut protocol = Galaku::default();
     protocol.is_caiping_pump_device = false;

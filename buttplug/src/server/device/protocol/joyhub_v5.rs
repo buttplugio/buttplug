@@ -14,7 +14,7 @@ use crate::{
   server::device::{
     configuration::{
       ProtocolCommunicationSpecifier,
-      ProtocolDeviceAttributes,
+      UserDeviceDefinition,
     },
     configuration::UserDeviceIdentifier,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
@@ -81,7 +81,7 @@ impl ProtocolInitializer for JoyHubV5Initializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes,
+    _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(JoyHubV5::new(hardware)))
   }
