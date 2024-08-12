@@ -127,7 +127,7 @@ use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{
-      self, ActuatorType, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, ButtplugServerDeviceMessage, ButtplugServerMessage, Endpoint, SensorReadingV4
+      self, ActuatorType, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, ButtplugServerDeviceMessage, ButtplugServerMessage, Endpoint, SensorReadingV4, SensorType
     },
   },
   server::device::{
@@ -830,11 +830,11 @@ pub trait ProtocolHandler: Sync + Send {
 
   fn handle_sensor_read_cmd(
     &self,
-    _: Arc<Hardware>,
+    device: Arc<Hardware>,
     message: message::SensorReadCmdV4,
-  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+  ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     match message.sensor_type() {
-      //SensorType::Battery => self.handle_battery_level_cmd(device, message),
+      SensorType::Battery => self.handle_battery_level_cmd(device, message),
       _ => future::ready(Err(ButtplugDeviceError::UnhandledCommand(
         "Command not implemented for this protocol: SensorReadCmd".to_string(),
       )))

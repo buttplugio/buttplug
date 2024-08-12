@@ -192,6 +192,12 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributes {
     };
 
     // Raw messages
+    let raw_attrs = if let Some(raw_feature) = features.iter().find(|f| f.raw().is_some()) {
+      Some(RawDeviceMessageAttributes::new(raw_feature.raw().as_ref().unwrap().endpoints()))
+    } else {
+      None
+    };
+
 
     Self {
       scalar_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::ScalarCmd),
@@ -199,6 +205,9 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributes {
       linear_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::LinearCmd),
       sensor_read_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorReadCmd),
       sensor_subscribe_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorSubscribeCmd),
+      raw_read_cmd: raw_attrs.clone(),
+      raw_write_cmd: raw_attrs.clone(),
+      raw_subscribe_cmd: raw_attrs.clone(),
       ..Default::default()
     }
   }

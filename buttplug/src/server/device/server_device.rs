@@ -46,13 +46,7 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     message::{
-      self, ActuatorType, BatteryLevelReading, ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceMessage, ButtplugDeviceMessageType, ButtplugMessage,
-      ButtplugServerDeviceMessage, ButtplugServerMessage, 
-      Endpoint, FeatureType, RSSILevelReading, RawReading, RawSubscribeCmd, ScalarCmd, ScalarCmdV4,
-      ScalarSubcommandV4, SensorReadCmd,
-      SensorReadCmdV4, SensorSubscribeCmd, SensorSubscribeCmdV4, SensorType,
-      SensorUnsubscribeCmdV4, VibrateCmd,
+      self, ActuatorType, BatteryLevelReading, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, ButtplugDeviceMessageType, ButtplugMessage, ButtplugServerDeviceMessage, Endpoint, FeatureType, RSSILevelReading, RawReading, RawSubscribeCmd, ScalarCmd, ScalarCmdV4, ScalarSubcommandV4, SensorReadCmd, SensorReadCmdV4, SensorReading, SensorReadingV4, SensorSubscribeCmd, SensorSubscribeCmdV4, SensorType, SensorUnsubscribeCmdV4, VibrateCmd
     },
     ButtplugResultFuture,
   },
@@ -61,14 +55,13 @@ use crate::{
       configuration::DeviceConfigurationManager,
       hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent},
       protocol::ProtocolHandler,
-    },
-    ButtplugServerResultFuture,
+    }, ButtplugServerResultFuture
   },
   util::{self, async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use core::hash::{Hash, Hasher};
 use dashmap::DashSet;
-use futures::future::{self, FutureExt};
+use futures::future::{self, BoxFuture, FutureExt};
 use getset::Getters;
 use tokio::sync::RwLock;
 use tokio_stream::StreamExt;
@@ -670,13 +663,19 @@ impl ServerDevice {
       sensor_feature_index,
       *message.sensor_type(),
     );
-    self.handle_sensor_read_cmd_v4(sensor_read_v4)
+
+    let read_fut = self.handle_sensor_read_cmd_v4(sensor_read_v4); 
+    async move {
+      read_fut
+        .await
+        .map(|res| SensorReading::new(message.device_index(), *message.sensor_index(), *message.sensor_type(), res.data().clone()).into())      
+    }.boxed()
   }
 
   fn handle_sensor_read_cmd_v4(
     &self,
     message: message::SensorReadCmdV4,
-  ) -> ButtplugServerResultFuture {
+  ) -> BoxFuture<'static, Result<SensorReadingV4, ButtplugError>> {
     let result = self.check_sensor_command(message.feature_index(), message.sensor_type());
     let device = self.hardware.clone();
     let handler = self.handler.clone();
@@ -947,18 +946,12 @@ impl ServerDevice {
       let sensor_read = self.handle_sensor_read_cmd_v4(sensor_read_msg);
       let sensor_range_end = *battery_feature.sensor().as_ref().unwrap().value_range()[0].end();
       return async move {
-        let return_msg = sensor_read.await?;
-        if let ButtplugServerMessage::SensorReading(reading) = return_msg {
-          if reading.sensor_type() == SensorType::Battery {
-            Ok(
-              BatteryLevelReading::new(0, reading.data()[0] as f64 / sensor_range_end as f64)
-                .into(),
-            )
-          } else {
-            Err(ButtplugError::ButtplugDeviceError(
-              ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::Battery),
-            ))
-          }
+        let reading = sensor_read.await?;
+        if reading.sensor_type() == SensorType::Battery {
+          Ok(
+            BatteryLevelReading::new(0, reading.data()[0] as f64 / sensor_range_end as f64)
+              .into(),
+          )
         } else {
           Err(ButtplugError::ButtplugDeviceError(
             ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::Battery),
@@ -991,8 +984,7 @@ impl ServerDevice {
       let sensor_read_msg = SensorReadCmdV4::new(0, index as u32, SensorType::RSSI);
       let sensor_read = self.handle_sensor_read_cmd_v4(sensor_read_msg);
       return async move {
-        let return_msg = sensor_read.await?;
-        if let ButtplugServerMessage::SensorReading(reading) = return_msg {
+        let reading = sensor_read.await?;
           if reading.sensor_type() == SensorType::RSSI {
             Ok(
               RSSILevelReading::new(0, reading.data()[0])
@@ -1003,11 +995,6 @@ impl ServerDevice {
               ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::RSSI),
             ))
           }
-        } else {
-          Err(ButtplugError::ButtplugDeviceError(
-            ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::RSSI),
-          ))
-        }
       }
       .boxed();
     }
