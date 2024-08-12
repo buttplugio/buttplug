@@ -11,7 +11,7 @@ use crate::{
     message::{self, Endpoint},
   },
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceIdentifier, UserDeviceDefinition},
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
       fleshlight_launch_helper::calculate_speed,

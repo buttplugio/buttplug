@@ -46,7 +46,31 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     message::{
-      self, ActuatorType, BatteryLevelReading, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, ButtplugDeviceMessageType, ButtplugMessage, ButtplugServerDeviceMessage, Endpoint, FeatureType, RSSILevelReading, RawReading, RawSubscribeCmd, ScalarCmd, ScalarCmdV4, ScalarSubcommandV4, SensorReadCmd, SensorReadCmdV4, SensorReading, SensorReadingV4, SensorSubscribeCmd, SensorSubscribeCmdV4, SensorType, SensorUnsubscribeCmdV4, VibrateCmd
+      self,
+      ActuatorType,
+      BatteryLevelReading,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessage,
+      ButtplugDeviceMessageType,
+      ButtplugMessage,
+      ButtplugServerDeviceMessage,
+      Endpoint,
+      FeatureType,
+      RSSILevelReading,
+      RawReading,
+      RawSubscribeCmd,
+      ScalarCmd,
+      ScalarCmdV4,
+      ScalarSubcommandV4,
+      SensorReadCmd,
+      SensorReadCmdV4,
+      SensorReading,
+      SensorReadingV4,
+      SensorSubscribeCmd,
+      SensorSubscribeCmdV4,
+      SensorType,
+      SensorUnsubscribeCmdV4,
+      VibrateCmd,
     },
     ButtplugResultFuture,
   },
@@ -55,7 +79,8 @@ use crate::{
       configuration::DeviceConfigurationManager,
       hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent},
       protocol::ProtocolHandler,
-    }, ButtplugServerResultFuture
+    },
+    ButtplugServerResultFuture,
   },
   util::{self, async_manager, stream::convert_broadcast_receiver_to_stream},
 };
@@ -67,13 +92,11 @@ use tokio::sync::RwLock;
 use tokio_stream::StreamExt;
 
 use super::{
-  configuration::{
-    UserDeviceDefinition,
-    UserDeviceIdentifier,
-  },
+  configuration::{UserDeviceDefinition, UserDeviceIdentifier},
   hardware::HardwareWriteCmd,
   protocol::{
-    actuator_command_manager::ActuatorCommandManager, ProtocolKeepaliveStrategy,
+    actuator_command_manager::ActuatorCommandManager,
+    ProtocolKeepaliveStrategy,
     ProtocolSpecializer,
   },
 };
@@ -113,7 +136,8 @@ impl Hash for ServerDevice {
   }
 }
 
-impl Eq for ServerDevice {}
+impl Eq for ServerDevice {
+}
 
 impl PartialEq for ServerDevice {
   fn eq(&self, other: &Self) -> bool {
@@ -664,12 +688,19 @@ impl ServerDevice {
       *message.sensor_type(),
     );
 
-    let read_fut = self.handle_sensor_read_cmd_v4(sensor_read_v4); 
+    let read_fut = self.handle_sensor_read_cmd_v4(sensor_read_v4);
     async move {
-      read_fut
-        .await
-        .map(|res| SensorReading::new(message.device_index(), *message.sensor_index(), *message.sensor_type(), res.data().clone()).into())      
-    }.boxed()
+      read_fut.await.map(|res| {
+        SensorReading::new(
+          message.device_index(),
+          *message.sensor_index(),
+          *message.sensor_type(),
+          res.data().clone(),
+        )
+        .into()
+      })
+    }
+    .boxed()
   }
 
   fn handle_sensor_read_cmd_v4(
@@ -948,10 +979,7 @@ impl ServerDevice {
       return async move {
         let reading = sensor_read.await?;
         if reading.sensor_type() == SensorType::Battery {
-          Ok(
-            BatteryLevelReading::new(0, reading.data()[0] as f64 / sensor_range_end as f64)
-              .into(),
-          )
+          Ok(BatteryLevelReading::new(0, reading.data()[0] as f64 / sensor_range_end as f64).into())
         } else {
           Err(ButtplugError::ButtplugDeviceError(
             ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::Battery),
@@ -967,34 +995,30 @@ impl ServerDevice {
   }
 
   fn handle_rssi_level_cmd(&self) -> ButtplugServerResultFuture {
-    if let Some((index, _)) =
-      self
-        .definition
-        .features()
-        .iter()
-        .enumerate()
-        .find(|(_, x)| {
-          *x.feature_type() == FeatureType::RSSI
-            && x.sensor().as_ref().is_some_and(|y| {
-              y.messages()
-                .contains(&message::ButtplugSensorFeatureMessageType::SensorReadCmd)
-            })
-        })
+    if let Some((index, _)) = self
+      .definition
+      .features()
+      .iter()
+      .enumerate()
+      .find(|(_, x)| {
+        *x.feature_type() == FeatureType::RSSI
+          && x.sensor().as_ref().is_some_and(|y| {
+            y.messages()
+              .contains(&message::ButtplugSensorFeatureMessageType::SensorReadCmd)
+          })
+      })
     {
       let sensor_read_msg = SensorReadCmdV4::new(0, index as u32, SensorType::RSSI);
       let sensor_read = self.handle_sensor_read_cmd_v4(sensor_read_msg);
       return async move {
         let reading = sensor_read.await?;
-          if reading.sensor_type() == SensorType::RSSI {
-            Ok(
-              RSSILevelReading::new(0, reading.data()[0])
-                .into(),
-            )
-          } else {
-            Err(ButtplugError::ButtplugDeviceError(
-              ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::RSSI),
-            ))
-          }
+        if reading.sensor_type() == SensorType::RSSI {
+          Ok(RSSILevelReading::new(0, reading.data()[0]).into())
+        } else {
+          Err(ButtplugError::ButtplugDeviceError(
+            ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::RSSI),
+          ))
+        }
       }
       .boxed();
     }

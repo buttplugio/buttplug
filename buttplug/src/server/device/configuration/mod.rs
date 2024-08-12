@@ -656,7 +656,7 @@ mod test {
     ));
     assert!(!config.protocol_specializers(&spec).is_empty());
   }
-/*
+  /*
   #[test]
   fn test_specific_device_config_creation() {
     let dcm = create_unit_test_dcm(false);

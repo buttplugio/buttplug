@@ -83,14 +83,12 @@ impl ProtocolHandler for XInput {
           ))
         }
       };
-      Ok(
-        message::SensorReadingV4::new(
-          msg.device_index(),
-          *msg.feature_index(),
-          *msg.sensor_type(),
-          vec![battery],
-        )
-      )
+      Ok(message::SensorReadingV4::new(
+        msg.device_index(),
+        *msg.feature_index(),
+        *msg.sensor_type(),
+        vec![battery],
+      ))
     }
     .boxed()
   }

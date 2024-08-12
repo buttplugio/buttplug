@@ -8,7 +8,15 @@
 //! Buttplug Error Structs/Enums, representing protocol errors.
 
 use super::message::{
-  self, serializer::ButtplugSerializerError, ActuatorType, ButtplugDeviceMessageType, ButtplugMessageSpecVersion, Endpoint, ErrorCode, FeatureType, SensorType
+  self,
+  serializer::ButtplugSerializerError,
+  ActuatorType,
+  ButtplugDeviceMessageType,
+  ButtplugMessageSpecVersion,
+  Endpoint,
+  ErrorCode,
+  FeatureType,
+  SensorType,
 };
 #[cfg(feature = "server")]
 use crate::server::device::hardware::communication::HardwareSpecificError;

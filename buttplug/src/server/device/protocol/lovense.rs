@@ -167,7 +167,7 @@ impl ProtocolInitializer for LovenseInitializer {
     {
       protocol.use_mply = true;
     }
-    
+
     debug!(
       "Device type {} initialized with {} vibrators {} using Mply",
       protocol.device_type,

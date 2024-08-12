@@ -42,7 +42,6 @@ impl ButtplugMessageValidator for SensorUnsubscribeCmdV4 {
   }
 }
 
-
 #[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct SensorUnsubscribeCmdV3 {

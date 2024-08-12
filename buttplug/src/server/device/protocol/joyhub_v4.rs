@@ -12,11 +12,8 @@ use crate::{
   },
   generic_protocol_initializer_setup,
   server::device::{
-    configuration::{
-      ProtocolCommunicationSpecifier,
-      UserDeviceDefinition,
-    },
     configuration::UserDeviceIdentifier,
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },

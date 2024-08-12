@@ -5,16 +5,25 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::
-  core::{
-    errors::{ButtplugDeviceError, ButtplugError},
-    message::{
-      ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugDeviceCommandMessageUnion, DeviceFeature, DeviceFeatureActuator, RotateCmd, RotationSubcommand, ScalarCmd, ScalarCmdV4, ScalarSubcommand
-    },
-  };
+use crate::core::{
+  errors::{ButtplugDeviceError, ButtplugError},
+  message::{
+    ActuatorType,
+    ButtplugActuatorFeatureMessageType,
+    ButtplugDeviceCommandMessageUnion,
+    DeviceFeature,
+    DeviceFeatureActuator,
+    RotateCmd,
+    RotationSubcommand,
+    ScalarCmd,
+    ScalarCmdV4,
+    ScalarSubcommand,
+  },
+};
 use getset::Getters;
 use std::{
-  collections::HashSet, sync::atomic::{AtomicBool, AtomicU32, Ordering::Relaxed}
+  collections::HashSet,
+  sync::atomic::{AtomicBool, AtomicU32, Ordering::Relaxed},
 };
 
 // As of the last rewrite of the command manager, we're currently only tracking values of scalar and
@@ -26,7 +35,7 @@ struct FeatureStatus {
   actuator_type: ActuatorType,
   actuator: DeviceFeatureActuator,
   sent: AtomicBool,
-  value: (AtomicU32, AtomicBool)
+  value: (AtomicU32, AtomicBool),
 }
 
 impl FeatureStatus {
@@ -35,12 +44,15 @@ impl FeatureStatus {
       actuator_type: *actuator_type,
       actuator: actuator.clone(),
       sent: AtomicBool::new(false),
-      value: (AtomicU32::new(0), AtomicBool::new(false))
+      value: (AtomicU32::new(0), AtomicBool::new(false)),
     }
   }
 
   pub fn current(&self) -> (ActuatorType, (u32, bool)) {
-    (self.actuator_type, (self.value.0.load(Relaxed), self.value.1.load(Relaxed)))
+    (
+      self.actuator_type,
+      (self.value.0.load(Relaxed), self.value.1.load(Relaxed)),
+    )
   }
 
   pub fn messages(&self) -> &HashSet<ButtplugActuatorFeatureMessageType> {
@@ -102,25 +114,23 @@ impl ActuatorCommandManager {
   pub fn new(features: &Vec<DeviceFeature>) -> Self {
     let mut stop_commands = vec![];
 
-    let mut statuses = vec!();
+    let mut statuses = vec![];
     let mut scalar_subcommands = vec![];
     let mut rotate_subcommands = vec![];
     for (index, feature) in features.iter().enumerate() {
       if let Some(actuator) = feature.actuator() {
         let actuator_type: ActuatorType = feature.feature_type().clone().try_into().unwrap();
         statuses.push(FeatureStatus::new(&actuator_type, actuator));
-        if actuator.messages().contains(&crate::core::message::ButtplugActuatorFeatureMessageType::RotateCmd) {
-          rotate_subcommands.push(RotationSubcommand::new(
-            index as u32,
-            0.0, 
-            false,
-          ));
-        } else if actuator.messages().contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ScalarCmd) {
-          scalar_subcommands.push(ScalarSubcommand::new(
-            index as u32,
-            0.0,
-            actuator_type
-          ));
+        if actuator
+          .messages()
+          .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::RotateCmd)
+        {
+          rotate_subcommands.push(RotationSubcommand::new(index as u32, 0.0, false));
+        } else if actuator
+          .messages()
+          .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ScalarCmd)
+        {
+          scalar_subcommands.push(ScalarSubcommand::new(index as u32, 0.0, actuator_type));
         }
       }
     }
@@ -143,13 +153,13 @@ impl ActuatorCommandManager {
     &self,
     msg_type: ButtplugActuatorFeatureMessageType,
     commands: &Vec<(u32, ActuatorType, (f64, bool))>,
-    match_all: bool
+    match_all: bool,
   ) -> Result<Vec<(u32, ActuatorType, (u32, bool))>, ButtplugError> {
     // Convert from the generic 0.0-1.0 range to the StepCount attribute given by the device config.
 
     // If we've already sent commands before, we should check against our old values. Otherwise, we
     // should always send whatever command we're going to send.
-    let mut result: Vec<(u32, ActuatorType, (u32, bool))> = vec!();
+    let mut result: Vec<(u32, ActuatorType, (u32, bool))> = vec![];
 
     for command in commands {
       if command.0 >= self.feature_status.len().try_into().unwrap() {
@@ -198,14 +208,31 @@ impl ActuatorCommandManager {
       );
     }
 
-    let mut final_result: Vec<Option<(ActuatorType, u32)>> = vec![None; self.feature_status.iter().filter(|x| x.messages().contains(&ButtplugActuatorFeatureMessageType::ScalarCmd)).count()];
+    let mut final_result: Vec<Option<(ActuatorType, u32)>> = vec![
+      None;
+      self
+        .feature_status
+        .iter()
+        .filter(|x| x
+          .messages()
+          .contains(&ButtplugActuatorFeatureMessageType::ScalarCmd))
+        .count()
+    ];
 
-    let mut commands: Vec<(u32, ActuatorType, (f64, bool))> = vec!();
-    msg.scalars().iter().for_each(|x| commands.push((x.feature_index(), x.actuator_type(), (x.scalar(), false))));
-    let mut result = self
-      .update(ButtplugActuatorFeatureMessageType::ScalarCmd, &commands, match_all)?;
+    let mut commands: Vec<(u32, ActuatorType, (f64, bool))> = vec![];
+    msg
+      .scalars()
+      .iter()
+      .for_each(|x| commands.push((x.feature_index(), x.actuator_type(), (x.scalar(), false))));
+    let mut result = self.update(
+      ButtplugActuatorFeatureMessageType::ScalarCmd,
+      &commands,
+      match_all,
+    )?;
     result.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
-    result.iter().for_each(|(index, actuator, value)| final_result[*index as usize] = Some((*actuator, value.0)));
+    result.iter().for_each(|(index, actuator, value)| {
+      final_result[*index as usize] = Some((*actuator, value.0))
+    });
     error!("{:?}", final_result);
     Ok(final_result)
   }
@@ -226,14 +253,32 @@ impl ActuatorCommandManager {
       );
     }
 
-    let mut final_result: Vec<Option<(u32, bool)>> = vec![None; self.feature_status.iter().filter(|x| x.messages().contains(&ButtplugActuatorFeatureMessageType::RotateCmd)).count()];
+    let mut final_result: Vec<Option<(u32, bool)>> = vec![
+      None;
+      self
+        .feature_status
+        .iter()
+        .filter(|x| x
+          .messages()
+          .contains(&ButtplugActuatorFeatureMessageType::RotateCmd))
+        .count()
+    ];
 
-    let mut commands: Vec<(u32, ActuatorType, (f64, bool))> = vec!();
-    msg.rotations().iter().for_each(|x| commands.push((x.index(), ActuatorType::Rotate, (x.speed(), x.clockwise()))));
-    let mut result = self
-      .update(ButtplugActuatorFeatureMessageType::RotateCmd, &commands, match_all)?;
+    let mut commands: Vec<(u32, ActuatorType, (f64, bool))> = vec![];
+    msg
+      .rotations()
+      .iter()
+      .for_each(|x| commands.push((x.index(), ActuatorType::Rotate, (x.speed(), x.clockwise()))));
+    let mut result = self.update(
+      ButtplugActuatorFeatureMessageType::RotateCmd,
+      &commands,
+      match_all,
+    )?;
     result.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
-    result.iter().enumerate().for_each(|(array_index, (_, _, value))| final_result[array_index] = Some(*value));
+    result
+      .iter()
+      .enumerate()
+      .for_each(|(array_index, (_, _, value))| final_result[array_index] = Some(*value));
     Ok(final_result)
   }
 

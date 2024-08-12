@@ -127,11 +127,19 @@ use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{
-      self, ActuatorType, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, ButtplugServerDeviceMessage, ButtplugServerMessage, Endpoint, SensorReadingV4, SensorType
+      self,
+      ActuatorType,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessage,
+      ButtplugServerDeviceMessage,
+      ButtplugServerMessage,
+      Endpoint,
+      SensorReadingV4,
+      SensorType,
     },
   },
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceIdentifier, UserDeviceDefinition},
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd},
   },
 };

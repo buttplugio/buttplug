@@ -45,7 +45,6 @@ impl ButtplugMessageValidator for SensorReadCmdV4 {
   }
 }
 
-
 #[derive(
   Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, CopyGetters,
 )]

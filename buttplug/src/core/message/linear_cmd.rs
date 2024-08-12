@@ -10,8 +10,6 @@ use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-
-
 /// Move device to a certain position in a certain amount of time
 #[derive(Debug, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
@@ -72,7 +70,6 @@ impl ButtplugMessageValidator for LinearCmdV4 {
     Ok(())
   }
 }
-
 
 /// Move device to a certain position in a certain amount of time
 #[derive(Debug, PartialEq, Clone, CopyGetters)]

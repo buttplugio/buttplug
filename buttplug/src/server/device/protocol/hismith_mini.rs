@@ -78,7 +78,8 @@ impl ProtocolInitializer for HismithMiniInitializer {
         .features()
         .iter()
         .filter(|x| *x.feature_type() == FeatureType::Vibrate)
-        .count() >= 2
+        .count()
+        >= 2,
     }))
   }
 }

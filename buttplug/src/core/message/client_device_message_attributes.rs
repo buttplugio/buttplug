@@ -193,11 +193,12 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributes {
 
     // Raw messages
     let raw_attrs = if let Some(raw_feature) = features.iter().find(|f| f.raw().is_some()) {
-      Some(RawDeviceMessageAttributes::new(raw_feature.raw().as_ref().unwrap().endpoints()))
+      Some(RawDeviceMessageAttributes::new(
+        raw_feature.raw().as_ref().unwrap().endpoints(),
+      ))
     } else {
       None
     };
-
 
     Self {
       scalar_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::ScalarCmd),

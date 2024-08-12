@@ -10,7 +10,15 @@ use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{
-      self, ButtplugDeviceMessage, ButtplugMessage, ButtplugServerDeviceMessage, ButtplugServerMessage, Endpoint, SensorReading, SensorReadingV4, SensorType
+      self,
+      ButtplugDeviceMessage,
+      ButtplugMessage,
+      ButtplugServerDeviceMessage,
+      ButtplugServerMessage,
+      Endpoint,
+      SensorReading,
+      SensorReadingV4,
+      SensorType,
     },
   },
   server::device::{

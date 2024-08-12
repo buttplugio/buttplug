@@ -94,7 +94,12 @@ pub use endpoint::Endpoint;
 pub use error::{Error, ErrorCode, ErrorV0};
 pub use fleshlight_launch_fw12_cmd::FleshlightLaunchFW12Cmd;
 pub use kiiroo_cmd::KiirooCmd;
-pub use linear_cmd::{LinearCmdV2 as LinearCmd, VectorSubcommandV2 as VectorSubcommand, LinearCmdV4, VectorSubcommandV4};
+pub use linear_cmd::{
+  LinearCmdV2 as LinearCmd,
+  LinearCmdV4,
+  VectorSubcommandV2 as VectorSubcommand,
+  VectorSubcommandV4,
+};
 pub use log_level::LogLevel;
 pub use lovense_cmd::LovenseCmd;
 pub use ok::Ok;
@@ -107,15 +112,28 @@ pub use raw_write_cmd::RawWriteCmd;
 pub use request_device_list::RequestDeviceList;
 pub use request_log::RequestLog;
 pub use request_server_info::RequestServerInfo;
-pub use rotate_cmd::{RotateCmdV2 as RotateCmd, RotationSubcommandV2 as RotationSubcommand, RotateCmdV4, RotationSubcommandV4};
+pub use rotate_cmd::{
+  RotateCmdV2 as RotateCmd,
+  RotateCmdV4,
+  RotationSubcommandV2 as RotationSubcommand,
+  RotationSubcommandV4,
+};
 pub use rssi_level_cmd::RSSILevelCmd;
 pub use rssi_level_reading::RSSILevelReading;
-pub use scalar_cmd::{ScalarCmdV3 as ScalarCmd, ScalarSubcommandV3 as ScalarSubcommand, ScalarCmdV4, ScalarSubcommandV4};
+pub use scalar_cmd::{
+  ScalarCmdV3 as ScalarCmd,
+  ScalarCmdV4,
+  ScalarSubcommandV3 as ScalarSubcommand,
+  ScalarSubcommandV4,
+};
 pub use scanning_finished::ScanningFinished;
 pub use sensor_read_cmd::{SensorReadCmdV3 as SensorReadCmd, SensorReadCmdV4};
 pub use sensor_reading::{SensorReadingV3 as SensorReading, SensorReadingV4};
 pub use sensor_subscribe_cmd::{SensorSubscribeCmdV3 as SensorSubscribeCmd, SensorSubscribeCmdV4};
-pub use sensor_unsubscribe_cmd::{SensorUnsubscribeCmdV3 as SensorUnsubscribeCmd, SensorUnsubscribeCmdV4};
+pub use sensor_unsubscribe_cmd::{
+  SensorUnsubscribeCmdV3 as SensorUnsubscribeCmd,
+  SensorUnsubscribeCmdV4,
+};
 pub use server_info::{ServerInfo, ServerInfoV0};
 pub use single_motor_vibrate_cmd::SingleMotorVibrateCmd;
 pub use start_scanning::StartScanning;
@@ -289,9 +307,9 @@ impl TryFrom<ButtplugDeviceMessageType> for ButtplugActuatorFeatureMessageType {
       ButtplugDeviceMessageType::LinearCmd => Ok(ButtplugActuatorFeatureMessageType::LinearCmd),
       ButtplugDeviceMessageType::RotateCmd => Ok(ButtplugActuatorFeatureMessageType::RotateCmd),
       ButtplugDeviceMessageType::ScalarCmd => Ok(ButtplugActuatorFeatureMessageType::ScalarCmd),
-      _ => Err(())
-    }      
-  }  
+      _ => Err(()),
+    }
+  }
 }
 
 #[derive(Copy, Debug, Clone, Hash, Display, PartialEq, Eq, Serialize, Deserialize)]
@@ -316,11 +334,15 @@ impl TryFrom<ButtplugDeviceMessageType> for ButtplugSensorFeatureMessageType {
 
   fn try_from(value: ButtplugDeviceMessageType) -> Result<Self, Self::Error> {
     match value {
-      ButtplugDeviceMessageType::SensorReadCmd => Ok(ButtplugSensorFeatureMessageType::SensorReadCmd),
-      ButtplugDeviceMessageType::SensorSubscribeCmd => Ok(ButtplugSensorFeatureMessageType::SensorSubscribeCmd),
-      _ => Err(())
-    }      
-  }  
+      ButtplugDeviceMessageType::SensorReadCmd => {
+        Ok(ButtplugSensorFeatureMessageType::SensorReadCmd)
+      }
+      ButtplugDeviceMessageType::SensorSubscribeCmd => {
+        Ok(ButtplugSensorFeatureMessageType::SensorSubscribeCmd)
+      }
+      _ => Err(()),
+    }
+  }
 }
 
 #[derive(Copy, Debug, Clone, Hash, Display, PartialEq, Eq, Serialize, Deserialize)]
@@ -347,10 +369,12 @@ impl TryFrom<ButtplugDeviceMessageType> for ButtplugRawFeatureMessageType {
     match value {
       ButtplugDeviceMessageType::RawReadCmd => Ok(ButtplugRawFeatureMessageType::RawReadCmd),
       ButtplugDeviceMessageType::RawWriteCmd => Ok(ButtplugRawFeatureMessageType::RawWriteCmd),
-      ButtplugDeviceMessageType::RawSubscribeCmd => Ok(ButtplugRawFeatureMessageType::RawSubscribeCmd),
-      _ => Err(())
-    }      
-  }  
+      ButtplugDeviceMessageType::RawSubscribeCmd => {
+        Ok(ButtplugRawFeatureMessageType::RawSubscribeCmd)
+      }
+      _ => Err(()),
+    }
+  }
 }
 
 /// Represents all possible messages a

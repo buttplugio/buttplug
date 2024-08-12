@@ -6,7 +6,13 @@
 // for full license information.
 
 use crate::{
-  core::{errors::ButtplugDeviceError, message::{ActuatorType::{self, Constrict, Rotate, Vibrate}, Endpoint}},
+  core::{
+    errors::ButtplugDeviceError,
+    message::{
+      ActuatorType::{self, Constrict, Rotate, Vibrate},
+      Endpoint,
+    },
+  },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},

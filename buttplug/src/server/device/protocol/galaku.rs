@@ -11,7 +11,13 @@ use std::sync::Arc;
 use futures_util::future::BoxFuture;
 use futures_util::{future, FutureExt};
 
-use crate::core::message::{self, SensorReadCmdV4, SensorReadingV4, SensorSubscribeCmdV4, SensorUnsubscribeCmdV4};
+use crate::core::message::{
+  self,
+  SensorReadCmdV4,
+  SensorReadingV4,
+  SensorSubscribeCmdV4,
+  SensorUnsubscribeCmdV4,
+};
 use crate::core::message::{
   ActuatorType,
   ButtplugDeviceMessage,
@@ -23,11 +29,8 @@ use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_initializer_setup,
   server::device::{
-    configuration::{
-      ProtocolCommunicationSpecifier,
-      UserDeviceDefinition,
-    },
     configuration::UserDeviceIdentifier,
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition},
     hardware::{
       Hardware,
       HardwareCommand,
