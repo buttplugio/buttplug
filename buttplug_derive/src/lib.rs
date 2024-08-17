@@ -264,9 +264,20 @@ fn impl_from_specific_buttplug_message_derive_macro(ast: &syn::DeriveInput) -> T
   let name = &ast.ident;
   if let syn::Data::Enum(ref e) = ast.data {
     let idents: Vec<_> = e.variants.iter().map(|x| x.ident.clone()).collect();
+    // Unlike try_from, where we expect all of our field identifiers to match, we may have different
+    // identifiers and field types when implementing from_specific. Therefore we need to parallel
+    // iterate our field identifiers and the identifier of the first member. This means we're locked
+    // to an enum style of field name([unnamed type]), but we're the only ones who use this macro,
+    // and on structs that almost never change, so hopefully leaving this comment will be enough.
+    let mut fields: Vec<_> = vec!();
+    for var in e.variants.iter() {
+      for field in var.fields.iter() {
+        fields.push(field.ty.clone());
+      }
+    }
     let gen = quote! {
-        #(impl From<#idents> for #name {
-            fn from(msg: #idents) -> #name {
+        #(impl From<#fields> for #name {
+            fn from(msg: #fields) -> #name {
                 #name::#idents(msg)
             }
         })*
