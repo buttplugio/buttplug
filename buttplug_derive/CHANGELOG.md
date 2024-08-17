@@ -1,4 +1,13 @@
+# 0.8.1 - 2024/08/17
+
+## Bugfixes
+
+- Fix issue with mismatch between enum field and unnamed type being different causing compile issues
+  in try_from generation for server message structs.
+
 # 0.8.0 - 2022/12/29
+
+## Features
 
 - Add ButtplugMessageFinalizer trait derivation
 
@@ -28,6 +37,7 @@
   properties derive macro.
 
 # v0.5.0 - 2020/10/09
+
 ## Features
 
 - Remove ButtplugProtocolCreator and ButtplugProtocol derives
