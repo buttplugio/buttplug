@@ -212,7 +212,7 @@ impl ChannelClientTestHelper {
       self.next_client_message().await,
       ButtplugClientMessage::RequestDeviceList(..)
     ));
-    let mut dl = message::DeviceList::new(vec![]);
+    let mut dl = message::DeviceListV3::new(vec![]);
     dl.set_id(2);
     self.send_client_incoming(dl.into()).await;
     finish_notifier.notified().await;

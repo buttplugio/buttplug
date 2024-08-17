@@ -186,7 +186,7 @@ async fn test_client_repeated_deviceadded_message() {
     helper_clone
       .send_client_incoming(message::Ok::new(3).into())
       .await;
-    let device_added = message::DeviceAdded::new(
+    let device_added = message::DeviceAddedV3::new(
       1,
       "Test Device",
       &None,
@@ -234,7 +234,7 @@ async fn test_client_repeated_deviceremoved_message() {
     helper_clone
       .send_client_incoming(message::Ok::new(3).into())
       .await;
-    let device_added = message::DeviceAdded::new(
+    let device_added = message::DeviceAddedV3::new(
       1,
       "Test Device",
       &None,

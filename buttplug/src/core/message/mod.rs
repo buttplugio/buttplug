@@ -74,7 +74,7 @@ pub use client_device_message_attributes::{
   SensorDeviceMessageAttributes,
   SensorType,
 };
-pub use device_added::{DeviceAdded, DeviceAddedV0, DeviceAddedV1, DeviceAddedV2};
+pub use device_added::{DeviceAddedV3, DeviceAddedV0, DeviceAddedV1, DeviceAddedV2};
 pub use device_feature::{
   DeviceFeature,
   DeviceFeatureActuator,
@@ -82,9 +82,9 @@ pub use device_feature::{
   DeviceFeatureSensor,
   FeatureType,
 };
-pub use device_list::{DeviceList, DeviceListV0, DeviceListV1, DeviceListV2};
+pub use device_list::{DeviceListV3, DeviceListV0, DeviceListV1, DeviceListV2};
 pub use device_message_info::{
-  DeviceMessageInfo,
+  DeviceMessageInfoV3,
   DeviceMessageInfoV0,
   DeviceMessageInfoV1,
   DeviceMessageInfoV2,
@@ -448,8 +448,8 @@ pub enum ButtplugServerMessage {
   // Handshake messages
   ServerInfo(ServerInfo),
   // Device enumeration messages
-  DeviceList(DeviceList),
-  DeviceAdded(DeviceAdded),
+  DeviceList(DeviceListV3),
+  DeviceAdded(DeviceAddedV3),
   DeviceRemoved(DeviceRemoved),
   ScanningFinished(ScanningFinished),
   // Generic commands
@@ -460,6 +460,8 @@ pub enum ButtplugServerMessage {
   BatteryLevelReading(BatteryLevelReading),
   RSSILevelReading(RSSILevelReading),
 }
+
+
 
 /// Represents all possible messages a [ButtplugServer][crate::server::ButtplugServer] can send to a
 /// [ButtplugClient][crate::client::ButtplugClient] that denote an EVENT from a device. These are
@@ -554,8 +556,8 @@ pub enum ButtplugSpecV3ServerMessage {
   // Handshake messages
   ServerInfo(ServerInfo),
   // Device enumeration messages
-  DeviceList(DeviceList),
-  DeviceAdded(DeviceAdded),
+  DeviceList(DeviceListV3),
+  DeviceAdded(DeviceAddedV3),
   DeviceRemoved(DeviceRemoved),
   ScanningFinished(ScanningFinished),
   // Generic commands

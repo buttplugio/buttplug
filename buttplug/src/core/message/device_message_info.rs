@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 /// Substructure of device messages, used for attribute information (name, messages supported, etc...)
 #[derive(Clone, Debug, PartialEq, Eq, MutGetters, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct DeviceMessageInfo {
+pub struct DeviceMessageInfoV3 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   #[getset(get_copy = "pub")]
   device_index: u32,
@@ -40,7 +40,7 @@ pub struct DeviceMessageInfo {
   device_messages: ClientDeviceMessageAttributes,
 }
 
-impl DeviceMessageInfo {
+impl DeviceMessageInfoV3 {
   pub fn new(
     device_index: u32,
     device_name: &str,
@@ -58,8 +58,8 @@ impl DeviceMessageInfo {
   }
 }
 
-impl From<DeviceAdded> for DeviceMessageInfo {
-  fn from(device_added: DeviceAdded) -> Self {
+impl From<DeviceAddedV3> for DeviceMessageInfoV3 {
+  fn from(device_added: DeviceAddedV3) -> Self {
     Self {
       device_index: device_added.device_index(),
       device_name: device_added.device_name().clone(),
@@ -84,9 +84,9 @@ pub struct DeviceMessageInfoV2 {
   device_messages: ClientDeviceMessageAttributesV2,
 }
 
-impl From<DeviceAdded> for DeviceMessageInfoV2 {
-  fn from(device_added: DeviceAdded) -> Self {
-    let dmi = DeviceMessageInfo::from(device_added);
+impl From<DeviceAddedV3> for DeviceMessageInfoV2 {
+  fn from(device_added: DeviceAddedV3) -> Self {
+    let dmi = DeviceMessageInfoV3::from(device_added);
     DeviceMessageInfoV2::from(dmi)
   }
 }
@@ -102,8 +102,8 @@ impl From<DeviceAddedV2> for DeviceMessageInfoV2 {
   }
 }
 
-impl From<DeviceMessageInfo> for DeviceMessageInfoV2 {
-  fn from(device_message_info: DeviceMessageInfo) -> Self {
+impl From<DeviceMessageInfoV3> for DeviceMessageInfoV2 {
+  fn from(device_message_info: DeviceMessageInfoV3) -> Self {
     // No structural difference, it's all content changes
     Self {
       device_index: device_message_info.device_index,
@@ -127,8 +127,8 @@ pub struct DeviceMessageInfoV1 {
   device_messages: ClientDeviceMessageAttributesV1,
 }
 
-impl From<DeviceAdded> for DeviceMessageInfoV1 {
-  fn from(device_added: DeviceAdded) -> Self {
+impl From<DeviceAddedV3> for DeviceMessageInfoV1 {
+  fn from(device_added: DeviceAddedV3) -> Self {
     let dmi = DeviceMessageInfoV2::from(device_added);
     DeviceMessageInfoV1::from(dmi)
   }
@@ -159,9 +159,9 @@ pub struct DeviceMessageInfoV0 {
   device_messages: Vec<ButtplugDeviceMessageType>,
 }
 
-impl From<DeviceAdded> for DeviceMessageInfoV0 {
-  fn from(device_added: DeviceAdded) -> Self {
-    let dmi = DeviceMessageInfo::from(device_added);
+impl From<DeviceAddedV3> for DeviceMessageInfoV0 {
+  fn from(device_added: DeviceAddedV3) -> Self {
+    let dmi = DeviceMessageInfoV3::from(device_added);
     let dmi_v2: DeviceMessageInfoV2 = dmi.into();
     let dmi_v1: DeviceMessageInfoV1 = dmi_v2.into();
     dmi_v1.into()

@@ -22,7 +22,7 @@ use crate::{
       ButtplugDeviceMessageType,
       ClientDeviceMessageAttributes,
       ClientGenericDeviceMessageAttributes,
-      DeviceMessageInfo,
+      DeviceMessageInfoV3,
       Endpoint,
       LinearCmd,
       RawReadCmd,
@@ -220,7 +220,7 @@ impl ButtplugClientDevice {
   }
 
   pub(super) fn new_from_device_info(
-    info: &DeviceMessageInfo,
+    info: &DeviceMessageInfoV3,
     sender: &Arc<ButtplugClientMessageSender>,
   ) -> Self {
     ButtplugClientDevice::new(

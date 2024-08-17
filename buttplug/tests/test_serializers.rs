@@ -58,7 +58,7 @@ async fn test_garbled_client_rsi_response() {
     )
     .await;
   let _ = helper.recv_outgoing().await;
-  let mut dl = message::DeviceList::new(vec![]);
+  let mut dl = message::DeviceListV3::new(vec![]);
   dl.set_id(2);
   helper.send_client_incoming(dl.into()).await;
   finish_notifier.notified().await;
