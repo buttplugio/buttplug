@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 // it.
 #[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct LovenseCmd {
+pub struct LovenseCmdV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
@@ -26,7 +26,7 @@ pub struct LovenseCmd {
   command: String,
 }
 
-impl LovenseCmd {
+impl LovenseCmdV0 {
   pub fn new(device_index: u32, command: &str) -> Self {
     Self {
       id: 1,
@@ -36,7 +36,7 @@ impl LovenseCmd {
   }
 }
 
-impl ButtplugMessageValidator for LovenseCmd {
+impl ButtplugMessageValidator for LovenseCmdV0 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
   }

@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 /// Battery level response
 #[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct BatteryLevelReading {
+pub struct BatteryLevelReadingV2 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
@@ -23,7 +23,7 @@ pub struct BatteryLevelReading {
   battery_level: f64,
 }
 
-impl BatteryLevelReading {
+impl BatteryLevelReadingV2 {
   pub fn new(device_index: u32, battery_level: f64) -> Self {
     Self {
       id: 1,
@@ -33,7 +33,7 @@ impl BatteryLevelReading {
   }
 }
 
-impl ButtplugMessageValidator for BatteryLevelReading {
+impl ButtplugMessageValidator for BatteryLevelReadingV2 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     self.is_in_command_range(

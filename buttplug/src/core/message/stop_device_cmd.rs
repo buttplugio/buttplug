@@ -11,14 +11,14 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct StopDeviceCmd {
+pub struct StopDeviceCmdV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
 }
 
-impl StopDeviceCmd {
+impl StopDeviceCmdV0 {
   pub fn new(device_index: u32) -> Self {
     Self {
       id: 1,
@@ -27,7 +27,7 @@ impl StopDeviceCmd {
   }
 }
 
-impl ButtplugMessageValidator for StopDeviceCmd {
+impl ButtplugMessageValidator for StopDeviceCmdV0 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
   }

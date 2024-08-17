@@ -781,21 +781,21 @@ pub trait ProtocolHandler: Sync + Send {
 
   fn handle_vorze_a10_cyclone_cmd(
     &self,
-    message: message::VorzeA10CycloneCmd,
+    message: message::VorzeA10CycloneCmdV0,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented(print_type_of(&message))
   }
 
   fn handle_kiiroo_cmd(
     &self,
-    message: message::KiirooCmd,
+    message: message::KiirooCmdV0,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented(print_type_of(&message))
   }
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    message: message::FleshlightLaunchFW12Cmd,
+    message: message::FleshlightLaunchFW12CmdV0,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented(print_type_of(&message))
   }
@@ -809,7 +809,7 @@ pub trait ProtocolHandler: Sync + Send {
 
   fn handle_linear_cmd(
     &self,
-    message: message::LinearCmd,
+    message: message::LinearCmdV2,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented(print_type_of(&message))
   }
@@ -887,7 +887,7 @@ pub trait ProtocolHandler: Sync + Send {
   fn handle_rssi_level_cmd(
     &self,
     _device: Arc<Hardware>,
-    _message: message::RSSILevelCmd,
+    _message: message::RSSILevelCmdV2,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Command not implemented for this protocol: SensorReadCmd".to_string(),

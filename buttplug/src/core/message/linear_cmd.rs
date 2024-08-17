@@ -106,7 +106,7 @@ pub struct LinearCmdV2 {
   vectors: Vec<VectorSubcommandV2>,
 }
 
-impl LinearCmd {
+impl LinearCmdV2 {
   pub fn new(device_index: u32, vectors: Vec<VectorSubcommandV2>) -> Self {
     Self {
       id: 1,

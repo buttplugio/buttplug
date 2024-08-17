@@ -55,7 +55,7 @@ async fn setup_test_server(
   {
     ButtplugServerMessage::ServerInfo(s) => assert_eq!(
       s,
-      message::ServerInfo::new("Buttplug Server", ButtplugMessageSpecVersion::Version3, 0)
+      message::ServerInfoV2::new("Buttplug Server", ButtplugMessageSpecVersion::Version3, 0)
     ),
     _ => panic!("Should've received ok"),
   }
@@ -65,14 +65,14 @@ async fn setup_test_server(
 #[tokio::test]
 async fn test_server_handshake() {
   let msg =
-    message::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version3).into();
+    message::RequestServerInfoV1::new("Test Client", ButtplugMessageSpecVersion::Version3).into();
   let (server, _recv) = setup_test_server(msg).await;
   assert!(server.connected());
 }
 
 #[tokio::test]
 async fn test_server_handshake_not_done_first() {
-  let msg = message::Ping::default().into();
+  let msg = message::PingV0::default().into();
   let server = test_server(false);
   // assert_eq!(server.server_name, "Test Server");
   let result = server.parse_message(msg).await;
@@ -87,7 +87,7 @@ async fn test_server_handshake_not_done_first() {
 #[tokio::test]
 async fn test_client_version_older_than_server() {
   let msg =
-    message::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
+    message::RequestServerInfoV1::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
   let server = test_server(false);
   // assert_eq!(server.server_name, "Test Server");
   match server
@@ -97,7 +97,7 @@ async fn test_client_version_older_than_server() {
   {
     ButtplugServerMessage::ServerInfo(s) => assert_eq!(
       s,
-      message::ServerInfo::new("Buttplug Server", ButtplugMessageSpecVersion::Version2, 0)
+      message::ServerInfoV2::new("Buttplug Server", ButtplugMessageSpecVersion::Version2, 0)
     ),
     _ => panic!("Should've received ok"),
   }
@@ -108,7 +108,7 @@ async fn test_client_version_older_than_server() {
 async fn test_server_version_older_than_client() {
   let server = test_server(false);
   let msg =
-    message::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
+    message::RequestServerInfoV1::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
   assert!(
     server.parse_message(msg).await.is_err(),
     "Client having higher version than server should fail"
@@ -123,7 +123,7 @@ async fn test_ping_timeout() {
     .expect("Test, assuming infallible.");
   let recv = server.event_stream();
   pin_mut!(recv);
-  let msg = message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+  let msg = message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
   sleep(Duration::from_millis(150)).await;
   let reply = server.parse_message(msg.into()).await;
   assert!(
@@ -132,7 +132,7 @@ async fn test_ping_timeout() {
     reply
   );
   sleep(Duration::from_millis(300)).await;
-  let pingmsg = message::Ping::default();
+  let pingmsg = message::PingV0::default();
   let result = server.parse_message(pingmsg.into()).await;
   let err = result.unwrap_err();
   if !matches!(err.original_error(), ButtplugError::ButtplugPingError(_)) {
@@ -166,11 +166,11 @@ async fn test_device_stop_on_ping_timeout() {
   let recv = server.event_stream();
   pin_mut!(recv);
 
-  let msg = message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+  let msg = message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
   let mut reply = server.parse_message(msg.into()).await;
   assert!(reply.is_ok());
   reply = server
-    .parse_message(message::StartScanning::default().into())
+    .parse_message(message::StartScanningV0::default().into())
     .await;
   assert!(reply.is_ok());
   // Check that we got an event back about a new device.
@@ -191,7 +191,7 @@ async fn test_device_stop_on_ping_timeout() {
   }
   server
     .parse_message(
-      message::VibrateCmd::new(device_index, vec![message::VibrateSubcommand::new(0, 0.5)]).into(),
+      message::VibrateCmdV1::new(device_index, vec![message::VibrateSubcommandV1::new(0, 0.5)]).into(),
     )
     .await
     .expect("Test, assuming infallible.");
@@ -218,7 +218,7 @@ async fn test_device_stop_on_ping_timeout() {
 
 #[tokio::test]
 async fn test_repeated_handshake() {
-  let msg = message::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version3);
+  let msg = message::RequestServerInfoV1::new("Test Client", ButtplugMessageSpecVersion::Version3);
 
   let (server, _recv) = setup_test_server((msg.clone()).into()).await;
   assert!(server.connected());
@@ -231,10 +231,10 @@ async fn test_repeated_handshake() {
 
 #[tokio::test]
 async fn test_invalid_device_index() {
-  let msg = message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+  let msg = message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
   let (server, _) = setup_test_server(msg.into()).await;
   let reply = server
-    .parse_message(message::VibrateCmd::new(10, vec![]).into())
+    .parse_message(message::VibrateCmdV1::new(10, vec![]).into())
     .await;
   assert!(reply.is_err());
   assert!(matches!(
@@ -255,12 +255,12 @@ async fn test_device_index_generation() {
   pin_mut!(recv);
   assert!(server
     .parse_message(
-      message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
+      message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
     )
     .await
     .is_ok());
   assert!(server
-    .parse_message(message::StartScanning::default().into())
+    .parse_message(message::StartScanningV0::default().into())
     .await
     .is_ok());
   // Check that we got an event back about a new device.
@@ -300,12 +300,12 @@ async fn test_server_scanning_finished() {
   pin_mut!(recv);
   assert!(server
     .parse_message(
-      message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
+      message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
     )
     .await
     .is_ok());
   assert!(server
-    .parse_message(message::StartScanning::default().into())
+    .parse_message(message::StartScanningV0::default().into())
     .await
     .is_ok());
   // Check that we got an event back about a new device.

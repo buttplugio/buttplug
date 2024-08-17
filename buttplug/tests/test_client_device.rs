@@ -15,7 +15,7 @@ use buttplug::{
   },
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    message::{self, ButtplugClientMessage, ClientDeviceMessageAttributes},
+    message::{self, ButtplugClientMessage, ClientDeviceMessageAttributesV3},
   },
   util::async_manager,
 };
@@ -184,14 +184,14 @@ async fn test_client_repeated_deviceadded_message() {
       ButtplugClientMessage::StartScanning(..)
     ));
     helper_clone
-      .send_client_incoming(message::Ok::new(3).into())
+      .send_client_incoming(message::OkV0::new(3).into())
       .await;
     let device_added = message::DeviceAddedV3::new(
       1,
       "Test Device",
       &None,
       &None,
-      &ClientDeviceMessageAttributes::default(),
+      &ClientDeviceMessageAttributesV3::default(),
     );
     helper_clone
       .send_client_incoming(device_added.clone().into())
@@ -232,16 +232,16 @@ async fn test_client_repeated_deviceremoved_message() {
       ButtplugClientMessage::StartScanning(..)
     ));
     helper_clone
-      .send_client_incoming(message::Ok::new(3).into())
+      .send_client_incoming(message::OkV0::new(3).into())
       .await;
     let device_added = message::DeviceAddedV3::new(
       1,
       "Test Device",
       &None,
       &None,
-      &ClientDeviceMessageAttributes::default(),
+      &ClientDeviceMessageAttributesV3::default(),
     );
-    let device_removed = message::DeviceRemoved::new(1);
+    let device_removed = message::DeviceRemovedV0::new(1);
     helper_clone.send_client_incoming(device_added.into()).await;
     helper_clone
       .send_client_incoming(device_removed.clone().into())

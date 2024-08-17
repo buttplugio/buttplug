@@ -13,14 +13,14 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Default, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 #[getset(get_copy = "pub")]
-pub struct VibrateSubcommand {
+pub struct VibrateSubcommandV1 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
   index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Speed"))]
   speed: f64,
 }
 
-impl VibrateSubcommand {
+impl VibrateSubcommandV1 {
   pub fn new(index: u32, speed: f64) -> Self {
     Self { index, speed }
   }
@@ -30,18 +30,18 @@ impl VibrateSubcommand {
   Debug, Default, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, Getters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct VibrateCmd {
+pub struct VibrateCmdV1 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Speeds"))]
   #[getset(get = "pub")]
-  speeds: Vec<VibrateSubcommand>,
+  speeds: Vec<VibrateSubcommandV1>,
 }
 
-impl VibrateCmd {
-  pub fn new(device_index: u32, speeds: Vec<VibrateSubcommand>) -> Self {
+impl VibrateCmdV1 {
+  pub fn new(device_index: u32, speeds: Vec<VibrateSubcommandV1>) -> Self {
     Self {
       id: 1,
       device_index,
@@ -50,7 +50,7 @@ impl VibrateCmd {
   }
 }
 
-impl ButtplugMessageValidator for VibrateCmd {
+impl ButtplugMessageValidator for VibrateCmdV1 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     for speed in &self.speeds {

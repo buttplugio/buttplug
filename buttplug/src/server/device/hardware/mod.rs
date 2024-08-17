@@ -5,7 +5,7 @@ use std::{fmt::Debug, sync::Arc, time::Duration};
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{Endpoint, RawReadCmd, RawReading, RawSubscribeCmd, RawUnsubscribeCmd, RawWriteCmd},
+    message::{Endpoint, RawReadCmdV2, RawReadingV2, RawSubscribeCmdV2, RawUnsubscribeCmdV2, RawWriteCmdV2},
   },
   server::device::configuration::ProtocolCommunicationSpecifier,
 };
@@ -44,8 +44,8 @@ impl HardwareReadCmd {
   }
 }
 
-impl From<RawReadCmd> for HardwareReadCmd {
-  fn from(msg: RawReadCmd) -> Self {
+impl From<RawReadCmdV2> for HardwareReadCmd {
+  fn from(msg: RawReadCmdV2) -> Self {
     Self {
       endpoint: msg.endpoint(),
       length: msg.expected_length(),
@@ -83,8 +83,8 @@ impl HardwareWriteCmd {
   }
 }
 
-impl From<RawWriteCmd> for HardwareWriteCmd {
-  fn from(msg: RawWriteCmd) -> Self {
+impl From<RawWriteCmdV2> for HardwareWriteCmd {
+  fn from(msg: RawWriteCmdV2) -> Self {
     Self {
       endpoint: msg.endpoint(),
       data: msg.data().clone(),
@@ -116,8 +116,8 @@ impl HardwareSubscribeCmd {
   }
 }
 
-impl From<RawSubscribeCmd> for HardwareSubscribeCmd {
-  fn from(msg: RawSubscribeCmd) -> Self {
+impl From<RawSubscribeCmdV2> for HardwareSubscribeCmd {
+  fn from(msg: RawSubscribeCmdV2) -> Self {
     Self {
       endpoint: msg.endpoint(),
     }
@@ -143,8 +143,8 @@ impl HardwareUnsubscribeCmd {
   }
 }
 
-impl From<RawUnsubscribeCmd> for HardwareUnsubscribeCmd {
-  fn from(msg: RawUnsubscribeCmd) -> Self {
+impl From<RawUnsubscribeCmdV2> for HardwareUnsubscribeCmd {
+  fn from(msg: RawUnsubscribeCmdV2) -> Self {
     Self {
       endpoint: msg.endpoint(),
     }
@@ -161,20 +161,20 @@ pub enum HardwareCommand {
   Unsubscribe(HardwareUnsubscribeCmd),
 }
 
-impl From<RawWriteCmd> for HardwareCommand {
-  fn from(msg: RawWriteCmd) -> Self {
+impl From<RawWriteCmdV2> for HardwareCommand {
+  fn from(msg: RawWriteCmdV2) -> Self {
     HardwareCommand::Write(msg.into())
   }
 }
 
-impl From<RawSubscribeCmd> for HardwareCommand {
-  fn from(msg: RawSubscribeCmd) -> Self {
+impl From<RawSubscribeCmdV2> for HardwareCommand {
+  fn from(msg: RawSubscribeCmdV2) -> Self {
     HardwareCommand::Subscribe(msg.into())
   }
 }
 
-impl From<RawUnsubscribeCmd> for HardwareCommand {
-  fn from(msg: RawUnsubscribeCmd) -> Self {
+impl From<RawUnsubscribeCmdV2> for HardwareCommand {
+  fn from(msg: RawUnsubscribeCmdV2) -> Self {
     HardwareCommand::Unsubscribe(msg.into())
   }
 }
@@ -213,9 +213,9 @@ impl HardwareReading {
   }
 }
 
-impl From<HardwareReading> for RawReading {
+impl From<HardwareReading> for RawReadingV2 {
   fn from(reading: HardwareReading) -> Self {
-    RawReading::new(0, *reading.endpoint(), reading.data().clone())
+    RawReadingV2::new(0, *reading.endpoint(), reading.data().clone())
   }
 }
 

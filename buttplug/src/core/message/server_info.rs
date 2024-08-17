@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
   Debug, ButtplugMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, CopyGetters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct ServerInfo {
+pub struct ServerInfoV2 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "MessageVersion"))]
@@ -28,7 +28,7 @@ pub struct ServerInfo {
   server_name: String,
 }
 
-impl ServerInfo {
+impl ServerInfoV2 {
   pub fn new(
     server_name: &str,
     message_version: ButtplugMessageSpecVersion,
@@ -43,7 +43,7 @@ impl ServerInfo {
   }
 }
 
-impl ButtplugMessageValidator for ServerInfo {
+impl ButtplugMessageValidator for ServerInfoV2 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
   }
@@ -94,8 +94,8 @@ impl ServerInfoV0 {
   }
 }
 
-impl From<ServerInfo> for ServerInfoV0 {
-  fn from(msg: ServerInfo) -> Self {
+impl From<ServerInfoV2> for ServerInfoV0 {
+  fn from(msg: ServerInfoV2) -> Self {
     let mut out_msg = Self::new(&msg.server_name, msg.message_version, msg.max_ping_time);
     out_msg.set_id(msg.id());
     out_msg

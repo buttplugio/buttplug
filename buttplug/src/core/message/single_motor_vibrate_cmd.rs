@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct SingleMotorVibrateCmd {
+pub struct SingleMotorVibrateCmdV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
@@ -22,7 +22,7 @@ pub struct SingleMotorVibrateCmd {
   speed: f64,
 }
 
-impl SingleMotorVibrateCmd {
+impl SingleMotorVibrateCmdV0 {
   pub fn new(device_index: u32, speed: f64) -> Self {
     Self {
       id: 1,
@@ -32,7 +32,7 @@ impl SingleMotorVibrateCmd {
   }
 }
 
-impl ButtplugMessageValidator for SingleMotorVibrateCmd {
+impl ButtplugMessageValidator for SingleMotorVibrateCmdV0 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     self.is_in_command_range(

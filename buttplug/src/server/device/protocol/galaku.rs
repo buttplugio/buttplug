@@ -210,7 +210,7 @@ impl ProtocolHandler for Galaku {
           device
             .subscribe(&HardwareSubscribeCmd::new(Endpoint::RxBLEBattery))
             .await?;
-          Ok(message::Ok::new(message.id()).into())
+          Ok(message::OkV0::new(message.id()).into())
         }
       }
       .boxed(),
@@ -232,7 +232,7 @@ impl ProtocolHandler for Galaku {
           device
             .unsubscribe(&HardwareUnsubscribeCmd::new(Endpoint::RxBLEBattery))
             .await?;
-          Ok(message::Ok::new(message.id()).into())
+          Ok(message::OkV0::new(message.id()).into())
         }
       }
       .boxed(),

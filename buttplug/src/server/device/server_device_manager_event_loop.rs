@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::message::{ButtplugServerMessage, DeviceAddedV3, DeviceRemoved, ScanningFinished},
+  core::message::{ButtplugServerMessage, DeviceAddedV3, DeviceRemovedV0, ScanningFinishedV0},
   server::device::{
     configuration::DeviceConfigurationManager,
     hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
@@ -132,7 +132,7 @@ impl ServerDeviceManagerEventLoop {
           self.scanning_started = false;
           if self
             .server_sender
-            .send(ScanningFinished::default().into())
+            .send(ScanningFinishedV0::default().into())
             .is_err()
           {
             info!("Server disappeared, exiting loop.");
@@ -314,7 +314,7 @@ impl ServerDeviceManagerEventLoop {
             .expect("Remove will always work.");
           if self
             .server_sender
-            .send(DeviceRemoved::new(device_index).into())
+            .send(DeviceRemovedV0::new(device_index).into())
             .is_err()
           {
             debug!("Server not currently available, dropping Device Removed event.");

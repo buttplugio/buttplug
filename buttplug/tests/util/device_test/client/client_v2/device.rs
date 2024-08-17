@@ -21,26 +21,7 @@ use buttplug::{
     connector::ButtplugConnectorError,
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      BatteryLevelCmd,
-      ButtplugDeviceMessageType,
-      ButtplugMessage,
-      ButtplugSpecV2ClientMessage,
-      ButtplugSpecV2ServerMessage,
-      ClientDeviceMessageAttributesV2,
-      DeviceMessageInfoV2,
-      Endpoint,
-      LinearCmd,
-      RSSILevelCmd,
-      RawReadCmd,
-      RawSubscribeCmd,
-      RawUnsubscribeCmd,
-      RawWriteCmd,
-      RotateCmd,
-      RotationSubcommand,
-      StopDeviceCmd,
-      VectorSubcommand,
-      VibrateCmd,
-      VibrateSubcommand,
+      BatteryLevelCmdV2, ButtplugDeviceMessageType, ButtplugMessage, ButtplugSpecV2ClientMessage, ButtplugSpecV2ServerMessage, ClientDeviceMessageAttributesV2, DeviceMessageInfoV2, Endpoint, LinearCmdV2, RSSILevelCmdV2, RawReadCmdV2, RawSubscribeCmdV2, RawUnsubscribeCmdV2, RawWriteCmdV2, RotateCmdV2, RotationSubcommandV2, StopDeviceCmdV0, VectorSubcommandV2, VibrateCmdV1, VibrateSubcommandV1
     },
   },
   util::stream::convert_broadcast_receiver_to_stream,
@@ -299,12 +280,12 @@ impl ButtplugClientDevice {
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::VibrateCmd).into(),
       );
     };
-    let mut speed_vec: Vec<VibrateSubcommand>;
+    let mut speed_vec: Vec<VibrateSubcommandV1>;
     match speed_cmd {
       VibrateCommand::Speed(speed) => {
         speed_vec = Vec::with_capacity(vibrator_count as usize);
         for i in 0..vibrator_count {
-          speed_vec.push(VibrateSubcommand::new(i, speed));
+          speed_vec.push(VibrateSubcommandV1::new(i, speed));
         }
       }
       VibrateCommand::SpeedMap(map) => {
@@ -321,7 +302,7 @@ impl ButtplugClientDevice {
               ButtplugDeviceError::DeviceFeatureIndexError(vibrator_count, idx).into(),
             );
           }
-          speed_vec.push(VibrateSubcommand::new(idx, speed));
+          speed_vec.push(VibrateSubcommandV1::new(idx, speed));
         }
       }
       VibrateCommand::SpeedVec(vec) => {
@@ -333,11 +314,11 @@ impl ButtplugClientDevice {
         }
         speed_vec = Vec::with_capacity(vec.len());
         for (i, v) in vec.iter().enumerate() {
-          speed_vec.push(VibrateSubcommand::new(i as u32, *v));
+          speed_vec.push(VibrateSubcommandV1::new(i as u32, *v));
         }
       }
     }
-    let msg = VibrateCmd::new(self.index, speed_vec).into();
+    let msg = VibrateCmdV1::new(self.index, speed_vec).into();
     self.send_message_expect_ok(msg)
   }
 
@@ -350,12 +331,12 @@ impl ButtplugClientDevice {
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LinearCmd).into(),
       );
     };
-    let mut linear_vec: Vec<VectorSubcommand>;
+    let mut linear_vec: Vec<VectorSubcommandV2>;
     match linear_cmd {
       LinearCommand::Linear(dur, pos) => {
         linear_vec = Vec::with_capacity(linear_count as usize);
         for i in 0..linear_count {
-          linear_vec.push(VectorSubcommand::new(i, dur, pos));
+          linear_vec.push(VectorSubcommandV2::new(i, dur, pos));
         }
       }
       LinearCommand::LinearMap(map) => {
@@ -371,7 +352,7 @@ impl ButtplugClientDevice {
               ButtplugDeviceError::DeviceFeatureIndexError(linear_count, idx).into(),
             );
           }
-          linear_vec.push(VectorSubcommand::new(idx, dur, pos));
+          linear_vec.push(VectorSubcommandV2::new(idx, dur, pos));
         }
       }
       LinearCommand::LinearVec(vec) => {
@@ -382,11 +363,11 @@ impl ButtplugClientDevice {
         }
         linear_vec = Vec::with_capacity(vec.len());
         for (i, v) in vec.iter().enumerate() {
-          linear_vec.push(VectorSubcommand::new(i as u32, v.0, v.1));
+          linear_vec.push(VectorSubcommandV2::new(i as u32, v.0, v.1));
         }
       }
     }
-    let msg = LinearCmd::new(self.index, linear_vec).into();
+    let msg = LinearCmdV2::new(self.index, linear_vec).into();
     self.send_message_expect_ok(msg)
   }
 
@@ -399,12 +380,12 @@ impl ButtplugClientDevice {
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RotateCmd).into(),
       );
     };
-    let mut rotate_vec: Vec<RotationSubcommand>;
+    let mut rotate_vec: Vec<RotationSubcommandV2>;
     match rotate_cmd {
       RotateCommand::Rotate(speed, clockwise) => {
         rotate_vec = Vec::with_capacity(rotate_count as usize);
         for i in 0..rotate_count {
-          rotate_vec.push(RotationSubcommand::new(i, speed, clockwise));
+          rotate_vec.push(RotationSubcommandV2::new(i, speed, clockwise));
         }
       }
       RotateCommand::RotateMap(map) => {
@@ -420,7 +401,7 @@ impl ButtplugClientDevice {
               ButtplugDeviceError::DeviceFeatureIndexError(rotate_count, idx).into(),
             );
           }
-          rotate_vec.push(RotationSubcommand::new(idx, speed, clockwise));
+          rotate_vec.push(RotationSubcommandV2::new(idx, speed, clockwise));
         }
       }
       RotateCommand::RotateVec(vec) => {
@@ -431,11 +412,11 @@ impl ButtplugClientDevice {
         }
         rotate_vec = Vec::with_capacity(vec.len());
         for (i, v) in vec.iter().enumerate() {
-          rotate_vec.push(RotationSubcommand::new(i as u32, v.0, v.1));
+          rotate_vec.push(RotationSubcommandV2::new(i as u32, v.0, v.1));
         }
       }
     }
-    let msg = RotateCmd::new(self.index, rotate_vec).into();
+    let msg = RotateCmdV2::new(self.index, rotate_vec).into();
     self.send_message_expect_ok(msg)
   }
 
@@ -445,7 +426,7 @@ impl ButtplugClientDevice {
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::BatteryLevelCmd).into(),
       );
     }
-    let msg = ButtplugSpecV2ClientMessage::BatteryLevelCmd(BatteryLevelCmd::new(self.index));
+    let msg = ButtplugSpecV2ClientMessage::BatteryLevelCmd(BatteryLevelCmdV2::new(self.index));
     let send_fut = self.send_message(msg);
     Box::pin(async move {
       match send_fut.await? {
@@ -468,7 +449,7 @@ impl ButtplugClientDevice {
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RSSILevelCmd).into(),
       );
     }
-    let msg = ButtplugSpecV2ClientMessage::RSSILevelCmd(RSSILevelCmd::new(self.index));
+    let msg = ButtplugSpecV2ClientMessage::RSSILevelCmd(RSSILevelCmdV2::new(self.index));
     let send_fut = self.send_message(msg);
     Box::pin(async move {
       match send_fut.await? {
@@ -496,7 +477,7 @@ impl ButtplugClientDevice {
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawWriteCmd).into(),
       );
     }
-    let msg = ButtplugSpecV2ClientMessage::RawWriteCmd(RawWriteCmd::new(
+    let msg = ButtplugSpecV2ClientMessage::RawWriteCmd(RawWriteCmdV2::new(
       self.index,
       endpoint,
       &data,
@@ -516,7 +497,7 @@ impl ButtplugClientDevice {
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawReadCmd).into(),
       );
     }
-    let msg = ButtplugSpecV2ClientMessage::RawReadCmd(RawReadCmd::new(
+    let msg = ButtplugSpecV2ClientMessage::RawReadCmd(RawReadCmdV2::new(
       self.index,
       endpoint,
       expected_length,
@@ -545,7 +526,7 @@ impl ButtplugClientDevice {
       );
     }
     let msg =
-      ButtplugSpecV2ClientMessage::RawSubscribeCmd(RawSubscribeCmd::new(self.index, endpoint));
+      ButtplugSpecV2ClientMessage::RawSubscribeCmd(RawSubscribeCmdV2::new(self.index, endpoint));
     self.send_message_expect_ok(msg)
   }
 
@@ -557,14 +538,14 @@ impl ButtplugClientDevice {
       );
     }
     let msg =
-      ButtplugSpecV2ClientMessage::RawUnsubscribeCmd(RawUnsubscribeCmd::new(self.index, endpoint));
+      ButtplugSpecV2ClientMessage::RawUnsubscribeCmd(RawUnsubscribeCmdV2::new(self.index, endpoint));
     self.send_message_expect_ok(msg)
   }
 
   /// Commands device to stop all movement.
   pub fn stop(&self) -> ButtplugClientResultFuture {
     // All devices accept StopDeviceCmd
-    self.send_message_expect_ok(StopDeviceCmd::new(self.index).into())
+    self.send_message_expect_ok(StopDeviceCmdV0::new(self.index).into())
   }
 
   pub fn index(&self) -> u32 {

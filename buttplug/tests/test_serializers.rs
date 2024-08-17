@@ -49,7 +49,7 @@ async fn test_garbled_client_rsi_response() {
     .await;
   helper
     .send_client_incoming(
-      message::ServerInfo::new(
+      message::ServerInfoV2::new(
         "test server",
         message::BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
         0,
@@ -74,7 +74,7 @@ async fn test_serialized_error_relay() {
       helper_clone.next_client_message().await,
       ButtplugClientMessage::StartScanning(..)
     ));
-    let mut error_msg = ButtplugServerMessage::Error(message::Error::from(ButtplugError::from(
+    let mut error_msg = ButtplugServerMessage::Error(message::ErrorV0::from(ButtplugError::from(
       ButtplugUnknownError::NoDeviceCommManagers,
     )));
     error_msg.set_id(3);

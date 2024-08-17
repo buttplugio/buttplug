@@ -63,8 +63,8 @@ use crate::{
       ButtplugDeviceManagerMessageUnion,
       ButtplugMessage,
       ButtplugServerMessage,
-      StopAllDevices,
-      StopScanning,
+      StopAllDevicesV0,
+      StopScanningV0,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
@@ -205,7 +205,7 @@ impl ButtplugServerBuilder {
           });
           // TODO Should the event sender return a result instead of an error message?
           if output_sender_clone
-            .send(message::Error::from(ButtplugError::from(ButtplugPingError::PingedOut)).into())
+            .send(message::ErrorV0::from(ButtplugError::from(ButtplugPingError::PingedOut)).into())
             .is_err()
           {
             error!("Server disappeared, cannot update about ping out.");
@@ -285,13 +285,13 @@ impl ButtplugServer {
   }
 
   /// Disconnects the server from a client, if it is connected.
-  pub fn disconnect(&self) -> BoxFuture<Result<(), message::Error>> {
+  pub fn disconnect(&self) -> BoxFuture<Result<(), message::ErrorV0>> {
     debug!("Buttplug Server {} disconnect requested", self.server_name);
     let ping_timer = self.ping_timer.clone();
     let stop_scanning_fut =
-      self.parse_message(ButtplugClientMessage::StopScanning(StopScanning::default()));
+      self.parse_message(ButtplugClientMessage::StopScanning(StopScanningV0::default()));
     let stop_fut = self.parse_message(ButtplugClientMessage::StopAllDevices(
-      StopAllDevices::default(),
+      StopAllDevicesV0::default(),
     ));
     let connected = self.connected.clone();
     async move {
@@ -312,7 +312,7 @@ impl ButtplugServer {
   pub fn parse_message(
     &self,
     msg: ButtplugClientMessage,
-  ) -> BoxFuture<'static, Result<ButtplugServerMessage, message::Error>> {
+  ) -> BoxFuture<'static, Result<ButtplugServerMessage, message::ErrorV0>> {
     trace!(
       "Buttplug Server {} received message to client parse: {:?}",
       self.server_name,
@@ -324,11 +324,11 @@ impl ButtplugServer {
       // we haven't received RequestServerInfo first, but we do want to know if
       // we pinged out.
       let error = if self.ping_timer.pinged_out() {
-        Some(message::Error::from(ButtplugError::from(
+        Some(message::ErrorV0::from(ButtplugError::from(
           ButtplugPingError::PingedOut,
         )))
       } else if !matches!(msg, ButtplugClientMessage::RequestServerInfo(_)) {
-        Some(message::Error::from(ButtplugError::from(
+        Some(message::ErrorV0::from(ButtplugError::from(
           ButtplugHandshakeError::RequestServerInfoExpected,
         )))
       } else {
@@ -366,7 +366,7 @@ impl ButtplugServer {
           ok_msg
         })
         .map_err(|err| {
-          let mut error = message::Error::from(err);
+          let mut error = message::ErrorV0::from(err);
           error.set_id(id);
           error
         })
@@ -380,7 +380,7 @@ impl ButtplugServer {
   /// Protocol Spec](https://buttplug-spec.docs.buttplug.io). This is the first thing that must
   /// happens upon connection to the server, in order to make sure the server can speak the same
   /// protocol version as the client.
-  fn perform_handshake(&self, msg: message::RequestServerInfo) -> ButtplugServerResultFuture {
+  fn perform_handshake(&self, msg: message::RequestServerInfoV1) -> ButtplugServerResultFuture {
     if self.connected() {
       return ButtplugHandshakeError::HandshakeAlreadyHappened.into();
     }
@@ -399,7 +399,7 @@ impl ButtplugServer {
     // Only start the ping timer after we've received the handshake.
     let ping_timer = self.ping_timer.clone();
     let out_msg =
-      message::ServerInfo::new(&self.server_name, msg.message_version(), self.max_ping_time);
+      message::ServerInfoV2::new(&self.server_name, msg.message_version(), self.max_ping_time);
     let connected = self.connected.clone();
     async move {
       ping_timer.start_ping_timer().await;
@@ -411,14 +411,14 @@ impl ButtplugServer {
   }
 
   /// Update the [PingTimer] with the latest received ping message.
-  fn handle_ping(&self, msg: message::Ping) -> ButtplugServerResultFuture {
+  fn handle_ping(&self, msg: message::PingV0) -> ButtplugServerResultFuture {
     if self.max_ping_time == 0 {
       return ButtplugPingError::PingTimerNotRunning.into();
     }
     let fut = self.ping_timer.update_ping_time();
     async move {
       fut.await;
-      Result::Ok(message::Ok::new(msg.id()).into())
+      Result::Ok(message::OkV0::new(msg.id()).into())
     }
     .boxed()
   }

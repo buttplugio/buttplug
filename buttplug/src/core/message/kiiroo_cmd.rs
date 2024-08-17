@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 /// Kiiroo Command (Version 0 Message, Deprecated in spec)
 #[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct KiirooCmd {
+pub struct KiirooCmdV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
@@ -23,7 +23,7 @@ pub struct KiirooCmd {
   command: String,
 }
 
-impl KiirooCmd {
+impl KiirooCmdV0 {
   pub fn new(device_index: u32, command: &str) -> Self {
     Self {
       id: 1,
@@ -33,7 +33,7 @@ impl KiirooCmd {
   }
 }
 
-impl ButtplugMessageValidator for KiirooCmd {
+impl ButtplugMessageValidator for KiirooCmdV0 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
   }

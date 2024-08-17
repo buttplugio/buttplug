@@ -17,12 +17,12 @@ use buttplug::{
       ButtplugMessageSpecVersion,
       ButtplugSpecV2ClientMessage,
       ButtplugSpecV2ServerMessage,
-      Ping,
-      RequestDeviceList,
-      RequestServerInfo,
-      StartScanning,
-      StopAllDevices,
-      StopScanning,
+      PingV0,
+      RequestDeviceListV0,
+      RequestServerInfoV1,
+      StartScanningV0,
+      StopAllDevicesV0,
+      StopScanningV0,
     },
   },
   util::{
@@ -242,7 +242,7 @@ impl ButtplugClient {
     info!("Running handshake with server.");
     let msg = self
       .send_message_ignore_connect_status(
-        RequestServerInfo::new(&self.client_name, ButtplugMessageSpecVersion::Version2).into(),
+        RequestServerInfoV1::new(&self.client_name, ButtplugMessageSpecVersion::Version2).into(),
       )
       .await?;
 
@@ -259,7 +259,7 @@ impl ButtplugClient {
       // handle sending the message and getting the return, and
       // will send the client updates as events.
       let msg = self
-        .send_message(RequestDeviceList::default().into())
+        .send_message(RequestDeviceListV0::default().into())
         .await?;
       if let ButtplugSpecV2ServerMessage::DeviceList(m) = msg {
         self
@@ -309,7 +309,7 @@ impl ButtplugClient {
   /// Returns Err([ButtplugClientError]) if request fails due to issues with
   /// DeviceManagers on the server, disconnection, etc.
   pub fn start_scanning(&self) -> ButtplugClientResultFuture {
-    self.send_message_expect_ok(StartScanning::default().into())
+    self.send_message_expect_ok(StartScanningV0::default().into())
   }
 
   /// Tells server to stop scanning for devices.
@@ -317,7 +317,7 @@ impl ButtplugClient {
   /// Returns Err([ButtplugClientError]) if request fails due to issues with
   /// DeviceManagers on the server, disconnection, etc.
   pub fn stop_scanning(&self) -> ButtplugClientResultFuture {
-    self.send_message_expect_ok(StopScanning::default().into())
+    self.send_message_expect_ok(StopScanningV0::default().into())
   }
 
   /// Tells server to stop all devices.
@@ -325,7 +325,7 @@ impl ButtplugClient {
   /// Returns Err([ButtplugClientError]) if request fails due to issues with
   /// DeviceManagers on the server, disconnection, etc.
   pub fn stop_all_devices(&self) -> ButtplugClientResultFuture {
-    self.send_message_expect_ok(StopAllDevices::default().into())
+    self.send_message_expect_ok(StopAllDevicesV0::default().into())
   }
 
   pub fn event_stream(&self) -> impl Stream<Item = ButtplugClientEvent> {
@@ -408,7 +408,7 @@ impl ButtplugClient {
   }
 
   pub fn ping(&self) -> ButtplugClientResultFuture {
-    let ping_fut = self.send_message_expect_ok(Ping::default().into());
+    let ping_fut = self.send_message_expect_ok(PingV0::default().into());
     Box::pin(ping_fut)
   }
 

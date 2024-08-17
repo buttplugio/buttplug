@@ -27,12 +27,12 @@ async fn test_capabilities_exposure() {
 
   server
     .parse_message(
-      message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into(),
+      message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into(),
     )
     .await
     .expect("Test, assuming infallible.");
   server
-    .parse_message(message::StartScanning::default().into())
+    .parse_message(message::StartScanningV0::default().into())
     .await
     .expect("Test, assuming infallible.");
   while let Some(msg) = recv.next().await {
@@ -51,12 +51,12 @@ async fn test_server_raw_message() {
   pin_mut!(recv);
   assert!(server
     .parse_message(
-      message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
+      message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
     )
     .await
     .is_ok());
   assert!(server
-    .parse_message(message::StartScanning::default().into())
+    .parse_message(message::StartScanningV0::default().into())
     .await
     .is_ok());
   while let Some(msg) = recv.next().await {
@@ -84,12 +84,12 @@ async fn test_server_no_raw_message() {
   pin_mut!(recv);
   assert!(server
     .parse_message(
-      message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
+      message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
     )
     .await
     .is_ok());
   assert!(server
-    .parse_message(message::StartScanning::default().into())
+    .parse_message(message::StartScanningV0::default().into())
     .await
     .is_ok());
   while let Some(msg) = recv.next().await {
@@ -117,12 +117,12 @@ async fn test_reject_on_no_raw_message() {
   pin_mut!(recv);
   assert!(server
     .parse_message(
-      message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
+      message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
     )
     .await
     .is_ok());
   assert!(server
-    .parse_message(message::StartScanning::default().into())
+    .parse_message(message::StartScanningV0::default().into())
     .await
     .is_ok());
   while let Some(msg) = recv.next().await {
@@ -133,7 +133,7 @@ async fn test_reject_on_no_raw_message() {
       let mut should_be_err;
       should_be_err = server
         .parse_message(
-          message::RawWriteCmd::new(da.device_index(), Endpoint::Tx, &[0x0], false).into(),
+          message::RawWriteCmdV2::new(da.device_index(), Endpoint::Tx, &[0x0], false).into(),
         )
         .await;
       assert!(should_be_err.is_err());
@@ -143,7 +143,7 @@ async fn test_reject_on_no_raw_message() {
       ));
 
       should_be_err = server
-        .parse_message(message::RawReadCmd::new(da.device_index(), Endpoint::Tx, 0, 0).into())
+        .parse_message(message::RawReadCmdV2::new(da.device_index(), Endpoint::Tx, 0, 0).into())
         .await;
       assert!(should_be_err.is_err());
       assert!(matches!(
@@ -152,7 +152,7 @@ async fn test_reject_on_no_raw_message() {
       ));
 
       should_be_err = server
-        .parse_message(message::RawSubscribeCmd::new(da.device_index(), Endpoint::Tx).into())
+        .parse_message(message::RawSubscribeCmdV2::new(da.device_index(), Endpoint::Tx).into())
         .await;
       assert!(should_be_err.is_err());
       assert!(matches!(
@@ -161,7 +161,7 @@ async fn test_reject_on_no_raw_message() {
       ));
 
       should_be_err = server
-        .parse_message(message::RawUnsubscribeCmd::new(da.device_index(), Endpoint::Tx).into())
+        .parse_message(message::RawUnsubscribeCmdV2::new(da.device_index(), Endpoint::Tx).into())
         .await;
       assert!(should_be_err.is_err());
       assert!(matches!(

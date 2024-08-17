@@ -186,7 +186,7 @@ impl ProtocolHandler for VorzeSA {
 
   fn handle_linear_cmd(
     &self,
-    msg: message::LinearCmd,
+    msg: message::LinearCmdV2,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = msg.vectors()[0].clone();
 
@@ -210,7 +210,7 @@ impl ProtocolHandler for VorzeSA {
 
   fn handle_vorze_a10_cyclone_cmd(
     &self,
-    msg: message::VorzeA10CycloneCmd,
+    msg: message::VorzeA10CycloneCmdV0,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.handle_rotate_cmd(&[Some((msg.speed(), msg.clockwise()))])
   }

@@ -16,7 +16,7 @@ use crate::{
       ButtplugServerDeviceMessage,
       ButtplugServerMessage,
       Endpoint,
-      SensorReading,
+      SensorReadingV3,
       SensorReadingV4,
       SensorType,
     },
@@ -87,14 +87,14 @@ impl ProtocolHandler for KiirooV21 {
 
   fn handle_linear_cmd(
     &self,
-    message: message::LinearCmd,
+    message: message::LinearCmdV2,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
     let previous_position = self.previous_position.load(SeqCst);
     let distance = (previous_position as f64 - (v.position() * 99f64)).abs() / 99f64;
-    let fl_cmd = message::FleshlightLaunchFW12Cmd::new(
+    let fl_cmd = message::FleshlightLaunchFW12CmdV0::new(
       message.device_index(),
       (v.position() * 99f64) as u8,
       (calculate_speed(distance, v.duration()) * 99f64) as u8,
@@ -104,7 +104,7 @@ impl ProtocolHandler for KiirooV21 {
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    message: message::FleshlightLaunchFW12Cmd,
+    message: message::FleshlightLaunchFW12CmdV0,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let previous_position = self.previous_position.clone();
     let position = message.position();
@@ -161,7 +161,7 @@ impl ProtocolHandler for KiirooV21 {
     message: message::SensorSubscribeCmdV4,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     if self.subscribed_sensors.contains(message.feature_index()) {
-      return future::ready(Ok(message::Ok::new(message.id()).into())).boxed();
+      return future::ready(Ok(message::OkV0::new(message.id()).into())).boxed();
     }
     let sensors = self.subscribed_sensors.clone();
     // Format for the Kiiroo Pearl 2.1:
@@ -218,7 +218,7 @@ impl ProtocolHandler for KiirooV21 {
                   if stream_sensors.contains(&sensor_index)
                     && sender
                       .send(
-                        SensorReading::new(device_index, sensor_index, sensor_type, sensor_data)
+                        SensorReadingV3::new(device_index, sensor_index, sensor_type, sensor_data)
                           .into(),
                       )
                       .is_err()
@@ -235,7 +235,7 @@ impl ProtocolHandler for KiirooV21 {
         });
       }
       sensors.insert(*message.feature_index());
-      Ok(message::Ok::new(message.id()).into())
+      Ok(message::OkV0::new(message.id()).into())
     }
     .boxed()
   }
@@ -246,7 +246,7 @@ impl ProtocolHandler for KiirooV21 {
     message: message::SensorUnsubscribeCmdV4,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     if !self.subscribed_sensors.contains(message.feature_index()) {
-      return future::ready(Ok(message::Ok::new(message.id()).into())).boxed();
+      return future::ready(Ok(message::OkV0::new(message.id()).into())).boxed();
     }
     let sensors = self.subscribed_sensors.clone();
     async move {
@@ -258,7 +258,7 @@ impl ProtocolHandler for KiirooV21 {
           .unsubscribe(&HardwareUnsubscribeCmd::new(Endpoint::Rx))
           .await?;
       }
-      Ok(message::Ok::new(message.id()).into())
+      Ok(message::OkV0::new(message.id()).into())
     }
     .boxed()
   }

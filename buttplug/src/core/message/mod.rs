@@ -59,19 +59,19 @@ mod test;
 mod vibrate_cmd;
 mod vorze_a10_cyclone_cmd;
 
-pub use self::log::Log;
-pub use battery_level_cmd::BatteryLevelCmd;
-pub use battery_level_reading::BatteryLevelReading;
+pub use self::log::LogV0;
+pub use battery_level_cmd::BatteryLevelCmdV2;
+pub use battery_level_reading::BatteryLevelReadingV2;
 pub use client_device_message_attributes::{
   ActuatorType,
-  ClientDeviceMessageAttributes,
-  ClientDeviceMessageAttributesBuilder,
+  ClientDeviceMessageAttributesV3,
+  ClientDeviceMessageAttributesV3Builder,
   ClientDeviceMessageAttributesV1,
   ClientDeviceMessageAttributesV2,
-  ClientGenericDeviceMessageAttributes,
-  NullDeviceMessageAttributes,
-  RawDeviceMessageAttributes,
-  SensorDeviceMessageAttributes,
+  ClientGenericDeviceMessageAttributesV3,
+  NullDeviceMessageAttributesV1,
+  RawDeviceMessageAttributesV2,
+  SensorDeviceMessageAttributesV3,
   SensorType,
 };
 pub use device_added::{DeviceAddedV3, DeviceAddedV0, DeviceAddedV1, DeviceAddedV2};
@@ -89,60 +89,60 @@ pub use device_message_info::{
   DeviceMessageInfoV1,
   DeviceMessageInfoV2,
 };
-pub use device_removed::DeviceRemoved;
+pub use device_removed::DeviceRemovedV0;
 pub use endpoint::Endpoint;
-pub use error::{Error, ErrorCode, ErrorV0};
-pub use fleshlight_launch_fw12_cmd::FleshlightLaunchFW12Cmd;
-pub use kiiroo_cmd::KiirooCmd;
+pub use error::{ErrorV0, ErrorCode};
+pub use fleshlight_launch_fw12_cmd::FleshlightLaunchFW12CmdV0;
+pub use kiiroo_cmd::KiirooCmdV0;
 pub use linear_cmd::{
-  LinearCmdV2 as LinearCmd,
+  LinearCmdV2,
   LinearCmdV4,
-  VectorSubcommandV2 as VectorSubcommand,
+  VectorSubcommandV2,
   VectorSubcommandV4,
 };
 pub use log_level::LogLevel;
-pub use lovense_cmd::LovenseCmd;
-pub use ok::Ok;
-pub use ping::Ping;
-pub use raw_read_cmd::RawReadCmd;
-pub use raw_reading::RawReading;
-pub use raw_subscribe_cmd::RawSubscribeCmd;
-pub use raw_unsubscribe_cmd::RawUnsubscribeCmd;
-pub use raw_write_cmd::RawWriteCmd;
-pub use request_device_list::RequestDeviceList;
-pub use request_log::RequestLog;
-pub use request_server_info::RequestServerInfo;
+pub use lovense_cmd::LovenseCmdV0;
+pub use ok::OkV0;
+pub use ping::PingV0;
+pub use raw_read_cmd::RawReadCmdV2;
+pub use raw_reading::RawReadingV2;
+pub use raw_subscribe_cmd::RawSubscribeCmdV2;
+pub use raw_unsubscribe_cmd::RawUnsubscribeCmdV2;
+pub use raw_write_cmd::RawWriteCmdV2;
+pub use request_device_list::RequestDeviceListV0;
+pub use request_log::RequestLogV0;
+pub use request_server_info::RequestServerInfoV1;
 pub use rotate_cmd::{
-  RotateCmdV2 as RotateCmd,
+  RotateCmdV2,
   RotateCmdV4,
-  RotationSubcommandV2 as RotationSubcommand,
+  RotationSubcommandV2,
   RotationSubcommandV4,
 };
-pub use rssi_level_cmd::RSSILevelCmd;
-pub use rssi_level_reading::RSSILevelReading;
+pub use rssi_level_cmd::RSSILevelCmdV2;
+pub use rssi_level_reading::RSSILevelReadingV2;
 pub use scalar_cmd::{
-  ScalarCmdV3 as ScalarCmd,
+  ScalarCmdV3,
   ScalarCmdV4,
-  ScalarSubcommandV3 as ScalarSubcommand,
+  ScalarSubcommandV3,
   ScalarSubcommandV4,
 };
-pub use scanning_finished::ScanningFinished;
-pub use sensor_read_cmd::{SensorReadCmdV3 as SensorReadCmd, SensorReadCmdV4};
-pub use sensor_reading::{SensorReadingV3 as SensorReading, SensorReadingV4};
-pub use sensor_subscribe_cmd::{SensorSubscribeCmdV3 as SensorSubscribeCmd, SensorSubscribeCmdV4};
+pub use scanning_finished::ScanningFinishedV0;
+pub use sensor_read_cmd::{SensorReadCmdV3, SensorReadCmdV4};
+pub use sensor_reading::{SensorReadingV3, SensorReadingV4};
+pub use sensor_subscribe_cmd::{SensorSubscribeCmdV3, SensorSubscribeCmdV4};
 pub use sensor_unsubscribe_cmd::{
-  SensorUnsubscribeCmdV3 as SensorUnsubscribeCmd,
+  SensorUnsubscribeCmdV3,
   SensorUnsubscribeCmdV4,
 };
-pub use server_info::{ServerInfo, ServerInfoV0};
-pub use single_motor_vibrate_cmd::SingleMotorVibrateCmd;
-pub use start_scanning::StartScanning;
-pub use stop_all_devices::StopAllDevices;
-pub use stop_device_cmd::StopDeviceCmd;
-pub use stop_scanning::StopScanning;
-pub use test::Test;
-pub use vibrate_cmd::{VibrateCmd, VibrateSubcommand};
-pub use vorze_a10_cyclone_cmd::VorzeA10CycloneCmd;
+pub use server_info::{ServerInfoV2, ServerInfoV0};
+pub use single_motor_vibrate_cmd::SingleMotorVibrateCmdV0;
+pub use start_scanning::StartScanningV0;
+pub use stop_all_devices::StopAllDevicesV0;
+pub use stop_device_cmd::StopDeviceCmdV0;
+pub use stop_scanning::StopScanningV0;
+pub use test::TestV0;
+pub use vibrate_cmd::{VibrateCmdV1, VibrateSubcommandV1};
+pub use vorze_a10_cyclone_cmd::VorzeA10CycloneCmdV0;
 
 use crate::core::errors::ButtplugMessageError;
 use serde::{Deserialize, Serialize};
@@ -391,38 +391,38 @@ impl TryFrom<ButtplugDeviceMessageType> for ButtplugRawFeatureMessageType {
   FromSpecificButtplugMessage,
 )]
 pub enum ButtplugClientMessage {
-  Ping(Ping),
-  RequestLog(RequestLog),
+  Ping(PingV0),
+  RequestLog(RequestLogV0),
   // Handshake messages
-  RequestServerInfo(RequestServerInfo),
+  RequestServerInfo(RequestServerInfoV1),
   // Device enumeration messages
-  StartScanning(StartScanning),
-  StopScanning(StopScanning),
-  RequestDeviceList(RequestDeviceList),
+  StartScanning(StartScanningV0),
+  StopScanning(StopScanningV0),
+  RequestDeviceList(RequestDeviceListV0),
   // Generic commands
-  StopAllDevices(StopAllDevices),
-  VibrateCmd(VibrateCmd),
-  LinearCmd(LinearCmd),
-  RotateCmd(RotateCmd),
-  RawWriteCmd(RawWriteCmd),
-  RawReadCmd(RawReadCmd),
-  StopDeviceCmd(StopDeviceCmd),
-  RawSubscribeCmd(RawSubscribeCmd),
-  RawUnsubscribeCmd(RawUnsubscribeCmd),
-  ScalarCmd(ScalarCmd),
+  StopAllDevices(StopAllDevicesV0),
+  VibrateCmd(VibrateCmdV1),
+  LinearCmd(LinearCmdV2),
+  RotateCmd(RotateCmdV2),
+  RawWriteCmd(RawWriteCmdV2),
+  RawReadCmd(RawReadCmdV2),
+  StopDeviceCmd(StopDeviceCmdV0),
+  RawSubscribeCmd(RawSubscribeCmdV2),
+  RawUnsubscribeCmd(RawUnsubscribeCmdV2),
+  ScalarCmd(ScalarCmdV3),
   // Sensor commands
-  BatteryLevelCmd(BatteryLevelCmd),
-  RSSILevelCmd(RSSILevelCmd),
-  SensorReadCmd(SensorReadCmd),
-  SensorSubscribeCmd(SensorSubscribeCmd),
-  SensorUnsubscribeCmd(SensorUnsubscribeCmd),
+  BatteryLevelCmd(BatteryLevelCmdV2),
+  RSSILevelCmd(RSSILevelCmdV2),
+  SensorReadCmd(SensorReadCmdV3),
+  SensorSubscribeCmd(SensorSubscribeCmdV3),
+  SensorUnsubscribeCmd(SensorUnsubscribeCmdV3),
   // Deprecated generic commands
-  SingleMotorVibrateCmd(SingleMotorVibrateCmd),
+  SingleMotorVibrateCmd(SingleMotorVibrateCmdV0),
   // Deprecated device specific commands
-  FleshlightLaunchFW12Cmd(FleshlightLaunchFW12Cmd),
-  LovenseCmd(LovenseCmd),
-  KiirooCmd(KiirooCmd),
-  VorzeA10CycloneCmd(VorzeA10CycloneCmd),
+  FleshlightLaunchFW12Cmd(FleshlightLaunchFW12CmdV0),
+  LovenseCmd(LovenseCmdV0),
+  KiirooCmd(KiirooCmdV0),
+  VorzeA10CycloneCmd(VorzeA10CycloneCmdV0),
   // To Add:
 }
 
@@ -441,24 +441,24 @@ pub enum ButtplugClientMessage {
 )]
 pub enum ButtplugServerMessage {
   // Status messages
-  Ok(Ok),
-  Error(Error),
-  Test(Test),
-  Log(Log),
+  Ok(OkV0),
+  Error(ErrorV0),
+  Test(TestV0),
+  Log(LogV0),
   // Handshake messages
-  ServerInfo(ServerInfo),
+  ServerInfo(ServerInfoV2),
   // Device enumeration messages
   DeviceList(DeviceListV3),
   DeviceAdded(DeviceAddedV3),
-  DeviceRemoved(DeviceRemoved),
-  ScanningFinished(ScanningFinished),
+  DeviceRemoved(DeviceRemovedV0),
+  ScanningFinished(ScanningFinishedV0),
   // Generic commands
-  RawReading(RawReading),
+  RawReading(RawReadingV2),
   // Sensor Reading Messages
-  SensorReading(SensorReading),
+  SensorReading(SensorReadingV3),
   // Deprecated Server Messages
-  BatteryLevelReading(BatteryLevelReading),
-  RSSILevelReading(RSSILevelReading),
+  BatteryLevelReading(BatteryLevelReadingV2),
+  RSSILevelReading(RSSILevelReadingV2),
 }
 
 
@@ -480,9 +480,9 @@ pub enum ButtplugServerMessage {
 )]
 pub enum ButtplugServerDeviceMessage {
   // Generic commands
-  RawReading(RawReading),
+  RawReading(RawReadingV2),
   // Generic Sensor Reading Messages
-  SensorReading(SensorReading),
+  SensorReading(SensorReadingV3),
 }
 
 impl From<ButtplugServerDeviceMessage> for ButtplugServerMessage {
@@ -514,27 +514,27 @@ pub type ButtplugCurrentSpecServerMessage = ButtplugSpecV3ServerMessage;
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugSpecV3ClientMessage {
   // Handshake messages
-  RequestServerInfo(RequestServerInfo),
-  Ping(Ping),
+  RequestServerInfo(RequestServerInfoV1),
+  Ping(PingV0),
   // Device enumeration messages
-  StartScanning(StartScanning),
-  StopScanning(StopScanning),
-  RequestDeviceList(RequestDeviceList),
+  StartScanning(StartScanningV0),
+  StopScanning(StopScanningV0),
+  RequestDeviceList(RequestDeviceListV0),
   // Generic commands
-  StopAllDevices(StopAllDevices),
-  VibrateCmd(VibrateCmd),
-  LinearCmd(LinearCmd),
-  RotateCmd(RotateCmd),
-  RawWriteCmd(RawWriteCmd),
-  RawReadCmd(RawReadCmd),
-  StopDeviceCmd(StopDeviceCmd),
-  RawSubscribeCmd(RawSubscribeCmd),
-  RawUnsubscribeCmd(RawUnsubscribeCmd),
-  ScalarCmd(ScalarCmd),
+  StopAllDevices(StopAllDevicesV0),
+  VibrateCmd(VibrateCmdV1),
+  LinearCmd(LinearCmdV2),
+  RotateCmd(RotateCmdV2),
+  RawWriteCmd(RawWriteCmdV2),
+  RawReadCmd(RawReadCmdV2),
+  StopDeviceCmd(StopDeviceCmdV0),
+  RawSubscribeCmd(RawSubscribeCmdV2),
+  RawUnsubscribeCmd(RawUnsubscribeCmdV2),
+  ScalarCmd(ScalarCmdV3),
   // Sensor commands
-  SensorReadCmd(SensorReadCmd),
-  SensorSubscribeCmd(SensorSubscribeCmd),
-  SensorUnsubscribeCmd(SensorUnsubscribeCmd),
+  SensorReadCmd(SensorReadCmdV3),
+  SensorSubscribeCmd(SensorSubscribeCmdV3),
+  SensorUnsubscribeCmd(SensorUnsubscribeCmdV3),
 }
 
 /// Represents all server-to-client messages in v3 of the Buttplug Spec
@@ -551,19 +551,19 @@ pub enum ButtplugSpecV3ClientMessage {
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugSpecV3ServerMessage {
   // Status messages
-  Ok(Ok),
-  Error(Error),
+  Ok(OkV0),
+  Error(ErrorV0),
   // Handshake messages
-  ServerInfo(ServerInfo),
+  ServerInfo(ServerInfoV2),
   // Device enumeration messages
   DeviceList(DeviceListV3),
   DeviceAdded(DeviceAddedV3),
-  DeviceRemoved(DeviceRemoved),
-  ScanningFinished(ScanningFinished),
+  DeviceRemoved(DeviceRemovedV0),
+  ScanningFinished(ScanningFinishedV0),
   // Generic commands
-  RawReading(RawReading),
+  RawReading(RawReadingV2),
   // Sensor commands
-  SensorReading(SensorReading),
+  SensorReading(SensorReadingV3),
 }
 
 impl ButtplugMessageFinalizer for ButtplugSpecV3ServerMessage {
@@ -591,25 +591,25 @@ impl ButtplugMessageFinalizer for ButtplugSpecV3ServerMessage {
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugSpecV2ClientMessage {
   // Handshake messages
-  RequestServerInfo(RequestServerInfo),
-  Ping(Ping),
+  RequestServerInfo(RequestServerInfoV1),
+  Ping(PingV0),
   // Device enumeration messages
-  StartScanning(StartScanning),
-  StopScanning(StopScanning),
-  RequestDeviceList(RequestDeviceList),
+  StartScanning(StartScanningV0),
+  StopScanning(StopScanningV0),
+  RequestDeviceList(RequestDeviceListV0),
   // Generic commands
-  StopAllDevices(StopAllDevices),
-  VibrateCmd(VibrateCmd),
-  LinearCmd(LinearCmd),
-  RotateCmd(RotateCmd),
-  RawWriteCmd(RawWriteCmd),
-  RawReadCmd(RawReadCmd),
-  StopDeviceCmd(StopDeviceCmd),
-  RawSubscribeCmd(RawSubscribeCmd),
-  RawUnsubscribeCmd(RawUnsubscribeCmd),
+  StopAllDevices(StopAllDevicesV0),
+  VibrateCmd(VibrateCmdV1),
+  LinearCmd(LinearCmdV2),
+  RotateCmd(RotateCmdV2),
+  RawWriteCmd(RawWriteCmdV2),
+  RawReadCmd(RawReadCmdV2),
+  StopDeviceCmd(StopDeviceCmdV0),
+  RawSubscribeCmd(RawSubscribeCmdV2),
+  RawUnsubscribeCmd(RawUnsubscribeCmdV2),
   // Sensor commands
-  BatteryLevelCmd(BatteryLevelCmd),
-  RSSILevelCmd(RSSILevelCmd),
+  BatteryLevelCmd(BatteryLevelCmdV2),
+  RSSILevelCmd(RSSILevelCmdV2),
 }
 
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
@@ -625,20 +625,20 @@ pub enum ButtplugSpecV2ClientMessage {
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugSpecV2ServerMessage {
   // Status messages
-  Ok(Ok),
-  Error(Error),
+  Ok(OkV0),
+  Error(ErrorV0),
   // Handshake messages
-  ServerInfo(ServerInfo),
+  ServerInfo(ServerInfoV2),
   // Device enumeration messages
   DeviceList(DeviceListV2),
   DeviceAdded(DeviceAddedV2),
-  DeviceRemoved(DeviceRemoved),
-  ScanningFinished(ScanningFinished),
+  DeviceRemoved(DeviceRemovedV0),
+  ScanningFinished(ScanningFinishedV0),
   // Generic commands
-  RawReading(RawReading),
+  RawReading(RawReadingV2),
   // Sensor commands
-  BatteryLevelReading(BatteryLevelReading),
-  RSSILevelReading(RSSILevelReading),
+  BatteryLevelReading(BatteryLevelReadingV2),
+  RSSILevelReading(RSSILevelReadingV2),
 }
 
 // This was implementated as a derive, but for some reason the .into() calls
@@ -686,25 +686,25 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV2ServerMessage {
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugSpecV1ClientMessage {
   // Handshake messages
-  RequestServerInfo(RequestServerInfo),
-  Ping(Ping),
+  RequestServerInfo(RequestServerInfoV1),
+  Ping(PingV0),
   // Device enumeration messages
-  StartScanning(StartScanning),
-  StopScanning(StopScanning),
-  RequestDeviceList(RequestDeviceList),
+  StartScanning(StartScanningV0),
+  StopScanning(StopScanningV0),
+  RequestDeviceList(RequestDeviceListV0),
   // Generic commands
-  StopAllDevices(StopAllDevices),
-  VibrateCmd(VibrateCmd),
-  LinearCmd(LinearCmd),
-  RotateCmd(RotateCmd),
-  StopDeviceCmd(StopDeviceCmd),
+  StopAllDevices(StopAllDevicesV0),
+  VibrateCmd(VibrateCmdV1),
+  LinearCmd(LinearCmdV2),
+  RotateCmd(RotateCmdV2),
+  StopDeviceCmd(StopDeviceCmdV0),
   // Deprecated generic commands
-  SingleMotorVibrateCmd(SingleMotorVibrateCmd),
+  SingleMotorVibrateCmd(SingleMotorVibrateCmdV0),
   // Deprecated device specific commands
-  FleshlightLaunchFW12Cmd(FleshlightLaunchFW12Cmd),
-  LovenseCmd(LovenseCmd),
-  KiirooCmd(KiirooCmd),
-  VorzeA10CycloneCmd(VorzeA10CycloneCmd),
+  FleshlightLaunchFW12Cmd(FleshlightLaunchFW12CmdV0),
+  LovenseCmd(LovenseCmdV0),
+  KiirooCmd(KiirooCmdV0),
+  VorzeA10CycloneCmd(VorzeA10CycloneCmdV0),
 }
 
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
@@ -712,7 +712,6 @@ pub enum ButtplugSpecV1ClientMessage {
   Debug,
   Clone,
   PartialEq,
-  Eq,
   ButtplugMessage,
   ButtplugMessageValidator,
   ButtplugMessageFinalizer,
@@ -721,16 +720,16 @@ pub enum ButtplugSpecV1ClientMessage {
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugSpecV1ServerMessage {
   // Status messages
-  Ok(Ok),
+  Ok(OkV0),
   Error(ErrorV0),
-  Log(Log),
+  Log(LogV0),
   // Handshake messages
   ServerInfo(ServerInfoV0),
   // Device enumeration messages
   DeviceList(DeviceListV1),
   DeviceAdded(DeviceAddedV1),
-  DeviceRemoved(DeviceRemoved),
-  ScanningFinished(ScanningFinished),
+  DeviceRemoved(DeviceRemovedV0),
+  ScanningFinished(ScanningFinishedV0),
 }
 
 // This was implementated as a derive, but for some reason the .into() calls
@@ -780,24 +779,24 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV1ServerMessage {
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugSpecV0ClientMessage {
-  RequestLog(RequestLog),
-  Ping(Ping),
+  RequestLog(RequestLogV0),
+  Ping(PingV0),
   // Handshake messages
-  RequestServerInfo(RequestServerInfo),
+  RequestServerInfo(RequestServerInfoV1),
   // Device enumeration messages
-  StartScanning(StartScanning),
-  StopScanning(StopScanning),
-  RequestDeviceList(RequestDeviceList),
+  StartScanning(StartScanningV0),
+  StopScanning(StopScanningV0),
+  RequestDeviceList(RequestDeviceListV0),
   // Generic commands
-  StopAllDevices(StopAllDevices),
-  StopDeviceCmd(StopDeviceCmd),
+  StopAllDevices(StopAllDevicesV0),
+  StopDeviceCmd(StopDeviceCmdV0),
   // Deprecated generic commands
-  SingleMotorVibrateCmd(SingleMotorVibrateCmd),
+  SingleMotorVibrateCmd(SingleMotorVibrateCmdV0),
   // Deprecated device specific commands
-  FleshlightLaunchFW12Cmd(FleshlightLaunchFW12Cmd),
-  LovenseCmd(LovenseCmd),
-  KiirooCmd(KiirooCmd),
-  VorzeA10CycloneCmd(VorzeA10CycloneCmd),
+  FleshlightLaunchFW12Cmd(FleshlightLaunchFW12CmdV0),
+  LovenseCmd(LovenseCmdV0),
+  KiirooCmd(KiirooCmdV0),
+  VorzeA10CycloneCmd(VorzeA10CycloneCmdV0),
 }
 
 /// Represents all server-to-client messages in v0 of the Buttplug Spec
@@ -805,7 +804,6 @@ pub enum ButtplugSpecV0ClientMessage {
   Debug,
   Clone,
   PartialEq,
-  Eq,
   ButtplugMessage,
   ButtplugMessageValidator,
   ButtplugMessageFinalizer,
@@ -814,16 +812,16 @@ pub enum ButtplugSpecV0ClientMessage {
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugSpecV0ServerMessage {
   // Status messages
-  Ok(Ok),
+  Ok(OkV0),
   Error(ErrorV0),
-  Log(Log),
+  Log(LogV0),
   // Handshake messages
   ServerInfo(ServerInfoV0),
   // Device enumeration messages
   DeviceList(DeviceListV0),
   DeviceAdded(DeviceAddedV0),
-  DeviceRemoved(DeviceRemoved),
-  ScanningFinished(ScanningFinished),
+  DeviceRemoved(DeviceRemovedV0),
+  ScanningFinished(ScanningFinishedV0),
 }
 
 // This was implementated as a derive, but for some reason the .into() calls
@@ -875,10 +873,10 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV0ServerMessage {
   TryFromButtplugClientMessage,
 )]
 pub enum ButtplugDeviceManagerMessageUnion {
-  RequestDeviceList(RequestDeviceList),
-  StopAllDevices(StopAllDevices),
-  StartScanning(StartScanning),
-  StopScanning(StopScanning),
+  RequestDeviceList(RequestDeviceListV0),
+  StopAllDevices(StopAllDevicesV0),
+  StartScanning(StartScanningV0),
+  StopScanning(StopScanningV0),
 }
 
 /// Represents all possible device command message types.
@@ -895,23 +893,23 @@ pub enum ButtplugDeviceManagerMessageUnion {
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugDeviceCommandMessageUnion {
-  FleshlightLaunchFW12Cmd(FleshlightLaunchFW12Cmd),
-  SingleMotorVibrateCmd(SingleMotorVibrateCmd),
-  VorzeA10CycloneCmd(VorzeA10CycloneCmd),
-  KiirooCmd(KiirooCmd),
+  FleshlightLaunchFW12Cmd(FleshlightLaunchFW12CmdV0),
+  SingleMotorVibrateCmd(SingleMotorVibrateCmdV0),
+  VorzeA10CycloneCmd(VorzeA10CycloneCmdV0),
+  KiirooCmd(KiirooCmdV0),
   // No LovenseCmd, it was never implemented anywhere.
-  VibrateCmd(VibrateCmd),
-  LinearCmd(LinearCmd),
-  RotateCmd(RotateCmd),
-  RawWriteCmd(RawWriteCmd),
-  RawReadCmd(RawReadCmd),
-  StopDeviceCmd(StopDeviceCmd),
-  RawSubscribeCmd(RawSubscribeCmd),
-  RawUnsubscribeCmd(RawUnsubscribeCmd),
-  BatteryLevelCmd(BatteryLevelCmd),
-  RSSILevelCmd(RSSILevelCmd),
-  ScalarCmd(ScalarCmd),
-  SensorReadCmd(SensorReadCmd),
-  SensorSubscribeCmd(SensorSubscribeCmd),
-  SensorUnsubscribeCmd(SensorUnsubscribeCmd),
+  VibrateCmd(VibrateCmdV1),
+  LinearCmd(LinearCmdV2),
+  RotateCmd(RotateCmdV2),
+  RawWriteCmd(RawWriteCmdV2),
+  RawReadCmd(RawReadCmdV2),
+  StopDeviceCmd(StopDeviceCmdV0),
+  RawSubscribeCmd(RawSubscribeCmdV2),
+  RawUnsubscribeCmd(RawUnsubscribeCmdV2),
+  BatteryLevelCmd(BatteryLevelCmdV2),
+  RSSILevelCmd(RSSILevelCmdV2),
+  ScalarCmd(ScalarCmdV3),
+  SensorReadCmd(SensorReadCmdV3),
+  SensorSubscribeCmd(SensorSubscribeCmdV3),
+  SensorUnsubscribeCmd(SensorUnsubscribeCmdV3),
 }

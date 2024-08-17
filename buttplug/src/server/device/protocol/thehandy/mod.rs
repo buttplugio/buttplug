@@ -136,7 +136,7 @@ impl ProtocolHandler for TheHandy {
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    message: message::FleshlightLaunchFW12Cmd,
+    message: message::FleshlightLaunchFW12CmdV0,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Oh good. ScriptPlayer hasn't updated to LinearCmd yet so now I have to
     // work backward from fleshlight to my own Linear format that Handy uses.
@@ -150,18 +150,17 @@ impl ProtocolHandler for TheHandy {
     let distance = (goal_position - previous_position).abs();
     let duration =
       fleshlight_launch_helper::calculate_duration(distance, message.speed() as f64 / 99f64) as u32;
-    self.handle_linear_cmd(message::LinearCmd::new(
+    self.handle_linear_cmd(message::LinearCmdV2::new(
       message.device_index(),
-      vec![message::VectorSubcommand::new(0, duration, goal_position)],
+      vec![message::VectorSubcommandV2::new(0, duration, goal_position)],
     ))
   }
 
   fn handle_linear_cmd(
     &self,
-    message: message::LinearCmd,
+    message: message::LinearCmdV2,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    // What is "How not to implement a command structure for your device that
-    // does one thing", Alex?
+    // What is "How not to implement a command structure for your device that does one thing", Alex?
 
     // First make sure we only have one vector.
     //

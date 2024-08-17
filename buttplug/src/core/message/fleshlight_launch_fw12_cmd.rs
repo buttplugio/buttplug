@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
   Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, CopyGetters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct FleshlightLaunchFW12Cmd {
+pub struct FleshlightLaunchFW12CmdV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
@@ -29,7 +29,7 @@ pub struct FleshlightLaunchFW12Cmd {
   speed: u8,
 }
 
-impl FleshlightLaunchFW12Cmd {
+impl FleshlightLaunchFW12CmdV0 {
   pub fn new(device_index: u32, position: u8, speed: u8) -> Self {
     Self {
       id: 1,
@@ -40,7 +40,7 @@ impl FleshlightLaunchFW12Cmd {
   }
 }
 
-impl ButtplugMessageValidator for FleshlightLaunchFW12Cmd {
+impl ButtplugMessageValidator for FleshlightLaunchFW12CmdV0 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     if !(0..100).contains(&self.speed) {
@@ -61,13 +61,13 @@ impl ButtplugMessageValidator for FleshlightLaunchFW12Cmd {
 
 #[cfg(test)]
 mod test {
-  use super::{ButtplugMessageValidator, FleshlightLaunchFW12Cmd};
+  use super::{ButtplugMessageValidator, FleshlightLaunchFW12CmdV0};
 
   #[test]
   pub fn test_legacy_fleshlight_message_bounds() {
-    assert!(FleshlightLaunchFW12Cmd::new(0, 0, 0).is_valid().is_ok());
-    assert!(FleshlightLaunchFW12Cmd::new(0, 99, 99).is_valid().is_ok());
-    assert!(FleshlightLaunchFW12Cmd::new(0, 100, 99).is_valid().is_err());
-    assert!(FleshlightLaunchFW12Cmd::new(0, 99, 100).is_valid().is_err());
+    assert!(FleshlightLaunchFW12CmdV0::new(0, 0, 0).is_valid().is_ok());
+    assert!(FleshlightLaunchFW12CmdV0::new(0, 99, 99).is_valid().is_ok());
+    assert!(FleshlightLaunchFW12CmdV0::new(0, 100, 99).is_valid().is_err());
+    assert!(FleshlightLaunchFW12CmdV0::new(0, 99, 100).is_valid().is_err());
   }
 }

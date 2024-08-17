@@ -147,7 +147,7 @@ fn serialize_to_version(
         .map(|msg| match ButtplugSpecV0ServerMessage::try_from(msg) {
           Ok(msgv0) => msgv0,
           Err(err) => ButtplugSpecV0ServerMessage::Error(
-            message::Error::from(ButtplugError::from(err)).into(),
+            message::ErrorV0::from(ButtplugError::from(err)).into(),
           ),
         })
         .collect();
@@ -160,7 +160,7 @@ fn serialize_to_version(
         .map(|msg| match ButtplugSpecV1ServerMessage::try_from(msg) {
           Ok(msgv0) => msgv0,
           Err(err) => ButtplugSpecV1ServerMessage::Error(
-            message::Error::from(ButtplugError::from(err)).into(),
+            message::ErrorV0::from(ButtplugError::from(err)).into(),
           ),
         })
         .collect();
@@ -343,7 +343,7 @@ impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
 #[cfg(test)]
 mod test {
   use super::*;
-  use crate::core::message::{RequestServerInfo, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION};
+  use crate::core::message::{RequestServerInfoV1, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION};
 
   #[test]
   fn test_correct_message_version() {
@@ -496,7 +496,7 @@ mod test {
       "[{\"Ok\":{\"NotAField\":\"NotAValue\",\"Id\":1}}]",
     ];
     let serializer = ButtplugClientJSONSerializer::default();
-    let _ = serializer.serialize(&vec![RequestServerInfo::new(
+    let _ = serializer.serialize(&vec![RequestServerInfoV1::new(
       "test client",
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     )

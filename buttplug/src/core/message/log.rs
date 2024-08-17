@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
   Debug, ButtplugMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, CopyGetters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct Log {
+pub struct LogV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "LogLevel"))]
@@ -26,7 +26,7 @@ pub struct Log {
   log_message: String,
 }
 
-impl Log {
+impl LogV0 {
   pub fn new(log_level: LogLevel, log_message: &str) -> Self {
     Self {
       id: 0,
@@ -36,7 +36,7 @@ impl Log {
   }
 }
 
-impl ButtplugMessageValidator for Log {
+impl ButtplugMessageValidator for LogV0 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_system_id(self.id)
   }

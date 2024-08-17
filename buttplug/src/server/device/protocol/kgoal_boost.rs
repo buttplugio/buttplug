@@ -15,7 +15,7 @@ use crate::{
       ButtplugServerDeviceMessage,
       ButtplugServerMessage,
       Endpoint,
-      SensorReading,
+      SensorReadingV3,
       SensorType,
     },
   },
@@ -65,7 +65,7 @@ impl ProtocolHandler for KGoalBoost {
     message: message::SensorSubscribeCmdV4,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     if self.subscribed_sensors.contains(message.feature_index()) {
-      return future::ready(Ok(message::Ok::new(message.id()).into())).boxed();
+      return future::ready(Ok(message::OkV0::new(message.id()).into())).boxed();
     }
     let sensors = self.subscribed_sensors.clone();
     // Readout value: 0x000104000005d3
@@ -105,7 +105,7 @@ impl ProtocolHandler for KGoalBoost {
                 if stream_sensors.contains(&0)
                   && sender
                     .send(
-                      SensorReading::new(device_index, 0, SensorType::Pressure, vec![normalized])
+                      SensorReadingV3::new(device_index, 0, SensorType::Pressure, vec![normalized])
                         .into(),
                     )
                     .is_err()
@@ -118,7 +118,7 @@ impl ProtocolHandler for KGoalBoost {
                 if stream_sensors.contains(&1)
                   && sender
                     .send(
-                      SensorReading::new(device_index, 0, SensorType::Pressure, vec![unnormalized])
+                      SensorReadingV3::new(device_index, 0, SensorType::Pressure, vec![unnormalized])
                         .into(),
                     )
                     .is_err()
@@ -134,7 +134,7 @@ impl ProtocolHandler for KGoalBoost {
         });
       }
       sensors.insert(*message.feature_index());
-      Ok(message::Ok::new(message.id()).into())
+      Ok(message::OkV0::new(message.id()).into())
     }
     .boxed()
   }
@@ -145,7 +145,7 @@ impl ProtocolHandler for KGoalBoost {
     message: message::SensorUnsubscribeCmdV4,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     if !self.subscribed_sensors.contains(message.feature_index()) {
-      return future::ready(Ok(message::Ok::new(message.id()).into())).boxed();
+      return future::ready(Ok(message::OkV0::new(message.id()).into())).boxed();
     }
     let sensors = self.subscribed_sensors.clone();
     async move {
@@ -157,7 +157,7 @@ impl ProtocolHandler for KGoalBoost {
           .unsubscribe(&HardwareUnsubscribeCmd::new(Endpoint::RxPressure))
           .await?;
       }
-      Ok(message::Ok::new(message.id()).into())
+      Ok(message::OkV0::new(message.id()).into())
     }
     .boxed()
   }

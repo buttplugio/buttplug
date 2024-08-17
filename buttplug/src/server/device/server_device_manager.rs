@@ -196,7 +196,7 @@ impl ServerDeviceManager {
       {
         // TODO Fill in error.
       }
-      Ok(message::Ok::default().into())
+      Ok(message::OkV0::default().into())
     }
     .boxed()
   }
@@ -211,7 +211,7 @@ impl ServerDeviceManager {
       {
         // TODO Fill in error.
       }
-      Ok(message::Ok::default().into())
+      Ok(message::OkV0::default().into())
     }
     .boxed()
   }
@@ -224,11 +224,11 @@ impl ServerDeviceManager {
         .iter()
         .map(|dev| {
           let device = dev.value();
-          device.parse_message(message::StopDeviceCmd::new(1).into())
+          device.parse_message(message::StopDeviceCmdV0::new(1).into())
         })
         .collect();
       future::join_all(fut_vec).await;
-      Ok(message::Ok::default().into())
+      Ok(message::OkV0::default().into())
     }
     .boxed()
   }
@@ -326,7 +326,7 @@ impl ServerDeviceManager {
         device.value().disconnect().await?;
       }
       token.cancel();
-      Ok(message::Ok::default().into())
+      Ok(message::OkV0::default().into())
     }
     .boxed()
   }

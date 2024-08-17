@@ -184,14 +184,14 @@ pub struct Fredorch {
 impl ProtocolHandler for Fredorch {
   fn handle_linear_cmd(
     &self,
-    message: message::LinearCmd,
+    message: message::LinearCmdV2,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
     let previous_position = self.previous_position.load(Ordering::SeqCst);
     let distance = (previous_position as f64 - (v.position() * 99f64)).abs() / 99f64;
-    let fl_cmd = message::FleshlightLaunchFW12Cmd::new(
+    let fl_cmd = message::FleshlightLaunchFW12CmdV0::new(
       0,
       (v.position() * 99f64) as u8,
       (calculate_speed(distance, v.duration()) * 99f64) as u8,
@@ -201,7 +201,7 @@ impl ProtocolHandler for Fredorch {
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    message: message::FleshlightLaunchFW12Cmd,
+    message: message::FleshlightLaunchFW12CmdV0,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let position = ((message.position() as f64 / 99.0) * 150.0) as u8;
     let speed = ((message.speed() as f64 / 99.0) * 15.0) as u8;

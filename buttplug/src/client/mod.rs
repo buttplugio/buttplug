@@ -17,12 +17,12 @@ use crate::{
     message::{
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,
-      Ping,
-      RequestDeviceList,
-      RequestServerInfo,
-      StartScanning,
-      StopAllDevices,
-      StopScanning,
+      PingV0,
+      RequestDeviceListV0,
+      RequestServerInfoV1,
+      StartScanningV0,
+      StopAllDevicesV0,
+      StopScanningV0,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
@@ -345,7 +345,7 @@ impl ButtplugClient {
     let msg = self
       .message_sender
       .send_message_ignore_connect_status(
-        RequestServerInfo::new(&self.client_name, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into(),
+        RequestServerInfoV1::new(&self.client_name, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into(),
       )
       .await?;
 
@@ -363,7 +363,7 @@ impl ButtplugClient {
       // will send the client updates as events.
       let msg = self
         .message_sender
-        .send_message(RequestDeviceList::default().into())
+        .send_message(RequestDeviceListV0::default().into())
         .await?;
       if let ButtplugCurrentSpecServerMessage::DeviceList(m) = msg {
         self
@@ -415,7 +415,7 @@ impl ButtplugClient {
   pub fn start_scanning(&self) -> ButtplugClientResultFuture {
     self
       .message_sender
-      .send_message_expect_ok(StartScanning::default().into())
+      .send_message_expect_ok(StartScanningV0::default().into())
   }
 
   /// Tells server to stop scanning for devices.
@@ -425,7 +425,7 @@ impl ButtplugClient {
   pub fn stop_scanning(&self) -> ButtplugClientResultFuture {
     self
       .message_sender
-      .send_message_expect_ok(StopScanning::default().into())
+      .send_message_expect_ok(StopScanningV0::default().into())
   }
 
   /// Tells server to stop all devices.
@@ -435,7 +435,7 @@ impl ButtplugClient {
   pub fn stop_all_devices(&self) -> ButtplugClientResultFuture {
     self
       .message_sender
-      .send_message_expect_ok(StopAllDevices::default().into())
+      .send_message_expect_ok(StopAllDevicesV0::default().into())
   }
 
   pub fn event_stream(&self) -> impl Stream<Item = ButtplugClientEvent> {
@@ -460,7 +460,7 @@ impl ButtplugClient {
   pub fn ping(&self) -> ButtplugClientResultFuture {
     let ping_fut = self
       .message_sender
-      .send_message_expect_ok(Ping::default().into());
+      .send_message_expect_ok(PingV0::default().into());
     ping_fut.boxed()
   }
 

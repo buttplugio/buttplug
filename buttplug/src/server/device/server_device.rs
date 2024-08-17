@@ -48,7 +48,7 @@ use crate::{
     message::{
       self,
       ActuatorType,
-      BatteryLevelReading,
+      BatteryLevelReadingV2,
       ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceMessage,
       ButtplugDeviceMessageType,
@@ -56,21 +56,21 @@ use crate::{
       ButtplugServerDeviceMessage,
       Endpoint,
       FeatureType,
-      RSSILevelReading,
-      RawReading,
-      RawSubscribeCmd,
-      ScalarCmd,
+      RSSILevelReadingV2,
+      RawReadingV2,
+      RawSubscribeCmdV2,
+      ScalarCmdV3,
       ScalarCmdV4,
       ScalarSubcommandV4,
-      SensorReadCmd,
+      SensorReadCmdV3,
       SensorReadCmdV4,
-      SensorReading,
+      SensorReadingV3,
       SensorReadingV4,
-      SensorSubscribeCmd,
+      SensorSubscribeCmdV3,
       SensorSubscribeCmdV4,
       SensorType,
       SensorUnsubscribeCmdV4,
-      VibrateCmd,
+      VibrateCmdV1,
     },
     ButtplugResultFuture,
   },
@@ -314,7 +314,7 @@ impl ServerDevice {
     // endpoint so just use an arbitrary message here to check.
     if self
       .supports_message(&ButtplugDeviceCommandMessageUnion::RawSubscribeCmd(
-        RawSubscribeCmd::new(1, Endpoint::Tx),
+        RawSubscribeCmdV2::new(1, Endpoint::Tx),
       ))
       .is_ok()
     {
@@ -347,7 +347,7 @@ impl ServerDevice {
             if raw_endpoints.contains(&endpoint) {
               Some(ServerDeviceEvent::Notification(
                 id,
-                ButtplugServerDeviceMessage::RawReading(RawReading::new(0, endpoint, data)),
+                ButtplugServerDeviceMessage::RawReading(RawReadingV2::new(0, endpoint, data)),
               ))
             } else {
               None
@@ -513,7 +513,7 @@ impl ServerDevice {
     }
   }
 
-  fn handle_scalarcmd_v3(&self, scalar_cmd: &ScalarCmd) -> ButtplugServerResultFuture {
+  fn handle_scalarcmd_v3(&self, scalar_cmd: &ScalarCmdV3) -> ButtplugServerResultFuture {
     let scalar_features: Vec<usize> = self
       .definition
       .features()
@@ -581,7 +581,7 @@ impl ServerDevice {
 
     if commands.is_empty() {
       trace!("No commands generated for incoming device packet, skipping and returning success.");
-      return future::ready(Ok(message::Ok::default().into())).boxed();
+      return future::ready(Ok(message::OkV0::default().into())).boxed();
     }
 
     self.handle_generic_command_result(self.handler.handle_scalar_cmd(&commands))
@@ -611,7 +611,7 @@ impl ServerDevice {
           }
         }
       }
-      Ok(message::Ok::default().into())
+      Ok(message::OkV0::default().into())
     }
     .boxed()
   }
@@ -638,7 +638,7 @@ impl ServerDevice {
       for fut in fut_vec {
         fut.await?;
       }
-      Ok(message::Ok::default().into())
+      Ok(message::OkV0::default().into())
     }
     .boxed()
   }
@@ -666,7 +666,7 @@ impl ServerDevice {
     }
   }
 
-  fn handle_sensor_read_cmd_v3(&self, message: SensorReadCmd) -> ButtplugServerResultFuture {
+  fn handle_sensor_read_cmd_v3(&self, message: SensorReadCmdV3) -> ButtplugServerResultFuture {
     let sensor_features: Vec<usize> = self
       .definition
       .features()
@@ -691,7 +691,7 @@ impl ServerDevice {
     let read_fut = self.handle_sensor_read_cmd_v4(sensor_read_v4);
     async move {
       read_fut.await.map(|res| {
-        SensorReading::new(
+        SensorReadingV3::new(
           message.device_index(),
           *message.sensor_index(),
           *message.sensor_type(),
@@ -722,7 +722,7 @@ impl ServerDevice {
 
   fn handle_sensor_subscribe_cmd_v3(
     &self,
-    message: SensorSubscribeCmd,
+    message: SensorSubscribeCmdV3,
   ) -> ButtplugServerResultFuture {
     let sensor_features: Vec<usize> = self
       .definition
@@ -766,7 +766,7 @@ impl ServerDevice {
 
   fn handle_sensor_unsubscribe_cmd_v3(
     &self,
-    message: message::SensorUnsubscribeCmd,
+    message: message::SensorUnsubscribeCmdV3,
   ) -> ButtplugServerResultFuture {
     let sensor_features: Vec<usize> = self
       .definition
@@ -808,7 +808,7 @@ impl ServerDevice {
     .boxed()
   }
 
-  fn handle_vibrate_cmd(&self, message: VibrateCmd) -> ButtplugServerResultFuture {
+  fn handle_vibrate_cmd(&self, message: VibrateCmdV1) -> ButtplugServerResultFuture {
     let vibrate_features: Vec<usize> = self
       .definition
       .features()
@@ -851,7 +851,7 @@ impl ServerDevice {
 
   fn handle_single_motor_vibrate_cmd(
     &self,
-    message: message::SingleMotorVibrateCmd,
+    message: message::SingleMotorVibrateCmdV0,
   ) -> ButtplugServerResultFuture {
     let vibrate_features: Vec<usize> = self
       .definition
@@ -886,26 +886,26 @@ impl ServerDevice {
     }
   }
 
-  fn handle_raw_write_cmd(&self, message: message::RawWriteCmd) -> ButtplugServerResultFuture {
+  fn handle_raw_write_cmd(&self, message: message::RawWriteCmdV2) -> ButtplugServerResultFuture {
     let id = message.id();
     let fut = self.hardware.write_value(&message.into());
     async move {
       fut
         .await
-        .map(|_| message::Ok::new(id).into())
+        .map(|_| message::OkV0::new(id).into())
         .map_err(|err| err.into())
     }
     .boxed()
   }
 
-  fn handle_raw_read_cmd(&self, message: message::RawReadCmd) -> ButtplugServerResultFuture {
+  fn handle_raw_read_cmd(&self, message: message::RawReadCmdV2) -> ButtplugServerResultFuture {
     let id = message.id();
     let fut = self.hardware.read_value(&message.into());
     async move {
       fut
         .await
         .map(|msg| {
-          let mut raw_msg: RawReading = msg.into();
+          let mut raw_msg: RawReadingV2 = msg.into();
           raw_msg.set_id(id);
           raw_msg.into()
         })
@@ -916,7 +916,7 @@ impl ServerDevice {
 
   fn handle_raw_unsubscribe_cmd(
     &self,
-    message: message::RawUnsubscribeCmd,
+    message: message::RawUnsubscribeCmdV2,
   ) -> ButtplugServerResultFuture {
     let id = message.id();
     let endpoint = message.endpoint();
@@ -924,11 +924,11 @@ impl ServerDevice {
     let raw_endpoints = self.raw_subscribed_endpoints.clone();
     async move {
       if !raw_endpoints.contains(&endpoint) {
-        return Ok(message::Ok::new(id).into());
+        return Ok(message::OkV0::new(id).into());
       }
       let result = fut
         .await
-        .map(|_| message::Ok::new(id).into())
+        .map(|_| message::OkV0::new(id).into())
         .map_err(|err| err.into());
       raw_endpoints.remove(&endpoint);
       result
@@ -938,7 +938,7 @@ impl ServerDevice {
 
   fn handle_raw_subscribe_cmd(
     &self,
-    message: message::RawSubscribeCmd,
+    message: message::RawSubscribeCmdV2,
   ) -> ButtplugServerResultFuture {
     let id = message.id();
     let endpoint = message.endpoint();
@@ -946,11 +946,11 @@ impl ServerDevice {
     let raw_endpoints = self.raw_subscribed_endpoints.clone();
     async move {
       if raw_endpoints.contains(&endpoint) {
-        return Ok(message::Ok::new(id).into());
+        return Ok(message::OkV0::new(id).into());
       }
       let result = fut
         .await
-        .map(|_| message::Ok::new(id).into())
+        .map(|_| message::OkV0::new(id).into())
         .map_err(|err| err.into());
       raw_endpoints.insert(endpoint);
       result
@@ -979,7 +979,7 @@ impl ServerDevice {
       return async move {
         let reading = sensor_read.await?;
         if reading.sensor_type() == SensorType::Battery {
-          Ok(BatteryLevelReading::new(0, reading.data()[0] as f64 / sensor_range_end as f64).into())
+          Ok(BatteryLevelReadingV2::new(0, reading.data()[0] as f64 / sensor_range_end as f64).into())
         } else {
           Err(ButtplugError::ButtplugDeviceError(
             ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::Battery),
@@ -1013,7 +1013,7 @@ impl ServerDevice {
       return async move {
         let reading = sensor_read.await?;
         if reading.sensor_type() == SensorType::RSSI {
-          Ok(RSSILevelReading::new(0, reading.data()[0]).into())
+          Ok(RSSILevelReadingV2::new(0, reading.data()[0]).into())
         } else {
           Err(ButtplugError::ButtplugDeviceError(
             ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::RSSI),

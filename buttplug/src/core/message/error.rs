@@ -43,7 +43,7 @@ pub enum ErrorCode {
   CopyGetters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct Error {
+pub struct ErrorV0 {
   /// Message Id, used for matching message pairs in remote connection instances.
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
@@ -59,7 +59,7 @@ pub struct Error {
   original_error: Option<ButtplugError>,
 }
 
-impl PartialEq for Error {
+impl PartialEq for ErrorV0 {
   fn eq(&self, other: &Self) -> bool {
     self.id == other.id
       && self.error_code == other.error_code
@@ -67,7 +67,7 @@ impl PartialEq for Error {
   }
 }
 
-impl Error {
+impl ErrorV0 {
   /// Creates a new error object.
   pub fn new(
     error_code: ErrorCode,
@@ -101,7 +101,7 @@ impl Error {
   }
 }
 
-impl From<ButtplugError> for Error {
+impl From<ButtplugError> for ErrorV0 {
   /// Converts a [ButtplugError] object into a Buttplug Protocol
   /// [Error] message.
   fn from(error: ButtplugError) -> Self {
@@ -116,65 +116,20 @@ impl From<ButtplugError> for Error {
     let msg = serde_json::to_string(&error).expect("All buttplug errors are serializable");
     #[cfg(not(feature = "serialize-json"))]
     let msg = error.to_string();
-    Error::new(code, &msg, Some(error))
-  }
-}
-
-#[derive(
-  Debug,
-  Clone,
-  PartialEq,
-  Eq,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
-  Getters,
-  CopyGetters,
-)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct ErrorV0 {
-  /// Message Id, used for matching message pairs in remote connection instances.
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  id: u32,
-  /// Specifies the class of the error.
-  #[cfg_attr(feature = "serialize-json", serde(rename = "ErrorCode"))]
-  #[getset(get_copy = "pub")]
-  error_code: ErrorCode,
-  /// Description of the error.
-  #[cfg_attr(feature = "serialize-json", serde(rename = "ErrorMessage"))]
-  #[getset(get = "pub")]
-  error_message: String,
-}
-
-impl ErrorV0 {
-  /// Creates a new error object.
-  pub fn new(error_code: ErrorCode, error_message: &str) -> Self {
-    Self {
-      id: 0,
-      error_code,
-      error_message: error_message.to_string(),
-    }
-  }
-}
-
-impl From<Error> for ErrorV0 {
-  fn from(error: Error) -> Self {
-    let mut err = ErrorV0::new(error.error_code, &error.error_message);
-    err.set_id(error.id());
-    err
+    ErrorV0::new(code, &msg, Some(error))
   }
 }
 
 #[cfg(feature = "serialize-json")]
 #[cfg(test)]
 mod test {
-  use crate::core::message::{ButtplugCurrentSpecServerMessage, Error, ErrorCode};
+  use crate::core::message::{ButtplugCurrentSpecServerMessage, ErrorV0, ErrorCode};
 
   const ERROR_STR: &str = "{\"Error\":{\"Id\":0,\"ErrorCode\":1,\"ErrorMessage\":\"Test Error\"}}";
 
   #[test]
   fn test_error_serialize() {
-    let error = ButtplugCurrentSpecServerMessage::Error(Error::new(
+    let error = ButtplugCurrentSpecServerMessage::Error(ErrorV0::new(
       ErrorCode::ErrorHandshake,
       "Test Error",
       None,
@@ -188,7 +143,7 @@ mod test {
     let union: ButtplugCurrentSpecServerMessage =
       serde_json::from_str(ERROR_STR).expect("Infallible deserialization");
     assert_eq!(
-      ButtplugCurrentSpecServerMessage::Error(Error::new(
+      ButtplugCurrentSpecServerMessage::Error(ErrorV0::new(
         ErrorCode::ErrorHandshake,
         "Test Error",
         None

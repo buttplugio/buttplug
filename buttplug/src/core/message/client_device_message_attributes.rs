@@ -90,71 +90,71 @@ impl TryFrom<FeatureType> for SensorType {
 // hosted in the server/device/configuration module.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct ClientDeviceMessageAttributes {
+pub struct ClientDeviceMessageAttributesV3 {
   // Generic commands
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(rename = "ScalarCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  scalar_cmd: Option<Vec<ClientGenericDeviceMessageAttributes>>,
+  scalar_cmd: Option<Vec<ClientGenericDeviceMessageAttributesV3>>,
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(rename = "RotateCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  rotate_cmd: Option<Vec<ClientGenericDeviceMessageAttributes>>,
+  rotate_cmd: Option<Vec<ClientGenericDeviceMessageAttributesV3>>,
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(rename = "LinearCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  linear_cmd: Option<Vec<ClientGenericDeviceMessageAttributes>>,
+  linear_cmd: Option<Vec<ClientGenericDeviceMessageAttributesV3>>,
 
   // Sensor Messages
   #[getset(get = "pub")]
   #[serde(rename = "SensorReadCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  sensor_read_cmd: Option<Vec<SensorDeviceMessageAttributes>>,
+  sensor_read_cmd: Option<Vec<SensorDeviceMessageAttributesV3>>,
   #[getset(get = "pub")]
   #[serde(rename = "SensorSubscribeCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  sensor_subscribe_cmd: Option<Vec<SensorDeviceMessageAttributes>>,
+  sensor_subscribe_cmd: Option<Vec<SensorDeviceMessageAttributesV3>>,
 
   // StopDeviceCmd always exists
   #[getset(get = "pub")]
   #[serde(rename = "StopDeviceCmd")]
   #[serde(skip_deserializing)]
-  stop_device_cmd: NullDeviceMessageAttributes,
+  stop_device_cmd: NullDeviceMessageAttributesV1,
 
   // Raw commands are only added post-serialization
   #[getset(get = "pub")]
   #[serde(rename = "RawReadCmd")]
   #[serde(skip_deserializing)]
   #[serde(skip_serializing_if = "Option::is_none")]
-  raw_read_cmd: Option<RawDeviceMessageAttributes>,
+  raw_read_cmd: Option<RawDeviceMessageAttributesV2>,
   // Raw commands are only added post-serialization
   #[getset(get = "pub")]
   #[serde(rename = "RawWriteCmd")]
   #[serde(skip_deserializing)]
   #[serde(skip_serializing_if = "Option::is_none")]
-  raw_write_cmd: Option<RawDeviceMessageAttributes>,
+  raw_write_cmd: Option<RawDeviceMessageAttributesV2>,
   // Raw commands are only added post-serialization
   #[getset(get = "pub")]
   #[serde(rename = "RawSubscribeCmd")]
   #[serde(skip_deserializing)]
   #[serde(skip_serializing_if = "Option::is_none")]
-  raw_subscribe_cmd: Option<RawDeviceMessageAttributes>,
+  raw_subscribe_cmd: Option<RawDeviceMessageAttributesV2>,
 
   // Needed to load from config for fallback, but unused here.
   #[getset(get = "pub")]
   #[serde(rename = "FleshlightLaunchFW12Cmd")]
   #[serde(skip_serializing)]
-  fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributes>,
+  fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributesV1>,
   #[getset(get = "pub")]
   #[serde(rename = "VorzeA10CycloneCmd")]
   #[serde(skip_serializing)]
-  vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributes>,
+  vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributesV1>,
 }
 
-impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributes {
+impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
   fn from(features: Vec<DeviceFeature>) -> Self {
     let actuator_filter = |message_type| {
-      let attrs: Vec<ClientGenericDeviceMessageAttributes> = features
+      let attrs: Vec<ClientGenericDeviceMessageAttributesV3> = features
         .iter()
         .filter(|x| {
           if let Some(actuator) = x.actuator() {
@@ -173,7 +173,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributes {
     };
 
     let sensor_filter = |message_type| {
-      let attrs: Vec<SensorDeviceMessageAttributes> = features
+      let attrs: Vec<SensorDeviceMessageAttributesV3> = features
         .iter()
         .filter(|x| {
           if let Some(sensor) = x.sensor() {
@@ -193,7 +193,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributes {
 
     // Raw messages
     let raw_attrs = if let Some(raw_feature) = features.iter().find(|f| f.raw().is_some()) {
-      Some(RawDeviceMessageAttributes::new(
+      Some(RawDeviceMessageAttributesV2::new(
         raw_feature.raw().as_ref().unwrap().endpoints(),
       ))
     } else {
@@ -214,8 +214,8 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributes {
   }
 }
 
-impl ClientDeviceMessageAttributes {
-  pub fn raw_unsubscribe_cmd(&self) -> &Option<RawDeviceMessageAttributes> {
+impl ClientDeviceMessageAttributesV3 {
+  pub fn raw_unsubscribe_cmd(&self) -> &Option<RawDeviceMessageAttributesV2> {
     self.raw_subscribe_cmd()
   }
 
@@ -283,66 +283,66 @@ impl ClientDeviceMessageAttributes {
 }
 
 #[derive(Default)]
-pub struct ClientDeviceMessageAttributesBuilder {
-  attrs: ClientDeviceMessageAttributes,
+pub struct ClientDeviceMessageAttributesV3Builder {
+  attrs: ClientDeviceMessageAttributesV3,
 }
 
-impl ClientDeviceMessageAttributesBuilder {
-  pub fn scalar_cmd(&mut self, attrs: &[ClientGenericDeviceMessageAttributes]) -> &Self {
+impl ClientDeviceMessageAttributesV3Builder {
+  pub fn scalar_cmd(&mut self, attrs: &[ClientGenericDeviceMessageAttributesV3]) -> &Self {
     self.attrs.scalar_cmd = Some(attrs.to_vec());
     self
   }
 
-  pub fn rotate_cmd(&mut self, attrs: &[ClientGenericDeviceMessageAttributes]) -> &Self {
+  pub fn rotate_cmd(&mut self, attrs: &[ClientGenericDeviceMessageAttributesV3]) -> &Self {
     self.attrs.rotate_cmd = Some(attrs.to_vec());
     self
   }
 
-  pub fn linear_cmd(&mut self, attrs: &[ClientGenericDeviceMessageAttributes]) -> &Self {
+  pub fn linear_cmd(&mut self, attrs: &[ClientGenericDeviceMessageAttributesV3]) -> &Self {
     self.attrs.linear_cmd = Some(attrs.to_vec());
     self
   }
 
-  pub fn sensor_read_cmd(&mut self, attrs: &[SensorDeviceMessageAttributes]) -> &Self {
+  pub fn sensor_read_cmd(&mut self, attrs: &[SensorDeviceMessageAttributesV3]) -> &Self {
     self.attrs.sensor_read_cmd = Some(attrs.to_vec());
     self
   }
 
-  pub fn sensor_subscribe_cmd(&mut self, attrs: &[SensorDeviceMessageAttributes]) -> &Self {
+  pub fn sensor_subscribe_cmd(&mut self, attrs: &[SensorDeviceMessageAttributesV3]) -> &Self {
     self.attrs.sensor_subscribe_cmd = Some(attrs.to_vec());
     self
   }
 
   pub fn raw_read_cmd(&mut self, endpoints: &[Endpoint]) -> &Self {
-    self.attrs.raw_read_cmd = Some(RawDeviceMessageAttributes::new(endpoints));
+    self.attrs.raw_read_cmd = Some(RawDeviceMessageAttributesV2::new(endpoints));
     self
   }
 
   pub fn raw_write_cmd(&mut self, endpoints: &[Endpoint]) -> &Self {
-    self.attrs.raw_write_cmd = Some(RawDeviceMessageAttributes::new(endpoints));
+    self.attrs.raw_write_cmd = Some(RawDeviceMessageAttributesV2::new(endpoints));
     self
   }
 
   pub fn raw_subscribe_cmd(&mut self, endpoints: &[Endpoint]) -> &Self {
-    self.attrs.raw_subscribe_cmd = Some(RawDeviceMessageAttributes::new(endpoints));
+    self.attrs.raw_subscribe_cmd = Some(RawDeviceMessageAttributesV2::new(endpoints));
     self
   }
 
-  pub fn finish(&mut self) -> ClientDeviceMessageAttributes {
+  pub fn finish(&mut self) -> ClientDeviceMessageAttributesV3 {
     self.attrs.finalize();
     self.attrs.clone()
   }
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
-pub struct NullDeviceMessageAttributes {}
+pub struct NullDeviceMessageAttributesV1 {}
 
 fn unspecified_feature() -> String {
   "N/A".to_string()
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Getters, Setters)]
-pub struct ClientGenericDeviceMessageAttributes {
+pub struct ClientGenericDeviceMessageAttributesV3 {
   #[getset(get = "pub")]
   #[serde(rename = "FeatureDescriptor")]
   #[serde(default = "unspecified_feature")]
@@ -359,7 +359,7 @@ pub struct ClientGenericDeviceMessageAttributes {
   index: u32,
 }
 
-impl TryFrom<DeviceFeature> for ClientGenericDeviceMessageAttributes {
+impl TryFrom<DeviceFeature> for ClientGenericDeviceMessageAttributesV3 {
   type Error = String;
   fn try_from(value: DeviceFeature) -> Result<Self, Self::Error> {
     if let Some(actuator) = value.actuator() {
@@ -381,7 +381,7 @@ impl TryFrom<DeviceFeature> for ClientGenericDeviceMessageAttributes {
   }
 }
 
-impl ClientGenericDeviceMessageAttributes {
+impl ClientGenericDeviceMessageAttributesV3 {
   pub fn new(feature_descriptor: &str, step_count: u32, actuator_type: ActuatorType) -> Self {
     Self {
       feature_descriptor: feature_descriptor.to_owned(),
@@ -399,13 +399,13 @@ impl ClientGenericDeviceMessageAttributes {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Default, Serialize, Deserialize, Getters, Setters)]
-pub struct RawDeviceMessageAttributes {
+pub struct RawDeviceMessageAttributesV2 {
   #[getset(get = "pub")]
   #[serde(rename = "Endpoints")]
   endpoints: Vec<Endpoint>,
 }
 
-impl RawDeviceMessageAttributes {
+impl RawDeviceMessageAttributesV2 {
   pub fn new(endpoints: &[Endpoint]) -> Self {
     Self {
       endpoints: endpoints.to_vec(),
@@ -428,7 +428,7 @@ where
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Getters, Setters)]
-pub struct SensorDeviceMessageAttributes {
+pub struct SensorDeviceMessageAttributesV3 {
   #[getset(get = "pub")]
   #[serde(rename = "FeatureDescriptor")]
   feature_descriptor: String,
@@ -444,7 +444,7 @@ pub struct SensorDeviceMessageAttributes {
   index: u32,
 }
 
-impl TryFrom<DeviceFeature> for SensorDeviceMessageAttributes {
+impl TryFrom<DeviceFeature> for SensorDeviceMessageAttributesV3 {
   type Error = String;
   fn try_from(value: DeviceFeature) -> Result<Self, Self::Error> {
     if let Some(sensor) = value.sensor() {
@@ -486,50 +486,50 @@ pub struct ClientDeviceMessageAttributesV2 {
   #[getset(get = "pub")]
   #[serde(rename = "BatteryLevelCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  battery_level_cmd: Option<NullDeviceMessageAttributes>,
+  battery_level_cmd: Option<NullDeviceMessageAttributesV1>,
 
   // RSSILevel is added post-serialization (only for bluetooth devices)
   #[getset(get = "pub")]
   #[serde(rename = "RSSILevelCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  rssi_level_cmd: Option<NullDeviceMessageAttributes>,
+  rssi_level_cmd: Option<NullDeviceMessageAttributesV1>,
 
   // StopDeviceCmd always exists
   #[getset(get = "pub")]
   #[serde(rename = "StopDeviceCmd")]
-  stop_device_cmd: NullDeviceMessageAttributes,
+  stop_device_cmd: NullDeviceMessageAttributesV1,
 
   // Raw commands are only added post-serialization
   #[getset(get = "pub")]
   #[serde(rename = "RawReadCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  raw_read_cmd: Option<RawDeviceMessageAttributes>,
+  raw_read_cmd: Option<RawDeviceMessageAttributesV2>,
   #[getset(get = "pub")]
   #[serde(rename = "RawWriteCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  raw_write_cmd: Option<RawDeviceMessageAttributes>,
+  raw_write_cmd: Option<RawDeviceMessageAttributesV2>,
   #[getset(get = "pub")]
   #[serde(rename = "RawSubscribeCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  raw_subscribe_cmd: Option<RawDeviceMessageAttributes>,
+  raw_subscribe_cmd: Option<RawDeviceMessageAttributesV2>,
   #[getset(get = "pub")]
   #[serde(rename = "RawUnsubscribeCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  raw_unsubscribe_cmd: Option<RawDeviceMessageAttributes>,
+  raw_unsubscribe_cmd: Option<RawDeviceMessageAttributesV2>,
 
   // Needed to load from config for fallback, but unused here.
   #[getset(get = "pub")]
   #[serde(rename = "FleshlightLaunchFW12Cmd")]
   #[serde(skip)]
-  fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributes>,
+  fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributesV1>,
   #[getset(get = "pub")]
   #[serde(rename = "VorzeA10CycloneCmd")]
   #[serde(skip)]
-  vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributes>,
+  vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributesV1>,
 }
 
-impl From<ClientDeviceMessageAttributes> for ClientDeviceMessageAttributesV2 {
-  fn from(other: ClientDeviceMessageAttributes) -> Self {
+impl From<ClientDeviceMessageAttributesV3> for ClientDeviceMessageAttributesV2 {
+  fn from(other: ClientDeviceMessageAttributesV3) -> Self {
     Self {
       vibrate_cmd: other
         .scalar_cmd()
@@ -550,7 +550,7 @@ impl From<ClientDeviceMessageAttributes> for ClientDeviceMessageAttributesV2 {
             .iter()
             .any(|x| *x.sensor_type() == SensorType::Battery)
           {
-            Some(NullDeviceMessageAttributes::default())
+            Some(NullDeviceMessageAttributesV1::default())
           } else {
             None
           }
@@ -564,7 +564,7 @@ impl From<ClientDeviceMessageAttributes> for ClientDeviceMessageAttributesV2 {
             .iter()
             .any(|x| *x.sensor_type() == SensorType::RSSI)
           {
-            Some(NullDeviceMessageAttributes::default())
+            Some(NullDeviceMessageAttributesV1::default())
           } else {
             None
           }
@@ -595,7 +595,7 @@ pub struct GenericDeviceMessageAttributesV2 {
 
 impl GenericDeviceMessageAttributesV2 {
   pub fn vibrate_cmd_from_scalar_cmd(
-    attributes_vec: &[ClientGenericDeviceMessageAttributes],
+    attributes_vec: &[ClientGenericDeviceMessageAttributesV3],
   ) -> Self {
     let mut feature_count = 0u32;
     let mut step_count = vec![];
@@ -612,8 +612,8 @@ impl GenericDeviceMessageAttributesV2 {
   }
 }
 
-impl From<Vec<ClientGenericDeviceMessageAttributes>> for GenericDeviceMessageAttributesV2 {
-  fn from(attributes_vec: Vec<ClientGenericDeviceMessageAttributes>) -> Self {
+impl From<Vec<ClientGenericDeviceMessageAttributesV3>> for GenericDeviceMessageAttributesV2 {
+  fn from(attributes_vec: Vec<ClientGenericDeviceMessageAttributesV3>) -> Self {
     Self {
       feature_count: attributes_vec.len() as u32,
       step_count: attributes_vec.iter().map(|x| *x.step_count()).collect(),
@@ -639,18 +639,18 @@ pub struct ClientDeviceMessageAttributesV1 {
 
   // StopDeviceCmd always exists
   #[getset(get = "pub")]
-  stop_device_cmd: NullDeviceMessageAttributes,
+  stop_device_cmd: NullDeviceMessageAttributesV1,
 
   // Obsolete commands are only added post-serialization
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  single_motor_vibrate_cmd: Option<NullDeviceMessageAttributes>,
+  single_motor_vibrate_cmd: Option<NullDeviceMessageAttributesV1>,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributes>,
+  fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributesV1>,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributes>,
+  vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributesV1>,
 }
 
 impl From<ClientDeviceMessageAttributesV2> for ClientDeviceMessageAttributesV1 {
@@ -672,7 +672,7 @@ impl From<ClientDeviceMessageAttributesV2> for ClientDeviceMessageAttributesV1 {
       fleshlight_launch_fw12_cmd: other.fleshlight_launch_fw12_cmd().clone(),
       vorze_a10_cyclone_cmd: other.vorze_a10_cyclone_cmd().clone(),
       single_motor_vibrate_cmd: if other.vibrate_cmd().is_some() {
-        Some(NullDeviceMessageAttributes::default())
+        Some(NullDeviceMessageAttributesV1::default())
       } else {
         None
       },

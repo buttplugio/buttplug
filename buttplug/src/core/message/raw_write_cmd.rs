@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
   Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, CopyGetters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct RawWriteCmd {
+pub struct RawWriteCmdV2 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
@@ -30,7 +30,7 @@ pub struct RawWriteCmd {
   write_with_response: bool,
 }
 
-impl RawWriteCmd {
+impl RawWriteCmdV2 {
   pub fn new(
     device_index: u32,
     endpoint: Endpoint,
@@ -47,7 +47,7 @@ impl RawWriteCmd {
   }
 }
 
-impl ButtplugMessageValidator for RawWriteCmd {
+impl ButtplugMessageValidator for RawWriteCmdV2 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
   }

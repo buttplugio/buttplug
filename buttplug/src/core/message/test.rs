@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
   Debug, Default, ButtplugMessage, ButtplugMessageFinalizer, Clone, PartialEq, Eq, Getters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct Test {
+pub struct TestV0 {
   /// Message Id, used for matching message pairs in remote connection instances.
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
@@ -24,7 +24,7 @@ pub struct Test {
   test_string: String,
 }
 
-impl Test {
+impl TestV0 {
   /// Creates a new Test message with the given Id.
   pub fn new(test: &str) -> Self {
     Self {
@@ -34,7 +34,7 @@ impl Test {
   }
 }
 
-impl ButtplugMessageValidator for Test {
+impl ButtplugMessageValidator for TestV0 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     // Test could have any Id. There's really no validity check for this. What a
     // horrible message. So glad it's deprecated. :|

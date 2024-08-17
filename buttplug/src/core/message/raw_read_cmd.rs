@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
   Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, CopyGetters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct RawReadCmd {
+pub struct RawReadCmdV2 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
@@ -30,7 +30,7 @@ pub struct RawReadCmd {
   timeout: u32,
 }
 
-impl RawReadCmd {
+impl RawReadCmdV2 {
   pub fn new(device_index: u32, endpoint: Endpoint, expected_length: u32, timeout: u32) -> Self {
     Self {
       id: 1,
@@ -42,7 +42,7 @@ impl RawReadCmd {
   }
 }
 
-impl ButtplugMessageValidator for RawReadCmd {
+impl ButtplugMessageValidator for RawReadCmdV2 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
     // TODO Should expected_length always be > 0?

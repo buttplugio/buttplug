@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
   Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, CopyGetters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct RSSILevelReading {
+pub struct RSSILevelReadingV2 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
@@ -24,7 +24,7 @@ pub struct RSSILevelReading {
   rssi_level: i32,
 }
 
-impl RSSILevelReading {
+impl RSSILevelReadingV2 {
   pub fn new(device_index: u32, rssi_level: i32) -> Self {
     Self {
       id: 1,
@@ -34,7 +34,7 @@ impl RSSILevelReading {
   }
 }
 
-impl ButtplugMessageValidator for RSSILevelReading {
+impl ButtplugMessageValidator for RSSILevelReadingV2 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     if self.rssi_level > 0 {

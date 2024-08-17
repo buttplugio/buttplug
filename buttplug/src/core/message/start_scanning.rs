@@ -11,18 +11,18 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, ButtplugMessage, ButtplugMessageFinalizer, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct StartScanning {
+pub struct StartScanningV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
 }
 
-impl Default for StartScanning {
+impl Default for StartScanningV0 {
   fn default() -> Self {
     Self { id: 1 }
   }
 }
 
-impl ButtplugMessageValidator for StartScanning {
+impl ButtplugMessageValidator for StartScanningV0 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
   }

@@ -142,7 +142,7 @@ impl ChannelClientTestHelper {
       outgoing_sender,
     )))));
     let client_serializer = ButtplugClientJSONSerializer::default();
-    let rsi_setup_msg = client_serializer.serialize(&[message::RequestServerInfo::new(
+    let rsi_setup_msg = client_serializer.serialize(&[message::RequestServerInfoV1::new(
       "Test client",
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     )
@@ -199,7 +199,7 @@ impl ChannelClientTestHelper {
     // Just assume we get an RSI message
     self
       .send_client_incoming(
-        message::ServerInfo::new(
+        message::ServerInfoV2::new(
           "test server",
           message::BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
           0,

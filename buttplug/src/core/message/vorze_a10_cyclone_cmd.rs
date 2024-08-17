@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
   Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, Default, PartialEq, Eq, Clone, CopyGetters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct VorzeA10CycloneCmd {
+pub struct VorzeA10CycloneCmdV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
@@ -27,7 +27,7 @@ pub struct VorzeA10CycloneCmd {
   clockwise: bool,
 }
 
-impl VorzeA10CycloneCmd {
+impl VorzeA10CycloneCmdV0 {
   pub fn new(device_index: u32, speed: u32, clockwise: bool) -> Self {
     Self {
       id: 1,
@@ -38,7 +38,7 @@ impl VorzeA10CycloneCmd {
   }
 }
 
-impl ButtplugMessageValidator for VorzeA10CycloneCmd {
+impl ButtplugMessageValidator for VorzeA10CycloneCmdV0 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     if self.speed > 99 {

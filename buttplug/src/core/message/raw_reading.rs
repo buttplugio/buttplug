@@ -24,7 +24,7 @@ use serde::{Deserialize, Serialize};
   CopyGetters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct RawReading {
+pub struct RawReadingV2 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
@@ -37,7 +37,7 @@ pub struct RawReading {
   data: Vec<u8>,
 }
 
-impl RawReading {
+impl RawReadingV2 {
   pub fn new(device_index: u32, endpoint: Endpoint, data: Vec<u8>) -> Self {
     Self {
       id: 0,
@@ -51,7 +51,7 @@ impl RawReading {
 #[cfg(feature = "serialize-json")]
 #[cfg(test)]
 mod test {
-  use crate::core::message::{ButtplugCurrentSpecServerMessage, Endpoint, RawReading};
+  use crate::core::message::{ButtplugCurrentSpecServerMessage, Endpoint, RawReadingV2};
 
   #[test]
   fn test_endpoint_deserialize() {
@@ -60,7 +60,7 @@ mod test {
     let union: ButtplugCurrentSpecServerMessage =
       serde_json::from_str(endpoint_str).expect("Infallible deserialization.");
     assert_eq!(
-      ButtplugCurrentSpecServerMessage::RawReading(RawReading::new(0, Endpoint::Tx, vec!(0))),
+      ButtplugCurrentSpecServerMessage::RawReading(RawReadingV2::new(0, Endpoint::Tx, vec!(0))),
       union
     );
   }
@@ -68,7 +68,7 @@ mod test {
   #[test]
   fn test_endpoint_serialize() {
     let union =
-      ButtplugCurrentSpecServerMessage::RawReading(RawReading::new(0, Endpoint::Tx, vec![0]));
+      ButtplugCurrentSpecServerMessage::RawReading(RawReadingV2::new(0, Endpoint::Tx, vec![0]));
     let js = serde_json::to_string(&union).expect("Infallible serialization.");
     let endpoint_str =
       "{\"RawReading\":{\"Id\":0,\"DeviceIndex\":0,\"Endpoint\":\"tx\",\"Data\":[0]}}";

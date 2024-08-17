@@ -222,9 +222,9 @@ pub enum ButtplugError {
   ButtplugUnknownError(#[from] ButtplugUnknownError),
 }
 
-impl From<message::Error> for ButtplugError {
+impl From<message::ErrorV0> for ButtplugError {
   /// Turns a Buttplug Protocol Error Message [super::messages::Error] into a [ButtplugError] type.
-  fn from(error: message::Error) -> Self {
+  fn from(error: message::ErrorV0) -> Self {
     match error.error_code() {
       ErrorCode::ErrorDevice => {
         ButtplugDeviceError::UntypedDeserializedError(error.error_message().clone()).into()

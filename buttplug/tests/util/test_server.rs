@@ -63,7 +63,7 @@ async fn run_server<ConnectorType>(
           async_manager::spawn(async move {
             if let Err(e) = client_message.is_valid() {
               error!("Message not valid: {:?} - Error: {}", client_message, e);
-              let mut err_msg = message::Error::from(ButtplugError::from(e));
+              let mut err_msg = message::ErrorV0::from(ButtplugError::from(e));
               err_msg.set_id(client_message.id());
               let _ = connector_clone.send(err_msg.into()).await;
               return;

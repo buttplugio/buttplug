@@ -13,11 +13,11 @@ use crate::core::{
     ButtplugDeviceCommandMessageUnion,
     DeviceFeature,
     DeviceFeatureActuator,
-    RotateCmd,
-    RotationSubcommand,
-    ScalarCmd,
+    RotateCmdV2,
+    RotationSubcommandV2,
+    ScalarCmdV3,
     ScalarCmdV4,
-    ScalarSubcommand,
+    ScalarSubcommandV3,
   },
 };
 use getset::Getters;
@@ -125,20 +125,20 @@ impl ActuatorCommandManager {
           .messages()
           .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::RotateCmd)
         {
-          rotate_subcommands.push(RotationSubcommand::new(index as u32, 0.0, false));
+        rotate_subcommands.push(RotationSubcommandV2::new(index as u32, 0.0, false));
         } else if actuator
           .messages()
           .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ScalarCmd)
         {
-          scalar_subcommands.push(ScalarSubcommand::new(index as u32, 0.0, actuator_type));
+          scalar_subcommands.push(ScalarSubcommandV3::new(index as u32, 0.0, actuator_type));
         }
       }
     }
     if !scalar_subcommands.is_empty() {
-      stop_commands.push(ScalarCmd::new(0, scalar_subcommands).into());
+      stop_commands.push(ScalarCmdV3::new(0, scalar_subcommands).into());
     }
     if !rotate_subcommands.is_empty() {
-      stop_commands.push(RotateCmd::new(0, rotate_subcommands).into());
+      stop_commands.push(RotateCmdV2::new(0, rotate_subcommands).into());
     }
 
     error!("{:?}", stop_commands);
@@ -239,7 +239,7 @@ impl ActuatorCommandManager {
 
   pub fn update_rotation(
     &self,
-    msg: &RotateCmd,
+    msg: &RotateCmdV2,
     match_all: bool,
   ) -> Result<Vec<Option<(u32, bool)>>, ButtplugError> {
     // First, make sure this is a valid command, that contains at least one

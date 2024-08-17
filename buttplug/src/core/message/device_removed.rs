@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, ButtplugMessage, Clone, PartialEq, Eq, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct DeviceRemoved {
+pub struct DeviceRemovedV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
@@ -22,7 +22,7 @@ pub struct DeviceRemoved {
   device_index: u32,
 }
 
-impl DeviceRemoved {
+impl DeviceRemovedV0 {
   pub fn new(device_index: u32) -> Self {
     Self {
       id: 0,
@@ -31,11 +31,11 @@ impl DeviceRemoved {
   }
 }
 
-impl ButtplugMessageValidator for DeviceRemoved {
+impl ButtplugMessageValidator for DeviceRemovedV0 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_system_id(self.id)
   }
 }
 
-impl ButtplugMessageFinalizer for DeviceRemoved {
+impl ButtplugMessageFinalizer for DeviceRemovedV0 {
 }

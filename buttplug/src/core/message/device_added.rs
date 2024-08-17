@@ -44,7 +44,7 @@ pub struct DeviceAddedV3 {
   device_message_timing_gap: Option<u32>,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
   #[getset(get = "pub")]
-  device_messages: ClientDeviceMessageAttributes,
+  device_messages: ClientDeviceMessageAttributesV3,
 }
 
 impl DeviceAddedV3 {
@@ -53,7 +53,7 @@ impl DeviceAddedV3 {
     device_name: &str,
     device_display_name: &Option<String>,
     device_message_timing_gap: &Option<u32>,
-    device_messages: &ClientDeviceMessageAttributes,
+    device_messages: &ClientDeviceMessageAttributesV3,
   ) -> Self {
     let mut obj = Self {
       id: 0,

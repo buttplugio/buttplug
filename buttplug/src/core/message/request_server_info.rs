@@ -17,7 +17,7 @@ fn return_version0() -> ButtplugMessageSpecVersion {
   Debug, ButtplugMessage, ButtplugMessageFinalizer, Clone, PartialEq, Eq, Getters, CopyGetters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct RequestServerInfo {
+pub struct RequestServerInfoV1 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "ClientName"))]
@@ -34,7 +34,7 @@ pub struct RequestServerInfo {
   message_version: ButtplugMessageSpecVersion,
 }
 
-impl RequestServerInfo {
+impl RequestServerInfoV1 {
   pub fn new(client_name: &str, message_version: ButtplugMessageSpecVersion) -> Self {
     Self {
       id: 1,
@@ -44,7 +44,7 @@ impl RequestServerInfo {
   }
 }
 
-impl ButtplugMessageValidator for RequestServerInfo {
+impl ButtplugMessageValidator for RequestServerInfoV1 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
   }
@@ -52,7 +52,7 @@ impl ButtplugMessageValidator for RequestServerInfo {
 
 #[cfg(test)]
 mod test {
-  use super::{ButtplugMessageSpecVersion, RequestServerInfo};
+  use super::{ButtplugMessageSpecVersion, RequestServerInfoV1};
 
   #[cfg(feature = "serialize-json")]
   #[test]
@@ -64,13 +64,13 @@ mod test {
         "MessageVersion": 2
 }
         "#;
-    let new_msg = RequestServerInfo {
+    let new_msg = RequestServerInfoV1 {
       id: 1,
       client_name: "Test Client".to_owned(),
       message_version: ButtplugMessageSpecVersion::Version2,
     };
     assert_eq!(
-      serde_json::from_str::<RequestServerInfo>(new_json).expect("Test unwrap"),
+      serde_json::from_str::<RequestServerInfoV1>(new_json).expect("Test unwrap"),
       new_msg
     );
   }
@@ -84,13 +84,13 @@ mod test {
         "ClientName": "Test Client"
 }
         "#;
-    let old_msg = RequestServerInfo {
+    let old_msg = RequestServerInfoV1 {
       id: 1,
       client_name: "Test Client".to_owned(),
       message_version: ButtplugMessageSpecVersion::Version0,
     };
     assert_eq!(
-      serde_json::from_str::<RequestServerInfo>(old_json).expect("Test unwrap"),
+      serde_json::from_str::<RequestServerInfoV1>(old_json).expect("Test unwrap"),
       old_msg
     );
   }
