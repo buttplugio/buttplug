@@ -50,7 +50,7 @@ dummy-runtime=[]
 unstable=[]
 
 [dependencies]
-buttplug_derive = "0.8.0"
+buttplug_derive = "0.8.1"
 # buttplug_derive = { path = "../buttplug_derive" }
 futures = "0.3.30"
 futures-util = "0.3.30"
