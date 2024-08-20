@@ -407,6 +407,26 @@ protocols:
                   - 100
               messages:
                 - SensorReadCmd
+      - identifier:
+          - BA
+        name: Lovense Solace Pro
+        features:
+          - feature-type: Oscillate
+            description: Stroker Oscillation Speed
+            actuator:
+              step-range:
+                - 0
+                - 20
+              messages:
+                - ScalarCmd
+          - feature-type: Battery
+            description: Battery Level
+            sensor:
+              value-range:
+                - - 0
+                  - 100
+              messages:
+                - SensorReadCmd                
     communication:
       - btle:
           names:
@@ -514,6 +534,9 @@ protocols:
             46530001-0023-4bd4-bbd5-a6920e4c5653:
               tx: 46530002-0023-4bd4-bbd5-a6920e4c5653
               rx: 46530003-0023-4bd4-bbd5-a6920e4c5653
+            42410001-0023-4bd4-bbd5-a6920e4c5653:
+              tx: 42410002-0023-4bd4-bbd5-a6920e4c5653
+              rx: 42410003-0023-4bd4-bbd5-a6920e4c5653
   lovense-connect-service:
     defaults:
       name: Lovense Connect Service Device
