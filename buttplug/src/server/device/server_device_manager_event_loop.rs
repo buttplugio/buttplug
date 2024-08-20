@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::message::{ButtplugServerMessage, DeviceAddedV3, DeviceRemovedV0, ScanningFinishedV0},
+  core::message::{ButtplugServerMessageV4, DeviceAddedV3, DeviceRemovedV0, ScanningFinishedV0},
   server::device::{
     configuration::DeviceConfigurationManager,
     hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
@@ -33,7 +33,7 @@ pub(super) struct ServerDeviceManagerEventLoop {
   device_map: Arc<DashMap<u32, Arc<ServerDevice>>>,
   /// Broadcaster that relays device events in the form of Buttplug Messages to
   /// whoever owns the Buttplug Server.
-  server_sender: broadcast::Sender<ButtplugServerMessage>,
+  server_sender: broadcast::Sender<ButtplugServerMessageV4>,
   /// As the device manager owns the Device Communication Managers, it will have
   /// a receiver that the comm managers all send thru.
   device_comm_receiver: mpsc::Receiver<HardwareCommunicationManagerEvent>,
@@ -58,7 +58,7 @@ impl ServerDeviceManagerEventLoop {
     device_config_manager: Arc<DeviceConfigurationManager>,
     device_map: Arc<DashMap<u32, Arc<ServerDevice>>>,
     loop_cancellation_token: CancellationToken,
-    server_sender: broadcast::Sender<ButtplugServerMessage>,
+    server_sender: broadcast::Sender<ButtplugServerMessageV4>,
     device_comm_receiver: mpsc::Receiver<HardwareCommunicationManagerEvent>,
     device_command_receiver: mpsc::Receiver<DeviceManagerCommand>,
   ) -> Self {

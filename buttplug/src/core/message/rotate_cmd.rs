@@ -74,7 +74,7 @@ impl ButtplugMessageValidator for RotateCmdV4 {
 #[derive(Debug, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 #[getset(get_copy = "pub")]
-pub struct RotationSubcommandV2 {
+pub struct RotationSubcommandV1 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
   index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Speed"))]
@@ -83,7 +83,7 @@ pub struct RotationSubcommandV2 {
   clockwise: bool,
 }
 
-impl RotationSubcommandV2 {
+impl RotationSubcommandV1 {
   pub fn new(index: u32, speed: f64, clockwise: bool) -> Self {
     Self {
       index,
@@ -95,7 +95,7 @@ impl RotationSubcommandV2 {
 
 #[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct RotateCmdV2 {
+pub struct RotateCmdV1 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
@@ -103,11 +103,11 @@ pub struct RotateCmdV2 {
   #[getset(get = "pub")]
   #[cfg_attr(feature = "serialize-json", serde(rename = "Rotations"))]
   #[getset(get = "pub")]
-  rotations: Vec<RotationSubcommandV2>,
+  rotations: Vec<RotationSubcommandV1>,
 }
 
-impl RotateCmdV2 {
-  pub fn new(device_index: u32, rotations: Vec<RotationSubcommandV2>) -> Self {
+impl RotateCmdV1 {
+  pub fn new(device_index: u32, rotations: Vec<RotationSubcommandV1>) -> Self {
     Self {
       id: 1,
       device_index,
@@ -116,7 +116,7 @@ impl RotateCmdV2 {
   }
 }
 
-impl ButtplugMessageValidator for RotateCmdV2 {
+impl ButtplugMessageValidator for RotateCmdV1 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     for rotation in &self.rotations {

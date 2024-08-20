@@ -51,16 +51,16 @@ impl RawReadingV2 {
 #[cfg(feature = "serialize-json")]
 #[cfg(test)]
 mod test {
-  use crate::core::message::{ButtplugCurrentSpecServerMessage, Endpoint, RawReadingV2};
+  use crate::core::message::{ButtplugServerMessageCurrent, Endpoint, RawReadingV2};
 
   #[test]
   fn test_endpoint_deserialize() {
     let endpoint_str =
       "{\"RawReading\":{\"Id\":0,\"DeviceIndex\":0,\"Endpoint\":\"tx\",\"Data\":[0]}}";
-    let union: ButtplugCurrentSpecServerMessage =
+    let union: ButtplugServerMessageCurrent =
       serde_json::from_str(endpoint_str).expect("Infallible deserialization.");
     assert_eq!(
-      ButtplugCurrentSpecServerMessage::RawReading(RawReadingV2::new(0, Endpoint::Tx, vec!(0))),
+      ButtplugServerMessageCurrent::RawReading(RawReadingV2::new(0, Endpoint::Tx, vec!(0))),
       union
     );
   }
@@ -68,7 +68,7 @@ mod test {
   #[test]
   fn test_endpoint_serialize() {
     let union =
-      ButtplugCurrentSpecServerMessage::RawReading(RawReadingV2::new(0, Endpoint::Tx, vec![0]));
+      ButtplugServerMessageCurrent::RawReading(RawReadingV2::new(0, Endpoint::Tx, vec![0]));
     let js = serde_json::to_string(&union).expect("Infallible serialization.");
     let endpoint_str =
       "{\"RawReading\":{\"Id\":0,\"DeviceIndex\":0,\"Endpoint\":\"tx\",\"Data\":[0]}}";

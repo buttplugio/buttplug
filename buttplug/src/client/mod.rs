@@ -15,8 +15,8 @@ use crate::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
     errors::{ButtplugError, ButtplugHandshakeError},
     message::{
-      ButtplugCurrentSpecClientMessage,
-      ButtplugCurrentSpecServerMessage,
+      ButtplugClientMessageV3,
+      ButtplugServerMessageV3,
       PingV0,
       RequestDeviceListV0,
       RequestServerInfoV1,
@@ -63,9 +63,9 @@ type ButtplugClientResult<T = ()> = Result<T, ButtplugClientError>;
 type ButtplugClientResultFuture<T = ()> = BoxFuture<'static, ButtplugClientResult<T>>;
 
 /// Result type used for passing server responses.
-pub type ButtplugServerMessageResult = ButtplugClientResult<ButtplugCurrentSpecServerMessage>;
+pub type ButtplugServerMessageResult = ButtplugClientResult<ButtplugServerMessageV3>;
 pub type ButtplugServerMessageResultFuture =
-  ButtplugClientResultFuture<ButtplugCurrentSpecServerMessage>;
+  ButtplugClientResultFuture<ButtplugServerMessageV3>;
 /// Future state type for returning server responses across futures.
 pub(crate) type ButtplugServerMessageStateShared =
   ButtplugFutureStateShared<ButtplugServerMessageResult>;
@@ -86,13 +86,13 @@ pub(crate) type ButtplugServerMessageFuture = ButtplugFuture<ButtplugServerMessa
 /// continue execution.
 #[derive(Clone)]
 pub struct ButtplugClientMessageFuturePair {
-  msg: ButtplugCurrentSpecClientMessage,
+  msg: ButtplugClientMessageV3,
   waker: ButtplugServerMessageStateShared,
 }
 
 impl ButtplugClientMessageFuturePair {
   pub fn new(
-    msg: ButtplugCurrentSpecClientMessage,
+    msg: ButtplugClientMessageV3,
     waker: ButtplugServerMessageStateShared,
   ) -> Self {
     Self { msg, waker }
@@ -201,7 +201,7 @@ impl ButtplugClientMessageSender {
 
   pub fn send_message(
     &self,
-    msg: ButtplugCurrentSpecClientMessage,
+    msg: ButtplugClientMessageV3,
   ) -> ButtplugServerMessageResultFuture {
     if !self.connected.load(Ordering::Relaxed) {
       future::ready(Err(ButtplugConnectorError::ConnectorNotConnected.into())).boxed()
@@ -214,7 +214,7 @@ impl ButtplugClientMessageSender {
   /// ButtplugMessage back from the server.
   pub fn send_message_ignore_connect_status(
     &self,
-    msg: ButtplugCurrentSpecClientMessage,
+    msg: ButtplugClientMessageV3,
   ) -> ButtplugServerMessageResultFuture {
     // Create a future to pair with the message being resolved.
     let fut = ButtplugServerMessageFuture::default();
@@ -236,7 +236,7 @@ impl ButtplugClientMessageSender {
   /// type ButtplugMessage back from the server.
   pub fn send_message_expect_ok(
     &self,
-    msg: ButtplugCurrentSpecClientMessage,
+    msg: ButtplugClientMessageV3,
   ) -> ButtplugClientResultFuture {
     let send_fut = self.send_message(msg);
     async move { send_fut.await.map(|_| ()) }.boxed()
@@ -295,7 +295,7 @@ impl ButtplugClient {
     mut connector: ConnectorType,
   ) -> Result<(), ButtplugClientError>
   where
-    ConnectorType: ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
+    ConnectorType: ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3>
       + 'static,
   {
     if self.connected() {
@@ -350,7 +350,7 @@ impl ButtplugClient {
       .await?;
 
     debug!("Got ServerInfo return.");
-    if let ButtplugCurrentSpecServerMessage::ServerInfo(server_info) = msg {
+    if let ButtplugServerMessageV3::ServerInfo(server_info) = msg {
       info!("Connected to {}", server_info.server_name());
       *self.server_name.lock().await = Some(server_info.server_name().clone());
       // Don't set ourselves as connected until after ServerInfo has been
@@ -365,7 +365,7 @@ impl ButtplugClient {
         .message_sender
         .send_message(RequestDeviceListV0::default().into())
         .await?;
-      if let ButtplugCurrentSpecServerMessage::DeviceList(m) = msg {
+      if let ButtplugServerMessageV3::DeviceList(m) = msg {
         self
           .message_sender
           .send_message_to_event_loop(ButtplugClientRequest::HandleDeviceList(m))

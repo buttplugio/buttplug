@@ -7,9 +7,44 @@
 
 use super::device_message_info::{DeviceMessageInfoV0, DeviceMessageInfoV1, DeviceMessageInfoV2};
 use super::*;
+use device_message_info::DeviceMessageInfoV4;
 use getset::Getters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
+
+/// List of all devices currently connected to the server.
+#[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage, Getters)]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+pub struct DeviceListV4 {
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  id: u32,
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Devices"))]
+  #[getset(get = "pub")]
+  devices: Vec<DeviceMessageInfoV4>,
+}
+
+impl DeviceListV4 {
+  pub fn new(devices: Vec<DeviceMessageInfoV4>) -> Self {
+    Self { id: 1, devices }
+  }
+}
+
+impl ButtplugMessageValidator for DeviceListV4 {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)
+  }
+}
+
+impl ButtplugMessageFinalizer for DeviceListV4 {
+  fn finalize(&mut self) {
+  }
+}
+
+impl From<DeviceListV4> for DeviceListV3 {
+  fn from(value: DeviceListV4) -> Self {
+    DeviceListV3::new(value.devices().iter().map(|x| x.clone().into()).collect())
+  }
+}
 
 /// List of all devices currently connected to the server.
 #[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage, Getters)]
@@ -84,8 +119,8 @@ pub struct DeviceListV1 {
   devices: Vec<DeviceMessageInfoV1>,
 }
 
-impl From<DeviceListV3> for DeviceListV1 {
-  fn from(msg: DeviceListV3) -> Self {
+impl From<DeviceListV2> for DeviceListV1 {
+  fn from(msg: DeviceListV2) -> Self {
     let mut devices = vec![];
     for d in msg.devices {
       let dmiv2 = DeviceMessageInfoV2::from(d);
@@ -117,12 +152,11 @@ pub struct DeviceListV0 {
   devices: Vec<DeviceMessageInfoV0>,
 }
 
-impl From<DeviceListV3> for DeviceListV0 {
-  fn from(msg: DeviceListV3) -> Self {
+impl From<DeviceListV1> for DeviceListV0 {
+  fn from(msg: DeviceListV1) -> Self {
     let mut devices = vec![];
     for d in msg.devices {
-      let dmiv2 = DeviceMessageInfoV2::from(d);
-      let dmiv1 = DeviceMessageInfoV1::from(dmiv2);
+      let dmiv1 = DeviceMessageInfoV1::from(d);
       devices.push(DeviceMessageInfoV0::from(dmiv1));
     }
     Self {

@@ -184,7 +184,7 @@ where
 }
 
 #[cfg(all(feature = "websockets", feature = "serialize-json"))]
-use crate::core::message::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage};
+use crate::core::message::{ButtplugClientMessageCurrent, ButtplugServerMessageCurrent};
 
 /// Convenience method for creating a new Buttplug Client Websocket connector that uses the JSON
 /// serializer. This is pretty much the only connector used for IPC right now, so this makes it easy
@@ -192,7 +192,7 @@ use crate::core::message::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpec
 #[cfg(all(feature = "websockets", feature = "serialize-json"))]
 pub fn new_json_ws_client_connector(
   address: &str,
-) -> impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage> {
+) -> impl ButtplugConnector<ButtplugClientMessageCurrent, ButtplugServerMessageCurrent> {
   use crate::core::message::serializer::ButtplugClientJSONSerializer;
 
   ButtplugRemoteClientConnector::<

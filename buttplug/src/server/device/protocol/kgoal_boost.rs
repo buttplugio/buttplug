@@ -9,14 +9,7 @@ use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{
-      self,
-      ButtplugDeviceMessage,
-      ButtplugMessage,
-      ButtplugServerDeviceMessage,
-      ButtplugServerMessage,
-      Endpoint,
-      SensorReadingV3,
-      SensorType,
+      self, ButtplugDeviceMessage, ButtplugServerDeviceMessage, Endpoint, SensorReadingV4, SensorType
     },
   },
   server::device::{
@@ -62,11 +55,12 @@ impl ProtocolHandler for KGoalBoost {
   fn handle_sensor_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: message::SensorSubscribeCmdV4,
-  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+    message: &message::SensorSubscribeCmdV4,
+  ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     if self.subscribed_sensors.contains(message.feature_index()) {
-      return future::ready(Ok(message::OkV0::new(message.id()).into())).boxed();
+      return future::ready(Ok(())).boxed();
     }
+    let message = message.clone();
     let sensors = self.subscribed_sensors.clone();
     // Readout value: 0x000104000005d3
     // Byte 0: Always 0x00
@@ -105,7 +99,7 @@ impl ProtocolHandler for KGoalBoost {
                 if stream_sensors.contains(&0)
                   && sender
                     .send(
-                      SensorReadingV3::new(device_index, 0, SensorType::Pressure, vec![normalized])
+                      SensorReadingV4::new(device_index, 0, SensorType::Pressure, vec![normalized])
                         .into(),
                     )
                     .is_err()
@@ -118,7 +112,7 @@ impl ProtocolHandler for KGoalBoost {
                 if stream_sensors.contains(&1)
                   && sender
                     .send(
-                      SensorReadingV3::new(device_index, 0, SensorType::Pressure, vec![unnormalized])
+                      SensorReadingV4::new(device_index, 0, SensorType::Pressure, vec![unnormalized])
                         .into(),
                     )
                     .is_err()
@@ -134,7 +128,7 @@ impl ProtocolHandler for KGoalBoost {
         });
       }
       sensors.insert(*message.feature_index());
-      Ok(message::OkV0::new(message.id()).into())
+      Ok(())
     }
     .boxed()
   }
@@ -142,11 +136,12 @@ impl ProtocolHandler for KGoalBoost {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: message::SensorUnsubscribeCmdV4,
-  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+    message: &message::SensorUnsubscribeCmdV4,
+  ) -> BoxFuture<Result<(), ButtplugDeviceError>> {    
     if !self.subscribed_sensors.contains(message.feature_index()) {
-      return future::ready(Ok(message::OkV0::new(message.id()).into())).boxed();
+      return future::ready(Ok(())).boxed();
     }
+    let message = message.clone();
     let sensors = self.subscribed_sensors.clone();
     async move {
       // If we have no sensors we're currently subscribed to, we'll need to bring up our BLE
@@ -157,7 +152,7 @@ impl ProtocolHandler for KGoalBoost {
           .unsubscribe(&HardwareUnsubscribeCmd::new(Endpoint::RxPressure))
           .await?;
       }
-      Ok(message::OkV0::new(message.id()).into())
+      Ok(())
     }
     .boxed()
   }

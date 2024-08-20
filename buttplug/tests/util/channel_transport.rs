@@ -13,37 +13,28 @@ use buttplug::{
   core::{
     connector::{
       transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
-      ButtplugConnectorError,
-      ButtplugRemoteClientConnector,
-      ButtplugRemoteServerConnector,
+      ButtplugConnectorError, ButtplugRemoteClientConnector, ButtplugRemoteServerConnector,
     },
     message::{
       self,
-      serializer::ButtplugMessageSerializer,
       serializer::{
-        ButtplugClientJSONSerializer,
-        ButtplugSerializedMessage,
+        ButtplugClientJSONSerializer, ButtplugMessageSerializer, ButtplugSerializedMessage,
         ButtplugServerJSONSerializer,
       },
-      ButtplugClientMessage,
-      ButtplugCurrentSpecClientMessage,
-      ButtplugMessage,
-      ButtplugServerMessage,
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      ButtplugClientMessageCurrent, ButtplugClientMessageV3, ButtplugClientMessageVariant,
+      ButtplugMessage, ButtplugServerMessageVariant, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
   util::async_manager,
 };
 use futures::{
   future::{self, BoxFuture},
-  select,
-  FutureExt,
+  select, FutureExt,
 };
 use std::sync::Arc;
 use tokio::sync::{
   mpsc::{channel, Receiver, Sender},
-  Mutex,
-  Notify,
+  Mutex, Notify,
 };
 use tracing::*;
 
@@ -194,31 +185,33 @@ impl ChannelClientTestHelper {
     // Wait for RequestServerInfo message
     assert!(matches!(
       self.next_client_message().await,
-      ButtplugClientMessage::RequestServerInfo(..)
+      ButtplugClientMessageVariant::V3(ButtplugClientMessageV3::RequestServerInfo(..))
     ));
     // Just assume we get an RSI message
     self
-      .send_client_incoming(
+      .send_client_incoming(ButtplugServerMessageVariant::V3(
         message::ServerInfoV2::new(
           "test server",
           message::BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
           0,
         )
         .into(),
-      )
+      ))
       .await;
     // Wait for RequestDeviceList message.
     assert!(matches!(
       self.next_client_message().await,
-      ButtplugClientMessage::RequestDeviceList(..)
+      ButtplugClientMessageVariant::V3(ButtplugClientMessageV3::RequestDeviceList(..))
     ));
     let mut dl = message::DeviceListV3::new(vec![]);
     dl.set_id(2);
-    self.send_client_incoming(dl.into()).await;
+    self
+      .send_client_incoming(ButtplugServerMessageVariant::V3(dl.into()))
+      .await;
     finish_notifier.notified().await;
   }
 
-  pub async fn next_client_message(&self) -> ButtplugClientMessage {
+  pub async fn next_client_message(&self) -> ButtplugClientMessageVariant {
     self
       .server_serializer
       .deserialize(
@@ -249,7 +242,7 @@ impl ChannelClientTestHelper {
       .expect("Test, assuming infallible");
   }
 
-  pub async fn send_client_incoming(&self, msg: ButtplugServerMessage) {
+  pub async fn send_client_incoming(&self, msg: ButtplugServerMessageVariant) {
     self
       .send_incoming(ButtplugTransportIncomingMessage::Message(
         self.server_serializer.serialize(&vec![msg]),
@@ -257,7 +250,7 @@ impl ChannelClientTestHelper {
       .await;
   }
 
-  pub async fn send_server_incoming(&self, msg: ButtplugCurrentSpecClientMessage) {
+  pub async fn send_server_incoming(&self, msg: ButtplugClientMessageCurrent) {
     self
       .send_incoming(ButtplugTransportIncomingMessage::Message(
         self.client_serializer.serialize(&[msg]),
@@ -329,7 +322,7 @@ impl ChannelServerTestHelper {
       .expect("Test, assuming infallible");
   }
 
-  pub async fn send_client_incoming(&self, msg: ButtplugServerMessage) {
+  pub async fn send_client_incoming(&self, msg: ButtplugServerMessageVariant) {
     self
       .send_incoming(ButtplugTransportIncomingMessage::Message(
         self.server_serializer.serialize(&vec![msg]),
@@ -337,7 +330,7 @@ impl ChannelServerTestHelper {
       .await;
   }
 
-  pub async fn send_server_incoming(&self, msg: ButtplugCurrentSpecClientMessage) {
+  pub async fn send_server_incoming(&self, msg: ButtplugClientMessageCurrent) {
     self
       .send_incoming(ButtplugTransportIncomingMessage::Message(
         self.client_serializer.serialize(&[msg]),

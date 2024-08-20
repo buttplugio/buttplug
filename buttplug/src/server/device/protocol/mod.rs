@@ -132,7 +132,7 @@ use crate::{
       ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceMessage,
       ButtplugServerDeviceMessage,
-      ButtplugServerMessage,
+      //ButtplugServerMessage,
       Endpoint,
       SensorReadingV4,
       SensorType,
@@ -809,7 +809,7 @@ pub trait ProtocolHandler: Sync + Send {
 
   fn handle_linear_cmd(
     &self,
-    message: message::LinearCmdV2,
+    message: message::LinearCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented(print_type_of(&message))
   }
@@ -817,8 +817,8 @@ pub trait ProtocolHandler: Sync + Send {
   fn handle_sensor_subscribe_cmd(
     &self,
     _device: Arc<Hardware>,
-    _message: message::SensorSubscribeCmdV4,
-  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+    _message: &message::SensorSubscribeCmdV4,
+  ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Command not implemented for this protocol: BatteryCmd".to_string(),
     )))
@@ -828,8 +828,8 @@ pub trait ProtocolHandler: Sync + Send {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     _device: Arc<Hardware>,
-    _message: message::SensorUnsubscribeCmdV4,
-  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+    _message: &message::SensorUnsubscribeCmdV4,
+  ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Command not implemented for this protocol: BatteryCmd".to_string(),
     )))
@@ -839,10 +839,10 @@ pub trait ProtocolHandler: Sync + Send {
   fn handle_sensor_read_cmd(
     &self,
     device: Arc<Hardware>,
-    message: message::SensorReadCmdV4,
+    message: &message::SensorReadCmdV4,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     match message.sensor_type() {
-      SensorType::Battery => self.handle_battery_level_cmd(device, message),
+      SensorType::Battery => self.handle_battery_level_cmd(device, message.clone()),
       _ => future::ready(Err(ButtplugDeviceError::UnhandledCommand(
         "Command not implemented for this protocol: SensorReadCmd".to_string(),
       )))
@@ -888,7 +888,7 @@ pub trait ProtocolHandler: Sync + Send {
     &self,
     _device: Arc<Hardware>,
     _message: message::RSSILevelCmdV2,
-  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+  ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Command not implemented for this protocol: SensorReadCmd".to_string(),
     )))

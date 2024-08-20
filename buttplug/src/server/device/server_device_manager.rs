@@ -13,12 +13,12 @@ use crate::{
     errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
     message::{
       self,
-      ButtplugClientMessage,
+      ButtplugClientMessageV4,
       ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceManagerMessageUnion,
       ButtplugDeviceMessage,
       ButtplugMessage,
-      ButtplugServerMessage,
+      ButtplugServerMessageV4,
       DeviceListV3,
       DeviceMessageInfoV3,
     },
@@ -172,15 +172,16 @@ impl ServerDeviceManagerBuilder {
 pub struct ServerDeviceManager {
   #[getset(get = "pub")]
   device_configuration_manager: Arc<DeviceConfigurationManager>,
+  #[getset(get = "pub(crate)")]
   devices: Arc<DashMap<u32, Arc<ServerDevice>>>,
   device_command_sender: mpsc::Sender<DeviceManagerCommand>,
   loop_cancellation_token: CancellationToken,
   running: Arc<AtomicBool>,
-  output_sender: broadcast::Sender<ButtplugServerMessage>,
+  output_sender: broadcast::Sender<ButtplugServerMessageV4>,
 }
 
 impl ServerDeviceManager {
-  pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessage> {
+  pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessageV4> {
     // Unlike the client API, we can expect anyone using the server to pin this
     // themselves.
     convert_broadcast_receiver_to_stream(self.output_sender.subscribe())
@@ -277,7 +278,7 @@ impl ServerDeviceManager {
     }
   }
 
-  pub fn parse_message(&self, msg: ButtplugClientMessage) -> ButtplugServerResultFuture {
+  pub fn parse_message(&self, msg: ButtplugClientMessageV4) -> ButtplugServerResultFuture {
     if !self.running.load(Ordering::SeqCst) {
       return future::ready(Err(ButtplugUnknownError::DeviceManagerNotRunning.into())).boxed();
     }

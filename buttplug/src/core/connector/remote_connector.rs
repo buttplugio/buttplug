@@ -20,11 +20,11 @@ use crate::{
       ButtplugMessageSerializer,
       ButtplugSerializedMessage,
     },
-    ButtplugClientMessage,
-    ButtplugCurrentSpecClientMessage,
-    ButtplugCurrentSpecServerMessage,
+    ButtplugClientMessageVariant,
+    ButtplugClientMessageCurrent,
+    ButtplugServerMessageCurrent,
     ButtplugMessage,
-    ButtplugServerMessage,
+    ButtplugServerMessageVariant,
   },
   util::async_manager,
 };
@@ -171,15 +171,15 @@ pub type ButtplugRemoteClientConnector<
 > = ButtplugRemoteConnector<
   TransportType,
   SerializerType,
-  ButtplugCurrentSpecClientMessage,
-  ButtplugCurrentSpecServerMessage,
+  ButtplugClientMessageCurrent,
+  ButtplugServerMessageCurrent,
 >;
 
 pub type ButtplugRemoteServerConnector<TransportType, SerializerType> = ButtplugRemoteConnector<
   TransportType,
   SerializerType,
-  ButtplugServerMessage,
-  ButtplugClientMessage,
+  ButtplugServerMessageVariant,
+  ButtplugClientMessageVariant,
 >;
 
 pub struct ButtplugRemoteConnector<

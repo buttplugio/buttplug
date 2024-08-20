@@ -17,20 +17,20 @@ use crate::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
       ActuatorType,
-      ButtplugCurrentSpecClientMessage,
-      ButtplugCurrentSpecServerMessage,
+      ButtplugClientMessageV3,
+      ButtplugServerMessageV3,
       ButtplugDeviceMessageType,
       ClientDeviceMessageAttributesV3,
       ClientGenericDeviceMessageAttributesV3,
       DeviceMessageInfoV3,
       Endpoint,
-      LinearCmdV2,
+      LinearCmdV1,
       RawReadCmdV2,
       RawSubscribeCmdV2,
       RawUnsubscribeCmdV2,
       RawWriteCmdV2,
-      RotateCmdV2,
-      RotationSubcommandV2,
+      RotateCmdV1,
+      RotationSubcommandV1,
       ScalarCmdV3,
       ScalarSubcommandV3,
       SensorReadCmdV3,
@@ -38,7 +38,7 @@ use crate::{
       SensorType,
       SensorUnsubscribeCmdV3,
       StopDeviceCmdV0,
-      VectorSubcommandV2,
+      VectorSubcommandV1,
     },
   },
   util::stream::convert_broadcast_receiver_to_stream,
@@ -67,7 +67,7 @@ pub enum ButtplugClientDeviceEvent {
   /// Client has disconnected from server.
   ClientDisconnect,
   /// Message was received from server for that specific device.
-  Message(ButtplugCurrentSpecServerMessage),
+  Message(ButtplugServerMessageV3),
 }
 
 /// Convenience enum for forming [VibrateCmd] commands.
@@ -335,7 +335,6 @@ impl ButtplugClientDevice {
       }
     }
     let msg = ScalarCmdV3::new(self.index, scalar_vec).into();
-    info!("{:?}", msg);
     self.event_loop_sender.send_message_expect_ok(msg)
   }
 
@@ -437,12 +436,12 @@ impl ButtplugClientDevice {
 
     let linear_count: u32 = self.message_attributes.linear_cmd().as_ref().unwrap().len() as u32;
 
-    let mut linear_vec: Vec<VectorSubcommandV2>;
+    let mut linear_vec: Vec<VectorSubcommandV1>;
     match linear_cmd {
       LinearCommand::Linear(dur, pos) => {
         linear_vec = Vec::with_capacity(linear_count as usize);
         for i in 0..linear_count {
-          linear_vec.push(VectorSubcommandV2::new(i, *dur, *pos));
+          linear_vec.push(VectorSubcommandV1::new(i, *dur, *pos));
         }
       }
       LinearCommand::LinearMap(map) => {
@@ -458,7 +457,7 @@ impl ButtplugClientDevice {
               ButtplugDeviceError::DeviceFeatureIndexError(linear_count, *idx).into(),
             );
           }
-          linear_vec.push(VectorSubcommandV2::new(*idx, *dur, *pos));
+          linear_vec.push(VectorSubcommandV1::new(*idx, *dur, *pos));
         }
       }
       LinearCommand::LinearVec(vec) => {
@@ -469,11 +468,11 @@ impl ButtplugClientDevice {
         }
         linear_vec = Vec::with_capacity(vec.len() as usize);
         for (i, v) in vec.iter().enumerate() {
-          linear_vec.push(VectorSubcommandV2::new(i as u32, v.0, v.1));
+          linear_vec.push(VectorSubcommandV1::new(i as u32, v.0, v.1));
         }
       }
     }
-    let msg = LinearCmdV2::new(self.index, linear_vec).into();
+    let msg = LinearCmdV1::new(self.index, linear_vec).into();
     self.event_loop_sender.send_message_expect_ok(msg)
   }
 
@@ -495,12 +494,12 @@ impl ButtplugClientDevice {
 
     let rotate_count: u32 = self.message_attributes.rotate_cmd().as_ref().unwrap().len() as u32;
 
-    let mut rotate_vec: Vec<RotationSubcommandV2>;
+    let mut rotate_vec: Vec<RotationSubcommandV1>;
     match rotate_cmd {
       RotateCommand::Rotate(speed, clockwise) => {
         rotate_vec = Vec::with_capacity(rotate_count as usize);
         for i in 0..rotate_count {
-          rotate_vec.push(RotationSubcommandV2::new(i, *speed, *clockwise));
+          rotate_vec.push(RotationSubcommandV1::new(i, *speed, *clockwise));
         }
       }
       RotateCommand::RotateMap(map) => {
@@ -516,7 +515,7 @@ impl ButtplugClientDevice {
               ButtplugDeviceError::DeviceFeatureIndexError(rotate_count, *idx).into(),
             );
           }
-          rotate_vec.push(RotationSubcommandV2::new(*idx, *speed, *clockwise));
+          rotate_vec.push(RotationSubcommandV1::new(*idx, *speed, *clockwise));
         }
       }
       RotateCommand::RotateVec(vec) => {
@@ -527,11 +526,11 @@ impl ButtplugClientDevice {
         }
         rotate_vec = Vec::with_capacity(vec.len() as usize);
         for (i, v) in vec.iter().enumerate() {
-          rotate_vec.push(RotationSubcommandV2::new(i as u32, v.0, v.1));
+          rotate_vec.push(RotationSubcommandV1::new(i as u32, v.0, v.1));
         }
       }
     }
-    let msg = RotateCmdV2::new(self.index, rotate_vec).into();
+    let msg = RotateCmdV1::new(self.index, rotate_vec).into();
     self.event_loop_sender.send_message_expect_ok(msg)
   }
 
@@ -589,7 +588,7 @@ impl ButtplugClientDevice {
     let msg = SensorReadCmdV3::new(self.index, sensor_indexes[0], *sensor_type).into();
     let reply = self.event_loop_sender.send_message(msg);
     async move {
-      if let ButtplugCurrentSpecServerMessage::SensorReading(data) = reply.await? {
+      if let ButtplugServerMessageV3::SensorReading(data) = reply.await? {
         Ok(data.data().clone())
       } else {
         Err(
@@ -647,7 +646,7 @@ impl ButtplugClientDevice {
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawWriteCmd).into(),
       );
     }
-    let msg = ButtplugCurrentSpecClientMessage::RawWriteCmd(RawWriteCmdV2::new(
+    let msg = ButtplugClientMessageV3::RawWriteCmd(RawWriteCmdV2::new(
       self.index,
       endpoint,
       data,
@@ -667,7 +666,7 @@ impl ButtplugClientDevice {
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawReadCmd).into(),
       );
     }
-    let msg = ButtplugCurrentSpecClientMessage::RawReadCmd(RawReadCmdV2::new(
+    let msg = ButtplugClientMessageV3::RawReadCmd(RawReadCmdV2::new(
       self.index,
       endpoint,
       expected_length,
@@ -676,8 +675,8 @@ impl ButtplugClientDevice {
     let send_fut = self.event_loop_sender.send_message(msg);
     async move {
       match send_fut.await? {
-        ButtplugCurrentSpecServerMessage::RawReading(reading) => Ok(reading.data().clone()),
-        ButtplugCurrentSpecServerMessage::Error(err) => Err(ButtplugError::from(err).into()),
+        ButtplugServerMessageV3::RawReading(reading) => Ok(reading.data().clone()),
+        ButtplugServerMessageV3::Error(err) => Err(ButtplugError::from(err).into()),
         msg => Err(
           ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
             "{:?}",
@@ -697,7 +696,7 @@ impl ButtplugClientDevice {
       );
     }
     let msg =
-      ButtplugCurrentSpecClientMessage::RawSubscribeCmd(RawSubscribeCmdV2::new(self.index, endpoint));
+      ButtplugClientMessageV3::RawSubscribeCmd(RawSubscribeCmdV2::new(self.index, endpoint));
     self.event_loop_sender.send_message_expect_ok(msg)
   }
 
@@ -707,7 +706,7 @@ impl ButtplugClientDevice {
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawSubscribeCmd).into(),
       );
     }
-    let msg = ButtplugCurrentSpecClientMessage::RawUnsubscribeCmd(RawUnsubscribeCmdV2::new(
+    let msg = ButtplugClientMessageV3::RawUnsubscribeCmd(RawUnsubscribeCmdV2::new(
       self.index, endpoint,
     ));
     self.event_loop_sender.send_message_expect_ok(msg)

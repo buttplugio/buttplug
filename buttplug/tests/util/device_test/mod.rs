@@ -4,7 +4,7 @@ pub mod client;
 pub mod connector;
 use super::{TestDeviceIdentifier, TestHardwareEvent};
 use buttplug::{
-  core::message::{RotationSubcommandV2, ScalarSubcommandV3, VectorSubcommandV2, VibrateSubcommandV1},
+  core::message::{RotationSubcommandV1, ScalarSubcommandV3, VectorSubcommandV1, VibrateSubcommandV1},
   server::device::hardware::HardwareCommand,
 };
 use serde::{Deserialize, Serialize};
@@ -36,8 +36,8 @@ enum TestCommand {
 enum TestClientCommand {
   Scalar(Vec<ScalarSubcommandV3>),
   Vibrate(Vec<VibrateSubcommandV1>),
-  Rotate(Vec<RotationSubcommandV2>),
-  Linear(Vec<VectorSubcommandV2>),
+  Rotate(Vec<RotationSubcommandV1>),
+  Linear(Vec<VectorSubcommandV1>),
   Battery {
     expected_power: f64,
     run_async: bool,

@@ -8,16 +8,7 @@
 use crate::core::{
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
-    ActuatorType,
-    ButtplugActuatorFeatureMessageType,
-    ButtplugDeviceCommandMessageUnion,
-    DeviceFeature,
-    DeviceFeatureActuator,
-    RotateCmdV2,
-    RotationSubcommandV2,
-    ScalarCmdV3,
-    ScalarCmdV4,
-    ScalarSubcommandV3,
+    ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugDeviceCommandMessageUnion, DeviceFeature, DeviceFeatureActuator, RotateCmdV4, RotationSubcommandV4, ScalarCmdV4, ScalarSubcommandV4
   },
 };
 use getset::Getters;
@@ -125,20 +116,20 @@ impl ActuatorCommandManager {
           .messages()
           .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::RotateCmd)
         {
-        rotate_subcommands.push(RotationSubcommandV2::new(index as u32, 0.0, false));
+        rotate_subcommands.push(RotationSubcommandV4::new(index as u32, 0.0, false));
         } else if actuator
           .messages()
           .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ScalarCmd)
         {
-          scalar_subcommands.push(ScalarSubcommandV3::new(index as u32, 0.0, actuator_type));
+          scalar_subcommands.push(ScalarSubcommandV4::new(index as u32, 0.0, actuator_type));
         }
       }
     }
     if !scalar_subcommands.is_empty() {
-      stop_commands.push(ScalarCmdV3::new(0, scalar_subcommands).into());
+      stop_commands.push(ScalarCmdV4::new(0, scalar_subcommands).into());
     }
     if !rotate_subcommands.is_empty() {
-      stop_commands.push(RotateCmdV2::new(0, rotate_subcommands).into());
+      stop_commands.push(RotateCmdV4::new(0, rotate_subcommands).into());
     }
 
     error!("{:?}", stop_commands);
@@ -239,7 +230,7 @@ impl ActuatorCommandManager {
 
   pub fn update_rotation(
     &self,
-    msg: &RotateCmdV2,
+    msg: &RotateCmdV4,
     match_all: bool,
   ) -> Result<Vec<Option<(u32, bool)>>, ButtplugError> {
     // First, make sure this is a valid command, that contains at least one
@@ -268,7 +259,7 @@ impl ActuatorCommandManager {
     msg
       .rotations()
       .iter()
-      .for_each(|x| commands.push((x.index(), ActuatorType::Rotate, (x.speed(), x.clockwise()))));
+      .for_each(|x| commands.push((x.feature_index(), ActuatorType::Rotate, (x.speed(), x.clockwise()))));
     let mut result = self.update(
       ButtplugActuatorFeatureMessageType::RotateCmd,
       &commands,

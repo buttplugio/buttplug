@@ -15,8 +15,8 @@ use buttplug::{
     errors::{ButtplugError, ButtplugHandshakeError},
     message::{
       ButtplugMessageSpecVersion,
-      ButtplugSpecV2ClientMessage,
-      ButtplugSpecV2ServerMessage,
+      ButtplugClientMessageV2,
+      ButtplugServerMessageV2,
       PingV0,
       RequestDeviceListV0,
       RequestServerInfoV1,
@@ -54,9 +54,9 @@ type ButtplugClientResult<T = ()> = Result<T, ButtplugClientError>;
 pub(super) type ButtplugClientResultFuture<T = ()> = BoxFuture<'static, ButtplugClientResult<T>>;
 
 /// Result type used for passing server responses.
-pub(super) type ButtplugServerMessageResult = ButtplugClientResult<ButtplugSpecV2ServerMessage>;
+pub(super) type ButtplugServerMessageResult = ButtplugClientResult<ButtplugServerMessageV2>;
 pub(super) type ButtplugServerMessageResultFuture =
-  ButtplugClientResultFuture<ButtplugSpecV2ServerMessage>;
+  ButtplugClientResultFuture<ButtplugServerMessageV2>;
 /// Future state type for returning server responses across futures.
 pub(super) type ButtplugServerMessageStateShared =
   ButtplugFutureStateShared<ButtplugServerMessageResult>;
@@ -81,12 +81,12 @@ pub(super) type ButtplugServerMessageFuture = ButtplugFuture<ButtplugServerMessa
 /// future we're waiting on and allow us to continue execution.
 #[derive(Clone)]
 pub struct ButtplugClientMessageFuturePair {
-  pub msg: ButtplugSpecV2ClientMessage,
+  pub msg: ButtplugClientMessageV2,
   pub waker: ButtplugServerMessageStateShared,
 }
 
 impl ButtplugClientMessageFuturePair {
-  pub fn new(msg: ButtplugSpecV2ClientMessage, waker: ButtplugServerMessageStateShared) -> Self {
+  pub fn new(msg: ButtplugClientMessageV2, waker: ButtplugServerMessageStateShared) -> Self {
     Self { msg, waker }
   }
 }
@@ -191,7 +191,7 @@ impl ButtplugClient {
   ) -> Result<(), ButtplugClientError>
   where
     ConnectorType:
-      ButtplugConnector<ButtplugSpecV2ClientMessage, ButtplugSpecV2ServerMessage> + 'static,
+      ButtplugConnector<ButtplugClientMessageV2, ButtplugServerMessageV2> + 'static,
   {
     if self.connected() {
       return Err(ButtplugClientError::ButtplugConnectorError(
@@ -247,7 +247,7 @@ impl ButtplugClient {
       .await?;
 
     debug!("Got ServerInfo return.");
-    if let ButtplugSpecV2ServerMessage::ServerInfo(server_info) = msg {
+    if let ButtplugServerMessageV2::ServerInfo(server_info) = msg {
       info!("Connected to {}", server_info.server_name());
       *self.server_name.lock().await = Some(server_info.server_name().clone());
       // Don't set ourselves as connected until after ServerInfo has been
@@ -261,7 +261,7 @@ impl ButtplugClient {
       let msg = self
         .send_message(RequestDeviceListV0::default().into())
         .await?;
-      if let ButtplugSpecV2ServerMessage::DeviceList(m) = msg {
+      if let ButtplugServerMessageV2::DeviceList(m) = msg {
         self
           .send_message_to_event_loop(ButtplugClientRequest::HandleDeviceList(m))
           .await?;
@@ -360,7 +360,7 @@ impl ButtplugClient {
     })
   }
 
-  fn send_message(&self, msg: ButtplugSpecV2ClientMessage) -> ButtplugServerMessageResultFuture {
+  fn send_message(&self, msg: ButtplugClientMessageV2) -> ButtplugServerMessageResultFuture {
     if !self.connected() {
       Box::pin(future::ready(Err(
         ButtplugConnectorError::ConnectorNotConnected.into(),
@@ -374,7 +374,7 @@ impl ButtplugClient {
   /// ButtplugMessage back from the server.
   fn send_message_ignore_connect_status(
     &self,
-    msg: ButtplugSpecV2ClientMessage,
+    msg: ButtplugClientMessageV2,
   ) -> ButtplugServerMessageResultFuture {
     // Create a future to pair with the message being resolved.
     let fut = ButtplugServerMessageFuture::default();
@@ -393,7 +393,7 @@ impl ButtplugClient {
 
   /// Sends a ButtplugMessage from client to server. Expects to receive an [Ok]
   /// type ButtplugMessage back from the server.
-  fn send_message_expect_ok(&self, msg: ButtplugSpecV2ClientMessage) -> ButtplugClientResultFuture {
+  fn send_message_expect_ok(&self, msg: ButtplugClientMessageV2) -> ButtplugClientResultFuture {
     let send_fut = self.send_message(msg);
     Box::pin(async move { send_fut.await.map(|_| ()) })
   }

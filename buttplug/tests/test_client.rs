@@ -20,7 +20,7 @@ use buttplug::{
       ButtplugInProcessClientConnectorBuilder,
     },
     errors::{ButtplugDeviceError, ButtplugError},
-    message::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
+    message::{ButtplugClientMessageCurrent, ButtplugServerMessageCurrent},
   },
   server::ButtplugServerBuilder,
 };
@@ -32,12 +32,12 @@ use tokio::{sync::mpsc::Sender, time::sleep};
 #[derive(Default)]
 struct ButtplugFailingConnector {}
 
-impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
+impl ButtplugConnector<ButtplugClientMessageCurrent, ButtplugServerMessageCurrent>
   for ButtplugFailingConnector
 {
   fn connect(
     &mut self,
-    _: Sender<ButtplugCurrentSpecServerMessage>,
+    _: Sender<ButtplugServerMessageCurrent>,
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     ButtplugConnectorError::ConnectorNotConnected.into()
   }
@@ -46,7 +46,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
     ButtplugConnectorError::ConnectorNotConnected.into()
   }
 
-  fn send(&self, _msg: ButtplugCurrentSpecClientMessage) -> ButtplugConnectorResultFuture {
+  fn send(&self, _msg: ButtplugClientMessageCurrent) -> ButtplugConnectorResultFuture {
     panic!("Should never be called")
   }
 }

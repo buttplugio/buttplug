@@ -123,13 +123,13 @@ impl From<ButtplugError> for ErrorV0 {
 #[cfg(feature = "serialize-json")]
 #[cfg(test)]
 mod test {
-  use crate::core::message::{ButtplugCurrentSpecServerMessage, ErrorV0, ErrorCode};
+  use crate::core::message::{ButtplugServerMessageCurrent, ErrorV0, ErrorCode};
 
   const ERROR_STR: &str = "{\"Error\":{\"Id\":0,\"ErrorCode\":1,\"ErrorMessage\":\"Test Error\"}}";
 
   #[test]
   fn test_error_serialize() {
-    let error = ButtplugCurrentSpecServerMessage::Error(ErrorV0::new(
+    let error = ButtplugServerMessageCurrent::Error(ErrorV0::new(
       ErrorCode::ErrorHandshake,
       "Test Error",
       None,
@@ -140,10 +140,10 @@ mod test {
 
   #[test]
   fn test_error_deserialize() {
-    let union: ButtplugCurrentSpecServerMessage =
+    let union: ButtplugServerMessageCurrent =
       serde_json::from_str(ERROR_STR).expect("Infallible deserialization");
     assert_eq!(
-      ButtplugCurrentSpecServerMessage::Error(ErrorV0::new(
+      ButtplugServerMessageCurrent::Error(ErrorV0::new(
         ErrorCode::ErrorHandshake,
         "Test Error",
         None

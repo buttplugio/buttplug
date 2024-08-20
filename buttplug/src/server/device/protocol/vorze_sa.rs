@@ -186,7 +186,7 @@ impl ProtocolHandler for VorzeSA {
 
   fn handle_linear_cmd(
     &self,
-    msg: message::LinearCmdV2,
+    msg: message::LinearCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = msg.vectors()[0].clone();
 

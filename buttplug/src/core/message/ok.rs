@@ -40,21 +40,21 @@ impl ButtplugMessageValidator for OkV0 {
 #[cfg(feature = "serialize-json")]
 #[cfg(test)]
 mod test {
-  use crate::core::message::{ButtplugCurrentSpecServerMessage, OkV0};
+  use crate::core::message::{ButtplugServerMessageCurrent, OkV0};
 
   const OK_STR: &str = "{\"Ok\":{\"Id\":0}}";
 
   #[test]
   fn test_ok_serialize() {
-    let ok = ButtplugCurrentSpecServerMessage::Ok(OkV0::new(0));
+    let ok = ButtplugServerMessageCurrent::Ok(OkV0::new(0));
     let js = serde_json::to_string(&ok).expect("Infallible serialization");
     assert_eq!(OK_STR, js);
   }
 
   #[test]
   fn test_ok_deserialize() {
-    let union: ButtplugCurrentSpecServerMessage =
+    let union: ButtplugServerMessageCurrent =
       serde_json::from_str(OK_STR).expect("Infallible deserialization");
-    assert_eq!(ButtplugCurrentSpecServerMessage::Ok(OkV0::new(0)), union);
+    assert_eq!(ButtplugServerMessageCurrent::Ok(OkV0::new(0)), union);
   }
 }

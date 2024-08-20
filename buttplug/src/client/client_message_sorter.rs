@@ -13,7 +13,7 @@ use crate::{
     ButtplugClientMessageFuturePair,
     ButtplugServerMessageStateShared,
   },
-  core::message::{ButtplugCurrentSpecServerMessage, ButtplugMessage, ButtplugMessageValidator},
+  core::message::{ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageV3},
 };
 use dashmap::DashMap;
 use std::sync::{
@@ -85,7 +85,8 @@ impl ClientMessageSorter {
   ///
   /// Returns true if the response message was resolved to a future via matching `id`, otherwise
   /// returns false. False returns mean the message should be considered as an *event*.
-  pub fn maybe_resolve_result(&self, msg: &ButtplugCurrentSpecServerMessage) -> bool {
+  pub fn maybe_resolve_result(&self, msg: &ButtplugServerMessageV3) -> bool {
+    error!("{:?}", msg);
     let id = msg.id();
     trace!("Trying to resolve message future for id {}.", id);
     match self.future_map.remove(&id) {
@@ -94,7 +95,7 @@ impl ClientMessageSorter {
         if let Err(e) = msg.is_valid() {
           error!("Message not valid: {:?} - Error: {}", msg, e);
           state.set_reply(Err(ButtplugClientError::ButtplugError(e.into())));
-        } else if let ButtplugCurrentSpecServerMessage::Error(e) = msg {
+        } else if let ButtplugServerMessageV3::Error(e) = msg {
           state.set_reply(Err(e.original_error().into()))
         } else {
           state.set_reply(Ok(msg.clone()))

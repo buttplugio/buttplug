@@ -24,13 +24,13 @@ pub struct TCodeV03 {}
 impl ProtocolHandler for TCodeV03 {
   fn handle_linear_cmd(
     &self,
-    msg: message::LinearCmdV2,
+    msg: message::LinearCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut msg_vec = vec![];
     for v in msg.vectors() {
       let position = (v.position() * 99f64) as u32;
 
-      let command = format!("L{}{:02}I{}\n", v.index(), position, v.duration());
+      let command = format!("L{}{:02}I{}\n", v.feature_index(), position, v.duration());
       msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, command.as_bytes().to_vec(), false).into());
     }
     Ok(msg_vec)

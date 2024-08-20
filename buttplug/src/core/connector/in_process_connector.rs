@@ -9,8 +9,7 @@
 
 use crate::{
   core::{
-    connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
-    message::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
+    connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture}, errors::{ButtplugError, ButtplugMessageError}, message::{ButtplugClientMessageV3, ButtplugServerMessageV3, ButtplugServerMessageVariant}
   },
   server::ButtplugServer,
   util::async_manager,
@@ -70,7 +69,7 @@ impl ButtplugInProcessClientConnectorBuilder {
 pub struct ButtplugInProcessClientConnector {
   /// Internal server object for the embedded connector.
   server: Arc<ButtplugServer>,
-  server_outbound_sender: Sender<ButtplugCurrentSpecServerMessage>,
+  server_outbound_sender: Sender<ButtplugServerMessageV3>,
   connected: Arc<AtomicBool>,
 }
 
@@ -113,12 +112,12 @@ impl<'a> ButtplugInProcessClientConnector {
   }
 }
 
-impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
+impl ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3>
   for ButtplugInProcessClientConnector
 {
   fn connect(
     &mut self,
-    message_sender: Sender<ButtplugCurrentSpecServerMessage>,
+    message_sender: Sender<ButtplugServerMessageV3>,
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     if !self.connected.load(Ordering::SeqCst) {
       let connected = self.connected.clone();
@@ -135,8 +134,10 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
             // in-process conversion, we can unwrap because we know our
             // try_into() will always succeed (which may not be the case with
             // remote connections that have different spec versions).
-            if send.send(event.try_into().expect("This is in-process so we're always on the latest message spec, this will always work.")).await.is_err() {
-              break;
+            if let ButtplugServerMessageVariant::V3(v3_msg) = event {
+              if send.send(v3_msg).await.is_err() {
+                break;
+              }
             }
           }
           info!("Stopping In Process Client Connector Event Sender Loop, due to channel receiver being dropped.");
@@ -158,7 +159,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
     }
   }
 
-  fn send(&self, msg: ButtplugCurrentSpecClientMessage) -> ButtplugConnectorResultFuture {
+  fn send(&self, msg: ButtplugClientMessageV3) -> ButtplugConnectorResultFuture {
     if !self.connected.load(Ordering::SeqCst) {
       return ButtplugConnectorError::ConnectorNotConnected.into();
     }
@@ -168,11 +169,15 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
     let output_fut = self.server.parse_message(input);
     let sender = self.server_outbound_sender.clone();
     async move {
-      let output: ButtplugCurrentSpecServerMessage = output_fut
-        .await
-        .unwrap_or_else(|e| e.into())
-        .try_into()
-        .expect("This is in-process so message conversions will always work.");
+      let output = match output_fut.await
+      {
+        Ok(m) => if let ButtplugServerMessageVariant::V3(msg) = m {
+          msg
+        } else {
+          ButtplugServerMessageV3::Error(ButtplugError::from(ButtplugMessageError::MessageConversionError("In-process connector messages should never have differing versions.".to_owned())).into())
+        }
+        Err(e) => e.into()
+      };
       sender
         .send(output)
         .await

@@ -21,7 +21,7 @@ use buttplug::{
     connector::ButtplugConnectorError,
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      BatteryLevelCmdV2, ButtplugDeviceMessageType, ButtplugMessage, ButtplugSpecV2ClientMessage, ButtplugSpecV2ServerMessage, ClientDeviceMessageAttributesV2, DeviceMessageInfoV2, Endpoint, LinearCmdV2, RSSILevelCmdV2, RawReadCmdV2, RawSubscribeCmdV2, RawUnsubscribeCmdV2, RawWriteCmdV2, RotateCmdV2, RotationSubcommandV2, StopDeviceCmdV0, VectorSubcommandV2, VibrateCmdV1, VibrateSubcommandV1
+      BatteryLevelCmdV2, ButtplugDeviceMessageType, ButtplugMessage, ButtplugClientMessageV2, ButtplugServerMessageV2, ClientDeviceMessageAttributesV2, DeviceMessageInfoV2, Endpoint, LinearCmdV1, RSSILevelCmdV2, RawReadCmdV2, RawSubscribeCmdV2, RawUnsubscribeCmdV2, RawWriteCmdV2, RotateCmdV1, RotationSubcommandV1, StopDeviceCmdV0, VectorSubcommandV1, VibrateCmdV1, VibrateSubcommandV1
     },
   },
   util::stream::convert_broadcast_receiver_to_stream,
@@ -48,7 +48,7 @@ pub enum ButtplugClientDeviceEvent {
   /// Client has disconnected from server.
   ClientDisconnect,
   /// Message was received from server for that specific device.
-  Message(ButtplugSpecV2ServerMessage),
+  Message(ButtplugServerMessageV2),
 }
 
 /// Convenience enum for forming [VibrateCmd] commands.
@@ -200,8 +200,8 @@ impl ButtplugClientDevice {
   /// response from the server.
   fn send_message(
     &self,
-    msg: ButtplugSpecV2ClientMessage,
-  ) -> ButtplugClientResultFuture<ButtplugSpecV2ServerMessage> {
+    msg: ButtplugClientMessageV2,
+  ) -> ButtplugClientResultFuture<ButtplugServerMessageV2> {
     let message_sender = self.event_loop_sender.clone();
     let client_connected = self.client_connected.clone();
     let device_connected = self.device_connected.clone();
@@ -229,7 +229,7 @@ impl ButtplugClientDevice {
             )
           })?;
         let msg = fut.await?;
-        if let ButtplugSpecV2ServerMessage::Error(_err) = msg {
+        if let ButtplugServerMessageV2::Error(_err) = msg {
           Err(ButtplugError::from(_err).into())
         } else {
           Ok(msg)
@@ -254,12 +254,12 @@ impl ButtplugClientDevice {
 
   /// Sends a message, expecting back an [Ok][crate::core::messages::Ok]
   /// message, otherwise returns a [ButtplugError]
-  fn send_message_expect_ok(&self, msg: ButtplugSpecV2ClientMessage) -> ButtplugClientResultFuture {
+  fn send_message_expect_ok(&self, msg: ButtplugClientMessageV2) -> ButtplugClientResultFuture {
     let send_fut = self.send_message(msg);
     Box::pin(async move {
       match send_fut.await? {
-        ButtplugSpecV2ServerMessage::Ok(_) => Ok(()),
-        ButtplugSpecV2ServerMessage::Error(_err) => Err(ButtplugError::from(_err).into()),
+        ButtplugServerMessageV2::Ok(_) => Ok(()),
+        ButtplugServerMessageV2::Error(_err) => Err(ButtplugError::from(_err).into()),
         msg => Err(
           ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
             "{:?}",
@@ -331,12 +331,12 @@ impl ButtplugClientDevice {
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LinearCmd).into(),
       );
     };
-    let mut linear_vec: Vec<VectorSubcommandV2>;
+    let mut linear_vec: Vec<VectorSubcommandV1>;
     match linear_cmd {
       LinearCommand::Linear(dur, pos) => {
         linear_vec = Vec::with_capacity(linear_count as usize);
         for i in 0..linear_count {
-          linear_vec.push(VectorSubcommandV2::new(i, dur, pos));
+          linear_vec.push(VectorSubcommandV1::new(i, dur, pos));
         }
       }
       LinearCommand::LinearMap(map) => {
@@ -352,7 +352,7 @@ impl ButtplugClientDevice {
               ButtplugDeviceError::DeviceFeatureIndexError(linear_count, idx).into(),
             );
           }
-          linear_vec.push(VectorSubcommandV2::new(idx, dur, pos));
+          linear_vec.push(VectorSubcommandV1::new(idx, dur, pos));
         }
       }
       LinearCommand::LinearVec(vec) => {
@@ -363,11 +363,11 @@ impl ButtplugClientDevice {
         }
         linear_vec = Vec::with_capacity(vec.len());
         for (i, v) in vec.iter().enumerate() {
-          linear_vec.push(VectorSubcommandV2::new(i as u32, v.0, v.1));
+          linear_vec.push(VectorSubcommandV1::new(i as u32, v.0, v.1));
         }
       }
     }
-    let msg = LinearCmdV2::new(self.index, linear_vec).into();
+    let msg = LinearCmdV1::new(self.index, linear_vec).into();
     self.send_message_expect_ok(msg)
   }
 
@@ -380,12 +380,12 @@ impl ButtplugClientDevice {
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RotateCmd).into(),
       );
     };
-    let mut rotate_vec: Vec<RotationSubcommandV2>;
+    let mut rotate_vec: Vec<RotationSubcommandV1>;
     match rotate_cmd {
       RotateCommand::Rotate(speed, clockwise) => {
         rotate_vec = Vec::with_capacity(rotate_count as usize);
         for i in 0..rotate_count {
-          rotate_vec.push(RotationSubcommandV2::new(i, speed, clockwise));
+          rotate_vec.push(RotationSubcommandV1::new(i, speed, clockwise));
         }
       }
       RotateCommand::RotateMap(map) => {
@@ -401,7 +401,7 @@ impl ButtplugClientDevice {
               ButtplugDeviceError::DeviceFeatureIndexError(rotate_count, idx).into(),
             );
           }
-          rotate_vec.push(RotationSubcommandV2::new(idx, speed, clockwise));
+          rotate_vec.push(RotationSubcommandV1::new(idx, speed, clockwise));
         }
       }
       RotateCommand::RotateVec(vec) => {
@@ -412,11 +412,11 @@ impl ButtplugClientDevice {
         }
         rotate_vec = Vec::with_capacity(vec.len());
         for (i, v) in vec.iter().enumerate() {
-          rotate_vec.push(RotationSubcommandV2::new(i as u32, v.0, v.1));
+          rotate_vec.push(RotationSubcommandV1::new(i as u32, v.0, v.1));
         }
       }
     }
-    let msg = RotateCmdV2::new(self.index, rotate_vec).into();
+    let msg = RotateCmdV1::new(self.index, rotate_vec).into();
     self.send_message_expect_ok(msg)
   }
 
@@ -426,12 +426,12 @@ impl ButtplugClientDevice {
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::BatteryLevelCmd).into(),
       );
     }
-    let msg = ButtplugSpecV2ClientMessage::BatteryLevelCmd(BatteryLevelCmdV2::new(self.index));
+    let msg = ButtplugClientMessageV2::BatteryLevelCmd(BatteryLevelCmdV2::new(self.index));
     let send_fut = self.send_message(msg);
     Box::pin(async move {
       match send_fut.await? {
-        ButtplugSpecV2ServerMessage::BatteryLevelReading(reading) => Ok(reading.battery_level()),
-        ButtplugSpecV2ServerMessage::Error(err) => Err(ButtplugError::from(err).into()),
+        ButtplugServerMessageV2::BatteryLevelReading(reading) => Ok(reading.battery_level()),
+        ButtplugServerMessageV2::Error(err) => Err(ButtplugError::from(err).into()),
         msg => Err(
           ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
             "{:?}",
@@ -449,12 +449,12 @@ impl ButtplugClientDevice {
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RSSILevelCmd).into(),
       );
     }
-    let msg = ButtplugSpecV2ClientMessage::RSSILevelCmd(RSSILevelCmdV2::new(self.index));
+    let msg = ButtplugClientMessageV2::RSSILevelCmd(RSSILevelCmdV2::new(self.index));
     let send_fut = self.send_message(msg);
     Box::pin(async move {
       match send_fut.await? {
-        ButtplugSpecV2ServerMessage::RSSILevelReading(reading) => Ok(reading.rssi_level()),
-        ButtplugSpecV2ServerMessage::Error(err) => Err(ButtplugError::from(err).into()),
+        ButtplugServerMessageV2::RSSILevelReading(reading) => Ok(reading.rssi_level()),
+        ButtplugServerMessageV2::Error(err) => Err(ButtplugError::from(err).into()),
         msg => Err(
           ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
             "{:?}",
@@ -477,7 +477,7 @@ impl ButtplugClientDevice {
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawWriteCmd).into(),
       );
     }
-    let msg = ButtplugSpecV2ClientMessage::RawWriteCmd(RawWriteCmdV2::new(
+    let msg = ButtplugClientMessageV2::RawWriteCmd(RawWriteCmdV2::new(
       self.index,
       endpoint,
       &data,
@@ -497,7 +497,7 @@ impl ButtplugClientDevice {
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawReadCmd).into(),
       );
     }
-    let msg = ButtplugSpecV2ClientMessage::RawReadCmd(RawReadCmdV2::new(
+    let msg = ButtplugClientMessageV2::RawReadCmd(RawReadCmdV2::new(
       self.index,
       endpoint,
       expected_length,
@@ -506,8 +506,8 @@ impl ButtplugClientDevice {
     let send_fut = self.send_message(msg);
     Box::pin(async move {
       match send_fut.await? {
-        ButtplugSpecV2ServerMessage::RawReading(reading) => Ok(reading.data().clone()),
-        ButtplugSpecV2ServerMessage::Error(err) => Err(ButtplugError::from(err).into()),
+        ButtplugServerMessageV2::RawReading(reading) => Ok(reading.data().clone()),
+        ButtplugServerMessageV2::Error(err) => Err(ButtplugError::from(err).into()),
         msg => Err(
           ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
             "{:?}",
@@ -526,7 +526,7 @@ impl ButtplugClientDevice {
       );
     }
     let msg =
-      ButtplugSpecV2ClientMessage::RawSubscribeCmd(RawSubscribeCmdV2::new(self.index, endpoint));
+      ButtplugClientMessageV2::RawSubscribeCmd(RawSubscribeCmdV2::new(self.index, endpoint));
     self.send_message_expect_ok(msg)
   }
 
@@ -538,7 +538,7 @@ impl ButtplugClientDevice {
       );
     }
     let msg =
-      ButtplugSpecV2ClientMessage::RawUnsubscribeCmd(RawUnsubscribeCmdV2::new(self.index, endpoint));
+      ButtplugClientMessageV2::RawUnsubscribeCmd(RawUnsubscribeCmdV2::new(self.index, endpoint));
     self.send_message_expect_ok(msg)
   }
 

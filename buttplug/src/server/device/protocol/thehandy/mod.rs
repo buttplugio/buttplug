@@ -150,15 +150,15 @@ impl ProtocolHandler for TheHandy {
     let distance = (goal_position - previous_position).abs();
     let duration =
       fleshlight_launch_helper::calculate_duration(distance, message.speed() as f64 / 99f64) as u32;
-    self.handle_linear_cmd(message::LinearCmdV2::new(
+    self.handle_linear_cmd(message::LinearCmdV4::new(
       message.device_index(),
-      vec![message::VectorSubcommandV2::new(0, duration, goal_position)],
+      vec![message::VectorSubcommandV4::new(0, duration, goal_position)],
     ))
   }
 
   fn handle_linear_cmd(
     &self,
-    message: message::LinearCmdV2,
+    message: message::LinearCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // What is "How not to implement a command structure for your device that does one thing", Alex?
 

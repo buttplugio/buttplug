@@ -10,11 +10,7 @@ use buttplug::{
     connector::ButtplugConnector,
     errors::ButtplugError,
     message::{
-      self,
-      ButtplugClientMessage,
-      ButtplugMessage,
-      ButtplugMessageValidator,
-      ButtplugServerMessage,
+      self, ButtplugClientMessageVariant, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageVariant
     },
   },
   server::{ButtplugServer, ButtplugServerBuilder},
@@ -40,10 +36,10 @@ pub struct ButtplugTestServer {
 async fn run_server<ConnectorType>(
   server: Arc<ButtplugServer>,
   connector: ConnectorType,
-  mut connector_receiver: mpsc::Receiver<ButtplugClientMessage>,
+  mut connector_receiver: mpsc::Receiver<ButtplugClientMessageVariant>,
   disconnect_notifier: Arc<Notify>,
 ) where
-  ConnectorType: ButtplugConnector<ButtplugServerMessage, ButtplugClientMessage> + 'static,
+  ConnectorType: ButtplugConnector<ButtplugServerMessageVariant, ButtplugClientMessageVariant> + 'static,
 {
   info!("Starting remote server loop");
   let shared_connector = Arc::new(connector);
@@ -65,7 +61,7 @@ async fn run_server<ConnectorType>(
               error!("Message not valid: {:?} - Error: {}", client_message, e);
               let mut err_msg = message::ErrorV0::from(ButtplugError::from(e));
               err_msg.set_id(client_message.id());
-              let _ = connector_clone.send(err_msg.into()).await;
+              let _ = connector_clone.send(ButtplugServerMessageVariant::V3(err_msg.into())).await;
               return;
             }
             match server_clone.parse_message(client_message.clone()).await {
@@ -75,7 +71,7 @@ async fn run_server<ConnectorType>(
                 }
               },
               Err(err_msg) => {
-                if connector_clone.send(err_msg.into()).await.is_err() {
+                if connector_clone.send(ButtplugServerMessageVariant::V3(err_msg.into())).await.is_err() {
                   error!("Cannot send reply to server, dropping and assuming remote server thread has exited.");
                 }
               }
@@ -129,7 +125,7 @@ impl ButtplugTestServer {
     mut connector: ConnectorType,
   ) -> impl Future<Output = Result<(), ButtplugServerConnectorError>>
   where
-    ConnectorType: ButtplugConnector<ButtplugServerMessage, ButtplugClientMessage> + 'static,
+    ConnectorType: ButtplugConnector<ButtplugServerMessageVariant, ButtplugClientMessageVariant> + 'static,
   {
     let server_clone = self.server.clone();
     let disconnect_notifier = self.disconnect_notifier.clone();

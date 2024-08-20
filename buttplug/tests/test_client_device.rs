@@ -15,7 +15,7 @@ use buttplug::{
   },
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    message::{self, ButtplugClientMessage, ClientDeviceMessageAttributesV3},
+    message::{self, ClientDeviceMessageAttributesV3},
   },
   util::async_manager,
 };
@@ -127,6 +127,7 @@ async fn test_client_device_connected_no_event_listener() {
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_client_device_invalid_command() {
+  tracing_subscriber::fmt::init();
   let (client, _) = test_client_with_device().await;
 
   let mut event_stream = client.event_stream();
@@ -174,6 +175,8 @@ async fn test_client_device_invalid_command() {
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_client_repeated_deviceadded_message() {
+    use buttplug::core::message::{ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageVariant};
+
   let helper = Arc::new(util::channel_transport::ChannelClientTestHelper::new());
   helper.simulate_successful_connect().await;
   let helper_clone = helper.clone();
@@ -181,10 +184,10 @@ async fn test_client_repeated_deviceadded_message() {
   async_manager::spawn(async move {
     assert!(matches!(
       helper_clone.next_client_message().await,
-      ButtplugClientMessage::StartScanning(..)
+      ButtplugClientMessageVariant::V3(ButtplugClientMessageV3::StartScanning(..))
     ));
     helper_clone
-      .send_client_incoming(message::OkV0::new(3).into())
+      .send_client_incoming(ButtplugServerMessageVariant::V3(message::OkV0::new(3).into()))
       .await;
     let device_added = message::DeviceAddedV3::new(
       1,
@@ -194,9 +197,9 @@ async fn test_client_repeated_deviceadded_message() {
       &ClientDeviceMessageAttributesV3::default(),
     );
     helper_clone
-      .send_client_incoming(device_added.clone().into())
+      .send_client_incoming(ButtplugServerMessageVariant::V3(device_added.clone().into()))
       .await;
-    helper_clone.send_client_incoming(device_added.into()).await;
+    helper_clone.send_client_incoming(ButtplugServerMessageVariant::V3(device_added.into())).await;
   });
   helper
     .client()
@@ -222,6 +225,8 @@ async fn test_client_repeated_deviceadded_message() {
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_client_repeated_deviceremoved_message() {
+  use buttplug::core::message::{ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageVariant};
+
   let helper = Arc::new(util::channel_transport::ChannelClientTestHelper::new());
   helper.simulate_successful_connect().await;
   let helper_clone = helper.clone();
@@ -229,10 +234,10 @@ async fn test_client_repeated_deviceremoved_message() {
   async_manager::spawn(async move {
     assert!(matches!(
       helper_clone.next_client_message().await,
-      ButtplugClientMessage::StartScanning(..)
+      ButtplugClientMessageVariant::V3(ButtplugClientMessageV3::StartScanning(..))
     ));
     helper_clone
-      .send_client_incoming(message::OkV0::new(3).into())
+      .send_client_incoming(ButtplugServerMessageVariant::V3(message::OkV0::new(3).into()))
       .await;
     let device_added = message::DeviceAddedV3::new(
       1,
@@ -242,12 +247,12 @@ async fn test_client_repeated_deviceremoved_message() {
       &ClientDeviceMessageAttributesV3::default(),
     );
     let device_removed = message::DeviceRemovedV0::new(1);
-    helper_clone.send_client_incoming(device_added.into()).await;
+    helper_clone.send_client_incoming(ButtplugServerMessageVariant::V3(device_added.into())).await;
     helper_clone
-      .send_client_incoming(device_removed.clone().into())
+      .send_client_incoming(ButtplugServerMessageVariant::V3(device_removed.clone().into()))
       .await;
     helper_clone
-      .send_client_incoming(device_removed.into())
+      .send_client_incoming(ButtplugServerMessageVariant::V3(device_removed.into()))
       .await;
   });
   helper

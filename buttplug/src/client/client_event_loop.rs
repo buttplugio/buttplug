@@ -18,8 +18,8 @@ use crate::core::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
-    ButtplugCurrentSpecClientMessage,
-    ButtplugCurrentSpecServerMessage,
+    ButtplugClientMessageV3,
+    ButtplugServerMessageV3,
     ButtplugDeviceMessage,
     ButtplugMessageValidator,
     DeviceListV3,
@@ -80,14 +80,14 @@ pub enum ButtplugClientRequest {
 pub(super) struct ButtplugClientEventLoop<ConnectorType>
 where
   ConnectorType:
-    ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage> + 'static,
+    ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3> + 'static,
 {
   /// Connected status from client, managed by the event loop in case of disconnect.
   connected_status: Arc<AtomicBool>,
   /// Connector the event loop will use to communicate with the [ButtplugServer]
   connector: ConnectorType,
   /// Receiver for messages send from the [ButtplugServer] via the connector.
-  from_connector_receiver: mpsc::Receiver<ButtplugCurrentSpecServerMessage>,
+  from_connector_receiver: mpsc::Receiver<ButtplugServerMessageV3>,
   /// Map of devices shared between the client and the event loop
   device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
   /// Sends events to the [ButtplugClient] instance.
@@ -103,7 +103,7 @@ where
 impl<ConnectorType> ButtplugClientEventLoop<ConnectorType>
 where
   ConnectorType:
-    ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage> + 'static,
+    ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3> + 'static,
 {
   /// Creates a new [ButtplugClientEventLoop].
   ///
@@ -113,7 +113,7 @@ where
   pub fn new(
     connected_status: Arc<AtomicBool>,
     connector: ConnectorType,
-    from_connector_receiver: mpsc::Receiver<ButtplugCurrentSpecServerMessage>,
+    from_connector_receiver: mpsc::Receiver<ButtplugServerMessageV3>,
     to_client_sender: broadcast::Sender<ButtplugClientEvent>,
     from_client_sender: Arc<ButtplugClientMessageSender>,
     device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
@@ -200,7 +200,7 @@ where
   /// server, it will catch [DeviceAdded]/[DeviceList]/[DeviceRemoved] messages
   /// and update its map accordingly. After that, it will pass the information
   /// on as a [ButtplugClientEvent] to the [ButtplugClient].
-  async fn parse_connector_message(&mut self, msg: ButtplugCurrentSpecServerMessage) {
+  async fn parse_connector_message(&mut self, msg: ButtplugServerMessageV3) {
     if self.sorter.maybe_resolve_result(&msg) {
       trace!("Message future found, returning");
       return;
@@ -213,7 +213,7 @@ where
     trace!("Message future not found, assuming server event.");
     info!("{:?}", msg);
     match msg {
-      ButtplugCurrentSpecServerMessage::DeviceAdded(dev) => {
+      ButtplugServerMessageV3::DeviceAdded(dev) => {
         trace!("Device added, updating map and sending to client");
         // We already have this device. Emit an error to let the client know the
         // server is being weird.
@@ -230,7 +230,7 @@ where
         let device = self.create_client_device(&info);
         self.send_client_event(ButtplugClientEvent::DeviceAdded(device));
       }
-      ButtplugCurrentSpecServerMessage::DeviceRemoved(dev) => {
+      ButtplugServerMessageV3::DeviceRemoved(dev) => {
         if self.device_map.contains_key(&dev.device_index()) {
           trace!("Device removed, updating map and sending to client");
           self.disconnect_device(dev.device_index());
@@ -239,31 +239,31 @@ where
           self.send_client_event(ButtplugClientEvent::Error(ButtplugDeviceError::DeviceConnectionError("Device removal requested for a device the client does not know about. Server may be in a weird state.".to_owned()).into()));
         }
       }
-      ButtplugCurrentSpecServerMessage::ScanningFinished(_) => {
+      ButtplugServerMessageV3::ScanningFinished(_) => {
         trace!("Scanning finished event received, forwarding to client.");
         self.send_client_event(ButtplugClientEvent::ScanningFinished);
       }
-      ButtplugCurrentSpecServerMessage::RawReading(msg) => {
+      ButtplugServerMessageV3::RawReading(msg) => {
         let device_idx = msg.device_index();
         if let Some(device) = self.device_map.get(&device_idx) {
           device
             .value()
             .queue_event(ButtplugClientDeviceEvent::Message(
-              ButtplugCurrentSpecServerMessage::from(msg),
+              ButtplugServerMessageV3::from(msg),
             ));
         }
       }
-      ButtplugCurrentSpecServerMessage::SensorReading(msg) => {
+      ButtplugServerMessageV3::SensorReading(msg) => {
         let device_idx = msg.device_index();
         if let Some(device) = self.device_map.get(&device_idx) {
           device
             .value()
             .queue_event(ButtplugClientDeviceEvent::Message(
-              ButtplugCurrentSpecServerMessage::from(msg),
+              ButtplugServerMessageV3::from(msg),
             ));
         }
       }
-      ButtplugCurrentSpecServerMessage::Error(e) => {
+      ButtplugServerMessageV3::Error(e) => {
         self.send_client_event(ButtplugClientEvent::Error(e.into()));
       }
       _ => error!("Cannot process message, dropping: {:?}", msg),

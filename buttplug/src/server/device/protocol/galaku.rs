@@ -12,7 +12,6 @@ use futures_util::future::BoxFuture;
 use futures_util::{future, FutureExt};
 
 use crate::core::message::{
-  self,
   SensorReadCmdV4,
   SensorReadingV4,
   SensorSubscribeCmdV4,
@@ -21,8 +20,6 @@ use crate::core::message::{
 use crate::core::message::{
   ActuatorType,
   ButtplugDeviceMessage,
-  ButtplugMessage,
-  ButtplugServerMessage,
   SensorType,
 };
 use crate::{
@@ -202,15 +199,16 @@ impl ProtocolHandler for Galaku {
   fn handle_sensor_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: SensorSubscribeCmdV4,
-  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+    message: &SensorSubscribeCmdV4,
+  ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
+    let message = message.clone();
     match message.sensor_type() {
       SensorType::Battery => {
         async move {
           device
             .subscribe(&HardwareSubscribeCmd::new(Endpoint::RxBLEBattery))
             .await?;
-          Ok(message::OkV0::new(message.id()).into())
+          Ok(())
         }
       }
       .boxed(),
@@ -224,15 +222,16 @@ impl ProtocolHandler for Galaku {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: SensorUnsubscribeCmdV4,
-  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+    message: &SensorUnsubscribeCmdV4,
+  ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
+    let message = message.clone();
     match message.sensor_type() {
       SensorType::Battery => {
         async move {
           device
             .unsubscribe(&HardwareUnsubscribeCmd::new(Endpoint::RxBLEBattery))
             .await?;
-          Ok(message::OkV0::new(message.id()).into())
+          Ok(())
         }
       }
       .boxed(),

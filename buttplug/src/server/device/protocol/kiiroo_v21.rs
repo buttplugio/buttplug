@@ -12,11 +12,8 @@ use crate::{
     message::{
       self,
       ButtplugDeviceMessage,
-      ButtplugMessage,
       ButtplugServerDeviceMessage,
-      ButtplugServerMessage,
       Endpoint,
-      SensorReadingV3,
       SensorReadingV4,
       SensorType,
     },
@@ -87,7 +84,7 @@ impl ProtocolHandler for KiirooV21 {
 
   fn handle_linear_cmd(
     &self,
-    message: message::LinearCmdV2,
+    message: message::LinearCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to
@@ -123,6 +120,7 @@ impl ProtocolHandler for KiirooV21 {
     message: message::SensorReadCmdV4,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     debug!("Trying to get battery reading.");
+    let message = message.clone();
     // Reading the "whitelist" endpoint for this device retrieves the battery level,
     // which is byte 5. All other bytes of the 20-byte result are unknown.
     let msg = HardwareReadCmd::new(Endpoint::Whitelist, 20, 0);
@@ -158,10 +156,11 @@ impl ProtocolHandler for KiirooV21 {
   fn handle_sensor_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: message::SensorSubscribeCmdV4,
-  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+    message: &message::SensorSubscribeCmdV4,
+  ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
+    let message = message.clone();
     if self.subscribed_sensors.contains(message.feature_index()) {
-      return future::ready(Ok(message::OkV0::new(message.id()).into())).boxed();
+      return future::ready(Ok(())).boxed();
     }
     let sensors = self.subscribed_sensors.clone();
     // Format for the Kiiroo Pearl 2.1:
@@ -218,7 +217,7 @@ impl ProtocolHandler for KiirooV21 {
                   if stream_sensors.contains(&sensor_index)
                     && sender
                       .send(
-                        SensorReadingV3::new(device_index, sensor_index, sensor_type, sensor_data)
+                        SensorReadingV4::new(device_index, sensor_index, sensor_type, sensor_data)
                           .into(),
                       )
                       .is_err()
@@ -235,7 +234,7 @@ impl ProtocolHandler for KiirooV21 {
         });
       }
       sensors.insert(*message.feature_index());
-      Ok(message::OkV0::new(message.id()).into())
+      Ok(())
     }
     .boxed()
   }
@@ -243,10 +242,12 @@ impl ProtocolHandler for KiirooV21 {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: message::SensorUnsubscribeCmdV4,
-  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+    message: &message::SensorUnsubscribeCmdV4,
+  ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
+    let message = message.clone();
+
     if !self.subscribed_sensors.contains(message.feature_index()) {
-      return future::ready(Ok(message::OkV0::new(message.id()).into())).boxed();
+      return future::ready(Ok(())).boxed();
     }
     let sensors = self.subscribed_sensors.clone();
     async move {
@@ -258,7 +259,7 @@ impl ProtocolHandler for KiirooV21 {
           .unsubscribe(&HardwareUnsubscribeCmd::new(Endpoint::Rx))
           .await?;
       }
-      Ok(message::OkV0::new(message.id()).into())
+      Ok(())
     }
     .boxed()
   }

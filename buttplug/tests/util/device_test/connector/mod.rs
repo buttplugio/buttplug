@@ -14,12 +14,12 @@ use buttplug::core::{
       ButtplugSerializerError,
       ButtplugServerJSONSerializer,
     },
-    ButtplugSpecV0ClientMessage,
-    ButtplugSpecV0ServerMessage,
-    ButtplugSpecV1ClientMessage,
-    ButtplugSpecV1ServerMessage,
-    ButtplugSpecV2ClientMessage,
-    ButtplugSpecV2ServerMessage,
+    ButtplugClientMessageV0,
+    ButtplugServerMessageV0,
+    ButtplugClientMessageV1,
+    ButtplugServerMessageV1,
+    ButtplugClientMessageV2,
+    ButtplugServerMessageV2,
   },
 };
 use std::sync::Arc;
@@ -33,8 +33,8 @@ pub struct ButtplugClientJSONSerializerV2 {
 }
 
 impl ButtplugMessageSerializer for ButtplugClientJSONSerializerV2 {
-  type Inbound = ButtplugSpecV2ServerMessage;
-  type Outbound = ButtplugSpecV2ClientMessage;
+  type Inbound = ButtplugServerMessageV2;
+  type Outbound = ButtplugClientMessageV2;
 
   fn deserialize(
     &self,
@@ -54,22 +54,22 @@ pub type ChannelClientConnectorCurrent =
 pub type ChannelClientConnectorV2 = ButtplugRemoteConnector<
   channel_transport::ChannelTransport,
   ButtplugClientJSONSerializerV2,
-  ButtplugSpecV2ClientMessage,
-  ButtplugSpecV2ServerMessage,
+  ButtplugClientMessageV2,
+  ButtplugServerMessageV2,
 >;
 
 pub type ChannelClientConnectorV1 = ButtplugRemoteConnector<
   channel_transport::ChannelTransport,
   ButtplugClientJSONSerializer,
-  ButtplugSpecV1ClientMessage,
-  ButtplugSpecV1ServerMessage,
+  ButtplugClientMessageV1,
+  ButtplugServerMessageV1,
 >;
 
 pub type ChannelClientConnectorV0 = ButtplugRemoteConnector<
   channel_transport::ChannelTransport,
   ButtplugClientJSONSerializer,
-  ButtplugSpecV0ClientMessage,
-  ButtplugSpecV0ServerMessage,
+  ButtplugClientMessageV0,
+  ButtplugServerMessageV0,
 >;
 
 pub type ChannelServerConnector =

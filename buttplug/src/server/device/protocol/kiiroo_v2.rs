@@ -58,7 +58,7 @@ impl ProtocolHandler for KiirooV2 {
 
   fn handle_linear_cmd(
     &self,
-    message: message::LinearCmdV2,
+    message: message::LinearCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to
