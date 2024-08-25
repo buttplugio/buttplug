@@ -356,7 +356,7 @@ impl ButtplugClient {
       // Don't set ourselves as connected until after ServerInfo has been
       // received. This means we avoid possible races with the RequestServerInfo
       // handshake.
-      self.connected.store(true, Ordering::SeqCst);
+      self.connected.store(true, Ordering::Relaxed);
 
       // Get currently connected devices. The event loop will
       // handle sending the message and getting the return, and
