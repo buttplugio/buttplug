@@ -81,13 +81,15 @@ impl ButtplugMessageFinalizer for DeviceAddedV4 {
 
 impl From<DeviceAddedV4> for DeviceAddedV3 {
   fn from(value: DeviceAddedV4) -> Self {
-    DeviceAddedV3::new(
+    let mut da3 = DeviceAddedV3::new(
       value.device_index(),
       &value.device_name(),
       &value.device_display_name(),
       &None,
       &value.device_features().clone().into(),
-    )
+    );
+    da3.set_id(value.id);
+    da3
   }
 }
 

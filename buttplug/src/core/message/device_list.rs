@@ -42,7 +42,9 @@ impl ButtplugMessageFinalizer for DeviceListV4 {
 
 impl From<DeviceListV4> for DeviceListV3 {
   fn from(value: DeviceListV4) -> Self {
-    DeviceListV3::new(value.devices().iter().map(|x| x.clone().into()).collect())
+    let mut dl3 = DeviceListV3::new(value.devices().iter().map(|x| x.clone().into()).collect());
+    dl3.set_id(value.id);
+    dl3
   }
 }
 
