@@ -50,8 +50,10 @@ mod ping_timer;
 mod server_builder;
 mod server;
 mod server_message_conversion;
+mod server_downgrade_wrapper;
 
 pub use server::ButtplugServer;
+pub use server_downgrade_wrapper::ButtplugServerDowngradeWrapper;
 pub use server_builder::ButtplugServerBuilder;
 
 use futures::future::BoxFuture;

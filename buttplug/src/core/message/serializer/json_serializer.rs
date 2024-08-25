@@ -133,10 +133,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
     } else {
       return Err(ButtplugSerializerError::BinaryDeserializationError);
     };
-    // If we don't have a message version yet, we need to parse this as a
-    // RequestServerInfo message to get the version. RequestServerInfo can
-    // always be parsed as the latest message version, as we keep it
-    // compatible across versions via serde options.
+
     if let Some(version) = self.message_version.get() {
       return Ok(match version {
         ButtplugMessageSpecVersion::Version0 => {
@@ -176,14 +173,15 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
         }        
       });
     }
-    // instead of using if/else here, return in the if, which drops the borrow.
-    // so we can possibly mutate it now.
-    let msg_union = deserialize_to_message::<ButtplugClientMessageV3>(&self.validator, msg)?;
+    // If we don't have a message version yet, we need to parse this as a RequestServerInfo message
+    // to get the version. RequestServerInfo can always be parsed as the latest message version, as
+    // we keep it compatible across versions via serde options.
+    let msg_union = deserialize_to_message::<ButtplugClientMessageV4>(&self.validator, msg)?;
     // If the message is malformed, just return an spec version not received error.
     if msg_union.is_empty() {
       return Err(ButtplugSerializerError::MessageSpecVersionNotReceived);
     }
-    if let ButtplugClientMessageV3::RequestServerInfo(rsi) = &msg_union[0] {
+    if let ButtplugClientMessageV4::RequestServerInfo(rsi) = &msg_union[0] {
       info!(
         "Setting JSON Wrapper message version to {}",
         rsi.message_version()
@@ -195,7 +193,8 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
     } else {
       return Err(ButtplugSerializerError::MessageSpecVersionNotReceived);
     }
-    Ok(msg_union.iter().cloned().map(|m| m.into()).collect())
+    // Now that we know our version, parse the message again.
+    self.deserialize(serialized_msg)
   }
 
   fn serialize(&self, msgs: &[ButtplugServerMessageVariant]) -> ButtplugSerializedMessage {

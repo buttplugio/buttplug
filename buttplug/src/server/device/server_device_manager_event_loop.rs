@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::message::{ButtplugServerMessageV4, DeviceAddedV3, DeviceRemovedV0, ScanningFinishedV0},
+  core::message::{ButtplugServerMessageV4, DeviceAddedV4, DeviceRemovedV0, ScanningFinishedV0},
   server::device::{
     configuration::DeviceConfigurationManager,
     hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
@@ -281,12 +281,12 @@ impl ServerDeviceManagerEventLoop {
         });
 
         info!("Assigning index {} to {}", device_index, device.name());
-        let device_added_message = DeviceAddedV3::new(
+        let device_added_message = DeviceAddedV4::new(
           device_index,
           &device.name(),
           &device.definition().user_config().display_name(),
           &None,
-          &device.definition().features().clone().into(),
+          &device.definition().features().clone(),
         );
         self.device_map.insert(device_index, device);
         // After that, we can send out to the server's event listeners to let

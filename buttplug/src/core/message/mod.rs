@@ -74,7 +74,7 @@ pub use client_device_message_attributes::{
   SensorDeviceMessageAttributesV3,
   SensorType,
 };
-pub use device_added::{DeviceAddedV3, DeviceAddedV0, DeviceAddedV1, DeviceAddedV2};
+pub use device_added::{DeviceAddedV3, DeviceAddedV0, DeviceAddedV1, DeviceAddedV2, DeviceAddedV4};
 pub use device_feature::{
   DeviceFeature,
   DeviceFeatureActuator,
@@ -82,12 +82,13 @@ pub use device_feature::{
   DeviceFeatureSensor,
   FeatureType,
 };
-pub use device_list::{DeviceListV3, DeviceListV0, DeviceListV1, DeviceListV2};
+pub use device_list::{DeviceListV3, DeviceListV0, DeviceListV1, DeviceListV2, DeviceListV4};
 pub use device_message_info::{
   DeviceMessageInfoV3,
   DeviceMessageInfoV0,
   DeviceMessageInfoV1,
   DeviceMessageInfoV2,
+  DeviceMessageInfoV4,
 };
 pub use device_removed::DeviceRemovedV0;
 pub use endpoint::Endpoint;
@@ -402,6 +403,18 @@ pub enum ButtplugClientMessageVariant {
   V4(ButtplugClientMessageV4),
 }
 
+impl ButtplugClientMessageVariant {
+  pub fn version(&self) -> ButtplugMessageSpecVersion {
+    match self {
+      Self::V0(_) => ButtplugMessageSpecVersion::Version0,
+      Self::V1(_) => ButtplugMessageSpecVersion::Version1,
+      Self::V2(_) => ButtplugMessageSpecVersion::Version2,
+      Self::V3(_) => ButtplugMessageSpecVersion::Version3,
+      Self::V4(_) => ButtplugMessageSpecVersion::Version4
+    }
+  }
+}
+
 impl From<ButtplugClientMessageV0> for ButtplugClientMessageVariant {
   fn from(value: ButtplugClientMessageV0) -> Self {
     ButtplugClientMessageVariant::V0(value)
@@ -439,6 +452,18 @@ pub enum ButtplugServerMessageVariant {
   V2(ButtplugServerMessageV2),
   V3(ButtplugServerMessageV3),
   V4(ButtplugServerMessageV4),
+}
+
+impl ButtplugServerMessageVariant {
+  pub fn version(&self) -> ButtplugMessageSpecVersion {
+    match self {
+      Self::V0(_) => ButtplugMessageSpecVersion::Version0,
+      Self::V1(_) => ButtplugMessageSpecVersion::Version1,
+      Self::V2(_) => ButtplugMessageSpecVersion::Version2,
+      Self::V3(_) => ButtplugMessageSpecVersion::Version3,
+      Self::V4(_) => ButtplugMessageSpecVersion::Version4
+    }
+  }
 }
 
 impl From<ButtplugServerMessageV0> for ButtplugServerMessageVariant {
@@ -558,8 +583,8 @@ pub enum ButtplugServerMessageV4 {
   // Handshake messages
   ServerInfo(ServerInfoV2),
   // Device enumeration messages
-  DeviceList(DeviceListV3),
-  DeviceAdded(DeviceAddedV3),
+  DeviceList(DeviceListV4),
+  DeviceAdded(DeviceAddedV4),
   DeviceRemoved(DeviceRemovedV0),
   ScanningFinished(ScanningFinishedV0),
   // Generic commands

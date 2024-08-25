@@ -7,13 +7,13 @@
 
 use super::{
   device::
-    ServerDeviceManager, ping_timer::PingTimer, server_message_conversion::ButtplugServerMessageConverter, ButtplugServerResultFuture
+    ServerDeviceManager, ping_timer::PingTimer, ButtplugServerResultFuture
 };
 use crate::{
   core::{
     errors::*,
     message::{
-      self, ButtplugClientMessageV4, ButtplugClientMessageVariant, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugServerMessageV4, ButtplugServerMessageVariant, ErrorV0, StopAllDevicesV0, StopScanningV0, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
+      self, ButtplugClientMessageV4, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion, ButtplugMessage, ButtplugServerMessageV4, StopAllDevicesV0, StopScanningV0, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
     },
   },
   util::stream::convert_broadcast_receiver_to_stream,
@@ -25,7 +25,7 @@ use futures::{
 use std::{
   fmt,
   sync::{
-    atomic::{AtomicBool, AtomicI32, Ordering},
+    atomic::{AtomicBool, Ordering},
     Arc,
   },
 };
@@ -56,9 +56,6 @@ pub struct ButtplugServer {
   /// Broadcaster for server events. Receivers for this are handed out through the
   /// [ButtplugServer::event_stream()] method.
   output_sender: broadcast::Sender<ButtplugServerMessageV4>,
-  /// Spec version of the currently connected client. Held as an atomic so we don't have to worry
-  /// about locks when doing lookups.
-  spec_version: Arc<AtomicI32>
 }
 
 impl std::fmt::Debug for ButtplugServer {
@@ -79,25 +76,19 @@ impl ButtplugServer {
       ping_timer,
       device_manager,
       connected,
-      output_sender,
-      spec_version: Arc::new(AtomicI32::new(-1))
+      output_sender
     }
   }
 
   /// Retreive an async stream of ButtplugServerMessages. This is how the server sends out
   /// non-query-related updates to the system, including information on devices being added/removed,
   /// client disconnection, etc...
-  pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessageVariant> {
+  pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessageV4> {
     // Unlike the client API, we can expect anyone using the server to pin this
     // themselves.
     let server_receiver = convert_broadcast_receiver_to_stream(self.output_sender.subscribe());
     let device_receiver = self.device_manager.event_stream();
-    let spec_version = self.spec_version.clone();
-    device_receiver.merge(server_receiver).map(move |m| {
-        let converter = ButtplugServerMessageConverter::new(None);
-        converter.convert_outgoing(&m, &spec_version.load(Ordering::Relaxed).try_into().unwrap()).unwrap()
-      }
-    )
+    device_receiver.merge(server_receiver)
   }
 
   /// Returns a references to the internal device manager, for handling configuration.
@@ -117,12 +108,11 @@ impl ButtplugServer {
     // HACK Injecting messages here is weird since we're never quite sure what version they should
     // be. Can we turn this into actual method calls?
     let stop_scanning_fut =
-      self.parse_message_internal(ButtplugClientMessageV4::StopScanning(StopScanningV0::default()));
-    let stop_fut = self.parse_message_internal(ButtplugClientMessageV4::StopAllDevices(
+      self.parse_message(ButtplugClientMessageV4::StopScanning(StopScanningV0::default()));
+    let stop_fut = self.parse_message(ButtplugClientMessageV4::StopAllDevices(
       StopAllDevicesV0::default(),
     ));
     let connected = self.connected.clone();
-    let spec_version = self.spec_version.clone();
     async move {
       connected.store(false, Ordering::SeqCst);
       ping_timer.stop_ping_timer().await;
@@ -131,44 +121,18 @@ impl ButtplugServer {
       let _ = stop_scanning_fut.await;
       info!("Server disconnected, stopping all devices...");
       let _ = stop_fut.await;
-      // Set spec version to -1, will fail all message parsing until we get a RequestServerInfo message.
-      spec_version.store(-1, Ordering::Relaxed);
       Ok(())
     }
     .boxed()
   }
 
-  /// Sends a [ButtplugClientMessage] to be parsed by the server (for handshake or ping), or passed
-  /// into the server's [DeviceManager] for communication with devices.
-  pub fn parse_message(
-    &self,
-    msg: ButtplugClientMessageVariant,
-  ) -> BoxFuture<'static, Result<ButtplugServerMessageVariant, message::ErrorV0>> {
-    match msg {
-      ButtplugClientMessageVariant::V4(msg) => {
-        let fut = self.parse_message_internal(msg);
-        async move {
-          Ok(fut.await?.into())
-        }.boxed()
-      }
-      msg => {
-        let converter = ButtplugServerMessageConverter::new(Some(msg));
-        match converter.convert_incoming(&self.device_manager) {
-          Ok(converted_msg) => {
-            let fut = self.parse_message_internal(converted_msg);
-            let spec_version = self.spec_version.load(Ordering::Relaxed);
-            async move {
-              let result = fut.await?;
-              converter.convert_outgoing(&result, &ButtplugMessageSpecVersion::try_from(spec_version).map_err(|e| ErrorV0::from(e))?).map_err(|e| e.into())
-            }.boxed()
-          }
-          Err(e) => future::ready(Err(e.into())).boxed()
-        }
-      }
-    }
+  pub fn shutdown(&self) -> ButtplugServerResultFuture {
+    let device_manager = self.device_manager.clone();
+    //let disconnect_future = self.disconnect();
+    async move { device_manager.shutdown().await }.boxed()
   }
 
-  fn parse_message_internal(
+  pub fn parse_message(
     &self,
     msg: ButtplugClientMessageV4,
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, message::ErrorV0>> {
@@ -255,7 +219,6 @@ impl ButtplugServer {
       )
       .into();
     }
-    self.spec_version.store(msg.message_version() as i32, Ordering::Relaxed);
     // Only start the ping timer after we've received the handshake.
     let ping_timer = self.ping_timer.clone();
     let out_msg =
@@ -281,12 +244,6 @@ impl ButtplugServer {
       Result::Ok(message::OkV0::new(msg.id()).into())
     }
     .boxed()
-  }
-
-  pub fn shutdown(&self) -> ButtplugServerResultFuture {
-    let device_manager = self.device_manager.clone();
-    //let disconnect_future = self.disconnect();
-    async move { device_manager.shutdown().await }.boxed()
   }
 }
 

@@ -19,8 +19,8 @@ use crate::{
       ButtplugDeviceMessage,
       ButtplugMessage,
       ButtplugServerMessageV4,
-      DeviceListV3,
-      DeviceMessageInfoV3,
+      DeviceListV4,
+      DeviceMessageInfoV4,
     },
   },
   server::{
@@ -259,16 +259,16 @@ impl ServerDeviceManager {
           .iter()
           .map(|device| {
             let dev = device.value();
-            DeviceMessageInfoV3::new(
+            DeviceMessageInfoV4::new(
               *device.key(),
               &dev.name(),
               &dev.definition().user_config().display_name(),
               &None,
-              dev.definition().features().clone().into(),
+              dev.definition().features().clone(),
             )
           })
           .collect();
-        let mut device_list = DeviceListV3::new(devices);
+        let mut device_list = DeviceListV4::new(devices);
         device_list.set_id(msg.id());
         future::ready(Ok(device_list.into())).boxed()
       }
