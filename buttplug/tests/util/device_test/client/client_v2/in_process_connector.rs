@@ -11,7 +11,7 @@ use buttplug::{
   core::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture}, errors::{ButtplugError, ButtplugMessageError}, message::{ButtplugClientMessageV2, ButtplugServerMessageV2, ButtplugServerMessageVariant}
   },
-  server::{ButtplugServer, ButtplugServerBuilder},
+  server::{ButtplugServer, ButtplugServerBuilder, ButtplugServerDowngradeWrapper},
   util::async_manager,
 };
 use futures::{
@@ -19,13 +19,7 @@ use futures::{
   pin_mut,
   StreamExt,
 };
-use std::{
-  convert::TryInto,
-  sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-  },
-};
+use std::sync::{atomic::{AtomicBool, Ordering}, Arc};
 use tokio::sync::mpsc::{channel, Sender};
 use tracing::*;
 use tracing_futures::Instrument;
@@ -70,7 +64,7 @@ impl ButtplugInProcessClientConnectorBuilder {
 #[cfg(feature = "server")]
 pub struct ButtplugInProcessClientConnector {
   /// Internal server object for the embedded connector.
-  server: Arc<ButtplugServer>,
+  server: Arc<ButtplugServerDowngradeWrapper>,
   server_outbound_sender: Sender<ButtplugServerMessageV2>,
   connected: Arc<AtomicBool>,
 }
@@ -94,23 +88,13 @@ impl<'a> ButtplugInProcessClientConnector {
     let (server_outbound_sender, _) = channel(256);
     Self {
       server_outbound_sender,
-      server: Arc::new(server.unwrap_or_else(|| {
+      server: Arc::new(ButtplugServerDowngradeWrapper::new(server.unwrap_or_else(|| {
         ButtplugServerBuilder::default()
           .finish()
           .expect("Default server builder should always work.")
-      })),
+      }))),
       connected: Arc::new(AtomicBool::new(false)),
     }
-  }
-
-  /// Get a reference to the internal server.
-  ///
-  /// Allows the owner to manipulate the internal server instance. Useful for
-  /// setting up
-  /// [DeviceCommunicationManager][crate::server::device::communication_manager::DeviceCommunicationManager]s
-  /// before connection.
-  pub fn server_ref(&'a self) -> &'a ButtplugServer {
-    &self.server
   }
 }
 
@@ -126,7 +110,7 @@ impl ButtplugConnector<ButtplugClientMessageV2, ButtplugServerMessageV2>
       let connected = self.connected.clone();
       let send = message_sender.clone();
       self.server_outbound_sender = message_sender;
-      let server_recv = self.server.event_stream();
+      let server_recv = self.server.client_version_event_stream();
       async move {
         async_manager::spawn(async move {
           info!("Starting In Process Client Connector Event Sender Loop");

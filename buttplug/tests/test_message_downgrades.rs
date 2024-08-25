@@ -21,7 +21,7 @@ use buttplug::{
   },
   server::{
     device::hardware::{HardwareCommand, HardwareWriteCmd},
-    ButtplugServerBuilder,
+    ButtplugServerBuilder, ButtplugServerDowngradeWrapper,
   },
 };
 use futures::{pin_mut, StreamExt};
@@ -29,7 +29,7 @@ use util::test_server_with_device;
 
 #[tokio::test]
 async fn test_version0_connection() {
-  let server = ButtplugServerBuilder::default().finish().unwrap();
+  let server = ButtplugServerDowngradeWrapper::new(ButtplugServerBuilder::default().finish().unwrap());
   let serializer = ButtplugServerJSONSerializer::default();
   let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
   let output = serializer
@@ -48,7 +48,7 @@ async fn test_version0_connection() {
 
 #[tokio::test]
 async fn test_version2_connection() {
-  let server = ButtplugServerBuilder::default().finish().unwrap();
+  let server = ButtplugServerDowngradeWrapper::new(ButtplugServerBuilder::default().finish().unwrap());
   let serializer = ButtplugServerJSONSerializer::default();
   let rsi =
     r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client", "MessageVersion": 2}}]"#;
@@ -69,7 +69,7 @@ async fn test_version2_connection() {
 #[tokio::test]
 async fn test_version0_device_added_device_list() {
   let (server, _) = test_server_with_device("Massage Demo", false);
-  let recv = server.event_stream();
+  let recv = server.client_version_event_stream();
   pin_mut!(recv);
   let serializer = ButtplugServerJSONSerializer::default();
   let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
@@ -117,7 +117,7 @@ async fn test_version0_device_added_device_list() {
 #[tokio::test]
 async fn test_version0_singlemotorvibratecmd() {
   let (server, mut device) = test_server_with_device("Massage Demo", false);
-  let recv = server.event_stream();
+  let recv = server.client_version_event_stream();
   pin_mut!(recv);
   let serializer = ButtplugServerJSONSerializer::default();
   let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
@@ -173,7 +173,7 @@ async fn test_version0_singlemotorvibratecmd() {
 #[tokio::test]
 async fn test_version1_singlemotorvibratecmd() {
   let (server, mut device) = test_server_with_device("Massage Demo", false);
-  let recv = server.event_stream();
+  let recv = server.client_version_event_stream();
   pin_mut!(recv);
   let serializer = ButtplugServerJSONSerializer::default();
   let rsi =
@@ -240,7 +240,7 @@ async fn test_version1_singlemotorvibratecmd() {
 #[tokio::test]
 async fn test_version0_oscilatoronly() {
   let (server, mut _device) = test_server_with_device("Xone", false);
-  let recv = server.event_stream();
+  let recv = server.client_version_event_stream();
   pin_mut!(recv);
   let serializer = ButtplugServerJSONSerializer::default();
   let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
@@ -285,7 +285,7 @@ async fn test_version0_oscilatoronly() {
 #[tokio::test]
 async fn test_version1_oscilatoronly() {
   let (server, mut _device) = test_server_with_device("Xone", false);
-  let recv = server.event_stream();
+  let recv = server.client_version_event_stream();
   pin_mut!(recv);
   let serializer = ButtplugServerJSONSerializer::default();
   let rsi =

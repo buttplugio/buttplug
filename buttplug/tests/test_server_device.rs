@@ -22,7 +22,7 @@ use util::test_server_with_device;
 async fn test_capabilities_exposure() {
   // Hold the channel but don't do anything with it.
   let (server, _channel) = test_server_with_device("Onyx+", false);
-  let recv = server.event_stream();
+  let recv = server.client_version_event_stream();
   pin_mut!(recv);
 
   server
@@ -47,7 +47,7 @@ async fn test_capabilities_exposure() {
 #[tokio::test]
 async fn test_server_raw_message() {
   let (server, _) = test_server_with_device("Massage Demo", true);
-  let recv = server.event_stream();
+  let recv = server.client_version_event_stream();
   pin_mut!(recv);
   assert!(server
     .parse_message(
@@ -80,7 +80,7 @@ async fn test_server_raw_message() {
 #[tokio::test]
 async fn test_server_no_raw_message() {
   let (server, _) = test_server_with_device("Massage Demo", false);
-  let recv = server.event_stream();
+  let recv = server.client_version_event_stream();
   pin_mut!(recv);
   assert!(server
     .parse_message(
@@ -113,7 +113,7 @@ async fn test_server_no_raw_message() {
 #[tokio::test]
 async fn test_reject_on_no_raw_message() {
   let (server, _) = test_server_with_device("Massage Demo", false);
-  let recv = server.event_stream();
+  let recv = server.client_version_event_stream();
   pin_mut!(recv);
   assert!(server
     .parse_message(

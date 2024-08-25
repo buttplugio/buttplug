@@ -87,6 +87,7 @@ async fn test_connect_init() {
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_client_connected_status() {
+  tracing_subscriber::fmt::init();
   let client = test_client().await;
   client
     .disconnect()

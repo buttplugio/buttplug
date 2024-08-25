@@ -13,7 +13,7 @@ use buttplug::{
       self, ButtplugClientMessageVariant, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageVariant
     },
   },
-  server::{ButtplugServer, ButtplugServerBuilder},
+  server::{ButtplugServer, ButtplugServerBuilder, ButtplugServerDowngradeWrapper},
   util::async_manager,
 };
 use futures::{future::Future, pin_mut, select, FutureExt, StreamExt};
@@ -29,12 +29,12 @@ pub enum ButtplugServerConnectorError {
 }
 
 pub struct ButtplugTestServer {
-  server: Arc<ButtplugServer>,
+  server: Arc<ButtplugServerDowngradeWrapper>,
   disconnect_notifier: Arc<Notify>,
 }
 
 async fn run_server<ConnectorType>(
-  server: Arc<ButtplugServer>,
+  server: Arc<ButtplugServerDowngradeWrapper>,
   connector: ConnectorType,
   mut connector_receiver: mpsc::Receiver<ButtplugClientMessageVariant>,
   disconnect_notifier: Arc<Notify>,
@@ -43,7 +43,7 @@ async fn run_server<ConnectorType>(
 {
   info!("Starting remote server loop");
   let shared_connector = Arc::new(connector);
-  let server_receiver = server.event_stream();
+  let server_receiver = server.client_version_event_stream();
   pin_mut!(server_receiver);
   loop {
     select! {
@@ -115,7 +115,7 @@ impl Default for ButtplugTestServer {
 impl ButtplugTestServer {
   pub fn new(server: ButtplugServer) -> Self {
     Self {
-      server: Arc::new(server),
+      server: Arc::new(ButtplugServerDowngradeWrapper::new(server)),
       disconnect_notifier: Arc::new(Notify::new()),
     }
   }
