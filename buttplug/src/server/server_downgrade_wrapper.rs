@@ -36,6 +36,10 @@ impl ButtplugServerDowngradeWrapper {
     }
   }
 
+  pub fn client_name(&self) -> Option<&String> {
+    self.server.client_name()
+  }
+
   /// Returns a references to the internal device manager, for handling configuration.
   pub fn device_manager(&self) -> Arc<ServerDeviceManager> {
     self.server.device_manager()

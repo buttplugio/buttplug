@@ -22,6 +22,7 @@ use futures::{
   future::{self, BoxFuture, FutureExt},
   Stream,
 };
+use once_cell::sync::OnceCell;
 use std::{
   fmt,
   sync::{
@@ -56,6 +57,8 @@ pub struct ButtplugServer {
   /// Broadcaster for server events. Receivers for this are handed out through the
   /// [ButtplugServer::event_stream()] method.
   output_sender: broadcast::Sender<ButtplugServerMessageV4>,
+  /// Name of the connected client, assuming there is one.
+  client_name: Arc<OnceCell<String>>
 }
 
 impl std::fmt::Debug for ButtplugServer {
@@ -76,8 +79,13 @@ impl ButtplugServer {
       ping_timer,
       device_manager,
       connected,
-      output_sender
+      output_sender,
+      client_name: Arc::new(OnceCell::new())
     }
+  }
+
+  pub fn client_name(&self) -> Option<&String> {
+    self.client_name.get()
   }
 
   /// Retreive an async stream of ButtplugServerMessages. This is how the server sends out
