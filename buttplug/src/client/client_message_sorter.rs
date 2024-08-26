@@ -86,7 +86,7 @@ impl ClientMessageSorter {
   /// Returns true if the response message was resolved to a future via matching `id`, otherwise
   /// returns false. False returns mean the message should be considered as an *event*.
   pub fn maybe_resolve_result(&self, msg: &ButtplugServerMessageV3) -> bool {
-    error!("{:?}", msg);
+    trace!("{:?}", msg);
     let id = msg.id();
     trace!("Trying to resolve message future for id {}.", id);
     match self.future_map.remove(&id) {

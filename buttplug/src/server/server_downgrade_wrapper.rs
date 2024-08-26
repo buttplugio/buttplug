@@ -81,7 +81,6 @@ impl ButtplugServerDowngradeWrapper {
     &self,
     msg: ButtplugClientMessageVariant,
   ) -> BoxFuture<'static, Result<ButtplugServerMessageVariant, ButtplugServerMessageVariant>> {
-    error!("{:?}", msg);
     match msg {
       ButtplugClientMessageVariant::V4(msg) => {
         let fut = self.server.parse_message(msg);
