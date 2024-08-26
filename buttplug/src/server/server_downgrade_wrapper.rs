@@ -7,7 +7,7 @@
 
 use std::{fmt, sync::Arc};
 
-use crate::core::message::{self, ButtplugClientMessageVariant, ButtplugMessageSpecVersion, ButtplugServerMessageV4, ButtplugServerMessageVariant};
+use crate::core::message::{self, ButtplugClientMessageVariant, ButtplugMessageSpecVersion, ButtplugServerMessageV4, ButtplugServerMessageVariant, ErrorV0};
 
 use super::{device::ServerDeviceManager, server_message_conversion::ButtplugServerMessageConverter, ButtplugServer, ButtplugServerResultFuture};
 use futures::{future::{self, BoxFuture, FutureExt}, Stream};
@@ -55,6 +55,10 @@ impl ButtplugServerDowngradeWrapper {
     self.server.disconnect()
   }
 
+  pub fn spec_version(&self) -> Option<ButtplugMessageSpecVersion> {
+    self.spec_version.get().copied()
+  }
+
   pub fn client_version_event_stream(&self) -> impl Stream<Item = ButtplugServerMessageVariant> {
     let spec_version = self.spec_version.clone();
     self.server.event_stream().map(move |m| {
@@ -76,31 +80,31 @@ impl ButtplugServerDowngradeWrapper {
   pub fn parse_message(
     &self,
     msg: ButtplugClientMessageVariant,
-  ) -> BoxFuture<'static, Result<ButtplugServerMessageVariant, message::ErrorV0>> {
+  ) -> BoxFuture<'static, Result<ButtplugServerMessageVariant, ButtplugServerMessageVariant>> {
     error!("{:?}", msg);
     match msg {
       ButtplugClientMessageVariant::V4(msg) => {
         let fut = self.server.parse_message(msg);
         async move {
-          Ok(fut.await?.into())
+          Ok(fut.await.map_err(|e| ButtplugServerMessageVariant::from(ButtplugServerMessageV4::from(e)))?.into())
         }.boxed()
       }
       msg => {
         let v = msg.version();
         let converter = ButtplugServerMessageConverter::new(Some(msg));
+        let spec_version = *self.spec_version.get_or_init(|| {
+          info!("Setting Buttplug Server Message Spec Downgrade version to {}", v);
+          v
+        } );
         match converter.convert_incoming(&self.server.device_manager()) {
           Ok(converted_msg) => {
             let fut = self.server.parse_message(converted_msg);
-            let spec_version = *self.spec_version.get_or_init(|| {
-              info!("Setting Buttplug Server Message Spec Downgrade version to {}", v);
-              v
-            } );
             async move {
-              let result = fut.await?;
-              converter.convert_outgoing(&result, &spec_version).map_err(|e| e.into())
+              let result = fut.await.map_err(|e| converter.convert_outgoing(&e.into(), &spec_version).unwrap())?;
+              converter.convert_outgoing(&result, &spec_version).map_err(|e| converter.convert_outgoing(&&ButtplugServerMessageV4::from(ErrorV0::from(e)), &spec_version).unwrap())
             }.boxed()
           }
-          Err(e) => future::ready(Err(e.into())).boxed()
+          Err(e) => future::ready(Err(converter.convert_outgoing(&ButtplugServerMessageV4::from(ErrorV0::from(e)), &spec_version).unwrap())).boxed()
         }
       }
     }

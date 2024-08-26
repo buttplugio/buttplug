@@ -71,7 +71,7 @@ async fn run_server<ConnectorType>(
                 }
               },
               Err(err_msg) => {
-                if connector_clone.send(ButtplugServerMessageVariant::V3(err_msg.into())).await.is_err() {
+                if connector_clone.send(err_msg).await.is_err() {
                   error!("Cannot send reply to server, dropping and assuming remote server thread has exited.");
                 }
               }

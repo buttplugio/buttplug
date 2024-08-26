@@ -147,3 +147,17 @@ pub fn test_server_with_device(
     device,
   )
 }
+
+#[allow(dead_code)]
+pub fn test_server_v4_with_device(
+  device_type: &str,
+  allow_raw_message: bool,
+) -> (ButtplugServer, TestDeviceChannelHost) {
+  let mut builder = TestDeviceCommunicationManagerBuilder::default();
+  let device = builder.add_test_device(&TestDeviceIdentifier::new(device_type, None));
+
+  (
+    test_server_with_comm_manager(builder, allow_raw_message),
+    device,
+  )
+}

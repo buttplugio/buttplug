@@ -166,7 +166,11 @@ impl ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3>
         } else {
           ButtplugServerMessageV3::Error(ButtplugError::from(ButtplugMessageError::MessageConversionError("In-process connector messages should never have differing versions.".to_owned())).into())
         }
-        Err(e) => e.into()
+        Err(e) => if let ButtplugServerMessageVariant::V3(msg) = e {
+          msg
+        } else {
+          ButtplugServerMessageV3::Error(ButtplugError::from(ButtplugMessageError::MessageConversionError("In-process connector messages should never have differing versions.".to_owned())).into())
+        }
       };
       sender
         .send(output)

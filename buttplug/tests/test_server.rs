@@ -29,8 +29,7 @@ use buttplug::{
     device::{
       hardware::{HardwareCommand, HardwareWriteCmd},
       ServerDeviceManagerBuilder,
-    },
-    ButtplugServerBuilder, ButtplugServerDowngradeWrapper,
+    }, ButtplugServerBuilder, ButtplugServerDowngradeWrapper
   },
 };
 use futures::{pin_mut, Stream, StreamExt};
@@ -86,10 +85,14 @@ async fn test_server_handshake_not_done_first_v3() {
   // assert_eq!(server.server_name, "Test Server");
   let result = server.parse_message(msg.try_into().unwrap()).await;
   assert!(result.is_err());
-  assert!(matches!(
-    result.unwrap_err().original_error(),
-    ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError::RequestServerInfoExpected)
-  ));
+  if let Err(ButtplugServerMessageVariant::V3(ButtplugServerMessageV3::Error(e))) = result {
+    assert!(matches!(
+      e.original_error(),
+      ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError::RequestServerInfoExpected)
+    ));
+  } else {
+    panic!("Should've gotten error")
+  }
   assert!(!server.connected());
 }
 
@@ -232,24 +235,33 @@ async fn test_repeated_handshake() {
   let (server, _recv) = setup_test_server((msg.clone()).into()).await;
   assert!(server.connected());
   let err = server.parse_message(message::ButtplugClientMessageVariant::V3(msg.into())).await.unwrap_err();
-  assert!(matches!(
-    err.original_error(),
-    ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError::HandshakeAlreadyHappened)
-  ));
+  if let ButtplugServerMessageVariant::V3(ButtplugServerMessageV3::Error(e)) = err {
+    assert!(matches!(
+      e.original_error(),
+      ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError::HandshakeAlreadyHappened)
+    ));
+  } else {
+    panic!("Should've gotten error")
+  }
+
 }
 
 #[tokio::test]
 async fn test_invalid_device_index() {
   let msg = message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
   let (server, _) = setup_test_server(msg.into()).await;
-  let reply = server
+  let err = server
     .parse_message(message::ButtplugClientMessageVariant::V3(message::VibrateCmdV1::new(10, vec![]).into()))
-    .await;
-  assert!(reply.is_err());
-  assert!(matches!(
-    reply.unwrap_err().original_error(),
-    ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceNotAvailable(_))
-  ));
+    .await
+    .unwrap_err();
+  if let ButtplugServerMessageVariant::V3(ButtplugServerMessageV3::Error(e)) = err {
+    assert!(matches!(
+      e.original_error(),
+      ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceNotAvailable(_))
+    ));
+  } else {
+    panic!("Should've gotten error")
+  }  
 }
 
 #[tokio::test]

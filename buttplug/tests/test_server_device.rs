@@ -8,12 +8,12 @@
 mod util;
 use buttplug::core::{
   errors::{ButtplugDeviceError, ButtplugError},
-  message::{self, ButtplugClientMessageVariant, ButtplugServerMessageV3, ButtplugServerMessageVariant, Endpoint, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
+  message::{self, ButtplugClientMessageV4, ButtplugClientMessageVariant, ButtplugServerMessageV3, ButtplugServerMessageV4, ButtplugServerMessageVariant, Endpoint, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
 };
 use futures::{pin_mut, StreamExt};
 use std::matches;
 pub use util::test_device_manager::TestDeviceCommunicationManagerBuilder;
-use util::test_server_with_device;
+use util::{test_server_with_device, test_server_v4_with_device};
 
 // Test devices that have protocols that support movements not all devices do.
 // For instance, the Onyx+ is part of a protocol that supports vibration, but
@@ -112,28 +112,28 @@ async fn test_server_no_raw_message() {
 
 #[tokio::test]
 async fn test_reject_on_no_raw_message() {
-  let (server, _) = test_server_with_device("Massage Demo", false);
-  let recv = server.client_version_event_stream();
+  let (server, _) = test_server_v4_with_device("Massage Demo", false);
+  let recv = server.event_stream();
   pin_mut!(recv);
   assert!(server
     .parse_message(
-      ButtplugClientMessageVariant::V3(message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into())
+      ButtplugClientMessageV4::from(message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION))
     )
     .await
     .is_ok());
   assert!(server
-    .parse_message(ButtplugClientMessageVariant::V3(message::StartScanningV0::default().into()))
+    .parse_message(ButtplugClientMessageV4::from(message::StartScanningV0::default()))
     .await
     .is_ok());
   while let Some(msg) = recv.next().await {
-    if let ButtplugServerMessageVariant::V3(ButtplugServerMessageV3::ScanningFinished(_)) = msg {
+    if let ButtplugServerMessageV4::ScanningFinished(_) = msg {
       continue;
-    } else if let ButtplugServerMessageVariant::V3(ButtplugServerMessageV3::DeviceAdded(da)) = msg {
+    } else if let ButtplugServerMessageV4::DeviceAdded(da) = msg {
       assert_eq!(da.device_name(), "Aneros Vivi");
       let mut should_be_err;
       should_be_err = server
         .parse_message(
-          ButtplugClientMessageVariant::V3(message::RawWriteCmdV2::new(da.device_index(), Endpoint::Tx, &[0x0], false).into()),
+          ButtplugClientMessageV4::from(message::RawWriteCmdV2::new(da.device_index(), Endpoint::Tx, &[0x0], false)),
         )
         .await;
       assert!(should_be_err.is_err());
@@ -143,7 +143,7 @@ async fn test_reject_on_no_raw_message() {
       ));
 
       should_be_err = server
-        .parse_message(ButtplugClientMessageVariant::V3(message::RawReadCmdV2::new(da.device_index(), Endpoint::Tx, 0, 0).into()))
+        .parse_message(ButtplugClientMessageV4::from(message::RawReadCmdV2::new(da.device_index(), Endpoint::Tx, 0, 0)))
         .await;
       assert!(should_be_err.is_err());
       assert!(matches!(
@@ -152,7 +152,7 @@ async fn test_reject_on_no_raw_message() {
       ));
 
       should_be_err = server
-        .parse_message(ButtplugClientMessageVariant::V3(message::RawSubscribeCmdV2::new(da.device_index(), Endpoint::Tx).into()))
+        .parse_message(ButtplugClientMessageV4::from(message::RawSubscribeCmdV2::new(da.device_index(), Endpoint::Tx)))
         .await;
       assert!(should_be_err.is_err());
       assert!(matches!(
@@ -161,7 +161,7 @@ async fn test_reject_on_no_raw_message() {
       ));
 
       should_be_err = server
-        .parse_message(ButtplugClientMessageVariant::V3(message::RawUnsubscribeCmdV2::new(da.device_index(), Endpoint::Tx).into()))
+        .parse_message(ButtplugClientMessageV4::from(message::RawUnsubscribeCmdV2::new(da.device_index(), Endpoint::Tx)))
         .await;
       assert!(should_be_err.is_err());
       assert!(matches!(
