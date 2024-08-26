@@ -7,6 +7,9 @@
 
 //! Transports for remote (IPC/network/etc) communication between clients and servers
 
+mod stream;
+pub use stream::ButtplugStreamTransport;
+
 #[cfg(feature = "websockets")]
 mod websocket;
 use crate::core::connector::{
