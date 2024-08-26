@@ -72,6 +72,14 @@ impl ButtplugServerBuilder {
     }
   }
 
+  pub fn with_shared_device_manager(device_manager: Arc<ServerDeviceManager>) -> Self {
+    Self {
+      name: "Buttplug Server".to_owned(),
+      max_ping_time: None,
+      device_manager: device_manager,
+    }
+  }
+
   /// Set the name of the server, which is relayed to the client on connection (mostly for
   /// confirmation in UI dialogs)
   pub fn name(&mut self, name: &str) -> &mut Self {
