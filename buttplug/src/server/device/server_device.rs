@@ -449,7 +449,6 @@ impl ServerDevice {
   fn handle_scalarcmd_v4(&self, msg: &ScalarCmdV4) -> ButtplugServerResultFuture {
 
     if msg.scalars().is_empty() {
-      error!("NO SCALARS!");
       return future::ready(Err(ButtplugDeviceError::ProtocolRequirementError("ScalarCmd with no subcommands is not valid.".to_owned()).into())).boxed(); 
     }
 

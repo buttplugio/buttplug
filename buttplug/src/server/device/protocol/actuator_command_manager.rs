@@ -132,8 +132,6 @@ impl ActuatorCommandManager {
       stop_commands.push(RotateCmdV4::new(0, rotate_subcommands).into());
     }
 
-    error!("{:?}", stop_commands);
-
     Self {
       feature_status: statuses,
       stop_commands,
@@ -224,7 +222,6 @@ impl ActuatorCommandManager {
     result.iter().for_each(|(index, actuator, value)| {
       final_result[*index as usize] = Some((*actuator, value.0))
     });
-    error!("{:?}", final_result);
     Ok(final_result)
   }
 

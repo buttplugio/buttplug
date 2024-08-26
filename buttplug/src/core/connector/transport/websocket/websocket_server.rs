@@ -150,7 +150,7 @@ async fn run_connection_loop(
                   let _ = response_sender.send(ButtplugTransportIncomingMessage::Close("Websocket server closed".to_owned())).await;
                   // If closing errors out, log it but there's not a lot we can do.
                   if let Err(e) = websocket_server_sender.close().await {
-                    error!("{:?}", e);
+                    error!("Error closing websocket: {:?}", e);
                   }
                   break;
                 }

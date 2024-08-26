@@ -150,7 +150,7 @@ fn serial_read_thread(
             if e.kind() == ErrorKind::TimedOut {
               continue;
             }
-            error!("{:?}", e);
+            error!("Serial port error: {:?}", e);
           }
         }
       }
