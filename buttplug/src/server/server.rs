@@ -119,6 +119,8 @@ impl ButtplugServer {
       StopAllDevicesV0::default(),
     ));
     let connected = self.connected.clone();
+    let mut name = self.client_name.try_write().expect("We should never conflict on name access");
+    *name = None;
     async move {
       connected.store(false, Ordering::SeqCst);
       ping_timer.stop_ping_timer().await;
