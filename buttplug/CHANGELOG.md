@@ -1,3 +1,31 @@
+# 8.1.0 (2024-09-01)
+
+## Breaking(ish) Changes
+
+- The server API now only accepts the latest version of the message spec. However since I'm the only
+  one building against that API, this doesn't need a full version rev, but I figure I'll log it here nonetheless.
+
+## Features
+
+- Rewrite of message version translation system
+  - Buttplug server now only communicates in the latest message version, all messages are expected
+    to be upgraded before hitting the server, and downgraded after leaving it. This is now handled by the ButtplugServerDowngradeWrapper system.
+- Added Device Support
+  - Activejoy Vibrating Egg
+  - Lovense Mini Sex Machine
+  - Many Galaku devices
+  - Many Joyhub devices
+  - Tryfun Surge Pro
+  - Zemalia Dice for Love
+  - Cupido devices
+  - Lelo Enigma Double Sonic
+  - Svakom Cici 2 and Trysta Neo
+  - Lelo F1S v3
+
+## Bugfixes
+
+- Fix compatibility for early Satisfyer devices
+
 # 8.0.0 (2024-05-12)
 
 ## Breaking Changes
