@@ -22,15 +22,13 @@ use futures::{
   future::{self, BoxFuture, FutureExt},
   Stream,
 };
-use once_cell::sync::OnceCell;
 use std::{
-  fmt,
-  sync::{
+  fmt, sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
-  },
+  }
 };
-use tokio::sync::broadcast;
+use tokio::sync::{broadcast, RwLock};
 use tokio_stream::StreamExt;
 use tracing_futures::Instrument;
 
@@ -58,7 +56,7 @@ pub struct ButtplugServer {
   /// [ButtplugServer::event_stream()] method.
   output_sender: broadcast::Sender<ButtplugServerMessageV4>,
   /// Name of the connected client, assuming there is one.
-  client_name: Arc<OnceCell<String>>
+  client_name: Arc<RwLock<Option<String>>>
 }
 
 impl std::fmt::Debug for ButtplugServer {
@@ -80,12 +78,12 @@ impl ButtplugServer {
       device_manager,
       connected,
       output_sender,
-      client_name: Arc::new(OnceCell::new())
+      client_name: Arc::new(RwLock::new(None))
     }
   }
 
-  pub fn client_name(&self) -> Option<&String> {
-    self.client_name.get()
+  pub fn client_name(&self) -> Option<String> {
+    self.client_name.try_read().expect("We should never conflict on name access").clone()
   }
 
   /// Retreive an async stream of ButtplugServerMessages. This is how the server sends out
@@ -234,7 +232,9 @@ impl ButtplugServer {
     let out_msg =
       message::ServerInfoV2::new(&self.server_name, msg.message_version(), self.max_ping_time);
     let connected = self.connected.clone();
-    async move {
+    let mut name = self.client_name.try_write().expect("We should never conflict on name access");
+    *name = Some(msg.client_name().clone());
+    async move {      
       ping_timer.start_ping_timer().await;
       connected.store(true, Ordering::SeqCst);
       debug!("Server handshake check successful.");

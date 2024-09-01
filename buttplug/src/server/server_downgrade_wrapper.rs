@@ -36,7 +36,7 @@ impl ButtplugServerDowngradeWrapper {
     }
   }
 
-  pub fn client_name(&self) -> Option<&String> {
+  pub fn client_name(&self) -> Option<String> {
     self.server.client_name()
   }
 
