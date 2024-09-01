@@ -220,6 +220,8 @@ impl ButtplugServer {
       msg.client_name(),
       msg.message_version()
     );
+
+    #[cfg(not(feature="allow-unstable-v4-connections"))]
     if BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION < msg.message_version() {
       return ButtplugHandshakeError::MessageSpecVersionMismatch(
         BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,

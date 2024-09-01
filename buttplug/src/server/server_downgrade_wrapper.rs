@@ -124,20 +124,20 @@ impl ButtplugServerDowngradeWrapper {
 
 #[cfg(test)]
 mod test {
-  use crate::{core::message::{ButtplugClientMessageV4, ButtplugClientMessageVariant, RequestServerInfoV1}, server::{ButtplugServerBuilder, ButtplugServerDowngradeWrapper}};
+  use crate::{core::message::{ButtplugClientMessageV4, ButtplugClientMessageVariant, RequestServerInfoV1, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION}, server::{ButtplugServerBuilder, ButtplugServerDowngradeWrapper}};
 
   #[cfg_attr(feature="allow-unstable-v4-connections", ignore)]
   #[tokio::test]
-  async fn test_v4_block() {
+  async fn test_downgrader_v4_block() {
     let wrapper = ButtplugServerDowngradeWrapper::new(ButtplugServerBuilder::default().finish().unwrap());
-    assert!(wrapper.parse_message(ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::RequestServerInfo(RequestServerInfoV1::new("TestClient", crate::core::message::ButtplugMessageSpecVersion::Version4)))).await.is_err());
+    assert!(wrapper.parse_message(ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::RequestServerInfo(RequestServerInfoV1::new("TestClient", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)))).await.is_err());
   }
 
   #[cfg_attr(not(feature="allow-unstable-v4-connections"), ignore)]
   #[tokio::test]
-  async fn test_v4_allow() {
+  async fn test_downgrader_v4_allow() {
     let wrapper = ButtplugServerDowngradeWrapper::new(ButtplugServerBuilder::default().finish().unwrap());
-    let result = wrapper.parse_message(ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::RequestServerInfo(RequestServerInfoV1::new("TestClient", crate::core::message::ButtplugMessageSpecVersion::Version4)))).await;
+    let result = wrapper.parse_message(ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::RequestServerInfo(RequestServerInfoV1::new("TestClient", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)))).await;
     println!("{:?}", result);
     assert!(result.is_ok());
   }
