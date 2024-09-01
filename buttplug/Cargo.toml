@@ -1,6 +1,6 @@
 [package]
 name = "buttplug"
-version = "8.1.0"
+version = "9.0.0"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Buttplug Intimate Hardware Control Library"
 license = "BSD-3-Clause"
@@ -48,6 +48,7 @@ wasm = ["server", "wasm-bindgen-runtime", "serialize-json", "uuid/js"]
 dummy-runtime=[]
 # Compiler config
 unstable=[]
+allow-unstable-v4-connections=[]
 
 [dependencies]
 buttplug_derive = "0.8.1"

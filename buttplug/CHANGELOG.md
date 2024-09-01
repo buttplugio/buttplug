@@ -1,9 +1,16 @@
-# 8.1.0 (2024-09-01)
+# 9.0.0 (2024-09-01)
 
-## Breaking(ish) Changes
+## Breaking Changes
 
-- The server API now only accepts the latest version of the message spec. However since I'm the only
-  one building against that API, this doesn't need a full version rev, but I figure I'll log it here nonetheless.
+- The 9.0 line will be our development version for the v4 message spec, which will release in
+  Buttplug v10. That said, in order to test the underlying code while v4 is in development, we're
+  releasing this as an actual production version. It is assumed that Nonpolynomial is currently the
+  only user of the Server portion of the system, which will remain unstable throughout the Buttplug
+  v9 version. If anyone else is using the server API, well, I guess we're about to find out.
+- The server API now only accepts the latest version of the message spec. As of v9, this is the v4
+  message spec, which is currently in development. Therefore, we recommend only using
+  ButtplugServerDowngradeWrapper to access a ButtplugServer for the time being. Assuming you're
+  accessing the ButtplugServer. Which you probably shouldn't.
 
 ## Features
 
