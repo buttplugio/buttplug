@@ -7,7 +7,7 @@
 
 use std::{fmt, sync::Arc};
 
-use crate::core::message::{self, ButtplugClientMessageVariant, ButtplugMessageSpecVersion, ButtplugServerMessageV4, ButtplugServerMessageVariant, ErrorV0};
+use crate::core::{errors::{ButtplugError, ButtplugMessageError}, message::{self, ButtplugClientMessageVariant, ButtplugMessageSpecVersion, ButtplugServerMessageV4, ButtplugServerMessageVariant, ErrorV0}};
 
 use super::{device::ServerDeviceManager, server_message_conversion::ButtplugServerMessageConverter, ButtplugServer, ButtplugServerResultFuture};
 use futures::{future::{self, BoxFuture, FutureExt}, Stream};
@@ -83,10 +83,14 @@ impl ButtplugServerDowngradeWrapper {
   ) -> BoxFuture<'static, Result<ButtplugServerMessageVariant, ButtplugServerMessageVariant>> {
     match msg {
       ButtplugClientMessageVariant::V4(msg) => {
-        let fut = self.server.parse_message(msg);
-        async move {
-          Ok(fut.await.map_err(|e| ButtplugServerMessageVariant::from(ButtplugServerMessageV4::from(e)))?.into())
-        }.boxed()
+        if cfg!(feature="allow-unstable-v4-connections") {
+          let fut = self.server.parse_message(msg);
+          async move {
+            Ok(fut.await.map_err(|e| ButtplugServerMessageVariant::from(ButtplugServerMessageV4::from(e)))?.into())
+          }.boxed()
+        } else {
+          future::ready(Err(ButtplugServerMessageV4::from(ErrorV0::from(ButtplugError::from(ButtplugMessageError::UnhandledMessage("Buttplug not compiled to handle v4 messages.".to_owned())))).into())).boxed()
+        }
       }
       msg => {
         let v = msg.version();
@@ -115,5 +119,26 @@ impl ButtplugServerDowngradeWrapper {
 
   pub fn destroy(self) -> ButtplugServer {
     self.server
+  }
+}
+
+#[cfg(test)]
+mod test {
+  use crate::{core::message::{ButtplugClientMessageV4, ButtplugClientMessageVariant, RequestServerInfoV1}, server::{ButtplugServerBuilder, ButtplugServerDowngradeWrapper}};
+
+  #[cfg_attr(feature="allow-unstable-v4-connections", ignore)]
+  #[tokio::test]
+  async fn test_v4_block() {
+    let wrapper = ButtplugServerDowngradeWrapper::new(ButtplugServerBuilder::default().finish().unwrap());
+    assert!(wrapper.parse_message(ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::RequestServerInfo(RequestServerInfoV1::new("TestClient", crate::core::message::ButtplugMessageSpecVersion::Version4)))).await.is_err());
+  }
+
+  #[cfg_attr(not(feature="allow-unstable-v4-connections"), ignore)]
+  #[tokio::test]
+  async fn test_v4_allow() {
+    let wrapper = ButtplugServerDowngradeWrapper::new(ButtplugServerBuilder::default().finish().unwrap());
+    let result = wrapper.parse_message(ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::RequestServerInfo(RequestServerInfoV1::new("TestClient", crate::core::message::ButtplugMessageSpecVersion::Version4)))).await;
+    println!("{:?}", result);
+    assert!(result.is_ok());
   }
 }
