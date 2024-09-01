@@ -13,7 +13,13 @@ use buttplug::{
     connector::transport::ButtplugTransportIncomingMessage,
     errors::{ButtplugError, ButtplugUnknownError},
     message::{
-      self, serializer::ButtplugSerializedMessage, ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugMessage, ButtplugServerMessageV3, ButtplugServerMessageVariant
+      self,
+      serializer::ButtplugSerializedMessage,
+      ButtplugClientMessageV3,
+      ButtplugClientMessageVariant,
+      ButtplugMessage,
+      ButtplugServerMessageV3,
+      ButtplugServerMessageVariant,
     },
   },
   util::async_manager,
@@ -44,20 +50,21 @@ async fn test_garbled_client_rsi_response() {
     ))
     .await;
   helper
-    .send_client_incoming(
-      ButtplugServerMessageVariant::V3(
+    .send_client_incoming(ButtplugServerMessageVariant::V3(
       message::ServerInfoV2::new(
         "test server",
         message::BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
         0,
       )
-      .into()),
-    )
+      .into(),
+    ))
     .await;
   let _ = helper.recv_outgoing().await;
   let mut dl = message::DeviceListV3::new(vec![]);
   dl.set_id(2);
-  helper.send_client_incoming(ButtplugServerMessageVariant::V3(dl.into())).await;
+  helper
+    .send_client_incoming(ButtplugServerMessageVariant::V3(dl.into()))
+    .await;
   finish_notifier.notified().await;
 }
 
@@ -71,11 +78,13 @@ async fn test_serialized_error_relay() {
       helper_clone.next_client_message().await,
       ButtplugClientMessageVariant::V3(ButtplugClientMessageV3::StartScanning(..))
     ));
-    let mut error_msg = ButtplugServerMessageV3::Error(message::ErrorV0::from(ButtplugError::from(
-      ButtplugUnknownError::NoDeviceCommManagers,
-    )));
+    let mut error_msg = ButtplugServerMessageV3::Error(message::ErrorV0::from(
+      ButtplugError::from(ButtplugUnknownError::NoDeviceCommManagers),
+    ));
     error_msg.set_id(3);
-    helper_clone.send_client_incoming(ButtplugServerMessageVariant::V3(error_msg)).await;
+    helper_clone
+      .send_client_incoming(ButtplugServerMessageVariant::V3(error_msg))
+      .await;
   });
   assert!(matches!(
     helper.client().start_scanning().await.unwrap_err(),

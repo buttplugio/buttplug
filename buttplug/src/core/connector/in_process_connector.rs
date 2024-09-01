@@ -9,7 +9,9 @@
 
 use crate::{
   core::{
-    connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture}, errors::{ButtplugError, ButtplugMessageError}, message::{ButtplugClientMessageV3, ButtplugServerMessageV3, ButtplugServerMessageVariant}
+    connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
+    errors::{ButtplugError, ButtplugMessageError},
+    message::{ButtplugClientMessageV3, ButtplugServerMessageV3, ButtplugServerMessageVariant},
   },
   server::{ButtplugServer, ButtplugServerDowngradeWrapper},
   util::async_manager,
@@ -159,17 +161,30 @@ impl ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3>
     let output_fut = self.server.parse_message(input);
     let sender = self.server_outbound_sender.clone();
     async move {
-      let output = match output_fut.await
-      {
-        Ok(m) => if let ButtplugServerMessageVariant::V3(msg) = m {
-          msg
-        } else {
-          ButtplugServerMessageV3::Error(ButtplugError::from(ButtplugMessageError::MessageConversionError("In-process connector messages should never have differing versions.".to_owned())).into())
+      let output = match output_fut.await {
+        Ok(m) => {
+          if let ButtplugServerMessageVariant::V3(msg) = m {
+            msg
+          } else {
+            ButtplugServerMessageV3::Error(
+              ButtplugError::from(ButtplugMessageError::MessageConversionError(
+                "In-process connector messages should never have differing versions.".to_owned(),
+              ))
+              .into(),
+            )
+          }
         }
-        Err(e) => if let ButtplugServerMessageVariant::V3(msg) = e {
-          msg
-        } else {
-          ButtplugServerMessageV3::Error(ButtplugError::from(ButtplugMessageError::MessageConversionError("In-process connector messages should never have differing versions.".to_owned())).into())
+        Err(e) => {
+          if let ButtplugServerMessageVariant::V3(msg) = e {
+            msg
+          } else {
+            ButtplugServerMessageV3::Error(
+              ButtplugError::from(ButtplugMessageError::MessageConversionError(
+                "In-process connector messages should never have differing versions.".to_owned(),
+              ))
+              .into(),
+            )
+          }
         }
       };
       sender

@@ -22,7 +22,49 @@ use super::device::ServerDeviceManager;
 use crate::core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    self, ActuatorType, BatteryLevelCmdV2, BatteryLevelReadingV2, ButtplugClientMessageV4, ButtplugClientMessageV0, ButtplugClientMessageV1, ButtplugClientMessageV2, ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugServerMessageV0, ButtplugServerMessageV1, ButtplugServerMessageV2, ButtplugServerMessageV3, ButtplugServerMessageV4, ButtplugServerMessageVariant, DeviceFeature, ErrorV0, FeatureType, LinearCmdV1, LinearCmdV4, RSSILevelCmdV2, RSSILevelReadingV2, RotateCmdV1, RotateCmdV4, RotationSubcommandV4, ScalarCmdV3, ScalarCmdV4, ScalarSubcommandV4, SensorReadCmdV3, SensorReadCmdV4, SensorReadingV3, SensorSubscribeCmdV3, SensorSubscribeCmdV4, SensorType, SensorUnsubscribeCmdV3, SensorUnsubscribeCmdV4, VectorSubcommandV4, VibrateCmdV1, VorzeA10CycloneCmdV0
+    self,
+    ActuatorType,
+    BatteryLevelCmdV2,
+    BatteryLevelReadingV2,
+    ButtplugClientMessageV0,
+    ButtplugClientMessageV1,
+    ButtplugClientMessageV2,
+    ButtplugClientMessageV3,
+    ButtplugClientMessageV4,
+    ButtplugClientMessageVariant,
+    ButtplugDeviceMessage,
+    ButtplugMessage,
+    ButtplugMessageSpecVersion,
+    ButtplugServerMessageV0,
+    ButtplugServerMessageV1,
+    ButtplugServerMessageV2,
+    ButtplugServerMessageV3,
+    ButtplugServerMessageV4,
+    ButtplugServerMessageVariant,
+    DeviceFeature,
+    ErrorV0,
+    FeatureType,
+    LinearCmdV1,
+    LinearCmdV4,
+    RSSILevelCmdV2,
+    RSSILevelReadingV2,
+    RotateCmdV1,
+    RotateCmdV4,
+    RotationSubcommandV4,
+    ScalarCmdV3,
+    ScalarCmdV4,
+    ScalarSubcommandV4,
+    SensorReadCmdV3,
+    SensorReadCmdV4,
+    SensorReadingV3,
+    SensorSubscribeCmdV3,
+    SensorSubscribeCmdV4,
+    SensorType,
+    SensorUnsubscribeCmdV3,
+    SensorUnsubscribeCmdV4,
+    VectorSubcommandV4,
+    VibrateCmdV1,
+    VorzeA10CycloneCmdV0,
   },
 };
 
@@ -149,15 +191,9 @@ impl TryFrom<ButtplugClientMessageV1> for ButtplugClientMessageV2 {
       ButtplugClientMessageV1::StopDeviceCmd(m) => {
         Ok(ButtplugClientMessageV2::StopDeviceCmd(m.clone()))
       }
-      ButtplugClientMessageV1::VibrateCmd(m) => {
-        Ok(ButtplugClientMessageV2::VibrateCmd(m.clone()))
-      }
-      ButtplugClientMessageV1::LinearCmd(m) => {
-        Ok(ButtplugClientMessageV2::LinearCmd(m.clone()))
-      }
-      ButtplugClientMessageV1::RotateCmd(m) => {
-        Ok(ButtplugClientMessageV2::RotateCmd(m.clone()))
-      }
+      ButtplugClientMessageV1::VibrateCmd(m) => Ok(ButtplugClientMessageV2::VibrateCmd(m.clone())),
+      ButtplugClientMessageV1::LinearCmd(m) => Ok(ButtplugClientMessageV2::LinearCmd(m.clone())),
+      ButtplugClientMessageV1::RotateCmd(m) => Ok(ButtplugClientMessageV2::RotateCmd(m.clone())),
       ButtplugClientMessageV1::FleshlightLaunchFW12Cmd(_) => {
         // Direct access to FleshlightLaunchFW12Cmd could cause some devices to break via rapid
         // changes of position/speed. Yes, some Kiiroo devices really *are* that fragile.
@@ -225,14 +261,18 @@ impl From<ButtplugClientMessageV0> for ButtplugClientMessageV1 {
 impl TryFrom<ButtplugServerMessageV4> for ButtplugServerMessageV3 {
   type Error = ButtplugMessageError;
 
-  fn try_from(value: ButtplugServerMessageV4) -> Result<Self, <ButtplugServerMessageV3 as TryFrom<ButtplugServerMessageV4>>::Error> {
+  fn try_from(
+    value: ButtplugServerMessageV4,
+  ) -> Result<Self, <ButtplugServerMessageV3 as TryFrom<ButtplugServerMessageV4>>::Error> {
     match value {
       // Direct conversions
       ButtplugServerMessageV4::Ok(m) => Ok(ButtplugServerMessageV3::Ok(m)),
       ButtplugServerMessageV4::Error(m) => Ok(ButtplugServerMessageV3::Error(m)),
       ButtplugServerMessageV4::ServerInfo(m) => Ok(ButtplugServerMessageV3::ServerInfo(m)),
       ButtplugServerMessageV4::DeviceRemoved(m) => Ok(ButtplugServerMessageV3::DeviceRemoved(m)),
-      ButtplugServerMessageV4::ScanningFinished(m) => Ok(ButtplugServerMessageV3::ScanningFinished(m)),
+      ButtplugServerMessageV4::ScanningFinished(m) => {
+        Ok(ButtplugServerMessageV3::ScanningFinished(m))
+      }
       ButtplugServerMessageV4::RawReading(m) => Ok(ButtplugServerMessageV3::RawReading(m)),
       ButtplugServerMessageV4::DeviceList(m) => Ok(ButtplugServerMessageV3::DeviceList(m.into())),
       ButtplugServerMessageV4::DeviceAdded(m) => Ok(ButtplugServerMessageV3::DeviceAdded(m.into())),
@@ -240,7 +280,7 @@ impl TryFrom<ButtplugServerMessageV4> for ButtplugServerMessageV3 {
       _ => Err(ButtplugMessageError::MessageConversionError(format!(
         "Cannot convert message {:?} to current message spec while lacking state.",
         value
-      )))
+      ))),
     }
   }
 }
@@ -256,7 +296,11 @@ impl From<ButtplugServerMessageV3> for ButtplugServerMessageV2 {
       ButtplugServerMessageV3::RawReading(m) => ButtplugServerMessageV2::RawReading(m),
       ButtplugServerMessageV3::DeviceAdded(m) => ButtplugServerMessageV2::DeviceAdded(m.into()),
       ButtplugServerMessageV3::DeviceList(m) => ButtplugServerMessageV2::DeviceList(m.into()),
-      ButtplugServerMessageV3::SensorReading(_) => ButtplugServerMessageV2::Error(ErrorV0::from(ButtplugError::from(ButtplugMessageError::MessageConversionError("SensorReading cannot be converted to Buttplug Message Spec V2".to_owned()))))
+      ButtplugServerMessageV3::SensorReading(_) => ButtplugServerMessageV2::Error(ErrorV0::from(
+        ButtplugError::from(ButtplugMessageError::MessageConversionError(
+          "SensorReading cannot be converted to Buttplug Message Spec V2".to_owned(),
+        )),
+      )),
     }
   }
 }
@@ -271,9 +315,25 @@ impl From<ButtplugServerMessageV2> for ButtplugServerMessageV1 {
       ButtplugServerMessageV2::ScanningFinished(m) => ButtplugServerMessageV1::ScanningFinished(m),
       ButtplugServerMessageV2::DeviceAdded(m) => ButtplugServerMessageV1::DeviceAdded(m.into()),
       ButtplugServerMessageV2::DeviceList(m) => ButtplugServerMessageV1::DeviceList(m.into()),
-      ButtplugServerMessageV2::BatteryLevelReading(_) => ButtplugServerMessageV1::Error(ErrorV0::from(ButtplugError::from(ButtplugMessageError::MessageConversionError("BatteryLevelReading cannot be converted to Buttplug Message Spec V1".to_owned())))),
-      ButtplugServerMessageV2::RSSILevelReading(_) => ButtplugServerMessageV1::Error(ErrorV0::from(ButtplugError::from(ButtplugMessageError::MessageConversionError("RSSILevelReading cannot be converted to Buttplug Message Spec V1".to_owned())))),
-      ButtplugServerMessageV2::RawReading(_) => ButtplugServerMessageV1::Error(ErrorV0::from(ButtplugError::from(ButtplugMessageError::MessageConversionError("RawReading cannot be converted to Buttplug Message Spec V1".to_owned())))),
+      ButtplugServerMessageV2::BatteryLevelReading(_) => {
+        ButtplugServerMessageV1::Error(ErrorV0::from(ButtplugError::from(
+          ButtplugMessageError::MessageConversionError(
+            "BatteryLevelReading cannot be converted to Buttplug Message Spec V1".to_owned(),
+          ),
+        )))
+      }
+      ButtplugServerMessageV2::RSSILevelReading(_) => {
+        ButtplugServerMessageV1::Error(ErrorV0::from(ButtplugError::from(
+          ButtplugMessageError::MessageConversionError(
+            "RSSILevelReading cannot be converted to Buttplug Message Spec V1".to_owned(),
+          ),
+        )))
+      }
+      ButtplugServerMessageV2::RawReading(_) => ButtplugServerMessageV1::Error(ErrorV0::from(
+        ButtplugError::from(ButtplugMessageError::MessageConversionError(
+          "RawReading cannot be converted to Buttplug Message Spec V1".to_owned(),
+        )),
+      )),
     }
   }
 }
@@ -288,12 +348,16 @@ impl From<ButtplugServerMessageV1> for ButtplugServerMessageV0 {
       ButtplugServerMessageV1::ScanningFinished(m) => ButtplugServerMessageV0::ScanningFinished(m),
       ButtplugServerMessageV1::DeviceAdded(m) => ButtplugServerMessageV0::DeviceAdded(m.into()),
       ButtplugServerMessageV1::DeviceList(m) => ButtplugServerMessageV0::DeviceList(m.into()),
-      ButtplugServerMessageV1::Log(_) => ButtplugServerMessageV0::Error(ErrorV0::from(ButtplugError::from(ButtplugMessageError::MessageConversionError("For security reasons, Log should never be sent from a Buttplug Server".to_owned()))))
+      ButtplugServerMessageV1::Log(_) => ButtplugServerMessageV0::Error(ErrorV0::from(
+        ButtplugError::from(ButtplugMessageError::MessageConversionError(
+          "For security reasons, Log should never be sent from a Buttplug Server".to_owned(),
+        )),
+      )),
     }
   }
 }
 
-pub struct ButtplugServerMessageConverter{
+pub struct ButtplugServerMessageConverter {
   original_message: Option<ButtplugClientMessageVariant>,
 }
 
@@ -304,7 +368,10 @@ impl ButtplugServerMessageConverter {
     }
   }
 
-  pub fn convert_incoming(&self, device_manager: &ServerDeviceManager) -> Result<ButtplugClientMessageV4, ButtplugError> {
+  pub fn convert_incoming(
+    &self,
+    device_manager: &ServerDeviceManager,
+  ) -> Result<ButtplugClientMessageV4, ButtplugError> {
     if let Some(msg) = &self.original_message {
       match msg {
         ButtplugClientMessageVariant::V0(m) => self.convert_incoming_v0(m, device_manager),
@@ -314,14 +381,19 @@ impl ButtplugServerMessageConverter {
         ButtplugClientMessageVariant::V4(m) => Ok(m.clone()),
       }
     } else {
-      Err(ButtplugMessageError::MessageConversionError("No incoming message provided for conversion".to_owned()).into())
+      Err(
+        ButtplugMessageError::MessageConversionError(
+          "No incoming message provided for conversion".to_owned(),
+        )
+        .into(),
+      )
     }
   }
 
   fn convert_incoming_v0(
     &self,
     msg_v0: &ButtplugClientMessageV0,
-    device_manager: &ServerDeviceManager
+    device_manager: &ServerDeviceManager,
   ) -> Result<ButtplugClientMessageV4, ButtplugError> {
     // All v0 messages can be converted to v1 messages.
     self.convert_incoming_v1(&msg_v0.clone().into(), device_manager)
@@ -330,7 +402,7 @@ impl ButtplugServerMessageConverter {
   fn convert_incoming_v1(
     &self,
     msg_v1: &ButtplugClientMessageV1,
-    device_manager: &ServerDeviceManager
+    device_manager: &ServerDeviceManager,
   ) -> Result<ButtplugClientMessageV4, ButtplugError> {
     // Instead of converting to v2 message attributes then to v4 device features, we move directly
     // from v0 command messages to v4 device features here. There's no reason to do the middle step.
@@ -350,16 +422,20 @@ impl ButtplugServerMessageConverter {
   fn convert_incoming_v2(
     &self,
     msg_v2: &ButtplugClientMessageV2,
-    device_manager: &ServerDeviceManager
+    device_manager: &ServerDeviceManager,
   ) -> Result<ButtplugClientMessageV4, ButtplugError> {
     match msg_v2 {
       // Convert v2 specific queries to v3 generic sensor queries
       ButtplugClientMessageV2::BatteryLevelCmd(m) => {
         self.convert_batterylevelcmd_v2_to_sensorreadcmd_v4(m, device_manager)
       }
-      ButtplugClientMessageV2::RSSILevelCmd(m) => self.convert_rssilevelcmd_v2_to_sensorreadv4(m, device_manager),
+      ButtplugClientMessageV2::RSSILevelCmd(m) => {
+        self.convert_rssilevelcmd_v2_to_sensorreadv4(m, device_manager)
+      }
       // Convert VibrateCmd to a ScalarCmd command
-      ButtplugClientMessageV2::VibrateCmd(m) => self.convert_vibratecmdv1_to_scalarcmdv4(m, device_manager),
+      ButtplugClientMessageV2::VibrateCmd(m) => {
+        self.convert_vibratecmdv1_to_scalarcmdv4(m, device_manager)
+      }
       _ => self.convert_incoming_v3(&msg_v2.clone().try_into()?, device_manager),
     }
   }
@@ -367,22 +443,35 @@ impl ButtplugServerMessageConverter {
   fn convert_incoming_v3(
     &self,
     msg_v3: &ButtplugClientMessageV3,
-    device_manager: &ServerDeviceManager
+    device_manager: &ServerDeviceManager,
   ) -> Result<ButtplugClientMessageV4, ButtplugError> {
     match msg_v3 {
       // Convert v1/v2 message attribute commands into device feature commands
-      ButtplugClientMessageV3::VibrateCmd(m) => self.convert_vibratecmdv1_to_scalarcmdv4(m, device_manager),
-      ButtplugClientMessageV3::ScalarCmd(m) => self.convert_scalarcmdv3_to_scalarcmdv4(m, device_manager),
-      ButtplugClientMessageV3::RotateCmd(m) => self.convert_rotatecmdv1_to_scalarcmdv4(m, device_manager),
-      ButtplugClientMessageV3::LinearCmd(m) => self.convert_linearcmdv1_to_linearcmdv4(m, device_manager),
-      ButtplugClientMessageV3::SensorReadCmd(m) => self.convert_sensorreadv3_to_sensorreadv4(m, device_manager),
+      ButtplugClientMessageV3::VibrateCmd(m) => {
+        self.convert_vibratecmdv1_to_scalarcmdv4(m, device_manager)
+      }
+      ButtplugClientMessageV3::ScalarCmd(m) => {
+        self.convert_scalarcmdv3_to_scalarcmdv4(m, device_manager)
+      }
+      ButtplugClientMessageV3::RotateCmd(m) => {
+        self.convert_rotatecmdv1_to_scalarcmdv4(m, device_manager)
+      }
+      ButtplugClientMessageV3::LinearCmd(m) => {
+        self.convert_linearcmdv1_to_linearcmdv4(m, device_manager)
+      }
+      ButtplugClientMessageV3::SensorReadCmd(m) => {
+        self.convert_sensorreadv3_to_sensorreadv4(m, device_manager)
+      }
       ButtplugClientMessageV3::SensorSubscribeCmd(m) => {
         self.convert_sensorsubscribev3_to_sensorsubcribe4(m, device_manager)
       }
       ButtplugClientMessageV3::SensorUnsubscribeCmd(m) => {
         self.convert_sensorunsubscribev3_to_sensorunsubcribe4(m, device_manager)
       }
-      _ => msg_v3.clone().try_into().map_err(|e: ButtplugMessageError| e.into()),
+      _ => msg_v3
+        .clone()
+        .try_into()
+        .map_err(|e: ButtplugMessageError| e.into()),
     }
   }
 
@@ -434,13 +523,14 @@ impl ButtplugServerMessageConverter {
     message: &message::SingleMotorVibrateCmdV0,
     device_manager: &ServerDeviceManager,
   ) -> Result<ButtplugClientMessageV4, ButtplugError> {
-    let vibrate_features: Vec<usize> = self.find_device_features(message, device_manager, |(_, x)| {
-      *x.feature_type() == FeatureType::Vibrate
-        && x.actuator().as_ref().is_some_and(|y| {
-          y.messages()
-            .contains(&message::ButtplugActuatorFeatureMessageType::ScalarCmd)
-        })
-    })?;
+    let vibrate_features: Vec<usize> =
+      self.find_device_features(message, device_manager, |(_, x)| {
+        *x.feature_type() == FeatureType::Vibrate
+          && x.actuator().as_ref().is_some_and(|y| {
+            y.messages()
+              .contains(&message::ButtplugActuatorFeatureMessageType::ScalarCmd)
+          })
+      })?;
 
     let cmds: Vec<ScalarSubcommandV4> = vibrate_features
       .iter()
@@ -457,13 +547,14 @@ impl ButtplugServerMessageConverter {
     message: &VorzeA10CycloneCmdV0,
     device_manager: &ServerDeviceManager,
   ) -> Result<ButtplugClientMessageV4, ButtplugError> {
-    let rotate_features: Vec<usize> = self.find_device_features(message, device_manager, |(_, x)| {
-      *x.feature_type() == FeatureType::Rotate
-        && x.actuator().as_ref().is_some_and(|y| {
-          y.messages()
-            .contains(&message::ButtplugActuatorFeatureMessageType::RotateCmd)
-        })
-    })?;
+    let rotate_features: Vec<usize> =
+      self.find_device_features(message, device_manager, |(_, x)| {
+        *x.feature_type() == FeatureType::Rotate
+          && x.actuator().as_ref().is_some_and(|y| {
+            y.messages()
+              .contains(&message::ButtplugActuatorFeatureMessageType::RotateCmd)
+          })
+      })?;
 
     let cmds: Vec<RotationSubcommandV4> = rotate_features
       .iter()
@@ -522,22 +613,24 @@ impl ButtplugServerMessageConverter {
         message.device_index(),
         rssi_features[0] as u32,
         SensorType::RSSI,
-      ).into()
+      )
+      .into(),
     )
   }
 
   fn convert_vibratecmdv1_to_scalarcmdv4(
     &self,
     message: &VibrateCmdV1,
-    device_manager: &ServerDeviceManager
+    device_manager: &ServerDeviceManager,
   ) -> Result<ButtplugClientMessageV4, ButtplugError> {
-    let vibrate_features: Vec<usize> = self.find_device_features(message, device_manager, |(_, x)| {
-      *x.feature_type() == FeatureType::Vibrate
-        && x.actuator().as_ref().is_some_and(|y| {
-          y.messages()
-            .contains(&message::ButtplugActuatorFeatureMessageType::ScalarCmd)
-        })
-    })?;
+    let vibrate_features: Vec<usize> =
+      self.find_device_features(message, device_manager, |(_, x)| {
+        *x.feature_type() == FeatureType::Vibrate
+          && x.actuator().as_ref().is_some_and(|y| {
+            y.messages()
+              .contains(&message::ButtplugActuatorFeatureMessageType::ScalarCmd)
+          })
+      })?;
 
     let cmds: Vec<ScalarSubcommandV4> = message
       .speeds()
@@ -559,15 +652,15 @@ impl ButtplugServerMessageConverter {
   fn convert_scalarcmdv3_to_scalarcmdv4(
     &self,
     message: &ScalarCmdV3,
-    device_manager: &ServerDeviceManager
+    device_manager: &ServerDeviceManager,
   ) -> Result<ButtplugClientMessageV4, ButtplugError> {
-
-    let scalar_features: Vec<usize> = self.find_device_features(message, device_manager, |(_, x)| {
-      x.actuator().as_ref().is_some_and(|y| {
-        y.messages()
-          .contains(&message::ButtplugActuatorFeatureMessageType::ScalarCmd)
-      })
-    })?;
+    let scalar_features: Vec<usize> =
+      self.find_device_features(message, device_manager, |(_, x)| {
+        x.actuator().as_ref().is_some_and(|y| {
+          y.messages()
+            .contains(&message::ButtplugActuatorFeatureMessageType::ScalarCmd)
+        })
+      })?;
 
     let scalars_v4: Vec<ScalarSubcommandV4> = message
       .scalars()
@@ -589,14 +682,15 @@ impl ButtplugServerMessageConverter {
   fn convert_rotatecmdv1_to_scalarcmdv4(
     &self,
     message: &RotateCmdV1,
-    device_manager: &ServerDeviceManager
+    device_manager: &ServerDeviceManager,
   ) -> Result<ButtplugClientMessageV4, ButtplugError> {
-    let rotate_features: Vec<usize> = self.find_device_features(message, device_manager,|(_, x)| {
-      x.actuator().as_ref().is_some_and(|y| {
+    let rotate_features: Vec<usize> =
+      self.find_device_features(message, device_manager, |(_, x)| {
+        x.actuator().as_ref().is_some_and(|y| {
           y.messages()
             .contains(&message::ButtplugActuatorFeatureMessageType::RotateCmd)
         })
-    })?;
+      })?;
 
     let cmds: Vec<RotationSubcommandV4> = message
       .rotations()
@@ -618,14 +712,15 @@ impl ButtplugServerMessageConverter {
   fn convert_linearcmdv1_to_linearcmdv4(
     &self,
     message: &LinearCmdV1,
-    device_manager: &ServerDeviceManager
+    device_manager: &ServerDeviceManager,
   ) -> Result<ButtplugClientMessageV4, ButtplugError> {
-    let linear_features: Vec<usize> = self.find_device_features(message, device_manager,|(_, x)| {
-      x.actuator().as_ref().is_some_and(|y| {
+    let linear_features: Vec<usize> =
+      self.find_device_features(message, device_manager, |(_, x)| {
+        x.actuator().as_ref().is_some_and(|y| {
           y.messages()
             .contains(&message::ButtplugActuatorFeatureMessageType::LinearCmd)
         })
-    })?;
+      })?;
 
     let cmds: Vec<VectorSubcommandV4> = message
       .vectors()
@@ -647,7 +742,7 @@ impl ButtplugServerMessageConverter {
   fn convert_sensorreadv3_to_sensorreadv4(
     &self,
     message: &SensorReadCmdV3,
-    device_manager: &ServerDeviceManager
+    device_manager: &ServerDeviceManager,
   ) -> Result<ButtplugClientMessageV4, ButtplugError> {
     let features = self.find_device_features(message, device_manager, |(_, x)| {
       x.sensor().as_ref().is_some_and(|y| {
@@ -723,66 +818,89 @@ impl ButtplugServerMessageConverter {
   pub fn convert_outgoing(
     &self,
     msg: &ButtplugServerMessageV4,
-    version: &ButtplugMessageSpecVersion
+    version: &ButtplugMessageSpecVersion,
   ) -> Result<ButtplugServerMessageVariant, ButtplugError> {
     match version {
-      ButtplugMessageSpecVersion::Version0 => Ok(ButtplugServerMessageVariant::V0(self.convert_servermessagev4_to_servermessagev0(msg)?)),
-      ButtplugMessageSpecVersion::Version1 => Ok(ButtplugServerMessageVariant::V1(self.convert_servermessagev4_to_servermessagev1(msg)?)),
-      ButtplugMessageSpecVersion::Version2 => Ok(ButtplugServerMessageVariant::V2(self.convert_servermessagev4_to_servermessagev2(msg)?)),
-      ButtplugMessageSpecVersion::Version3 => Ok(ButtplugServerMessageVariant::V3(self.convert_servermessagev4_to_servermessagev3(msg)?)),
+      ButtplugMessageSpecVersion::Version0 => Ok(ButtplugServerMessageVariant::V0(
+        self.convert_servermessagev4_to_servermessagev0(msg)?,
+      )),
+      ButtplugMessageSpecVersion::Version1 => Ok(ButtplugServerMessageVariant::V1(
+        self.convert_servermessagev4_to_servermessagev1(msg)?,
+      )),
+      ButtplugMessageSpecVersion::Version2 => Ok(ButtplugServerMessageVariant::V2(
+        self.convert_servermessagev4_to_servermessagev2(msg)?,
+      )),
+      ButtplugMessageSpecVersion::Version3 => Ok(ButtplugServerMessageVariant::V3(
+        self.convert_servermessagev4_to_servermessagev3(msg)?,
+      )),
       ButtplugMessageSpecVersion::Version4 => Ok(ButtplugServerMessageVariant::V4(msg.clone())),
     }
   }
 
-  fn convert_servermessagev4_to_servermessagev3(&self, msg: &ButtplugServerMessageV4) -> Result<ButtplugServerMessageV3, ButtplugError> {
+  fn convert_servermessagev4_to_servermessagev3(
+    &self,
+    msg: &ButtplugServerMessageV4,
+  ) -> Result<ButtplugServerMessageV3, ButtplugError> {
     match msg {
       ButtplugServerMessageV4::SensorReading(m) => {
         let original_msg = self.original_message.as_ref().unwrap();
-        if let ButtplugClientMessageVariant::V3(ButtplugClientMessageV3::SensorReadCmd(msg)) = &original_msg {
-          Ok(SensorReadingV3::new(
-            msg.device_index(),
-            *msg.sensor_index(),
-            *msg.sensor_type(),
-            m.data().clone(),
-          ).into())
+        if let ButtplugClientMessageVariant::V3(ButtplugClientMessageV3::SensorReadCmd(msg)) =
+          &original_msg
+        {
+          Ok(
+            SensorReadingV3::new(
+              msg.device_index(),
+              *msg.sensor_index(),
+              *msg.sensor_type(),
+              m.data().clone(),
+            )
+            .into(),
+          )
         } else {
           Err(ButtplugMessageError::UnexpectedMessageType("SensorReading".to_owned()).into())
         }
-      },
-      _ => Ok(msg.clone().try_into()?)
+      }
+      _ => Ok(msg.clone().try_into()?),
     }
   }
 
-  fn convert_servermessagev4_to_servermessagev2(&self, msg: &ButtplugServerMessageV4) -> Result<ButtplugServerMessageV2, ButtplugError> {
+  fn convert_servermessagev4_to_servermessagev2(
+    &self,
+    msg: &ButtplugServerMessageV4,
+  ) -> Result<ButtplugServerMessageV2, ButtplugError> {
     let msg_v3 = self.convert_servermessagev4_to_servermessagev3(msg)?;
     match msg_v3 {
       ButtplugServerMessageV3::SensorReading(m) => {
         let original_msg = self.original_message.as_ref().unwrap();
         // Sensor Reading didn't exist in v2, we only had Battery or RSSI. Therefore we need to
         // context of the original message to make sure this conversion happens correctly.
-        if let ButtplugClientMessageVariant::V2(ButtplugClientMessageV2::BatteryLevelCmd(msg)) = &original_msg {
-          Ok(BatteryLevelReadingV2::new(
-            msg.device_index(),
-            m.data()[0] as f64 / 100f64,
-          ).into())
-        } else if let ButtplugClientMessageVariant::V2(ButtplugClientMessageV2::RSSILevelCmd(msg)) = &original_msg {
-          Ok(RSSILevelReadingV2::new(
-            msg.device_index(),
-            m.data()[0],
-          ).into())
+        if let ButtplugClientMessageVariant::V2(ButtplugClientMessageV2::BatteryLevelCmd(msg)) =
+          &original_msg
+        {
+          Ok(BatteryLevelReadingV2::new(msg.device_index(), m.data()[0] as f64 / 100f64).into())
+        } else if let ButtplugClientMessageVariant::V2(ButtplugClientMessageV2::RSSILevelCmd(msg)) =
+          &original_msg
+        {
+          Ok(RSSILevelReadingV2::new(msg.device_index(), m.data()[0]).into())
         } else {
           Err(ButtplugMessageError::UnexpectedMessageType("SensorReading".to_owned()).into())
         }
       }
-      _ => Ok(msg_v3.into())
+      _ => Ok(msg_v3.into()),
     }
   }
 
-  fn convert_servermessagev4_to_servermessagev1(&self, msg: &ButtplugServerMessageV4) -> Result<ButtplugServerMessageV1, ButtplugError> {
+  fn convert_servermessagev4_to_servermessagev1(
+    &self,
+    msg: &ButtplugServerMessageV4,
+  ) -> Result<ButtplugServerMessageV1, ButtplugError> {
     Ok(self.convert_servermessagev4_to_servermessagev2(msg)?.into())
   }
 
-  fn convert_servermessagev4_to_servermessagev0(&self, msg: &ButtplugServerMessageV4) -> Result<ButtplugServerMessageV0, ButtplugError> {
+  fn convert_servermessagev4_to_servermessagev0(
+    &self,
+    msg: &ButtplugServerMessageV4,
+  ) -> Result<ButtplugServerMessageV0, ButtplugError> {
     Ok(self.convert_servermessagev4_to_servermessagev1(msg)?.into())
   }
 

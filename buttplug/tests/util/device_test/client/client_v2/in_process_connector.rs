@@ -9,7 +9,9 @@
 
 use buttplug::{
   core::{
-    connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture}, errors::{ButtplugError, ButtplugMessageError}, message::{ButtplugClientMessageV2, ButtplugServerMessageV2, ButtplugServerMessageVariant}
+    connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
+    errors::{ButtplugError, ButtplugMessageError},
+    message::{ButtplugClientMessageV2, ButtplugServerMessageV2, ButtplugServerMessageVariant},
   },
   server::{ButtplugServer, ButtplugServerBuilder, ButtplugServerDowngradeWrapper},
   util::async_manager,
@@ -19,7 +21,10 @@ use futures::{
   pin_mut,
   StreamExt,
 };
-use std::sync::{atomic::{AtomicBool, Ordering}, Arc};
+use std::sync::{
+  atomic::{AtomicBool, Ordering},
+  Arc,
+};
 use tokio::sync::mpsc::{channel, Sender};
 use tracing::*;
 use tracing_futures::Instrument;
@@ -88,11 +93,13 @@ impl<'a> ButtplugInProcessClientConnector {
     let (server_outbound_sender, _) = channel(256);
     Self {
       server_outbound_sender,
-      server: Arc::new(ButtplugServerDowngradeWrapper::new(server.unwrap_or_else(|| {
-        ButtplugServerBuilder::default()
-          .finish()
-          .expect("Default server builder should always work.")
-      }))),
+      server: Arc::new(ButtplugServerDowngradeWrapper::new(server.unwrap_or_else(
+        || {
+          ButtplugServerBuilder::default()
+            .finish()
+            .expect("Default server builder should always work.")
+        },
+      ))),
       connected: Arc::new(AtomicBool::new(false)),
     }
   }
@@ -156,17 +163,30 @@ impl ButtplugConnector<ButtplugClientMessageV2, ButtplugServerMessageV2>
     let output_fut = self.server.parse_message(input);
     let sender = self.server_outbound_sender.clone();
     async move {
-      let output = match output_fut.await
-      {
-        Ok(m) => if let ButtplugServerMessageVariant::V2(msg) = m {
-          msg
-        } else {
-          ButtplugServerMessageV2::Error(ButtplugError::from(ButtplugMessageError::MessageConversionError("In-process connector messages should never have differing versions.".to_owned())).into())
+      let output = match output_fut.await {
+        Ok(m) => {
+          if let ButtplugServerMessageVariant::V2(msg) = m {
+            msg
+          } else {
+            ButtplugServerMessageV2::Error(
+              ButtplugError::from(ButtplugMessageError::MessageConversionError(
+                "In-process connector messages should never have differing versions.".to_owned(),
+              ))
+              .into(),
+            )
+          }
         }
-        Err(e) => if let ButtplugServerMessageVariant::V2(msg) = e {
-          msg
-        } else {
-          ButtplugServerMessageV2::Error(ButtplugError::from(ButtplugMessageError::MessageConversionError("In-process connector messages should never have differing versions.".to_owned())).into())
+        Err(e) => {
+          if let ButtplugServerMessageVariant::V2(msg) = e {
+            msg
+          } else {
+            ButtplugServerMessageV2::Error(
+              ButtplugError::from(ButtplugMessageError::MessageConversionError(
+                "In-process connector messages should never have differing versions.".to_owned(),
+              ))
+              .into(),
+            )
+          }
         }
       };
       sender

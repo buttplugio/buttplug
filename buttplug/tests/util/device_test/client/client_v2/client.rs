@@ -14,8 +14,8 @@ use buttplug::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
     errors::{ButtplugError, ButtplugHandshakeError},
     message::{
-      ButtplugMessageSpecVersion,
       ButtplugClientMessageV2,
+      ButtplugMessageSpecVersion,
       ButtplugServerMessageV2,
       PingV0,
       RequestDeviceListV0,
@@ -190,8 +190,7 @@ impl ButtplugClient {
     mut connector: ConnectorType,
   ) -> Result<(), ButtplugClientError>
   where
-    ConnectorType:
-      ButtplugConnector<ButtplugClientMessageV2, ButtplugServerMessageV2> + 'static,
+    ConnectorType: ButtplugConnector<ButtplugClientMessageV2, ButtplugServerMessageV2> + 'static,
   {
     if self.connected() {
       return Err(ButtplugClientError::ButtplugConnectorError(

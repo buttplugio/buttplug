@@ -5,15 +5,20 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{
-  device::
-    ServerDeviceManager, ping_timer::PingTimer, ButtplugServerResultFuture
-};
+use super::{device::ServerDeviceManager, ping_timer::PingTimer, ButtplugServerResultFuture};
 use crate::{
   core::{
     errors::*,
     message::{
-      self, ButtplugClientMessageV4, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion, ButtplugMessage, ButtplugServerMessageV4, StopAllDevicesV0, StopScanningV0, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
+      self,
+      ButtplugClientMessageV4,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceManagerMessageUnion,
+      ButtplugMessage,
+      ButtplugServerMessageV4,
+      StopAllDevicesV0,
+      StopScanningV0,
+      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
   util::stream::convert_broadcast_receiver_to_stream,
@@ -23,10 +28,11 @@ use futures::{
   Stream,
 };
 use std::{
-  fmt, sync::{
+  fmt,
+  sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
-  }
+  },
 };
 use tokio::sync::{broadcast, RwLock};
 use tokio_stream::StreamExt;
@@ -56,7 +62,7 @@ pub struct ButtplugServer {
   /// [ButtplugServer::event_stream()] method.
   output_sender: broadcast::Sender<ButtplugServerMessageV4>,
   /// Name of the connected client, assuming there is one.
-  client_name: Arc<RwLock<Option<String>>>
+  client_name: Arc<RwLock<Option<String>>>,
 }
 
 impl std::fmt::Debug for ButtplugServer {
@@ -70,7 +76,14 @@ impl std::fmt::Debug for ButtplugServer {
 }
 
 impl ButtplugServer {
-  pub(super) fn new(server_name: &str, max_ping_time: u32, ping_timer: Arc<PingTimer>, device_manager: Arc<ServerDeviceManager>, connected: Arc<AtomicBool>, output_sender: broadcast::Sender<ButtplugServerMessageV4>) -> Self {
+  pub(super) fn new(
+    server_name: &str,
+    max_ping_time: u32,
+    ping_timer: Arc<PingTimer>,
+    device_manager: Arc<ServerDeviceManager>,
+    connected: Arc<AtomicBool>,
+    output_sender: broadcast::Sender<ButtplugServerMessageV4>,
+  ) -> Self {
     ButtplugServer {
       server_name: server_name.to_owned(),
       max_ping_time,
@@ -78,12 +91,16 @@ impl ButtplugServer {
       device_manager,
       connected,
       output_sender,
-      client_name: Arc::new(RwLock::new(None))
+      client_name: Arc::new(RwLock::new(None)),
     }
   }
 
   pub fn client_name(&self) -> Option<String> {
-    self.client_name.try_read().expect("We should never conflict on name access").clone()
+    self
+      .client_name
+      .try_read()
+      .expect("We should never conflict on name access")
+      .clone()
   }
 
   /// Retreive an async stream of ButtplugServerMessages. This is how the server sends out
@@ -113,13 +130,17 @@ impl ButtplugServer {
     let ping_timer = self.ping_timer.clone();
     // HACK Injecting messages here is weird since we're never quite sure what version they should
     // be. Can we turn this into actual method calls?
-    let stop_scanning_fut =
-      self.parse_message(ButtplugClientMessageV4::StopScanning(StopScanningV0::default()));
+    let stop_scanning_fut = self.parse_message(ButtplugClientMessageV4::StopScanning(
+      StopScanningV0::default(),
+    ));
     let stop_fut = self.parse_message(ButtplugClientMessageV4::StopAllDevices(
       StopAllDevicesV0::default(),
     ));
     let connected = self.connected.clone();
-    let mut name = self.client_name.try_write().expect("We should never conflict on name access");
+    let mut name = self
+      .client_name
+      .try_write()
+      .expect("We should never conflict on name access");
     *name = None;
     async move {
       connected.store(false, Ordering::SeqCst);
@@ -221,7 +242,7 @@ impl ButtplugServer {
       msg.message_version()
     );
 
-    #[cfg(not(feature="allow-unstable-v4-connections"))]
+    #[cfg(not(feature = "allow-unstable-v4-connections"))]
     if BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION < msg.message_version() {
       return ButtplugHandshakeError::MessageSpecVersionMismatch(
         BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
@@ -234,9 +255,12 @@ impl ButtplugServer {
     let out_msg =
       message::ServerInfoV2::new(&self.server_name, msg.message_version(), self.max_ping_time);
     let connected = self.connected.clone();
-    let mut name = self.client_name.try_write().expect("We should never conflict on name access");
+    let mut name = self
+      .client_name
+      .try_write()
+      .expect("We should never conflict on name access");
     *name = Some(msg.client_name().clone());
-    async move {      
+    async move {
       ping_timer.start_ping_timer().await;
       connected.store(true, Ordering::SeqCst);
       debug!("Server handshake check successful.");
@@ -268,7 +292,8 @@ mod test {
   #[tokio::test]
   async fn test_server_reuse() {
     let server = ButtplugServerBuilder::default().finish().unwrap();
-    let msg = message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+    let msg =
+      message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
     let mut reply = server.parse_message(msg.clone().into()).await;
     assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
 

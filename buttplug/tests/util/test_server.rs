@@ -10,7 +10,11 @@ use buttplug::{
     connector::ButtplugConnector,
     errors::ButtplugError,
     message::{
-      self, ButtplugClientMessageVariant, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageVariant
+      self,
+      ButtplugClientMessageVariant,
+      ButtplugMessage,
+      ButtplugMessageValidator,
+      ButtplugServerMessageVariant,
     },
   },
   server::{ButtplugServer, ButtplugServerBuilder, ButtplugServerDowngradeWrapper},
@@ -39,7 +43,8 @@ async fn run_server<ConnectorType>(
   mut connector_receiver: mpsc::Receiver<ButtplugClientMessageVariant>,
   disconnect_notifier: Arc<Notify>,
 ) where
-  ConnectorType: ButtplugConnector<ButtplugServerMessageVariant, ButtplugClientMessageVariant> + 'static,
+  ConnectorType:
+    ButtplugConnector<ButtplugServerMessageVariant, ButtplugClientMessageVariant> + 'static,
 {
   info!("Starting remote server loop");
   let shared_connector = Arc::new(connector);
@@ -125,7 +130,8 @@ impl ButtplugTestServer {
     mut connector: ConnectorType,
   ) -> impl Future<Output = Result<(), ButtplugServerConnectorError>>
   where
-    ConnectorType: ButtplugConnector<ButtplugServerMessageVariant, ButtplugClientMessageVariant> + 'static,
+    ConnectorType:
+      ButtplugConnector<ButtplugServerMessageVariant, ButtplugClientMessageVariant> + 'static,
   {
     let server_clone = self.server.clone();
     let disconnect_notifier = self.disconnect_notifier.clone();

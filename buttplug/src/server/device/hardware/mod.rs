@@ -5,7 +5,14 @@ use std::{fmt::Debug, sync::Arc, time::Duration};
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{Endpoint, RawReadCmdV2, RawReadingV2, RawSubscribeCmdV2, RawUnsubscribeCmdV2, RawWriteCmdV2},
+    message::{
+      Endpoint,
+      RawReadCmdV2,
+      RawReadingV2,
+      RawSubscribeCmdV2,
+      RawUnsubscribeCmdV2,
+      RawWriteCmdV2,
+    },
   },
   server::device::configuration::ProtocolCommunicationSpecifier,
 };

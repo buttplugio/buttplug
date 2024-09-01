@@ -15,10 +15,10 @@ use buttplug::core::{
       ButtplugServerJSONSerializer,
     },
     ButtplugClientMessageV0,
-    ButtplugServerMessageV0,
     ButtplugClientMessageV1,
-    ButtplugServerMessageV1,
     ButtplugClientMessageV2,
+    ButtplugServerMessageV0,
+    ButtplugServerMessageV1,
     ButtplugServerMessageV2,
   },
 };

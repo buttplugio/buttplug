@@ -12,7 +12,8 @@ use crate::{
   core::{
     connector::{
       transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
-      ButtplugConnectorError, ButtplugConnectorResultFuture,
+      ButtplugConnectorError,
+      ButtplugConnectorResultFuture,
     },
     message::serializer::ButtplugSerializedMessage,
   },

@@ -19,9 +19,9 @@ use crate::core::{
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
     ButtplugClientMessageV3,
-    ButtplugServerMessageV3,
     ButtplugDeviceMessage,
     ButtplugMessageValidator,
+    ButtplugServerMessageV3,
     DeviceListV3,
     DeviceMessageInfoV3,
   },
@@ -79,8 +79,7 @@ pub enum ButtplugClientRequest {
 /// async channels, and those channels should never have backpressure. We hope.
 pub(super) struct ButtplugClientEventLoop<ConnectorType>
 where
-  ConnectorType:
-    ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3> + 'static,
+  ConnectorType: ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3> + 'static,
 {
   /// Connected status from client, managed by the event loop in case of disconnect.
   connected_status: Arc<AtomicBool>,
@@ -102,8 +101,7 @@ where
 
 impl<ConnectorType> ButtplugClientEventLoop<ConnectorType>
 where
-  ConnectorType:
-    ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3> + 'static,
+  ConnectorType: ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3> + 'static,
 {
   /// Creates a new [ButtplugClientEventLoop].
   ///

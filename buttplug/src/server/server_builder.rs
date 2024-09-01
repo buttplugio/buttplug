@@ -13,23 +13,19 @@ use super::{
   },
   ping_timer::PingTimer,
   server::ButtplugServer,
-  ButtplugServerError
+  ButtplugServerError,
 };
 use crate::{
   core::{
     errors::*,
-    message::{
-      self, ButtplugServerMessageV4
-    },
+    message::{self, ButtplugServerMessageV4},
   },
   util::async_manager,
 };
-use std::
-  sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-  }
-;
+use std::sync::{
+  atomic::{AtomicBool, Ordering},
+  Arc,
+};
 use tokio::sync::broadcast;
 use tracing_futures::Instrument;
 
@@ -133,7 +129,9 @@ impl ButtplugServerBuilder {
           });
           // TODO Should the event sender return a result instead of an error message?
           if output_sender_clone
-            .send(ButtplugServerMessageV4::Error(message::ErrorV0::from(ButtplugError::from(ButtplugPingError::PingedOut)).into()))
+            .send(ButtplugServerMessageV4::Error(
+              message::ErrorV0::from(ButtplugError::from(ButtplugPingError::PingedOut)).into(),
+            ))
             .is_err()
           {
             error!("Server disappeared, cannot update about ping out.");
@@ -144,6 +142,13 @@ impl ButtplugServerBuilder {
     }
 
     // Assuming everything passed, return the server.
-    Ok(ButtplugServer::new(&self.name, ping_time, ping_timer, self.device_manager.clone(), connected, output_sender))
+    Ok(ButtplugServer::new(
+      &self.name,
+      ping_time,
+      ping_timer,
+      self.device_manager.clone(),
+      connected,
+      output_sender,
+    ))
   }
 }

@@ -22,7 +22,8 @@ use buttplug::{
       ServerDeviceManagerBuilder,
     },
     ButtplugServer,
-    ButtplugServerBuilder, ButtplugServerDowngradeWrapper,
+    ButtplugServerBuilder,
+    ButtplugServerDowngradeWrapper,
   },
   util::device_configuration::load_protocol_configs,
 };

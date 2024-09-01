@@ -16,9 +16,9 @@ use buttplug::core::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
+    ButtplugClientMessageV2,
     ButtplugDeviceMessage,
     ButtplugMessageValidator,
-    ButtplugClientMessageV2,
     ButtplugServerMessageV2,
     DeviceListV2,
     DeviceMessageInfoV2,
@@ -77,8 +77,7 @@ pub(super) enum ButtplugClientRequest {
 /// async channels, and those channels should never have backpressure. We hope.
 pub(super) struct ButtplugClientEventLoop<ConnectorType>
 where
-  ConnectorType:
-    ButtplugConnector<ButtplugClientMessageV2, ButtplugServerMessageV2> + 'static,
+  ConnectorType: ButtplugConnector<ButtplugClientMessageV2, ButtplugServerMessageV2> + 'static,
 {
   /// Connected status from client, managed by the event loop in case of disconnect.
   connected_status: Arc<AtomicBool>,
@@ -100,8 +99,7 @@ where
 
 impl<ConnectorType> ButtplugClientEventLoop<ConnectorType>
 where
-  ConnectorType:
-    ButtplugConnector<ButtplugClientMessageV2, ButtplugServerMessageV2> + 'static,
+  ConnectorType: ButtplugConnector<ButtplugClientMessageV2, ButtplugServerMessageV2> + 'static,
 {
   /// Creates a new [ButtplugClientEventLoop].
   ///

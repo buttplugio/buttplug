@@ -11,16 +11,12 @@ use std::sync::Arc;
 use futures_util::future::BoxFuture;
 use futures_util::{future, FutureExt};
 
+use crate::core::message::{ActuatorType, ButtplugDeviceMessage, SensorType};
 use crate::core::message::{
   SensorReadCmdV4,
   SensorReadingV4,
   SensorSubscribeCmdV4,
   SensorUnsubscribeCmdV4,
-};
-use crate::core::message::{
-  ActuatorType,
-  ButtplugDeviceMessage,
-  SensorType,
 };
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},

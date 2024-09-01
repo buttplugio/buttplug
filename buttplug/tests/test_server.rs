@@ -22,14 +22,23 @@ use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError},
     message::{
-      self, ButtplugMessageSpecVersion, ButtplugServerMessageV2, ButtplugServerMessageV3, ButtplugServerMessageV4, ButtplugServerMessageVariant, Endpoint, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
+      self,
+      ButtplugMessageSpecVersion,
+      ButtplugServerMessageV2,
+      ButtplugServerMessageV3,
+      ButtplugServerMessageV4,
+      ButtplugServerMessageVariant,
+      Endpoint,
+      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
   server::{
     device::{
       hardware::{HardwareCommand, HardwareWriteCmd},
       ServerDeviceManagerBuilder,
-    }, ButtplugServerBuilder, ButtplugServerDowngradeWrapper
+    },
+    ButtplugServerBuilder,
+    ButtplugServerDowngradeWrapper,
   },
 };
 use futures::{pin_mut, Stream, StreamExt};
@@ -38,7 +47,10 @@ use tokio::time::sleep;
 
 async fn setup_test_server(
   msg_union: message::ButtplugClientMessageV3,
-) -> (ButtplugServerDowngradeWrapper, impl Stream<Item = ButtplugServerMessageVariant>) {
+) -> (
+  ButtplugServerDowngradeWrapper,
+  impl Stream<Item = ButtplugServerMessageVariant>,
+) {
   let server = ButtplugServerDowngradeWrapper::new(test_server(false));
   let recv = server.client_version_event_stream();
   // assert_eq!(server.server_name, "Test Server");
@@ -98,8 +110,9 @@ async fn test_server_handshake_not_done_first_v3() {
 
 #[tokio::test]
 async fn test_client_version_older_than_server() {
-  let msg =
-    message::ButtplugClientMessageVariant::V2(message::RequestServerInfoV1::new("Test Client", ButtplugMessageSpecVersion::Version2).into());
+  let msg = message::ButtplugClientMessageVariant::V2(
+    message::RequestServerInfoV1::new("Test Client", ButtplugMessageSpecVersion::Version2).into(),
+  );
   let server = ButtplugServerDowngradeWrapper::new(test_server(false));
   // assert_eq!(server.server_name, "Test Server");
   match server
@@ -119,8 +132,9 @@ async fn test_client_version_older_than_server() {
 #[ignore = "Needs to be rewritten to send in via the JSON parser, otherwise we're type bound due to the enum and can't fail"]
 async fn test_server_version_older_than_client() {
   let server = ButtplugServerDowngradeWrapper::new(test_server(false));
-  let msg =
-    message::ButtplugClientMessageVariant::V2(message::RequestServerInfoV1::new("Test Client", ButtplugMessageSpecVersion::Version2).into());
+  let msg = message::ButtplugClientMessageVariant::V2(
+    message::RequestServerInfoV1::new("Test Client", ButtplugMessageSpecVersion::Version2).into(),
+  );
   assert!(
     server.parse_message(msg).await.is_err(),
     "Client having higher version than server should fail"
@@ -137,7 +151,9 @@ async fn test_ping_timeout() {
   pin_mut!(recv);
   let msg = message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
   sleep(Duration::from_millis(150)).await;
-  let reply = server.parse_message(message::ButtplugClientMessageV4::RequestServerInfo(msg)).await;
+  let reply = server
+    .parse_message(message::ButtplugClientMessageV4::RequestServerInfo(msg))
+    .await;
   assert!(
     reply.is_ok(),
     "ping timer shouldn't start until handshake finished. {:?}",
@@ -145,7 +161,9 @@ async fn test_ping_timeout() {
   );
   sleep(Duration::from_millis(300)).await;
   let pingmsg = message::PingV0::default();
-  let result = server.parse_message(message::ButtplugClientMessageV4::Ping(pingmsg.into())).await;
+  let result = server
+    .parse_message(message::ButtplugClientMessageV4::Ping(pingmsg.into()))
+    .await;
   let err = result.unwrap_err();
   if !matches!(err.original_error(), ButtplugError::ButtplugPingError(_)) {
     panic!("Got wrong type of error back!");
@@ -179,10 +197,14 @@ async fn test_device_stop_on_ping_timeout() {
   pin_mut!(recv);
 
   let msg = message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
-  let mut reply = server.parse_message(message::ButtplugClientMessageV4::from(msg)).await;
+  let mut reply = server
+    .parse_message(message::ButtplugClientMessageV4::from(msg))
+    .await;
   assert!(reply.is_ok());
   reply = server
-    .parse_message(message::ButtplugClientMessageV4::from(message::StartScanningV0::default()))
+    .parse_message(message::ButtplugClientMessageV4::from(
+      message::StartScanningV0::default(),
+    ))
     .await;
   assert!(reply.is_ok());
   // Check that we got an event back about a new device.
@@ -202,9 +224,16 @@ async fn test_device_stop_on_ping_timeout() {
     }
   }
   server
-    .parse_message(
-      message::ButtplugClientMessageV4::from(message::ScalarCmdV4::new(device_index, vec![message::ScalarSubcommandV4::new(0, 0.5, message::ActuatorType::Vibrate)])),
-    )
+    .parse_message(message::ButtplugClientMessageV4::from(
+      message::ScalarCmdV4::new(
+        device_index,
+        vec![message::ScalarSubcommandV4::new(
+          0,
+          0.5,
+          message::ActuatorType::Vibrate,
+        )],
+      ),
+    ))
     .await
     .expect("Test, assuming infallible.");
 
@@ -234,7 +263,10 @@ async fn test_repeated_handshake() {
 
   let (server, _recv) = setup_test_server((msg.clone()).into()).await;
   assert!(server.connected());
-  let err = server.parse_message(message::ButtplugClientMessageVariant::V3(msg.into())).await.unwrap_err();
+  let err = server
+    .parse_message(message::ButtplugClientMessageVariant::V3(msg.into()))
+    .await
+    .unwrap_err();
   if let ButtplugServerMessageVariant::V3(ButtplugServerMessageV3::Error(e)) = err {
     assert!(matches!(
       e.original_error(),
@@ -243,7 +275,6 @@ async fn test_repeated_handshake() {
   } else {
     panic!("Should've gotten error")
   }
-
 }
 
 #[tokio::test]
@@ -251,7 +282,9 @@ async fn test_invalid_device_index() {
   let msg = message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
   let (server, _) = setup_test_server(msg.into()).await;
   let err = server
-    .parse_message(message::ButtplugClientMessageVariant::V3(message::VibrateCmdV1::new(10, vec![]).into()))
+    .parse_message(message::ButtplugClientMessageVariant::V3(
+      message::VibrateCmdV1::new(10, vec![]).into(),
+    ))
     .await
     .unwrap_err();
   if let ButtplugServerMessageVariant::V3(ButtplugServerMessageV3::Error(e)) = err {
@@ -261,7 +294,7 @@ async fn test_invalid_device_index() {
     ));
   } else {
     panic!("Should've gotten error")
-  }  
+  }
 }
 
 #[tokio::test]
@@ -276,7 +309,8 @@ async fn test_device_index_generation() {
   pin_mut!(recv);
   assert!(server
     .parse_message(
-      message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
+      message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
+        .into()
     )
     .await
     .is_ok());
@@ -321,7 +355,8 @@ async fn test_server_scanning_finished() {
   pin_mut!(recv);
   assert!(server
     .parse_message(
-      message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
+      message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
+        .into()
     )
     .await
     .is_ok());

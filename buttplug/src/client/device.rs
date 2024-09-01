@@ -18,8 +18,8 @@ use crate::{
     message::{
       ActuatorType,
       ButtplugClientMessageV3,
-      ButtplugServerMessageV3,
       ButtplugDeviceMessageType,
+      ButtplugServerMessageV3,
       ClientDeviceMessageAttributesV3,
       ClientGenericDeviceMessageAttributesV3,
       DeviceMessageInfoV3,
@@ -706,9 +706,8 @@ impl ButtplugClientDevice {
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawSubscribeCmd).into(),
       );
     }
-    let msg = ButtplugClientMessageV3::RawUnsubscribeCmd(RawUnsubscribeCmdV2::new(
-      self.index, endpoint,
-    ));
+    let msg =
+      ButtplugClientMessageV3::RawUnsubscribeCmd(RawUnsubscribeCmdV2::new(self.index, endpoint));
     self.event_loop_sender.send_message_expect_ok(msg)
   }
 

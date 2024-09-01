@@ -64,8 +64,7 @@ type ButtplugClientResultFuture<T = ()> = BoxFuture<'static, ButtplugClientResul
 
 /// Result type used for passing server responses.
 pub type ButtplugServerMessageResult = ButtplugClientResult<ButtplugServerMessageV3>;
-pub type ButtplugServerMessageResultFuture =
-  ButtplugClientResultFuture<ButtplugServerMessageV3>;
+pub type ButtplugServerMessageResultFuture = ButtplugClientResultFuture<ButtplugServerMessageV3>;
 /// Future state type for returning server responses across futures.
 pub(crate) type ButtplugServerMessageStateShared =
   ButtplugFutureStateShared<ButtplugServerMessageResult>;
@@ -91,10 +90,7 @@ pub struct ButtplugClientMessageFuturePair {
 }
 
 impl ButtplugClientMessageFuturePair {
-  pub fn new(
-    msg: ButtplugClientMessageV3,
-    waker: ButtplugServerMessageStateShared,
-  ) -> Self {
+  pub fn new(msg: ButtplugClientMessageV3, waker: ButtplugServerMessageStateShared) -> Self {
     Self { msg, waker }
   }
 }
@@ -199,10 +195,7 @@ impl ButtplugClientMessageSender {
     self.message_sender.subscribe()
   }
 
-  pub fn send_message(
-    &self,
-    msg: ButtplugClientMessageV3,
-  ) -> ButtplugServerMessageResultFuture {
+  pub fn send_message(&self, msg: ButtplugClientMessageV3) -> ButtplugServerMessageResultFuture {
     if !self.connected.load(Ordering::Relaxed) {
       future::ready(Err(ButtplugConnectorError::ConnectorNotConnected.into())).boxed()
     } else {
@@ -234,10 +227,7 @@ impl ButtplugClientMessageSender {
 
   /// Sends a ButtplugMessage from client to server. Expects to receive an [Ok]
   /// type ButtplugMessage back from the server.
-  pub fn send_message_expect_ok(
-    &self,
-    msg: ButtplugClientMessageV3,
-  ) -> ButtplugClientResultFuture {
+  pub fn send_message_expect_ok(&self, msg: ButtplugClientMessageV3) -> ButtplugClientResultFuture {
     let send_fut = self.send_message(msg);
     async move { send_fut.await.map(|_| ()) }.boxed()
   }
@@ -295,8 +285,7 @@ impl ButtplugClient {
     mut connector: ConnectorType,
   ) -> Result<(), ButtplugClientError>
   where
-    ConnectorType: ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3>
-      + 'static,
+    ConnectorType: ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3> + 'static,
   {
     if self.connected() {
       return Err(ButtplugClientError::ButtplugConnectorError(

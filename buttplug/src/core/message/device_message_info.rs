@@ -83,7 +83,6 @@ impl From<DeviceMessageInfoV4> for DeviceMessageInfoV3 {
   }
 }
 
-
 /// Substructure of device messages, used for attribute information (name, messages supported, etc...)
 #[derive(Clone, Debug, PartialEq, Eq, MutGetters, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]

@@ -9,7 +9,12 @@ use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{
-      self, ButtplugDeviceMessage, ButtplugServerDeviceMessage, Endpoint, SensorReadingV4, SensorType
+      self,
+      ButtplugDeviceMessage,
+      ButtplugServerDeviceMessage,
+      Endpoint,
+      SensorReadingV4,
+      SensorType,
     },
   },
   server::device::{
@@ -112,8 +117,13 @@ impl ProtocolHandler for KGoalBoost {
                 if stream_sensors.contains(&1)
                   && sender
                     .send(
-                      SensorReadingV4::new(device_index, 0, SensorType::Pressure, vec![unnormalized])
-                        .into(),
+                      SensorReadingV4::new(
+                        device_index,
+                        0,
+                        SensorType::Pressure,
+                        vec![unnormalized],
+                      )
+                      .into(),
                     )
                     .is_err()
                 {
@@ -137,7 +147,7 @@ impl ProtocolHandler for KGoalBoost {
     &self,
     device: Arc<Hardware>,
     message: &message::SensorUnsubscribeCmdV4,
-  ) -> BoxFuture<Result<(), ButtplugDeviceError>> {    
+  ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     if !self.subscribed_sensors.contains(message.feature_index()) {
       return future::ready(Ok(())).boxed();
     }

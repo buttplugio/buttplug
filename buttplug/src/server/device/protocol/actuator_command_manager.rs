@@ -8,7 +8,15 @@
 use crate::core::{
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
-    ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugDeviceCommandMessageUnion, DeviceFeature, DeviceFeatureActuator, RotateCmdV4, RotationSubcommandV4, ScalarCmdV4, ScalarSubcommandV4
+    ActuatorType,
+    ButtplugActuatorFeatureMessageType,
+    ButtplugDeviceCommandMessageUnion,
+    DeviceFeature,
+    DeviceFeatureActuator,
+    RotateCmdV4,
+    RotationSubcommandV4,
+    ScalarCmdV4,
+    ScalarSubcommandV4,
   },
 };
 use getset::Getters;
@@ -116,7 +124,7 @@ impl ActuatorCommandManager {
           .messages()
           .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::RotateCmd)
         {
-        rotate_subcommands.push(RotationSubcommandV4::new(index as u32, 0.0, false));
+          rotate_subcommands.push(RotationSubcommandV4::new(index as u32, 0.0, false));
         } else if actuator
           .messages()
           .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ScalarCmd)
@@ -253,10 +261,13 @@ impl ActuatorCommandManager {
     ];
 
     let mut commands: Vec<(u32, ActuatorType, (f64, bool))> = vec![];
-    msg
-      .rotations()
-      .iter()
-      .for_each(|x| commands.push((x.feature_index(), ActuatorType::Rotate, (x.speed(), x.clockwise()))));
+    msg.rotations().iter().for_each(|x| {
+      commands.push((
+        x.feature_index(),
+        ActuatorType::Rotate,
+        (x.speed(), x.clockwise()),
+      ))
+    });
     let mut result = self.update(
       ButtplugActuatorFeatureMessageType::RotateCmd,
       &commands,

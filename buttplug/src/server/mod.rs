@@ -47,19 +47,22 @@
 
 pub mod device;
 mod ping_timer;
-mod server_builder;
 mod server;
-mod server_message_conversion;
+mod server_builder;
 mod server_downgrade_wrapper;
+mod server_message_conversion;
 
 pub use server::ButtplugServer;
-pub use server_downgrade_wrapper::ButtplugServerDowngradeWrapper;
 pub use server_builder::ButtplugServerBuilder;
+pub use server_downgrade_wrapper::ButtplugServerDowngradeWrapper;
 
 use futures::future::BoxFuture;
 use thiserror::Error;
 
-use crate::core::{errors::{ButtplugDeviceError, ButtplugError}, message::ButtplugServerMessageV4};
+use crate::core::{
+  errors::{ButtplugDeviceError, ButtplugError},
+  message::ButtplugServerMessageV4,
+};
 
 /// Result type for Buttplug Server methods, as the server will always communicate in
 /// [ButtplugServerMessage] instances in order to follow the [Buttplug

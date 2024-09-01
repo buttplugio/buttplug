@@ -46,7 +46,18 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     message::{
-      self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessageType, ButtplugMessage, ButtplugServerDeviceMessage, ButtplugServerMessageV4, Endpoint, FeatureType, RawReadingV2, RawSubscribeCmdV2, ScalarCmdV4, SensorType,
+      self,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessageType,
+      ButtplugMessage,
+      ButtplugServerDeviceMessage,
+      ButtplugServerMessageV4,
+      Endpoint,
+      FeatureType,
+      RawReadingV2,
+      RawSubscribeCmdV2,
+      ScalarCmdV4,
+      SensorType,
     },
     ButtplugResultFuture,
   },
@@ -447,9 +458,14 @@ impl ServerDevice {
   }
 
   fn handle_scalarcmd_v4(&self, msg: &ScalarCmdV4) -> ButtplugServerResultFuture {
-
     if msg.scalars().is_empty() {
-      return future::ready(Err(ButtplugDeviceError::ProtocolRequirementError("ScalarCmd with no subcommands is not valid.".to_owned()).into())).boxed(); 
+      return future::ready(Err(
+        ButtplugDeviceError::ProtocolRequirementError(
+          "ScalarCmd with no subcommands is not valid.".to_owned(),
+        )
+        .into(),
+      ))
+      .boxed();
     }
 
     for command in msg.scalars() {
@@ -603,7 +619,7 @@ impl ServerDevice {
       handler
         .handle_sensor_subscribe_cmd(device, &message)
         .await
-        .map(|_| message::OkV0::new(message.id()).into())        
+        .map(|_| message::OkV0::new(message.id()).into())
         .map_err(|e| e.into())
     }
     .boxed()

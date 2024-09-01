@@ -123,7 +123,7 @@ impl From<ButtplugError> for ErrorV0 {
 #[cfg(feature = "serialize-json")]
 #[cfg(test)]
 mod test {
-  use crate::core::message::{ButtplugServerMessageCurrent, ErrorV0, ErrorCode};
+  use crate::core::message::{ButtplugServerMessageCurrent, ErrorCode, ErrorV0};
 
   const ERROR_STR: &str = "{\"Error\":{\"Id\":0,\"ErrorCode\":1,\"ErrorMessage\":\"Test Error\"}}";
 
