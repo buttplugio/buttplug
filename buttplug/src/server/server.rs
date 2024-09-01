@@ -257,15 +257,14 @@ impl ButtplugServer {
 
 #[cfg(test)]
 mod test {
-  /*
   use crate::{
     core::message::{self, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
-    server::ButtplugServer,
+    server::ButtplugServerBuilder,
   };
   #[tokio::test]
   async fn test_server_reuse() {
-    let server = ButtplugServer::default();
-    let msg = message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+    let server = ButtplugServerBuilder::default().finish().unwrap();
+    let msg = message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
     let mut reply = server.parse_message(msg.clone().into()).await;
     assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
 
@@ -284,5 +283,4 @@ mod test {
       reply
     );
   }
-  */
 }
