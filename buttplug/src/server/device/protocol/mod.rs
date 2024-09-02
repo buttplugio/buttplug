@@ -100,6 +100,7 @@ pub mod svakom_barnard;
 pub mod svakom_dice;
 pub mod svakom_dt250a;
 pub mod svakom_iker;
+pub mod svakom_jordan;
 pub mod svakom_pulse;
 pub mod svakom_sam;
 pub mod svakom_suitcase;
@@ -496,6 +497,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     svakom_iker::setup::SvakomIkerIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom_jordan::setup::SvakomJordanIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,

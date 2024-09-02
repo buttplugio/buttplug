@@ -3366,6 +3366,32 @@ protocols:
           services:
             0000ffe0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+  svakom-jordan:
+    defaults:
+      name: Svakom Jordan
+      features:
+        - feature-type: Vibrate
+          actuator:
+            step-range:
+              - 0
+              - 10
+            messages:
+              - ScalarCmd
+        - feature-type: Oscillate
+          actuator:
+            step-range:
+              - 0
+              - 5
+            messages:
+              - ScalarCmd
+    communication:
+      - btle:
+          names:
+            - Jordan
+          services:
+            0000ffe0-0000-1000-8000-00805f9b34fb:
+              tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+              rx: 0000ffe2-0000-1000-8000-00805f9b34fb
   svakom-pulse:
     defaults:
       name: Svakom Pulse Device
@@ -3528,32 +3554,6 @@ protocols:
           services:
             0000ffe0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffe1-0000-1000-8000-00805f9b34fb
-  svakom-trystaneo:
-    defaults:
-      name: Svakom Trysta Neo
-      features:
-        - feature-type: Vibrate
-          actuator:
-            step-range:
-              - 0
-              - 10
-            messages:
-              - ScalarCmd
-        - feature-type: Rotate
-          actuator:
-            step-range:
-              - 0
-              - 3
-            messages:
-              - ScalarCmd
-    communication:
-      - btle:
-          names:
-            - Trysta Neo
-          services:
-            0000ffe0-0000-1000-8000-00805f9b34fb:
-              tx: 0000ffe1-0000-1000-8000-00805f9b34fb
-              rx: 0000ffe2-0000-1000-8000-00805f9b34fb
   realov:
     defaults:
       name: Realov Device
