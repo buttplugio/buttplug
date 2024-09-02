@@ -1,3 +1,9 @@
+# 9.0.1 (2024-09-02)
+
+## Bugfixes
+
+- #657: Fix issue where message downgrader was not setting message IDs in all cases
+
 # 9.0.0 (2024-09-01)
 
 ## Breaking Changes
