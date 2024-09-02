@@ -122,6 +122,9 @@ protocols:
           - V
         name: Lovense Mission
       - identifier:
+          - CA
+        name: Lovense Mission 2
+      - identifier:
           - X
         name: Lovense Ferri
       - identifier:
@@ -537,6 +540,9 @@ protocols:
             42410001-0023-4bd4-bbd5-a6920e4c5653:
               tx: 42410002-0023-4bd4-bbd5-a6920e4c5653
               rx: 42410003-0023-4bd4-bbd5-a6920e4c5653
+            43410001-0023-4bd4-bbd5-a6920e4c5653:
+              tx: 43410002-0023-4bd4-bbd5-a6920e4c5653
+              rx: 43410003-0023-4bd4-bbd5-a6920e4c5653
   lovense-connect-service:
     defaults:
       name: Lovense Connect Service Device
