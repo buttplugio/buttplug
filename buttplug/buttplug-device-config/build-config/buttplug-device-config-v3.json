@@ -14059,6 +14059,18 @@
         },
         {
           "identifier": [
+            "J-Euphoric"
+          ],
+          "name": "JoyHub Euphoric"
+        },
+        {
+          "identifier": [
+            "J-Euphoric3"
+          ],
+          "name": "JoyHub Euphoric3"
+        },
+        {
+          "identifier": [
             "J-Petalwish2"
           ],
           "name": "JoyHub Petalwish 2",
@@ -14310,6 +14322,26 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-Pul"
+          ],
+          "name": "JoyHub Pul",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -14335,7 +14367,10 @@
               "J-Mariner",
               "J-Mace",
               "J-MarsLion",
-              "J-Tarian"
+              "J-Tarian",
+              "J-Pul",
+              "J-Euphoric",
+              "J-Euphoric3"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -15150,6 +15185,38 @@
         },
         {
           "identifier": [
+            "J-Fabledragon"
+          ],
+          "name": "JoyHub Fable Dragon",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
             "J-VelvetRabbit"
           ],
           "name": "JoyHub Velvet Rabbit",
@@ -15243,6 +15310,82 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-VibSiren2"
+          ],
+          "name": "JoyHub VibSiren 2",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Veemy"
+          ],
+          "name": "JoyHub Veemy",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -15273,7 +15416,10 @@
               "J-Flamewing",
               "J-VelvetRabbit",
               "J-VividPulse",
-              "J-VioletVine"
+              "J-VioletVine",
+              "J-VibSiren2",
+              "J-Veemy",
+              "J-Fabledragon"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -15381,13 +15527,61 @@
             "J-RoseLin"
           ],
           "name": "JoyHub RoseLin"
+        },
+        {
+          "identifier": [
+            "J-Viele"
+          ],
+          "name": "JoyHub Viele",
+          "features": [
+            {
+              "feature-type": "Rotate",
+              "description": "Internal Simulator",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Internal Whip",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Internal Vibrator",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
         {
           "btle": {
             "names": [
-              "J-RoseLin"
+              "J-RoseLin",
+              "J-Viele"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
