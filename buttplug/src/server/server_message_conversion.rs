@@ -743,11 +743,14 @@ impl ButtplugServerMessageConverter {
 
     let sensor_feature_index = features[*message.sensor_index() as usize] as u32;
 
-    Ok(SensorReadCmdV4::new(
-      message.device_index(),
-      sensor_feature_index,
-      *message.sensor_type(),
-    ).into())
+    Ok(
+      SensorReadCmdV4::new(
+        message.device_index(),
+        sensor_feature_index,
+        *message.sensor_type(),
+      )
+      .into(),
+    )
   }
 
   fn convert_sensorsubscribev3_to_sensorsubcribe4(
@@ -764,11 +767,14 @@ impl ButtplugServerMessageConverter {
 
     let sensor_feature_index = features[*message.sensor_index() as usize] as u32;
 
-    Ok(SensorSubscribeCmdV4::new(
-      message.device_index(),
-      sensor_feature_index,
-      *message.sensor_type(),
-    ).into())
+    Ok(
+      SensorSubscribeCmdV4::new(
+        message.device_index(),
+        sensor_feature_index,
+        *message.sensor_type(),
+      )
+      .into(),
+    )
   }
 
   fn convert_sensorunsubscribev3_to_sensorunsubcribe4(
@@ -785,11 +791,14 @@ impl ButtplugServerMessageConverter {
 
     let sensor_feature_index = features[*message.sensor_index() as usize] as u32;
 
-    Ok(SensorUnsubscribeCmdV4::new(
-      message.device_index(),
-      sensor_feature_index,
-      *message.sensor_type(),
-    ).into())
+    Ok(
+      SensorUnsubscribeCmdV4::new(
+        message.device_index(),
+        sensor_feature_index,
+        *message.sensor_type(),
+      )
+      .into(),
+    )
   }
 
   //
@@ -802,19 +811,19 @@ impl ButtplugServerMessageConverter {
     version: &ButtplugMessageSpecVersion,
   ) -> Result<ButtplugServerMessageVariant, ButtplugError> {
     let mut outgoing_msg = match version {
-      ButtplugMessageSpecVersion::Version0 => ButtplugServerMessageVariant::V0(
-        self.convert_servermessagev4_to_servermessagev0(msg)?,
-      ),
-      ButtplugMessageSpecVersion::Version1 => ButtplugServerMessageVariant::V1(
-        self.convert_servermessagev4_to_servermessagev1(msg)?,
-      ),
-      ButtplugMessageSpecVersion::Version2 => ButtplugServerMessageVariant::V2(
-        self.convert_servermessagev4_to_servermessagev2(msg)?,
-      ),
-      ButtplugMessageSpecVersion::Version3 => ButtplugServerMessageVariant::V3(
-        self.convert_servermessagev4_to_servermessagev3(msg)?,
-      ),
-      ButtplugMessageSpecVersion::Version4 => ButtplugServerMessageVariant::V4(msg.clone())
+      ButtplugMessageSpecVersion::Version0 => {
+        ButtplugServerMessageVariant::V0(self.convert_servermessagev4_to_servermessagev0(msg)?)
+      }
+      ButtplugMessageSpecVersion::Version1 => {
+        ButtplugServerMessageVariant::V1(self.convert_servermessagev4_to_servermessagev1(msg)?)
+      }
+      ButtplugMessageSpecVersion::Version2 => {
+        ButtplugServerMessageVariant::V2(self.convert_servermessagev4_to_servermessagev2(msg)?)
+      }
+      ButtplugMessageSpecVersion::Version3 => {
+        ButtplugServerMessageVariant::V3(self.convert_servermessagev4_to_servermessagev3(msg)?)
+      }
+      ButtplugMessageSpecVersion::Version4 => ButtplugServerMessageVariant::V4(msg.clone()),
     };
     // Always make sure the ID is set after conversion
     outgoing_msg.set_id(msg.id());
@@ -832,11 +841,11 @@ impl ButtplugServerMessageConverter {
           &original_msg
         {
           let msg_out = SensorReadingV3::new(
-              msg.device_index(),
-              *msg.sensor_index(),
-              *msg.sensor_type(),
-              m.data().clone(),
-            );
+            msg.device_index(),
+            *msg.sensor_index(),
+            *msg.sensor_type(),
+            m.data().clone(),
+          );
           Ok(msg_out.into())
         } else {
           Err(ButtplugMessageError::UnexpectedMessageType("SensorReading".to_owned()).into())
