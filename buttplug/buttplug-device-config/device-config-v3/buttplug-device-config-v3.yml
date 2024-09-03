@@ -6116,6 +6116,28 @@ protocols:
           services:
             0000fe00-0000-1000-8000-00805f9b34fb:
               tx: 0000fe01-0000-1000-8000-00805f9b34fb
+  cowgirl-cone:
+    defaults:
+      name: The Cowgirl Cone
+      features:
+        - feature-type: Vibrate
+          actuator:
+            step-range:
+              - 0
+              - 128
+            messages:
+              - ScalarCmd
+    configurations:
+      - identifier:
+          - CG-CONE
+        name: The Cowgirl Cone
+    communication:
+      - btle:
+          names:
+            - CG-CONE
+          services:
+            0000ffe0-0000-1000-8000-00805f9b34fb:
+              tx: 0000ffe1-0000-1000-8000-00805f9b34fb
   galaku-pump:
     defaults:
       name: Galaku Device

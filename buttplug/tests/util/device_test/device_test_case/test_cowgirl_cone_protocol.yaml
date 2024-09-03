@@ -1,0 +1,52 @@
+devices:
+  - identifier: 
+      name: CG-CONE
+    expected_name: "The Cowgirl Cone"
+device_init:
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xaa, 0x56, 0x00, 0x00]
+            write_with_response: false
+# ToDo: Allow the 3 second delay
+device_commands:
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xf1, 0x01, 0x32, 0x00]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 0
+            Scalar: 0.75
+            ActuatorType: Vibrate
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xf1, 0x01, 0x40, 0x00]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages: 
+        - !Stop 
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            data: [0xf1, 0x01, 0x00, 0x00]
+            write_with_response: false
