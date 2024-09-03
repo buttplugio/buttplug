@@ -15,11 +15,13 @@ pub mod fleshlight_launch_helper;
 // Since users can pick and choose protocols, we need all of these to be public.
 pub mod activejoy;
 pub mod adrienlastic;
+pub mod amorelie_joy;
 pub mod aneros;
 pub mod ankni;
 pub mod buttplug_passthru;
 pub mod cachito;
 pub mod cowgirl;
+pub mod cowgirl_cone;
 pub mod cupido;
 pub mod foreo;
 pub mod fox;
@@ -212,6 +214,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     adrienlastic::setup::AdrienLasticIdentifierFactory::default(),
   );
+  add_to_protocol_map(
+    &mut map,
+    amorelie_joy::setup::AmorelieJoyIdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, aneros::setup::AnerosIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
@@ -224,6 +230,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     cowgirl::setup::CowgirlIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    cowgirl_cone::setup::CowgirlConeIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, cupido::setup::CupidoIdentifierFactory::default());
   add_to_protocol_map(

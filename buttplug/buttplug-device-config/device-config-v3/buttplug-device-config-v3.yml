@@ -9135,3 +9135,42 @@ protocols:
             0000f0b0-0000-1000-8000-00805f9b34fb:
               tx: 0000f0b1-0000-1000-8000-00805f9b34fb
               rx: 0000f0b2-0000-1000-8000-00805f9b34fb
+  amorelie-joy:
+    defaults:
+      name: Amorelie Joy Device
+      features:
+        - feature-type: Vibrate
+          actuator:
+            step-range:
+              - 0
+              - 100
+            messages:
+              - ScalarCmd
+    configurations:
+      - identifier:
+          - 4D02
+        name: Amorelie Joy Move
+      - identifier:
+          - 4D05
+        name: Amorelie Joy Cha-Cha
+      - identifier:
+          - 4D06
+        name: Amorelie Joy Boogie
+      - identifier:
+          - 4D01
+        name: Amorelie Joy Shimmer
+      - identifier:
+          - 4D03
+        name: Amorelie Joy Grow
+    communication:
+      - btle:
+          names:
+            - 4D01
+            - 4D02
+            - 4D03
+            - 4D05
+            - 4D06
+          services:
+            0000ffe0-0000-1000-8000-00805f9b34fb:
+              rx: 0000ffe2-0000-1000-8000-00805f9b34fb
+              tx: 0000ffe3-0000-1000-8000-00805f9b34fb
