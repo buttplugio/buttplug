@@ -108,6 +108,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_cupido_protocol.yaml" ; "Cupido Protocol")]
 //#[test_case("test_cowgirl_cone_protocol.yaml" ; "The Cowgirl Cone Protocol")]
 #[test_case("test_amorelie_joy_protocol.yaml" ; "Amorelie Joy Protocol")]
+#[test_case("test_svakom_sam2.yaml" ; "Svakom Sam Neo 2 Pro")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
@@ -206,6 +207,7 @@ async fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_cupido_protocol.yaml" ; "Cupido Protocol")]
 //#[test_case("test_cowgirl_cone_protocol.yaml" ; "The Cowgirl Cone Protocol")]
 #[test_case("test_amorelie_joy_protocol.yaml" ; "Amorelie Joy Protocol")]
+#[test_case("test_svakom_sam2.yaml" ; "Svakom Sam Neo 2 Pro")]
 #[tokio::test]
 async fn test_device_protocols_json_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();

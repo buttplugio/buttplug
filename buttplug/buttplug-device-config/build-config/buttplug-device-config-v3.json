@@ -5678,6 +5678,67 @@
         }
       ]
     },
+    "svakom-sam2": {
+      "defaults": {
+        "name": "Svakom Sam Neo 2",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                10
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Constrict",
+            "actuator": {
+              "step-range": [
+                0,
+                5
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Sam Neo 2"
+          ],
+          "name": "Svakom Sam Neo 2"
+        },
+        {
+          "identifier": [
+            "Sam Neo 2 Pro"
+          ],
+          "name": "Svakom Sam Neo 2 Pro"
+        }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Sam Neo 2",
+              "Sam Neo 2 Pro"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
     "svakom-alex": {
       "defaults": {
         "name": "Svakom Alex Neo",
