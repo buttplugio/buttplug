@@ -14183,6 +14183,12 @@
         },
         {
           "identifier": [
+            "J-Torrian"
+          ],
+          "name": "JoyHub Torrian"
+        },
+        {
+          "identifier": [
             "J-Petalwish2"
           ],
           "name": "JoyHub Petalwish 2",
@@ -14482,7 +14488,8 @@
               "J-Tarian",
               "J-Pul",
               "J-Euphoric",
-              "J-Euphoric3"
+              "J-Euphoric3",
+              "J-Torrian"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
