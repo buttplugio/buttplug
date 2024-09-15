@@ -6823,6 +6823,26 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "GIGI3"
+          ],
+          "name": "Lelo Gigi 3",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -6835,7 +6855,8 @@
               "Tiani Harmony",
               "TOR3",
               "Hugo2",
-              "DoubleSonic"
+              "DoubleSonic",
+              "GIGI3"
             ],
             "services": {
               "0000fff0-0000-1000-8000-00805f9b34fb": {
