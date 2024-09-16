@@ -5795,7 +5795,8 @@
         {
           "btle": {
             "names": [
-              "Alex NEO 2"
+              "Alex NEO 2",
+              "S63E Alex NEO 2"
             ],
             "services": {
               "0000ffe0-0000-1000-8000-00805f9b34fb": {
