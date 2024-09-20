@@ -45,6 +45,7 @@ async fn delayed_constrict_handler(device: Arc<Hardware>, scalar: u8) {
     error!("Delayed JoyHub Constrict command error: {:?}", res.err());
   }
 }
+
 fn vibes_changed(
   old_commands_lock: &RwLock<Vec<Option<(ActuatorType, u32)>>>,
   new_commands: &[Option<(ActuatorType, u32)>],
@@ -61,6 +62,28 @@ fn vibes_changed(
     }
     if let Some(ocmd) = old_commands[i] {
       if let Some(ncmd) = new_commands[i] {
+        if ocmd.1 != ncmd.1 {
+          return true;
+        }
+      }
+    }
+  }
+  false
+}
+
+fn scalar_changed(
+  old_commands_lock: &RwLock<Vec<Option<(ActuatorType, u32)>>>,
+  new_commands: &[Option<(ActuatorType, u32)>],
+  index: usize,
+) -> bool {
+  let old_commands = old_commands_lock.read().expect("locks should work");
+  if old_commands.len() != new_commands.len() {
+    return true;
+  }
+
+  if index < old_commands.len() {
+    if let Some(ocmd) = old_commands[index] {
+      if let Some(ncmd) = new_commands[index] {
         if ocmd.1 != ncmd.1 {
           return true;
         }
@@ -118,7 +141,10 @@ impl ProtocolHandler for JoyHubV5 {
 
     if let Some(cmd) = cmd2 {
       if cmd.0 == ActuatorType::Constrict {
-        if vibes_changed(&self.last_cmds, commands, vec![2usize]) {
+        // cmd2 = None; // Not used again in this protocol variant
+        if !scalar_changed(&self.last_cmds, commands, 1usize) {
+          // no-op
+        } else if vibes_changed(&self.last_cmds, commands, vec![1usize]) {
           let dev = self.device.clone();
           async_manager::spawn(async move { delayed_constrict_handler(dev, cmd.1 as u8).await });
         } else {

@@ -70,6 +70,28 @@ fn vibes_changed(
   false
 }
 
+fn scalar_changed(
+  old_commands_lock: &RwLock<Vec<Option<(ActuatorType, u32)>>>,
+  new_commands: &[Option<(ActuatorType, u32)>],
+  index: usize,
+) -> bool {
+  let old_commands = old_commands_lock.read().expect("locks should work");
+  if old_commands.len() != new_commands.len() {
+    return true;
+  }
+
+  if index < old_commands.len() {
+    if let Some(ocmd) = old_commands[index] {
+      if let Some(ncmd) = new_commands[index] {
+        if ocmd.1 != ncmd.1 {
+          return true;
+        }
+      }
+    }
+  }
+  false
+}
+
 #[derive(Default)]
 pub struct JoyHubV4Initializer {}
 
@@ -123,10 +145,12 @@ impl ProtocolHandler for JoyHubV4 {
 
     if let Some(cmd) = cmd3 {
       if cmd.0 == ActuatorType::Constrict {
-        if vibes_changed(&self.last_cmds, commands, vec![2usize]) {
+        cmd3 = None;
+        if !scalar_changed(&self.last_cmds, commands, 2usize) {
+          // no-op
+        } else if vibes_changed(&self.last_cmds, commands, vec![2usize]) {
           let dev = self.device.clone();
           async_manager::spawn(async move { delayed_constrict_handler(dev, cmd.1 as u8).await });
-          cmd3 = None;
         } else {
           let mut command_writer = self.last_cmds.write().expect("Locks should work");
           *command_writer = commands.to_vec();
