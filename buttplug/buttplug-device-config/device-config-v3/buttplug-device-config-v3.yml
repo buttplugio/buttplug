@@ -8117,6 +8117,9 @@ protocols:
           - J-Torrian
         name: JoyHub Torrian
       - identifier:
+          - J-Rayen
+        name: JoyHub Rayen
+      - identifier:
           - J-Petalwish2
         name: JoyHub Petalwish 2
         features:
@@ -8300,6 +8303,7 @@ protocols:
             - J-Euphoric
             - J-Euphoric3
             - J-Torrian
+            - J-Rayen
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
