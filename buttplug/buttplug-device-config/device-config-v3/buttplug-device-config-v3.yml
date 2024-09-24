@@ -8800,6 +8800,24 @@ protocols:
               messages:
                 - ScalarCmd
       - identifier:
+          - J-Faunus
+        name: JoyHub Faunus
+        features:
+          - feature-type: Oscillate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+      - identifier:
           - J-VelvetRabbit
         name: JoyHub Velvet Rabbit
         features:
@@ -8896,6 +8914,32 @@ protocols:
                 - 255
               messages:
                 - ScalarCmd
+      - identifier:
+          - J-VortexTongue2
+        name: JoyHub Lips
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Rotate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Constrict
+            description: Air Pump
+            actuator:
+              step-range:
+                - 0
+                - 3
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
@@ -8927,6 +8971,8 @@ protocols:
             - J-VibSiren2
             - J-Veemy
             - J-Fabledragon
+            - J-Faunus
+            - J-VortexTongue2
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
