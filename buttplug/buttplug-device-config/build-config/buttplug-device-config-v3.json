@@ -15632,6 +15632,38 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-Torin"
+          ],
+          "name": "JoyHub Torin",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -15667,7 +15699,8 @@
               "J-Veemy",
               "J-Fabledragon",
               "J-Faunus",
-              "J-VortexTongue2"
+              "J-VortexTongue2",
+              "J-Torin"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
