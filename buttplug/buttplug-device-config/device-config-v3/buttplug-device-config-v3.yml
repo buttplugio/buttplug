@@ -8132,6 +8132,9 @@ protocols:
           - J-Rayen
         name: JoyHub Rayen
       - identifier:
+          - J-Mackay
+        name: JoyHub Mackay
+      - identifier:
           - J-Petalwish2
         name: JoyHub Petalwish 2
         features:
@@ -8288,6 +8291,18 @@ protocols:
                 - 255
               messages:
                 - ScalarCmd
+      - identifier:
+          - J-ROSELLA3
+        name: JoyHub Rose Love
+        features:
+          - feature-type: Constrict
+            description: Air Pump
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
@@ -8316,6 +8331,8 @@ protocols:
             - J-Euphoric3
             - J-Torrian
             - J-Rayen
+            - J-ROSELLA3
+            - J-Mackay
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
