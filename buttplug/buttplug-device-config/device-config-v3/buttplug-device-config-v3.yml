@@ -8062,10 +8062,14 @@ protocols:
       - identifier:
           - MP1N_QC_TL_P2
         name: Sistalk MonsterPub BeatHeart
+      - identifier:
+          - TDG_LIP_PT2
+        name: Tracy's Dog Surreal
     communication:
       - btle:
           names:
             - MonsterPub
+            - TracyDog
           services:
             00006000-0000-1000-8000-00805f9b34fb:
               tx: 00006001-0000-1000-8000-00805f9b34fb
