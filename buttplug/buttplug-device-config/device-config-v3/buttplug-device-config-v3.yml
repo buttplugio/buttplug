@@ -6417,6 +6417,12 @@ protocols:
       - identifier:
           - LL18
         name: Galaku Mitang
+      - identifier:
+          - CYX2
+        name: Secret Lover Simon
+      - identifier:
+          - RC31
+        name: ecret Lover Betty
       # Type 1
       - identifier:
           - G317
@@ -7473,6 +7479,8 @@ protocols:
             - K12A
             - K12C
             - LL18
+            - CYX2 # Secret Lover Simon
+            - RC31 # Secret Lover Betty
             # Type 1
             - G317
             - G312
