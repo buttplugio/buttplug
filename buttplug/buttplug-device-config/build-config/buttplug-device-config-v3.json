@@ -11328,6 +11328,18 @@
         },
         {
           "identifier": [
+            "CYX2"
+          ],
+          "name": "Secret Lover Simon"
+        },
+        {
+          "identifier": [
+            "RC31"
+          ],
+          "name": "ecret Lover Betty"
+        },
+        {
+          "identifier": [
             "G317"
           ],
           "name": "Galaku Zaku Aircraft Cup",
@@ -13132,6 +13144,8 @@
               "K12A",
               "K12C",
               "LL18",
+              "CYX2",
+              "RC31",
               "G317",
               "G312",
               "G302",
