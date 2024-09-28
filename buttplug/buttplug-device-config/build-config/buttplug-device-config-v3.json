@@ -14238,6 +14238,12 @@
         },
         {
           "identifier": [
+            "J-Mackay"
+          ],
+          "name": "JoyHub Mackay"
+        },
+        {
+          "identifier": [
             "J-Petalwish2"
           ],
           "name": "JoyHub Petalwish 2",
@@ -14509,6 +14515,27 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-ROSELLA3"
+          ],
+          "name": "JoyHub Rose Love",
+          "features": [
+            {
+              "feature-type": "Constrict",
+              "description": "Air Pump",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -14539,7 +14566,9 @@
               "J-Euphoric",
               "J-Euphoric3",
               "J-Torrian",
-              "J-Rayen"
+              "J-Rayen",
+              "J-ROSELLA3",
+              "J-Mackay"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
