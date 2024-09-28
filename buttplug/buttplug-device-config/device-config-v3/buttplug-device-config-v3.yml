@@ -5817,11 +5817,7 @@ protocols:
               tx: 0000fff3-0000-1000-8000-00805f9b34fb
   pink_punch:
     defaults:
-      name: Pink Punch Sunset Mushroom
-      configurations:
-        - identifier:
-            - PinkPunch_Peachu
-          name: Pink Punch Peachu
+      name: Pink Punch Device
       features:
         - feature-type: Vibrate
           actuator:
@@ -5830,11 +5826,22 @@ protocols:
               - 100
             messages:
               - ScalarCmd
+    configurations:
+      - identifier:
+          - Pink_Punch
+        name: Pink Punch Sunset Mushroom
+      - identifier:
+          - PinkPunch_Peachu
+        name: Pink Punch Peachu
+      - identifier:
+          - PinkPunch_DreamBunny
+        name: Pink Punch Dream Bunny
     communication:
       - btle:
           names:
             - Pink_Punch
             - PinkPunch_Peachu
+            - PinkPunch_DreamBunny
           services:
             0000ffe0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffe1-0000-1000-8000-00805f9b34fb
