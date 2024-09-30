@@ -1,0 +1,46 @@
+devices:
+  - identifier: 
+      name: "IMP 3"
+    expected_name: "Kuirkish Imp 3"
+device_commands:
+  # Vibrate 50%
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [ 0x55, 0x04, 0x01, 0x00, 0x00, 0x80, 0xAA ]
+            write_with_response: false
+
+  # Vibrate 100%
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 1
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [ 0x55, 0x04, 0x01, 0x00, 0x00, 0xFF, 0xAA ]
+            write_with_response: false
+  # Stop
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [ 0x55, 0x04, 0x01, 0x00, 0x00, 0x00, 0xAA ]
+            write_with_response: false
