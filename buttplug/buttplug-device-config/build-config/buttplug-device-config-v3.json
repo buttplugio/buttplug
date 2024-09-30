@@ -16325,6 +16325,52 @@
           }
         }
       ]
+    },
+    "feelingso": {
+      "defaults": {
+        "name": "FeelingSo Flair Feel",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                19
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Oscillate",
+            "actuator": {
+              "step-range": [
+                0,
+                19
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Flair Feel"
+            ],
+            "services": {
+              "42410001-0000-0101-0000-736278637a72": {
+                "tx": "42410002-0000-0101-0000-736278637a72",
+                "rx": "42410003-0000-0101-0000-736278637a72"
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }
