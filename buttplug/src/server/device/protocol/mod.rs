@@ -23,6 +23,7 @@ pub mod cachito;
 pub mod cowgirl;
 pub mod cowgirl_cone;
 pub mod cupido;
+pub mod deepsire;
 pub mod feelingso;
 pub mod foreo;
 pub mod fox;
@@ -239,6 +240,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     cowgirl_cone::setup::CowgirlConeIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, cupido::setup::CupidoIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    deepsire::setup::DeepSireIdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     lovense::setup::LovenseIdentifierFactory::default(),
