@@ -15727,6 +15727,38 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-VBarbiep"
+          ],
+          "name": "JoyHub VBarbie p",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -15763,7 +15795,8 @@
               "J-Fabledragon",
               "J-Faunus",
               "J-VortexTongue2",
-              "J-Torin"
+              "J-Torin",
+              "J-VBarbiep"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
