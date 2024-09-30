@@ -1,28 +1,34 @@
 {
-  "rust-analyzer.diagnostics.disabled": [
-   "macro-error"
-  ],
-  "yaml.customTags": [
-    "!Messages mapping",
-    "!Commands mapping",
-    "!Scalar sequence",
-    "!Stop",
-    "!FleshlightLaunchFW12Cmd mapping",
-    "!Linear sequence",
-    "!Write mapping",
-    "!Subscribe mapping",
-    "!Unsubscribe mapping",
-    "!Notifications sequence",
-    "!Reads sequence",
-    "!Events mapping",
-    "!Rotate sequence",
-    "!Battery",
-    "!RSSI",
-    "!Vibrate sequence",
-    "!Battery mapping"
-  ],
-  "rust-analyzer.linkedProjects": [
-    ".\\buttplug\\Cargo.toml"
-  ],
-  
+  "rust-analyzer": {
+    "diagnostics.disabled": [
+      "macro-error"
+    ],
+    "linkedProjects": [
+      "./buttplug/Cargo.toml"
+    ],
+  },
+  "yaml": {
+    "schemas": {
+      "buttplug/buttplug-device-config/device-config-v3/buttplug-device-config-schema-v3.json": "buttplug/buttplug-device-config/device-config-v3/buttplug-device-config-v3.yml"
+    },
+    "customTags": [
+      "!Messages mapping",
+      "!Commands mapping",
+      "!Scalar sequence",
+      "!Stop",
+      "!FleshlightLaunchFW12Cmd mapping",
+      "!Linear sequence",
+      "!Write mapping",
+      "!Subscribe mapping",
+      "!Unsubscribe mapping",
+      "!Notifications sequence",
+      "!Reads sequence",
+      "!Events mapping",
+      "!Rotate sequence",
+      "!Battery",
+      "!RSSI",
+      "!Vibrate sequence",
+      "!Battery mapping"
+    ],
+  },
 }
