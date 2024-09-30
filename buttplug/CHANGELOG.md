@@ -1,4 +1,11 @@
-# 9.0.2 (2024-09-28)
+# 9.0.3 (2024-09-30)
+
+## Bugfixes
+
+- Actually include changes listed to v9.0.2
+  - Rebase went wrong and commits were missed
+
+# 9.0.2 (2024-09-29)
 
 ## Features
 
