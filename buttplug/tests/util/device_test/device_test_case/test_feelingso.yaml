@@ -1,0 +1,63 @@
+devices:
+  - identifier: 
+      name: "Flair Feel"
+    expected_name: "FeelingSo Flair Feel"
+device_commands:
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [ 0xaa, 0x40, 0x03, 0x0a, 0x00, 0x14, 0x19 ]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 0
+            Scalar: 0.75
+            ActuatorType: Vibrate
+          - Index: 1
+            Scalar: 0.5
+            ActuatorType: Oscillate
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [ 0xaa, 0x40, 0x03, 0x0f, 0x0a, 0x14, 0x19 ]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 0
+            Scalar: 0
+            ActuatorType: Vibrate
+          - Index: 1
+            Scalar: 0.5
+            ActuatorType: Oscillate
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [ 0xaa, 0x40, 0x03, 0x00, 0x0a, 0x14, 0x19 ]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [ 0xaa, 0x40, 0x03, 0x00, 0x00, 0x14, 0x19 ]
+            write_with_response: false
