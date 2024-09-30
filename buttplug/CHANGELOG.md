@@ -1,3 +1,17 @@
+# 9.0.2 (2024-09-28)
+
+## Features
+
+- Added Device Support
+  - Sensee Dream Stick, Sensee Moonlight, Sensee Voice-Interactive Female Vibrator, Sensee No8,
+    Sensee Astronaut, Sensee Capsule (Improved support), JoyHub Euphoric, JoyHub Euphoric 3, JoyHub
+    Fable Dragon, JoyHub Viele, JoyHub Pul, JoyHub VibSiren 2, JoyHub Veemy, JoyHub Torrian, JoyHub
+    Reyan (untested), JoyHub Lips, JoyHub Faunus, JoyHub Torin, JoyHub Love Rose, JoyHub Mackay,
+    Lovense Mission 2, The Cowgirl Cone, Amorelie Joy Move, Amorelie Joy Cha-Cha, Amorelie Joy
+    Boogie, Amorelie Joy Shimmer, Amorelie Joy Grow, Svakom Jordan, Svakom Sam Neo 2 (untested),
+    Svakom Sam Neo 2 Pro, Lelo Gigi 3, Lelo Liv 3, Pink Punch Dream Bunny, Secret Lover Simon,
+    Secret Lover Betty, Tracy's Dog Surreal
+  
 # 9.0.1 (2024-09-02)
 
 ## Bugfixes
