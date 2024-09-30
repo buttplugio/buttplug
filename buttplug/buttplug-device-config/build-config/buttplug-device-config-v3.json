@@ -16371,6 +16371,47 @@
           }
         }
       ]
+    },
+    "deepsire": {
+      "defaults": {
+        "name": "DeepSire Device",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "IMP 3"
+          ],
+          "name": "Kuirkish Imp 3"
+        }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "IMP 3"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }
