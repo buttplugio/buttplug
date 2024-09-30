@@ -23,6 +23,7 @@ pub mod cachito;
 pub mod cowgirl;
 pub mod cowgirl_cone;
 pub mod cupido;
+pub mod feelingso;
 pub mod foreo;
 pub mod fox;
 pub mod fredorch;
@@ -257,6 +258,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
 
   add_to_protocol_map(&mut map, ankni::setup::AnkniIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    feelingso::setup::FeelingSoIdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, foreo::setup::ForeoIdentifierFactory::default());
   add_to_protocol_map(&mut map, fox::setup::FoxIdentifierFactory::default());
   add_to_protocol_map(
