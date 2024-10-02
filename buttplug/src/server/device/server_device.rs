@@ -502,11 +502,10 @@ impl ServerDevice {
       Err(err) => return future::ready(Err(err)).boxed(),
     };
 
-    if commands.is_empty() {
+    if commands.is_empty() || commands.iter().filter(|x| x.is_some()).count() == 0 {
       trace!("No commands generated for incoming device packet, skipping and returning success.");
       return future::ready(Ok(message::OkV0::default().into())).boxed();
     }
-
     self.handle_generic_command_result(self.handler.handle_scalar_cmd(&commands))
   }
 
