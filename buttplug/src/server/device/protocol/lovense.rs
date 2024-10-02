@@ -15,14 +15,14 @@ use crate::{
     hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
-  util::sleep,
+  util::{sleep, async_manager}
 };
 use async_trait::async_trait;
 use futures::{future::BoxFuture, FutureExt};
 use regex::Regex;
 use std::{
   sync::{
-    atomic::{AtomicBool, Ordering},
+    atomic::{AtomicBool, AtomicU32, AtomicU8, Ordering},
     Arc,
   },
   time::Duration,
@@ -141,13 +141,12 @@ impl LovenseInitializer {
 impl ProtocolInitializer for LovenseInitializer {
   async fn initialize(
     &mut self,
-    _: Arc<Hardware>,
+    hardware: Arc<Hardware>,
     device_definition: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let mut protocol = Lovense::default();
-    protocol.device_type = self.device_type.clone();
+    let device_type = self.device_type.clone();
 
-    protocol.vibrator_count = device_definition
+    let vibrator_count = device_definition
       .features()
       .iter()
       .filter(|x| [FeatureType::Vibrate, FeatureType::Oscillate].contains(x.feature_type()))
@@ -159,31 +158,49 @@ impl ProtocolInitializer for LovenseInitializer {
       .filter(|x| x.actuator().is_some())
       .count();
 
+    
     // This might need better tuning if other complex Lovenses are released
     // Currently this only applies to the Flexer/Lapis/Solace
-    if (protocol.vibrator_count == 2 && actuator_count > 2)
-      || protocol.vibrator_count > 2
-      || protocol.device_type == "H"
-    {
-      protocol.use_mply = true;
-    }
+    let use_mply = (vibrator_count == 2 && actuator_count > 2)
+      || vibrator_count > 2
+      || device_type == "H";
 
     debug!(
       "Device type {} initialized with {} vibrators {} using Mply",
-      protocol.device_type,
-      protocol.vibrator_count,
-      if protocol.use_mply { "" } else { "not " }
+      device_type,
+      vibrator_count,
+      if use_mply { "" } else { "not " }
     );
-    Ok(Arc::new(protocol))
+
+    Ok(Arc::new(Lovense::new(hardware, &device_type, vibrator_count, use_mply)))
   }
 }
 
-#[derive(Default)]
 pub struct Lovense {
   rotation_direction: Arc<AtomicBool>,
   vibrator_count: usize,
   use_mply: bool,
   device_type: String,
+  // Pairing of position: u8, duration: u32
+  linear_info: Arc<(AtomicU8, AtomicU32)>,
+}
+
+impl Lovense {
+  pub fn new(hardware: Arc<Hardware>, device_type: &str, vibrator_count: usize, use_mply: bool) -> Self {
+
+    let linear_info = Arc::new((AtomicU8::new(0), AtomicU32::new(0)));
+    if device_type == "BA" {
+      async_manager::spawn(update_linear_movement(hardware.clone(), linear_info.clone()));
+    }
+
+    Self {
+      rotation_direction: Arc::new(AtomicBool::new(false)),
+      vibrator_count,
+      use_mply,
+      device_type: device_type.to_owned(),
+      linear_info,
+    }
+  }
 }
 
 impl ProtocolHandler for Lovense {
@@ -384,5 +401,60 @@ impl ProtocolHandler for Lovense {
       ))
     }
     .boxed()
+  }
+
+  fn handle_linear_cmd(
+      &self,
+      message: message::LinearCmdV4,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let vector = message.vectors().first().expect("Already checked for vector subcommand");
+    self.linear_info.0.store((vector.position() * 100f64) as u8, Ordering::SeqCst);
+    self.linear_info.1.store(vector.duration(), Ordering::SeqCst);
+    Ok(vec!())
+  }
+}
+
+async fn update_linear_movement(device: Arc<Hardware>, linear_info: Arc<(AtomicU8, AtomicU32)>) {
+  let mut last_goal_position = 0i32;
+  let mut current_move_amount = 0i32;
+  let mut current_position = 0i32;
+  loop {
+    // See if we've updated our goal position
+    let goal_position = linear_info.0.load(Ordering::Relaxed) as i32;
+    // If we have and it's not the same, recalculate based on current status.
+    if last_goal_position != goal_position {
+      last_goal_position = goal_position;
+      // We move every 100ms, so divide the movement into that many chunks.
+      // If we're moving so fast it'd be under our 100ms boundary, just move in 1 step.
+      let move_steps = (linear_info.1.load(Ordering::Relaxed) / 100).max(1);
+      current_move_amount = (goal_position as i32 - current_position) as i32 / move_steps as i32;
+    }
+
+    // If we aren't going anywhere, just pause then restart
+    if current_position == last_goal_position {
+      sleep(Duration::from_millis(100)).await;
+      continue;
+    }
+
+    // Update our position, make sure we don't overshoot
+    current_position += current_move_amount;
+    if current_move_amount < 0 {
+      if current_position < last_goal_position {
+        current_position = last_goal_position;
+      }
+    } else {
+      if current_position > last_goal_position {
+        current_position = last_goal_position;
+      }
+    }
+
+    let lovense_cmd = format!("FSetSite:{};", current_position);
+    info!("{}", lovense_cmd);
+
+    let hardware_cmd = HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd.into_bytes(), false);
+    if device.write_value(&hardware_cmd).await.is_err() {
+      return;
+    }
+    sleep(Duration::from_millis(100)).await;
   }
 }
