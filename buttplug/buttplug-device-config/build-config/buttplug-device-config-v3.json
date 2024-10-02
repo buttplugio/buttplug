@@ -759,6 +759,19 @@
               }
             },
             {
+              "feature-type": "Position",
+              "description": "Stroker Position Based Movement",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "LinearCmd"
+                ]
+              }
+            },
+            {
               "feature-type": "Battery",
               "description": "Battery Level",
               "sensor": {
