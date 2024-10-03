@@ -1,0 +1,57 @@
+devices:
+  - identifier: 
+      name: "LOOB"
+    expected_name: "Joyroid Loob"
+device_init: 
+  # Initialization
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x00, 0x01, 0x01, 0xf4]
+            write_with_response: true
+device_commands:            
+  # Commands
+  - !Messages
+      device_index: 0
+      messages:
+        - !Linear
+          - Index: 0
+            Position: 0.51
+            Duration: 200
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x01, 0xfe, 0x00, 0xc8]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Linear
+          - Index: 0
+            Position: 1.0
+            Duration: 50
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x03, 0xe8, 0x00, 0x32]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Linear
+          - Index: 0
+            Position: 0.0
+            Duration: 500
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x00, 0x01, 0x01, 0xf4]
+            write_with_response: false
