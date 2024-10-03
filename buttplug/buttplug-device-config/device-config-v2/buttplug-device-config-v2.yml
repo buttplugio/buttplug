@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 31
+  minor: 32
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -4974,3 +4974,16 @@ protocols:
         ScalarCmd:
           - StepRange: [ 0, 100 ]
             ActuatorType: Vibrate
+  loob:
+    btle:
+      names:
+        - LOOB
+      services:
+        b75c49d2-04a3-4071-a0b5-35853eb08307:
+          tx: ba5c49d2-04a3-4071-a0b5-35853eb08307
+    defaults:
+      name: Joyroid Loob
+      messages:
+        LinearCmd:
+          - StepRange: [1, 1000]
+            ActuatorType: Position

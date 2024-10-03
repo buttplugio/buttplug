@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 3,
-    "minor": 6
+    "minor": 7
   },
   "protocols": {
     "lovense": {
@@ -16453,6 +16453,39 @@
             "services": {
               "0000ffe0-0000-1000-8000-00805f9b34fb": {
                 "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "loob": {
+      "defaults": {
+        "name": "Joyroid Loob",
+        "features": [
+          {
+            "feature-type": "Position",
+            "actuator": {
+              "step-range": [
+                0,
+                1000
+              ],
+              "messages": [
+                "LinearCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "LOOB"
+            ],
+            "services": {
+              "b75c49d2-04a3-4071-a0b5-35853eb08307": {
+                "tx": "ba5c49d2-04a3-4071-a0b5-35853eb08307"
               }
             }
           }

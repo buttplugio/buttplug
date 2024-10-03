@@ -61,9 +61,10 @@ serde_json = "1.0.125"
 serde_repr = "0.1.19"
 uuid = { version = "1.10.0", features = ["serde"] }
 url = "2.5.2"
-btleplug = { version = "0.11.5", optional = true }
+# btleplug = { version = "0.11.5", optional = true }
 # btleplug = { path = "../../btleplug", optional = true}
 # btleplug = { git = 'https://github.com/deviceplug/btleplug', branch = 'master', optional = true }
+btleplug = { git = 'https://github.com/blackspherefollower/btleplug', branch = 'dev', optional = true }
 strum_macros = "0.26.4"
 strum = "0.26.3"
 once_cell = "1.19.0"
@@ -99,6 +100,7 @@ aes = { version = "0.8.4" }
 ecb = { version = "0.1.2", features = ["std"] }
 rand = { version = "0.8.5" }
 sha2 = { version = "0.10.8", features = ["std"] }
+log = "0.4.22"
 
 [dev-dependencies]
 serde_yaml = "0.9.34"
