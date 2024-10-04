@@ -8162,6 +8162,9 @@ protocols:
           - J-Mackay
         name: JoyHub Mackay
       - identifier:
+          - J-Rowdy3
+        name: JoyHub Rowdy 3
+      - identifier:
           - J-Petalwish2
         name: JoyHub Petalwish 2
         features:
@@ -8360,6 +8363,7 @@ protocols:
             - J-Rayen
             - J-ROSELLA3
             - J-Mackay
+            - J-Rowdy3
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
@@ -8959,6 +8963,81 @@ protocols:
               messages:
                 - ScalarCmd
       - identifier:
+          - J-Viball
+        name: JoyHub Viball
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Oscillate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+      - identifier:
+          - J-Vase
+        name: JoyHub Vase
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Oscillate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+      - identifier:
+          - J-Vortex2s
+        name: JoyHub Vortex 2s
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+      - identifier:
           - J-VortexTongue2
         name: JoyHub Lips
         features:
@@ -9020,6 +9099,24 @@ protocols:
                 - 255
               messages:
                 - ScalarCmd
+      - identifier:
+          - J-Vbarbie
+        name: JoyHub VBarbie
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
@@ -9055,6 +9152,10 @@ protocols:
             - J-VortexTongue2
             - J-Torin
             - J-VBarbiep
+            - J-Vbarbie
+            - J-Viball
+            - J-Vase
+            - J-Vortex2s
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
