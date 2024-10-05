@@ -133,7 +133,7 @@ impl ProtocolHandler for JoyHubV5 {
     commands: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let cmd1 = commands[0];
-    let cmd2 = if commands.len() > 1 {
+    let mut cmd2 = if commands.len() > 1 {
       commands[1]
     } else {
       None
@@ -141,7 +141,7 @@ impl ProtocolHandler for JoyHubV5 {
 
     if let Some(cmd) = cmd2 {
       if cmd.0 == ActuatorType::Constrict {
-        // cmd2 = None; // Not used again in this protocol variant
+        cmd2 = None;
         if !scalar_changed(&self.last_cmds, commands, 1usize) {
           // no-op
         } else if vibes_changed(&self.last_cmds, commands, vec![1usize]) {
@@ -176,7 +176,7 @@ impl ProtocolHandler for JoyHubV5 {
       vec![
         0xa0,
         0x03,
-        0x00,
+        cmd2.unwrap_or((ActuatorType::Vibrate, 0)).1 as u8,
         0x00,
         cmd1.unwrap_or((ActuatorType::Vibrate, 0)).1 as u8,
         0x00,
