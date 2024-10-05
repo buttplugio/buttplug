@@ -14297,6 +14297,12 @@
         },
         {
           "identifier": [
+            "J-Eclipse"
+          ],
+          "name": "JoyHub Eclipse"
+        },
+        {
+          "identifier": [
             "J-Petalwish2"
           ],
           "name": "JoyHub Petalwish 2",
@@ -14622,7 +14628,8 @@
               "J-Rayen",
               "J-ROSELLA3",
               "J-Mackay",
-              "J-Rowdy3"
+              "J-Rowdy3",
+              "J-Eclipse"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -15943,6 +15950,82 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-Royaleye"
+          ],
+          "name": "JoyHub Royaleye",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-VBarbie2t"
+          ],
+          "name": "JoyHub Norma",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -15984,7 +16067,9 @@
               "J-Vbarbie",
               "J-Viball",
               "J-Vase",
-              "J-Vortex2s"
+              "J-Vortex2s",
+              "J-Royaleye",
+              "J-VBarbie2t"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -16194,13 +16279,46 @@
             "J-Virtuoso"
           ],
           "name": "JoyHub Virtuoso"
+        },
+        {
+          "identifier": [
+            "J-Pathfinder3"
+          ],
+          "name": "JoyHub Pathfinder 3",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
         {
           "btle": {
             "names": [
-              "J-Virtuoso"
+              "J-Virtuoso",
+              "J-Pathfinder3"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
