@@ -8165,6 +8165,9 @@ protocols:
           - J-Rowdy3
         name: JoyHub Rowdy 3
       - identifier:
+          - J-Eclipse
+        name: JoyHub Eclipse
+      - identifier:
           - J-Petalwish2
         name: JoyHub Petalwish 2
         features:
@@ -8364,6 +8367,7 @@ protocols:
             - J-ROSELLA3
             - J-Mackay
             - J-Rowdy3
+            - J-Eclipse
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
@@ -9117,6 +9121,49 @@ protocols:
                 - 255
               messages:
                 - ScalarCmd
+      - identifier:
+          - J-Royaleye
+        name: JoyHub Royaleye
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+      - identifier:
+          - J-VBarbie2t
+        name: JoyHub Norma
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Oscillate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
@@ -9156,6 +9203,8 @@ protocols:
             - J-Viball
             - J-Vase
             - J-Vortex2s
+            - J-Royaleye
+            - J-VBarbie2t
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
@@ -9274,10 +9323,29 @@ protocols:
       - identifier:
           - J-Virtuoso
         name: JoyHub Virtuoso
+      - identifier:
+          - J-Pathfinder3
+        name: JoyHub Pathfinder 3
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Oscillate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
             - J-Virtuoso
+            - J-Pathfinder3
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
