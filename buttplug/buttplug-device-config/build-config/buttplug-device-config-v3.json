@@ -16751,6 +16751,128 @@
           }
         }
       ]
+    },
+    "nextlevelracing": {
+      "defaults": {
+        "name": "Next Level Racing HF8 Haptic Gaming Pad",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "description": "Right thigh",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Vibrate",
+            "description": "Left thigh",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Vibrate",
+            "description": "Right buttock",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Vibrate",
+            "description": "Left buttock",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Vibrate",
+            "description": "Right back",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Vibrate",
+            "description": "Left back",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Vibrate",
+            "description": "Right shoulder",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Vibrate",
+            "description": "Left shoulder",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "communication": [
+        {
+          "serial": {
+            "port": "default",
+            "baud-rate": 115200,
+            "data-bits": 8,
+            "parity": "N",
+            "stop-bits": 1
+          }
+        }
+      ]
     }
   }
 }
