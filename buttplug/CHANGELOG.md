@@ -1,3 +1,18 @@
+# 9.0.4 (2024-10-06)
+
+## Features
+
+- Linear (position/duration) movement support for the Lovense Solace Pro
+- Added Device Support
+  - FeelingSo Flair Feel
+  - Kuirkish Imp 3
+  - JoyHub VBarbie
+
+## Bugfixes
+
+- Fix issue with Lovense Solace (non-pro) getting incorrect Mply commands and not stopping when
+  expected.
+
 # 9.0.3 (2024-09-30)
 
 ## Bugfixes
