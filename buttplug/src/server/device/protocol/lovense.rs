@@ -449,7 +449,6 @@ async fn update_linear_movement(device: Arc<Hardware>, linear_info: Arc<(AtomicU
     }
 
     let lovense_cmd = format!("FSetSite:{};", current_position);
-    info!("{}", lovense_cmd);
 
     let hardware_cmd = HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd.into_bytes(), false);
     if device.write_value(&hardware_cmd).await.is_err() {
