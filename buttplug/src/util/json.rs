@@ -11,10 +11,10 @@
 //! jsonschema library.
 
 use crate::core::message::serializer::ButtplugSerializerError;
-use jsonschema::JSONSchema;
+use jsonschema::Validator;
 
 pub struct JSONValidator {
-  schema: JSONSchema,
+  schema: Validator,
 }
 
 impl JSONValidator {
@@ -26,7 +26,7 @@ impl JSONValidator {
   pub fn new(schema: &str) -> Self {
     let schema_json: serde_json::Value =
       serde_json::from_str(schema).expect("Built in schema better be valid");
-    let schema = JSONSchema::compile(&schema_json).expect("Built in schema better be valid");
+    let schema = Validator::new(&schema_json).expect("Built in schema better be valid");
     Self { schema }
   }
 

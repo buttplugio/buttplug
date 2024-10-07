@@ -29,7 +29,7 @@ use crate::core::{
     ButtplugServerMessageVariant,
   },
 };
-use jsonschema::JSONSchema;
+use jsonschema::Validator;
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 use serde_json::{Deserializer, Value};
@@ -39,14 +39,14 @@ static MESSAGE_JSON_SCHEMA: &str =
   include_str!("../../../../buttplug-schema/schema/buttplug-schema.json");
 
 /// Creates a [jsonschema::JSONSchema] validator using the built in buttplug message schema.
-pub fn create_message_validator() -> JSONSchema {
+pub fn create_message_validator() -> Validator {
   let schema: serde_json::Value =
     serde_json::from_str(MESSAGE_JSON_SCHEMA).expect("Built in schema better be valid");
-  JSONSchema::compile(&schema).expect("Built in schema better be valid")
+  Validator::new(&schema).expect("Built in schema better be valid")
 }
 pub struct ButtplugServerJSONSerializer {
   pub(super) message_version: OnceCell<message::ButtplugMessageSpecVersion>,
-  validator: JSONSchema,
+  validator: Validator,
 }
 
 impl Default for ButtplugServerJSONSerializer {
@@ -83,7 +83,7 @@ where
 }
 
 pub fn deserialize_to_message<T>(
-  validator: &JSONSchema,
+  validator: &Validator,
   msg_str: &str,
 ) -> Result<Vec<T>, ButtplugSerializerError>
 where
@@ -319,7 +319,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
 }
 
 pub struct ButtplugClientJSONSerializerImpl {
-  validator: JSONSchema,
+  validator: Validator,
 }
 
 impl Default for ButtplugClientJSONSerializerImpl {
