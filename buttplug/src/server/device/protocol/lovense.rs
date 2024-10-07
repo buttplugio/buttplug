@@ -15,7 +15,7 @@ use crate::{
     hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
-  util::{sleep, async_manager}
+  util::{async_manager, sleep},
 };
 use async_trait::async_trait;
 use futures::{future::BoxFuture, FutureExt};
@@ -158,12 +158,10 @@ impl ProtocolInitializer for LovenseInitializer {
       .filter(|x| x.actuator().is_some())
       .count();
 
-    
     // This might need better tuning if other complex Lovenses are released
     // Currently this only applies to the Flexer/Lapis/Solace
-    let use_mply = (vibrator_count == 2 && actuator_count > 2)
-      || vibrator_count > 2
-      || device_type == "H";
+    let use_mply =
+      (vibrator_count == 2 && actuator_count > 2) || vibrator_count > 2 || device_type == "H";
 
     debug!(
       "Device type {} initialized with {} vibrators {} using Mply",
@@ -172,7 +170,12 @@ impl ProtocolInitializer for LovenseInitializer {
       if use_mply { "" } else { "not " }
     );
 
-    Ok(Arc::new(Lovense::new(hardware, &device_type, vibrator_count, use_mply)))
+    Ok(Arc::new(Lovense::new(
+      hardware,
+      &device_type,
+      vibrator_count,
+      use_mply,
+    )))
   }
 }
 
@@ -186,11 +189,18 @@ pub struct Lovense {
 }
 
 impl Lovense {
-  pub fn new(hardware: Arc<Hardware>, device_type: &str, vibrator_count: usize, use_mply: bool) -> Self {
-
+  pub fn new(
+    hardware: Arc<Hardware>,
+    device_type: &str,
+    vibrator_count: usize,
+    use_mply: bool,
+  ) -> Self {
     let linear_info = Arc::new((AtomicU8::new(0), AtomicU32::new(0)));
     if device_type == "BA" {
-      async_manager::spawn(update_linear_movement(hardware.clone(), linear_info.clone()));
+      async_manager::spawn(update_linear_movement(
+        hardware.clone(),
+        linear_info.clone(),
+      ));
     }
 
     Self {
@@ -404,13 +414,22 @@ impl ProtocolHandler for Lovense {
   }
 
   fn handle_linear_cmd(
-      &self,
-      message: message::LinearCmdV4,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let vector = message.vectors().first().expect("Already checked for vector subcommand");
-    self.linear_info.0.store((vector.position() * 100f64) as u8, Ordering::SeqCst);
-    self.linear_info.1.store(vector.duration(), Ordering::SeqCst);
-    Ok(vec!())
+    &self,
+    message: message::LinearCmdV4,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let vector = message
+      .vectors()
+      .first()
+      .expect("Already checked for vector subcommand");
+    self
+      .linear_info
+      .0
+      .store((vector.position() * 100f64) as u8, Ordering::SeqCst);
+    self
+      .linear_info
+      .1
+      .store(vector.duration(), Ordering::SeqCst);
+    Ok(vec![])
   }
 }
 
