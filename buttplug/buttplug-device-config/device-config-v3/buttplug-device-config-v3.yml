@@ -8310,7 +8310,7 @@ protocols:
             actuator:
               step-range:
                 - 0
-                - 4
+                - 5
               messages:
                 - ScalarCmd
       - identifier:
