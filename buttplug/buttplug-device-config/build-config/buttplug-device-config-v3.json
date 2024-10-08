@@ -16026,6 +16026,38 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-Pau"
+          ],
+          "name": "JoyHub Pau",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -16069,7 +16101,8 @@
               "J-Vase",
               "J-Vortex2s",
               "J-Royaleye",
-              "J-VBarbie2t"
+              "J-VBarbie2t",
+              "J-Pau"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
