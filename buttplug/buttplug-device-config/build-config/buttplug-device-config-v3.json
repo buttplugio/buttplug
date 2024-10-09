@@ -11349,7 +11349,13 @@
           "identifier": [
             "RC31"
           ],
-          "name": "ecret Lover Betty"
+          "name": "Secret Lover Betty"
+        },
+        {
+          "identifier": [
+            "MD19"
+          ],
+          "name": "Secret Lover Kevin"
         },
         {
           "identifier": [
@@ -13159,6 +13165,7 @@
               "LL18",
               "CYX2",
               "RC31",
+              "MD19",
               "G317",
               "G312",
               "G302",
@@ -14595,6 +14602,38 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-DukeDazzle2"
+          ],
+          "name": "JoyHub Edasich",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -14629,7 +14668,8 @@
               "J-ROSELLA3",
               "J-Mackay",
               "J-Rowdy3",
-              "J-Eclipse"
+              "J-Eclipse",
+              "J-DukeDazzle2"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -16058,6 +16098,38 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-Petalwish3"
+          ],
+          "name": "JoyHub Petalwish 3",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -16102,7 +16174,8 @@
               "J-Vortex2s",
               "J-Royaleye",
               "J-VBarbie2t",
-              "J-Pau"
+              "J-Pau",
+              "J-Petalwish3"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {

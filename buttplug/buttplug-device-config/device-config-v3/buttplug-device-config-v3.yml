@@ -6430,7 +6430,10 @@ protocols:
         name: Secret Lover Simon
       - identifier:
           - RC31
-        name: ecret Lover Betty
+        name: Secret Lover Betty
+      - identifier:
+          - MD19
+        name: Secret Lover Kevin
       # Type 1
       - identifier:
           - G317
@@ -7489,6 +7492,7 @@ protocols:
             - LL18
             - CYX2 # Secret Lover Simon
             - RC31 # Secret Lover Betty
+            - MD19 # Secret Lover Kevin
             # Type 1
             - G317
             - G312
@@ -8336,6 +8340,24 @@ protocols:
                 - 255
               messages:
                 - ScalarCmd
+      - identifier:
+          - J-DukeDazzle2
+        name: JoyHub Edasich
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Oscillate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
@@ -8368,6 +8390,7 @@ protocols:
             - J-Mackay
             - J-Rowdy3
             - J-Eclipse
+            - J-DukeDazzle2
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
@@ -9182,6 +9205,24 @@ protocols:
                 - 255
               messages:
                 - ScalarCmd
+      - identifier:
+          - J-Petalwish3
+        name: JoyHub Petalwish 3
+        features:
+          - feature-type: Oscillate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
@@ -9224,6 +9265,7 @@ protocols:
             - J-Royaleye
             - J-VBarbie2t
             - J-Pau
+            - J-Petalwish3
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
