@@ -10513,7 +10513,8 @@
         },
         {
           "identifier": [
-            "Cali"
+            "Cali",
+            "LY165A01"
           ],
           "name": "metaXsire Cali",
           "features": [
@@ -10626,6 +10627,7 @@
             "names": [
               "Rex",
               "Cali",
+              "LY165A01",
               "Olis",
               "LY213A01"
             ],
