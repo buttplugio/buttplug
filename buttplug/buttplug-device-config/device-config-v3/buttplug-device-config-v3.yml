@@ -5985,6 +5985,7 @@ protocols:
         name: metaXsire Rex
       - identifier:
           - Cali
+          - LY165A01
         name: metaXsire Cali
         features:
           - feature-type: Vibrate
@@ -6049,6 +6050,7 @@ protocols:
           names:
             - Rex
             - Cali
+            - LY165A01
             - Olis
             - LY213A01
           services:
