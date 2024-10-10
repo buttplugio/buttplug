@@ -1680,6 +1680,7 @@ protocols:
                 - ScalarCmd
       - identifier:
           - 6909 MV1
+          - 6909 MV2
         name: MysteryVibe Tenuto 2
         features:
           - feature-type: Vibrate
@@ -1759,6 +1760,7 @@ protocols:
             - 6907 MV1
             - 6908 MV1
             - 6909 MV1
+            - 6909 MV2
             - 6914 MV1
             - 6915 MV1
           services:

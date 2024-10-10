@@ -2959,7 +2959,8 @@
         },
         {
           "identifier": [
-            "6909 MV1"
+            "6909 MV1",
+            "6909 MV2"
           ],
           "name": "MysteryVibe Tenuto 2",
           "features": [
@@ -3097,6 +3098,7 @@
               "6907 MV1",
               "6908 MV1",
               "6909 MV1",
+              "6909 MV2",
               "6914 MV1",
               "6915 MV1"
             ],
