@@ -2959,7 +2959,8 @@
         },
         {
           "identifier": [
-            "6909 MV1"
+            "6909 MV1",
+            "6909 MV2"
           ],
           "name": "MysteryVibe Tenuto 2",
           "features": [
@@ -3097,6 +3098,7 @@
               "6907 MV1",
               "6908 MV1",
               "6909 MV1",
+              "6909 MV2",
               "6914 MV1",
               "6915 MV1"
             ],
@@ -10511,7 +10513,8 @@
         },
         {
           "identifier": [
-            "Cali"
+            "Cali",
+            "LY165A01"
           ],
           "name": "metaXsire Cali",
           "features": [
@@ -10624,6 +10627,7 @@
             "names": [
               "Rex",
               "Cali",
+              "LY165A01",
               "Olis",
               "LY213A01"
             ],
@@ -11349,7 +11353,13 @@
           "identifier": [
             "RC31"
           ],
-          "name": "ecret Lover Betty"
+          "name": "Secret Lover Betty"
+        },
+        {
+          "identifier": [
+            "MD19"
+          ],
+          "name": "Secret Lover Kevin"
         },
         {
           "identifier": [
@@ -13159,6 +13169,7 @@
               "LL18",
               "CYX2",
               "RC31",
+              "MD19",
               "G317",
               "G312",
               "G302",
@@ -14291,6 +14302,18 @@
         },
         {
           "identifier": [
+            "J-Rowdy3"
+          ],
+          "name": "JoyHub Rowdy 3"
+        },
+        {
+          "identifier": [
+            "J-Eclipse"
+          ],
+          "name": "JoyHub Eclipse"
+        },
+        {
+          "identifier": [
             "J-Petalwish2"
           ],
           "name": "JoyHub Petalwish 2",
@@ -14534,7 +14557,7 @@
               "actuator": {
                 "step-range": [
                   0,
-                  4
+                  5
                 ],
                 "messages": [
                   "ScalarCmd"
@@ -14583,6 +14606,38 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-DukeDazzle2"
+          ],
+          "name": "JoyHub Edasich",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -14615,7 +14670,10 @@
               "J-Torrian",
               "J-Rayen",
               "J-ROSELLA3",
-              "J-Mackay"
+              "J-Mackay",
+              "J-Rowdy3",
+              "J-Eclipse",
+              "J-DukeDazzle2"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -15666,6 +15724,138 @@
         },
         {
           "identifier": [
+            "J-Viball"
+          ],
+          "name": "JoyHub Viball",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Vase"
+          ],
+          "name": "JoyHub Vase",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Vortex2s"
+          ],
+          "name": "JoyHub Vortex 2s",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
             "J-VortexTongue2"
           ],
           "name": "JoyHub Lips",
@@ -15772,6 +15962,178 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-Vbarbie"
+          ],
+          "name": "JoyHub VBarbie",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Royaleye"
+          ],
+          "name": "JoyHub Royaleye",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-VBarbie2t"
+          ],
+          "name": "JoyHub Norma",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Pau"
+          ],
+          "name": "JoyHub Pau",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Petalwish3"
+          ],
+          "name": "JoyHub Petalwish 3",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -15809,7 +16171,15 @@
               "J-Faunus",
               "J-VortexTongue2",
               "J-Torin",
-              "J-VBarbiep"
+              "J-VBarbiep",
+              "J-Vbarbie",
+              "J-Viball",
+              "J-Vase",
+              "J-Vortex2s",
+              "J-Royaleye",
+              "J-VBarbie2t",
+              "J-Pau",
+              "J-Petalwish3"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -16019,13 +16389,46 @@
             "J-Virtuoso"
           ],
           "name": "JoyHub Virtuoso"
+        },
+        {
+          "identifier": [
+            "J-Pathfinder3"
+          ],
+          "name": "JoyHub Pathfinder 3",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
         {
           "btle": {
             "names": [
-              "J-Virtuoso"
+              "J-Virtuoso",
+              "J-Pathfinder3"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -16455,6 +16858,128 @@
                 "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
               }
             }
+          }
+        }
+      ]
+    },
+    "nextlevelracing": {
+      "defaults": {
+        "name": "Next Level Racing HF8 Haptic Gaming Pad",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "description": "Right thigh",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Vibrate",
+            "description": "Left thigh",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Vibrate",
+            "description": "Right buttock",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Vibrate",
+            "description": "Left buttock",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Vibrate",
+            "description": "Right back",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Vibrate",
+            "description": "Left back",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Vibrate",
+            "description": "Right shoulder",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Vibrate",
+            "description": "Left shoulder",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "communication": [
+        {
+          "serial": {
+            "port": "default",
+            "baud-rate": 115200,
+            "data-bits": 8,
+            "parity": "N",
+            "stop-bits": 1
           }
         }
       ]
