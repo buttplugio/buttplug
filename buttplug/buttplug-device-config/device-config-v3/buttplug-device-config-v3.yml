@@ -1,6 +1,6 @@
 version:
   major: 3
-  minor: 7
+  minor: 8
 protocols:
   lovense:
     defaults:
