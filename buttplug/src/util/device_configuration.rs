@@ -291,6 +291,8 @@ fn load_main_config(
     skip_version_check,
   )?;
 
+  info!("Loaded config version {:?}", main_config.version);
+
   let mut dcm_builder = DeviceConfigurationManagerBuilder::default();
 
   // Each protocol will need to become a ProtocolDeviceConfiguration, so we'll need to
