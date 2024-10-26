@@ -2997,6 +2997,7 @@ protocols:
         name: Svakom Ella Neo
       - identifier:
           - '117'
+          - Edeny
         name: Svakom Edeny
       - identifier:
           - S38A
@@ -3022,6 +3023,7 @@ protocols:
           names:
             - '116'
             - '117'
+            - Edeny
             - '118'
             - Viviana
             - Ella NEO
