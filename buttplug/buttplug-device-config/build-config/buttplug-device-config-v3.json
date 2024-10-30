@@ -5482,6 +5482,12 @@
             "ERICA"
           ],
           "name": "Svakom Erica"
+        },
+        {
+          "identifier": [
+            "Cici+ 2"
+          ],
+          "name": "Svakom Cici+ 2"
         }
       ],
       "communication": [
@@ -5489,7 +5495,8 @@
           "btle": {
             "names": [
               "B2CM6",
-              "ERICA"
+              "ERICA",
+              "Cici+ 2"
             ],
             "services": {
               "0000ffe0-0000-1000-8000-00805f9b34fb": {
