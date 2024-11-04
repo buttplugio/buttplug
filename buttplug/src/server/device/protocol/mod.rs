@@ -127,6 +127,7 @@ pub mod wevibe_chorus;
 pub mod xibao;
 pub mod xinput;
 pub mod xiuxiuda;
+pub mod xuanhuan;
 pub mod youcups;
 pub mod youou;
 pub mod zalo;
@@ -590,6 +591,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     xiuxiuda::setup::XiuxiudaIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    xuanhuan::setup::XuanhuanIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
