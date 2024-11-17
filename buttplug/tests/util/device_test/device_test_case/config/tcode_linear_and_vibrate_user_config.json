@@ -1,0 +1,61 @@
+{
+  "version": {
+    "major": 3,
+    "minor": 999
+  },
+  "user-configs": {
+    "protocols": {
+      "tcode-v03": {
+        "communication": [{
+          "btle": {
+            "names": [
+              "tcode-v03"
+            ],
+            "services": {
+              "0000eea0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ee01-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+        ],
+        "configurations": []
+      }
+    },
+    "devices": [
+      {
+        "identifier": {
+          "protocol": "tcode-v03",
+          "identifier": "tcode-v03",
+          "address": "COM7"
+        },
+        "config": {
+          "name": "TCode v0.3 (Single Linear Axis + Single Vibe)",
+          "features": [{
+            "description": "",
+            "feature-type": "Position",
+            "actuator": {
+              "step-range": [0, 100],
+              "step-limit": [0, 100],
+              "messages": ["LinearCmd"]
+            }
+          }, {
+            "description": "",
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [0, 99],
+              "step-limit": [0, 99],
+              "messages": ["ScalarCmd"]
+            }
+          }
+          ],
+          "user-config": {
+            "allow": false,
+            "deny": false,
+            "index": 0
+          }
+        }
+      }
+    ]
+  }
+}
