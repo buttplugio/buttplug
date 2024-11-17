@@ -19,6 +19,7 @@ use crate::core::{
     ScalarSubcommandV4,
   },
 };
+use ahash::{HashMap, HashMapExt};
 use getset::Getters;
 use std::{
   collections::HashSet,
@@ -205,16 +206,17 @@ impl ActuatorCommandManager {
       );
     }
 
-    let mut final_result: Vec<Option<(ActuatorType, u32)>> = vec![
-      None;
-      self
-        .feature_status
-        .iter()
-        .filter(|x| x
-          .messages()
-          .contains(&ButtplugActuatorFeatureMessageType::ScalarCmd))
-        .count()
-    ];
+    let mut idxs = HashMap::new();
+    for (i, x) in self.feature_status.iter().enumerate() {
+      if x
+        .messages()
+        .contains(&ButtplugActuatorFeatureMessageType::ScalarCmd)
+      {
+        idxs.insert(i, idxs.len());
+      }
+    }
+
+    let mut final_result: Vec<Option<(ActuatorType, u32)>> = vec![None; idxs.len()];
 
     let mut commands: Vec<(u32, ActuatorType, (f64, bool))> = vec![];
     msg
@@ -228,7 +230,7 @@ impl ActuatorCommandManager {
     )?;
     result.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
     result.iter().for_each(|(index, actuator, value)| {
-      final_result[*index as usize] = Some((*actuator, value.0))
+      final_result[idxs[&(*index as usize)]] = Some((*actuator, value.0))
     });
     Ok(final_result)
   }
@@ -255,7 +257,7 @@ impl ActuatorCommandManager {
         .feature_status
         .iter()
         .filter(|x| x
-          .messages()
+        .messages()
           .contains(&ButtplugActuatorFeatureMessageType::RotateCmd))
         .count()
     ];
