@@ -1,6 +1,6 @@
 version:
   major: 3
-  minor: 8
+  minor: 9
 protocols:
   lovense:
     defaults:
@@ -9760,3 +9760,22 @@ protocols:
           services:
             0000fffe-0000-1000-8000-00805f9b34fb:
               tx: 0000fe02-0000-1000-8000-00805f9b34fb
+  serveu:
+    defaults:
+      name: ServeU
+      features:
+        # TODO ServeU has an explicit connection interval of 20ms, we should define this here somehow?
+        - feature-type: Stroker
+          actuator:
+            step-range:
+              - 0
+              - 100
+            messages:
+              - LinearCmd
+    communication:
+      - btle:
+          names:
+            - ServeU
+          services:
+            31bb1111-33e3-4f3c-a7fb-104288e7cb77:
+              tx: 31bb2222-33e3-4f3c-a7fb-104288e7cb77
