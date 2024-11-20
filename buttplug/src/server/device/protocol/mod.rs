@@ -95,6 +95,7 @@ pub mod satisfyer;
 pub mod sensee;
 pub mod sensee_capsule;
 pub mod sensee_v2;
+pub mod serveu;
 pub mod svakom;
 pub mod svakom_alex;
 pub mod svakom_alex_v2;
@@ -485,6 +486,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     sensee_v2::setup::SenseeV2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    serveu::setup::ServeUIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, svakom::setup::SvakomIdentifierFactory::default());
   add_to_protocol_map(
