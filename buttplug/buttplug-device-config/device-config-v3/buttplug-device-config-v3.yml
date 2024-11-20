@@ -9765,7 +9765,7 @@ protocols:
       name: ServeU
       features:
         # TODO ServeU has an explicit connection interval of 20ms, we should define this here somehow?
-        - feature-type: Stroker
+        - feature-type: Position
           actuator:
             step-range:
               - 0

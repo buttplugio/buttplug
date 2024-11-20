@@ -17047,7 +17047,7 @@
         "name": "ServeU",
         "features": [
           {
-            "feature-type": "Stroker",
+            "feature-type": "Position",
             "actuator": {
               "step-range": [
                 0,
