@@ -20,12 +20,9 @@ use futures::{
   future::{self, BoxFuture, FutureExt},
   StreamExt,
 };
-use std::{
-  convert::TryInto,
-  sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-  },
+use std::sync::{
+  atomic::{AtomicBool, Ordering},
+  Arc,
 };
 use tokio::sync::mpsc::{channel, Sender};
 use tracing_futures::Instrument;
