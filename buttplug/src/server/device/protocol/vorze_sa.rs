@@ -202,7 +202,7 @@ impl ProtocolHandler for VorzeSA {
 
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![self.device_type as u8, position as u8, speed as u8],
+      vec![self.device_type as u8, position as u8, speed],
       true,
     )
     .into()])

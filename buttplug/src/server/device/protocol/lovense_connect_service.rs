@@ -68,7 +68,7 @@ impl ProtocolInitializer for LovenseConnectServiceInitializer {
         .to_vec();
 
       hardware
-        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into())
+        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false))
         .await?;
 
       protocol.vibrator_count = 0;
@@ -273,7 +273,7 @@ impl ProtocolHandler for LovenseConnectService {
     cmds: &[Option<(u32, bool)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut hardware_cmds = vec![];
-    if let Some(Some((speed, clockwise))) = cmds.get(0) {
+    if let Some(Some((speed, clockwise))) = cmds.first() {
       let lovense_cmd = format!("/Rotate?v={}&t={}", speed, self.address)
         .as_bytes()
         .to_vec();
@@ -307,8 +307,7 @@ impl ProtocolHandler for LovenseConnectService {
           *msg.feature_index(),
           *msg.sensor_type(),
           vec![reading.data()[0] as i32],
-        )
-        .into(),
+        ),
       )
     }
     .boxed()

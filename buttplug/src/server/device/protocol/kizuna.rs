@@ -30,7 +30,7 @@ impl ProtocolHandler for Kizuna {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![48 + scalar as u8, '\r' as u8, '\n' as u8],
+      vec![48 + scalar as u8, b'\r', b'\n'],
       false,
     )
     .into()])

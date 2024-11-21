@@ -120,13 +120,10 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
               config
                 .features
                 .as_ref()
-                .or(Some(
-                  defaults
+                .unwrap_or(defaults
                     .features
                     .as_ref()
-                    .expect("Defaults always have features"),
-                ))
-                .unwrap(),
+                    .expect("Defaults always have features")),
             );
             configurations.insert(Some(identifier.to_owned()), config_attrs);
           }
@@ -285,7 +282,7 @@ fn load_main_config(
   }
   // Start by loading the main config
   let main_config = load_protocol_config_from_json::<BaseConfigFile>(
-    &main_config_str
+    main_config_str
       .as_ref()
       .unwrap_or(&DEVICE_CONFIGURATION_JSON.to_owned()),
     skip_version_check,
@@ -336,7 +333,7 @@ fn load_user_config(
 ) -> Result<(), ButtplugDeviceError> {
   info!("Loading user configuration from string.");
   let user_config_file =
-    load_protocol_config_from_json::<UserConfigFile>(&user_config_str, skip_version_check)?;
+    load_protocol_config_from_json::<UserConfigFile>(user_config_str, skip_version_check)?;
 
   if user_config_file.user_configs.is_none() {
     info!("No user configurations provided in user config.");
@@ -405,9 +402,9 @@ pub fn save_user_config(dcm: &DeviceConfigurationManager) -> Result<String, Butt
   };
   let mut user_config_file = UserConfigFile::new(3, 0);
   user_config_file.user_configs = Some(user_config_definition);
-  Ok(serde_json::to_string(&user_config_file).map_err(|e| {
+  serde_json::to_string(&user_config_file).map_err(|e| {
     ButtplugError::from(ButtplugDeviceError::DeviceConfigurationError(format!(
       "Cannot save device configuration file: {e:?}",
     )))
-  })?)
+  })
 }

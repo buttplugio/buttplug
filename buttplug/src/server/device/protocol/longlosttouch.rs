@@ -85,14 +85,14 @@ fn form_commands(data: Arc<Vec<AtomicU8>>, force: Option<Vec<bool>>) -> Vec<Vec<
       cmds.push(vec![
         0xAA,
         0x02,
-        i + 1 as u8,
+        i + 1_u8,
         0x00,
         0x00,
         data[i as usize].load(Ordering::SeqCst),
       ])
     }
   });
-  return cmds;
+  cmds
 }
 
 async fn send_longlosttouch_updates(device: Arc<Hardware>, data: Arc<Vec<AtomicU8>>) {
@@ -100,7 +100,7 @@ async fn send_longlosttouch_updates(device: Arc<Hardware>, data: Arc<Vec<AtomicU
     let cmds = form_commands(data.clone(), None);
     for cmd in cmds {
       if let Err(e) = device
-        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, cmd, true).into())
+        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, cmd, true))
         .await
       {
         error!(

@@ -149,7 +149,7 @@ impl ProtocolHandler for TheHandy {
       .store(message.position(), Ordering::SeqCst);
     let distance = (goal_position - previous_position).abs();
     let duration =
-      fleshlight_launch_helper::calculate_duration(distance, message.speed() as f64 / 99f64) as u32;
+      fleshlight_launch_helper::calculate_duration(distance, message.speed() as f64 / 99f64);
     self.handle_linear_cmd(message::LinearCmdV4::new(
       message.device_index(),
       vec![message::VectorSubcommandV4::new(0, duration, goal_position)],

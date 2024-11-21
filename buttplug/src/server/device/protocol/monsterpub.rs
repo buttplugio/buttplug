@@ -49,7 +49,7 @@ impl ProtocolIdentifier for MonsterPubIdentifier {
       .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 32, 500))
       .await;
     let ident = match read_resp {
-      Ok(data) => std::str::from_utf8(&data.data())
+      Ok(data) => std::str::from_utf8(data.data())
         .map_err(|_| {
           ButtplugDeviceError::ProtocolSpecificError(
             "monsterpub".to_owned(),
@@ -151,10 +151,11 @@ impl ProtocolHandler for MonsterPub {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut data = vec![];
     let mut stop = true;
+
     if self.tx == Endpoint::Generic0 {
       data.push(3u8);
     }
-    for (_, cmd) in cmds.iter().enumerate() {
+    for cmd in cmds.iter() {
       if let Some((_, speed)) = cmd {
         data.push(*speed as u8);
         if *speed != 0 {

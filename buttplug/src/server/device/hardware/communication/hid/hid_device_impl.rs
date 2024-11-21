@@ -77,8 +77,8 @@ impl HardwareConnector for HidHardwareConnector {
       self.device_info.product_string().unwrap()
     );
     let hardware = Hardware::new(
-      &self.device_info.product_string().unwrap(),
-      &self.device_info.serial_number().unwrap(),
+      self.device_info.product_string().unwrap(),
+      self.device_info.serial_number().unwrap(),
       &[Endpoint::Rx, Endpoint::Tx],
       Box::new(device_impl_internal),
     );
