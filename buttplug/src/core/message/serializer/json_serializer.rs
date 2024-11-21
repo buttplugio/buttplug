@@ -227,8 +227,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
                     "Message {:?} not in Spec V0! This is a server bug.",
                     msg
                   )),
-                ))
-                .into(),
+                )),
               ),
             })
             .collect();
@@ -245,8 +244,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
                     "Message {:?} not in Spec V1! This is a server bug.",
                     msg
                   )),
-                ))
-                .into(),
+                )),
               ),
             })
             .collect();
@@ -263,8 +261,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
                     "Message {:?} not in Spec V2! This is a server bug.",
                     msg
                   )),
-                ))
-                .into(),
+                )),
               ),
             })
             .collect();
@@ -281,8 +278,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
                     "Message {:?} not in Spec V3! This is a server bug.",
                     msg
                   )),
-                ))
-                .into(),
+                )),
               ),
             })
             .collect();
@@ -299,8 +295,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
                     "Message {:?} not in Spec V4! This is a server bug.",
                     msg
                   )),
-                ))
-                .into(),
+                )),
               ),
             })
             .collect();
