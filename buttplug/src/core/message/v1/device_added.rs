@@ -7,7 +7,6 @@
 
 use crate::core::message::{
   v2::{DeviceAddedV2, DeviceMessageInfoV2},
-  ButtplugDeviceMessage,
   ButtplugMessage,
   ButtplugMessageError,
   ButtplugMessageFinalizer,
