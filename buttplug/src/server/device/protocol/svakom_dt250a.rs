@@ -65,7 +65,7 @@ impl ProtocolHandler for SvakomDT250A {
     &self,
     cmds: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if cmds.len() == 0 {
+    if cmds.is_empty() {
       return Ok(vec![]);
     }
 
@@ -142,10 +142,10 @@ impl ProtocolHandler for SvakomDT250A {
       }
     }
 
-    return if hcmd.is_some() {
+    if hcmd.is_some() {
       Ok(vec![hcmd.unwrap().into()])
     } else {
       Ok(vec![])
-    };
+    }
   }
 }

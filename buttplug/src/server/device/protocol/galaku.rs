@@ -45,7 +45,7 @@ static KEY_TAB: [[u32; 12]; 4] = [
 
 fn get_tab_key(r: usize, t: usize) -> u32 {
   let e = 3 & r;
-  return KEY_TAB[e][t];
+  KEY_TAB[e][t]
 }
 
 fn encrypt(data: Vec<u32>) -> Vec<u32> {
@@ -55,17 +55,17 @@ fn encrypt(data: Vec<u32>) -> Vec<u32> {
     let u = (a ^ data[0] ^ data[i]) + a;
     new_data.push(u);
   }
-  return new_data;
+  new_data
 }
 
 fn decrypt(data: Vec<u32>) -> Vec<u32> {
   let mut new_data = vec![data[0]];
   for i in 1..data.len() {
     let a = get_tab_key(data[i - 1] as usize, i);
-    let u = data[i] as i32 - a as i32 ^ data[0] as i32 ^ a as i32;
+    let u = (data[i] as i32 - a as i32) ^ data[0] as i32 ^ a as i32;
     new_data.push(if u < 0 { (u + 256) as u32 } else { u as u32 });
   }
-  return new_data;
+  new_data
 }
 
 fn send_bytes(data: Vec<u32>) -> Vec<u8> {
@@ -76,7 +76,7 @@ fn send_bytes(data: Vec<u32>) -> Vec<u8> {
   for value in encrypt(new_data) {
     uint8_array.push(value as u8);
   }
-  return uint8_array;
+  uint8_array
 }
 
 fn read_value(data: Vec<u8>) -> u32 {
@@ -85,7 +85,7 @@ fn read_value(data: Vec<u8>) -> u32 {
     uint32_data.push(value as u32);
   }
   let decrypted_data = decrypt(uint32_data);
-  if decrypted_data.len() > 0 {
+  if !decrypted_data.is_empty() {
     decrypted_data[4]
   } else {
     0
@@ -264,7 +264,7 @@ impl ProtocolHandler for Galaku {
               *message.sensor_type(),
               vec![read_value(data) as i32],
             );
-            Ok(battery_reading.into())
+            Ok(battery_reading)
           }
           HardwareEvent::Disconnected(_) => Err(ButtplugDeviceError::ProtocolSpecificError(
             "Galaku".to_owned(),

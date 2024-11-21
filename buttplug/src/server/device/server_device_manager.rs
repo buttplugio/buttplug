@@ -242,7 +242,7 @@ impl ServerDeviceManager {
       Some(device) => {
         let fut = device.parse_message(device_msg);
         // Create a future to run the message through the device, then handle adding the id to the result.
-        async move { fut.await }.boxed()
+        fut.boxed()
       }
       None => ButtplugDeviceError::DeviceNotAvailable(device_msg.device_index()).into(),
     }
@@ -262,7 +262,7 @@ impl ServerDeviceManager {
             DeviceMessageInfoV4::new(
               *device.key(),
               &dev.name(),
-              &dev.definition().user_config().display_name(),
+              dev.definition().user_config().display_name(),
               &None,
               dev.definition().features().clone(),
             )

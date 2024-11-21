@@ -222,7 +222,7 @@ where
     Self {
       transport: Some(transport),
       event_loop_sender: None,
-      dummy_serializer: PhantomData::default(),
+      dummy_serializer: PhantomData,
     }
   }
 }

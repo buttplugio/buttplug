@@ -45,5 +45,5 @@ where
   let handle = tokio::runtime::Handle::current();
   let _ = handle.enter();
   // Execute the future, blocking the current thread until completion
-  futures::executor::block_on(async move { f.await })
+  futures::executor::block_on(f)
 }

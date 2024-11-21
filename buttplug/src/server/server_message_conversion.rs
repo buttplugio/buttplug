@@ -197,7 +197,7 @@ impl TryFrom<ButtplugClientMessageV1> for ButtplugClientMessageV2 {
       ButtplugClientMessageV1::FleshlightLaunchFW12Cmd(_) => {
         // Direct access to FleshlightLaunchFW12Cmd could cause some devices to break via rapid
         // changes of position/speed. Yes, some Kiiroo devices really *are* that fragile.
-        Err(ButtplugMessageError::MessageConversionError("FleshlightLaunchFW12Cmd is not implemented. Please update the client software to use a newer command".to_owned()).into())
+        Err(ButtplugMessageError::MessageConversionError("FleshlightLaunchFW12Cmd is not implemented. Please update the client software to use a newer command".to_owned()))
       }
       ButtplugClientMessageV1::RequestLog(_) => {
         // Log was a huge security hole, as we'd just send our server logs to whomever asked, which
@@ -205,19 +205,18 @@ impl TryFrom<ButtplugClientMessageV1> for ButtplugClientMessageV2 {
         Err(
           ButtplugMessageError::MessageConversionError(
             "RequestLog is no longer allowed by any version of Buttplug.".to_owned(),
-          )
-          .into(),
+          ),
         )
       }
       ButtplugClientMessageV1::KiirooCmd(_) => {
         // No device protocol implementation ever worked with KiirooCmd, so no one ever should've
         // used it. We'll just return an error if we ever see it.
-        Err(ButtplugMessageError::MessageConversionError("KiirooCmd is not implemented. Please update the client software to use a newer command".to_owned()).into())
+        Err(ButtplugMessageError::MessageConversionError("KiirooCmd is not implemented. Please update the client software to use a newer command".to_owned()))
       }
       ButtplugClientMessageV1::LovenseCmd(_) => {
         // LovenseCmd allowed users to directly send strings to a Lovense device, which was a Bad
         // Idea. Will always return an error.
-        Err(ButtplugMessageError::MessageConversionError("LovenseCmd is not implemented. Please update the client software to use a newer command".to_owned()).into())
+        Err(ButtplugMessageError::MessageConversionError("LovenseCmd is not implemented. Please update the client software to use a newer command".to_owned()))
       }
       _ => Err(ButtplugMessageError::MessageConversionError(format!(
         "Cannot convert message {:?} to current message spec while lacking state.",
@@ -343,7 +342,7 @@ impl From<ButtplugServerMessageV1> for ButtplugServerMessageV0 {
     match value {
       ButtplugServerMessageV1::Ok(m) => ButtplugServerMessageV0::Ok(m),
       ButtplugServerMessageV1::Error(m) => ButtplugServerMessageV0::Error(m),
-      ButtplugServerMessageV1::ServerInfo(m) => ButtplugServerMessageV0::ServerInfo(m.into()),
+      ButtplugServerMessageV1::ServerInfo(m) => ButtplugServerMessageV0::ServerInfo(m),
       ButtplugServerMessageV1::DeviceRemoved(m) => ButtplugServerMessageV0::DeviceRemoved(m),
       ButtplugServerMessageV1::ScanningFinished(m) => ButtplugServerMessageV0::ScanningFinished(m),
       ButtplugServerMessageV1::DeviceAdded(m) => ButtplugServerMessageV0::DeviceAdded(m.into()),
@@ -664,8 +663,8 @@ impl ButtplugServerMessageConverter {
       .map(|x| {
         ScalarSubcommandV4::new(
           scalar_features[x.index() as usize] as u32,
-          x.scalar().clone(),
-          x.actuator_type().clone(),
+          x.scalar(),
+          x.actuator_type(),
         )
       })
       .collect();

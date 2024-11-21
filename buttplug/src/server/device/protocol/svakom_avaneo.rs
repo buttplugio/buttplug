@@ -46,7 +46,7 @@ async fn delayed_update_handler(device: Arc<Hardware>, mode: u8, scalar: u8) {
   let res = device
     .write_value(&HardwareWriteCmd::new(
       Endpoint::Tx,
-      [0x55, mode, 0x00, 0x00, scalar as u8, 0xff].to_vec(),
+      [0x55, mode, 0x00, 0x00, scalar, 0xff].to_vec(),
       false,
     ))
     .await;
@@ -69,7 +69,7 @@ impl ProtocolHandler for SvakomAvaNeo {
     &self,
     cmds: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if cmds.len() == 0 {
+    if cmds.is_empty() {
       return Ok(vec![]);
     }
 
@@ -120,10 +120,10 @@ impl ProtocolHandler for SvakomAvaNeo {
       }
     }
 
-    return if hcmd.is_some() {
+    if hcmd.is_some() {
       Ok(vec![hcmd.unwrap().into()])
     } else {
       Ok(vec![])
-    };
+    }
   }
 }
