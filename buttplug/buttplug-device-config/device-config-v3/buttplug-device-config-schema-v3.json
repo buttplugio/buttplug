@@ -1,153 +1,23 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Buttplug Device Config Schema",
-  "version": 2,
   "description": "JSON format for Buttplug Device Config Files.",
-  "components": {
-    "uuid": {
-      "type": "string",
-      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
-    },
-    "endpoint": {
-      "type": "object",
-      "patternProperties": {
-        "^(command|firmware|rx|rxaccel|rxblebattery|rxblemodel|rxpressure|rxtouch|tx|txmode|txshock|txvibrate|txvendorcontrol|whitelist|generic[1-2]?[0-9]|generic3[0-1])$": {
-          "$ref": "#/components/uuid"
-        }
-      },
-      "additionalProperties": false,
-      "minProperties": 1
-    },
-    "btle-definition": {
-      "type": "object",
-      "properties": {
-        "names": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "minItems": 1
-        },
-        "manufacturer-data": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "company": {
-                "type": "integer"
-              },
-              "expected-length": {
-                "type": "integer"
-              },
-              "data": {
-                "type": "array",
-                "items": {
-                  "type": "integer"
-                }
-              }
-            },
-            "required": [
-              "company"
-            ]
-          }
-        },
-        "advertised-services": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "$ref": "#/components/uuid"
-          }
-        },
-        "services": {
-          "type": "object",
-          "patternProperties": {
-            "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$": {
-              "$ref": "#/components/endpoint"
-            }
-          },
-          "minProperties": 1,
-          "additionalProperties": false
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "names",
-        "services"
-      ]
-    },
-    "websocket-definition": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "name"
-      ]
-    },
-    "serial-definition": {
-      "type": "object",
-      "properties": {
-        "port": {
-          "type": "string"
-        },
-        "baud-rate": {
-          "type": "integer"
-        },
-        "data-bits": {
-          "type": "integer"
-        },
-        "parity": {
-          "type": "string"
-        },
-        "stop-bits": {
-          "type": "integer"
-        }
-      },
-      "required": [
-        "port",
-        "baud-rate",
-        "data-bits",
-        "parity",
-        "stop-bits"
-      ],
-      "additionalProperties": false
-    },
-    "xinput-definition": {
-      "type": "object",
-      "properties": {
-        "exists": {
-          "type": "boolean"
-        }
-      }
-    },
-    "lovense-connect-service-definition": {
-      "type": "object",
-      "properties": {
-        "exists": {
-          "type": "boolean"
-        }
-      }
-    },
-    "usb-definition": {
-      "type": "object",
+  "$defs": {
+    "VIDPIDSpecifier": {
+      "title": "Specifier for HID (USB, Bluetooth) devices",
+      "description": "Handles devices managed by the operating system's HID manager.",
       "properties": {
         "pairs": {
           "type": "array",
           "items": {
+            "title": "VIDPIDPair",
             "type": "object",
             "properties": {
               "vendor-id": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 65535
+                "type": "integer"
               },
               "product-id": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 65535
+                "type": "integer"
               }
             },
             "required": [
@@ -155,16 +25,16 @@
               "product-id"
             ],
             "additionalProperties": false
-          },
-          "minItems": 1
+          }
         }
       },
       "required": [
         "pairs"
-      ]
+      ],
+      "additionalProperties": false
     },
-    "step-range": {
-      "description": "Specifies the range of steps to use for a device. Devices will use the low end value as a stop.",
+    "RangeInclusive<integer>": {
+      "title": "RangeInclusive<integer>",
       "type": "array",
       "items": {
         "type": "integer"
@@ -172,372 +42,481 @@
       "minItems": 2,
       "maxItems": 2
     },
-    "features": {
-      "type": "array",
-      "description": "Attributes for device messages.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "description": {
-            "type": "string"
-          },
-          "feature-type": {
-            "type": "string",
-            "pattern": "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|Battery|RSSI|Pressure)$"
-          },
-          "actuator": {
-            "type": "object",
-            "properties": {
-              "step-range": {
-                "$ref": "#/components/step-range"
-              },
-              "messages": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "pattern": "^(ScalarCmd|RotateCmd|LinearCmd)$"
-                }
-              }
-            },
-            "required": [
-              "step-range",
-              "messages"
-            ]
-          },
-          "sensor": {
-            "type": "object",
-            "properties": {
-              "value-range": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/step-range"
-                },
-                "minItems": 1
-              },
-              "messages": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "pattern": "^(SensorReadCmd|SensorSubscribeCmd)$"
-                }
-              }
-            },
-            "required": [
-              "value-range",
-              "messages"
-            ]
-          }
-        },
-        "required": [
-          "feature-type"
-        ],
-        "additionalProperties": false
-      }
-    },
-    "user-config-features": {
-      "type": "array",
-      "description": "Attributes for device messages, with additional customization for user configs.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "description": {
-            "type": "string"
-          },
-          "feature-type": {
-            "type": "string",
-            "pattern": "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|Battery|RSSI|Pressure)$"
-          },
-          "actuator": {
-            "type": "object",
-            "properties": {
-              "step-range": {
-                "$ref": "#/components/step-range"
-              },
-              "step-limit": {
-                "$ref": "#/components/step-range"
-              },
-              "messages": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "pattern": "^(ScalarCmd|RotateCmd|LinearCmd)$"
-                }
-              }
-            },
-            "required": [
-              "step-range",
-              "step-limit",
-              "messages"
-            ]
-          },
-          "sensor": {
-            "type": "object",
-            "properties": {
-              "value-range": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/step-range"
-                },
-                "minItems": 1
-              },
-              "messages": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "pattern": "^(SensorReadCmd|SensorSubscribeCmd)$"
-                }
-              }
-            },
-            "required": [
-              "value-range",
-              "messages"
-            ]
-          }
-        },
-        "required": [
-          "feature-type"
-        ],
-        "additionalProperties": false
-      }
-    },
-    "user-config-customization": {
-      "type": "object",
+    "ProtocolAttributes": {
+      "title": "ProtocolAttributes",
       "properties": {
-        "allow": {
-          "type": "boolean"
+        "identifier": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
-        "deny": {
-          "type": "boolean"
-        },
-        "display-name": {
+        "name": {
           "type": "string"
         },
-        "index": {
+        "features": {
+          "type": "array",
+          "items": {
+            "title": "DeviceFeature",
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "feature-type": {
+                "enum": [
+                  "Unknown",
+                  "Vibrate",
+                  "Rotate",
+                  "Oscillate",
+                  "Constrict",
+                  "Inflate",
+                  "Position",
+                  "Battery",
+                  "RSSI",
+                  "Button",
+                  "Pressure",
+                  "Raw"
+                ]
+              },
+              "actuator": {
+                "title": "DeviceFeatureActuator",
+                "properties": {
+                  "step-range": {
+                    "$ref": "#/$defs/RangeInclusive<integer>"
+                  },
+                  "step-limit": {
+                    "$ref": "#/$defs/RangeInclusive<integer>"
+                  },
+                  "messages": {
+                    "type": "array",
+                    "items": {
+                      "title": "ButtplugActuatorFeatureMessageType",
+                      "enum": [
+                        "ScalarCmd",
+                        "RotateCmd",
+                        "LinearCmd"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "step-range",
+                  "messages"
+                ],
+                "additionalProperties": false
+              },
+              "sensor": {
+                "title": "DeviceFeatureSensor",
+                "properties": {
+                  "value-range": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/RangeInclusive<integer>"
+                    }
+                  },
+                  "messages": {
+                    "type": "array",
+                    "items": {
+                      "title": "ButtplugSensorFeatureMessageType",
+                      "enum": [
+                        "SensorReadCmd",
+                        "SensorSubscribeCmd"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "value-range",
+                  "messages"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "feature-type"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "version": {
+      "title": "ConfigVersion",
+      "properties": {
+        "major": {
+          "type": "integer"
+        },
+        "minor": {
           "type": "integer"
         }
       },
-      "additionalProperties": false,
       "required": [
-        "allow",
-        "deny",
-        "index"
-      ]
-    },
-    "user-config-definition": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "features": {
-          "$ref": "#/components/user-config-features"
-        },
-        "user-config": {
-          "$ref": "#/components/user-config-customization"
-        }
-      },
+        "major",
+        "minor"
+      ],
       "additionalProperties": false
-    },
-    "defaults-definition": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "features": {
-          "$ref": "#/components/features"
-        }
-      },
-      "required": [
-        "name",
-        "features"
-      ]
-    },
-    "configurations-definition": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "identifier": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "minItems": 1
-          },
-          "name": {
-            "type": "string"
-          },
-          "features": {
-            "$ref": "#/components/features"
-          }
-        },
-        "required": [
-          "name",
-          "identifier"
-        ],
-        "additionalProperties": false
-      },
-      "minItems": 1
-    }
-  },
-  "type": "object",
-  "properties": {
-    "version": {
-      "description": "Version of the device configuration file.",
-      "type": "object",
-      "properties": {
-        "major": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "minor": {
-          "type": "integer",
-          "minimum": 0
-        }
-      }
     },
     "protocols": {
-      "type": "object",
-      "patternProperties": {
-        "^.*$": {
-          "type": "object",
-          "properties": {
-            "communication": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "btle": {
-                    "$ref": "#/components/btle-definition"
-                  },
-                  "serial": {
-                    "$ref": "#/components/serial-definition"
-                  },
-                  "websocket": {
-                    "$ref": "#/components/websocket-definition"
-                  },
-                  "usb": {
-                    "$ref": "#/components/usb-definition"
-                  },
-                  "hid": {
-                    "$ref": "#/components/usb-definition"
-                  },
-                  "xinput": {
-                    "$ref": "#/components/xinput-definition"
-                  },
-                  "lovense-connect-service": {
-                    "$ref": "#/components/lovense-connect-service-definition"
-                  }
-                }
-              },
-              "maxProperties": 1
-            },
-            "devices": {
-              "type": "object",
+      "additionalProperties": {
+        "title": "ProtocolDefinition",
+        "type": "object",
+        "properties": {
+          "communication": {
+            "type": "array",
+            "items": {
+              "title": "ProtocolCommunicationSpecifier",
               "properties": {
-                "defaults": {
-                  "$ref": "#/components/defaults-definition"
-                },
-                "configurations": {
-                  "$ref": "#/components/configurations-definition"
-                }
-              }
-            }
-          }
-        }
-      },
-      "additionalProperties": false
-    },
-    "user-configs": {
-      "type": "object",
-      "properties": {
-        "protocols": {
-          "type": "object",
-          "patternProperties": {
-            "^.*$": {
-              "type": "object",
-              "properties": {
-                "communication": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "btle": {
-                        "$ref": "#/components/btle-definition"
-                      },
-                      "serial": {
-                        "$ref": "#/components/serial-definition"
-                      },
-                      "websocket": {
-                        "$ref": "#/components/websocket-definition"
-                      },
-                      "usb": {
-                        "$ref": "#/components/usb-definition"
-                      },
-                      "hid": {
-                        "$ref": "#/components/usb-definition"
+                "btle": {
+                  "title": "Specifier for Bluetooth LE Devices",
+                  "description": "Used by protocols for identifying bluetooth devices via their advertisements, as well as defining the services and characteristics they are expected to have.",
+                  "type": "object",
+                  "properties": {
+                    "names": {
+                      "description": "Set of expected advertised names for this device.",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "manufacturer-data": {
+                      "description": "Array of possible manufacturer data values.",
+                      "type": "array",
+                      "items": {
+                        "title": "BluetoothLEManufacturerData",
+                        "properties": {
+                          "company": {
+                            "type": "integer"
+                          },
+                          "data": {
+                            "oneOf": [
+                              {
+                                "const": null
+                              },
+                              {
+                                "type": "array",
+                                "items": {
+                                  "type": "number"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "advertised-services": {
+                      "description": "Set of expected advertised services for this device.",
+                      "type": "array",
+                      "items": {
+                        "title": "Uuid",
+                        "type": "string"
+                      }
+                    },
+                    "services": {
+                      "description": "Services we expect the device may have. More services may be listed in a specifier than any one device may have, but we expect at least one to be matched by a device in order to consider the device part of the protocol that has this specifier.",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "command": {
+                            "title": "Expect to take commands, when multiple receive endpoints may be available",
+                            "type": "string"
+                          },
+                          "firmware": {
+                            "title": "Firmware updates (Buttplug does not update firmware, but some firmware endpoints are used for mode setting)",
+                            "type": "string"
+                          },
+                          "rx": {
+                            "title": "Common receive endpoint name",
+                            "type": "string"
+                          },
+                          "rxaccel": {
+                            "title": "Receive endpoint for accelerometer data",
+                            "type": "string"
+                          },
+                          "rxblebattery": {
+                            "title": "Receive endpoint for battery levels (usually expected to be BLE standard profile)",
+                            "type": "string"
+                          },
+                          "rxblemodel": {
+                            "title": "Receive endpoint for BLE model (usually expected to be BLE standard profile)",
+                            "type": "string"
+                          },
+                          "rxpressure": {
+                            "title": "Receive endpoint for pressure sensors",
+                            "type": "string"
+                          },
+                          "rxtouch": {
+                            "title": "Receive endpoint for touch sensors",
+                            "type": "string"
+                          },
+                          "tx": {
+                            "title": "Common transmit endpoint name",
+                            "type": "string"
+                          },
+                          "txmode": {
+                            "title": "Transmit endpoint for hardware mode setting.",
+                            "type": "string"
+                          },
+                          "txshock": {
+                            "title": "Transmit endpoint for shock setting (unused)",
+                            "type": "string"
+                          },
+                          "txvibrate": {
+                            "title": "Transmit endpoint for vibration setting",
+                            "type": "string"
+                          },
+                          "txvendorcontrol": {
+                            "title": "Transmit endpoint for vendor (proprietary) control",
+                            "type": "string"
+                          },
+                          "whitelist": {
+                            "title": "Transmit endpoint for whitelist updating",
+                            "type": "string"
+                          },
+                          "generic0": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic1": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic2": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic3": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic4": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic5": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic6": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic7": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic8": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic9": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic10": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic11": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic12": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic13": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic14": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic15": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic16": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic17": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic18": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic19": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic20": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic21": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic22": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic23": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic24": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic25": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic26": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic27": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic28": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic29": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic30": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          },
+                          "generic31": {
+                            "title": "Generic endpoint (available for user configurations)",
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false
                       }
                     }
                   },
-                  "maxProperties": 1
+                  "required": [
+                    "names",
+                    "services"
+                  ],
+                  "additionalProperties": false
                 },
-                "devices": {
+                "hid": {
+                  "$ref": "#/$defs/VIDPIDSpecifier"
+                },
+                "usb": {
+                  "$ref": "#/$defs/VIDPIDSpecifier"
+                },
+                "serial": {
+                  "title": "Specifier for Serial devices",
+                  "description": "Handles serial port device identification (via port names) and configuration.",
+                  "properties": {
+                    "baud-rate": {
+                      "type": "integer"
+                    },
+                    "data-bits": {
+                      "type": "integer"
+                    },
+                    "stop-bits": {
+                      "type": "integer"
+                    },
+                    "parity": {
+                      "type": "string"
+                    },
+                    "port": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "baud-rate",
+                    "data-bits",
+                    "stop-bits",
+                    "parity",
+                    "port"
+                  ],
+                  "additionalProperties": false
+                },
+                "xinput": {
+                  "title": "Specifier for XInput devices",
                   "type": "object",
                   "properties": {
-                    "configurations": {
-                      "$ref": "#/components/configurations-definition"
+                    "exists": {
+                      "description": "Needed for deserialziation but unused.",
+                      "type": "boolean"
                     }
-                  }
+                  },
+                  "required": [
+                    "exists"
+                  ],
+                  "additionalProperties": false
+                },
+                "lovense-connect-service": {
+                  "title": "Specifier for Lovense Connect Service devices",
+                  "description": "Network based services, has no attributes because the Lovense Connect Service device communication manager handles all device discovery and identification itself.",
+                  "properties": {
+                    "exists": {
+                      "description": "Needed for proper deserialization, but clippy will complain.",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "exists"
+                  ],
+                  "additionalProperties": false
+                },
+                "websocket": {
+                  "title": "Specifier for Websocket Device Manager devices",
+                  "description": "The websocket device manager is a network based manager, so we have no info other than possibly a device name that is provided as part of the connection handshake.",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "additionalProperties": false
                 }
-              }
+              },
+              "minProperties": 1,
+              "maxProperties": 1,
+              "additionalProperties": false
             }
           },
-          "additionalProperties": false
-        },
-        "devices": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "identifier": {
-                "type": "object",
-                "properties": {
-                  "address": {
-                    "type": "string"
-                  },
-                  "protocol": {
-                    "type": "string"
-                  },
-                  "identifier": {
-                    "type": "string"
-                  }
-                },
-                "additionalProperties": false,
-                "required": [
-                  "address",
-                  "protocol"
-                ]
-              },
-              "config": {
-                "$ref": "#/components/user-config-definition"
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "identifier",
-              "config"
-            ]
+          "defaults": {
+            "$ref": "#/$defs/ProtocolAttributes"
+          },
+          "configurations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ProtocolAttributes"
+            }
           }
-        }
-      },
-      "additionalProperties": false
-    },
-    "additionalProperties": false
+        },
+        "required": [],
+        "additionalProperties": false
+      }
+    }
   },
   "required": [
     "version"
   ],
-  "maxProperties": 2,
   "additionalProperties": false
 }
