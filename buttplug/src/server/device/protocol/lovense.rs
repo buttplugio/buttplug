@@ -365,7 +365,7 @@ impl ProtocolHandler for Lovense {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let direction = self.rotation_direction.clone();
     let mut hardware_cmds = vec![];
-    if let Some(Some((speed, clockwise))) = cmds.get(0) {
+    if let Some(Some((speed, clockwise))) = cmds.first() {
       let lovense_cmd = format!("Rotate:{};", speed).as_bytes().to_vec();
       hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
       let dir = direction.load(Ordering::SeqCst);
@@ -414,8 +414,7 @@ impl ProtocolHandler for Lovense {
                     *message.feature_index(),
                     message::SensorType::Battery,
                     vec![level as i32],
-                  )
-                  .into(),
+                  ),
                 );
               }
             }
@@ -469,7 +468,7 @@ async fn update_linear_movement(device: Arc<Hardware>, linear_info: Arc<(AtomicU
       // We move every 100ms, so divide the movement into that many chunks.
       // If we're moving so fast it'd be under our 100ms boundary, just move in 1 step.
       let move_steps = (linear_info.1.load(Ordering::Relaxed) / 100).max(1);
-      current_move_amount = (goal_position as i32 - current_position) as i32 / move_steps as i32;
+      current_move_amount = (goal_position - current_position) / move_steps as i32;
     }
 
     // If we aren't going anywhere, just pause then restart
@@ -484,10 +483,8 @@ async fn update_linear_movement(device: Arc<Hardware>, linear_info: Arc<(AtomicU
       if current_position < last_goal_position {
         current_position = last_goal_position;
       }
-    } else {
-      if current_position > last_goal_position {
-        current_position = last_goal_position;
-      }
+    } else if current_position > last_goal_position {
+      current_position = last_goal_position;
     }
 
     let lovense_cmd = format!("FSetSite:{};", current_position);

@@ -55,7 +55,7 @@ pub struct HidAsyncDevice {
 impl Clone for HidAsyncDevice {
   fn clone(&self) -> Self {
     Self {
-      inner: self.inner.as_ref().map(|dev| Arc::clone(&dev)),
+      inner: self.inner.as_ref().map(Arc::clone),
     }
   }
 }
@@ -70,13 +70,7 @@ impl Drop for HidAsyncDevice {
         drop(req_tx);
 
         // Wait for the reader thread to finish
-        match guard.read_thread.take() {
-          Some(jh) => match jh.join() {
-            Ok(_) => info!("device read thread joined"),
-            Err(_) => {} //error!("failed to join device read thread"),
-          },
-          None => {} //error!("already joined"),
-        }
+        if let Some(jh) = guard.read_thread.take() { if jh.join().is_ok() { info!("device read thread joined") } }
       } else {
         //error!("Failed to take lock on device");
       }
@@ -126,7 +120,7 @@ impl HidAsyncDevice {
                     continue;
                   }
                   //debug!("Read data");
-                  if let Err(_) = data_tx.send(Some(buf)) {
+                  if data_tx.send(Some(buf)).is_err() {
                     //error!("Sending internally: {}", e);
                     break;
                   }
@@ -179,14 +173,11 @@ impl AsyncWrite for HidAsyncDevice {
       //let this: &mut Self = &mut self;
       //debug!("Will write {} bytes: {:?}", buf.len(), &buf[..]);
       match self.inner.as_mut().unwrap().lock() {
-        Ok(guard) => match guard.device.lock() {
-          Ok(guard) => {
-            guard
-              .write(&buf[..])
-              .map_err(|e| io::Error::new(io::ErrorKind::Other, format!("hidapi failed: {}", e)))?;
-            //debug!("Wrote: {:?}", &buf[0..max_len]);
-          }
-          Err(_) => {} //error!("{:?}", e),
+        Ok(guard) => if let Ok(guard) = guard.device.lock() {
+          guard
+            .write(buf)
+            .map_err(|e| io::Error::new(io::ErrorKind::Other, format!("hidapi failed: {}", e)))?;
+          //debug!("Wrote: {:?}", &buf[0..max_len]);
         },
         Err(e) => {
           return Poll::Ready(Err(io::Error::new(

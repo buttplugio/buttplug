@@ -308,7 +308,7 @@ impl ButtplugClientDevice {
             ButtplugDeviceError::DeviceFeatureCountMismatch(scalar_count, map.len() as u32).into(),
           );
         }
-        scalar_vec = Vec::with_capacity(map.len() as usize);
+        scalar_vec = Vec::with_capacity(map.len());
         for (idx, speed) in map {
           if *idx >= scalar_count {
             return create_boxed_future_client_error(
@@ -328,7 +328,7 @@ impl ButtplugClientDevice {
             ButtplugDeviceError::DeviceFeatureCountMismatch(scalar_count, vec.len() as u32).into(),
           );
         }
-        scalar_vec = Vec::with_capacity(vec.len() as usize);
+        scalar_vec = Vec::with_capacity(vec.len());
         for (i, v) in vec.iter().enumerate() {
           scalar_vec.push(ScalarSubcommandV3::new(*attrs[i].index(), *v, *actuator));
         }
@@ -392,7 +392,7 @@ impl ButtplugClientDevice {
             ButtplugDeviceError::DeviceFeatureCountMismatch(scalar_count, map.len() as u32).into(),
           );
         }
-        scalar_vec = Vec::with_capacity(map.len() as usize);
+        scalar_vec = Vec::with_capacity(map.len());
         for (idx, (scalar, actuator)) in map {
           if *idx >= scalar_count {
             return create_boxed_future_client_error(
@@ -408,7 +408,7 @@ impl ButtplugClientDevice {
             ButtplugDeviceError::DeviceFeatureCountMismatch(scalar_count, vec.len() as u32).into(),
           );
         }
-        scalar_vec = Vec::with_capacity(vec.len() as usize);
+        scalar_vec = Vec::with_capacity(vec.len());
         for (i, (scalar, actuator)) in vec.iter().enumerate() {
           scalar_vec.push(ScalarSubcommandV3::new(i as u32, *scalar, *actuator));
         }
@@ -450,7 +450,7 @@ impl ButtplugClientDevice {
             ButtplugDeviceError::DeviceFeatureCountMismatch(linear_count, map.len() as u32).into(),
           );
         }
-        linear_vec = Vec::with_capacity(map.len() as usize);
+        linear_vec = Vec::with_capacity(map.len());
         for (idx, (dur, pos)) in map {
           if *idx >= linear_count {
             return create_boxed_future_client_error(
@@ -466,7 +466,7 @@ impl ButtplugClientDevice {
             ButtplugDeviceError::DeviceFeatureCountMismatch(linear_count, vec.len() as u32).into(),
           );
         }
-        linear_vec = Vec::with_capacity(vec.len() as usize);
+        linear_vec = Vec::with_capacity(vec.len());
         for (i, v) in vec.iter().enumerate() {
           linear_vec.push(VectorSubcommandV1::new(i as u32, v.0, v.1));
         }
@@ -508,7 +508,7 @@ impl ButtplugClientDevice {
             ButtplugDeviceError::DeviceFeatureCountMismatch(rotate_count, map.len() as u32).into(),
           );
         }
-        rotate_vec = Vec::with_capacity(map.len() as usize);
+        rotate_vec = Vec::with_capacity(map.len());
         for (idx, (speed, clockwise)) in map {
           if *idx > rotate_count - 1 {
             return create_boxed_future_client_error(
@@ -524,7 +524,7 @@ impl ButtplugClientDevice {
             ButtplugDeviceError::DeviceFeatureCountMismatch(rotate_count, vec.len() as u32).into(),
           );
         }
-        rotate_vec = Vec::with_capacity(vec.len() as usize);
+        rotate_vec = Vec::with_capacity(vec.len());
         for (i, v) in vec.iter().enumerate() {
           rotate_vec.push(RotationSubcommandV1::new(i as u32, v.0, v.1));
         }

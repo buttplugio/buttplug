@@ -65,7 +65,7 @@ impl ServerDeviceManagerEventLoop {
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
     Self {
       comm_managers,
-      device_config_manager: device_config_manager,
+      device_config_manager,
       server_sender,
       device_map,
       device_comm_receiver,
@@ -284,7 +284,7 @@ impl ServerDeviceManagerEventLoop {
         let device_added_message = DeviceAddedV4::new(
           device_index,
           &device.name(),
-          &device.definition().user_config().display_name(),
+          device.definition().user_config().display_name(),
           &None,
           &device.definition().features().clone(),
         );

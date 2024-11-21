@@ -72,7 +72,7 @@ impl ButtplugServerBuilder {
     Self {
       name: "Buttplug Server".to_owned(),
       max_ping_time: None,
-      device_manager: device_manager,
+      device_manager,
     }
   }
 
@@ -130,7 +130,7 @@ impl ButtplugServerBuilder {
           // TODO Should the event sender return a result instead of an error message?
           if output_sender_clone
             .send(ButtplugServerMessageV4::Error(
-              message::ErrorV0::from(ButtplugError::from(ButtplugPingError::PingedOut)).into(),
+              message::ErrorV0::from(ButtplugError::from(ButtplugPingError::PingedOut)),
             ))
             .is_err()
           {

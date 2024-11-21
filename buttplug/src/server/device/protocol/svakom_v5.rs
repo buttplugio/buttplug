@@ -76,7 +76,7 @@ impl ProtocolHandler for SvakomV5 {
       .map(|c| (c.0, c.1))
       .collect::<Vec<(ActuatorType, u32)>>();
 
-    if vibes.len() > 0 {
+    if !vibes.is_empty() {
       let mut changed = last_vibes.len() != vibes.len();
       let vibe1 = vibes[0].1;
       if !changed && vibes[0].1 != last_vibes[0].1 {
@@ -129,7 +129,7 @@ impl ProtocolHandler for SvakomV5 {
       .filter(|c| c.0 == Oscillate)
       .map(|c| (c.0, c.1))
       .collect::<Vec<(ActuatorType, u32)>>();
-    if oscs.len() > 0 {
+    if !oscs.is_empty() {
       let mut changed = oscs.len() != last_oscs.len();
       if !changed && oscs[0].1 != last_oscs[0].1 {
         changed = true;
@@ -150,8 +150,7 @@ impl ProtocolHandler for SvakomV5 {
     let mut command_writer = self.last_cmds.write().expect("Locks should work");
     *command_writer = commands
       .iter()
-      .filter(|c| c.is_some())
-      .map(|c| c.unwrap_or((Vibrate, 0)))
+      .filter_map(|c| *c)
       .collect::<Vec<(ActuatorType, u32)>>();
     Ok(hcmds)
   }
