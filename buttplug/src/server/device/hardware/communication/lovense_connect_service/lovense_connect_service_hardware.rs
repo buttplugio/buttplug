@@ -169,7 +169,7 @@ impl HardwareInternal for LovenseServiceHardware {
           async_manager::spawn(async move {
             trace!(
               "Got http response: {}",
-              res.text().await.unwrap_or(format!("no response"))
+              res.text().await.unwrap_or("no response".to_string())
             );
           });
           Ok(())

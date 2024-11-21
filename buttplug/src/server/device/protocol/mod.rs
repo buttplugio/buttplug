@@ -487,10 +487,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     sensee_v2::setup::SenseeV2IdentifierFactory::default(),
   );
-  add_to_protocol_map(
-    &mut map,
-    serveu::setup::ServeUIdentifierFactory::default(),
-  );
+  add_to_protocol_map(&mut map, serveu::setup::ServeUIdentifierFactory::default());
   add_to_protocol_map(&mut map, svakom::setup::SvakomIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,

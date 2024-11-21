@@ -196,7 +196,7 @@ impl ServerDevice {
 
     // Build the server device and return.
     let handler = protocol_initializer
-      .initialize(hardware.clone(), &attrs.clone().into())
+      .initialize(hardware.clone(), &attrs.clone())
       .await?;
 
     let requires_keepalive = hardware.requires_keepalive();
@@ -249,14 +249,14 @@ impl ServerDevice {
           if hardware.time_since_last_write().await > wait_duration {
             match &strategy {
               ProtocolKeepaliveStrategy::RepeatPacketStrategy(packet) => {
-                if let Err(e) = hardware.write_value(&packet).await {
+                if let Err(e) = hardware.write_value(packet).await {
                   warn!("Error writing keepalive packet: {:?}", e);
                   break;
                 }
               }
               ProtocolKeepaliveStrategy::RepeatLastPacketStrategy => {
                 if let Some(packet) = &*keepalive_packet.read().await {
-                  if let Err(e) = hardware.write_value(&packet).await {
+                  if let Err(e) = hardware.write_value(packet).await {
                     warn!("Error writing keepalive packet: {:?}", e);
                     break;
                   }
@@ -418,7 +418,7 @@ impl ServerDevice {
     // thing. This should be a very rare thing.
     if self.handler.has_handle_message() {
       let fut = self.handle_generic_command_result(self.handler.handle_message(&command_message));
-      return async move { fut.await }.boxed();
+      return fut.boxed();
     }
 
     match command_message {
@@ -496,7 +496,7 @@ impl ServerDevice {
 
     let commands = match self
       .actuator_command_manager
-      .update_scalar(&msg, self.handler.needs_full_command_set())
+      .update_scalar(msg, self.handler.needs_full_command_set())
     {
       Ok(values) => values,
       Err(err) => return future::ready(Err(err)).boxed(),

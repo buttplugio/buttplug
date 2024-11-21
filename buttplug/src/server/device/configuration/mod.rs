@@ -375,7 +375,7 @@ impl DeviceConfigurationManager {
     protocol: &str,
     specifier: &ProtocolCommunicationSpecifier,
   ) -> Result<(), ButtplugDeviceError> {
-    if !self.protocol_map.contains_key(protocol) {}
+    self.protocol_map.contains_key(protocol);
     self
       .user_communication_specifiers
       .entry(protocol.to_owned())
@@ -404,7 +404,7 @@ impl DeviceConfigurationManager {
     identifier: &UserDeviceIdentifier,
     definition: &UserDeviceDefinition,
   ) -> Result<(), ButtplugDeviceError> {
-    if !self.protocol_map.contains_key(identifier.protocol()) {}
+    self.protocol_map.contains_key(identifier.protocol());
     self
       .user_device_definitions
       .entry(identifier.clone())
@@ -470,7 +470,7 @@ impl DeviceConfigurationManager {
 
     let mut index = 0;
     while current_indexes.contains(&index) {
-      index = index + 1;
+      index += 1;
     }
     debug!("Generating and assigning index {index:?} for device {identifier:?}");
     index
@@ -540,8 +540,8 @@ impl DeviceConfigurationManager {
       debug!("User device config found for {:?}", identifier);
       attrs.clone()
     } else if let Some(attrs) = self.base_device_definitions.get(&BaseDeviceIdentifier::new(
-      &identifier.protocol(),
-      &identifier.identifier(),
+      identifier.protocol(),
+      identifier.identifier(),
     )) {
       debug!(
         "Protocol + Identifier device config found for {:?}",
@@ -550,7 +550,7 @@ impl DeviceConfigurationManager {
       UserDeviceDefinition::new_from_base_definition(attrs, self.device_index(identifier))
     } else if let Some(attrs) = self
       .base_device_definitions
-      .get(&BaseDeviceIdentifier::new(&identifier.protocol(), &None))
+      .get(&BaseDeviceIdentifier::new(identifier.protocol(), &None))
     {
       debug!("Protocol device config found for {:?}", identifier);
       UserDeviceDefinition::new_from_base_definition(attrs, self.device_index(identifier))

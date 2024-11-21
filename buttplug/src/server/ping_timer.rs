@@ -90,7 +90,7 @@ impl PingTimer {
         ping_timeout_notifier.clone(),
         pinged_out.clone(),
       );
-      async_manager::spawn(async move { fut.await });
+      async_manager::spawn(fut);
     }
     Self {
       max_ping_time,

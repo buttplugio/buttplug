@@ -27,7 +27,7 @@ impl ProtocolHandler for Synchro {
     &self,
     cmds: &[Option<(u32, bool)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if let Some(Some((speed, clockwise))) = cmds.get(0) {
+    if let Some(Some((speed, clockwise))) = cmds.first() {
       Ok(vec![HardwareWriteCmd::new(
         Endpoint::Tx,
         vec![

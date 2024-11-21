@@ -153,7 +153,7 @@ impl ButtplugServerDowngradeWrapper {
                 .map_err(|e| {
                   converter
                     .convert_outgoing(
-                      &&ButtplugServerMessageV4::from(ErrorV0::from(e)),
+                      &ButtplugServerMessageV4::from(ErrorV0::from(e)),
                       &spec_version,
                     )
                     .unwrap()

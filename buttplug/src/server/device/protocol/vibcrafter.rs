@@ -47,7 +47,7 @@ fn encrypt(command: String) -> Vec<u8> {
   let res = enc.encrypt_padded_vec_mut::<Pkcs7>(command.as_bytes());
 
   info!("Encoded {} to {:?}", command, res);
-  return res;
+  res
 }
 
 fn decrypt(data: Vec<u8>) -> String {
@@ -55,7 +55,7 @@ fn decrypt(data: Vec<u8>) -> String {
   let res = String::from_utf8(dec.decrypt_padded_vec_mut::<Pkcs7>(&data).unwrap()).unwrap();
 
   info!("Decoded {} from {:?}", res, data);
-  return res;
+  res
 }
 
 #[async_trait]
@@ -99,7 +99,7 @@ impl ProtocolInitializer for VibCrafterInitializer {
           if let Some(to_hash) = parts.get(1) {
             debug!("VibCrafter to hash {:?}", to_hash);
             let mut sha256 = Sha256::new();
-            sha256.update(&to_hash.as_str().as_bytes());
+            sha256.update(to_hash.as_str().as_bytes());
             let result = &sha256.finalize();
 
             let auth_msg = format!("Auth:{:02x}{:02x};", result[0], result[1]);

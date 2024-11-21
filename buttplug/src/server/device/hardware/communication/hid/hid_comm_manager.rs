@@ -64,7 +64,7 @@ impl TimedRetryCommunicationManagerImpl for HidCommunicationManager {
         continue;
       }
       seen_addresses.push(serial_number.clone());
-      let device_creator = HidHardwareConnector::new(api.clone(), &device);
+      let device_creator = HidHardwareConnector::new(api.clone(), device);
       if device_sender
         .send(HardwareCommunicationManagerEvent::DeviceFound {
           name: device.product_string().unwrap().to_owned(),

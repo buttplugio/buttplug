@@ -119,7 +119,7 @@ impl ActuatorCommandManager {
     let mut rotate_subcommands = vec![];
     for (index, feature) in features.iter().enumerate() {
       if let Some(actuator) = feature.actuator() {
-        let actuator_type: ActuatorType = feature.feature_type().clone().try_into().unwrap();
+        let actuator_type: ActuatorType = (*feature.feature_type()).try_into().unwrap();
         statuses.push(FeatureStatus::new(&actuator_type, actuator));
         if actuator
           .messages()
@@ -180,10 +180,8 @@ impl ActuatorCommandManager {
         } else if match_all {
           result.push((u32_index, *cmd.actuator_type(), cmd.current().1));
         }
-      } else if match_all {
-        if cmd.messages().contains(&msg_type) {
-          result.push((u32_index, *cmd.actuator_type(), cmd.current().1));
-        }
+      } else if match_all && cmd.messages().contains(&msg_type) {
+        result.push((u32_index, *cmd.actuator_type(), cmd.current().1));
       }
     }
     // Return the command vector for the protocol to turn into proprietary commands
@@ -257,7 +255,7 @@ impl ActuatorCommandManager {
         .feature_status
         .iter()
         .filter(|x| x
-        .messages()
+          .messages()
           .contains(&ButtplugActuatorFeatureMessageType::RotateCmd))
         .count()
     ];

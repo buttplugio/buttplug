@@ -32,7 +32,7 @@ impl ProtocolHandler for LiboElle {
       let speed = scalar as u8;
       if index == 1 {
         let mut data = 0u8;
-        if speed as u8 > 0 && speed <= 7 {
+        if speed > 0 && speed <= 7 {
           data |= (speed - 1) << 4;
           data |= 1; // Set the mode too
         } else if speed > 7 {
