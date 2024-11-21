@@ -137,7 +137,7 @@ impl Serialize for Endpoint {
 
 struct EndpointVisitor;
 
-impl<'de> Visitor<'de> for EndpointVisitor {
+impl Visitor<'_> for EndpointVisitor {
   type Value = Endpoint;
 
   fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
