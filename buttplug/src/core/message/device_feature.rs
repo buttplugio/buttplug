@@ -222,9 +222,13 @@ impl DeviceFeatureActuator {
 
   pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
     if self.step_range.is_empty() || self.step_range.start() > self.step_range.end() {
-      Err(ButtplugDeviceError::DeviceConfigurationError("Step range out of order, must be start <= x <= end.".to_string()))
+      Err(ButtplugDeviceError::DeviceConfigurationError(
+        "Step range out of order, must be start <= x <= end.".to_string(),
+      ))
     } else if self.step_limit.is_empty() || self.step_limit.start() > self.step_limit.end() {
-      Err(ButtplugDeviceError::DeviceConfigurationError("Step limit out of order, must be start <= x <= end.".to_string()))
+      Err(ButtplugDeviceError::DeviceConfigurationError(
+        "Step limit out of order, must be start <= x <= end.".to_string(),
+      ))
     } else {
       Ok(())
     }

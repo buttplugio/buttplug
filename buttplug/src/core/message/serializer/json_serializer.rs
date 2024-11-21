@@ -222,14 +222,12 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
             .iter()
             .map(|msg| match msg {
               ButtplugServerMessageVariant::V0(msgv0) => msgv0.clone(),
-              _ => ButtplugServerMessageV0::Error(
-                message::ErrorV0::from(ButtplugError::from(
-                  ButtplugMessageError::MessageConversionError(format!(
-                    "Message {:?} not in Spec V0! This is a server bug.",
-                    msg
-                  )),
+              _ => ButtplugServerMessageV0::Error(message::ErrorV0::from(ButtplugError::from(
+                ButtplugMessageError::MessageConversionError(format!(
+                  "Message {:?} not in Spec V0! This is a server bug.",
+                  msg
                 )),
-              ),
+              ))),
             })
             .collect();
           vec_to_protocol_json(&msg_vec)
@@ -239,14 +237,12 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
             .iter()
             .map(|msg| match msg {
               ButtplugServerMessageVariant::V1(msgv1) => msgv1.clone(),
-              _ => ButtplugServerMessageV1::Error(
-                message::ErrorV0::from(ButtplugError::from(
-                  ButtplugMessageError::MessageConversionError(format!(
-                    "Message {:?} not in Spec V1! This is a server bug.",
-                    msg
-                  )),
+              _ => ButtplugServerMessageV1::Error(message::ErrorV0::from(ButtplugError::from(
+                ButtplugMessageError::MessageConversionError(format!(
+                  "Message {:?} not in Spec V1! This is a server bug.",
+                  msg
                 )),
-              ),
+              ))),
             })
             .collect();
           vec_to_protocol_json(&msg_vec)
@@ -256,14 +252,12 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
             .iter()
             .map(|msg| match msg {
               ButtplugServerMessageVariant::V2(msgv2) => msgv2.clone(),
-              _ => ButtplugServerMessageV2::Error(
-                message::ErrorV0::from(ButtplugError::from(
-                  ButtplugMessageError::MessageConversionError(format!(
-                    "Message {:?} not in Spec V2! This is a server bug.",
-                    msg
-                  )),
+              _ => ButtplugServerMessageV2::Error(message::ErrorV0::from(ButtplugError::from(
+                ButtplugMessageError::MessageConversionError(format!(
+                  "Message {:?} not in Spec V2! This is a server bug.",
+                  msg
                 )),
-              ),
+              ))),
             })
             .collect();
           vec_to_protocol_json(&msg_vec)
@@ -273,14 +267,12 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
             .iter()
             .map(|msg| match msg {
               ButtplugServerMessageVariant::V3(msgv3) => msgv3.clone(),
-              _ => ButtplugServerMessageV3::Error(
-                message::ErrorV0::from(ButtplugError::from(
-                  ButtplugMessageError::MessageConversionError(format!(
-                    "Message {:?} not in Spec V3! This is a server bug.",
-                    msg
-                  )),
+              _ => ButtplugServerMessageV3::Error(message::ErrorV0::from(ButtplugError::from(
+                ButtplugMessageError::MessageConversionError(format!(
+                  "Message {:?} not in Spec V3! This is a server bug.",
+                  msg
                 )),
-              ),
+              ))),
             })
             .collect();
           vec_to_protocol_json(&msg_vec)
@@ -290,14 +282,12 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
             .iter()
             .map(|msg| match msg {
               ButtplugServerMessageVariant::V4(msgv4) => msgv4.clone(),
-              _ => ButtplugServerMessageV4::Error(
-                message::ErrorV0::from(ButtplugError::from(
-                  ButtplugMessageError::MessageConversionError(format!(
-                    "Message {:?} not in Spec V4! This is a server bug.",
-                    msg
-                  )),
+              _ => ButtplugServerMessageV4::Error(message::ErrorV0::from(ButtplugError::from(
+                ButtplugMessageError::MessageConversionError(format!(
+                  "Message {:?} not in Spec V4! This is a server bug.",
+                  msg
                 )),
-              ),
+              ))),
             })
             .collect();
           vec_to_protocol_json(&msg_vec)

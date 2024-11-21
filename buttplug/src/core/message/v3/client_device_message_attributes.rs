@@ -134,9 +134,12 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
     };
 
     // Raw messages
-    let raw_attrs = features.iter().find(|f| f.raw().is_some()).map(|raw_feature| RawDeviceMessageAttributesV2::new(
-        raw_feature.raw().as_ref().unwrap().endpoints(),
-      ));
+    let raw_attrs = features
+      .iter()
+      .find(|f| f.raw().is_some())
+      .map(|raw_feature| {
+        RawDeviceMessageAttributesV2::new(raw_feature.raw().as_ref().unwrap().endpoints())
+      });
 
     Self {
       scalar_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::ScalarCmd),
@@ -257,7 +260,10 @@ impl TryFrom<DeviceFeature> for ClientGenericDeviceMessageAttributesV3 {
       };
       Ok(attrs)
     } else {
-      Err("Cannot produce a GenericDeviceMessageAttribute from a feature with no actuator member".to_string())
+      Err(
+        "Cannot produce a GenericDeviceMessageAttribute from a feature with no actuator member"
+          .to_string(),
+      )
     }
   }
 }

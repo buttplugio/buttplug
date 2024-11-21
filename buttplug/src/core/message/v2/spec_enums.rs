@@ -6,14 +6,42 @@
 // for full license information.
 
 use crate::core::message::{
-  ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, DeviceRemovedV0, ErrorV0, LinearCmdV1, OkV0, PingV0, RequestDeviceListV0, RequestServerInfoV1, RotateCmdV1, ScanningFinishedV0, StartScanningV0, StopAllDevicesV0, StopDeviceCmdV0, StopScanningV0, VibrateCmdV1
+  ButtplugMessage,
+  ButtplugMessageError,
+  ButtplugMessageFinalizer,
+  ButtplugMessageValidator,
+  DeviceRemovedV0,
+  ErrorV0,
+  LinearCmdV1,
+  OkV0,
+  PingV0,
+  RequestDeviceListV0,
+  RequestServerInfoV1,
+  RotateCmdV1,
+  ScanningFinishedV0,
+  StartScanningV0,
+  StopAllDevicesV0,
+  StopDeviceCmdV0,
+  StopScanningV0,
+  VibrateCmdV1,
 };
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-use super::{BatteryLevelCmdV2, BatteryLevelReadingV2, DeviceAddedV2, DeviceListV2, RSSILevelCmdV2, RSSILevelReadingV2, RawReadCmdV2, RawReadingV2, RawSubscribeCmdV2, RawUnsubscribeCmdV2, RawWriteCmdV2, ServerInfoV2};
-
-
+use super::{
+  BatteryLevelCmdV2,
+  BatteryLevelReadingV2,
+  DeviceAddedV2,
+  DeviceListV2,
+  RSSILevelCmdV2,
+  RSSILevelReadingV2,
+  RawReadCmdV2,
+  RawReadingV2,
+  RawSubscribeCmdV2,
+  RawUnsubscribeCmdV2,
+  RawWriteCmdV2,
+  ServerInfoV2,
+};
 
 /// Represents all client-to-server messages in v2 of the Buttplug Spec
 #[derive(
@@ -77,4 +105,3 @@ pub enum ButtplugServerMessageV2 {
   BatteryLevelReading(BatteryLevelReadingV2),
   RSSILevelReading(RSSILevelReadingV2),
 }
-

@@ -6,13 +6,13 @@
 // for full license information.
 
 use crate::core::message::{
-    v1::NullDeviceMessageAttributesV1,
-    v3::ClientDeviceMessageAttributesV3,
-    ActuatorType,
-    ClientGenericDeviceMessageAttributesV3,
-    Endpoint,
-    SensorType,
-  };
+  v1::NullDeviceMessageAttributesV1,
+  v3::ClientDeviceMessageAttributesV3,
+  ActuatorType,
+  ClientGenericDeviceMessageAttributesV3,
+  Endpoint,
+  SensorType,
+};
 use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 

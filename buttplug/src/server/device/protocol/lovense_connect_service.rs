@@ -301,14 +301,12 @@ impl ProtocolHandler for LovenseConnectService {
         .read_value(&HardwareReadCmd::new(Endpoint::Rx, 0, 0))
         .await?;
       debug!("Battery level: {}", reading.data()[0]);
-      Ok(
-        message::SensorReadingV4::new(
-          msg.device_index(),
-          *msg.feature_index(),
-          *msg.sensor_type(),
-          vec![reading.data()[0] as i32],
-        ),
-      )
+      Ok(message::SensorReadingV4::new(
+        msg.device_index(),
+        *msg.feature_index(),
+        *msg.sensor_type(),
+        vec![reading.data()[0] as i32],
+      ))
     }
     .boxed()
   }

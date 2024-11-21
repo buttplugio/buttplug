@@ -152,8 +152,7 @@ impl ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3>
     if !self.connected.load(Ordering::SeqCst) {
       return ButtplugConnectorError::ConnectorNotConnected.into();
     }
-    let input = msg
-      .into();
+    let input = msg.into();
     let output_fut = self.server.parse_message(input);
     let sender = self.server_outbound_sender.clone();
     async move {
