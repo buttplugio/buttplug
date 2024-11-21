@@ -12,6 +12,7 @@ mod raw_write_cmd;
 mod rssi_level_cmd;
 mod rssi_level_reading;
 mod server_info;
+mod spec_enums;
 
 pub use battery_level_cmd::BatteryLevelCmdV2;
 pub use battery_level_reading::BatteryLevelReadingV2;
@@ -31,3 +32,4 @@ pub use raw_write_cmd::RawWriteCmdV2;
 pub use rssi_level_cmd::RSSILevelCmdV2;
 pub use rssi_level_reading::RSSILevelReadingV2;
 pub use server_info::ServerInfoV2;
+pub use spec_enums::{ButtplugClientMessageV2, ButtplugServerMessageV2};

@@ -9,6 +9,7 @@ mod sensor_read_cmd;
 mod sensor_reading;
 mod sensor_subscribe_cmd;
 mod sensor_unsubscribe_cmd;
+mod spec_enums;
 
 pub use device_added::DeviceAddedV4;
 pub use device_list::DeviceListV4;
@@ -20,3 +21,4 @@ pub use sensor_read_cmd::SensorReadCmdV4;
 pub use sensor_reading::SensorReadingV4;
 pub use sensor_subscribe_cmd::SensorSubscribeCmdV4;
 pub use sensor_unsubscribe_cmd::SensorUnsubscribeCmdV4;
+pub use spec_enums::{ButtplugClientMessageV4, ButtplugServerMessageV4};
