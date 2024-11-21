@@ -104,22 +104,21 @@ impl UserDeviceDefinition {
   // feature indexing when the message itself is handled.
   pub fn allows_message(&self, msg_type: &ButtplugDeviceMessageType) -> bool {
     for feature in &self.features {
-      if let Ok(actuator_msg_type) = ButtplugActuatorFeatureMessageType::try_from(*msg_type)
-      {
+      if let Ok(actuator_msg_type) = ButtplugActuatorFeatureMessageType::try_from(*msg_type) {
         if let Some(actuator) = feature.actuator() {
           if actuator.messages().contains(&actuator_msg_type) {
             return true;
           }
         }
-      } else if let Ok(sensor_msg_type) =
-        ButtplugSensorFeatureMessageType::try_from(*msg_type)
-      {
+      } else if let Ok(sensor_msg_type) = ButtplugSensorFeatureMessageType::try_from(*msg_type) {
         if let Some(sensor) = feature.sensor() {
           if sensor.messages().contains(&sensor_msg_type) {
             return true;
           }
         }
-      } else if ButtplugRawFeatureMessageType::try_from(*msg_type).is_ok() && feature.raw().is_some() {
+      } else if ButtplugRawFeatureMessageType::try_from(*msg_type).is_ok()
+        && feature.raw().is_some()
+      {
         return true;
       }
     }

@@ -117,13 +117,12 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
             let config_attrs = BaseDeviceDefinition::new(
               // Even subconfigurations always have names
               &config.name,
-              config
-                .features
-                .as_ref()
-                .unwrap_or(defaults
-                    .features
-                    .as_ref()
-                    .expect("Defaults always have features")),
+              config.features.as_ref().unwrap_or(
+                defaults
+                  .features
+                  .as_ref()
+                  .expect("Defaults always have features"),
+              ),
             );
             configurations.insert(Some(identifier.to_owned()), config_attrs);
           }

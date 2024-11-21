@@ -202,21 +202,25 @@ impl TryFrom<ButtplugClientMessageV1> for ButtplugClientMessageV2 {
       ButtplugClientMessageV1::RequestLog(_) => {
         // Log was a huge security hole, as we'd just send our server logs to whomever asked, which
         // contain all sorts of identifying information. Always return an error here.
-        Err(
-          ButtplugMessageError::MessageConversionError(
-            "RequestLog is no longer allowed by any version of Buttplug.".to_owned(),
-          ),
-        )
+        Err(ButtplugMessageError::MessageConversionError(
+          "RequestLog is no longer allowed by any version of Buttplug.".to_owned(),
+        ))
       }
       ButtplugClientMessageV1::KiirooCmd(_) => {
         // No device protocol implementation ever worked with KiirooCmd, so no one ever should've
         // used it. We'll just return an error if we ever see it.
-        Err(ButtplugMessageError::MessageConversionError("KiirooCmd is not implemented. Please update the client software to use a newer command".to_owned()))
+        Err(ButtplugMessageError::MessageConversionError(
+          "KiirooCmd is not implemented. Please update the client software to use a newer command"
+            .to_owned(),
+        ))
       }
       ButtplugClientMessageV1::LovenseCmd(_) => {
         // LovenseCmd allowed users to directly send strings to a Lovense device, which was a Bad
         // Idea. Will always return an error.
-        Err(ButtplugMessageError::MessageConversionError("LovenseCmd is not implemented. Please update the client software to use a newer command".to_owned()))
+        Err(ButtplugMessageError::MessageConversionError(
+          "LovenseCmd is not implemented. Please update the client software to use a newer command"
+            .to_owned(),
+        ))
       }
       _ => Err(ButtplugMessageError::MessageConversionError(format!(
         "Cannot convert message {:?} to current message spec while lacking state.",
