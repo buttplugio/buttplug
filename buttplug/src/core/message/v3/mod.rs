@@ -7,6 +7,7 @@ mod sensor_read_cmd;
 mod sensor_reading;
 mod sensor_subscribe_cmd;
 mod sensor_unsubscribe_cmd;
+mod spec_enums;
 
 pub use client_device_message_attributes::{
   ClientDeviceMessageAttributesV3,
@@ -20,3 +21,4 @@ pub use sensor_read_cmd::SensorReadCmdV3;
 pub use sensor_reading::SensorReadingV3;
 pub use sensor_subscribe_cmd::SensorSubscribeCmdV3;
 pub use sensor_unsubscribe_cmd::SensorUnsubscribeCmdV3;
+pub use spec_enums::{ButtplugClientMessageV3, ButtplugServerMessageV3};
