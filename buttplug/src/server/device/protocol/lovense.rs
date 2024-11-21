@@ -408,14 +408,12 @@ impl ProtocolHandler for Lovense {
               // do for now.
               let start_pos = usize::from(data_str.contains('s'));
               if let Ok(level) = data_str[start_pos..(len - 1)].parse::<u8>() {
-                return Ok(
-                  message::SensorReadingV4::new(
-                    message.device_index(),
-                    *message.feature_index(),
-                    message::SensorType::Battery,
-                    vec![level as i32],
-                  ),
-                );
+                return Ok(message::SensorReadingV4::new(
+                  message.device_index(),
+                  *message.feature_index(),
+                  message::SensorType::Battery,
+                  vec![level as i32],
+                ));
               }
             }
           }

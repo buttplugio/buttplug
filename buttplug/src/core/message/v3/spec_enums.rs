@@ -6,12 +6,43 @@
 // for full license information.
 
 use crate::core::message::{
-  ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, DeviceRemovedV0, ErrorV0, LinearCmdV1, OkV0, PingV0, RequestDeviceListV0, RequestServerInfoV1, RotateCmdV1, ScanningFinishedV0, StartScanningV0, StopAllDevicesV0, StopDeviceCmdV0, StopScanningV0, VibrateCmdV1, RawReadCmdV2, RawReadingV2, RawSubscribeCmdV2, RawUnsubscribeCmdV2, RawWriteCmdV2, ServerInfoV2
+  ButtplugMessage,
+  ButtplugMessageError,
+  ButtplugMessageFinalizer,
+  ButtplugMessageValidator,
+  DeviceRemovedV0,
+  ErrorV0,
+  LinearCmdV1,
+  OkV0,
+  PingV0,
+  RawReadCmdV2,
+  RawReadingV2,
+  RawSubscribeCmdV2,
+  RawUnsubscribeCmdV2,
+  RawWriteCmdV2,
+  RequestDeviceListV0,
+  RequestServerInfoV1,
+  RotateCmdV1,
+  ScanningFinishedV0,
+  ServerInfoV2,
+  StartScanningV0,
+  StopAllDevicesV0,
+  StopDeviceCmdV0,
+  StopScanningV0,
+  VibrateCmdV1,
 };
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-use super::{DeviceAddedV3, DeviceListV3, ScalarCmdV3, SensorReadCmdV3, SensorReadingV3, SensorSubscribeCmdV3, SensorUnsubscribeCmdV3};
+use super::{
+  DeviceAddedV3,
+  DeviceListV3,
+  ScalarCmdV3,
+  SensorReadCmdV3,
+  SensorReadingV3,
+  SensorSubscribeCmdV3,
+  SensorUnsubscribeCmdV3,
+};
 
 /// Represents all client-to-server messages in v3 of the Buttplug Spec
 #[derive(
