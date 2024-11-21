@@ -70,7 +70,11 @@ impl Drop for HidAsyncDevice {
         drop(req_tx);
 
         // Wait for the reader thread to finish
-        if let Some(jh) = guard.read_thread.take() { if jh.join().is_ok() { info!("device read thread joined") } }
+        if let Some(jh) = guard.read_thread.take() {
+          if jh.join().is_ok() {
+            info!("device read thread joined")
+          }
+        }
       } else {
         //error!("Failed to take lock on device");
       }
@@ -173,12 +177,14 @@ impl AsyncWrite for HidAsyncDevice {
       //let this: &mut Self = &mut self;
       //debug!("Will write {} bytes: {:?}", buf.len(), &buf[..]);
       match self.inner.as_mut().unwrap().lock() {
-        Ok(guard) => if let Ok(guard) = guard.device.lock() {
-          guard
-            .write(buf)
-            .map_err(|e| io::Error::new(io::ErrorKind::Other, format!("hidapi failed: {}", e)))?;
-          //debug!("Wrote: {:?}", &buf[0..max_len]);
-        },
+        Ok(guard) => {
+          if let Ok(guard) = guard.device.lock() {
+            guard
+              .write(buf)
+              .map_err(|e| io::Error::new(io::ErrorKind::Other, format!("hidapi failed: {}", e)))?;
+            //debug!("Wrote: {:?}", &buf[0..max_len]);
+          }
+        }
         Err(e) => {
           return Poll::Ready(Err(io::Error::new(
             io::ErrorKind::Other,

@@ -6,12 +6,40 @@
 // for full license information.
 
 use crate::core::message::{
-  ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, DeviceRemovedV0, ErrorV0, FleshlightLaunchFW12CmdV0, KiirooCmdV0, LogV0, LovenseCmdV0, OkV0, PingV0, RequestDeviceListV0, RequestLogV0, ScanningFinishedV0, ServerInfoV0, SingleMotorVibrateCmdV0, StartScanningV0, StopAllDevicesV0, StopDeviceCmdV0, StopScanningV0, VorzeA10CycloneCmdV0
+  ButtplugMessage,
+  ButtplugMessageError,
+  ButtplugMessageFinalizer,
+  ButtplugMessageValidator,
+  DeviceRemovedV0,
+  ErrorV0,
+  FleshlightLaunchFW12CmdV0,
+  KiirooCmdV0,
+  LogV0,
+  LovenseCmdV0,
+  OkV0,
+  PingV0,
+  RequestDeviceListV0,
+  RequestLogV0,
+  ScanningFinishedV0,
+  ServerInfoV0,
+  SingleMotorVibrateCmdV0,
+  StartScanningV0,
+  StopAllDevicesV0,
+  StopDeviceCmdV0,
+  StopScanningV0,
+  VorzeA10CycloneCmdV0,
 };
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-use super::{DeviceAddedV1, DeviceListV1, LinearCmdV1, RequestServerInfoV1, RotateCmdV1, VibrateCmdV1};
+use super::{
+  DeviceAddedV1,
+  DeviceListV1,
+  LinearCmdV1,
+  RequestServerInfoV1,
+  RotateCmdV1,
+  VibrateCmdV1,
+};
 
 /// Represents all client-to-server messages in v1 of the Buttplug Spec
 #[derive(

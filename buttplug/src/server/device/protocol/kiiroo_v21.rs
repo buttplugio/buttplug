@@ -205,9 +205,7 @@ impl ProtocolHandler for KiirooV21 {
                     (u16::MAX as i32) - ((data[2 * i] as i32) << 8 | (data[2 * i + 1] as i32))
                   })
                   .collect();
-                let digital: Vec<i32> = (0..4)
-                  .map(|i| ((data[8] as i32) >> i) & 1)
-                  .collect();
+                let digital: Vec<i32> = (0..4).map(|i| ((data[8] as i32) >> i) & 1).collect();
                 for ((sensor_index, sensor_type), sensor_data) in (0u32..)
                   .zip([SensorType::Pressure, SensorType::Button])
                   .zip([analog, digital])

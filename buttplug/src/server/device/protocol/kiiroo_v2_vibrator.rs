@@ -33,7 +33,8 @@ impl ProtocolHandler for KiirooV2Vibrator {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![
-        cmds.first()
+        cmds
+          .first()
           .unwrap_or(&None)
           .unwrap_or((ActuatorType::Vibrate, 0))
           .1 as u8,

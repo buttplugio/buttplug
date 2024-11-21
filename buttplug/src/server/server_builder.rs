@@ -129,9 +129,9 @@ impl ButtplugServerBuilder {
           });
           // TODO Should the event sender return a result instead of an error message?
           if output_sender_clone
-            .send(ButtplugServerMessageV4::Error(
-              message::ErrorV0::from(ButtplugError::from(ButtplugPingError::PingedOut)),
-            ))
+            .send(ButtplugServerMessageV4::Error(message::ErrorV0::from(
+              ButtplugError::from(ButtplugPingError::PingedOut),
+            )))
             .is_err()
           {
             error!("Server disappeared, cannot update about ping out.");
