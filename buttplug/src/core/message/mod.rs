@@ -13,119 +13,23 @@
 //! are also enum types that are used to classify messages into categories, for instance, messages
 //! that only should be sent by a client or server.
 
-mod battery_level_cmd;
-mod battery_level_reading;
-mod client_device_message_attributes;
-mod device_added;
-mod device_feature;
-mod device_list;
-mod device_message_info;
-mod device_removed;
-mod endpoint;
-mod error;
-mod fleshlight_launch_fw12_cmd;
-mod kiiroo_cmd;
-mod linear_cmd;
-mod log;
-mod log_level;
-mod lovense_cmd;
-mod ok;
-mod ping;
-mod raw_read_cmd;
-mod raw_reading;
-mod raw_subscribe_cmd;
-mod raw_unsubscribe_cmd;
-mod raw_write_cmd;
-mod request_device_list;
-mod request_log;
-mod request_server_info;
-mod rotate_cmd;
-mod rssi_level_cmd;
-mod rssi_level_reading;
-mod scalar_cmd;
-mod scanning_finished;
-mod sensor_read_cmd;
-mod sensor_reading;
-mod sensor_subscribe_cmd;
-mod sensor_unsubscribe_cmd;
-pub mod serializer;
-mod server_info;
-mod single_motor_vibrate_cmd;
-mod start_scanning;
-mod stop_all_devices;
-mod stop_device_cmd;
-mod stop_scanning;
-mod test;
-mod vibrate_cmd;
-mod vorze_a10_cyclone_cmd;
+pub mod v0;
+pub mod v1;
+pub mod v2;
+pub mod v3;
+pub mod v4;
 
-pub use self::log::LogV0;
-pub use battery_level_cmd::BatteryLevelCmdV2;
-pub use battery_level_reading::BatteryLevelReadingV2;
-pub use client_device_message_attributes::{
-  ActuatorType,
-  ClientDeviceMessageAttributesV1,
-  ClientDeviceMessageAttributesV2,
-  ClientDeviceMessageAttributesV3,
-  ClientDeviceMessageAttributesV3Builder,
-  ClientGenericDeviceMessageAttributesV3,
-  NullDeviceMessageAttributesV1,
-  RawDeviceMessageAttributesV2,
-  SensorDeviceMessageAttributesV3,
-  SensorType,
-};
-pub use device_added::{DeviceAddedV0, DeviceAddedV1, DeviceAddedV2, DeviceAddedV3, DeviceAddedV4};
-pub use device_feature::{
-  DeviceFeature,
-  DeviceFeatureActuator,
-  DeviceFeatureRaw,
-  DeviceFeatureSensor,
-  FeatureType,
-};
-pub use device_list::{DeviceListV0, DeviceListV1, DeviceListV2, DeviceListV3, DeviceListV4};
-pub use device_message_info::{
-  DeviceMessageInfoV0,
-  DeviceMessageInfoV1,
-  DeviceMessageInfoV2,
-  DeviceMessageInfoV3,
-  DeviceMessageInfoV4,
-};
-pub use device_removed::DeviceRemovedV0;
+mod device_feature;
+mod endpoint;
+pub mod serializer;
+
+pub use device_feature::*;
 pub use endpoint::Endpoint;
-pub use error::{ErrorCode, ErrorV0};
-pub use fleshlight_launch_fw12_cmd::FleshlightLaunchFW12CmdV0;
-pub use kiiroo_cmd::KiirooCmdV0;
-pub use linear_cmd::{LinearCmdV1, LinearCmdV4, VectorSubcommandV1, VectorSubcommandV4};
-pub use log_level::LogLevel;
-pub use lovense_cmd::LovenseCmdV0;
-pub use ok::OkV0;
-pub use ping::PingV0;
-pub use raw_read_cmd::RawReadCmdV2;
-pub use raw_reading::RawReadingV2;
-pub use raw_subscribe_cmd::RawSubscribeCmdV2;
-pub use raw_unsubscribe_cmd::RawUnsubscribeCmdV2;
-pub use raw_write_cmd::RawWriteCmdV2;
-pub use request_device_list::RequestDeviceListV0;
-pub use request_log::RequestLogV0;
-pub use request_server_info::RequestServerInfoV1;
-pub use rotate_cmd::{RotateCmdV1, RotateCmdV4, RotationSubcommandV1, RotationSubcommandV4};
-pub use rssi_level_cmd::RSSILevelCmdV2;
-pub use rssi_level_reading::RSSILevelReadingV2;
-pub use scalar_cmd::{ScalarCmdV3, ScalarCmdV4, ScalarSubcommandV3, ScalarSubcommandV4};
-pub use scanning_finished::ScanningFinishedV0;
-pub use sensor_read_cmd::{SensorReadCmdV3, SensorReadCmdV4};
-pub use sensor_reading::{SensorReadingV3, SensorReadingV4};
-pub use sensor_subscribe_cmd::{SensorSubscribeCmdV3, SensorSubscribeCmdV4};
-pub use sensor_unsubscribe_cmd::{SensorUnsubscribeCmdV3, SensorUnsubscribeCmdV4};
-pub use server_info::{ServerInfoV0, ServerInfoV2};
-pub use single_motor_vibrate_cmd::SingleMotorVibrateCmdV0;
-pub use start_scanning::StartScanningV0;
-pub use stop_all_devices::StopAllDevicesV0;
-pub use stop_device_cmd::StopDeviceCmdV0;
-pub use stop_scanning::StopScanningV0;
-pub use test::TestV0;
-pub use vibrate_cmd::{VibrateCmdV1, VibrateSubcommandV1};
-pub use vorze_a10_cyclone_cmd::VorzeA10CycloneCmdV0;
+pub use v0::*;
+pub use v1::*;
+pub use v2::*;
+pub use v3::*;
+pub use v4::*;
 
 use crate::core::errors::ButtplugMessageError;
 use serde::{Deserialize, Serialize};
@@ -587,7 +491,7 @@ impl ButtplugMessageFinalizer for ButtplugServerMessageV4 {
     match self {
       ButtplugServerMessageV4::DeviceAdded(da) => da.finalize(),
       ButtplugServerMessageV4::DeviceList(dl) => dl.finalize(),
-      _ => return,
+      _ => (),
     }
   }
 }
@@ -655,7 +559,7 @@ impl ButtplugMessageFinalizer for ButtplugServerMessageV3 {
     match self {
       ButtplugServerMessageV3::DeviceAdded(da) => da.finalize(),
       ButtplugServerMessageV3::DeviceList(dl) => dl.finalize(),
-      _ => return,
+      _ => (),
     }
   }
 }
@@ -937,6 +841,66 @@ impl TryFrom<ButtplugClientMessageV4> for ButtplugDeviceCommandMessageUnion {
         Ok(ButtplugDeviceCommandMessageUnion::RawUnsubscribeCmd(m))
       }
       _ => Err(()),
+    }
+  }
+}
+
+#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ActuatorType {
+  Unknown,
+  Vibrate,
+  // Single Direction Rotation Speed
+  Rotate,
+  Oscillate,
+  Constrict,
+  Inflate,
+  // For instances where we specify a position to move to ASAP. Usually servos, probably for the
+  // OSR-2/SR-6.
+  Position,
+}
+
+impl TryFrom<FeatureType> for ActuatorType {
+  type Error = String;
+  fn try_from(value: FeatureType) -> Result<Self, Self::Error> {
+    match value {
+      FeatureType::Unknown => Ok(ActuatorType::Unknown),
+      FeatureType::Vibrate => Ok(ActuatorType::Vibrate),
+      FeatureType::Rotate => Ok(ActuatorType::Rotate),
+      FeatureType::Oscillate => Ok(ActuatorType::Oscillate),
+      FeatureType::Constrict => Ok(ActuatorType::Constrict),
+      FeatureType::Inflate => Ok(ActuatorType::Inflate),
+      FeatureType::Position => Ok(ActuatorType::Position),
+      _ => Err(format!(
+        "Feature type {value} not valid for ActuatorType conversion"
+      )),
+    }
+  }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display)]
+pub enum SensorType {
+  Unknown,
+  Battery,
+  RSSI,
+  Button,
+  Pressure,
+  // Temperature,
+  // Accelerometer,
+  // Gyro,
+}
+
+impl TryFrom<FeatureType> for SensorType {
+  type Error = String;
+  fn try_from(value: FeatureType) -> Result<Self, Self::Error> {
+    match value {
+      FeatureType::Unknown => Ok(SensorType::Unknown),
+      FeatureType::Battery => Ok(SensorType::Battery),
+      FeatureType::RSSI => Ok(SensorType::RSSI),
+      FeatureType::Button => Ok(SensorType::Button),
+      FeatureType::Pressure => Ok(SensorType::Pressure),
+      _ => Err(format!(
+        "Feature type {value} not valid for SensorType conversion"
+      )),
     }
   }
 }
