@@ -485,8 +485,7 @@ impl TryFrom<ButtplugClientMessageV4> for ButtplugDeviceManagerMessageUnion {
 pub enum ButtplugDeviceCommandMessageUnion {
   StopDeviceCmd(StopDeviceCmdV0),
   LinearCmd(LinearCmdV4),
-  RotateCmd(RotateCmdV4),
-  ScalarCmd(ScalarCmdV4),
+  LevelCmd(LevelCmdV4),
   SensorReadCmd(SensorReadCmdV4),
   SensorSubscribeCmd(SensorSubscribeCmdV4),
   SensorUnsubscribeCmd(SensorUnsubscribeCmdV4),
@@ -505,8 +504,7 @@ impl TryFrom<ButtplugClientMessageV4> for ButtplugDeviceCommandMessageUnion {
         Ok(ButtplugDeviceCommandMessageUnion::StopDeviceCmd(m))
       }
       ButtplugClientMessageV4::LinearCmd(m) => Ok(ButtplugDeviceCommandMessageUnion::LinearCmd(m)),
-      ButtplugClientMessageV4::RotateCmd(m) => Ok(ButtplugDeviceCommandMessageUnion::RotateCmd(m)),
-      ButtplugClientMessageV4::ScalarCmd(m) => Ok(ButtplugDeviceCommandMessageUnion::ScalarCmd(m)),
+      ButtplugClientMessageV4::LevelCmd(m) => Ok(ButtplugDeviceCommandMessageUnion::LevelCmd(m)),
       ButtplugClientMessageV4::SensorReadCmd(m) => {
         Ok(ButtplugDeviceCommandMessageUnion::SensorReadCmd(m))
       }

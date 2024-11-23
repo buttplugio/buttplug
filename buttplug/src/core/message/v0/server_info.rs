@@ -11,7 +11,6 @@ use crate::core::message::{
   ButtplugMessageFinalizer,
   ButtplugMessageSpecVersion,
   ButtplugMessageValidator,
-  ServerInfoV2,
 };
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
@@ -59,18 +58,6 @@ impl ServerInfoV0 {
       max_ping_time,
       server_name: server_name.to_string(),
     }
-  }
-}
-
-impl From<ServerInfoV2> for ServerInfoV0 {
-  fn from(msg: ServerInfoV2) -> Self {
-    let mut out_msg = Self::new(
-      msg.server_name(),
-      msg.message_version(),
-      msg.max_ping_time(),
-    );
-    out_msg.set_id(msg.id());
-    out_msg
   }
 }
 

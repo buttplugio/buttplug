@@ -6,11 +6,10 @@
 // for full license information.
 
 use crate::core::message::{
-  v2::{DeviceAddedV2, DeviceMessageInfoV2},
   ButtplugMessage,
   ButtplugMessageError,
   ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
+  ButtplugMessageValidator, DeviceAddedV0, DeviceMessageInfoV0,
 };
 
 use super::{device_message_info::DeviceMessageInfoV1, ClientDeviceMessageAttributesV1};
@@ -24,32 +23,33 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceAddedV1 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  id: u32,
+  pub(in crate::core::message) id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   #[getset(get_copy = "pub")]
-  device_index: u32,
+  pub(in crate::core::message) device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
   #[getset(get = "pub")]
-  device_name: String,
+  pub(in crate::core::message) device_name: String,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
   #[getset(get = "pub")]
-  device_messages: ClientDeviceMessageAttributesV1,
+  pub(in crate::core::message) device_messages: ClientDeviceMessageAttributesV1,
 }
 
-impl From<DeviceAddedV2> for DeviceAddedV1 {
-  fn from(msg: DeviceAddedV2) -> Self {
+impl From<DeviceAddedV1> for DeviceAddedV0 {
+  fn from(msg: DeviceAddedV1) -> Self {
     let id = msg.id();
-    let dmiv2 = DeviceMessageInfoV2::from(msg);
-    let dmiv1 = DeviceMessageInfoV1::from(dmiv2);
+    let dmiv1 = DeviceMessageInfoV1::from(msg);
+    let dmiv0 = DeviceMessageInfoV0::from(dmiv1);
 
     Self {
       id,
-      device_index: dmiv1.device_index(),
-      device_name: dmiv1.device_name().clone(),
-      device_messages: dmiv1.device_messages().clone(),
+      device_index: dmiv0.device_index(),
+      device_name: dmiv0.device_name().clone(),
+      device_messages: dmiv0.device_messages().clone(),
     }
   }
 }
+
 
 impl ButtplugMessageValidator for DeviceAddedV1 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {

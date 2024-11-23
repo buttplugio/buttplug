@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::v4::DeviceMessageInfoV4;
+use crate::core::message::DeviceMessageInfoV2;
 
 use super::*;
 use getset::{CopyGetters, Getters, MutGetters};
@@ -72,14 +72,13 @@ impl From<DeviceAddedV3> for DeviceMessageInfoV3 {
   }
 }
 
-impl From<DeviceMessageInfoV4> for DeviceMessageInfoV3 {
-  fn from(value: DeviceMessageInfoV4) -> Self {
-    DeviceMessageInfoV3::new(
-      value.device_index(),
-      value.device_name(),
-      value.device_display_name(),
-      &None,
-      value.device_features().clone().into(),
-    )
+impl From<DeviceMessageInfoV3> for DeviceMessageInfoV2 {
+  fn from(device_message_info: DeviceMessageInfoV3) -> Self {
+    // No structural difference, it's all content changes
+    Self {
+      device_index: device_message_info.device_index(),
+      device_name: device_message_info.device_name().clone(),
+      device_messages: device_message_info.device_messages().clone().into(),
+    }
   }
 }
