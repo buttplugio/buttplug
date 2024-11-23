@@ -6,7 +6,7 @@
 // for full license information.
 
 use super::DeviceAddedV4;
-use crate::core::message::DeviceFeature;
+use crate::core::message::{DeviceFeature, DeviceMessageInfoV3};
 use getset::{CopyGetters, Getters, MutGetters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
@@ -68,5 +68,17 @@ impl From<DeviceAddedV4> for DeviceMessageInfoV4 {
       device_message_timing_gap: *device_added.device_message_timing_gap(),
       device_features: device_added.device_features().clone(),
     }
+  }
+}
+
+impl From<DeviceMessageInfoV4> for DeviceMessageInfoV3 {
+  fn from(value: DeviceMessageInfoV4) -> Self {
+    DeviceMessageInfoV3::new(
+      value.device_index(),
+      value.device_name(),
+      value.device_display_name(),
+      &None,
+      value.device_features().clone().into(),
+    )
   }
 }

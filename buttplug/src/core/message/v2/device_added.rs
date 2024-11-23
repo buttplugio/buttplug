@@ -7,11 +7,10 @@
 
 use super::{device_message_info::DeviceMessageInfoV2, ClientDeviceMessageAttributesV2};
 use crate::core::message::{
-  v3::{DeviceAddedV3, DeviceMessageInfoV3},
   ButtplugMessage,
   ButtplugMessageError,
   ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
+  ButtplugMessageValidator, DeviceAddedV1, DeviceMessageInfoV1,
 };
 
 use getset::{CopyGetters, Getters};
@@ -23,23 +22,23 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceAddedV2 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  id: u32,
+  pub(in crate::core::message) id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   #[getset(get_copy = "pub")]
-  device_index: u32,
+  pub(in crate::core::message) device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
   #[getset(get = "pub")]
-  device_name: String,
+  pub(in crate::core::message) device_name: String,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
   #[getset(get = "pub")]
-  device_messages: ClientDeviceMessageAttributesV2,
+  pub(in crate::core::message) device_messages: ClientDeviceMessageAttributesV2,
 }
 
-impl From<DeviceAddedV3> for DeviceAddedV2 {
-  fn from(msg: DeviceAddedV3) -> Self {
+impl From<DeviceAddedV2> for DeviceAddedV1 {
+  fn from(msg: DeviceAddedV2) -> Self {
     let id = msg.id();
-    let dmi = DeviceMessageInfoV3::from(msg);
-    let dmiv1 = DeviceMessageInfoV2::from(dmi);
+    let dmiv2 = DeviceMessageInfoV2::from(msg);
+    let dmiv1 = DeviceMessageInfoV1::from(dmiv2);
 
     Self {
       id,

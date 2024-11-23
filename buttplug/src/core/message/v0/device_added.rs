@@ -5,9 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::device_message_info::DeviceMessageInfoV0;
 use crate::core::message::{
-  v1::{DeviceAddedV1, DeviceMessageInfoV1},
   ButtplugDeviceMessageType,
   ButtplugMessage,
   ButtplugMessageError,
@@ -23,31 +21,16 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceAddedV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  id: u32,
+  pub(in crate::core::message) id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   #[getset(get_copy = "pub")]
-  device_index: u32,
+  pub(in crate::core::message) device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
   #[getset(get = "pub")]
-  device_name: String,
+  pub(in crate::core::message) device_name: String,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
   #[getset(get = "pub")]
-  device_messages: Vec<ButtplugDeviceMessageType>,
-}
-
-impl From<DeviceAddedV1> for DeviceAddedV0 {
-  fn from(msg: DeviceAddedV1) -> Self {
-    let id = msg.id();
-    let dmiv1 = DeviceMessageInfoV1::from(msg);
-    let dmiv0 = DeviceMessageInfoV0::from(dmiv1);
-
-    Self {
-      id,
-      device_index: dmiv0.device_index(),
-      device_name: dmiv0.device_name().clone(),
-      device_messages: dmiv0.device_messages().clone(),
-    }
-  }
+  pub(in crate::core::message) device_messages: Vec<ButtplugDeviceMessageType>,
 }
 
 impl ButtplugMessageValidator for DeviceAddedV0 {

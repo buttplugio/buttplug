@@ -10,7 +10,7 @@ use crate::core::message::{
   ButtplugMessageError,
   ButtplugMessageFinalizer,
   ButtplugMessageSpecVersion,
-  ButtplugMessageValidator,
+  ButtplugMessageValidator, ServerInfoV0,
 };
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
@@ -52,5 +52,17 @@ impl ServerInfoV2 {
 impl ButtplugMessageValidator for ServerInfoV2 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
+  }
+}
+
+impl From<ServerInfoV2> for ServerInfoV0 {
+  fn from(msg: ServerInfoV2) -> Self {
+    let mut out_msg = Self::new(
+      msg.server_name(),
+      msg.message_version(),
+      msg.max_ping_time(),
+    );
+    out_msg.set_id(msg.id());
+    out_msg
   }
 }

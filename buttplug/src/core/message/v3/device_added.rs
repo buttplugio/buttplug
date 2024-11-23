@@ -6,11 +6,7 @@
 // for full license information.
 
 use crate::core::message::{
-  v4::DeviceAddedV4,
-  ButtplugMessage,
-  ButtplugMessageError,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
+  ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, DeviceAddedV2, DeviceMessageInfoV0, DeviceMessageInfoV1, DeviceMessageInfoV2
 };
 
 use getset::{CopyGetters, Getters};
@@ -18,7 +14,7 @@ use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-use super::ClientDeviceMessageAttributesV3;
+use super::{ClientDeviceMessageAttributesV3, DeviceMessageInfoV3};
 
 /// Notification that a device has been found and connected to the server.
 #[derive(ButtplugMessage, Clone, Debug, PartialEq, Eq, Getters, CopyGetters)]
@@ -87,16 +83,33 @@ impl ButtplugMessageFinalizer for DeviceAddedV3 {
   }
 }
 
-impl From<DeviceAddedV4> for DeviceAddedV3 {
-  fn from(value: DeviceAddedV4) -> Self {
-    let mut da3 = DeviceAddedV3::new(
-      value.device_index(),
-      value.device_name(),
-      value.device_display_name(),
-      &None,
-      &value.device_features().clone().into(),
-    );
-    da3.set_id(value.id());
-    da3
+impl From<DeviceAddedV3> for DeviceMessageInfoV0 {
+  fn from(device_added: DeviceAddedV3) -> Self {
+    let dmi = DeviceMessageInfoV3::from(device_added);
+    let dmi_v2: DeviceMessageInfoV2 = dmi.into();
+    let dmi_v1: DeviceMessageInfoV1 = dmi_v2.into();
+    dmi_v1.into()
+  }
+}
+
+impl From<DeviceAddedV3> for DeviceAddedV2 {
+  fn from(msg: DeviceAddedV3) -> Self {
+    let id = msg.id();
+    let dmi = DeviceMessageInfoV3::from(msg);
+    let dmiv1 = DeviceMessageInfoV2::from(dmi);
+
+    Self {
+      id,
+      device_index: dmiv1.device_index(),
+      device_name: dmiv1.device_name().clone(),
+      device_messages: dmiv1.device_messages().clone(),
+    }
+  }
+}
+
+impl From<DeviceAddedV3> for DeviceMessageInfoV2 {
+  fn from(device_added: DeviceAddedV3) -> Self {
+    let dmi = DeviceMessageInfoV3::from(device_added);
+    DeviceMessageInfoV2::from(dmi)
   }
 }
