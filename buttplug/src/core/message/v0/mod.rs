@@ -25,6 +25,7 @@ mod vorze_a10_cyclone_cmd;
 
 pub use device_added::DeviceAddedV0;
 pub use device_list::DeviceListV0;
+pub use device_message_info::DeviceMessageInfoV0;
 pub use device_removed::DeviceRemovedV0;
 pub use error::{ErrorCode, ErrorV0};
 pub use fleshlight_launch_fw12_cmd::FleshlightLaunchFW12CmdV0;

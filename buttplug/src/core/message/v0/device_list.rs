@@ -7,7 +7,6 @@
 
 use super::device_message_info::DeviceMessageInfoV0;
 use crate::core::message::{
-  v1::DeviceListV1,
   ButtplugMessage,
   ButtplugMessageError,
   ButtplugMessageFinalizer,
@@ -21,24 +20,10 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceListV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  id: u32,
+  pub(in crate::core::message) id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Devices"))]
   #[getset(get = "pub")]
-  devices: Vec<DeviceMessageInfoV0>,
-}
-
-impl From<DeviceListV1> for DeviceListV0 {
-  fn from(msg: DeviceListV1) -> Self {
-    let mut devices = vec![];
-    for d in msg.devices() {
-      let dmiv1 = d.clone();
-      devices.push(DeviceMessageInfoV0::from(dmiv1));
-    }
-    Self {
-      id: msg.id(),
-      devices,
-    }
-  }
+  pub(in crate::core::message) devices: Vec<DeviceMessageInfoV0>,
 }
 
 impl ButtplugMessageValidator for DeviceListV0 {

@@ -6,11 +6,10 @@
 // for full license information.
 
 use crate::core::message::{
-  v4::DeviceListV4,
   ButtplugMessage,
   ButtplugMessageError,
   ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
+  ButtplugMessageValidator, DeviceListV2, DeviceMessageInfoV2,
 };
 use getset::Getters;
 #[cfg(feature = "serialize-json")]
@@ -49,10 +48,16 @@ impl ButtplugMessageFinalizer for DeviceListV3 {
   }
 }
 
-impl From<DeviceListV4> for DeviceListV3 {
-  fn from(value: DeviceListV4) -> Self {
-    let mut dl3 = DeviceListV3::new(value.devices().iter().map(|x| x.clone().into()).collect());
-    dl3.set_id(value.id());
-    dl3
+impl From<DeviceListV3> for DeviceListV2 {
+  fn from(msg: DeviceListV3) -> Self {
+    let mut devices = vec![];
+    for d in msg.devices() {
+      devices.push(DeviceMessageInfoV2::from(d.clone()));
+    }
+    Self {
+      id: msg.id(),
+      devices,
+    }
   }
 }
+

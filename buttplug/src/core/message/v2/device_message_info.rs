@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::v3::{DeviceAddedV3, DeviceMessageInfoV3};
+use crate::core::message::{ClientDeviceMessageAttributesV1, DeviceMessageInfoV1};
 
 use super::*;
 use getset::{CopyGetters, Getters};
@@ -17,19 +17,25 @@ use serde::{Deserialize, Serialize};
 pub struct DeviceMessageInfoV2 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   #[getset(get_copy = "pub")]
-  device_index: u32,
+  pub(in crate::core::message) device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
   #[getset(get = "pub")]
-  device_name: String,
+  pub(in crate::core::message) device_name: String,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
   #[getset(get = "pub")]
-  device_messages: ClientDeviceMessageAttributesV2,
+  pub(in crate::core::message) device_messages: ClientDeviceMessageAttributesV2,
 }
 
-impl From<DeviceAddedV3> for DeviceMessageInfoV2 {
-  fn from(device_added: DeviceAddedV3) -> Self {
-    let dmi = DeviceMessageInfoV3::from(device_added);
-    DeviceMessageInfoV2::from(dmi)
+impl From<DeviceMessageInfoV2> for DeviceMessageInfoV1 {
+  fn from(device_message_info: DeviceMessageInfoV2) -> Self {
+    // No structural difference, it's all content changes
+    Self {
+      device_index: device_message_info.device_index(),
+      device_name: device_message_info.device_name().clone(),
+      device_messages: ClientDeviceMessageAttributesV1::from(
+        device_message_info.device_messages().clone(),
+      ),
+    }
   }
 }
 
@@ -40,17 +46,6 @@ impl From<DeviceAddedV2> for DeviceMessageInfoV2 {
       device_index: device_added.device_index(),
       device_name: device_added.device_name().clone(),
       device_messages: device_added.device_messages().clone(),
-    }
-  }
-}
-
-impl From<DeviceMessageInfoV3> for DeviceMessageInfoV2 {
-  fn from(device_message_info: DeviceMessageInfoV3) -> Self {
-    // No structural difference, it's all content changes
-    Self {
-      device_index: device_message_info.device_index(),
-      device_name: device_message_info.device_name().clone(),
-      device_messages: device_message_info.device_messages().clone().into(),
     }
   }
 }
