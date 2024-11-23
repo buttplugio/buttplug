@@ -12,10 +12,12 @@ use crate::core::{
     ButtplugActuatorFeatureMessageType,
     ButtplugDeviceMessageType,
     ButtplugSensorFeatureMessageType,
+    ClientDeviceMessageAttributesV2,
     DeviceFeature,
+    GenericDeviceMessageAttributesV2,
     NullDeviceMessageAttributesV1,
     RawDeviceMessageAttributesV2,
-    SensorType,
+    SensorType
   },
 };
 use getset::{Getters, MutGetters, Setters};
@@ -91,6 +93,78 @@ pub struct ClientDeviceMessageAttributesV3 {
   #[serde(rename = "VorzeA10CycloneCmd")]
   #[serde(skip_serializing)]
   vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributesV1>,
+}
+
+pub fn vibrate_cmd_from_scalar_cmd(
+  attributes_vec: &[ClientGenericDeviceMessageAttributesV3],
+) -> GenericDeviceMessageAttributesV2 {
+  let mut feature_count = 0u32;
+  let mut step_count = vec![];
+  for attr in attributes_vec {
+    if *attr.actuator_type() == ActuatorType::Vibrate {
+      feature_count += 1;
+      step_count.push(*attr.step_count());
+    }
+  }
+  GenericDeviceMessageAttributesV2 {
+    feature_count,
+    step_count,
+  }
+}
+
+impl From<ClientDeviceMessageAttributesV3> for ClientDeviceMessageAttributesV2 {
+  fn from(other: ClientDeviceMessageAttributesV3) -> Self {
+    Self {
+      vibrate_cmd: other
+        .scalar_cmd()
+        .as_ref()
+        .map(|x| vibrate_cmd_from_scalar_cmd(x))
+        .filter(|x| x.feature_count() != 0),
+      rotate_cmd: other
+        .rotate_cmd()
+        .as_ref()
+        .map(|x| GenericDeviceMessageAttributesV2::from(x.clone())),
+      linear_cmd: other
+        .linear_cmd()
+        .as_ref()
+        .map(|x| GenericDeviceMessageAttributesV2::from(x.clone())),
+      battery_level_cmd: {
+        if let Some(sensor_info) = other.sensor_read_cmd() {
+          if sensor_info
+            .iter()
+            .any(|x| *x.sensor_type() == SensorType::Battery)
+          {
+            Some(NullDeviceMessageAttributesV1::default())
+          } else {
+            None
+          }
+        } else {
+          None
+        }
+      },
+      rssi_level_cmd: {
+        if let Some(sensor_info) = other.sensor_read_cmd() {
+          if sensor_info
+            .iter()
+            .any(|x| *x.sensor_type() == SensorType::RSSI)
+          {
+            Some(NullDeviceMessageAttributesV1::default())
+          } else {
+            None
+          }
+        } else {
+          None
+        }
+      },
+      stop_device_cmd: other.stop_device_cmd().clone(),
+      raw_read_cmd: other.raw_read_cmd().clone(),
+      raw_write_cmd: other.raw_write_cmd().clone(),
+      raw_subscribe_cmd: other.raw_subscribe_cmd().clone(),
+      raw_unsubscribe_cmd: other.raw_subscribe_cmd().clone(),
+      fleshlight_launch_fw12_cmd: other.fleshlight_launch_fw12_cmd().clone(),
+      vorze_a10_cyclone_cmd: other.vorze_a10_cyclone_cmd().clone(),
+    }
+  }
 }
 
 impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
@@ -243,6 +317,15 @@ pub struct ClientGenericDeviceMessageAttributesV3 {
   #[getset(get = "pub")]
   #[serde(skip, default)]
   index: u32,
+}
+
+impl From<Vec<ClientGenericDeviceMessageAttributesV3>> for GenericDeviceMessageAttributesV2 {
+  fn from(attributes_vec: Vec<ClientGenericDeviceMessageAttributesV3>) -> Self {
+    Self {
+      feature_count: attributes_vec.len() as u32,
+      step_count: attributes_vec.iter().map(|x| *x.step_count()).collect(),
+    }
+  }
 }
 
 impl TryFrom<DeviceFeature> for ClientGenericDeviceMessageAttributesV3 {
