@@ -8095,6 +8095,33 @@ protocols:
       - identifier:
           - TDG_LIP_PT2
         name: Tracy's Dog Surreal
+      - identifier:
+          - MP1P_QC_TL_P6
+        name: Sistalk MonsterPub 1P Mister Devil
+      - identifier:
+          - MPMB_QC_TL_P2
+        name: Sistalk MonsterPub Sweet
+      - identifier:
+          - MPAV_QC_TL_P1
+        name: Sistalk MonsterPub Amazing
+      - identifier:
+          - MP_SUCKBANG_P5
+        name: Sistalk MonsterPub Pop
+        features:
+          - feature-type: Oscillate
+            actuator:
+              step-range:
+                - 0
+                - 100
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 100
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
