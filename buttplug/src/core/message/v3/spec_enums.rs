@@ -5,32 +5,9 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::{
-  ButtplugMessage,
-  ButtplugMessageError,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
-  DeviceRemovedV0,
-  ErrorV0,
-  LinearCmdV1,
-  OkV0,
-  PingV0,
-  RawReadCmdV2,
-  RawReadingV2,
-  RawSubscribeCmdV2,
-  RawUnsubscribeCmdV2,
-  RawWriteCmdV2,
-  RequestDeviceListV0,
-  RequestServerInfoV1,
-  RotateCmdV1,
-  ScanningFinishedV0,
-  ServerInfoV2,
-  StartScanningV0,
-  StopAllDevicesV0,
-  StopDeviceCmdV0,
-  StopScanningV0,
-  VibrateCmdV1,
-};
+use crate::core::{errors::ButtplugError, message::{
+  ButtplugClientMessageV2, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, ButtplugServerMessageV2, DeviceRemovedV0, ErrorV0, LinearCmdV1, OkV0, PingV0, RawReadCmdV2, RawReadingV2, RawSubscribeCmdV2, RawUnsubscribeCmdV2, RawWriteCmdV2, RequestDeviceListV0, RequestServerInfoV1, RotateCmdV1, ScanningFinishedV0, ServerInfoV2, StartScanningV0, StopAllDevicesV0, StopDeviceCmdV0, StopScanningV0, VibrateCmdV1
+}};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
@@ -80,6 +57,54 @@ pub enum ButtplugClientMessageV3 {
   SensorUnsubscribeCmd(SensorUnsubscribeCmdV3),
 }
 
+// For v2 to v3, all deprecations should be treated as conversions, but will require current
+// connected device state, meaning they'll need to be implemented where they can also access the
+// device manager.
+impl TryFrom<ButtplugClientMessageV2> for ButtplugClientMessageV3 {
+  type Error = ButtplugMessageError;
+
+  fn try_from(value: ButtplugClientMessageV2) -> Result<Self, Self::Error> {
+    match value {
+      ButtplugClientMessageV2::Ping(m) => Ok(ButtplugClientMessageV3::Ping(m.clone())),
+      ButtplugClientMessageV2::RequestServerInfo(m) => {
+        Ok(ButtplugClientMessageV3::RequestServerInfo(m.clone()))
+      }
+      ButtplugClientMessageV2::StartScanning(m) => {
+        Ok(ButtplugClientMessageV3::StartScanning(m.clone()))
+      }
+      ButtplugClientMessageV2::StopScanning(m) => {
+        Ok(ButtplugClientMessageV3::StopScanning(m.clone()))
+      }
+      ButtplugClientMessageV2::RequestDeviceList(m) => {
+        Ok(ButtplugClientMessageV3::RequestDeviceList(m.clone()))
+      }
+      ButtplugClientMessageV2::StopAllDevices(m) => {
+        Ok(ButtplugClientMessageV3::StopAllDevices(m.clone()))
+      }
+      ButtplugClientMessageV2::StopDeviceCmd(m) => {
+        Ok(ButtplugClientMessageV3::StopDeviceCmd(m.clone()))
+      }
+      // Vibrate was supposed to be phased out in v3 but was left in the allowable message set.
+      // Oops.
+      ButtplugClientMessageV2::VibrateCmd(m) => Ok(ButtplugClientMessageV3::VibrateCmd(m)),
+      ButtplugClientMessageV2::LinearCmd(m) => Ok(ButtplugClientMessageV3::LinearCmd(m)),
+      ButtplugClientMessageV2::RotateCmd(m) => Ok(ButtplugClientMessageV3::RotateCmd(m)),
+      ButtplugClientMessageV2::RawReadCmd(m) => Ok(ButtplugClientMessageV3::RawReadCmd(m)),
+      ButtplugClientMessageV2::RawWriteCmd(m) => Ok(ButtplugClientMessageV3::RawWriteCmd(m)),
+      ButtplugClientMessageV2::RawSubscribeCmd(m) => {
+        Ok(ButtplugClientMessageV3::RawSubscribeCmd(m))
+      }
+      ButtplugClientMessageV2::RawUnsubscribeCmd(m) => {
+        Ok(ButtplugClientMessageV3::RawUnsubscribeCmd(m))
+      }
+      _ => Err(ButtplugMessageError::MessageConversionError(format!(
+        "Cannot convert message {:?} to V3 message spec while lacking state.",
+        value
+      ))),
+    }
+  }
+}
+
 /// Represents all server-to-client messages in v3 of the Buttplug Spec
 #[derive(
   Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, FromSpecificButtplugMessage,
@@ -108,6 +133,26 @@ impl ButtplugMessageFinalizer for ButtplugServerMessageV3 {
       ButtplugServerMessageV3::DeviceAdded(da) => da.finalize(),
       ButtplugServerMessageV3::DeviceList(dl) => dl.finalize(),
       _ => (),
+    }
+  }
+}
+
+impl From<ButtplugServerMessageV3> for ButtplugServerMessageV2 {
+  fn from(value: ButtplugServerMessageV3) -> Self {
+    match value {
+      ButtplugServerMessageV3::Ok(m) => ButtplugServerMessageV2::Ok(m),
+      ButtplugServerMessageV3::Error(m) => ButtplugServerMessageV2::Error(m),
+      ButtplugServerMessageV3::ServerInfo(m) => ButtplugServerMessageV2::ServerInfo(m),
+      ButtplugServerMessageV3::DeviceRemoved(m) => ButtplugServerMessageV2::DeviceRemoved(m),
+      ButtplugServerMessageV3::ScanningFinished(m) => ButtplugServerMessageV2::ScanningFinished(m),
+      ButtplugServerMessageV3::RawReading(m) => ButtplugServerMessageV2::RawReading(m),
+      ButtplugServerMessageV3::DeviceAdded(m) => ButtplugServerMessageV2::DeviceAdded(m.into()),
+      ButtplugServerMessageV3::DeviceList(m) => ButtplugServerMessageV2::DeviceList(m.into()),
+      ButtplugServerMessageV3::SensorReading(_) => ButtplugServerMessageV2::Error(ErrorV0::from(
+        ButtplugError::from(ButtplugMessageError::MessageConversionError(
+          "SensorReading cannot be converted to Buttplug Message Spec V2".to_owned(),
+        )),
+      )),
     }
   }
 }

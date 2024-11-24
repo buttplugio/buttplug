@@ -6,11 +6,7 @@
 // for full license information.
 
 use crate::core::message::{
-  ButtplugDeviceMessage,
-  ButtplugMessage,
-  ButtplugMessageError,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
+  self, find_device_feature_indexes, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, LinearCmdV1, TryFromDeviceFeatures
 };
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
@@ -64,15 +60,32 @@ impl LinearCmdV4 {
 impl ButtplugMessageValidator for LinearCmdV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
-    for vec in &self.vectors {
-      self.is_in_command_range(
-        vec.position,
-        format!(
-          "VectorSubcommand position {} for index {} is invalid, should be between 0.0 and 1.0",
-          vec.position, vec.feature_index
-        ),
-      )?;
-    }
     Ok(())
+  }
+}
+
+impl TryFromDeviceFeatures<LinearCmdV1> for LinearCmdV4 {
+  fn try_from_device_features(msg: LinearCmdV1, features: &[crate::core::message::DeviceFeature]) -> Result<Self, crate::core::errors::ButtplugError> {
+    let linear_features: Vec<usize> =
+      find_device_feature_indexes(features, |(_, x)| {
+        x.actuator().as_ref().is_some_and(|y| {
+          y.messages()
+            .contains(&message::ButtplugActuatorFeatureMessageType::LinearCmd)
+        })
+      })?;
+
+    let cmds: Vec<VectorSubcommandV4> = msg
+      .vectors()
+      .iter()
+      .map(|x| {
+        VectorSubcommandV4::new(
+          linear_features[x.index() as usize] as u32,
+          x.duration(),
+          x.position(),
+        )
+      })
+      .collect();
+
+    Ok(LinearCmdV4::new(msg.device_index(), cmds).into())
   }
 }
