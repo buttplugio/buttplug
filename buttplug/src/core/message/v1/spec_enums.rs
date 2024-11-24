@@ -5,30 +5,9 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::{
-  ButtplugMessage,
-  ButtplugMessageError,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
-  DeviceRemovedV0,
-  ErrorV0,
-  FleshlightLaunchFW12CmdV0,
-  KiirooCmdV0,
-  LogV0,
-  LovenseCmdV0,
-  OkV0,
-  PingV0,
-  RequestDeviceListV0,
-  RequestLogV0,
-  ScanningFinishedV0,
-  ServerInfoV0,
-  SingleMotorVibrateCmdV0,
-  StartScanningV0,
-  StopAllDevicesV0,
-  StopDeviceCmdV0,
-  StopScanningV0,
-  VorzeA10CycloneCmdV0,
-};
+use crate::core::{errors::ButtplugError, message::{
+  ButtplugClientMessageV0, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, ButtplugServerMessageV0, DeviceRemovedV0, ErrorV0, FleshlightLaunchFW12CmdV0, KiirooCmdV0, LogV0, LovenseCmdV0, OkV0, PingV0, RequestDeviceListV0, RequestLogV0, ScanningFinishedV0, ServerInfoV0, SingleMotorVibrateCmdV0, StartScanningV0, StopAllDevicesV0, StopDeviceCmdV0, StopScanningV0, VorzeA10CycloneCmdV0
+}};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
@@ -76,6 +55,37 @@ pub enum ButtplugClientMessageV1 {
   VorzeA10CycloneCmd(VorzeA10CycloneCmdV0),
 }
 
+// No messages were changed or deprecated before v2, so we can convert all v0 messages to v1.
+impl From<ButtplugClientMessageV0> for ButtplugClientMessageV1 {
+  fn from(value: ButtplugClientMessageV0) -> Self {
+    match value {
+      ButtplugClientMessageV0::Ping(m) => ButtplugClientMessageV1::Ping(m),
+      ButtplugClientMessageV0::RequestServerInfo(m) => {
+        ButtplugClientMessageV1::RequestServerInfo(m)
+      }
+      ButtplugClientMessageV0::StartScanning(m) => ButtplugClientMessageV1::StartScanning(m),
+      ButtplugClientMessageV0::StopScanning(m) => ButtplugClientMessageV1::StopScanning(m),
+      ButtplugClientMessageV0::RequestDeviceList(m) => {
+        ButtplugClientMessageV1::RequestDeviceList(m)
+      }
+      ButtplugClientMessageV0::StopAllDevices(m) => ButtplugClientMessageV1::StopAllDevices(m),
+      ButtplugClientMessageV0::StopDeviceCmd(m) => ButtplugClientMessageV1::StopDeviceCmd(m),
+      ButtplugClientMessageV0::FleshlightLaunchFW12Cmd(m) => {
+        ButtplugClientMessageV1::FleshlightLaunchFW12Cmd(m)
+      }
+      ButtplugClientMessageV0::KiirooCmd(m) => ButtplugClientMessageV1::KiirooCmd(m),
+      ButtplugClientMessageV0::LovenseCmd(m) => ButtplugClientMessageV1::LovenseCmd(m),
+      ButtplugClientMessageV0::RequestLog(m) => ButtplugClientMessageV1::RequestLog(m),
+      ButtplugClientMessageV0::SingleMotorVibrateCmd(m) => {
+        ButtplugClientMessageV1::SingleMotorVibrateCmd(m)
+      }
+      ButtplugClientMessageV0::VorzeA10CycloneCmd(m) => {
+        ButtplugClientMessageV1::VorzeA10CycloneCmd(m)
+      }
+    }
+  }
+}
+
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
 #[derive(
   Debug,
@@ -99,4 +109,23 @@ pub enum ButtplugServerMessageV1 {
   DeviceAdded(DeviceAddedV1),
   DeviceRemoved(DeviceRemovedV0),
   ScanningFinished(ScanningFinishedV0),
+}
+
+impl From<ButtplugServerMessageV1> for ButtplugServerMessageV0 {
+  fn from(value: ButtplugServerMessageV1) -> Self {
+    match value {
+      ButtplugServerMessageV1::Ok(m) => ButtplugServerMessageV0::Ok(m),
+      ButtplugServerMessageV1::Error(m) => ButtplugServerMessageV0::Error(m),
+      ButtplugServerMessageV1::ServerInfo(m) => ButtplugServerMessageV0::ServerInfo(m),
+      ButtplugServerMessageV1::DeviceRemoved(m) => ButtplugServerMessageV0::DeviceRemoved(m),
+      ButtplugServerMessageV1::ScanningFinished(m) => ButtplugServerMessageV0::ScanningFinished(m),
+      ButtplugServerMessageV1::DeviceAdded(m) => ButtplugServerMessageV0::DeviceAdded(m.into()),
+      ButtplugServerMessageV1::DeviceList(m) => ButtplugServerMessageV0::DeviceList(m.into()),
+      ButtplugServerMessageV1::Log(_) => ButtplugServerMessageV0::Error(ErrorV0::from(
+        ButtplugError::from(ButtplugMessageError::MessageConversionError(
+          "For security reasons, Log should never be sent from a Buttplug Server".to_owned(),
+        )),
+      )),
+    }
+  }
 }

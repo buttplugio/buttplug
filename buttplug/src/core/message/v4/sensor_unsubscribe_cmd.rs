@@ -6,12 +6,7 @@
 // for full license information.
 
 use crate::core::message::{
-  ButtplugDeviceMessage,
-  ButtplugMessage,
-  ButtplugMessageError,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
-  SensorType,
+  find_device_feature_indexes, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, ButtplugSensorFeatureMessageType, SensorType, SensorUnsubscribeCmdV3, TryFromDeviceFeatures
 };
 use getset::Getters;
 #[cfg(feature = "serialize-json")]
@@ -46,5 +41,27 @@ impl SensorUnsubscribeCmdV4 {
 impl ButtplugMessageValidator for SensorUnsubscribeCmdV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
+  }
+}
+
+impl TryFromDeviceFeatures<SensorUnsubscribeCmdV3> for SensorUnsubscribeCmdV4 {
+  fn try_from_device_features(msg: SensorUnsubscribeCmdV3, features: &[crate::core::message::DeviceFeature]) -> Result<Self, crate::core::errors::ButtplugError> {
+    let features = find_device_feature_indexes(features, |(_, x)| {
+      x.sensor().as_ref().is_some_and(|y| {
+        y.messages()
+          .contains(&ButtplugSensorFeatureMessageType::SensorSubscribeCmd)
+      })
+    })?;
+  
+    let sensor_feature_index = features[*msg.sensor_index() as usize] as u32;
+  
+    Ok(
+      SensorUnsubscribeCmdV4::new(
+        msg.device_index(),
+        sensor_feature_index,
+        *msg.sensor_type(),
+      )
+      .into(),
+    )
   }
 }
