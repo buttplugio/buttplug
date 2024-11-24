@@ -10,12 +10,7 @@ use std::{fmt, sync::Arc};
 use crate::core::{
   errors::{ButtplugError, ButtplugMessageError},
   message::{
-    self,
-    ButtplugClientMessageVariant,
-    ButtplugMessageSpecVersion,
-    ButtplugServerMessageV4,
-    ButtplugServerMessageVariant,
-    ErrorV0,
+    self, ButtplugClientMessageV4, ButtplugClientMessageVariant, ButtplugMessageSpecVersion, ButtplugServerMessageV4, ButtplugServerMessageVariant, DeviceFeature, ErrorV0, TryFromClientMessage, TryFromDeviceFeatures
   },
 };
 
@@ -131,7 +126,17 @@ impl ButtplugServerDowngradeWrapper {
       }
       msg => {
         let v = msg.version();
-        let converter = ButtplugServerMessageConverter::new(Some(msg));
+        let mgr = self.server.device_manager();
+        let features = if let Some(idx) = msg.device_index() {
+          if let Some(info) = mgr.devices().get(&idx) {
+            Some(info.definition().features().clone())
+          } else {
+            None
+          }
+        } else {
+          None
+        };
+        let converter = ButtplugServerMessageConverter::new(Some(msg.clone()));
         let spec_version = *self.spec_version.get_or_init(|| {
           info!(
             "Setting Buttplug Server Message Spec Downgrade version to {}",
@@ -139,7 +144,7 @@ impl ButtplugServerDowngradeWrapper {
           );
           v
         });
-        match converter.convert_incoming(&self.server.device_manager()) {
+        match ButtplugClientMessageV4::try_from_client_message(msg, &features) {
           Ok(converted_msg) => {
             let fut = self.server.parse_message(converted_msg);
             async move {
