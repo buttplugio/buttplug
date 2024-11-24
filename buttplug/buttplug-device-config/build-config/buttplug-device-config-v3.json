@@ -10136,6 +10136,40 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "2204"
+          ],
+          "name": "Sinloli Cosima",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "description": "Stroker Oscillation Speed",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Constrict",
+              "description": "Air Pump",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -10146,7 +10180,8 @@
               "Sinloli",
               "Sinloli-Sherry",
               "Eropair *",
-              "HISMITH S1"
+              "HISMITH S1",
+              "Sinloli Cosima"
             ],
             "services": {
               "0000ffe5-0000-1000-8000-00805f9b34fb": {
