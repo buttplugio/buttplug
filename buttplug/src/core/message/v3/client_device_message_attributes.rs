@@ -216,7 +216,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
       });
 
     Self {
-      scalar_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::ScalarCmd),
+      scalar_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::LevelCmd),
       rotate_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::RotateCmd),
       linear_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::LinearCmd),
       sensor_read_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorReadCmd),
@@ -232,50 +232,6 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
 impl ClientDeviceMessageAttributesV3 {
   pub fn raw_unsubscribe_cmd(&self) -> &Option<RawDeviceMessageAttributesV2> {
     self.raw_subscribe_cmd()
-  }
-
-  pub fn message_allowed(&self, message_type: &ButtplugDeviceMessageType) -> bool {
-    match message_type {
-      ButtplugDeviceMessageType::ScalarCmd => self.scalar_cmd.is_some(),
-      // VibrateCmd and SingleMotorVibrateCmd will derive from Scalars, so errors will be thrown in
-      // the scalar parser if the actuator isn't correct.
-      ButtplugDeviceMessageType::VibrateCmd => self.scalar_cmd.is_some(),
-      ButtplugDeviceMessageType::SingleMotorVibrateCmd => self.scalar_cmd.is_some(),
-      ButtplugDeviceMessageType::SensorReadCmd => self.sensor_read_cmd.is_some(),
-      ButtplugDeviceMessageType::SensorSubscribeCmd => self.sensor_subscribe_cmd.is_some(),
-      ButtplugDeviceMessageType::SensorUnsubscribeCmd => self.sensor_subscribe_cmd.is_some(),
-      ButtplugDeviceMessageType::LinearCmd => self.linear_cmd.is_some(),
-      ButtplugDeviceMessageType::RotateCmd => self.rotate_cmd.is_some(),
-      ButtplugDeviceMessageType::BatteryLevelCmd => {
-        if let Some(sensor_info) = &self.sensor_read_cmd {
-          sensor_info
-            .iter()
-            .any(|x| *x.sensor_type() == SensorType::Battery)
-        } else {
-          false
-        }
-      }
-      ButtplugDeviceMessageType::FleshlightLaunchFW12Cmd => {
-        self.fleshlight_launch_fw12_cmd.is_some()
-      }
-      ButtplugDeviceMessageType::RSSILevelCmd => {
-        if let Some(sensor_info) = &self.sensor_read_cmd {
-          sensor_info
-            .iter()
-            .any(|x| *x.sensor_type() == SensorType::RSSI)
-        } else {
-          false
-        }
-      }
-      ButtplugDeviceMessageType::RawReadCmd => self.raw_read_cmd.is_some(),
-      ButtplugDeviceMessageType::RawSubscribeCmd => self.raw_subscribe_cmd.is_some(),
-      ButtplugDeviceMessageType::RawUnsubscribeCmd => self.raw_subscribe_cmd.is_some(),
-      ButtplugDeviceMessageType::RawWriteCmd => self.raw_write_cmd.is_some(),
-      ButtplugDeviceMessageType::VorzeA10CycloneCmd => self.vorze_a10_cyclone_cmd.is_some(),
-      ButtplugDeviceMessageType::StopDeviceCmd => true,
-      ButtplugDeviceMessageType::KiirooCmd => false,
-      ButtplugDeviceMessageType::LovenseCmd => false,
-    }
   }
 
   pub fn finalize(&mut self) {

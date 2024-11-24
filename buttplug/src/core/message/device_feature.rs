@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::core::{
-  errors::ButtplugDeviceError,
+  errors::{ButtplugDeviceError, ButtplugError},
   message::{ButtplugDeviceMessageType, Endpoint},
 };
 use getset::{Getters, MutGetters, Setters};
@@ -287,5 +287,24 @@ impl DeviceFeatureRaw {
         .cloned(),
       ),
     }
+  }
+}
+
+/// TryFrom for Buttplug Device Messages that need to use a device feature definition to convert
+pub trait TryFromDeviceFeatures<T> where Self: Sized {
+  fn try_from_device_features(msg: T, features: &[DeviceFeature]) -> Result<Self, ButtplugError>;
+}
+
+pub fn find_device_feature_indexes<P>(features: &[DeviceFeature], criteria: P) -> Result<Vec<usize>, ButtplugError> where P: FnMut(&(usize, &DeviceFeature)) -> bool {
+  let feature_indexes: Vec<usize> = features.iter().enumerate().filter(criteria).map(|(index, _)| index).collect();
+  if feature_indexes.is_empty() {
+    Err(
+      ButtplugDeviceError::ProtocolRequirementError(format!(
+        "Feature index conversion returned 0 features.",
+      ))
+      .into(),
+    )
+  } else {
+    Ok(feature_indexes)
   }
 }
