@@ -16193,6 +16193,39 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-Marshal"
+          ],
+          "name": "JoyHub Marshal",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Constrict",
+              "description": "Air Pump",
+              "actuator": {
+                "step-range": [
+                  0,
+                  9
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -16238,7 +16271,8 @@
               "J-Royaleye",
               "J-VBarbie2t",
               "J-Pau",
-              "J-Petalwish3"
+              "J-Petalwish3",
+              "J-Marshal"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
