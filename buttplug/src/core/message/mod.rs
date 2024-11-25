@@ -350,6 +350,7 @@ impl ButtplugClientMessageVariant {
           ButtplugClientMessageV3::VibrateCmd(a) => Some(a.device_index()),
           ButtplugClientMessageV3::SensorSubscribeCmd(a) => Some(a.device_index()),
           ButtplugClientMessageV3::SensorUnsubscribeCmd(a) => Some(a.device_index()),
+          ButtplugClientMessageV3::ScalarCmd(a) => Some(a.device_index()),
           ButtplugClientMessageV3::RotateCmd(a) => Some(a.device_index()),
           ButtplugClientMessageV3::LinearCmd(a) => Some(a.device_index()),
           ButtplugClientMessageV3::SensorReadCmd(a) => Some(a.device_index()),
