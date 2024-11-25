@@ -293,7 +293,7 @@ impl ButtplugClientDevice {
   /// Commands device to vibrate, assuming it has the features to do so.
   pub fn vibrate(&self, speed_cmd: VibrateCommand) -> ButtplugClientResultFuture {
     let vibrator_count: u32 = if let Some(features) = self.message_attributes.vibrate_cmd() {
-      *features.feature_count()
+      features.feature_count()
     } else {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::VibrateCmd).into(),
@@ -344,7 +344,7 @@ impl ButtplugClientDevice {
   /// Commands device to move linearly, assuming it has the features to do so.
   pub fn linear(&self, linear_cmd: LinearCommand) -> ButtplugClientResultFuture {
     let linear_count: u32 = if let Some(features) = self.message_attributes.linear_cmd() {
-      *features.feature_count()
+      features.feature_count()
     } else {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LinearCmd).into(),
@@ -393,7 +393,7 @@ impl ButtplugClientDevice {
   /// Commands device to rotate, assuming it has the features to do so.
   pub fn rotate(&self, rotate_cmd: RotateCommand) -> ButtplugClientResultFuture {
     let rotate_count: u32 = if let Some(features) = self.message_attributes.rotate_cmd() {
-      *features.feature_count()
+      features.feature_count()
     } else {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RotateCmd).into(),

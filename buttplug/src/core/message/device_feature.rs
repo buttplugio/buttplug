@@ -27,6 +27,8 @@ pub enum FeatureType {
   Vibrate,
   // Single Direction Rotation Speed
   Rotate,
+  // Two Direction Rotation Speed
+  RotateWithDirection,
   Oscillate,
   Constrict,
   Inflate,
@@ -53,6 +55,7 @@ impl From<ActuatorType> for FeatureType {
       ActuatorType::Unknown => FeatureType::Unknown,
       ActuatorType::Vibrate => FeatureType::Vibrate,
       ActuatorType::Rotate => FeatureType::Rotate,
+      ActuatorType::RotateWithDirection => FeatureType::RotateWithDirection,
       ActuatorType::Oscillate => FeatureType::Oscillate,
       ActuatorType::Constrict => FeatureType::Constrict,
       ActuatorType::Inflate => FeatureType::Inflate,
@@ -148,6 +151,16 @@ where
   seq.end()
 }
 
+fn range_i32_serialize<S>(range: &RangeInclusive<i32>, serializer: S) -> Result<S::Ok, S::Error>
+where
+  S: Serializer,
+{
+  let mut seq = serializer.serialize_seq(Some(2))?;
+  seq.serialize_element(&range.start())?;
+  seq.serialize_element(&range.end())?;
+  seq.end()
+}
+
 fn range_sequence_serialize<S>(
   range_vec: &Vec<RangeInclusive<i32>>,
   serializer: S,
@@ -166,8 +179,8 @@ where
 pub struct DeviceFeatureActuatorSerialized {
   #[getset(get = "pub")]
   #[serde(rename = "step-range")]
-  #[serde(serialize_with = "range_serialize")]
-  step_range: RangeInclusive<u32>,
+  #[serde(serialize_with = "range_i32_serialize")]
+  step_range: RangeInclusive<i32>,
   // This doesn't exist in base configs, so when we load these from the base config file, we'll just
   // copy the step_range value.
   #[getset(get = "pub")]
@@ -184,8 +197,8 @@ pub struct DeviceFeatureActuatorSerialized {
 pub struct DeviceFeatureActuator {
   #[getset(get = "pub")]
   #[serde(rename = "step-range")]
-  #[serde(serialize_with = "range_serialize")]
-  step_range: RangeInclusive<u32>,
+  #[serde(serialize_with = "range_i32_serialize")]
+  step_range: RangeInclusive<i32>,
   // This doesn't exist in base configs, so when we load these from the base config file, we'll just
   // copy the step_range value.
   #[getset(get = "pub")]
@@ -201,7 +214,7 @@ impl From<DeviceFeatureActuatorSerialized> for DeviceFeatureActuator {
   fn from(value: DeviceFeatureActuatorSerialized) -> Self {
     Self {
       step_range: value.step_range.clone(),
-      step_limit: value.step_limit.unwrap_or(value.step_range),
+      step_limit: value.step_limit.unwrap_or(RangeInclusive::new(0, value.step_range.end().abs() as u32)),
       messages: value.messages,
     }
   }
@@ -209,7 +222,7 @@ impl From<DeviceFeatureActuatorSerialized> for DeviceFeatureActuator {
 
 impl DeviceFeatureActuator {
   pub fn new(
-    step_range: &RangeInclusive<u32>,
+    step_range: &RangeInclusive<i32>,
     step_limit: &RangeInclusive<u32>,
     messages: &HashSet<ButtplugActuatorFeatureMessageType>,
   ) -> Self {

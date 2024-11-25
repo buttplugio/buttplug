@@ -225,12 +225,11 @@ async fn test_device_stop_on_ping_timeout() {
   }
   server
     .parse_message(message::ButtplugClientMessageV4::from(
-      message::ScalarCmdV4::new(
+      message::LevelCmdV4::new(
         device_index,
-        vec![message::ScalarSubcommandV4::new(
+        vec![message::LevelSubcommandV4::new(
           0,
-          0.5,
-          message::ActuatorType::Vibrate,
+          64
         )],
       ),
     ))
