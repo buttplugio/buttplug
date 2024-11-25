@@ -8,16 +8,7 @@
 use crate::core::{
   errors::ButtplugDeviceError,
   message::{
-    ActuatorType,
-    ButtplugActuatorFeatureMessageType,
-    ButtplugDeviceMessageType,
-    ButtplugSensorFeatureMessageType,
-    ClientDeviceMessageAttributesV2,
-    DeviceFeature,
-    GenericDeviceMessageAttributesV2,
-    NullDeviceMessageAttributesV1,
-    RawDeviceMessageAttributesV2,
-    SensorType
+    ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugDeviceMessageType, ButtplugSensorFeatureMessageType, ClientDeviceMessageAttributesV2, DeviceFeature, FeatureType, GenericDeviceMessageAttributesV2, NullDeviceMessageAttributesV1, RawDeviceMessageAttributesV2, SensorType
   },
 };
 use getset::{Getters, MutGetters, Setters};
@@ -188,6 +179,27 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
       }
     };
 
+    // We have to calculate rotation attributes seperately, since they're a combination of
+    // feature type and message in >= v4.
+    let rotate_attributes = {
+      let attrs: Vec<ClientGenericDeviceMessageAttributesV3> = features
+      .iter()
+      .filter(|x| {
+        if let Some(actuator) = x.actuator() {
+          actuator.messages().contains(&ButtplugActuatorFeatureMessageType::LevelCmd) && *x.feature_type() == FeatureType::RotateWithDirection
+        } else {
+          false
+        }
+      })
+      .map(|x| x.clone().try_into().unwrap())
+      .collect();
+    if !attrs.is_empty() {
+      Some(attrs)
+    } else {
+      None
+    }
+    };
+
     let sensor_filter = |message_type| {
       let attrs: Vec<SensorDeviceMessageAttributesV3> = features
         .iter()
@@ -217,7 +229,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
 
     Self {
       scalar_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::LevelCmd),
-      rotate_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::RotateCmd),
+      rotate_cmd: rotate_attributes,
       linear_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::LinearCmd),
       sensor_read_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorReadCmd),
       sensor_subscribe_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorSubscribeCmd),

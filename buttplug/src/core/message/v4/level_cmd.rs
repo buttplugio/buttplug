@@ -66,10 +66,10 @@ impl ButtplugMessageValidator for LevelCmdV4 {
 impl TryFromDeviceFeatures<VorzeA10CycloneCmdV0> for LevelCmdV4 {
   fn try_from_device_features(msg: VorzeA10CycloneCmdV0, features: &[DeviceFeature]) -> Result<Self, crate::core::errors::ButtplugError> {
     let rotate_features: Vec<usize> = find_device_feature_indexes(features, |(_, x)| {
-      *x.feature_type() == FeatureType::Rotate
+      *x.feature_type() == FeatureType::RotateWithDirection
         && x.actuator().as_ref().is_some_and(|y| {
           y.messages()
-            .contains(&message::ButtplugActuatorFeatureMessageType::RotateCmd)
+            .contains(&message::ButtplugActuatorFeatureMessageType::LevelCmd)
         })
     })?;
 

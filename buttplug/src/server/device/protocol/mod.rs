@@ -831,6 +831,7 @@ pub trait ProtocolHandler: Sync + Send {
           ActuatorType::Inflate => self.handle_scalar_inflate_cmd(index as u32, *scalar)?,
           ActuatorType::Oscillate => self.handle_scalar_oscillate_cmd(index as u32, *scalar)?,
           ActuatorType::Rotate => self.handle_scalar_rotate_cmd(index as u32, *scalar)?,
+          ActuatorType::RotateWithDirection => self.handle_rotate_cmd(&vec!(Some((*scalar, true))))?,
           ActuatorType::Vibrate => self.handle_scalar_vibrate_cmd(index as u32, *scalar)?,
           ActuatorType::Position => self.handle_scalar_position_cmd(index as u32, *scalar)?,
           ActuatorType::Unknown => Err(ButtplugDeviceError::UnhandledCommand(

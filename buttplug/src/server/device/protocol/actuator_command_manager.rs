@@ -13,29 +13,24 @@ use crate::core::{
     ButtplugDeviceCommandMessageUnion,
     DeviceFeature,
     DeviceFeatureActuator,
-    RotateCmdV4,
-    RotationSubcommandV4,
-    ScalarCmdV4,
-    ScalarSubcommandV4,
+    LevelCmdV4,
+    LevelSubcommandV4,
   },
 };
 use ahash::{HashMap, HashMapExt};
 use getset::Getters;
 use std::{
   collections::HashSet,
-  sync::atomic::{AtomicBool, AtomicU32, Ordering::Relaxed},
+  sync::atomic::{AtomicBool, AtomicI32, Ordering::Relaxed},
 };
 
-// As of the last rewrite of the command manager, we're currently only tracking values of scalar and
-// rotation commands. We can just use the rotation (AtomicU32, AtomicBool) pair for storage, and
-// ignore the direction bool for Scalars.
 #[derive(Getters)]
 #[getset(get = "pub")]
 struct FeatureStatus {
   actuator_type: ActuatorType,
   actuator: DeviceFeatureActuator,
   sent: AtomicBool,
-  value: (AtomicU32, AtomicBool),
+  value: AtomicI32
 }
 
 impl FeatureStatus {
@@ -44,14 +39,14 @@ impl FeatureStatus {
       actuator_type: *actuator_type,
       actuator: actuator.clone(),
       sent: AtomicBool::new(false),
-      value: (AtomicU32::new(0), AtomicBool::new(false)),
+      value: AtomicI32::new(0),
     }
   }
 
-  pub fn current(&self) -> (ActuatorType, (u32, bool)) {
+  pub fn current(&self) -> (ActuatorType, i32) {
     (
       self.actuator_type,
-      (self.value.0.load(Relaxed), self.value.1.load(Relaxed)),
+      self.value.load(Relaxed),
     )
   }
 
@@ -59,43 +54,28 @@ impl FeatureStatus {
     self.actuator.messages()
   }
 
-  pub fn update(&self, value: &(f64, bool)) -> Option<(u32, bool)> {
+  pub fn update(&self, value: i32) -> Option<i32> {
     let mut result = None;
     let range_start = *self.actuator.step_limit().start();
     let range = self.actuator.step_limit().end() - range_start;
-    let scalar_modifier = value.0 * range as f64;
-    let scalar = if scalar_modifier < 0.0001 {
-      0
-    } else {
-      // When calculating speeds, round up. This follows how we calculated
-      // things in buttplug-js and buttplug-csharp, so it's more for history
-      // than anything, but it's what users will expect.
-      ((scalar_modifier + range_start as f64).ceil() as u32).clamp(
-        *self.actuator.step_range().start(),
-        *self.actuator.step_range().end(),
-      )
-    };
+
     trace!(
-      "{:?} {:?} {} {} {}",
+      "{:?} {:?} {}",
       self.actuator.step_range(),
       self.actuator.step_limit(),
       range,
-      scalar_modifier,
-      scalar
     );
     // If we've already sent commands, we don't want to send them again,
     // because some of our communication busses are REALLY slow. Make sure
     // these values get None in our return vector.
-    let current = self.value.0.load(Relaxed);
-    let clockwise = self.value.1.load(Relaxed);
+    let current = self.value.load(Relaxed);
     let sent = self.sent.load(Relaxed);
-    if !sent || scalar != current || clockwise != value.1 {
-      self.value.0.store(scalar, Relaxed);
-      self.value.1.store(value.1, Relaxed);
+    if !sent || value != current {
+      self.value.store(value, Relaxed);
       if !sent {
         self.sent.store(true, Relaxed);
       }
-      result = Some((scalar, value.1));
+      result = Some(value);
     }
     result
   }
@@ -119,30 +99,21 @@ impl ActuatorCommandManager {
     let mut stop_commands = vec![];
 
     let mut statuses = vec![];
-    let mut scalar_subcommands = vec![];
-    let mut rotate_subcommands = vec![];
+    let mut level_subcommands = vec![];
     for (index, feature) in features.iter().enumerate() {
       if let Some(actuator) = feature.actuator() {
         let actuator_type: ActuatorType = (*feature.feature_type()).try_into().unwrap();
         statuses.push(FeatureStatus::new(&actuator_type, actuator));
         if actuator
           .messages()
-          .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::RotateCmd)
+          .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::LevelCmd)
         {
-          rotate_subcommands.push(RotationSubcommandV4::new(index as u32, 0.0, false));
-        } else if actuator
-          .messages()
-          .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ScalarCmd)
-        {
-          scalar_subcommands.push(ScalarSubcommandV4::new(index as u32, 0.0, actuator_type));
+          level_subcommands.push(LevelSubcommandV4::new(index as u32, 0));
         }
       }
     }
-    if !scalar_subcommands.is_empty() {
-      stop_commands.push(ScalarCmdV4::new(0, scalar_subcommands).into());
-    }
-    if !rotate_subcommands.is_empty() {
-      stop_commands.push(RotateCmdV4::new(0, rotate_subcommands).into());
+    if !level_subcommands.is_empty() {
+      stop_commands.push(LevelCmdV4::new(0, level_subcommands).into());
     }
 
     Self {
@@ -154,14 +125,14 @@ impl ActuatorCommandManager {
   fn update(
     &self,
     msg_type: ButtplugActuatorFeatureMessageType,
-    commands: &Vec<(u32, ActuatorType, (f64, bool))>,
+    commands: &Vec<(u32, ActuatorType, i32)>,
     match_all: bool,
-  ) -> Result<Vec<(u32, ActuatorType, (u32, bool))>, ButtplugError> {
+  ) -> Result<Vec<(u32, ActuatorType, i32)>, ButtplugError> {
     // Convert from the generic 0.0-1.0 range to the StepCount attribute given by the device config.
 
     // If we've already sent commands before, we should check against our old values. Otherwise, we
     // should always send whatever command we're going to send.
-    let mut result: Vec<(u32, ActuatorType, (u32, bool))> = vec![];
+    let mut result = vec![];
 
     for command in commands {
       if command.0 >= self.feature_status.len().try_into().unwrap() {
@@ -177,12 +148,12 @@ impl ActuatorCommandManager {
 
     for (index, cmd) in self.feature_status.iter().enumerate() {
       let u32_index: u32 = index.try_into().unwrap();
-      if let Some((_, cmd_actuator, cmd_value)) = commands.iter().find(|x| x.0 == u32_index) {
+      if let Some((_, actuator, cmd_value)) = commands.iter().find(|x| x.0 == u32_index) {
         // By this point, we should have already checked whether the feature takes the message type.
-        if let Some(updated_value) = self.feature_status[index].update(cmd_value) {
-          result.push((u32_index, *cmd_actuator, updated_value));
+        if let Some(updated_value) = self.feature_status[index].update(*cmd_value) {
+          result.push((u32_index, *actuator, updated_value));
         } else if match_all {
-          result.push((u32_index, *cmd.actuator_type(), cmd.current().1));
+          result.push((u32_index, *actuator, cmd.current().1));
         }
       } else if match_all && cmd.messages().contains(&msg_type) {
         result.push((u32_index, *cmd.actuator_type(), cmd.current().1));
@@ -192,14 +163,14 @@ impl ActuatorCommandManager {
     Ok(result)
   }
 
-  pub fn update_scalar(
+  pub fn update_level(
     &self,
-    msg: &ScalarCmdV4,
+    msg: &LevelCmdV4,
     match_all: bool,
-  ) -> Result<Vec<Option<(ActuatorType, u32)>>, ButtplugError> {
+  ) -> Result<Vec<Option<(ActuatorType, i32)>>, ButtplugError> {
     // First, make sure this is a valid command, that contains at least one
     // subcommand.
-    if msg.scalars().is_empty() {
+    if msg.levels().is_empty() {
       return Err(
         ButtplugDeviceError::ProtocolRequirementError(
           "ScalarCmd has 0 commands, will not do anything.".to_owned(),
@@ -212,76 +183,28 @@ impl ActuatorCommandManager {
     for (i, x) in self.feature_status.iter().enumerate() {
       if x
         .messages()
-        .contains(&ButtplugActuatorFeatureMessageType::ScalarCmd)
+        .contains(&ButtplugActuatorFeatureMessageType::LevelCmd)
       {
         idxs.insert(i, idxs.len());
       }
     }
 
-    let mut final_result: Vec<Option<(ActuatorType, u32)>> = vec![None; idxs.len()];
+    let mut final_result = vec![None; idxs.len()];
 
-    let mut commands: Vec<(u32, ActuatorType, (f64, bool))> = vec![];
+    let mut commands = vec![];
     msg
-      .scalars()
+      .levels()
       .iter()
-      .for_each(|x| commands.push((x.feature_index(), x.actuator_type(), (x.scalar(), false))));
+      .for_each(|x| commands.push((x.feature_index(), *self.feature_status[x.feature_index() as usize].actuator_type(), x.level())));
     let mut result = self.update(
-      ButtplugActuatorFeatureMessageType::ScalarCmd,
+      ButtplugActuatorFeatureMessageType::LevelCmd,
       &commands,
       match_all,
     )?;
     result.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
     result.iter().for_each(|(index, actuator, value)| {
-      final_result[idxs[&(*index as usize)]] = Some((*actuator, value.0))
+      final_result[idxs[&(*index as usize)]] = Some((*actuator, *value))
     });
-    Ok(final_result)
-  }
-
-  pub fn update_rotation(
-    &self,
-    msg: &RotateCmdV4,
-    match_all: bool,
-  ) -> Result<Vec<Option<(u32, bool)>>, ButtplugError> {
-    // First, make sure this is a valid command, that contains at least one
-    // command.
-    if msg.rotations().is_empty() {
-      return Err(
-        ButtplugDeviceError::ProtocolRequirementError(
-          "RotateCmd has 0 commands, will not do anything.".to_owned(),
-        )
-        .into(),
-      );
-    }
-
-    let mut final_result: Vec<Option<(u32, bool)>> = vec![
-      None;
-      self
-        .feature_status
-        .iter()
-        .filter(|x| x
-          .messages()
-          .contains(&ButtplugActuatorFeatureMessageType::RotateCmd))
-        .count()
-    ];
-
-    let mut commands: Vec<(u32, ActuatorType, (f64, bool))> = vec![];
-    msg.rotations().iter().for_each(|x| {
-      commands.push((
-        x.feature_index(),
-        ActuatorType::Rotate,
-        (x.speed(), x.clockwise()),
-      ))
-    });
-    let mut result = self.update(
-      ButtplugActuatorFeatureMessageType::RotateCmd,
-      &commands,
-      match_all,
-    )?;
-    result.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
-    result
-      .iter()
-      .enumerate()
-      .for_each(|(array_index, (_, _, value))| final_result[array_index] = Some(*value));
     Ok(final_result)
   }
 

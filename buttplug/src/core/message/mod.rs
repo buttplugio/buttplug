@@ -195,7 +195,6 @@ impl Ord for ButtplugDeviceMessageType {
 #[derive(Copy, Debug, Clone, Hash, Display, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ButtplugActuatorFeatureMessageType {
   LevelCmd,
-  RotateCmd,
   LinearCmd,
 }
 
@@ -203,7 +202,6 @@ impl From<ButtplugActuatorFeatureMessageType> for ButtplugDeviceMessageType {
   fn from(value: ButtplugActuatorFeatureMessageType) -> Self {
     match value {
       ButtplugActuatorFeatureMessageType::LinearCmd => ButtplugDeviceMessageType::LinearCmd,
-      ButtplugActuatorFeatureMessageType::RotateCmd => ButtplugDeviceMessageType::RotateCmd,
       ButtplugActuatorFeatureMessageType::LevelCmd => ButtplugDeviceMessageType::ScalarCmd,
     }
   }
@@ -215,8 +213,7 @@ impl TryFrom<ButtplugDeviceMessageType> for ButtplugActuatorFeatureMessageType {
   fn try_from(value: ButtplugDeviceMessageType) -> Result<Self, Self::Error> {
     match value {
       ButtplugDeviceMessageType::LinearCmd => Ok(ButtplugActuatorFeatureMessageType::LinearCmd),
-      ButtplugDeviceMessageType::RotateCmd => Ok(ButtplugActuatorFeatureMessageType::RotateCmd),
-      ButtplugDeviceMessageType::ScalarCmd => Ok(ButtplugActuatorFeatureMessageType::LevelCmd),
+      ButtplugDeviceMessageType::LevelCmd => Ok(ButtplugActuatorFeatureMessageType::LevelCmd),
       _ => Err(()),
     }
   }
@@ -609,6 +606,8 @@ pub enum ActuatorType {
   Vibrate,
   // Single Direction Rotation Speed
   Rotate,
+  // Two Direction Rotation Speed
+  RotateWithDirection,
   Oscillate,
   Constrict,
   Inflate,
@@ -624,6 +623,7 @@ impl TryFrom<FeatureType> for ActuatorType {
       FeatureType::Unknown => Ok(ActuatorType::Unknown),
       FeatureType::Vibrate => Ok(ActuatorType::Vibrate),
       FeatureType::Rotate => Ok(ActuatorType::Rotate),
+      FeatureType::RotateWithDirection => Ok(ActuatorType::RotateWithDirection),
       FeatureType::Oscillate => Ok(ActuatorType::Oscillate),
       FeatureType::Constrict => Ok(ActuatorType::Constrict),
       FeatureType::Inflate => Ok(ActuatorType::Inflate),
