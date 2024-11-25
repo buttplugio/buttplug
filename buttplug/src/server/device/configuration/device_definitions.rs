@@ -7,7 +7,7 @@ use crate::core::message::{
   ButtplugRawFeatureMessageType,
   ButtplugSensorFeatureMessageType,
   DeviceFeature,
-  Endpoint,
+  Endpoint, FeatureType,
 };
 
 #[derive(Debug, Clone, Getters)]
@@ -104,9 +104,16 @@ impl UserDeviceDefinition {
   // feature indexing when the message itself is handled.
   pub fn allows_message(&self, msg_type: &ButtplugDeviceMessageType) -> bool {
     for feature in &self.features {
+      debug!("{:?}", feature);
       if let Ok(actuator_msg_type) = ButtplugActuatorFeatureMessageType::try_from(*msg_type) {
         if let Some(actuator) = feature.actuator() {
+          debug!("{:?}", actuator);
           if actuator.messages().contains(&actuator_msg_type) {
+            return true;
+          }
+          if *msg_type == ButtplugDeviceMessageType::RotateCmd && 
+          actuator.messages().contains(&ButtplugActuatorFeatureMessageType::LevelCmd) &&
+          *feature.feature_type() == FeatureType::RotateWithDirection {
             return true;
           }
         }
@@ -120,8 +127,11 @@ impl UserDeviceDefinition {
         && feature.raw().is_some()
       {
         return true;
+      } else {
+        debug!("CANNOT DECODE MESSAGE TYPE?!");
       }
     }
+    debug!("RETURNING FALSE");
     false
   }
 }

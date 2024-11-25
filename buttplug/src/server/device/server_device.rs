@@ -46,18 +46,7 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     message::{
-      self,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceMessageType,
-      ButtplugMessage,
-      ButtplugServerDeviceMessage,
-      ButtplugServerMessageV4,
-      Endpoint,
-      FeatureType,
-      RawReadingV2,
-      RawSubscribeCmdV2,
-      ScalarCmdV4,
-      SensorType,
+      self, ActuatorType, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessageType, ButtplugMessage, ButtplugServerDeviceMessage, ButtplugServerMessageV4, Endpoint, FeatureType, LevelCmdV4, RawReadingV2, RawSubscribeCmdV2, SensorType
     },
     ButtplugResultFuture,
   },
@@ -380,11 +369,8 @@ impl ServerDevice {
       ButtplugDeviceCommandMessageUnion::RawWriteCmd(_) => {
         check_msg(ButtplugDeviceMessageType::RawWriteCmd)
       }
-      ButtplugDeviceCommandMessageUnion::RotateCmd(_) => {
-        check_msg(ButtplugDeviceMessageType::RotateCmd)
-      }
-      ButtplugDeviceCommandMessageUnion::ScalarCmd(_) => {
-        check_msg(ButtplugDeviceMessageType::ScalarCmd)
+      ButtplugDeviceCommandMessageUnion::LevelCmd(_) => {
+        check_msg(ButtplugDeviceMessageType::LevelCmd)
       }
       ButtplugDeviceCommandMessageUnion::StopDeviceCmd(_) => {
         //check_msg(ButtplugDeviceMessageType::StopDeviceCmd)
@@ -438,7 +424,8 @@ impl ServerDevice {
         self.handle_sensor_unsubscribe_cmd_v4(msg)
       }
       // Actuator messages
-      ButtplugDeviceCommandMessageUnion::ScalarCmd(msg) => self.handle_scalarcmd_v4(&msg),
+      ButtplugDeviceCommandMessageUnion::LevelCmd(msg) => self.handle_levelcmd_v4(&msg),
+      /*
       ButtplugDeviceCommandMessageUnion::RotateCmd(msg) => {
         let commands = match self
           .actuator_command_manager
@@ -449,6 +436,7 @@ impl ServerDevice {
         };
         self.handle_generic_command_result(self.handler.handle_rotate_cmd(&commands))
       }
+      */
       ButtplugDeviceCommandMessageUnion::LinearCmd(msg) => {
         self.handle_generic_command_result(self.handler.handle_linear_cmd(msg))
       }
@@ -457,18 +445,18 @@ impl ServerDevice {
     }
   }
 
-  fn handle_scalarcmd_v4(&self, msg: &ScalarCmdV4) -> ButtplugServerResultFuture {
-    if msg.scalars().is_empty() {
+  fn handle_levelcmd_v4(&self, msg: &LevelCmdV4) -> ButtplugServerResultFuture {
+    if msg.levels().is_empty() {
       return future::ready(Err(
         ButtplugDeviceError::ProtocolRequirementError(
-          "ScalarCmd with no subcommands is not valid.".to_owned(),
+          "LevelCmd with no subcommands is not valid.".to_owned(),
         )
         .into(),
       ))
       .boxed();
     }
 
-    for command in msg.scalars() {
+    for command in msg.levels() {
       if command.feature_index() > self.definition.features().len() as u32 {
         return future::ready(Err(
           ButtplugDeviceError::DeviceFeatureIndexError(
@@ -481,22 +469,11 @@ impl ServerDevice {
       }
       let feature_type =
         self.definition.features()[command.feature_index() as usize].feature_type();
-      if *feature_type != command.actuator_type().into() {
-        return future::ready(Err(
-          ButtplugDeviceError::DeviceActuatorTypeMismatch(
-            self.name(),
-            command.actuator_type(),
-            *feature_type,
-          )
-          .into(),
-        ))
-        .boxed();
-      }
     }
 
     let commands = match self
       .actuator_command_manager
-      .update_scalar(msg, self.handler.needs_full_command_set())
+      .update_level(msg, self.handler.needs_full_command_set())
     {
       Ok(values) => values,
       Err(err) => return future::ready(Err(err)).boxed(),
@@ -506,7 +483,7 @@ impl ServerDevice {
       trace!("No commands generated for incoming device packet, skipping and returning success.");
       return future::ready(Ok(message::OkV0::default().into())).boxed();
     }
-    self.handle_generic_command_result(self.handler.handle_scalar_cmd(&commands))
+    self.handle_generic_command_result(self.handler.handle_scalar_cmd(&commands.iter().map(|x| if let Some((y, z)) = x { Some((*y, *z as u32)) } else { None } ).collect::<Vec<Option<(ActuatorType, u32)>>>()))
   }
 
   fn handle_hardware_commands(&self, commands: Vec<HardwareCommand>) -> ButtplugServerResultFuture {
