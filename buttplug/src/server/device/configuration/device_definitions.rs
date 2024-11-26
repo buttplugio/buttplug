@@ -104,7 +104,6 @@ impl UserDeviceDefinition {
   // feature indexing when the message itself is handled.
   pub fn allows_message(&self, msg_type: &ButtplugDeviceMessageType) -> bool {
     for feature in &self.features {
-      debug!("{:?}", feature);
       if let Ok(actuator_msg_type) = ButtplugActuatorFeatureMessageType::try_from(*msg_type) {
         if let Some(actuator) = feature.actuator() {
           debug!("{:?}", actuator);
@@ -127,11 +126,8 @@ impl UserDeviceDefinition {
         && feature.raw().is_some()
       {
         return true;
-      } else {
-        debug!("CANNOT DECODE MESSAGE TYPE?!");
       }
     }
-    debug!("RETURNING FALSE");
     false
   }
 }

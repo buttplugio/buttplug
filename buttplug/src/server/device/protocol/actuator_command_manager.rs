@@ -205,7 +205,7 @@ impl ActuatorCommandManager {
     result.iter().for_each(|(index, actuator, value)| {
       final_result[*idxs.get(index).unwrap() as usize] = Some((*actuator, *value))
     });
-
+    debug!("{:?}", final_result);
     Ok(final_result)
   }
 
