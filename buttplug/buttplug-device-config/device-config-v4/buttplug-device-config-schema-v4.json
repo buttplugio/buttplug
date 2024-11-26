@@ -305,8 +305,7 @@
         },
         "required": [
           "feature-type",
-          "id",
-          "base-id"
+          "id"
         ],
         "additionalProperties": false
       }
@@ -355,7 +354,6 @@
       },
       "required": [
         "id",
-        "base-id",
         "features",
         "user-config"
       ],
