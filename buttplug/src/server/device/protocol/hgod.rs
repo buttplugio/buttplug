@@ -92,7 +92,7 @@ async fn send_hgod_updates(device: Arc<Hardware>, data: Arc<AtomicU8>) {
 impl ProtocolHandler for Hgod {
   fn handle_scalar_cmd(
     &self,
-    commands: &[Option<(ActuatorType, u32)>],
+    commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if let Some(cmd) = commands[0] {
       self.last_command.store(cmd.1 as u8, Ordering::SeqCst);

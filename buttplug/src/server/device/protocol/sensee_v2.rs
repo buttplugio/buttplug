@@ -101,19 +101,19 @@ impl ProtocolHandler for SenseeV2 {
 
   fn handle_scalar_cmd(
     &self,
-    commands: &[Option<(ActuatorType, u32)>],
+    commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let vibes: Vec<(ActuatorType, u32)> = commands
+    let vibes: Vec<(ActuatorType, i32)> = commands
       .iter()
       .map(|x| x.expect("Expecting all commands"))
       .filter(|x| x.0 == ActuatorType::Vibrate)
       .collect();
-    let thrusts: Vec<(ActuatorType, u32)> = commands
+    let thrusts: Vec<(ActuatorType, i32)> = commands
       .iter()
       .map(|x| x.expect("Expecting all commands"))
       .filter(|x| x.0 == ActuatorType::Oscillate)
       .collect();
-    let sucks: Vec<(ActuatorType, u32)> = commands
+    let sucks: Vec<(ActuatorType, i32)> = commands
       .iter()
       .map(|x| x.expect("Expecting all commands"))
       .filter(|x| x.0 == ActuatorType::Constrict)

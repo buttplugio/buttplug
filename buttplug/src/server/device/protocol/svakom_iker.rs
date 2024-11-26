@@ -61,7 +61,7 @@ impl ProtocolHandler for SvakomIker {
 
   fn handle_scalar_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, u32)>],
+    cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut vibe_off = false;
     let mut msg_vec = vec![];

@@ -99,13 +99,13 @@ impl LovenseConnectService {
 impl ProtocolHandler for LovenseConnectService {
   fn handle_scalar_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, u32)>],
+    cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut hardware_cmds = vec![];
 
     // Handle vibration commands, these will be by far the most common. Fucking machine oscillation
     // uses lovense vibrate commands internally too, so we can include them here.
-    let vibrate_cmds: Vec<&(ActuatorType, u32)> = cmds
+    let vibrate_cmds: Vec<&(ActuatorType, i32)> = cmds
       .iter()
       .filter(|x| {
         if let Some(val) = x {
@@ -160,7 +160,7 @@ impl ProtocolHandler for LovenseConnectService {
     }
 
     // Handle constriction commands.
-    let thrusting_cmds: Vec<&(ActuatorType, u32)> = cmds
+    let thrusting_cmds: Vec<&(ActuatorType, i32)> = cmds
       .iter()
       .filter(|x| {
         if let Some(val) = x {
@@ -180,7 +180,7 @@ impl ProtocolHandler for LovenseConnectService {
     }
 
     // Handle constriction commands.
-    let constrict_cmds: Vec<&(ActuatorType, u32)> = cmds
+    let constrict_cmds: Vec<&(ActuatorType, i32)> = cmds
       .iter()
       .filter(|x| {
         if let Some(val) = x {
@@ -208,7 +208,7 @@ impl ProtocolHandler for LovenseConnectService {
     }
 
     // Handle "rotation" commands: Currently just applicable as the Flexer's Fingering command
-    let rotation_cmds: Vec<&(ActuatorType, u32)> = cmds
+    let rotation_cmds: Vec<&(ActuatorType, i32)> = cmds
       .iter()
       .filter(|x| {
         if let Some(val) = x {

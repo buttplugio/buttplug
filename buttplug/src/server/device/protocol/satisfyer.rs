@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{self, Endpoint},
+    message::{self, ActuatorType, Endpoint},
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
@@ -176,7 +176,7 @@ impl ProtocolHandler for Satisfyer {
 
   fn handle_scalar_cmd(
     &self,
-    commands: &[Option<(message::ActuatorType, u32)>],
+    commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if self.feature_count != commands.len() {
       return Err(ButtplugDeviceError::DeviceFeatureCountMismatch(

@@ -41,6 +41,7 @@ impl ProtocolHandler for TCodeV03 {
     index: u32,
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    debug!("TCODE VIBRATE COMMAND");
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
       format!("V{}{:02}\n", index, scalar).as_bytes().to_vec(),

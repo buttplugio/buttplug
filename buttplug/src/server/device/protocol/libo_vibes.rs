@@ -28,7 +28,7 @@ impl ProtocolHandler for LiboVibes {
 
   fn handle_scalar_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, u32)>],
+    cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut msg_vec = vec![];
     for (index, cmd) in cmds.iter().enumerate() {

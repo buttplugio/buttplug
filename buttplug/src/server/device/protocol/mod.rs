@@ -820,20 +820,20 @@ pub trait ProtocolHandler: Sync + Send {
   // actuators, they should just implement their own version of this method.
   fn handle_scalar_cmd(
     &self,
-    commands: &[Option<(ActuatorType, u32)>],
+    commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut command_vec = vec![];
     for (index, command) in commands.iter().enumerate().filter(|(_, x)| x.is_some()) {
       let (actuator, scalar) = command.as_ref().expect("Already verified existence");
       command_vec.append(
         &mut (match *actuator {
-          ActuatorType::Constrict => self.handle_scalar_constrict_cmd(index as u32, *scalar)?,
-          ActuatorType::Inflate => self.handle_scalar_inflate_cmd(index as u32, *scalar)?,
-          ActuatorType::Oscillate => self.handle_scalar_oscillate_cmd(index as u32, *scalar)?,
-          ActuatorType::Rotate => self.handle_scalar_rotate_cmd(index as u32, *scalar)?,
-          ActuatorType::RotateWithDirection => self.handle_rotate_cmd(&vec!(Some((*scalar, true))))?,
-          ActuatorType::Vibrate => self.handle_scalar_vibrate_cmd(index as u32, *scalar)?,
-          ActuatorType::Position => self.handle_scalar_position_cmd(index as u32, *scalar)?,
+          ActuatorType::Constrict => self.handle_scalar_constrict_cmd(index as u32, *scalar as u32)?,
+          ActuatorType::Inflate => self.handle_scalar_inflate_cmd(index as u32, *scalar as u32)?,
+          ActuatorType::Oscillate => self.handle_scalar_oscillate_cmd(index as u32, *scalar as u32)?,
+          ActuatorType::Rotate => self.handle_scalar_rotate_cmd(index as u32, *scalar as u32)?,
+          ActuatorType::RotateWithDirection => self.handle_rotate_cmd(&vec!(Some((scalar.abs() as u32, *scalar >= 0))))?,
+          ActuatorType::Vibrate => self.handle_scalar_vibrate_cmd(index as u32, *scalar as u32)?,
+          ActuatorType::Position => self.handle_scalar_position_cmd(index as u32, *scalar as u32)?,
           ActuatorType::Unknown => Err(ButtplugDeviceError::UnhandledCommand(
             "Unknown actuator types are not controllable.".to_owned(),
           ))?,

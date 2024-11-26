@@ -33,7 +33,7 @@ impl ProtocolHandler for XInput {
 
   fn handle_scalar_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, u32)>],
+    cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // XInput is fast enough that we can ignore the commands handed
     // back by the manager and just form our own packet. This means

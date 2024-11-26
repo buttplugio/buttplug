@@ -60,7 +60,7 @@ impl ProtocolHandler for LeloF1s {
 
   fn handle_scalar_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, u32)>],
+    cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut cmd_vec = vec![0x1];
     for cmd in cmds.iter() {

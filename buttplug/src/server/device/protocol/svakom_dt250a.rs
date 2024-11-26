@@ -63,7 +63,7 @@ impl SvakomDT250A {
 impl ProtocolHandler for SvakomDT250A {
   fn handle_scalar_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, u32)>],
+    cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if cmds.is_empty() {
       return Ok(vec![]);
