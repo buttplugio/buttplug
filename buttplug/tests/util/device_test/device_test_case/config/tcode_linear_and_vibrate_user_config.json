@@ -6,18 +6,19 @@
   "user-configs": {
     "protocols": {
       "tcode-v03": {
-        "communication": [{
-          "btle": {
-            "names": [
-              "tcode-v03"
-            ],
-            "services": {
-              "0000eea0-0000-1000-8000-00805f9b34fb": {
-                "tx": "0000ee01-0000-1000-8000-00805f9b34fb"
+        "communication": [
+          {
+            "btle": {
+              "names": [
+                "tcode-v03"
+              ],
+              "services": {
+                "0000eea0-0000-1000-8000-00805f9b34fb": {
+                  "tx": "0000ee01-0000-1000-8000-00805f9b34fb"
+                }
               }
             }
           }
-        }
         ],
         "configurations": []
       }
@@ -31,23 +32,44 @@
         },
         "config": {
           "name": "TCode v0.3 (Single Linear Axis + Single Vibe)",
-          "features": [{
-            "description": "",
-            "feature-type": "Position",
-            "actuator": {
-              "step-range": [0, 100],
-              "step-limit": [0, 100],
-              "messages": ["LinearCmd"]
+          "id": "e4384a37-fd37-4b9e-8464-a510dd8410a7",
+          "features": [
+            {
+              "description": "",
+              "feature-type": "Position",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "step-limit": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "LinearCmd"
+                ]
+              },
+              "id": "c5e6384e-399b-4c2b-9791-eb48abaf3bf7"
+            },
+            {
+              "description": "",
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  99
+                ],
+                "step-limit": [
+                  0,
+                  99
+                ],
+                "messages": [
+                  "LevelCmd"
+                ]
+              },
+              "id": "e4384a37-fd37-4b9e-8464-a510dd8410a7"
             }
-          }, {
-            "description": "",
-            "feature-type": "Vibrate",
-            "actuator": {
-              "step-range": [0, 99],
-              "step-limit": [0, 99],
-              "messages": ["LevelCmd"]
-            }
-          }
           ],
           "user-config": {
             "allow": false,
