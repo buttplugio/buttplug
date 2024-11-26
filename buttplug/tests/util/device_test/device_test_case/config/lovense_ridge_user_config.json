@@ -13,6 +13,8 @@
         },
         "config": {
           "name": "Lovense Sex Machine",
+          "id": "c8633234-07a4-4ad9-961d-a4d777b32be8",
+          "base-id": "c8633234-07a4-4ad9-961d-a4d777b32be7",
           "features": [
             {
               "feature-type": "Oscillate",
@@ -29,7 +31,9 @@
                 "messages": [
                   "LevelCmd"
                 ]
-              }
+              },
+              "base-id": "56d94863-b321-428b-8b68-bac0197556e1",
+              "id": "56d94863-b321-428b-8b68-bac0197556e2"
             },
             {
               "feature-type": "Battery",
@@ -44,7 +48,9 @@
                 "messages": [
                   "SensorReadCmd"
                 ]
-              }
+              },
+              "base-id": "b9899daa-7755-4ebb-88b4-13122d12745e",
+              "id": "b9899daa-7755-4ebb-88b4-13122d12745f"
             }
           ],
           "user-config": {
