@@ -6,7 +6,7 @@
   "scripts": {
     "build": "js-yaml device-config-v2/buttplug-device-config-v2.yml > build-config/buttplug-device-config-v2.json && ajv validate --strict=false -s device-config-v2/buttplug-device-config-schema-v2.json -d build-config/buttplug-device-config-v2.json",
     "build:v3": "js-yaml device-config-v3/buttplug-device-config-v3.yml > build-config/buttplug-device-config-v3.json && ajv validate --strict=false -s device-config-v3/buttplug-device-config-schema-v3.json -d build-config/buttplug-device-config-v3.json",
-    "build:v4": "js-yaml device-config-v4/buttplug-device-config-v4.yml > build-config/buttplug-device-config-v4.json && ajv validate --strict=false -s device-config-v4/buttplug-device-config-schema-v4.json -d build-config/buttplug-device-config-v4.json",
+    "build:v4": "node ./add-uuids.js && js-yaml device-config-v4/buttplug-device-config-v4.yml > build-config/buttplug-device-config-v4.json && ajv validate --strict=false -s device-config-v4/buttplug-device-config-schema-v4.json -d build-config/buttplug-device-config-v4.json",
     "convert": "node ./convert-v2-to-v3.js"
   },
   "repository": {
@@ -26,7 +26,8 @@
   "devDependencies": {
     "ajv": "^8.17.1",
     "ajv-cli": "^5.0.0",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "uuid": "^11.0.3"
   },
   "dependencies": {
     "trash-cli": "^5.0.0"
