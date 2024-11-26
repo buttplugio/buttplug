@@ -433,16 +433,11 @@
               },
               "maxProperties": 1
             },
-            "devices": {
-              "type": "object",
-              "properties": {
-                "defaults": {
-                  "$ref": "#/components/defaults-definition"
-                },
-                "configurations": {
-                  "$ref": "#/components/configurations-definition"
-                }
-              }
+            "defaults": {
+              "$ref": "#/components/defaults-definition"
+            },
+            "configurations": {
+              "$ref": "#/components/configurations-definition"
             }
           }
         }
