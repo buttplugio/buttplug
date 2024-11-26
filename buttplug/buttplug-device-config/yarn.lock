@@ -205,6 +205,7 @@ __metadata:
     ajv-cli: "npm:^5.0.0"
     js-yaml: "npm:^4.1.0"
     trash-cli: "npm:^5.0.0"
+    uuid: "npm:^11.0.3"
   languageName: unknown
   linkType: soft
 
@@ -1156,6 +1157,15 @@ __metadata:
   dependencies:
     os-homedir: "npm:^1.0.0"
   checksum: 10c0/cbcb251c64f0dce8f3a598049afa5dadd42c928f9834c8720227ee17ededa819296582f9964d963974787f00a4d4cd68e90fd69bc5d8df528d666a6882f84b0c
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^11.0.3":
+  version: 11.0.3
+  resolution: "uuid@npm:11.0.3"
+  bin:
+    uuid: dist/esm/bin/uuid
+  checksum: 10c0/cee762fc76d949a2ff9205770334699e0043d52bb766472593a25f150077c9deed821230251ea3d6ab3943a5ea137d2826678797f1d5f6754c7ce5ce27e9f7a6
   languageName: node
   linkType: hard
 
