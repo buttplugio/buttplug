@@ -138,10 +138,15 @@ impl TryFromDeviceFeatures<VibrateCmdV1> for LevelCmdV4 {
 
 impl TryFromDeviceFeatures<ScalarCmdV3> for LevelCmdV4 {
   fn try_from_device_features(msg: ScalarCmdV3, features: &[DeviceFeature]) -> Result<Self, crate::core::errors::ButtplugError> {
-    // We can assume here that ScalarCmd will translate directly to LevelCmd.
+    let feature_indexes: Vec<usize> = find_device_feature_indexes(features, |(_, x)| {
+        x.actuator().as_ref().is_some_and(|y| {
+          y.messages()
+            .contains(&message::ButtplugActuatorFeatureMessageType::LevelCmd)
+        })
+    })?;
     let mut cmds: Vec<LevelSubcommandV4> = vec!(); 
     for cmd in msg.scalars() {
-      cmds.push(LevelSubcommandV4::new(cmd.index(), (cmd.scalar() * *features.get(cmd.index() as usize).ok_or(ButtplugError::from(ButtplugDeviceError::DeviceFeatureIndexError(cmd.index(), features.len() as u32)))?.actuator().as_ref().unwrap().step_range().end() as f64).ceil() as i32));
+      cmds.push(LevelSubcommandV4::new(feature_indexes[cmd.index() as usize] as u32, (cmd.scalar() * *features.get(feature_indexes[cmd.index() as usize] as usize).ok_or(ButtplugError::from(ButtplugDeviceError::DeviceFeatureIndexError(cmd.index(), features.len() as u32)))?.actuator().as_ref().unwrap().step_range().end() as f64).ceil() as i32));
     }
     Ok(LevelCmdV4::new(msg.device_index(), cmds).into())
   }
@@ -149,10 +154,16 @@ impl TryFromDeviceFeatures<ScalarCmdV3> for LevelCmdV4 {
 
 impl TryFromDeviceFeatures<RotateCmdV1> for LevelCmdV4 {
   fn try_from_device_features(msg: RotateCmdV1, features: &[DeviceFeature]) -> Result<Self, crate::core::errors::ButtplugError> {
-    // We can assume here that ScalarCmd will translate directly to LevelCmd.
+    let feature_indexes: Vec<usize> = find_device_feature_indexes(features, |(_, x)| {
+      *x.feature_type() == FeatureType::RotateWithDirection
+        && x.actuator().as_ref().is_some_and(|y| {
+          y.messages()
+            .contains(&message::ButtplugActuatorFeatureMessageType::LevelCmd)
+        })
+    })?;
     let mut cmds: Vec<LevelSubcommandV4> = vec!(); 
     for cmd in msg.rotations() {
-      cmds.push(LevelSubcommandV4::new(cmd.index(), (cmd.speed() * *features.get(cmd.index() as usize).ok_or(ButtplugError::from(ButtplugDeviceError::DeviceFeatureIndexError(cmd.index(), features.len() as u32)))?.actuator().as_ref().unwrap().step_range().end() as f64 * (if cmd.clockwise() { 1f64 } else { -1f64 })).ceil() as i32));
+      cmds.push(LevelSubcommandV4::new(feature_indexes[cmd.index() as usize] as u32, (cmd.speed() * *features.get(feature_indexes[cmd.index() as usize] as usize).ok_or(ButtplugError::from(ButtplugDeviceError::DeviceFeatureIndexError(cmd.index(), features.len() as u32)))?.actuator().as_ref().unwrap().step_range().end() as f64 * (if cmd.clockwise() { 1f64 } else { -1f64 })).ceil() as i32));
     }
     Ok(LevelCmdV4::new(msg.device_index(), cmds).into())
   }

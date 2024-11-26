@@ -146,7 +146,7 @@ impl ProtocolHandler for VibCrafter {
 
   fn handle_scalar_cmd(
     &self,
-    commands: &[Option<(ActuatorType, u32)>],
+    commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let speed0 = commands[0].unwrap_or((ActuatorType::Vibrate, 0)).1;
     let speed1 = if commands.len() > 1 {

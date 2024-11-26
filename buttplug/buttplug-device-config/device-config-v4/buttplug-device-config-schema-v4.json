@@ -195,7 +195,7 @@
                 "type": "array",
                 "items": {
                   "type": "string",
-                  "pattern": "^(ScalarCmd|RotateCmd|LinearCmd)$"
+                  "pattern": "^(LevelCmd|LinearCmd)$"
                 }
               }
             },
@@ -260,7 +260,7 @@
                 "type": "array",
                 "items": {
                   "type": "string",
-                  "pattern": "^(ScalarCmd|RotateCmd|LinearCmd)$"
+                  "pattern": "^(LevelCmd|LinearCmd)$"
                 }
               }
             },

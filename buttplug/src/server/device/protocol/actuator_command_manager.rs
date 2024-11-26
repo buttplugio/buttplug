@@ -90,7 +90,7 @@ impl FeatureStatus {
 // horrible day some sex toy decides to use floats in its protocol), so we can just use atomics and
 // call it done.
 pub struct ActuatorCommandManager {
-  feature_status: Vec<FeatureStatus>,
+  feature_status: HashMap<usize, FeatureStatus>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
 
@@ -98,12 +98,12 @@ impl ActuatorCommandManager {
   pub fn new(features: &Vec<DeviceFeature>) -> Self {
     let mut stop_commands = vec![];
 
-    let mut statuses = vec![];
+    let mut statuses = HashMap::new();
     let mut level_subcommands = vec![];
     for (index, feature) in features.iter().enumerate() {
       if let Some(actuator) = feature.actuator() {
         let actuator_type: ActuatorType = (*feature.feature_type()).try_into().unwrap();
-        statuses.push(FeatureStatus::new(&actuator_type, actuator));
+        statuses.insert(index, FeatureStatus::new(&actuator_type, actuator));
         if actuator
           .messages()
           .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::LevelCmd)
@@ -146,11 +146,11 @@ impl ActuatorCommandManager {
       }
     }
 
-    for (index, cmd) in self.feature_status.iter().enumerate() {
-      let u32_index: u32 = index.try_into().unwrap();
+    for (index, cmd) in self.feature_status.iter() {
+      let u32_index = *index as u32;
       if let Some((_, actuator, cmd_value)) = commands.iter().find(|x| x.0 == u32_index) {
         // By this point, we should have already checked whether the feature takes the message type.
-        if let Some(updated_value) = self.feature_status[index].update(*cmd_value) {
+        if let Some(updated_value) = cmd.update(*cmd_value) {
           result.push((u32_index, *actuator, updated_value));
         } else if match_all {
           result.push((u32_index, *actuator, cmd.current().1));
@@ -180,12 +180,12 @@ impl ActuatorCommandManager {
     }
 
     let mut idxs = HashMap::new();
-    for (i, x) in self.feature_status.iter().enumerate() {
+    for (i, x) in self.feature_status.iter() {
       if x
         .messages()
         .contains(&ButtplugActuatorFeatureMessageType::LevelCmd)
       {
-        idxs.insert(i, idxs.len());
+        idxs.insert(*i as u32, idxs.len() as u32);
       }
     }
 
@@ -195,7 +195,7 @@ impl ActuatorCommandManager {
     msg
       .levels()
       .iter()
-      .for_each(|x| commands.push((x.feature_index(), *self.feature_status[x.feature_index() as usize].actuator_type(), x.level())));
+      .for_each(|x| commands.push((x.feature_index(), *self.feature_status.get(&(x.feature_index() as usize)).unwrap().actuator_type(), x.level())));
     let mut result = self.update(
       ButtplugActuatorFeatureMessageType::LevelCmd,
       &commands,
@@ -203,8 +203,9 @@ impl ActuatorCommandManager {
     )?;
     result.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
     result.iter().for_each(|(index, actuator, value)| {
-      final_result[idxs[&(*index as usize)]] = Some((*actuator, *value))
+      final_result[*idxs.get(index).unwrap() as usize] = Some((*actuator, *value))
     });
+
     Ok(final_result)
   }
 

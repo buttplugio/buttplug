@@ -143,7 +143,7 @@ impl ProtocolHandler for Galaku {
 
   fn handle_scalar_cmd(
     &self,
-    commands: &[Option<(ActuatorType, u32)>],
+    commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if commands.len() == 1 {
       if let Some(cmd) = commands[0] {
@@ -168,7 +168,7 @@ impl ProtocolHandler for Galaku {
           ];
           return Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()]);
         } else {
-          let data: Vec<u32> = vec![90, 0, 0, 1, 49, cmd.1, 0, 0, 0, 0];
+          let data: Vec<u32> = vec![90, 0, 0, 1, 49, cmd.1 as u32, 0, 0, 0, 0];
           return Ok(vec![HardwareWriteCmd::new(
             Endpoint::Tx,
             send_bytes(data),
@@ -181,7 +181,7 @@ impl ProtocolHandler for Galaku {
       let cmd0 = commands[0].unwrap_or((ActuatorType::Vibrate, 0));
       let cmd1 = commands[1].unwrap_or((ActuatorType::Vibrate, 0));
 
-      let data: Vec<u32> = vec![90, 0, 0, 1, 64, 3, cmd0.1, cmd1.1, 0, 0];
+      let data: Vec<u32> = vec![90, 0, 0, 1, 64, 3, cmd0.1 as u32, cmd1.1 as u32, 0, 0];
       return Ok(vec![HardwareWriteCmd::new(
         Endpoint::Tx,
         send_bytes(data),

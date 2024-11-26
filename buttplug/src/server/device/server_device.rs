@@ -467,10 +467,7 @@ impl ServerDevice {
         ))
         .boxed();
       }
-      let feature_type =
-        self.definition.features()[command.feature_index() as usize].feature_type();
     }
-
     let commands = match self
       .actuator_command_manager
       .update_level(msg, self.handler.needs_full_command_set())
@@ -483,7 +480,7 @@ impl ServerDevice {
       trace!("No commands generated for incoming device packet, skipping and returning success.");
       return future::ready(Ok(message::OkV0::default().into())).boxed();
     }
-    self.handle_generic_command_result(self.handler.handle_scalar_cmd(&commands.iter().map(|x| if let Some((y, z)) = x { Some((*y, *z as u32)) } else { None } ).collect::<Vec<Option<(ActuatorType, u32)>>>()))
+    self.handle_generic_command_result(self.handler.handle_scalar_cmd(&commands.iter().map(|x| if let Some((y, z)) = x { Some((*y, *z)) } else { None } ).collect::<Vec<Option<(ActuatorType, i32)>>>()))
   }
 
   fn handle_hardware_commands(&self, commands: Vec<HardwareCommand>) -> ButtplugServerResultFuture {

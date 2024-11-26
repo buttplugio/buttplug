@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::core::message::ActuatorType;
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
 use crate::{
   core::{
@@ -143,19 +144,24 @@ impl ProtocolHandler for VorzeSA {
     }])
   }
 
-  fn handle_rotate_cmd(
+  fn handle_scalar_cmd(
     &self,
-    cmds: &[Option<(u32, bool)>],
+    cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if cmds.len() == 1 {
-      if let Some((speed, clockwise)) = cmds[0] {
-        let data: u8 = (clockwise as u8) << 7 | (speed as u8);
-        Ok(vec![HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![self.device_type as u8, VorzeActions::Rotate as u8, data],
-          true,
-        )
-        .into()])
+      if let Some((actuator, speed)) = cmds[0] {
+        if actuator == ActuatorType::Vibrate {
+          self.handle_scalar_vibrate_cmd(0, speed as u32)
+        } else {
+          let clockwise = if speed >= 0 { 1u8 } else { 0 };
+          let data: u8 = (clockwise) << 7 | (speed.abs() as u8);
+          Ok(vec![HardwareWriteCmd::new(
+            Endpoint::Tx,
+            vec![self.device_type as u8, VorzeActions::Rotate as u8, data],
+            true,
+          )
+          .into()])
+        }
       } else {
         Ok(vec![])
       }
@@ -163,12 +169,14 @@ impl ProtocolHandler for VorzeSA {
       let mut data_left = 0u8;
       let mut data_right = 0u8;
       let mut changed = false;
-      if let Some((speed, clockwise)) = cmds[0] {
-        data_left = (clockwise as u8) << 7 | (speed as u8);
+      if let Some((_, speed)) = cmds[0] {
+        let clockwise = if speed >= 0 { 1u8 } else { 0 };
+        data_left = clockwise << 7 | (speed.abs() as u8);
         changed = true;
       }
-      if let Some((speed, clockwise)) = cmds[1] {
-        data_right = (clockwise as u8) << 7 | (speed as u8);
+      if let Some((_, speed)) = cmds[1] {
+        let clockwise = if speed >= 0 { 1u8 } else { 0 };
+        data_right = clockwise << 7 | (speed.abs() as u8);
         changed = true;
       }
       if changed {
