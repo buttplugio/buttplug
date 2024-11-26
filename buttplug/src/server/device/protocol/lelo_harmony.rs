@@ -99,7 +99,7 @@ pub struct LeloHarmony {}
 impl ProtocolHandler for LeloHarmony {
   fn handle_scalar_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, u32)>],
+    cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut cmd_vec: Vec<HardwareCommand> = vec![];
     for (i, cmd) in cmds.iter().enumerate() {

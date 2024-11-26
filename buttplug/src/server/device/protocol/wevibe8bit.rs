@@ -32,13 +32,13 @@ impl ProtocolHandler for WeVibe8Bit {
 
   fn handle_scalar_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, u32)>],
+    cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let r_speed_int = cmds[0].unwrap_or((ActuatorType::Vibrate, 0u32)).1 as u8;
+    let r_speed_int = cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;
     let r_speed_ext = cmds
       .last()
       .unwrap_or(&None)
-      .unwrap_or((ActuatorType::Vibrate, 0u32))
+      .unwrap_or((ActuatorType::Vibrate, 0))
       .1 as u8;
     let data = if r_speed_int == 0 && r_speed_ext == 0 {
       vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]

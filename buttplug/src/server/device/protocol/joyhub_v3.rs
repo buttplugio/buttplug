@@ -33,7 +33,7 @@ impl ProtocolHandler for JoyHubV3 {
 
   fn handle_scalar_cmd(
     &self,
-    commands: &[Option<(ActuatorType, u32)>],
+    commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let cmd1 = commands[0];
     Ok(vec![HardwareWriteCmd::new(

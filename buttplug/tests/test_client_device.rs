@@ -144,7 +144,7 @@ async fn test_client_device_connected_no_event_listener() {
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_client_device_invalid_command() {
-  tracing_subscriber::fmt::init();
+  //tracing_subscriber::fmt::init();
   let (client, _) = test_client_with_device().await;
 
   let mut event_stream = client.event_stream();

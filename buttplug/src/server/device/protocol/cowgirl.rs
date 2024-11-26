@@ -32,7 +32,7 @@ impl ProtocolHandler for Cowgirl {
 
   fn handle_scalar_cmd(
     &self,
-    commands: &[Option<(ActuatorType, u32)>],
+    commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut data: Vec<u8> = vec![0x00, 0x01];
     if commands.len() != 2 {

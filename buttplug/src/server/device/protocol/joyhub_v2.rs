@@ -40,8 +40,8 @@ async fn delayed_constrict_handler(device: Arc<Hardware>, scalar: u8) {
 }
 
 fn vibes_changed(
-  old_commands_lock: &RwLock<Vec<Option<(ActuatorType, u32)>>>,
-  new_commands: &[Option<(ActuatorType, u32)>],
+  old_commands_lock: &RwLock<Vec<Option<(ActuatorType, i32)>>>,
+  new_commands: &[Option<(ActuatorType, i32)>],
   exclude: Vec<usize>,
 ) -> bool {
   let old_commands = old_commands_lock.read().expect("locks should work");
@@ -65,8 +65,8 @@ fn vibes_changed(
 }
 
 fn scalar_changed(
-  old_commands_lock: &RwLock<Vec<Option<(ActuatorType, u32)>>>,
-  new_commands: &[Option<(ActuatorType, u32)>],
+  old_commands_lock: &RwLock<Vec<Option<(ActuatorType, i32)>>>,
+  new_commands: &[Option<(ActuatorType, i32)>],
   index: usize,
 ) -> bool {
   let old_commands = old_commands_lock.read().expect("locks should work");
@@ -102,7 +102,7 @@ impl ProtocolInitializer for JoyHubV2Initializer {
 
 pub struct JoyHubV2 {
   device: Arc<Hardware>,
-  last_cmds: RwLock<Vec<Option<(ActuatorType, u32)>>>,
+  last_cmds: RwLock<Vec<Option<(ActuatorType, i32)>>>,
 }
 
 impl JoyHubV2 {
@@ -123,7 +123,7 @@ impl ProtocolHandler for JoyHubV2 {
 
   fn handle_scalar_cmd(
     &self,
-    commands: &[Option<(ActuatorType, u32)>],
+    commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let cmd1 = commands[0];
     let mut cmd2 = if commands.len() > 1 {

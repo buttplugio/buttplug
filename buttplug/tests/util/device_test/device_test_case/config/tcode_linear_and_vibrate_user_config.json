@@ -1,6 +1,6 @@
 {
   "version": {
-    "major": 3,
+    "major": 4,
     "minor": 999
   },
   "user-configs": {
@@ -45,7 +45,7 @@
             "actuator": {
               "step-range": [0, 99],
               "step-limit": [0, 99],
-              "messages": ["ScalarCmd"]
+              "messages": ["LevelCmd"]
             }
           }
           ],
