@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::core::message::ActuatorType;
 use crate::util::async_manager;
 use crate::{
   core::{errors::ButtplugDeviceError, message, message::Endpoint},
@@ -129,7 +130,7 @@ impl LongLostTouch {
 impl ProtocolHandler for LongLostTouch {
   fn handle_scalar_cmd(
     &self,
-    commands: &[Option<(message::ActuatorType, u32)>],
+    commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if commands.len() != 2 {
       return Err(ButtplugDeviceError::DeviceFeatureCountMismatch(

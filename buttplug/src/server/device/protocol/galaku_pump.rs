@@ -40,7 +40,7 @@ impl ProtocolHandler for GalakuPump {
 
   fn handle_scalar_cmd(
     &self,
-    commands: &[Option<(ActuatorType, u32)>],
+    commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if commands.len() != 2 {
       return Err(ProtocolSpecificError(

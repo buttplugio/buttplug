@@ -39,7 +39,7 @@ impl ProtocolInitializer for SvakomV5Initializer {
 }
 
 pub struct SvakomV5 {
-  last_cmds: RwLock<Vec<(ActuatorType, u32)>>,
+  last_cmds: RwLock<Vec<(ActuatorType, i32)>>,
 }
 
 impl SvakomV5 {
@@ -60,7 +60,7 @@ impl ProtocolHandler for SvakomV5 {
 
   fn handle_scalar_cmd(
     &self,
-    commands: &[Option<(ActuatorType, u32)>],
+    commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let last_commands = self.last_cmds.read().expect("Locks should work").clone();
     let mut hcmds = Vec::new();
@@ -69,12 +69,12 @@ impl ProtocolHandler for SvakomV5 {
       .iter()
       .filter(|c| c.is_some_and(|c| c.0 == Vibrate))
       .map(|c| c.unwrap_or((Vibrate, 0)))
-      .collect::<Vec<(ActuatorType, u32)>>();
+      .collect::<Vec<(ActuatorType, i32)>>();
     let last_vibes = last_commands
       .iter()
       .filter(|c| c.0 == Vibrate)
       .map(|c| (c.0, c.1))
-      .collect::<Vec<(ActuatorType, u32)>>();
+      .collect::<Vec<(ActuatorType, i32)>>();
 
     if !vibes.is_empty() {
       let mut changed = last_vibes.len() != vibes.len();
@@ -123,12 +123,12 @@ impl ProtocolHandler for SvakomV5 {
       .iter()
       .filter(|c| c.is_some_and(|c| c.0 == Oscillate))
       .map(|c| c.unwrap_or((Oscillate, 0)))
-      .collect::<Vec<(ActuatorType, u32)>>();
+      .collect::<Vec<(ActuatorType, i32)>>();
     let last_oscs = last_commands
       .iter()
       .filter(|c| c.0 == Oscillate)
       .map(|c| (c.0, c.1))
-      .collect::<Vec<(ActuatorType, u32)>>();
+      .collect::<Vec<(ActuatorType, i32)>>();
     if !oscs.is_empty() {
       let mut changed = oscs.len() != last_oscs.len();
       if !changed && oscs[0].1 != last_oscs[0].1 {
@@ -151,7 +151,7 @@ impl ProtocolHandler for SvakomV5 {
     *command_writer = commands
       .iter()
       .filter_map(|c| *c)
-      .collect::<Vec<(ActuatorType, u32)>>();
+      .collect::<Vec<(ActuatorType, i32)>>();
     Ok(hcmds)
   }
 }

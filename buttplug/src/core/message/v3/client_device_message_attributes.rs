@@ -160,12 +160,13 @@ impl From<ClientDeviceMessageAttributesV3> for ClientDeviceMessageAttributesV2 {
 
 impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
   fn from(features: Vec<DeviceFeature>) -> Self {
-    let actuator_filter = |message_type| {
+    let actuator_filter = |message_type: &ButtplugActuatorFeatureMessageType| {
       let attrs: Vec<ClientGenericDeviceMessageAttributesV3> = features
         .iter()
         .filter(|x| {
           if let Some(actuator) = x.actuator() {
-            actuator.messages().contains(message_type)
+            // Carve out RotateCmd here
+            !(*message_type == ButtplugActuatorFeatureMessageType::LevelCmd && *x.feature_type() == FeatureType::RotateWithDirection) && actuator.messages().contains(message_type)
           } else {
             false
           }

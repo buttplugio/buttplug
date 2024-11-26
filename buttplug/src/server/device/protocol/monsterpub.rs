@@ -147,7 +147,7 @@ impl ProtocolHandler for MonsterPub {
 
   fn handle_scalar_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, u32)>],
+    cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut data = vec![];
     let mut stop = true;

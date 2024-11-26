@@ -31,7 +31,7 @@ impl ProtocolHandler for MetaXSire {
 
   fn handle_scalar_cmd(
     &self,
-    commands: &[Option<(ActuatorType, u32)>],
+    commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut data: Vec<u8> = vec![0x23, 0x07];
     data.push((commands.len() * 3) as u8);

@@ -16,7 +16,7 @@ device_commands:
       commands: 
         - !Write
             endpoint: tx
-            data: [0x05, 0xB2, 0x00]
+            data: [0x05, 0xB2, 0x80]
             write_with_response: true
   - !Messages
       device_index: 0
@@ -30,7 +30,7 @@ device_commands:
       commands:
         - !Write
             endpoint: tx
-            data: [0x05, 0x63, 0x00]
+            data: [0x05, 0x63, 0x80]
             write_with_response: true
   - !Messages
       device_index: 0
@@ -72,5 +72,5 @@ device_commands:
       commands:
         - !Write
             endpoint: tx
-            data: [0x05, 0x00, 0x00]
+            data: [0x05, 0x80, 0x80]
             write_with_response: true

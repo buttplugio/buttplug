@@ -12,7 +12,7 @@ use crate::{
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-    hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
+    hardware::{self, Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
   util::{async_manager, sleep},
@@ -233,7 +233,7 @@ impl ProtocolHandler for Lovense {
 
   fn handle_scalar_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, u32)>],
+    cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if self.use_lvs {
       let mut speeds = vec![0x4cu8, 0x56, 0x53, 0x3a];
@@ -285,7 +285,7 @@ impl ProtocolHandler for Lovense {
 
     // Handle vibration commands, these will be by far the most common. Fucking machine oscillation
     // uses lovense vibrate commands internally too, so we can include them here.
-    let vibrate_cmds: Vec<&(ActuatorType, u32)> = cmds
+    let vibrate_cmds: Vec<&(ActuatorType, i32)> = cmds
       .iter()
       .filter(|x| {
         if let Some(val) = x {
@@ -336,7 +336,7 @@ impl ProtocolHandler for Lovense {
     }
 
     // Handle constriction commands.
-    let constrict_cmds: Vec<&(ActuatorType, u32)> = cmds
+    let constrict_cmds: Vec<&(ActuatorType, i32)> = cmds
       .iter()
       .filter(|x| {
         if let Some(val) = x {
@@ -356,6 +356,23 @@ impl ProtocolHandler for Lovense {
       hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
     }
 
+    let rotate_cmds: Vec<Option<(u32, bool)>> = cmds
+    .iter()
+    .filter(|x| {
+      if let Some(val) = x {
+        val.0 == ActuatorType::RotateWithDirection
+      } else {
+        false
+      }
+    })
+    .map(|x| {
+      let (_, speed) = x.as_ref().expect("Already verified is some");
+      Some((speed.abs() as u32, *speed >= 0))
+    })
+    .collect();
+
+    hardware_cmds.append(&mut self.handle_rotate_cmd(&rotate_cmds).unwrap());
+
     Ok(hardware_cmds)
   }
 
@@ -363,6 +380,7 @@ impl ProtocolHandler for Lovense {
     &self,
     cmds: &[Option<(u32, bool)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    debug!("GOT ROTATION COMMAND?!");
     let direction = self.rotation_direction.clone();
     let mut hardware_cmds = vec![];
     if let Some(Some((speed, clockwise))) = cmds.first() {
@@ -376,6 +394,7 @@ impl ProtocolHandler for Lovense {
           .push(HardwareWriteCmd::new(Endpoint::Tx, b"RotateChange;".to_vec(), false).into());
       }
     }
+    debug!("{:?}", hardware_cmds);
     Ok(hardware_cmds)
   }
 

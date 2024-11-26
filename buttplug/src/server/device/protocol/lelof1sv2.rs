@@ -123,7 +123,7 @@ impl ProtocolHandler for LeloF1sV2 {
 
   fn handle_scalar_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, u32)>],
+    cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if self.use_harmony {
       let mut cmd_vec: Vec<HardwareCommand> = vec![];
