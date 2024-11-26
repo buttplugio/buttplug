@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Buttplug Device Config Schema",
-  "version": 2,
+  "version": 4,
   "description": "JSON format for Buttplug Device Config Files.",
   "components": {
     "uuid": {
@@ -54,7 +54,6 @@
         "advertised-services": {
           "type": "array",
           "items": {
-            "type": "string",
             "$ref": "#/components/uuid"
           }
         },
@@ -181,9 +180,12 @@
           "description": {
             "type": "string"
           },
+          "id": {
+            "$ref": "#/components/uuid"
+          },
           "feature-type": {
             "type": "string",
-            "pattern": "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|Battery|RSSI|Pressure)$"
+            "pattern": "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|Battery|RSSI|Pressure|RotateWithDirection)$"
           },
           "actuator": {
             "type": "object",
@@ -229,7 +231,8 @@
           }
         },
         "required": [
-          "feature-type"
+          "feature-type",
+          "id"
         ],
         "additionalProperties": false
       }
@@ -242,6 +245,12 @@
         "properties": {
           "description": {
             "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/uuid"
+          },
+          "base-id": {
+            "$ref": "#/components/uuid"
           },
           "feature-type": {
             "type": "string",
@@ -295,7 +304,9 @@
           }
         },
         "required": [
-          "feature-type"
+          "feature-type",
+          "id",
+          "base-id"
         ],
         "additionalProperties": false
       }
@@ -329,6 +340,12 @@
         "name": {
           "type": "string"
         },
+        "id": {
+          "$ref": "#/components/uuid"
+        },
+        "base-id": {
+          "$ref": "#/components/uuid"
+        },
         "features": {
           "$ref": "#/components/user-config-features"
         },
@@ -336,6 +353,12 @@
           "$ref": "#/components/user-config-customization"
         }
       },
+      "required": [
+        "id",
+        "base-id",
+        "features",
+        "user-config"
+      ],
       "additionalProperties": false
     },
     "defaults-definition": {
@@ -344,13 +367,17 @@
         "name": {
           "type": "string"
         },
+        "id": {
+          "$ref": "#/components/uuid"
+        },
         "features": {
           "$ref": "#/components/features"
         }
       },
       "required": [
         "name",
-        "features"
+        "features",
+        "id"
       ]
     },
     "configurations-definition": {
@@ -368,13 +395,17 @@
           "name": {
             "type": "string"
           },
+          "id": {
+            "$ref": "#/components/uuid"
+          },
           "features": {
             "$ref": "#/components/features"
           }
         },
         "required": [
           "name",
-          "identifier"
+          "identifier",
+          "id"
         ],
         "additionalProperties": false
       },
@@ -433,16 +464,11 @@
               },
               "maxProperties": 1
             },
-            "devices": {
-              "type": "object",
-              "properties": {
-                "defaults": {
-                  "$ref": "#/components/defaults-definition"
-                },
-                "configurations": {
-                  "$ref": "#/components/configurations-definition"
-                }
-              }
+            "defaults": {
+              "$ref": "#/components/defaults-definition"
+            },
+            "configurations": {
+              "$ref": "#/components/configurations-definition"
             }
           }
         }
