@@ -315,7 +315,7 @@ impl DeviceFeatureRaw {
 }
 
 /// TryFrom for Buttplug Device Messages that need to use a device feature definition to convert
-pub trait TryFromDeviceAttributes<T> where Self: Sized {
+pub(crate) trait TryFromDeviceAttributes<T> where Self: Sized {
   fn try_from_device_attributes(msg: T, features: &LegacyDeviceAttributes) -> Result<Self, ButtplugError>;
 }
 
@@ -458,8 +458,9 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV1 {
 
 #[derive(Debug, Getters, Clone)]
 pub(crate) struct LegacyDeviceAttributes {
-  #[getset(get = "pub")]
+  /*  #[getset(get = "pub")]
   attrs_v1: ClientDeviceMessageAttributesV1,
+  */
   #[getset(get = "pub")]
   attrs_v2: ClientDeviceMessageAttributesV2,
   #[getset(get = "pub")]
@@ -473,23 +474,10 @@ impl LegacyDeviceAttributes {
     Self {
       attrs_v3: ClientDeviceMessageAttributesV3::from(features.clone()),
       attrs_v2: ClientDeviceMessageAttributesV2::from(features.clone()),
+      /*
       attrs_v1: ClientDeviceMessageAttributesV1::from(features.clone()),
+      */
       features: features.clone()
     }
-  }
-}
-
-
-pub fn find_device_features<P>(features: &[DeviceFeature], criteria: P) -> Result<Vec<DeviceFeature>, ButtplugError> where P: FnMut(&&DeviceFeature) -> bool {
-  let filtered_features: Vec<DeviceFeature> = features.iter().filter(criteria).map(|f| f.clone()).collect();
-  if filtered_features.is_empty() {
-    Err(
-      ButtplugDeviceError::ProtocolRequirementError(format!(
-        "Feature filtering returned 0 features.",
-      ))
-      .into(),
-    )
-  } else {
-    Ok(filtered_features)
   }
 }
