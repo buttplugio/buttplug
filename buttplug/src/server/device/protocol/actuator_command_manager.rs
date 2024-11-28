@@ -137,7 +137,7 @@ impl ActuatorCommandManager {
     // should always send whatever command we're going to send.
     let mut result = vec![];
 
-    for (cmd) in self.feature_status.iter() {
+    for cmd in self.feature_status.iter() {
       if let Some((_, actuator, cmd_value)) = commands.iter().find(|x| x.0 == *cmd.feature_id()) {
         // By this point, we should have already checked whether the feature takes the message type.
         if let Some(updated_value) = cmd.update(*cmd_value) {
