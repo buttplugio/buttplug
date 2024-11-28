@@ -357,19 +357,19 @@ impl ProtocolHandler for Lovense {
     }
 
     let rotate_cmds: Vec<Option<(u32, bool)>> = cmds
-    .iter()
-    .filter(|x| {
-      if let Some(val) = x {
-        val.0 == ActuatorType::RotateWithDirection
-      } else {
-        false
-      }
-    })
-    .map(|x| {
-      let (_, speed) = x.as_ref().expect("Already verified is some");
-      Some((speed.abs() as u32, *speed >= 0))
-    })
-    .collect();
+      .iter()
+      .filter(|x| {
+        if let Some(val) = x {
+          val.0 == ActuatorType::RotateWithDirection
+        } else {
+          false
+        }
+      })
+      .map(|x| {
+        let (_, speed) = x.as_ref().expect("Already verified is some");
+        Some((speed.abs() as u32, *speed >= 0))
+      })
+      .collect();
 
     hardware_cmds.append(&mut self.handle_rotate_cmd(&rotate_cmds).unwrap());
 

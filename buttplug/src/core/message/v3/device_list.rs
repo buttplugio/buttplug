@@ -9,7 +9,9 @@ use crate::core::message::{
   ButtplugMessage,
   ButtplugMessageError,
   ButtplugMessageFinalizer,
-  ButtplugMessageValidator, DeviceListV2, DeviceMessageInfoV2,
+  ButtplugMessageValidator,
+  DeviceListV2,
+  DeviceMessageInfoV2,
 };
 use getset::Getters;
 #[cfg(feature = "serialize-json")]
@@ -60,4 +62,3 @@ impl From<DeviceListV3> for DeviceListV2 {
     }
   }
 }
-

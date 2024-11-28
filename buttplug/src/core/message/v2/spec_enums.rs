@@ -5,9 +5,31 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::{errors::ButtplugError, message::{
-  ButtplugClientMessageV1, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, ButtplugServerMessageV1, DeviceRemovedV0, ErrorV0, LinearCmdV1, OkV0, PingV0, RequestDeviceListV0, RequestServerInfoV1, RotateCmdV1, ScanningFinishedV0, StartScanningV0, StopAllDevicesV0, StopDeviceCmdV0, StopScanningV0, VibrateCmdV1
-}};
+use crate::core::{
+  errors::ButtplugError,
+  message::{
+    ButtplugClientMessageV1,
+    ButtplugMessage,
+    ButtplugMessageError,
+    ButtplugMessageFinalizer,
+    ButtplugMessageValidator,
+    ButtplugServerMessageV1,
+    DeviceRemovedV0,
+    ErrorV0,
+    LinearCmdV1,
+    OkV0,
+    PingV0,
+    RequestDeviceListV0,
+    RequestServerInfoV1,
+    RotateCmdV1,
+    ScanningFinishedV0,
+    StartScanningV0,
+    StopAllDevicesV0,
+    StopDeviceCmdV0,
+    StopScanningV0,
+    VibrateCmdV1,
+  },
+};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
@@ -152,7 +174,6 @@ pub enum ButtplugServerMessageV2 {
   BatteryLevelReading(BatteryLevelReadingV2),
   RSSILevelReading(RSSILevelReadingV2),
 }
-
 
 impl From<ButtplugServerMessageV2> for ButtplugServerMessageV1 {
   fn from(value: ButtplugServerMessageV2) -> Self {

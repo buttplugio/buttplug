@@ -827,13 +827,21 @@ pub trait ProtocolHandler: Sync + Send {
       let (actuator, scalar) = command.as_ref().expect("Already verified existence");
       command_vec.append(
         &mut (match *actuator {
-          ActuatorType::Constrict => self.handle_scalar_constrict_cmd(index as u32, *scalar as u32)?,
+          ActuatorType::Constrict => {
+            self.handle_scalar_constrict_cmd(index as u32, *scalar as u32)?
+          }
           ActuatorType::Inflate => self.handle_scalar_inflate_cmd(index as u32, *scalar as u32)?,
-          ActuatorType::Oscillate => self.handle_scalar_oscillate_cmd(index as u32, *scalar as u32)?,
+          ActuatorType::Oscillate => {
+            self.handle_scalar_oscillate_cmd(index as u32, *scalar as u32)?
+          }
           ActuatorType::Rotate => self.handle_scalar_rotate_cmd(index as u32, *scalar as u32)?,
-          ActuatorType::RotateWithDirection => self.handle_rotate_cmd(&vec!(Some((scalar.abs() as u32, *scalar >= 0))))?,
+          ActuatorType::RotateWithDirection => {
+            self.handle_rotate_cmd(&vec![Some((scalar.abs() as u32, *scalar >= 0))])?
+          }
           ActuatorType::Vibrate => self.handle_scalar_vibrate_cmd(index as u32, *scalar as u32)?,
-          ActuatorType::Position => self.handle_scalar_position_cmd(index as u32, *scalar as u32)?,
+          ActuatorType::Position => {
+            self.handle_scalar_position_cmd(index as u32, *scalar as u32)?
+          }
           ActuatorType::Unknown => Err(ButtplugDeviceError::UnhandledCommand(
             "Unknown actuator types are not controllable.".to_owned(),
           ))?,

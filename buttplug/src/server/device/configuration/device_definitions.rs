@@ -8,7 +8,8 @@ use crate::core::message::{
   ButtplugRawFeatureMessageType,
   ButtplugSensorFeatureMessageType,
   DeviceFeature,
-  Endpoint, FeatureType,
+  Endpoint,
+  FeatureType,
 };
 
 #[derive(Debug, Clone, Getters)]
@@ -27,7 +28,7 @@ impl BaseDeviceDefinition {
     Self {
       name: name.to_owned(),
       features: features.into(),
-      id: id.clone()
+      id: id.clone(),
     }
   }
 }
@@ -121,9 +122,12 @@ impl UserDeviceDefinition {
           if actuator.messages().contains(&actuator_msg_type) {
             return true;
           }
-          if *msg_type == ButtplugDeviceMessageType::RotateCmd && 
-          actuator.messages().contains(&ButtplugActuatorFeatureMessageType::LevelCmd) &&
-          *feature.feature_type() == FeatureType::RotateWithDirection {
+          if *msg_type == ButtplugDeviceMessageType::RotateCmd
+            && actuator
+              .messages()
+              .contains(&ButtplugActuatorFeatureMessageType::LevelCmd)
+            && *feature.feature_type() == FeatureType::RotateWithDirection
+          {
             return true;
           }
         }
