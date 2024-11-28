@@ -10,15 +10,7 @@ use crate::{
   core::{
     errors::*,
     message::{
-      self,
-      ButtplugClientMessageV4,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceManagerMessageUnion,
-      ButtplugMessage,
-      ButtplugServerMessageV4,
-      StopAllDevicesV0,
-      StopScanningV0,
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      self, ButtplugClientMessageV4, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugServerMessageV4, StopAllDevicesV0, StopScanningV0, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
     },
   },
   util::stream::convert_broadcast_receiver_to_stream,
@@ -63,6 +55,8 @@ pub struct ButtplugServer {
   output_sender: broadcast::Sender<ButtplugServerMessageV4>,
   /// Name of the connected client, assuming there is one.
   client_name: Arc<RwLock<Option<String>>>,
+  /// Allow v4 message spec connections (currently in beta, message spec may change/break)
+  allow_v4_connections: bool
 }
 
 impl std::fmt::Debug for ButtplugServer {
@@ -83,6 +77,7 @@ impl ButtplugServer {
     device_manager: Arc<ServerDeviceManager>,
     connected: Arc<AtomicBool>,
     output_sender: broadcast::Sender<ButtplugServerMessageV4>,
+    allow_v4_connections: bool
   ) -> Self {
     ButtplugServer {
       server_name: server_name.to_owned(),
@@ -92,6 +87,7 @@ impl ButtplugServer {
       connected,
       output_sender,
       client_name: Arc::new(RwLock::new(None)),
+      allow_v4_connections
     }
   }
 
@@ -243,13 +239,22 @@ impl ButtplugServer {
       msg.message_version()
     );
 
-    if BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION < msg.message_version() {
+    // Only approve v4 connections if the server was created allowing v4 messages.
+    if msg.message_version() == ButtplugMessageSpecVersion::Version4 {
+      if !self.allow_v4_connections {
+        return ButtplugHandshakeError::UnhandledMessageSpecVersionRequested(
+          msg.message_version(),
+        )
+        .into();
+      }
+    } else if BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION < msg.message_version() {
       return ButtplugHandshakeError::MessageSpecVersionMismatch(
         BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
         msg.message_version(),
       )
       .into();
     }
+
     // Only start the ping timer after we've received the handshake.
     let ping_timer = self.ping_timer.clone();
     let out_msg =
@@ -311,5 +316,23 @@ mod test {
       "Should get back ok on handshake after disconnect: {:?}",
       reply
     );
+  }
+
+  #[tokio::test]
+  async fn test_server_v4_accept() {
+    let server = ButtplugServerBuilder::default().allow_v4_connections().finish().unwrap();
+    let msg =
+      message::RequestServerInfoV1::new("Test Client", message::ButtplugMessageSpecVersion::Version4);
+    let reply = server.parse_message(msg.clone().into()).await;
+    assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
+  }
+
+  #[tokio::test]
+  async fn test_server_v4_deny() {
+    let server = ButtplugServerBuilder::default().finish().unwrap();
+    let msg =
+      message::RequestServerInfoV1::new("Test Client", message::ButtplugMessageSpecVersion::Version4);
+    let reply = server.parse_message(msg.clone().into()).await;
+    assert!(reply.is_err(), "Should get back err: {:?}", reply);
   }
 }

@@ -53,6 +53,8 @@ pub enum ButtplugHandshakeError {
   MessageSpecVersionMismatch(ButtplugMessageSpecVersion, ButtplugMessageSpecVersion),
   /// Untyped Deserialized Error: {0}
   UntypedDeserializedError(String),
+  /// Unhandled spec version requested, may require extra arguments to activate: {0}
+  UnhandledMessageSpecVersionRequested(ButtplugMessageSpecVersion)
 }
 
 /// Message errors occur when a message is somehow malformed on creation, or
