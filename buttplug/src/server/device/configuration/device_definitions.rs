@@ -1,5 +1,6 @@
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::core::message::{
   ButtplugActuatorFeatureMessageType,
@@ -17,14 +18,16 @@ pub struct BaseDeviceDefinition {
   name: String,
   /// Message attributes for this device instance.
   features: Vec<DeviceFeature>,
+  id: Uuid,
 }
 
 impl BaseDeviceDefinition {
   /// Create a new instance
-  pub fn new(name: &str, features: &[DeviceFeature]) -> Self {
+  pub fn new(name: &str, id: &Uuid, features: &[DeviceFeature]) -> Self {
     Self {
       name: name.to_owned(),
       features: features.into(),
+      id: id.clone()
     }
   }
 }
@@ -62,6 +65,8 @@ impl UserDeviceCustomization {
 pub struct UserDeviceDefinition {
   /// Given name of the device this instance represents.
   name: String,
+  id: Uuid,
+  base_id: Option<Uuid>,
   /// Message attributes for this device instance.
   features: Vec<DeviceFeature>,
   /// Per-user configurations specific to this device instance.
@@ -73,11 +78,15 @@ impl UserDeviceDefinition {
   /// Create a new instance
   pub fn new(
     name: &str,
+    id: &Uuid,
+    base_id: &Option<Uuid>,
     features: &[DeviceFeature],
     user_config: &UserDeviceCustomization,
   ) -> Self {
     Self {
       name: name.to_owned(),
+      id: id.to_owned(),
+      base_id: base_id.to_owned(),
       features: features.into(),
       user_config: user_config.clone(),
     }
@@ -86,6 +95,8 @@ impl UserDeviceDefinition {
   pub fn new_from_base_definition(def: &BaseDeviceDefinition, index: u32) -> Self {
     Self {
       name: def.name().clone(),
+      id: Uuid::new_v4(),
+      base_id: Some(def.id().clone()),
       features: def.features().clone(),
       user_config: UserDeviceCustomization {
         index,

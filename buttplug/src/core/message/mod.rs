@@ -664,6 +664,6 @@ impl TryFrom<FeatureType> for SensorType {
   }
 }
 
-pub trait TryFromClientMessage<T> where Self: Sized {
-  fn try_from_client_message(msg: T, features: &Option<Vec<DeviceFeature>>) -> Result<Self, ButtplugError>;
+pub(crate) trait TryFromClientMessage<T> where Self: Sized {
+  fn try_from_client_message(msg: T, features: &Option<LegacyDeviceAttributes>) -> Result<Self, ButtplugError>;
 }

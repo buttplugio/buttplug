@@ -131,7 +131,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_omobo_protocol.yaml" ; "Omobo Protocol")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v3(test_file: &str) {
-  tracing_subscriber::fmt::init();
+  // tracing_subscriber::fmt::init();
   util::device_test::client::client_v3::run_embedded_test_case(&load_test_case(test_file).await)
     .await;
 }

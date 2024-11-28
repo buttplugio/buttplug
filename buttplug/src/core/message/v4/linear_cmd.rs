@@ -6,11 +6,12 @@
 // for full license information.
 
 use crate::core::message::{
-  self, find_device_feature_indexes, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, LinearCmdV1, TryFromDeviceFeatures
+  ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, LegacyDeviceAttributes, LinearCmdV1, TryFromDeviceAttributes
 };
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 /// Move device to a certain position in a certain amount of time
 #[derive(Debug, PartialEq, Clone, CopyGetters)]
@@ -23,14 +24,17 @@ pub struct VectorSubcommandV4 {
   duration: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Position"))]
   position: f64,
+  #[cfg_attr(feature = "serialize-json", serde(skip))]
+  id: Option<Uuid>
 }
 
 impl VectorSubcommandV4 {
-  pub fn new(feature_index: u32, duration: u32, position: f64) -> Self {
+  pub fn new(feature_index: u32, duration: u32, position: f64, id: &Option<Uuid>) -> Self {
     Self {
       feature_index,
       duration,
       position,
+      id: id.clone(),
     }
   }
 }
@@ -64,24 +68,17 @@ impl ButtplugMessageValidator for LinearCmdV4 {
   }
 }
 
-impl TryFromDeviceFeatures<LinearCmdV1> for LinearCmdV4 {
-  fn try_from_device_features(msg: LinearCmdV1, features: &[crate::core::message::DeviceFeature]) -> Result<Self, crate::core::errors::ButtplugError> {
-    let linear_features: Vec<usize> =
-      find_device_feature_indexes(features, |(_, x)| {
-        x.actuator().as_ref().is_some_and(|y| {
-          y.messages()
-            .contains(&message::ButtplugActuatorFeatureMessageType::LinearCmd)
-        })
-      })?;
-
+impl TryFromDeviceAttributes<LinearCmdV1> for LinearCmdV4 {
+  fn try_from_device_attributes(msg: LinearCmdV1, features: &LegacyDeviceAttributes) -> Result<Self, crate::core::errors::ButtplugError> {
     let cmds: Vec<VectorSubcommandV4> = msg
       .vectors()
       .iter()
       .map(|x| {
         VectorSubcommandV4::new(
-          linear_features[x.index() as usize] as u32,
+          0,
           x.duration(),
           x.position(),
+          &Some(features.attrs_v3().linear_cmd().as_ref().unwrap()[x.index() as usize].feature().id().clone())
         )
       })
       .collect();
