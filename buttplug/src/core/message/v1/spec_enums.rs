@@ -5,9 +5,35 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::{errors::ButtplugError, message::{
-  ButtplugClientMessageV0, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, ButtplugServerMessageV0, DeviceRemovedV0, ErrorV0, FleshlightLaunchFW12CmdV0, KiirooCmdV0, LogV0, LovenseCmdV0, OkV0, PingV0, RequestDeviceListV0, RequestLogV0, ScanningFinishedV0, ServerInfoV0, SingleMotorVibrateCmdV0, StartScanningV0, StopAllDevicesV0, StopDeviceCmdV0, StopScanningV0, VorzeA10CycloneCmdV0
-}};
+use crate::core::{
+  errors::ButtplugError,
+  message::{
+    ButtplugClientMessageV0,
+    ButtplugMessage,
+    ButtplugMessageError,
+    ButtplugMessageFinalizer,
+    ButtplugMessageValidator,
+    ButtplugServerMessageV0,
+    DeviceRemovedV0,
+    ErrorV0,
+    FleshlightLaunchFW12CmdV0,
+    KiirooCmdV0,
+    LogV0,
+    LovenseCmdV0,
+    OkV0,
+    PingV0,
+    RequestDeviceListV0,
+    RequestLogV0,
+    ScanningFinishedV0,
+    ServerInfoV0,
+    SingleMotorVibrateCmdV0,
+    StartScanningV0,
+    StopAllDevicesV0,
+    StopDeviceCmdV0,
+    StopScanningV0,
+    VorzeA10CycloneCmdV0,
+  },
+};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 

@@ -310,71 +310,61 @@ impl ButtplugClientMessageVariant {
     // TODO there has to be a better way to do this. We just need to dig through our enum and see if
     // our message impls ButtplugDeviceMessage. Manually doing this works but is so gross.
     match self {
-      Self::V0(msg) => {
-        match msg {
-          ButtplugClientMessageV0::FleshlightLaunchFW12Cmd(a) => Some(a.device_index()), 
-          ButtplugClientMessageV0::KiirooCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV0::LovenseCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV0::SingleMotorVibrateCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV0::VorzeA10CycloneCmd(a) => Some(a.device_index()),
-          _ => None
-        }
-      }
-      Self::V1(msg) => {
-        match msg {
-          ButtplugClientMessageV1::FleshlightLaunchFW12Cmd(a) => Some(a.device_index()), 
-          ButtplugClientMessageV1::KiirooCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV1::LovenseCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV1::SingleMotorVibrateCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV1::VorzeA10CycloneCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV1::VibrateCmd(a) => Some(a.device_index()),
-          _ => None
-        }
-      }
-      Self::V2(msg) => {
-        match msg {
-          ButtplugClientMessageV2::VibrateCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV2::RSSILevelCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV2::RotateCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV2::LinearCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV2::BatteryLevelCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV2::RawReadCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV2::RawWriteCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV2::RawSubscribeCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV2::RawUnsubscribeCmd(a) => Some(a.device_index()),
-          _ => None
-        }
-      }
-      Self::V3(msg) => {
-        match msg {
-          ButtplugClientMessageV3::VibrateCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV3::SensorSubscribeCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV3::SensorUnsubscribeCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV3::ScalarCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV3::RotateCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV3::LinearCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV3::SensorReadCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV3::RawReadCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV3::RawWriteCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV3::RawSubscribeCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV3::RawUnsubscribeCmd(a) => Some(a.device_index()),
-          _ => None
-        }
-      }
-      Self::V4(msg) => {
-        match msg {
-          ButtplugClientMessageV4::SensorSubscribeCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV4::SensorUnsubscribeCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV4::LevelCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV4::LinearCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV4::SensorReadCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV4::RawReadCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV4::RawWriteCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV4::RawSubscribeCmd(a) => Some(a.device_index()),
-          ButtplugClientMessageV4::RawUnsubscribeCmd(a) => Some(a.device_index()),
-          _ => None
-        }
-      }
+      Self::V0(msg) => match msg {
+        ButtplugClientMessageV0::FleshlightLaunchFW12Cmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV0::KiirooCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV0::LovenseCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV0::SingleMotorVibrateCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV0::VorzeA10CycloneCmd(a) => Some(a.device_index()),
+        _ => None,
+      },
+      Self::V1(msg) => match msg {
+        ButtplugClientMessageV1::FleshlightLaunchFW12Cmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV1::KiirooCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV1::LovenseCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV1::SingleMotorVibrateCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV1::VorzeA10CycloneCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV1::VibrateCmd(a) => Some(a.device_index()),
+        _ => None,
+      },
+      Self::V2(msg) => match msg {
+        ButtplugClientMessageV2::VibrateCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV2::RSSILevelCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV2::RotateCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV2::LinearCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV2::BatteryLevelCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV2::RawReadCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV2::RawWriteCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV2::RawSubscribeCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV2::RawUnsubscribeCmd(a) => Some(a.device_index()),
+        _ => None,
+      },
+      Self::V3(msg) => match msg {
+        ButtplugClientMessageV3::VibrateCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV3::SensorSubscribeCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV3::SensorUnsubscribeCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV3::ScalarCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV3::RotateCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV3::LinearCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV3::SensorReadCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV3::RawReadCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV3::RawWriteCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV3::RawSubscribeCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV3::RawUnsubscribeCmd(a) => Some(a.device_index()),
+        _ => None,
+      },
+      Self::V4(msg) => match msg {
+        ButtplugClientMessageV4::SensorSubscribeCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV4::SensorUnsubscribeCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV4::LevelCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV4::LinearCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV4::SensorReadCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV4::RawReadCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV4::RawWriteCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV4::RawSubscribeCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV4::RawUnsubscribeCmd(a) => Some(a.device_index()),
+        _ => None,
+      },
     }
   }
 }
@@ -664,6 +654,12 @@ impl TryFrom<FeatureType> for SensorType {
   }
 }
 
-pub(crate) trait TryFromClientMessage<T> where Self: Sized {
-  fn try_from_client_message(msg: T, features: &Option<LegacyDeviceAttributes>) -> Result<Self, ButtplugError>;
+pub(crate) trait TryFromClientMessage<T>
+where
+  Self: Sized,
+{
+  fn try_from_client_message(
+    msg: T,
+    features: &Option<LegacyDeviceAttributes>,
+  ) -> Result<Self, ButtplugError>;
 }

@@ -7,7 +7,13 @@
 
 use super::device_message_info::DeviceMessageInfoV1;
 use crate::core::message::{
-  v2::DeviceListV2, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, DeviceListV0, DeviceMessageInfoV0
+  v2::DeviceListV2,
+  ButtplugMessage,
+  ButtplugMessageError,
+  ButtplugMessageFinalizer,
+  ButtplugMessageValidator,
+  DeviceListV0,
+  DeviceMessageInfoV0,
 };
 use getset::Getters;
 #[cfg(feature = "serialize-json")]

@@ -10,7 +10,9 @@ use crate::core::message::{
   ButtplugMessage,
   ButtplugMessageError,
   ButtplugMessageFinalizer,
-  ButtplugMessageValidator, DeviceAddedV1, DeviceMessageInfoV1,
+  ButtplugMessageValidator,
+  DeviceAddedV1,
+  DeviceMessageInfoV1,
 };
 
 use getset::{CopyGetters, Getters};

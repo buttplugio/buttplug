@@ -6,7 +6,14 @@
 // for full license information.
 
 use crate::core::message::{
-  ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, LegacyDeviceAttributes, LinearCmdV1, TryFromDeviceAttributes
+  ButtplugDeviceMessage,
+  ButtplugMessage,
+  ButtplugMessageError,
+  ButtplugMessageFinalizer,
+  ButtplugMessageValidator,
+  LegacyDeviceAttributes,
+  LinearCmdV1,
+  TryFromDeviceAttributes,
 };
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
@@ -25,7 +32,7 @@ pub struct VectorSubcommandV4 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Position"))]
   position: f64,
   #[cfg_attr(feature = "serialize-json", serde(skip))]
-  id: Option<Uuid>
+  id: Option<Uuid>,
 }
 
 impl VectorSubcommandV4 {
@@ -69,7 +76,10 @@ impl ButtplugMessageValidator for LinearCmdV4 {
 }
 
 impl TryFromDeviceAttributes<LinearCmdV1> for LinearCmdV4 {
-  fn try_from_device_attributes(msg: LinearCmdV1, features: &LegacyDeviceAttributes) -> Result<Self, crate::core::errors::ButtplugError> {
+  fn try_from_device_attributes(
+    msg: LinearCmdV1,
+    features: &LegacyDeviceAttributes,
+  ) -> Result<Self, crate::core::errors::ButtplugError> {
     let cmds: Vec<VectorSubcommandV4> = msg
       .vectors()
       .iter()
@@ -78,7 +88,12 @@ impl TryFromDeviceAttributes<LinearCmdV1> for LinearCmdV4 {
           0,
           x.duration(),
           x.position(),
-          &Some(features.attrs_v3().linear_cmd().as_ref().unwrap()[x.index() as usize].feature().id().clone())
+          &Some(
+            features.attrs_v3().linear_cmd().as_ref().unwrap()[x.index() as usize]
+              .feature()
+              .id()
+              .clone(),
+          ),
         )
       })
       .collect();

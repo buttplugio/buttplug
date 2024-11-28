@@ -46,7 +46,20 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     message::{
-      self, ActuatorType, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessageType, ButtplugMessage, ButtplugServerDeviceMessage, ButtplugServerMessageV4, Endpoint, FeatureType, LegacyDeviceAttributes, LevelCmdV4, RawReadingV2, RawSubscribeCmdV2, SensorType
+      self,
+      ActuatorType,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessageType,
+      ButtplugMessage,
+      ButtplugServerDeviceMessage,
+      ButtplugServerMessageV4,
+      Endpoint,
+      FeatureType,
+      LegacyDeviceAttributes,
+      LevelCmdV4,
+      RawReadingV2,
+      RawSubscribeCmdV2,
+      SensorType,
     },
     ButtplugResultFuture,
   },
@@ -278,7 +291,7 @@ impl ServerDevice {
       definition: definition.clone(),
       raw_subscribed_endpoints: Arc::new(DashSet::new()),
       // Generating legacy attributes is cheap, just do it right when we create the device.
-      legacy_attributes: LegacyDeviceAttributes::new(definition.features())
+      legacy_attributes: LegacyDeviceAttributes::new(definition.features()),
     }
   }
 
@@ -462,7 +475,7 @@ impl ServerDevice {
     }
 
     let mut msg = msg.clone();
-    
+
     for command in &mut msg.levels_mut().iter_mut() {
       if command.feature_id().is_some() {
         continue;
@@ -477,7 +490,11 @@ impl ServerDevice {
         ))
         .boxed();
       } else {
-        command.set_feature_id(Some(self.definition.features()[command.feature_index() as usize].id().clone()));
+        command.set_feature_id(Some(
+          self.definition.features()[command.feature_index() as usize]
+            .id()
+            .clone(),
+        ));
       }
     }
     let commands = match self
@@ -492,7 +509,20 @@ impl ServerDevice {
       trace!("No commands generated for incoming device packet, skipping and returning success.");
       return future::ready(Ok(message::OkV0::default().into())).boxed();
     }
-    self.handle_generic_command_result(self.handler.handle_scalar_cmd(&commands.iter().map(|x| if let Some((y, z)) = x { Some((*y, *z)) } else { None } ).collect::<Vec<Option<(ActuatorType, i32)>>>()))
+    self.handle_generic_command_result(
+      self.handler.handle_scalar_cmd(
+        &commands
+          .iter()
+          .map(|x| {
+            if let Some((y, z)) = x {
+              Some((*y, *z))
+            } else {
+              None
+            }
+          })
+          .collect::<Vec<Option<(ActuatorType, i32)>>>(),
+      ),
+    )
   }
 
   fn handle_hardware_commands(&self, commands: Vec<HardwareCommand>) -> ButtplugServerResultFuture {
@@ -557,8 +587,12 @@ impl ServerDevice {
     feature_id: &Uuid,
     sensor_type: &SensorType,
   ) -> Result<(), ButtplugDeviceError> {
-
-    if let Some(feature) = self.definition.features().iter().find(|x| *x.id() == *feature_id) {
+    if let Some(feature) = self
+      .definition
+      .features()
+      .iter()
+      .find(|x| *x.id() == *feature_id)
+    {
       if *feature.feature_type() == FeatureType::from(*sensor_type) {
         Ok(())
       } else {
@@ -566,7 +600,7 @@ impl ServerDevice {
           feature_id.to_string(),
           *sensor_type,
           *feature.feature_type(),
-        ))  
+        ))
       }
     } else {
       Err(ButtplugDeviceError::DeviceSensorIndexError(
@@ -580,7 +614,11 @@ impl ServerDevice {
     &self,
     message: message::SensorReadCmdV4,
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, ButtplugError>> {
-    let result = self.check_sensor_command(*message.feature_index(), message.feature_id().as_ref().unwrap(), message.sensor_type());
+    let result = self.check_sensor_command(
+      *message.feature_index(),
+      message.feature_id().as_ref().unwrap(),
+      message.sensor_type(),
+    );
     let device = self.hardware.clone();
     let handler = self.handler.clone();
     async move {
@@ -598,7 +636,11 @@ impl ServerDevice {
     &self,
     message: message::SensorSubscribeCmdV4,
   ) -> ButtplugServerResultFuture {
-    let result = self.check_sensor_command(*message.feature_index(), message.feature_id().as_ref().unwrap(), message.sensor_type());
+    let result = self.check_sensor_command(
+      *message.feature_index(),
+      message.feature_id().as_ref().unwrap(),
+      message.sensor_type(),
+    );
     let device = self.hardware.clone();
     let handler = self.handler.clone();
     async move {
@@ -616,7 +658,11 @@ impl ServerDevice {
     &self,
     message: message::SensorUnsubscribeCmdV4,
   ) -> ButtplugServerResultFuture {
-    let result = self.check_sensor_command(*message.feature_index(), message.feature_id().as_ref().unwrap(), message.sensor_type());
+    let result = self.check_sensor_command(
+      *message.feature_index(),
+      message.feature_id().as_ref().unwrap(),
+      message.sensor_type(),
+    );
     let device = self.hardware.clone();
     let handler = self.handler.clone();
     async move {

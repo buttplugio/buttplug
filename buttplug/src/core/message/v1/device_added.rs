@@ -9,7 +9,9 @@ use crate::core::message::{
   ButtplugMessage,
   ButtplugMessageError,
   ButtplugMessageFinalizer,
-  ButtplugMessageValidator, DeviceAddedV0, DeviceMessageInfoV0,
+  ButtplugMessageValidator,
+  DeviceAddedV0,
+  DeviceMessageInfoV0,
 };
 
 use super::{device_message_info::DeviceMessageInfoV1, ClientDeviceMessageAttributesV1};
@@ -49,7 +51,6 @@ impl From<DeviceAddedV1> for DeviceAddedV0 {
     }
   }
 }
-
 
 impl ButtplugMessageValidator for DeviceAddedV1 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
