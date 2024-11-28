@@ -8,7 +8,7 @@
 use std::{fmt, sync::Arc};
 
 use crate::core::{
-  errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+  errors::{ButtplugDeviceError, ButtplugError},
   message::{
     self,
     ButtplugClientMessageV4,
@@ -194,15 +194,3 @@ impl ButtplugServerDowngradeWrapper {
   }
 }
 
-#[cfg(test)]
-mod test {
-  use crate::{
-    core::message::{
-      ButtplugClientMessageV4,
-      ButtplugClientMessageVariant,
-      RequestServerInfoV1,
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
-    },
-    server::{ButtplugServerBuilder, ButtplugServerDowngradeWrapper},
-  };
-}
