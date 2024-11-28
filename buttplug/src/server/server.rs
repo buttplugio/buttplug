@@ -215,6 +215,7 @@ impl ButtplugServer {
         .await
         .map(|mut ok_msg| {
           ok_msg.set_id(id);
+          trace!("Server returning message: {:?}", ok_msg);
           ok_msg
         })
         .map_err(|err| {

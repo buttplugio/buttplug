@@ -607,9 +607,12 @@ mod test {
         &BaseDeviceIdentifier::new("lovense", &Some("P".to_owned())),
         &BaseDeviceDefinition::new(
           "Lovense Edge",
+          &uuid::Uuid::new_v4(),
           &vec![
             DeviceFeature::new(
               "Edge Vibration 1",
+              &uuid::Uuid::new_v4(),
+              &None,
               FeatureType::Vibrate,
               &Some(DeviceFeatureActuator::new(
                 &RangeInclusive::new(0, 20),
@@ -620,6 +623,8 @@ mod test {
             ),
             DeviceFeature::new(
               "Edge Vibration 2",
+              &uuid::Uuid::new_v4(),
+              &None,
               FeatureType::Vibrate,
               &Some(DeviceFeatureActuator::new(
                 &RangeInclusive::new(0, 20),

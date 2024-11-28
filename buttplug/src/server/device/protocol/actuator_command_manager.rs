@@ -19,6 +19,7 @@ use crate::core::{
 };
 use ahash::{HashMap, HashMapExt};
 use getset::Getters;
+use uuid::Uuid;
 use std::{
   collections::HashSet,
   sync::atomic::{AtomicBool, AtomicI32, Ordering::Relaxed},
@@ -27,6 +28,7 @@ use std::{
 #[derive(Getters)]
 #[getset(get = "pub")]
 struct FeatureStatus {
+  feature_id: Uuid,
   actuator_type: ActuatorType,
   actuator: DeviceFeatureActuator,
   sent: AtomicBool,
@@ -34,8 +36,9 @@ struct FeatureStatus {
 }
 
 impl FeatureStatus {
-  pub fn new(actuator_type: &ActuatorType, actuator: &DeviceFeatureActuator) -> Self {
+  pub fn new(feature_id: &Uuid, actuator_type: &ActuatorType, actuator: &DeviceFeatureActuator) -> Self {
     Self {
+      feature_id: *feature_id,
       actuator_type: *actuator_type,
       actuator: actuator.clone(),
       sent: AtomicBool::new(false),
@@ -90,7 +93,7 @@ impl FeatureStatus {
 // horrible day some sex toy decides to use floats in its protocol), so we can just use atomics and
 // call it done.
 pub struct ActuatorCommandManager {
-  feature_status: HashMap<usize, FeatureStatus>,
+  feature_status: Vec<FeatureStatus>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
 
@@ -98,17 +101,17 @@ impl ActuatorCommandManager {
   pub fn new(features: &Vec<DeviceFeature>) -> Self {
     let mut stop_commands = vec![];
 
-    let mut statuses = HashMap::new();
+    let mut statuses = vec!();
     let mut level_subcommands = vec![];
     for (index, feature) in features.iter().enumerate() {
       if let Some(actuator) = feature.actuator() {
         let actuator_type: ActuatorType = (*feature.feature_type()).try_into().unwrap();
-        statuses.insert(index, FeatureStatus::new(&actuator_type, actuator));
+        statuses.push(FeatureStatus::new(feature.id(), &actuator_type, actuator));
         if actuator
           .messages()
           .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::LevelCmd)
         {
-          level_subcommands.push(LevelSubcommandV4::new(index as u32, 0));
+          level_subcommands.push(LevelSubcommandV4::new(index as u32, 0, &Some(feature.id().clone())));
         }
       }
     }
@@ -125,38 +128,25 @@ impl ActuatorCommandManager {
   fn update(
     &self,
     msg_type: ButtplugActuatorFeatureMessageType,
-    commands: &Vec<(u32, ActuatorType, i32)>,
+    commands: &Vec<(Uuid, ActuatorType, i32)>,
     match_all: bool,
-  ) -> Result<Vec<(u32, ActuatorType, i32)>, ButtplugError> {
+  ) -> Result<Vec<(Uuid, ActuatorType, i32)>, ButtplugError> {
     // Convert from the generic 0.0-1.0 range to the StepCount attribute given by the device config.
 
     // If we've already sent commands before, we should check against our old values. Otherwise, we
     // should always send whatever command we're going to send.
     let mut result = vec![];
 
-    for command in commands {
-      if command.0 >= self.feature_status.len().try_into().unwrap() {
-        return Err(
-          ButtplugDeviceError::ProtocolRequirementError(format!(
-            "Command requests feature index {}, which does not exist.",
-            command.0,
-          ))
-          .into(),
-        );
-      }
-    }
-
-    for (index, cmd) in self.feature_status.iter() {
-      let u32_index = *index as u32;
-      if let Some((_, actuator, cmd_value)) = commands.iter().find(|x| x.0 == u32_index) {
+    for (cmd) in self.feature_status.iter() {
+      if let Some((_, actuator, cmd_value)) = commands.iter().find(|x| x.0 == *cmd.feature_id()) {
         // By this point, we should have already checked whether the feature takes the message type.
         if let Some(updated_value) = cmd.update(*cmd_value) {
-          result.push((u32_index, *actuator, updated_value));
+          result.push((cmd.feature_id().clone(), *actuator, updated_value));
         } else if match_all {
-          result.push((u32_index, *actuator, cmd.current().1));
+          result.push((cmd.feature_id().clone(), *actuator, cmd.current().1));
         }
       } else if match_all && cmd.messages().contains(&msg_type) {
-        result.push((u32_index, *cmd.actuator_type(), cmd.current().1));
+        result.push((cmd.feature_id().clone(), *cmd.actuator_type(), cmd.current().1));
       }
     }
     // Return the command vector for the protocol to turn into proprietary commands
@@ -168,24 +158,34 @@ impl ActuatorCommandManager {
     msg: &LevelCmdV4,
     match_all: bool,
   ) -> Result<Vec<Option<(ActuatorType, i32)>>, ButtplugError> {
+    trace!("Updating level for message: {:?}", msg);
     // First, make sure this is a valid command, that contains at least one
     // subcommand.
     if msg.levels().is_empty() {
       return Err(
         ButtplugDeviceError::ProtocolRequirementError(
-          "ScalarCmd has 0 commands, will not do anything.".to_owned(),
+          format!("LevelCmd has 0 commands, will not do anything: {:?}", msg),
+        )
+        .into(),
+      );
+    }
+
+    if msg.levels().iter().filter(|x| x.feature_id().is_none()).count() > 0 {
+      return Err(
+        ButtplugDeviceError::ProtocolRequirementError(
+          format!("LevelCmd has unresolved feature ids: {:?}", msg),
         )
         .into(),
       );
     }
 
     let mut idxs = HashMap::new();
-    for (i, x) in self.feature_status.iter() {
+    for x in self.feature_status.iter() {
       if x
         .messages()
         .contains(&ButtplugActuatorFeatureMessageType::LevelCmd)
       {
-        idxs.insert(*i as u32, idxs.len() as u32);
+        idxs.insert(x.feature_id(), idxs.len() as u32);
       }
     }
 
@@ -195,7 +195,11 @@ impl ActuatorCommandManager {
     msg
       .levels()
       .iter()
-      .for_each(|x| commands.push((x.feature_index(), *self.feature_status.get(&(x.feature_index() as usize)).unwrap().actuator_type(), x.level())));
+      .for_each(|x| {
+        let id = x.feature_id().expect("Already checked existence");
+        trace!("Updating command for {:?}", id);
+        commands.push((id.clone(), *self.feature_status.iter().find(|y| *y.feature_id() == x.feature_id().unwrap()).unwrap().actuator_type(), x.level()))
+      });
     let mut result = self.update(
       ButtplugActuatorFeatureMessageType::LevelCmd,
       &commands,

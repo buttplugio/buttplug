@@ -6,11 +6,12 @@
 // for full license information.
 
 use crate::core::message::{
-  find_device_feature_indexes, BatteryLevelCmdV2, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, ButtplugSensorFeatureMessageType, FeatureType, RSSILevelCmdV2, SensorReadCmdV3, SensorType, TryFromDeviceFeatures
+  find_device_features, BatteryLevelCmdV2, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, ButtplugSensorFeatureMessageType, FeatureType, LegacyDeviceAttributes, RSSILevelCmdV2, SensorReadCmdV3, SensorType, TryFromDeviceAttributes
 };
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(
   Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, CopyGetters,
@@ -27,15 +28,19 @@ pub struct SensorReadCmdV4 {
   #[getset(get = "pub")]
   #[cfg_attr(feature = "serialize-json", serde(rename = "SensorType"))]
   sensor_type: SensorType,
+  #[getset(get = "pub")]
+  #[cfg_attr(feature = "serialize-json", serde(skip))]
+  feature_id: Option<Uuid>
 }
 
 impl SensorReadCmdV4 {
-  pub fn new(device_index: u32, feature_index: u32, sensor_type: SensorType) -> Self {
+  pub fn new(device_index: u32, feature_index: u32, sensor_type: SensorType, feature_id: &Option<Uuid>) -> Self {
     Self {
       id: 1,
       device_index,
       feature_index,
       sensor_type,
+      feature_id: feature_id.clone()
     }
   }
 }
@@ -47,9 +52,9 @@ impl ButtplugMessageValidator for SensorReadCmdV4 {
   }
 }
 
-impl TryFromDeviceFeatures<BatteryLevelCmdV2> for SensorReadCmdV4 {
-  fn try_from_device_features(msg: BatteryLevelCmdV2, features: &[crate::core::message::DeviceFeature]) -> Result<Self, crate::core::errors::ButtplugError> {
-    let battery_features = find_device_feature_indexes(features, |(_, x)| {
+impl TryFromDeviceAttributes<BatteryLevelCmdV2> for SensorReadCmdV4 {
+  fn try_from_device_attributes(msg: BatteryLevelCmdV2, features: &LegacyDeviceAttributes) -> Result<Self, crate::core::errors::ButtplugError> {
+    let battery_features = find_device_features(features.features(), |x| {
       *x.feature_type() == FeatureType::Battery
         && x.sensor().as_ref().is_some_and(|y| {
           y.messages()
@@ -60,17 +65,18 @@ impl TryFromDeviceFeatures<BatteryLevelCmdV2> for SensorReadCmdV4 {
     Ok(
       SensorReadCmdV4::new(
         msg.device_index(),
-        battery_features[0] as u32,
+        0,
         SensorType::Battery,
+        &Some(battery_features[0].id().clone())
       )
       .into(),
     )
   }
 }
 
-impl TryFromDeviceFeatures<RSSILevelCmdV2> for SensorReadCmdV4 {
-  fn try_from_device_features(msg: RSSILevelCmdV2, features: &[crate::core::message::DeviceFeature]) -> Result<Self, crate::core::errors::ButtplugError> {
-    let rssi_features = find_device_feature_indexes(features, |(_, x)| {
+impl TryFromDeviceAttributes<RSSILevelCmdV2> for SensorReadCmdV4 {
+  fn try_from_device_attributes(msg: RSSILevelCmdV2, features: &LegacyDeviceAttributes) -> Result<Self, crate::core::errors::ButtplugError> {
+    let rssi_features = find_device_features(features.features(), |x| {
       *x.feature_type() == FeatureType::RSSI
         && x.sensor().as_ref().is_some_and(|y| {
           y.messages()
@@ -81,30 +87,25 @@ impl TryFromDeviceFeatures<RSSILevelCmdV2> for SensorReadCmdV4 {
     Ok(
       SensorReadCmdV4::new(
         msg.device_index(),
-        rssi_features[0] as u32,
+        0,
         SensorType::RSSI,
+        &Some(rssi_features[0].id().clone())
       )
       .into(),
     )
   }
 }
 
-impl TryFromDeviceFeatures<SensorReadCmdV3> for SensorReadCmdV4 {
-  fn try_from_device_features(msg: SensorReadCmdV3, features: &[crate::core::message::DeviceFeature]) -> Result<Self, crate::core::errors::ButtplugError> {
-    let features = find_device_feature_indexes(features, |(_, x)| {
-      x.sensor().as_ref().is_some_and(|y| {
-        y.messages()
-          .contains(&ButtplugSensorFeatureMessageType::SensorReadCmd)
-      })
-    })?;
-  
-    let sensor_feature_index = features[*msg.sensor_index() as usize] as u32;
+impl TryFromDeviceAttributes<SensorReadCmdV3> for SensorReadCmdV4 {
+  fn try_from_device_attributes(msg: SensorReadCmdV3, features: &LegacyDeviceAttributes) -> Result<Self, crate::core::errors::ButtplugError> {
+    let sensor_feature_id = features.attrs_v3().sensor_read_cmd().as_ref().unwrap()[*msg.sensor_index() as usize].feature().id();
   
     Ok(
       SensorReadCmdV4::new(
         msg.device_index(),
-        sensor_feature_index,
+        0,
         *msg.sensor_type(),
+        &Some(sensor_feature_id.clone())
       )
       .into(),
     )

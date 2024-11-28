@@ -229,7 +229,8 @@ async fn test_device_stop_on_ping_timeout() {
         device_index,
         vec![message::LevelSubcommandV4::new(
           0,
-          64
+          64,
+          &None
         )],
       ),
     ))

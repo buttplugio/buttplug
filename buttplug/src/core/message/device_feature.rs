@@ -12,12 +12,10 @@ use crate::core::{
 use getset::{Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use std::{collections::HashSet, ops::RangeInclusive};
+use uuid::Uuid;
 
 use super::{
-  ActuatorType,
-  ButtplugActuatorFeatureMessageType,
-  ButtplugSensorFeatureMessageType,
-  SensorType,
+  ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugSensorFeatureMessageType, ClientDeviceMessageAttributesV1, ClientDeviceMessageAttributesV2, ClientDeviceMessageAttributesV3, ClientGenericDeviceMessageAttributesV3, RawDeviceMessageAttributesV2, SensorDeviceMessageAttributesV3, SensorType
 };
 
 #[derive(Debug, Default, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -105,11 +103,20 @@ pub struct DeviceFeature {
   #[getset(get = "pub")]
   #[serde(skip)]
   raw: Option<DeviceFeatureRaw>,
+  #[getset(get = "pub", get_mut = "pub(super)")]
+  #[serde(skip_serializing)]
+  id: Uuid,
+  #[getset(get = "pub", get_mut = "pub(super)")]
+  #[serde(rename = "base-id")]
+  #[serde(skip_serializing)]
+  base_id: Option<Uuid>,
 }
 
 impl DeviceFeature {
   pub fn new(
     description: &str,
+    id: &Uuid,
+    base_id: &Option<Uuid>,
     feature_type: FeatureType,
     actuator: &Option<DeviceFeatureActuator>,
     sensor: &Option<DeviceFeatureSensor>,
@@ -120,6 +127,8 @@ impl DeviceFeature {
       actuator: actuator.clone(),
       sensor: sensor.clone(),
       raw: None,
+      id: id.clone(),
+      base_id: base_id.clone(),
     }
   }
 
@@ -137,6 +146,8 @@ impl DeviceFeature {
       actuator: None,
       sensor: None,
       raw: Some(DeviceFeatureRaw::new(endpoints)),
+      id: uuid::Uuid::new_v4(),
+      base_id: None
     }
   }
 }
@@ -304,20 +315,181 @@ impl DeviceFeatureRaw {
 }
 
 /// TryFrom for Buttplug Device Messages that need to use a device feature definition to convert
-pub trait TryFromDeviceFeatures<T> where Self: Sized {
-  fn try_from_device_features(msg: T, features: &[DeviceFeature]) -> Result<Self, ButtplugError>;
+pub trait TryFromDeviceAttributes<T> where Self: Sized {
+  fn try_from_device_attributes(msg: T, features: &LegacyDeviceAttributes) -> Result<Self, ButtplugError>;
 }
 
-pub fn find_device_feature_indexes<P>(features: &[DeviceFeature], criteria: P) -> Result<Vec<usize>, ButtplugError> where P: FnMut(&(usize, &DeviceFeature)) -> bool {
-  let feature_indexes: Vec<usize> = features.iter().enumerate().filter(criteria).map(|(index, _)| index).collect();
-  if feature_indexes.is_empty() {
+impl TryFrom<DeviceFeature> for SensorDeviceMessageAttributesV3 {
+  type Error = String;
+  fn try_from(value: DeviceFeature) -> Result<Self, Self::Error> {
+    if let Some(sensor) = value.sensor() {
+      Ok(Self {
+        feature_descriptor: value.description().to_owned(),
+        sensor_type: (*value.feature_type()).try_into()?,
+        sensor_range: sensor.value_range().clone(),
+        feature: value.clone(),
+        index: 0
+      })
+    } else {
+      Err("Device Feature does not expose a sensor.".to_owned())
+    }
+  }
+}
+
+impl TryFrom<DeviceFeature> for ClientGenericDeviceMessageAttributesV3 {
+  type Error = String;
+  fn try_from(value: DeviceFeature) -> Result<Self, Self::Error> {
+    if let Some(actuator) = value.actuator() {
+      let actuator_type = (*value.feature_type()).try_into()?;
+      let step_limit = actuator.step_limit();
+      let step_count = step_limit.end() - step_limit.start();
+      let attrs = Self {
+        feature_descriptor: value.description().to_owned(),
+        actuator_type,
+        step_count,
+        feature: value.clone(),
+        index: 0
+      };
+      Ok(attrs)
+    } else {
+      Err(
+        "Cannot produce a GenericDeviceMessageAttribute from a feature with no actuator member"
+          .to_string(),
+      )
+    }
+  }
+}
+
+impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
+  fn from(features: Vec<DeviceFeature>) -> Self {
+    let actuator_filter = |message_type: &ButtplugActuatorFeatureMessageType| {
+      let attrs: Vec<ClientGenericDeviceMessageAttributesV3> = features
+        .iter()
+        .filter(|x| {
+          if let Some(actuator) = x.actuator() {
+            // Carve out RotateCmd here
+            !(*message_type == ButtplugActuatorFeatureMessageType::LevelCmd && *x.feature_type() == FeatureType::RotateWithDirection) && actuator.messages().contains(message_type)
+          } else {
+            false
+          }
+        })
+        .map(|x| x.clone().try_into().unwrap())
+        .collect();
+      if !attrs.is_empty() {
+        Some(attrs)
+      } else {
+        None
+      }
+    };
+
+    // We have to calculate rotation attributes seperately, since they're a combination of
+    // feature type and message in >= v4.
+    let rotate_attributes = {
+      let attrs: Vec<ClientGenericDeviceMessageAttributesV3> = features
+      .iter()
+      .filter(|x| {
+        if let Some(actuator) = x.actuator() {
+          actuator.messages().contains(&ButtplugActuatorFeatureMessageType::LevelCmd) && *x.feature_type() == FeatureType::RotateWithDirection
+        } else {
+          false
+        }
+      })
+      .map(|x| x.clone().try_into().unwrap())
+      .collect();
+    if !attrs.is_empty() {
+      Some(attrs)
+    } else {
+      None
+    }
+    };
+
+    let sensor_filter = |message_type| {
+      let attrs: Vec<SensorDeviceMessageAttributesV3> = features
+        .iter()
+        .filter(|x| {
+          if let Some(sensor) = x.sensor() {
+            sensor.messages().contains(message_type)
+          } else {
+            false
+          }
+        })
+        .map(|x| x.clone().try_into().unwrap())
+        .collect();
+      if !attrs.is_empty() {
+        Some(attrs)
+      } else {
+        None
+      }
+    };
+
+    // Raw messages
+    let raw_attrs = features
+      .iter()
+      .find(|f| f.raw().is_some())
+      .map(|raw_feature| {
+        RawDeviceMessageAttributesV2::new(raw_feature.raw().as_ref().unwrap().endpoints())
+      });
+
+    Self {
+      scalar_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::LevelCmd),
+      rotate_cmd: rotate_attributes,
+      linear_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::LinearCmd),
+      sensor_read_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorReadCmd),
+      sensor_subscribe_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorSubscribeCmd),
+      raw_read_cmd: raw_attrs.clone(),
+      raw_write_cmd: raw_attrs.clone(),
+      raw_subscribe_cmd: raw_attrs.clone(),
+      ..Default::default()
+    }
+  }
+}
+
+impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV2 {
+  fn from(value: Vec<DeviceFeature>) -> Self {
+      ClientDeviceMessageAttributesV3::from(value).into()
+  }
+}
+
+impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV1 {
+  fn from(value: Vec<DeviceFeature>) -> Self {
+      ClientDeviceMessageAttributesV2::from(ClientDeviceMessageAttributesV3::from(value)).into()
+  }
+}
+
+#[derive(Debug, Getters, Clone)]
+pub(crate) struct LegacyDeviceAttributes {
+  #[getset(get = "pub")]
+  attrs_v1: ClientDeviceMessageAttributesV1,
+  #[getset(get = "pub")]
+  attrs_v2: ClientDeviceMessageAttributesV2,
+  #[getset(get = "pub")]
+  attrs_v3: ClientDeviceMessageAttributesV3,
+  #[getset(get = "pub")]
+  features: Vec<DeviceFeature>
+}
+
+impl LegacyDeviceAttributes {
+  pub fn new(features: &Vec<DeviceFeature>) -> Self {
+    Self {
+      attrs_v3: ClientDeviceMessageAttributesV3::from(features.clone()),
+      attrs_v2: ClientDeviceMessageAttributesV2::from(features.clone()),
+      attrs_v1: ClientDeviceMessageAttributesV1::from(features.clone()),
+      features: features.clone()
+    }
+  }
+}
+
+
+pub fn find_device_features<P>(features: &[DeviceFeature], criteria: P) -> Result<Vec<DeviceFeature>, ButtplugError> where P: FnMut(&&DeviceFeature) -> bool {
+  let filtered_features: Vec<DeviceFeature> = features.iter().filter(criteria).map(|f| f.clone()).collect();
+  if filtered_features.is_empty() {
     Err(
       ButtplugDeviceError::ProtocolRequirementError(format!(
-        "Feature index conversion returned 0 features.",
+        "Feature filtering returned 0 features.",
       ))
       .into(),
     )
   } else {
-    Ok(feature_indexes)
+    Ok(filtered_features)
   }
 }

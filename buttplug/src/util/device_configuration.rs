@@ -25,6 +25,7 @@ use dashmap::DashMap;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fmt::Display};
+use uuid::Uuid;
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../buttplug-device-config/build-config/buttplug-device-config-v4.json");
@@ -67,6 +68,9 @@ struct ProtocolAttributes {
   #[serde(skip_serializing_if = "Option::is_none")]
   identifier: Option<Vec<String>>,
   name: String,
+  id: Uuid,
+  #[serde(rename = "base-id")]
+  base_id: Option<Uuid>,
   #[serde(skip_serializing_if = "Option::is_none")]
   features: Option<Vec<DeviceFeature>>,
 }
@@ -105,6 +109,7 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
     if let Some(defaults) = protocol_def.defaults() {
       let config_attrs = BaseDeviceDefinition::new(
         &defaults.name,
+        &defaults.id,
         defaults
           .features
           .as_ref()
@@ -117,6 +122,7 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
             let config_attrs = BaseDeviceDefinition::new(
               // Even subconfigurations always have names
               &config.name,
+              &config.id,
               config.features.as_ref().unwrap_or(
                 defaults
                   .features
