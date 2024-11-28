@@ -108,28 +108,16 @@ impl ButtplugServerDowngradeWrapper {
   ) -> BoxFuture<'static, Result<ButtplugServerMessageVariant, ButtplugServerMessageVariant>> {
     match msg {
       ButtplugClientMessageVariant::V4(msg) => {
-        if cfg!(feature = "allow-unstable-v4-connections") {
-          let fut = self.server.parse_message(msg);
-          async move {
-            Ok(
-              fut
-                .await
-                .map_err(|e| ButtplugServerMessageVariant::from(ButtplugServerMessageV4::from(e)))?
-                .into(),
-            )
-          }
-          .boxed()
-        } else {
-          future::ready(Err(
-            ButtplugServerMessageV4::from(ErrorV0::from(ButtplugError::from(
-              ButtplugMessageError::UnhandledMessage(
-                "Buttplug not compiled to handle v4 messages.".to_owned(),
-              ),
-            )))
-            .into(),
-          ))
-          .boxed()
+        let fut = self.server.parse_message(msg);
+        async move {
+          Ok(
+            fut
+              .await
+              .map_err(|e| ButtplugServerMessageVariant::from(ButtplugServerMessageV4::from(e)))?
+              .into(),
+          )
         }
+        .boxed()
       }
       msg => {
         let v = msg.version();
@@ -217,37 +205,4 @@ mod test {
     },
     server::{ButtplugServerBuilder, ButtplugServerDowngradeWrapper},
   };
-
-  #[cfg_attr(feature = "allow-unstable-v4-connections", ignore)]
-  #[tokio::test]
-  async fn test_downgrader_v4_block() {
-    let wrapper =
-      ButtplugServerDowngradeWrapper::new(ButtplugServerBuilder::default().finish().unwrap());
-    assert!(wrapper
-      .parse_message(ButtplugClientMessageVariant::V4(
-        ButtplugClientMessageV4::RequestServerInfo(RequestServerInfoV1::new(
-          "TestClient",
-          BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
-        ))
-      ))
-      .await
-      .is_err());
-  }
-
-  #[cfg_attr(not(feature = "allow-unstable-v4-connections"), ignore)]
-  #[tokio::test]
-  async fn test_downgrader_v4_allow() {
-    let wrapper =
-      ButtplugServerDowngradeWrapper::new(ButtplugServerBuilder::default().finish().unwrap());
-    let result = wrapper
-      .parse_message(ButtplugClientMessageVariant::V4(
-        ButtplugClientMessageV4::RequestServerInfo(RequestServerInfoV1::new(
-          "TestClient",
-          BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
-        )),
-      ))
-      .await;
-    println!("{:?}", result);
-    assert!(result.is_ok());
-  }
 }
