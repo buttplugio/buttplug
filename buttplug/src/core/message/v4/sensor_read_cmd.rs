@@ -5,9 +5,9 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::{
-  find_device_features, BatteryLevelCmdV2, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, ButtplugSensorFeatureMessageType, FeatureType, LegacyDeviceAttributes, RSSILevelCmdV2, SensorReadCmdV3, SensorType, TryFromDeviceAttributes
-};
+use crate::core::{errors::{ButtplugDeviceError, ButtplugError}, message::{
+  BatteryLevelCmdV2, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, LegacyDeviceAttributes, RSSILevelCmdV2, SensorReadCmdV3, SensorType, TryFromDeviceAttributes
+}};
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
@@ -54,20 +54,14 @@ impl ButtplugMessageValidator for SensorReadCmdV4 {
 
 impl TryFromDeviceAttributes<BatteryLevelCmdV2> for SensorReadCmdV4 {
   fn try_from_device_attributes(msg: BatteryLevelCmdV2, features: &LegacyDeviceAttributes) -> Result<Self, crate::core::errors::ButtplugError> {
-    let battery_features = find_device_features(features.features(), |x| {
-      *x.feature_type() == FeatureType::Battery
-        && x.sensor().as_ref().is_some_and(|y| {
-          y.messages()
-            .contains(&ButtplugSensorFeatureMessageType::SensorReadCmd)
-        })
-    })?;
-  
+    let battery_feature = features.attrs_v2().battery_level_cmd().as_ref().ok_or(ButtplugError::from(ButtplugDeviceError::DeviceConfigurationError("Device configuration does not have Battery sensor available.".to_owned())))?.feature();
+
     Ok(
       SensorReadCmdV4::new(
         msg.device_index(),
         0,
         SensorType::Battery,
-        &Some(battery_features[0].id().clone())
+        &Some(battery_feature.id().clone())
       )
       .into(),
     )
@@ -76,20 +70,14 @@ impl TryFromDeviceAttributes<BatteryLevelCmdV2> for SensorReadCmdV4 {
 
 impl TryFromDeviceAttributes<RSSILevelCmdV2> for SensorReadCmdV4 {
   fn try_from_device_attributes(msg: RSSILevelCmdV2, features: &LegacyDeviceAttributes) -> Result<Self, crate::core::errors::ButtplugError> {
-    let rssi_features = find_device_features(features.features(), |x| {
-      *x.feature_type() == FeatureType::RSSI
-        && x.sensor().as_ref().is_some_and(|y| {
-          y.messages()
-            .contains(&ButtplugSensorFeatureMessageType::SensorReadCmd)
-        })
-    })?;
-  
+    let rssi_feature = features.attrs_v2().rssi_level_cmd().as_ref().ok_or(ButtplugError::from(ButtplugDeviceError::DeviceConfigurationError("Device configuration does not have Battery sensor available.".to_owned())))?.feature();
+
     Ok(
       SensorReadCmdV4::new(
         msg.device_index(),
         0,
         SensorType::RSSI,
-        &Some(rssi_features[0].id().clone())
+        &Some(rssi_feature.id().clone())
       )
       .into(),
     )

@@ -8,6 +8,8 @@
 use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 
+use crate::core::message::DeviceFeature;
+
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct NullDeviceMessageAttributesV1 {}
 
@@ -47,12 +49,16 @@ pub struct ClientDeviceMessageAttributesV1 {
 pub struct GenericDeviceMessageAttributesV1 {
   #[serde(rename = "FeatureCount")]
   feature_count: u32,
+  #[getset(get = "pub")]
+  #[serde(skip)]
+  pub(in crate::core::message) features: Vec<DeviceFeature>
 }
 
 impl GenericDeviceMessageAttributesV1 {
-  pub fn new(feature_count: u32) -> Self {
+  pub fn new(feature_count: u32, features: &Vec<DeviceFeature>) -> Self {
     Self {
-      feature_count
+      feature_count,
+      features: features.clone()
     }
   }
 }
