@@ -10,7 +10,8 @@ use crate::core::message::{
   ButtplugMessage,
   ButtplugMessageError,
   ButtplugMessageFinalizer,
-  ButtplugMessageValidator, DeviceListV3,
+  ButtplugMessageValidator,
+  DeviceListV3,
 };
 use getset::Getters;
 #[cfg(feature = "serialize-json")]

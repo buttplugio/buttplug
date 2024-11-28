@@ -12,7 +12,7 @@ mod spec_enums;
 pub use client_device_message_attributes::{
   ClientDeviceMessageAttributesV3,
   ClientGenericDeviceMessageAttributesV3,
-  SensorDeviceMessageAttributesV3
+  SensorDeviceMessageAttributesV3,
 };
 pub use device_added::DeviceAddedV3;
 pub use device_list::DeviceListV3;

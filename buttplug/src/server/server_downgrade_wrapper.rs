@@ -10,7 +10,14 @@ use std::{fmt, sync::Arc};
 use crate::core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    self, ButtplugClientMessageV4, ButtplugClientMessageVariant, ButtplugMessageSpecVersion, ButtplugServerMessageV4, ButtplugServerMessageVariant, ErrorV0, TryFromClientMessage
+    self,
+    ButtplugClientMessageV4,
+    ButtplugClientMessageVariant,
+    ButtplugMessageSpecVersion,
+    ButtplugServerMessageV4,
+    ButtplugServerMessageVariant,
+    ErrorV0,
+    TryFromClientMessage,
   },
 };
 
@@ -134,12 +141,22 @@ impl ButtplugServerDowngradeWrapper {
             v
           );
           v
-        });        
+        });
         let features = if let Some(idx) = msg.device_index() {
           if let Some(info) = mgr.devices().get(&idx) {
             Some(info.legacy_attributes().clone())
           } else {
-            return future::ready(Err(converter.convert_outgoing(&ButtplugServerMessageV4::from(ErrorV0::from(ButtplugError::from(ButtplugDeviceError::DeviceNotAvailable(idx)))),  &spec_version).unwrap())).boxed();
+            return future::ready(Err(
+              converter
+                .convert_outgoing(
+                  &ButtplugServerMessageV4::from(ErrorV0::from(ButtplugError::from(
+                    ButtplugDeviceError::DeviceNotAvailable(idx),
+                  ))),
+                  &spec_version,
+                )
+                .unwrap(),
+            ))
+            .boxed();
           }
         } else {
           None

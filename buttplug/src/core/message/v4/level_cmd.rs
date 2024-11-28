@@ -5,9 +5,24 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::{errors::{ButtplugDeviceError, ButtplugError}, message::{
-  ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, FeatureType, LegacyDeviceAttributes, RotateCmdV1, ScalarCmdV3, SingleMotorVibrateCmdV0, TryFromDeviceAttributes, VibrateCmdV1, VorzeA10CycloneCmdV0
-}};
+use crate::core::{
+  errors::{ButtplugDeviceError, ButtplugError},
+  message::{
+    ButtplugDeviceMessage,
+    ButtplugMessage,
+    ButtplugMessageError,
+    ButtplugMessageFinalizer,
+    ButtplugMessageValidator,
+    FeatureType,
+    LegacyDeviceAttributes,
+    RotateCmdV1,
+    ScalarCmdV3,
+    SingleMotorVibrateCmdV0,
+    TryFromDeviceAttributes,
+    VibrateCmdV1,
+    VorzeA10CycloneCmdV0,
+  },
+};
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
@@ -24,7 +39,7 @@ pub struct LevelSubcommandV4 {
   level: i32,
   #[cfg_attr(feature = "serialize-json", serde(skip))]
   #[getset(set = "pub")]
-  feature_id: Option<Uuid>
+  feature_id: Option<Uuid>,
 }
 
 impl LevelSubcommandV4 {
@@ -32,13 +47,20 @@ impl LevelSubcommandV4 {
     Self {
       feature_index,
       level,
-      feature_id: feature_id.clone()
+      feature_id: feature_id.clone(),
     }
   }
 }
 
 #[derive(
-  Debug, Default, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, Getters, MutGetters
+  Debug,
+  Default,
+  ButtplugDeviceMessage,
+  ButtplugMessageFinalizer,
+  PartialEq,
+  Clone,
+  Getters,
+  MutGetters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct LevelCmdV4 {
@@ -69,27 +91,35 @@ impl ButtplugMessageValidator for LevelCmdV4 {
 }
 
 impl TryFromDeviceAttributes<VorzeA10CycloneCmdV0> for LevelCmdV4 {
-  fn try_from_device_attributes(msg: VorzeA10CycloneCmdV0, features: &LegacyDeviceAttributes) -> Result<Self, crate::core::errors::ButtplugError> {
+  fn try_from_device_attributes(
+    msg: VorzeA10CycloneCmdV0,
+    features: &LegacyDeviceAttributes,
+  ) -> Result<Self, crate::core::errors::ButtplugError> {
     let cmds: Vec<LevelSubcommandV4> = features
-    .features()
-    .iter()
-    .filter(|feature| *feature.feature_type() == FeatureType::RotateWithDirection)
-    .map(|feature| {
-      LevelSubcommandV4::new(
-        0,
-        (((msg.speed() as f64 / 99f64).ceil() * (if msg.clockwise() { 1f64 } else { -1f64 })) * *feature.actuator().as_ref().unwrap().step_range().end() as f64).ceil() as i32,
-        &Some(feature.id().clone())
-      )
-    })
-    .collect();
+      .features()
+      .iter()
+      .filter(|feature| *feature.feature_type() == FeatureType::RotateWithDirection)
+      .map(|feature| {
+        LevelSubcommandV4::new(
+          0,
+          (((msg.speed() as f64 / 99f64).ceil() * (if msg.clockwise() { 1f64 } else { -1f64 }))
+            * *feature.actuator().as_ref().unwrap().step_range().end() as f64)
+            .ceil() as i32,
+          &Some(feature.id().clone()),
+        )
+      })
+      .collect();
 
-  Ok(LevelCmdV4::new(msg.device_index(), cmds).into())
+    Ok(LevelCmdV4::new(msg.device_index(), cmds).into())
   }
 }
 
 impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for LevelCmdV4 {
   // For VibrateCmd, just take everything out of V2's VibrateCmd and make a command.
-  fn try_from_device_attributes(msg: SingleMotorVibrateCmdV0, features: &LegacyDeviceAttributes) -> Result<Self, crate::core::errors::ButtplugError> {
+  fn try_from_device_attributes(
+    msg: SingleMotorVibrateCmdV0,
+    features: &LegacyDeviceAttributes,
+  ) -> Result<Self, crate::core::errors::ButtplugError> {
     let cmds: Vec<LevelSubcommandV4> = features
       .features()
       .iter()
@@ -97,12 +127,13 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for LevelCmdV4 {
       .map(|feature| {
         LevelSubcommandV4::new(
           0,
-          (msg.speed() * *feature.actuator().as_ref().unwrap().step_range().end() as f64).ceil() as i32,
-          &Some(feature.id().clone())
+          (msg.speed() * *feature.actuator().as_ref().unwrap().step_range().end() as f64).ceil()
+            as i32,
+          &Some(feature.id().clone()),
         )
       })
       .collect();
-  
+
     Ok(LevelCmdV4::new(msg.device_index(), cmds).into())
   }
 }
@@ -112,21 +143,42 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for LevelCmdV4 {
   // we can just use the V2 spec client device attributes for it. If this was sent on a V1 protocol,
   // it'll still have all the same features.
   //
-  // Due to specs v1/2 using feature counts instead of per-feature objects, we calculate our 
-  fn try_from_device_attributes(msg: VibrateCmdV1, features: &LegacyDeviceAttributes) -> Result<Self, crate::core::errors::ButtplugError> {
-    let vibrate_attributes = features.attrs_v2().vibrate_cmd().as_ref().ok_or(ButtplugError::from(ButtplugDeviceError::DeviceFeatureCountMismatch(0, msg.speeds().len() as u32)))?;
+  // Due to specs v1/2 using feature counts instead of per-feature objects, we calculate our
+  fn try_from_device_attributes(
+    msg: VibrateCmdV1,
+    features: &LegacyDeviceAttributes,
+  ) -> Result<Self, crate::core::errors::ButtplugError> {
+    let vibrate_attributes =
+      features
+        .attrs_v2()
+        .vibrate_cmd()
+        .as_ref()
+        .ok_or(ButtplugError::from(
+          ButtplugDeviceError::DeviceFeatureCountMismatch(0, msg.speeds().len() as u32),
+        ))?;
 
     let mut cmds: Vec<LevelSubcommandV4> = vec![];
     for vibrate_cmd in msg.speeds() {
       if vibrate_cmd.index() > vibrate_attributes.features().len() as u32 {
-        return Err(ButtplugError::from(ButtplugDeviceError::DeviceFeatureCountMismatch(vibrate_cmd.index(), msg.speeds().len() as u32)))
+        return Err(ButtplugError::from(
+          ButtplugDeviceError::DeviceFeatureCountMismatch(
+            vibrate_cmd.index(),
+            msg.speeds().len() as u32,
+          ),
+        ));
       }
       let feature = &vibrate_attributes.features()[vibrate_cmd.index() as usize];
-      let actuator = feature.actuator().as_ref().ok_or(ButtplugDeviceError::DeviceConfigurationError("Device configuration does not have Vibrate actuator available.".to_owned()))?;
+      let actuator =
+        feature
+          .actuator()
+          .as_ref()
+          .ok_or(ButtplugDeviceError::DeviceConfigurationError(
+            "Device configuration does not have Vibrate actuator available.".to_owned(),
+          ))?;
       cmds.push(LevelSubcommandV4::new(
         0,
         (vibrate_cmd.speed() * *actuator.step_range().end() as f64).ceil() as i32,
-        &Some(feature.id().clone())
+        &Some(feature.id().clone()),
       ))
     }
 
@@ -136,12 +188,21 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for LevelCmdV4 {
 
 impl TryFromDeviceAttributes<ScalarCmdV3> for LevelCmdV4 {
   // ScalarCmd only came in with V3, so we can just use the V3 device attributes.
-  fn try_from_device_attributes(msg: ScalarCmdV3, features: &LegacyDeviceAttributes) -> Result<Self, crate::core::errors::ButtplugError> {
-    let mut cmds: Vec<LevelSubcommandV4> = vec!(); 
+  fn try_from_device_attributes(
+    msg: ScalarCmdV3,
+    features: &LegacyDeviceAttributes,
+  ) -> Result<Self, crate::core::errors::ButtplugError> {
+    let mut cmds: Vec<LevelSubcommandV4> = vec![];
     for cmd in msg.scalars() {
       // TODO this should be checked
-      let feature = features.attrs_v3().scalar_cmd().as_ref().unwrap()[cmd.index() as usize].feature();
-      cmds.push(LevelSubcommandV4::new(0, (cmd.scalar() * *feature.actuator().as_ref().unwrap().step_range().end() as f64).ceil() as i32, &Some(feature.id().clone())));
+      let feature =
+        features.attrs_v3().scalar_cmd().as_ref().unwrap()[cmd.index() as usize].feature();
+      cmds.push(LevelSubcommandV4::new(
+        0,
+        (cmd.scalar() * *feature.actuator().as_ref().unwrap().step_range().end() as f64).ceil()
+          as i32,
+        &Some(feature.id().clone()),
+      ));
     }
     Ok(LevelCmdV4::new(msg.device_index(), cmds).into())
   }
@@ -151,12 +212,23 @@ impl TryFromDeviceAttributes<RotateCmdV1> for LevelCmdV4 {
   // RotateCmd exists up through Message Spec v3. We can assume that, if we're receiving it, we can
   // just use the V3 spec client device attributes for it. If this was sent on a V1/V2 protocol,
   // it'll still have all the same features.
-  fn try_from_device_attributes(msg: RotateCmdV1, features: &LegacyDeviceAttributes) -> Result<Self, crate::core::errors::ButtplugError> {
-    let mut cmds: Vec<LevelSubcommandV4> = vec!(); 
+  fn try_from_device_attributes(
+    msg: RotateCmdV1,
+    features: &LegacyDeviceAttributes,
+  ) -> Result<Self, crate::core::errors::ButtplugError> {
+    let mut cmds: Vec<LevelSubcommandV4> = vec![];
     for cmd in msg.rotations() {
       // TODO this should be checked
-      let feature = features.attrs_v3().rotate_cmd().as_ref().unwrap()[cmd.index() as usize].feature();
-      cmds.push(LevelSubcommandV4::new(0, (cmd.speed() * *feature.actuator().as_ref().unwrap().step_range().end() as f64 * (if cmd.clockwise() { 1f64 } else { -1f64 })).ceil() as i32, &Some(feature.id().clone())));
+      let feature =
+        features.attrs_v3().rotate_cmd().as_ref().unwrap()[cmd.index() as usize].feature();
+      cmds.push(LevelSubcommandV4::new(
+        0,
+        (cmd.speed()
+          * *feature.actuator().as_ref().unwrap().step_range().end() as f64
+          * (if cmd.clockwise() { 1f64 } else { -1f64 }))
+        .ceil() as i32,
+        &Some(feature.id().clone()),
+      ));
     }
     Ok(LevelCmdV4::new(msg.device_index(), cmds).into())
   }

@@ -51,14 +51,14 @@ pub struct GenericDeviceMessageAttributesV1 {
   feature_count: u32,
   #[getset(get = "pub")]
   #[serde(skip)]
-  pub(in crate::core::message) features: Vec<DeviceFeature>
+  pub(in crate::core::message) features: Vec<DeviceFeature>,
 }
 
 impl GenericDeviceMessageAttributesV1 {
   pub fn new(feature_count: u32, features: &Vec<DeviceFeature>) -> Self {
     Self {
       feature_count,
-      features: features.clone()
+      features: features.clone(),
     }
   }
 }

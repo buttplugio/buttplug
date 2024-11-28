@@ -15,7 +15,16 @@ use std::{collections::HashSet, ops::RangeInclusive};
 use uuid::Uuid;
 
 use super::{
-  ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugSensorFeatureMessageType, ClientDeviceMessageAttributesV1, ClientDeviceMessageAttributesV2, ClientDeviceMessageAttributesV3, ClientGenericDeviceMessageAttributesV3, RawDeviceMessageAttributesV2, SensorDeviceMessageAttributesV3, SensorType
+  ActuatorType,
+  ButtplugActuatorFeatureMessageType,
+  ButtplugSensorFeatureMessageType,
+  ClientDeviceMessageAttributesV1,
+  ClientDeviceMessageAttributesV2,
+  ClientDeviceMessageAttributesV3,
+  ClientGenericDeviceMessageAttributesV3,
+  RawDeviceMessageAttributesV2,
+  SensorDeviceMessageAttributesV3,
+  SensorType,
 };
 
 #[derive(Debug, Default, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -147,7 +156,7 @@ impl DeviceFeature {
       sensor: None,
       raw: Some(DeviceFeatureRaw::new(endpoints)),
       id: uuid::Uuid::new_v4(),
-      base_id: None
+      base_id: None,
     }
   }
 }
@@ -225,7 +234,9 @@ impl From<DeviceFeatureActuatorSerialized> for DeviceFeatureActuator {
   fn from(value: DeviceFeatureActuatorSerialized) -> Self {
     Self {
       step_range: value.step_range.clone(),
-      step_limit: value.step_limit.unwrap_or(RangeInclusive::new(0, value.step_range.end().abs() as u32)),
+      step_limit: value
+        .step_limit
+        .unwrap_or(RangeInclusive::new(0, value.step_range.end().abs() as u32)),
       messages: value.messages,
     }
   }
@@ -315,8 +326,14 @@ impl DeviceFeatureRaw {
 }
 
 /// TryFrom for Buttplug Device Messages that need to use a device feature definition to convert
-pub(crate) trait TryFromDeviceAttributes<T> where Self: Sized {
-  fn try_from_device_attributes(msg: T, features: &LegacyDeviceAttributes) -> Result<Self, ButtplugError>;
+pub(crate) trait TryFromDeviceAttributes<T>
+where
+  Self: Sized,
+{
+  fn try_from_device_attributes(
+    msg: T,
+    features: &LegacyDeviceAttributes,
+  ) -> Result<Self, ButtplugError>;
 }
 
 impl TryFrom<DeviceFeature> for SensorDeviceMessageAttributesV3 {
@@ -328,7 +345,7 @@ impl TryFrom<DeviceFeature> for SensorDeviceMessageAttributesV3 {
         sensor_type: (*value.feature_type()).try_into()?,
         sensor_range: sensor.value_range().clone(),
         feature: value.clone(),
-        index: 0
+        index: 0,
       })
     } else {
       Err("Device Feature does not expose a sensor.".to_owned())
@@ -348,7 +365,7 @@ impl TryFrom<DeviceFeature> for ClientGenericDeviceMessageAttributesV3 {
         actuator_type,
         step_count,
         feature: value.clone(),
-        index: 0
+        index: 0,
       };
       Ok(attrs)
     } else {
@@ -368,7 +385,9 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
         .filter(|x| {
           if let Some(actuator) = x.actuator() {
             // Carve out RotateCmd here
-            !(*message_type == ButtplugActuatorFeatureMessageType::LevelCmd && *x.feature_type() == FeatureType::RotateWithDirection) && actuator.messages().contains(message_type)
+            !(*message_type == ButtplugActuatorFeatureMessageType::LevelCmd
+              && *x.feature_type() == FeatureType::RotateWithDirection)
+              && actuator.messages().contains(message_type)
           } else {
             false
           }
@@ -386,21 +405,24 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
     // feature type and message in >= v4.
     let rotate_attributes = {
       let attrs: Vec<ClientGenericDeviceMessageAttributesV3> = features
-      .iter()
-      .filter(|x| {
-        if let Some(actuator) = x.actuator() {
-          actuator.messages().contains(&ButtplugActuatorFeatureMessageType::LevelCmd) && *x.feature_type() == FeatureType::RotateWithDirection
-        } else {
-          false
-        }
-      })
-      .map(|x| x.clone().try_into().unwrap())
-      .collect();
-    if !attrs.is_empty() {
-      Some(attrs)
-    } else {
-      None
-    }
+        .iter()
+        .filter(|x| {
+          if let Some(actuator) = x.actuator() {
+            actuator
+              .messages()
+              .contains(&ButtplugActuatorFeatureMessageType::LevelCmd)
+              && *x.feature_type() == FeatureType::RotateWithDirection
+          } else {
+            false
+          }
+        })
+        .map(|x| x.clone().try_into().unwrap())
+        .collect();
+      if !attrs.is_empty() {
+        Some(attrs)
+      } else {
+        None
+      }
     };
 
     let sensor_filter = |message_type| {
@@ -446,13 +468,13 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
 
 impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV2 {
   fn from(value: Vec<DeviceFeature>) -> Self {
-      ClientDeviceMessageAttributesV3::from(value).into()
+    ClientDeviceMessageAttributesV3::from(value).into()
   }
 }
 
 impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV1 {
   fn from(value: Vec<DeviceFeature>) -> Self {
-      ClientDeviceMessageAttributesV2::from(ClientDeviceMessageAttributesV3::from(value)).into()
+    ClientDeviceMessageAttributesV2::from(ClientDeviceMessageAttributesV3::from(value)).into()
   }
 }
 
@@ -466,7 +488,7 @@ pub(crate) struct LegacyDeviceAttributes {
   #[getset(get = "pub")]
   attrs_v3: ClientDeviceMessageAttributesV3,
   #[getset(get = "pub")]
-  features: Vec<DeviceFeature>
+  features: Vec<DeviceFeature>,
 }
 
 impl LegacyDeviceAttributes {
@@ -477,7 +499,7 @@ impl LegacyDeviceAttributes {
       /*
       attrs_v1: ClientDeviceMessageAttributesV1::from(features.clone()),
       */
-      features: features.clone()
+      features: features.clone(),
     }
   }
 }

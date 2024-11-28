@@ -6,9 +6,13 @@
 // for full license information.
 
 use crate::core::message::{
-  v1::NullDeviceMessageAttributesV1, ClientDeviceMessageAttributesV1, DeviceFeature, Endpoint, GenericDeviceMessageAttributesV1
+  v1::NullDeviceMessageAttributesV1,
+  ClientDeviceMessageAttributesV1,
+  DeviceFeature,
+  Endpoint,
+  GenericDeviceMessageAttributesV1,
 };
-use getset::{Getters, Setters, CopyGetters};
+use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Getters, Setters)]
@@ -108,7 +112,7 @@ pub struct GenericDeviceMessageAttributesV2 {
   pub(in crate::core::message) step_count: Vec<u32>,
   #[getset(get = "pub")]
   #[serde(skip)]
-  pub(in crate::core::message) features: Vec<DeviceFeature>
+  pub(in crate::core::message) features: Vec<DeviceFeature>,
 }
 
 impl From<GenericDeviceMessageAttributesV2> for GenericDeviceMessageAttributesV1 {
@@ -136,13 +140,13 @@ impl RawDeviceMessageAttributesV2 {
 pub struct SensorDeviceMessageAttributesV2 {
   #[getset(get = "pub")]
   #[serde(skip)]
-  feature: DeviceFeature
+  feature: DeviceFeature,
 }
 
 impl SensorDeviceMessageAttributesV2 {
   pub fn new(feature: &DeviceFeature) -> Self {
     Self {
-      feature: feature.clone()
+      feature: feature.clone(),
     }
   }
 }
