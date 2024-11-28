@@ -5,10 +5,16 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::
-  message::{
-    ActuatorType, ClientDeviceMessageAttributesV2, DeviceFeature, GenericDeviceMessageAttributesV2, NullDeviceMessageAttributesV1, RawDeviceMessageAttributesV2, SensorDeviceMessageAttributesV2, SensorType
-  };
+use crate::core::message::{
+  ActuatorType,
+  ClientDeviceMessageAttributesV2,
+  DeviceFeature,
+  GenericDeviceMessageAttributesV2,
+  NullDeviceMessageAttributesV1,
+  RawDeviceMessageAttributesV2,
+  SensorDeviceMessageAttributesV2,
+  SensorType,
+};
 use getset::{Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use std::ops::RangeInclusive;
@@ -100,7 +106,7 @@ pub fn vibrate_cmd_from_scalar_cmd(
   GenericDeviceMessageAttributesV2 {
     feature_count,
     step_count,
-    features
+    features,
   }
 }
 
@@ -207,7 +213,7 @@ pub struct ClientGenericDeviceMessageAttributesV3 {
   // of this version of the protocol, only use it for comparison when doing message conversion.
   #[getset(get = "pub")]
   #[serde(skip)]
-  pub(in crate::core::message) feature: DeviceFeature
+  pub(in crate::core::message) feature: DeviceFeature,
 }
 
 impl From<Vec<ClientGenericDeviceMessageAttributesV3>> for GenericDeviceMessageAttributesV2 {
@@ -221,13 +227,18 @@ impl From<Vec<ClientGenericDeviceMessageAttributesV3>> for GenericDeviceMessageA
 }
 
 impl ClientGenericDeviceMessageAttributesV3 {
-  pub fn new(feature_descriptor: &str, step_count: u32, actuator_type: ActuatorType, feature: &DeviceFeature) -> Self {
+  pub fn new(
+    feature_descriptor: &str,
+    step_count: u32,
+    actuator_type: ActuatorType,
+    feature: &DeviceFeature,
+  ) -> Self {
     Self {
       feature_descriptor: feature_descriptor.to_owned(),
       actuator_type,
       step_count,
       feature: feature.clone(),
-      index: 0
+      index: 0,
     }
   }
 }
@@ -265,5 +276,5 @@ pub struct SensorDeviceMessageAttributesV3 {
   // of this version of the protocol, only use it for comparison when doing message conversion.
   #[getset(get = "pub")]
   #[serde(skip)]
-  pub(in crate::core::message) feature: DeviceFeature  
+  pub(in crate::core::message) feature: DeviceFeature,
 }

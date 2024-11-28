@@ -19,11 +19,11 @@ use crate::core::{
 };
 use ahash::{HashMap, HashMapExt};
 use getset::Getters;
-use uuid::Uuid;
 use std::{
   collections::HashSet,
   sync::atomic::{AtomicBool, AtomicI32, Ordering::Relaxed},
 };
+use uuid::Uuid;
 
 #[derive(Getters)]
 #[getset(get = "pub")]
@@ -32,11 +32,15 @@ struct FeatureStatus {
   actuator_type: ActuatorType,
   actuator: DeviceFeatureActuator,
   sent: AtomicBool,
-  value: AtomicI32
+  value: AtomicI32,
 }
 
 impl FeatureStatus {
-  pub fn new(feature_id: &Uuid, actuator_type: &ActuatorType, actuator: &DeviceFeatureActuator) -> Self {
+  pub fn new(
+    feature_id: &Uuid,
+    actuator_type: &ActuatorType,
+    actuator: &DeviceFeatureActuator,
+  ) -> Self {
     Self {
       feature_id: *feature_id,
       actuator_type: *actuator_type,
@@ -47,10 +51,7 @@ impl FeatureStatus {
   }
 
   pub fn current(&self) -> (ActuatorType, i32) {
-    (
-      self.actuator_type,
-      self.value.load(Relaxed),
-    )
+    (self.actuator_type, self.value.load(Relaxed))
   }
 
   pub fn messages(&self) -> &HashSet<ButtplugActuatorFeatureMessageType> {
@@ -101,7 +102,7 @@ impl ActuatorCommandManager {
   pub fn new(features: &Vec<DeviceFeature>) -> Self {
     let mut stop_commands = vec![];
 
-    let mut statuses = vec!();
+    let mut statuses = vec![];
     let mut level_subcommands = vec![];
     for (index, feature) in features.iter().enumerate() {
       if let Some(actuator) = feature.actuator() {
@@ -111,7 +112,11 @@ impl ActuatorCommandManager {
           .messages()
           .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::LevelCmd)
         {
-          level_subcommands.push(LevelSubcommandV4::new(index as u32, 0, &Some(feature.id().clone())));
+          level_subcommands.push(LevelSubcommandV4::new(
+            index as u32,
+            0,
+            &Some(feature.id().clone()),
+          ));
         }
       }
     }
@@ -146,7 +151,11 @@ impl ActuatorCommandManager {
           result.push((cmd.feature_id().clone(), *actuator, cmd.current().1));
         }
       } else if match_all && cmd.messages().contains(&msg_type) {
-        result.push((cmd.feature_id().clone(), *cmd.actuator_type(), cmd.current().1));
+        result.push((
+          cmd.feature_id().clone(),
+          *cmd.actuator_type(),
+          cmd.current().1,
+        ));
       }
     }
     // Return the command vector for the protocol to turn into proprietary commands
@@ -163,18 +172,26 @@ impl ActuatorCommandManager {
     // subcommand.
     if msg.levels().is_empty() {
       return Err(
-        ButtplugDeviceError::ProtocolRequirementError(
-          format!("LevelCmd has 0 commands, will not do anything: {:?}", msg),
-        )
+        ButtplugDeviceError::ProtocolRequirementError(format!(
+          "LevelCmd has 0 commands, will not do anything: {:?}",
+          msg
+        ))
         .into(),
       );
     }
 
-    if msg.levels().iter().filter(|x| x.feature_id().is_none()).count() > 0 {
+    if msg
+      .levels()
+      .iter()
+      .filter(|x| x.feature_id().is_none())
+      .count()
+      > 0
+    {
       return Err(
-        ButtplugDeviceError::ProtocolRequirementError(
-          format!("LevelCmd has unresolved feature ids: {:?}", msg),
-        )
+        ButtplugDeviceError::ProtocolRequirementError(format!(
+          "LevelCmd has unresolved feature ids: {:?}",
+          msg
+        ))
         .into(),
       );
     }
@@ -192,14 +209,20 @@ impl ActuatorCommandManager {
     let mut final_result = vec![None; idxs.len()];
 
     let mut commands = vec![];
-    msg
-      .levels()
-      .iter()
-      .for_each(|x| {
-        let id = x.feature_id().expect("Already checked existence");
-        trace!("Updating command for {:?}", id);
-        commands.push((id.clone(), *self.feature_status.iter().find(|y| *y.feature_id() == x.feature_id().unwrap()).unwrap().actuator_type(), x.level()))
-      });
+    msg.levels().iter().for_each(|x| {
+      let id = x.feature_id().expect("Already checked existence");
+      trace!("Updating command for {:?}", id);
+      commands.push((
+        id.clone(),
+        *self
+          .feature_status
+          .iter()
+          .find(|y| *y.feature_id() == x.feature_id().unwrap())
+          .unwrap()
+          .actuator_type(),
+        x.level(),
+      ))
+    });
     let mut result = self.update(
       ButtplugActuatorFeatureMessageType::LevelCmd,
       &commands,

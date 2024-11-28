@@ -20,7 +20,7 @@ pub use client_device_message_attributes::{
   ClientDeviceMessageAttributesV2,
   GenericDeviceMessageAttributesV2,
   RawDeviceMessageAttributesV2,
-  SensorDeviceMessageAttributesV2
+  SensorDeviceMessageAttributesV2,
 };
 pub use device_added::DeviceAddedV2;
 pub use device_list::DeviceListV2;

@@ -6,7 +6,14 @@
 // for full license information.
 
 use crate::core::message::{
-  ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, DeviceAddedV2, DeviceMessageInfoV0, DeviceMessageInfoV1, DeviceMessageInfoV2
+  ButtplugMessage,
+  ButtplugMessageError,
+  ButtplugMessageFinalizer,
+  ButtplugMessageValidator,
+  DeviceAddedV2,
+  DeviceMessageInfoV0,
+  DeviceMessageInfoV1,
+  DeviceMessageInfoV2,
 };
 
 use getset::{CopyGetters, Getters};
