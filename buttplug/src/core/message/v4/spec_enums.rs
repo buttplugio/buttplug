@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::core::{errors::ButtplugError, message::{
-  ButtplugClientMessageV0, ButtplugClientMessageV1, ButtplugClientMessageV2, ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, ButtplugServerMessageV3, DeviceFeature, DeviceRemovedV0, ErrorV0, LegacyDeviceAttributes, OkV0, PingV0, RawReadCmdV2, RawReadingV2, RawSubscribeCmdV2, RawUnsubscribeCmdV2, RawWriteCmdV2, RequestDeviceListV0, RequestServerInfoV1, ScanningFinishedV0, ServerInfoV2, StartScanningV0, StopAllDevicesV0, StopDeviceCmdV0, StopScanningV0, TryFromClientMessage, TryFromDeviceAttributes
+  ButtplugClientMessageV0, ButtplugClientMessageV1, ButtplugClientMessageV2, ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, ButtplugServerMessageV3, DeviceRemovedV0, ErrorV0, LegacyDeviceAttributes, OkV0, PingV0, RawReadCmdV2, RawReadingV2, RawSubscribeCmdV2, RawUnsubscribeCmdV2, RawWriteCmdV2, RequestDeviceListV0, RequestServerInfoV1, ScanningFinishedV0, ServerInfoV2, StartScanningV0, StopAllDevicesV0, StopDeviceCmdV0, StopScanningV0, TryFromClientMessage, TryFromDeviceAttributes
 }};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};

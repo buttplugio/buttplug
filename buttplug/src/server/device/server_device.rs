@@ -559,7 +559,7 @@ impl ServerDevice {
   ) -> Result<(), ButtplugDeviceError> {
 
     if let Some(feature) = self.definition.features().iter().find(|x| *x.id() == *feature_id) {
-      if (*feature.feature_type() == FeatureType::from(*sensor_type)) {
+      if *feature.feature_type() == FeatureType::from(*sensor_type) {
         Ok(())
       } else {
         Err(ButtplugDeviceError::DeviceSensorTypeMismatch(
