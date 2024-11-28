@@ -177,7 +177,7 @@ pub enum ButtplugDeviceError {
   /// Actuator Type Mismatch: Index {0} got command for {1}, but expects {2}
   DeviceActuatorTypeMismatch(String, ActuatorType, FeatureType),
   /// Sensor Type Mismatch: Index {0} got command for {1}, but expects {2}
-  DeviceSensorTypeMismatch(u32, SensorType, FeatureType),
+  DeviceSensorTypeMismatch(String, SensorType, FeatureType),
   /// Protocol does not have an implementation available for Sensor Type {0}
   ProtocolSensorNotSupported(SensorType),
 }
