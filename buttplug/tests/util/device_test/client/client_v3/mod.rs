@@ -31,6 +31,7 @@ use tracing::*;
 
 async fn run_test_client_command(command: &TestClientCommand, device: &Arc<ButtplugClientDevice>) {
   use TestClientCommand::*;
+  trace!("Running test command: {:?}", command);
   match command {
     Scalar(msg) => {
       device
@@ -220,7 +221,7 @@ pub async fn run_test_case(
           for command in commands {
             tokio::select! {
               _ = tokio::time::sleep(Duration::from_millis(500)) => {
-                panic!("Timeout while waiting for device output!")
+                panic!("Timeout while waiting for device init output!")
               }
               event = device_receiver.recv() => {
                 info!("Got event {:?}", event);
@@ -294,7 +295,7 @@ pub async fn run_test_case(
         for command in commands {
           tokio::select! {
             _ = tokio::time::sleep(Duration::from_millis(500)) => {
-              panic!("Timeout while waiting for device output!")
+              panic!("Timeout while waiting for device command output!")
             }
             event = device_receiver.recv() => {
               if let Some(command_event) = event {

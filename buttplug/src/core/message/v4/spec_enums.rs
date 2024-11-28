@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::core::{errors::ButtplugError, message::{
-  ButtplugClientMessageV0, ButtplugClientMessageV1, ButtplugClientMessageV2, ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, ButtplugServerMessageV3, DeviceFeature, DeviceRemovedV0, ErrorV0, OkV0, PingV0, RawReadCmdV2, RawReadingV2, RawSubscribeCmdV2, RawUnsubscribeCmdV2, RawWriteCmdV2, RequestDeviceListV0, RequestServerInfoV1, ScanningFinishedV0, ServerInfoV2, StartScanningV0, StopAllDevicesV0, StopDeviceCmdV0, StopScanningV0, TryFromClientMessage, TryFromDeviceFeatures
+  ButtplugClientMessageV0, ButtplugClientMessageV1, ButtplugClientMessageV2, ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, ButtplugServerMessageV3, DeviceFeature, DeviceRemovedV0, ErrorV0, LegacyDeviceAttributes, OkV0, PingV0, RawReadCmdV2, RawReadingV2, RawSubscribeCmdV2, RawUnsubscribeCmdV2, RawWriteCmdV2, RequestDeviceListV0, RequestServerInfoV1, ScanningFinishedV0, ServerInfoV2, StartScanningV0, StopAllDevicesV0, StopDeviceCmdV0, StopScanningV0, TryFromClientMessage, TryFromDeviceAttributes
 }};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
@@ -159,7 +159,7 @@ impl TryFrom<ButtplugServerMessageV4> for ButtplugServerMessageV3 {
 }
 
 impl TryFromClientMessage<ButtplugClientMessageVariant> for ButtplugClientMessageV4 {
-  fn try_from_client_message(msg: ButtplugClientMessageVariant, features: &Option<Vec<DeviceFeature>>) -> Result<Self, crate::core::errors::ButtplugError> {
+  fn try_from_client_message(msg: ButtplugClientMessageVariant, features: &Option<LegacyDeviceAttributes>) -> Result<Self, crate::core::errors::ButtplugError> {
     let id = msg.id();
     let mut converted_msg = match msg {
       ButtplugClientMessageVariant::V0(m) => Self::try_from_client_message(m, features),
@@ -177,7 +177,7 @@ impl TryFromClientMessage<ButtplugClientMessageVariant> for ButtplugClientMessag
 impl TryFromClientMessage<ButtplugClientMessageV0> for ButtplugClientMessageV4 {
   fn try_from_client_message(
     msg: ButtplugClientMessageV0,
-    features: &Option<Vec<DeviceFeature>>
+    features: &Option<LegacyDeviceAttributes>
   ) -> Result<Self, ButtplugError> {
     // All v0 messages can be converted to v1 messages.
     Self::try_from_client_message(ButtplugClientMessageV1::from(msg), features)
@@ -187,7 +187,7 @@ impl TryFromClientMessage<ButtplugClientMessageV0> for ButtplugClientMessageV4 {
 impl TryFromClientMessage<ButtplugClientMessageV1> for ButtplugClientMessageV4 {
   fn try_from_client_message(
     msg: ButtplugClientMessageV1,
-    features: &Option<Vec<DeviceFeature>>
+    features: &Option<LegacyDeviceAttributes>
   ) -> Result<Self, ButtplugError> {
     // Instead of converting to v2 message attributes then to v4 device features, we move directly
     // from v0 command messages to v4 device features here. There's no reason to do the middle step.
@@ -195,11 +195,11 @@ impl TryFromClientMessage<ButtplugClientMessageV1> for ButtplugClientMessageV4 {
       match msg {
         ButtplugClientMessageV1::VorzeA10CycloneCmd(m)  => {
           // Vorze and RotateCmd are equivalent, so this is an ok conversion.
-          Ok(LevelCmdV4::try_from_device_features(m, device_features)?.into())
+          Ok(LevelCmdV4::try_from_device_attributes(m, device_features)?.into())
         }
         ButtplugClientMessageV1::SingleMotorVibrateCmd(m) => {
           // Vorze and RotateCmd are equivalent, so this is an ok conversion.
-          Ok(LevelCmdV4::try_from_device_features(m, device_features)?.into())
+          Ok(LevelCmdV4::try_from_device_attributes(m, device_features)?.into())
         }
         _ => Self::try_from_client_message(ButtplugClientMessageV2::try_from(msg)?, features),
       }  
@@ -210,19 +210,19 @@ impl TryFromClientMessage<ButtplugClientMessageV1> for ButtplugClientMessageV4 {
 }
 
 impl TryFromClientMessage<ButtplugClientMessageV2> for ButtplugClientMessageV4 {
-  fn try_from_client_message(msg: ButtplugClientMessageV2, features: &Option<Vec<DeviceFeature>>) -> Result<Self, ButtplugError> {
+  fn try_from_client_message(msg: ButtplugClientMessageV2, features: &Option<LegacyDeviceAttributes>) -> Result<Self, ButtplugError> {
     if let Some(device_features) = features {
       match msg {
         // Convert v2 specific queries to v3 generic sensor queries
         ButtplugClientMessageV2::BatteryLevelCmd(m) => {
-          Ok(SensorReadCmdV4::try_from_device_features(m, device_features)?.into())
+          Ok(SensorReadCmdV4::try_from_device_attributes(m, device_features)?.into())
         }
         ButtplugClientMessageV2::RSSILevelCmd(m) => {
-          Ok(SensorReadCmdV4::try_from_device_features(m, device_features)?.into())
+          Ok(SensorReadCmdV4::try_from_device_attributes(m, device_features)?.into())
         }
         // Convert VibrateCmd to a ScalarCmd command
         ButtplugClientMessageV2::VibrateCmd(m) => {
-          Ok(LevelCmdV4::try_from_device_features(m, device_features)?.into())
+          Ok(LevelCmdV4::try_from_device_attributes(m, device_features)?.into())
         }
         _ => Self::try_from_client_message(ButtplugClientMessageV3::try_from(msg)?, features),
       }
@@ -233,24 +233,24 @@ impl TryFromClientMessage<ButtplugClientMessageV2> for ButtplugClientMessageV4 {
 }
 
 impl TryFromClientMessage<ButtplugClientMessageV3> for ButtplugClientMessageV4 {
-  fn try_from_client_message(msg: ButtplugClientMessageV3, features: &Option<Vec<DeviceFeature>>) -> Result<Self, ButtplugError> {
+  fn try_from_client_message(msg: ButtplugClientMessageV3, features: &Option<LegacyDeviceAttributes>) -> Result<Self, ButtplugError> {
     if let Some(features) = features {
       match msg {
         // Convert v1/v2 message attribute commands into device feature commands
         ButtplugClientMessageV3::VibrateCmd(m) =>
-          Ok(LevelCmdV4::try_from_device_features(m, features)?.into()),
+          Ok(LevelCmdV4::try_from_device_attributes(m, features)?.into()),
         ButtplugClientMessageV3::ScalarCmd(m) =>
-          Ok(LevelCmdV4::try_from_device_features(m, features)?.into()),
+          Ok(LevelCmdV4::try_from_device_attributes(m, features)?.into()),
         ButtplugClientMessageV3::RotateCmd(m) =>
-          Ok(LevelCmdV4::try_from_device_features(m, features)?.into()),
+          Ok(LevelCmdV4::try_from_device_attributes(m, features)?.into()),
         ButtplugClientMessageV3::LinearCmd(m) =>
-          Ok(LinearCmdV4::try_from_device_features(m, features)?.into()),      
+          Ok(LinearCmdV4::try_from_device_attributes(m, features)?.into()),      
         ButtplugClientMessageV3::SensorReadCmd(m) =>
-          Ok(SensorReadCmdV4::try_from_device_features(m, features)?.into()),
+          Ok(SensorReadCmdV4::try_from_device_attributes(m, features)?.into()),
         ButtplugClientMessageV3::SensorSubscribeCmd(m) =>
-          Ok(SensorSubscribeCmdV4::try_from_device_features(m, features)?.into()),
+          Ok(SensorSubscribeCmdV4::try_from_device_attributes(m, features)?.into()),
         ButtplugClientMessageV3::SensorUnsubscribeCmd(m) =>
-          Ok(SensorUnsubscribeCmdV4::try_from_device_features(m, features)?.into()),
+          Ok(SensorUnsubscribeCmdV4::try_from_device_attributes(m, features)?.into()),
         _ => ButtplugClientMessageV4::try_from(msg).map_err(|e: ButtplugMessageError| e.into()),
       }
     } else {

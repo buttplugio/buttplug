@@ -16,14 +16,12 @@
 //! device structures (i.e. converting from v4 device features to <= v3 message attributes for
 //! messages like DeviceAdded).
 
-use super::device::ServerDeviceManager;
 use crate::core::{
   errors::{ButtplugError, ButtplugMessageError},
   message::{
     BatteryLevelReadingV2,
     ButtplugClientMessageV2,
     ButtplugClientMessageV3,
-    ButtplugClientMessageV4,
     ButtplugClientMessageVariant,
     ButtplugDeviceMessage,
     ButtplugMessage,
