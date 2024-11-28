@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::core::message::{
-  v1::NullDeviceMessageAttributesV1, ClientDeviceMessageAttributesV1, Endpoint, GenericDeviceMessageAttributesV1
+  v1::NullDeviceMessageAttributesV1, ClientDeviceMessageAttributesV1, DeviceFeature, Endpoint, GenericDeviceMessageAttributesV1
 };
 use getset::{Getters, Setters, CopyGetters};
 use serde::{Deserialize, Serialize};
@@ -29,13 +29,13 @@ pub struct ClientDeviceMessageAttributesV2 {
   #[getset(get = "pub")]
   #[serde(rename = "BatteryLevelCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::core::message) battery_level_cmd: Option<NullDeviceMessageAttributesV1>,
+  pub(in crate::core::message) battery_level_cmd: Option<SensorDeviceMessageAttributesV2>,
 
   // RSSILevel is added post-serialization (only for bluetooth devices)
   #[getset(get = "pub")]
   #[serde(rename = "RSSILevelCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::core::message) rssi_level_cmd: Option<NullDeviceMessageAttributesV1>,
+  pub(in crate::core::message) rssi_level_cmd: Option<SensorDeviceMessageAttributesV2>,
 
   // StopDeviceCmd always exists
   #[getset(get = "pub")]
@@ -106,11 +106,14 @@ pub struct GenericDeviceMessageAttributesV2 {
   #[getset(get = "pub")]
   #[serde(rename = "StepCount")]
   pub(in crate::core::message) step_count: Vec<u32>,
+  #[getset(get = "pub")]
+  #[serde(skip)]
+  pub(in crate::core::message) features: Vec<DeviceFeature>
 }
 
 impl From<GenericDeviceMessageAttributesV2> for GenericDeviceMessageAttributesV1 {
   fn from(attributes: GenericDeviceMessageAttributesV2) -> Self {
-    Self::new(attributes.feature_count())
+    Self::new(attributes.feature_count(), attributes.features())
   }
 }
 
@@ -125,6 +128,21 @@ impl RawDeviceMessageAttributesV2 {
   pub fn new(endpoints: &[Endpoint]) -> Self {
     Self {
       endpoints: endpoints.to_vec(),
+    }
+  }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Default, Serialize, Deserialize, Getters, Setters)]
+pub struct SensorDeviceMessageAttributesV2 {
+  #[getset(get = "pub")]
+  #[serde(skip)]
+  feature: DeviceFeature
+}
+
+impl SensorDeviceMessageAttributesV2 {
+  pub fn new(feature: &DeviceFeature) -> Self {
+    Self {
+      feature: feature.clone()
     }
   }
 }
