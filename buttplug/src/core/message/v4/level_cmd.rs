@@ -5,9 +5,9 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::{
-  self, find_device_features, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, FeatureType, LegacyDeviceAttributes, RotateCmdV1, ScalarCmdV3, SingleMotorVibrateCmdV0, TryFromDeviceAttributes, VibrateCmdV1, VorzeA10CycloneCmdV0
-};
+use crate::core::{errors::{ButtplugDeviceError, ButtplugError}, message::{
+  ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, FeatureType, LegacyDeviceAttributes, RotateCmdV1, ScalarCmdV3, SingleMotorVibrateCmdV0, TryFromDeviceAttributes, VibrateCmdV1, VorzeA10CycloneCmdV0
+}};
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
@@ -111,26 +111,24 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for LevelCmdV4 {
   // VibrateCmd only exists up through Message Spec v2. We can assume that, if we're receiving it,
   // we can just use the V2 spec client device attributes for it. If this was sent on a V1 protocol,
   // it'll still have all the same features.
+  //
+  // Due to specs v1/2 using feature counts instead of per-feature objects, we calculate our 
   fn try_from_device_attributes(msg: VibrateCmdV1, features: &LegacyDeviceAttributes) -> Result<Self, crate::core::errors::ButtplugError> {
-    let filtered_features = find_device_features(features.features(), |x| {
-      *x.feature_type() == FeatureType::Vibrate
-        && x.actuator().as_ref().is_some_and(|y| {
-          y.messages()
-            .contains(&message::ButtplugActuatorFeatureMessageType::LevelCmd)
-        })
-    })?;
+    let vibrate_attributes = features.attrs_v2().vibrate_cmd().as_ref().ok_or(ButtplugError::from(ButtplugDeviceError::DeviceFeatureCountMismatch(0, msg.speeds().len() as u32)))?;
 
-    let cmds: Vec<LevelSubcommandV4> = msg
-    .speeds()
-    .iter()
-    .map(|x| {
-      LevelSubcommandV4::new(
+    let mut cmds: Vec<LevelSubcommandV4> = vec![];
+    for vibrate_cmd in msg.speeds() {
+      if vibrate_cmd.index() > vibrate_attributes.features().len() as u32 {
+        return Err(ButtplugError::from(ButtplugDeviceError::DeviceFeatureCountMismatch(vibrate_cmd.index(), msg.speeds().len() as u32)))
+      }
+      let feature = &vibrate_attributes.features()[vibrate_cmd.index() as usize];
+      let actuator = feature.actuator().as_ref().ok_or(ButtplugDeviceError::DeviceConfigurationError("Device configuration does not have Vibrate actuator available.".to_owned()))?;
+      cmds.push(LevelSubcommandV4::new(
         0,
-        (x.speed() * *filtered_features[x.index() as usize].actuator().as_ref().unwrap().step_range().end() as f64).ceil() as i32,
-        &Some(filtered_features[x.index() as usize].id().clone())
-      )
-    })
-    .collect();
+        (vibrate_cmd.speed() * *actuator.step_range().end() as f64).ceil() as i32,
+        &Some(feature.id().clone())
+      ))
+    }
 
     Ok(LevelCmdV4::new(msg.device_index(), cmds).into())
   }

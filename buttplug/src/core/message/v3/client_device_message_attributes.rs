@@ -7,7 +7,7 @@
 
 use crate::core::
   message::{
-    ActuatorType, ClientDeviceMessageAttributesV2, DeviceFeature, GenericDeviceMessageAttributesV2, NullDeviceMessageAttributesV1, RawDeviceMessageAttributesV2, SensorType
+    ActuatorType, ClientDeviceMessageAttributesV2, DeviceFeature, GenericDeviceMessageAttributesV2, NullDeviceMessageAttributesV1, RawDeviceMessageAttributesV2, SensorDeviceMessageAttributesV2, SensorType
   };
 use getset::{Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
@@ -89,15 +89,18 @@ pub fn vibrate_cmd_from_scalar_cmd(
 ) -> GenericDeviceMessageAttributesV2 {
   let mut feature_count = 0u32;
   let mut step_count = vec![];
+  let mut features = vec![];
   for attr in attributes_vec {
     if *attr.actuator_type() == ActuatorType::Vibrate {
       feature_count += 1;
       step_count.push(*attr.step_count());
+      features.push(attr.feature().clone());
     }
   }
   GenericDeviceMessageAttributesV2 {
     feature_count,
     step_count,
+    features
   }
 }
 
@@ -119,11 +122,11 @@ impl From<ClientDeviceMessageAttributesV3> for ClientDeviceMessageAttributesV2 {
         .map(|x| GenericDeviceMessageAttributesV2::from(x.clone())),
       battery_level_cmd: {
         if let Some(sensor_info) = other.sensor_read_cmd() {
-          if sensor_info
+          if let Some(attr) = sensor_info
             .iter()
-            .any(|x| *x.sensor_type() == SensorType::Battery)
+            .find(|x| *x.sensor_type() == SensorType::Battery)
           {
-            Some(NullDeviceMessageAttributesV1::default())
+            Some(SensorDeviceMessageAttributesV2::new(attr.feature()))
           } else {
             None
           }
@@ -133,11 +136,11 @@ impl From<ClientDeviceMessageAttributesV3> for ClientDeviceMessageAttributesV2 {
       },
       rssi_level_cmd: {
         if let Some(sensor_info) = other.sensor_read_cmd() {
-          if sensor_info
+          if let Some(attr) = sensor_info
             .iter()
-            .any(|x| *x.sensor_type() == SensorType::RSSI)
+            .find(|x| *x.sensor_type() == SensorType::RSSI)
           {
-            Some(NullDeviceMessageAttributesV1::default())
+            Some(SensorDeviceMessageAttributesV2::new(attr.feature()))
           } else {
             None
           }
@@ -212,6 +215,7 @@ impl From<Vec<ClientGenericDeviceMessageAttributesV3>> for GenericDeviceMessageA
     Self {
       feature_count: attributes_vec.len() as u32,
       step_count: attributes_vec.iter().map(|x| *x.step_count()).collect(),
+      features: attributes_vec.iter().map(|x| x.feature().clone()).collect(),
     }
   }
 }

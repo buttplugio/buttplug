@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::core::message::{
-  ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, ButtplugSensorFeatureMessageType, LegacyDeviceAttributes, SensorSubscribeCmdV3, SensorType, TryFromDeviceAttributes
+  ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, LegacyDeviceAttributes, SensorSubscribeCmdV3, SensorType, TryFromDeviceAttributes
 };
 use getset::Getters;
 #[cfg(feature = "serialize-json")]
