@@ -8,7 +8,7 @@
 use crate::core::message::ActuatorType;
 use crate::util::async_manager;
 use crate::{
-  core::{errors::ButtplugDeviceError, message, message::Endpoint},
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
