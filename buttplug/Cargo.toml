@@ -48,6 +48,7 @@ wasm = ["server", "wasm-bindgen-runtime", "serialize-json", "uuid/js"]
 dummy-runtime=[]
 # Compiler config
 unstable=[]
+default_v4_spec = []
 
 [dependencies]
 buttplug_derive = "0.8.1"
