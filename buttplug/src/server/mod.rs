@@ -49,12 +49,10 @@ pub mod device;
 mod ping_timer;
 mod server;
 mod server_builder;
-mod server_downgrade_wrapper;
 mod server_message_conversion;
 
 pub use server::ButtplugServer;
 pub use server_builder::ButtplugServerBuilder;
-pub use server_downgrade_wrapper::ButtplugServerDowngradeWrapper;
 
 use futures::future::BoxFuture;
 use thiserror::Error;
