@@ -13,13 +13,10 @@ use crate::{
     errors::{ButtplugError, ButtplugMessageError},
     message::{ButtplugClientMessageV3, ButtplugServerMessageV3, ButtplugServerMessageVariant},
   },
-  server::{ButtplugServer, ButtplugServerDowngradeWrapper},
+  server::{ButtplugServer, ButtplugServerBuilder},
   util::async_manager,
 };
-use futures::{
-  future::{self, BoxFuture, FutureExt},
-  StreamExt,
-};
+use futures::{StreamExt, future::{self, BoxFuture, FutureExt}};
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
@@ -67,7 +64,7 @@ impl ButtplugInProcessClientConnectorBuilder {
 #[derive(Clone)]
 pub struct ButtplugInProcessClientConnector {
   /// Internal server object for the embedded connector.
-  server: Arc<ButtplugServerDowngradeWrapper>,
+  server: Arc<ButtplugServer>,
   server_outbound_sender: Sender<ButtplugServerMessageV3>,
   connected: Arc<AtomicBool>,
 }
@@ -89,13 +86,11 @@ impl<'a> ButtplugInProcessClientConnector {
     let (server_outbound_sender, _) = channel(256);
     Self {
       server_outbound_sender,
-      server: Arc::new(ButtplugServerDowngradeWrapper::new(
-        server.unwrap(), /*.unwrap_or_else(|| {
-                           ButtplugServerBuilder::default()
-                             .finish()
-                             .expect("Default server builder should always work.")
-                         })*/
-      )),
+      server: Arc::new(server.unwrap_or_else(|| {
+        ButtplugServerBuilder::default()
+          .finish()
+          .expect("Default server builder should always work.")
+      })),
       connected: Arc::new(AtomicBool::new(false)),
     }
   }
@@ -112,7 +107,7 @@ impl ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3>
       let connected = self.connected.clone();
       let send = message_sender.clone();
       self.server_outbound_sender = message_sender;
-      let server_recv = self.server.client_version_event_stream();
+      let server_recv = self.server.event_stream();
       async move {
         async_manager::spawn(async move {
           info!("Starting In Process Client Connector Event Sender Loop");

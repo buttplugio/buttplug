@@ -23,7 +23,6 @@ use buttplug::{
     },
     ButtplugServer,
     ButtplugServerBuilder,
-    ButtplugServerDowngradeWrapper,
   },
   util::device_configuration::load_protocol_configs,
 };
@@ -166,12 +165,12 @@ where
 pub fn test_server_with_device(
   device_type: &str,
   allow_raw_message: bool,
-) -> (ButtplugServerDowngradeWrapper, TestDeviceChannelHost) {
+) -> (ButtplugServer, TestDeviceChannelHost) {
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
   let device = builder.add_test_device(&TestDeviceIdentifier::new(device_type, None));
 
   (
-    ButtplugServerDowngradeWrapper::new(test_server_with_comm_manager(builder, allow_raw_message)),
+    test_server_with_comm_manager(builder, allow_raw_message),
     device,
   )
 }
