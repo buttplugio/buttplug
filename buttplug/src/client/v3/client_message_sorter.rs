@@ -7,14 +7,12 @@
 
 //! Handling of remote message pairing and future resolution.
 
-use crate::{
-  client::{
+use super::{
     ButtplugClientError,
     ButtplugClientMessageFuturePair,
     ButtplugServerMessageStateShared,
-  },
-  core::message::{ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageV3},
-};
+  };
+use crate::core::message::{ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageV3};
 use dashmap::DashMap;
 use std::sync::{
   atomic::{AtomicU32, Ordering},
