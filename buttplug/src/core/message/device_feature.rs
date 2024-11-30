@@ -171,16 +171,6 @@ where
   seq.end()
 }
 
-fn range_i32_serialize<S>(range: &RangeInclusive<i32>, serializer: S) -> Result<S::Ok, S::Error>
-where
-  S: Serializer,
-{
-  let mut seq = serializer.serialize_seq(Some(2))?;
-  seq.serialize_element(&range.start())?;
-  seq.serialize_element(&range.end())?;
-  seq.end()
-}
-
 fn range_sequence_serialize<S>(
   range_vec: &Vec<RangeInclusive<i32>>,
   serializer: S,
@@ -199,8 +189,8 @@ where
 pub struct DeviceFeatureActuatorSerialized {
   #[getset(get = "pub")]
   #[serde(rename = "step-range")]
-  #[serde(serialize_with = "range_i32_serialize")]
-  step_range: RangeInclusive<i32>,
+  #[serde(serialize_with = "range_serialize")]
+  step_range: RangeInclusive<u32>,
   // This doesn't exist in base configs, so when we load these from the base config file, we'll just
   // copy the step_range value.
   #[getset(get = "pub")]
@@ -217,8 +207,8 @@ pub struct DeviceFeatureActuatorSerialized {
 pub struct DeviceFeatureActuator {
   #[getset(get = "pub")]
   #[serde(rename = "step-range")]
-  #[serde(serialize_with = "range_i32_serialize")]
-  step_range: RangeInclusive<i32>,
+  #[serde(serialize_with = "range_serialize")]
+  step_range: RangeInclusive<u32>,
   // This doesn't exist in base configs, so when we load these from the base config file, we'll just
   // copy the step_range value.
   #[getset(get = "pub")]
@@ -236,7 +226,7 @@ impl From<DeviceFeatureActuatorSerialized> for DeviceFeatureActuator {
       step_range: value.step_range.clone(),
       step_limit: value
         .step_limit
-        .unwrap_or(RangeInclusive::new(0, value.step_range.end().abs() as u32)),
+        .unwrap_or(value.step_range.clone()),
       messages: value.messages,
     }
   }
@@ -244,7 +234,7 @@ impl From<DeviceFeatureActuatorSerialized> for DeviceFeatureActuator {
 
 impl DeviceFeatureActuator {
   pub fn new(
-    step_range: &RangeInclusive<i32>,
+    step_range: &RangeInclusive<u32>,
     step_limit: &RangeInclusive<u32>,
     messages: &HashSet<ButtplugActuatorFeatureMessageType>,
   ) -> Self {
@@ -256,13 +246,13 @@ impl DeviceFeatureActuator {
   }
 
   pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
-    if self.step_range.is_empty() || self.step_range.start() > self.step_range.end() {
+    if self.step_range.is_empty()  {
       Err(ButtplugDeviceError::DeviceConfigurationError(
-        "Step range out of order, must be start <= x <= end.".to_string(),
+        "Step range empty.".to_string(),
       ))
-    } else if self.step_limit.is_empty() || self.step_limit.start() > self.step_limit.end() {
+    } else if self.step_limit.is_empty() {
       Err(ButtplugDeviceError::DeviceConfigurationError(
-        "Step limit out of order, must be start <= x <= end.".to_string(),
+        "Step limit empty.".to_string(),
       ))
     } else {
       Ok(())

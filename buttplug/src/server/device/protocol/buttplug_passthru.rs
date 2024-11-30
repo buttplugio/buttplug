@@ -34,7 +34,7 @@ impl ProtocolHandler for ButtplugPassthru {
     &self,
     command_message: &ButtplugDeviceCommandMessageUnion,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
+    Ok(vec![/*HardwareWriteCmd::new(
       Endpoint::Tx,
       serde_json::to_string(&command_message)
         .expect("Type is always serializable")
@@ -42,6 +42,6 @@ impl ProtocolHandler for ButtplugPassthru {
         .to_vec(),
       false,
     )
-    .into()])
+    .into()*/])
   }
 }

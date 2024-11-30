@@ -10,7 +10,7 @@ use crate::{
   core::{
     errors::*,
     message::{
-      self, ButtplugClientMessageV4, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugServerMessageV4, StopAllDevicesV0, StopScanningV0, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
+      self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion, ButtplugInternalClientMessageV4, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugServerMessageV4, StopAllDevicesV0, StopScanningV0, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
     },
   },
   util::stream::convert_broadcast_receiver_to_stream,
@@ -126,10 +126,10 @@ impl ButtplugServer {
     let ping_timer = self.ping_timer.clone();
     // HACK Injecting messages here is weird since we're never quite sure what version they should
     // be. Can we turn this into actual method calls?
-    let stop_scanning_fut = self.parse_message(ButtplugClientMessageV4::StopScanning(
+    let stop_scanning_fut = self.parse_message(ButtplugInternalClientMessageV4::StopScanning(
       StopScanningV0::default(),
     ));
-    let stop_fut = self.parse_message(ButtplugClientMessageV4::StopAllDevices(
+    let stop_fut = self.parse_message(ButtplugInternalClientMessageV4::StopAllDevices(
       StopAllDevicesV0::default(),
     ));
     let connected = self.connected.clone();
@@ -159,7 +159,7 @@ impl ButtplugServer {
 
   pub fn parse_message(
     &self,
-    msg: ButtplugClientMessageV4,
+    msg: ButtplugInternalClientMessageV4,
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, message::ErrorV0>> {
     trace!(
       "Buttplug Server {} received message to client parse: {:?}",
@@ -175,7 +175,7 @@ impl ButtplugServer {
         Some(message::ErrorV0::from(ButtplugError::from(
           ButtplugPingError::PingedOut,
         )))
-      } else if !matches!(msg, ButtplugClientMessageV4::RequestServerInfo(_)) {
+      } else if !matches!(msg, ButtplugInternalClientMessageV4::RequestServerInfo(_)) {
         Some(message::ErrorV0::from(ButtplugError::from(
           ButtplugHandshakeError::RequestServerInfoExpected,
         )))
@@ -199,8 +199,8 @@ impl ButtplugServer {
       self.device_manager.parse_message(msg.clone())
     } else {
       match msg {
-        ButtplugClientMessageV4::RequestServerInfo(rsi_msg) => self.perform_handshake(rsi_msg),
-        ButtplugClientMessageV4::Ping(p) => self.handle_ping(p),
+        ButtplugInternalClientMessageV4::RequestServerInfo(rsi_msg) => self.perform_handshake(rsi_msg),
+        ButtplugInternalClientMessageV4::Ping(p) => self.handle_ping(p),
         _ => ButtplugMessageError::UnexpectedMessageType(format!("{:?}", msg)).into(),
       }
     };
@@ -327,6 +327,7 @@ mod test {
     assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
   }
 
+  #[cfg(not(feature = "default_v4_spec"))]
   #[tokio::test]
   async fn test_server_v4_deny() {
     let server = ButtplugServerBuilder::default().finish().unwrap();

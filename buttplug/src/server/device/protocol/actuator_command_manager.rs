@@ -6,18 +6,12 @@
 // for full license information.
 
 use crate::core::{
-  errors::{ButtplugDeviceError, ButtplugError},
+  errors::ButtplugError,
   message::{
-    ActuatorType,
-    ButtplugActuatorFeatureMessageType,
-    ButtplugDeviceCommandMessageUnion,
-    DeviceFeature,
-    DeviceFeatureActuator,
-    LevelCmdV4,
-    LevelSubcommandV4,
+    ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugDeviceCommandMessageUnion, DeviceFeature, DeviceFeatureActuator, InternalLevelCmdV4, InternalLevelSubcommandV4
   },
 };
-use ahash::{HashMap, HashMapExt};
+use std::collections::HashMap;
 use getset::Getters;
 use std::{
   collections::HashSet,
@@ -112,16 +106,16 @@ impl ActuatorCommandManager {
           .messages()
           .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::LevelCmd)
         {
-          level_subcommands.push(LevelSubcommandV4::new(
+          level_subcommands.push(InternalLevelSubcommandV4::new(
             index as u32,
             0,
-            &Some(feature.id().clone()),
+            *feature.id(),
           ));
         }
       }
     }
     if !level_subcommands.is_empty() {
-      stop_commands.push(LevelCmdV4::new(0, level_subcommands).into());
+      stop_commands.push(InternalLevelCmdV4::new(0, 0, &level_subcommands).into());
     }
 
     Self {
@@ -164,37 +158,10 @@ impl ActuatorCommandManager {
 
   pub fn update_level(
     &self,
-    msg: &LevelCmdV4,
+    msg: &InternalLevelCmdV4,
     match_all: bool,
   ) -> Result<Vec<Option<(ActuatorType, i32)>>, ButtplugError> {
     trace!("Updating level for message: {:?}", msg);
-    // First, make sure this is a valid command, that contains at least one
-    // subcommand.
-    if msg.levels().is_empty() {
-      return Err(
-        ButtplugDeviceError::ProtocolRequirementError(format!(
-          "LevelCmd has 0 commands, will not do anything: {:?}",
-          msg
-        ))
-        .into(),
-      );
-    }
-
-    if msg
-      .levels()
-      .iter()
-      .filter(|x| x.feature_id().is_none())
-      .count()
-      > 0
-    {
-      return Err(
-        ButtplugDeviceError::ProtocolRequirementError(format!(
-          "LevelCmd has unresolved feature ids: {:?}",
-          msg
-        ))
-        .into(),
-      );
-    }
 
     let mut idxs = HashMap::new();
     for x in self.feature_status.iter() {
@@ -210,14 +177,14 @@ impl ActuatorCommandManager {
 
     let mut commands = vec![];
     msg.levels().iter().for_each(|x| {
-      let id = x.feature_id().expect("Already checked existence");
+      let id = x.feature_id();
       trace!("Updating command for {:?}", id);
       commands.push((
         id.clone(),
         *self
           .feature_status
           .iter()
-          .find(|y| *y.feature_id() == x.feature_id().unwrap())
+          .find(|y| *y.feature_id() == x.feature_id())
           .unwrap()
           .actuator_type(),
         x.level(),

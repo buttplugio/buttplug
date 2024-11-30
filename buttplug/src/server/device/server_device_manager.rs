@@ -12,15 +12,7 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
     message::{
-      self,
-      ButtplugClientMessageV4,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceManagerMessageUnion,
-      ButtplugDeviceMessage,
-      ButtplugMessage,
-      ButtplugServerMessageV4,
-      DeviceListV4,
-      DeviceMessageInfoV4,
+      self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion, ButtplugDeviceMessage, ButtplugInternalClientMessageV4, ButtplugMessage, ButtplugServerMessageV4, DeviceListV4, DeviceMessageInfoV4, LegacyDeviceAttributes
     },
   },
   server::{
@@ -45,11 +37,10 @@ use futures::{
 };
 use getset::Getters;
 use std::{
-  convert::TryFrom,
-  sync::{
+  collections::HashMap, convert::TryFrom, sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
-  },
+  }
 };
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
@@ -278,19 +269,23 @@ impl ServerDeviceManager {
     }
   }
 
-  pub fn parse_message(&self, msg: ButtplugClientMessageV4) -> ButtplugServerResultFuture {
+  pub fn parse_message(&self, msg: ButtplugInternalClientMessageV4) -> ButtplugServerResultFuture {
     if !self.running.load(Ordering::SeqCst) {
       return future::ready(Err(ButtplugUnknownError::DeviceManagerNotRunning.into())).boxed();
     }
     // If this is a device command message, just route it directly to the
     // device.
-    match ButtplugDeviceCommandMessageUnion::try_from(msg.clone()) {
-      Ok(device_msg) => self.parse_device_message(device_msg),
-      Err(_) => match ButtplugDeviceManagerMessageUnion::try_from(msg.clone()) {
-        Ok(manager_msg) => self.parse_device_manager_message(manager_msg),
-        Err(_) => ButtplugMessageError::UnexpectedMessageType(format!("{:?}", msg)).into(),
-      },
+    if let Ok(device_msg) = ButtplugDeviceCommandMessageUnion::try_from(msg.clone()) {
+      self.parse_device_message(device_msg)
+    } else if let Ok(manager_msg) = ButtplugDeviceManagerMessageUnion::try_from(msg.clone()) {
+      self.parse_device_manager_message(manager_msg)
+    } else {
+      ButtplugMessageError::UnexpectedMessageType(format!("{:?}", msg)).into()
     }
+  }
+
+  pub(crate) fn feature_map(&self) -> HashMap<u32, LegacyDeviceAttributes> {
+    self.devices().iter().map(|x| (*x.key(), x.legacy_attributes().clone())).collect()
   }
 
   pub fn device_info(&self, index: u32) -> Option<ServerDeviceInfo> {

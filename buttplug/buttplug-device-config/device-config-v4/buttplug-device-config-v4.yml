@@ -103,7 +103,7 @@ protocols:
           - feature-type: RotateWithDirection
             actuator:
               step-range:
-                - -20
+                - 0
                 - 20
               messages:
                 - LevelCmd
@@ -396,7 +396,7 @@ protocols:
           - feature-type: RotateWithDirection
             actuator:
               step-range:
-                - -20
+                - 0
                 - 20
               messages:
                 - LevelCmd
@@ -724,7 +724,7 @@ protocols:
           - feature-type: RotateWithDirection
             actuator:
               step-range:
-                - -20
+                - 0
                 - 20
               messages:
                 - LevelCmd
@@ -973,7 +973,7 @@ protocols:
           - feature-type: RotateWithDirection
             actuator:
               step-range:
-                - -20
+                - 0
                 - 20
               messages:
                 - LevelCmd
@@ -3139,7 +3139,7 @@ protocols:
         - feature-type: RotateWithDirection
           actuator:
             step-range:
-              - -10
+              - 0
               - 10
             messages:
               - LevelCmd
@@ -3249,7 +3249,7 @@ protocols:
           - feature-type: RotateWithDirection
             actuator:
               step-range:
-                - -99
+                - 0
                 - 99
               messages:
                 - LevelCmd
@@ -3262,7 +3262,7 @@ protocols:
           - feature-type: RotateWithDirection
             actuator:
               step-range:
-                - -99
+                - 0
                 - 99
               messages:
                 - LevelCmd
@@ -3275,7 +3275,7 @@ protocols:
           - feature-type: RotateWithDirection
             actuator:
               step-range:
-                - -99
+                - 0
                 - 99
               messages:
                 - LevelCmd
@@ -3283,7 +3283,7 @@ protocols:
           - feature-type: RotateWithDirection
             actuator:
               step-range:
-                - -99
+                - 0
                 - 99
               messages:
                 - LevelCmd
@@ -4163,7 +4163,7 @@ protocols:
         - feature-type: RotateWithDirection
           actuator:
             step-range:
-              - -255
+              - 0
               - 255
             messages:
               - LevelCmd
@@ -6789,7 +6789,7 @@ protocols:
         - feature-type: RotateWithDirection
           actuator:
             step-range:
-              - -6
+              - 0
               - 6
             messages:
               - LevelCmd
