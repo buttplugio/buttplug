@@ -253,9 +253,7 @@ async fn test_client_repeated_deviceadded_message() {
 #[tokio::test]
 async fn test_client_repeated_deviceremoved_message() {
   use buttplug::core::message::{
-    ButtplugClientMessageV3,
-    ButtplugClientMessageVariant,
-    ButtplugServerMessageVariant,
+    ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageVariant
   };
 
   let helper = Arc::new(util::channel_transport::ChannelClientTestHelper::new());

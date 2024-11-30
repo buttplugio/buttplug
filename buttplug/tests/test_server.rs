@@ -78,7 +78,7 @@ async fn test_server_handshake() {
 
 #[tokio::test]
 async fn test_server_handshake_not_done_first_v4() {
-  let msg = message::ButtplugClientMessageV4::Ping(message::PingV0::default().into());
+  let msg = message::ButtplugInternalClientMessageV4::Ping(message::PingV0::default().into());
   let server = test_server(false);
   // assert_eq!(server.server_name, "Test Server");
   let result = server.parse_message(msg).await;
@@ -152,7 +152,7 @@ async fn test_ping_timeout() {
   let msg = message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
   sleep(Duration::from_millis(150)).await;
   let reply = server
-    .parse_message(message::ButtplugClientMessageV4::RequestServerInfo(msg))
+    .parse_message(message::ButtplugInternalClientMessageV4::RequestServerInfo(msg))
     .await;
   assert!(
     reply.is_ok(),
@@ -162,7 +162,7 @@ async fn test_ping_timeout() {
   sleep(Duration::from_millis(300)).await;
   let pingmsg = message::PingV0::default();
   let result = server
-    .parse_message(message::ButtplugClientMessageV4::Ping(pingmsg.into()))
+    .parse_message(message::ButtplugInternalClientMessageV4::Ping(pingmsg.into()))
     .await;
   let err = result.unwrap_err();
   if !matches!(err.original_error(), ButtplugError::ButtplugPingError(_)) {
@@ -198,11 +198,11 @@ async fn test_device_stop_on_ping_timeout() {
 
   let msg = message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
   let mut reply = server
-    .parse_message(message::ButtplugClientMessageV4::from(msg))
+    .parse_message(message::ButtplugInternalClientMessageV4::from(msg))
     .await;
   assert!(reply.is_ok());
   reply = server
-    .parse_message(message::ButtplugClientMessageV4::from(
+    .parse_message(message::ButtplugInternalClientMessageV4::from(
       message::StartScanningV0::default(),
     ))
     .await;
@@ -223,11 +223,13 @@ async fn test_device_stop_on_ping_timeout() {
       );
     }
   }
+
   server
-    .parse_message(message::ButtplugClientMessageV4::from(
-      message::LevelCmdV4::new(
+    .parse_message(message::ButtplugInternalClientMessageV4::from(
+      message::InternalLevelCmdV4::new(
+        0,
         device_index,
-        vec![message::LevelSubcommandV4::new(0, 64, &None)],
+        &vec![message::InternalLevelSubcommandV4::new(0, 64, "f50a528b-b023-40f0-9906-df037443950a".try_into().unwrap())],
       ),
     ))
     .await
@@ -237,7 +239,7 @@ async fn test_device_stop_on_ping_timeout() {
     &mut device,
     HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
   );
-  /*
+/*
   // Wait out the ping, we should get a stop message.
   let mut i = 0u32;
   while command_receiver.is_empty() {
