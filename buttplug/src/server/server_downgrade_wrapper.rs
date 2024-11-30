@@ -7,19 +7,11 @@
 
 use std::{fmt, sync::Arc};
 
-use crate::core::{
-  errors::{ButtplugDeviceError, ButtplugError},
+use crate::core::
   message::{
-    self,
-    ButtplugClientMessageV4,
-    ButtplugClientMessageVariant,
-    ButtplugMessageSpecVersion,
-    ButtplugServerMessageV4,
-    ButtplugServerMessageVariant,
-    ErrorV0,
-    TryFromClientMessage,
-  },
-};
+    self, ButtplugClientMessageVariant, ButtplugInternalClientMessageV4, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugServerMessageV4, ButtplugServerMessageVariant, ErrorV0, TryFromClientMessage
+  }
+;
 
 use super::{
   device::ServerDeviceManager,
@@ -106,9 +98,19 @@ impl ButtplugServerDowngradeWrapper {
     &self,
     msg: ButtplugClientMessageVariant,
   ) -> BoxFuture<'static, Result<ButtplugServerMessageVariant, ButtplugServerMessageVariant>> {
+    let features = self.server.device_manager().feature_map();
+    let msg_id = msg.id();
     match msg {
       ButtplugClientMessageVariant::V4(msg) => {
-        let fut = self.server.parse_message(msg);
+        let internal_msg = match ButtplugInternalClientMessageV4::try_from_client_message(msg, &features) {
+          Ok(m) => m,
+          Err(e) => {
+            let mut err_msg = ErrorV0::from(e);
+            err_msg.set_id(msg_id);
+            return future::ready(Err(ButtplugServerMessageVariant::from(ButtplugServerMessageV4::from(err_msg)))).boxed();
+          }
+        };
+        let fut = self.server.parse_message(internal_msg);
         async move {
           Ok(
             fut
@@ -121,7 +123,6 @@ impl ButtplugServerDowngradeWrapper {
       }
       msg => {
         let v = msg.version();
-        let mgr = self.server.device_manager();
         let converter = ButtplugServerMessageConverter::new(Some(msg.clone()));
         let spec_version = *self.spec_version.get_or_init(|| {
           info!(
@@ -130,26 +131,7 @@ impl ButtplugServerDowngradeWrapper {
           );
           v
         });
-        let features = if let Some(idx) = msg.device_index() {
-          if let Some(info) = mgr.devices().get(&idx) {
-            Some(info.legacy_attributes().clone())
-          } else {
-            return future::ready(Err(
-              converter
-                .convert_outgoing(
-                  &ButtplugServerMessageV4::from(ErrorV0::from(ButtplugError::from(
-                    ButtplugDeviceError::DeviceNotAvailable(idx),
-                  ))),
-                  &spec_version,
-                )
-                .unwrap(),
-            ))
-            .boxed();
-          }
-        } else {
-          None
-        };
-        match ButtplugClientMessageV4::try_from_client_message(msg, &features) {
+        match ButtplugInternalClientMessageV4::try_from_client_message(msg, &features) {
           Ok(converted_msg) => {
             let fut = self.server.parse_message(converted_msg);
             async move {
@@ -171,15 +153,20 @@ impl ButtplugServerDowngradeWrapper {
             }
             .boxed()
           }
-          Err(e) => future::ready(Err(
+          Err(e) => {
+            let mut err_msg = ErrorV0::from(e);
+            err_msg.set_id(msg_id);
+
+            future::ready(Err(
             converter
               .convert_outgoing(
-                &ButtplugServerMessageV4::from(ErrorV0::from(e)),
+                &ButtplugServerMessageV4::from(err_msg),
                 &spec_version,
               )
               .unwrap(),
           ))
-          .boxed(),
+          .boxed()
+        }
         }
       }
     }

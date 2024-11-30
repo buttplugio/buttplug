@@ -46,20 +46,7 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     message::{
-      self,
-      ActuatorType,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceMessageType,
-      ButtplugMessage,
-      ButtplugServerDeviceMessage,
-      ButtplugServerMessageV4,
-      Endpoint,
-      FeatureType,
-      LegacyDeviceAttributes,
-      LevelCmdV4,
-      RawReadingV2,
-      RawSubscribeCmdV2,
-      SensorType,
+      self, ActuatorType, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessageType, ButtplugMessage, ButtplugServerDeviceMessage, ButtplugServerMessageV4, Endpoint, FeatureType, InternalLevelCmdV4, LegacyDeviceAttributes, RawReadingV2, RawSubscribeCmdV2, SensorType
     },
     ButtplugResultFuture,
   },
@@ -463,40 +450,7 @@ impl ServerDevice {
     }
   }
 
-  fn handle_levelcmd_v4(&self, msg: &LevelCmdV4) -> ButtplugServerResultFuture {
-    if msg.levels().is_empty() {
-      return future::ready(Err(
-        ButtplugDeviceError::ProtocolRequirementError(
-          "LevelCmd with no subcommands is not valid.".to_owned(),
-        )
-        .into(),
-      ))
-      .boxed();
-    }
-
-    let mut msg = msg.clone();
-
-    for command in &mut msg.levels_mut().iter_mut() {
-      if command.feature_id().is_some() {
-        continue;
-      }
-      if command.feature_index() > self.definition.features().len() as u32 {
-        return future::ready(Err(
-          ButtplugDeviceError::DeviceFeatureIndexError(
-            self.definition.features().len() as u32,
-            command.feature_index(),
-          )
-          .into(),
-        ))
-        .boxed();
-      } else {
-        command.set_feature_id(Some(
-          self.definition.features()[command.feature_index() as usize]
-            .id()
-            .clone(),
-        ));
-      }
-    }
+  fn handle_levelcmd_v4(&self, msg: &InternalLevelCmdV4) -> ButtplugServerResultFuture {
     let commands = match self
       .actuator_command_manager
       .update_level(&msg, self.handler.needs_full_command_set())

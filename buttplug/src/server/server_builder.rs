@@ -57,7 +57,10 @@ impl Default for ButtplugServerBuilder {
         .finish()
         .unwrap(),
       ),
-      allow_v4_connections: false
+      #[cfg(not(feature = "default_v4_spec"))]
+      allow_v4_connections: false,
+      #[cfg(feature = "default_v4_spec")]
+      allow_v4_connections: true,
     }
   }
 }
@@ -68,7 +71,10 @@ impl ButtplugServerBuilder {
       name: "Buttplug Server".to_owned(),
       max_ping_time: None,
       device_manager: Arc::new(device_manager),
-      allow_v4_connections: false
+      #[cfg(not(feature = "default_v4_spec"))]
+      allow_v4_connections: false,
+      #[cfg(feature = "default_v4_spec")]
+      allow_v4_connections: true,
     }
   }
 

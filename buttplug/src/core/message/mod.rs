@@ -23,6 +23,7 @@ mod device_feature;
 mod endpoint;
 pub mod serializer;
 
+use std::collections::HashMap;
 pub use device_feature::*;
 pub use endpoint::Endpoint;
 pub use v0::*;
@@ -79,10 +80,15 @@ impl TryFrom<i32> for ButtplugMessageSpecVersion {
 /// client request.
 pub const BUTTPLUG_SERVER_EVENT_ID: u32 = 0;
 
+#[cfg(not(feature = "default_v4_spec"))]
 /// The current latest version of the spec implemented by the library.
 pub const BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION: ButtplugMessageSpecVersion =
   ButtplugMessageSpecVersion::Version3;
-
+#[cfg(feature = "default_v4_spec")]
+/// The current latest version of the spec implemented by the library.
+pub const BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION: ButtplugMessageSpecVersion =
+  ButtplugMessageSpecVersion::Version4;
+  
 pub trait ButtplugMessageFinalizer {
   fn finalize(&mut self) {
   }
@@ -502,28 +508,28 @@ pub type ButtplugServerMessageCurrent = ButtplugServerMessageV3;
   ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
 )]
-pub enum ButtplugDeviceManagerMessageUnion {
+pub(crate) enum ButtplugDeviceManagerMessageUnion {
   RequestDeviceList(RequestDeviceListV0),
   StopAllDevices(StopAllDevicesV0),
   StartScanning(StartScanningV0),
   StopScanning(StopScanningV0),
 }
 
-impl TryFrom<ButtplugClientMessageV4> for ButtplugDeviceManagerMessageUnion {
+impl TryFrom<ButtplugInternalClientMessageV4> for ButtplugDeviceManagerMessageUnion {
   type Error = ();
 
-  fn try_from(value: ButtplugClientMessageV4) -> Result<Self, Self::Error> {
+  fn try_from(value: ButtplugInternalClientMessageV4) -> Result<Self, Self::Error> {
     match value {
-      ButtplugClientMessageV4::RequestDeviceList(m) => {
+      ButtplugInternalClientMessageV4::RequestDeviceList(m) => {
         Ok(ButtplugDeviceManagerMessageUnion::RequestDeviceList(m))
       }
-      ButtplugClientMessageV4::StopAllDevices(m) => {
+      ButtplugInternalClientMessageV4::StopAllDevices(m) => {
         Ok(ButtplugDeviceManagerMessageUnion::StopAllDevices(m))
       }
-      ButtplugClientMessageV4::StartScanning(m) => {
+      ButtplugInternalClientMessageV4::StartScanning(m) => {
         Ok(ButtplugDeviceManagerMessageUnion::StartScanning(m))
       }
-      ButtplugClientMessageV4::StopScanning(m) => {
+      ButtplugInternalClientMessageV4::StopScanning(m) => {
         Ok(ButtplugDeviceManagerMessageUnion::StopScanning(m))
       }
       _ => Err(()),
@@ -541,11 +547,10 @@ impl TryFrom<ButtplugClientMessageV4> for ButtplugDeviceManagerMessageUnion {
   ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugDeviceCommandMessageUnion {
   StopDeviceCmd(StopDeviceCmdV0),
   LinearCmd(LinearCmdV4),
-  LevelCmd(LevelCmdV4),
+  LevelCmd(InternalLevelCmdV4),
   SensorReadCmd(SensorReadCmdV4),
   SensorSubscribeCmd(SensorSubscribeCmdV4),
   SensorUnsubscribeCmd(SensorUnsubscribeCmdV4),
@@ -555,35 +560,35 @@ pub enum ButtplugDeviceCommandMessageUnion {
   RawUnsubscribeCmd(RawUnsubscribeCmdV2),
 }
 
-impl TryFrom<ButtplugClientMessageV4> for ButtplugDeviceCommandMessageUnion {
+impl TryFrom<ButtplugInternalClientMessageV4> for ButtplugDeviceCommandMessageUnion {
   type Error = ();
 
-  fn try_from(value: ButtplugClientMessageV4) -> Result<Self, Self::Error> {
+  fn try_from(value: ButtplugInternalClientMessageV4) -> Result<Self, Self::Error> {
     match value {
-      ButtplugClientMessageV4::StopDeviceCmd(m) => {
+      ButtplugInternalClientMessageV4::StopDeviceCmd(m) => {
         Ok(ButtplugDeviceCommandMessageUnion::StopDeviceCmd(m))
       }
-      ButtplugClientMessageV4::LinearCmd(m) => Ok(ButtplugDeviceCommandMessageUnion::LinearCmd(m)),
-      ButtplugClientMessageV4::LevelCmd(m) => Ok(ButtplugDeviceCommandMessageUnion::LevelCmd(m)),
-      ButtplugClientMessageV4::SensorReadCmd(m) => {
+      ButtplugInternalClientMessageV4::LinearCmd(m) => Ok(ButtplugDeviceCommandMessageUnion::LinearCmd(m)),
+      ButtplugInternalClientMessageV4::LevelCmd(m) => Ok(ButtplugDeviceCommandMessageUnion::LevelCmd(m)),
+      ButtplugInternalClientMessageV4::SensorReadCmd(m) => {
         Ok(ButtplugDeviceCommandMessageUnion::SensorReadCmd(m))
       }
-      ButtplugClientMessageV4::SensorSubscribeCmd(m) => {
+      ButtplugInternalClientMessageV4::SensorSubscribeCmd(m) => {
         Ok(ButtplugDeviceCommandMessageUnion::SensorSubscribeCmd(m))
       }
-      ButtplugClientMessageV4::SensorUnsubscribeCmd(m) => {
+      ButtplugInternalClientMessageV4::SensorUnsubscribeCmd(m) => {
         Ok(ButtplugDeviceCommandMessageUnion::SensorUnsubscribeCmd(m))
       }
-      ButtplugClientMessageV4::RawWriteCmd(m) => {
+      ButtplugInternalClientMessageV4::RawWriteCmd(m) => {
         Ok(ButtplugDeviceCommandMessageUnion::RawWriteCmd(m))
       }
-      ButtplugClientMessageV4::RawReadCmd(m) => {
+      ButtplugInternalClientMessageV4::RawReadCmd(m) => {
         Ok(ButtplugDeviceCommandMessageUnion::RawReadCmd(m))
       }
-      ButtplugClientMessageV4::RawSubscribeCmd(m) => {
+      ButtplugInternalClientMessageV4::RawSubscribeCmd(m) => {
         Ok(ButtplugDeviceCommandMessageUnion::RawSubscribeCmd(m))
       }
-      ButtplugClientMessageV4::RawUnsubscribeCmd(m) => {
+      ButtplugInternalClientMessageV4::RawUnsubscribeCmd(m) => {
         Ok(ButtplugDeviceCommandMessageUnion::RawUnsubscribeCmd(m))
       }
       _ => Err(()),
@@ -660,6 +665,6 @@ where
 {
   fn try_from_client_message(
     msg: T,
-    features: &Option<LegacyDeviceAttributes>,
+    features: &HashMap<u32, LegacyDeviceAttributes>,
   ) -> Result<Self, ButtplugError>;
 }

@@ -16,13 +16,17 @@ mod sensor_subscribe_cmd;
 mod sensor_unsubscribe_cmd;
 mod spec_enums;
 
-pub use device_added::DeviceAddedV4;
-pub use device_list::DeviceListV4;
-pub use device_message_info::DeviceMessageInfoV4;
-pub use level_cmd::{LevelCmdV4, LevelSubcommandV4};
-pub use linear_cmd::{LinearCmdV4, VectorSubcommandV4};
-pub use sensor_read_cmd::SensorReadCmdV4;
-pub use sensor_reading::SensorReadingV4;
-pub use sensor_subscribe_cmd::SensorSubscribeCmdV4;
-pub use sensor_unsubscribe_cmd::SensorUnsubscribeCmdV4;
-pub use spec_enums::{ButtplugClientMessageV4, ButtplugServerMessageV4};
+pub use {
+  device_added::DeviceAddedV4,
+  device_list::DeviceListV4,
+  device_message_info::DeviceMessageInfoV4,
+  level_cmd::{LevelCmdV4, LevelSubcommandV4},
+  linear_cmd::{LinearCmdV4, VectorSubcommandV4},
+  sensor_read_cmd::SensorReadCmdV4,
+  sensor_reading::SensorReadingV4,
+  sensor_subscribe_cmd::SensorSubscribeCmdV4,
+  sensor_unsubscribe_cmd::SensorUnsubscribeCmdV4,
+  spec_enums::{ButtplugClientMessageV4, ButtplugServerMessageV4},
+  level_cmd::{InternalLevelSubcommandV4, InternalLevelCmdV4},
+  spec_enums::ButtplugInternalClientMessageV4
+};
