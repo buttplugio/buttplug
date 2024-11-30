@@ -5,12 +5,12 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{device::ServerDeviceManager, ping_timer::PingTimer, ButtplugServerResultFuture};
+use super::{device::ServerDeviceManager, ping_timer::PingTimer, server_message_conversion::ButtplugServerMessageConverter, ButtplugServerResultFuture};
 use crate::{
   core::{
     errors::*,
     message::{
-      self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion, ButtplugInternalClientMessageV4, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugServerMessageV4, StopAllDevicesV0, StopScanningV0, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
+      self, ButtplugClientMessageVariant, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion, ButtplugInternalClientMessageV4, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugServerMessageV4, ButtplugServerMessageVariant, ErrorV0, StopAllDevicesV0, StopScanningV0, TryFromClientMessage, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
     },
   },
   util::stream::convert_broadcast_receiver_to_stream,
@@ -19,14 +19,14 @@ use futures::{
   future::{self, BoxFuture, FutureExt},
   Stream,
 };
+use once_cell::sync::OnceCell;
 use std::{
-  fmt,
-  sync::{
+  fmt, sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
-  },
+  }
 };
-use tokio::sync::{broadcast, RwLock};
+use tokio::sync::broadcast;
 use tokio_stream::StreamExt;
 use tracing_futures::Instrument;
 
@@ -54,9 +54,11 @@ pub struct ButtplugServer {
   /// [ButtplugServer::event_stream()] method.
   output_sender: broadcast::Sender<ButtplugServerMessageV4>,
   /// Name of the connected client, assuming there is one.
-  client_name: Arc<RwLock<Option<String>>>,
+  client_name: Arc<OnceCell<String>>,
   /// Allow v4 message spec connections (currently in beta, message spec may change/break)
-  allow_v4_connections: bool
+  allow_v4_connections: bool,
+  /// Current spec version for the connected client
+  spec_version: Arc<OnceCell<ButtplugMessageSpecVersion>>,
 }
 
 impl std::fmt::Debug for ButtplugServer {
@@ -86,23 +88,23 @@ impl ButtplugServer {
       device_manager,
       connected,
       output_sender,
-      client_name: Arc::new(RwLock::new(None)),
-      allow_v4_connections
+      client_name: Arc::new(OnceCell::new()),
+      allow_v4_connections,
+      spec_version: Arc::new(OnceCell::new())
     }
   }
 
   pub fn client_name(&self) -> Option<String> {
     self
       .client_name
-      .try_read()
-      .expect("We should never conflict on name access")
-      .clone()
+      .get()
+      .cloned()
   }
 
-  /// Retreive an async stream of ButtplugServerMessages. This is how the server sends out
-  /// non-query-related updates to the system, including information on devices being added/removed,
-  /// client disconnection, etc...
-  pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessageV4> {
+  /// Retreive an async stream of ButtplugServerMessages, always at the latest available message
+  /// spec. This is how the server sends out non-query-related updates to the system, including
+  /// information on devices being added/removed, client disconnection, etc...
+  pub fn server_version_event_stream(&self) -> impl Stream<Item = ButtplugServerMessageV4> {
     // Unlike the client API, we can expect anyone using the server to pin this
     // themselves.
     let server_receiver = convert_broadcast_receiver_to_stream(self.output_sender.subscribe());
@@ -124,20 +126,15 @@ impl ButtplugServer {
   pub fn disconnect(&self) -> BoxFuture<Result<(), message::ErrorV0>> {
     debug!("Buttplug Server {} disconnect requested", self.server_name);
     let ping_timer = self.ping_timer.clone();
-    // HACK Injecting messages here is weird since we're never quite sure what version they should
-    // be. Can we turn this into actual method calls?
-    let stop_scanning_fut = self.parse_message(ButtplugInternalClientMessageV4::StopScanning(
+    // As long as StopScanning/StopAllDevices aren't changed across message specs, we can inject
+    // them using parse_checked_message and bypass version checking.
+    let stop_scanning_fut = self.parse_checked_message(ButtplugInternalClientMessageV4::StopScanning(
       StopScanningV0::default(),
     ));
-    let stop_fut = self.parse_message(ButtplugInternalClientMessageV4::StopAllDevices(
+    let stop_fut = self.parse_checked_message(ButtplugInternalClientMessageV4::StopAllDevices(
       StopAllDevicesV0::default(),
     ));
     let connected = self.connected.clone();
-    let mut name = self
-      .client_name
-      .try_write()
-      .expect("We should never conflict on name access");
-    *name = None;
     async move {
       connected.store(false, Ordering::SeqCst);
       ping_timer.stop_ping_timer().await;
@@ -157,7 +154,106 @@ impl ButtplugServer {
     async move { device_manager.shutdown().await }.boxed()
   }
 
+  /// Retreive an async stream of ButtplugServerMessages. This is how the server sends out
+  /// non-query-related updates to the system, including information on devices being added/removed,
+  /// client disconnection, etc...
+  pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessageVariant> {
+    let spec_version = self.spec_version.clone();
+    let converter = ButtplugServerMessageConverter::new(None);
+    self.server_version_event_stream().map(move |m| {
+      // If we get an event and don't have a spec version yet, just throw out the latest.
+      converter
+        .convert_outgoing(
+          &m,
+          spec_version
+            .get()
+            .unwrap_or(&ButtplugMessageSpecVersion::Version4),
+        )
+        .unwrap()
+    })
+  }
+
+  /// Sends a [ButtplugClientMessage] to be parsed by the server (for handshake or ping), or passed
+  /// into the server's [DeviceManager] for communication with devices.
   pub fn parse_message(
+    &self,
+    msg: ButtplugClientMessageVariant,
+  ) -> BoxFuture<'static, Result<ButtplugServerMessageVariant, ButtplugServerMessageVariant>> {
+    let features = self.device_manager().feature_map();
+    let msg_id = msg.id();
+    match msg {
+      ButtplugClientMessageVariant::V4(msg) => {
+        let internal_msg = match ButtplugInternalClientMessageV4::try_from_client_message(msg, &features) {
+          Ok(m) => m,
+          Err(e) => {
+            let mut err_msg = ErrorV0::from(e);
+            err_msg.set_id(msg_id);
+            return future::ready(Err(ButtplugServerMessageVariant::from(ButtplugServerMessageV4::from(err_msg)))).boxed();
+          }
+        };
+        let fut = self.parse_checked_message(internal_msg);
+        async move {
+          Ok(
+            fut
+              .await
+              .map_err(|e| ButtplugServerMessageVariant::from(ButtplugServerMessageV4::from(e)))?
+              .into(),
+          )
+        }
+        .boxed()
+      }
+      msg => {
+        let v = msg.version();
+        let converter = ButtplugServerMessageConverter::new(Some(msg.clone()));
+        let spec_version = *self.spec_version.get_or_init(|| {
+          info!(
+            "Setting Buttplug Server Message Spec Downgrade version to {}",
+            v
+          );
+          v
+        });
+        match ButtplugInternalClientMessageV4::try_from_client_message(msg, &features) {
+          Ok(converted_msg) => {
+            let fut = self.parse_checked_message(converted_msg);
+            async move {
+              let result = fut.await.map_err(|e| {
+                converter
+                  .convert_outgoing(&e.into(), &spec_version)
+                  .unwrap()
+              })?;
+              converter
+                .convert_outgoing(&result, &spec_version)
+                .map_err(|e| {
+                  converter
+                    .convert_outgoing(
+                      &ButtplugServerMessageV4::from(ErrorV0::from(e)),
+                      &spec_version,
+                    )
+                    .unwrap()
+                })
+            }
+            .boxed()
+          }
+          Err(e) => {
+            let mut err_msg = ErrorV0::from(e);
+            err_msg.set_id(msg_id);
+
+            future::ready(Err(
+            converter
+              .convert_outgoing(
+                &ButtplugServerMessageV4::from(err_msg),
+                &spec_version,
+              )
+              .unwrap(),
+          ))
+          .boxed()
+        }
+        }
+      }
+    }
+  }
+
+  pub fn parse_checked_message(
     &self,
     msg: ButtplugInternalClientMessageV4,
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, message::ErrorV0>> {
@@ -233,6 +329,9 @@ impl ButtplugServer {
     if self.connected() {
       return ButtplugHandshakeError::HandshakeAlreadyHappened.into();
     }
+    if !self.connected() && self.client_name.get().is_some() {
+      return ButtplugHandshakeError::ReconnectDenied.into();
+    }
     info!(
       "Performing server handshake check with client {} at message version {}.",
       msg.client_name(),
@@ -260,11 +359,10 @@ impl ButtplugServer {
     let out_msg =
       message::ServerInfoV2::new(&self.server_name, msg.message_version(), self.max_ping_time);
     let connected = self.connected.clone();
-    let mut name = self
+    self
       .client_name
-      .try_write()
+      .set(msg.client_name().to_owned())
       .expect("We should never conflict on name access");
-    *name = Some(msg.client_name().clone());
     async move {
       ping_timer.start_ping_timer().await;
       connected.store(true, Ordering::SeqCst);
@@ -295,14 +393,14 @@ mod test {
     server::ButtplugServerBuilder,
   };
   #[tokio::test]
-  async fn test_server_reuse() {
+  async fn test_server_deny_reuse() {
     let server = ButtplugServerBuilder::default().finish().unwrap();
     let msg =
       message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
-    let mut reply = server.parse_message(msg.clone().into()).await;
+    let mut reply = server.parse_checked_message(msg.clone().into()).await;
     assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
 
-    reply = server.parse_message(msg.clone().into()).await;
+    reply = server.parse_checked_message(msg.clone().into()).await;
     assert!(
       reply.is_err(),
       "Should get back err on double handshake: {:?}",
@@ -310,10 +408,10 @@ mod test {
     );
     assert!(server.disconnect().await.is_ok(), "Should disconnect ok");
 
-    reply = server.parse_message(msg.clone().into()).await;
+    reply = server.parse_checked_message(msg.clone().into()).await;
     assert!(
-      reply.is_ok(),
-      "Should get back ok on handshake after disconnect: {:?}",
+      reply.is_err(),
+      "Should get back err on handshake after disconnect: {:?}",
       reply
     );
   }
@@ -323,7 +421,7 @@ mod test {
     let server = ButtplugServerBuilder::default().allow_v4_connections().finish().unwrap();
     let msg =
       message::RequestServerInfoV1::new("Test Client", message::ButtplugMessageSpecVersion::Version4);
-    let reply = server.parse_message(msg.clone().into()).await;
+    let reply = server.parse_checked_message(msg.clone().into()).await;
     assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
   }
 
@@ -333,7 +431,7 @@ mod test {
     let server = ButtplugServerBuilder::default().finish().unwrap();
     let msg =
       message::RequestServerInfoV1::new("Test Client", message::ButtplugMessageSpecVersion::Version4);
-    let reply = server.parse_message(msg.clone().into()).await;
+    let reply = server.parse_checked_message(msg.clone().into()).await;
     assert!(reply.is_err(), "Should get back err: {:?}", reply);
   }
 }
