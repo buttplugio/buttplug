@@ -49,6 +49,8 @@ pub enum ButtplugHandshakeError {
   RequestServerInfoExpected,
   /// Handshake already happened, cannot run handshake again.
   HandshakeAlreadyHappened,
+  /// Server has already connected and disconnected, cannot be reused
+  ReconnectDenied,
   /// Server spec version ({0}) must be equal or greater than client version ({1})
   MessageSpecVersionMismatch(ButtplugMessageSpecVersion, ButtplugMessageSpecVersion),
   /// Untyped Deserialized Error: {0}
