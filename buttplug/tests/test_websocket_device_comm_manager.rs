@@ -12,7 +12,7 @@ mod test {
 
   use buttplug::{
     client::ButtplugClient,
-    core::connector::ButtplugInProcessClientConnectorBuilder,
+    client::connector::ButtplugInProcessClientConnectorBuilder,
     server::device::hardware::communication::websocket_server::websocket_server_comm_manager::WebsocketServerDeviceCommunicationManagerBuilder,
   };
 

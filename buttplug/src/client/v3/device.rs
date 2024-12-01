@@ -17,31 +17,15 @@ use crate::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
       ActuatorType,
-      ButtplugClientMessageV3,
-      ButtplugDeviceMessageType,
-      ButtplugServerMessageV3,
-      ClientDeviceMessageAttributesV3,
-      ClientGenericDeviceMessageAttributesV3,
-      DeviceMessageInfoV3,
       Endpoint,
-      LinearCmdV1,
       RawReadCmdV2,
       RawSubscribeCmdV2,
       RawUnsubscribeCmdV2,
       RawWriteCmdV2,
-      RotateCmdV1,
-      RotationSubcommandV1,
-      ScalarCmdV3,
-      ScalarSubcommandV3,
-      SensorReadCmdV3,
-      SensorSubscribeCmdV3,
       SensorType,
-      SensorUnsubscribeCmdV3,
       StopDeviceCmdV0,
-      VectorSubcommandV1,
     },
-  },
-  util::stream::convert_broadcast_receiver_to_stream,
+  }, server::message::{ButtplugClientMessageV3, ButtplugDeviceMessageType, ButtplugServerMessageV3, ClientDeviceMessageAttributesV3, ClientGenericDeviceMessageAttributesV3, DeviceMessageInfoV3, LinearCmdV1, RotateCmdV1, RotationSubcommandV1, ScalarCmdV3, ScalarSubcommandV3, SensorReadCmdV3, SensorSubscribeCmdV3, SensorUnsubscribeCmdV3, VectorSubcommandV1}, util::stream::convert_broadcast_receiver_to_stream
 };
 use futures::{FutureExt, Stream};
 use getset::{CopyGetters, Getters};
@@ -367,7 +351,7 @@ impl ButtplugClientDevice {
   pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {
     if self.message_attributes.scalar_cmd().is_none() {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::VibrateCmd).into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::VibrateCmd.to_string()).into(),
       );
     }
 
@@ -430,7 +414,7 @@ impl ButtplugClientDevice {
   pub fn linear(&self, linear_cmd: &LinearCommand) -> ButtplugClientResultFuture {
     if self.message_attributes.linear_cmd().is_none() {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LinearCmd).into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LinearCmd.to_string()).into(),
       );
     }
 
@@ -488,7 +472,7 @@ impl ButtplugClientDevice {
   pub fn rotate(&self, rotate_cmd: &RotateCommand) -> ButtplugClientResultFuture {
     if self.message_attributes.rotate_cmd().is_none() {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RotateCmd).into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RotateCmd.to_string()).into(),
       );
     }
 
@@ -541,7 +525,7 @@ impl ButtplugClientDevice {
   ) -> ButtplugClientResultFuture {
     if self.message_attributes.sensor_subscribe_cmd().is_none() {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::SensorSubscribeCmd)
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::SensorSubscribeCmd.to_string())
           .into(),
       );
     }
@@ -556,7 +540,7 @@ impl ButtplugClientDevice {
   ) -> ButtplugClientResultFuture {
     if self.message_attributes.sensor_subscribe_cmd().is_none() {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::SensorSubscribeCmd)
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::SensorSubscribeCmd.to_string())
           .into(),
       );
     }
@@ -567,7 +551,7 @@ impl ButtplugClientDevice {
   fn read_single_sensor(&self, sensor_type: &SensorType) -> ButtplugClientResultFuture<Vec<i32>> {
     if self.message_attributes.sensor_read_cmd().is_none() {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::SensorReadCmd).into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::SensorReadCmd.to_string()).into(),
       );
     }
     let sensor_indexes: Vec<u32> = self
@@ -643,7 +627,7 @@ impl ButtplugClientDevice {
   ) -> ButtplugClientResultFuture {
     if self.message_attributes.raw_write_cmd().is_none() {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawWriteCmd).into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawWriteCmd.to_string()).into(),
       );
     }
     let msg = ButtplugClientMessageV3::RawWriteCmd(RawWriteCmdV2::new(
@@ -663,7 +647,7 @@ impl ButtplugClientDevice {
   ) -> ButtplugClientResultFuture<Vec<u8>> {
     if self.message_attributes.raw_read_cmd().is_none() {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawReadCmd).into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawReadCmd.to_string()).into(),
       );
     }
     let msg = ButtplugClientMessageV3::RawReadCmd(RawReadCmdV2::new(
@@ -692,7 +676,7 @@ impl ButtplugClientDevice {
   pub fn raw_subscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
     if self.message_attributes.raw_subscribe_cmd().is_none() {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawSubscribeCmd).into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawSubscribeCmd.to_string()).into(),
       );
     }
     let msg =
@@ -703,7 +687,7 @@ impl ButtplugClientDevice {
   pub fn raw_unsubscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
     if self.message_attributes.raw_subscribe_cmd().is_none() {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawSubscribeCmd).into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawSubscribeCmd.to_string()).into(),
       );
     }
     let msg =

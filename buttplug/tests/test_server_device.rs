@@ -6,12 +6,16 @@
 // for full license information.
 
 mod util;
-use buttplug::core::{
+use buttplug::{core::{
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
-    self, ButtplugClientMessageVariant, ButtplugInternalClientMessageV4, ButtplugServerMessageV3, ButtplugServerMessageV4, ButtplugServerMessageVariant, Endpoint, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
+    ButtplugServerMessageV4, Endpoint, RawReadCmdV2, RawSubscribeCmdV2, RawUnsubscribeCmdV2, RawWriteCmdV2, RequestServerInfoV1, StartScanningV0, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
   },
-};
+},
+server::message::{
+  spec_enums::ButtplugInternalClientMessageV4, ButtplugClientMessageVariant, ButtplugServerMessageV3, ButtplugServerMessageVariant 
+},};
+
 use futures::{pin_mut, StreamExt};
 use std::matches;
 pub use util::test_device_manager::TestDeviceCommunicationManagerBuilder;
@@ -29,14 +33,14 @@ async fn test_capabilities_exposure() {
 
   server
     .parse_message(ButtplugClientMessageVariant::V3(
-      message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
+      RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
         .into(),
     ))
     .await
     .expect("Test, assuming infallible.");
   server
     .parse_message(ButtplugClientMessageVariant::V3(
-      message::StartScanningV0::default().into(),
+      StartScanningV0::default().into(),
     ))
     .await
     .expect("Test, assuming infallible.");
@@ -56,14 +60,14 @@ async fn test_server_raw_message() {
   pin_mut!(recv);
   assert!(server
     .parse_message(ButtplugClientMessageVariant::V3(
-      message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
+      RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
         .into()
     ))
     .await
     .is_ok());
   assert!(server
     .parse_message(ButtplugClientMessageVariant::V3(
-      message::StartScanningV0::default().into()
+      StartScanningV0::default().into()
     ))
     .await
     .is_ok());
@@ -92,14 +96,14 @@ async fn test_server_no_raw_message() {
   pin_mut!(recv);
   assert!(server
     .parse_message(ButtplugClientMessageVariant::V3(
-      message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
+      RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
         .into()
     ))
     .await
     .is_ok());
   assert!(server
     .parse_message(ButtplugClientMessageVariant::V3(
-      message::StartScanningV0::default().into()
+      StartScanningV0::default().into()
     ))
     .await
     .is_ok());
@@ -128,13 +132,13 @@ async fn test_reject_on_no_raw_message() {
   pin_mut!(recv);
   assert!(server
     .parse_checked_message(ButtplugInternalClientMessageV4::from(
-      message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
+      RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
     ))
     .await
     .is_ok());
   assert!(server
     .parse_checked_message(ButtplugInternalClientMessageV4::from(
-      message::StartScanningV0::default()
+      StartScanningV0::default()
     ))
     .await
     .is_ok());
@@ -145,7 +149,7 @@ async fn test_reject_on_no_raw_message() {
       assert_eq!(da.device_name(), "Aneros Vivi");
       let mut should_be_err;
       should_be_err = server
-        .parse_checked_message(ButtplugInternalClientMessageV4::from(message::RawWriteCmdV2::new(
+        .parse_checked_message(ButtplugInternalClientMessageV4::from(RawWriteCmdV2::new(
           da.device_index(),
           Endpoint::Tx,
           &[0x0],
@@ -159,7 +163,7 @@ async fn test_reject_on_no_raw_message() {
       ));
 
       should_be_err = server
-        .parse_checked_message(ButtplugInternalClientMessageV4::from(message::RawReadCmdV2::new(
+        .parse_checked_message(ButtplugInternalClientMessageV4::from(RawReadCmdV2::new(
           da.device_index(),
           Endpoint::Tx,
           0,
@@ -174,7 +178,7 @@ async fn test_reject_on_no_raw_message() {
 
       should_be_err = server
         .parse_checked_message(ButtplugInternalClientMessageV4::from(
-          message::RawSubscribeCmdV2::new(da.device_index(), Endpoint::Tx),
+          RawSubscribeCmdV2::new(da.device_index(), Endpoint::Tx),
         ))
         .await;
       assert!(should_be_err.is_err());
@@ -185,7 +189,7 @@ async fn test_reject_on_no_raw_message() {
 
       should_be_err = server
         .parse_checked_message(ButtplugInternalClientMessageV4::from(
-          message::RawUnsubscribeCmdV2::new(da.device_index(), Endpoint::Tx),
+          RawUnsubscribeCmdV2::new(da.device_index(), Endpoint::Tx),
         ))
         .await;
       assert!(should_be_err.is_err());
@@ -236,8 +240,8 @@ async fn test_repeated_address_additions() {
     let mut device_removed_called = true;
     while let Some(msg) = recv.next().await {
       match msg {
-        ButtplugServerMessage::ScanningFinished(_) => continue,
-        ButtplugServerMessage::DeviceAdded(da) => {
+        ButtplugServerScanningFinished(_) => continue,
+        ButtplugServerDeviceAdded(da) => {
           assert_eq!(da.device_name(), "Aneros Vivi");
           if device_index.is_none() {
             device_index = Some(da.device_index());
@@ -250,7 +254,7 @@ async fn test_repeated_address_additions() {
             return;
           }
         }
-        ButtplugServerMessage::DeviceRemoved(dr) => {
+        ButtplugServerDeviceRemoved(dr) => {
           assert_eq!(
             dr.device_index(),
             device_index.expect("Test, assuming infallible.")

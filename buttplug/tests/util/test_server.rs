@@ -10,14 +10,11 @@ use buttplug::{
     connector::ButtplugConnector,
     errors::ButtplugError,
     message::{
-      self,
-      ButtplugClientMessageVariant,
       ButtplugMessage,
-      ButtplugMessageValidator,
-      ButtplugServerMessageVariant,
+      ButtplugMessageValidator, ErrorV0,
     },
   },
-  server::{ButtplugServer, ButtplugServerBuilder},
+  server::{message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant,}, ButtplugServer, ButtplugServerBuilder},
   util::async_manager,
 };
 use futures::{future::Future, pin_mut, select, FutureExt, StreamExt};
@@ -64,7 +61,7 @@ async fn run_server<ConnectorType>(
           async_manager::spawn(async move {
             if let Err(e) = client_message.is_valid() {
               error!("Message not valid: {:?} - Error: {}", client_message, e);
-              let mut err_msg = message::ErrorV0::from(ButtplugError::from(e));
+              let mut err_msg = ErrorV0::from(ButtplugError::from(e));
               err_msg.set_id(client_message.id());
               let _ = connector_clone.send(ButtplugServerMessageVariant::V3(err_msg.into())).await;
               return;

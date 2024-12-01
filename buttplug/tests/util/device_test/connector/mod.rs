@@ -1,25 +1,22 @@
 pub mod channel_transport;
-use buttplug::core::{
-  connector::{
-    ButtplugRemoteClientConnector,
-    ButtplugRemoteConnector,
-    ButtplugRemoteServerConnector,
+use buttplug::{
+  client::{
+    connector::ButtplugRemoteClientConnector,
+    serializer::{ButtplugClientJSONSerializer, ButtplugClientJSONSerializerImpl},
   },
-  message::{
-    serializer::{
-      ButtplugClientJSONSerializer,
-      ButtplugClientJSONSerializerImpl,
-      ButtplugMessageSerializer,
-      ButtplugSerializedMessage,
-      ButtplugSerializerError,
-      ButtplugServerJSONSerializer,
+  core::{
+    connector::ButtplugRemoteConnector,
+    message::serializer::{
+      ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugSerializerError,
     },
-    ButtplugClientMessageV0,
-    ButtplugClientMessageV1,
-    ButtplugClientMessageV2,
-    ButtplugServerMessageV0,
-    ButtplugServerMessageV1,
-    ButtplugServerMessageV2,
+  },
+  server::{
+    connector::ButtplugRemoteServerConnector,
+    message::{
+      serializer::ButtplugServerJSONSerializer, ButtplugClientMessageV0, ButtplugClientMessageV1,
+      ButtplugClientMessageV2, ButtplugServerMessageV0, ButtplugServerMessageV1,
+      ButtplugServerMessageV2,
+    },
   },
 };
 use std::sync::Arc;

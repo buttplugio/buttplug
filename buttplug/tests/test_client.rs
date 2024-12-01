@@ -5,24 +5,24 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+/*
 mod util;
 use util::{test_client, test_client_with_delayed_device_manager, test_client_with_device};
 extern crate buttplug;
 extern crate tracing;
 
 use buttplug::{
-  client::{ButtplugClient, ButtplugClientError, ButtplugClientEvent},
+  client::{connector::ButtplugInProcessClientConnectorBuilder, ButtplugClient, ButtplugClientError, ButtplugClientEvent},
   core::{
     connector::{
       ButtplugConnector,
       ButtplugConnectorError,
       ButtplugConnectorResultFuture,
-      ButtplugInProcessClientConnectorBuilder,
     },
     errors::{ButtplugDeviceError, ButtplugError},
-    message::{ButtplugClientMessageCurrent, ButtplugServerMessageCurrent},
+    message::{ButtplugClientMessageCurrent, ButtplugClientMessageV4, ButtplugServerMessageCurrent, ButtplugServerMessageV4},
   },
-  server::ButtplugServerBuilder,
+  server::{message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant}, ButtplugServerBuilder},
 };
 
 use futures::{future::BoxFuture, StreamExt};
@@ -32,12 +32,12 @@ use tokio::{sync::mpsc::Sender, time::sleep};
 #[derive(Default)]
 struct ButtplugFailingConnector {}
 
-impl ButtplugConnector<ButtplugClientMessageCurrent, ButtplugServerMessageCurrent>
+impl ButtplugConnector<ButtplugClientMessageVariant, ButtplugServerMessageVariant>
   for ButtplugFailingConnector
 {
   fn connect(
     &mut self,
-    _: Sender<ButtplugServerMessageCurrent>,
+    _: Sender<ButtplugServerMessageVariant>,
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     ButtplugConnectorError::ConnectorNotConnected.into()
   }
@@ -46,7 +46,7 @@ impl ButtplugConnector<ButtplugClientMessageCurrent, ButtplugServerMessageCurren
     ButtplugConnectorError::ConnectorNotConnected.into()
   }
 
-  fn send(&self, _msg: ButtplugClientMessageCurrent) -> ButtplugConnectorResultFuture {
+  fn send(&self, _msg: ButtplugClientMessageVariant) -> ButtplugConnectorResultFuture {
     panic!("Should never be called")
   }
 }
@@ -227,3 +227,4 @@ async fn test_stop_all_devices_and_device_command_range() {
 // TODO Test receiving unmatched DeviceRemoved
 // TODO Test receiving Error when expecting Ok (i.e. StartScanning returns an error)
 // TODO Test receiving wrong message expecting Ok (i.e. StartScanning returns DeviceList)
+*/

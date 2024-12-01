@@ -10,18 +10,16 @@ mod util;
 pub use util::test_device_manager::check_test_recv_value;
 
 use buttplug::{
-  core::message::{
-    self,
-    serializer::{
+  core::
+    message::{serializer::{
       ButtplugMessageSerializer,
       ButtplugSerializedMessage,
-      ButtplugServerJSONSerializer,
     },
-    Endpoint,
+    Endpoint, StartScanningV0,
+  
   },
   server::{
-    device::hardware::{HardwareCommand, HardwareWriteCmd},
-    ButtplugServerBuilder,
+    device::hardware::{HardwareCommand, HardwareWriteCmd}, message::{serializer::ButtplugServerJSONSerializer, ButtplugClientMessageVariant}, ButtplugServerBuilder
   },
 };
 use futures::{pin_mut, StreamExt};
@@ -90,8 +88,8 @@ async fn test_version0_device_added_device_list() {
       );
   // Skip JSON parsing here, we aren't converting versions.
   let reply = server
-    .parse_message(message::ButtplugClientMessageVariant::V0(
-      message::StartScanningV0::default().into(),
+    .parse_message(ButtplugClientMessageVariant::V0(
+      StartScanningV0::default().into(),
     ))
     .await;
   assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
@@ -140,8 +138,8 @@ async fn test_version0_singlemotorvibratecmd() {
       );
   // Skip JSON parsing here, we aren't converting versions.
   let reply = server
-    .parse_message(message::ButtplugClientMessageVariant::V0(
-      message::StartScanningV0::default().into(),
+    .parse_message(ButtplugClientMessageVariant::V0(
+      StartScanningV0::default().into(),
     ))
     .await;
   assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
@@ -199,8 +197,8 @@ async fn test_version1_singlemotorvibratecmd() {
       );
   // Skip JSON parsing here, we aren't converting versions.
   let reply = server
-    .parse_message(message::ButtplugClientMessageVariant::V1(
-      message::StartScanningV0::default().into(),
+    .parse_message(ButtplugClientMessageVariant::V1(
+      StartScanningV0::default().into(),
     ))
     .await;
   assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
@@ -267,8 +265,8 @@ async fn test_version0_oscilatoronly() {
       );
   // Skip JSON parsing here, we aren't converting versions.
   let reply = server
-    .parse_message(message::ButtplugClientMessageVariant::V0(
-      message::StartScanningV0::default().into(),
+    .parse_message(ButtplugClientMessageVariant::V0(
+      StartScanningV0::default().into(),
     ))
     .await;
   assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
@@ -315,8 +313,8 @@ async fn test_version1_oscilatoronly() {
       );
   // Skip JSON parsing here, we aren't converting versions.
   let reply = server
-    .parse_message(message::ButtplugClientMessageVariant::V1(
-      message::StartScanningV0::default().into(),
+    .parse_message(ButtplugClientMessageVariant::V1(
+      StartScanningV0::default().into(),
     ))
     .await;
   assert!(reply.is_ok(), "Should get back ok: {:?}", reply);

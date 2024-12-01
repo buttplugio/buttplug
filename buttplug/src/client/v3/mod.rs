@@ -15,8 +15,6 @@ use crate::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
     errors::{ButtplugError, ButtplugHandshakeError},
     message::{
-      ButtplugClientMessageV3,
-      ButtplugServerMessageV3,
       PingV0,
       RequestDeviceListV0,
       RequestServerInfoV1,
@@ -25,12 +23,11 @@ use crate::{
       StopScanningV0,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
-  },
-  util::{
+  }, server::message::{ButtplugClientMessageV3, ButtplugServerMessageV3}, util::{
     async_manager,
     future::{ButtplugFuture, ButtplugFutureStateShared},
     stream::convert_broadcast_receiver_to_stream,
-  },
+  }
 };
 use client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
 use dashmap::DashMap;
