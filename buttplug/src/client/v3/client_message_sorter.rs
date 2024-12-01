@@ -12,7 +12,7 @@ use super::{
     ButtplugClientMessageFuturePair,
     ButtplugServerMessageStateShared,
   };
-use crate::core::message::{ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageV3};
+use crate::{core::message::{ButtplugMessage, ButtplugMessageValidator}, server::message::ButtplugServerMessageV3};
 use dashmap::DashMap;
 use std::sync::{
   atomic::{AtomicU32, Ordering},

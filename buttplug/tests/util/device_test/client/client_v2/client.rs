@@ -14,9 +14,7 @@ use buttplug::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
     errors::{ButtplugError, ButtplugHandshakeError},
     message::{
-      ButtplugClientMessageV2,
       ButtplugMessageSpecVersion,
-      ButtplugServerMessageV2,
       PingV0,
       RequestDeviceListV0,
       RequestServerInfoV1,
@@ -24,6 +22,10 @@ use buttplug::{
       StopAllDevicesV0,
       StopScanningV0,
     },
+  },
+  server::message::{
+    ButtplugClientMessageV2,
+    ButtplugServerMessageV2,
   },
   util::{
     async_manager,

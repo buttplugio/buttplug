@@ -12,7 +12,8 @@ use super::client::{
   ButtplugClientMessageFuturePair,
   ButtplugServerMessageStateShared,
 };
-use buttplug::core::message::{ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageV2};
+use buttplug::core::message::{ButtplugMessage, ButtplugMessageValidator};
+use buttplug::server::message::ButtplugServerMessageV2;
 use dashmap::DashMap;
 use std::sync::{
   atomic::{AtomicU32, Ordering},
