@@ -12,7 +12,12 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
     message::{
-      self, ButtplugDeviceMessage, ButtplugMessage, ButtplugServerMessageV4, DeviceListV4, DeviceMessageInfoV4
+      self,
+      ButtplugDeviceMessage,
+      ButtplugMessage,
+      ButtplugServerMessageV4,
+      DeviceListV4,
+      DeviceMessageInfoV4,
     },
   },
   server::{
@@ -24,7 +29,17 @@ use crate::{
       },
       server_device_manager_event_loop::ServerDeviceManagerEventLoop,
       ServerDevice,
-    }, message::{legacy_device_attributes::LegacyDeviceAttributes, spec_enums::{ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion, ButtplugInternalClientMessageV4}}, ButtplugServerError, ButtplugServerResultFuture
+    },
+    message::{
+      legacy_device_attributes::LegacyDeviceAttributes,
+      spec_enums::{
+        ButtplugDeviceCommandMessageUnion,
+        ButtplugDeviceManagerMessageUnion,
+        ButtplugInternalClientMessageV4,
+      },
+    },
+    ButtplugServerError,
+    ButtplugServerResultFuture,
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
@@ -35,10 +50,12 @@ use futures::{
 };
 use getset::Getters;
 use std::{
-  collections::HashMap, convert::TryFrom, sync::{
+  collections::HashMap,
+  convert::TryFrom,
+  sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
-  }
+  },
 };
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
@@ -283,7 +300,11 @@ impl ServerDeviceManager {
   }
 
   pub(crate) fn feature_map(&self) -> HashMap<u32, LegacyDeviceAttributes> {
-    self.devices().iter().map(|x| (*x.key(), x.legacy_attributes().clone())).collect()
+    self
+      .devices()
+      .iter()
+      .map(|x| (*x.key(), x.legacy_attributes().clone()))
+      .collect()
   }
 
   pub fn device_info(&self, index: u32) -> Option<ServerDeviceInfo> {

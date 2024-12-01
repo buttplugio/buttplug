@@ -6,11 +6,16 @@
 // for full license information.
 
 use super::device_message_info::DeviceMessageInfoV1;
-use crate::{core::{errors::ButtplugMessageError, message::{
-  ButtplugMessage,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
-}}, server::message::{v0::{DeviceListV0, DeviceMessageInfoV0}, v2::DeviceListV2}};
+use crate::{
+  core::{
+    errors::ButtplugMessageError,
+    message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
+  },
+  server::message::{
+    v0::{DeviceListV0, DeviceMessageInfoV0},
+    v2::DeviceListV2,
+  },
+};
 use getset::Getters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};

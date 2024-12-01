@@ -19,26 +19,25 @@
 use crate::core::{
   errors::{ButtplugError, ButtplugMessageError},
   message::{
+    ButtplugDeviceMessage,
     ButtplugMessage,
     ButtplugMessageSpecVersion,
-    ButtplugDeviceMessage,
     ButtplugServerMessageV4,
-  }
+  },
 };
 
-use super::
-  message::{
-    BatteryLevelReadingV2,
-    ButtplugClientMessageV2,
-    ButtplugClientMessageV3,
-    ButtplugClientMessageVariant,
-    ButtplugServerMessageV0,
-    ButtplugServerMessageV1,
-    ButtplugServerMessageV2,
-    ButtplugServerMessageV3,
-    ButtplugServerMessageVariant,
-    RSSILevelReadingV2,
-    SensorReadingV3,
+use super::message::{
+  BatteryLevelReadingV2,
+  ButtplugClientMessageV2,
+  ButtplugClientMessageV3,
+  ButtplugClientMessageVariant,
+  ButtplugServerMessageV0,
+  ButtplugServerMessageV1,
+  ButtplugServerMessageV2,
+  ButtplugServerMessageV3,
+  ButtplugServerMessageVariant,
+  RSSILevelReadingV2,
+  SensorReadingV3,
 };
 
 pub struct ButtplugServerMessageConverter {

@@ -23,11 +23,13 @@ use crate::{
       StopScanningV0,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
-  }, server::message::{ButtplugClientMessageV3, ButtplugServerMessageV3}, util::{
+  },
+  server::message::{ButtplugClientMessageV3, ButtplugServerMessageV3},
+  util::{
     async_manager,
     future::{ButtplugFuture, ButtplugFutureStateShared},
     stream::convert_broadcast_receiver_to_stream,
-  }
+  },
 };
 use client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
 use dashmap::DashMap;

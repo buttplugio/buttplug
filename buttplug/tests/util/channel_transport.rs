@@ -9,17 +9,36 @@
 
 use crate::util::ButtplugTestServer;
 use buttplug::{
-  client::{connector::ButtplugRemoteClientConnector, serializer::ButtplugClientJSONSerializer, ButtplugClient, ButtplugClientError},
+  client::{
+    connector::ButtplugRemoteClientConnector,
+    serializer::ButtplugClientJSONSerializer,
+    ButtplugClient,
+    ButtplugClientError,
+  },
   core::{
     connector::{
       transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
       ButtplugConnectorError,
     },
     message::{
-      serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage}, ButtplugClientMessageCurrent, ButtplugMessage, RequestServerInfoV1, ServerInfoV2, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
+      serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
+      ButtplugClientMessageCurrent,
+      ButtplugMessage,
+      RequestServerInfoV1,
+      ServerInfoV2,
+      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
-  server::{connector::ButtplugRemoteServerConnector, message::{serializer::ButtplugServerJSONSerializer, ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageVariant, DeviceListV3}},
+  server::{
+    connector::ButtplugRemoteServerConnector,
+    message::{
+      serializer::ButtplugServerJSONSerializer,
+      ButtplugClientMessageV3,
+      ButtplugClientMessageVariant,
+      ButtplugServerMessageVariant,
+      DeviceListV3,
+    },
+  },
   util::async_manager,
 };
 use futures::{
@@ -187,12 +206,7 @@ impl ChannelClientTestHelper {
     // Just assume we get an RSI message
     self
       .send_client_incoming(ButtplugServerMessageVariant::V3(
-        ServerInfoV2::new(
-          "test server",
-          BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
-          0,
-        )
-        .into(),
+        ServerInfoV2::new("test server", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION, 0).into(),
       ))
       .await;
     // Wait for RequestDeviceList message.

@@ -6,14 +6,14 @@
 // for full license information.
 
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
+  core::{errors::ButtplugDeviceError, message::Endpoint},
+  server::{
+    device::{
+      hardware::{HardwareCommand, HardwareWriteCmd},
+      protocol::{generic_protocol_setup, ProtocolHandler},
+    },
+    message::internal_linear_cmd::InternalLinearCmdV4,
   },
-  server::{device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::internal_linear_cmd::InternalLinearCmdV4},
 };
 
 generic_protocol_setup!(TCodeV03, "tcode-v03");

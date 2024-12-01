@@ -63,7 +63,6 @@
 //! There are slightly more useful situations like device forwarders where this work comes in also,
 //! but that Windows 7/Android example is where the idea originally came from.
 
-
 pub mod remote_connector;
 pub mod transport;
 

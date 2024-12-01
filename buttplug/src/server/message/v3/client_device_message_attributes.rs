@@ -5,9 +5,25 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{core::message::{
-  ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugSensorFeatureMessageType, DeviceFeature, FeatureType, SensorType
-}, server::message::{v1::NullDeviceMessageAttributesV1, v2::{ClientDeviceMessageAttributesV2, GenericDeviceMessageAttributesV2, RawDeviceMessageAttributesV2, SensorDeviceMessageAttributesV2}}};
+use crate::{
+  core::message::{
+    ActuatorType,
+    ButtplugActuatorFeatureMessageType,
+    ButtplugSensorFeatureMessageType,
+    DeviceFeature,
+    FeatureType,
+    SensorType,
+  },
+  server::message::{
+    v1::NullDeviceMessageAttributesV1,
+    v2::{
+      ClientDeviceMessageAttributesV2,
+      GenericDeviceMessageAttributesV2,
+      RawDeviceMessageAttributesV2,
+      SensorDeviceMessageAttributesV2,
+    },
+  },
+};
 use getset::{Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use std::ops::RangeInclusive;

@@ -10,11 +10,20 @@ use crate::{
     errors::ButtplugDeviceError,
     message::{self, ActuatorType, ButtplugDeviceMessage, Endpoint, FeatureType, SensorReadingV4},
   },
-  server::{device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-    hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-  }, message::internal_linear_cmd::InternalLinearCmdV4},
+  server::{
+    device::{
+      configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+      hardware::{
+        Hardware,
+        HardwareCommand,
+        HardwareEvent,
+        HardwareSubscribeCmd,
+        HardwareWriteCmd,
+      },
+      protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+    },
+    message::internal_linear_cmd::InternalLinearCmdV4,
+  },
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;

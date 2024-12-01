@@ -6,11 +6,13 @@
 // for full license information.
 
 use super::{device_message_info::DeviceMessageInfoV2, ClientDeviceMessageAttributesV2};
-use crate::{core::{errors::ButtplugMessageError, message::{
-  ButtplugMessage,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
-}}, server::message::v1::{DeviceAddedV1, DeviceMessageInfoV1}};
+use crate::{
+  core::{
+    errors::ButtplugMessageError,
+    message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
+  },
+  server::message::v1::{DeviceAddedV1, DeviceMessageInfoV1},
+};
 
 use getset::{CopyGetters, Getters};
 

@@ -10,21 +10,34 @@ use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{
-      ButtplugDeviceMessage, Endpoint, SensorReadCmdV4, SensorReadingV4, SensorSubscribeCmdV4, SensorType, SensorUnsubscribeCmdV4
+      ButtplugDeviceMessage,
+      Endpoint,
+      SensorReadCmdV4,
+      SensorReadingV4,
+      SensorSubscribeCmdV4,
+      SensorType,
+      SensorUnsubscribeCmdV4,
     },
   },
-  server::{device::{
-    hardware::{
-      Hardware,
-      HardwareCommand,
-      HardwareEvent,
-      HardwareReadCmd,
-      HardwareSubscribeCmd,
-      HardwareUnsubscribeCmd,
-      HardwareWriteCmd,
+  server::{
+    device::{
+      hardware::{
+        Hardware,
+        HardwareCommand,
+        HardwareEvent,
+        HardwareReadCmd,
+        HardwareSubscribeCmd,
+        HardwareUnsubscribeCmd,
+        HardwareWriteCmd,
+      },
+      protocol::{generic_protocol_setup, ProtocolHandler},
     },
-    protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::{internal_linear_cmd::InternalLinearCmdV4, ButtplugServerDeviceMessage, FleshlightLaunchFW12CmdV0}},
+    message::{
+      internal_linear_cmd::InternalLinearCmdV4,
+      ButtplugServerDeviceMessage,
+      FleshlightLaunchFW12CmdV0,
+    },
+  },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use dashmap::DashSet;
