@@ -9,6 +9,8 @@
 pub mod client_event_loop;
 pub mod client_message_sorter;
 pub mod device;
+pub mod connector;
+pub mod serializer;
 
 use crate::{
   core::{

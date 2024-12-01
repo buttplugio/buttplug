@@ -6,10 +6,8 @@ use crate::{
       ButtplugSerializedMessage,
       ButtplugSerializerError,
     },
-    ButtplugClientMessageCurrent,
     ButtplugMessage,
     ButtplugMessageFinalizer,
-    ButtplugServerMessageCurrent,
   },
   server::message::{ButtplugClientMessageV3, ButtplugServerMessageV3},
 };
