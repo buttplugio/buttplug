@@ -4,7 +4,7 @@ pub mod client;
 pub mod connector;
 use super::{TestDeviceIdentifier, TestHardwareEvent};
 use buttplug::{
-  core::message::{
+  server::message::{
     RotationSubcommandV1,
     ScalarSubcommandV3,
     VectorSubcommandV1,

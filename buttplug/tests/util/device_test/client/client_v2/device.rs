@@ -21,27 +21,30 @@ use buttplug::{
     connector::ButtplugConnectorError,
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      BatteryLevelCmdV2,
-      ButtplugClientMessageV2,
-      ButtplugDeviceMessageType,
       ButtplugMessage,
-      ButtplugServerMessageV2,
-      ClientDeviceMessageAttributesV2,
-      DeviceMessageInfoV2,
       Endpoint,
-      LinearCmdV1,
-      RSSILevelCmdV2,
       RawReadCmdV2,
       RawSubscribeCmdV2,
       RawUnsubscribeCmdV2,
       RawWriteCmdV2,
-      RotateCmdV1,
-      RotationSubcommandV1,
       StopDeviceCmdV0,
-      VectorSubcommandV1,
-      VibrateCmdV1,
-      VibrateSubcommandV1,
     },
+  },
+  server::message::{
+    BatteryLevelCmdV2,
+    ButtplugClientMessageV2,
+    ButtplugDeviceMessageType,
+    ButtplugServerMessageV2,
+    ClientDeviceMessageAttributesV2,
+    DeviceMessageInfoV2,
+    LinearCmdV1,
+    RSSILevelCmdV2,
+    RotateCmdV1,
+    RotationSubcommandV1,
+    VectorSubcommandV1,
+    VibrateCmdV1,
+    VibrateSubcommandV1,
+
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
@@ -296,7 +299,7 @@ impl ButtplugClientDevice {
       features.feature_count()
     } else {
       return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::VibrateCmd).into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::VibrateCmd.to_string()).into(),
       );
     };
     let mut speed_vec: Vec<VibrateSubcommandV1>;
@@ -347,7 +350,7 @@ impl ButtplugClientDevice {
       features.feature_count()
     } else {
       return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LinearCmd).into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LinearCmd.to_string()).into(),
       );
     };
     let mut linear_vec: Vec<VectorSubcommandV1>;
@@ -396,7 +399,7 @@ impl ButtplugClientDevice {
       features.feature_count()
     } else {
       return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RotateCmd).into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RotateCmd.to_string()).into(),
       );
     };
     let mut rotate_vec: Vec<RotationSubcommandV1>;
@@ -442,7 +445,7 @@ impl ButtplugClientDevice {
   pub fn battery_level(&self) -> ButtplugClientResultFuture<f64> {
     if self.message_attributes.battery_level_cmd().is_none() {
       return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::BatteryLevelCmd).into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::BatteryLevelCmd.to_string()).into(),
       );
     }
     let msg = ButtplugClientMessageV2::BatteryLevelCmd(BatteryLevelCmdV2::new(self.index));
@@ -465,7 +468,7 @@ impl ButtplugClientDevice {
   pub fn rssi_level(&self) -> ButtplugClientResultFuture<i32> {
     if self.message_attributes.rssi_level_cmd().is_none() {
       return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RSSILevelCmd).into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RSSILevelCmd.to_string()).into(),
       );
     }
     let msg = ButtplugClientMessageV2::RSSILevelCmd(RSSILevelCmdV2::new(self.index));
@@ -493,7 +496,7 @@ impl ButtplugClientDevice {
   ) -> ButtplugClientResultFuture {
     if self.message_attributes.raw_write_cmd().is_none() {
       return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawWriteCmd).into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawWriteCmd.to_string()).into(),
       );
     }
     let msg = ButtplugClientMessageV2::RawWriteCmd(RawWriteCmdV2::new(
@@ -513,7 +516,7 @@ impl ButtplugClientDevice {
   ) -> ButtplugClientResultFuture<Vec<u8>> {
     if self.message_attributes.raw_read_cmd().is_none() {
       return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawReadCmd).into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawReadCmd.to_string()).into(),
       );
     }
     let msg = ButtplugClientMessageV2::RawReadCmd(RawReadCmdV2::new(
@@ -541,7 +544,7 @@ impl ButtplugClientDevice {
   pub fn raw_subscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
     if self.message_attributes.raw_subscribe_cmd().is_none() {
       return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawSubscribeCmd).into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawSubscribeCmd.to_string()).into(),
       );
     }
     let msg =
@@ -552,7 +555,7 @@ impl ButtplugClientDevice {
   pub fn raw_unsubscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
     if self.message_attributes.raw_subscribe_cmd().is_none() {
       return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawUnsubscribeCmd)
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawUnsubscribeCmd.to_string())
           .into(),
       );
     }

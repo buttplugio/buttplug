@@ -192,11 +192,11 @@ async fn test_client_device_invalid_command() {
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_client_repeated_deviceadded_message() {
-  use buttplug::core::message::{
+  use buttplug::{core::message::OkV0, server::message::{
     ButtplugClientMessageV3,
     ButtplugClientMessageVariant,
-    ButtplugServerMessageVariant,
-  };
+    ButtplugServerMessageVariant, ClientDeviceMessageAttributesV3, DeviceAddedV3,
+  }};
 
   let helper = Arc::new(util::channel_transport::ChannelClientTestHelper::new());
   helper.simulate_successful_connect().await;
@@ -209,10 +209,10 @@ async fn test_client_repeated_deviceadded_message() {
     ));
     helper_clone
       .send_client_incoming(ButtplugServerMessageVariant::V3(
-        message::OkV0::new(3).into(),
+        OkV0::new(3).into(),
       ))
       .await;
-    let device_added = message::DeviceAddedV3::new(
+    let device_added = DeviceAddedV3::new(
       1,
       "Test Device",
       &None,
@@ -252,9 +252,9 @@ async fn test_client_repeated_deviceadded_message() {
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_client_repeated_deviceremoved_message() {
-  use buttplug::core::message::{
-    ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageVariant
-  };
+  use buttplug::{core::message::{DeviceRemovedV0, OkV0}, server::message::{
+    ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageVariant, ClientDeviceMessageAttributesV3, DeviceAddedV3
+  }};
 
   let helper = Arc::new(util::channel_transport::ChannelClientTestHelper::new());
   helper.simulate_successful_connect().await;
@@ -267,17 +267,17 @@ async fn test_client_repeated_deviceremoved_message() {
     ));
     helper_clone
       .send_client_incoming(ButtplugServerMessageVariant::V3(
-        message::OkV0::new(3).into(),
+        OkV0::new(3).into(),
       ))
       .await;
-    let device_added = message::DeviceAddedV3::new(
+    let device_added = DeviceAddedV3::new(
       1,
       "Test Device",
       &None,
       &None,
       &ClientDeviceMessageAttributesV3::default(),
     );
-    let device_removed = message::DeviceRemovedV0::new(1);
+    let device_removed = DeviceRemovedV0::new(1);
     helper_clone
       .send_client_incoming(ButtplugServerMessageVariant::V3(device_added.into()))
       .await;

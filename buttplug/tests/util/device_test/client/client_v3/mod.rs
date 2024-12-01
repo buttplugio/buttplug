@@ -12,8 +12,8 @@ use buttplug::{
     RotateCommand,
     ScalarCommand,
     ScalarValueCommand,
+    connector::ButtplugInProcessClientConnectorBuilder,
   },
-  core::connector::ButtplugInProcessClientConnectorBuilder,
   server::{device::ServerDeviceManagerBuilder, ButtplugServer, ButtplugServerBuilder},
   util::{async_manager, device_configuration::load_protocol_configs},
 };

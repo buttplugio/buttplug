@@ -11,9 +11,9 @@ use buttplug::{
   core::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
     errors::{ButtplugError, ButtplugMessageError},
-    message::{ButtplugClientMessageV2, ButtplugServerMessageV2, ButtplugServerMessageVariant},
   },
-  server::{ButtplugServer, ButtplugServerBuilder},
+  server::{ButtplugServer, ButtplugServerBuilder, message::{ButtplugClientMessageV2, ButtplugServerMessageV2, ButtplugServerMessageVariant},
+},
   util::async_manager,
 };
 use futures::{
