@@ -2,8 +2,12 @@ use super::*;
 use crate::core::{
   errors::ButtplugMessageError,
   message::{
-  ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, PingV0, RequestServerInfoV1
-}
+    ButtplugMessage,
+    ButtplugMessageFinalizer,
+    ButtplugMessageValidator,
+    PingV0,
+    RequestServerInfoV1,
+  },
 };
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};

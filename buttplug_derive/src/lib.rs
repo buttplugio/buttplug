@@ -199,7 +199,7 @@ fn impl_from_specific_buttplug_message_derive_macro(ast: &syn::DeriveInput) -> T
     // iterate our field identifiers and the identifier of the first member. This means we're locked
     // to an enum style of field name([unnamed type]), but we're the only ones who use this macro,
     // and on structs that almost never change, so hopefully leaving this comment will be enough.
-    let mut fields: Vec<_> = vec!();
+    let mut fields: Vec<_> = vec![];
     for var in e.variants.iter() {
       for field in var.fields.iter() {
         fields.push(field.ty.clone());

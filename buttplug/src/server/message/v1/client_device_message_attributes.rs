@@ -8,7 +8,10 @@
 use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 
-use crate::{core::message::DeviceFeature, server::message::{v2::ClientDeviceMessageAttributesV2, v3::ClientDeviceMessageAttributesV3}};
+use crate::{
+  core::message::DeviceFeature,
+  server::message::{v2::ClientDeviceMessageAttributesV2, v3::ClientDeviceMessageAttributesV3},
+};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct NullDeviceMessageAttributesV1 {}

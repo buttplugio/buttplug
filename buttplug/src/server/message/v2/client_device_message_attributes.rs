@@ -5,10 +5,17 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{core::message::{
-  DeviceFeature,
-  Endpoint,
-}, server::message::{v1::{ClientDeviceMessageAttributesV1, GenericDeviceMessageAttributesV1, NullDeviceMessageAttributesV1}, v3::ClientDeviceMessageAttributesV3}};
+use crate::{
+  core::message::{DeviceFeature, Endpoint},
+  server::message::{
+    v1::{
+      ClientDeviceMessageAttributesV1,
+      GenericDeviceMessageAttributesV1,
+      NullDeviceMessageAttributesV1,
+    },
+    v3::ClientDeviceMessageAttributesV3,
+  },
+};
 use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};
 

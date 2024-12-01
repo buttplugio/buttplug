@@ -12,8 +12,11 @@ use buttplug::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
     errors::{ButtplugError, ButtplugMessageError},
   },
-  server::{ButtplugServer, ButtplugServerBuilder, message::{ButtplugClientMessageV2, ButtplugServerMessageV2, ButtplugServerMessageVariant},
-},
+  server::{
+    message::{ButtplugClientMessageV2, ButtplugServerMessageV2, ButtplugServerMessageVariant},
+    ButtplugServer,
+    ButtplugServerBuilder,
+  },
   util::async_manager,
 };
 use futures::{
@@ -93,13 +96,11 @@ impl<'a> ButtplugInProcessClientConnector {
     let (server_outbound_sender, _) = channel(256);
     Self {
       server_outbound_sender,
-      server: Arc::new(server.unwrap_or_else(
-        || {
-          ButtplugServerBuilder::default()
-            .finish()
-            .expect("Default server builder should always work.")
-        },
-      )),
+      server: Arc::new(server.unwrap_or_else(|| {
+        ButtplugServerBuilder::default()
+          .finish()
+          .expect("Default server builder should always work.")
+      })),
       connected: Arc::new(AtomicBool::new(false)),
     }
   }

@@ -7,12 +7,15 @@
 
 //! Fleshlight FW v1.2 Command (Version 0 Message, Deprecated)
 
-use crate::core::{errors::ButtplugMessageError, message::{
-  ButtplugDeviceMessage,
-  ButtplugMessage,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
-}};
+use crate::core::{
+  errors::ButtplugMessageError,
+  message::{
+    ButtplugDeviceMessage,
+    ButtplugMessage,
+    ButtplugMessageFinalizer,
+    ButtplugMessageValidator,
+  },
+};
 use getset::CopyGetters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};

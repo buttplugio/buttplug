@@ -10,16 +10,15 @@ mod util;
 pub use util::test_device_manager::check_test_recv_value;
 
 use buttplug::{
-  core::
-    message::{serializer::{
-      ButtplugMessageSerializer,
-      ButtplugSerializedMessage,
-    },
-    Endpoint, StartScanningV0,
-  
+  core::message::{
+    serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
+    Endpoint,
+    StartScanningV0,
   },
   server::{
-    device::hardware::{HardwareCommand, HardwareWriteCmd}, message::{serializer::ButtplugServerJSONSerializer, ButtplugClientMessageVariant}, ButtplugServerBuilder
+    device::hardware::{HardwareCommand, HardwareWriteCmd},
+    message::{serializer::ButtplugServerJSONSerializer, ButtplugClientMessageVariant},
+    ButtplugServerBuilder,
   },
 };
 use futures::{pin_mut, StreamExt};
@@ -27,8 +26,7 @@ use util::test_server_with_device;
 
 #[tokio::test]
 async fn test_version0_connection() {
-  let server =
-    ButtplugServerBuilder::default().finish().unwrap();
+  let server = ButtplugServerBuilder::default().finish().unwrap();
   let serializer = ButtplugServerJSONSerializer::default();
   let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
   let output = serializer
@@ -47,8 +45,7 @@ async fn test_version0_connection() {
 
 #[tokio::test]
 async fn test_version2_connection() {
-  let server =
-    ButtplugServerBuilder::default().finish().unwrap();
+  let server = ButtplugServerBuilder::default().finish().unwrap();
   let serializer = ButtplugServerJSONSerializer::default();
   let rsi =
     r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client", "MessageVersion": 2}}]"#;

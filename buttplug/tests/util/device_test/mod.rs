@@ -4,13 +4,13 @@ pub mod client;
 pub mod connector;
 use super::{TestDeviceIdentifier, TestHardwareEvent};
 use buttplug::{
+  server::device::hardware::HardwareCommand,
   server::message::{
     RotationSubcommandV1,
     ScalarSubcommandV3,
     VectorSubcommandV1,
     VibrateSubcommandV1,
   },
-  server::device::hardware::HardwareCommand,
 };
 use serde::{Deserialize, Serialize};
 

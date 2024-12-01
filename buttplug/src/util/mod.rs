@@ -23,8 +23,8 @@ pub use wasmtimer::tokio::sleep;
 
 #[cfg(all(feature = "server", feature = "client"))]
 use crate::{
-  client::ButtplugClient,
   client::connector::ButtplugInProcessClientConnectorBuilder,
+  client::ButtplugClient,
   server::device::{configuration::DeviceConfigurationManagerBuilder, ServerDeviceManagerBuilder},
   server::ButtplugServerBuilder,
 };

@@ -6,15 +6,28 @@
 // for full license information.
 
 mod util;
-use buttplug::{core::{
-  errors::{ButtplugDeviceError, ButtplugError},
-  message::{
-    ButtplugServerMessageV4, Endpoint, RawReadCmdV2, RawSubscribeCmdV2, RawUnsubscribeCmdV2, RawWriteCmdV2, RequestServerInfoV1, StartScanningV0, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
+use buttplug::{
+  core::{
+    errors::{ButtplugDeviceError, ButtplugError},
+    message::{
+      ButtplugServerMessageV4,
+      Endpoint,
+      RawReadCmdV2,
+      RawSubscribeCmdV2,
+      RawUnsubscribeCmdV2,
+      RawWriteCmdV2,
+      RequestServerInfoV1,
+      StartScanningV0,
+      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+    },
   },
-},
-server::message::{
-  spec_enums::ButtplugInternalClientMessageV4, ButtplugClientMessageVariant, ButtplugServerMessageV3, ButtplugServerMessageVariant 
-},};
+  server::message::{
+    spec_enums::ButtplugInternalClientMessageV4,
+    ButtplugClientMessageVariant,
+    ButtplugServerMessageV3,
+    ButtplugServerMessageVariant,
+  },
+};
 
 use futures::{pin_mut, StreamExt};
 use std::matches;
@@ -33,8 +46,7 @@ async fn test_capabilities_exposure() {
 
   server
     .parse_message(ButtplugClientMessageVariant::V3(
-      RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
-        .into(),
+      RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into(),
     ))
     .await
     .expect("Test, assuming infallible.");
@@ -60,8 +72,7 @@ async fn test_server_raw_message() {
   pin_mut!(recv);
   assert!(server
     .parse_message(ButtplugClientMessageVariant::V3(
-      RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
-        .into()
+      RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
     ))
     .await
     .is_ok());
@@ -96,8 +107,7 @@ async fn test_server_no_raw_message() {
   pin_mut!(recv);
   assert!(server
     .parse_message(ButtplugClientMessageVariant::V3(
-      RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
-        .into()
+      RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
     ))
     .await
     .is_ok());

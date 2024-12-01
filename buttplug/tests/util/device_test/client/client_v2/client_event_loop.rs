@@ -12,16 +12,18 @@ use super::{
   client_message_sorter::ClientMessageSorter,
   device::{ButtplugClientDevice, ButtplugClientDeviceEvent},
 };
-use buttplug::{core::{
-  connector::{ButtplugConnector, ButtplugConnectorStateShared},
-  errors::{ButtplugDeviceError, ButtplugError}, message::{  ButtplugDeviceMessage,
-    ButtplugMessageValidator,}
-}, server::message::{
-  ButtplugClientMessageV2,
-  ButtplugServerMessageV2,
-  DeviceListV2,
-  DeviceMessageInfoV2,
-},
+use buttplug::{
+  core::{
+    connector::{ButtplugConnector, ButtplugConnectorStateShared},
+    errors::{ButtplugDeviceError, ButtplugError},
+    message::{ButtplugDeviceMessage, ButtplugMessageValidator},
+  },
+  server::message::{
+    ButtplugClientMessageV2,
+    ButtplugServerMessageV2,
+    DeviceListV2,
+    DeviceMessageInfoV2,
+  },
 };
 use dashmap::DashMap;
 use std::sync::{

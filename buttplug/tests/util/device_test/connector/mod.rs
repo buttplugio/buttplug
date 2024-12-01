@@ -7,14 +7,20 @@ use buttplug::{
   core::{
     connector::ButtplugRemoteConnector,
     message::serializer::{
-      ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugSerializerError,
+      ButtplugMessageSerializer,
+      ButtplugSerializedMessage,
+      ButtplugSerializerError,
     },
   },
   server::{
     connector::ButtplugRemoteServerConnector,
     message::{
-      serializer::ButtplugServerJSONSerializer, ButtplugClientMessageV0, ButtplugClientMessageV1,
-      ButtplugClientMessageV2, ButtplugServerMessageV0, ButtplugServerMessageV1,
+      serializer::ButtplugServerJSONSerializer,
+      ButtplugClientMessageV0,
+      ButtplugClientMessageV1,
+      ButtplugClientMessageV2,
+      ButtplugServerMessageV0,
+      ButtplugServerMessageV1,
       ButtplugServerMessageV2,
     },
   },

@@ -13,6 +13,7 @@ mod spec_enums;
 mod test;
 mod vorze_a10_cyclone_cmd;
 
+use crate::core::message::v0::*;
 pub use device_added::DeviceAddedV0;
 pub use device_list::DeviceListV0;
 pub use device_message_info::DeviceMessageInfoV0;
@@ -27,4 +28,3 @@ pub use single_motor_vibrate_cmd::SingleMotorVibrateCmdV0;
 pub use spec_enums::{ButtplugClientMessageV0, ButtplugServerMessageV0};
 pub use test::TestV0;
 pub use vorze_a10_cyclone_cmd::VorzeA10CycloneCmdV0;
-use crate::core::message::v0::*;

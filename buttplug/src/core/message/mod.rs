@@ -84,7 +84,7 @@ pub const BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION: ButtplugMessageSpecVersion =
 /// The current latest version of the spec implemented by the library.
 pub const BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION: ButtplugMessageSpecVersion =
   ButtplugMessageSpecVersion::Version4;
-  
+
 pub trait ButtplugMessageFinalizer {
   fn finalize(&mut self) {
   }

@@ -5,11 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{core::{errors::ButtplugMessageError, message::{
-  ButtplugMessage,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
-}}, server::message::v0::{DeviceAddedV0, DeviceMessageInfoV0}};
+use crate::{
+  core::{
+    errors::ButtplugMessageError,
+    message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
+  },
+  server::message::v0::{DeviceAddedV0, DeviceMessageInfoV0},
+};
 
 use super::{device_message_info::DeviceMessageInfoV1, ClientDeviceMessageAttributesV1};
 

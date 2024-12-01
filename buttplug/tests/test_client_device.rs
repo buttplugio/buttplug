@@ -192,11 +192,16 @@ async fn test_client_device_invalid_command() {
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_client_repeated_deviceadded_message() {
-  use buttplug::{core::message::OkV0, server::message::{
-    ButtplugClientMessageV3,
-    ButtplugClientMessageVariant,
-    ButtplugServerMessageVariant, ClientDeviceMessageAttributesV3, DeviceAddedV3,
-  }};
+  use buttplug::{
+    core::message::OkV0,
+    server::message::{
+      ButtplugClientMessageV3,
+      ButtplugClientMessageVariant,
+      ButtplugServerMessageVariant,
+      ClientDeviceMessageAttributesV3,
+      DeviceAddedV3,
+    },
+  };
 
   let helper = Arc::new(util::channel_transport::ChannelClientTestHelper::new());
   helper.simulate_successful_connect().await;
@@ -208,9 +213,7 @@ async fn test_client_repeated_deviceadded_message() {
       ButtplugClientMessageVariant::V3(ButtplugClientMessageV3::StartScanning(..))
     ));
     helper_clone
-      .send_client_incoming(ButtplugServerMessageVariant::V3(
-        OkV0::new(3).into(),
-      ))
+      .send_client_incoming(ButtplugServerMessageVariant::V3(OkV0::new(3).into()))
       .await;
     let device_added = DeviceAddedV3::new(
       1,
@@ -252,9 +255,16 @@ async fn test_client_repeated_deviceadded_message() {
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_client_repeated_deviceremoved_message() {
-  use buttplug::{core::message::{DeviceRemovedV0, OkV0}, server::message::{
-    ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageVariant, ClientDeviceMessageAttributesV3, DeviceAddedV3
-  }};
+  use buttplug::{
+    core::message::{DeviceRemovedV0, OkV0},
+    server::message::{
+      ButtplugClientMessageV3,
+      ButtplugClientMessageVariant,
+      ButtplugServerMessageVariant,
+      ClientDeviceMessageAttributesV3,
+      DeviceAddedV3,
+    },
+  };
 
   let helper = Arc::new(util::channel_transport::ChannelClientTestHelper::new());
   helper.simulate_successful_connect().await;
@@ -266,9 +276,7 @@ async fn test_client_repeated_deviceremoved_message() {
       ButtplugClientMessageVariant::V3(ButtplugClientMessageV3::StartScanning(..))
     ));
     helper_clone
-      .send_client_incoming(ButtplugServerMessageVariant::V3(
-        OkV0::new(3).into(),
-      ))
+      .send_client_incoming(ButtplugServerMessageVariant::V3(OkV0::new(3).into()))
       .await;
     let device_added = DeviceAddedV3::new(
       1,

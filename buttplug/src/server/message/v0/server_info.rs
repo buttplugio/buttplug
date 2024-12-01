@@ -5,12 +5,16 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::{errors::ButtplugMessageError, message::{
-  ButtplugMessage,
-  ButtplugMessageFinalizer,
-  ButtplugMessageSpecVersion,
-  ButtplugMessageValidator, ServerInfoV2,
-}};
+use crate::core::{
+  errors::ButtplugMessageError,
+  message::{
+    ButtplugMessage,
+    ButtplugMessageFinalizer,
+    ButtplugMessageSpecVersion,
+    ButtplugMessageValidator,
+    ServerInfoV2,
+  },
+};
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
@@ -65,7 +69,6 @@ impl ButtplugMessageValidator for ServerInfoV0 {
     self.is_system_id(self.id)
   }
 }
-
 
 impl From<ServerInfoV2> for ServerInfoV0 {
   fn from(msg: ServerInfoV2) -> Self {

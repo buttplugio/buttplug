@@ -23,10 +23,7 @@ use buttplug::{
       StopScanningV0,
     },
   },
-  server::message::{
-    ButtplugClientMessageV2,
-    ButtplugServerMessageV2,
-  },
+  server::message::{ButtplugClientMessageV2, ButtplugServerMessageV2},
   util::{
     async_manager,
     future::{ButtplugFuture, ButtplugFutureStateShared},

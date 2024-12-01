@@ -5,9 +5,17 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{core::{errors::ButtplugMessageError, message::{
-  ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, DeviceAddedV4,
-}}, server::message::{v0::DeviceMessageInfoV0, v1::DeviceMessageInfoV1, v2::{DeviceAddedV2, DeviceMessageInfoV2}}};
+use crate::{
+  core::{
+    errors::ButtplugMessageError,
+    message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, DeviceAddedV4},
+  },
+  server::message::{
+    v0::DeviceMessageInfoV0,
+    v1::DeviceMessageInfoV1,
+    v2::{DeviceAddedV2, DeviceMessageInfoV2},
+  },
+};
 
 use getset::{CopyGetters, Getters};
 

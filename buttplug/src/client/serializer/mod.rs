@@ -1,11 +1,18 @@
-use crate::{core::message::{
-  serializer::{
-    json_serializer::{create_message_validator, deserialize_to_message, vec_to_protocol_json},
-    ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugSerializerError,
+use crate::{
+  core::message::{
+    serializer::{
+      json_serializer::{create_message_validator, deserialize_to_message, vec_to_protocol_json},
+      ButtplugMessageSerializer,
+      ButtplugSerializedMessage,
+      ButtplugSerializerError,
+    },
+    ButtplugClientMessageCurrent,
+    ButtplugMessage,
+    ButtplugMessageFinalizer,
+    ButtplugServerMessageCurrent,
   },
-  ButtplugClientMessageCurrent, ButtplugMessage, ButtplugMessageFinalizer,
-  ButtplugServerMessageCurrent,
-}, server::message::{ButtplugClientMessageV3, ButtplugServerMessageV3}};
+  server::message::{ButtplugClientMessageV3, ButtplugServerMessageV3},
+};
 use jsonschema::Validator;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;

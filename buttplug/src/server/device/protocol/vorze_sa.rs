@@ -10,10 +10,7 @@ use crate::server::device::configuration::ProtocolCommunicationSpecifier;
 use crate::server::message::internal_linear_cmd::InternalLinearCmdV4;
 use crate::server::message::VorzeA10CycloneCmdV0;
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  },
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     configuration::{UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},

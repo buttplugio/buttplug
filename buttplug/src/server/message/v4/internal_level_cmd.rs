@@ -5,12 +5,28 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{core::{
-  errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-  message::{
-    ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, FeatureType, LevelCmdV4, LevelSubcommandV4, 
+use crate::{
+  core::{
+    errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+    message::{
+      ButtplugDeviceMessage,
+      ButtplugMessage,
+      ButtplugMessageFinalizer,
+      ButtplugMessageValidator,
+      FeatureType,
+      LevelCmdV4,
+      LevelSubcommandV4,
+    },
   },
-}, server::message::{v0::{SingleMotorVibrateCmdV0, VorzeA10CycloneCmdV0}, v1::{RotateCmdV1, VibrateCmdV1}, v3::ScalarCmdV3, ButtplugDeviceMessageType, LegacyDeviceAttributes, TryFromDeviceAttributes}};
+  server::message::{
+    v0::{SingleMotorVibrateCmdV0, VorzeA10CycloneCmdV0},
+    v1::{RotateCmdV1, VibrateCmdV1},
+    v3::ScalarCmdV3,
+    ButtplugDeviceMessageType,
+    LegacyDeviceAttributes,
+    TryFromDeviceAttributes,
+  },
+};
 use getset::{CopyGetters, Getters};
 use uuid::Uuid;
 
@@ -27,35 +43,66 @@ impl InternalLevelSubcommandV4 {
     Self {
       feature_index,
       level,
-      feature_id
+      feature_id,
     }
   }
 }
 
 impl TryFromDeviceAttributes<&LevelSubcommandV4> for InternalLevelSubcommandV4 {
-  fn try_from_device_attributes(subcommand: &LevelSubcommandV4, attrs: &LegacyDeviceAttributes) -> Result<Self, ButtplugError> {
+  fn try_from_device_attributes(
+    subcommand: &LevelSubcommandV4,
+    attrs: &LegacyDeviceAttributes,
+  ) -> Result<Self, ButtplugError> {
     let features = attrs.features();
     // Since we have the feature info already, check limit and unpack into step range when creating
     // If this message isn't the result of an upgrade from another older message, we won't have set our feature yet.
     let feature_id = if let Some(feature) = features.get(subcommand.feature_index() as usize) {
       *feature.id()
     } else {
-      return Err(ButtplugError::from(ButtplugDeviceError::DeviceFeatureIndexError(features.len() as u32, subcommand.feature_index())));
+      return Err(ButtplugError::from(
+        ButtplugDeviceError::DeviceFeatureIndexError(
+          features.len() as u32,
+          subcommand.feature_index(),
+        ),
+      ));
     };
-    
-    let feature = features.iter().find(|x| *x.id() == feature_id).expect("Already checked existence or created.");
+
+    let feature = features
+      .iter()
+      .find(|x| *x.id() == feature_id)
+      .expect("Already checked existence or created.");
     let level = subcommand.level();
     // Check to make sure the feature has an actuator that handles LevelCmd
     if let Some(actuator) = feature.actuator() {
       // Check to make sure the level is within the range of the feature.
-      if actuator.messages().contains(&crate::core::message::ButtplugActuatorFeatureMessageType::LevelCmd) {
+      if actuator
+        .messages()
+        .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::LevelCmd)
+      {
         // Currently, rotate with direction is the only actuator type that can take negative values.
-        if *feature.feature_type() == FeatureType::RotateWithDirection && !actuator.step_limit().contains(&(level.abs() as u32)) {
-          Err(ButtplugError::from(ButtplugDeviceError::DeviceStepRangeError(*actuator.step_limit().end(), level.abs() as u32)))
+        if *feature.feature_type() == FeatureType::RotateWithDirection
+          && !actuator.step_limit().contains(&(level.abs() as u32))
+        {
+          Err(ButtplugError::from(
+            ButtplugDeviceError::DeviceStepRangeError(
+              *actuator.step_limit().end(),
+              level.abs() as u32,
+            ),
+          ))
         } else if level < 0 {
-          Err(ButtplugError::from(ButtplugDeviceError::DeviceStepRangeError(*actuator.step_limit().end(), level.abs() as u32)))
+          Err(ButtplugError::from(
+            ButtplugDeviceError::DeviceStepRangeError(
+              *actuator.step_limit().end(),
+              level.abs() as u32,
+            ),
+          ))
         } else if !actuator.step_limit().contains(&(level.abs() as u32)) {
-          Err(ButtplugError::from(ButtplugDeviceError::DeviceStepRangeError(*actuator.step_limit().end(), level.abs() as u32)))
+          Err(ButtplugError::from(
+            ButtplugDeviceError::DeviceStepRangeError(
+              *actuator.step_limit().end(),
+              level.abs() as u32,
+            ),
+          ))
         } else {
           Ok(Self {
             feature_id,
@@ -64,10 +111,14 @@ impl TryFromDeviceAttributes<&LevelSubcommandV4> for InternalLevelSubcommandV4 {
           })
         }
       } else {
-        Err(ButtplugError::from(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LevelCmd.to_string())))
+        Err(ButtplugError::from(
+          ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LevelCmd.to_string()),
+        ))
       }
     } else {
-      Err(ButtplugError::from(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LevelCmd.to_string())))
+      Err(ButtplugError::from(
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LevelCmd.to_string()),
+      ))
     }
   }
 }
@@ -96,7 +147,7 @@ impl InternalLevelCmdV4 {
     Self {
       id,
       device_index,
-      levels: levels.clone()
+      levels: levels.clone(),
     }
   }
 }
@@ -113,11 +164,15 @@ impl TryFromDeviceAttributes<LevelCmdV4> for InternalLevelCmdV4 {
     msg: LevelCmdV4,
     features: &LegacyDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
-    let levels: Result<Vec<InternalLevelSubcommandV4>, ButtplugError> = msg.levels().iter().map(|x| InternalLevelSubcommandV4::try_from_device_attributes(x, features)).collect();
+    let levels: Result<Vec<InternalLevelSubcommandV4>, ButtplugError> = msg
+      .levels()
+      .iter()
+      .map(|x| InternalLevelSubcommandV4::try_from_device_attributes(x, features))
+      .collect();
     Ok(Self {
       id: msg.id(),
       device_index: msg.device_index(),
-      levels: levels?
+      levels: levels?,
     })
   }
 }
@@ -142,7 +197,10 @@ impl TryFromDeviceAttributes<VorzeA10CycloneCmdV0> for InternalLevelCmdV4 {
       })
       .collect();
 
-    InternalLevelCmdV4::try_from_device_attributes(LevelCmdV4::new(msg.device_index(), cmds), features)
+    InternalLevelCmdV4::try_from_device_attributes(
+      LevelCmdV4::new(msg.device_index(), cmds),
+      features,
+    )
   }
 }
 
@@ -162,12 +220,12 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for InternalLevelCmdV4 {
           index as u32,
           (msg.speed() * *feature.actuator().as_ref().unwrap().step_range().end() as f64).ceil()
             as i32,
-          *feature.id()
+          *feature.id(),
         )
       })
       .collect();
 
-      Ok(InternalLevelCmdV4::new(msg.id(), msg.device_index(), &cmds))
+    Ok(InternalLevelCmdV4::new(msg.id(), msg.device_index(), &cmds))
   }
 }
 
@@ -201,7 +259,13 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for InternalLevelCmdV4 {
         ));
       }
       let feature = &vibrate_attributes.features()[vibrate_cmd.index() as usize];
-      let idx = features.features().iter().enumerate().find(|(_, f)| *f.id() == *feature.id()).expect("Already checked existence").0;
+      let idx = features
+        .features()
+        .iter()
+        .enumerate()
+        .find(|(_, f)| *f.id() == *feature.id())
+        .expect("Already checked existence")
+        .0;
       let actuator =
         feature
           .actuator()
@@ -209,11 +273,11 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for InternalLevelCmdV4 {
           .ok_or(ButtplugDeviceError::DeviceConfigurationError(
             "Device configuration does not have Vibrate actuator available.".to_owned(),
           ))?;
-        cmds.push(InternalLevelSubcommandV4::new(
-          idx as u32,
-          (vibrate_cmd.speed() * *actuator.step_range().end() as f64).ceil() as i32,
-          *feature.id()
-        ))
+      cmds.push(InternalLevelSubcommandV4::new(
+        idx as u32,
+        (vibrate_cmd.speed() * *actuator.step_range().end() as f64).ceil() as i32,
+        *feature.id(),
+      ))
     }
 
     Ok(InternalLevelCmdV4::new(msg.id(), msg.device_index(), &cmds))
@@ -228,17 +292,44 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for InternalLevelCmdV4 {
   ) -> Result<Self, crate::core::errors::ButtplugError> {
     let mut cmds: Vec<InternalLevelSubcommandV4> = vec![];
     if msg.scalars().is_empty() {
-      return Err(ButtplugError::from(ButtplugDeviceError::ProtocolRequirementError("ScalarCmd with no subcommands is not allowed.".to_owned())));
+      return Err(ButtplugError::from(
+        ButtplugDeviceError::ProtocolRequirementError(
+          "ScalarCmd with no subcommands is not allowed.".to_owned(),
+        ),
+      ));
     }
     for cmd in msg.scalars() {
-      let scalar_attrs = attrs.attrs_v3().scalar_cmd().as_ref().ok_or(ButtplugError::from(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::ScalarCmd.to_string())))?;
-      let feature = scalar_attrs.get(cmd.index() as usize).ok_or(ButtplugError::from(ButtplugDeviceError::DeviceFeatureIndexError(scalar_attrs.len() as u32, cmd.index())))?;
-      let idx = attrs.features().iter().enumerate().find(|(_, f)| *f.id() == *feature.feature().id()).expect("Already proved existence").0 as u32;
-      let actuator = feature.feature().actuator().as_ref().ok_or(ButtplugError::from(ButtplugDeviceError::DeviceNoActuatorError("ScalarCmdV3".to_owned())))?;
+      let scalar_attrs = attrs
+        .attrs_v3()
+        .scalar_cmd()
+        .as_ref()
+        .ok_or(ButtplugError::from(
+          ButtplugDeviceError::MessageNotSupported(
+            ButtplugDeviceMessageType::ScalarCmd.to_string(),
+          ),
+        ))?;
+      let feature = scalar_attrs
+        .get(cmd.index() as usize)
+        .ok_or(ButtplugError::from(
+          ButtplugDeviceError::DeviceFeatureIndexError(scalar_attrs.len() as u32, cmd.index()),
+        ))?;
+      let idx = attrs
+        .features()
+        .iter()
+        .enumerate()
+        .find(|(_, f)| *f.id() == *feature.feature().id())
+        .expect("Already proved existence")
+        .0 as u32;
+      let actuator = feature
+        .feature()
+        .actuator()
+        .as_ref()
+        .ok_or(ButtplugError::from(
+          ButtplugDeviceError::DeviceNoActuatorError("ScalarCmdV3".to_owned()),
+        ))?;
       cmds.push(InternalLevelSubcommandV4::new(
         idx,
-        (cmd.scalar() * *actuator.step_range().end() as f64).ceil()
-          as i32,
+        (cmd.scalar() * *actuator.step_range().end() as f64).ceil() as i32,
         *feature.feature.id(),
       ));
     }
@@ -256,10 +347,34 @@ impl TryFromDeviceAttributes<RotateCmdV1> for InternalLevelCmdV4 {
   ) -> Result<Self, crate::core::errors::ButtplugError> {
     let mut cmds: Vec<InternalLevelSubcommandV4> = vec![];
     for cmd in msg.rotations() {
-      let rotate_attrs = attrs.attrs_v3().rotate_cmd().as_ref().ok_or(ButtplugError::from(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RotateCmd.to_string())))?;
-      let feature = rotate_attrs.get(cmd.index() as usize).ok_or(ButtplugError::from(ButtplugDeviceError::DeviceFeatureIndexError(rotate_attrs.len() as u32, cmd.index())))?;
-      let idx = attrs.features().iter().enumerate().find(|(_, f)| *f.id() == *feature.feature().id()).expect("Already proved existence").0 as u32;
-      let actuator = feature.feature().actuator().as_ref().ok_or(ButtplugError::from(ButtplugDeviceError::DeviceNoActuatorError("RotateCmdV1".to_owned())))?;
+      let rotate_attrs = attrs
+        .attrs_v3()
+        .rotate_cmd()
+        .as_ref()
+        .ok_or(ButtplugError::from(
+          ButtplugDeviceError::MessageNotSupported(
+            ButtplugDeviceMessageType::RotateCmd.to_string(),
+          ),
+        ))?;
+      let feature = rotate_attrs
+        .get(cmd.index() as usize)
+        .ok_or(ButtplugError::from(
+          ButtplugDeviceError::DeviceFeatureIndexError(rotate_attrs.len() as u32, cmd.index()),
+        ))?;
+      let idx = attrs
+        .features()
+        .iter()
+        .enumerate()
+        .find(|(_, f)| *f.id() == *feature.feature().id())
+        .expect("Already proved existence")
+        .0 as u32;
+      let actuator = feature
+        .feature()
+        .actuator()
+        .as_ref()
+        .ok_or(ButtplugError::from(
+          ButtplugDeviceError::DeviceNoActuatorError("RotateCmdV1".to_owned()),
+        ))?;
       cmds.push(InternalLevelSubcommandV4::new(
         idx,
         (cmd.speed()
@@ -272,4 +387,3 @@ impl TryFromDeviceAttributes<RotateCmdV1> for InternalLevelCmdV4 {
     Ok(InternalLevelCmdV4::new(msg.id(), msg.device_index(), &cmds))
   }
 }
-

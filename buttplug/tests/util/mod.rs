@@ -13,8 +13,8 @@ pub mod test_device_manager;
 pub use delay_device_communication_manager::DelayDeviceCommunicationManagerBuilder;
 pub mod channel_transport;
 use buttplug::{
-  client::ButtplugClient,
   client::connector::ButtplugInProcessClientConnectorBuilder,
+  client::ButtplugClient,
   server::{
     device::{
       configuration::DeviceConfigurationManager,

@@ -5,17 +5,18 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::{
-  errors::ButtplugDeviceError,
-  message::Endpoint,
-};
+use crate::core::{errors::ButtplugDeviceError, message::Endpoint};
 use getset::{Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use std::{collections::HashSet, ops::RangeInclusive};
 use uuid::Uuid;
 
 use super::{
-  ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugRawFeatureMessageType, ButtplugSensorFeatureMessageType, SensorType
+  ActuatorType,
+  ButtplugActuatorFeatureMessageType,
+  ButtplugRawFeatureMessageType,
+  ButtplugSensorFeatureMessageType,
+  SensorType,
 };
 
 #[derive(Debug, Default, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -215,9 +216,7 @@ impl From<DeviceFeatureActuatorSerialized> for DeviceFeatureActuator {
   fn from(value: DeviceFeatureActuatorSerialized) -> Self {
     Self {
       step_range: value.step_range.clone(),
-      step_limit: value
-        .step_limit
-        .unwrap_or(value.step_range.clone()),
+      step_limit: value.step_limit.unwrap_or(value.step_range.clone()),
       messages: value.messages,
     }
   }
@@ -237,7 +236,7 @@ impl DeviceFeatureActuator {
   }
 
   pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
-    if self.step_range.is_empty()  {
+    if self.step_range.is_empty() {
       Err(ButtplugDeviceError::DeviceConfigurationError(
         "Step range empty.".to_string(),
       ))
