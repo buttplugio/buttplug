@@ -63,8 +63,7 @@
 //! There are slightly more useful situations like device forwarders where this work comes in also,
 //! but that Windows 7/Android example is where the idea originally came from.
 
-#[cfg(all(feature = "server", feature = "client", not(feature = "wasm")))]
-mod in_process_connector;
+
 pub mod remote_connector;
 pub mod transport;
 
@@ -74,16 +73,7 @@ use crate::{
 };
 use displaydoc::Display;
 use futures::future::{self, BoxFuture, FutureExt};
-#[cfg(all(feature = "server", feature = "client", not(feature = "wasm")))]
-pub use in_process_connector::{
-  ButtplugInProcessClientConnector,
-  ButtplugInProcessClientConnectorBuilder,
-};
-pub use remote_connector::{
-  ButtplugRemoteClientConnector,
-  ButtplugRemoteConnector,
-  ButtplugRemoteServerConnector,
-};
+pub use remote_connector::ButtplugRemoteConnector;
 use thiserror::Error;
 use tokio::sync::mpsc::Sender;
 #[cfg(feature = "websockets")]
@@ -181,24 +171,4 @@ where
   /// If the connector is not currently connected, or an error happens during
   /// the send operation, this will return a [ButtplugConnectorError]
   fn send(&self, msg: OutboundMessageType) -> ButtplugConnectorResultFuture;
-}
-
-#[cfg(all(feature = "websockets", feature = "serialize-json"))]
-use crate::core::message::{ButtplugClientMessageCurrent, ButtplugServerMessageCurrent};
-
-/// Convenience method for creating a new Buttplug Client Websocket connector that uses the JSON
-/// serializer. This is pretty much the only connector used for IPC right now, so this makes it easy
-/// to create one without having to fill in the generic types.
-#[cfg(all(feature = "websockets", feature = "serialize-json"))]
-pub fn new_json_ws_client_connector(
-  address: &str,
-) -> impl ButtplugConnector<ButtplugClientMessageCurrent, ButtplugServerMessageCurrent> {
-  use crate::core::message::serializer::ButtplugClientJSONSerializer;
-
-  ButtplugRemoteClientConnector::<
-      ButtplugWebsocketClientTransport,
-      ButtplugClientJSONSerializer,
-    >::new(ButtplugWebsocketClientTransport::new_insecure_connector(
-    address,
-  ))
 }

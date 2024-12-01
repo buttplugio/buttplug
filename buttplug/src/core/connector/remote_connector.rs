@@ -16,15 +16,10 @@ use super::{
 use crate::{
   core::message::{
     serializer::{
-      ButtplugClientJSONSerializer,
       ButtplugMessageSerializer,
       ButtplugSerializedMessage,
     },
-    ButtplugClientMessageCurrent,
-    ButtplugClientMessageVariant,
     ButtplugMessage,
-    ButtplugServerMessageCurrent,
-    ButtplugServerMessageVariant,
   },
   util::async_manager,
 };
@@ -164,23 +159,6 @@ async fn remote_connector_event_loop<
     }
   }
 }
-
-pub type ButtplugRemoteClientConnector<
-  TransportType,
-  SerializerType = ButtplugClientJSONSerializer,
-> = ButtplugRemoteConnector<
-  TransportType,
-  SerializerType,
-  ButtplugClientMessageCurrent,
-  ButtplugServerMessageCurrent,
->;
-
-pub type ButtplugRemoteServerConnector<TransportType, SerializerType> = ButtplugRemoteConnector<
-  TransportType,
-  SerializerType,
-  ButtplugServerMessageVariant,
-  ButtplugClientMessageVariant,
->;
 
 pub struct ButtplugRemoteConnector<
   TransportType,

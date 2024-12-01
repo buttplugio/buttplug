@@ -12,7 +12,7 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
     message::{
-      self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion, ButtplugDeviceMessage, ButtplugInternalClientMessageV4, ButtplugMessage, ButtplugServerMessageV4, DeviceListV4, DeviceMessageInfoV4, LegacyDeviceAttributes
+      self, ButtplugDeviceMessage, ButtplugMessage, ButtplugServerMessageV4, DeviceListV4, DeviceMessageInfoV4
     },
   },
   server::{
@@ -24,9 +24,7 @@ use crate::{
       },
       server_device_manager_event_loop::ServerDeviceManagerEventLoop,
       ServerDevice,
-    },
-    ButtplugServerError,
-    ButtplugServerResultFuture,
+    }, message::{legacy_device_attributes::LegacyDeviceAttributes, spec_enums::{ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion, ButtplugInternalClientMessageV4}}, ButtplugServerError, ButtplugServerResultFuture
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };

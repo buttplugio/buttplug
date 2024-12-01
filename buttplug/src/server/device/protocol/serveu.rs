@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::internal_linear_cmd::InternalLinearCmdV4},
 };
 use std::sync::{
   atomic::{AtomicU8, Ordering},
@@ -27,7 +27,7 @@ pub struct ServeU {
 impl ProtocolHandler for ServeU {
   fn handle_linear_cmd(
     &self,
-    message: crate::core::message::LinearCmdV4,
+    message: InternalLinearCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let last_pos = self.last_position.load(Ordering::Relaxed);
     let current_cmd = message
