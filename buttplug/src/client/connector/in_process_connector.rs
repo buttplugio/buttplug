@@ -12,10 +12,17 @@ use crate::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
     errors::{ButtplugError, ButtplugMessageError},
   },
-  server::{message::{ButtplugClientMessageV3, ButtplugServerMessageV3, ButtplugServerMessageVariant}, ButtplugServer, ButtplugServerBuilder},
+  server::{
+    message::{ButtplugClientMessageV3, ButtplugServerMessageV3, ButtplugServerMessageVariant},
+    ButtplugServer,
+    ButtplugServerBuilder,
+  },
   util::async_manager,
 };
-use futures::{StreamExt, future::{self, BoxFuture, FutureExt}};
+use futures::{
+  future::{self, BoxFuture, FutureExt},
+  StreamExt,
+};
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,

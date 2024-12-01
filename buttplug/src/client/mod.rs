@@ -5,9 +5,6 @@ pub mod serializer;
 
 #[cfg(not(feature = "default_v4_spec"))]
 pub use v3::{
-  ButtplugClientError,
-  ButtplugClientEvent,
-  ButtplugClient,
   device::{
     ButtplugClientDevice,
     ButtplugClientDeviceEvent,
@@ -15,14 +12,14 @@ pub use v3::{
     RotateCommand,
     ScalarCommand,
     ScalarValueCommand,
-  }
+  },
+  ButtplugClient,
+  ButtplugClientError,
+  ButtplugClientEvent,
 };
 
 #[cfg(feature = "default_v4_spec")]
 pub use v4::{
-  ButtplugClientError,
-  ButtplugClientEvent,
-  ButtplugClient,
   device::{
     ButtplugClientDevice,
     ButtplugClientDeviceEvent,
@@ -30,6 +27,8 @@ pub use v4::{
     RotateCommand,
     ScalarCommand,
     ScalarValueCommand,
-  }
+  },
+  ButtplugClient,
+  ButtplugClientError,
+  ButtplugClientEvent,
 };
-

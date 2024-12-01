@@ -6,21 +6,21 @@
 // for full license information.
 
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  },
-  server::{device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{
-      fleshlight_launch_helper::calculate_speed,
-      generic_protocol_initializer_setup,
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
+  core::{errors::ButtplugDeviceError, message::Endpoint},
+  server::{
+    device::{
+      configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+      hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+      protocol::{
+        fleshlight_launch_helper::calculate_speed,
+        generic_protocol_initializer_setup,
+        ProtocolHandler,
+        ProtocolIdentifier,
+        ProtocolInitializer,
+      },
     },
-  }, message::{internal_linear_cmd::InternalLinearCmdV4, FleshlightLaunchFW12CmdV0}},
+    message::{internal_linear_cmd::InternalLinearCmdV4, FleshlightLaunchFW12CmdV0},
+  },
 };
 use async_trait::async_trait;
 use std::sync::{

@@ -15,10 +15,7 @@ use super::{
 };
 use crate::{
   core::message::{
-    serializer::{
-      ButtplugMessageSerializer,
-      ButtplugSerializedMessage,
-    },
+    serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
     ButtplugMessage,
   },
   util::async_manager,

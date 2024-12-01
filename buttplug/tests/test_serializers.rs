@@ -13,14 +13,19 @@ use buttplug::{
     connector::transport::ButtplugTransportIncomingMessage,
     errors::{ButtplugError, ButtplugUnknownError},
     message::{
-      serializer::ButtplugSerializedMessage, ButtplugMessage, ErrorV0, ServerInfoV2, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
+      serializer::ButtplugSerializedMessage,
+      ButtplugMessage,
+      ErrorV0,
+      ServerInfoV2,
+      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
   server::message::{
     ButtplugClientMessageV3,
     ButtplugClientMessageVariant,
     ButtplugServerMessageV3,
-    ButtplugServerMessageVariant, DeviceListV3,
+    ButtplugServerMessageVariant,
+    DeviceListV3,
   },
   util::async_manager,
 };
@@ -51,12 +56,7 @@ async fn test_garbled_client_rsi_response() {
     .await;
   helper
     .send_client_incoming(ButtplugServerMessageVariant::V3(
-      ServerInfoV2::new(
-        "test server",
-        BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
-        0,
-      )
-      .into(),
+      ServerInfoV2::new("test server", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION, 0).into(),
     ))
     .await;
   let _ = helper.recv_outgoing().await;
@@ -78,9 +78,9 @@ async fn test_serialized_error_relay() {
       helper_clone.next_client_message().await,
       ButtplugClientMessageVariant::V3(ButtplugClientMessageV3::StartScanning(..))
     ));
-    let mut error_msg = ButtplugServerMessageV3::Error(ErrorV0::from(
-      ButtplugError::from(ButtplugUnknownError::NoDeviceCommManagers),
-    ));
+    let mut error_msg = ButtplugServerMessageV3::Error(ErrorV0::from(ButtplugError::from(
+      ButtplugUnknownError::NoDeviceCommManagers,
+    )));
     error_msg.set_id(3);
     helper_clone
       .send_client_incoming(ButtplugServerMessageVariant::V3(error_msg))

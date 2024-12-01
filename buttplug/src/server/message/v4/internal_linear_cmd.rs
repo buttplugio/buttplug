@@ -2,7 +2,10 @@ use crate::{
   core::{
     errors::ButtplugMessageError,
     message::{
-      ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator,
+      ButtplugDeviceMessage,
+      ButtplugMessage,
+      ButtplugMessageFinalizer,
+      ButtplugMessageValidator,
       LinearCmdV4,
     },
   },

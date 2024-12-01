@@ -45,9 +45,9 @@
 //!   - If the server object is dropped, all devices are stopped and disconnected as part
 //!     of the [DeviceManager] teardown.
 
+pub mod connector;
 pub mod device;
 pub mod message;
-pub mod connector;
 mod ping_timer;
 mod server;
 mod server_builder;

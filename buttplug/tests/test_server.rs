@@ -22,16 +22,34 @@ use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError},
     message::{
-      ButtplugMessageSpecVersion, ButtplugServerMessageV4, Endpoint, ErrorCode, PingV0, RequestServerInfoV1, ServerInfoV2, StartScanningV0, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
+      ButtplugMessageSpecVersion,
+      ButtplugServerMessageV4,
+      Endpoint,
+      ErrorCode,
+      PingV0,
+      RequestServerInfoV1,
+      ServerInfoV2,
+      StartScanningV0,
+      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
   server::{
     device::{
       hardware::{HardwareCommand, HardwareWriteCmd},
       ServerDeviceManagerBuilder,
-    }, message::{
-      internal_level_cmd::{InternalLevelCmdV4, InternalLevelSubcommandV4}, spec_enums::ButtplugInternalClientMessageV4, ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageV2, ButtplugServerMessageV3, ButtplugServerMessageVariant, VibrateCmdV1
-    }, ButtplugServer, ButtplugServerBuilder
+    },
+    message::{
+      internal_level_cmd::{InternalLevelCmdV4, InternalLevelSubcommandV4},
+      spec_enums::ButtplugInternalClientMessageV4,
+      ButtplugClientMessageV3,
+      ButtplugClientMessageVariant,
+      ButtplugServerMessageV2,
+      ButtplugServerMessageV3,
+      ButtplugServerMessageVariant,
+      VibrateCmdV1,
+    },
+    ButtplugServer,
+    ButtplugServerBuilder,
   },
 };
 use futures::{pin_mut, Stream, StreamExt};
@@ -63,8 +81,7 @@ async fn setup_test_server(
 
 #[tokio::test]
 async fn test_server_handshake() {
-  let msg =
-    RequestServerInfoV1::new("Test Client", ButtplugMessageSpecVersion::Version3).into();
+  let msg = RequestServerInfoV1::new("Test Client", ButtplugMessageSpecVersion::Version3).into();
   let (server, _recv) = setup_test_server(msg).await;
   assert!(server.connected());
 }
@@ -222,7 +239,11 @@ async fn test_device_stop_on_ping_timeout() {
       InternalLevelCmdV4::new(
         0,
         device_index,
-        &vec![InternalLevelSubcommandV4::new(0, 64, "f50a528b-b023-40f0-9906-df037443950a".try_into().unwrap())],
+        &vec![InternalLevelSubcommandV4::new(
+          0,
+          64,
+          "f50a528b-b023-40f0-9906-df037443950a".try_into().unwrap(),
+        )],
       ),
     ))
     .await
@@ -232,7 +253,7 @@ async fn test_device_stop_on_ping_timeout() {
     &mut device,
     HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
   );
-/*
+  /*
   // Wait out the ping, we should get a stop message.
   let mut i = 0u32;
   while command_receiver.is_empty() {
@@ -300,8 +321,7 @@ async fn test_device_index_generation() {
   pin_mut!(recv);
   assert!(server
     .parse_checked_message(
-      RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
-        .into()
+      RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
     )
     .await
     .is_ok());
@@ -346,8 +366,7 @@ async fn test_server_scanning_finished() {
   pin_mut!(recv);
   assert!(server
     .parse_checked_message(
-      RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
-        .into()
+      RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
     )
     .await
     .is_ok());

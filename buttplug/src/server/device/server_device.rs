@@ -46,7 +46,15 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     message::{
-      self, ActuatorType, ButtplugMessage, ButtplugServerMessageV4, Endpoint, FeatureType, RawReadingV2, RawSubscribeCmdV2, SensorType
+      self,
+      ActuatorType,
+      ButtplugMessage,
+      ButtplugServerMessageV4,
+      Endpoint,
+      FeatureType,
+      RawReadingV2,
+      RawSubscribeCmdV2,
+      SensorType,
     },
     ButtplugResultFuture,
   },
@@ -55,7 +63,15 @@ use crate::{
       configuration::DeviceConfigurationManager,
       hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent},
       protocol::ProtocolHandler,
-    }, message::{internal_level_cmd::InternalLevelCmdV4, legacy_device_attributes::LegacyDeviceAttributes, spec_enums::ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessageType, ButtplugServerDeviceMessage}, ButtplugServerResultFuture
+    },
+    message::{
+      internal_level_cmd::InternalLevelCmdV4,
+      legacy_device_attributes::LegacyDeviceAttributes,
+      spec_enums::ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessageType,
+      ButtplugServerDeviceMessage,
+    },
+    ButtplugServerResultFuture,
   },
   util::{self, async_manager, stream::convert_broadcast_receiver_to_stream},
 };
@@ -354,7 +370,9 @@ impl ServerDevice {
         .definition
         .allows_message(&msg_type)
         .then_some(())
-        .ok_or(ButtplugDeviceError::MessageNotSupported(msg_type.to_string()))
+        .ok_or(ButtplugDeviceError::MessageNotSupported(
+          msg_type.to_string(),
+        ))
     };
 
     match message {

@@ -7,10 +7,13 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::{device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::internal_linear_cmd::InternalLinearCmdV4},
+  server::{
+    device::{
+      hardware::{HardwareCommand, HardwareWriteCmd},
+      protocol::{generic_protocol_setup, ProtocolHandler},
+    },
+    message::internal_linear_cmd::InternalLinearCmdV4,
+  },
 };
 use std::sync::{
   atomic::{AtomicU8, Ordering},

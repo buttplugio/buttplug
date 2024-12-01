@@ -3,7 +3,8 @@ mod in_process_connector;
 
 #[cfg(all(feature = "server", feature = "client", not(feature = "wasm")))]
 pub use in_process_connector::{
-  ButtplugInProcessClientConnector, ButtplugInProcessClientConnectorBuilder,
+  ButtplugInProcessClientConnector,
+  ButtplugInProcessClientConnectorBuilder,
 };
 
 #[cfg(all(feature = "websockets", feature = "serialize-json"))]

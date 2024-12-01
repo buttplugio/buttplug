@@ -54,4 +54,3 @@ impl ButtplugMessageValidator for ServerInfoV2 {
     self.is_not_system_id(self.id)
   }
 }
-

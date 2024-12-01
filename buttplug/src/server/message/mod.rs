@@ -1,16 +1,32 @@
-use std::cmp::Ordering;
+use crate::core::{
+  errors::{ButtplugError, ButtplugMessageError},
+  message::{
+    ButtplugActuatorFeatureMessageType,
+    ButtplugClientMessageV4,
+    ButtplugDeviceMessage,
+    ButtplugMessage,
+    ButtplugMessageFinalizer,
+    ButtplugMessageSpecVersion,
+    ButtplugMessageValidator,
+    ButtplugRawFeatureMessageType,
+    ButtplugSensorFeatureMessageType,
+    ButtplugServerMessageV4,
+    RawReadingV2,
+    SensorReadingV4,
+  },
+};
 use legacy_device_attributes::LegacyDeviceAttributes;
-use crate::core::{errors::{ButtplugError, ButtplugMessageError}, message::{ButtplugActuatorFeatureMessageType, ButtplugClientMessageV4, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageSpecVersion, ButtplugMessageValidator, ButtplugRawFeatureMessageType, ButtplugSensorFeatureMessageType, ButtplugServerMessageV4, RawReadingV2, SensorReadingV4}};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use std::cmp::Ordering;
 
 pub mod internal_device_feature;
 pub mod legacy_device_attributes;
+pub mod serializer;
 mod v0;
 mod v1;
 mod v2;
 mod v3;
 mod v4;
-pub mod serializer;
 
 pub use v0::*;
 pub use v1::*;
@@ -115,7 +131,9 @@ impl From<ButtplugRawFeatureMessageType> for ButtplugDeviceMessageType {
       ButtplugRawFeatureMessageType::RawReadCmd => ButtplugDeviceMessageType::RawReadCmd,
       ButtplugRawFeatureMessageType::RawWriteCmd => ButtplugDeviceMessageType::RawWriteCmd,
       ButtplugRawFeatureMessageType::RawSubscribeCmd => ButtplugDeviceMessageType::RawSubscribeCmd,
-      ButtplugRawFeatureMessageType::RawUnsubscribeCmd => ButtplugDeviceMessageType::RawUnsubscribeCmd,
+      ButtplugRawFeatureMessageType::RawUnsubscribeCmd => {
+        ButtplugDeviceMessageType::RawUnsubscribeCmd
+      }
     }
   }
 }

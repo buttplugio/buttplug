@@ -6,12 +6,12 @@
 // for full license information.
 
 use crate::core::message::{
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageError,
-    ButtplugMessageFinalizer,
-    ButtplugMessageValidator,
-    SensorType,
+  ButtplugDeviceMessage,
+  ButtplugMessage,
+  ButtplugMessageError,
+  ButtplugMessageFinalizer,
+  ButtplugMessageValidator,
+  SensorType,
 };
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
@@ -61,4 +61,3 @@ impl ButtplugMessageValidator for SensorReadCmdV4 {
     // TODO Should expected_length always be > 0?
   }
 }
-
