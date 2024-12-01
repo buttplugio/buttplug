@@ -1,19 +1,20 @@
-
 #[cfg(all(feature = "server", feature = "client", not(feature = "wasm")))]
 mod in_process_connector;
 
 #[cfg(all(feature = "server", feature = "client", not(feature = "wasm")))]
 pub use in_process_connector::{
-  ButtplugInProcessClientConnector,
-  ButtplugInProcessClientConnectorBuilder,
+  ButtplugInProcessClientConnector, ButtplugInProcessClientConnectorBuilder,
 };
 
-use crate::core::connector::ButtplugRemoteConnector;
 #[cfg(all(feature = "websockets", feature = "serialize-json"))]
-use crate::{core::{
-  connector::{ButtplugConnector, ButtplugWebsocketClientTransport},  
-  message::{ButtplugClientMessageCurrent, ButtplugServerMessageCurrent}
-}, client::serializer::ButtplugClientJSONSerializer};
+use crate::{
+  client::serializer::ButtplugClientJSONSerializer,
+  core::connector::{ButtplugConnector, ButtplugWebsocketClientTransport},
+};
+use crate::{
+  core::connector::ButtplugRemoteConnector,
+  server::message::{ButtplugClientMessageV3, ButtplugServerMessageV3},
+};
 
 /// Convenience method for creating a new Buttplug Client Websocket connector that uses the JSON
 /// serializer. This is pretty much the only connector used for IPC right now, so this makes it easy
@@ -21,7 +22,7 @@ use crate::{core::{
 #[cfg(all(feature = "websockets", feature = "serialize-json"))]
 pub fn new_json_ws_client_connector(
   address: &str,
-) -> impl ButtplugConnector<ButtplugClientMessageCurrent, ButtplugServerMessageCurrent> {
+) -> impl ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3> {
   ButtplugRemoteClientConnector::<
       ButtplugWebsocketClientTransport,
       ButtplugClientJSONSerializer,
@@ -36,6 +37,6 @@ pub type ButtplugRemoteClientConnector<
 > = ButtplugRemoteConnector<
   TransportType,
   SerializerType,
-  ButtplugClientMessageCurrent,
-  ButtplugServerMessageCurrent,
+  ButtplugClientMessageV3,
+  ButtplugServerMessageV3,
 >;

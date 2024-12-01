@@ -14,7 +14,7 @@ pub use delay_device_communication_manager::DelayDeviceCommunicationManagerBuild
 pub mod channel_transport;
 use buttplug::{
   client::ButtplugClient,
-  core::connector::ButtplugInProcessClientConnectorBuilder,
+  client::connector::ButtplugInProcessClientConnectorBuilder,
   server::{
     device::{
       configuration::DeviceConfigurationManager,
