@@ -83,5 +83,3 @@ impl ButtplugMessageFinalizer for DeviceAddedV4 {
   fn finalize(&mut self) {
   }
 }
-
-

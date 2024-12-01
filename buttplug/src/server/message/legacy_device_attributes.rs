@@ -1,8 +1,8 @@
-use std::collections::HashMap;
-use getset::Getters;
-use crate::core::{errors::ButtplugError, message::DeviceFeature};
 use super::v2::ClientDeviceMessageAttributesV2;
 use super::v3::ClientDeviceMessageAttributesV3;
+use crate::core::{errors::ButtplugError, message::DeviceFeature};
+use getset::Getters;
+use std::collections::HashMap;
 
 #[derive(Debug, Getters, Clone)]
 pub(crate) struct LegacyDeviceAttributes {

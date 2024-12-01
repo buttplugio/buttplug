@@ -5,12 +5,38 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{core::{
-  errors::{ButtplugError, ButtplugMessageError},
-  message::{
-    ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, ButtplugServerMessageV4, DeviceRemovedV0, ErrorV0, OkV0, PingV0, RawReadCmdV2, RawReadingV2, RawSubscribeCmdV2, RawUnsubscribeCmdV2, RawWriteCmdV2, RequestDeviceListV0, RequestServerInfoV1, ScanningFinishedV0, ServerInfoV2, StartScanningV0, StopAllDevicesV0, StopDeviceCmdV0, StopScanningV0
+use crate::{
+  core::{
+    errors::{ButtplugError, ButtplugMessageError},
+    message::{
+      ButtplugMessage,
+      ButtplugMessageFinalizer,
+      ButtplugMessageValidator,
+      ButtplugServerMessageV4,
+      DeviceRemovedV0,
+      ErrorV0,
+      OkV0,
+      PingV0,
+      RawReadCmdV2,
+      RawReadingV2,
+      RawSubscribeCmdV2,
+      RawUnsubscribeCmdV2,
+      RawWriteCmdV2,
+      RequestDeviceListV0,
+      RequestServerInfoV1,
+      ScanningFinishedV0,
+      ServerInfoV2,
+      StartScanningV0,
+      StopAllDevicesV0,
+      StopDeviceCmdV0,
+      StopScanningV0,
+    },
   },
-}, server::message::{v1::{LinearCmdV1, RotateCmdV1, VibrateCmdV1}, v2::{ButtplugClientMessageV2, ButtplugServerMessageV2}}};
+  server::message::{
+    v1::{LinearCmdV1, RotateCmdV1, VibrateCmdV1},
+    v2::{ButtplugClientMessageV2, ButtplugServerMessageV2},
+  },
+};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 

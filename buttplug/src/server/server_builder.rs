@@ -40,7 +40,7 @@ pub struct ButtplugServerBuilder {
   /// Device manager builder for the server
   device_manager: Arc<ServerDeviceManager>,
   /// Allow connections for clients using beta v4 message spec support (message spec may change and break for now)
-  allow_v4_connections: bool
+  allow_v4_connections: bool,
 }
 
 impl Default for ButtplugServerBuilder {
@@ -83,7 +83,7 @@ impl ButtplugServerBuilder {
       name: "Buttplug Server".to_owned(),
       max_ping_time: None,
       device_manager,
-      allow_v4_connections: false
+      allow_v4_connections: false,
     }
   }
 
@@ -158,7 +158,9 @@ impl ButtplugServerBuilder {
     }
 
     if self.allow_v4_connections {
-      warn!("Allowing beta v4 connections. Note that things may break due to message spec changes.");
+      warn!(
+        "Allowing beta v4 connections. Note that things may break due to message spec changes."
+      );
     }
 
     // Assuming everything passed, return the server.
@@ -169,7 +171,7 @@ impl ButtplugServerBuilder {
       self.device_manager.clone(),
       connected,
       output_sender,
-      self.allow_v4_connections
+      self.allow_v4_connections,
     ))
   }
 }

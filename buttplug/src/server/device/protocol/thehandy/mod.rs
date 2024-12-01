@@ -9,28 +9,31 @@ use self::handyplug::Ping;
 
 use super::fleshlight_launch_helper;
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  },
-  server::{device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{
-      generic_protocol_initializer_setup,
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
+  core::{errors::ButtplugDeviceError, message::Endpoint},
+  server::{
+    device::{
+      configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+      hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+      protocol::{
+        generic_protocol_initializer_setup,
+        ProtocolHandler,
+        ProtocolIdentifier,
+        ProtocolInitializer,
+      },
     },
-  }, message::{internal_linear_cmd::{InternalLinearCmdV4, InternalVectorSubcommandV4}, FleshlightLaunchFW12CmdV0}},
+    message::{
+      internal_linear_cmd::{InternalLinearCmdV4, InternalVectorSubcommandV4},
+      FleshlightLaunchFW12CmdV0,
+    },
+  },
 };
 use async_trait::async_trait;
 use prost::Message;
-use uuid::Uuid;
 use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
 };
+use uuid::Uuid;
 
 mod protocomm {
   include!("./protocomm.rs");
@@ -157,7 +160,7 @@ impl ProtocolHandler for TheHandy {
         0,
         duration,
         goal_position,
-        Uuid::new_v4()
+        Uuid::new_v4(),
       )],
     ))
   }

@@ -5,7 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::{ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator};
+use crate::core::message::{
+  ButtplugDeviceMessage,
+  ButtplugMessage,
+  ButtplugMessageError,
+  ButtplugMessageFinalizer,
+  ButtplugMessageValidator,
+};
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
@@ -18,7 +24,7 @@ pub struct LevelSubcommandV4 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
   feature_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Scalar"))]
-  level: i32
+  level: i32,
 }
 
 impl LevelSubcommandV4 {
@@ -31,13 +37,7 @@ impl LevelSubcommandV4 {
 }
 
 #[derive(
-  Debug,
-  Default,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Clone,
-  Getters,
+  Debug, Default, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, Getters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct LevelCmdV4 {

@@ -6,14 +6,14 @@
 // for full license information.
 
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
+  core::{errors::ButtplugDeviceError, message::Endpoint},
+  server::{
+    device::{
+      hardware::{HardwareCommand, HardwareWriteCmd},
+      protocol::{generic_protocol_setup, ProtocolHandler},
+    },
+    message::spec_enums::ButtplugDeviceCommandMessageUnion,
   },
-  server::{device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::spec_enums::ButtplugDeviceCommandMessageUnion},
 };
 
 generic_protocol_setup!(ButtplugPassthru, "buttplug-passthru");

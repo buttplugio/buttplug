@@ -151,13 +151,31 @@ use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{
-      ActuatorType, ButtplugDeviceMessage, Endpoint, SensorReadCmdV4, SensorReadingV4, SensorSubscribeCmdV4, SensorType, SensorUnsubscribeCmdV4
+      ActuatorType,
+      ButtplugDeviceMessage,
+      Endpoint,
+      SensorReadCmdV4,
+      SensorReadingV4,
+      SensorSubscribeCmdV4,
+      SensorType,
+      SensorUnsubscribeCmdV4,
     },
   },
-  server::{device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-    hardware::{Hardware, HardwareCommand, HardwareReadCmd},
-  }, message::{internal_linear_cmd::InternalLinearCmdV4, spec_enums::ButtplugDeviceCommandMessageUnion, ButtplugServerDeviceMessage, FleshlightLaunchFW12CmdV0, KiirooCmdV0, RSSILevelCmdV2, VorzeA10CycloneCmdV0}},
+  server::{
+    device::{
+      configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+      hardware::{Hardware, HardwareCommand, HardwareReadCmd},
+    },
+    message::{
+      internal_linear_cmd::InternalLinearCmdV4,
+      spec_enums::ButtplugDeviceCommandMessageUnion,
+      ButtplugServerDeviceMessage,
+      FleshlightLaunchFW12CmdV0,
+      KiirooCmdV0,
+      RSSILevelCmdV2,
+      VorzeA10CycloneCmdV0,
+    },
+  },
 };
 use async_trait::async_trait;
 use futures::{

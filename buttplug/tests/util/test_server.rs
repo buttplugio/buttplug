@@ -9,12 +9,13 @@ use buttplug::{
   core::{
     connector::ButtplugConnector,
     errors::ButtplugError,
-    message::{
-      ButtplugMessage,
-      ButtplugMessageValidator, ErrorV0,
-    },
+    message::{ButtplugMessage, ButtplugMessageValidator, ErrorV0},
   },
-  server::{message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant,}, ButtplugServer, ButtplugServerBuilder},
+  server::{
+    message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant},
+    ButtplugServer,
+    ButtplugServerBuilder,
+  },
   util::async_manager,
 };
 use futures::{future::Future, pin_mut, select, FutureExt, StreamExt};

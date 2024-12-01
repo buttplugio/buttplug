@@ -1,15 +1,39 @@
 use crate::core::{
   errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
   message::{
-    self, serializer::{
-      json_serializer::{create_message_validator, deserialize_to_message, msg_to_protocol_json, vec_to_protocol_json}, ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugSerializerError
-    }, ButtplugClientMessageV4, ButtplugMessageSpecVersion, ButtplugServerMessageCurrent, ButtplugServerMessageV4
+    self,
+    serializer::{
+      json_serializer::{
+        create_message_validator,
+        deserialize_to_message,
+        msg_to_protocol_json,
+        vec_to_protocol_json,
+      },
+      ButtplugMessageSerializer,
+      ButtplugSerializedMessage,
+      ButtplugSerializerError,
+    },
+    ButtplugClientMessageV4,
+    ButtplugMessageSpecVersion,
+    ButtplugServerMessageCurrent,
+    ButtplugServerMessageV4,
   },
 };
 use jsonschema::Validator;
 use once_cell::sync::OnceCell;
 
-use super::{ButtplugClientMessageV0, ButtplugClientMessageV1, ButtplugClientMessageV2, ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageV0, ButtplugServerMessageV1, ButtplugServerMessageV2, ButtplugServerMessageV3, ButtplugServerMessageVariant};
+use super::{
+  ButtplugClientMessageV0,
+  ButtplugClientMessageV1,
+  ButtplugClientMessageV2,
+  ButtplugClientMessageV3,
+  ButtplugClientMessageVariant,
+  ButtplugServerMessageV0,
+  ButtplugServerMessageV1,
+  ButtplugServerMessageV2,
+  ButtplugServerMessageV3,
+  ButtplugServerMessageVariant,
+};
 
 pub struct ButtplugServerJSONSerializer {
   pub(super) message_version: OnceCell<message::ButtplugMessageSpecVersion>,

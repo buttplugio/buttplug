@@ -5,14 +5,37 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{device::ServerDeviceManager, message::{legacy_device_attributes::TryFromClientMessage, ButtplugClientMessageVariant, ButtplugServerMessageVariant}, ping_timer::PingTimer, server_message_conversion::ButtplugServerMessageConverter, ButtplugServerResultFuture};
+use super::{
+  device::ServerDeviceManager,
+  message::{
+    legacy_device_attributes::TryFromClientMessage,
+    ButtplugClientMessageVariant,
+    ButtplugServerMessageVariant,
+  },
+  ping_timer::PingTimer,
+  server_message_conversion::ButtplugServerMessageConverter,
+  ButtplugServerResultFuture,
+};
 use crate::{
   core::{
     errors::*,
     message::{
-      self, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugServerMessageV4, ErrorV0, StopAllDevicesV0, StopScanningV0, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
+      self,
+      ButtplugMessage,
+      ButtplugMessageSpecVersion,
+      ButtplugServerMessageV4,
+      ErrorV0,
+      StopAllDevicesV0,
+      StopScanningV0,
+      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
-  }, server::message::spec_enums::{ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion, ButtplugInternalClientMessageV4}, util::stream::convert_broadcast_receiver_to_stream
+  },
+  server::message::spec_enums::{
+    ButtplugDeviceCommandMessageUnion,
+    ButtplugDeviceManagerMessageUnion,
+    ButtplugInternalClientMessageV4,
+  },
+  util::stream::convert_broadcast_receiver_to_stream,
 };
 use futures::{
   future::{self, BoxFuture, FutureExt},
@@ -20,10 +43,11 @@ use futures::{
 };
 use once_cell::sync::OnceCell;
 use std::{
-  fmt, sync::{
+  fmt,
+  sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
-  }
+  },
 };
 use tokio::sync::broadcast;
 use tokio_stream::StreamExt;
@@ -78,7 +102,7 @@ impl ButtplugServer {
     device_manager: Arc<ServerDeviceManager>,
     connected: Arc<AtomicBool>,
     output_sender: broadcast::Sender<ButtplugServerMessageV4>,
-    allow_v4_connections: bool
+    allow_v4_connections: bool,
   ) -> Self {
     ButtplugServer {
       server_name: server_name.to_owned(),
@@ -89,15 +113,12 @@ impl ButtplugServer {
       output_sender,
       client_name: Arc::new(OnceCell::new()),
       allow_v4_connections,
-      spec_version: Arc::new(OnceCell::new())
+      spec_version: Arc::new(OnceCell::new()),
     }
   }
 
   pub fn client_name(&self) -> Option<String> {
-    self
-      .client_name
-      .get()
-      .cloned()
+    self.client_name.get().cloned()
   }
 
   /// Retreive an async stream of ButtplugServerMessages, always at the latest available message
@@ -127,9 +148,9 @@ impl ButtplugServer {
     let ping_timer = self.ping_timer.clone();
     // As long as StopScanning/StopAllDevices aren't changed across message specs, we can inject
     // them using parse_checked_message and bypass version checking.
-    let stop_scanning_fut = self.parse_checked_message(ButtplugInternalClientMessageV4::StopScanning(
-      StopScanningV0::default(),
-    ));
+    let stop_scanning_fut = self.parse_checked_message(
+      ButtplugInternalClientMessageV4::StopScanning(StopScanningV0::default()),
+    );
     let stop_fut = self.parse_checked_message(ButtplugInternalClientMessageV4::StopAllDevices(
       StopAllDevicesV0::default(),
     ));
@@ -182,14 +203,18 @@ impl ButtplugServer {
     let msg_id = msg.id();
     match msg {
       ButtplugClientMessageVariant::V4(msg) => {
-        let internal_msg = match ButtplugInternalClientMessageV4::try_from_client_message(msg, &features) {
-          Ok(m) => m,
-          Err(e) => {
-            let mut err_msg = ErrorV0::from(e);
-            err_msg.set_id(msg_id);
-            return future::ready(Err(ButtplugServerMessageVariant::from(ButtplugServerMessageV4::from(err_msg)))).boxed();
-          }
-        };
+        let internal_msg =
+          match ButtplugInternalClientMessageV4::try_from_client_message(msg, &features) {
+            Ok(m) => m,
+            Err(e) => {
+              let mut err_msg = ErrorV0::from(e);
+              err_msg.set_id(msg_id);
+              return future::ready(Err(ButtplugServerMessageVariant::from(
+                ButtplugServerMessageV4::from(err_msg),
+              )))
+              .boxed();
+            }
+          };
         let fut = self.parse_checked_message(internal_msg);
         async move {
           Ok(
@@ -238,15 +263,12 @@ impl ButtplugServer {
             err_msg.set_id(msg_id);
 
             future::ready(Err(
-            converter
-              .convert_outgoing(
-                &ButtplugServerMessageV4::from(err_msg),
-                &spec_version,
-              )
-              .unwrap(),
-          ))
-          .boxed()
-        }
+              converter
+                .convert_outgoing(&ButtplugServerMessageV4::from(err_msg), &spec_version)
+                .unwrap(),
+            ))
+            .boxed()
+          }
         }
       }
     }
@@ -294,7 +316,9 @@ impl ButtplugServer {
       self.device_manager.parse_message(msg.clone())
     } else {
       match msg {
-        ButtplugInternalClientMessageV4::RequestServerInfo(rsi_msg) => self.perform_handshake(rsi_msg),
+        ButtplugInternalClientMessageV4::RequestServerInfo(rsi_msg) => {
+          self.perform_handshake(rsi_msg)
+        }
         ButtplugInternalClientMessageV4::Ping(p) => self.handle_ping(p),
         _ => ButtplugMessageError::UnexpectedMessageType(format!("{:?}", msg)).into(),
       }
@@ -340,10 +364,8 @@ impl ButtplugServer {
     // Only approve v4 connections if the server was created allowing v4 messages.
     if msg.message_version() == ButtplugMessageSpecVersion::Version4 {
       if !self.allow_v4_connections {
-        return ButtplugHandshakeError::UnhandledMessageSpecVersionRequested(
-          msg.message_version(),
-        )
-        .into();
+        return ButtplugHandshakeError::UnhandledMessageSpecVersionRequested(msg.message_version())
+          .into();
       }
     } else if BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION < msg.message_version() {
       return ButtplugHandshakeError::MessageSpecVersionMismatch(
@@ -417,9 +439,14 @@ mod test {
 
   #[tokio::test]
   async fn test_server_v4_accept() {
-    let server = ButtplugServerBuilder::default().allow_v4_connections().finish().unwrap();
-    let msg =
-      message::RequestServerInfoV1::new("Test Client", message::ButtplugMessageSpecVersion::Version4);
+    let server = ButtplugServerBuilder::default()
+      .allow_v4_connections()
+      .finish()
+      .unwrap();
+    let msg = message::RequestServerInfoV1::new(
+      "Test Client",
+      message::ButtplugMessageSpecVersion::Version4,
+    );
     let reply = server.parse_checked_message(msg.clone().into()).await;
     assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
   }
@@ -428,8 +455,10 @@ mod test {
   #[tokio::test]
   async fn test_server_v4_deny() {
     let server = ButtplugServerBuilder::default().finish().unwrap();
-    let msg =
-      message::RequestServerInfoV1::new("Test Client", message::ButtplugMessageSpecVersion::Version4);
+    let msg = message::RequestServerInfoV1::new(
+      "Test Client",
+      message::ButtplugMessageSpecVersion::Version4,
+    );
     let reply = server.parse_checked_message(msg.clone().into()).await;
     assert!(reply.is_err(), "Should get back err: {:?}", reply);
   }

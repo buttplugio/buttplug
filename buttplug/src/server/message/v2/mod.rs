@@ -8,6 +8,7 @@ mod rssi_level_cmd;
 mod rssi_level_reading;
 mod spec_enums;
 
+use crate::core::message::v2::*;
 pub use battery_level_cmd::BatteryLevelCmdV2;
 pub use battery_level_reading::BatteryLevelReadingV2;
 pub use client_device_message_attributes::{
@@ -22,4 +23,3 @@ pub use device_message_info::DeviceMessageInfoV2;
 pub use rssi_level_cmd::RSSILevelCmdV2;
 pub use rssi_level_reading::RSSILevelReadingV2;
 pub use spec_enums::{ButtplugClientMessageV2, ButtplugServerMessageV2};
-use crate::core::message::v2::*;

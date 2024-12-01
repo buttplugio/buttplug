@@ -8,18 +8,15 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{
-      self,
-      ButtplugDeviceMessage,
-      Endpoint,
-      SensorReadingV4,
-      SensorType,
-    },
+    message::{self, ButtplugDeviceMessage, Endpoint, SensorReadingV4, SensorType},
   },
-  server::{device::{
-    hardware::{Hardware, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::ButtplugServerDeviceMessage},
+  server::{
+    device::{
+      hardware::{Hardware, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd},
+      protocol::{generic_protocol_setup, ProtocolHandler},
+    },
+    message::ButtplugServerDeviceMessage,
+  },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use dashmap::DashSet;

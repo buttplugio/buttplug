@@ -5,9 +5,20 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{core::{errors::ButtplugMessageError, message::{
-  ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, SensorSubscribeCmdV4, SensorType
-}}, server::message::{LegacyDeviceAttributes, TryFromDeviceAttributes}};
+use crate::{
+  core::{
+    errors::ButtplugMessageError,
+    message::{
+      ButtplugDeviceMessage,
+      ButtplugMessage,
+      ButtplugMessageFinalizer,
+      ButtplugMessageValidator,
+      SensorSubscribeCmdV4,
+      SensorType,
+    },
+  },
+  server::message::{LegacyDeviceAttributes, TryFromDeviceAttributes},
+};
 use getset::Getters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};

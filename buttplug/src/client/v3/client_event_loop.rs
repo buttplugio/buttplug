@@ -14,11 +14,19 @@ use super::{
   ButtplugClientMessageFuturePair,
   ButtplugClientMessageSender,
 };
-use crate::{core::{
-  connector::{ButtplugConnector, ButtplugConnectorStateShared},
-  errors::{ButtplugDeviceError, ButtplugError},
-  message::{ButtplugDeviceMessage, ButtplugMessageValidator},
-}, server::message::{ButtplugClientMessageV3, ButtplugServerMessageV3, DeviceListV3, DeviceMessageInfoV3}};
+use crate::{
+  core::{
+    connector::{ButtplugConnector, ButtplugConnectorStateShared},
+    errors::{ButtplugDeviceError, ButtplugError},
+    message::{ButtplugDeviceMessage, ButtplugMessageValidator},
+  },
+  server::message::{
+    ButtplugClientMessageV3,
+    ButtplugServerMessageV3,
+    DeviceListV3,
+    DeviceMessageInfoV3,
+  },
+};
 use dashmap::DashMap;
 use futures::FutureExt;
 use std::sync::{
