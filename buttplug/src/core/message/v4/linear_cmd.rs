@@ -11,9 +11,6 @@ use crate::core::message::{
   ButtplugMessageError,
   ButtplugMessageFinalizer,
   ButtplugMessageValidator,
-  LegacyDeviceAttributes,
-  LinearCmdV1,
-  TryFromDeviceAttributes,
 };
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
@@ -72,32 +69,5 @@ impl ButtplugMessageValidator for LinearCmdV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     Ok(())
-  }
-}
-
-impl TryFromDeviceAttributes<LinearCmdV1> for LinearCmdV4 {
-  fn try_from_device_attributes(
-    msg: LinearCmdV1,
-    features: &LegacyDeviceAttributes,
-  ) -> Result<Self, crate::core::errors::ButtplugError> {
-    let cmds: Vec<VectorSubcommandV4> = msg
-      .vectors()
-      .iter()
-      .map(|x| {
-        VectorSubcommandV4::new(
-          0,
-          x.duration(),
-          x.position(),
-          &Some(
-            features.attrs_v3().linear_cmd().as_ref().unwrap()[x.index() as usize]
-              .feature()
-              .id()
-              .clone(),
-          ),
-        )
-      })
-      .collect();
-
-    Ok(LinearCmdV4::new(msg.device_index(), cmds).into())
   }
 }

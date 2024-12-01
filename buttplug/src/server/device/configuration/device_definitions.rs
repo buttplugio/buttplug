@@ -2,15 +2,14 @@ use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::core::message::{
+use crate::{core::message::{
   ButtplugActuatorFeatureMessageType,
-  ButtplugDeviceMessageType,
   ButtplugRawFeatureMessageType,
   ButtplugSensorFeatureMessageType,
   DeviceFeature,
   Endpoint,
   FeatureType,
-};
+}, server::message::ButtplugDeviceMessageType};
 
 #[derive(Debug, Clone, Getters)]
 #[getset(get = "pub")]

@@ -8,14 +8,7 @@
 //! Message de/serialization handling
 
 #[cfg(feature = "serialize-json")]
-mod json_serializer;
-#[cfg(feature = "serialize-json")]
-pub use json_serializer::{
-  vec_to_protocol_json,
-  ButtplugClientJSONSerializer,
-  ButtplugClientJSONSerializerImpl,
-  ButtplugServerJSONSerializer,
-};
+pub mod json_serializer;
 
 use serde::{Deserialize, Serialize};
 use thiserror::Error;

@@ -10,11 +10,11 @@ use crate::{
     errors::ButtplugDeviceError,
     message::{self, ActuatorType, ButtplugDeviceMessage, Endpoint, FeatureType, SensorReadingV4},
   },
-  server::device::{
+  server::{device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-  },
+  }, message::internal_linear_cmd::InternalLinearCmdV4},
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
@@ -454,7 +454,7 @@ impl ProtocolHandler for Lovense {
 
   fn handle_linear_cmd(
     &self,
-    message: message::LinearCmdV4,
+    message: InternalLinearCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let vector = message
       .vectors()

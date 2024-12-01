@@ -27,6 +27,4 @@ pub use {
   sensor_subscribe_cmd::SensorSubscribeCmdV4,
   sensor_unsubscribe_cmd::SensorUnsubscribeCmdV4,
   spec_enums::{ButtplugClientMessageV4, ButtplugServerMessageV4},
-  level_cmd::{InternalLevelSubcommandV4, InternalLevelCmdV4},
-  spec_enums::ButtplugInternalClientMessageV4
 };

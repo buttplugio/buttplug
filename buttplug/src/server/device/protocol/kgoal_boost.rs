@@ -11,16 +11,15 @@ use crate::{
     message::{
       self,
       ButtplugDeviceMessage,
-      ButtplugServerDeviceMessage,
       Endpoint,
       SensorReadingV4,
       SensorType,
     },
   },
-  server::device::{
+  server::{device::{
     hardware::{Hardware, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::ButtplugServerDeviceMessage},
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use dashmap::DashSet;

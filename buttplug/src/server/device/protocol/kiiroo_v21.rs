@@ -10,15 +10,10 @@ use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{
-      self,
-      ButtplugDeviceMessage,
-      ButtplugServerDeviceMessage,
-      Endpoint,
-      SensorReadingV4,
-      SensorType,
+      ButtplugDeviceMessage, Endpoint, SensorReadCmdV4, SensorReadingV4, SensorSubscribeCmdV4, SensorType, SensorUnsubscribeCmdV4
     },
   },
-  server::device::{
+  server::{device::{
     hardware::{
       Hardware,
       HardwareCommand,
@@ -29,7 +24,7 @@ use crate::{
       HardwareWriteCmd,
     },
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::{internal_linear_cmd::InternalLinearCmdV4, ButtplugServerDeviceMessage, FleshlightLaunchFW12CmdV0}},
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use dashmap::DashSet;
@@ -84,14 +79,14 @@ impl ProtocolHandler for KiirooV21 {
 
   fn handle_linear_cmd(
     &self,
-    message: message::LinearCmdV4,
+    message: InternalLinearCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
     let previous_position = self.previous_position.load(SeqCst);
     let distance = (previous_position as f64 - (v.position() * 99f64)).abs() / 99f64;
-    let fl_cmd = message::FleshlightLaunchFW12CmdV0::new(
+    let fl_cmd = FleshlightLaunchFW12CmdV0::new(
       message.device_index(),
       (v.position() * 99f64) as u8,
       (calculate_speed(distance, v.duration()) * 99f64) as u8,
@@ -101,7 +96,7 @@ impl ProtocolHandler for KiirooV21 {
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    message: message::FleshlightLaunchFW12CmdV0,
+    message: FleshlightLaunchFW12CmdV0,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let previous_position = self.previous_position.clone();
     let position = message.position();
@@ -117,7 +112,7 @@ impl ProtocolHandler for KiirooV21 {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: message::SensorReadCmdV4,
+    message: SensorReadCmdV4,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     debug!("Trying to get battery reading.");
     let message = message.clone();
@@ -135,7 +130,7 @@ impl ProtocolHandler for KiirooV21 {
         ));
       }
       let battery_level = data[5] as i32;
-      let battery_reading = message::SensorReadingV4::new(
+      let battery_reading = SensorReadingV4::new(
         message.device_index(),
         *message.feature_index(),
         *message.sensor_type(),
@@ -156,7 +151,7 @@ impl ProtocolHandler for KiirooV21 {
   fn handle_sensor_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: &message::SensorSubscribeCmdV4,
+    message: &SensorSubscribeCmdV4,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     let message = message.clone();
     if self.subscribed_sensors.contains(message.feature_index()) {
@@ -238,7 +233,7 @@ impl ProtocolHandler for KiirooV21 {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: &message::SensorUnsubscribeCmdV4,
+    message: &SensorUnsubscribeCmdV4,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     let message = message.clone();
 
