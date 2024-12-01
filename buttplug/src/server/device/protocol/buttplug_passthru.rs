@@ -8,12 +8,12 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ButtplugDeviceCommandMessageUnion, Endpoint},
+    message::Endpoint,
   },
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::spec_enums::ButtplugDeviceCommandMessageUnion},
 };
 
 generic_protocol_setup!(ButtplugPassthru, "buttplug-passthru");

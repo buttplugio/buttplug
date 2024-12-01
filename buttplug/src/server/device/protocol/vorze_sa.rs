@@ -7,10 +7,12 @@
 
 use crate::core::message::ActuatorType;
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
+use crate::server::message::internal_linear_cmd::InternalLinearCmdV4;
+use crate::server::message::VorzeA10CycloneCmdV0;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{self, Endpoint},
+    message::Endpoint,
   },
   server::device::{
     configuration::{UserDeviceDefinition, UserDeviceIdentifier},
@@ -194,7 +196,7 @@ impl ProtocolHandler for VorzeSA {
 
   fn handle_linear_cmd(
     &self,
-    msg: message::LinearCmdV4,
+    msg: InternalLinearCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = msg.vectors()[0].clone();
 
@@ -218,7 +220,7 @@ impl ProtocolHandler for VorzeSA {
 
   fn handle_vorze_a10_cyclone_cmd(
     &self,
-    msg: message::VorzeA10CycloneCmdV0,
+    msg: VorzeA10CycloneCmdV0,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.handle_rotate_cmd(&[Some((msg.speed(), msg.clockwise()))])
   }

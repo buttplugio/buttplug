@@ -11,7 +11,6 @@ use super::message::{
   self,
   serializer::ButtplugSerializerError,
   ActuatorType,
-  ButtplugDeviceMessageType,
   ButtplugMessageSpecVersion,
   Endpoint,
   ErrorCode,
@@ -134,7 +133,7 @@ pub enum ButtplugDeviceError {
   /// Device {0} not connected
   DeviceNotConnected(String),
   /// Device does not support message type {0}.
-  MessageNotSupported(ButtplugDeviceMessageType),
+  MessageNotSupported(String),
   /// Device only has {0} features, but {1} commands were sent.
   DeviceFeatureCountMismatch(u32, u32),
   /// Device only has {0} features, but was given an index of {1}

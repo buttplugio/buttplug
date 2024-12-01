@@ -11,10 +11,7 @@ use crate::core::message::{
   ButtplugMessageError,
   ButtplugMessageFinalizer,
   ButtplugMessageValidator,
-  LegacyDeviceAttributes,
   SensorType,
-  SensorUnsubscribeCmdV3,
-  TryFromDeviceAttributes,
 };
 use getset::Getters;
 #[cfg(feature = "serialize-json")]
@@ -59,27 +56,5 @@ impl SensorUnsubscribeCmdV4 {
 impl ButtplugMessageValidator for SensorUnsubscribeCmdV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
-  }
-}
-
-impl TryFromDeviceAttributes<SensorUnsubscribeCmdV3> for SensorUnsubscribeCmdV4 {
-  fn try_from_device_attributes(
-    msg: SensorUnsubscribeCmdV3,
-    features: &LegacyDeviceAttributes,
-  ) -> Result<Self, crate::core::errors::ButtplugError> {
-    let sensor_feature_id = features.attrs_v3().sensor_subscribe_cmd().as_ref().unwrap()
-      [*msg.sensor_index() as usize]
-      .feature()
-      .id();
-
-    Ok(
-      SensorUnsubscribeCmdV4::new(
-        msg.device_index(),
-        0,
-        *msg.sensor_type(),
-        &Some(sensor_feature_id.clone()),
-      )
-      .into(),
-    )
   }
 }

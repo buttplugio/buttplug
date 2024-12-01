@@ -8,9 +8,9 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{self, Endpoint},
+    message::Endpoint,
   },
-  server::device::{
+  server::{device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
@@ -20,7 +20,7 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  },
+  }, message::{internal_linear_cmd::InternalLinearCmdV4, FleshlightLaunchFW12CmdV0}},
 };
 use async_trait::async_trait;
 use std::sync::{
@@ -84,14 +84,14 @@ impl ProtocolHandler for KiirooV21Initialized {
 
   fn handle_linear_cmd(
     &self,
-    message: message::LinearCmdV4,
+    message: InternalLinearCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
     let previous_position = self.previous_position.load(Ordering::SeqCst);
     let distance = (previous_position as f64 - (v.position() * 99f64)).abs() / 99f64;
-    let fl_cmd = message::FleshlightLaunchFW12CmdV0::new(
+    let fl_cmd = FleshlightLaunchFW12CmdV0::new(
       0,
       (v.position() * 99f64) as u8,
       (calculate_speed(distance, v.duration()) * 99f64) as u8,
@@ -101,7 +101,7 @@ impl ProtocolHandler for KiirooV21Initialized {
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    message: message::FleshlightLaunchFW12CmdV0,
+    message: FleshlightLaunchFW12CmdV0,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let position = message.position();
     self.previous_position.store(position, Ordering::SeqCst);
