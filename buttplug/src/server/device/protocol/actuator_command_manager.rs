@@ -5,12 +5,12 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::{
+use crate::{core::{
   errors::ButtplugError,
   message::{
-    ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugDeviceCommandMessageUnion, DeviceFeature, DeviceFeatureActuator, InternalLevelCmdV4, InternalLevelSubcommandV4
+    ActuatorType, ButtplugActuatorFeatureMessageType, DeviceFeature, DeviceFeatureActuator,
   },
-};
+}, server::message::{internal_level_cmd::{InternalLevelCmdV4, InternalLevelSubcommandV4}, spec_enums::ButtplugDeviceCommandMessageUnion}};
 use std::collections::HashMap;
 use getset::Getters;
 use std::{

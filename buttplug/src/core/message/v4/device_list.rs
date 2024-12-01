@@ -11,7 +11,6 @@ use crate::core::message::{
   ButtplugMessageError,
   ButtplugMessageFinalizer,
   ButtplugMessageValidator,
-  DeviceListV3,
 };
 use getset::Getters;
 #[cfg(feature = "serialize-json")]
@@ -42,13 +41,5 @@ impl ButtplugMessageValidator for DeviceListV4 {
 
 impl ButtplugMessageFinalizer for DeviceListV4 {
   fn finalize(&mut self) {
-  }
-}
-
-impl From<DeviceListV4> for DeviceListV3 {
-  fn from(value: DeviceListV4) -> Self {
-    let mut dl3 = DeviceListV3::new(value.devices().iter().map(|x| x.clone().into()).collect());
-    dl3.set_id(value.id());
-    dl3
   }
 }

@@ -5,15 +5,14 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{device::ServerDeviceManager, ping_timer::PingTimer, server_message_conversion::ButtplugServerMessageConverter, ButtplugServerResultFuture};
+use super::{device::ServerDeviceManager, message::{legacy_device_attributes::TryFromClientMessage, ButtplugClientMessageVariant, ButtplugServerMessageVariant}, ping_timer::PingTimer, server_message_conversion::ButtplugServerMessageConverter, ButtplugServerResultFuture};
 use crate::{
   core::{
     errors::*,
     message::{
-      self, ButtplugClientMessageVariant, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion, ButtplugInternalClientMessageV4, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugServerMessageV4, ButtplugServerMessageVariant, ErrorV0, StopAllDevicesV0, StopScanningV0, TryFromClientMessage, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
+      self, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugServerMessageV4, ErrorV0, StopAllDevicesV0, StopScanningV0, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
     },
-  },
-  util::stream::convert_broadcast_receiver_to_stream,
+  }, server::message::spec_enums::{ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion, ButtplugInternalClientMessageV4}, util::stream::convert_broadcast_receiver_to_stream
 };
 use futures::{
   future::{self, BoxFuture, FutureExt},

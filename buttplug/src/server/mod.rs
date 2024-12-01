@@ -46,6 +46,8 @@
 //!     of the [DeviceManager] teardown.
 
 pub mod device;
+pub mod message;
+pub mod connector;
 mod ping_timer;
 mod server;
 mod server_builder;

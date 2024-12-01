@@ -11,9 +11,9 @@ use super::fleshlight_launch_helper;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{self, ButtplugDeviceMessage, Endpoint},
+    message::Endpoint,
   },
-  server::device::{
+  server::{device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
@@ -22,10 +22,11 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  },
+  }, message::{internal_linear_cmd::{InternalLinearCmdV4, InternalVectorSubcommandV4}, FleshlightLaunchFW12CmdV0}},
 };
 use async_trait::async_trait;
 use prost::Message;
+use uuid::Uuid;
 use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
@@ -136,7 +137,7 @@ impl ProtocolHandler for TheHandy {
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    message: message::FleshlightLaunchFW12CmdV0,
+    message: FleshlightLaunchFW12CmdV0,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Oh good. ScriptPlayer hasn't updated to LinearCmd yet so now I have to
     // work backward from fleshlight to my own Linear format that Handy uses.
@@ -150,20 +151,20 @@ impl ProtocolHandler for TheHandy {
     let distance = (goal_position - previous_position).abs();
     let duration =
       fleshlight_launch_helper::calculate_duration(distance, message.speed() as f64 / 99f64);
-    self.handle_linear_cmd(message::LinearCmdV4::new(
-      message.device_index(),
-      vec![message::VectorSubcommandV4::new(
+    self.handle_linear_cmd(InternalLinearCmdV4::new(
+      0,
+      vec![InternalVectorSubcommandV4::new(
         0,
         duration,
         goal_position,
-        &None,
+        Uuid::new_v4()
       )],
     ))
   }
 
   fn handle_linear_cmd(
     &self,
-    message: message::LinearCmdV4,
+    message: InternalLinearCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // What is "How not to implement a command structure for your device that does one thing", Alex?
 
