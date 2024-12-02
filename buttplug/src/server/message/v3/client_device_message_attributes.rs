@@ -20,7 +20,6 @@ use crate::{
       ClientDeviceMessageAttributesV2,
       GenericDeviceMessageAttributesV2,
       RawDeviceMessageAttributesV2,
-      SensorDeviceMessageAttributesV2,
     },
   },
 };
@@ -104,18 +103,15 @@ pub fn vibrate_cmd_from_scalar_cmd(
 ) -> GenericDeviceMessageAttributesV2 {
   let mut feature_count = 0u32;
   let mut step_count = vec![];
-  let mut features = vec![];
   for attr in attributes_vec {
     if *attr.actuator_type() == ActuatorType::Vibrate {
       feature_count += 1;
       step_count.push(*attr.step_count());
-      features.push(attr.feature().clone());
     }
   }
   GenericDeviceMessageAttributesV2 {
     feature_count,
     step_count,
-    features,
   }
 }
 
@@ -137,11 +133,12 @@ impl From<ClientDeviceMessageAttributesV3> for ClientDeviceMessageAttributesV2 {
         .map(|x| GenericDeviceMessageAttributesV2::from(x.clone())),
       battery_level_cmd: {
         if let Some(sensor_info) = other.sensor_read_cmd() {
-          if let Some(attr) = sensor_info
+          if sensor_info
             .iter()
             .find(|x| *x.sensor_type() == SensorType::Battery)
+            .is_some()
           {
-            Some(SensorDeviceMessageAttributesV2::new(attr.feature()))
+            Some(NullDeviceMessageAttributesV1::default())
           } else {
             None
           }
@@ -151,11 +148,12 @@ impl From<ClientDeviceMessageAttributesV3> for ClientDeviceMessageAttributesV2 {
       },
       rssi_level_cmd: {
         if let Some(sensor_info) = other.sensor_read_cmd() {
-          if let Some(attr) = sensor_info
+          if sensor_info
             .iter()
             .find(|x| *x.sensor_type() == SensorType::RSSI)
+            .is_some()
           {
-            Some(SensorDeviceMessageAttributesV2::new(attr.feature()))
+            Some(NullDeviceMessageAttributesV1::default())
           } else {
             None
           }
@@ -218,11 +216,6 @@ pub struct ClientGenericDeviceMessageAttributesV3 {
   #[getset(get = "pub")]
   #[serde(skip, default)]
   pub(in crate::server::message) index: u32,
-  // Matching device feature for this attribute. Do not serialize or deserialize this, it's not part
-  // of this version of the protocol, only use it for comparison when doing message conversion.
-  #[getset(get = "pub")]
-  #[serde(skip)]
-  pub(in crate::server::message) feature: DeviceFeature,
 }
 
 impl From<Vec<ClientGenericDeviceMessageAttributesV3>> for GenericDeviceMessageAttributesV2 {
@@ -230,7 +223,6 @@ impl From<Vec<ClientGenericDeviceMessageAttributesV3>> for GenericDeviceMessageA
     Self {
       feature_count: attributes_vec.len() as u32,
       step_count: attributes_vec.iter().map(|x| *x.step_count()).collect(),
-      features: attributes_vec.iter().map(|x| x.feature().clone()).collect(),
     }
   }
 }
@@ -240,13 +232,11 @@ impl ClientGenericDeviceMessageAttributesV3 {
     feature_descriptor: &str,
     step_count: u32,
     actuator_type: ActuatorType,
-    feature: &DeviceFeature,
   ) -> Self {
     Self {
       feature_descriptor: feature_descriptor.to_owned(),
       actuator_type,
       step_count,
-      feature: feature.clone(),
       index: 0,
     }
   }
@@ -299,7 +289,6 @@ impl TryFrom<DeviceFeature> for ClientGenericDeviceMessageAttributesV3 {
         feature_descriptor: value.description().to_owned(),
         actuator_type,
         step_count,
-        feature: value.clone(),
         index: 0,
       };
       Ok(attrs)

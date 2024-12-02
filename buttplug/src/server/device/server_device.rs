@@ -65,11 +65,7 @@ use crate::{
       protocol::ProtocolHandler,
     },
     message::{
-      internal_level_cmd::InternalLevelCmdV4,
-      legacy_device_attributes::LegacyDeviceAttributes,
-      spec_enums::ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceMessageType,
-      ButtplugServerDeviceMessage,
+      internal_level_cmd::InternalLevelCmdV4, internal_sensor_read_cmd::InternalSensorReadCmdV4, internal_sensor_subscribe_cmd::InternalSensorSubscribeCmdV4, internal_sensor_unsubscribe_cmd::InternalSensorUnsubscribeCmdV4, legacy_device_attributes::LegacyDeviceAttributes, spec_enums::ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessageType, ButtplugServerDeviceMessage
     },
     ButtplugServerResultFuture,
   },
@@ -555,21 +551,21 @@ impl ServerDevice {
   fn check_sensor_command(
     &self,
     feature_index: u32,
-    feature_id: &Uuid,
-    sensor_type: &SensorType,
+    feature_id: Uuid,
+    sensor_type: SensorType,
   ) -> Result<(), ButtplugDeviceError> {
     if let Some(feature) = self
       .definition
       .features()
       .iter()
-      .find(|x| *x.id() == *feature_id)
+      .find(|x| *x.id() == feature_id)
     {
-      if *feature.feature_type() == FeatureType::from(*sensor_type) {
+      if *feature.feature_type() == FeatureType::from(sensor_type) {
         Ok(())
       } else {
         Err(ButtplugDeviceError::DeviceSensorTypeMismatch(
           feature_id.to_string(),
-          *sensor_type,
+          sensor_type,
           *feature.feature_type(),
         ))
       }
@@ -583,11 +579,11 @@ impl ServerDevice {
 
   fn handle_sensor_read_cmd_v4(
     &self,
-    message: message::SensorReadCmdV4,
+    message: InternalSensorReadCmdV4,
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, ButtplugError>> {
     let result = self.check_sensor_command(
-      *message.feature_index(),
-      message.feature_id().as_ref().unwrap(),
+      message.feature_index(),
+      message.feature_id(),
       message.sensor_type(),
     );
     let device = self.hardware.clone();
@@ -605,11 +601,11 @@ impl ServerDevice {
 
   fn handle_sensor_subscribe_cmd_v4(
     &self,
-    message: message::SensorSubscribeCmdV4,
+    message: InternalSensorSubscribeCmdV4,
   ) -> ButtplugServerResultFuture {
     let result = self.check_sensor_command(
-      *message.feature_index(),
-      message.feature_id().as_ref().unwrap(),
+      message.feature_index(),
+      message.feature_id(),
       message.sensor_type(),
     );
     let device = self.hardware.clone();
@@ -627,11 +623,11 @@ impl ServerDevice {
 
   fn handle_sensor_unsubscribe_cmd_v4(
     &self,
-    message: message::SensorUnsubscribeCmdV4,
+    message: InternalSensorUnsubscribeCmdV4,
   ) -> ButtplugServerResultFuture {
     let result = self.check_sensor_command(
-      *message.feature_index(),
-      message.feature_id().as_ref().unwrap(),
+      message.feature_index(),
+      message.feature_id(),
       message.sensor_type(),
     );
     let device = self.hardware.clone();

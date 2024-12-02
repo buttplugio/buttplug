@@ -6,6 +6,7 @@ mod device_list;
 mod device_message_info;
 mod rssi_level_cmd;
 mod rssi_level_reading;
+mod server_device_message_attributes;
 mod spec_enums;
 
 use crate::core::message::v2::*;
@@ -15,7 +16,10 @@ pub use client_device_message_attributes::{
   ClientDeviceMessageAttributesV2,
   GenericDeviceMessageAttributesV2,
   RawDeviceMessageAttributesV2,
-  SensorDeviceMessageAttributesV2,
+};
+pub use server_device_message_attributes::{
+  ServerDeviceMessageAttributesV2,
+  ServerGenericDeviceMessageAttributesV2,
 };
 pub use device_added::DeviceAddedV2;
 pub use device_list::DeviceListV2;
