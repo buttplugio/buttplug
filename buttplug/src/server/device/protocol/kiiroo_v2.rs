@@ -19,7 +19,7 @@ use crate::{
         ProtocolInitializer,
       },
     },
-    message::{internal_linear_cmd::InternalLinearCmdV4, FleshlightLaunchFW12CmdV0},
+    message::{checked_linear_cmd::CheckedLinearCmdV4, FleshlightLaunchFW12CmdV0},
   },
 };
 use async_trait::async_trait;
@@ -58,7 +58,7 @@ impl ProtocolHandler for KiirooV2 {
 
   fn handle_linear_cmd(
     &self,
-    message: InternalLinearCmdV4,
+    message: CheckedLinearCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to

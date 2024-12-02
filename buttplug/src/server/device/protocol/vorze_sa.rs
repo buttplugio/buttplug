@@ -7,7 +7,7 @@
 
 use crate::core::message::ActuatorType;
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
-use crate::server::message::internal_linear_cmd::InternalLinearCmdV4;
+use crate::server::message::checked_linear_cmd::CheckedLinearCmdV4;
 use crate::server::message::VorzeA10CycloneCmdV0;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
@@ -193,7 +193,7 @@ impl ProtocolHandler for VorzeSA {
 
   fn handle_linear_cmd(
     &self,
-    msg: InternalLinearCmdV4,
+    msg: CheckedLinearCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = msg.vectors()[0].clone();
 

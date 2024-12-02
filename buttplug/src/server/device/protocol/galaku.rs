@@ -12,9 +12,9 @@ use futures_util::future::BoxFuture;
 use futures_util::{future, FutureExt};
 
 use crate::core::message::{ActuatorType, SensorType, SensorReadingV4};
-use crate::server::message::internal_sensor_read_cmd::InternalSensorReadCmdV4;
-use crate::server::message::internal_sensor_subscribe_cmd::InternalSensorSubscribeCmdV4;
-use crate::server::message::internal_sensor_unsubscribe_cmd::InternalSensorUnsubscribeCmdV4;
+use crate::server::message::checked_sensor_read_cmd::CheckedSensorReadCmdV4;
+use crate::server::message::checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4;
+use crate::server::message::checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_initializer_setup,
@@ -192,7 +192,7 @@ impl ProtocolHandler for Galaku {
   fn handle_sensor_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: &InternalSensorSubscribeCmdV4,
+    message: &CheckedSensorSubscribeCmdV4,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     let message = message.clone();
     match message.sensor_type() {
@@ -215,7 +215,7 @@ impl ProtocolHandler for Galaku {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: &InternalSensorUnsubscribeCmdV4,
+    message: &CheckedSensorUnsubscribeCmdV4,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     let message = message.clone();
     match message.sensor_type() {
@@ -238,7 +238,7 @@ impl ProtocolHandler for Galaku {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: InternalSensorReadCmdV4,
+    message: CheckedSensorReadCmdV4,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     let data: Vec<u32> = vec![90, 0, 0, 1, 19, 0, 0, 0, 0, 0];
     let mut device_notification_receiver = device.event_stream();

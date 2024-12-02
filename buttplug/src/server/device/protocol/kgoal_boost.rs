@@ -15,7 +15,7 @@ use crate::{
       hardware::{Hardware, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd},
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
-    message::{internal_sensor_subscribe_cmd::InternalSensorSubscribeCmdV4, internal_sensor_unsubscribe_cmd::InternalSensorUnsubscribeCmdV4, ButtplugServerDeviceMessage},
+    message::{checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, ButtplugServerDeviceMessage},
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
@@ -56,7 +56,7 @@ impl ProtocolHandler for KGoalBoost {
   fn handle_sensor_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: &InternalSensorSubscribeCmdV4,
+    message: &CheckedSensorSubscribeCmdV4,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     if self.subscribed_sensors.contains(&message.feature_index()) {
       return future::ready(Ok(())).boxed();
@@ -142,7 +142,7 @@ impl ProtocolHandler for KGoalBoost {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: &InternalSensorUnsubscribeCmdV4,
+    message: &CheckedSensorUnsubscribeCmdV4,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     if !self.subscribed_sensors.contains(&message.feature_index()) {
       return future::ready(Ok(())).boxed();

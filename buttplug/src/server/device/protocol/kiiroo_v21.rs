@@ -30,7 +30,7 @@ use crate::{
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
     message::{
-      internal_linear_cmd::InternalLinearCmdV4, internal_sensor_read_cmd::InternalSensorReadCmdV4, internal_sensor_subscribe_cmd::InternalSensorSubscribeCmdV4, internal_sensor_unsubscribe_cmd::InternalSensorUnsubscribeCmdV4, ButtplugServerDeviceMessage, FleshlightLaunchFW12CmdV0
+      checked_linear_cmd::CheckedLinearCmdV4, checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, ButtplugServerDeviceMessage, FleshlightLaunchFW12CmdV0
     },
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
@@ -87,7 +87,7 @@ impl ProtocolHandler for KiirooV21 {
 
   fn handle_linear_cmd(
     &self,
-    message: InternalLinearCmdV4,
+    message: CheckedLinearCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to
@@ -120,7 +120,7 @@ impl ProtocolHandler for KiirooV21 {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: InternalSensorReadCmdV4,
+    message: CheckedSensorReadCmdV4,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     debug!("Trying to get battery reading.");
     let message = message.clone();
@@ -159,7 +159,7 @@ impl ProtocolHandler for KiirooV21 {
   fn handle_sensor_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: &InternalSensorSubscribeCmdV4,
+    message: &CheckedSensorSubscribeCmdV4,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     let message = message.clone();
     if self.subscribed_sensors.contains(&message.feature_index()) {
@@ -241,7 +241,7 @@ impl ProtocolHandler for KiirooV21 {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: &InternalSensorUnsubscribeCmdV4,
+    message: &CheckedSensorUnsubscribeCmdV4,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     let message = message.clone();
 
