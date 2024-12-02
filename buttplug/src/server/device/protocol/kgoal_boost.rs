@@ -8,14 +8,14 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{self, ButtplugDeviceMessage, Endpoint, SensorReadingV4, SensorType},
+    message::{Endpoint, SensorReadingV4, SensorType},
   },
   server::{
     device::{
       hardware::{Hardware, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd},
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
-    message::ButtplugServerDeviceMessage,
+    message::{internal_sensor_subscribe_cmd::InternalSensorSubscribeCmdV4, internal_sensor_unsubscribe_cmd::InternalSensorUnsubscribeCmdV4, ButtplugServerDeviceMessage},
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
@@ -56,9 +56,9 @@ impl ProtocolHandler for KGoalBoost {
   fn handle_sensor_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: &message::SensorSubscribeCmdV4,
+    message: &InternalSensorSubscribeCmdV4,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
-    if self.subscribed_sensors.contains(message.feature_index()) {
+    if self.subscribed_sensors.contains(&message.feature_index()) {
       return future::ready(Ok(())).boxed();
     }
     let message = message.clone();
@@ -133,7 +133,7 @@ impl ProtocolHandler for KGoalBoost {
           }
         });
       }
-      sensors.insert(*message.feature_index());
+      sensors.insert(message.feature_index());
       Ok(())
     }
     .boxed()
@@ -142,9 +142,9 @@ impl ProtocolHandler for KGoalBoost {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: &message::SensorUnsubscribeCmdV4,
+    message: &InternalSensorUnsubscribeCmdV4,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
-    if !self.subscribed_sensors.contains(message.feature_index()) {
+    if !self.subscribed_sensors.contains(&message.feature_index()) {
       return future::ready(Ok(())).boxed();
     }
     let message = message.clone();
@@ -152,7 +152,7 @@ impl ProtocolHandler for KGoalBoost {
     async move {
       // If we have no sensors we're currently subscribed to, we'll need to bring up our BLE
       // characteristic subscription.
-      sensors.remove(message.feature_index());
+      sensors.remove(&message.feature_index());
       if sensors.is_empty() {
         device
           .unsubscribe(&HardwareUnsubscribeCmd::new(Endpoint::RxPressure))

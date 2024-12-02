@@ -1,6 +1,6 @@
-use super::v2::ClientDeviceMessageAttributesV2;
-use super::v3::ClientDeviceMessageAttributesV3;
-use crate::core::{errors::ButtplugError, message::DeviceFeature};
+use super::ServerDeviceMessageAttributesV3;
+use super::{server_device_feature::ServerDeviceFeature, v2::ServerDeviceMessageAttributesV2};
+use crate::core::errors::ButtplugError;
 use getset::Getters;
 use std::collections::HashMap;
 
@@ -10,18 +10,18 @@ pub(crate) struct LegacyDeviceAttributes {
   attrs_v1: ClientDeviceMessageAttributesV1,
   */
   #[getset(get = "pub")]
-  attrs_v2: ClientDeviceMessageAttributesV2,
+  attrs_v2: ServerDeviceMessageAttributesV2,
   #[getset(get = "pub")]
-  attrs_v3: ClientDeviceMessageAttributesV3,
+  attrs_v3: ServerDeviceMessageAttributesV3,
   #[getset(get = "pub")]
-  features: Vec<DeviceFeature>,
+  features: Vec<ServerDeviceFeature>,
 }
 
 impl LegacyDeviceAttributes {
-  pub fn new(features: &Vec<DeviceFeature>) -> Self {
+  pub fn new(features: &Vec<ServerDeviceFeature>) -> Self {
     Self {
-      attrs_v3: ClientDeviceMessageAttributesV3::from(features.clone()),
-      attrs_v2: ClientDeviceMessageAttributesV2::from(features.clone()),
+      attrs_v3: ServerDeviceMessageAttributesV3::from(features.clone()),
+      attrs_v2: ServerDeviceMessageAttributesV2::from(features.clone()),
       /*
       attrs_v1: ClientDeviceMessageAttributesV1::from(features.clone()),
       */

@@ -9,7 +9,6 @@ use crate::core::{errors::ButtplugDeviceError, message::Endpoint};
 use getset::{Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use std::{collections::HashSet, ops::RangeInclusive};
-use uuid::Uuid;
 
 use super::{
   ActuatorType,
@@ -104,20 +103,11 @@ pub struct DeviceFeature {
   #[getset(get = "pub")]
   #[serde(skip)]
   raw: Option<DeviceFeatureRaw>,
-  #[getset(get = "pub", get_mut = "pub(super)")]
-  #[serde(skip_serializing)]
-  id: Uuid,
-  #[getset(get = "pub", get_mut = "pub(super)")]
-  #[serde(rename = "base-id")]
-  #[serde(skip_serializing)]
-  base_id: Option<Uuid>,
 }
 
 impl DeviceFeature {
   pub fn new(
     description: &str,
-    id: &Uuid,
-    base_id: &Option<Uuid>,
     feature_type: FeatureType,
     actuator: &Option<DeviceFeatureActuator>,
     sensor: &Option<DeviceFeatureSensor>,
@@ -128,8 +118,6 @@ impl DeviceFeature {
       actuator: actuator.clone(),
       sensor: sensor.clone(),
       raw: None,
-      id: id.clone(),
-      base_id: base_id.clone(),
     }
   }
 
@@ -147,8 +135,6 @@ impl DeviceFeature {
       actuator: None,
       sensor: None,
       raw: Some(DeviceFeatureRaw::new(endpoints)),
-      id: uuid::Uuid::new_v4(),
-      base_id: None,
     }
   }
 }

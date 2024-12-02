@@ -52,16 +52,12 @@ pub struct ClientDeviceMessageAttributesV1 {
 pub struct GenericDeviceMessageAttributesV1 {
   #[serde(rename = "FeatureCount")]
   feature_count: u32,
-  #[getset(get = "pub")]
-  #[serde(skip)]
-  pub(in crate::server::message) features: Vec<DeviceFeature>,
 }
 
 impl GenericDeviceMessageAttributesV1 {
-  pub fn new(feature_count: u32, features: &Vec<DeviceFeature>) -> Self {
+  pub fn new(feature_count: u32) -> Self {
     Self {
       feature_count,
-      features: features.clone(),
     }
   }
 }

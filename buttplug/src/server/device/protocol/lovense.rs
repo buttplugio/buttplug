@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{self, ActuatorType, ButtplugDeviceMessage, Endpoint, FeatureType, SensorReadingV4},
+    message::{self, ActuatorType, Endpoint, FeatureType, SensorReadingV4},
   },
   server::{
     device::{
@@ -22,7 +22,7 @@ use crate::{
       },
       protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     },
-    message::internal_linear_cmd::InternalLinearCmdV4,
+    message::{internal_linear_cmd::InternalLinearCmdV4, internal_sensor_read_cmd::InternalSensorReadCmdV4},
   },
   util::{async_manager, sleep},
 };
@@ -410,7 +410,7 @@ impl ProtocolHandler for Lovense {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: message::SensorReadCmdV4,
+    message: InternalSensorReadCmdV4,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     let mut device_notification_receiver = device.event_stream();
     async move {
@@ -438,7 +438,7 @@ impl ProtocolHandler for Lovense {
               if let Ok(level) = data_str[start_pos..(len - 1)].parse::<u8>() {
                 return Ok(message::SensorReadingV4::new(
                   message.device_index(),
-                  *message.feature_index(),
+                  message.feature_index(),
                   message::SensorType::Battery,
                   vec![level as i32],
                 ));

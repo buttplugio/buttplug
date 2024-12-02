@@ -16,9 +16,6 @@ use crate::{
       RawWriteCmdV2,
       RequestDeviceListV0,
       RequestServerInfoV1,
-      SensorReadCmdV4,
-      SensorSubscribeCmdV4,
-      SensorUnsubscribeCmdV4,
       StartScanningV0,
       StopAllDevicesV0,
       StopDeviceCmdV0,
@@ -37,7 +34,7 @@ use crate::{
   },
 };
 
-use super::{internal_level_cmd::InternalLevelCmdV4, internal_linear_cmd::InternalLinearCmdV4};
+use super::{internal_level_cmd::InternalLevelCmdV4, internal_linear_cmd::InternalLinearCmdV4, internal_sensor_read_cmd::InternalSensorReadCmdV4, internal_sensor_subscribe_cmd::InternalSensorSubscribeCmdV4, internal_sensor_unsubscribe_cmd::InternalSensorUnsubscribeCmdV4};
 
 /// An InternalClientMessage has had its contents verified and should need no further internal error
 /// checking. Processing may still return errors, but should be due to system state, not message
@@ -70,9 +67,9 @@ pub enum ButtplugInternalClientMessageV4 {
   LevelCmd(InternalLevelCmdV4),
   LinearCmd(InternalLinearCmdV4),
   // Sensor commands
-  SensorReadCmd(SensorReadCmdV4),
-  SensorSubscribeCmd(SensorSubscribeCmdV4),
-  SensorUnsubscribeCmd(SensorUnsubscribeCmdV4),
+  SensorReadCmd(InternalSensorReadCmdV4),
+  SensorSubscribeCmd(InternalSensorSubscribeCmdV4),
+  SensorUnsubscribeCmd(InternalSensorUnsubscribeCmdV4),
   // Raw commands
   RawWriteCmd(RawWriteCmdV2),
   RawReadCmd(RawReadCmdV2),
@@ -139,14 +136,37 @@ impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugInternalClientMes
         }
       }
       ButtplugClientMessageV4::SensorReadCmd(m) => {
-        Ok(ButtplugInternalClientMessageV4::SensorReadCmd(m))
+        if let Some(features) = feature_map.get(&m.device_index()) {
+          Ok(ButtplugInternalClientMessageV4::SensorReadCmd(
+            InternalSensorReadCmdV4::try_from_device_attributes(m, features)?,
+          ))
+        } else {
+          Err(ButtplugError::from(
+            ButtplugDeviceError::DeviceNotAvailable(m.device_index()),
+          ))
+        }
       }
       ButtplugClientMessageV4::SensorSubscribeCmd(m) => {
-        Ok(ButtplugInternalClientMessageV4::SensorSubscribeCmd(m))
+        if let Some(features) = feature_map.get(&m.device_index()) {
+          Ok(ButtplugInternalClientMessageV4::SensorSubscribeCmd(
+            InternalSensorSubscribeCmdV4::try_from_device_attributes(m, features)?,
+          ))
+        } else {
+          Err(ButtplugError::from(
+            ButtplugDeviceError::DeviceNotAvailable(m.device_index()),
+          ))
+        }
       }
       ButtplugClientMessageV4::SensorUnsubscribeCmd(m) => {
-        Ok(ButtplugInternalClientMessageV4::SensorUnsubscribeCmd(m))
-      }
+        if let Some(features) = feature_map.get(&m.device_index()) {
+          Ok(ButtplugInternalClientMessageV4::SensorUnsubscribeCmd(
+            InternalSensorUnsubscribeCmdV4::try_from_device_attributes(m, features)?,
+          ))
+        } else {
+          Err(ButtplugError::from(
+            ButtplugDeviceError::DeviceNotAvailable(m.device_index()),
+          ))
+        }      }
 
       // Message that need device index and hardware endpoint checking
       ButtplugClientMessageV4::RawWriteCmd(m) => {
@@ -283,10 +303,10 @@ impl TryFromClientMessage<ButtplugClientMessageV2> for ButtplugInternalClientMes
     match msg {
       // Convert v2 specific queries to v3 generic sensor queries
       ButtplugClientMessageV2::BatteryLevelCmd(m) => {
-        Ok(check_device_index_and_convert::<_, SensorReadCmdV4>(m, features)?.into())
+        Ok(check_device_index_and_convert::<_, InternalSensorReadCmdV4>(m, features)?.into())
       }
       ButtplugClientMessageV2::RSSILevelCmd(m) => {
-        Ok(check_device_index_and_convert::<_, SensorReadCmdV4>(m, features)?.into())
+        Ok(check_device_index_and_convert::<_, InternalSensorReadCmdV4>(m, features)?.into())
       }
       // Convert VibrateCmd to a ScalarCmd command
       ButtplugClientMessageV2::VibrateCmd(m) => {
@@ -317,13 +337,13 @@ impl TryFromClientMessage<ButtplugClientMessageV3> for ButtplugInternalClientMes
         Ok(check_device_index_and_convert::<_, InternalLinearCmdV4>(m, features)?.into())
       }
       ButtplugClientMessageV3::SensorReadCmd(m) => {
-        Ok(check_device_index_and_convert::<_, SensorReadCmdV4>(m, features)?.into())
+        Ok(check_device_index_and_convert::<_, InternalSensorReadCmdV4>(m, features)?.into())
       }
       ButtplugClientMessageV3::SensorSubscribeCmd(m) => {
-        Ok(check_device_index_and_convert::<_, SensorSubscribeCmdV4>(m, features)?.into())
+        Ok(check_device_index_and_convert::<_, InternalSensorSubscribeCmdV4>(m, features)?.into())
       }
       ButtplugClientMessageV3::SensorUnsubscribeCmd(m) => {
-        Ok(check_device_index_and_convert::<_, SensorUnsubscribeCmdV4>(m, features)?.into())
+        Ok(check_device_index_and_convert::<_, InternalSensorUnsubscribeCmdV4>(m, features)?.into())
       }
       _ => {
         ButtplugInternalClientMessageV4::try_from(msg).map_err(|e: ButtplugMessageError| e.into())
@@ -388,9 +408,9 @@ pub enum ButtplugDeviceCommandMessageUnion {
   StopDeviceCmd(StopDeviceCmdV0),
   LinearCmd(InternalLinearCmdV4),
   LevelCmd(InternalLevelCmdV4),
-  SensorReadCmd(SensorReadCmdV4),
-  SensorSubscribeCmd(SensorSubscribeCmdV4),
-  SensorUnsubscribeCmd(SensorUnsubscribeCmdV4),
+  SensorReadCmd(InternalSensorReadCmdV4),
+  SensorSubscribeCmd(InternalSensorSubscribeCmdV4),
+  SensorUnsubscribeCmd(InternalSensorUnsubscribeCmdV4),
   RawWriteCmd(RawWriteCmdV2),
   RawReadCmd(RawReadCmdV2),
   RawSubscribeCmd(RawSubscribeCmdV2),
