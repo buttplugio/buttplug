@@ -15,7 +15,7 @@ use crate::{
   server::{device::{
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::internal_sensor_read_cmd::InternalSensorReadCmdV4},
+  }, message::checked_sensor_read_cmd::CheckedSensorReadCmdV4},
 };
 use byteorder::WriteBytesExt;
 use futures::future::{BoxFuture, FutureExt};
@@ -66,7 +66,7 @@ impl ProtocolHandler for XInput {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    msg: InternalSensorReadCmdV4,
+    msg: CheckedSensorReadCmdV4,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     async move {
       let reading = device

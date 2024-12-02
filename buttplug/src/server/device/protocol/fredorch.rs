@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
-use crate::server::message::internal_linear_cmd::InternalLinearCmdV4;
+use crate::server::message::checked_linear_cmd::CheckedLinearCmdV4;
 use crate::server::message::FleshlightLaunchFW12CmdV0;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
@@ -183,7 +183,7 @@ pub struct Fredorch {
 impl ProtocolHandler for Fredorch {
   fn handle_linear_cmd(
     &self,
-    message: InternalLinearCmdV4,
+    message: CheckedLinearCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to

@@ -16,7 +16,7 @@ use crate::{
       SensorType,
     },
   },
-  server::message::{internal_sensor_subscribe_cmd::InternalSensorSubscribeCmdV4, LegacyDeviceAttributes, TryFromDeviceAttributes},
+  server::message::{checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, LegacyDeviceAttributes, TryFromDeviceAttributes},
 };
 use getset::Getters;
 #[cfg(feature = "serialize-json")]
@@ -54,7 +54,7 @@ impl ButtplugMessageValidator for SensorSubscribeCmdV3 {
   }
 }
 
-impl TryFromDeviceAttributes<SensorSubscribeCmdV3> for InternalSensorSubscribeCmdV4 {
+impl TryFromDeviceAttributes<SensorSubscribeCmdV3> for CheckedSensorSubscribeCmdV4 {
   fn try_from_device_attributes(
     msg: SensorSubscribeCmdV3,
     features: &LegacyDeviceAttributes,
@@ -65,7 +65,7 @@ impl TryFromDeviceAttributes<SensorSubscribeCmdV3> for InternalSensorSubscribeCm
       .id();
 
     Ok(
-      InternalSensorSubscribeCmdV4::new(
+      CheckedSensorSubscribeCmdV4::new(
         msg.device_index(),
         0,
         *msg.sensor_type(),

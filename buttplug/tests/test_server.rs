@@ -39,7 +39,7 @@ use buttplug::{
       ServerDeviceManagerBuilder,
     },
     message::{
-      internal_level_cmd::{InternalLevelCmdV4, InternalLevelSubcommandV4},
+      checked_level_cmd::{CheckedLevelCmdV4, CheckedLevelSubcommandV4},
       spec_enums::ButtplugInternalClientMessageV4,
       ButtplugClientMessageV3,
       ButtplugClientMessageVariant,
@@ -236,10 +236,10 @@ async fn test_device_stop_on_ping_timeout() {
 
   server
     .parse_checked_message(ButtplugInternalClientMessageV4::from(
-      InternalLevelCmdV4::new(
+      CheckedLevelCmdV4::new(
         0,
         device_index,
-        &vec![InternalLevelSubcommandV4::new(
+        &vec![CheckedLevelSubcommandV4::new(
           0,
           64,
           "f50a528b-b023-40f0-9906-df037443950a".try_into().unwrap(),

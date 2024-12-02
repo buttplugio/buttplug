@@ -19,7 +19,7 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  }, message::internal_sensor_read_cmd::InternalSensorReadCmdV4},
+  }, message::checked_sensor_read_cmd::CheckedSensorReadCmdV4},
 };
 use async_trait::async_trait;
 use futures::future::{BoxFuture, FutureExt};
@@ -292,7 +292,7 @@ impl ProtocolHandler for LovenseConnectService {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    msg: InternalSensorReadCmdV4,
+    msg: CheckedSensorReadCmdV4,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     async move {
       // This is a dummy read. We just store the battery level in the device
