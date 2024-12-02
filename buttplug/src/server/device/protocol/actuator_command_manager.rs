@@ -15,7 +15,7 @@ use crate::{
     },
   },
   server::message::{
-    internal_level_cmd::{InternalLevelCmdV4, InternalLevelSubcommandV4}, server_device_feature::ServerDeviceFeature, spec_enums::ButtplugDeviceCommandMessageUnion
+    checked_level_cmd::{CheckedLevelCmdV4, CheckedLevelSubcommandV4}, server_device_feature::ServerDeviceFeature, spec_enums::ButtplugDeviceCommandMessageUnion
   },
 };
 use getset::Getters;
@@ -113,7 +113,7 @@ impl ActuatorCommandManager {
           .messages()
           .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::LevelCmd)
         {
-          level_subcommands.push(InternalLevelSubcommandV4::new(
+          level_subcommands.push(CheckedLevelSubcommandV4::new(
             index as u32,
             0,
             *feature.id(),
@@ -122,7 +122,7 @@ impl ActuatorCommandManager {
       }
     }
     if !level_subcommands.is_empty() {
-      stop_commands.push(InternalLevelCmdV4::new(0, 0, &level_subcommands).into());
+      stop_commands.push(CheckedLevelCmdV4::new(0, 0, &level_subcommands).into());
     }
 
     Self {
@@ -165,7 +165,7 @@ impl ActuatorCommandManager {
 
   pub fn update_level(
     &self,
-    msg: &InternalLevelCmdV4,
+    msg: &CheckedLevelCmdV4,
     match_all: bool,
   ) -> Result<Vec<Option<(ActuatorType, i32)>>, ButtplugError> {
     trace!("Updating level for message: {:?}", msg);
