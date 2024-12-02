@@ -22,7 +22,7 @@ use crate::{
       },
       protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     },
-    message::{internal_linear_cmd::InternalLinearCmdV4, internal_sensor_read_cmd::InternalSensorReadCmdV4},
+    message::{checked_linear_cmd::CheckedLinearCmdV4, checked_sensor_read_cmd::CheckedSensorReadCmdV4},
   },
   util::{async_manager, sleep},
 };
@@ -410,7 +410,7 @@ impl ProtocolHandler for Lovense {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: InternalSensorReadCmdV4,
+    message: CheckedSensorReadCmdV4,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     let mut device_notification_receiver = device.event_stream();
     async move {
@@ -463,7 +463,7 @@ impl ProtocolHandler for Lovense {
 
   fn handle_linear_cmd(
     &self,
-    message: InternalLinearCmdV4,
+    message: CheckedLinearCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let vector = message
       .vectors()

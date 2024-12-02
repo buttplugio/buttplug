@@ -16,7 +16,7 @@ use crate::{
       SensorType,
     },
   },
-  server::message::{internal_sensor_read_cmd::InternalSensorReadCmdV4, LegacyDeviceAttributes, TryFromDeviceAttributes},
+  server::message::{checked_sensor_read_cmd::CheckedSensorReadCmdV4, LegacyDeviceAttributes, TryFromDeviceAttributes},
 };
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
@@ -45,7 +45,7 @@ impl ButtplugMessageValidator for RSSILevelCmdV2 {
   }
 }
 
-impl TryFromDeviceAttributes<RSSILevelCmdV2> for InternalSensorReadCmdV4 {
+impl TryFromDeviceAttributes<RSSILevelCmdV2> for CheckedSensorReadCmdV4 {
   fn try_from_device_attributes(
     msg: RSSILevelCmdV2,
     features: &LegacyDeviceAttributes,
@@ -62,7 +62,7 @@ impl TryFromDeviceAttributes<RSSILevelCmdV2> for InternalSensorReadCmdV4 {
       .feature();
 
     Ok(
-      InternalSensorReadCmdV4::new(
+      CheckedSensorReadCmdV4::new(
         msg.device_index(),
         0,
         SensorType::RSSI,

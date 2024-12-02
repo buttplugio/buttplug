@@ -65,7 +65,7 @@ use crate::{
       protocol::ProtocolHandler,
     },
     message::{
-      internal_level_cmd::InternalLevelCmdV4, internal_sensor_read_cmd::InternalSensorReadCmdV4, internal_sensor_subscribe_cmd::InternalSensorSubscribeCmdV4, internal_sensor_unsubscribe_cmd::InternalSensorUnsubscribeCmdV4, legacy_device_attributes::LegacyDeviceAttributes, spec_enums::ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessageType, ButtplugServerDeviceMessage
+      checked_level_cmd::CheckedLevelCmdV4, checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, legacy_device_attributes::LegacyDeviceAttributes, spec_enums::ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessageType, ButtplugServerDeviceMessage
     },
     ButtplugServerResultFuture,
   },
@@ -463,7 +463,7 @@ impl ServerDevice {
     }
   }
 
-  fn handle_levelcmd_v4(&self, msg: &InternalLevelCmdV4) -> ButtplugServerResultFuture {
+  fn handle_levelcmd_v4(&self, msg: &CheckedLevelCmdV4) -> ButtplugServerResultFuture {
     let commands = match self
       .actuator_command_manager
       .update_level(&msg, self.handler.needs_full_command_set())
@@ -579,7 +579,7 @@ impl ServerDevice {
 
   fn handle_sensor_read_cmd_v4(
     &self,
-    message: InternalSensorReadCmdV4,
+    message: CheckedSensorReadCmdV4,
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, ButtplugError>> {
     let result = self.check_sensor_command(
       message.feature_index(),
@@ -601,7 +601,7 @@ impl ServerDevice {
 
   fn handle_sensor_subscribe_cmd_v4(
     &self,
-    message: InternalSensorSubscribeCmdV4,
+    message: CheckedSensorSubscribeCmdV4,
   ) -> ButtplugServerResultFuture {
     let result = self.check_sensor_command(
       message.feature_index(),
@@ -623,7 +623,7 @@ impl ServerDevice {
 
   fn handle_sensor_unsubscribe_cmd_v4(
     &self,
-    message: InternalSensorUnsubscribeCmdV4,
+    message: CheckedSensorUnsubscribeCmdV4,
   ) -> ButtplugServerResultFuture {
     let result = self.check_sensor_command(
       message.feature_index(),
