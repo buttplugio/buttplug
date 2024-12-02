@@ -7,11 +7,8 @@
 
 use super::json::JSONValidator;
 use crate::{
-  core::{
-    errors::{ButtplugDeviceError, ButtplugError},
-    message::DeviceFeature,
-  },
-  server::device::configuration::{
+  core::errors::{ButtplugDeviceError, ButtplugError},
+  server::{device::configuration::{
     BaseDeviceDefinition,
     BaseDeviceIdentifier,
     DeviceConfigurationManager,
@@ -19,7 +16,7 @@ use crate::{
     ProtocolCommunicationSpecifier,
     UserDeviceDefinition,
     UserDeviceIdentifier,
-  },
+  }, message::server_device_feature::ServerDeviceFeature},
 };
 use dashmap::DashMap;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
@@ -72,7 +69,7 @@ struct ProtocolAttributes {
   #[serde(rename = "base-id")]
   base_id: Option<Uuid>,
   #[serde(skip_serializing_if = "Option::is_none")]
-  features: Option<Vec<DeviceFeature>>,
+  features: Option<Vec<ServerDeviceFeature>>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]

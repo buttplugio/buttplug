@@ -13,11 +13,10 @@ use crate::{
       ButtplugMessage,
       ButtplugMessageFinalizer,
       ButtplugMessageValidator,
-      SensorReadCmdV4,
       SensorType,
     },
   },
-  server::message::{LegacyDeviceAttributes, TryFromDeviceAttributes},
+  server::message::{internal_sensor_read_cmd::InternalSensorReadCmdV4, LegacyDeviceAttributes, TryFromDeviceAttributes},
 };
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
@@ -47,7 +46,7 @@ impl ButtplugMessageValidator for BatteryLevelCmdV2 {
   }
 }
 
-impl TryFromDeviceAttributes<BatteryLevelCmdV2> for SensorReadCmdV4 {
+impl TryFromDeviceAttributes<BatteryLevelCmdV2> for InternalSensorReadCmdV4 {
   fn try_from_device_attributes(
     msg: BatteryLevelCmdV2,
     features: &LegacyDeviceAttributes,
@@ -64,11 +63,11 @@ impl TryFromDeviceAttributes<BatteryLevelCmdV2> for SensorReadCmdV4 {
       .feature();
 
     Ok(
-      SensorReadCmdV4::new(
+      InternalSensorReadCmdV4::new(
         msg.device_index(),
         0,
         SensorType::Battery,
-        &Some(battery_feature.id().clone()),
+        *battery_feature.id(),
       )
       .into(),
     )

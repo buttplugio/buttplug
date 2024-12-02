@@ -581,12 +581,11 @@ impl DeviceConfigurationManager {
 #[cfg(test)]
 mod test {
   use super::*;
-  use crate::core::message::{
+  use crate::{core::message::{
     ButtplugActuatorFeatureMessageType,
-    DeviceFeature,
     DeviceFeatureActuator,
     FeatureType,
-  };
+  }, server::message::server_device_feature::ServerDeviceFeature};
   use std::{
     collections::{HashMap, HashSet},
     ops::RangeInclusive,
@@ -609,7 +608,7 @@ mod test {
           "Lovense Edge",
           &uuid::Uuid::new_v4(),
           &vec![
-            DeviceFeature::new(
+            ServerDeviceFeature::new(
               "Edge Vibration 1",
               &uuid::Uuid::new_v4(),
               &None,
@@ -621,7 +620,7 @@ mod test {
               )),
               &None,
             ),
-            DeviceFeature::new(
+            ServerDeviceFeature::new(
               "Edge Vibration 2",
               &uuid::Uuid::new_v4(),
               &None,

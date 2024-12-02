@@ -8,9 +8,9 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{self, ActuatorType, ButtplugDeviceMessage, Endpoint, FeatureType, SensorReadingV4},
+    message::{self, ActuatorType, Endpoint, FeatureType, SensorReadingV4},
   },
-  server::device::{
+  server::{device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{
@@ -19,7 +19,7 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  },
+  }, message::internal_sensor_read_cmd::InternalSensorReadCmdV4},
 };
 use async_trait::async_trait;
 use futures::future::{BoxFuture, FutureExt};
@@ -292,7 +292,7 @@ impl ProtocolHandler for LovenseConnectService {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    msg: message::SensorReadCmdV4,
+    msg: InternalSensorReadCmdV4,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     async move {
       // This is a dummy read. We just store the battery level in the device
@@ -303,8 +303,8 @@ impl ProtocolHandler for LovenseConnectService {
       debug!("Battery level: {}", reading.data()[0]);
       Ok(message::SensorReadingV4::new(
         msg.device_index(),
-        *msg.feature_index(),
-        *msg.sensor_type(),
+        msg.feature_index(),
+        msg.sensor_type(),
         vec![reading.data()[0] as i32],
       ))
     }

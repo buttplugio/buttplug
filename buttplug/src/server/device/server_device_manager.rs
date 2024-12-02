@@ -12,12 +12,7 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
     message::{
-      self,
-      ButtplugDeviceMessage,
-      ButtplugMessage,
-      ButtplugServerMessageV4,
-      DeviceListV4,
-      DeviceMessageInfoV4,
+      self, ButtplugDeviceMessage, ButtplugMessage, ButtplugServerMessageV4, DeviceFeature, DeviceListV4, DeviceMessageInfoV4
     },
   },
   server::{
@@ -270,7 +265,7 @@ impl ServerDeviceManager {
               &dev.name(),
               dev.definition().user_config().display_name(),
               &None,
-              dev.definition().features().clone(),
+              dev.definition().features().iter().cloned().map(|x| x.into()).collect::<Vec<DeviceFeature>>(),
             )
           })
           .collect();

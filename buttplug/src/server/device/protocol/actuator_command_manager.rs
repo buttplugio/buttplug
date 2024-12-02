@@ -11,13 +11,11 @@ use crate::{
     message::{
       ActuatorType,
       ButtplugActuatorFeatureMessageType,
-      DeviceFeature,
       DeviceFeatureActuator,
     },
   },
   server::message::{
-    internal_level_cmd::{InternalLevelCmdV4, InternalLevelSubcommandV4},
-    spec_enums::ButtplugDeviceCommandMessageUnion,
+    internal_level_cmd::{InternalLevelCmdV4, InternalLevelSubcommandV4}, server_device_feature::ServerDeviceFeature, spec_enums::ButtplugDeviceCommandMessageUnion
   },
 };
 use getset::Getters;
@@ -102,7 +100,7 @@ pub struct ActuatorCommandManager {
 }
 
 impl ActuatorCommandManager {
-  pub fn new(features: &Vec<DeviceFeature>) -> Self {
+  pub fn new(features: &Vec<ServerDeviceFeature>) -> Self {
     let mut stop_commands = vec![];
 
     let mut statuses = vec![];

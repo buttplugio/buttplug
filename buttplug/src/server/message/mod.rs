@@ -22,6 +22,7 @@ use std::cmp::Ordering;
 pub mod internal_device_feature;
 pub mod legacy_device_attributes;
 pub mod serializer;
+pub mod server_device_feature;
 mod v0;
 mod v1;
 mod v2;

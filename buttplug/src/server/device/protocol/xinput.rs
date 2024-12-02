@@ -10,12 +10,12 @@ use byteorder::LittleEndian;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{self, ActuatorType, ButtplugDeviceMessage, Endpoint, SensorReadingV4},
+    message::{self, ActuatorType, Endpoint, SensorReadingV4},
   },
-  server::device::{
+  server::{device::{
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::internal_sensor_read_cmd::InternalSensorReadCmdV4},
 };
 use byteorder::WriteBytesExt;
 use futures::future::{BoxFuture, FutureExt};
@@ -66,7 +66,7 @@ impl ProtocolHandler for XInput {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    msg: message::SensorReadCmdV4,
+    msg: InternalSensorReadCmdV4,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     async move {
       let reading = device
@@ -85,8 +85,8 @@ impl ProtocolHandler for XInput {
       };
       Ok(message::SensorReadingV4::new(
         msg.device_index(),
-        *msg.feature_index(),
-        *msg.sensor_type(),
+        msg.feature_index(),
+        msg.sensor_type(),
         vec![battery],
       ))
     }
