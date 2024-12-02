@@ -37,13 +37,13 @@ pub struct ClientDeviceMessageAttributesV2 {
   #[getset(get = "pub")]
   #[serde(rename = "BatteryLevelCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) battery_level_cmd: Option<SensorDeviceMessageAttributesV2>,
+  pub(in crate::server::message) battery_level_cmd: Option<NullDeviceMessageAttributesV1>,
 
   // RSSILevel is added post-serialization (only for bluetooth devices)
   #[getset(get = "pub")]
   #[serde(rename = "RSSILevelCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) rssi_level_cmd: Option<SensorDeviceMessageAttributesV2>,
+  pub(in crate::server::message) rssi_level_cmd: Option<NullDeviceMessageAttributesV1>,
 
   // StopDeviceCmd always exists
   #[getset(get = "pub")]
@@ -114,14 +114,11 @@ pub struct GenericDeviceMessageAttributesV2 {
   #[getset(get = "pub")]
   #[serde(rename = "StepCount")]
   pub(in crate::server::message) step_count: Vec<u32>,
-  #[getset(get = "pub")]
-  #[serde(skip)]
-  pub(in crate::server::message) features: Vec<DeviceFeature>,
 }
 
 impl From<GenericDeviceMessageAttributesV2> for GenericDeviceMessageAttributesV1 {
   fn from(attributes: GenericDeviceMessageAttributesV2) -> Self {
-    Self::new(attributes.feature_count(), attributes.features())
+    Self::new(attributes.feature_count())
   }
 }
 
@@ -136,21 +133,6 @@ impl RawDeviceMessageAttributesV2 {
   pub fn new(endpoints: &[Endpoint]) -> Self {
     Self {
       endpoints: endpoints.to_vec(),
-    }
-  }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Default, Serialize, Deserialize, Getters, Setters)]
-pub struct SensorDeviceMessageAttributesV2 {
-  #[getset(get = "pub")]
-  #[serde(skip)]
-  feature: DeviceFeature,
-}
-
-impl SensorDeviceMessageAttributesV2 {
-  pub fn new(feature: &DeviceFeature) -> Self {
-    Self {
-      feature: feature.clone(),
     }
   }
 }

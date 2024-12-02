@@ -16,7 +16,6 @@ use crate::core::message::{
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 #[derive(
   Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, CopyGetters,
@@ -33,9 +32,6 @@ pub struct SensorReadCmdV4 {
   #[getset(get = "pub")]
   #[cfg_attr(feature = "serialize-json", serde(rename = "SensorType"))]
   sensor_type: SensorType,
-  #[getset(get = "pub")]
-  #[cfg_attr(feature = "serialize-json", serde(skip))]
-  feature_id: Option<Uuid>,
 }
 
 impl SensorReadCmdV4 {
@@ -43,14 +39,12 @@ impl SensorReadCmdV4 {
     device_index: u32,
     feature_index: u32,
     sensor_type: SensorType,
-    feature_id: &Option<Uuid>,
   ) -> Self {
     Self {
       id: 1,
       device_index,
       feature_index,
       sensor_type,
-      feature_id: feature_id.clone(),
     }
   }
 }

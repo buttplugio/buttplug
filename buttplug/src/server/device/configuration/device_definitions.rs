@@ -7,11 +7,10 @@ use crate::{
     ButtplugActuatorFeatureMessageType,
     ButtplugRawFeatureMessageType,
     ButtplugSensorFeatureMessageType,
-    DeviceFeature,
     Endpoint,
     FeatureType,
   },
-  server::message::ButtplugDeviceMessageType,
+  server::message::{server_device_feature::ServerDeviceFeature, ButtplugDeviceMessageType},
 };
 
 #[derive(Debug, Clone, Getters)]
@@ -20,13 +19,13 @@ pub struct BaseDeviceDefinition {
   /// Given name of the device this instance represents.
   name: String,
   /// Message attributes for this device instance.
-  features: Vec<DeviceFeature>,
+  features: Vec<ServerDeviceFeature>,
   id: Uuid,
 }
 
 impl BaseDeviceDefinition {
   /// Create a new instance
-  pub fn new(name: &str, id: &Uuid, features: &[DeviceFeature]) -> Self {
+  pub fn new(name: &str, id: &Uuid, features: &[ServerDeviceFeature]) -> Self {
     Self {
       name: name.to_owned(),
       features: features.into(),
@@ -71,7 +70,7 @@ pub struct UserDeviceDefinition {
   id: Uuid,
   base_id: Option<Uuid>,
   /// Message attributes for this device instance.
-  features: Vec<DeviceFeature>,
+  features: Vec<ServerDeviceFeature>,
   /// Per-user configurations specific to this device instance.
   #[serde(rename = "user-config")]
   user_config: UserDeviceCustomization,
@@ -83,7 +82,7 @@ impl UserDeviceDefinition {
     name: &str,
     id: &Uuid,
     base_id: &Option<Uuid>,
-    features: &[DeviceFeature],
+    features: &[ServerDeviceFeature],
     user_config: &UserDeviceCustomization,
   ) -> Self {
     Self {
@@ -111,7 +110,7 @@ impl UserDeviceDefinition {
   pub fn add_raw_messages(&mut self, endpoints: &[Endpoint]) {
     self
       .features
-      .push(DeviceFeature::new_raw_feature(endpoints));
+      .push(ServerDeviceFeature::new_raw_feature(endpoints));
   }
 
   // Return true if any feature on this device handles this message. We'll deal with the actual

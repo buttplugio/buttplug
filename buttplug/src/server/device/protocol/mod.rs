@@ -138,13 +138,9 @@ use crate::{
     errors::ButtplugDeviceError,
     message::{
       ActuatorType,
-      ButtplugDeviceMessage,
       Endpoint,
-      SensorReadCmdV4,
       SensorReadingV4,
-      SensorSubscribeCmdV4,
       SensorType,
-      SensorUnsubscribeCmdV4,
     },
   },
   server::{
@@ -153,13 +149,7 @@ use crate::{
       hardware::{Hardware, HardwareCommand, HardwareReadCmd},
     },
     message::{
-      internal_linear_cmd::InternalLinearCmdV4,
-      spec_enums::ButtplugDeviceCommandMessageUnion,
-      ButtplugServerDeviceMessage,
-      FleshlightLaunchFW12CmdV0,
-      KiirooCmdV0,
-      RSSILevelCmdV2,
-      VorzeA10CycloneCmdV0,
+      internal_linear_cmd::InternalLinearCmdV4, internal_sensor_read_cmd::InternalSensorReadCmdV4, internal_sensor_subscribe_cmd::InternalSensorSubscribeCmdV4, internal_sensor_unsubscribe_cmd::InternalSensorUnsubscribeCmdV4, spec_enums::ButtplugDeviceCommandMessageUnion, ButtplugServerDeviceMessage, FleshlightLaunchFW12CmdV0, KiirooCmdV0, RSSILevelCmdV2, VorzeA10CycloneCmdV0
     },
   },
 };
@@ -883,7 +873,7 @@ pub trait ProtocolHandler: Sync + Send {
   fn handle_sensor_subscribe_cmd(
     &self,
     _device: Arc<Hardware>,
-    _message: &SensorSubscribeCmdV4,
+    _message: &InternalSensorSubscribeCmdV4,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Command not implemented for this protocol: BatteryCmd".to_string(),
@@ -894,7 +884,7 @@ pub trait ProtocolHandler: Sync + Send {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     _device: Arc<Hardware>,
-    _message: &SensorUnsubscribeCmdV4,
+    _message: &InternalSensorUnsubscribeCmdV4,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Command not implemented for this protocol: BatteryCmd".to_string(),
@@ -905,7 +895,7 @@ pub trait ProtocolHandler: Sync + Send {
   fn handle_sensor_read_cmd(
     &self,
     device: Arc<Hardware>,
-    message: &SensorReadCmdV4,
+    message: &InternalSensorReadCmdV4,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     match message.sensor_type() {
       SensorType::Battery => self.handle_battery_level_cmd(device, message.clone()),
@@ -921,7 +911,7 @@ pub trait ProtocolHandler: Sync + Send {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: SensorReadCmdV4,
+    message: InternalSensorReadCmdV4,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     // If we have a standardized BLE Battery endpoint, handle that above the
     // protocol, as it'll always be the same.
@@ -934,8 +924,8 @@ pub trait ProtocolHandler: Sync + Send {
         let battery_level = hw_msg.data()[0] as i32;
         let battery_reading = SensorReadingV4::new(
           message.device_index(),
-          *message.feature_index(),
-          *message.sensor_type(),
+          message.feature_index(),
+          message.sensor_type(),
           vec![battery_level],
         );
         debug!("Got battery reading: {}", battery_level);

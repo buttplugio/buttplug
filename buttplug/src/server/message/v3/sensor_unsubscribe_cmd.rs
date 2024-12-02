@@ -14,10 +14,9 @@ use crate::{
       ButtplugMessageFinalizer,
       ButtplugMessageValidator,
       SensorType,
-      SensorUnsubscribeCmdV4,
     },
   },
-  server::message::{LegacyDeviceAttributes, TryFromDeviceAttributes},
+  server::message::{internal_sensor_unsubscribe_cmd::InternalSensorUnsubscribeCmdV4, LegacyDeviceAttributes, TryFromDeviceAttributes},
 };
 use getset::Getters;
 #[cfg(feature = "serialize-json")]
@@ -55,7 +54,7 @@ impl ButtplugMessageValidator for SensorUnsubscribeCmdV3 {
   }
 }
 
-impl TryFromDeviceAttributes<SensorUnsubscribeCmdV3> for SensorUnsubscribeCmdV4 {
+impl TryFromDeviceAttributes<SensorUnsubscribeCmdV3> for InternalSensorUnsubscribeCmdV4 {
   fn try_from_device_attributes(
     msg: SensorUnsubscribeCmdV3,
     features: &LegacyDeviceAttributes,
@@ -66,11 +65,11 @@ impl TryFromDeviceAttributes<SensorUnsubscribeCmdV3> for SensorUnsubscribeCmdV4 
       .id();
 
     Ok(
-      SensorUnsubscribeCmdV4::new(
+      InternalSensorUnsubscribeCmdV4::new(
         msg.device_index(),
         0,
         *msg.sensor_type(),
-        &Some(sensor_feature_id.clone()),
+        *sensor_feature_id,
       )
       .into(),
     )
