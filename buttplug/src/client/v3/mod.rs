@@ -8,8 +8,8 @@
 //! Communications API for accessing Buttplug Servers
 pub mod client_event_loop;
 pub mod client_message_sorter;
-pub mod device;
 pub mod connector;
+pub mod device;
 pub mod serializer;
 
 use crate::{

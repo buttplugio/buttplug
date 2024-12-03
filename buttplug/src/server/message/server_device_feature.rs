@@ -5,7 +5,17 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::{errors::ButtplugDeviceError, message::{DeviceFeature, DeviceFeatureActuator, DeviceFeatureRaw, DeviceFeatureSensor, Endpoint, FeatureType}};
+use crate::core::{
+  errors::ButtplugDeviceError,
+  message::{
+    DeviceFeature,
+    DeviceFeatureActuator,
+    DeviceFeatureRaw,
+    DeviceFeatureSensor,
+    Endpoint,
+    FeatureType,
+  },
+};
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -94,7 +104,7 @@ impl From<ServerDeviceFeature> for DeviceFeature {
       &value.description(),
       *value.feature_type(),
       value.actuator(),
-      value.sensor()
+      value.sensor(),
     )
   }
 }

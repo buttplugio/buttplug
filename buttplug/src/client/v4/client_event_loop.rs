@@ -18,7 +18,12 @@ use crate::core::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
-    ButtplugClientMessageV4, ButtplugDeviceMessage, ButtplugMessageValidator, ButtplugServerMessageV4, DeviceListV4, DeviceMessageInfoV4
+    ButtplugClientMessageV4,
+    ButtplugDeviceMessage,
+    ButtplugMessageValidator,
+    ButtplugServerMessageV4,
+    DeviceListV4,
+    DeviceMessageInfoV4,
   },
 };
 use dashmap::DashMap;

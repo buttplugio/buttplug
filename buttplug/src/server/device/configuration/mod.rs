@@ -581,11 +581,10 @@ impl DeviceConfigurationManager {
 #[cfg(test)]
 mod test {
   use super::*;
-  use crate::{core::message::{
-    ButtplugActuatorFeatureMessageType,
-    DeviceFeatureActuator,
-    FeatureType,
-  }, server::message::server_device_feature::ServerDeviceFeature};
+  use crate::{
+    core::message::{ButtplugActuatorFeatureMessageType, DeviceFeatureActuator, FeatureType},
+    server::message::server_device_feature::ServerDeviceFeature,
+  };
   use std::{
     collections::{HashMap, HashSet},
     ops::RangeInclusive,

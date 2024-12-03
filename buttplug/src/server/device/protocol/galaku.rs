@@ -11,7 +11,7 @@ use std::sync::Arc;
 use futures_util::future::BoxFuture;
 use futures_util::{future, FutureExt};
 
-use crate::core::message::{ActuatorType, SensorType, SensorReadingV4};
+use crate::core::message::{ActuatorType, SensorReadingV4, SensorType};
 use crate::server::message::checked_sensor_read_cmd::CheckedSensorReadCmdV4;
 use crate::server::message::checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4;
 use crate::server::message::checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4;

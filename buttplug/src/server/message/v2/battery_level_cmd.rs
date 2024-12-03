@@ -16,7 +16,11 @@ use crate::{
       SensorType,
     },
   },
-  server::message::{checked_sensor_read_cmd::CheckedSensorReadCmdV4, LegacyDeviceAttributes, TryFromDeviceAttributes},
+  server::message::{
+    checked_sensor_read_cmd::CheckedSensorReadCmdV4,
+    LegacyDeviceAttributes,
+    TryFromDeviceAttributes,
+  },
 };
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
