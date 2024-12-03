@@ -2127,6 +2127,9 @@ protocols:
                 - 27
               messages:
                 - ScalarCmd
+      - identifier:
+          - Jive 2
+        name: WeVibe Jive 2
     communication:
       - btle:
           names:
@@ -2139,6 +2142,7 @@ protocols:
             - Nova2
             - Nova_2
             - Nova 2
+            - Jive 2
           services:
             f000bb03-0451-4000-b000-000000000000:
               tx: f000c000-0451-4000-b000-000000000000
