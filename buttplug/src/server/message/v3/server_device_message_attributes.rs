@@ -14,7 +14,9 @@ use crate::{
     SensorType,
   },
   server::message::{
-    server_device_feature::ServerDeviceFeature, v1::NullDeviceMessageAttributesV1, v2::RawDeviceMessageAttributesV2,
+    server_device_feature::ServerDeviceFeature,
+    v1::NullDeviceMessageAttributesV1,
+    v2::RawDeviceMessageAttributesV2,
   },
 };
 use getset::{Getters, MutGetters, Setters};
@@ -29,8 +31,10 @@ pub struct ServerDeviceMessageAttributesV3 {
   pub(in crate::server::message) linear_cmd: Option<Vec<ServerGenericDeviceMessageAttributesV3>>,
 
   // Sensor Messages
-  pub(in crate::server::message) sensor_read_cmd: Option<Vec<ServerSensorDeviceMessageAttributesV3>>,
-  pub(in crate::server::message) sensor_subscribe_cmd: Option<Vec<ServerSensorDeviceMessageAttributesV3>>,
+  pub(in crate::server::message) sensor_read_cmd:
+    Option<Vec<ServerSensorDeviceMessageAttributesV3>>,
+  pub(in crate::server::message) sensor_subscribe_cmd:
+    Option<Vec<ServerSensorDeviceMessageAttributesV3>>,
 
   // StopDeviceCmd always exists
   pub(in crate::server::message) stop_device_cmd: NullDeviceMessageAttributesV1,
@@ -45,9 +49,8 @@ pub struct ServerDeviceMessageAttributesV3 {
   pub(in crate::server::message) vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributesV1>,
 }
 
-
 #[derive(Clone, Debug, PartialEq, Eq, Getters, Setters)]
-#[getset(get="pub")]
+#[getset(get = "pub")]
 pub struct ServerGenericDeviceMessageAttributesV3 {
   pub(in crate::server::message) feature_descriptor: String,
   pub(in crate::server::message) actuator_type: ActuatorType,
@@ -57,7 +60,7 @@ pub struct ServerGenericDeviceMessageAttributesV3 {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Getters, Setters)]
-#[getset(get="pub")]
+#[getset(get = "pub")]
 pub struct ServerSensorDeviceMessageAttributesV3 {
   pub(in crate::server::message) feature_descriptor: String,
   pub(in crate::server::message) sensor_type: SensorType,

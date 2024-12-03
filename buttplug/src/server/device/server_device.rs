@@ -65,7 +65,14 @@ use crate::{
       protocol::ProtocolHandler,
     },
     message::{
-      checked_level_cmd::CheckedLevelCmdV4, checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, legacy_device_attributes::LegacyDeviceAttributes, spec_enums::ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessageType, ButtplugServerDeviceMessage
+      checked_level_cmd::CheckedLevelCmdV4,
+      checked_sensor_read_cmd::CheckedSensorReadCmdV4,
+      checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4,
+      checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4,
+      legacy_device_attributes::LegacyDeviceAttributes,
+      spec_enums::ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessageType,
+      ButtplugServerDeviceMessage,
     },
     ButtplugServerResultFuture,
   },

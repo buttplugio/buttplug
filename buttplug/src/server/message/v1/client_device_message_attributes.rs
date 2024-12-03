@@ -56,9 +56,7 @@ pub struct GenericDeviceMessageAttributesV1 {
 
 impl GenericDeviceMessageAttributesV1 {
   pub fn new(feature_count: u32) -> Self {
-    Self {
-      feature_count,
-    }
+    Self { feature_count }
   }
 }
 

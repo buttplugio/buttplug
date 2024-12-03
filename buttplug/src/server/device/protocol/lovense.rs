@@ -22,7 +22,10 @@ use crate::{
       },
       protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     },
-    message::{checked_linear_cmd::CheckedLinearCmdV4, checked_sensor_read_cmd::CheckedSensorReadCmdV4},
+    message::{
+      checked_linear_cmd::CheckedLinearCmdV4,
+      checked_sensor_read_cmd::CheckedSensorReadCmdV4,
+    },
   },
   util::{async_manager, sleep},
 };

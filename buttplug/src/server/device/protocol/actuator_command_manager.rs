@@ -8,14 +8,12 @@
 use crate::{
   core::{
     errors::ButtplugError,
-    message::{
-      ActuatorType,
-      ButtplugActuatorFeatureMessageType,
-      DeviceFeatureActuator,
-    },
+    message::{ActuatorType, ButtplugActuatorFeatureMessageType, DeviceFeatureActuator},
   },
   server::message::{
-    checked_level_cmd::{CheckedLevelCmdV4, CheckedLevelSubcommandV4}, server_device_feature::ServerDeviceFeature, spec_enums::ButtplugDeviceCommandMessageUnion
+    checked_level_cmd::{CheckedLevelCmdV4, CheckedLevelSubcommandV4},
+    server_device_feature::ServerDeviceFeature,
+    spec_enums::ButtplugDeviceCommandMessageUnion,
   },
 };
 use getset::Getters;

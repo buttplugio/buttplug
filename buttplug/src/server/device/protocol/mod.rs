@@ -150,12 +150,7 @@ pub mod zalo;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{
-      ActuatorType,
-      Endpoint,
-      SensorReadingV4,
-      SensorType,
-    },
+    message::{ActuatorType, Endpoint, SensorReadingV4, SensorType},
   },
   server::{
     device::{
@@ -163,7 +158,16 @@ use crate::{
       hardware::{Hardware, HardwareCommand, HardwareReadCmd},
     },
     message::{
-      checked_linear_cmd::CheckedLinearCmdV4, checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, spec_enums::ButtplugDeviceCommandMessageUnion, ButtplugServerDeviceMessage, FleshlightLaunchFW12CmdV0, KiirooCmdV0, RSSILevelCmdV2, VorzeA10CycloneCmdV0
+      checked_linear_cmd::CheckedLinearCmdV4,
+      checked_sensor_read_cmd::CheckedSensorReadCmdV4,
+      checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4,
+      checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4,
+      spec_enums::ButtplugDeviceCommandMessageUnion,
+      ButtplugServerDeviceMessage,
+      FleshlightLaunchFW12CmdV0,
+      KiirooCmdV0,
+      RSSILevelCmdV2,
+      VorzeA10CycloneCmdV0,
     },
   },
 };

@@ -228,11 +228,7 @@ impl From<Vec<ClientGenericDeviceMessageAttributesV3>> for GenericDeviceMessageA
 }
 
 impl ClientGenericDeviceMessageAttributesV3 {
-  pub fn new(
-    feature_descriptor: &str,
-    step_count: u32,
-    actuator_type: ActuatorType,
-  ) -> Self {
+  pub fn new(feature_descriptor: &str, step_count: u32, actuator_type: ActuatorType) -> Self {
     Self {
       feature_descriptor: feature_descriptor.to_owned(),
       actuator_type,

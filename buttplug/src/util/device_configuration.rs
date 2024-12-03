@@ -8,15 +8,18 @@
 use super::json::JSONValidator;
 use crate::{
   core::errors::{ButtplugDeviceError, ButtplugError},
-  server::{device::configuration::{
-    BaseDeviceDefinition,
-    BaseDeviceIdentifier,
-    DeviceConfigurationManager,
-    DeviceConfigurationManagerBuilder,
-    ProtocolCommunicationSpecifier,
-    UserDeviceDefinition,
-    UserDeviceIdentifier,
-  }, message::server_device_feature::ServerDeviceFeature},
+  server::{
+    device::configuration::{
+      BaseDeviceDefinition,
+      BaseDeviceIdentifier,
+      DeviceConfigurationManager,
+      DeviceConfigurationManagerBuilder,
+      ProtocolCommunicationSpecifier,
+      UserDeviceDefinition,
+      UserDeviceIdentifier,
+    },
+    message::server_device_feature::ServerDeviceFeature,
+  },
 };
 use dashmap::DashMap;
 use getset::{CopyGetters, Getters, MutGetters, Setters};

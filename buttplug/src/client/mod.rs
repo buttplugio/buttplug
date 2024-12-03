@@ -3,6 +3,7 @@ pub mod v4;
 
 #[cfg(not(feature = "default_v4_spec"))]
 pub use v3::{
+  connector,
   device::{
     ButtplugClientDevice,
     ButtplugClientDeviceEvent,
@@ -11,11 +12,10 @@ pub use v3::{
     ScalarCommand,
     ScalarValueCommand,
   },
+  serializer,
   ButtplugClient,
   ButtplugClientError,
   ButtplugClientEvent,
-  serializer,
-  connector,
 };
 
 #[cfg(feature = "default_v4_spec")]

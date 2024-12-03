@@ -33,11 +33,7 @@ pub struct SensorSubscribeCmdV4 {
 }
 
 impl SensorSubscribeCmdV4 {
-  pub fn new(
-    device_index: u32,
-    feature_index: u32,
-    sensor_type: SensorType,
-  ) -> Self {
+  pub fn new(device_index: u32, feature_index: u32, sensor_type: SensorType) -> Self {
     Self {
       id: 1,
       device_index,

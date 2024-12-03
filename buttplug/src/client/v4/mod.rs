@@ -9,8 +9,8 @@
 pub mod client_device_feature;
 pub mod client_event_loop;
 pub mod client_message_sorter;
-pub mod device;
 pub mod connector;
+pub mod device;
 pub mod serializer;
 
 use crate::{
@@ -18,7 +18,15 @@ use crate::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
     errors::{ButtplugError, ButtplugHandshakeError},
     message::{
-      ButtplugClientMessageV4, ButtplugServerMessageV4, PingV0, RequestDeviceListV0, RequestServerInfoV1, StartScanningV0, StopAllDevicesV0, StopScanningV0, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
+      ButtplugClientMessageV4,
+      ButtplugServerMessageV4,
+      PingV0,
+      RequestDeviceListV0,
+      RequestServerInfoV1,
+      StartScanningV0,
+      StopAllDevicesV0,
+      StopScanningV0,
+      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
   util::{

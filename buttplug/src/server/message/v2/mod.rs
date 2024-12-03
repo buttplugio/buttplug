@@ -17,13 +17,13 @@ pub use client_device_message_attributes::{
   GenericDeviceMessageAttributesV2,
   RawDeviceMessageAttributesV2,
 };
-pub use server_device_message_attributes::{
-  ServerDeviceMessageAttributesV2,
-  ServerGenericDeviceMessageAttributesV2,
-};
 pub use device_added::DeviceAddedV2;
 pub use device_list::DeviceListV2;
 pub use device_message_info::DeviceMessageInfoV2;
 pub use rssi_level_cmd::RSSILevelCmdV2;
 pub use rssi_level_reading::RSSILevelReadingV2;
+pub use server_device_message_attributes::{
+  ServerDeviceMessageAttributesV2,
+  ServerGenericDeviceMessageAttributesV2,
+};
 pub use spec_enums::{ButtplugClientMessageV2, ButtplugServerMessageV2};
