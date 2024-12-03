@@ -32,7 +32,7 @@ use crate::{
       ServerDevice,
     },
     message::{
-      legacy_device_attributes::LegacyDeviceAttributes,
+      server_device_attributes::ServerDeviceAttributes,
       spec_enums::{
         ButtplugCheckedClientMessageV4,
         ButtplugDeviceCommandMessageUnionV4,
@@ -306,7 +306,7 @@ impl ServerDeviceManager {
     }
   }
 
-  pub(crate) fn feature_map(&self) -> HashMap<u32, LegacyDeviceAttributes> {
+  pub(crate) fn feature_map(&self) -> HashMap<u32, ServerDeviceAttributes> {
     self
       .devices()
       .iter()
