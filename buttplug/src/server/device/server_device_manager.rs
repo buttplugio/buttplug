@@ -35,7 +35,7 @@ use crate::{
       legacy_device_attributes::LegacyDeviceAttributes,
       spec_enums::{
         ButtplugCheckedClientMessageV4,
-        ButtplugDeviceCommandMessageUnion,
+        ButtplugDeviceCommandMessageUnionV4,
         ButtplugDeviceManagerMessageUnion,
       },
     },
@@ -243,7 +243,7 @@ impl ServerDeviceManager {
 
   fn parse_device_message(
     &self,
-    device_msg: ButtplugDeviceCommandMessageUnion,
+    device_msg: ButtplugDeviceCommandMessageUnionV4,
   ) -> ButtplugServerResultFuture {
     match self.devices.get(&device_msg.device_index()) {
       Some(device) => {
@@ -297,7 +297,7 @@ impl ServerDeviceManager {
     }
     // If this is a device command message, just route it directly to the
     // device.
-    if let Ok(device_msg) = ButtplugDeviceCommandMessageUnion::try_from(msg.clone()) {
+    if let Ok(device_msg) = ButtplugDeviceCommandMessageUnionV4::try_from(msg.clone()) {
       self.parse_device_message(device_msg)
     } else if let Ok(manager_msg) = ButtplugDeviceManagerMessageUnion::try_from(msg.clone()) {
       self.parse_device_manager_message(manager_msg)
