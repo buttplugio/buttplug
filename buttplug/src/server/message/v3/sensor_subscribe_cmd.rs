@@ -68,14 +68,11 @@ impl TryFromDeviceAttributes<SensorSubscribeCmdV3> for CheckedSensorSubscribeCmd
       .feature()
       .id();
 
-    Ok(
-      CheckedSensorSubscribeCmdV4::new(
-        msg.device_index(),
-        0,
-        *msg.sensor_type(),
-        *sensor_feature_id,
-      )
-      .into(),
-    )
+    Ok(CheckedSensorSubscribeCmdV4::new(
+      msg.device_index(),
+      0,
+      *msg.sensor_type(),
+      *sensor_feature_id,
+    ))
   }
 }

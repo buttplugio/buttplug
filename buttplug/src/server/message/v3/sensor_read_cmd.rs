@@ -71,14 +71,11 @@ impl TryFromDeviceAttributes<SensorReadCmdV3> for CheckedSensorReadCmdV4 {
       .feature()
       .id();
 
-    Ok(
-      CheckedSensorReadCmdV4::new(
-        msg.device_index(),
-        0,
-        *msg.sensor_type(),
-        *sensor_feature_id,
-      )
-      .into(),
-    )
+    Ok(CheckedSensorReadCmdV4::new(
+      msg.device_index(),
+      0,
+      *msg.sensor_type(),
+      *sensor_feature_id,
+    ))
   }
 }

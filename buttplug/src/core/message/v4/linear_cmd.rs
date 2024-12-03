@@ -38,7 +38,7 @@ impl VectorSubcommandV4 {
       feature_index,
       duration,
       position,
-      id: id.clone(),
+      id: *id,
     }
   }
 }

@@ -151,28 +151,20 @@ impl From<ServerDeviceMessageAttributesV3> for ServerDeviceMessageAttributesV2 {
         .map(|x| ServerGenericDeviceMessageAttributesV2::from(x.clone())),
       battery_level_cmd: {
         if let Some(sensor_info) = other.sensor_read_cmd() {
-          if let Some(attr) = sensor_info
+          sensor_info
             .iter()
             .find(|x| *x.sensor_type() == SensorType::Battery)
-          {
-            Some(ServerSensorDeviceMessageAttributesV2::new(attr.feature()))
-          } else {
-            None
-          }
+            .map(|attr| ServerSensorDeviceMessageAttributesV2::new(attr.feature()))
         } else {
           None
         }
       },
       rssi_level_cmd: {
         if let Some(sensor_info) = other.sensor_read_cmd() {
-          if let Some(attr) = sensor_info
+          sensor_info
             .iter()
             .find(|x| *x.sensor_type() == SensorType::RSSI)
-          {
-            Some(ServerSensorDeviceMessageAttributesV2::new(attr.feature()))
-          } else {
-            None
-          }
+            .map(|attr| ServerSensorDeviceMessageAttributesV2::new(attr.feature()))
         } else {
           None
         }

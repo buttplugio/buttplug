@@ -153,7 +153,7 @@ impl ProtocolHandler for VorzeSA {
           self.handle_scalar_vibrate_cmd(0, speed as u32)
         } else {
           let clockwise = if speed >= 0 { 1u8 } else { 0 };
-          let data: u8 = (clockwise) << 7 | (speed.abs() as u8);
+          let data: u8 = (clockwise) << 7 | (speed.unsigned_abs() as u8);
           Ok(vec![HardwareWriteCmd::new(
             Endpoint::Tx,
             vec![self.device_type as u8, VorzeActions::Rotate as u8, data],
@@ -170,12 +170,12 @@ impl ProtocolHandler for VorzeSA {
       let mut changed = false;
       if let Some((_, speed)) = cmds[0] {
         let clockwise = if speed >= 0 { 1u8 } else { 0 };
-        data_left = clockwise << 7 | (speed.abs() as u8);
+        data_left = clockwise << 7 | (speed.unsigned_abs() as u8);
         changed = true;
       }
       if let Some((_, speed)) = cmds[1] {
         let clockwise = if speed >= 0 { 1u8 } else { 0 };
-        data_right = clockwise << 7 | (speed.abs() as u8);
+        data_right = clockwise << 7 | (speed.unsigned_abs() as u8);
         changed = true;
       }
       if changed {

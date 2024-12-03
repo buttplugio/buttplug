@@ -81,32 +81,32 @@ impl TryFromDeviceAttributes<&LevelSubcommandV4> for CheckedLevelSubcommandV4 {
       {
         // Currently, rotate with direction is the only actuator type that can take negative values.
         if *feature.feature_type() == FeatureType::RotateWithDirection
-          && !actuator.step_limit().contains(&(level.abs() as u32))
+          && !actuator.step_limit().contains(&level.unsigned_abs())
         {
           Err(ButtplugError::from(
             ButtplugDeviceError::DeviceStepRangeError(
               *actuator.step_limit().end(),
-              level.abs() as u32,
+              level.unsigned_abs(),
             ),
           ))
         } else if level < 0 {
           Err(ButtplugError::from(
             ButtplugDeviceError::DeviceStepRangeError(
               *actuator.step_limit().end(),
-              level.abs() as u32,
+              level.unsigned_abs(),
             ),
           ))
-        } else if !actuator.step_limit().contains(&(level.abs() as u32)) {
+        } else if !actuator.step_limit().contains(&level.unsigned_abs()) {
           Err(ButtplugError::from(
             ButtplugDeviceError::DeviceStepRangeError(
               *actuator.step_limit().end(),
-              level.abs() as u32,
+              level.unsigned_abs(),
             ),
           ))
         } else {
           Ok(Self {
             feature_id,
-            level: level, //*actuator.step_limit().start() as i32 + level,
+            level, //*actuator.step_limit().start() as i32 + level,
             feature_index: subcommand.feature_index(),
           })
         }
