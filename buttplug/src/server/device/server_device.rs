@@ -69,7 +69,7 @@ use crate::{
       checked_sensor_read_cmd::CheckedSensorReadCmdV4,
       checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4,
       checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4,
-      legacy_device_attributes::LegacyDeviceAttributes,
+      server_device_attributes::ServerDeviceAttributes,
       spec_enums::ButtplugDeviceCommandMessageUnionV4,
       ButtplugDeviceMessageType,
       ButtplugServerDeviceMessage,
@@ -116,7 +116,7 @@ pub struct ServerDevice {
   raw_subscribed_endpoints: Arc<DashSet<Endpoint>>,
   keepalive_packet: Arc<RwLock<Option<HardwareWriteCmd>>>,
   #[getset(get = "pub")]
-  legacy_attributes: LegacyDeviceAttributes,
+  legacy_attributes: ServerDeviceAttributes,
 }
 impl Debug for ServerDevice {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -296,7 +296,7 @@ impl ServerDevice {
       definition: definition.clone(),
       raw_subscribed_endpoints: Arc::new(DashSet::new()),
       // Generating legacy attributes is cheap, just do it right when we create the device.
-      legacy_attributes: LegacyDeviceAttributes::new(definition.features()),
+      legacy_attributes: ServerDeviceAttributes::new(definition.features()),
     }
   }
 

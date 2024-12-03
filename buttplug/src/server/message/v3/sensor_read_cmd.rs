@@ -18,7 +18,7 @@ use crate::{
   },
   server::message::{
     checked_sensor_read_cmd::CheckedSensorReadCmdV4,
-    LegacyDeviceAttributes,
+    ServerDeviceAttributes,
     TryFromDeviceAttributes,
   },
 };
@@ -64,7 +64,7 @@ impl ButtplugMessageValidator for SensorReadCmdV3 {
 impl TryFromDeviceAttributes<SensorReadCmdV3> for CheckedSensorReadCmdV4 {
   fn try_from_device_attributes(
     msg: SensorReadCmdV3,
-    features: &LegacyDeviceAttributes,
+    features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
     let sensor_feature_id = features.attrs_v3().sensor_read_cmd().as_ref().unwrap()
       [*msg.sensor_index() as usize]

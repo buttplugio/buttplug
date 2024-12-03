@@ -5,7 +5,7 @@ use getset::Getters;
 use std::collections::HashMap;
 
 #[derive(Debug, Getters, Clone)]
-pub(crate) struct LegacyDeviceAttributes {
+pub(crate) struct ServerDeviceAttributes {
   /*  #[getset(get = "pub")]
   attrs_v1: ClientDeviceMessageAttributesV1,
   */
@@ -17,7 +17,7 @@ pub(crate) struct LegacyDeviceAttributes {
   features: Vec<ServerDeviceFeature>,
 }
 
-impl LegacyDeviceAttributes {
+impl ServerDeviceAttributes {
   pub fn new(features: &Vec<ServerDeviceFeature>) -> Self {
     Self {
       attrs_v3: ServerDeviceMessageAttributesV3::from(features.clone()),
@@ -36,6 +36,6 @@ where
 {
   fn try_from_client_message(
     msg: T,
-    features: &HashMap<u32, LegacyDeviceAttributes>,
+    features: &HashMap<u32, ServerDeviceAttributes>,
   ) -> Result<Self, ButtplugError>;
 }
