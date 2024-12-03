@@ -22,7 +22,7 @@ use buttplug::{
     },
   },
   server::message::{
-    spec_enums::ButtplugInternalClientMessageV4,
+    spec_enums::ButtplugCheckedClientMessageV4,
     ButtplugClientMessageVariant,
     ButtplugServerMessageV3,
     ButtplugServerMessageVariant,
@@ -141,13 +141,13 @@ async fn test_reject_on_no_raw_message() {
   let recv = server.server_version_event_stream();
   pin_mut!(recv);
   assert!(server
-    .parse_checked_message(ButtplugInternalClientMessageV4::from(
+    .parse_checked_message(ButtplugCheckedClientMessageV4::from(
       RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
     ))
     .await
     .is_ok());
   assert!(server
-    .parse_checked_message(ButtplugInternalClientMessageV4::from(
+    .parse_checked_message(ButtplugCheckedClientMessageV4::from(
       StartScanningV0::default()
     ))
     .await
@@ -159,7 +159,7 @@ async fn test_reject_on_no_raw_message() {
       assert_eq!(da.device_name(), "Aneros Vivi");
       let mut should_be_err;
       should_be_err = server
-        .parse_checked_message(ButtplugInternalClientMessageV4::from(RawWriteCmdV2::new(
+        .parse_checked_message(ButtplugCheckedClientMessageV4::from(RawWriteCmdV2::new(
           da.device_index(),
           Endpoint::Tx,
           &[0x0],
@@ -173,7 +173,7 @@ async fn test_reject_on_no_raw_message() {
       ));
 
       should_be_err = server
-        .parse_checked_message(ButtplugInternalClientMessageV4::from(RawReadCmdV2::new(
+        .parse_checked_message(ButtplugCheckedClientMessageV4::from(RawReadCmdV2::new(
           da.device_index(),
           Endpoint::Tx,
           0,
@@ -187,7 +187,7 @@ async fn test_reject_on_no_raw_message() {
       ));
 
       should_be_err = server
-        .parse_checked_message(ButtplugInternalClientMessageV4::from(
+        .parse_checked_message(ButtplugCheckedClientMessageV4::from(
           RawSubscribeCmdV2::new(da.device_index(), Endpoint::Tx),
         ))
         .await;
@@ -198,7 +198,7 @@ async fn test_reject_on_no_raw_message() {
       ));
 
       should_be_err = server
-        .parse_checked_message(ButtplugInternalClientMessageV4::from(
+        .parse_checked_message(ButtplugCheckedClientMessageV4::from(
           RawUnsubscribeCmdV2::new(da.device_index(), Endpoint::Tx),
         ))
         .await;
