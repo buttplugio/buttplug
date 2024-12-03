@@ -132,7 +132,7 @@ impl ButtplugClientDevice {
       device_features: device_features
         .iter()
         .enumerate()
-        .map(|(i, x)| ClientDeviceFeature::new(index, i as u32, x, &message_sender))
+        .map(|(i, x)| ClientDeviceFeature::new(index, i as u32, x, message_sender))
         .collect(),
       event_loop_sender: message_sender.clone(),
       internal_event_sender: event_sender,
@@ -178,15 +178,11 @@ impl ButtplugClientDevice {
     if features.is_empty() {
       // TODO err
     }
-    let subcommands = features
-      .iter()
-      .map(|x| x.level_subcommand(level as i32))
-      .collect();
+    let subcommands = features.iter().map(|x| x.level_subcommand(level)).collect();
     let command = LevelCmdV4::new(self.index, subcommands);
     self
       .event_loop_sender
       .send_message_expect_ok(command.into())
-      .into()
   }
 
   pub fn vibrate_features(&self) -> Vec<ClientDeviceFeature> {
@@ -202,8 +198,7 @@ impl ButtplugClientDevice {
     self
       .device_features
       .iter()
-      .find(|x| *x.feature().feature_type() == FeatureType::Battery)
-      .is_some()
+      .any(|x| *x.feature().feature_type() == FeatureType::Battery)
   }
 
   pub fn battery_level(&self) -> ButtplugClientResultFuture<u32> {
@@ -227,8 +222,7 @@ impl ButtplugClientDevice {
     self
       .device_features
       .iter()
-      .find(|x| *x.feature().feature_type() == FeatureType::RSSI)
-      .is_some()
+      .any(|x| *x.feature().feature_type() == FeatureType::RSSI)
   }
 
   pub fn rssi_level(&self) -> ButtplugClientResultFuture<u32> {
@@ -257,8 +251,7 @@ impl ButtplugClientDevice {
     if self
       .device_features
       .iter()
-      .find(|x| x.feature().raw().is_some())
-      .is_some()
+      .any(|x| x.feature().raw().is_some())
     {
       let msg = ButtplugClientMessageV4::RawWriteCmd(RawWriteCmdV2::new(
         self.index,
@@ -286,8 +279,7 @@ impl ButtplugClientDevice {
     if self
       .device_features
       .iter()
-      .find(|x| x.feature().raw().is_some())
-      .is_some()
+      .any(|x| x.feature().raw().is_some())
     {
       let msg = ButtplugClientMessageV4::RawReadCmd(RawReadCmdV2::new(
         self.index,
@@ -324,8 +316,7 @@ impl ButtplugClientDevice {
     if self
       .device_features
       .iter()
-      .find(|x| x.feature().raw().is_some())
-      .is_some()
+      .any(|x| x.feature().raw().is_some())
     {
       let msg =
         ButtplugClientMessageV4::RawSubscribeCmd(RawSubscribeCmdV2::new(self.index, endpoint));
@@ -344,8 +335,7 @@ impl ButtplugClientDevice {
     if self
       .device_features
       .iter()
-      .find(|x| x.feature().raw().is_some())
-      .is_some()
+      .any(|x| x.feature().raw().is_some())
     {
       let msg =
         ButtplugClientMessageV4::RawUnsubscribeCmd(RawUnsubscribeCmdV2::new(self.index, endpoint));

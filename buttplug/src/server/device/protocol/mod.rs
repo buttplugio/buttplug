@@ -840,7 +840,7 @@ pub trait ProtocolHandler: Sync + Send {
           }
           ActuatorType::Rotate => self.handle_scalar_rotate_cmd(index as u32, *scalar as u32)?,
           ActuatorType::RotateWithDirection => {
-            self.handle_rotate_cmd(&vec![Some((scalar.abs() as u32, *scalar >= 0))])?
+            self.handle_rotate_cmd(&[Some((scalar.unsigned_abs(), *scalar >= 0))])?
           }
           ActuatorType::Vibrate => self.handle_scalar_vibrate_cmd(index as u32, *scalar as u32)?,
           ActuatorType::Position => {

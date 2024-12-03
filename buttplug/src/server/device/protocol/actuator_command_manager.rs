@@ -145,16 +145,12 @@ impl ActuatorCommandManager {
       if let Some((_, actuator, cmd_value)) = commands.iter().find(|x| x.0 == *cmd.feature_id()) {
         // By this point, we should have already checked whether the feature takes the message type.
         if let Some(updated_value) = cmd.update(*cmd_value) {
-          result.push((cmd.feature_id().clone(), *actuator, updated_value));
+          result.push((*cmd.feature_id(), *actuator, updated_value));
         } else if match_all {
-          result.push((cmd.feature_id().clone(), *actuator, cmd.current().1));
+          result.push((*cmd.feature_id(), *actuator, cmd.current().1));
         }
       } else if match_all && cmd.messages().contains(&msg_type) {
-        result.push((
-          cmd.feature_id().clone(),
-          *cmd.actuator_type(),
-          cmd.current().1,
-        ));
+        result.push((*cmd.feature_id(), *cmd.actuator_type(), cmd.current().1));
       }
     }
     // Return the command vector for the protocol to turn into proprietary commands
@@ -185,7 +181,7 @@ impl ActuatorCommandManager {
       let id = x.feature_id();
       trace!("Updating command for {:?}", id);
       commands.push((
-        id.clone(),
+        id,
         *self
           .feature_status
           .iter()

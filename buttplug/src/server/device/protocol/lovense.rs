@@ -379,7 +379,7 @@ impl ProtocolHandler for Lovense {
       })
       .map(|x| {
         let (_, speed) = x.as_ref().expect("Already verified is some");
-        Some((speed.abs() as u32, *speed >= 0))
+        Some((speed.unsigned_abs(), *speed >= 0))
       })
       .collect();
 
