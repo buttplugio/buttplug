@@ -23,7 +23,7 @@ use crate::{
     v1::{RotateCmdV1, VibrateCmdV1},
     v3::ScalarCmdV3,
     ButtplugDeviceMessageType,
-    LegacyDeviceAttributes,
+    ServerDeviceAttributes,
     TryFromDeviceAttributes,
   },
 };
@@ -57,7 +57,7 @@ impl From<CheckedLevelSubcommandV4> for LevelSubcommandV4 {
 impl TryFromDeviceAttributes<&LevelSubcommandV4> for CheckedLevelSubcommandV4 {
   fn try_from_device_attributes(
     subcommand: &LevelSubcommandV4,
-    attrs: &LegacyDeviceAttributes,
+    attrs: &ServerDeviceAttributes,
   ) -> Result<Self, ButtplugError> {
     let features = attrs.features();
     // Since we have the feature info already, check limit and unpack into step range when creating
@@ -181,7 +181,7 @@ impl ButtplugMessageValidator for CheckedLevelCmdV4 {
 impl TryFromDeviceAttributes<LevelCmdV4> for CheckedLevelCmdV4 {
   fn try_from_device_attributes(
     msg: LevelCmdV4,
-    features: &LegacyDeviceAttributes,
+    features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
     let levels: Result<Vec<CheckedLevelSubcommandV4>, ButtplugError> = msg
       .levels()
@@ -199,7 +199,7 @@ impl TryFromDeviceAttributes<LevelCmdV4> for CheckedLevelCmdV4 {
 impl TryFromDeviceAttributes<VorzeA10CycloneCmdV0> for CheckedLevelCmdV4 {
   fn try_from_device_attributes(
     msg: VorzeA10CycloneCmdV0,
-    features: &LegacyDeviceAttributes,
+    features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
     let cmds: Vec<LevelSubcommandV4> = features
       .features()
@@ -227,7 +227,7 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedLevelCmdV4 {
   // For VibrateCmd, just take everything out of V2's VibrateCmd and make a command.
   fn try_from_device_attributes(
     msg: SingleMotorVibrateCmdV0,
-    features: &LegacyDeviceAttributes,
+    features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
     let cmds: Vec<CheckedLevelSubcommandV4> = features
       .features()
@@ -256,7 +256,7 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedLevelCmdV4 {
   // Due to specs v1/2 using feature counts instead of per-feature objects, we calculate our
   fn try_from_device_attributes(
     msg: VibrateCmdV1,
-    features: &LegacyDeviceAttributes,
+    features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
     let vibrate_attributes =
       features
@@ -307,7 +307,7 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedLevelCmdV4 {
   // ScalarCmd only came in with V3, so we can just use the V3 device attributes.
   fn try_from_device_attributes(
     msg: ScalarCmdV3,
-    attrs: &LegacyDeviceAttributes,
+    attrs: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
     let mut cmds: Vec<CheckedLevelSubcommandV4> = vec![];
     if msg.scalars().is_empty() {
@@ -362,7 +362,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedLevelCmdV4 {
   // it'll still have all the same features.
   fn try_from_device_attributes(
     msg: RotateCmdV1,
-    attrs: &LegacyDeviceAttributes,
+    attrs: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
     let mut cmds: Vec<CheckedLevelSubcommandV4> = vec![];
     for cmd in msg.rotations() {

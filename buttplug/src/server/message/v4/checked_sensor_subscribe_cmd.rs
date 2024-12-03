@@ -71,7 +71,7 @@ impl ButtplugMessageValidator for CheckedSensorSubscribeCmdV4 {
 impl TryFromDeviceAttributes<SensorSubscribeCmdV4> for CheckedSensorSubscribeCmdV4 {
   fn try_from_device_attributes(
     msg: SensorSubscribeCmdV4,
-    features: &crate::server::message::LegacyDeviceAttributes,
+    features: &crate::server::message::ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
     if let Some(feature) = features.features().get(*msg.feature_index() as usize) {
       if let Some(sensor) = feature.sensor() {

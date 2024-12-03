@@ -18,7 +18,7 @@ use crate::{
   },
   server::message::{
     checked_sensor_read_cmd::CheckedSensorReadCmdV4,
-    LegacyDeviceAttributes,
+    ServerDeviceAttributes,
     TryFromDeviceAttributes,
   },
 };
@@ -52,7 +52,7 @@ impl ButtplugMessageValidator for RSSILevelCmdV2 {
 impl TryFromDeviceAttributes<RSSILevelCmdV2> for CheckedSensorReadCmdV4 {
   fn try_from_device_attributes(
     msg: RSSILevelCmdV2,
-    features: &LegacyDeviceAttributes,
+    features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
     let rssi_feature = features
       .attrs_v2()

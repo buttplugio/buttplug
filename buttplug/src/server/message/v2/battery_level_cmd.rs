@@ -18,7 +18,7 @@ use crate::{
   },
   server::message::{
     checked_sensor_read_cmd::CheckedSensorReadCmdV4,
-    LegacyDeviceAttributes,
+    ServerDeviceAttributes,
     TryFromDeviceAttributes,
   },
 };
@@ -53,7 +53,7 @@ impl ButtplugMessageValidator for BatteryLevelCmdV2 {
 impl TryFromDeviceAttributes<BatteryLevelCmdV2> for CheckedSensorReadCmdV4 {
   fn try_from_device_attributes(
     msg: BatteryLevelCmdV2,
-    features: &LegacyDeviceAttributes,
+    features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
     let battery_feature = features
       .attrs_v2()
