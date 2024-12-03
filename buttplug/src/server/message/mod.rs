@@ -15,12 +15,11 @@ use crate::core::{
     SensorReadingV4,
   },
 };
-use legacy_device_attributes::LegacyDeviceAttributes;
+use server_device_attributes::ServerDeviceAttributes;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 
-pub mod internal_device_feature;
-pub mod legacy_device_attributes;
+pub mod server_device_attributes;
 pub mod serializer;
 pub mod server_device_feature;
 mod v0;
@@ -361,6 +360,6 @@ where
 {
   fn try_from_device_attributes(
     msg: T,
-    features: &LegacyDeviceAttributes,
+    features: &ServerDeviceAttributes,
   ) -> Result<Self, ButtplugError>;
 }

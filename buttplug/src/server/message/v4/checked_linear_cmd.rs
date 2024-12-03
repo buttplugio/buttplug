@@ -10,7 +10,7 @@ use crate::{
       VectorSubcommandV4,
     },
   },
-  server::message::{v1::LinearCmdV1, LegacyDeviceAttributes, TryFromDeviceAttributes},
+  server::message::{v1::LinearCmdV1, ServerDeviceAttributes, TryFromDeviceAttributes},
 };
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
@@ -94,7 +94,7 @@ impl ButtplugMessageValidator for CheckedLinearCmdV4 {
 impl TryFromDeviceAttributes<LinearCmdV1> for CheckedLinearCmdV4 {
   fn try_from_device_attributes(
     msg: LinearCmdV1,
-    features: &LegacyDeviceAttributes,
+    features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
     let cmds: Vec<CheckedVectorSubcommandV4> = msg
       .vectors()
@@ -118,7 +118,7 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedLinearCmdV4 {
 impl TryFromDeviceAttributes<LinearCmdV4> for CheckedLinearCmdV4 {
   fn try_from_device_attributes(
     msg: LinearCmdV4,
-    features: &LegacyDeviceAttributes,
+    features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
     let cmds: Vec<CheckedVectorSubcommandV4> = msg
       .vectors()

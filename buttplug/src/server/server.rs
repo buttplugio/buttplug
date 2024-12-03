@@ -8,7 +8,7 @@
 use super::{
   device::ServerDeviceManager,
   message::{
-    legacy_device_attributes::TryFromClientMessage,
+    server_device_attributes::TryFromClientMessage,
     ButtplugClientMessageVariant,
     ButtplugServerMessageVariant,
   },
