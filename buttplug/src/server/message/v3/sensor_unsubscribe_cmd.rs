@@ -16,7 +16,11 @@ use crate::{
       SensorType,
     },
   },
-  server::message::{checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, LegacyDeviceAttributes, TryFromDeviceAttributes},
+  server::message::{
+    checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4,
+    LegacyDeviceAttributes,
+    TryFromDeviceAttributes,
+  },
 };
 use getset::Getters;
 #[cfg(feature = "serialize-json")]

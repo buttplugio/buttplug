@@ -34,7 +34,13 @@ use crate::{
   },
 };
 
-use super::{checked_level_cmd::CheckedLevelCmdV4, checked_linear_cmd::CheckedLinearCmdV4, checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4};
+use super::{
+  checked_level_cmd::CheckedLevelCmdV4,
+  checked_linear_cmd::CheckedLinearCmdV4,
+  checked_sensor_read_cmd::CheckedSensorReadCmdV4,
+  checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4,
+  checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4,
+};
 
 /// An InternalClientMessage has had its contents verified and should need no further internal error
 /// checking. Processing may still return errors, but should be due to system state, not message
@@ -166,7 +172,8 @@ impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugInternalClientMes
           Err(ButtplugError::from(
             ButtplugDeviceError::DeviceNotAvailable(m.device_index()),
           ))
-        }      }
+        }
+      }
 
       // Message that need device index and hardware endpoint checking
       ButtplugClientMessageV4::RawWriteCmd(m) => {

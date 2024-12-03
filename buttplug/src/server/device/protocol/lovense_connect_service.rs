@@ -10,16 +10,19 @@ use crate::{
     errors::ButtplugDeviceError,
     message::{self, ActuatorType, Endpoint, FeatureType, SensorReadingV4},
   },
-  server::{device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-    protocol::{
-      generic_protocol_initializer_setup,
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
+  server::{
+    device::{
+      configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+      hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
+      protocol::{
+        generic_protocol_initializer_setup,
+        ProtocolHandler,
+        ProtocolIdentifier,
+        ProtocolInitializer,
+      },
     },
-  }, message::checked_sensor_read_cmd::CheckedSensorReadCmdV4},
+    message::checked_sensor_read_cmd::CheckedSensorReadCmdV4,
+  },
 };
 use async_trait::async_trait;
 use futures::future::{BoxFuture, FutureExt};

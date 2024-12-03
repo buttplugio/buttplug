@@ -5,13 +5,27 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{core::{errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError}, message::{
-  ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, ButtplugSensorFeatureMessageType, SensorType, SensorUnsubscribeCmdV4
-}}, server::message::TryFromDeviceAttributes};
+use crate::{
+  core::{
+    errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+    message::{
+      ButtplugDeviceMessage,
+      ButtplugMessage,
+      ButtplugMessageFinalizer,
+      ButtplugMessageValidator,
+      ButtplugSensorFeatureMessageType,
+      SensorType,
+      SensorUnsubscribeCmdV4,
+    },
+  },
+  server::message::TryFromDeviceAttributes,
+};
 use getset::CopyGetters;
 use uuid::Uuid;
 
-#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, CopyGetters)]
+#[derive(
+  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, CopyGetters,
+)]
 #[getset(get_copy = "pub")]
 pub struct CheckedSensorUnsubscribeCmdV4 {
   id: u32,
@@ -46,21 +60,38 @@ impl ButtplugMessageValidator for CheckedSensorUnsubscribeCmdV4 {
 
 impl TryFromDeviceAttributes<SensorUnsubscribeCmdV4> for CheckedSensorUnsubscribeCmdV4 {
   fn try_from_device_attributes(
-      msg: SensorUnsubscribeCmdV4,
-      features: &crate::server::message::LegacyDeviceAttributes,
-    ) -> Result<Self, crate::core::errors::ButtplugError> {
+    msg: SensorUnsubscribeCmdV4,
+    features: &crate::server::message::LegacyDeviceAttributes,
+  ) -> Result<Self, crate::core::errors::ButtplugError> {
     if let Some(feature) = features.features().get(*msg.feature_index() as usize) {
       if let Some(sensor) = feature.sensor() {
-        if sensor.messages().contains(&ButtplugSensorFeatureMessageType::SensorSubscribeCmd) {
-          Ok(CheckedSensorUnsubscribeCmdV4::new(msg.device_index(), *msg.feature_index(), *msg.sensor_type(), *feature.id()))
+        if sensor
+          .messages()
+          .contains(&ButtplugSensorFeatureMessageType::SensorSubscribeCmd)
+        {
+          Ok(CheckedSensorUnsubscribeCmdV4::new(
+            msg.device_index(),
+            *msg.feature_index(),
+            *msg.sensor_type(),
+            *feature.id(),
+          ))
         } else {
-          Err(ButtplugError::from(ButtplugDeviceError::MessageNotSupported("SensorUnsubscribeCmd".to_string())))
+          Err(ButtplugError::from(
+            ButtplugDeviceError::MessageNotSupported("SensorUnsubscribeCmd".to_string()),
+          ))
         }
       } else {
-        Err(ButtplugError::from(ButtplugDeviceError::DeviceNoSensorError("SensorUnsubscribeCmd".to_string())))
+        Err(ButtplugError::from(
+          ButtplugDeviceError::DeviceNoSensorError("SensorUnsubscribeCmd".to_string()),
+        ))
       }
     } else {
-      Err(ButtplugError::from(ButtplugDeviceError::DeviceFeatureIndexError(features.features().len() as u32, *msg.feature_index())))    
+      Err(ButtplugError::from(
+        ButtplugDeviceError::DeviceFeatureIndexError(
+          features.features().len() as u32,
+          *msg.feature_index(),
+        ),
+      ))
     }
   }
 }

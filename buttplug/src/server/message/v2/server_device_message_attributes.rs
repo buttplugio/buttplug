@@ -8,8 +8,10 @@
 use crate::{
   core::message::{ActuatorType, SensorType},
   server::message::{
-    server_device_feature::ServerDeviceFeature, v1::NullDeviceMessageAttributesV1,
-    ServerDeviceMessageAttributesV3, ServerGenericDeviceMessageAttributesV3
+    server_device_feature::ServerDeviceFeature,
+    v1::NullDeviceMessageAttributesV1,
+    ServerDeviceMessageAttributesV3,
+    ServerGenericDeviceMessageAttributesV3,
   },
 };
 use getset::{CopyGetters, Getters, Setters};
@@ -111,7 +113,6 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV2 {
   }
 }
 
-
 pub fn vibrate_cmd_from_scalar_cmd(
   attributes_vec: &[ServerGenericDeviceMessageAttributesV3],
 ) -> ServerGenericDeviceMessageAttributesV2 {
@@ -128,7 +129,7 @@ pub fn vibrate_cmd_from_scalar_cmd(
   ServerGenericDeviceMessageAttributesV2 {
     feature_count,
     step_count,
-    features
+    features,
   }
 }
 

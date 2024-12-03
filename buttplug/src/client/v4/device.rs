@@ -8,13 +8,27 @@
 //! Representation and management of devices connected to the server.
 
 use super::{
-  client_device_feature::ClientDeviceFeature, create_boxed_future_client_error, ButtplugClientMessageSender, ButtplugClientResultFuture
+  client_device_feature::ClientDeviceFeature,
+  create_boxed_future_client_error,
+  ButtplugClientMessageSender,
+  ButtplugClientResultFuture,
 };
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      ButtplugClientMessageV4, ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4, Endpoint, FeatureType, LevelCmdV4, RawReadCmdV2, RawSubscribeCmdV2, RawUnsubscribeCmdV2, RawWriteCmdV2, StopDeviceCmdV0 
+      ButtplugClientMessageV4,
+      ButtplugServerMessageV4,
+      DeviceFeature,
+      DeviceMessageInfoV4,
+      Endpoint,
+      FeatureType,
+      LevelCmdV4,
+      RawReadCmdV2,
+      RawSubscribeCmdV2,
+      RawUnsubscribeCmdV2,
+      RawWriteCmdV2,
+      StopDeviceCmdV0,
     },
   },
   util::stream::convert_broadcast_receiver_to_stream,
@@ -115,7 +129,11 @@ impl ButtplugClientDevice {
       name: name.to_owned(),
       display_name: display_name.clone(),
       index,
-      device_features: device_features.iter().enumerate().map(|(i, x)| ClientDeviceFeature::new(index, i as u32, x, &message_sender)).collect(),
+      device_features: device_features
+        .iter()
+        .enumerate()
+        .map(|(i, x)| ClientDeviceFeature::new(index, i as u32, x, &message_sender))
+        .collect(),
       event_loop_sender: message_sender.clone(),
       internal_event_sender: event_sender,
       device_connected,
@@ -147,7 +165,12 @@ impl ButtplugClientDevice {
   }
 
   fn filter_device_features(&self, feature_type: FeatureType) -> Vec<ClientDeviceFeature> {
-    self.device_features.iter().filter(|x| *x.feature().feature_type() == feature_type).cloned().collect()
+    self
+      .device_features
+      .iter()
+      .filter(|x| *x.feature().feature_type() == feature_type)
+      .cloned()
+      .collect()
   }
 
   fn level(&self, feature_type: FeatureType, level: i32) -> ButtplugClientResultFuture {
@@ -155,10 +178,15 @@ impl ButtplugClientDevice {
     if features.is_empty() {
       // TODO err
     }
-    let subcommands = features.iter().map(|x| x.level_subcommand(level as i32)).collect();
+    let subcommands = features
+      .iter()
+      .map(|x| x.level_subcommand(level as i32))
+      .collect();
     let command = LevelCmdV4::new(self.index, subcommands);
-    self.event_loop_sender.send_message_expect_ok(command.into()).into()
-    
+    self
+      .event_loop_sender
+      .send_message_expect_ok(command.into())
+      .into()
   }
 
   pub fn vibrate_features(&self) -> Vec<ClientDeviceFeature> {
@@ -171,30 +199,52 @@ impl ButtplugClientDevice {
   }
 
   pub fn has_battery_level(&self) -> bool {
-    self.device_features.iter().find(|x| *x.feature().feature_type() == FeatureType::Battery).is_some()
+    self
+      .device_features
+      .iter()
+      .find(|x| *x.feature().feature_type() == FeatureType::Battery)
+      .is_some()
   }
 
   pub fn battery_level(&self) -> ButtplugClientResultFuture<u32> {
-    if let Some(battery) = self.device_features.iter().find(|x| *x.feature().feature_type() == FeatureType::Battery) {
+    if let Some(battery) = self
+      .device_features
+      .iter()
+      .find(|x| *x.feature().feature_type() == FeatureType::Battery)
+    {
       battery.battery_level()
     } else {
       create_boxed_future_client_error(
-        ButtplugDeviceError::DeviceFeatureMismatch("Device does not have battery feature available".to_owned())
-          .into())
+        ButtplugDeviceError::DeviceFeatureMismatch(
+          "Device does not have battery feature available".to_owned(),
+        )
+        .into(),
+      )
     }
   }
 
   pub fn has_rssi_level(&self) -> bool {
-    self.device_features.iter().find(|x| *x.feature().feature_type() == FeatureType::RSSI).is_some()
+    self
+      .device_features
+      .iter()
+      .find(|x| *x.feature().feature_type() == FeatureType::RSSI)
+      .is_some()
   }
 
   pub fn rssi_level(&self) -> ButtplugClientResultFuture<u32> {
-    if let Some(rssi) = self.device_features.iter().find(|x| *x.feature().feature_type() == FeatureType::RSSI) {
+    if let Some(rssi) = self
+      .device_features
+      .iter()
+      .find(|x| *x.feature().feature_type() == FeatureType::RSSI)
+    {
       rssi.rssi_level()
     } else {
       create_boxed_future_client_error(
-        ButtplugDeviceError::DeviceFeatureMismatch("Device does not have RSSI feature available".to_owned())
-          .into())
+        ButtplugDeviceError::DeviceFeatureMismatch(
+          "Device does not have RSSI feature available".to_owned(),
+        )
+        .into(),
+      )
     }
   }
 
@@ -204,18 +254,26 @@ impl ButtplugClientDevice {
     data: &[u8],
     write_with_response: bool,
   ) -> ButtplugClientResultFuture {
-    if self.device_features.iter().find(|x| x.feature().raw().is_some()).is_some() {
+    if self
+      .device_features
+      .iter()
+      .find(|x| x.feature().raw().is_some())
+      .is_some()
+    {
       let msg = ButtplugClientMessageV4::RawWriteCmd(RawWriteCmdV2::new(
         self.index,
         endpoint,
         data,
         write_with_response,
       ));
-      self.event_loop_sender.send_message_expect_ok(msg)  
+      self.event_loop_sender.send_message_expect_ok(msg)
     } else {
       create_boxed_future_client_error(
-        ButtplugDeviceError::DeviceFeatureMismatch("Device does not have raw feature available".to_owned())
-          .into())
+        ButtplugDeviceError::DeviceFeatureMismatch(
+          "Device does not have raw feature available".to_owned(),
+        )
+        .into(),
+      )
     }
   }
 
@@ -225,7 +283,12 @@ impl ButtplugClientDevice {
     expected_length: u32,
     timeout: u32,
   ) -> ButtplugClientResultFuture<Vec<u8>> {
-    if self.device_features.iter().find(|x| x.feature().raw().is_some()).is_some() {
+    if self
+      .device_features
+      .iter()
+      .find(|x| x.feature().raw().is_some())
+      .is_some()
+    {
       let msg = ButtplugClientMessageV4::RawReadCmd(RawReadCmdV2::new(
         self.index,
         endpoint,
@@ -249,32 +312,51 @@ impl ButtplugClientDevice {
       .boxed()
     } else {
       create_boxed_future_client_error(
-        ButtplugDeviceError::DeviceFeatureMismatch("Device does not have raw feature available".to_owned())
-          .into())
+        ButtplugDeviceError::DeviceFeatureMismatch(
+          "Device does not have raw feature available".to_owned(),
+        )
+        .into(),
+      )
     }
   }
 
   pub fn raw_subscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
-    if self.device_features.iter().find(|x| x.feature().raw().is_some()).is_some() {
+    if self
+      .device_features
+      .iter()
+      .find(|x| x.feature().raw().is_some())
+      .is_some()
+    {
       let msg =
-      ButtplugClientMessageV4::RawSubscribeCmd(RawSubscribeCmdV2::new(self.index, endpoint));
-    self.event_loop_sender.send_message_expect_ok(msg)
+        ButtplugClientMessageV4::RawSubscribeCmd(RawSubscribeCmdV2::new(self.index, endpoint));
+      self.event_loop_sender.send_message_expect_ok(msg)
     } else {
       create_boxed_future_client_error(
-        ButtplugDeviceError::DeviceFeatureMismatch("Device does not have raw feature available".to_owned())
-          .into())
+        ButtplugDeviceError::DeviceFeatureMismatch(
+          "Device does not have raw feature available".to_owned(),
+        )
+        .into(),
+      )
     }
   }
 
   pub fn raw_unsubscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
-    if self.device_features.iter().find(|x| x.feature().raw().is_some()).is_some() {
+    if self
+      .device_features
+      .iter()
+      .find(|x| x.feature().raw().is_some())
+      .is_some()
+    {
       let msg =
-      ButtplugClientMessageV4::RawUnsubscribeCmd(RawUnsubscribeCmdV2::new(self.index, endpoint));
-    self.event_loop_sender.send_message_expect_ok(msg)
+        ButtplugClientMessageV4::RawUnsubscribeCmd(RawUnsubscribeCmdV2::new(self.index, endpoint));
+      self.event_loop_sender.send_message_expect_ok(msg)
     } else {
       create_boxed_future_client_error(
-        ButtplugDeviceError::DeviceFeatureMismatch("Device does not have raw feature available".to_owned())
-          .into())
+        ButtplugDeviceError::DeviceFeatureMismatch(
+          "Device does not have raw feature available".to_owned(),
+        )
+        .into(),
+      )
     }
   }
 

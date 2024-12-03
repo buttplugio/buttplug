@@ -22,7 +22,6 @@ use buttplug::{
     },
     message::{
       serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
-      ButtplugClientMessageCurrent,
       ButtplugMessage,
       RequestServerInfoV1,
       ServerInfoV2,
