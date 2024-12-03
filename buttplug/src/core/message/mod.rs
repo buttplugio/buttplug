@@ -9,9 +9,10 @@
 //! messages
 //!
 //! The core communication types for the Buttplug protocol. There are structs for each message type,
-//! sometimes with multiple versions of the same message relating to different spec versions. There
-//! are also enum types that are used to classify messages into categories, for instance, messages
-//! that only should be sent by a client or server.
+//! with only the current message spec being included here (older message specs are only used for
+//! backward compatibilty and are in the server::message module). There are also enum types that are
+//! used to classify messages into categories, for instance, messages that only should be sent by a
+//! client or server.
 
 pub mod v0;
 pub mod v1;

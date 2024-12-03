@@ -564,7 +564,7 @@ impl ServerDevice {
         Ok(())
       } else {
         Err(ButtplugDeviceError::DeviceSensorTypeMismatch(
-          feature_id.to_string(),
+          feature_index,
           sensor_type,
           *feature.feature_type(),
         ))
