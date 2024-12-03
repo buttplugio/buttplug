@@ -10,11 +10,10 @@
 use crate::{
   core::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
-    errors::{ButtplugError, ButtplugMessageError}, message::{ButtplugClientMessageV4, ButtplugServerMessageV4},
+    errors::{ButtplugError, ButtplugMessageError},
+    message::{ButtplugClientMessageV4, ButtplugServerMessageV4},
   },
-  server::{
-    message::ButtplugServerMessageVariant, ButtplugServer, ButtplugServerBuilder
-  },
+  server::{message::ButtplugServerMessageVariant, ButtplugServer, ButtplugServerBuilder},
   util::async_manager,
 };
 use futures::{

@@ -12,10 +12,15 @@ use crate::{
       ButtplugDeviceMessage,
       ButtplugMessage,
       ButtplugMessageFinalizer,
-      ButtplugMessageValidator, SensorType,
+      ButtplugMessageValidator,
+      SensorType,
     },
   },
-  server::message::{checked_sensor_read_cmd::CheckedSensorReadCmdV4, LegacyDeviceAttributes, TryFromDeviceAttributes},
+  server::message::{
+    checked_sensor_read_cmd::CheckedSensorReadCmdV4,
+    LegacyDeviceAttributes,
+    TryFromDeviceAttributes,
+  },
 };
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]

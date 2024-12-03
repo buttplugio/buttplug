@@ -9,12 +9,7 @@ use super::fleshlight_launch_helper::calculate_speed;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{
-      ButtplugDeviceMessage,
-      Endpoint,
-      SensorReadingV4,
-      SensorType,
-    },
+    message::{ButtplugDeviceMessage, Endpoint, SensorReadingV4, SensorType},
   },
   server::{
     device::{
@@ -30,7 +25,12 @@ use crate::{
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
     message::{
-      checked_linear_cmd::CheckedLinearCmdV4, checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, ButtplugServerDeviceMessage, FleshlightLaunchFW12CmdV0
+      checked_linear_cmd::CheckedLinearCmdV4,
+      checked_sensor_read_cmd::CheckedSensorReadCmdV4,
+      checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4,
+      checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4,
+      ButtplugServerDeviceMessage,
+      FleshlightLaunchFW12CmdV0,
     },
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},

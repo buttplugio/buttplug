@@ -12,10 +12,13 @@ use crate::{
     errors::ButtplugDeviceError,
     message::{self, ActuatorType, Endpoint, SensorReadingV4},
   },
-  server::{device::{
-    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_sensor_read_cmd::CheckedSensorReadCmdV4},
+  server::{
+    device::{
+      hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
+      protocol::{generic_protocol_setup, ProtocolHandler},
+    },
+    message::checked_sensor_read_cmd::CheckedSensorReadCmdV4,
+  },
 };
 use byteorder::WriteBytesExt;
 use futures::future::{BoxFuture, FutureExt};

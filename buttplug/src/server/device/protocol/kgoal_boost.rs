@@ -15,7 +15,11 @@ use crate::{
       hardware::{Hardware, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd},
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
-    message::{checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, ButtplugServerDeviceMessage},
+    message::{
+      checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4,
+      checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4,
+      ButtplugServerDeviceMessage,
+    },
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
