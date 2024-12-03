@@ -412,7 +412,7 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceManagerMessageUni
   ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
 )]
-pub enum ButtplugDeviceCommandMessageUnion {
+pub enum ButtplugDeviceCommandMessageUnionV4 {
   StopDeviceCmd(StopDeviceCmdV0),
   LinearCmd(CheckedLinearCmdV4),
   LevelCmd(CheckedLevelCmdV4),
@@ -427,9 +427,9 @@ pub enum ButtplugDeviceCommandMessageUnion {
 
 // The Buttplug Passthrough protocol requires us to be able to convert from packed messages back to
 // json.
-impl From<ButtplugDeviceCommandMessageUnion> for ButtplugClientMessageV4 {
-  fn from(value: ButtplugDeviceCommandMessageUnion) -> Self {
-    use ButtplugDeviceCommandMessageUnion::*;
+impl From<ButtplugDeviceCommandMessageUnionV4> for ButtplugClientMessageV4 {
+  fn from(value: ButtplugDeviceCommandMessageUnionV4) -> Self {
+    use ButtplugDeviceCommandMessageUnionV4::*;
     match value {
       StopDeviceCmd(msg) => msg.into(),
       LevelCmd(msg) => LevelCmdV4::from(msg).into(),
@@ -445,40 +445,40 @@ impl From<ButtplugDeviceCommandMessageUnion> for ButtplugClientMessageV4 {
   }
 }
 
-impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceCommandMessageUnion {
+impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceCommandMessageUnionV4 {
   type Error = ();
 
   fn try_from(value: ButtplugCheckedClientMessageV4) -> Result<Self, Self::Error> {
     match value {
       ButtplugCheckedClientMessageV4::StopDeviceCmd(m) => {
-        Ok(ButtplugDeviceCommandMessageUnion::StopDeviceCmd(m))
+        Ok(ButtplugDeviceCommandMessageUnionV4::StopDeviceCmd(m))
       }
       ButtplugCheckedClientMessageV4::LinearCmd(m) => {
-        Ok(ButtplugDeviceCommandMessageUnion::LinearCmd(m))
+        Ok(ButtplugDeviceCommandMessageUnionV4::LinearCmd(m))
       }
       ButtplugCheckedClientMessageV4::LevelCmd(m) => {
-        Ok(ButtplugDeviceCommandMessageUnion::LevelCmd(m))
+        Ok(ButtplugDeviceCommandMessageUnionV4::LevelCmd(m))
       }
       ButtplugCheckedClientMessageV4::SensorReadCmd(m) => {
-        Ok(ButtplugDeviceCommandMessageUnion::SensorReadCmd(m))
+        Ok(ButtplugDeviceCommandMessageUnionV4::SensorReadCmd(m))
       }
       ButtplugCheckedClientMessageV4::SensorSubscribeCmd(m) => {
-        Ok(ButtplugDeviceCommandMessageUnion::SensorSubscribeCmd(m))
+        Ok(ButtplugDeviceCommandMessageUnionV4::SensorSubscribeCmd(m))
       }
       ButtplugCheckedClientMessageV4::SensorUnsubscribeCmd(m) => {
-        Ok(ButtplugDeviceCommandMessageUnion::SensorUnsubscribeCmd(m))
+        Ok(ButtplugDeviceCommandMessageUnionV4::SensorUnsubscribeCmd(m))
       }
       ButtplugCheckedClientMessageV4::RawWriteCmd(m) => {
-        Ok(ButtplugDeviceCommandMessageUnion::RawWriteCmd(m))
+        Ok(ButtplugDeviceCommandMessageUnionV4::RawWriteCmd(m))
       }
       ButtplugCheckedClientMessageV4::RawReadCmd(m) => {
-        Ok(ButtplugDeviceCommandMessageUnion::RawReadCmd(m))
+        Ok(ButtplugDeviceCommandMessageUnionV4::RawReadCmd(m))
       }
       ButtplugCheckedClientMessageV4::RawSubscribeCmd(m) => {
-        Ok(ButtplugDeviceCommandMessageUnion::RawSubscribeCmd(m))
+        Ok(ButtplugDeviceCommandMessageUnionV4::RawSubscribeCmd(m))
       }
       ButtplugCheckedClientMessageV4::RawUnsubscribeCmd(m) => {
-        Ok(ButtplugDeviceCommandMessageUnion::RawUnsubscribeCmd(m))
+        Ok(ButtplugDeviceCommandMessageUnionV4::RawUnsubscribeCmd(m))
       }
       _ => Err(()),
     }
