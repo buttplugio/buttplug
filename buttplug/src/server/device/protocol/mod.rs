@@ -162,7 +162,7 @@ use crate::{
       checked_sensor_read_cmd::CheckedSensorReadCmdV4,
       checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4,
       checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4,
-      spec_enums::ButtplugDeviceCommandMessageUnion,
+      spec_enums::ButtplugDeviceCommandMessageUnionV4,
       ButtplugServerDeviceMessage,
       FleshlightLaunchFW12CmdV0,
       KiirooCmdV0,
@@ -799,7 +799,7 @@ pub trait ProtocolHandler: Sync + Send {
 
   fn handle_message(
     &self,
-    message: &ButtplugDeviceCommandMessageUnion,
+    message: &ButtplugDeviceCommandMessageUnionV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented(print_type_of(&message))
   }
