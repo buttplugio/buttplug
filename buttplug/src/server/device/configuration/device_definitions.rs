@@ -29,7 +29,7 @@ impl BaseDeviceDefinition {
     Self {
       name: name.to_owned(),
       features: features.into(),
-      id: id.clone(),
+      id: *id,
     }
   }
 }
@@ -98,7 +98,7 @@ impl UserDeviceDefinition {
     Self {
       name: def.name().clone(),
       id: Uuid::new_v4(),
-      base_id: Some(def.id().clone()),
+      base_id: Some(*def.id()),
       features: def.features().clone(),
       user_config: UserDeviceCustomization {
         index,

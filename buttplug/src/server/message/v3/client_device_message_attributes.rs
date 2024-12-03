@@ -135,8 +135,7 @@ impl From<ClientDeviceMessageAttributesV3> for ClientDeviceMessageAttributesV2 {
         if let Some(sensor_info) = other.sensor_read_cmd() {
           if sensor_info
             .iter()
-            .find(|x| *x.sensor_type() == SensorType::Battery)
-            .is_some()
+            .any(|x| *x.sensor_type() == SensorType::Battery)
           {
             Some(NullDeviceMessageAttributesV1::default())
           } else {
@@ -150,8 +149,7 @@ impl From<ClientDeviceMessageAttributesV3> for ClientDeviceMessageAttributesV2 {
         if let Some(sensor_info) = other.sensor_read_cmd() {
           if sensor_info
             .iter()
-            .find(|x| *x.sensor_type() == SensorType::RSSI)
-            .is_some()
+            .any(|x| *x.sensor_type() == SensorType::RSSI)
           {
             Some(NullDeviceMessageAttributesV1::default())
           } else {

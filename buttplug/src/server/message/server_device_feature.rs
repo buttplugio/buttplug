@@ -73,8 +73,8 @@ impl ServerDeviceFeature {
       actuator: actuator.clone(),
       sensor: sensor.clone(),
       raw: None,
-      id: id.clone(),
-      base_id: base_id.clone(),
+      id: *id,
+      base_id: *base_id,
     }
   }
 
@@ -101,7 +101,7 @@ impl ServerDeviceFeature {
 impl From<ServerDeviceFeature> for DeviceFeature {
   fn from(value: ServerDeviceFeature) -> Self {
     DeviceFeature::new(
-      &value.description(),
+      value.description(),
       *value.feature_type(),
       value.actuator(),
       value.sensor(),

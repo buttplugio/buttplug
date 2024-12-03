@@ -84,15 +84,14 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedLinearCmdV4 {
           0,
           x.duration(),
           x.position(),
-          features.attrs_v3().linear_cmd().as_ref().unwrap()[x.index() as usize]
+          *features.attrs_v3().linear_cmd().as_ref().unwrap()[x.index() as usize]
             .feature()
-            .id()
-            .clone(),
+            .id(),
         )
       })
       .collect();
 
-    Ok(CheckedLinearCmdV4::new(msg.device_index(), cmds).into())
+    Ok(CheckedLinearCmdV4::new(msg.device_index(), cmds))
   }
 }
 
@@ -109,11 +108,11 @@ impl TryFromDeviceAttributes<LinearCmdV4> for CheckedLinearCmdV4 {
           0,
           x.duration(),
           x.position(),
-          features.features()[x.feature_index() as usize].id().clone(),
+          *features.features()[x.feature_index() as usize].id(),
         )
       })
       .collect();
 
-    Ok(CheckedLinearCmdV4::new(msg.device_index(), cmds).into())
+    Ok(CheckedLinearCmdV4::new(msg.device_index(), cmds))
   }
 }

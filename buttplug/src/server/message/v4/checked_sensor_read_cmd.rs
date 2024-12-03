@@ -46,7 +46,7 @@ impl CheckedSensorReadCmdV4 {
       device_index,
       feature_index,
       sensor_type,
-      feature_id: feature_id,
+      feature_id,
     }
   }
 }

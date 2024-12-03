@@ -66,14 +66,11 @@ impl TryFromDeviceAttributes<BatteryLevelCmdV2> for CheckedSensorReadCmdV4 {
       ))?
       .feature();
 
-    Ok(
-      CheckedSensorReadCmdV4::new(
-        msg.device_index(),
-        0,
-        SensorType::Battery,
-        *battery_feature.id(),
-      )
-      .into(),
-    )
+    Ok(CheckedSensorReadCmdV4::new(
+      msg.device_index(),
+      0,
+      SensorType::Battery,
+      *battery_feature.id(),
+    ))
   }
 }
