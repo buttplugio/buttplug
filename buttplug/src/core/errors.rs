@@ -138,6 +138,8 @@ pub enum ButtplugDeviceError {
   DeviceFeatureCountMismatch(u32, u32),
   /// Device only has {0} features, but was given an index of {1}
   DeviceFeatureIndexError(u32, u32),
+  /// Device feature mismatch: {0}
+  DeviceFeatureMismatch(String),
   /// Device only has {0} sensors, but was given an index of {1}
   DeviceSensorIndexError(u32, u32),
   /// Device connection error: {0}
@@ -184,9 +186,9 @@ pub enum ButtplugDeviceError {
   /// Device Configuration Error: {0}
   DeviceConfigurationError(String),
   /// Actuator Type Mismatch: Index {0} got command for {1}, but expects {2}
-  DeviceActuatorTypeMismatch(String, ActuatorType, FeatureType),
+  DeviceActuatorTypeMismatch(u32, ActuatorType, FeatureType),
   /// Sensor Type Mismatch: Index {0} got command for {1}, but expects {2}
-  DeviceSensorTypeMismatch(String, SensorType, FeatureType),
+  DeviceSensorTypeMismatch(u32, SensorType, FeatureType),
   /// Protocol does not have an implementation available for Sensor Type {0}
   ProtocolSensorNotSupported(SensorType),
 }
