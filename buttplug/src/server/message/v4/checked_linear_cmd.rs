@@ -7,6 +7,7 @@ use crate::{
       ButtplugMessageFinalizer,
       ButtplugMessageValidator,
       LinearCmdV4,
+      VectorSubcommandV4,
     },
   },
   server::message::{v1::LinearCmdV1, LegacyDeviceAttributes, TryFromDeviceAttributes},
@@ -42,6 +43,12 @@ impl CheckedVectorSubcommandV4 {
   }
 }
 
+impl From<CheckedVectorSubcommandV4> for VectorSubcommandV4 {
+  fn from(value: CheckedVectorSubcommandV4) -> Self {
+    Self::new(value.feature_index(), value.duration(), value.position())
+  }
+}
+
 #[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct CheckedLinearCmdV4 {
@@ -61,6 +68,19 @@ impl CheckedLinearCmdV4 {
       device_index,
       vectors,
     }
+  }
+}
+
+impl From<CheckedLinearCmdV4> for LinearCmdV4 {
+  fn from(value: CheckedLinearCmdV4) -> Self {
+    Self::new(
+      value.device_index(),
+      value
+        .vectors()
+        .iter()
+        .map(|x| VectorSubcommandV4::from(x.clone()))
+        .collect(),
+    )
   }
 }
 

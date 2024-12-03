@@ -31,9 +31,9 @@ use crate::{
     },
   },
   server::message::spec_enums::{
+    ButtplugCheckedClientMessageV4,
     ButtplugDeviceCommandMessageUnion,
     ButtplugDeviceManagerMessageUnion,
-    ButtplugInternalClientMessageV4,
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
@@ -149,9 +149,9 @@ impl ButtplugServer {
     // As long as StopScanning/StopAllDevices aren't changed across message specs, we can inject
     // them using parse_checked_message and bypass version checking.
     let stop_scanning_fut = self.parse_checked_message(
-      ButtplugInternalClientMessageV4::StopScanning(StopScanningV0::default()),
+      ButtplugCheckedClientMessageV4::StopScanning(StopScanningV0::default()),
     );
-    let stop_fut = self.parse_checked_message(ButtplugInternalClientMessageV4::StopAllDevices(
+    let stop_fut = self.parse_checked_message(ButtplugCheckedClientMessageV4::StopAllDevices(
       StopAllDevicesV0::default(),
     ));
     let connected = self.connected.clone();
@@ -204,7 +204,7 @@ impl ButtplugServer {
     match msg {
       ButtplugClientMessageVariant::V4(msg) => {
         let internal_msg =
-          match ButtplugInternalClientMessageV4::try_from_client_message(msg, &features) {
+          match ButtplugCheckedClientMessageV4::try_from_client_message(msg, &features) {
             Ok(m) => m,
             Err(e) => {
               let mut err_msg = ErrorV0::from(e);
@@ -236,7 +236,7 @@ impl ButtplugServer {
           );
           v
         });
-        match ButtplugInternalClientMessageV4::try_from_client_message(msg, &features) {
+        match ButtplugCheckedClientMessageV4::try_from_client_message(msg, &features) {
           Ok(converted_msg) => {
             let fut = self.parse_checked_message(converted_msg);
             async move {
@@ -276,7 +276,7 @@ impl ButtplugServer {
 
   pub fn parse_checked_message(
     &self,
-    msg: ButtplugInternalClientMessageV4,
+    msg: ButtplugCheckedClientMessageV4,
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, message::ErrorV0>> {
     trace!(
       "Buttplug Server {} received message to client parse: {:?}",
@@ -292,7 +292,7 @@ impl ButtplugServer {
         Some(message::ErrorV0::from(ButtplugError::from(
           ButtplugPingError::PingedOut,
         )))
-      } else if !matches!(msg, ButtplugInternalClientMessageV4::RequestServerInfo(_)) {
+      } else if !matches!(msg, ButtplugCheckedClientMessageV4::RequestServerInfo(_)) {
         Some(message::ErrorV0::from(ButtplugError::from(
           ButtplugHandshakeError::RequestServerInfoExpected,
         )))
@@ -316,10 +316,10 @@ impl ButtplugServer {
       self.device_manager.parse_message(msg.clone())
     } else {
       match msg {
-        ButtplugInternalClientMessageV4::RequestServerInfo(rsi_msg) => {
+        ButtplugCheckedClientMessageV4::RequestServerInfo(rsi_msg) => {
           self.perform_handshake(rsi_msg)
         }
-        ButtplugInternalClientMessageV4::Ping(p) => self.handle_ping(p),
+        ButtplugCheckedClientMessageV4::Ping(p) => self.handle_ping(p),
         _ => ButtplugMessageError::UnexpectedMessageType(format!("{:?}", msg)).into(),
       }
     };

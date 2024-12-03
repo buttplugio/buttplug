@@ -48,6 +48,12 @@ impl CheckedLevelSubcommandV4 {
   }
 }
 
+impl From<CheckedLevelSubcommandV4> for LevelSubcommandV4 {
+  fn from(value: CheckedLevelSubcommandV4) -> Self {
+    LevelSubcommandV4::new(value.feature_index(), value.level)
+  }
+}
+
 impl TryFromDeviceAttributes<&LevelSubcommandV4> for CheckedLevelSubcommandV4 {
   fn try_from_device_attributes(
     subcommand: &LevelSubcommandV4,
@@ -140,6 +146,19 @@ pub struct CheckedLevelCmdV4 {
   device_index: u32,
   #[getset(get = "pub")]
   levels: Vec<CheckedLevelSubcommandV4>,
+}
+
+impl From<CheckedLevelCmdV4> for LevelCmdV4 {
+  fn from(value: CheckedLevelCmdV4) -> Self {
+    LevelCmdV4::new(
+      value.device_index(),
+      value
+        .levels()
+        .iter()
+        .map(|x| LevelSubcommandV4::from(x.clone()))
+        .collect(),
+    )
+  }
 }
 
 impl CheckedLevelCmdV4 {

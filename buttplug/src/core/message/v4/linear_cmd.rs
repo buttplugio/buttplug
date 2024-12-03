@@ -15,7 +15,6 @@ use crate::core::message::{
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 /// Move device to a certain position in a certain amount of time
 #[derive(Debug, PartialEq, Clone, CopyGetters)]
@@ -28,17 +27,14 @@ pub struct VectorSubcommandV4 {
   duration: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Position"))]
   position: f64,
-  #[cfg_attr(feature = "serialize-json", serde(skip))]
-  id: Option<Uuid>,
 }
 
 impl VectorSubcommandV4 {
-  pub fn new(feature_index: u32, duration: u32, position: f64, id: &Option<Uuid>) -> Self {
+  pub fn new(feature_index: u32, duration: u32, position: f64) -> Self {
     Self {
       feature_index,
       duration,
       position,
-      id: *id,
     }
   }
 }
