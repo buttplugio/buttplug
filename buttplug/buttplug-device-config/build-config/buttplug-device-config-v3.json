@@ -3729,6 +3729,12 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "Jive 2"
+          ],
+          "name": "WeVibe Jive 2"
         }
       ],
       "communication": [
@@ -3743,7 +3749,8 @@
               "Nelson",
               "Nova2",
               "Nova_2",
-              "Nova 2"
+              "Nova 2",
+              "Jive 2"
             ],
             "services": {
               "f000bb03-0451-4000-b000-000000000000": {
