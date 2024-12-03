@@ -40,7 +40,7 @@ use buttplug::{
     },
     message::{
       checked_level_cmd::{CheckedLevelCmdV4, CheckedLevelSubcommandV4},
-      spec_enums::ButtplugInternalClientMessageV4,
+      spec_enums::ButtplugCheckedClientMessageV4,
       ButtplugClientMessageV3,
       ButtplugClientMessageVariant,
       ButtplugServerMessageV2,
@@ -88,7 +88,7 @@ async fn test_server_handshake() {
 
 #[tokio::test]
 async fn test_server_handshake_not_done_first_v4() {
-  let msg = ButtplugInternalClientMessageV4::Ping(PingV0::default().into());
+  let msg = ButtplugCheckedClientMessageV4::Ping(PingV0::default().into());
   let server = test_server(false);
   // assert_eq!(server.server_name, "Test Server");
   let result = server.parse_checked_message(msg).await;
@@ -162,7 +162,7 @@ async fn test_ping_timeout() {
   let msg = RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
   sleep(Duration::from_millis(150)).await;
   let reply = server
-    .parse_checked_message(ButtplugInternalClientMessageV4::RequestServerInfo(msg))
+    .parse_checked_message(ButtplugCheckedClientMessageV4::RequestServerInfo(msg))
     .await;
   assert!(
     reply.is_ok(),
@@ -172,7 +172,7 @@ async fn test_ping_timeout() {
   sleep(Duration::from_millis(300)).await;
   let pingmsg = PingV0::default();
   let result = server
-    .parse_checked_message(ButtplugInternalClientMessageV4::Ping(pingmsg.into()))
+    .parse_checked_message(ButtplugCheckedClientMessageV4::Ping(pingmsg.into()))
     .await;
   let err = result.unwrap_err();
   if !matches!(err.original_error(), ButtplugError::ButtplugPingError(_)) {
@@ -208,11 +208,11 @@ async fn test_device_stop_on_ping_timeout() {
 
   let msg = RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
   let mut reply = server
-    .parse_checked_message(ButtplugInternalClientMessageV4::from(msg))
+    .parse_checked_message(ButtplugCheckedClientMessageV4::from(msg))
     .await;
   assert!(reply.is_ok());
   reply = server
-    .parse_checked_message(ButtplugInternalClientMessageV4::from(
+    .parse_checked_message(ButtplugCheckedClientMessageV4::from(
       StartScanningV0::default(),
     ))
     .await;
@@ -235,7 +235,7 @@ async fn test_device_stop_on_ping_timeout() {
   }
 
   server
-    .parse_checked_message(ButtplugInternalClientMessageV4::from(
+    .parse_checked_message(ButtplugCheckedClientMessageV4::from(
       CheckedLevelCmdV4::new(
         0,
         device_index,

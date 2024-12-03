@@ -34,9 +34,9 @@ use crate::{
     message::{
       legacy_device_attributes::LegacyDeviceAttributes,
       spec_enums::{
+        ButtplugCheckedClientMessageV4,
         ButtplugDeviceCommandMessageUnion,
         ButtplugDeviceManagerMessageUnion,
-        ButtplugInternalClientMessageV4,
       },
     },
     ButtplugServerError,
@@ -291,7 +291,7 @@ impl ServerDeviceManager {
     }
   }
 
-  pub fn parse_message(&self, msg: ButtplugInternalClientMessageV4) -> ButtplugServerResultFuture {
+  pub fn parse_message(&self, msg: ButtplugCheckedClientMessageV4) -> ButtplugServerResultFuture {
     if !self.running.load(Ordering::SeqCst) {
       return future::ready(Err(ButtplugUnknownError::DeviceManagerNotRunning.into())).boxed();
     }

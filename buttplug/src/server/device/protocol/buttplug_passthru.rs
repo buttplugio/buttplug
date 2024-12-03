@@ -6,10 +6,13 @@
 // for full license information.
 
 use crate::{
-  core::errors::ButtplugDeviceError,
+  core::{
+    errors::ButtplugDeviceError,
+    message::{ButtplugClientMessageV4, Endpoint},
+  },
   server::{
     device::{
-      hardware::HardwareCommand,
+      hardware::{HardwareCommand, HardwareWriteCmd},
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
     message::spec_enums::ButtplugDeviceCommandMessageUnion,
@@ -34,14 +37,14 @@ impl ProtocolHandler for ButtplugPassthru {
     &self,
     command_message: &ButtplugDeviceCommandMessageUnion,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![/*HardwareWriteCmd::new(
+    Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      serde_json::to_string(&command_message)
+      serde_json::to_string(&ButtplugClientMessageV4::from(command_message.clone()))
         .expect("Type is always serializable")
         .as_bytes()
         .to_vec(),
       false,
     )
-    .into()*/])
+    .into()])
   }
 }

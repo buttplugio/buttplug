@@ -51,6 +51,16 @@ impl CheckedSensorReadCmdV4 {
   }
 }
 
+impl From<CheckedSensorReadCmdV4> for SensorReadCmdV4 {
+  fn from(value: CheckedSensorReadCmdV4) -> Self {
+    Self::new(
+      value.device_index(),
+      value.feature_index(),
+      value.sensor_type(),
+    )
+  }
+}
+
 impl ButtplugMessageValidator for CheckedSensorReadCmdV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
