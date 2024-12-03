@@ -32,7 +32,7 @@ use crate::{
   },
   server::message::spec_enums::{
     ButtplugCheckedClientMessageV4,
-    ButtplugDeviceCommandMessageUnion,
+    ButtplugDeviceCommandMessageUnionV4,
     ButtplugDeviceManagerMessageUnion,
   },
   util::stream::convert_broadcast_receiver_to_stream,
@@ -311,7 +311,7 @@ impl ButtplugServer {
     // tagging the result with the message id in the future we put out as the
     // return value from this method.
     let out_fut = if ButtplugDeviceManagerMessageUnion::try_from(msg.clone()).is_ok()
-      || ButtplugDeviceCommandMessageUnion::try_from(msg.clone()).is_ok()
+      || ButtplugDeviceCommandMessageUnionV4::try_from(msg.clone()).is_ok()
     {
       self.device_manager.parse_message(msg.clone())
     } else {

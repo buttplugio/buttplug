@@ -13,7 +13,7 @@ use crate::{
   server::message::{
     checked_level_cmd::{CheckedLevelCmdV4, CheckedLevelSubcommandV4},
     server_device_feature::ServerDeviceFeature,
-    spec_enums::ButtplugDeviceCommandMessageUnion,
+    spec_enums::ButtplugDeviceCommandMessageUnionV4,
   },
 };
 use getset::Getters;
@@ -94,7 +94,7 @@ impl FeatureStatus {
 // call it done.
 pub struct ActuatorCommandManager {
   feature_status: Vec<FeatureStatus>,
-  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
+  stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4>,
 }
 
 impl ActuatorCommandManager {
@@ -204,7 +204,7 @@ impl ActuatorCommandManager {
     Ok(final_result)
   }
 
-  pub fn stop_commands(&self) -> Vec<ButtplugDeviceCommandMessageUnion> {
+  pub fn stop_commands(&self) -> Vec<ButtplugDeviceCommandMessageUnionV4> {
     self.stop_commands.clone()
   }
 }

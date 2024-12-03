@@ -15,7 +15,7 @@ use crate::{
       hardware::{HardwareCommand, HardwareWriteCmd},
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
-    message::spec_enums::ButtplugDeviceCommandMessageUnion,
+    message::spec_enums::ButtplugDeviceCommandMessageUnionV4,
   },
 };
 
@@ -35,7 +35,7 @@ impl ProtocolHandler for ButtplugPassthru {
 
   fn handle_message(
     &self,
-    command_message: &ButtplugDeviceCommandMessageUnion,
+    command_message: &ButtplugDeviceCommandMessageUnionV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
