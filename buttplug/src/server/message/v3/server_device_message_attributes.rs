@@ -80,7 +80,7 @@ impl TryFrom<ServerDeviceFeature> for ServerGenericDeviceMessageAttributesV3 {
         feature_descriptor: value.description().to_owned(),
         actuator_type,
         step_count,
-        feature: value.clone().into(),
+        feature: value.clone(),
         index: 0,
       };
       Ok(attrs)
@@ -101,7 +101,7 @@ impl TryFrom<ServerDeviceFeature> for ServerSensorDeviceMessageAttributesV3 {
         feature_descriptor: value.description().to_owned(),
         sensor_type: (*value.feature_type()).try_into()?,
         sensor_range: sensor.value_range().clone(),
-        feature: value.clone().into(),
+        feature: value.clone(),
         index: 0,
       })
     } else {

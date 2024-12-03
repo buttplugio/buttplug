@@ -274,7 +274,7 @@ where
 {
   // Vorze and RotateCmd are equivalent, so this is an ok conversion.
   if let Some(attrs) = features.get(&msg.device_index()) {
-    Ok(U::try_from_device_attributes(msg.clone(), attrs)?.into())
+    Ok(U::try_from_device_attributes(msg.clone(), attrs)?)
   } else {
     Err(ButtplugError::from(
       ButtplugDeviceError::DeviceNotAvailable(msg.device_index()),

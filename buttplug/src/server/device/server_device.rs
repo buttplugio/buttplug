@@ -473,7 +473,7 @@ impl ServerDevice {
   fn handle_levelcmd_v4(&self, msg: &CheckedLevelCmdV4) -> ButtplugServerResultFuture {
     let commands = match self
       .actuator_command_manager
-      .update_level(&msg, self.handler.needs_full_command_set())
+      .update_level(msg, self.handler.needs_full_command_set())
     {
       Ok(values) => values,
       Err(err) => return future::ready(Err(err)).boxed(),

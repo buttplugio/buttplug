@@ -6,10 +6,10 @@
 // for full license information.
 
 use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
+  core::errors::ButtplugDeviceError,
   server::{
     device::{
-      hardware::{HardwareCommand, HardwareWriteCmd},
+      hardware::HardwareCommand,
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
     message::spec_enums::ButtplugDeviceCommandMessageUnion,
