@@ -105,6 +105,7 @@ impl From<ServerDeviceFeature> for DeviceFeature {
       *value.feature_type(),
       value.actuator(),
       value.sensor(),
+      value.raw()
     )
   }
 }
