@@ -8158,6 +8158,9 @@ protocols:
           - MPAV_QC_TL_P1
         name: Sistalk MonsterPub Amazing
       - identifier:
+          - MH_TOR_TL_P5
+        name: Sistalk MonsterHub Tornado
+      - identifier:
           - MP_SUCKBANG_P5
         name: Sistalk MonsterPub Pop
         features:
@@ -8179,6 +8182,7 @@ protocols:
       - btle:
           names:
             - MonsterPub
+            - MonsterHub
             - TracyDog
           services:
             00006000-0000-1000-8000-00805f9b34fb:

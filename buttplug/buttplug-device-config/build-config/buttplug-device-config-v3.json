@@ -14267,6 +14267,12 @@
         },
         {
           "identifier": [
+            "MH_TOR_TL_P5"
+          ],
+          "name": "Sistalk MonsterHub Tornado"
+        },
+        {
+          "identifier": [
             "MP_SUCKBANG_P5"
           ],
           "name": "Sistalk MonsterPub Pop",
@@ -14303,6 +14309,7 @@
           "btle": {
             "names": [
               "MonsterPub",
+              "MonsterHub",
               "TracyDog"
             ],
             "services": {
