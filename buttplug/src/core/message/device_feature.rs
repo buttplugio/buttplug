@@ -118,13 +118,14 @@ impl DeviceFeature {
     feature_type: FeatureType,
     actuator: &Option<DeviceFeatureActuator>,
     sensor: &Option<DeviceFeatureSensor>,
+    raw: &Option<DeviceFeatureRaw>,
   ) -> Self {
     Self {
       description: description.to_owned(),
       feature_type,
       actuator: actuator.clone(),
       sensor: sensor.clone(),
-      raw: None,
+      raw: raw.clone(),
     }
   }
 
