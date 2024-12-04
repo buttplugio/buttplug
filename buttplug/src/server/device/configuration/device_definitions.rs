@@ -126,7 +126,7 @@ impl UserDeviceDefinition {
           if *msg_type == ButtplugDeviceMessageType::RotateCmd
             && actuator
               .messages()
-              .contains(&ButtplugActuatorFeatureMessageType::LevelCmd)
+              .contains(&ButtplugActuatorFeatureMessageType::ValueCmd)
             && *feature.feature_type() == FeatureType::RotateWithDirection
           {
             return true;

@@ -14,8 +14,8 @@ use crate::{
       ButtplugMessageFinalizer,
       ButtplugMessageValidator,
       FeatureType,
-      LevelCmdV4,
-      LevelSubcommandV4,
+      ValueCmdV4,
+      ValueSubcommandV4,
     },
   },
   server::message::{
@@ -32,13 +32,13 @@ use uuid::Uuid;
 
 #[derive(Debug, PartialEq, Clone, CopyGetters)]
 #[getset(get_copy = "pub")]
-pub struct CheckedLevelSubcommandV4 {
+pub struct CheckedValueSubcommandV4 {
   feature_index: u32,
   level: i32,
   feature_id: Uuid,
 }
 
-impl CheckedLevelSubcommandV4 {
+impl CheckedValueSubcommandV4 {
   pub fn new(feature_index: u32, level: i32, feature_id: Uuid) -> Self {
     Self {
       feature_index,
@@ -48,15 +48,15 @@ impl CheckedLevelSubcommandV4 {
   }
 }
 
-impl From<CheckedLevelSubcommandV4> for LevelSubcommandV4 {
-  fn from(value: CheckedLevelSubcommandV4) -> Self {
-    LevelSubcommandV4::new(value.feature_index(), value.level)
+impl From<CheckedValueSubcommandV4> for ValueSubcommandV4 {
+  fn from(value: CheckedValueSubcommandV4) -> Self {
+    ValueSubcommandV4::new(value.feature_index(), value.level)
   }
 }
 
-impl TryFromDeviceAttributes<&LevelSubcommandV4> for CheckedLevelSubcommandV4 {
+impl TryFromDeviceAttributes<&ValueSubcommandV4> for CheckedValueSubcommandV4 {
   fn try_from_device_attributes(
-    subcommand: &LevelSubcommandV4,
+    subcommand: &ValueSubcommandV4,
     attrs: &ServerDeviceAttributes,
   ) -> Result<Self, ButtplugError> {
     let features = attrs.features();
@@ -83,7 +83,7 @@ impl TryFromDeviceAttributes<&LevelSubcommandV4> for CheckedLevelSubcommandV4 {
       // Check to make sure the level is within the range of the feature.
       if actuator
         .messages()
-        .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::LevelCmd)
+        .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ValueCmd)
       {
         // Currently, rotate with direction is the only actuator type that can take negative values.
         if *feature.feature_type() == FeatureType::RotateWithDirection
@@ -118,12 +118,12 @@ impl TryFromDeviceAttributes<&LevelSubcommandV4> for CheckedLevelSubcommandV4 {
         }
       } else {
         Err(ButtplugError::from(
-          ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LevelCmd.to_string()),
+          ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::ValueCmd.to_string()),
         ))
       }
     } else {
       Err(ButtplugError::from(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LevelCmd.to_string()),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::ValueCmd.to_string()),
       ))
     }
   }
@@ -139,30 +139,30 @@ impl TryFromDeviceAttributes<&LevelSubcommandV4> for CheckedLevelSubcommandV4 {
   Getters,
   CopyGetters,
 )]
-pub struct CheckedLevelCmdV4 {
+pub struct CheckedValueCmdV4 {
   #[getset(get_copy = "pub")]
   id: u32,
   #[getset(get_copy = "pub")]
   device_index: u32,
   #[getset(get = "pub")]
-  levels: Vec<CheckedLevelSubcommandV4>,
+  levels: Vec<CheckedValueSubcommandV4>,
 }
 
-impl From<CheckedLevelCmdV4> for LevelCmdV4 {
-  fn from(value: CheckedLevelCmdV4) -> Self {
-    LevelCmdV4::new(
+impl From<CheckedValueCmdV4> for ValueCmdV4 {
+  fn from(value: CheckedValueCmdV4) -> Self {
+    ValueCmdV4::new(
       value.device_index(),
       value
         .levels()
         .iter()
-        .map(|x| LevelSubcommandV4::from(x.clone()))
+        .map(|x| ValueSubcommandV4::from(x.clone()))
         .collect(),
     )
   }
 }
 
-impl CheckedLevelCmdV4 {
-  pub fn new(id: u32, device_index: u32, levels: &Vec<CheckedLevelSubcommandV4>) -> Self {
+impl CheckedValueCmdV4 {
+  pub fn new(id: u32, device_index: u32, levels: &Vec<CheckedValueSubcommandV4>) -> Self {
     Self {
       id,
       device_index,
@@ -171,22 +171,22 @@ impl CheckedLevelCmdV4 {
   }
 }
 
-impl ButtplugMessageValidator for CheckedLevelCmdV4 {
+impl ButtplugMessageValidator for CheckedValueCmdV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     Ok(())
   }
 }
 
-impl TryFromDeviceAttributes<LevelCmdV4> for CheckedLevelCmdV4 {
+impl TryFromDeviceAttributes<ValueCmdV4> for CheckedValueCmdV4 {
   fn try_from_device_attributes(
-    msg: LevelCmdV4,
+    msg: ValueCmdV4,
     features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
-    let levels: Result<Vec<CheckedLevelSubcommandV4>, ButtplugError> = msg
+    let levels: Result<Vec<CheckedValueSubcommandV4>, ButtplugError> = msg
       .levels()
       .iter()
-      .map(|x| CheckedLevelSubcommandV4::try_from_device_attributes(x, features))
+      .map(|x| CheckedValueSubcommandV4::try_from_device_attributes(x, features))
       .collect();
     Ok(Self {
       id: msg.id(),
@@ -196,18 +196,18 @@ impl TryFromDeviceAttributes<LevelCmdV4> for CheckedLevelCmdV4 {
   }
 }
 
-impl TryFromDeviceAttributes<VorzeA10CycloneCmdV0> for CheckedLevelCmdV4 {
+impl TryFromDeviceAttributes<VorzeA10CycloneCmdV0> for CheckedValueCmdV4 {
   fn try_from_device_attributes(
     msg: VorzeA10CycloneCmdV0,
     features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
-    let cmds: Vec<LevelSubcommandV4> = features
+    let cmds: Vec<ValueSubcommandV4> = features
       .features()
       .iter()
       .enumerate()
       .filter(|(_, feature)| *feature.feature_type() == FeatureType::RotateWithDirection)
       .map(|(index, feature)| {
-        LevelSubcommandV4::new(
+        ValueSubcommandV4::new(
           index as u32,
           (((msg.speed() as f64 / 99f64).ceil() * (if msg.clockwise() { 1f64 } else { -1f64 }))
             * *feature.actuator().as_ref().unwrap().step_range().end() as f64)
@@ -216,26 +216,26 @@ impl TryFromDeviceAttributes<VorzeA10CycloneCmdV0> for CheckedLevelCmdV4 {
       })
       .collect();
 
-    CheckedLevelCmdV4::try_from_device_attributes(
-      LevelCmdV4::new(msg.device_index(), cmds),
+    CheckedValueCmdV4::try_from_device_attributes(
+      ValueCmdV4::new(msg.device_index(), cmds),
       features,
     )
   }
 }
 
-impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedLevelCmdV4 {
+impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedValueCmdV4 {
   // For VibrateCmd, just take everything out of V2's VibrateCmd and make a command.
   fn try_from_device_attributes(
     msg: SingleMotorVibrateCmdV0,
     features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
-    let cmds: Vec<CheckedLevelSubcommandV4> = features
+    let cmds: Vec<CheckedValueSubcommandV4> = features
       .features()
       .iter()
       .enumerate()
       .filter(|(_, feature)| *feature.feature_type() == FeatureType::Vibrate)
       .map(|(index, feature)| {
-        CheckedLevelSubcommandV4::new(
+        CheckedValueSubcommandV4::new(
           index as u32,
           (msg.speed() * *feature.actuator().as_ref().unwrap().step_range().end() as f64).ceil()
             as i32,
@@ -244,11 +244,11 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedLevelCmdV4 {
       })
       .collect();
 
-    Ok(CheckedLevelCmdV4::new(msg.id(), msg.device_index(), &cmds))
+    Ok(CheckedValueCmdV4::new(msg.id(), msg.device_index(), &cmds))
   }
 }
 
-impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedLevelCmdV4 {
+impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedValueCmdV4 {
   // VibrateCmd only exists up through Message Spec v2. We can assume that, if we're receiving it,
   // we can just use the V2 spec client device attributes for it. If this was sent on a V1 protocol,
   // it'll still have all the same features.
@@ -267,7 +267,7 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedLevelCmdV4 {
           ButtplugDeviceError::DeviceFeatureCountMismatch(0, msg.speeds().len() as u32),
         ))?;
 
-    let mut cmds: Vec<CheckedLevelSubcommandV4> = vec![];
+    let mut cmds: Vec<CheckedValueSubcommandV4> = vec![];
     for vibrate_cmd in msg.speeds() {
       if vibrate_cmd.index() > vibrate_attributes.features().len() as u32 {
         return Err(ButtplugError::from(
@@ -292,24 +292,24 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedLevelCmdV4 {
           .ok_or(ButtplugDeviceError::DeviceConfigurationError(
             "Device configuration does not have Vibrate actuator available.".to_owned(),
           ))?;
-      cmds.push(CheckedLevelSubcommandV4::new(
+      cmds.push(CheckedValueSubcommandV4::new(
         idx as u32,
         (vibrate_cmd.speed() * *actuator.step_range().end() as f64).ceil() as i32,
         *feature.id(),
       ))
     }
 
-    Ok(CheckedLevelCmdV4::new(msg.id(), msg.device_index(), &cmds))
+    Ok(CheckedValueCmdV4::new(msg.id(), msg.device_index(), &cmds))
   }
 }
 
-impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedLevelCmdV4 {
+impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedValueCmdV4 {
   // ScalarCmd only came in with V3, so we can just use the V3 device attributes.
   fn try_from_device_attributes(
     msg: ScalarCmdV3,
     attrs: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
-    let mut cmds: Vec<CheckedLevelSubcommandV4> = vec![];
+    let mut cmds: Vec<CheckedValueSubcommandV4> = vec![];
     if msg.scalars().is_empty() {
       return Err(ButtplugError::from(
         ButtplugDeviceError::ProtocolRequirementError(
@@ -346,17 +346,17 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedLevelCmdV4 {
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceNoActuatorError("ScalarCmdV3".to_owned()),
         ))?;
-      cmds.push(CheckedLevelSubcommandV4::new(
+      cmds.push(CheckedValueSubcommandV4::new(
         idx,
         (cmd.scalar() * *actuator.step_range().end() as f64).ceil() as i32,
         *feature.feature.id(),
       ));
     }
-    Ok(CheckedLevelCmdV4::new(msg.id(), msg.device_index(), &cmds))
+    Ok(CheckedValueCmdV4::new(msg.id(), msg.device_index(), &cmds))
   }
 }
 
-impl TryFromDeviceAttributes<RotateCmdV1> for CheckedLevelCmdV4 {
+impl TryFromDeviceAttributes<RotateCmdV1> for CheckedValueCmdV4 {
   // RotateCmd exists up through Message Spec v3. We can assume that, if we're receiving it, we can
   // just use the V3 spec client device attributes for it. If this was sent on a V1/V2 protocol,
   // it'll still have all the same features.
@@ -364,7 +364,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedLevelCmdV4 {
     msg: RotateCmdV1,
     attrs: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
-    let mut cmds: Vec<CheckedLevelSubcommandV4> = vec![];
+    let mut cmds: Vec<CheckedValueSubcommandV4> = vec![];
     for cmd in msg.rotations() {
       let rotate_attrs = attrs
         .attrs_v3()
@@ -394,7 +394,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedLevelCmdV4 {
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceNoActuatorError("RotateCmdV1".to_owned()),
         ))?;
-      cmds.push(CheckedLevelSubcommandV4::new(
+      cmds.push(CheckedValueSubcommandV4::new(
         idx,
         (cmd.speed()
           * *actuator.step_range().end() as f64
@@ -403,6 +403,6 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedLevelCmdV4 {
         *feature.feature().id(),
       ));
     }
-    Ok(CheckedLevelCmdV4::new(msg.id(), msg.device_index(), &cmds))
+    Ok(CheckedValueCmdV4::new(msg.id(), msg.device_index(), &cmds))
   }
 }

@@ -88,7 +88,7 @@ impl ProtocolHandler for MetaXSireRepeat {
     true
   }
 
-  fn handle_scalar_cmd(
+  fn handle_value_cmd(
     &self,
     commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {

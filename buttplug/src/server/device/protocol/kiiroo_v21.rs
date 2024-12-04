@@ -25,7 +25,7 @@ use crate::{
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
     message::{
-      checked_linear_cmd::CheckedLinearCmdV4,
+      checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4,
       checked_sensor_read_cmd::CheckedSensorReadCmdV4,
       checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4,
       checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4,
@@ -72,7 +72,7 @@ impl Default for KiirooV21 {
 }
 
 impl ProtocolHandler for KiirooV21 {
-  fn handle_scalar_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     _: u32,
     scalar: u32,
@@ -87,7 +87,7 @@ impl ProtocolHandler for KiirooV21 {
 
   fn handle_linear_cmd(
     &self,
-    message: CheckedLinearCmdV4,
+    message: CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to

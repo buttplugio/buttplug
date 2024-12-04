@@ -12,7 +12,7 @@ use crate::{
       hardware::{HardwareCommand, HardwareWriteCmd},
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
-    message::checked_linear_cmd::CheckedLinearCmdV4,
+    message::checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4,
   },
 };
 use std::sync::{
@@ -30,7 +30,7 @@ pub struct ServeU {
 impl ProtocolHandler for ServeU {
   fn handle_linear_cmd(
     &self,
-    message: CheckedLinearCmdV4,
+    message: CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let last_pos = self.last_position.load(Ordering::Relaxed);
     let current_cmd = message

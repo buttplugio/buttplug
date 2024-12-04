@@ -6,8 +6,8 @@ use crate::{
       ButtplugMessage,
       ButtplugMessageFinalizer,
       ButtplugMessageValidator,
-      LinearCmdV4,
-      VectorSubcommandV4,
+      ValueWithParameterCmdV4,
+      ValueWithParameterSubcommandV4,
     },
   },
   server::message::{v1::LinearCmdV1, ServerDeviceAttributes, TryFromDeviceAttributes},
@@ -21,7 +21,7 @@ use uuid::Uuid;
 #[derive(Debug, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 #[getset(get_copy = "pub")]
-pub struct CheckedVectorSubcommandV4 {
+pub struct CheckedValueWithParameterSubcommandV4 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
   feature_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Duration"))]
@@ -32,7 +32,7 @@ pub struct CheckedVectorSubcommandV4 {
   id: Uuid,
 }
 
-impl CheckedVectorSubcommandV4 {
+impl CheckedValueWithParameterSubcommandV4 {
   pub fn new(feature_index: u32, duration: u32, position: f64, id: Uuid) -> Self {
     Self {
       feature_index,
@@ -43,26 +43,26 @@ impl CheckedVectorSubcommandV4 {
   }
 }
 
-impl From<CheckedVectorSubcommandV4> for VectorSubcommandV4 {
-  fn from(value: CheckedVectorSubcommandV4) -> Self {
+impl From<CheckedValueWithParameterSubcommandV4> for ValueWithParameterSubcommandV4 {
+  fn from(value: CheckedValueWithParameterSubcommandV4) -> Self {
     Self::new(value.feature_index(), value.duration(), value.position())
   }
 }
 
 #[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct CheckedLinearCmdV4 {
+pub struct CheckedValueWithParameterCmdV4 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Vectors"))]
   #[getset(get = "pub")]
-  vectors: Vec<CheckedVectorSubcommandV4>,
+  vectors: Vec<CheckedValueWithParameterSubcommandV4>,
 }
 
-impl CheckedLinearCmdV4 {
-  pub fn new(device_index: u32, vectors: Vec<CheckedVectorSubcommandV4>) -> Self {
+impl CheckedValueWithParameterCmdV4 {
+  pub fn new(device_index: u32, vectors: Vec<CheckedValueWithParameterSubcommandV4>) -> Self {
     Self {
       id: 1,
       device_index,
@@ -71,36 +71,36 @@ impl CheckedLinearCmdV4 {
   }
 }
 
-impl From<CheckedLinearCmdV4> for LinearCmdV4 {
-  fn from(value: CheckedLinearCmdV4) -> Self {
+impl From<CheckedValueWithParameterCmdV4> for ValueWithParameterCmdV4 {
+  fn from(value: CheckedValueWithParameterCmdV4) -> Self {
     Self::new(
       value.device_index(),
       value
         .vectors()
         .iter()
-        .map(|x| VectorSubcommandV4::from(x.clone()))
+        .map(|x| ValueWithParameterSubcommandV4::from(x.clone()))
         .collect(),
     )
   }
 }
 
-impl ButtplugMessageValidator for CheckedLinearCmdV4 {
+impl ButtplugMessageValidator for CheckedValueWithParameterCmdV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     Ok(())
   }
 }
 
-impl TryFromDeviceAttributes<LinearCmdV1> for CheckedLinearCmdV4 {
+impl TryFromDeviceAttributes<LinearCmdV1> for CheckedValueWithParameterCmdV4 {
   fn try_from_device_attributes(
     msg: LinearCmdV1,
     features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
-    let cmds: Vec<CheckedVectorSubcommandV4> = msg
+    let cmds: Vec<CheckedValueWithParameterSubcommandV4> = msg
       .vectors()
       .iter()
       .map(|x| {
-        CheckedVectorSubcommandV4::new(
+        CheckedValueWithParameterSubcommandV4::new(
           0,
           x.duration(),
           x.position(),
@@ -111,20 +111,20 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedLinearCmdV4 {
       })
       .collect();
 
-    Ok(CheckedLinearCmdV4::new(msg.device_index(), cmds))
+    Ok(CheckedValueWithParameterCmdV4::new(msg.device_index(), cmds))
   }
 }
 
-impl TryFromDeviceAttributes<LinearCmdV4> for CheckedLinearCmdV4 {
+impl TryFromDeviceAttributes<ValueWithParameterCmdV4> for CheckedValueWithParameterCmdV4 {
   fn try_from_device_attributes(
-    msg: LinearCmdV4,
+    msg: ValueWithParameterCmdV4,
     features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
-    let cmds: Vec<CheckedVectorSubcommandV4> = msg
+    let cmds: Vec<CheckedValueWithParameterSubcommandV4> = msg
       .vectors()
       .iter()
       .map(|x| {
-        CheckedVectorSubcommandV4::new(
+        CheckedValueWithParameterSubcommandV4::new(
           0,
           x.duration(),
           x.position(),
@@ -133,6 +133,6 @@ impl TryFromDeviceAttributes<LinearCmdV4> for CheckedLinearCmdV4 {
       })
       .collect();
 
-    Ok(CheckedLinearCmdV4::new(msg.device_index(), cmds))
+    Ok(CheckedValueWithParameterCmdV4::new(msg.device_index(), cmds))
   }
 }

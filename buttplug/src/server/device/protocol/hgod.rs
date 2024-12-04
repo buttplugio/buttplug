@@ -90,7 +90,7 @@ async fn send_hgod_updates(device: Arc<Hardware>, data: Arc<AtomicU8>) {
 }
 
 impl ProtocolHandler for Hgod {
-  fn handle_scalar_cmd(
+  fn handle_value_cmd(
     &self,
     commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {

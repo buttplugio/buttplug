@@ -26,7 +26,7 @@ impl ProtocolHandler for HtkBm {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_scalar_cmd(
+  fn handle_value_cmd(
     &self,
     cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {

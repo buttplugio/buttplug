@@ -53,7 +53,8 @@ pub enum ButtplugDeviceMessageType {
   SensorReadCmd,
   SensorSubscribeCmd,
   SensorUnsubscribeCmd,
-  LevelCmd,
+  ValueCmd,
+  ValueWithParameterCmd,
   // Deprecated generic commands
   SingleMotorVibrateCmd,
   // Deprecated device specific commands
@@ -80,8 +81,8 @@ impl Ord for ButtplugDeviceMessageType {
 impl From<ButtplugActuatorFeatureMessageType> for ButtplugDeviceMessageType {
   fn from(value: ButtplugActuatorFeatureMessageType) -> Self {
     match value {
-      ButtplugActuatorFeatureMessageType::LinearCmd => ButtplugDeviceMessageType::LinearCmd,
-      ButtplugActuatorFeatureMessageType::LevelCmd => ButtplugDeviceMessageType::ScalarCmd,
+      ButtplugActuatorFeatureMessageType::ValueWithParameterCmd => ButtplugDeviceMessageType::LinearCmd,
+      ButtplugActuatorFeatureMessageType::ValueCmd => ButtplugDeviceMessageType::ScalarCmd,
     }
   }
 }
@@ -91,8 +92,8 @@ impl TryFrom<ButtplugDeviceMessageType> for ButtplugActuatorFeatureMessageType {
 
   fn try_from(value: ButtplugDeviceMessageType) -> Result<Self, Self::Error> {
     match value {
-      ButtplugDeviceMessageType::LinearCmd => Ok(ButtplugActuatorFeatureMessageType::LinearCmd),
-      ButtplugDeviceMessageType::LevelCmd => Ok(ButtplugActuatorFeatureMessageType::LevelCmd),
+      ButtplugDeviceMessageType::LinearCmd => Ok(ButtplugActuatorFeatureMessageType::ValueWithParameterCmd),
+      ButtplugDeviceMessageType::ValueCmd => Ok(ButtplugActuatorFeatureMessageType::ValueCmd),
       _ => Err(()),
     }
   }
@@ -225,8 +226,8 @@ impl ButtplugClientMessageVariant {
       Self::V4(msg) => match msg {
         ButtplugClientMessageV4::SensorSubscribeCmd(a) => Some(a.device_index()),
         ButtplugClientMessageV4::SensorUnsubscribeCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV4::LevelCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV4::LinearCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV4::ValueCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV4::ValueWithParameterCmd(a) => Some(a.device_index()),
         ButtplugClientMessageV4::SensorReadCmd(a) => Some(a.device_index()),
         ButtplugClientMessageV4::RawReadCmd(a) => Some(a.device_index()),
         ButtplugClientMessageV4::RawWriteCmd(a) => Some(a.device_index()),

@@ -297,7 +297,7 @@ impl NintendoJoycon {
 }
 
 impl ProtocolHandler for NintendoJoycon {
-  fn handle_scalar_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     _: u32,
     scalar: u32,

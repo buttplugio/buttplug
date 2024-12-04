@@ -76,7 +76,7 @@ impl ProtocolInitializer for VibratissimoInitializer {
 pub struct Vibratissimo {}
 
 impl ProtocolHandler for Vibratissimo {
-  fn handle_scalar_cmd(
+  fn handle_value_cmd(
     &self,
     cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {

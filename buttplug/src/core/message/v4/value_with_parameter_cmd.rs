@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 #[getset(get_copy = "pub")]
-pub struct VectorSubcommandV4 {
+pub struct ValueWithParameterSubcommandV4 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
   feature_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Duration"))]
@@ -29,7 +29,7 @@ pub struct VectorSubcommandV4 {
   position: f64,
 }
 
-impl VectorSubcommandV4 {
+impl ValueWithParameterSubcommandV4 {
   pub fn new(feature_index: u32, duration: u32, position: f64) -> Self {
     Self {
       feature_index,
@@ -41,18 +41,18 @@ impl VectorSubcommandV4 {
 
 #[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct LinearCmdV4 {
+pub struct ValueWithParameterCmdV4 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Vectors"))]
   #[getset(get = "pub")]
-  vectors: Vec<VectorSubcommandV4>,
+  vectors: Vec<ValueWithParameterSubcommandV4>,
 }
 
-impl LinearCmdV4 {
-  pub fn new(device_index: u32, vectors: Vec<VectorSubcommandV4>) -> Self {
+impl ValueWithParameterCmdV4 {
+  pub fn new(device_index: u32, vectors: Vec<ValueWithParameterSubcommandV4>) -> Self {
     Self {
       id: 1,
       device_index,
@@ -61,7 +61,7 @@ impl LinearCmdV4 {
   }
 }
 
-impl ButtplugMessageValidator for LinearCmdV4 {
+impl ButtplugMessageValidator for ValueWithParameterCmdV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     Ok(())
