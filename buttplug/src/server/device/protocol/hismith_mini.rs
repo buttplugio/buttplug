@@ -80,6 +80,12 @@ impl ProtocolInitializer for HismithMiniInitializer {
         .filter(|x| *x.feature_type() == FeatureType::Vibrate)
         .count()
         >= 2,
+      second_constrict: device_definition
+        .features()
+        .iter()
+        .position(|x| *x.feature_type() == FeatureType::Constrict)
+        .unwrap_or(0)
+        == 1,
     }))
   }
 }
@@ -87,6 +93,7 @@ impl ProtocolInitializer for HismithMiniInitializer {
 #[derive(Default)]
 pub struct HismithMini {
   dual_vibe: bool,
+  second_constrict: bool,
 }
 
 impl ProtocolHandler for HismithMini {
@@ -135,7 +142,7 @@ impl ProtocolHandler for HismithMini {
     _index: u32,
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let idx: u8 = 0x03;
+    let idx: u8 = if self.second_constrict { 0x05 } else { 0x03 };
     let speed: u8 = scalar as u8;
 
     Ok(vec![HardwareWriteCmd::new(

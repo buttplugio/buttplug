@@ -1,6 +1,6 @@
 version:
   major: 3
-  minor: 9
+  minor: 10
 protocols:
   lovense:
     defaults:
@@ -2127,6 +2127,9 @@ protocols:
                 - 27
               messages:
                 - ScalarCmd
+      - identifier:
+          - Jive 2
+        name: WeVibe Jive 2
     communication:
       - btle:
           names:
@@ -2139,6 +2142,7 @@ protocols:
             - Nova2
             - Nova_2
             - Nova 2
+            - Jive 2
           services:
             f000bb03-0451-4000-b000-000000000000:
               tx: f000c000-0451-4000-b000-000000000000
@@ -3605,6 +3609,32 @@ protocols:
           services:
             0000ffe0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+  svakom-barney:
+    defaults:
+      name: Mutufun Barney
+      features:
+        - feature-type: Vibrate
+          actuator:
+            step-range:
+              - 0
+              - 10
+            messages:
+              - ScalarCmd
+        - feature-type: Vibrate
+          actuator:
+            step-range:
+              - 0
+              - 10
+            messages:
+              - ScalarCmd
+    communication:
+      - btle:
+          names:
+            - DJ333A
+          services:
+            0000ffe0-0000-1000-8000-00805f9b34fb:
+              tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+              rx: 0000ffe2-0000-1000-8000-00805f9b34fb
   realov:
     defaults:
       name: Realov Device
@@ -3833,6 +3863,8 @@ protocols:
               tx: 0000fff1-0000-1000-8000-00805f9b34fb
               whitelist: 00000a10-0000-1000-8000-00805f9b34fb
               rx: 00000a04-0000-1000-8000-00805f9b34fb
+              txvibrate: 0000fff2-0000-1000-8000-00805f9b34fb
+              generic0: 00000a11-0000-1000-8000-00805f9b34fb
   lelo-harmony:
     defaults:
       name: Lelo Tiani Harmony
@@ -5775,6 +5807,26 @@ protocols:
                 - 100
               messages:
                 - ScalarCmd
+      - identifier:
+          - '2204'
+        name: Sinloli Cosima
+        features:
+          - feature-type: Oscillate
+            description: Stroker Oscillation Speed
+            actuator:
+              step-range:
+                - 0
+                - 100
+              messages:
+                - ScalarCmd
+          - feature-type: Constrict
+            description: Air Pump
+            actuator:
+              step-range:
+                - 0
+                - 100
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
@@ -5783,6 +5835,7 @@ protocols:
             - Sinloli-Sherry
             - Eropair *
             - HISMITH S1
+            - Sinloli Cosima
           services:
             0000ffe5-0000-1000-8000-00805f9b34fb:
               tx: 0000ffe9-0000-1000-8000-00805f9b34fb
@@ -8095,10 +8148,41 @@ protocols:
       - identifier:
           - TDG_LIP_PT2
         name: Tracy's Dog Surreal
+      - identifier:
+          - MP1P_QC_TL_P6
+        name: Sistalk MonsterPub 1P Mister Devil
+      - identifier:
+          - MPMB_QC_TL_P2
+        name: Sistalk MonsterPub Sweet
+      - identifier:
+          - MPAV_QC_TL_P1
+        name: Sistalk MonsterPub Amazing
+      - identifier:
+          - MH_TOR_TL_P5
+        name: Sistalk MonsterHub Tornado
+      - identifier:
+          - MP_SUCKBANG_P5
+        name: Sistalk MonsterPub Pop
+        features:
+          - feature-type: Oscillate
+            actuator:
+              step-range:
+                - 0
+                - 100
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 100
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
             - MonsterPub
+            - MonsterHub
             - TracyDog
           services:
             00006000-0000-1000-8000-00805f9b34fb:
@@ -9233,6 +9317,25 @@ protocols:
                 - 255
               messages:
                 - ScalarCmd
+      - identifier:
+          - J-Marshal
+        name: JoyHub Marshal
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Constrict
+            description: Air Pump
+            actuator:
+              step-range:
+                - 0
+                - 9
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
@@ -9276,6 +9379,7 @@ protocols:
             - J-VBarbie2t
             - J-Pau
             - J-Petalwish3
+            - J-Marshal
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
