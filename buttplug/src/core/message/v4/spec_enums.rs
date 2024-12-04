@@ -34,8 +34,8 @@ use serde::{Deserialize, Serialize};
 use super::{
   DeviceAddedV4,
   DeviceListV4,
-  LevelCmdV4,
-  LinearCmdV4,
+  ValueCmdV4,
+  ValueWithParameterCmdV4,
   SensorReadCmdV4,
   SensorReadingV4,
   SensorSubscribeCmdV4,
@@ -64,8 +64,8 @@ pub enum ButtplugClientMessageV4 {
   // Generic commands
   StopDeviceCmd(StopDeviceCmdV0),
   StopAllDevices(StopAllDevicesV0),
-  LevelCmd(LevelCmdV4),
-  LinearCmd(LinearCmdV4),
+  ValueCmd(ValueCmdV4),
+  ValueWithParameterCmd(ValueWithParameterCmdV4),
   // Sensor commands
   SensorReadCmd(SensorReadCmdV4),
   SensorSubscribeCmd(SensorSubscribeCmdV4),

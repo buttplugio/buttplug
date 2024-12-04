@@ -21,18 +21,24 @@ use super::{
 #[derive(Debug, Default, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FeatureType {
   #[default]
+  // Used for when types are added that we do not know how to handle
   Unknown,
+  // Level/ValueCmd types
   Vibrate,
   // Single Direction Rotation Speed
   Rotate,
-  // Two Direction Rotation Speed
-  RotateWithDirection,
   Oscillate,
   Constrict,
   Inflate,
   // For instances where we specify a position to move to ASAP. Usually servos, probably for the
   // OSR-2/SR-6.
   Position,
+  // ValueWithParameterCmd types
+  // Two Direction Rotation Speed
+  RotateWithDirection,
+  PositionWithDuration,
+  // Might be useful but dunno if we need it yet, or how to convey "speed" units
+  // PositionWithSpeed
   // Sensor Types
   Battery,
   RSSI,
@@ -54,6 +60,7 @@ impl From<ActuatorType> for FeatureType {
       ActuatorType::Vibrate => FeatureType::Vibrate,
       ActuatorType::Rotate => FeatureType::Rotate,
       ActuatorType::RotateWithDirection => FeatureType::RotateWithDirection,
+      ActuatorType::PositionWithDuration => FeatureType::PositionWithDuration,
       ActuatorType::Oscillate => FeatureType::Oscillate,
       ActuatorType::Constrict => FeatureType::Constrict,
       ActuatorType::Inflate => FeatureType::Inflate,

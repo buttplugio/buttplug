@@ -7,7 +7,7 @@
 
 use crate::core::message::ActuatorType;
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
-use crate::server::message::checked_linear_cmd::CheckedLinearCmdV4;
+use crate::server::message::checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4;
 use crate::server::message::VorzeA10CycloneCmdV0;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
@@ -124,7 +124,7 @@ impl ProtocolHandler for VorzeSA {
     true
   }
 
-  fn handle_scalar_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     _index: u32,
     scalar: u32,
@@ -143,14 +143,14 @@ impl ProtocolHandler for VorzeSA {
     }])
   }
 
-  fn handle_scalar_cmd(
+  fn handle_value_cmd(
     &self,
     cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if cmds.len() == 1 {
       if let Some((actuator, speed)) = cmds[0] {
         if actuator == ActuatorType::Vibrate {
-          self.handle_scalar_vibrate_cmd(0, speed as u32)
+          self.handle_value_vibrate_cmd(0, speed as u32)
         } else {
           let clockwise = if speed >= 0 { 1u8 } else { 0 };
           let data: u8 = (clockwise) << 7 | (speed.unsigned_abs() as u8);
@@ -193,7 +193,7 @@ impl ProtocolHandler for VorzeSA {
 
   fn handle_linear_cmd(
     &self,
-    msg: CheckedLinearCmdV4,
+    msg: CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = msg.vectors()[0].clone();
 

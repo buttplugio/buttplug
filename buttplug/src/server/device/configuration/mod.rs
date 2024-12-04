@@ -615,7 +615,7 @@ mod test {
               &Some(DeviceFeatureActuator::new(
                 &RangeInclusive::new(0, 20),
                 &RangeInclusive::new(0, 20),
-                &HashSet::from_iter([ButtplugActuatorFeatureMessageType::LevelCmd]),
+                &HashSet::from_iter([ButtplugActuatorFeatureMessageType::ValueCmd]),
               )),
               &None,
             ),
@@ -627,7 +627,7 @@ mod test {
               &Some(DeviceFeatureActuator::new(
                 &RangeInclusive::new(0, 20),
                 &RangeInclusive::new(0, 20),
-                &HashSet::from_iter([ButtplugActuatorFeatureMessageType::LevelCmd]),
+                &HashSet::from_iter([ButtplugActuatorFeatureMessageType::ValueCmd]),
               )),
               &None,
             ),

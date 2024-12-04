@@ -23,7 +23,7 @@ use crate::{
       DeviceMessageInfoV4,
       Endpoint,
       FeatureType,
-      LevelCmdV4,
+      ValueCmdV4,
       RawReadCmdV2,
       RawSubscribeCmdV2,
       RawUnsubscribeCmdV2,
@@ -173,13 +173,13 @@ impl ButtplugClientDevice {
       .collect()
   }
 
-  fn level(&self, feature_type: FeatureType, level: i32) -> ButtplugClientResultFuture {
+  fn set_value(&self, feature_type: FeatureType, value: i32) -> ButtplugClientResultFuture {
     let features = self.filter_device_features(feature_type);
     if features.is_empty() {
       // TODO err
     }
-    let subcommands = features.iter().map(|x| x.level_subcommand(level)).collect();
-    let command = LevelCmdV4::new(self.index, subcommands);
+    let subcommands = features.iter().map(|x| x.value_subcommand(value)).collect();
+    let command = ValueCmdV4::new(self.index, subcommands);
     self
       .event_loop_sender
       .send_message_expect_ok(command.into())
@@ -191,7 +191,7 @@ impl ButtplugClientDevice {
 
   /// Commands device to vibrate, assuming it has the features to do so.
   pub fn vibrate(&self, speed: u32) -> ButtplugClientResultFuture {
-    self.level(FeatureType::Vibrate, speed as i32)
+    self.set_value(FeatureType::Vibrate, speed as i32)
   }
 
   pub fn has_battery_level(&self) -> bool {

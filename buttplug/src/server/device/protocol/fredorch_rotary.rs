@@ -191,7 +191,7 @@ impl FredorchRotary {
 }
 
 impl ProtocolHandler for FredorchRotary {
-  fn handle_scalar_oscillate_cmd(
+  fn handle_value_oscillate_cmd(
     &self,
     _index: u32,
     scalar: u32,

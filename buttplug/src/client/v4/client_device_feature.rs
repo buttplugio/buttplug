@@ -11,8 +11,8 @@ use crate::{
       ButtplugServerMessageV4,
       DeviceFeature,
       FeatureType,
-      LevelCmdV4,
-      LevelSubcommandV4,
+      ValueCmdV4,
+      ValueSubcommandV4,
       SensorReadCmdV4,
       SensorSubscribeCmdV4,
       SensorUnsubscribeCmdV4,
@@ -58,14 +58,14 @@ impl ClientDeviceFeature {
     }
   }
 
-  pub(super) fn level_subcommand(&self, level: i32) -> LevelSubcommandV4 {
-    LevelSubcommandV4::new(self.feature_index, level)
+  pub(super) fn value_subcommand(&self, value: i32) -> ValueSubcommandV4 {
+    ValueSubcommandV4::new(self.feature_index, value)
   }
 
-  fn check_and_send_level_cmd(
+  fn check_and_set_value(
     &self,
     feature: FeatureType,
-    level: i32,
+    value: i32,
   ) -> ButtplugClientResultFuture {
     if *self.feature.feature_type() != feature {
       future::ready(Err(ButtplugClientError::from(ButtplugError::from(
@@ -78,37 +78,37 @@ impl ClientDeviceFeature {
       .boxed()
     } else {
       self.event_loop_sender.send_message_expect_ok(
-        LevelCmdV4::new(self.device_index, vec![self.level_subcommand(level)]).into(),
+        ValueCmdV4::new(self.device_index, vec![self.value_subcommand(value)]).into(),
       )
     }
   }
 
   pub fn vibrate(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_send_level_cmd(FeatureType::Vibrate, level as i32)
+    self.check_and_set_value(FeatureType::Vibrate, level as i32)
   }
 
   pub fn oscillate(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_send_level_cmd(FeatureType::Oscillate, level as i32)
+    self.check_and_set_value(FeatureType::Oscillate, level as i32)
   }
 
   pub fn rotate(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_send_level_cmd(FeatureType::Rotate, level as i32)
+    self.check_and_set_value(FeatureType::Rotate, level as i32)
   }
 
   pub fn inflate(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_send_level_cmd(FeatureType::Inflate, level as i32)
+    self.check_and_set_value(FeatureType::Inflate, level as i32)
   }
 
   pub fn constrict(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_send_level_cmd(FeatureType::Constrict, level as i32)
+    self.check_and_set_value(FeatureType::Constrict, level as i32)
   }
 
   pub fn position(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_send_level_cmd(FeatureType::Position, level as i32)
+    self.check_and_set_value(FeatureType::Position, level as i32)
   }
 
   pub fn rotate_with_direction(&self, level: i32) -> ButtplugClientResultFuture {
-    self.check_and_send_level_cmd(FeatureType::RotateWithDirection, level)
+    self.check_and_set_value(FeatureType::RotateWithDirection, level)
   }
 
   pub fn subscribe_sensor(&self, sensor_index: u32) -> ButtplugClientResultFuture {
