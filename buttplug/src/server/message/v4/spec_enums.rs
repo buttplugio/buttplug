@@ -9,8 +9,8 @@ use crate::{
       ButtplugMessage,
       ButtplugMessageFinalizer,
       ButtplugMessageValidator,
-      LevelCmdV4,
-      LinearCmdV4,
+      ValueCmdV4,
+      ValueWithParameterCmdV4,
       PingV0,
       RawReadCmdV2,
       RawSubscribeCmdV2,
@@ -40,8 +40,8 @@ use crate::{
 };
 
 use super::{
-  checked_level_cmd::CheckedLevelCmdV4,
-  checked_linear_cmd::CheckedLinearCmdV4,
+  checked_value_cmd::CheckedValueCmdV4,
+  checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4,
   checked_sensor_read_cmd::CheckedSensorReadCmdV4,
   checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4,
   checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4,
@@ -75,8 +75,8 @@ pub enum ButtplugCheckedClientMessageV4 {
   // Generic commands
   StopDeviceCmd(StopDeviceCmdV0),
   StopAllDevices(StopAllDevicesV0),
-  LevelCmd(CheckedLevelCmdV4),
-  LinearCmd(CheckedLinearCmdV4),
+  ValueCmd(CheckedValueCmdV4),
+  ValueWithParameterCmd(CheckedValueWithParameterCmdV4),
   // Sensor commands
   SensorReadCmd(CheckedSensorReadCmdV4),
   SensorSubscribeCmd(CheckedSensorSubscribeCmdV4),
@@ -124,10 +124,10 @@ impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMess
       }
 
       // Message that need device index and feature checking
-      ButtplugClientMessageV4::LevelCmd(m) => {
+      ButtplugClientMessageV4::ValueCmd(m) => {
         if let Some(features) = feature_map.get(&m.device_index()) {
-          Ok(ButtplugCheckedClientMessageV4::LevelCmd(
-            CheckedLevelCmdV4::try_from_device_attributes(m, features)?,
+          Ok(ButtplugCheckedClientMessageV4::ValueCmd(
+            CheckedValueCmdV4::try_from_device_attributes(m, features)?,
           ))
         } else {
           Err(ButtplugError::from(
@@ -135,10 +135,10 @@ impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMess
           ))
         }
       }
-      ButtplugClientMessageV4::LinearCmd(m) => {
+      ButtplugClientMessageV4::ValueWithParameterCmd(m) => {
         if let Some(features) = feature_map.get(&m.device_index()) {
-          Ok(ButtplugCheckedClientMessageV4::LinearCmd(
-            CheckedLinearCmdV4::try_from_device_attributes(m, features)?,
+          Ok(ButtplugCheckedClientMessageV4::ValueWithParameterCmd(
+            CheckedValueWithParameterCmdV4::try_from_device_attributes(m, features)?,
           ))
         } else {
           Err(ButtplugError::from(
@@ -293,10 +293,10 @@ impl TryFromClientMessage<ButtplugClientMessageV1> for ButtplugCheckedClientMess
     match msg {
       ButtplugClientMessageV1::VorzeA10CycloneCmd(m) => {
         // Vorze and RotateCmd are equivalent, so this is an ok conversion.
-        Ok(check_device_index_and_convert::<_, CheckedLevelCmdV4>(m, features)?.into())
+        Ok(check_device_index_and_convert::<_, CheckedValueCmdV4>(m, features)?.into())
       }
       ButtplugClientMessageV1::SingleMotorVibrateCmd(m) => {
-        Ok(check_device_index_and_convert::<_, CheckedLevelCmdV4>(m, features)?.into())
+        Ok(check_device_index_and_convert::<_, CheckedValueCmdV4>(m, features)?.into())
       }
       _ => Self::try_from_client_message(ButtplugClientMessageV2::try_from(msg)?, features),
     }
@@ -318,7 +318,7 @@ impl TryFromClientMessage<ButtplugClientMessageV2> for ButtplugCheckedClientMess
       }
       // Convert VibrateCmd to a ScalarCmd command
       ButtplugClientMessageV2::VibrateCmd(m) => {
-        Ok(check_device_index_and_convert::<_, CheckedLevelCmdV4>(m, features)?.into())
+        Ok(check_device_index_and_convert::<_, CheckedValueCmdV4>(m, features)?.into())
       }
       _ => Self::try_from_client_message(ButtplugClientMessageV3::try_from(msg)?, features),
     }
@@ -333,16 +333,16 @@ impl TryFromClientMessage<ButtplugClientMessageV3> for ButtplugCheckedClientMess
     match msg {
       // Convert v1/v2 message attribute commands into device feature commands
       ButtplugClientMessageV3::VibrateCmd(m) => {
-        Ok(check_device_index_and_convert::<_, CheckedLevelCmdV4>(m, features)?.into())
+        Ok(check_device_index_and_convert::<_, CheckedValueCmdV4>(m, features)?.into())
       }
       ButtplugClientMessageV3::ScalarCmd(m) => {
-        Ok(check_device_index_and_convert::<_, CheckedLevelCmdV4>(m, features)?.into())
+        Ok(check_device_index_and_convert::<_, CheckedValueCmdV4>(m, features)?.into())
       }
       ButtplugClientMessageV3::RotateCmd(m) => {
-        Ok(check_device_index_and_convert::<_, CheckedLevelCmdV4>(m, features)?.into())
+        Ok(check_device_index_and_convert::<_, CheckedValueCmdV4>(m, features)?.into())
       }
       ButtplugClientMessageV3::LinearCmd(m) => {
-        Ok(check_device_index_and_convert::<_, CheckedLinearCmdV4>(m, features)?.into())
+        Ok(check_device_index_and_convert::<_, CheckedValueWithParameterCmdV4>(m, features)?.into())
       }
       ButtplugClientMessageV3::SensorReadCmd(m) => {
         Ok(check_device_index_and_convert::<_, CheckedSensorReadCmdV4>(m, features)?.into())
@@ -414,8 +414,8 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceManagerMessageUni
 )]
 pub enum ButtplugDeviceCommandMessageUnionV4 {
   StopDeviceCmd(StopDeviceCmdV0),
-  LinearCmd(CheckedLinearCmdV4),
-  LevelCmd(CheckedLevelCmdV4),
+  LinearCmd(CheckedValueWithParameterCmdV4),
+  LevelCmd(CheckedValueCmdV4),
   SensorReadCmd(CheckedSensorReadCmdV4),
   SensorSubscribeCmd(CheckedSensorSubscribeCmdV4),
   SensorUnsubscribeCmd(CheckedSensorUnsubscribeCmdV4),
@@ -432,8 +432,8 @@ impl From<ButtplugDeviceCommandMessageUnionV4> for ButtplugClientMessageV4 {
     use ButtplugDeviceCommandMessageUnionV4::*;
     match value {
       StopDeviceCmd(msg) => msg.into(),
-      LevelCmd(msg) => LevelCmdV4::from(msg).into(),
-      LinearCmd(msg) => LinearCmdV4::from(msg).into(),
+      LevelCmd(msg) => ValueCmdV4::from(msg).into(),
+      LinearCmd(msg) => ValueWithParameterCmdV4::from(msg).into(),
       SensorReadCmd(msg) => SensorReadCmdV4::from(msg).into(),
       SensorSubscribeCmd(msg) => SensorSubscribeCmdV4::from(msg).into(),
       SensorUnsubscribeCmd(msg) => SensorUnsubscribeCmdV4::from(msg).into(),
@@ -453,10 +453,10 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceCommandMessageUni
       ButtplugCheckedClientMessageV4::StopDeviceCmd(m) => {
         Ok(ButtplugDeviceCommandMessageUnionV4::StopDeviceCmd(m))
       }
-      ButtplugCheckedClientMessageV4::LinearCmd(m) => {
+      ButtplugCheckedClientMessageV4::ValueWithParameterCmd(m) => {
         Ok(ButtplugDeviceCommandMessageUnionV4::LinearCmd(m))
       }
-      ButtplugCheckedClientMessageV4::LevelCmd(m) => {
+      ButtplugCheckedClientMessageV4::ValueCmd(m) => {
         Ok(ButtplugDeviceCommandMessageUnionV4::LevelCmd(m))
       }
       ButtplugCheckedClientMessageV4::SensorReadCmd(m) => {

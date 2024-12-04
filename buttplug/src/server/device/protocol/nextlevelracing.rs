@@ -23,7 +23,7 @@ impl ProtocolHandler for NextLevelRacing {
     false
   }
 
-  fn handle_scalar_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     index: u32,
     scalar: u32,

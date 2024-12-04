@@ -90,7 +90,7 @@ impl ProtocolHandler for MysteryVibe {
     true
   }
 
-  fn handle_scalar_cmd(
+  fn handle_value_cmd(
     &self,
     cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {

@@ -155,8 +155,8 @@ pub trait ButtplugDeviceMessage: ButtplugMessage {
 
 #[derive(Copy, Debug, Clone, Hash, Display, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ButtplugActuatorFeatureMessageType {
-  LevelCmd,
-  LinearCmd,
+  ValueCmd,
+  ValueWithParameterCmd,
 }
 
 #[derive(Copy, Debug, Clone, Hash, Display, PartialEq, Eq, Serialize, Deserialize)]
@@ -192,6 +192,7 @@ pub enum ActuatorType {
   // For instances where we specify a position to move to ASAP. Usually servos, probably for the
   // OSR-2/SR-6.
   Position,
+  PositionWithDuration,
 }
 
 impl TryFrom<FeatureType> for ActuatorType {
@@ -202,6 +203,7 @@ impl TryFrom<FeatureType> for ActuatorType {
       FeatureType::Vibrate => Ok(ActuatorType::Vibrate),
       FeatureType::Rotate => Ok(ActuatorType::Rotate),
       FeatureType::RotateWithDirection => Ok(ActuatorType::RotateWithDirection),
+      FeatureType::PositionWithDuration => Ok(ActuatorType::PositionWithDuration),
       FeatureType::Oscillate => Ok(ActuatorType::Oscillate),
       FeatureType::Constrict => Ok(ActuatorType::Constrict),
       FeatureType::Inflate => Ok(ActuatorType::Inflate),

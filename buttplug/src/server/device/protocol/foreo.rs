@@ -58,7 +58,7 @@ impl ProtocolHandler for Foreo {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_scalar_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     _: u32,
     scalar: u32,

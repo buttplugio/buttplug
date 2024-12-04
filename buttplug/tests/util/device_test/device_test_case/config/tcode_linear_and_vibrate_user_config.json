@@ -47,7 +47,7 @@
                   100
                 ],
                 "messages": [
-                  "LinearCmd"
+                  "ValueWithParameterCmd"
                 ]
               },
               "id": "c5e6384e-399b-4c2b-9791-eb48abaf3bf7"
@@ -65,7 +65,7 @@
                   99
                 ],
                 "messages": [
-                  "LevelCmd"
+                  "ValueCmd"
                 ]
               },
               "id": "e4384a37-fd37-4b9e-8464-a510dd8410a7"

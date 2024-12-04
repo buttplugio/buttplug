@@ -23,7 +23,7 @@ impl ProtocolHandler for Kizuna {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_scalar_rotate_cmd(
+  fn handle_value_rotate_cmd(
     &self,
     _index: u32,
     scalar: u32,

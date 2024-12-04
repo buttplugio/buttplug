@@ -11,7 +11,7 @@ use crate::{
     message::{ActuatorType, ButtplugActuatorFeatureMessageType, DeviceFeatureActuator},
   },
   server::message::{
-    checked_level_cmd::{CheckedLevelCmdV4, CheckedLevelSubcommandV4},
+    checked_value_cmd::{CheckedValueCmdV4, CheckedValueSubcommandV4},
     server_device_feature::ServerDeviceFeature,
     spec_enums::ButtplugDeviceCommandMessageUnionV4,
   },
@@ -104,9 +104,9 @@ impl ActuatorCommandManager {
         statuses.push(FeatureStatus::new(feature.id(), &actuator_type, actuator));
         if actuator
           .messages()
-          .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::LevelCmd)
+          .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ValueCmd)
         {
-          level_subcommands.push(CheckedLevelSubcommandV4::new(
+          level_subcommands.push(CheckedValueSubcommandV4::new(
             index as u32,
             0,
             *feature.id(),
@@ -115,7 +115,7 @@ impl ActuatorCommandManager {
       }
     }
     if !level_subcommands.is_empty() {
-      stop_commands.push(CheckedLevelCmdV4::new(0, 0, &level_subcommands).into());
+      stop_commands.push(CheckedValueCmdV4::new(0, 0, &level_subcommands).into());
     }
 
     Self {
@@ -154,7 +154,7 @@ impl ActuatorCommandManager {
 
   pub fn update_level(
     &self,
-    msg: &CheckedLevelCmdV4,
+    msg: &CheckedValueCmdV4,
     match_all: bool,
   ) -> Result<Vec<Option<(ActuatorType, i32)>>, ButtplugError> {
     trace!("Updating level for message: {:?}", msg);
@@ -163,7 +163,7 @@ impl ActuatorCommandManager {
     for x in self.feature_status.iter() {
       if x
         .messages()
-        .contains(&ButtplugActuatorFeatureMessageType::LevelCmd)
+        .contains(&ButtplugActuatorFeatureMessageType::ValueCmd)
       {
         idxs.insert(x.feature_id(), idxs.len() as u32);
       }
@@ -187,7 +187,7 @@ impl ActuatorCommandManager {
       ))
     });
     let mut result = self.update(
-      ButtplugActuatorFeatureMessageType::LevelCmd,
+      ButtplugActuatorFeatureMessageType::ValueCmd,
       &commands,
       match_all,
     )?;

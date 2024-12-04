@@ -49,7 +49,7 @@ impl ProtocolHandler for AmorelieJoy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_scalar_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     _index: u32,
     scalar: u32,

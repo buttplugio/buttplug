@@ -185,7 +185,7 @@
           },
           "feature-type": {
             "type": "string",
-            "pattern": "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|Battery|RSSI|Pressure|RotateWithDirection)$"
+            "pattern": "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|Battery|RSSI|Pressure|RotateWithDirection|PositionWithDuration)$"
           },
           "actuator": {
             "type": "object",
@@ -197,7 +197,7 @@
                 "type": "array",
                 "items": {
                   "type": "string",
-                  "pattern": "^(LevelCmd|LinearCmd)$"
+                  "pattern": "^(ValueCmd|ValueWithParameterCmd)$"
                 }
               }
             },
@@ -254,7 +254,7 @@
           },
           "feature-type": {
             "type": "string",
-            "pattern": "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|Battery|RSSI|Pressure)$"
+            "pattern": "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|Battery|RSSI|Pressure|RotateWithDirection|PositionWithDuration)$"
           },
           "actuator": {
             "type": "object",
@@ -269,7 +269,7 @@
                 "type": "array",
                 "items": {
                   "type": "string",
-                  "pattern": "^(LevelCmd|LinearCmd)$"
+                  "pattern": "^(ValueCmd|ValueWithParameterCmd)$"
                 }
               }
             },

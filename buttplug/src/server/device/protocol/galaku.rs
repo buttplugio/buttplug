@@ -124,7 +124,7 @@ impl ProtocolHandler for Galaku {
     true
   }
 
-  fn handle_scalar_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     _index: u32,
     scalar: u32,
@@ -138,7 +138,7 @@ impl ProtocolHandler for Galaku {
     .into()])
   }
 
-  fn handle_scalar_cmd(
+  fn handle_value_cmd(
     &self,
     commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
