@@ -22,7 +22,7 @@ use crate::{
       },
     },
     message::{
-      checked_linear_cmd::{CheckedLinearCmdV4, CheckedVectorSubcommandV4},
+      checked_value_with_parameter_cmd::{CheckedValueWithParameterCmdV4, CheckedValueWithParameterSubcommandV4},
       FleshlightLaunchFW12CmdV0,
     },
   },
@@ -154,9 +154,9 @@ impl ProtocolHandler for TheHandy {
     let distance = (goal_position - previous_position).abs();
     let duration =
       fleshlight_launch_helper::calculate_duration(distance, message.speed() as f64 / 99f64);
-    self.handle_linear_cmd(CheckedLinearCmdV4::new(
+    self.handle_linear_cmd(CheckedValueWithParameterCmdV4::new(
       0,
-      vec![CheckedVectorSubcommandV4::new(
+      vec![CheckedValueWithParameterSubcommandV4::new(
         0,
         duration,
         goal_position,
@@ -167,7 +167,7 @@ impl ProtocolHandler for TheHandy {
 
   fn handle_linear_cmd(
     &self,
-    message: CheckedLinearCmdV4,
+    message: CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // What is "How not to implement a command structure for your device that does one thing", Alex?
 

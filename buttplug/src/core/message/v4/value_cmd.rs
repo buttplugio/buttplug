@@ -20,14 +20,14 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 #[getset(get_copy = "pub")]
-pub struct LevelSubcommandV4 {
+pub struct ValueSubcommandV4 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
   feature_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Scalar"))]
   level: i32,
 }
 
-impl LevelSubcommandV4 {
+impl ValueSubcommandV4 {
   pub fn new(feature_index: u32, level: i32) -> Self {
     Self {
       feature_index,
@@ -40,18 +40,18 @@ impl LevelSubcommandV4 {
   Debug, Default, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, Getters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct LevelCmdV4 {
+pub struct ValueCmdV4 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Scalars"))]
   #[getset(get = "pub")]
-  levels: Vec<LevelSubcommandV4>,
+  levels: Vec<ValueSubcommandV4>,
 }
 
-impl LevelCmdV4 {
-  pub fn new(device_index: u32, levels: Vec<LevelSubcommandV4>) -> Self {
+impl ValueCmdV4 {
+  pub fn new(device_index: u32, levels: Vec<ValueSubcommandV4>) -> Self {
     Self {
       id: 1,
       device_index,
@@ -60,7 +60,7 @@ impl LevelCmdV4 {
   }
 }
 
-impl ButtplugMessageValidator for LevelCmdV4 {
+impl ButtplugMessageValidator for ValueCmdV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     Ok(())

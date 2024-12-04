@@ -23,7 +23,7 @@ use crate::{
       protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     },
     message::{
-      checked_linear_cmd::CheckedLinearCmdV4,
+      checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4,
       checked_sensor_read_cmd::CheckedSensorReadCmdV4,
     },
   },
@@ -243,7 +243,7 @@ impl ProtocolHandler for Lovense {
     ))
   }
 
-  fn handle_scalar_cmd(
+  fn handle_value_cmd(
     &self,
     cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
@@ -466,7 +466,7 @@ impl ProtocolHandler for Lovense {
 
   fn handle_linear_cmd(
     &self,
-    message: CheckedLinearCmdV4,
+    message: CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let vector = message
       .vectors()

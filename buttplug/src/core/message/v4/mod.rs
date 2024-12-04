@@ -8,8 +8,8 @@
 mod device_added;
 mod device_list;
 mod device_message_info;
-mod level_cmd;
-mod linear_cmd;
+mod value_cmd;
+mod value_with_parameter_cmd;
 mod sensor_read_cmd;
 mod sensor_reading;
 mod sensor_subscribe_cmd;
@@ -20,8 +20,8 @@ pub use {
   device_added::DeviceAddedV4,
   device_list::DeviceListV4,
   device_message_info::DeviceMessageInfoV4,
-  level_cmd::{LevelCmdV4, LevelSubcommandV4},
-  linear_cmd::{LinearCmdV4, VectorSubcommandV4},
+  value_cmd::{ValueCmdV4, ValueSubcommandV4},
+  value_with_parameter_cmd::{ValueWithParameterCmdV4, ValueWithParameterSubcommandV4},
   sensor_read_cmd::SensorReadCmdV4,
   sensor_reading::SensorReadingV4,
   sensor_subscribe_cmd::SensorSubscribeCmdV4,

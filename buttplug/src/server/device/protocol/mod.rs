@@ -158,7 +158,7 @@ use crate::{
       hardware::{Hardware, HardwareCommand, HardwareReadCmd},
     },
     message::{
-      checked_linear_cmd::CheckedLinearCmdV4,
+      checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4,
       checked_sensor_read_cmd::CheckedSensorReadCmdV4,
       checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4,
       checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4,
@@ -822,7 +822,7 @@ pub trait ProtocolHandler: Sync + Send {
   // The default scalar handler assumes that most devices require discrete commands per feature. If
   // a protocol has commands that combine multiple features, either with matched or unmatched
   // actuators, they should just implement their own version of this method.
-  fn handle_scalar_cmd(
+  fn handle_value_cmd(
     &self,
     commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
@@ -832,22 +832,25 @@ pub trait ProtocolHandler: Sync + Send {
       command_vec.append(
         &mut (match *actuator {
           ActuatorType::Constrict => {
-            self.handle_scalar_constrict_cmd(index as u32, *scalar as u32)?
+            self.handle_value_constrict_cmd(index as u32, *scalar as u32)?
           }
-          ActuatorType::Inflate => self.handle_scalar_inflate_cmd(index as u32, *scalar as u32)?,
+          ActuatorType::Inflate => self.handle_value_inflate_cmd(index as u32, *scalar as u32)?,
           ActuatorType::Oscillate => {
-            self.handle_scalar_oscillate_cmd(index as u32, *scalar as u32)?
+            self.handle_value_oscillate_cmd(index as u32, *scalar as u32)?
           }
-          ActuatorType::Rotate => self.handle_scalar_rotate_cmd(index as u32, *scalar as u32)?,
+          ActuatorType::Rotate => self.handle_value_rotate_cmd(index as u32, *scalar as u32)?,
           ActuatorType::RotateWithDirection => {
             self.handle_rotate_cmd(&[Some((scalar.unsigned_abs(), *scalar >= 0))])?
           }
-          ActuatorType::Vibrate => self.handle_scalar_vibrate_cmd(index as u32, *scalar as u32)?,
+          ActuatorType::Vibrate => self.handle_value_vibrate_cmd(index as u32, *scalar as u32)?,
           ActuatorType::Position => {
-            self.handle_scalar_position_cmd(index as u32, *scalar as u32)?
+            self.handle_value_position_cmd(index as u32, *scalar as u32)?
           }
           ActuatorType::Unknown => Err(ButtplugDeviceError::UnhandledCommand(
             "Unknown actuator types are not controllable.".to_owned(),
+          ))?,
+          _ => Err(ButtplugDeviceError::UnhandledCommand(
+            format!("{} actuator types are not compatible with ValueCmd.", *actuator).to_owned(),
           ))?,
         }),
       );
@@ -855,52 +858,52 @@ pub trait ProtocolHandler: Sync + Send {
     Ok(command_vec)
   }
 
-  fn handle_scalar_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     _index: u32,
     _scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented("ScalarCmd (Vibrate Actuator)")
+    self.command_unimplemented("ValueCmd (Vibrate Actuator)")
   }
 
-  fn handle_scalar_rotate_cmd(
+  fn handle_value_rotate_cmd(
     &self,
     _index: u32,
     _scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented("ScalarCmd (Rotate Actuator)")
+    self.command_unimplemented("ValueCmd (Rotate Actuator)")
   }
 
-  fn handle_scalar_oscillate_cmd(
+  fn handle_value_oscillate_cmd(
     &self,
     _index: u32,
     _scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented("ScalarCmd (Osccilate Actuator)")
+    self.command_unimplemented("ValueCmd (Osccilate Actuator)")
   }
 
-  fn handle_scalar_inflate_cmd(
+  fn handle_value_inflate_cmd(
     &self,
     _index: u32,
     _scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented("ScalarCmd (Inflate Actuator)")
+    self.command_unimplemented("ValueCmd (Inflate Actuator)")
   }
 
-  fn handle_scalar_constrict_cmd(
+  fn handle_value_constrict_cmd(
     &self,
     _index: u32,
     _scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented("ScalarCmd (Constrict Actuator)")
+    self.command_unimplemented("ValueCmd (Constrict Actuator)")
   }
 
-  fn handle_scalar_position_cmd(
+  fn handle_value_position_cmd(
     &self,
     _index: u32,
     _scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented("ScalarCmd (Constrict Actuator)")
+    self.command_unimplemented("ValueCmd (Position Actuator)")
   }
 
   fn handle_vorze_a10_cyclone_cmd(
@@ -933,7 +936,7 @@ pub trait ProtocolHandler: Sync + Send {
 
   fn handle_linear_cmd(
     &self,
-    message: CheckedLinearCmdV4,
+    message: CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented(print_type_of(&message))
   }
@@ -944,7 +947,7 @@ pub trait ProtocolHandler: Sync + Send {
     _message: &CheckedSensorSubscribeCmdV4,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
-      "Command not implemented for this protocol: BatteryCmd".to_string(),
+      "Command not implemented for this protocol: SensorSubscribeCmd".to_string(),
     )))
     .boxed()
   }
@@ -955,7 +958,7 @@ pub trait ProtocolHandler: Sync + Send {
     _message: &CheckedSensorUnsubscribeCmdV4,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
-      "Command not implemented for this protocol: BatteryCmd".to_string(),
+      "Command not implemented for this protocol: SensorSubscribeCmd".to_string(),
     )))
     .boxed()
   }

@@ -320,7 +320,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
         .filter(|x| {
           if let Some(actuator) = x.actuator() {
             // Carve out RotateCmd here
-            !(*message_type == ButtplugActuatorFeatureMessageType::LevelCmd
+            !(*message_type == ButtplugActuatorFeatureMessageType::ValueCmd
               && *x.feature_type() == FeatureType::RotateWithDirection)
               && actuator.messages().contains(message_type)
           } else {
@@ -345,7 +345,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
           if let Some(actuator) = x.actuator() {
             actuator
               .messages()
-              .contains(&ButtplugActuatorFeatureMessageType::LevelCmd)
+              .contains(&ButtplugActuatorFeatureMessageType::ValueCmd)
               && *x.feature_type() == FeatureType::RotateWithDirection
           } else {
             false
@@ -388,9 +388,9 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
       });
 
     Self {
-      scalar_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::LevelCmd),
+      scalar_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::ValueCmd),
       rotate_cmd: rotate_attributes,
-      linear_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::LinearCmd),
+      linear_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::ValueWithParameterCmd),
       sensor_read_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorReadCmd),
       sensor_subscribe_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorSubscribeCmd),
       raw_read_cmd: raw_attrs.clone(),

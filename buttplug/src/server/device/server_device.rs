@@ -65,7 +65,7 @@ use crate::{
       protocol::ProtocolHandler,
     },
     message::{
-      checked_level_cmd::CheckedLevelCmdV4,
+      checked_value_cmd::CheckedValueCmdV4,
       checked_sensor_read_cmd::CheckedSensorReadCmdV4,
       checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4,
       checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4,
@@ -395,7 +395,7 @@ impl ServerDevice {
         check_msg(ButtplugDeviceMessageType::RawWriteCmd)
       }
       ButtplugDeviceCommandMessageUnionV4::LevelCmd(_) => {
-        check_msg(ButtplugDeviceMessageType::LevelCmd)
+        check_msg(ButtplugDeviceMessageType::ValueCmd)
       }
       ButtplugDeviceCommandMessageUnionV4::StopDeviceCmd(_) => {
         //check_msg(ButtplugDeviceMessageType::StopDeviceCmd)
@@ -470,7 +470,7 @@ impl ServerDevice {
     }
   }
 
-  fn handle_levelcmd_v4(&self, msg: &CheckedLevelCmdV4) -> ButtplugServerResultFuture {
+  fn handle_levelcmd_v4(&self, msg: &CheckedValueCmdV4) -> ButtplugServerResultFuture {
     let commands = match self
       .actuator_command_manager
       .update_level(msg, self.handler.needs_full_command_set())
@@ -484,7 +484,7 @@ impl ServerDevice {
       return future::ready(Ok(message::OkV0::default().into())).boxed();
     }
     self.handle_generic_command_result(
-      self.handler.handle_scalar_cmd(
+      self.handler.handle_value_cmd(
         &commands
           .iter()
           .map(|x| {

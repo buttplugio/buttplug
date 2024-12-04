@@ -12,7 +12,7 @@ use crate::{
       hardware::{HardwareCommand, HardwareWriteCmd},
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
-    message::checked_linear_cmd::CheckedLinearCmdV4,
+    message::checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4,
   },
 };
 
@@ -24,7 +24,7 @@ pub struct TCodeV03 {}
 impl ProtocolHandler for TCodeV03 {
   fn handle_linear_cmd(
     &self,
-    msg: CheckedLinearCmdV4,
+    msg: CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut msg_vec = vec![];
     for v in msg.vectors() {
@@ -36,7 +36,7 @@ impl ProtocolHandler for TCodeV03 {
     Ok(msg_vec)
   }
 
-  fn handle_scalar_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     index: u32,
     scalar: u32,
