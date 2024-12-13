@@ -10225,6 +10225,40 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "2202"
+          ],
+          "name": "Sinloli Ethel",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "description": "Stroker Oscillation Speed",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrator",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -10236,7 +10270,8 @@
               "Sinloli-Sherry",
               "Eropair *",
               "HISMITH S1",
-              "Sinloli Cosima"
+              "Sinloli Cosima",
+              "Sinloli-Ethel"
             ],
             "services": {
               "0000ffe5-0000-1000-8000-00805f9b34fb": {
