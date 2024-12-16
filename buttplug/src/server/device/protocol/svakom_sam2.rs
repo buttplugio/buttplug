@@ -35,7 +35,7 @@ impl ProtocolHandler for SvakomSam2 {
         0x03,
         0x00,
         0x00,
-        if scalar == 0 { 0x00 } else { 0x01 },
+        if scalar == 0 { 0x00 } else { 0x05 },
         scalar as u8,
         0x00,
       ]
