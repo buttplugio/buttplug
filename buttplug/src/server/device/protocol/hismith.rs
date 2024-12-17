@@ -16,6 +16,7 @@ use crate::{
 };
 use async_trait::async_trait;
 use std::sync::Arc;
+use crate::server::device::protocol::hismith_mini::HismithMiniInitializer;
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -36,6 +37,8 @@ pub mod setup {
 #[derive(Default)]
 pub struct HismithIdentifier {}
 
+const LEGACY_HISMITHS: [&'static str; 6] = ["1001", "1002", "1003", "3001", "2001", "1006"];
+
 #[async_trait]
 impl ProtocolIdentifier for HismithIdentifier {
   async fn identify(
@@ -53,6 +56,14 @@ impl ProtocolIdentifier for HismithIdentifier {
       .map(|b| format!("{:02x}", b))
       .collect::<String>();
     info!("Hismith Device Identifier: {}", identifier);
+
+    if !LEGACY_HISMITHS.contains(&identifier.as_str()) {
+      info!("Not a legacy Hismith, using hismith-mini protocol");
+      return Ok((
+        UserDeviceIdentifier::new(hardware.address(), "hismith-mini", &Some(identifier)),
+        Box::new(HismithMiniInitializer::default()),
+      ));
+    }
 
     Ok((
       UserDeviceIdentifier::new(hardware.address(), "hismith", &Some(identifier)),

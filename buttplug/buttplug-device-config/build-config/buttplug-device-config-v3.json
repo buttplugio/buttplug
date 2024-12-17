@@ -9985,6 +9985,39 @@
         },
         {
           "identifier": [
+            "1006"
+          ],
+          "name": "Hismith G011",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "description": "Stroker Oscillation Speed",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  1
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
             "3001"
           ],
           "name": "Wildolo Device",
@@ -10052,9 +10085,34 @@
         },
         {
           "identifier": [
-            "1005"
+            "1005",
+            "1102"
           ],
           "name": "Hismith Sex Machine"
+        },
+        {
+          "identifier": [
+            "1004"
+          ],
+          "name": "Hismith Mini Sex Machine"
+        },
+        {
+          "identifier": [
+            "1101"
+          ],
+          "name": "Hismith Servo Sex Machine"
+        },
+        {
+          "identifier": [
+            "1402"
+          ],
+          "name": "Hismith Ukulele"
+        },
+        {
+          "identifier": [
+            "1501"
+          ],
+          "name": "Hismith PleasureDrive"
         },
         {
           "identifier": [
@@ -10259,6 +10317,12 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "2205"
+          ],
+          "name": "Sinloli Aston"
         }
       ],
       "communication": [
@@ -10270,53 +10334,11 @@
               "Sinloli-Sherry",
               "Eropair *",
               "HISMITH S1",
+              "HISMITH S2",
+              "HISMITH S3",
               "Sinloli Cosima",
-              "Sinloli-Ethel"
-            ],
-            "services": {
-              "0000ffe5-0000-1000-8000-00805f9b34fb": {
-                "tx": "0000ffe9-0000-1000-8000-00805f9b34fb"
-              },
-              "0000ff90-0000-1000-8000-00805f9b34fb": {
-                "rxblemodel": "0000ff96-0000-1000-8000-00805f9b34fb"
-              }
-            }
-          }
-        }
-      ]
-    },
-    "hismith-servo": {
-      "defaults": {
-        "name": "Hismith servo device",
-        "features": [
-          {
-            "feature-type": "Position",
-            "description": "Fucking Machine Position",
-            "actuator": {
-              "step-range": [
-                0,
-                100
-              ],
-              "messages": [
-                "LinearCmd"
-              ]
-            }
-          }
-        ]
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "1101"
-          ],
-          "name": "Hismith Servo"
-        }
-      ],
-      "communication": [
-        {
-          "btle": {
-            "names": [
-              "HISMITH S2"
+              "Sinloli-Ethel",
+              "Sinloli Aston"
             ],
             "services": {
               "0000ffe5-0000-1000-8000-00805f9b34fb": {
