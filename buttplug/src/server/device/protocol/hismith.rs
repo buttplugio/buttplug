@@ -6,6 +6,7 @@
 // for full license information.
 
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
+use crate::server::device::protocol::hismith_mini::HismithMiniInitializer;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -16,7 +17,6 @@ use crate::{
 };
 use async_trait::async_trait;
 use std::sync::Arc;
-use crate::server::device::protocol::hismith_mini::HismithMiniInitializer;
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
