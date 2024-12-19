@@ -43,10 +43,13 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
     hardware: Arc<Hardware>,
     _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    
-    let use_harmony= !hardware.endpoints().contains(&Endpoint::Whitelist);
-    let sec_endpoint = if use_harmony { Endpoint::Generic0 } else { Endpoint::Whitelist };
-        
+    let use_harmony = !hardware.endpoints().contains(&Endpoint::Whitelist);
+    let sec_endpoint = if use_harmony {
+      Endpoint::Generic0
+    } else {
+      Endpoint::Whitelist
+    };
+
     // The Lelo F1s V2 has a very specific pairing flow:
     // * First the device is turned on in BLE mode (long press)
     // * Then the security endpoint (Whitelist) needs to be read (which we can do via subscribe)
@@ -100,7 +103,7 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
 }
 
 pub struct LeloF1sV2 {
-  use_harmony: bool
+  use_harmony: bool,
 }
 
 impl LeloF1sV2 {
@@ -122,8 +125,7 @@ impl ProtocolHandler for LeloF1sV2 {
     &self,
     cmds: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if self.use_harmony
-    {
+    if self.use_harmony {
       let mut cmd_vec: Vec<HardwareCommand> = vec![];
       for (i, cmd) in cmds.iter().enumerate() {
         if let Some(pair) = cmd {
@@ -144,7 +146,7 @@ impl ProtocolHandler for LeloF1sV2 {
               ],
               false,
             )
-                .into(),
+            .into(),
           );
         }
       }

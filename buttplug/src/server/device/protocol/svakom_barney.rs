@@ -50,7 +50,7 @@ impl ProtocolHandler for SvakomBarney {
       mode = 3;
     }
     let speed = (scalar as f64 / 3.0).ceil() as u8;*/
-    
+
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
       [
