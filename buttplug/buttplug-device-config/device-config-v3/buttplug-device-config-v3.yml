@@ -2734,6 +2734,34 @@ protocols:
               whitelist: 00001901-0000-1000-8000-00805f9b34fb
               tx: 00001902-0000-1000-8000-00805f9b34fb
               rx: 00001903-0000-1000-8000-00805f9b34fb
+  kiiroo-prowand:
+    defaults:
+      name: Kiiroo ProWand
+      features:
+        - feature-type: Vibrate
+          actuator:
+            step-range:
+              - 0
+              - 255
+            messages:
+              - ScalarCmd
+        - feature-type: Battery
+          description: Battery Level
+          sensor:
+            value-range:
+              - - 0
+                - 100
+            messages:
+              - SensorReadCmd
+    communication:
+      - btle:
+          names:
+            - ProWand
+          services:
+            00001400-0000-1000-8000-00805f9b34fb:
+              tx: 00001401-0000-1000-8000-00805f9b34fb
+            0000180f-0000-1000-8000-00805f9b34fb:
+              rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb
   vorze-cyclone-x:
     defaults:
       name: Vorze Cyclone X10 Device
