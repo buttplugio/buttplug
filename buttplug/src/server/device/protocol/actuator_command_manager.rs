@@ -257,7 +257,7 @@ impl ActuatorCommandManager {
         .feature_status
         .iter()
         .filter(|x| x
-        .messages()
+          .messages()
           .contains(&ButtplugActuatorFeatureMessageType::RotateCmd))
         .count()
     ];
