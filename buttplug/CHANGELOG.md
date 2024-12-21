@@ -1,3 +1,47 @@
+# 9.0.5 (2024-12-21)
+
+## Features
+
+- Added Device Support
+  - ServeU
+  - JoyHub Marsal
+  - Sinloli Cosima
+  - Sinloli Ethel
+  - MonsterPub 1P Mister Devil
+  - MonsterPub Pop
+  - MonsterPub Sweet
+  - MonsterPub Amazing
+  - MonsterHub Tornado
+  - Mutufun Barney
+  - WeVibe Jive 2
+  - Kiiroo ProWand
+  - JoyHub VBarbie
+  - JoyHub Vase
+  - JoyHub Vortex 2s
+  - JoyHub Viball
+  - JoyHub Rowdy 3
+  - JoyHub Eclipse
+  - JoyHub Royaleye
+  - JoyHub Norma
+  - JoyHub Pathfinder 3
+  - JoyHub Petalwish 3
+  - JoyHub Edasich
+  - JoyHub Pau
+  - Secret Lover Kevin
+  - Next Level Racing HF8 Haptic Gaming Pad
+  - Svakom Edeny (new identifier)
+  - Svakom Cici+ 2
+  - Amorelie Joy Shuffle
+  - Amorelie Joy Salsa
+
+## Bugfixes
+
+- Correct the state addressing for Scalar and Rotate Device Commands
+- Lelo F1SV3 (Harmony style models)
+- Svakom Sam 2 Pro vibration mode
+- The MarsLion max suction level was off by 1
+
+
 # 9.0.4 (2024-10-06)
 
 ## Features
