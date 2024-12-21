@@ -189,8 +189,8 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                   msg = outgoing_receiver.recv().fuse() => {
                     if let Some(msg) = msg {
                       let out_msg = match msg {
-                        ButtplugSerializedMessage::Text(text) => Message::Text(text),
-                        ButtplugSerializedMessage::Binary(bin) => Message::Binary(bin),
+                        ButtplugSerializedMessage::Text(text) => Message::Text(text.into()),
+                        ButtplugSerializedMessage::Binary(bin) => Message::Binary(bin.into()),
                       };
                       // TODO see what happens when we try to send to a remote that's closed connection.
                       writer.send(out_msg).await.expect("This should never fail?");
@@ -231,7 +231,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                         Message::Binary(v) => {
                           if incoming_sender
                             .send(ButtplugTransportIncomingMessage::Message(
-                              ButtplugSerializedMessage::Binary(v),
+                              ButtplugSerializedMessage::Binary(v.into()),
                             ))
                             .await
                             .is_err()

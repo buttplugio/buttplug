@@ -119,10 +119,9 @@ where
           let e = validator
             .validate(&json_msg)
             .expect_err("We can't get here without validity checks failing.");
-          let err_vec: Vec<jsonschema::ValidationError> = e.collect();
           return Err(ButtplugSerializerError::JsonSerializerError(format!(
             "Error during JSON Schema Validation - Message: {} - Error: {:?}",
-            json_msg, err_vec
+            json_msg, e
           )));
         }
       }

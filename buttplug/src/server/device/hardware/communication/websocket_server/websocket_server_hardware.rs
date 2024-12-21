@@ -75,7 +75,7 @@ async fn run_connection_loop(
         }
         pong_count = 0;
         if websocket_server_sender
-          .send(tokio_tungstenite::tungstenite::Message::Ping(vec!(0)))
+          .send(tokio_tungstenite::tungstenite::Message::Ping(vec!(0).into()))
           .await
           .is_err() {
           error!("Cannot send ping to client, considering connection closed.");
@@ -85,7 +85,7 @@ async fn run_connection_loop(
       ws_msg = request_receiver.recv().fuse() => {
         if let Some(binary_msg) = ws_msg {
           if websocket_server_sender
-            .send(tokio_tungstenite::tungstenite::Message::Binary(binary_msg))
+            .send(tokio_tungstenite::tungstenite::Message::Binary(binary_msg.into()))
             .await
             .is_err() {
             error!("Cannot send binary value to client, considering connection closed.");
@@ -107,7 +107,7 @@ async fn run_connection_loop(
                 }
                 tokio_tungstenite::tungstenite::Message::Binary(binary_msg) => {
                   // If no one is listening, ignore output.
-                  let _ = response_sender.send(binary_msg);
+                  let _ = response_sender.send(binary_msg.to_vec());
                 }
                 tokio_tungstenite::tungstenite::Message::Close(_) => {
                   // Drop the error if no one receives the message, we're breaking anyways.

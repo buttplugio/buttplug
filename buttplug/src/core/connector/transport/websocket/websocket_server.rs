@@ -96,7 +96,7 @@ async fn run_connection_loop(
         }
         pong_count = 0;
         if websocket_server_sender
-          .send(tokio_tungstenite::tungstenite::Message::Ping(vec!(0)))
+          .send(tokio_tungstenite::tungstenite::Message::Ping(vec!(0).into()))
           .await
           .is_err() {
           warn!("Cannot send ping to client, considering connection closed.");
@@ -109,7 +109,7 @@ async fn run_connection_loop(
             ButtplugSerializedMessage::Text(text_msg) => {
               trace!("Sending text message: {}", text_msg);
               if websocket_server_sender
-                .send(tokio_tungstenite::tungstenite::Message::Text(text_msg))
+                .send(tokio_tungstenite::tungstenite::Message::Text(text_msg.into()))
                 .await
                 .is_err() {
                 warn!("Cannot send text value to server, considering connection closed.");
@@ -118,7 +118,7 @@ async fn run_connection_loop(
             }
             ButtplugSerializedMessage::Binary(binary_msg) => {
               if websocket_server_sender
-                .send(tokio_tungstenite::tungstenite::Message::Binary(binary_msg))
+                .send(tokio_tungstenite::tungstenite::Message::Binary(binary_msg.into()))
                 .await
                 .is_err() {
                 warn!("Cannot send binary value to server, considering connection closed.");
@@ -141,7 +141,7 @@ async fn run_connection_loop(
               match msg {
                 tokio_tungstenite::tungstenite::Message::Text(text_msg) => {
                   trace!("Got text: {}", text_msg);
-                  if response_sender.send(ButtplugTransportIncomingMessage::Message(ButtplugSerializedMessage::Text(text_msg))).await.is_err() {
+                  if response_sender.send(ButtplugTransportIncomingMessage::Message(ButtplugSerializedMessage::Text(text_msg.as_str().to_owned()))).await.is_err() {
                     warn!("Connector that owns transport no longer available, exiting.");
                     break;
                   }

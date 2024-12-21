@@ -44,10 +44,9 @@ impl JSONValidator {
       ))
     })?;
     self.schema.validate(&check_value).map_err(|err| {
-      let err_vec: Vec<jsonschema::ValidationError> = err.collect();
       ButtplugSerializerError::JsonSerializerError(format!(
         "Error during JSON Schema Validation: {:?}",
-        err_vec
+        err
       ))
     })
   }
