@@ -5,48 +5,34 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::fleshlight_launch_helper::calculate_speed;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{
       self,
       ButtplugDeviceMessage,
-      ButtplugServerDeviceMessage,
       Endpoint,
       SensorReadingV4,
-      SensorType,
     },
   },
   server::device::{
     hardware::{
       Hardware,
       HardwareCommand,
-      HardwareEvent,
       HardwareReadCmd,
-      HardwareSubscribeCmd,
-      HardwareUnsubscribeCmd,
       HardwareWriteCmd,
     },
     protocol::{generic_protocol_setup, ProtocolHandler},
   },
-  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
-use dashmap::DashSet;
 use futures::{
-  future::{self, BoxFuture},
+  future::BoxFuture,
   FutureExt,
-  StreamExt,
 };
 use std::{
   default::Default,
-  pin::Pin,
-  sync::{
-    atomic::{AtomicU8, Ordering::SeqCst},
-    Arc,
-  },
+  sync::Arc,
 };
-use tokio::sync::broadcast;
 
 generic_protocol_setup!(KiirooProWand, "kiiroo-prowand");
 
