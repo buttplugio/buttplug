@@ -1,0 +1,19 @@
+devices:
+  - identifier: 
+      name: "BT05"
+    expected_name: "Fleshy Thrust Sync"
+device_commands:
+  - !Messages
+      device_index: 0
+      messages:
+        - !Linear
+          - Index: 0
+            Position: 0.30
+            Duration: 1000
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [54, 3, 232]
+            write_with_response: false

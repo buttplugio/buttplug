@@ -118,6 +118,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_tcode_linear_and_vibrate.yaml" ; "TCode (Linear + Vibrate)")]
 #[test_case("test_serveu_protocol.yaml" ; "ServeU")]
 #[test_case("test_kiiroo_prowand.yaml" ; "Kiiroo ProWand Protocol")]
+#[test_case("test_fleshy_thrust_protocol.yaml" ; "Fleshy Thrust Sync Protocol")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
@@ -226,6 +227,7 @@ async fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_tcode_linear_and_vibrate.yaml" ; "TCode (Linear + Vibrate)")]
 #[test_case("test_serveu_protocol.yaml" ; "ServeU")]
 #[test_case("test_kiiroo_prowand.yaml" ; "Kiiroo ProWand Protocol")]
+#[test_case("test_fleshy_thrust_protocol.yaml" ; "Fleshy Thrust Sync Protocol")]
 #[tokio::test]
 async fn test_device_protocols_json_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
@@ -304,6 +306,7 @@ async fn test_device_protocols_json_v3(test_file: &str) {
 #[test_case("test_tcode_linear_and_vibrate.yaml" ; "TCode (Linear + Vibrate)")]
 #[test_case("test_serveu_protocol.yaml" ; "ServeU")]
 #[test_case("test_kiiroo_prowand.yaml" ; "Kiiroo ProWand Protocol")]
+#[test_case("test_fleshy_thrust_protocol.yaml" ; "Fleshy Thrust Sync Protocol")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v2(test_file: &str) {
   util::device_test::client::client_v2::run_embedded_test_case(&load_test_case(test_file).await)
@@ -381,6 +384,7 @@ async fn test_device_protocols_embedded_v2(test_file: &str) {
 #[test_case("test_tcode_linear_and_vibrate.yaml" ; "TCode (Linear + Vibrate)")]
 #[test_case("test_serveu_protocol.yaml" ; "ServeU")]
 #[test_case("test_kiiroo_prowand.yaml" ; "Kiiroo ProWand Protocol")]
+#[test_case("test_fleshy_thrust_protocol.yaml" ; "Fleshy Thrust Sync Protocol")]
 #[tokio::test]
 async fn test_device_protocols_json_v2(test_file: &str) {
   util::device_test::client::client_v2::run_json_test_case(&load_test_case(test_file).await).await;
