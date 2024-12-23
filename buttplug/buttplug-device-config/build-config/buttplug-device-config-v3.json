@@ -363,9 +363,62 @@
         },
         {
           "identifier": [
+            "OC"
+          ],
+          "name": "Lovense Osci 3",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  20
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  20
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
             "ED"
           ],
           "name": "Lovense Gush"
+        },
+        {
+          "identifier": [
+            "EZ"
+          ],
+          "name": "Lovense Gush 2"
         },
         {
           "identifier": [
@@ -941,6 +994,14 @@
               "43410001-0023-4bd4-bbd5-a6920e4c5653": {
                 "tx": "43410002-0023-4bd4-bbd5-a6920e4c5653",
                 "rx": "43410003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "4f430001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "4f430002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "4f430003-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "455a0001-0023-4bd4-bbd5-a6920e4c5653": {
+                "tx": "455a0002-0023-4bd4-bbd5-a6920e4c5653",
+                "rx": "455a0003-0023-4bd4-bbd5-a6920e4c5653"
               }
             }
           }

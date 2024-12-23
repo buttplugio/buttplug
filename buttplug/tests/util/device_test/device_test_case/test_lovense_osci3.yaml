@@ -1,0 +1,66 @@
+devices:
+  - identifier: 
+      name: "LVS-DoesntMatter"
+    expected_name: "Lovense Osci 3"
+device_init: 
+  # Initialization
+  - !Commands
+      device_index: 0
+      commands:
+        - !Subscribe
+            endpoint: rx
+        - !Write
+            endpoint: tx
+            # "DeviceType;"
+            data: [68, 101, 118, 105, 99, 101, 84, 121, 112, 101, 59]
+            write_with_response: false
+  - !Events
+      device_index: 0
+      events:
+        - !Notifications
+          - endpoint: rx
+            # "OC:253:0082059AD3BD;"
+            data: [79, 67, 58, 50, 53, 50, 58, 48, 48, 56, 50, 48, 53, 57, 65, 68, 51, 66, 68, 59]
+device_commands:
+  - !Messages
+      device_index: 0
+      messages: 
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+          - Index: 1
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            # "LVS:<0x0a0x0a>;"
+            data: [76, 86, 83, 58, 10, 10, 59]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.75
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            # "LVS:<0x0f0xff>;"
+            data: [76, 86, 83, 58, 15, 255, 59]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages: 
+        - !Stop 
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            # "LVS:<0x000x00>;"
+            data: [76, 86, 83, 58, 0, 0, 59]
+            write_with_response: false
