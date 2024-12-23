@@ -1,3 +1,13 @@
+# 9.0.6 (2024-12-23)
+
+## Features
+
+- Added Device Support
+  - Lovense Osci 3, Gush 2
+  - Kiiroo Prowand
+  - Fleshy Thrust Sync
+  - JoyHub Piet 2
+
 # 9.0.5 (2024-12-21)
 
 ## Features
