@@ -163,6 +163,10 @@ impl ProtocolInitializer for LovenseInitializer {
     let use_mply =
       (vibrator_count == 2 && actuator_count > 2) || vibrator_count > 2 || device_type == "H";
 
+    // New Lovense devices seem to be moving to the simplified LVS:<bytearray>; command format.
+    // I'm not sure if there's a good way to detect this.
+    let use_lvs = device_type == "OC";
+
     debug!(
       "Device type {} initialized with {} vibrators {} using Mply",
       device_type,
@@ -175,6 +179,7 @@ impl ProtocolInitializer for LovenseInitializer {
       &device_type,
       vibrator_count,
       use_mply,
+      use_lvs,
     )))
   }
 }
@@ -183,6 +188,7 @@ pub struct Lovense {
   rotation_direction: Arc<AtomicBool>,
   vibrator_count: usize,
   use_mply: bool,
+  use_lvs: bool,
   device_type: String,
   // Pairing of position: u8, duration: u32
   linear_info: Arc<(AtomicU8, AtomicU32)>,
@@ -194,6 +200,7 @@ impl Lovense {
     device_type: &str,
     vibrator_count: usize,
     use_mply: bool,
+    use_lvs: bool,
   ) -> Self {
     let linear_info = Arc::new((AtomicU8::new(0), AtomicU32::new(0)));
     if device_type == "BA" {
@@ -207,6 +214,7 @@ impl Lovense {
       rotation_direction: Arc::new(AtomicBool::new(false)),
       vibrator_count,
       use_mply,
+      use_lvs,
       device_type: device_type.to_owned(),
       linear_info,
     }
@@ -227,6 +235,21 @@ impl ProtocolHandler for Lovense {
     &self,
     cmds: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    if self.use_lvs {
+      let mut speeds = vec![0x4cu8, 0x56, 0x53, 0x3a];
+      speeds.append(
+        &mut cmds
+          .iter()
+          .map(|x| if let Some(val) = x { val.1 as u8 } else { 0xff })
+          .collect::<Vec<u8>>(),
+      );
+      speeds.push(0x3b);
+
+      return Ok(vec![
+        HardwareWriteCmd::new(Endpoint::Tx, speeds, false).into()
+      ]);
+    }
+
     if self.use_mply {
       let mut speeds = cmds
         .iter()
