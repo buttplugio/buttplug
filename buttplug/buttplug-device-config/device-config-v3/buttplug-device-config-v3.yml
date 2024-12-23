@@ -8616,6 +8616,24 @@ protocols:
               messages:
                 - ScalarCmd
       - identifier:
+          - J-Piet2
+        name: JoyHub Piet 2
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Rotate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+      - identifier:
           - J-Panther
         name: JoyHub Panther
         features:
@@ -9477,6 +9495,7 @@ protocols:
             - J-Pau
             - J-Petalwish3
             - J-Marshal
+            - J-Piet2
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
