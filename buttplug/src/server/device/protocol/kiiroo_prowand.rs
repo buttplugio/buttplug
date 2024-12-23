@@ -16,12 +16,7 @@ use crate::{
     },
   },
   server::device::{
-    hardware::{
-      Hardware,
-      HardwareCommand,
-      HardwareReadCmd,
-      HardwareWriteCmd,
-    },
+    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
   },
 };
