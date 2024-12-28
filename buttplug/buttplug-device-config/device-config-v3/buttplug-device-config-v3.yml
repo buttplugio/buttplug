@@ -3004,11 +3004,14 @@ protocols:
     communication:
       - btle:
           names:
-            - Aogu BLE *
+            - Aogu BLE*
+            - AB Shutter3*
           services:
             0000ffe5-0000-1000-8000-00805f9b34fb:
               tx: 0000ffe9-0000-1000-8000-00805f9b34fb
               rx: 0000ffe2-0000-1000-8000-00805f9b34fb
+            f1817d8d-6769-5905-832d-323dacdaffe3:
+              tx: 0000d34e-0000-1000-8000-00805f9b34fb
   svakom:
     defaults:
       name: Svakom Device
