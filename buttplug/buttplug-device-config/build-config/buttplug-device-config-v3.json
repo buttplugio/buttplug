@@ -16524,6 +16524,103 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-Vince"
+          ],
+          "name": "JoyHub Vince",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Dallin"
+          ],
+          "name": "JoyHub Dallin",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Mace2"
+          ],
+          "name": "JoyHub Maynor",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Constrict",
+              "description": "Air Pump",
+              "actuator": {
+                "step-range": [
+                  0,
+                  9
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -16571,7 +16668,10 @@
               "J-Pau",
               "J-Petalwish3",
               "J-Marshal",
-              "J-Piet2"
+              "J-Piet2",
+              "J-Vince",
+              "J-Dallin",
+              "J-Mace2"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
