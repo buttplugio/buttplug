@@ -8310,6 +8310,31 @@ protocols:
                 - 100
               messages:
                 - ScalarCmd
+      - identifier:
+          - TDG_CRAYBIT_PT
+        name: Tracy's Dog Craybit Pro
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 100
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 100
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 100
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
@@ -8321,6 +8346,7 @@ protocols:
               tx: 00006001-0000-1000-8000-00805f9b34fb
               txmode: 00006002-0000-1000-8000-00805f9b34fb
               txvibrate: 00006003-0000-1000-8000-00805f9b34fb
+              generic0: 0000600a-0000-1000-8000-00805f9b34fb
             00006010-0000-1000-8000-00805f9b34fb:
               rxblemodel: 00006014-0000-1000-8000-00805f9b34fb
             00008000-0000-1000-8000-00805f9b34fb:

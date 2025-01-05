@@ -117,8 +117,10 @@ impl ProtocolInitializer for MonsterPubInitializer {
     Ok(Arc::new(MonsterPub::new(
       if hardware.endpoints().contains(&Endpoint::TxVibrate) {
         Endpoint::TxVibrate
-      } else {
+      } else if hardware.endpoints().contains(&Endpoint::Tx) {
         Endpoint::Tx
+      } else {
+        Endpoint::Generic0 // tracy's dog 3 vibe
       },
     )))
   }
@@ -149,6 +151,9 @@ impl ProtocolHandler for MonsterPub {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut data = vec![];
     let mut stop = true;
+    if self.tx == Endpoint::Generic0 {
+      data.push(3u8);
+    }
     for (_, cmd) in cmds.iter().enumerate() {
       if let Some((_, speed)) = cmd {
         data.push(*speed as u8);
