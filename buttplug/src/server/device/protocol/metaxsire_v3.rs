@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::core::message::ActuatorType;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -20,11 +21,9 @@ use crate::{
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
-use std::sync::{
-  atomic::{AtomicU8, Ordering},
-  Arc,
-};
+use std::sync::Arc;
 use std::time::Duration;
+use tokio::sync::RwLock;
 
 generic_protocol_initializer_setup!(MetaXSireV3, "metaxsire-v3");
 #[derive(Default)]
@@ -35,46 +34,59 @@ impl ProtocolInitializer for MetaXSireV3Initializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &UserDeviceDefinition,
+    device_definition: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    Ok(Arc::new(MetaXSireV3::new(hardware)))
+    let feature_count = device_definition
+      .features()
+      .iter()
+      .filter(|x| x.actuator().is_some())
+      .count();
+    Ok(Arc::new(MetaXSireV3::new(hardware, feature_count)))
   }
 }
 
 const METAXSIRE_COMMAND_DELAY_MS: u64 = 100;
 
-async fn command_update_handler(device: Arc<Hardware>, command_holder: Arc<AtomicU8>) {
+async fn command_update_handler(device: Arc<Hardware>, command_holder: Arc<RwLock<Vec<u8>>>) {
   trace!("Entering metaXsire v3 Control Loop");
-  let mut current_command = command_holder.load(Ordering::Relaxed);
-  while current_command == 0
-    || device
-      .write_value(&HardwareWriteCmd::new(
-        Endpoint::Tx,
-        vec![0xa1, 0x04, current_command, 0x01],
-        false,
-      ))
-      .await
-      .is_ok()
-  {
+  let mut current_commands = command_holder.read().await.clone();
+  let mut errored = false;
+  while !errored {
+    for i in 0..current_commands.len() {
+      if current_commands[i] == 0 {
+        continue;
+      }
+      errored = !device
+        .write_value(&HardwareWriteCmd::new(
+          Endpoint::Tx,
+          vec![0xa1, 0x04, current_commands[i], i as u8 + 1],
+          false,
+        ))
+        .await
+        .is_ok();
+      if errored {
+        break;
+      }
+    }
     sleep(Duration::from_millis(METAXSIRE_COMMAND_DELAY_MS)).await;
-    current_command = command_holder.load(Ordering::Relaxed);
-    trace!("metaXsire v3 Command: {:?}", current_command);
+    current_commands = command_holder.read().await.clone();
+    trace!("metaXsire v3 Command: {:?}", current_commands);
   }
   trace!("metaXsire v3 control loop exiting, most likely due to device disconnection.");
 }
 
 pub struct MetaXSireV3 {
-  current_command: Arc<AtomicU8>,
+  current_commands: Arc<RwLock<Vec<u8>>>,
 }
 
 impl MetaXSireV3 {
-  fn new(device: Arc<Hardware>) -> Self {
-    let current_command = Arc::new(AtomicU8::new(0));
-    let current_command_clone = current_command.clone();
+  fn new(device: Arc<Hardware>, feature_count: usize) -> Self {
+    let current_commands = Arc::new(RwLock::new(vec![0u8; feature_count]));
+    let current_commands_clone = current_commands.clone();
     async_manager::spawn(
-      async move { command_update_handler(device, current_command_clone).await },
+      async move { command_update_handler(device, current_commands_clone).await },
     );
-    Self { current_command }
+    Self { current_commands }
   }
 }
 
@@ -83,19 +95,29 @@ impl ProtocolHandler for MetaXSireV3 {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_scalar_vibrate_cmd(
+  fn handle_scalar_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    commands: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let current_command = self.current_command.clone();
-    current_command.store(scalar as u8, Ordering::Relaxed);
-
-    Ok(vec![HardwareWriteCmd::new(
-      Endpoint::Tx,
-      vec![0xa1, 0x04, scalar as u8, 0x01],
-      true,
-    )
-    .into()])
+    let mut cmds = vec![];
+    for i in 0..commands.len() {
+      if let Some(cmd) = commands[i] {
+        let current_commands = self.current_commands.clone();
+        async_manager::spawn(async move {
+          let write_mutex = current_commands.clone();
+          let mut command_writer = write_mutex.write().await;
+          command_writer[i] = cmd.1 as u8;
+        });
+        cmds.push(
+          HardwareWriteCmd::new(
+            Endpoint::Tx,
+            vec![0xa1, 0x04, cmd.1 as u8, i as u8 + 1],
+            true,
+          )
+          .into(),
+        );
+      }
+    }
+    Ok(cmds)
   }
 }
