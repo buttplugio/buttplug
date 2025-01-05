@@ -11075,6 +11075,38 @@
             "TAY009"
           ],
           "name": "metaXsire Tay 9"
+        },
+        {
+          "identifier": [
+            "TA-S001A"
+          ],
+          "name": "metaXsire Zeus",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  20
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  20
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -11082,7 +11114,8 @@
           "btle": {
             "names": [
               "TAY001",
-              "TAY009"
+              "TAY009",
+              "TA-S001A"
             ],
             "services": {
               "0000fff0-0000-1000-8000-00805f9b34fb": {
