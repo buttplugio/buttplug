@@ -5413,6 +5413,12 @@
             "Cici 2"
           ],
           "name": "Svakom Cici 2"
+        },
+        {
+          "identifier": [
+            "Emma Neo 2"
+          ],
+          "name": "Svakom Emma Neo 2"
         }
       ],
       "communication": [
@@ -5430,7 +5436,8 @@
               "Vick Neo",
               "STG05A",
               "QH-SJ007A",
-              "Cici 2"
+              "Cici 2",
+              "Emma Neo 2"
             ],
             "services": {
               "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -5751,6 +5758,26 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "Mini Emma Neo"
+          ],
+          "name": "Svakom Mini Emma Neo",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  10
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -5759,7 +5786,8 @@
             "names": [
               "Chika",
               "Mora Neo",
-              "Trysta Neo"
+              "Trysta Neo",
+              "Mini Emma Neo"
             ],
             "services": {
               "0000ffe0-0000-1000-8000-00805f9b34fb": {
