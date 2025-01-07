@@ -17696,6 +17696,51 @@
           }
         }
       ]
+    },
+    "nexus-revo": {
+      "defaults": {
+        "name": "Nexus Revo Stealth",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                10
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Rotate",
+            "actuator": {
+              "step-range": [
+                0,
+                2
+              ],
+              "messages": [
+                "RotateCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "XW-LW3"
+            ],
+            "services": {
+              "0000c570-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000c571-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }
