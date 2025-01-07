@@ -8,26 +8,15 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{
-      self,
-      ButtplugDeviceMessage,
-      Endpoint,
-      SensorReadingV4,
-    },
+    message::{self, ButtplugDeviceMessage, Endpoint, SensorReadingV4},
   },
   server::device::{
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
   },
 };
-use futures::{
-  future::BoxFuture,
-  FutureExt,
-};
-use std::{
-  default::Default,
-  sync::Arc,
-};
+use futures::{future::BoxFuture, FutureExt};
+use std::{default::Default, sync::Arc};
 
 generic_protocol_setup!(KiirooProWand, "kiiroo-prowand");
 
