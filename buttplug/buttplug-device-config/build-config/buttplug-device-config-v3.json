@@ -5264,7 +5264,8 @@
         {
           "btle": {
             "names": [
-              "Aogu BLE *"
+              "Aogu BLE *",
+              "AB Shutter3 [Aogu BLE Device]"
             ],
             "services": {
               "0000ffe5-0000-1000-8000-00805f9b34fb": {
