@@ -17742,6 +17742,51 @@
           }
         }
       ]
+    },
+    "luvmazer": {
+      "defaults": {
+        "name": "Luvmazer Finger Magic",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Rotate",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "TKLM-W001-BT"
+            ],
+            "services": {
+              "0000ffa0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }
