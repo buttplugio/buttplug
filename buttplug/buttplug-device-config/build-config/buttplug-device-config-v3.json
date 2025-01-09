@@ -17038,6 +17038,60 @@
         }
       ]
     },
+    "joyhub-v6": {
+      "defaults": {
+        "name": "JoyHub Device",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Constrict",
+            "description": "Suction",
+            "actuator": {
+              "step-range": [
+                0,
+                9
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "J-Melody"
+          ],
+          "name": "JoyHub Melody"
+        }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "J-Melody"
+            ],
+            "services": {
+              "0000ffa0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
     "itoys": {
       "defaults": {
         "name": "iToys Seagull",
