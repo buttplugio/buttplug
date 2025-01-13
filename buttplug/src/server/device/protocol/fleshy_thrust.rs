@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4},
 };
 
 generic_protocol_setup!(FleshyThrust, "fleshy-thrust");
@@ -21,7 +21,7 @@ pub struct FleshyThrust {}
 impl ProtocolHandler for FleshyThrust {
   fn handle_linear_cmd(
     &self,
-    message: crate::core::message::LinearCmdV4,
+    message: CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_cmd = message
       .vectors()
