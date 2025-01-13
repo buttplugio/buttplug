@@ -28,9 +28,9 @@ impl ProtocolHandler for SvakomBarney {
     true
   }
 
-  fn handle_scalar_cmd(
+  fn handle_value_cmd(
     &self,
-    commands: &[Option<(ActuatorType, u32)>],
+    commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut actuator: u8 = 0;
     let mut scalar: u8 = 0;
