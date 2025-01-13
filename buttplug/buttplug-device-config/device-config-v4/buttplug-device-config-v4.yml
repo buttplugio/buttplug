@@ -139,6 +139,36 @@ protocols:
         name: Lovense Osci
         id: ce5c7b0c-6fbe-4dc6-980e-39467bda938b
       - identifier:
+          - OC
+        name: Lovense Osci 3
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 20
+              messages:
+                - ValueCmd
+            id: 631e69a9-c9a5-44ad-b911-c4c98b085090
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 20
+              messages:
+                - ValueCmd
+            id: 73e5f790-0a80-4b20-ad5e-9447a7330f5d
+          - feature-type: Battery
+            description: Battery Level
+            sensor:
+              value-range:
+                - - 0
+                  - 100
+              messages:
+                - SensorReadCmd
+            id: ae3715a5-504f-4bda-9e55-48759efe1995
+        id: 21e74aa2-f3d8-4575-96a0-0b2e2c0ea376
+      - identifier:
           - V
         name: Lovense Mission
         id: 89a5f037-cbb6-4e5c-9090-8dc51507b38a
@@ -3132,6 +3162,37 @@ protocols:
               whitelist: 00001901-0000-1000-8000-00805f9b34fb
               tx: 00001902-0000-1000-8000-00805f9b34fb
               rx: 00001903-0000-1000-8000-00805f9b34fb
+  kiiroo-prowand:
+    defaults:
+      name: Kiiroo ProWand
+      features:
+        - feature-type: Vibrate
+          actuator:
+            step-range:
+              - 0
+              - 255
+            messages:
+              - ValueCmd
+          id: 66b4f083-f432-4f07-b6b1-b8824d947585
+        - feature-type: Battery
+          description: Battery Level
+          sensor:
+            value-range:
+              - - 0
+                - 100
+            messages:
+              - SensorReadCmd
+          id: 282087c2-0556-486a-9843-4e6df45ff198
+      id: a1a940ac-f0fa-4636-8307-722106225104
+    communication:
+      - btle:
+          names:
+            - ProWand
+          services:
+            00001400-0000-1000-8000-00805f9b34fb:
+              tx: 00001401-0000-1000-8000-00805f9b34fb
+            0000180f-0000-1000-8000-00805f9b34fb:
+              rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb
   vorze-cyclone-x:
     defaults:
       name: Vorze Cyclone X10 Device
@@ -11226,3 +11287,23 @@ protocols:
           services:
             31bb1111-33e3-4f3c-a7fb-104288e7cb77:
               tx: 31bb2222-33e3-4f3c-a7fb-104288e7cb77
+  fleshy-thrust:
+    defaults:
+      name: Fleshy Thrust Sync
+      features:
+        - feature-type: Position
+          actuator:
+            step-range:
+              - 0
+              - 180
+            messages:
+              - ValueWithParameterCmd
+          id: e0958ce1-28d7-4042-ba9c-e232f5fc2f72
+      id: 362a0a65-8a19-4dc2-acbe-53ceab09d46b
+    communication:
+      - btle:
+          names:
+            - BT05
+          services:
+            0000ffe0-0000-1000-8000-00805f9b34fb:
+              tx: 0000ffe1-0000-1000-8000-00805f9b34fb
