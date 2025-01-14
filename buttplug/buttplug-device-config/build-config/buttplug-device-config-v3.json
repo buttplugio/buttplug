@@ -14746,6 +14746,12 @@
         },
         {
           "identifier": [
+            "J-Scarlett"
+          ],
+          "name": "JoyHub Scarlett"
+        },
+        {
+          "identifier": [
             "J-Petalwish2"
           ],
           "name": "JoyHub Petalwish 2",
@@ -15105,7 +15111,8 @@
               "J-Mackay",
               "J-Rowdy3",
               "J-Eclipse",
-              "J-DukeDazzle2"
+              "J-DukeDazzle2",
+              "J-Scarlett"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -15572,6 +15579,38 @@
             "J-Pathfinder2"
           ],
           "name": "JoyHub Pathfinder 2",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Pathfinder"
+          ],
+          "name": "JoyHub Pathfinder",
           "features": [
             {
               "feature-type": "Oscillate",
@@ -16746,6 +16785,7 @@
               "J-Vbarbie3f",
               "J-CHERLY2c",
               "J-Pathfinder2",
+              "J-Pathfinder",
               "J-VibRipple",
               "J-Verax",
               "J-Verax2",
