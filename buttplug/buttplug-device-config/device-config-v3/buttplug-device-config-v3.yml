@@ -7895,6 +7895,7 @@ protocols:
             - FOX
             - FOX M70 Pro
             - FoxM70Pro
+            - FOX M70-2
           services:
             0000ae00-0000-1000-8000-00805f9b34fb:
               tx: 0000ae01-0000-1000-8000-00805f9b34fb
