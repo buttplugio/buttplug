@@ -14753,6 +14753,18 @@
         },
         {
           "identifier": [
+            "J-Tarik"
+          ],
+          "name": "JoyHub Tarik"
+        },
+        {
+          "identifier": [
+            "J-UricaGuard2"
+          ],
+          "name": "JoyHub Urica Guard 2"
+        },
+        {
+          "identifier": [
             "J-Petalwish2"
           ],
           "name": "JoyHub Petalwish 2",
@@ -15113,7 +15125,9 @@
               "J-Rowdy3",
               "J-Eclipse",
               "J-DukeDazzle2",
-              "J-Scarlett"
+              "J-Scarlett",
+              "J-Tarik",
+              "J-UricaGuard2"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -16768,6 +16782,178 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-Verax4"
+          ],
+          "name": "JoyHub Verax 4",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Palmyra"
+          ],
+          "name": "JoyHub Palmyra",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Xylia"
+          ],
+          "name": "JoyHub Xylia",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Maiden"
+          ],
+          "name": "JoyHub Maiden",
+          "features": [
+            {
+              "feature-type": "Rotate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Constrict",
+              "actuator": {
+                "step-range": [
+                  0,
+                  5
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Viele3"
+          ],
+          "name": "JoyHub Viele 3",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Rotate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -16819,7 +17005,12 @@
               "J-Piet2",
               "J-Vince",
               "J-Dallin",
-              "J-Mace2"
+              "J-Mace2",
+              "J-Verax4",
+              "J-Palmyra",
+              "J-Maiden",
+              "J-Viele3",
+              "J-Xylia"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
