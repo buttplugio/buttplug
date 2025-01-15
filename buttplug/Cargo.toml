@@ -114,21 +114,17 @@ prost-build = "0.13.4"
 rusty-xinput = "1.3.0"
 windows = { version = "0.57.0", features = ["Devices_Bluetooth", "Foundation"] }
 serialport = { version = "4.6.1", optional = true }
-# Linux hidraw is needed here in order to work with the lovense dongle. libusb breaks it on linux.
-# Other platforms are not affected by the feature changes.
-hidapi = { version = "2.6.3", default-features = false, features = ["linux-static-hidraw", "illumos-static-libusb"], optional = true }
+hidapi = { version = "2.6.3", default-features = false, features = ["windows-native"], optional = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 serialport = { version = "4.6.1", optional = true }
 # Linux hidraw is needed here in order to work with the lovense dongle. libusb breaks it on linux.
 # Other platforms are not affected by the feature changes.
-hidapi = { version = "2.6.3", default-features = false, features = ["linux-static-hidraw", "illumos-static-libusb"], optional = true }
+hidapi = { version = "2.6.3", default-features = false, features = ["linux-static-hidraw"], optional = true }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 serialport = { version = "4.6.1", optional = true }
-# Linux hidraw is needed here in order to work with the lovense dongle. libusb breaks it on linux.
-# Other platforms are not affected by the feature changes.
-hidapi = { version = "2.6.3", default-features = false, features = ["linux-static-hidraw", "illumos-static-libusb"], optional = true }
+hidapi = { version = "2.6.3", default-features = false, features = ["macos-shared-device"], optional = true }
 
 [target.wasm32-unknown-unknown.dependencies]
 wasm-bindgen = { version = "0.2.99", features = ["serde-serialize"] }
