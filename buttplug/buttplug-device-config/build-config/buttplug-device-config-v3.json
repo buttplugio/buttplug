@@ -14802,6 +14802,12 @@
         },
         {
           "identifier": [
+            "J-Viva"
+          ],
+          "name": "JoyHub Viva"
+        },
+        {
+          "identifier": [
             "J-Petalwish2"
           ],
           "name": "JoyHub Petalwish 2",
@@ -15164,7 +15170,8 @@
               "J-DukeDazzle2",
               "J-Scarlett",
               "J-Tarik",
-              "J-UricaGuard2"
+              "J-UricaGuard2",
+              "J-Viva"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
