@@ -8474,6 +8474,9 @@ protocols:
           - J-Viva
         name: JoyHub Viva
       - identifier:
+          - J-Ryden
+        name: JoyHub Ryden
+      - identifier:
           - J-Petalwish2
         name: JoyHub Petalwish 2
         features:
@@ -8697,6 +8700,7 @@ protocols:
             - J-Tarik
             - J-UricaGuard2
             - J-Viva
+            - J-Ryden
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
