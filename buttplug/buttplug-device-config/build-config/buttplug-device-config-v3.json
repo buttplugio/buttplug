@@ -5837,6 +5837,48 @@
         }
       ]
     },
+    "svakom-v6": {
+      "defaults": {
+        "name": "Svakom Device v6",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                10
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "CocoPro"
+          ],
+          "name": "Svakom Coco Pro"
+        }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "CocoPro"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
     "svakom-sam": {
       "defaults": {
         "name": "Svakom Sam Neo",
