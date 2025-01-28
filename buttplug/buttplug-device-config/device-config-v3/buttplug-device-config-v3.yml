@@ -10436,3 +10436,35 @@ protocols:
           services:
             b75c49d2-04a3-4071-a0b5-35853eb08307:
               tx: ba5c49d2-04a3-4071-a0b5-35853eb08307
+  bananasome:
+    defaults:
+      name: Bananasome Rocket X7
+      features:
+        - feature-type: Oscillate
+          actuator:
+            step-range:
+              - 0
+              - 255
+            messages:
+              - ScalarCmd
+        - feature-type: Vibrate
+          actuator:
+            step-range:
+              - 0
+              - 255
+            messages:
+              - ScalarCmd
+        - feature-type: Vibrate
+          actuator:
+            step-range:
+              - 0
+              - 255
+            messages:
+              - ScalarCmd
+    communication:
+      - btle:
+          names:
+            - 火箭X7
+          services:
+            0000ae00-0000-1000-8000-00805f9b34fb:
+              tx: 0000ae01-0000-1000-8000-00805f9b34fb
