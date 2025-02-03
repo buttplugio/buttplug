@@ -13291,6 +13291,153 @@
         },
         {
           "identifier": [
+            "QCVW"
+          ],
+          "name": "Kisstoy Lost (Vibrating)",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "QCSW"
+          ],
+          "name": "Kisstoy Lost (Sucking)",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "QCPW"
+          ],
+          "name": "Kisstoy Lost (Insertable)",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "description": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Battery",
+              "description": "Battery Level",
+              "sensor": {
+                "value-range": [
+                  [
+                    0,
+                    100
+                  ]
+                ],
+                "messages": [
+                  "SensorReadCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
             "TFG1"
           ],
           "name": "Galaku Aurora Aircraft Cup",
@@ -13610,6 +13757,9 @@
               "G403",
               "G43A",
               "K12B",
+              "QCVW",
+              "QCSW",
+              "QCPW",
               "TFG1",
               "GK27",
               "GK25",
@@ -18251,6 +18401,39 @@
             "services": {
               "0000ae00-0000-1000-8000-00805f9b34fb": {
                 "tx": "0000ae01-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "omobo": {
+      "defaults": {
+        "name": "Omobo ViVegg Vibrator",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                100
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "S6"
+            ],
+            "services": {
+              "0000ffb0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffb2-0000-1000-8000-00805f9b34fb"
               }
             }
           }
