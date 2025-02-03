@@ -91,6 +91,7 @@ pub mod nextlevelracing;
 pub mod nexus_revo;
 pub mod nintendo_joycon;
 pub mod nobra;
+pub mod omobo;
 pub mod patoo;
 pub mod picobong;
 pub mod pink_punch;
@@ -486,6 +487,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     nintendo_joycon::setup::NintendoJoyconIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, nobra::setup::NobraIdentifierFactory::default());
+  add_to_protocol_map(&mut map, omobo::setup::OmoboIdentifierFactory::default());
   add_to_protocol_map(&mut map, patoo::setup::PatooIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
