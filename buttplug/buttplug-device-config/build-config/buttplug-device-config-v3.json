@@ -3775,6 +3775,26 @@
         },
         {
           "identifier": [
+            "Wand 2"
+          ],
+          "name": "WeVibe Wand 2",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  22
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
             "Bond",
             "Nelson"
           ],
@@ -3843,6 +3863,7 @@
               "Moxie",
               "Vector",
               "Wand",
+              "Wand 2",
               "Bond",
               "Nelson",
               "Nova2",
@@ -4916,6 +4937,57 @@
           "btle": {
             "names": [
               "ProWand"
+            ],
+            "services": {
+              "00001400-0000-1000-8000-00805f9b34fb": {
+                "tx": "00001401-0000-1000-8000-00805f9b34fb"
+              },
+              "0000180f-0000-1000-8000-00805f9b34fb": {
+                "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "kiiroo-spot": {
+      "defaults": {
+        "name": "Kiiroo Spot",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                100
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Battery",
+            "description": "Battery Level",
+            "sensor": {
+              "value-range": [
+                [
+                  0,
+                  100
+                ]
+              ],
+              "messages": [
+                "SensorReadCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "SPOT W1"
             ],
             "services": {
               "00001400-0000-1000-8000-00805f9b34fb": {
