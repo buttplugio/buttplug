@@ -13992,6 +13992,38 @@
         },
         {
           "identifier": [
+            "CCP322S5"
+          ],
+          "name": "Easylive Vader",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
             "CTY508S5"
           ],
           "name": "Sensee Voice-Interactive Female Vibrator",
@@ -14027,6 +14059,38 @@
             "PTYB22S2"
           ],
           "name": "Sensee Moonlight",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Constrict",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "CTY823S5"
+          ],
+          "name": "Sensee Little Seahorse",
           "features": [
             {
               "feature-type": "Vibrate",
@@ -14096,7 +14160,9 @@
               "Easylive NO8 Cup",
               "CTY508S5",
               "CTY916S4",
-              "PTYB22S2"
+              "PTYB22S2",
+              "CCP322S5",
+              "CTY823S5"
             ],
             "services": {
               "0000fff0-0000-1000-8000-00805f9b34fb": {
