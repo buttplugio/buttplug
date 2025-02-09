@@ -1,3 +1,42 @@
+# 9.0.7 (2025-02-08)
+
+## Features
+
+- Lovense Devices can now be detected via advertised service instead of name
+  - This means if you rename your toy in the lovense app, we'll (hopefully) still find it.
+- Added Device Support
+  - Joyhub Vince
+  - Joyhub Maynor
+  - Joyhub Dallin
+  - Joyhub Melody
+  - Joyhub Pathfinder
+  - Joyhub Scarlett
+  - JoyHub Verax 4
+  - JoyHub Palmyra
+  - JoyHub Maiden
+  - JoyHub Viele 3
+  - JoyHub Xylia
+  - JoyHub Tarik
+  - JoyHub Urica Guard 2
+  - JoyHub Ryden
+  - JoyHub Viva
+  - Svakom Emma Neo 2
+  - Svakom Mini Emma Neo
+  - Svakom Coco Pro
+  - metaXsire Zeus
+  - Tracy's Dog Craybit Pro
+  - Nexus Revo Stealth
+  - Luvmazer Finger Magic
+  - Fox M70-2
+  - PrettyLove (new identifier)
+  - Joyroid Loob
+  - Bananasome Rocket X7
+  - Omobo ViVegg Vibrator
+  - Kisstoy Lost (Vibrating)
+  - Kisstoy Lost (Sucking)
+  - Kisstoy Lost (Insertable)
+  - Kiiroo Spot
+
 # 9.0.6 (2024-12-23)
 
 ## Features
