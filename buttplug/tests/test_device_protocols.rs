@@ -409,6 +409,7 @@ async fn test_device_protocols_embedded_v2(test_file: &str) {
 #[test_case("test_fleshy_thrust_protocol.yaml" ; "Fleshy Thrust Sync Protocol")]
 #[test_case("test_nexus_revo.yaml" ; "Nexus Revo Protocol")]
 #[test_case("test_omobo_protocol.yaml" ; "Omobo Protocol")]
+#[test_case("test_yiciyuan_protocol.yaml" ; "Yiciyuan Protocol")]
 #[tokio::test]
 async fn test_device_protocols_json_v2(test_file: &str) {
   util::device_test::client::client_v2::run_json_test_case(&load_test_case(test_file).await).await;
