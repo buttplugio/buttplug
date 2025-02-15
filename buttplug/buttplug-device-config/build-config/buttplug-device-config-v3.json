@@ -18577,6 +18577,75 @@
           }
         }
       ]
+    },
+    "yiciyuan": {
+      "defaults": {
+        "name": "YiCiYuan Device",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                20
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "YS-TD-01"
+          ],
+          "name": "YiCiYuan Vibrator 01"
+        },
+        {
+          "identifier": [
+            "YS-TD-02"
+          ],
+          "name": "YiCiYuan Vibrator 02"
+        },
+        {
+          "identifier": [
+            "YS-TD-03"
+          ],
+          "name": "YiCiYuan Vibrator 03"
+        },
+        {
+          "identifier": [
+            "YCY-FJB-01"
+          ],
+          "name": "YiCiYuan Masturbation Cup 01"
+        },
+        {
+          "identifier": [
+            "YCY-FJB-02"
+          ],
+          "name": "YiCiYuan Masturbation Cup 02"
+        }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "YS-TD-01",
+              "YS-TD-02",
+              "YS-TD-03",
+              "YCY-FJB-01",
+              "YCY-FJB-02"
+            ],
+            "services": {
+              "0000ff40-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ff41-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }
