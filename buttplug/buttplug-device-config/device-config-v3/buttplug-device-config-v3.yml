@@ -1,6 +1,6 @@
 version:
   major: 3
-  minor: 12
+  minor: 13
 protocols:
   lovense:
     defaults:
@@ -3399,10 +3399,14 @@ protocols:
       - identifier:
           - CocoPro
         name: Svakom Coco Pro
+      - identifier:
+          - Echo 2
+        name: Svakom Echo 2
     communication:
       - btle:
           names:
             - CocoPro
+            - Echo 2
           services:
             0000ffe0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffe1-0000-1000-8000-00805f9b34fb
