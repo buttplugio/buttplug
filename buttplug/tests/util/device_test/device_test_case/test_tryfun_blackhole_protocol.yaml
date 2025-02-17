@@ -1,0 +1,70 @@
+devices:
+  - identifier: 
+      name: "TF-BHPLUS"
+    expected_name: "TryFun Black Hole Plus"
+device_commands:
+  # Commands
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 1.0
+          ActuatorType: Oscillate
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x00, 0x02, 0x00, 0x03, 0x0c, 0x64, 0x90]
+        write_with_response: false
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 1
+          Scalar: 1.0
+          ActuatorType: Vibrate
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x01, 0x02, 0x00, 0x03, 0x09, 0x64, 0x93]
+        write_with_response: false
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 0.5
+          ActuatorType: Oscillate
+        - Index: 1
+          Scalar: 0.5
+          ActuatorType: Vibrate
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x02, 0x02, 0x00, 0x03, 0x0c, 0x32, 0xc2]
+        write_with_response: false
+      - !Write
+        endpoint: tx
+        data: [0x03, 0x02, 0x00, 0x03, 0x09, 0x32, 0xc5]
+        write_with_response: false
+  - !Messages
+    device_index: 0
+    messages:
+      - !Stop
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x04, 0x02, 0x00, 0x03, 0x0c, 0x00, 0xf4]
+        write_with_response: false
+      - !Write
+        endpoint: tx
+        data: [0x05, 0x02, 0x00, 0x03, 0x09, 0x00, 0xf7]
+        write_with_response: false
