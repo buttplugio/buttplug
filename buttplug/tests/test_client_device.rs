@@ -15,14 +15,22 @@ use buttplug::{
   },
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    message::{self, ClientDeviceMessageAttributesV3},
+    message::{self, ButtplugActuatorFeatureMessageType, ClientDeviceMessageAttributesV3, DeviceFeature, DeviceFeatureActuator, Endpoint, FeatureType},
   },
-  util::async_manager,
+  server::device::{
+    configuration::{UserDeviceCustomization, UserDeviceDefinition, UserDeviceIdentifier},
+    hardware::{HardwareCommand, HardwareWriteCmd}
+  },
+  util::{
+    async_manager,
+    device_configuration::load_protocol_configs
+  },
 };
 use futures::StreamExt;
 use std::{sync::Arc, time::Duration};
 use tokio::time::sleep;
-use util::{test_client_with_device, test_device_manager::TestHardwareEvent};
+use util::test_device_manager::{check_test_recv_value, TestDeviceIdentifier};
+use util::{test_client_with_device, test_client_with_device_and_custom_dcm, test_device_manager::TestHardwareEvent};
 
 #[cfg(feature = "server")]
 #[tokio::test]
@@ -301,6 +309,97 @@ async fn test_client_repeated_deviceremoved_message() {
       .expect("Test, assuming infallible."),
     ButtplugClientEvent::Error(..)
   ));
+}
+
+
+#[tokio::test]
+async fn test_client_range_limits() {
+  let dcm = load_protocol_configs(&None, &None, false)
+      .expect("Test, assuming infallible.")
+      .finish()
+      .expect("Test, assuming infallible.");
+
+  // Add a user config that configures the test device to only user the lower and upper half for the two vibrators
+  let identifier = UserDeviceIdentifier::new("range-test", "aneros", &Some("Massage Demo".into()));
+  let test_identifier = TestDeviceIdentifier::new("Massage Demo", Some("range-test".into()));
+  dcm
+      .add_user_device_definition(
+        &identifier,
+        &UserDeviceDefinition::new(
+          "Massage Demo",
+          &[
+            DeviceFeature::new(
+              "Lower half",
+              FeatureType::Vibrate,
+              &Some(DeviceFeatureActuator::new(
+                &(0..=127),
+                &(0..=64),
+                &[ButtplugActuatorFeatureMessageType::ScalarCmd].into(),
+              )),
+              &None,
+            ),
+            DeviceFeature::new(
+              "Upper half",
+              FeatureType::Vibrate,
+              &Some(DeviceFeatureActuator::new(
+                &(0..=127),
+                &(64..=127),
+                &[ButtplugActuatorFeatureMessageType::ScalarCmd].into(),
+              )),
+              &None,
+            ),
+          ],
+          &UserDeviceCustomization::default(),
+        ),
+      )
+      .unwrap();
+
+  // Start the server & client
+  let (client, mut device) = test_client_with_device_and_custom_dcm(&test_identifier, dcm).await;
+  let mut event_stream = client.event_stream();
+  assert!(client.start_scanning().await.is_ok());
+
+  while let Some(event) = event_stream.next().await {
+    if let ButtplugClientEvent::DeviceAdded(dev) = event {
+      // Vibrate at half strength
+      assert!(dev
+          .vibrate(&ScalarValueCommand::ScalarValue(0.5))
+          .await
+          .is_ok());
+
+      // Lower half
+      check_test_recv_value(
+        &mut device,
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 32], false)),
+      );
+
+      // Upper half
+      check_test_recv_value(
+        &mut device,
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF2, 96], false)),
+      );
+
+      // Disable device
+      assert!(dev
+          .vibrate(&ScalarValueCommand::ScalarValue(0.0))
+          .await
+          .is_ok());
+
+      // Lower half
+      check_test_recv_value(
+        &mut device,
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false)),
+      );
+
+      // Upper half
+      check_test_recv_value(
+        &mut device,
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF2, 0], false)),
+      );
+      break;
+    }
+  }
+  assert!(client.stop_all_devices().await.is_ok());
 }
 
 // TODO Test invalid messages to device
