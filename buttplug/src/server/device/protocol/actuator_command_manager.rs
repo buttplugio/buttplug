@@ -61,8 +61,8 @@ impl FeatureStatus {
 
   pub fn update(&self, value: &(f64, bool)) -> Option<(u32, bool)> {
     let mut result = None;
-    let range_start = *self.actuator.step_range().start();
-    let range = self.actuator.step_range().end() - range_start;
+    let range_start = *self.actuator.step_limit().start();
+    let range = self.actuator.step_limit().end() - range_start;
     let scalar_modifier = value.0 * range as f64;
     let scalar = if scalar_modifier < 0.0001 {
       0
@@ -70,11 +70,15 @@ impl FeatureStatus {
       // When calculating speeds, round up. This follows how we calculated
       // things in buttplug-js and buttplug-csharp, so it's more for history
       // than anything, but it's what users will expect.
-      (scalar_modifier + range_start as f64).ceil() as u32
+      ((scalar_modifier + range_start as f64).ceil() as u32).clamp(
+        *self.actuator.step_range().start(),
+        *self.actuator.step_range().end(),
+      )
     };
     trace!(
-      "{:?} {} {} {}",
+      "{:?} {:?} {} {} {}",
       self.actuator.step_range(),
+      self.actuator.step_limit(),
       range,
       scalar_modifier,
       scalar
