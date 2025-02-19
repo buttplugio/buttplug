@@ -100,6 +100,33 @@ pub async fn test_client_with_device() -> (ButtplugClient, TestDeviceChannelHost
 }
 
 #[allow(dead_code)]
+pub async fn test_client_with_device_and_custom_dcm(
+  identifier: &TestDeviceIdentifier,
+  dcm: DeviceConfigurationManager,
+) -> (ButtplugClient, TestDeviceChannelHost) {
+  let mut builder = TestDeviceCommunicationManagerBuilder::default();
+  let device = builder.add_test_device(identifier);
+
+  let mut dm_builder = ServerDeviceManagerBuilder::new(dcm);
+  dm_builder.comm_manager(builder);
+
+  let server_builder = ButtplugServerBuilder::new(dm_builder.finish().unwrap());
+
+  let connector = ButtplugInProcessClientConnectorBuilder::default()
+    .server(server_builder.finish().unwrap())
+    .finish();
+
+  let client = ButtplugClient::new("Test Client");
+  assert!(!client.connected());
+  client
+    .connect(connector)
+    .await
+    .expect("Test, assuming infallible.");
+  assert!(client.connected());
+  (client, device)
+}
+
+#[allow(dead_code)]
 pub async fn test_client_with_delayed_device_manager() -> ButtplugClient {
   let builder = DelayDeviceCommunicationManagerBuilder::default();
 
