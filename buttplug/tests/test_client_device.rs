@@ -25,13 +25,18 @@ use buttplug::{
       FeatureType,
     },
   },
-  server::device::{
+  server::{device::{
     configuration::{UserDeviceCustomization, UserDeviceDefinition, UserDeviceIdentifier},
-    hardware::{HardwareCommand, HardwareWriteCmd},
+    hardware::{HardwareCommand, HardwareWriteCmd}
+  }, message::server_device_feature::ServerDeviceFeature},
+  util::{
+    async_manager,
+    device_configuration::load_protocol_configs
   },
   util::{async_manager, device_configuration::load_protocol_configs},
 };
 use futures::StreamExt;
+use uuid::Uuid;
 use std::{sync::Arc, time::Duration};
 use tokio::time::sleep;
 use util::test_device_manager::{check_test_recv_value, TestDeviceIdentifier};
@@ -337,36 +342,42 @@ async fn test_client_range_limits() {
   let identifier = UserDeviceIdentifier::new("range-test", "aneros", &Some("Massage Demo".into()));
   let test_identifier = TestDeviceIdentifier::new("Massage Demo", Some("range-test".into()));
   dcm
-    .add_user_device_definition(
-      &identifier,
-      &UserDeviceDefinition::new(
-        "Massage Demo",
-        &[
-          DeviceFeature::new(
-            "Lower half",
-            FeatureType::Vibrate,
-            &Some(DeviceFeatureActuator::new(
-              &(0..=127),
-              &(0..=64),
-              &[ButtplugActuatorFeatureMessageType::ScalarCmd].into(),
-            )),
-            &None,
-          ),
-          DeviceFeature::new(
-            "Upper half",
-            FeatureType::Vibrate,
-            &Some(DeviceFeatureActuator::new(
-              &(0..=127),
-              &(64..=127),
-              &[ButtplugActuatorFeatureMessageType::ScalarCmd].into(),
-            )),
-            &None,
-          ),
-        ],
-        &UserDeviceCustomization::default(),
-      ),
-    )
-    .unwrap();
+      .add_user_device_definition(
+        &identifier,
+        &UserDeviceDefinition::new(
+          "Massage Demo",
+          &Uuid::new_v4(),
+          &None,
+          &[
+            ServerDeviceFeature::new(
+              "Lower half",
+              &Uuid::new_v4(),
+              &None,
+              FeatureType::Vibrate,
+              &Some(DeviceFeatureActuator::new(
+                &(0..=127),
+                &(0..=64),
+                &[ButtplugActuatorFeatureMessageType::ValueCmd].into(),
+              )),
+              &None,
+            ),
+            ServerDeviceFeature::new(
+              "Upper half",
+              &Uuid::new_v4(),
+              &None,              
+              FeatureType::Vibrate,
+              &Some(DeviceFeatureActuator::new(
+                &(0..=127),
+                &(64..=127),
+                &[ButtplugActuatorFeatureMessageType::ValueCmd].into(),
+              )),
+              &None,
+            ),
+          ],
+          &UserDeviceCustomization::default(),
+        ),
+      )
+      .unwrap();
 
   // Start the server & client
   let (client, mut device) = test_client_with_device_and_custom_dcm(&test_identifier, dcm).await;
