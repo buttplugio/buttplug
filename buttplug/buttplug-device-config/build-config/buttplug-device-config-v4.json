@@ -6233,6 +6233,59 @@
         }
       ]
     },
+    "svakom-v6": {
+      "defaults": {
+        "name": "Svakom Device v6",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                10
+              ],
+              "messages": [
+                "ValueCmd"
+              ]
+            },
+            "id": "e4f10a46-e127-4f45-b0ca-163ba7d6afe4"
+          }
+        ],
+        "id": "3ed0b8fb-0c7d-40ac-8ebd-342816d521bf"
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "CocoPro"
+          ],
+          "name": "Svakom Coco Pro",
+          "id": "9dd9130a-7a15-4053-8f5f-81c3baa87c52"
+        },
+        {
+          "identifier": [
+            "Echo 2"
+          ],
+          "name": "Svakom Echo 2",
+          "id": "fa5e8697-1580-4ca7-b707-9282bffcf6cb"
+        }
+      ],
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "CocoPro",
+              "Echo 2"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
     "svakom-sam": {
       "defaults": {
         "name": "Svakom Sam Neo",
@@ -11474,6 +11527,115 @@
               },
               "0000ffac-0000-1000-8000-00805f9b34fb": {
                 "tx": "0000ffb5-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "tryfun-meta2": {
+      "defaults": {
+        "name": "TryFun Meta 2",
+        "features": [
+          {
+            "feature-type": "Oscillate",
+            "actuator": {
+              "step-range": [
+                0,
+                100
+              ],
+              "messages": [
+                "ValueCmd"
+              ]
+            },
+            "id": "ed3c19ea-9920-47cd-b516-b27598a14451"
+          },
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                100
+              ],
+              "messages": [
+                "ValueCmd"
+              ]
+            },
+            "id": "41f32d8e-917a-405a-be66-5a9e8b76b338"
+          },
+          {
+            "feature-type": "RotateWithDirection",
+            "actuator": {
+              "step-range": [
+                0,
+                100
+              ],
+              "messages": [
+                "ValueCmd"
+              ]
+            },
+            "id": "1b64305a-b043-40cc-bc17-efe16ebff2c5"
+          }
+        ],
+        "id": "d65543d1-5a43-4152-b86a-93150d76650b"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "TF-META2"
+            ],
+            "services": {
+              "0000ffac-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffb7-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "tryfun-blackhole": {
+      "defaults": {
+        "name": "TryFun Black Hole Plus",
+        "features": [
+          {
+            "feature-type": "Oscillate",
+            "actuator": {
+              "step-range": [
+                0,
+                100
+              ],
+              "messages": [
+                "ValueCmd"
+              ]
+            },
+            "id": "92518925-3afc-4cc7-8b93-7d46c3432407"
+          },
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                100
+              ],
+              "messages": [
+                "ValueCmd"
+              ]
+            },
+            "id": "73e93d8a-1e16-4539-9e12-e3f878a2f798"
+          }
+        ],
+        "id": "7ae72b3f-b560-4c40-bc1b-a47a2f4b10c1"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "TF-BHPLUS"
+            ],
+            "services": {
+              "0000ffac-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffb7-0000-1000-8000-00805f9b34fb"
               }
             }
           }
@@ -18664,6 +18826,287 @@
             "services": {
               "0000ffe0-0000-1000-8000-00805f9b34fb": {
                 "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "nexus-revo": {
+      "defaults": {
+        "name": "Nexus Revo Stealth",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                10
+              ],
+              "messages": [
+                "ValueCmd"
+              ]
+            },
+            "id": "45897e25-6ff3-4cd4-b94d-96b7d1365200"
+          },
+          {
+            "feature-type": "RotateWithDirection",
+            "actuator": {
+              "step-range": [
+                0,
+                2
+              ],
+              "messages": [
+                "ValueCmd"
+              ]
+            },
+            "id": "3bb932f8-cf93-4c65-9590-d827ca42d13f"
+          }
+        ],
+        "id": "7ea9b5b3-2976-4f65-a496-02072ead205a"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "XW-LW3"
+            ],
+            "services": {
+              "0000c570-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000c571-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "luvmazer": {
+      "defaults": {
+        "name": "Luvmazer Finger Magic",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ValueCmd"
+              ]
+            },
+            "id": "2ec98845-5fbb-420c-b124-a4192f8f03bf"
+          },
+          {
+            "feature-type": "Rotate",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ValueCmd"
+              ]
+            },
+            "id": "e87ed584-9a62-4a33-9751-a62159abe444"
+          }
+        ],
+        "id": "e040ed3a-de0d-48d4-9e92-e53c4b8babf6"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "TKLM-W001-BT"
+            ],
+            "services": {
+              "0000ffa0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "loob": {
+      "defaults": {
+        "name": "Joyroid Loob",
+        "features": [
+          {
+            "feature-type": "PositionWithDuration",
+            "actuator": {
+              "step-range": [
+                0,
+                1000
+              ],
+              "messages": [
+                "ValueWithParameterCmd"
+              ]
+            },
+            "id": "7510001a-340c-4dfe-bcb7-a72503f3e3fb"
+          }
+        ],
+        "id": "428956d9-4f5a-45cc-98f7-055ae4e14ddc"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "LOOB"
+            ],
+            "services": {
+              "b75c49d2-04a3-4071-a0b5-35853eb08307": {
+                "tx": "ba5c49d2-04a3-4071-a0b5-35853eb08307"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "bananasome": {
+      "defaults": {
+        "name": "Bananasome Rocket X7",
+        "features": [
+          {
+            "feature-type": "Oscillate",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ValueCmd"
+              ]
+            },
+            "id": "77e15239-7fcc-4140-a4eb-c43f223303d7"
+          },
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ValueCmd"
+              ]
+            },
+            "id": "d09d2219-d37a-440d-a25b-7b20912c3fd9"
+          },
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                255
+              ],
+              "messages": [
+                "ValueCmd"
+              ]
+            },
+            "id": "045faf27-3934-405f-a808-6e79c78f9cbf"
+          }
+        ],
+        "id": "ac747692-2935-46d6-8ff7-de9b5ad9f4ab"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "火箭X7"
+            ],
+            "services": {
+              "0000ae00-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ae01-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "omobo": {
+      "defaults": {
+        "name": "Omobo ViVegg Vibrator",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                100
+              ],
+              "messages": [
+                "ValueCmd"
+              ]
+            },
+            "id": "f1a5a47c-025a-48f9-9da5-7e5e1f6abcd0"
+          }
+        ],
+        "id": "ee2ee249-78dc-4fcc-965e-1bd7038f0a70"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "S6"
+            ],
+            "services": {
+              "0000ffb0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffb2-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "kiiroo-spot": {
+      "defaults": {
+        "name": "Kiiroo Spot",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                100
+              ],
+              "messages": [
+                "ValueCmd"
+              ]
+            },
+            "id": "ab6b4381-b52e-46d4-aaca-7d0e4ab4972e"
+          },
+          {
+            "feature-type": "Battery",
+            "description": "Battery Level",
+            "sensor": {
+              "value-range": [
+                [
+                  0,
+                  100
+                ]
+              ],
+              "messages": [
+                "SensorReadCmd"
+              ]
+            },
+            "id": "c4ae09aa-1cdc-472c-842b-dc395d7ee5f0"
+          }
+        ],
+        "id": "3fa3d292-4942-4b12-9812-a3e83894c941"
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "SPOT W1"
+            ],
+            "services": {
+              "00001400-0000-1000-8000-00805f9b34fb": {
+                "tx": "00001401-0000-1000-8000-00805f9b34fb"
+              },
+              "0000180f-0000-1000-8000-00805f9b34fb": {
+                "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
               }
             }
           }
