@@ -346,11 +346,22 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedValueCmdV4 {
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceNoActuatorError("ScalarCmdV3".to_owned()),
         ))?;
-      cmds.push(CheckedValueSubcommandV4::new(
-        idx,
-        (cmd.scalar() * *actuator.step_range().end() as f64).ceil() as i32,
-        *feature.feature.id(),
-      ));
+
+      // This needs to take the user configured step limit into account, otherwise we'll hand back
+      // the wrong placement and it won't be noticed.
+      if cmd.scalar() > 0.000001 {
+        cmds.push(CheckedValueSubcommandV4::new(
+          idx,
+          (cmd.scalar() * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64) + *actuator.step_limit().start() as f64).ceil() as i32,
+          *feature.feature.id(),
+        ));
+      } else {
+        cmds.push(CheckedValueSubcommandV4::new(
+          idx,
+          0,
+          *feature.feature.id(),
+        ));
+      }
     }
     Ok(CheckedValueCmdV4::new(msg.id(), msg.device_index(), &cmds))
   }
