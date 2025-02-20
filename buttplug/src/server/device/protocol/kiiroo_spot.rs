@@ -8,12 +8,12 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{self, ButtplugDeviceMessage, Endpoint, SensorReadingV4},
+    message::{self, Endpoint, SensorReadingV4},
   },
-  server::device::{
+  server::{device::{
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_sensor_read_cmd::CheckedSensorReadCmdV4},
 };
 use futures::{future::BoxFuture, FutureExt};
 use std::{default::Default, sync::Arc};
@@ -24,7 +24,7 @@ generic_protocol_setup!(KiirooSpot, "kiiroo-spot");
 pub struct KiirooSpot {}
 
 impl ProtocolHandler for KiirooSpot {
-  fn handle_scalar_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     _: u32,
     scalar: u32,
@@ -40,7 +40,7 @@ impl ProtocolHandler for KiirooSpot {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: message::SensorReadCmdV4,
+    message: CheckedSensorReadCmdV4,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     debug!("Trying to get battery reading.");
     let message = message.clone();
@@ -52,8 +52,8 @@ impl ProtocolHandler for KiirooSpot {
       let battery_level = data[0] as i32;
       let battery_reading = message::SensorReadingV4::new(
         message.device_index(),
-        *message.feature_index(),
-        *message.sensor_type(),
+        message.feature_index(),
+        message.sensor_type(),
         vec![battery_level],
       );
       debug!("Got battery reading: {}", battery_level);

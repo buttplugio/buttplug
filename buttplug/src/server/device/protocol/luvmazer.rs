@@ -72,7 +72,7 @@ impl ProtocolHandler for Luvmazer {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_scalar_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     _index: u32,
     scalar: u32,
@@ -85,7 +85,7 @@ impl ProtocolHandler for Luvmazer {
     .into()])
   }
 
-  fn handle_scalar_rotate_cmd(
+  fn handle_value_rotate_cmd(
     &self,
     _index: u32,
     scalar: u32,
@@ -98,9 +98,9 @@ impl ProtocolHandler for Luvmazer {
     .into()])
   }
 
-  fn handle_scalar_cmd(
+  fn handle_value_cmd(
     &self,
-    commands: &[Option<(ActuatorType, u32)>],
+    commands: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let cmd1 = commands[0];
     let cmd2 = if commands.len() > 1 {
