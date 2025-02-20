@@ -27,7 +27,7 @@ impl ProtocolHandler for TryFunMeta2 {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_scalar_oscillate_cmd(
+  fn handle_value_oscillate_cmd(
     &self,
     _index: u32,
     scalar: u32,
@@ -90,7 +90,7 @@ impl ProtocolHandler for TryFunMeta2 {
     Ok(vec![])
   }
 
-  fn handle_scalar_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     _index: u32,
     scalar: u32,

@@ -8,9 +8,9 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{self, Endpoint},
+    message::Endpoint,
   },
-  server::device::{
+  server::{device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
@@ -19,7 +19,7 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  },
+  }, message::checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4},
 };
 use async_trait::async_trait;
 use std::cmp::{max, min};
@@ -49,7 +49,7 @@ pub struct Loob {}
 impl ProtocolHandler for Loob {
   fn handle_linear_cmd(
     &self,
-    message: message::LinearCmdV4,
+    message: CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if let Some(vec) = message.vectors().get(0) {
       let pos: u16 = max(min((vec.position() * 1000.0) as u16, 1000), 1);

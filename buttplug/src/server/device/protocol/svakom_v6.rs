@@ -63,7 +63,7 @@ impl ProtocolHandler for SvakomV6 {
     true
   }
 
-  fn handle_scalar_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     commands: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
