@@ -6588,7 +6588,6 @@
         {
           "btle": {
             "names": [
-              "SX218A",
               "Ava Neo"
             ],
             "services": {
