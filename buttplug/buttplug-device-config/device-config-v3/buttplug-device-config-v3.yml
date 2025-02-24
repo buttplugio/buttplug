@@ -2634,8 +2634,19 @@ protocols:
               messages:
                 - ScalarCmd
       - identifier:
+          - OhMiBod NEX2
+        name: OhMiBod NEX|2
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 100
+              messages:
+                - ScalarCmd
+      - identifier:
           - OhMiBod NEX3
-        name: hMiBod NEX|3
+        name: OhMiBod NEX|3
         features:
           - feature-type: Vibrate
             actuator:
@@ -2735,6 +2746,7 @@ protocols:
             - Pearl 3
             - OhMiBod 4.0
             - OhMiBod LUMEN
+            - OhMiBod NEX2
             - OhMiBod NEX3
             - OhMiBod ESCA
             - OhMiBod Foxy
