@@ -5,7 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use std::sync::atomic::{AtomicU8, Ordering};
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_setup,
@@ -14,6 +13,7 @@ use crate::{
     protocol::ProtocolHandler,
   },
 };
+use std::sync::atomic::{AtomicU8, Ordering};
 
 generic_protocol_setup!(TryFunBlackHole, "tryfun-blackhole");
 
@@ -33,7 +33,14 @@ impl ProtocolHandler for TryFunBlackHole {
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut sum: u8 = 0xff;
-    let mut data = vec![self.packet_id.fetch_add(1, Ordering::Relaxed), 0x02, 0x00, 0x03, 0x0c, scalar as u8];
+    let mut data = vec![
+      self.packet_id.fetch_add(1, Ordering::Relaxed),
+      0x02,
+      0x00,
+      0x03,
+      0x0c,
+      scalar as u8,
+    ];
     let mut count = 1;
     for item in data.iter().skip(1) {
       sum -= item;
@@ -51,7 +58,14 @@ impl ProtocolHandler for TryFunBlackHole {
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut sum: u8 = 0xff;
-    let mut data = vec![self.packet_id.fetch_add(1, Ordering::Relaxed), 0x02, 0x00, 0x03, 0x09, scalar as u8];
+    let mut data = vec![
+      self.packet_id.fetch_add(1, Ordering::Relaxed),
+      0x02,
+      0x00,
+      0x03,
+      0x09,
+      scalar as u8,
+    ];
     let mut count = 1;
     for item in data.iter().skip(1) {
       sum -= item;
