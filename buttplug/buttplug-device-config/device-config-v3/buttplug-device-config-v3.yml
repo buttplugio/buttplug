@@ -6524,6 +6524,32 @@ protocols:
           services:
             0000cfa2-0000-1000-8000-00805f9b34fb:
               tx: 0000cf21-0000-1000-8000-00805f9b34fb
+  sexverse-lg389:
+    defaults:
+      name: Sexverse LG389
+      features:
+        - feature-type: Vibrate
+          actuator:
+            step-range:
+              - 0
+              - 3
+            messages:
+              - ScalarCmd
+        - feature-type: Oscillate
+          actuator:
+            step-range:
+              - 0
+              - 10
+            messages:
+              - ScalarCmd
+    communication:
+      - btle:
+          names:
+            - LG389
+          services:
+            0000bae0-0000-1000-8000-00805f9b34fb:
+              tx: 0000bae1-0000-1000-8000-00805f9b34fb
+              rx: 0000bae2-0000-1000-8000-00805f9b34fb
   cowgirl:
     defaults:
       name: The Cowgirl Device
