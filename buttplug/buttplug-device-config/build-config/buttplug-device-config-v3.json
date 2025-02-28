@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 3,
-    "minor": 13
+    "minor": 14
   },
   "protocols": {
     "lovense": {
@@ -4589,9 +4589,29 @@
         },
         {
           "identifier": [
+            "OhMiBod NEX2"
+          ],
+          "name": "OhMiBod NEX|2",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  100
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
             "OhMiBod NEX3"
           ],
-          "name": "hMiBod NEX|3",
+          "name": "OhMiBod NEX|3",
           "features": [
             {
               "feature-type": "Vibrate",
@@ -4763,6 +4783,7 @@
               "Pearl 3",
               "OhMiBod 4.0",
               "OhMiBod LUMEN",
+              "OhMiBod NEX2",
               "OhMiBod NEX3",
               "OhMiBod ESCA",
               "OhMiBod Foxy",
@@ -6567,7 +6588,6 @@
         {
           "btle": {
             "names": [
-              "SX218A",
               "Ava Neo"
             ],
             "services": {
@@ -10958,18 +10978,6 @@
             }
           },
           {
-            "feature-type": "Rotate",
-            "actuator": {
-              "step-range": [
-                0,
-                100
-              ],
-              "messages": [
-                "RotateCmd"
-              ]
-            }
-          },
-          {
             "feature-type": "Vibrate",
             "actuator": {
               "step-range": [
@@ -10978,6 +10986,18 @@
               ],
               "messages": [
                 "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Rotate",
+            "actuator": {
+              "step-range": [
+                0,
+                100
+              ],
+              "messages": [
+                "RotateCmd"
               ]
             }
           }
@@ -11414,6 +11434,52 @@
             "services": {
               "0000cfa2-0000-1000-8000-00805f9b34fb": {
                 "tx": "0000cf21-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "sexverse-lg389": {
+      "defaults": {
+        "name": "Sexverse LG389",
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "actuator": {
+              "step-range": [
+                0,
+                3
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          },
+          {
+            "feature-type": "Oscillate",
+            "actuator": {
+              "step-range": [
+                0,
+                10
+              ],
+              "messages": [
+                "ScalarCmd"
+              ]
+            }
+          }
+        ]
+      },
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "LG389"
+            ],
+            "services": {
+              "0000bae0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000bae1-0000-1000-8000-00805f9b34fb",
+                "rx": "0000bae2-0000-1000-8000-00805f9b34fb"
               }
             }
           }
@@ -11958,8 +12024,8 @@
           "name": "Galaku Zaku Aircraft Cup",
           "features": [
             {
-              "feature-type": "Vibrate",
-              "description": "Vibrate",
+              "feature-type": "Oscillate",
+              "description": "Oscillate",
               "actuator": {
                 "step-range": [
                   0,
