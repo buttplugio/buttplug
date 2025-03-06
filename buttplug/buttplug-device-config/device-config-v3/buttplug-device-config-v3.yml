@@ -9021,6 +9021,42 @@ protocols:
               messages:
                 - ScalarCmd
       - identifier:
+          - J-Pearlconch
+        name: JoyHub Pearlconch
+        features:
+          - feature-type: Rotate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+      - identifier:
+          - J-PearlconchL
+        name: JoyHub Pearlconch L
+        features:
+          - feature-type: Rotate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+      - identifier:
           - J-Piet2
         name: JoyHub Piet 2
         features:
@@ -10030,6 +10066,7 @@ protocols:
       - btle:
           names:
             - J-Pearlconch
+            - J-PearlconchL
             - J-PetiteRose
             - J-MoonHorn
             - J-VibTrefoil
