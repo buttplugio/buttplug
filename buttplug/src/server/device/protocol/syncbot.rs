@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2025 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -325,9 +325,9 @@ impl ProtocolInitializer for SyncbotInitializer {
 /// vec![
 ///   0xf0, // byte 0: signature
 ///   0xc9, // byte 1: signature
-///   0x00, // byte 2: data (position; encrypted)
-///   0x00, // byte 3: data (rotation; encrypted)
-///   0x00, // byte 4: data (grip; encrypted)
+///   0x00, // byte 2: data (position (0-255); encrypted)
+///   0x00, // byte 3: data (rotation (0-255: 128 is neutral); encrypted)
+///   0x00, // byte 4: data (grip (38-216: 128 is neutral); encrypted)
 ///   0x00, // byte 5: data (unused?; encrypted)
 ///   0x00, // byte 6: checksum1 (sum of unencrypted bytes 2-5; encrypted)
 ///   0x00, // byte 7: null?
@@ -480,18 +480,18 @@ impl ProtocolHandler for Syncbot {
     Ok(vec![])
   }
 
-  fn handle_scalar_oscillate_cmd(
+  fn handle_scalar_constrict_cmd(
     &self,
     _index: u32,
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    debug!("Syncbot: Handling oscillate command: {:?}", scalar);
+    debug!("Syncbot: Handling constrict command: {:?}", scalar);
     let current_command = self.current_command.clone();
     // Gripping into negative direction is currently not supported
-    let oscillate_byte = 128_u8 + scalar as u8;
+    let constrict_byte = 128_u8 + scalar as u8;
     async_manager::spawn(async move {
       let mut command_writer = current_command.write().await;
-      command_writer[2] = oscillate_byte;
+      command_writer[2] = constrict_byte;
     });
     Ok(vec![])
   }

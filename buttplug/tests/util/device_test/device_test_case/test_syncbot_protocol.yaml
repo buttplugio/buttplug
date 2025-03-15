@@ -61,7 +61,7 @@ device_commands:
         - !Scalar
           - Index: 0
             Scalar: 0.5
-            ActuatorType: Oscillate
+            ActuatorType: Constrict
   - !Commands
       device_index: 0
       commands:
@@ -78,7 +78,7 @@ device_commands:
         - !Scalar
           - Index: 0
             Scalar: 0
-            ActuatorType: Oscillate
+            ActuatorType: Constrict
   - !Commands
       device_index: 0
       commands:

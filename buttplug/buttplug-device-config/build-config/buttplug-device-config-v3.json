@@ -18704,7 +18704,7 @@
             }
           },
           {
-            "feature-type": "Oscillate",
+            "feature-type": "Constrict",
             "actuator": {
               "step-range": [
                 0,
@@ -18734,33 +18734,6 @@
           "btle": {
             "names": [
               "V"
-            ],
-            "manufacturer-data": [
-              {
-                "company": 27808,
-                "data": [
-                  101,
-                  198,
-                  74,
-                  128,
-                  118,
-                  49,
-                  46,
-                  52,
-                  0,
-                  128,
-                  112,
-                  96,
-                  80,
-                  64,
-                  48,
-                  32,
-                  16,
-                  0,
-                  0,
-                  0
-                ]
-              }
             ],
             "services": {
               "0000ffe0-0000-1000-8000-00805f9b34fb": {
