@@ -125,6 +125,7 @@ pub mod svakom_v3;
 pub mod svakom_v4;
 pub mod svakom_v5;
 pub mod svakom_v6;
+pub mod syncbot;
 pub mod synchro;
 pub mod tcode_v03;
 pub mod thehandy;
@@ -607,6 +608,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     svakom_v6::setup::SvakomV6IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    syncbot::setup::SyncbotIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
