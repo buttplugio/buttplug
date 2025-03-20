@@ -10,6 +10,9 @@
 pub mod websocket_client;
 pub mod websocket_server;
 
+#[cfg(not(feature = "tokio-net"))]
+pub mod tungstenite_connect;
+
 pub use tokio_tungstenite::tungstenite::Error as TungsteniteError;
 pub use websocket_client::ButtplugWebsocketClientTransport;
 

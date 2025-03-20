@@ -23,13 +23,18 @@ use crate::{
 use futures::{future::BoxFuture, FutureExt, SinkExt, StreamExt};
 use std::{sync::Arc, time::Duration};
 use tokio::{
-  net::{TcpListener, TcpStream},
   sync::{
     mpsc::{Receiver, Sender},
     Notify,
   },
   time::sleep,
 };
+
+#[cfg(not(feature = "tokio-net"))]
+use super::tungstenite_connect::{TcpListener, TcpStream};
+#[cfg(feature = "tokio-net")]
+use tokio::net::{TcpListener, TcpStream};
+use tokio_tungstenite::accept_async;
 
 #[derive(Clone, Debug)]
 pub struct ButtplugWebsocketServerTransportBuilder {
@@ -230,14 +235,12 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
       debug!("Websocket: Listening on: {}", addr);
       if let Ok((stream, _)) = listener.accept().await {
         info!("Websocket: Got connection");
-        let ws_stream = tokio_tungstenite::accept_async(stream)
-          .await
-          .map_err(|err| {
-            error!("Websocket server accept error: {:?}", err);
-            ButtplugConnectorError::TransportSpecificError(
-              ButtplugConnectorTransportSpecificError::TungsteniteError(err),
-            )
-          })?;
+        let ws_stream = accept_async(stream).await.map_err(|err| {
+          error!("Websocket server accept error: {:?}", err);
+          ButtplugConnectorError::TransportSpecificError(
+            ButtplugConnectorTransportSpecificError::TungsteniteError(err),
+          )
+        })?;
         async_manager::spawn(async move {
           run_connection_loop(
             ws_stream,

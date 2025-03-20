@@ -33,14 +33,14 @@ use tokio::sync::{
   mpsc::{Receiver, Sender},
   Notify,
 };
-use tokio_tungstenite::{
-  connect_async,
-  connect_async_tls_with_config,
-  tungstenite::protocol::Message,
-  Connector,
-};
+use tokio_tungstenite::{tungstenite::Message, Connector};
 use tracing::Instrument;
 use url::Url;
+
+#[cfg(not(feature = "tokio-net"))]
+use super::tungstenite_connect::{connect_async, connect_async_tls_with_config};
+#[cfg(feature = "tokio-net")]
+use tokio_tungstenite::{connect_async, connect_async_tls_with_config};
 
 pub fn get_rustls_config_dangerous() -> ClientConfig {
   let store = rustls::RootCertStore::empty();
