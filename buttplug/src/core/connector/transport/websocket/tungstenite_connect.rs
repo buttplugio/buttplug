@@ -1,10 +1,15 @@
 use std::{
+  io::{Read, Write},
   net::{SocketAddr, ToSocketAddrs},
   sync::Arc,
 };
 
-use futures::io::AllowStdIo;
-use tokio::task::spawn_blocking;
+use futures::executor::block_on;
+use tokio::{
+  io::{AsyncReadExt, AsyncWriteExt, DuplexStream},
+  runtime::Handle,
+  task::spawn_blocking,
+};
 use tokio_tungstenite::{
   client_async_tls,
   client_async_tls_with_config,
@@ -20,9 +25,8 @@ use tokio_tungstenite::{
   MaybeTlsStream,
   WebSocketStream,
 };
-use tokio_util::compat::{Compat, FuturesAsyncReadCompatExt};
 
-pub type TcpStream = Compat<AllowStdIo<std::net::TcpStream>>;
+pub type TcpStream = DuplexStream;
 
 pub struct TcpListener(Arc<std::net::TcpListener>);
 
@@ -41,8 +45,34 @@ impl TcpListener {
     spawn_blocking(move || listener.accept())
       .await
       .unwrap()
-      .map(|(stream, addr)| (AllowStdIo::new(stream).compat(), addr))
+      .map(|(stream, addr)| (wrap_stream(stream), addr))
   }
+}
+
+fn wrap_stream(stream: std::net::TcpStream) -> DuplexStream {
+  let (frontend, backend) = tokio::io::duplex(1024);
+  let (mut read, mut write) = (stream.try_clone().unwrap(), stream);
+  let (mut backend_read, mut backend_write) = tokio::io::split(backend);
+
+  let handle = Handle::current();
+  std::thread::spawn(move || loop {
+    let _ = handle.enter();
+    let mut buf = [0u8; 1024];
+    while let Ok(len) = block_on(backend_read.read(&mut buf)) {
+      write.write(&mut buf[..len]).unwrap();
+    }
+  });
+
+  let handle = Handle::current();
+  std::thread::spawn(move || loop {
+    let _ = handle.enter();
+    let mut buf = [0u8; 1024];
+    while let Ok(len) = read.read(&mut buf) {
+      block_on(backend_write.write(&mut buf[..len])).unwrap();
+    }
+  });
+
+  frontend
 }
 
 fn connect_uri(uri: &Uri) -> Result<std::net::TcpStream, Error> {
@@ -75,7 +105,7 @@ pub async fn connect_async<Req: IntoClientRequest>(
   match spawn_blocking(move || connect_uri(&uri)).await.unwrap() {
     Ok(stream) => {
       stream.set_nodelay(true)?;
-      client_async_tls(request, AllowStdIo::new(stream).compat()).await
+      client_async_tls(request, wrap_stream(stream)).await
     }
     Err(e) => Err(e),
   }
@@ -92,8 +122,7 @@ pub async fn connect_async_tls_with_config<Req: IntoClientRequest>(
   match spawn_blocking(move || connect_uri(&uri)).await.unwrap() {
     Ok(stream) => {
       stream.set_nodelay(disable_nagle)?;
-      client_async_tls_with_config(request, AllowStdIo::new(stream).compat(), config, connector)
-        .await
+      client_async_tls_with_config(request, wrap_stream(stream), config, connector).await
     }
     Err(e) => Err(e),
   }
