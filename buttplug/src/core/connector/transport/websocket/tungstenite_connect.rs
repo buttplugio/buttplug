@@ -51,15 +51,22 @@ impl TcpListener {
 
 fn wrap_stream(stream: std::net::TcpStream) -> DuplexStream {
   let (frontend, backend) = tokio::io::duplex(1024);
-  let (mut read, mut write) = (stream.try_clone().unwrap(), stream);
   let (mut backend_read, mut backend_write) = tokio::io::split(backend);
+
+  // Simultaneous send/recv on the same fd from multiple threads SHOULD be perfectly safe...
+  // This is required on platforms (like Switch) where TcpSocket::try_clone doesn't work.
+  let stream = Arc::new(stream);
+  let (read, write) = (Arc::clone(&stream), stream);
 
   let handle = Handle::current();
   std::thread::spawn(move || loop {
     let _ = handle.enter();
     let mut buf = [0u8; 1024];
     while let Ok(len) = block_on(backend_read.read(&mut buf)) {
-      write.write(&mut buf[..len]).unwrap();
+      // prefer Arc::get_mut_unchecked once it's stabilized
+      unsafe { &*Arc::as_ptr(&write).cast_mut() }
+        .write(&mut buf[..len])
+        .unwrap();
     }
   });
 
@@ -67,7 +74,7 @@ fn wrap_stream(stream: std::net::TcpStream) -> DuplexStream {
   std::thread::spawn(move || loop {
     let _ = handle.enter();
     let mut buf = [0u8; 1024];
-    while let Ok(len) = read.read(&mut buf) {
+    while let Ok(len) = unsafe { &*Arc::as_ptr(&read).cast_mut() }.read(&mut buf) {
       block_on(backend_write.write(&mut buf[..len])).unwrap();
     }
   });
