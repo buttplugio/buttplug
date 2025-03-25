@@ -10062,6 +10062,24 @@ protocols:
                 - 255
               messages:
                 - ScalarCmd
+      - identifier:
+          - J-Troi
+        name: JoyHub Troi
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
@@ -10117,6 +10135,7 @@ protocols:
             - J-Maiden
             - J-Viele3
             - J-Xylia
+            - J-Troi
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
