@@ -6,42 +6,131 @@
 // for full license information.
 
 use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
+  core::{
+    errors::ButtplugDeviceError,
+    message::Endpoint,
+    message::{ActuatorType, ActuatorType::Vibrate},
+  },
+  generic_protocol_initializer_setup,
   server::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+    configuration::UserDeviceDefinition,
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{
+      ProtocolCommunicationSpecifier,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+      UserDeviceIdentifier,
+    },
   },
 };
+use async_trait::async_trait;
+use std::sync::{Arc, RwLock};
 
-generic_protocol_setup!(SvakomV6, "svakom-v6");
+generic_protocol_initializer_setup!(SvakomV6, "svakom-v6");
 
 #[derive(Default)]
-pub struct SvakomV6 {}
+pub struct SvakomV6Initializer {}
+
+#[async_trait]
+impl ProtocolInitializer for SvakomV6Initializer {
+  async fn initialize(
+    &mut self,
+    _: Arc<Hardware>,
+    _: &UserDeviceDefinition,
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
+    Ok(Arc::new(SvakomV6::new()))
+  }
+}
+
+pub struct SvakomV6 {
+  last_cmds: RwLock<Vec<(ActuatorType, u32)>>,
+}
+
+impl SvakomV6 {
+  fn new() -> Self {
+    let last_cmds = RwLock::new(vec![]);
+    Self { last_cmds }
+  }
+}
 
 impl ProtocolHandler for SvakomV6 {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_scalar_vibrate_cmd(
+  fn needs_full_command_set(&self) -> bool {
+    true
+  }
+
+  fn handle_scalar_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    commands: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      Endpoint::Tx,
-      [
-        0x55,
-        0x03,
-        0x00,
-        0x00,
-        if scalar == 0 { 0x00 } else { 0x01 },
-        scalar as u8,
-        0x00,
-      ]
-      .to_vec(),
-      false,
-    )
-    .into()])
+    let last_commands = self.last_cmds.read().expect("Locks should work").clone();
+    let mut hcmds = Vec::new();
+
+    let vibes = commands
+      .iter()
+      .filter(|c| c.is_some_and(|c| c.0 == Vibrate))
+      .map(|c| c.unwrap_or((Vibrate, 0)))
+      .collect::<Vec<(ActuatorType, u32)>>();
+    let last_vibes = last_commands
+      .iter()
+      .filter(|c| c.0 == Vibrate)
+      .map(|c| (c.0, c.1))
+      .collect::<Vec<(ActuatorType, u32)>>();
+
+    if vibes.len() > 0 {
+      let mut changed = last_vibes.len() != vibes.len();
+      let vibe1 = vibes[0].1;
+      if !changed && vibes[0].1 != last_vibes[0].1 {
+        changed = true;
+      }
+      let mut vibe2 = vibes[0].1;
+      if vibes.len() > 1 {
+        vibe2 = vibes[1].1;
+        if !changed && vibes[1].1 != last_vibes[1].1 {
+          changed = true;
+        }
+      }
+      if changed {
+        hcmds.push(
+          HardwareWriteCmd::new(
+            Endpoint::Tx,
+            [
+              0x55,
+              0x03,
+              if (vibe1 > 0 && vibe2 > 0) || vibe1 == vibe2 {
+                0x00
+              } else if vibe1 > 0 {
+                0x01
+              } else {
+                0x02
+              },
+              0x00,
+              if vibe1 == vibe2 && vibe1 == 0 {
+                0x00
+              } else {
+                0x01
+              },
+              vibe1.max(vibe2) as u8,
+              0x00,
+            ]
+            .to_vec(),
+            false,
+          )
+          .into(),
+        );
+      }
+    }
+
+    let mut command_writer = self.last_cmds.write().expect("Locks should work");
+    *command_writer = commands
+      .iter()
+      .filter(|c| c.is_some())
+      .map(|c| c.unwrap_or((Vibrate, 0)))
+      .collect::<Vec<(ActuatorType, u32)>>();
+    Ok(hcmds)
   }
 }

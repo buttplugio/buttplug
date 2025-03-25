@@ -15,22 +15,31 @@ use buttplug::{
   },
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    message::{self, ButtplugActuatorFeatureMessageType, ClientDeviceMessageAttributesV3, DeviceFeature, DeviceFeatureActuator, Endpoint, FeatureType},
+    message::{
+      self,
+      ButtplugActuatorFeatureMessageType,
+      ClientDeviceMessageAttributesV3,
+      DeviceFeature,
+      DeviceFeatureActuator,
+      Endpoint,
+      FeatureType,
+    },
   },
   server::device::{
     configuration::{UserDeviceCustomization, UserDeviceDefinition, UserDeviceIdentifier},
-    hardware::{HardwareCommand, HardwareWriteCmd}
+    hardware::{HardwareCommand, HardwareWriteCmd},
   },
-  util::{
-    async_manager,
-    device_configuration::load_protocol_configs
-  },
+  util::{async_manager, device_configuration::load_protocol_configs},
 };
 use futures::StreamExt;
 use std::{sync::Arc, time::Duration};
 use tokio::time::sleep;
 use util::test_device_manager::{check_test_recv_value, TestDeviceIdentifier};
-use util::{test_client_with_device, test_client_with_device_and_custom_dcm, test_device_manager::TestHardwareEvent};
+use util::{
+  test_client_with_device,
+  test_client_with_device_and_custom_dcm,
+  test_device_manager::TestHardwareEvent,
+};
 
 #[cfg(feature = "server")]
 #[tokio::test]
@@ -311,48 +320,47 @@ async fn test_client_repeated_deviceremoved_message() {
   ));
 }
 
-
 #[tokio::test]
 async fn test_client_range_limits() {
   let dcm = load_protocol_configs(&None, &None, false)
-      .expect("Test, assuming infallible.")
-      .finish()
-      .expect("Test, assuming infallible.");
+    .expect("Test, assuming infallible.")
+    .finish()
+    .expect("Test, assuming infallible.");
 
   // Add a user config that configures the test device to only user the lower and upper half for the two vibrators
   let identifier = UserDeviceIdentifier::new("range-test", "aneros", &Some("Massage Demo".into()));
   let test_identifier = TestDeviceIdentifier::new("Massage Demo", Some("range-test".into()));
   dcm
-      .add_user_device_definition(
-        &identifier,
-        &UserDeviceDefinition::new(
-          "Massage Demo",
-          &[
-            DeviceFeature::new(
-              "Lower half",
-              FeatureType::Vibrate,
-              &Some(DeviceFeatureActuator::new(
-                &(0..=127),
-                &(0..=64),
-                &[ButtplugActuatorFeatureMessageType::ScalarCmd].into(),
-              )),
-              &None,
-            ),
-            DeviceFeature::new(
-              "Upper half",
-              FeatureType::Vibrate,
-              &Some(DeviceFeatureActuator::new(
-                &(0..=127),
-                &(64..=127),
-                &[ButtplugActuatorFeatureMessageType::ScalarCmd].into(),
-              )),
-              &None,
-            ),
-          ],
-          &UserDeviceCustomization::default(),
-        ),
-      )
-      .unwrap();
+    .add_user_device_definition(
+      &identifier,
+      &UserDeviceDefinition::new(
+        "Massage Demo",
+        &[
+          DeviceFeature::new(
+            "Lower half",
+            FeatureType::Vibrate,
+            &Some(DeviceFeatureActuator::new(
+              &(0..=127),
+              &(0..=64),
+              &[ButtplugActuatorFeatureMessageType::ScalarCmd].into(),
+            )),
+            &None,
+          ),
+          DeviceFeature::new(
+            "Upper half",
+            FeatureType::Vibrate,
+            &Some(DeviceFeatureActuator::new(
+              &(0..=127),
+              &(64..=127),
+              &[ButtplugActuatorFeatureMessageType::ScalarCmd].into(),
+            )),
+            &None,
+          ),
+        ],
+        &UserDeviceCustomization::default(),
+      ),
+    )
+    .unwrap();
 
   // Start the server & client
   let (client, mut device) = test_client_with_device_and_custom_dcm(&test_identifier, dcm).await;
@@ -363,9 +371,9 @@ async fn test_client_range_limits() {
     if let ButtplugClientEvent::DeviceAdded(dev) = event {
       // Vibrate at half strength
       assert!(dev
-          .vibrate(&ScalarValueCommand::ScalarValue(0.5))
-          .await
-          .is_ok());
+        .vibrate(&ScalarValueCommand::ScalarValue(0.5))
+        .await
+        .is_ok());
 
       // Lower half
       check_test_recv_value(
@@ -381,9 +389,9 @@ async fn test_client_range_limits() {
 
       // Disable device
       assert!(dev
-          .vibrate(&ScalarValueCommand::ScalarValue(0.0))
-          .await
-          .is_ok());
+        .vibrate(&ScalarValueCommand::ScalarValue(0.0))
+        .await
+        .is_ok());
 
       // Lower half
       check_test_recv_value(
