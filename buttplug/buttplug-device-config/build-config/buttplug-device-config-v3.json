@@ -11460,6 +11460,12 @@
         },
         {
           "identifier": [
+            "TAY006"
+          ],
+          "name": "metaXsire Tay 6"
+        },
+        {
+          "identifier": [
             "TA-S001A"
           ],
           "name": "metaXsire Zeus",
@@ -11496,6 +11502,7 @@
           "btle": {
             "names": [
               "TAY001",
+              "TAY006",
               "TAY009",
               "TA-S001A"
             ],
