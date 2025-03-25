@@ -11311,11 +11311,34 @@
           }
         ]
       },
+      "configurations": [
+        {
+          "identifier": [
+            "LB-W01"
+          ],
+          "name": "Libo Miao",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  20
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        }
+      ],
       "communication": [
         {
           "btle": {
             "names": [
-              "LY272A01"
+              "LY272A01",
+              "LB-W01"
             ],
             "services": {
               "0000bae0-0000-1000-8000-00805f9b34fb": {
