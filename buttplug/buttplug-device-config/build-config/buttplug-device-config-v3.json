@@ -5960,6 +5960,38 @@
             "Echo 2"
           ],
           "name": "Svakom Echo 2"
+        },
+        {
+          "identifier": [
+            "Vick Neo 2"
+          ],
+          "name": "Svakom Vick Neo 2",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  10
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  10
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -5967,7 +5999,8 @@
           "btle": {
             "names": [
               "CocoPro",
-              "Echo 2"
+              "Echo 2",
+              "Vick Neo 2"
             ],
             "services": {
               "0000ffe0-0000-1000-8000-00805f9b34fb": {
