@@ -6538,6 +6538,9 @@ protocols:
           - TAY009
         name: metaXsire Tay 9
       - identifier:
+          - TAY006
+        name: metaXsire Tay 6
+      - identifier:
           - TA-S001A
         name: metaXsire Zeus
         features:
@@ -6559,6 +6562,7 @@ protocols:
       - btle:
           names:
             - TAY001
+            - TAY006
             - TAY009
             - TA-S001A
           services:
