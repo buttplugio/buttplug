@@ -125,6 +125,33 @@ impl ProtocolHandler for SvakomV6 {
       }
     }
 
+    if vibes.len() > 2 {
+      let mut changed = last_vibes.len() != vibes.len();
+      let vibe3 = vibes[2].1;
+      if !changed && vibes[2].1 != last_vibes[2].1 {
+        changed = true;
+      }
+      if changed {
+        hcmds.push(
+          HardwareWriteCmd::new(
+            Endpoint::Tx,
+            [
+              0x55,
+              0x07,
+              0x00,
+              0x00,
+              if vibe3 == 0 { 0x00 } else { 0x01 },
+              vibe3 as u8,
+              0x00,
+            ]
+            .to_vec(),
+            false,
+          )
+          .into(),
+        );
+      }
+    }
+
     let mut command_writer = self.last_cmds.write().expect("Locks should work");
     *command_writer = commands
       .iter()
