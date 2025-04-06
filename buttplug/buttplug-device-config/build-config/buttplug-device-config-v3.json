@@ -15751,6 +15751,26 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-Mars"
+          ],
+          "name": "JoyHub Mars",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -15791,7 +15811,8 @@
               "J-Tarik",
               "J-UricaGuard2",
               "J-Viva",
-              "J-Ryden"
+              "J-Ryden",
+              "J-Mars"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -17714,6 +17735,70 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "J-Tanmouth"
+          ],
+          "name": "JoyHub Tanmouth",
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "identifier": [
+            "J-Marcela"
+          ],
+          "name": "JoyHub Marcela",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  255
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -17772,7 +17857,9 @@
               "J-Maiden",
               "J-Viele3",
               "J-Xylia",
-              "J-Troi"
+              "J-Troi",
+              "J-Tanmouth",
+              "J-Marcela"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
