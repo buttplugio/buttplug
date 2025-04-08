@@ -9022,6 +9022,73 @@ protocols:
                 - 255
               messages:
                 - ScalarCmd
+      - identifier:
+          - J-Martino
+        name: JoyHub Martino
+        features:
+          - feature-type: Oscillate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+      - identifier:
+          - J-MarsLion2
+        name: JoyHub Mars Lion 2
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Constrict
+            actuator:
+              step-range:
+                - 0
+                - 5
+              messages:
+                - ScalarCmd
+      - identifier:
+          - J-Myrna
+        name: JoyHub Myrna
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Constrict
+            actuator:
+              step-range:
+                - 0
+                - 9
+              messages:
+                - ScalarCmd
+      - identifier:
+          - J-Vase2
+        name: JoyHub Vase 2
+        features:
+          - feature-type: Vibrate
+            description: Biting lips
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            description: Sideways flicker
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
@@ -9061,6 +9128,10 @@ protocols:
             - J-Viva
             - J-Ryden
             - J-Mars
+            - J-MarsLion2
+            - J-Myrna
+            - J-Vase2
+            - J-Martino
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
@@ -10190,6 +10261,75 @@ protocols:
                 - 255
               messages:
                 - ScalarCmd
+      - identifier:
+          - J-Vita
+        name: JoyHub Vita
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Rotate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Oscillate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+      - identifier:
+          - J-LACH
+        name: JoyHub Lach
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Constrict
+            actuator:
+              step-range:
+                - 0
+                - 5
+              messages:
+                - ScalarCmd
+      - identifier:
+          - J-Markel
+        name: JoyHub Markel
+        features:
+          - feature-type: Oscillate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Constrict
+            description: Suction
+            actuator:
+              step-range:
+                - 0
+                - 9
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
@@ -10248,6 +10388,9 @@ protocols:
             - J-Troi
             - J-Tanmouth
             - J-Marcela
+            - J-Vita
+            - J-LACH
+            - J-Markel
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
