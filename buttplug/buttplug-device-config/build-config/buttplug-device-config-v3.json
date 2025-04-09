@@ -11409,6 +11409,38 @@
               }
             }
           ]
+        },
+        {
+          "identifier": [
+            "HH010"
+          ],
+          "name": "metaXsire HH010",
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  20
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "actuator": {
+                "step-range": [
+                  0,
+                  20
+                ],
+                "messages": [
+                  "ScalarCmd"
+                ]
+              }
+            }
+          ]
         }
       ],
       "communication": [
@@ -11416,7 +11448,8 @@
           "btle": {
             "names": [
               "LY272A01",
-              "LB-W01"
+              "LB-W01",
+              "HH010"
             ],
             "services": {
               "0000bae0-0000-1000-8000-00805f9b34fb": {
