@@ -27,8 +27,8 @@ use ecb::cipher::block_padding::Pkcs7;
 use ecb::cipher::{BlockDecryptMut, BlockEncryptMut, KeyInit};
 use std::sync::Arc;
 
-use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
+use rand::distr::Alphanumeric;
+use rand::{rng, Rng};
 use regex::Regex;
 use sha2::{Digest, Sha256};
 
@@ -70,7 +70,7 @@ impl ProtocolInitializer for VibCrafterInitializer {
       .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
       .await?;
 
-    let auth_str = thread_rng()
+    let auth_str = rng()
       .sample_iter(&Alphanumeric)
       .take(6)
       .map(char::from)

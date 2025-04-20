@@ -55,75 +55,75 @@ buttplug_derive = "0.8.1"
 # buttplug_derive = { path = "../buttplug_derive" }
 futures = "0.3.31"
 futures-util = "0.3.31"
-async-trait = "0.1.86"
-serde = { version = "1.0.217", features = ["derive"] }
-serde_json = "1.0.139"
-serde_repr = "0.1.19"
-uuid = { version = "1.13.2", features = ["serde"] }
+async-trait = "0.1.88"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+serde_repr = "0.1.20"
+uuid = { version = "1.16.0", features = ["serde"] }
 url = "2.5.4"
-btleplug = { version = "0.11.7", optional = true }
-# btleplug = { path = "../../btleplug", optional = true}
+# btleplug = { version = "0.11.7", optional = true }
+btleplug = { path = "../../btleplug", optional = true}
 # btleplug = { git = 'https://github.com/deviceplug/btleplug', branch = 'master', optional = true }
 strum_macros = "0.27.1"
 strum = "0.27.1"
-once_cell = "1.20.3"
+once_cell = "1.21.3"
 paste = "1.0.15"
 lazy_static = "1.5.0"
 byteorder = "1.5.0"
-thiserror = "2.0.11"
+thiserror = "2.0.12"
 cfg-if = "1.0.0"
 tracing = "0.1.41"
 tracing-futures = "0.2.5"
 tracing-subscriber = { version = "0.3.19", features = ["json"] }
 dashmap = { version = "6.1.0", features = ["serde"] }
 displaydoc = "0.2.5"
-tokio = { version = "1.43.0", features = ["sync", "macros", "io-util"] }
+tokio = { version = "1.44.2", features = ["sync", "macros", "io-util"] }
 async-stream = "0.3.6"
 prost = "0.13.5"
-tokio-util = "0.7.13"
-reqwest = { version = "0.12.12", default-features = false, optional = true, features = ["rustls-tls"] }
+tokio-util = "0.7.14"
+reqwest = { version = "0.12.15", default-features = false, optional = true, features = ["rustls-tls"] }
 serde-aux = "4.6.0"
-getset = "0.1.4"
+getset = "0.1.5"
 os_info = "3.10.0"
 ahash = "0.8.11"
-jsonschema = { version = "0.29.0", default-features = false }
+jsonschema = { version = "0.30.0", default-features = false }
 derivative = "2.2.0"
 tokio-stream = "0.1.17"
 instant = "0.1.13"
 regex = "1.11.1"
 tokio-tungstenite = { version = "0.26.2", features = ["rustls-tls-webpki-roots", "url"], optional = true }
-rustls = { version = "0.23.23", optional = true, default-features = false, features = ["ring"]}
+rustls = { version = "0.23.26", optional = true, default-features = false, features = ["ring"]}
 aes = { version = "0.8.4" }
 ecb = { version = "0.1.2", features = ["std"] }
-rand = { version = "0.8.5" }
+rand = { version = "0.9.1" }
 sha2 = { version = "0.10.8", features = ["std"] }
 # Used by several packages, but we need to bring in the JS feature for wasm. Pinned at 0.2 until dependencies update
-getrandom = { version = "0.2", features = ["js"] }
+getrandom = { version = "0.3.2", features = ["wasm_js"] }
 
 [dev-dependencies]
 serde_yaml = "0.9.34"
 test-case = "3.3.1"
-tokio = { version = "1.43.0", features = ["io-std", "rt"] }
+tokio = { version = "1.44.2", features = ["io-std", "rt"] }
 tracing-log = { version = "0.2.0" }
 tokio-test = "0.4.4"
 
 [build-dependencies]
-prost-build = "0.13.4"
+prost-build = "0.13.5"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 rusty-xinput = "1.3.0"
-windows = { version = "0.59.0", features = ["Devices_Bluetooth", "Foundation"] }
-serialport = { version = "4.7.0", optional = true }
+windows = { version = "0.61.1", features = ["Devices_Bluetooth", "Foundation"] }
+serialport = { version = "4.7.1", optional = true }
 hidapi = { version = "2.6.3", default-features = false, features = ["windows-native"], optional = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
-serialport = { version = "4.7.0", optional = true }
+serialport = { version = "4.7.1", optional = true }
 # Linux hidraw is needed here in order to work with the lovense dongle. libusb breaks it on linux.
 # Other platforms are not affected by the feature changes.
 hidapi = { version = "2.6.3", default-features = false, features = ["linux-static-hidraw"], optional = true }
 
 [target.'cfg(target_os = "macos")'.dependencies]
-serialport = { version = "4.7.0", optional = true }
+serialport = { version = "4.7.1", optional = true }
 hidapi = { version = "2.6.3", default-features = false, features = ["macos-shared-device"], optional = true }
 
 [target.wasm32-unknown-unknown.dependencies]
