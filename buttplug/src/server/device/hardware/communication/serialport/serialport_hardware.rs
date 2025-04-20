@@ -118,7 +118,7 @@ fn serial_write_thread(mut port: Box<dyn SerialPort>, receiver: mpsc::Receiver<V
   // This is a blocking recv so we don't have to worry about the port.
   while let Some(v) = recv.blocking_recv() {
     if let Err(err) = port.write_all(&v) {
-      error!("Cannot write data to serial port, exiting thread: {}", err);
+      warn!("Cannot write data to serial port, exiting thread: {}", err);
       return;
     }
   }
@@ -158,6 +158,7 @@ fn serial_read_thread(
         warn!("Error reading from serial port: {:?}", e);
         if e.kind() == serialport::ErrorKind::NoDevice {
           info!("Serial device gone, breaking out of read loop.");
+          break;
         }
       }
     }
@@ -206,6 +207,8 @@ impl SerialPortHardware {
     */
     // TODO for now, assume 8/N/1. Not really sure when/if this would ever change.
     let port_name = port_info.port_name.clone();
+    let port_name_clone = port_name.clone();
+
     thread::Builder::new()
       .name("Serial Port Connection Thread".to_string())
       .spawn(move || {
@@ -232,15 +235,30 @@ impl SerialPortHardware {
     let (writer_sender, writer_receiver) = mpsc::channel(256);
     let (reader_sender, reader_receiver) = mpsc::channel(256);
 
+    let connected = Arc::new(AtomicBool::new(true));
     let token = CancellationToken::new();
     let read_token = token.child_token();
     let read_port = (*port)
       .try_clone()
       .expect("Should always be able to clone port");
+    let connected_clone = connected.clone();
+    let event_stream_clone = device_event_sender.clone();
     let read_thread = thread::Builder::new()
       .name("Serial Reader Thread".to_string())
       .spawn(move || {
         serial_read_thread(read_port, reader_sender, read_token);
+        connected_clone.store(false, Ordering::Relaxed);
+        if event_stream_clone.receiver_count() != 0 {
+          if let Err(err) = event_stream_clone
+          .send(HardwareEvent::Disconnected(
+            format!("{:?}", &port_name_clone)
+          )) {
+            error!(
+              "Cannot send notification, device object disappeared: {:?}",
+              err
+            );
+          }
+        }
       })
       .expect("Should always be able to create thread");
 
@@ -263,7 +281,7 @@ impl SerialPortHardware {
       port_receiver: Arc::new(Mutex::new(reader_receiver)),
       port_sender: writer_sender,
       _port: Arc::new(Mutex::new(port)),
-      connected: Arc::new(AtomicBool::new(true)),
+      connected,
       device_event_sender,
       thread_cancellation_token: token,
     })
