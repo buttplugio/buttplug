@@ -12,51 +12,34 @@ use crate::core::message::{
   ButtplugMessageFinalizer,
   ButtplugMessageValidator,
 };
-use getset::{CopyGetters, Getters};
+use getset::CopyGetters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-/// Move device to a certain position in a certain amount of time
-#[derive(Debug, PartialEq, Clone, CopyGetters)]
+#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-#[getset(get_copy = "pub")]
-pub struct ValueWithParameterSubcommandV4 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
-  feature_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Duration"))]
-  duration: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Position"))]
-  position: f64,
-}
-
-impl ValueWithParameterSubcommandV4 {
-  pub fn new(feature_index: u32, duration: u32, position: f64) -> Self {
-    Self {
-      feature_index,
-      duration,
-      position,
-    }
-  }
-}
-
-#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, Getters)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[getset(get_copy="pub")]
 pub struct ValueWithParameterCmdV4 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Vectors"))]
-  #[getset(get = "pub")]
-  vectors: Vec<ValueWithParameterSubcommandV4>,
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
+  feature_index: u32,
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Duration"))]
+  value: u32,
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Position"))]
+  parameter: i32,
 }
 
 impl ValueWithParameterCmdV4 {
-  pub fn new(device_index: u32, vectors: Vec<ValueWithParameterSubcommandV4>) -> Self {
+  pub fn new(device_index: u32, feature_index: u32, value: u32, parameter: i32) -> Self {
     Self {
       id: 1,
       device_index,
-      vectors,
+      feature_index,
+      value,
+      parameter
     }
   }
 }

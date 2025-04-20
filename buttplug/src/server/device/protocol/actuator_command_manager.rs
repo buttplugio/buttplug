@@ -120,7 +120,9 @@ impl ActuatorCommandManager {
       }
     }
     if !level_subcommands.is_empty() {
-      stop_commands.push(CheckedValueCmdV4::new(0, 0, &level_subcommands).into());
+      for level in level_subcommands {
+        stop_commands.push(CheckedValueCmdV4::new(0, 0, &level_subcommands).into());
+      }
     }
 
     Self {
