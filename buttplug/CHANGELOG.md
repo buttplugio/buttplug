@@ -1,3 +1,25 @@
+# 9.0.8 (2025-04-20)
+
+## Features
+
+- Added Device Support
+  - TryFun Meta 2, Black Hole Plus
+  - OhMiBox Nex|2
+  - Sexverse LG389
+  - Galaku Zaku Aircraft Cup
+  - JoyHub Pearlconch L, Troi, Tanmouth, Marcela
+  - Libo Miao
+  - Svakom Vick Neo 2
+  - Svakom Iker Neo
+  - metaXsire Tay 6
+  - metaXsire HH010
+
+## Bugfixes
+
+- ScalarCmd devices now properly heed user set device limits
+- Disconnecting a serial device in use now fires disconnect event
+  - Versus what it used to do, which was an unbounded, very fast memory leak
+
 # 9.0.7 (2025-02-08)
 
 ## Features

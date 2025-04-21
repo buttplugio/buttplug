@@ -1,6 +1,6 @@
 [package]
 name = "buttplug"
-version = "9.0.7"
+version = "9.0.8"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Buttplug Intimate Hardware Control Library"
 license = "BSD-3-Clause"
@@ -61,8 +61,8 @@ serde_json = "1.0.140"
 serde_repr = "0.1.20"
 uuid = { version = "1.16.0", features = ["serde"] }
 url = "2.5.4"
-# btleplug = { version = "0.11.7", optional = true }
-btleplug = { path = "../../btleplug", optional = true}
+btleplug = { version = "0.11.8", optional = true }
+# btleplug = { path = "../../btleplug", optional = true}
 # btleplug = { git = 'https://github.com/deviceplug/btleplug', branch = 'master', optional = true }
 strum_macros = "0.27.1"
 strum = "0.27.1"
