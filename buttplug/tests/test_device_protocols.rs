@@ -129,6 +129,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_luvmazer_protocol.yaml" ; "Luvmazer Protocol")]
 #[test_case("test_bananasome_protocol.yaml" ; "Bananasome Protocol")]
 #[test_case("test_omobo_protocol.yaml" ; "Omobo Protocol")]
+#[test_case("test_syncbot_protocol.yaml" ; "Syncbot Protocol")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
@@ -248,6 +249,7 @@ async fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_luvmazer_protocol.yaml" ; "Luvmazer Protocol")]
 #[test_case("test_bananasome_protocol.yaml" ; "Bananasome Protocol")]
 #[test_case("test_omobo_protocol.yaml" ; "Omobo Protocol")]
+#[test_case("test_syncbot_protocol.yaml" ; "Syncbot Protocol")]
 #[tokio::test]
 async fn test_device_protocols_json_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
