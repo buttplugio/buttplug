@@ -143,6 +143,7 @@ pub mod xibao;
 pub mod xinput;
 pub mod xiuxiuda;
 pub mod xuanhuan;
+pub mod yiciyuan;
 pub mod youcups;
 pub mod youou;
 pub mod zalo;
@@ -666,6 +667,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     youcups::setup::YoucupsIdentifierFactory::default(),
   );
+  add_to_protocol_map(&mut map, yiciyuan::setup::YiciyuanIdentifierFactory::default());
   add_to_protocol_map(&mut map, youou::setup::YououIdentifierFactory::default());
   add_to_protocol_map(&mut map, zalo::setup::ZaloIdentifierFactory::default());
   add_to_protocol_map(
