@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(AdrienLastic, "adrienlastic");
@@ -25,12 +25,11 @@ impl ProtocolHandler for AdrienLastic {
 
   fn handle_value_vibrate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      format!("MotorValue:{:02};", scalar).as_bytes().to_vec(),
+      format!("MotorValue:{:02};", cmd.value()).as_bytes().to_vec(),
       true,
     )
     .into()])

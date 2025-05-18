@@ -23,10 +23,9 @@ impl ProtocolHandler for Svakom {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_vibrate_cmd(
+    fn handle_value_vibrate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let multiplier: u8 = if scalar == 0 { 0x00 } else { 0x01 };
     Ok(vec![HardwareWriteCmd::new(

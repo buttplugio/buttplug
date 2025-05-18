@@ -70,10 +70,9 @@ impl Xuanhuan {
 }
 
 impl ProtocolHandler for Xuanhuan {
-  fn handle_value_vibrate_cmd(
+    fn handle_value_vibrate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_command = self.current_command.clone();
     async_manager::spawn(async move {

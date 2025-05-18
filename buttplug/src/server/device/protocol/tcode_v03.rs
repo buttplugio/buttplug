@@ -22,7 +22,7 @@ generic_protocol_setup!(TCodeV03, "tcode-v03");
 pub struct TCodeV03 {}
 
 impl ProtocolHandler for TCodeV03 {
-  fn handle_linear_cmd(
+  fn handle_position_with_duration_cmd(
     &self,
     msg: CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {

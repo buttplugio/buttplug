@@ -47,20 +47,16 @@ impl ProtocolInitializer for LoobInitializer {
 pub struct Loob {}
 
 impl ProtocolHandler for Loob {
-  fn handle_linear_cmd(
+  fn handle_position_with_duration_cmd(
     &self,
-    message: CheckedValueWithParameterCmdV4,
+    message: &CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if let Some(vec) = message.vectors().get(0) {
-      let pos: u16 = max(min((vec.position() * 1000.0) as u16, 1000), 1);
-      let time: u16 = max(vec.duration() as u16, 1);
-      let mut data = pos.to_be_bytes().to_vec();
-      for b in time.to_be_bytes() {
-        data.push(b);
-      }
-      Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()])
-    } else {
-      Ok(vec![])
+    let pos: u16 = max(min(message.value() as u16, 1000), 1);
+    let time: u16 = max(message.parameter() as u16, 1);
+    let mut data = pos.to_be_bytes().to_vec();
+    for b in time.to_be_bytes() {
+      data.push(b);
     }
+    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()])
   }
 }

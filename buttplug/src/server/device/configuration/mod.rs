@@ -642,7 +642,7 @@ mod test {
   fn test_config_equals() {
     let config = create_unit_test_dcm(false);
     let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
-      "LovenseDummyTestName",
+      "LVS-Something",
       &HashMap::new(),
       &[],
     ));

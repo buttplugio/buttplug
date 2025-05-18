@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Debug};
 
 use crate::{
   core::{
@@ -9,8 +9,6 @@ use crate::{
       ButtplugMessage,
       ButtplugMessageFinalizer,
       ButtplugMessageValidator,
-      ValueCmdV4,
-      ValueWithParameterCmdV4,
       PingV0,
       RawReadCmdV2,
       RawSubscribeCmdV2,
@@ -18,9 +16,6 @@ use crate::{
       RawWriteCmdV2,
       RequestDeviceListV0,
       RequestServerInfoV1,
-      SensorReadCmdV4,
-      SensorSubscribeCmdV4,
-      SensorUnsubscribeCmdV4,
       StartScanningV0,
       StopAllDevicesV0,
       StopDeviceCmdV0,
@@ -269,8 +264,8 @@ fn check_device_index_and_convert<T, U>(
   features: &HashMap<u32, ServerDeviceAttributes>,
 ) -> Result<U, ButtplugError>
 where
-  T: ButtplugDeviceMessage,
-  U: TryFromDeviceAttributes<T>,
+  T: ButtplugDeviceMessage + Debug,
+  U: TryFromDeviceAttributes<T> + Debug,
 {
   // Vorze and RotateCmd are equivalent, so this is an ok conversion.
   if let Some(attrs) = features.get(&msg.device_index()) {
@@ -415,6 +410,8 @@ pub enum ButtplugDeviceCommandMessageUnionV4 {
   StopDeviceCmd(StopDeviceCmdV0),
   ValueCmd(CheckedValueCmdV4),
   ValueWithParameterCmd(CheckedValueWithParameterCmdV4),
+  ValueVecCmd(CheckedValueVecCmdV4),
+  ValueWithParameterVecCmd(CheckedValueWithParameterVecCmdV4),
   SensorReadCmd(CheckedSensorReadCmdV4),
   SensorSubscribeCmd(CheckedSensorSubscribeCmdV4),
   SensorUnsubscribeCmd(CheckedSensorUnsubscribeCmdV4),
@@ -422,26 +419,6 @@ pub enum ButtplugDeviceCommandMessageUnionV4 {
   RawReadCmd(RawReadCmdV2),
   RawSubscribeCmd(RawSubscribeCmdV2),
   RawUnsubscribeCmd(RawUnsubscribeCmdV2),
-}
-
-// The Buttplug Passthrough protocol requires us to be able to convert from packed messages back to
-// json.
-impl From<ButtplugDeviceCommandMessageUnionV4> for ButtplugClientMessageV4 {
-  fn from(value: ButtplugDeviceCommandMessageUnionV4) -> Self {
-    use ButtplugDeviceCommandMessageUnionV4::*;
-    match value {
-      StopDeviceCmd(msg) => msg.into(),
-      ValueCmd(msg) => ValueCmdV4::from(msg).into(),
-      ValueWithParameterCmd(msg) => ValueWithParameterCmdV4::from(msg).into(),
-      SensorReadCmd(msg) => SensorReadCmdV4::from(msg).into(),
-      SensorSubscribeCmd(msg) => SensorSubscribeCmdV4::from(msg).into(),
-      SensorUnsubscribeCmd(msg) => SensorUnsubscribeCmdV4::from(msg).into(),
-      RawReadCmd(msg) => msg.into(),
-      RawWriteCmd(msg) => msg.into(),
-      RawSubscribeCmd(msg) => msg.into(),
-      RawUnsubscribeCmd(msg) => msg.into(),
-    }
-  }
 }
 
 impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceCommandMessageUnionV4 {
@@ -454,6 +431,12 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceCommandMessageUni
       }
       ButtplugCheckedClientMessageV4::ValueWithParameterCmd(m) => {
         Ok(ButtplugDeviceCommandMessageUnionV4::ValueWithParameterCmd(m))
+      }
+      ButtplugCheckedClientMessageV4::ValueVecCmd(m) => {
+        Ok(ButtplugDeviceCommandMessageUnionV4::ValueVecCmd(m))
+      }
+      ButtplugCheckedClientMessageV4::ValueWithParameterVecCmd(m) => {
+        Ok(ButtplugDeviceCommandMessageUnionV4::ValueWithParameterVecCmd(m))
       }
       ButtplugCheckedClientMessageV4::ValueCmd(m) => {
         Ok(ButtplugDeviceCommandMessageUnionV4::ValueCmd(m))

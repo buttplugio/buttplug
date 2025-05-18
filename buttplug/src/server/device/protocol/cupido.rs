@@ -8,10 +8,10 @@
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_setup,
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::ProtocolHandler,
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(Cupido, "cupido");
@@ -26,12 +26,11 @@ impl ProtocolHandler for Cupido {
 
   fn handle_value_vibrate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![0xb0, 0x03, 0, 0, 0, scalar as u8, 0xaa],
+      vec![0xb0, 0x03, 0, 0, 0, cmd.value() as u8, 0xaa],
       false,
     )
     .into()])

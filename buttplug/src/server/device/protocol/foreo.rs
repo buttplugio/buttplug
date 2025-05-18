@@ -6,6 +6,7 @@
 // for full license information.
 
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
+use crate::server::message::checked_value_cmd::CheckedValueCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -60,12 +61,11 @@ impl ProtocolHandler for Foreo {
 
   fn handle_value_vibrate_cmd(
     &self,
-    _: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![0x01, self.mode, scalar as u8],
+      vec![0x01, self.mode, cmd.value() as u8],
       true,
     )
     .into()])

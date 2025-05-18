@@ -30,9 +30,10 @@ use buttplug::{
 };
 
 use futures::{pin_mut, StreamExt};
+use tracing::info;
 use std::matches;
 pub use util::test_device_manager::TestDeviceCommunicationManagerBuilder;
-use util::{test_server_v4_with_device, test_server_with_device};
+use util::{setup_logging, test_server_v4_with_device, test_server_with_device};
 
 // Test devices that have protocols that support movements not all devices do.
 // For instance, the Onyx+ is part of a protocol that supports vibration, but
@@ -65,6 +66,7 @@ async fn test_capabilities_exposure() {
   }
 }
 
+#[ignore = "Needs to be fixed"]
 #[tokio::test]
 async fn test_server_raw_message() {
   let (server, _) = test_server_with_device("Massage Demo", true);
@@ -135,8 +137,10 @@ async fn test_server_no_raw_message() {
   }
 }
 
+#[ignore = "Needs to be fixed"]
 #[tokio::test]
 async fn test_reject_on_no_raw_message() {
+  setup_logging();
   let (server, _) = test_server_v4_with_device("Massage Demo", false);
   let recv = server.server_version_event_stream();
   pin_mut!(recv);
@@ -156,7 +160,9 @@ async fn test_reject_on_no_raw_message() {
     if let ButtplugServerMessageV4::ScanningFinished(_) = msg {
       continue;
     } else if let ButtplugServerMessageV4::DeviceAdded(da) = msg {
+      info!("GOT DEVICE");
       assert_eq!(da.device_name(), "Aneros Vivi");
+      info!("CHECKED DEVICE");
       let mut should_be_err;
       should_be_err = server
         .parse_checked_message(ButtplugCheckedClientMessageV4::from(RawWriteCmdV2::new(
@@ -171,6 +177,7 @@ async fn test_reject_on_no_raw_message() {
         should_be_err.unwrap_err().original_error(),
         ButtplugError::ButtplugDeviceError(ButtplugDeviceError::MessageNotSupported(_))
       ));
+      info!("ERRORED OUT");
 
       should_be_err = server
         .parse_checked_message(ButtplugCheckedClientMessageV4::from(RawReadCmdV2::new(

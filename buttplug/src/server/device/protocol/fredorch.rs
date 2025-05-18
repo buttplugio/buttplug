@@ -181,29 +181,24 @@ pub struct Fredorch {
 }
 
 impl ProtocolHandler for Fredorch {
-  fn handle_linear_cmd(
+  fn handle_position_with_duration_cmd(
     &self,
-    message: CheckedValueWithParameterCmdV4,
+    message: &CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
     let previous_position = self.previous_position.load(Ordering::SeqCst);
-    let distance = (previous_position as f64 - (v.position() * 99f64)).abs() / 99f64;
+    let distance = (previous_position as i32 - message.value() as i32).abs();
     let fl_cmd = FleshlightLaunchFW12CmdV0::new(
       0,
-      (v.position() * 99f64) as u8,
-      (calculate_speed(distance, v.duration()) * 99f64) as u8,
+      (message.value()) as u8,
+      (calculate_speed(distance as f64, message.parameter().try_into().unwrap()) * 99f64) as u8,
     );
-    self.handle_fleshlight_launch_fw12_cmd(fl_cmd)
-  }
-
-  fn handle_fleshlight_launch_fw12_cmd(
-    &self,
-    message: FleshlightLaunchFW12CmdV0,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let position = ((message.position() as f64 / 99.0) * 150.0) as u8;
-    let speed = ((message.speed() as f64 / 99.0) * 15.0) as u8;
+    
+    // TODO Clean this up, we do not need the conversions anymore since we'll have done the
+    // calculations before we get to the protocol layer.
+    let position = ((fl_cmd.position() as f64 / 99.0) * 150.0) as u8;
+    let speed = ((fl_cmd.speed() as f64 / 99.0) * 15.0) as u8;
     let mut data: Vec<u8> = vec![
       0x01, 0x10, 0x00, 0x6B, 0x00, 0x05, 0x0a, 0x00, speed, 0x00, speed, 0x00, position, 0x00,
       position, 0x00, 0x01,

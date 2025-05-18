@@ -5,52 +5,67 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use std::sync::atomic::{AtomicU8, Ordering};
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(JeJoue, "jejoue");
 
-#[derive(Default)]
-pub struct JeJoue {}
+pub struct JeJoue {
+  speeds: [AtomicU8; 2]
+}
+
+impl Default for JeJoue {
+  fn default() -> Self {
+    Self {
+      speeds: [AtomicU8::new(0), AtomicU8::new(0)]
+    }
+  }
+}
 
 impl ProtocolHandler for JeJoue {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, i32)>],
+    cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    // Store off result before the match, so we drop the lock ASAP.
+    self.speeds[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
+
     // Default to both vibes
     let mut pattern: u8 = 1;
 
     // Use vibe 1 as speed
-    let mut speed = cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;
-
-    // Unless it's zero, then five vibe 2 a chance
-    if speed == 0 {
-      speed = cmds[1].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;
+    let mut speed = self.speeds[0].load(Ordering::Relaxed);
+    let vibe1_running = speed > 0;
+    let mut vibe2_running = false;
+    // Unless it's zero, then give vibe 2 a chance
+    if !vibe1_running {
+      speed = self.speeds[1].load(Ordering::Relaxed);
 
       // If we've vibing on 2 only, then change the pattern
       if speed != 0 {
+        vibe2_running = true;
         pattern = 3;
       }
     }
 
     // If we've vibing on 1 only, then change the pattern
-    if pattern == 1 && speed != 0 && cmds[1].unwrap_or((ActuatorType::Vibrate, 0)).1 == 0 {
+    if pattern == 1 && speed != 0 && !vibe2_running {
       pattern = 2;
     }
+
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![pattern, speed],

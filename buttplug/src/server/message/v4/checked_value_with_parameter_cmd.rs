@@ -2,7 +2,7 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, FeatureType, ValueWithParameterCmdV4
+      ActuatorType, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, FeatureType, ValueWithParameterCmdV4
     },
   },
   server::message::{server_device_feature::ServerDeviceFeature, ButtplugDeviceMessageType, ServerDeviceAttributes, TryFromDeviceAttributes, VorzeA10CycloneCmdV0},
@@ -10,24 +10,39 @@ use crate::{
 use getset::CopyGetters;
 use uuid::Uuid;
 
-#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, CopyGetters)] 
+#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, Eq, Clone, CopyGetters)] 
 #[getset(get_copy="pub")]
 pub struct CheckedValueWithParameterCmdV4 {
   id: u32,
   device_index: u32,
   feature_index: u32,
   feature_uuid: Uuid,
+  actuator_type: ActuatorType,
   value: u32,
   parameter: i32,
 }
 
+impl PartialEq for CheckedValueWithParameterCmdV4 {
+  fn eq(&self, other: &Self) -> bool {
+    // Compare everything but the message id
+    self.device_index() == other.device_index() &&
+    self.feature_index() == other.feature_index() &&
+    self.value() == other.value() &&
+    self.actuator_type() == other.actuator_type() &&
+    self.feature_uuid() == other.feature_uuid() &&
+    self.parameter() == other.parameter()
+  }
+}
+
+
 impl CheckedValueWithParameterCmdV4 {
-  pub fn new(device_index: u32, feature_index: u32, feature_uuid: Uuid, value: u32, parameter: i32) -> Self {
+  pub fn new(device_index: u32, feature_index: u32, feature_uuid: Uuid, actuator_type: ActuatorType, value: u32, parameter: i32) -> Self {
     Self {
       id: 1,
       device_index,
       feature_index,
       feature_uuid,
+      actuator_type,
       value,
       parameter
     }
@@ -39,6 +54,7 @@ impl From<CheckedValueWithParameterCmdV4> for ValueWithParameterCmdV4 {
     ValueWithParameterCmdV4::new(
       value.device_index(),
       value.feature_index(),
+      value.actuator_type(),
       value.value(),
       value.parameter()
     )
@@ -99,6 +115,7 @@ impl TryFromDeviceAttributes<ValueWithParameterCmdV4> for CheckedValueWithParame
             feature_uuid: *feature.id(),
             device_index: cmd.device_index(),
             feature_index: cmd.feature_index(),
+            actuator_type: cmd.actuator_type(),
             value: cmd.value(),
             parameter: cmd.parameter()
           })
@@ -150,6 +167,7 @@ impl TryFromDeviceAttributes<VorzeA10CycloneCmdV0> for CheckedValueWithParameter
       msg.device_index(),
       feature.0 as u32,
       *feature.1.id(),
+      ActuatorType::RotateWithDirection,
       ((msg.speed() as f64 / 99f64).ceil() * (((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64) + *actuator.step_limit().start() as f64).ceil()) as u32,
       if msg.clockwise() { 1 } else { -1 }
     ))

@@ -8,7 +8,6 @@
 use crate::core::message::ActuatorType;
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
 use crate::server::message::checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4;
-use crate::server::message::VorzeA10CycloneCmdV0;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -124,10 +123,9 @@ impl ProtocolHandler for VorzeSA {
     true
   }
 
-  fn handle_value_vibrate_cmd(
+    fn handle_value_vibrate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![{
       HardwareWriteCmd::new(
@@ -191,14 +189,13 @@ impl ProtocolHandler for VorzeSA {
     }
   }
 
-  fn handle_linear_cmd(
+  fn handle_position_with_duration_cmd(
     &self,
     msg: CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let v = msg.vectors()[0].clone();
 
     let previous_position = self.previous_position.load(Ordering::SeqCst);
-    let position = v.position() * 200f64;
+    let position = message.value();
     let distance = (previous_position as f64 - position).abs();
 
     let speed = get_piston_speed(distance, v.duration() as f64);
@@ -213,12 +210,5 @@ impl ProtocolHandler for VorzeSA {
       true,
     )
     .into()])
-  }
-
-  fn handle_vorze_a10_cyclone_cmd(
-    &self,
-    msg: VorzeA10CycloneCmdV0,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.handle_rotate_cmd(&[Some((msg.speed(), msg.clockwise()))])
   }
 }

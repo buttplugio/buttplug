@@ -7,7 +7,7 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
@@ -16,7 +16,7 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
@@ -91,15 +91,14 @@ impl ProtocolHandler for Leten {
 
   fn handle_value_vibrate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_command = self.current_command.clone();
-    current_command.store(scalar as u8, Ordering::Relaxed);
+    current_command.store(cmd.value() as u8, Ordering::Relaxed);
 
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![0x02, scalar as u8],
+      vec![0x02, cmd.value() as u8],
       true,
     )
     .into()])

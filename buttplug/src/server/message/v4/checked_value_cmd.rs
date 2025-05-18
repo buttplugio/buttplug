@@ -9,11 +9,7 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      ButtplugDeviceMessage,
-      ButtplugMessage,
-      ButtplugMessageFinalizer,
-      ButtplugMessageValidator,
-      ValueCmdV4,
+      ActuatorType, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, ValueCmdV4
     },
   },
   server::message::{
@@ -25,13 +21,12 @@ use uuid::Uuid;
 
 #[derive(
   Debug,
-  Default,
   ButtplugDeviceMessage,
   ButtplugMessageFinalizer,
-  PartialEq,
   Clone,
   Getters,
   CopyGetters,
+  Eq,
 )]
 #[getset(get_copy = "pub")]
 pub struct CheckedValueCmdV4 {
@@ -39,7 +34,19 @@ pub struct CheckedValueCmdV4 {
   device_index: u32,
   feature_index: u32,
   value: u32,
-  feature_uuid: Uuid
+  feature_uuid: Uuid,
+  actuator_type: ActuatorType
+}
+
+impl PartialEq for CheckedValueCmdV4 {
+  fn eq(&self, other: &Self) -> bool {
+    // Compare everything but the message id
+    self.device_index() == other.device_index() &&
+    self.feature_index() == other.feature_index() &&
+    self.value() == other.value() &&
+    self.actuator_type() == other.actuator_type() &&
+    self.feature_uuid() == other.feature_uuid()
+  }
 }
 
 impl From<CheckedValueCmdV4> for ValueCmdV4 {
@@ -47,18 +54,20 @@ impl From<CheckedValueCmdV4> for ValueCmdV4 {
     ValueCmdV4::new(
       value.device_index(),
       value.feature_index(),
+      value.actuator_type(),
       value.value()
     )
   }
 }
 
 impl CheckedValueCmdV4 {
-  pub fn new(id: u32, device_index: u32, feature_index: u32, feature_uuid: Uuid, value: u32) -> Self {
+  pub fn new(id: u32, device_index: u32, feature_index: u32, feature_uuid: Uuid, actuator_type: ActuatorType, value: u32) -> Self {
     Self {
       id,
       device_index,
       feature_index,
       feature_uuid,
+      actuator_type,
       value
     }
   }
@@ -119,6 +128,7 @@ impl TryFromDeviceAttributes<ValueCmdV4> for CheckedValueCmdV4 {
             feature_uuid: *feature.id(),
             device_index: cmd.device_index(),
             feature_index: cmd.feature_index(),
+            actuator_type: cmd.actuator_type(),
             value: cmd.value(),
           })
         }

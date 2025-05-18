@@ -19,21 +19,16 @@ generic_protocol_setup!(FleshyThrust, "fleshy-thrust");
 pub struct FleshyThrust {}
 
 impl ProtocolHandler for FleshyThrust {
-  fn handle_linear_cmd(
+  fn handle_position_with_duration_cmd(
     &self,
-    message: CheckedValueWithParameterCmdV4,
+    message: &CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let current_cmd = message
-      .vectors()
-      .first()
-      .ok_or(ButtplugDeviceError::DeviceFeatureCountMismatch(1, 0))?;
-
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![
-        (current_cmd.position() * 180f64).abs() as u8,
-        ((current_cmd.duration() & 0xff00) >> 8) as u8,
-        (current_cmd.duration() & 0xff) as u8,
+        message.value() as u8,
+        ((message.parameter() & 0xff00) >> 8) as u8,
+        (message.parameter() & 0xff) as u8,
       ],
       false,
     )

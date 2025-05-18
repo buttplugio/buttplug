@@ -51,28 +51,7 @@ pub struct KiirooV2 {
   previous_position: Arc<AtomicU8>,
 }
 
-impl ProtocolHandler for KiirooV2 {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
-
-  fn handle_linear_cmd(
-    &self,
-    message: CheckedValueWithParameterCmdV4,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let v = message.vectors()[0].clone();
-    // In the protocol, we know max speed is 99, so convert here. We have to
-    // use AtomicU8 because there's no AtomicF64 yet.
-    let previous_position = self.previous_position.load(Ordering::SeqCst);
-    let distance = (previous_position as f64 - (v.position() * 99f64)).abs() / 99f64;
-    let fl_cmd = FleshlightLaunchFW12CmdV0::new(
-      0,
-      (v.position() * 99f64) as u8,
-      (calculate_speed(distance, v.duration()) * 99f64) as u8,
-    );
-    self.handle_fleshlight_launch_fw12_cmd(fl_cmd)
-  }
-
+impl KiirooV2 {
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
     message: FleshlightLaunchFW12CmdV0,
@@ -85,5 +64,27 @@ impl ProtocolHandler for KiirooV2 {
       false,
     )
     .into()])
+  }
+}
+
+impl ProtocolHandler for KiirooV2 {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
+  fn handle_position_with_duration_cmd(
+    &self,
+    cmd: &CheckedValueWithParameterCmdV4,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    // In the protocol, we know max speed is 99, so convert here. We have to
+    // use AtomicU8 because there's no AtomicF64 yet.
+    let previous_position = self.previous_position.load(Ordering::SeqCst);
+    let distance = (previous_position as f64 - (cmd.value() as f64)).abs() / 99f64;
+    let fl_cmd = FleshlightLaunchFW12CmdV0::new(
+      0,
+      cmd.value() as u8,
+      (calculate_speed(distance, cmd.parameter() as u32) * 99f64) as u8,
+    );
+    self.handle_fleshlight_launch_fw12_cmd(fl_cmd)
   }
 }

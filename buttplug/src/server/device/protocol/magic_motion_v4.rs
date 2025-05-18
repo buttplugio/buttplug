@@ -26,14 +26,15 @@ impl ProtocolHandler for MagicMotionV4 {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn needs_full_command_set(&self) -> bool {
+  fn outputs_full_command_set(&self) -> bool {
     true
   }
 
-  fn handle_value_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    // TODO We need to know the number of actuators the device has here.
     let data = if cmds.len() == 1 {
       vec![
         0x10,

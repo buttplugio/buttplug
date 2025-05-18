@@ -6,18 +6,14 @@
 // for full license information.
 
 use crate::core::message::{
-  ButtplugDeviceMessage,
-  ButtplugMessage,
-  ButtplugMessageError,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
+  ActuatorType, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator
 };
 use getset::CopyGetters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 #[derive(
-  Debug, Default, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, CopyGetters,
+  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, CopyGetters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 #[getset(get_copy="pub")]
@@ -28,16 +24,19 @@ pub struct ValueCmdV4 {
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
   feature_index: u32,
+  #[cfg_attr(feature = "serialize-json", serde(rename = "ActuatorType"))]
+  actuator_type: ActuatorType,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Value"))]
   value: u32,
 }
 
 impl ValueCmdV4 {
-  pub fn new(device_index: u32, feature_index: u32, value: u32) -> Self {
+  pub fn new(device_index: u32, feature_index: u32, actuator_type: ActuatorType, value: u32) -> Self {
     Self {
       id: 1,
       device_index,
       feature_index,
+      actuator_type,
       value,
     }
   }

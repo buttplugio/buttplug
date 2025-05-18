@@ -7,7 +7,6 @@
 
 use self::handyplug::Ping;
 
-use super::fleshlight_launch_helper;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::{
@@ -15,25 +14,19 @@ use crate::{
       configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
       hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
       protocol::{
-        generic_protocol_initializer_setup,
-        ProtocolHandler,
-        ProtocolIdentifier,
+        generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier,
         ProtocolInitializer,
       },
     },
-    message::{
-      checked_value_with_parameter_cmd::{CheckedValueWithParameterCmdV4, CheckedValueWithParameterSubcommandV4},
-      FleshlightLaunchFW12CmdV0,
-    },
+    message::checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4,
   },
 };
 use async_trait::async_trait;
 use prost::Message;
 use std::sync::{
-  atomic::{AtomicU8, Ordering},
+  atomic::AtomicU8,
   Arc,
 };
-use uuid::Uuid;
 
 mod protocomm {
   include!("./protocomm.rs");
@@ -138,48 +131,11 @@ impl ProtocolHandler for TheHandy {
     ))
   }
 
-  fn handle_fleshlight_launch_fw12_cmd(
-    &self,
-    message: FleshlightLaunchFW12CmdV0,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    // Oh good. ScriptPlayer hasn't updated to LinearCmd yet so now I have to
-    // work backward from fleshlight to my own Linear format that Handy uses.
-    //
-    // Building this library was a mistake.
-    let goal_position = message.position() as f64 / 100f64;
-    let previous_position = self.previous_position.load(Ordering::SeqCst) as f64 / 100f64;
-    self
-      .previous_position
-      .store(message.position(), Ordering::SeqCst);
-    let distance = (goal_position - previous_position).abs();
-    let duration =
-      fleshlight_launch_helper::calculate_duration(distance, message.speed() as f64 / 99f64);
-    self.handle_linear_cmd(CheckedValueWithParameterCmdV4::new(
-      0,
-      vec![CheckedValueWithParameterSubcommandV4::new(
-        0,
-        duration,
-        goal_position,
-        Uuid::new_v4(),
-      )],
-    ))
-  }
-
-  fn handle_linear_cmd(
+  fn handle_position_with_duration_cmd(
     &self,
     message: CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // What is "How not to implement a command structure for your device that does one thing", Alex?
-
-    // First make sure we only have one vector.
-    //
-    // TODO Use the command manager to check this.
-    if message.vectors().len() != 1 {
-      return Err(ButtplugDeviceError::DeviceFeatureCountMismatch(
-        1,
-        message.vectors().len() as u32,
-      ));
-    }
 
     let linear = handyplug::LinearCmd {
       // You know when message IDs are important? When you have a protocol that handles multiple
@@ -206,8 +162,8 @@ impl ProtocolHandler for TheHandy {
       // The handy. It's the handy.
       vectors: vec![handyplug::linear_cmd::Vector {
         index: 0,
-        duration: message.vectors()[0].duration(),
-        position: message.vectors()[0].position(),
+        position: message.value() as f64 / 100f64,
+        duration: message.parameter() as u32,
       }],
     };
     let linear_payload = handyplug::Payload {

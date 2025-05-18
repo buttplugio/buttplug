@@ -6,10 +6,11 @@
 // for full license information.
 
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
+use crate::server::message::checked_value_cmd::CheckedValueCmdV4;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
   server::device::{
     configuration::{UserDeviceDefinition, UserDeviceIdentifier},
@@ -90,13 +91,11 @@ async fn send_hgod_updates(device: Arc<Hardware>, data: Arc<AtomicU8>) {
 }
 
 impl ProtocolHandler for Hgod {
-  fn handle_value_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
-    commands: &[Option<(ActuatorType, i32)>],
+    cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if let Some(cmd) = commands[0] {
-      self.last_command.store(cmd.1 as u8, Ordering::SeqCst);
-    }
+    self.last_command.store(cmd.value() as u8, Ordering::SeqCst);
     Ok(vec![])
   }
 }

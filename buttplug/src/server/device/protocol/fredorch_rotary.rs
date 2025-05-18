@@ -6,6 +6,7 @@
 // for full license information.
 
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
+use crate::server::message::checked_value_cmd::CheckedValueCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -193,10 +194,9 @@ impl FredorchRotary {
 impl ProtocolHandler for FredorchRotary {
   fn handle_value_oscillate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let speed: u8 = scalar as u8;
+    let speed: u8 = cmd.value() as u8;
 
     self.target_speed.store(speed, Ordering::SeqCst);
     if speed == 0 {

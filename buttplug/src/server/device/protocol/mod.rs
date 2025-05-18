@@ -7,8 +7,6 @@
 
 //! Implementations of communication protocols for hardware supported by Buttplug
 
-pub mod actuator_command_manager;
-
 // Utility mods
 pub mod fleshlight_launch_helper;
 
@@ -19,7 +17,6 @@ pub mod amorelie_joy;
 pub mod aneros;
 pub mod ankni;
 pub mod bananasome;
-pub mod buttplug_passthru;
 pub mod cachito;
 pub mod cowgirl;
 pub mod cowgirl_cone;
@@ -39,12 +36,12 @@ pub mod hismith_mini;
 pub mod htk_bm;
 pub mod itoys;
 pub mod jejoue;
-pub mod joyhub;
-pub mod joyhub_v2;
-pub mod joyhub_v3;
-pub mod joyhub_v4;
-pub mod joyhub_v5;
-pub mod joyhub_v6;
+// pub mod joyhub;
+// pub mod joyhub_v2;
+// pub mod joyhub_v3;
+// pub mod joyhub_v4;
+// pub mod joyhub_v5;
+// pub mod joyhub_v6;
 pub mod kgoal_boost;
 pub mod kiiroo_prowand;
 pub mod kiiroo_spot;
@@ -58,94 +55,94 @@ pub mod lelof1s;
 pub mod lelof1sv2;
 pub mod leten;
 pub mod libo_elle;
-pub mod libo_shark;
-pub mod libo_vibes;
+//pub mod libo_shark;
+//pub mod libo_vibes;
 pub mod lioness;
-pub mod longlosttouch;
+//pub mod longlosttouch;
 pub mod loob;
 pub mod lovedistance;
-pub mod lovehoney_desire;
+//pub mod lovehoney_desire;
 pub mod lovense;
-pub mod lovense_connect_service;
+//pub mod lovense_connect_service;
 pub mod lovenuts;
 pub mod luvmazer;
 pub mod magic_motion_v1;
 pub mod magic_motion_v2;
 pub mod magic_motion_v3;
-pub mod magic_motion_v4;
+//pub mod magic_motion_v4;
 pub mod mannuo;
 pub mod maxpro;
-pub mod meese;
-pub mod metaxsire;
-pub mod metaxsire_repeat;
-pub mod metaxsire_v2;
-pub mod metaxsire_v3;
-mod metaxsire_v4;
-pub mod mizzzee;
-pub mod mizzzee_v2;
-pub mod mizzzee_v3;
-pub mod monsterpub;
-pub mod motorbunny;
-pub mod mysteryvibe;
-pub mod mysteryvibe_v2;
-pub mod nextlevelracing;
-pub mod nexus_revo;
-pub mod nintendo_joycon;
-pub mod nobra;
-pub mod omobo;
-pub mod patoo;
-pub mod picobong;
-pub mod pink_punch;
-pub mod prettylove;
-pub mod raw_protocol;
-pub mod realov;
-pub mod sakuraneko;
-pub mod satisfyer;
-pub mod sensee;
-pub mod sensee_capsule;
-pub mod sensee_v2;
-pub mod serveu;
-pub mod sexverse_lg389;
-pub mod svakom;
-pub mod svakom_alex;
-pub mod svakom_alex_v2;
-pub mod svakom_avaneo;
-pub mod svakom_barnard;
-pub mod svakom_barney;
-pub mod svakom_dice;
-pub mod svakom_dt250a;
-pub mod svakom_iker;
-pub mod svakom_jordan;
-pub mod svakom_pulse;
-pub mod svakom_sam;
-pub mod svakom_sam2;
-pub mod svakom_suitcase;
-pub mod svakom_tarax;
-pub mod svakom_v2;
-pub mod svakom_v3;
-pub mod svakom_v4;
-pub mod svakom_v5;
-pub mod svakom_v6;
-pub mod synchro;
-pub mod tcode_v03;
-pub mod thehandy;
-pub mod tryfun;
-pub mod tryfun_blackhole;
-pub mod tryfun_meta2;
-pub mod vibcrafter;
-pub mod vibratissimo;
-pub mod vorze_sa;
-pub mod wetoy;
-pub mod wevibe;
-pub mod wevibe8bit;
-pub mod wevibe_chorus;
-pub mod xibao;
-pub mod xinput;
-pub mod xiuxiuda;
-pub mod xuanhuan;
-pub mod youcups;
-pub mod youou;
-pub mod zalo;
+//pub mod meese;
+//pub mod metaxsire;
+//pub mod metaxsire_repeat;
+//pub mod metaxsire_v2;
+//pub mod metaxsire_v3;
+//mod metaxsire_v4;
+//pub mod mizzzee;
+//pub mod mizzzee_v2;
+//pub mod mizzzee_v3;
+//pub mod monsterpub;
+//pub mod motorbunny;
+//pub mod mysteryvibe;
+//pub mod mysteryvibe_v2;
+//pub mod nextlevelracing;
+//pub mod nexus_revo;
+//pub mod nintendo_joycon;
+//pub mod nobra;
+//pub mod omobo;
+//pub mod patoo;
+//pub mod picobong;
+//pub mod pink_punch;
+//pub mod prettylove;
+//pub mod raw_protocol;
+//pub mod realov;
+//pub mod sakuraneko;
+//pub mod satisfyer;
+//pub mod sensee;
+//pub mod sensee_capsule;
+//pub mod sensee_v2;
+//pub mod serveu;
+//pub mod sexverse_lg389;
+//pub mod svakom;
+//pub mod svakom_alex;
+//pub mod svakom_alex_v2;
+//pub mod svakom_avaneo;
+//pub mod svakom_barnard;
+//pub mod svakom_barney;
+//pub mod svakom_dice;
+//pub mod svakom_dt250a;
+//pub mod svakom_iker;
+//pub mod svakom_jordan;
+//pub mod svakom_pulse;
+//pub mod svakom_sam;
+//pub mod svakom_sam2;
+//pub mod svakom_suitcase;
+//pub mod svakom_tarax;
+//pub mod svakom_v2;
+//pub mod svakom_v3;
+//pub mod svakom_v4;
+//pub mod svakom_v5;
+//pub mod svakom_v6;
+//pub mod synchro;
+//pub mod tcode_v03;
+//pub mod thehandy;
+//pub mod tryfun;
+//pub mod tryfun_blackhole;
+//pub mod tryfun_meta2;
+//pub mod vibcrafter;
+//pub mod vibratissimo;
+//pub mod vorze_sa;
+//pub mod wetoy;
+//pub mod wevibe;
+//pub mod wevibe8bit;
+//pub mod wevibe_chorus;
+//pub mod xibao;
+//pub mod xinput;
+//pub mod xiuxiuda;
+//pub mod xuanhuan;
+//pub mod youcups;
+//pub mod youou;
+//pub mod zalo;
 
 use crate::{
   core::{
@@ -158,16 +155,7 @@ use crate::{
       hardware::{Hardware, HardwareCommand, HardwareReadCmd},
     },
     message::{
-      checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4,
-      checked_sensor_read_cmd::CheckedSensorReadCmdV4,
-      checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4,
-      checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4,
-      spec_enums::ButtplugDeviceCommandMessageUnionV4,
-      ButtplugServerDeviceMessage,
-      FleshlightLaunchFW12CmdV0,
-      KiirooCmdV0,
-      RSSILevelCmdV2,
-      VorzeA10CycloneCmdV0,
+      checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, checked_value_cmd::CheckedValueCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage
     },
   },
 };
@@ -244,13 +232,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     amorelie_joy::setup::AmorelieJoyIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, aneros::setup::AnerosIdentifierFactory::default());
+  add_to_protocol_map(&mut map, ankni::setup::AnkniIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     bananasome::setup::BananasomeIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    buttplug_passthru::setup::ButtplugPassthruIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
@@ -282,12 +267,11 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     hismith_mini::setup::HismithMiniIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, htk_bm::setup::HtkBmIdentifierFactory::default());
-  add_to_protocol_map(
-    &mut map,
-    thehandy::setup::TheHandyIdentifierFactory::default(),
-  );
+  // add_to_protocol_map(
+  //   &mut map,
+  //   thehandy::setup::TheHandyIdentifierFactory::default(),
+  // );
 
-  add_to_protocol_map(&mut map, ankni::setup::AnkniIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     feelingso::setup::FeelingSoIdentifierFactory::default(),
@@ -318,27 +302,27 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
 
   add_to_protocol_map(&mut map, itoys::setup::IToysIdentifierFactory::default());
   add_to_protocol_map(&mut map, jejoue::setup::JeJoueIdentifierFactory::default());
-  add_to_protocol_map(&mut map, joyhub::setup::JoyHubIdentifierFactory::default());
-  add_to_protocol_map(
-    &mut map,
-    joyhub_v2::setup::JoyHubV2IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    joyhub_v3::setup::JoyHubV3IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    joyhub_v4::setup::JoyHubV4IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    joyhub_v5::setup::JoyHubV5IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    joyhub_v6::setup::JoyHubV6IdentifierFactory::default(),
-  );
+//  add_to_protocol_map(&mut map, joyhub::setup::JoyHubIdentifierFactory::default());
+//  add_to_protocol_map(
+//    &mut map,
+//    joyhub_v2::setup::JoyHubV2IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    joyhub_v3::setup::JoyHubV3IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    joyhub_v4::setup::JoyHubV4IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    joyhub_v5::setup::JoyHubV5IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    joyhub_v6::setup::JoyHubV6IdentifierFactory::default(),
+//  );
   add_to_protocol_map(
     &mut map,
     kiiroo_prowand::setup::KiirooProWandIdentifierFactory::default(),
@@ -359,324 +343,335 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     kiiroo_v21::setup::KiirooV21IdentifierFactory::default(),
   );
-  add_to_protocol_map(
-    &mut map,
-    kiiroo_v21_initialized::setup::KiirooV21InitializedIdentifierFactory::default(),
-  );
-  add_to_protocol_map(&mut map, kizuna::setup::KizunaIdentifierFactory::default());
-  add_to_protocol_map(
-    &mut map,
-    lelof1s::setup::LeloF1sIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    lelof1sv2::setup::LeloF1sV2IdentifierFactory::default(),
-  );
-  add_to_protocol_map(&mut map, leten::setup::LetenIdentifierFactory::default());
-  add_to_protocol_map(
-    &mut map,
-    lelo_harmony::setup::LeloHarmonyIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    libo_elle::setup::LiboElleIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    libo_shark::setup::LiboSharkIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    libo_vibes::setup::LiboVibesIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    lioness::setup::LionessIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    longlosttouch::setup::LongLostTouchIdentifierFactory::default(),
-  );
-  add_to_protocol_map(&mut map, loob::setup::LoobIdentifierFactory::default());
-  add_to_protocol_map(
-    &mut map,
-    lovehoney_desire::setup::LovehoneyDesireIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    lovedistance::setup::LoveDistanceIdentifierFactory::default(),
-  );
-
-  add_to_protocol_map(
-    &mut map,
-    lovense_connect_service::setup::LovenseConnectServiceIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    lovenuts::setup::LoveNutsIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    luvmazer::setup::LuvmazerIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    magic_motion_v1::setup::MagicMotionV1IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    magic_motion_v2::setup::MagicMotionV2IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    magic_motion_v3::setup::MagicMotionV3IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    magic_motion_v4::setup::MagicMotionV4IdentifierFactory::default(),
-  );
-  add_to_protocol_map(&mut map, mannuo::setup::ManNuoIdentifierFactory::default());
-  add_to_protocol_map(&mut map, maxpro::setup::MaxproIdentifierFactory::default());
-  add_to_protocol_map(&mut map, meese::setup::MeeseIdentifierFactory::default());
-  add_to_protocol_map(
-    &mut map,
-    metaxsire::setup::MetaXSireIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    metaxsire_repeat::setup::MetaXSireRepeatIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    metaxsire_v2::setup::MetaXSireV2IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    metaxsire_v3::setup::MetaXSireV3IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    metaxsire_v4::setup::MetaXSireV4IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    mizzzee::setup::MizzZeeIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    mizzzee_v2::setup::MizzZeeV2IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    mizzzee_v3::setup::MizzZeeV3IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    monsterpub::setup::MonsterPubIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    motorbunny::setup::MotorbunnyIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    mysteryvibe::setup::MysteryVibeIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    mysteryvibe_v2::setup::MysteryVibeV2IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    nexus_revo::setup::NexusRevoIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    nextlevelracing::setup::NextLevelRacingIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    nintendo_joycon::setup::NintendoJoyconIdentifierFactory::default(),
-  );
-  add_to_protocol_map(&mut map, nobra::setup::NobraIdentifierFactory::default());
-  add_to_protocol_map(&mut map, omobo::setup::OmoboIdentifierFactory::default());
-  add_to_protocol_map(&mut map, patoo::setup::PatooIdentifierFactory::default());
-  add_to_protocol_map(
-    &mut map,
-    picobong::setup::PicobongIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    pink_punch::setup::PinkPunchIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    prettylove::setup::PrettyLoveIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    raw_protocol::setup::RawProtocolIdentifierFactory::default(),
-  );
-  add_to_protocol_map(&mut map, realov::setup::RealovIdentifierFactory::default());
-  add_to_protocol_map(
-    &mut map,
-    sakuraneko::setup::SakuranekoIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    satisfyer::setup::SatisfyerIdentifierFactory::default(),
-  );
-  add_to_protocol_map(&mut map, sensee::setup::SenseeIdentifierFactory::default());
-  add_to_protocol_map(
-    &mut map,
-    sensee_capsule::setup::SenseeCapsuleIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    sensee_v2::setup::SenseeV2IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    sexverse_lg389::setup::SexverseLG389IdentifierFactory::default(),
-  );
-  add_to_protocol_map(&mut map, serveu::setup::ServeUIdentifierFactory::default());
-  add_to_protocol_map(&mut map, svakom::setup::SvakomIdentifierFactory::default());
-  add_to_protocol_map(
-    &mut map,
-    svakom_avaneo::setup::SvakomAvaNeoIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    svakom_alex::setup::SvakomAlexIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    svakom_alex_v2::setup::SvakomAlexV2IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    svakom_barnard::setup::SvakomBarnardIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    svakom_barney::setup::SvakomBarneyIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    svakom_dice::setup::SvakomDiceIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    svakom_dt250a::setup::SvakomDT250AIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    svakom_iker::setup::SvakomIkerIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    svakom_jordan::setup::SvakomJordanIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    svakom_pulse::setup::SvakomPulseIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    svakom_sam::setup::SvakomSamIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    svakom_sam2::setup::SvakomSam2IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    svakom_suitcase::setup::SvakomSuitcaseIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    svakom_tarax::setup::SvakomTaraXIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    svakom_v2::setup::SvakomV2IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    svakom_v3::setup::SvakomV3IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    svakom_v4::setup::SvakomV4IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    svakom_v5::setup::SvakomV5IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    svakom_v6::setup::SvakomV6IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    synchro::setup::SynchroIdentifierFactory::default(),
-  );
-  add_to_protocol_map(&mut map, tryfun::setup::TryFunIdentifierFactory::default());
-  add_to_protocol_map(
-    &mut map,
-    tryfun_blackhole::setup::TryFunBlackHoleIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    tryfun_meta2::setup::TryFunMeta2IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    tcode_v03::setup::TCodeV03IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    vibcrafter::setup::VibCrafterIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    vibratissimo::setup::VibratissimoIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    vorze_sa::setup::VorzeSAIdentifierFactory::default(),
-  );
-  add_to_protocol_map(&mut map, wetoy::setup::WeToyIdentifierFactory::default());
-  add_to_protocol_map(&mut map, wevibe::setup::WeVibeIdentifierFactory::default());
-  add_to_protocol_map(
-    &mut map,
-    wevibe8bit::setup::WeVibe8BitIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    wevibe_chorus::setup::WeVibeChorusIdentifierFactory::default(),
-  );
-  add_to_protocol_map(&mut map, xibao::setup::XibaoIdentifierFactory::default());
-  add_to_protocol_map(&mut map, xinput::setup::XInputIdentifierFactory::default());
-  add_to_protocol_map(
-    &mut map,
-    xiuxiuda::setup::XiuxiudaIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    xuanhuan::setup::XuanhuanIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    youcups::setup::YoucupsIdentifierFactory::default(),
-  );
-  add_to_protocol_map(&mut map, youou::setup::YououIdentifierFactory::default());
-  add_to_protocol_map(&mut map, zalo::setup::ZaloIdentifierFactory::default());
-  add_to_protocol_map(
-    &mut map,
-    kgoal_boost::setup::KGoalBoostIdentifierFactory::default(),
-  );
+add_to_protocol_map(
+  &mut map,
+  kiiroo_v21_initialized::setup::KiirooV21InitializedIdentifierFactory::default(),
+);
+add_to_protocol_map(&mut map, kizuna::setup::KizunaIdentifierFactory::default());
+add_to_protocol_map(
+  &mut map,
+  lelof1s::setup::LeloF1sIdentifierFactory::default(),
+);
+add_to_protocol_map(
+  &mut map,
+  lelof1sv2::setup::LeloF1sV2IdentifierFactory::default(),
+);
+add_to_protocol_map(&mut map, leten::setup::LetenIdentifierFactory::default());
+add_to_protocol_map(
+  &mut map,
+  lelo_harmony::setup::LeloHarmonyIdentifierFactory::default(),
+);
+add_to_protocol_map(
+  &mut map,
+  libo_elle::setup::LiboElleIdentifierFactory::default(),
+);
+// add_to_protocol_map(
+//   &mut map,
+//   libo_shark::setup::LiboSharkIdentifierFactory::default(),
+// );
+// add_to_protocol_map(
+//   &mut map,
+//   libo_vibes::setup::LiboVibesIdentifierFactory::default(),
+// );
+add_to_protocol_map(
+  &mut map,
+  lioness::setup::LionessIdentifierFactory::default(),
+);
+//  add_to_protocol_map(
+//    &mut map,
+//    longlosttouch::setup::LongLostTouchIdentifierFactory::default(),
+//  );
+add_to_protocol_map(&mut map, loob::setup::LoobIdentifierFactory::default());
+// add_to_protocol_map(
+//   &mut map,
+//   lovehoney_desire::setup::LovehoneyDesireIdentifierFactory::default(),
+// );
+add_to_protocol_map(
+  &mut map,
+  lovedistance::setup::LoveDistanceIdentifierFactory::default(),
+);
+//
+//  add_to_protocol_map(
+//    &mut map,
+//    lovense_connect_service::setup::LovenseConnectServiceIdentifierFactory::default(),
+//  );
+add_to_protocol_map(
+  &mut map,
+  lovenuts::setup::LoveNutsIdentifierFactory::default(),
+);
+add_to_protocol_map(
+  &mut map,
+  luvmazer::setup::LuvmazerIdentifierFactory::default(),
+);
+add_to_protocol_map(
+  &mut map,
+  magic_motion_v1::setup::MagicMotionV1IdentifierFactory::default(),
+);
+add_to_protocol_map(
+  &mut map,
+  magic_motion_v2::setup::MagicMotionV2IdentifierFactory::default(),
+);
+add_to_protocol_map(
+  &mut map,
+  magic_motion_v3::setup::MagicMotionV3IdentifierFactory::default(),
+);
+//add_to_protocol_map(
+//  &mut map,
+//  magic_motion_v4::setup::MagicMotionV4IdentifierFactory::default(),
+//);
+add_to_protocol_map(&mut map, mannuo::setup::ManNuoIdentifierFactory::default());
+add_to_protocol_map(&mut map, maxpro::setup::MaxproIdentifierFactory::default());
+//  add_to_protocol_map(&mut map, meese::setup::MeeseIdentifierFactory::default());
+//  add_to_protocol_map(
+//    &mut map,
+//    metaxsire::setup::MetaXSireIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    metaxsire_repeat::setup::MetaXSireRepeatIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    metaxsire_v2::setup::MetaXSireV2IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    metaxsire_v3::setup::MetaXSireV3IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    metaxsire_v4::setup::MetaXSireV4IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    mizzzee::setup::MizzZeeIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    mizzzee_v2::setup::MizzZeeV2IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    mizzzee_v3::setup::MizzZeeV3IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    monsterpub::setup::MonsterPubIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    motorbunny::setup::MotorbunnyIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    mysteryvibe::setup::MysteryVibeIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    mysteryvibe_v2::setup::MysteryVibeV2IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    nexus_revo::setup::NexusRevoIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    nextlevelracing::setup::NextLevelRacingIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    nintendo_joycon::setup::NintendoJoyconIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(&mut map, nobra::setup::NobraIdentifierFactory::default());
+//  add_to_protocol_map(&mut map, omobo::setup::OmoboIdentifierFactory::default());
+//  add_to_protocol_map(&mut map, patoo::setup::PatooIdentifierFactory::default());
+//  add_to_protocol_map(
+//    &mut map,
+//    picobong::setup::PicobongIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    pink_punch::setup::PinkPunchIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    prettylove::setup::PrettyLoveIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    raw_protocol::setup::RawProtocolIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(&mut map, realov::setup::RealovIdentifierFactory::default());
+//  add_to_protocol_map(
+//    &mut map,
+//    sakuraneko::setup::SakuranekoIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    satisfyer::setup::SatisfyerIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(&mut map, sensee::setup::SenseeIdentifierFactory::default());
+//  add_to_protocol_map(
+//    &mut map,
+//    sensee_capsule::setup::SenseeCapsuleIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    sensee_v2::setup::SenseeV2IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    sexverse_lg389::setup::SexverseLG389IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(&mut map, serveu::setup::ServeUIdentifierFactory::default());
+//  add_to_protocol_map(&mut map, svakom::setup::SvakomIdentifierFactory::default());
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_avaneo::setup::SvakomAvaNeoIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_alex::setup::SvakomAlexIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_alex_v2::setup::SvakomAlexV2IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_barnard::setup::SvakomBarnardIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_barney::setup::SvakomBarneyIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_dice::setup::SvakomDiceIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_dt250a::setup::SvakomDT250AIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_iker::setup::SvakomIkerIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_jordan::setup::SvakomJordanIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_pulse::setup::SvakomPulseIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_sam::setup::SvakomSamIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_sam2::setup::SvakomSam2IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_suitcase::setup::SvakomSuitcaseIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_tarax::setup::SvakomTaraXIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_v2::setup::SvakomV2IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_v3::setup::SvakomV3IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_v4::setup::SvakomV4IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_v5::setup::SvakomV5IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    svakom_v6::setup::SvakomV6IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    synchro::setup::SynchroIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(&mut map, tryfun::setup::TryFunIdentifierFactory::default());
+//  add_to_protocol_map(
+//    &mut map,
+//    tryfun_blackhole::setup::TryFunBlackHoleIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    tryfun_meta2::setup::TryFunMeta2IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    tcode_v03::setup::TCodeV03IdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    vibcrafter::setup::VibCrafterIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    vibratissimo::setup::VibratissimoIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    vorze_sa::setup::VorzeSAIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(&mut map, wetoy::setup::WeToyIdentifierFactory::default());
+//  add_to_protocol_map(&mut map, wevibe::setup::WeVibeIdentifierFactory::default());
+//  add_to_protocol_map(
+//    &mut map,
+//    wevibe8bit::setup::WeVibe8BitIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    wevibe_chorus::setup::WeVibeChorusIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(&mut map, xibao::setup::XibaoIdentifierFactory::default());
+//  add_to_protocol_map(&mut map, xinput::setup::XInputIdentifierFactory::default());
+//  add_to_protocol_map(
+//    &mut map,
+//    xiuxiuda::setup::XiuxiudaIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    xuanhuan::setup::XuanhuanIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(
+//    &mut map,
+//    youcups::setup::YoucupsIdentifierFactory::default(),
+//  );
+//  add_to_protocol_map(&mut map, youou::setup::YououIdentifierFactory::default());
+//  add_to_protocol_map(&mut map, zalo::setup::ZaloIdentifierFactory::default());
+//  add_to_protocol_map(
+//    &mut map,
+//    kgoal_boost::setup::KGoalBoostIdentifierFactory::default(),
+//  );
   map
+}
+
+pub enum ProtocolCommandCacheType {
+  /// Protocol handles its own caching internally.
+  Internal,
+  /// Protocol expects the device to handle caching, which usually means comparing the current
+  /// message to the last received message.
+  External,
+  /// Protocol expects no caching, will receive every command regardless of repeats. This is a
+  /// marker value for when we're evaluating protocol issues.
+  None
 }
 
 fn print_type_of<T>(_: &T) -> &'static str {
@@ -785,17 +780,17 @@ impl ProtocolInitializer for GenericProtocolInitializer {
 }
 
 pub trait ProtocolHandler: Sync + Send {
-  fn needs_full_command_set(&self) -> bool {
-    false
-  }
-
-  fn has_handle_message(&self) -> bool {
-    false
+  fn cache_strategy(&self) -> ProtocolCommandCacheType {
+    ProtocolCommandCacheType::External
   }
 
   fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
     ProtocolKeepaliveStrategy::NoStrategy
   }
+
+  fn outputs_full_command_set(&self) -> bool {
+    false
+  } 
 
   fn handle_message(
     &self,
@@ -824,121 +819,85 @@ pub trait ProtocolHandler: Sync + Send {
   // actuators, they should just implement their own version of this method.
   fn handle_value_cmd(
     &self,
-    commands: &[Option<(ActuatorType, i32)>],
+    cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let mut command_vec = vec![];
-    for (index, command) in commands.iter().enumerate().filter(|(_, x)| x.is_some()) {
-      let (actuator, scalar) = command.as_ref().expect("Already verified existence");
-      command_vec.append(
-        &mut (match *actuator {
-          ActuatorType::Constrict => {
-            self.handle_value_constrict_cmd(index as u32, *scalar as u32)?
-          }
-          ActuatorType::Inflate => self.handle_value_inflate_cmd(index as u32, *scalar as u32)?,
-          ActuatorType::Oscillate => {
-            self.handle_value_oscillate_cmd(index as u32, *scalar as u32)?
-          }
-          ActuatorType::Rotate => self.handle_value_rotate_cmd(index as u32, *scalar as u32)?,
-          ActuatorType::RotateWithDirection => {
-            self.handle_rotate_cmd(&[Some((scalar.unsigned_abs(), *scalar >= 0))])?
-          }
-          ActuatorType::Vibrate => self.handle_value_vibrate_cmd(index as u32, *scalar as u32)?,
-          ActuatorType::Position => {
-            self.handle_value_position_cmd(index as u32, *scalar as u32)?
-          }
-          ActuatorType::Unknown => Err(ButtplugDeviceError::UnhandledCommand(
-            "Unknown actuator types are not controllable.".to_owned(),
-          ))?,
-          _ => Err(ButtplugDeviceError::UnhandledCommand(
-            format!("{} actuator types are not compatible with ValueCmd.", *actuator).to_owned(),
-          ))?,
-        }),
-      );
+    let actuator = cmd.actuator_type();
+    match actuator {
+      ActuatorType::Constrict => {
+        self.handle_value_constrict_cmd(cmd)
+      }
+      ActuatorType::Inflate => self.handle_value_inflate_cmd(cmd),
+      ActuatorType::Oscillate => {
+        self.handle_value_oscillate_cmd(cmd)
+      }
+      ActuatorType::Rotate => self.handle_value_rotate_cmd(cmd),
+      ActuatorType::Vibrate => self.handle_value_vibrate_cmd(cmd),
+      ActuatorType::Position => {
+        self.handle_value_position_cmd(cmd)
+      }
+      ActuatorType::Unknown => Err(ButtplugDeviceError::UnhandledCommand(
+        "Unknown actuator types are not controllable.".to_owned(),
+      ))?,
+      _ => Err(ButtplugDeviceError::UnhandledCommand(
+        format!("{} actuator types are not compatible with ValueCmd.", actuator).to_owned(),
+      ))?,
     }
-    Ok(command_vec)
   }
 
   fn handle_value_vibrate_cmd(
     &self,
-    _index: u32,
-    _scalar: u32,
+    _cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ValueCmd (Vibrate Actuator)")
   }
 
   fn handle_value_rotate_cmd(
     &self,
-    _index: u32,
-    _scalar: u32,
+    _cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ValueCmd (Rotate Actuator)")
   }
 
   fn handle_value_oscillate_cmd(
     &self,
-    _index: u32,
-    _scalar: u32,
+    _cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ValueCmd (Osccilate Actuator)")
   }
 
   fn handle_value_inflate_cmd(
     &self,
-    _index: u32,
-    _scalar: u32,
+    _cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ValueCmd (Inflate Actuator)")
   }
 
   fn handle_value_constrict_cmd(
     &self,
-    _index: u32,
-    _scalar: u32,
+    _cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ValueCmd (Constrict Actuator)")
   }
 
   fn handle_value_position_cmd(
     &self,
-    _index: u32,
-    _scalar: u32,
+    _cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ValueCmd (Position Actuator)")
   }
 
-  fn handle_vorze_a10_cyclone_cmd(
+  fn handle_position_with_duration_cmd(
     &self,
-    message: VorzeA10CycloneCmdV0,
+    cmd: &CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented(print_type_of(&message))
+    self.command_unimplemented(print_type_of(cmd))
   }
 
-  fn handle_kiiroo_cmd(
+  fn handle_rotation_with_direction_cmd(
     &self,
-    message: KiirooCmdV0,
+    cmd: &CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented(print_type_of(&message))
-  }
-
-  fn handle_fleshlight_launch_fw12_cmd(
-    &self,
-    message: FleshlightLaunchFW12CmdV0,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented(print_type_of(&message))
-  }
-
-  fn handle_rotate_cmd(
-    &self,
-    _commands: &[Option<(u32, bool)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented("RotateCmd")
-  }
-
-  fn handle_linear_cmd(
-    &self,
-    message: CheckedValueWithParameterCmdV4,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented(print_type_of(&message))
+    self.command_unimplemented(print_type_of(cmd))
   }
 
   fn handle_sensor_subscribe_cmd(
@@ -1014,7 +973,7 @@ pub trait ProtocolHandler: Sync + Send {
   fn handle_rssi_level_cmd(
     &self,
     _device: Arc<Hardware>,
-    _message: RSSILevelCmdV2,
+    _message: CheckedSensorReadCmdV4,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Command not implemented for this protocol: SensorReadCmd".to_string(),
