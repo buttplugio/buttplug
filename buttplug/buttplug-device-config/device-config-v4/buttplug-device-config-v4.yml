@@ -106,7 +106,7 @@ protocols:
                 - 0
                 - 20
               messages:
-                - ValueCmd
+                - ValueWithParameterCmd
             id: 238ec87f-a64d-48bf-841d-c20175bc6f02
           - feature-type: Battery
             description: Battery Level
@@ -429,7 +429,7 @@ protocols:
                 - 0
                 - 20
               messages:
-                - ValueCmd
+                - ValueWithParameterCmd
             id: 6fef1161-3a35-4419-944d-8b1bacb19e5d
           - feature-type: Battery
             description: Battery Level
@@ -757,7 +757,7 @@ protocols:
                 - 0
                 - 20
               messages:
-                - ValueCmd
+                - ValueWithParameterCmd
             id: 1e914840-1b60-4478-86f8-c9c92d8c7b81
           - feature-type: Battery
             description: Battery Level
@@ -1006,7 +1006,7 @@ protocols:
                 - 0
                 - 20
               messages:
-                - ValueCmd
+                - ValueWithParameterCmd
             id: 9debc9c8-6bbf-4b72-8fb4-bfa24048554a
           - feature-type: Battery
             description: Battery Level
@@ -3201,9 +3201,9 @@ protocols:
           actuator:
             step-range:
               - 0
-              - 10
+              - 10S
             messages:
-              - ValueCmd
+              - ValueWithParameterCmd
           id: 53bfe934-3f7d-4852-aad4-3c3be47ec180
       id: 9faa1275-3154-427b-b4c6-b4eeec7f51df
     communication:
@@ -3313,7 +3313,7 @@ protocols:
                 - 0
                 - 99
               messages:
-                - ValueCmd
+                - ValueWithParameterCmd
             id: aed57640-194d-44be-bea8-ff3eb43671ee
         id: 6155dc2b-ba8f-4157-a4eb-9a3dc0b065d4
       - identifier:
@@ -3326,7 +3326,7 @@ protocols:
                 - 0
                 - 99
               messages:
-                - ValueCmd
+                - ValueWithParameterCmd
             id: 984e3317-0ce7-4400-9d6f-d29dd73895bc
         id: 633fb81b-f650-471d-979e-bff080cf8ae3
       - identifier:
@@ -3339,7 +3339,7 @@ protocols:
                 - 0
                 - 99
               messages:
-                - ValueCmd
+                - ValueWithParameterCmd
             id: 59a44d2e-6c1e-4761-9e7d-7e3139e6dbd7
           - feature-type: RotateWithDirection
             actuator:
@@ -3347,7 +3347,7 @@ protocols:
                 - 0
                 - 99
               messages:
-                - ValueCmd
+                - ValueWithParameterCmd
             id: f31d7089-99e7-4aa1-9bf1-ed4f51fc06c0
         id: 185b51d5-1739-4562-b6e2-4542f84ab377
       - identifier:
@@ -4258,7 +4258,7 @@ protocols:
               - 0
               - 255
             messages:
-              - ValueCmd
+              - ValueWithParameterCmd
           id: 0d8e4bf0-cd9b-4da1-85bd-188e0badc2ae
       id: 8eb65942-77dc-4e12-85c6-2125ff46778d
     configurations:
@@ -6884,7 +6884,7 @@ protocols:
               - 0
               - 6
             messages:
-              - ValueCmd
+              - ValueWithParameterCmd
           id: b91512ab-6206-40f8-b911-3fd7f4cc9dd9
       id: 7ff57a47-b055-4f05-84da-d24bca06083f
     configurations:
@@ -6972,7 +6972,7 @@ protocols:
               - 0
               - 100
             messages:
-              - ValueCmd
+              - ValueWithParameterCmd
           id: 1b64305a-b043-40cc-bc17-efe16ebff2c5
       id: d65543d1-5a43-4152-b86a-93150d76650b
     communication:
@@ -11420,7 +11420,7 @@ protocols:
               - 0
               - 2
             messages:
-              - ValueCmd
+              - ValueWithParameterCmd
           id: 3bb932f8-cf93-4c65-9590-d827ca42d13f
       id: 7ea9b5b3-2976-4f65-a496-02072ead205a
     communication:
