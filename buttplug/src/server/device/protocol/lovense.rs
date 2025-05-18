@@ -23,22 +23,24 @@ use crate::{
       protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     },
     message::{
-      checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4,
-      checked_sensor_read_cmd::CheckedSensorReadCmdV4,
+      checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_value_cmd::CheckedValueCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4
     },
   },
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
+use dashmap::DashMap;
 use futures::{future::BoxFuture, FutureExt};
 use regex::Regex;
+use uuid::Uuid;
 use std::{
   sync::{
-    atomic::{AtomicBool, AtomicU32, AtomicU8, Ordering},
+    atomic::{AtomicU32, AtomicU8, Ordering},
     Arc,
-  },
-  time::Duration,
+  }, time::Duration
 };
+
+use super::ProtocolCommandCacheType;
 
 // Constants for dealing with the Lovense subscript/write race condition. The
 // timeout needs to be VERY long, otherwise this trips up old lovense serial
@@ -197,13 +199,13 @@ impl ProtocolInitializer for LovenseInitializer {
 }
 
 pub struct Lovense {
-  rotation_direction: Arc<AtomicBool>,
-  vibrator_count: usize,
+  rotation_direction: AtomicU8,
+  vibrator_values: Vec<AtomicU32>,
   use_mply: bool,
   use_lvs: bool,
   device_type: String,
-  // Pairing of position: u8, duration: u32
-  linear_info: Arc<(AtomicU8, AtomicU32)>,
+  value_cache: DashMap<Uuid, u32>,
+  linear_info: Arc<(AtomicU32, AtomicU32)>,
 }
 
 impl Lovense {
@@ -214,7 +216,7 @@ impl Lovense {
     use_mply: bool,
     use_lvs: bool,
   ) -> Self {
-    let linear_info = Arc::new((AtomicU8::new(0), AtomicU32::new(0)));
+    let linear_info = Arc::new((AtomicU32::new(0), AtomicU32::new(0)));
     if device_type == "BA" {
       async_manager::spawn(update_linear_movement(
         hardware.clone(),
@@ -222,47 +224,40 @@ impl Lovense {
       ));
     }
 
+    let mut vibrator_values = vec!();
+    for _ in 0..vibrator_count {
+      vibrator_values.push(AtomicU32::new(0));
+    }
+
     Self {
-      rotation_direction: Arc::new(AtomicBool::new(false)),
-      vibrator_count,
+      rotation_direction: AtomicU8::new(0),
+      vibrator_values,
       use_mply,
       use_lvs,
       device_type: device_type.to_owned(),
+      value_cache: DashMap::new(),
       linear_info,
     }
   }
-}
 
-impl ProtocolHandler for Lovense {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    // For Lovense, we'll just repeat the device type packet and drop the result.
-    super::ProtocolKeepaliveStrategy::RepeatPacketStrategy(HardwareWriteCmd::new(
-      Endpoint::Tx,
-      b"DeviceType;".to_vec(),
-      false,
-    ))
-  }
-
-  fn handle_value_cmd(
-    &self,
-    cmds: &[Option<(ActuatorType, i32)>],
+  fn handle_lvs_cmd(
+    &self
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if self.use_lvs {
-      let mut speeds = vec![0x4cu8, 0x56, 0x53, 0x3a];
-      speeds.append(
-        &mut cmds
-          .iter()
-          .map(|x| if let Some(val) = x { val.1 as u8 } else { 0xff })
-          .collect::<Vec<u8>>(),
-      );
+      let mut speeds = "LVS:{}".as_bytes().to_vec();
+      for i in self.vibrator_values.iter() {
+        speeds.push(i.load(Ordering::Relaxed) as u8);
+      }
       speeds.push(0x3b);
 
-      return Ok(vec![
+      Ok(vec![
         HardwareWriteCmd::new(Endpoint::Tx, speeds, false).into()
-      ]);
-    }
+      ])
+  }
 
-    if self.use_mply {
+  fn handle_mply_cmd(
+    &self
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    /*
       let mut speeds = cmds
         .iter()
         .map(|x| {
@@ -285,31 +280,74 @@ impl ProtocolHandler for Lovense {
 
       let lovense_cmd = format!("Mply:{};", speeds.join(":")).as_bytes().to_vec();
 
-      return Ok(vec![HardwareWriteCmd::new(
+      Ok(vec![HardwareWriteCmd::new(
         Endpoint::Tx,
         lovense_cmd,
         false,
       )
-      .into()]);
-    }
+      .into()])
+      */
+      Ok(vec![])
+  }
+}
 
-    let mut hardware_cmds = vec![];
+impl ProtocolHandler for Lovense {
+  fn cache_strategy(&self) -> ProtocolCommandCacheType {
+    ProtocolCommandCacheType::Internal
+  }
 
-    // Handle vibration commands, these will be by far the most common. Fucking machine oscillation
-    // uses lovense vibrate commands internally too, so we can include them here.
-    let vibrate_cmds: Vec<&(ActuatorType, i32)> = cmds
-      .iter()
-      .filter(|x| {
-        if let Some(val) = x {
-          [ActuatorType::Vibrate, ActuatorType::Oscillate].contains(&val.0)
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    // For Lovense, we'll just repeat the device type packet and drop the result.
+    super::ProtocolKeepaliveStrategy::RepeatPacketStrategy(HardwareWriteCmd::new(
+      Endpoint::Tx,
+      b"DeviceType;".to_vec(),
+      false,
+    ))
+  }
+  
+  fn handle_value_vibrate_cmd(
+    &self,
+    cmd: &CheckedValueCmdV4
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let current_vibrator_value = self.vibrator_values[cmd.feature_index() as usize].load(Ordering::Relaxed);
+    if current_vibrator_value == cmd.value() {
+      Ok(vec![])
+    } else {
+      self.vibrator_values[cmd.feature_index() as usize].store(cmd.value(), Ordering::Relaxed);
+      let speeds: Vec<u32> = self.vibrator_values.iter().map(|v| v.load(Ordering::Relaxed)).collect();
+      if self.use_lvs {
+        self.handle_lvs_cmd()
+      } else if self.use_mply {
+        self.handle_mply_cmd()
+      } else {
+        let lovense_cmd = if self.vibrator_values.len() == 1 {
+          format!("Vibrate:{};", cmd.value()).as_bytes().to_vec()
         } else {
-          false
-        }
-      })
-      .map(|x| x.as_ref().expect("Already verified is some"))
-      .collect();
-
-    if !vibrate_cmds.is_empty() {
+          format!("Vibrate{}:{};", cmd.feature_index() + 1, cmd.value()).as_bytes().to_vec()
+        };
+        Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into()])
+      }
+    }
+    /*
+    if self.use_lvs {
+      self.handle_lvs_cmd(cmd)
+    } else if self.use_mply {
+      self.handle_mply_cmd(cmd)
+    } else {
+      // Handle vibration commands, these will be by far the most common. Fucking machine oscillation
+      // uses lovense vibrate commands internally too, so we can include them here.
+      let vibrate_cmds: Vec<> = cmds
+        .iter()
+        .filter(|x| {
+          if let Some(val) = x {
+            [ActuatorType::Vibrate, ActuatorType::Oscillate].contains(&val.0)
+          } else {
+            false
+          }
+        })
+        .map(|x| x.as_ref().expect("Already verified is some"))
+        .collect();
+            if !vibrate_cmds.is_empty() {
       // Lovense is the same situation as the Lovehoney Desire, where commands
       // are different if we're addressing all motors or seperate motors.
       // Difference here being that there's Lovense variants with different
@@ -346,67 +384,43 @@ impl ProtocolHandler for Lovense {
         }
       }
     }
+      */
 
-    // Handle constriction commands.
-    let constrict_cmds: Vec<&(ActuatorType, i32)> = cmds
-      .iter()
-      .filter(|x| {
-        if let Some(val) = x {
-          val.0 == ActuatorType::Constrict
-        } else {
-          false
-        }
-      })
-      .map(|x| x.as_ref().expect("Already verified is some"))
-      .collect();
-    if !constrict_cmds.is_empty() {
-      // Only the max has a constriction system, and there's only one, so just parse the first command.
-      let lovense_cmd = format!("Air:Level:{};", constrict_cmds[0].1)
-        .as_bytes()
-        .to_vec();
-
-      hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
-    }
-
-    let rotate_cmds: Vec<Option<(u32, bool)>> = cmds
-      .iter()
-      .filter(|x| {
-        if let Some(val) = x {
-          val.0 == ActuatorType::RotateWithDirection
-        } else {
-          false
-        }
-      })
-      .map(|x| {
-        let (_, speed) = x.as_ref().expect("Already verified is some");
-        Some((speed.unsigned_abs(), *speed >= 0))
-      })
-      .collect();
-
-    hardware_cmds.append(&mut self.handle_rotate_cmd(&rotate_cmds).unwrap());
-
-    Ok(hardware_cmds)
   }
 
-  fn handle_rotate_cmd(
+  
+  fn handle_value_constrict_cmd(
     &self,
-    cmds: &[Option<(u32, bool)>],
+    cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    debug!("GOT ROTATION COMMAND?!");
-    let direction = self.rotation_direction.clone();
+    let lovense_cmd = format!("Air:Level:{};", cmd.value())
+      .as_bytes()
+      .to_vec();
+
+    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into()])
+  } 
+
+  fn handle_value_rotate_cmd(
+    &self,
+    cmd: &CheckedValueCmdV4,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.handle_rotation_with_direction_cmd(&CheckedValueWithParameterCmdV4::new(cmd.device_index(), cmd.feature_index(), cmd.feature_uuid(), cmd.actuator_type(), cmd.value(), 0))
+  }
+
+  fn handle_rotation_with_direction_cmd(
+    &self,
+    cmd: &CheckedValueWithParameterCmdV4,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut hardware_cmds = vec![];
-    if let Some(Some((speed, clockwise))) = cmds.first() {
-      let lovense_cmd = format!("Rotate:{};", speed).as_bytes().to_vec();
-      hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
-      let dir = direction.load(Ordering::SeqCst);
-      // TODO Should we store speed and direction as an option for rotation caching? This is weird.
-      if dir != *clockwise {
-        direction.store(*clockwise, Ordering::SeqCst);
-        hardware_cmds
-          .push(HardwareWriteCmd::new(Endpoint::Tx, b"RotateChange;".to_vec(), false).into());
-      }
+    let lovense_cmd = format!("Rotate:{};", cmd.value()).as_bytes().to_vec();
+    hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+    let current_dir = self.rotation_direction.load(Ordering::Relaxed);
+    if current_dir != cmd.parameter() as u8 {
+      self.rotation_direction.store(cmd.parameter() as u8, Ordering::Relaxed);
+      hardware_cmds
+        .push(HardwareWriteCmd::new(Endpoint::Tx, b"RotateChange;".to_vec(), false).into());
     }
-    debug!("{:?}", hardware_cmds);
+    trace!("{:?}", hardware_cmds);
     Ok(hardware_cmds)
   }
 
@@ -464,27 +478,23 @@ impl ProtocolHandler for Lovense {
     .boxed()
   }
 
-  fn handle_linear_cmd(
+  fn handle_position_with_duration_cmd(
     &self,
-    message: CheckedValueWithParameterCmdV4,
+    message: &CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let vector = message
-      .vectors()
-      .first()
-      .expect("Already checked for vector subcommand");
     self
       .linear_info
       .0
-      .store((vector.position() * 100f64) as u8, Ordering::SeqCst);
+      .store(message.value(), Ordering::Relaxed);
     self
       .linear_info
       .1
-      .store(vector.duration(), Ordering::SeqCst);
+      .store(message.parameter() as u32, Ordering::Relaxed);
     Ok(vec![])
   }
 }
 
-async fn update_linear_movement(device: Arc<Hardware>, linear_info: Arc<(AtomicU8, AtomicU32)>) {
+async fn update_linear_movement(device: Arc<Hardware>, linear_info: Arc<(AtomicU32, AtomicU32)>) {
   let mut last_goal_position = 0i32;
   let mut current_move_amount = 0i32;
   let mut current_position = 0i32;

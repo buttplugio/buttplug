@@ -73,10 +73,9 @@ pub struct Youou {
 }
 
 impl ProtocolHandler for Youou {
-  fn handle_value_vibrate_cmd(
+    fn handle_value_vibrate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Byte 2 seems to be a monotonically increasing packet id of some kind
     //

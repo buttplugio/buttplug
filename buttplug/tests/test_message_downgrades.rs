@@ -7,6 +7,7 @@
 
 extern crate buttplug;
 mod util;
+use tracing::info;
 pub use util::test_device_manager::check_test_recv_value;
 
 use buttplug::{

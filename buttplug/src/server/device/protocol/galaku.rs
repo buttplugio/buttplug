@@ -6,15 +6,17 @@
 // for full license information.
 
 use async_trait::async_trait;
+use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::Arc;
 
 use futures_util::future::BoxFuture;
 use futures_util::{future, FutureExt};
 
-use crate::core::message::{ActuatorType, SensorReadingV4, SensorType};
+use crate::core::message::{SensorReadingV4, SensorType};
 use crate::server::message::checked_sensor_read_cmd::CheckedSensorReadCmdV4;
 use crate::server::message::checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4;
 use crate::server::message::checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4;
+use crate::server::message::checked_value_cmd::CheckedValueCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_initializer_setup,
@@ -22,11 +24,7 @@ use crate::{
     configuration::UserDeviceIdentifier,
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition},
     hardware::{
-      Hardware,
-      HardwareCommand,
-      HardwareEvent,
-      HardwareSubscribeCmd,
-      HardwareUnsubscribeCmd,
+      Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd,
       HardwareWriteCmd,
     },
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
@@ -110,9 +108,18 @@ impl ProtocolInitializer for GalakuInitializer {
   }
 }
 
-#[derive(Default)]
 pub struct Galaku {
   is_caiping_pump_device: bool,
+  speeds: [AtomicU8; 2],
+}
+
+impl Default for Galaku {
+  fn default() -> Self {
+    Self {
+      is_caiping_pump_device: false,
+      speeds: [AtomicU8::new(0), AtomicU8::new(0)],
+    }
+  }
 }
 
 impl ProtocolHandler for Galaku {
@@ -120,73 +127,44 @@ impl ProtocolHandler for Galaku {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn needs_full_command_set(&self) -> bool {
+  fn outputs_full_command_set(&self) -> bool {
     true
   }
 
   fn handle_value_vibrate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let data: Vec<u32> = vec![90, 0, 0, 1, 49, scalar, 0, 0, 0, 0];
-    Ok(vec![HardwareWriteCmd::new(
-      Endpoint::Tx,
-      send_bytes(data),
-      false,
-    )
-    .into()])
-  }
-
-  fn handle_value_cmd(
-    &self,
-    commands: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if commands.len() == 1 {
-      if let Some(cmd) = commands[0] {
-        if self.is_caiping_pump_device {
-          let data: Vec<u8> = vec![
-            0xAA,
-            1,
-            10,
-            3,
-            cmd.1 as u8,
-            if cmd.1 == 0 { 0 } else { 1 },
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-          ];
-          return Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()]);
-        } else {
-          let data: Vec<u32> = vec![90, 0, 0, 1, 49, cmd.1 as u32, 0, 0, 0, 0];
-          return Ok(vec![HardwareWriteCmd::new(
-            Endpoint::Tx,
-            send_bytes(data),
-            false,
-          )
-          .into()]);
-        }
-      }
+    if self.is_caiping_pump_device {
+      let data: Vec<u8> = vec![
+        0xAA,
+        1,
+        10,
+        3,
+        cmd.value() as u8,
+        if cmd.value() == 0 { 0 } else { 1 },
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ];
+      return Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()]);
     } else {
-      let cmd0 = commands[0].unwrap_or((ActuatorType::Vibrate, 0));
-      let cmd1 = commands[1].unwrap_or((ActuatorType::Vibrate, 0));
-
-      let data: Vec<u32> = vec![90, 0, 0, 1, 64, 3, cmd0.1 as u32, cmd1.1 as u32, 0, 0];
-      return Ok(vec![HardwareWriteCmd::new(
+      self.speeds[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
+      let data: Vec<u32> = vec![90, 0, 0, 1, 49, self.speeds[0].load(Ordering::Relaxed) as u32, self.speeds[1].load(Ordering::Relaxed) as u32, 0, 0, 0];
+      Ok(vec![HardwareWriteCmd::new(
         Endpoint::Tx,
         send_bytes(data),
         false,
       )
-      .into()]);
+      .into()])
     }
-    Ok(vec![])
   }
 
   fn handle_sensor_subscribe_cmd(

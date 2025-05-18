@@ -5,9 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::errors::ButtplugDeviceError::ProtocolSpecificError;
-use crate::core::message::ActuatorType;
-use crate::core::message::ActuatorType::{Oscillate, Vibrate};
+use crate::server::message::checked_value_cmd::CheckedValueCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -16,6 +14,7 @@ use crate::{
   },
 };
 use std::num::Wrapping;
+use std::sync::atomic::{AtomicU8, Ordering};
 
 static KEY_TAB: [[u8; 12]; 4] = [
   [0, 24, 0x98, 0xf7, 0xa5, 61, 13, 41, 37, 80, 68, 70],
@@ -26,29 +25,20 @@ static KEY_TAB: [[u8; 12]; 4] = [
 
 generic_protocol_setup!(GalakuPump, "galaku-pump");
 
-#[derive(Default)]
-pub struct GalakuPump {}
+pub struct GalakuPump {
+  speeds: [AtomicU8; 2]
+}
 
-impl ProtocolHandler for GalakuPump {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
-
-  fn needs_full_command_set(&self) -> bool {
-    true
-  }
-
-  fn handle_value_cmd(
-    &self,
-    commands: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if commands.len() != 2 {
-      return Err(ProtocolSpecificError(
-        "galaku-pump".to_owned(),
-        format!("Expected 2 attributes, got {}", commands.len()),
-      ));
+impl Default for GalakuPump {
+  fn default() -> Self {
+    Self {
+      speeds: [AtomicU8::new(0), AtomicU8::new(0)]
     }
+  }
+}
 
+impl GalakuPump {
+  fn hardware_command(&self) -> Vec<HardwareCommand> {
     let mut data: Vec<u8> = vec![
       0x23,
       0x5a,
@@ -57,8 +47,8 @@ impl ProtocolHandler for GalakuPump {
       0x01,
       0x60,
       0x03,
-      commands[0].unwrap_or((Oscillate, 0)).1 as u8,
-      commands[1].unwrap_or((Vibrate, 0)).1 as u8,
+      self.speeds[0].load(Ordering::Relaxed) as u8,
+      self.speeds[1].load(Ordering::Relaxed) as u8,
       0x00,
       0x00,
     ];
@@ -70,6 +60,32 @@ impl ProtocolHandler for GalakuPump {
       data2.push((Wrapping((k ^ 0x23) ^ data[i]) + Wrapping(k)).0);
     }
 
-    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data2, true).into()])
+    vec![HardwareWriteCmd::new(Endpoint::Tx, data2, true).into()]
+  }
+}
+
+impl ProtocolHandler for GalakuPump {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
+  fn outputs_full_command_set(&self) -> bool {
+    true
+  }
+
+  fn handle_value_oscillate_cmd(
+      &self,
+      cmd: &CheckedValueCmdV4,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.speeds[0].store(cmd.value() as u8, Ordering::Relaxed);
+    Ok(self.hardware_command())
+  }
+
+  fn handle_value_vibrate_cmd(
+      &self,
+      cmd: &CheckedValueCmdV4,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.speeds[1].store(cmd.value() as u8, Ordering::Relaxed);
+    Ok(self.hardware_command())
   }
 }

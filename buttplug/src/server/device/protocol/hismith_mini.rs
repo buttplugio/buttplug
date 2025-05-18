@@ -10,11 +10,11 @@ use crate::{
     errors::ButtplugDeviceError,
     message::{Endpoint, FeatureType},
   },
-  server::device::{
+  server::{device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 use async_trait::async_trait;
 use std::sync::Arc;
@@ -103,11 +103,10 @@ impl ProtocolHandler for HismithMini {
 
   fn handle_value_oscillate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let idx: u8 = 0x03;
-    let speed: u8 = scalar as u8;
+    let speed: u8 = cmd.value() as u8;
 
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
@@ -119,15 +118,14 @@ impl ProtocolHandler for HismithMini {
 
   fn handle_value_vibrate_cmd(
     &self,
-    index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let idx: u8 = if !self.dual_vibe || index == 1 {
+    let idx: u8 = if !self.dual_vibe || cmd.feature_index() == 1 {
       0x05
     } else {
       0x03
     };
-    let speed: u8 = scalar as u8;
+    let speed: u8 = cmd.value() as u8;
 
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
@@ -139,11 +137,10 @@ impl ProtocolHandler for HismithMini {
 
   fn handle_value_constrict_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let idx: u8 = if self.second_constrict { 0x05 } else { 0x03 };
-    let speed: u8 = scalar as u8;
+    let speed: u8 = cmd.value() as u8;
 
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,

@@ -8,9 +8,9 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
-  server::device::{
+  server::{device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{
@@ -19,10 +19,10 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 use async_trait::async_trait;
-use std::sync::Arc;
+use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
 
 generic_protocol_initializer_setup!(LeloF1s, "lelo-f1s");
 
@@ -42,32 +42,42 @@ impl ProtocolInitializer for LeloF1sInitializer {
     hardware
       .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
       .await?;
-    Ok(Arc::new(LeloF1s::default()))
+    Ok(Arc::new(LeloF1s::new(false)))
   }
 }
 
-#[derive(Default)]
-pub struct LeloF1s {}
+pub struct LeloF1s {
+  speeds: [AtomicU8; 2],
+  write_with_response: bool
+}
+
+impl LeloF1s {
+  pub fn new(write_with_response: bool) -> Self {
+    Self {
+      write_with_response,
+      speeds: [AtomicU8::new(0), AtomicU8::new(0)]
+    }
+  }
+}
 
 impl ProtocolHandler for LeloF1s {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn needs_full_command_set(&self) -> bool {
+  fn outputs_full_command_set(&self) -> bool {
     true
   }
 
-  fn handle_value_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, i32)>],
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.speeds[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
     let mut cmd_vec = vec![0x1];
-    for cmd in cmds.iter() {
-      cmd_vec.push(cmd.expect("LeloF1s should always send all values").1 as u8);
-    }
+    self.speeds.iter().for_each(|v| cmd_vec.push(v.load(Ordering::Relaxed)));
     Ok(vec![
-      HardwareWriteCmd::new(Endpoint::Tx, cmd_vec, false).into()
+      HardwareWriteCmd::new(Endpoint::Tx, cmd_vec, self.write_with_response).into()
     ])
   }
 }

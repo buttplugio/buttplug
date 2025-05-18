@@ -21,7 +21,12 @@ pub struct CheckedValueWithParameterVecCmdV4 {
 }
 
 impl CheckedValueWithParameterVecCmdV4 {
-  pub fn new(id: u32, device_index: u32, value_vec: Vec<CheckedValueWithParameterCmdV4>) -> Self {
+  pub fn new(id: u32, device_index: u32, mut value_vec: Vec<CheckedValueWithParameterCmdV4>) -> Self {
+    // Several tests and parts of the system assumed we always sorted by feature index. This is not
+    // necessarily true of incoming messages, but we also never explicitly specified the execution
+    // order of subcommands within a message, so we'll just sort here for now to make tests pass,
+    // and implement unordered checking after v4 ships.
+    value_vec.sort_by_key(|k| k.feature_index());
     Self {
       id,
       device_index,
@@ -59,9 +64,10 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedValueWithParameterVecCmdV4 
       cmds.push(CheckedValueWithParameterCmdV4::new(
         msg.device_index(),
         x.index(),
-        *f.id(),          
+        *f.id(),
+        crate::core::message::ActuatorType::PositionWithDuration,
         (x.position() * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64) + *actuator.step_limit().start() as f64).ceil() as u32,
-        x.duration().try_into().map_err(|e| ButtplugError::from(ButtplugMessageError::InvalidMessageContents("Duration should be under 2^31. You are not waiting 24 days to run this command.".to_owned())))?,
+        x.duration().try_into().map_err(|_| ButtplugError::from(ButtplugMessageError::InvalidMessageContents("Duration should be under 2^31. You are not waiting 24 days to run this command.".to_owned())))?,
       ));
     }
     Ok(CheckedValueWithParameterVecCmdV4::new(msg.id(), msg.device_index(), cmds))
@@ -110,6 +116,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedValueWithParameterVecCmdV4 
         msg.device_index(),
         idx,
         *feature.feature.id(),
+        crate::core::message::ActuatorType::RotateWithDirection,
         (cmd.speed() * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64) + *actuator.step_limit().start() as f64).ceil() as u32,
         if cmd.clockwise() { 1 } else { -1 }
       ));

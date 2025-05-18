@@ -16,10 +16,7 @@ use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      self,
       ButtplugActuatorFeatureMessageType,
-      ClientDeviceMessageAttributesV3,
-      DeviceFeature,
       DeviceFeatureActuator,
       Endpoint,
       FeatureType,
@@ -33,7 +30,6 @@ use buttplug::{
     async_manager,
     device_configuration::load_protocol_configs
   },
-  util::{async_manager, device_configuration::load_protocol_configs},
 };
 use futures::StreamExt;
 use uuid::Uuid;
@@ -149,7 +145,6 @@ async fn test_client_device_connected_no_event_listener() {
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_client_device_invalid_command() {
-  //tracing_subscriber::fmt::init();
   let (client, _) = test_client_with_device().await;
 
   let mut event_stream = client.event_stream();

@@ -5,56 +5,75 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use std::sync::atomic::{AtomicU8, Ordering};
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
   generic_protocol_setup,
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::ProtocolHandler,
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(FeelingSo, "feelingso");
 
-#[derive(Default)]
-pub struct FeelingSo {}
+pub struct FeelingSo {
+  speeds: [AtomicU8; 2]
+}
+
+impl Default for FeelingSo {
+  fn default() -> Self {
+    Self {
+      speeds: [AtomicU8::new(0), AtomicU8::new(0)]
+    }
+  }
+}
+
+impl FeelingSo {
+  fn hardware_command(&self) -> Vec<HardwareCommand> {
+    vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![
+        0xaa,
+        0x40,
+        0x03,
+        self.speeds[0].load(Ordering::Relaxed),
+        self.speeds[1].load(Ordering::Relaxed),
+        0x14, // Oscillate range: 1 to 4
+        0x19, // Checksum?
+      ],
+      false,
+    )
+    .into()]
+  }
+}
 
 impl ProtocolHandler for FeelingSo {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn needs_full_command_set(&self) -> bool {
+  fn outputs_full_command_set(&self) -> bool {
     true
   }
 
-  fn handle_value_cmd(
-    &self,
-    commands: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let cmd1 = commands[0];
-    let cmd2 = if commands.len() > 1 {
-      commands[1]
-    } else {
-      None
-    };
-
-    Ok(vec![HardwareWriteCmd::new(
-      Endpoint::Tx,
-      vec![
-        0xaa,
-        0x40,
-        0x03,
-        cmd1.unwrap_or((ActuatorType::Vibrate, 0)).1 as u8,
-        cmd2.unwrap_or((ActuatorType::Oscillate, 0)).1 as u8,
-        0x14, // Oscillate range: 1 to 4
-        0x19, // Checksum?
-      ],
-      false,
-    )
-    .into()])
+  fn handle_value_oscillate_cmd(
+      &self,
+      cmd: &CheckedValueCmdV4,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.speeds[1].store(cmd.value() as u8, Ordering::Relaxed);
+    Ok(self.hardware_command())
+  }
+  
+  fn handle_value_vibrate_cmd(
+      &self,
+      cmd: &CheckedValueCmdV4,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.speeds[0].store(cmd.value() as u8, Ordering::Relaxed);
+    Ok(self.hardware_command())
   }
 }

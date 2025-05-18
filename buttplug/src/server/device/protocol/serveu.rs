@@ -28,7 +28,7 @@ pub struct ServeU {
 }
 
 impl ProtocolHandler for ServeU {
-  fn handle_linear_cmd(
+  fn handle_position_with_duration_cmd(
     &self,
     message: CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {

@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(LiboElle, "libo-elle");
@@ -25,12 +25,11 @@ impl ProtocolHandler for LiboElle {
 
   fn handle_value_vibrate_cmd(
     &self,
-    index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![{
-      let speed = scalar as u8;
-      if index == 1 {
+      let speed = cmd.value() as u8;
+      if cmd.feature_index() == 1 {
         let mut data = 0u8;
         if speed > 0 && speed <= 7 {
           data |= (speed - 1) << 4;

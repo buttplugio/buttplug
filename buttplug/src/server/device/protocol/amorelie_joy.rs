@@ -7,7 +7,7 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     configuration::{UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
@@ -17,7 +17,7 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 use async_trait::async_trait;
 use std::sync::Arc;
@@ -51,15 +51,14 @@ impl ProtocolHandler for AmorelieJoy {
 
   fn handle_value_vibrate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
       [
         0x01,         // static header
         0x01,         // pattern (1 = steady),
-        scalar as u8, // speed 0-100
+        cmd.value() as u8, // speed 0-100
       ]
       .to_vec(),
       false,

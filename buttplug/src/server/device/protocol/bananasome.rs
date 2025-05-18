@@ -5,57 +5,74 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use std::sync::atomic::{AtomicU8, Ordering};
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{
-      ActuatorType,
-      ActuatorType::{Oscillate, Vibrate},
       Endpoint,
     },
   },
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(Bananasome, "bananasome");
 
-#[derive(Default)]
-pub struct Bananasome {}
+pub struct Bananasome {
+  current_commands: [AtomicU8; 3]
+}
+
+impl Default for Bananasome {
+  fn default() -> Self {
+    Self {
+      current_commands: [AtomicU8::new(0), AtomicU8::new(0), AtomicU8::new(0)]
+    }
+  }
+}
+
+impl Bananasome {
+  fn hardware_command(&self) -> Vec<HardwareCommand> {
+    vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![
+        0xa0,
+        0x03,
+        self.current_commands[0].load(Ordering::Relaxed) as u8,
+        self.current_commands[1].load(Ordering::Relaxed) as u8,
+        self.current_commands[2].load(Ordering::Relaxed) as u8,
+      ],
+      false,
+    )
+    .into()]
+  }
+}
 
 impl ProtocolHandler for Bananasome {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn needs_full_command_set(&self) -> bool {
+  fn outputs_full_command_set(&self) -> bool {
     true
   }
-  fn handle_value_cmd(
-    &self,
-    commands: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      Endpoint::Tx,
-      vec![
-        0xa0,
-        0x03,
-        commands[0].unwrap_or((Oscillate, 0)).1 as u8,
-        if commands.len() > 1 {
-          commands[1].unwrap_or((Vibrate, 0)).1
-        } else {
-          0
-        } as u8,
-        if commands.len() > 2 {
-          commands[2].unwrap_or((Vibrate, 0)).1
-        } else {
-          0
-        } as u8,
-      ],
-      false,
-    )
-    .into()])
+
+  fn handle_value_oscillate_cmd(
+      &self,
+      cmd: &CheckedValueCmdV4,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.current_commands[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
+    Ok(self.hardware_command())
+  }
+
+  fn handle_value_vibrate_cmd(
+      &self,
+      _cmd: &CheckedValueCmdV4,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(self.hardware_command())
+      
   }
 }

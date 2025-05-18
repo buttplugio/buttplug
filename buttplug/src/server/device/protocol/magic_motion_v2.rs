@@ -5,76 +5,69 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use std::sync::atomic::{AtomicU8, Ordering};
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
-  server::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+  server::{
+    device::{
+      hardware::{HardwareCommand, HardwareWriteCmd},
+      protocol::{generic_protocol_setup, ProtocolHandler},
+    },
+    message::checked_value_cmd::CheckedValueCmdV4,
   },
 };
 
 generic_protocol_setup!(MagicMotionV2, "magic-motion-2");
 
-#[derive(Default)]
-pub struct MagicMotionV2 {}
+pub struct MagicMotionV2 {
+  speeds: [AtomicU8; 2],
+}
+
+impl Default for MagicMotionV2 {
+  fn default() -> Self {
+    Self {
+      speeds: [AtomicU8::new(0), AtomicU8::new(0)],
+    }
+  }
+}
 
 impl ProtocolHandler for MagicMotionV2 {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn needs_full_command_set(&self) -> bool {
+  fn outputs_full_command_set(&self) -> bool {
     true
   }
 
-  fn handle_value_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, i32)>],
+    cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let data = if cmds.len() == 1 {
-      vec![
-        0x10,
-        0xff,
-        0x04,
-        0x0a,
-        0x32,
-        0x0a,
-        0x00,
-        0x04,
-        0x08,
-        cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8,
-        0x64,
-        0x00,
-        0x04,
-        0x08,
-        0,
-        0x64,
-        0x01,
-      ]
-    } else {
-      vec![
-        0x10,
-        0xff,
-        0x04,
-        0x0a,
-        0x32,
-        0x0a,
-        0x00,
-        0x04,
-        0x08,
-        cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8,
-        0x64,
-        0x00,
-        0x04,
-        0x08,
-        cmds[1].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8,
-        0x64,
-        0x01,
-      ]
-    };
+    self.speeds[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
+    let data = vec![
+      0x10,
+      0xff,
+      0x04,
+      0x0a,
+      0x32,
+      0x0a,
+      0x00,
+      0x04,
+      0x08,
+      self.speeds[0].load(Ordering::Relaxed),
+      0x64,
+      0x00,
+      0x04,
+      0x08,
+      self.speeds[1].load(Ordering::Relaxed),
+      0x64,
+      0x01,
+    ];
     Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()])
   }
 }

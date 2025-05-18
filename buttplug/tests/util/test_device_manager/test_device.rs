@@ -29,6 +29,7 @@ use buttplug::{
 use async_trait::async_trait;
 use dashmap::DashSet;
 use futures::future::{self, BoxFuture, FutureExt};
+use tracing::error;
 use serde::{Deserialize, Serialize};
 use std::{
   collections::{HashSet, VecDeque},
@@ -236,7 +237,10 @@ impl TestDevice {
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let sender = self.test_device_channel.clone();
     async move {
-      sender.send(data_command).await.expect("Test");
+      if let Err(e) = sender.send(data_command).await {
+        error!("{}", e);
+        panic!("{:?}", e);
+      }
       Ok(())
     }
     .boxed()

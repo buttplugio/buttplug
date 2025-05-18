@@ -8,63 +8,20 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
-  server::device::{
-    configuration::UserDeviceDefinition,
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{
-      generic_protocol_initializer_setup,
-      ProtocolCommunicationSpecifier,
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
-      UserDeviceIdentifier,
-    },
-  },
-  util::async_manager,
+  server::{device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::ProtocolHandler,
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
-use async_trait::async_trait;
-use std::{sync::Arc, time::Duration};
-use tokio::time::sleep;
 
-generic_protocol_initializer_setup!(Luvmazer, "luvmazer");
+use super::generic_protocol_setup;
 
-async fn delayed_rotate_handler(device: Arc<Hardware>, scalar: u8) {
-  sleep(Duration::from_millis(25)).await;
-  let res = device
-    .write_value(&HardwareWriteCmd::new(
-      Endpoint::Tx,
-      vec![0xa0, 0x0f, 0x00, 0x00, 0x64, scalar as u8],
-      false,
-    ))
-    .await;
-  if res.is_err() {
-    error!("Delayed Luvmazer Rotate command error: {:?}", res.err());
-  }
-}
+generic_protocol_setup!(Luvmazer, "luvmazer");
+
 #[derive(Default)]
-pub struct LuvmazerInitializer {}
-
-#[async_trait]
-impl ProtocolInitializer for LuvmazerInitializer {
-  async fn initialize(
-    &mut self,
-    hardware: Arc<Hardware>,
-    _: &UserDeviceDefinition,
-  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    Ok(Arc::new(Luvmazer::new(hardware)))
-  }
-}
-
 pub struct Luvmazer {
-  device: Arc<Hardware>,
-}
-
-impl Luvmazer {
-  fn new(device: Arc<Hardware>) -> Self {
-    Self { device }
-  }
 }
 
 impl ProtocolHandler for Luvmazer {
@@ -72,14 +29,13 @@ impl ProtocolHandler for Luvmazer {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_vibrate_cmd(
+    fn handle_value_vibrate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![0xa0, 0x01, 0x00, 0x00, 0x64, scalar as u8],
+      vec![0xa0, 0x01, 0x00, 0x00, 0x64, cmd.value() as u8],
       false,
     )
     .into()])
@@ -87,53 +43,13 @@ impl ProtocolHandler for Luvmazer {
 
   fn handle_value_rotate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![0xa0, 0x0f, 0x00, 0x00, 0x64, scalar as u8],
+      vec![0xa0, 0x0f, 0x00, 0x00, 0x64, cmd.value() as u8],
       false,
     )
     .into()])
-  }
-
-  fn handle_value_cmd(
-    &self,
-    commands: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let cmd1 = commands[0];
-    let cmd2 = if commands.len() > 1 {
-      commands[1]
-    } else {
-      None
-    };
-
-    if let Some(cmd) = cmd2 {
-      if cmd.0 == ActuatorType::Rotate {
-        if cmd1.is_some() {
-          let dev = self.device.clone();
-          async_manager::spawn(async move { delayed_rotate_handler(dev, cmd.1 as u8).await });
-        } else {
-          return Ok(vec![HardwareWriteCmd::new(
-            Endpoint::Tx,
-            vec![0xa0, 0x0f, 0x00, 0x00, 0x64, cmd.1 as u8],
-            false,
-          )
-          .into()]);
-        }
-      }
-    }
-
-    if let Some(cmd) = cmd1 {
-      return Ok(vec![HardwareWriteCmd::new(
-        Endpoint::Tx,
-        vec![0xa0, 0x01, 0x00, 0x00, 0x64, cmd.1 as u8],
-        false,
-      )
-      .into()]);
-    }
-
-    Ok(vec![])
   }
 }

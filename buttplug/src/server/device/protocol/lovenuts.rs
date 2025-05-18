@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(LoveNuts, "lovenuts");
@@ -25,11 +25,10 @@ impl ProtocolHandler for LoveNuts {
 
   fn handle_value_vibrate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut data: Vec<u8> = vec![0x45, 0x56, 0x4f, 0x4c];
-    data.append(&mut [scalar as u8 | (scalar as u8) << 4; 10].to_vec());
+    data.append(&mut [cmd.value() as u8 | (cmd.value() as u8) << 4; 10].to_vec());
     data.push(0x00);
     data.push(0xff);
 

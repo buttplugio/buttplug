@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(DeepSire, "deepsire");
@@ -25,12 +25,11 @@ impl ProtocolHandler for DeepSire {
 
   fn handle_value_vibrate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![0x55, 0x04, 0x01, 0x00, 0x00, scalar as u8, 0xAA],
+      vec![0x55, 0x04, 0x01, 0x00, 0x00, cmd.value() as u8, 0xAA],
       false,
     )
     .into()])

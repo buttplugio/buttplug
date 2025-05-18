@@ -10,22 +10,19 @@ use crate::{
     errors::ButtplugDeviceError,
     message::{ActuatorType, Endpoint},
   },
-  server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-    hardware::{
-      Hardware,
-      HardwareCommand,
-      HardwareEvent,
-      HardwareSubscribeCmd,
-      HardwareUnsubscribeCmd,
-      HardwareWriteCmd,
+  server::{
+    device::{
+      configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+      hardware::{
+        Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd,
+        HardwareWriteCmd,
+      },
+      protocol::{
+        generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier,
+        ProtocolInitializer,
+      },
     },
-    protocol::{
-      generic_protocol_initializer_setup,
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
-    },
+    message::checked_value_cmd::CheckedValueCmdV4,
   },
 };
 use async_trait::async_trait;
@@ -99,32 +96,24 @@ pub struct LeloHarmony {}
 impl ProtocolHandler for LeloHarmony {
   fn handle_value_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, i32)>],
+    cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let mut cmd_vec: Vec<HardwareCommand> = vec![];
-    for (i, cmd) in cmds.iter().enumerate() {
-      if let Some(pair) = cmd {
-        cmd_vec.push(
-          HardwareWriteCmd::new(
-            Endpoint::Tx,
-            vec![
-              0x0a,
-              0x12,
-              i as u8 + 1,
-              0x08,
-              0x00,
-              0x00,
-              0x00,
-              0x00,
-              pair.1 as u8,
-              0x00,
-            ],
-            false,
-          )
-          .into(),
-        );
-      }
-    }
-    Ok(cmd_vec)
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![
+        0x0a,
+        0x12,
+        cmd.feature_index() as u8 + 1,
+        0x08,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        cmd.value() as u8,
+        0x00,
+      ],
+      false,
+    )
+    .into()])
   }
 }

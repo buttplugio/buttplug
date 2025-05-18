@@ -8,23 +8,19 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{
       Hardware,
-      HardwareCommand,
       HardwareEvent,
       HardwareSubscribeCmd,
       HardwareUnsubscribeCmd,
       HardwareWriteCmd,
     },
     protocol::{
-      generic_protocol_initializer_setup,
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
+      generic_protocol_initializer_setup, lelo_harmony::LeloHarmony, lelof1s::LeloF1s, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer
     },
   },
 };
@@ -76,7 +72,11 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
           )
         } else if n.eq(&authed) {
           debug!("Lelo F1s V2 is authorised!");
-          return Ok(Arc::new(LeloF1sV2::new(use_harmony)));
+          if use_harmony {
+            return Ok(Arc::new(LeloHarmony::default()));
+          } else {
+            return Ok(Arc::new(LeloF1s::new(true)));
+          }
         } else {
           debug!("Lelo F1s V2 gave us a password: {:?}", n);
           // Can't send whilst subscribed
@@ -99,65 +99,5 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
         ));
       }
     }
-  }
-}
-
-pub struct LeloF1sV2 {
-  use_harmony: bool,
-}
-
-impl LeloF1sV2 {
-  fn new(use_harmony: bool) -> Self {
-    Self { use_harmony }
-  }
-}
-
-impl ProtocolHandler for LeloF1sV2 {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
-
-  fn needs_full_command_set(&self) -> bool {
-    !self.use_harmony
-  }
-
-  fn handle_value_cmd(
-    &self,
-    cmds: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if self.use_harmony {
-      let mut cmd_vec: Vec<HardwareCommand> = vec![];
-      for (i, cmd) in cmds.iter().enumerate() {
-        if let Some(pair) = cmd {
-          cmd_vec.push(
-            HardwareWriteCmd::new(
-              Endpoint::TxVibrate,
-              vec![
-                0x0a,
-                0x12,
-                i as u8 + 1,
-                0x08,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                pair.1 as u8,
-                0x00,
-              ],
-              false,
-            )
-            .into(),
-          );
-        }
-      }
-      return Ok(cmd_vec);
-    }
-    let mut cmd_vec = vec![0x1];
-    for cmd in cmds.iter() {
-      cmd_vec.push(cmd.expect("LeloF1s should always send all values").1 as u8);
-    }
-    Ok(vec![
-      HardwareWriteCmd::new(Endpoint::Tx, cmd_vec, true).into()
-    ])
   }
 }

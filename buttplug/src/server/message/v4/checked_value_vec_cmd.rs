@@ -44,7 +44,12 @@ pub struct CheckedValueVecCmdV4 {
 }
 
 impl CheckedValueVecCmdV4 {
-  pub fn new(id: u32, device_index: u32, value_vec: Vec<CheckedValueCmdV4>) -> Self {
+  pub fn new(id: u32, device_index: u32, mut value_vec: Vec<CheckedValueCmdV4>) -> Self {
+    // Several tests and parts of the system assumed we always sorted by feature index. This is not
+    // necessarily true of incoming messages, but we also never explicitly specified the execution
+    // order of subcommands within a message, so we'll just sort here for now to make tests pass,
+    // and implement unordered checking after v4 ships.
+    value_vec.sort_by_key(|k| k.feature_index());
     Self {
       id,
       device_index,
@@ -89,6 +94,7 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedValueVecCmdV4 {
         msg.device_index(),
         index as u32,
         *feature.id(),
+        crate::core::message::ActuatorType::Vibrate,
         (msg.speed() * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64) + *actuator.step_limit().start() as f64).ceil() as u32,
       ))
     }
@@ -147,6 +153,7 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedValueVecCmdV4 {
         msg.device_index(),
         idx as u32,
         *feature.id(),
+        crate::core::message::ActuatorType::Vibrate,
         (vibrate_cmd.speed() * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64) + *actuator.step_limit().start() as f64).ceil() as u32,
       ))
     }
@@ -206,6 +213,7 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedValueVecCmdV4 {
           msg.device_index(),
           idx,
           *feature.feature.id(),
+          cmd.actuator_type(),
           (cmd.scalar() * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64) + *actuator.step_limit().start() as f64).ceil() as u32,
         ));
       } else {
@@ -214,10 +222,12 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedValueVecCmdV4 {
           msg.device_index(),
           idx,
           *feature.feature.id(),
+          cmd.actuator_type(),
           0
         ));
       }
     }
+
     Ok(CheckedValueVecCmdV4::new(msg.id(), msg.device_index(), cmds))
   }
 }

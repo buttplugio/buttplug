@@ -39,7 +39,7 @@ use buttplug::{
       ServerDeviceManagerBuilder,
     },
     message::{
-      checked_value_cmd::{CheckedValueCmdV4, CheckedValueSubcommandV4},
+      checked_value_cmd::CheckedValueCmdV4,
       spec_enums::ButtplugCheckedClientMessageV4,
       ButtplugClientMessageV3,
       ButtplugClientMessageVariant,
@@ -239,11 +239,10 @@ async fn test_device_stop_on_ping_timeout() {
       CheckedValueCmdV4::new(
         0,
         device_index,
-        &vec![CheckedValueSubcommandV4::new(
-          0,
-          64,
-          "f50a528b-b023-40f0-9906-df037443950a".try_into().unwrap(),
-        )],
+        0,
+        "f50a528b-b023-40f0-9906-df037443950a".try_into().unwrap(),
+        buttplug::core::message::ActuatorType::Vibrate,
+        64,
       ),
     ))
     .await

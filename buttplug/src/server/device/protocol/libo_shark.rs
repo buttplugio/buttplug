@@ -30,7 +30,6 @@ impl ProtocolHandler for LiboShark {
     &self,
     cmds: &[Option<(ActuatorType, i32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    // Store off result before the match, so we drop the lock ASAP.
     let mut data = 0u8;
     if let Some((_, speed)) = cmds[0] {
       data |= (speed as u8) << 4;
