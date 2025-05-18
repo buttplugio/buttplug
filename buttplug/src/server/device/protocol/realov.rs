@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(Realov, "realov");
@@ -29,7 +29,7 @@ impl ProtocolHandler for Realov {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      [0xc5u8, 0x55, scalar as u8, 0xaa].to_vec(),
+      [0xc5u8, 0x55, cmd.value() as u8, 0xaa].to_vec(),
       false,
     )
     .into()])

@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(Youcups, "youcups");
@@ -29,7 +29,7 @@ impl ProtocolHandler for Youcups {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      format!("$SYS,{}?", scalar as u8).as_bytes().to_vec(),
+      format!("$SYS,{}?", cmd.value() as u8).as_bytes().to_vec(),
       false,
     )
     .into()])

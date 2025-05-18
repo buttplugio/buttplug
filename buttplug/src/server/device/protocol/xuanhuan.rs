@@ -7,15 +7,16 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{
-      generic_protocol_initializer_setup,
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
+  server::{
+    device::{
+      configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+      hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+      protocol::{
+        generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier,
+        ProtocolInitializer,
+      },
     },
+    message::checked_value_cmd::CheckedValueCmdV4,
   },
   util::{async_manager, sleep},
 };
@@ -70,19 +71,20 @@ impl Xuanhuan {
 }
 
 impl ProtocolHandler for Xuanhuan {
-    fn handle_value_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4
+    cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_command = self.current_command.clone();
+    let speed = cmd.value();
     async_manager::spawn(async move {
       let write_mutex = current_command.clone();
       let mut command_writer = write_mutex.write().await;
-      *command_writer = vec![0x03, 0x02, 0x00, scalar as u8];
+      *command_writer = vec![0x03, 0x02, 0x00, speed as u8];
     });
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![0x03, 0x02, 0x00, scalar as u8],
+      vec![0x03, 0x02, 0x00, cmd.value() as u8],
       true,
     )
     .into()])

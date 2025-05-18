@@ -7,7 +7,7 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
@@ -16,7 +16,7 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 use async_trait::async_trait;
 use std::sync::Arc;
@@ -48,11 +48,11 @@ impl ProtocolHandler for Nobra {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-    fn handle_value_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let output_speed = if scalar == 0 { 0x70 } else { 0x60 + scalar };
+    let output_speed = if cmd.value() == 0 { 0x70 } else { 0x60 + cmd.value() };
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![output_speed as u8],

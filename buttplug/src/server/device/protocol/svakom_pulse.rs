@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(SvakomPulse, "svakom-pulse");
@@ -34,8 +34,8 @@ impl ProtocolHandler for SvakomPulse {
         0x03,
         0x03,
         0x00,
-        if scalar == 0 { 0x00 } else { 0x01 },
-        scalar as u8 + 1,
+        if cmd.value() == 0 { 0x00 } else { 0x01 },
+        cmd.value() as u8 + 1,
       ]
       .to_vec(),
       false,

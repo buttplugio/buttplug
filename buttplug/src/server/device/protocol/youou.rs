@@ -6,6 +6,7 @@
 // for full license information.
 
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
+use crate::server::message::checked_value_cmd::CheckedValueCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -82,7 +83,7 @@ impl ProtocolHandler for Youou {
     // Speed seems to be 0-247 or so.
     //
     // Anything above that sets a pattern which isn't what we want here.
-    let state = u8::from(scalar > 0);
+    let state = u8::from(cmd.value() > 0);
 
     // Scope the packet id set so we can unlock ASAP.
     let mut data = vec![
@@ -92,7 +93,7 @@ impl ProtocolHandler for Youou {
       0x02,
       0x03,
       0x01,
-      scalar as u8,
+      cmd.value() as u8,
       state,
     ];
     self.packet_id.store(

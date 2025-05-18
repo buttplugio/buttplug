@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(SvakomJordan, "svakom-jordan");
@@ -23,7 +23,7 @@ impl ProtocolHandler for SvakomJordan {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-    fn handle_value_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
@@ -34,18 +34,18 @@ impl ProtocolHandler for SvakomJordan {
         0x03,
         0x00,
         0x00,
-        if scalar == 0 { 0x00 } else { 0x01 },
-        scalar as u8,
+        if cmd.value() == 0 { 0x00 } else { 0x01 },
+        cmd.value() as u8,
         0x00,
       ],
       false,
     )
     .into()])
   }
+
   fn handle_value_oscillate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
@@ -54,8 +54,8 @@ impl ProtocolHandler for SvakomJordan {
         0x08,
         0x00,
         0x00,
-        if scalar == 0 { 0x00 } else { 0x01 },
-        scalar as u8,
+        if cmd.value() == 0 { 0x00 } else { 0x01 },
+        cmd.value() as u8,
         0x00,
       ],
       false,

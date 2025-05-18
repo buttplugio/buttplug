@@ -7,11 +7,11 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 use async_trait::async_trait;
 use std::sync::Arc;
@@ -81,7 +81,7 @@ impl ProtocolHandler for PrettyLove {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![0x00u8, scalar as u8],
+      vec![0x00u8, cmd.value() as u8],
       true,
     )
     .into()])

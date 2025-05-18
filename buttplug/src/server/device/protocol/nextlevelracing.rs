@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(NextLevelRacing, "nextlevelracing");
@@ -19,18 +19,13 @@ generic_protocol_setup!(NextLevelRacing, "nextlevelracing");
 pub struct NextLevelRacing {}
 
 impl ProtocolHandler for NextLevelRacing {
-  fn needs_full_command_set(&self) -> bool {
-    false
-  }
-
   fn handle_value_vibrate_cmd(
     &self,
-    index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      format!("M{}{}\r", index, scalar).into_bytes(),
+      format!("M{}{}\r", cmd.feature_index(), cmd.value()).into_bytes(),
       false,
     )
     .into()])

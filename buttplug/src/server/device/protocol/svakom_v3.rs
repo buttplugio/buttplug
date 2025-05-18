@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(SvakomV3, "svakom-v3");
@@ -23,20 +23,19 @@ impl ProtocolHandler for SvakomV3 {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_vibrate_cmd(
+    fn handle_value_vibrate_cmd(
     &self,
-    index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
       [
         0x55,
-        if index == 0 { 0x03 } else { 0x09 },
-        if index == 0 { 0x03 } else { 0x00 },
+        if cmd.feature_index() == 0 { 0x03 } else { 0x09 },
+        if cmd.feature_index() == 0 { 0x03 } else { 0x00 },
         0x00,
-        if scalar == 0 { 0x00 } else { 0x01 },
-        scalar as u8,
+        if cmd.value() == 0 { 0x00 } else { 0x01 },
+        cmd.value() as u8,
       ]
       .to_vec(),
       false,
@@ -46,12 +45,11 @@ impl ProtocolHandler for SvakomV3 {
 
   fn handle_value_rotate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      [0x55, 0x08, 0x00, 0x00, scalar as u8, 0xff].to_vec(),
+      [0x55, 0x08, 0x00, 0x00, cmd.value() as u8, 0xff].to_vec(),
       false,
     )
     .into()])

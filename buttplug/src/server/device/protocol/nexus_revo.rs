@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::{checked_value_cmd::CheckedValueCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4}},
 };
 
 generic_protocol_setup!(NexusRevo, "nexus-revo");
@@ -23,37 +23,34 @@ impl ProtocolHandler for NexusRevo {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-    fn handle_value_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![0xaa, 0x01, 0x01, 0x00, 0x01, scalar as u8],
+      vec![0xaa, 0x01, 0x01, 0x00, 0x01, cmd.value() as u8],
       true,
     )
     .into()])
   }
 
-  fn handle_rotate_cmd(
-    &self,
-    commands: &[Option<(u32, bool)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if let Some(Some(cmd)) = commands.first() {
-      return Ok(vec![HardwareWriteCmd::new(
-        Endpoint::Tx,
-        vec![
-          0xaa,
-          0x01,
-          0x02,
-          0x00,
-          cmd.0 as u8 + if cmd.0 != 0 && cmd.1 { 2 } else { 0 },
-          0x00,
-        ],
-        true,
+  fn handle_rotation_with_direction_cmd(
+      &self,
+      cmd: &CheckedValueWithParameterCmdV4,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![
+        0xaa,
+        0x01,
+        0x02,
+        0x00,
+        cmd.value() as u8 + if cmd.value() != 0 && cmd.parameter() > 0 { 2 } else { 0 },
+        0x00,
+      ],
+      true,
       )
-      .into()]);
-    }
-    Ok(vec![])
+      .into()])
   }
 }

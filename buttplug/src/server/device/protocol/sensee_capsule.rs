@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(SenseeCapsule, "sensee-capsule");
@@ -38,7 +38,7 @@ impl ProtocolHandler for SenseeCapsule {
         0x12,
         0x66,
         0xf9,
-        0xf0 | scalar as u8,
+        0xf0 | cmd.value() as u8,
       ],
       false,
     )
@@ -47,8 +47,7 @@ impl ProtocolHandler for SenseeCapsule {
 
   fn handle_value_constrict_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
@@ -61,7 +60,7 @@ impl ProtocolHandler for SenseeCapsule {
         0x11,
         0x66,
         0xf2,
-        0xf0 | scalar as u8,
+        0xf0 | cmd.value() as u8,
         0x00,
         0x00,
       ],

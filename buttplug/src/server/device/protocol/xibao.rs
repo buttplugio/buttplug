@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 use std::num::Wrapping;
 
@@ -26,8 +26,7 @@ impl ProtocolHandler for Xibao {
 
   fn handle_value_oscillate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
@@ -43,8 +42,8 @@ impl ProtocolHandler for Xibao {
         0x00,
         0x02,
         0x04,
-        scalar as u8,
-        (Wrapping(scalar as u8) + Wrapping(0xb5)).0,
+        cmd.value() as u8,
+        (Wrapping(cmd.value() as u8) + Wrapping(0xb5)).0,
       ],
       false,
     )

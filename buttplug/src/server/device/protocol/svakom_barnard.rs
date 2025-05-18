@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(SvakomBarnard, "svakom-barnard");
@@ -25,8 +25,7 @@ impl ProtocolHandler for SvakomBarnard {
 
   fn handle_value_vibrate_cmd(
     &self,
-    _index: u32,
-    speed: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
@@ -35,8 +34,8 @@ impl ProtocolHandler for SvakomBarnard {
         0x03,
         0x00,
         0x00,
-        speed as u8,
-        if speed == 0 { 0x00 } else { 0x01 },
+        cmd.value() as u8,
+        if cmd.value() == 0 { 0x00 } else { 0x01 },
       ]
       .to_vec(),
       false,
@@ -46,8 +45,7 @@ impl ProtocolHandler for SvakomBarnard {
 
   fn handle_value_oscillate_cmd(
     &self,
-    _index: u32,
-    speed: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
@@ -56,8 +54,8 @@ impl ProtocolHandler for SvakomBarnard {
         0x08,
         0x00,
         0x00,
-        speed as u8,
-        if speed == 0 { 0x00 } else { 0xff },
+        cmd.value() as u8,
+        if cmd.value() == 0 { 0x00 } else { 0xff },
       ]
       .to_vec(),
       false,

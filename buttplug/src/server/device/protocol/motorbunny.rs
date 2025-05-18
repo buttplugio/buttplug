@@ -14,10 +14,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::{checked_value_cmd::CheckedValueCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4}},
 };
 
 generic_protocol_setup!(Motorbunny, "motorbunny");
@@ -30,16 +30,16 @@ impl ProtocolHandler for Motorbunny {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-    fn handle_value_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut command_vec: Vec<u8>;
-    if scalar == 0 {
+    if cmd.value() == 0 {
       command_vec = vec![0xf0, 0x00, 0x00, 0x00, 0x00, 0xec];
     } else {
       command_vec = vec![0xff];
-      let mut vibe_commands = [scalar as u8, 0x14].repeat(7);
+      let mut vibe_commands = [cmd.value() as u8, 0x14].repeat(7);
       let crc = vibe_commands
         .iter()
         .fold(0u8, |a, b| a.overflowing_add(*b).0);
@@ -54,17 +54,16 @@ impl ProtocolHandler for Motorbunny {
     .into()])
   }
 
-  fn handle_rotate_cmd(
+  fn handle_rotation_with_direction_cmd(
     &self,
-    commands: &[Option<(u32, bool)>],
+    cmd: &CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let rotate = commands[0].unwrap_or((0, false));
     let mut command_vec: Vec<u8>;
-    if rotate.0 == 0 {
+    if cmd.value() == 0 {
       command_vec = vec![0xa0, 0x00, 0x00, 0x00, 0x00, 0xec];
     } else {
       command_vec = vec![0xaf];
-      let mut rotate_command = [if rotate.1 { 0x2a } else { 0x29 }, rotate.0 as u8].repeat(7);
+      let mut rotate_command = [if cmd.parameter() > 0 { 0x2a } else { 0x29 }, cmd.value() as u8].repeat(7);
       let crc = rotate_command
         .iter()
         .fold(0u8, |a, b| a.overflowing_add(*b).0);

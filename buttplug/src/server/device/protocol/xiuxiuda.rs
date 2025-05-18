@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(Xiuxiuda, "xiuxiuda");
@@ -29,7 +29,7 @@ impl ProtocolHandler for Xiuxiuda {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      [0x00, 0x00, 0x00, 0x00, 0x65, 0x3a, 0x30, scalar as u8, 0x64].to_vec(),
+      [0x00, 0x00, 0x00, 0x00, 0x65, 0x3a, 0x30, cmd.value() as u8, 0x64].to_vec(),
       false,
     )
     .into()])
