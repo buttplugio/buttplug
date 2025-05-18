@@ -8,10 +8,10 @@
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_setup,
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::ProtocolHandler,
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(TryFun, "tryfun");
@@ -26,11 +26,10 @@ impl ProtocolHandler for TryFun {
 
   fn handle_value_oscillate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut sum: u8 = 0xff;
-    let mut data = vec![0xAA, 0x02, 0x07, scalar as u8];
+    let mut data = vec![0xAA, 0x02, 0x07, cmd.value() as u8];
     let mut count = 0;
     for item in data.iter().skip(1) {
       sum -= item;
@@ -44,11 +43,10 @@ impl ProtocolHandler for TryFun {
 
   fn handle_value_rotate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut sum: u8 = 0xff;
-    let mut data = vec![0xAA, 0x02, 0x08, scalar as u8];
+    let mut data = vec![0xAA, 0x02, 0x08, cmd.value() as u8];
     let mut count = 0;
     for item in data.iter().skip(1) {
       sum -= item;
@@ -71,11 +69,11 @@ impl ProtocolHandler for TryFun {
         0x02,
         0x00,
         0x05,
-        if scalar == 0 { 1u8 } else { 2u8 },
-        if scalar == 0 { 2u8 } else { scalar as u8 },
+        if cmd.value() == 0 { 1u8 } else { 2u8 },
+        if cmd.value() == 0 { 2u8 } else { cmd.value() as u8 },
         0x01,
-        if scalar == 0 { 1u8 } else { 0u8 },
-        0xfd - (scalar as u8).max(1),
+        if cmd.value() == 0 { 1u8 } else { 0u8 },
+        0xfd - (cmd.value() as u8).max(1),
       ],
       true,
     )

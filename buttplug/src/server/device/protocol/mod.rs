@@ -72,76 +72,76 @@ pub mod magic_motion_v3;
 //pub mod magic_motion_v4;
 pub mod mannuo;
 pub mod maxpro;
-//pub mod meese;
+pub mod meese;
 //pub mod metaxsire;
 //pub mod metaxsire_repeat;
 //pub mod metaxsire_v2;
 //pub mod metaxsire_v3;
 //mod metaxsire_v4;
-//pub mod mizzzee;
-//pub mod mizzzee_v2;
-//pub mod mizzzee_v3;
+pub mod mizzzee;
+pub mod mizzzee_v2;
+pub mod mizzzee_v3;
 //pub mod monsterpub;
-//pub mod motorbunny;
+pub mod motorbunny;
 //pub mod mysteryvibe;
 //pub mod mysteryvibe_v2;
-//pub mod nextlevelracing;
-//pub mod nexus_revo;
-//pub mod nintendo_joycon;
-//pub mod nobra;
-//pub mod omobo;
+pub mod nextlevelracing;
+pub mod nexus_revo;
+pub mod nintendo_joycon;
+pub mod nobra;
+pub mod omobo;
 //pub mod patoo;
-//pub mod picobong;
-//pub mod pink_punch;
-//pub mod prettylove;
+pub mod picobong;
+pub mod pink_punch;
+pub mod prettylove;
 //pub mod raw_protocol;
-//pub mod realov;
-//pub mod sakuraneko;
+pub mod realov;
+pub mod sakuraneko;
 //pub mod satisfyer;
 //pub mod sensee;
-//pub mod sensee_capsule;
+pub mod sensee_capsule;
 //pub mod sensee_v2;
-//pub mod serveu;
+pub mod serveu;
 //pub mod sexverse_lg389;
-//pub mod svakom;
-//pub mod svakom_alex;
-//pub mod svakom_alex_v2;
+pub mod svakom;
+pub mod svakom_alex;
+pub mod svakom_alex_v2;
 //pub mod svakom_avaneo;
-//pub mod svakom_barnard;
+pub mod svakom_barnard;
 //pub mod svakom_barney;
-//pub mod svakom_dice;
+pub mod svakom_dice;
 //pub mod svakom_dt250a;
 //pub mod svakom_iker;
-//pub mod svakom_jordan;
-//pub mod svakom_pulse;
+pub mod svakom_jordan;
+pub mod svakom_pulse;
 //pub mod svakom_sam;
-//pub mod svakom_sam2;
+pub mod svakom_sam2;
 //pub mod svakom_suitcase;
 //pub mod svakom_tarax;
-//pub mod svakom_v2;
-//pub mod svakom_v3;
+pub mod svakom_v2;
+pub mod svakom_v3;
 //pub mod svakom_v4;
 //pub mod svakom_v5;
 //pub mod svakom_v6;
-//pub mod synchro;
-//pub mod tcode_v03;
-//pub mod thehandy;
-//pub mod tryfun;
-//pub mod tryfun_blackhole;
-//pub mod tryfun_meta2;
+pub mod synchro;
+pub mod tcode_v03;
+pub mod thehandy;
+pub mod tryfun;
+pub mod tryfun_blackhole;
+pub mod tryfun_meta2;
 //pub mod vibcrafter;
 //pub mod vibratissimo;
 //pub mod vorze_sa;
-//pub mod wetoy;
+pub mod wetoy;
 //pub mod wevibe;
 //pub mod wevibe8bit;
 //pub mod wevibe_chorus;
-//pub mod xibao;
+pub mod xibao;
 //pub mod xinput;
-//pub mod xiuxiuda;
-//pub mod xuanhuan;
-//pub mod youcups;
-//pub mod youou;
+pub mod xiuxiuda;
+pub mod xuanhuan;
+pub mod youcups;
+pub mod youou;
 //pub mod zalo;
 
 use crate::{
@@ -421,7 +421,7 @@ add_to_protocol_map(
 //);
 add_to_protocol_map(&mut map, mannuo::setup::ManNuoIdentifierFactory::default());
 add_to_protocol_map(&mut map, maxpro::setup::MaxproIdentifierFactory::default());
-//  add_to_protocol_map(&mut map, meese::setup::MeeseIdentifierFactory::default());
+  add_to_protocol_map(&mut map, meese::setup::MeeseIdentifierFactory::default());
 //  add_to_protocol_map(
 //    &mut map,
 //    metaxsire::setup::MetaXSireIdentifierFactory::default(),
@@ -442,26 +442,26 @@ add_to_protocol_map(&mut map, maxpro::setup::MaxproIdentifierFactory::default())
 //    &mut map,
 //    metaxsire_v4::setup::MetaXSireV4IdentifierFactory::default(),
 //  );
-//  add_to_protocol_map(
-//    &mut map,
-//    mizzzee::setup::MizzZeeIdentifierFactory::default(),
-//  );
-//  add_to_protocol_map(
-//    &mut map,
-//    mizzzee_v2::setup::MizzZeeV2IdentifierFactory::default(),
-//  );
-//  add_to_protocol_map(
-//    &mut map,
-//    mizzzee_v3::setup::MizzZeeV3IdentifierFactory::default(),
-//  );
+  add_to_protocol_map(
+    &mut map,
+    mizzzee::setup::MizzZeeIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    mizzzee_v2::setup::MizzZeeV2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    mizzzee_v3::setup::MizzZeeV3IdentifierFactory::default(),
+  );
 //  add_to_protocol_map(
 //    &mut map,
 //    monsterpub::setup::MonsterPubIdentifierFactory::default(),
 //  );
-//  add_to_protocol_map(
-//    &mut map,
-//    motorbunny::setup::MotorbunnyIdentifierFactory::default(),
-//  );
+  add_to_protocol_map(
+    &mut map,
+    motorbunny::setup::MotorbunnyIdentifierFactory::default(),
+  );
 //  add_to_protocol_map(
 //    &mut map,
 //    mysteryvibe::setup::MysteryVibeIdentifierFactory::default(),
@@ -470,51 +470,51 @@ add_to_protocol_map(&mut map, maxpro::setup::MaxproIdentifierFactory::default())
 //    &mut map,
 //    mysteryvibe_v2::setup::MysteryVibeV2IdentifierFactory::default(),
 //  );
-//  add_to_protocol_map(
-//    &mut map,
-//    nexus_revo::setup::NexusRevoIdentifierFactory::default(),
-//  );
-//  add_to_protocol_map(
-//    &mut map,
-//    nextlevelracing::setup::NextLevelRacingIdentifierFactory::default(),
-//  );
-//  add_to_protocol_map(
-//    &mut map,
-//    nintendo_joycon::setup::NintendoJoyconIdentifierFactory::default(),
-//  );
-//  add_to_protocol_map(&mut map, nobra::setup::NobraIdentifierFactory::default());
-//  add_to_protocol_map(&mut map, omobo::setup::OmoboIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    nexus_revo::setup::NexusRevoIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    nextlevelracing::setup::NextLevelRacingIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    nintendo_joycon::setup::NintendoJoyconIdentifierFactory::default(),
+  );
+  add_to_protocol_map(&mut map, nobra::setup::NobraIdentifierFactory::default());
+  add_to_protocol_map(&mut map, omobo::setup::OmoboIdentifierFactory::default());
 //  add_to_protocol_map(&mut map, patoo::setup::PatooIdentifierFactory::default());
-//  add_to_protocol_map(
-//    &mut map,
-//    picobong::setup::PicobongIdentifierFactory::default(),
-//  );
-//  add_to_protocol_map(
-//    &mut map,
-//    pink_punch::setup::PinkPunchIdentifierFactory::default(),
-//  );
-//  add_to_protocol_map(
-//    &mut map,
-//    prettylove::setup::PrettyLoveIdentifierFactory::default(),
-//  );
+  add_to_protocol_map(
+    &mut map,
+    picobong::setup::PicobongIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    pink_punch::setup::PinkPunchIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    prettylove::setup::PrettyLoveIdentifierFactory::default(),
+);
 //  add_to_protocol_map(
 //    &mut map,
 //    raw_protocol::setup::RawProtocolIdentifierFactory::default(),
 //  );
-//  add_to_protocol_map(&mut map, realov::setup::RealovIdentifierFactory::default());
-//  add_to_protocol_map(
-//    &mut map,
-//    sakuraneko::setup::SakuranekoIdentifierFactory::default(),
-//  );
+  add_to_protocol_map(&mut map, realov::setup::RealovIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    sakuraneko::setup::SakuranekoIdentifierFactory::default(),
+  );
 //  add_to_protocol_map(
 //    &mut map,
 //    satisfyer::setup::SatisfyerIdentifierFactory::default(),
 //  );
 //  add_to_protocol_map(&mut map, sensee::setup::SenseeIdentifierFactory::default());
-//  add_to_protocol_map(
-//    &mut map,
-//    sensee_capsule::setup::SenseeCapsuleIdentifierFactory::default(),
-//  );
+  add_to_protocol_map(
+    &mut map,
+    sensee_capsule::setup::SenseeCapsuleIdentifierFactory::default(),
+  );
 //  add_to_protocol_map(
 //    &mut map,
 //    sensee_v2::setup::SenseeV2IdentifierFactory::default(),
@@ -523,32 +523,32 @@ add_to_protocol_map(&mut map, maxpro::setup::MaxproIdentifierFactory::default())
 //    &mut map,
 //    sexverse_lg389::setup::SexverseLG389IdentifierFactory::default(),
 //  );
-//  add_to_protocol_map(&mut map, serveu::setup::ServeUIdentifierFactory::default());
-//  add_to_protocol_map(&mut map, svakom::setup::SvakomIdentifierFactory::default());
+  add_to_protocol_map(&mut map, serveu::setup::ServeUIdentifierFactory::default());
+  add_to_protocol_map(&mut map, svakom::setup::SvakomIdentifierFactory::default());
 //  add_to_protocol_map(
 //    &mut map,
 //    svakom_avaneo::setup::SvakomAvaNeoIdentifierFactory::default(),
 //  );
-//  add_to_protocol_map(
-//    &mut map,
-//    svakom_alex::setup::SvakomAlexIdentifierFactory::default(),
-//  );
-//  add_to_protocol_map(
-//    &mut map,
-//    svakom_alex_v2::setup::SvakomAlexV2IdentifierFactory::default(),
-//  );
-//  add_to_protocol_map(
-//    &mut map,
-//    svakom_barnard::setup::SvakomBarnardIdentifierFactory::default(),
-//  );
+  add_to_protocol_map(
+    &mut map,
+    svakom_alex::setup::SvakomAlexIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom_alex_v2::setup::SvakomAlexV2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom_barnard::setup::SvakomBarnardIdentifierFactory::default(),
+  );
 //  add_to_protocol_map(
 //    &mut map,
 //    svakom_barney::setup::SvakomBarneyIdentifierFactory::default(),
 //  );
-//  add_to_protocol_map(
-//    &mut map,
-//    svakom_dice::setup::SvakomDiceIdentifierFactory::default(),
-//  );
+  add_to_protocol_map(
+    &mut map,
+    svakom_dice::setup::SvakomDiceIdentifierFactory::default(),
+  );
 //  add_to_protocol_map(
 //    &mut map,
 //    svakom_dt250a::setup::SvakomDT250AIdentifierFactory::default(),
@@ -557,22 +557,22 @@ add_to_protocol_map(&mut map, maxpro::setup::MaxproIdentifierFactory::default())
 //    &mut map,
 //    svakom_iker::setup::SvakomIkerIdentifierFactory::default(),
 //  );
-//  add_to_protocol_map(
-//    &mut map,
-//    svakom_jordan::setup::SvakomJordanIdentifierFactory::default(),
-//  );
-//  add_to_protocol_map(
-//    &mut map,
-//    svakom_pulse::setup::SvakomPulseIdentifierFactory::default(),
-//  );
+  add_to_protocol_map(
+    &mut map,
+    svakom_jordan::setup::SvakomJordanIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom_pulse::setup::SvakomPulseIdentifierFactory::default(),
+  );
 //  add_to_protocol_map(
 //    &mut map,
 //    svakom_sam::setup::SvakomSamIdentifierFactory::default(),
 //  );
-//  add_to_protocol_map(
-//    &mut map,
-//    svakom_sam2::setup::SvakomSam2IdentifierFactory::default(),
-//  );
+  add_to_protocol_map(
+    &mut map,
+    svakom_sam2::setup::SvakomSam2IdentifierFactory::default(),
+  );
 //  add_to_protocol_map(
 //    &mut map,
 //    svakom_suitcase::setup::SvakomSuitcaseIdentifierFactory::default(),
@@ -581,14 +581,14 @@ add_to_protocol_map(&mut map, maxpro::setup::MaxproIdentifierFactory::default())
 //    &mut map,
 //    svakom_tarax::setup::SvakomTaraXIdentifierFactory::default(),
 //  );
-//  add_to_protocol_map(
-//    &mut map,
-//    svakom_v2::setup::SvakomV2IdentifierFactory::default(),
-//  );
-//  add_to_protocol_map(
-//    &mut map,
-//    svakom_v3::setup::SvakomV3IdentifierFactory::default(),
-//  );
+  add_to_protocol_map(
+    &mut map,
+    svakom_v2::setup::SvakomV2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom_v3::setup::SvakomV3IdentifierFactory::default(),
+  );
 //  add_to_protocol_map(
 //    &mut map,
 //    svakom_v4::setup::SvakomV4IdentifierFactory::default(),
@@ -601,23 +601,23 @@ add_to_protocol_map(&mut map, maxpro::setup::MaxproIdentifierFactory::default())
 //    &mut map,
 //    svakom_v6::setup::SvakomV6IdentifierFactory::default(),
 //  );
-//  add_to_protocol_map(
-//    &mut map,
-//    synchro::setup::SynchroIdentifierFactory::default(),
-//  );
-//  add_to_protocol_map(&mut map, tryfun::setup::TryFunIdentifierFactory::default());
-//  add_to_protocol_map(
-//    &mut map,
-//    tryfun_blackhole::setup::TryFunBlackHoleIdentifierFactory::default(),
-//  );
-//  add_to_protocol_map(
-//    &mut map,
-//    tryfun_meta2::setup::TryFunMeta2IdentifierFactory::default(),
-//  );
-//  add_to_protocol_map(
-//    &mut map,
-//    tcode_v03::setup::TCodeV03IdentifierFactory::default(),
-//  );
+  add_to_protocol_map(
+    &mut map,
+    synchro::setup::SynchroIdentifierFactory::default(),
+  );
+  add_to_protocol_map(&mut map, tryfun::setup::TryFunIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    tryfun_blackhole::setup::TryFunBlackHoleIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    tryfun_meta2::setup::TryFunMeta2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    tcode_v03::setup::TCodeV03IdentifierFactory::default(),
+  );
 //  add_to_protocol_map(
 //    &mut map,
 //    vibcrafter::setup::VibCrafterIdentifierFactory::default(),
@@ -630,7 +630,7 @@ add_to_protocol_map(&mut map, maxpro::setup::MaxproIdentifierFactory::default())
 //    &mut map,
 //    vorze_sa::setup::VorzeSAIdentifierFactory::default(),
 //  );
-//  add_to_protocol_map(&mut map, wetoy::setup::WeToyIdentifierFactory::default());
+  add_to_protocol_map(&mut map, wetoy::setup::WeToyIdentifierFactory::default());
 //  add_to_protocol_map(&mut map, wevibe::setup::WeVibeIdentifierFactory::default());
 //  add_to_protocol_map(
 //    &mut map,
@@ -640,26 +640,26 @@ add_to_protocol_map(&mut map, maxpro::setup::MaxproIdentifierFactory::default())
 //    &mut map,
 //    wevibe_chorus::setup::WeVibeChorusIdentifierFactory::default(),
 //  );
-//  add_to_protocol_map(&mut map, xibao::setup::XibaoIdentifierFactory::default());
+  add_to_protocol_map(&mut map, xibao::setup::XibaoIdentifierFactory::default());
 //  add_to_protocol_map(&mut map, xinput::setup::XInputIdentifierFactory::default());
-//  add_to_protocol_map(
-//    &mut map,
-//    xiuxiuda::setup::XiuxiudaIdentifierFactory::default(),
-//  );
-//  add_to_protocol_map(
-//    &mut map,
-//    xuanhuan::setup::XuanhuanIdentifierFactory::default(),
-//  );
-//  add_to_protocol_map(
-//    &mut map,
-//    youcups::setup::YoucupsIdentifierFactory::default(),
-//  );
-//  add_to_protocol_map(&mut map, youou::setup::YououIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    xiuxiuda::setup::XiuxiudaIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    xuanhuan::setup::XuanhuanIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    youcups::setup::YoucupsIdentifierFactory::default(),
+  );
+  add_to_protocol_map(&mut map, youou::setup::YououIdentifierFactory::default());
 //  add_to_protocol_map(&mut map, zalo::setup::ZaloIdentifierFactory::default());
-//  add_to_protocol_map(
-//    &mut map,
-//    kgoal_boost::setup::KGoalBoostIdentifierFactory::default(),
-//  );
+  add_to_protocol_map(
+    &mut map,
+    kgoal_boost::setup::KGoalBoostIdentifierFactory::default(),
+  );
   map
 }
 

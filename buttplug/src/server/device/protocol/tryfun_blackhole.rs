@@ -8,10 +8,10 @@
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_setup,
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::ProtocolHandler,
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 use std::sync::atomic::{AtomicU8, Ordering};
 
@@ -29,8 +29,7 @@ impl ProtocolHandler for TryFunBlackHole {
 
   fn handle_value_oscillate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut sum: u8 = 0xff;
     let mut data = vec![
@@ -39,7 +38,7 @@ impl ProtocolHandler for TryFunBlackHole {
       0x00,
       0x03,
       0x0c,
-      scalar as u8,
+      cmd.value() as u8,
     ];
     let mut count = 1;
     for item in data.iter().skip(1) {
@@ -63,7 +62,7 @@ impl ProtocolHandler for TryFunBlackHole {
       0x00,
       0x03,
       0x09,
-      scalar as u8,
+      cmd.value() as u8,
     ];
     let mut count = 1;
     for item in data.iter().skip(1) {

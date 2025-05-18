@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(Omobo, "omobo");
@@ -29,7 +29,7 @@ impl ProtocolHandler for Omobo {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![0xa1, 0x04, 0x04, 0x01, scalar as u8, 0xff, 0x55],
+      vec![0xa1, 0x04, 0x04, 0x01, cmd.value() as u8, 0xff, 0x55],
       true,
     )
     .into()])

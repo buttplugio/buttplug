@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(SvakomAlex, "svakom-alex");
@@ -34,7 +34,7 @@ impl ProtocolHandler for SvakomAlex {
         1,
         3,
         0,
-        if scalar == 0 { 0xFF } else { scalar as u8 },
+        if cmd.value() == 0 { 0xFF } else { cmd.value() as u8 },
         0,
       ]
       .to_vec(),

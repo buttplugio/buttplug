@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(MizzZee, "mizzzee");
@@ -23,7 +23,7 @@ impl ProtocolHandler for MizzZee {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-    fn handle_value_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
@@ -34,8 +34,8 @@ impl ProtocolHandler for MizzZee {
         0x96,
         0x03,
         0x01,
-        if scalar == 0 { 0x00 } else { 0x01 },
-        scalar as u8,
+        if cmd.value() == 0 { 0x00 } else { 0x01 },
+        cmd.value() as u8,
       ],
       false,
     )

@@ -237,10 +237,7 @@ impl TestDevice {
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let sender = self.test_device_channel.clone();
     async move {
-      if let Err(e) = sender.send(data_command).await {
-        error!("{}", e);
-        panic!("{:?}", e);
-      }
+      sender.send(data_command).await.unwrap();
       Ok(())
     }
     .boxed()

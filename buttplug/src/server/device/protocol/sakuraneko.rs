@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(Sakuraneko, "sakuraneko");
@@ -37,7 +37,7 @@ impl ProtocolHandler for Sakuraneko {
         0x00,
         0x00,
         0x64,
-        scalar as u8,
+        cmd.value() as u8,
         0x00,
         0x64,
         0xdf,
@@ -50,8 +50,7 @@ impl ProtocolHandler for Sakuraneko {
 
   fn handle_value_rotate_cmd(
     &self,
-    _index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
@@ -63,7 +62,7 @@ impl ProtocolHandler for Sakuraneko {
         0x00,
         0x00,
         0x64,
-        scalar as u8,
+        cmd.value() as u8,
         0x00,
         0x32,
         0xdf,

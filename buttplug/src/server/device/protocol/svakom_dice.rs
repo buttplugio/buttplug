@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(SvakomDice, "svakom-dice");
@@ -29,7 +29,7 @@ impl ProtocolHandler for SvakomDice {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      [0x55, 0x04, 0x00, 0x00, 01, scalar as u8, 0xaa].to_vec(),
+      [0x55, 0x04, 0x00, 0x00, 01, cmd.value() as u8, 0xaa].to_vec(),
       false,
     )
     .into()])

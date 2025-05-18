@@ -7,9 +7,12 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+  server::{
+    device::{
+      hardware::{HardwareCommand, HardwareWriteCmd},
+      protocol::{generic_protocol_setup, ProtocolHandler},
+    },
+    message::checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4,
   },
 };
 
@@ -23,30 +26,26 @@ impl ProtocolHandler for Synchro {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_rotate_cmd(
+  fn handle_rotation_with_direction_cmd(
     &self,
-    cmds: &[Option<(u32, bool)>],
+    cmd: &CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if let Some(Some((speed, clockwise))) = cmds.first() {
-      Ok(vec![HardwareWriteCmd::new(
-        Endpoint::Tx,
-        vec![
-          0xa1,
-          0x01,
-          *speed as u8
-            | if *clockwise || *speed == 0 {
-              0x00
-            } else {
-              0x80
-            },
-          0x77,
-          0x55,
-        ],
-        false,
-      )
-      .into()])
-    } else {
-      Ok(vec![])
-    }
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![
+        0xa1,
+        0x01,
+        cmd.value() as u8
+          | if cmd.parameter() > 0 || cmd.value() == 0 {
+            0x00
+          } else {
+            0x80
+          },
+        0x77,
+        0x55,
+      ],
+      false,
+    )
+    .into()])
   }
 }

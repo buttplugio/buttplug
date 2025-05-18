@@ -7,7 +7,7 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
@@ -16,7 +16,7 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
@@ -116,15 +116,15 @@ impl ProtocolHandler for MizzZeeV3 {
     super::ProtocolKeepaliveStrategy::NoStrategy
   }
 
-    fn handle_value_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_scalar = self.current_scalar.clone();
-    current_scalar.store(scalar, Ordering::Relaxed);
+    current_scalar.store(cmd.value(), Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      scalar_to_vector(scalar),
+      scalar_to_vector(cmd.value()),
       true,
     )
     .into()])

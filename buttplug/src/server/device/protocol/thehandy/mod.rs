@@ -105,12 +105,7 @@ impl ProtocolInitializer for TheHandyInitializer {
 }
 
 #[derive(Default)]
-pub struct TheHandy {
-  // The generic command manager would normally handle this storage, but the only reason we're
-  // retaining tracking information is to build our fucking timing calculation for the fleshlight
-  // command backport. I am so mad right now.
-  previous_position: Arc<AtomicU8>,
-}
+pub struct TheHandy {}
 
 impl ProtocolHandler for TheHandy {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
@@ -133,7 +128,7 @@ impl ProtocolHandler for TheHandy {
 
   fn handle_position_with_duration_cmd(
     &self,
-    message: CheckedValueWithParameterCmdV4,
+    message: &CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // What is "How not to implement a command structure for your device that does one thing", Alex?
 

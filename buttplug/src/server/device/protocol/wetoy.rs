@@ -6,6 +6,7 @@
 // for full license information.
 
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
+use crate::server::message::checked_value_cmd::CheckedValueCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -55,10 +56,10 @@ impl ProtocolHandler for WeToy {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      if scalar == 0 {
+      if cmd.value() == 0 {
         vec![0x80, 0x03]
       } else {
-        vec![0xb2, scalar as u8 - 1]
+        vec![0xb2, cmd.value() as u8 - 1]
       },
       true,
     )

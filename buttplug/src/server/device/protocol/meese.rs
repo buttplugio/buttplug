@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(Meese, "meese");
@@ -25,12 +25,11 @@ impl ProtocolHandler for Meese {
 
   fn handle_value_vibrate_cmd(
     &self,
-    index: u32,
-    scalar: u32,
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![0x01, 0x80, 0x01 + (index as u8), (scalar as u8)],
+      vec![0x01, 0x80, 0x01 + (cmd.feature_index() as u8), (cmd.value() as u8)],
       true,
     )
     .into()])

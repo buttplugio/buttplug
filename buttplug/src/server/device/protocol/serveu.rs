@@ -30,18 +30,14 @@ pub struct ServeU {
 impl ProtocolHandler for ServeU {
   fn handle_position_with_duration_cmd(
     &self,
-    message: CheckedValueWithParameterCmdV4,
+    cmd: &CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let last_pos = self.last_position.load(Ordering::Relaxed);
-    let current_cmd = message
-      .vectors()
-      .first()
-      .ok_or(ButtplugDeviceError::DeviceFeatureCountMismatch(1, 0))?;
     // Need to get "units" (abstracted steps 0-100) per second, so calculate how far we need to move over our goal duration.
-    let goal_pos = (current_cmd.position() * 100f64).ceil() as u8;
+    let goal_pos = cmd.value() as u8;
     self.last_position.store(goal_pos, Ordering::Relaxed);
     let speed_threshold = ((((goal_pos as i8) - last_pos as i8).abs()) as f64
-      / ((current_cmd.duration() as f64) / 1000f64))
+      / ((cmd.parameter() as f64) / 1000f64))
       .ceil();
 
     let speed = if speed_threshold <= 0.00001 {
