@@ -302,6 +302,19 @@ impl ServerDevice {
             feature.feature_type().clone().try_into().unwrap(),
             0,
           ).into());
+        } else if actuator
+          .messages()
+          .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ValueWithParameterCmd)
+          && *feature.feature_type() == FeatureType::RotateWithDirection
+        {
+          stop_commands.push(CheckedValueWithParameterCmdV4::new(
+            0,
+            index as u32,
+            *feature.id(),
+            feature.feature_type().clone().try_into().unwrap(),
+            0,            
+            0,
+          ).into());
         }
       }
     }
@@ -442,9 +455,7 @@ impl ServerDevice {
         return future::ready(Ok(message::OkV0::default().into())).boxed();
       }
     }
-    self.handle_generic_command_result(
-      self.handler.handle_value_cmd(msg),
-    )
+    self.handle_generic_command_result(self.handler.handle_value_cmd(msg))
   }
 
   fn handle_hardware_commands(&self, commands: Vec<HardwareCommand>) -> ButtplugServerResultFuture {
