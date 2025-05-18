@@ -143,13 +143,45 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
           if let Some(actuator) = x.actuator() {
             actuator
               .messages()
-              .contains(&ButtplugActuatorFeatureMessageType::ValueCmd)
+              .contains(&ButtplugActuatorFeatureMessageType::ValueWithParameterCmd)
               && *x.feature_type() == FeatureType::RotateWithDirection
           } else {
             false
           }
         })
-        .map(|x| x.clone().try_into().unwrap())
+        .map(|x| {
+          // RotateWithDirection is a v4 Type, convert back to Rotate for v3
+          let mut attr: ServerGenericDeviceMessageAttributesV3 = x.clone().try_into().unwrap();
+          attr.actuator_type = ActuatorType::Rotate;
+          attr
+        })
+        .collect();
+      if !attrs.is_empty() {
+        Some(attrs)
+      } else {
+        None
+      }
+    };
+
+    let linear_attributes = {
+      let attrs: Vec<ServerGenericDeviceMessageAttributesV3> = features
+        .iter()
+        .filter(|x| {
+          if let Some(actuator) = x.actuator() {
+            actuator
+              .messages()
+              .contains(&ButtplugActuatorFeatureMessageType::ValueWithParameterCmd)
+              && *x.feature_type() == FeatureType::PositionWithDuration
+          } else {
+            false
+          }
+        })
+        .map(|x| {
+          // PositionWithDuration is a v4 Type, convert back to Position for v3
+          let mut attr: ServerGenericDeviceMessageAttributesV3 = x.clone().try_into().unwrap();
+          attr.actuator_type = ActuatorType::Position;
+          attr
+        })
         .collect();
       if !attrs.is_empty() {
         Some(attrs)
@@ -188,7 +220,7 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
     Self {
       scalar_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::ValueCmd),
       rotate_cmd: rotate_attributes,
-      linear_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::ValueWithParameterCmd),
+      linear_cmd: linear_attributes,
       sensor_read_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorReadCmd),
       sensor_subscribe_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorSubscribeCmd),
       raw_read_cmd: raw_attrs.clone(),
