@@ -11386,7 +11386,7 @@ protocols:
     defaults:
       name: Fleshy Thrust Sync
       features:
-        - feature-type: Position
+        - feature-type: PositionWithDuration
           actuator:
             step-range:
               - 0
