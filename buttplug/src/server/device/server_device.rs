@@ -493,6 +493,7 @@ impl ServerDevice {
         return future::ready(Ok(message::OkV0::default().into())).boxed();
       }
     }
+    self.last_actuator_command.insert(msg.feature_uuid(), ActuatorCommand::ValueCmd(msg.value()));
     self.handle_generic_command_result(self.handler.handle_value_cmd(msg))
   }
 
