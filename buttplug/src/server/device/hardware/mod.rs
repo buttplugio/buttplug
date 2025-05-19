@@ -39,6 +39,7 @@ const GENERIC_RAW_COMMAND_UUID: Uuid = uuid!("f5250140-8a86-4eb7-9c60-c96b71ee63
 #[getset(get_copy = "pub")]
 pub struct HardwareReadCmd {
   /// Feature ID for reading
+  #[serde(default)]
   feature_id: Uuid,
   /// Endpoint to read from
   endpoint: Endpoint,
@@ -76,10 +77,11 @@ impl From<RawReadCmdV2> for HardwareReadCmd {
 /// Low level write command structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
-#[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize, Getters, CopyGetters)]
+#[derive(Eq, Debug, Clone, Serialize, Deserialize, Getters, CopyGetters)]
 pub struct HardwareWriteCmd {
   /// Feature ID for this command
   #[getset(get_copy = "pub")]
+  #[serde(default)]
   feature_id: Uuid,
   /// Endpoint to write to
   #[getset(get_copy = "pub")]
@@ -90,6 +92,14 @@ pub struct HardwareWriteCmd {
   /// Only used with Bluetooth LE writing. If true, use WriteWithResponse commands when sending data to device.
   #[getset(get_copy = "pub")]
   write_with_response: bool,
+}
+
+impl PartialEq for HardwareWriteCmd {
+  fn eq(&self, other: &Self) -> bool {
+    self.endpoint() == other.endpoint() &&
+    self.data() == other.data() &&
+    self.write_with_response() == other.write_with_response()
+  }
 }
 
 impl HardwareWriteCmd {
@@ -124,14 +134,21 @@ impl From<RawWriteCmdV2> for HardwareWriteCmd {
 /// While usually related to notify/indicate characteristics on Bluetooth LE devices, can be used
 /// with any read endpoint to signal that any information received should be automatically passed to
 /// the protocol implementation.
-#[derive(PartialEq, Eq, Debug, Clone, Copy, Serialize, Deserialize, CopyGetters)]
+#[derive(Eq, Debug, Clone, Copy, Serialize, Deserialize, CopyGetters)]
 #[getset(get_copy = "pub")]
 pub struct HardwareSubscribeCmd {
   /// Feature ID for this command
   #[getset(get_copy = "pub")]
+  #[serde(default)]
   feature_id: Uuid,
   /// Endpoint to subscribe to notifications from.
   endpoint: Endpoint,
+}
+
+impl PartialEq for HardwareSubscribeCmd {
+  fn eq(&self, other: &Self) -> bool {
+    self.endpoint() == other.endpoint()
+  }
 }
 
 impl HardwareSubscribeCmd {
@@ -156,11 +173,18 @@ impl From<RawSubscribeCmdV2> for HardwareSubscribeCmd {
 /// Low level subscribe structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
-#[derive(PartialEq, Eq, Debug, Clone, Copy, Serialize, Deserialize, CopyGetters)]
+#[derive(Eq, Debug, Clone, Copy, Serialize, Deserialize, CopyGetters)]
 #[getset(get_copy = "pub")]
 pub struct HardwareUnsubscribeCmd {
+  #[serde(default)]
   feature_id: Uuid,
   endpoint: Endpoint,
+}
+
+impl PartialEq for HardwareUnsubscribeCmd {
+  fn eq(&self, other: &Self) -> bool {
+    self.endpoint() == other.endpoint()
+  }
 }
 
 impl HardwareUnsubscribeCmd {
