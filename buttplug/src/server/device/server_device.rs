@@ -37,9 +37,7 @@
 //! In order to handle multiple message spec versions
 
 use std::{
-  fmt::{self, Debug},
-  sync::Arc,
-  time::Duration,
+  collections::VecDeque, fmt::{self, Debug}, sync::Arc, time::Duration
 };
 
 use crate::{
@@ -64,7 +62,7 @@ use crate::{
       protocol::ProtocolHandler,
     },
     message::{
-      checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, checked_value_cmd::CheckedValueCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, server_device_attributes::ServerDeviceAttributes, spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugDeviceMessageType, ButtplugServerDeviceMessage
+      checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, checked_value_cmd::CheckedValueCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, server_device_attributes::ServerDeviceAttributes, spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage
     },
     ButtplugServerResultFuture,
   },
@@ -74,13 +72,12 @@ use core::hash::{Hash, Hasher};
 use dashmap::{DashMap, DashSet};
 use futures::future::{self, BoxFuture, FutureExt};
 use getset::Getters;
-use tokio::sync::RwLock;
+use tokio::sync::{Mutex, RwLock};
 use tokio_stream::StreamExt;
 use uuid::Uuid;
 
 use super::{
   configuration::{UserDeviceDefinition, UserDeviceIdentifier},
-  hardware::HardwareWriteCmd,
   protocol::{
     //actuator_command_manager::ActuatorCommandManager,
     ProtocolKeepaliveStrategy,
@@ -112,10 +109,10 @@ pub struct ServerDevice {
   #[getset(get = "pub")]
   identifier: UserDeviceIdentifier,
   raw_subscribed_endpoints: Arc<DashSet<Endpoint>>,
-  keepalive_packet: Arc<RwLock<Option<HardwareWriteCmd>>>,
   #[getset(get = "pub")]
   legacy_attributes: ServerDeviceAttributes,
   last_actuator_command: DashMap<Uuid, ActuatorCommand>,
+  current_hardware_commands: Arc<Mutex<Option<VecDeque<HardwareCommand>>>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4>,
 }
 impl Debug for ServerDevice {
@@ -243,49 +240,88 @@ impl ServerDevice {
     let keepalive_packet = Arc::new(RwLock::new(None));
     //let acm = ActuatorCommandManager::new(definition.features());
     // If we've gotten here, we know our hardware is connected. This means we can start the keepalive if it's required.
-    if hardware.requires_keepalive()
-      && !matches!(
-        handler.keepalive_strategy(),
-        ProtocolKeepaliveStrategy::NoStrategy
-      )
+    //if hardware.requires_keepalive()
+    //  && !matches!(
+    //    handler.keepalive_strategy(),
+    //    ProtocolKeepaliveStrategy::NoStrategy
+    //  )
+    //{
+    let current_hardware_commands = Arc::new(Mutex::new(None));
     {
+      let current_hardware_commands = current_hardware_commands.clone();
       let hardware = hardware.clone();
       let strategy = handler.keepalive_strategy();
       let keepalive_packet = keepalive_packet.clone();
       async_manager::spawn(async move {
         // Arbitrary wait time for now.
         let wait_duration = Duration::from_secs(5);
+        let bt_duration = Duration::from_millis(100);
         loop {
-          if hardware.time_since_last_write().await > wait_duration {
-            match &strategy {
-              ProtocolKeepaliveStrategy::RepeatPacketStrategy(packet) => {
-                if let Err(e) = hardware.write_value(packet).await {
-                  warn!("Error writing keepalive packet: {:?}", e);
-                  break;
-                }
+          // Loop based on our 10hz estimate for most BLE toys.
+          util::sleep(bt_duration).await;
+          // Run commands in order, otherwise we may end up sending out of order. This may take a while,
+          // but it's what 99% of protocols expect. If they want something else, they can implement it
+          // themselves.
+          //
+          // If anything errors out, just bail on the command series. This most likely means the device
+          // disconnected.
+          let mut local_commands: VecDeque<HardwareCommand> = {
+            let mut c = current_hardware_commands.lock().await;
+            if let Some(command_vec) = c.take() {
+              command_vec
+            } else {
+              continue;
+            }
+          };
+          while let Some(command) = local_commands.pop_front() {
+            let _ = hardware.parse_message(&command).await;
+            if hardware.requires_keepalive()
+              && matches!(
+                strategy,
+                ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+              )
+            {
+              if let HardwareCommand::Write(command) = command {
+                *keepalive_packet.write().await = Some(command);
               }
-              ProtocolKeepaliveStrategy::RepeatLastPacketStrategy => {
-                if let Some(packet) = &*keepalive_packet.read().await {
+            }
+          }
+          if hardware.requires_keepalive()
+            && !matches!(
+              strategy,
+              ProtocolKeepaliveStrategy::NoStrategy
+            )
+          {
+            if hardware.time_since_last_write().await > wait_duration {
+              match &strategy {
+                ProtocolKeepaliveStrategy::RepeatPacketStrategy(packet) => {
                   if let Err(e) = hardware.write_value(packet).await {
                     warn!("Error writing keepalive packet: {:?}", e);
                     break;
                   }
                 }
-              }
-              _ => {
-                info!(
-                  "Protocol keepalive strategy {:?} not implemented, replacing with NoStrategy",
-                  strategy
-                );
+                ProtocolKeepaliveStrategy::RepeatLastPacketStrategy => {
+                  if let Some(packet) = &*keepalive_packet.read().await {
+                    if let Err(e) = hardware.write_value(packet).await {
+                      warn!("Error writing keepalive packet: {:?}", e);
+                      break;
+                    }
+                  }
+                }
+                _ => {
+                  info!(
+                    "Protocol keepalive strategy {:?} not implemented, replacing with NoStrategy",
+                    strategy
+                  );
+                }
               }
             }
           }
-          // Arbitrary wait time for now.
-          util::sleep(wait_duration).await;
         }
         info!("Leaving keepalive task for {}", hardware.name());
       });
     }
+    //}
 
     let mut stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4> = vec![];
     for (index, feature) in definition.features().iter().enumerate() {
@@ -324,12 +360,12 @@ impl ServerDevice {
       //actuator_command_manager: acm,
       handler,
       hardware,
-      keepalive_packet,
       definition: definition.clone(),
       raw_subscribed_endpoints: Arc::new(DashSet::new()),
       // Generating legacy attributes is cheap, just do it right when we create the device.
       legacy_attributes: ServerDeviceAttributes::new(definition.features()),
       last_actuator_command: DashMap::new(),
+      current_hardware_commands,
       stop_commands
     }
   }
@@ -459,9 +495,7 @@ impl ServerDevice {
   }
 
   fn handle_hardware_commands(&self, commands: Vec<HardwareCommand>) -> ButtplugServerResultFuture {
-    let hardware = self.hardware.clone();
-    let keepalive_type = self.handler.keepalive_strategy();
-    let keepalive_packet = self.keepalive_packet.clone();
+    let current_hardware_commands = self.current_hardware_commands.clone();
     async move {
       // Run commands in order, otherwise we may end up sending out of order. This may take a while,
       // but it's what 99% of protocols expect. If they want something else, they can implement it
@@ -469,18 +503,18 @@ impl ServerDevice {
       //
       // If anything errors out, just bail on the command series. This most likely means the device
       // disconnected.
-      for command in commands {
-        hardware.parse_message(&command).await?;
-        if hardware.requires_keepalive()
-          && matches!(
-            keepalive_type,
-            ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-          )
-        {
-          if let HardwareCommand::Write(command) = command {
-            *keepalive_packet.write().await = Some(command);
-          }
+      let mut c = current_hardware_commands.lock().await;
+      if let Some(g) = c.as_mut() {
+        for command in commands {
+          g.retain(|v| v.feature_id() != command.feature_id());
+          g.push_back(command);
         }
+      } else {
+        let mut n = VecDeque::new();
+        for command in commands {
+          n.push_back(command);
+        }
+        *c = Some(n);
       }
       Ok(message::OkV0::default().into())
     }
