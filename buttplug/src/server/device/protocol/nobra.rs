@@ -19,8 +19,10 @@ use crate::{
   }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::Arc;
 
+const NOBRA_PROTOCOL_UUID: Uuid = uuid!("166e7d2b-b9ed-4769-aaaf-66127e4e14eb");
 generic_protocol_initializer_setup!(Nobra, "nobra");
 
 #[derive(Default)]
@@ -34,7 +36,7 @@ impl ProtocolInitializer for NobraInitializer {
     _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
-      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, vec![0x70], false))
+      .write_value(&HardwareWriteCmd::new(NOBRA_PROTOCOL_UUID, Endpoint::Tx, vec![0x70], false))
       .await?;
     Ok(Arc::new(Nobra::default()))
   }
@@ -54,6 +56,7 @@ impl ProtocolHandler for Nobra {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let output_speed = if cmd.value() == 0 { 0x70 } else { 0x60 + cmd.value() };
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       vec![output_speed as u8],
       false,

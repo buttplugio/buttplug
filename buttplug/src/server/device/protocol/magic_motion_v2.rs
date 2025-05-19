@@ -7,6 +7,8 @@
 
 use std::sync::atomic::{AtomicU8, Ordering};
 
+use uuid::{uuid, Uuid};
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -20,6 +22,8 @@ use crate::{
     message::checked_value_cmd::CheckedValueCmdV4,
   },
 };
+
+const MAGIC_MOTION_2_PROTOCOL_UUID: Uuid = uuid!("4d6e9297-c57e-4ce7-a63c-24cc7d117a47");
 
 generic_protocol_setup!(MagicMotionV2, "magic-motion-2");
 
@@ -68,6 +72,6 @@ impl ProtocolHandler for MagicMotionV2 {
       0x64,
       0x01,
     ];
-    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(MAGIC_MOTION_2_PROTOCOL_UUID, Endpoint::Tx, data, false).into()])
   }
 }

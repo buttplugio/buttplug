@@ -17,7 +17,10 @@ use crate::{
   },
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::Arc;
+
+const HISMITH_PROTOCOL_UUID: Uuid = uuid!("e59f9c5d-bb4a-4a9c-ab57-0ceb43af1da7");
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -48,7 +51,7 @@ impl ProtocolIdentifier for HismithIdentifier {
     _: ProtocolCommunicationSpecifier,
   ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     let result = hardware
-      .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
+      .read_value(&HardwareReadCmd::new(HISMITH_PROTOCOL_UUID, Endpoint::RxBLEModel, 128, 500))
       .await?;
 
     let identifier = result
@@ -103,6 +106,7 @@ impl ProtocolHandler for Hismith {
     let speed: u8 = cmd.value() as u8;
 
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       vec![0xAA, idx, speed, speed + idx],
       false,
@@ -124,6 +128,7 @@ impl ProtocolHandler for Hismith {
     };
 
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       vec![0xAA, idx, speed, speed + idx],
       false,

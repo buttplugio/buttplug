@@ -5,40 +5,42 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use std::sync::atomic::{AtomicU8, Ordering};
+
+use uuid::{uuid, Uuid};
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
+const LIBO_SHARK_PROTOCOL_UUID: Uuid = uuid!("c0044425-b59c-4037-a702-0438afcaad3e");
 generic_protocol_setup!(LiboShark, "libo-shark");
 
 #[derive(Default)]
-pub struct LiboShark {}
+pub struct LiboShark {
+  values: [AtomicU8; 2]
+}
 
 impl ProtocolHandler for LiboShark {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, i32)>],
+    cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let mut data = 0u8;
-    if let Some((_, speed)) = cmds[0] {
-      data |= (speed as u8) << 4;
-    }
-    if let Some((_, speed)) = cmds[1] {
-      data |= speed as u8;
-    }
+    self.values[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
+    let data = self.values[0].load(Ordering::Relaxed) << 4 | self.values[1].load(Ordering::Relaxed);
     Ok(vec![
-      HardwareWriteCmd::new(Endpoint::Tx, vec![data], false).into()
+      HardwareWriteCmd::new(LIBO_SHARK_PROTOCOL_UUID, Endpoint::Tx, vec![data], false).into()
     ])
   }
 }

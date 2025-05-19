@@ -19,8 +19,10 @@ use crate::{
   }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::Arc;
 
+const LOVEDISTANCE_PROTOCOL_UUID: Uuid = uuid!("a5f50cd5-7985-438c-a5bc-f8ff72bc0117");
 generic_protocol_initializer_setup!(LoveDistance, "lovedistance");
 
 #[derive(Default)]
@@ -33,9 +35,9 @@ impl ProtocolInitializer for LoveDistanceInitializer {
     hardware: Arc<Hardware>,
     _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let msg = HardwareWriteCmd::new(Endpoint::Tx, vec![0xf3, 0, 0], false);
+    let msg = HardwareWriteCmd::new(LOVEDISTANCE_PROTOCOL_UUID, Endpoint::Tx, vec![0xf3, 0, 0], false);
     hardware.write_value(&msg).await?;
-    let msg = HardwareWriteCmd::new(Endpoint::Tx, vec![0xf4, 1], false);
+    let msg = HardwareWriteCmd::new(LOVEDISTANCE_PROTOCOL_UUID, Endpoint::Tx, vec![0xf4, 1], false);
     hardware.write_value(&msg).await?;
     Ok(Arc::new(LoveDistance::default()))
   }
@@ -54,6 +56,7 @@ impl ProtocolHandler for LoveDistance {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       vec![0xf3, 0x00, cmd.value() as u8],
       false,

@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
   server::{
     device::{
@@ -26,8 +26,10 @@ use crate::{
   },
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::Arc;
 
+const LELO_HARMONY_PROTOCOL_UUID: Uuid = uuid!("220e180a-e6d5-4fd1-963e-43a6f990b717");
 generic_protocol_initializer_setup!(LeloHarmony, "lelo-harmony");
 
 #[derive(Default)]
@@ -52,7 +54,7 @@ impl ProtocolInitializer for LeloHarmonyInitializer {
     // * If it returns 0x00,00,00,00,00,00,00,00 the connection is authorised
     let mut event_receiver = hardware.event_stream();
     hardware
-      .subscribe(&HardwareSubscribeCmd::new(Endpoint::Whitelist))
+      .subscribe(&HardwareSubscribeCmd::new(LELO_HARMONY_PROTOCOL_UUID, Endpoint::Whitelist))
       .await?;
 
     loop {
@@ -69,15 +71,15 @@ impl ProtocolInitializer for LeloHarmonyInitializer {
           debug!("Lelo Harmony gave us a password: {:?}", n);
           // Can't send whilst subscribed
           hardware
-            .unsubscribe(&HardwareUnsubscribeCmd::new(Endpoint::Whitelist))
+            .unsubscribe(&HardwareUnsubscribeCmd::new(LELO_HARMONY_PROTOCOL_UUID, Endpoint::Whitelist))
             .await?;
           // Send with response
           hardware
-            .write_value(&HardwareWriteCmd::new(Endpoint::Whitelist, n, true))
+            .write_value(&HardwareWriteCmd::new(LELO_HARMONY_PROTOCOL_UUID, Endpoint::Whitelist, n, true))
             .await?;
           // Get back to the loop
           hardware
-            .subscribe(&HardwareSubscribeCmd::new(Endpoint::Whitelist))
+            .subscribe(&HardwareSubscribeCmd::new(LELO_HARMONY_PROTOCOL_UUID, Endpoint::Whitelist))
             .await?;
         }
       } else {
@@ -99,6 +101,7 @@ impl ProtocolHandler for LeloHarmony {
     cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       vec![
         0x0a,

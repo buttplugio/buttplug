@@ -18,6 +18,7 @@ use crate::{
   util::async_manager,
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::{
   sync::{
     atomic::{AtomicBool, AtomicU16, Ordering},
@@ -26,6 +27,8 @@ use std::{
   time::Duration,
 };
 use tokio::sync::Notify;
+
+const NINTENDO_JOYCON_PROTOCOL_UUID: Uuid = uuid!("de9cce17-abb7-4ad5-9754-f1872733c197");
 
 /// Send command, sub-command, and data (sub-command's arguments) with u8 integers
 /// This returns ACK packet for the command or Error.
@@ -61,7 +64,7 @@ async fn send_command_raw(
 
   // send command
   device
-    .write_value(&HardwareWriteCmd::new(Endpoint::Tx, buf.to_vec(), false))
+    .write_value(&HardwareWriteCmd::new(NINTENDO_JOYCON_PROTOCOL_UUID, Endpoint::Tx, buf.to_vec(), false))
     .await
 }
 

@@ -23,10 +23,8 @@ use crate::{
 };
 use async_trait::async_trait;
 use prost::Message;
-use std::sync::{
-  atomic::AtomicU8,
-  Arc,
-};
+use uuid::{uuid, Uuid};
+use std::sync::Arc;
 
 mod protocomm {
   include!("./protocomm.rs");
@@ -36,6 +34,7 @@ mod handyplug {
   include!("./handyplug.rs");
 }
 
+const THEHANDY_PROTOCOL_UUID: Uuid = uuid!("e7c3ba93-ddbf-4f38-a960-30a332739d02");
 generic_protocol_initializer_setup!(TheHandy, "thehandy");
 
 #[derive(Default)]
@@ -119,7 +118,8 @@ impl ProtocolHandler for TheHandy {
       .encode(&mut ping_buf)
       .expect("Infallible encode.");
 
-    super::ProtocolKeepaliveStrategy::RepeatPacketStrategy(HardwareWriteCmd::new(
+    super::ProtocolKeepaliveStrategy::RepeatPacketStrategy(HardwareWriteCmd::new( 
+      THEHANDY_PROTOCOL_UUID,
       Endpoint::Tx,
       ping_buf,
       true,
@@ -171,7 +171,7 @@ impl ProtocolHandler for TheHandy {
       .encode(&mut linear_buf)
       .expect("Infallible encode.");
     Ok(vec![
-      HardwareWriteCmd::new(Endpoint::Tx, linear_buf, true).into()
+      HardwareWriteCmd::new(THEHANDY_PROTOCOL_UUID, Endpoint::Tx, linear_buf, true).into()
     ])
   }
 }

@@ -19,15 +19,17 @@ use crate::{
         ProtocolInitializer,
       },
     },
-    message::{checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, FleshlightLaunchFW12CmdV0},
+    message::checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4,
   },
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
 };
 
+const KIIROO_V2_PROTOCOL_UUID: Uuid = uuid!("05ab9d57-5e65-47b2-add4-5bad3e8663e5");
 generic_protocol_initializer_setup!(KiirooV2, "kiiroo-v2");
 
 #[derive(Default)]
@@ -40,7 +42,7 @@ impl ProtocolInitializer for KiirooV2Initializer {
     hardware: Arc<Hardware>,
     _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let msg = HardwareWriteCmd::new(Endpoint::Firmware, vec![0x0u8], true);
+    let msg = HardwareWriteCmd::new(KIIROO_V2_PROTOCOL_UUID, Endpoint::Firmware, vec![0x0u8], true);
     hardware.write_value(&msg).await?;
     Ok(Arc::new(KiirooV2::default()))
   }
@@ -49,22 +51,6 @@ impl ProtocolInitializer for KiirooV2Initializer {
 #[derive(Default)]
 pub struct KiirooV2 {
   previous_position: Arc<AtomicU8>,
-}
-
-impl KiirooV2 {
-  fn handle_fleshlight_launch_fw12_cmd(
-    &self,
-    message: FleshlightLaunchFW12CmdV0,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let position = message.position();
-    self.previous_position.store(position, Ordering::SeqCst);
-    Ok(vec![HardwareWriteCmd::new(
-      Endpoint::Tx,
-      [message.position(), message.speed()].to_vec(),
-      false,
-    )
-    .into()])
-  }
 }
 
 impl ProtocolHandler for KiirooV2 {
@@ -80,11 +66,15 @@ impl ProtocolHandler for KiirooV2 {
     // use AtomicU8 because there's no AtomicF64 yet.
     let previous_position = self.previous_position.load(Ordering::SeqCst);
     let distance = (previous_position as f64 - (cmd.value() as f64)).abs() / 99f64;
-    let fl_cmd = FleshlightLaunchFW12CmdV0::new(
-      0,
-      cmd.value() as u8,
-      (calculate_speed(distance, cmd.parameter() as u32) * 99f64) as u8,
-    );
-    self.handle_fleshlight_launch_fw12_cmd(fl_cmd)
+    let position = cmd.value() as u8;
+    let calculated_speed = (calculate_speed(distance, cmd.parameter() as u32) * 99f64) as u8;
+    self.previous_position.store(position, Ordering::SeqCst);
+    Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
+      Endpoint::Tx,
+      [position, calculated_speed].to_vec(),
+      false,
+    )
+    .into()])
   }
 }

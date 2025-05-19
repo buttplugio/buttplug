@@ -23,10 +23,13 @@ use crate::{
   },
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
 };
+
+const KIIROO_V21_INITIALIZED_PROTOCOL_UUID: Uuid = uuid!("22329023-5464-41b6-a0de-673d7e993055");
 
 generic_protocol_initializer_setup!(KiirooV21Initialized, "kiiroo-v21-initialized");
 
@@ -43,6 +46,7 @@ impl ProtocolInitializer for KiirooV21InitializedInitializer {
     debug!("calling Onyx+ init");
     hardware
       .write_value(&HardwareWriteCmd::new(
+        KIIROO_V21_INITIALIZED_PROTOCOL_UUID,
         Endpoint::Tx,
         vec![0x03u8, 0x00u8, 0x64u8, 0x19u8],
         true,
@@ -50,6 +54,7 @@ impl ProtocolInitializer for KiirooV21InitializedInitializer {
       .await?;
     hardware
       .write_value(&HardwareWriteCmd::new(
+        KIIROO_V21_INITIALIZED_PROTOCOL_UUID,
         Endpoint::Tx,
         vec![0x03u8, 0x00u8, 0x64u8, 0x00u8],
         true,
@@ -67,11 +72,13 @@ pub struct KiirooV21Initialized {
 impl KiirooV21Initialized {
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
+    uuid: Uuid,
     message: FleshlightLaunchFW12CmdV0,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let position = message.position();
     self.previous_position.store(position, Ordering::SeqCst);
     Ok(vec![HardwareWriteCmd::new(
+      uuid,
       Endpoint::Tx,
       [0x03, 0x00, message.speed(), message.position()].to_vec(),
       false,
@@ -90,6 +97,7 @@ impl ProtocolHandler for KiirooV21Initialized {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       vec![0x01, cmd.value() as u8],
       false,
@@ -110,7 +118,7 @@ impl ProtocolHandler for KiirooV21Initialized {
       cmd.value() as u8,
       (calculate_speed(distance, cmd.parameter() as u32) * 99f64) as u8,
     );
-    self.handle_fleshlight_launch_fw12_cmd(fl_cmd)
+    self.handle_fleshlight_launch_fw12_cmd(cmd.feature_uuid(), fl_cmd)
   }
 
 }

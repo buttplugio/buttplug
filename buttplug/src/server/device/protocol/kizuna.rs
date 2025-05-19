@@ -28,6 +28,7 @@ impl ProtocolHandler for Kizuna {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       vec![48 + cmd.value() as u8, b'\r', b'\n'],
       false,

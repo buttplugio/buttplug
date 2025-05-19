@@ -46,6 +46,6 @@ impl ProtocolHandler for Maxpro {
     }
 
     data[9] = crc;
-    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, data, false).into()])
   }
 }

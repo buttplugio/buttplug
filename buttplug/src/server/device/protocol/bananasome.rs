@@ -7,6 +7,8 @@
 
 use std::sync::atomic::{AtomicU8, Ordering};
 
+use uuid::{uuid, Uuid};
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -20,6 +22,7 @@ use crate::{
   }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
+const BANANASOME_PROTOCOL_UUID: Uuid = uuid!("a0a2e5f8-3692-4f6b-8add-043513ed86f6");
 generic_protocol_setup!(Bananasome, "bananasome");
 
 pub struct Bananasome {
@@ -35,8 +38,10 @@ impl Default for Bananasome {
 }
 
 impl Bananasome {
-  fn hardware_command(&self) -> Vec<HardwareCommand> {
+  fn hardware_command(&self, cmd: &CheckedValueCmdV4) -> Vec<HardwareCommand> {
+    self.current_commands[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
     vec![HardwareWriteCmd::new(
+      BANANASOME_PROTOCOL_UUID,
       Endpoint::Tx,
       vec![
         0xa0,
@@ -64,15 +69,13 @@ impl ProtocolHandler for Bananasome {
       &self,
       cmd: &CheckedValueCmdV4,
     ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.current_commands[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
-    Ok(self.hardware_command())
+    Ok(self.hardware_command(cmd))
   }
 
   fn handle_value_vibrate_cmd(
       &self,
-      _cmd: &CheckedValueCmdV4,
+      cmd: &CheckedValueCmdV4,
     ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(self.hardware_command())
-      
+    Ok(self.hardware_command(cmd))
   }
 }

@@ -7,6 +7,8 @@
 
 use std::sync::atomic::{AtomicU8, Ordering};
 
+use uuid::{uuid, Uuid};
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -18,6 +20,7 @@ use crate::{
   }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
+const JEJOUE_PROTOCOL_UUID: Uuid = uuid!("d3dd2bf5-b029-4bc1-9466-39f82c2e3258");
 generic_protocol_setup!(JeJoue, "jejoue");
 
 pub struct JeJoue {
@@ -67,6 +70,7 @@ impl ProtocolHandler for JeJoue {
     }
 
     Ok(vec![HardwareWriteCmd::new(
+      JEJOUE_PROTOCOL_UUID,
       Endpoint::Tx,
       vec![pattern, speed],
       false,

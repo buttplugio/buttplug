@@ -25,7 +25,7 @@ use crate::{
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
     message::{
-      checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, checked_value_cmd::CheckedValueCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, ButtplugServerDeviceMessage, FleshlightLaunchFW12CmdV0
+      checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, checked_value_cmd::CheckedValueCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, ButtplugServerDeviceMessage
     },
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
@@ -55,23 +55,6 @@ pub struct KiirooV21 {
   event_stream: broadcast::Sender<ButtplugServerDeviceMessage>,
 }
 
-impl KiirooV21 {
-  fn handle_fleshlight_launch_fw12_cmd(
-    &self,
-    message: FleshlightLaunchFW12CmdV0,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let previous_position = self.previous_position.clone();
-    let position = message.position();
-    previous_position.store(position, SeqCst);
-    Ok(vec![HardwareWriteCmd::new(
-      Endpoint::Tx,
-      [0x03, 0x00, message.speed(), message.position()].to_vec(),
-      false,
-    )
-    .into()])
-  }
-}
-
 impl Default for KiirooV21 {
   fn default() -> Self {
     let (sender, _) = broadcast::channel(256);
@@ -89,6 +72,7 @@ impl ProtocolHandler for KiirooV21 {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       vec![0x01, cmd.value() as u8],
       false,
@@ -104,12 +88,16 @@ impl ProtocolHandler for KiirooV21 {
     // use AtomicU8 because there's no AtomicF64 yet.
     let previous_position = self.previous_position.load(SeqCst);
     let distance = (previous_position as f64 - (cmd.value() as f64)).abs() / 99f64;
-    let fl_cmd = FleshlightLaunchFW12CmdV0::new(
-      cmd.device_index(),
-      (cmd.value()) as u8,
-      (calculate_speed(distance, cmd.parameter() as u32) * 99f64) as u8,
-    );
-    self.handle_fleshlight_launch_fw12_cmd(fl_cmd)
+    let position = (cmd.value()) as u8;
+    let speed = (calculate_speed(distance, cmd.parameter() as u32) * 99f64) as u8;
+    self.previous_position.store(position, SeqCst);
+    Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
+      Endpoint::Tx,
+      [0x03, 0x00, speed, position].to_vec(),
+      false,
+    )
+    .into()])
   }
 
   fn handle_battery_level_cmd(
@@ -121,7 +109,7 @@ impl ProtocolHandler for KiirooV21 {
     let message = message.clone();
     // Reading the "whitelist" endpoint for this device retrieves the battery level,
     // which is byte 5. All other bytes of the 20-byte result are unknown.
-    let msg = HardwareReadCmd::new(Endpoint::Whitelist, 20, 0);
+    let msg = HardwareReadCmd::new(message.feature_id(), Endpoint::Whitelist, 20, 0);
     let fut = device.read_value(&msg);
     async move {
       let hw_msg = fut.await?;
@@ -176,7 +164,7 @@ impl ProtocolHandler for KiirooV21 {
       // characteristic subscription.
       if sensors.is_empty() {
         device
-          .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
+          .subscribe(&HardwareSubscribeCmd::new(message.feature_id(), Endpoint::Rx))
           .await?;
         let sender = self.event_stream.clone();
         let mut hardware_stream = device.event_stream();
@@ -250,7 +238,7 @@ impl ProtocolHandler for KiirooV21 {
       sensors.remove(&message.feature_index());
       if sensors.is_empty() {
         device
-          .unsubscribe(&HardwareUnsubscribeCmd::new(Endpoint::Rx))
+          .unsubscribe(&HardwareUnsubscribeCmd::new(message.feature_id(), Endpoint::Rx))
           .await?;
       }
       Ok(())

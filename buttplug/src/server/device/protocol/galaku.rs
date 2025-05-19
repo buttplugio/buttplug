@@ -6,6 +6,7 @@
 // for full license information.
 
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::Arc;
 
@@ -87,6 +88,7 @@ fn read_value(data: Vec<u8>) -> u32 {
   }
 }
 
+const GALAKU_PROTOCOL_UUID: Uuid = uuid!("766d15d5-0f43-4768-a73a-96ff48bc389e");
 generic_protocol_initializer_setup!(Galaku, "galaku");
 
 #[derive(Default)]
@@ -154,11 +156,12 @@ impl ProtocolHandler for Galaku {
         0,
         0,
       ];
-      return Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()]);
+      return Ok(vec![HardwareWriteCmd::new(GALAKU_PROTOCOL_UUID, Endpoint::Tx, data, false).into()]);
     } else {
       self.speeds[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
       let data: Vec<u32> = vec![90, 0, 0, 1, 49, self.speeds[0].load(Ordering::Relaxed) as u32, self.speeds[1].load(Ordering::Relaxed) as u32, 0, 0, 0];
       Ok(vec![HardwareWriteCmd::new(
+        GALAKU_PROTOCOL_UUID,
         Endpoint::Tx,
         send_bytes(data),
         false,
@@ -170,14 +173,14 @@ impl ProtocolHandler for Galaku {
   fn handle_sensor_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: &CheckedSensorSubscribeCmdV4,
+    cmd: &CheckedSensorSubscribeCmdV4,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
-    let message = message.clone();
-    match message.sensor_type() {
+    let cmd = cmd.clone();
+    match cmd.sensor_type() {
       SensorType::Battery => {
         async move {
           device
-            .subscribe(&HardwareSubscribeCmd::new(Endpoint::RxBLEBattery))
+            .subscribe(&HardwareSubscribeCmd::new(cmd.feature_id(), Endpoint::RxBLEBattery))
             .await?;
           Ok(())
         }
@@ -193,14 +196,14 @@ impl ProtocolHandler for Galaku {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: &CheckedSensorUnsubscribeCmdV4,
+    cmd: &CheckedSensorUnsubscribeCmdV4,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
-    let message = message.clone();
-    match message.sensor_type() {
+    let cmd = cmd.clone();
+    match cmd.sensor_type() {
       SensorType::Battery => {
         async move {
           device
-            .unsubscribe(&HardwareUnsubscribeCmd::new(Endpoint::RxBLEBattery))
+            .unsubscribe(&HardwareUnsubscribeCmd::new(cmd.feature_id(), Endpoint::RxBLEBattery))
             .await?;
           Ok(())
         }
@@ -216,16 +219,16 @@ impl ProtocolHandler for Galaku {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: CheckedSensorReadCmdV4,
+    cmd: CheckedSensorReadCmdV4,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     let data: Vec<u32> = vec![90, 0, 0, 1, 19, 0, 0, 0, 0, 0];
     let mut device_notification_receiver = device.event_stream();
     async move {
       device
-        .subscribe(&HardwareSubscribeCmd::new(Endpoint::RxBLEBattery))
+        .subscribe(&HardwareSubscribeCmd::new(cmd.feature_id(), Endpoint::RxBLEBattery))
         .await?;
       device
-        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, send_bytes(data), true))
+        .write_value(&HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, send_bytes(data), true))
         .await?;
       while let Ok(event) = device_notification_receiver.recv().await {
         return match event {
@@ -234,9 +237,9 @@ impl ProtocolHandler for Galaku {
               continue;
             }
             let battery_reading = SensorReadingV4::new(
-              message.device_index(),
-              message.feature_index(),
-              message.sensor_type(),
+              cmd.device_index(),
+              cmd.feature_index(),
+              cmd.sensor_type(),
               vec![read_value(data) as i32],
             );
             Ok(battery_reading)

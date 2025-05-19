@@ -78,7 +78,7 @@ impl ProtocolHandler for KGoalBoost {
       // characteristic subscription.
       if sensors.is_empty() {
         device
-          .subscribe(&HardwareSubscribeCmd::new(Endpoint::RxPressure))
+          .subscribe(&HardwareSubscribeCmd::new(message.feature_id(), Endpoint::RxPressure))
           .await?;
         let sender = self.event_stream.clone();
         let mut hardware_stream = device.event_stream();
@@ -159,7 +159,7 @@ impl ProtocolHandler for KGoalBoost {
       sensors.remove(&message.feature_index());
       if sensors.is_empty() {
         device
-          .unsubscribe(&HardwareUnsubscribeCmd::new(Endpoint::RxPressure))
+          .unsubscribe(&HardwareUnsubscribeCmd::new(message.feature_id(), Endpoint::RxPressure))
           .await?;
       }
       Ok(())

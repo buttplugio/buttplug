@@ -7,6 +7,8 @@
 
 use std::sync::atomic::{AtomicU8, Ordering};
 
+use uuid::{uuid, Uuid};
+
 use crate::server::message::checked_value_cmd::CheckedValueCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
@@ -16,6 +18,7 @@ use crate::{
   },
 };
 
+const COWGIRL_PROTOCOL_UUID: Uuid = uuid!("0474d2fd-f566-4bed-8770-88e457a96144");
 generic_protocol_setup!(Cowgirl, "cowgirl");
 
 pub struct Cowgirl {
@@ -32,7 +35,7 @@ impl Default for Cowgirl {
 
 impl Cowgirl {
   fn hardware_commands(&self) -> Vec<HardwareCommand> {
-    vec![HardwareWriteCmd::new(Endpoint::Tx, vec![0x00, 0x01, self.speeds[0].load(Ordering::Relaxed), self.speeds[1].load(Ordering::Relaxed)], true).into()]
+    vec![HardwareWriteCmd::new(COWGIRL_PROTOCOL_UUID, Endpoint::Tx, vec![0x00, 0x01, self.speeds[0].load(Ordering::Relaxed), self.speeds[1].load(Ordering::Relaxed)], true).into()]
   }
 }
 
