@@ -389,15 +389,17 @@ async fn test_client_range_limits() {
 
       // Lower half
       check_test_recv_value(
+        &Duration::from_millis(150),
         &mut device,
-        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 32], false)),
-      );
+        HardwareCommand::Write(HardwareWriteCmd::new(Uuid::nil(), Endpoint::Tx, vec![0xF1, 32], false)),
+      ).await;
 
       // Upper half
       check_test_recv_value(
+        &Duration::from_millis(150),
         &mut device,
-        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF2, 96], false)),
-      );
+        HardwareCommand::Write(HardwareWriteCmd::new(Uuid::nil(), Endpoint::Tx, vec![0xF2, 96], false)),
+      ).await;
 
       // Disable device
       assert!(dev
@@ -407,15 +409,17 @@ async fn test_client_range_limits() {
 
       // Lower half
       check_test_recv_value(
+        &Duration::from_millis(150),
         &mut device,
-        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false)),
-      );
+        HardwareCommand::Write(HardwareWriteCmd::new(Uuid::nil(), Endpoint::Tx, vec![0xF1, 0], false)),
+      ).await;
 
       // Upper half
       check_test_recv_value(
+        &Duration::from_millis(150),
         &mut device,
-        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF2, 0], false)),
-      );
+        HardwareCommand::Write(HardwareWriteCmd::new(Uuid::nil(), Endpoint::Tx, vec![0xF2, 0], false)),
+      ).await;
       break;
     }
   }

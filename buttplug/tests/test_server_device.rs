@@ -40,6 +40,7 @@ use util::{setup_logging, test_server_v4_with_device, test_server_with_device};
 // the device itself does not.
 #[tokio::test]
 async fn test_capabilities_exposure() {
+  tracing_subscriber::fmt::init();
   // Hold the channel but don't do anything with it.
   let (server, _channel) = test_server_with_device("Onyx+", false);
   let recv = server.event_stream();

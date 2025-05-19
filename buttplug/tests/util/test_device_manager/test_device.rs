@@ -29,7 +29,6 @@ use buttplug::{
 use async_trait::async_trait;
 use dashmap::DashSet;
 use futures::future::{self, BoxFuture, FutureExt};
-use tracing::error;
 use serde::{Deserialize, Serialize};
 use std::{
   collections::{HashSet, VecDeque},

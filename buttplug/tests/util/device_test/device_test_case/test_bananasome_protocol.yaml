@@ -13,6 +13,7 @@ device_commands:
       device_index: 0
       commands:
         - !Write
+            feature_id: "a0a2e5f8-3692-4f6b-8add-043513ed86f6"
             endpoint: tx
             data: [0xa0, 0x03, 0x00, 0x80, 0x00]
             write_with_response: false
@@ -26,6 +27,7 @@ device_commands:
       device_index: 0
       commands:
         - !Write
+            feature_id: "a0a2e5f8-3692-4f6b-8add-043513ed86f6"
             endpoint: tx
             data: [0xa0, 0x03, 0x00, 0x80, 0x80]
             write_with_response: false
@@ -46,6 +48,7 @@ device_commands:
       device_index: 0
       commands:
         - !Write
+            feature_id: "a0a2e5f8-3692-4f6b-8add-043513ed86f6"
             endpoint: tx
             data: [0xa0, 0x03, 0xc0, 0xc0, 0x40]
             write_with_response: false
@@ -57,6 +60,7 @@ device_commands:
       device_index: 0
       commands:
         - !Write
+            feature_id: "a0a2e5f8-3692-4f6b-8add-043513ed86f6"
             endpoint: tx
             data: [0xa0, 0x03, 0x00, 0x00, 0x00]
             write_with_response: false
