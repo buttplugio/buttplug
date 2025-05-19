@@ -24,13 +24,13 @@ pub struct TCodeV03 {}
 impl ProtocolHandler for TCodeV03 {
   fn handle_position_with_duration_cmd(
     &self,
-    msg: &CheckedValueWithParameterCmdV4,
+    cmd: &CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut msg_vec = vec![];
-    let position = msg.value() as u32;
+    let position = cmd.value() as u32;
 
-    let command = format!("L{}{:02}I{}\n", msg.feature_index(), position, msg.parameter() as u32);
-    msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, command.as_bytes().to_vec(), false).into());
+    let command = format!("L{}{:02}I{}\n", cmd.feature_index(), position, cmd.parameter() as u32);
+    msg_vec.push(HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, command.as_bytes().to_vec(), false).into());
 
     Ok(msg_vec)
   }
@@ -40,6 +40,7 @@ impl ProtocolHandler for TCodeV03 {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       format!("V{}{:02}\n", cmd.feature_index(), cmd.value()).as_bytes().to_vec(),
       false,

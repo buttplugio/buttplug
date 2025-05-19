@@ -21,8 +21,10 @@ use crate::{
   },
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::Arc;
 
+const WETOY_PROTOCOL_UUID: Uuid = uuid!("d7b4fee7-d07c-4d35-8f01-9f4990294be8");
 generic_protocol_initializer_setup!(WeToy, "wetoy");
 
 #[derive(Default)]
@@ -36,7 +38,7 @@ impl ProtocolInitializer for WeToyInitializer {
     _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
-      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, vec![0x80, 0x03], true))
+      .write_value(&HardwareWriteCmd::new(WETOY_PROTOCOL_UUID, Endpoint::Tx, vec![0x80, 0x03], true))
       .await?;
     Ok(Arc::new(WeToy::default()))
   }
@@ -55,6 +57,7 @@ impl ProtocolHandler for WeToy {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       if cmd.value() == 0 {
         vec![0x80, 0x03]
