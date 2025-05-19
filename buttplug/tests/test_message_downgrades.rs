@@ -7,7 +7,8 @@
 
 extern crate buttplug;
 mod util;
-use tracing::info;
+use std::time::Duration;
+
 pub use util::test_device_manager::check_test_recv_value;
 
 use buttplug::{
@@ -24,6 +25,7 @@ use buttplug::{
 };
 use futures::{pin_mut, StreamExt};
 use util::test_server_with_device;
+use uuid::Uuid;
 
 #[tokio::test]
 async fn test_version0_connection() {
@@ -116,6 +118,7 @@ async fn test_version0_device_added_device_list() {
 
 #[tokio::test]
 async fn test_version0_singlemotorvibratecmd() {
+  tracing_subscriber::fmt::init();
   let (server, mut device) = test_server_with_device("Massage Demo", false);
   let recv = server.event_stream();
   pin_mut!(recv);
@@ -167,9 +170,10 @@ async fn test_version0_singlemotorvibratecmd() {
     r#"[{"Ok":{"Id":2}}]"#.to_owned().into()
   );
   check_test_recv_value(
+    &Duration::from_millis(150),
     &mut device,
-    HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
-  );
+    HardwareCommand::Write(HardwareWriteCmd::new(Uuid::nil(), Endpoint::Tx, vec![0xF1, 64], false)),
+  ).await;
 }
 
 #[tokio::test]
@@ -236,13 +240,14 @@ async fn test_version1_singlemotorvibratecmd() {
     r#"[{"Ok":{"Id":2}}]"#.to_owned().into()
   );
   check_test_recv_value(
+    &Duration::from_millis(150),
     &mut device,
-    HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
-  );
+    HardwareCommand::Write(HardwareWriteCmd::new(Uuid::nil(), Endpoint::Tx, vec![0xF1, 64], false)),
+  ).await;
 }
 
 #[tokio::test]
-async fn test_version0_oscilatoronly() {
+async fn test_version0_oscillatoronly() {
   let (server, mut _device) = test_server_with_device("Xone", false);
   let recv = server.event_stream();
   pin_mut!(recv);

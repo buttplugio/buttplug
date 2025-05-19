@@ -53,6 +53,7 @@ use buttplug::{
   },
 };
 use futures::{pin_mut, Stream, StreamExt};
+use uuid::Uuid;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -249,9 +250,10 @@ async fn test_device_stop_on_ping_timeout() {
     .expect("Test, assuming infallible.");
 
   check_test_recv_value(
+    &Duration::from_millis(150),
     &mut device,
-    HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
-  );
+    HardwareCommand::Write(HardwareWriteCmd::new(Uuid::nil(), Endpoint::Tx, vec![0xF1, 64], false)),
+  ).await;
   /*
   // Wait out the ping, we should get a stop message.
   let mut i = 0u32;

@@ -21,7 +21,7 @@ struct TestDevice {
   expected_display_name: Option<String>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 enum TestCommand {
   Messages {
     device_index: u32,
