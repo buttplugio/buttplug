@@ -779,6 +779,8 @@ impl ProtocolInitializer for GenericProtocolInitializer {
   }
 }
 
+const GENERIC_BATTERY_READ_UUID: Uuid = uuid!("876a8e07-4b88-43d0-80b8-3532db372bce");
+
 pub trait ProtocolHandler: Sync + Send {
   fn cache_strategy(&self) -> ProtocolCommandCacheType {
     ProtocolCommandCacheType::External
@@ -947,7 +949,7 @@ pub trait ProtocolHandler: Sync + Send {
     // protocol, as it'll always be the same.
     if device.endpoints().contains(&Endpoint::RxBLEBattery) {
       debug!("Trying to get battery reading.");
-      let msg = HardwareReadCmd::new(Endpoint::RxBLEBattery, 1, 0);
+      let msg = HardwareReadCmd::new(GENERIC_BATTERY_READ_UUID, Endpoint::RxBLEBattery, 1, 0);
       let fut = device.read_value(&msg);
       async move {
         let hw_msg = fut.await?;
