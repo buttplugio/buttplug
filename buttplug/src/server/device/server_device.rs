@@ -62,7 +62,14 @@ use crate::{
       protocol::ProtocolHandler,
     },
     message::{
-      checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, checked_value_cmd::CheckedValueCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, server_device_attributes::ServerDeviceAttributes, spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage
+      checked_sensor_read_cmd::CheckedSensorReadCmdV4, 
+      checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, 
+      checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, 
+      checked_value_cmd::CheckedValueCmdV4, 
+      checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, 
+      server_device_attributes::ServerDeviceAttributes, 
+      spec_enums::ButtplugDeviceCommandMessageUnionV4, 
+      ButtplugServerDeviceMessage
     },
     ButtplugServerResultFuture,
   },
@@ -238,15 +245,9 @@ impl ServerDevice {
     definition: &UserDeviceDefinition,
   ) -> Self {
     let keepalive_packet = Arc::new(RwLock::new(None));
-    //let acm = ActuatorCommandManager::new(definition.features());
-    // If we've gotten here, we know our hardware is connected. This means we can start the keepalive if it's required.
-    //if hardware.requires_keepalive()
-    //  && !matches!(
-    //    handler.keepalive_strategy(),
-    //    ProtocolKeepaliveStrategy::NoStrategy
-    //  )
-    //{
     let current_hardware_commands = Arc::new(Mutex::new(None));
+
+    // Set up and start the packet send task
     {
       let current_hardware_commands = current_hardware_commands.clone();
       let hardware = hardware.clone();
@@ -274,6 +275,8 @@ impl ServerDevice {
             }
           };
           while let Some(command) = local_commands.pop_front() {
+            trace!("Sending hardware command {:?}", command);
+            // TODO This needs to throw system error messages
             let _ = hardware.parse_message(&command).await;
             if hardware.requires_keepalive()
               && matches!(
@@ -321,7 +324,6 @@ impl ServerDevice {
         info!("Leaving keepalive task for {}", hardware.name());
       });
     }
-    //}
 
     let mut stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4> = vec![];
     for (index, feature) in definition.features().iter().enumerate() {
