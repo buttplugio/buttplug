@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{self, ActuatorType, Endpoint, FeatureType, SensorReadingV4},
+    message::{self, Endpoint, FeatureType, SensorReadingV4},
   },
   server::{
     device::{
@@ -32,7 +32,7 @@ use async_trait::async_trait;
 use dashmap::DashMap;
 use futures::{future::BoxFuture, FutureExt};
 use regex::Regex;
-use uuid::Uuid;
+use uuid::{uuid, Uuid};
 use std::{
   sync::{
     atomic::{AtomicU32, AtomicU8, Ordering},
@@ -40,7 +40,7 @@ use std::{
   }, time::Duration
 };
 
-use super::ProtocolCommandCacheType;
+use super::ProtocolCommandOutputStrategy;
 
 // Constants for dealing with the Lovense subscript/write race condition. The
 // timeout needs to be VERY long, otherwise this trips up old lovense serial
@@ -49,6 +49,8 @@ use super::ProtocolCommandCacheType;
 // Just buy new adapters, people.
 const LOVENSE_COMMAND_TIMEOUT_MS: u64 = 500;
 const LOVENSE_COMMAND_RETRY: u64 = 5;
+
+const LOVENSE_PROTOCOL_UUID: Uuid = uuid!("cfa3fac5-48bb-4d87-817e-a439965956e1");
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -102,11 +104,11 @@ impl ProtocolIdentifier for LovenseIdentifier {
     let mut event_receiver = hardware.event_stream();
     let mut count = 0;
     hardware
-      .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
+      .subscribe(&HardwareSubscribeCmd::new(LOVENSE_PROTOCOL_UUID, Endpoint::Rx))
       .await?;
 
     loop {
-      let msg = HardwareWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), false);
+      let msg = HardwareWriteCmd::new(LOVENSE_PROTOCOL_UUID, Endpoint::Tx, b"DeviceType;".to_vec(), false);
       hardware.write_value(&msg).await?;
 
       select! {
@@ -250,7 +252,7 @@ impl Lovense {
       speeds.push(0x3b);
 
       Ok(vec![
-        HardwareWriteCmd::new(Endpoint::Tx, speeds, false).into()
+        HardwareWriteCmd::new(LOVENSE_PROTOCOL_UUID, Endpoint::Tx, speeds, false).into()
       ])
   }
 
@@ -292,13 +294,14 @@ impl Lovense {
 }
 
 impl ProtocolHandler for Lovense {
-  fn cache_strategy(&self) -> ProtocolCommandCacheType {
-    ProtocolCommandCacheType::Internal
+  fn cache_strategy(&self) -> ProtocolCommandOutputStrategy {
+    ProtocolCommandOutputStrategy::FullCommand
   }
 
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     // For Lovense, we'll just repeat the device type packet and drop the result.
     super::ProtocolKeepaliveStrategy::RepeatPacketStrategy(HardwareWriteCmd::new(
+      LOVENSE_PROTOCOL_UUID,
       Endpoint::Tx,
       b"DeviceType;".to_vec(),
       false,
@@ -325,7 +328,7 @@ impl ProtocolHandler for Lovense {
         } else {
           format!("Vibrate{}:{};", cmd.feature_index() + 1, cmd.value()).as_bytes().to_vec()
         };
-        Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into()])
+        Ok(vec![HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, lovense_cmd, false).into()])
       }
     }
     /*
@@ -397,7 +400,7 @@ impl ProtocolHandler for Lovense {
       .as_bytes()
       .to_vec();
 
-    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into()])
+    Ok(vec![HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, lovense_cmd, false).into()])
   } 
 
   fn handle_value_rotate_cmd(
@@ -413,12 +416,12 @@ impl ProtocolHandler for Lovense {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut hardware_cmds = vec![];
     let lovense_cmd = format!("Rotate:{};", cmd.value()).as_bytes().to_vec();
-    hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+    hardware_cmds.push(HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, lovense_cmd, false).into());
     let current_dir = self.rotation_direction.load(Ordering::Relaxed);
     if current_dir != cmd.parameter() as u8 {
       self.rotation_direction.store(cmd.parameter() as u8, Ordering::Relaxed);
       hardware_cmds
-        .push(HardwareWriteCmd::new(Endpoint::Tx, b"RotateChange;".to_vec(), false).into());
+        .push(HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, b"RotateChange;".to_vec(), false).into());
     }
     trace!("{:?}", hardware_cmds);
     Ok(hardware_cmds)
@@ -432,6 +435,7 @@ impl ProtocolHandler for Lovense {
     let mut device_notification_receiver = device.event_stream();
     async move {
       let write_fut = device.write_value(&HardwareWriteCmd::new(
+        message.feature_id(),
         Endpoint::Tx,
         b"Battery;".to_vec(),
         false,
@@ -528,7 +532,7 @@ async fn update_linear_movement(device: Arc<Hardware>, linear_info: Arc<(AtomicU
 
     let lovense_cmd = format!("FSetSite:{};", current_position);
 
-    let hardware_cmd = HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd.into_bytes(), false);
+    let hardware_cmd = HardwareWriteCmd::new(LOVENSE_PROTOCOL_UUID, Endpoint::Tx, lovense_cmd.into_bytes(), false);
     if device.write_value(&hardware_cmd).await.is_err() {
       return;
     }

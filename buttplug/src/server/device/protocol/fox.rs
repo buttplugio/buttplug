@@ -28,6 +28,7 @@ impl ProtocolHandler for Fox {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       vec![0x03, 0x01, 0x01, 0xfe, cmd.value() as u8],
       false,

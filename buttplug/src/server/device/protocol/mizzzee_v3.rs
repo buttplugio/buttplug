@@ -20,9 +20,11 @@ use crate::{
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::{sync::Arc, time::Duration};
 
+const MIZZZEE_V3_PROTOCOL_UUID: Uuid = uuid!("a4d62eee-0f9e-4e39-b488-9161b1b5e9f5");
 generic_protocol_initializer_setup!(MizzZeeV3, "mizzzee-v3");
 
 #[derive(Default)]
@@ -81,6 +83,7 @@ async fn vibration_update_handler(device: Arc<Hardware>, current_scalar_holder: 
   let mut current_scalar = current_scalar_holder.load(Ordering::Relaxed);
   while device
     .write_value(&HardwareWriteCmd::new(
+      MIZZZEE_V3_PROTOCOL_UUID,
       Endpoint::Tx,
       scalar_to_vector(current_scalar),
       true,
@@ -123,6 +126,7 @@ impl ProtocolHandler for MizzZeeV3 {
     let current_scalar = self.current_scalar.clone();
     current_scalar.store(cmd.value(), Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
+      MIZZZEE_V3_PROTOCOL_UUID,
       Endpoint::Tx,
       scalar_to_vector(cmd.value()),
       true,

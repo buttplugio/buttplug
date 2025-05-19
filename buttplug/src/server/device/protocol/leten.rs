@@ -20,11 +20,14 @@ use crate::{
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
 };
 use std::time::Duration;
+
+const LETEN_PROTOCOL_UUID: Uuid = uuid!("7d899f44-2676-4a00-9c68-0c800055ee2a");
 
 generic_protocol_initializer_setup!(Leten, "leten");
 #[derive(Default)]
@@ -40,7 +43,7 @@ impl ProtocolInitializer for LetenInitializer {
     // There's a more complex auth flow that the app "sometimes" goes through where it
     // sends [0x04, 0x00] and waits for [0x01] on Rx before calling [0x04, 0x01]
     hardware
-      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, vec![0x04, 0x01], true))
+      .write_value(&HardwareWriteCmd::new(LETEN_PROTOCOL_UUID, Endpoint::Tx, vec![0x04, 0x01], true))
       .await?;
     // Sometimes sending this causes Rx to receive [0x0a]
     Ok(Arc::new(Leten::new(hardware)))
@@ -54,6 +57,7 @@ async fn command_update_handler(device: Arc<Hardware>, command_holder: Arc<Atomi
   let mut current_command = command_holder.load(Ordering::Relaxed);
   while device
     .write_value(&HardwareWriteCmd::new(
+      LETEN_PROTOCOL_UUID,
       Endpoint::Tx,
       vec![0x02, current_command],
       true,
@@ -97,6 +101,7 @@ impl ProtocolHandler for Leten {
     current_command.store(cmd.value() as u8, Ordering::Relaxed);
 
     Ok(vec![HardwareWriteCmd::new(
+      LETEN_PROTOCOL_UUID,
       Endpoint::Tx,
       vec![0x02, cmd.value() as u8],
       true,

@@ -28,6 +28,7 @@ impl ProtocolHandler for ActiveJoy {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       [
         0xb0,        // static header

@@ -23,6 +23,7 @@ use crate::{
 };
 use async_trait::async_trait;
 use futures::FutureExt;
+use uuid::{uuid, Uuid};
 use std::{
   sync::{
     atomic::{AtomicU8, Ordering},
@@ -32,7 +33,7 @@ use std::{
 };
 
 const FREDORCH_COMMAND_TIMEOUT_MS: u64 = 100;
-
+const FREDORCH_ROTORY_PROTOCOL_UUID: Uuid = uuid!("0ec6598a-bfd1-4f47-9738-e8cd8ace6473");
 generic_protocol_initializer_setup!(FredorchRotary, "fredorch-rotary");
 
 #[derive(Default)]
@@ -51,7 +52,7 @@ impl ProtocolInitializer for FredorchRotaryInitializer {
 
     let mut event_receiver = hardware.event_stream();
     hardware
-      .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
+      .subscribe(&HardwareSubscribeCmd::new(FREDORCH_ROTORY_PROTOCOL_UUID, Endpoint::Rx))
       .await?;
 
     let init: Vec<(String, Vec<u8>)> = vec![
@@ -78,7 +79,7 @@ impl ProtocolInitializer for FredorchRotaryInitializer {
     for data in init {
       debug!("FredorchRotary: {} - sent {:?}", data.0, data.1);
       hardware
-        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.1.clone(), false))
+        .write_value(&HardwareWriteCmd::new(FREDORCH_ROTORY_PROTOCOL_UUID, Endpoint::Tx, data.1.clone(), false))
         .await?;
 
       select! {
@@ -132,6 +133,7 @@ async fn speed_update_handler(
       };
       let update = device
         .write_value(&HardwareWriteCmd::new(
+          FREDORCH_ROTORY_PROTOCOL_UUID,
           Endpoint::Tx,
           vec![0x55u8, 0x03, cmd, cmd + 3, 0xaa],
           false,
@@ -202,6 +204,7 @@ impl ProtocolHandler for FredorchRotary {
     if speed == 0 {
       self.current_speed.store(speed, Ordering::SeqCst);
       Ok(vec![HardwareWriteCmd::new(
+        FREDORCH_ROTORY_PROTOCOL_UUID,
         Endpoint::Tx,
         vec![0x55, 0x03, 0x24, 0x27, 0xaa],
         false,

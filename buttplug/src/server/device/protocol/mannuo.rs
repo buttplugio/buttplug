@@ -34,6 +34,6 @@ impl ProtocolHandler for ManNuo {
       crc ^= b;
     }
     data.push(crc);
-    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, true).into()])
+    Ok(vec![HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, data, true).into()])
   }
 }

@@ -17,7 +17,10 @@ use crate::{
   }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::Arc;
+
+const HISMITH_MINI_PROTOCOL_UUID: Uuid = uuid!("94befc1a-9859-4bf6-99ee-5678c89237a7");
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -46,7 +49,7 @@ impl ProtocolIdentifier for HismithMiniIdentifier {
     _: ProtocolCommunicationSpecifier,
   ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     let result = hardware
-      .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
+      .read_value(&HardwareReadCmd::new(HISMITH_MINI_PROTOCOL_UUID, Endpoint::RxBLEModel, 128, 500))
       .await?;
 
     let identifier = result
@@ -109,6 +112,7 @@ impl ProtocolHandler for HismithMini {
     let speed: u8 = cmd.value() as u8;
 
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       vec![0xCC, idx, speed, speed + idx],
       false,
@@ -128,6 +132,7 @@ impl ProtocolHandler for HismithMini {
     let speed: u8 = cmd.value() as u8;
 
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       vec![0xCC, idx, speed, speed + idx],
       false,
@@ -143,6 +148,7 @@ impl ProtocolHandler for HismithMini {
     let speed: u8 = cmd.value() as u8;
 
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       vec![0xCC, idx, speed, speed + idx],
       false,

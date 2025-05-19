@@ -28,6 +28,7 @@ impl ProtocolHandler for SvakomBarnard {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       [
         0x55,
@@ -48,6 +49,7 @@ impl ProtocolHandler for SvakomBarnard {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.uuid(),
       Endpoint::Tx,
       [
         0x55,

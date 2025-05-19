@@ -28,6 +28,7 @@ impl ProtocolHandler for Omobo {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       vec![0xa1, 0x04, 0x04, 0x01, cmd.value() as u8, 0xff, 0x55],
       true,

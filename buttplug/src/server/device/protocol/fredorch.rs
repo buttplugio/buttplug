@@ -24,6 +24,7 @@ use crate::{
 };
 use async_trait::async_trait;
 use futures::FutureExt;
+use uuid::{uuid, Uuid};
 use std::{
   sync::{
     atomic::{AtomicU8, Ordering},
@@ -76,6 +77,8 @@ pub fn crc16(data: &[u8]) -> [u8; 2] {
   [n, o]
 }
 
+const FREDORCH_PROTOCOL_UUID: Uuid = uuid!("f9a83f46-0af5-4766-84f0-a1cca6614115");
+
 generic_protocol_initializer_setup!(Fredorch, "fredorch");
 
 #[derive(Default)]
@@ -90,7 +93,7 @@ impl ProtocolInitializer for FredorchInitializer {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut event_receiver = hardware.event_stream();
     hardware
-      .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
+      .subscribe(&HardwareSubscribeCmd::new(FREDORCH_PROTOCOL_UUID, Endpoint::Rx))
       .await?;
 
     let init: Vec<(String, Vec<u8>)> = vec![
@@ -144,7 +147,7 @@ impl ProtocolInitializer for FredorchInitializer {
       data.1.push(crc[1]);
       debug!("Fredorch: {} - sent {:?}", data.0, data.1);
       hardware
-        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.1.clone(), false))
+        .write_value(&HardwareWriteCmd::new(FREDORCH_PROTOCOL_UUID, Endpoint::Tx, data.1.clone(), false))
         .await?;
 
       select! {
@@ -188,17 +191,13 @@ impl ProtocolHandler for Fredorch {
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
     let previous_position = self.previous_position.load(Ordering::SeqCst);
-    let distance = (previous_position as i32 - message.value() as i32).abs();
-    let fl_cmd = FleshlightLaunchFW12CmdV0::new(
-      0,
-      (message.value()) as u8,
-      (calculate_speed(distance as f64, message.parameter().try_into().unwrap()) * 99f64) as u8,
-    );
-    
+    let distance = (previous_position as f64 - message.value() as f64).abs() / 99f64;
+
     // TODO Clean this up, we do not need the conversions anymore since we'll have done the
     // calculations before we get to the protocol layer.
-    let position = ((fl_cmd.position() as f64 / 99.0) * 150.0) as u8;
-    let speed = ((fl_cmd.speed() as f64 / 99.0) * 15.0) as u8;
+    let position = ((message.value() as f64 / 99.0) * 150.0) as u8;
+    let converted_speed = calculate_speed(distance as f64, message.parameter().try_into().unwrap()) * 99f64;
+    let speed = ((converted_speed as f64 / 99.0) * 15.0) as u8;
     let mut data: Vec<u8> = vec![
       0x01, 0x10, 0x00, 0x6B, 0x00, 0x05, 0x0a, 0x00, speed, 0x00, speed, 0x00, position, 0x00,
       position, 0x00, 0x01,
@@ -207,6 +206,6 @@ impl ProtocolHandler for Fredorch {
     data.push(crc[0]);
     data.push(crc[1]);
     self.previous_position.store(position, Ordering::SeqCst);
-    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(FREDORCH_PROTOCOL_UUID, Endpoint::Tx, data, false).into()])
   }
 }

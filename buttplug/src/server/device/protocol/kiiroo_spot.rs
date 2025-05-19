@@ -29,6 +29,7 @@ impl ProtocolHandler for KiirooSpot {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       vec![0x00, 0xff, 0x00, 0x00, 0x00, cmd.value() as u8],
       false,
@@ -43,7 +44,7 @@ impl ProtocolHandler for KiirooSpot {
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     debug!("Trying to get battery reading.");
     let message = message.clone();
-    let msg = HardwareReadCmd::new(Endpoint::RxBLEBattery, 20, 0);
+    let msg = HardwareReadCmd::new(message.feature_id(), Endpoint::RxBLEBattery, 20, 0);
     let fut = device.read_value(&msg);
     async move {
       let hw_msg = fut.await?;

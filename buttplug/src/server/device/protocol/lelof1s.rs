@@ -22,8 +22,10 @@ use crate::{
   }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
 
+const LELO_F1S_PROTOCOL_UUID: Uuid = uuid!("4987f232-40f9-47a3-8d0c-e30b74e75310");
 generic_protocol_initializer_setup!(LeloF1s, "lelo-f1s");
 
 #[derive(Default)]
@@ -40,7 +42,7 @@ impl ProtocolInitializer for LeloF1sInitializer {
     // before it'll accept any commands. Unless we listen for event on
     // the button, this is more likely to turn the device off.
     hardware
-      .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
+      .subscribe(&HardwareSubscribeCmd::new(LELO_F1S_PROTOCOL_UUID, Endpoint::Rx))
       .await?;
     Ok(Arc::new(LeloF1s::new(false)))
   }
@@ -77,7 +79,7 @@ impl ProtocolHandler for LeloF1s {
     let mut cmd_vec = vec![0x1];
     self.speeds.iter().for_each(|v| cmd_vec.push(v.load(Ordering::Relaxed)));
     Ok(vec![
-      HardwareWriteCmd::new(Endpoint::Tx, cmd_vec, self.write_with_response).into()
+      HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, cmd_vec, self.write_with_response).into()
     ])
   }
 }

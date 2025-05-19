@@ -22,9 +22,11 @@ use crate::{
   }, message::checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4},
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::cmp::{max, min};
 use std::sync::Arc;
 
+const LOOB_PROTOCOL_UUID: Uuid = uuid!("b3a02457-3bda-4c5b-8363-aead6eda74ae");
 generic_protocol_initializer_setup!(Loob, "loob");
 
 #[derive(Default)]
@@ -37,7 +39,7 @@ impl ProtocolInitializer for LoobInitializer {
     hardware: Arc<Hardware>,
     _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let msg = HardwareWriteCmd::new(Endpoint::Tx, vec![0x00, 0x01, 0x01, 0xf4], true);
+    let msg = HardwareWriteCmd::new(LOOB_PROTOCOL_UUID, Endpoint::Tx, vec![0x00, 0x01, 0x01, 0xf4], true);
     hardware.write_value(&msg).await?;
     Ok(Arc::new(Loob::default()))
   }
@@ -57,6 +59,6 @@ impl ProtocolHandler for Loob {
     for b in time.to_be_bytes() {
       data.push(b);
     }
-    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(message.feature_uuid(), Endpoint::Tx, data, false).into()])
   }
 }

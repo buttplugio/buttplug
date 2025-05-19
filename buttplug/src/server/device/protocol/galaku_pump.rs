@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::{uuid, Uuid};
+
 use crate::server::message::checked_value_cmd::CheckedValueCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
@@ -23,6 +25,7 @@ static KEY_TAB: [[u8; 12]; 4] = [
   [0, 0xc5, 0xd6, 0xe7, 0xf8, 10, 50, 32, 111, 98, 13, 10],
 ];
 
+const GALAKU_PUMP_PROTOCOL_UUID: Uuid = uuid!("165ae3a9-33be-46a8-b438-9a6fc0f183cb");
 generic_protocol_setup!(GalakuPump, "galaku-pump");
 
 pub struct GalakuPump {
@@ -60,7 +63,7 @@ impl GalakuPump {
       data2.push((Wrapping((k ^ 0x23) ^ data[i]) + Wrapping(k)).0);
     }
 
-    vec![HardwareWriteCmd::new(Endpoint::Tx, data2, true).into()]
+    vec![HardwareWriteCmd::new(GALAKU_PUMP_PROTOCOL_UUID, Endpoint::Tx, data2, true).into()]
   }
 }
 

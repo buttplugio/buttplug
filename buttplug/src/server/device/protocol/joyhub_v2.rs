@@ -20,15 +20,18 @@ use crate::{
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
 
+const JOYHUB_V2_PROTOCOL_UUID: Uuid = uuid!("3144b936-99c8-47f3-b85d-defa5fac9e6d");
 generic_protocol_initializer_setup!(JoyHubV2, "joyhub-v2");
 
 async fn delayed_constrict_handler(device: Arc<Hardware>, scalar: u8) {
   sleep(Duration::from_millis(50)).await;
   let res = device
     .write_value(&HardwareWriteCmd::new(
+      JOYHUB_V2_PROTOCOL_UUID,
       Endpoint::Tx,
       vec![0xa0, 0x0d, 0x00, 0x00, scalar, 0xff],
       false,

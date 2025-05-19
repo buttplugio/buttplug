@@ -7,6 +7,8 @@
 
 use std::sync::atomic::{AtomicU8, Ordering};
 
+use uuid::{Uuid, uuid};
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -18,6 +20,9 @@ use crate::{
     protocol::ProtocolHandler,
   }, message::checked_value_cmd::CheckedValueCmdV4},
 };
+
+
+const FEELINGSO_PROTOCOL_UUID: Uuid = uuid!("397d4cce-3173-4f66-b7ad-6ee21e59f854");
 
 generic_protocol_setup!(FeelingSo, "feelingso");
 
@@ -36,6 +41,7 @@ impl Default for FeelingSo {
 impl FeelingSo {
   fn hardware_command(&self) -> Vec<HardwareCommand> {
     vec![HardwareWriteCmd::new(
+      FEELINGSO_PROTOCOL_UUID,      
       Endpoint::Tx,
       vec![
         0xaa,

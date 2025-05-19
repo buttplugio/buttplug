@@ -28,6 +28,7 @@ impl ProtocolHandler for SvakomDice {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       [0x55, 0x04, 0x00, 0x00, 01, cmd.value() as u8, 0xaa].to_vec(),
       false,

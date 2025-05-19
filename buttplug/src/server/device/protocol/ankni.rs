@@ -21,9 +21,12 @@ use crate::{
   },
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::Arc;
 
 generic_protocol_initializer_setup!(Ankni, "ankni");
+
+const ANKNI_PROTOCOL_UUID: Uuid = uuid!("9859232d-57ee-4135-a93c-c8988bf8cbbf");
 
 #[derive(Default)]
 pub struct AnkniInitializer {}
@@ -35,7 +38,7 @@ impl ProtocolInitializer for AnkniInitializer {
     hardware: Arc<Hardware>,
     _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let msg = HardwareReadCmd::new(Endpoint::Generic0, 16, 100);
+    let msg = HardwareReadCmd::new(ANKNI_PROTOCOL_UUID, Endpoint::Generic0, 16, 100);
     let reading = hardware.read_value(&msg).await?;
 
     // No mac address on PnP characteristic, assume no handshake required
@@ -51,6 +54,7 @@ impl ProtocolInitializer for AnkniInitializer {
     debug!("Ankni Checksum: {:#02X}", check);
 
     let msg = HardwareWriteCmd::new(
+      ANKNI_PROTOCOL_UUID,
       Endpoint::Tx,
       vec![
         0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
@@ -60,6 +64,7 @@ impl ProtocolInitializer for AnkniInitializer {
     );
     hardware.write_value(&msg).await?;
     let msg = HardwareWriteCmd::new(
+      ANKNI_PROTOCOL_UUID,
       Endpoint::Tx,
       vec![
         0x01, 0x02, check, check, check, check, check, check, check, check, check, check, check,
@@ -85,6 +90,7 @@ impl ProtocolHandler for Ankni {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       vec![
         0x03,

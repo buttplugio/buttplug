@@ -21,8 +21,10 @@ use crate::{
   },
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::Arc;
 
+const LIONESS_PROTOCOL_UUID: Uuid = uuid!("1912c626-f611-4569-9d62-fb40ff8e1474");
 generic_protocol_initializer_setup!(Lioness, "lioness");
 
 #[derive(Default)]
@@ -36,11 +38,12 @@ impl ProtocolInitializer for LionessInitializer {
     _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
-      .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
+      .subscribe(&HardwareSubscribeCmd::new(LIONESS_PROTOCOL_UUID, Endpoint::Rx))
       .await?;
 
     let res = hardware
       .write_value(&HardwareWriteCmd::new(
+        LIONESS_PROTOCOL_UUID,
         Endpoint::Tx,
         vec![0x01, 0xAA, 0xAA, 0xBB, 0xCC, 0x10],
         true,
@@ -69,6 +72,7 @@ impl ProtocolHandler for Lioness {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       vec![0x02, 0xAA, 0xBB, 0xCC, 0xCC, cmd.value() as u8],
       false,

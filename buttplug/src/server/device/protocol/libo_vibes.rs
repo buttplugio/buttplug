@@ -5,17 +5,20 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::{uuid, Uuid};
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{ActuatorType, Endpoint},
   },
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
+const LIBO_VIBES_PROTOCOL_UUID: Uuid = uuid!("72a3d029-cf33-4fff-beec-1c45b85cc8ae");
 generic_protocol_setup!(LiboVibes, "libo-vibes");
 
 #[derive(Default)]
@@ -26,24 +29,19 @@ impl ProtocolHandler for LiboVibes {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, i32)>],
+    cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut msg_vec = vec![];
-    for (index, cmd) in cmds.iter().enumerate() {
-      if let Some((_, speed)) = cmd {
-        if index == 0 {
-          msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, vec![*speed as u8], false).into());
-
-          // If this is a single vibe device, we need to send stop to TxMode too
-          if *speed as u8 == 0 && cmds.len() == 1 {
-            msg_vec.push(HardwareWriteCmd::new(Endpoint::TxMode, vec![0u8], false).into());
-          }
-        } else if index == 1 {
-          msg_vec.push(HardwareWriteCmd::new(Endpoint::TxMode, vec![*speed as u8], false).into());
-        }
+    if cmd.feature_index() == 0 {
+      msg_vec.push(HardwareWriteCmd::new(LIBO_VIBES_PROTOCOL_UUID, Endpoint::Tx, vec![cmd.value() as u8], false).into());
+      // If this is a single vibe device, we need to send stop to TxMode too
+      if cmd.value() as u8 == 0 {
+        msg_vec.push(HardwareWriteCmd::new(LIBO_VIBES_PROTOCOL_UUID, Endpoint::TxMode, vec![0u8], false).into());
       }
+    } else if cmd.feature_index() == 1 {
+      msg_vec.push(HardwareWriteCmd::new(LIBO_VIBES_PROTOCOL_UUID, Endpoint::TxMode, vec![cmd.value() as u8], false).into());
     }
     Ok(msg_vec)
   }

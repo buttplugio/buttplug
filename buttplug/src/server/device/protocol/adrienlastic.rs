@@ -28,6 +28,7 @@ impl ProtocolHandler for AdrienLastic {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       format!("MotorValue:{:02};", cmd.value()).as_bytes().to_vec(),
       true,

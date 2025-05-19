@@ -8,13 +8,13 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
   generic_protocol_setup,
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::ProtocolHandler,
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(JoyHubV3, "joyhub-v3");
@@ -31,12 +31,12 @@ impl ProtocolHandler for JoyHubV3 {
     true
   }
 
-  fn handle_value_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
-    commands: &[Option<(ActuatorType, i32)>],
+    cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let cmd1 = commands[0];
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       vec![
         0xa0,
@@ -44,7 +44,7 @@ impl ProtocolHandler for JoyHubV3 {
         0x00,
         0x00,
         0x00,
-        cmd1.unwrap_or((ActuatorType::Vibrate, 0)).1 as u8,
+        cmd.value() as u8,
         0xaa,
       ],
       false,

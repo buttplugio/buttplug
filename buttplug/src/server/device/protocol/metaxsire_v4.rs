@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+  server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+  }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 
 generic_protocol_setup!(MetaXSireV4, "metaxsire-v4");
@@ -28,8 +28,9 @@ impl ProtocolHandler for MetaXSireV4 {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
-      vec![0xbb, 0x01, scalar as u8, 0x66],
+      vec![0xbb, 0x01, cmd.value() as u8, 0x66],
       true,
     )
     .into()])

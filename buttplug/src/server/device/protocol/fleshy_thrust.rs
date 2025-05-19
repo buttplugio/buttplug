@@ -21,14 +21,15 @@ pub struct FleshyThrust {}
 impl ProtocolHandler for FleshyThrust {
   fn handle_position_with_duration_cmd(
     &self,
-    message: &CheckedValueWithParameterCmdV4,
+    cmd: &CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       vec![
-        message.value() as u8,
-        ((message.parameter() & 0xff00) >> 8) as u8,
-        (message.parameter() & 0xff) as u8,
+        cmd.value() as u8,
+        ((cmd.parameter() & 0xff00) >> 8) as u8,
+        (cmd.parameter() & 0xff) as u8,
       ],
       false,
     )

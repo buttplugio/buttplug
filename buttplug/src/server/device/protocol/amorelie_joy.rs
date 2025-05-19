@@ -20,7 +20,10 @@ use crate::{
   }, message::checked_value_cmd::CheckedValueCmdV4},
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::Arc;
+
+const AMORELIE_JOY_PROTOCOL_UUID: Uuid = uuid!("0968017b-96f8-44ae-b113-39080dd7ed5f");
 
 generic_protocol_initializer_setup!(AmorelieJoy, "amorelie-joy");
 
@@ -35,7 +38,7 @@ impl ProtocolInitializer for AmorelieJoyInitializer {
     _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
-      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, vec![0x03], false))
+      .write_value(&HardwareWriteCmd::new(AMORELIE_JOY_PROTOCOL_UUID, Endpoint::Tx, vec![0x03], false))
       .await?;
     Ok(Arc::new(AmorelieJoy::default()))
   }
@@ -54,6 +57,7 @@ impl ProtocolHandler for AmorelieJoy {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),
       Endpoint::Tx,
       [
         0x01,         // static header

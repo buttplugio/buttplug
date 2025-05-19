@@ -25,6 +25,7 @@ use crate::{
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::{
   sync::{
     atomic::{AtomicU8, Ordering},
@@ -36,6 +37,7 @@ use std::{
 // Time between Hgod update commands, in milliseconds.
 const HGOD_COMMAND_DELAY_MS: u64 = 100;
 
+const HGOD_PROTOCOL_UUID: Uuid = uuid!("0a086d5b-9918-4b73-b2dd-86ed66de6f51");
 generic_protocol_initializer_setup!(Hgod, "hgod");
 
 #[derive(Default)]
@@ -76,7 +78,7 @@ async fn send_hgod_updates(device: Arc<Hardware>, data: Arc<AtomicU8>) {
     let command = vec![0x55, 0x04, 0, 0, 0, speed];
     if speed > 0 {
       if let Err(e) = device
-        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, command, false))
+        .write_value(&HardwareWriteCmd::new(HGOD_PROTOCOL_UUID, Endpoint::Tx, command, false))
         .await
       {
         error!(
