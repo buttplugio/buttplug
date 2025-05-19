@@ -21,9 +21,11 @@ use crate::{
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::{sync::Arc, time::Duration};
 use tokio::sync::RwLock;
 
+const XUANHUAN_PROTOCOL_UUID: Uuid = uuid!("1798125d-722a-43fd-8ec9-7b88b3248ac9");
 generic_protocol_initializer_setup!(Xuanhuan, "xuanhuan");
 
 #[derive(Default)]
@@ -45,7 +47,7 @@ async fn vibration_update_handler(device: Arc<Hardware>, command_holder: Arc<RwL
   let mut current_command = command_holder.read().await.clone();
   while current_command == vec![0x03, 0x02, 0x00, 0x00]
     || device
-      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, current_command, true))
+      .write_value(&HardwareWriteCmd::new(XUANHUAN_PROTOCOL_UUID, Endpoint::Tx, current_command, true))
       .await
       .is_ok()
   {
@@ -83,6 +85,7 @@ impl ProtocolHandler for Xuanhuan {
       *command_writer = vec![0x03, 0x02, 0x00, speed as u8];
     });
     Ok(vec![HardwareWriteCmd::new(
+      XUANHUAN_PROTOCOL_UUID,
       Endpoint::Tx,
       vec![0x03, 0x02, 0x00, cmd.value() as u8],
       true,

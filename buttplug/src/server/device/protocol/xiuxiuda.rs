@@ -28,6 +28,7 @@ impl ProtocolHandler for Xiuxiuda {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
+      cmd.feature_uuid(),      
       Endpoint::Tx,
       [0x00, 0x00, 0x00, 0x00, 0x65, 0x3a, 0x30, cmd.value() as u8, 0x64].to_vec(),
       false,
