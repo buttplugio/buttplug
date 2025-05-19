@@ -11,9 +11,8 @@ mod test_device_comm_manager;
 
 use buttplug::{
   server::device::hardware::HardwareCommand,
-  util::stream::{iffy_is_empty_check, recv_now},
 };
-use std::sync::{Arc, Mutex};
+use std::time::Duration;
 pub use test_device::{TestDevice, TestDeviceChannelHost, TestHardwareEvent};
 #[cfg(feature = "server")]
 pub use test_device_comm_manager::{
@@ -21,19 +20,13 @@ pub use test_device_comm_manager::{
   TestDeviceCommunicationManagerBuilder,
   TestDeviceIdentifier,
 };
-use tokio::sync::mpsc::Receiver;
 
 #[allow(dead_code)]
-pub fn check_test_recv_value(receiver: &mut TestDeviceChannelHost, command: HardwareCommand) {
+pub async fn check_test_recv_value(timeout: &Duration, receiver: &mut TestDeviceChannelHost, command: HardwareCommand) {
   assert_eq!(
-    recv_now(&mut receiver.receiver)
+    tokio::time::timeout(*timeout, receiver.receiver.recv()).await
       .expect("No messages received")
       .expect("Test"),
     command
   );
-}
-
-#[allow(dead_code)]
-pub fn check_test_recv_empty(receiver: &Arc<Mutex<Receiver<HardwareCommand>>>) -> bool {
-  iffy_is_empty_check(&mut receiver.lock().expect("Test"))
 }
