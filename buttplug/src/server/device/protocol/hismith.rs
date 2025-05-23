@@ -106,7 +106,7 @@ impl ProtocolHandler for Hismith {
     let speed: u8 = cmd.value() as u8;
 
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       vec![0xAA, idx, speed, speed + idx],
       false,
@@ -128,7 +128,7 @@ impl ProtocolHandler for Hismith {
     };
 
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       vec![0xAA, idx, speed, speed + idx],
       false,

@@ -79,7 +79,7 @@ impl ProtocolHandler for LeloF1s {
     let mut cmd_vec = vec![0x1];
     self.speeds.iter().for_each(|v| cmd_vec.push(v.load(Ordering::Relaxed)));
     Ok(vec![
-      HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, cmd_vec, self.write_with_response).into()
+      HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, cmd_vec, self.write_with_response).into()
     ])
   }
 }

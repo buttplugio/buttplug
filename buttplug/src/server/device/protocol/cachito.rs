@@ -28,7 +28,7 @@ impl ProtocolHandler for Cachito {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       vec![2u8 + (cmd.feature_index() as u8), 1u8 + (cmd.feature_index() as u8), cmd.value() as u8, 0u8],
       false,

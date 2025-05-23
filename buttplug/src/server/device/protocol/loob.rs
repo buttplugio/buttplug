@@ -59,6 +59,6 @@ impl ProtocolHandler for Loob {
     for b in time.to_be_bytes() {
       data.push(b);
     }
-    Ok(vec![HardwareWriteCmd::new(message.feature_uuid(), Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(message.feature_id(), Endpoint::Tx, data, false).into()])
   }
 }

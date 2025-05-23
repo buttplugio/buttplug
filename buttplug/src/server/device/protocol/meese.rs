@@ -28,7 +28,7 @@ impl ProtocolHandler for Meese {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       vec![0x01, 0x80, 0x01 + (cmd.feature_index() as u8), (cmd.value() as u8)],
       true,

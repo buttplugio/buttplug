@@ -43,7 +43,7 @@ impl ProtocolHandler for KiirooV2Vibrator {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       self.speeds.iter().map(|v| v.load(Ordering::Relaxed)).collect(),
       false,

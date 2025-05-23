@@ -24,7 +24,7 @@ impl ProtocolHandler for NextLevelRacing {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       format!("M{}{}\r", cmd.feature_index(), cmd.value()).into_bytes(),
       false,

@@ -487,13 +487,13 @@ impl ServerDevice {
   }
 
   fn handle_valuecmd_v4(&self, msg: &CheckedValueCmdV4) -> ButtplugServerResultFuture {
-    if let Some(last_msg) = self.last_actuator_command.get(&msg.feature_uuid()) {
+    if let Some(last_msg) = self.last_actuator_command.get(&msg.feature_id()) {
       if *last_msg == ActuatorCommand::ValueCmd(msg.value()) {
         trace!("No commands generated for incoming device packet, skipping and returning success.");
         return future::ready(Ok(message::OkV0::default().into())).boxed();
       }
     }
-    self.last_actuator_command.insert(msg.feature_uuid(), ActuatorCommand::ValueCmd(msg.value()));
+    self.last_actuator_command.insert(msg.feature_id(), ActuatorCommand::ValueCmd(msg.value()));
     self.handle_generic_command_result(self.handler.handle_value_cmd(msg))
   }
 
@@ -509,7 +509,7 @@ impl ServerDevice {
       let mut c = current_hardware_commands.lock().await;
       if let Some(g) = c.as_mut() {
         for command in commands {
-          g.retain(|v| v.feature_id() != command.feature_id());
+          g.retain(|v| v.command_id() != command.command_id());
           g.push_back(command);
         }
       } else {

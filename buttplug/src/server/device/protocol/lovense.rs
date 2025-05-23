@@ -328,7 +328,7 @@ impl ProtocolHandler for Lovense {
         } else {
           format!("Vibrate{}:{};", cmd.feature_index() + 1, cmd.value()).as_bytes().to_vec()
         };
-        Ok(vec![HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, lovense_cmd, false).into()])
+        Ok(vec![HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, lovense_cmd, false).into()])
       }
     }
     /*
@@ -400,14 +400,14 @@ impl ProtocolHandler for Lovense {
       .as_bytes()
       .to_vec();
 
-    Ok(vec![HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, lovense_cmd, false).into()])
+    Ok(vec![HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, lovense_cmd, false).into()])
   } 
 
   fn handle_value_rotate_cmd(
     &self,
     cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.handle_rotation_with_direction_cmd(&CheckedValueWithParameterCmdV4::new(cmd.device_index(), cmd.feature_index(), cmd.feature_uuid(), cmd.actuator_type(), cmd.value(), 0))
+    self.handle_rotation_with_direction_cmd(&CheckedValueWithParameterCmdV4::new(cmd.device_index(), cmd.feature_index(), cmd.feature_id(), cmd.actuator_type(), cmd.value(), 0))
   }
 
   fn handle_rotation_with_direction_cmd(
@@ -416,12 +416,12 @@ impl ProtocolHandler for Lovense {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut hardware_cmds = vec![];
     let lovense_cmd = format!("Rotate:{};", cmd.value()).as_bytes().to_vec();
-    hardware_cmds.push(HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, lovense_cmd, false).into());
+    hardware_cmds.push(HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, lovense_cmd, false).into());
     let current_dir = self.rotation_direction.load(Ordering::Relaxed);
     if current_dir != cmd.parameter() as u8 {
       self.rotation_direction.store(cmd.parameter() as u8, Ordering::Relaxed);
       hardware_cmds
-        .push(HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, b"RotateChange;".to_vec(), false).into());
+        .push(HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, b"RotateChange;".to_vec(), false).into());
     }
     trace!("{:?}", hardware_cmds);
     Ok(hardware_cmds)

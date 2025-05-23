@@ -72,7 +72,7 @@ impl ProtocolHandler for Lioness {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       vec![0x02, 0xAA, 0xBB, 0xCC, 0xCC, cmd.value() as u8],
       false,

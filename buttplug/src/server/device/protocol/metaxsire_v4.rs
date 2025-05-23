@@ -28,7 +28,7 @@ impl ProtocolHandler for MetaXSireV4 {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       vec![0xbb, 0x01, cmd.value() as u8, 0x66],
       true,

@@ -34,7 +34,7 @@ pub struct CheckedValueCmdV4 {
   device_index: u32,
   feature_index: u32,
   value: u32,
-  feature_uuid: Uuid,
+  feature_id: Uuid,
   actuator_type: ActuatorType
 }
 
@@ -45,7 +45,7 @@ impl PartialEq for CheckedValueCmdV4 {
     self.feature_index() == other.feature_index() &&
     self.value() == other.value() &&
     self.actuator_type() == other.actuator_type() &&
-    self.feature_uuid() == other.feature_uuid()
+    self.feature_id() == other.feature_id()
   }
 }
 
@@ -61,12 +61,12 @@ impl From<CheckedValueCmdV4> for ValueCmdV4 {
 }
 
 impl CheckedValueCmdV4 {
-  pub fn new(id: u32, device_index: u32, feature_index: u32, feature_uuid: Uuid, actuator_type: ActuatorType, value: u32) -> Self {
+  pub fn new(id: u32, device_index: u32, feature_index: u32, feature_id: Uuid, actuator_type: ActuatorType, value: u32) -> Self {
     Self {
       id,
       device_index,
       feature_index,
-      feature_uuid,
+      feature_id,
       actuator_type,
       value
     }
@@ -125,7 +125,7 @@ impl TryFromDeviceAttributes<ValueCmdV4> for CheckedValueCmdV4 {
           // making this a barrier.
           Ok(Self {
             id: cmd.id(),
-            feature_uuid: *feature.id(),
+            feature_id: *feature.id(),
             device_index: cmd.device_index(),
             feature_index: cmd.feature_index(),
             actuator_type: cmd.actuator_type(),

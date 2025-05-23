@@ -29,7 +29,7 @@ impl ProtocolHandler for Picobong {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mode: u8 = if cmd.value() == 0 { 0xff } else { 0x01 };
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       [0x01, mode, cmd.value() as u8].to_vec(),
       false,
