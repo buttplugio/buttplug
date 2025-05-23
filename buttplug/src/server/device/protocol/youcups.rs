@@ -28,7 +28,7 @@ impl ProtocolHandler for Youcups {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(), 
+      cmd.feature_id(),
       Endpoint::Tx,
       format!("$SYS,{}?", cmd.value() as u8).as_bytes().to_vec(),
       false,

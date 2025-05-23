@@ -22,10 +22,9 @@ use crate::{
 };
 use async_trait::async_trait;
 use uuid::{uuid, Uuid};
-use std::{sync::Arc, time::Duration};
-use tokio::sync::RwLock;
+use std::{sync::{atomic::{AtomicU8, Ordering}, Arc}, time::Duration};
 
-const XUANHUAN_PROTOCOL_UUID: Uuid = uuid!("1798125d-722a-43fd-8ec9-7b88b3248ac9");
+const XUANHUAN_PROTOCOL_ID: Uuid = uuid!("e9f9f8ab-4fd5-4573-a4ec-ab542568849b");
 generic_protocol_initializer_setup!(Xuanhuan, "xuanhuan");
 
 #[derive(Default)]
@@ -42,28 +41,32 @@ impl ProtocolInitializer for XuanhuanInitializer {
   }
 }
 
-async fn vibration_update_handler(device: Arc<Hardware>, command_holder: Arc<RwLock<Vec<u8>>>) {
+async fn vibration_update_handler(device: Arc<Hardware>, command_holder: Arc<AtomicU8>) {
   info!("Entering Xuanhuan Control Loop");
-  let mut current_command = command_holder.read().await.clone();
-  while current_command == vec![0x03, 0x02, 0x00, 0x00]
-    || device
-      .write_value(&HardwareWriteCmd::new(XUANHUAN_PROTOCOL_UUID, Endpoint::Tx, current_command, true))
-      .await
-      .is_ok()
-  {
+  loop {
+    let speed = command_holder.load(Ordering::Relaxed);
+    if speed != 0 {
+      let current_command = vec![0x03, 0x02, 0x00, speed];
+      if device
+         .write_value(&HardwareWriteCmd::new(XUANHUAN_PROTOCOL_ID, Endpoint::Tx, current_command, true))
+         .await
+         .is_err()
+      {
+        break;
+      }
+    }
     sleep(Duration::from_millis(300)).await;
-    current_command = command_holder.read().await.clone();
   }
   info!("Xuanhuan control loop exiting, most likely due to device disconnection.");
 }
 
 pub struct Xuanhuan {
-  current_command: Arc<RwLock<Vec<u8>>>,
+  current_command: Arc<AtomicU8>,
 }
 
 impl Xuanhuan {
   fn new(device: Arc<Hardware>) -> Self {
-    let current_command = Arc::new(RwLock::new(vec![0x03, 0x02, 0x00, 0x00]));
+    let current_command = Arc::new(AtomicU8::new(0));
     let current_command_clone = current_command.clone();
     async_manager::spawn(
       async move { vibration_update_handler(device, current_command_clone).await },
@@ -77,17 +80,13 @@ impl ProtocolHandler for Xuanhuan {
     &self,
     cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let current_command = self.current_command.clone();
-    let speed = cmd.value();
-    async_manager::spawn(async move {
-      let write_mutex = current_command.clone();
-      let mut command_writer = write_mutex.write().await;
-      *command_writer = vec![0x03, 0x02, 0x00, speed as u8];
-    });
+    let speed = cmd.value() as u8;
+    self.current_command.store(speed, Ordering::Relaxed);
+
     Ok(vec![HardwareWriteCmd::new(
-      XUANHUAN_PROTOCOL_UUID,
+      XUANHUAN_PROTOCOL_ID,
       Endpoint::Tx,
-      vec![0x03, 0x02, 0x00, cmd.value() as u8],
+      vec![0x03, 0x02, 0x00, speed],
       true,
     )
     .into()])

@@ -8,6 +8,7 @@
 use crate::core::message::ActuatorType;
 use crate::server::device::hardware::Hardware;
 use crate::server::device::protocol::ProtocolInitializer;
+use crate::server::message::checked_value_cmd::CheckedValueCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -17,8 +18,10 @@ use crate::{
   },
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::Arc;
 
+const METAXSIRE_V2_PROTOCOL_ID: Uuid = uuid!("28b934b4-ca45-4e14-85e7-4c1524b2b4c1");
 generic_protocol_initializer_setup!(MetaXSireV2, "metaxsire-v2");
 
 #[derive(Default)]
@@ -32,7 +35,7 @@ impl ProtocolInitializer for MetaXSireV2Initializer {
     _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
-      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, vec![0xaa, 0x04], true))
+      .write_value(&HardwareWriteCmd::new(METAXSIRE_V2_PROTOCOL_ID, Endpoint::Tx, vec![0xaa, 0x04], true))
       .await?;
     Ok(Arc::new(MetaXSireV2::default()))
   }
@@ -46,24 +49,15 @@ impl ProtocolHandler for MetaXSireV2 {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
-    commands: &[Option<(ActuatorType, i32)>],
+    commands: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let mut hcmds = vec![];
-    for i in 0..commands.len() {
-      if let Some(cmd) = commands[i] {
-        hcmds.push(
-          HardwareWriteCmd::new(
-            Endpoint::Tx,
-            vec![0xaa, 0x03, 0x01, (i + 1) as u8, 0x64, cmd.1 as u8],
-            true,
-          )
-          .into(),
-        );
-      }
-    }
-
-    Ok(hcmds)
+    Ok(vec![HardwareWriteCmd::new(
+        commands.feature_id(),
+        Endpoint::Tx,
+        vec![0xaa, 0x03, 0x01, (commands.feature_index() + 1) as u8, 0x64, commands.value() as u8],
+        true,
+    ).into()])
   }
 }

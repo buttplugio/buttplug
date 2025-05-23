@@ -56,7 +56,7 @@ impl ProtocolHandler for TryFunMeta2 {
     sum += count;
     data.push(sum);
 
-    Ok(vec![HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, data, false).into()])
   }
 
   fn handle_rotation_with_direction_cmd(
@@ -86,7 +86,7 @@ impl ProtocolHandler for TryFunMeta2 {
     }
     sum += count;
     data.push(sum);
-    Ok(vec![HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, data, false).into()])
   }
 
   fn handle_value_vibrate_cmd(
@@ -112,6 +112,6 @@ impl ProtocolHandler for TryFunMeta2 {
     sum += count;
     data.push(sum);
 
-    Ok(vec![HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, data, false).into()])
   }
 }
