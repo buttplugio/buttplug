@@ -28,7 +28,7 @@ impl ProtocolHandler for MizzZeeV2 {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       vec![0x69, 0x96, 0x04, 0x02, cmd.value() as u8, 0x2c, cmd.value() as u8],
       false,

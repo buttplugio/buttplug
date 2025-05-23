@@ -38,9 +38,9 @@ impl ProtocolHandler for LiboElle {
           data |= (speed - 8) << 4;
           data |= 4; // Set the mode too
         }
-        HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, vec![data], false).into()
+        HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, vec![data], false).into()
       } else {
-        HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::TxMode, vec![speed], false).into()
+        HardwareWriteCmd::new(cmd.feature_id(), Endpoint::TxMode, vec![speed], false).into()
       }
     }])
   }

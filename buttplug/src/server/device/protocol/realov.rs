@@ -28,7 +28,7 @@ impl ProtocolHandler for Realov {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       [0xc5u8, 0x55, cmd.value() as u8, 0xaa].to_vec(),
       false,

@@ -80,7 +80,7 @@ impl ProtocolHandler for PrettyLove {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       vec![0x00u8, cmd.value() as u8],
       true,

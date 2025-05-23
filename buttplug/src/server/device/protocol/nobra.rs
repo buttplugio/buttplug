@@ -56,7 +56,7 @@ impl ProtocolHandler for Nobra {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let output_speed = if cmd.value() == 0 { 0x70 } else { 0x60 + cmd.value() };
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       vec![output_speed as u8],
       false,

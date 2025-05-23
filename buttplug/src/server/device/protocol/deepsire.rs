@@ -28,7 +28,7 @@ impl ProtocolHandler for DeepSire {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new( 
-      cmd.feature_uuid(),      
+      cmd.feature_id(),      
       Endpoint::Tx,
       vec![0x55, 0x04, 0x01, 0x00, 0x00, cmd.value() as u8, 0xAA],
       false,

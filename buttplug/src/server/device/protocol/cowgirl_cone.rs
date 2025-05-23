@@ -61,7 +61,7 @@ impl ProtocolHandler for CowgirlCone {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       vec![0xf1, 0x01, cmd.value() as u8, 0x00],
       false,

@@ -29,7 +29,7 @@ impl ProtocolHandler for Cupido {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       vec![0xb0, 0x03, 0, 0, 0, cmd.value() as u8, 0xaa],
       false,

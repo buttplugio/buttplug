@@ -28,7 +28,7 @@ impl ProtocolHandler for NexusRevo {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       vec![0xaa, 0x01, 0x01, 0x00, 0x01, cmd.value() as u8],
       true,
@@ -41,7 +41,7 @@ impl ProtocolHandler for NexusRevo {
       cmd: &CheckedValueWithParameterCmdV4,
     ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       vec![
         0xaa,

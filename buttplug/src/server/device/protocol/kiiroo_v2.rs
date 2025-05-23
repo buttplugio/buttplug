@@ -70,7 +70,7 @@ impl ProtocolHandler for KiirooV2 {
     let calculated_speed = (calculate_speed(distance, cmd.parameter() as u32) * 99f64) as u8;
     self.previous_position.store(position, Ordering::SeqCst);
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       [position, calculated_speed].to_vec(),
       false,

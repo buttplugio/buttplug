@@ -29,7 +29,7 @@ impl ProtocolHandler for KiirooSpot {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       vec![0x00, 0xff, 0x00, 0x00, 0x00, cmd.value() as u8],
       false,
