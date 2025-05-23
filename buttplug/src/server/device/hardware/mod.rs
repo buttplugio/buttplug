@@ -25,7 +25,7 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::{broadcast, RwLock};
 use uuid::{uuid, Uuid};
 
-// Raw commands don't have a set feature, they're added dynamically when the raw system is turned
+// Raw commands don't have a set feature or command, they're added dynamically when the raw system is turned
 // on. Therefore we just attach a generic ID to all raw commands, as we don't really expect to need
 // to debug these either (as they're only used for dev work).
 const GENERIC_RAW_COMMAND_UUID: Uuid = uuid!("f5250140-8a86-4eb7-9c60-c96b71ee6330");
@@ -40,7 +40,7 @@ const GENERIC_RAW_COMMAND_UUID: Uuid = uuid!("f5250140-8a86-4eb7-9c60-c96b71ee63
 pub struct HardwareReadCmd {
   /// Feature ID for reading
   #[serde(default)]
-  feature_id: Uuid,
+  command_id: Uuid,
   /// Endpoint to read from
   endpoint: Endpoint,
   /// Amount of data to read from endpoint
@@ -51,9 +51,9 @@ pub struct HardwareReadCmd {
 
 impl HardwareReadCmd {
   /// Creates a new DeviceReadCmd instance
-  pub fn new(feature_id: Uuid, endpoint: Endpoint, length: u32, timeout_ms: u32) -> Self {
+  pub fn new(command_id: Uuid, endpoint: Endpoint, length: u32, timeout_ms: u32) -> Self {
     Self {
-      feature_id,
+      command_id,
       endpoint,
       length,
       timeout_ms,
@@ -64,7 +64,7 @@ impl HardwareReadCmd {
 impl From<RawReadCmdV2> for HardwareReadCmd {
   fn from(msg: RawReadCmdV2) -> Self {
     Self {
-      feature_id: GENERIC_RAW_COMMAND_UUID,
+      command_id: GENERIC_RAW_COMMAND_UUID,
       endpoint: msg.endpoint(),
       length: msg.expected_length(),
       timeout_ms: msg.timeout(),
@@ -82,7 +82,7 @@ pub struct HardwareWriteCmd {
   /// Feature ID for this command
   #[getset(get_copy = "pub")]
   #[serde(default)]
-  feature_id: Uuid,
+  command_id: Uuid,
   /// Endpoint to write to
   #[getset(get_copy = "pub")]
   endpoint: Endpoint,
@@ -104,9 +104,9 @@ impl PartialEq for HardwareWriteCmd {
 
 impl HardwareWriteCmd {
   /// Create a new DeviceWriteCmd instance.
-  pub fn new(feature_id: Uuid, endpoint: Endpoint, data: Vec<u8>, write_with_response: bool) -> Self {
+  pub fn new(command_id: Uuid, endpoint: Endpoint, data: Vec<u8>, write_with_response: bool) -> Self {
     Self {
-      feature_id,
+      command_id,
       endpoint,
       data,
       write_with_response,
@@ -117,7 +117,7 @@ impl HardwareWriteCmd {
 impl From<RawWriteCmdV2> for HardwareWriteCmd {
   fn from(msg: RawWriteCmdV2) -> Self {
     Self {
-      feature_id: GENERIC_RAW_COMMAND_UUID,
+      command_id: GENERIC_RAW_COMMAND_UUID,
       endpoint: msg.endpoint(),
       data: msg.data().clone(),
       write_with_response: msg.write_with_response(),
@@ -140,7 +140,7 @@ pub struct HardwareSubscribeCmd {
   /// Feature ID for this command
   #[getset(get_copy = "pub")]
   #[serde(default)]
-  feature_id: Uuid,
+  command_id: Uuid,
   /// Endpoint to subscribe to notifications from.
   endpoint: Endpoint,
 }
@@ -153,15 +153,15 @@ impl PartialEq for HardwareSubscribeCmd {
 
 impl HardwareSubscribeCmd {
   /// Create a new DeviceSubscribeCmd instance
-  pub fn new(feature_id: Uuid, endpoint: Endpoint) -> Self {
-    Self { feature_id, endpoint }
+  pub fn new(command_id: Uuid, endpoint: Endpoint) -> Self {
+    Self { command_id, endpoint }
   }
 }
 
 impl From<RawSubscribeCmdV2> for HardwareSubscribeCmd {
   fn from(msg: RawSubscribeCmdV2) -> Self {
     Self {
-      feature_id: GENERIC_RAW_COMMAND_UUID,
+      command_id: GENERIC_RAW_COMMAND_UUID,
       endpoint: msg.endpoint(),
     }
   }
@@ -177,7 +177,7 @@ impl From<RawSubscribeCmdV2> for HardwareSubscribeCmd {
 #[getset(get_copy = "pub")]
 pub struct HardwareUnsubscribeCmd {
   #[serde(default)]
-  feature_id: Uuid,
+  command_id: Uuid,
   endpoint: Endpoint,
 }
 
@@ -189,15 +189,15 @@ impl PartialEq for HardwareUnsubscribeCmd {
 
 impl HardwareUnsubscribeCmd {
   /// Create a new DeviceUnsubscribeCmd instance
-  pub fn new(feature_id: Uuid, endpoint: Endpoint) -> Self {
-    Self { feature_id, endpoint }
+  pub fn new(command_id: Uuid, endpoint: Endpoint) -> Self {
+    Self { command_id, endpoint }
   }
 }
 
 impl From<RawUnsubscribeCmdV2> for HardwareUnsubscribeCmd {
   fn from(msg: RawUnsubscribeCmdV2) -> Self {
     Self {
-      feature_id: GENERIC_RAW_COMMAND_UUID,
+      command_id: GENERIC_RAW_COMMAND_UUID,
       endpoint: msg.endpoint(),
     }
   }
@@ -214,11 +214,11 @@ pub enum HardwareCommand {
 }
 
 impl HardwareCommand {
-  pub fn feature_id(&self) -> Uuid {
+  pub fn command_id(&self) -> Uuid {
     match self {
-      HardwareCommand::Write(c) => c.feature_id(),
-      HardwareCommand::Subscribe(c) => c.feature_id(),
-      HardwareCommand::Unsubscribe(c) => c.feature_id(),
+      HardwareCommand::Write(c) => c.command_id(),
+      HardwareCommand::Subscribe(c) => c.command_id(),
+      HardwareCommand::Unsubscribe(c) => c.command_id(),
     }
   }
 }
