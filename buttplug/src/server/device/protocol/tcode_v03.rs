@@ -30,7 +30,7 @@ impl ProtocolHandler for TCodeV03 {
     let position = cmd.value() as u32;
 
     let command = format!("L{}{:02}I{}\n", cmd.feature_index(), position, cmd.parameter() as u32);
-    msg_vec.push(HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, command.as_bytes().to_vec(), false).into());
+    msg_vec.push(HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, command.as_bytes().to_vec(), false).into());
 
     Ok(msg_vec)
   }
@@ -40,7 +40,7 @@ impl ProtocolHandler for TCodeV03 {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       format!("V{}{:02}\n", cmd.feature_index(), cmd.value()).as_bytes().to_vec(),
       false,

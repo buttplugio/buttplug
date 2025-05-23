@@ -110,6 +110,6 @@ impl ProtocolHandler for Youou {
     let mut data2 = vec![crc, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
     data.append(&mut data2);
 
-    Ok(vec![HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, data, false).into()])
   }
 }

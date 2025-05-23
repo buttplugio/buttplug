@@ -24,7 +24,7 @@ use async_trait::async_trait;
 use uuid::{uuid, Uuid};
 use std::sync::Arc;
 
-const WETOY_PROTOCOL_UUID: Uuid = uuid!("d7b4fee7-d07c-4d35-8f01-9f4990294be8");
+const WETOY_PROTOCOL_ID: Uuid = uuid!("9868762e-4203-4876-abf5-83c992e024b4");
 generic_protocol_initializer_setup!(WeToy, "wetoy");
 
 #[derive(Default)]
@@ -38,7 +38,7 @@ impl ProtocolInitializer for WeToyInitializer {
     _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
-      .write_value(&HardwareWriteCmd::new(WETOY_PROTOCOL_UUID, Endpoint::Tx, vec![0x80, 0x03], true))
+      .write_value(&HardwareWriteCmd::new(WETOY_PROTOCOL_ID, Endpoint::Tx, vec![0x80, 0x03], true))
       .await?;
     Ok(Arc::new(WeToy::default()))
   }
@@ -52,12 +52,12 @@ impl ProtocolHandler for WeToy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-    fn handle_value_vibrate_cmd(
+  fn handle_value_vibrate_cmd(
     &self,
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      cmd.feature_id(),
       Endpoint::Tx,
       if cmd.value() == 0 {
         vec![0x80, 0x03]
