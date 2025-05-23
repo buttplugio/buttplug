@@ -5,7 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::ActuatorType;
 use crate::server::device::hardware::Hardware;
 use crate::server::device::protocol::ProtocolInitializer;
 use crate::server::message::checked_value_cmd::CheckedValueCmdV4;

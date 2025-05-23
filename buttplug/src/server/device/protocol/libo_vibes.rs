@@ -10,7 +10,7 @@ use uuid::{uuid, Uuid};
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
   server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},

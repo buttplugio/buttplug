@@ -102,7 +102,7 @@ pub enum ServerDeviceEvent {
 #[derive(Debug, PartialEq)]
 enum ActuatorCommand {
   ValueCmd(u32),
-  ValueWithParameterCmd((u32, i32))
+  _ValueWithParameterCmd((u32, i32))
 }
 
 #[derive(Getters)]
@@ -419,7 +419,7 @@ impl ServerDevice {
 
   pub fn needs_update(
     &self,
-    command_message: &ButtplugDeviceCommandMessageUnionV4,
+    _command_message: &ButtplugDeviceCommandMessageUnionV4,
   ) -> bool {
     return true;
   }

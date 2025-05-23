@@ -7,7 +7,6 @@
 
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
 use crate::server::message::checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4;
-use crate::server::message::FleshlightLaunchFW12CmdV0;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
