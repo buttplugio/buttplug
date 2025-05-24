@@ -405,7 +405,7 @@ pub fn save_user_config(dcm: &DeviceConfigurationManager) -> Result<String, Butt
     protocols: Some(user_protos.clone()),
     user_device_configs: Some(user_definitions_vec),
   };
-  let mut user_config_file = UserConfigFile::new(3, 0);
+  let mut user_config_file = UserConfigFile::new(4, 0);
   user_config_file.user_configs = Some(user_config_definition);
   serde_json::to_string(&user_config_file).map_err(|e| {
     ButtplugError::from(ButtplugDeviceError::DeviceConfigurationError(format!(

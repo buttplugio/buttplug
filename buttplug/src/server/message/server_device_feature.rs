@@ -50,11 +50,9 @@ pub struct ServerDeviceFeature {
   #[serde(skip)]
   raw: Option<DeviceFeatureRaw>,
   #[getset(get = "pub", get_mut = "pub(super)")]
-  #[serde(skip_serializing)]
   id: Uuid,
   #[getset(get = "pub", get_mut = "pub(super)")]
-  #[serde(rename = "base-id")]
-  #[serde(skip_serializing)]
+  #[serde(rename = "base-id", skip_serializing_if = "Option::is_none")]
   base_id: Option<Uuid>,
 }
 
