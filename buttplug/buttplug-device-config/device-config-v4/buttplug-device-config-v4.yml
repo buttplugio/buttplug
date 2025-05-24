@@ -3201,7 +3201,7 @@ protocols:
           actuator:
             step-range:
               - 0
-              - 10S
+              - 10
             messages:
               - ValueWithParameterCmd
           id: 53bfe934-3f7d-4852-aad4-3c3be47ec180
