@@ -68,6 +68,7 @@ pub struct UserDeviceDefinition {
   /// Given name of the device this instance represents.
   name: String,
   id: Uuid,
+  #[serde(skip_serializing_if = "Option::is_none", rename="base-id")]
   base_id: Option<Uuid>,
   /// Message attributes for this device instance.
   features: Vec<ServerDeviceFeature>,
