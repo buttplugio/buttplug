@@ -93,6 +93,12 @@ impl From<SensorType> for FeatureType {
   Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize,
 )]
 pub struct DeviceFeature {
+  // Index of the feature on the device. This was originally implicit as the position in the feature
+  // array. We now make it explicit even though it's still just array position, because implicit
+  // array positions have made life hell in so many different ways.
+  #[getset(get = "pub")]
+  #[serde(rename="FeatureIndex")]
+  feature_index: u32,
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(default)]
   description: String,
@@ -114,6 +120,7 @@ pub struct DeviceFeature {
 
 impl DeviceFeature {
   pub fn new(
+    index: u32,
     description: &str,
     feature_type: FeatureType,
     actuator: &Option<DeviceFeatureActuator>,
@@ -121,6 +128,7 @@ impl DeviceFeature {
     raw: &Option<DeviceFeatureRaw>,
   ) -> Self {
     Self {
+      feature_index: index,
       description: description.to_owned(),
       feature_type,
       actuator: actuator.clone(),
@@ -136,8 +144,9 @@ impl DeviceFeature {
     Ok(())
   }
 
-  pub fn new_raw_feature(endpoints: &[Endpoint]) -> Self {
+  pub fn new_raw_feature(index: u32, endpoints: &[Endpoint]) -> Self {
     Self {
+      feature_index: index,
       description: "Raw Endpoints".to_owned(),
       feature_type: FeatureType::Raw,
       actuator: None,

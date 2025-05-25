@@ -424,6 +424,22 @@ impl ServerDevice {
     return true;
   }
 
+  pub fn as_device_message_info(&self, index: u32) -> DeviceMessageInfoV4 {
+    DeviceMessageInfoV4::new(
+      index,
+      &self.name(),
+      self.definition().user_config().display_name(),
+      &None,
+      self
+        .definition
+        .features()
+        .iter()
+        .enumerate()
+        .map(|(i, x)| x.as_device_feature(i as u32))
+        .collect::<Vec<DeviceFeature>>(),
+    )
+  }
+
   // In order to not have to worry about id setting at the protocol level (this
   // should be taken care of in the server's device manager), we return server
   // messages but Buttplug errors.

@@ -287,19 +287,7 @@ impl ServerDeviceManagerEventLoop {
         });
 
         info!("Assigning index {} to {}", device_index, device.name());
-        let device_added_message = DeviceAddedV4::new(
-          device_index,
-          &device.name(),
-          device.definition().user_config().display_name(),
-          &None,
-          &device
-            .definition()
-            .features()
-            .iter()
-            .cloned()
-            .map(|x| x.into())
-            .collect::<Vec<DeviceFeature>>(),
-        );
+        let device_added_message = DeviceAddedV4::from(device.as_device_message_info(device_index));
         self.device_map.insert(device_index, device);
         // After that, we can send out to the server's event listeners to let
         // them know a device has been added.
