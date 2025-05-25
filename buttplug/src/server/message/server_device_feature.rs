@@ -101,6 +101,17 @@ impl ServerDeviceFeature {
     }
   }
 
+  pub fn as_device_feature(&self, index: u32) -> DeviceFeature {
+    DeviceFeature::new(
+      index,
+      self.description(),
+      self.feature_type(),
+      self.actuator(),
+      self.sensor(),
+      self.raw()
+    )
+  }
+
   pub fn new_raw_feature(endpoints: &[Endpoint]) -> Self {
     Self {
       description: "Raw Endpoints".to_owned(),
@@ -114,14 +125,3 @@ impl ServerDeviceFeature {
   }
 }
 
-impl From<ServerDeviceFeature> for DeviceFeature {
-  fn from(value: ServerDeviceFeature) -> Self {
-    DeviceFeature::new(
-      value.description(),
-      *value.feature_type(),
-      value.actuator(),
-      value.sensor(),
-      value.raw()
-    )
-  }
-}

@@ -265,20 +265,7 @@ impl ServerDeviceManager {
           .devices
           .iter()
           .map(|device| {
-            let dev = device.value();
-            DeviceMessageInfoV4::new(
-              *device.key(),
-              &dev.name(),
-              dev.definition().user_config().display_name(),
-              &None,
-              dev
-                .definition()
-                .features()
-                .iter()
-                .cloned()
-                .map(|x| x.into())
-                .collect::<Vec<DeviceFeature>>(),
-            )
+            device.value().as_device_message_info(*device.key())
           })
           .collect();
         let mut device_list = DeviceListV4::new(devices);

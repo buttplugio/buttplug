@@ -18,6 +18,8 @@ use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
+use super::DeviceMessageInfoV4;
+
 /// Notification that a device has been found and connected to the server.
 #[derive(ButtplugMessage, Clone, Debug, PartialEq, Eq, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
@@ -70,6 +72,19 @@ impl DeviceAddedV4 {
     };
     obj.finalize();
     obj
+  }
+}
+
+impl From<DeviceMessageInfoV4> for DeviceAddedV4 {
+  fn from(value: DeviceMessageInfoV4) -> Self {
+    Self {
+      id: 0,
+      device_index: value.device_index(),
+      device_name: value.device_name().clone(),
+      device_display_name: value.device_display_name().clone(),
+      device_message_timing_gap: value.device_message_timing_gap().clone(),
+      device_features: value.device_features().clone()
+    }
   }
 }
 
