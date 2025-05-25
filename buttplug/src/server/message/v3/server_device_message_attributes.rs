@@ -73,7 +73,7 @@ impl TryFrom<ServerDeviceFeature> for ServerGenericDeviceMessageAttributesV3 {
   type Error = String;
   fn try_from(value: ServerDeviceFeature) -> Result<Self, Self::Error> {
     if let Some(actuator) = value.actuator() {
-      let actuator_type = (*value.feature_type()).try_into()?;
+      let actuator_type = (value.feature_type()).try_into()?;
       let step_limit = actuator.step_limit();
       let step_count = step_limit.end() - step_limit.start();
       let attrs = Self {
@@ -99,7 +99,7 @@ impl TryFrom<ServerDeviceFeature> for ServerSensorDeviceMessageAttributesV3 {
     if let Some(sensor) = value.sensor() {
       Ok(Self {
         feature_descriptor: value.description().to_owned(),
-        sensor_type: (*value.feature_type()).try_into()?,
+        sensor_type: (value.feature_type()).try_into()?,
         sensor_range: sensor.value_range().clone(),
         feature: value.clone(),
         index: 0,
@@ -119,7 +119,7 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
           if let Some(actuator) = x.actuator() {
             // Carve out RotateCmd here
             !(*message_type == ButtplugActuatorFeatureMessageType::ValueCmd
-              && *x.feature_type() == FeatureType::RotateWithDirection)
+              && x.feature_type() == FeatureType::RotateWithDirection)
               && actuator.messages().contains(message_type)
           } else {
             false
@@ -144,7 +144,7 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
             actuator
               .messages()
               .contains(&ButtplugActuatorFeatureMessageType::ValueWithParameterCmd)
-              && *x.feature_type() == FeatureType::RotateWithDirection
+              && x.feature_type() == FeatureType::RotateWithDirection
           } else {
             false
           }
@@ -171,7 +171,7 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
             actuator
               .messages()
               .contains(&ButtplugActuatorFeatureMessageType::ValueWithParameterCmd)
-              && *x.feature_type() == FeatureType::PositionWithDuration
+              && x.feature_type() == FeatureType::PositionWithDuration
           } else {
             false
           }

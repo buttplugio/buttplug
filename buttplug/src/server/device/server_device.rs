@@ -37,21 +37,17 @@
 //! In order to handle multiple message spec versions
 
 use std::{
-  collections::VecDeque, fmt::{self, Debug}, sync::Arc, time::Duration
+  collections::VecDeque,
+  fmt::{self, Debug},
+  sync::Arc,
+  time::Duration,
 };
 
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     message::{
-      self,
-      ActuatorType,
-      ButtplugMessage,
-      ButtplugServerMessageV4,
-      Endpoint,
-      FeatureType,
-      RawReadingV2,
-      SensorType,
+      self, ActuatorType, ButtplugMessage, ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4, Endpoint, FeatureType, RawReadingV2, SensorType
     },
     ButtplugResultFuture,
   },
@@ -62,14 +58,13 @@ use crate::{
       protocol::ProtocolHandler,
     },
     message::{
-      checked_sensor_read_cmd::CheckedSensorReadCmdV4, 
-      checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, 
-      checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, 
-      checked_value_cmd::CheckedValueCmdV4, 
-      checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, 
-      server_device_attributes::ServerDeviceAttributes, 
-      spec_enums::ButtplugDeviceCommandMessageUnionV4, 
-      ButtplugServerDeviceMessage
+      checked_sensor_read_cmd::CheckedSensorReadCmdV4,
+      checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4,
+      checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4,
+      checked_value_cmd::CheckedValueCmdV4,
+      checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4,
+      server_device_attributes::ServerDeviceAttributes,
+      spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage,
     },
     ButtplugServerResultFuture,
   },
@@ -102,7 +97,7 @@ pub enum ServerDeviceEvent {
 #[derive(Debug, PartialEq)]
 enum ActuatorCommand {
   ValueCmd(u32),
-  _ValueWithParameterCmd((u32, i32))
+  _ValueWithParameterCmd((u32, i32)),
 }
 
 #[derive(Getters)]
@@ -137,8 +132,7 @@ impl Hash for ServerDevice {
   }
 }
 
-impl Eq for ServerDevice {
-}
+impl Eq for ServerDevice {}
 
 impl PartialEq for ServerDevice {
   fn eq(&self, other: &Self) -> bool {
@@ -290,10 +284,7 @@ impl ServerDevice {
             }
           }
           if hardware.requires_keepalive()
-            && !matches!(
-              strategy,
-              ProtocolKeepaliveStrategy::NoStrategy
-            )
+            && !matches!(strategy, ProtocolKeepaliveStrategy::NoStrategy)
           {
             if hardware.time_since_last_write().await > wait_duration {
               match &strategy {
@@ -332,27 +323,32 @@ impl ServerDevice {
           .messages()
           .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ValueCmd)
         {
-          stop_commands.push(CheckedValueCmdV4::new(
-            index as u32,
-            0,
-            index as u32,
-            *feature.id(),
-            feature.feature_type().clone().try_into().unwrap(),
-            0,
-          ).into());
-        } else if actuator
-          .messages()
-          .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ValueWithParameterCmd)
-          && *feature.feature_type() == FeatureType::RotateWithDirection
+          stop_commands.push(
+            CheckedValueCmdV4::new(
+              index as u32,
+              0,
+              index as u32,
+              feature.id(),
+              feature.feature_type().clone().try_into().unwrap(),
+              0,
+            )
+            .into(),
+          );
+        } else if actuator.messages().contains(
+          &crate::core::message::ButtplugActuatorFeatureMessageType::ValueWithParameterCmd,
+        ) && feature.feature_type() == FeatureType::RotateWithDirection
         {
-          stop_commands.push(CheckedValueWithParameterCmdV4::new(
-            0,
-            index as u32,
-            *feature.id(),
-            feature.feature_type().clone().try_into().unwrap(),
-            0,            
-            0,
-          ).into());
+          stop_commands.push(
+            CheckedValueWithParameterCmdV4::new(
+              0,
+              index as u32,
+              feature.id(),
+              feature.feature_type().clone().try_into().unwrap(),
+              0,
+              0,
+            )
+            .into(),
+          );
         }
       }
     }
@@ -368,7 +364,7 @@ impl ServerDevice {
       legacy_attributes: ServerDeviceAttributes::new(definition.features()),
       last_actuator_command: DashMap::new(),
       current_hardware_commands,
-      stop_commands
+      stop_commands,
     }
   }
 
@@ -417,10 +413,7 @@ impl ServerDevice {
     hardware_stream.merge(handler_mapped_stream)
   }
 
-  pub fn needs_update(
-    &self,
-    _command_message: &ButtplugDeviceCommandMessageUnionV4,
-  ) -> bool {
+  pub fn needs_update(&self, _command_message: &ButtplugDeviceCommandMessageUnionV4) -> bool {
     return true;
   }
 
@@ -451,12 +444,16 @@ impl ServerDevice {
       // Raw messages
       ButtplugDeviceCommandMessageUnionV4::RawReadCmd(msg) => self.handle_raw_read_cmd(msg),
       ButtplugDeviceCommandMessageUnionV4::RawWriteCmd(msg) => self.handle_raw_write_cmd(msg),
-      ButtplugDeviceCommandMessageUnionV4::RawSubscribeCmd(msg) => self.handle_raw_subscribe_cmd(msg),
+      ButtplugDeviceCommandMessageUnionV4::RawSubscribeCmd(msg) => {
+        self.handle_raw_subscribe_cmd(msg)
+      }
       ButtplugDeviceCommandMessageUnionV4::RawUnsubscribeCmd(msg) => {
         self.handle_raw_unsubscribe_cmd(msg)
       }
       // Sensor messages
-      ButtplugDeviceCommandMessageUnionV4::SensorReadCmd(msg) => self.handle_sensor_read_cmd_v4(msg),
+      ButtplugDeviceCommandMessageUnionV4::SensorReadCmd(msg) => {
+        self.handle_sensor_read_cmd_v4(msg)
+      }
       ButtplugDeviceCommandMessageUnionV4::SensorSubscribeCmd(msg) => {
         self.handle_sensor_subscribe_cmd_v4(msg)
       }
@@ -471,7 +468,10 @@ impl ServerDevice {
         } else if msg.actuator_type() == ActuatorType::RotateWithDirection {
           self.handle_generic_command_result(self.handler.handle_rotation_with_direction_cmd(&msg))
         } else {
-          future::ready(Err(ButtplugDeviceError::MessageNotSupported(msg.actuator_type().to_string()).into())).boxed()
+          future::ready(Err(
+            ButtplugDeviceError::MessageNotSupported(msg.actuator_type().to_string()).into(),
+          ))
+          .boxed()
         }
       }
       ButtplugDeviceCommandMessageUnionV4::ValueVecCmd(msg) => {
@@ -485,7 +485,8 @@ impl ServerDevice {
             f.await?;
           }
           Ok(message::OkV0::new(msg_id).into())
-        }.boxed()
+        }
+        .boxed()
       }
       ButtplugDeviceCommandMessageUnionV4::ValueWithParameterVecCmd(msg) => {
         let m = &msg.value_vec()[0];
@@ -494,7 +495,10 @@ impl ServerDevice {
         } else if m.actuator_type() == ActuatorType::RotateWithDirection {
           self.handle_generic_command_result(self.handler.handle_rotation_with_direction_cmd(&m))
         } else {
-          future::ready(Err(ButtplugDeviceError::MessageNotSupported(m.actuator_type().to_string()).into())).boxed()
+          future::ready(Err(
+            ButtplugDeviceError::MessageNotSupported(m.actuator_type().to_string()).into(),
+          ))
+          .boxed()
         }
       }
       // Other generic messages
@@ -509,7 +513,9 @@ impl ServerDevice {
         return future::ready(Ok(message::OkV0::default().into())).boxed();
       }
     }
-    self.last_actuator_command.insert(msg.feature_id(), ActuatorCommand::ValueCmd(msg.value()));
+    self
+      .last_actuator_command
+      .insert(msg.feature_id(), ActuatorCommand::ValueCmd(msg.value()));
     self.handle_generic_command_result(self.handler.handle_value_cmd(msg))
   }
 
@@ -554,7 +560,8 @@ impl ServerDevice {
 
   fn handle_stop_device_cmd(&self) -> ButtplugServerResultFuture {
     let mut fut_vec = vec![];
-    self.stop_commands
+    self
+      .stop_commands
       .iter()
       .for_each(|msg| fut_vec.push(self.parse_message(msg.clone())));
     async move {
@@ -576,15 +583,15 @@ impl ServerDevice {
       .definition
       .features()
       .iter()
-      .find(|x| *x.id() == feature_id)
+      .find(|x| x.id() == feature_id)
     {
-      if *feature.feature_type() == FeatureType::from(sensor_type) {
+      if feature.feature_type() == FeatureType::from(sensor_type) {
         Ok(())
       } else {
         Err(ButtplugDeviceError::DeviceSensorTypeMismatch(
           feature_index,
           sensor_type,
-          *feature.feature_type(),
+          feature.feature_type(),
         ))
       }
     } else {

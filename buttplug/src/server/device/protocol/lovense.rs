@@ -165,7 +165,7 @@ impl ProtocolInitializer for LovenseInitializer {
     let vibrator_count = device_definition
       .features()
       .iter()
-      .filter(|x| [FeatureType::Vibrate, FeatureType::Oscillate].contains(x.feature_type()))
+      .filter(|x| [FeatureType::Vibrate, FeatureType::Oscillate].contains(&x.feature_type()))
       .count();
 
     let actuator_count = device_definition

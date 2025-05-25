@@ -79,7 +79,7 @@ impl TryFromDeviceAttributes<SensorReadCmdV4> for CheckedSensorReadCmdV4 {
           msg.device_index(),
           *msg.feature_index(),
           *msg.sensor_type(),
-          *feature.id(),
+          feature.id(),
         ))
       } else {
         Err(ButtplugError::from(

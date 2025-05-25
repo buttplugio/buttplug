@@ -77,7 +77,7 @@ impl TryFromDeviceAttributes<ValueWithParameterCmdV4> for CheckedValueWithParame
     // Since we have the feature info already, check limit and unpack into step range when creating
     // If this message isn't the result of an upgrade from another older message, we won't have set our feature yet.
     let feature_id = if let Some(feature) = features.get(cmd.feature_index() as usize) {
-      *feature.id()
+      feature.id()
     } else {
       return Err(ButtplugError::from(
         ButtplugDeviceError::DeviceFeatureIndexError(
@@ -89,7 +89,7 @@ impl TryFromDeviceAttributes<ValueWithParameterCmdV4> for CheckedValueWithParame
 
     let feature = features
       .iter()
-      .find(|x| *x.id() == feature_id)
+      .find(|x| x.id() == feature_id)
       .expect("Already checked existence or created.");
     let level = cmd.value();
     // Check to make sure the feature has an actuator that handles LevelCmd
@@ -112,7 +112,7 @@ impl TryFromDeviceAttributes<ValueWithParameterCmdV4> for CheckedValueWithParame
           // making this a barrier.
           Ok(Self {
             id: cmd.id(),
-            feature_id: *feature.id(),
+            feature_id: feature.id(),
             device_index: cmd.device_index(),
             feature_index: cmd.feature_index(),
             actuator_type: cmd.actuator_type(),
@@ -153,7 +153,7 @@ impl TryFromDeviceAttributes<VorzeA10CycloneCmdV0> for CheckedValueWithParameter
       .features()
       .iter()
       .enumerate()
-      .filter(|(_, feature)| *feature.feature_type() == FeatureType::RotateWithDirection)
+      .filter(|(_, feature)| feature.feature_type() == FeatureType::RotateWithDirection)
       .collect();
       
     if features.is_empty() {
@@ -166,7 +166,7 @@ impl TryFromDeviceAttributes<VorzeA10CycloneCmdV0> for CheckedValueWithParameter
     Ok(CheckedValueWithParameterCmdV4::new(
       msg.device_index(),
       feature.0 as u32,
-      *feature.1.id(),
+      feature.1.id(),
       ActuatorType::RotateWithDirection,
       ((msg.speed() as f64 / 99f64).ceil() * (((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64) + *actuator.step_limit().start() as f64).ceil()) as u32,
       if msg.clockwise() { 1 } else { -1 }

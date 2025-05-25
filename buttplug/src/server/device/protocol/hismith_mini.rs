@@ -80,13 +80,13 @@ impl ProtocolInitializer for HismithMiniInitializer {
       dual_vibe: device_definition
         .features()
         .iter()
-        .filter(|x| *x.feature_type() == FeatureType::Vibrate)
+        .filter(|x| x.feature_type() == FeatureType::Vibrate)
         .count()
         >= 2,
       second_constrict: device_definition
         .features()
         .iter()
-        .position(|x| *x.feature_type() == FeatureType::Constrict)
+        .position(|x| x.feature_type() == FeatureType::Constrict)
         .unwrap_or(0)
         == 1,
     }))

@@ -70,7 +70,7 @@ impl TryFromDeviceAttributes<BatteryLevelCmdV2> for CheckedSensorReadCmdV4 {
       msg.device_index(),
       0,
       SensorType::Battery,
-      *battery_feature.id(),
+      battery_feature.id(),
     ))
   }
 }
