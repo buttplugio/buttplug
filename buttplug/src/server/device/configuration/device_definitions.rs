@@ -32,6 +32,10 @@ impl BaseDeviceDefinition {
       id: *id,
     }
   }
+
+  pub fn create_user_device_features(&self) -> Vec<ServerDeviceFeature> {
+    self.features.iter().map(|feature| feature.as_user_feature()).collect()
+  }
 }
 
 #[derive(Serialize, Deserialize, Debug, Getters, CopyGetters, Default, Clone)]
@@ -100,7 +104,7 @@ impl UserDeviceDefinition {
       name: def.name().clone(),
       id: Uuid::new_v4(),
       base_id: Some(*def.id()),
-      features: def.features().clone(),
+      features: def.create_user_device_features(),
       user_config: UserDeviceCustomization {
         index,
         ..Default::default()

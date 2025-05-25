@@ -83,6 +83,24 @@ impl ServerDeviceFeature {
     Ok(())
   }
 
+  /// If this is a base feature (i.e. base_id is None), create a new feature with a randomized id
+  /// and the current feature id as the base id. Otherwise, just pass back a copy of self.
+  pub fn as_user_feature(&self) -> Self {
+    if !self.base_id.is_none() {
+      self.clone()  
+    } else {
+      Self {
+        description: self.description.clone(),
+        feature_type: self.feature_type,
+        actuator: self.actuator.clone(),
+        sensor: self.sensor.clone(),
+        raw: self.raw.clone(),
+        id: Uuid::new_v4(),
+        base_id: Some(self.id)
+      }
+    }
+  }
+
   pub fn new_raw_feature(endpoints: &[Endpoint]) -> Self {
     Self {
       description: "Raw Endpoints".to_owned(),
