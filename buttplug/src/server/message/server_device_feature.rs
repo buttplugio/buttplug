@@ -16,7 +16,7 @@ use crate::core::{
     FeatureType,
   },
 };
-use getset::{Getters, MutGetters, Setters};
+use getset::{Getters, MutGetters, Setters, CopyGetters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -29,13 +29,13 @@ use uuid::Uuid;
 // then we denote this by prefixing the type with Client/Server. Server attributes will usually be
 // hosted in the server/device/configuration module.
 #[derive(
-  Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize,
+  Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize, CopyGetters
 )]
 pub struct ServerDeviceFeature {
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(default)]
   description: String,
-  #[getset(get = "pub")]
+  #[getset(get_copy = "pub")]
   #[serde(rename = "feature-type")]
   feature_type: FeatureType,
   #[getset(get = "pub")]
@@ -49,9 +49,9 @@ pub struct ServerDeviceFeature {
   #[getset(get = "pub")]
   #[serde(skip)]
   raw: Option<DeviceFeatureRaw>,
-  #[getset(get = "pub", get_mut = "pub(super)")]
+  #[getset(get_copy = "pub", get_mut = "pub(super)")]
   id: Uuid,
-  #[getset(get = "pub", get_mut = "pub(super)")]
+  #[getset(get_copy = "pub", get_mut = "pub(super)")]
   #[serde(rename = "base-id", skip_serializing_if = "Option::is_none")]
   base_id: Option<Uuid>,
 }

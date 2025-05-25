@@ -69,7 +69,7 @@ impl TryFromDeviceAttributes<RSSILevelCmdV2> for CheckedSensorReadCmdV4 {
       msg.device_index(),
       0,
       SensorType::RSSI,
-      *rssi_feature.id(),
+      rssi_feature.id(),
     ))
   }
 }

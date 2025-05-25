@@ -76,7 +76,7 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedValueVecCmdV4 {
       .features()
       .iter()
       .enumerate()
-      .filter(|(_, feature)| *feature.feature_type() == FeatureType::Vibrate)
+      .filter(|(_, feature)| feature.feature_type() == FeatureType::Vibrate)
       .peekable();
 
     // Check to make sure we have any vibrate attributes at all.
@@ -93,7 +93,7 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedValueVecCmdV4 {
         msg.id(),
         msg.device_index(),
         index as u32,
-        *feature.id(),
+        feature.id(),
         crate::core::message::ActuatorType::Vibrate,
         (msg.speed() * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64) + *actuator.step_limit().start() as f64).ceil() as u32,
       ))
@@ -138,7 +138,7 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedValueVecCmdV4 {
         .features()
         .iter()
         .enumerate()
-        .find(|(_, f)| *f.id() == *feature.id())
+        .find(|(_, f)| f.id() == feature.id())
         .expect("Already checked existence")
         .0;
       let actuator =
@@ -152,7 +152,7 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedValueVecCmdV4 {
         msg.id(),
         msg.device_index(),
         idx as u32,
-        *feature.id(),
+        feature.id(),
         crate::core::message::ActuatorType::Vibrate,
         (vibrate_cmd.speed() * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64) + *actuator.step_limit().start() as f64).ceil() as u32,
       ))
@@ -194,7 +194,7 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedValueVecCmdV4 {
         .features()
         .iter()
         .enumerate()
-        .find(|(_, f)| *f.id() == *feature.feature().id())
+        .find(|(_, f)| f.id() == feature.feature().id())
         .expect("Already proved existence")
         .0 as u32;
       let actuator = feature
@@ -212,7 +212,7 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedValueVecCmdV4 {
           msg.id(),
           msg.device_index(),
           idx,
-          *feature.feature.id(),
+          feature.feature.id(),
           cmd.actuator_type(),
           (cmd.scalar() * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64) + *actuator.step_limit().start() as f64).ceil() as u32,
         ));
@@ -221,7 +221,7 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedValueVecCmdV4 {
           msg.id(),
           msg.device_index(),
           idx,
-          *feature.feature.id(),
+          feature.feature.id(),
           cmd.actuator_type(),
           0
         ));

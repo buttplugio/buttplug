@@ -90,7 +90,7 @@ impl TryFromDeviceAttributes<ValueCmdV4> for CheckedValueCmdV4 {
     // Since we have the feature info already, check limit and unpack into step range when creating
     // If this message isn't the result of an upgrade from another older message, we won't have set our feature yet.
     let feature_id = if let Some(feature) = features.get(cmd.feature_index() as usize) {
-      *feature.id()
+      feature.id()
     } else {
       return Err(ButtplugError::from(
         ButtplugDeviceError::DeviceFeatureIndexError(
@@ -102,7 +102,7 @@ impl TryFromDeviceAttributes<ValueCmdV4> for CheckedValueCmdV4 {
 
     let feature = features
       .iter()
-      .find(|x| *x.id() == feature_id)
+      .find(|x| x.id() == feature_id)
       .expect("Already checked existence or created.");
     let level = cmd.value();
     // Check to make sure the feature has an actuator that handles LevelCmd
@@ -125,7 +125,7 @@ impl TryFromDeviceAttributes<ValueCmdV4> for CheckedValueCmdV4 {
           // making this a barrier.
           Ok(Self {
             id: cmd.id(),
-            feature_id: *feature.id(),
+            feature_id: feature.id(),
             device_index: cmd.device_index(),
             feature_index: cmd.feature_index(),
             actuator_type: cmd.actuator_type(),

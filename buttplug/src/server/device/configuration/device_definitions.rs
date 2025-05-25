@@ -132,7 +132,7 @@ impl UserDeviceDefinition {
             && actuator
               .messages()
               .contains(&ButtplugActuatorFeatureMessageType::ValueCmd)
-            && *feature.feature_type() == FeatureType::RotateWithDirection
+            && feature.feature_type() == FeatureType::RotateWithDirection
           {
             return true;
           }

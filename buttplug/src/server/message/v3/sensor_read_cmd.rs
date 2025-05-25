@@ -75,7 +75,7 @@ impl TryFromDeviceAttributes<SensorReadCmdV3> for CheckedSensorReadCmdV4 {
       msg.device_index(),
       0,
       *msg.sensor_type(),
-      *sensor_feature_id,
+      sensor_feature_id,
     ))
   }
 }

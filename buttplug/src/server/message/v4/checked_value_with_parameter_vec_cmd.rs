@@ -64,7 +64,7 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedValueWithParameterVecCmdV4 
       cmds.push(CheckedValueWithParameterCmdV4::new(
         msg.device_index(),
         x.index(),
-        *f.id(),
+        f.id(),
         crate::core::message::ActuatorType::PositionWithDuration,
         (x.position() * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64) + *actuator.step_limit().start() as f64).ceil() as u32,
         x.duration().try_into().map_err(|_| ButtplugError::from(ButtplugMessageError::InvalidMessageContents("Duration should be under 2^31. You are not waiting 24 days to run this command.".to_owned())))?,
@@ -102,7 +102,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedValueWithParameterVecCmdV4 
         .features()
         .iter()
         .enumerate()
-        .find(|(_, f)| *f.id() == *feature.feature().id())
+        .find(|(_, f)| f.id() == feature.feature().id())
         .expect("Already proved existence")
         .0 as u32;
       let actuator = feature
@@ -115,7 +115,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedValueWithParameterVecCmdV4 
       cmds.push(CheckedValueWithParameterCmdV4::new(
         msg.device_index(),
         idx,
-        *feature.feature.id(),
+        feature.feature.id(),
         crate::core::message::ActuatorType::RotateWithDirection,
         (cmd.speed() * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64) + *actuator.step_limit().start() as f64).ceil() as u32,
         if cmd.clockwise() { 1 } else { -1 }
