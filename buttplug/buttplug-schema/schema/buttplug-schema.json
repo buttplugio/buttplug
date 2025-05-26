@@ -447,7 +447,7 @@
                 "DeviceFeatures": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/DeviceFeaturesV4" 
+                    "$ref": "#/components/DeviceFeatureV4" 
                   }
                 }
               },
@@ -475,12 +475,12 @@
             "description": "Name of the server. Can be 0-length.",
             "type": "string"
           },
-          "APIVersionMajor": {
+          "ApiVersionMajor": {
             "description": "Message template version of the server software.",
             "type": "integer",
             "minimum": 0
           },
-          "APIVersionMinor": {
+          "ApiVersionMinor": {
             "description": "Message template version of the server software.",
             "type": "integer",
             "minimum": 0
