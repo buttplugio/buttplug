@@ -14,6 +14,7 @@ mod sensor_read_cmd;
 mod sensor_reading;
 mod sensor_subscribe_cmd;
 mod sensor_unsubscribe_cmd;
+mod server_info;
 mod spec_enums;
 
 pub use {
@@ -26,5 +27,6 @@ pub use {
   sensor_reading::SensorReadingV4,
   sensor_subscribe_cmd::SensorSubscribeCmdV4,
   sensor_unsubscribe_cmd::SensorUnsubscribeCmdV4,
+  server_info::ServerInfoV4,
   spec_enums::{ButtplugClientMessageV4, ButtplugServerMessageV4},
 };
