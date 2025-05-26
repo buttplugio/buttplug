@@ -8,17 +8,14 @@
 use crate::core::{
   errors::ButtplugDeviceError,
   message::{
-    DeviceFeature,
-    DeviceFeatureActuator,
-    DeviceFeatureRaw,
-    DeviceFeatureSensor,
-    Endpoint,
-    FeatureType,
+    ButtplugActuatorFeatureMessageType, ButtplugSensorFeatureMessageType, DeviceFeature, DeviceFeatureActuator, DeviceFeatureRaw, DeviceFeatureSensor, Endpoint, FeatureType
   },
 };
 use getset::{Getters, MutGetters, Setters, CopyGetters};
-use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
+use std::{collections::HashSet, ops::RangeInclusive};
+
 
 // This will look almost exactly like ServerDeviceFeature. However, it will only contain
 // information we want the client to know, i.e. step counts versus specific step ranges. This is
@@ -41,11 +38,11 @@ pub struct ServerDeviceFeature {
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(rename = "actuator")]
-  actuator: Option<DeviceFeatureActuator>,
+  actuator: Option<ServerDeviceFeatureActuator>,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(rename = "sensor")]
-  sensor: Option<DeviceFeatureSensor>,
+  sensor: Option<ServerDeviceFeatureSensor>,
   #[getset(get = "pub")]
   #[serde(skip)]
   raw: Option<DeviceFeatureRaw>,
@@ -62,8 +59,8 @@ impl ServerDeviceFeature {
     id: &Uuid,
     base_id: &Option<Uuid>,
     feature_type: FeatureType,
-    actuator: &Option<DeviceFeatureActuator>,
-    sensor: &Option<DeviceFeatureSensor>,
+    actuator: &Option<ServerDeviceFeatureActuator>,
+    sensor: &Option<ServerDeviceFeatureSensor>,
   ) -> Self {
     Self {
       description: description.to_owned(),
@@ -81,6 +78,17 @@ impl ServerDeviceFeature {
       actuator.is_valid()?;
     }
     Ok(())
+  }
+
+  pub fn as_device_feature(&self, index: u32) -> DeviceFeature {
+    DeviceFeature::new(
+      index,
+      self.description(),
+      self.feature_type(),
+      &self.actuator.clone().and_then(|x| Some(DeviceFeatureActuator::from(x))),
+      &self.sensor.clone().and_then(|x| Some(DeviceFeatureSensor::from(x))),
+      self.raw()
+    )
   }
 
   /// If this is a base feature (i.e. base_id is None), create a new feature with a randomized id
@@ -101,17 +109,6 @@ impl ServerDeviceFeature {
     }
   }
 
-  pub fn as_device_feature(&self, index: u32) -> DeviceFeature {
-    DeviceFeature::new(
-      index,
-      self.description(),
-      self.feature_type(),
-      self.actuator(),
-      self.sensor(),
-      self.raw()
-    )
-  }
-
   pub fn new_raw_feature(endpoints: &[Endpoint]) -> Self {
     Self {
       description: "Raw Endpoints".to_owned(),
@@ -125,3 +122,142 @@ impl ServerDeviceFeature {
   }
 }
 
+fn range_serialize<S>(range: &RangeInclusive<u32>, serializer: S) -> Result<S::Ok, S::Error>
+where
+  S: Serializer,
+{
+  let mut seq = serializer.serialize_seq(Some(2))?;
+  seq.serialize_element(&range.start())?;
+  seq.serialize_element(&range.end())?;
+  seq.end()
+}
+
+fn range_sequence_serialize<S>(
+  range_vec: &Vec<RangeInclusive<i32>>,
+  serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+  S: Serializer,
+{
+  let mut seq = serializer.serialize_seq(Some(range_vec.len()))?;
+  for range in range_vec {
+    seq.serialize_element(&vec![*range.start(), *range.end()])?;
+  }
+  seq.end()
+}
+
+// Copy class used for deserialization, so we can have an optional step-limit
+#[derive(Clone, Debug, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize)]
+pub struct ServerDeviceFeatureActuatorSerialized {
+  #[getset(get = "pub")]
+  #[serde(rename = "step-range")]
+  #[serde(serialize_with = "range_serialize")]
+  step_range: RangeInclusive<u32>,
+  // This doesn't exist in base configs, so when we load these from the base config file, we'll just
+  // copy the step_range value.
+  #[getset(get = "pub")]
+  #[serde(rename = "step-limit")]
+  #[serde(default)]
+  step_limit: Option<RangeInclusive<u32>>,
+  #[getset(get = "pub")]
+  #[serde(rename = "messages")]
+  messages: HashSet<ButtplugActuatorFeatureMessageType>,
+}
+
+
+impl From<ServerDeviceFeatureActuatorSerialized> for ServerDeviceFeatureActuator {
+  fn from(value: ServerDeviceFeatureActuatorSerialized) -> Self {
+    Self {
+      step_range: value.step_range.clone(),
+      step_limit: value.step_limit.unwrap_or(value.step_range.clone()),
+      messages: value.messages,
+    }
+  }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize)]
+#[serde(from = "ServerDeviceFeatureActuatorSerialized")]
+pub struct ServerDeviceFeatureActuator {
+  #[getset(get = "pub")]
+  #[serde(rename = "step-range")]
+  #[serde(serialize_with = "range_serialize")]
+  step_range: RangeInclusive<u32>,
+  // This doesn't exist in base configs, so when we load these from the base config file, we'll just
+  // copy the step_range value.
+  #[getset(get = "pub")]
+  #[serde(rename = "step-limit")]
+  #[serde(serialize_with = "range_serialize")]
+  step_limit: RangeInclusive<u32>,
+  #[getset(get = "pub")]
+  #[serde(rename = "messages")]
+  messages: HashSet<ButtplugActuatorFeatureMessageType>,
+}
+
+impl ServerDeviceFeatureActuator {
+  pub fn new(
+    step_range: &RangeInclusive<u32>,
+    step_limit: &RangeInclusive<u32>,
+    messages: &HashSet<ButtplugActuatorFeatureMessageType>,
+  ) -> Self {
+    Self {
+      step_range: step_range.clone(),
+      step_limit: step_limit.clone(),
+      messages: messages.clone(),
+    }
+  }
+
+  pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
+    if self.step_range.is_empty() {
+      Err(ButtplugDeviceError::DeviceConfigurationError(
+        "Step range empty.".to_string(),
+      ))
+    } else if self.step_limit.is_empty() {
+      Err(ButtplugDeviceError::DeviceConfigurationError(
+        "Step limit empty.".to_string(),
+      ))
+    } else {
+      Ok(())
+    }
+  }
+}
+
+impl From<ServerDeviceFeatureActuator> for DeviceFeatureActuator {
+  fn from(value: ServerDeviceFeatureActuator) -> Self {
+    DeviceFeatureActuator::new(
+      value.step_limit().end() - value.step_limit().start(),
+      value.messages()
+    )
+  }
+}
+
+#[derive(
+  Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize,
+)]
+pub struct ServerDeviceFeatureSensor {
+  #[getset(get = "pub", get_mut = "pub(super)")]
+  #[serde(rename = "value-range")]
+  #[serde(serialize_with = "range_sequence_serialize")]
+  value_range: Vec<RangeInclusive<i32>>,
+  #[getset(get = "pub")]
+  #[serde(rename = "messages")]
+  messages: HashSet<ButtplugSensorFeatureMessageType>,
+}
+
+impl ServerDeviceFeatureSensor {
+  pub fn new(
+    value_range: &Vec<RangeInclusive<i32>>,
+    messages: &HashSet<ButtplugSensorFeatureMessageType>,
+  ) -> Self {
+    Self {
+      value_range: value_range.clone(),
+      messages: messages.clone(),
+    }
+  }
+}
+
+impl From<ServerDeviceFeatureSensor> for DeviceFeatureSensor {
+  fn from(value: ServerDeviceFeatureSensor) -> Self {
+    // Unlike actuator, this is just a straight copy.
+    DeviceFeatureSensor::new(value.value_range(), value.messages())
+  }
+}

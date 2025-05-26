@@ -277,12 +277,10 @@ impl TryFrom<DeviceFeature> for ClientGenericDeviceMessageAttributesV3 {
   fn try_from(value: DeviceFeature) -> Result<Self, Self::Error> {
     if let Some(actuator) = value.actuator() {
       let actuator_type = (*value.feature_type()).try_into()?;
-      let step_limit = actuator.step_limit();
-      let step_count = step_limit.end() - step_limit.start();
       let attrs = Self {
         feature_descriptor: value.description().to_owned(),
         actuator_type,
-        step_count,
+        step_count: *actuator.step_count(),
         index: 0,
       };
       Ok(attrs)

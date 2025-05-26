@@ -583,7 +583,7 @@ mod test {
   use super::*;
   use crate::{
     core::message::{ButtplugActuatorFeatureMessageType, DeviceFeatureActuator, FeatureType},
-    server::message::server_device_feature::ServerDeviceFeature,
+    server::message::server_device_feature::{ServerDeviceFeature, ServerDeviceFeatureActuator},
   };
   use std::{
     collections::{HashMap, HashSet},
@@ -612,7 +612,7 @@ mod test {
               &uuid::Uuid::new_v4(),
               &None,
               FeatureType::Vibrate,
-              &Some(DeviceFeatureActuator::new(
+              &Some(ServerDeviceFeatureActuator::new(
                 &RangeInclusive::new(0, 20),
                 &RangeInclusive::new(0, 20),
                 &HashSet::from_iter([ButtplugActuatorFeatureMessageType::ValueCmd]),
@@ -624,7 +624,7 @@ mod test {
               &uuid::Uuid::new_v4(),
               &None,
               FeatureType::Vibrate,
-              &Some(DeviceFeatureActuator::new(
+              &Some(ServerDeviceFeatureActuator::new(
                 &RangeInclusive::new(0, 20),
                 &RangeInclusive::new(0, 20),
                 &HashSet::from_iter([ButtplugActuatorFeatureMessageType::ValueCmd]),

@@ -101,20 +101,21 @@ pub struct DeviceFeature {
   feature_index: u32,
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(default)]
+  #[serde(rename="Description")]
   description: String,
   #[getset(get = "pub")]
-  #[serde(rename = "feature-type")]
+  #[serde(rename = "FeatureType")]
   feature_type: FeatureType,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(rename = "actuator")]
+  #[serde(rename = "Actuator")]
   actuator: Option<DeviceFeatureActuator>,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(rename = "sensor")]
+  #[serde(rename = "Sensor")]
   sensor: Option<DeviceFeatureSensor>,
   #[getset(get = "pub")]
-  #[serde(skip)]
+  #[serde(rename = "Raw")]
   raw: Option<DeviceFeatureRaw>,
 }
 
@@ -135,13 +136,6 @@ impl DeviceFeature {
       sensor: sensor.clone(),
       raw: raw.clone(),
     }
-  }
-
-  pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
-    if let Some(actuator) = &self.actuator {
-      actuator.is_valid()?;
-    }
-    Ok(())
   }
 
   pub fn new_raw_feature(index: u32, endpoints: &[Endpoint]) -> Self {
@@ -181,74 +175,23 @@ where
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize)]
-pub struct DeviceFeatureActuatorSerialized {
-  #[getset(get = "pub")]
-  #[serde(rename = "step-range")]
-  #[serde(serialize_with = "range_serialize")]
-  step_range: RangeInclusive<u32>,
-  // This doesn't exist in base configs, so when we load these from the base config file, we'll just
-  // copy the step_range value.
-  #[getset(get = "pub")]
-  #[serde(rename = "step-limit")]
-  #[serde(default)]
-  step_limit: Option<RangeInclusive<u32>>,
-  #[getset(get = "pub")]
-  #[serde(rename = "messages")]
-  messages: HashSet<ButtplugActuatorFeatureMessageType>,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize)]
-#[serde(from = "DeviceFeatureActuatorSerialized")]
 pub struct DeviceFeatureActuator {
   #[getset(get = "pub")]
-  #[serde(rename = "step-range")]
-  #[serde(serialize_with = "range_serialize")]
-  step_range: RangeInclusive<u32>,
-  // This doesn't exist in base configs, so when we load these from the base config file, we'll just
-  // copy the step_range value.
+  #[serde(rename = "StepCount")]
+  step_count: u32,
   #[getset(get = "pub")]
-  #[serde(rename = "step-limit")]
-  #[serde(serialize_with = "range_serialize")]
-  step_limit: RangeInclusive<u32>,
-  #[getset(get = "pub")]
-  #[serde(rename = "messages")]
+  #[serde(rename = "Messages")]
   messages: HashSet<ButtplugActuatorFeatureMessageType>,
-}
-
-impl From<DeviceFeatureActuatorSerialized> for DeviceFeatureActuator {
-  fn from(value: DeviceFeatureActuatorSerialized) -> Self {
-    Self {
-      step_range: value.step_range.clone(),
-      step_limit: value.step_limit.unwrap_or(value.step_range.clone()),
-      messages: value.messages,
-    }
-  }
 }
 
 impl DeviceFeatureActuator {
   pub fn new(
-    step_range: &RangeInclusive<u32>,
-    step_limit: &RangeInclusive<u32>,
+    step_count: u32,
     messages: &HashSet<ButtplugActuatorFeatureMessageType>,
   ) -> Self {
     Self {
-      step_range: step_range.clone(),
-      step_limit: step_limit.clone(),
+      step_count,
       messages: messages.clone(),
-    }
-  }
-
-  pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
-    if self.step_range.is_empty() {
-      Err(ButtplugDeviceError::DeviceConfigurationError(
-        "Step range empty.".to_string(),
-      ))
-    } else if self.step_limit.is_empty() {
-      Err(ButtplugDeviceError::DeviceConfigurationError(
-        "Step limit empty.".to_string(),
-      ))
-    } else {
-      Ok(())
     }
   }
 }
@@ -258,11 +201,11 @@ impl DeviceFeatureActuator {
 )]
 pub struct DeviceFeatureSensor {
   #[getset(get = "pub", get_mut = "pub(super)")]
-  #[serde(rename = "value-range")]
+  #[serde(rename = "ValueRange")]
   #[serde(serialize_with = "range_sequence_serialize")]
   value_range: Vec<RangeInclusive<i32>>,
   #[getset(get = "pub")]
-  #[serde(rename = "messages")]
+  #[serde(rename = "Messages")]
   messages: HashSet<ButtplugSensorFeatureMessageType>,
 }
 
