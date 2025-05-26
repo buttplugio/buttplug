@@ -23,10 +23,10 @@ use serde::{Deserialize, Serialize};
 pub struct ServerInfoV4 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "APIVersionMajor"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "ApiVersionMajor"))]
   #[getset(get_copy = "pub")]
   api_version_major: ButtplugMessageSpecVersion,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "APIVersionMinor"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "ApiVersionMinor"))]
   #[getset(get_copy = "pub")]
   api_version_minor: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "MaxPingTime"))]
