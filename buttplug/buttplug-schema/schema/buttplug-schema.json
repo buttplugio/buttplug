@@ -291,9 +291,208 @@
       "description": "Specifies granularity of each feature on the device.",
       "minimum": 1,
       "type": "integer"
+    },
+    "DeviceFeatureV4": {
+      "description": "Specifies feature for a device.",
+      "type": "object",
+      "properties": {
+        "FeatureDescription": {
+          "type": "string"
+        },
+        "FeatureIndex": {
+          "type": "integer"
+        },
+        "FeatureType": {
+          "type": "string"
+        },
+        "Actuator": {
+          "type": "object",
+          "properties": {
+            "StepCount": {
+              "type": "integer"              
+            },
+            "Messages": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "StepCount",
+            "Messages"
+          ]
+        },
+        "Sensor": {
+          "type": "object",
+          "properties": {
+            "ValueRange": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            },
+            "Messages": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "ValueRange",
+            "Messages"
+          ]
+        },
+        "Raw": {
+          "type": "object",
+          "properties": {
+            "Endpoints": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "Messages": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "Endpoints",
+            "Messages"
+          ]          
+        }
+      },
+      "required": [
+        "FeatureDescription",
+        "FeatureIndex",
+        "FeatureType"
+      ]
     }
   },
   "messages": {
+    "SpecV4Messages": {
+      "ValueCmd": {
+        "type": "object",
+        "description": "Sends a generic value set command to a device.",
+        "properties": {
+          "Id": { "$ref": "#/components/ClientId" },
+          "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+          "FeatureIndex": { "$ref": "#/components/DeviceIndex" },
+          "ActuatorType": { 
+            "type": "string"
+          },
+          "Value": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Id",
+          "DeviceIndex",
+          "FeatureIndex",
+          "ActuatorType",
+          "Value"
+        ]
+      },
+      "ValueWithParameterCmd": {
+        "type": "object",
+        "description": "Sends a generic value with parameter command to a device.",
+        "properties": {
+          "Id": { "$ref": "#/components/ClientId" },
+          "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+          "FeatureIndex": { "$ref": "#/components/DeviceIndex" },
+          "ActuatorType": { 
+            "type": "string"
+          },
+          "Value": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "Parameter": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Id",
+          "DeviceIndex",
+          "FeatureIndex",
+          "ActuatorType",
+          "Value"
+        ]
+      },
+      "DeviceList": {
+        "type": "object",
+        "description": "List of all available devices known to the system.",
+        "properties": {
+          "Id": { "$ref": "#/components/ClientId" },
+          "Devices": {
+            "description": "Array of device ids and names.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "DeviceName": { "$ref": "#/components/DeviceName" },
+                "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+                "DeviceDisplayName": { "type": "string" },
+                "DeviceMessageTimingGap": { "type": "integer" },
+                "DeviceFeatures": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/DeviceFeaturesV4" 
+                  }
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "DeviceName",
+                "DeviceIndex",
+                "DeviceMessages"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Id",
+          "Devices"
+        ]
+      },
+      "ServerInfo": {
+        "type": "object",
+        "description": "Server version information, with API version in Major.Minor format.",
+        "properties": {
+          "Id": { "$ref": "#/components/ClientId" },
+          "ServerName": {
+            "description": "Name of the server. Can be 0-length.",
+            "type": "string"
+          },
+          "APIVersionMajor": {
+            "description": "Message template version of the server software.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "APIVersionMinor": {
+            "description": "Message template version of the server software.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "MaxPingTime": {
+            "description": "Maximum time (in milliseconds) the server will wait between ping messages from client before shutting down.",
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }, 
     "SpecV3Messages": {
       "DeviceList": {
         "type": "object",
@@ -1333,6 +1532,42 @@
     }
   },
   "specs": {
+    "MessageSpecV4": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "All messages valid in Buttplug Spec v3",
+        "properties": {
+          "DeviceList": { "$ref": "#/messages/SpecV4Messages/DeviceList" },
+          "Error": { "$ref": "#/messages/SpecV0Messages/Error" },
+          "Ok": { "$ref": "#/messages/SpecV0Messages/Ok" },
+          "Ping": { "$ref": "#/messages/SpecV0Messages/Ping" },
+          "RawReadCmd": { "$ref": "#/messages/SpecV2Messages/RawReadCmd" },
+          "RawReading": { "$ref": "#/messages/SpecV2Messages/RawReading" },
+          "RawWriteCmd": { "$ref": "#/messages/SpecV2Messages/RawWriteCmd" },
+          "RawSubscribeCmd": { "$ref": "#/messages/SpecV2Messages/RawSubscribeCmd" },
+          "RawUnsubscribeCmd": { "$ref": "#/messages/SpecV2Messages/RawUnsubscribeCmd" },
+          "RequestDeviceList": { "$ref": "#/messages/SpecV0Messages/RequestDeviceList" },
+          "RequestServerInfo": { "$ref": "#/messages/SpecV1Messages/RequestServerInfo" },
+          "ScanningFinished": { "$ref": "#/messages/SpecV0Messages/ScanningFinished" },
+          "SensorReadCmd": { "$ref": "#/messages/SpecV3Messages/SensorReadCmd" },
+          "SensorReading": { "$ref": "#/messages/SpecV3Messages/SensorReading" },
+          "SensorSubscribeCmd": { "$ref": "#/messages/SpecV3Messages/SensorSubscribeCmd" },
+          "SensorUnsubscribeCmd": { "$ref": "#/messages/SpecV3Messages/SensorUnsubscribeCmd" },
+          "ServerInfo": { "$ref": "#/messages/SpecV4Messages/ServerInfo" },
+          "StartScanning": { "$ref": "#/messages/SpecV0Messages/StartScanning" },
+          "StopAllDevices": { "$ref": "#/messages/SpecV0Messages/StopAllDevices" },
+          "StopDeviceCmd": { "$ref": "#/messages/SpecV0Messages/StopDeviceCmd" },
+          "StopScanning": { "$ref": "#/messages/SpecV0Messages/StopScanning" },
+          "ValueCmd": { "$ref": "#/messages/SpecV4Messages/ValueCmd" },
+          "ValueWithParameterCmd": { "$ref": "#/messages/SpecV4Messages/ValueWithParameterCmd" }
+        },
+        "additionalProperties": false,
+        "minProperties": 1,
+        "maxProperties": 1
+      },
+      "minItems": 1
+    },    
     "MessageSpecV3": {
       "type": "array",
       "items": {
@@ -1482,6 +1717,7 @@
     }
   },
   "anyOf": [ 
+    { "$ref": "#/specs/MessageSpecV4" }, 
     { "$ref": "#/specs/MessageSpecV3" }, 
     { "$ref": "#/specs/MessageSpecV2" },
     { "$ref": "#/specs/MessageSpecV1" }, 
