@@ -25,7 +25,6 @@ use crate::{
       RequestDeviceListV0,
       RequestServerInfoV1,
       ScanningFinishedV0,
-      ServerInfoV2,
       StartScanningV0,
       StopAllDevicesV0,
       StopDeviceCmdV0,
@@ -34,7 +33,7 @@ use crate::{
   },
   server::message::{
     v1::{LinearCmdV1, RotateCmdV1, VibrateCmdV1},
-    v2::{ButtplugClientMessageV2, ButtplugServerMessageV2},
+    v2::{ButtplugClientMessageV2, ButtplugServerMessageV2, ServerInfoV2},
   },
 };
 #[cfg(feature = "serialize-json")]
@@ -196,7 +195,7 @@ impl TryFrom<ButtplugServerMessageV4> for ButtplugServerMessageV3 {
       // Direct conversions
       ButtplugServerMessageV4::Ok(m) => Ok(ButtplugServerMessageV3::Ok(m)),
       ButtplugServerMessageV4::Error(m) => Ok(ButtplugServerMessageV3::Error(m)),
-      ButtplugServerMessageV4::ServerInfo(m) => Ok(ButtplugServerMessageV3::ServerInfo(m)),
+      ButtplugServerMessageV4::ServerInfo(m) => Ok(ButtplugServerMessageV3::ServerInfo(m.into())),
       ButtplugServerMessageV4::DeviceRemoved(m) => Ok(ButtplugServerMessageV3::DeviceRemoved(m)),
       ButtplugServerMessageV4::ScanningFinished(m) => {
         Ok(ButtplugServerMessageV3::ScanningFinished(m))

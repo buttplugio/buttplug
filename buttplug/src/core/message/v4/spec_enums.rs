@@ -22,7 +22,7 @@ use crate::core::message::{
   RequestDeviceListV0,
   RequestServerInfoV1,
   ScanningFinishedV0,
-  ServerInfoV2,
+  ServerInfoV4,
   StartScanningV0,
   StopAllDevicesV0,
   StopDeviceCmdV0,
@@ -87,7 +87,7 @@ pub enum ButtplugServerMessageV4 {
   Ok(OkV0),
   Error(ErrorV0),
   // Handshake messages
-  ServerInfo(ServerInfoV2),
+  ServerInfo(ServerInfoV4),
   // Device enumeration messages
   DeviceList(DeviceListV4),
   DeviceAdded(DeviceAddedV4),

@@ -5,15 +5,12 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{core::{
-  errors::ButtplugMessageError,
-  message::{
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-    ButtplugMessageSpecVersion,
-    ButtplugMessageValidator,
-  },
-}, server::message::ServerInfoV2};
+use crate::core::{errors::ButtplugMessageError, message::{
+  ButtplugMessage,
+  ButtplugMessageFinalizer,
+  ButtplugMessageSpecVersion,
+  ButtplugMessageValidator, ServerInfoV4,
+}};
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
@@ -22,18 +19,9 @@ use serde::{Deserialize, Serialize};
   Debug, ButtplugMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, CopyGetters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct ServerInfoV0 {
+pub struct ServerInfoV2 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "MajorVersion"))]
-  #[getset(get_copy = "pub")]
-  major_version: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "MinorVersion"))]
-  #[getset(get_copy = "pub")]
-  minor_version: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "BuildVersion"))]
-  #[getset(get_copy = "pub")]
-  build_version: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "MessageVersion"))]
   #[getset(get_copy = "pub")]
   message_version: ButtplugMessageSpecVersion,
@@ -45,7 +33,7 @@ pub struct ServerInfoV0 {
   server_name: String,
 }
 
-impl ServerInfoV0 {
+impl ServerInfoV2 {
   pub fn new(
     server_name: &str,
     message_version: ButtplugMessageSpecVersion,
@@ -53,9 +41,6 @@ impl ServerInfoV0 {
   ) -> Self {
     Self {
       id: 1,
-      major_version: 0,
-      minor_version: 0,
-      build_version: 0,
       message_version,
       max_ping_time,
       server_name: server_name.to_string(),
@@ -63,20 +48,19 @@ impl ServerInfoV0 {
   }
 }
 
-impl ButtplugMessageValidator for ServerInfoV0 {
+impl ButtplugMessageValidator for ServerInfoV2 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
-    self.is_system_id(self.id)
+    self.is_not_system_id(self.id)
   }
 }
 
-impl From<ServerInfoV2> for ServerInfoV0 {
-  fn from(msg: ServerInfoV2) -> Self {
-    let mut out_msg = Self::new(
-      msg.server_name(),
-      msg.message_version(),
-      msg.max_ping_time(),
-    );
-    out_msg.set_id(msg.id());
-    out_msg
+impl From<ServerInfoV4> for ServerInfoV2 {
+  fn from(value: ServerInfoV4) -> Self {
+    Self {
+      id: value.id(),
+      server_name: value.server_name().clone(),
+      message_version: value.api_version_major(),
+      max_ping_time: value.max_ping_time(),
+    }
   }
 }

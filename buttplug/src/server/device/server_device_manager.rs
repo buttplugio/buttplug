@@ -16,9 +16,7 @@ use crate::{
       ButtplugDeviceMessage,
       ButtplugMessage,
       ButtplugServerMessageV4,
-      DeviceFeature,
       DeviceListV4,
-      DeviceMessageInfoV4,
     },
   },
   server::{

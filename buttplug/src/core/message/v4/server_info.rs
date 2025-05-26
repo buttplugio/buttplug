@@ -20,12 +20,15 @@ use serde::{Deserialize, Serialize};
   Debug, ButtplugMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, CopyGetters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct ServerInfoV2 {
+pub struct ServerInfoV4 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "MessageVersion"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "APIVersionMajor"))]
   #[getset(get_copy = "pub")]
-  message_version: ButtplugMessageSpecVersion,
+  api_version_major: ButtplugMessageSpecVersion,
+  #[cfg_attr(feature = "serialize-json", serde(rename = "APIVersionMinor"))]
+  #[getset(get_copy = "pub")]
+  api_version_minor: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "MaxPingTime"))]
   #[getset(get_copy = "pub")]
   max_ping_time: u32,
@@ -34,22 +37,24 @@ pub struct ServerInfoV2 {
   server_name: String,
 }
 
-impl ServerInfoV2 {
+impl ServerInfoV4 {
   pub fn new(
     server_name: &str,
-    message_version: ButtplugMessageSpecVersion,
+    api_version_major: ButtplugMessageSpecVersion,
+    api_version_minor: u32,
     max_ping_time: u32,
   ) -> Self {
     Self {
       id: 1,
-      message_version,
+      api_version_major,
+      api_version_minor,
       max_ping_time,
       server_name: server_name.to_string(),
     }
   }
 }
 
-impl ButtplugMessageValidator for ServerInfoV2 {
+impl ButtplugMessageValidator for ServerInfoV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
   }
