@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::{errors::ButtplugDeviceError, message::Endpoint};
+use crate::core::message::Endpoint;
 use getset::{Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use std::{collections::HashSet, ops::RangeInclusive};
@@ -148,16 +148,6 @@ impl DeviceFeature {
       raw: Some(DeviceFeatureRaw::new(endpoints)),
     }
   }
-}
-
-fn range_serialize<S>(range: &RangeInclusive<u32>, serializer: S) -> Result<S::Ok, S::Error>
-where
-  S: Serializer,
-{
-  let mut seq = serializer.serialize_seq(Some(2))?;
-  seq.serialize_element(&range.start())?;
-  seq.serialize_element(&range.end())?;
-  seq.end()
 }
 
 fn range_sequence_serialize<S>(
