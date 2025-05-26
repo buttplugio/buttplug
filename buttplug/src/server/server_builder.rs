@@ -39,8 +39,6 @@ pub struct ButtplugServerBuilder {
   max_ping_time: Option<u32>,
   /// Device manager builder for the server
   device_manager: Arc<ServerDeviceManager>,
-  /// Allow connections for clients using beta v4 message spec support (message spec may change and break for now)
-  allow_v4_connections: bool,
 }
 
 impl Default for ButtplugServerBuilder {
@@ -57,10 +55,6 @@ impl Default for ButtplugServerBuilder {
         .finish()
         .unwrap(),
       ),
-      #[cfg(not(feature = "default_v4_spec"))]
-      allow_v4_connections: false,
-      #[cfg(feature = "default_v4_spec")]
-      allow_v4_connections: true,
     }
   }
 }
@@ -71,10 +65,6 @@ impl ButtplugServerBuilder {
       name: "Buttplug Server".to_owned(),
       max_ping_time: None,
       device_manager: Arc::new(device_manager),
-      #[cfg(not(feature = "default_v4_spec"))]
-      allow_v4_connections: false,
-      #[cfg(feature = "default_v4_spec")]
-      allow_v4_connections: true,
     }
   }
 
@@ -83,7 +73,6 @@ impl ButtplugServerBuilder {
       name: "Buttplug Server".to_owned(),
       max_ping_time: None,
       device_manager,
-      allow_v4_connections: false,
     }
   }
 
@@ -103,11 +92,6 @@ impl ButtplugServerBuilder {
   /// into the Websocket protocol. This ping is specific to the Buttplug protocol.
   pub fn max_ping_time(&mut self, ping_time: u32) -> &mut Self {
     self.max_ping_time = Some(ping_time);
-    self
-  }
-
-  pub fn allow_v4_connections(&mut self) -> &mut Self {
-    self.allow_v4_connections = true;
     self
   }
 
@@ -157,12 +141,6 @@ impl ButtplugServerBuilder {
       );
     }
 
-    if self.allow_v4_connections {
-      warn!(
-        "Allowing beta v4 connections. Note that things may break due to message spec changes."
-      );
-    }
-
     // Assuming everything passed, return the server.
     Ok(ButtplugServer::new(
       &self.name,
@@ -171,7 +149,6 @@ impl ButtplugServerBuilder {
       self.device_manager.clone(),
       connected,
       output_sender,
-      self.allow_v4_connections,
     ))
   }
 }

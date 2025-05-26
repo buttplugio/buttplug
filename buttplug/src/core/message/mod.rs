@@ -77,11 +77,6 @@ impl TryFrom<i32> for ButtplugMessageSpecVersion {
 /// client request.
 pub const BUTTPLUG_SERVER_EVENT_ID: u32 = 0;
 
-#[cfg(not(feature = "default_v4_spec"))]
-/// The current latest version of the spec implemented by the library.
-pub const BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION: ButtplugMessageSpecVersion =
-  ButtplugMessageSpecVersion::Version3;
-#[cfg(feature = "default_v4_spec")]
 /// The current latest version of the spec implemented by the library.
 pub const BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION: ButtplugMessageSpecVersion =
   ButtplugMessageSpecVersion::Version4;
