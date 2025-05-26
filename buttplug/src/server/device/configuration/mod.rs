@@ -582,7 +582,7 @@ impl DeviceConfigurationManager {
 mod test {
   use super::*;
   use crate::{
-    core::message::{ButtplugActuatorFeatureMessageType, DeviceFeatureActuator, FeatureType},
+    core::message::{ButtplugActuatorFeatureMessageType, FeatureType},
     server::message::server_device_feature::{ServerDeviceFeature, ServerDeviceFeatureActuator},
   };
   use std::{

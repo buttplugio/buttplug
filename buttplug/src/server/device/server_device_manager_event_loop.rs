@@ -9,7 +9,6 @@ use crate::{
   core::message::{
     ButtplugServerMessageV4,
     DeviceAddedV4,
-    DeviceFeature,
     DeviceRemovedV0,
     ScanningFinishedV0,
   },
