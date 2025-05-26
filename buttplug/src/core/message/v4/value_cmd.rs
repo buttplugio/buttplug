@@ -22,7 +22,7 @@ pub struct ValueCmdV4 {
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "FeatureIndex"))]
   feature_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "ActuatorType"))]
   actuator_type: ActuatorType,
