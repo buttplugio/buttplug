@@ -26,6 +26,7 @@ use buttplug::{
     ButtplugServerMessageV3,
     ButtplugServerMessageVariant,
     DeviceListV3,
+    ServerInfoV2,
   },
   util::async_manager,
 };
