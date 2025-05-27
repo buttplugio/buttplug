@@ -10,12 +10,13 @@ use crate::{
     errors::ButtplugMessageError,
     message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
   },
-  server::message::ButtplugDeviceMessageType,
 };
 use getset::{CopyGetters, Getters};
 
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
+
+use super::spec_enums::ButtplugDeviceMessageNameV0;
 
 #[derive(Default, ButtplugMessage, Clone, Debug, PartialEq, Eq, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
@@ -30,7 +31,7 @@ pub struct DeviceAddedV0 {
   pub(in crate::server::message) device_name: String,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
   #[getset(get = "pub")]
-  pub(in crate::server::message) device_messages: Vec<ButtplugDeviceMessageType>,
+  pub(in crate::server::message) device_messages: Vec<ButtplugDeviceMessageNameV0>,
 }
 
 impl ButtplugMessageValidator for DeviceAddedV0 {

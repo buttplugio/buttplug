@@ -28,4 +28,4 @@ pub use server_device_message_attributes::{
   ServerGenericDeviceMessageAttributesV3,
   ServerSensorDeviceMessageAttributesV3,
 };
-pub use spec_enums::{ButtplugClientMessageV3, ButtplugServerMessageV3};
+pub use spec_enums::{ButtplugClientMessageV3, ButtplugServerMessageV3, ButtplugDeviceMessageTypeV3};

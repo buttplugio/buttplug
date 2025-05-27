@@ -9,9 +9,9 @@ use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-use crate::server::message::{v0::DeviceMessageInfoV0, ButtplugDeviceMessageType};
+use crate::server::message::{v0::DeviceMessageInfoV0, ButtplugDeviceMessageNameV0};
 
-use super::{ClientDeviceMessageAttributesV1, DeviceAddedV1};
+use super::{spec_enums::ButtplugDeviceMessageNameV1, ClientDeviceMessageAttributesV1, DeviceAddedV1};
 
 #[derive(Clone, Debug, PartialEq, Eq, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
@@ -40,29 +40,29 @@ impl From<DeviceAddedV1> for DeviceMessageInfoV1 {
 impl From<DeviceMessageInfoV1> for DeviceMessageInfoV0 {
   fn from(device_message_info: DeviceMessageInfoV1) -> Self {
     // Convert to array of message types.
-    let mut device_messages: Vec<ButtplugDeviceMessageType> = vec![];
+    let mut device_messages: Vec<ButtplugDeviceMessageNameV0> = vec![];
 
-    device_messages.push(ButtplugDeviceMessageType::StopDeviceCmd);
+    device_messages.push(ButtplugDeviceMessageNameV0::StopDeviceCmd);
     if device_message_info
       .device_messages()
       .single_motor_vibrate_cmd()
       .is_some()
     {
-      device_messages.push(ButtplugDeviceMessageType::SingleMotorVibrateCmd);
+      device_messages.push(ButtplugDeviceMessageNameV0::SingleMotorVibrateCmd);
     }
     if device_message_info
       .device_messages()
       .fleshlight_launch_fw12_cmd()
       .is_some()
     {
-      device_messages.push(ButtplugDeviceMessageType::FleshlightLaunchFW12Cmd);
+      device_messages.push(ButtplugDeviceMessageNameV0::FleshlightLaunchFW12Cmd);
     }
     if device_message_info
       .device_messages()
       .vorze_a10_cyclone_cmd()
       .is_some()
     {
-      device_messages.push(ButtplugDeviceMessageType::VorzeA10CycloneCmd);
+      device_messages.push(ButtplugDeviceMessageNameV0::VorzeA10CycloneCmd);
     }
 
     device_messages.sort();

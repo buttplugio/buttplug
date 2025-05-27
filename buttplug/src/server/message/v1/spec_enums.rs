@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use std::cmp::Ordering;
+
 use crate::{
   core::{
     errors::{ButtplugError, ButtplugMessageError},
@@ -156,5 +158,36 @@ impl From<ButtplugServerMessageV1> for ButtplugServerMessageV0 {
         )),
       )),
     }
+  }
+}
+
+#[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]
+pub enum ButtplugDeviceMessageNameV1 {
+  VibrateCmd,
+  LinearCmd,
+  RotateCmd,
+  StopDeviceCmd,
+  RawWriteCmd,
+  RawReadCmd,
+  RawSubscribeCmd,
+  RawUnsubscribeCmd,
+  // Deprecated generic commands
+  SingleMotorVibrateCmd,
+  // Deprecated device specific commands
+  FleshlightLaunchFW12Cmd,
+  LovenseCmd,
+  KiirooCmd,
+  VorzeA10CycloneCmd,
+}
+
+impl PartialOrd for ButtplugDeviceMessageNameV1 {
+  fn partial_cmp(&self, other: &ButtplugDeviceMessageNameV1) -> Option<Ordering> {
+    Some(self.cmp(other))
+  }
+}
+
+impl Ord for ButtplugDeviceMessageNameV1 {
+  fn cmp(&self, other: &ButtplugDeviceMessageNameV1) -> Ordering {
+    self.to_string().cmp(&other.to_string())
   }
 }
