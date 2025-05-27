@@ -5,10 +5,12 @@ use crate::{
       ActuatorType, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, FeatureType, ValueWithParameterCmdV4
     },
   },
-  server::message::{server_device_feature::ServerDeviceFeature, ButtplugDeviceMessageType, ServerDeviceAttributes, TryFromDeviceAttributes, VorzeA10CycloneCmdV0},
+  server::message::{server_device_feature::ServerDeviceFeature, ServerDeviceAttributes, TryFromDeviceAttributes, VorzeA10CycloneCmdV0},
 };
 use getset::CopyGetters;
 use uuid::Uuid;
+
+use super::spec_enums::ButtplugDeviceMessageNameV4;
 
 #[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, Eq, Clone, CopyGetters)] 
 #[getset(get_copy="pub")]
@@ -122,12 +124,12 @@ impl TryFromDeviceAttributes<ValueWithParameterCmdV4> for CheckedValueWithParame
         }
       } else {
         Err(ButtplugError::from(
-          ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::ValueCmd.to_string()),
+          ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::ValueCmd.to_string()),
         ))
       }
     } else {
       Err(ButtplugError::from(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::ValueCmd.to_string()),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::ValueCmd.to_string()),
       ))
     }
   }

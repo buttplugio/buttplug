@@ -1,23 +1,18 @@
 use crate::core::{
   errors::{ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugActuatorFeatureMessageType,
     ButtplugClientMessageV4,
     ButtplugDeviceMessage,
     ButtplugMessage,
     ButtplugMessageFinalizer,
     ButtplugMessageSpecVersion,
     ButtplugMessageValidator,
-    ButtplugRawFeatureMessageType,
-    ButtplugSensorFeatureMessageType,
     ButtplugServerMessageV4,
     RawReadingV2,
     SensorReadingV4,
   },
 };
 use server_device_attributes::ServerDeviceAttributes;
-use serde::{Deserialize, Serialize};
-use std::cmp::Ordering;
 
 pub mod server_device_attributes;
 pub mod serializer;
@@ -34,125 +29,6 @@ pub use v2::*;
 pub use v3::*;
 pub use v4::*;
 
-/// Used in [MessageAttributes][crate::core::messages::DeviceMessageAttributes] for denoting message
-/// capabilties.
-// TODO Should this enum exist? We don't really need a list of EVERY message across all of the specs at any point.
-#[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]
-pub enum ButtplugDeviceMessageType {
-  VibrateCmd,
-  LinearCmd,
-  RotateCmd,
-  StopDeviceCmd,
-  RawWriteCmd,
-  RawReadCmd,
-  RawSubscribeCmd,
-  RawUnsubscribeCmd,
-  BatteryLevelCmd,
-  RSSILevelCmd,
-  ScalarCmd,
-  SensorReadCmd,
-  SensorSubscribeCmd,
-  SensorUnsubscribeCmd,
-  ValueCmd,
-  ValueWithParameterCmd,
-  // Deprecated generic commands
-  SingleMotorVibrateCmd,
-  // Deprecated device specific commands
-  FleshlightLaunchFW12Cmd,
-  LovenseCmd,
-  KiirooCmd,
-  VorzeA10CycloneCmd,
-}
-
-// Ordering for ButtplugDeviceMessageType should be lexicographic, for
-// serialization reasons.
-impl PartialOrd for ButtplugDeviceMessageType {
-  fn partial_cmp(&self, other: &ButtplugDeviceMessageType) -> Option<Ordering> {
-    Some(self.cmp(other))
-  }
-}
-
-impl Ord for ButtplugDeviceMessageType {
-  fn cmp(&self, other: &ButtplugDeviceMessageType) -> Ordering {
-    self.to_string().cmp(&other.to_string())
-  }
-}
-
-impl From<ButtplugActuatorFeatureMessageType> for ButtplugDeviceMessageType {
-  fn from(value: ButtplugActuatorFeatureMessageType) -> Self {
-    match value {
-      ButtplugActuatorFeatureMessageType::ValueWithParameterCmd => ButtplugDeviceMessageType::LinearCmd,
-      ButtplugActuatorFeatureMessageType::ValueCmd => ButtplugDeviceMessageType::ScalarCmd,
-    }
-  }
-}
-
-impl TryFrom<ButtplugDeviceMessageType> for ButtplugActuatorFeatureMessageType {
-  type Error = ();
-
-  fn try_from(value: ButtplugDeviceMessageType) -> Result<Self, Self::Error> {
-    match value {
-      ButtplugDeviceMessageType::LinearCmd => Ok(ButtplugActuatorFeatureMessageType::ValueWithParameterCmd),
-      ButtplugDeviceMessageType::ValueCmd => Ok(ButtplugActuatorFeatureMessageType::ValueCmd),
-      _ => Err(()),
-    }
-  }
-}
-
-impl From<ButtplugSensorFeatureMessageType> for ButtplugDeviceMessageType {
-  fn from(value: ButtplugSensorFeatureMessageType) -> Self {
-    match value {
-      ButtplugSensorFeatureMessageType::SensorReadCmd => ButtplugDeviceMessageType::SensorReadCmd,
-      ButtplugSensorFeatureMessageType::SensorSubscribeCmd => {
-        ButtplugDeviceMessageType::SensorSubscribeCmd
-      }
-    }
-  }
-}
-
-impl TryFrom<ButtplugDeviceMessageType> for ButtplugSensorFeatureMessageType {
-  type Error = ();
-
-  fn try_from(value: ButtplugDeviceMessageType) -> Result<Self, Self::Error> {
-    match value {
-      ButtplugDeviceMessageType::SensorReadCmd => {
-        Ok(ButtplugSensorFeatureMessageType::SensorReadCmd)
-      }
-      ButtplugDeviceMessageType::SensorSubscribeCmd => {
-        Ok(ButtplugSensorFeatureMessageType::SensorSubscribeCmd)
-      }
-      _ => Err(()),
-    }
-  }
-}
-
-impl From<ButtplugRawFeatureMessageType> for ButtplugDeviceMessageType {
-  fn from(value: ButtplugRawFeatureMessageType) -> Self {
-    match value {
-      ButtplugRawFeatureMessageType::RawReadCmd => ButtplugDeviceMessageType::RawReadCmd,
-      ButtplugRawFeatureMessageType::RawWriteCmd => ButtplugDeviceMessageType::RawWriteCmd,
-      ButtplugRawFeatureMessageType::RawSubscribeCmd => ButtplugDeviceMessageType::RawSubscribeCmd,
-      ButtplugRawFeatureMessageType::RawUnsubscribeCmd => {
-        ButtplugDeviceMessageType::RawUnsubscribeCmd
-      }
-    }
-  }
-}
-
-impl TryFrom<ButtplugDeviceMessageType> for ButtplugRawFeatureMessageType {
-  type Error = ();
-
-  fn try_from(value: ButtplugDeviceMessageType) -> Result<Self, Self::Error> {
-    match value {
-      ButtplugDeviceMessageType::RawReadCmd => Ok(ButtplugRawFeatureMessageType::RawReadCmd),
-      ButtplugDeviceMessageType::RawWriteCmd => Ok(ButtplugRawFeatureMessageType::RawWriteCmd),
-      ButtplugDeviceMessageType::RawSubscribeCmd => {
-        Ok(ButtplugRawFeatureMessageType::RawSubscribeCmd)
-      }
-      _ => Err(()),
-    }
-  }
-}
 
 #[derive(
   Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator,

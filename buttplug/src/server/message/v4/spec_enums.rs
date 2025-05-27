@@ -466,3 +466,17 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceCommandMessageUni
     }
   }
 }
+
+ #[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display)]
+pub enum ButtplugDeviceMessageNameV4 {
+  StopDeviceCmd,
+  RawWriteCmd,
+  RawReadCmd,
+  RawSubscribeCmd,
+  RawUnsubscribeCmd,
+  SensorReadCmd,
+  SensorSubscribeCmd,
+  SensorUnsubscribeCmd,
+  ValueCmd,
+  ValueWithParameterCmd,
+}

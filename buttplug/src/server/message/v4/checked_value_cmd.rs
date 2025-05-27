@@ -13,11 +13,13 @@ use crate::{
     },
   },
   server::message::{
-    ButtplugDeviceMessageType, ServerDeviceAttributes, TryFromDeviceAttributes
+    ServerDeviceAttributes, TryFromDeviceAttributes
   },
 };
 use getset::{CopyGetters, Getters};
 use uuid::Uuid;
+
+use super::spec_enums::ButtplugDeviceMessageNameV4;
 
 #[derive(
   Debug,
@@ -134,12 +136,12 @@ impl TryFromDeviceAttributes<ValueCmdV4> for CheckedValueCmdV4 {
         }
       } else {
         Err(ButtplugError::from(
-          ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::ValueCmd.to_string()),
+          ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::ValueCmd.to_string()),
         ))
       }
     } else {
       Err(ButtplugError::from(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::ValueCmd.to_string()),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::ValueCmd.to_string()),
       ))
     }
   }

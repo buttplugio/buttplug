@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use super::*;
 use crate::core::{
   errors::ButtplugMessageError,
@@ -64,4 +66,29 @@ pub enum ButtplugServerMessageV0 {
   DeviceAdded(DeviceAddedV0),
   DeviceRemoved(DeviceRemovedV0),
   ScanningFinished(ScanningFinishedV0),
+}
+
+
+#[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]
+pub enum ButtplugDeviceMessageNameV0 {
+  StopDeviceCmd,
+  // Deprecated generic commands
+  SingleMotorVibrateCmd,
+  // Deprecated device specific commands
+  FleshlightLaunchFW12Cmd,
+  LovenseCmd,
+  KiirooCmd,
+  VorzeA10CycloneCmd,
+}
+
+impl PartialOrd for ButtplugDeviceMessageNameV0 {
+  fn partial_cmp(&self, other: &ButtplugDeviceMessageNameV0) -> Option<Ordering> {
+    Some(self.cmp(other))
+  }
+}
+
+impl Ord for ButtplugDeviceMessageNameV0 {
+  fn cmp(&self, other: &ButtplugDeviceMessageNameV0) -> Ordering {
+    self.to_string().cmp(&other.to_string())
+  }
 }

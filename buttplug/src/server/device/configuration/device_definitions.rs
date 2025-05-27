@@ -4,13 +4,9 @@ use uuid::Uuid;
 
 use crate::{
   core::message::{
-    ButtplugActuatorFeatureMessageType,
-    ButtplugRawFeatureMessageType,
-    ButtplugSensorFeatureMessageType,
     Endpoint,
-    FeatureType,
   },
-  server::message::{server_device_feature::ServerDeviceFeature, ButtplugDeviceMessageType},
+  server::message::{server_device_feature::ServerDeviceFeature},
 };
 
 #[derive(Debug, Clone, Getters)]
@@ -116,39 +112,5 @@ impl UserDeviceDefinition {
     self
       .features
       .push(ServerDeviceFeature::new_raw_feature(endpoints));
-  }
-
-  // Return true if any feature on this device handles this message. We'll deal with the actual
-  // feature indexing when the message itself is handled.
-  pub fn allows_message(&self, msg_type: &ButtplugDeviceMessageType) -> bool {
-    for feature in &self.features {
-      if let Ok(actuator_msg_type) = ButtplugActuatorFeatureMessageType::try_from(*msg_type) {
-        if let Some(actuator) = feature.actuator() {
-          debug!("{:?}", actuator);
-          if actuator.messages().contains(&actuator_msg_type) {
-            return true;
-          }
-          if *msg_type == ButtplugDeviceMessageType::RotateCmd
-            && actuator
-              .messages()
-              .contains(&ButtplugActuatorFeatureMessageType::ValueCmd)
-            && feature.feature_type() == FeatureType::RotateWithDirection
-          {
-            return true;
-          }
-        }
-      } else if let Ok(sensor_msg_type) = ButtplugSensorFeatureMessageType::try_from(*msg_type) {
-        if let Some(sensor) = feature.sensor() {
-          if sensor.messages().contains(&sensor_msg_type) {
-            return true;
-          }
-        }
-      } else if ButtplugRawFeatureMessageType::try_from(*msg_type).is_ok()
-        && feature.raw().is_some()
-      {
-        return true;
-      }
-    }
-    false
   }
 }

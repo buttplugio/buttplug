@@ -25,6 +25,6 @@ pub use lovense_cmd::LovenseCmdV0;
 pub use request_log::RequestLogV0;
 pub use server_info::ServerInfoV0;
 pub use single_motor_vibrate_cmd::SingleMotorVibrateCmdV0;
-pub use spec_enums::{ButtplugClientMessageV0, ButtplugServerMessageV0};
+pub use spec_enums::{ButtplugClientMessageV0, ButtplugServerMessageV0, ButtplugDeviceMessageNameV0};
 pub use test::TestV0;
 pub use vorze_a10_cyclone_cmd::VorzeA10CycloneCmdV0;
