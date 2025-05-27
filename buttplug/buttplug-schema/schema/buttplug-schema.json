@@ -402,6 +402,30 @@
           "Value"
         ]
       },
+      "OneShotCmd": {
+        "type": "object",
+        "description": "Sends a generic value set command to a device.",
+        "properties": {
+          "Id": { "$ref": "#/components/ClientId" },
+          "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+          "FeatureIndex": { "$ref": "#/components/DeviceIndex" },
+          "ActuatorType": { 
+            "type": "string"
+          },
+          "Value": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Id",
+          "DeviceIndex",
+          "FeatureIndex",
+          "ActuatorType",
+          "Value"
+        ]
+      },
       "ValueWithParameterCmd": {
         "type": "object",
         "description": "Sends a generic value with parameter command to a device.",
