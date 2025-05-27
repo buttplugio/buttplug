@@ -109,7 +109,7 @@ impl ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3>
     &mut self,
     message_sender: Sender<ButtplugServerMessageV3>,
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
-    if !self.connected.load(Ordering::SeqCst) {
+    if !self.connected.load(Ordering::Relaxed) {
       let connected = self.connected.clone();
       let send = message_sender.clone();
       self.server_outbound_sender = message_sender;
@@ -132,7 +132,7 @@ impl ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3>
           }
           info!("Stopping In Process Client Connector Event Sender Loop, due to channel receiver being dropped.");
         }.instrument(tracing::info_span!("InProcessClientConnectorEventSenderLoop")));
-        connected.store(true, Ordering::SeqCst);
+        connected.store(true, Ordering::Relaxed);
         Ok(())
       }.boxed()
     } else {
@@ -141,8 +141,8 @@ impl ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3>
   }
 
   fn disconnect(&self) -> ButtplugConnectorResultFuture {
-    if self.connected.load(Ordering::SeqCst) {
-      self.connected.store(false, Ordering::SeqCst);
+    if self.connected.load(Ordering::Relaxed) {
+      self.connected.store(false, Ordering::Relaxed);
       future::ready(Ok(())).boxed()
     } else {
       ButtplugConnectorError::ConnectorNotConnected.into()
@@ -150,7 +150,7 @@ impl ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3>
   }
 
   fn send(&self, msg: ButtplugClientMessageV3) -> ButtplugConnectorResultFuture {
-    if !self.connected.load(Ordering::SeqCst) {
+    if !self.connected.load(Ordering::Relaxed) {
       return ButtplugConnectorError::ConnectorNotConnected.into();
     }
     let input = msg.into();

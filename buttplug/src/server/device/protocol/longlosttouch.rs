@@ -67,29 +67,29 @@ fn form_commands(data: Arc<Vec<AtomicU8>>, force: Option<Vec<bool>>) -> Vec<Vec<
     }
   }
 
-  if data[0].load(Ordering::SeqCst) == data[1].load(Ordering::SeqCst) {
-    if zero[0] || zero[1] || data[0].load(Ordering::SeqCst) != 0 {
+  if data[0].load(Ordering::Relaxed) == data[1].load(Ordering::Relaxed) {
+    if zero[0] || zero[1] || data[0].load(Ordering::Relaxed) != 0 {
       cmds.push(vec![
         0xAA,
         0x02,
         0x00,
         0x00,
         0x00,
-        data[0].load(Ordering::SeqCst),
+        data[0].load(Ordering::Relaxed),
       ])
     }
     return cmds;
   }
 
   (0..2).for_each(|i| {
-    if !skip[i as usize] && (zero[i as usize] || data[i as usize].load(Ordering::SeqCst) != 0) {
+    if !skip[i as usize] && (zero[i as usize] || data[i as usize].load(Ordering::Relaxed) != 0) {
       cmds.push(vec![
         0xAA,
         0x02,
         i + 1_u8,
         0x00,
         0x00,
-        data[i as usize].load(Ordering::SeqCst),
+        data[i as usize].load(Ordering::Relaxed),
       ])
     }
   });
@@ -140,7 +140,7 @@ impl ProtocolHandler for LongLostTouch {
     }
     for (i, item) in commands.iter().enumerate() {
       if let Some(command) = item {
-        self.last_command[i].store(command.1 as u8, Ordering::SeqCst);
+        self.last_command[i].store(command.1 as u8, Ordering::Relaxed);
       }
     }
     Ok(

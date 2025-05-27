@@ -118,8 +118,8 @@ async fn speed_update_handler(
   info!("Entering FredorchRotary Control Loop");
 
   loop {
-    let ts = target_speed.load(Ordering::SeqCst);
-    let cs = current_speed.load(Ordering::SeqCst);
+    let ts = target_speed.load(Ordering::Relaxed);
+    let cs = current_speed.load(Ordering::Relaxed);
 
     trace!("FredorchRotary: {}c vs {}t", cs, ts);
 
@@ -163,7 +163,7 @@ async fn speed_update_handler(
             },
             0,
           ),
-          Ordering::SeqCst,
+          Ordering::Relaxed,
         );
         continue;
       } else {
@@ -200,9 +200,9 @@ impl ProtocolHandler for FredorchRotary {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let speed: u8 = cmd.value() as u8;
 
-    self.target_speed.store(speed, Ordering::SeqCst);
+    self.target_speed.store(speed, Ordering::Relaxed);
     if speed == 0 {
-      self.current_speed.store(speed, Ordering::SeqCst);
+      self.current_speed.store(speed, Ordering::Relaxed);
       Ok(vec![HardwareWriteCmd::new(
         FREDORCH_ROTORY_PROTOCOL_UUID,
         Endpoint::Tx,

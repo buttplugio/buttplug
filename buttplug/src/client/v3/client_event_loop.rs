@@ -356,7 +356,7 @@ where
     device_indexes
       .iter()
       .for_each(|k| self.disconnect_device(*k));
-    self.connected_status.store(false, Ordering::SeqCst);
+    self.connected_status.store(false, Ordering::Relaxed);
     self.send_client_event(ButtplugClientEvent::ServerDisconnect);
 
     debug!("Exiting client event loop.");

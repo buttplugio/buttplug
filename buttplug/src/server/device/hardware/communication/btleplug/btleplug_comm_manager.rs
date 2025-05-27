@@ -86,7 +86,7 @@ impl HardwareCommunicationManager for BtlePlugCommunicationManager {
     let adapter_event_sender = self.adapter_event_sender.clone();
     let scanning_status = self.scanning_status.clone();
     // Set to true just to make sure we don't call ScanningFinished too early.
-    scanning_status.store(true, Ordering::SeqCst);
+    scanning_status.store(true, Ordering::Relaxed);
     async move {
       if adapter_event_sender
         .send(BtleplugAdapterCommand::StartScanning)
@@ -94,7 +94,7 @@ impl HardwareCommunicationManager for BtlePlugCommunicationManager {
         .is_err()
       {
         error!("Error starting scan, cannot send to btleplug event loop.");
-        scanning_status.store(false, Ordering::SeqCst);
+        scanning_status.store(false, Ordering::Relaxed);
         Err(
           ButtplugDeviceError::DeviceConnectionError(
             "Cannot send start scanning request to event loop.".to_owned(),
@@ -111,7 +111,7 @@ impl HardwareCommunicationManager for BtlePlugCommunicationManager {
   fn stop_scanning(&mut self) -> ButtplugResultFuture {
     let adapter_event_sender = self.adapter_event_sender.clone();
     // Just assume any outcome of this means we're done scanning.
-    self.scanning_status.store(false, Ordering::SeqCst);
+    self.scanning_status.store(false, Ordering::Relaxed);
     async move {
       if adapter_event_sender
         .send(BtleplugAdapterCommand::StopScanning)
@@ -133,11 +133,11 @@ impl HardwareCommunicationManager for BtlePlugCommunicationManager {
   }
 
   fn scanning_status(&self) -> bool {
-    self.scanning_status.load(Ordering::SeqCst)
+    self.scanning_status.load(Ordering::Relaxed)
   }
 
   fn can_scan(&self) -> bool {
-    self.adapter_connected.load(Ordering::SeqCst)
+    self.adapter_connected.load(Ordering::Relaxed)
   }
 }
 /*

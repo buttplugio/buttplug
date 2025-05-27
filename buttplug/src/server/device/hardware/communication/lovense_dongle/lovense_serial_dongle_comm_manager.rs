@@ -252,7 +252,7 @@ impl LovenseSerialDongleCommunicationManager {
                       .expect("Thread should always create");
                     *(held_read_thread.lock().await) = Some(read_thread);
                     *(held_write_thread.lock().await) = Some(write_thread);
-                    dongle_available.store(true, Ordering::SeqCst);
+                    dongle_available.store(true, Ordering::Relaxed);
                     machine_sender_clone
                       .send(LovenseDeviceCommand::DongleFound(
                         writer_sender,
@@ -312,11 +312,11 @@ impl HardwareCommunicationManager for LovenseSerialDongleCommunicationManager {
   }
 
   fn scanning_status(&self) -> bool {
-    self.is_scanning.load(Ordering::SeqCst)
+    self.is_scanning.load(Ordering::Relaxed)
   }
 
   fn can_scan(&self) -> bool {
-    self.dongle_available.load(Ordering::SeqCst)
+    self.dongle_available.load(Ordering::Relaxed)
   }
 }
 

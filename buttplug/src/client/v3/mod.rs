@@ -365,7 +365,7 @@ impl ButtplugClient {
 
   /// Returns true if client is currently connected.
   pub fn connected(&self) -> bool {
-    self.connected.load(Ordering::SeqCst)
+    self.connected.load(Ordering::Relaxed)
   }
 
   /// Disconnects from server, if connected.
@@ -384,7 +384,7 @@ impl ButtplugClient {
     let send_fut = self.message_sender.send_message_to_event_loop(msg);
     let connected = self.connected.clone();
     async move {
-      connected.store(false, Ordering::SeqCst);
+      connected.store(false, Ordering::Relaxed);
       send_fut.await?;
       Ok(())
     }

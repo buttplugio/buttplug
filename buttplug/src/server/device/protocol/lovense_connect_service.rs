@@ -281,10 +281,10 @@ impl ProtocolHandler for LovenseConnectService {
         .as_bytes()
         .to_vec();
       hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
-      let dir = self.rotation_direction.load(Ordering::SeqCst);
+      let dir = self.rotation_direction.load(Ordering::Relaxed);
       // TODO Should we store speed and direction as an option for rotation caching? This is weird.
       if dir != *clockwise {
-        self.rotation_direction.store(*clockwise, Ordering::SeqCst);
+        self.rotation_direction.store(*clockwise, Ordering::Relaxed);
         hardware_cmds
           .push(HardwareWriteCmd::new(Endpoint::Tx, b"RotateChange?".to_vec(), false).into());
       }

@@ -122,7 +122,7 @@ pub struct Satisfyer {
 fn form_command(feature_count: usize, data: Arc<Vec<AtomicU8>>) -> Vec<u8> {
   data[0..feature_count]
     .iter()
-    .map(|d| vec![d.load(Ordering::SeqCst); 4])
+    .map(|d| vec![d.load(Ordering::Relaxed); 4])
     .collect::<Vec<Vec<u8>>>()
     .concat()
 }
@@ -186,7 +186,7 @@ impl ProtocolHandler for Satisfyer {
     }
     for (i, item) in commands.iter().enumerate() {
       let command_val = item.as_ref().unwrap().1 as u8;
-      self.last_command[i].store(command_val, Ordering::SeqCst);
+      self.last_command[i].store(command_val, Ordering::Relaxed);
     }
     let data = form_command(self.feature_count, self.last_command.clone());
 

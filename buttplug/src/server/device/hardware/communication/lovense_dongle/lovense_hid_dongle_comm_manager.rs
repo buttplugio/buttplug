@@ -242,7 +242,7 @@ impl LovenseHIDDongleCommunicationManager {
         ButtplugDeviceError::DeviceConnectionError("Cannot find lovense HID Dongle.".to_owned())
       })?;
 
-      dongle_available.store(true, Ordering::SeqCst);
+      dongle_available.store(true, Ordering::Relaxed);
 
       let read_thread = thread::Builder::new()
         .name("Lovense Dongle HID Reader Thread".to_string())
@@ -288,7 +288,7 @@ impl HardwareCommunicationManager for LovenseHIDDongleCommunicationManager {
   fn start_scanning(&mut self) -> ButtplugResultFuture {
     debug!("Lovense Dongle Manager scanning for devices");
     let sender = self.machine_sender.clone();
-    self.is_scanning.store(true, Ordering::SeqCst);
+    self.is_scanning.store(true, Ordering::Relaxed);
     async move {
       sender
         .send(LovenseDeviceCommand::StartScanning)
@@ -312,11 +312,11 @@ impl HardwareCommunicationManager for LovenseHIDDongleCommunicationManager {
   }
 
   fn scanning_status(&self) -> bool {
-    self.is_scanning.load(Ordering::SeqCst)
+    self.is_scanning.load(Ordering::Relaxed)
   }
 
   fn can_scan(&self) -> bool {
-    self.dongle_available.load(Ordering::SeqCst)
+    self.dongle_available.load(Ordering::Relaxed)
   }
 }
 

@@ -121,7 +121,7 @@ impl ButtplugServerBuilder {
           // This will only exit if we've pinged out.
           ping_timeout_notifier.await;
           error!("Ping out signal received, stopping server");
-          connected_clone.store(false, Ordering::SeqCst);
+          connected_clone.store(false, Ordering::Relaxed);
           async_manager::spawn(async move {
             if let Err(e) = device_manager_clone.stop_all_devices().await {
               error!("Could not stop devices on ping timeout: {:?}", e);

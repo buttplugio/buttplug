@@ -74,11 +74,11 @@ impl ClientMessageSorter {
   /// Given a message and its related future, set the message's `id`, and match that id with the
   /// future to be resolved when we get a response back.
   pub fn register_future(&self, msg_fut: &mut ButtplugClientMessageFuturePair) {
-    let id = self.current_id.load(Ordering::SeqCst);
+    let id = self.current_id.load(Ordering::Relaxed);
     trace!("Setting message id to {}", id);
     msg_fut.msg.set_id(id);
     self.future_map.insert(id, msg_fut.waker.clone());
-    self.current_id.store(id + 1, Ordering::SeqCst);
+    self.current_id.store(id + 1, Ordering::Relaxed);
   }
 
   /// Given a response message from the server, resolve related future if we have one.

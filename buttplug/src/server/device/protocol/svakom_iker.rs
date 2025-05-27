@@ -66,7 +66,7 @@ impl ProtocolHandler for SvakomIker {
     let mut vibe_off = false;
     let mut msg_vec = vec![];
     if let Some((_, speed)) = cmds[0] {
-      self.last_speeds[0].store(speed as u8, Ordering::SeqCst);
+      self.last_speeds[0].store(speed as u8, Ordering::Relaxed);
       if speed == 0 {
         vibe_off = true;
       }
@@ -81,7 +81,7 @@ impl ProtocolHandler for SvakomIker {
     }
     if cmds.len() > 1 {
       if let Some((_, speed)) = cmds[1] {
-        self.last_speeds[1].store(speed as u8, Ordering::SeqCst);
+        self.last_speeds[1].store(speed as u8, Ordering::Relaxed);
         msg_vec.push(
           HardwareWriteCmd::new(
             Endpoint::Tx,
@@ -90,7 +90,7 @@ impl ProtocolHandler for SvakomIker {
           )
           .into(),
         );
-      } else if vibe_off && self.last_speeds[1].load(Ordering::SeqCst) != 0 {
+      } else if vibe_off && self.last_speeds[1].load(Ordering::Relaxed) != 0 {
         msg_vec.push(
           HardwareWriteCmd::new(
             Endpoint::Tx,
@@ -99,7 +99,7 @@ impl ProtocolHandler for SvakomIker {
               0x07,
               0x00,
               0x00,
-              self.last_speeds[1].load(Ordering::SeqCst),
+              self.last_speeds[1].load(Ordering::Relaxed),
               0x00,
             ]
             .to_vec(),

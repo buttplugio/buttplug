@@ -151,12 +151,12 @@ impl BtleplugAdapterTask {
 
     // Start by assuming we'll find the adapter on the first try. If not, we'll print an error
     // message then loop while trying to find it.
-    self.adapter_connected.store(true, Ordering::SeqCst);
+    self.adapter_connected.store(true, Ordering::Relaxed);
 
     let adapter;
 
     loop {
-      let adapter_found = self.adapter_connected.load(Ordering::SeqCst);
+      let adapter_found = self.adapter_connected.load(Ordering::Relaxed);
       if !adapter_found {
         sleep(Duration::from_secs(1)).await;
       }
@@ -202,7 +202,7 @@ impl BtleplugAdapterTask {
             adapter
           } else {
             if adapter_found {
-              self.adapter_connected.store(false, Ordering::SeqCst);
+              self.adapter_connected.store(false, Ordering::Relaxed);
               warn!("Bluetooth LE adapter not found, will not be using bluetooth scanning until found. Buttplug will continue polling for the adapter, but no more warning messages will be posted.");
             }
             continue;
@@ -210,7 +210,7 @@ impl BtleplugAdapterTask {
         }
         Err(e) => {
           if adapter_found {
-            self.adapter_connected.store(false, Ordering::SeqCst);
+            self.adapter_connected.store(false, Ordering::Relaxed);
             error!("Error retreiving BTLE adapters: {:?}", e);
           }
           continue;

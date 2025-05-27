@@ -76,7 +76,7 @@ impl KiirooV21Initialized {
     message: FleshlightLaunchFW12CmdV0,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let position = message.position();
-    self.previous_position.store(position, Ordering::SeqCst);
+    self.previous_position.store(position, Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
       uuid,
       Endpoint::Tx,
@@ -111,7 +111,7 @@ impl ProtocolHandler for KiirooV21Initialized {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
-    let previous_position = self.previous_position.load(Ordering::SeqCst);
+    let previous_position = self.previous_position.load(Ordering::Relaxed);
     let distance = (previous_position as f64 - (cmd.value() as f64)).abs() / 99f64;
     let fl_cmd = FleshlightLaunchFW12CmdV0::new(
       0,

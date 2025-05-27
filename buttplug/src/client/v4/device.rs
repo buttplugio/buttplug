@@ -155,7 +155,7 @@ impl ButtplugClientDevice {
   }
 
   pub fn connected(&self) -> bool {
-    self.device_connected.load(Ordering::SeqCst)
+    self.device_connected.load(Ordering::Relaxed)
   }
 
   pub fn event_stream(&self) -> Box<dyn Stream<Item = ButtplugClientDeviceEvent> + Send + Unpin> {
@@ -359,11 +359,11 @@ impl ButtplugClientDevice {
   }
 
   pub(super) fn set_device_connected(&self, connected: bool) {
-    self.device_connected.store(connected, Ordering::SeqCst);
+    self.device_connected.store(connected, Ordering::Relaxed);
   }
 
   pub(super) fn set_client_connected(&self, connected: bool) {
-    self.client_connected.store(connected, Ordering::SeqCst);
+    self.client_connected.store(connected, Ordering::Relaxed);
   }
 
   pub(super) fn queue_event(&self, event: ButtplugClientDeviceEvent) {
