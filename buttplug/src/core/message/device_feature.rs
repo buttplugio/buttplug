@@ -30,6 +30,7 @@ pub enum FeatureType {
   Oscillate,
   Constrict,
   Inflate,
+  Heater,
   // For instances where we specify a position to move to ASAP. Usually servos, probably for the
   // OSR-2/SR-6.
   Position,
@@ -59,6 +60,7 @@ impl From<ActuatorType> for FeatureType {
       ActuatorType::Unknown => FeatureType::Unknown,
       ActuatorType::Vibrate => FeatureType::Vibrate,
       ActuatorType::Rotate => FeatureType::Rotate,
+      ActuatorType::Heater => FeatureType::Heater,
       ActuatorType::RotateWithDirection => FeatureType::RotateWithDirection,
       ActuatorType::PositionWithDuration => FeatureType::PositionWithDuration,
       ActuatorType::Oscillate => FeatureType::Oscillate,
