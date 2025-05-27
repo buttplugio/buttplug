@@ -326,7 +326,7 @@ where
         client = self.from_client_receiver.recv() => match client {
           Err(_) => {
             info!("Client disconnected, exiting loop.");
-            self.connected_status.store(false, Ordering::SeqCst);
+            self.connected_status.store(false, Ordering::Relaxed);
             self.device_map.iter().for_each(|val| val.value().set_client_connected(false));
             self.send_client_event(ButtplugClientEvent::ServerDisconnect);
             return;

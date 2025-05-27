@@ -54,7 +54,7 @@ impl HardwareCommunicationManager for DelayDeviceCommunicationManager {
   fn start_scanning(&mut self) -> ButtplugResultFuture {
     let is_scanning = self.is_scanning.clone();
     async move {
-      is_scanning.store(true, Ordering::SeqCst);
+      is_scanning.store(true, Ordering::Relaxed);
       Ok(())
     }
     .boxed()
@@ -64,7 +64,7 @@ impl HardwareCommunicationManager for DelayDeviceCommunicationManager {
     let is_scanning = self.is_scanning.clone();
     let sender = self.sender.clone();
     async move {
-      is_scanning.store(false, Ordering::SeqCst);
+      is_scanning.store(false, Ordering::Relaxed);
       sender
         .send(HardwareCommunicationManagerEvent::ScanningFinished)
         .await
@@ -75,7 +75,7 @@ impl HardwareCommunicationManager for DelayDeviceCommunicationManager {
   }
 
   fn scanning_status(&self) -> bool {
-    self.is_scanning.load(Ordering::SeqCst)
+    self.is_scanning.load(Ordering::Relaxed)
   }
 
   fn can_scan(&self) -> bool {

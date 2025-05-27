@@ -107,7 +107,7 @@ impl LovenseServiceHardware {
                 info!("Exiting lovense service device connection check loop.");
                 break;
               }
-              battery_level_clone.store(toy.battery.clamp(0, 100) as u8, Ordering::SeqCst);
+              battery_level_clone.store(toy.battery.clamp(0, 100) as u8, Ordering::Relaxed);
               break;
             }
           }
@@ -145,7 +145,7 @@ impl HardwareInternal for LovenseServiceHardware {
     async move {
       Ok(HardwareReading::new(
         Endpoint::Rx,
-        &[battery_level.load(Ordering::SeqCst)],
+        &[battery_level.load(Ordering::Relaxed)],
       ))
     }
     .boxed()

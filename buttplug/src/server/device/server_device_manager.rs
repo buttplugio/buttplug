@@ -277,7 +277,7 @@ impl ServerDeviceManager {
   }
 
   pub fn parse_message(&self, msg: ButtplugCheckedClientMessageV4) -> ButtplugServerResultFuture {
-    if !self.running.load(Ordering::SeqCst) {
+    if !self.running.load(Ordering::Relaxed) {
       return future::ready(Err(ButtplugUnknownError::DeviceManagerNotRunning.into())).boxed();
     }
     // If this is a device command message, just route it directly to the
@@ -320,7 +320,7 @@ impl ServerDeviceManager {
     let devices = self.devices.clone();
     // Make sure that, once our owning server shuts us down, no one outside can use this manager
     // again. Otherwise we can have all sorts of ownership weirdness.
-    self.running.store(false, Ordering::SeqCst);
+    self.running.store(false, Ordering::Relaxed);
     let stop_scanning = self.stop_scanning();
     let stop_devices = self.stop_all_devices();
     let token = self.loop_cancellation_token.clone();

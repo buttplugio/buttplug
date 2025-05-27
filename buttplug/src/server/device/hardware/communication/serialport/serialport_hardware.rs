@@ -296,7 +296,7 @@ impl HardwareInternal for SerialPortHardware {
   fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let connected = self.connected.clone();
     async move {
-      connected.store(false, Ordering::SeqCst);
+      connected.store(false, Ordering::Relaxed);
       Ok(())
     }
     .boxed()

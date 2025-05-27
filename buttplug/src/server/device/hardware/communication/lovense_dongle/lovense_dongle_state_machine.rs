@@ -61,7 +61,7 @@ impl ChannelHub {
   }
 
   pub fn create_new_wait_for_dongle_state(self) -> Option<Box<dyn LovenseDongleState>> {
-    self.is_scanning.store(false, Ordering::SeqCst);
+    self.is_scanning.store(false, Ordering::Relaxed);
     Some(Box::new(LovenseDongleWaitForDongle::new(
       self.comm_manager_incoming,
       self.event_outgoing,
@@ -154,7 +154,7 @@ impl ChannelHub {
   }
 
   pub fn set_scanning_status(&self, is_scanning: bool) {
-    self.is_scanning.store(is_scanning, Ordering::SeqCst);
+    self.is_scanning.store(is_scanning, Ordering::Relaxed);
   }
 }
 
@@ -244,12 +244,12 @@ impl LovenseDongleState for LovenseDongleWaitForDongle {
         }
         LovenseDeviceCommand::StartScanning => {
           debug!("Lovense dongle not found, storing StartScanning command until found.");
-          self.is_scanning.store(true, Ordering::SeqCst);
+          self.is_scanning.store(true, Ordering::Relaxed);
           should_scan = true;
         }
         LovenseDeviceCommand::StopScanning => {
           debug!("Lovense dongle not found, clearing StartScanning command and emitting ScanningFinished.");
-          self.is_scanning.store(false, Ordering::SeqCst);
+          self.is_scanning.store(false, Ordering::Relaxed);
           should_scan = false;
           // If we were requested to scan and then asked to stop, act like we at least tried.
           if self

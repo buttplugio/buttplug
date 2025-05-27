@@ -160,14 +160,14 @@ impl HardwareCommunicationManager for TestDeviceCommunicationManager {
     let device_sender = self.device_sender.clone();
     let is_scanning = self.is_scanning.clone();
     async move {
-      is_scanning.store(true, Ordering::SeqCst);
+      is_scanning.store(true, Ordering::Relaxed);
       for event in events {
         if device_sender.send(event).await.is_err() {
           error!("Device channel no longer open.");
         }
       }
       // TODO Should should use
-      is_scanning.store(false, Ordering::SeqCst);
+      is_scanning.store(false, Ordering::Relaxed);
       if device_sender
         .send(HardwareCommunicationManagerEvent::ScanningFinished)
         .await
@@ -191,6 +191,6 @@ impl HardwareCommunicationManager for TestDeviceCommunicationManager {
   }
 
   fn scanning_status(&self) -> bool {
-    self.is_scanning.load(Ordering::SeqCst)
+    self.is_scanning.load(Ordering::Relaxed)
   }
 }

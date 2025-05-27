@@ -40,7 +40,7 @@ use std::{
   default::Default,
   pin::Pin,
   sync::{
-    atomic::{AtomicU8, Ordering::SeqCst},
+    atomic::{AtomicU8, Ordering::Relaxed},
     Arc,
   },
 };
@@ -86,11 +86,11 @@ impl ProtocolHandler for KiirooV21 {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
-    let previous_position = self.previous_position.load(SeqCst);
+    let previous_position = self.previous_position.load(Relaxed);
     let distance = (previous_position as f64 - (cmd.value() as f64)).abs() / 99f64;
     let position = (cmd.value()) as u8;
     let speed = (calculate_speed(distance, cmd.parameter() as u32) * 99f64) as u8;
-    self.previous_position.store(position, SeqCst);
+    self.previous_position.store(position, Relaxed);
     Ok(vec![HardwareWriteCmd::new(
       cmd.feature_id(),
       Endpoint::Tx,

@@ -64,11 +64,11 @@ impl ProtocolHandler for KiirooV2 {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
-    let previous_position = self.previous_position.load(Ordering::SeqCst);
+    let previous_position = self.previous_position.load(Ordering::Relaxed);
     let distance = (previous_position as f64 - (cmd.value() as f64)).abs() / 99f64;
     let position = cmd.value() as u8;
     let calculated_speed = (calculate_speed(distance, cmd.parameter() as u32) * 99f64) as u8;
-    self.previous_position.store(position, Ordering::SeqCst);
+    self.previous_position.store(position, Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
       cmd.feature_id(),
       Endpoint::Tx,

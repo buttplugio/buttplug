@@ -37,7 +37,7 @@ async fn ping_timer(
         if started {
           if !pinged {
             notifier.notify_waiters();
-            pinged_out_status.store(true, Ordering::SeqCst);
+            pinged_out_status.store(true, Ordering::Relaxed);
             return;
           }
           pinged = false;
@@ -122,7 +122,7 @@ impl PingTimer {
 
   pub fn start_ping_timer(&self) -> impl Future<Output = ()> {
     // If we're starting the timer, clear our status.
-    self.pinged_out.store(false, Ordering::SeqCst);
+    self.pinged_out.store(false, Ordering::Relaxed);
     self.send_ping_msg(PingMessage::StartTimer)
   }
 
@@ -135,6 +135,6 @@ impl PingTimer {
   }
 
   pub fn pinged_out(&self) -> bool {
-    self.pinged_out.load(Ordering::SeqCst)
+    self.pinged_out.load(Ordering::Relaxed)
   }
 }

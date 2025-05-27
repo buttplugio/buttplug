@@ -211,7 +211,7 @@ impl ButtplugClientDevice {
   }
 
   pub fn connected(&self) -> bool {
-    self.device_connected.load(Ordering::SeqCst)
+    self.device_connected.load(Ordering::Relaxed)
   }
 
   /// Sends a message through the owning
@@ -230,10 +230,10 @@ impl ButtplugClientDevice {
     let device_name = self.name.clone();
     Box::pin(
       async move {
-        if !client_connected.load(Ordering::SeqCst) {
+        if !client_connected.load(Ordering::Relaxed) {
           error!("Client not connected, cannot run device command");
           return Err(ButtplugConnectorError::ConnectorNotConnected.into());
-        } else if !device_connected.load(Ordering::SeqCst) {
+        } else if !device_connected.load(Ordering::Relaxed) {
           error!("Device not connected, cannot run device command");
           return Err(
             ButtplugError::from(ButtplugDeviceError::DeviceNotConnected(device_name)).into(),
@@ -592,11 +592,11 @@ impl ButtplugClientDevice {
   }
 
   pub(super) fn set_device_connected(&self, connected: bool) {
-    self.device_connected.store(connected, Ordering::SeqCst);
+    self.device_connected.store(connected, Ordering::Relaxed);
   }
 
   pub(super) fn set_client_connected(&self, connected: bool) {
-    self.client_connected.store(connected, Ordering::SeqCst);
+    self.client_connected.store(connected, Ordering::Relaxed);
   }
 
   pub(super) fn queue_event(&self, event: ButtplugClientDeviceEvent) {

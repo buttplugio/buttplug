@@ -189,7 +189,7 @@ impl ProtocolHandler for Fredorch {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
-    let previous_position = self.previous_position.load(Ordering::SeqCst);
+    let previous_position = self.previous_position.load(Ordering::Relaxed);
     let distance = (previous_position as f64 - message.value() as f64).abs() / 99f64;
 
     // TODO Clean this up, we do not need the conversions anymore since we'll have done the
@@ -204,7 +204,7 @@ impl ProtocolHandler for Fredorch {
     let crc = crc16(&data);
     data.push(crc[0]);
     data.push(crc[1]);
-    self.previous_position.store(position, Ordering::SeqCst);
+    self.previous_position.store(position, Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(FREDORCH_PROTOCOL_UUID, Endpoint::Tx, data, false).into()])
   }
 }

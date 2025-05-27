@@ -194,7 +194,7 @@ impl ProtocolHandler for VorzeSA {
     msg: CheckedValueWithParameterCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
 
-    let previous_position = self.previous_position.load(Ordering::SeqCst);
+    let previous_position = self.previous_position.load(Ordering::Relaxed);
     let position = message.value();
     let distance = (previous_position as f64 - position).abs();
 
@@ -202,7 +202,7 @@ impl ProtocolHandler for VorzeSA {
 
     self
       .previous_position
-      .store(position as u8, Ordering::SeqCst);
+      .store(position as u8, Ordering::Relaxed);
 
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,

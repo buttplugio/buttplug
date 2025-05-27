@@ -135,7 +135,7 @@ impl ButtplugServer {
 
   /// If true, client is currently connected to the server.
   pub fn connected(&self) -> bool {
-    self.connected.load(Ordering::SeqCst)
+    self.connected.load(Ordering::Relaxed)
   }
 
   /// Disconnects the server from a client, if it is connected.
@@ -152,7 +152,7 @@ impl ButtplugServer {
     ));
     let connected = self.connected.clone();
     async move {
-      connected.store(false, Ordering::SeqCst);
+      connected.store(false, Ordering::Relaxed);
       ping_timer.stop_ping_timer().await;
       // Ignore returns here, we just want to stop.
       info!("Server disconnected, stopping device scanning if it was started...");
@@ -380,7 +380,7 @@ impl ButtplugServer {
       .expect("We should never conflict on name access");
     async move {
       ping_timer.start_ping_timer().await;
-      connected.store(true, Ordering::SeqCst);
+      connected.store(true, Ordering::Relaxed);
       debug!("Server handshake check successful.");
       Result::Ok(out_msg.into())
     }

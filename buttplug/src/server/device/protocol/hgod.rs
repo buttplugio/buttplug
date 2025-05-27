@@ -74,7 +74,7 @@ impl Hgod {
 // HGod toys vibes only last ~100ms seconds.
 async fn send_hgod_updates(device: Arc<Hardware>, data: Arc<AtomicU8>) {
   loop {
-    let speed = data.load(Ordering::SeqCst);
+    let speed = data.load(Ordering::Relaxed);
     let command = vec![0x55, 0x04, 0, 0, 0, speed];
     if speed > 0 {
       if let Err(e) = device
@@ -97,7 +97,7 @@ impl ProtocolHandler for Hgod {
     &self,
     cmd: &CheckedValueCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.last_command.store(cmd.value() as u8, Ordering::SeqCst);
+    self.last_command.store(cmd.value() as u8, Ordering::Relaxed);
     Ok(vec![])
   }
 }

@@ -256,7 +256,7 @@ impl HardwareInternal for WebsocketServerHardware {
   fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let connected = self.connected.clone();
     async move {
-      connected.store(false, Ordering::SeqCst);
+      connected.store(false, Ordering::Relaxed);
       Ok(())
     }
     .boxed()
@@ -294,7 +294,7 @@ impl HardwareInternal for WebsocketServerHardware {
     &self,
     _msg: &HardwareSubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    if self.subscribed.load(Ordering::SeqCst) {
+    if self.subscribed.load(Ordering::Relaxed) {
       error!("Endpoint already subscribed somehow!");
       return future::ready(Ok(())).boxed();
     }
@@ -305,7 +305,7 @@ impl HardwareInternal for WebsocketServerHardware {
     let subscribed = self.subscribed.clone();
     let subscribed_token = self.subscribe_token.clone();
     async move {
-      subscribed.store(true, Ordering::SeqCst);
+      subscribed.store(true, Ordering::Relaxed);
       let token = CancellationToken::new();
       *(subscribed_token.lock().await) = Some(token.child_token());
       async_manager::spawn(async move {
@@ -342,11 +342,11 @@ impl HardwareInternal for WebsocketServerHardware {
     &self,
     _msg: &HardwareUnsubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    if self.subscribed.load(Ordering::SeqCst) {
+    if self.subscribed.load(Ordering::Relaxed) {
       let subscribed = self.subscribed.clone();
       let subscribed_token = self.subscribe_token.clone();
       async move {
-        subscribed.store(false, Ordering::SeqCst);
+        subscribed.store(false, Ordering::Relaxed);
         let token = (subscribed_token.lock().await)
           .take()
           .expect("If we were subscribed, we'll have a token.");

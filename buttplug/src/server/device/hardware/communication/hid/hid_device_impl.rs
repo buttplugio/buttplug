@@ -111,7 +111,7 @@ impl HardwareInternal for HIDDeviceImpl {
   fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let connected = self.connected.clone();
     Box::pin(async move {
-      connected.store(false, Ordering::SeqCst);
+      connected.store(false, Ordering::Relaxed);
       Ok(())
     })
   }
