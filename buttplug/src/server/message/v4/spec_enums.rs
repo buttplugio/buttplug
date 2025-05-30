@@ -10,10 +10,6 @@ use crate::{
       ButtplugMessageFinalizer,
       ButtplugMessageValidator,
       PingV0,
-      RawReadCmdV2,
-      RawSubscribeCmdV2,
-      RawUnsubscribeCmdV2,
-      RawWriteCmdV2,
       RequestDeviceListV0,
       RequestServerInfoV1,
       StartScanningV0,
@@ -23,14 +19,7 @@ use crate::{
     },
   },
   server::message::{
-    server_device_attributes::TryFromClientMessage,
-    v0::ButtplugClientMessageV0,
-    v1::ButtplugClientMessageV1,
-    v2::ButtplugClientMessageV2,
-    v3::ButtplugClientMessageV3,
-    ButtplugClientMessageVariant,
-    ServerDeviceAttributes,
-    TryFromDeviceAttributes,
+    checked_raw_read_cmd::CheckedRawReadCmdV2, checked_raw_subscribe_cmd::CheckedRawSubscribeCmdV2, checked_raw_unsubscribe_cmd::CheckedRawUnsubscribeCmdV2, checked_raw_write_cmd::CheckedRawWriteCmdV2, server_device_attributes::TryFromClientMessage, v0::ButtplugClientMessageV0, v1::ButtplugClientMessageV1, v2::ButtplugClientMessageV2, v3::ButtplugClientMessageV3, ButtplugClientMessageVariant, ServerDeviceAttributes, TryFromDeviceAttributes
   },
 };
 
@@ -73,10 +62,10 @@ pub enum ButtplugCheckedClientMessageV4 {
   SensorSubscribeCmd(CheckedSensorSubscribeCmdV4),
   SensorUnsubscribeCmd(CheckedSensorUnsubscribeCmdV4),
   // Raw commands
-  RawWriteCmd(RawWriteCmdV2),
-  RawReadCmd(RawReadCmdV2),
-  RawSubscribeCmd(RawSubscribeCmdV2),
-  RawUnsubscribeCmd(RawUnsubscribeCmdV2),
+  RawWriteCmd(CheckedRawWriteCmdV2),
+  RawReadCmd(CheckedRawReadCmdV2),
+  RawSubscribeCmd(CheckedRawSubscribeCmdV2),
+  RawUnsubscribeCmd(CheckedRawUnsubscribeCmdV2),
   // Internal conversions for v1-v3 messages with subcommands
   ValueVecCmd(CheckedValueVecCmdV4),
   ValueWithParameterVecCmd(CheckedValueWithParameterVecCmdV4),
@@ -175,14 +164,50 @@ impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMess
       }
 
       // Message that need device index and hardware endpoint checking
-      ButtplugClientMessageV4::RawWriteCmd(m) => Ok(ButtplugCheckedClientMessageV4::RawWriteCmd(m)),
-      ButtplugClientMessageV4::RawReadCmd(m) => Ok(ButtplugCheckedClientMessageV4::RawReadCmd(m)),
+      ButtplugClientMessageV4::RawWriteCmd(m) => {
+        if let Some(features) = feature_map.get(&m.device_index()) {
+          Ok(ButtplugCheckedClientMessageV4::RawWriteCmd(
+            CheckedRawWriteCmdV2::try_from_device_attributes(m, features)?,
+          ))
+        } else {
+          Err(ButtplugError::from(
+            ButtplugDeviceError::DeviceNotAvailable(m.device_index()),
+          ))
+        }
+      },
+      ButtplugClientMessageV4::RawReadCmd(m) => {
+        if let Some(features) = feature_map.get(&m.device_index()) {
+          Ok(ButtplugCheckedClientMessageV4::RawReadCmd(
+            CheckedRawReadCmdV2::try_from_device_attributes(m, features)?,
+          ))
+        } else {
+          Err(ButtplugError::from(
+            ButtplugDeviceError::DeviceNotAvailable(m.device_index()),
+          ))
+        }
+      },
       ButtplugClientMessageV4::RawSubscribeCmd(m) => {
-        Ok(ButtplugCheckedClientMessageV4::RawSubscribeCmd(m))
-      }
+        if let Some(features) = feature_map.get(&m.device_index()) {
+          Ok(ButtplugCheckedClientMessageV4::RawSubscribeCmd(
+            CheckedRawSubscribeCmdV2::try_from_device_attributes(m, features)?,
+          ))
+        } else {
+          Err(ButtplugError::from(
+            ButtplugDeviceError::DeviceNotAvailable(m.device_index()),
+          ))
+        }
+      },
       ButtplugClientMessageV4::RawUnsubscribeCmd(m) => {
-        Ok(ButtplugCheckedClientMessageV4::RawUnsubscribeCmd(m))
-      }
+        if let Some(features) = feature_map.get(&m.device_index()) {
+          Ok(ButtplugCheckedClientMessageV4::RawUnsubscribeCmd(
+            CheckedRawUnsubscribeCmdV2::try_from_device_attributes(m, features)?,
+          ))
+        } else {
+          Err(ButtplugError::from(
+            ButtplugDeviceError::DeviceNotAvailable(m.device_index()),
+          ))
+        }
+      },
     }
   }
 }
@@ -213,14 +238,6 @@ impl TryFrom<ButtplugClientMessageV3> for ButtplugCheckedClientMessageV4 {
       }
       ButtplugClientMessageV3::StopDeviceCmd(m) => {
         Ok(ButtplugCheckedClientMessageV4::StopDeviceCmd(m.clone()))
-      }
-      ButtplugClientMessageV3::RawReadCmd(m) => Ok(ButtplugCheckedClientMessageV4::RawReadCmd(m)),
-      ButtplugClientMessageV3::RawWriteCmd(m) => Ok(ButtplugCheckedClientMessageV4::RawWriteCmd(m)),
-      ButtplugClientMessageV3::RawSubscribeCmd(m) => {
-        Ok(ButtplugCheckedClientMessageV4::RawSubscribeCmd(m))
-      }
-      ButtplugClientMessageV3::RawUnsubscribeCmd(m) => {
-        Ok(ButtplugCheckedClientMessageV4::RawUnsubscribeCmd(m))
       }
       _ => Err(ButtplugMessageError::MessageConversionError(format!(
         "Cannot convert message {:?} to V4 message spec while lacking state.",
@@ -347,6 +364,18 @@ impl TryFromClientMessage<ButtplugClientMessageV3> for ButtplugCheckedClientMess
       ButtplugClientMessageV3::SensorUnsubscribeCmd(m) => {
         Ok(check_device_index_and_convert::<_, CheckedSensorUnsubscribeCmdV4>(m, features)?.into())
       }
+      ButtplugClientMessageV3::RawReadCmd(m) => {
+        Ok(check_device_index_and_convert::<_, CheckedRawReadCmdV2>(m, features)?.into())
+      }
+      ButtplugClientMessageV3::RawWriteCmd(m) => {
+        Ok(check_device_index_and_convert::<_, CheckedRawWriteCmdV2>(m, features)?.into())
+      }
+      ButtplugClientMessageV3::RawSubscribeCmd(m) => {
+        Ok(check_device_index_and_convert::<_, CheckedRawSubscribeCmdV2>(m, features)?.into())
+      }
+      ButtplugClientMessageV3::RawUnsubscribeCmd(m) => {
+        Ok(check_device_index_and_convert::<_, CheckedRawUnsubscribeCmdV2>(m, features)?.into())
+      }
       _ => {
         ButtplugCheckedClientMessageV4::try_from(msg).map_err(|e: ButtplugMessageError| e.into())
       }
@@ -415,10 +444,10 @@ pub enum ButtplugDeviceCommandMessageUnionV4 {
   SensorReadCmd(CheckedSensorReadCmdV4),
   SensorSubscribeCmd(CheckedSensorSubscribeCmdV4),
   SensorUnsubscribeCmd(CheckedSensorUnsubscribeCmdV4),
-  RawWriteCmd(RawWriteCmdV2),
-  RawReadCmd(RawReadCmdV2),
-  RawSubscribeCmd(RawSubscribeCmdV2),
-  RawUnsubscribeCmd(RawUnsubscribeCmdV2),
+  RawWriteCmd(CheckedRawWriteCmdV2),
+  RawReadCmd(CheckedRawReadCmdV2),
+  RawSubscribeCmd(CheckedRawSubscribeCmdV2),
+  RawUnsubscribeCmd(CheckedRawUnsubscribeCmdV2),
 }
 
 impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceCommandMessageUnionV4 {

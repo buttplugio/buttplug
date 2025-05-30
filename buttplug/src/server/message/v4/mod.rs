@@ -1,3 +1,7 @@
+pub mod checked_raw_read_cmd;
+pub mod checked_raw_subscribe_cmd;
+pub mod checked_raw_unsubscribe_cmd;
+pub mod checked_raw_write_cmd;
 pub mod checked_value_cmd;
 pub mod checked_value_with_parameter_cmd;
 pub mod checked_value_vec_cmd;
