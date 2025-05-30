@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::server::message::{v0::DeviceMessageInfoV0, ButtplugDeviceMessageNameV0};
 
-use super::{spec_enums::ButtplugDeviceMessageNameV1, ClientDeviceMessageAttributesV1, DeviceAddedV1};
+use super::{ClientDeviceMessageAttributesV1, DeviceAddedV1};
 
 #[derive(Clone, Debug, PartialEq, Eq, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]

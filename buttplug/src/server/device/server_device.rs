@@ -58,13 +58,7 @@ use crate::{
       protocol::ProtocolHandler,
     },
     message::{
-      checked_sensor_read_cmd::CheckedSensorReadCmdV4,
-      checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4,
-      checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4,
-      checked_value_cmd::CheckedValueCmdV4,
-      checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4,
-      server_device_attributes::ServerDeviceAttributes,
-      spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage,
+      checked_raw_read_cmd::CheckedRawReadCmdV2, checked_raw_subscribe_cmd::CheckedRawSubscribeCmdV2, checked_raw_unsubscribe_cmd::CheckedRawUnsubscribeCmdV2, checked_raw_write_cmd::CheckedRawWriteCmdV2, checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, checked_value_cmd::CheckedValueCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, server_device_attributes::ServerDeviceAttributes, spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage
     },
     ButtplugServerResultFuture,
   },
@@ -250,7 +244,7 @@ impl ServerDevice {
       async_manager::spawn(async move {
         // Arbitrary wait time for now.
         let wait_duration = Duration::from_secs(5);
-        let bt_duration = Duration::from_millis(100);
+        let bt_duration = Duration::from_millis(30);
         loop {
           // Loop based on our 10hz estimate for most BLE toys.
           util::sleep(bt_duration).await;
@@ -668,7 +662,7 @@ impl ServerDevice {
     .boxed()
   }
 
-  fn handle_raw_write_cmd(&self, message: message::RawWriteCmdV2) -> ButtplugServerResultFuture {
+  fn handle_raw_write_cmd(&self, message: CheckedRawWriteCmdV2) -> ButtplugServerResultFuture {
     let id = message.id();
     let fut = self.hardware.write_value(&message.into());
     async move {
@@ -680,7 +674,7 @@ impl ServerDevice {
     .boxed()
   }
 
-  fn handle_raw_read_cmd(&self, message: message::RawReadCmdV2) -> ButtplugServerResultFuture {
+  fn handle_raw_read_cmd(&self, message: CheckedRawReadCmdV2) -> ButtplugServerResultFuture {
     let id = message.id();
     let fut = self.hardware.read_value(&message.into());
     async move {
@@ -698,7 +692,7 @@ impl ServerDevice {
 
   fn handle_raw_unsubscribe_cmd(
     &self,
-    message: message::RawUnsubscribeCmdV2,
+    message: CheckedRawUnsubscribeCmdV2,
   ) -> ButtplugServerResultFuture {
     let id = message.id();
     let endpoint = message.endpoint();
@@ -720,7 +714,7 @@ impl ServerDevice {
 
   fn handle_raw_subscribe_cmd(
     &self,
-    message: message::RawSubscribeCmdV2,
+    message: CheckedRawSubscribeCmdV2,
   ) -> ButtplugServerResultFuture {
     let id = message.id();
     let endpoint = message.endpoint();

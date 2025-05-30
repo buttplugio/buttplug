@@ -7,14 +7,10 @@ use crate::{
     errors::ButtplugDeviceError,
     message::{
       Endpoint,
-      RawReadCmdV2,
       RawReadingV2,
-      RawSubscribeCmdV2,
-      RawUnsubscribeCmdV2,
-      RawWriteCmdV2,
     },
   },
-  server::device::configuration::ProtocolCommunicationSpecifier,
+  server::{device::configuration::ProtocolCommunicationSpecifier, message::{checked_raw_read_cmd::CheckedRawReadCmdV2, checked_raw_subscribe_cmd::CheckedRawSubscribeCmdV2, checked_raw_unsubscribe_cmd::CheckedRawUnsubscribeCmdV2, checked_raw_write_cmd::CheckedRawWriteCmdV2}},
 };
 use async_trait::async_trait;
 use futures::future::BoxFuture;
@@ -61,8 +57,8 @@ impl HardwareReadCmd {
   }
 }
 
-impl From<RawReadCmdV2> for HardwareReadCmd {
-  fn from(msg: RawReadCmdV2) -> Self {
+impl From<CheckedRawReadCmdV2> for HardwareReadCmd {
+  fn from(msg: CheckedRawReadCmdV2) -> Self {
     Self {
       command_id: GENERIC_RAW_COMMAND_UUID,
       endpoint: msg.endpoint(),
@@ -114,8 +110,8 @@ impl HardwareWriteCmd {
   }
 }
 
-impl From<RawWriteCmdV2> for HardwareWriteCmd {
-  fn from(msg: RawWriteCmdV2) -> Self {
+impl From<CheckedRawWriteCmdV2> for HardwareWriteCmd {
+  fn from(msg: CheckedRawWriteCmdV2) -> Self {
     Self {
       command_id: GENERIC_RAW_COMMAND_UUID,
       endpoint: msg.endpoint(),
@@ -158,8 +154,8 @@ impl HardwareSubscribeCmd {
   }
 }
 
-impl From<RawSubscribeCmdV2> for HardwareSubscribeCmd {
-  fn from(msg: RawSubscribeCmdV2) -> Self {
+impl From<CheckedRawSubscribeCmdV2> for HardwareSubscribeCmd {
+  fn from(msg: CheckedRawSubscribeCmdV2) -> Self {
     Self {
       command_id: GENERIC_RAW_COMMAND_UUID,
       endpoint: msg.endpoint(),
@@ -194,8 +190,8 @@ impl HardwareUnsubscribeCmd {
   }
 }
 
-impl From<RawUnsubscribeCmdV2> for HardwareUnsubscribeCmd {
-  fn from(msg: RawUnsubscribeCmdV2) -> Self {
+impl From<CheckedRawUnsubscribeCmdV2> for HardwareUnsubscribeCmd {
+  fn from(msg: CheckedRawUnsubscribeCmdV2) -> Self {
     Self {
       command_id: GENERIC_RAW_COMMAND_UUID,
       endpoint: msg.endpoint(),
@@ -223,20 +219,20 @@ impl HardwareCommand {
   }
 }
 
-impl From<RawWriteCmdV2> for HardwareCommand {
-  fn from(msg: RawWriteCmdV2) -> Self {
+impl From<CheckedRawWriteCmdV2> for HardwareCommand {
+  fn from(msg: CheckedRawWriteCmdV2) -> Self {
     HardwareCommand::Write(msg.into())
   }
 }
 
-impl From<RawSubscribeCmdV2> for HardwareCommand {
-  fn from(msg: RawSubscribeCmdV2) -> Self {
+impl From<CheckedRawSubscribeCmdV2> for HardwareCommand {
+  fn from(msg: CheckedRawSubscribeCmdV2) -> Self {
     HardwareCommand::Subscribe(msg.into())
   }
 }
 
-impl From<RawUnsubscribeCmdV2> for HardwareCommand {
-  fn from(msg: RawUnsubscribeCmdV2) -> Self {
+impl From<CheckedRawUnsubscribeCmdV2> for HardwareCommand {
+  fn from(msg: CheckedRawUnsubscribeCmdV2) -> Self {
     HardwareCommand::Unsubscribe(msg.into())
   }
 }
