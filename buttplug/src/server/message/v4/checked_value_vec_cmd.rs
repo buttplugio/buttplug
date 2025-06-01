@@ -17,7 +17,7 @@ use crate::{
     },
   },
   server::message::{
-    v0::SingleMotorVibrateCmdV0, v1::VibrateCmdV1, v3::ScalarCmdV3, ButtplugDeviceMessageTypeV3, ServerDeviceAttributes, TryFromDeviceAttributes
+    v0::SingleMotorVibrateCmdV0, v1::VibrateCmdV1, v3::ScalarCmdV3, ButtplugDeviceMessageNameV3, ServerDeviceAttributes, TryFromDeviceAttributes
   },
 };
 use getset::{CopyGetters, Getters};
@@ -182,7 +182,7 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedValueVecCmdV4 {
         .as_ref()
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::MessageNotSupported(
-            ButtplugDeviceMessageTypeV3::ScalarCmd.to_string(),
+            ButtplugDeviceMessageNameV3::ScalarCmd.to_string(),
           ),
         ))?;
       let feature = scalar_attrs

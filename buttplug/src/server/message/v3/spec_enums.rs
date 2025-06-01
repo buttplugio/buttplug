@@ -213,7 +213,7 @@ impl TryFrom<ButtplugServerMessageV4> for ButtplugServerMessageV3 {
 }
 
 #[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]
-pub enum ButtplugDeviceMessageTypeV3 {
+pub enum ButtplugDeviceMessageNameV3 {
   LinearCmd,
   RotateCmd,
   StopDeviceCmd,
