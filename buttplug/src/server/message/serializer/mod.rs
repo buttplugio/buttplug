@@ -122,11 +122,11 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
     if let ButtplugClientMessageV4::RequestServerInfo(rsi) = &msg_union[0] {
       info!(
         "Setting JSON Wrapper message version to {}",
-        rsi.message_version()
+        rsi.api_version_major()
       );
       self
         .message_version
-        .set(rsi.message_version())
+        .set(rsi.api_version_major())
         .expect("This should only ever be called once.");
     } else {
       return Err(ButtplugSerializerError::MessageSpecVersionNotReceived);

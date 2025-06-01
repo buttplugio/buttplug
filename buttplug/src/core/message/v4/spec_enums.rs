@@ -20,7 +20,7 @@ use crate::core::message::{
   RawUnsubscribeCmdV2,
   RawWriteCmdV2,
   RequestDeviceListV0,
-  RequestServerInfoV1,
+  RequestServerInfoV4,
   ScanningFinishedV0,
   ServerInfoV4,
   StartScanningV0,
@@ -55,7 +55,7 @@ use super::{
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugClientMessageV4 {
   // Handshake messages
-  RequestServerInfo(RequestServerInfoV1),
+  RequestServerInfo(RequestServerInfoV4),
   Ping(PingV0),
   // Device enumeration messages
   StartScanning(StartScanningV0),

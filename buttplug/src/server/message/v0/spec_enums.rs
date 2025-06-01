@@ -1,16 +1,15 @@
 use std::cmp::Ordering;
 
 use super::*;
-use crate::core::{
+use crate::{core::{
   errors::ButtplugMessageError,
   message::{
     ButtplugMessage,
     ButtplugMessageFinalizer,
     ButtplugMessageValidator,
     PingV0,
-    RequestServerInfoV1,
   },
-};
+}, server::message::RequestServerInfoV1};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
