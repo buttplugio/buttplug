@@ -10,7 +10,6 @@ use crate::{
     ActuatorType,
     ButtplugActuatorFeatureMessageType,
     ButtplugSensorFeatureMessageType,
-    FeatureType,
     SensorType,
   },
   server::message::{
@@ -69,138 +68,111 @@ pub struct ServerSensorDeviceMessageAttributesV3 {
   pub(in crate::server::message) feature: ServerDeviceFeature,
 }
 
-impl TryFrom<ServerDeviceFeature> for ServerGenericDeviceMessageAttributesV3 {
-  type Error = String;
-  fn try_from(value: ServerDeviceFeature) -> Result<Self, Self::Error> {
-    if let Some(actuator) = value.actuator() {
-      let actuator_type = (value.feature_type()).try_into()?;
-      let step_limit = actuator.step_limit();
-      let step_count = step_limit.end() - step_limit.start();
-      let attrs = Self {
-        feature_descriptor: value.description().to_owned(),
-        actuator_type,
-        step_count,
-        feature: value.clone(),
-        index: 0,
-      };
-      Ok(attrs)
-    } else {
-      Err(
-        "Cannot produce a GenericDeviceMessageAttribute from a feature with no actuator member"
-          .to_string(),
-      )
-    }
-  }
-}
-
-impl TryFrom<ServerDeviceFeature> for ServerSensorDeviceMessageAttributesV3 {
-  type Error = String;
-  fn try_from(value: ServerDeviceFeature) -> Result<Self, Self::Error> {
-    if let Some(sensor) = value.sensor() {
-      Ok(Self {
-        feature_descriptor: value.description().to_owned(),
-        sensor_type: (value.feature_type()).try_into()?,
-        sensor_range: sensor.value_range().clone(),
-        feature: value.clone(),
-        index: 0,
-      })
-    } else {
-      Err("Device Feature does not expose a sensor.".to_owned())
-    }
-  }
-}
-
 impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
   fn from(features: Vec<ServerDeviceFeature>) -> Self {
-    let actuator_filter = |message_type: &ButtplugActuatorFeatureMessageType| {
-      let attrs: Vec<ServerGenericDeviceMessageAttributesV3> = features
-        .iter()
-        .filter(|x| {
-          if let Some(actuator) = x.actuator() {
-            // Carve out RotateCmd here
-            !(*message_type == ButtplugActuatorFeatureMessageType::ValueCmd
-              && x.feature_type() == FeatureType::RotateWithDirection)
-              && actuator.messages().contains(message_type)
-          } else {
-            false
+    let scalar_attrs: Vec<ServerGenericDeviceMessageAttributesV3> = features
+      .iter()
+      .map(|feature| {
+        let mut actuator_vec = vec!();
+        if let Some(actuator_map) = feature.actuator() {
+          for (actuator_type, actuator) in actuator_map {
+            if actuator.messages().contains(&ButtplugActuatorFeatureMessageType::ValueCmd) {
+              let actuator_type = *actuator_type;
+              let step_limit = actuator.step_limit();
+              let step_count = step_limit.end() - step_limit.start();
+              let attrs = ServerGenericDeviceMessageAttributesV3 {
+                feature_descriptor: feature.description().to_owned(),
+                actuator_type,
+                step_count,
+                feature: feature.clone(),
+                index: 0,
+              };
+              actuator_vec.push(attrs)
+            }
           }
-        })
-        .map(|x| x.clone().try_into().unwrap())
-        .collect();
-      if !attrs.is_empty() {
-        Some(attrs)
-      } else {
-        None
-      }
-    };
+        }
+        actuator_vec
+      })
+      .flatten()
+      .collect();
 
     // We have to calculate rotation attributes seperately, since they're a combination of
     // feature type and message in >= v4.
-    let rotate_attributes = {
-      let attrs: Vec<ServerGenericDeviceMessageAttributesV3> = features
-        .iter()
-        .filter(|x| {
-          if let Some(actuator) = x.actuator() {
-            actuator
-              .messages()
-              .contains(&ButtplugActuatorFeatureMessageType::ValueWithParameterCmd)
-              && x.feature_type() == FeatureType::RotateWithDirection
-          } else {
-            false
+    let rotate_attrs: Vec<ServerGenericDeviceMessageAttributesV3> = features
+      .iter()
+      .map(|feature| {
+        let mut actuator_vec = vec!();
+        if let Some(actuator_map) = feature.actuator() {
+          for (actuator_type, actuator) in actuator_map {
+            if *actuator_type == ActuatorType::RotateWithDirection && actuator.messages().contains(&ButtplugActuatorFeatureMessageType::ValueWithParameterCmd) {
+              let actuator_type = ActuatorType::Rotate;
+              let step_limit = actuator.step_limit();
+              let step_count = step_limit.end() - step_limit.start();
+              let attrs = ServerGenericDeviceMessageAttributesV3 {
+                feature_descriptor: feature.description().to_owned(),
+                actuator_type,
+                step_count,
+                feature: feature.clone(),
+                index: 0,
+              };
+              actuator_vec.push(attrs)
+            }
           }
-        })
-        .map(|x| {
-          // RotateWithDirection is a v4 Type, convert back to Rotate for v3
-          let mut attr: ServerGenericDeviceMessageAttributesV3 = x.clone().try_into().unwrap();
-          attr.actuator_type = ActuatorType::Rotate;
-          attr
-        })
-        .collect();
-      if !attrs.is_empty() {
-        Some(attrs)
-      } else {
-        None
-      }
-    };
+        }
+        actuator_vec
+      })
+      .flatten()
+      .collect();
 
-    let linear_attributes = {
-      let attrs: Vec<ServerGenericDeviceMessageAttributesV3> = features
-        .iter()
-        .filter(|x| {
-          if let Some(actuator) = x.actuator() {
-            actuator
-              .messages()
-              .contains(&ButtplugActuatorFeatureMessageType::ValueWithParameterCmd)
-              && x.feature_type() == FeatureType::PositionWithDuration
-          } else {
-            false
+    let linear_attrs: Vec<ServerGenericDeviceMessageAttributesV3> = features
+      .iter()
+      .map(|feature| {
+        let mut actuator_vec = vec!();
+        if let Some(actuator_map) = feature.actuator() {
+          for (actuator_type, actuator) in actuator_map {
+            if *actuator_type == ActuatorType::PositionWithDuration && actuator.messages().contains(&ButtplugActuatorFeatureMessageType::ValueWithParameterCmd) {
+              let actuator_type = ActuatorType::Position;
+              let step_limit = actuator.step_limit();
+              let step_count = step_limit.end() - step_limit.start();
+              let attrs = ServerGenericDeviceMessageAttributesV3 {
+                feature_descriptor: feature.description().to_owned(),
+                actuator_type,
+                step_count,
+                feature: feature.clone(),
+                index: 0,
+              };              
+              actuator_vec.push(attrs)
+            }
           }
-        })
-        .map(|x| {
-          // PositionWithDuration is a v4 Type, convert back to Position for v3
-          let mut attr: ServerGenericDeviceMessageAttributesV3 = x.clone().try_into().unwrap();
-          attr.actuator_type = ActuatorType::Position;
-          attr
-        })
-        .collect();
-      if !attrs.is_empty() {
-        Some(attrs)
-      } else {
-        None
-      }
-    };
+        }
+        actuator_vec
+      })
+      .flatten()
+      .collect();
 
     let sensor_filter = |message_type| {
       let attrs: Vec<ServerSensorDeviceMessageAttributesV3> = features
         .iter()
-        .filter(|x| {
-          if let Some(sensor) = x.sensor() {
-            sensor.messages().contains(message_type)
-          } else {
-            false
+        .map(|feature| {
+          let mut sensor_vec = vec!();
+          if let Some(sensor_map) = feature.sensor() {
+            for (sensor_type, sensor) in sensor_map {
+              // Only convert Battery backwards. Other sensors weren't really built for v3 and we
+              // never recommended using them or implemented much for them.
+              if *sensor_type == SensorType::Battery && sensor.messages().contains(message_type) {
+                sensor_vec.push(ServerSensorDeviceMessageAttributesV3 {
+                  feature_descriptor: feature.description().to_owned(),
+                  sensor_type: *sensor_type,
+                  sensor_range: sensor.value_range().clone(),
+                  feature: feature.clone(),
+                  index: 0,
+                });
+              }
+            }
           }
+          sensor_vec
         })
-        .map(|x| x.clone().try_into().unwrap())
+        .flatten()
         .collect();
       if !attrs.is_empty() {
         Some(attrs)
@@ -218,9 +190,9 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
       });
 
     Self {
-      scalar_cmd: actuator_filter(&ButtplugActuatorFeatureMessageType::ValueCmd),
-      rotate_cmd: rotate_attributes,
-      linear_cmd: linear_attributes,
+      scalar_cmd: if scalar_attrs.is_empty() { None } else { Some(scalar_attrs) },
+      rotate_cmd: if rotate_attrs.is_empty() { None } else { Some(rotate_attrs) },
+      linear_cmd: if linear_attrs.is_empty() { None } else { Some(linear_attrs) },
       sensor_read_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorReadCmd),
       sensor_subscribe_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorSubscribeCmd),
       raw_read_cmd: raw_attrs.clone(),

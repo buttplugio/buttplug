@@ -173,7 +173,7 @@ pub type ButtplugClientMessageCurrent = ButtplugClientMessageV4;
 /// Type alias for the latest version of server-to-client messages.
 pub type ButtplugServerMessageCurrent = ButtplugServerMessageV4;
 
-#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash)]
 pub enum ActuatorType {
   Unknown,
   Vibrate,
@@ -212,7 +212,7 @@ impl TryFrom<FeatureType> for ActuatorType {
   }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, Hash)]
 pub enum SensorType {
   Unknown,
   Battery,

@@ -8,13 +8,13 @@
 use crate::core::{
   errors::ButtplugDeviceError,
   message::{
-    ButtplugActuatorFeatureMessageType, ButtplugSensorFeatureMessageType, DeviceFeature, DeviceFeatureActuator, DeviceFeatureRaw, DeviceFeatureSensor, Endpoint, FeatureType
+    ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugSensorFeatureMessageType, DeviceFeature, DeviceFeatureActuator, DeviceFeatureRaw, DeviceFeatureSensor, Endpoint, FeatureType, SensorType
   },
 };
 use getset::{Getters, MutGetters, Setters, CopyGetters};
 use uuid::Uuid;
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
-use std::{collections::HashSet, ops::RangeInclusive};
+use std::{collections::{HashMap, HashSet}, ops::RangeInclusive};
 
 
 // This will look almost exactly like ServerDeviceFeature. However, it will only contain
@@ -38,11 +38,11 @@ pub struct ServerDeviceFeature {
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(rename = "actuator")]
-  actuator: Option<ServerDeviceFeatureActuator>,
+  actuator: Option<HashMap<ActuatorType, ServerDeviceFeatureActuator>>,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(rename = "sensor")]
-  sensor: Option<ServerDeviceFeatureSensor>,
+  sensor: Option<HashMap<SensorType, ServerDeviceFeatureSensor>>,
   #[getset(get = "pub")]
   #[serde(skip)]
   raw: Option<DeviceFeatureRaw>,
@@ -59,8 +59,8 @@ impl ServerDeviceFeature {
     id: &Uuid,
     base_id: &Option<Uuid>,
     feature_type: FeatureType,
-    actuator: &Option<ServerDeviceFeatureActuator>,
-    sensor: &Option<ServerDeviceFeatureSensor>,
+    actuator: &Option<HashMap<ActuatorType, ServerDeviceFeatureActuator>>,
+    sensor: &Option<HashMap<SensorType, ServerDeviceFeatureSensor>>,
   ) -> Self {
     Self {
       description: description.to_owned(),
@@ -74,8 +74,10 @@ impl ServerDeviceFeature {
   }
 
   pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
-    if let Some(actuator) = &self.actuator {
-      actuator.is_valid()?;
+    if let Some(actuator_map) = &self.actuator {
+      for (_, actuator) in actuator_map {
+        actuator.is_valid()?;
+      }
     }
     Ok(())
   }
@@ -85,8 +87,12 @@ impl ServerDeviceFeature {
       index,
       self.description(),
       self.feature_type(),
-      &self.actuator.clone().and_then(|x| Some(DeviceFeatureActuator::from(x))),
-      &self.sensor.clone().and_then(|x| Some(DeviceFeatureSensor::from(x))),
+      &self.actuator.clone().and_then(|x| {
+        Some(x.iter().map(|(t, a)|  (*t, DeviceFeatureActuator::from(a.clone()))).collect())
+      }),
+      &self.sensor.clone().and_then(|x| {
+        Some(x.iter().map(|(t, a)|  (*t, DeviceFeatureSensor::from(a.clone()))).collect())
+      }),
       self.raw()
     )
   }

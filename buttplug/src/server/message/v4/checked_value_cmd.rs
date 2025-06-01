@@ -108,31 +108,37 @@ impl TryFromDeviceAttributes<ValueCmdV4> for CheckedValueCmdV4 {
       .expect("Already checked existence or created.");
     let level = cmd.value();
     // Check to make sure the feature has an actuator that handles LevelCmd
-    if let Some(actuator) = feature.actuator() {
-      // Check to make sure the level is within the range of the feature.
-      if actuator
-        .messages()
-        .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ValueCmd)
-      {
-        if !actuator.step_limit().contains(&level) {
-          Err(ButtplugError::from(
-            ButtplugDeviceError::DeviceStepRangeError(
-              *actuator.step_limit().end(),
-              level,
-            ),
-          ))
+    if let Some(actuator_map) = feature.actuator() {
+      if let Some(actuator) = actuator_map.get(&cmd.actuator_type()) {
+        // Check to make sure the level is within the range of the feature.
+        if actuator
+          .messages()
+          .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ValueCmd)
+        {
+          if !actuator.step_limit().contains(&level) {
+            Err(ButtplugError::from(
+              ButtplugDeviceError::DeviceStepRangeError(
+                *actuator.step_limit().end(),
+                level,
+              ),
+            ))
+          } else {
+            // We can't make a private trait impl to turn a ValueCmd into a CheckedValueCmd, and this
+            // is all about security, so we just copy. Silly, but it works for our needs in terms of
+            // making this a barrier.
+            Ok(Self {
+              id: cmd.id(),
+              feature_id: feature.id(),
+              device_index: cmd.device_index(),
+              feature_index: cmd.feature_index(),
+              actuator_type: cmd.actuator_type(),
+              value: cmd.value(),
+            })
+          }
         } else {
-          // We can't make a private trait impl to turn a ValueCmd into a CheckedValueCmd, and this
-          // is all about security, so we just copy. Silly, but it works for our needs in terms of
-          // making this a barrier.
-          Ok(Self {
-            id: cmd.id(),
-            feature_id: feature.id(),
-            device_index: cmd.device_index(),
-            feature_index: cmd.feature_index(),
-            actuator_type: cmd.actuator_type(),
-            value: cmd.value(),
-          })
+          Err(ButtplugError::from(
+            ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::ValueCmd.to_string()),
+          ))
         }
       } else {
         Err(ButtplugError::from(
