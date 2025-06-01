@@ -117,6 +117,25 @@ impl ButtplugServer {
     self.client_name.get().cloned()
   }
 
+  /// Retreive an async stream of ButtplugServerMessages. This is how the server sends out
+  /// non-query-related updates to the system, including information on devices being added/removed,
+  /// client disconnection, etc...
+  pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessageVariant> {
+    let spec_version = self.spec_version.clone();
+    let converter = ButtplugServerMessageConverter::new(None);
+    self.server_version_event_stream().map(move |m| {
+      // If we get an event and don't have a spec version yet, just throw out the latest.
+      converter
+        .convert_outgoing(
+          &m,
+          spec_version
+            .get()
+            .unwrap_or(&ButtplugMessageSpecVersion::Version4),
+        )
+        .unwrap()
+    })
+  }
+
   /// Retreive an async stream of ButtplugServerMessages, always at the latest available message
   /// spec. This is how the server sends out non-query-related updates to the system, including
   /// information on devices being added/removed, client disconnection, etc...
@@ -168,25 +187,6 @@ impl ButtplugServer {
     let device_manager = self.device_manager.clone();
     //let disconnect_future = self.disconnect();
     async move { device_manager.shutdown().await }.boxed()
-  }
-
-  /// Retreive an async stream of ButtplugServerMessages. This is how the server sends out
-  /// non-query-related updates to the system, including information on devices being added/removed,
-  /// client disconnection, etc...
-  pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessageVariant> {
-    let spec_version = self.spec_version.clone();
-    let converter = ButtplugServerMessageConverter::new(None);
-    self.server_version_event_stream().map(move |m| {
-      // If we get an event and don't have a spec version yet, just throw out the latest.
-      converter
-        .convert_outgoing(
-          &m,
-          spec_version
-            .get()
-            .unwrap_or(&ButtplugMessageSpecVersion::Version4),
-        )
-        .unwrap()
-    })
   }
 
   /// Sends a [ButtplugClientMessage] to be parsed by the server (for handshake or ping), or passed
