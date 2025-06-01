@@ -307,45 +307,55 @@
         },
         "Actuator": {
           "type": "object",
-          "properties": {
-            "StepCount": {
-              "type": "integer"              
-            },
-            "Messages": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
+          "patternProperties": {
+            "^.*$": {
+              "type": "object",
+              "properties": {
+                "StepCount": {
+                  "type": "integer"              
+                },
+                "Messages": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "StepCount",
+                "Messages"
+              ]
             }
-          },
-          "required": [
-            "StepCount",
-            "Messages"
-          ]
+          }
         },
         "Sensor": {
           "type": "object",
-          "properties": {
-            "ValueRange": {
-              "type": "array",
-              "items": {
-                "type": "array",
-                "items": {
-                  "type": "integer"
+          "patternProperties": {
+            "^.*$": {
+              "type": "object",
+              "properties": {
+                "ValueRange": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "Messages": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 }
-              }
-            },
-            "Messages": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
+              },
+              "required": [
+                "ValueRange",
+                "Messages"
+              ]
             }
-          },
-          "required": [
-            "ValueRange",
-            "Messages"
-          ]
+          }
         },
         "Raw": {
           "type": "object",

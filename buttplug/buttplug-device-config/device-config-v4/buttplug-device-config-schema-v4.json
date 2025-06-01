@@ -189,52 +189,63 @@
           },
           "actuator": {
             "type": "object",
-            "properties": {
-              "step-range": {
-                "$ref": "#/components/step-range"
-              },
-              "messages": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "pattern": "^(ValueCmd|ValueWithParameterCmd)$"
-                }
+            "patternProperties": {
+              "^.*$": {
+                "type": "object",
+                "properties": {
+                  "step-range": {
+                    "$ref": "#/components/step-range"
+                  },
+                  "messages": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^(ValueCmd|ValueWithParameterCmd)$"
+                    }
+                  }
+                },
+                "required": [
+                  "step-range",
+                  "messages"
+                ]
               }
-            },
-            "required": [
-              "step-range",
-              "messages"
-            ]
+            }
           },
           "sensor": {
             "type": "object",
-            "properties": {
-              "value-range": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/step-range"
+            "patternProperties": {
+              "^.*$": {
+                "type": "object",
+                "properties": {
+                  "value-range": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/step-range"
+                    },
+                    "minItems": 1
+                  },
+                  "messages": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^(SensorReadCmd|SensorSubscribeCmd)$"
+                    }
+                  }
                 },
-                "minItems": 1
-              },
-              "messages": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "pattern": "^(SensorReadCmd|SensorSubscribeCmd)$"
-                }
+                "required": [
+                  "value-range",
+                  "messages"
+                ],
+                "additionalProperties": false
               }
-            },
-            "required": [
-              "value-range",
-              "messages"
-            ]
+            }         
           }
         },
         "required": [
           "feature-type",
           "id"
         ],
-        "additionalProperties": false
+        "additionalProperties": false           
       }
     },
     "user-config-features": {
@@ -257,54 +268,58 @@
           },
           "actuator": {
             "type": "object",
-            "properties": {              
-              "type": "object",
-              "properties": {
-                "step-range": {
-                  "$ref": "#/components/step-range"
-                },
-                "step-limit": {
-                  "$ref": "#/components/step-range"
-                },
-                "messages": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "pattern": "^(ValueCmd|ValueWithParameterCmd)$"
+            "patternProperties": {
+              "^.*$": {
+                "type": "object",
+                "properties": {
+                  "step-range": {
+                    "$ref": "#/components/step-range"
+                  },
+                  "step-limit": {
+                    "$ref": "#/components/step-range"
+                  },
+                  "messages": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^(ValueCmd|ValueWithParameterCmd)$"
+                    }
                   }
-                }
-              },
-              "required": [
-                "step-range",
-                "step-limit",
-                "messages"
-              ]
+                },
+                "required": [
+                  "step-range",
+                  "step-limit",
+                  "messages"
+                ]
+              }
             }
           },
           "sensor": {
             "type": "object",
-            "properties": {
-              "type": "object",
-              "properties": {
-                "value-range": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/step-range"
+            "patternProperties": {
+              "^.*$": {
+                "type": "object",
+                "properties": {
+                  "value-range": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/step-range"
+                    },
+                    "minItems": 1
                   },
-                  "minItems": 1
-                },
-                "messages": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "pattern": "^(SensorReadCmd|SensorSubscribeCmd)$"
+                  "messages": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^(SensorReadCmd|SensorSubscribeCmd)$"
+                    }
                   }
-                }
-              },
-              "required": [
-                "value-range",
-                "messages"
-              ]
+                },
+                "required": [
+                  "value-range",
+                  "messages"
+                ]
+              }
             }
           }
         },
