@@ -28,7 +28,7 @@ use crate::{
   },
   server::message::{
     ButtplugClientMessageV3,
-    ButtplugDeviceMessageType,
+    ButtplugDeviceMessageNameV3,
     ButtplugServerMessageV3,
     ClientDeviceMessageAttributesV3,
     ClientGenericDeviceMessageAttributesV3,
@@ -369,7 +369,7 @@ impl ButtplugClientDevice {
   pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {
     if self.message_attributes.scalar_cmd().is_none() {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::VibrateCmd.to_string())
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV3::ScalarCmd.to_string())
           .into(),
       );
     }
@@ -433,7 +433,7 @@ impl ButtplugClientDevice {
   pub fn linear(&self, linear_cmd: &LinearCommand) -> ButtplugClientResultFuture {
     if self.message_attributes.linear_cmd().is_none() {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LinearCmd.to_string())
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV3::LinearCmd.to_string())
           .into(),
       );
     }
@@ -492,7 +492,7 @@ impl ButtplugClientDevice {
   pub fn rotate(&self, rotate_cmd: &RotateCommand) -> ButtplugClientResultFuture {
     if self.message_attributes.rotate_cmd().is_none() {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RotateCmd.to_string())
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV3::RotateCmd.to_string())
           .into(),
       );
     }
@@ -547,7 +547,7 @@ impl ButtplugClientDevice {
     if self.message_attributes.sensor_subscribe_cmd().is_none() {
       return create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageType::SensorSubscribeCmd.to_string(),
+          ButtplugDeviceMessageNameV3::SensorSubscribeCmd.to_string(),
         )
         .into(),
       );
@@ -564,7 +564,7 @@ impl ButtplugClientDevice {
     if self.message_attributes.sensor_subscribe_cmd().is_none() {
       return create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageType::SensorSubscribeCmd.to_string(),
+          ButtplugDeviceMessageNameV3::SensorSubscribeCmd.to_string(),
         )
         .into(),
       );
@@ -577,7 +577,7 @@ impl ButtplugClientDevice {
     if self.message_attributes.sensor_read_cmd().is_none() {
       return create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageType::SensorReadCmd.to_string(),
+          ButtplugDeviceMessageNameV3::SensorReadCmd.to_string(),
         )
         .into(),
       );
@@ -656,7 +656,7 @@ impl ButtplugClientDevice {
     if self.message_attributes.raw_write_cmd().is_none() {
       return create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageType::RawWriteCmd.to_string(),
+          ButtplugDeviceMessageNameV3::RawWriteCmd.to_string(),
         )
         .into(),
       );
@@ -678,7 +678,7 @@ impl ButtplugClientDevice {
   ) -> ButtplugClientResultFuture<Vec<u8>> {
     if self.message_attributes.raw_read_cmd().is_none() {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawReadCmd.to_string())
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV3::RawReadCmd.to_string())
           .into(),
       );
     }
@@ -709,7 +709,7 @@ impl ButtplugClientDevice {
     if self.message_attributes.raw_subscribe_cmd().is_none() {
       return create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageType::RawSubscribeCmd.to_string(),
+          ButtplugDeviceMessageNameV3::RawSubscribeCmd.to_string(),
         )
         .into(),
       );
@@ -723,7 +723,7 @@ impl ButtplugClientDevice {
     if self.message_attributes.raw_subscribe_cmd().is_none() {
       return create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageType::RawSubscribeCmd.to_string(),
+          ButtplugDeviceMessageNameV3::RawSubscribeCmd.to_string(),
         )
         .into(),
       );

@@ -20,17 +20,19 @@
               "feature-type": "Oscillate",
               "description": "Fucking Machine Oscillation Speed",
               "actuator": {
-                "step-range": [
-                  0,
-                  10
-                ],
-                "step-limit": [
-                  0,
-                  10
-                ],
-                "messages": [
-                  "ValueCmd"
-                ]
+                "Oscillate": {
+                  "step-range": [
+                    0,
+                    10
+                  ],
+                  "step-limit": [
+                    0,
+                    10
+                  ],
+                  "messages": [
+                    "ValueCmd"
+                  ]
+                }
               },
               "base-id": "56d94863-b321-428b-8b68-bac0197556e1",
               "id": "56d94863-b321-428b-8b68-bac0197556e2"
@@ -39,15 +41,17 @@
               "feature-type": "Battery",
               "description": "Battery Level",
               "sensor": {
-                "value-range": [
-                  [
-                    0,
-                    100
+                "Battery": {
+                  "value-range": [
+                    [
+                      0,
+                      100
+                    ]
+                  ],
+                  "messages": [
+                    "SensorReadCmd"
                   ]
-                ],
-                "messages": [
-                  "SensorReadCmd"
-                ]
+                }
               },
               "base-id": "b9899daa-7755-4ebb-88b4-13122d12745e",
               "id": "b9899daa-7755-4ebb-88b4-13122d12745f"

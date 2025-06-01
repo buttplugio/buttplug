@@ -38,17 +38,19 @@
               "description": "",
               "feature-type": "PositionWithDuration",
               "actuator": {
-                "step-range": [
-                  0,
-                  100
-                ],
-                "step-limit": [
-                  0,
-                  100
-                ],
-                "messages": [
-                  "ValueWithParameterCmd"
-                ]
+                "PositionWithDuration": {
+                  "step-range": [
+                    0,
+                    100
+                  ],
+                  "step-limit": [
+                    0,
+                    100
+                  ],
+                  "messages": [
+                    "ValueWithParameterCmd"
+                  ]
+                }
               },
               "id": "c5e6384e-399b-4c2b-9791-eb48abaf3bf7"
             },
@@ -56,17 +58,19 @@
               "description": "",
               "feature-type": "Vibrate",
               "actuator": {
-                "step-range": [
-                  0,
-                  99
-                ],
-                "step-limit": [
-                  0,
-                  99
-                ],
-                "messages": [
-                  "ValueCmd"
-                ]
+                "Vibrate": {
+                  "step-range": [
+                    0,
+                    99
+                  ],
+                  "step-limit": [
+                    0,
+                    99
+                  ],
+                  "messages": [
+                    "ValueCmd"
+                  ]
+                }
               },
               "id": "e4384a37-fd37-4b9e-8464-a510dd8410a7"
             }

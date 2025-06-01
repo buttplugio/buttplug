@@ -33,7 +33,7 @@ use buttplug::{
   server::message::{
     BatteryLevelCmdV2,
     ButtplugClientMessageV2,
-    ButtplugDeviceMessageType,
+    ButtplugDeviceMessageNameV2,
     ButtplugServerMessageV2,
     ClientDeviceMessageAttributesV2,
     DeviceMessageInfoV2,
@@ -298,7 +298,7 @@ impl ButtplugClientDevice {
       features.feature_count()
     } else {
       return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::VibrateCmd.to_string())
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV2::VibrateCmd.to_string())
           .into(),
       );
     };
@@ -350,7 +350,7 @@ impl ButtplugClientDevice {
       features.feature_count()
     } else {
       return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LinearCmd.to_string())
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV2::LinearCmd.to_string())
           .into(),
       );
     };
@@ -400,7 +400,7 @@ impl ButtplugClientDevice {
       features.feature_count()
     } else {
       return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RotateCmd.to_string())
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV2::RotateCmd.to_string())
           .into(),
       );
     };
@@ -448,7 +448,7 @@ impl ButtplugClientDevice {
     if self.message_attributes.battery_level_cmd().is_none() {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageType::BatteryLevelCmd.to_string(),
+          ButtplugDeviceMessageNameV2::BatteryLevelCmd.to_string(),
         )
         .into(),
       );
@@ -474,7 +474,7 @@ impl ButtplugClientDevice {
     if self.message_attributes.rssi_level_cmd().is_none() {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageType::RSSILevelCmd.to_string(),
+          ButtplugDeviceMessageNameV2::RSSILevelCmd.to_string(),
         )
         .into(),
       );
@@ -505,7 +505,7 @@ impl ButtplugClientDevice {
     if self.message_attributes.raw_write_cmd().is_none() {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageType::RawWriteCmd.to_string(),
+          ButtplugDeviceMessageNameV2::RawWriteCmd.to_string(),
         )
         .into(),
       );
@@ -527,7 +527,7 @@ impl ButtplugClientDevice {
   ) -> ButtplugClientResultFuture<Vec<u8>> {
     if self.message_attributes.raw_read_cmd().is_none() {
       return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawReadCmd.to_string())
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV2::RawReadCmd.to_string())
           .into(),
       );
     }
@@ -557,7 +557,7 @@ impl ButtplugClientDevice {
     if self.message_attributes.raw_subscribe_cmd().is_none() {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageType::RawSubscribeCmd.to_string(),
+          ButtplugDeviceMessageNameV2::RawSubscribeCmd.to_string(),
         )
         .into(),
       );
@@ -571,7 +571,7 @@ impl ButtplugClientDevice {
     if self.message_attributes.raw_subscribe_cmd().is_none() {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageType::RawUnsubscribeCmd.to_string(),
+          ButtplugDeviceMessageNameV2::RawUnsubscribeCmd.to_string(),
         )
         .into(),
       );
