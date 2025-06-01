@@ -22,14 +22,7 @@ use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError},
     message::{
-      ButtplugMessageSpecVersion,
-      ButtplugServerMessageV4,
-      Endpoint,
-      ErrorCode,
-      PingV0,
-      RequestServerInfoV1,
-      StartScanningV0,
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      ButtplugMessageSpecVersion, ButtplugServerMessageV4, Endpoint, ErrorCode, PingV0, RequestServerInfoV1, ServerInfoV4, StartScanningV0, ValueCmdV4, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
     },
   },
   server::{
@@ -38,15 +31,7 @@ use buttplug::{
       ServerDeviceManagerBuilder,
     },
     message::{
-      checked_value_cmd::CheckedValueCmdV4,
-      spec_enums::ButtplugCheckedClientMessageV4,
-      ButtplugClientMessageV3,
-      ButtplugClientMessageVariant,
-      ButtplugServerMessageV2,
-      ButtplugServerMessageV3,
-      ButtplugServerMessageVariant,
-      VibrateCmdV1,
-      ServerInfoV2,
+      checked_value_cmd::CheckedValueCmdV4, spec_enums::ButtplugCheckedClientMessageV4, ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageV2, ButtplugServerMessageV3, ButtplugServerMessageVariant, ServerInfoV2, VibrateCmdV1
     },
     ButtplugServer,
     ButtplugServerBuilder,
@@ -71,9 +56,9 @@ async fn setup_test_server(
     .await
     .expect("Test, assuming infallible.")
   {
-    ButtplugServerMessageVariant::V3(ButtplugServerMessageV3::ServerInfo(s)) => assert_eq!(
+    ButtplugServerMessageVariant::V4(ButtplugServerMessageV4::ServerInfo(s)) => assert_eq!(
       s,
-      ServerInfoV2::new("Buttplug Server", ButtplugMessageSpecVersion::Version3, 0)
+      ServerInfoV4::new("Buttplug Server", ButtplugMessageSpecVersion::Version4, 0, 0)
     ),
     _ => panic!("Should've received ok"),
   }
@@ -295,12 +280,12 @@ async fn test_invalid_device_index() {
   let msg = RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
   let (server, _) = setup_test_server(msg.into()).await;
   let err = server
-    .parse_message(ButtplugClientMessageVariant::V3(
-      VibrateCmdV1::new(10, vec![]).into(),
+    .parse_message(ButtplugClientMessageVariant::V4(
+      ValueCmdV4::new(10, 0, buttplug::core::message::ActuatorType::Vibrate, 0).into(),
     ))
     .await
     .unwrap_err();
-  if let ButtplugServerMessageVariant::V3(ButtplugServerMessageV3::Error(e)) = err {
+  if let ButtplugServerMessageVariant::V4(ButtplugServerMessageV4::Error(e)) = err {
     assert!(matches!(
       e.original_error(),
       ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceNotAvailable(_))

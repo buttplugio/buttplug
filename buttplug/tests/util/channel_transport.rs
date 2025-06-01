@@ -21,10 +21,7 @@ use buttplug::{
       ButtplugConnectorError,
     },
     message::{
-      serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
-      ButtplugMessage,
-      RequestServerInfoV1,
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage}, ButtplugClientMessageV4, ButtplugMessage, DeviceListV4, RequestServerInfoV1, ServerInfoV4, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
     },
   },
   server::{
@@ -200,23 +197,23 @@ impl ChannelClientTestHelper {
     // Wait for RequestServerInfo message
     assert!(matches!(
       self.next_client_message().await,
-      ButtplugClientMessageVariant::V3(ButtplugClientMessageV3::RequestServerInfo(..))
+      ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::RequestServerInfo(..))
     ));
     // Just assume we get an RSI message
     self
-      .send_client_incoming(ButtplugServerMessageVariant::V3(
-        ServerInfoV2::new("test server", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION, 0).into(),
+      .send_client_incoming(ButtplugServerMessageVariant::V4(
+        ServerInfoV4::new("test server", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION, 0, 0).into(),
       ))
       .await;
     // Wait for RequestDeviceList message.
     assert!(matches!(
       self.next_client_message().await,
-      ButtplugClientMessageVariant::V3(ButtplugClientMessageV3::RequestDeviceList(..))
+      ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::RequestDeviceList(..))
     ));
-    let mut dl = DeviceListV3::new(vec![]);
+    let mut dl = DeviceListV4::new(vec![]);
     dl.set_id(2);
     self
-      .send_client_incoming(ButtplugServerMessageVariant::V3(dl.into()))
+      .send_client_incoming(ButtplugServerMessageVariant::V4(dl.into()))
       .await;
     finish_notifier.notified().await;
   }
