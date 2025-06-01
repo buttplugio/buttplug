@@ -253,54 +253,59 @@
             "$ref": "#/components/uuid"
           },
           "feature-type": {
-            "type": "string",
-            "pattern": "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|Battery|RSSI|Pressure|RotateWithDirection|PositionWithDuration)$"
+            "type": "string"
           },
           "actuator": {
             "type": "object",
-            "properties": {
-              "step-range": {
-                "$ref": "#/components/step-range"
-              },
-              "step-limit": {
-                "$ref": "#/components/step-range"
-              },
-              "messages": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "pattern": "^(ValueCmd|ValueWithParameterCmd)$"
+            "properties": {              
+              "type": "object",
+              "properties": {
+                "step-range": {
+                  "$ref": "#/components/step-range"
+                },
+                "step-limit": {
+                  "$ref": "#/components/step-range"
+                },
+                "messages": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^(ValueCmd|ValueWithParameterCmd)$"
+                  }
                 }
-              }
-            },
-            "required": [
-              "step-range",
-              "step-limit",
-              "messages"
-            ]
+              },
+              "required": [
+                "step-range",
+                "step-limit",
+                "messages"
+              ]
+            }
           },
           "sensor": {
             "type": "object",
             "properties": {
-              "value-range": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/step-range"
+              "type": "object",
+              "properties": {
+                "value-range": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/step-range"
+                  },
+                  "minItems": 1
                 },
-                "minItems": 1
-              },
-              "messages": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "pattern": "^(SensorReadCmd|SensorSubscribeCmd)$"
+                "messages": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^(SensorReadCmd|SensorSubscribeCmd)$"
+                  }
                 }
-              }
-            },
-            "required": [
-              "value-range",
-              "messages"
-            ]
+              },
+              "required": [
+                "value-range",
+                "messages"
+              ]
+            }
           }
         },
         "required": [
