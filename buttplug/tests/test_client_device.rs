@@ -8,39 +8,30 @@
 mod util;
 use buttplug::{
   client::{
-    ButtplugClientDeviceEvent,
-    ButtplugClientError,
-    ButtplugClientEvent,
-    ScalarValueCommand,
+    ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent, ScalarValueCommand,
   },
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    message::{
-      ButtplugActuatorFeatureMessageType,
-      DeviceFeatureActuator,
-      Endpoint,
-      FeatureType,
+    message::{ActuatorType, ButtplugActuatorFeatureMessageType, Endpoint, FeatureType},
+  },
+  server::{
+    device::{
+      configuration::{UserDeviceCustomization, UserDeviceDefinition, UserDeviceIdentifier},
+      hardware::{HardwareCommand, HardwareWriteCmd},
     },
+    message::server_device_feature::{ServerDeviceFeature, ServerDeviceFeatureActuator},
   },
-  server::{device::{
-    configuration::{UserDeviceCustomization, UserDeviceDefinition, UserDeviceIdentifier},
-    hardware::{HardwareCommand, HardwareWriteCmd}
-  }, message::server_device_feature::ServerDeviceFeature},
-  util::{
-    async_manager,
-    device_configuration::load_protocol_configs
-  },
+  util::{async_manager, device_configuration::load_protocol_configs},
 };
 use futures::StreamExt;
-use uuid::Uuid;
-use std::{sync::Arc, time::Duration};
+use std::{collections::HashMap, sync::Arc, time::Duration};
 use tokio::time::sleep;
 use util::test_device_manager::{check_test_recv_value, TestDeviceIdentifier};
 use util::{
-  test_client_with_device,
-  test_client_with_device_and_custom_dcm,
+  test_client_with_device, test_client_with_device_and_custom_dcm,
   test_device_manager::TestHardwareEvent,
 };
+use uuid::Uuid;
 
 #[cfg(feature = "server")]
 #[tokio::test]
@@ -195,11 +186,8 @@ async fn test_client_repeated_deviceadded_message() {
   use buttplug::{
     core::message::OkV0,
     server::message::{
-      ButtplugClientMessageV3,
-      ButtplugClientMessageVariant,
-      ButtplugServerMessageVariant,
-      ClientDeviceMessageAttributesV3,
-      DeviceAddedV3,
+      ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageVariant,
+      ClientDeviceMessageAttributesV3, DeviceAddedV3,
     },
   };
 
@@ -258,11 +246,8 @@ async fn test_client_repeated_deviceremoved_message() {
   use buttplug::{
     core::message::{DeviceRemovedV0, OkV0},
     server::message::{
-      ButtplugClientMessageV3,
-      ButtplugClientMessageVariant,
-      ButtplugServerMessageVariant,
-      ClientDeviceMessageAttributesV3,
-      DeviceAddedV3,
+      ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageVariant,
+      ClientDeviceMessageAttributesV3, DeviceAddedV3,
     },
   };
 
@@ -336,43 +321,53 @@ async fn test_client_range_limits() {
   // Add a user config that configures the test device to only user the lower and upper half for the two vibrators
   let identifier = UserDeviceIdentifier::new("range-test", "aneros", &Some("Massage Demo".into()));
   let test_identifier = TestDeviceIdentifier::new("Massage Demo", Some("range-test".into()));
+  let mut feature_1_actuator = HashMap::new();
+  feature_1_actuator.insert(
+    ActuatorType::Vibrate,
+    ServerDeviceFeatureActuator::new(
+      &(0..=127),
+      &(0..=64),
+      &[ButtplugActuatorFeatureMessageType::ValueCmd].into(),
+    ),
+  );
+  let mut feature_2_actuator = HashMap::new();
+  feature_2_actuator.insert(
+    ActuatorType::Vibrate,
+    ServerDeviceFeatureActuator::new(
+      &(0..=127),
+      &(64..=127),
+      &[ButtplugActuatorFeatureMessageType::ValueCmd].into(),
+    ),
+  );
   dcm
-      .add_user_device_definition(
-        &identifier,
-        &UserDeviceDefinition::new(
-          "Massage Demo",
-          &Uuid::new_v4(),
-          &None,
-          &[
-            ServerDeviceFeature::new(
-              "Lower half",
-              &Uuid::new_v4(),
-              &None,
-              FeatureType::Vibrate,
-              &Some(DeviceFeatureActuator::new(
-                &(0..=127),
-                &(0..=64),
-                &[ButtplugActuatorFeatureMessageType::ValueCmd].into(),
-              )),
-              &None,
-            ),
-            ServerDeviceFeature::new(
-              "Upper half",
-              &Uuid::new_v4(),
-              &None,              
-              FeatureType::Vibrate,
-              &Some(DeviceFeatureActuator::new(
-                &(0..=127),
-                &(64..=127),
-                &[ButtplugActuatorFeatureMessageType::ValueCmd].into(),
-              )),
-              &None,
-            ),
-          ],
-          &UserDeviceCustomization::default(),
-        ),
-      )
-      .unwrap();
+    .add_user_device_definition(
+      &identifier,
+      &UserDeviceDefinition::new(
+        "Massage Demo",
+        &Uuid::new_v4(),
+        &None,
+        &[
+          ServerDeviceFeature::new(
+            "Lower half",
+            &Uuid::new_v4(),
+            &None,
+            FeatureType::Vibrate,
+            &Some(feature_1_actuator),
+            &None,
+          ),
+          ServerDeviceFeature::new(
+            "Upper half",
+            &Uuid::new_v4(),
+            &None,
+            FeatureType::Vibrate,
+            &Some(feature_2_actuator),
+            &None,
+          ),
+        ],
+        &UserDeviceCustomization::default(),
+      ),
+    )
+    .unwrap();
 
   // Start the server & client
   let (client, mut device) = test_client_with_device_and_custom_dcm(&test_identifier, dcm).await;
@@ -391,15 +386,27 @@ async fn test_client_range_limits() {
       check_test_recv_value(
         &Duration::from_millis(150),
         &mut device,
-        HardwareCommand::Write(HardwareWriteCmd::new(Uuid::nil(), Endpoint::Tx, vec![0xF1, 32], false)),
-      ).await;
+        HardwareCommand::Write(HardwareWriteCmd::new(
+          Uuid::nil(),
+          Endpoint::Tx,
+          vec![0xF1, 32],
+          false,
+        )),
+      )
+      .await;
 
       // Upper half
       check_test_recv_value(
         &Duration::from_millis(150),
         &mut device,
-        HardwareCommand::Write(HardwareWriteCmd::new(Uuid::nil(), Endpoint::Tx, vec![0xF2, 96], false)),
-      ).await;
+        HardwareCommand::Write(HardwareWriteCmd::new(
+          Uuid::nil(),
+          Endpoint::Tx,
+          vec![0xF2, 96],
+          false,
+        )),
+      )
+      .await;
 
       // Disable device
       assert!(dev
@@ -411,15 +418,27 @@ async fn test_client_range_limits() {
       check_test_recv_value(
         &Duration::from_millis(150),
         &mut device,
-        HardwareCommand::Write(HardwareWriteCmd::new(Uuid::nil(), Endpoint::Tx, vec![0xF1, 0], false)),
-      ).await;
+        HardwareCommand::Write(HardwareWriteCmd::new(
+          Uuid::nil(),
+          Endpoint::Tx,
+          vec![0xF1, 0],
+          false,
+        )),
+      )
+      .await;
 
       // Upper half
       check_test_recv_value(
         &Duration::from_millis(150),
         &mut device,
-        HardwareCommand::Write(HardwareWriteCmd::new(Uuid::nil(), Endpoint::Tx, vec![0xF2, 0], false)),
-      ).await;
+        HardwareCommand::Write(HardwareWriteCmd::new(
+          Uuid::nil(),
+          Endpoint::Tx,
+          vec![0xF2, 0],
+          false,
+        )),
+      )
+      .await;
       break;
     }
   }

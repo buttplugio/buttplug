@@ -16,7 +16,6 @@ use buttplug::{
       serializer::ButtplugSerializedMessage,
       ButtplugMessage,
       ErrorV0,
-      ServerInfoV2,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },

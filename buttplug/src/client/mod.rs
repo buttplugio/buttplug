@@ -1,7 +1,7 @@
 mod v3;
 //pub mod v4;
 
-#[cfg(not(feature = "default_v4_spec"))]
+//#[cfg(not(feature = "default_v4_spec"))]
 pub use v3::{
   connector,
   device::{
@@ -17,7 +17,7 @@ pub use v3::{
   ButtplugClientError,
   ButtplugClientEvent,
 };
-
+/*
 #[cfg(feature = "default_v4_spec")]
 pub use v4::{
   device::{
@@ -32,3 +32,4 @@ pub use v4::{
   ButtplugClientError,
   ButtplugClientEvent,
 };
+*/

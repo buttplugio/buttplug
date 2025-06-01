@@ -29,5 +29,5 @@ pub use {
     ServerGenericDeviceMessageAttributesV2,
   },
   server_info::ServerInfoV2,
-  spec_enums::{ButtplugClientMessageV2, ButtplugServerMessageV2}
+  spec_enums::{ButtplugClientMessageV2, ButtplugServerMessageV2, ButtplugDeviceMessageNameV2}
 };

@@ -23,7 +23,7 @@ use crate::{
       StartScanningV0,
       StopAllDevicesV0,
       StopScanningV0,
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      ButtplugMessageSpecVersion,
     },
   },
   server::message::{ButtplugClientMessageV3, ButtplugServerMessageV3},
@@ -328,7 +328,7 @@ impl ButtplugClient {
     let msg = self
       .message_sender
       .send_message_ignore_connect_status(
-        RequestServerInfoV1::new(&self.client_name, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into(),
+        RequestServerInfoV1::new(&self.client_name, ButtplugMessageSpecVersion::Version3).into(),
       )
       .await?;
 

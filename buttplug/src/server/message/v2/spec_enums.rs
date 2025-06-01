@@ -210,3 +210,18 @@ impl From<ButtplugServerMessageV2> for ButtplugServerMessageV1 {
     }
   }
 }
+
+
+#[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]
+pub enum ButtplugDeviceMessageNameV2 {
+  LinearCmd,
+  RotateCmd,
+  StopDeviceCmd,
+  RawWriteCmd,
+  RawReadCmd,
+  RawSubscribeCmd,
+  RawUnsubscribeCmd,
+  VibrateCmd,
+  BatteryLevelCmd,
+  RSSILevelCmd,
+}
