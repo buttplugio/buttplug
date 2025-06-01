@@ -5,7 +5,7 @@ use crate::{
       ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator
     },
   },
-  server::message::{v1::LinearCmdV1, ButtplugDeviceMessageTypeV3, RotateCmdV1, ServerDeviceAttributes, TryFromDeviceAttributes},
+  server::message::{v1::LinearCmdV1, ButtplugDeviceMessageNameV3, RotateCmdV1, ServerDeviceAttributes, TryFromDeviceAttributes},
 };
 use getset::{Getters, CopyGetters};
 use super::checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4;
@@ -90,7 +90,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedValueWithParameterVecCmdV4 
         .as_ref()
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::MessageNotSupported(
-            ButtplugDeviceMessageTypeV3::RotateCmd.to_string(),
+            ButtplugDeviceMessageNameV3::RotateCmd.to_string(),
           ),
         ))?;
       let feature = rotate_attrs
