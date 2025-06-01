@@ -185,6 +185,7 @@ pub enum ActuatorType {
   Constrict,
   Inflate,
   Heater,
+  Led,
   // For instances where we specify a position to move to ASAP. Usually servos, probably for the
   // OSR-2/SR-6.
   Position,
@@ -199,6 +200,7 @@ impl TryFrom<FeatureType> for ActuatorType {
       FeatureType::Vibrate => Ok(ActuatorType::Vibrate),
       FeatureType::Rotate => Ok(ActuatorType::Rotate),
       FeatureType::Heater => Ok(ActuatorType::Heater),
+      FeatureType::Led => Ok(ActuatorType::Led),
       FeatureType::RotateWithDirection => Ok(ActuatorType::RotateWithDirection),
       FeatureType::PositionWithDuration => Ok(ActuatorType::PositionWithDuration),
       FeatureType::Oscillate => Ok(ActuatorType::Oscillate),
