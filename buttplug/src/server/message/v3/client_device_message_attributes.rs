@@ -35,7 +35,7 @@ use std::ops::RangeInclusive;
 // For many messages, client and server configurations may be exactly the same. If they are not,
 // then we denote this by prefixing the type with Client/Server. Server attributes will usually be
 // hosted in the server/device/configuration module.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters)]
+#[derive(Clone, Debug, Default, PartialEq, Getters, MutGetters, Setters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ClientDeviceMessageAttributesV3 {
   // Generic commands
@@ -250,7 +250,7 @@ where
   seq.end()
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Getters, Setters)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Getters, Setters)]
 pub struct SensorDeviceMessageAttributesV3 {
   #[getset(get = "pub")]
   #[serde(rename = "FeatureDescriptor")]

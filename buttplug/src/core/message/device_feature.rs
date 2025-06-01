@@ -92,7 +92,7 @@ impl From<SensorType> for FeatureType {
 // then we denote this by prefixing the type with Client/Server. Server attributes will usually be
 // hosted in the server/device/configuration module.
 #[derive(
-  Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize,
+  Clone, Debug, Default, PartialEq, Getters, MutGetters, Setters, Serialize, Deserialize,
 )]
 pub struct DeviceFeature {
   // Index of the feature on the device. This was originally implicit as the position in the feature

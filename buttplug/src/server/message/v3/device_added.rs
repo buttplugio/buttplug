@@ -25,7 +25,7 @@ use serde::{Deserialize, Serialize};
 use super::{ClientDeviceMessageAttributesV3, DeviceMessageInfoV3};
 
 /// Notification that a device has been found and connected to the server.
-#[derive(ButtplugMessage, Clone, Debug, PartialEq, Eq, Getters, CopyGetters)]
+#[derive(ButtplugMessage, PartialEq, Clone, Debug, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceAddedV3 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
