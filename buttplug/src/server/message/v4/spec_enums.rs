@@ -4,22 +4,11 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      ButtplugClientMessageV4,
-      ButtplugDeviceMessage,
-      ButtplugMessage,
-      ButtplugMessageFinalizer,
-      ButtplugMessageValidator,
-      PingV0,
-      RequestDeviceListV0,
-      RequestServerInfoV1,
-      StartScanningV0,
-      StopAllDevicesV0,
-      StopDeviceCmdV0,
-      StopScanningV0,
+      ButtplugClientMessageV4, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, PingV0, RequestDeviceListV0, RequestServerInfoV4, StartScanningV0, StopAllDevicesV0, StopDeviceCmdV0, StopScanningV0
     },
   },
   server::message::{
-    checked_raw_read_cmd::CheckedRawReadCmdV2, checked_raw_subscribe_cmd::CheckedRawSubscribeCmdV2, checked_raw_unsubscribe_cmd::CheckedRawUnsubscribeCmdV2, checked_raw_write_cmd::CheckedRawWriteCmdV2, server_device_attributes::TryFromClientMessage, v0::ButtplugClientMessageV0, v1::ButtplugClientMessageV1, v2::ButtplugClientMessageV2, v3::ButtplugClientMessageV3, ButtplugClientMessageVariant, ServerDeviceAttributes, TryFromDeviceAttributes
+    checked_raw_read_cmd::CheckedRawReadCmdV2, checked_raw_subscribe_cmd::CheckedRawSubscribeCmdV2, checked_raw_unsubscribe_cmd::CheckedRawUnsubscribeCmdV2, checked_raw_write_cmd::CheckedRawWriteCmdV2, server_device_attributes::TryFromClientMessage, v0::ButtplugClientMessageV0, v1::ButtplugClientMessageV1, v2::ButtplugClientMessageV2, v3::ButtplugClientMessageV3, ButtplugClientMessageVariant, RequestServerInfoV1, ServerDeviceAttributes, TryFromDeviceAttributes
   },
 };
 
@@ -46,7 +35,7 @@ use super::{
 )]
 pub enum ButtplugCheckedClientMessageV4 {
   // Handshake messages
-  RequestServerInfo(RequestServerInfoV1),
+  RequestServerInfo(RequestServerInfoV4),
   Ping(PingV0),
   // Device enumeration messages
   StartScanning(StartScanningV0),
@@ -212,6 +201,14 @@ impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMess
   }
 }
 
+impl From<RequestServerInfoV1> for RequestServerInfoV4 {
+  fn from(value: RequestServerInfoV1) -> Self {
+    let mut msg = RequestServerInfoV4::new(value.client_name(), value.message_version(), 0);
+    msg.set_id(value.id());
+    msg
+  }
+}
+
 // For v3 to v4, all deprecations should be treated as conversions, but will require current
 // connected device state, meaning they'll need to be implemented where they can also access the
 // device manager.
@@ -222,7 +219,7 @@ impl TryFrom<ButtplugClientMessageV3> for ButtplugCheckedClientMessageV4 {
     match value {
       ButtplugClientMessageV3::Ping(m) => Ok(ButtplugCheckedClientMessageV4::Ping(m.clone())),
       ButtplugClientMessageV3::RequestServerInfo(m) => {
-        Ok(ButtplugCheckedClientMessageV4::RequestServerInfo(m.clone()))
+        Ok(ButtplugCheckedClientMessageV4::RequestServerInfo(RequestServerInfoV4::from(m)))
       }
       ButtplugClientMessageV3::StartScanning(m) => {
         Ok(ButtplugCheckedClientMessageV4::StartScanning(m.clone()))

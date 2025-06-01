@@ -23,7 +23,6 @@ use crate::{
       RawUnsubscribeCmdV2,
       RawWriteCmdV2,
       RequestDeviceListV0,
-      RequestServerInfoV1,
       ScanningFinishedV0,
       StartScanningV0,
       StopAllDevicesV0,
@@ -32,7 +31,7 @@ use crate::{
     },
   },
   server::message::{
-    v1::{LinearCmdV1, RotateCmdV1, VibrateCmdV1},
+    v1::{LinearCmdV1, RequestServerInfoV1, RotateCmdV1, VibrateCmdV1},
     v2::{ButtplugClientMessageV2, ButtplugServerMessageV2, ServerInfoV2},
   },
 };

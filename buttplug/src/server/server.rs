@@ -348,7 +348,7 @@ impl ButtplugServer {
   /// Protocol Spec](https://buttplug-spec.docs.buttplug.io). This is the first thing that must
   /// happens upon connection to the server, in order to make sure the server can speak the same
   /// protocol version as the client.
-  fn perform_handshake(&self, msg: message::RequestServerInfoV1) -> ButtplugServerResultFuture {
+  fn perform_handshake(&self, msg: message::RequestServerInfoV4) -> ButtplugServerResultFuture {
     if self.connected() {
       return ButtplugHandshakeError::HandshakeAlreadyHappened.into();
     }
@@ -356,23 +356,32 @@ impl ButtplugServer {
       return ButtplugHandshakeError::ReconnectDenied.into();
     }
     info!(
-      "Performing server handshake check with client {} at message version {}.",
+      "Performing server handshake check with client {} at message version {}.{}",
       msg.client_name(),
-      msg.message_version()
+      msg.api_version_major(),
+      msg.api_version_minor()
     );
 
-    if BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION < msg.message_version() {
+    if BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION < msg.api_version_major() {
       return ButtplugHandshakeError::MessageSpecVersionMismatch(
         BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
-        msg.message_version(),
+        msg.api_version_major(),
       )
       .into();
     }
 
     // Only start the ping timer after we've received the handshake.
     let ping_timer = self.ping_timer.clone();
+
+    // Due to programming/spec errors in prior versions of the protocol, anything before v4 expected
+    // that it would be back a matching api version of the server. The correct response is to send back whatever the 
+    let output_version = if (msg.api_version_major() as u32) < 4 {
+      msg.api_version_major() 
+    } else {
+      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
+    };
     let out_msg =
-      message::ServerInfoV4::new(&self.server_name, msg.message_version(), 0, self.max_ping_time);
+      message::ServerInfoV4::new(&self.server_name, output_version, 0, self.max_ping_time);
     let connected = self.connected.clone();
     self
       .client_name
@@ -411,7 +420,7 @@ mod test {
   async fn test_server_deny_reuse() {
     let server = ButtplugServerBuilder::default().finish().unwrap();
     let msg =
-      message::RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+      message::RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION, 0);
     let mut reply = server.parse_checked_message(msg.clone().into()).await;
     assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
 

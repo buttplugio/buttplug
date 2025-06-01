@@ -9,20 +9,22 @@ mod device_added;
 mod device_list;
 mod device_message_info;
 mod one_shot_cmd;
-mod value_cmd;
-mod value_with_parameter_cmd;
+mod request_server_info;
 mod sensor_read_cmd;
 mod sensor_reading;
 mod sensor_subscribe_cmd;
 mod sensor_unsubscribe_cmd;
 mod server_info;
 mod spec_enums;
+mod value_cmd;
+mod value_with_parameter_cmd;
 
 pub use {
   device_added::DeviceAddedV4,
   device_list::DeviceListV4,
   device_message_info::DeviceMessageInfoV4,
   one_shot_cmd::OneShotCmdV4,
+  request_server_info::RequestServerInfoV4,
   value_cmd::ValueCmdV4,
   value_with_parameter_cmd::ValueWithParameterCmdV4,
   sensor_read_cmd::SensorReadCmdV4,
