@@ -311,38 +311,45 @@ impl ServerDevice {
     }
 
     let mut stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4> = vec![];
+    // We consider the feature's FeatureType to be the "main" capability of a feature. Use that to
+    // calculate stop commands.
     for (index, feature) in definition.features().iter().enumerate() {
-      if let Some(actuator) = feature.actuator() {
-        if actuator
-          .messages()
-          .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ValueCmd)
-        {
-          stop_commands.push(
-            CheckedValueCmdV4::new(
-              index as u32,
-              0,
-              index as u32,
-              feature.id(),
-              feature.feature_type().clone().try_into().unwrap(),
-              0,
-            )
-            .into(),
-          );
-        } else if actuator.messages().contains(
-          &crate::core::message::ButtplugActuatorFeatureMessageType::ValueWithParameterCmd,
-        ) && feature.feature_type() == FeatureType::RotateWithDirection
-        {
-          stop_commands.push(
-            CheckedValueWithParameterCmdV4::new(
-              0,
-              index as u32,
-              feature.id(),
-              feature.feature_type().clone().try_into().unwrap(),
-              0,
-              0,
-            )
-            .into(),
-          );
+      if let Some(actuator_map) = feature.actuator() {
+        for (actuator_type, actuator) in actuator_map {
+          if FeatureType::try_from(*actuator_type) != Ok(feature.feature_type()) {
+            continue;
+          }
+          if actuator
+            .messages()
+            .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ValueCmd)
+          {
+            stop_commands.push(
+              CheckedValueCmdV4::new(
+                index as u32,
+                0,
+                index as u32,
+                feature.id(),
+                feature.feature_type().clone().try_into().unwrap(),
+                0,
+              )
+              .into(),
+            );
+          } else if actuator.messages().contains(
+            &crate::core::message::ButtplugActuatorFeatureMessageType::ValueWithParameterCmd,
+          ) && feature.feature_type() == FeatureType::RotateWithDirection
+          {
+            stop_commands.push(
+              CheckedValueWithParameterCmdV4::new(
+                0,
+                index as u32,
+                feature.id(),
+                feature.feature_type().clone().try_into().unwrap(),
+                0,
+                0,
+              )
+              .into(),
+            );
+          }
         }
       }
     }

@@ -8,7 +8,7 @@
 use crate::core::message::Endpoint;
 use getset::{Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
-use std::{collections::HashSet, ops::RangeInclusive};
+use std::{collections::{HashMap, HashSet}, ops::RangeInclusive};
 
 use super::{
   ActuatorType,
@@ -111,11 +111,11 @@ pub struct DeviceFeature {
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(rename = "Actuator")]
-  actuator: Option<DeviceFeatureActuator>,
+  actuator: Option<HashMap<ActuatorType, DeviceFeatureActuator>>,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(rename = "Sensor")]
-  sensor: Option<DeviceFeatureSensor>,
+  sensor: Option<HashMap<SensorType, DeviceFeatureSensor>>,
   #[getset(get = "pub")]
   #[serde(rename = "Raw")]
   raw: Option<DeviceFeatureRaw>,
@@ -126,8 +126,8 @@ impl DeviceFeature {
     index: u32,
     description: &str,
     feature_type: FeatureType,
-    actuator: &Option<DeviceFeatureActuator>,
-    sensor: &Option<DeviceFeatureSensor>,
+    actuator: &Option<HashMap<ActuatorType, DeviceFeatureActuator>>,
+    sensor: &Option<HashMap<SensorType, DeviceFeatureSensor>>,
     raw: &Option<DeviceFeatureRaw>,
   ) -> Self {
     Self {

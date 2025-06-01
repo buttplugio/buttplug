@@ -582,7 +582,7 @@ impl DeviceConfigurationManager {
 mod test {
   use super::*;
   use crate::{
-    core::message::{ButtplugActuatorFeatureMessageType, FeatureType},
+    core::message::{ActuatorType, ButtplugActuatorFeatureMessageType, FeatureType},
     server::message::server_device_feature::{ServerDeviceFeature, ServerDeviceFeatureActuator},
   };
   use std::{
@@ -598,6 +598,12 @@ mod test {
       HashSet::new(),
       HashMap::new(),
     ));
+    let mut feature_actuator = HashMap::new();
+    feature_actuator.insert(ActuatorType::Vibrate, ServerDeviceFeatureActuator::new(
+                &RangeInclusive::new(0, 20),
+                &RangeInclusive::new(0, 20),
+                &HashSet::from_iter([ButtplugActuatorFeatureMessageType::ValueCmd]),
+              ));
     builder
       .allow_raw_messages(allow_raw_messages)
       .communication_specifier("lovense", &[specifiers])
@@ -612,11 +618,7 @@ mod test {
               &uuid::Uuid::new_v4(),
               &None,
               FeatureType::Vibrate,
-              &Some(ServerDeviceFeatureActuator::new(
-                &RangeInclusive::new(0, 20),
-                &RangeInclusive::new(0, 20),
-                &HashSet::from_iter([ButtplugActuatorFeatureMessageType::ValueCmd]),
-              )),
+              &Some(feature_actuator.clone()),
               &None,
             ),
             ServerDeviceFeature::new(
@@ -624,11 +626,7 @@ mod test {
               &uuid::Uuid::new_v4(),
               &None,
               FeatureType::Vibrate,
-              &Some(ServerDeviceFeatureActuator::new(
-                &RangeInclusive::new(0, 20),
-                &RangeInclusive::new(0, 20),
-                &HashSet::from_iter([ButtplugActuatorFeatureMessageType::ValueCmd]),
-              )),
+              &Some(feature_actuator.clone()),
               &None,
             ),
           ],

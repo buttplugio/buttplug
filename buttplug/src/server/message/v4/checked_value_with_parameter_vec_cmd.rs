@@ -60,7 +60,12 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedValueWithParameterVecCmdV4 
           .get(x.index() as usize)
           .ok_or(ButtplugDeviceError::DeviceFeatureIndexError(features.len() as u32, x.index() as u32))?
           .feature();
-      let actuator = f.actuator().as_ref().ok_or(ButtplugError::from(ButtplugDeviceError::DeviceFeatureMismatch("Device got LinearCmd command but has no actuators on Linear feature.".to_owned())))?;
+      let actuator = f
+        .actuator()
+        .as_ref()
+        .ok_or(ButtplugError::from(ButtplugDeviceError::DeviceFeatureMismatch("Device got LinearCmd command but has no actuators on Linear feature.".to_owned())))?
+        .get(&crate::core::message::ActuatorType::PositionWithDuration)
+        .ok_or(ButtplugError::from(ButtplugDeviceError::DeviceFeatureMismatch("Device got LinearCmd command but has no actuators on Linear feature.".to_owned())))?;
       cmds.push(CheckedValueWithParameterCmdV4::new(
         msg.device_index(),
         x.index(),
@@ -109,6 +114,10 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedValueWithParameterVecCmdV4 
         .feature()
         .actuator()
         .as_ref()
+        .ok_or(ButtplugError::from(
+          ButtplugDeviceError::DeviceNoActuatorError("RotateCmdV1".to_owned()),
+        ))?
+        .get(&crate::core::message::ActuatorType::RotateWithDirection)
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceNoActuatorError("RotateCmdV1".to_owned()),
         ))?;

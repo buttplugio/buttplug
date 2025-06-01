@@ -74,20 +74,26 @@ impl TryFromDeviceAttributes<SensorSubscribeCmdV4> for CheckedSensorSubscribeCmd
     features: &crate::server::message::ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
     if let Some(feature) = features.features().get(*msg.feature_index() as usize) {
-      if let Some(sensor) = feature.sensor() {
-        if sensor
-          .messages()
-          .contains(&ButtplugSensorFeatureMessageType::SensorSubscribeCmd)
-        {
-          Ok(CheckedSensorSubscribeCmdV4::new(
-            msg.device_index(),
-            *msg.feature_index(),
-            *msg.sensor_type(),
-            feature.id(),
-          ))
+      if let Some(sensor_map) = feature.sensor() {
+        if let Some(sensor) = sensor_map.get(msg.sensor_type()) {
+          if sensor
+            .messages()
+            .contains(&ButtplugSensorFeatureMessageType::SensorSubscribeCmd)
+          {
+            Ok(CheckedSensorSubscribeCmdV4::new(
+              msg.device_index(),
+              *msg.feature_index(),
+              *msg.sensor_type(),
+              feature.id(),
+            ))
+          } else {
+            Err(ButtplugError::from(
+              ButtplugDeviceError::MessageNotSupported("SensorSubscribeCmd".to_string()),
+            ))
+          }
         } else {
           Err(ButtplugError::from(
-            ButtplugDeviceError::MessageNotSupported("SensorSubscribeCmd".to_string()),
+            ButtplugDeviceError::DeviceNoSensorError("SensorSubscribeCmd".to_string()),
           ))
         }
       } else {

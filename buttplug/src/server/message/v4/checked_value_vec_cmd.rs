@@ -9,11 +9,7 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      ButtplugDeviceMessage,
-      ButtplugMessage,
-      ButtplugMessageFinalizer,
-      ButtplugMessageValidator,
-      FeatureType,
+      ActuatorType, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator
     },
   },
   server::message::{
@@ -76,7 +72,13 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedValueVecCmdV4 {
       .features()
       .iter()
       .enumerate()
-      .filter(|(_, feature)| feature.feature_type() == FeatureType::Vibrate)
+      .filter(|(_, feature)| {
+        if let Some(actuator_map) = feature.actuator() {
+          actuator_map.contains_key(&crate::core::message::ActuatorType::Vibrate)
+        } else {
+          false
+        }
+      })
       .peekable();
 
     // Check to make sure we have any vibrate attributes at all.
@@ -86,7 +88,8 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedValueVecCmdV4 {
 
     let mut cmds = vec!();
     for (index, feature) in vibrate_features {
-      let actuator = feature.actuator().as_ref().ok_or(ButtplugError::from(ButtplugDeviceError::DeviceFeatureMismatch("Device got SingleMotorVibrateCmd command but has no actuators on Vibrate Feature.".to_owned())))?;
+      // if we've made it this far, we know we have actuators in a list
+      let actuator = feature.actuator().as_ref().unwrap().get(&ActuatorType::Vibrate).unwrap();
       // This doesn't need to run through a security check because we have to construct it to be
       // inherently secure anyways.
       cmds.push(CheckedValueCmdV4::new(
@@ -147,6 +150,10 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedValueVecCmdV4 {
           .as_ref()
           .ok_or(ButtplugDeviceError::DeviceConfigurationError(
             "Device configuration does not have Vibrate actuator available.".to_owned(),
+          ))?
+          .get(&ActuatorType::Vibrate)
+          .ok_or(ButtplugDeviceError::DeviceConfigurationError(
+            "Device configuration does not have Vibrate actuator available.".to_owned(),
           ))?;
       cmds.push(CheckedValueCmdV4::new(
         msg.id(),
@@ -201,6 +208,10 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedValueVecCmdV4 {
         .feature()
         .actuator()
         .as_ref()
+        .ok_or(ButtplugError::from(
+          ButtplugDeviceError::DeviceNoActuatorError("ScalarCmdV3".to_owned()),
+        ))?
+        .get(&cmd.actuator_type())
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceNoActuatorError("ScalarCmdV3".to_owned()),
         ))?;
