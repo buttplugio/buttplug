@@ -17,7 +17,7 @@ use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 /// List of all devices currently connected to the server.
-#[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage, Getters)]
+#[derive(Default, Clone, Debug, PartialEq, ButtplugMessage, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceListV4 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
