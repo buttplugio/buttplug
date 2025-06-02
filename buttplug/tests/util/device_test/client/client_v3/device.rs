@@ -7,7 +7,7 @@
 
 //! Representation and management of devices connected to the server.
 
-use super::{
+use super::client::{
   create_boxed_future_client_error,
   ButtplugClientMessageSender,
   ButtplugClientResultFuture,

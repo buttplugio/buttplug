@@ -15,13 +15,7 @@ use buttplug::{
   server::{
     connector::ButtplugRemoteServerConnector,
     message::{
-      serializer::ButtplugServerJSONSerializer,
-      ButtplugClientMessageV0,
-      ButtplugClientMessageV1,
-      ButtplugClientMessageV2,
-      ButtplugServerMessageV0,
-      ButtplugServerMessageV1,
-      ButtplugServerMessageV2,
+      serializer::ButtplugServerJSONSerializer, ButtplugClientMessageV0, ButtplugClientMessageV1, ButtplugClientMessageV2, ButtplugClientMessageV3, ButtplugServerMessageV0, ButtplugServerMessageV1, ButtplugServerMessageV2, ButtplugServerMessageV3
     },
   },
 };
@@ -29,6 +23,27 @@ use std::sync::Arc;
 use tokio::sync::{mpsc, Notify};
 
 use self::channel_transport::ChannelTransport;
+
+#[derive(Default)]
+pub struct ButtplugClientJSONSerializerV3 {
+  serializer_impl: ButtplugClientJSONSerializerImpl,
+}
+
+impl ButtplugMessageSerializer for ButtplugClientJSONSerializerV3 {
+  type Inbound = ButtplugServerMessageV3;
+  type Outbound = ButtplugClientMessageV3;
+
+  fn deserialize(
+    &self,
+    msg: &ButtplugSerializedMessage,
+  ) -> Result<Vec<Self::Inbound>, ButtplugSerializerError> {
+    self.serializer_impl.deserialize(msg)
+  }
+
+  fn serialize(&self, msg: &[Self::Outbound]) -> ButtplugSerializedMessage {
+    self.serializer_impl.serialize(msg)
+  }
+}
 
 #[derive(Default)]
 pub struct ButtplugClientJSONSerializerV2 {
@@ -53,6 +68,13 @@ impl ButtplugMessageSerializer for ButtplugClientJSONSerializerV2 {
 
 pub type ChannelClientConnectorCurrent =
   ButtplugRemoteClientConnector<channel_transport::ChannelTransport, ButtplugClientJSONSerializer>;
+
+pub type ChannelClientConnectorV3 = ButtplugRemoteConnector<
+  channel_transport::ChannelTransport,
+  ButtplugClientJSONSerializerV3,
+  ButtplugClientMessageV3,
+  ButtplugServerMessageV3,
+>;
 
 pub type ChannelClientConnectorV2 = ButtplugRemoteConnector<
   channel_transport::ChannelTransport,
@@ -96,6 +118,27 @@ pub fn build_channel_connector(
   ));
   (client_connector, server_connector)
 }
+
+
+pub fn build_channel_connector_v3(
+  notify: &Arc<Notify>,
+) -> (ChannelClientConnectorV3, ChannelServerConnector) {
+  let (server_sender, server_receiver) = mpsc::channel(256);
+  let (client_sender, client_receiver) = mpsc::channel(256);
+
+  let client_connector = ChannelClientConnectorV3::new(ChannelTransport::new(
+    notify,
+    server_sender,
+    client_receiver,
+  ));
+  let server_connector = ChannelServerConnector::new(ChannelTransport::new(
+    notify,
+    client_sender,
+    server_receiver,
+  ));
+  (client_connector, server_connector)
+}
+
 
 pub fn build_channel_connector_v2(
   notify: &Arc<Notify>,
