@@ -33,7 +33,7 @@ pub struct DeviceMessageInfoV3 {
     serde(rename = "DeviceMessageTimingGap")
   )]
   #[getset(get = "pub")]
-  device_message_timing_gap: Option<u32>,
+  device_message_timing_gap: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
   #[getset(get = "pub", get_mut = "pub(super)")]
   device_messages: ClientDeviceMessageAttributesV3,
@@ -44,14 +44,14 @@ impl DeviceMessageInfoV3 {
     device_index: u32,
     device_name: &str,
     device_display_name: &Option<String>,
-    device_message_timing_gap: &Option<u32>,
+    device_message_timing_gap: u32,
     device_messages: ClientDeviceMessageAttributesV3,
   ) -> Self {
     Self {
       device_index,
       device_name: device_name.to_owned(),
       device_display_name: device_display_name.clone(),
-      device_message_timing_gap: *device_message_timing_gap,
+      device_message_timing_gap: device_message_timing_gap,
       device_messages,
     }
   }
@@ -63,7 +63,7 @@ impl From<DeviceAddedV3> for DeviceMessageInfoV3 {
       device_index: device_added.device_index(),
       device_name: device_added.device_name().clone(),
       device_display_name: device_added.device_display_name().clone(),
-      device_message_timing_gap: *device_added.device_message_timing_gap(),
+      device_message_timing_gap: device_added.device_message_timing_gap(),
       device_messages: device_added.device_messages().clone(),
     }
   }
@@ -86,7 +86,7 @@ impl From<DeviceMessageInfoV4> for DeviceMessageInfoV3 {
       value.device_index(),
       value.device_name(),
       value.device_display_name(),
-      &None,
+      value.device_message_timing_gap(),
       value.device_features().clone().into(),
     )
   }

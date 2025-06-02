@@ -31,7 +31,7 @@ pub struct DeviceMessageInfoV4 {
     feature = "serialize-json",
     serde(rename = "DeviceMessageTimingGap")
   )]
-  #[getset(get = "pub")]
+  #[getset(get_copy = "pub")]
   device_message_timing_gap: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceFeatures"))]
   #[getset(get = "pub", get_mut = "pub(super)")]
@@ -62,7 +62,7 @@ impl From<DeviceAddedV4> for DeviceMessageInfoV4 {
       device_index: device_added.device_index(),
       device_name: device_added.device_name().clone(),
       device_display_name: device_added.device_display_name().clone(),
-      device_message_timing_gap: *device_added.device_message_timing_gap(),
+      device_message_timing_gap: device_added.device_message_timing_gap(),
       device_features: device_added.device_features().clone(),
     }
   }
