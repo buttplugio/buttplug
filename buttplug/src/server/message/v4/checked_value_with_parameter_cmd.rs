@@ -100,7 +100,7 @@ impl TryFromDeviceAttributes<ValueWithParameterCmdV4> for CheckedValueWithParame
         // Check to make sure the level is within the range of the feature.
         if actuator
           .messages()
-          .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ValueCmd)
+          .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ValueWithParameterCmd)
         {
           if !actuator.step_limit().contains(&level) {
             Err(ButtplugError::from(
@@ -125,17 +125,17 @@ impl TryFromDeviceAttributes<ValueWithParameterCmdV4> for CheckedValueWithParame
           }
         } else {
           Err(ButtplugError::from(
-            ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::ValueCmd.to_string()),
+            ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::ValueWithParameterCmd.to_string()),
           ))
         }
       } else {
         Err(ButtplugError::from(
-          ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::ValueCmd.to_string()),
+          ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::ValueWithParameterCmd.to_string()),
         ))
       }
     } else {
       Err(ButtplugError::from(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::ValueCmd.to_string()),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::ValueWithParameterCmd.to_string()),
       ))
     }
   }
