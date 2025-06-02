@@ -76,8 +76,10 @@ impl TryFrom<i32> for ButtplugMessageSpecVersion {
 pub const BUTTPLUG_SERVER_EVENT_ID: u32 = 0;
 
 /// The current latest version of the spec implemented by the library.
-pub const BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION: ButtplugMessageSpecVersion =
+pub const BUTTPLUG_CURRENT_API_MAJOR_VERSION: ButtplugMessageSpecVersion =
   ButtplugMessageSpecVersion::Version4;
+
+pub const BUTTPLUG_CURRENT_API_MINOR_VERSION: u32 = 0;
 
 pub trait ButtplugMessageFinalizer {
   fn finalize(&mut self) {

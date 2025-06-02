@@ -5,11 +5,8 @@ use crate::{
       ButtplugMessageSerializer,
       ButtplugSerializedMessage,
       ButtplugSerializerError,
-    },
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
+    }, ButtplugClientMessageV4, ButtplugMessage, ButtplugMessageFinalizer, ButtplugServerMessageV4
   },
-  server::message::{ButtplugClientMessageV3, ButtplugServerMessageV3},
 };
 use jsonschema::Validator;
 use serde::{Deserialize, Serialize};
@@ -56,8 +53,8 @@ pub struct ButtplugClientJSONSerializer {
 }
 
 impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
-  type Inbound = ButtplugServerMessageV3;
-  type Outbound = ButtplugClientMessageV3;
+  type Inbound = ButtplugServerMessageV4;
+  type Outbound = ButtplugClientMessageV4;
 
   fn deserialize(
     &self,
@@ -74,7 +71,7 @@ impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
 #[cfg(test)]
 mod test {
   use super::*;
-  use crate::core::message::{RequestServerInfoV1, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION};
+  use crate::core::message::{RequestServerInfoV4, BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION};
 
   #[test]
   fn test_client_incorrect_messages() {
@@ -99,11 +96,11 @@ mod test {
       "[{\"Ok\":{\"NotAField\":\"NotAValue\",\"Id\":1}}]",
     ];
     let serializer = ButtplugClientJSONSerializer::default();
-    let _ = serializer.serialize(&vec![RequestServerInfoV1::new(
+    let _ = serializer.serialize(&vec![RequestServerInfoV4::new(
       "test client",
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
-    )
-    .into()]);
+      BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+      BUTTPLUG_CURRENT_API_MINOR_VERSION
+    ).into()]);
     for msg in incorrect_incoming_messages {
       let res = serializer.deserialize(&ButtplugSerializedMessage::Text(msg.to_owned()));
       assert!(res.is_err(), "{} should be an error", msg);

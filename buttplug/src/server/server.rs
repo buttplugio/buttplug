@@ -27,7 +27,7 @@ use crate::{
       ErrorV0,
       StopAllDevicesV0,
       StopScanningV0,
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      BUTTPLUG_CURRENT_API_MAJOR_VERSION,
     },
   },
   server::message::spec_enums::{
@@ -362,9 +362,9 @@ impl ButtplugServer {
       msg.api_version_minor()
     );
 
-    if BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION < msg.api_version_major() {
+    if BUTTPLUG_CURRENT_API_MAJOR_VERSION < msg.api_version_major() {
       return ButtplugHandshakeError::MessageSpecVersionMismatch(
-        BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
         msg.api_version_major(),
       )
       .into();
@@ -378,7 +378,7 @@ impl ButtplugServer {
     let output_version = if (msg.api_version_major() as u32) < 4 {
       msg.api_version_major() 
     } else {
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
+      BUTTPLUG_CURRENT_API_MAJOR_VERSION
     };
     let out_msg =
       message::ServerInfoV4::new(&self.server_name, output_version, 0, self.max_ping_time);
@@ -413,14 +413,14 @@ impl ButtplugServer {
 #[cfg(test)]
 mod test {
   use crate::{
-    core::message::{self, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
+    core::message::{self, BUTTPLUG_CURRENT_API_MAJOR_VERSION},
     server::ButtplugServerBuilder,
   };
   #[tokio::test]
   async fn test_server_deny_reuse() {
     let server = ButtplugServerBuilder::default().finish().unwrap();
     let msg =
-      message::RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION, 0);
+      message::RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, 0);
     let mut reply = server.parse_checked_message(msg.clone().into()).await;
     assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
 
