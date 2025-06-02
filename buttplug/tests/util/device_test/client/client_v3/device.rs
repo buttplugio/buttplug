@@ -12,7 +12,7 @@ use super::{
   ButtplugClientMessageSender,
   ButtplugClientResultFuture,
 };
-use crate::{
+use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
@@ -55,6 +55,7 @@ use std::{
     Arc,
   },
 };
+use log::*;
 use tokio::sync::broadcast;
 
 /// Enum for messages going to a [ButtplugClientDevice] instance.

@@ -26,7 +26,7 @@ use super::super::{
 };
 use futures::StreamExt;
 use std::{sync::Arc, time::Duration};
-use tracing::*;
+use log::*;
 
 async fn run_test_client_command(command: &TestClientCommand, device: &Arc<ButtplugClientDevice>) {
   use TestClientCommand::*;

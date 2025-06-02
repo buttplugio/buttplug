@@ -34,7 +34,7 @@ use std::{
   time::{SystemTime, UNIX_EPOCH},
 };
 use tokio::sync::mpsc::Sender;
-use tracing::*;
+use log::*;
 
 pub fn generate_address() -> String {
   info!("Generating random address for test device");

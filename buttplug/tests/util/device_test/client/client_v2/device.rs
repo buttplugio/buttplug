@@ -58,7 +58,7 @@ use std::{
   },
 };
 use tokio::sync::broadcast;
-use tracing::*;
+use log::*;
 use tracing_futures::Instrument;
 
 /// Enum for messages going to a [ButtplugClientDevice] instance.

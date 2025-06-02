@@ -22,7 +22,7 @@ use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError},
     message::{
-      ButtplugMessageSpecVersion, ButtplugServerMessageV4, Endpoint, ErrorCode, PingV0, RequestServerInfoV1, ServerInfoV4, StartScanningV0, ValueCmdV4, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
+      ButtplugClientMessageV4, ButtplugMessageSpecVersion, ButtplugServerMessageV4, Endpoint, ErrorCode, PingV0, RequestServerInfoV4, ServerInfoV4, StartScanningV0, ValueCmdV4, BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION
     },
   },
   server::{
@@ -31,7 +31,7 @@ use buttplug::{
       ServerDeviceManagerBuilder,
     },
     message::{
-      checked_value_cmd::CheckedValueCmdV4, spec_enums::ButtplugCheckedClientMessageV4, ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageV2, ButtplugServerMessageV3, ButtplugServerMessageVariant, ServerInfoV2, VibrateCmdV1
+      checked_value_cmd::CheckedValueCmdV4, spec_enums::ButtplugCheckedClientMessageV4, ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageV2, ButtplugServerMessageV3, ButtplugServerMessageVariant, RequestServerInfoV1, ServerInfoV2, VibrateCmdV1
     },
     ButtplugServer,
     ButtplugServerBuilder,
@@ -43,7 +43,7 @@ use std::time::Duration;
 use tokio::time::sleep;
 
 async fn setup_test_server(
-  msg_union: ButtplugClientMessageV3,
+  msg_union: ButtplugClientMessageV4,
 ) -> (
   ButtplugServer,
   impl Stream<Item = ButtplugServerMessageVariant>,
@@ -67,7 +67,7 @@ async fn setup_test_server(
 
 #[tokio::test]
 async fn test_server_handshake() {
-  let msg = RequestServerInfoV1::new("Test Client", ButtplugMessageSpecVersion::Version3).into();
+  let msg = RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION).into();
   let (server, _recv) = setup_test_server(msg).await;
   assert!(server.connected());
 }
@@ -145,7 +145,7 @@ async fn test_ping_timeout() {
     .expect("Test, assuming infallible.");
   let recv = server.event_stream();
   pin_mut!(recv);
-  let msg = RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+  let msg = RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION);
   sleep(Duration::from_millis(150)).await;
   let reply = server
     .parse_checked_message(ButtplugCheckedClientMessageV4::RequestServerInfo(msg))
@@ -192,7 +192,7 @@ async fn test_device_stop_on_ping_timeout() {
   let recv = server.server_version_event_stream();
   pin_mut!(recv);
 
-  let msg = RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+  let msg = RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION);
   let mut reply = server
     .parse_checked_message(ButtplugCheckedClientMessageV4::from(msg))
     .await;
@@ -257,15 +257,15 @@ async fn test_device_stop_on_ping_timeout() {
 
 #[tokio::test]
 async fn test_repeated_handshake() {
-  let msg = RequestServerInfoV1::new("Test Client", ButtplugMessageSpecVersion::Version3);
+  let msg = RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION);
 
   let (server, _recv) = setup_test_server((msg.clone()).into()).await;
   assert!(server.connected());
   let err = server
-    .parse_message(ButtplugClientMessageVariant::V3(msg.into()))
+    .parse_message(ButtplugClientMessageVariant::V4(msg.into()))
     .await
     .unwrap_err();
-  if let ButtplugServerMessageVariant::V3(ButtplugServerMessageV3::Error(e)) = err {
+  if let ButtplugServerMessageVariant::V4(ButtplugServerMessageV4::Error(e)) = err {
     assert!(matches!(
       e.original_error(),
       ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError::HandshakeAlreadyHappened)
@@ -277,7 +277,7 @@ async fn test_repeated_handshake() {
 
 #[tokio::test]
 async fn test_invalid_device_index() {
-  let msg = RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+  let msg = RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION);
   let (server, _) = setup_test_server(msg.into()).await;
   let err = server
     .parse_message(ButtplugClientMessageVariant::V4(
@@ -307,7 +307,7 @@ async fn test_device_index_generation() {
   pin_mut!(recv);
   assert!(server
     .parse_checked_message(
-      RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
+      RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION).into()
     )
     .await
     .is_ok());
@@ -352,7 +352,7 @@ async fn test_server_scanning_finished() {
   pin_mut!(recv);
   assert!(server
     .parse_checked_message(
-      RequestServerInfoV1::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
+      RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION).into()
     )
     .await
     .is_ok());

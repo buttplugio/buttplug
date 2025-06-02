@@ -19,7 +19,7 @@ use std::sync::{
   atomic::{AtomicU32, Ordering},
   Arc,
 };
-use tracing::*;
+use log::*;
 
 /// Message sorting and pairing for remote client connectors.
 ///

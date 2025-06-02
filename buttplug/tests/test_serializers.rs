@@ -13,7 +13,7 @@ use buttplug::{
     connector::transport::ButtplugTransportIncomingMessage,
     errors::{ButtplugError, ButtplugUnknownError},
     message::{
-      serializer::ButtplugSerializedMessage, ButtplugClientMessageV4, ButtplugMessage, ButtplugServerMessageV4, ErrorV0, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
+      serializer::ButtplugSerializedMessage, ButtplugClientMessageV4, ButtplugMessage, ButtplugServerMessageV4, ErrorV0, BUTTPLUG_CURRENT_API_MAJOR_VERSION
     },
   },
   server::message::{
@@ -54,7 +54,7 @@ async fn test_garbled_client_rsi_response() {
     .await;
   helper
     .send_client_incoming(ButtplugServerMessageVariant::V3(
-      ServerInfoV2::new("test server", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION, 0).into(),
+      ServerInfoV2::new("test server", BUTTPLUG_CURRENT_API_MAJOR_VERSION, 0).into(),
     ))
     .await;
   let _ = helper.recv_outgoing().await;

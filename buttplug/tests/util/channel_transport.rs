@@ -21,18 +21,15 @@ use buttplug::{
       ButtplugConnectorError,
     },
     message::{
-      serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage}, ButtplugClientMessageV4, ButtplugMessage, DeviceListV4, RequestServerInfoV1, ServerInfoV4, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
+      serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage}, ButtplugClientMessageV4, ButtplugMessage, DeviceListV4, RequestServerInfoV4, ServerInfoV4, BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION
     },
   },
   server::{
     connector::ButtplugRemoteServerConnector,
     message::{
       serializer::ButtplugServerJSONSerializer,
-      ButtplugClientMessageV3,
       ButtplugClientMessageVariant,
       ButtplugServerMessageVariant,
-      DeviceListV3,
-      ServerInfoV2,
     },
   },
   util::async_manager,
@@ -48,7 +45,7 @@ use tokio::sync::{
   Mutex,
   Notify,
 };
-use tracing::*;
+use log::*;
 
 struct ChannelTransport {
   outside_receiver: Arc<Mutex<Option<Receiver<ButtplugTransportIncomingMessage>>>>,
@@ -145,9 +142,10 @@ impl ChannelClientTestHelper {
       outgoing_sender,
     )))));
     let client_serializer = ButtplugClientJSONSerializer::default();
-    let rsi_setup_msg = client_serializer.serialize(&[RequestServerInfoV1::new(
+    let rsi_setup_msg = client_serializer.serialize(&[RequestServerInfoV4::new(
       "Test client",
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+      BUTTPLUG_CURRENT_API_MINOR_VERSION
     )
     .into()]);
     let server_serializer = ButtplugServerJSONSerializer::default();
@@ -202,7 +200,7 @@ impl ChannelClientTestHelper {
     // Just assume we get an RSI message
     self
       .send_client_incoming(ButtplugServerMessageVariant::V4(
-        ServerInfoV4::new("test server", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION, 0, 0).into(),
+        ServerInfoV4::new("test server", BUTTPLUG_CURRENT_API_MAJOR_VERSION, 0, 0).into(),
       ))
       .await;
     // Wait for RequestDeviceList message.
@@ -257,7 +255,7 @@ impl ChannelClientTestHelper {
       .await;
   }
 
-  pub async fn send_server_incoming(&self, msg: ButtplugClientMessageV3) {
+  pub async fn send_server_incoming(&self, msg: ButtplugClientMessageV4) {
     self
       .send_incoming(ButtplugTransportIncomingMessage::Message(
         self.client_serializer.serialize(&[msg]),
@@ -337,7 +335,7 @@ impl ChannelServerTestHelper {
       .await;
   }
 
-  pub async fn send_server_incoming(&self, msg: ButtplugClientMessageV3) {
+  pub async fn send_server_incoming(&self, msg: ButtplugClientMessageV4) {
     self
       .send_incoming(ButtplugTransportIncomingMessage::Message(
         self.client_serializer.serialize(&[msg]),

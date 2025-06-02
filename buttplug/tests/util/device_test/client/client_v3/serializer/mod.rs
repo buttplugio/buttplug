@@ -1,4 +1,4 @@
-use crate::{
+use buttplug::{
   core::message::{
     serializer::{
       json_serializer::{create_message_validator, deserialize_to_message, vec_to_protocol_json},
@@ -68,48 +68,5 @@ impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
 
   fn serialize(&self, msg: &[Self::Outbound]) -> ButtplugSerializedMessage {
     self.serializer_impl.serialize(msg)
-  }
-}
-
-#[cfg(test)]
-mod test {
-  use super::*;
-  use crate::core::message::{RequestServerInfoV1, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION};
-
-  #[test]
-  fn test_client_incorrect_messages() {
-    let incorrect_incoming_messages = vec![
-      // Not valid JSON
-      "not a json message",
-      // Valid json object but no contents
-      "{}",
-      // Valid json but not an object
-      "[]",
-      // Not a message type
-      "[{\"NotAMessage\":{}}]",
-      // Valid json and message type but not in correct format
-      "[{\"Ok\":[]}]",
-      // Valid json and message type but not in correct format
-      "[{\"Ok\":{}}]",
-      // Valid json and message type but not an array.
-      "{\"Ok\":{\"Id\":0}}",
-      // Valid json and message type but not an array.
-      "[{\"Ok\":{\"Id\":0}}]",
-      // Valid json and message type but with extra content
-      "[{\"Ok\":{\"NotAField\":\"NotAValue\",\"Id\":1}}]",
-    ];
-    let serializer = ButtplugClientJSONSerializer::default();
-    let _ = serializer.serialize(&vec![RequestServerInfoV1::new(
-      "test client",
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
-    )
-    .into()]);
-    for msg in incorrect_incoming_messages {
-      let res = serializer.deserialize(&ButtplugSerializedMessage::Text(msg.to_owned()));
-      assert!(res.is_err(), "{} should be an error", msg);
-      if let Err(ButtplugSerializerError::MessageSpecVersionNotReceived) = res {
-        assert!(false, "Wrong error!");
-      }
-    }
   }
 }

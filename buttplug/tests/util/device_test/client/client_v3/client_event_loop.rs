@@ -14,7 +14,7 @@ use super::{
   ButtplugClientMessageFuturePair,
   ButtplugClientMessageSender,
 };
-use crate::{
+use buttplug::{
   core::{
     connector::{ButtplugConnector, ButtplugConnectorStateShared},
     errors::{ButtplugDeviceError, ButtplugError},
@@ -33,7 +33,8 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
-use tokio::sync::{broadcast, mpsc};
+use tokio::{select, sync::{broadcast, mpsc}};
+use log::*;
 
 /// Enum used for communication from the client to the event loop.
 #[derive(Clone)]
