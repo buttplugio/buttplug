@@ -175,7 +175,7 @@ impl ButtplugClientDevice {
       .send_message_expect_ok(ValueCmdV4::new(self.index, x.feature_index(), actuator_type, value).into()))
       .collect();
     async move {
-      futures::future::try_join_all(fut_vec).await.map_err(|e| ButtplugError::from(ButtplugDeviceError::DeviceConnectionError(format!("{:?}", e))))?;
+      futures::future::try_join_all(fut_vec).await?;
       Ok(())
     }.boxed()
   }
