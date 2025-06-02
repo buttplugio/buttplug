@@ -29,7 +29,7 @@ use std::sync::{
   Arc,
 };
 use tokio::sync::mpsc::{channel, Sender};
-use tracing::*;
+use log::*;
 use tracing_futures::Instrument;
 
 #[derive(Default)]

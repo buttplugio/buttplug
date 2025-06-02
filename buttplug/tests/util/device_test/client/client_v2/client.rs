@@ -9,6 +9,7 @@
 
 use super::client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
 use super::device::ButtplugClientDevice;
+use buttplug::server::message::RequestServerInfoV1;
 use buttplug::{
   core::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
@@ -17,7 +18,6 @@ use buttplug::{
       ButtplugMessageSpecVersion,
       PingV0,
       RequestDeviceListV0,
-      RequestServerInfoV1,
       StartScanningV0,
       StopAllDevicesV0,
       StopScanningV0,
@@ -41,7 +41,8 @@ use std::sync::{
 };
 use thiserror::Error;
 use tokio::sync::{broadcast, mpsc, Mutex};
-use tracing::*;
+use log::*;
+use tracing::{span, Span, Level};
 use tracing_futures::Instrument;
 
 /// Result type used for public APIs.

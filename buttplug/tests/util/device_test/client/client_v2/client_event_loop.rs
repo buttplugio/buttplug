@@ -31,7 +31,7 @@ use std::sync::{
   Arc,
 };
 use tokio::sync::{broadcast, mpsc};
-use tracing::*;
+use log::*;
 
 /// Enum used for communication from the client to the event loop.
 #[derive(Clone)]

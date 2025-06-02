@@ -12,21 +12,15 @@ pub mod connector;
 pub mod device;
 pub mod serializer;
 
-use crate::{
+use buttplug::{
   core::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
     errors::{ButtplugError, ButtplugHandshakeError},
     message::{
-      PingV0,
-      RequestDeviceListV0,
-      RequestServerInfoV1,
-      StartScanningV0,
-      StopAllDevicesV0,
-      StopScanningV0,
-      ButtplugMessageSpecVersion,
+      ButtplugMessageSpecVersion, PingV0, RequestDeviceListV0, StartScanningV0, StopAllDevicesV0, StopScanningV0
     },
   },
-  server::message::{ButtplugClientMessageV3, ButtplugServerMessageV3},
+  server::message::{ButtplugClientMessageV3, ButtplugServerMessageV3, RequestServerInfoV1},
   util::{
     async_manager,
     future::{ButtplugFuture, ButtplugFutureStateShared},
@@ -47,6 +41,8 @@ use std::sync::{
 use thiserror::Error;
 use tokio::sync::{broadcast, mpsc, Mutex};
 use tracing_futures::Instrument;
+use log::*;
+
 
 /// Result type used for public APIs.
 ///

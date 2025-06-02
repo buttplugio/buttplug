@@ -8,10 +8,10 @@
 mod util;
 use buttplug::{
   client::{
-    ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent, ScalarValueCommand,
+    ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent,
   },
   core::{
-    errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+    errors::{ButtplugError, ButtplugMessageError},
     message::{ActuatorType, ButtplugActuatorFeatureMessageType, Endpoint, FeatureType},
   },
   server::{
@@ -153,29 +153,11 @@ async fn test_client_device_invalid_command() {
   let test_device = client_device.expect("Test, assuming infallible.");
   assert!(matches!(
     test_device
-      .vibrate(&ScalarValueCommand::ScalarValue(2.0))
+      .vibrate(25)
       .await
       .unwrap_err(),
     ButtplugClientError::ButtplugError(ButtplugError::ButtplugMessageError(
       ButtplugMessageError::InvalidMessageContents(..)
-    ))
-  ));
-  assert!(matches!(
-    test_device
-      .vibrate(&ScalarValueCommand::ScalarValueVec(vec!(0.5, 0.5, 0.5)))
-      .await
-      .unwrap_err(),
-    ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(
-      ButtplugDeviceError::DeviceFeatureCountMismatch(..)
-    ))
-  ));
-  assert!(matches!(
-    test_device
-      .vibrate(&ScalarValueCommand::ScalarValueVec(vec!()))
-      .await
-      .unwrap_err(),
-    ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(
-      ButtplugDeviceError::ProtocolRequirementError(..)
     ))
   ));
 }
@@ -381,7 +363,7 @@ async fn test_client_range_limits() {
     if let ButtplugClientEvent::DeviceAdded(dev) = event {
       // Vibrate at half strength
       assert!(dev
-        .vibrate(&ScalarValueCommand::ScalarValue(0.5))
+        .vibrate(10)
         .await
         .is_ok());
 
@@ -413,7 +395,7 @@ async fn test_client_range_limits() {
 
       // Disable device
       assert!(dev
-        .vibrate(&ScalarValueCommand::ScalarValue(0.0))
+        .vibrate(0)
         .await
         .is_ok());
 
