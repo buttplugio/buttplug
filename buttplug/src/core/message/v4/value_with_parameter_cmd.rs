@@ -24,9 +24,9 @@ pub struct ValueWithParameterCmdV4 {
   feature_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "ActuatorType"))]
   actuator_type: ActuatorType,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Duration"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Value"))]
   value: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Position"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Parameter"))]
   parameter: i32,
 }
 

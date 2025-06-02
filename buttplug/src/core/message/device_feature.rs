@@ -105,7 +105,7 @@ pub struct DeviceFeature {
   feature_index: u32,
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(default)]
-  #[serde(rename="Description")]
+  #[serde(rename="FeatureDescription")]
   description: String,
   #[getset(get = "pub")]
   #[serde(rename = "FeatureType")]
@@ -120,6 +120,7 @@ pub struct DeviceFeature {
   sensor: Option<HashMap<SensorType, DeviceFeatureSensor>>,
   #[getset(get = "pub")]
   #[serde(rename = "Raw")]
+  #[serde(skip_serializing_if="Option::is_none")]
   raw: Option<DeviceFeatureRaw>,
 }
 
