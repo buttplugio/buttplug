@@ -7,7 +7,7 @@
 
 //! Handling of remote message pairing and future resolution.
 
-use super::{
+use super::client::{
   ButtplugClientError,
   ButtplugClientMessageFuturePair,
   ButtplugServerMessageStateShared,

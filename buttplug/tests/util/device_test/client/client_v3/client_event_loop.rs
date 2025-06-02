@@ -11,8 +11,7 @@ use super::{
   client_message_sorter::ClientMessageSorter,
   device::{ButtplugClientDevice, ButtplugClientDeviceEvent},
   ButtplugClientEvent,
-  ButtplugClientMessageFuturePair,
-  ButtplugClientMessageSender,
+  client::{ButtplugClientMessageFuturePair, ButtplugClientMessageSender},
 };
 use buttplug::{
   core::{
