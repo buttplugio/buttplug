@@ -136,6 +136,7 @@ async fn test_client_device_connected_no_event_listener() {
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_client_device_invalid_command() {
+  use buttplug::core::errors::ButtplugDeviceError;
   let (client, _) = test_client_with_device().await;
 
   let mut event_stream = client.event_stream();
@@ -151,13 +152,14 @@ async fn test_client_device_invalid_command() {
     }
   }
   let test_device = client_device.expect("Test, assuming infallible.");
+
   assert!(matches!(
     test_device
-      .vibrate(25)
+      .vibrate(1000)
       .await
       .unwrap_err(),
-    ButtplugClientError::ButtplugError(ButtplugError::ButtplugMessageError(
-      ButtplugMessageError::InvalidMessageContents(..)
+    ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(
+      ButtplugDeviceError::DeviceStepRangeError(..)
     ))
   ));
 }
@@ -190,7 +192,7 @@ async fn test_client_repeated_deviceadded_message() {
       1,
       "Test Device",
       &None,
-      &None,
+      0,
       &vec!(),
     );
     helper_clone
@@ -229,8 +231,7 @@ async fn test_client_repeated_deviceremoved_message() {
   use buttplug::{
     core::message::{DeviceRemovedV0, OkV0},
     server::message::{
-      ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageVariant,
-      ClientDeviceMessageAttributesV3, DeviceAddedV3,
+      ButtplugClientMessageVariant, ButtplugServerMessageVariant,
     },
   };
 
@@ -239,11 +240,11 @@ async fn test_client_repeated_deviceremoved_message() {
   let helper_clone = helper.clone();
   let mut event_stream = helper.client().event_stream();
   async_manager::spawn(async move {
-    use buttplug::core::message::DeviceAddedV4;
+    use buttplug::core::message::{ButtplugClientMessageV4, DeviceAddedV4};
 
     assert!(matches!(
       helper_clone.next_client_message().await,
-      ButtplugClientMessageVariant::V3(ButtplugClientMessageV3::StartScanning(..))
+      ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::StartScanning(..))
     ));
     helper_clone
       .send_client_incoming(ButtplugServerMessageVariant::V4(OkV0::new(3).into()))
@@ -252,7 +253,7 @@ async fn test_client_repeated_deviceremoved_message() {
       1,
       "Test Device",
       &None,
-      &None,
+      0,
       &vec!()
     );
     let device_removed = DeviceRemovedV0::new(1);
@@ -363,7 +364,7 @@ async fn test_client_range_limits() {
     if let ButtplugClientEvent::DeviceAdded(dev) = event {
       // Vibrate at half strength
       assert!(dev
-        .vibrate(10)
+        .vibrate(32)
         .await
         .is_ok());
 
