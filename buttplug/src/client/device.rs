@@ -15,20 +15,9 @@ use super::{
 };
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+    errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError, ButtplugUnknownError},
     message::{
-      ButtplugClientMessageV4,
-      ButtplugServerMessageV4,
-      DeviceFeature,
-      DeviceMessageInfoV4,
-      Endpoint,
-      FeatureType,
-      ValueCmdV4,
-      RawReadCmdV2,
-      RawSubscribeCmdV2,
-      RawUnsubscribeCmdV2,
-      RawWriteCmdV2,
-      StopDeviceCmdV0,
+      ActuatorType, ButtplugClientMessageV4, ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4, Endpoint, FeatureType, RawReadCmdV2, RawSubscribeCmdV2, RawUnsubscribeCmdV2, RawWriteCmdV2, StopDeviceCmdV0, ValueCmdV4
     },
   },
   util::stream::convert_broadcast_receiver_to_stream,
@@ -164,35 +153,42 @@ impl ButtplugClientDevice {
     )))
   }
 
-  fn filter_device_features(&self, feature_type: FeatureType) -> Vec<ClientDeviceFeature> {
+  fn filter_device_actuators(&self, actuator_type: ActuatorType) -> Vec<ClientDeviceFeature> {
     self
       .device_features
       .iter()
-      .filter(|x| *x.feature().feature_type() == feature_type)
+      .filter(|x| x.feature().actuator().as_ref().ok_or(false).unwrap().contains_key(&actuator_type))
       .cloned()
       .collect()
   }
 
-  fn set_value(&self, feature_type: FeatureType, value: i32) -> ButtplugClientResultFuture {
-    let features = self.filter_device_features(feature_type);
+  fn set_value(&self, actuator_type: ActuatorType, value: u32) -> ButtplugClientResultFuture {
+    let features = self.filter_device_actuators(actuator_type);
     if features.is_empty() {
       // TODO err
     }
-    let subcommands = features.iter().map(|x| x.value_subcommand(value)).collect();
-    let command = ValueCmdV4::new(self.index, subcommands);
-    self
+    let fut_vec: Vec<ButtplugClientResultFuture> = features
+      .iter()
+      .map(|x| 
+        self
       .event_loop_sender
-      .send_message_expect_ok(command.into())
+      .send_message_expect_ok(ValueCmdV4::new(self.index, x.feature_index(), actuator_type, value).into()))
+      .collect();
+    async move {
+      futures::future::try_join_all(fut_vec).await.map_err(|e| ButtplugError::from(ButtplugDeviceError::DeviceConnectionError(format!("{:?}", e))))?;
+      Ok(())
+    }.boxed()
   }
 
   pub fn vibrate_features(&self) -> Vec<ClientDeviceFeature> {
-    self.filter_device_features(FeatureType::Vibrate)
+    self.filter_device_actuators(ActuatorType::Vibrate)
   }
 
   /// Commands device to vibrate, assuming it has the features to do so.
   pub fn vibrate(&self, speed: u32) -> ButtplugClientResultFuture {
-    self.set_value(FeatureType::Vibrate, speed as i32)
+    self.set_value(ActuatorType::Vibrate, speed)
   }
+
 
   pub fn has_battery_level(&self) -> bool {
     self

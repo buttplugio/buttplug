@@ -22,11 +22,11 @@ use crate::{
       ButtplugServerMessageV4,
       PingV0,
       RequestDeviceListV0,
-      RequestServerInfoV1,
+      RequestServerInfoV4,
       StartScanningV0,
       StopAllDevicesV0,
       StopScanningV0,
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION,
     },
   },
   util::{
@@ -37,7 +37,7 @@ use crate::{
 };
 use client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
 use dashmap::DashMap;
-pub use device::ButtplugClientDevice;
+pub use device::{ButtplugClientDevice, ButtplugClientDeviceEvent};
 use futures::{
   future::{self, BoxFuture, FutureExt},
   Stream,
@@ -199,8 +199,8 @@ impl ButtplugClientMessageSender {
     }
   }
 
-  /// Sends a ButtplugMessage from client to server. Expects to receive a
-  /// ButtplugMessage back from the server.
+  /// Sends a ButtplugMessage from client to server. Expects to receive a ButtplugMessage back from
+  /// the server.
   pub fn send_message_ignore_connect_status(
     &self,
     msg: ButtplugClientMessageV4,
@@ -330,7 +330,7 @@ impl ButtplugClient {
     let msg = self
       .message_sender
       .send_message_ignore_connect_status(
-        RequestServerInfoV1::new(&self.client_name, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into(),
+        RequestServerInfoV4::new(&self.client_name, BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION).into(),
       )
       .await?;
 

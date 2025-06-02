@@ -10,11 +10,11 @@ pub use in_process_connector::{
 #[cfg(all(feature = "websockets", feature = "serialize-json"))]
 use crate::{
   client::serializer::ButtplugClientJSONSerializer,
-  core::connector::{ButtplugConnector, ButtplugWebsocketClientTransport},
+  core::{connector::{ButtplugConnector, ButtplugWebsocketClientTransport}},
 };
-use crate::{
-  core::connector::ButtplugRemoteConnector,
-  server::message::{ButtplugClientMessageV3, ButtplugServerMessageV3},
+use crate::core::{
+  connector::ButtplugRemoteConnector,
+  message::{ButtplugClientMessageV4, ButtplugServerMessageV4}
 };
 
 /// Convenience method for creating a new Buttplug Client Websocket connector that uses the JSON
@@ -23,7 +23,7 @@ use crate::{
 #[cfg(all(feature = "websockets", feature = "serialize-json"))]
 pub fn new_json_ws_client_connector(
   address: &str,
-) -> impl ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3> {
+) -> impl ButtplugConnector<ButtplugClientMessageV4, ButtplugServerMessageV4> {
   ButtplugRemoteClientConnector::<
       ButtplugWebsocketClientTransport,
       ButtplugClientJSONSerializer,
@@ -38,6 +38,6 @@ pub type ButtplugRemoteClientConnector<
 > = ButtplugRemoteConnector<
   TransportType,
   SerializerType,
-  ButtplugClientMessageV3,
-  ButtplugServerMessageV3,
+  ButtplugClientMessageV4,
+  ButtplugServerMessageV4,
 >;
