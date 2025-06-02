@@ -107,7 +107,7 @@ impl TryFromDeviceAttributes<ValueCmdV4> for CheckedValueCmdV4 {
       .find(|x| x.id() == feature_id)
       .expect("Already checked existence or created.");
     let level = cmd.value();
-    // Check to make sure the feature has an actuator that handles LevelCmd
+    // Check to make sure the feature has an actuator that handles ValueCmd
     if let Some(actuator_map) = feature.actuator() {
       if let Some(actuator) = actuator_map.get(&cmd.actuator_type()) {
         // Check to make sure the level is within the range of the feature.
@@ -115,7 +115,7 @@ impl TryFromDeviceAttributes<ValueCmdV4> for CheckedValueCmdV4 {
           .messages()
           .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ValueCmd)
         {
-          if !actuator.step_limit().contains(&level) {
+          if level > actuator.step_count() {
             Err(ButtplugError::from(
               ButtplugDeviceError::DeviceStepRangeError(
                 *actuator.step_limit().end(),
@@ -132,7 +132,7 @@ impl TryFromDeviceAttributes<ValueCmdV4> for CheckedValueCmdV4 {
               device_index: cmd.device_index(),
               feature_index: cmd.feature_index(),
               actuator_type: cmd.actuator_type(),
-              value: cmd.value(),
+              value: if cmd.value() > 0 { actuator.step_limit().start() + cmd.value() } else { 0 },
             })
           }
         } else {
