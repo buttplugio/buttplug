@@ -83,7 +83,6 @@ device_init:
 device_commands:            
   # Commands
   #
-  # TODO How do we send FleshlightLaunchFW12Cmd?!
   - !Messages
       device_index: 0
       messages:

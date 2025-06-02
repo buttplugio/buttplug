@@ -1,21 +1,15 @@
-mod client;
-mod client_event_loop;
-mod client_message_sorter;
-mod device;
-mod in_process_connector;
-
 use crate::util::{
-  device_test::connector::build_channel_connector_v2,
+  device_test::{
+    client::client_v3::client::ButtplugClientResultFuture, connector::build_channel_connector
+  },
   ButtplugTestServer,
   TestDeviceChannelHost,
 };
 use buttplug::{
-  server::{device::ServerDeviceManagerBuilder, ButtplugServer, ButtplugServerBuilder},
-  util::{async_manager, device_configuration::load_protocol_configs},
+  client::{
+    client_device_feature::ClientDeviceFeature, connector::ButtplugInProcessClientConnectorBuilder, ButtplugClient, ButtplugClientDevice, ButtplugClientEvent
+  }, core::message::{ActuatorType, DeviceFeature, FeatureType}, server::{device::ServerDeviceManagerBuilder, ButtplugServer, ButtplugServerBuilder}, util::{async_manager, device_configuration::load_protocol_configs}
 };
-use client::{ButtplugClient, ButtplugClientEvent};
-use device::{ButtplugClientDevice, LinearCommand, RotateCommand, VibrateCommand};
-use in_process_connector::ButtplugInProcessClientConnectorBuilder;
 use tokio::sync::Notify;
 
 use super::super::{
@@ -32,37 +26,37 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
   use TestClientCommand::*;
   match command {
     Scalar(msg) => {
-      
+      let fut_vec: Vec<_> = msg.iter().map(|cmd| {
+        let f = device.device_features()[cmd.index() as usize].clone();
+        f.check_and_set_actuator_value_float(cmd.actuator_type(), cmd.scalar())
+      }).collect();
+      futures::future::try_join_all(fut_vec).await.unwrap();
     }
     Vibrate(msg) => {
-      device
-        .vibrate(VibrateCommand::SpeedMap(
-          msg.iter().map(|x| (x.index(), x.speed())).collect(),
-        ))
-        .await
-        .expect("Should always succeed.");
+      let fut_vec: Vec<_> = msg.iter().map(|cmd| {
+        let vibe_features: Vec<&ClientDeviceFeature> = device.device_features().iter().filter(|f| *f.feature().feature_type() == FeatureType::Vibrate).collect();
+        let f = vibe_features[cmd.index() as usize].clone();
+        f.check_and_set_actuator_value_float(ActuatorType::Vibrate, cmd.speed())
+      }).collect();
+      futures::future::try_join_all(fut_vec).await.unwrap();
     }
     Stop => {
       device.stop().await.expect("Stop failed");
     }
     Rotate(msg) => {
-      device
-        .rotate(RotateCommand::RotateMap(
-          msg
-            .iter()
-            .map(|x| (x.index(), (x.speed(), x.clockwise())))
-            .collect(),
-        ))
-        .await
-        .expect("Should always succeed.");
+      let fut_vec: Vec<_> = msg.iter().map(|cmd| {
+        let vibe_features: Vec<&ClientDeviceFeature> = device.device_features().iter().filter(|f| *f.feature().feature_type() == FeatureType::RotateWithDirection).collect();
+        let f = vibe_features[cmd.index() as usize].clone();
+        f.check_and_set_actuator_value_with_parameter_float(ActuatorType::RotateWithDirection, cmd.speed(), if cmd.clockwise() { 1 } else { 0 })
+      }).collect();
+      futures::future::try_join_all(fut_vec).await.unwrap();
     }
     Linear(msg) => {
-      device
-        .linear(LinearCommand::LinearVec(
-          msg.iter().map(|x| (x.duration(), x.position())).collect(),
-        ))
-        .await
-        .expect("Should always succeed.");
+      let fut_vec: Vec<_> = msg.iter().map(|cmd| {
+        let f = device.device_features()[cmd.index() as usize].clone();
+        f.check_and_set_actuator_value_with_parameter_float(ActuatorType::PositionWithDuration, cmd.position(), cmd.duration() as i32)
+      }).collect();
+      futures::future::try_join_all(fut_vec).await.unwrap();
     }
     Battery {
       expected_power,
@@ -74,11 +68,11 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
         let device = device.clone();
         let expected_power = *expected_power;
         async_manager::spawn(async move {
-          let battery_level = device.battery_level().await.unwrap();
+          let battery_level = device.battery_level().await.unwrap() as f64 / 100f64;
           assert_eq!(battery_level, expected_power);
         });
       } else {
-        assert_eq!(device.battery_level().await.unwrap(), *expected_power);
+        assert_eq!(device.battery_level().await.unwrap() as f64 / 100f64, *expected_power);
       }
     }
     _ => {
@@ -161,7 +155,7 @@ pub async fn run_embedded_test_case(test_case: &DeviceTestCase) {
 pub async fn run_json_test_case(test_case: &DeviceTestCase) {
   let notify = Arc::new(Notify::default());
 
-  let (client_connector, server_connector) = build_channel_connector_v2(&notify);
+  let (client_connector, server_connector) = build_channel_connector(&notify);
 
   let (server, device_channels) = build_server(test_case);
   let remote_server = ButtplugTestServer::new(server);
@@ -211,7 +205,7 @@ pub async fn run_test_case(
           for command in commands {
             tokio::select! {
               _ = tokio::time::sleep(Duration::from_millis(500)) => {
-                panic!("Timeout while waiting for device init output!")
+                panic!("Timeout while waiting for device output!")
               }
               event = device_receiver.recv() => {
                 info!("Got event {:?}", event);
@@ -250,11 +244,9 @@ pub async fn run_test_case(
           if let Some(expected_name) = &test_case.devices[device_added.index() as usize].expected_name {
             assert_eq!(*expected_name, *device_added.name());
           }
-          /*
-          if let Some(expected_name) = &test_case.devices[device_added.index() as usize].expected_display_name {
-            assert_eq!(*expected_name, *device_added.display_name());
+          if let Some(expected_display_name) = &test_case.devices[device_added.index() as usize].expected_display_name {
+            assert_eq!(Some(expected_display_name.clone()), *device_added.display_name());
           }
-          */
           if client.devices().len() == test_case.devices.len() {
             break;
           }
@@ -287,7 +279,7 @@ pub async fn run_test_case(
         for command in commands {
           tokio::select! {
             _ = tokio::time::sleep(Duration::from_millis(500)) => {
-              panic!("Timeout while waiting for device command output!")
+              panic!("Timeout while waiting for device output!")
             }
             event = device_receiver.recv() => {
               if let Some(command_event) = event {
