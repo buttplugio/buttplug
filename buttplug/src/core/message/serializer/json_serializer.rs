@@ -38,7 +38,7 @@ where
 }
 
 pub fn deserialize_to_message<T>(
-  validator: &Validator,
+  validator: Option<&Validator>,
   msg_str: &str,
 ) -> Result<Vec<T>, ButtplugSerializerError>
 where
@@ -53,31 +53,31 @@ where
   for msg in stream {
     match msg {
       Ok(json_msg) => {
-        if validator.is_valid(&json_msg) {
-          match serde_json::from_value::<Vec<T>>(json_msg) {
-            Ok(mut msg_vec) => {
-              for msg in msg_vec.iter_mut() {
-                msg.finalize();
-              }
-              result.append(&mut msg_vec);
-              //Ok(msg_vec)
-            }
-            Err(e) => {
-              return Err(ButtplugSerializerError::JsonSerializerError(format!(
-                "Message: {} - Error: {:?}",
-                msg_str, e
-              )))
-            }
+        if let Some(validator) = validator {
+          if !validator.is_valid(&json_msg) {
+            // If is_valid fails, re-run validation to get our error message.
+            let e = validator
+              .validate(&json_msg)
+              .expect_err("We can't get here without validity checks failing.");
+            return Err(ButtplugSerializerError::JsonSerializerError(format!(
+              "Error during JSON Schema Validation - Message: {} - Error: {:?}",
+              json_msg, e
+            )));
           }
-        } else {
-          // If is_valid fails, re-run validation to get our error message.
-          let e = validator
-            .validate(&json_msg)
-            .expect_err("We can't get here without validity checks failing.");
-          return Err(ButtplugSerializerError::JsonSerializerError(format!(
-            "Error during JSON Schema Validation - Message: {} - Error: {:?}",
-            json_msg, e
-          )));
+        }
+        match serde_json::from_value::<Vec<T>>(json_msg) {
+          Ok(mut msg_vec) => {
+            for msg in msg_vec.iter_mut() {
+              msg.finalize();
+            }
+            result.append(&mut msg_vec);
+          }
+          Err(e) => {
+            return Err(ButtplugSerializerError::JsonSerializerError(format!(
+              "Message: {} - Error: {:?}",
+              msg_str, e
+            )))
+          }
         }
       }
       Err(e) => {

@@ -33,7 +33,7 @@ impl ButtplugClientJSONSerializerImpl {
     T: serde::de::DeserializeOwned + ButtplugMessageFinalizer + Clone + Debug,
   {
     if let ButtplugSerializedMessage::Text(text_msg) = msg {
-      deserialize_to_message::<T>(&self.validator, text_msg)
+      deserialize_to_message::<T>(Some(&self.validator), text_msg)
     } else {
       Err(ButtplugSerializerError::BinaryDeserializationError)
     }
