@@ -212,6 +212,10 @@ impl ServerDeviceFeatureActuator {
     }
   }
 
+  pub fn step_count(&self) -> u32 {
+    self.step_limit.end() - self.step_limit().start()
+  }
+
   pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
     if self.step_range.is_empty() {
       Err(ButtplugDeviceError::DeviceConfigurationError(

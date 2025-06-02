@@ -16,10 +16,6 @@ use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-fn return_version0() -> ButtplugMessageSpecVersion {
-  ButtplugMessageSpecVersion::Version0
-}
-
 // For RequestServerInfo, serde will take care of invalid message versions from json, and internal
 // representations of versions require using the version enum as a type bound. Therefore we do not
 // need explicit content checking for the message.
