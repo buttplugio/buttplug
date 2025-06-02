@@ -463,11 +463,36 @@
           "Value"
         ]
       },
+      "DeviceAdded": {
+        "type": "object",
+        "description": "List of all available devices known to the system.",
+        "properties": {
+          "Id": { "$ref": "#/components/SystemId" },
+          "DeviceName": { "$ref": "#/components/DeviceName" },
+          "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+          "DeviceDisplayName": { "type": "string" },
+          "DeviceMessageTimingGap": { "type": "integer" },
+          "DeviceFeatures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/DeviceFeatureV4" 
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Id",
+          "DeviceName",
+          "DeviceIndex",
+          "DeviceMessageTimingGap",
+          "DeviceFeatures"
+        ]
+      },      
       "DeviceList": {
         "type": "object",
         "description": "List of all available devices known to the system.",
         "properties": {
-          "Id": { "$ref": "#/components/ClientId" },
+          "Id": { "$ref": "#/components/SystemId" },
           "Devices": {
             "description": "Array of device ids and names.",
             "type": "array",
@@ -487,9 +512,11 @@
               },
               "additionalProperties": false,
               "required": [
+                "Id",
                 "DeviceName",
                 "DeviceIndex",
-                "DeviceMessages"
+                "DeviceMessageTimingGap",
+                "DeviceFeatures"
               ]
             }
           }
@@ -498,6 +525,34 @@
         "required": [
           "Id",
           "Devices"
+        ]
+      },
+      "RequestServerInfo": {
+        "type": "object",
+        "description": "Request server version, and relay client name.",
+        "properties": {
+          "Id": { "$ref": "#/components/ClientId" },
+          "ClientName": {
+            "description": "Name of the client software.",
+            "type": "string"
+          },
+          "ApiVersionMajor": {
+            "description": "Message template version of the server software.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "ApiVersionMinor": {
+            "description": "Message template version of the server software.",
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Id",
+          "ClientName",
+          "ApiVersionMajor",
+          "ApiVersionMinor"
         ]
       },
       "ServerInfo": {
@@ -1570,9 +1625,11 @@
       "type": "array",
       "items": {
         "type": "object",
-        "description": "All messages valid in Buttplug Spec v3",
+        "description": "All messages valid in Buttplug Spec v4",
         "properties": {
+          "DeviceAdded": { "$ref": "#/messages/SpecV4Messages/DeviceAdded" },
           "DeviceList": { "$ref": "#/messages/SpecV4Messages/DeviceList" },
+          "DeviceRemoved": { "$ref": "#/messages/SpecV0Messages/DeviceRemoved" },
           "Error": { "$ref": "#/messages/SpecV0Messages/Error" },
           "Ok": { "$ref": "#/messages/SpecV0Messages/Ok" },
           "Ping": { "$ref": "#/messages/SpecV0Messages/Ping" },
@@ -1582,7 +1639,7 @@
           "RawSubscribeCmd": { "$ref": "#/messages/SpecV2Messages/RawSubscribeCmd" },
           "RawUnsubscribeCmd": { "$ref": "#/messages/SpecV2Messages/RawUnsubscribeCmd" },
           "RequestDeviceList": { "$ref": "#/messages/SpecV0Messages/RequestDeviceList" },
-          "RequestServerInfo": { "$ref": "#/messages/SpecV1Messages/RequestServerInfo" },
+          "RequestServerInfo": { "$ref": "#/messages/SpecV4Messages/RequestServerInfo" },
           "ScanningFinished": { "$ref": "#/messages/SpecV0Messages/ScanningFinished" },
           "SensorReadCmd": { "$ref": "#/messages/SpecV3Messages/SensorReadCmd" },
           "SensorReading": { "$ref": "#/messages/SpecV3Messages/SensorReading" },
