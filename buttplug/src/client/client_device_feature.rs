@@ -47,7 +47,39 @@ impl ClientDeviceFeature {
     }
   }
 
-  fn check_and_set_actuator_value(
+  pub fn check_and_set_actuator_value_float(
+    &self,
+    actuator_type: ActuatorType,
+    value: f64,
+  ) -> ButtplugClientResultFuture {
+    if let Some(actuator_map) = self.feature().actuator() {
+      if let Some(actuator) = actuator_map.get(&actuator_type) {
+        self.event_loop_sender.send_message_expect_ok(
+          ValueCmdV4::new(self.device_index, self.feature_index, actuator_type, (value * *actuator.step_count() as f64).ceil() as u32).into(),
+        )
+      } else {
+        future::ready(Err(ButtplugClientError::from(ButtplugError::from(
+          ButtplugDeviceError::DeviceActuatorTypeMismatch(
+            self.feature_index,
+            actuator_type,
+            *self.feature.feature_type(),
+          ),
+        ))))
+        .boxed()
+      }
+    } else {
+      future::ready(Err(ButtplugClientError::from(ButtplugError::from(
+        ButtplugDeviceError::DeviceActuatorTypeMismatch(
+          self.feature_index,
+          actuator_type,
+          *self.feature.feature_type(),
+        ),
+      ))))
+      .boxed()
+    }
+  }
+
+  pub fn check_and_set_actuator_value(
     &self,
     actuator_type: ActuatorType,
     value: u32,
@@ -103,7 +135,7 @@ impl ClientDeviceFeature {
     self.check_and_set_actuator_value(ActuatorType::Position, level)
   }
 
-  fn check_and_set_actuator_value_with_parameter(
+  pub fn check_and_set_actuator_value_with_parameter(
     &self,
     actuator_type: ActuatorType,
     value: u32,
@@ -113,6 +145,39 @@ impl ClientDeviceFeature {
       if let Some(_) = actuator_map.get(&actuator_type) {
         self.event_loop_sender.send_message_expect_ok(
           ValueWithParameterCmdV4::new(self.device_index, self.feature_index, actuator_type, value, parameter).into(),
+        )
+      } else {
+        future::ready(Err(ButtplugClientError::from(ButtplugError::from(
+          ButtplugDeviceError::DeviceActuatorTypeMismatch(
+            self.feature_index,
+            actuator_type,
+            *self.feature.feature_type(),
+          ),
+        ))))
+        .boxed()
+      }
+    } else {
+      future::ready(Err(ButtplugClientError::from(ButtplugError::from(
+        ButtplugDeviceError::DeviceActuatorTypeMismatch(
+          self.feature_index,
+          actuator_type,
+          *self.feature.feature_type(),
+        ),
+      ))))
+      .boxed()
+    }
+  }
+
+  pub fn check_and_set_actuator_value_with_parameter_float(
+    &self,
+    actuator_type: ActuatorType,
+    value: f64,
+    parameter: i32,
+  ) -> ButtplugClientResultFuture {
+    if let Some(actuator_map) = self.feature().actuator() {
+      if let Some(actuator) = actuator_map.get(&actuator_type) {
+        self.event_loop_sender.send_message_expect_ok(
+          ValueWithParameterCmdV4::new(self.device_index, self.feature_index, actuator_type, (value * *actuator.step_count() as f64).ceil() as u32, parameter).into(),
         )
       } else {
         future::ready(Err(ButtplugClientError::from(ButtplugError::from(
