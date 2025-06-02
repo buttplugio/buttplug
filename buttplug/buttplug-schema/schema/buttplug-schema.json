@@ -580,6 +580,83 @@
             "minimum": 0
           }
         }
+      },
+      "SensorReadCmd": {
+        "type": "object",
+        "description": "Sends a request to read a sensor value.",
+        "properties": {
+          "Id": { "$ref": "#/components/ClientId" },
+          "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+          "FeatureIndex": { "type": "integer" },
+          "SensorType": { "type": "string" }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Id",
+          "DeviceIndex",
+          "FeatureIndex",
+          "SensorType"
+        ]
+      },
+      "SensorReading": {
+        "type": "object",
+        "description": "Returns from either a sensor read request or a subscribed sensor event.",
+        "properties": {
+          "Id": { "$ref": "#/components/ServerId" },
+          "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+          "FeatureIndex": { "type": "integer" },
+          "SensorType": { "type": "string" },
+          "Data": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Id",
+          "DeviceIndex",
+          "FeatureIndex",
+          "SensorType",
+          "Data"
+        ]
+      },
+      "SensorSubscribeCmd": {
+        "type": "object",
+        "description": "Sends a request to subscribe for updates to a sensor value.",
+        "properties": {
+          "Id": { "$ref": "#/components/ClientId" },
+          "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+          "FeatureIndex": { "type": "integer" },
+          "SensorType": { "type": "string" }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Id",
+          "DeviceIndex",
+          "FeatureIndex",
+          "SensorType"
+        ]
+      },
+      "SensorUnsubscribeCmd": {
+        "type": "object",
+        "description": "Sends a request to subscribe for updates to a sensor value.",
+        "properties": {
+          "Id": { "$ref": "#/components/ClientId" },
+          "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+          "FeatureIndex": { "type": "integer" },
+          "SensorType": { "type": "string" }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Id",
+          "DeviceIndex",
+          "FeatureIndex",
+          "SensorType"
+        ]
       }
     }, 
     "SpecV3Messages": {
@@ -753,7 +830,7 @@
           "SensorIndex",
           "SensorType"
         ]
-      }      
+      }
     },
     "SpecV2Messages": {
       "DeviceList": {
@@ -1641,10 +1718,10 @@
           "RequestDeviceList": { "$ref": "#/messages/SpecV0Messages/RequestDeviceList" },
           "RequestServerInfo": { "$ref": "#/messages/SpecV4Messages/RequestServerInfo" },
           "ScanningFinished": { "$ref": "#/messages/SpecV0Messages/ScanningFinished" },
-          "SensorReadCmd": { "$ref": "#/messages/SpecV3Messages/SensorReadCmd" },
-          "SensorReading": { "$ref": "#/messages/SpecV3Messages/SensorReading" },
-          "SensorSubscribeCmd": { "$ref": "#/messages/SpecV3Messages/SensorSubscribeCmd" },
-          "SensorUnsubscribeCmd": { "$ref": "#/messages/SpecV3Messages/SensorUnsubscribeCmd" },
+          "SensorReadCmd": { "$ref": "#/messages/SpecV4Messages/SensorReadCmd" },
+          "SensorReading": { "$ref": "#/messages/SpecV4Messages/SensorReading" },
+          "SensorSubscribeCmd": { "$ref": "#/messages/SpecV4Messages/SensorSubscribeCmd" },
+          "SensorUnsubscribeCmd": { "$ref": "#/messages/SpecV4Messages/SensorUnsubscribeCmd" },
           "ServerInfo": { "$ref": "#/messages/SpecV4Messages/ServerInfo" },
           "StartScanning": { "$ref": "#/messages/SpecV0Messages/StartScanning" },
           "StopAllDevices": { "$ref": "#/messages/SpecV0Messages/StopAllDevices" },
