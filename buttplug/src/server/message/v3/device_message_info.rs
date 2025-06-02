@@ -30,10 +30,7 @@ pub struct DeviceMessageInfoV3 {
   device_display_name: Option<String>,
   #[cfg_attr(
     feature = "serialize-json",
-    serde(
-      rename = "DeviceMessageTimingGap",
-      skip_serializing_if = "Option::is_none"
-    )
+    serde(rename = "DeviceMessageTimingGap")
   )]
   #[getset(get = "pub")]
   device_message_timing_gap: Option<u32>,

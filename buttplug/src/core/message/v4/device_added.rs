@@ -42,13 +42,10 @@ pub struct DeviceAddedV4 {
   device_display_name: Option<String>,
   #[cfg_attr(
     feature = "serialize-json",
-    serde(
-      rename = "DeviceMessageTimingGap",
-      skip_serializing_if = "Option::is_none"
-    )
+    serde(rename = "DeviceMessageTimingGap")
   )]
   #[getset(get = "pub")]
-  device_message_timing_gap: Option<u32>,
+  device_message_timing_gap: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceFeatures"))]
   #[getset(get = "pub")]
   device_features: Vec<DeviceFeature>,
@@ -59,7 +56,7 @@ impl DeviceAddedV4 {
     device_index: u32,
     device_name: &str,
     device_display_name: &Option<String>,
-    device_message_timing_gap: &Option<u32>,
+    device_message_timing_gap: u32,
     device_features: &Vec<DeviceFeature>,
   ) -> Self {
     let mut obj = Self {
@@ -67,7 +64,7 @@ impl DeviceAddedV4 {
       device_index,
       device_name: device_name.to_string(),
       device_display_name: device_display_name.clone(),
-      device_message_timing_gap: *device_message_timing_gap,
+      device_message_timing_gap: device_message_timing_gap,
       device_features: device_features.clone(),
     };
     obj.finalize();

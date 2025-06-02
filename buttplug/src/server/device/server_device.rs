@@ -423,8 +423,8 @@ impl ServerDevice {
       index,
       &self.name(),
       self.definition().user_config().display_name(),
-      &None,
-      self
+      100,
+      &self
         .definition
         .features()
         .iter()
