@@ -17,7 +17,7 @@ use crate::{
   server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::{checked_value_cmd::CheckedValueCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4}},
+  }, message::{checked_actuator_cmd::CheckedActuatorCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4}},
 };
 
 generic_protocol_setup!(Motorbunny, "motorbunny");
@@ -32,7 +32,7 @@ impl ProtocolHandler for Motorbunny {
 
   fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4
+    cmd: &CheckedActuatorCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut command_vec: Vec<u8>;
     if cmd.value() == 0 {

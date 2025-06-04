@@ -14,7 +14,7 @@ use crate::{
       protocol::ProtocolHandler,
     },
     message::{
-      checked_value_cmd::CheckedValueCmdV4,
+      checked_actuator_cmd::CheckedActuatorCmdV4,
       checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4,
     },
   },
@@ -35,7 +35,7 @@ impl ProtocolHandler for TryFunMeta2 {
 
   fn handle_value_oscillate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4,
+    cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut sum: u8 = 0xff;
     let mut data = vec![
@@ -91,7 +91,7 @@ impl ProtocolHandler for TryFunMeta2 {
 
   fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4,
+    cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut sum: u8 = 0xff;
     let mut data = vec![

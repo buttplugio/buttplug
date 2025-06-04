@@ -29,8 +29,6 @@ pub use v2::*;
 pub use v4::*;
 
 use crate::core::errors::ButtplugMessageError;
-use serde::{Deserialize, Serialize};
-#[cfg(feature = "serialize-json")]
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::convert::TryFrom;
 
@@ -38,9 +36,8 @@ use super::errors::ButtplugError;
 
 /// Enum of possible [Buttplug Message
 /// Spec](https://buttplug-spec.docs.buttplug.io) versions.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Display)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Display, Serialize_repr, Deserialize_repr)]
 #[repr(u32)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize_repr, Deserialize_repr))]
 pub enum ButtplugMessageSpecVersion {
   Version0 = 0,
   Version1 = 1,
@@ -148,96 +145,7 @@ pub trait ButtplugDeviceMessage: ButtplugMessage {
   fn set_device_index(&mut self, id: u32);
 }
 
-#[derive(Copy, Debug, Clone, Hash, Display, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ButtplugActuatorFeatureMessageType {
-  ValueCmd,
-  ValueWithParameterCmd,
-}
-
-#[derive(Copy, Debug, Clone, Hash, Display, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ButtplugSensorFeatureMessageType {
-  SensorReadCmd,
-  SensorSubscribeCmd,
-}
-
-#[derive(Copy, Debug, Clone, Hash, Display, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ButtplugRawFeatureMessageType {
-  RawReadCmd,
-  RawWriteCmd,
-  RawSubscribeCmd,
-  RawUnsubscribeCmd,
-}
-
 /// Type alias for the latest version of client-to-server messages.
 pub type ButtplugClientMessageCurrent = ButtplugClientMessageV4;
 /// Type alias for the latest version of server-to-client messages.
 pub type ButtplugServerMessageCurrent = ButtplugServerMessageV4;
-
-#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash)]
-pub enum ActuatorType {
-  Unknown,
-  Vibrate,
-  // Single Direction Rotation Speed
-  Rotate,
-  // Two Direction Rotation Speed
-  RotateWithDirection,
-  Oscillate,
-  Constrict,
-  Inflate,
-  Heater,
-  Led,
-  // For instances where we specify a position to move to ASAP. Usually servos, probably for the
-  // OSR-2/SR-6.
-  Position,
-  PositionWithDuration,
-}
-
-impl TryFrom<FeatureType> for ActuatorType {
-  type Error = String;
-  fn try_from(value: FeatureType) -> Result<Self, Self::Error> {
-    match value {
-      FeatureType::Unknown => Ok(ActuatorType::Unknown),
-      FeatureType::Vibrate => Ok(ActuatorType::Vibrate),
-      FeatureType::Rotate => Ok(ActuatorType::Rotate),
-      FeatureType::Heater => Ok(ActuatorType::Heater),
-      FeatureType::Led => Ok(ActuatorType::Led),
-      FeatureType::RotateWithDirection => Ok(ActuatorType::RotateWithDirection),
-      FeatureType::PositionWithDuration => Ok(ActuatorType::PositionWithDuration),
-      FeatureType::Oscillate => Ok(ActuatorType::Oscillate),
-      FeatureType::Constrict => Ok(ActuatorType::Constrict),
-      FeatureType::Inflate => Ok(ActuatorType::Inflate),
-      FeatureType::Position => Ok(ActuatorType::Position),
-      _ => Err(format!(
-        "Feature type {value} not valid for ActuatorType conversion"
-      )),
-    }
-  }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, Hash)]
-pub enum SensorType {
-  Unknown,
-  Battery,
-  RSSI,
-  Button,
-  Pressure,
-  // Temperature,
-  // Accelerometer,
-  // Gyro,
-}
-
-impl TryFrom<FeatureType> for SensorType {
-  type Error = String;
-  fn try_from(value: FeatureType) -> Result<Self, Self::Error> {
-    match value {
-      FeatureType::Unknown => Ok(SensorType::Unknown),
-      FeatureType::Battery => Ok(SensorType::Battery),
-      FeatureType::RSSI => Ok(SensorType::RSSI),
-      FeatureType::Button => Ok(SensorType::Button),
-      FeatureType::Pressure => Ok(SensorType::Pressure),
-      _ => Err(format!(
-        "Feature type {value} not valid for SensorType conversion"
-      )),
-    }
-  }
-}

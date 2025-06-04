@@ -8,13 +8,13 @@
 use crate::core::{
   errors::ButtplugDeviceError,
   message::{
-    ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugSensorFeatureMessageType, DeviceFeature, DeviceFeatureActuator, DeviceFeatureRaw, DeviceFeatureSensor, Endpoint, FeatureType, SensorType
+    ActuatorType, DeviceFeature, DeviceFeatureActuator, DeviceFeatureRaw, DeviceFeatureSensor, Endpoint, FeatureType, SensorCommandType, SensorType
   },
 };
 use getset::{Getters, MutGetters, Setters, CopyGetters};
 use uuid::Uuid;
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
-use std::{collections::{HashMap, HashSet}, ops::RangeInclusive};
+use std::{collections::{HashSet, HashMap}, ops::RangeInclusive};
 
 
 // This will look almost exactly like ServerDeviceFeature. However, it will only contain
@@ -165,9 +165,6 @@ pub struct ServerDeviceFeatureActuatorSerialized {
   #[serde(rename = "step-limit")]
   #[serde(default)]
   step_limit: Option<RangeInclusive<u32>>,
-  #[getset(get = "pub")]
-  #[serde(rename = "messages")]
-  messages: HashSet<ButtplugActuatorFeatureMessageType>,
 }
 
 
@@ -176,7 +173,6 @@ impl From<ServerDeviceFeatureActuatorSerialized> for ServerDeviceFeatureActuator
     Self {
       step_range: value.step_range.clone(),
       step_limit: value.step_limit.unwrap_or(value.step_range.clone()),
-      messages: value.messages,
     }
   }
 }
@@ -194,21 +190,16 @@ pub struct ServerDeviceFeatureActuator {
   #[serde(rename = "step-limit")]
   #[serde(serialize_with = "range_serialize")]
   step_limit: RangeInclusive<u32>,
-  #[getset(get = "pub")]
-  #[serde(rename = "messages")]
-  messages: HashSet<ButtplugActuatorFeatureMessageType>,
 }
 
 impl ServerDeviceFeatureActuator {
   pub fn new(
     step_range: &RangeInclusive<u32>,
     step_limit: &RangeInclusive<u32>,
-    messages: &HashSet<ButtplugActuatorFeatureMessageType>,
   ) -> Self {
     Self {
       step_range: step_range.clone(),
       step_limit: step_limit.clone(),
-      messages: messages.clone(),
     }
   }
 
@@ -235,7 +226,6 @@ impl From<ServerDeviceFeatureActuator> for DeviceFeatureActuator {
   fn from(value: ServerDeviceFeatureActuator) -> Self {
     DeviceFeatureActuator::new(
       value.step_limit().end() - value.step_limit().start(),
-      value.messages()
     )
   }
 }
@@ -249,18 +239,18 @@ pub struct ServerDeviceFeatureSensor {
   #[serde(serialize_with = "range_sequence_serialize")]
   value_range: Vec<RangeInclusive<i32>>,
   #[getset(get = "pub")]
-  #[serde(rename = "messages")]
-  messages: HashSet<ButtplugSensorFeatureMessageType>,
+  #[serde(rename = "SensorCommands")]
+  sensor_commands: HashSet<SensorCommandType>,  
 }
 
 impl ServerDeviceFeatureSensor {
   pub fn new(
     value_range: &Vec<RangeInclusive<i32>>,
-    messages: &HashSet<ButtplugSensorFeatureMessageType>,
+    sensor_commands: &HashSet<SensorCommandType>
   ) -> Self {
     Self {
       value_range: value_range.clone(),
-      messages: messages.clone(),
+      sensor_commands: sensor_commands.clone()
     }
   }
 }
@@ -268,6 +258,6 @@ impl ServerDeviceFeatureSensor {
 impl From<ServerDeviceFeatureSensor> for DeviceFeatureSensor {
   fn from(value: ServerDeviceFeatureSensor) -> Self {
     // Unlike actuator, this is just a straight copy.
-    DeviceFeatureSensor::new(value.value_range(), value.messages())
+    DeviceFeatureSensor::new(value.value_range(), value.sensor_commands())
   }
 }

@@ -10,7 +10,7 @@ use crate::{
   server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_value_cmd::CheckedValueCmdV4},
+  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
 };
 
 generic_protocol_setup!(SenseeCapsule, "sensee-capsule");
@@ -25,7 +25,7 @@ impl ProtocolHandler for SenseeCapsule {
 
     fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4
+    cmd: &CheckedActuatorCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       cmd.feature_id(),
@@ -48,7 +48,7 @@ impl ProtocolHandler for SenseeCapsule {
 
   fn handle_value_constrict_cmd(
     &self,
-    cmd: &CheckedValueCmdV4
+    cmd: &CheckedActuatorCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       cmd.feature_id(),

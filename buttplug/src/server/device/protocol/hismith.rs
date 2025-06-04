@@ -7,7 +7,7 @@
 
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
 use crate::server::device::protocol::hismith_mini::HismithMiniInitializer;
-use crate::server::message::checked_value_cmd::CheckedValueCmdV4;
+use crate::server::message::checked_actuator_cmd::CheckedActuatorCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -100,7 +100,7 @@ impl ProtocolHandler for Hismith {
 
   fn handle_value_oscillate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4
+    cmd: &CheckedActuatorCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let idx: u8 = 0x04;
     let speed: u8 = cmd.value() as u8;
@@ -116,7 +116,7 @@ impl ProtocolHandler for Hismith {
 
   fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4
+    cmd: &CheckedActuatorCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Wildolo has a vibe at index 0 using id 4
     // The thrusting stroker has a vibe at index 1 using id 6 (and the weird 0xf0 off)

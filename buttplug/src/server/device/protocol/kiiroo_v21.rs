@@ -25,7 +25,7 @@ use crate::{
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
     message::{
-      checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, checked_value_cmd::CheckedValueCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, ButtplugServerDeviceMessage
+      checked_sensor_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, checked_actuator_cmd::CheckedActuatorCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, ButtplugServerDeviceMessage
     },
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
@@ -69,7 +69,7 @@ impl Default for KiirooV21 {
 impl ProtocolHandler for KiirooV21 {
   fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4
+    cmd: &CheckedActuatorCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       cmd.feature_id(),

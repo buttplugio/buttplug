@@ -16,7 +16,7 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  }, message::checked_value_cmd::CheckedValueCmdV4},
+  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
@@ -95,7 +95,7 @@ impl ProtocolHandler for Leten {
 
   fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4
+    cmd: &CheckedActuatorCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_command = self.current_command.clone();
     current_command.store(cmd.value() as u8, Ordering::Relaxed);

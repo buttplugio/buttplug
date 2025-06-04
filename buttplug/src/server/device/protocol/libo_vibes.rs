@@ -15,7 +15,7 @@ use crate::{
   server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_value_cmd::CheckedValueCmdV4},
+  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
 };
 
 const LIBO_VIBES_PROTOCOL_UUID: Uuid = uuid!("72a3d029-cf33-4fff-beec-1c45b85cc8ae");
@@ -31,7 +31,7 @@ impl ProtocolHandler for LiboVibes {
 
   fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4,
+    cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut msg_vec = vec![];
     if cmd.feature_index() == 0 {

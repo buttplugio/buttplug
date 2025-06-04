@@ -18,7 +18,7 @@ use crate::{
   server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::ProtocolHandler,
-  }, message::checked_value_cmd::CheckedValueCmdV4},
+  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
 };
 
 
@@ -69,7 +69,7 @@ impl ProtocolHandler for FeelingSo {
 
   fn handle_value_oscillate_cmd(
       &self,
-      cmd: &CheckedValueCmdV4,
+      cmd: &CheckedActuatorCmdV4,
     ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[1].store(cmd.value() as u8, Ordering::Relaxed);
     Ok(self.hardware_command())
@@ -77,7 +77,7 @@ impl ProtocolHandler for FeelingSo {
   
   fn handle_value_vibrate_cmd(
       &self,
-      cmd: &CheckedValueCmdV4,
+      cmd: &CheckedActuatorCmdV4,
     ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[0].store(cmd.value() as u8, Ordering::Relaxed);
     Ok(self.hardware_command())

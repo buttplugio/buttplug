@@ -155,7 +155,7 @@ use crate::{
       hardware::{Hardware, HardwareCommand, HardwareReadCmd},
     },
     message::{
-      checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, checked_value_cmd::CheckedValueCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage
+      checked_sensor_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, checked_actuator_cmd::CheckedActuatorCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage
     },
   },
 };
@@ -832,7 +832,7 @@ pub trait ProtocolHandler: Sync + Send {
   // actuators, they should just implement their own version of this method.
   fn handle_value_cmd(
     &self,
-    cmd: &CheckedValueCmdV4,
+    cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let actuator = cmd.actuator_type();
     match actuator {
@@ -859,42 +859,42 @@ pub trait ProtocolHandler: Sync + Send {
 
   fn handle_value_vibrate_cmd(
     &self,
-    _cmd: &CheckedValueCmdV4,
+    _cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ValueCmd (Vibrate Actuator)")
   }
 
   fn handle_value_rotate_cmd(
     &self,
-    _cmd: &CheckedValueCmdV4,
+    _cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ValueCmd (Rotate Actuator)")
   }
 
   fn handle_value_oscillate_cmd(
     &self,
-    _cmd: &CheckedValueCmdV4,
+    _cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ValueCmd (Osccilate Actuator)")
   }
 
   fn handle_value_inflate_cmd(
     &self,
-    _cmd: &CheckedValueCmdV4,
+    _cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ValueCmd (Inflate Actuator)")
   }
 
   fn handle_value_constrict_cmd(
     &self,
-    _cmd: &CheckedValueCmdV4,
+    _cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ValueCmd (Constrict Actuator)")
   }
 
   fn handle_value_position_cmd(
     &self,
-    _cmd: &CheckedValueCmdV4,
+    _cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ValueCmd (Position Actuator)")
   }

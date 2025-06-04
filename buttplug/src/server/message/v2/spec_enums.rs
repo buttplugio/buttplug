@@ -9,19 +9,7 @@ use crate::{
   core::{
     errors::{ButtplugError, ButtplugMessageError},
     message::{
-      ButtplugMessage,
-      ButtplugMessageFinalizer,
-      ButtplugMessageValidator,
-      DeviceRemovedV0,
-      ErrorV0,
-      OkV0,
-      PingV0,
-      RequestDeviceListV0,
-      ScanningFinishedV0,
-      StartScanningV0,
-      StopAllDevicesV0,
-      StopDeviceCmdV0,
-      StopScanningV0,
+      ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, DeviceRemovedV0, ErrorV0, OkV0, PingV0, RawReadingV2, RequestDeviceListV0, ScanningFinishedV0, StartScanningV0, StopAllDevicesV0, StopDeviceCmdV0, StopScanningV0
     },
   },
   server::message::v1::{
@@ -44,7 +32,6 @@ use super::{
   RSSILevelCmdV2,
   RSSILevelReadingV2,
   RawReadCmdV2,
-  RawReadingV2,
   RawSubscribeCmdV2,
   RawUnsubscribeCmdV2,
   RawWriteCmdV2,

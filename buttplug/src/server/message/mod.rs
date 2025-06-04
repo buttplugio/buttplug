@@ -100,15 +100,9 @@ impl ButtplugClientMessageVariant {
         _ => None,
       },
       Self::V4(msg) => match msg {
-        ButtplugClientMessageV4::SensorSubscribeCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV4::SensorUnsubscribeCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV4::ValueCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV4::ValueWithParameterCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV4::SensorReadCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV4::RawReadCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV4::RawWriteCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV4::RawSubscribeCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV4::RawUnsubscribeCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV4::ActuatorCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV4::SensorCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV4::RawCmd(a) => Some(a.device_index()),
         _ => None,
       },
     }

@@ -14,10 +14,10 @@ use futures_util::future::BoxFuture;
 use futures_util::{future, FutureExt};
 
 use crate::core::message::{SensorReadingV4, SensorType};
-use crate::server::message::checked_sensor_read_cmd::CheckedSensorReadCmdV4;
+use crate::server::message::checked_sensor_cmd::CheckedSensorReadCmdV4;
 use crate::server::message::checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4;
 use crate::server::message::checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4;
-use crate::server::message::checked_value_cmd::CheckedValueCmdV4;
+use crate::server::message::checked_actuator_cmd::CheckedActuatorCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_initializer_setup,
@@ -135,7 +135,7 @@ impl ProtocolHandler for Galaku {
 
   fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4,
+    cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if self.is_caiping_pump_device {
       let data: Vec<u8> = vec![

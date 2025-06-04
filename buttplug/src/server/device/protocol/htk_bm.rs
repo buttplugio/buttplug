@@ -17,7 +17,7 @@ use crate::{
   server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_value_cmd::CheckedValueCmdV4},
+  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
 };
 
 const HTK_BM_PROTOCOL_UUID: Uuid = uuid!("4c70cb95-d3d9-4288-81ab-be845f9ad1fe");
@@ -42,7 +42,7 @@ impl ProtocolHandler for HtkBm {
 
   fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4,
+    cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
 

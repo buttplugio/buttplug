@@ -14,7 +14,7 @@ use crate::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-  }, message::checked_value_cmd::CheckedValueCmdV4},
+  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
 };
 use async_trait::async_trait;
 use uuid::{uuid, Uuid};
@@ -106,7 +106,7 @@ impl ProtocolHandler for HismithMini {
 
   fn handle_value_oscillate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4
+    cmd: &CheckedActuatorCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let idx: u8 = 0x03;
     let speed: u8 = cmd.value() as u8;
@@ -122,7 +122,7 @@ impl ProtocolHandler for HismithMini {
 
   fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4
+    cmd: &CheckedActuatorCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let idx: u8 = if !self.dual_vibe || cmd.feature_index() == 1 {
       0x05
@@ -142,7 +142,7 @@ impl ProtocolHandler for HismithMini {
 
   fn handle_value_constrict_cmd(
     &self,
-    cmd: &CheckedValueCmdV4
+    cmd: &CheckedActuatorCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let idx: u8 = if self.second_constrict { 0x05 } else { 0x03 };
     let speed: u8 = cmd.value() as u8;

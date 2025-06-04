@@ -9,8 +9,12 @@ mod rssi_level_reading;
 mod server_device_message_attributes;
 mod server_info;
 mod spec_enums;
+mod raw_read_cmd;
+mod raw_subscribe_cmd;
+mod raw_unsubscribe_cmd;
+mod raw_write_cmd;
 
-use crate::core::message::v2::*;
+use {crate::core::message::Endpoint};
 pub use {
   battery_level_cmd::BatteryLevelCmdV2,
   battery_level_reading::BatteryLevelReadingV2,
@@ -22,6 +26,10 @@ pub use {
   device_added::DeviceAddedV2,
   device_list::DeviceListV2,
   device_message_info::DeviceMessageInfoV2,
+  raw_read_cmd::RawReadCmdV2,
+  raw_subscribe_cmd::RawSubscribeCmdV2,
+  raw_unsubscribe_cmd::RawUnsubscribeCmdV2,
+  raw_write_cmd::RawWriteCmdV2,
   rssi_level_cmd::RSSILevelCmdV2,
   rssi_level_reading::RSSILevelReadingV2,
   server_device_message_attributes::{
@@ -31,3 +39,7 @@ pub use {
   server_info::ServerInfoV2,
   spec_enums::{ButtplugClientMessageV2, ButtplugServerMessageV2, ButtplugDeviceMessageNameV2}
 };
+
+pub(crate) trait RawCmdV2 {
+  fn endpoint(&self) -> Endpoint;
+}

@@ -1,78 +1,91 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      ActuatorType, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, FeatureType, ValueWithParameterCmdV4
+      ActuatorCmdV4, ActuatorCommand, ActuatorType, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator,
     },
   },
-  server::message::{server_device_feature::ServerDeviceFeature, ServerDeviceAttributes, TryFromDeviceAttributes, VorzeA10CycloneCmdV0},
+  server::message::{
+    ServerDeviceAttributes, TryFromDeviceAttributes, VorzeA10CycloneCmdV0
+  },
 };
-use getset::CopyGetters;
+use getset::{CopyGetters, Getters};
 use uuid::Uuid;
 
 use super::spec_enums::ButtplugDeviceMessageNameV4;
 
-#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, Eq, Clone, CopyGetters)] 
-#[getset(get_copy="pub")]
-pub struct CheckedValueWithParameterCmdV4 {
+#[derive(
+  Debug,
+  ButtplugDeviceMessage,
+  ButtplugMessageFinalizer,
+  Clone,
+  Getters,
+  CopyGetters,
+  Eq,
+)]
+#[getset(get_copy = "pub")]
+pub struct CheckedActuatorCmdV4 {
   id: u32,
   device_index: u32,
   feature_index: u32,
   feature_id: Uuid,
   actuator_type: ActuatorType,
-  value: u32,
-  parameter: i32,
+  actuator_command: ActuatorCommand
 }
 
-impl PartialEq for CheckedValueWithParameterCmdV4 {
+impl PartialEq for CheckedActuatorCmdV4 {
   fn eq(&self, other: &Self) -> bool {
     // Compare everything but the message id
     self.device_index() == other.device_index() &&
     self.feature_index() == other.feature_index() &&
-    self.value() == other.value() &&
     self.actuator_type() == other.actuator_type() &&
     self.feature_id() == other.feature_id() &&
-    self.parameter() == other.parameter()
+    self.actuator_command() == other.actuator_command()
   }
 }
 
-
-impl CheckedValueWithParameterCmdV4 {
-  pub fn new(device_index: u32, feature_index: u32, feature_id: Uuid, actuator_type: ActuatorType, value: u32, parameter: i32) -> Self {
-    Self {
-      id: 1,
-      device_index,
-      feature_index,
-      feature_id,
-      actuator_type,
-      value,
-      parameter
-    }
-  }
-}
-
-impl From<CheckedValueWithParameterCmdV4> for ValueWithParameterCmdV4 {
-  fn from(value: CheckedValueWithParameterCmdV4) -> Self {
-    ValueWithParameterCmdV4::new(
+impl From<CheckedActuatorCmdV4> for ActuatorCmdV4 {
+  fn from(value: CheckedActuatorCmdV4) -> Self {
+    ActuatorCmdV4::new(
       value.device_index(),
       value.feature_index(),
       value.actuator_type(),
-      value.value(),
-      value.parameter()
+      value.actuator_command()
     )
   }
 }
 
-impl ButtplugMessageValidator for CheckedValueWithParameterCmdV4 {
+impl CheckedActuatorCmdV4 {
+  pub fn new(id: u32, device_index: u32, feature_index: u32, feature_id: Uuid, actuator_type: ActuatorType, actuator_command: ActuatorCommand) -> Self {
+    Self {
+      id,
+      device_index,
+      feature_index,
+      feature_id,
+      actuator_type,
+      actuator_command
+    }
+  }
+}
+
+impl ButtplugMessageValidator for CheckedActuatorCmdV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     Ok(())
   }
 }
 
-impl TryFromDeviceAttributes<ValueWithParameterCmdV4> for CheckedValueWithParameterCmdV4 {
+
+impl TryFromDeviceAttributes<ActuatorCmdV4> for CheckedActuatorCmdV4 {
   fn try_from_device_attributes(
-    cmd: ValueWithParameterCmdV4,
+    cmd: ActuatorCmdV4,
     attrs: &ServerDeviceAttributes,
   ) -> Result<Self, ButtplugError> {
     let features = attrs.features();
@@ -94,15 +107,15 @@ impl TryFromDeviceAttributes<ValueWithParameterCmdV4> for CheckedValueWithParame
       .find(|x| x.id() == feature_id)
       .expect("Already checked existence or created.");
     let level = cmd.value();
-    // Check to make sure the feature has an actuator that handles LevelCmd
+    // Check to make sure the feature has an actuator that handles ValueCmd
     if let Some(actuator_map) = feature.actuator() {
       if let Some(actuator) = actuator_map.get(&cmd.actuator_type()) {
         // Check to make sure the level is within the range of the feature.
         if actuator
           .messages()
-          .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ValueWithParameterCmd)
+          .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ValueCmd)
         {
-          if !actuator.step_limit().contains(&level) {
+          if level > actuator.step_count() {
             Err(ButtplugError::from(
               ButtplugDeviceError::DeviceStepRangeError(
                 *actuator.step_limit().end(),
@@ -119,23 +132,22 @@ impl TryFromDeviceAttributes<ValueWithParameterCmdV4> for CheckedValueWithParame
               device_index: cmd.device_index(),
               feature_index: cmd.feature_index(),
               actuator_type: cmd.actuator_type(),
-              value: cmd.value(),
-              parameter: cmd.parameter()
+              actuator_command: cmd.actuator_command()
             })
           }
         } else {
           Err(ButtplugError::from(
-            ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::ValueWithParameterCmd.to_string()),
+            ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::ValueCmd.to_string()),
           ))
         }
       } else {
         Err(ButtplugError::from(
-          ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::ValueWithParameterCmd.to_string()),
+          ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::ValueCmd.to_string()),
         ))
       }
     } else {
       Err(ButtplugError::from(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::ValueWithParameterCmd.to_string()),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::ValueCmd.to_string()),
       ))
     }
   }
@@ -152,7 +164,7 @@ impl TryFromDeviceAttributes<ValueWithParameterCmdV4> for CheckedValueWithParame
 //
 // And the bigger question is: Did anyone ever even use this message? We phased it out early, it may
 // just not exist in the wild anymore. :P
-impl TryFromDeviceAttributes<VorzeA10CycloneCmdV0> for CheckedValueWithParameterCmdV4 {
+impl TryFromDeviceAttributes<VorzeA10CycloneCmdV0> for CheckedActuatorCmdV4 {
   fn try_from_device_attributes(
     msg: VorzeA10CycloneCmdV0,
     features: &ServerDeviceAttributes,
