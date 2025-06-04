@@ -10,7 +10,7 @@ use crate::{
   server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_value_cmd::CheckedValueCmdV4},
+  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
 };
 
 generic_protocol_setup!(ManNuo, "mannuo");
@@ -25,7 +25,7 @@ impl ProtocolHandler for ManNuo {
 
   fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4
+    cmd: &CheckedActuatorCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut data = vec![0xAA, 0x55, 0x06, 0x01, 0x01, 0x01, cmd.value() as u8, 0xFA];
     // Simple XOR of everything up to the 9th byte for CRC.

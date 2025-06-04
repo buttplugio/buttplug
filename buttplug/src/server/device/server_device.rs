@@ -58,7 +58,7 @@ use crate::{
       protocol::ProtocolHandler,
     },
     message::{
-      checked_raw_read_cmd::CheckedRawReadCmdV2, checked_raw_subscribe_cmd::CheckedRawSubscribeCmdV2, checked_raw_unsubscribe_cmd::CheckedRawUnsubscribeCmdV2, checked_raw_write_cmd::CheckedRawWriteCmdV2, checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, checked_value_cmd::CheckedValueCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, server_device_attributes::ServerDeviceAttributes, spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage
+      checked_raw_cmd::CheckedRawReadCmdV2, checked_raw_subscribe_cmd::CheckedRawSubscribeCmdV2, checked_raw_unsubscribe_cmd::CheckedRawUnsubscribeCmdV2, checked_raw_write_cmd::CheckedRawWriteCmdV2, checked_sensor_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, checked_actuator_cmd::CheckedActuatorCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, server_device_attributes::ServerDeviceAttributes, spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage
     },
     ButtplugServerResultFuture,
   },
@@ -324,7 +324,7 @@ impl ServerDevice {
             .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ValueCmd)
           {
             stop_commands.push(
-              CheckedValueCmdV4::new(
+              CheckedActuatorCmdV4::new(
                 index as u32,
                 0,
                 index as u32,
@@ -507,7 +507,7 @@ impl ServerDevice {
     }
   }
 
-  fn handle_valuecmd_v4(&self, msg: &CheckedValueCmdV4) -> ButtplugServerResultFuture {
+  fn handle_valuecmd_v4(&self, msg: &CheckedActuatorCmdV4) -> ButtplugServerResultFuture {
     if let Some(last_msg) = self.last_actuator_command.get(&msg.feature_id()) {
       if *last_msg == ActuatorCommand::ValueCmd(msg.value()) {
         trace!("No commands generated for incoming device packet, skipping and returning success.");

@@ -23,7 +23,7 @@ use crate::{
       protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     },
     message::{
-      checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_value_cmd::CheckedValueCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4
+      checked_sensor_cmd::CheckedSensorReadCmdV4, checked_actuator_cmd::CheckedActuatorCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4
     },
   },
   util::{async_manager, sleep},
@@ -310,7 +310,7 @@ impl ProtocolHandler for Lovense {
   
   fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4
+    cmd: &CheckedActuatorCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_vibrator_value = self.vibrator_values[cmd.feature_index() as usize].load(Ordering::Relaxed);
     if current_vibrator_value == cmd.value() {
@@ -394,7 +394,7 @@ impl ProtocolHandler for Lovense {
   
   fn handle_value_constrict_cmd(
     &self,
-    cmd: &CheckedValueCmdV4,
+    cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let lovense_cmd = format!("Air:Level:{};", cmd.value())
       .as_bytes()
@@ -405,7 +405,7 @@ impl ProtocolHandler for Lovense {
 
   fn handle_value_rotate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4,
+    cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.handle_rotation_with_direction_cmd(&CheckedValueWithParameterCmdV4::new(cmd.device_index(), cmd.feature_index(), cmd.feature_id(), cmd.actuator_type(), cmd.value(), 0))
   }

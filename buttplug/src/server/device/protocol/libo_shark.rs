@@ -17,7 +17,7 @@ use crate::{
   server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_value_cmd::CheckedValueCmdV4},
+  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
 };
 
 const LIBO_SHARK_PROTOCOL_UUID: Uuid = uuid!("c0044425-b59c-4037-a702-0438afcaad3e");
@@ -35,7 +35,7 @@ impl ProtocolHandler for LiboShark {
 
   fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4,
+    cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.values[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
     let data = self.values[0].load(Ordering::Relaxed) << 4 | self.values[1].load(Ordering::Relaxed);

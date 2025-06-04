@@ -14,7 +14,7 @@ use crate::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-  }, message::checked_value_cmd::CheckedValueCmdV4},
+  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
   util::async_manager,
 };
 use async_trait::async_trait;
@@ -302,7 +302,7 @@ impl NintendoJoycon {
 impl ProtocolHandler for NintendoJoycon {
   fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4
+    cmd: &CheckedActuatorCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speed_val.store(cmd.value() as u16, Ordering::Relaxed);
     Ok(vec![])

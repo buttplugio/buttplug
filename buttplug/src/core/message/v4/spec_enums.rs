@@ -6,27 +6,7 @@
 // for full license information.
 
 use crate::core::message::{
-  ButtplugMessage,
-  ButtplugMessageError,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
-  DeviceRemovedV0,
-  ErrorV0,
-  OkV0,
-  PingV0,
-  RawReadCmdV2,
-  RawReadingV2,
-  RawSubscribeCmdV2,
-  RawUnsubscribeCmdV2,
-  RawWriteCmdV2,
-  RequestDeviceListV0,
-  RequestServerInfoV4,
-  ScanningFinishedV0,
-  ServerInfoV4,
-  StartScanningV0,
-  StopAllDevicesV0,
-  StopDeviceCmdV0,
-  StopScanningV0,
+  v4::sensor_cmd::SensorCmdV4, ActuatorCmdV4, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, DeviceRemovedV0, ErrorV0, OkV0, PingV0, RawCmdV4, RawReadingV2, RequestDeviceListV0, RequestServerInfoV4, ScanningFinishedV0, ServerInfoV4, StartScanningV0, StopAllDevicesV0, StopDeviceCmdV0, StopScanningV0
 };
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
@@ -34,12 +14,7 @@ use serde::{Deserialize, Serialize};
 use super::{
   DeviceAddedV4,
   DeviceListV4,
-  ValueCmdV4,
-  ValueWithParameterCmdV4,
-  SensorReadCmdV4,
   SensorReadingV4,
-  SensorSubscribeCmdV4,
-  SensorUnsubscribeCmdV4,
 };
 
 /// Represents all client-to-server messages in v3 of the Buttplug Spec
@@ -64,17 +39,9 @@ pub enum ButtplugClientMessageV4 {
   // Generic commands
   StopDeviceCmd(StopDeviceCmdV0),
   StopAllDevices(StopAllDevicesV0),
-  ValueCmd(ValueCmdV4),
-  ValueWithParameterCmd(ValueWithParameterCmdV4),
-  // Sensor commands
-  SensorReadCmd(SensorReadCmdV4),
-  SensorSubscribeCmd(SensorSubscribeCmdV4),
-  SensorUnsubscribeCmd(SensorUnsubscribeCmdV4),
-  // Raw commands
-  RawWriteCmd(RawWriteCmdV2),
-  RawReadCmd(RawReadCmdV2),
-  RawSubscribeCmd(RawSubscribeCmdV2),
-  RawUnsubscribeCmd(RawUnsubscribeCmdV2),
+  ActuatorCmd(ActuatorCmdV4),
+  SensorCmd(SensorCmdV4),
+  RawCmd(RawCmdV4),
 }
 
 /// Represents all server-to-client messages in v3 of the Buttplug Spec

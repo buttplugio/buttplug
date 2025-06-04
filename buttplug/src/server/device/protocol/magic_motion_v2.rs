@@ -19,7 +19,7 @@ use crate::{
       hardware::{HardwareCommand, HardwareWriteCmd},
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
-    message::checked_value_cmd::CheckedValueCmdV4,
+    message::checked_actuator_cmd::CheckedActuatorCmdV4,
   },
 };
 
@@ -50,7 +50,7 @@ impl ProtocolHandler for MagicMotionV2 {
 
   fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4,
+    cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
     let data = vec![

@@ -5,56 +5,47 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::{
+use crate::{core::{errors::ButtplugMessageError, message::{
   ButtplugDeviceMessage,
   ButtplugMessage,
-  ButtplugMessageError,
   ButtplugMessageFinalizer,
   ButtplugMessageValidator,
   Endpoint,
-};
-use getset::{CopyGetters, Getters};
+}}, server::message::RawCmdV2};
+use getset::CopyGetters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 #[derive(
-  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, CopyGetters,
+  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, CopyGetters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct RawWriteCmdV2 {
+pub struct RawSubscribeCmdV2 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Endpoint"))]
-  #[getset(get_copy = "pub")]
   endpoint: Endpoint,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Data"))]
-  #[getset(get = "pub")]
-  data: Vec<u8>,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "WriteWithResponse"))]
-  #[getset(get_copy = "pub")]
-  write_with_response: bool,
 }
 
-impl RawWriteCmdV2 {
-  pub fn new(
-    device_index: u32,
-    endpoint: Endpoint,
-    data: &[u8],
-    write_with_response: bool,
-  ) -> Self {
+impl RawSubscribeCmdV2 {
+  pub fn new(device_index: u32, endpoint: Endpoint) -> Self {
     Self {
       id: 1,
       device_index,
       endpoint,
-      data: data.to_vec(),
-      write_with_response,
     }
   }
 }
 
-impl ButtplugMessageValidator for RawWriteCmdV2 {
+impl RawCmdV2 for RawSubscribeCmdV2 {
+  fn endpoint(&self) -> Endpoint {
+    self.endpoint
+  }
+}
+
+impl ButtplugMessageValidator for RawSubscribeCmdV2 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
   }

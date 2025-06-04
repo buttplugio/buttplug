@@ -8,12 +8,12 @@ use crate::{
     },
   },
   server::message::{
-    checked_raw_read_cmd::CheckedRawReadCmdV2, checked_raw_subscribe_cmd::CheckedRawSubscribeCmdV2, checked_raw_unsubscribe_cmd::CheckedRawUnsubscribeCmdV2, checked_raw_write_cmd::CheckedRawWriteCmdV2, server_device_attributes::TryFromClientMessage, v0::ButtplugClientMessageV0, v1::ButtplugClientMessageV1, v2::ButtplugClientMessageV2, v3::ButtplugClientMessageV3, ButtplugClientMessageVariant, RequestServerInfoV1, ServerDeviceAttributes, TryFromDeviceAttributes
+    checked_raw_cmd::CheckedRawCmdV4, server_device_attributes::TryFromClientMessage, v0::ButtplugClientMessageV0, v1::ButtplugClientMessageV1, v2::ButtplugClientMessageV2, v3::ButtplugClientMessageV3, ButtplugClientMessageVariant, RequestServerInfoV1, ServerDeviceAttributes, TryFromDeviceAttributes
   },
 };
 
 use super::{
-  checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, checked_value_cmd::CheckedValueCmdV4, checked_value_vec_cmd::CheckedValueVecCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, checked_value_with_parameter_vec_cmd::CheckedValueWithParameterVecCmdV4
+  checked_sensor_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, checked_actuator_cmd::CheckedActuatorCmdV4, checked_actuator_vec_cmd::CheckedActuatorVecCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, checked_value_with_parameter_vec_cmd::CheckedValueWithParameterVecCmdV4
 };
 
 /// An CheckedClientMessage has had its contents verified and should need no further error/validity
@@ -44,19 +44,16 @@ pub enum ButtplugCheckedClientMessageV4 {
   // Generic commands
   StopDeviceCmd(StopDeviceCmdV0),
   StopAllDevices(StopAllDevicesV0),
-  ValueCmd(CheckedValueCmdV4),
+  ValueCmd(CheckedActuatorCmdV4),
   ValueWithParameterCmd(CheckedValueWithParameterCmdV4),
   // Sensor commands
   SensorReadCmd(CheckedSensorReadCmdV4),
   SensorSubscribeCmd(CheckedSensorSubscribeCmdV4),
   SensorUnsubscribeCmd(CheckedSensorUnsubscribeCmdV4),
   // Raw commands
-  RawWriteCmd(CheckedRawWriteCmdV2),
-  RawReadCmd(CheckedRawReadCmdV2),
-  RawSubscribeCmd(CheckedRawSubscribeCmdV2),
-  RawUnsubscribeCmd(CheckedRawUnsubscribeCmdV2),
+  RawWriteCmd(CheckedRawCmdV4),
   // Internal conversions for v1-v3 messages with subcommands
-  ValueVecCmd(CheckedValueVecCmdV4),
+  ValueVecCmd(CheckedActuatorVecCmdV4),
   ValueWithParameterVecCmd(CheckedValueWithParameterVecCmdV4),
 }
 
@@ -96,10 +93,10 @@ impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMess
       }
 
       // Message that need device index and feature checking
-      ButtplugClientMessageV4::ValueCmd(m) => {
+      ButtplugClientMessageV4::ActuatorCmd(m) => {
         if let Some(features) = feature_map.get(&m.device_index()) {
           Ok(ButtplugCheckedClientMessageV4::ValueCmd(
-            CheckedValueCmdV4::try_from_device_attributes(m, features)?,
+            CheckedActuatorCmdV4::try_from_device_attributes(m, features)?,
           ))
         } else {
           Err(ButtplugError::from(
@@ -304,7 +301,7 @@ impl TryFromClientMessage<ButtplugClientMessageV1> for ButtplugCheckedClientMess
         Ok(check_device_index_and_convert::<_, CheckedValueWithParameterCmdV4>(m, features)?.into())
       }
       ButtplugClientMessageV1::SingleMotorVibrateCmd(m) => {
-        Ok(check_device_index_and_convert::<_, CheckedValueVecCmdV4>(m, features)?.into())
+        Ok(check_device_index_and_convert::<_, CheckedActuatorVecCmdV4>(m, features)?.into())
       }
       _ => Self::try_from_client_message(ButtplugClientMessageV2::try_from(msg)?, features),
     }
@@ -326,7 +323,7 @@ impl TryFromClientMessage<ButtplugClientMessageV2> for ButtplugCheckedClientMess
       }
       // Convert VibrateCmd to a ScalarCmd command
       ButtplugClientMessageV2::VibrateCmd(m) => {
-        Ok(check_device_index_and_convert::<_, CheckedValueVecCmdV4>(m, features)?.into())
+        Ok(check_device_index_and_convert::<_, CheckedActuatorVecCmdV4>(m, features)?.into())
       }
       _ => Self::try_from_client_message(ButtplugClientMessageV3::try_from(msg)?, features),
     }
@@ -341,10 +338,10 @@ impl TryFromClientMessage<ButtplugClientMessageV3> for ButtplugCheckedClientMess
     match msg {
       // Convert v1/v2 message attribute commands into device feature commands
       ButtplugClientMessageV3::VibrateCmd(m) => {
-        Ok(check_device_index_and_convert::<_, CheckedValueVecCmdV4>(m, features)?.into())
+        Ok(check_device_index_and_convert::<_, CheckedActuatorVecCmdV4>(m, features)?.into())
       }
       ButtplugClientMessageV3::ScalarCmd(m) => {
-        Ok(check_device_index_and_convert::<_, CheckedValueVecCmdV4>(m, features)?.into())
+        Ok(check_device_index_and_convert::<_, CheckedActuatorVecCmdV4>(m, features)?.into())
       }
       ButtplugClientMessageV3::RotateCmd(m) => {
         Ok(check_device_index_and_convert::<_, CheckedValueWithParameterVecCmdV4>(m, features)?.into())
@@ -434,9 +431,9 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceManagerMessageUni
 )]
 pub enum ButtplugDeviceCommandMessageUnionV4 {
   StopDeviceCmd(StopDeviceCmdV0),
-  ValueCmd(CheckedValueCmdV4),
+  ValueCmd(CheckedActuatorCmdV4),
   ValueWithParameterCmd(CheckedValueWithParameterCmdV4),
-  ValueVecCmd(CheckedValueVecCmdV4),
+  ValueVecCmd(CheckedActuatorVecCmdV4),
   ValueWithParameterVecCmd(CheckedValueWithParameterVecCmdV4),
   SensorReadCmd(CheckedSensorReadCmdV4),
   SensorSubscribeCmd(CheckedSensorSubscribeCmdV4),

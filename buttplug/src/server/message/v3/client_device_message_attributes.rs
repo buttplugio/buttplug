@@ -7,8 +7,7 @@
 
 use crate::{
   core::message::{
-    ActuatorType, ButtplugActuatorFeatureMessageType, ButtplugSensorFeatureMessageType,
-    DeviceFeature, SensorType,
+    ActuatorType, DeviceFeature, SensorCommandType, SensorType
   },
   server::message::{
     v1::NullDeviceMessageAttributesV1, v2::{
@@ -277,7 +276,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
         let mut actuator_vec = vec!();
         if let Some(actuator_map) = feature.actuator() {
           for (actuator_type, actuator) in actuator_map {
-            if actuator.messages().contains(&ButtplugActuatorFeatureMessageType::ValueCmd) {
+            if ![ActuatorType::PositionWithDuration, ActuatorType::RotateWithDirection].contains(actuator_type) {
               let actuator_type = *actuator_type;
               let attrs = ClientGenericDeviceMessageAttributesV3 {
                 feature_descriptor: feature.description().to_owned(),
@@ -302,7 +301,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
         let mut actuator_vec = vec!();
         if let Some(actuator_map) = feature.actuator() {
           for (actuator_type, actuator) in actuator_map {
-            if *actuator_type == ActuatorType::RotateWithDirection && actuator.messages().contains(&ButtplugActuatorFeatureMessageType::ValueWithParameterCmd) {
+            if *actuator_type == ActuatorType::RotateWithDirection {
               let actuator_type = ActuatorType::Rotate;
               let attrs = ClientGenericDeviceMessageAttributesV3 {
                 feature_descriptor: feature.description().to_owned(),
@@ -325,7 +324,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
         let mut actuator_vec = vec!();
         if let Some(actuator_map) = feature.actuator() {
           for (actuator_type, actuator) in actuator_map {
-            if *actuator_type == ActuatorType::PositionWithDuration && actuator.messages().contains(&ButtplugActuatorFeatureMessageType::ValueWithParameterCmd) {
+            if *actuator_type == ActuatorType::PositionWithDuration {
               let actuator_type = ActuatorType::Position;
               let attrs = ClientGenericDeviceMessageAttributesV3 {
                 feature_descriptor: feature.description().to_owned(),
@@ -342,7 +341,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
       .flatten()
       .collect();
 
-    let sensor_filter = |message_type| {
+    let sensor_filter = {
       let attrs: Vec<SensorDeviceMessageAttributesV3> = features
         .iter()
         .map(|feature| {
@@ -351,7 +350,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
             for (sensor_type, sensor) in sensor_map {
               // Only convert Battery backwards. Other sensors weren't really built for v3 and we
               // never recommended using them or implemented much for them.
-              if *sensor_type == SensorType::Battery && sensor.messages().contains(message_type) {
+              if *sensor_type == SensorType::Battery && sensor.sensor_commands().contains(&SensorCommandType::Read) {
                 sensor_vec.push(SensorDeviceMessageAttributesV3 {
                   feature_descriptor: feature.description().to_owned(),
                   sensor_type: *sensor_type,
@@ -385,8 +384,8 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
       scalar_cmd: if scalar_attrs.is_empty() { None } else { Some(scalar_attrs) },
       rotate_cmd: if rotate_attrs.is_empty() { None } else { Some(rotate_attrs) },
       linear_cmd: if linear_attrs.is_empty() { None } else { Some(linear_attrs) },
-      sensor_read_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorReadCmd),
-      sensor_subscribe_cmd: sensor_filter(&ButtplugSensorFeatureMessageType::SensorSubscribeCmd),
+      sensor_read_cmd: sensor_filter,
+      sensor_subscribe_cmd: None,
       raw_read_cmd: raw_attrs.clone(),
       raw_write_cmd: raw_attrs.clone(),
       raw_subscribe_cmd: raw_attrs.clone(),

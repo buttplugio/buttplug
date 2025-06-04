@@ -17,11 +17,7 @@ use crate::{
       ErrorV0,
       OkV0,
       PingV0,
-      RawReadCmdV2,
       RawReadingV2,
-      RawSubscribeCmdV2,
-      RawUnsubscribeCmdV2,
-      RawWriteCmdV2,
       RequestDeviceListV0,
       ScanningFinishedV0,
       StartScanningV0,
@@ -31,8 +27,7 @@ use crate::{
     },
   },
   server::message::{
-    v1::{LinearCmdV1, RequestServerInfoV1, RotateCmdV1, VibrateCmdV1},
-    v2::{ButtplugClientMessageV2, ButtplugServerMessageV2, ServerInfoV2},
+    v1::{LinearCmdV1, RequestServerInfoV1, RotateCmdV1, VibrateCmdV1}, v2::{ButtplugClientMessageV2, ButtplugServerMessageV2, ServerInfoV2}, RawReadCmdV2, RawSubscribeCmdV2, RawUnsubscribeCmdV2, RawWriteCmdV2
   },
 };
 #[cfg(feature = "serialize-json")]

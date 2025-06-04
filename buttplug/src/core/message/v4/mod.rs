@@ -5,32 +5,26 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+mod actuator_cmd;
 mod device_added;
 mod device_list;
 mod device_message_info;
-mod one_shot_cmd;
+mod raw_cmd;
 mod request_server_info;
-mod sensor_read_cmd;
+mod sensor_cmd;
 mod sensor_reading;
-mod sensor_subscribe_cmd;
-mod sensor_unsubscribe_cmd;
 mod server_info;
 mod spec_enums;
-mod value_cmd;
-mod value_with_parameter_cmd;
 
 pub use {
+  actuator_cmd::{ActuatorCmdV4, ActuatorPositionWithDuration, ActuatorRotateWithDirection, ActuatorValue, ActuatorCommand},
   device_added::DeviceAddedV4,
   device_list::DeviceListV4,
   device_message_info::DeviceMessageInfoV4,
-  one_shot_cmd::OneShotCmdV4,
+  raw_cmd::{RawCmdV4, RawCommandData, RawCommandType, RawCommandRead, RawCommandWrite},
   request_server_info::RequestServerInfoV4,
-  value_cmd::ValueCmdV4,
-  value_with_parameter_cmd::ValueWithParameterCmdV4,
-  sensor_read_cmd::SensorReadCmdV4,
+  sensor_cmd::{SensorCmdV4, SensorCommandType},
   sensor_reading::SensorReadingV4,
-  sensor_subscribe_cmd::SensorSubscribeCmdV4,
-  sensor_unsubscribe_cmd::SensorUnsubscribeCmdV4,
   server_info::ServerInfoV4,
   spec_enums::{ButtplugClientMessageV4, ButtplugServerMessageV4},
 };

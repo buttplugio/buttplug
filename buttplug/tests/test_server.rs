@@ -31,7 +31,7 @@ use buttplug::{
       ServerDeviceManagerBuilder,
     },
     message::{
-      checked_value_cmd::CheckedValueCmdV4, spec_enums::ButtplugCheckedClientMessageV4, ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageV2, ButtplugServerMessageV3, ButtplugServerMessageVariant, RequestServerInfoV1, ServerInfoV2, VibrateCmdV1
+      checked_actuator_cmd::CheckedActuatorCmdV4, spec_enums::ButtplugCheckedClientMessageV4, ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageV2, ButtplugServerMessageV3, ButtplugServerMessageVariant, RequestServerInfoV1, ServerInfoV2, VibrateCmdV1
     },
     ButtplugServer,
     ButtplugServerBuilder,
@@ -222,7 +222,7 @@ async fn test_device_stop_on_ping_timeout() {
 
   server
     .parse_checked_message(ButtplugCheckedClientMessageV4::from(
-      CheckedValueCmdV4::new(
+      CheckedActuatorCmdV4::new(
         0,
         device_index,
         0,

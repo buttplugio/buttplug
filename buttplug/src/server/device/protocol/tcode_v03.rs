@@ -12,7 +12,7 @@ use crate::{
       hardware::{HardwareCommand, HardwareWriteCmd},
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
-    message::{checked_value_cmd::CheckedValueCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4},
+    message::{checked_actuator_cmd::CheckedActuatorCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4},
   },
 };
 
@@ -25,11 +25,11 @@ impl ProtocolHandler for TCodeV03 {
 
   fn handle_value_position_cmd(
       &self,
-      cmd: &CheckedValueCmdV4,
+      cmd: &CheckedActuatorCmdV4,
     ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut msg_vec = vec![];
 
-    let command = format!("L0{:03}\n", cmd.value());
+    let command = format!("L0{:02}\n", cmd.value());
     msg_vec.push(HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, command.as_bytes().to_vec(), false).into());
 
     Ok(msg_vec)
@@ -42,7 +42,7 @@ impl ProtocolHandler for TCodeV03 {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut msg_vec = vec![];
     
-    let command = format!("L{}{:03}I{}\n", cmd.feature_index(), cmd.value(), cmd.parameter() as u32);
+    let command = format!("L{}{:02}I{}\n", cmd.feature_index(), cmd.value(), cmd.parameter() as u32);
     msg_vec.push(HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, command.as_bytes().to_vec(), false).into());
 
     Ok(msg_vec)
@@ -50,7 +50,7 @@ impl ProtocolHandler for TCodeV03 {
 
     fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4
+    cmd: &CheckedActuatorCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       cmd.feature_id(),

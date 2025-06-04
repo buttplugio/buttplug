@@ -9,7 +9,7 @@ use std::sync::atomic::{AtomicU8, Ordering};
 
 use uuid::{uuid, Uuid};
 
-use crate::server::message::checked_value_cmd::CheckedValueCmdV4;
+use crate::server::message::checked_actuator_cmd::CheckedActuatorCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -50,7 +50,7 @@ impl ProtocolHandler for Cowgirl {
 
   fn handle_value_vibrate_cmd(
       &self,
-      cmd: &CheckedValueCmdV4,
+      cmd: &CheckedActuatorCmdV4,
     ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[0].store(cmd.value() as u8, Ordering::Relaxed);
     Ok(self.hardware_commands())
@@ -58,7 +58,7 @@ impl ProtocolHandler for Cowgirl {
 
   fn handle_value_rotate_cmd(
       &self,
-      cmd: &CheckedValueCmdV4,
+      cmd: &CheckedActuatorCmdV4,
     ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[1].store(cmd.value() as u8, Ordering::Relaxed);
     Ok(self.hardware_commands())

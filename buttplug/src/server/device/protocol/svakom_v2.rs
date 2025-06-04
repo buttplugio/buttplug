@@ -10,7 +10,7 @@ use crate::{
   server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_value_cmd::CheckedValueCmdV4},
+  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
 };
 
 generic_protocol_setup!(SvakomV2, "svakom-v2");
@@ -25,7 +25,7 @@ impl ProtocolHandler for SvakomV2 {
 
   fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4
+    cmd: &CheckedActuatorCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if cmd.feature_index() == 1 {
       Ok(vec![HardwareWriteCmd::new(

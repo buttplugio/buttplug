@@ -7,7 +7,7 @@
 
 use crate::server::device::hardware::Hardware;
 use crate::server::device::protocol::ProtocolInitializer;
-use crate::server::message::checked_value_cmd::CheckedValueCmdV4;
+use crate::server::message::checked_actuator_cmd::CheckedActuatorCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -50,7 +50,7 @@ impl ProtocolHandler for MetaXSireV2 {
 
   fn handle_value_vibrate_cmd(
     &self,
-    commands: &CheckedValueCmdV4,
+    commands: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
         commands.feature_id(),

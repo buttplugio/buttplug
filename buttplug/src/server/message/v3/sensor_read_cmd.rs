@@ -17,7 +17,7 @@ use crate::{
     },
   },
   server::message::{
-    checked_sensor_read_cmd::CheckedSensorReadCmdV4,
+    checked_sensor_cmd::CheckedSensorCmdV4,
     ServerDeviceAttributes,
     TryFromDeviceAttributes,
   },

@@ -18,7 +18,7 @@ use crate::{
 };
 use getset::{CopyGetters, Getters};
 
-use super::checked_value_cmd::CheckedValueCmdV4;
+use super::checked_actuator_cmd::CheckedActuatorCmdV4;
 
 #[derive(
   Debug,
@@ -30,17 +30,17 @@ use super::checked_value_cmd::CheckedValueCmdV4;
   Getters,
   CopyGetters,
 )]
-pub struct CheckedValueVecCmdV4 {
+pub struct CheckedActuatorVecCmdV4 {
   #[getset(get_copy = "pub")]
   id: u32,
   #[getset(get_copy = "pub")]
   device_index: u32,
   #[getset(get = "pub")]
-  value_vec: Vec<CheckedValueCmdV4>
+  value_vec: Vec<CheckedActuatorCmdV4>
 }
 
-impl CheckedValueVecCmdV4 {
-  pub fn new(id: u32, device_index: u32, mut value_vec: Vec<CheckedValueCmdV4>) -> Self {
+impl CheckedActuatorVecCmdV4 {
+  pub fn new(id: u32, device_index: u32, mut value_vec: Vec<CheckedActuatorCmdV4>) -> Self {
     // Several tests and parts of the system assumed we always sorted by feature index. This is not
     // necessarily true of incoming messages, but we also never explicitly specified the execution
     // order of subcommands within a message, so we'll just sort here for now to make tests pass,
@@ -54,7 +54,7 @@ impl CheckedValueVecCmdV4 {
   }
 }
 
-impl ButtplugMessageValidator for CheckedValueVecCmdV4 {
+impl ButtplugMessageValidator for CheckedActuatorVecCmdV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     Ok(())
@@ -62,7 +62,7 @@ impl ButtplugMessageValidator for CheckedValueVecCmdV4 {
 }
 
 
-impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedValueVecCmdV4 {
+impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedActuatorVecCmdV4 {
   // For VibrateCmd, just take everything out of V2's VibrateCmd and make a command.
   fn try_from_device_attributes(
     msg: SingleMotorVibrateCmdV0,
@@ -92,7 +92,7 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedValueVecCmdV4 {
       let actuator = feature.actuator().as_ref().unwrap().get(&ActuatorType::Vibrate).unwrap();
       // This doesn't need to run through a security check because we have to construct it to be
       // inherently secure anyways.
-      cmds.push(CheckedValueCmdV4::new(
+      cmds.push(CheckedActuatorCmdV4::new(
         msg.id(),
         msg.device_index(),
         index as u32,
@@ -101,11 +101,11 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedValueVecCmdV4 {
         (msg.speed() * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64) + *actuator.step_limit().start() as f64).ceil() as u32,
       ))
     }
-    Ok(CheckedValueVecCmdV4::new(msg.id(), msg.device_index(), cmds))
+    Ok(CheckedActuatorVecCmdV4::new(msg.id(), msg.device_index(), cmds))
   }
 }
 
-impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedValueVecCmdV4 {
+impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedActuatorVecCmdV4 {
   // VibrateCmd only exists up through Message Spec v2. We can assume that, if we're receiving it,
   // we can just use the V2 spec client device attributes for it. If this was sent on a V1 protocol,
   // it'll still have all the same features.
@@ -126,7 +126,7 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedValueVecCmdV4 {
           ButtplugDeviceError::DeviceFeatureCountMismatch(0, msg.speeds().len() as u32),
         ))?;
 
-    let mut cmds: Vec<CheckedValueCmdV4> = vec![];
+    let mut cmds: Vec<CheckedActuatorCmdV4> = vec![];
     for vibrate_cmd in msg.speeds() {
       if vibrate_cmd.index() > vibrate_attributes.features().len() as u32 {
         return Err(ButtplugError::from(
@@ -155,7 +155,7 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedValueVecCmdV4 {
           .ok_or(ButtplugDeviceError::DeviceConfigurationError(
             "Device configuration does not have Vibrate actuator available.".to_owned(),
           ))?;
-      cmds.push(CheckedValueCmdV4::new(
+      cmds.push(CheckedActuatorCmdV4::new(
         msg.id(),
         msg.device_index(),
         idx as u32,
@@ -164,17 +164,17 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedValueVecCmdV4 {
         (vibrate_cmd.speed() * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64) + *actuator.step_limit().start() as f64).ceil() as u32,
       ))
     }
-    Ok(CheckedValueVecCmdV4::new(msg.id(), msg.device_index(), cmds))
+    Ok(CheckedActuatorVecCmdV4::new(msg.id(), msg.device_index(), cmds))
   }
 }
 
-impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedValueVecCmdV4 {
+impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedActuatorVecCmdV4 {
   // ScalarCmd only came in with V3, so we can just use the V3 device attributes.
   fn try_from_device_attributes(
     msg: ScalarCmdV3,
     attrs: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
-    let mut cmds: Vec<CheckedValueCmdV4> = vec![];
+    let mut cmds: Vec<CheckedActuatorCmdV4> = vec![];
     if msg.scalars().is_empty() {
       return Err(ButtplugError::from(
         ButtplugDeviceError::ProtocolRequirementError(
@@ -219,7 +219,7 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedValueVecCmdV4 {
       // This needs to take the user configured step limit into account, otherwise we'll hand back
       // the wrong placement and it won't be noticed.
       if cmd.scalar() > 0.000001 {
-        cmds.push(CheckedValueCmdV4::new(
+        cmds.push(CheckedActuatorCmdV4::new(
           msg.id(),
           msg.device_index(),
           idx,
@@ -228,7 +228,7 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedValueVecCmdV4 {
           (cmd.scalar() * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64) + *actuator.step_limit().start() as f64).ceil() as u32,
         ));
       } else {
-        cmds.push(CheckedValueCmdV4::new(
+        cmds.push(CheckedActuatorCmdV4::new(
           msg.id(),
           msg.device_index(),
           idx,
@@ -239,6 +239,6 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedValueVecCmdV4 {
       }
     }
 
-    Ok(CheckedValueVecCmdV4::new(msg.id(), msg.device_index(), cmds))
+    Ok(CheckedActuatorVecCmdV4::new(msg.id(), msg.device_index(), cmds))
   }
 }

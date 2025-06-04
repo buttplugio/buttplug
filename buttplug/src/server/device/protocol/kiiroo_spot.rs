@@ -13,7 +13,7 @@ use crate::{
   server::{device::{
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::{checked_sensor_read_cmd::CheckedSensorReadCmdV4, checked_value_cmd::CheckedValueCmdV4}},
+  }, message::{checked_sensor_cmd::CheckedSensorReadCmdV4, checked_actuator_cmd::CheckedActuatorCmdV4}},
 };
 use futures::{future::BoxFuture, FutureExt};
 use std::{default::Default, sync::Arc};
@@ -26,7 +26,7 @@ pub struct KiirooSpot {}
 impl ProtocolHandler for KiirooSpot {
   fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4
+    cmd: &CheckedActuatorCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       cmd.feature_id(),

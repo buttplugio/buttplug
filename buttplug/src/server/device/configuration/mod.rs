@@ -582,7 +582,7 @@ impl DeviceConfigurationManager {
 mod test {
   use super::*;
   use crate::{
-    core::message::{ActuatorType, ButtplugActuatorFeatureMessageType, FeatureType},
+    core::message::{ActuatorType, FeatureType},
     server::message::server_device_feature::{ServerDeviceFeature, ServerDeviceFeatureActuator},
   };
   use std::{
@@ -601,9 +601,7 @@ mod test {
     let mut feature_actuator = HashMap::new();
     feature_actuator.insert(ActuatorType::Vibrate, ServerDeviceFeatureActuator::new(
                 &RangeInclusive::new(0, 20),
-                &RangeInclusive::new(0, 20),
-                &HashSet::from_iter([ButtplugActuatorFeatureMessageType::ValueCmd]),
-              ));
+                &RangeInclusive::new(0, 20)));
     builder
       .allow_raw_messages(allow_raw_messages)
       .communication_specifier("lovense", &[specifiers])

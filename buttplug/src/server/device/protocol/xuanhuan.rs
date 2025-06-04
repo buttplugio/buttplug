@@ -16,7 +16,7 @@ use crate::{
         ProtocolInitializer,
       },
     },
-    message::checked_value_cmd::CheckedValueCmdV4,
+    message::checked_actuator_cmd::CheckedActuatorCmdV4,
   },
   util::{async_manager, sleep},
 };
@@ -78,7 +78,7 @@ impl Xuanhuan {
 impl ProtocolHandler for Xuanhuan {
   fn handle_value_vibrate_cmd(
     &self,
-    cmd: &CheckedValueCmdV4,
+    cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let speed = cmd.value() as u8;
     self.current_command.store(speed, Ordering::Relaxed);
