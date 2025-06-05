@@ -298,7 +298,7 @@ impl TryFromClientMessage<ButtplugClientMessageV1> for ButtplugCheckedClientMess
     match msg {
       ButtplugClientMessageV1::VorzeA10CycloneCmd(m) => {
         // Vorze and RotateCmd are equivalent, so this is an ok conversion.
-        Ok(check_device_index_and_convert::<_, CheckedValueWithParameterCmdV4>(m, features)?.into())
+        Err(ButtplugError::ButtplugMessageError(ButtplugMessageError::MessageConversionError("VorzeA10CycloneCmd is considered unused, and no longer supported. If you are seeing this message and need VorzeA10CycloneCmd, file an issue in the Buttplug repo.".to_owned())))
       }
       ButtplugClientMessageV1::SingleMotorVibrateCmd(m) => {
         Ok(check_device_index_and_convert::<_, CheckedActuatorVecCmdV4>(m, features)?.into())
@@ -319,7 +319,7 @@ impl TryFromClientMessage<ButtplugClientMessageV2> for ButtplugCheckedClientMess
         Ok(check_device_index_and_convert::<_, CheckedSensorReadCmdV4>(m, features)?.into())
       }
       ButtplugClientMessageV2::RSSILevelCmd(m) => {
-        Ok(check_device_index_and_convert::<_, CheckedSensorReadCmdV4>(m, features)?.into())
+        Err(ButtplugError::ButtplugMessageError(ButtplugMessageError::MessageConversionError("RSSILevelCmd is considered unused, and no longer supported. If you are seeing this message and need RSSILevelCmd, file an issue in the Buttplug repo.".to_owned())))
       }
       // Convert VibrateCmd to a ScalarCmd command
       ButtplugClientMessageV2::VibrateCmd(m) => {
