@@ -1,0 +1,52 @@
+devices:
+  - identifier:
+      name: "Je Joue"
+    expected_name: "Je Joue Device"
+device_commands:
+  # Set vibration to 50%
+  - !Messages
+    device_index: 0
+    messages:
+      - !Vibrate
+        - Index: 0
+          Speed: 0.5
+  # Verify hardware message for 50% speed
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        feature_id: d3dd2bf5-b029-4bc1-9466-39f82c2e3258
+        endpoint: tx
+        data: [2, 3] # pattern=2 (vibe1), speed=127 (50%)
+        write_with_response: false
+  # Set vibration to 100%
+  - !Messages
+    device_index: 0
+    messages:
+      - !Vibrate
+        - Index: 0
+          Speed: 1.0
+  # Verify hardware message for 100% speed
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        feature_id: d3dd2bf5-b029-4bc1-9466-39f82c2e3258
+        endpoint: tx
+        data: [2, 5] # pattern=2 (vibe1), speed=255 (100%)
+        write_with_response: false
+  # Stop the device
+  - !Messages
+    device_index: 0
+    messages:
+      - !Stop # Verify hardware message for stop
+
+
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        feature_id: d3dd2bf5-b029-4bc1-9466-39f82c2e3258
+        endpoint: tx
+        data: [1, 0] # pattern=1 (both), speed=0 (stop)
+        write_with_response: false
