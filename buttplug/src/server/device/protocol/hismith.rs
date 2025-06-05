@@ -114,9 +114,11 @@ impl ProtocolHandler for Hismith {
     .into()])
   }
 
-  fn handle_value_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Wildolo has a vibe at index 0 using id 4
     // The thrusting stroker has a vibe at index 1 using id 6 (and the weird 0xf0 off)

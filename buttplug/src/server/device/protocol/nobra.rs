@@ -50,9 +50,11 @@ impl ProtocolHandler for Nobra {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let output_speed = if cmd.value() == 0 { 0x70 } else { 0x60 + cmd.value() };
     Ok(vec![HardwareWriteCmd::new(

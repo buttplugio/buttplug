@@ -26,7 +26,7 @@ generic_protocol_setup!(KiirooProWand, "kiiroo-prowand");
 pub struct KiirooProWand {}
 
 impl ProtocolHandler for KiirooProWand {
-  fn handle_value_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
     cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {

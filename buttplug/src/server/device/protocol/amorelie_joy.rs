@@ -17,7 +17,7 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  }},
 };
 use async_trait::async_trait;
 use uuid::{uuid, Uuid};
@@ -52,17 +52,19 @@ impl ProtocolHandler for AmorelieJoy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    _feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       [
         0x01,         // static header
         0x01,         // pattern (1 = steady),
-        cmd.value() as u8, // speed 0-100
+        speed as u8, // speed 0-100
       ]
       .to_vec(),
       false,

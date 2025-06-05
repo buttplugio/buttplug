@@ -67,9 +67,11 @@ impl Default for KiirooV21 {
 }
 
 impl ProtocolHandler for KiirooV21 {
-  fn handle_value_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       cmd.feature_id(),

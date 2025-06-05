@@ -58,7 +58,7 @@ use crate::{
       protocol::ProtocolHandler,
     },
     message::{
-      checked_raw_cmd::CheckedRawReadCmdV2, checked_raw_subscribe_cmd::CheckedRawSubscribeCmdV2, checked_raw_unsubscribe_cmd::CheckedRawUnsubscribeCmdV2, checked_raw_write_cmd::CheckedRawWriteCmdV2, checked_sensor_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, checked_actuator_cmd::CheckedActuatorCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, server_device_attributes::ServerDeviceAttributes, spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage
+      checked_raw_cmd::CheckedRawCmdV4, checked_sensor_cmd::CheckedSensorCmdV4, checked_actuator_cmd::CheckedActuatorCmdV4, server_device_attributes::ServerDeviceAttributes, spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage
     },
     ButtplugServerResultFuture,
   },
@@ -443,39 +443,14 @@ impl ServerDevice {
   ) -> ButtplugServerResultFuture {
     match command_message {
       // Raw messages
-      ButtplugDeviceCommandMessageUnionV4::RawReadCmd(msg) => self.handle_raw_read_cmd(msg),
-      ButtplugDeviceCommandMessageUnionV4::RawWriteCmd(msg) => self.handle_raw_write_cmd(msg),
-      ButtplugDeviceCommandMessageUnionV4::RawSubscribeCmd(msg) => {
-        self.handle_raw_subscribe_cmd(msg)
-      }
-      ButtplugDeviceCommandMessageUnionV4::RawUnsubscribeCmd(msg) => {
-        self.handle_raw_unsubscribe_cmd(msg)
-      }
+      ButtplugDeviceCommandMessageUnionV4::RawCmd(msg) => self.handle_raw_cmd(msg),
       // Sensor messages
-      ButtplugDeviceCommandMessageUnionV4::SensorReadCmd(msg) => {
-        self.handle_sensor_read_cmd_v4(msg)
-      }
-      ButtplugDeviceCommandMessageUnionV4::SensorSubscribeCmd(msg) => {
-        self.handle_sensor_subscribe_cmd_v4(msg)
-      }
-      ButtplugDeviceCommandMessageUnionV4::SensorUnsubscribeCmd(msg) => {
-        self.handle_sensor_unsubscribe_cmd_v4(msg)
+      ButtplugDeviceCommandMessageUnionV4::SensorCmd(msg) => {
+        self.handle_sensor_cmd_v4(msg)
       }
       // Actuator messages
-      ButtplugDeviceCommandMessageUnionV4::ValueCmd(msg) => self.handle_valuecmd_v4(&msg),
-      ButtplugDeviceCommandMessageUnionV4::ValueWithParameterCmd(msg) => {
-        if msg.actuator_type() == ActuatorType::PositionWithDuration {
-          self.handle_generic_command_result(self.handler.handle_position_with_duration_cmd(&msg))
-        } else if msg.actuator_type() == ActuatorType::RotateWithDirection {
-          self.handle_generic_command_result(self.handler.handle_rotation_with_direction_cmd(&msg))
-        } else {
-          future::ready(Err(
-            ButtplugDeviceError::MessageNotSupported(msg.actuator_type().to_string()).into(),
-          ))
-          .boxed()
-        }
-      }
-      ButtplugDeviceCommandMessageUnionV4::ValueVecCmd(msg) => {
+      ButtplugDeviceCommandMessageUnionV4::ActuatorCmd(msg) => self.handle_actuatorcmd_v4(&msg),
+      ButtplugDeviceCommandMessageUnionV4::ActuatorVecCmd(msg) => {
         let mut futs = vec![];
         let msg_id = msg.id();
         for m in msg.value_vec() {
@@ -489,25 +464,12 @@ impl ServerDevice {
         }
         .boxed()
       }
-      ButtplugDeviceCommandMessageUnionV4::ValueWithParameterVecCmd(msg) => {
-        let m = &msg.value_vec()[0];
-        if m.actuator_type() == ActuatorType::PositionWithDuration {
-          self.handle_generic_command_result(self.handler.handle_position_with_duration_cmd(&m))
-        } else if m.actuator_type() == ActuatorType::RotateWithDirection {
-          self.handle_generic_command_result(self.handler.handle_rotation_with_direction_cmd(&m))
-        } else {
-          future::ready(Err(
-            ButtplugDeviceError::MessageNotSupported(m.actuator_type().to_string()).into(),
-          ))
-          .boxed()
-        }
-      }
       // Other generic messages
       ButtplugDeviceCommandMessageUnionV4::StopDeviceCmd(_) => self.handle_stop_device_cmd(),
     }
   }
 
-  fn handle_valuecmd_v4(&self, msg: &CheckedActuatorCmdV4) -> ButtplugServerResultFuture {
+  fn handle_actuatorcmd_v4(&self, msg: &CheckedActuatorCmdV4) -> ButtplugServerResultFuture {
     if let Some(last_msg) = self.last_actuator_command.get(&msg.feature_id()) {
       if *last_msg == ActuatorCommand::ValueCmd(msg.value()) {
         trace!("No commands generated for incoming device packet, skipping and returning success.");
@@ -605,7 +567,7 @@ impl ServerDevice {
 
   fn handle_sensor_read_cmd_v4(
     &self,
-    message: CheckedSensorReadCmdV4,
+    message: CheckedSensorCmdV4,
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, ButtplugError>> {
     let result = self.check_sensor_command(
       message.feature_index(),
@@ -627,7 +589,7 @@ impl ServerDevice {
 
   fn handle_sensor_subscribe_cmd_v4(
     &self,
-    message: CheckedSensorSubscribeCmdV4,
+    message: CheckedSensorCmdV4,
   ) -> ButtplugServerResultFuture {
     let result = self.check_sensor_command(
       message.feature_index(),
@@ -649,7 +611,7 @@ impl ServerDevice {
 
   fn handle_sensor_unsubscribe_cmd_v4(
     &self,
-    message: CheckedSensorUnsubscribeCmdV4,
+    message: CheckedSensorCmdV4,
   ) -> ButtplugServerResultFuture {
     let result = self.check_sensor_command(
       message.feature_index(),

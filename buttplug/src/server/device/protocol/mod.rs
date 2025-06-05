@@ -147,7 +147,7 @@ pub mod youou;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint, SensorReadingV4, SensorType},
+    message::{ActuatorCommand, ActuatorType, Endpoint, SensorReadingV4, SensorType},
   },
   server::{
     device::{
@@ -155,7 +155,7 @@ use crate::{
       hardware::{Hardware, HardwareCommand, HardwareReadCmd},
     },
     message::{
-      checked_sensor_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, checked_actuator_cmd::CheckedActuatorCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage
+      checked_actuator_cmd::CheckedActuatorCmdV4, checked_sensor_cmd::CheckedSensorCmdV4, spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage
     },
   },
 };
@@ -830,12 +830,13 @@ pub trait ProtocolHandler: Sync + Send {
   // The default scalar handler assumes that most devices require discrete commands per feature. If
   // a protocol has commands that combine multiple features, either with matched or unmatched
   // actuators, they should just implement their own version of this method.
-  fn handle_value_cmd(
+  fn handle_actuator_cmd(
     &self,
     cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let actuator = cmd.actuator_type();
-    match actuator {
+    let actuator_command = cmd.actuator_command();
+    match actuator_command {
+      /*
       ActuatorType::Constrict => {
         self.handle_value_constrict_cmd(cmd)
       }
@@ -844,22 +845,27 @@ pub trait ProtocolHandler: Sync + Send {
         self.handle_value_oscillate_cmd(cmd)
       }
       ActuatorType::Rotate => self.handle_value_rotate_cmd(cmd),
-      ActuatorType::Vibrate => self.handle_value_vibrate_cmd(cmd),
+      */
+      ActuatorCommand::Vibrate(x) => self.handle_actuator_vibrate_cmd(cmd.feature_index(), cmd.feature_id(), x.value()),
+      /*
       ActuatorType::Position => {
         self.handle_value_position_cmd(cmd)
       }
       ActuatorType::Unknown => Err(ButtplugDeviceError::UnhandledCommand(
         "Unknown actuator types are not controllable.".to_owned(),
       ))?,
+      */
       _ => Err(ButtplugDeviceError::UnhandledCommand(
-        format!("{} actuator types are not compatible with ValueCmd.", actuator).to_owned(),
+        format!("{} actuator types are not compatible with .", actuator).to_owned(),
       ))?,
     }
   }
 
-  fn handle_value_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
-    _cmd: &CheckedActuatorCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ValueCmd (Vibrate Actuator)")
   }

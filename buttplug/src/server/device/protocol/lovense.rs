@@ -308,9 +308,11 @@ impl ProtocolHandler for Lovense {
     ))
   }
   
-  fn handle_value_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_vibrator_value = self.vibrator_values[cmd.feature_index() as usize].load(Ordering::Relaxed);
     if current_vibrator_value == cmd.value() {
