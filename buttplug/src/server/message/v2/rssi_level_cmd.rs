@@ -7,19 +7,10 @@
 
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+    errors::{ButtplugMessageError},
     message::{
-      ButtplugDeviceMessage,
-      ButtplugMessage,
-      ButtplugMessageFinalizer,
-      ButtplugMessageValidator,
-      SensorType,
+      ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator,
     },
-  },
-  server::message::{
-    checked_sensor_cmd::CheckedSensorReadCmdV4,
-    ServerDeviceAttributes,
-    TryFromDeviceAttributes,
   },
 };
 #[cfg(feature = "serialize-json")]
@@ -46,30 +37,5 @@ impl RSSILevelCmdV2 {
 impl ButtplugMessageValidator for RSSILevelCmdV2 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
-  }
-}
-
-impl TryFromDeviceAttributes<RSSILevelCmdV2> for CheckedSensorReadCmdV4 {
-  fn try_from_device_attributes(
-    msg: RSSILevelCmdV2,
-    features: &ServerDeviceAttributes,
-  ) -> Result<Self, crate::core::errors::ButtplugError> {
-    let rssi_feature = features
-      .attrs_v2()
-      .rssi_level_cmd()
-      .as_ref()
-      .ok_or(ButtplugError::from(
-        ButtplugDeviceError::DeviceConfigurationError(
-          "Device configuration does not have Battery sensor available.".to_owned(),
-        ),
-      ))?
-      .feature();
-
-    Ok(CheckedSensorReadCmdV4::new(
-      msg.device_index(),
-      0,
-      SensorType::RSSI,
-      rssi_feature.id(),
-    ))
   }
 }
