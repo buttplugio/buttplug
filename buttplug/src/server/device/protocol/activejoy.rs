@@ -5,12 +5,14 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  }},
 };
 
 generic_protocol_setup!(ActiveJoy, "activejoy");
@@ -23,20 +25,22 @@ impl ProtocolHandler for ActiveJoy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       [
         0xb0,        // static header
         0x01,        // mode: 1=vibe, 5=shock, 6=thrust, 7=suction, 8=rotation, 16=swing,
         0x00,        // strong mode = 1 (thrust, suction, swing, rotate)
-        cmd.feature_index() as u8, // 0 unless vibe2
-        if cmd.value() == 0 { 0x00 } else { 0x01 },
-        cmd.value() as u8,
+        feature_index as u8, // 0 unless vibe2
+        if speed == 0 { 0x00 } else { 0x01 },
+        speed as u8,
       ]
       .to_vec(),
       false,

@@ -51,9 +51,11 @@ impl ProtocolHandler for TryFunBlackHole {
     Ok(vec![HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, data, false).into()])
   }
 
-    fn handle_value_vibrate_cmd(
+    fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut sum: u8 = 0xff;
     let mut data = vec![

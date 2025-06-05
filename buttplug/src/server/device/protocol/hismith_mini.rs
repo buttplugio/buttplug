@@ -120,9 +120,11 @@ impl ProtocolHandler for HismithMini {
     .into()])
   }
 
-  fn handle_value_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let idx: u8 = if !self.dual_vibe || cmd.feature_index() == 1 {
       0x05

@@ -23,9 +23,11 @@ impl ProtocolHandler for ManNuo {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut data = vec![0xAA, 0x55, 0x06, 0x01, 0x01, 0x01, cmd.value() as u8, 0xFA];
     // Simple XOR of everything up to the 9th byte for CRC.

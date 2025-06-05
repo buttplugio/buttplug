@@ -48,7 +48,7 @@ impl ProtocolHandler for MetaXSireV2 {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
     commands: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {

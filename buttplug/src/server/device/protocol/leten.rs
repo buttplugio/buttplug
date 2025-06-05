@@ -93,9 +93,11 @@ impl ProtocolHandler for Leten {
     super::ProtocolKeepaliveStrategy::NoStrategy
   }
 
-  fn handle_value_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_command = self.current_command.clone();
     current_command.store(cmd.value() as u8, Ordering::Relaxed);

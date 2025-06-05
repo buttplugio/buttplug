@@ -23,9 +23,11 @@ impl ProtocolHandler for LoveNuts {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut data: Vec<u8> = vec![0x45, 0x56, 0x4f, 0x4c];
     data.append(&mut [cmd.value() as u8 | (cmd.value() as u8) << 4; 10].to_vec());

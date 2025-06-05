@@ -9,7 +9,6 @@ use crate::core::message::{
   ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, Endpoint
 };
 use getset::{CopyGetters, Getters};
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 pub trait RawCmdEndpoint {
@@ -17,7 +16,7 @@ pub trait RawCmdEndpoint {
 }
 
 #[derive(
-  Debug, Display, PartialEq, Eq, Clone, Serialize, Deserialize
+  Debug, Display, PartialEq, Eq, Clone, Copy, Serialize, Deserialize
 )]
 pub enum RawCommandType {
   Read,

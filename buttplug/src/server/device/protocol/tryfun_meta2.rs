@@ -89,7 +89,7 @@ impl ProtocolHandler for TryFunMeta2 {
     Ok(vec![HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, data, false).into()])
   }
 
-  fn handle_value_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
     cmd: &CheckedActuatorCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {

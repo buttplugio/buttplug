@@ -119,9 +119,11 @@ impl ProtocolHandler for MizzZeeV3 {
     super::ProtocolKeepaliveStrategy::NoStrategy
   }
 
-  fn handle_value_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_scalar = self.current_scalar.clone();
     current_scalar.store(cmd.value(), Ordering::Relaxed);

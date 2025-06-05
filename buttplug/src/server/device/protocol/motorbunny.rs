@@ -30,9 +30,11 @@ impl ProtocolHandler for Motorbunny {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut command_vec: Vec<u8>;
     if cmd.value() == 0 {
