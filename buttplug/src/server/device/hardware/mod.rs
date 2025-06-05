@@ -10,7 +10,7 @@ use crate::{
       RawReadingV2,
     },
   },
-  server::{device::configuration::ProtocolCommunicationSpecifier, message::{checked_raw_cmd::CheckedRawReadCmdV2, checked_raw_subscribe_cmd::CheckedRawSubscribeCmdV2, checked_raw_unsubscribe_cmd::CheckedRawUnsubscribeCmdV2, checked_raw_write_cmd::CheckedRawWriteCmdV2}},
+  server::{device::configuration::ProtocolCommunicationSpecifier, message::{checked_raw_cmd::CheckedRawCmdV4}},
 };
 use async_trait::async_trait;
 use futures::future::BoxFuture;
@@ -45,6 +45,7 @@ pub struct HardwareReadCmd {
   timeout_ms: u32,
 }
 
+
 impl HardwareReadCmd {
   /// Creates a new DeviceReadCmd instance
   pub fn new(command_id: Uuid, endpoint: Endpoint, length: u32, timeout_ms: u32) -> Self {
@@ -57,8 +58,8 @@ impl HardwareReadCmd {
   }
 }
 
-impl From<CheckedRawReadCmdV2> for HardwareReadCmd {
-  fn from(msg: CheckedRawReadCmdV2) -> Self {
+impl From<CheckedRawCmdV2> for HardwareReadCmd {
+  fn from(msg: CheckedRawCmdV2) -> Self {
     Self {
       command_id: GENERIC_RAW_COMMAND_UUID,
       endpoint: msg.endpoint(),

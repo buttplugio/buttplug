@@ -25,7 +25,7 @@ use uuid::Uuid;
 pub struct CheckedSensorCmdV4 {
   id: u32,
   device_index: u32,
-  feature_index: u32,
+  feature_index: Option<u32>,
   sensor_type: SensorType,
   sensor_command: SensorCommandType,
   feature_id: Uuid,
@@ -34,7 +34,7 @@ pub struct CheckedSensorCmdV4 {
 impl CheckedSensorCmdV4 {
   pub fn new(
     device_index: u32,
-    feature_index: u32,
+    feature_index: Option<u32>,
     sensor_type: SensorType,
     sensor_command: SensorCommandType,
     feature_id: Uuid,
@@ -50,6 +50,7 @@ impl CheckedSensorCmdV4 {
   }
 }
 
+/*
 impl From<CheckedSensorCmdV4> for SensorCmdV4 {
   fn from(value: CheckedSensorCmdV4) -> Self {
     Self::new(
@@ -60,6 +61,7 @@ impl From<CheckedSensorCmdV4> for SensorCmdV4 {
     )
   }
 }
+  */
 
 impl ButtplugMessageValidator for CheckedSensorCmdV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
@@ -79,7 +81,7 @@ impl TryFromDeviceAttributes<SensorCmdV4> for CheckedSensorCmdV4 {
           if sensor.sensor_commands().contains(&msg.sensor_command_type()) {
             Ok(CheckedSensorCmdV4::new(
               msg.device_index(),
-              msg.feature_index(),
+              Some(msg.feature_index()),
               msg.sensor_type(),
               msg.sensor_command_type(),
               feature.id(),

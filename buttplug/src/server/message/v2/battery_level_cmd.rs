@@ -9,15 +9,11 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      ButtplugDeviceMessage,
-      ButtplugMessage,
-      ButtplugMessageFinalizer,
-      ButtplugMessageValidator,
-      SensorType,
+      ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, SensorCommandType, SensorType
     },
   },
   server::message::{
-    checked_sensor_cmd::CheckedSensorReadCmdV4,
+    checked_sensor_cmd::CheckedSensorCmdV4,
     ServerDeviceAttributes,
     TryFromDeviceAttributes,
   },
@@ -50,7 +46,7 @@ impl ButtplugMessageValidator for BatteryLevelCmdV2 {
   }
 }
 
-impl TryFromDeviceAttributes<BatteryLevelCmdV2> for CheckedSensorReadCmdV4 {
+impl TryFromDeviceAttributes<BatteryLevelCmdV2> for CheckedSensorCmdV4 {
   fn try_from_device_attributes(
     msg: BatteryLevelCmdV2,
     features: &ServerDeviceAttributes,
@@ -66,10 +62,11 @@ impl TryFromDeviceAttributes<BatteryLevelCmdV2> for CheckedSensorReadCmdV4 {
       ))?
       .feature();
 
-    Ok(CheckedSensorReadCmdV4::new(
+    Ok(CheckedSensorCmdV4::new(
       msg.device_index(),
-      0,
+      None,
       SensorType::Battery,
+      SensorCommandType::Read,
       battery_feature.id(),
     ))
   }

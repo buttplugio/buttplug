@@ -10,8 +10,8 @@ use crate::{core::{errors::ButtplugMessageError, message::{
   ButtplugMessage,
   ButtplugMessageFinalizer,
   ButtplugMessageValidator,
-  Endpoint,
-}}, server::message::RawCmdV2};
+  Endpoint, RawCmdEndpoint,
+}},};
 use getset::CopyGetters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
@@ -39,7 +39,7 @@ impl RawSubscribeCmdV2 {
   }
 }
 
-impl RawCmdV2 for RawSubscribeCmdV2 {
+impl RawCmdEndpoint for RawSubscribeCmdV2 {
   fn endpoint(&self) -> Endpoint {
     self.endpoint
   }

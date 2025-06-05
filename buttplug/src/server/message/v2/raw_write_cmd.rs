@@ -5,13 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{core::{errors::ButtplugMessageError, message::{
+use crate::core::{errors::ButtplugMessageError, message::{
   ButtplugDeviceMessage,
   ButtplugMessage,
   ButtplugMessageFinalizer,
   ButtplugMessageValidator,
-  Endpoint,
-}}, server::message::RawCmdV2};
+  Endpoint, RawCmdEndpoint,
+}};
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
@@ -52,7 +52,7 @@ impl RawWriteCmdV2 {
   }
 }
 
-impl RawCmdV2 for RawWriteCmdV2 {
+impl RawCmdEndpoint for RawWriteCmdV2 {
   fn endpoint(&self) -> Endpoint {
     self.endpoint
   }
