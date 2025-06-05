@@ -193,6 +193,8 @@ pub enum ButtplugDeviceError {
   DeviceSensorTypeMismatch(u32, SensorType, FeatureType),
   /// Protocol does not have an implementation available for Sensor Type {0}
   ProtocolSensorNotSupported(SensorType),
+  /// Device does not support {0}
+  ActuatorNotSupported(ActuatorType),
 }
 
 /// Unknown errors occur in exceptional circumstances where no other error type

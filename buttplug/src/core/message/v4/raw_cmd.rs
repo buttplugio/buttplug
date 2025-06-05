@@ -12,6 +12,9 @@ use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
+pub trait RawCmdEndpoint {
+  fn endpoint(&self) -> Endpoint;
+}
 
 #[derive(
   Debug, Display, PartialEq, Eq, Clone, Serialize, Deserialize
@@ -82,10 +85,9 @@ pub struct RawCmdV4 {
   id: u32,
   #[serde(rename = "DeviceIndex")]
   device_index: u32,
-  #[getset(get = "pub")]
   #[serde(rename = "Endpoint")]
   endpoint: Endpoint,
-  #[getset(get = "pub")]
+  #[getset(get_copy = "pub")]
   #[serde(rename = "RawCommandType")]
   raw_command_type: RawCommandType,
   #[getset(get = "pub")]
@@ -109,5 +111,11 @@ impl ButtplugMessageValidator for RawCmdV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
     // TODO Should expected_length always be > 0?
+  }
+}
+
+impl RawCmdEndpoint for RawCmdV4 {
+  fn endpoint(&self) -> Endpoint {
+    self.endpoint
   }
 }

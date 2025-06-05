@@ -9,7 +9,7 @@ use crate::core::{errors::ButtplugMessageError, message::{
   ButtplugMessage,
   ButtplugMessageFinalizer,
   ButtplugMessageSpecVersion,
-  ButtplugMessageValidator, RequestServerInfoV4,
+  ButtplugMessageValidator,
 }};
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]

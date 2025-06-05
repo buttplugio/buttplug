@@ -14,7 +14,6 @@ mod raw_subscribe_cmd;
 mod raw_unsubscribe_cmd;
 mod raw_write_cmd;
 
-use {crate::core::message::Endpoint};
 pub use {
   battery_level_cmd::BatteryLevelCmdV2,
   battery_level_reading::BatteryLevelReadingV2,
@@ -39,7 +38,3 @@ pub use {
   server_info::ServerInfoV2,
   spec_enums::{ButtplugClientMessageV2, ButtplugServerMessageV2, ButtplugDeviceMessageNameV2}
 };
-
-pub(crate) trait RawCmdV2 {
-  fn endpoint(&self) -> Endpoint;
-}

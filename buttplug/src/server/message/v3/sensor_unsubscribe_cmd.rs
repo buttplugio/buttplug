@@ -9,15 +9,11 @@ use crate::{
   core::{
     errors::ButtplugMessageError,
     message::{
-      ButtplugDeviceMessage,
-      ButtplugMessage,
-      ButtplugMessageFinalizer,
-      ButtplugMessageValidator,
-      SensorType,
+      ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, SensorCommandType, SensorType
     },
   },
   server::message::{
-    checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4,
+    checked_sensor_cmd::CheckedSensorCmdV4,
     ServerDeviceAttributes,
     TryFromDeviceAttributes,
   },
@@ -58,7 +54,7 @@ impl ButtplugMessageValidator for SensorUnsubscribeCmdV3 {
   }
 }
 
-impl TryFromDeviceAttributes<SensorUnsubscribeCmdV3> for CheckedSensorUnsubscribeCmdV4 {
+impl TryFromDeviceAttributes<SensorUnsubscribeCmdV3> for CheckedSensorCmdV4 {
   fn try_from_device_attributes(
     msg: SensorUnsubscribeCmdV3,
     features: &ServerDeviceAttributes,
@@ -68,10 +64,11 @@ impl TryFromDeviceAttributes<SensorUnsubscribeCmdV3> for CheckedSensorUnsubscrib
       .feature()
       .id();
 
-    Ok(CheckedSensorUnsubscribeCmdV4::new(
+    Ok(CheckedSensorCmdV4::new(
       msg.device_index(),
-      0,
+      None,
       *msg.sensor_type(),
+      SensorCommandType::Unsubscribe,
       sensor_feature_id,
     ))
   }

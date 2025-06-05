@@ -9,11 +9,7 @@ use crate::{
   core::{
     errors::ButtplugMessageError,
     message::{
-      ButtplugDeviceMessage,
-      ButtplugMessage,
-      ButtplugMessageFinalizer,
-      ButtplugMessageValidator,
-      SensorType,
+      ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, SensorCommandType, SensorType
     },
   },
   server::message::{
@@ -61,7 +57,7 @@ impl ButtplugMessageValidator for SensorReadCmdV3 {
   }
 }
 
-impl TryFromDeviceAttributes<SensorReadCmdV3> for CheckedSensorReadCmdV4 {
+impl TryFromDeviceAttributes<SensorReadCmdV3> for CheckedSensorCmdV4 {
   fn try_from_device_attributes(
     msg: SensorReadCmdV3,
     features: &ServerDeviceAttributes,
@@ -71,10 +67,11 @@ impl TryFromDeviceAttributes<SensorReadCmdV3> for CheckedSensorReadCmdV4 {
       .feature()
       .id();
 
-    Ok(CheckedSensorReadCmdV4::new(
+    Ok(CheckedSensorCmdV4::new(
       msg.device_index(),
-      0,
+      None,
       *msg.sensor_type(),
+      SensorCommandType::Read,
       sensor_feature_id,
     ))
   }
