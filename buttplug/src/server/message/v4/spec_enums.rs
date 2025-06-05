@@ -225,7 +225,7 @@ impl TryFromClientMessage<ButtplugClientMessageV1> for ButtplugCheckedClientMess
     // Instead of converting to v2 message attributes then to v4 device features, we move directly
     // from v0 command messages to v4 device features here. There's no reason to do the middle step.
     match msg {
-      ButtplugClientMessageV1::VorzeA10CycloneCmd(m) => {
+      ButtplugClientMessageV1::VorzeA10CycloneCmd(_) => {
         // Vorze and RotateCmd are equivalent, so this is an ok conversion.
         Err(ButtplugError::ButtplugMessageError(ButtplugMessageError::MessageConversionError("VorzeA10CycloneCmd is considered unused, and no longer supported. If you are seeing this message and need VorzeA10CycloneCmd, file an issue in the Buttplug repo.".to_owned())))
       }
@@ -247,7 +247,7 @@ impl TryFromClientMessage<ButtplugClientMessageV2> for ButtplugCheckedClientMess
       ButtplugClientMessageV2::BatteryLevelCmd(m) => {
         Ok(check_device_index_and_convert::<_, CheckedSensorCmdV4>(m, features)?.into())
       }
-      ButtplugClientMessageV2::RSSILevelCmd(m) => {
+      ButtplugClientMessageV2::RSSILevelCmd(_) => {
         Err(ButtplugError::ButtplugMessageError(ButtplugMessageError::MessageConversionError("RSSILevelCmd is considered unused, and no longer supported. If you are seeing this message and need RSSILevelCmd, file an issue in the Buttplug repo.".to_owned())))
       }
       // Convert VibrateCmd to a ScalarCmd command
