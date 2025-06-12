@@ -8835,6 +8835,9 @@ protocols:
           - J-Tarik
         name: JoyHub Tarik
       - identifier:
+          - J-Derik
+        name: JoyHub Urica Guard
+      - identifier:
           - J-UricaGuard2
         name: JoyHub Urica Guard 2
       - identifier:
@@ -9151,6 +9154,7 @@ protocols:
             - J-Myrna
             - J-Vase2
             - J-Martino
+            - J-Derik
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
