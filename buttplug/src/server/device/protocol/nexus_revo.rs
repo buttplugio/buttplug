@@ -12,7 +12,7 @@ use crate::{
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }
+  },
 };
 
 generic_protocol_setup!(NexusRevo, "nexus-revo");
@@ -29,7 +29,7 @@ impl ProtocolHandler for NexusRevo {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
@@ -45,7 +45,7 @@ impl ProtocolHandler for NexusRevo {
     feature_index: u32,
     feature_id: Uuid,
     speed: u32,
-    clockwise: bool
+    clockwise: bool,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
@@ -59,7 +59,7 @@ impl ProtocolHandler for NexusRevo {
         0x00,
       ],
       true,
-      )
-      .into()])
+    )
+    .into()])
   }
 }

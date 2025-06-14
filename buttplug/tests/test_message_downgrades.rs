@@ -172,8 +172,14 @@ async fn test_version0_singlemotorvibratecmd() {
   check_test_recv_value(
     &Duration::from_millis(150),
     &mut device,
-    HardwareCommand::Write(HardwareWriteCmd::new(Uuid::nil(), Endpoint::Tx, vec![0xF1, 64], false)),
-  ).await;
+    HardwareCommand::Write(HardwareWriteCmd::new(
+      Uuid::nil(),
+      Endpoint::Tx,
+      vec![0xF1, 64],
+      false,
+    )),
+  )
+  .await;
 }
 
 #[tokio::test]
@@ -242,8 +248,14 @@ async fn test_version1_singlemotorvibratecmd() {
   check_test_recv_value(
     &Duration::from_millis(150),
     &mut device,
-    HardwareCommand::Write(HardwareWriteCmd::new(Uuid::nil(), Endpoint::Tx, vec![0xF1, 64], false)),
-  ).await;
+    HardwareCommand::Write(HardwareWriteCmd::new(
+      Uuid::nil(),
+      Endpoint::Tx,
+      vec![0xF1, 64],
+      false,
+    )),
+  )
+  .await;
 }
 
 #[tokio::test]

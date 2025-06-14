@@ -5,15 +5,18 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{core::{
-  errors::ButtplugMessageError,
-  message::{
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-    ButtplugMessageSpecVersion,
-    ButtplugMessageValidator,
+use crate::{
+  core::{
+    errors::ButtplugMessageError,
+    message::{
+      ButtplugMessage,
+      ButtplugMessageFinalizer,
+      ButtplugMessageSpecVersion,
+      ButtplugMessageValidator,
+    },
   },
-}, server::message::ServerInfoV2};
+  server::message::ServerInfoV2,
+};
 use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};

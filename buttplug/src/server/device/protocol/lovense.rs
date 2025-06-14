@@ -11,29 +11,24 @@ use crate::{
     message::{self, Endpoint, FeatureType, SensorReadingV4},
   },
   server::device::{
-      configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-      hardware::{
-        Hardware,
-        HardwareCommand,
-        HardwareEvent,
-        HardwareSubscribeCmd,
-        HardwareWriteCmd,
-      },
-      protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-    },
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+  },
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
 use dashmap::DashMap;
 use futures::{future::BoxFuture, FutureExt};
 use regex::Regex;
-use uuid::{uuid, Uuid};
 use std::{
   sync::{
     atomic::{AtomicBool, AtomicU32, Ordering},
     Arc,
-  }, time::Duration
+  },
+  time::Duration,
 };
+use uuid::{uuid, Uuid};
 
 use super::ProtocolCommandOutputStrategy;
 
@@ -99,11 +94,19 @@ impl ProtocolIdentifier for LovenseIdentifier {
     let mut event_receiver = hardware.event_stream();
     let mut count = 0;
     hardware
-      .subscribe(&HardwareSubscribeCmd::new(LOVENSE_PROTOCOL_UUID, Endpoint::Rx))
+      .subscribe(&HardwareSubscribeCmd::new(
+        LOVENSE_PROTOCOL_UUID,
+        Endpoint::Rx,
+      ))
       .await?;
 
     loop {
-      let msg = HardwareWriteCmd::new(LOVENSE_PROTOCOL_UUID, Endpoint::Tx, b"DeviceType;".to_vec(), false);
+      let msg = HardwareWriteCmd::new(
+        LOVENSE_PROTOCOL_UUID,
+        Endpoint::Tx,
+        b"DeviceType;".to_vec(),
+        false,
+      );
       hardware.write_value(&msg).await?;
 
       select! {
@@ -221,7 +224,7 @@ impl Lovense {
       ));
     }
 
-    let mut vibrator_values = vec!();
+    let mut vibrator_values = vec![];
     for _ in 0..vibrator_count {
       vibrator_values.push(AtomicU32::new(0));
     }
@@ -237,54 +240,54 @@ impl Lovense {
     }
   }
 
-  fn handle_lvs_cmd(
-    &self
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-      let mut speeds = "LVS:{}".as_bytes().to_vec();
-      for i in self.vibrator_values.iter() {
-        speeds.push(i.load(Ordering::Relaxed) as u8);
-      }
-      speeds.push(0x3b);
+  fn handle_lvs_cmd(&self) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let mut speeds = "LVS:{}".as_bytes().to_vec();
+    for i in self.vibrator_values.iter() {
+      speeds.push(i.load(Ordering::Relaxed) as u8);
+    }
+    speeds.push(0x3b);
 
-      Ok(vec![
-        HardwareWriteCmd::new(LOVENSE_PROTOCOL_UUID, Endpoint::Tx, speeds, false).into()
-      ])
+    Ok(vec![HardwareWriteCmd::new(
+      LOVENSE_PROTOCOL_UUID,
+      Endpoint::Tx,
+      speeds,
+      false,
+    )
+    .into()])
   }
 
-  fn handle_mply_cmd(
-    &self
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_mply_cmd(&self) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     /*
-      let mut speeds = cmds
-        .iter()
-        .map(|x| {
-          if let Some(val) = x {
-            val.1.to_string()
-          } else {
-            "-1".to_string()
-          }
-        })
-        .collect::<Vec<_>>();
-
-      if speeds.len() == 1 && self.device_type == "H" {
-        // Max range unless stopped
-        speeds.push(if speeds[0] == "0" {
-          "0".to_string()
+    let mut speeds = cmds
+      .iter()
+      .map(|x| {
+        if let Some(val) = x {
+          val.1.to_string()
         } else {
-          "20".to_string()
-        });
-      }
+          "-1".to_string()
+        }
+      })
+      .collect::<Vec<_>>();
 
-      let lovense_cmd = format!("Mply:{};", speeds.join(":")).as_bytes().to_vec();
+    if speeds.len() == 1 && self.device_type == "H" {
+      // Max range unless stopped
+      speeds.push(if speeds[0] == "0" {
+        "0".to_string()
+      } else {
+        "20".to_string()
+      });
+    }
 
-      Ok(vec![HardwareWriteCmd::new(
-        Endpoint::Tx,
-        lovense_cmd,
-        false,
-      )
-      .into()])
-      */
-      Ok(vec![])
+    let lovense_cmd = format!("Mply:{};", speeds.join(":")).as_bytes().to_vec();
+
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      lovense_cmd,
+      false,
+    )
+    .into()])
+    */
+    Ok(vec![])
   }
 }
 
@@ -302,19 +305,24 @@ impl ProtocolHandler for Lovense {
       false,
     ))
   }
-  
+
   fn handle_actuator_vibrate_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let current_vibrator_value = self.vibrator_values[feature_index as usize].load(Ordering::Relaxed);
+    let current_vibrator_value =
+      self.vibrator_values[feature_index as usize].load(Ordering::Relaxed);
     if current_vibrator_value == speed {
       Ok(vec![])
     } else {
       self.vibrator_values[feature_index as usize].store(speed, Ordering::Relaxed);
-      let speeds: Vec<u32> = self.vibrator_values.iter().map(|v| v.load(Ordering::Relaxed)).collect();
+      let speeds: Vec<u32> = self
+        .vibrator_values
+        .iter()
+        .map(|v| v.load(Ordering::Relaxed))
+        .collect();
       if self.use_lvs {
         self.handle_lvs_cmd()
       } else if self.use_mply {
@@ -323,9 +331,17 @@ impl ProtocolHandler for Lovense {
         let lovense_cmd = if self.vibrator_values.len() == 1 {
           format!("Vibrate:{speed};").as_bytes().to_vec()
         } else {
-          format!("Vibrate{}:{};", feature_index + 1, speed).as_bytes().to_vec()
+          format!("Vibrate{}:{};", feature_index + 1, speed)
+            .as_bytes()
+            .to_vec()
         };
-        Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, lovense_cmd, false).into()])
+        Ok(vec![HardwareWriteCmd::new(
+          feature_id,
+          Endpoint::Tx,
+          lovense_cmd,
+          false,
+        )
+        .into()])
       }
     }
     /*
@@ -385,28 +401,30 @@ impl ProtocolHandler for Lovense {
       }
     }
       */
-
   }
 
-  
   fn handle_actuator_constrict_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    level: u32
+    level: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let lovense_cmd = format!("Air:Level:{level};")
-      .as_bytes()
-      .to_vec();
+    let lovense_cmd = format!("Air:Level:{level};").as_bytes().to_vec();
 
-    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, lovense_cmd, false).into()])
-  } 
+    Ok(vec![HardwareWriteCmd::new(
+      feature_id,
+      Endpoint::Tx,
+      lovense_cmd,
+      false,
+    )
+    .into()])
+  }
 
   fn handle_actuator_rotate_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.handle_rotation_with_direction_cmd(feature_index, feature_id, speed, false)
   }
@@ -416,7 +434,7 @@ impl ProtocolHandler for Lovense {
     feature_index: u32,
     feature_id: Uuid,
     speed: u32,
-    clockwise: bool
+    clockwise: bool,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut hardware_cmds = vec![];
     let lovense_cmd = format!("Rotate:{speed};").as_bytes().to_vec();
@@ -424,8 +442,9 @@ impl ProtocolHandler for Lovense {
     let current_dir = self.rotation_direction.load(Ordering::Relaxed);
     if current_dir != clockwise {
       self.rotation_direction.store(clockwise, Ordering::Relaxed);
-      hardware_cmds
-        .push(HardwareWriteCmd::new(feature_id, Endpoint::Tx, b"RotateChange;".to_vec(), false).into());
+      hardware_cmds.push(
+        HardwareWriteCmd::new(feature_id, Endpoint::Tx, b"RotateChange;".to_vec(), false).into(),
+      );
     }
     trace!("{:?}", hardware_cmds);
     Ok(hardware_cmds)
@@ -492,16 +511,10 @@ impl ProtocolHandler for Lovense {
     _feature_index: u32,
     _feature_id: Uuid,
     position: u32,
-    duration: u32,    
+    duration: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self
-      .linear_info
-      .0
-      .store(position, Ordering::Relaxed);
-    self
-      .linear_info
-      .1
-      .store(duration, Ordering::Relaxed);
+    self.linear_info.0.store(position, Ordering::Relaxed);
+    self.linear_info.1.store(duration, Ordering::Relaxed);
     Ok(vec![])
   }
 }
@@ -540,7 +553,12 @@ async fn update_linear_movement(device: Arc<Hardware>, linear_info: Arc<(AtomicU
 
     let lovense_cmd = format!("FSetSite:{current_position};");
 
-    let hardware_cmd = HardwareWriteCmd::new(LOVENSE_PROTOCOL_UUID, Endpoint::Tx, lovense_cmd.into_bytes(), false);
+    let hardware_cmd = HardwareWriteCmd::new(
+      LOVENSE_PROTOCOL_UUID,
+      Endpoint::Tx,
+      lovense_cmd.into_bytes(),
+      false,
+    );
     if device.write_value(&hardware_cmd).await.is_err() {
       return;
     }

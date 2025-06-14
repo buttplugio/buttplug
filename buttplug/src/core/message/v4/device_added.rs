@@ -40,10 +40,7 @@ pub struct DeviceAddedV4 {
   )]
   #[getset(get = "pub")]
   device_display_name: Option<String>,
-  #[cfg_attr(
-    feature = "serialize-json",
-    serde(rename = "DeviceMessageTimingGap")
-  )]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessageTimingGap"))]
   #[getset(get_copy = "pub")]
   device_message_timing_gap: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceFeatures"))]
@@ -80,7 +77,7 @@ impl From<DeviceMessageInfoV4> for DeviceAddedV4 {
       device_name: value.device_name().clone(),
       device_display_name: value.device_display_name().clone(),
       device_message_timing_gap: value.device_message_timing_gap(),
-      device_features: value.device_features().clone()
+      device_features: value.device_features().clone(),
     }
   }
 }

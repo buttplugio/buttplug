@@ -29,7 +29,7 @@ impl ProtocolHandler for ManNuo {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut data = vec![0xAA, 0x55, 0x06, 0x01, 0x01, 0x01, speed as u8, 0xFA];
     // Simple XOR of everything up to the 9th byte for CRC.
@@ -38,6 +38,12 @@ impl ProtocolHandler for ManNuo {
       crc ^= b;
     }
     data.push(crc);
-    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, true).into()])
+    Ok(vec![HardwareWriteCmd::new(
+      feature_id,
+      Endpoint::Tx,
+      data,
+      true,
+    )
+    .into()])
   }
 }

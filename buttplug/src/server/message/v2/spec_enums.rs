@@ -9,7 +9,20 @@ use crate::{
   core::{
     errors::{ButtplugError, ButtplugMessageError},
     message::{
-      ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, DeviceRemovedV0, ErrorV0, OkV0, PingV0, RawReadingV2, RequestDeviceListV0, ScanningFinishedV0, StartScanningV0, StopAllDevicesV0, StopDeviceCmdV0, StopScanningV0
+      ButtplugMessage,
+      ButtplugMessageFinalizer,
+      ButtplugMessageValidator,
+      DeviceRemovedV0,
+      ErrorV0,
+      OkV0,
+      PingV0,
+      RawReadingV2,
+      RequestDeviceListV0,
+      ScanningFinishedV0,
+      StartScanningV0,
+      StopAllDevicesV0,
+      StopDeviceCmdV0,
+      StopScanningV0,
     },
   },
   server::message::v1::{
@@ -196,7 +209,6 @@ impl From<ButtplugServerMessageV2> for ButtplugServerMessageV1 {
     }
   }
 }
-
 
 #[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]
 pub enum ButtplugDeviceMessageNameV2 {

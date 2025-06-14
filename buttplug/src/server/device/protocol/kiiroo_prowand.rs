@@ -8,18 +8,16 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{
-      self, Endpoint, SensorReadingV4, SensorType
-    },
+    message::{self, Endpoint, SensorReadingV4, SensorType},
   },
   server::device::{
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }
+  },
 };
 use futures::{future::BoxFuture, FutureExt};
-use uuid::Uuid;
 use std::{default::Default, sync::Arc};
+use uuid::Uuid;
 
 generic_protocol_setup!(KiirooProWand, "kiiroo-prowand");
 
@@ -31,7 +29,7 @@ impl ProtocolHandler for KiirooProWand {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
@@ -62,12 +60,8 @@ impl ProtocolHandler for KiirooProWand {
       let hw_msg = fut.await?;
       let data = hw_msg.data();
       let battery_level = data[0] as i32;
-      let battery_reading = message::SensorReadingV4::new(
-        0,
-        feature_index,
-        SensorType::Battery,
-        vec![battery_level],
-      );
+      let battery_reading =
+        message::SensorReadingV4::new(0, feature_index, SensorType::Battery, vec![battery_level]);
       debug!("Got battery reading: {}", battery_level);
       Ok(battery_reading)
     }

@@ -10,10 +10,10 @@ use uuid::Uuid;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_setup,
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::ProtocolHandler,
-  }},
+  },
 };
 
 generic_protocol_setup!(Cupido, "cupido");
@@ -30,7 +30,7 @@ impl ProtocolHandler for Cupido {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,

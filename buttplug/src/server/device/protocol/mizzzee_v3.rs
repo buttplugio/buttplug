@@ -20,9 +20,9 @@ use crate::{
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::{sync::Arc, time::Duration};
+use uuid::{uuid, Uuid};
 
 const MIZZZEE_V3_PROTOCOL_UUID: Uuid = uuid!("a4d62eee-0f9e-4e39-b488-9161b1b5e9f5");
 generic_protocol_initializer_setup!(MizzZeeV3, "mizzzee-v3");
@@ -123,7 +123,7 @@ impl ProtocolHandler for MizzZeeV3 {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_scalar = self.current_scalar.clone();
     current_scalar.store(speed, Ordering::Relaxed);

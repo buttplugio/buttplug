@@ -7,10 +7,7 @@
 
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  },
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     configuration::{UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
@@ -24,7 +21,6 @@ use crate::{
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
 use std::{
   sync::{
     atomic::{AtomicU8, Ordering},
@@ -32,6 +28,7 @@ use std::{
   },
   time::Duration,
 };
+use uuid::{uuid, Uuid};
 
 // Time between Hgod update commands, in milliseconds.
 const HGOD_COMMAND_DELAY_MS: u64 = 100;
@@ -77,7 +74,12 @@ async fn send_hgod_updates(device: Arc<Hardware>, data: Arc<AtomicU8>) {
     let command = vec![0x55, 0x04, 0, 0, 0, speed];
     if speed > 0 {
       if let Err(e) = device
-        .write_value(&HardwareWriteCmd::new(HGOD_PROTOCOL_UUID, Endpoint::Tx, command, false))
+        .write_value(&HardwareWriteCmd::new(
+          HGOD_PROTOCOL_UUID,
+          Endpoint::Tx,
+          command,
+          false,
+        ))
         .await
       {
         error!(
@@ -96,7 +98,7 @@ impl ProtocolHandler for Hgod {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.last_command.store(speed as u8, Ordering::Relaxed);
     Ok(vec![])

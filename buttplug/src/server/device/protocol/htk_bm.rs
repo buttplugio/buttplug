@@ -10,10 +10,7 @@ use std::sync::atomic::{AtomicU8, Ordering};
 use uuid::{uuid, Uuid};
 
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  },
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
@@ -24,13 +21,13 @@ const HTK_BM_PROTOCOL_UUID: Uuid = uuid!("4c70cb95-d3d9-4288-81ab-be845f9ad1fe")
 generic_protocol_setup!(HtkBm, "htk_bm");
 
 pub struct HtkBm {
-  speeds: [AtomicU8; 2]
+  speeds: [AtomicU8; 2],
 }
 
 impl Default for HtkBm {
   fn default() -> Self {
     Self {
-      speeds: [AtomicU8::new(0), AtomicU8::new(0)]
+      speeds: [AtomicU8::new(0), AtomicU8::new(0)],
     }
   }
 }
@@ -44,7 +41,7 @@ impl ProtocolHandler for HtkBm {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
 
@@ -58,6 +55,12 @@ impl ProtocolHandler for HtkBm {
     } else if right != 0 {
       data = 13 // right only
     }
-    Ok(vec![HardwareWriteCmd::new(HTK_BM_PROTOCOL_UUID, Endpoint::Tx, vec![data], false).into()])
+    Ok(vec![HardwareWriteCmd::new(
+      HTK_BM_PROTOCOL_UUID,
+      Endpoint::Tx,
+      vec![data],
+      false,
+    )
+    .into()])
   }
 }

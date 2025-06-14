@@ -19,8 +19,8 @@ use crate::{
   },
 };
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
 use std::sync::Arc;
+use uuid::{uuid, Uuid};
 
 const NOBRA_PROTOCOL_UUID: Uuid = uuid!("166e7d2b-b9ed-4769-aaaf-66127e4e14eb");
 generic_protocol_initializer_setup!(Nobra, "nobra");
@@ -36,7 +36,12 @@ impl ProtocolInitializer for NobraInitializer {
     _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
-      .write_value(&HardwareWriteCmd::new(NOBRA_PROTOCOL_UUID, Endpoint::Tx, vec![0x70], false))
+      .write_value(&HardwareWriteCmd::new(
+        NOBRA_PROTOCOL_UUID,
+        Endpoint::Tx,
+        vec![0x70],
+        false,
+      ))
       .await?;
     Ok(Arc::new(Nobra::default()))
   }
@@ -54,7 +59,7 @@ impl ProtocolHandler for Nobra {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let output_speed = if speed == 0 { 0x70 } else { 0x60 + speed };
     Ok(vec![HardwareWriteCmd::new(

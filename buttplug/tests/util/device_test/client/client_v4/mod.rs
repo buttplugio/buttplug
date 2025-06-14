@@ -1,14 +1,22 @@
 use crate::util::{
   device_test::{
-    client::client_v3::client::ButtplugClientResultFuture, connector::build_channel_connector
+    client::client_v3::client::ButtplugClientResultFuture,
+    connector::build_channel_connector,
   },
   ButtplugTestServer,
   TestDeviceChannelHost,
 };
 use buttplug::{
   client::{
-    client_device_feature::ClientDeviceFeature, connector::ButtplugInProcessClientConnectorBuilder, ButtplugClient, ButtplugClientDevice, ButtplugClientEvent
-  }, core::message::{ActuatorType, DeviceFeature, FeatureType}, server::{device::ServerDeviceManagerBuilder, ButtplugServer, ButtplugServerBuilder}, util::{async_manager, device_configuration::load_protocol_configs}
+    client_device_feature::ClientDeviceFeature,
+    connector::ButtplugInProcessClientConnectorBuilder,
+    ButtplugClient,
+    ButtplugClientDevice,
+    ButtplugClientEvent,
+  },
+  core::message::{ActuatorType, DeviceFeature, FeatureType},
+  server::{device::ServerDeviceManagerBuilder, ButtplugServer, ButtplugServerBuilder},
+  util::{async_manager, device_configuration::load_protocol_configs},
 };
 use tokio::sync::Notify;
 
@@ -19,43 +27,71 @@ use super::super::{
   TestCommand,
 };
 use futures::StreamExt;
-use std::{sync::Arc, time::Duration};
 use log::*;
+use std::{sync::Arc, time::Duration};
 
 async fn run_test_client_command(command: &TestClientCommand, device: &Arc<ButtplugClientDevice>) {
   use TestClientCommand::*;
   match command {
     Scalar(msg) => {
-      let fut_vec: Vec<_> = msg.iter().map(|cmd| {
-        let f = device.device_features()[cmd.index() as usize].clone();
-        f.check_and_set_actuator_value_float(cmd.actuator_type(), cmd.scalar())
-      }).collect();
+      let fut_vec: Vec<_> = msg
+        .iter()
+        .map(|cmd| {
+          let f = device.device_features()[cmd.index() as usize].clone();
+          f.check_and_set_actuator_value_float(cmd.actuator_type(), cmd.scalar())
+        })
+        .collect();
       futures::future::try_join_all(fut_vec).await.unwrap();
     }
     Vibrate(msg) => {
-      let fut_vec: Vec<_> = msg.iter().map(|cmd| {
-        let vibe_features: Vec<&ClientDeviceFeature> = device.device_features().iter().filter(|f| *f.feature().feature_type() == FeatureType::Vibrate).collect();
-        let f = vibe_features[cmd.index() as usize].clone();
-        f.check_and_set_actuator_value_float(ActuatorType::Vibrate, cmd.speed())
-      }).collect();
+      let fut_vec: Vec<_> = msg
+        .iter()
+        .map(|cmd| {
+          let vibe_features: Vec<&ClientDeviceFeature> = device
+            .device_features()
+            .iter()
+            .filter(|f| *f.feature().feature_type() == FeatureType::Vibrate)
+            .collect();
+          let f = vibe_features[cmd.index() as usize].clone();
+          f.check_and_set_actuator_value_float(ActuatorType::Vibrate, cmd.speed())
+        })
+        .collect();
       futures::future::try_join_all(fut_vec).await.unwrap();
     }
     Stop => {
       device.stop().await.expect("Stop failed");
     }
     Rotate(msg) => {
-      let fut_vec: Vec<_> = msg.iter().map(|cmd| {
-        let vibe_features: Vec<&ClientDeviceFeature> = device.device_features().iter().filter(|f| *f.feature().feature_type() == FeatureType::RotateWithDirection).collect();
-        let f = vibe_features[cmd.index() as usize].clone();
-        f.check_and_set_actuator_value_with_parameter_float(ActuatorType::RotateWithDirection, cmd.speed(), if cmd.clockwise() { 1 } else { 0 })
-      }).collect();
+      let fut_vec: Vec<_> = msg
+        .iter()
+        .map(|cmd| {
+          let vibe_features: Vec<&ClientDeviceFeature> = device
+            .device_features()
+            .iter()
+            .filter(|f| *f.feature().feature_type() == FeatureType::RotateWithDirection)
+            .collect();
+          let f = vibe_features[cmd.index() as usize].clone();
+          f.check_and_set_actuator_value_with_parameter_float(
+            ActuatorType::RotateWithDirection,
+            cmd.speed(),
+            if cmd.clockwise() { 1 } else { 0 },
+          )
+        })
+        .collect();
       futures::future::try_join_all(fut_vec).await.unwrap();
     }
     Linear(msg) => {
-      let fut_vec: Vec<_> = msg.iter().map(|cmd| {
-        let f = device.device_features()[cmd.index() as usize].clone();
-        f.check_and_set_actuator_value_with_parameter_float(ActuatorType::PositionWithDuration, cmd.position(), cmd.duration() as i32)
-      }).collect();
+      let fut_vec: Vec<_> = msg
+        .iter()
+        .map(|cmd| {
+          let f = device.device_features()[cmd.index() as usize].clone();
+          f.check_and_set_actuator_value_with_parameter_float(
+            ActuatorType::PositionWithDuration,
+            cmd.position(),
+            cmd.duration() as i32,
+          )
+        })
+        .collect();
       futures::future::try_join_all(fut_vec).await.unwrap();
     }
     Battery {
@@ -72,7 +108,10 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
           assert_eq!(battery_level, expected_power);
         });
       } else {
-        assert_eq!(device.battery_level().await.unwrap() as f64 / 100f64, *expected_power);
+        assert_eq!(
+          device.battery_level().await.unwrap() as f64 / 100f64,
+          *expected_power
+        );
       }
     }
     _ => {

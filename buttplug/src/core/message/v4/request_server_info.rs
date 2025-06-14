@@ -34,16 +34,20 @@ pub struct RequestServerInfoV4 {
   api_version_major: ButtplugMessageSpecVersion,
   #[cfg_attr(feature = "serialize-json", serde(rename = "ApiVersionMinor"))]
   #[getset(get_copy = "pub")]
-  api_version_minor: u32,  
+  api_version_minor: u32,
 }
 
 impl RequestServerInfoV4 {
-  pub fn new(client_name: &str, api_version_major: ButtplugMessageSpecVersion, api_version_minor: u32) -> Self {
+  pub fn new(
+    client_name: &str,
+    api_version_major: ButtplugMessageSpecVersion,
+    api_version_minor: u32,
+  ) -> Self {
     Self {
       id: 1,
       client_name: client_name.to_string(),
       api_version_major,
-      api_version_minor
+      api_version_minor,
     }
   }
 }

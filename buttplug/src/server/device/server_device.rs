@@ -47,18 +47,48 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     message::{
-      self, ActuatorRotateWithDirection, ActuatorType, ActuatorValue, ButtplugMessage, ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4, Endpoint, FeatureType, RawCommand, RawCommandRead, RawCommandWrite, RawReadingV2, SensorCommandType, SensorType
+      self,
+      ActuatorRotateWithDirection,
+      ActuatorType,
+      ActuatorValue,
+      ButtplugMessage,
+      ButtplugServerMessageV4,
+      DeviceFeature,
+      DeviceMessageInfoV4,
+      Endpoint,
+      FeatureType,
+      RawCommand,
+      RawCommandRead,
+      RawCommandWrite,
+      RawReadingV2,
+      SensorCommandType,
+      SensorType,
     },
     ButtplugResultFuture,
   },
   server::{
     device::{
       configuration::DeviceConfigurationManager,
-      hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent, HardwareReadCmd, HardwareSubscribeCmd, HardwareUnsubscribeCmd, HardwareWriteCmd, GENERIC_RAW_COMMAND_UUID},
+      hardware::{
+        Hardware,
+        HardwareCommand,
+        HardwareConnector,
+        HardwareEvent,
+        HardwareReadCmd,
+        HardwareSubscribeCmd,
+        HardwareUnsubscribeCmd,
+        HardwareWriteCmd,
+        GENERIC_RAW_COMMAND_UUID,
+      },
       protocol::ProtocolHandler,
     },
     message::{
-      checked_actuator_cmd::CheckedActuatorCmdV4, checked_raw_cmd::CheckedRawCmdV4, checked_sensor_cmd::CheckedSensorCmdV4, server_device_attributes::ServerDeviceAttributes, spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage
+      checked_actuator_cmd::CheckedActuatorCmdV4,
+      checked_raw_cmd::CheckedRawCmdV4,
+      checked_sensor_cmd::CheckedSensorCmdV4,
+      server_device_attributes::ServerDeviceAttributes,
+      spec_enums::ButtplugDeviceCommandMessageUnionV4,
+      ButtplugServerDeviceMessage,
     },
     ButtplugServerResultFuture,
   },
@@ -120,7 +150,8 @@ impl Hash for ServerDevice {
   }
 }
 
-impl Eq for ServerDevice {}
+impl Eq for ServerDevice {
+}
 
 impl PartialEq for ServerDevice {
   fn eq(&self, other: &Self) -> bool {
@@ -271,30 +302,31 @@ impl ServerDevice {
           }
           if hardware.requires_keepalive()
             && !matches!(strategy, ProtocolKeepaliveStrategy::NoStrategy)
-            && hardware.time_since_last_write().await > wait_duration {
-              match &strategy {
-                ProtocolKeepaliveStrategy::RepeatPacketStrategy(packet) => {
+            && hardware.time_since_last_write().await > wait_duration
+          {
+            match &strategy {
+              ProtocolKeepaliveStrategy::RepeatPacketStrategy(packet) => {
+                if let Err(e) = hardware.write_value(packet).await {
+                  warn!("Error writing keepalive packet: {:?}", e);
+                  break;
+                }
+              }
+              ProtocolKeepaliveStrategy::RepeatLastPacketStrategy => {
+                if let Some(packet) = &*keepalive_packet.read().await {
                   if let Err(e) = hardware.write_value(packet).await {
                     warn!("Error writing keepalive packet: {:?}", e);
                     break;
                   }
                 }
-                ProtocolKeepaliveStrategy::RepeatLastPacketStrategy => {
-                  if let Some(packet) = &*keepalive_packet.read().await {
-                    if let Err(e) = hardware.write_value(packet).await {
-                      warn!("Error writing keepalive packet: {:?}", e);
-                      break;
-                    }
-                  }
-                }
-                _ => {
-                  info!(
-                    "Protocol keepalive strategy {:?} not implemented, replacing with NoStrategy",
-                    strategy
-                  );
-                }
+              }
+              _ => {
+                info!(
+                  "Protocol keepalive strategy {:?} not implemented, replacing with NoStrategy",
+                  strategy
+                );
               }
             }
+          }
         }
         info!("Leaving keepalive task for {}", hardware.name());
       });
@@ -311,14 +343,7 @@ impl ServerDevice {
           }
           let mut stop_cmd = |actuator_cmd| {
             stop_commands.push(
-              CheckedActuatorCmdV4::new(
-                1,
-                0,
-                index as u32,
-                feature.id(),
-                actuator_cmd
-              )
-              .into(),
+              CheckedActuatorCmdV4::new(1, 0, index as u32, feature.id(), actuator_cmd).into(),
             );
           };
 
@@ -349,7 +374,9 @@ impl ServerDevice {
               break;
             }
             ActuatorType::RotateWithDirection => {
-              stop_cmd(message::ActuatorCommand::RotateWithDirection(ActuatorRotateWithDirection::new(0, false)));
+              stop_cmd(message::ActuatorCommand::RotateWithDirection(
+                ActuatorRotateWithDirection::new(0, false),
+              ));
               break;
             }
             _ => {
@@ -543,20 +570,32 @@ impl ServerDevice {
 
   fn handle_sensor_cmd(
     &self,
-    message: CheckedSensorCmdV4
+    message: CheckedSensorCmdV4,
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, ButtplugError>> {
     match message.sensor_command() {
-      SensorCommandType::Read => self.handle_sensor_read_cmd(message.feature_index(), message.feature_id(), message.sensor_type()),
-      SensorCommandType::Subscribe => self.handle_sensor_subscribe_cmd(message.feature_index(), message.feature_id(), message.sensor_type()),
-      SensorCommandType::Unsubscribe => self.handle_sensor_unsubscribe_cmd(message.feature_index(), message.feature_id(), message.sensor_type()),
+      SensorCommandType::Read => self.handle_sensor_read_cmd(
+        message.feature_index(),
+        message.feature_id(),
+        message.sensor_type(),
+      ),
+      SensorCommandType::Subscribe => self.handle_sensor_subscribe_cmd(
+        message.feature_index(),
+        message.feature_id(),
+        message.sensor_type(),
+      ),
+      SensorCommandType::Unsubscribe => self.handle_sensor_unsubscribe_cmd(
+        message.feature_index(),
+        message.feature_id(),
+        message.sensor_type(),
+      ),
     }
-  } 
+  }
 
   fn handle_sensor_read_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType
+    sensor_type: SensorType,
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, ButtplugError>> {
     let device = self.hardware.clone();
     let handler = self.handler.clone();
@@ -574,7 +613,7 @@ impl ServerDevice {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType
+    sensor_type: SensorType,
   ) -> ButtplugServerResultFuture {
     let device = self.hardware.clone();
     let handler = self.handler.clone();
@@ -592,7 +631,7 @@ impl ServerDevice {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType
+    sensor_type: SensorType,
   ) -> ButtplugServerResultFuture {
     let device = self.hardware.clone();
     let handler = self.handler.clone();
@@ -608,23 +647,24 @@ impl ServerDevice {
 
   fn handle_raw_cmd(&self, message: CheckedRawCmdV4) -> ButtplugServerResultFuture {
     match message.raw_command() {
-      RawCommand::Read(read_data) => {
-        self.handle_raw_read_cmd(*message.endpoint(), read_data)
-      },
-      RawCommand::Subscribe => {
-        self.handle_raw_subscribe_cmd(*message.endpoint())
-      },
-      RawCommand::Unsubscribe => {
-        self.handle_raw_unsubscribe_cmd(*message.endpoint())
-      },
-      RawCommand::Write(write_data) => {
-        self.handle_raw_write_cmd(*message.endpoint(), write_data)
-      }
+      RawCommand::Read(read_data) => self.handle_raw_read_cmd(*message.endpoint(), read_data),
+      RawCommand::Subscribe => self.handle_raw_subscribe_cmd(*message.endpoint()),
+      RawCommand::Unsubscribe => self.handle_raw_unsubscribe_cmd(*message.endpoint()),
+      RawCommand::Write(write_data) => self.handle_raw_write_cmd(*message.endpoint(), write_data),
     }
   }
 
-  fn handle_raw_write_cmd(&self, endpoint: Endpoint, write_data: &RawCommandWrite) -> ButtplugServerResultFuture {
-    let fut = self.hardware.write_value(&HardwareWriteCmd::new(GENERIC_RAW_COMMAND_UUID, endpoint, write_data.data().clone(), write_data.write_with_response()));
+  fn handle_raw_write_cmd(
+    &self,
+    endpoint: Endpoint,
+    write_data: &RawCommandWrite,
+  ) -> ButtplugServerResultFuture {
+    let fut = self.hardware.write_value(&HardwareWriteCmd::new(
+      GENERIC_RAW_COMMAND_UUID,
+      endpoint,
+      write_data.data().clone(),
+      write_data.write_with_response(),
+    ));
     async move {
       fut
         .await
@@ -634,8 +674,17 @@ impl ServerDevice {
     .boxed()
   }
 
-  fn handle_raw_read_cmd(&self, endpoint: Endpoint, read_data: &RawCommandRead) -> ButtplugServerResultFuture {
-    let fut = self.hardware.read_value(&HardwareReadCmd::new(GENERIC_RAW_COMMAND_UUID, endpoint, read_data.expected_length(), read_data.timeout()));
+  fn handle_raw_read_cmd(
+    &self,
+    endpoint: Endpoint,
+    read_data: &RawCommandRead,
+  ) -> ButtplugServerResultFuture {
+    let fut = self.hardware.read_value(&HardwareReadCmd::new(
+      GENERIC_RAW_COMMAND_UUID,
+      endpoint,
+      read_data.expected_length(),
+      read_data.timeout(),
+    ));
     async move {
       fut
         .await
@@ -649,11 +698,11 @@ impl ServerDevice {
     .boxed()
   }
 
-  fn handle_raw_unsubscribe_cmd(
-    &self,
-    endpoint: Endpoint,
-  ) -> ButtplugServerResultFuture {
-    let fut = self.hardware.unsubscribe(&HardwareUnsubscribeCmd::new(GENERIC_RAW_COMMAND_UUID, endpoint));
+  fn handle_raw_unsubscribe_cmd(&self, endpoint: Endpoint) -> ButtplugServerResultFuture {
+    let fut = self.hardware.unsubscribe(&HardwareUnsubscribeCmd::new(
+      GENERIC_RAW_COMMAND_UUID,
+      endpoint,
+    ));
     let raw_endpoints = self.raw_subscribed_endpoints.clone();
     async move {
       if !raw_endpoints.contains(&endpoint) {
@@ -669,11 +718,11 @@ impl ServerDevice {
     .boxed()
   }
 
-  fn handle_raw_subscribe_cmd(
-    &self,
-    endpoint: Endpoint,
-  ) -> ButtplugServerResultFuture {
-    let fut = self.hardware.subscribe(&HardwareSubscribeCmd::new(GENERIC_RAW_COMMAND_UUID, endpoint));
+  fn handle_raw_subscribe_cmd(&self, endpoint: Endpoint) -> ButtplugServerResultFuture {
+    let fut = self.hardware.subscribe(&HardwareSubscribeCmd::new(
+      GENERIC_RAW_COMMAND_UUID,
+      endpoint,
+    ));
     let raw_endpoints = self.raw_subscribed_endpoints.clone();
     async move {
       if raw_endpoints.contains(&endpoint) {

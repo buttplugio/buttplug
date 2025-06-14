@@ -47,6 +47,7 @@ use buttplug::{
 };
 use futures::{FutureExt, Stream};
 use getset::{CopyGetters, Getters};
+use log::*;
 use std::{
   collections::HashMap,
   fmt,
@@ -55,7 +56,6 @@ use std::{
     Arc,
   },
 };
-use log::*;
 use tokio::sync::broadcast;
 
 /// Enum for messages going to a [ButtplugClientDevice] instance.
@@ -370,8 +370,10 @@ impl ButtplugClientDevice {
   pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {
     if self.message_attributes.scalar_cmd().is_none() {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV3::ScalarCmd.to_string())
-          .into(),
+        ButtplugDeviceError::MessageNotSupported(
+          ButtplugDeviceMessageNameV3::ScalarCmd.to_string(),
+        )
+        .into(),
       );
     }
 
@@ -434,8 +436,10 @@ impl ButtplugClientDevice {
   pub fn linear(&self, linear_cmd: &LinearCommand) -> ButtplugClientResultFuture {
     if self.message_attributes.linear_cmd().is_none() {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV3::LinearCmd.to_string())
-          .into(),
+        ButtplugDeviceError::MessageNotSupported(
+          ButtplugDeviceMessageNameV3::LinearCmd.to_string(),
+        )
+        .into(),
       );
     }
 
@@ -493,8 +497,10 @@ impl ButtplugClientDevice {
   pub fn rotate(&self, rotate_cmd: &RotateCommand) -> ButtplugClientResultFuture {
     if self.message_attributes.rotate_cmd().is_none() {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV3::RotateCmd.to_string())
-          .into(),
+        ButtplugDeviceError::MessageNotSupported(
+          ButtplugDeviceMessageNameV3::RotateCmd.to_string(),
+        )
+        .into(),
       );
     }
 
@@ -679,8 +685,10 @@ impl ButtplugClientDevice {
   ) -> ButtplugClientResultFuture<Vec<u8>> {
     if self.message_attributes.raw_read_cmd().is_none() {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV3::RawReadCmd.to_string())
-          .into(),
+        ButtplugDeviceError::MessageNotSupported(
+          ButtplugDeviceMessageNameV3::RawReadCmd.to_string(),
+        )
+        .into(),
       );
     }
     let msg = ButtplugClientMessageV3::RawReadCmd(RawReadCmdV2::new(

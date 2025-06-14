@@ -8,14 +8,24 @@
 use crate::core::{
   errors::ButtplugDeviceError,
   message::{
-    ActuatorType, DeviceFeature, DeviceFeatureActuator, DeviceFeatureRaw, DeviceFeatureSensor, Endpoint, FeatureType, SensorCommandType, SensorType
+    ActuatorType,
+    DeviceFeature,
+    DeviceFeatureActuator,
+    DeviceFeatureRaw,
+    DeviceFeatureSensor,
+    Endpoint,
+    FeatureType,
+    SensorCommandType,
+    SensorType,
   },
 };
-use getset::{Getters, MutGetters, Setters, CopyGetters};
-use uuid::Uuid;
+use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
-use std::{collections::{HashSet, HashMap}, ops::RangeInclusive};
-
+use std::{
+  collections::{HashMap, HashSet},
+  ops::RangeInclusive,
+};
+use uuid::Uuid;
 
 // This will look almost exactly like ServerDeviceFeature. However, it will only contain
 // information we want the client to know, i.e. step counts versus specific step ranges. This is
@@ -26,7 +36,17 @@ use std::{collections::{HashSet, HashMap}, ops::RangeInclusive};
 // then we denote this by prefixing the type with Client/Server. Server attributes will usually be
 // hosted in the server/device/configuration module.
 #[derive(
-  Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize, CopyGetters
+  Clone,
+  Debug,
+  Default,
+  PartialEq,
+  Eq,
+  Getters,
+  MutGetters,
+  Setters,
+  Serialize,
+  Deserialize,
+  CopyGetters,
 )]
 pub struct ServerDeviceFeature {
   #[getset(get = "pub", get_mut = "pub(super)")]
@@ -87,9 +107,17 @@ impl ServerDeviceFeature {
       index,
       self.description(),
       self.feature_type(),
-      &self.actuator.clone().map(|x| x.iter().map(|(t, a)|  (*t, DeviceFeatureActuator::from(a.clone()))).collect()),
-      &self.sensor.clone().map(|x| x.iter().map(|(t, a)|  (*t, DeviceFeatureSensor::from(a.clone()))).collect()),
-      self.raw()
+      &self.actuator.clone().map(|x| {
+        x.iter()
+          .map(|(t, a)| (*t, DeviceFeatureActuator::from(a.clone())))
+          .collect()
+      }),
+      &self.sensor.clone().map(|x| {
+        x.iter()
+          .map(|(t, a)| (*t, DeviceFeatureSensor::from(a.clone())))
+          .collect()
+      }),
+      self.raw(),
     )
   }
 
@@ -97,7 +125,7 @@ impl ServerDeviceFeature {
   /// and the current feature id as the base id. Otherwise, just pass back a copy of self.
   pub fn as_user_feature(&self) -> Self {
     if self.base_id.is_some() {
-      self.clone()  
+      self.clone()
     } else {
       Self {
         description: self.description.clone(),
@@ -106,7 +134,7 @@ impl ServerDeviceFeature {
         sensor: self.sensor.clone(),
         raw: self.raw.clone(),
         id: Uuid::new_v4(),
-        base_id: Some(self.id)
+        base_id: Some(self.id),
       }
     }
   }
@@ -163,7 +191,6 @@ pub struct ServerDeviceFeatureActuatorSerialized {
   step_limit: Option<RangeInclusive<u32>>,
 }
 
-
 impl From<ServerDeviceFeatureActuatorSerialized> for ServerDeviceFeatureActuator {
   fn from(value: ServerDeviceFeatureActuatorSerialized) -> Self {
     Self {
@@ -189,10 +216,7 @@ pub struct ServerDeviceFeatureActuator {
 }
 
 impl ServerDeviceFeatureActuator {
-  pub fn new(
-    step_range: &RangeInclusive<u32>,
-    step_limit: &RangeInclusive<u32>,
-  ) -> Self {
+  pub fn new(step_range: &RangeInclusive<u32>, step_limit: &RangeInclusive<u32>) -> Self {
     Self {
       step_range: step_range.clone(),
       step_limit: step_limit.clone(),
@@ -220,9 +244,7 @@ impl ServerDeviceFeatureActuator {
 
 impl From<ServerDeviceFeatureActuator> for DeviceFeatureActuator {
   fn from(value: ServerDeviceFeatureActuator) -> Self {
-    DeviceFeatureActuator::new(
-      value.step_limit().end() - value.step_limit().start(),
-    )
+    DeviceFeatureActuator::new(value.step_limit().end() - value.step_limit().start())
   }
 }
 
@@ -236,17 +258,17 @@ pub struct ServerDeviceFeatureSensor {
   value_range: Vec<RangeInclusive<i32>>,
   #[getset(get = "pub")]
   #[serde(rename = "SensorCommands")]
-  sensor_commands: HashSet<SensorCommandType>,  
+  sensor_commands: HashSet<SensorCommandType>,
 }
 
 impl ServerDeviceFeatureSensor {
   pub fn new(
     value_range: &Vec<RangeInclusive<i32>>,
-    sensor_commands: &HashSet<SensorCommandType>
+    sensor_commands: &HashSet<SensorCommandType>,
   ) -> Self {
     Self {
       value_range: value_range.clone(),
-      sensor_commands: sensor_commands.clone()
+      sensor_commands: sensor_commands.clone(),
     }
   }
 }

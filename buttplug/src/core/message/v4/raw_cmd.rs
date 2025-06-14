@@ -6,7 +6,12 @@
 // for full license information.
 
 use crate::core::message::{
-  ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator, Endpoint
+  ButtplugDeviceMessage,
+  ButtplugMessage,
+  ButtplugMessageError,
+  ButtplugMessageFinalizer,
+  ButtplugMessageValidator,
+  Endpoint,
 };
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
@@ -15,42 +20,36 @@ pub trait RawCmdEndpoint {
   fn endpoint(&self) -> Endpoint;
 }
 
-#[derive(
-  Debug, Display, PartialEq, Eq, Clone, Serialize, Deserialize
-)]
+#[derive(Debug, Display, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum RawCommand {
   Read(RawCommandRead),
   Write(RawCommandWrite),
   Subscribe,
-  Unsubscribe
+  Unsubscribe,
 }
 
-#[derive(
-  Debug, PartialEq, Eq, Clone, Serialize, Deserialize, CopyGetters
-)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, CopyGetters)]
 #[getset(get_copy = "pub")]
 pub struct RawCommandRead {
   #[serde(rename = "ExpectedLength")]
   expected_length: u32,
   #[serde(rename = "Timeout")]
-  timeout: u32
+  timeout: u32,
 }
 
 impl RawCommandRead {
   pub fn new(expected_length: u32, timeout: u32) -> Self {
     Self {
       expected_length,
-      timeout
+      timeout,
     }
   }
 }
 
-#[derive(
-  Debug, PartialEq, Eq, Clone, Serialize, Deserialize, Getters, CopyGetters
-)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, Getters, CopyGetters)]
 pub struct RawCommandWrite {
   #[serde(rename = "Data")]
-  #[getset(get = "pub")]  
+  #[getset(get = "pub")]
   data: Vec<u8>,
   #[serde(rename = "WriteWithResponse")]
   #[getset(get_copy = "pub")]
@@ -61,13 +60,21 @@ impl RawCommandWrite {
   pub fn new(data: &Vec<u8>, write_with_response: bool) -> Self {
     Self {
       data: data.clone(),
-      write_with_response
+      write_with_response,
     }
   }
 }
 
 #[derive(
-  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, Serialize, Deserialize
+  Debug,
+  ButtplugDeviceMessage,
+  ButtplugMessageFinalizer,
+  PartialEq,
+  Eq,
+  Clone,
+  Getters,
+  Serialize,
+  Deserialize,
 )]
 pub struct RawCmdV4 {
   #[serde(rename = "Id")]
@@ -87,7 +94,7 @@ impl RawCmdV4 {
       id: 1,
       device_index,
       endpoint,
-      raw_command
+      raw_command,
     }
   }
 }

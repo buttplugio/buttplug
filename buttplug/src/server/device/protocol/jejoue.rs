@@ -10,10 +10,7 @@ use std::sync::atomic::{AtomicU8, Ordering};
 use uuid::{uuid, Uuid};
 
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  },
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
@@ -24,13 +21,13 @@ const JEJOUE_PROTOCOL_UUID: Uuid = uuid!("d3dd2bf5-b029-4bc1-9466-39f82c2e3258")
 generic_protocol_setup!(JeJoue, "jejoue");
 
 pub struct JeJoue {
-  speeds: [AtomicU8; 2]
+  speeds: [AtomicU8; 2],
 }
 
 impl Default for JeJoue {
   fn default() -> Self {
     Self {
-      speeds: [AtomicU8::new(0), AtomicU8::new(0)]
+      speeds: [AtomicU8::new(0), AtomicU8::new(0)],
     }
   }
 }
@@ -44,7 +41,7 @@ impl ProtocolHandler for JeJoue {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
 

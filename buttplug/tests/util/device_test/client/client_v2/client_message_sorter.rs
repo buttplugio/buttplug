@@ -15,11 +15,11 @@ use super::client::{
 use buttplug::core::message::{ButtplugMessage, ButtplugMessageValidator};
 use buttplug::server::message::ButtplugServerMessageV2;
 use dashmap::DashMap;
+use log::*;
 use std::sync::{
   atomic::{AtomicU32, Ordering},
   Arc,
 };
-use log::*;
 
 /// Message sorting and pairing for remote client connectors.
 ///

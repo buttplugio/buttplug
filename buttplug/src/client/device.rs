@@ -17,7 +17,21 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      ActuatorCmdV4, ActuatorCommand, ActuatorType, ActuatorValue, ButtplugClientMessageV4, ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4, Endpoint, FeatureType, RawCmdV4, RawCommand, RawCommandRead, RawCommandWrite, StopDeviceCmdV0
+      ActuatorCmdV4,
+      ActuatorCommand,
+      ActuatorType,
+      ActuatorValue,
+      ButtplugClientMessageV4,
+      ButtplugServerMessageV4,
+      DeviceFeature,
+      DeviceMessageInfoV4,
+      Endpoint,
+      FeatureType,
+      RawCmdV4,
+      RawCommand,
+      RawCommandRead,
+      RawCommandWrite,
+      StopDeviceCmdV0,
     },
   },
   util::stream::convert_broadcast_receiver_to_stream,
@@ -157,7 +171,14 @@ impl ButtplugClientDevice {
     self
       .device_features
       .iter()
-      .filter(|x| x.feature().actuator().as_ref().ok_or(false).unwrap().contains_key(&actuator_type))
+      .filter(|x| {
+        x.feature()
+          .actuator()
+          .as_ref()
+          .ok_or(false)
+          .unwrap()
+          .contains_key(&actuator_type)
+      })
       .cloned()
       .collect()
   }
@@ -169,15 +190,17 @@ impl ButtplugClientDevice {
     }
     let fut_vec: Vec<ButtplugClientResultFuture> = features
       .iter()
-      .map(|x| 
-        self
-      .event_loop_sender
-      .send_message_expect_ok(ActuatorCmdV4::new(self.index, x.feature_index(), actuator_command).into()))
+      .map(|x| {
+        self.event_loop_sender.send_message_expect_ok(
+          ActuatorCmdV4::new(self.index, x.feature_index(), actuator_command).into(),
+        )
+      })
       .collect();
     async move {
       futures::future::try_join_all(fut_vec).await?;
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   pub fn vibrate_features(&self) -> Vec<ClientDeviceFeature> {
@@ -251,10 +274,7 @@ impl ButtplugClientDevice {
       let msg = ButtplugClientMessageV4::RawCmd(RawCmdV4::new(
         self.index,
         endpoint,
-        RawCommand::Write(RawCommandWrite::new(
-          &data.to_vec(),
-          write_with_response,
-        ))
+        RawCommand::Write(RawCommandWrite::new(&data.to_vec(), write_with_response)),
       ));
       self.event_loop_sender.send_message_expect_ok(msg)
     } else {
@@ -281,10 +301,7 @@ impl ButtplugClientDevice {
       let msg = ButtplugClientMessageV4::RawCmd(RawCmdV4::new(
         self.index,
         endpoint,
-        RawCommand::Read(RawCommandRead::new(
-          expected_length,
-          timeout,
-        ))
+        RawCommand::Read(RawCommandRead::new(expected_length, timeout)),
       ));
       let send_fut = self.event_loop_sender.send_message(msg);
       async move {
@@ -335,8 +352,11 @@ impl ButtplugClientDevice {
       .iter()
       .any(|x| x.feature().raw().is_some())
     {
-      let msg =
-        ButtplugClientMessageV4::RawCmd(RawCmdV4::new(self.index, endpoint, RawCommand::Unsubscribe));
+      let msg = ButtplugClientMessageV4::RawCmd(RawCmdV4::new(
+        self.index,
+        endpoint,
+        RawCommand::Unsubscribe,
+      ));
       self.event_loop_sender.send_message_expect_ok(msg)
     } else {
       create_boxed_future_client_error(

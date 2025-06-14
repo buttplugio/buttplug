@@ -17,7 +17,6 @@ use buttplug::{
   server::message::{ButtplugClientMessageV3, ButtplugServerMessageV3},
 };
 
-
 pub type ButtplugRemoteClientConnector<
   TransportType,
   SerializerType = ButtplugClientJSONSerializer,

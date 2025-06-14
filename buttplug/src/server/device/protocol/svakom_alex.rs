@@ -25,24 +25,16 @@ impl ProtocolHandler for SvakomAlex {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-    fn handle_actuator_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
       Endpoint::Tx,
-      [
-        18,
-        1,
-        3,
-        0,
-        if speed == 0 { 0xFF } else { speed as u8 },
-        0,
-      ]
-      .to_vec(),
+      [18, 1, 3, 0, if speed == 0 { 0xFF } else { speed as u8 }, 0].to_vec(),
       false,
     )
     .into()])

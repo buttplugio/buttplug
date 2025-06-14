@@ -8,10 +8,10 @@
 //! Implementation of internal Buttplug Client event loop.
 
 use super::{
+  client::{ButtplugClientMessageFuturePair, ButtplugClientMessageSender},
   client_message_sorter::ClientMessageSorter,
   device::{ButtplugClientDevice, ButtplugClientDeviceEvent},
   ButtplugClientEvent,
-  client::{ButtplugClientMessageFuturePair, ButtplugClientMessageSender},
 };
 use buttplug::{
   core::{
@@ -28,12 +28,15 @@ use buttplug::{
 };
 use dashmap::DashMap;
 use futures::FutureExt;
+use log::*;
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
-use tokio::{select, sync::{broadcast, mpsc}};
-use log::*;
+use tokio::{
+  select,
+  sync::{broadcast, mpsc},
+};
 
 /// Enum used for communication from the client to the event loop.
 #[derive(Clone)]

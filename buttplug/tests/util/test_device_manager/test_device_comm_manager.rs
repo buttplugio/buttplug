@@ -24,6 +24,7 @@ use buttplug::{
   },
 };
 use futures::future::{self, FutureExt};
+use log::*;
 use serde::{Deserialize, Serialize};
 use std::{
   collections::HashMap,
@@ -34,7 +35,6 @@ use std::{
   time::{SystemTime, UNIX_EPOCH},
 };
 use tokio::sync::mpsc::Sender;
-use log::*;
 
 pub fn generate_address() -> String {
   info!("Generating random address for test device");

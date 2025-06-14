@@ -24,12 +24,12 @@ use futures::{
   pin_mut,
   StreamExt,
 };
+use log::*;
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
 use tokio::sync::mpsc::{channel, Sender};
-use log::*;
 use tracing_futures::Instrument;
 
 #[derive(Default)]

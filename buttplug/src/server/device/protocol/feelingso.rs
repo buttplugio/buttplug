@@ -7,13 +7,10 @@
 
 use std::sync::atomic::{AtomicU8, Ordering};
 
-use uuid::{Uuid, uuid};
+use uuid::{uuid, Uuid};
 
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  },
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_setup,
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
@@ -21,19 +18,18 @@ use crate::{
   },
 };
 
-
 const FEELINGSO_PROTOCOL_UUID: Uuid = uuid!("397d4cce-3173-4f66-b7ad-6ee21e59f854");
 
 generic_protocol_setup!(FeelingSo, "feelingso");
 
 pub struct FeelingSo {
-  speeds: [AtomicU8; 2]
+  speeds: [AtomicU8; 2],
 }
 
 impl Default for FeelingSo {
   fn default() -> Self {
     Self {
-      speeds: [AtomicU8::new(0), AtomicU8::new(0)]
+      speeds: [AtomicU8::new(0), AtomicU8::new(0)],
     }
   }
 }
@@ -41,7 +37,7 @@ impl Default for FeelingSo {
 impl FeelingSo {
   fn hardware_command(&self) -> Vec<HardwareCommand> {
     vec![HardwareWriteCmd::new(
-      FEELINGSO_PROTOCOL_UUID,      
+      FEELINGSO_PROTOCOL_UUID,
       Endpoint::Tx,
       vec![
         0xaa,
@@ -71,18 +67,18 @@ impl ProtocolHandler for FeelingSo {
     &self,
     _feature_index: u32,
     _feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[1].store(speed as u8, Ordering::Relaxed);
     Ok(self.hardware_command())
   }
-  
+
   fn handle_actuator_vibrate_cmd(
     &self,
     _feature_index: u32,
     _feature_id: Uuid,
-    speed: u32
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[0].store(speed as u8, Ordering::Relaxed);
     Ok(self.hardware_command())
   }

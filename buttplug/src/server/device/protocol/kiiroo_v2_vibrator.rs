@@ -10,10 +10,7 @@ use std::sync::atomic::{AtomicU8, Ordering};
 use uuid::Uuid;
 
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  },
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
@@ -23,13 +20,13 @@ use crate::{
 generic_protocol_setup!(KiirooV2Vibrator, "kiiroo-v2-vibrator");
 
 pub struct KiirooV2Vibrator {
-  speeds: [AtomicU8; 3]
+  speeds: [AtomicU8; 3],
 }
 
 impl Default for KiirooV2Vibrator {
   fn default() -> Self {
     Self {
-      speeds: [AtomicU8::new(0), AtomicU8::new(0), AtomicU8::new(0)]
+      speeds: [AtomicU8::new(0), AtomicU8::new(0), AtomicU8::new(0)],
     }
   }
 }
@@ -43,13 +40,17 @@ impl ProtocolHandler for KiirooV2Vibrator {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
       Endpoint::Tx,
-      self.speeds.iter().map(|v| v.load(Ordering::Relaxed)).collect(),
+      self
+        .speeds
+        .iter()
+        .map(|v| v.load(Ordering::Relaxed))
+        .collect(),
       false,
     )
     .into()])

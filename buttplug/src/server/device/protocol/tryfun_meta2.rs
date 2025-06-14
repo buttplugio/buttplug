@@ -10,11 +10,10 @@ use uuid::Uuid;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_setup,
-  server::
-    device::{
-      hardware::{HardwareCommand, HardwareWriteCmd},
-      protocol::ProtocolHandler,
-    },
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::ProtocolHandler,
+  },
 };
 use std::sync::atomic::{AtomicU8, Ordering};
 
@@ -34,7 +33,7 @@ impl ProtocolHandler for TryFunMeta2 {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut sum: u8 = 0xff;
     let mut data = vec![
@@ -55,7 +54,13 @@ impl ProtocolHandler for TryFunMeta2 {
     sum += count;
     data.push(sum);
 
-    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(
+      feature_id,
+      Endpoint::Tx,
+      data,
+      false,
+    )
+    .into()])
   }
 
   fn handle_rotation_with_direction_cmd(
@@ -63,7 +68,7 @@ impl ProtocolHandler for TryFunMeta2 {
     feature_index: u32,
     feature_id: Uuid,
     speed: u32,
-    clockwise: bool
+    clockwise: bool,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut speed = speed as i8;
     if clockwise {
@@ -88,14 +93,20 @@ impl ProtocolHandler for TryFunMeta2 {
     }
     sum += count;
     data.push(sum);
-    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(
+      feature_id,
+      Endpoint::Tx,
+      data,
+      false,
+    )
+    .into()])
   }
 
   fn handle_actuator_vibrate_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut sum: u8 = 0xff;
     let mut data = vec![
@@ -116,6 +127,12 @@ impl ProtocolHandler for TryFunMeta2 {
     sum += count;
     data.push(sum);
 
-    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(
+      feature_id,
+      Endpoint::Tx,
+      data,
+      false,
+    )
+    .into()])
   }
 }

@@ -14,17 +14,25 @@ use buttplug::{
       Endpoint,
       RequestServerInfoV4,
       StartScanningV0,
-      BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION,
+      BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+      BUTTPLUG_CURRENT_API_MINOR_VERSION,
     },
   },
   server::message::{
-    checked_raw_cmd::CheckedRawReadCmdV2, checked_raw_subscribe_cmd::CheckedRawSubscribeCmdV2, checked_raw_unsubscribe_cmd::CheckedRawUnsubscribeCmdV2, checked_raw_write_cmd::CheckedRawWriteCmdV2, spec_enums::ButtplugCheckedClientMessageV4, ButtplugClientMessageVariant, ButtplugServerMessageV3, ButtplugServerMessageVariant
+    checked_raw_cmd::CheckedRawReadCmdV2,
+    checked_raw_subscribe_cmd::CheckedRawSubscribeCmdV2,
+    checked_raw_unsubscribe_cmd::CheckedRawUnsubscribeCmdV2,
+    checked_raw_write_cmd::CheckedRawWriteCmdV2,
+    spec_enums::ButtplugCheckedClientMessageV4,
+    ButtplugClientMessageVariant,
+    ButtplugServerMessageV3,
+    ButtplugServerMessageVariant,
   },
 };
 
 use futures::{pin_mut, StreamExt};
-use tracing::info;
 use std::matches;
+use tracing::info;
 pub use util::test_device_manager::TestDeviceCommunicationManagerBuilder;
 use util::{setup_logging, test_server_v4_with_device, test_server_with_device};
 
@@ -42,7 +50,12 @@ async fn test_capabilities_exposure() {
 
   server
     .parse_message(ButtplugClientMessageVariant::V4(
-      RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION).into(),
+      RequestServerInfoV4::new(
+        "Test Client",
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION,
+      )
+      .into(),
     ))
     .await
     .expect("Test, assuming infallible.");
@@ -70,7 +83,12 @@ async fn test_server_raw_message() {
   pin_mut!(recv);
   assert!(server
     .parse_message(ButtplugClientMessageVariant::V4(
-      RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION).into()
+      RequestServerInfoV4::new(
+        "Test Client",
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION
+      )
+      .into()
     ))
     .await
     .is_ok());
@@ -108,7 +126,12 @@ async fn test_server_no_raw_message() {
   pin_mut!(recv);
   assert!(server
     .parse_message(ButtplugClientMessageVariant::V4(
-      RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION).into()
+      RequestServerInfoV4::new(
+        "Test Client",
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION
+      )
+      .into()
     ))
     .await
     .is_ok());
@@ -147,7 +170,11 @@ async fn test_reject_on_no_raw_message() {
   pin_mut!(recv);
   assert!(server
     .parse_checked_message(ButtplugCheckedClientMessageV4::from(
-      RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION)
+      RequestServerInfoV4::new(
+        "Test Client",
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION
+      )
     ))
     .await
     .is_ok());
@@ -164,12 +191,9 @@ async fn test_reject_on_no_raw_message() {
       assert_eq!(da.device_name(), "Aneros Vivi");
       let mut should_be_err;
       should_be_err = server
-        .parse_checked_message(ButtplugCheckedClientMessageV4::from(CheckedRawWriteCmdV2::new(
-          da.device_index(),
-          Endpoint::Tx,
-          &[0x0],
-          false,
-        )))
+        .parse_checked_message(ButtplugCheckedClientMessageV4::from(
+          CheckedRawWriteCmdV2::new(da.device_index(), Endpoint::Tx, &[0x0], false),
+        ))
         .await;
       assert!(should_be_err.is_err());
       assert!(matches!(
@@ -179,12 +203,9 @@ async fn test_reject_on_no_raw_message() {
       info!("ERRORED OUT");
 
       should_be_err = server
-        .parse_checked_message(ButtplugCheckedClientMessageV4::from(CheckedRawReadCmdV2::new(
-          da.device_index(),
-          Endpoint::Tx,
-          0,
-          0,
-        )))
+        .parse_checked_message(ButtplugCheckedClientMessageV4::from(
+          CheckedRawReadCmdV2::new(da.device_index(), Endpoint::Tx, 0, 0),
+        ))
         .await;
       assert!(should_be_err.is_err());
       assert!(matches!(

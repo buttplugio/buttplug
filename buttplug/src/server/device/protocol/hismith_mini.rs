@@ -17,8 +17,8 @@ use crate::{
   },
 };
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
 use std::sync::Arc;
+use uuid::{uuid, Uuid};
 
 const HISMITH_MINI_PROTOCOL_UUID: Uuid = uuid!("94befc1a-9859-4bf6-99ee-5678c89237a7");
 
@@ -49,7 +49,12 @@ impl ProtocolIdentifier for HismithMiniIdentifier {
     _: ProtocolCommunicationSpecifier,
   ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     let result = hardware
-      .read_value(&HardwareReadCmd::new(HISMITH_MINI_PROTOCOL_UUID, Endpoint::RxBLEModel, 128, 500))
+      .read_value(&HardwareReadCmd::new(
+        HISMITH_MINI_PROTOCOL_UUID,
+        Endpoint::RxBLEModel,
+        128,
+        500,
+      ))
       .await?;
 
     let identifier = result
@@ -108,7 +113,7 @@ impl ProtocolHandler for HismithMini {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let idx: u8 = 0x03;
     let speed: u8 = speed as u8;
@@ -126,7 +131,7 @@ impl ProtocolHandler for HismithMini {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let idx: u8 = if !self.dual_vibe || feature_index == 1 {
       0x05
@@ -148,7 +153,7 @@ impl ProtocolHandler for HismithMini {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    level: u32
+    level: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let idx: u8 = if self.second_constrict { 0x05 } else { 0x03 };
     let speed: u8 = level as u8;

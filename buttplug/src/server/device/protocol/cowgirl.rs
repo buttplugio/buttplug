@@ -21,20 +21,31 @@ const COWGIRL_PROTOCOL_UUID: Uuid = uuid!("0474d2fd-f566-4bed-8770-88e457a96144"
 generic_protocol_setup!(Cowgirl, "cowgirl");
 
 pub struct Cowgirl {
-  speeds: [AtomicU8; 2]
+  speeds: [AtomicU8; 2],
 }
 
 impl Default for Cowgirl {
   fn default() -> Self {
     Self {
-      speeds: [AtomicU8::new(0), AtomicU8::new(0)]
+      speeds: [AtomicU8::new(0), AtomicU8::new(0)],
     }
   }
 }
 
 impl Cowgirl {
   fn hardware_commands(&self) -> Vec<HardwareCommand> {
-    vec![HardwareWriteCmd::new(COWGIRL_PROTOCOL_UUID, Endpoint::Tx, vec![0x00, 0x01, self.speeds[0].load(Ordering::Relaxed), self.speeds[1].load(Ordering::Relaxed)], true).into()]
+    vec![HardwareWriteCmd::new(
+      COWGIRL_PROTOCOL_UUID,
+      Endpoint::Tx,
+      vec![
+        0x00,
+        0x01,
+        self.speeds[0].load(Ordering::Relaxed),
+        self.speeds[1].load(Ordering::Relaxed),
+      ],
+      true,
+    )
+    .into()]
   }
 }
 
@@ -51,7 +62,7 @@ impl ProtocolHandler for Cowgirl {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[0].store(speed as u8, Ordering::Relaxed);
     Ok(self.hardware_commands())
@@ -61,7 +72,7 @@ impl ProtocolHandler for Cowgirl {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[1].store(speed as u8, Ordering::Relaxed);
     Ok(self.hardware_commands())

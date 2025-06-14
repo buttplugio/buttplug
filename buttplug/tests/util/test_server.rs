@@ -19,10 +19,10 @@ use buttplug::{
   util::async_manager,
 };
 use futures::{future::Future, pin_mut, select, FutureExt, StreamExt};
+use log::*;
 use std::sync::Arc;
 use thiserror::Error;
 use tokio::sync::{mpsc, Notify};
-use log::*;
 
 #[derive(Error, Debug)]
 pub enum ButtplugServerConnectorError {

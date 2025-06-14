@@ -9,9 +9,7 @@ mod test_device;
 #[cfg(feature = "server")]
 mod test_device_comm_manager;
 
-use buttplug::{
-  server::device::hardware::HardwareCommand,
-};
+use buttplug::server::device::hardware::HardwareCommand;
 use std::time::Duration;
 pub use test_device::{TestDevice, TestDeviceChannelHost, TestHardwareEvent};
 #[cfg(feature = "server")]
@@ -22,9 +20,14 @@ pub use test_device_comm_manager::{
 };
 
 #[allow(dead_code)]
-pub async fn check_test_recv_value(timeout: &Duration, receiver: &mut TestDeviceChannelHost, command: HardwareCommand) {
+pub async fn check_test_recv_value(
+  timeout: &Duration,
+  receiver: &mut TestDeviceChannelHost,
+  command: HardwareCommand,
+) {
   assert_eq!(
-    tokio::time::timeout(*timeout, receiver.receiver.recv()).await
+    tokio::time::timeout(*timeout, receiver.receiver.recv())
+      .await
       .expect("No messages received")
       .expect("Test"),
     command

@@ -6,10 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  },
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{
@@ -20,13 +17,18 @@ use crate::{
       HardwareWriteCmd,
     },
     protocol::{
-      generic_protocol_initializer_setup, lelo_harmony::LeloHarmony, lelof1s::LeloF1s, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer
+      generic_protocol_initializer_setup,
+      lelo_harmony::LeloHarmony,
+      lelof1s::LeloF1s,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
     },
   },
 };
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
 use std::sync::Arc;
+use uuid::{uuid, Uuid};
 
 const LELO_F1S_V2_PROTOCOL_UUID: Uuid = uuid!("85c59ac5-89ee-4549-8958-ce5449226a5c");
 generic_protocol_initializer_setup!(LeloF1sV2, "lelo-f1sv2");
@@ -60,7 +62,10 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
     // * If it returns 0x00,00,00,00,00,00,00,00 the connection is authorised
     let mut event_receiver = hardware.event_stream();
     hardware
-      .subscribe(&HardwareSubscribeCmd::new(LELO_F1S_V2_PROTOCOL_UUID, sec_endpoint))
+      .subscribe(&HardwareSubscribeCmd::new(
+        LELO_F1S_V2_PROTOCOL_UUID,
+        sec_endpoint,
+      ))
       .await?;
     let noauth: Vec<u8> = vec![0; 8];
     let authed: Vec<u8> = vec![1, 0, 0, 0, 0, 0, 0, 0];
@@ -83,15 +88,26 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
           debug!("Lelo F1s V2 gave us a password: {:?}", n);
           // Can't send whilst subscribed
           hardware
-            .unsubscribe(&HardwareUnsubscribeCmd::new(LELO_F1S_V2_PROTOCOL_UUID, sec_endpoint))
+            .unsubscribe(&HardwareUnsubscribeCmd::new(
+              LELO_F1S_V2_PROTOCOL_UUID,
+              sec_endpoint,
+            ))
             .await?;
           // Send with response
           hardware
-            .write_value(&HardwareWriteCmd::new(LELO_F1S_V2_PROTOCOL_UUID, sec_endpoint, n, true))
+            .write_value(&HardwareWriteCmd::new(
+              LELO_F1S_V2_PROTOCOL_UUID,
+              sec_endpoint,
+              n,
+              true,
+            ))
             .await?;
           // Get back to the loop
           hardware
-            .subscribe(&HardwareSubscribeCmd::new(LELO_F1S_V2_PROTOCOL_UUID, sec_endpoint))
+            .subscribe(&HardwareSubscribeCmd::new(
+              LELO_F1S_V2_PROTOCOL_UUID,
+              sec_endpoint,
+            ))
             .await?;
         }
       } else {

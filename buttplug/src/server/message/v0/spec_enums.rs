@@ -1,15 +1,13 @@
 use std::cmp::Ordering;
 
 use super::*;
-use crate::{core::{
-  errors::ButtplugMessageError,
-  message::{
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-    ButtplugMessageValidator,
-    PingV0,
+use crate::{
+  core::{
+    errors::ButtplugMessageError,
+    message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, PingV0},
   },
-}, server::message::RequestServerInfoV1};
+  server::message::RequestServerInfoV1,
+};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
@@ -66,7 +64,6 @@ pub enum ButtplugServerMessageV0 {
   DeviceRemoved(DeviceRemovedV0),
   ScanningFinished(ScanningFinishedV0),
 }
-
 
 #[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]
 pub enum ButtplugDeviceMessageNameV0 {

@@ -22,7 +22,6 @@ use crate::{
 };
 use async_trait::async_trait;
 use futures::FutureExt;
-use uuid::{uuid, Uuid};
 use std::{
   sync::{
     atomic::{AtomicU8, Ordering},
@@ -30,6 +29,7 @@ use std::{
   },
   time::Duration,
 };
+use uuid::{uuid, Uuid};
 
 use super::fleshlight_launch_helper::calculate_speed;
 
@@ -91,7 +91,10 @@ impl ProtocolInitializer for FredorchInitializer {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut event_receiver = hardware.event_stream();
     hardware
-      .subscribe(&HardwareSubscribeCmd::new(FREDORCH_PROTOCOL_UUID, Endpoint::Rx))
+      .subscribe(&HardwareSubscribeCmd::new(
+        FREDORCH_PROTOCOL_UUID,
+        Endpoint::Rx,
+      ))
       .await?;
 
     let init: Vec<(String, Vec<u8>)> = vec![
@@ -145,7 +148,12 @@ impl ProtocolInitializer for FredorchInitializer {
       data.1.push(crc[1]);
       debug!("Fredorch: {} - sent {:?}", data.0, data.1);
       hardware
-        .write_value(&HardwareWriteCmd::new(FREDORCH_PROTOCOL_UUID, Endpoint::Tx, data.1.clone(), false))
+        .write_value(&HardwareWriteCmd::new(
+          FREDORCH_PROTOCOL_UUID,
+          Endpoint::Tx,
+          data.1.clone(),
+          false,
+        ))
         .await?;
 
       select! {
@@ -182,12 +190,12 @@ pub struct Fredorch {
 }
 
 impl ProtocolHandler for Fredorch {
-    fn handle_position_with_duration_cmd(
+  fn handle_position_with_duration_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,
     position: u32,
-    duration: u32,    
+    duration: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
@@ -207,6 +215,12 @@ impl ProtocolHandler for Fredorch {
     data.push(crc[0]);
     data.push(crc[1]);
     self.previous_position.store(position, Ordering::Relaxed);
-    Ok(vec![HardwareWriteCmd::new(FREDORCH_PROTOCOL_UUID, Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(
+      FREDORCH_PROTOCOL_UUID,
+      Endpoint::Tx,
+      data,
+      false,
+    )
+    .into()])
   }
 }

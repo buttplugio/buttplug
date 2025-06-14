@@ -14,8 +14,8 @@ use crate::core::{
 };
 use server_device_attributes::ServerDeviceAttributes;
 
-pub mod server_device_attributes;
 pub mod serializer;
+pub mod server_device_attributes;
 pub mod server_device_feature;
 mod v0;
 mod v1;
@@ -28,7 +28,6 @@ pub use v1::*;
 pub use v2::*;
 pub use v3::*;
 pub use v4::*;
-
 
 #[derive(
   Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator,

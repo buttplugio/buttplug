@@ -1,7 +1,8 @@
 use crate::core::{
   errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
   message::{
-    self, serializer::{
+    self,
+    serializer::{
       json_serializer::{
         create_message_validator,
         deserialize_to_message,
@@ -11,12 +12,17 @@ use crate::core::{
       ButtplugMessageSerializer,
       ButtplugSerializedMessage,
       ButtplugSerializerError,
-    }, ButtplugClientMessageV4, ButtplugMessageFinalizer, ButtplugMessageSpecVersion, ButtplugServerMessageCurrent, ButtplugServerMessageV4
+    },
+    ButtplugClientMessageV4,
+    ButtplugMessageFinalizer,
+    ButtplugMessageSpecVersion,
+    ButtplugServerMessageCurrent,
+    ButtplugServerMessageV4,
   },
 };
 use jsonschema::Validator;
 use once_cell::sync::OnceCell;
-use serde::{Deserialize};
+use serde::Deserialize;
 
 use super::{
   ButtplugClientMessageV0,
@@ -33,10 +39,9 @@ use super::{
 
 #[derive(Deserialize, ButtplugMessageFinalizer, Clone, Debug)]
 struct RequestServerInfoMessage {
-  #[serde(rename="RequestServerInfo")]
-  rsi: RequestServerInfoVersion
+  #[serde(rename = "RequestServerInfo")]
+  rsi: RequestServerInfoVersion,
 }
-
 
 #[derive(Deserialize, ButtplugMessageFinalizer, Clone, Debug)]
 struct RequestServerInfoVersion {
@@ -47,7 +52,7 @@ struct RequestServerInfoVersion {
   #[serde(default, rename = "MessageVersion")]
   message_version: Option<u32>,
   #[serde(default, rename = "ApiVersionMajor")]
-  api_major_version: Option<u32>
+  api_major_version: Option<u32>,
 }
 
 pub struct ButtplugServerJSONSerializer {
@@ -130,26 +135,26 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
     // to get the version. As of v4, RequestServerInfo is of a different layout than RSI v0-v3,
     // therefore we need to step through versions for compatibility sake.
     info!("{:?}", msg);
-    let msg_version = if let Ok(msg_union) = deserialize_to_message::<RequestServerInfoMessage>(None, msg) {
-      info!("PARSING {:?}", msg_union);
-      if msg_union.is_empty() {
-        Err(ButtplugSerializerError::MessageSpecVersionNotReceived)
-      } else if let Some(v) = msg_union[0].rsi.api_major_version {
-        ButtplugMessageSpecVersion::try_from(v as i32).map_err(|e| ButtplugSerializerError::MessageSpecVersionNotReceived)
-      } else if let Some(v) = msg_union[0].rsi.message_version {
-        ButtplugMessageSpecVersion::try_from(v as i32).map_err(|e| ButtplugSerializerError::MessageSpecVersionNotReceived)
+    let msg_version =
+      if let Ok(msg_union) = deserialize_to_message::<RequestServerInfoMessage>(None, msg) {
+        info!("PARSING {:?}", msg_union);
+        if msg_union.is_empty() {
+          Err(ButtplugSerializerError::MessageSpecVersionNotReceived)
+        } else if let Some(v) = msg_union[0].rsi.api_major_version {
+          ButtplugMessageSpecVersion::try_from(v as i32)
+            .map_err(|e| ButtplugSerializerError::MessageSpecVersionNotReceived)
+        } else if let Some(v) = msg_union[0].rsi.message_version {
+          ButtplugMessageSpecVersion::try_from(v as i32)
+            .map_err(|e| ButtplugSerializerError::MessageSpecVersionNotReceived)
+        } else {
+          Ok(ButtplugMessageSpecVersion::Version0)
+        }
       } else {
-        Ok(ButtplugMessageSpecVersion::Version0)
-      }
-    } else {
-      info!("NOT EVEN PARSING");
-      Err(ButtplugSerializerError::MessageSpecVersionNotReceived)
-    }?;
+        info!("NOT EVEN PARSING");
+        Err(ButtplugSerializerError::MessageSpecVersionNotReceived)
+      }?;
 
-    info!(
-      "Setting JSON Wrapper message version to {}",
-      msg_version
-    );
+    info!("Setting JSON Wrapper message version to {}", msg_version);
     self
       .message_version
       .set(msg_version)

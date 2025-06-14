@@ -20,8 +20,8 @@ use crate::{
   },
 };
 use async_trait::async_trait;
-use uuid::Uuid;
 use std::sync::Arc;
+use uuid::Uuid;
 
 generic_protocol_initializer_setup!(Foreo, "foreo");
 
@@ -63,7 +63,7 @@ impl ProtocolHandler for Foreo {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
