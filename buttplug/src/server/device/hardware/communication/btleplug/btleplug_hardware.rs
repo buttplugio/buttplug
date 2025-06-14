@@ -106,15 +106,14 @@ impl<T: Peripheral> HardwareConnector for BtleplugHardwareConnector<T> {
     {
       if let Err(err) = self.device.connect().await {
         let return_err = ButtplugDeviceError::DeviceSpecificError(
-          HardwareSpecificError::BtleplugError(format!("{:?}", err)),
+          HardwareSpecificError::BtleplugError(format!("{err:?}")),
         );
         return Err(return_err);
       }
       if let Err(err) = self.device.discover_services().await {
         error!("BTLEPlug error discovering characteristics: {:?}", err);
         return Err(ButtplugDeviceError::DeviceConnectionError(format!(
-          "BTLEPlug error discovering characteristics: {:?}",
-          err
+          "BTLEPlug error discovering characteristics: {err:?}"
         )));
       }
     }
@@ -214,7 +213,7 @@ impl<T: Peripheral> HardwareSpecializer for BtleplugHardwareSpecializer<T> {
     );
     let mut hardware = Hardware::new(
       &self.name,
-      &format!("{:?}", address),
+      &format!("{address:?}"),
       &endpoints.keys().cloned().collect::<Vec<Endpoint>>(),
       Box::new(device_internal_impl),
     );
@@ -270,7 +269,7 @@ impl<T: Peripheral + 'static> BtlePlugHardware<T> {
                 continue;
               }
               if let Err(err) = event_stream_clone.send(HardwareEvent::Notification(
-                format!("{:?}", address),
+                format!("{address:?}"),
                 endpoint,
                 notification.value,
               )) {
@@ -292,7 +291,7 @@ impl<T: Peripheral + 'static> BtlePlugHardware<T> {
                 if event_stream_clone.receiver_count() != 0 {
                   if let Err(err) = event_stream_clone
                   .send(HardwareEvent::Disconnected(
-                    format!("{:?}", address)
+                    format!("{address:?}")
                   )) {
                     error!(
                       "Cannot send notification, device object disappeared: {:?}",
@@ -398,7 +397,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
         Err(err) => {
           error!("BTLEPlug device write error: {:?}", err);
           Err(ButtplugDeviceError::DeviceSpecificError(
-            HardwareSpecificError::BtleplugError(format!("{:?}", err)),
+            HardwareSpecificError::BtleplugError(format!("{err:?}")),
           ))
         }
       }
@@ -429,7 +428,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
         Err(err) => {
           error!("BTLEPlug device read error: {:?}", err);
           Err(ButtplugDeviceError::DeviceSpecificError(
-            HardwareSpecificError::BtleplugError(format!("{:?}", err)),
+            HardwareSpecificError::BtleplugError(format!("{err:?}")),
           ))
         }
       }
@@ -460,8 +459,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     async move {
       device.subscribe(&characteristic).await.map_err(|e| {
         ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::BtleplugError(format!(
-          "{:?}",
-          e
+          "{e:?}"
         )))
       })?;
       endpoints.insert(endpoint);
@@ -493,8 +491,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     async move {
       device.unsubscribe(&characteristic).await.map_err(|e| {
         ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::BtleplugError(format!(
-          "{:?}",
-          e
+          "{e:?}"
         )))
       })?;
       endpoints.remove(&endpoint);

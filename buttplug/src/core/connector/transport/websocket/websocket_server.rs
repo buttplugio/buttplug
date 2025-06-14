@@ -224,7 +224,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
       debug!("Websocket: Socket bound.");
       let listener = try_socket.map_err(|e| {
         ButtplugConnectorError::TransportSpecificError(
-          ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{:?}", e)),
+          ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{e:?}")),
         )
       })?;
       debug!("Websocket: Listening on: {}", addr);

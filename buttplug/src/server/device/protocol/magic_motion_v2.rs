@@ -14,13 +14,10 @@ use crate::{
     errors::ButtplugDeviceError,
     message::Endpoint,
   },
-  server::{
-    device::{
+  server::device::{
       hardware::{HardwareCommand, HardwareWriteCmd},
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
-    message::checked_actuator_cmd::CheckedActuatorCmdV4,
-  },
 };
 
 const MAGIC_MOTION_2_PROTOCOL_UUID: Uuid = uuid!("4d6e9297-c57e-4ce7-a63c-24cc7d117a47");

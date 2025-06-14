@@ -265,13 +265,11 @@ where
         }
       }
       Err(err) => Err(ButtplugDeviceError::DeviceConfigurationError(format!(
-        "{}",
-        err
+        "{err}"
       ))),
     },
     Err(err) => Err(ButtplugDeviceError::DeviceConfigurationError(format!(
-      "{}",
-      err
+      "{err}"
     ))),
   }
 }

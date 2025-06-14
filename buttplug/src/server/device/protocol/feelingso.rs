@@ -15,10 +15,10 @@ use crate::{
     message::Endpoint,
   },
   generic_protocol_setup,
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::ProtocolHandler,
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  },
 };
 
 

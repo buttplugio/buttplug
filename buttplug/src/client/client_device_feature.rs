@@ -85,7 +85,7 @@ impl ClientDeviceFeature {
   ) -> ButtplugClientResultFuture {
     let actuator_type = actuator_command.as_actuator_type();
     if let Some(actuator_map) = self.feature().actuator() {
-      if let Some(_) = actuator_map.get(&actuator_type) {
+      if actuator_map.get(&actuator_type).is_some() {
         self.event_loop_sender.send_message_expect_ok(
           ActuatorCmdV4::new(self.device_index, self.feature_index, actuator_command).into(),
         )        

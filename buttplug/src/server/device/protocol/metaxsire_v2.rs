@@ -7,7 +7,6 @@
 
 use crate::server::device::hardware::Hardware;
 use crate::server::device::protocol::ProtocolInitializer;
-use crate::server::message::checked_actuator_cmd::CheckedActuatorCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{

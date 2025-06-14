@@ -64,7 +64,7 @@ impl DeviceAddedV4 {
       device_index,
       device_name: device_name.to_string(),
       device_display_name: device_display_name.clone(),
-      device_message_timing_gap: device_message_timing_gap,
+      device_message_timing_gap,
       device_features: device_features.clone(),
     };
     obj.finalize();
@@ -79,7 +79,7 @@ impl From<DeviceMessageInfoV4> for DeviceAddedV4 {
       device_index: value.device_index(),
       device_name: value.device_name().clone(),
       device_display_name: value.device_display_name().clone(),
-      device_message_timing_gap: value.device_message_timing_gap().clone(),
+      device_message_timing_gap: value.device_message_timing_gap(),
       device_features: value.device_features().clone()
     }
   }

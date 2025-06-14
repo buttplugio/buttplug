@@ -10,8 +10,7 @@ use crate::{
     errors::ButtplugDeviceError,
     message::Endpoint,
   },
-  server::{
-    device::{
+  server::device::{
       configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
       hardware::{
         Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd,
@@ -22,8 +21,6 @@ use crate::{
         ProtocolInitializer,
       },
     },
-    message::checked_actuator_cmd::CheckedActuatorCmdV4,
-  },
 };
 use async_trait::async_trait;
 use uuid::{uuid, Uuid};

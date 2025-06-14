@@ -40,7 +40,7 @@ pub mod setup {
 #[derive(Default)]
 pub struct HismithIdentifier {}
 
-const LEGACY_HISMITHS: [&'static str; 6] = ["1001", "1002", "1003", "3001", "2001", "1006"];
+const LEGACY_HISMITHS: [&str; 6] = ["1001", "1002", "1003", "3001", "2001", "1006"];
 
 #[async_trait]
 impl ProtocolIdentifier for HismithIdentifier {
@@ -56,7 +56,7 @@ impl ProtocolIdentifier for HismithIdentifier {
     let identifier = result
       .data()
       .iter()
-      .map(|b| format!("{:02x}", b))
+      .map(|b| format!("{b:02x}"))
       .collect::<String>();
     info!("Hismith Device Identifier: {}", identifier);
 

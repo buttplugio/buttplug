@@ -360,7 +360,7 @@ impl ButtplugClient {
     } else {
       self.disconnect().await?;
       Err(ButtplugClientError::ButtplugError(
-        ButtplugHandshakeError::UnexpectedHandshakeMessageReceived(format!("{:?}", msg)).into(),
+        ButtplugHandshakeError::UnexpectedHandshakeMessageReceived(format!("{msg:?}")).into(),
       ))
     }
   }

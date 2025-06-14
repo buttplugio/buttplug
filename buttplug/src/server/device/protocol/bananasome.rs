@@ -46,9 +46,9 @@ impl Bananasome {
       vec![
         0xa0,
         0x03,
-        self.current_commands[0].load(Ordering::Relaxed) as u8,
-        self.current_commands[1].load(Ordering::Relaxed) as u8,
-        self.current_commands[2].load(Ordering::Relaxed) as u8,
+        self.current_commands[0].load(Ordering::Relaxed),
+        self.current_commands[1].load(Ordering::Relaxed),
+        self.current_commands[2].load(Ordering::Relaxed),
       ],
       false,
     )

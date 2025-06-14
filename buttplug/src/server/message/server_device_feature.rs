@@ -75,7 +75,7 @@ impl ServerDeviceFeature {
 
   pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
     if let Some(actuator_map) = &self.actuator {
-      for (_, actuator) in actuator_map {
+      for actuator in actuator_map.values() {
         actuator.is_valid()?;
       }
     }
@@ -87,12 +87,8 @@ impl ServerDeviceFeature {
       index,
       self.description(),
       self.feature_type(),
-      &self.actuator.clone().and_then(|x| {
-        Some(x.iter().map(|(t, a)|  (*t, DeviceFeatureActuator::from(a.clone()))).collect())
-      }),
-      &self.sensor.clone().and_then(|x| {
-        Some(x.iter().map(|(t, a)|  (*t, DeviceFeatureSensor::from(a.clone()))).collect())
-      }),
+      &self.actuator.clone().map(|x| x.iter().map(|(t, a)|  (*t, DeviceFeatureActuator::from(a.clone()))).collect()),
+      &self.sensor.clone().map(|x| x.iter().map(|(t, a)|  (*t, DeviceFeatureSensor::from(a.clone()))).collect()),
       self.raw()
     )
   }
@@ -100,7 +96,7 @@ impl ServerDeviceFeature {
   /// If this is a base feature (i.e. base_id is None), create a new feature with a randomized id
   /// and the current feature id as the base id. Otherwise, just pass back a copy of self.
   pub fn as_user_feature(&self) -> Self {
-    if !self.base_id.is_none() {
+    if self.base_id.is_some() {
       self.clone()  
     } else {
       Self {

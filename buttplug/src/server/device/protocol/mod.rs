@@ -147,7 +147,7 @@ pub mod youou;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorCommand, ActuatorType, Endpoint, SensorReadingV4, SensorType},
+    message::{ActuatorCommand, Endpoint, SensorReadingV4, SensorType},
   },
   server::{
     device::{
@@ -155,7 +155,7 @@ use crate::{
       hardware::{Hardware, HardwareCommand, HardwareReadCmd},
     },
     message::{
-      checked_actuator_cmd::CheckedActuatorCmdV4, checked_sensor_cmd::CheckedSensorCmdV4, spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage
+      checked_actuator_cmd::CheckedActuatorCmdV4, spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage
     },
   },
 };

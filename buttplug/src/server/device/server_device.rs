@@ -182,8 +182,7 @@ impl ServerDevice {
       attrs
     } else {
       return Err(ButtplugDeviceError::DeviceConfigurationError(format!(
-        "No protocols with viable protocol attributes for hardware {:?}.",
-        identifier
+        "No protocols with viable protocol attributes for hardware {identifier:?}."
       )));
     };
 
@@ -210,8 +209,7 @@ impl ServerDevice {
     {
       if let Err(e) = device.handle_stop_device_cmd().await {
         return Err(ButtplugDeviceError::DeviceConnectionError(format!(
-          "Error setting up keepalive: {}",
-          e
+          "Error setting up keepalive: {e}"
         )));
       }
     }
@@ -273,8 +271,7 @@ impl ServerDevice {
           }
           if hardware.requires_keepalive()
             && !matches!(strategy, ProtocolKeepaliveStrategy::NoStrategy)
-          {
-            if hardware.time_since_last_write().await > wait_duration {
+            && hardware.time_since_last_write().await > wait_duration {
               match &strategy {
                 ProtocolKeepaliveStrategy::RepeatPacketStrategy(packet) => {
                   if let Err(e) = hardware.write_value(packet).await {
@@ -298,7 +295,6 @@ impl ServerDevice {
                 }
               }
             }
-          }
         }
         info!("Leaving keepalive task for {}", hardware.name());
       });
@@ -309,7 +305,7 @@ impl ServerDevice {
     // calculate stop commands.
     for (index, feature) in definition.features().iter().enumerate() {
       if let Some(actuator_map) = feature.actuator() {
-        for (actuator_type, _) in actuator_map {
+        for actuator_type in actuator_map.keys() {
           if FeatureType::try_from(*actuator_type) != Ok(feature.feature_type()) {
             continue;
           }
@@ -426,7 +422,7 @@ impl ServerDevice {
   }
 
   pub fn needs_update(&self, _command_message: &ButtplugDeviceCommandMessageUnionV4) -> bool {
-    return true;
+    true
   }
 
   pub fn as_device_message_info(&self, index: u32) -> DeviceMessageInfoV4 {
@@ -463,7 +459,7 @@ impl ServerDevice {
         let mut futs = vec![];
         let msg_id = msg.id();
         for m in msg.value_vec() {
-          futs.push(self.handle_actuatorcmd_v4(&m))
+          futs.push(self.handle_actuatorcmd_v4(m))
         }
         async move {
           for f in futs {

@@ -147,7 +147,7 @@ impl HardwareInternal for XInputHardware {
       let battery = handle
         .get_gamepad_battery_information(index as u32)
         .map_err(|e| {
-          ButtplugDeviceError::from(HardwareSpecificError::XInputError(format!("{:?}", e)))
+          ButtplugDeviceError::from(HardwareSpecificError::XInputError(format!("{e:?}")))
         })?;
       Ok(HardwareReading::new(
         Endpoint::Rx,
@@ -175,7 +175,7 @@ impl HardwareInternal for XInputHardware {
       handle
         .set_state(index as u32, left_motor_speed, right_motor_speed)
         .map_err(|e: XInputUsageError| {
-          ButtplugDeviceError::from(HardwareSpecificError::XInputError(format!("{:?}", e)))
+          ButtplugDeviceError::from(HardwareSpecificError::XInputError(format!("{e:?}")))
         })
     }
     .boxed()

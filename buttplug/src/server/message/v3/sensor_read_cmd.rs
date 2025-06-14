@@ -67,31 +67,29 @@ impl TryFromDeviceAttributes<SensorReadCmdV3> for CheckedSensorCmdV4 {
       Err(ButtplugError::from(
         ButtplugDeviceError::MessageNotSupported("SensorReadCmdV3".to_owned()),
       ))
-    } else {
-      if let Some((feature_index, feature)) = features
-        .features()
-        .iter()
-        .enumerate()
-        .find(|(_, p)| {
-          if let Some(sensor_map) = p.sensor() {
-            if sensor_map.contains_key(&SensorType::Battery) {
-              return true;
-            }
+    } else if let Some((feature_index, feature)) = features
+      .features()
+      .iter()
+      .enumerate()
+      .find(|(_, p)| {
+        if let Some(sensor_map) = p.sensor() {
+          if sensor_map.contains_key(&SensorType::Battery) {
+            return true;
           }
-          return false;
-        }) {
-        Ok(CheckedSensorCmdV4::new(
-          msg.device_index(),
-          feature_index as u32,
-          SensorType::Battery,
-          SensorCommandType::Read,
-          feature.id(),
-        ))
-      } else {
-        Err(ButtplugError::from(
-          ButtplugDeviceError::MessageNotSupported("SensorReadCmdV3".to_owned()),
-        ))
-      }
+        }
+        false
+      }) {
+      Ok(CheckedSensorCmdV4::new(
+        msg.device_index(),
+        feature_index as u32,
+        SensorType::Battery,
+        SensorCommandType::Read,
+        feature.id(),
+      ))
+    } else {
+      Err(ButtplugError::from(
+        ButtplugDeviceError::MessageNotSupported("SensorReadCmdV3".to_owned()),
+      ))
     }
   }
 }

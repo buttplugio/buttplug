@@ -14,10 +14,10 @@ use crate::{
     errors::ButtplugDeviceError,
     message::Endpoint,
   },
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  },
 };
 
 const LIBO_SHARK_PROTOCOL_UUID: Uuid = uuid!("c0044425-b59c-4037-a702-0438afcaad3e");

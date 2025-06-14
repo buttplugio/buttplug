@@ -12,10 +12,10 @@ use crate::{
     errors::ButtplugDeviceError,
     message::Endpoint,
   },
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  },
 };
 
 const LIBO_VIBES_PROTOCOL_UUID: Uuid = uuid!("72a3d029-cf33-4fff-beec-1c45b85cc8ae");

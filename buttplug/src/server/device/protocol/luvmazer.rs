@@ -12,10 +12,10 @@ use crate::{
     errors::ButtplugDeviceError,
     message::Endpoint,
   },
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::ProtocolHandler,
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  },
 };
 
 use super::generic_protocol_setup;

@@ -51,7 +51,7 @@ impl DeviceMessageInfoV3 {
       device_index,
       device_name: device_name.to_owned(),
       device_display_name: device_display_name.clone(),
-      device_message_timing_gap: device_message_timing_gap,
+      device_message_timing_gap,
       device_messages,
     }
   }

@@ -282,8 +282,7 @@ impl HardwareInternal for WebsocketServerHardware {
     async move {
       sender.send(data).await.map_err(|err| {
         ButtplugDeviceError::DeviceCommunicationError(format!(
-          "Could not write value to websocket device: {}",
-          err
+          "Could not write value to websocket device: {err}"
         ))
       })
     }

@@ -7,8 +7,7 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::{
-    device::{
+  server::device::{
       configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
       hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
       protocol::{
@@ -16,8 +15,6 @@ use crate::{
         ProtocolInitializer,
       },
     },
-    message::checked_actuator_cmd::CheckedActuatorCmdV4,
-  },
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;

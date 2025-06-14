@@ -10,8 +10,7 @@ use crate::{
     errors::ButtplugDeviceError,
     message::{self, Endpoint, FeatureType, SensorReadingV4},
   },
-  server::{
-    device::{
+  server::device::{
       configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
       hardware::{
         Hardware,
@@ -22,10 +21,6 @@ use crate::{
       },
       protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     },
-    message::{
-      checked_actuator_cmd::CheckedActuatorCmdV4,
-    },
-  },
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
@@ -35,7 +30,7 @@ use regex::Regex;
 use uuid::{uuid, Uuid};
 use std::{
   sync::{
-    atomic::{AtomicBool, AtomicU32, AtomicU8, Ordering},
+    atomic::{AtomicBool, AtomicU32, Ordering},
     Arc,
   }, time::Duration
 };
@@ -326,7 +321,7 @@ impl ProtocolHandler for Lovense {
         self.handle_mply_cmd()
       } else {
         let lovense_cmd = if self.vibrator_values.len() == 1 {
-          format!("Vibrate:{};", speed).as_bytes().to_vec()
+          format!("Vibrate:{speed};").as_bytes().to_vec()
         } else {
           format!("Vibrate{}:{};", feature_index + 1, speed).as_bytes().to_vec()
         };
@@ -400,7 +395,7 @@ impl ProtocolHandler for Lovense {
     feature_id: Uuid,
     level: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let lovense_cmd = format!("Air:Level:{};", level)
+    let lovense_cmd = format!("Air:Level:{level};")
       .as_bytes()
       .to_vec();
 
@@ -424,7 +419,7 @@ impl ProtocolHandler for Lovense {
     clockwise: bool
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut hardware_cmds = vec![];
-    let lovense_cmd = format!("Rotate:{};", speed).as_bytes().to_vec();
+    let lovense_cmd = format!("Rotate:{speed};").as_bytes().to_vec();
     hardware_cmds.push(HardwareWriteCmd::new(feature_id, Endpoint::Tx, lovense_cmd, false).into());
     let current_dir = self.rotation_direction.load(Ordering::Relaxed);
     if current_dir != clockwise {
@@ -543,7 +538,7 @@ async fn update_linear_movement(device: Arc<Hardware>, linear_info: Arc<(AtomicU
       current_position = last_goal_position;
     }
 
-    let lovense_cmd = format!("FSetSite:{};", current_position);
+    let lovense_cmd = format!("FSetSite:{current_position};");
 
     let hardware_cmd = HardwareWriteCmd::new(LOVENSE_PROTOCOL_UUID, Endpoint::Tx, lovense_cmd.into_bytes(), false);
     if device.write_value(&hardware_cmd).await.is_err() {

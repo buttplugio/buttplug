@@ -320,7 +320,7 @@ impl ButtplugServer {
           self.perform_handshake(rsi_msg)
         }
         ButtplugCheckedClientMessageV4::Ping(p) => self.handle_ping(p),
-        _ => ButtplugMessageError::UnexpectedMessageType(format!("{:?}", msg)).into(),
+        _ => ButtplugMessageError::UnexpectedMessageType(format!("{msg:?}")).into(),
       }
     };
     // Simple way to set the ID on the way out. Just rewrap

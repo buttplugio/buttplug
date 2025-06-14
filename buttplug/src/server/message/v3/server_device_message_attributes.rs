@@ -70,7 +70,7 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
   fn from(features: Vec<ServerDeviceFeature>) -> Self {
     let scalar_attrs: Vec<ServerGenericDeviceMessageAttributesV3> = features
       .iter()
-      .map(|feature| {
+      .flat_map(|feature| {
         let mut actuator_vec = vec!();
         if let Some(actuator_map) = feature.actuator() {
           for (actuator_type, actuator) in actuator_map {
@@ -91,14 +91,13 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
         }
         actuator_vec
       })
-      .flatten()
       .collect();
 
     // We have to calculate rotation attributes seperately, since they're a combination of
     // feature type and message in >= v4.
     let rotate_attrs: Vec<ServerGenericDeviceMessageAttributesV3> = features
       .iter()
-      .map(|feature| {
+      .flat_map(|feature| {
         let mut actuator_vec = vec!();
         if let Some(actuator_map) = feature.actuator() {
           for (actuator_type, actuator) in actuator_map {
@@ -119,12 +118,11 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
         }
         actuator_vec
       })
-      .flatten()
       .collect();
 
     let linear_attrs: Vec<ServerGenericDeviceMessageAttributesV3> = features
       .iter()
-      .map(|feature| {
+      .flat_map(|feature| {
         let mut actuator_vec = vec!();
         if let Some(actuator_map) = feature.actuator() {
           for (actuator_type, actuator) in actuator_map {
@@ -145,7 +143,6 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
         }
         actuator_vec
       })
-      .flatten()
       .collect();
 
     let sensor_filter = {

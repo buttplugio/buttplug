@@ -132,8 +132,7 @@ impl HardwareInternal for HIDDeviceImpl {
     Box::pin(async move {
       device.lock().await.write(&data).await.map_err(|e| {
         ButtplugDeviceError::DeviceCommunicationError(format!(
-          "Cannot write to HID Device: {:?}.",
-          e
+          "Cannot write to HID Device: {e:?}."
         ))
       })?;
       Ok(())

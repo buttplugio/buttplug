@@ -163,8 +163,7 @@ impl TryFrom<ButtplugClientMessageV3> for ButtplugCheckedClientMessageV4 {
         Ok(ButtplugCheckedClientMessageV4::StopDeviceCmd(m.clone()))
       }
       _ => Err(ButtplugMessageError::MessageConversionError(format!(
-        "Cannot convert message {:?} to V4 message spec while lacking state.",
-        value
+        "Cannot convert message {value:?} to V4 message spec while lacking state."
       ))),
     }
   }

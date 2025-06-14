@@ -293,8 +293,7 @@ impl ButtplugClientDevice {
           ButtplugServerMessageV4::Error(err) => Err(ButtplugError::from(err).into()),
           msg => Err(
             ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
-              "{:?}",
-              msg
+              "{msg:?}"
             )))
             .into(),
           ),

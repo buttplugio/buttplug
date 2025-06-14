@@ -14,7 +14,6 @@ use futures_util::future::BoxFuture;
 use futures_util::{future, FutureExt};
 
 use crate::core::message::{SensorReadingV4, SensorType};
-use crate::server::message::checked_actuator_cmd::CheckedActuatorCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_initializer_setup,
@@ -155,7 +154,7 @@ impl ProtocolHandler for Galaku {
         0,
         0,
       ];
-      return Ok(vec![HardwareWriteCmd::new(GALAKU_PROTOCOL_UUID, Endpoint::Tx, data, false).into()]);
+      Ok(vec![HardwareWriteCmd::new(GALAKU_PROTOCOL_UUID, Endpoint::Tx, data, false).into()])
     } else {
       self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
       let data: Vec<u32> = vec![90, 0, 0, 1, 49, self.speeds[0].load(Ordering::Relaxed) as u32, self.speeds[1].load(Ordering::Relaxed) as u32, 0, 0, 0];
