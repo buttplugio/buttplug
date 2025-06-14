@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::{device::{
@@ -30,9 +32,9 @@ impl ProtocolHandler for Omobo {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
-      vec![0xa1, 0x04, 0x04, 0x01, cmd.value() as u8, 0xff, 0x55],
+      vec![0xa1, 0x04, 0x04, 0x01, speed as u8, 0xff, 0x55],
       true,
     )
     .into()])

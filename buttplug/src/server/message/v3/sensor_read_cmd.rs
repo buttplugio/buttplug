@@ -7,7 +7,7 @@
 
 use crate::{
   core::{
-    errors::ButtplugMessageError,
+    errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
       ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, SensorCommandType, SensorType
     },
@@ -62,17 +62,36 @@ impl TryFromDeviceAttributes<SensorReadCmdV3> for CheckedSensorCmdV4 {
     msg: SensorReadCmdV3,
     features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
-    let sensor_feature_id = features.attrs_v3().sensor_read_cmd().as_ref().unwrap()
-      [*msg.sensor_index() as usize]
-      .feature()
-      .id();
-
-    Ok(CheckedSensorCmdV4::new(
-      msg.device_index(),
-      None,
-      *msg.sensor_type(),
-      SensorCommandType::Read,
-      sensor_feature_id,
-    ))
+    // Reject any SensorRead that's not a battery, we never supported sensors otherwise in v3.
+    if msg.sensor_type != SensorType::Battery {  
+      Err(ButtplugError::from(
+        ButtplugDeviceError::MessageNotSupported("SensorReadCmdV3".to_owned()),
+      ))
+    } else {
+      if let Some((feature_index, feature)) = features
+        .features()
+        .iter()
+        .enumerate()
+        .find(|(_, p)| {
+          if let Some(sensor_map) = p.sensor() {
+            if sensor_map.contains_key(&SensorType::Battery) {
+              return true;
+            }
+          }
+          return false;
+        }) {
+        Ok(CheckedSensorCmdV4::new(
+          msg.device_index(),
+          feature_index as u32,
+          SensorType::Battery,
+          SensorCommandType::Read,
+          feature.id(),
+        ))
+      } else {
+        Err(ButtplugError::from(
+          ButtplugDeviceError::MessageNotSupported("SensorReadCmdV3".to_owned()),
+        ))
+      }
+    }
   }
 }

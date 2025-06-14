@@ -9,7 +9,7 @@ use self::handyplug::Ping;
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::{
+  server::
     device::{
       configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
       hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
@@ -17,8 +17,6 @@ use crate::{
         generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier,
         ProtocolInitializer,
       },
-    },
-    message::checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4,
   },
 };
 use async_trait::async_trait;
@@ -126,9 +124,12 @@ impl ProtocolHandler for TheHandy {
     ))
   }
 
-  fn handle_position_with_duration_cmd(
+    fn handle_position_with_duration_cmd(
     &self,
-    message: &CheckedValueWithParameterCmdV4,
+    _feature_index: u32,
+    feature_id: Uuid,
+    position: u32,
+    duration: u32,    
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // What is "How not to implement a command structure for your device that does one thing", Alex?
 
@@ -157,8 +158,8 @@ impl ProtocolHandler for TheHandy {
       // The handy. It's the handy.
       vectors: vec![handyplug::linear_cmd::Vector {
         index: 0,
-        position: message.value() as f64 / 100f64,
-        duration: message.parameter() as u32,
+        position: position as f64 / 100f64,
+        duration: duration as u32,
       }],
     };
     let linear_payload = handyplug::Payload {

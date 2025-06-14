@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::{device::{
@@ -30,9 +32,9 @@ impl ProtocolHandler for IToys {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
-      vec![0xa0, 0x01, 0x00, 0x00, cmd.value() as u8, 0xff],
+      vec![0xa0, 0x01, 0x00, 0x00, speed as u8, 0xff],
       false,
     )
     .into()])

@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::{device::{
@@ -30,9 +32,9 @@ impl ProtocolHandler for MizzZeeV2 {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
-      vec![0x69, 0x96, 0x04, 0x02, cmd.value() as u8, 0x2c, cmd.value() as u8],
+      vec![0x69, 0x96, 0x04, 0x02, speed as u8, 0x2c, speed as u8],
       false,
     )
     .into()])

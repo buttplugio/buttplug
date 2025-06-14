@@ -29,7 +29,7 @@ impl ProtocolHandler for TryFun {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut sum: u8 = 0xff;
-    let mut data = vec![0xAA, 0x02, 0x07, cmd.value() as u8];
+    let mut data = vec![0xAA, 0x02, 0x07, speed as u8];
     let mut count = 0;
     for item in data.iter().skip(1) {
       sum -= item;
@@ -46,7 +46,7 @@ impl ProtocolHandler for TryFun {
     cmd: &CheckedValueCmdV4
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut sum: u8 = 0xff;
-    let mut data = vec![0xAA, 0x02, 0x08, cmd.value() as u8];
+    let mut data = vec![0xAA, 0x02, 0x08, speed as u8];
     let mut count = 0;
     for item in data.iter().skip(1) {
       sum -= item;
@@ -71,10 +71,10 @@ impl ProtocolHandler for TryFun {
         0x00,
         0x05,
         if cmd.value() == 0 { 1u8 } else { 2u8 },
-        if cmd.value() == 0 { 2u8 } else { cmd.value() as u8 },
+        if cmd.value() == 0 { 2u8 } else { speed as u8 },
         0x01,
         if cmd.value() == 0 { 1u8 } else { 0u8 },
-        0xfd - (cmd.value() as u8).max(1),
+        0xfd - (speed as u8).max(1),
       ],
       true,
     )

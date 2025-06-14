@@ -94,7 +94,7 @@ impl TryFromDeviceAttributes<ActuatorCmdV4> for CheckedActuatorCmdV4 {
     //
     // If this message isn't the result of an upgrade from another older message, we won't have set
     // our feature id yet.
-    let (feature, feature_id) = if let Some(feature) = features.get(cmd.feature_index() as usize) {
+    let (feature, _) = if let Some(feature) = features.get(cmd.feature_index() as usize) {
       (feature, feature.id())
     } else {
       return Err(ButtplugError::from(

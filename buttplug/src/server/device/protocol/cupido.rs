@@ -5,13 +5,15 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_setup,
   server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::ProtocolHandler,
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  }},
 };
 
 generic_protocol_setup!(Cupido, "cupido");
@@ -31,9 +33,9 @@ impl ProtocolHandler for Cupido {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
-      vec![0xb0, 0x03, 0, 0, 0, cmd.value() as u8, 0xaa],
+      vec![0xb0, 0x03, 0, 0, 0, speed as u8, 0xaa],
       false,
     )
     .into()])

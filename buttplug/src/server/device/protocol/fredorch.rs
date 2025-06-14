@@ -6,7 +6,6 @@
 // for full license information.
 
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
-use crate::server::message::checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -183,19 +182,22 @@ pub struct Fredorch {
 }
 
 impl ProtocolHandler for Fredorch {
-  fn handle_position_with_duration_cmd(
+    fn handle_position_with_duration_cmd(
     &self,
-    message: &CheckedValueWithParameterCmdV4,
+    _feature_index: u32,
+    feature_id: Uuid,
+    position: u32,
+    duration: u32,    
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
     let previous_position = self.previous_position.load(Ordering::Relaxed);
-    let distance = (previous_position as f64 - message.value() as f64).abs() / 99f64;
+    let distance = (previous_position as f64 - position as f64).abs() / 99f64;
 
     // TODO Clean this up, we do not need the conversions anymore since we'll have done the
     // calculations before we get to the protocol layer.
-    let position = ((message.value() as f64 / 99.0) * 150.0) as u8;
-    let converted_speed = calculate_speed(distance as f64, message.parameter().try_into().unwrap()) * 99f64;
+    let position = ((position as f64 / 99.0) * 150.0) as u8;
+    let converted_speed = calculate_speed(distance as f64, duration.try_into().unwrap()) * 99f64;
     let speed = ((converted_speed as f64 / 99.0) * 15.0) as u8;
     let mut data: Vec<u8> = vec![
       0x01, 0x10, 0x00, 0x6B, 0x00, 0x05, 0x0a, 0x00, speed, 0x00, speed, 0x00, position, 0x00,

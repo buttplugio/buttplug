@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::{device::{
@@ -30,10 +32,10 @@ impl ProtocolHandler for LoveNuts {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut data: Vec<u8> = vec![0x45, 0x56, 0x4f, 0x4c];
-    data.append(&mut [cmd.value() as u8 | (cmd.value() as u8) << 4; 10].to_vec());
+    data.append(&mut [speed as u8 | (speed as u8) << 4; 10].to_vec());
     data.push(0x00);
     data.push(0xff);
 
-    Ok(vec![HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, false).into()])
   }
 }

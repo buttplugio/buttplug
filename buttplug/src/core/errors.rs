@@ -152,8 +152,8 @@ pub enum ButtplugDeviceError {
   DeviceNoActuatorError(String),
   /// Device got {0} message but has no sensors
   DeviceNoSensorError(String),
-  /// Device got {0} message but has no sensors
-  DeviceNoRawError(String),
+  /// Device got raw message but has no raw support
+  DeviceNoRawError,
   /// Device does not have endpoint {0}
   InvalidEndpoint(Endpoint),
   /// Device does not handle command type: {0}

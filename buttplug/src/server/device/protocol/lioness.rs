@@ -74,9 +74,9 @@ impl ProtocolHandler for Lioness {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
-      vec![0x02, 0xAA, 0xBB, 0xCC, 0xCC, cmd.value() as u8],
+      vec![0x02, 0xAA, 0xBB, 0xCC, 0xCC, speed as u8],
       false,
     )
     .into()])

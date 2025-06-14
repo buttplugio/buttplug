@@ -5,18 +5,12 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
+use crate::
   core::{
     errors::ButtplugMessageError,
     message::{
-      ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, SensorCommandType, SensorType
+      ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, SensorType
     },
-  },
-  server::message::{
-    checked_sensor_cmd::CheckedSensorCmdV4,
-    ServerDeviceAttributes,
-    TryFromDeviceAttributes,
-  },
 };
 use getset::Getters;
 #[cfg(feature = "serialize-json")]
@@ -51,25 +45,5 @@ impl SensorUnsubscribeCmdV3 {
 impl ButtplugMessageValidator for SensorUnsubscribeCmdV3 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
-  }
-}
-
-impl TryFromDeviceAttributes<SensorUnsubscribeCmdV3> for CheckedSensorCmdV4 {
-  fn try_from_device_attributes(
-    msg: SensorUnsubscribeCmdV3,
-    features: &ServerDeviceAttributes,
-  ) -> Result<Self, crate::core::errors::ButtplugError> {
-    let sensor_feature_id = features.attrs_v3().sensor_subscribe_cmd().as_ref().unwrap()
-      [*msg.sensor_index() as usize]
-      .feature()
-      .id();
-
-    Ok(CheckedSensorCmdV4::new(
-      msg.device_index(),
-      None,
-      *msg.sensor_type(),
-      SensorCommandType::Unsubscribe,
-      sensor_feature_id,
-    ))
   }
 }

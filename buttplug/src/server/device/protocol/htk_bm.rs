@@ -14,10 +14,10 @@ use crate::{
     errors::ButtplugDeviceError,
     message::Endpoint,
   },
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  },
 };
 
 const HTK_BM_PROTOCOL_UUID: Uuid = uuid!("4c70cb95-d3d9-4288-81ab-be845f9ad1fe");
@@ -42,9 +42,11 @@ impl ProtocolHandler for HtkBm {
 
   fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.speeds[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
+    self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
 
     let mut data: u8 = 15;
     let left = self.speeds[0].load(Ordering::Relaxed);

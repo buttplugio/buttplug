@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::{device::{
@@ -29,25 +31,25 @@ impl ProtocolHandler for SvakomV2 {
     feature_id: Uuid,
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if cmd.feature_index() == 1 {
+    if feature_index == 1 {
       Ok(vec![HardwareWriteCmd::new(
-        cmd.feature_id(),
+        feature_id,
         Endpoint::Tx,
-        [0x55, 0x06, 0x01, 0x00, cmd.value() as u8, cmd.value() as u8].to_vec(),
+        [0x55, 0x06, 0x01, 0x00, speed as u8, speed as u8].to_vec(),
         true,
       )
       .into()])
     } else {
       Ok(vec![HardwareWriteCmd::new(
-        cmd.feature_id(),
+        feature_id,
         Endpoint::Tx,
         [
           0x55,
           0x03,
           0x03,
           0x00,
-          if cmd.value() == 0 { 0x00 } else { 0x01 },
-          cmd.value() as u8,
+          if speed == 0 { 0x00 } else { 0x01 },
+          speed as u8,
         ]
         .to_vec(),
         true,

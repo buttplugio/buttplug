@@ -5,15 +5,15 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::{
+  server::
     device::{
       hardware::{HardwareCommand, HardwareWriteCmd},
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
-    message::checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4,
-  },
 };
 use std::sync::{
   atomic::{AtomicU8, Ordering},
@@ -28,16 +28,19 @@ pub struct ServeU {
 }
 
 impl ProtocolHandler for ServeU {
-  fn handle_position_with_duration_cmd(
+    fn handle_position_with_duration_cmd(
     &self,
-    cmd: &CheckedValueWithParameterCmdV4,
+    _feature_index: u32,
+    feature_id: Uuid,
+    position: u32,
+    duration: u32,    
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let last_pos = self.last_position.load(Ordering::Relaxed);
     // Need to get "units" (abstracted steps 0-100) per second, so calculate how far we need to move over our goal duration.
-    let goal_pos = cmd.value() as u8;
+    let goal_pos = position as u8;
     self.last_position.store(goal_pos, Ordering::Relaxed);
     let speed_threshold = ((((goal_pos as i8) - last_pos as i8).abs()) as f64
-      / ((cmd.parameter() as f64) / 1000f64))
+      / ((duration as f64) / 1000f64))
       .ceil();
 
     let speed = if speed_threshold <= 0.00001 {
@@ -55,7 +58,7 @@ impl ProtocolHandler for ServeU {
     };
 
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       vec![0x01, goal_pos, speed],
       false,

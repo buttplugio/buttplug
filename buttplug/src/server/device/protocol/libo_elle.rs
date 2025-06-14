@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::{device::{
@@ -30,8 +32,8 @@ impl ProtocolHandler for LiboElle {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![{
-      let speed = cmd.value() as u8;
-      if cmd.feature_index() == 1 {
+      let speed = speed as u8;
+      if feature_index == 1 {
         let mut data = 0u8;
         if speed > 0 && speed <= 7 {
           data |= (speed - 1) << 4;
@@ -40,9 +42,9 @@ impl ProtocolHandler for LiboElle {
           data |= (speed - 8) << 4;
           data |= 4; // Set the mode too
         }
-        HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, vec![data], false).into()
+        HardwareWriteCmd::new(feature_id, Endpoint::Tx, vec![data], false).into()
       } else {
-        HardwareWriteCmd::new(cmd.feature_id(), Endpoint::TxMode, vec![speed], false).into()
+        HardwareWriteCmd::new(feature_id, Endpoint::TxMode, vec![speed], false).into()
       }
     }])
   }

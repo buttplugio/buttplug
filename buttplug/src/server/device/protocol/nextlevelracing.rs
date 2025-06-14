@@ -5,12 +5,14 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  }
 };
 
 generic_protocol_setup!(NextLevelRacing, "nextlevelracing");
@@ -26,9 +28,9 @@ impl ProtocolHandler for NextLevelRacing {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
-      format!("M{}{}\r", cmd.feature_index(), cmd.value()).into_bytes(),
+      format!("M{}{}\r", feature_index, speed).into_bytes(),
       false,
     )
     .into()])

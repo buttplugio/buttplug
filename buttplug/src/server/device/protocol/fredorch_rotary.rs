@@ -194,12 +194,13 @@ impl FredorchRotary {
 }
 
 impl ProtocolHandler for FredorchRotary {
-  fn handle_value_oscillate_cmd(
+  fn handle_actuator_oscillate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let speed: u8 = cmd.value() as u8;
-
+    let speed: u8 = speed as u8;
     self.target_speed.store(speed, Ordering::Relaxed);
     if speed == 0 {
       self.current_speed.store(speed, Ordering::Relaxed);

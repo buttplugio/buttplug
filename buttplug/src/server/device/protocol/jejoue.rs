@@ -42,9 +42,11 @@ impl ProtocolHandler for JeJoue {
 
   fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.speeds[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
+    self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
 
     // Default to both vibes
     let mut pattern: u8 = 1;

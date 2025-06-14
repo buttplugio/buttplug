@@ -62,9 +62,24 @@ impl TryFromDeviceAttributes<BatteryLevelCmdV2> for CheckedSensorCmdV4 {
       ))?
       .feature();
 
+    let feature_index = features
+      .features()
+      .iter()
+      .enumerate()
+      .find(|(_, p)| {
+        if let Some(sensor_map) = p.sensor() {
+          if sensor_map.contains_key(&SensorType::Battery) {
+            return true;
+          }
+        }
+        return false;
+      })
+      .expect("Already found matching battery feature, can unwrap this.")
+      .0;
+
     Ok(CheckedSensorCmdV4::new(
       msg.device_index(),
-      None,
+      feature_index as u32,
       SensorType::Battery,
       SensorCommandType::Read,
       battery_feature.id(),

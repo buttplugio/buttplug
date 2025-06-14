@@ -78,9 +78,11 @@ impl Xuanhuan {
 impl ProtocolHandler for Xuanhuan {
   fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let speed = cmd.value() as u8;
+    let speed = speed as u8;
     self.current_command.store(speed, Ordering::Relaxed);
 
     Ok(vec![HardwareWriteCmd::new(

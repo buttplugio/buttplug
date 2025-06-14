@@ -16,17 +16,17 @@ pub trait RawCmdEndpoint {
 }
 
 #[derive(
-  Debug, Display, PartialEq, Eq, Clone, Copy, Serialize, Deserialize
+  Debug, Display, PartialEq, Eq, Clone, Serialize, Deserialize
 )]
-pub enum RawCommandType {
-  Read,
-  Write,
+pub enum RawCommand {
+  Read(RawCommandRead),
+  Write(RawCommandWrite),
   Subscribe,
   Unsubscribe
 }
 
 #[derive(
-  Debug, PartialEq, Eq, Clone, Serialize, Deserialize, Getters
+  Debug, PartialEq, Eq, Clone, Serialize, Deserialize, CopyGetters
 )]
 #[getset(get_copy = "pub")]
 pub struct RawCommandRead {
@@ -67,17 +67,7 @@ impl RawCommandWrite {
 }
 
 #[derive(
-  Debug, Display, PartialEq, Eq, Clone, Serialize, Deserialize
-)]
-pub enum RawCommandData {
-  Read(RawCommandRead),
-  Write(RawCommandWrite),
-  Subscribe,
-  Unsubscribe
-}
-
-#[derive(
-  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, CopyGetters, Serialize, Deserialize
+  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, Serialize, Deserialize
 )]
 pub struct RawCmdV4 {
   #[serde(rename = "Id")]
@@ -86,22 +76,18 @@ pub struct RawCmdV4 {
   device_index: u32,
   #[serde(rename = "Endpoint")]
   endpoint: Endpoint,
-  #[getset(get_copy = "pub")]
-  #[serde(rename = "RawCommandType")]
-  raw_command_type: RawCommandType,
   #[getset(get = "pub")]
-  #[serde(rename = "RawCommandData", skip_serializing_if = "Option::is_none")]
-  raw_command_data: Option<RawCommandData>,
+  #[serde(rename = "RawCommand")]
+  raw_command: RawCommand,
 }
 
 impl RawCmdV4 {
-  pub fn new(device_index: u32, endpoint: Endpoint, raw_command_type: RawCommandType, raw_command_data: &Option<RawCommandData>) -> Self {
+  pub fn new(device_index: u32, endpoint: Endpoint, raw_command: RawCommand) -> Self {
     Self {
       id: 1,
       device_index,
       endpoint,
-      raw_command_type,
-      raw_command_data: raw_command_data.clone()
+      raw_command
     }
   }
 }

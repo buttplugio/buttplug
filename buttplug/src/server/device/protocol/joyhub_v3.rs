@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -38,7 +40,7 @@ impl ProtocolHandler for JoyHubV3 {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       vec![
         0xa0,
@@ -46,7 +48,7 @@ impl ProtocolHandler for JoyHubV3 {
         0x00,
         0x00,
         0x00,
-        cmd.value() as u8,
+        speed as u8,
         0xaa,
       ],
       false,

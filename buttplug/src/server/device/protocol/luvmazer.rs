@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -36,22 +38,24 @@ impl ProtocolHandler for Luvmazer {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
-      vec![0xa0, 0x01, 0x00, 0x00, 0x64, cmd.value() as u8],
+      vec![0xa0, 0x01, 0x00, 0x00, 0x64, speed as u8],
       false,
     )
     .into()])
   }
 
-  fn handle_value_rotate_cmd(
+  fn handle_actuator_rotate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    _feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
-      vec![0xa0, 0x0f, 0x00, 0x00, 0x64, cmd.value() as u8],
+      vec![0xa0, 0x0f, 0x00, 0x00, 0x64, speed as u8],
       false,
     )
     .into()])

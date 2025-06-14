@@ -50,12 +50,14 @@ impl ProtocolHandler for MetaXSireV2 {
 
   fn handle_actuator_vibrate_cmd(
     &self,
-    commands: &CheckedActuatorCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-        commands.feature_id(),
+        feature_id,
         Endpoint::Tx,
-        vec![0xaa, 0x03, 0x01, (commands.feature_index() + 1) as u8, 0x64, commands.value() as u8],
+        vec![0xaa, 0x03, 0x01, (feature_index + 1) as u8, 0x64, speed as u8],
         true,
     ).into()])
   }

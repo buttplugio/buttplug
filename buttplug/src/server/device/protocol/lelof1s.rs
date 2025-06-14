@@ -10,7 +10,7 @@ use crate::{
     errors::ButtplugDeviceError,
     message::Endpoint,
   },
-  server::{device::{
+  server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{
@@ -19,7 +19,7 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  },
 };
 use async_trait::async_trait;
 use uuid::{uuid, Uuid};
@@ -77,11 +77,11 @@ impl ProtocolHandler for LeloF1s {
     feature_id: Uuid,
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.speeds[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
+    self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     let mut cmd_vec = vec![0x1];
     self.speeds.iter().for_each(|v| cmd_vec.push(v.load(Ordering::Relaxed)));
     Ok(vec![
-      HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, cmd_vec, self.write_with_response).into()
+      HardwareWriteCmd::new(feature_id, Endpoint::Tx, cmd_vec, self.write_with_response).into()
     ])
   }
 }

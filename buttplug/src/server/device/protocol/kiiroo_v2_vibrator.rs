@@ -7,15 +7,17 @@
 
 use std::sync::atomic::{AtomicU8, Ordering};
 
+use uuid::Uuid;
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::Endpoint,
   },
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  },
 };
 
 generic_protocol_setup!(KiirooV2Vibrator, "kiiroo-v2-vibrator");
@@ -39,11 +41,13 @@ impl ProtocolHandler for KiirooV2Vibrator {
 
   fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.speeds[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
+    self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       self.speeds.iter().map(|v| v.load(Ordering::Relaxed)).collect(),
       false,
