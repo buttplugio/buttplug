@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::{device::{
@@ -30,7 +32,7 @@ impl ProtocolHandler for MagicMotionV1 {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       vec![
         0x0b,
@@ -42,7 +44,7 @@ impl ProtocolHandler for MagicMotionV1 {
         0x00,
         0x04,
         0x08,
-        cmd.value() as u8,
+        speed as u8,
         0x64,
         0x00,
       ],
@@ -51,12 +53,14 @@ impl ProtocolHandler for MagicMotionV1 {
     .into()])
   }
 
-  fn handle_value_oscillate_cmd(
+  fn handle_actuator_oscillate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       vec![
         0x0b,
@@ -68,7 +72,7 @@ impl ProtocolHandler for MagicMotionV1 {
         0x00,
         0x04,
         0x08,
-        cmd.value() as u8,
+        speed as u8,
         0x64,
         0x00,
       ],

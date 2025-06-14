@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::{device::{
@@ -36,9 +38,9 @@ impl ProtocolHandler for Maxpro {
       0xff,
       0xff,
       0x3f,
-      cmd.value() as u8,
+      speed as u8,
       0x5f,
-      cmd.value() as u8,
+      speed as u8,
       0x00,
     ];
     let mut crc: u8 = 0;
@@ -48,6 +50,6 @@ impl ProtocolHandler for Maxpro {
     }
 
     data[9] = crc;
-    Ok(vec![HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, false).into()])
   }
 }

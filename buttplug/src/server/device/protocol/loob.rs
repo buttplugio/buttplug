@@ -10,7 +10,7 @@ use crate::{
     errors::ButtplugDeviceError,
     message::Endpoint,
   },
-  server::{device::{
+  server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
@@ -19,7 +19,7 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  }, message::checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4},
+  },
 };
 use async_trait::async_trait;
 use uuid::{uuid, Uuid};
@@ -49,16 +49,19 @@ impl ProtocolInitializer for LoobInitializer {
 pub struct Loob {}
 
 impl ProtocolHandler for Loob {
-  fn handle_position_with_duration_cmd(
+    fn handle_position_with_duration_cmd(
     &self,
-    message: &CheckedValueWithParameterCmdV4,
+    _feature_index: u32,
+    feature_id: Uuid,
+    position: u32,
+    duration: u32,    
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let pos: u16 = max(min(message.value() as u16, 1000), 1);
-    let time: u16 = max(message.parameter() as u16, 1);
+    let pos: u16 = max(min(position as u16, 1000), 1);
+    let time: u16 = max(duration as u16, 1);
     let mut data = pos.to_be_bytes().to_vec();
     for b in time.to_be_bytes() {
       data.push(b);
     }
-    Ok(vec![HardwareWriteCmd::new(message.feature_id(), Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, false).into()])
   }
 }

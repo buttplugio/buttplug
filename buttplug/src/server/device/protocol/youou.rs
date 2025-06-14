@@ -16,6 +16,7 @@ use crate::{
   },
 };
 use async_trait::async_trait;
+use uuid::Uuid;
 use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
@@ -85,7 +86,7 @@ impl ProtocolHandler for Youou {
     // Speed seems to be 0-247 or so.
     //
     // Anything above that sets a pattern which isn't what we want here.
-    let state = u8::from(cmd.value() > 0);
+    let state = u8::from(speed > 0);
 
     // Scope the packet id set so we can unlock ASAP.
     let mut data = vec![
@@ -95,7 +96,7 @@ impl ProtocolHandler for Youou {
       0x02,
       0x03,
       0x01,
-      cmd.value() as u8,
+      speed as u8,
       state,
     ];
     self.packet_id.store(
@@ -112,6 +113,6 @@ impl ProtocolHandler for Youou {
     let mut data2 = vec![crc, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
     data.append(&mut data2);
 
-    Ok(vec![HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, false).into()])
   }
 }

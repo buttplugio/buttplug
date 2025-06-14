@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_setup,
@@ -27,9 +29,11 @@ impl ProtocolHandler for TryFunBlackHole {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_oscillate_cmd(
+  fn handle_actuator_oscillate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut sum: u8 = 0xff;
     let mut data = vec![
@@ -38,7 +42,7 @@ impl ProtocolHandler for TryFunBlackHole {
       0x00,
       0x03,
       0x0c,
-      cmd.value() as u8,
+      speed as u8,
     ];
     let mut count = 1;
     for item in data.iter().skip(1) {
@@ -48,10 +52,10 @@ impl ProtocolHandler for TryFunBlackHole {
     sum += count;
     data.push(sum);
 
-    Ok(vec![HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, false).into()])
   }
 
-    fn handle_actuator_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
@@ -64,7 +68,7 @@ impl ProtocolHandler for TryFunBlackHole {
       0x00,
       0x03,
       0x09,
-      cmd.value() as u8,
+      speed as u8,
     ];
     let mut count = 1;
     for item in data.iter().skip(1) {
@@ -74,6 +78,6 @@ impl ProtocolHandler for TryFunBlackHole {
     sum += count;
     data.push(sum);
 
-    Ok(vec![HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, false).into()])
   }
 }

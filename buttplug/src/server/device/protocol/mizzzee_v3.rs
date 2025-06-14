@@ -126,11 +126,11 @@ impl ProtocolHandler for MizzZeeV3 {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_scalar = self.current_scalar.clone();
-    current_scalar.store(cmd.value(), Ordering::Relaxed);
+    current_scalar.store(speed, Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
       MIZZZEE_V3_PROTOCOL_UUID,
       Endpoint::Tx,
-      scalar_to_vector(cmd.value()),
+      scalar_to_vector(speed),
       true,
     )
     .into()])

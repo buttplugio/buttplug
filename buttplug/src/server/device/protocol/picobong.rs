@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::{device::{
@@ -29,11 +31,11 @@ impl ProtocolHandler for Picobong {
     feature_id: Uuid,
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let mode: u8 = if cmd.value() == 0 { 0xff } else { 0x01 };
+    let mode: u8 = if speed == 0 { 0xff } else { 0x01 };
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
-      [0x01, mode, cmd.value() as u8].to_vec(),
+      [0x01, mode, speed as u8].to_vec(),
       false,
     )
     .into()])

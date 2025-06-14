@@ -21,7 +21,7 @@ pub use {
   device_added::DeviceAddedV4,
   device_list::DeviceListV4,
   device_message_info::DeviceMessageInfoV4,
-  raw_cmd::{RawCmdV4, RawCommandData, RawCommandType, RawCommandRead, RawCommandWrite, RawCmdEndpoint},
+  raw_cmd::{RawCmdV4, RawCommandRead, RawCommandWrite, RawCmdEndpoint, RawCommand},
   request_server_info::RequestServerInfoV4,
   sensor_cmd::{SensorCmdV4, SensorCommandType},
   sensor_reading::SensorReadingV4,

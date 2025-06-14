@@ -31,17 +31,19 @@ impl ProtocolHandler for LiboVibes {
 
   fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut msg_vec = vec![];
-    if cmd.feature_index() == 0 {
-      msg_vec.push(HardwareWriteCmd::new(LIBO_VIBES_PROTOCOL_UUID, Endpoint::Tx, vec![cmd.value() as u8], false).into());
+    if feature_index == 0 {
+      msg_vec.push(HardwareWriteCmd::new(LIBO_VIBES_PROTOCOL_UUID, Endpoint::Tx, vec![speed as u8], false).into());
       // If this is a single vibe device, we need to send stop to TxMode too
-      if cmd.value() as u8 == 0 {
+      if speed as u8 == 0 {
         msg_vec.push(HardwareWriteCmd::new(LIBO_VIBES_PROTOCOL_UUID, Endpoint::TxMode, vec![0u8], false).into());
       }
-    } else if cmd.feature_index() == 1 {
-      msg_vec.push(HardwareWriteCmd::new(LIBO_VIBES_PROTOCOL_UUID, Endpoint::TxMode, vec![cmd.value() as u8], false).into());
+    } else if feature_index == 1 {
+      msg_vec.push(HardwareWriteCmd::new(LIBO_VIBES_PROTOCOL_UUID, Endpoint::TxMode, vec![speed as u8], false).into());
     }
     Ok(msg_vec)
   }

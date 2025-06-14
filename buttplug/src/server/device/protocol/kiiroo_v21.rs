@@ -24,9 +24,7 @@ use crate::{
       },
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
-    message::{
-      checked_sensor_cmd::CheckedSensorReadCmdV4, checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4, checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4, checked_actuator_cmd::CheckedActuatorCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, ButtplugServerDeviceMessage
-    },
+    message::ButtplugServerDeviceMessage,
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
@@ -36,6 +34,7 @@ use futures::{
   FutureExt,
   StreamExt,
 };
+use uuid::Uuid;
 use std::{
   default::Default,
   pin::Pin,
@@ -74,27 +73,30 @@ impl ProtocolHandler for KiirooV21 {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
-      vec![0x01, cmd.value() as u8],
+      vec![0x01, speed as u8],
       false,
     )
     .into()])
   }
 
-  fn handle_position_with_duration_cmd(
+    fn handle_position_with_duration_cmd(
     &self,
-    cmd: &CheckedValueWithParameterCmdV4,
+    _feature_index: u32,
+    feature_id: Uuid,
+    position: u32,
+    duration: u32,    
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
     let previous_position = self.previous_position.load(Relaxed);
-    let distance = (previous_position as f64 - (cmd.value() as f64)).abs() / 99f64;
-    let position = (cmd.value()) as u8;
-    let speed = (calculate_speed(distance, cmd.parameter() as u32) * 99f64) as u8;
+    let distance = (previous_position as f64 - (position as f64)).abs() / 99f64;
+    let position = position as u8;
+    let speed = (calculate_speed(distance, duration as u32) * 99f64) as u8;
     self.previous_position.store(position, Relaxed);
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       [0x03, 0x00, speed, position].to_vec(),
       false,
@@ -105,13 +107,13 @@ impl ProtocolHandler for KiirooV21 {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: CheckedSensorReadCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     debug!("Trying to get battery reading.");
-    let message = message.clone();
     // Reading the "whitelist" endpoint for this device retrieves the battery level,
     // which is byte 5. All other bytes of the 20-byte result are unknown.
-    let msg = HardwareReadCmd::new(message.feature_id(), Endpoint::Whitelist, 20, 0);
+    let msg = HardwareReadCmd::new(feature_id, Endpoint::Whitelist, 20, 0);
     let fut = device.read_value(&msg);
     async move {
       let hw_msg = fut.await?;
@@ -124,9 +126,9 @@ impl ProtocolHandler for KiirooV21 {
       }
       let battery_level = data[5] as i32;
       let battery_reading = SensorReadingV4::new(
-        message.device_index(),
-        message.feature_index(),
-        message.sensor_type(),
+        0,
+        feature_index,
+        SensorType::Battery,
         vec![battery_level],
       );
       debug!("Got battery reading: {}", battery_level);
@@ -144,10 +146,11 @@ impl ProtocolHandler for KiirooV21 {
   fn handle_sensor_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: &CheckedSensorSubscribeCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    sensor_type: SensorType
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
-    let message = message.clone();
-    if self.subscribed_sensors.contains(&message.feature_index()) {
+    if self.subscribed_sensors.contains(&feature_index) {
       return future::ready(Ok(())).boxed();
     }
     let sensors = self.subscribed_sensors.clone();
@@ -166,12 +169,11 @@ impl ProtocolHandler for KiirooV21 {
       // characteristic subscription.
       if sensors.is_empty() {
         device
-          .subscribe(&HardwareSubscribeCmd::new(message.feature_id(), Endpoint::Rx))
+          .subscribe(&HardwareSubscribeCmd::new(feature_id, Endpoint::Rx))
           .await?;
         let sender = self.event_stream.clone();
         let mut hardware_stream = device.event_stream();
         let stream_sensors = sensors.clone();
-        let device_index = message.device_index();
         // If we subscribe successfully, we need to set up our event handler.
         async_manager::spawn(async move {
           while let Ok(info) = hardware_stream.recv().await {
@@ -201,7 +203,7 @@ impl ProtocolHandler for KiirooV21 {
                   if stream_sensors.contains(&sensor_index)
                     && sender
                       .send(
-                        SensorReadingV4::new(device_index, sensor_index, sensor_type, sensor_data)
+                        SensorReadingV4::new(0, sensor_index, sensor_type, sensor_data)
                           .into(),
                       )
                       .is_err()
@@ -217,7 +219,7 @@ impl ProtocolHandler for KiirooV21 {
           }
         });
       }
-      sensors.insert(message.feature_index());
+      sensors.insert(feature_index);
       Ok(())
     }
     .boxed()
@@ -226,21 +228,22 @@ impl ProtocolHandler for KiirooV21 {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: &CheckedSensorUnsubscribeCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    sensor_type: SensorType
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
-    let message = message.clone();
 
-    if !self.subscribed_sensors.contains(&message.feature_index()) {
+    if !self.subscribed_sensors.contains(&feature_index) {
       return future::ready(Ok(())).boxed();
     }
     let sensors = self.subscribed_sensors.clone();
     async move {
       // If we have no sensors we're currently subscribed to, we'll need to end our BLE
       // characteristic subscription.
-      sensors.remove(&message.feature_index());
+      sensors.remove(&feature_index);
       if sensors.is_empty() {
         device
-          .unsubscribe(&HardwareUnsubscribeCmd::new(message.feature_id(), Endpoint::Rx))
+          .unsubscribe(&HardwareUnsubscribeCmd::new(feature_id, Endpoint::Rx))
           .await?;
       }
       Ok(())

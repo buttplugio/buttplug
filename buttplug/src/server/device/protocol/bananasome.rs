@@ -19,7 +19,7 @@ use crate::{
   server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  }},
 };
 
 const BANANASOME_PROTOCOL_UUID: Uuid = uuid!("a0a2e5f8-3692-4f6b-8add-043513ed86f6");
@@ -38,8 +38,8 @@ impl Default for Bananasome {
 }
 
 impl Bananasome {
-  fn hardware_command(&self, cmd: &CheckedActuatorCmdV4) -> Vec<HardwareCommand> {
-    self.current_commands[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
+  fn hardware_command(&self, feature_index: u32, speed: u32) -> Vec<HardwareCommand> {
+    self.current_commands[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     vec![HardwareWriteCmd::new(
       BANANASOME_PROTOCOL_UUID,
       Endpoint::Tx,
@@ -65,17 +65,21 @@ impl ProtocolHandler for Bananasome {
     true
   }
 
-  fn handle_value_oscillate_cmd(
-      &self,
-      cmd: &CheckedActuatorCmdV4,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(self.hardware_command(cmd))
+  fn handle_actuator_oscillate_cmd(
+    &self,
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(self.hardware_command(feature_index, speed))
   }
 
   fn handle_actuator_vibrate_cmd(
-      &self,
-      cmd: &CheckedActuatorCmdV4,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(self.hardware_command(cmd))
+    &self,
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(self.hardware_command(feature_index, speed))
   }
 }

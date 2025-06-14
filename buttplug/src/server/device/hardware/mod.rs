@@ -6,11 +6,10 @@ use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{
-      Endpoint,
-      RawReadingV2,
+      Endpoint, RawCommand, RawReadingV2
     },
   },
-  server::{device::configuration::ProtocolCommunicationSpecifier, message::{checked_raw_cmd::CheckedRawCmdV4}},
+  server::{device::configuration::ProtocolCommunicationSpecifier, message::checked_raw_cmd::CheckedRawCmdV4},
 };
 use async_trait::async_trait;
 use futures::future::BoxFuture;
@@ -24,7 +23,7 @@ use uuid::{uuid, Uuid};
 // Raw commands don't have a set feature or command, they're added dynamically when the raw system is turned
 // on. Therefore we just attach a generic ID to all raw commands, as we don't really expect to need
 // to debug these either (as they're only used for dev work).
-const GENERIC_RAW_COMMAND_UUID: Uuid = uuid!("f5250140-8a86-4eb7-9c60-c96b71ee6330");
+pub const GENERIC_RAW_COMMAND_UUID: Uuid = uuid!("f5250140-8a86-4eb7-9c60-c96b71ee6330");
 
 /// Parameters for reading data from a [Hardware](crate::device::Hardware) endpoint
 ///
@@ -54,17 +53,6 @@ impl HardwareReadCmd {
       endpoint,
       length,
       timeout_ms,
-    }
-  }
-}
-
-impl From<CheckedRawCmdV2> for HardwareReadCmd {
-  fn from(msg: CheckedRawCmdV2) -> Self {
-    Self {
-      command_id: GENERIC_RAW_COMMAND_UUID,
-      endpoint: msg.endpoint(),
-      length: msg.expected_length(),
-      timeout_ms: msg.timeout(),
     }
   }
 }
@@ -111,17 +99,6 @@ impl HardwareWriteCmd {
   }
 }
 
-impl From<CheckedRawWriteCmdV2> for HardwareWriteCmd {
-  fn from(msg: CheckedRawWriteCmdV2) -> Self {
-    Self {
-      command_id: GENERIC_RAW_COMMAND_UUID,
-      endpoint: msg.endpoint(),
-      data: msg.data().clone(),
-      write_with_response: msg.write_with_response(),
-    }
-  }
-}
-
 /// Parameters for subscribing to a [Hardware](crate::device::Hardware) endpoint
 ///
 /// Low level subscribe structure, used by
@@ -155,15 +132,6 @@ impl HardwareSubscribeCmd {
   }
 }
 
-impl From<CheckedRawSubscribeCmdV2> for HardwareSubscribeCmd {
-  fn from(msg: CheckedRawSubscribeCmdV2) -> Self {
-    Self {
-      command_id: GENERIC_RAW_COMMAND_UUID,
-      endpoint: msg.endpoint(),
-    }
-  }
-}
-
 /// Parameters for unsubscribing from a [Hardware](crate::device::Hardware) endpoint that has
 /// previously been subscribed.
 ///
@@ -191,15 +159,6 @@ impl HardwareUnsubscribeCmd {
   }
 }
 
-impl From<CheckedRawUnsubscribeCmdV2> for HardwareUnsubscribeCmd {
-  fn from(msg: CheckedRawUnsubscribeCmdV2) -> Self {
-    Self {
-      command_id: GENERIC_RAW_COMMAND_UUID,
-      endpoint: msg.endpoint(),
-    }
-  }
-}
-
 /// Enumeration of all possible commands that can be sent to a
 /// [Hardware](crate::device::Hardware).
 #[derive(PartialEq, Eq, Debug, Serialize, Deserialize)]
@@ -220,24 +179,6 @@ impl HardwareCommand {
   }
 }
 
-impl From<CheckedRawWriteCmdV2> for HardwareCommand {
-  fn from(msg: CheckedRawWriteCmdV2) -> Self {
-    HardwareCommand::Write(msg.into())
-  }
-}
-
-impl From<CheckedRawSubscribeCmdV2> for HardwareCommand {
-  fn from(msg: CheckedRawSubscribeCmdV2) -> Self {
-    HardwareCommand::Subscribe(msg.into())
-  }
-}
-
-impl From<CheckedRawUnsubscribeCmdV2> for HardwareCommand {
-  fn from(msg: CheckedRawUnsubscribeCmdV2) -> Self {
-    HardwareCommand::Unsubscribe(msg.into())
-  }
-}
-
 impl From<HardwareWriteCmd> for HardwareCommand {
   fn from(msg: HardwareWriteCmd) -> Self {
     HardwareCommand::Write(msg)
@@ -253,6 +194,25 @@ impl From<HardwareSubscribeCmd> for HardwareCommand {
 impl From<HardwareUnsubscribeCmd> for HardwareCommand {
   fn from(msg: HardwareUnsubscribeCmd) -> Self {
     HardwareCommand::Unsubscribe(msg)
+  }
+}
+
+impl From<CheckedRawCmdV4> for HardwareCommand {
+  fn from(value: CheckedRawCmdV4) -> Self {
+    match value.raw_command() {
+      RawCommand::Write(x) => {
+        HardwareCommand::Write(HardwareWriteCmd { command_id: GENERIC_RAW_COMMAND_UUID, endpoint: *value.endpoint(), data: x.data().clone(), write_with_response: x.write_with_response() })
+      }
+      RawCommand::Subscribe => {
+        HardwareCommand::Subscribe(HardwareSubscribeCmd { command_id: GENERIC_RAW_COMMAND_UUID, endpoint: *value.endpoint() })
+      }
+      RawCommand::Unsubscribe => {
+        HardwareCommand::Unsubscribe(HardwareUnsubscribeCmd { command_id: GENERIC_RAW_COMMAND_UUID, endpoint: *value.endpoint() })
+      }
+      _ => {
+        panic!("Should never try to convert a raw read command into a hardware command!");
+      }
+    }
   }
 }
 

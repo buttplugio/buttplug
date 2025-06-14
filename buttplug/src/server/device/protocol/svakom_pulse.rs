@@ -36,7 +36,7 @@ impl ProtocolHandler for SvakomPulse {
         0x03,
         0x00,
         if cmd.value() == 0 { 0x00 } else { 0x01 },
-        cmd.value() as u8 + 1,
+        speed as u8 + 1,
       ]
       .to_vec(),
       false,

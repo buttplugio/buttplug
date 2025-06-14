@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::{device::{
@@ -23,14 +25,16 @@ impl ProtocolHandler for Kizuna {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_rotate_cmd(
+  fn handle_actuator_rotate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    _feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
-      vec![48 + cmd.value() as u8, b'\r', b'\n'],
+      vec![48 + speed as u8, b'\r', b'\n'],
       false,
     )
     .into()])

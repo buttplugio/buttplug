@@ -10,11 +10,11 @@ use crate::util;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_initializer_setup,
-  server::{device::{
+  server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  },
   util::async_manager,
 };
 use async_trait::async_trait;
@@ -306,7 +306,7 @@ impl ProtocolHandler for NintendoJoycon {
     feature_id: Uuid,
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.speed_val.store(cmd.value() as u16, Ordering::Relaxed);
+    self.speed_val.store(speed as u16, Ordering::Relaxed);
     Ok(vec![])
   }
 }

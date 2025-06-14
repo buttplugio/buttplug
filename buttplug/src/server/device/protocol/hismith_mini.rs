@@ -104,15 +104,17 @@ impl ProtocolHandler for HismithMini {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_oscillate_cmd(
+  fn handle_actuator_oscillate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let idx: u8 = 0x03;
-    let speed: u8 = cmd.value() as u8;
+    let speed: u8 = speed as u8;
 
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       vec![0xCC, idx, speed, speed + idx],
       false,
@@ -126,15 +128,15 @@ impl ProtocolHandler for HismithMini {
     feature_id: Uuid,
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let idx: u8 = if !self.dual_vibe || cmd.feature_index() == 1 {
+    let idx: u8 = if !self.dual_vibe || feature_index == 1 {
       0x05
     } else {
       0x03
     };
-    let speed: u8 = cmd.value() as u8;
+    let speed: u8 = speed as u8;
 
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       vec![0xCC, idx, speed, speed + idx],
       false,
@@ -142,15 +144,17 @@ impl ProtocolHandler for HismithMini {
     .into()])
   }
 
-  fn handle_value_constrict_cmd(
+  fn handle_actuator_constrict_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    level: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let idx: u8 = if self.second_constrict { 0x05 } else { 0x03 };
-    let speed: u8 = cmd.value() as u8;
+    let speed: u8 = level as u8;
 
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       vec![0xCC, idx, speed, speed + idx],
       false,

@@ -7,7 +7,7 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::{
+  server::
     device::{
       configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
       hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
@@ -19,8 +19,6 @@ use crate::{
         ProtocolInitializer,
       },
     },
-    message::{checked_actuator_cmd::CheckedActuatorCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4, FleshlightLaunchFW12CmdV0},
-  },
 };
 use async_trait::async_trait;
 use uuid::{uuid, Uuid};
@@ -69,24 +67,6 @@ pub struct KiirooV21Initialized {
   previous_position: Arc<AtomicU8>,
 }
 
-impl KiirooV21Initialized {
-  fn handle_fleshlight_launch_fw12_cmd(
-    &self,
-    uuid: Uuid,
-    message: FleshlightLaunchFW12CmdV0,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let position = message.position();
-    self.previous_position.store(position, Ordering::Relaxed);
-    Ok(vec![HardwareWriteCmd::new(
-      uuid,
-      Endpoint::Tx,
-      [0x03, 0x00, message.speed(), message.position()].to_vec(),
-      false,
-    )
-    .into()])
-  }
-}
-
 impl ProtocolHandler for KiirooV21Initialized {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
@@ -94,33 +74,40 @@ impl ProtocolHandler for KiirooV21Initialized {
 
   fn handle_actuator_vibrate_cmd(
     &self,
-    feature_index: u32,
+    _feature_index: u32,
     feature_id: Uuid,
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
-      vec![0x01, cmd.value() as u8],
+      vec![0x01, speed as u8],
       false,
     )
     .into()])
   }
 
-  fn handle_position_with_duration_cmd(
+    fn handle_position_with_duration_cmd(
     &self,
-    cmd: &CheckedValueWithParameterCmdV4,
+    _feature_index: u32,
+    feature_id: Uuid,
+    position: u32,
+    duration: u32,    
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
     let previous_position = self.previous_position.load(Ordering::Relaxed);
-    let distance = (previous_position as f64 - (cmd.value() as f64)).abs() / 99f64;
-    let fl_cmd = FleshlightLaunchFW12CmdV0::new(
-      0,
-      cmd.value() as u8,
-      (calculate_speed(distance, cmd.parameter() as u32) * 99f64) as u8,
-    );
-    self.handle_fleshlight_launch_fw12_cmd(cmd.feature_id(), fl_cmd)
+    let distance = (previous_position as f64 - (position as f64)).abs() / 99f64;
+    let calculated_speed = (calculate_speed(distance, duration as u32) * 99f64) as u8;
+
+    self.previous_position.store(position as u8, Ordering::Relaxed);
+    Ok(vec![HardwareWriteCmd::new(
+      feature_id,
+      Endpoint::Tx,
+      [0x03, 0x00, calculated_speed, position as u8].to_vec(),
+      false,
+    )
+    .into()])
   }
 
 }

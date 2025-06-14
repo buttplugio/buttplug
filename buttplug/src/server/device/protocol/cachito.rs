@@ -5,12 +5,14 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::{device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  }},
 };
 
 generic_protocol_setup!(Cachito, "cachito");
@@ -30,9 +32,9 @@ impl ProtocolHandler for Cachito {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
-      vec![2u8 + (cmd.feature_index() as u8), 1u8 + (cmd.feature_index() as u8), cmd.value() as u8, 0u8],
+      vec![2u8 + (feature_index as u8), 1u8 + feature_index as u8, speed as u8, 0u8],
       false,
     )
     .into()])

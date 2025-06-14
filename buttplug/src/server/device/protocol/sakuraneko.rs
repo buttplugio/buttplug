@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::{device::{
@@ -30,7 +32,7 @@ impl ProtocolHandler for Sakuraneko {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       vec![
         0xa1,
@@ -40,7 +42,7 @@ impl ProtocolHandler for Sakuraneko {
         0x00,
         0x00,
         0x64,
-        cmd.value() as u8,
+        speed as u8,
         0x00,
         0x64,
         0xdf,
@@ -51,12 +53,14 @@ impl ProtocolHandler for Sakuraneko {
     .into()])
   }
 
-  fn handle_value_rotate_cmd(
+  fn handle_actuator_rotate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    _feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       vec![
         0xa2,
@@ -66,7 +70,7 @@ impl ProtocolHandler for Sakuraneko {
         0x00,
         0x00,
         0x64,
-        cmd.value() as u8,
+        speed as u8,
         0x00,
         0x32,
         0xdf,

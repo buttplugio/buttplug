@@ -9,7 +9,7 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, Endpoint, RawCmdEndpoint, RawCmdV4, RawCommandData, RawCommandRead, RawCommandType, RawCommandWrite
+      ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, Endpoint, RawCmdEndpoint, RawCmdV4, RawCommandRead, RawCommand, RawCommandWrite
     },
   },
   server::message::{
@@ -40,26 +40,21 @@ pub struct CheckedRawCmdV4 {
   #[serde(rename = "Endpoint")]
   endpoint: Endpoint,
   #[getset(get = "pub")]
-  #[serde(rename = "RawCommandType")]
-  raw_command_type: RawCommandType,
-  #[getset(get = "pub")]
-  #[serde(rename = "RawCommandData", skip_serializing_if = "Option::is_none")]
-  raw_command_data: Option<RawCommandData>,
+  #[serde(rename = "RawCommand")]
+  raw_command: RawCommand,
 }
 
 impl CheckedRawCmdV4 {
   pub fn new(
     device_index: u32,
     endpoint: Endpoint,
-    raw_command_type: RawCommandType,
-    raw_command_data: &Option<RawCommandData>,
+    raw_command: RawCommand,
   ) -> Self {
     Self {
       id: 1,
       device_index,
       endpoint,
-      raw_command_type,
-      raw_command_data: raw_command_data.clone(),
+      raw_command
     }
   }
 }
@@ -74,7 +69,6 @@ impl ButtplugMessageValidator for CheckedRawCmdV4 {
 fn check_raw_endpoint<T>(
   msg: &T,
   features: &crate::server::message::ServerDeviceAttributes,
-  raw_command_type: RawCommandType,
 ) -> Result<(), ButtplugError> where T: RawCmdEndpoint {
   // Find the raw feature.
   if let Some(raw_feature) = features.features().iter().find(|x| x.raw().is_some()) {
@@ -92,9 +86,7 @@ fn check_raw_endpoint<T>(
       )))
     }
   } else {
-    Err(ButtplugError::from(ButtplugDeviceError::DeviceNoRawError(
-      format!("{}", raw_command_type),
-    )))
+    Err(ButtplugError::from(ButtplugDeviceError::DeviceNoRawError))
   }
 }
 
@@ -103,13 +95,12 @@ impl TryFromDeviceAttributes<RawCmdV4> for CheckedRawCmdV4 {
     msg: RawCmdV4,
     features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
-    check_raw_endpoint(&msg, features, msg.raw_command_type())?;
+    check_raw_endpoint(&msg, features)?;
     Ok(CheckedRawCmdV4 {
       id: msg.id(),
       device_index: msg.device_index(),
       endpoint: msg.endpoint(),
-      raw_command_type: msg.raw_command_type().clone(),
-      raw_command_data: msg.raw_command_data().clone()
+      raw_command: msg.raw_command().clone(),
     })
   }
 }
@@ -119,16 +110,15 @@ impl TryFromDeviceAttributes<RawReadCmdV2> for CheckedRawCmdV4 {
     msg: RawReadCmdV2,
     features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
-    check_raw_endpoint(&msg, features, RawCommandType::Read)?;
+    check_raw_endpoint(&msg, features)?;
     Ok(CheckedRawCmdV4 {
       id: msg.id(),
       device_index: msg.device_index(),
       endpoint: msg.endpoint(),
-      raw_command_type: RawCommandType::Read,
-      raw_command_data: Some(RawCommandData::Read(RawCommandRead::new(
+      raw_command: RawCommand::Read(RawCommandRead::new(
         msg.expected_length(),
         msg.timeout(),
-      ))),
+      )),
     })
   }
 }
@@ -138,13 +128,12 @@ impl TryFromDeviceAttributes<RawSubscribeCmdV2> for CheckedRawCmdV4 {
     msg: RawSubscribeCmdV2,
     features: &crate::server::message::ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
-    check_raw_endpoint(&msg, features, RawCommandType::Subscribe)?;
+    check_raw_endpoint(&msg, features)?;
     Ok(CheckedRawCmdV4 {
       id: msg.id(),
       device_index: msg.device_index(),
       endpoint: msg.endpoint(),
-      raw_command_type: RawCommandType::Subscribe,
-      raw_command_data: None,
+      raw_command: RawCommand::Subscribe,
     })
   }
 }
@@ -154,13 +143,12 @@ impl TryFromDeviceAttributes<RawUnsubscribeCmdV2> for CheckedRawCmdV4 {
     msg: RawUnsubscribeCmdV2,
     features: &crate::server::message::ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
-    check_raw_endpoint(&msg, features, RawCommandType::Unsubscribe)?;
+    check_raw_endpoint(&msg, features)?;
     Ok(CheckedRawCmdV4 {
       id: msg.id(),
       device_index: msg.device_index(),
       endpoint: msg.endpoint(),
-      raw_command_type: RawCommandType::Unsubscribe,
-      raw_command_data: None,
+      raw_command: RawCommand::Unsubscribe
     })
   }
 }
@@ -170,16 +158,15 @@ impl TryFromDeviceAttributes<RawWriteCmdV2> for CheckedRawCmdV4 {
     msg: RawWriteCmdV2,
     features: &crate::server::message::ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
-    check_raw_endpoint(&msg, features, RawCommandType::Write)?;
+    check_raw_endpoint(&msg, features)?;
     Ok(CheckedRawCmdV4 {
       id: msg.id(),
       device_index: msg.device_index(),
       endpoint: msg.endpoint(),
-      raw_command_type: RawCommandType::Write,
-      raw_command_data: Some(RawCommandData::Write(RawCommandWrite::new(
+      raw_command: RawCommand::Write(RawCommandWrite::new(
         msg.data(),
         msg.write_with_response(),
-      ))),
+      )),
     })
   }
 }

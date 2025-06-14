@@ -5,12 +5,14 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4},
+  },
 };
 
 generic_protocol_setup!(FleshyThrust, "fleshy-thrust");
@@ -19,17 +21,20 @@ generic_protocol_setup!(FleshyThrust, "fleshy-thrust");
 pub struct FleshyThrust {}
 
 impl ProtocolHandler for FleshyThrust {
-  fn handle_position_with_duration_cmd(
+    fn handle_position_with_duration_cmd(
     &self,
-    cmd: &CheckedValueWithParameterCmdV4,
+    _feature_index: u32,
+    feature_id: Uuid,
+    position: u32,
+    duration: u32,    
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       vec![
-        cmd.value() as u8,
-        ((cmd.parameter() & 0xff00) >> 8) as u8,
-        (cmd.parameter() & 0xff) as u8,
+        position as u8,
+        ((duration & 0xff00) >> 8) as u8,
+        (duration & 0xff) as u8,
       ],
       false,
     )

@@ -6,7 +6,6 @@
 // for full license information.
 
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
-use crate::server::message::checked_actuator_cmd::CheckedActuatorCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -21,6 +20,7 @@ use crate::{
   },
 };
 use async_trait::async_trait;
+use uuid::Uuid;
 use std::sync::Arc;
 
 generic_protocol_initializer_setup!(Foreo, "foreo");
@@ -66,9 +66,9 @@ impl ProtocolHandler for Foreo {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
-      vec![0x01, self.mode, cmd.value() as u8],
+      vec![0x01, self.mode, speed as u8],
       true,
     )
     .into()])

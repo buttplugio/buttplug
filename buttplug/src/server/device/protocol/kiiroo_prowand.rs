@@ -9,15 +9,16 @@ use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{
-      self, Endpoint, SensorReadingV4
+      self, Endpoint, SensorReadingV4, SensorType
     },
   },
-  server::{device::{
+  server::device::{
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::{checked_sensor_cmd::CheckedSensorReadCmdV4, checked_actuator_cmd::CheckedActuatorCmdV4}},
+  }
 };
 use futures::{future::BoxFuture, FutureExt};
+use uuid::Uuid;
 use std::{default::Default, sync::Arc};
 
 generic_protocol_setup!(KiirooProWand, "kiiroo-prowand");
@@ -28,18 +29,20 @@ pub struct KiirooProWand {}
 impl ProtocolHandler for KiirooProWand {
   fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       vec![
         0x00,
         0x00,
         0x64,
-        if cmd.value() == 0 { 0x00 } else { 0xff },
-        cmd.value() as u8,
-        cmd.value() as u8,
+        if speed == 0 { 0x00 } else { 0xff },
+        speed as u8,
+        speed as u8,
       ],
       false,
     )
@@ -49,20 +52,20 @@ impl ProtocolHandler for KiirooProWand {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: CheckedSensorReadCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     debug!("Trying to get battery reading.");
-    let message = message.clone();
-    let msg = HardwareReadCmd::new(message.feature_id(), Endpoint::RxBLEBattery, 20, 0);
+    let msg = HardwareReadCmd::new(feature_id, Endpoint::RxBLEBattery, 20, 0);
     let fut = device.read_value(&msg);
     async move {
       let hw_msg = fut.await?;
       let data = hw_msg.data();
       let battery_level = data[0] as i32;
       let battery_reading = message::SensorReadingV4::new(
-        message.device_index(),
-        message.feature_index(),
-        message.sensor_type(),
+        0,
+        feature_index,
+        SensorType::Battery,
         vec![battery_level],
       );
       debug!("Got battery reading: {}", battery_level);

@@ -59,12 +59,12 @@ impl ProtocolHandler for WeToy {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
-      if cmd.value() == 0 {
+      if speed == 0 {
         vec![0x80, 0x03]
       } else {
-        vec![0xb2, cmd.value() as u8 - 1]
+        vec![0xb2, speed as u8 - 1]
       },
       true,
     )

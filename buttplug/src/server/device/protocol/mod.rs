@@ -836,96 +836,107 @@ pub trait ProtocolHandler: Sync + Send {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let actuator_command = cmd.actuator_command();
     match actuator_command {
-      /*
-      ActuatorType::Constrict => {
-        self.handle_value_constrict_cmd(cmd)
+      ActuatorCommand::Constrict(x) => {
+        self.handle_actuator_constrict_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
       }
-      ActuatorType::Inflate => self.handle_value_inflate_cmd(cmd),
-      ActuatorType::Oscillate => {
-        self.handle_value_oscillate_cmd(cmd)
+      ActuatorCommand::Inflate(x) => self.handle_actuator_inflate_cmd(cmd.feature_index(), cmd.feature_id(), x.value()),
+      ActuatorCommand::Oscillate(x) => {
+        self.handle_actuator_oscillate_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
       }
-      ActuatorType::Rotate => self.handle_value_rotate_cmd(cmd),
-      */
+      ActuatorCommand::Rotate(x) => self.handle_actuator_rotate_cmd(cmd.feature_index(), cmd.feature_id(), x.value()),
       ActuatorCommand::Vibrate(x) => self.handle_actuator_vibrate_cmd(cmd.feature_index(), cmd.feature_id(), x.value()),
-      /*
-      ActuatorType::Position => {
-        self.handle_value_position_cmd(cmd)
+      ActuatorCommand::Position(x) => {
+        self.handle_actuator_position_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
       }
-      ActuatorType::Unknown => Err(ButtplugDeviceError::UnhandledCommand(
-        "Unknown actuator types are not controllable.".to_owned(),
-      ))?,
-      */
       _ => Err(ButtplugDeviceError::UnhandledCommand(
-        format!("{} actuator types are not compatible with .", actuator).to_owned(),
+        format!("{} actuator types are not compatible", actuator_command.as_actuator_type()).to_owned(),
       ))?,
     }
   }
 
   fn handle_actuator_vibrate_cmd(
     &self,
-    feature_index: u32,
-    feature_id: Uuid,
-    speed: u32
+    _feature_index: u32,
+    _feature_id: Uuid,
+    _speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented("ValueCmd (Vibrate Actuator)")
+    self.command_unimplemented("OutputCmd (Vibrate Actuator)")
   }
 
-  fn handle_value_rotate_cmd(
+  fn handle_actuator_rotate_cmd(
     &self,
-    _cmd: &CheckedActuatorCmdV4,
+    _feature_index: u32,
+    _feature_id: Uuid,
+    _speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented("ValueCmd (Rotate Actuator)")
+    self.command_unimplemented("OutputCmd (Rotate Actuator)")
   }
 
-  fn handle_value_oscillate_cmd(
+  fn handle_actuator_oscillate_cmd(
     &self,
-    _cmd: &CheckedActuatorCmdV4,
+    _feature_index: u32,
+    _feature_id: Uuid,
+    _speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented("ValueCmd (Osccilate Actuator)")
+    self.command_unimplemented("OutputCmd (Oscillate Actuator)")
   }
 
-  fn handle_value_inflate_cmd(
+  fn handle_actuator_inflate_cmd(
     &self,
-    _cmd: &CheckedActuatorCmdV4,
+    _feature_index: u32,
+    _feature_id: Uuid,
+    _level: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented("ValueCmd (Inflate Actuator)")
+    self.command_unimplemented("OutputCmd (Inflate Actuator)")
   }
 
-  fn handle_value_constrict_cmd(
+  fn handle_actuator_constrict_cmd(
     &self,
-    _cmd: &CheckedActuatorCmdV4,
+    _feature_index: u32,
+    _feature_id: Uuid,
+    _level: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented("ValueCmd (Constrict Actuator)")
+    self.command_unimplemented("OutputCmd (Constrict Actuator)")
   }
 
-  fn handle_value_position_cmd(
+  fn handle_actuator_position_cmd(
     &self,
-    _cmd: &CheckedActuatorCmdV4,
+    _feature_index: u32,
+    _feature_id: Uuid,
+    _position: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented("ValueCmd (Position Actuator)")
+    self.command_unimplemented("OutputCmd (Position Actuator)")
   }
 
   fn handle_position_with_duration_cmd(
     &self,
-    cmd: &CheckedValueWithParameterCmdV4,
+    _feature_index: u32,
+    _feature_id: Uuid,
+    _position: u32,
+    _duration: u32,    
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented(print_type_of(cmd))
+    self.command_unimplemented("OutputCmd (Position w/ Duration Actuator)")
   }
 
   fn handle_rotation_with_direction_cmd(
     &self,
-    cmd: &CheckedValueWithParameterCmdV4,
+    _feature_index: u32,
+    _feature_id: Uuid,
+    _speed: u32,
+    _clockwise: bool, 
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented(print_type_of(cmd))
+    self.command_unimplemented("OutputCmd (Rotation w/ Direction Actuator)")
   }
 
   fn handle_sensor_subscribe_cmd(
     &self,
     _device: Arc<Hardware>,
-    _message: &CheckedSensorSubscribeCmdV4,
+    _feature_index: u32,
+    _feature_id: Uuid,
+    _sensor_type: SensorType
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
-      "Command not implemented for this protocol: SensorSubscribeCmd".to_string(),
+      "Command not implemented for this protocol: InputCmd (Subscribe)".to_string(),
     )))
     .boxed()
   }
@@ -933,10 +944,12 @@ pub trait ProtocolHandler: Sync + Send {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     _device: Arc<Hardware>,
-    _message: &CheckedSensorUnsubscribeCmdV4,
+    _feature_index: u32,
+    _feature_id: Uuid,
+    _sensor_type: SensorType
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
-      "Command not implemented for this protocol: SensorSubscribeCmd".to_string(),
+      "Command not implemented for this protocol: InputCmd (Unsubscribe)".to_string(),
     )))
     .boxed()
   }
@@ -944,12 +957,14 @@ pub trait ProtocolHandler: Sync + Send {
   fn handle_sensor_read_cmd(
     &self,
     device: Arc<Hardware>,
-    message: &CheckedSensorReadCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    sensor_type: SensorType
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
-    match message.sensor_type() {
-      SensorType::Battery => self.handle_battery_level_cmd(device, message.clone()),
+    match sensor_type {
+      SensorType::Battery => self.handle_battery_level_cmd(device, feature_index, feature_id),
       _ => future::ready(Err(ButtplugDeviceError::UnhandledCommand(
-        "Command not implemented for this protocol: SensorReadCmd".to_string(),
+        "Command not implemented for this protocol: InputCmd (Read)".to_string(),
       )))
       .boxed(),
     }
@@ -960,21 +975,22 @@ pub trait ProtocolHandler: Sync + Send {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: CheckedSensorReadCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     // If we have a standardized BLE Battery endpoint, handle that above the
     // protocol, as it'll always be the same.
     if device.endpoints().contains(&Endpoint::RxBLEBattery) {
       debug!("Trying to get battery reading.");
-      let msg = HardwareReadCmd::new(GENERIC_BATTERY_READ_UUID, Endpoint::RxBLEBattery, 1, 0);
+      let msg = HardwareReadCmd::new(feature_id, Endpoint::RxBLEBattery, 1, 0);
       let fut = device.read_value(&msg);
       async move {
         let hw_msg = fut.await?;
         let battery_level = hw_msg.data()[0] as i32;
         let battery_reading = SensorReadingV4::new(
-          message.device_index(),
-          message.feature_index(),
-          message.sensor_type(),
+          0,
+          feature_index,
+          SensorType::Battery,
           vec![battery_level],
         );
         debug!("Got battery reading: {}", battery_level);
@@ -991,8 +1007,9 @@ pub trait ProtocolHandler: Sync + Send {
 
   fn handle_rssi_level_cmd(
     &self,
-    _device: Arc<Hardware>,
-    _message: CheckedSensorReadCmdV4,
+    device: Arc<Hardware>,
+    feature_index: u32,
+    _feature_id: Uuid,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Command not implemented for this protocol: SensorReadCmd".to_string(),

@@ -47,18 +47,18 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     message::{
-      self, ActuatorType, ButtplugMessage, ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4, Endpoint, FeatureType, RawReadingV2, SensorType
+      self, ActuatorRotateWithDirection, ActuatorType, ActuatorValue, ButtplugMessage, ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4, Endpoint, FeatureType, RawCommand, RawCommandRead, RawCommandWrite, RawReadingV2, SensorCommandType, SensorType
     },
     ButtplugResultFuture,
   },
   server::{
     device::{
       configuration::DeviceConfigurationManager,
-      hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent},
+      hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent, HardwareReadCmd, HardwareSubscribeCmd, HardwareUnsubscribeCmd, HardwareWriteCmd, GENERIC_RAW_COMMAND_UUID},
       protocol::ProtocolHandler,
     },
     message::{
-      checked_raw_cmd::CheckedRawCmdV4, checked_sensor_cmd::CheckedSensorCmdV4, checked_actuator_cmd::CheckedActuatorCmdV4, server_device_attributes::ServerDeviceAttributes, spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage
+      checked_actuator_cmd::CheckedActuatorCmdV4, checked_raw_cmd::CheckedRawCmdV4, checked_sensor_cmd::CheckedSensorCmdV4, server_device_attributes::ServerDeviceAttributes, spec_enums::ButtplugDeviceCommandMessageUnionV4, ButtplugServerDeviceMessage
     },
     ButtplugServerResultFuture,
   },
@@ -88,12 +88,6 @@ pub enum ServerDeviceEvent {
   Disconnected(UserDeviceIdentifier),
 }
 
-#[derive(Debug, PartialEq)]
-enum ActuatorCommand {
-  ValueCmd(u32),
-  _ValueWithParameterCmd((u32, i32)),
-}
-
 #[derive(Getters)]
 pub struct ServerDevice {
   hardware: Arc<Hardware>,
@@ -107,7 +101,7 @@ pub struct ServerDevice {
   raw_subscribed_endpoints: Arc<DashSet<Endpoint>>,
   #[getset(get = "pub")]
   legacy_attributes: ServerDeviceAttributes,
-  last_actuator_command: DashMap<Uuid, ActuatorCommand>,
+  last_actuator_command: DashMap<Uuid, CheckedActuatorCmdV4>,
   current_hardware_commands: Arc<Mutex<Option<VecDeque<HardwareCommand>>>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4>,
 }
@@ -315,40 +309,57 @@ impl ServerDevice {
     // calculate stop commands.
     for (index, feature) in definition.features().iter().enumerate() {
       if let Some(actuator_map) = feature.actuator() {
-        for (actuator_type, actuator) in actuator_map {
+        for (actuator_type, _) in actuator_map {
           if FeatureType::try_from(*actuator_type) != Ok(feature.feature_type()) {
             continue;
           }
-          if actuator
-            .messages()
-            .contains(&crate::core::message::ButtplugActuatorFeatureMessageType::ValueCmd)
-          {
+          let mut stop_cmd = |actuator_cmd| {
             stop_commands.push(
               CheckedActuatorCmdV4::new(
-                index as u32,
+                1,
                 0,
                 index as u32,
                 feature.id(),
-                feature.feature_type().clone().try_into().unwrap(),
-                0,
+                actuator_cmd
               )
               .into(),
             );
-          } else if actuator.messages().contains(
-            &crate::core::message::ButtplugActuatorFeatureMessageType::ValueWithParameterCmd,
-          ) && feature.feature_type() == FeatureType::RotateWithDirection
-          {
-            stop_commands.push(
-              CheckedValueWithParameterCmdV4::new(
-                0,
-                index as u32,
-                feature.id(),
-                feature.feature_type().clone().try_into().unwrap(),
-                0,
-                0,
-              )
-              .into(),
-            );
+          };
+
+          // Break out of these if one is found, we only need 1 stop message per output.
+          match actuator_type {
+            ActuatorType::Constrict => {
+              stop_cmd(message::ActuatorCommand::Constrict(ActuatorValue::new(0)));
+              break;
+            }
+            ActuatorType::Heater => {
+              stop_cmd(message::ActuatorCommand::Heater(ActuatorValue::new(0)));
+              break;
+            }
+            ActuatorType::Inflate => {
+              stop_cmd(message::ActuatorCommand::Inflate(ActuatorValue::new(0)));
+              break;
+            }
+            ActuatorType::Led => {
+              stop_cmd(message::ActuatorCommand::Led(ActuatorValue::new(0)));
+              break;
+            }
+            ActuatorType::Oscillate => {
+              stop_cmd(message::ActuatorCommand::Oscillate(ActuatorValue::new(0)));
+              break;
+            }
+            ActuatorType::Rotate => {
+              stop_cmd(message::ActuatorCommand::Rotate(ActuatorValue::new(0)));
+              break;
+            }
+            ActuatorType::RotateWithDirection => {
+              stop_cmd(message::ActuatorCommand::RotateWithDirection(ActuatorRotateWithDirection::new(0, false)));
+              break;
+            }
+            _ => {
+              // There's not much we can do about position or position w/ duration, so just continue on
+              continue;
+            }
           }
         }
       }
@@ -445,16 +456,14 @@ impl ServerDevice {
       // Raw messages
       ButtplugDeviceCommandMessageUnionV4::RawCmd(msg) => self.handle_raw_cmd(msg),
       // Sensor messages
-      ButtplugDeviceCommandMessageUnionV4::SensorCmd(msg) => {
-        self.handle_sensor_cmd_v4(msg)
-      }
+      ButtplugDeviceCommandMessageUnionV4::SensorCmd(msg) => self.handle_sensor_cmd(msg),
       // Actuator messages
       ButtplugDeviceCommandMessageUnionV4::ActuatorCmd(msg) => self.handle_actuatorcmd_v4(&msg),
       ButtplugDeviceCommandMessageUnionV4::ActuatorVecCmd(msg) => {
         let mut futs = vec![];
         let msg_id = msg.id();
         for m in msg.value_vec() {
-          futs.push(self.handle_valuecmd_v4(&m))
+          futs.push(self.handle_actuatorcmd_v4(&m))
         }
         async move {
           for f in futs {
@@ -471,15 +480,15 @@ impl ServerDevice {
 
   fn handle_actuatorcmd_v4(&self, msg: &CheckedActuatorCmdV4) -> ButtplugServerResultFuture {
     if let Some(last_msg) = self.last_actuator_command.get(&msg.feature_id()) {
-      if *last_msg == ActuatorCommand::ValueCmd(msg.value()) {
+      if *last_msg == *msg {
         trace!("No commands generated for incoming device packet, skipping and returning success.");
         return future::ready(Ok(message::OkV0::default().into())).boxed();
       }
     }
     self
       .last_actuator_command
-      .insert(msg.feature_id(), ActuatorCommand::ValueCmd(msg.value()));
-    self.handle_generic_command_result(self.handler.handle_value_cmd(msg))
+      .insert(msg.feature_id(), msg.clone());
+    self.handle_generic_command_result(self.handler.handle_actuator_cmd(msg))
   }
 
   fn handle_hardware_commands(&self, commands: Vec<HardwareCommand>) -> ButtplugServerResultFuture {
@@ -536,50 +545,28 @@ impl ServerDevice {
     .boxed()
   }
 
-  fn check_sensor_command(
+  fn handle_sensor_cmd(
+    &self,
+    message: CheckedSensorCmdV4
+  ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, ButtplugError>> {
+    match message.sensor_command() {
+      SensorCommandType::Read => self.handle_sensor_read_cmd(message.feature_index(), message.feature_id(), message.sensor_type()),
+      SensorCommandType::Subscribe => self.handle_sensor_subscribe_cmd(message.feature_index(), message.feature_id(), message.sensor_type()),
+      SensorCommandType::Unsubscribe => self.handle_sensor_unsubscribe_cmd(message.feature_index(), message.feature_id(), message.sensor_type()),
+    }
+  } 
+
+  fn handle_sensor_read_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType,
-  ) -> Result<(), ButtplugDeviceError> {
-    if let Some(feature) = self
-      .definition
-      .features()
-      .iter()
-      .find(|x| x.id() == feature_id)
-    {
-      if feature.feature_type() == FeatureType::from(sensor_type) {
-        Ok(())
-      } else {
-        Err(ButtplugDeviceError::DeviceSensorTypeMismatch(
-          feature_index,
-          sensor_type,
-          feature.feature_type(),
-        ))
-      }
-    } else {
-      Err(ButtplugDeviceError::DeviceSensorIndexError(
-        self.definition.features().len() as u32,
-        feature_index,
-      ))
-    }
-  }
-
-  fn handle_sensor_read_cmd_v4(
-    &self,
-    message: CheckedSensorCmdV4,
+    sensor_type: SensorType
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, ButtplugError>> {
-    let result = self.check_sensor_command(
-      message.feature_index(),
-      message.feature_id(),
-      message.sensor_type(),
-    );
     let device = self.hardware.clone();
     let handler = self.handler.clone();
     async move {
-      result?;
       handler
-        .handle_sensor_read_cmd(device, &message)
+        .handle_sensor_read_cmd(device, feature_index, feature_id, sensor_type)
         .await
         .map_err(|e| e.into())
         .map(|e| e.into())
@@ -587,71 +574,78 @@ impl ServerDevice {
     .boxed()
   }
 
-  fn handle_sensor_subscribe_cmd_v4(
+  fn handle_sensor_subscribe_cmd(
     &self,
-    message: CheckedSensorCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    sensor_type: SensorType
   ) -> ButtplugServerResultFuture {
-    let result = self.check_sensor_command(
-      message.feature_index(),
-      message.feature_id(),
-      message.sensor_type(),
-    );
     let device = self.hardware.clone();
     let handler = self.handler.clone();
     async move {
-      result?;
       handler
-        .handle_sensor_subscribe_cmd(device, &message)
+        .handle_sensor_subscribe_cmd(device, feature_index, feature_id, sensor_type)
         .await
-        .map(|_| message::OkV0::new(message.id()).into())
+        .map(|_| message::OkV0::new(1).into())
         .map_err(|e| e.into())
     }
     .boxed()
   }
 
-  fn handle_sensor_unsubscribe_cmd_v4(
+  fn handle_sensor_unsubscribe_cmd(
     &self,
-    message: CheckedSensorCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    sensor_type: SensorType
   ) -> ButtplugServerResultFuture {
-    let result = self.check_sensor_command(
-      message.feature_index(),
-      message.feature_id(),
-      message.sensor_type(),
-    );
     let device = self.hardware.clone();
     let handler = self.handler.clone();
     async move {
-      result?;
       handler
-        .handle_sensor_unsubscribe_cmd(device, &message)
+        .handle_sensor_unsubscribe_cmd(device, feature_index, feature_id, sensor_type)
         .await
-        .map(|_| message::OkV0::new(message.id()).into())
+        .map(|_| message::OkV0::new(1).into())
         .map_err(|e| e.into())
     }
     .boxed()
   }
 
-  fn handle_raw_write_cmd(&self, message: CheckedRawWriteCmdV2) -> ButtplugServerResultFuture {
-    let id = message.id();
-    let fut = self.hardware.write_value(&message.into());
+  fn handle_raw_cmd(&self, message: CheckedRawCmdV4) -> ButtplugServerResultFuture {
+    match message.raw_command() {
+      RawCommand::Read(read_data) => {
+        self.handle_raw_read_cmd(*message.endpoint(), read_data)
+      },
+      RawCommand::Subscribe => {
+        self.handle_raw_subscribe_cmd(*message.endpoint())
+      },
+      RawCommand::Unsubscribe => {
+        self.handle_raw_unsubscribe_cmd(*message.endpoint())
+      },
+      RawCommand::Write(write_data) => {
+        self.handle_raw_write_cmd(*message.endpoint(), write_data)
+      }
+    }
+  }
+
+  fn handle_raw_write_cmd(&self, endpoint: Endpoint, write_data: &RawCommandWrite) -> ButtplugServerResultFuture {
+    let fut = self.hardware.write_value(&HardwareWriteCmd::new(GENERIC_RAW_COMMAND_UUID, endpoint, write_data.data().clone(), write_data.write_with_response()));
     async move {
       fut
         .await
-        .map(|_| message::OkV0::new(id).into())
+        .map(|_| message::OkV0::new(1).into())
         .map_err(|err| err.into())
     }
     .boxed()
   }
 
-  fn handle_raw_read_cmd(&self, message: CheckedRawReadCmdV2) -> ButtplugServerResultFuture {
-    let id = message.id();
-    let fut = self.hardware.read_value(&message.into());
+  fn handle_raw_read_cmd(&self, endpoint: Endpoint, read_data: &RawCommandRead) -> ButtplugServerResultFuture {
+    let fut = self.hardware.read_value(&HardwareReadCmd::new(GENERIC_RAW_COMMAND_UUID, endpoint, read_data.expected_length(), read_data.timeout()));
     async move {
       fut
         .await
         .map(|msg| {
           let mut raw_msg: RawReadingV2 = msg.into();
-          raw_msg.set_id(id);
+          raw_msg.set_id(1);
           raw_msg.into()
         })
         .map_err(|err| err.into())
@@ -661,19 +655,17 @@ impl ServerDevice {
 
   fn handle_raw_unsubscribe_cmd(
     &self,
-    message: CheckedRawUnsubscribeCmdV2,
+    endpoint: Endpoint,
   ) -> ButtplugServerResultFuture {
-    let id = message.id();
-    let endpoint = message.endpoint();
-    let fut = self.hardware.unsubscribe(&message.into());
+    let fut = self.hardware.unsubscribe(&HardwareUnsubscribeCmd::new(GENERIC_RAW_COMMAND_UUID, endpoint));
     let raw_endpoints = self.raw_subscribed_endpoints.clone();
     async move {
       if !raw_endpoints.contains(&endpoint) {
-        return Ok(message::OkV0::new(id).into());
+        return Ok(message::OkV0::new(1).into());
       }
       let result = fut
         .await
-        .map(|_| message::OkV0::new(id).into())
+        .map(|_| message::OkV0::new(1).into())
         .map_err(|err| err.into());
       raw_endpoints.remove(&endpoint);
       result
@@ -683,19 +675,17 @@ impl ServerDevice {
 
   fn handle_raw_subscribe_cmd(
     &self,
-    message: CheckedRawSubscribeCmdV2,
+    endpoint: Endpoint,
   ) -> ButtplugServerResultFuture {
-    let id = message.id();
-    let endpoint = message.endpoint();
-    let fut = self.hardware.subscribe(&message.into());
+    let fut = self.hardware.subscribe(&HardwareSubscribeCmd::new(GENERIC_RAW_COMMAND_UUID, endpoint));
     let raw_endpoints = self.raw_subscribed_endpoints.clone();
     async move {
       if raw_endpoints.contains(&endpoint) {
-        return Ok(message::OkV0::new(id).into());
+        return Ok(message::OkV0::new(1).into());
       }
       let result = fut
         .await
-        .map(|_| message::OkV0::new(id).into())
+        .map(|_| message::OkV0::new(1).into())
         .map_err(|err| err.into());
       raw_endpoints.insert(endpoint);
       result

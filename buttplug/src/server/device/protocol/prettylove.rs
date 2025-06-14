@@ -14,6 +14,7 @@ use crate::{
   }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
 };
 use async_trait::async_trait;
+use uuid::Uuid;
 use std::sync::Arc;
 
 pub mod setup {
@@ -82,9 +83,9 @@ impl ProtocolHandler for PrettyLove {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
-      vec![0x00u8, cmd.value() as u8],
+      vec![0x00u8, speed as u8],
       true,
     )
     .into()])

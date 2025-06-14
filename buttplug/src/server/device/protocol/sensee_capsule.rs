@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::{device::{
@@ -30,7 +32,7 @@ impl ProtocolHandler for SenseeCapsule {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       vec![
         0x55,
@@ -41,19 +43,21 @@ impl ProtocolHandler for SenseeCapsule {
         0x12,
         0x66,
         0xf9,
-        0xf0 | cmd.value() as u8,
+        0xf0 | speed as u8,
       ],
       false,
     )
     .into()])
   }
 
-  fn handle_value_constrict_cmd(
+  fn handle_actuator_constrict_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    level: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       vec![
         0x55,
@@ -64,7 +68,7 @@ impl ProtocolHandler for SenseeCapsule {
         0x11,
         0x66,
         0xf2,
-        0xf0 | cmd.value() as u8,
+        0xf0 | level as u8,
         0x00,
         0x00,
       ],

@@ -7,7 +7,7 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::{device::{
+  server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
@@ -16,7 +16,7 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  },
 };
 use async_trait::async_trait;
 use uuid::{uuid, Uuid};
@@ -58,9 +58,9 @@ impl ProtocolHandler for LoveDistance {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
-      vec![0xf3, 0x00, cmd.value() as u8],
+      vec![0xf3, 0x00, speed as u8],
       false,
     )
     .into()])

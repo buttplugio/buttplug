@@ -23,7 +23,7 @@ use crate::{
       protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     },
     message::{
-      checked_sensor_cmd::CheckedSensorReadCmdV4, checked_actuator_cmd::CheckedActuatorCmdV4, checked_value_with_parameter_cmd::CheckedValueWithParameterCmdV4
+      checked_actuator_cmd::CheckedActuatorCmdV4,
     },
   },
   util::{async_manager, sleep},
@@ -35,7 +35,7 @@ use regex::Regex;
 use uuid::{uuid, Uuid};
 use std::{
   sync::{
-    atomic::{AtomicU32, AtomicU8, Ordering},
+    atomic::{AtomicBool, AtomicU32, AtomicU8, Ordering},
     Arc,
   }, time::Duration
 };
@@ -201,7 +201,7 @@ impl ProtocolInitializer for LovenseInitializer {
 }
 
 pub struct Lovense {
-  rotation_direction: AtomicU8,
+  rotation_direction: AtomicBool,
   vibrator_values: Vec<AtomicU32>,
   use_mply: bool,
   use_lvs: bool,
@@ -232,7 +232,7 @@ impl Lovense {
     }
 
     Self {
-      rotation_direction: AtomicU8::new(0),
+      rotation_direction: AtomicBool::new(false),
       vibrator_values,
       use_mply,
       use_lvs,
@@ -314,11 +314,11 @@ impl ProtocolHandler for Lovense {
     feature_id: Uuid,
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let current_vibrator_value = self.vibrator_values[cmd.feature_index() as usize].load(Ordering::Relaxed);
-    if current_vibrator_value == cmd.value() {
+    let current_vibrator_value = self.vibrator_values[feature_index as usize].load(Ordering::Relaxed);
+    if current_vibrator_value == speed {
       Ok(vec![])
     } else {
-      self.vibrator_values[cmd.feature_index() as usize].store(cmd.value(), Ordering::Relaxed);
+      self.vibrator_values[feature_index as usize].store(speed, Ordering::Relaxed);
       let speeds: Vec<u32> = self.vibrator_values.iter().map(|v| v.load(Ordering::Relaxed)).collect();
       if self.use_lvs {
         self.handle_lvs_cmd()
@@ -326,11 +326,11 @@ impl ProtocolHandler for Lovense {
         self.handle_mply_cmd()
       } else {
         let lovense_cmd = if self.vibrator_values.len() == 1 {
-          format!("Vibrate:{};", cmd.value()).as_bytes().to_vec()
+          format!("Vibrate:{};", speed).as_bytes().to_vec()
         } else {
-          format!("Vibrate{}:{};", cmd.feature_index() + 1, cmd.value()).as_bytes().to_vec()
+          format!("Vibrate{}:{};", feature_index + 1, speed).as_bytes().to_vec()
         };
-        Ok(vec![HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, lovense_cmd, false).into()])
+        Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, lovense_cmd, false).into()])
       }
     }
     /*
@@ -394,36 +394,43 @@ impl ProtocolHandler for Lovense {
   }
 
   
-  fn handle_value_constrict_cmd(
+  fn handle_actuator_constrict_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    level: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let lovense_cmd = format!("Air:Level:{};", cmd.value())
+    let lovense_cmd = format!("Air:Level:{};", level)
       .as_bytes()
       .to_vec();
 
-    Ok(vec![HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, lovense_cmd, false).into()])
+    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, lovense_cmd, false).into()])
   } 
 
-  fn handle_value_rotate_cmd(
+  fn handle_actuator_rotate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.handle_rotation_with_direction_cmd(&CheckedValueWithParameterCmdV4::new(cmd.device_index(), cmd.feature_index(), cmd.feature_id(), cmd.actuator_type(), cmd.value(), 0))
+    self.handle_rotation_with_direction_cmd(feature_index, feature_id, speed, false)
   }
 
   fn handle_rotation_with_direction_cmd(
     &self,
-    cmd: &CheckedValueWithParameterCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32,
+    clockwise: bool
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut hardware_cmds = vec![];
-    let lovense_cmd = format!("Rotate:{};", cmd.value()).as_bytes().to_vec();
-    hardware_cmds.push(HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, lovense_cmd, false).into());
+    let lovense_cmd = format!("Rotate:{};", speed).as_bytes().to_vec();
+    hardware_cmds.push(HardwareWriteCmd::new(feature_id, Endpoint::Tx, lovense_cmd, false).into());
     let current_dir = self.rotation_direction.load(Ordering::Relaxed);
-    if current_dir != cmd.parameter() as u8 {
-      self.rotation_direction.store(cmd.parameter() as u8, Ordering::Relaxed);
+    if current_dir != clockwise {
+      self.rotation_direction.store(clockwise, Ordering::Relaxed);
       hardware_cmds
-        .push(HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, b"RotateChange;".to_vec(), false).into());
+        .push(HardwareWriteCmd::new(feature_id, Endpoint::Tx, b"RotateChange;".to_vec(), false).into());
     }
     trace!("{:?}", hardware_cmds);
     Ok(hardware_cmds)
@@ -432,12 +439,13 @@ impl ProtocolHandler for Lovense {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: CheckedSensorReadCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     let mut device_notification_receiver = device.event_stream();
     async move {
       let write_fut = device.write_value(&HardwareWriteCmd::new(
-        message.feature_id(),
+        feature_id,
         Endpoint::Tx,
         b"Battery;".to_vec(),
         false,
@@ -460,8 +468,8 @@ impl ProtocolHandler for Lovense {
               let start_pos = usize::from(data_str.contains('s'));
               if let Ok(level) = data_str[start_pos..(len - 1)].parse::<u8>() {
                 return Ok(message::SensorReadingV4::new(
-                  message.device_index(),
-                  message.feature_index(),
+                  0,
+                  feature_index,
                   message::SensorType::Battery,
                   vec![level as i32],
                 ));
@@ -486,16 +494,19 @@ impl ProtocolHandler for Lovense {
 
   fn handle_position_with_duration_cmd(
     &self,
-    message: &CheckedValueWithParameterCmdV4,
+    _feature_index: u32,
+    _feature_id: Uuid,
+    position: u32,
+    duration: u32,    
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self
       .linear_info
       .0
-      .store(message.value(), Ordering::Relaxed);
+      .store(position, Ordering::Relaxed);
     self
       .linear_info
       .1
-      .store(message.parameter() as u32, Ordering::Relaxed);
+      .store(duration, Ordering::Relaxed);
     Ok(vec![])
   }
 }

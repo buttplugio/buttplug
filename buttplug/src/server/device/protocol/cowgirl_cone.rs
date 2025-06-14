@@ -58,14 +58,14 @@ impl ProtocolHandler for CowgirlCone {
 
   fn handle_actuator_vibrate_cmd(
     &self,
-    feature_index: u32,
+    _feature_index: u32,
     feature_id: Uuid,
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
-      vec![0xf1, 0x01, cmd.value() as u8, 0x00],
+      vec![0xf1, 0x01, speed as u8, 0x00],
       false,
     )
     .into()])

@@ -14,9 +14,6 @@ use futures_util::future::BoxFuture;
 use futures_util::{future, FutureExt};
 
 use crate::core::message::{SensorReadingV4, SensorType};
-use crate::server::message::checked_sensor_cmd::CheckedSensorReadCmdV4;
-use crate::server::message::checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4;
-use crate::server::message::checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4;
 use crate::server::message::checked_actuator_cmd::CheckedActuatorCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
@@ -135,7 +132,9 @@ impl ProtocolHandler for Galaku {
 
   fn handle_actuator_vibrate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if self.is_caiping_pump_device {
       let data: Vec<u8> = vec![
@@ -143,8 +142,8 @@ impl ProtocolHandler for Galaku {
         1,
         10,
         3,
-        cmd.value() as u8,
-        if cmd.value() == 0 { 0 } else { 1 },
+        speed as u8,
+        if speed == 0 { 0 } else { 1 },
         0,
         0,
         0,
@@ -158,7 +157,7 @@ impl ProtocolHandler for Galaku {
       ];
       return Ok(vec![HardwareWriteCmd::new(GALAKU_PROTOCOL_UUID, Endpoint::Tx, data, false).into()]);
     } else {
-      self.speeds[cmd.feature_index() as usize].store(cmd.value() as u8, Ordering::Relaxed);
+      self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
       let data: Vec<u32> = vec![90, 0, 0, 1, 49, self.speeds[0].load(Ordering::Relaxed) as u32, self.speeds[1].load(Ordering::Relaxed) as u32, 0, 0, 0];
       Ok(vec![HardwareWriteCmd::new(
         GALAKU_PROTOCOL_UUID,
@@ -173,14 +172,15 @@ impl ProtocolHandler for Galaku {
   fn handle_sensor_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    cmd: &CheckedSensorSubscribeCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    sensor_type: SensorType
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
-    let cmd = cmd.clone();
-    match cmd.sensor_type() {
+    match sensor_type {
       SensorType::Battery => {
         async move {
           device
-            .subscribe(&HardwareSubscribeCmd::new(cmd.feature_id(), Endpoint::RxBLEBattery))
+            .subscribe(&HardwareSubscribeCmd::new(feature_id, Endpoint::RxBLEBattery))
             .await?;
           Ok(())
         }
@@ -196,14 +196,15 @@ impl ProtocolHandler for Galaku {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    cmd: &CheckedSensorUnsubscribeCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    sensor_type: SensorType
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
-    let cmd = cmd.clone();
-    match cmd.sensor_type() {
+    match sensor_type {
       SensorType::Battery => {
         async move {
           device
-            .unsubscribe(&HardwareUnsubscribeCmd::new(cmd.feature_id(), Endpoint::RxBLEBattery))
+            .unsubscribe(&HardwareUnsubscribeCmd::new(feature_id, Endpoint::RxBLEBattery))
             .await?;
           Ok(())
         }
@@ -219,16 +220,17 @@ impl ProtocolHandler for Galaku {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    cmd: CheckedSensorReadCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
   ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
     let data: Vec<u32> = vec![90, 0, 0, 1, 19, 0, 0, 0, 0, 0];
     let mut device_notification_receiver = device.event_stream();
     async move {
       device
-        .subscribe(&HardwareSubscribeCmd::new(cmd.feature_id(), Endpoint::RxBLEBattery))
+        .subscribe(&HardwareSubscribeCmd::new(feature_id, Endpoint::RxBLEBattery))
         .await?;
       device
-        .write_value(&HardwareWriteCmd::new(cmd.feature_id(), Endpoint::Tx, send_bytes(data), true))
+        .write_value(&HardwareWriteCmd::new(feature_id, Endpoint::Tx, send_bytes(data), true))
         .await?;
       while let Ok(event) = device_notification_receiver.recv().await {
         return match event {
@@ -237,9 +239,9 @@ impl ProtocolHandler for Galaku {
               continue;
             }
             let battery_reading = SensorReadingV4::new(
-              cmd.device_index(),
-              cmd.feature_index(),
-              cmd.sensor_type(),
+              0,
+              feature_index,
+              SensorType::Battery,
               vec![read_value(data) as i32],
             );
             Ok(battery_reading)

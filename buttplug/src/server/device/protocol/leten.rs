@@ -100,12 +100,12 @@ impl ProtocolHandler for Leten {
     speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_command = self.current_command.clone();
-    current_command.store(cmd.value() as u8, Ordering::Relaxed);
+    current_command.store(speed as u8, Ordering::Relaxed);
 
     Ok(vec![HardwareWriteCmd::new(
       LETEN_PROTOCOL_UUID,
       Endpoint::Tx,
-      vec![0x02, cmd.value() as u8],
+      vec![0x02, speed as u8],
       true,
     )
     .into()])

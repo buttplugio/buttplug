@@ -77,6 +77,7 @@ pub enum ActuatorCommand {
 }
 
 impl ActuatorCommand {
+
   pub fn value(&self) -> u32 {
     match self {
       ActuatorCommand::Constrict(x)

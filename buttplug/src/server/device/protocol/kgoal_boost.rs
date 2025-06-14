@@ -15,11 +15,7 @@ use crate::{
       hardware::{Hardware, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd},
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
-    message::{
-      checked_sensor_subscribe_cmd::CheckedSensorSubscribeCmdV4,
-      checked_sensor_unsubscribe_cmd::CheckedSensorUnsubscribeCmdV4,
-      ButtplugServerDeviceMessage,
-    },
+    message::ButtplugServerDeviceMessage,
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
@@ -29,6 +25,7 @@ use futures::{
   FutureExt,
   StreamExt,
 };
+use uuid::Uuid;
 use std::{pin::Pin, sync::Arc};
 use tokio::sync::broadcast;
 
@@ -60,12 +57,13 @@ impl ProtocolHandler for KGoalBoost {
   fn handle_sensor_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: &CheckedSensorSubscribeCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    sensor_type: SensorType
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
-    if self.subscribed_sensors.contains(&message.feature_index()) {
+    if self.subscribed_sensors.contains(&feature_index) {
       return future::ready(Ok(())).boxed();
     }
-    let message = message.clone();
     let sensors = self.subscribed_sensors.clone();
     // Readout value: 0x000104000005d3
     // Byte 0: Always 0x00
@@ -78,12 +76,11 @@ impl ProtocolHandler for KGoalBoost {
       // characteristic subscription.
       if sensors.is_empty() {
         device
-          .subscribe(&HardwareSubscribeCmd::new(message.feature_id(), Endpoint::RxPressure))
+          .subscribe(&HardwareSubscribeCmd::new(feature_id, Endpoint::RxPressure))
           .await?;
         let sender = self.event_stream.clone();
         let mut hardware_stream = device.event_stream();
         let stream_sensors = sensors.clone();
-        let device_index = message.device_index();
         // If we subscribe successfully, we need to set up our event handler.
         async_manager::spawn(async move {
           while let Ok(info) = hardware_stream.recv().await {
@@ -104,7 +101,7 @@ impl ProtocolHandler for KGoalBoost {
                 if stream_sensors.contains(&0)
                   && sender
                     .send(
-                      SensorReadingV4::new(device_index, 0, SensorType::Pressure, vec![normalized])
+                      SensorReadingV4::new(0, 0, SensorType::Pressure, vec![normalized])
                         .into(),
                     )
                     .is_err()
@@ -118,7 +115,7 @@ impl ProtocolHandler for KGoalBoost {
                   && sender
                     .send(
                       SensorReadingV4::new(
-                        device_index,
+                        0,
                         0,
                         SensorType::Pressure,
                         vec![unnormalized],
@@ -137,7 +134,7 @@ impl ProtocolHandler for KGoalBoost {
           }
         });
       }
-      sensors.insert(message.feature_index());
+      sensors.insert(feature_index);
       Ok(())
     }
     .boxed()
@@ -146,20 +143,21 @@ impl ProtocolHandler for KGoalBoost {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: &CheckedSensorUnsubscribeCmdV4,
+    feature_index: u32,
+    feature_id: Uuid,
+    sensor_type: SensorType
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
-    if !self.subscribed_sensors.contains(&message.feature_index()) {
+    if !self.subscribed_sensors.contains(&feature_index) {
       return future::ready(Ok(())).boxed();
     }
-    let message = message.clone();
     let sensors = self.subscribed_sensors.clone();
     async move {
       // If we have no sensors we're currently subscribed to, we'll need to bring up our BLE
       // characteristic subscription.
-      sensors.remove(&message.feature_index());
+      sensors.remove(&feature_index);
       if sensors.is_empty() {
         device
-          .unsubscribe(&HardwareUnsubscribeCmd::new(message.feature_id(), Endpoint::RxPressure))
+          .unsubscribe(&HardwareUnsubscribeCmd::new(feature_id, Endpoint::RxPressure))
           .await?;
       }
       Ok(())

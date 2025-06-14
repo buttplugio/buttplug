@@ -36,7 +36,7 @@ impl ProtocolHandler for SvakomSam2 {
         0x00,
         0x00,
         if cmd.value() == 0 { 0x00 } else { 0x05 },
-        cmd.value() as u8,
+        speed as u8,
         0x00,
       ]
       .to_vec(),
@@ -58,7 +58,7 @@ impl ProtocolHandler for SvakomSam2 {
         0x00,
         0x00,
         if cmd.value() == 0 { 0x00 } else { 0x01 },
-        cmd.value() as u8,
+        speed as u8,
         0x00,
       ]
       .to_vec(),

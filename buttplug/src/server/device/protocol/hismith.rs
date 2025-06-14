@@ -7,7 +7,6 @@
 
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
 use crate::server::device::protocol::hismith_mini::HismithMiniInitializer;
-use crate::server::message::checked_actuator_cmd::CheckedActuatorCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -98,15 +97,17 @@ impl ProtocolHandler for Hismith {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_oscillate_cmd(
+  fn handle_actuator_oscillate_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let idx: u8 = 0x04;
-    let speed: u8 = cmd.value() as u8;
+    let speed: u8 = speed as u8;
 
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       vec![0xAA, idx, speed, speed + idx],
       false,
@@ -122,15 +123,15 @@ impl ProtocolHandler for Hismith {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Wildolo has a vibe at index 0 using id 4
     // The thrusting stroker has a vibe at index 1 using id 6 (and the weird 0xf0 off)
-    let idx: u8 = if cmd.feature_index() == 0 { 0x04 } else { 0x06 };
-    let speed: u8 = if cmd.feature_index() != 0 && cmd.value() == 0 {
+    let idx: u8 = if feature_index == 0 { 0x04 } else { 0x06 };
+    let speed: u8 = if feature_index != 0 && speed == 0 {
       0xf0
     } else {
-      cmd.value() as u8
+      speed as u8
     };
 
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_id(),
+      feature_id,
       Endpoint::Tx,
       vec![0xAA, idx, speed, speed + idx],
       false,

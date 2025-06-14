@@ -281,11 +281,17 @@ impl TryFromClientMessage<ButtplugClientMessageV3> for ButtplugCheckedClientMess
       ButtplugClientMessageV3::SensorReadCmd(m) => {
         Ok(check_device_index_and_convert::<_, CheckedSensorCmdV4>(m, features)?.into())
       }
-      ButtplugClientMessageV3::SensorSubscribeCmd(m) => {
-        Ok(check_device_index_and_convert::<_, CheckedSensorCmdV4>(m, features)?.into())
+      ButtplugClientMessageV3::SensorSubscribeCmd(_) => {
+        // Always reject v3 sub/unsub. It was never implemented or indexed correctly.
+        Err(ButtplugError::from(
+          ButtplugDeviceError::MessageNotSupported("SensorSubscribeCmdV3".to_owned()),
+        ))
       }
-      ButtplugClientMessageV3::SensorUnsubscribeCmd(m) => {
-        Ok(check_device_index_and_convert::<_, CheckedSensorCmdV4>(m, features)?.into())
+      ButtplugClientMessageV3::SensorUnsubscribeCmd(_) => {
+        // Always reject v3 sub/unsub. It was never implemented or indexed correctly.
+        Err(ButtplugError::from(
+          ButtplugDeviceError::MessageNotSupported("SensorUnsubscribeCmdV3".to_owned()),
+        ))      
       }
       ButtplugClientMessageV3::RawReadCmd(m) => {
         Ok(check_device_index_and_convert::<_, CheckedRawCmdV4>(m, features)?.into())
