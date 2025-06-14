@@ -46,9 +46,9 @@ struct RequestServerInfoMessage {
 #[derive(Deserialize, ButtplugMessageFinalizer, Clone, Debug)]
 struct RequestServerInfoVersion {
   #[serde(rename = "Id")]
-  id: u32,
+  _id: u32,
   #[serde(rename = "ClientName")]
-  client_name: String,
+  _client_name: String,
   #[serde(default, rename = "MessageVersion")]
   message_version: Option<u32>,
   #[serde(default, rename = "ApiVersionMajor")]
@@ -142,10 +142,10 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
           Err(ButtplugSerializerError::MessageSpecVersionNotReceived)
         } else if let Some(v) = msg_union[0].rsi.api_major_version {
           ButtplugMessageSpecVersion::try_from(v as i32)
-            .map_err(|e| ButtplugSerializerError::MessageSpecVersionNotReceived)
+            .map_err(|_| ButtplugSerializerError::MessageSpecVersionNotReceived)
         } else if let Some(v) = msg_union[0].rsi.message_version {
           ButtplugMessageSpecVersion::try_from(v as i32)
-            .map_err(|e| ButtplugSerializerError::MessageSpecVersionNotReceived)
+            .map_err(|_| ButtplugSerializerError::MessageSpecVersionNotReceived)
         } else {
           Ok(ButtplugMessageSpecVersion::Version0)
         }

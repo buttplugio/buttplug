@@ -27,7 +27,7 @@ impl ProtocolHandler for MagicMotionV1 {
 
   fn handle_actuator_vibrate_cmd(
     &self,
-    feature_index: u32,
+    _feature_index: u32,
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
@@ -55,7 +55,7 @@ impl ProtocolHandler for MagicMotionV1 {
 
   fn handle_actuator_oscillate_cmd(
     &self,
-    feature_index: u32,
+    _feature_index: u32,
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {

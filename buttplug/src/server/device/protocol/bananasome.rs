@@ -63,7 +63,7 @@ impl ProtocolHandler for Bananasome {
   fn handle_actuator_oscillate_cmd(
     &self,
     feature_index: u32,
-    feature_id: Uuid,
+    _feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(self.hardware_command(feature_index, speed))
@@ -72,7 +72,7 @@ impl ProtocolHandler for Bananasome {
   fn handle_actuator_vibrate_cmd(
     &self,
     feature_index: u32,
-    feature_id: Uuid,
+    _feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(self.hardware_command(feature_index, speed))

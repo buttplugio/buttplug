@@ -1015,8 +1015,8 @@ pub trait ProtocolHandler: Sync + Send {
 
   fn handle_rssi_level_cmd(
     &self,
-    device: Arc<Hardware>,
-    feature_index: u32,
+    _device: Arc<Hardware>,
+    _feature_index: u32,
     _feature_id: Uuid,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(

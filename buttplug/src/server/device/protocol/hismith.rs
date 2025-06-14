@@ -104,7 +104,7 @@ impl ProtocolHandler for Hismith {
 
   fn handle_actuator_oscillate_cmd(
     &self,
-    feature_index: u32,
+    _feature_index: u32,
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {

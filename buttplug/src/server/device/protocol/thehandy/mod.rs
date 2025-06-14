@@ -128,7 +128,7 @@ impl ProtocolHandler for TheHandy {
   fn handle_position_with_duration_cmd(
     &self,
     _feature_index: u32,
-    feature_id: Uuid,
+    _feature_id: Uuid,
     position: u32,
     duration: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {

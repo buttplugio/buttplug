@@ -77,8 +77,8 @@ impl ProtocolHandler for GalakuPump {
 
   fn handle_actuator_oscillate_cmd(
     &self,
-    feature_index: u32,
-    feature_id: Uuid,
+    _feature_index: u32,
+    _feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[0].store(speed as u8, Ordering::Relaxed);
@@ -87,8 +87,8 @@ impl ProtocolHandler for GalakuPump {
 
   fn handle_actuator_vibrate_cmd(
     &self,
-    feature_index: u32,
-    feature_id: Uuid,
+    _feature_index: u32,
+    _feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[1].store(speed as u8, Ordering::Relaxed);

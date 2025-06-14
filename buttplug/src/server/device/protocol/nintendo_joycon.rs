@@ -307,8 +307,8 @@ impl NintendoJoycon {
 impl ProtocolHandler for NintendoJoycon {
   fn handle_actuator_vibrate_cmd(
     &self,
-    feature_index: u32,
-    feature_id: Uuid,
+    _feature_index: u32,
+    _feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speed_val.store(speed as u16, Ordering::Relaxed);

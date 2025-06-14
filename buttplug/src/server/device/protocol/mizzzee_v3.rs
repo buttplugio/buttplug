@@ -121,8 +121,8 @@ impl ProtocolHandler for MizzZeeV3 {
 
   fn handle_actuator_vibrate_cmd(
     &self,
-    feature_index: u32,
-    feature_id: Uuid,
+    _feature_index: u32,
+    _feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_scalar = self.current_scalar.clone();
