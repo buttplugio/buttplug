@@ -60,8 +60,7 @@ where
               .validate(&json_msg)
               .expect_err("We can't get here without validity checks failing.");
             return Err(ButtplugSerializerError::JsonSerializerError(format!(
-              "Error during JSON Schema Validation - Message: {} - Error: {:?}",
-              json_msg, e
+              "Error during JSON Schema Validation - Message: {json_msg} - Error: {e:?}"
             )));
           }
         }
@@ -74,16 +73,14 @@ where
           }
           Err(e) => {
             return Err(ButtplugSerializerError::JsonSerializerError(format!(
-              "Message: {} - Error: {:?}",
-              msg_str, e
+              "Message: {msg_str} - Error: {e:?}"
             )))
           }
         }
       }
       Err(e) => {
         return Err(ButtplugSerializerError::JsonSerializerError(format!(
-          "Message: {} - Error: {:?}",
-          msg_str, e
+          "Message: {msg_str} - Error: {e:?}"
         )))
       }
     }

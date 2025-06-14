@@ -197,8 +197,8 @@ impl ProtocolHandler for Fredorch {
     // TODO Clean this up, we do not need the conversions anymore since we'll have done the
     // calculations before we get to the protocol layer.
     let position = ((position as f64 / 99.0) * 150.0) as u8;
-    let converted_speed = calculate_speed(distance as f64, duration.try_into().unwrap()) * 99f64;
-    let speed = ((converted_speed as f64 / 99.0) * 15.0) as u8;
+    let converted_speed = calculate_speed(distance, duration.try_into().unwrap()) * 99f64;
+    let speed = ((converted_speed / 99.0) * 15.0) as u8;
     let mut data: Vec<u8> = vec![
       0x01, 0x10, 0x00, 0x6B, 0x00, 0x05, 0x0a, 0x00, speed, 0x00, speed, 0x00, position, 0x00,
       position, 0x00, 0x01,

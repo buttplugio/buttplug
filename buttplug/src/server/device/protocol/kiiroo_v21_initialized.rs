@@ -98,7 +98,7 @@ impl ProtocolHandler for KiirooV21Initialized {
     // use AtomicU8 because there's no AtomicF64 yet.
     let previous_position = self.previous_position.load(Ordering::Relaxed);
     let distance = (previous_position as f64 - (position as f64)).abs() / 99f64;
-    let calculated_speed = (calculate_speed(distance, duration as u32) * 99f64) as u8;
+    let calculated_speed = (calculate_speed(distance, duration) * 99f64) as u8;
 
     self.previous_position.store(position as u8, Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(

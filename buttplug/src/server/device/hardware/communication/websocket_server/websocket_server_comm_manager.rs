@@ -92,7 +92,7 @@ impl WebsocketServerDeviceCommunicationManager {
         "127.0.0.1"
       };
 
-      let addr = format!("{}:{}", base_addr, port);
+      let addr = format!("{base_addr}:{port}");
       debug!("Trying to listen on {}", addr);
 
       // Create the event loop and TCP listener we'll accept connections on.

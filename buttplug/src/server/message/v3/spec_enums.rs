@@ -120,8 +120,7 @@ impl TryFrom<ButtplugClientMessageV2> for ButtplugClientMessageV3 {
         Ok(ButtplugClientMessageV3::RawUnsubscribeCmd(m))
       }
       _ => Err(ButtplugMessageError::MessageConversionError(format!(
-        "Cannot convert message {:?} to V3 message spec while lacking state.",
-        value
+        "Cannot convert message {value:?} to V3 message spec while lacking state."
       ))),
     }
   }
@@ -199,8 +198,7 @@ impl TryFrom<ButtplugServerMessageV4> for ButtplugServerMessageV3 {
       ButtplugServerMessageV4::DeviceAdded(m) => Ok(ButtplugServerMessageV3::DeviceAdded(m.into())),
       // All other messages (SensorReading) requires device manager context.
       _ => Err(ButtplugMessageError::MessageConversionError(format!(
-        "Cannot convert message {:?} to current message spec while lacking state.",
-        value
+        "Cannot convert message {value:?} to current message spec while lacking state."
       ))),
     }
   }

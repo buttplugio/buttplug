@@ -254,7 +254,7 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedActuatorVecCmdV4 {
     for x in msg.vectors() {
       let f = features
           .get(x.index() as usize)
-          .ok_or(ButtplugDeviceError::DeviceFeatureIndexError(features.len() as u32, x.index() as u32))?
+          .ok_or(ButtplugDeviceError::DeviceFeatureIndexError(features.len() as u32, x.index()))?
           .feature();
       let actuator = f
         .actuator()

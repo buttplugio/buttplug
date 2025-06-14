@@ -287,7 +287,7 @@ impl ServerDeviceManager {
     } else if let Ok(manager_msg) = ButtplugDeviceManagerMessageUnion::try_from(msg.clone()) {
       self.parse_device_manager_message(manager_msg)
     } else {
-      ButtplugMessageError::UnexpectedMessageType(format!("{:?}", msg)).into()
+      ButtplugMessageError::UnexpectedMessageType(format!("{msg:?}")).into()
     }
   }
 

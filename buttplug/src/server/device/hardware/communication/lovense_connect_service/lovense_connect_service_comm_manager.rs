@@ -130,7 +130,7 @@ pub struct LovenseConnectServiceCommunicationManager {
 }
 
 pub(super) async fn get_local_info(host: &str) -> Option<LovenseServiceLocalInfo> {
-  match reqwest::get(format!("{}/GetToys", host)).await {
+  match reqwest::get(format!("{host}/GetToys")).await {
     Ok(res) => {
       if res.status() != StatusCode::OK {
         error!(

@@ -102,7 +102,7 @@ impl BtleplugAdapterTask {
     {
       let span = info_span!(
         "btleplug enumeration",
-        address = tracing::field::display(format!("{:?}", peripheral_id)),
+        address = tracing::field::display(format!("{peripheral_id:?}")),
         name = tracing::field::display(&device_name)
       );
       let _enter = span.enter();
@@ -124,7 +124,7 @@ impl BtleplugAdapterTask {
         .event_sender
         .send(HardwareCommunicationManagerEvent::DeviceFound {
           name: device_name,
-          address: format!("{:?}", peripheral_id),
+          address: format!("{peripheral_id:?}"),
           creator: device_creator,
         })
         .await

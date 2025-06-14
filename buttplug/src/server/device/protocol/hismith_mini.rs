@@ -10,11 +10,11 @@ use crate::{
     errors::ButtplugDeviceError,
     message::{Endpoint, FeatureType},
   },
-  server::{device::{
+  server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  },
 };
 use async_trait::async_trait;
 use uuid::{uuid, Uuid};
@@ -55,7 +55,7 @@ impl ProtocolIdentifier for HismithMiniIdentifier {
     let identifier = result
       .data()
       .iter()
-      .map(|b| format!("{:02x}", b))
+      .map(|b| format!("{b:02x}"))
       .collect::<String>();
     info!("Hismith Device Identifier: {}", identifier);
 

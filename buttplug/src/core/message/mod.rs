@@ -59,8 +59,7 @@ impl TryFrom<i32> for ButtplugMessageSpecVersion {
       4 => Ok(ButtplugMessageSpecVersion::Version4),
       _ => Err(
         ButtplugMessageError::InvalidMessageContents(format!(
-          "Message spec version {} is not valid",
-          value
+          "Message spec version {value} is not valid"
         ))
         .into(),
       ),

@@ -10,10 +10,10 @@ use uuid::Uuid;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_setup,
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::ProtocolHandler,
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  },
 };
 use std::sync::atomic::{AtomicU8, Ordering};
 

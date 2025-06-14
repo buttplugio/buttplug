@@ -9,10 +9,10 @@ use uuid::Uuid;
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  },
 };
 
 generic_protocol_setup!(SvakomAlex, "svakom-alex");

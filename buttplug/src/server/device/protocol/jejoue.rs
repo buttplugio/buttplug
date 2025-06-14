@@ -14,10 +14,10 @@ use crate::{
     errors::ButtplugDeviceError,
     message::Endpoint,
   },
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_actuator_cmd::CheckedActuatorCmdV4},
+  },
 };
 
 const JEJOUE_PROTOCOL_UUID: Uuid = uuid!("d3dd2bf5-b029-4bc1-9466-39f82c2e3258");

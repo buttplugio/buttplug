@@ -69,7 +69,7 @@ impl ProtocolHandler for KiirooV2 {
     let previous_position = self.previous_position.load(Ordering::Relaxed);
     let distance = (previous_position as f64 - (position as f64)).abs() / 99f64;
     let position = position as u8;
-    let calculated_speed = (calculate_speed(distance, duration as u32) * 99f64) as u8;
+    let calculated_speed = (calculate_speed(distance, duration) * 99f64) as u8;
     self.previous_position.store(position, Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
       feature_id,

@@ -181,14 +181,13 @@ impl AsyncWrite for HidAsyncDevice {
           if let Ok(guard) = guard.device.lock() {
             guard
               .write(buf)
-              .map_err(|e| io::Error::new(io::ErrorKind::Other, format!("hidapi failed: {}", e)))?;
+              .map_err(|e| io::Error::other(format!("hidapi failed: {e}")))?;
             //debug!("Wrote: {:?}", &buf[0..max_len]);
           }
         }
         Err(e) => {
-          return Poll::Ready(Err(io::Error::new(
-            io::ErrorKind::Other,
-            format!("Mutex broken: {:?}", e),
+          return Poll::Ready(Err(io::Error::other(
+            format!("Mutex broken: {e:?}"),
           )))
         }
       }
@@ -231,7 +230,7 @@ impl AsyncRead for HidAsyncDevice {
       .as_mut()
       .unwrap()
       .lock()
-      .map_err(|e| io::Error::new(io::ErrorKind::Other, format!("Mutex broken: {:?}", e)))?;
+      .map_err(|e| io::Error::other(format!("Mutex broken: {e:?}")))?;
     loop {
       let waker = cx.waker().clone();
       match this.rstate {
@@ -275,8 +274,7 @@ impl AsyncRead for HidAsyncDevice {
             }
             Err(e) => match e {
               mpsc::TryRecvError::Disconnected => {
-                return Poll::Ready(Err(io::Error::new(
-                  io::ErrorKind::Other,
+                return Poll::Ready(Err(io::Error::other(
                   "Inner channel dead",
                 )));
               }

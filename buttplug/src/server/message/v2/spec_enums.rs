@@ -129,8 +129,7 @@ impl TryFrom<ButtplugClientMessageV1> for ButtplugClientMessageV2 {
         ))
       }
       _ => Err(ButtplugMessageError::MessageConversionError(format!(
-        "Cannot convert message {:?} to current message spec while lacking state.",
-        value
+        "Cannot convert message {value:?} to current message spec while lacking state."
       ))),
     }
   }

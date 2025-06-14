@@ -30,7 +30,7 @@ impl ProtocolHandler for NextLevelRacing {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
       Endpoint::Tx,
-      format!("M{}{}\r", feature_index, speed).into_bytes(),
+      format!("M{feature_index}{speed}\r").into_bytes(),
       false,
     )
     .into()])

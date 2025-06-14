@@ -6,7 +6,6 @@
 // for full license information.
 
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
-use crate::server::message::checked_actuator_cmd::CheckedActuatorCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{

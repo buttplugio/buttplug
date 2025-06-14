@@ -34,7 +34,7 @@ impl ProtocolHandler for AdrienLastic {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
       Endpoint::Tx,
-      format!("MotorValue:{:02};", speed).as_bytes().to_vec(),
+      format!("MotorValue:{speed:02};").as_bytes().to_vec(),
       true,
     )
     .into()])

@@ -7,7 +7,6 @@
 
 use uuid::{uuid, Uuid};
 
-use crate::server::message::checked_actuator_cmd::CheckedActuatorCmdV4;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -50,8 +49,8 @@ impl GalakuPump {
       0x01,
       0x60,
       0x03,
-      self.speeds[0].load(Ordering::Relaxed) as u8,
-      self.speeds[1].load(Ordering::Relaxed) as u8,
+      self.speeds[0].load(Ordering::Relaxed),
+      self.speeds[1].load(Ordering::Relaxed),
       0x00,
       0x00,
     ];

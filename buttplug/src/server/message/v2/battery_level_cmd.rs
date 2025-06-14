@@ -72,7 +72,7 @@ impl TryFromDeviceAttributes<BatteryLevelCmdV2> for CheckedSensorCmdV4 {
             return true;
           }
         }
-        return false;
+        false
       })
       .expect("Already found matching battery feature, can unwrap this.")
       .0;

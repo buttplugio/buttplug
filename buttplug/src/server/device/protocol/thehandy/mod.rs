@@ -159,7 +159,7 @@ impl ProtocolHandler for TheHandy {
       vectors: vec![handyplug::linear_cmd::Vector {
         index: 0,
         position: position as f64 / 100f64,
-        duration: duration as u32,
+        duration,
       }],
     };
     let linear_payload = handyplug::Payload {
