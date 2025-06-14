@@ -34,7 +34,6 @@ use futures::{
   FutureExt,
   StreamExt,
 };
-use uuid::Uuid;
 use std::{
   default::Default,
   pin::Pin,
@@ -44,6 +43,7 @@ use std::{
   },
 };
 use tokio::sync::broadcast;
+use uuid::Uuid;
 
 generic_protocol_setup!(KiirooV21, "kiiroo-v21");
 
@@ -70,7 +70,7 @@ impl ProtocolHandler for KiirooV21 {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
@@ -81,12 +81,12 @@ impl ProtocolHandler for KiirooV21 {
     .into()])
   }
 
-    fn handle_position_with_duration_cmd(
+  fn handle_position_with_duration_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,
     position: u32,
-    duration: u32,    
+    duration: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
@@ -125,12 +125,8 @@ impl ProtocolHandler for KiirooV21 {
         ));
       }
       let battery_level = data[5] as i32;
-      let battery_reading = SensorReadingV4::new(
-        0,
-        feature_index,
-        SensorType::Battery,
-        vec![battery_level],
-      );
+      let battery_reading =
+        SensorReadingV4::new(0, feature_index, SensorType::Battery, vec![battery_level]);
       debug!("Got battery reading: {}", battery_level);
       Ok(battery_reading)
     }
@@ -148,7 +144,7 @@ impl ProtocolHandler for KiirooV21 {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType
+    sensor_type: SensorType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     if self.subscribed_sensors.contains(&feature_index) {
       return future::ready(Ok(())).boxed();
@@ -202,10 +198,7 @@ impl ProtocolHandler for KiirooV21 {
                 {
                   if stream_sensors.contains(&sensor_index)
                     && sender
-                      .send(
-                        SensorReadingV4::new(0, sensor_index, sensor_type, sensor_data)
-                          .into(),
-                      )
+                      .send(SensorReadingV4::new(0, sensor_index, sensor_type, sensor_data).into())
                       .is_err()
                   {
                     debug!(
@@ -230,9 +223,8 @@ impl ProtocolHandler for KiirooV21 {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType
+    sensor_type: SensorType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
-
     if !self.subscribed_sensors.contains(&feature_index) {
       return future::ready(Ok(())).boxed();
     }

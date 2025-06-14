@@ -8,7 +8,10 @@
 use crate::core::message::{Endpoint, SensorCommandType};
 use getset::{Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
-use std::{collections::{HashMap, HashSet}, ops::RangeInclusive};
+use std::{
+  collections::{HashMap, HashSet},
+  ops::RangeInclusive,
+};
 
 #[derive(Debug, Default, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FeatureType {
@@ -46,7 +49,6 @@ pub enum FeatureType {
   // Raw Feature, for when raw messages are on
   Raw,
 }
-
 
 #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash)]
 pub enum ActuatorType {
@@ -117,7 +119,6 @@ impl TryFrom<FeatureType> for SensorType {
   }
 }
 
-
 impl From<ActuatorType> for FeatureType {
   fn from(value: ActuatorType) -> Self {
     match value {
@@ -164,11 +165,11 @@ pub struct DeviceFeature {
   // array. We now make it explicit even though it's still just array position, because implicit
   // array positions have made life hell in so many different ways.
   #[getset(get = "pub")]
-  #[serde(rename="FeatureIndex")]
+  #[serde(rename = "FeatureIndex")]
   feature_index: u32,
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(default)]
-  #[serde(rename="FeatureDescription")]
+  #[serde(rename = "FeatureDescription")]
   description: String,
   #[getset(get = "pub")]
   #[serde(rename = "FeatureType")]
@@ -183,7 +184,7 @@ pub struct DeviceFeature {
   sensor: Option<HashMap<SensorType, DeviceFeatureSensor>>,
   #[getset(get = "pub")]
   #[serde(rename = "Raw")]
-  #[serde(skip_serializing_if="Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   raw: Option<DeviceFeatureRaw>,
 }
 
@@ -240,12 +241,8 @@ pub struct DeviceFeatureActuator {
 }
 
 impl DeviceFeatureActuator {
-  pub fn new(
-    step_count: u32,
-  ) -> Self {
-    Self {
-      step_count,
-    }
+  pub fn new(step_count: u32) -> Self {
+    Self { step_count }
   }
 }
 

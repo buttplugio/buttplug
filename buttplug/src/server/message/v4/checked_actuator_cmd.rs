@@ -9,13 +9,15 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      ActuatorCmdV4, ActuatorCommand, ButtplugDeviceMessage, ButtplugMessage,
-      ButtplugMessageFinalizer, ButtplugMessageValidator,
+      ActuatorCmdV4,
+      ActuatorCommand,
+      ButtplugDeviceMessage,
+      ButtplugMessage,
+      ButtplugMessageFinalizer,
+      ButtplugMessageValidator,
     },
   },
-  server::message::{
-    ServerDeviceAttributes, TryFromDeviceAttributes,
-  },
+  server::message::{ServerDeviceAttributes, TryFromDeviceAttributes},
 };
 use getset::{CopyGetters, Getters};
 use uuid::Uuid;
@@ -112,7 +114,11 @@ impl TryFromDeviceAttributes<ActuatorCmdV4> for CheckedActuatorCmdV4 {
             ButtplugDeviceError::DeviceStepRangeError(step_count, value),
           ))
         } else {
-          let new_value = if step_count != 0 { actuator.step_limit().start() + value } else { 0 };
+          let new_value = if step_count != 0 {
+            actuator.step_limit().start() + value
+          } else {
+            0
+          };
           let mut new_command = cmd.command();
           new_command.set_value(new_value);
           // We can't make a private trait impl to turn a ValueCmd into a CheckedValueCmd, and this
@@ -135,7 +141,9 @@ impl TryFromDeviceAttributes<ActuatorCmdV4> for CheckedActuatorCmdV4 {
       }
     } else {
       Err(ButtplugError::from(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::ActuatorCmd.to_string()),
+        ButtplugDeviceError::MessageNotSupported(
+          ButtplugDeviceMessageNameV4::ActuatorCmd.to_string(),
+        ),
       ))
     }
   }

@@ -7,9 +7,7 @@
 
 mod util;
 use buttplug::{
-  client::{
-    ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent,
-  },
+  client::{ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent},
   core::{
     errors::{ButtplugError, ButtplugMessageError},
     message::{ActuatorType, ButtplugActuatorFeatureMessageType, Endpoint, FeatureType},
@@ -28,7 +26,8 @@ use std::{collections::HashMap, sync::Arc, time::Duration};
 use tokio::time::sleep;
 use util::test_device_manager::{check_test_recv_value, TestDeviceIdentifier};
 use util::{
-  test_client_with_device, test_client_with_device_and_custom_dcm,
+  test_client_with_device,
+  test_client_with_device_and_custom_dcm,
   test_device_manager::TestHardwareEvent,
 };
 use uuid::Uuid;
@@ -154,10 +153,7 @@ async fn test_client_device_invalid_command() {
   let test_device = client_device.expect("Test, assuming infallible.");
 
   assert!(matches!(
-    test_device
-      .vibrate(1000)
-      .await
-      .unwrap_err(),
+    test_device.vibrate(1000).await.unwrap_err(),
     ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(
       ButtplugDeviceError::DeviceStepRangeError(..)
     ))
@@ -169,11 +165,9 @@ async fn test_client_device_invalid_command() {
 async fn test_client_repeated_deviceadded_message() {
   use buttplug::{
     core::message::OkV0,
-    server::message::{
-      ButtplugClientMessageVariant, ButtplugServerMessageVariant,
-    },
+    server::message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant},
   };
-  
+
   let helper = Arc::new(util::channel_transport::ChannelClientTestHelper::new());
   helper.simulate_successful_connect().await;
   let helper_clone = helper.clone();
@@ -188,13 +182,7 @@ async fn test_client_repeated_deviceadded_message() {
     helper_clone
       .send_client_incoming(ButtplugServerMessageVariant::V4(OkV0::new(3).into()))
       .await;
-    let device_added = DeviceAddedV4::new(
-      1,
-      "Test Device",
-      &None,
-      0,
-      &vec!(),
-    );
+    let device_added = DeviceAddedV4::new(1, "Test Device", &None, 0, &vec![]);
     helper_clone
       .send_client_incoming(ButtplugServerMessageVariant::V4(
         device_added.clone().into(),
@@ -230,9 +218,7 @@ async fn test_client_repeated_deviceadded_message() {
 async fn test_client_repeated_deviceremoved_message() {
   use buttplug::{
     core::message::{DeviceRemovedV0, OkV0},
-    server::message::{
-      ButtplugClientMessageVariant, ButtplugServerMessageVariant,
-    },
+    server::message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant},
   };
 
   let helper = Arc::new(util::channel_transport::ChannelClientTestHelper::new());
@@ -249,13 +235,7 @@ async fn test_client_repeated_deviceremoved_message() {
     helper_clone
       .send_client_incoming(ButtplugServerMessageVariant::V4(OkV0::new(3).into()))
       .await;
-    let device_added = DeviceAddedV4::new(
-      1,
-      "Test Device",
-      &None,
-      0,
-      &vec!()
-    );
+    let device_added = DeviceAddedV4::new(1, "Test Device", &None, 0, &vec![]);
     let device_removed = DeviceRemovedV0::new(1);
     helper_clone
       .send_client_incoming(ButtplugServerMessageVariant::V4(device_added.into()))
@@ -363,10 +343,7 @@ async fn test_client_range_limits() {
   while let Some(event) = event_stream.next().await {
     if let ButtplugClientEvent::DeviceAdded(dev) = event {
       // Vibrate at half strength
-      assert!(dev
-        .vibrate(32)
-        .await
-        .is_ok());
+      assert!(dev.vibrate(32).await.is_ok());
 
       // Lower half
       check_test_recv_value(
@@ -395,10 +372,7 @@ async fn test_client_range_limits() {
       .await;
 
       // Disable device
-      assert!(dev
-        .vibrate(0)
-        .await
-        .is_ok());
+      assert!(dev.vibrate(0).await.is_ok());
 
       // Lower half
       check_test_recv_value(

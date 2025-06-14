@@ -2,12 +2,7 @@ use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{
-  core::message::{
-    Endpoint,
-  },
-  server::message::{server_device_feature::ServerDeviceFeature},
-};
+use crate::{core::message::Endpoint, server::message::server_device_feature::ServerDeviceFeature};
 
 #[derive(Debug, Clone, Getters)]
 #[getset(get = "pub")]
@@ -30,7 +25,11 @@ impl BaseDeviceDefinition {
   }
 
   pub fn create_user_device_features(&self) -> Vec<ServerDeviceFeature> {
-    self.features.iter().map(|feature| feature.as_user_feature()).collect()
+    self
+      .features
+      .iter()
+      .map(|feature| feature.as_user_feature())
+      .collect()
   }
 }
 
@@ -68,7 +67,7 @@ pub struct UserDeviceDefinition {
   /// Given name of the device this instance represents.
   name: String,
   id: Uuid,
-  #[serde(skip_serializing_if = "Option::is_none", rename="base-id")]
+  #[serde(skip_serializing_if = "Option::is_none", rename = "base-id")]
   base_id: Option<Uuid>,
   /// Message attributes for this device instance.
   features: Vec<ServerDeviceFeature>,

@@ -249,10 +249,10 @@ impl SerialPortHardware {
         serial_read_thread(read_port, reader_sender, read_token);
         connected_clone.store(false, Ordering::Relaxed);
         if event_stream_clone.receiver_count() != 0 {
-          if let Err(err) = event_stream_clone
-          .send(HardwareEvent::Disconnected(
-            format!("{:?}", &port_name_clone)
-          )) {
+          if let Err(err) = event_stream_clone.send(HardwareEvent::Disconnected(format!(
+            "{:?}",
+            &port_name_clone
+          ))) {
             error!(
               "Cannot send notification, device object disappeared: {:?}",
               err

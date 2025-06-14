@@ -18,7 +18,6 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
   serde_yaml::from_str(&yaml_test_case).expect("Could not parse yaml for file.")
 }
 
-
 //#[test_case("test_cowgirl_cone_protocol.yaml" ; "The Cowgirl Cone Protocol")]
 #[test_case("test_activejoy_protocol.yaml" ; "ActiveJoy Protocol")]
 #[test_case("test_adrienlastic_protocol.yaml" ; "Adrien Lastic Protocol")]
@@ -250,8 +249,7 @@ async fn test_device_protocols_embedded_v4(test_file: &str) {
 #[tokio::test]
 async fn test_device_protocols_json_v4(test_file: &str) {
   tracing_subscriber::fmt::init();
-  util::device_test::client::client_v4::run_json_test_case(&load_test_case(test_file).await)
-    .await;
+  util::device_test::client::client_v4::run_json_test_case(&load_test_case(test_file).await).await;
 }
 
 //#[test_case("test_cowgirl_cone_protocol.yaml" ; "The Cowgirl Cone Protocol")]

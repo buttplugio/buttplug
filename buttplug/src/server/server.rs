@@ -253,8 +253,8 @@ impl ButtplugServer {
                     )
                     .unwrap()
                 });
-                debug!("Server returning: {:?}", out_msg);
-                out_msg
+              debug!("Server returning: {:?}", out_msg);
+              out_msg
             }
             .boxed()
           }
@@ -374,9 +374,9 @@ impl ButtplugServer {
     let ping_timer = self.ping_timer.clone();
 
     // Due to programming/spec errors in prior versions of the protocol, anything before v4 expected
-    // that it would be back a matching api version of the server. The correct response is to send back whatever the 
+    // that it would be back a matching api version of the server. The correct response is to send back whatever the
     let output_version = if (msg.api_version_major() as u32) < 4 {
-      msg.api_version_major() 
+      msg.api_version_major()
     } else {
       BUTTPLUG_CURRENT_API_MAJOR_VERSION
     };
@@ -439,5 +439,4 @@ mod test {
       reply
     );
   }
-
 }

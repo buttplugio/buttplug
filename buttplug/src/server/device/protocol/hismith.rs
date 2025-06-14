@@ -16,8 +16,8 @@ use crate::{
   },
 };
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
 use std::sync::Arc;
+use uuid::{uuid, Uuid};
 
 const HISMITH_PROTOCOL_UUID: Uuid = uuid!("e59f9c5d-bb4a-4a9c-ab57-0ceb43af1da7");
 
@@ -50,7 +50,12 @@ impl ProtocolIdentifier for HismithIdentifier {
     _: ProtocolCommunicationSpecifier,
   ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     let result = hardware
-      .read_value(&HardwareReadCmd::new(HISMITH_PROTOCOL_UUID, Endpoint::RxBLEModel, 128, 500))
+      .read_value(&HardwareReadCmd::new(
+        HISMITH_PROTOCOL_UUID,
+        Endpoint::RxBLEModel,
+        128,
+        500,
+      ))
       .await?;
 
     let identifier = result
@@ -101,7 +106,7 @@ impl ProtocolHandler for Hismith {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let idx: u8 = 0x04;
     let speed: u8 = speed as u8;
@@ -119,7 +124,7 @@ impl ProtocolHandler for Hismith {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Wildolo has a vibe at index 0 using id 4
     // The thrusting stroker has a vibe at index 1 using id 6 (and the weird 0xf0 off)

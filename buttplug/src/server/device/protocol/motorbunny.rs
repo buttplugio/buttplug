@@ -36,7 +36,7 @@ impl ProtocolHandler for Motorbunny {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut command_vec: Vec<u8>;
     if speed == 0 {
@@ -59,12 +59,12 @@ impl ProtocolHandler for Motorbunny {
     .into()])
   }
 
-fn handle_rotation_with_direction_cmd(
+  fn handle_rotation_with_direction_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
     speed: u32,
-    clockwise: bool
+    clockwise: bool,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut command_vec: Vec<u8>;
     if speed == 0 {

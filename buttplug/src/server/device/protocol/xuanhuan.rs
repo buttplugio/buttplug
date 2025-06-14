@@ -8,18 +8,26 @@
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-      configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-      hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-      protocol::{
-        generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier,
-        ProtocolInitializer,
-      },
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
     },
+  },
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
+use std::{
+  sync::{
+    atomic::{AtomicU8, Ordering},
+    Arc,
+  },
+  time::Duration,
+};
 use uuid::{uuid, Uuid};
-use std::{sync::{atomic::{AtomicU8, Ordering}, Arc}, time::Duration};
 
 const XUANHUAN_PROTOCOL_ID: Uuid = uuid!("e9f9f8ab-4fd5-4573-a4ec-ab542568849b");
 generic_protocol_initializer_setup!(Xuanhuan, "xuanhuan");
@@ -45,9 +53,14 @@ async fn vibration_update_handler(device: Arc<Hardware>, command_holder: Arc<Ato
     if speed != 0 {
       let current_command = vec![0x03, 0x02, 0x00, speed];
       if device
-         .write_value(&HardwareWriteCmd::new(XUANHUAN_PROTOCOL_ID, Endpoint::Tx, current_command, true))
-         .await
-         .is_err()
+        .write_value(&HardwareWriteCmd::new(
+          XUANHUAN_PROTOCOL_ID,
+          Endpoint::Tx,
+          current_command,
+          true,
+        ))
+        .await
+        .is_err()
       {
         break;
       }
@@ -77,7 +90,7 @@ impl ProtocolHandler for Xuanhuan {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let speed = speed as u8;
     self.current_command.store(speed, Ordering::Relaxed);

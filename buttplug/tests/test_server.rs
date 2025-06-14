@@ -22,7 +22,18 @@ use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError},
     message::{
-      ButtplugClientMessageV4, ButtplugMessageSpecVersion, ButtplugServerMessageV4, Endpoint, ErrorCode, PingV0, RequestServerInfoV4, ServerInfoV4, StartScanningV0, ValueCmdV4, BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION
+      ButtplugClientMessageV4,
+      ButtplugMessageSpecVersion,
+      ButtplugServerMessageV4,
+      Endpoint,
+      ErrorCode,
+      PingV0,
+      RequestServerInfoV4,
+      ServerInfoV4,
+      StartScanningV0,
+      ValueCmdV4,
+      BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+      BUTTPLUG_CURRENT_API_MINOR_VERSION,
     },
   },
   server::{
@@ -31,16 +42,25 @@ use buttplug::{
       ServerDeviceManagerBuilder,
     },
     message::{
-      checked_actuator_cmd::CheckedActuatorCmdV4, spec_enums::ButtplugCheckedClientMessageV4, ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageV2, ButtplugServerMessageV3, ButtplugServerMessageVariant, RequestServerInfoV1, ServerInfoV2, VibrateCmdV1
+      checked_actuator_cmd::CheckedActuatorCmdV4,
+      spec_enums::ButtplugCheckedClientMessageV4,
+      ButtplugClientMessageV3,
+      ButtplugClientMessageVariant,
+      ButtplugServerMessageV2,
+      ButtplugServerMessageV3,
+      ButtplugServerMessageVariant,
+      RequestServerInfoV1,
+      ServerInfoV2,
+      VibrateCmdV1,
     },
     ButtplugServer,
     ButtplugServerBuilder,
   },
 };
 use futures::{pin_mut, Stream, StreamExt};
-use uuid::Uuid;
 use std::time::Duration;
 use tokio::time::sleep;
+use uuid::Uuid;
 
 async fn setup_test_server(
   msg_union: ButtplugClientMessageV4,
@@ -58,7 +78,12 @@ async fn setup_test_server(
   {
     ButtplugServerMessageVariant::V4(ButtplugServerMessageV4::ServerInfo(s)) => assert_eq!(
       s,
-      ServerInfoV4::new("Buttplug Server", ButtplugMessageSpecVersion::Version4, 0, 0)
+      ServerInfoV4::new(
+        "Buttplug Server",
+        ButtplugMessageSpecVersion::Version4,
+        0,
+        0
+      )
     ),
     _ => panic!("Should've received ok"),
   }
@@ -67,7 +92,12 @@ async fn setup_test_server(
 
 #[tokio::test]
 async fn test_server_handshake() {
-  let msg = RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION).into();
+  let msg = RequestServerInfoV4::new(
+    "Test Client",
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+    BUTTPLUG_CURRENT_API_MINOR_VERSION,
+  )
+  .into();
   let (server, _recv) = setup_test_server(msg).await;
   assert!(server.connected());
 }
@@ -145,7 +175,11 @@ async fn test_ping_timeout() {
     .expect("Test, assuming infallible.");
   let recv = server.event_stream();
   pin_mut!(recv);
-  let msg = RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION);
+  let msg = RequestServerInfoV4::new(
+    "Test Client",
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+    BUTTPLUG_CURRENT_API_MINOR_VERSION,
+  );
   sleep(Duration::from_millis(150)).await;
   let reply = server
     .parse_checked_message(ButtplugCheckedClientMessageV4::RequestServerInfo(msg))
@@ -192,7 +226,11 @@ async fn test_device_stop_on_ping_timeout() {
   let recv = server.server_version_event_stream();
   pin_mut!(recv);
 
-  let msg = RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION);
+  let msg = RequestServerInfoV4::new(
+    "Test Client",
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+    BUTTPLUG_CURRENT_API_MINOR_VERSION,
+  );
   let mut reply = server
     .parse_checked_message(ButtplugCheckedClientMessageV4::from(msg))
     .await;
@@ -237,8 +275,14 @@ async fn test_device_stop_on_ping_timeout() {
   check_test_recv_value(
     &Duration::from_millis(150),
     &mut device,
-    HardwareCommand::Write(HardwareWriteCmd::new(Uuid::nil(), Endpoint::Tx, vec![0xF1, 64], false)),
-  ).await;
+    HardwareCommand::Write(HardwareWriteCmd::new(
+      Uuid::nil(),
+      Endpoint::Tx,
+      vec![0xF1, 64],
+      false,
+    )),
+  )
+  .await;
   /*
   // Wait out the ping, we should get a stop message.
   let mut i = 0u32;
@@ -257,7 +301,11 @@ async fn test_device_stop_on_ping_timeout() {
 
 #[tokio::test]
 async fn test_repeated_handshake() {
-  let msg = RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION);
+  let msg = RequestServerInfoV4::new(
+    "Test Client",
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+    BUTTPLUG_CURRENT_API_MINOR_VERSION,
+  );
 
   let (server, _recv) = setup_test_server((msg.clone()).into()).await;
   assert!(server.connected());
@@ -277,7 +325,11 @@ async fn test_repeated_handshake() {
 
 #[tokio::test]
 async fn test_invalid_device_index() {
-  let msg = RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION);
+  let msg = RequestServerInfoV4::new(
+    "Test Client",
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+    BUTTPLUG_CURRENT_API_MINOR_VERSION,
+  );
   let (server, _) = setup_test_server(msg.into()).await;
   let err = server
     .parse_message(ButtplugClientMessageVariant::V4(
@@ -307,7 +359,12 @@ async fn test_device_index_generation() {
   pin_mut!(recv);
   assert!(server
     .parse_checked_message(
-      RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION).into()
+      RequestServerInfoV4::new(
+        "Test Client",
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION
+      )
+      .into()
     )
     .await
     .is_ok());
@@ -352,7 +409,12 @@ async fn test_server_scanning_finished() {
   pin_mut!(recv);
   assert!(server
     .parse_checked_message(
-      RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION).into()
+      RequestServerInfoV4::new(
+        "Test Client",
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION
+      )
+      .into()
     )
     .await
     .is_ok());

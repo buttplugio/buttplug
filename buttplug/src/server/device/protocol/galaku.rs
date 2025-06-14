@@ -6,9 +6,9 @@
 // for full license information.
 
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
 use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::Arc;
+use uuid::{uuid, Uuid};
 
 use futures_util::future::BoxFuture;
 use futures_util::{future, FutureExt};
@@ -21,7 +21,11 @@ use crate::{
     configuration::UserDeviceIdentifier,
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition},
     hardware::{
-      Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd,
+      Hardware,
+      HardwareCommand,
+      HardwareEvent,
+      HardwareSubscribeCmd,
+      HardwareUnsubscribeCmd,
       HardwareWriteCmd,
     },
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
@@ -133,7 +137,7 @@ impl ProtocolHandler for Galaku {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if self.is_caiping_pump_device {
       let data: Vec<u8> = vec![
@@ -154,10 +158,27 @@ impl ProtocolHandler for Galaku {
         0,
         0,
       ];
-      Ok(vec![HardwareWriteCmd::new(GALAKU_PROTOCOL_UUID, Endpoint::Tx, data, false).into()])
+      Ok(vec![HardwareWriteCmd::new(
+        GALAKU_PROTOCOL_UUID,
+        Endpoint::Tx,
+        data,
+        false,
+      )
+      .into()])
     } else {
       self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
-      let data: Vec<u32> = vec![90, 0, 0, 1, 49, self.speeds[0].load(Ordering::Relaxed) as u32, self.speeds[1].load(Ordering::Relaxed) as u32, 0, 0, 0];
+      let data: Vec<u32> = vec![
+        90,
+        0,
+        0,
+        1,
+        49,
+        self.speeds[0].load(Ordering::Relaxed) as u32,
+        self.speeds[1].load(Ordering::Relaxed) as u32,
+        0,
+        0,
+        0,
+      ];
       Ok(vec![HardwareWriteCmd::new(
         GALAKU_PROTOCOL_UUID,
         Endpoint::Tx,
@@ -173,13 +194,16 @@ impl ProtocolHandler for Galaku {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType
+    sensor_type: SensorType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     match sensor_type {
       SensorType::Battery => {
         async move {
           device
-            .subscribe(&HardwareSubscribeCmd::new(feature_id, Endpoint::RxBLEBattery))
+            .subscribe(&HardwareSubscribeCmd::new(
+              feature_id,
+              Endpoint::RxBLEBattery,
+            ))
             .await?;
           Ok(())
         }
@@ -197,13 +221,16 @@ impl ProtocolHandler for Galaku {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType
+    sensor_type: SensorType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     match sensor_type {
       SensorType::Battery => {
         async move {
           device
-            .unsubscribe(&HardwareUnsubscribeCmd::new(feature_id, Endpoint::RxBLEBattery))
+            .unsubscribe(&HardwareUnsubscribeCmd::new(
+              feature_id,
+              Endpoint::RxBLEBattery,
+            ))
             .await?;
           Ok(())
         }
@@ -226,10 +253,18 @@ impl ProtocolHandler for Galaku {
     let mut device_notification_receiver = device.event_stream();
     async move {
       device
-        .subscribe(&HardwareSubscribeCmd::new(feature_id, Endpoint::RxBLEBattery))
+        .subscribe(&HardwareSubscribeCmd::new(
+          feature_id,
+          Endpoint::RxBLEBattery,
+        ))
         .await?;
       device
-        .write_value(&HardwareWriteCmd::new(feature_id, Endpoint::Tx, send_bytes(data), true))
+        .write_value(&HardwareWriteCmd::new(
+          feature_id,
+          Endpoint::Tx,
+          send_bytes(data),
+          true,
+        ))
         .await?;
       while let Ok(event) = device_notification_receiver.recv().await {
         return match event {

@@ -6,10 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  },
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
@@ -22,9 +19,9 @@ use crate::{
   },
 };
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
 use std::cmp::{max, min};
 use std::sync::Arc;
+use uuid::{uuid, Uuid};
 
 const LOOB_PROTOCOL_UUID: Uuid = uuid!("b3a02457-3bda-4c5b-8363-aead6eda74ae");
 generic_protocol_initializer_setup!(Loob, "loob");
@@ -39,7 +36,12 @@ impl ProtocolInitializer for LoobInitializer {
     hardware: Arc<Hardware>,
     _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let msg = HardwareWriteCmd::new(LOOB_PROTOCOL_UUID, Endpoint::Tx, vec![0x00, 0x01, 0x01, 0xf4], true);
+    let msg = HardwareWriteCmd::new(
+      LOOB_PROTOCOL_UUID,
+      Endpoint::Tx,
+      vec![0x00, 0x01, 0x01, 0xf4],
+      true,
+    );
     hardware.write_value(&msg).await?;
     Ok(Arc::new(Loob::default()))
   }
@@ -49,12 +51,12 @@ impl ProtocolInitializer for LoobInitializer {
 pub struct Loob {}
 
 impl ProtocolHandler for Loob {
-    fn handle_position_with_duration_cmd(
+  fn handle_position_with_duration_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,
     position: u32,
-    duration: u32,    
+    duration: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let pos: u16 = max(min(position as u16, 1000), 1);
     let time: u16 = max(duration as u16, 1);
@@ -62,6 +64,12 @@ impl ProtocolHandler for Loob {
     for b in time.to_be_bytes() {
       data.push(b);
     }
-    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(
+      feature_id,
+      Endpoint::Tx,
+      data,
+      false,
+    )
+    .into()])
   }
 }

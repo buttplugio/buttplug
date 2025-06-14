@@ -4,15 +4,15 @@ mod client_device_message_attributes;
 mod device_added;
 mod device_list;
 mod device_message_info;
+mod raw_read_cmd;
+mod raw_subscribe_cmd;
+mod raw_unsubscribe_cmd;
+mod raw_write_cmd;
 mod rssi_level_cmd;
 mod rssi_level_reading;
 mod server_device_message_attributes;
 mod server_info;
 mod spec_enums;
-mod raw_read_cmd;
-mod raw_subscribe_cmd;
-mod raw_unsubscribe_cmd;
-mod raw_write_cmd;
 
 pub use {
   battery_level_cmd::BatteryLevelCmdV2,
@@ -36,5 +36,5 @@ pub use {
     ServerGenericDeviceMessageAttributesV2,
   },
   server_info::ServerInfoV2,
-  spec_enums::{ButtplugClientMessageV2, ButtplugServerMessageV2, ButtplugDeviceMessageNameV2}
+  spec_enums::{ButtplugClientMessageV2, ButtplugDeviceMessageNameV2, ButtplugServerMessageV2},
 };

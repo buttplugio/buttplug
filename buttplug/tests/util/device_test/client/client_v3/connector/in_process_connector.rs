@@ -20,13 +20,15 @@ use buttplug::{
   util::async_manager,
 };
 use futures::{
-  future::{self, BoxFuture, FutureExt}, pin_mut, StreamExt
+  future::{self, BoxFuture, FutureExt},
+  pin_mut,
+  StreamExt,
 };
+use log::info;
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
-use log::info;
 use tokio::sync::mpsc::{channel, Sender};
 use tracing_futures::Instrument;
 

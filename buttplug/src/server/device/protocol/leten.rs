@@ -20,12 +20,12 @@ use crate::{
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
 use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
 };
 use std::time::Duration;
+use uuid::{uuid, Uuid};
 
 const LETEN_PROTOCOL_UUID: Uuid = uuid!("7d899f44-2676-4a00-9c68-0c800055ee2a");
 
@@ -43,7 +43,12 @@ impl ProtocolInitializer for LetenInitializer {
     // There's a more complex auth flow that the app "sometimes" goes through where it
     // sends [0x04, 0x00] and waits for [0x01] on Rx before calling [0x04, 0x01]
     hardware
-      .write_value(&HardwareWriteCmd::new(LETEN_PROTOCOL_UUID, Endpoint::Tx, vec![0x04, 0x01], true))
+      .write_value(&HardwareWriteCmd::new(
+        LETEN_PROTOCOL_UUID,
+        Endpoint::Tx,
+        vec![0x04, 0x01],
+        true,
+      ))
       .await?;
     // Sometimes sending this causes Rx to receive [0x0a]
     Ok(Arc::new(Leten::new(hardware)))
@@ -97,7 +102,7 @@ impl ProtocolHandler for Leten {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_command = self.current_command.clone();
     current_command.store(speed as u8, Ordering::Relaxed);

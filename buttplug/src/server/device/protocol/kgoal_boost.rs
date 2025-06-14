@@ -25,9 +25,9 @@ use futures::{
   FutureExt,
   StreamExt,
 };
-use uuid::Uuid;
 use std::{pin::Pin, sync::Arc};
 use tokio::sync::broadcast;
+use uuid::Uuid;
 
 generic_protocol_setup!(KGoalBoost, "kgoal-boost");
 
@@ -59,7 +59,7 @@ impl ProtocolHandler for KGoalBoost {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType
+    sensor_type: SensorType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     if self.subscribed_sensors.contains(&feature_index) {
       return future::ready(Ok(())).boxed();
@@ -100,10 +100,7 @@ impl ProtocolHandler for KGoalBoost {
                 let unnormalized = (data[5] as i32) << 8 | data[6] as i32;
                 if stream_sensors.contains(&0)
                   && sender
-                    .send(
-                      SensorReadingV4::new(0, 0, SensorType::Pressure, vec![normalized])
-                        .into(),
-                    )
+                    .send(SensorReadingV4::new(0, 0, SensorType::Pressure, vec![normalized]).into())
                     .is_err()
                 {
                   debug!(
@@ -114,13 +111,7 @@ impl ProtocolHandler for KGoalBoost {
                 if stream_sensors.contains(&1)
                   && sender
                     .send(
-                      SensorReadingV4::new(
-                        0,
-                        0,
-                        SensorType::Pressure,
-                        vec![unnormalized],
-                      )
-                      .into(),
+                      SensorReadingV4::new(0, 0, SensorType::Pressure, vec![unnormalized]).into(),
                     )
                     .is_err()
                 {
@@ -145,7 +136,7 @@ impl ProtocolHandler for KGoalBoost {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType
+    sensor_type: SensorType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     if !self.subscribed_sensors.contains(&feature_index) {
       return future::ready(Ok(())).boxed();
@@ -157,7 +148,10 @@ impl ProtocolHandler for KGoalBoost {
       sensors.remove(&feature_index);
       if sensors.is_empty() {
         device
-          .unsubscribe(&HardwareUnsubscribeCmd::new(feature_id, Endpoint::RxPressure))
+          .unsubscribe(&HardwareUnsubscribeCmd::new(
+            feature_id,
+            Endpoint::RxPressure,
+          ))
           .await?;
       }
       Ok(())

@@ -9,11 +9,10 @@ use uuid::Uuid;
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::
-    device::{
-      hardware::{HardwareCommand, HardwareWriteCmd},
-      protocol::{generic_protocol_setup, ProtocolHandler},
-    },
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
 
 generic_protocol_setup!(Synchro, "synchro");
@@ -31,7 +30,7 @@ impl ProtocolHandler for Synchro {
     feature_index: u32,
     feature_id: Uuid,
     speed: u32,
-    clockwise: bool
+    clockwise: bool,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
@@ -39,12 +38,7 @@ impl ProtocolHandler for Synchro {
       vec![
         0xa1,
         0x01,
-        speed as u8
-          | if clockwise || speed == 0 {
-            0x00
-          } else {
-            0x80
-          },
+        speed as u8 | if clockwise || speed == 0 { 0x00 } else { 0x80 },
         0x77,
         0x55,
       ],

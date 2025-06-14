@@ -21,12 +21,12 @@ generic_protocol_setup!(FleshyThrust, "fleshy-thrust");
 pub struct FleshyThrust {}
 
 impl ProtocolHandler for FleshyThrust {
-    fn handle_position_with_duration_cmd(
+  fn handle_position_with_duration_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,
     position: u32,
-    duration: u32,    
+    duration: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,

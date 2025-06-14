@@ -18,7 +18,6 @@ use crate::{
   util::async_manager,
 };
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
 use std::{
   sync::{
     atomic::{AtomicBool, AtomicU16, Ordering},
@@ -27,6 +26,7 @@ use std::{
   time::Duration,
 };
 use tokio::sync::Notify;
+use uuid::{uuid, Uuid};
 
 const NINTENDO_JOYCON_PROTOCOL_UUID: Uuid = uuid!("de9cce17-abb7-4ad5-9754-f1872733c197");
 
@@ -64,7 +64,12 @@ async fn send_command_raw(
 
   // send command
   device
-    .write_value(&HardwareWriteCmd::new(NINTENDO_JOYCON_PROTOCOL_UUID, Endpoint::Tx, buf.to_vec(), false))
+    .write_value(&HardwareWriteCmd::new(
+      NINTENDO_JOYCON_PROTOCOL_UUID,
+      Endpoint::Tx,
+      buf.to_vec(),
+      false,
+    ))
     .await
 }
 
@@ -304,7 +309,7 @@ impl ProtocolHandler for NintendoJoycon {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speed_val.store(speed as u16, Ordering::Relaxed);
     Ok(vec![])

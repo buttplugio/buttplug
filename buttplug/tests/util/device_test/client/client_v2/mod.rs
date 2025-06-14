@@ -25,15 +25,13 @@ use super::super::{
   TestCommand,
 };
 use futures::StreamExt;
-use std::{sync::Arc, time::Duration};
 use log::*;
+use std::{sync::Arc, time::Duration};
 
 async fn run_test_client_command(command: &TestClientCommand, device: &Arc<ButtplugClientDevice>) {
   use TestClientCommand::*;
   match command {
-    Scalar(msg) => {
-      
-    }
+    Scalar(msg) => {}
     Vibrate(msg) => {
       device
         .vibrate(VibrateCommand::SpeedMap(

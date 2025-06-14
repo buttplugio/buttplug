@@ -185,11 +185,7 @@ impl AsyncWrite for HidAsyncDevice {
             //debug!("Wrote: {:?}", &buf[0..max_len]);
           }
         }
-        Err(e) => {
-          return Poll::Ready(Err(io::Error::other(
-            format!("Mutex broken: {e:?}"),
-          )))
-        }
+        Err(e) => return Poll::Ready(Err(io::Error::other(format!("Mutex broken: {e:?}")))),
       }
       buf = &buf[max_len..];
       if buf.is_empty() {
@@ -274,9 +270,7 @@ impl AsyncRead for HidAsyncDevice {
             }
             Err(e) => match e {
               mpsc::TryRecvError::Disconnected => {
-                return Poll::Ready(Err(io::Error::other(
-                  "Inner channel dead",
-                )));
+                return Poll::Ready(Err(io::Error::other("Inner channel dead")));
               }
               mpsc::TryRecvError::Empty => {
                 return Poll::Pending;

@@ -6,25 +6,28 @@
 // for full license information.
 
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  },
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-      configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-      hardware::{
-        Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd,
-        HardwareWriteCmd,
-      },
-      protocol::{
-        generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier,
-        ProtocolInitializer,
-      },
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    hardware::{
+      Hardware,
+      HardwareCommand,
+      HardwareEvent,
+      HardwareSubscribeCmd,
+      HardwareUnsubscribeCmd,
+      HardwareWriteCmd,
     },
+    protocol::{
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+    },
+  },
 };
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
 use std::sync::Arc;
+use uuid::{uuid, Uuid};
 
 const LELO_HARMONY_PROTOCOL_UUID: Uuid = uuid!("220e180a-e6d5-4fd1-963e-43a6f990b717");
 generic_protocol_initializer_setup!(LeloHarmony, "lelo-harmony");
@@ -51,7 +54,10 @@ impl ProtocolInitializer for LeloHarmonyInitializer {
     // * If it returns 0x00,00,00,00,00,00,00,00 the connection is authorised
     let mut event_receiver = hardware.event_stream();
     hardware
-      .subscribe(&HardwareSubscribeCmd::new(LELO_HARMONY_PROTOCOL_UUID, Endpoint::Whitelist))
+      .subscribe(&HardwareSubscribeCmd::new(
+        LELO_HARMONY_PROTOCOL_UUID,
+        Endpoint::Whitelist,
+      ))
       .await?;
 
     loop {
@@ -68,15 +74,26 @@ impl ProtocolInitializer for LeloHarmonyInitializer {
           debug!("Lelo Harmony gave us a password: {:?}", n);
           // Can't send whilst subscribed
           hardware
-            .unsubscribe(&HardwareUnsubscribeCmd::new(LELO_HARMONY_PROTOCOL_UUID, Endpoint::Whitelist))
+            .unsubscribe(&HardwareUnsubscribeCmd::new(
+              LELO_HARMONY_PROTOCOL_UUID,
+              Endpoint::Whitelist,
+            ))
             .await?;
           // Send with response
           hardware
-            .write_value(&HardwareWriteCmd::new(LELO_HARMONY_PROTOCOL_UUID, Endpoint::Whitelist, n, true))
+            .write_value(&HardwareWriteCmd::new(
+              LELO_HARMONY_PROTOCOL_UUID,
+              Endpoint::Whitelist,
+              n,
+              true,
+            ))
             .await?;
           // Get back to the loop
           hardware
-            .subscribe(&HardwareSubscribeCmd::new(LELO_HARMONY_PROTOCOL_UUID, Endpoint::Whitelist))
+            .subscribe(&HardwareSubscribeCmd::new(
+              LELO_HARMONY_PROTOCOL_UUID,
+              Endpoint::Whitelist,
+            ))
             .await?;
         }
       } else {
@@ -125,7 +142,7 @@ impl ProtocolHandler for LeloHarmony {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.handle_input_cmd(feature_index, feature_id, speed)
   }
@@ -134,7 +151,7 @@ impl ProtocolHandler for LeloHarmony {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.handle_input_cmd(feature_index, feature_id, speed)
   }

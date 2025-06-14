@@ -21,7 +21,14 @@ use buttplug::{
       ButtplugConnectorError,
     },
     message::{
-      serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage}, ButtplugClientMessageV4, ButtplugMessage, DeviceListV4, RequestServerInfoV4, ServerInfoV4, BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION
+      serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
+      ButtplugClientMessageV4,
+      ButtplugMessage,
+      DeviceListV4,
+      RequestServerInfoV4,
+      ServerInfoV4,
+      BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+      BUTTPLUG_CURRENT_API_MINOR_VERSION,
     },
   },
   server::{
@@ -39,13 +46,13 @@ use futures::{
   select,
   FutureExt,
 };
+use log::*;
 use std::sync::Arc;
 use tokio::sync::{
   mpsc::{channel, Receiver, Sender},
   Mutex,
   Notify,
 };
-use log::*;
 
 struct ChannelTransport {
   outside_receiver: Arc<Mutex<Option<Receiver<ButtplugTransportIncomingMessage>>>>,
@@ -145,7 +152,7 @@ impl ChannelClientTestHelper {
     let rsi_setup_msg = client_serializer.serialize(&[RequestServerInfoV4::new(
       "Test client",
       BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-      BUTTPLUG_CURRENT_API_MINOR_VERSION
+      BUTTPLUG_CURRENT_API_MINOR_VERSION,
     )
     .into()]);
     let server_serializer = ButtplugServerJSONSerializer::default();

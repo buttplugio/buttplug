@@ -20,8 +20,8 @@ use crate::{
   util::sleep,
 };
 use async_trait::async_trait;
-use uuid::Uuid;
 use std::{sync::Arc, time::Duration};
+use uuid::Uuid;
 
 generic_protocol_initializer_setup!(CowgirlCone, "cowgirl-cone");
 
@@ -60,7 +60,7 @@ impl ProtocolHandler for CowgirlCone {
     &self,
     _feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,

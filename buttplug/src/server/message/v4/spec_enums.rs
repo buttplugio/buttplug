@@ -4,16 +4,38 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      ButtplugClientMessageV4, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, PingV0, RequestDeviceListV0, RequestServerInfoV4, StartScanningV0, StopAllDevicesV0, StopDeviceCmdV0, StopScanningV0
+      ButtplugClientMessageV4,
+      ButtplugDeviceMessage,
+      ButtplugMessage,
+      ButtplugMessageFinalizer,
+      ButtplugMessageValidator,
+      PingV0,
+      RequestDeviceListV0,
+      RequestServerInfoV4,
+      StartScanningV0,
+      StopAllDevicesV0,
+      StopDeviceCmdV0,
+      StopScanningV0,
     },
   },
   server::message::{
-    checked_raw_cmd::CheckedRawCmdV4, server_device_attributes::TryFromClientMessage, v0::ButtplugClientMessageV0, v1::ButtplugClientMessageV1, v2::ButtplugClientMessageV2, v3::ButtplugClientMessageV3, ButtplugClientMessageVariant, RequestServerInfoV1, ServerDeviceAttributes, TryFromDeviceAttributes
+    checked_raw_cmd::CheckedRawCmdV4,
+    server_device_attributes::TryFromClientMessage,
+    v0::ButtplugClientMessageV0,
+    v1::ButtplugClientMessageV1,
+    v2::ButtplugClientMessageV2,
+    v3::ButtplugClientMessageV3,
+    ButtplugClientMessageVariant,
+    RequestServerInfoV1,
+    ServerDeviceAttributes,
+    TryFromDeviceAttributes,
   },
 };
 
 use super::{
-  checked_sensor_cmd::CheckedSensorCmdV4, checked_actuator_cmd::CheckedActuatorCmdV4, checked_actuator_vec_cmd::CheckedActuatorVecCmdV4,
+  checked_actuator_cmd::CheckedActuatorCmdV4,
+  checked_actuator_vec_cmd::CheckedActuatorVecCmdV4,
+  checked_sensor_cmd::CheckedSensorCmdV4,
 };
 
 /// An CheckedClientMessage has had its contents verified and should need no further error/validity
@@ -122,7 +144,7 @@ impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMess
             ButtplugDeviceError::DeviceNotAvailable(m.device_index()),
           ))
         }
-      },
+      }
     }
   }
 }
@@ -144,9 +166,9 @@ impl TryFrom<ButtplugClientMessageV3> for ButtplugCheckedClientMessageV4 {
   fn try_from(value: ButtplugClientMessageV3) -> Result<Self, Self::Error> {
     match value {
       ButtplugClientMessageV3::Ping(m) => Ok(ButtplugCheckedClientMessageV4::Ping(m.clone())),
-      ButtplugClientMessageV3::RequestServerInfo(m) => {
-        Ok(ButtplugCheckedClientMessageV4::RequestServerInfo(RequestServerInfoV4::from(m)))
-      }
+      ButtplugClientMessageV3::RequestServerInfo(m) => Ok(
+        ButtplugCheckedClientMessageV4::RequestServerInfo(RequestServerInfoV4::from(m)),
+      ),
       ButtplugClientMessageV3::StartScanning(m) => {
         Ok(ButtplugCheckedClientMessageV4::StartScanning(m.clone()))
       }
@@ -290,7 +312,7 @@ impl TryFromClientMessage<ButtplugClientMessageV3> for ButtplugCheckedClientMess
         // Always reject v3 sub/unsub. It was never implemented or indexed correctly.
         Err(ButtplugError::from(
           ButtplugDeviceError::MessageNotSupported("SensorUnsubscribeCmdV3".to_owned()),
-        ))      
+        ))
       }
       ButtplugClientMessageV3::RawReadCmd(m) => {
         Ok(check_device_index_and_convert::<_, CheckedRawCmdV4>(m, features)?.into())
@@ -396,7 +418,7 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceCommandMessageUni
   }
 }
 
- #[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display)]
+#[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display)]
 pub enum ButtplugDeviceMessageNameV4 {
   StopDeviceCmd,
   RawCmd,

@@ -9,10 +9,10 @@ use uuid::Uuid;
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }},
+  },
 };
 
 generic_protocol_setup!(Cachito, "cachito");
@@ -29,12 +29,17 @@ impl ProtocolHandler for Cachito {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
       Endpoint::Tx,
-      vec![2u8 + (feature_index as u8), 1u8 + feature_index as u8, speed as u8, 0u8],
+      vec![
+        2u8 + (feature_index as u8),
+        1u8 + feature_index as u8,
+        speed as u8,
+        0u8,
+      ],
       false,
     )
     .into()])

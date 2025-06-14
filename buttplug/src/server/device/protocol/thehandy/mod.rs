@@ -9,20 +9,21 @@ use self::handyplug::Ping;
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::
-    device::{
-      configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-      hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-      protocol::{
-        generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier,
-        ProtocolInitializer,
-      },
+  server::device::{
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+    },
   },
 };
 use async_trait::async_trait;
 use prost::Message;
-use uuid::{uuid, Uuid};
 use std::sync::Arc;
+use uuid::{uuid, Uuid};
 
 mod protocomm {
   include!("./protocomm.rs");
@@ -116,7 +117,7 @@ impl ProtocolHandler for TheHandy {
       .encode(&mut ping_buf)
       .expect("Infallible encode.");
 
-    super::ProtocolKeepaliveStrategy::RepeatPacketStrategy(HardwareWriteCmd::new( 
+    super::ProtocolKeepaliveStrategy::RepeatPacketStrategy(HardwareWriteCmd::new(
       THEHANDY_PROTOCOL_UUID,
       Endpoint::Tx,
       ping_buf,
@@ -124,12 +125,12 @@ impl ProtocolHandler for TheHandy {
     ))
   }
 
-    fn handle_position_with_duration_cmd(
+  fn handle_position_with_duration_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,
     position: u32,
-    duration: u32,    
+    duration: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // What is "How not to implement a command structure for your device that does one thing", Alex?
 
@@ -171,8 +172,12 @@ impl ProtocolHandler for TheHandy {
     linear_payload
       .encode(&mut linear_buf)
       .expect("Infallible encode.");
-    Ok(vec![
-      HardwareWriteCmd::new(THEHANDY_PROTOCOL_UUID, Endpoint::Tx, linear_buf, true).into()
-    ])
+    Ok(vec![HardwareWriteCmd::new(
+      THEHANDY_PROTOCOL_UUID,
+      Endpoint::Tx,
+      linear_buf,
+      true,
+    )
+    .into()])
   }
 }

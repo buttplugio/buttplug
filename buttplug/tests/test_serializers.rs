@@ -13,7 +13,12 @@ use buttplug::{
     connector::transport::ButtplugTransportIncomingMessage,
     errors::{ButtplugError, ButtplugUnknownError},
     message::{
-      serializer::ButtplugSerializedMessage, ButtplugClientMessageV4, ButtplugMessage, ButtplugServerMessageV4, ErrorV0, BUTTPLUG_CURRENT_API_MAJOR_VERSION
+      serializer::ButtplugSerializedMessage,
+      ButtplugClientMessageV4,
+      ButtplugMessage,
+      ButtplugServerMessageV4,
+      ErrorV0,
+      BUTTPLUG_CURRENT_API_MAJOR_VERSION,
     },
   },
   server::message::{

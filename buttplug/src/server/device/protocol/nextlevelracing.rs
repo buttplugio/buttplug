@@ -12,7 +12,7 @@ use crate::{
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }
+  },
 };
 
 generic_protocol_setup!(NextLevelRacing, "nextlevelracing");
@@ -25,7 +25,7 @@ impl ProtocolHandler for NextLevelRacing {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,

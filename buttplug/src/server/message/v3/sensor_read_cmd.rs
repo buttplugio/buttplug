@@ -9,7 +9,12 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, SensorCommandType, SensorType
+      ButtplugDeviceMessage,
+      ButtplugMessage,
+      ButtplugMessageFinalizer,
+      ButtplugMessageValidator,
+      SensorCommandType,
+      SensorType,
     },
   },
   server::message::{
@@ -63,22 +68,20 @@ impl TryFromDeviceAttributes<SensorReadCmdV3> for CheckedSensorCmdV4 {
     features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
     // Reject any SensorRead that's not a battery, we never supported sensors otherwise in v3.
-    if msg.sensor_type != SensorType::Battery {  
+    if msg.sensor_type != SensorType::Battery {
       Err(ButtplugError::from(
         ButtplugDeviceError::MessageNotSupported("SensorReadCmdV3".to_owned()),
       ))
-    } else if let Some((feature_index, feature)) = features
-      .features()
-      .iter()
-      .enumerate()
-      .find(|(_, p)| {
+    } else if let Some((feature_index, feature)) =
+      features.features().iter().enumerate().find(|(_, p)| {
         if let Some(sensor_map) = p.sensor() {
           if sensor_map.contains_key(&SensorType::Battery) {
             return true;
           }
         }
         false
-      }) {
+      })
+    {
       Ok(CheckedSensorCmdV4::new(
         msg.device_index(),
         feature_index as u32,

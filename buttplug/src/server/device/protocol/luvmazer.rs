@@ -8,10 +8,7 @@
 use uuid::Uuid;
 
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  },
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::ProtocolHandler,
@@ -23,19 +20,18 @@ use super::generic_protocol_setup;
 generic_protocol_setup!(Luvmazer, "luvmazer");
 
 #[derive(Default)]
-pub struct Luvmazer {
-}
+pub struct Luvmazer {}
 
 impl ProtocolHandler for Luvmazer {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-    fn handle_actuator_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
@@ -50,7 +46,7 @@ impl ProtocolHandler for Luvmazer {
     &self,
     _feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,

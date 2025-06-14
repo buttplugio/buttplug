@@ -16,18 +16,24 @@ use crate::core::message::{
 use getset::CopyGetters;
 use serde::{Deserialize, Serialize};
 
-
-#[derive(
-  Debug, Display, PartialEq, Eq, Clone, Serialize, Deserialize, Hash, Copy
-)]
+#[derive(Debug, Display, PartialEq, Eq, Clone, Serialize, Deserialize, Hash, Copy)]
 pub enum SensorCommandType {
   Read,
   Subscribe,
-  Unsubscribe
+  Unsubscribe,
 }
 
 #[derive(
-  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Copy, CopyGetters, Serialize, Deserialize
+  Debug,
+  ButtplugDeviceMessage,
+  ButtplugMessageFinalizer,
+  PartialEq,
+  Eq,
+  Clone,
+  Copy,
+  CopyGetters,
+  Serialize,
+  Deserialize,
 )]
 pub struct SensorCmdV4 {
   #[serde(rename = "Id")]
@@ -46,13 +52,18 @@ pub struct SensorCmdV4 {
 }
 
 impl SensorCmdV4 {
-  pub fn new(device_index: u32, feature_index: u32, sensor_type: SensorType, sensor_command_type: SensorCommandType) -> Self {
+  pub fn new(
+    device_index: u32,
+    feature_index: u32,
+    sensor_type: SensorType,
+    sensor_command_type: SensorCommandType,
+  ) -> Self {
     Self {
       id: 1,
       device_index,
       feature_index,
       sensor_type,
-      sensor_command_type
+      sensor_command_type,
     }
   }
 }

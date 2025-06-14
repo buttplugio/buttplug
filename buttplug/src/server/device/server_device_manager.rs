@@ -262,9 +262,7 @@ impl ServerDeviceManager {
         let devices = self
           .devices
           .iter()
-          .map(|device| {
-            device.value().as_device_message_info(*device.key())
-          })
+          .map(|device| device.value().as_device_message_info(*device.key()))
           .collect();
         let mut device_list = DeviceListV4::new(devices);
         device_list.set_id(msg.id());

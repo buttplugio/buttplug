@@ -35,14 +35,14 @@ use futures::{
   future::{self, BoxFuture},
   Stream,
 };
+use log::*;
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
 use thiserror::Error;
 use tokio::sync::{broadcast, mpsc, Mutex};
-use log::*;
-use tracing::{span, Span, Level};
+use tracing::{span, Level, Span};
 use tracing_futures::Instrument;
 
 /// Result type used for public APIs.

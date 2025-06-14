@@ -29,10 +29,10 @@ impl ProtocolHandler for DeepSire {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new( 
-      feature_id,      
+    Ok(vec![HardwareWriteCmd::new(
+      feature_id,
       Endpoint::Tx,
       vec![0x55, 0x04, 0x01, 0x00, 0x00, speed as u8, 0xAA],
       false,

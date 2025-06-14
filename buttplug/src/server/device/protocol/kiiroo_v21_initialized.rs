@@ -7,25 +7,24 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::
-    device::{
-      configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-      hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-      protocol::{
-        fleshlight_launch_helper::calculate_speed,
-        generic_protocol_initializer_setup,
-        ProtocolHandler,
-        ProtocolIdentifier,
-        ProtocolInitializer,
-      },
+  server::device::{
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{
+      fleshlight_launch_helper::calculate_speed,
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
     },
+  },
 };
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
 use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
 };
+use uuid::{uuid, Uuid};
 
 const KIIROO_V21_INITIALIZED_PROTOCOL_UUID: Uuid = uuid!("22329023-5464-41b6-a0de-673d7e993055");
 
@@ -76,7 +75,7 @@ impl ProtocolHandler for KiirooV21Initialized {
     &self,
     _feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
@@ -87,12 +86,12 @@ impl ProtocolHandler for KiirooV21Initialized {
     .into()])
   }
 
-    fn handle_position_with_duration_cmd(
+  fn handle_position_with_duration_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,
     position: u32,
-    duration: u32,    
+    duration: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
@@ -100,7 +99,9 @@ impl ProtocolHandler for KiirooV21Initialized {
     let distance = (previous_position as f64 - (position as f64)).abs() / 99f64;
     let calculated_speed = (calculate_speed(distance, duration) * 99f64) as u8;
 
-    self.previous_position.store(position as u8, Ordering::Relaxed);
+    self
+      .previous_position
+      .store(position as u8, Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
       Endpoint::Tx,
@@ -109,5 +110,4 @@ impl ProtocolHandler for KiirooV21Initialized {
     )
     .into()])
   }
-
 }

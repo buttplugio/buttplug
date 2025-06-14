@@ -29,7 +29,7 @@ impl ProtocolHandler for SvakomV2 {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if feature_index == 1 {
       Ok(vec![HardwareWriteCmd::new(

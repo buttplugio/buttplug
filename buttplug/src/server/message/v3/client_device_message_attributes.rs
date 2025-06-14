@@ -6,14 +6,14 @@
 // for full license information.
 
 use crate::{
-  core::message::{
-    ActuatorType, DeviceFeature, SensorCommandType, SensorType
-  },
+  core::message::{ActuatorType, DeviceFeature, SensorCommandType, SensorType},
   server::message::{
-    v1::NullDeviceMessageAttributesV1, v2::{
-      ClientDeviceMessageAttributesV2, GenericDeviceMessageAttributesV2,
+    v1::NullDeviceMessageAttributesV1,
+    v2::{
+      ClientDeviceMessageAttributesV2,
+      GenericDeviceMessageAttributesV2,
       RawDeviceMessageAttributesV2,
-    }
+    },
   },
 };
 use getset::{Getters, MutGetters, Setters};
@@ -273,10 +273,15 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
     let scalar_attrs: Vec<ClientGenericDeviceMessageAttributesV3> = features
       .iter()
       .flat_map(|feature| {
-        let mut actuator_vec = vec!();
+        let mut actuator_vec = vec![];
         if let Some(actuator_map) = feature.actuator() {
           for (actuator_type, actuator) in actuator_map {
-            if ![ActuatorType::PositionWithDuration, ActuatorType::RotateWithDirection].contains(actuator_type) {
+            if ![
+              ActuatorType::PositionWithDuration,
+              ActuatorType::RotateWithDirection,
+            ]
+            .contains(actuator_type)
+            {
               let actuator_type = *actuator_type;
               let attrs = ClientGenericDeviceMessageAttributesV3 {
                 feature_descriptor: feature.description().to_owned(),
@@ -297,7 +302,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
     let rotate_attrs: Vec<ClientGenericDeviceMessageAttributesV3> = features
       .iter()
       .flat_map(|feature| {
-        let mut actuator_vec = vec!();
+        let mut actuator_vec = vec![];
         if let Some(actuator_map) = feature.actuator() {
           for (actuator_type, actuator) in actuator_map {
             if *actuator_type == ActuatorType::RotateWithDirection {
@@ -319,7 +324,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
     let linear_attrs: Vec<ClientGenericDeviceMessageAttributesV3> = features
       .iter()
       .flat_map(|feature| {
-        let mut actuator_vec = vec!();
+        let mut actuator_vec = vec![];
         if let Some(actuator_map) = feature.actuator() {
           for (actuator_type, actuator) in actuator_map {
             if *actuator_type == ActuatorType::PositionWithDuration {
@@ -342,12 +347,14 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
       let attrs: Vec<SensorDeviceMessageAttributesV3> = features
         .iter()
         .map(|feature| {
-          let mut sensor_vec = vec!();
+          let mut sensor_vec = vec![];
           if let Some(sensor_map) = feature.sensor() {
             for (sensor_type, sensor) in sensor_map {
               // Only convert Battery backwards. Other sensors weren't really built for v3 and we
               // never recommended using them or implemented much for them.
-              if *sensor_type == SensorType::Battery && sensor.sensor_commands().contains(&SensorCommandType::Read) {
+              if *sensor_type == SensorType::Battery
+                && sensor.sensor_commands().contains(&SensorCommandType::Read)
+              {
                 sensor_vec.push(SensorDeviceMessageAttributesV3 {
                   feature_descriptor: feature.description().to_owned(),
                   sensor_type: *sensor_type,
@@ -378,9 +385,21 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
       });
 
     Self {
-      scalar_cmd: if scalar_attrs.is_empty() { None } else { Some(scalar_attrs) },
-      rotate_cmd: if rotate_attrs.is_empty() { None } else { Some(rotate_attrs) },
-      linear_cmd: if linear_attrs.is_empty() { None } else { Some(linear_attrs) },
+      scalar_cmd: if scalar_attrs.is_empty() {
+        None
+      } else {
+        Some(scalar_attrs)
+      },
+      rotate_cmd: if rotate_attrs.is_empty() {
+        None
+      } else {
+        Some(rotate_attrs)
+      },
+      linear_cmd: if linear_attrs.is_empty() {
+        None
+      } else {
+        Some(linear_attrs)
+      },
       sensor_read_cmd: sensor_filter,
       sensor_subscribe_cmd: None,
       raw_read_cmd: raw_attrs.clone(),

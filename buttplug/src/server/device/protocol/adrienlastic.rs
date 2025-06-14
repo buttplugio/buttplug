@@ -9,10 +9,10 @@ use uuid::Uuid;
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }},
+  },
 };
 
 generic_protocol_setup!(AdrienLastic, "adrienlastic");
@@ -29,7 +29,7 @@ impl ProtocolHandler for AdrienLastic {
     &self,
     _feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,

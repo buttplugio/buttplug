@@ -10,29 +10,24 @@ use std::sync::atomic::{AtomicU8, Ordering};
 use uuid::{uuid, Uuid};
 
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::{
-      Endpoint,
-    },
-  },
-  server::{device::{
+  core::{errors::ButtplugDeviceError, message::Endpoint},
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }},
+  },
 };
 
 const BANANASOME_PROTOCOL_UUID: Uuid = uuid!("a0a2e5f8-3692-4f6b-8add-043513ed86f6");
 generic_protocol_setup!(Bananasome, "bananasome");
 
 pub struct Bananasome {
-  current_commands: [AtomicU8; 3]
+  current_commands: [AtomicU8; 3],
 }
 
 impl Default for Bananasome {
   fn default() -> Self {
     Self {
-      current_commands: [AtomicU8::new(0), AtomicU8::new(0), AtomicU8::new(0)]
+      current_commands: [AtomicU8::new(0), AtomicU8::new(0), AtomicU8::new(0)],
     }
   }
 }
@@ -69,7 +64,7 @@ impl ProtocolHandler for Bananasome {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(self.hardware_command(feature_index, speed))
   }
@@ -78,7 +73,7 @@ impl ProtocolHandler for Bananasome {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(self.hardware_command(feature_index, speed))
   }

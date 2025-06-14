@@ -36,7 +36,9 @@ use super::errors::ButtplugError;
 
 /// Enum of possible [Buttplug Message
 /// Spec](https://buttplug-spec.docs.buttplug.io) versions.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Display, Serialize_repr, Deserialize_repr)]
+#[derive(
+  Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Display, Serialize_repr, Deserialize_repr,
+)]
 #[repr(u32)]
 pub enum ButtplugMessageSpecVersion {
   Version0 = 0,

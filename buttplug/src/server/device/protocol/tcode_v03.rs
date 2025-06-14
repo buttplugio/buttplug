@@ -9,11 +9,10 @@ use uuid::Uuid;
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::
-    device::{
-      hardware::{HardwareCommand, HardwareWriteCmd},
-      protocol::{generic_protocol_setup, ProtocolHandler},
-    },
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
 
 generic_protocol_setup!(TCodeV03, "tcode-v03");
@@ -22,7 +21,6 @@ generic_protocol_setup!(TCodeV03, "tcode-v03");
 pub struct TCodeV03 {}
 
 impl ProtocolHandler for TCodeV03 {
-
   fn handle_actuator_position_cmd(
     &self,
     feature_index: u32,
@@ -32,32 +30,35 @@ impl ProtocolHandler for TCodeV03 {
     let mut msg_vec = vec![];
 
     let command = format!("L0{position:02}\n");
-    msg_vec.push(HardwareWriteCmd::new(feature_id, Endpoint::Tx, command.as_bytes().to_vec(), false).into());
+    msg_vec.push(
+      HardwareWriteCmd::new(feature_id, Endpoint::Tx, command.as_bytes().to_vec(), false).into(),
+    );
 
     Ok(msg_vec)
-    
   }
 
-    fn handle_position_with_duration_cmd(
+  fn handle_position_with_duration_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
     position: u32,
-    duration: u32,    
+    duration: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut msg_vec = vec![];
-    
+
     let command = format!("L{feature_index}{position:02}I{duration}\n");
-    msg_vec.push(HardwareWriteCmd::new(feature_id, Endpoint::Tx, command.as_bytes().to_vec(), false).into());
+    msg_vec.push(
+      HardwareWriteCmd::new(feature_id, Endpoint::Tx, command.as_bytes().to_vec(), false).into(),
+    );
 
     Ok(msg_vec)
   }
 
-    fn handle_actuator_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,

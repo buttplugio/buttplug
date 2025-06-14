@@ -5,11 +5,12 @@ use std::{fmt::Debug, sync::Arc, time::Duration};
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{
-      Endpoint, RawCommand, RawReadingV2
-    },
+    message::{Endpoint, RawCommand, RawReadingV2},
   },
-  server::{device::configuration::ProtocolCommunicationSpecifier, message::checked_raw_cmd::CheckedRawCmdV4},
+  server::{
+    device::configuration::ProtocolCommunicationSpecifier,
+    message::checked_raw_cmd::CheckedRawCmdV4,
+  },
 };
 use async_trait::async_trait;
 use futures::future::BoxFuture;
@@ -43,7 +44,6 @@ pub struct HardwareReadCmd {
   /// Timeout for reading data
   timeout_ms: u32,
 }
-
 
 impl HardwareReadCmd {
   /// Creates a new DeviceReadCmd instance
@@ -81,15 +81,20 @@ pub struct HardwareWriteCmd {
 
 impl PartialEq for HardwareWriteCmd {
   fn eq(&self, other: &Self) -> bool {
-    self.endpoint() == other.endpoint() &&
-    self.data() == other.data() &&
-    self.write_with_response() == other.write_with_response()
+    self.endpoint() == other.endpoint()
+      && self.data() == other.data()
+      && self.write_with_response() == other.write_with_response()
   }
 }
 
 impl HardwareWriteCmd {
   /// Create a new DeviceWriteCmd instance.
-  pub fn new(command_id: Uuid, endpoint: Endpoint, data: Vec<u8>, write_with_response: bool) -> Self {
+  pub fn new(
+    command_id: Uuid,
+    endpoint: Endpoint,
+    data: Vec<u8>,
+    write_with_response: bool,
+  ) -> Self {
     Self {
       command_id,
       endpoint,
@@ -128,7 +133,10 @@ impl PartialEq for HardwareSubscribeCmd {
 impl HardwareSubscribeCmd {
   /// Create a new DeviceSubscribeCmd instance
   pub fn new(command_id: Uuid, endpoint: Endpoint) -> Self {
-    Self { command_id, endpoint }
+    Self {
+      command_id,
+      endpoint,
+    }
   }
 }
 
@@ -155,7 +163,10 @@ impl PartialEq for HardwareUnsubscribeCmd {
 impl HardwareUnsubscribeCmd {
   /// Create a new DeviceUnsubscribeCmd instance
   pub fn new(command_id: Uuid, endpoint: Endpoint) -> Self {
-    Self { command_id, endpoint }
+    Self {
+      command_id,
+      endpoint,
+    }
   }
 }
 
@@ -200,15 +211,20 @@ impl From<HardwareUnsubscribeCmd> for HardwareCommand {
 impl From<CheckedRawCmdV4> for HardwareCommand {
   fn from(value: CheckedRawCmdV4) -> Self {
     match value.raw_command() {
-      RawCommand::Write(x) => {
-        HardwareCommand::Write(HardwareWriteCmd { command_id: GENERIC_RAW_COMMAND_UUID, endpoint: *value.endpoint(), data: x.data().clone(), write_with_response: x.write_with_response() })
-      }
-      RawCommand::Subscribe => {
-        HardwareCommand::Subscribe(HardwareSubscribeCmd { command_id: GENERIC_RAW_COMMAND_UUID, endpoint: *value.endpoint() })
-      }
-      RawCommand::Unsubscribe => {
-        HardwareCommand::Unsubscribe(HardwareUnsubscribeCmd { command_id: GENERIC_RAW_COMMAND_UUID, endpoint: *value.endpoint() })
-      }
+      RawCommand::Write(x) => HardwareCommand::Write(HardwareWriteCmd {
+        command_id: GENERIC_RAW_COMMAND_UUID,
+        endpoint: *value.endpoint(),
+        data: x.data().clone(),
+        write_with_response: x.write_with_response(),
+      }),
+      RawCommand::Subscribe => HardwareCommand::Subscribe(HardwareSubscribeCmd {
+        command_id: GENERIC_RAW_COMMAND_UUID,
+        endpoint: *value.endpoint(),
+      }),
+      RawCommand::Unsubscribe => HardwareCommand::Unsubscribe(HardwareUnsubscribeCmd {
+        command_id: GENERIC_RAW_COMMAND_UUID,
+        endpoint: *value.endpoint(),
+      }),
       _ => {
         panic!("Should never try to convert a raw read command into a hardware command!");
       }

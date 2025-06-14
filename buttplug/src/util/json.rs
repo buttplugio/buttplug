@@ -38,9 +38,7 @@ impl JSONValidator {
   /// - `json_str`: JSON string to validate.
   pub fn validate(&self, json_str: &str) -> Result<(), ButtplugSerializerError> {
     let check_value = serde_json::from_str(json_str).map_err(|err| {
-      ButtplugSerializerError::JsonSerializerError(format!(
-        "Message: {json_str} - Error: {err:?}"
-      ))
+      ButtplugSerializerError::JsonSerializerError(format!("Message: {json_str} - Error: {err:?}"))
     })?;
     self.schema.validate(&check_value).map_err(|err| {
       ButtplugSerializerError::JsonSerializerError(format!(

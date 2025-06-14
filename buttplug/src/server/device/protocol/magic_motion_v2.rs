@@ -10,14 +10,11 @@ use std::sync::atomic::{AtomicU8, Ordering};
 use uuid::{uuid, Uuid};
 
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  },
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-      hardware::{HardwareCommand, HardwareWriteCmd},
-      protocol::{generic_protocol_setup, ProtocolHandler},
-    },
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
 
 const MAGIC_MOTION_2_PROTOCOL_UUID: Uuid = uuid!("4d6e9297-c57e-4ce7-a63c-24cc7d117a47");
@@ -49,7 +46,7 @@ impl ProtocolHandler for MagicMotionV2 {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     let data = vec![
@@ -71,6 +68,12 @@ impl ProtocolHandler for MagicMotionV2 {
       0x64,
       0x01,
     ];
-    Ok(vec![HardwareWriteCmd::new(MAGIC_MOTION_2_PROTOCOL_UUID, Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(
+      MAGIC_MOTION_2_PROTOCOL_UUID,
+      Endpoint::Tx,
+      data,
+      false,
+    )
+    .into()])
   }
 }

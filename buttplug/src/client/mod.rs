@@ -26,7 +26,8 @@ use crate::{
       StartScanningV0,
       StopAllDevicesV0,
       StopScanningV0,
-      BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION,
+      BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+      BUTTPLUG_CURRENT_API_MINOR_VERSION,
     },
   },
   util::{
@@ -330,7 +331,12 @@ impl ButtplugClient {
     let msg = self
       .message_sender
       .send_message_ignore_connect_status(
-        RequestServerInfoV4::new(&self.client_name, BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION).into(),
+        RequestServerInfoV4::new(
+          &self.client_name,
+          BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+          BUTTPLUG_CURRENT_API_MINOR_VERSION,
+        )
+        .into(),
       )
       .await?;
 

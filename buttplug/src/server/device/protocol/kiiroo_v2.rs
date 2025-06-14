@@ -7,26 +7,24 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::{
-    device::{
-      configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-      hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-      protocol::{
-        fleshlight_launch_helper::calculate_speed,
-        generic_protocol_initializer_setup,
-        ProtocolHandler,
-        ProtocolIdentifier,
-        ProtocolInitializer,
-      },
+  server::device::{
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{
+      fleshlight_launch_helper::calculate_speed,
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
     },
   },
 };
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
 use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
 };
+use uuid::{uuid, Uuid};
 
 const KIIROO_V2_PROTOCOL_UUID: Uuid = uuid!("05ab9d57-5e65-47b2-add4-5bad3e8663e5");
 generic_protocol_initializer_setup!(KiirooV2, "kiiroo-v2");
@@ -41,7 +39,12 @@ impl ProtocolInitializer for KiirooV2Initializer {
     hardware: Arc<Hardware>,
     _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let msg = HardwareWriteCmd::new(KIIROO_V2_PROTOCOL_UUID, Endpoint::Firmware, vec![0x0u8], true);
+    let msg = HardwareWriteCmd::new(
+      KIIROO_V2_PROTOCOL_UUID,
+      Endpoint::Firmware,
+      vec![0x0u8],
+      true,
+    );
     hardware.write_value(&msg).await?;
     Ok(Arc::new(KiirooV2::default()))
   }
@@ -57,12 +60,12 @@ impl ProtocolHandler for KiirooV2 {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-    fn handle_position_with_duration_cmd(
+  fn handle_position_with_duration_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,
     position: u32,
-    duration: u32,    
+    duration: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.

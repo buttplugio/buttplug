@@ -28,13 +28,13 @@ const GALAKU_PUMP_PROTOCOL_UUID: Uuid = uuid!("165ae3a9-33be-46a8-b438-9a6fc0f18
 generic_protocol_setup!(GalakuPump, "galaku-pump");
 
 pub struct GalakuPump {
-  speeds: [AtomicU8; 2]
+  speeds: [AtomicU8; 2],
 }
 
 impl Default for GalakuPump {
   fn default() -> Self {
     Self {
-      speeds: [AtomicU8::new(0), AtomicU8::new(0)]
+      speeds: [AtomicU8::new(0), AtomicU8::new(0)],
     }
   }
 }
@@ -79,7 +79,7 @@ impl ProtocolHandler for GalakuPump {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[0].store(speed as u8, Ordering::Relaxed);
     Ok(self.hardware_command())
@@ -89,7 +89,7 @@ impl ProtocolHandler for GalakuPump {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[1].store(speed as u8, Ordering::Relaxed);
     Ok(self.hardware_command())

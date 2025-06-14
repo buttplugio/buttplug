@@ -19,8 +19,8 @@ use crate::{
   },
 };
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
 use std::sync::Arc;
+use uuid::{uuid, Uuid};
 
 generic_protocol_initializer_setup!(Ankni, "ankni");
 
@@ -87,7 +87,7 @@ impl ProtocolHandler for Ankni {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,

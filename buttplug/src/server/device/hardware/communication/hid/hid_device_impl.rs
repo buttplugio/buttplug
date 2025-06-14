@@ -131,9 +131,7 @@ impl HardwareInternal for HIDDeviceImpl {
     let data = msg.data.clone();
     Box::pin(async move {
       device.lock().await.write(&data).await.map_err(|e| {
-        ButtplugDeviceError::DeviceCommunicationError(format!(
-          "Cannot write to HID Device: {e:?}."
-        ))
+        ButtplugDeviceError::DeviceCommunicationError(format!("Cannot write to HID Device: {e:?}."))
       })?;
       Ok(())
     })

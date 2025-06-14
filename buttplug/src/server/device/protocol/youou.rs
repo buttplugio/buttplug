@@ -15,11 +15,11 @@ use crate::{
   },
 };
 use async_trait::async_trait;
-use uuid::Uuid;
 use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
 };
+use uuid::Uuid;
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -74,11 +74,11 @@ pub struct Youou {
 }
 
 impl ProtocolHandler for Youou {
-    fn handle_actuator_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Byte 2 seems to be a monotonically increasing packet id of some kind
     //
@@ -112,6 +112,12 @@ impl ProtocolHandler for Youou {
     let mut data2 = vec![crc, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
     data.append(&mut data2);
 
-    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(
+      feature_id,
+      Endpoint::Tx,
+      data,
+      false,
+    )
+    .into()])
   }
 }

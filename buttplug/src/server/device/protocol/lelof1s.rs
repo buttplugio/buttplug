@@ -6,10 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  },
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareSubscribeCmd, HardwareWriteCmd},
@@ -22,8 +19,11 @@ use crate::{
   },
 };
 use async_trait::async_trait;
+use std::sync::{
+  atomic::{AtomicU8, Ordering},
+  Arc,
+};
 use uuid::{uuid, Uuid};
-use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
 
 const LELO_F1S_PROTOCOL_UUID: Uuid = uuid!("4987f232-40f9-47a3-8d0c-e30b74e75310");
 generic_protocol_initializer_setup!(LeloF1s, "lelo-f1s");
@@ -42,7 +42,10 @@ impl ProtocolInitializer for LeloF1sInitializer {
     // before it'll accept any commands. Unless we listen for event on
     // the button, this is more likely to turn the device off.
     hardware
-      .subscribe(&HardwareSubscribeCmd::new(LELO_F1S_PROTOCOL_UUID, Endpoint::Rx))
+      .subscribe(&HardwareSubscribeCmd::new(
+        LELO_F1S_PROTOCOL_UUID,
+        Endpoint::Rx,
+      ))
       .await?;
     Ok(Arc::new(LeloF1s::new(false)))
   }
@@ -50,14 +53,14 @@ impl ProtocolInitializer for LeloF1sInitializer {
 
 pub struct LeloF1s {
   speeds: [AtomicU8; 2],
-  write_with_response: bool
+  write_with_response: bool,
 }
 
 impl LeloF1s {
   pub fn new(write_with_response: bool) -> Self {
     Self {
       write_with_response,
-      speeds: [AtomicU8::new(0), AtomicU8::new(0)]
+      speeds: [AtomicU8::new(0), AtomicU8::new(0)],
     }
   }
 }
@@ -75,13 +78,20 @@ impl ProtocolHandler for LeloF1s {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     let mut cmd_vec = vec![0x1];
-    self.speeds.iter().for_each(|v| cmd_vec.push(v.load(Ordering::Relaxed)));
-    Ok(vec![
-      HardwareWriteCmd::new(feature_id, Endpoint::Tx, cmd_vec, self.write_with_response).into()
-    ])
+    self
+      .speeds
+      .iter()
+      .for_each(|v| cmd_vec.push(v.load(Ordering::Relaxed)));
+    Ok(vec![HardwareWriteCmd::new(
+      feature_id,
+      Endpoint::Tx,
+      cmd_vec,
+      self.write_with_response,
+    )
+    .into()])
   }
 }

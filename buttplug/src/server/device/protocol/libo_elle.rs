@@ -29,7 +29,7 @@ impl ProtocolHandler for LiboElle {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![{
       let speed = speed as u8;

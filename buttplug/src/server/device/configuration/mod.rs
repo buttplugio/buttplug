@@ -599,9 +599,10 @@ mod test {
       HashMap::new(),
     ));
     let mut feature_actuator = HashMap::new();
-    feature_actuator.insert(ActuatorType::Vibrate, ServerDeviceFeatureActuator::new(
-                &RangeInclusive::new(0, 20),
-                &RangeInclusive::new(0, 20)));
+    feature_actuator.insert(
+      ActuatorType::Vibrate,
+      ServerDeviceFeatureActuator::new(&RangeInclusive::new(0, 20), &RangeInclusive::new(0, 20)),
+    );
     builder
       .allow_raw_messages(allow_raw_messages)
       .communication_specifier("lovense", &[specifiers])

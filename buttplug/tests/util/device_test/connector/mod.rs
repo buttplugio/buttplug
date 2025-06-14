@@ -15,7 +15,15 @@ use buttplug::{
   server::{
     connector::ButtplugRemoteServerConnector,
     message::{
-      serializer::ButtplugServerJSONSerializer, ButtplugClientMessageV0, ButtplugClientMessageV1, ButtplugClientMessageV2, ButtplugClientMessageV3, ButtplugServerMessageV0, ButtplugServerMessageV1, ButtplugServerMessageV2, ButtplugServerMessageV3
+      serializer::ButtplugServerJSONSerializer,
+      ButtplugClientMessageV0,
+      ButtplugClientMessageV1,
+      ButtplugClientMessageV2,
+      ButtplugClientMessageV3,
+      ButtplugServerMessageV0,
+      ButtplugServerMessageV1,
+      ButtplugServerMessageV2,
+      ButtplugServerMessageV3,
     },
   },
 };
@@ -119,7 +127,6 @@ pub fn build_channel_connector(
   (client_connector, server_connector)
 }
 
-
 pub fn build_channel_connector_v3(
   notify: &Arc<Notify>,
 ) -> (ChannelClientConnectorV3, ChannelServerConnector) {
@@ -138,7 +145,6 @@ pub fn build_channel_connector_v3(
   ));
   (client_connector, server_connector)
 }
-
 
 pub fn build_channel_connector_v2(
   notify: &Arc<Notify>,

@@ -25,11 +25,11 @@ impl ProtocolHandler for Sakuraneko {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-    fn handle_actuator_vibrate_cmd(
+  fn handle_actuator_vibrate_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
@@ -57,7 +57,7 @@ impl ProtocolHandler for Sakuraneko {
     &self,
     _feature_index: u32,
     feature_id: Uuid,
-    speed: u32
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
