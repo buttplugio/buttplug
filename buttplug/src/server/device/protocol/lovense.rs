@@ -405,7 +405,7 @@ impl ProtocolHandler for Lovense {
 
   fn handle_actuator_constrict_cmd(
     &self,
-    feature_index: u32,
+    _feature_index: u32,
     feature_id: Uuid,
     level: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
@@ -431,7 +431,7 @@ impl ProtocolHandler for Lovense {
 
   fn handle_rotation_with_direction_cmd(
     &self,
-    feature_index: u32,
+    _feature_index: u32,
     feature_id: Uuid,
     speed: u32,
     clockwise: bool,

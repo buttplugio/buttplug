@@ -27,7 +27,7 @@ impl ProtocolHandler for SenseeCapsule {
 
   fn handle_actuator_vibrate_cmd(
     &self,
-    feature_index: u32,
+    _feature_index: u32,
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
@@ -52,7 +52,7 @@ impl ProtocolHandler for SenseeCapsule {
 
   fn handle_actuator_constrict_cmd(
     &self,
-    feature_index: u32,
+    _feature_index: u32,
     feature_id: Uuid,
     level: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {

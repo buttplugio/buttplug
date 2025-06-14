@@ -136,7 +136,7 @@ impl ProtocolHandler for Galaku {
   fn handle_actuator_vibrate_cmd(
     &self,
     feature_index: u32,
-    feature_id: Uuid,
+    _feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if self.is_caiping_pump_device {
@@ -192,7 +192,7 @@ impl ProtocolHandler for Galaku {
   fn handle_sensor_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    feature_index: u32,
+    _feature_index: u32,
     feature_id: Uuid,
     sensor_type: SensorType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
@@ -219,7 +219,7 @@ impl ProtocolHandler for Galaku {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    feature_index: u32,
+    _feature_index: u32,
     feature_id: Uuid,
     sensor_type: SensorType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {

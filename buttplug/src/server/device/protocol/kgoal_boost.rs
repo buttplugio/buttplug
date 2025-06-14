@@ -59,7 +59,7 @@ impl ProtocolHandler for KGoalBoost {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType,
+    _sensor_type: SensorType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     if self.subscribed_sensors.contains(&feature_index) {
       return future::ready(Ok(())).boxed();
@@ -136,7 +136,7 @@ impl ProtocolHandler for KGoalBoost {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType,
+    _sensor_type: SensorType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     if !self.subscribed_sensors.contains(&feature_index) {
       return future::ready(Ok(())).boxed();

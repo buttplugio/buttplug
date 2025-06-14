@@ -23,7 +23,7 @@ pub struct TCodeV03 {}
 impl ProtocolHandler for TCodeV03 {
   fn handle_actuator_position_cmd(
     &self,
-    feature_index: u32,
+    _feature_index: u32,
     feature_id: Uuid,
     position: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {

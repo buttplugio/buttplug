@@ -27,7 +27,7 @@ impl ProtocolHandler for Synchro {
 
   fn handle_rotation_with_direction_cmd(
     &self,
-    feature_index: u32,
+    _feature_index: u32,
     feature_id: Uuid,
     speed: u32,
     clockwise: bool,

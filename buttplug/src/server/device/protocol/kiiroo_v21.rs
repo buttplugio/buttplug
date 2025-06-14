@@ -68,7 +68,7 @@ impl Default for KiirooV21 {
 impl ProtocolHandler for KiirooV21 {
   fn handle_actuator_vibrate_cmd(
     &self,
-    feature_index: u32,
+    _feature_index: u32,
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
@@ -144,7 +144,7 @@ impl ProtocolHandler for KiirooV21 {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType,
+    _sensor_type: SensorType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     if self.subscribed_sensors.contains(&feature_index) {
       return future::ready(Ok(())).boxed();
@@ -223,7 +223,7 @@ impl ProtocolHandler for KiirooV21 {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType,
+    _sensor_type: SensorType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     if !self.subscribed_sensors.contains(&feature_index) {
       return future::ready(Ok(())).boxed();
