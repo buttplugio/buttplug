@@ -313,17 +313,10 @@
               "properties": {
                 "StepCount": {
                   "type": "integer"              
-                },
-                "Messages": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
                 }
               },
               "required": [
-                "StepCount",
-                "Messages"
+                "StepCount"
               ]
             }
           }
@@ -342,17 +335,10 @@
                       "type": "integer"
                     }
                   }
-                },
-                "Messages": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
                 }
               },
               "required": [
-                "ValueRange",
-                "Messages"
+                "ValueRange"
               ]
             }
           }
@@ -365,17 +351,10 @@
               "items": {
                 "type": "string"
               }
-            },
-            "Messages": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
             }
           },
           "required": [
-            "Endpoints",
-            "Messages"
+            "Endpoints"
           ]          
         }
       },
@@ -388,19 +367,62 @@
   },
   "messages": {
     "SpecV4Messages": {
-      "ValueCmd": {
+      "ActuatorCmd": {
         "type": "object",
         "description": "Sends a generic value set command to a device.",
         "properties": {
           "Id": { "$ref": "#/components/ClientId" },
           "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
           "FeatureIndex": { "$ref": "#/components/DeviceIndex" },
-          "ActuatorType": { 
-            "type": "string"
-          },
-          "Value": {
-            "type": "integer",
-            "minimum": 0
+          "Command": {
+            "type": "object",
+            "patternProperties": {
+              "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|Heater|Led)$": {
+                "type": "object",
+                "properties": {
+                  "Value": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "Value"
+                ]
+              },
+              "^RotateWithDirection$": {
+                "type": "object",
+                "properties": {
+                  "Speed": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "Clockwise": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "Speed",
+                  "Clockwise"
+                ]
+              },
+              "^PositionWithDuration$": {
+                "type": "object",
+                "properties": {
+                  "Position": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "Duration": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "Position",
+                  "Duration"
+                ]
+              }
+            }
           }
         },
         "additionalProperties": false,
@@ -408,23 +430,43 @@
           "Id",
           "DeviceIndex",
           "FeatureIndex",
-          "ActuatorType",
-          "Value"
+          "Command"
         ]
       },
-      "OneShotCmd": {
+      "SensorCmd": {
         "type": "object",
-        "description": "Sends a generic value set command to a device.",
+        "description": "Sends a request to read a sensor value.",
         "properties": {
           "Id": { "$ref": "#/components/ClientId" },
           "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
-          "FeatureIndex": { "$ref": "#/components/DeviceIndex" },
-          "ActuatorType": { 
-            "type": "string"
-          },
-          "Value": {
-            "type": "integer",
-            "minimum": 0
+          "FeatureIndex": { "type": "integer" },
+          "SensorType": { "type": "string" },
+          "SensorCommand": { "type": "string" }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Id",
+          "DeviceIndex",
+          "FeatureIndex",
+          "SensorType",
+          "SensorCommand"
+        ]
+      },
+      "SensorReading": {
+        "type": "object",
+        "description": "Returns from either a sensor read request or a subscribed sensor event.",
+        "properties": {
+          "Id": { "$ref": "#/components/ServerId" },
+          "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+          "FeatureIndex": { "type": "integer" },
+          "SensorType": { "type": "string" },
+          "Data": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            }
           }
         },
         "additionalProperties": false,
@@ -432,35 +474,41 @@
           "Id",
           "DeviceIndex",
           "FeatureIndex",
-          "ActuatorType",
-          "Value"
+          "SensorType",
+          "Data"
         ]
       },
-      "ValueWithParameterCmd": {
+      "RawCmd": {
         "type": "object",
-        "description": "Sends a generic value with parameter command to a device.",
+        "description": "Sends a request to raw endpoints.",
         "properties": {
           "Id": { "$ref": "#/components/ClientId" },
           "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
-          "FeatureIndex": { "$ref": "#/components/DeviceIndex" },
-          "ActuatorType": { 
-            "type": "string"
-          },
-          "Value": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "Parameter": {
-            "type": "integer"
+          "Endpoint": { "type": "string" },
+          "RawCommand": { 
+            "type": "object",
+            "properties": {
+              "Read": {
+                "type": "object"
+              },
+              "Write": {
+                "type": "object"
+              },
+              "Subscribe": {
+                "type": "object"
+              },
+              "Unsubscribe": {
+                "type": "object"
+              }
+            }
           }
         },
         "additionalProperties": false,
         "required": [
           "Id",
           "DeviceIndex",
-          "FeatureIndex",
-          "ActuatorType",
-          "Value"
+          "Endpoint",
+          "RawCommand"
         ]
       },
       "DeviceAdded": {
@@ -580,83 +628,6 @@
             "minimum": 0
           }
         }
-      },
-      "SensorReadCmd": {
-        "type": "object",
-        "description": "Sends a request to read a sensor value.",
-        "properties": {
-          "Id": { "$ref": "#/components/ClientId" },
-          "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
-          "FeatureIndex": { "type": "integer" },
-          "SensorType": { "type": "string" }
-        },
-        "additionalProperties": false,
-        "required": [
-          "Id",
-          "DeviceIndex",
-          "FeatureIndex",
-          "SensorType"
-        ]
-      },
-      "SensorReading": {
-        "type": "object",
-        "description": "Returns from either a sensor read request or a subscribed sensor event.",
-        "properties": {
-          "Id": { "$ref": "#/components/ServerId" },
-          "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
-          "FeatureIndex": { "type": "integer" },
-          "SensorType": { "type": "string" },
-          "Data": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 255
-            }
-          }
-        },
-        "additionalProperties": false,
-        "required": [
-          "Id",
-          "DeviceIndex",
-          "FeatureIndex",
-          "SensorType",
-          "Data"
-        ]
-      },
-      "SensorSubscribeCmd": {
-        "type": "object",
-        "description": "Sends a request to subscribe for updates to a sensor value.",
-        "properties": {
-          "Id": { "$ref": "#/components/ClientId" },
-          "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
-          "FeatureIndex": { "type": "integer" },
-          "SensorType": { "type": "string" }
-        },
-        "additionalProperties": false,
-        "required": [
-          "Id",
-          "DeviceIndex",
-          "FeatureIndex",
-          "SensorType"
-        ]
-      },
-      "SensorUnsubscribeCmd": {
-        "type": "object",
-        "description": "Sends a request to subscribe for updates to a sensor value.",
-        "properties": {
-          "Id": { "$ref": "#/components/ClientId" },
-          "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
-          "FeatureIndex": { "type": "integer" },
-          "SensorType": { "type": "string" }
-        },
-        "additionalProperties": false,
-        "required": [
-          "Id",
-          "DeviceIndex",
-          "FeatureIndex",
-          "SensorType"
-        ]
       }
     }, 
     "SpecV3Messages": {
@@ -1710,25 +1681,19 @@
           "Error": { "$ref": "#/messages/SpecV0Messages/Error" },
           "Ok": { "$ref": "#/messages/SpecV0Messages/Ok" },
           "Ping": { "$ref": "#/messages/SpecV0Messages/Ping" },
-          "RawReadCmd": { "$ref": "#/messages/SpecV2Messages/RawReadCmd" },
+          "RawCmd": { "$ref": "#/messages/SpecV4Messages/RawCmd" },
           "RawReading": { "$ref": "#/messages/SpecV2Messages/RawReading" },
-          "RawWriteCmd": { "$ref": "#/messages/SpecV2Messages/RawWriteCmd" },
-          "RawSubscribeCmd": { "$ref": "#/messages/SpecV2Messages/RawSubscribeCmd" },
-          "RawUnsubscribeCmd": { "$ref": "#/messages/SpecV2Messages/RawUnsubscribeCmd" },
           "RequestDeviceList": { "$ref": "#/messages/SpecV0Messages/RequestDeviceList" },
           "RequestServerInfo": { "$ref": "#/messages/SpecV4Messages/RequestServerInfo" },
           "ScanningFinished": { "$ref": "#/messages/SpecV0Messages/ScanningFinished" },
-          "SensorReadCmd": { "$ref": "#/messages/SpecV4Messages/SensorReadCmd" },
+          "SensorCmd": { "$ref": "#/messages/SpecV4Messages/SensorCmd" },
           "SensorReading": { "$ref": "#/messages/SpecV4Messages/SensorReading" },
-          "SensorSubscribeCmd": { "$ref": "#/messages/SpecV4Messages/SensorSubscribeCmd" },
-          "SensorUnsubscribeCmd": { "$ref": "#/messages/SpecV4Messages/SensorUnsubscribeCmd" },
           "ServerInfo": { "$ref": "#/messages/SpecV4Messages/ServerInfo" },
           "StartScanning": { "$ref": "#/messages/SpecV0Messages/StartScanning" },
           "StopAllDevices": { "$ref": "#/messages/SpecV0Messages/StopAllDevices" },
           "StopDeviceCmd": { "$ref": "#/messages/SpecV0Messages/StopDeviceCmd" },
           "StopScanning": { "$ref": "#/messages/SpecV0Messages/StopScanning" },
-          "ValueCmd": { "$ref": "#/messages/SpecV4Messages/ValueCmd" },
-          "ValueWithParameterCmd": { "$ref": "#/messages/SpecV4Messages/ValueWithParameterCmd" }
+          "ActuatorCmd": { "$ref": "#/messages/SpecV4Messages/ActuatorCmd" }
         },
         "additionalProperties": false,
         "minProperties": 1,

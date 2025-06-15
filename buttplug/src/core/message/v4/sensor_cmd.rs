@@ -47,8 +47,8 @@ pub struct SensorCmdV4 {
   #[serde(rename = "SensorType")]
   sensor_type: SensorType,
   #[getset(get_copy = "pub")]
-  #[serde(rename = "SensorCommandType")]
-  sensor_command_type: SensorCommandType,
+  #[serde(rename = "SensorCommand")]
+  sensor_command: SensorCommandType,
 }
 
 impl SensorCmdV4 {
@@ -63,7 +63,7 @@ impl SensorCmdV4 {
       device_index,
       feature_index,
       sensor_type,
-      sensor_command_type,
+      sensor_command: sensor_command_type,
     }
   }
 }
