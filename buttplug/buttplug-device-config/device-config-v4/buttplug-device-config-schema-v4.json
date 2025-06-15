@@ -185,28 +185,20 @@
           },
           "feature-type": {
             "type": "string",
-            "pattern": "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|Battery|RSSI|Pressure|RotateWithDirection|PositionWithDuration)$"
+            "pattern": "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|Battery|RSSI|Pressure|RotateWithDirection|PositionWithDuration|Heater|Led)$"
           },
           "actuator": {
             "type": "object",
             "patternProperties": {
-              "^.*$": {
+              "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|RotateWithDirection|PositionWithDuration|Heater|Led)$": {
                 "type": "object",
                 "properties": {
                   "step-range": {
                     "$ref": "#/components/step-range"
-                  },
-                  "messages": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "pattern": "^(ValueCmd|ValueWithParameterCmd)$"
-                    }
                   }
                 },
                 "required": [
-                  "step-range",
-                  "messages"
+                  "step-range"
                 ]
               }
             }
@@ -214,7 +206,7 @@
           "sensor": {
             "type": "object",
             "patternProperties": {
-              "^.*$": {
+              "^(Battery|RSSI|Pressure)$": {
                 "type": "object",
                 "properties": {
                   "value-range": {
@@ -224,17 +216,17 @@
                     },
                     "minItems": 1
                   },
-                  "messages": {
+                  "sensor-commands": {
                     "type": "array",
                     "items": {
                       "type": "string",
-                      "pattern": "^(SensorReadCmd|SensorSubscribeCmd)$"
+                      "pattern": "^(Read|Subscribe)$"
                     }
                   }
                 },
                 "required": [
                   "value-range",
-                  "messages"
+                  "sensor-commands"
                 ],
                 "additionalProperties": false
               }
