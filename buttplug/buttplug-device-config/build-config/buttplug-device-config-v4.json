@@ -15,9 +15,6 @@
                 "step-range": [
                   0,
                   20
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -34,8 +31,8 @@
                     100
                   ]
                 ],
-                "messages": [
-                  "SensorReadCmd"
+                "sensor-commands": [
+                  "Read"
                 ]
               }
             },
@@ -59,9 +56,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -75,9 +69,6 @@
                   "step-range": [
                     0,
                     3
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -94,8 +85,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -117,9 +108,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -132,9 +120,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -151,8 +136,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -175,9 +160,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -190,9 +172,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueWithParameterCmd"
                   ]
                 }
               },
@@ -209,8 +188,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -267,9 +246,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -282,9 +258,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -301,8 +274,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -360,9 +333,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -379,8 +349,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -403,9 +373,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -422,8 +389,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -445,9 +412,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -460,9 +424,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -479,8 +440,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -509,9 +470,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -524,9 +482,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -543,8 +498,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -581,9 +536,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -597,9 +549,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -613,9 +562,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -632,8 +578,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -655,9 +601,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -670,9 +613,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -689,8 +629,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -712,9 +652,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -727,9 +664,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -746,8 +680,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -776,9 +710,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -791,9 +722,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueWithParameterCmd"
                   ]
                 }
               },
@@ -810,8 +738,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -834,9 +762,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -850,9 +775,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -866,9 +788,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -885,8 +804,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -916,9 +835,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -935,8 +851,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -959,9 +875,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -975,9 +888,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueWithParameterCmd"
                   ]
                 }
               },
@@ -994,8 +904,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -1174,9 +1084,6 @@
                 "step-range": [
                   0,
                   20
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -1193,8 +1100,8 @@
                     100
                   ]
                 ],
-                "messages": [
-                  "SensorReadCmd"
+                "sensor-commands": [
+                  "Read"
                 ]
               }
             },
@@ -1218,9 +1125,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1234,9 +1138,6 @@
                   "step-range": [
                     0,
                     3
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1253,8 +1154,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -1276,9 +1177,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1291,9 +1189,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1310,8 +1205,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -1333,9 +1228,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1348,9 +1240,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueWithParameterCmd"
                   ]
                 }
               },
@@ -1367,8 +1256,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -1454,9 +1343,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1473,8 +1359,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -1496,9 +1382,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1511,9 +1394,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1530,8 +1410,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -1560,9 +1440,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1575,9 +1452,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1594,8 +1468,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -1625,9 +1499,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1641,9 +1512,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1660,8 +1528,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -1683,9 +1551,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1698,9 +1563,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1717,8 +1579,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -1740,9 +1602,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1755,9 +1614,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1774,8 +1630,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -1797,9 +1653,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1812,9 +1665,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueWithParameterCmd"
                   ]
                 }
               },
@@ -1831,8 +1681,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -1855,9 +1705,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1871,9 +1718,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1887,9 +1731,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1906,8 +1747,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -1937,9 +1778,6 @@
                   "step-range": [
                     0,
                     20
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -1956,8 +1794,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -1986,9 +1824,6 @@
                 "step-range": [
                   0,
                   65535
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -2001,9 +1836,6 @@
                 "step-range": [
                   0,
                   65535
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -2031,9 +1863,6 @@
                 "step-range": [
                   0,
                   99
-                ],
-                "messages": [
-                  "ValueWithParameterCmd"
                 ]
               }
             },
@@ -2092,9 +1921,6 @@
                 "step-range": [
                   0,
                   3
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -2147,9 +1973,6 @@
                 "step-range": [
                   0,
                   3
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -2162,9 +1985,6 @@
                 "step-range": [
                   0,
                   3
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -2225,9 +2045,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -2299,9 +2116,6 @@
                   "step-range": [
                     0,
                     99
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -2323,9 +2137,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -2338,9 +2149,6 @@
                   "step-range": [
                     0,
                     3
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -2362,9 +2170,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -2377,9 +2182,6 @@
                   "step-range": [
                     0,
                     3
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -2401,9 +2203,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -2416,9 +2215,6 @@
                   "step-range": [
                     0,
                     3
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -2465,9 +2261,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -2484,8 +2277,8 @@
                     100
                   ]
                 ],
-                "messages": [
-                  "SensorReadCmd"
+                "sensor-commands": [
+                  "Read"
                 ]
               }
             },
@@ -2595,9 +2388,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -2614,8 +2404,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -2674,9 +2464,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -2693,8 +2480,8 @@
                     100
                   ]
                 ],
-                "messages": [
-                  "SensorReadCmd"
+                "sensor-commands": [
+                  "Read"
                 ]
               }
             },
@@ -2738,9 +2525,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -2753,9 +2537,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -2772,8 +2553,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -2795,9 +2576,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -2810,9 +2588,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -2829,8 +2604,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -2859,9 +2634,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -2874,9 +2646,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -2893,8 +2662,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -2939,9 +2708,6 @@
                 "step-range": [
                   0,
                   77
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -2958,8 +2724,8 @@
                     100
                   ]
                 ],
-                "messages": [
-                  "SensorReadCmd"
+                "sensor-commands": [
+                  "Read"
                 ]
               }
             },
@@ -2997,9 +2763,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -3016,8 +2779,8 @@
                     100
                   ]
                 ],
-                "messages": [
-                  "SensorReadCmd"
+                "sensor-commands": [
+                  "Read"
                 ]
               }
             },
@@ -3075,9 +2838,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3090,9 +2850,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3109,8 +2866,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -3139,9 +2896,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3154,9 +2908,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3173,8 +2924,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -3220,9 +2971,6 @@
                 "step-range": [
                   0,
                   56
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -3235,9 +2983,6 @@
                 "step-range": [
                   0,
                   56
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -3250,9 +2995,6 @@
                 "step-range": [
                   0,
                   56
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -3265,9 +3007,6 @@
                 "step-range": [
                   0,
                   56
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -3280,9 +3019,6 @@
                 "step-range": [
                   0,
                   56
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -3295,9 +3031,6 @@
                 "step-range": [
                   0,
                   56
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -3334,9 +3067,6 @@
                   "step-range": [
                     0,
                     56
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3349,9 +3079,6 @@
                   "step-range": [
                     0,
                     56
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3390,9 +3117,6 @@
                 "step-range": [
                   0,
                   56
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -3405,9 +3129,6 @@
                 "step-range": [
                   0,
                   56
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -3420,9 +3141,6 @@
                 "step-range": [
                   0,
                   56
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -3452,9 +3170,6 @@
                   "step-range": [
                     0,
                     56
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3467,9 +3182,6 @@
                   "step-range": [
                     0,
                     56
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3482,9 +3194,6 @@
                   "step-range": [
                     0,
                     56
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3497,9 +3206,6 @@
                   "step-range": [
                     0,
                     56
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3512,9 +3218,6 @@
                   "step-range": [
                     0,
                     56
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3527,9 +3230,6 @@
                   "step-range": [
                     0,
                     56
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3552,9 +3252,6 @@
                   "step-range": [
                     0,
                     56
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3567,9 +3264,6 @@
                   "step-range": [
                     0,
                     56
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3582,9 +3276,6 @@
                   "step-range": [
                     0,
                     56
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3597,9 +3288,6 @@
                   "step-range": [
                     0,
                     56
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3621,9 +3309,6 @@
                   "step-range": [
                     0,
                     56
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3636,9 +3321,6 @@
                   "step-range": [
                     0,
                     56
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3651,9 +3333,6 @@
                   "step-range": [
                     0,
                     56
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3666,9 +3345,6 @@
                   "step-range": [
                     0,
                     56
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3690,9 +3366,6 @@
                   "step-range": [
                     0,
                     56
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3734,9 +3407,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -3816,9 +3486,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -3835,8 +3502,8 @@
                     100
                   ]
                 ],
-                "messages": [
-                  "SensorReadCmd"
+                "sensor-commands": [
+                  "Read"
                 ]
               }
             },
@@ -3861,9 +3528,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3876,9 +3540,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3895,8 +3556,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -3918,9 +3579,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3933,9 +3591,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3948,9 +3603,6 @@
                   "step-range": [
                     0,
                     2
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -3967,8 +3619,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -4012,9 +3664,6 @@
                 "step-range": [
                   0,
                   15
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -4091,9 +3740,6 @@
                   "step-range": [
                     0,
                     15
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4106,9 +3752,6 @@
                   "step-range": [
                     0,
                     15
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4130,9 +3773,6 @@
                   "step-range": [
                     0,
                     15
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4145,9 +3785,6 @@
                   "step-range": [
                     0,
                     15
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4169,9 +3806,6 @@
                   "step-range": [
                     0,
                     15
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4184,9 +3818,6 @@
                   "step-range": [
                     0,
                     15
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4208,9 +3839,6 @@
                   "step-range": [
                     0,
                     15
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4223,9 +3851,6 @@
                   "step-range": [
                     0,
                     15
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4277,9 +3902,6 @@
                 "step-range": [
                   0,
                   12
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -4302,9 +3924,6 @@
                   "step-range": [
                     0,
                     22
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4333,9 +3952,6 @@
                   "step-range": [
                     0,
                     12
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4348,9 +3964,6 @@
                   "step-range": [
                     0,
                     12
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4372,9 +3985,6 @@
                   "step-range": [
                     0,
                     22
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4397,9 +4007,6 @@
                   "step-range": [
                     0,
                     27
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4423,9 +4030,6 @@
                   "step-range": [
                     0,
                     27
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4438,9 +4042,6 @@
                   "step-range": [
                     0,
                     27
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4510,9 +4111,6 @@
                 "step-range": [
                   0,
                   30
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -4525,9 +4123,6 @@
                 "step-range": [
                   0,
                   30
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -4550,9 +4145,6 @@
                   "step-range": [
                     0,
                     30
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4565,9 +4157,6 @@
                   "step-range": [
                     0,
                     30
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4589,9 +4178,6 @@
                   "step-range": [
                     0,
                     30
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4631,9 +4217,6 @@
                 "step-range": [
                   0,
                   8
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -4668,9 +4251,6 @@
                 "step-range": [
                   0,
                   15
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -4683,9 +4263,6 @@
                 "step-range": [
                   0,
                   15
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -4698,9 +4275,6 @@
                 "step-range": [
                   0,
                   15
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -4713,9 +4287,6 @@
                 "step-range": [
                   0,
                   15
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -4728,9 +4299,6 @@
                 "step-range": [
                   0,
                   15
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -4743,9 +4311,6 @@
                 "step-range": [
                   0,
                   15
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -4758,9 +4323,6 @@
                 "step-range": [
                   0,
                   15
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -4773,9 +4335,6 @@
                 "step-range": [
                   0,
                   15
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -4812,9 +4371,6 @@
                   "step-range": [
                     0,
                     15
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4827,9 +4383,6 @@
                   "step-range": [
                     0,
                     15
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4842,9 +4395,6 @@
                   "step-range": [
                     0,
                     15
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4857,9 +4407,6 @@
                   "step-range": [
                     0,
                     15
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4895,9 +4442,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -4910,9 +4454,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -4925,9 +4466,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -4950,9 +4488,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4974,9 +4509,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -4989,9 +4521,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5013,9 +4542,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5028,9 +4554,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5052,9 +4575,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5067,9 +4587,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5091,9 +4608,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5106,9 +4620,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5121,9 +4632,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5174,9 +4682,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5193,8 +4698,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -5216,9 +4721,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5241,9 +4743,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5265,9 +4764,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5280,9 +4776,6 @@
                   "step-range": [
                     0,
                     99
-                  ],
-                  "messages": [
-                    "ValueWithParameterCmd"
                   ]
                 }
               },
@@ -5304,9 +4797,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5328,9 +4818,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5352,9 +4839,6 @@
                   "step-range": [
                     0,
                     6
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5376,9 +4860,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5400,9 +4881,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5424,9 +4902,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5448,9 +4923,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5473,9 +4945,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5498,9 +4967,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5566,9 +5032,6 @@
                   "step-range": [
                     0,
                     99
-                  ],
-                  "messages": [
-                    "ValueWithParameterCmd"
                   ]
                 }
               },
@@ -5590,9 +5053,6 @@
                   "step-range": [
                     0,
                     99
-                  ],
-                  "messages": [
-                    "ValueWithParameterCmd"
                   ]
                 }
               },
@@ -5615,9 +5075,6 @@
                   "step-range": [
                     0,
                     99
-                  ],
-                  "messages": [
-                    "ValueWithParameterCmd"
                   ]
                 }
               },
@@ -5641,9 +5098,6 @@
                   "step-range": [
                     0,
                     99
-                  ],
-                  "messages": [
-                    "ValueWithParameterCmd"
                   ]
                 }
               },
@@ -5687,9 +5141,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -5706,8 +5157,8 @@
                     100
                   ]
                 ],
-                "messages": [
-                  "SensorReadCmd"
+                "sensor-commands": [
+                  "Read"
                 ]
               }
             },
@@ -5745,9 +5196,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueWithParameterCmd"
                 ]
               }
             },
@@ -5780,9 +5228,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -5824,9 +5269,6 @@
                   "step-range": [
                     0,
                     4
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5848,9 +5290,6 @@
                   "step-range": [
                     0,
                     4
-                  ],
-                  "messages": [
-                    "ValueWithParameterCmd"
                   ]
                 }
               },
@@ -5898,9 +5337,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5922,9 +5358,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -5946,9 +5379,6 @@
                   "step-range": [
                     0,
                     99
-                  ],
-                  "messages": [
-                    "ValueWithParameterCmd"
                   ]
                 }
               },
@@ -5970,9 +5400,6 @@
                   "step-range": [
                     0,
                     99
-                  ],
-                  "messages": [
-                    "ValueWithParameterCmd"
                   ]
                 }
               },
@@ -5994,9 +5421,6 @@
                   "step-range": [
                     0,
                     99
-                  ],
-                  "messages": [
-                    "ValueWithParameterCmd"
                   ]
                 }
               },
@@ -6009,9 +5433,6 @@
                   "step-range": [
                     0,
                     99
-                  ],
-                  "messages": [
-                    "ValueWithParameterCmd"
                   ]
                 }
               },
@@ -6033,9 +5454,6 @@
                   "step-range": [
                     0,
                     99
-                  ],
-                  "messages": [
-                    "ValueWithParameterCmd"
                   ]
                 }
               },
@@ -6076,9 +5494,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -6113,9 +5528,6 @@
                 "step-range": [
                   0,
                   99
-                ],
-                "messages": [
-                  "ValueWithParameterCmd"
                 ]
               }
             },
@@ -6148,9 +5560,6 @@
                 "step-range": [
                   0,
                   3
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -6186,9 +5595,6 @@
                 "step-range": [
                   0,
                   19
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -6250,9 +5656,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -6373,9 +5776,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -6405,9 +5805,6 @@
                   "step-range": [
                     0,
                     10
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -6420,9 +5817,6 @@
                   "step-range": [
                     0,
                     1
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -6452,9 +5846,6 @@
                   "step-range": [
                     0,
                     10
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -6468,9 +5859,6 @@
                   "step-range": [
                     0,
                     1
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -6510,9 +5898,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -6525,9 +5910,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -6588,9 +5970,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -6603,9 +5982,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -6635,9 +6011,6 @@
                   "step-range": [
                     0,
                     10
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -6650,9 +6023,6 @@
                   "step-range": [
                     0,
                     10
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -6665,9 +6035,6 @@
                   "step-range": [
                     0,
                     3
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -6689,9 +6056,6 @@
                   "step-range": [
                     0,
                     10
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -6704,9 +6068,6 @@
                   "step-range": [
                     0,
                     10
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -6719,9 +6080,6 @@
                   "step-range": [
                     0,
                     3
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -6760,9 +6118,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -6815,9 +6170,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -6830,9 +6182,6 @@
                 "step-range": [
                   0,
                   1
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -6872,9 +6221,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -6887,9 +6233,6 @@
                 "step-range": [
                   0,
                   5
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -6942,9 +6285,6 @@
                 "step-range": [
                   0,
                   3
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -6980,9 +6320,6 @@
                 "step-range": [
                   0,
                   3
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7018,9 +6355,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7056,9 +6390,6 @@
                 "step-range": [
                   0,
                   3
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7071,9 +6402,6 @@
                 "step-range": [
                   0,
                   3
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7086,9 +6414,6 @@
                 "step-range": [
                   0,
                   2
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7124,9 +6449,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7139,9 +6461,6 @@
                 "step-range": [
                   0,
                   5
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7195,9 +6514,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7210,9 +6526,6 @@
                 "step-range": [
                   0,
                   5
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7248,9 +6561,6 @@
                 "step-range": [
                   0,
                   9
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7351,9 +6661,6 @@
                 "step-range": [
                   0,
                   30
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7366,9 +6673,6 @@
                 "step-range": [
                   0,
                   1
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7415,9 +6719,6 @@
                 "step-range": [
                   0,
                   3
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7431,9 +6732,6 @@
                 "step-range": [
                   0,
                   3
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7469,9 +6767,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7484,9 +6779,6 @@
                 "step-range": [
                   0,
                   1
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7523,9 +6815,6 @@
                 "step-range": [
                   0,
                   3
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7538,9 +6827,6 @@
                 "step-range": [
                   0,
                   3
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7575,9 +6861,6 @@
                 "step-range": [
                   0,
                   50
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7612,9 +6895,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7627,9 +6907,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueWithParameterCmd"
                 ]
               }
             },
@@ -7681,9 +6958,6 @@
                 "step-range": [
                   0,
                   8
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7706,9 +6980,6 @@
                   "step-range": [
                     0,
                     8
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -7721,9 +6992,6 @@
                   "step-range": [
                     0,
                     8
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -7745,9 +7013,6 @@
                   "step-range": [
                     0,
                     8
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -7760,9 +7025,6 @@
                   "step-range": [
                     0,
                     8
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -7816,9 +7078,6 @@
                   "step-range": [
                     0,
                     4
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -7863,9 +7122,6 @@
                 "step-range": [
                   0,
                   9
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7917,9 +7173,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7932,9 +7185,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7970,9 +7220,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -7985,9 +7232,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -8043,9 +7287,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -8058,9 +7299,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -8084,9 +7322,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -8099,9 +7334,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -8123,9 +7355,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -8154,9 +7383,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -8169,9 +7395,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -8193,9 +7416,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -8217,9 +7437,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -8266,9 +7483,6 @@
                 "step-range": [
                   0,
                   127
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -8282,9 +7496,6 @@
                 "step-range": [
                   0,
                   127
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -8319,9 +7530,6 @@
                 "step-range": [
                   0,
                   127
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -8334,9 +7542,6 @@
                 "step-range": [
                   0,
                   127
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -8366,9 +7571,6 @@
                   "step-range": [
                     0,
                     127
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -8390,9 +7592,6 @@
                   "step-range": [
                     0,
                     127
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -8454,9 +7653,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -8491,9 +7687,6 @@
                 "step-range": [
                   0,
                   15
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -8537,9 +7730,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueWithParameterCmd"
                 ]
               }
             },
@@ -8575,9 +7765,6 @@
                 "step-range": [
                   0,
                   5
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -8590,9 +7777,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -8644,9 +7828,6 @@
                 "step-range": [
                   0,
                   5
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -8659,9 +7840,6 @@
                 "step-range": [
                   0,
                   5
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -8696,9 +7874,6 @@
                 "step-range": [
                   0,
                   15
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -8733,9 +7908,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -8779,9 +7951,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -8794,9 +7963,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -8836,9 +8002,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueWithParameterCmd"
                 ]
               }
             },
@@ -8870,9 +8033,6 @@
                 "step-range": [
                   0,
                   150
-                ],
-                "messages": [
-                  "ValueWithParameterCmd"
                 ]
               }
             },
@@ -8909,9 +8069,6 @@
                 "step-range": [
                   0,
                   20
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -8947,9 +8104,6 @@
                 "step-range": [
                   0,
                   68
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -8984,9 +8138,6 @@
                 "step-range": [
                   0,
                   68
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -9021,9 +8172,6 @@
                 "step-range": [
                   0,
                   1000
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -9058,9 +8206,6 @@
                 "step-range": [
                   0,
                   1
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -9073,9 +8218,6 @@
                 "step-range": [
                   0,
                   1
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -9113,9 +8255,6 @@
                 "step-range": [
                   0,
                   3
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -9156,9 +8295,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -9194,9 +8330,6 @@
                 "step-range": [
                   0,
                   121
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -9313,9 +8446,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -9338,9 +8468,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9362,9 +8489,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9377,9 +8501,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9408,9 +8529,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9432,9 +8550,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9447,9 +8562,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9471,9 +8583,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9495,9 +8604,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9510,9 +8616,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9534,9 +8637,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9558,9 +8658,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9573,9 +8670,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9597,9 +8691,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9612,9 +8703,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9636,9 +8724,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9651,9 +8736,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9676,9 +8758,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9691,9 +8770,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9716,9 +8792,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9731,9 +8804,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9756,9 +8826,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9771,9 +8838,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9804,9 +8868,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9819,9 +8880,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9845,9 +8903,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9860,9 +8915,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9886,9 +8938,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9901,9 +8950,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9925,9 +8971,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9940,9 +8983,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9966,9 +9006,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -9981,9 +9018,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10007,9 +9041,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10022,9 +9053,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10049,9 +9077,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10064,9 +9089,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10079,9 +9101,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10105,9 +9124,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10120,9 +9136,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10194,9 +9207,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10209,9 +9219,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10234,9 +9241,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10249,9 +9253,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10273,9 +9274,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10297,9 +9295,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10322,9 +9317,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10347,9 +9339,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10362,9 +9351,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10388,9 +9374,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10403,9 +9386,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10427,9 +9407,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10451,9 +9428,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10475,9 +9449,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10490,9 +9461,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10514,9 +9482,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10538,9 +9503,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10553,9 +9515,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10577,9 +9536,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10658,9 +9614,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10673,9 +9626,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10705,9 +9655,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10720,9 +9667,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10745,9 +9689,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10760,9 +9701,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10827,9 +9765,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10842,9 +9777,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10869,9 +9801,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10884,9 +9813,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10924,9 +9850,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10939,9 +9862,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10965,9 +9885,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -10980,9 +9897,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11014,9 +9928,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11029,9 +9940,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11054,9 +9962,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11069,9 +9974,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11109,9 +10011,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11124,9 +10023,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11148,9 +10044,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11163,9 +10056,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11187,9 +10077,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11212,9 +10099,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11227,9 +10111,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11266,9 +10147,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11290,9 +10168,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11305,9 +10180,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11330,9 +10202,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11345,9 +10214,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11378,9 +10244,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11393,9 +10256,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11434,9 +10294,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11449,9 +10306,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11475,9 +10329,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11490,9 +10341,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11550,9 +10398,6 @@
                 "step-range": [
                   0,
                   3
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -11595,8 +10440,8 @@
                     100
                   ]
                 ],
-                "messages": [
-                  "SensorReadCmd"
+                "sensor-commands": [
+                  "Read"
                 ]
               }
             },
@@ -11634,9 +10479,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -11649,9 +10491,6 @@
                 "step-range": [
                   0,
                   3
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -11681,9 +10520,6 @@
                   "step-range": [
                     0,
                     10
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11721,9 +10557,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -11768,9 +10601,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11783,9 +10613,6 @@
                   "step-range": [
                     0,
                     1
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11807,9 +10634,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11851,9 +10675,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -11891,9 +10712,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11907,9 +10725,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11932,9 +10747,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11948,9 +10760,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11973,9 +10782,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -11989,9 +10795,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -12014,9 +10817,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -12030,9 +10830,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -12076,9 +10873,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueWithParameterCmd"
                 ]
               }
             },
@@ -12125,9 +10919,6 @@
                 "step-range": [
                   0,
                   3
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -12162,9 +10953,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -12224,9 +11012,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -12270,9 +11055,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -12285,9 +11067,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -12326,9 +11105,6 @@
                 "step-range": [
                   0,
                   6
-                ],
-                "messages": [
-                  "ValueWithParameterCmd"
                 ]
               }
             },
@@ -12374,9 +11150,6 @@
                 "step-range": [
                   0,
                   9
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -12389,9 +11162,6 @@
                 "step-range": [
                   0,
                   9
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -12414,9 +11184,6 @@
                   "step-range": [
                     0,
                     4
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -12456,9 +11223,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -12471,9 +11235,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -12486,9 +11247,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueWithParameterCmd"
                 ]
               }
             },
@@ -12523,9 +11281,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -12538,9 +11293,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -12575,9 +11327,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -12608,9 +11357,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -12623,9 +11369,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -12647,9 +11390,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -12662,9 +11402,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -12677,9 +11414,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -12701,9 +11435,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -12716,9 +11447,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -12759,9 +11487,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -12830,9 +11555,6 @@
                 "step-range": [
                   0,
                   20
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -12845,9 +11567,6 @@
                 "step-range": [
                   0,
                   20
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -12882,9 +11601,6 @@
                 "step-range": [
                   0,
                   20
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -12936,9 +11652,6 @@
                 "step-range": [
                   0,
                   99
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -12973,9 +11686,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -12988,9 +11698,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -13042,9 +11749,6 @@
                 "step-range": [
                   0,
                   128
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -13088,9 +11792,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -13103,9 +11804,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -13150,9 +11848,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -13169,8 +11864,8 @@
                     100
                   ]
                 ],
-                "messages": [
-                  "SensorReadCmd"
+                "sensor-commands": [
+                  "Read"
                 ]
               }
             },
@@ -13593,9 +12288,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -13609,9 +12301,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -13628,8 +12317,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -13652,9 +12341,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -13668,9 +12354,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -13687,8 +12370,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -13711,9 +12394,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -13727,9 +12407,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -13746,8 +12423,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -13770,9 +12447,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -13786,9 +12460,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -13805,8 +12476,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -13829,9 +12500,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -13845,9 +12513,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -13864,8 +12529,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -13888,9 +12553,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -13904,9 +12566,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -13923,8 +12582,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -13947,9 +12606,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -13963,9 +12619,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -13982,8 +12635,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -14006,9 +12659,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14022,9 +12672,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14041,8 +12688,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -14065,9 +12712,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14081,9 +12725,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14100,8 +12741,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -14124,9 +12765,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14140,9 +12778,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14159,8 +12794,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -14183,9 +12818,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14199,9 +12831,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14218,8 +12847,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -14242,9 +12871,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14258,9 +12884,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14277,8 +12900,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -14301,9 +12924,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14317,9 +12937,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14336,8 +12953,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -14360,9 +12977,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14376,9 +12990,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14395,8 +13006,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -14419,9 +13030,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14435,9 +13043,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14454,8 +13059,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -14478,9 +13083,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14494,9 +13096,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14513,8 +13112,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -14537,9 +13136,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14553,9 +13149,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14572,8 +13165,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -14596,9 +13189,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14612,9 +13202,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14631,8 +13218,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -14655,9 +13242,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14671,9 +13255,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14690,8 +13271,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -14714,9 +13295,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14730,9 +13308,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14749,8 +13324,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -14773,9 +13348,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14789,9 +13361,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14808,8 +13377,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -14832,9 +13401,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14848,9 +13414,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14867,8 +13430,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -14891,9 +13454,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14907,9 +13467,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14926,8 +13483,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -14950,9 +13507,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14966,9 +13520,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -14985,8 +13536,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -15009,9 +13560,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15025,9 +13573,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15044,8 +13589,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -15068,9 +13613,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15084,9 +13626,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15103,8 +13642,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -15127,9 +13666,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15143,9 +13679,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15162,8 +13695,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -15186,9 +13719,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15202,9 +13732,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15221,8 +13748,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -15245,9 +13772,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15261,9 +13785,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15280,8 +13801,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -15304,9 +13825,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15320,9 +13838,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15339,8 +13854,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -15363,9 +13878,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15379,9 +13891,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15398,8 +13907,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -15422,9 +13931,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15438,9 +13944,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15457,8 +13960,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -15481,9 +13984,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15500,8 +14000,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -15524,9 +14024,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15543,8 +14040,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -15567,9 +14064,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15586,8 +14080,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -15610,9 +14104,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15629,8 +14120,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -15653,9 +14144,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15672,8 +14160,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "sensor-commands": [
+                    "Read"
                   ]
                 }
               },
@@ -15802,9 +14290,6 @@
                 "step-range": [
                   0,
                   99
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -15839,9 +14324,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -15876,9 +14358,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -15891,9 +14370,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -15930,9 +14406,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15945,9 +14418,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15969,9 +14439,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -15984,9 +14451,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -16008,9 +14472,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -16023,9 +14484,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -16047,9 +14505,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -16062,9 +14517,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -16106,9 +14558,6 @@
                 "step-range": [
                   0,
                   3
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -16145,9 +14594,6 @@
                 "step-range": [
                   0,
                   9
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -16179,9 +14625,6 @@
                 "step-range": [
                   0,
                   19
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -16216,9 +14659,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -16231,9 +14671,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -16269,9 +14706,6 @@
                 "step-range": [
                   0,
                   16
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -16325,9 +14759,6 @@
                 "step-range": [
                   0,
                   1000
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -16368,9 +14799,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -16671,9 +15099,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -16696,9 +15121,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -16711,9 +15133,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -16735,9 +15154,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -16750,9 +15166,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -16774,9 +15187,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -16789,9 +15199,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -16813,9 +15220,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -16828,9 +15232,6 @@
                   "step-range": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -16896,9 +15297,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -17061,9 +15459,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17076,9 +15471,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17100,9 +15492,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17116,9 +15505,6 @@
                   "step-range": [
                     0,
                     3
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17131,9 +15517,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17156,9 +15539,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17171,9 +15551,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17187,9 +15564,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17211,9 +15585,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17227,9 +15598,6 @@
                   "step-range": [
                     0,
                     7
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17251,9 +15619,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17266,9 +15631,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17290,9 +15652,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17306,9 +15665,6 @@
                   "step-range": [
                     0,
                     2
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17330,9 +15686,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17346,9 +15699,6 @@
                   "step-range": [
                     0,
                     5
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17370,9 +15720,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17395,9 +15742,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17419,9 +15763,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17434,9 +15775,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17501,9 +15839,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -17526,9 +15861,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17541,9 +15873,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17565,9 +15894,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17580,9 +15906,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17604,9 +15927,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17619,9 +15939,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17643,9 +15960,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17659,9 +15973,6 @@
                   "step-range": [
                     0,
                     9
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17683,9 +15994,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17699,9 +16007,6 @@
                   "step-range": [
                     0,
                     7
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17723,9 +16028,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17739,9 +16041,6 @@
                   "step-range": [
                     0,
                     5
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17764,9 +16063,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17780,9 +16076,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17804,9 +16097,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17819,9 +16109,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17843,9 +16130,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17859,9 +16143,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17875,9 +16156,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17900,9 +16178,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17916,9 +16191,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17931,9 +16203,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17956,9 +16225,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17972,9 +16238,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -17988,9 +16251,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18012,9 +16272,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18027,9 +16284,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18052,9 +16306,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18068,9 +16319,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18093,9 +16341,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18109,9 +16354,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18133,9 +16375,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18148,9 +16387,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18172,9 +16408,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18187,9 +16420,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18211,9 +16441,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18227,9 +16454,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18243,9 +16467,6 @@
                   "step-range": [
                     0,
                     5
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18267,9 +16488,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18282,9 +16500,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18306,9 +16521,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18321,9 +16533,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18345,9 +16554,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18360,9 +16566,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18376,9 +16579,6 @@
                   "step-range": [
                     0,
                     3
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18400,9 +16600,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18415,9 +16612,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18439,9 +16633,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18454,9 +16645,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18478,9 +16666,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18493,9 +16678,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18517,9 +16699,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18532,9 +16711,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18556,9 +16732,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18571,9 +16744,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18595,9 +16765,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18610,9 +16777,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18634,9 +16798,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18649,9 +16810,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18673,9 +16831,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18688,9 +16843,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18703,9 +16855,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18727,9 +16876,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18742,9 +16888,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18766,9 +16909,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18781,9 +16921,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18796,9 +16933,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18820,9 +16954,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18835,9 +16966,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18850,9 +16978,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18874,9 +16999,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18889,9 +17011,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18904,9 +17023,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18928,9 +17044,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18943,9 +17056,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18959,9 +17069,6 @@
                   "step-range": [
                     0,
                     3
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18983,9 +17090,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -18998,9 +17102,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19022,9 +17123,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19037,9 +17135,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19061,9 +17156,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19076,9 +17168,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19100,9 +17189,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19115,9 +17201,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19139,9 +17222,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19154,9 +17234,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19169,9 +17246,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19193,9 +17267,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19208,9 +17279,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19232,9 +17300,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19247,9 +17312,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19324,9 +17386,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -19378,9 +17437,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -19393,9 +17449,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -19409,9 +17462,6 @@
                 "step-range": [
                   0,
                   4
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -19442,9 +17492,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19458,9 +17505,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19474,9 +17518,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19513,9 +17554,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -19529,9 +17567,6 @@
                 "step-range": [
                   0,
                   1
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -19561,9 +17596,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19576,9 +17608,6 @@
                   "step-range": [
                     0,
                     255
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19615,9 +17644,6 @@
                 "step-range": [
                   0,
                   3
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -19652,9 +17678,6 @@
                 "step-range": [
                   0,
                   25
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -19695,9 +17718,6 @@
                 "step-range": [
                   0,
                   99
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -19710,9 +17730,6 @@
                 "step-range": [
                   0,
                   99
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -19756,9 +17773,6 @@
                   "step-range": [
                     0,
                     99
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -19798,9 +17812,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -19839,9 +17850,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -19877,9 +17885,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -19915,9 +17920,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20012,9 +18014,6 @@
                 "step-range": [
                   0,
                   19
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20027,9 +18026,6 @@
                 "step-range": [
                   0,
                   19
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20065,9 +18061,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20112,9 +18105,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20128,9 +18118,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20144,9 +18131,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20160,9 +18144,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20176,9 +18157,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20192,9 +18170,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20208,9 +18183,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20224,9 +18196,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20258,9 +18227,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20295,9 +18261,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueWithParameterCmd"
                 ]
               }
             },
@@ -20332,9 +18295,6 @@
                 "step-range": [
                   0,
                   180
-                ],
-                "messages": [
-                  "ValueWithParameterCmd"
                 ]
               }
             },
@@ -20369,9 +18329,6 @@
                 "step-range": [
                   0,
                   10
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20384,9 +18341,6 @@
                 "step-range": [
                   0,
                   2
-                ],
-                "messages": [
-                  "ValueWithParameterCmd"
                 ]
               }
             },
@@ -20421,9 +18375,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20436,9 +18387,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20473,9 +18421,6 @@
                 "step-range": [
                   0,
                   1000
-                ],
-                "messages": [
-                  "ValueWithParameterCmd"
                 ]
               }
             },
@@ -20510,9 +18455,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20525,9 +18467,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20540,9 +18479,6 @@
                 "step-range": [
                   0,
                   255
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20577,9 +18513,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20614,9 +18547,6 @@
                 "step-range": [
                   0,
                   100
-                ],
-                "messages": [
-                  "ValueCmd"
                 ]
               }
             },
@@ -20633,8 +18563,8 @@
                     100
                   ]
                 ],
-                "messages": [
-                  "SensorReadCmd"
+                "sensor-commands": [
+                  "Read"
                 ]
               }
             },
