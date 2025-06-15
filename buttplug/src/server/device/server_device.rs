@@ -376,6 +376,10 @@ impl ServerDevice {
               ));
               break;
             }
+            ActuatorType::Vibrate => {
+              stop_cmd(message::ActuatorCommand::Vibrate(ActuatorValue::new(0)));
+              break;
+            }
             _ => {
               // There's not much we can do about position or position w/ duration, so just continue on
               continue;
@@ -384,7 +388,6 @@ impl ServerDevice {
         }
       }
     }
-
     Self {
       identifier,
       //actuator_command_manager: acm,
