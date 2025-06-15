@@ -338,9 +338,6 @@ impl ServerDevice {
     for (index, feature) in definition.features().iter().enumerate() {
       if let Some(actuator_map) = feature.actuator() {
         for actuator_type in actuator_map.keys() {
-          if FeatureType::try_from(*actuator_type) != Ok(feature.feature_type()) {
-            continue;
-          }
           let mut stop_cmd = |actuator_cmd| {
             stop_commands.push(
               CheckedActuatorCmdV4::new(1, 0, index as u32, feature.id(), actuator_cmd).into(),
