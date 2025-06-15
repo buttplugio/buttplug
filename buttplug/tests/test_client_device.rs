@@ -9,8 +9,8 @@ mod util;
 use buttplug::{
   client::{ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent},
   core::{
-    errors::{ButtplugError, ButtplugMessageError},
-    message::{ActuatorType, ButtplugActuatorFeatureMessageType, Endpoint, FeatureType},
+    errors::ButtplugError,
+    message::{ActuatorType, Endpoint, FeatureType},
   },
   server::{
     device::{
@@ -290,20 +290,12 @@ async fn test_client_range_limits() {
   let mut feature_1_actuator = HashMap::new();
   feature_1_actuator.insert(
     ActuatorType::Vibrate,
-    ServerDeviceFeatureActuator::new(
-      &(0..=127),
-      &(0..=64),
-      &[ButtplugActuatorFeatureMessageType::ValueCmd].into(),
-    ),
+    ServerDeviceFeatureActuator::new(&(0..=127), &(0..=64)),
   );
   let mut feature_2_actuator = HashMap::new();
   feature_2_actuator.insert(
     ActuatorType::Vibrate,
-    ServerDeviceFeatureActuator::new(
-      &(0..=127),
-      &(64..=127),
-      &[ButtplugActuatorFeatureMessageType::ValueCmd].into(),
-    ),
+    ServerDeviceFeatureActuator::new(&(0..=127), &(64..=127)),
   );
   dcm
     .add_user_device_definition(
