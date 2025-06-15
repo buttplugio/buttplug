@@ -862,12 +862,18 @@ pub trait ProtocolHandler: Sync + Send {
       ActuatorCommand::Led(x) => {
         self.handle_actuator_led_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
       }
-      ActuatorCommand::PositionWithDuration(x) =>  {
-        self.handle_position_with_duration_cmd(cmd.feature_index(), cmd.feature_id(), x.position(), x.duration())
-      }
-      ActuatorCommand::RotateWithDirection(x) =>  {
-        self.handle_rotation_with_direction_cmd(cmd.feature_index(), cmd.feature_id(), x.speed(), x.clockwise())
-      }      
+      ActuatorCommand::PositionWithDuration(x) => self.handle_position_with_duration_cmd(
+        cmd.feature_index(),
+        cmd.feature_id(),
+        x.position(),
+        x.duration(),
+      ),
+      ActuatorCommand::RotateWithDirection(x) => self.handle_rotation_with_direction_cmd(
+        cmd.feature_index(),
+        cmd.feature_id(),
+        x.speed(),
+        x.clockwise(),
+      ),
     }
   }
 
