@@ -15,16 +15,7 @@ use super::client::{
 use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    message::{
-      ActuatorType,
-      Endpoint,
-      RawReadCmdV2,
-      RawSubscribeCmdV2,
-      RawUnsubscribeCmdV2,
-      RawWriteCmdV2,
-      SensorType,
-      StopDeviceCmdV0,
-    },
+    message::{ActuatorType, Endpoint, SensorType, StopDeviceCmdV0},
   },
   server::message::{
     ButtplugClientMessageV3,
@@ -34,6 +25,10 @@ use buttplug::{
     ClientGenericDeviceMessageAttributesV3,
     DeviceMessageInfoV3,
     LinearCmdV1,
+    RawReadCmdV2,
+    RawSubscribeCmdV2,
+    RawUnsubscribeCmdV2,
+    RawWriteCmdV2,
     RotateCmdV1,
     RotationSubcommandV1,
     ScalarCmdV3,

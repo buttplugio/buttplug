@@ -1,6 +1,5 @@
 use crate::util::{
   device_test::{
-    client::client_v3::client::ButtplugClientResultFuture,
     connector::build_channel_connector,
   },
   ButtplugTestServer,
@@ -14,7 +13,7 @@ use buttplug::{
     ButtplugClientDevice,
     ButtplugClientEvent,
   },
-  core::message::{ActuatorType, DeviceFeature, FeatureType},
+  core::message::{ActuatorType, FeatureType},
   server::{device::ServerDeviceManagerBuilder, ButtplugServer, ButtplugServerBuilder},
   util::{async_manager, device_configuration::load_protocol_configs},
 };
@@ -65,16 +64,24 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
       let fut_vec: Vec<_> = msg
         .iter()
         .map(|cmd| {
-          let vibe_features: Vec<&ClientDeviceFeature> = device
+          let rotate_features: Vec<&ClientDeviceFeature> = device
             .device_features()
             .iter()
             .filter(|f| *f.feature().feature_type() == FeatureType::RotateWithDirection)
             .collect();
-          let f = vibe_features[cmd.index() as usize].clone();
-          f.check_and_set_actuator_value_with_parameter_float(
-            ActuatorType::RotateWithDirection,
-            cmd.speed(),
-            if cmd.clockwise() { 1 } else { 0 },
+          let f = rotate_features[cmd.index() as usize].clone();
+          f.rotate_with_direction(
+            (cmd.speed()
+              * *f
+                .feature()
+                .actuator()
+                .as_ref()
+                .unwrap()
+                .get(&ActuatorType::RotateWithDirection)
+                .unwrap()
+                .step_count() as f64)
+              .ceil() as u32,
+            cmd.clockwise(),
           )
         })
         .collect();
@@ -85,10 +92,18 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
         .iter()
         .map(|cmd| {
           let f = device.device_features()[cmd.index() as usize].clone();
-          f.check_and_set_actuator_value_with_parameter_float(
-            ActuatorType::PositionWithDuration,
-            cmd.position(),
-            cmd.duration() as i32,
+          f.position_with_duration(
+            (cmd.position()
+              * *f
+                .feature()
+                .actuator()
+                .as_ref()
+                .unwrap()
+                .get(&ActuatorType::PositionWithDuration)
+                .unwrap()
+                .step_count() as f64)
+              .ceil() as u32,
+            cmd.duration(),
           )
         })
         .collect();

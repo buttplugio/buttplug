@@ -12,6 +12,9 @@ use buttplug::{
     message::{
       ButtplugServerMessageV4,
       Endpoint,
+      RawCommand,
+      RawCommandRead,
+      RawCommandWrite,
       RequestServerInfoV4,
       StartScanningV0,
       BUTTPLUG_CURRENT_API_MAJOR_VERSION,
@@ -19,13 +22,9 @@ use buttplug::{
     },
   },
   server::message::{
-    checked_raw_cmd::CheckedRawReadCmdV2,
-    checked_raw_subscribe_cmd::CheckedRawSubscribeCmdV2,
-    checked_raw_unsubscribe_cmd::CheckedRawUnsubscribeCmdV2,
-    checked_raw_write_cmd::CheckedRawWriteCmdV2,
+    checked_raw_cmd::CheckedRawCmdV4,
     spec_enums::ButtplugCheckedClientMessageV4,
     ButtplugClientMessageVariant,
-    ButtplugServerMessageV3,
     ButtplugServerMessageVariant,
   },
 };
@@ -191,9 +190,11 @@ async fn test_reject_on_no_raw_message() {
       assert_eq!(da.device_name(), "Aneros Vivi");
       let mut should_be_err;
       should_be_err = server
-        .parse_checked_message(ButtplugCheckedClientMessageV4::from(
-          CheckedRawWriteCmdV2::new(da.device_index(), Endpoint::Tx, &[0x0], false),
-        ))
+        .parse_checked_message(ButtplugCheckedClientMessageV4::from(CheckedRawCmdV4::new(
+          da.device_index(),
+          Endpoint::Tx,
+          RawCommand::Write(RawCommandWrite::new(&vec![0x0], false)),
+        )))
         .await;
       assert!(should_be_err.is_err());
       assert!(matches!(
@@ -203,9 +204,11 @@ async fn test_reject_on_no_raw_message() {
       info!("ERRORED OUT");
 
       should_be_err = server
-        .parse_checked_message(ButtplugCheckedClientMessageV4::from(
-          CheckedRawReadCmdV2::new(da.device_index(), Endpoint::Tx, 0, 0),
-        ))
+        .parse_checked_message(ButtplugCheckedClientMessageV4::from(CheckedRawCmdV4::new(
+          da.device_index(),
+          Endpoint::Tx,
+          RawCommand::Read(RawCommandRead::new(0, 0)),
+        )))
         .await;
       assert!(should_be_err.is_err());
       assert!(matches!(
@@ -214,9 +217,11 @@ async fn test_reject_on_no_raw_message() {
       ));
 
       should_be_err = server
-        .parse_checked_message(ButtplugCheckedClientMessageV4::from(
-          CheckedRawSubscribeCmdV2::new(da.device_index(), Endpoint::Tx),
-        ))
+        .parse_checked_message(ButtplugCheckedClientMessageV4::from(CheckedRawCmdV4::new(
+          da.device_index(),
+          Endpoint::Tx,
+          RawCommand::Subscribe,
+        )))
         .await;
       assert!(should_be_err.is_err());
       assert!(matches!(
@@ -225,9 +230,11 @@ async fn test_reject_on_no_raw_message() {
       ));
 
       should_be_err = server
-        .parse_checked_message(ButtplugCheckedClientMessageV4::from(
-          CheckedRawUnsubscribeCmdV2::new(da.device_index(), Endpoint::Tx),
-        ))
+        .parse_checked_message(ButtplugCheckedClientMessageV4::from(CheckedRawCmdV4::new(
+          da.device_index(),
+          Endpoint::Tx,
+          RawCommand::Unsubscribe,
+        )))
         .await;
       assert!(should_be_err.is_err());
       assert!(matches!(

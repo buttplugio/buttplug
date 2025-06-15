@@ -20,15 +20,7 @@ use buttplug::{
   core::{
     connector::ButtplugConnectorError,
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    message::{
-      ButtplugMessage,
-      Endpoint,
-      RawReadCmdV2,
-      RawSubscribeCmdV2,
-      RawUnsubscribeCmdV2,
-      RawWriteCmdV2,
-      StopDeviceCmdV0,
-    },
+    message::{ButtplugMessage, Endpoint, StopDeviceCmdV0},
   },
   server::message::{
     BatteryLevelCmdV2,
@@ -39,6 +31,10 @@ use buttplug::{
     DeviceMessageInfoV2,
     LinearCmdV1,
     RSSILevelCmdV2,
+    RawReadCmdV2,
+    RawSubscribeCmdV2,
+    RawUnsubscribeCmdV2,
+    RawWriteCmdV2,
     RotateCmdV1,
     RotationSubcommandV1,
     VectorSubcommandV1,
