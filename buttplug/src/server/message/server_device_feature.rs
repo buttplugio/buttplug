@@ -257,7 +257,7 @@ pub struct ServerDeviceFeatureSensor {
   #[serde(serialize_with = "range_sequence_serialize")]
   value_range: Vec<RangeInclusive<i32>>,
   #[getset(get = "pub")]
-  #[serde(rename = "SensorCommands")]
+  #[serde(rename = "sensor-commands")]
   sensor_commands: HashSet<SensorCommandType>,
 }
 
