@@ -856,13 +856,18 @@ pub trait ProtocolHandler: Sync + Send {
       ActuatorCommand::Position(x) => {
         self.handle_actuator_position_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
       }
-      _ => Err(ButtplugDeviceError::UnhandledCommand(
-        format!(
-          "{} actuator types are not compatible",
-          actuator_command.as_actuator_type()
-        )
-        .to_owned(),
-      ))?,
+      ActuatorCommand::Heater(x) => {
+        self.handle_actuator_heater_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+      }
+      ActuatorCommand::Led(x) => {
+        self.handle_actuator_led_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+      }
+      ActuatorCommand::PositionWithDuration(x) =>  {
+        self.handle_position_with_duration_cmd(cmd.feature_index(), cmd.feature_id(), x.position(), x.duration())
+      }
+      ActuatorCommand::RotateWithDirection(x) =>  {
+        self.handle_rotation_with_direction_cmd(cmd.feature_index(), cmd.feature_id(), x.speed(), x.clockwise())
+      }      
     }
   }
 
@@ -909,6 +914,24 @@ pub trait ProtocolHandler: Sync + Send {
     _level: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("OutputCmd (Constrict Actuator)")
+  }
+
+  fn handle_actuator_heater_cmd(
+    &self,
+    _feature_index: u32,
+    _feature_id: Uuid,
+    _level: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.command_unimplemented("OutputCmd (Heater Actuator)")
+  }
+
+  fn handle_actuator_led_cmd(
+    &self,
+    _feature_index: u32,
+    _feature_id: Uuid,
+    _level: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.command_unimplemented("OutputCmd (Led Actuator)")
   }
 
   fn handle_actuator_position_cmd(
