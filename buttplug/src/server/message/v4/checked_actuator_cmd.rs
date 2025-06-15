@@ -114,7 +114,8 @@ impl TryFromDeviceAttributes<ActuatorCmdV4> for CheckedActuatorCmdV4 {
             ButtplugDeviceError::DeviceStepRangeError(step_count, value),
           ))
         } else {
-          let new_value = if step_count != 0 {
+          // Only set adjusted value if we haven't gotten zero, otherwise assume stop.
+          let new_value = if step_count != 0 && value != 0 {
             actuator.step_limit().start() + value
           } else {
             0
