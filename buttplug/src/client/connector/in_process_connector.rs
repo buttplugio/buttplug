@@ -78,7 +78,7 @@ impl Default for ButtplugInProcessClientConnector {
   }
 }
 
-impl<'a> ButtplugInProcessClientConnector {
+impl ButtplugInProcessClientConnector {
   /// Creates a new in-process connector, with a server instance.
   ///
   /// Sets up a server, using the basic [ButtplugServer] construction arguments.
