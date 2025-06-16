@@ -37,7 +37,7 @@
             {
               "description": "",
               "feature-type": "PositionWithDuration",
-              "actuator": {
+              "output": {
                 "PositionWithDuration": {
                   "step-range": [
                     0,
@@ -46,9 +46,6 @@
                   "step-limit": [
                     0,
                     100
-                  ],
-                  "messages": [
-                    "ValueWithParameterCmd"
                   ]
                 }
               },
@@ -57,7 +54,7 @@
             {
               "description": "",
               "feature-type": "Vibrate",
-              "actuator": {
+              "output": {
                 "Vibrate": {
                   "step-range": [
                     0,
@@ -66,9 +63,6 @@
                   "step-limit": [
                     0,
                     99
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },

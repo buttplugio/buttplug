@@ -13,7 +13,7 @@ use uuid::{uuid, Uuid};
 use futures_util::future::BoxFuture;
 use futures_util::{future, FutureExt};
 
-use crate::core::message::{SensorReadingV4, SensorType};
+use crate::core::message::{InputReadingV4, InputType};
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_initializer_setup,
@@ -133,7 +133,7 @@ impl ProtocolHandler for Galaku {
     true
   }
 
-  fn handle_actuator_vibrate_cmd(
+  fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,
     _feature_id: Uuid,
@@ -189,15 +189,15 @@ impl ProtocolHandler for Galaku {
     }
   }
 
-  fn handle_sensor_subscribe_cmd(
+  fn handle_input_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
     _feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType,
+    sensor_type: InputType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     match sensor_type {
-      SensorType::Battery => {
+      InputType::Battery => {
         async move {
           device
             .subscribe(&HardwareSubscribeCmd::new(
@@ -216,15 +216,15 @@ impl ProtocolHandler for Galaku {
     }
   }
 
-  fn handle_sensor_unsubscribe_cmd(
+  fn handle_input_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
     _feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType,
+    sensor_type: InputType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     match sensor_type {
-      SensorType::Battery => {
+      InputType::Battery => {
         async move {
           device
             .unsubscribe(&HardwareUnsubscribeCmd::new(
@@ -248,7 +248,7 @@ impl ProtocolHandler for Galaku {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-  ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
+  ) -> BoxFuture<Result<InputReadingV4, ButtplugDeviceError>> {
     let data: Vec<u32> = vec![90, 0, 0, 1, 19, 0, 0, 0, 0, 0];
     let mut device_notification_receiver = device.event_stream();
     async move {
@@ -272,10 +272,10 @@ impl ProtocolHandler for Galaku {
             if endpoint != Endpoint::RxBLEBattery {
               continue;
             }
-            let battery_reading = SensorReadingV4::new(
+            let battery_reading = InputReadingV4::new(
               0,
               feature_index,
-              SensorType::Battery,
+              InputType::Battery,
               vec![read_value(data) as i32],
             );
             Ok(battery_reading)

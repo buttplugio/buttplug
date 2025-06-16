@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{self, Endpoint, SensorReadingV4, SensorType},
+    message::{self, Endpoint, InputReadingV4, InputType},
   },
   server::device::{
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
@@ -25,7 +25,7 @@ generic_protocol_setup!(KiirooProWand, "kiiroo-prowand");
 pub struct KiirooProWand {}
 
 impl ProtocolHandler for KiirooProWand {
-  fn handle_actuator_vibrate_cmd(
+  fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,
@@ -52,7 +52,7 @@ impl ProtocolHandler for KiirooProWand {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-  ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
+  ) -> BoxFuture<Result<InputReadingV4, ButtplugDeviceError>> {
     debug!("Trying to get battery reading.");
     let msg = HardwareReadCmd::new(feature_id, Endpoint::RxBLEBattery, 20, 0);
     let fut = device.read_value(&msg);
@@ -61,7 +61,7 @@ impl ProtocolHandler for KiirooProWand {
       let data = hw_msg.data();
       let battery_level = data[0] as i32;
       let battery_reading =
-        message::SensorReadingV4::new(0, feature_index, SensorType::Battery, vec![battery_level]);
+        message::InputReadingV4::new(0, feature_index, InputType::Battery, vec![battery_level]);
       debug!("Got battery reading: {}", battery_level);
       Ok(battery_reading)
     }

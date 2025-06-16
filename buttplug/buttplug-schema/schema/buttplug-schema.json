@@ -305,7 +305,7 @@
         "FeatureType": {
           "type": "string"
         },
-        "Actuator": {
+        "Output": {
           "type": "object",
           "patternProperties": {
             "^.*$": {
@@ -321,7 +321,7 @@
             }
           }
         },
-        "Sensor": {
+        "Input": {
           "type": "object",
           "patternProperties": {
             "^.*$": {
@@ -367,7 +367,7 @@
   },
   "messages": {
     "SpecV4Messages": {
-      "ActuatorCmd": {
+      "OutputCmd": {
         "type": "object",
         "description": "Sends a generic value set command to a device.",
         "properties": {
@@ -433,33 +433,33 @@
           "Command"
         ]
       },
-      "SensorCmd": {
+      "InputCmd": {
         "type": "object",
         "description": "Sends a request to read a sensor value.",
         "properties": {
           "Id": { "$ref": "#/components/ClientId" },
           "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
           "FeatureIndex": { "type": "integer" },
-          "SensorType": { "type": "string" },
-          "SensorCommand": { "type": "string" }
+          "InputType": { "type": "string" },
+          "InputCommand": { "type": "string" }
         },
         "additionalProperties": false,
         "required": [
           "Id",
           "DeviceIndex",
           "FeatureIndex",
-          "SensorType",
-          "SensorCommand"
+          "InputType",
+          "InputCommand"
         ]
       },
-      "SensorReading": {
+      "InputReading": {
         "type": "object",
         "description": "Returns from either a sensor read request or a subscribed sensor event.",
         "properties": {
           "Id": { "$ref": "#/components/ServerId" },
           "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
           "FeatureIndex": { "type": "integer" },
-          "SensorType": { "type": "string" },
+          "InputType": { "type": "string" },
           "Data": {
             "type": "array",
             "items": {
@@ -474,7 +474,7 @@
           "Id",
           "DeviceIndex",
           "FeatureIndex",
-          "SensorType",
+          "InputType",
           "Data"
         ]
       },
@@ -1686,14 +1686,14 @@
           "RequestDeviceList": { "$ref": "#/messages/SpecV0Messages/RequestDeviceList" },
           "RequestServerInfo": { "$ref": "#/messages/SpecV4Messages/RequestServerInfo" },
           "ScanningFinished": { "$ref": "#/messages/SpecV0Messages/ScanningFinished" },
-          "SensorCmd": { "$ref": "#/messages/SpecV4Messages/SensorCmd" },
-          "SensorReading": { "$ref": "#/messages/SpecV4Messages/SensorReading" },
+          "InputCmd": { "$ref": "#/messages/SpecV4Messages/InputCmd" },
+          "InputReading": { "$ref": "#/messages/SpecV4Messages/InputReading" },
           "ServerInfo": { "$ref": "#/messages/SpecV4Messages/ServerInfo" },
           "StartScanning": { "$ref": "#/messages/SpecV0Messages/StartScanning" },
           "StopAllDevices": { "$ref": "#/messages/SpecV0Messages/StopAllDevices" },
           "StopDeviceCmd": { "$ref": "#/messages/SpecV0Messages/StopDeviceCmd" },
           "StopScanning": { "$ref": "#/messages/SpecV0Messages/StopScanning" },
-          "ActuatorCmd": { "$ref": "#/messages/SpecV4Messages/ActuatorCmd" }
+          "OutputCmd": { "$ref": "#/messages/SpecV4Messages/OutputCmd" }
         },
         "additionalProperties": false,
         "minProperties": 1,

@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::message::{ActuatorType, SensorType},
+  core::message::{OutputType, InputType},
   server::message::{
     server_device_feature::ServerDeviceFeature,
     v1::NullDeviceMessageAttributesV1,
@@ -47,7 +47,7 @@ pub struct ServerDeviceMessageAttributesV3 {
 #[getset(get = "pub")]
 pub struct ServerGenericDeviceMessageAttributesV3 {
   pub(in crate::server::message) feature_descriptor: String,
-  pub(in crate::server::message) actuator_type: ActuatorType,
+  pub(in crate::server::message) actuator_type: OutputType,
   pub(in crate::server::message) step_count: u32,
   pub(in crate::server::message) index: u32,
   pub(in crate::server::message) feature: ServerDeviceFeature,
@@ -57,7 +57,7 @@ pub struct ServerGenericDeviceMessageAttributesV3 {
 #[getset(get = "pub")]
 pub struct ServerSensorDeviceMessageAttributesV3 {
   pub(in crate::server::message) feature_descriptor: String,
-  pub(in crate::server::message) sensor_type: SensorType,
+  pub(in crate::server::message) sensor_type: InputType,
   pub(in crate::server::message) sensor_range: Vec<RangeInclusive<i32>>,
   pub(in crate::server::message) index: u32,
   pub(in crate::server::message) feature: ServerDeviceFeature,
@@ -69,11 +69,11 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
       .iter()
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
-        if let Some(actuator_map) = feature.actuator() {
-          for (actuator_type, actuator) in actuator_map {
+        if let Some(output_map) = feature.output() {
+          for (actuator_type, actuator) in output_map {
             if ![
-              ActuatorType::PositionWithDuration,
-              ActuatorType::RotateWithDirection,
+              OutputType::PositionWithDuration,
+              OutputType::RotateWithDirection,
             ]
             .contains(actuator_type)
             {
@@ -101,10 +101,10 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
       .iter()
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
-        if let Some(actuator_map) = feature.actuator() {
-          for (actuator_type, actuator) in actuator_map {
-            if *actuator_type == ActuatorType::RotateWithDirection {
-              let actuator_type = ActuatorType::Rotate;
+        if let Some(output_map) = feature.output() {
+          for (actuator_type, actuator) in output_map {
+            if *actuator_type == OutputType::RotateWithDirection {
+              let actuator_type = OutputType::Rotate;
               let step_limit = actuator.step_limit();
               let step_count = step_limit.end() - step_limit.start();
               let attrs = ServerGenericDeviceMessageAttributesV3 {
@@ -126,10 +126,10 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
       .iter()
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
-        if let Some(actuator_map) = feature.actuator() {
-          for (actuator_type, actuator) in actuator_map {
-            if *actuator_type == ActuatorType::PositionWithDuration {
-              let actuator_type = ActuatorType::Position;
+        if let Some(output_map) = feature.output() {
+          for (actuator_type, actuator) in output_map {
+            if *actuator_type == OutputType::PositionWithDuration {
+              let actuator_type = OutputType::Position;
               let step_limit = actuator.step_limit();
               let step_count = step_limit.end() - step_limit.start();
               let attrs = ServerGenericDeviceMessageAttributesV3 {
@@ -152,11 +152,11 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
         .iter()
         .map(|feature| {
           let mut sensor_vec = vec![];
-          if let Some(sensor_map) = feature.sensor() {
+          if let Some(sensor_map) = feature.input() {
             for (sensor_type, sensor) in sensor_map {
               // Only convert Battery backwards. Other sensors weren't really built for v3 and we
               // never recommended using them or implemented much for them.
-              if *sensor_type == SensorType::Battery {
+              if *sensor_type == InputType::Battery {
                 sensor_vec.push(ServerSensorDeviceMessageAttributesV3 {
                   feature_descriptor: feature.description().to_owned(),
                   sensor_type: *sensor_type,

@@ -8,7 +8,7 @@
 use crate::core::{
   errors::ButtplugMessageError,
   message::{
-    ActuatorType,
+    OutputType,
     ButtplugDeviceMessage,
     ButtplugMessage,
     ButtplugMessageFinalizer,
@@ -27,11 +27,11 @@ pub struct ScalarSubcommandV3 {
   #[serde(rename = "Scalar")]
   scalar: f64,
   #[serde(rename = "ActuatorType")]
-  actuator_type: ActuatorType,
+  actuator_type: OutputType,
 }
 
 impl ScalarSubcommandV3 {
-  pub fn new(index: u32, scalar: f64, actuator_type: ActuatorType) -> Self {
+  pub fn new(index: u32, scalar: f64, actuator_type: OutputType) -> Self {
     Self {
       index,
       scalar,

@@ -11,13 +11,13 @@ use crate::core::message::{
   ButtplugMessageError,
   ButtplugMessageFinalizer,
   ButtplugMessageValidator,
-  SensorType,
+  InputType,
 };
 use getset::CopyGetters;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Display, PartialEq, Eq, Clone, Serialize, Deserialize, Hash, Copy)]
-pub enum SensorCommandType {
+pub enum InputCommandType {
   Read,
   Subscribe,
   Unsubscribe,
@@ -35,7 +35,7 @@ pub enum SensorCommandType {
   Serialize,
   Deserialize,
 )]
-pub struct SensorCmdV4 {
+pub struct InputCmdV4 {
   #[serde(rename = "Id")]
   id: u32,
   #[serde(rename = "DeviceIndex")]
@@ -44,31 +44,31 @@ pub struct SensorCmdV4 {
   #[serde(rename = "FeatureIndex")]
   feature_index: u32,
   #[getset(get_copy = "pub")]
-  #[serde(rename = "SensorType")]
-  sensor_type: SensorType,
+  #[serde(rename = "InputType")]
+  input_type: InputType,
   #[getset(get_copy = "pub")]
-  #[serde(rename = "SensorCommand")]
-  sensor_command: SensorCommandType,
+  #[serde(rename = "InputCommand")]
+  input_command: InputCommandType,
 }
 
-impl SensorCmdV4 {
+impl InputCmdV4 {
   pub fn new(
     device_index: u32,
     feature_index: u32,
-    sensor_type: SensorType,
-    sensor_command_type: SensorCommandType,
+    input_type: InputType,
+    input_command_type: InputCommandType,
   ) -> Self {
     Self {
       id: 1,
       device_index,
       feature_index,
-      sensor_type,
-      sensor_command: sensor_command_type,
+      input_type,
+      input_command: input_command_type,
     }
   }
 }
 
-impl ButtplugMessageValidator for SensorCmdV4 {
+impl ButtplugMessageValidator for InputCmdV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
     // TODO Should expected_length always be > 0?

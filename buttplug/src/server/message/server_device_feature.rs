@@ -8,15 +8,15 @@
 use crate::core::{
   errors::ButtplugDeviceError,
   message::{
-    ActuatorType,
+    OutputType,
     DeviceFeature,
-    DeviceFeatureActuator,
+    DeviceFeatureOutput,
     DeviceFeatureRaw,
-    DeviceFeatureSensor,
+    DeviceFeatureInput,
     Endpoint,
     FeatureType,
-    SensorCommandType,
-    SensorType,
+    InputCommandType,
+    InputType,
   },
 };
 use getset::{CopyGetters, Getters, MutGetters, Setters};
@@ -57,12 +57,12 @@ pub struct ServerDeviceFeature {
   feature_type: FeatureType,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(rename = "actuator")]
-  actuator: Option<HashMap<ActuatorType, ServerDeviceFeatureActuator>>,
+  #[serde(rename = "output")]
+  output: Option<HashMap<OutputType, ServerDeviceFeatureOutput>>,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(rename = "sensor")]
-  sensor: Option<HashMap<SensorType, ServerDeviceFeatureSensor>>,
+  #[serde(rename = "input")]
+  input: Option<HashMap<InputType, ServerDeviceFeatureInput>>,
   #[getset(get = "pub")]
   #[serde(skip)]
   raw: Option<DeviceFeatureRaw>,
@@ -79,14 +79,14 @@ impl ServerDeviceFeature {
     id: &Uuid,
     base_id: &Option<Uuid>,
     feature_type: FeatureType,
-    actuator: &Option<HashMap<ActuatorType, ServerDeviceFeatureActuator>>,
-    sensor: &Option<HashMap<SensorType, ServerDeviceFeatureSensor>>,
+    output: &Option<HashMap<OutputType, ServerDeviceFeatureOutput>>,
+    input: &Option<HashMap<InputType, ServerDeviceFeatureInput>>,
   ) -> Self {
     Self {
       description: description.to_owned(),
       feature_type,
-      actuator: actuator.clone(),
-      sensor: sensor.clone(),
+      output: output.clone(),
+      input: input.clone(),
       raw: None,
       id: *id,
       base_id: *base_id,
@@ -94,8 +94,8 @@ impl ServerDeviceFeature {
   }
 
   pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
-    if let Some(actuator_map) = &self.actuator {
-      for actuator in actuator_map.values() {
+    if let Some(output_map) = &self.output {
+      for actuator in output_map.values() {
         actuator.is_valid()?;
       }
     }
@@ -107,14 +107,14 @@ impl ServerDeviceFeature {
       index,
       self.description(),
       self.feature_type(),
-      &self.actuator.clone().map(|x| {
+      &self.output.clone().map(|x| {
         x.iter()
-          .map(|(t, a)| (*t, DeviceFeatureActuator::from(a.clone())))
+          .map(|(t, a)| (*t, DeviceFeatureOutput::from(a.clone())))
           .collect()
       }),
-      &self.sensor.clone().map(|x| {
+      &self.input.clone().map(|x| {
         x.iter()
-          .map(|(t, a)| (*t, DeviceFeatureSensor::from(a.clone())))
+          .map(|(t, a)| (*t, DeviceFeatureInput::from(a.clone())))
           .collect()
       }),
       self.raw(),
@@ -130,8 +130,8 @@ impl ServerDeviceFeature {
       Self {
         description: self.description.clone(),
         feature_type: self.feature_type,
-        actuator: self.actuator.clone(),
-        sensor: self.sensor.clone(),
+        output: self.output.clone(),
+        input: self.input.clone(),
         raw: self.raw.clone(),
         id: Uuid::new_v4(),
         base_id: Some(self.id),
@@ -143,8 +143,8 @@ impl ServerDeviceFeature {
     Self {
       description: "Raw Endpoints".to_owned(),
       feature_type: FeatureType::Raw,
-      actuator: None,
-      sensor: None,
+      output: None,
+      input: None,
       raw: Some(DeviceFeatureRaw::new(endpoints)),
       id: uuid::Uuid::new_v4(),
       base_id: None,
@@ -191,7 +191,7 @@ pub struct ServerDeviceFeatureActuatorSerialized {
   step_limit: Option<RangeInclusive<u32>>,
 }
 
-impl From<ServerDeviceFeatureActuatorSerialized> for ServerDeviceFeatureActuator {
+impl From<ServerDeviceFeatureActuatorSerialized> for ServerDeviceFeatureOutput {
   fn from(value: ServerDeviceFeatureActuatorSerialized) -> Self {
     Self {
       step_range: value.step_range.clone(),
@@ -202,7 +202,7 @@ impl From<ServerDeviceFeatureActuatorSerialized> for ServerDeviceFeatureActuator
 
 #[derive(Clone, Debug, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize)]
 #[serde(from = "ServerDeviceFeatureActuatorSerialized")]
-pub struct ServerDeviceFeatureActuator {
+pub struct ServerDeviceFeatureOutput {
   #[getset(get = "pub")]
   #[serde(rename = "step-range")]
   #[serde(serialize_with = "range_serialize")]
@@ -215,7 +215,7 @@ pub struct ServerDeviceFeatureActuator {
   step_limit: RangeInclusive<u32>,
 }
 
-impl ServerDeviceFeatureActuator {
+impl ServerDeviceFeatureOutput {
   pub fn new(step_range: &RangeInclusive<u32>, step_limit: &RangeInclusive<u32>) -> Self {
     Self {
       step_range: step_range.clone(),
@@ -242,40 +242,40 @@ impl ServerDeviceFeatureActuator {
   }
 }
 
-impl From<ServerDeviceFeatureActuator> for DeviceFeatureActuator {
-  fn from(value: ServerDeviceFeatureActuator) -> Self {
-    DeviceFeatureActuator::new(value.step_limit().end() - value.step_limit().start())
+impl From<ServerDeviceFeatureOutput> for DeviceFeatureOutput {
+  fn from(value: ServerDeviceFeatureOutput) -> Self {
+    DeviceFeatureOutput::new(value.step_limit().end() - value.step_limit().start())
   }
 }
 
 #[derive(
   Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize,
 )]
-pub struct ServerDeviceFeatureSensor {
+pub struct ServerDeviceFeatureInput {
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(rename = "value-range")]
   #[serde(serialize_with = "range_sequence_serialize")]
   value_range: Vec<RangeInclusive<i32>>,
   #[getset(get = "pub")]
-  #[serde(rename = "sensor-commands")]
-  sensor_commands: HashSet<SensorCommandType>,
+  #[serde(rename = "input-commands")]
+  input_commands: HashSet<InputCommandType>,
 }
 
-impl ServerDeviceFeatureSensor {
+impl ServerDeviceFeatureInput {
   pub fn new(
     value_range: &Vec<RangeInclusive<i32>>,
-    sensor_commands: &HashSet<SensorCommandType>,
+    sensor_commands: &HashSet<InputCommandType>,
   ) -> Self {
     Self {
       value_range: value_range.clone(),
-      sensor_commands: sensor_commands.clone(),
+      input_commands: sensor_commands.clone(),
     }
   }
 }
 
-impl From<ServerDeviceFeatureSensor> for DeviceFeatureSensor {
-  fn from(value: ServerDeviceFeatureSensor) -> Self {
+impl From<ServerDeviceFeatureInput> for DeviceFeatureInput {
+  fn from(value: ServerDeviceFeatureInput) -> Self {
     // Unlike actuator, this is just a straight copy.
-    DeviceFeatureSensor::new(value.value_range(), value.sensor_commands())
+    DeviceFeatureInput::new(value.value_range(), value.input_commands())
   }
 }

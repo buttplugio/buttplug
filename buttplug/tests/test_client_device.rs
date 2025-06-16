@@ -10,14 +10,14 @@ use buttplug::{
   client::{ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent},
   core::{
     errors::ButtplugError,
-    message::{ActuatorType, Endpoint, FeatureType},
+    message::{OutputType, Endpoint, FeatureType},
   },
   server::{
     device::{
       configuration::{UserDeviceCustomization, UserDeviceDefinition, UserDeviceIdentifier},
       hardware::{HardwareCommand, HardwareWriteCmd},
     },
-    message::server_device_feature::{ServerDeviceFeature, ServerDeviceFeatureActuator},
+    message::server_device_feature::{ServerDeviceFeature, ServerDeviceFeatureOutput},
   },
   util::{async_manager, device_configuration::load_protocol_configs},
 };
@@ -289,13 +289,13 @@ async fn test_client_range_limits() {
   let test_identifier = TestDeviceIdentifier::new("Massage Demo", Some("range-test".into()));
   let mut feature_1_actuator = HashMap::new();
   feature_1_actuator.insert(
-    ActuatorType::Vibrate,
-    ServerDeviceFeatureActuator::new(&(0..=127), &(0..=64)),
+    OutputType::Vibrate,
+    ServerDeviceFeatureOutput::new(&(0..=127), &(0..=64)),
   );
   let mut feature_2_actuator = HashMap::new();
   feature_2_actuator.insert(
-    ActuatorType::Vibrate,
-    ServerDeviceFeatureActuator::new(&(0..=127), &(64..=127)),
+    OutputType::Vibrate,
+    ServerDeviceFeatureOutput::new(&(0..=127), &(64..=127)),
   );
   dcm
     .add_user_device_definition(

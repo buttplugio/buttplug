@@ -13,9 +13,9 @@ use crate::{
       ButtplugMessage,
       ButtplugMessageFinalizer,
       ButtplugMessageValidator,
-      SensorCmdV4,
-      SensorCommandType,
-      SensorType,
+      InputCmdV4,
+      InputCommandType,
+      InputType,
     },
   },
   server::message::TryFromDeviceAttributes,
@@ -27,70 +27,70 @@ use uuid::Uuid;
   Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, CopyGetters,
 )]
 #[getset(get_copy = "pub")]
-pub struct CheckedSensorCmdV4 {
+pub struct CheckedInputCmdV4 {
   id: u32,
   device_index: u32,
   feature_index: u32,
-  sensor_type: SensorType,
-  sensor_command: SensorCommandType,
+  input_type: InputType,
+  input_command: InputCommandType,
   feature_id: Uuid,
 }
 
-impl CheckedSensorCmdV4 {
+impl CheckedInputCmdV4 {
   pub fn new(
     device_index: u32,
     feature_index: u32,
-    sensor_type: SensorType,
-    sensor_command: SensorCommandType,
+    input_type: InputType,
+    input_command: InputCommandType,
     feature_id: Uuid,
   ) -> Self {
     Self {
       id: 1,
       device_index,
       feature_index,
-      sensor_type,
-      sensor_command,
+      input_type,
+      input_command,
       feature_id,
     }
   }
 }
 
-impl ButtplugMessageValidator for CheckedSensorCmdV4 {
+impl ButtplugMessageValidator for CheckedInputCmdV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
     // TODO Should expected_length always be > 0?
   }
 }
 
-impl TryFromDeviceAttributes<SensorCmdV4> for CheckedSensorCmdV4 {
+impl TryFromDeviceAttributes<InputCmdV4> for CheckedInputCmdV4 {
   fn try_from_device_attributes(
-    msg: SensorCmdV4,
+    msg: InputCmdV4,
     features: &crate::server::message::ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
     if let Some(feature) = features.features().get(msg.feature_index() as usize) {
-      if let Some(sensor_map) = feature.sensor() {
-        if let Some(sensor) = sensor_map.get(&msg.sensor_type()) {
-          if sensor.sensor_commands().contains(&msg.sensor_command()) {
-            Ok(CheckedSensorCmdV4::new(
+      if let Some(sensor_map) = feature.input() {
+        if let Some(sensor) = sensor_map.get(&msg.input_type()) {
+          if sensor.input_commands().contains(&msg.input_command()) {
+            Ok(CheckedInputCmdV4::new(
               msg.device_index(),
               msg.feature_index(),
-              msg.sensor_type(),
-              msg.sensor_command(),
+              msg.input_type(),
+              msg.input_command(),
               feature.id(),
             ))
           } else {
             Err(ButtplugError::from(
-              ButtplugDeviceError::DeviceNoSensorError("SensorCmd".to_string()),
+              ButtplugDeviceError::DeviceNoSensorError("InputCmd".to_string()),
             ))
           }
         } else {
           Err(ButtplugError::from(
-            ButtplugDeviceError::DeviceNoSensorError("SensorCmd".to_string()),
+            ButtplugDeviceError::DeviceNoSensorError("InputCmd".to_string()),
           ))
         }
       } else {
         Err(ButtplugError::from(
-          ButtplugDeviceError::DeviceNoSensorError("SensorCmd".to_string()),
+          ButtplugDeviceError::DeviceNoSensorError("InputCmd".to_string()),
         ))
       }
     } else {

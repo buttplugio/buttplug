@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{self, Endpoint, FeatureType, SensorReadingV4},
+    message::{self, Endpoint, FeatureType, InputReadingV4},
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
@@ -169,7 +169,7 @@ impl ProtocolInitializer for LovenseInitializer {
     let actuator_count = device_definition
       .features()
       .iter()
-      .filter(|x| x.actuator().is_some())
+      .filter(|x| x.output().is_some())
       .count();
 
     // This might need better tuning if other complex Lovenses are released
@@ -306,7 +306,7 @@ impl ProtocolHandler for Lovense {
     ))
   }
 
-  fn handle_actuator_vibrate_cmd(
+  fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
@@ -403,7 +403,7 @@ impl ProtocolHandler for Lovense {
       */
   }
 
-  fn handle_actuator_constrict_cmd(
+  fn handle_output_constrict_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,
@@ -420,7 +420,7 @@ impl ProtocolHandler for Lovense {
     .into()])
   }
 
-  fn handle_actuator_rotate_cmd(
+  fn handle_output_rotate_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
@@ -455,7 +455,7 @@ impl ProtocolHandler for Lovense {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-  ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
+  ) -> BoxFuture<Result<InputReadingV4, ButtplugDeviceError>> {
     let mut device_notification_receiver = device.event_stream();
     async move {
       let write_fut = device.write_value(&HardwareWriteCmd::new(
@@ -481,10 +481,10 @@ impl ProtocolHandler for Lovense {
               // do for now.
               let start_pos = usize::from(data_str.contains('s'));
               if let Ok(level) = data_str[start_pos..(len - 1)].parse::<u8>() {
-                return Ok(message::SensorReadingV4::new(
+                return Ok(message::InputReadingV4::new(
                   0,
                   feature_index,
-                  message::SensorType::Battery,
+                  message::InputType::Battery,
                   vec![level as i32],
                 ));
               }

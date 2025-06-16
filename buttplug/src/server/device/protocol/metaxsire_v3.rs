@@ -39,7 +39,7 @@ impl ProtocolInitializer for MetaXSireV3Initializer {
     let feature_count = device_definition
       .features()
       .iter()
-      .filter(|x| x.actuator().is_some())
+      .filter(|x| x.output().is_some())
       .count();
     Ok(Arc::new(MetaXSireV3::new(hardware, feature_count)))
   }

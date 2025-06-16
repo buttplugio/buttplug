@@ -85,7 +85,7 @@ impl ButtplugServerMessageConverter {
     msg: &ButtplugServerMessageV4,
   ) -> Result<ButtplugServerMessageV3, ButtplugError> {
     match msg {
-      ButtplugServerMessageV4::SensorReading(m) => {
+      ButtplugServerMessageV4::InputReading(m) => {
         let original_msg = self.original_message.as_ref().unwrap();
         if let ButtplugClientMessageVariant::V3(ButtplugClientMessageV3::SensorReadCmd(msg)) =
           &original_msg

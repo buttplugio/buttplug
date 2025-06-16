@@ -149,7 +149,7 @@ impl ProtocolHandler for VibCrafter {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_actuator_vibrate_cmd(
+  fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,
     feature_id: uuid::Uuid,

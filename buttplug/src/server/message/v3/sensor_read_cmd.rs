@@ -13,12 +13,12 @@ use crate::{
       ButtplugMessage,
       ButtplugMessageFinalizer,
       ButtplugMessageValidator,
-      SensorCommandType,
-      SensorType,
+      InputCommandType,
+      InputType,
     },
   },
   server::message::{
-    checked_sensor_cmd::CheckedSensorCmdV4,
+    checked_input_cmd::CheckedInputCmdV4,
     ServerDeviceAttributes,
     TryFromDeviceAttributes,
   },
@@ -48,11 +48,11 @@ pub struct SensorReadCmdV3 {
   sensor_index: u32,
   #[getset(get = "pub")]
   #[serde(rename = "SensorType")]
-  sensor_type: SensorType,
+  sensor_type: InputType,
 }
 
 impl SensorReadCmdV3 {
-  pub fn new(device_index: u32, sensor_index: u32, sensor_type: SensorType) -> Self {
+  pub fn new(device_index: u32, sensor_index: u32, sensor_type: InputType) -> Self {
     Self {
       id: 1,
       device_index,
@@ -69,31 +69,31 @@ impl ButtplugMessageValidator for SensorReadCmdV3 {
   }
 }
 
-impl TryFromDeviceAttributes<SensorReadCmdV3> for CheckedSensorCmdV4 {
+impl TryFromDeviceAttributes<SensorReadCmdV3> for CheckedInputCmdV4 {
   fn try_from_device_attributes(
     msg: SensorReadCmdV3,
     features: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
     // Reject any SensorRead that's not a battery, we never supported sensors otherwise in v3.
-    if msg.sensor_type != SensorType::Battery {
+    if msg.sensor_type != InputType::Battery {
       Err(ButtplugError::from(
         ButtplugDeviceError::MessageNotSupported("SensorReadCmdV3".to_owned()),
       ))
     } else if let Some((feature_index, feature)) =
       features.features().iter().enumerate().find(|(_, p)| {
-        if let Some(sensor_map) = p.sensor() {
-          if sensor_map.contains_key(&SensorType::Battery) {
+        if let Some(sensor_map) = p.input() {
+          if sensor_map.contains_key(&InputType::Battery) {
             return true;
           }
         }
         false
       })
     {
-      Ok(CheckedSensorCmdV4::new(
+      Ok(CheckedInputCmdV4::new(
         msg.device_index(),
         feature_index as u32,
-        SensorType::Battery,
-        SensorCommandType::Read,
+        InputType::Battery,
+        InputCommandType::Read,
         feature.id(),
       ))
     } else {

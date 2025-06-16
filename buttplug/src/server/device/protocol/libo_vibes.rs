@@ -26,7 +26,7 @@ impl ProtocolHandler for LiboVibes {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_actuator_vibrate_cmd(
+  fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,
     _feature_id: Uuid,

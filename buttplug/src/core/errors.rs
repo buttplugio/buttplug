@@ -10,12 +10,12 @@
 use super::message::{
   self,
   serializer::ButtplugSerializerError,
-  ActuatorType,
+  OutputType,
   ButtplugMessageSpecVersion,
   Endpoint,
   ErrorCode,
   FeatureType,
-  SensorType,
+  InputType,
 };
 #[cfg(feature = "server")]
 use crate::server::device::hardware::communication::HardwareSpecificError;
@@ -184,13 +184,13 @@ pub enum ButtplugDeviceError {
   /// Device Configuration Error: {0}
   DeviceConfigurationError(String),
   /// Actuator Type Mismatch: Index {0} got command for {1}, but expects {2}
-  DeviceActuatorTypeMismatch(u32, ActuatorType, FeatureType),
+  DeviceActuatorTypeMismatch(u32, OutputType, FeatureType),
   /// Sensor Type Mismatch: Index {0} got command for {1}, but expects {2}
-  DeviceSensorTypeMismatch(u32, SensorType, FeatureType),
+  DeviceSensorTypeMismatch(u32, InputType, FeatureType),
   /// Protocol does not have an implementation available for Sensor Type {0}
-  ProtocolSensorNotSupported(SensorType),
+  ProtocolSensorNotSupported(InputType),
   /// Device does not support {0}
-  ActuatorNotSupported(ActuatorType),
+  ActuatorNotSupported(OutputType),
 }
 
 /// Unknown errors occur in exceptional circumstances where no other error type

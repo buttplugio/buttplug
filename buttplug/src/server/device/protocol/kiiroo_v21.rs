@@ -9,7 +9,7 @@ use super::fleshlight_launch_helper::calculate_speed;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{Endpoint, SensorReadingV4, SensorType},
+    message::{Endpoint, InputReadingV4, InputType},
   },
   server::{
     device::{
@@ -66,7 +66,7 @@ impl Default for KiirooV21 {
 }
 
 impl ProtocolHandler for KiirooV21 {
-  fn handle_actuator_vibrate_cmd(
+  fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,
@@ -109,7 +109,7 @@ impl ProtocolHandler for KiirooV21 {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-  ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
+  ) -> BoxFuture<Result<InputReadingV4, ButtplugDeviceError>> {
     debug!("Trying to get battery reading.");
     // Reading the "whitelist" endpoint for this device retrieves the battery level,
     // which is byte 5. All other bytes of the 20-byte result are unknown.
@@ -126,7 +126,7 @@ impl ProtocolHandler for KiirooV21 {
       }
       let battery_level = data[5] as i32;
       let battery_reading =
-        SensorReadingV4::new(0, feature_index, SensorType::Battery, vec![battery_level]);
+        InputReadingV4::new(0, feature_index, InputType::Battery, vec![battery_level]);
       debug!("Got battery reading: {}", battery_level);
       Ok(battery_reading)
     }
@@ -139,12 +139,12 @@ impl ProtocolHandler for KiirooV21 {
     convert_broadcast_receiver_to_stream(self.event_stream.subscribe()).boxed()
   }
 
-  fn handle_sensor_subscribe_cmd(
+  fn handle_input_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-    _sensor_type: SensorType,
+    _sensor_type: InputType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     if self.subscribed_sensors.contains(&feature_index) {
       return future::ready(Ok(())).boxed();
@@ -193,12 +193,12 @@ impl ProtocolHandler for KiirooV21 {
                   .collect();
                 let digital: Vec<i32> = (0..4).map(|i| ((data[8] as i32) >> i) & 1).collect();
                 for ((sensor_index, sensor_type), sensor_data) in (0u32..)
-                  .zip([SensorType::Pressure, SensorType::Button])
+                  .zip([InputType::Pressure, InputType::Button])
                   .zip([analog, digital])
                 {
                   if stream_sensors.contains(&sensor_index)
                     && sender
-                      .send(SensorReadingV4::new(0, sensor_index, sensor_type, sensor_data).into())
+                      .send(InputReadingV4::new(0, sensor_index, sensor_type, sensor_data).into())
                       .is_err()
                   {
                     debug!(
@@ -218,12 +218,12 @@ impl ProtocolHandler for KiirooV21 {
     .boxed()
   }
 
-  fn handle_sensor_unsubscribe_cmd(
+  fn handle_input_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-    _sensor_type: SensorType,
+    _sensor_type: InputType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     if !self.subscribed_sensors.contains(&feature_index) {
       return future::ready(Ok(())).boxed();
