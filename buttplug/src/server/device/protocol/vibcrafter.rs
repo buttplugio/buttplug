@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
@@ -25,7 +25,8 @@ use aes::Aes128;
 use async_trait::async_trait;
 use ecb::cipher::block_padding::Pkcs7;
 use ecb::cipher::{BlockDecryptMut, BlockEncryptMut, KeyInit};
-use std::sync::Arc;
+use uuid::{uuid, Uuid};
+use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
 
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
@@ -35,6 +36,7 @@ use sha2::{Digest, Sha256};
 type Aes128EcbEnc = ecb::Encryptor<Aes128>;
 type Aes128EcbDec = ecb::Decryptor<Aes128>;
 
+const VIBCRAFTER_PROTOCOL_UUID: Uuid = uuid!("d3721a71-a81d-461a-b404-8599ce50c00b");
 const VIBCRAFTER_KEY: [u8; 16] = *b"jdk#Cra%f5Vib28r";
 
 generic_protocol_initializer_setup!(VibCrafter, "vibcrafter");
@@ -67,7 +69,7 @@ impl ProtocolInitializer for VibCrafterInitializer {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut event_receiver = hardware.event_stream();
     hardware
-      .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
+      .subscribe(&HardwareSubscribeCmd::new(VIBCRAFTER_PROTOCOL_UUID, Endpoint::Rx))
       .await?;
 
     let auth_str = thread_rng()
@@ -78,6 +80,7 @@ impl ProtocolInitializer for VibCrafterInitializer {
     let auth_msg = format!("Auth:{};", auth_str);
     hardware
       .write_value(&HardwareWriteCmd::new(
+        VIBCRAFTER_PROTOCOL_UUID,
         Endpoint::Tx,
         encrypt(auth_msg),
         false,
@@ -105,6 +108,7 @@ impl ProtocolInitializer for VibCrafterInitializer {
             let auth_msg = format!("Auth:{:02x}{:02x};", result[0], result[1]);
             hardware
               .write_value(&HardwareWriteCmd::new(
+                VIBCRAFTER_PROTOCOL_UUID,
                 Endpoint::Tx,
                 encrypt(auth_msg),
                 false,
@@ -113,19 +117,19 @@ impl ProtocolInitializer for VibCrafterInitializer {
           } else {
             return Err(ButtplugDeviceError::ProtocolSpecificError(
               "VibCrafter".to_owned(),
-              "VibCrafter didn't provided valid security handshake".to_owned(),
+              "VibCrafter didn't provide a valid security handshake".to_owned(),
             ));
           }
         } else {
           return Err(ButtplugDeviceError::ProtocolSpecificError(
             "VibCrafter".to_owned(),
-            "VibCrafter didn't provided valid security handshake".to_owned(),
+            "VibCrafter didn't provide a valid security handshake".to_owned(),
           ));
         }
       } else {
         return Err(ButtplugDeviceError::ProtocolSpecificError(
           "VibCrafter".to_owned(),
-          "VibCrafter didn't provided valid security handshake".to_owned(),
+          "VibCrafter didn't provide a valid security handshake".to_owned(),
         ));
       }
     }
@@ -133,31 +137,27 @@ impl ProtocolInitializer for VibCrafterInitializer {
 }
 
 #[derive(Default)]
-pub struct VibCrafter {}
+pub struct VibCrafter {
+  speeds: [AtomicU8; 2]
+}
 
 impl ProtocolHandler for VibCrafter {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn needs_full_command_set(&self) -> bool {
-    true
-  }
-
-  fn handle_value_cmd(
-    &self,
-    commands: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let speed0 = commands[0].unwrap_or((ActuatorType::Vibrate, 0)).1;
-    let speed1 = if commands.len() > 1 {
-      commands[1].unwrap_or((ActuatorType::Vibrate, 0)).1
-    } else {
-      speed0
-    };
+  fn handle_actuator_vibrate_cmd(
+      &self,
+      feature_index: u32,
+      feature_id: uuid::Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
 
     Ok(vec![HardwareWriteCmd::new(
+      feature_id,
       Endpoint::Tx,
-      encrypt(format!("MtInt:{:02}{:02};", speed0, speed1)),
+      encrypt(format!("MtInt:{:02}{:02};", self.speeds[0].load(Ordering::Relaxed), self.speeds[1].load(Ordering::Relaxed))),
       false,
     )
     .into()])
