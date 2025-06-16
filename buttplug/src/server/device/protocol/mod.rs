@@ -129,7 +129,7 @@ pub mod thehandy;
 // pub mod tryfun;
 pub mod tryfun_blackhole;
 pub mod tryfun_meta2;
-// pub mod vibcrafter;
+pub mod vibcrafter;
 // pub mod vibratissimo;
 // pub mod vorze_sa;
 pub mod wetoy;
@@ -137,7 +137,7 @@ pub mod wetoy;
 // pub mod wevibe8bit;
 // pub mod wevibe_chorus;
 pub mod xibao;
-// pub mod xinput;
+pub mod xinput;
 pub mod xiuxiuda;
 pub mod xuanhuan;
 pub mod youcups;
@@ -168,7 +168,7 @@ use futures::{
 };
 use std::pin::Pin;
 use std::{collections::HashMap, sync::Arc};
-use uuid::{uuid, Uuid};
+use uuid::Uuid;
 
 /// Strategy for situations where hardware needs to get updates every so often in order to keep
 /// things alive. Currently this only applies to iOS backgrounding with bluetooth devices, but since
@@ -382,10 +382,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     lioness::setup::LionessIdentifierFactory::default(),
   );
-  //  add_to_protocol_map(
-  //    &mut map,
-  //    longlosttouch::setup::LongLostTouchIdentifierFactory::default(),
-  //  );
+  // add_to_protocol_map(
+  //   &mut map,
+  //   longlosttouch::setup::LongLostTouchIdentifierFactory::default(),
+  // );
   add_to_protocol_map(&mut map, loob::setup::LoobIdentifierFactory::default());
   //  add_to_protocol_map(
   //    &mut map,
@@ -623,10 +623,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     tcode_v03::setup::TCodeV03IdentifierFactory::default(),
   );
-  //  add_to_protocol_map(
-  //    &mut map,
-  //    vibcrafter::setup::VibCrafterIdentifierFactory::default(),
-  //  );
+  add_to_protocol_map(
+    &mut map,
+    vibcrafter::setup::VibCrafterIdentifierFactory::default(),
+  );
   //  add_to_protocol_map(
   //    &mut map,
   //    vibratissimo::setup::VibratissimoIdentifierFactory::default(),
@@ -646,7 +646,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   //    wevibe_chorus::setup::WeVibeChorusIdentifierFactory::default(),
   //  );
   add_to_protocol_map(&mut map, xibao::setup::XibaoIdentifierFactory::default());
-  //  add_to_protocol_map(&mut map, xinput::setup::XInputIdentifierFactory::default());
+  add_to_protocol_map(&mut map, xinput::setup::XInputIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     xiuxiuda::setup::XiuxiudaIdentifierFactory::default(),
@@ -791,8 +791,6 @@ impl ProtocolInitializer for GenericProtocolInitializer {
     Ok(self.handler.take().unwrap())
   }
 }
-
-const GENERIC_BATTERY_READ_UUID: Uuid = uuid!("876a8e07-4b88-43d0-80b8-3532db372bce");
 
 pub trait ProtocolHandler: Sync + Send {
   fn cache_strategy(&self) -> ProtocolCommandOutputStrategy {
