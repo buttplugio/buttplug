@@ -90,11 +90,8 @@ impl ErrorV0 {
         .expect("Already checked that it's valid.")
     } else {
       // Try deserializing what's in the error_message field
-      #[cfg(feature = "serialize-json")]
-      {
-        if let Ok(deserialized_msg) = serde_json::from_str(&self.error_message) {
-          return deserialized_msg;
-        }
+      if let Ok(deserialized_msg) = serde_json::from_str(&self.error_message) {
+        return deserialized_msg;
       }
       ButtplugError::from(self.clone())
     }
@@ -112,15 +109,11 @@ impl From<ButtplugError> for ErrorV0 {
       ButtplugError::ButtplugHandshakeError { .. } => ErrorCode::ErrorHandshake,
       ButtplugError::ButtplugUnknownError { .. } => ErrorCode::ErrorUnknown,
     };
-    #[cfg(feature = "serialize-json")]
     let msg = serde_json::to_string(&error).expect("All buttplug errors are serializable");
-    #[cfg(not(feature = "serialize-json"))]
-    let msg = error.to_string();
     ErrorV0::new(code, &msg, Some(error))
   }
 }
 
-#[cfg(feature = "serialize-json")]
 #[cfg(test)]
 mod test {
   use crate::core::message::{ButtplugServerMessageCurrent, ErrorCode, ErrorV0};

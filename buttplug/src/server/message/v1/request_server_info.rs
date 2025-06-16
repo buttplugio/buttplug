@@ -44,11 +44,7 @@ pub struct RequestServerInfoV1 {
   client_name: String,
   // Default for this message is set to 0, as this field didn't exist in the
   // first version of the protocol.
-  #[cfg_attr(
-    feature = "serialize-json",
-    serde(rename = "MessageVersion"),
-    serde(default = "return_version0")
-  )]
+  #[serde(rename = "MessageVersion", default = "return_version0")]
   #[getset(get_copy = "pub")]
   message_version: ButtplugMessageSpecVersion,
 }
@@ -73,7 +69,6 @@ impl ButtplugMessageValidator for RequestServerInfoV1 {
 mod test {
   use super::{ButtplugMessageSpecVersion, RequestServerInfoV1};
 
-  #[cfg(feature = "serialize-json")]
   #[test]
   fn test_request_server_info_version1_json_conversion() {
     let new_json = r#"
@@ -94,7 +89,6 @@ mod test {
     );
   }
 
-  #[cfg(feature = "serialize-json")]
   #[test]
   fn test_request_server_info_version0_json_conversion() {
     let old_json = r#"

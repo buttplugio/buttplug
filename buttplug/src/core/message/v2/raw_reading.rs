@@ -54,7 +54,6 @@ impl RawReadingV2 {
   }
 }
 
-#[cfg(feature = "serialize-json")]
 #[cfg(test)]
 mod test {
   use crate::core::message::{ButtplugServerMessageCurrent, Endpoint, RawReadingV2};
