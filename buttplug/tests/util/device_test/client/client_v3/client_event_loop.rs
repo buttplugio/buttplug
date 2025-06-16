@@ -285,7 +285,10 @@ where
     trace!("Sending message to connector: {:?}", msg_fut.msg);
     self.sorter.register_future(&mut msg_fut);
     if let Err(e) = self.connector.send(msg_fut.msg).await {
-      error!("Sending message failed, connector most likely no longer connected: {:?}", e);
+      error!(
+        "Sending message failed, connector most likely no longer connected: {:?}",
+        e
+      );
     }
   }
 

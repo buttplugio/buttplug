@@ -6,10 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  },
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
@@ -25,8 +22,11 @@ use aes::Aes128;
 use async_trait::async_trait;
 use ecb::cipher::block_padding::Pkcs7;
 use ecb::cipher::{BlockDecryptMut, BlockEncryptMut, KeyInit};
+use std::sync::{
+  atomic::{AtomicU8, Ordering},
+  Arc,
+};
 use uuid::{uuid, Uuid};
-use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
 
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
@@ -69,7 +69,10 @@ impl ProtocolInitializer for VibCrafterInitializer {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut event_receiver = hardware.event_stream();
     hardware
-      .subscribe(&HardwareSubscribeCmd::new(VIBCRAFTER_PROTOCOL_UUID, Endpoint::Rx))
+      .subscribe(&HardwareSubscribeCmd::new(
+        VIBCRAFTER_PROTOCOL_UUID,
+        Endpoint::Rx,
+      ))
       .await?;
 
     let auth_str = thread_rng()
@@ -138,7 +141,7 @@ impl ProtocolInitializer for VibCrafterInitializer {
 
 #[derive(Default)]
 pub struct VibCrafter {
-  speeds: [AtomicU8; 2]
+  speeds: [AtomicU8; 2],
 }
 
 impl ProtocolHandler for VibCrafter {
@@ -147,17 +150,21 @@ impl ProtocolHandler for VibCrafter {
   }
 
   fn handle_actuator_vibrate_cmd(
-      &self,
-      feature_index: u32,
-      feature_id: uuid::Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    feature_index: u32,
+    feature_id: uuid::Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
 
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
       Endpoint::Tx,
-      encrypt(format!("MtInt:{:02}{:02};", self.speeds[0].load(Ordering::Relaxed), self.speeds[1].load(Ordering::Relaxed))),
+      encrypt(format!(
+        "MtInt:{:02}{:02};",
+        self.speeds[0].load(Ordering::Relaxed),
+        self.speeds[1].load(Ordering::Relaxed)
+      )),
       false,
     )
     .into()])
