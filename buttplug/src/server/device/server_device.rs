@@ -56,7 +56,6 @@ use crate::{
       DeviceFeature,
       DeviceMessageInfoV4,
       Endpoint,
-      FeatureType,
       RawCommand,
       RawCommandRead,
       RawCommandWrite,
