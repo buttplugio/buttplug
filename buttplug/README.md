@@ -102,7 +102,6 @@ The following crate features are available
 | --------- | ----------- | ----------- |
 | `client` | None | Buttplug client implementation (in-process connection only) |
 | `server` | None | Buttplug server implementation (in-process connection only) |
-| `serialize-json` | None | Serde JSON serializer for Buttplug messages, needed for remote connectors |
 | `websockets` | `tokio-runtime` | Websocket connectors, used to connect remote clients (Clear/SSL)/servers (Clear Only) |
 | `btleplug-manager` | `server` | Bluetooth hardware support on Windows >=10, macOS, Linux, iOS, Android |
 | `lovense-dongle-manager` | `server` | Lovense USB Dongle support on Windows >=7, macOS, Linux |
@@ -119,7 +118,6 @@ Default features are enough to build a full desktop system:
 - `tokio-runtime`
 - `client`
 - `server`
-- `serialize-json` 
 - `websocket`
 - `websocket-server-manager`
 - `btleplug-manager` (feature builds as noop on WASM)

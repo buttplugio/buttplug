@@ -42,7 +42,6 @@ impl ButtplugMessageValidator for OkV0 {
   }
 }
 
-#[cfg(feature = "serialize-json")]
 #[cfg(test)]
 mod test {
   use crate::core::message::{ButtplugServerMessageCurrent, OkV0};

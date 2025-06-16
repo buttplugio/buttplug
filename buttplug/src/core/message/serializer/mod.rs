@@ -6,8 +6,6 @@
 // for full license information.
 
 //! Message de/serialization handling
-
-#[cfg(feature = "serialize-json")]
 pub mod json_serializer;
 
 use serde::{Deserialize, Serialize};
