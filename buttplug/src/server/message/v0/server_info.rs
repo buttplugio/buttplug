@@ -18,32 +18,39 @@ use crate::{
   server::message::ServerInfoV2,
 };
 use getset::{CopyGetters, Getters};
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 #[derive(
-  Debug, ButtplugMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, CopyGetters,
+  Debug,
+  ButtplugMessage,
+  ButtplugMessageFinalizer,
+  PartialEq,
+  Eq,
+  Clone,
+  Getters,
+  CopyGetters,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ServerInfoV0 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "MajorVersion"))]
+  #[serde(rename = "MajorVersion")]
   #[getset(get_copy = "pub")]
   major_version: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "MinorVersion"))]
+  #[serde(rename = "MinorVersion")]
   #[getset(get_copy = "pub")]
   minor_version: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "BuildVersion"))]
+  #[serde(rename = "BuildVersion")]
   #[getset(get_copy = "pub")]
   build_version: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "MessageVersion"))]
+  #[serde(rename = "MessageVersion")]
   #[getset(get_copy = "pub")]
   message_version: ButtplugMessageSpecVersion,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "MaxPingTime"))]
+  #[serde(rename = "MaxPingTime")]
   #[getset(get_copy = "pub")]
   max_ping_time: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "ServerName"))]
+  #[serde(rename = "ServerName")]
   #[getset(get = "pub")]
   server_name: String,
 }

@@ -5,14 +5,12 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 use std::cmp::Ord;
 use tracing::Level;
 
 /// Log Levels (Version 1 Message, Deprecated)
-#[derive(Debug, PartialEq, Clone, Ord, PartialOrd, Eq, Copy)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(Debug, PartialEq, Clone, Ord, PartialOrd, Eq, Copy, Serialize, Deserialize)]
 pub enum LogLevel {
   Off = 0,
   Fatal,

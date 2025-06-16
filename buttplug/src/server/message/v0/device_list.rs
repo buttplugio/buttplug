@@ -11,15 +11,15 @@ use crate::core::{
   message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
 };
 use getset::Getters;
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage, Getters)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(
+  Default, Clone, Debug, PartialEq, Eq, ButtplugMessage, Getters, Serialize, Deserialize,
+)]
 pub struct DeviceListV0 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   pub(in crate::server::message) id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Devices"))]
+  #[serde(rename = "Devices")]
   #[getset(get = "pub")]
   pub(in crate::server::message) devices: Vec<DeviceMessageInfoV0>,
 }

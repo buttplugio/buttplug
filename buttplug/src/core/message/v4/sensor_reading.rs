@@ -13,7 +13,6 @@ use crate::core::message::{
   SensorType,
 };
 use getset::{CopyGetters, Getters};
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 // This message can have an Id of 0, as it can be emitted as part of a
@@ -28,20 +27,21 @@ use serde::{Deserialize, Serialize};
   CopyGetters,
   PartialEq,
   Eq,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct SensorReadingV4 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  #[serde(rename = "DeviceIndex")]
   device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "FeatureIndex"))]
+  #[serde(rename = "FeatureIndex")]
   #[getset[get_copy="pub"]]
   feature_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "SensorType"))]
+  #[serde(rename = "SensorType")]
   #[getset[get_copy="pub"]]
   sensor_type: SensorType,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Data"))]
+  #[serde(rename = "Data")]
   #[getset[get="pub"]]
   data: Vec<i32>,
 }

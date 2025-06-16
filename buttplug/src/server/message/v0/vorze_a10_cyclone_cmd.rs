@@ -15,22 +15,29 @@ use crate::core::{
   },
 };
 use getset::CopyGetters;
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 #[derive(
-  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, Default, PartialEq, Eq, Clone, CopyGetters,
+  Debug,
+  ButtplugDeviceMessage,
+  ButtplugMessageFinalizer,
+  Default,
+  PartialEq,
+  Eq,
+  Clone,
+  CopyGetters,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct VorzeA10CycloneCmdV0 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  #[serde(rename = "DeviceIndex")]
   device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Speed"))]
+  #[serde(rename = "Speed")]
   #[getset(get_copy = "pub")]
   speed: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Clockwise"))]
+  #[serde(rename = "Clockwise")]
   #[getset(get_copy = "pub")]
   clockwise: bool,
 }

@@ -13,26 +13,33 @@ use crate::core::message::{
   ButtplugMessageValidator,
 };
 use getset::{CopyGetters, Getters};
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 // For RequestServerInfo, serde will take care of invalid message versions from json, and internal
 // representations of versions require using the version enum as a type bound. Therefore we do not
 // need explicit content checking for the message.
 #[derive(
-  Debug, ButtplugMessage, ButtplugMessageFinalizer, Clone, PartialEq, Eq, Getters, CopyGetters,
+  Debug,
+  ButtplugMessage,
+  ButtplugMessageFinalizer,
+  Clone,
+  PartialEq,
+  Eq,
+  Getters,
+  CopyGetters,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RequestServerInfoV4 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "ClientName"))]
+  #[serde(rename = "ClientName")]
   #[getset(get = "pub")]
   client_name: String,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "ApiVersionMajor"))]
+  #[serde(rename = "ApiVersionMajor")]
   #[getset(get_copy = "pub")]
   api_version_major: ButtplugMessageSpecVersion,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "ApiVersionMinor"))]
+  #[serde(rename = "ApiVersionMinor")]
   #[getset(get_copy = "pub")]
   api_version_minor: u32,
 }

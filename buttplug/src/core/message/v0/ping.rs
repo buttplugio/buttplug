@@ -11,13 +11,13 @@ use crate::core::message::{
   ButtplugMessageFinalizer,
   ButtplugMessageValidator,
 };
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
-#[derive(Debug, ButtplugMessage, ButtplugMessageFinalizer, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(
+  Debug, ButtplugMessage, ButtplugMessageFinalizer, Clone, PartialEq, Eq, Serialize, Deserialize,
+)]
 pub struct PingV0 {
   /// Message Id, used for matching message pairs in remote connection instances.
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
 }
 

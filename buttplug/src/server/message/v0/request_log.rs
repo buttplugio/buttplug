@@ -11,15 +11,23 @@ use crate::core::{
   message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
 };
 use getset::CopyGetters;
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, ButtplugMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, CopyGetters)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(
+  Debug,
+  ButtplugMessage,
+  ButtplugMessageFinalizer,
+  PartialEq,
+  Eq,
+  Clone,
+  CopyGetters,
+  Serialize,
+  Deserialize,
+)]
 pub struct RequestLogV0 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "LogLevel"))]
+  #[serde(rename = "LogLevel")]
   #[getset(get_copy = "pub")]
   log_level: LogLevel,
 }

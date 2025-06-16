@@ -70,10 +70,7 @@ impl TryFromDeviceAttributes<SensorCmdV4> for CheckedSensorCmdV4 {
     if let Some(feature) = features.features().get(msg.feature_index() as usize) {
       if let Some(sensor_map) = feature.sensor() {
         if let Some(sensor) = sensor_map.get(&msg.sensor_type()) {
-          if sensor
-            .sensor_commands()
-            .contains(&msg.sensor_command())
-          {
+          if sensor.sensor_commands().contains(&msg.sensor_command()) {
             Ok(CheckedSensorCmdV4::new(
               msg.device_index(),
               msg.feature_index(),

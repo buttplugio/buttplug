@@ -17,21 +17,21 @@ use super::{device_message_info::DeviceMessageInfoV1, ClientDeviceMessageAttribu
 
 use getset::{CopyGetters, Getters};
 
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(ButtplugMessage, Clone, Debug, PartialEq, Eq, Getters, CopyGetters)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(
+  ButtplugMessage, Clone, Debug, PartialEq, Eq, Getters, CopyGetters, Serialize, Deserialize,
+)]
 pub struct DeviceAddedV1 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   pub(in crate::server::message) id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  #[serde(rename = "DeviceIndex")]
   #[getset(get_copy = "pub")]
   pub(in crate::server::message) device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
+  #[serde(rename = "DeviceName")]
   #[getset(get = "pub")]
   pub(in crate::server::message) device_name: String,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
+  #[serde(rename = "DeviceMessages")]
   #[getset(get = "pub")]
   pub(in crate::server::message) device_messages: ClientDeviceMessageAttributesV1,
 }

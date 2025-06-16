@@ -35,7 +35,6 @@ use crate::{
     RawWriteCmdV2,
   },
 };
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 use super::{
@@ -57,8 +56,9 @@ use super::{
   ButtplugMessageValidator,
   ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugClientMessageV3 {
   // Handshake messages
   RequestServerInfo(RequestServerInfoV1),
@@ -133,9 +133,15 @@ impl TryFrom<ButtplugClientMessageV2> for ButtplugClientMessageV3 {
 
 /// Represents all server-to-client messages in v3 of the Buttplug Spec
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, FromSpecificButtplugMessage,
+  Debug,
+  Clone,
+  PartialEq,
+  ButtplugMessage,
+  ButtplugMessageValidator,
+  FromSpecificButtplugMessage,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugServerMessageV3 {
   // Status messages
   Ok(OkV0),

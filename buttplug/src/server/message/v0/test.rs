@@ -10,19 +10,26 @@ use crate::core::{
   message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
 };
 use getset::Getters;
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 #[derive(
-  Debug, Default, ButtplugMessage, ButtplugMessageFinalizer, Clone, PartialEq, Eq, Getters,
+  Debug,
+  Default,
+  ButtplugMessage,
+  ButtplugMessageFinalizer,
+  Clone,
+  PartialEq,
+  Eq,
+  Getters,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct TestV0 {
   /// Message Id, used for matching message pairs in remote connection instances.
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
   /// Test string, which will be echoed back to client when sent to server.
-  #[cfg_attr(feature = "serialize-json", serde(rename = "TestString"))]
+  #[serde(rename = "TestString")]
   #[getset(get = "pub")]
   test_string: String,
 }

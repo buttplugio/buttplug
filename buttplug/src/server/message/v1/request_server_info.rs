@@ -15,7 +15,6 @@ use crate::core::{
   },
 };
 use getset::{CopyGetters, Getters};
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 fn return_version0() -> ButtplugMessageSpecVersion {
@@ -26,13 +25,21 @@ fn return_version0() -> ButtplugMessageSpecVersion {
 // representations of versions require using the version enum as a type bound. Therefore we do not
 // need explicit content checking for the message.
 #[derive(
-  Debug, ButtplugMessage, ButtplugMessageFinalizer, Clone, PartialEq, Eq, Getters, CopyGetters,
+  Debug,
+  ButtplugMessage,
+  ButtplugMessageFinalizer,
+  Clone,
+  PartialEq,
+  Eq,
+  Getters,
+  CopyGetters,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RequestServerInfoV1 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "ClientName"))]
+  #[serde(rename = "ClientName")]
   #[getset(get = "pub")]
   client_name: String,
   // Default for this message is set to 0, as this field didn't exist in the

@@ -15,17 +15,24 @@ use crate::core::{
   },
 };
 use getset::CopyGetters;
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, CopyGetters)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(
+  Debug,
+  ButtplugDeviceMessage,
+  ButtplugMessageFinalizer,
+  PartialEq,
+  Clone,
+  CopyGetters,
+  Serialize,
+  Deserialize,
+)]
 pub struct SingleMotorVibrateCmdV0 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  #[serde(rename = "DeviceIndex")]
   device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Speed"))]
+  #[serde(rename = "Speed")]
   #[getset(get_copy = "pub")]
   speed: f64,
 }

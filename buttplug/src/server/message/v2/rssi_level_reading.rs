@@ -15,19 +15,25 @@ use crate::core::{
   },
 };
 use getset::CopyGetters;
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 #[derive(
-  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, CopyGetters,
+  Debug,
+  ButtplugDeviceMessage,
+  ButtplugMessageFinalizer,
+  PartialEq,
+  Eq,
+  Clone,
+  CopyGetters,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RSSILevelReadingV2 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  #[serde(rename = "DeviceIndex")]
   device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "RSSILevel"))]
+  #[serde(rename = "RSSILevel")]
   #[getset(get_copy = "pub")]
   rssi_level: i32,
 }

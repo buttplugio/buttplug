@@ -24,23 +24,30 @@ use crate::{
   },
 };
 use getset::{CopyGetters, Getters};
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 #[derive(
-  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, CopyGetters,
+  Debug,
+  ButtplugDeviceMessage,
+  ButtplugMessageFinalizer,
+  PartialEq,
+  Eq,
+  Clone,
+  Getters,
+  CopyGetters,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct SensorReadCmdV3 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  #[serde(rename = "DeviceIndex")]
   device_index: u32,
   #[getset(get = "pub")]
-  #[cfg_attr(feature = "serialize-json", serde(rename = "SensorIndex"))]
+  #[serde(rename = "SensorIndex")]
   sensor_index: u32,
   #[getset(get = "pub")]
-  #[cfg_attr(feature = "serialize-json", serde(rename = "SensorType"))]
+  #[serde(rename = "SensorType")]
   sensor_type: SensorType,
 }
 

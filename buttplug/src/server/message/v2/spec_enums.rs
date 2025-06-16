@@ -34,7 +34,6 @@ use crate::{
     VibrateCmdV1,
   },
 };
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 use super::{
@@ -60,8 +59,9 @@ use super::{
   ButtplugMessageValidator,
   ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugClientMessageV2 {
   // Handshake messages
   RequestServerInfo(RequestServerInfoV1),
@@ -157,8 +157,9 @@ impl TryFrom<ButtplugClientMessageV1> for ButtplugClientMessageV2 {
   ButtplugMessageValidator,
   ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugServerMessageV2 {
   // Status messages
   Ok(OkV0),
