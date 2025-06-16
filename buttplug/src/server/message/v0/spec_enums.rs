@@ -8,7 +8,6 @@ use crate::{
   },
   server::message::RequestServerInfoV1,
 };
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 /// Represents all client-to-server messages in v0 of the Buttplug Spec
@@ -20,8 +19,9 @@ use serde::{Deserialize, Serialize};
   ButtplugMessageValidator,
   ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugClientMessageV0 {
   RequestLog(RequestLogV0),
   Ping(PingV0),
@@ -48,9 +48,15 @@ pub enum ButtplugClientMessageV0 {
 
 /// Represents all server-to-client messages in v0 of the Buttplug Spec
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugMessageFinalizer,
+  Debug,
+  Clone,
+  PartialEq,
+  ButtplugMessage,
+  ButtplugMessageValidator,
+  ButtplugMessageFinalizer,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugServerMessageV0 {
   // Status messages
   Ok(OkV0),

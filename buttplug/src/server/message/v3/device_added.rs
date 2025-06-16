@@ -19,23 +19,23 @@ use crate::{
 
 use getset::{CopyGetters, Getters};
 
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 use super::{ClientDeviceMessageAttributesV3, DeviceMessageInfoV3};
 
 /// Notification that a device has been found and connected to the server.
-#[derive(ButtplugMessage, PartialEq, Clone, Debug, Getters, CopyGetters)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(
+  ButtplugMessage, PartialEq, Clone, Debug, Getters, CopyGetters, Serialize, Deserialize,
+)]
 pub struct DeviceAddedV3 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
   // DeviceAdded is not considered a device message because it only notifies of existence and is not
   // a command (and goes from server to client), therefore we have to define the getter ourselves.
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  #[serde(rename = "DeviceIndex")]
   #[getset(get_copy = "pub")]
   device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
+  #[serde(rename = "DeviceName")]
   #[getset(get = "pub")]
   device_name: String,
   #[cfg_attr(
@@ -44,10 +44,10 @@ pub struct DeviceAddedV3 {
   )]
   #[getset(get = "pub")]
   device_display_name: Option<String>,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessageTimingGap"))]
+  #[serde(rename = "DeviceMessageTimingGap")]
   #[getset(get_copy = "pub")]
   device_message_timing_gap: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
+  #[serde(rename = "DeviceMessages")]
   #[getset(get = "pub")]
   device_messages: ClientDeviceMessageAttributesV3,
 }

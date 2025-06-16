@@ -15,18 +15,26 @@ use crate::core::{
   },
 };
 use getset::Getters;
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 /// Kiiroo Command (Version 0 Message, Deprecated in spec)
-#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(
+  Debug,
+  ButtplugDeviceMessage,
+  ButtplugMessageFinalizer,
+  PartialEq,
+  Eq,
+  Clone,
+  Getters,
+  Serialize,
+  Deserialize,
+)]
 pub struct KiirooCmdV0 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  #[serde(rename = "DeviceIndex")]
   device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Command"))]
+  #[serde(rename = "Command")]
   #[getset(get = "pub")]
   command: String,
 }

@@ -22,7 +22,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, CopyGetters)]
 #[getset(get_copy = "pub")]
 pub struct ActuatorValue {
-  #[serde(rename="Value")]
+  #[serde(rename = "Value")]
   value: u32,
 }
 
@@ -35,9 +35,9 @@ impl ActuatorValue {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, CopyGetters)]
 #[getset(get_copy = "pub")]
 pub struct ActuatorPositionWithDuration {
-  #[serde(rename="Position")]
+  #[serde(rename = "Position")]
   position: u32,
-  #[serde(rename="Duration")]
+  #[serde(rename = "Duration")]
   duration: u32,
 }
 
@@ -50,9 +50,9 @@ impl ActuatorPositionWithDuration {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, CopyGetters)]
 #[getset(get_copy = "pub")]
 pub struct ActuatorRotateWithDirection {
-  #[serde(rename="Speed")]
+  #[serde(rename = "Speed")]
   speed: u32,
-  #[serde(rename="Clockwise")]
+  #[serde(rename = "Clockwise")]
   clockwise: bool,
 }
 
@@ -158,13 +158,13 @@ impl ActuatorCommand {
 )]
 #[getset(get_copy = "pub")]
 pub struct ActuatorCmdV4 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  #[serde(rename = "DeviceIndex")]
   device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "FeatureIndex"))]
+  #[serde(rename = "FeatureIndex")]
   feature_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Command"))]
+  #[serde(rename = "Command")]
   command: ActuatorCommand,
 }
 

@@ -39,8 +39,7 @@ where
   }
 }
 
-#[derive(Debug, Error, Display, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(Debug, Error, Display, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ButtplugHandshakeError {
   /// Expected either a ServerInfo or Error message, received {0}
   UnexpectedHandshakeMessageReceived(String),
@@ -69,8 +68,7 @@ where
   }
 }
 
-#[derive(Debug, Error, Display, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(Debug, Error, Display, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ButtplugMessageError {
   /// Got unexpected message type: {0}
   UnexpectedMessageType(String),
@@ -103,8 +101,7 @@ where
   }
 }
 
-#[derive(Debug, Error, Display, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(Debug, Error, Display, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ButtplugPingError {
   /// Pinged timer exhausted, system has shut down.
   PingedOut,
@@ -127,8 +124,7 @@ where
     ButtplugError::from(err).into()
   }
 }
-#[derive(Debug, Error, Display, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(Debug, Error, Display, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ButtplugDeviceError {
   /// Device {0} not connected
   DeviceNotConnected(String),
@@ -208,8 +204,7 @@ where
   }
 }
 
-#[derive(Debug, Error, Display, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(Debug, Error, Display, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ButtplugUnknownError {
   /// Cannot start scanning, no device communication managers available to use for scanning.
   NoDeviceCommManagers,
@@ -222,8 +217,7 @@ pub enum ButtplugUnknownError {
 }
 
 /// Aggregation enum for protocol error types.
-#[derive(Debug, Error, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(Debug, Error, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ButtplugError {
   #[error(transparent)]
   ButtplugHandshakeError(#[from] ButtplugHandshakeError),

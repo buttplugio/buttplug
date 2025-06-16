@@ -17,24 +17,31 @@ use crate::core::{
   },
 };
 use getset::{CopyGetters, Getters};
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 #[derive(
-  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, CopyGetters,
+  Debug,
+  ButtplugDeviceMessage,
+  ButtplugMessageFinalizer,
+  PartialEq,
+  Eq,
+  Clone,
+  Getters,
+  CopyGetters,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RawWriteCmdV2 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  #[serde(rename = "DeviceIndex")]
   device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Endpoint"))]
+  #[serde(rename = "Endpoint")]
   endpoint: Endpoint,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Data"))]
+  #[serde(rename = "Data")]
   #[getset(get = "pub")]
   data: Vec<u8>,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "WriteWithResponse"))]
+  #[serde(rename = "WriteWithResponse")]
   #[getset(get_copy = "pub")]
   write_with_response: bool,
 }

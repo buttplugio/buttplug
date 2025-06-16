@@ -15,16 +15,14 @@ use crate::core::{
   },
 };
 use getset::{CopyGetters, Getters};
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, PartialEq, Clone, CopyGetters)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(Debug, Default, PartialEq, Clone, CopyGetters, Serialize, Deserialize)]
 #[getset(get_copy = "pub")]
 pub struct VibrateSubcommandV1 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
+  #[serde(rename = "Index")]
   index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Speed"))]
+  #[serde(rename = "Speed")]
   speed: f64,
 }
 
@@ -35,15 +33,22 @@ impl VibrateSubcommandV1 {
 }
 
 #[derive(
-  Debug, Default, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, Getters,
+  Debug,
+  Default,
+  ButtplugDeviceMessage,
+  ButtplugMessageFinalizer,
+  PartialEq,
+  Clone,
+  Getters,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct VibrateCmdV1 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  #[serde(rename = "DeviceIndex")]
   device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Speeds"))]
+  #[serde(rename = "Speeds")]
   #[getset(get = "pub")]
   speeds: Vec<VibrateSubcommandV1>,
 }

@@ -16,20 +16,28 @@ use crate::core::{
   },
 };
 use getset::Getters;
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(
+  Debug,
+  ButtplugDeviceMessage,
+  ButtplugMessageFinalizer,
+  PartialEq,
+  Eq,
+  Clone,
+  Getters,
+  Serialize,
+  Deserialize,
+)]
 pub struct SensorUnsubscribeCmdV3 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  #[serde(rename = "DeviceIndex")]
   device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "SensorIndex"))]
+  #[serde(rename = "SensorIndex")]
   #[getset(get = "pub")]
   sensor_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "SensorType"))]
+  #[serde(rename = "SensorType")]
   #[getset(get = "pub")]
   sensor_type: SensorType,
 }

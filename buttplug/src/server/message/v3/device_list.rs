@@ -13,18 +13,16 @@ use crate::{
   server::message::v2::{DeviceListV2, DeviceMessageInfoV2},
 };
 use getset::Getters;
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 use super::DeviceMessageInfoV3;
 
 /// List of all devices currently connected to the server.
-#[derive(Default, Clone, Debug, PartialEq, ButtplugMessage, Getters)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(Default, Clone, Debug, PartialEq, ButtplugMessage, Getters, Serialize, Deserialize)]
 pub struct DeviceListV3 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Devices"))]
+  #[serde(rename = "Devices")]
   #[getset(get = "pub")]
   devices: Vec<DeviceMessageInfoV3>,
 }

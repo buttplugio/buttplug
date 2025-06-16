@@ -17,24 +17,30 @@ use crate::core::{
   },
 };
 use getset::CopyGetters;
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 #[derive(
-  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, CopyGetters,
+  Debug,
+  ButtplugDeviceMessage,
+  ButtplugMessageFinalizer,
+  PartialEq,
+  Eq,
+  Clone,
+  CopyGetters,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RawReadCmdV2 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  #[serde(rename = "DeviceIndex")]
   device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Endpoint"))]
+  #[serde(rename = "Endpoint")]
   endpoint: Endpoint,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "ExpectedLength"))]
+  #[serde(rename = "ExpectedLength")]
   #[getset(get_copy = "pub")]
   expected_length: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Timeout"))]
+  #[serde(rename = "Timeout")]
   #[getset(get_copy = "pub")]
   timeout: u32,
 }

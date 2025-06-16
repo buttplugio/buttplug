@@ -16,19 +16,17 @@ use crate::core::{
   },
 };
 use getset::{CopyGetters, Getters};
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 /// Generic command for setting a level (single magnitude value) of a device feature.
-#[derive(Debug, PartialEq, Clone, CopyGetters)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(Debug, PartialEq, Clone, CopyGetters, Serialize, Deserialize)]
 #[getset(get_copy = "pub")]
 pub struct ScalarSubcommandV3 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
+  #[serde(rename = "Index")]
   index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Scalar"))]
+  #[serde(rename = "Scalar")]
   scalar: f64,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "ActuatorType"))]
+  #[serde(rename = "ActuatorType")]
   actuator_type: ActuatorType,
 }
 
@@ -43,15 +41,22 @@ impl ScalarSubcommandV3 {
 }
 
 #[derive(
-  Debug, Default, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, Getters,
+  Debug,
+  Default,
+  ButtplugDeviceMessage,
+  ButtplugMessageFinalizer,
+  PartialEq,
+  Clone,
+  Getters,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ScalarCmdV3 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  #[serde(rename = "DeviceIndex")]
   device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Scalars"))]
+  #[serde(rename = "Scalars")]
   #[getset(get = "pub")]
   scalars: Vec<ScalarSubcommandV3>,
 }

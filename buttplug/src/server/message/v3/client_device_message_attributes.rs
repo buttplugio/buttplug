@@ -28,8 +28,9 @@ use std::ops::RangeInclusive;
 // For many messages, client and server configurations may be exactly the same. If they are not,
 // then we denote this by prefixing the type with Client/Server. Server attributes will usually be
 // hosted in the server/device/configuration module.
-#[derive(Clone, Debug, Default, PartialEq, Getters, MutGetters, Setters)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(
+  Clone, Debug, Default, PartialEq, Getters, MutGetters, Setters, Serialize, Deserialize,
+)]
 pub struct ClientDeviceMessageAttributesV3 {
   // Generic commands
   #[getset(get = "pub", get_mut = "pub(super)")]

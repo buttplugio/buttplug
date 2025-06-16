@@ -27,7 +27,6 @@ use crate::core::message::{
   StopDeviceCmdV0,
   StopScanningV0,
 };
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 use super::{DeviceAddedV4, DeviceListV4, SensorReadingV4};
@@ -41,8 +40,9 @@ use super::{DeviceAddedV4, DeviceListV4, SensorReadingV4};
   ButtplugMessageValidator,
   ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugClientMessageV4 {
   // Handshake messages
   RequestServerInfo(RequestServerInfoV4),
@@ -61,9 +61,15 @@ pub enum ButtplugClientMessageV4 {
 
 /// Represents all server-to-client messages in v3 of the Buttplug Spec
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, FromSpecificButtplugMessage,
+  Debug,
+  Clone,
+  PartialEq,
+  ButtplugMessage,
+  ButtplugMessageValidator,
+  FromSpecificButtplugMessage,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugServerMessageV4 {
   // Status messages
   Ok(OkV0),

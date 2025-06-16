@@ -15,21 +15,29 @@ use crate::core::{
   },
 };
 use getset::Getters;
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 /// Lovense specific commands (Version 0 Message, **Deprecated**)
 // As this message is considered deprecated and is not actually implemented for
 // Lovense devices even on spec v1 connections, we can put a null validator on
 // it.
-#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(
+  Debug,
+  ButtplugDeviceMessage,
+  ButtplugMessageFinalizer,
+  PartialEq,
+  Eq,
+  Clone,
+  Getters,
+  Serialize,
+  Deserialize,
+)]
 pub struct LovenseCmdV0 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  #[serde(rename = "DeviceIndex")]
   device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Command"))]
+  #[serde(rename = "Command")]
   #[getset(get = "pub")]
   command: String,
 }

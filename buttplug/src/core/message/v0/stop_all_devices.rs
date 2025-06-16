@@ -11,13 +11,13 @@ use crate::core::message::{
   ButtplugMessageFinalizer,
   ButtplugMessageValidator,
 };
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, ButtplugMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(
+  Debug, ButtplugMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Serialize, Deserialize,
+)]
 pub struct StopAllDevicesV0 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
 }
 

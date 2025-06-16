@@ -8,17 +8,15 @@
 use super::DeviceAddedV4;
 use crate::core::message::DeviceFeature;
 use getset::{CopyGetters, Getters, MutGetters};
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 /// Substructure of device messages, used for attribute information (name, messages supported, etc...)
-#[derive(Clone, Debug, PartialEq, MutGetters, Getters, CopyGetters)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(Clone, Debug, PartialEq, MutGetters, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct DeviceMessageInfoV4 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  #[serde(rename = "DeviceIndex")]
   #[getset(get_copy = "pub")]
   device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
+  #[serde(rename = "DeviceName")]
   #[getset(get = "pub")]
   device_name: String,
   #[cfg_attr(
@@ -27,10 +25,10 @@ pub struct DeviceMessageInfoV4 {
   )]
   #[getset(get = "pub")]
   device_display_name: Option<String>,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessageTimingGap"))]
+  #[serde(rename = "DeviceMessageTimingGap")]
   #[getset(get_copy = "pub")]
   device_message_timing_gap: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceFeatures"))]
+  #[serde(rename = "DeviceFeatures")]
   #[getset(get = "pub", get_mut = "pub(super)")]
   device_features: Vec<DeviceFeature>,
 }

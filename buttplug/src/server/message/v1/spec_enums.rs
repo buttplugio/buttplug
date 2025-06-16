@@ -39,7 +39,6 @@ use crate::{
     VorzeA10CycloneCmdV0,
   },
 };
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 use super::{
@@ -60,8 +59,9 @@ use super::{
   ButtplugMessageValidator,
   ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugClientMessageV1 {
   // Handshake and server messages
   RequestServerInfo(RequestServerInfoV1),
@@ -126,8 +126,9 @@ impl From<ButtplugClientMessageV0> for ButtplugClientMessageV1 {
   ButtplugMessageValidator,
   ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugServerMessageV1 {
   // Status messages
   Ok(OkV0),

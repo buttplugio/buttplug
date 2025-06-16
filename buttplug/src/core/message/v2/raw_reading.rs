@@ -13,7 +13,6 @@ use crate::core::message::{
   Endpoint,
 };
 use getset::{CopyGetters, Getters};
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 // This message can have an Id of 0, as it can be emitted as part of a
@@ -28,17 +27,18 @@ use serde::{Deserialize, Serialize};
   Clone,
   Getters,
   CopyGetters,
+  Serialize,
+  Deserialize,
 )]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RawReadingV2 {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  #[serde(rename = "Id")]
   id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  #[serde(rename = "DeviceIndex")]
   device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Endpoint"))]
+  #[serde(rename = "Endpoint")]
   #[getset(get_copy = "pub")]
   endpoint: Endpoint,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Data"))]
+  #[serde(rename = "Data")]
   #[getset(get = "pub")]
   data: Vec<u8>,
 }
