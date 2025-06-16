@@ -1,7 +1,5 @@
 use crate::util::{
-  device_test::{
-    connector::build_channel_connector,
-  },
+  device_test::connector::build_channel_connector,
   ButtplugTestServer,
   TestDeviceChannelHost,
 };
