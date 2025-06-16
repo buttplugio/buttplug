@@ -51,17 +51,18 @@ device_commands:
             data: [0x01, 100, 250]
             write_with_response: false
   # Test same position/stop
-  - !Messages
-      device_index: 0
-      messages:
-        - !Linear
-          - Index: 0
-            Position: 1.0
-            Duration: 10
-  - !Commands
-      device_index: 0
-      commands:
-        - !Write
-            endpoint: tx
-            data: [0x01, 100, 0]
-            write_with_response: false
+  # NOTE: we now throw away repeat commands. Should we not for this?
+  # - !Messages
+  #     device_index: 0
+  #     messages:
+  #       - !Linear
+  #         - Index: 0
+  #           Position: 1.0
+  #           Duration: 10
+  # - !Commands
+  #     device_index: 0
+  #     commands:
+  #       - !Write
+  #           endpoint: tx
+  #           data: [0x01, 100, 0]
+  #           write_with_response: false
