@@ -10,7 +10,7 @@ use byteorder::LittleEndian;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{self, Endpoint, SensorReadingV4, SensorType},
+    message::{self, Endpoint, InputReadingV4, InputType},
   },
   server::device::{
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
@@ -32,7 +32,7 @@ pub struct XInput {
 }
 
 impl ProtocolHandler for XInput {
-  fn handle_actuator_vibrate_cmd(
+  fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,
     feature_id: uuid::Uuid,
@@ -65,13 +65,13 @@ impl ProtocolHandler for XInput {
     .into()])
   }
 
-  fn handle_sensor_read_cmd(
+  fn handle_input_read_cmd(
     &self,
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: uuid::Uuid,
-    _sensor_type: message::SensorType,
-  ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
+    _sensor_type: message::InputType,
+  ) -> BoxFuture<Result<InputReadingV4, ButtplugDeviceError>> {
     async move {
       let reading = device
         .read_value(&HardwareReadCmd::new(feature_id, Endpoint::Rx, 0, 0))
@@ -87,10 +87,10 @@ impl ProtocolHandler for XInput {
           ))
         }
       };
-      Ok(message::SensorReadingV4::new(
+      Ok(message::InputReadingV4::new(
         0,
         feature_index,
-        SensorType::Battery,
+        InputType::Battery,
         vec![battery],
       ))
     }

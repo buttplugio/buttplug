@@ -48,9 +48,9 @@ use crate::{
     errors::{ButtplugDeviceError, ButtplugError},
     message::{
       self,
-      ActuatorRotateWithDirection,
-      ActuatorType,
-      ActuatorValue,
+      OutputRotateWithDirection,
+      OutputType,
+      OutputValue,
       ButtplugMessage,
       ButtplugServerMessageV4,
       DeviceFeature,
@@ -60,8 +60,8 @@ use crate::{
       RawCommandRead,
       RawCommandWrite,
       RawReadingV2,
-      SensorCommandType,
-      SensorType,
+      InputCommandType,
+      InputType,
     },
     ButtplugResultFuture,
   },
@@ -82,9 +82,9 @@ use crate::{
       protocol::ProtocolHandler,
     },
     message::{
-      checked_actuator_cmd::CheckedActuatorCmdV4,
+      checked_output_cmd::CheckedOutputCmdV4,
       checked_raw_cmd::CheckedRawCmdV4,
-      checked_sensor_cmd::CheckedSensorCmdV4,
+      checked_input_cmd::CheckedInputCmdV4,
       server_device_attributes::ServerDeviceAttributes,
       spec_enums::ButtplugDeviceCommandMessageUnionV4,
       ButtplugServerDeviceMessage,
@@ -104,7 +104,7 @@ use uuid::Uuid;
 use super::{
   configuration::{UserDeviceDefinition, UserDeviceIdentifier},
   protocol::{
-    //actuator_command_manager::ActuatorCommandManager,
+    //output_command_manager::ActuatorCommandManager,
     ProtocolKeepaliveStrategy,
     ProtocolSpecializer,
   },
@@ -123,14 +123,14 @@ pub struct ServerDevice {
   handler: Arc<dyn ProtocolHandler>,
   #[getset(get = "pub")]
   definition: UserDeviceDefinition,
-  //actuator_command_manager: ActuatorCommandManager,
+  //output_command_manager: ActuatorCommandManager,
   /// Unique identifier for the device
   #[getset(get = "pub")]
   identifier: UserDeviceIdentifier,
   raw_subscribed_endpoints: Arc<DashSet<Endpoint>>,
   #[getset(get = "pub")]
   legacy_attributes: ServerDeviceAttributes,
-  last_actuator_command: DashMap<Uuid, CheckedActuatorCmdV4>,
+  last_output_command: DashMap<Uuid, CheckedOutputCmdV4>,
   current_hardware_commands: Arc<Mutex<Option<VecDeque<HardwareCommand>>>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4>,
 }
@@ -335,48 +335,48 @@ impl ServerDevice {
     // We consider the feature's FeatureType to be the "main" capability of a feature. Use that to
     // calculate stop commands.
     for (index, feature) in definition.features().iter().enumerate() {
-      if let Some(actuator_map) = feature.actuator() {
-        for actuator_type in actuator_map.keys() {
+      if let Some(output_map) = feature.output() {
+        for actuator_type in output_map.keys() {
           let mut stop_cmd = |actuator_cmd| {
             stop_commands.push(
-              CheckedActuatorCmdV4::new(1, 0, index as u32, feature.id(), actuator_cmd).into(),
+              CheckedOutputCmdV4::new(1, 0, index as u32, feature.id(), actuator_cmd).into(),
             );
           };
 
           // Break out of these if one is found, we only need 1 stop message per output.
           match actuator_type {
-            ActuatorType::Constrict => {
-              stop_cmd(message::ActuatorCommand::Constrict(ActuatorValue::new(0)));
+            OutputType::Constrict => {
+              stop_cmd(message::OutputCommand::Constrict(OutputValue::new(0)));
               break;
             }
-            ActuatorType::Heater => {
-              stop_cmd(message::ActuatorCommand::Heater(ActuatorValue::new(0)));
+            OutputType::Heater => {
+              stop_cmd(message::OutputCommand::Heater(OutputValue::new(0)));
               break;
             }
-            ActuatorType::Inflate => {
-              stop_cmd(message::ActuatorCommand::Inflate(ActuatorValue::new(0)));
+            OutputType::Inflate => {
+              stop_cmd(message::OutputCommand::Inflate(OutputValue::new(0)));
               break;
             }
-            ActuatorType::Led => {
-              stop_cmd(message::ActuatorCommand::Led(ActuatorValue::new(0)));
+            OutputType::Led => {
+              stop_cmd(message::OutputCommand::Led(OutputValue::new(0)));
               break;
             }
-            ActuatorType::Oscillate => {
-              stop_cmd(message::ActuatorCommand::Oscillate(ActuatorValue::new(0)));
+            OutputType::Oscillate => {
+              stop_cmd(message::OutputCommand::Oscillate(OutputValue::new(0)));
               break;
             }
-            ActuatorType::Rotate => {
-              stop_cmd(message::ActuatorCommand::Rotate(ActuatorValue::new(0)));
+            OutputType::Rotate => {
+              stop_cmd(message::OutputCommand::Rotate(OutputValue::new(0)));
               break;
             }
-            ActuatorType::RotateWithDirection => {
-              stop_cmd(message::ActuatorCommand::RotateWithDirection(
-                ActuatorRotateWithDirection::new(0, false),
+            OutputType::RotateWithDirection => {
+              stop_cmd(message::OutputCommand::RotateWithDirection(
+                OutputRotateWithDirection::new(0, false),
               ));
               break;
             }
-            ActuatorType::Vibrate => {
-              stop_cmd(message::ActuatorCommand::Vibrate(ActuatorValue::new(0)));
+            OutputType::Vibrate => {
+              stop_cmd(message::OutputCommand::Vibrate(OutputValue::new(0)));
               break;
             }
             _ => {
@@ -389,14 +389,14 @@ impl ServerDevice {
     }
     Self {
       identifier,
-      //actuator_command_manager: acm,
+      //output_command_manager: acm,
       handler,
       hardware,
       definition: definition.clone(),
       raw_subscribed_endpoints: Arc::new(DashSet::new()),
       // Generating legacy attributes is cheap, just do it right when we create the device.
       legacy_attributes: ServerDeviceAttributes::new(definition.features()),
-      last_actuator_command: DashMap::new(),
+      last_output_command: DashMap::new(),
       current_hardware_commands,
       stop_commands,
     }
@@ -500,17 +500,17 @@ impl ServerDevice {
     }
   }
 
-  fn handle_actuatorcmd_v4(&self, msg: &CheckedActuatorCmdV4) -> ButtplugServerResultFuture {
-    if let Some(last_msg) = self.last_actuator_command.get(&msg.feature_id()) {
+  fn handle_actuatorcmd_v4(&self, msg: &CheckedOutputCmdV4) -> ButtplugServerResultFuture {
+    if let Some(last_msg) = self.last_output_command.get(&msg.feature_id()) {
       if *last_msg == *msg {
         trace!("No commands generated for incoming device packet, skipping and returning success.");
         return future::ready(Ok(message::OkV0::default().into())).boxed();
       }
     }
     self
-      .last_actuator_command
+      .last_output_command
       .insert(msg.feature_id(), msg.clone());
-    self.handle_generic_command_result(self.handler.handle_actuator_cmd(msg))
+    self.handle_generic_command_result(self.handler.handle_output_cmd(msg))
   }
 
   fn handle_hardware_commands(&self, commands: Vec<HardwareCommand>) -> ButtplugServerResultFuture {
@@ -569,23 +569,23 @@ impl ServerDevice {
 
   fn handle_sensor_cmd(
     &self,
-    message: CheckedSensorCmdV4,
+    message: CheckedInputCmdV4,
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, ButtplugError>> {
-    match message.sensor_command() {
-      SensorCommandType::Read => self.handle_sensor_read_cmd(
+    match message.input_command() {
+      InputCommandType::Read => self.handle_sensor_read_cmd(
         message.feature_index(),
         message.feature_id(),
-        message.sensor_type(),
+        message.input_type(),
       ),
-      SensorCommandType::Subscribe => self.handle_sensor_subscribe_cmd(
+      InputCommandType::Subscribe => self.handle_sensor_subscribe_cmd(
         message.feature_index(),
         message.feature_id(),
-        message.sensor_type(),
+        message.input_type(),
       ),
-      SensorCommandType::Unsubscribe => self.handle_sensor_unsubscribe_cmd(
+      InputCommandType::Unsubscribe => self.handle_sensor_unsubscribe_cmd(
         message.feature_index(),
         message.feature_id(),
-        message.sensor_type(),
+        message.input_type(),
       ),
     }
   }
@@ -594,13 +594,13 @@ impl ServerDevice {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType,
+    sensor_type: InputType,
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, ButtplugError>> {
     let device = self.hardware.clone();
     let handler = self.handler.clone();
     async move {
       handler
-        .handle_sensor_read_cmd(device, feature_index, feature_id, sensor_type)
+        .handle_input_read_cmd(device, feature_index, feature_id, sensor_type)
         .await
         .map_err(|e| e.into())
         .map(|e| e.into())
@@ -612,13 +612,13 @@ impl ServerDevice {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType,
+    sensor_type: InputType,
   ) -> ButtplugServerResultFuture {
     let device = self.hardware.clone();
     let handler = self.handler.clone();
     async move {
       handler
-        .handle_sensor_subscribe_cmd(device, feature_index, feature_id, sensor_type)
+        .handle_input_subscribe_cmd(device, feature_index, feature_id, sensor_type)
         .await
         .map(|_| message::OkV0::new(1).into())
         .map_err(|e| e.into())
@@ -630,13 +630,13 @@ impl ServerDevice {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType,
+    sensor_type: InputType,
   ) -> ButtplugServerResultFuture {
     let device = self.hardware.clone();
     let handler = self.handler.clone();
     async move {
       handler
-        .handle_sensor_unsubscribe_cmd(device, feature_index, feature_id, sensor_type)
+        .handle_input_unsubscribe_cmd(device, feature_index, feature_id, sensor_type)
         .await
         .map(|_| message::OkV0::new(1).into())
         .map_err(|e| e.into())

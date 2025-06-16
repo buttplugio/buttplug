@@ -21,7 +21,7 @@ generic_protocol_setup!(TCodeV03, "tcode-v03");
 pub struct TCodeV03 {}
 
 impl ProtocolHandler for TCodeV03 {
-  fn handle_actuator_position_cmd(
+  fn handle_output_position_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,
@@ -54,7 +54,7 @@ impl ProtocolHandler for TCodeV03 {
     Ok(msg_vec)
   }
 
-  fn handle_actuator_vibrate_cmd(
+  fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,

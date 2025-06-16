@@ -22,9 +22,9 @@ use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError},
     message::{
-      ActuatorCmdV4,
-      ActuatorCommand,
-      ActuatorValue,
+      OutputCmdV4,
+      OutputCommand,
+      OutputValue,
       ButtplugClientMessageV4,
       ButtplugMessageSpecVersion,
       ButtplugServerMessageV4,
@@ -44,7 +44,7 @@ use buttplug::{
       ServerDeviceManagerBuilder,
     },
     message::{
-      checked_actuator_cmd::CheckedActuatorCmdV4,
+      checked_output_cmd::CheckedOutputCmdV4,
       spec_enums::ButtplugCheckedClientMessageV4,
       ButtplugClientMessageV3,
       ButtplugClientMessageVariant,
@@ -261,12 +261,12 @@ async fn test_device_stop_on_ping_timeout() {
 
   server
     .parse_checked_message(ButtplugCheckedClientMessageV4::from(
-      CheckedActuatorCmdV4::new(
+      CheckedOutputCmdV4::new(
         0,
         device_index,
         0,
         "f50a528b-b023-40f0-9906-df037443950a".try_into().unwrap(),
-        ActuatorCommand::Vibrate(ActuatorValue::new(64)),
+        OutputCommand::Vibrate(OutputValue::new(64)),
       ),
     ))
     .await
@@ -333,7 +333,7 @@ async fn test_invalid_device_index() {
   let (server, _) = setup_test_server(msg.into()).await;
   let err = server
     .parse_message(ButtplugClientMessageVariant::V4(
-      ActuatorCmdV4::new(10, 0, ActuatorCommand::Vibrate(ActuatorValue::new(0))).into(),
+      OutputCmdV4::new(10, 0, OutputCommand::Vibrate(OutputValue::new(0))).into(),
     ))
     .await
     .unwrap_err();

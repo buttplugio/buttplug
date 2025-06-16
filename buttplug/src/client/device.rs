@@ -17,10 +17,10 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      ActuatorCmdV4,
-      ActuatorCommand,
-      ActuatorType,
-      ActuatorValue,
+      OutputCmdV4,
+      OutputCommand,
+      OutputType,
+      OutputValue,
       ButtplugClientMessageV4,
       ButtplugServerMessageV4,
       DeviceFeature,
@@ -167,13 +167,13 @@ impl ButtplugClientDevice {
     )))
   }
 
-  fn filter_device_actuators(&self, actuator_type: ActuatorType) -> Vec<ClientDeviceFeature> {
+  fn filter_device_actuators(&self, actuator_type: OutputType) -> Vec<ClientDeviceFeature> {
     self
       .device_features
       .iter()
       .filter(|x| {
         x.feature()
-          .actuator()
+          .output()
           .as_ref()
           .ok_or(false)
           .unwrap()
@@ -183,8 +183,8 @@ impl ButtplugClientDevice {
       .collect()
   }
 
-  fn set_value(&self, actuator_command: ActuatorCommand) -> ButtplugClientResultFuture {
-    let features = self.filter_device_actuators(actuator_command.as_actuator_type());
+  fn set_value(&self, output_command: OutputCommand) -> ButtplugClientResultFuture {
+    let features = self.filter_device_actuators(output_command.as_output_type());
     if features.is_empty() {
       // TODO err
     }
@@ -192,7 +192,7 @@ impl ButtplugClientDevice {
       .iter()
       .map(|x| {
         self.event_loop_sender.send_message_expect_ok(
-          ActuatorCmdV4::new(self.index, x.feature_index(), actuator_command).into(),
+          OutputCmdV4::new(self.index, x.feature_index(), output_command).into(),
         )
       })
       .collect();
@@ -204,12 +204,12 @@ impl ButtplugClientDevice {
   }
 
   pub fn vibrate_features(&self) -> Vec<ClientDeviceFeature> {
-    self.filter_device_actuators(ActuatorType::Vibrate)
+    self.filter_device_actuators(OutputType::Vibrate)
   }
 
   /// Commands device to vibrate, assuming it has the features to do so.
   pub fn vibrate(&self, speed: u32) -> ButtplugClientResultFuture {
-    self.set_value(ActuatorCommand::Vibrate(ActuatorValue::new(speed)))
+    self.set_value(OutputCommand::Vibrate(OutputValue::new(speed)))
   }
 
   pub fn has_battery_level(&self) -> bool {

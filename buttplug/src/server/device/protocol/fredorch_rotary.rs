@@ -201,7 +201,7 @@ impl FredorchRotary {
 }
 
 impl ProtocolHandler for FredorchRotary {
-  fn handle_actuator_oscillate_cmd(
+  fn handle_output_oscillate_cmd(
     &self,
     _feature_index: u32,
     _feature_id: Uuid,

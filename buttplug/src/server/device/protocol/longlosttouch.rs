@@ -5,7 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::ActuatorType;
 use crate::util::async_manager;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
@@ -22,9 +21,12 @@ use crate::{
   util::sleep,
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
+
+const LONGLOSTTOUCH_PROTOCOL_UUID: Uuid = uuid!("c47db34f-fa93-4a2b-923d-7d60feaae945");
 
 generic_protocol_initializer_setup!(LongLostTouch, "longlosttouch");
 
@@ -43,10 +45,10 @@ impl ProtocolInitializer for LongLostTouchInitializer {
 }
 
 pub struct LongLostTouch {
-  last_command: Arc<Vec<AtomicU8>>,
+  last_command: Arc<[AtomicU8; 2]>,
 }
 
-fn form_commands(data: Arc<Vec<AtomicU8>>, force: Option<Vec<bool>>) -> Vec<Vec<u8>> {
+fn form_commands(data: Arc<[AtomicU8; 2]>, force: Option<Vec<bool>>) -> Vec<Vec<u8>> {
   let mut cmds: Vec<Vec<u8>> = Vec::new();
   if data.len() != 2 {
     return cmds;
@@ -96,12 +98,12 @@ fn form_commands(data: Arc<Vec<AtomicU8>>, force: Option<Vec<bool>>) -> Vec<Vec<
   cmds
 }
 
-async fn send_longlosttouch_updates(device: Arc<Hardware>, data: Arc<Vec<AtomicU8>>) {
+async fn send_longlosttouch_updates(device: Arc<Hardware>, data: Arc<[AtomicU8; 2]>) {
   loop {
     let cmds = form_commands(data.clone(), None);
     for cmd in cmds {
       if let Err(e) = device
-        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, cmd, true))
+        .write_value(&HardwareWriteCmd::new(LONGLOSTTOUCH_PROTOCOL_UUID, Endpoint::Tx, cmd, true))
         .await
       {
         error!(
@@ -117,7 +119,7 @@ async fn send_longlosttouch_updates(device: Arc<Hardware>, data: Arc<Vec<AtomicU
 
 impl LongLostTouch {
   fn new(hardware: Arc<Hardware>) -> Self {
-    let last_command = Arc::new((0..2).map(|_| AtomicU8::new(0)).collect::<Vec<AtomicU8>>());
+    let last_command = Arc::new([AtomicU8::default(), AtomicU8::default()]);
     let last_command_clone = last_command.clone();
     async_manager::spawn(async move {
       send_longlosttouch_updates(hardware, last_command_clone).await;
@@ -128,29 +130,39 @@ impl LongLostTouch {
 }
 
 impl ProtocolHandler for LongLostTouch {
-  fn handle_value_cmd(
-    &self,
-    commands: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if commands.len() != 2 {
-      return Err(ButtplugDeviceError::DeviceFeatureCountMismatch(
-        2,
-        commands.len() as u32,
-      ));
-    }
-    for (i, item) in commands.iter().enumerate() {
-      if let Some(command) = item {
-        self.last_command[i].store(command.1 as u8, Ordering::Relaxed);
-      }
-    }
+  fn handle_actuator_vibrate_cmd(
+      &self,
+      _feature_index: u32,
+      feature_id: uuid::Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.last_command[0].store(speed as u8, Ordering::Relaxed);
     Ok(
       form_commands(
         self.last_command.clone(),
         Some(commands.iter().map(|i| i.is_some()).collect()),
       )
       .iter()
-      .map(|data| HardwareWriteCmd::new(Endpoint::Tx, data.clone(), true).into())
+      .map(|data| HardwareWriteCmd::new(feature_id, Endpoint::Tx, data.clone(), true).into())
       .collect(),
     )
+  }
+
+  fn handle_actuator_oscillate_cmd(
+      &self,
+      _feature_index: u32,
+      feature_id: uuid::Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+      self.last_command[1].store(speed as u8, Ordering::Relaxed);
+      Ok(
+        form_commands(
+          self.last_command.clone(),
+          Some(commands.iter().map(|i| i.is_some()).collect()),
+        )
+        .iter()
+        .map(|data| HardwareWriteCmd::new(feature_id, Endpoint::Tx, data.clone(), true).into())
+        .collect(),
+      )
   }
 }

@@ -10,7 +10,7 @@ use crate::core::message::{
   ButtplugMessage,
   ButtplugMessageFinalizer,
   ButtplugMessageValidator,
-  SensorType,
+  InputType,
 };
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
@@ -30,7 +30,7 @@ use serde::{Deserialize, Serialize};
   Serialize,
   Deserialize,
 )]
-pub struct SensorReadingV4 {
+pub struct InputReadingV4 {
   #[serde(rename = "Id")]
   id: u32,
   #[serde(rename = "DeviceIndex")]
@@ -40,17 +40,17 @@ pub struct SensorReadingV4 {
   feature_index: u32,
   #[serde(rename = "SensorType")]
   #[getset[get_copy="pub"]]
-  sensor_type: SensorType,
+  sensor_type: InputType,
   #[serde(rename = "Data")]
   #[getset[get="pub"]]
   data: Vec<i32>,
 }
 
-impl SensorReadingV4 {
+impl InputReadingV4 {
   pub fn new(
     device_index: u32,
     feature_index: u32,
-    sensor_type: SensorType,
+    sensor_type: InputType,
     data: Vec<i32>,
   ) -> Self {
     Self {

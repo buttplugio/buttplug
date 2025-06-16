@@ -9,11 +9,11 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      ActuatorCommand,
-      ActuatorPositionWithDuration,
-      ActuatorRotateWithDirection,
-      ActuatorType,
-      ActuatorValue,
+      OutputCommand,
+      OutputPositionWithDuration,
+      OutputRotateWithDirection,
+      OutputType,
+      OutputValue,
       ButtplugDeviceMessage,
       ButtplugMessage,
       ButtplugMessageFinalizer,
@@ -33,7 +33,7 @@ use crate::{
 };
 use getset::{CopyGetters, Getters};
 
-use super::checked_actuator_cmd::CheckedActuatorCmdV4;
+use super::checked_output_cmd::CheckedOutputCmdV4;
 
 #[derive(
   Debug,
@@ -45,17 +45,17 @@ use super::checked_actuator_cmd::CheckedActuatorCmdV4;
   Getters,
   CopyGetters,
 )]
-pub struct CheckedActuatorVecCmdV4 {
+pub struct CheckedOutputVecCmdV4 {
   #[getset(get_copy = "pub")]
   id: u32,
   #[getset(get_copy = "pub")]
   device_index: u32,
   #[getset(get = "pub")]
-  value_vec: Vec<CheckedActuatorCmdV4>,
+  value_vec: Vec<CheckedOutputCmdV4>,
 }
 
-impl CheckedActuatorVecCmdV4 {
-  pub fn new(id: u32, device_index: u32, mut value_vec: Vec<CheckedActuatorCmdV4>) -> Self {
+impl CheckedOutputVecCmdV4 {
+  pub fn new(id: u32, device_index: u32, mut value_vec: Vec<CheckedOutputCmdV4>) -> Self {
     // Several tests and parts of the system assumed we always sorted by feature index. This is not
     // necessarily true of incoming messages, but we also never explicitly specified the execution
     // order of subcommands within a message, so we'll just sort here for now to make tests pass,
@@ -69,14 +69,14 @@ impl CheckedActuatorVecCmdV4 {
   }
 }
 
-impl ButtplugMessageValidator for CheckedActuatorVecCmdV4 {
+impl ButtplugMessageValidator for CheckedOutputVecCmdV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     Ok(())
   }
 }
 
-impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedActuatorVecCmdV4 {
+impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedOutputVecCmdV4 {
   // For VibrateCmd, just take everything out of V2's VibrateCmd and make a command.
   fn try_from_device_attributes(
     msg: SingleMotorVibrateCmdV0,
@@ -87,8 +87,8 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedActuatorVecCmdV
       .iter()
       .enumerate()
       .filter(|(_, feature)| {
-        if let Some(actuator_map) = feature.actuator() {
-          actuator_map.contains_key(&crate::core::message::ActuatorType::Vibrate)
+        if let Some(output_map) = feature.output() {
+          output_map.contains_key(&crate::core::message::OutputType::Vibrate)
         } else {
           false
         }
@@ -107,26 +107,26 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedActuatorVecCmdV
     for (index, feature) in vibrate_features {
       // if we've made it this far, we know we have actuators in a list
       let actuator = feature
-        .actuator()
+        .output()
         .as_ref()
         .unwrap()
-        .get(&ActuatorType::Vibrate)
+        .get(&OutputType::Vibrate)
         .unwrap();
       // This doesn't need to run through a security check because we have to construct it to be
       // inherently secure anyways.
-      cmds.push(CheckedActuatorCmdV4::new(
+      cmds.push(CheckedOutputCmdV4::new(
         msg.id(),
         msg.device_index(),
         index as u32,
         feature.id(),
-        ActuatorCommand::Vibrate(ActuatorValue::new(
+        OutputCommand::Vibrate(OutputValue::new(
           (msg.speed() * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64)
             + *actuator.step_limit().start() as f64)
             .ceil() as u32,
         )),
       ))
     }
-    Ok(CheckedActuatorVecCmdV4::new(
+    Ok(CheckedOutputVecCmdV4::new(
       msg.id(),
       msg.device_index(),
       cmds,
@@ -134,7 +134,7 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedActuatorVecCmdV
   }
 }
 
-impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedActuatorVecCmdV4 {
+impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedOutputVecCmdV4 {
   // VibrateCmd only exists up through Message Spec v2. We can assume that, if we're receiving it,
   // we can just use the V2 spec client device attributes for it. If this was sent on a V1 protocol,
   // it'll still have all the same features.
@@ -155,7 +155,7 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedActuatorVecCmdV4 {
           ButtplugDeviceError::DeviceFeatureCountMismatch(0, msg.speeds().len() as u32),
         ))?;
 
-    let mut cmds: Vec<CheckedActuatorCmdV4> = vec![];
+    let mut cmds: Vec<CheckedOutputCmdV4> = vec![];
     for vibrate_cmd in msg.speeds() {
       if vibrate_cmd.index() > vibrate_attributes.features().len() as u32 {
         return Err(ButtplugError::from(
@@ -174,21 +174,21 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedActuatorVecCmdV4 {
         .expect("Already checked existence")
         .0;
       let actuator = feature
-        .actuator()
+        .output()
         .as_ref()
         .ok_or(ButtplugDeviceError::DeviceConfigurationError(
           "Device configuration does not have Vibrate actuator available.".to_owned(),
         ))?
-        .get(&ActuatorType::Vibrate)
+        .get(&OutputType::Vibrate)
         .ok_or(ButtplugDeviceError::DeviceConfigurationError(
           "Device configuration does not have Vibrate actuator available.".to_owned(),
         ))?;
-      cmds.push(CheckedActuatorCmdV4::new(
+      cmds.push(CheckedOutputCmdV4::new(
         msg.id(),
         msg.device_index(),
         idx as u32,
         feature.id(),
-        ActuatorCommand::Vibrate(ActuatorValue::new(
+        OutputCommand::Vibrate(OutputValue::new(
           (vibrate_cmd.speed()
             * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64)
             + *actuator.step_limit().start() as f64)
@@ -196,7 +196,7 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedActuatorVecCmdV4 {
         )),
       ))
     }
-    Ok(CheckedActuatorVecCmdV4::new(
+    Ok(CheckedOutputVecCmdV4::new(
       msg.id(),
       msg.device_index(),
       cmds,
@@ -204,13 +204,13 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedActuatorVecCmdV4 {
   }
 }
 
-impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedActuatorVecCmdV4 {
+impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedOutputVecCmdV4 {
   // ScalarCmd only came in with V3, so we can just use the V3 device attributes.
   fn try_from_device_attributes(
     msg: ScalarCmdV3,
     attrs: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
-    let mut cmds: Vec<CheckedActuatorCmdV4> = vec![];
+    let mut cmds: Vec<CheckedOutputCmdV4> = vec![];
     if msg.scalars().is_empty() {
       return Err(ButtplugError::from(
         ButtplugDeviceError::ProtocolRequirementError(
@@ -242,7 +242,7 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedActuatorVecCmdV4 {
         .0 as u32;
       let actuator = feature
         .feature()
-        .actuator()
+        .output()
         .as_ref()
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceNoActuatorError("ScalarCmdV3".to_owned()),
@@ -255,12 +255,12 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedActuatorVecCmdV4 {
       // This needs to take the user configured step limit into account, otherwise we'll hand back
       // the wrong placement and it won't be noticed.
       if cmd.scalar() > 0.000001 {
-        cmds.push(CheckedActuatorCmdV4::new(
+        cmds.push(CheckedOutputCmdV4::new(
           msg.id(),
           msg.device_index(),
           idx,
           feature.feature.id(),
-          ActuatorCommand::from_actuator_type(
+          OutputCommand::from_output_type(
             cmd.actuator_type(),
             (cmd.scalar()
               * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64)
@@ -270,17 +270,17 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedActuatorVecCmdV4 {
           .unwrap(),
         ));
       } else {
-        cmds.push(CheckedActuatorCmdV4::new(
+        cmds.push(CheckedOutputCmdV4::new(
           msg.id(),
           msg.device_index(),
           idx,
           feature.feature.id(),
-          ActuatorCommand::from_actuator_type(cmd.actuator_type(), 0).unwrap(),
+          OutputCommand::from_output_type(cmd.actuator_type(), 0).unwrap(),
         ));
       }
     }
 
-    Ok(CheckedActuatorVecCmdV4::new(
+    Ok(CheckedOutputVecCmdV4::new(
       msg.id(),
       msg.device_index(),
       cmds,
@@ -288,7 +288,7 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedActuatorVecCmdV4 {
   }
 }
 
-impl TryFromDeviceAttributes<LinearCmdV1> for CheckedActuatorVecCmdV4 {
+impl TryFromDeviceAttributes<LinearCmdV1> for CheckedOutputVecCmdV4 {
   fn try_from_device_attributes(
     msg: LinearCmdV1,
     features: &ServerDeviceAttributes,
@@ -313,25 +313,25 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedActuatorVecCmdV4 {
         ))?
         .feature();
       let actuator = f
-        .actuator()
+        .output()
         .as_ref()
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceFeatureMismatch(
             "Device got LinearCmd command but has no actuators on Linear feature.".to_owned(),
           ),
         ))?
-        .get(&crate::core::message::ActuatorType::PositionWithDuration)
+        .get(&crate::core::message::OutputType::PositionWithDuration)
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceFeatureMismatch(
             "Device got LinearCmd command but has no actuators on Linear feature.".to_owned(),
           ),
         ))?;
-      cmds.push(CheckedActuatorCmdV4::new(
+      cmds.push(CheckedOutputCmdV4::new(
         msg.device_index(),
         x.index(),
         0,
         f.id(),
-        ActuatorCommand::PositionWithDuration(ActuatorPositionWithDuration::new(
+        OutputCommand::PositionWithDuration(OutputPositionWithDuration::new(
           (x.position() * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64)
             + *actuator.step_limit().start() as f64)
             .ceil() as u32,
@@ -344,7 +344,7 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedActuatorVecCmdV4 {
         )),
       ));
     }
-    Ok(CheckedActuatorVecCmdV4::new(
+    Ok(CheckedOutputVecCmdV4::new(
       msg.id(),
       msg.device_index(),
       cmds,
@@ -352,7 +352,7 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedActuatorVecCmdV4 {
   }
 }
 
-impl TryFromDeviceAttributes<RotateCmdV1> for CheckedActuatorVecCmdV4 {
+impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
   // RotateCmd exists up through Message Spec v3. We can assume that, if we're receiving it, we can
   // just use the V3 spec client device attributes for it. If this was sent on a V1/V2 protocol,
   // it'll still have all the same features.
@@ -360,7 +360,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedActuatorVecCmdV4 {
     msg: RotateCmdV1,
     attrs: &ServerDeviceAttributes,
   ) -> Result<Self, crate::core::errors::ButtplugError> {
-    let mut cmds: Vec<CheckedActuatorCmdV4> = vec![];
+    let mut cmds: Vec<CheckedOutputCmdV4> = vec![];
     for cmd in msg.rotations() {
       let rotate_attrs = attrs
         .attrs_v3()
@@ -385,21 +385,21 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedActuatorVecCmdV4 {
         .0 as u32;
       let actuator = feature
         .feature()
-        .actuator()
+        .output()
         .as_ref()
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceNoActuatorError("RotateCmdV1".to_owned()),
         ))?
-        .get(&crate::core::message::ActuatorType::RotateWithDirection)
+        .get(&crate::core::message::OutputType::RotateWithDirection)
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceNoActuatorError("RotateCmdV1".to_owned()),
         ))?;
-      cmds.push(CheckedActuatorCmdV4::new(
+      cmds.push(CheckedOutputCmdV4::new(
         msg.device_index(),
         idx,
         0,
         feature.feature.id(),
-        ActuatorCommand::RotateWithDirection(ActuatorRotateWithDirection::new(
+        OutputCommand::RotateWithDirection(OutputRotateWithDirection::new(
           (cmd.speed() * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64)
             + *actuator.step_limit().start() as f64)
             .ceil() as u32,
@@ -407,7 +407,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedActuatorVecCmdV4 {
         )),
       ));
     }
-    Ok(CheckedActuatorVecCmdV4::new(
+    Ok(CheckedOutputVecCmdV4::new(
       msg.id(),
       msg.device_index(),
       cmds,

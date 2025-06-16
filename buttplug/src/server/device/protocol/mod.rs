@@ -147,7 +147,7 @@ pub mod youou;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorCommand, Endpoint, SensorReadingV4, SensorType},
+    message::{OutputCommand, Endpoint, InputReadingV4, InputType},
   },
   server::{
     device::{
@@ -155,7 +155,7 @@ use crate::{
       hardware::{Hardware, HardwareCommand, HardwareReadCmd},
     },
     message::{
-      checked_actuator_cmd::CheckedActuatorCmdV4,
+      checked_output_cmd::CheckedOutputCmdV4,
       spec_enums::ButtplugDeviceCommandMessageUnionV4,
       ButtplugServerDeviceMessage,
     },
@@ -830,43 +830,43 @@ pub trait ProtocolHandler: Sync + Send {
   // The default scalar handler assumes that most devices require discrete commands per feature. If
   // a protocol has commands that combine multiple features, either with matched or unmatched
   // actuators, they should just implement their own version of this method.
-  fn handle_actuator_cmd(
+  fn handle_output_cmd(
     &self,
-    cmd: &CheckedActuatorCmdV4,
+    cmd: &CheckedOutputCmdV4,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let actuator_command = cmd.actuator_command();
-    match actuator_command {
-      ActuatorCommand::Constrict(x) => {
-        self.handle_actuator_constrict_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+    let output_command = cmd.output_command();
+    match output_command {
+      OutputCommand::Constrict(x) => {
+        self.handle_output_constrict_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
       }
-      ActuatorCommand::Inflate(x) => {
-        self.handle_actuator_inflate_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+      OutputCommand::Inflate(x) => {
+        self.handle_output_inflate_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
       }
-      ActuatorCommand::Oscillate(x) => {
-        self.handle_actuator_oscillate_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+      OutputCommand::Oscillate(x) => {
+        self.handle_output_oscillate_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
       }
-      ActuatorCommand::Rotate(x) => {
-        self.handle_actuator_rotate_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+      OutputCommand::Rotate(x) => {
+        self.handle_output_rotate_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
       }
-      ActuatorCommand::Vibrate(x) => {
-        self.handle_actuator_vibrate_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+      OutputCommand::Vibrate(x) => {
+        self.handle_output_vibrate_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
       }
-      ActuatorCommand::Position(x) => {
-        self.handle_actuator_position_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+      OutputCommand::Position(x) => {
+        self.handle_output_position_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
       }
-      ActuatorCommand::Heater(x) => {
-        self.handle_actuator_heater_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+      OutputCommand::Heater(x) => {
+        self.handle_output_heater_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
       }
-      ActuatorCommand::Led(x) => {
-        self.handle_actuator_led_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+      OutputCommand::Led(x) => {
+        self.handle_output_led_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
       }
-      ActuatorCommand::PositionWithDuration(x) => self.handle_position_with_duration_cmd(
+      OutputCommand::PositionWithDuration(x) => self.handle_position_with_duration_cmd(
         cmd.feature_index(),
         cmd.feature_id(),
         x.position(),
         x.duration(),
       ),
-      ActuatorCommand::RotateWithDirection(x) => self.handle_rotation_with_direction_cmd(
+      OutputCommand::RotateWithDirection(x) => self.handle_rotation_with_direction_cmd(
         cmd.feature_index(),
         cmd.feature_id(),
         x.speed(),
@@ -875,7 +875,7 @@ pub trait ProtocolHandler: Sync + Send {
     }
   }
 
-  fn handle_actuator_vibrate_cmd(
+  fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,
     _feature_id: Uuid,
@@ -884,7 +884,7 @@ pub trait ProtocolHandler: Sync + Send {
     self.command_unimplemented("OutputCmd (Vibrate Actuator)")
   }
 
-  fn handle_actuator_rotate_cmd(
+  fn handle_output_rotate_cmd(
     &self,
     _feature_index: u32,
     _feature_id: Uuid,
@@ -893,7 +893,7 @@ pub trait ProtocolHandler: Sync + Send {
     self.command_unimplemented("OutputCmd (Rotate Actuator)")
   }
 
-  fn handle_actuator_oscillate_cmd(
+  fn handle_output_oscillate_cmd(
     &self,
     _feature_index: u32,
     _feature_id: Uuid,
@@ -902,7 +902,7 @@ pub trait ProtocolHandler: Sync + Send {
     self.command_unimplemented("OutputCmd (Oscillate Actuator)")
   }
 
-  fn handle_actuator_inflate_cmd(
+  fn handle_output_inflate_cmd(
     &self,
     _feature_index: u32,
     _feature_id: Uuid,
@@ -911,7 +911,7 @@ pub trait ProtocolHandler: Sync + Send {
     self.command_unimplemented("OutputCmd (Inflate Actuator)")
   }
 
-  fn handle_actuator_constrict_cmd(
+  fn handle_output_constrict_cmd(
     &self,
     _feature_index: u32,
     _feature_id: Uuid,
@@ -920,7 +920,7 @@ pub trait ProtocolHandler: Sync + Send {
     self.command_unimplemented("OutputCmd (Constrict Actuator)")
   }
 
-  fn handle_actuator_heater_cmd(
+  fn handle_output_heater_cmd(
     &self,
     _feature_index: u32,
     _feature_id: Uuid,
@@ -929,7 +929,7 @@ pub trait ProtocolHandler: Sync + Send {
     self.command_unimplemented("OutputCmd (Heater Actuator)")
   }
 
-  fn handle_actuator_led_cmd(
+  fn handle_output_led_cmd(
     &self,
     _feature_index: u32,
     _feature_id: Uuid,
@@ -938,7 +938,7 @@ pub trait ProtocolHandler: Sync + Send {
     self.command_unimplemented("OutputCmd (Led Actuator)")
   }
 
-  fn handle_actuator_position_cmd(
+  fn handle_output_position_cmd(
     &self,
     _feature_index: u32,
     _feature_id: Uuid,
@@ -967,12 +967,12 @@ pub trait ProtocolHandler: Sync + Send {
     self.command_unimplemented("OutputCmd (Rotation w/ Direction Actuator)")
   }
 
-  fn handle_sensor_subscribe_cmd(
+  fn handle_input_subscribe_cmd(
     &self,
     _device: Arc<Hardware>,
     _feature_index: u32,
     _feature_id: Uuid,
-    _sensor_type: SensorType,
+    _sensor_type: InputType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Command not implemented for this protocol: InputCmd (Subscribe)".to_string(),
@@ -980,12 +980,12 @@ pub trait ProtocolHandler: Sync + Send {
     .boxed()
   }
 
-  fn handle_sensor_unsubscribe_cmd(
+  fn handle_input_unsubscribe_cmd(
     &self,
     _device: Arc<Hardware>,
     _feature_index: u32,
     _feature_id: Uuid,
-    _sensor_type: SensorType,
+    _sensor_type: InputType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Command not implemented for this protocol: InputCmd (Unsubscribe)".to_string(),
@@ -993,15 +993,15 @@ pub trait ProtocolHandler: Sync + Send {
     .boxed()
   }
 
-  fn handle_sensor_read_cmd(
+  fn handle_input_read_cmd(
     &self,
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: SensorType,
-  ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
+    sensor_type: InputType,
+  ) -> BoxFuture<Result<InputReadingV4, ButtplugDeviceError>> {
     match sensor_type {
-      SensorType::Battery => self.handle_battery_level_cmd(device, feature_index, feature_id),
+      InputType::Battery => self.handle_battery_level_cmd(device, feature_index, feature_id),
       _ => future::ready(Err(ButtplugDeviceError::UnhandledCommand(
         "Command not implemented for this protocol: InputCmd (Read)".to_string(),
       )))
@@ -1016,7 +1016,7 @@ pub trait ProtocolHandler: Sync + Send {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-  ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
+  ) -> BoxFuture<Result<InputReadingV4, ButtplugDeviceError>> {
     // If we have a standardized BLE Battery endpoint, handle that above the
     // protocol, as it'll always be the same.
     if device.endpoints().contains(&Endpoint::RxBLEBattery) {
@@ -1027,7 +1027,7 @@ pub trait ProtocolHandler: Sync + Send {
         let hw_msg = fut.await?;
         let battery_level = hw_msg.data()[0] as i32;
         let battery_reading =
-          SensorReadingV4::new(0, feature_index, SensorType::Battery, vec![battery_level]);
+          InputReadingV4::new(0, feature_index, InputType::Battery, vec![battery_level]);
         debug!("Got battery reading: {}", battery_level);
         Ok(battery_reading)
       }

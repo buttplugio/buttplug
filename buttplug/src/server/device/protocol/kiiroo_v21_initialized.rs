@@ -71,7 +71,7 @@ impl ProtocolHandler for KiirooV21Initialized {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_actuator_vibrate_cmd(
+  fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,

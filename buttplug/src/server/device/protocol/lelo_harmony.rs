@@ -138,7 +138,7 @@ impl LeloHarmony {
 }
 
 impl ProtocolHandler for LeloHarmony {
-  fn handle_actuator_rotate_cmd(
+  fn handle_output_rotate_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
@@ -147,7 +147,7 @@ impl ProtocolHandler for LeloHarmony {
     self.handle_input_cmd(feature_index, feature_id, speed)
   }
 
-  fn handle_actuator_vibrate_cmd(
+  fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,

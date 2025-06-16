@@ -12,7 +12,7 @@ use crate::core::{
     ButtplugMessage,
     ButtplugMessageFinalizer,
     ButtplugMessageValidator,
-    SensorType,
+    InputType,
   },
 };
 use getset::Getters;
@@ -39,11 +39,11 @@ pub struct SensorSubscribeCmdV3 {
   sensor_index: u32,
   #[getset(get = "pub")]
   #[serde(rename = "SensorType")]
-  sensor_type: SensorType,
+  sensor_type: InputType,
 }
 
 impl SensorSubscribeCmdV3 {
-  pub fn new(device_index: u32, sensor_index: u32, sensor_type: SensorType) -> Self {
+  pub fn new(device_index: u32, sensor_index: u32, sensor_type: InputType) -> Self {
     Self {
       id: 1,
       device_index,

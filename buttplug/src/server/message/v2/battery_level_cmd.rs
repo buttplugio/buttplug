@@ -13,12 +13,12 @@ use crate::{
       ButtplugMessage,
       ButtplugMessageFinalizer,
       ButtplugMessageValidator,
-      SensorCommandType,
-      SensorType,
+      InputCommandType,
+      InputType,
     },
   },
   server::message::{
-    checked_sensor_cmd::CheckedSensorCmdV4,
+    checked_input_cmd::CheckedInputCmdV4,
     ServerDeviceAttributes,
     TryFromDeviceAttributes,
   },
@@ -58,7 +58,7 @@ impl ButtplugMessageValidator for BatteryLevelCmdV2 {
   }
 }
 
-impl TryFromDeviceAttributes<BatteryLevelCmdV2> for CheckedSensorCmdV4 {
+impl TryFromDeviceAttributes<BatteryLevelCmdV2> for CheckedInputCmdV4 {
   fn try_from_device_attributes(
     msg: BatteryLevelCmdV2,
     features: &ServerDeviceAttributes,
@@ -79,8 +79,8 @@ impl TryFromDeviceAttributes<BatteryLevelCmdV2> for CheckedSensorCmdV4 {
       .iter()
       .enumerate()
       .find(|(_, p)| {
-        if let Some(sensor_map) = p.sensor() {
-          if sensor_map.contains_key(&SensorType::Battery) {
+        if let Some(sensor_map) = p.input() {
+          if sensor_map.contains_key(&InputType::Battery) {
             return true;
           }
         }
@@ -89,11 +89,11 @@ impl TryFromDeviceAttributes<BatteryLevelCmdV2> for CheckedSensorCmdV4 {
       .expect("Already found matching battery feature, can unwrap this.")
       .0;
 
-    Ok(CheckedSensorCmdV4::new(
+    Ok(CheckedInputCmdV4::new(
       msg.device_index(),
       feature_index as u32,
-      SensorType::Battery,
-      SensorCommandType::Read,
+      InputType::Battery,
+      InputCommandType::Read,
       battery_feature.id(),
     ))
   }

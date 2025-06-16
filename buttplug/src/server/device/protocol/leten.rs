@@ -98,7 +98,7 @@ impl ProtocolHandler for Leten {
     super::ProtocolKeepaliveStrategy::NoStrategy
   }
 
-  fn handle_actuator_vibrate_cmd(
+  fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,
     _feature_id: Uuid,

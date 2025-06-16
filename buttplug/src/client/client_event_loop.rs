@@ -251,7 +251,7 @@ where
             ));
         }
       }
-      ButtplugServerMessageV4::SensorReading(msg) => {
+      ButtplugServerMessageV4::InputReading(msg) => {
         let device_idx = msg.device_index();
         if let Some(device) = self.device_map.get(&device_idx) {
           device

@@ -19,7 +19,7 @@
             {
               "feature-type": "Oscillate",
               "description": "Fucking Machine Oscillation Speed",
-              "actuator": {
+              "output": {
                 "Oscillate": {
                   "step-range": [
                     0,
@@ -28,9 +28,6 @@
                   "step-limit": [
                     0,
                     10
-                  ],
-                  "messages": [
-                    "ValueCmd"
                   ]
                 }
               },
@@ -40,7 +37,7 @@
             {
               "feature-type": "Battery",
               "description": "Battery Level",
-              "sensor": {
+              "input": {
                 "Battery": {
                   "value-range": [
                     [
@@ -48,8 +45,8 @@
                       100
                     ]
                   ],
-                  "messages": [
-                    "SensorReadCmd"
+                  "input-commands": [
+                    "Read"
                   ]
                 }
               },

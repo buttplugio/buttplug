@@ -6,8 +6,8 @@
 // for full license information.
 
 use crate::core::message::{
-  v4::sensor_cmd::SensorCmdV4,
-  ActuatorCmdV4,
+  v4::input_cmd::InputCmdV4,
+  OutputCmdV4,
   ButtplugMessage,
   ButtplugMessageError,
   ButtplugMessageFinalizer,
@@ -29,7 +29,7 @@ use crate::core::message::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::{DeviceAddedV4, DeviceListV4, SensorReadingV4};
+use super::{DeviceAddedV4, DeviceListV4, InputReadingV4};
 
 /// Represents all client-to-server messages in v3 of the Buttplug Spec
 #[derive(
@@ -54,8 +54,8 @@ pub enum ButtplugClientMessageV4 {
   // Generic commands
   StopDeviceCmd(StopDeviceCmdV0),
   StopAllDevices(StopAllDevicesV0),
-  ActuatorCmd(ActuatorCmdV4),
-  SensorCmd(SensorCmdV4),
+  OutputCmd(OutputCmdV4),
+  InputCmd(InputCmdV4),
   RawCmd(RawCmdV4),
 }
 
@@ -84,7 +84,7 @@ pub enum ButtplugServerMessageV4 {
   // Generic commands
   RawReading(RawReadingV2),
   // Sensor commands
-  SensorReading(SensorReadingV4),
+  InputReading(InputReadingV4),
 }
 
 impl ButtplugMessageFinalizer for ButtplugServerMessageV4 {

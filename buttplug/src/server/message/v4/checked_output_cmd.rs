@@ -9,8 +9,8 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      ActuatorCmdV4,
-      ActuatorCommand,
+      OutputCmdV4,
+      OutputCommand,
       ButtplugDeviceMessage,
       ButtplugMessage,
       ButtplugMessageFinalizer,
@@ -28,21 +28,21 @@ use super::spec_enums::ButtplugDeviceMessageNameV4;
   Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, Clone, Getters, CopyGetters, Eq,
 )]
 #[getset(get_copy = "pub")]
-pub struct CheckedActuatorCmdV4 {
+pub struct CheckedOutputCmdV4 {
   id: u32,
   device_index: u32,
   feature_index: u32,
   feature_id: Uuid,
-  actuator_command: ActuatorCommand,
+  output_command: OutputCommand,
 }
 
-impl PartialEq for CheckedActuatorCmdV4 {
+impl PartialEq for CheckedOutputCmdV4 {
   fn eq(&self, other: &Self) -> bool {
     // Compare everything but the message id
     self.device_index() == other.device_index()
       && self.feature_index() == other.feature_index()
       && self.feature_id() == other.feature_id()
-      && self.actuator_command() == other.actuator_command()
+      && self.output_command() == other.output_command()
   }
 }
 
@@ -54,40 +54,40 @@ impl From<CheckedActuatorCmdV4> for ActuatorCmdV4 {
       value.device_index(),
       value.feature_index(),
       value.actuator_type(),
-      value.actuator_command()
+      value.output_command()
     )
   }
 }
   */
 
-impl CheckedActuatorCmdV4 {
+impl CheckedOutputCmdV4 {
   pub fn new(
     id: u32,
     device_index: u32,
     feature_index: u32,
     feature_id: Uuid,
-    actuator_command: ActuatorCommand,
+    output_command: OutputCommand,
   ) -> Self {
     Self {
       id,
       device_index,
       feature_index,
       feature_id,
-      actuator_command,
+      output_command: output_command,
     }
   }
 }
 
-impl ButtplugMessageValidator for CheckedActuatorCmdV4 {
+impl ButtplugMessageValidator for CheckedOutputCmdV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     Ok(())
   }
 }
 
-impl TryFromDeviceAttributes<ActuatorCmdV4> for CheckedActuatorCmdV4 {
+impl TryFromDeviceAttributes<OutputCmdV4> for CheckedOutputCmdV4 {
   fn try_from_device_attributes(
-    cmd: ActuatorCmdV4,
+    cmd: OutputCmdV4,
     attrs: &ServerDeviceAttributes,
   ) -> Result<Self, ButtplugError> {
     let features = attrs.features();
@@ -105,8 +105,8 @@ impl TryFromDeviceAttributes<ActuatorCmdV4> for CheckedActuatorCmdV4 {
     };
 
     // Check to make sure the feature has an actuator that handles the data we've been passed
-    if let Some(actuator_map) = feature.actuator() {
-      if let Some(actuator) = actuator_map.get(&cmd.command().as_actuator_type()) {
+    if let Some(output_map) = feature.output() {
+      if let Some(actuator) = output_map.get(&cmd.command().as_output_type()) {
         let value = cmd.command().value();
         let step_count = actuator.step_count();
         if value > step_count {
@@ -130,7 +130,7 @@ impl TryFromDeviceAttributes<ActuatorCmdV4> for CheckedActuatorCmdV4 {
             feature_id: feature.id(),
             device_index: cmd.device_index(),
             feature_index: cmd.feature_index(),
-            actuator_command: new_command,
+            output_command: new_command,
           })
         }
       } else {

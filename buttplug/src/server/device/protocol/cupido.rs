@@ -26,7 +26,7 @@ impl ProtocolHandler for Cupido {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_actuator_vibrate_cmd(
+  fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,
@@ -64,7 +64,7 @@ impl ProtocolHandler for Cupido {
             let battery_reading = SensorReading::new(
               message.device_index(),
               *message.sensor_index(),
-              *message.sensor_type(),
+              *message.input_type(),
               vec![data[5] as i32],
             );
             Ok(battery_reading.into())

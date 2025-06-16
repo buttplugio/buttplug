@@ -60,7 +60,7 @@ impl ProtocolHandler for Bananasome {
     true
   }
 
-  fn handle_actuator_oscillate_cmd(
+  fn handle_output_oscillate_cmd(
     &self,
     feature_index: u32,
     _feature_id: Uuid,
@@ -69,7 +69,7 @@ impl ProtocolHandler for Bananasome {
     Ok(self.hardware_command(feature_index, speed))
   }
 
-  fn handle_actuator_vibrate_cmd(
+  fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,
     _feature_id: Uuid,

@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::message::{ActuatorType, SensorType},
+  core::message::{OutputType, InputType},
   server::message::{
     server_device_feature::ServerDeviceFeature,
     v1::NullDeviceMessageAttributesV1,
@@ -120,7 +120,7 @@ pub fn vibrate_cmd_from_scalar_cmd(
   let mut step_count = vec![];
   let mut features = vec![];
   for attr in attributes_vec {
-    if *attr.actuator_type() == ActuatorType::Vibrate {
+    if *attr.actuator_type() == OutputType::Vibrate {
       feature_count += 1;
       step_count.push(*attr.step_count());
       features.push(attr.feature().clone());
@@ -153,7 +153,7 @@ impl From<ServerDeviceMessageAttributesV3> for ServerDeviceMessageAttributesV2 {
         if let Some(sensor_info) = other.sensor_read_cmd() {
           sensor_info
             .iter()
-            .find(|x| *x.sensor_type() == SensorType::Battery)
+            .find(|x| *x.sensor_type() == InputType::Battery)
             .map(|attr| ServerSensorDeviceMessageAttributesV2::new(attr.feature()))
         } else {
           None
@@ -163,7 +163,7 @@ impl From<ServerDeviceMessageAttributesV3> for ServerDeviceMessageAttributesV2 {
         if let Some(sensor_info) = other.sensor_read_cmd() {
           sensor_info
             .iter()
-            .find(|x| *x.sensor_type() == SensorType::RSSI)
+            .find(|x| *x.sensor_type() == InputType::RSSI)
             .map(|attr| ServerSensorDeviceMessageAttributesV2::new(attr.feature()))
         } else {
           None

@@ -21,7 +21,7 @@ generic_protocol_setup!(NextLevelRacing, "nextlevelracing");
 pub struct NextLevelRacing {}
 
 impl ProtocolHandler for NextLevelRacing {
-  fn handle_actuator_vibrate_cmd(
+  fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,

@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{Endpoint, SensorReadingV4, SensorType},
+    message::{Endpoint, InputReadingV4, InputType},
   },
   server::{
     device::{
@@ -54,12 +54,12 @@ impl ProtocolHandler for KGoalBoost {
     convert_broadcast_receiver_to_stream(self.event_stream.subscribe()).boxed()
   }
 
-  fn handle_sensor_subscribe_cmd(
+  fn handle_input_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-    _sensor_type: SensorType,
+    _sensor_type: InputType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     if self.subscribed_sensors.contains(&feature_index) {
       return future::ready(Ok(())).boxed();
@@ -100,7 +100,7 @@ impl ProtocolHandler for KGoalBoost {
                 let unnormalized = (data[5] as i32) << 8 | data[6] as i32;
                 if stream_sensors.contains(&0)
                   && sender
-                    .send(SensorReadingV4::new(0, 0, SensorType::Pressure, vec![normalized]).into())
+                    .send(InputReadingV4::new(0, 0, InputType::Pressure, vec![normalized]).into())
                     .is_err()
                 {
                   debug!(
@@ -111,7 +111,7 @@ impl ProtocolHandler for KGoalBoost {
                 if stream_sensors.contains(&1)
                   && sender
                     .send(
-                      SensorReadingV4::new(0, 0, SensorType::Pressure, vec![unnormalized]).into(),
+                      InputReadingV4::new(0, 0, InputType::Pressure, vec![unnormalized]).into(),
                     )
                     .is_err()
                 {
@@ -131,12 +131,12 @@ impl ProtocolHandler for KGoalBoost {
     .boxed()
   }
 
-  fn handle_sensor_unsubscribe_cmd(
+  fn handle_input_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-    _sensor_type: SensorType,
+    _sensor_type: InputType,
   ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
     if !self.subscribed_sensors.contains(&feature_index) {
       return future::ready(Ok(())).boxed();

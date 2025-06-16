@@ -25,7 +25,7 @@ impl ProtocolHandler for Sakuraneko {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_actuator_vibrate_cmd(
+  fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,
@@ -53,7 +53,7 @@ impl ProtocolHandler for Sakuraneko {
     .into()])
   }
 
-  fn handle_actuator_rotate_cmd(
+  fn handle_output_rotate_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,

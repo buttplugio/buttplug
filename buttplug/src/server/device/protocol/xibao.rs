@@ -26,7 +26,7 @@ impl ProtocolHandler for Xibao {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_actuator_oscillate_cmd(
+  fn handle_output_oscillate_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,

@@ -582,8 +582,8 @@ impl DeviceConfigurationManager {
 mod test {
   use super::*;
   use crate::{
-    core::message::{ActuatorType, FeatureType},
-    server::message::server_device_feature::{ServerDeviceFeature, ServerDeviceFeatureActuator},
+    core::message::{OutputType, FeatureType},
+    server::message::server_device_feature::{ServerDeviceFeature, ServerDeviceFeatureOutput},
   };
   use std::{
     collections::{HashMap, HashSet},
@@ -600,8 +600,8 @@ mod test {
     ));
     let mut feature_actuator = HashMap::new();
     feature_actuator.insert(
-      ActuatorType::Vibrate,
-      ServerDeviceFeatureActuator::new(&RangeInclusive::new(0, 20), &RangeInclusive::new(0, 20)),
+      OutputType::Vibrate,
+      ServerDeviceFeatureOutput::new(&RangeInclusive::new(0, 20), &RangeInclusive::new(0, 20)),
     );
     builder
       .allow_raw_messages(allow_raw_messages)

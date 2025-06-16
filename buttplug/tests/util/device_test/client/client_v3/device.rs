@@ -15,7 +15,7 @@ use super::client::{
 use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    message::{ActuatorType, Endpoint, SensorType, StopDeviceCmdV0},
+    message::{OutputType, Endpoint, InputType, StopDeviceCmdV0},
   },
   server::message::{
     ButtplugClientMessageV3,
@@ -74,15 +74,15 @@ pub enum ButtplugClientDeviceEvent {
 /// a device. Units are in absolute speed values (0.0-1.0).
 pub enum ScalarCommand {
   /// Sets all vibration features of a device to the same speed.
-  Scalar((f64, ActuatorType)),
+  Scalar((f64, OutputType)),
   /// Sets vibration features to speed based on the index of the speed in the
   /// vec (i.e. motor 0 is set to `SpeedVec[0]`, motor 1 is set to
   /// `SpeedVec[1]`, etc...)
-  ScalarVec(Vec<(f64, ActuatorType)>),
+  ScalarVec(Vec<(f64, OutputType)>),
   /// Sets vibration features indicated by index to requested speed. For
   /// instance, if the map has an entry of (1, 0.5), it will set motor 1 to a
   /// speed of 0.5.
-  ScalarMap(HashMap<u32, (f64, ActuatorType)>),
+  ScalarMap(HashMap<u32, (f64, OutputType)>),
 }
 
 /// Convenience enum for forming [VibrateCmd] commands.
@@ -242,7 +242,7 @@ impl ButtplugClientDevice {
 
   fn scalar_value_attributes(
     &self,
-    actuator: &ActuatorType,
+    actuator: &OutputType,
   ) -> Vec<ClientGenericDeviceMessageAttributesV3> {
     if let Some(attrs) = self.message_attributes.scalar_cmd() {
       attrs
@@ -278,7 +278,7 @@ impl ButtplugClientDevice {
   fn scalar_from_value_command(
     &self,
     value_cmd: &ScalarValueCommand,
-    actuator: &ActuatorType,
+    actuator: &OutputType,
     attrs: &Vec<ClientGenericDeviceMessageAttributesV3>,
   ) -> ButtplugClientResultFuture {
     if attrs.is_empty() {
@@ -337,27 +337,27 @@ impl ButtplugClientDevice {
   }
 
   pub fn vibrate_attributes(&self) -> Vec<ClientGenericDeviceMessageAttributesV3> {
-    self.scalar_value_attributes(&ActuatorType::Vibrate)
+    self.scalar_value_attributes(&OutputType::Vibrate)
   }
 
   /// Commands device to vibrate, assuming it has the features to do so.
   pub fn vibrate(&self, speed_cmd: &ScalarValueCommand) -> ButtplugClientResultFuture {
     self.scalar_from_value_command(
       speed_cmd,
-      &ActuatorType::Vibrate,
+      &OutputType::Vibrate,
       &self.vibrate_attributes(),
     )
   }
 
   pub fn oscillate_attributes(&self) -> Vec<ClientGenericDeviceMessageAttributesV3> {
-    self.scalar_value_attributes(&ActuatorType::Oscillate)
+    self.scalar_value_attributes(&OutputType::Oscillate)
   }
 
   /// Commands device to vibrate, assuming it has the features to do so.
   pub fn oscillate(&self, speed_cmd: &ScalarValueCommand) -> ButtplugClientResultFuture {
     self.scalar_from_value_command(
       speed_cmd,
-      &ActuatorType::Oscillate,
+      &OutputType::Oscillate,
       &self.oscillate_attributes(),
     )
   }
@@ -544,7 +544,7 @@ impl ButtplugClientDevice {
   pub fn subscribe_sensor(
     &self,
     sensor_index: u32,
-    sensor_type: SensorType,
+    sensor_type: InputType,
   ) -> ButtplugClientResultFuture {
     if self.message_attributes.sensor_subscribe_cmd().is_none() {
       return create_boxed_future_client_error(
@@ -561,7 +561,7 @@ impl ButtplugClientDevice {
   pub fn unsubscribe_sensor(
     &self,
     sensor_index: u32,
-    sensor_type: SensorType,
+    sensor_type: InputType,
   ) -> ButtplugClientResultFuture {
     if self.message_attributes.sensor_subscribe_cmd().is_none() {
       return create_boxed_future_client_error(
@@ -575,7 +575,7 @@ impl ButtplugClientDevice {
     self.event_loop_sender.send_message_expect_ok(msg)
   }
 
-  fn read_single_sensor(&self, sensor_type: &SensorType) -> ButtplugClientResultFuture<Vec<i32>> {
+  fn read_single_sensor(&self, sensor_type: &InputType) -> ButtplugClientResultFuture<Vec<i32>> {
     if self.message_attributes.sensor_read_cmd().is_none() {
       return create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(
@@ -616,7 +616,7 @@ impl ButtplugClientDevice {
     .boxed()
   }
 
-  fn has_sensor_read(&self, sensor_type: SensorType) -> bool {
+  fn has_sensor_read(&self, sensor_type: InputType) -> bool {
     if let Some(sensor_attrs) = self.message_attributes.sensor_read_cmd() {
       sensor_attrs.iter().any(|x| *x.sensor_type() == sensor_type)
     } else {
@@ -625,11 +625,11 @@ impl ButtplugClientDevice {
   }
 
   pub fn has_battery_level(&self) -> bool {
-    self.has_sensor_read(SensorType::Battery)
+    self.has_sensor_read(InputType::Battery)
   }
 
   pub fn battery_level(&self) -> ButtplugClientResultFuture<f64> {
-    let send_fut = self.read_single_sensor(&SensorType::Battery);
+    let send_fut = self.read_single_sensor(&InputType::Battery);
     Box::pin(async move {
       let data = send_fut.await?;
       let battery_level = data[0];
@@ -638,11 +638,11 @@ impl ButtplugClientDevice {
   }
 
   pub fn has_rssi_level(&self) -> bool {
-    self.has_sensor_read(SensorType::RSSI)
+    self.has_sensor_read(InputType::RSSI)
   }
 
   pub fn rssi_level(&self) -> ButtplugClientResultFuture<i32> {
-    let send_fut = self.read_single_sensor(&SensorType::RSSI);
+    let send_fut = self.read_single_sensor(&InputType::RSSI);
     Box::pin(async move {
       let data = send_fut.await?;
       Ok(data[0])

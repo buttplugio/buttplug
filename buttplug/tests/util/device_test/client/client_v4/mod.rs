@@ -11,7 +11,7 @@ use buttplug::{
     ButtplugClientDevice,
     ButtplugClientEvent,
   },
-  core::message::{ActuatorType, FeatureType},
+  core::message::{OutputType, FeatureType},
   server::{device::ServerDeviceManagerBuilder, ButtplugServer, ButtplugServerBuilder},
   util::{async_manager, device_configuration::load_protocol_configs},
 };
@@ -50,7 +50,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
             .filter(|f| *f.feature().feature_type() == FeatureType::Vibrate)
             .collect();
           let f = vibe_features[cmd.index() as usize].clone();
-          f.check_and_set_actuator_value_float(ActuatorType::Vibrate, cmd.speed())
+          f.check_and_set_actuator_value_float(OutputType::Vibrate, cmd.speed())
         })
         .collect();
       futures::future::try_join_all(fut_vec).await.unwrap();
@@ -72,10 +72,10 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
             (cmd.speed()
               * *f
                 .feature()
-                .actuator()
+                .output()
                 .as_ref()
                 .unwrap()
-                .get(&ActuatorType::RotateWithDirection)
+                .get(&OutputType::RotateWithDirection)
                 .unwrap()
                 .step_count() as f64)
               .ceil() as u32,
@@ -94,10 +94,10 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
             (cmd.position()
               * *f
                 .feature()
-                .actuator()
+                .output()
                 .as_ref()
                 .unwrap()
-                .get(&ActuatorType::PositionWithDuration)
+                .get(&OutputType::PositionWithDuration)
                 .unwrap()
                 .step_count() as f64)
               .ceil() as u32,

@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::message::{ActuatorType, DeviceFeature, SensorCommandType, SensorType},
+  core::message::{OutputType, DeviceFeature, InputCommandType, InputType},
   server::message::{
     v1::NullDeviceMessageAttributesV1,
     v2::{
@@ -98,7 +98,7 @@ pub fn vibrate_cmd_from_scalar_cmd(
   let mut feature_count = 0u32;
   let mut step_count = vec![];
   for attr in attributes_vec {
-    if *attr.actuator_type() == ActuatorType::Vibrate {
+    if *attr.actuator_type() == OutputType::Vibrate {
       feature_count += 1;
       step_count.push(*attr.step_count());
     }
@@ -129,7 +129,7 @@ impl From<ClientDeviceMessageAttributesV3> for ClientDeviceMessageAttributesV2 {
         if let Some(sensor_info) = other.sensor_read_cmd() {
           if sensor_info
             .iter()
-            .any(|x| *x.sensor_type() == SensorType::Battery)
+            .any(|x| *x.sensor_type() == InputType::Battery)
           {
             Some(NullDeviceMessageAttributesV1::default())
           } else {
@@ -143,7 +143,7 @@ impl From<ClientDeviceMessageAttributesV3> for ClientDeviceMessageAttributesV2 {
         if let Some(sensor_info) = other.sensor_read_cmd() {
           if sensor_info
             .iter()
-            .any(|x| *x.sensor_type() == SensorType::RSSI)
+            .any(|x| *x.sensor_type() == InputType::RSSI)
           {
             Some(NullDeviceMessageAttributesV1::default())
           } else {
@@ -200,7 +200,7 @@ pub struct ClientGenericDeviceMessageAttributesV3 {
   pub(in crate::server::message) feature_descriptor: String,
   #[getset(get = "pub")]
   #[serde(rename = "ActuatorType")]
-  pub(in crate::server::message) actuator_type: ActuatorType,
+  pub(in crate::server::message) actuator_type: OutputType,
   #[serde(rename = "StepCount")]
   #[getset(get = "pub")]
   pub(in crate::server::message) step_count: u32,
@@ -220,7 +220,7 @@ impl From<Vec<ClientGenericDeviceMessageAttributesV3>> for GenericDeviceMessageA
 }
 
 impl ClientGenericDeviceMessageAttributesV3 {
-  pub fn new(feature_descriptor: &str, step_count: u32, actuator_type: ActuatorType) -> Self {
+  pub fn new(feature_descriptor: &str, step_count: u32, actuator_type: OutputType) -> Self {
     Self {
       feature_descriptor: feature_descriptor.to_owned(),
       actuator_type,
@@ -251,7 +251,7 @@ pub struct SensorDeviceMessageAttributesV3 {
   pub(in crate::server::message) feature_descriptor: String,
   #[getset(get = "pub")]
   #[serde(rename = "SensorType")]
-  pub(in crate::server::message) sensor_type: SensorType,
+  pub(in crate::server::message) sensor_type: InputType,
   #[getset(get = "pub")]
   #[serde(rename = "SensorRange", serialize_with = "range_sequence_serialize")]
   pub(in crate::server::message) sensor_range: Vec<RangeInclusive<i32>>,
@@ -275,11 +275,11 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
       .iter()
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
-        if let Some(actuator_map) = feature.actuator() {
-          for (actuator_type, actuator) in actuator_map {
+        if let Some(output_map) = feature.output() {
+          for (actuator_type, actuator) in output_map {
             if ![
-              ActuatorType::PositionWithDuration,
-              ActuatorType::RotateWithDirection,
+              OutputType::PositionWithDuration,
+              OutputType::RotateWithDirection,
             ]
             .contains(actuator_type)
             {
@@ -304,10 +304,10 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
       .iter()
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
-        if let Some(actuator_map) = feature.actuator() {
-          for (actuator_type, actuator) in actuator_map {
-            if *actuator_type == ActuatorType::RotateWithDirection {
-              let actuator_type = ActuatorType::Rotate;
+        if let Some(output_map) = feature.output() {
+          for (actuator_type, actuator) in output_map {
+            if *actuator_type == OutputType::RotateWithDirection {
+              let actuator_type = OutputType::Rotate;
               let attrs = ClientGenericDeviceMessageAttributesV3 {
                 feature_descriptor: feature.description().to_owned(),
                 actuator_type,
@@ -326,10 +326,10 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
       .iter()
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
-        if let Some(actuator_map) = feature.actuator() {
-          for (actuator_type, actuator) in actuator_map {
-            if *actuator_type == ActuatorType::PositionWithDuration {
-              let actuator_type = ActuatorType::Position;
+        if let Some(output_map) = feature.output() {
+          for (actuator_type, actuator) in output_map {
+            if *actuator_type == OutputType::PositionWithDuration {
+              let actuator_type = OutputType::Position;
               let attrs = ClientGenericDeviceMessageAttributesV3 {
                 feature_descriptor: feature.description().to_owned(),
                 actuator_type,
@@ -349,12 +349,12 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
         .iter()
         .map(|feature| {
           let mut sensor_vec = vec![];
-          if let Some(sensor_map) = feature.sensor() {
+          if let Some(sensor_map) = feature.input() {
             for (sensor_type, sensor) in sensor_map {
               // Only convert Battery backwards. Other sensors weren't really built for v3 and we
               // never recommended using them or implemented much for them.
-              if *sensor_type == SensorType::Battery
-                && sensor.sensor_commands().contains(&SensorCommandType::Read)
+              if *sensor_type == InputType::Battery
+                && sensor.input_commands().contains(&InputCommandType::Read)
               {
                 sensor_vec.push(SensorDeviceMessageAttributesV3 {
                   feature_descriptor: feature.description().to_owned(),

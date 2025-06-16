@@ -9,7 +9,7 @@ use crate::core::{
     ButtplugMessageValidator,
     ButtplugServerMessageV4,
     RawReadingV2,
-    SensorReadingV4,
+    InputReadingV4,
   },
 };
 use server_device_attributes::ServerDeviceAttributes;
@@ -99,8 +99,8 @@ impl ButtplugClientMessageVariant {
         _ => None,
       },
       Self::V4(msg) => match msg {
-        ButtplugClientMessageV4::ActuatorCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV4::SensorCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV4::OutputCmd(a) => Some(a.device_index()),
+        ButtplugClientMessageV4::InputCmd(a) => Some(a.device_index()),
         ButtplugClientMessageV4::RawCmd(a) => Some(a.device_index()),
         _ => None,
       },
@@ -209,7 +209,7 @@ pub enum ButtplugServerDeviceMessage {
   // Generic commands
   RawReading(RawReadingV2),
   // Generic Sensor Reading Messages
-  SensorReading(SensorReadingV4),
+  SensorReading(InputReadingV4),
 }
 
 impl From<ButtplugServerDeviceMessage> for ButtplugServerMessageV4 {
@@ -217,7 +217,7 @@ impl From<ButtplugServerDeviceMessage> for ButtplugServerMessageV4 {
     match other {
       ButtplugServerDeviceMessage::RawReading(msg) => ButtplugServerMessageV4::RawReading(msg),
       ButtplugServerDeviceMessage::SensorReading(msg) => {
-        ButtplugServerMessageV4::SensorReading(msg)
+        ButtplugServerMessageV4::InputReading(msg)
       }
     }
   }

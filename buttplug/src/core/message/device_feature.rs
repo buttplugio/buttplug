@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::{Endpoint, SensorCommandType};
+use crate::core::message::{Endpoint, InputCommandType};
 use getset::{Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use std::{
@@ -51,7 +51,7 @@ pub enum FeatureType {
 }
 
 #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash)]
-pub enum ActuatorType {
+pub enum OutputType {
   Unknown,
   Vibrate,
   // Single Direction Rotation Speed
@@ -69,21 +69,21 @@ pub enum ActuatorType {
   PositionWithDuration,
 }
 
-impl TryFrom<FeatureType> for ActuatorType {
+impl TryFrom<FeatureType> for OutputType {
   type Error = String;
   fn try_from(value: FeatureType) -> Result<Self, Self::Error> {
     match value {
-      FeatureType::Unknown => Ok(ActuatorType::Unknown),
-      FeatureType::Vibrate => Ok(ActuatorType::Vibrate),
-      FeatureType::Rotate => Ok(ActuatorType::Rotate),
-      FeatureType::Heater => Ok(ActuatorType::Heater),
-      FeatureType::Led => Ok(ActuatorType::Led),
-      FeatureType::RotateWithDirection => Ok(ActuatorType::RotateWithDirection),
-      FeatureType::PositionWithDuration => Ok(ActuatorType::PositionWithDuration),
-      FeatureType::Oscillate => Ok(ActuatorType::Oscillate),
-      FeatureType::Constrict => Ok(ActuatorType::Constrict),
-      FeatureType::Inflate => Ok(ActuatorType::Inflate),
-      FeatureType::Position => Ok(ActuatorType::Position),
+      FeatureType::Unknown => Ok(OutputType::Unknown),
+      FeatureType::Vibrate => Ok(OutputType::Vibrate),
+      FeatureType::Rotate => Ok(OutputType::Rotate),
+      FeatureType::Heater => Ok(OutputType::Heater),
+      FeatureType::Led => Ok(OutputType::Led),
+      FeatureType::RotateWithDirection => Ok(OutputType::RotateWithDirection),
+      FeatureType::PositionWithDuration => Ok(OutputType::PositionWithDuration),
+      FeatureType::Oscillate => Ok(OutputType::Oscillate),
+      FeatureType::Constrict => Ok(OutputType::Constrict),
+      FeatureType::Inflate => Ok(OutputType::Inflate),
+      FeatureType::Position => Ok(OutputType::Position),
       _ => Err(format!(
         "Feature type {value} not valid for ActuatorType conversion"
       )),
@@ -92,7 +92,7 @@ impl TryFrom<FeatureType> for ActuatorType {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, Hash)]
-pub enum SensorType {
+pub enum InputType {
   Unknown,
   Battery,
   RSSI,
@@ -103,15 +103,15 @@ pub enum SensorType {
   // Gyro,
 }
 
-impl TryFrom<FeatureType> for SensorType {
+impl TryFrom<FeatureType> for InputType {
   type Error = String;
   fn try_from(value: FeatureType) -> Result<Self, Self::Error> {
     match value {
-      FeatureType::Unknown => Ok(SensorType::Unknown),
-      FeatureType::Battery => Ok(SensorType::Battery),
-      FeatureType::RSSI => Ok(SensorType::RSSI),
-      FeatureType::Button => Ok(SensorType::Button),
-      FeatureType::Pressure => Ok(SensorType::Pressure),
+      FeatureType::Unknown => Ok(InputType::Unknown),
+      FeatureType::Battery => Ok(InputType::Battery),
+      FeatureType::RSSI => Ok(InputType::RSSI),
+      FeatureType::Button => Ok(InputType::Button),
+      FeatureType::Pressure => Ok(InputType::Pressure),
       _ => Err(format!(
         "Feature type {value} not valid for SensorType conversion"
       )),
@@ -119,32 +119,32 @@ impl TryFrom<FeatureType> for SensorType {
   }
 }
 
-impl From<ActuatorType> for FeatureType {
-  fn from(value: ActuatorType) -> Self {
+impl From<OutputType> for FeatureType {
+  fn from(value: OutputType) -> Self {
     match value {
-      ActuatorType::Unknown => FeatureType::Unknown,
-      ActuatorType::Vibrate => FeatureType::Vibrate,
-      ActuatorType::Rotate => FeatureType::Rotate,
-      ActuatorType::Heater => FeatureType::Heater,
-      ActuatorType::Led => FeatureType::Led,
-      ActuatorType::RotateWithDirection => FeatureType::RotateWithDirection,
-      ActuatorType::PositionWithDuration => FeatureType::PositionWithDuration,
-      ActuatorType::Oscillate => FeatureType::Oscillate,
-      ActuatorType::Constrict => FeatureType::Constrict,
-      ActuatorType::Inflate => FeatureType::Inflate,
-      ActuatorType::Position => FeatureType::Position,
+      OutputType::Unknown => FeatureType::Unknown,
+      OutputType::Vibrate => FeatureType::Vibrate,
+      OutputType::Rotate => FeatureType::Rotate,
+      OutputType::Heater => FeatureType::Heater,
+      OutputType::Led => FeatureType::Led,
+      OutputType::RotateWithDirection => FeatureType::RotateWithDirection,
+      OutputType::PositionWithDuration => FeatureType::PositionWithDuration,
+      OutputType::Oscillate => FeatureType::Oscillate,
+      OutputType::Constrict => FeatureType::Constrict,
+      OutputType::Inflate => FeatureType::Inflate,
+      OutputType::Position => FeatureType::Position,
     }
   }
 }
 
-impl From<SensorType> for FeatureType {
-  fn from(value: SensorType) -> Self {
+impl From<InputType> for FeatureType {
+  fn from(value: InputType) -> Self {
     match value {
-      SensorType::Unknown => FeatureType::Unknown,
-      SensorType::Battery => FeatureType::Battery,
-      SensorType::RSSI => FeatureType::RSSI,
-      SensorType::Button => FeatureType::Button,
-      SensorType::Pressure => FeatureType::Pressure,
+      InputType::Unknown => FeatureType::Unknown,
+      InputType::Battery => FeatureType::Battery,
+      InputType::RSSI => FeatureType::RSSI,
+      InputType::Button => FeatureType::Button,
+      InputType::Pressure => FeatureType::Pressure,
     }
   }
 }
@@ -176,12 +176,12 @@ pub struct DeviceFeature {
   feature_type: FeatureType,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(rename = "Actuator")]
-  actuator: Option<HashMap<ActuatorType, DeviceFeatureActuator>>,
+  #[serde(rename = "Output")]
+  output: Option<HashMap<OutputType, DeviceFeatureOutput>>,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(rename = "Sensor")]
-  sensor: Option<HashMap<SensorType, DeviceFeatureSensor>>,
+  #[serde(rename = "Input")]
+  input: Option<HashMap<InputType, DeviceFeatureInput>>,
   #[getset(get = "pub")]
   #[serde(rename = "Raw")]
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -193,16 +193,16 @@ impl DeviceFeature {
     index: u32,
     description: &str,
     feature_type: FeatureType,
-    actuator: &Option<HashMap<ActuatorType, DeviceFeatureActuator>>,
-    sensor: &Option<HashMap<SensorType, DeviceFeatureSensor>>,
+    actuator: &Option<HashMap<OutputType, DeviceFeatureOutput>>,
+    sensor: &Option<HashMap<InputType, DeviceFeatureInput>>,
     raw: &Option<DeviceFeatureRaw>,
   ) -> Self {
     Self {
       feature_index: index,
       description: description.to_owned(),
       feature_type,
-      actuator: actuator.clone(),
-      sensor: sensor.clone(),
+      output: actuator.clone(),
+      input: sensor.clone(),
       raw: raw.clone(),
     }
   }
@@ -212,8 +212,8 @@ impl DeviceFeature {
       feature_index: index,
       description: "Raw Endpoints".to_owned(),
       feature_type: FeatureType::Raw,
-      actuator: None,
-      sensor: None,
+      output: None,
+      input: None,
       raw: Some(DeviceFeatureRaw::new(endpoints)),
     }
   }
@@ -234,13 +234,13 @@ where
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize)]
-pub struct DeviceFeatureActuator {
+pub struct DeviceFeatureOutput {
   #[getset(get = "pub")]
   #[serde(rename = "StepCount")]
   step_count: u32,
 }
 
-impl DeviceFeatureActuator {
+impl DeviceFeatureOutput {
   pub fn new(step_count: u32) -> Self {
     Self { step_count }
   }
@@ -249,24 +249,24 @@ impl DeviceFeatureActuator {
 #[derive(
   Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize,
 )]
-pub struct DeviceFeatureSensor {
+pub struct DeviceFeatureInput {
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(rename = "ValueRange")]
   #[serde(serialize_with = "range_sequence_serialize")]
   value_range: Vec<RangeInclusive<i32>>,
   #[getset(get = "pub")]
-  #[serde(rename = "SensorCommands")]
-  sensor_commands: HashSet<SensorCommandType>,
+  #[serde(rename = "InputCommands")]
+  input_commands: HashSet<InputCommandType>,
 }
 
-impl DeviceFeatureSensor {
+impl DeviceFeatureInput {
   pub fn new(
     value_range: &Vec<RangeInclusive<i32>>,
-    sensor_commands: &HashSet<SensorCommandType>,
+    sensor_commands: &HashSet<InputCommandType>,
   ) -> Self {
     Self {
       value_range: value_range.clone(),
-      sensor_commands: sensor_commands.clone(),
+      input_commands: sensor_commands.clone(),
     }
   }
 }

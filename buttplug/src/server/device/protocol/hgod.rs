@@ -94,7 +94,7 @@ async fn send_hgod_updates(device: Arc<Hardware>, data: Arc<AtomicU8>) {
 }
 
 impl ProtocolHandler for Hgod {
-  fn handle_actuator_vibrate_cmd(
+  fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,
     _feature_id: Uuid,

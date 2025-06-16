@@ -7,17 +7,17 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      ActuatorCmdV4,
-      ActuatorCommand,
-      ActuatorPositionWithDuration,
-      ActuatorRotateWithDirection,
-      ActuatorType,
-      ActuatorValue,
+      OutputCmdV4,
+      OutputCommand,
+      OutputPositionWithDuration,
+      OutputRotateWithDirection,
+      OutputType,
+      OutputValue,
       ButtplugServerMessageV4,
       DeviceFeature,
-      SensorCmdV4,
-      SensorCommandType,
-      SensorType,
+      InputCmdV4,
+      InputCommandType,
+      InputType,
     },
   },
   server::message::spec_enums::ButtplugDeviceMessageNameV4,
@@ -62,16 +62,16 @@ impl ClientDeviceFeature {
 
   pub fn check_and_set_actuator_value_float(
     &self,
-    actuator_type: ActuatorType,
+    actuator_type: OutputType,
     value: f64,
   ) -> ButtplugClientResultFuture {
-    if let Some(actuator_map) = self.feature().actuator() {
-      if let Some(actuator) = actuator_map.get(&actuator_type) {
+    if let Some(output_map) = self.feature().output() {
+      if let Some(actuator) = output_map.get(&actuator_type) {
         self.event_loop_sender.send_message_expect_ok(
-          ActuatorCmdV4::new(
+          OutputCmdV4::new(
             self.device_index,
             self.feature_index,
-            ActuatorCommand::from_actuator_type(
+            OutputCommand::from_output_type(
               actuator_type,
               (value * *actuator.step_count() as f64).ceil() as u32,
             )
@@ -103,13 +103,13 @@ impl ClientDeviceFeature {
 
   pub fn check_and_set_actuator(
     &self,
-    actuator_command: ActuatorCommand,
+    output_command: OutputCommand,
   ) -> ButtplugClientResultFuture {
-    let actuator_type = actuator_command.as_actuator_type();
-    if let Some(actuator_map) = self.feature().actuator() {
-      if actuator_map.get(&actuator_type).is_some() {
+    let actuator_type = output_command.as_output_type();
+    if let Some(output_map) = self.feature().output() {
+      if output_map.get(&actuator_type).is_some() {
         self.event_loop_sender.send_message_expect_ok(
-          ActuatorCmdV4::new(self.device_index, self.feature_index, actuator_command).into(),
+          OutputCmdV4::new(self.device_index, self.feature_index, output_command).into(),
         )
       } else {
         future::ready(Err(ButtplugClientError::from(ButtplugError::from(
@@ -134,27 +134,27 @@ impl ClientDeviceFeature {
   }
 
   pub fn vibrate(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_set_actuator(ActuatorCommand::Vibrate(ActuatorValue::new(level)))
+    self.check_and_set_actuator(OutputCommand::Vibrate(OutputValue::new(level)))
   }
 
   pub fn oscillate(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_set_actuator(ActuatorCommand::Oscillate(ActuatorValue::new(level)))
+    self.check_and_set_actuator(OutputCommand::Oscillate(OutputValue::new(level)))
   }
 
   pub fn rotate(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_set_actuator(ActuatorCommand::Rotate(ActuatorValue::new(level)))
+    self.check_and_set_actuator(OutputCommand::Rotate(OutputValue::new(level)))
   }
 
   pub fn inflate(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_set_actuator(ActuatorCommand::Inflate(ActuatorValue::new(level)))
+    self.check_and_set_actuator(OutputCommand::Inflate(OutputValue::new(level)))
   }
 
   pub fn constrict(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_set_actuator(ActuatorCommand::Constrict(ActuatorValue::new(level)))
+    self.check_and_set_actuator(OutputCommand::Constrict(OutputValue::new(level)))
   }
 
   pub fn position(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_set_actuator(ActuatorCommand::Position(ActuatorValue::new(level)))
+    self.check_and_set_actuator(OutputCommand::Position(OutputValue::new(level)))
   }
 
   pub fn position_with_duration(
@@ -162,29 +162,29 @@ impl ClientDeviceFeature {
     position: u32,
     duration_in_ms: u32,
   ) -> ButtplugClientResultFuture {
-    self.check_and_set_actuator(ActuatorCommand::PositionWithDuration(
-      ActuatorPositionWithDuration::new(position, duration_in_ms),
+    self.check_and_set_actuator(OutputCommand::PositionWithDuration(
+      OutputPositionWithDuration::new(position, duration_in_ms),
     ))
   }
 
   pub fn rotate_with_direction(&self, level: u32, clockwise: bool) -> ButtplugClientResultFuture {
-    self.check_and_set_actuator(ActuatorCommand::RotateWithDirection(
-      ActuatorRotateWithDirection::new(level, clockwise),
+    self.check_and_set_actuator(OutputCommand::RotateWithDirection(
+      OutputRotateWithDirection::new(level, clockwise),
     ))
   }
 
-  pub fn subscribe_sensor(&self, sensor_type: SensorType) -> ButtplugClientResultFuture {
-    if let Some(sensor_map) = self.feature.sensor() {
+  pub fn subscribe_sensor(&self, sensor_type: InputType) -> ButtplugClientResultFuture {
+    if let Some(sensor_map) = self.feature.input() {
       if let Some(sensor) = sensor_map.get(&sensor_type) {
         if sensor
-          .sensor_commands()
-          .contains(&SensorCommandType::Subscribe)
+          .input_commands()
+          .contains(&InputCommandType::Subscribe)
         {
-          let msg = SensorCmdV4::new(
+          let msg = InputCmdV4::new(
             self.device_index,
             self.feature_index,
             sensor_type,
-            SensorCommandType::Subscribe,
+            InputCommandType::Subscribe,
           )
           .into();
           return self.event_loop_sender.send_message_expect_ok(msg);
@@ -197,18 +197,18 @@ impl ClientDeviceFeature {
     )
   }
 
-  pub fn unsubscribe_sensor(&self, sensor_type: SensorType) -> ButtplugClientResultFuture {
-    if let Some(sensor_map) = self.feature.sensor() {
+  pub fn unsubscribe_sensor(&self, sensor_type: InputType) -> ButtplugClientResultFuture {
+    if let Some(sensor_map) = self.feature.input() {
       if let Some(sensor) = sensor_map.get(&sensor_type) {
         if sensor
-          .sensor_commands()
-          .contains(&SensorCommandType::Subscribe)
+          .input_commands()
+          .contains(&InputCommandType::Subscribe)
         {
-          let msg = SensorCmdV4::new(
+          let msg = InputCmdV4::new(
             self.device_index,
             self.feature_index,
             sensor_type,
-            SensorCommandType::Unsubscribe,
+            InputCommandType::Unsubscribe,
           )
           .into();
           return self.event_loop_sender.send_message_expect_ok(msg);
@@ -221,20 +221,20 @@ impl ClientDeviceFeature {
     )
   }
 
-  fn read_sensor(&self, sensor_type: SensorType) -> ButtplugClientResultFuture<Vec<i32>> {
-    if let Some(sensor_map) = self.feature.sensor() {
+  fn read_sensor(&self, sensor_type: InputType) -> ButtplugClientResultFuture<Vec<i32>> {
+    if let Some(sensor_map) = self.feature.input() {
       if let Some(sensor) = sensor_map.get(&sensor_type) {
-        if sensor.sensor_commands().contains(&SensorCommandType::Read) {
-          let msg = SensorCmdV4::new(
+        if sensor.input_commands().contains(&InputCommandType::Read) {
+          let msg = InputCmdV4::new(
             self.device_index,
             self.feature_index,
             sensor_type,
-            SensorCommandType::Read,
+            InputCommandType::Read,
           )
           .into();
           let reply = self.event_loop_sender.send_message(msg);
           return async move {
-            if let ButtplugServerMessageV4::SensorReading(data) = reply.await? {
+            if let ButtplugServerMessageV4::InputReading(data) = reply.await? {
               Ok(data.data().clone())
             } else {
               Err(
@@ -258,13 +258,13 @@ impl ClientDeviceFeature {
   pub fn battery_level(&self) -> ButtplugClientResultFuture<u32> {
     if self
       .feature()
-      .sensor()
+      .input()
       .as_ref()
       .ok_or(false)
       .unwrap()
-      .contains_key(&SensorType::Battery)
+      .contains_key(&InputType::Battery)
     {
-      let send_fut = self.read_sensor(SensorType::Battery);
+      let send_fut = self.read_sensor(InputType::Battery);
       Box::pin(async move {
         let data = send_fut.await?;
         let battery_level = data[0];
@@ -281,13 +281,13 @@ impl ClientDeviceFeature {
   pub fn rssi_level(&self) -> ButtplugClientResultFuture<u32> {
     if self
       .feature()
-      .sensor()
+      .input()
       .as_ref()
       .ok_or(false)
       .unwrap()
-      .contains_key(&SensorType::RSSI)
+      .contains_key(&InputType::RSSI)
     {
-      let send_fut = self.read_sensor(SensorType::RSSI);
+      let send_fut = self.read_sensor(InputType::RSSI);
       Box::pin(async move {
         let data = send_fut.await?;
         let battery_level = data[0];

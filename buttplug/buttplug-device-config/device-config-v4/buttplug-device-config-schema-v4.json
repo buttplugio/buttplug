@@ -187,7 +187,7 @@
             "type": "string",
             "pattern": "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|Battery|RSSI|Pressure|RotateWithDirection|PositionWithDuration|Heater|Led)$"
           },
-          "actuator": {
+          "output": {
             "type": "object",
             "patternProperties": {
               "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|RotateWithDirection|PositionWithDuration|Heater|Led)$": {
@@ -203,7 +203,7 @@
               }
             }
           },
-          "sensor": {
+          "input": {
             "type": "object",
             "patternProperties": {
               "^(Battery|RSSI|Pressure)$": {
@@ -216,7 +216,7 @@
                     },
                     "minItems": 1
                   },
-                  "sensor-commands": {
+                  "input-commands": {
                     "type": "array",
                     "items": {
                       "type": "string",
@@ -226,7 +226,7 @@
                 },
                 "required": [
                   "value-range",
-                  "sensor-commands"
+                  "input-commands"
                 ],
                 "additionalProperties": false
               }
@@ -258,38 +258,26 @@
           "feature-type": {
             "type": "string"
           },
-          "actuator": {
+                    "output": {
             "type": "object",
             "patternProperties": {
-              "^.*$": {
+              "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|RotateWithDirection|PositionWithDuration|Heater|Led)$": {
                 "type": "object",
                 "properties": {
                   "step-range": {
                     "$ref": "#/components/step-range"
-                  },
-                  "step-limit": {
-                    "$ref": "#/components/step-range"
-                  },
-                  "messages": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "pattern": "^(ValueCmd|ValueWithParameterCmd)$"
-                    }
                   }
                 },
                 "required": [
-                  "step-range",
-                  "step-limit",
-                  "messages"
+                  "step-range"
                 ]
               }
             }
           },
-          "sensor": {
+          "input": {
             "type": "object",
             "patternProperties": {
-              "^.*$": {
+              "^(Battery|RSSI|Pressure)$": {
                 "type": "object",
                 "properties": {
                   "value-range": {
@@ -299,20 +287,21 @@
                     },
                     "minItems": 1
                   },
-                  "messages": {
+                  "input-commands": {
                     "type": "array",
                     "items": {
                       "type": "string",
-                      "pattern": "^(SensorReadCmd|SensorSubscribeCmd)$"
+                      "pattern": "^(Read|Subscribe)$"
                     }
                   }
                 },
                 "required": [
                   "value-range",
-                  "messages"
-                ]
+                  "input-commands"
+                ],
+                "additionalProperties": false
               }
-            }
+            }         
           }
         },
         "required": [
