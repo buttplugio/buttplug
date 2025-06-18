@@ -130,7 +130,7 @@ pub mod thehandy;
 pub mod tryfun_blackhole;
 pub mod tryfun_meta2;
 pub mod vibcrafter;
-// pub mod vibratissimo;
+pub mod vibratissimo;
 // pub mod vorze_sa;
 pub mod wetoy;
 pub mod wevibe;
@@ -142,7 +142,7 @@ pub mod xiuxiuda;
 pub mod xuanhuan;
 pub mod youcups;
 pub mod youou;
-// pub mod zalo;
+pub mod zalo;
 
 use crate::{
   core::{
@@ -627,10 +627,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     vibcrafter::setup::VibCrafterIdentifierFactory::default(),
   );
-  //  add_to_protocol_map(
-  //    &mut map,
-  //    vibratissimo::setup::VibratissimoIdentifierFactory::default(),
-  //  );
+  add_to_protocol_map(
+    &mut map,
+    vibratissimo::setup::VibratissimoIdentifierFactory::default(),
+  );
   //  add_to_protocol_map(
   //    &mut map,
   //    vorze_sa::setup::VorzeSAIdentifierFactory::default(),
@@ -660,7 +660,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     youcups::setup::YoucupsIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, youou::setup::YououIdentifierFactory::default());
-  //  add_to_protocol_map(&mut map, zalo::setup::ZaloIdentifierFactory::default());
+  add_to_protocol_map(&mut map, zalo::setup::ZaloIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     kgoal_boost::setup::KGoalBoostIdentifierFactory::default(),

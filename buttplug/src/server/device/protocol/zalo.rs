@@ -5,10 +5,12 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use std::sync::atomic::{AtomicU8, Ordering};
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::{Endpoint},
   },
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
@@ -19,25 +21,26 @@ use crate::{
 generic_protocol_setup!(Zalo, "zalo");
 
 #[derive(Default)]
-pub struct Zalo {}
+pub struct Zalo {
+  speeds: [AtomicU8; 2]
+}
 
 impl ProtocolHandler for Zalo {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_cmd(
-    &self,
-    cmds: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    // Store off result before the match, so we drop the lock ASAP.
-    let speed0: u8 = cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;
-    let speed1: u8 = if cmds.len() == 1 {
-      0
-    } else {
-      cmds[1].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8
-    };
+  fn handle_output_vibrate_cmd(
+      &self,
+      feature_index: u32,
+      feature_id: uuid::Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
+    let speed0: u8 = self.speeds[0].load(Ordering::Relaxed);
+    let speed1: u8 = self.speeds[1].load(Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
+      feature_id,
       Endpoint::Tx,
       vec![
         if speed0 == 0 && speed1 == 0 {
