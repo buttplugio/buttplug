@@ -133,9 +133,9 @@ pub mod vibcrafter;
 // pub mod vibratissimo;
 // pub mod vorze_sa;
 pub mod wetoy;
-// pub mod wevibe;
-// pub mod wevibe8bit;
-// pub mod wevibe_chorus;
+pub mod wevibe;
+pub mod wevibe8bit;
+pub mod wevibe_chorus;
 pub mod xibao;
 pub mod xinput;
 pub mod xiuxiuda;
@@ -636,15 +636,15 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   //    vorze_sa::setup::VorzeSAIdentifierFactory::default(),
   //  );
   add_to_protocol_map(&mut map, wetoy::setup::WeToyIdentifierFactory::default());
-  //  add_to_protocol_map(&mut map, wevibe::setup::WeVibeIdentifierFactory::default());
-  //  add_to_protocol_map(
-  //    &mut map,
-  //    wevibe8bit::setup::WeVibe8BitIdentifierFactory::default(),
-  //  );
-  //  add_to_protocol_map(
-  //    &mut map,
-  //    wevibe_chorus::setup::WeVibeChorusIdentifierFactory::default(),
-  //  );
+  add_to_protocol_map(&mut map, wevibe::setup::WeVibeIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    wevibe8bit::setup::WeVibe8BitIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    wevibe_chorus::setup::WeVibeChorusIdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, xibao::setup::XibaoIdentifierFactory::default());
   add_to_protocol_map(&mut map, xinput::setup::XInputIdentifierFactory::default());
   add_to_protocol_map(

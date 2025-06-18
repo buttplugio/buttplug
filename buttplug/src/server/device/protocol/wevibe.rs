@@ -5,11 +5,12 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::core::message::OutputType;
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
   server::device::{
     configuration::{UserDeviceDefinition, UserDeviceIdentifier},
@@ -23,8 +24,11 @@ use crate::{
   },
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
+use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::Arc;
 
+const WEVIBE_PROTOCOL_UUID: Uuid = uuid!("3658e33d-086d-401e-9dce-8e9e88ff791f");
 generic_protocol_initializer_setup!(WeVibe, "wevibe");
 
 #[derive(Default)]
@@ -35,11 +39,12 @@ impl ProtocolInitializer for WeVibeInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &UserDeviceDefinition,
+    def: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     debug!("calling WeVibe init");
     hardware
       .write_value(&HardwareWriteCmd::new(
+        WEVIBE_PROTOCOL_UUID,
         Endpoint::Tx,
         vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
         true,
@@ -47,37 +52,46 @@ impl ProtocolInitializer for WeVibeInitializer {
       .await?;
     hardware
       .write_value(&HardwareWriteCmd::new(
+        WEVIBE_PROTOCOL_UUID,
         Endpoint::Tx,
         vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
         true,
       ))
       .await?;
-    Ok(Arc::new(WeVibe::default()))
+    let num_vibrators = def.features().iter().filter(|x| x.output().as_ref().map_or(false, |x| x.contains_key(&OutputType::Vibrate))).count() as u8;
+    Ok(Arc::new(WeVibe::new(num_vibrators)))
   }
 }
 
-#[derive(Default)]
-pub struct WeVibe {}
+pub struct WeVibe {
+  num_vibrators: u8,
+  speeds: [AtomicU8; 2]
+}
+
+impl WeVibe {
+  fn new(num_vibrators: u8) -> Self {
+    Self {
+      num_vibrators,
+      speeds: [AtomicU8::default(), AtomicU8::default()]
+    }
+  }
+}
 
 impl ProtocolHandler for WeVibe {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn needs_full_command_set(&self) -> bool {
-    true
-  }
-
-  fn handle_value_cmd(
-    &self,
-    cmds: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let r_speed_int = cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;
-    let r_speed_ext = cmds
-      .last()
-      .unwrap_or(&None)
-      .unwrap_or((ActuatorType::Vibrate, 0))
-      .1 as u8;
+  fn handle_output_vibrate_cmd(
+      &self,
+      feature_index: u32,
+      feature_id: uuid::Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
+    let max_vibrators = if self.num_vibrators > 1 { 1 } else { 0 };
+    let r_speed_int = self.speeds[0].load(Ordering::Relaxed);
+    let r_speed_ext = self.speeds[max_vibrators].load(Ordering::Relaxed);
     let data = if r_speed_int == 0 && r_speed_ext == 0 {
       vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
     } else {
@@ -92,6 +106,6 @@ impl ProtocolHandler for WeVibe {
         0x00,
       ]
     };
-    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, true).into()])
+    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, true).into()])
   }
 }

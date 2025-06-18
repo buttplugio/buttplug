@@ -5,41 +5,65 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
+
+use async_trait::async_trait;
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
-  },
-  server::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
-  },
+    message::{Endpoint, OutputType},
+  }, generic_protocol_initializer_setup, server::device::{
+    configuration::{UserDeviceDefinition, UserDeviceIdentifier}, hardware::{Hardware, HardwareCommand, HardwareWriteCmd}, protocol::{ProtocolHandler, ProtocolInitializer, ProtocolCommunicationSpecifier, ProtocolIdentifier}
+  }
 };
 
-generic_protocol_setup!(WeVibeChorus, "wevibe-chorus");
+generic_protocol_initializer_setup!(WeVibeChorus, "wevibe-chorus");
 
 #[derive(Default)]
-pub struct WeVibeChorus {}
+pub struct WeVibeChorusInitializer {}
+
+#[async_trait]
+impl ProtocolInitializer for WeVibeChorusInitializer {
+  async fn initialize(
+    &mut self,
+    _hardware: Arc<Hardware>,
+    def: &UserDeviceDefinition,
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
+    let num_vibrators = def.features().iter().filter(|x| x.output().as_ref().map_or(false, |x| x.contains_key(&OutputType::Vibrate))).count() as u8;
+    Ok(Arc::new(WeVibeChorus::new(num_vibrators)))
+  }
+}
+
+pub struct WeVibeChorus {
+  num_vibrators: u8,
+  speeds: [AtomicU8; 2]
+}
+
+impl WeVibeChorus {
+  fn new(num_vibrators: u8) -> Self {
+    Self {
+      num_vibrators,
+      speeds: [AtomicU8::default(), AtomicU8::default()]
+    }
+  }
+}
 
 impl ProtocolHandler for WeVibeChorus {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn needs_full_command_set(&self) -> bool {
-    true
-  }
-
-  fn handle_value_cmd(
-    &self,
-    cmds: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let r_speed_int = cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;
-    let r_speed_ext = cmds
-      .last()
-      .unwrap_or(&None)
-      .unwrap_or((ActuatorType::Vibrate, 0))
-      .1 as u8;
+  fn handle_output_vibrate_cmd(
+      &self,
+      feature_index: u32,
+      feature_id: uuid::Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
+    let max_vibrators = if self.num_vibrators > 1 { 1 } else { 0 };
+    let r_speed_int = self.speeds[0].load(Ordering::Relaxed);
+    let r_speed_ext = self.speeds[max_vibrators].load(Ordering::Relaxed);
     let data = if r_speed_int == 0 && r_speed_ext == 0 {
       vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
     } else {
@@ -57,6 +81,6 @@ impl ProtocolHandler for WeVibeChorus {
         0x00,
       ]
     };
-    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, true).into()])
+    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, true).into()])
   }
 }
