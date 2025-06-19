@@ -117,9 +117,9 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 //#[test_case("test_tryfun_protocol.yaml" ; "TryFun Protocol")]
 //#[test_case("test_tryfun_surge.yaml" ; "TryFun Protocol - Surge Pro")]
 //#[test_case("test_user_config_display_name.yaml" ; "User Config Display Name")]
-//#[test_case("test_vorze_cyclone.yaml" ; "Vorze Protocol - Cyclone")]
-//#[test_case("test_vorze_ufo_tw.yaml" ; "Vorze Protocol - UFO TW")]
-//#[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO")]
+#[test_case("test_vorze_cyclone.yaml" ; "Vorze Protocol - Cyclone")]
+#[test_case("test_vorze_ufo_tw.yaml" ; "Vorze Protocol - UFO TW")]
+#[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO")]
 #[test_case("test_wetoy_protocol.yaml" ; "WeToy Protocol")]
 #[test_case("test_wevibe_4plus.yaml" ; "WeVibe Protocol (Legacy) - 4 Plus")]
 #[test_case("test_wevibe_chorus.yaml" ; "WeVibe Protocol (Chorus) - Chorus")]
@@ -131,6 +131,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v4(test_file: &str) {
+  tracing_subscriber::fmt::init();
   util::device_test::client::client_v4::run_embedded_test_case(&load_test_case(test_file).await)
     .await;
 }
