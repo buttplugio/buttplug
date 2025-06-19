@@ -1,0 +1,39 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
+use crate::{
+  core::{errors::ButtplugDeviceError, message::Endpoint},
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{
+      vorze_sa::{VorzeActions, VorzeDevice}, ProtocolHandler,
+    },
+  },
+};
+
+#[derive(Default)]
+pub struct VorzeSACyclone {}
+
+impl ProtocolHandler for VorzeSACyclone {
+  fn handle_rotation_with_direction_cmd(
+      &self,
+      _feature_index: u32,
+      feature_id: uuid::Uuid,
+      speed: u32,
+      clockwise: bool,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let clockwise = if clockwise { 1u8 } else { 0 };
+    let data: u8 = (clockwise) << 7 | (speed as u8);
+    Ok(vec![HardwareWriteCmd::new(
+      feature_id,
+      Endpoint::Tx,
+      vec![VorzeDevice::Cyclone as u8, VorzeActions::Rotate as u8, data],
+      true,
+    )
+    .into()])
+  }
+}
