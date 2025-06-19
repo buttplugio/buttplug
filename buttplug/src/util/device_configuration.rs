@@ -69,6 +69,8 @@ struct ProtocolAttributes {
   identifier: Option<Vec<String>>,
   name: String,
   id: Uuid,
+  #[serde(skip_serializing_if = "Option::is_none", rename="protocol-variant")]
+  protocol_variant: Option<String>,
   #[serde(rename = "base-id")]
   base_id: Option<Uuid>,
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -110,6 +112,7 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
       let config_attrs = BaseDeviceDefinition::new(
         &defaults.name,
         &defaults.id,
+        &defaults.protocol_variant,
         defaults
           .features
           .as_ref()
@@ -123,6 +126,7 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
               // Even subconfigurations always have names
               &config.name,
               &config.id,
+              &config.protocol_variant,
               config.features.as_ref().unwrap_or(
                 defaults
                   .features

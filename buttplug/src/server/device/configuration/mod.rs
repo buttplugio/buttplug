@@ -611,6 +611,7 @@ mod test {
         &BaseDeviceDefinition::new(
           "Lovense Edge",
           &uuid::Uuid::new_v4(),
+          &None,
           &vec![
             ServerDeviceFeature::new(
               "Edge Vibration 1",
