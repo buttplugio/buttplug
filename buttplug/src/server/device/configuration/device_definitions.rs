@@ -12,15 +12,17 @@ pub struct BaseDeviceDefinition {
   /// Message attributes for this device instance.
   features: Vec<ServerDeviceFeature>,
   id: Uuid,
+  protocol_variant: Option<String>,
 }
 
 impl BaseDeviceDefinition {
   /// Create a new instance
-  pub fn new(name: &str, id: &Uuid, features: &[ServerDeviceFeature]) -> Self {
+  pub fn new(name: &str, id: &Uuid, protocol_variant: &Option<String>, features: &[ServerDeviceFeature]) -> Self {
     Self {
       name: name.to_owned(),
       features: features.into(),
       id: *id,
+      protocol_variant: protocol_variant.clone()
     }
   }
 
@@ -69,6 +71,8 @@ pub struct UserDeviceDefinition {
   id: Uuid,
   #[serde(skip_serializing_if = "Option::is_none", rename = "base-id")]
   base_id: Option<Uuid>,
+  #[serde(skip_serializing_if = "Option::is_none", rename = "protocol-variant")]
+  protocol_variant: Option<String>,
   /// Message attributes for this device instance.
   features: Vec<ServerDeviceFeature>,
   /// Per-user configurations specific to this device instance.
@@ -82,6 +86,7 @@ impl UserDeviceDefinition {
     name: &str,
     id: &Uuid,
     base_id: &Option<Uuid>,
+    protocol_variant: &Option<String>,
     features: &[ServerDeviceFeature],
     user_config: &UserDeviceCustomization,
   ) -> Self {
@@ -89,6 +94,7 @@ impl UserDeviceDefinition {
       name: name.to_owned(),
       id: id.to_owned(),
       base_id: base_id.to_owned(),
+      protocol_variant: protocol_variant.clone(),
       features: features.into(),
       user_config: user_config.clone(),
     }
@@ -99,6 +105,7 @@ impl UserDeviceDefinition {
       name: def.name().clone(),
       id: Uuid::new_v4(),
       base_id: Some(*def.id()),
+      protocol_variant: def.protocol_variant().clone(),
       features: def.create_user_device_features(),
       user_config: UserDeviceCustomization {
         index,

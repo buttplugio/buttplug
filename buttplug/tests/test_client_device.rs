@@ -304,6 +304,7 @@ async fn test_client_range_limits() {
         "Massage Demo",
         &Uuid::new_v4(),
         &None,
+        &None,
         &[
           ServerDeviceFeature::new(
             "Lower half",

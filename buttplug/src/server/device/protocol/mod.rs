@@ -131,7 +131,7 @@ pub mod tryfun_blackhole;
 pub mod tryfun_meta2;
 pub mod vibcrafter;
 pub mod vibratissimo;
-// pub mod vorze_sa;
+pub mod vorze_sa;
 pub mod wetoy;
 pub mod wevibe;
 pub mod wevibe8bit;
@@ -631,10 +631,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     vibratissimo::setup::VibratissimoIdentifierFactory::default(),
   );
-  //  add_to_protocol_map(
-  //    &mut map,
-  //    vorze_sa::setup::VorzeSAIdentifierFactory::default(),
-  //  );
+  add_to_protocol_map(
+    &mut map,
+    vorze_sa::setup::VorzeSAIdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, wetoy::setup::WeToyIdentifierFactory::default());
   add_to_protocol_map(&mut map, wevibe::setup::WeVibeIdentifierFactory::default());
   add_to_protocol_map(
