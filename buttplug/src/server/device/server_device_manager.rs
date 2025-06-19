@@ -245,9 +245,10 @@ impl ServerDeviceManager {
   ) -> ButtplugServerResultFuture {
     match self.devices.get(&device_msg.device_index()) {
       Some(device) => {
-        let fut = device.parse_message(device_msg);
+        //let fut = device.parse_message(device_msg);
+        device.parse_message(device_msg)
         // Create a future to run the message through the device, then handle adding the id to the result.
-        fut.boxed()
+        //fut.boxed()
       }
       None => ButtplugDeviceError::DeviceNotAvailable(device_msg.device_index()).into(),
     }
