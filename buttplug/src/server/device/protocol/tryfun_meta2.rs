@@ -88,7 +88,7 @@ impl ProtocolHandler for TryFunMeta2 {
     ];
     let mut count = 1;
     for item in data.iter().skip(1) {
-      sum -= item;
+      sum = sum.wrapping_sub(*item);
       count += 1;
     }
     sum += count;
