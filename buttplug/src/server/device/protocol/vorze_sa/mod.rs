@@ -36,21 +36,43 @@ impl ProtocolInitializer for VorzeSAInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &UserDeviceDefinition,
+    def: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let hwname = hardware.name().to_ascii_lowercase();
-    if hwname.contains("cycsa") {
-      Ok(Arc::new(cyclone::VorzeSACyclone::default()))
-    } else if hwname.contains("ufo-tw") {
-      Ok(Arc::new(ufo::VorzeSAUfo::new(VorzeDevice::UfoTw)))
-    } else if hwname.contains("ufo") {
-      Ok(Arc::new(ufo::VorzeSAUfo::new(VorzeDevice::Ufo)))
-    } else if hwname.contains("bach") {
-      Ok(Arc::new(vibrator::VorzeSAVibrator::new(VorzeDevice::Bach)))
-    } else if hwname.contains("rocket") {
-      Ok(Arc::new(vibrator::VorzeSAVibrator::new(VorzeDevice::Rocket)))
-    } else if hwname.contains("piston") {
-      Ok(Arc::new(piston::VorzeSAPiston::default()))
+    if let Some(variant) = def.protocol_variant() {
+      let hwname = hardware.name();
+      match variant.as_str() { 
+        "vorze-sa-cyclone" => Ok(Arc::new(cyclone::VorzeSACyclone::default())),
+        "vorze-sa-ufo" => {
+          if hwname.contains("ufo-tw") {
+            Ok(Arc::new(ufo::VorzeSAUfo::new(VorzeDevice::UfoTw)))
+          } else if hwname.contains("ufo") {
+            Ok(Arc::new(ufo::VorzeSAUfo::new(VorzeDevice::Ufo)))
+          } else {
+            Err(ButtplugDeviceError::ProtocolNotImplemented(format!(
+              "No protocol implementation for Vorze Device {}",
+              hardware.name()
+            )))              
+          }
+        }
+        "vorze-sa-vibrator" => {
+          if hwname.contains("bach") {
+            Ok(Arc::new(vibrator::VorzeSAVibrator::new(VorzeDevice::Bach)))
+          } else if hwname.contains("rocket") {
+            Ok(Arc::new(vibrator::VorzeSAVibrator::new(VorzeDevice::Rocket)))
+          } else {
+            Err(ButtplugDeviceError::ProtocolNotImplemented(format!(
+              "No protocol implementation for Vorze Device {}",
+              hardware.name()
+            )))
+          }
+        }
+        "vorze-sa-piston" => Ok(Arc::new(piston::VorzeSAPiston::default())),
+        _ => Err(ButtplugDeviceError::ProtocolNotImplemented(format!(
+              "No protocol implementation for Vorze Device {}",
+              hardware.name()
+            )))
+
+      }
     } else {
       Err(ButtplugDeviceError::ProtocolNotImplemented(format!(
         "No protocol implementation for Vorze Device {}",

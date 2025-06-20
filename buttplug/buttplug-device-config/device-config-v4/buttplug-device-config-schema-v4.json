@@ -369,6 +369,9 @@
         "id": {
           "$ref": "#/components/uuid"
         },
+        "protocol-variant": {
+          "type": "string"
+        },
         "features": {
           "$ref": "#/components/features"
         }
@@ -396,6 +399,9 @@
           },
           "id": {
             "$ref": "#/components/uuid"
+          },
+          "protocol-variant": {
+            "type": "string"
           },
           "features": {
             "$ref": "#/components/features"
