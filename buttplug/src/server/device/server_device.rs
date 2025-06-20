@@ -387,7 +387,6 @@ impl ServerDevice {
         }
       }
     }
-    info!("STOP COMMANDS: {:?}", stop_commands);
     Self {
       identifier,
       //output_command_manager: acm,
@@ -554,18 +553,15 @@ impl ServerDevice {
   }
 
   fn handle_stop_device_cmd(&self) -> ButtplugServerResultFuture {
-    error!("GOT STOP DEVICE CMD");
     let mut fut_vec = vec![];
     self
       .stop_commands
       .iter()
       .for_each(|msg| fut_vec.push(self.parse_message(msg.clone())));
     async move {
-      error!("AWAITING");
       for fut in fut_vec {
         fut.await?;
       }
-      error!("RETURNING");
       Ok(message::OkV0::default().into())
     }
     .boxed()
