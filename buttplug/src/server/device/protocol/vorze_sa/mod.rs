@@ -6,9 +6,9 @@
 // for full license information.
 
 mod vibrator;
-mod cyclone;
+mod single_rotator;
 mod piston;
-mod ufo;
+mod dual_rotator;
 
 use crate::{
   core::errors::ButtplugDeviceError,
@@ -39,14 +39,13 @@ impl ProtocolInitializer for VorzeSAInitializer {
     def: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     if let Some(variant) = def.protocol_variant() {
-      let hwname = hardware.name();
+      let hwname = hardware.name().to_ascii_lowercase();
       match variant.as_str() { 
-        "vorze-sa-cyclone" => Ok(Arc::new(cyclone::VorzeSACyclone::default())),
-        "vorze-sa-ufo" => {
-          if hwname.contains("ufo-tw") {
-            Ok(Arc::new(ufo::VorzeSAUfo::new(VorzeDevice::UfoTw)))
+        "vorze-sa-single-rotator" => {
+          if hwname.contains("cycsa") {
+            Ok(Arc::new(single_rotator::VorzeSASingleRotator::new(VorzeDevice::Cyclone)))
           } else if hwname.contains("ufo") {
-            Ok(Arc::new(ufo::VorzeSAUfo::new(VorzeDevice::Ufo)))
+            Ok(Arc::new(single_rotator::VorzeSASingleRotator::new(VorzeDevice::Ufo)))
           } else {
             Err(ButtplugDeviceError::ProtocolNotImplemented(format!(
               "No protocol implementation for Vorze Device {}",
@@ -54,6 +53,7 @@ impl ProtocolInitializer for VorzeSAInitializer {
             )))              
           }
         }
+        "vorze-sa-dual-rotator" => Ok(Arc::new(dual_rotator::VorzeSADualRotator::default())),
         "vorze-sa-vibrator" => {
           if hwname.contains("bach") {
             Ok(Arc::new(vibrator::VorzeSAVibrator::new(VorzeDevice::Bach)))

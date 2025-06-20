@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::{uuid, Uuid};
+
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint}, server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
@@ -15,26 +17,19 @@ use crate::{
 };
 use std::sync::atomic::{AtomicI8, Ordering};
 
-pub struct VorzeSAUfo {
-  device_type: VorzeDevice,
+// Vorze UFO needs a unified protocol UUID since we update both outputs in the same packet.
+const VORZE_UFO_PROTOCOL_UUID: Uuid = uuid!("013c2d1f-b3c0-4372-9cf6-e5fafd3b7631");
+
+#[derive(Default)]
+pub struct VorzeSADualRotator {
   speeds: [AtomicI8; 2]
 }
 
-impl VorzeSAUfo {
-  pub fn new(device_type: VorzeDevice) -> Self {
-    Self {
-      device_type,
-      speeds: [AtomicI8::new(0), AtomicI8::new(0)]
-    }
-  }
-}
-
-impl ProtocolHandler for VorzeSAUfo {
-
+impl ProtocolHandler for VorzeSADualRotator {
   fn handle_rotation_with_direction_cmd(
       &self,
       feature_index: u32,
-      feature_id: uuid::Uuid,
+      _feature_id: uuid::Uuid,
       speed: u32,
       clockwise: bool,
     ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
@@ -44,9 +39,9 @@ impl ProtocolHandler for VorzeSAUfo {
     let speed_right = self.speeds[1].load(Ordering::Relaxed);
     let data_right = ((speed_right >= 0) as u8) << 7 | (speed_right.unsigned_abs());
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      VORZE_UFO_PROTOCOL_UUID,
       Endpoint::Tx,
-      vec![self.device_type as u8, data_left, data_right],
+      vec![VorzeDevice::UfoTw as u8, data_left, data_right],
       true,
     )
     .into()])
