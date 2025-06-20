@@ -8,10 +8,10 @@
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_setup,
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::ProtocolHandler,
-  }, message::checked_value_cmd::CheckedValueCmdV4},
+  },
 };
 
 generic_protocol_setup!(TryFun, "tryfun");
@@ -24,10 +24,12 @@ impl ProtocolHandler for TryFun {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_oscillate_cmd(
-    &self,
-    cmd: &CheckedValueCmdV4
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_oscillate_cmd(
+      &self,
+      _feature_index: u32,
+      feature_id: uuid::Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut sum: u8 = 0xff;
     let mut data = vec![0xAA, 0x02, 0x07, speed as u8];
     let mut count = 0;
@@ -38,13 +40,15 @@ impl ProtocolHandler for TryFun {
     sum += count;
     data.push(sum);
 
-    Ok(vec![HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, data, true).into()])
+    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, true).into()])
   }
 
-  fn handle_value_rotate_cmd(
-    &self,
-    cmd: &CheckedValueCmdV4
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_rotate_cmd(
+      &self,
+      _feature_index: u32,
+      feature_id: uuid::Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut sum: u8 = 0xff;
     let mut data = vec![0xAA, 0x02, 0x08, speed as u8];
     let mut count = 0;
@@ -55,25 +59,27 @@ impl ProtocolHandler for TryFun {
     sum += count;
     data.push(sum);
 
-    Ok(vec![HardwareWriteCmd::new(cmd.feature_uuid(), Endpoint::Tx, data, true).into()])
+    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, true).into()])
   }
 
-    fn handle_value_vibrate_cmd(
-    &self,
-    cmd: &CheckedValueCmdV4
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_vibrate_cmd(
+      &self,
+      _feature_index: u32,
+      feature_id: uuid::Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(), 
+      feature_id, 
       Endpoint::Tx,
       vec![
         0x00,
         0x02,
         0x00,
         0x05,
-        if cmd.value() == 0 { 1u8 } else { 2u8 },
-        if cmd.value() == 0 { 2u8 } else { speed as u8 },
+        if speed == 0 { 1u8 } else { 2u8 },
+        if speed == 0 { 2u8 } else { speed as u8 },
         0x01,
-        if cmd.value() == 0 { 1u8 } else { 0u8 },
+        if speed == 0 { 1u8 } else { 0u8 },
         0xfd - (speed as u8).max(1),
       ],
       true,
