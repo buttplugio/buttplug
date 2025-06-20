@@ -266,7 +266,7 @@ impl ServerDevice {
       async_manager::spawn(async move {
         // Arbitrary wait time for now.
         let wait_duration = Duration::from_secs(5);
-        let bt_duration = Duration::from_millis(30);
+        let bt_duration = Duration::from_millis(75);
         loop {
           // Loop based on our 10hz estimate for most BLE toys.
           util::sleep(bt_duration).await;
@@ -285,7 +285,7 @@ impl ServerDevice {
             }
           };
           while let Some(command) = local_commands.pop_front() {
-            trace!("Sending hardware command {:?}", command);
+            debug!("Sending hardware command {:?}", command);
             // TODO This needs to throw system error messages
             let _ = hardware.parse_message(&command).await;
             if hardware.requires_keepalive()

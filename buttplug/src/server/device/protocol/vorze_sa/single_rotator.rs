@@ -15,10 +15,19 @@ use crate::{
   },
 };
 
-#[derive(Default)]
-pub struct VorzeSACyclone {}
+pub struct VorzeSASingleRotator {
+  device_type: VorzeDevice
+}
 
-impl ProtocolHandler for VorzeSACyclone {
+impl VorzeSASingleRotator {
+  pub fn new(device_type: VorzeDevice) -> Self {
+    Self {
+      device_type
+    }
+  }
+}
+
+impl ProtocolHandler for VorzeSASingleRotator {
   fn handle_rotation_with_direction_cmd(
       &self,
       _feature_index: u32,
@@ -31,7 +40,7 @@ impl ProtocolHandler for VorzeSACyclone {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
       Endpoint::Tx,
-      vec![VorzeDevice::Cyclone as u8, VorzeActions::Rotate as u8, data],
+      vec![self.device_type as u8, VorzeActions::Rotate as u8, data],
       true,
     )
     .into()])

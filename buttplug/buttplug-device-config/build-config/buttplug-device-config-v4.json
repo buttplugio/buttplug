@@ -5368,7 +5368,7 @@
             "CycSA"
           ],
           "name": "Vorze A10 Cyclone SA",
-          "protocol-variant": "vorze-sa-cyclone",
+          "protocol-variant": "vorze-sa-single-rotator",
           "features": [
             {
               "feature-type": "RotateWithDirection",
@@ -5390,7 +5390,7 @@
             "UFOSA"
           ],
           "name": "Vorze UFO SA",
-          "protocol-variant": "vorze-sa-ufo",
+          "protocol-variant": "vorze-sa-single-rotator",
           "features": [
             {
               "feature-type": "RotateWithDirection",
@@ -5412,7 +5412,7 @@
             "UFO-TW"
           ],
           "name": "Vorze UFO TW",
-          "protocol-variant": "vorze-sa-cyclone",
+          "protocol-variant": "vorze-sa-dual-rotator",
           "features": [
             {
               "feature-type": "RotateWithDirection",
