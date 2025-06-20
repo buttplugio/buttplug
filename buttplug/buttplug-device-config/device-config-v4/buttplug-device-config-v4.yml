@@ -3089,10 +3089,6 @@ protocols:
             - vendor-id: 2889
               product-id: 1615
   kiiroo-v1:
-    defaults:
-      name: Kiiroo V1 Device
-      features: []
-      id: 31086104-54c4-4554-8d1a-25fae110f20b
     configurations:
       - identifier:
           - PEARL
@@ -3137,6 +3133,7 @@ protocols:
       - identifier:
           - Bach smart
         name: Vorze Bach
+        protocol-variant: vorze-sa-vibrator
         features:
           - feature-type: Vibrate
             output:
@@ -3149,6 +3146,7 @@ protocols:
       - identifier:
           - ROCKET
         name: Adult Festa Rocket
+        protocol-variant: vorze-sa-vibrator
         features:
           - feature-type: Vibrate
             output:
@@ -3161,6 +3159,7 @@ protocols:
       - identifier:
           - CycSA
         name: Vorze A10 Cyclone SA
+        protocol-variant: vorze-sa-cyclone
         features:
           - feature-type: RotateWithDirection
             output:
@@ -3173,6 +3172,7 @@ protocols:
       - identifier:
           - UFOSA
         name: Vorze UFO SA
+        protocol-variant: vorze-sa-ufo
         features:
           - feature-type: RotateWithDirection
             output:
@@ -3185,6 +3185,7 @@ protocols:
       - identifier:
           - UFO-TW
         name: Vorze UFO TW
+        protocol-variant: vorze-sa-cyclone
         features:
           - feature-type: RotateWithDirection
             output:
@@ -3204,6 +3205,7 @@ protocols:
       - identifier:
           - VorzePiston
         name: Vorze Piston
+        protocol-variant: vorze-sa-piston
         features:
           - feature-type: PositionWithDuration
             output:
