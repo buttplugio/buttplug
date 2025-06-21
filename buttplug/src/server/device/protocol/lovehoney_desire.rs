@@ -5,35 +5,64 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
+
+use async_trait::async_trait;
+use uuid::{uuid, Uuid};
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
   server::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_initializer_setup, ProtocolHandler, ProtocolInitializer, UserDeviceDefinition, ProtocolIdentifier, ProtocolCommunicationSpecifier, UserDeviceIdentifier},
   },
 };
 
-generic_protocol_setup!(LovehoneyDesire, "lovehoney-desire");
+const LOVEHONEY_DESIRE_PROTOCOL_UUID: Uuid = uuid!("5dcd8487-4814-44cb-a768-13bf81d545c0");
+const LOVEHONEY_DESIRE_VIBE2_PROTOCOL_UUID: Uuid = uuid!("d44a99fe-903b-4fff-bee7-1141767c9cca");
+
+generic_protocol_initializer_setup!(LovehoneyDesire, "lovehoney-desire");
 
 #[derive(Default)]
-pub struct LovehoneyDesire {}
+pub struct LovehoneyDesireInitializer {}
+
+#[async_trait]
+impl ProtocolInitializer for LovehoneyDesireInitializer {
+  async fn initialize(
+    &mut self,
+    _: Arc<Hardware>,
+    def: &UserDeviceDefinition,
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
+    Ok(Arc::new(LovehoneyDesire::new(def
+    .features()
+    .iter()
+    .filter(|x| x.output().is_some())
+    .count() as u8)))
+  }
+}
+
+pub struct LovehoneyDesire {
+  current_commands: Vec<AtomicU8>
+}
+
+impl LovehoneyDesire {
+  fn new(num_vibrators: u8) -> Self {
+    Self {
+      current_commands: std::iter::repeat_with(|| AtomicU8::default()).take(num_vibrators as usize).collect()
+    }
+  }
+}
 
 impl ProtocolHandler for LovehoneyDesire {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
-
-  fn needs_full_command_set(&self) -> bool {
-    true
-  }
-
-  fn handle_value_cmd(
-    &self,
-    cmds: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_vibrate_cmd(
+      &self,
+      feature_index: u32,
+      _feature_id: Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // The Lovehoney Desire has 2 types of commands
     //
     // - Set both motors with one command
@@ -41,38 +70,20 @@ impl ProtocolHandler for LovehoneyDesire {
     //
     // We'll need to check what we got back and write our
     // commands accordingly.
-    //
-    // Neat way of checking if everything is the same via
-    // https://sts10.github.io/2019/06/06/is-all-equal-function.html.
-    //
-    // Just make sure we're not matching on None, 'cause if
-    // that's the case we ain't got shit to do.
-    let mut msg_vec = vec![];
-    if cmds[0].is_some() && cmds.windows(2).all(|w| w[0] == w[1]) {
-      msg_vec.push(
-        HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![
-            0xF3,
-            0,
-            cmds[0].expect("Already checked value existence").1 as u8,
-          ],
-          true,
-        )
-        .into(),
-      );
+    if self.current_commands.len() == 1 {
+      Ok(vec![HardwareWriteCmd::new(LOVEHONEY_DESIRE_PROTOCOL_UUID, Endpoint::Tx, vec![0xF3, 0, speed as u8], true).into()])
     } else {
-      // We have differing values. Set each motor separately.
-      let mut i = 1;
-
-      for cmd in cmds {
-        if let Some((_, speed)) = cmd {
-          msg_vec
-            .push(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF3, i, *speed as u8], true).into());
-        }
-        i += 1;
+      self.current_commands[feature_index as usize].store(speed as u8, Ordering::Relaxed);
+      let speed0 = self.current_commands[0].load(Ordering::Relaxed);
+      let speed1 = self.current_commands[1].load(Ordering::Relaxed);
+      if speed0 == speed1 {
+        Ok(vec![HardwareWriteCmd::new(LOVEHONEY_DESIRE_PROTOCOL_UUID, Endpoint::Tx, vec![0xF3, 0, speed0 as u8], true).into()])
+      } else {
+        Ok(vec![
+          HardwareWriteCmd::new(LOVEHONEY_DESIRE_PROTOCOL_UUID, Endpoint::Tx, vec![0xF3, 1, speed0 as u8], true).into(),
+          HardwareWriteCmd::new(LOVEHONEY_DESIRE_VIBE2_PROTOCOL_UUID, Endpoint::Tx, vec![0xF3, 2, speed1 as u8], true).into(),
+        ])
       }
     }
-    Ok(msg_vec)
   }
 }
