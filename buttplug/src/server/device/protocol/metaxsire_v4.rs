@@ -21,9 +21,7 @@ generic_protocol_setup!(MetaXSireV4, "metaxsire-v4");
 pub struct MetaXSireV4 {}
 
 impl ProtocolHandler for MetaXSireV4 {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

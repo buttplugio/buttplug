@@ -50,9 +50,7 @@ impl Cowgirl {
 }
 
 impl ProtocolHandler for Cowgirl {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn outputs_full_command_set(&self) -> bool {
     true

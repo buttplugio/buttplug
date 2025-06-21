@@ -21,9 +21,7 @@ generic_protocol_setup!(Youcups, "youcups");
 pub struct Youcups {}
 
 impl ProtocolHandler for Youcups {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

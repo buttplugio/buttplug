@@ -21,9 +21,7 @@ generic_protocol_setup!(Maxpro, "maxpro");
 pub struct Maxpro {}
 
 impl ProtocolHandler for Maxpro {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

@@ -22,7 +22,7 @@ pub struct SvakomAlexV2 {}
 
 impl ProtocolHandler for SvakomAlexV2 {
   fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
-    ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+    ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
   }
 
   fn handle_output_vibrate_cmd(

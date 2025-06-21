@@ -22,9 +22,7 @@ generic_protocol_setup!(JoyHubV3, "joyhub-v3");
 pub struct JoyHubV3 {}
 
 impl ProtocolHandler for JoyHubV3 {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn outputs_full_command_set(&self) -> bool {
     true

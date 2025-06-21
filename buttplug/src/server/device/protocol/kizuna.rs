@@ -21,9 +21,7 @@ generic_protocol_setup!(Kizuna, "kizuna");
 pub struct Kizuna {}
 
 impl ProtocolHandler for Kizuna {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_rotate_cmd(
     &self,

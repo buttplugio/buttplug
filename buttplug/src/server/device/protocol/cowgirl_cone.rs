@@ -52,9 +52,7 @@ impl ProtocolInitializer for CowgirlConeInitializer {
 pub struct CowgirlCone {}
 
 impl ProtocolHandler for CowgirlCone {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

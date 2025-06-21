@@ -62,7 +62,7 @@ impl SvakomV6 {
 
 impl ProtocolHandler for SvakomV6 {
   fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
-    ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+    ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
   }
 
   fn handle_output_vibrate_cmd(

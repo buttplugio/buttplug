@@ -21,9 +21,7 @@ generic_protocol_setup!(Omobo, "omobo");
 pub struct Omobo {}
 
 impl ProtocolHandler for Omobo {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

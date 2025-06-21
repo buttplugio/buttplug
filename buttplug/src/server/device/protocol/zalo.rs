@@ -26,9 +26,7 @@ pub struct Zalo {
 }
 
 impl ProtocolHandler for Zalo {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
       &self,

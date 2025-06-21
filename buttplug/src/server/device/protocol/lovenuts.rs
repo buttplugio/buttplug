@@ -21,9 +21,7 @@ generic_protocol_setup!(LoveNuts, "lovenuts");
 pub struct LoveNuts {}
 
 impl ProtocolHandler for LoveNuts {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

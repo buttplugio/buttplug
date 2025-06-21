@@ -50,9 +50,7 @@ impl WeVibeChorus {
 }
 
 impl ProtocolHandler for WeVibeChorus {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
       &self,

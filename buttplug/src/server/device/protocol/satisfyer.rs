@@ -22,7 +22,7 @@ use std::{
   sync::{
     atomic::{AtomicU8, Ordering},
     Arc,
-  },
+  }, time::Duration,
 };
 
 const SATISFYER_PROTOCOL_UUID: Uuid = uuid!("79a0ed0d-f392-4c48-967e-f4467438c344");
@@ -146,13 +146,13 @@ impl Satisfyer {
 
 impl ProtocolHandler for Satisfyer {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::ForceRepeatLastPacketStrategy
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_secs(3))
   }
 
   fn handle_output_vibrate_cmd(
       &self,
       feature_index: u32,
-      feature_id: Uuid,
+      _feature_id: Uuid,
       speed: u32,
     ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.last_command[feature_index as usize].store(speed as u8, Ordering::Relaxed);

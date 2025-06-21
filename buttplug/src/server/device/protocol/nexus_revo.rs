@@ -21,9 +21,7 @@ generic_protocol_setup!(NexusRevo, "nexus-revo");
 pub struct NexusRevo {}
 
 impl ProtocolHandler for NexusRevo {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

@@ -21,9 +21,7 @@ generic_protocol_setup!(Cachito, "cachito");
 pub struct Cachito {}
 
 impl ProtocolHandler for Cachito {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

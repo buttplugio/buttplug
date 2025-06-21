@@ -72,9 +72,7 @@ impl ProtocolInitializer for PrettyLoveInitializer {
 pub struct PrettyLove {}
 
 impl ProtocolHandler for PrettyLove {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

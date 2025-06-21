@@ -50,9 +50,7 @@ impl WeVibe8Bit {
 }
 
 impl ProtocolHandler for WeVibe8Bit {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
       &self,

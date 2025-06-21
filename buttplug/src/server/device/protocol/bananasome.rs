@@ -52,9 +52,7 @@ impl Bananasome {
 }
 
 impl ProtocolHandler for Bananasome {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn outputs_full_command_set(&self) -> bool {
     true

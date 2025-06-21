@@ -21,9 +21,7 @@ generic_protocol_setup!(MagicMotionV3, "magic-motion-3");
 pub struct MagicMotionV3 {}
 
 impl ProtocolHandler for MagicMotionV3 {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

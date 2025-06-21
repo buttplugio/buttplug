@@ -21,9 +21,7 @@ generic_protocol_setup!(IToys, "itoys");
 pub struct IToys {}
 
 impl ProtocolHandler for IToys {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

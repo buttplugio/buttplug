@@ -22,9 +22,7 @@ generic_protocol_setup!(Xibao, "xibao");
 pub struct Xibao {}
 
 impl ProtocolHandler for Xibao {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_oscillate_cmd(
     &self,

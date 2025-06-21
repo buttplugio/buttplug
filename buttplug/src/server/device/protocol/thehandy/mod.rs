@@ -117,7 +117,7 @@ impl ProtocolHandler for TheHandy {
       .encode(&mut ping_buf)
       .expect("Infallible encode.");
 
-    super::ProtocolKeepaliveStrategy::RepeatPacketStrategy(HardwareWriteCmd::new(
+    super::ProtocolKeepaliveStrategy::HardwareRequiredRepeatPacketStrategy(HardwareWriteCmd::new(
       THEHANDY_PROTOCOL_UUID,
       Endpoint::Tx,
       ping_buf,

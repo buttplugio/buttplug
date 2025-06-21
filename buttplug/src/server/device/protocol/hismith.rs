@@ -98,9 +98,7 @@ impl ProtocolInitializer for HismithInitializer {
 pub struct Hismith {}
 
 impl ProtocolHandler for Hismith {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_oscillate_cmd(
     &self,
