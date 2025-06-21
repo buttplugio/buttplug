@@ -16,9 +16,8 @@ use crate::{
   },
 };
 use std::time::Duration;
-use uuid::{uuid, Uuid};
+use uuid::Uuid;
 
-const MIZZZEE_V3_PROTOCOL_UUID: Uuid = uuid!("a4d62eee-0f9e-4e39-b488-9161b1b5e9f5");
 generic_protocol_setup!(MizzZeeV3, "mizzzee-v3");
 
 // Time between MizzZee v3 update commands, in milliseconds.

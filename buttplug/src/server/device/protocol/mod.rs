@@ -73,10 +73,9 @@ pub mod magic_motion_v3;
 pub mod mannuo;
 pub mod maxpro;
 pub mod meese;
-// pub mod metaxsire;
-// pub mod metaxsire_repeat;
+pub mod metaxsire;
 pub mod metaxsire_v2;
-// pub mod metaxsire_v3;
+pub mod metaxsire_v3;
 mod metaxsire_v4;
 pub mod mizzzee;
 pub mod mizzzee_v2;
@@ -406,22 +405,18 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(&mut map, mannuo::setup::ManNuoIdentifierFactory::default());
   add_to_protocol_map(&mut map, maxpro::setup::MaxproIdentifierFactory::default());
   add_to_protocol_map(&mut map, meese::setup::MeeseIdentifierFactory::default());
-  //  add_to_protocol_map(
-  //    &mut map,
-  //    metaxsire::setup::MetaXSireIdentifierFactory::default(),
-  //  );
-  //  add_to_protocol_map(
-  //    &mut map,
-  //    metaxsire_repeat::setup::MetaXSireRepeatIdentifierFactory::default(),
-  //  );
+  add_to_protocol_map(
+    &mut map,
+    metaxsire::setup::MetaXSireIdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     metaxsire_v2::setup::MetaXSireV2IdentifierFactory::default(),
   );
-  //  add_to_protocol_map(
-  //    &mut map,
-  //    metaxsire_v3::setup::MetaXSireV3IdentifierFactory::default(),
-  //  );
+  add_to_protocol_map(
+    &mut map,
+    metaxsire_v3::setup::MetaXSireV3IdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     metaxsire_v4::setup::MetaXSireV4IdentifierFactory::default(),

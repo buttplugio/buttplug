@@ -18,7 +18,7 @@ use crate::{
 };
 use async_trait::async_trait;
 use uuid::{uuid, Uuid};
-use std::{collections::BTreeMap, sync::{atomic::{AtomicU8, Ordering}, Arc}};
+use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
