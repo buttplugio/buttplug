@@ -772,10 +772,6 @@ pub trait ProtocolHandler: Sync + Send {
     ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
   }
 
-  fn outputs_full_command_set(&self) -> bool {
-    false
-  }
-
   fn handle_message(
     &self,
     message: &ButtplugDeviceCommandMessageUnionV4,
