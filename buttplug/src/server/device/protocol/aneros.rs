@@ -21,9 +21,7 @@ generic_protocol_setup!(Aneros, "aneros");
 pub struct Aneros {}
 
 impl ProtocolHandler for Aneros {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

@@ -147,47 +147,41 @@ use futures::{
   future::{self, BoxFuture, FutureExt},
   StreamExt,
 };
-use std::pin::Pin;
+use std::{pin::Pin, time::Duration};
 use std::{collections::HashMap, sync::Arc};
 use uuid::Uuid;
 
 /// Strategy for situations where hardware needs to get updates every so often in order to keep
-/// things alive. Currently this only applies to iOS backgrounding with bluetooth devices, but since
+/// things alive. Currently this applies to iOS backgrounding with bluetooth devices, as well as
+/// some protocols like Satisfyer and Mysteryvibe that need constant command refreshing, but since
 /// we never know which of our hundreds of supported devices someone might connect, we need context
 /// as to which keepalive strategy to use.
 ///
 /// When choosing a keepalive strategy for a protocol:
 ///
-/// - All protocols use NoStrategy by default. For many devices, sending trash will break them in
-///   very weird ways and we can't risk that, so we need to know the protocol context.
-/// - If the protocol already needs its own keepalive (Satisfyer, Mysteryvibe, etc...), use
-///   NoStrategy for now. RepeatLastPacketStrategy could be used, but we'd need per-protocol
-///   timeouts at that point.
 /// - If the protocol has a command that essentially does nothing to the actuators, set up
 ///   RepeatPacketStrategy to use that. This is useful for devices that have info commands (like
 ///   Lovense), ping commands (like The Handy), sensor commands that aren't yet subscribed to output
 ///   notifications, etc...
+/// - If a protocol needs specific timing or keepalives, regardless of the OS/hardware manager being
+///   used, like Satisfyer or Mysteryvibe, use RepeatLastPacketStrategyWithTiming.
 /// - For many devices with only scalar actuators, RepeatLastPacketStrategy should work. You just
 ///   need to make sure the protocol doesn't have a packet counter or something else that will trip
 ///   if the same packet is replayed multiple times.
-/// - For all other devices, use Custom Strategy. This assumes the protocol will have implemented a
-///   method to generate a valid packet.
 #[derive(Debug)]
 pub enum ProtocolKeepaliveStrategy {
-  /// Do nothing. This is for protocols that already require internal keepalives, like satisfyer,
-  /// mysteryvibe, etc.
-  NoStrategy,
-  /// Repeat a specific packet, such as a ping or a no-op
-  RepeatPacketStrategy(HardwareWriteCmd),
-  /// Repeat whatever the last packet sent was, and send Stop commands until first packet sent. This
-  /// will be useful for most devices that purely use scalar commands.
-  RepeatLastPacketStrategy,
-  /// Repeat whatever the last packet sent was, and send Stop commands until first packet sent.
-  /// Unlike RepeatLastPacketStrategy, which requires hardware need for repeats, this will always
-  /// repeat, which can be useful for holding connections live (looking at you, Satisfyer)
-  ForceRepeatLastPacketStrategy,
-  /// Call a specific method on the protocol implementation to generate keepalive packets.
-  CustomStrategy,
+  /// Repeat a specific packet, such as a ping or a no-op. Only do this when the hardware manager
+  /// requires it (currently only iOS bluetooth during backgrounding).
+  HardwareRequiredRepeatPacketStrategy(HardwareWriteCmd),
+  /// Repeat whatever the last packet sent was, and send Stop commands until first packet sent. Uses
+  /// a default timing, suitable for most protocols that don't need constant device updates outside
+  /// of OS requirements. Only do this when the hardware manager requires it (currently only iOS
+  /// bluetooth during backgrounding).
+  HardwareRequiredRepeatLastPacketStrategy,
+  /// Repeat whatever the last packet sent was, and send Stop commands until first packet sent. Do
+  /// this regardless of whether or not the hardware manager requires it. Useful for hardware that
+  /// requires keepalives, like Satisfyer, Mysteryvibe, Leten, etc...
+  RepeatLastPacketStrategyWithTiming(Duration),
 }
 
 pub trait ProtocolIdentifierFactory: Send + Sync {
@@ -786,7 +780,7 @@ pub trait ProtocolHandler: Sync + Send {
   }
 
   fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
-    ProtocolKeepaliveStrategy::NoStrategy
+    ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
   }
 
   fn outputs_full_command_set(&self) -> bool {

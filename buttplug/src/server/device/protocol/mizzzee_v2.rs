@@ -21,9 +21,7 @@ generic_protocol_setup!(MizzZeeV2, "mizzzee-v2");
 pub struct MizzZeeV2 {}
 
 impl ProtocolHandler for MizzZeeV2 {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

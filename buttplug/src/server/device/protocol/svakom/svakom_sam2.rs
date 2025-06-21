@@ -20,7 +20,7 @@ pub struct SvakomSam2 {}
 
 impl ProtocolHandler for SvakomSam2 {
   fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
-    ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+    ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
   }
 
   fn handle_output_vibrate_cmd(

@@ -33,9 +33,7 @@ impl Default for JeJoue {
 }
 
 impl ProtocolHandler for JeJoue {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

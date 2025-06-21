@@ -52,9 +52,7 @@ impl ProtocolInitializer for WeToyInitializer {
 pub struct WeToy {}
 
 impl ProtocolHandler for WeToy {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

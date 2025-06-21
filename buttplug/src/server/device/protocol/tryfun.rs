@@ -20,9 +20,7 @@ generic_protocol_setup!(TryFun, "tryfun");
 pub struct TryFun {}
 
 impl ProtocolHandler for TryFun {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_oscillate_cmd(
       &self,

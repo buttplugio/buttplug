@@ -32,9 +32,7 @@ impl Default for KiirooV2Vibrator {
 }
 
 impl ProtocolHandler for KiirooV2Vibrator {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

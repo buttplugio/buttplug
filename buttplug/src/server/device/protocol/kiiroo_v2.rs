@@ -56,9 +56,7 @@ pub struct KiirooV2 {
 }
 
 impl ProtocolHandler for KiirooV2 {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_position_with_duration_cmd(
     &self,

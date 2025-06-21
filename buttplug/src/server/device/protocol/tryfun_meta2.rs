@@ -25,9 +25,7 @@ pub struct TryFunMeta2 {
 }
 
 impl ProtocolHandler for TryFunMeta2 {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_oscillate_cmd(
     &self,

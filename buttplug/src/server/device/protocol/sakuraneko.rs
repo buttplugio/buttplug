@@ -21,9 +21,7 @@ generic_protocol_setup!(Sakuraneko, "sakuraneko");
 pub struct Sakuraneko {}
 
 impl ProtocolHandler for Sakuraneko {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

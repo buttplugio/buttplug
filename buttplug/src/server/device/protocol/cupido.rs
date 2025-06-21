@@ -22,9 +22,7 @@ generic_protocol_setup!(Cupido, "cupido");
 pub struct Cupido {}
 
 impl ProtocolHandler for Cupido {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

@@ -234,10 +234,10 @@ impl ServerDevice {
     if (requires_keepalive
       && matches!(
         strategy,
-        ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+        ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
       )) || matches!(
         strategy,
-        ProtocolKeepaliveStrategy::ForceRepeatLastPacketStrategy
+        ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_)
       )
     {
       if let Err(e) = device.handle_stop_device_cmd().await {
@@ -294,7 +294,7 @@ impl ServerDevice {
             if hardware.requires_keepalive()
               && matches!(
                 strategy,
-                ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+                ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
               )
             {
               if let HardwareCommand::Write(command) = command {
@@ -302,32 +302,33 @@ impl ServerDevice {
               }
             }
           }
-          if hardware.requires_keepalive()
-            && !matches!(strategy, ProtocolKeepaliveStrategy::NoStrategy)
-            && hardware.time_since_last_write().await > wait_duration
+          if (hardware.requires_keepalive() && hardware.time_since_last_write().await > wait_duration) ||
+            matches!(strategy, ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_))            
           {
             match &strategy {
-              ProtocolKeepaliveStrategy::RepeatPacketStrategy(packet) => {
+              ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(duration) => {
+                if hardware.time_since_last_write().await > *duration {
+                  if let Some(packet) = &*keepalive_packet.read().await {
+                    if let Err(e) = hardware.write_value(packet).await {
+                      warn!("Error writing keepalive packet: {:?}", e);
+                      break;
+                    }
+                  }
+                }
+              }
+              ProtocolKeepaliveStrategy::HardwareRequiredRepeatPacketStrategy(packet) => {
                 if let Err(e) = hardware.write_value(packet).await {
                   warn!("Error writing keepalive packet: {:?}", e);
                   break;
                 }
               }
-              ProtocolKeepaliveStrategy::RepeatLastPacketStrategy => {
+              ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy => {
                 if let Some(packet) = &*keepalive_packet.read().await {
                   if let Err(e) = hardware.write_value(packet).await {
                     warn!("Error writing keepalive packet: {:?}", e);
                     break;
                   }
-                } else {
-
                 }
-              }
-              _ => {
-                info!(
-                  "Protocol keepalive strategy {:?} not implemented, replacing with NoStrategy",
-                  strategy
-                );
               }
             }
           }

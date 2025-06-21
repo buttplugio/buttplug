@@ -55,9 +55,7 @@ pub struct Foreo {
 }
 
 impl ProtocolHandler for Foreo {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

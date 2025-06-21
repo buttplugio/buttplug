@@ -21,9 +21,7 @@ generic_protocol_setup!(Picobong, "picobong");
 pub struct Picobong {}
 
 impl ProtocolHandler for Picobong {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

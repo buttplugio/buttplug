@@ -21,9 +21,7 @@ generic_protocol_setup!(Xiuxiuda, "xiuxiuda");
 pub struct Xiuxiuda {}
 
 impl ProtocolHandler for Xiuxiuda {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

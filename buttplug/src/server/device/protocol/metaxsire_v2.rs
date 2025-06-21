@@ -48,9 +48,7 @@ impl ProtocolInitializer for MetaXSireV2Initializer {
 pub struct MetaXSireV2 {}
 
 impl ProtocolHandler for MetaXSireV2 {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

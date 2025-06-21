@@ -34,9 +34,7 @@ impl Default for MagicMotionV2 {
 }
 
 impl ProtocolHandler for MagicMotionV2 {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn outputs_full_command_set(&self) -> bool {
     true

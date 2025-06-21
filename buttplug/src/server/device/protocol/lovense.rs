@@ -298,7 +298,7 @@ impl ProtocolHandler for Lovense {
 
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     // For Lovense, we'll just repeat the device type packet and drop the result.
-    super::ProtocolKeepaliveStrategy::RepeatPacketStrategy(HardwareWriteCmd::new(
+    super::ProtocolKeepaliveStrategy::HardwareRequiredRepeatPacketStrategy(HardwareWriteCmd::new(
       LOVENSE_PROTOCOL_UUID,
       Endpoint::Tx,
       b"DeviceType;".to_vec(),

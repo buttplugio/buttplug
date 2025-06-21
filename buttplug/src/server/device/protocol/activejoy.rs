@@ -21,9 +21,7 @@ generic_protocol_setup!(ActiveJoy, "activejoy");
 pub struct ActiveJoy {}
 
 impl ProtocolHandler for ActiveJoy {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

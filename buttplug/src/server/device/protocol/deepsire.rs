@@ -21,9 +21,7 @@ generic_protocol_setup!(DeepSire, "deepsire");
 pub struct DeepSire {}
 
 impl ProtocolHandler for DeepSire {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

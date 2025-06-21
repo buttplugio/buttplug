@@ -105,9 +105,7 @@ pub struct HismithMini {
 }
 
 impl ProtocolHandler for HismithMini {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_oscillate_cmd(
     &self,

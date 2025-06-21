@@ -20,7 +20,7 @@ pub struct SvakomJordan {}
 
 impl ProtocolHandler for SvakomJordan {
   fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
-    ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+    ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
   }
 
   fn handle_output_vibrate_cmd(

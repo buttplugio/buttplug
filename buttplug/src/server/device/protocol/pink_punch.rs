@@ -21,9 +21,7 @@ generic_protocol_setup!(PinkPunch, "pink_punch");
 pub struct PinkPunch {}
 
 impl ProtocolHandler for PinkPunch {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

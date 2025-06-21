@@ -23,9 +23,7 @@ generic_protocol_setup!(Luvmazer, "luvmazer");
 pub struct Luvmazer {}
 
 impl ProtocolHandler for Luvmazer {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,

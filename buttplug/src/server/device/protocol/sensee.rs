@@ -21,9 +21,7 @@ generic_protocol_setup!(Sensee, "sensee");
 pub struct Sensee {}
 
 impl ProtocolHandler for Sensee {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
+
 
   fn handle_output_vibrate_cmd(
     &self,
