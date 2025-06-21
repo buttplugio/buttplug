@@ -61,7 +61,7 @@ pub mod lioness;
 // pub mod longlosttouch;
 pub mod loob;
 pub mod lovedistance;
-// pub mod lovehoney_desire;
+pub mod lovehoney_desire;
 pub mod lovense;
 // pub mod lovense_connect_service;
 pub mod lovenuts;
@@ -360,15 +360,11 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     lioness::setup::LionessIdentifierFactory::default(),
   );
-  // add_to_protocol_map(
-  //   &mut map,
-  //   longlosttouch::setup::LongLostTouchIdentifierFactory::default(),
-  // );
   add_to_protocol_map(&mut map, loob::setup::LoobIdentifierFactory::default());
-  //  add_to_protocol_map(
-  //    &mut map,
-  //    lovehoney_desire::setup::LovehoneyDesireIdentifierFactory::default(),
-  //  );
+  add_to_protocol_map(
+    &mut map,
+    lovehoney_desire::setup::LovehoneyDesireIdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     lovedistance::setup::LoveDistanceIdentifierFactory::default(),

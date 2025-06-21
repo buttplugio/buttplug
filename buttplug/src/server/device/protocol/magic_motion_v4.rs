@@ -43,7 +43,6 @@ impl ProtocolInitializer for MagicMotionV4Initializer {
   }
 }
 
-#[derive(Default)]
 pub struct MagicMotionV4 {
   current_commands: Vec<AtomicU8>
 }
