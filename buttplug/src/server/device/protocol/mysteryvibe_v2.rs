@@ -8,25 +8,23 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    hardware::{Hardware, HardwareWriteCmd},
     protocol::{
-      generic_protocol_initializer_setup,
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
+      generic_protocol_initializer_setup, mysteryvibe::MysteryVibe, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer
     },
   },
-  util::{async_manager, sleep},
 };
 use async_trait::async_trait;
-use std::{sync::Arc, time::Duration};
-use tokio::sync::RwLock;
+use uuid::{uuid, Uuid};
+use std::sync::Arc;
 
 generic_protocol_initializer_setup!(MysteryVibeV2, "mysteryvibe-v2");
+
+const MYSTERYVIBE_V2_PROTOCOL_UUID: Uuid = uuid!("215a2c34-11fa-419a-84d2-60ac6acbc9f8");
 
 #[derive(Default)]
 pub struct MysteryVibeV2Initializer {}
@@ -36,80 +34,13 @@ impl ProtocolInitializer for MysteryVibeV2Initializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &UserDeviceDefinition,
+    def: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let msg = HardwareWriteCmd::new(Endpoint::TxMode, vec![0x03u8, 0x02u8, 0x40u8], true);
+    // The only thing that's different about MysteryVibeV2 from v1 is the initialization packet.
+    // Just send that then return the older protocol version.
+    let msg = HardwareWriteCmd::new(MYSTERYVIBE_V2_PROTOCOL_UUID, Endpoint::TxMode, vec![0x03u8, 0x02u8, 0x40u8], true);
     hardware.write_value(&msg).await?;
-    Ok(Arc::new(MysteryVibe::new(hardware)))
+    let vibrator_count = def.features().iter().filter(|x| x.output().is_some()).count();
+    Ok(Arc::new(MysteryVibe::new(vibrator_count as u8)))
   }
 }
-
-// Time between Mysteryvibe update commands, in milliseconds. This is basically
-// a best guess derived from watching packet timing a few years ago.
-//
-// Thelemic vibrator. Neat.
-//
-const MYSTERYVIBE_COMMAND_DELAY_MS: u64 = 93;
-
-async fn vibration_update_handler(device: Arc<Hardware>, command_holder: Arc<RwLock<Vec<u8>>>) {
-  info!("Entering Mysteryvibe Control Loop");
-  let mut current_command = command_holder.read().await.clone();
-  while device
-    .write_value(&HardwareWriteCmd::new(
-      Endpoint::TxVibrate,
-      current_command,
-      false,
-    ))
-    .await
-    .is_ok()
-  {
-    sleep(Duration::from_millis(MYSTERYVIBE_COMMAND_DELAY_MS)).await;
-    current_command = command_holder.read().await.clone();
-    info!("MV Command: {:?}", current_command);
-  }
-  info!("Mysteryvibe control loop exiting, most likely due to device disconnection.");
-}
-
-pub struct MysteryVibe {
-  current_command: Arc<RwLock<Vec<u8>>>,
-}
-
-impl MysteryVibe {
-  fn new(device: Arc<Hardware>) -> Self {
-    let current_command = Arc::new(RwLock::new(vec![0u8, 0, 0, 0, 0, 0]));
-    let current_command_clone = current_command.clone();
-    async_manager::spawn(
-      async move { vibration_update_handler(device, current_command_clone).await },
-    );
-    Self { current_command }
-  }
-}
-
-impl ProtocolHandler for MysteryVibe {
-  fn needs_full_command_set(&self) -> bool {
-    true
-  }
-
-  fn handle_value_cmd(
-    &self,
-    cmds: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let current_command = self.current_command.clone();
-    let cmds = cmds.to_vec();
-    async_manager::spawn(async move {
-      let write_mutex = current_command.clone();
-      let mut command_writer = write_mutex.write().await;
-      let command: Vec<u8> = cmds
-        .into_iter()
-        .map(|x| x.expect("Validity ensured via GCM match_all").1 as u8)
-        .collect();
-      *command_writer = command;
-    });
-    Ok(vec![])
-  }
-}
-
-// TODO Write some tests!
-//
-// At least, once I figure out how to do that with the weird timing on this
-// thing.

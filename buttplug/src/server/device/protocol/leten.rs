@@ -17,13 +17,9 @@ use crate::{
       ProtocolInitializer,
     },
   },
-  util::{async_manager, sleep},
 };
 use async_trait::async_trait;
-use std::sync::{
-  atomic::{AtomicU8, Ordering},
-  Arc,
-};
+use std::sync::Arc;
 use std::time::Duration;
 use uuid::{uuid, Uuid};
 
@@ -51,64 +47,29 @@ impl ProtocolInitializer for LetenInitializer {
       ))
       .await?;
     // Sometimes sending this causes Rx to receive [0x0a]
-    Ok(Arc::new(Leten::new(hardware)))
+    Ok(Arc::new(Leten::default()))
   }
 }
 
 const LETEN_COMMAND_DELAY_MS: u64 = 1000;
 
-async fn command_update_handler(device: Arc<Hardware>, command_holder: Arc<AtomicU8>) {
-  trace!("Entering Leten keep-alive loop");
-  let mut current_command = command_holder.load(Ordering::Relaxed);
-  while device
-    .write_value(&HardwareWriteCmd::new(
-      LETEN_PROTOCOL_UUID,
-      Endpoint::Tx,
-      vec![0x02, current_command],
-      true,
-    ))
-    .await
-    .is_ok()
-  {
-    sleep(Duration::from_millis(LETEN_COMMAND_DELAY_MS)).await;
-    current_command = command_holder.load(Ordering::Relaxed);
-    trace!("Leten Command: {:?}", current_command);
-  }
-  trace!("Leten keep-alive loop exiting, most likely due to device disconnection.");
-}
-
-pub struct Leten {
-  current_command: Arc<AtomicU8>,
-}
-
-impl Leten {
-  fn new(device: Arc<Hardware>) -> Self {
-    let current_command = Arc::new(AtomicU8::new(0));
-    let current_command_clone = current_command.clone();
-    async_manager::spawn(
-      async move { command_update_handler(device, current_command_clone).await },
-    );
-    Self { current_command }
-  }
-}
+#[derive(Default)]
+pub struct Leten {}
 
 impl ProtocolHandler for Leten {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     // Leten keepalive is shorter
-    super::ProtocolKeepaliveStrategy::NoStrategy
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_millis(LETEN_COMMAND_DELAY_MS))
   }
 
   fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,
-    _feature_id: Uuid,
+    feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let current_command = self.current_command.clone();
-    current_command.store(speed as u8, Ordering::Relaxed);
-
     Ok(vec![HardwareWriteCmd::new(
-      LETEN_PROTOCOL_UUID,
+      feature_id,
       Endpoint::Tx,
       vec![0x02, speed as u8],
       true,

@@ -8,38 +8,18 @@
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{
-      generic_protocol_initializer_setup,
+      generic_protocol_setup,
       ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
     },
   },
-  util::{async_manager, sleep},
 };
-use async_trait::async_trait;
-use std::sync::atomic::{AtomicU32, Ordering};
-use std::{sync::Arc, time::Duration};
+use std::time::Duration;
 use uuid::{uuid, Uuid};
 
 const MIZZZEE_V3_PROTOCOL_UUID: Uuid = uuid!("a4d62eee-0f9e-4e39-b488-9161b1b5e9f5");
-generic_protocol_initializer_setup!(MizzZeeV3, "mizzzee-v3");
-
-#[derive(Default)]
-pub struct MizzZeeV3Initializer {}
-
-#[async_trait]
-impl ProtocolInitializer for MizzZeeV3Initializer {
-  async fn initialize(
-    &mut self,
-    hardware: Arc<Hardware>,
-    _: &UserDeviceDefinition,
-  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    Ok(Arc::new(MizzZeeV3::new(hardware)))
-  }
-}
+generic_protocol_setup!(MizzZeeV3, "mizzzee-v3");
 
 // Time between MizzZee v3 update commands, in milliseconds.
 const MIZZZEE3_COMMAND_DELAY_MS: u64 = 200;
@@ -78,57 +58,22 @@ fn scalar_to_vector(scalar: u32) -> Vec<u8> {
   data
 }
 
-async fn vibration_update_handler(device: Arc<Hardware>, current_scalar_holder: Arc<AtomicU32>) {
-  info!("Entering Mizz Zee v3 Control Loop");
-  let mut current_scalar = current_scalar_holder.load(Ordering::Relaxed);
-  while device
-    .write_value(&HardwareWriteCmd::new(
-      MIZZZEE_V3_PROTOCOL_UUID,
-      Endpoint::Tx,
-      scalar_to_vector(current_scalar),
-      true,
-    ))
-    .await
-    .is_ok()
-  {
-    sleep(Duration::from_millis(MIZZZEE3_COMMAND_DELAY_MS)).await;
-    current_scalar = current_scalar_holder.load(Ordering::Relaxed);
-    trace!("Mizz Zee v3 scalar: {}", current_scalar);
-  }
-  info!("Mizz Zee v3 control loop exiting, most likely due to device disconnection.");
-}
-
 #[derive(Default)]
-pub struct MizzZeeV3 {
-  current_scalar: Arc<AtomicU32>,
-}
-
-impl MizzZeeV3 {
-  fn new(device: Arc<Hardware>) -> Self {
-    let current_scalar = Arc::new(AtomicU32::new(0));
-    let current_scalar_clone = current_scalar.clone();
-    async_manager::spawn(
-      async move { vibration_update_handler(device, current_scalar_clone).await },
-    );
-    Self { current_scalar }
-  }
-}
+pub struct MizzZeeV3 {}
 
 impl ProtocolHandler for MizzZeeV3 {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::NoStrategy
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_millis(MIZZZEE3_COMMAND_DELAY_MS))
   }
 
   fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,
-    _feature_id: Uuid,
+    feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let current_scalar = self.current_scalar.clone();
-    current_scalar.store(speed, Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
-      MIZZZEE_V3_PROTOCOL_UUID,
+      feature_id,
       Endpoint::Tx,
       scalar_to_vector(speed),
       true,
