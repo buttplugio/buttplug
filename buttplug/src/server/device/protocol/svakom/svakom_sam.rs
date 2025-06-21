@@ -6,10 +6,11 @@
 // for full license information.
 
 use crate::server::device::configuration::ProtocolCommunicationSpecifier;
+use crate::server::device::protocol::ProtocolKeepaliveStrategy;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
   server::device::{
     configuration::{UserDeviceDefinition, UserDeviceIdentifier},
@@ -23,9 +24,11 @@ use crate::{
   },
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::sync::Arc;
 
 generic_protocol_initializer_setup!(SvakomSam, "svakom-sam");
+const SVAKOM_SAM_PROTOCOL_UUID: Uuid = uuid!("e39a6b4a-230a-4669-be94-68135f97f166");
 
 #[derive(Default)]
 pub struct SvakomSamInitializer {}
@@ -38,7 +41,7 @@ impl ProtocolInitializer for SvakomSamInitializer {
     _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
-      .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
+      .subscribe(&HardwareSubscribeCmd::new(SVAKOM_SAM_PROTOCOL_UUID, Endpoint::Rx))
       .await?;
     let mut gen2 = hardware.endpoints().contains(&Endpoint::TxMode);
     if !gen2 && hardware.endpoints().contains(&Endpoint::Firmware) {
@@ -53,6 +56,7 @@ impl ProtocolInitializer for SvakomSamInitializer {
 pub struct SvakomSam {
   gen2: bool,
 }
+
 impl SvakomSam {
   pub fn new(gen2: bool) -> Self {
     Self { gen2 }
@@ -60,18 +64,19 @@ impl SvakomSam {
 }
 
 impl ProtocolHandler for SvakomSam {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
+    ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_cmd(
-    &self,
-    cmds: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let mut msg_vec = vec![];
-    if let Some((_, speed)) = cmds[0] {
-      msg_vec.push(
-        HardwareWriteCmd::new(
+  fn handle_output_vibrate_cmd(
+      &self,
+      feature_index: u32,
+      feature_id: Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    if feature_index == 0 {
+      Ok(vec![HardwareWriteCmd::new(
+        feature_id,
           Endpoint::Tx,
           if self.gen2 {
             [
@@ -88,16 +93,14 @@ impl ProtocolHandler for SvakomSam {
           },
           false,
         )
-        .into(),
-      );
+        .into()])
+    } else {
+      Ok(vec![HardwareWriteCmd::new(
+        feature_id,
+        Endpoint::Tx, 
+        [18, 6, 1, speed as u8].to_vec(),
+        false).into(),
+      ])
     }
-    if cmds.len() > 1 {
-      if let Some((_, speed)) = cmds[1] {
-        msg_vec.push(
-          HardwareWriteCmd::new(Endpoint::Tx, [18, 6, 1, speed as u8].to_vec(), false).into(),
-        );
-      }
-    }
-    Ok(msg_vec)
   }
 }
