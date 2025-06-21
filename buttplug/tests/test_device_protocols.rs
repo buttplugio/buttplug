@@ -98,7 +98,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 //#[test_case("test_sensee_capsule.yaml" ; "Sensee Capsule Protocol")]
 #[test_case("test_sensee_protocol.yaml" ; "Sensee Diandou Protocol - Rabbit")]
 #[test_case("test_serveu_protocol.yaml" ; "ServeU")]
-//#[test_case("test_sexverse_lg389_protocol.yaml" ; "Sexverse LG389 Protocol")]
+#[test_case("test_sexverse_lg389_protocol.yaml" ; "Sexverse LG389 Protocol")]
 #[test_case("test_svakom_alex_v2.yaml" ; "Svakom Alex Neo 2")]
 #[test_case("test_svakom_alex.yaml" ; "Svakom Alex Neo")]
 #[test_case("test_svakom_barnard.yaml" ; "Svakom (Fantasy Cup) Barnard")]
@@ -131,7 +131,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v4(test_file: &str) {
-  tracing_subscriber::fmt::init();
+  //tracing_subscriber::fmt::init();
   util::device_test::client::client_v4::run_embedded_test_case(&load_test_case(test_file).await)
     .await;
 }

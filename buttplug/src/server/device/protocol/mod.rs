@@ -102,7 +102,7 @@ pub mod sensee;
 pub mod sensee_capsule;
 // pub mod sensee_v2;
 pub mod serveu;
-// pub mod sexverse_lg389;
+pub mod sexverse_lg389;
 pub mod svakom;
 pub mod synchro;
 pub mod tcode_v03;
@@ -505,10 +505,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   //    &mut map,
   //    sensee_v2::setup::SenseeV2IdentifierFactory::default(),
   //  );
-  //  add_to_protocol_map(
-  //    &mut map,
-  //    sexverse_lg389::setup::SexverseLG389IdentifierFactory::default(),
-  //  );
+  add_to_protocol_map(
+    &mut map,
+    sexverse_lg389::setup::SexverseLG389IdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, serveu::setup::ServeUIdentifierFactory::default());
   //add_to_protocol_map(
   //  &mut map,
