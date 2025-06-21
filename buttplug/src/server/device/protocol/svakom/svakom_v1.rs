@@ -15,7 +15,7 @@ use crate::{
   },
 };
 
-generic_protocol_setup!(SvakomV1, "svakom_v1");
+generic_protocol_setup!(SvakomV1, "svakom-v1");
 
 #[derive(Default)]
 pub struct SvakomV1 {}

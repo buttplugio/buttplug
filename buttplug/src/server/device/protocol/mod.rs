@@ -510,7 +510,86 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   //    sexverse_lg389::setup::SexverseLG389IdentifierFactory::default(),
   //  );
   add_to_protocol_map(&mut map, serveu::setup::ServeUIdentifierFactory::default());
-  add_to_protocol_map(&mut map, svakom::setup::SvakomIdentifierFactory::default());
+  //add_to_protocol_map(
+  //  &mut map,
+  //  svakom::svakom_avaneo::setup::SvakomAvaNeoIdentifierFactory::default(),
+  //);
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_alex::setup::SvakomAlexIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_alex_v2::setup::SvakomAlexV2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_barnard::setup::SvakomBarnardIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_barney::setup::SvakomBarneyIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_dice::setup::SvakomDiceIdentifierFactory::default(),
+  );
+  //add_to_protocol_map(
+  //  &mut map,
+  //  svakom::svakom_dt250a::setup::SvakomDT250AIdentifierFactory::default(),
+  //);
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_iker::setup::SvakomIkerIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_jordan::setup::SvakomJordanIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_pulse::setup::SvakomPulseIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_sam::setup::SvakomSamIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_sam2::setup::SvakomSam2IdentifierFactory::default(),
+  );
+  //add_to_protocol_map(
+  //  &mut map,
+  //  svakom::svakom_suitcase::setup::SvakomSuitcaseIdentifierFactory::default(),
+  //);
+  //add_to_protocol_map(
+  //  &mut map,
+  //  svakom::svakom_tarax::setup::SvakomTaraXIdentifierFactory::default(),
+  //);
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_v1::setup::SvakomV1IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_v2::setup::SvakomV2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_v3::setup::SvakomV3IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_v4::setup::SvakomV4IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_v5::setup::SvakomV5IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_v6::setup::SvakomV6IdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     synchro::setup::SynchroIdentifierFactory::default(),
