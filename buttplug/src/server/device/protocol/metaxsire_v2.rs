@@ -47,10 +47,8 @@ impl ProtocolInitializer for MetaXSireV2Initializer {
 #[derive(Default)]
 pub struct MetaXSireV2 {}
 
-impl ProtocolHandler for MetaXSireV2 {
-
-
-  fn handle_output_vibrate_cmd(
+impl MetaXSireV2 {
+  fn form_command(
     &self,
     feature_index: u32,
     feature_id: Uuid,
@@ -70,5 +68,25 @@ impl ProtocolHandler for MetaXSireV2 {
       true,
     )
     .into()])
+  }
+}
+
+impl ProtocolHandler for MetaXSireV2 {
+  fn handle_output_vibrate_cmd(
+    &self,
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.form_command(feature_index, feature_id, speed)
+  }
+
+  fn handle_output_oscillate_cmd(
+    &self,
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.form_command(feature_index, feature_id, speed)
   }
 }
