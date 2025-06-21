@@ -8,6 +8,7 @@
 use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
 
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 
 use crate::{
   core::{
@@ -19,6 +20,8 @@ use crate::{
 };
 
 generic_protocol_initializer_setup!(WeVibeChorus, "wevibe-chorus");
+
+const WEVIBE_CHORUS_PROTOCOL_UUID: Uuid = uuid!("cdeadd1c-b913-4305-a255-bd8834c4e37f");
 
 #[derive(Default)]
 pub struct WeVibeChorusInitializer {}
@@ -79,6 +82,6 @@ impl ProtocolHandler for WeVibeChorus {
         0x00,
       ]
     };
-    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, true).into()])
+    Ok(vec![HardwareWriteCmd::new(WEVIBE_CHORUS_PROTOCOL_UUID, Endpoint::Tx, data, true).into()])
   }
 }

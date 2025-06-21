@@ -8,6 +8,7 @@
 use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
 
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 
 use crate::{
   core::{
@@ -19,6 +20,8 @@ use crate::{
 };
 
 generic_protocol_initializer_setup!(WeVibe8Bit, "wevibe-8bit");
+
+const WEVIBE8BIT_PROTOCOL_UUID: Uuid = uuid!("f5e48973-09e9-4063-8177-487f6292e2ed");
 
 #[derive(Default)]
 pub struct WeVibe8BitInitializer {}
@@ -50,8 +53,6 @@ impl WeVibe8Bit {
 }
 
 impl ProtocolHandler for WeVibe8Bit {
-
-
   fn handle_output_vibrate_cmd(
       &self,
       feature_index: u32,
@@ -78,6 +79,6 @@ impl ProtocolHandler for WeVibe8Bit {
         0x00,
       ]
     };
-    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, true).into()])
+    Ok(vec![HardwareWriteCmd::new(WEVIBE8BIT_PROTOCOL_UUID, Endpoint::Tx, data, true).into()])
   }
 }

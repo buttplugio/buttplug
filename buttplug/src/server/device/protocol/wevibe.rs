@@ -104,6 +104,6 @@ impl ProtocolHandler for WeVibe {
         0x00,
       ]
     };
-    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, true).into()])
+    Ok(vec![HardwareWriteCmd::new(WEVIBE_PROTOCOL_UUID, Endpoint::Tx, data, true).into()])
   }
 }
