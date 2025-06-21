@@ -5,37 +5,65 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
+
+use async_trait::async_trait;
+use uuid::{uuid, Uuid};
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
   server::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_initializer_setup, ProtocolHandler, ProtocolInitializer, UserDeviceDefinition, ProtocolIdentifier, ProtocolCommunicationSpecifier, UserDeviceIdentifier},
   },
 };
 
-generic_protocol_setup!(MagicMotionV4, "magic-motion-4");
+const MAGICMOTIONV4_PROTOCOL_UUID: Uuid = uuid!("d4d62d09-c3e1-44c9-8eba-caa15de5b2a7");
+
+generic_protocol_initializer_setup!(MagicMotionV4, "magic-motion-4");
 
 #[derive(Default)]
-pub struct MagicMotionV4 {}
+pub struct MagicMotionV4Initializer {}
+
+#[async_trait]
+impl ProtocolInitializer for MagicMotionV4Initializer {
+  async fn initialize(
+    &mut self,
+    _: Arc<Hardware>,
+    def: &UserDeviceDefinition,
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
+    Ok(Arc::new(MagicMotionV4::new(def
+    .features()
+    .iter()
+    .filter(|x| x.output().is_some())
+    .count() as u8)))
+  }
+}
+
+#[derive(Default)]
+pub struct MagicMotionV4 {
+  current_commands: Vec<AtomicU8>
+}
+
+impl MagicMotionV4 {
+  fn new(num_vibrators: u8) -> Self {
+    Self {
+      current_commands: std::iter::repeat_with(|| AtomicU8::default()).take(num_vibrators as usize).collect()
+    }
+  }
+}
 
 impl ProtocolHandler for MagicMotionV4 {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
-
-  fn outputs_full_command_set(&self) -> bool {
-    true
-  }
-
-  fn handle_value_vibrate_cmd(
-    &self,
-    cmds: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    // TODO We need to know the number of actuators the device has here.
-    let data = if cmds.len() == 1 {
+  fn handle_output_vibrate_cmd(
+      &self,
+      feature_index: u32,
+      _feature_id: Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let data = if self.current_commands.len() == 1 {
       vec![
         0x10,
         0xff,
@@ -46,16 +74,19 @@ impl ProtocolHandler for MagicMotionV4 {
         0x00,
         0x04,
         0x08,
-        cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8,
+        speed as u8,
         0x64,
         0x00,
         0x04,
         0x08,
-        cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8,
+        speed as u8,
         0x64,
         0x01,
       ]
     } else {
+      self.current_commands[feature_index as usize].store(speed as u8, Ordering::Relaxed);
+      let speed0 = self.current_commands[0].load(Ordering::Relaxed);
+      let speed1 = self.current_commands[1].load(Ordering::Relaxed);
       vec![
         0x10,
         0xff,
@@ -66,16 +97,16 @@ impl ProtocolHandler for MagicMotionV4 {
         0x00,
         0x04,
         0x08,
-        cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8,
+        speed0,
         0x64,
         0x00,
         0x04,
         0x08,
-        cmds[1].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8,
+        speed1,
         0x64,
         0x01,
       ]
     };
-    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, true).into()])
+    Ok(vec![HardwareWriteCmd::new(MAGICMOTIONV4_PROTOCOL_UUID, Endpoint::Tx, data, true).into()])
   }
 }
