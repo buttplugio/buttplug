@@ -125,12 +125,6 @@ impl Default for Galaku {
 }
 
 impl ProtocolHandler for Galaku {
-
-
-  fn outputs_full_command_set(&self) -> bool {
-    true
-  }
-
   fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,

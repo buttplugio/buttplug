@@ -52,12 +52,6 @@ impl Bananasome {
 }
 
 impl ProtocolHandler for Bananasome {
-
-
-  fn outputs_full_command_set(&self) -> bool {
-    true
-  }
-
   fn handle_output_oscillate_cmd(
     &self,
     feature_index: u32,

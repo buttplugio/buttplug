@@ -22,12 +22,6 @@ generic_protocol_setup!(JoyHubV3, "joyhub-v3");
 pub struct JoyHubV3 {}
 
 impl ProtocolHandler for JoyHubV3 {
-
-
-  fn outputs_full_command_set(&self) -> bool {
-    true
-  }
-
   fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,

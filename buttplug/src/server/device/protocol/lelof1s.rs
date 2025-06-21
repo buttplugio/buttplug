@@ -66,12 +66,6 @@ impl LeloF1s {
 }
 
 impl ProtocolHandler for LeloF1s {
-
-
-  fn outputs_full_command_set(&self) -> bool {
-    true
-  }
-
   fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,
@@ -85,7 +79,7 @@ impl ProtocolHandler for LeloF1s {
       .iter()
       .for_each(|v| cmd_vec.push(v.load(Ordering::Relaxed)));
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      LELO_F1S_PROTOCOL_UUID,
       Endpoint::Tx,
       cmd_vec,
       self.write_with_response,

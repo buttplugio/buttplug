@@ -55,12 +55,6 @@ impl FeelingSo {
 }
 
 impl ProtocolHandler for FeelingSo {
-
-
-  fn outputs_full_command_set(&self) -> bool {
-    true
-  }
-
   fn handle_output_oscillate_cmd(
     &self,
     _feature_index: u32,
