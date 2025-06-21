@@ -8,23 +8,24 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
-  util::{async_manager, sleep},
 };
 use async_trait::async_trait;
+use uuid::{uuid, Uuid};
 use std::{
   sync::{
     atomic::{AtomicU8, Ordering},
     Arc,
   },
-  time::Duration,
 };
+
+const SATISFYER_PROTOCOL_UUID: Uuid = uuid!("79a0ed0d-f392-4c48-967e-f4467438c344");
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -73,7 +74,7 @@ impl ProtocolIdentifier for SatisfyerIdentifier {
     }
 
     let result = hardware
-      .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
+      .read_value(&HardwareReadCmd::new(SATISFYER_PROTOCOL_UUID, Endpoint::RxBLEModel, 128, 500))
       .await?;
     let device_identifier = format!(
       "{}",
@@ -101,7 +102,7 @@ impl ProtocolInitializer for SatisfyerInitializer {
     hardware: Arc<Hardware>,
     device_definition: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let msg = HardwareWriteCmd::new(Endpoint::Command, vec![0x01], true);
+    let msg = HardwareWriteCmd::new(SATISFYER_PROTOCOL_UUID, Endpoint::Command, vec![0x01], true);
     let info_fut = hardware.write_value(&msg);
     info_fut.await?;
 
@@ -110,7 +111,8 @@ impl ProtocolInitializer for SatisfyerInitializer {
       .iter()
       .filter(|x| x.output().is_some())
       .count();
-    Ok(Arc::new(Satisfyer::new(hardware, feature_count)))
+
+    Ok(Arc::new(Satisfyer::new(feature_count)))
   }
 }
 
@@ -127,40 +129,13 @@ fn form_command(feature_count: usize, data: Arc<Vec<AtomicU8>>) -> Vec<u8> {
     .concat()
 }
 
-// Satisfyer toys will drop their connections if they don't get an update within ~10 seconds.
-// Therefore we try to send a command every ~1s unless something is sent/updated sooner.
-async fn send_satisfyer_updates(
-  device: Arc<Hardware>,
-  feature_count: usize,
-  data: Arc<Vec<AtomicU8>>,
-) {
-  loop {
-    let command = form_command(feature_count, data.clone());
-    if let Err(e) = device
-      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, command, false))
-      .await
-    {
-      error!(
-        "Got an error from a satisfyer device, exiting control loop: {:?}",
-        e
-      );
-      break;
-    }
-    sleep(Duration::from_secs(1)).await;
-  }
-}
-
 impl Satisfyer {
-  fn new(hardware: Arc<Hardware>, feature_count: usize) -> Self {
+  fn new(feature_count: usize) -> Self {
     let last_command = Arc::new(
       (0..feature_count)
         .map(|_| AtomicU8::new(0))
         .collect::<Vec<AtomicU8>>(),
     );
-    let last_command_clone = last_command.clone();
-    async_manager::spawn(async move {
-      send_satisfyer_updates(hardware, feature_count, last_command_clone).await;
-    });
 
     Self {
       feature_count,
@@ -170,26 +145,19 @@ impl Satisfyer {
 }
 
 impl ProtocolHandler for Satisfyer {
-  fn needs_full_command_set(&self) -> bool {
-    true
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::ForceRepeatLastPacketStrategy
   }
 
-  fn handle_value_cmd(
-    &self,
-    commands: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if self.feature_count != commands.len() {
-      return Err(ButtplugDeviceError::DeviceFeatureCountMismatch(
-        self.feature_count as u32,
-        commands.len() as u32,
-      ));
-    }
-    for (i, item) in commands.iter().enumerate() {
-      let command_val = item.as_ref().unwrap().1 as u8;
-      self.last_command[i].store(command_val, Ordering::Relaxed);
-    }
+  fn handle_output_vibrate_cmd(
+      &self,
+      feature_index: u32,
+      feature_id: Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.last_command[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     let data = form_command(self.feature_count, self.last_command.clone());
 
-    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(SATISFYER_PROTOCOL_UUID, Endpoint::Tx, data, false).into()])
   }
 }

@@ -97,7 +97,7 @@ pub mod prettylove;
 pub mod raw_protocol;
 pub mod realov;
 pub mod sakuraneko;
-// pub mod satisfyer;
+pub mod satisfyer;
 pub mod sensee;
 pub mod sensee_capsule;
 pub mod sensee_v2;
@@ -182,6 +182,10 @@ pub enum ProtocolKeepaliveStrategy {
   /// Repeat whatever the last packet sent was, and send Stop commands until first packet sent. This
   /// will be useful for most devices that purely use scalar commands.
   RepeatLastPacketStrategy,
+  /// Repeat whatever the last packet sent was, and send Stop commands until first packet sent.
+  /// Unlike RepeatLastPacketStrategy, which requires hardware need for repeats, this will always
+  /// repeat, which can be useful for holding connections live (looking at you, Satisfyer)
+  ForceRepeatLastPacketStrategy,
   /// Call a specific method on the protocol implementation to generate keepalive packets.
   CustomStrategy,
 }
@@ -492,10 +496,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     sakuraneko::setup::SakuranekoIdentifierFactory::default(),
   );
-  //  add_to_protocol_map(
-  //    &mut map,
-  //    satisfyer::setup::SatisfyerIdentifierFactory::default(),
-  //  );
+  add_to_protocol_map(
+    &mut map,
+    satisfyer::setup::SatisfyerIdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, sensee::setup::SenseeIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
