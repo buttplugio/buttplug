@@ -1,0 +1,18 @@
+defaults:
+  name: Xuanhuan Masturbator
+  features:
+    - feature-type: Vibrate
+      id: b52a4a37-3eae-40da-a4c2-abe546934900
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 10
+  id: 60b567f2-8b50-4673-a295-6dda343a7029
+communication:
+  - btle:
+      names:
+        - QUXIN
+      services:
+        0000fffe-0000-1000-8000-00805f9b34fb:
+          tx: 0000fe02-0000-1000-8000-00805f9b34fb

@@ -1,0 +1,18 @@
+defaults:
+  name: Fleshy Thrust Sync
+  features:
+    - feature-type: PositionWithDuration
+      id: a8185061-6d41-4eea-bc24-1ff1c5c405b9
+      output:
+        PositionWithDuration:
+          step-range:
+            - 0
+            - 180
+  id: f273ebd5-a698-4c35-9c46-0625fa442960
+communication:
+  - btle:
+      names:
+        - BT05
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb

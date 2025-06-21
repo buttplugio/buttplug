@@ -1,0 +1,20 @@
+defaults:
+  name: Pretty Love Device
+  features:
+    - feature-type: Vibrate
+      id: 349df5c5-1c5d-4de2-a3d9-c9159c640aba
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 3
+  id: abeb7195-dbc2-4bd1-a079-18ffbb04e521
+communication:
+  - btle:
+      names:
+        - Aogu BLE *
+        - AB Shutter3 [Aogu BLE Device]
+      services:
+        0000ffe5-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe9-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb

@@ -1,0 +1,28 @@
+defaults:
+  name: JoyHub Device
+  features:
+    - feature-type: Vibrate
+      id: 3adea9b9-8a81-4358-8774-17b621f33907
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+  id: acd3b85a-c842-458d-8ff8-eeaaf9be1562
+configurations:
+  - identifier:
+      - J-Ringstar
+    name: JoyHub Starfish
+    id: 40241a70-ecbd-4c08-8acf-8ee70e7b5d55
+  - identifier:
+      - J-RapidTwist2
+    name: JoyHub Resi Ring 2
+    id: 4611fa22-18b8-46fe-bece-070e24e1b9e8
+communication:
+  - btle:
+      names:
+        - J-Ringstar
+        - J-RapidTwist2
+      services:
+        0000ffa0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffa1-0000-1000-8000-00805f9b34fb

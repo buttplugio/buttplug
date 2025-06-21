@@ -1,0 +1,19 @@
+defaults:
+  name: IntoYou Remote Egg Vibrator
+  features:
+    - feature-type: Vibrate
+      id: 1fec4773-16a2-4bec-8910-1fcd9a85edaf
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+  id: 62e7b76d-ab99-42ca-89ea-865a6072451e
+communication:
+  - btle:
+      names:
+        - SS-TD-YDTD-001
+      services:
+        0000f0b0-0000-1000-8000-00805f9b34fb:
+          tx: 0000f0b1-0000-1000-8000-00805f9b34fb
+          rx: 0000f0b2-0000-1000-8000-00805f9b34fb

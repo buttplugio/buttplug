@@ -1,0 +1,16 @@
+defaults:
+  name: Rez TranceVibrator
+  features:
+    - feature-type: Vibrate
+      id: 01e369e0-541d-417a-9809-0600dab964c6
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+  id: 04923383-f64b-4b39-bed6-83862c5314d5
+communication:
+  - usb:
+      pairs:
+        - vendor-id: 2889
+          product-id: 1615

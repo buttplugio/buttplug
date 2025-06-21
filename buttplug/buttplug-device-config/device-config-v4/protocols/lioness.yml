@@ -1,0 +1,21 @@
+defaults:
+  name: Lioness
+  features:
+    - feature-type: Vibrate
+      id: 30051e05-190c-43e9-a35d-480a7615622d
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+  id: a35b0291-002b-4382-9eaf-6ebd9d04b668
+communication:
+  - btle:
+      names:
+        - Lioness
+        - Lioness2
+      services:
+        d973f2ed-b19e-11e2-9e96-0800200c9a66:
+          tx: d973f2f4-b19e-11e2-9e96-0800200c9a66
+        d973f2e5-b19e-11e2-9e96-0800200c9a66:
+          rx: d973f2e6-b19e-11e2-9e96-0800200c9a66

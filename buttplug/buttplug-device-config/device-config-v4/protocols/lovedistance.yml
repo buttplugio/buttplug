@@ -1,0 +1,69 @@
+defaults:
+  name: Love Distance Device
+  features:
+    - feature-type: Vibrate
+      id: 3eae1a60-e996-4726-858b-2128a1ae376a
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 121
+  id: 1cd71bad-3cfc-41ee-a6b8-8651bf658489
+configurations:
+  - identifier:
+      - REACH G
+    name: Love Distance Reach G
+    id: 7b190a71-6667-4b63-9929-42dc3a22d113
+  - identifier:
+      - REACH
+    name: Love Distance Reach
+    id: ad11cd1c-7450-4a0e-b7cf-4ff94e53b685
+  - identifier:
+      - MAG
+    name: Love Distance Mag
+    id: bae30100-1dfa-4bd9-a2b3-e9415bebd1cb
+  - identifier:
+      - SPAN
+    name: Love Distance Span
+    id: 84d00425-1a74-4fef-ad06-a5cdf22450d4
+  - identifier:
+      - RANGE
+    name: Love Distance Range
+    id: 9cd3854e-03d7-4a32-b189-a97990ef45be
+  - identifier:
+      - ORBIT
+    name: Love Distance Range
+    id: 04c77f83-87bc-4547-87cc-d2c45c203313
+  - identifier:
+      - JOIN G
+    name: Love Distance Join G
+    id: 21f4d6ea-9c83-4d3e-a095-f5761e6c63ed
+  - identifier:
+      - LINK
+    name: Love Distance Link
+    id: 7dfc44e0-0a77-4725-be94-55ae7fab2601
+  - identifier:
+      - GRASP
+    name: Love Distance Grasp
+    id: 57d24ed8-fc9d-4dad-87b0-d978d3ebe8cd
+  - identifier:
+      - RECEIVE
+    name: Love Distance Receive
+    id: d104ec28-cd82-4fdb-bb9b-96ffc3b639ed
+communication:
+  - btle:
+      names:
+        - REACH G
+        - REACH
+        - MAG
+        - SPAN
+        - RANGE
+        - ORBIT
+        - JOIN G
+        - LINK
+        - GRASP
+        - RECEIVE
+      services:
+        0000ff00-0000-1000-8000-00805f9b34fb:
+          tx: 0000ff01-0000-1000-8000-00805f9b34fb
+          rx: 0000ff02-0000-1000-8000-00805f9b34fb

@@ -1,0 +1,59 @@
+defaults:
+  name: Svakom Pulse Device
+  features:
+    - feature-type: Vibrate
+      id: 0ee3c15e-b05d-4c97-bb4a-523a5475c520
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 9
+  id: 91a8f7f5-d774-4beb-ad76-9864b3a46597
+configurations:
+  - identifier:
+      - SWK-SX013A
+    name: Svakom Pulse Lite Neo
+    id: 5b9918c8-af63-409f-9749-f5e6faf2dca0
+  - identifier:
+      - Pulse Union
+    name: Svakom Pulse Union
+    id: f40b1405-cf40-43c5-a568-24e3d2d70c65
+  - identifier:
+      - Pulse Galaxie
+    name: Svakom Pulse Galaxie
+    id: cd29302f-31f9-4c9f-aa12-ab381f941e82
+  - identifier:
+      - SX033APP
+    name: Svakom Mimiki
+    id: ccb6ce6f-5dc7-4ce4-bd31-3e8f3af14a4b
+  - identifier:
+      - BX288A
+    name: BeYourLover Kyukyu
+    id: ea05be83-2991-4cb5-8ad0-b108e0a52a5a
+  - identifier:
+      - QH-SX045A-B
+    name: Coleur Dor VX045A
+    id: 8abdd83e-af93-4f82-b240-d9eeed81e976
+  - identifier:
+      - SWK-SX067-B
+    name: Momonii Agatha
+    id: db486014-b4da-4cad-90f4-2ba53a36e335
+  - identifier:
+      - QH-HX029A-B
+    name: Coleur Dor HX029A
+    id: b9851f7f-ddc8-4df5-ad81-3071ec9daab1
+communication:
+  - btle:
+      names:
+        - SWK-SX013A
+        - Pulse Union
+        - Pulse Galaxie
+        - SX033APP
+        - BX288A
+        - QH-SX045A-B
+        - SWK-SX067-B
+        - QH-HX029A-B
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb

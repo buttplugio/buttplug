@@ -1,0 +1,205 @@
+defaults:
+  name: Foreo Device
+  features:
+    - feature-type: Vibrate
+      id: 0749f306-bd4c-48d7-9c2a-1309817a4dcc
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 10
+  id: 92d98050-7a3f-45b2-9df1-41e8cda28033
+configurations:
+  - identifier:
+      - FOFO
+      - LUNA fofo
+      - LUNA FOFO
+      - LUNA PLAY SMART
+    name: Foreo LUNA fofo
+    id: 98f14be3-8938-403a-8f90-d4bf5d15409f
+  - identifier:
+      - LUNA PLAYSMART2
+      - LUNA PLAY SMART2
+      - LUNA play smart2
+      - LUNA play smart 2
+    name: Foreo LUNA play smart 2
+    id: ee014806-a78a-4d83-9c22-25941f13c26e
+  - identifier:
+      - LUNA 3
+      - LUNA3
+    name: Foreo LUNA 3
+    id: c711b125-092c-4ece-bb98-83050b3fdf52
+  - identifier:
+      - LUNA3PLUS
+      - LUNA3 PLUS
+      - LUNA 3 PLUS
+      - LUNA 3 plus
+    name: Foreo LUNA 3 plus
+    id: da0802b8-f60c-4261-83f7-6c703e587fa2
+  - identifier:
+      - LUNA 3 MEN
+      - LUNA3MEN
+    name: Foreo LUNA 3 men
+    id: de02db79-eba2-48dc-b539-5364aaae4bd2
+  - identifier:
+      - LUNA MINI3
+      - LUNA MINI 3
+      - LUNA mini 3
+    name: Foreo LUNA 3 mini
+    id: 2ec4a921-d834-4da0-b710-a9d10fba4942
+  - identifier:
+      - LUNA4
+      - LUNA 4
+    name: Foreo LUNA 4
+    id: 695d3e66-e545-43ae-a8fa-8a8883e32439
+  - identifier:
+      - LUNA4PLUS
+      - LUNA4 PLUS
+      - LUNA 4 plus
+    name: Foreo LUNA 4 plus
+    id: 34503c35-05ef-44f4-875e-e46c9c81a71f
+  - identifier:
+      - LUNA4MEN
+      - LUNA 4 MEN
+      - LUNA 4 FOR MEN
+    name: Foreo LUNA 4 men
+    id: e519d03d-35e4-4e06-84da-a183a516d2bf
+  - identifier:
+      - LUNA MINI4
+      - LUNA MINI 4
+      - LUNA mini 4
+      - LUNA 4 mini
+    name: Foreo LUNA 4 mini
+    id: 52c53ab8-513a-4cb8-abb5-622086c7b6b0
+  - identifier:
+      - UFO
+    name: Foreo UFO
+    id: 67c567c0-1ea2-4093-80bf-a109f6831621
+  - identifier:
+      - UFO mini
+      - UFO MINI
+      - UFO MIN
+    name: Foreo UFO mini
+    id: 305f6099-c0a7-4eb0-bf0f-7499ef152d8c
+  - identifier:
+      - UFO2
+      - UFO 2
+    name: Foreo UFO 2
+    id: 5e5700df-c1b1-448a-822f-1808e453641f
+  - identifier:
+      - UFO3
+    name: Foreo UFO 3
+    id: 3256b258-13cd-4df9-abdb-d8e547c396d5
+  - identifier:
+      - UFO3go
+    name: Foreo UFO 3 go
+    id: 1ca37f05-520d-4696-86b1-d0edcf9fa803
+  - identifier:
+      - UFO3eyes
+    name: Foreo UFO 3 led
+    id: 77d89601-216c-42ee-9908-c0afd777c9a6
+  - identifier:
+      - UFO3mini
+    name: Foreo UFO 3 mini
+    id: 58f9677c-440f-43c9-9ab6-7f938edd3f4a
+  - identifier:
+      - UFOMINI2
+      - UFO mini 2
+    name: Foreo UFO mini 2
+    id: d555e823-52aa-4f02-8d8e-788c3dbe3a5e
+  - identifier:
+      - BEAR
+    name: Foreo BEAR
+    id: a050edb2-71b2-494a-b3db-4f0d9ac20310
+  - identifier:
+      - BEAR_MINI
+      - BEAR MINI
+      - BEAR mini
+    name: Foreo BEAR mini
+    id: 1231d10c-eee6-4061-8eb2-ffdec6f1523a
+  - identifier:
+      - BEAR2
+      - BEAR 2
+    name: Foreo BEAR 2
+    id: c57d9ca7-f3e6-4f48-b65c-fec9a648b699
+  - identifier:
+      - BEAR2go
+    name: Foreo BEAR 2 go
+    id: 35a0a090-3085-4f83-b9d2-eb26d0c21ea9
+  - identifier:
+      - BEAR2eyes
+    name: Foreo BEAR 2 eyes
+    id: c66dd16e-13e0-4446-809f-a1567fe746c7
+  - identifier:
+      - BEAR2body
+    name: Foreo BEAR 2 body
+    id: a837cdd0-6513-4962-85be-d4859e1a7c98
+  - identifier:
+      - KIWI
+    name: Foreo KIWI
+    id: d14e7fd0-1da8-44dc-8028-39a5655185fa
+  - identifier:
+      - KIWI derma
+    name: Foreo KIWI derma
+    id: ee07bc74-21af-455d-a26a-fab22f188f97
+communication:
+  - btle:
+      names:
+        - FOFO
+        - LUNA fofo
+        - LUNA FOFO
+        - LUNA PLAY SMART
+        - LUNA PLAYSMART2
+        - LUNA PLAY SMART2
+        - LUNA play smart2
+        - LUNA play smart 2
+        - LUNA 3
+        - LUNA3
+        - LUNA3PLUS
+        - LUNA3 PLUS
+        - LUNA 3 PLUS
+        - LUNA 3 plus
+        - LUNA 3 MEN
+        - LUNA3MEN
+        - LUNA MINI3
+        - LUNA MINI 3
+        - LUNA mini 3
+        - LUNA4PLUS
+        - LUNA4
+        - LUNA 4
+        - LUNA4PLUS
+        - LUNA4 PLUS
+        - LUNA 4 plus
+        - LUNA4MEN
+        - LUNA 4 MEN
+        - LUNA 4 FOR MEN
+        - LUNA MINI4
+        - LUNA MINI 4
+        - LUNA mini 4
+        - LUNA 4 mini
+        - UFO
+        - UFO mini
+        - UFO MINI
+        - UFO MIN
+        - UFO2
+        - UFO 2
+        - UFOMINI2
+        - UFO mini 2
+        - UFO3
+        - UFO3mini
+        - UFO3go
+        - UFO3led
+        - BEAR
+        - BEAR_MINI
+        - BEAR MINI
+        - BEAR mini
+        - BEAR2
+        - BEAR 2
+        - BEAR2go
+        - BEAR2body
+        - BEAR2eyes
+        - KIWI
+        - KIWI derma
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff1-0000-1000-8000-00805f9b34fb

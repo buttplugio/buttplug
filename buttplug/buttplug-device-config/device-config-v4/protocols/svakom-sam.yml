@@ -1,0 +1,29 @@
+defaults:
+  name: Svakom Sam Neo
+  features:
+    - feature-type: Vibrate
+      id: 260f221c-b861-4ee2-bd0f-17a0dd9a14ba
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 10
+    - feature-type: Vibrate
+      id: cfdf5760-bce0-465c-a2c6-60c86fdd3c95
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 1
+  id: d5fac59d-8e57-43a6-bcc9-61d06f6b8587
+communication:
+  - btle:
+      names:
+        - Sam Neo
+      services:
+        0000ae00-0000-1000-8000-00805f9b34fb:
+          tx: 0000ae01-0000-1000-8000-00805f9b34fb
+          rx: 0000ae02-0000-1000-8000-00805f9b34fb
+          txmode: 0000ae10-0000-1000-8000-00805f9b34fb
+        0000ffac-0000-1000-8000-00805f9b34fb:
+          firmware: 0000ffb4-0000-1000-8000-00805f9b34fb

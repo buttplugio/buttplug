@@ -1,0 +1,35 @@
+defaults:
+  name: The Cowgirl Device
+  features:
+    - feature-type: Vibrate
+      id: 11c01b64-e6cc-4b19-9a4d-eaf03a317b03
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+    - feature-type: Rotate
+      id: 9f3e0837-26e5-4ab1-bb2c-67be33ca920d
+      output:
+        Rotate:
+          step-range:
+            - 0
+            - 255
+  id: 5cdfacc3-7a69-415c-aefc-1d889fc5e824
+configurations:
+  - identifier:
+      - THE COWGIRL
+    name: The Cowgirl
+    id: 188130d5-6ea1-473f-a9f4-a176929221ff
+  - identifier:
+      - THE UNICORN
+    name: The Unicorn
+    id: 675d61d0-b30f-4f60-abf7-6d5f67a5b56c
+communication:
+  - btle:
+      names:
+        - THE COWGIRL
+        - THE UNICORN
+      services:
+        0000fe00-0000-1000-8000-00805f9b34fb:
+          tx: 0000fe01-0000-1000-8000-00805f9b34fb

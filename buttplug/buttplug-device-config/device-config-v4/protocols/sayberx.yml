@@ -1,0 +1,30 @@
+defaults:
+  name: SayberX Device
+  features: []
+  id: 9635a829-753b-4e5b-825c-24249526af09
+configurations:
+  - identifier:
+      - SayberX
+    name: SayberX
+    features:
+      - feature-type: Vibrate
+        id: a62d0356-a05f-475c-8a5f-fcfec1327b2a
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 4
+    id: 22716d89-5e28-462b-9723-60528fb7373e
+  - identifier:
+      - X-Ring
+    name: Sayber X-Ring
+    id: e77a2f7b-8556-48b8-8245-30c2c80681e7
+communication:
+  - btle:
+      names:
+        - SayberX
+        - X-Ring *
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff6-0000-1000-8000-00805f9b34fb
+          rx: 0000fff8-0000-1000-8000-00805f9b34fb

@@ -1,0 +1,1152 @@
+defaults:
+  name: Satisfyer Device
+  features:
+    - feature-type: Vibrate
+      id: 7153daef-c222-4841-9495-289798fff9ea
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+  id: 9a934b7a-b6aa-4ad6-8d5c-e00971d67159
+configurations:
+  - identifier:
+      - '10005'
+    name: Satisfyer Hot Spot
+    features:
+      - feature-type: Vibrate
+        id: b9bcbd6f-9f4a-4738-9a64-08e646fa2297
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: a8a7887f-c5dd-4e2c-ae88-d20e954bc65a
+  - identifier:
+      - '10006'
+    name: Satisfyer Heated Affair
+    features:
+      - feature-type: Vibrate
+        id: b03a8a9e-13ef-4ed6-820e-cb07d4e3aa30
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 624f9203-ca16-429c-b076-0725a5c04077
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 444d9fc4-23ed-4ea5-a1a5-923680d78af3
+  - identifier:
+      - '10007'
+    name: Satisfyer Big Heat
+    id: 67f6a3ba-d167-4d44-ac52-0991dbf1df16
+  - identifier:
+      - '10008'
+    name: Satisfyer Heated Thrill
+    features:
+      - feature-type: Vibrate
+        id: e5368b0e-00a7-4f20-b338-2a33d65db794
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 4bb68190-ea62-4277-b7f1-3d6f055a939a
+  - identifier:
+      - '10009'
+    name: Satisfyer Hot Bunny
+    features:
+      - feature-type: Vibrate
+        id: cd889856-c5a8-4d7b-9ff6-5f7e49c13b4a
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 5e8eba19-d6cf-4c85-9824-5afd6191c95a
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: b8219c94-f239-4f12-b3ab-ceeb816bdfb4
+  - identifier:
+      - '10010'
+    name: Satisfyer Heat Climax
+    features:
+      - feature-type: Vibrate
+        id: 7473ae23-1678-4d6c-bc45-311e126dce65
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 1340347e-7e6a-4c27-a593-7b7a41b09332
+  - identifier:
+      - '10011'
+    name: Satisfyer Heat Climax+
+    features:
+      - feature-type: Vibrate
+        id: 715282dc-6919-4a8f-a339-adeb0fa8b4b0
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 1eb40efb-6aa5-4154-a2f4-8cc962cd2682
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 4ffc5fb8-a619-4cbc-8cc9-23104a473ee4
+  - identifier:
+      - '10012'
+    name: Satisfyer Hot Passion
+    features:
+      - feature-type: Vibrate
+        id: 46c676b0-5dae-4376-b6b3-c3f0b9526260
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: a05e4d51-c296-4395-b5ba-1b8801079a15
+  - identifier:
+      - '10013'
+    name: Satisfyer Haute Couture+
+    features:
+      - feature-type: Vibrate
+        id: dd995a89-a889-40a8-9a88-aa05b8fe3e60
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: d39282bc-910b-40d2-a8f6-2c729ba5e2f2
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: defd08cf-76b3-4957-88ef-5c7fb2a89ff0
+  - identifier:
+      - '10014'
+    name: Satisfyer High Fashion+
+    features:
+      - feature-type: Vibrate
+        id: 9b18554d-8f0d-4941-8649-7e34375a0005
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 3fba6850-e170-4bbf-b61c-e105b3ea7762
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: d36dda3c-edf3-4ec2-be9a-393934157102
+  - identifier:
+      - '10015'
+    name: Satisfyer Prêt-à-porter+
+    features:
+      - feature-type: Vibrate
+        id: cee6ec1f-1f35-48ef-8864-fa76d2ebb8a5
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: c1a929c7-adf1-4cbe-907e-a24e6164e7af
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 3925e9e4-fc21-4bad-8ecd-4a8780a5ce83
+  - identifier:
+      - '10024'
+      - '10025'
+    name: Satisfyer Love Triangle
+    features:
+      - feature-type: Vibrate
+        id: 9dcbc0b0-b076-4b50-9104-c071d52e39ff
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 5ae0c642-bd10-4f21-8fef-60f94ca755c5
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: c771d860-0592-4962-8a05-dc2e7187bff6
+  - identifier:
+      - '10027'
+      - '10028'
+    name: Satisfyer Curvy 1+
+    features:
+      - feature-type: Vibrate
+        id: 95143c24-8928-405c-a6d0-1a64b3830498
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 78533341-96c5-4b21-aede-857ec827c1e6
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 4e47a95f-3a70-4bb4-829f-8b617afaaa1d
+  - identifier:
+      - '10030'
+      - '10031'
+    name: Satisfyer Curvy 2+
+    features:
+      - feature-type: Vibrate
+        id: f0bed160-760d-4d18-b462-247e124c537f
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 81b4e5d2-8fd7-4fed-a6cb-d3df12366040
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 7fa5b1e2-c30f-411f-a9b5-9eeee3d95170
+  - identifier:
+      - '10032'
+    name: Satisfyer Double Wand-er
+    id: 942818a5-f94f-4efb-b775-693f8b27ab9b
+  - identifier:
+      - '10046'
+      - '10047'
+      - '10048'
+    name: Satisfyer Double Joy
+    features:
+      - feature-type: Vibrate
+        id: 0b359281-588c-4aad-bfe1-54d605377120
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 9b9f616a-3219-4424-9ecf-c52520dec964
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 8b5e975e-4215-4b0c-a169-7d6209746d88
+  - identifier:
+      - '10049'
+      - '10050'
+      - '10051'
+    name: Satisfyer Double Fun
+    features:
+      - feature-type: Vibrate
+        id: d6f94a0f-11cd-4242-b05e-e7f237e6b7c0
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 2fe89205-fb8d-4fb7-93d3-d4169f92875d
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 05f9af5c-d7b9-43f0-8cf5-41f0c09def28
+  - identifier:
+      - '10052'
+      - '10053'
+      - '10054'
+    name: Satisfyer Double Love
+    features:
+      - feature-type: Vibrate
+        id: eb62f1da-11a0-48b1-8c8e-2c8ea6e24e61
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 16f5a83d-f0fc-41c1-a4d3-43ce13dd3529
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 82270653-6408-43ef-a148-cdfca58a5d2d
+  - identifier:
+      - '10055'
+    name: Satisfyer Curvy 3+
+    features:
+      - feature-type: Vibrate
+        id: 5d900545-d8cc-4c32-9ff5-e1d8e0c30b90
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 823f51aa-1766-41f4-b48f-f8b2de4c588e
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: e7c09700-6df1-40c5-b5bb-0203c782dc01
+  - identifier:
+      - '10059'
+      - '10060'
+      - '10061'
+    name: Satisfyer Hot Lover
+    features:
+      - feature-type: Vibrate
+        id: 406de8d0-b6d9-4f5d-b9cd-479092898aac
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 19f2225e-4bc8-4f70-9fb2-734abc8dd5be
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 5c90d251-a2fe-461a-a4ae-0e5172a9739d
+  - identifier:
+      - '10062'
+      - '10063'
+      - '10064'
+    name: Satisfyer Mono Flex
+    features:
+      - feature-type: Vibrate
+        id: d1bf52af-d49d-42bb-a277-73cc394dce90
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: d1d6a777-21e2-4e6c-9f2e-679d1e75c932
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 44dae430-c6b4-4688-8ab6-9696d82a4b00
+  - identifier:
+      - '10065'
+      - '10066'
+      - '10067'
+      - '10068'
+    name: Satisfyer Double Flex
+    features:
+      - feature-type: Vibrate
+        id: a824a4f4-11c4-4a84-81d6-424a622d1b06
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 7aa798ab-9bc5-47b4-a318-5349c68ebf93
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 467802b9-6e3b-4810-b659-da69885b7366
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 1715eee4-4aa5-4696-9f41-6e6c299061ec
+  - identifier:
+      - '10069'
+      - '10070'
+      - '10071'
+    name: Satisfyer Heat Wave
+    features:
+      - feature-type: Vibrate
+        id: 704fd1ec-a242-4e02-80ab-9db6f2377a7c
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: c6971493-fa87-45d6-b131-67af138f7b13
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: ce5ebe09-6d9d-44a1-93e9-f5247c03d3f1
+  - identifier:
+      - '10072'
+    name: Satisfyer Little Secret
+    id: b9a13914-c02c-44ac-b9a8-9e95776e3ceb
+  - identifier:
+      - '10073'
+    name: Satisfyer Sexy Secret
+    id: c62c869a-8d62-4386-a7f9-ec68ccc99513
+  - identifier:
+      - '10074'
+    name: Satisfyer Strong One
+    id: 03082593-a2ea-455b-9b94-66c3b1953144
+  - identifier:
+      - '10075'
+    name: Satisfyer Mighty One
+    id: e8b06812-88be-4a7d-9581-8ea7210f809a
+  - identifier:
+      - '10076'
+    name: Satisfyer Powerful One
+    id: d0832c21-c990-4bd8-b06f-32e5768af9d2
+  - identifier:
+      - '10077'
+    name: Satisfyer Royal One
+    id: 1f6254b1-301c-4455-9a5e-84886d5e3fce
+  - identifier:
+      - '10078'
+    name: Satisfyer Signet Ring
+    id: 571d6d2c-351a-4870-9a2a-af16bdc97731
+  - identifier:
+      - '10079'
+      - '10080'
+    name: Satisfyer Dual Love
+    features:
+      - feature-type: Vibrate
+        id: 39ca4a7a-c9f3-430a-8248-6001719c6a40
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 07ff65a4-ae65-4054-bd70-419ddac6d241
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 8d5afdb3-47d1-4841-92d6-d3c7b1b2238e
+  - identifier:
+      - '10081'
+      - '10082'
+    name: Satisfyer Dual Pleasure
+    features:
+      - feature-type: Vibrate
+        id: 18661df2-7eb2-452a-b611-85433bd99ea0
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: c6b1acf6-511e-44bd-ab1c-b2d944a35cf0
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: d609d09e-86e5-4544-bda3-16b15b532f2d
+  - identifier:
+      - '10090'
+    name: Satisfyer Hero+
+    features:
+      - feature-type: Vibrate
+        id: ec61550d-e557-4c57-b6a3-02b28bd5e0d6
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: cfcd017c-d3fb-46ab-82d9-55438e96a3d7
+  - identifier:
+      - '10091'
+    name: Satisfyer Knight+
+    features:
+      - feature-type: Vibrate
+        id: 5a8dba5a-ca48-4340-8140-fa1fc4d86b73
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 7fb611fe-6af4-4d0e-a6b8-0d4ee72e34af
+  - identifier:
+      - '10092'
+      - '10093'
+    name: Satisfyer Newcomer+
+    features:
+      - feature-type: Vibrate
+        id: 31fb6881-d23e-4f07-b233-c6531ccc79b3
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 98dcb92c-84a1-4a1f-88b9-7c61098020de
+  - identifier:
+      - '10100'
+      - '10101'
+    name: Satisfyer Plug-ilicious 1
+    features:
+      - feature-type: Vibrate
+        id: fec3511d-2fcd-4463-9ef0-b139c8aa8b0a
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 49020dca-5124-4965-9add-4230dfd0fe28
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: c7d1d682-b311-4ce8-b552-d68b8fcde1bc
+  - identifier:
+      - '10102'
+      - '10103'
+      - '10104'
+    name: Satisfyer Plug-ilicious 2
+    features:
+      - feature-type: Vibrate
+        id: 28f3bea8-f927-46a9-ab45-55daf1f76c87
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 540b8330-f039-4870-a6d2-d536f2415cf2
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 22513021-0cb9-4f30-ada7-f7ca6a86e085
+  - identifier:
+      - '10105'
+    name: Satisfyer E-Love Foreplay
+    features:
+      - feature-type: Vibrate
+        id: 0a939b92-0209-4d2f-b658-0db0ac9a2e6e
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 6c07e79d-8842-4e27-88a9-9a471928da5e
+  - identifier:
+      - '10108'
+    name: Satisfyer E-Love G-Hunter
+    features:
+      - feature-type: Vibrate
+        id: e46297ee-6037-44a8-ac06-5f8328d41b19
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 39bfa539-7c58-49a4-87ca-a691a11c16f1
+  - identifier:
+      - '10109'
+    name: Satisfyer E-Love G-Hunter+
+    features:
+      - feature-type: Vibrate
+        id: 9248bdf7-d918-4682-b197-59707ac5ea95
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 8d541f70-6595-49b1-b75d-77187f9b75dc
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 0b5bcc9b-b5d7-49d3-9c0a-c8dc82214306
+  - identifier:
+      - '10110'
+    name: Satisfyer E-Love G-Spotter
+    features:
+      - feature-type: Vibrate
+        id: 8f8b7024-005e-4fda-9c65-adf55dc3c470
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 40653fca-c115-4bd4-b3fa-c3875c41a562
+  - identifier:
+      - '10111'
+    name: Satisfyer E-Love G-Spotter+
+    features:
+      - feature-type: Vibrate
+        id: 397a61df-a515-49e1-a14d-af2de7855a3f
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 27720871-f08b-4151-96f1-006a5cc137fc
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 5a5afa20-0518-420e-a5ab-e5b09c5c9842
+  - identifier:
+      - '10112'
+    name: Satisfyer E-Love Story
+    features:
+      - feature-type: Vibrate
+        id: 56f7a9fe-d8ef-4a21-b15f-77307a6417ea
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 0bfe78b6-a128-4c68-b874-e85ee18273f0
+  - identifier:
+      - '10119'
+      - '10120'
+      - '10182'
+    name: Satisfyer Love Birds 1
+    id: c62ea9ae-dc65-429e-90e4-473fa8c5ffaa
+  - identifier:
+      - '10121'
+      - '10122'
+      - '10123'
+    name: Satisfyer Love Birds 2
+    id: 17b98fe5-4aeb-4c75-b554-701daf147dff
+  - identifier:
+      - '10124'
+      - '10125'
+      - '10126'
+    name: Satisfyer Love Birds Vary
+    id: fde0831c-e1da-46f0-b6fe-8bccfbe9fdae
+  - identifier:
+      - '10127'
+      - '10128'
+      - '10129'
+      - '10201'
+    name: Satisfyer Ribbed Petal
+    id: 30fb0255-b2e5-424b-bca5-8abdbe864ebf
+  - identifier:
+      - '10130'
+      - '10131'
+      - '10132'
+      - '10133'
+    name: Satisfyer Shiny Petal
+    id: b10e2742-01b9-4bc8-8caf-b18f0dc51baa
+  - identifier:
+      - '10134'
+      - '10135'
+      - '10136'
+      - '10202'
+    name: Satisfyer Smooth Petal
+    id: 37096541-c085-4b30-a978-cf1ab8c79198
+  - identifier:
+      - '10140'
+    name: Satisfyer Men Vibration+
+    features:
+      - feature-type: Vibrate
+        id: 54c660d2-c326-4272-a1a8-a6ab0a3f5620
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 992e2870-64ed-4704-a74b-2faf3baa0e4b
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 518071d2-a6b5-4ee9-9d10-9248fcc72d76
+  - identifier:
+      - '10141'
+    name: Satisfyer Power Plug
+    id: fb04247f-1ade-4c3e-816f-1a4c81ae0db4
+  - identifier:
+      - '10142'
+      - '10143'
+    name: Satisfyer Rotator Plug 1+
+    features:
+      - feature-type: Vibrate
+        id: 55ed967f-f37b-47e9-acbd-e091ece4a25a
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 4deb6ffc-7ffb-4892-adb9-ff3829cbf7bb
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 16d47710-4849-42b0-aa9b-e7375a533dc5
+  - identifier:
+      - '10144'
+      - '10145'
+    name: Satisfyer Rotator Plug 2+
+    features:
+      - feature-type: Vibrate
+        id: 08a92451-b728-4bf8-bde0-b2af748fc0bd
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: f9b0e791-a348-4485-b1a5-cd90e3503e13
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 7ef01670-5fa3-4bb2-b8b5-3c952f4cf263
+  - identifier:
+      - '10146'
+      - '10147'
+    name: Satisfyer Deep Diver
+    id: 3e04ed12-9d6e-4f7a-9cc8-09e58a9f760e
+  - identifier:
+      - '10148'
+      - '10149'
+    name: Satisfyer Sweet Seal
+    id: 99f4d915-7fea-4be1-893e-3ab74488a383
+  - identifier:
+      - '10150'
+      - '10151'
+    name: Satisfyer Trendsetter
+    id: e26a9471-44ab-438a-8290-4793ac6d5ddd
+  - identifier:
+      - '10154'
+      - '10155'
+      - '10156'
+    name: Satisfyer Twirling Joy
+    id: 682c5153-d84c-4a30-b172-42732eaa7081
+  - identifier:
+      - '10157'
+      - '10158'
+    name: Satisfyer Ultra Power Bullet 8
+    id: b7ed864e-a11d-40de-b3bc-2a28d6ebc2f2
+  - identifier:
+      - '10160'
+      - '10161'
+      - '10162'
+    name: Satisfyer Double Desire
+    features:
+      - feature-type: Vibrate
+        id: c1c09c65-a2d4-4caa-9f56-cec54897758b
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: bc03728b-573a-40d6-ae99-1aa1f508a804
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 17d338a2-dcb1-4170-9a01-ab2250f73b8f
+  - identifier:
+      - '10163'
+      - '10164'
+      - '10165'
+      - '10166'
+    name: Satisfyer Double Lust
+    features:
+      - feature-type: Vibrate
+        id: 9564b21d-c2ba-444e-85c4-dd9dcd80e3b5
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: c70c801e-980a-4052-a275-f8109058a1ad
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 4729ddda-fb21-4c3a-9868-b0fcbca18480
+  - identifier:
+      - '10167'
+    name: Satisfyer Epic Duo
+    id: b3879662-a471-4bea-ad9a-5d8b59a476a5
+  - identifier:
+      - '10168'
+    name: Satisfyer Pleasure Wand+
+    id: 9404874e-3de2-4696-a620-943f5affb910
+  - identifier:
+      - '10169'
+      - '10170'
+      - '10171'
+    name: Satisfyer Top Secret
+    features:
+      - feature-type: Vibrate
+        id: 9ccf5505-2b55-4386-aa8c-80cb7117f6c2
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 33b12687-c341-47da-81c2-2e2cf9862712
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 98f72ae0-a840-4805-918d-3427541325ca
+  - identifier:
+      - '10172'
+      - '10173'
+      - '10174'
+    name: Satisfyer Top Secret+
+    features:
+      - feature-type: Vibrate
+        id: be9d24ff-8470-481d-aee0-0ea30f0877de
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: ed63da4f-ee14-469c-a47c-12003141716a
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 99cfefd9-fd09-40c6-9a2f-3d68385a04bc
+  - identifier:
+      - '10175'
+      - '10176'
+    name: Satisfyer Bullseye
+    id: 48bb511e-1cc2-4b1d-9497-022b015287bc
+  - identifier:
+      - '10177'
+      - '10178'
+      - '10179'
+    name: Satisfyer Sunray
+    features:
+      - feature-type: Vibrate
+        id: d2786210-46f4-47ce-9f5b-80fa691e0ad2
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: e0dbd014-7415-4d0f-946e-188e239a8154
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: f624b4d4-5fe4-4390-9fbb-8ef170b5846c
+  - identifier:
+      - '10180'
+      - '10181'
+    name: Satisfyer Curvy Trinity 5+
+    features:
+      - feature-type: Vibrate
+        id: ff20f721-e6fe-4787-964d-327d29b0c391
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: e8322905-46aa-45f8-b7f7-25a88507a55d
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 69243058-fb93-4791-b78e-f32f50f902b3
+  - identifier:
+      - '10183'
+      - '10184'
+    name: Satisfyer Intensity Plug
+    id: 20c58cef-83e0-48f2-a352-a3663453403f
+  - identifier:
+      - '10185'
+    name: Satisfyer Power Masturbator
+    id: baa0ad15-08cc-426c-b1f2-02d9768f6e2c
+  - identifier:
+      - '10186'
+      - '10187'
+    name: Satisfyer Hug me
+    features:
+      - feature-type: Vibrate
+        id: 4019145b-56cf-473e-a286-4a8d040e80cc
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 7dc4760f-3a7c-4c2e-a7da-e7d8d52b196b
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 7d92f936-f672-478a-a26f-616758ff621d
+  - identifier:
+      - '10188'
+    name: Satisfyer Air Pump Bunny 5+
+    features:
+      - feature-type: Vibrate
+        id: 7abb00ea-bb62-4bef-a26f-a7f7135dec2c
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: c77d5b49-6257-4381-900a-9225caea7124
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: d112fbc4-9a5e-4518-b40c-f1200be124cd
+  - identifier:
+      - '10189'
+    name: Satisfyer Air Pump Vibrator 5+
+    features:
+      - feature-type: Vibrate
+        id: 1acf7f71-e57a-4a1a-81d3-d8bb977d6b72
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 2278b99f-cee5-48fa-9326-8add9730e1e2
+  - identifier:
+      - '10190'
+      - '10191'
+    name: Satisfyer Threesome 4
+    features:
+      - feature-type: Vibrate
+        id: 467accb0-f1f6-4175-afe5-08f48d069fe3
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 4b1b417b-ce44-45fd-be3f-77d939162e18
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 537ce4cb-f8e2-423b-80a5-5bcbb07e6e15
+  - identifier:
+      - '10192'
+    name: Satisfyer G-Spot Flex 4+
+    id: 8ba85779-5b40-48ae-88d5-7744bf852d22
+  - identifier:
+      - '10193'
+      - '10194'
+    name: Satisfyer G-Spot Flex 5+
+    id: 3844ee0f-94ed-49bf-9a9e-795f407c0ade
+  - identifier:
+      - '10195'
+    name: Satisfyer Air Pump Booty 5+
+    features:
+      - feature-type: Vibrate
+        id: 12990ee9-76cc-4b48-b711-f70587f14fd7
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 0687264e-3150-4d0a-818b-be6ad231d54c
+  - identifier:
+      - '10196'
+    name: Satisfyer Pro+ Wave 4
+    features:
+      - feature-type: Vibrate
+        id: c8d73535-d37b-4baa-81c6-c301f32390e0
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 304c7318-bd1b-40ba-a475-90b4d7127c46
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 7c33ff57-e4c7-4110-9814-451062806981
+  - identifier:
+      - '10197'
+      - '10198'
+    name: Satisfyer Mini Wand-er+
+    features:
+      - feature-type: Vibrate
+        id: 3a37453d-605c-4dd4-a83a-28be69ac55b8
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 42dafbc1-0aac-4348-898a-8d467d903191
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: a1cb3608-d17c-4c5f-b3d5-4c7ee87d5467
+  - identifier:
+      - '10199'
+      - '10200'
+    name: Satisfyer Tropical Tip
+    id: 7790e568-454e-45f8-85bb-5f8fd855c554
+  - identifier:
+      - '10203'
+      - '10204'
+    name: Satisfyer Twirling Pro+
+    features:
+      - feature-type: Vibrate
+        id: 866a3152-759b-4777-8578-8abaff6aea9a
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 5a7b0180-16b1-41e7-a016-af4a761564de
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 1bc5cd0a-feb7-4cfc-9155-09c7565d85e0
+  - identifier:
+      - '10205'
+    name: Satisfyer Perfect Pair 4
+    id: 7c2560dc-06d4-4da6-874a-5f6c2c05810d
+  - identifier:
+      - '10206'
+      - '10207'
+      - '10208'
+    name: Satisfyer Booty Absolute Beginners 5
+    id: 0a682803-b5ad-457a-bbf0-40e48b71cbcf
+  - identifier:
+      - '10241'
+      - '10242'
+    name: Satisfyer Rrrolling Sensation
+    features:
+      - feature-type: Vibrate
+        id: fdb9014d-b7b9-4b28-8804-cdf26b432df1
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 6665fc3b-a8e6-4a36-ad11-46f449abfc90
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 2a429cdd-20f9-4a22-82a9-dd79234e23de
+  - identifier:
+      - '10307'
+      - '10308'
+      - '10309'
+    name: Satisfyer Pro 2 Gen 3
+    features:
+      - feature-type: Vibrate
+        id: f14fc3ea-05f0-426a-ac01-70cdbadb43ec
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 1a3c8f91-c172-4378-9fe2-64891a06e8d1
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: b0578f68-2b0b-497a-b49a-2e897d3a040a
+communication:
+  - btle:
+      names:
+        - SF *
+      manufacturer-data:
+        - company: 93
+          data:
+            - 0
+            - 0
+            - 39
+        - company: 93
+          data:
+            - 0
+            - 0
+            - 40
+      services:
+        0000180a-0000-1000-8000-00805f9b34fb:
+          rxblemodel: 00002a24-0000-1000-8000-00805f9b34fb
+        51361500-c5e7-47c7-8a6e-47ebc99d80e8:
+          command: 51361501-c5e7-47c7-8a6e-47ebc99d80e8
+          tx: 51361502-c5e7-47c7-8a6e-47ebc99d80e8

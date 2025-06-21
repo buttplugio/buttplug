@@ -1,0 +1,28 @@
+defaults:
+  name: Muse Device
+  features:
+    - feature-type: Vibrate
+      id: 6dcc57e0-8a30-4e90-ba9e-4b8dd488d166
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 9
+  id: 94e9d8e0-94cc-42f5-b14d-c55cc91e2e68
+configurations:
+  - identifier:
+      - WB-ZDB-WST
+    name: Dream Lover Archer 2
+    id: 48b17c67-fb1f-40c7-8dcb-b67dfb041afc
+  - identifier:
+      - WB-TDD
+    name: Galaku Panty Vib
+    id: dd40210e-1523-4d61-bdaf-3827635fb181
+communication:
+  - btle:
+      names:
+        - WB-ZDB-WST
+        - WB-TDD
+      services:
+        0000aaa0-0000-1000-8000-00805f9b34fb:
+          tx: 0000aaa1-0000-1000-8000-00805f9b34fb

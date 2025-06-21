@@ -1,0 +1,50 @@
+defaults:
+  name: Picobong Device
+  features:
+    - feature-type: Vibrate
+      id: 6acffe62-d4ae-4a9e-8610-123d46d26dcc
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 10
+  id: e820a3cc-70e2-4766-98d4-934a00a667db
+configurations:
+  - identifier:
+      - Blow hole
+      - Picobong Male Toy
+    name: Picobong Blow hole
+    id: 1f59dbcf-b84d-4cf8-ac68-87bacb143b34
+  - identifier:
+      - Diver
+      - Picobong Egg
+    name: Picobong Diver
+    id: b3396470-af6e-45df-ad4f-944539d71600
+  - identifier:
+      - Life guard
+      - Picobong Ring
+    name: Picobong Life guard
+    id: 88684b6f-6fde-488e-86a5-5c1f50893345
+  - identifier:
+      - Surfer
+      - Picobong Butt Plug
+      - Egg driver
+      - Surfer_plug
+    name: Picobong Surfer
+    id: f7c40c1b-0d86-4d39-9163-34a9a243d614
+communication:
+  - btle:
+      names:
+        - Blow hole
+        - Picobong Male Toy
+        - Diver
+        - Picobong Egg
+        - Life guard
+        - Picobong Ring
+        - Surfer
+        - Picobong Butt Plug
+        - Egg driver
+        - Surfer_plug
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff1-0000-1000-8000-00805f9b34fb

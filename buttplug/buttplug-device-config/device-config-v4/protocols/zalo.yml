@@ -1,0 +1,63 @@
+defaults:
+  name: Zalo Device
+  features:
+    - feature-type: Vibrate
+      id: e6f5930a-98ee-4ced-9a51-b3938b7b6a0c
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 8
+  id: 45648a20-cb18-43a0-9d6c-8bc4ed63ef63
+configurations:
+  - identifier:
+      - ZALO-Queen
+    name: Zalo Queen
+    features:
+      - feature-type: Vibrate
+        id: 94357c17-fb2d-4579-a4fa-68d597315887
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 8
+      - feature-type: Vibrate
+        id: 43f2e203-f920-4c59-b7a8-d8902d7efa2f
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 8
+    id: 2aaeca64-1ce5-4333-a0ab-609546112d37
+  - identifier:
+      - ZALO-King
+    name: Zalo King
+    features:
+      - feature-type: Vibrate
+        id: 3e1cb89e-43bd-4b57-9f49-79dbb297ce14
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 8
+      - feature-type: Vibrate
+        id: ba694b89-b88e-4029-934f-95d23df42053
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 8
+    id: 94254e7a-2666-4e93-8f6d-101fad4a3807
+  - identifier:
+      - ZALO-Jeanne
+    name: Zalo Jeanne
+    id: 743b389e-1eb6-401a-80bc-116b6136c449
+communication:
+  - btle:
+      names:
+        - ZALO-Queen
+        - ZALO-King
+        - ZALO-Jeanne
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff1-0000-1000-8000-00805f9b34fb

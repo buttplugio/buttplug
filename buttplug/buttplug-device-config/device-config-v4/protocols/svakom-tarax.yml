@@ -1,0 +1,28 @@
+defaults:
+  name: ToyCod Tara X
+  features:
+    - feature-type: Vibrate
+      description: Internal vibrator
+      id: 8638eed8-37ec-4c54-aa06-a8dd3a832057
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 3
+    - feature-type: Vibrate
+      description: External pulsator
+      id: a2ad09c0-0042-4f29-875f-464fb83ca916
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 3
+  id: 870f69ff-45db-4a13-96e7-1915eef6ac59
+communication:
+  - btle:
+      names:
+        - SX218A
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb

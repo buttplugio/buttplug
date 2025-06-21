@@ -1,0 +1,140 @@
+defaults:
+  name: Magic Motion V2 Device
+  features:
+    - feature-type: Vibrate
+      id: 4fe8ab2c-2811-416c-967c-fce58cb8a2f3
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+    - feature-type: Battery
+      description: Battery Level
+      id: 014cdffe-d3d5-4bba-acf4-f26e809b45ec
+      input:
+        Battery:
+          value-range:
+            - - 0
+              - 100
+          input-commands:
+            - Read
+  id: 33902551-eb44-406b-bc9a-7f9f981a972a
+configurations:
+  - identifier:
+      - Lipstick
+    name: MagicMotion Awaken
+    id: 9ed09e5a-945d-4bb0-9813-3e07a8fd7baf
+  - identifier:
+      - Sword
+    name: MagicMotion Equinox
+    id: 5274feff-b0fa-4c37-9990-8861864fec59
+  - identifier:
+      - Curve
+    name: MagicMotion Solstice
+    id: b639a627-60fc-4eff-afeb-91ccdf2e616b
+  - identifier:
+      - Eidolon
+    name: MagicMotion Eidolon
+    features:
+      - feature-type: Vibrate
+        id: 6b96f9d2-87bc-4596-810d-9a96cbd1a2fa
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 86090f46-7c4c-46fe-883f-d3765f477bac
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Battery
+        description: Battery Level
+        id: 6baefd41-de6d-4c60-aedb-0a9b55f34875
+        input:
+          Battery:
+            value-range:
+              - - 0
+                - 100
+            input-commands:
+              - Read
+    id: 1093a17d-9596-49b7-945f-c44610244932
+  - identifier:
+      - Solstice X
+    name: MagicMotion Solstice X
+    features:
+      - feature-type: Vibrate
+        id: a245e29e-3f63-4c68-a5c2-c07c7c9970a4
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 70593a3b-2b16-4258-badb-9697074bf10b
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Battery
+        description: Battery Level
+        id: f966012c-6b68-4dc3-b4a4-16d34fdc30c7
+        input:
+          Battery:
+            value-range:
+              - - 0
+                - 100
+            input-commands:
+              - Read
+    id: adfc6c8c-b7e8-4c0c-9fdc-e7c2bd3b4552
+  - identifier:
+      - funwand
+    name: MagicMotion Zenith
+    id: 334f32f6-309e-4e79-a3de-b62aff0f6438
+  - identifier:
+      - CBT001
+    name: FunTown Jive
+    features:
+      - feature-type: Vibrate
+        id: 81515d54-be1d-42a1-bc7d-5b4e9c20db37
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Oscillate
+        id: d514fb91-2261-4c5c-a59e-9799fce40d17
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Battery
+        description: Battery Level
+        id: 123954de-a9f1-427a-823a-9b9173ad8856
+        input:
+          Battery:
+            value-range:
+              - - 0
+                - 100
+            input-commands:
+              - Read
+    id: d872f184-a2a4-4869-9506-d34975fa34c3
+communication:
+  - btle:
+      names:
+        - Eidolon
+        - Lipstick
+        - Sword
+        - Curve
+        - Solstice X
+        - funwand
+        - CBT001
+      services:
+        78667579-7b48-43db-b8c5-7928a6b0a335:
+          tx: 78667579-a914-49a4-8333-aa3c0cd8fedc
+        0000180f-0000-1000-8000-00805f9b34fb:
+          rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb

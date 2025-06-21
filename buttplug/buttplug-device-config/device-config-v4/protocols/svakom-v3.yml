@@ -1,0 +1,71 @@
+defaults:
+  name: Svakom Device v3
+  features:
+    - feature-type: Vibrate
+      id: 1e03f6a5-0197-4a5e-afb5-dcc1266c6a6e
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 10
+  id: 58212e06-d13e-461d-a8cd-5bd06cbe5d0c
+configurations:
+  - identifier:
+      - Phoenix Neo 2
+    name: Svakom Phoenix Neo 2
+    id: 14a51507-e4c8-4433-a87b-0a0464c00e31
+  - identifier:
+      - FK008A
+    name: Fantasy Cup Theodore
+    features:
+      - feature-type: Vibrate
+        id: 737fe419-62fa-4e1b-b6d0-2684cbe8b31f
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 10
+      - feature-type: Rotate
+        id: 5e612940-1d00-4680-aa3a-1b052755a01d
+        output:
+          Rotate:
+            step-range:
+              - 0
+              - 1
+    id: cdd17d02-603a-4a86-af6b-f2c97d09ed84
+  - identifier:
+      - Hannes NEO
+    name: Svakom Hannes Neo
+    id: d2fda3c5-fa1f-45b5-8f98-a9c33e83922d
+  - identifier:
+      - QH-SX007E
+    name: Svakom Alberta
+    features:
+      - feature-type: Vibrate
+        description: Vibrating attachments
+        id: 1859c6fa-1d2f-46c8-b97c-75a7ca62be8c
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 10
+      - feature-type: Vibrate
+        description: Suction lens
+        id: 63b84610-b32b-4526-a29a-4acb9ad4939d
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 1
+    id: 4e1d7b1c-133d-4d7c-9cfe-f4c4e5d0ca01
+communication:
+  - btle:
+      names:
+        - Phoenix Neo 2
+        - FK008A
+        - Hannes NEO
+        - QH-SX007E
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb

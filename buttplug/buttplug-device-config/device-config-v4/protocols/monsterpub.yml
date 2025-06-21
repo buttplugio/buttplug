@@ -1,0 +1,177 @@
+defaults:
+  name: Sistalk MonsterPub Device
+  features:
+    - feature-type: Vibrate
+      id: 79df96bb-25af-422e-a066-c7c3f301a843
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+  id: 87e76bfc-ecba-4cda-a574-4a92889a6bc3
+configurations:
+  - identifier:
+      - MP2_JK_N_P1
+    name: Sistalk MonsterPub 2 Doctor Whale
+    features:
+      - feature-type: Vibrate
+        id: 9cf2d977-c1c3-46c0-bb88-c71a3c65f7ae
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: ba941f5c-0946-443c-a6eb-5a0cff38a3b8
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 01eb3034-194f-4c91-88e4-8095bb0f4ff4
+  - identifier:
+      - MP_MW_TL_P2
+    name: Sistalk MonsterPub Magic Kiss
+    features:
+      - feature-type: Vibrate
+        id: d8d639f1-c821-46a6-9eb1-eb1eda9289b5
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: d3c1b259-b884-4a63-ba75-b8d9341398be
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: bdf1fea2-374d-4340-9057-6ee76595cb83
+  - identifier:
+      - MP2_QC_TL_P1
+    name: Sistalk MonsterPub 2 Mister Devil
+    features:
+      - feature-type: Vibrate
+        id: f9f2b6ae-d54d-4d78-a535-3879d96a7fd6
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 8186c4b9-40df-422d-8e70-f0babf32f82b
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 5a8c6ddf-15b2-4d7b-bdcf-38c7c49586bb
+  - identifier:
+      - MP_BABY_QC_N_P4
+    name: Sistalk MonsterPub Baby Youth Health
+    features:
+      - feature-type: Vibrate
+        id: 51923606-6704-48ca-b083-01ceacf897a1
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 553a765a-e91f-4187-85cb-b2be8311944b
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: fb558c71-beb7-43ec-8b78-2ca975aa7d7b
+  - identifier:
+      - MP_MXY_N_P1
+    name: Sistalk MonsterPub KiniCat
+    id: 19e019be-dd3f-4822-8243-288690cae235
+  - identifier:
+      - MP1N_QC_TL_P2
+    name: Sistalk MonsterPub BeatHeart
+    id: 640958c5-0fc0-4390-bdda-959c1686084d
+  - identifier:
+      - TDG_LIP_PT2
+    name: Tracy's Dog Surreal
+    id: f2049034-1515-4008-8cc3-2b6914080a5c
+  - identifier:
+      - MP1P_QC_TL_P6
+    name: Sistalk MonsterPub 1P Mister Devil
+    id: 1a39cdde-63ba-407a-8307-27b775c3f365
+  - identifier:
+      - MPMB_QC_TL_P2
+    name: Sistalk MonsterPub Sweet
+    id: 6d613fc2-76b2-4007-af78-e91bfe20e659
+  - identifier:
+      - MPAV_QC_TL_P1
+    name: Sistalk MonsterPub Amazing
+    id: 719a2ee0-bf1e-41bc-84c9-6d369b5646dd
+  - identifier:
+      - MH_TOR_TL_P5
+    name: Sistalk MonsterHub Tornado
+    id: 8ee7eb14-bc8b-4f66-ac29-8586fa3d1f04
+  - identifier:
+      - MP_SUCKBANG_P5
+    name: Sistalk MonsterPub Pop
+    features:
+      - feature-type: Oscillate
+        id: 6a9d1640-2b72-42f1-8ad1-1e1a97394f82
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 5462d583-6a92-4288-b743-46957be25efb
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: da7e6371-b4cd-475a-9a41-501f4bb06ef3
+  - identifier:
+      - TDG_CRAYBIT_PT
+    name: Tracy's Dog Craybit Pro
+    features:
+      - feature-type: Vibrate
+        id: 3fbc11b2-d07c-4793-a90d-364d62631aca
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 164c2dca-0f5e-4c06-8698-4e65b027a25e
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 8bea0dcd-400c-41a0-819e-bca090caf186
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 8d9c60c2-eb9a-4fd0-8917-78f7d94320b3
+communication:
+  - btle:
+      names:
+        - MonsterPub
+        - MonsterHub
+        - TracyDog
+      services:
+        00006000-0000-1000-8000-00805f9b34fb:
+          tx: 00006001-0000-1000-8000-00805f9b34fb
+          txmode: 00006002-0000-1000-8000-00805f9b34fb
+          txvibrate: 00006003-0000-1000-8000-00805f9b34fb
+          generic0: 0000600a-0000-1000-8000-00805f9b34fb
+        00006010-0000-1000-8000-00805f9b34fb:
+          rxblemodel: 00006014-0000-1000-8000-00805f9b34fb
+        00008000-0000-1000-8000-00805f9b34fb:
+          rx: 00008001-0000-1000-8000-00805f9b34fb

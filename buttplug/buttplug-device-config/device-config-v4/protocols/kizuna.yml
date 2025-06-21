@@ -1,0 +1,18 @@
+defaults:
+  name: Kizuna Smart
+  features:
+    - feature-type: Rotate
+      id: 7077cb50-d3d5-4357-8b5f-42517ffc83b8
+      output:
+        Rotate:
+          step-range:
+            - 0
+            - 9
+  id: 654be6a2-bfe6-4358-bd0a-0d8f2cd9d105
+communication:
+  - serial:
+      port: default
+      baud-rate: 19200
+      data-bits: 8
+      parity: 'N'
+      stop-bits: 1

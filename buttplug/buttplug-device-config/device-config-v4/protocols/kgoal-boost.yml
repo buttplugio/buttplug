@@ -1,0 +1,23 @@
+defaults:
+  name: KGoal Boost
+  features:
+    - feature-type: Battery
+      description: Battery Level
+      id: 59d2de82-3acf-4316-982f-c2b570afd297
+      input:
+        Battery:
+          value-range:
+            - - 0
+              - 100
+          input-commands:
+            - Read
+  id: 1835b668-d778-4552-b75a-95053e06cd5c
+communication:
+  - btle:
+      names:
+        - Boost
+      services:
+        0000180f-0000-1000-8000-00805f9b34fb:
+          rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb
+        8e7c6065-7656-17ad-1b41-b53d1a548e0d:
+          rxpressure: 10c2be2d-d2d5-b7a8-5f42-e2468c9ebbf5

@@ -1,0 +1,20 @@
+defaults:
+  name: Fredorch Rotary Device
+  features:
+    - feature-type: Oscillate
+      description: Fucking Machine Oscillation Speed
+      id: 0ec02168-f724-481a-a927-6ea6df4c89b5
+      output:
+        Oscillate:
+          step-range:
+            - 0
+            - 20
+  id: 86b9ab9e-8507-4abf-b6af-8ecd01a94476
+communication:
+  - btle:
+      names:
+        - M1_*
+      services:
+        0000ae10-0000-1000-8000-00805f9b34fb:
+          tx: 0000ae01-0000-1000-8000-00805f9b34fb
+          rx: 0000ae02-0000-1000-8000-00805f9b34fb

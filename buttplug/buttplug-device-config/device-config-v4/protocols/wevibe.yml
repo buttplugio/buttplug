@@ -1,0 +1,144 @@
+defaults:
+  name: WeVibe Device
+  features:
+    - feature-type: Vibrate
+      id: 6c0184bc-93b8-41a9-a976-934256dcdf9d
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 15
+  id: d42dc8a1-bb70-4dd6-b792-710248c00c6e
+configurations:
+  - identifier:
+      - Bloom
+    name: WeVibe Bloom
+    id: cb8bf4cd-b6bd-4499-b977-faf4e2bb9d4e
+  - identifier:
+      - Ditto
+    name: WeVibe Ditto
+    id: 0b9e22e7-b79c-4d26-b902-287436673da4
+  - identifier:
+      - Jive
+    name: WeVibe Jive
+    id: 0d361883-2894-42dd-9268-b36a067564a6
+  - identifier:
+      - Pivot
+    name: WeVibe Pivot
+    id: 5fca5cd6-6336-4eec-bdfc-048266d9f409
+  - identifier:
+      - Rave
+    name: WeVibe Rave
+    id: 534f442f-396c-4379-b3d0-9c001bcd2891
+  - identifier:
+      - Verge
+    name: WeVibe Verge
+    id: 6b31404c-c609-4d75-a312-191c0f7f6a9f
+  - identifier:
+      - Wish
+    name: WeVibe Wish
+    id: a7a85b12-bac4-49da-9d1e-0f5bc739fd3e
+  - identifier:
+      - Cougar
+      - 4 Plus
+      - 4_Plus
+      - 4plus
+      - classic
+      - Classic
+    name: WeVibe 4 Plus
+    features:
+      - feature-type: Vibrate
+        id: c76fd58e-a38c-4f25-a04c-d798e3f892d3
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 15
+      - feature-type: Vibrate
+        id: 027061c3-4d18-4d03-8219-13e3134b8a19
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 15
+    id: 11cd7b68-2c94-4fc8-837f-09d47214cee1
+  - identifier:
+      - Gala
+    name: WeVibe Gala
+    features:
+      - feature-type: Vibrate
+        id: 22386dcd-b409-49d2-be03-ad270eae92c4
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 15
+      - feature-type: Vibrate
+        id: 46f2d671-5bbf-49c0-928e-4a8b3cdd892b
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 15
+    id: 400ef30a-63eb-4648-b293-c7ecc874f509
+  - identifier:
+      - Nova
+    name: WeVibe Nova
+    features:
+      - feature-type: Vibrate
+        id: e609247a-8c12-422e-8df7-e03373bdbf7a
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 15
+      - feature-type: Vibrate
+        id: c84081f5-3a72-473a-b2b3-32500014b308
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 15
+    id: b667bb6a-46b1-4534-8c79-83aa0749028a
+  - identifier:
+      - Sync
+    name: WeVibe Sync
+    features:
+      - feature-type: Vibrate
+        id: 283b2826-80e3-455f-bec6-7800ebaf2c96
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 15
+      - feature-type: Vibrate
+        id: 64f00297-e4ef-4059-a622-c0bea33d4379
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 15
+    id: 0e72dab3-4b87-4bae-ae02-aae0bbb0f035
+communication:
+  - btle:
+      names:
+        - Cougar
+        - 4 Plus
+        - 4_Plus
+        - 4plus
+        - Bloom
+        - classic
+        - Classic
+        - Ditto
+        - Gala
+        - Jive
+        - Nova
+        - Pivot
+        - Rave
+        - Sync
+        - Verge
+        - Wish
+      services:
+        f000bb03-0451-4000-b000-000000000000:
+          tx: f000c000-0451-4000-b000-000000000000
+          rx: f000b000-0451-4000-b000-000000000000

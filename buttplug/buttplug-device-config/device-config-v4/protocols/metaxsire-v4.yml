@@ -1,0 +1,18 @@
+defaults:
+  name: metaXsire G1 Vibrator
+  features:
+    - feature-type: Vibrate
+      id: 0c9c5a7d-8d28-4003-b1d4-8de5c73c8fe4
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 99
+  id: e69dc695-695d-485b-be16-59161505fd6d
+communication:
+  - btle:
+      names:
+        - CFG1 vibrator
+      services:
+        0000cfa2-0000-1000-8000-00805f9b34fb:
+          tx: 0000cf21-0000-1000-8000-00805f9b34fb

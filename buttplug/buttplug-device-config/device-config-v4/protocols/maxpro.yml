@@ -1,0 +1,18 @@
+defaults:
+  name: MaxPro 2
+  features:
+    - feature-type: Vibrate
+      id: f3c0255d-2734-4f60-95a7-2e9fc04e399c
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+  id: 1f903059-93fd-4160-89a8-cc7a2001d0fa
+communication:
+  - btle:
+      names:
+        - M2
+      services:
+        6e400001-b5a3-f393-e0a9-e50e24dcca9e:
+          tx: 6e400002-b5a3-f393-e0a9-e50e24dcca9e

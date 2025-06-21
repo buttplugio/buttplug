@@ -1,0 +1,22 @@
+defaults:
+  name: ManNuo Device
+  features:
+    - feature-type: Vibrate
+      id: 36daf552-3c59-44b8-b00e-ff1e0e799fc6
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 3
+  id: 6fe6ed71-8869-4a38-bfc1-a7adc112e14e
+communication:
+  - btle:
+      names:
+        - Sex toys
+        - Sex Toys
+        - LXCDVP
+        - MANO PRODUCT
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff1-0000-1000-8000-00805f9b34fb
+          rx: 0000fff4-0000-1000-8000-00805f9b34fb

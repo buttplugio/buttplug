@@ -1,0 +1,43 @@
+defaults:
+  name: Meese Device
+  features:
+    - feature-type: Vibrate
+      id: 86e146ce-8aca-4df1-bfca-67dcf4d241c4
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 10
+    - feature-type: Vibrate
+      id: d2a0c869-d3c7-4ad7-b1fb-a8c914584abf
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 3
+  id: 6ee04bd7-2f57-4ada-b622-b9bb210ff0c1
+configurations:
+  - identifier:
+      - Meese-V389
+    name: Meese Tera
+    id: 8fe479fd-8343-49a2-959b-47f4cd7104ac
+  - identifier:
+      - Meese-cd
+    name: Meese Modo
+    features:
+      - feature-type: Vibrate
+        id: 9bdae29d-46fc-4435-8a63-71927e5e1ada
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 10
+    id: db5ab134-ecc8-4f50-9339-20908f8894e6
+communication:
+  - btle:
+      names:
+        - Meese-V389
+        - Meese-cd
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb

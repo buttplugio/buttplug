@@ -1,0 +1,29 @@
+defaults:
+  name: Libo Elle Device
+  features:
+    - feature-type: Vibrate
+      id: 1b336a6e-6f35-458f-837e-a0147f67c7f5
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 3
+  id: fe54deb6-5c13-4f69-a804-1af5fce5de96
+configurations:
+  - identifier:
+      - PiPiJing
+    name: LiBo Elle
+    id: af187899-8704-42f1-994e-694616576149
+  - identifier:
+      - Shuidi
+    name: Libo Elle 2
+    id: 98f5289c-98b4-4410-bed2-4d3050a4761e
+communication:
+  - btle:
+      names:
+        - PiPiJing
+        - Shuidi
+      services:
+        00006000-0000-1000-8000-00805f9b34fb:
+          tx: 00006001-0000-1000-8000-00805f9b34fb
+          txmode: 00006002-0000-1000-8000-00805f9b34fb

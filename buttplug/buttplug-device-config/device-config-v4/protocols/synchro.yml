@@ -1,0 +1,25 @@
+defaults:
+  name: Synchro
+  features:
+    - feature-type: RotateWithDirection
+      id: b7495351-9101-448a-94c4-4598cf541dca
+      output:
+        RotateWithDirection:
+          step-range:
+            - 0
+            - 6
+  id: f912a283-7308-4e56-a508-4d47d9caf7d2
+configurations:
+  - identifier:
+      - synchro EX
+    name: Synchro Exchange
+    id: 3535446e-779a-496b-8404-e895878cf3e1
+communication:
+  - btle:
+      names:
+        - Shinkuro
+        - synchro2
+        - synchro EX
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb

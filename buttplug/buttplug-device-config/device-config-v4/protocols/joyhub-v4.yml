@@ -1,0 +1,68 @@
+defaults:
+  name: JoyHub Device
+  features:
+    - feature-type: Vibrate
+      id: 95e495dc-7b4f-43fd-91ee-b7842f047f59
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+    - feature-type: Rotate
+      id: 0f6f75c5-66e8-4293-9ee0-50af9ecfc1b0
+      output:
+        Rotate:
+          step-range:
+            - 0
+            - 255
+    - feature-type: Constrict
+      description: Suction
+      id: 487bb0bd-af93-40ff-a92c-6e18772e707f
+      output:
+        Constrict:
+          step-range:
+            - 0
+            - 4
+  id: 12907be0-52b2-4df1-a4d1-29c246d72f2f
+configurations:
+  - identifier:
+      - J-RoseLin
+    name: JoyHub RoseLin
+    id: cea67021-dff3-4012-88c0-321706408a55
+  - identifier:
+      - J-Viele
+    name: JoyHub Viele
+    features:
+      - feature-type: Rotate
+        description: Internal Simulator
+        id: c731fe0b-3216-428a-9cc5-8e8f2fa21275
+        output:
+          Rotate:
+            step-range:
+              - 0
+              - 255
+      - feature-type: Vibrate
+        description: Internal Whip
+        id: 5462e403-9c83-429f-9dd5-db099f18e4e8
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 255
+      - feature-type: Vibrate
+        description: Internal Vibrator
+        id: f4407e47-4094-41c6-95b8-41f7c20e0f04
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 255
+    id: 7c5a1ffd-3228-4513-a180-115c94983eac
+communication:
+  - btle:
+      names:
+        - J-RoseLin
+        - J-Viele
+      services:
+        0000ffa0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffa1-0000-1000-8000-00805f9b34fb

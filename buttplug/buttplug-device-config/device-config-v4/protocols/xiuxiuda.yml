@@ -1,0 +1,18 @@
+defaults:
+  name: Xiuxiuda Device
+  features:
+    - feature-type: Vibrate
+      id: da1eb27b-6159-40f8-9662-69d9ca77f768
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 19
+  id: 2982ea67-a59f-4490-9a7c-23583a4ec642
+communication:
+  - btle:
+      names:
+        - XXD-Lush*
+      services:
+        53300001-0023-4bd4-bbd5-a6920e4c5653:
+          tx: 53300003-0023-4bd4-bbd5-a6920e4c5653

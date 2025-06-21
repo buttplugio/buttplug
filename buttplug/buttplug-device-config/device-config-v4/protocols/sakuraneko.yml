@@ -1,0 +1,53 @@
+defaults:
+  name: Sakuraneko Device
+  features:
+    - feature-type: Vibrate
+      id: bb67be77-f219-411d-98b5-d6b358eb94c9
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+  id: 0e121fa6-76db-484a-892f-4dc88ac6f333
+configurations:
+  - identifier:
+      - sakuraneko-01
+    name: Sakuraneko Korokoro
+    id: 26673810-3196-4733-8071-781c221c1a39
+  - identifier:
+      - sakuraneko-02
+    name: Sakuraneko Nukunuku
+    id: e1bcba4b-1f4d-4d57-8a30-ee3696fb206f
+  - identifier:
+      - sakuraneko-03
+    name: Sakuraneko Dokidoki
+    id: 7234946a-55ed-483a-8482-a6d6e1e97c4b
+  - identifier:
+      - sakuraneko-04
+    name: Sakuraneko Koikoi
+    features:
+      - feature-type: Vibrate
+        id: a5eb13a7-1f14-4785-a2ea-86dde4a3e15b
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Rotate
+        id: 62b84b1c-cfcd-4d9a-8dba-4d8210e5ee93
+        output:
+          Rotate:
+            step-range:
+              - 0
+              - 100
+    id: c45e02cd-b8b6-4617-996e-302db442b228
+communication:
+  - btle:
+      names:
+        - sakuraneko-01
+        - sakuraneko-02
+        - sakuraneko-03
+        - sakuraneko-04
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb

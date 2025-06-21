@@ -1,0 +1,19 @@
+defaults:
+  name: Svakom Alex Neo
+  features:
+    - feature-type: Vibrate
+      id: 323f02f5-f1ab-40b9-ba8b-eba65de178c3
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 3
+  id: 39ee59bc-fdc5-47c4-8da6-2c208e30a7b6
+communication:
+  - btle:
+      names:
+        - Alex NEO
+        - S63E Alex NEO
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb

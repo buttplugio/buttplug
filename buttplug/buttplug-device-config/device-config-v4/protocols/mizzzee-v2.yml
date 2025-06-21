@@ -1,0 +1,18 @@
+defaults:
+  name: Mizz Zee Device
+  features:
+    - feature-type: Vibrate
+      id: e120abaf-dd55-4b8a-ba17-ea86155a819c
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 68
+  id: 9fc65537-e8ae-4e54-bfcb-adebbe39d7e1
+communication:
+  - btle:
+      names:
+        - XHT
+      services:
+        0000eea0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ee01-0000-1000-8000-00805f9b34fb

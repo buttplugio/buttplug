@@ -1,0 +1,115 @@
+defaults:
+  name: Lelo Tiani Harmony
+  features:
+    - feature-type: Vibrate
+      id: 0cf2b478-2235-4f83-897c-d8bbebb822e8
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+    - feature-type: Vibrate
+      id: 0c89262b-0fcd-48c9-9492-a79758da781f
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+  id: 3bde5251-e810-418a-9ebf-8c3a50684d9a
+configurations:
+  - identifier:
+      - IdaWave
+      - Ida Wave
+    name: Lelo Ida Wave
+    features:
+      - feature-type: Vibrate
+        id: c887327d-e635-4086-83dc-2f21286f485c
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Rotate
+        id: 5bd48a1d-992e-4c69-ae74-ed94505eec58
+        output:
+          Rotate:
+            step-range:
+              - 0
+              - 100
+    id: a9de3981-7e0d-4b07-b8a9-10031bb6ddae
+  - identifier:
+      - TOR3
+    name: Lelo Tor 3
+    features:
+      - feature-type: Vibrate
+        id: d0c39af5-62b4-4bfe-a0bb-71f5c2e86c99
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: e0104054-fba7-4ba2-b51f-0f3d95aee1ba
+  - identifier:
+      - Hugo2
+    name: Lelo Hugo 2
+    id: 7d302aee-23cd-4681-b9fc-1275250e8a03
+  - identifier:
+      - DoubleSonic
+    name: Lelo Enigma Double Sonic
+    features:
+      - feature-type: Vibrate
+        id: 8a9d2c49-1486-4515-a0a4-320c9c903ccc
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Rotate
+        id: 6fdbe4ae-f0fc-44e0-b0a4-cbb56dee61d8
+        output:
+          Rotate:
+            step-range:
+              - 0
+              - 100
+    id: c6bf86e6-1054-4c14-a3bb-d415edf81834
+  - identifier:
+      - GIGI3
+    name: Lelo Gigi 3
+    features:
+      - feature-type: Vibrate
+        id: ea1ca70a-b3e9-41ba-8863-3f74156fef87
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: e722ba98-5c2d-4f77-a56d-ac72b213ed53
+  - identifier:
+      - LIV3
+    name: Lelo Liv 3
+    features:
+      - feature-type: Vibrate
+        id: 1599b3d9-055d-4c9b-a1fe-7cef1fac4c9e
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 0daa8498-172c-47bc-b6c4-57414589509b
+communication:
+  - btle:
+      names:
+        - IdaWave
+        - Ida Wave
+        - TianiHarmony
+        - Tiani Harmony
+        - TOR3
+        - Hugo2
+        - DoubleSonic
+        - GIGI3
+        - LIV3
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          command: 0000fff1-0000-1000-8000-00805f9b34fb
+          tx: 0000fff2-0000-1000-8000-00805f9b34fb
+          whitelist: 00000a11-0000-1000-8000-00805f9b34fb

@@ -1,0 +1,127 @@
+defaults:
+  name: WeVibe 8-bit Device
+  features:
+    - feature-type: Vibrate
+      id: 7b226142-d713-41cd-872a-aea10527482b
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 12
+  id: 527527b1-7bf2-40cb-b086-003af792f03f
+configurations:
+  - identifier:
+      - Melt
+    name: WeVibe Melt
+    features:
+      - feature-type: Vibrate
+        id: fdf47cba-4429-4944-9bb4-1db4facb8d29
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 22
+    id: 4f73e55c-bea8-4069-8409-cba30fbbfc81
+  - identifier:
+      - Moxie
+    name: WeVibe Moxie
+    id: d29641cb-953a-4d5c-8b43-ba481db2dd42
+  - identifier:
+      - Vector
+    name: WeVibe Vector
+    features:
+      - feature-type: Vibrate
+        id: 8828bbe0-acf0-4529-9f33-276b23a14afd
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 12
+      - feature-type: Vibrate
+        id: 12702494-a0e9-4929-b928-050d47391cb5
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 12
+    id: 52482637-708c-455b-b96b-d4d58af04562
+  - identifier:
+      - Wand
+    name: WeVibe Wand
+    features:
+      - feature-type: Vibrate
+        id: 2377d39d-580c-46ea-831c-bb9cb97899d7
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 22
+    id: 3829ad7c-be90-49ce-9ecc-fdafa18be3bb
+  - identifier:
+      - Wand 2
+    name: WeVibe Wand 2
+    features:
+      - feature-type: Vibrate
+        id: 4d92cf70-e464-435c-897e-fd2cd5a918e9
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 22
+    id: 3db74c3e-50e1-4dbf-a670-c7297ca52f62
+  - identifier:
+      - Bond
+      - Nelson
+    name: WeVibe Bond
+    features:
+      - feature-type: Vibrate
+        id: 240a36e0-4791-4676-aa3b-d1c407db2b1b
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 27
+    id: c4b2ecb2-655d-44d9-bfaf-03f314acd3a2
+  - identifier:
+      - Nova2
+      - Nova_2
+      - Nova 2
+    name: WeVibe Nova 2
+    features:
+      - feature-type: Vibrate
+        id: 22172834-1186-4ba2-b221-23f02c3fbd51
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 27
+      - feature-type: Vibrate
+        id: 0972ba1f-0b0e-4738-a050-5333da537b35
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 27
+    id: 2292e221-0f17-4d55-8697-f6abebf04ee5
+  - identifier:
+      - Jive 2
+    name: WeVibe Jive 2
+    id: 4a0d8ff9-db32-41c7-99e5-8bb005a25bd0
+communication:
+  - btle:
+      names:
+        - Melt
+        - Moxie
+        - Vector
+        - Wand
+        - Wand 2
+        - Bond
+        - Nelson
+        - Nova2
+        - Nova_2
+        - Nova 2
+        - Jive 2
+      services:
+        f000bb03-0451-4000-b000-000000000000:
+          tx: f000c000-0451-4000-b000-000000000000
+          rx: f000b000-0451-4000-b000-000000000000

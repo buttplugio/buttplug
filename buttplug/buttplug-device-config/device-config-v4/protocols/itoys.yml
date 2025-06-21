@@ -1,0 +1,18 @@
+defaults:
+  name: iToys Seagull
+  features:
+    - feature-type: Vibrate
+      id: 5f1a3edb-6015-404a-865a-c3ee2d568ed4
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 3
+  id: 5c58b967-b75f-4f5d-99ef-f581b2579918
+communication:
+  - btle:
+      names:
+        - 26-021-B
+      services:
+        0000ffa0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffa1-0000-1000-8000-00805f9b34fb

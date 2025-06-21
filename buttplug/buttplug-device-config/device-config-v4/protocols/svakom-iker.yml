@@ -1,0 +1,40 @@
+defaults:
+  name: Svakom Iker
+  features:
+    - feature-type: Vibrate
+      id: 36af2b39-85ec-4463-9ecd-59fbaff3ba38
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 10
+    - feature-type: Vibrate
+      id: 74e5fb53-383a-4938-81ff-cb84da773882
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 5
+  id: 1db55a7c-6133-4b33-bd54-e7fa8dead165
+communication:
+  - btle:
+      names:
+        - Iker
+      manufacturer-data:
+        - company: 39
+          data:
+            - 83
+            - 86
+            - 65
+            - 1
+            - 11
+            - 18
+            - 1
+            - 51
+            - 68
+            - 85
+            - 202
+            - 8
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb

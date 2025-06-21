@@ -1,0 +1,78 @@
+defaults:
+  name: Svakom Device v2
+  features:
+    - feature-type: Vibrate
+      id: 4a225b9d-94c6-437a-a038-3deb4ded5bc5
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 10
+  id: b1189537-2ef1-452b-b6b8-e8e0ba823156
+configurations:
+  - identifier:
+      - '116'
+    name: Svakom Phoenix Neo
+    id: 11905923-4084-4efb-9ac3-a6eba2bf4190
+  - identifier:
+      - Viviana
+    name: Svakom Viviana
+    id: 4bbda06f-ca32-4d34-a11f-d91d8987dc6d
+  - identifier:
+      - Ella NEO
+    name: Svakom Ella Neo
+    id: 87419e85-5570-41f0-84f2-7f15b138326d
+  - identifier:
+      - '117'
+      - Edeny
+    name: Svakom Edeny
+    id: 448ee908-2abc-46cb-aa3f-732830a25139
+  - identifier:
+      - S38A
+    name: Svakom Tammy Pro
+    id: b2c3e1ed-0c66-49d7-859d-7c9677c66297
+  - identifier:
+      - Vick NEO
+      - Vick Neo
+    name: Svakom Vick Neo
+    id: c37b8380-dd41-4fd1-8310-8c24230658bf
+  - identifier:
+      - STG05A
+    name: Svakom Aravinda
+    id: 63893174-b1fd-4ad3-940f-fbbb939ffa57
+  - identifier:
+      - '118'
+    name: ToyCod Vanesia
+    id: a61ae863-a8fc-4708-b313-b36385926dbf
+  - identifier:
+      - QH-SJ007A
+    name: Svakom Winni 2
+    id: f0609171-5e85-4800-adee-a43ef2e3826a
+  - identifier:
+      - Cici 2
+    name: Svakom Cici 2
+    id: 5c03568c-9318-4648-b149-b0fc716d5605
+  - identifier:
+      - Emma Neo 2
+    name: Svakom Emma Neo 2
+    id: a3c23c99-09e7-47d4-898b-9581dfc1f28b
+communication:
+  - btle:
+      names:
+        - '116'
+        - '117'
+        - Edeny
+        - '118'
+        - Viviana
+        - Ella NEO
+        - S38A
+        - Vick NEO
+        - Vick Neo
+        - STG05A
+        - QH-SJ007A
+        - Cici 2
+        - Emma Neo 2
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb

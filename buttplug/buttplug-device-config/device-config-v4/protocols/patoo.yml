@@ -1,0 +1,54 @@
+defaults:
+  name: Patoo Device
+  features:
+    - feature-type: Vibrate
+      id: 328761ed-4dd1-4535-9d37-e805f5eb1a61
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+  id: fbb69ec0-dda6-4fca-ae69-390a91c13c03
+configurations:
+  - identifier:
+      - PTVEA
+    name: Patoo Carrot
+    id: 929310c1-bf4a-4238-b8d9-96ffcca1f954
+  - identifier:
+      - PCS
+    name: Patoo Vibrator
+    id: 91af7b5e-8b16-4489-a916-1584ff1e561c
+  - identifier:
+      - PHT
+    name: Patoo Bean Sprout
+    id: a4175adb-1086-4a4a-8a43-9d484e231085
+  - identifier:
+      - PBT
+    name: Patoo Devil
+    features:
+      - feature-type: Vibrate
+        id: f2957620-0a5c-4d69-851c-f9d34544e4cc
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 49f28542-fb54-46e6-a6b8-f412617ce24f
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 70af2af2-ba71-4b41-9e5d-4c3000377a2b
+communication:
+  - btle:
+      names:
+        - PTVEA*
+        - PBT*
+        - PCS*
+        - PHT*
+      services:
+        f000aa64-0451-4000-b000-000000000000:
+          txmode: f000aa65-0451-4000-b000-000000000000
+          tx: f000aa68-0451-4000-b000-000000000000

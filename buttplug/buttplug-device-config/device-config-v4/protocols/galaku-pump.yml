@@ -1,0 +1,30 @@
+defaults:
+  name: Galaku Device
+  features:
+    - feature-type: Oscillate
+      id: 60946646-0160-425f-85ca-9210d35d61fd
+      output:
+        Oscillate:
+          step-range:
+            - 0
+            - 100
+    - feature-type: Vibrate
+      id: 97f24406-d413-43ed-b830-b76c3f912fad
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+  id: 2e954d01-4f42-4acd-9be8-9fdfa0172998
+configurations:
+  - identifier:
+      - V415
+    name: Galaku Nebula
+    id: 7689175c-af6e-4529-a2ae-c4f41f1db595
+communication:
+  - btle:
+      names:
+        - V415
+      services:
+        00001000-0000-1000-8000-00805f9b34fb:
+          tx: 00001001-0000-1000-8000-00805f9b34fb

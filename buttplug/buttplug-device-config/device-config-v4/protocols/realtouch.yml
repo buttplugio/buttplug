@@ -1,0 +1,16 @@
+defaults:
+  name: RealTouch
+  features:
+    - feature-type: PositionWithDuration
+      id: 60da884f-131a-4036-ae93-97efc97591e2
+      output:
+        PositionWithDuration:
+          step-range:
+            - 0
+            - 99
+  id: 2b428728-0785-4cbc-a71f-4f48412af194
+communication:
+  - hid:
+      pairs:
+        - vendor-id: 8020
+          product-id: 1

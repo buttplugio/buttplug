@@ -1,0 +1,25 @@
+defaults:
+  name: Nexus Revo Stealth
+  features:
+    - feature-type: Vibrate
+      id: 24125960-c279-4f64-87e3-a819af7319b4
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 10
+    - feature-type: RotateWithDirection
+      id: fabe3961-dc17-4f32-856f-13880c0a29a3
+      output:
+        RotateWithDirection:
+          step-range:
+            - 0
+            - 2
+  id: 622f93f2-53d5-4ada-b6a7-359a9d8aedd0
+communication:
+  - btle:
+      names:
+        - XW-LW3
+      services:
+        0000c570-0000-1000-8000-00805f9b34fb:
+          tx: 0000c571-0000-1000-8000-00805f9b34fb

@@ -1,0 +1,34 @@
+defaults:
+  name: Kiiroo v2 Device
+  features:
+    - feature-type: PositionWithDuration
+      id: 49b06ca8-dd4d-4306-91c6-931143dee212
+      output:
+        PositionWithDuration:
+          step-range:
+            - 0
+            - 99
+  id: 1de4322c-86c4-40b1-8e1b-1f51c30392c0
+configurations:
+  - identifier:
+      - Launch
+    name: Fleshlight Launch
+    id: f54eacbc-d84d-4c58-9410-9fbff25f14e8
+  - identifier:
+      - Onyx2
+    name: Kiiroo Onyx 2
+    id: 5f3e8a6a-3a47-43a0-aed6-689101509481
+communication:
+  - btle:
+      names:
+        - Launch
+        - Onyx2
+      services:
+        88f80580-0000-01e6-aace-0002a5d5c51b:
+          tx: 88f80581-0000-01e6-aace-0002a5d5c51b
+          rx: 88f80582-0000-01e6-aace-0002a5d5c51b
+          firmware: 88f80583-0000-01e6-aace-0002a5d5c51b
+        f60402a6-0293-4bdb-9f20-6758133f7090:
+          tx: 02962ac9-e86f-4094-989d-231d69995fc2
+          rx: d44d0393-0731-43b3-a373-8fc70b1f3323
+          firmware: c7b7a04b-2cc4-40ff-8b10-5d531d1161db

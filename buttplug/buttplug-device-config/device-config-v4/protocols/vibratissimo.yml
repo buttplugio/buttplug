@@ -1,0 +1,102 @@
+defaults:
+  name: Vibratissimo Device
+  features:
+    - feature-type: Vibrate
+      id: c4978273-df69-41b1-8ecd-0b5cdbb6d102
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+    - feature-type: Battery
+      description: Battery Level
+      id: e0d0a8e6-604a-4d49-bdab-d22fd8658c69
+      input:
+        Battery:
+          value-range:
+            - - 0
+              - 100
+          input-commands:
+            - Read
+  id: 4b82b175-c139-4af2-b5ad-aa576d9d01a4
+configurations:
+  - identifier:
+      - Licker
+      - SecretKiss
+      - Womenizer
+    name: Vibratissimo Licker
+    features:
+      - feature-type: Vibrate
+        id: 75aa2f87-0d7b-4df1-a661-dd270e92fdd8
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 255
+      - feature-type: Vibrate
+        id: 56fbae53-c57e-4eed-978c-dcf3279b228b
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 255
+      - feature-type: Battery
+        description: Battery Level
+        id: 0f194120-0912-4d5d-b201-7eee4cc622fe
+        input:
+          Battery:
+            value-range:
+              - - 0
+                - 100
+            input-commands:
+              - Read
+    id: c0f02f4f-5bbb-40ad-94fc-7d81c74c518c
+  - identifier:
+      - Rabbit
+    name: Vibratissimo Rabbit
+    features:
+      - feature-type: Vibrate
+        id: 675d6ccc-8145-40d2-a901-0b683cf8233b
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 255
+      - feature-type: Vibrate
+        id: c0009e3f-4263-4761-9168-17c9d81479ee
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 255
+      - feature-type: Vibrate
+        id: 16b15667-1598-4194-86b3-7e711f88adab
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 2
+      - feature-type: Battery
+        description: Battery Level
+        id: e70bb6fb-9e2c-4970-9483-9f9b661d6e9f
+        input:
+          Battery:
+            value-range:
+              - - 0
+                - 100
+            input-commands:
+              - Read
+    id: 2fa1c5bc-85ff-45d5-ada5-23986ad3eab9
+communication:
+  - btle:
+      names:
+        - Vibratissimo
+      services:
+        00001523-1212-efde-1523-785feabcd123:
+          txmode: 00001524-1212-efde-1523-785feabcd123
+          txvibrate: 00001526-1212-efde-1523-785feabcd123
+          rx: 00001527-1212-efde-1523-785feabcd123
+        0000180a-0000-1000-8000-00805f9b34fb:
+          rxblemodel: 00002a24-0000-1000-8000-00805f9b34fb
+        0000180f-0000-1000-8000-00805f9b34fb:
+          rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb

@@ -1,0 +1,23 @@
+defaults:
+  name: Leten Device
+  features:
+    - feature-type: Vibrate
+      id: f9df3044-6d90-4767-97a9-05d15e2f97ec
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 25
+  id: 8c613401-3bc2-434b-8ffe-881879b1e287
+communication:
+  - btle:
+      names:
+        - T528-LT
+        - F537-LT
+        - F520B-LT
+        - F520A-LT
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff1-0000-1000-8000-00805f9b34fb
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          rx: 0000ffe1-0000-1000-8000-00805f9b34fb

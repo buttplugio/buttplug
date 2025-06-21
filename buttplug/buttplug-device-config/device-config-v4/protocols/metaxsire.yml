@@ -1,0 +1,93 @@
+defaults:
+  name: metaXsire Device
+  features:
+    - feature-type: Vibrate
+      id: 74825924-5e2a-4dd6-a91a-10a24be40c09
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+  id: f595862c-fa49-460c-9667-87f0eac24a6c
+configurations:
+  - identifier:
+      - Rex
+    name: metaXsire Rex
+    id: 447c8bda-bafc-472a-9333-8f809bbc48bb
+  - identifier:
+      - Cali
+      - LY165A01
+    name: metaXsire Cali
+    features:
+      - feature-type: Vibrate
+        id: d3e17d91-94d8-449d-b049-91bd0ec3cf71
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 255
+      - feature-type: Constrict
+        id: 6aceca29-6833-4f61-b5af-1005bb50bdf9
+        output:
+          Constrict:
+            step-range:
+              - 0
+              - 255
+    id: e4bb4468-1de1-4f37-a348-5c7177923603
+  - identifier:
+      - Olis
+    name: metaXsire Olis
+    features:
+      - feature-type: Vibrate
+        id: 2e6d4a73-7847-4a5b-a03c-cdd6f07c39c9
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 255
+      - feature-type: Vibrate
+        id: c1530d49-07b0-432b-8c08-08e1ef4d2842
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 255
+      - feature-type: Rotate
+        id: cbc1187c-2400-4e9b-9fc0-a03744bd7295
+        output:
+          Rotate:
+            step-range:
+              - 0
+              - 255
+    id: 9e874901-c5d7-49d2-910d-3849ab5ff96c
+  - identifier:
+      - LY213A01
+    name: metaXsire BuCUE
+    features:
+      - feature-type: Oscillate
+        id: 641d8a6a-b068-4089-9632-c81ab872677d
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 255
+      - feature-type: Vibrate
+        id: 15dcc27e-ab6d-407e-8e1a-4b51e445fa5d
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 255
+    id: 941a41b2-78d2-45a6-b730-17a8ff8c75e0
+communication:
+  - btle:
+      names:
+        - Rex
+        - Cali
+        - LY165A01
+        - Olis
+        - LY213A01
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb

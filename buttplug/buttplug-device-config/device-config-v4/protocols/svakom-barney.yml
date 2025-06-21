@@ -1,0 +1,26 @@
+defaults:
+  name: Mutufun Barney
+  features:
+    - feature-type: Vibrate
+      id: ebbd9a68-1b05-4a21-8f3d-14b3dc7f1f70
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 10
+    - feature-type: Vibrate
+      id: be5e2510-9b63-4813-9192-2db123b82ac5
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 10
+  id: 1b3759c0-ee3b-4f5f-9b3a-3d6bc0cc9594
+communication:
+  - btle:
+      names:
+        - DJ333A
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb

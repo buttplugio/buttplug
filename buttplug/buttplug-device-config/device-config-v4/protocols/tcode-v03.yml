@@ -1,0 +1,18 @@
+defaults:
+  name: TCode v0.3 (Single Linear Axis)
+  features:
+    - feature-type: PositionWithDuration
+      id: a6e25b9d-4986-4771-8e8c-579ebb472844
+      output:
+        PositionWithDuration:
+          step-range:
+            - 0
+            - 100
+  id: 211da02e-467c-4788-96bd-689049867e85
+communication:
+  - serial:
+      port: default
+      baud-rate: 115200
+      data-bits: 8
+      parity: 'N'
+      stop-bits: 1

@@ -1,0 +1,33 @@
+defaults:
+  name: Coleur Dor DT250A
+  features:
+    - feature-type: Vibrate
+      id: 608e34f1-69eb-4469-95e2-c56fb26d7db6
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 3
+    - feature-type: Vibrate
+      id: 75e9695f-7049-4ad7-a8db-a85f62868266
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 3
+    - feature-type: Constrict
+      id: 5fd9d9a0-4f7c-4ef4-87d5-5081f41499f3
+      output:
+        Constrict:
+          step-range:
+            - 0
+            - 2
+  id: 7897a4fc-e45a-4f23-b04f-91415b3eeef7
+communication:
+  - btle:
+      names:
+        - DT250A
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb

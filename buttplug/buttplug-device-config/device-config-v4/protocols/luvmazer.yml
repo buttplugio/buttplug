@@ -1,0 +1,25 @@
+defaults:
+  name: Luvmazer Finger Magic
+  features:
+    - feature-type: Vibrate
+      id: af257986-e34f-47f9-a69e-7a78afd43d31
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+    - feature-type: Rotate
+      id: 8f021f8a-a07e-4934-af3b-fa3bafd2a747
+      output:
+        Rotate:
+          step-range:
+            - 0
+            - 255
+  id: c6d24bef-8263-4e3b-898d-7aeb7e58cc11
+communication:
+  - btle:
+      names:
+        - TKLM-W001-BT
+      services:
+        0000ffa0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffa1-0000-1000-8000-00805f9b34fb

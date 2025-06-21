@@ -1,0 +1,30 @@
+defaults:
+  name: LoveLife Krush
+  features:
+    - feature-type: Vibrate
+      id: af104b4d-73c3-4d89-95d6-ea7c4e21a3df
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 77
+    - feature-type: Battery
+      description: Battery Level
+      id: 72bc2f2f-7f67-4636-bc5c-42ac4b55cb59
+      input:
+        Battery:
+          value-range:
+            - - 0
+              - 100
+          input-commands:
+            - Read
+  id: f954c774-3e08-4569-800f-94e454ccd3ca
+communication:
+  - btle:
+      names:
+        - Krush
+      services:
+        78667579-7b48-43db-b8c5-7928a6b0a335:
+          tx: 78667579-a914-49a4-8333-aa3c0cd8fedc
+        0000180f-0000-1000-8000-00805f9b34fb:
+          rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb

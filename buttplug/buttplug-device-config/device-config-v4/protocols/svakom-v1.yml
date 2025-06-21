@@ -1,0 +1,35 @@
+defaults:
+  name: Svakom Device
+  features:
+    - feature-type: Vibrate
+      id: 22eb4b95-60f9-4885-80e7-279d02d59804
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 19
+  id: 77a1dde5-f31a-4fcb-972b-8094181c187f
+configurations:
+  - identifier:
+      - Aogu SCB
+    name: Svakom Ella
+    id: 46a3fb4f-5e26-45c0-9fd1-176ec896048c
+  - identifier:
+      - Phoenix NEO
+    name: Svakom Phoenix Neo
+    id: c9556aba-5bda-4f23-a690-623c4b9ee04b
+  - identifier:
+      - Emma NEO
+    name: Svakom Emma Neo
+    id: 68d39a06-e350-47ef-8834-e3197178b00e
+communication:
+  - btle:
+      names:
+        - Aogu SUV
+        - Aogu SCB
+        - Emma NEO
+        - Phoenix NEO
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb

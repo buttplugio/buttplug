@@ -1,0 +1,54 @@
+defaults:
+  name: VibCrafter Device
+  features:
+    - feature-type: Vibrate
+      id: 343a8e18-b76c-4482-b048-32d762bf87c9
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 99
+    - feature-type: Vibrate
+      id: d92a031e-bd0d-4815-a0bd-6c59566dcce2
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 99
+  id: a44eef0e-b412-44d0-9545-a4b7b0298514
+configurations:
+  - identifier:
+      - be gentle
+    name: VibCrafter Harlow
+    id: 687972b8-e52d-4ce8-8b16-b6d24585915b
+  - identifier:
+      - Hayden
+    name: VibCrafter Hayden
+    id: 4006a4fd-2a7a-417e-b64a-66f43ba28b9e
+  - identifier:
+      - Nidalee
+    name: VibCrafter Nidalee
+    id: 3e1e3e00-771b-4657-8450-6e314eed24b3
+  - identifier:
+      - Janna
+    name: VibCrafter Janna
+    features:
+      - feature-type: Vibrate
+        id: 51e20287-006c-4dc9-941a-346b8f960715
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 99
+    id: cb0756c3-111c-463b-a575-edc9204af528
+communication:
+  - btle:
+      names:
+        - be gentle
+        - Janna
+        - Hayden
+        - Nidalee
+      services:
+        53300051-0060-4bd4-bbe5-a6920e4c5663:
+          tx: 53300052-0060-4bd4-bbe5-a6920e4c5663
+          rx: 53300053-0060-4bd4-bbe5-a6920e4c5663

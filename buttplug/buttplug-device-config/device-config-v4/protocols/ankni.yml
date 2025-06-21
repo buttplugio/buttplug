@@ -1,0 +1,22 @@
+defaults:
+  name: Roselex Device
+  features:
+    - feature-type: Vibrate
+      id: 2ba5d52d-0f40-4f1f-8738-955f9f7715f3
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 3
+  id: 9a26d86b-afd3-4413-ad72-faddf14b7f03
+communication:
+  - btle:
+      names:
+        - DSJM
+      services:
+        0000fe00-0000-1000-8000-00805f9b34fb:
+          tx: 0000fe01-0000-1000-8000-00805f9b34fb
+        0000fffe-0000-1000-8000-00805f9b34fb:
+          tx: 0000fe02-0000-1000-8000-00805f9b34fb
+        0000180a-0000-1000-8000-00805f9b34fb:
+          generic0: 00002a50-0000-1000-8000-00805f9b34fb

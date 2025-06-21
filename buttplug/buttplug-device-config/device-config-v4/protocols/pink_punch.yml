@@ -1,0 +1,33 @@
+defaults:
+  name: Pink Punch Device
+  features:
+    - feature-type: Vibrate
+      id: 71813440-1a8e-4cfb-9753-bf1fdc674579
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+  id: c64c779a-4451-4c55-af1d-e4b40527d678
+configurations:
+  - identifier:
+      - Pink_Punch
+    name: Pink Punch Sunset Mushroom
+    id: 7e0338c1-0562-451a-95ce-1b078de2f32e
+  - identifier:
+      - PinkPunch_Peachu
+    name: Pink Punch Peachu
+    id: b0554241-8f73-45c7-baf8-fa179f1ea4ef
+  - identifier:
+      - PinkPunch_DreamBunny
+    name: Pink Punch Dream Bunny
+    id: 85703d43-c719-4753-ba92-3bb28c150565
+communication:
+  - btle:
+      names:
+        - Pink_Punch
+        - PinkPunch_Peachu
+        - PinkPunch_DreamBunny
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
