@@ -95,7 +95,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_sakuraneko_protocol.yaml" ; "Sakuraneko Protocol")]
 //#[test_case("test_satisfyer_dual_vibrator.yaml" ; "Satisfyer Protocol - Dual Vibrator")]
 //#[test_case("test_satisfyer_single_vibrator.yaml" ; "Satisfyer Protocol - Single Vibrator")]
-//#[test_case("test_sensee_capsule.yaml" ; "Sensee Capsule Protocol")]
+#[test_case("test_sensee_capsule.yaml" ; "Sensee Capsule Protocol")]
 #[test_case("test_sensee_protocol.yaml" ; "Sensee Diandou Protocol - Rabbit")]
 #[test_case("test_serveu_protocol.yaml" ; "ServeU")]
 #[test_case("test_sexverse_lg389_protocol.yaml" ; "Sexverse LG389 Protocol")]
