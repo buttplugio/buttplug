@@ -11,7 +11,7 @@ use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+    protocol::{generic_protocol_setup, ProtocolHandler, ProtocolKeepaliveStrategy},
   },
 };
 
@@ -21,8 +21,8 @@ generic_protocol_setup!(SvakomV3, "svakom-v3");
 pub struct SvakomV3 {}
 
 impl ProtocolHandler for SvakomV3 {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
+    ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
   fn handle_output_vibrate_cmd(

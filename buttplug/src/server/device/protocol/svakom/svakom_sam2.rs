@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_value_cmd::CheckedValueCmdV4},
+    protocol::{generic_protocol_setup, ProtocolHandler, ProtocolKeepaliveStrategy},
+  },
 };
 
 generic_protocol_setup!(SvakomSam2, "svakom-sam2");
@@ -19,23 +19,25 @@ generic_protocol_setup!(SvakomSam2, "svakom-sam2");
 pub struct SvakomSam2 {}
 
 impl ProtocolHandler for SvakomSam2 {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
+    ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-    fn handle_value_vibrate_cmd(
-    &self,
-    cmd: &CheckedValueCmdV4
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_vibrate_cmd(
+      &self,
+      _feature_index: u32,
+      feature_id: uuid::Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      feature_id,
       Endpoint::Tx,
       [
         0x55,
         0x03,
         0x00,
         0x00,
-        if cmd.value() == 0 { 0x00 } else { 0x05 },
+        if speed == 0 { 0x00 } else { 0x05 },
         speed as u8,
         0x00,
       ]
@@ -45,20 +47,22 @@ impl ProtocolHandler for SvakomSam2 {
     .into()])
   }
 
-  fn handle_value_constrict_cmd(
-    &self,
-    cmd: &CheckedValueCmdV4
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_constrict_cmd(
+      &self,
+      _feature_index: u32,
+      feature_id: uuid::Uuid,
+      level: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      feature_id,
       Endpoint::Tx,
       [
         0x55,
         0x09,
         0x00,
         0x00,
-        if cmd.value() == 0 { 0x00 } else { 0x01 },
-        speed as u8,
+        if level == 0 { 0x00 } else { 0x01 },
+        level as u8,
         0x00,
       ]
       .to_vec(),

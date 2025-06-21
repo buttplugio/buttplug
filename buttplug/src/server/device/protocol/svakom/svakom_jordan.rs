@@ -7,35 +7,37 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_value_cmd::CheckedValueCmdV4},
+    protocol::{generic_protocol_setup, ProtocolHandler, ProtocolKeepaliveStrategy},
+  }
 };
 
 generic_protocol_setup!(SvakomJordan, "svakom-jordan");
 
 #[derive(Default)]
-struct SvakomJordan {}
+pub struct SvakomJordan {}
 
 impl ProtocolHandler for SvakomJordan {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
+    ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_vibrate_cmd(
-    &self,
-    cmd: &CheckedValueCmdV4
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_vibrate_cmd(
+      &self,
+      _feature_index: u32,
+      feature_id: uuid::Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      feature_id,
       Endpoint::Tx,
       vec![
         0x55,
         0x03,
         0x00,
         0x00,
-        if cmd.value() == 0 { 0x00 } else { 0x01 },
+        if speed == 0 { 0x00 } else { 0x01 },
         speed as u8,
         0x00,
       ],
@@ -44,19 +46,21 @@ impl ProtocolHandler for SvakomJordan {
     .into()])
   }
 
-  fn handle_value_oscillate_cmd(
-    &self,
-    cmd: &CheckedValueCmdV4
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_oscillate_cmd(
+      &self,
+      _feature_index: u32,
+      feature_id: uuid::Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      feature_id,
       Endpoint::Tx,
       vec![
         0x55,
         0x08,
         0x00,
         0x00,
-        if cmd.value() == 0 { 0x00 } else { 0x01 },
+        if speed == 0 { 0x00 } else { 0x01 },
         speed as u8,
         0x00,
       ],

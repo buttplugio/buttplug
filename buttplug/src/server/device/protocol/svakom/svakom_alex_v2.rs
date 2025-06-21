@@ -11,18 +11,18 @@ use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+    protocol::{generic_protocol_setup, ProtocolHandler, ProtocolKeepaliveStrategy},
   },
 };
 
-generic_protocol_setup!(Svakom, "svakom");
+generic_protocol_setup!(SvakomAlexV2, "svakom-alex-v2");
 
 #[derive(Default)]
-pub struct Svakom {}
+pub struct SvakomAlexV2 {}
 
-impl ProtocolHandler for Svakom {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+impl ProtocolHandler for SvakomAlexV2 {
+  fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
+    ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
   fn handle_output_vibrate_cmd(
@@ -31,11 +31,10 @@ impl ProtocolHandler for Svakom {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let multiplier: u8 = if speed == 0 { 0x00 } else { 0x01 };
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
       Endpoint::Tx,
-      [0x55, 0x04, 0x03, 0x00, multiplier, speed as u8].to_vec(),
+      [0x55, 3, 3, 0, speed as u8, speed as u8 + 5].to_vec(),
       false,
     )
     .into()])

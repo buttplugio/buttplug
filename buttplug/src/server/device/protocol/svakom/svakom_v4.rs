@@ -5,38 +5,41 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::server::device::protocol::ProtocolKeepaliveStrategy;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_value_cmd::CheckedValueCmdV4},
+  },
 };
 
-generic_protocol_setup!(SvakomPulse, "svakom-pulse");
+generic_protocol_setup!(SvakomV4, "svakom-v4");
 
 #[derive(Default)]
-pub struct SvakomPulse {}
+pub struct SvakomV4 {}
 
-impl ProtocolHandler for SvakomPulse {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+impl ProtocolHandler for SvakomV4 {
+  fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
+    ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-    fn handle_value_vibrate_cmd(
-    &self,
-    cmd: &CheckedValueCmdV4
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_vibrate_cmd(
+      &self,
+      feature_index: u32,
+      feature_id: uuid::Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.feature_uuid(),
+      feature_id,
       Endpoint::Tx,
       [
         0x55,
         0x03,
-        0x03,
+        feature_index as u8 + 1,
         0x00,
-        if cmd.value() == 0 { 0x00 } else { 0x01 },
-        speed as u8 + 1,
+        if speed == 0 { 0x00 } else { 0x03 },
+        speed as u8,
       ]
       .to_vec(),
       false,

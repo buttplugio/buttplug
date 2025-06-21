@@ -8,63 +8,61 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
-  },
-  server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    message::Endpoint,
+  }, generic_protocol_setup, server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{
-      generic_protocol_initializer_setup,
       ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
+      ProtocolKeepaliveStrategy,
     },
-  },
+  }
 };
-use async_trait::async_trait;
 use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::Arc;
 
-generic_protocol_initializer_setup!(SvakomIker, "svakom-iker");
+generic_protocol_setup!(SvakomIker, "svakom-iker");
 
-#[derive(Default)]
-pub struct SvakomIkerInitializer {}
-
-#[async_trait]
-impl ProtocolInitializer for SvakomIkerInitializer {
-  async fn initialize(
-    &mut self,
-    _: Arc<Hardware>,
-    _: &UserDeviceDefinition,
-  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    Ok(Arc::new(SvakomIker::new()))
-  }
-}
 
 #[derive(Default)]
 pub struct SvakomIker {
-  last_speeds: Arc<Vec<AtomicU8>>,
-}
-
-impl SvakomIker {
-  fn new() -> Self {
-    let last_speeds = Arc::new((0..2).map(|_| AtomicU8::new(0)).collect::<Vec<AtomicU8>>());
-
-    Self { last_speeds }
-  }
+  last_speeds: Arc<[AtomicU8; 2]>,
 }
 
 impl ProtocolHandler for SvakomIker {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
+    ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_cmd(
-    &self,
-    cmds: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let mut vibe_off = false;
+  fn handle_output_vibrate_cmd(
+      &self,
+      feature_index: u32,
+      feature_id: uuid::Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    if feature_index == 0 {
+      Ok(vec![HardwareWriteCmd::new(
+        feature_id,
+        Endpoint::Tx,
+        [0x55, 0x03, 0x03, 0x00, 0x01, speed as u8].to_vec(),
+        false,
+      )
+      .into()])
+    } else {
+      Ok(vec![HardwareWriteCmd::new(
+        feature_id,
+        Endpoint::Tx,
+        [0x55, 0x07, 0x07, 0x00, 0x01, speed as u8].to_vec(),
+        false,
+      )
+      .into()])
+    }
+    /*
+    self.last_speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     let mut msg_vec = vec![];
+    let speed0 = self.last_speeds[0].load(Ordering::Relaxed);
+    let speed1 = self.last_speeds[1].load(Ordering::Relaxed);
+    let vibe_off = speed0 == 0 && speed1 == 0;
+
     if let Some((_, speed)) = cmds[0] {
       self.last_speeds[0].store(speed as u8, Ordering::Relaxed);
       if speed == 0 {
@@ -110,5 +108,6 @@ impl ProtocolHandler for SvakomIker {
       }
     }
     Ok(msg_vec)
+    */
   }
 }

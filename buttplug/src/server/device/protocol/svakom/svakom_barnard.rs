@@ -7,10 +7,10 @@
 
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::{device::{
+  server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
-  }, message::checked_value_cmd::CheckedValueCmdV4},
+    protocol::{generic_protocol_setup, ProtocolHandler, ProtocolKeepaliveStrategy},
+  },
 };
 
 generic_protocol_setup!(SvakomBarnard, "svakom-barnard");
@@ -19,14 +19,16 @@ generic_protocol_setup!(SvakomBarnard, "svakom-barnard");
 pub struct SvakomBarnard {}
 
 impl ProtocolHandler for SvakomBarnard {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
+    ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_vibrate_cmd(
-    &self,
-    cmd: &CheckedValueCmdV4
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_vibrate_cmd(
+      &self,
+      _feature_index: u32,
+      feature_id: uuid::Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       feature_id,
       Endpoint::Tx,
@@ -36,7 +38,7 @@ impl ProtocolHandler for SvakomBarnard {
         0x00,
         0x00,
         speed as u8,
-        if cmd.value() == 0 { 0x00 } else { 0x01 },
+        if speed == 0 { 0x00 } else { 0x01 },
       ]
       .to_vec(),
       false,
@@ -44,12 +46,14 @@ impl ProtocolHandler for SvakomBarnard {
     .into()])
   }
 
-  fn handle_value_oscillate_cmd(
-    &self,
-    cmd: &CheckedValueCmdV4
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_oscillate_cmd(
+      &self,
+      _feature_index: u32,
+      feature_id: uuid::Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      cmd.uuid(),
+      feature_id,
       Endpoint::Tx,
       [
         0x55,
@@ -57,7 +61,7 @@ impl ProtocolHandler for SvakomBarnard {
         0x00,
         0x00,
         speed as u8,
-        if cmd.value() == 0 { 0x00 } else { 0xff },
+        if speed == 0 { 0x00 } else { 0xff },
       ]
       .to_vec(),
       false,
