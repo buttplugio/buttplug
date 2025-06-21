@@ -1,0 +1,56 @@
+defaults:
+  name: Amorelie Joy Device
+  features:
+    - feature-type: Vibrate
+      id: 9be34b27-431e-47d0-871b-fea3c116d32d
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+  id: df7c19cc-8e49-4c55-98d1-0b060424260f
+configurations:
+  - identifier:
+      - 4D02
+    name: Amorelie Joy Move
+    id: b5681266-9f56-4a6f-9985-be33301af6af
+  - identifier:
+      - 4D05
+    name: Amorelie Joy Cha-Cha
+    id: 891e1acb-84ec-41e5-8782-2392a1343a34
+  - identifier:
+      - 4D06
+    name: Amorelie Joy Boogie
+    id: fdc21c92-80d8-4cfa-a4e2-a79fef020e1c
+  - identifier:
+      - 4D01
+    name: Amorelie Joy Shimmer
+    id: 7a98633a-8b7e-4065-8e10-12b17588f504
+  - identifier:
+      - 4D03
+    name: Amorelie Joy Grow
+    id: bd784815-49d7-4379-98d0-34aa1d9c0097
+  - identifier:
+      - 4D04
+    name: Amorelie Joy Shuffle
+    id: 6124dfc8-b0f4-4db0-b85a-b8d0da53b6a8
+  - identifier:
+      - 4D07
+    name: Amorelie Joy Salsa
+    id: 7e7776a5-98a8-42ef-a9e9-b4aeaf5adbaa
+communication:
+  - btle:
+      names:
+        - 4D01
+        - 4D02
+        - 4D03
+        - 4D04
+        - 4D05
+        - 4D06
+        - 4D07
+        - 4D08
+        - 4D09
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb
+          tx: 0000ffe3-0000-1000-8000-00805f9b34fb

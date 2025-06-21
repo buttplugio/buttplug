@@ -1,0 +1,109 @@
+defaults:
+  name: Cueme Device
+  features:
+    - feature-type: Vibrate
+      id: 812c9f59-e9a9-42d9-8c30-1dc91feea5ac
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 15
+    - feature-type: Vibrate
+      id: bbd5955a-5c2e-494e-911d-c64708763bea
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 15
+    - feature-type: Vibrate
+      id: 9c152f4a-8441-47f4-9b02-d0f64a468517
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 15
+    - feature-type: Vibrate
+      id: f19d9974-0631-4413-a544-7bf02c039743
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 15
+    - feature-type: Vibrate
+      id: ec23bb7f-34df-4480-8eba-3f95dc0d1e0a
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 15
+    - feature-type: Vibrate
+      id: 24c910ea-7cfb-486c-8e86-451e8b3bc22f
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 15
+    - feature-type: Vibrate
+      id: b8659ec6-6b50-4d74-8a92-2c127856a7ff
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 15
+    - feature-type: Vibrate
+      id: 96b18136-9780-4771-b5e6-f090927fbe14
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 15
+  id: aeecfe99-106d-4f25-a9b6-4a809971ebfb
+configurations:
+  - identifier:
+      - '1'
+    name: Cueme Mens
+    id: ff44bb15-c9ae-4751-b993-8f325129cbb2
+  - identifier:
+      - '2'
+    name: Cueme Bra
+    id: dcb3e162-5271-4737-b2e3-88534daafe05
+  - identifier:
+      - '3'
+    name: Cueme Womans
+    features:
+      - feature-type: Vibrate
+        id: b4554560-c0ad-42ac-82a8-4a8042fc6ab9
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 15
+      - feature-type: Vibrate
+        id: d666a28d-3701-499f-b0b9-7f6ccf722159
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 15
+      - feature-type: Vibrate
+        id: d2789e16-6771-4046-b5de-500def289894
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 15
+      - feature-type: Vibrate
+        id: c01700e6-1b57-41aa-831b-b3f7a54dbefe
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 15
+    id: 29364127-d158-411f-9e28-e8f33a5ca4a6
+communication:
+  - btle:
+      names:
+        - FUNCODE_*
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff1-0000-1000-8000-00805f9b34fb

@@ -1,0 +1,18 @@
+defaults:
+  name: Joyroid Loob
+  features:
+    - feature-type: PositionWithDuration
+      id: 7078c41e-0cd3-4264-8f54-c331ac4c81f9
+      output:
+        PositionWithDuration:
+          step-range:
+            - 0
+            - 1000
+  id: 26c0103c-9b39-4dbb-ad33-5cbdff03c178
+communication:
+  - btle:
+      names:
+        - LOOB
+      services:
+        b75c49d2-04a3-4071-a0b5-35853eb08307:
+          tx: ba5c49d2-04a3-4071-a0b5-35853eb08307

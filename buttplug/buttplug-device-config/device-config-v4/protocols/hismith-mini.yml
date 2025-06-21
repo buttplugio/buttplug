@@ -1,0 +1,186 @@
+defaults:
+  name: Hismith Mini device
+  features:
+    - feature-type: Oscillate
+      description: Fucking Machine Oscillation Speed
+      id: cd95dc09-627b-489e-841a-39cd5f06bf6d
+      output:
+        Oscillate:
+          step-range:
+            - 0
+            - 100
+  id: 195a4797-7b3a-4ecf-bffb-810f9b870a8b
+configurations:
+  - identifier:
+      - '4001'
+    name: Auxfun Sex Machine
+    id: 6227affb-9e0e-49cb-a77b-7913d40f83ce
+  - identifier:
+      - '1005'
+      - '1102'
+    name: Hismith Sex Machine
+    id: de78cf6a-30c2-40ce-ac8a-a060735c65ac
+  - identifier:
+      - '1004'
+    name: Hismith Mini Sex Machine
+    id: fa840f6f-6815-4fed-b238-4260ac21b90f
+  - identifier:
+      - '1101'
+    name: Hismith Servo Sex Machine
+    id: 330de697-9702-4bc7-89d6-3faf603f0238
+  - identifier:
+      - '1402'
+    name: Hismith Ukulele
+    id: 18f342d3-a927-44ac-9605-cf16ec8aad74
+  - identifier:
+      - '1501'
+    name: Hismith PleasureDrive
+    id: 5b98725d-56b3-499b-830d-50dc004c27c5
+  - identifier:
+      - '2201'
+    name: Sinloli Automatic Sex Doll
+    features:
+      - feature-type: Constrict
+        description: Air Pump
+        id: 1c45bd7c-ca54-483b-9994-f6d4c18cd59f
+        output:
+          Constrict:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        description: Vibrator
+        id: 23c0c1f0-af15-492d-8405-3ce3f24d13a3
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 81341b4e-144b-4427-b5e9-5024b12441c7
+  - identifier:
+      - '3101'
+    name: Eropair Rabbit Vibrator
+    features:
+      - feature-type: Vibrate
+        description: Internal Vibrator
+        id: 85ca7d86-a508-4d9e-9ee5-0223a4b68805
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        description: External Vibrator
+        id: 950bc937-6be1-4f6c-8d18-36cbd4d25bee
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: e59964ad-0c44-4301-9148-f8837e197d35
+  - identifier:
+      - '3102'
+    name: Eropair Thrusting Vibrating Dildo
+    features:
+      - feature-type: Oscillate
+        description: Thruster
+        id: 6255e8b0-f188-4a8b-9325-4c70af3b20be
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        description: Vibrator
+        id: e0eb75eb-a14b-4947-97de-0bd36517dabd
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: c1762d51-d2f7-4a03-bb8e-30cde5942831
+  - identifier:
+      - '2101'
+    name: Eropair Cup
+    features:
+      - feature-type: Constrict
+        description: Air Pump
+        id: 39ed62dd-77c2-4488-ba09-33792a65b013
+        output:
+          Constrict:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        description: Vibrator
+        id: d36a28fd-0042-4c5c-a36c-e0a72173e0ab
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 8ffeec80-9b8f-4cb5-a70d-6b6d8170a688
+  - identifier:
+      - '2204'
+    name: Sinloli Cosima
+    features:
+      - feature-type: Oscillate
+        description: Stroker Oscillation Speed
+        id: 928b7b2b-9e4e-47bc-8196-e304174e78fa
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Constrict
+        description: Air Pump
+        id: e9b6dc68-e89a-4f7b-a74f-8a25b31346ee
+        output:
+          Constrict:
+            step-range:
+              - 0
+              - 100
+    id: 9eb5977d-38be-4e77-8a26-1d69e8286689
+  - identifier:
+      - '2202'
+    name: Sinloli Ethel
+    features:
+      - feature-type: Oscillate
+        description: Stroker Oscillation Speed
+        id: 030bcd37-38f1-415f-b59e-d0013497fadf
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        description: Vibrator
+        id: 19ca1ed9-94ee-46f8-9b70-0e79a013db9d
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: a14d8479-e4b9-463f-af23-e78bd0c5d2c7
+  - identifier:
+      - '2205'
+    name: Sinloli Aston
+    id: d9ced3ed-cc74-4731-baeb-7bbf7fda288e
+communication:
+  - btle:
+      names:
+        - Auxfun-Box
+        - Sinloli
+        - Sinloli-Sherry
+        - Eropair *
+        - HISMITH S1
+        - HISMITH S2
+        - HISMITH S3
+        - Sinloli Cosima
+        - Sinloli-Ethel
+        - Sinloli Aston
+      services:
+        0000ffe5-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe9-0000-1000-8000-00805f9b34fb
+        0000ff90-0000-1000-8000-00805f9b34fb:
+          rxblemodel: 0000ff96-0000-1000-8000-00805f9b34fb

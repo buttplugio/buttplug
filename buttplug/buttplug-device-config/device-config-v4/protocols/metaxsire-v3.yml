@@ -1,0 +1,53 @@
+defaults:
+  name: metaXsire Tay
+  features:
+    - feature-type: Vibrate
+      id: 074a15d1-2efc-4cd8-8f1f-0f32f1468024
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 20
+  id: 2e8ff651-b10d-4686-89b5-b8197e80e159
+configurations:
+  - identifier:
+      - TAY001
+    name: metaXsire Tay 1
+    id: c7615c1d-d53f-4d24-82e1-ce08c301da66
+  - identifier:
+      - TAY009
+    name: metaXsire Tay 9
+    id: ddfe0ac7-f275-4e08-b16b-a5cd579e9a9e
+  - identifier:
+      - TAY006
+    name: metaXsire Tay 6
+    id: edfecee1-3b6f-4501-a9d9-717b2bd515a2
+  - identifier:
+      - TA-S001A
+    name: metaXsire Zeus
+    features:
+      - feature-type: Vibrate
+        id: 11c78de9-800a-4444-9647-0ed33181e63c
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 20
+      - feature-type: Oscillate
+        id: 47646747-4dea-47ba-80b2-407e2a276ae2
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 20
+    id: ae1e373f-1a35-476b-8da8-6017dcb7e0de
+communication:
+  - btle:
+      names:
+        - TAY001
+        - TAY006
+        - TAY009
+        - TA-S001A
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fe02-0000-1000-8000-00805f9b34fb

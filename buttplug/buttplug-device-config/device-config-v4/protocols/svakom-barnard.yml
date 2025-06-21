@@ -1,0 +1,25 @@
+defaults:
+  name: Fantasy Cup Barnard
+  features:
+    - feature-type: Vibrate
+      id: 7abda591-db6f-492c-a781-5f90d648b561
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 3
+    - feature-type: Oscillate
+      id: 5ec8c88b-bd24-4e94-bec1-467735a74b80
+      output:
+        Oscillate:
+          step-range:
+            - 0
+            - 3
+  id: aaebe699-02dd-461f-879d-c71da8c2d892
+communication:
+  - btle:
+      names:
+        - DG239A
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb

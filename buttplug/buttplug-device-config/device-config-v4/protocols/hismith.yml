@@ -1,0 +1,88 @@
+defaults:
+  name: Hismith device
+  features:
+    - feature-type: Oscillate
+      description: Fucking Machine Oscillation Speed
+      id: 24291feb-53a7-49ee-898a-8c42f534508f
+      output:
+        Oscillate:
+          step-range:
+            - 0
+            - 100
+  id: a8689335-db27-4a23-8724-6973168bb474
+configurations:
+  - identifier:
+      - '1001'
+    name: Hismith Sex Machine
+    id: 169414bc-55d6-4ada-a9ec-eae862e80e09
+  - identifier:
+      - '1002'
+    name: Hismith Pro Traveler
+    id: 33a59054-9a87-4ecb-9893-3b5101b6431b
+  - identifier:
+      - '1003'
+    name: Hismith Capsule
+    id: 119197ff-5750-40bf-9770-024e75cbe20c
+  - identifier:
+      - '2001'
+    name: Hismith Thrusting Cup
+    features:
+      - feature-type: Oscillate
+        description: Stroker Oscillation Speed
+        id: 1663c651-cab6-444d-bbd7-39baf190d6ab
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: b6a5ed20-e10a-4370-aa9e-0cd85bf1c6f7
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 1
+    id: 188ee17a-d776-4f9b-baaa-903b9fea276f
+  - identifier:
+      - '1006'
+    name: Hismith G011
+    features:
+      - feature-type: Oscillate
+        description: Stroker Oscillation Speed
+        id: 8621627f-4561-4272-9d95-231d9b8d3440
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 5815777e-11e1-4998-b9a6-68e09656f18c
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 1
+    id: fb1d1aa1-5a88-4a39-af74-bc127d670ab1
+  - identifier:
+      - '3001'
+    name: Wildolo Device
+    features:
+      - feature-type: Vibrate
+        id: 5ac186f5-ada6-4ec2-a65a-910b8b2292cc
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: ef153cf6-130d-43a1-82f1-4a16e457e8ea
+communication:
+  - btle:
+      names:
+        - HISMITH
+        - Wildolo
+        - "\aHISMITH"
+      services:
+        0000ffe5-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe9-0000-1000-8000-00805f9b34fb
+        0000ff90-0000-1000-8000-00805f9b34fb:
+          rxblemodel: 0000ff96-0000-1000-8000-00805f9b34fb

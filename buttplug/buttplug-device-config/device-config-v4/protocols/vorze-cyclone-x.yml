@@ -1,0 +1,16 @@
+defaults:
+  name: Vorze Cyclone X10 Device
+  features:
+    - feature-type: RotateWithDirection
+      id: 1d1b4dea-ab29-4426-a9f4-dda2c594eefb
+      output:
+        RotateWithDirection:
+          step-range:
+            - 0
+            - 10
+  id: ac27ce47-6d49-4c43-ac6f-01a19e546305
+communication:
+  - hid:
+      pairs:
+        - vendor-id: 1155
+          product-id: 22352

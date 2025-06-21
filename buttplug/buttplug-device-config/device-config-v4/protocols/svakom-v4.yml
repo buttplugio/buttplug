@@ -1,0 +1,41 @@
+defaults:
+  name: Svakom Device v4
+  features:
+    - feature-type: Vibrate
+      id: b61f8bde-2ad3-40a8-8e16-fe6dcec8a887
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 10
+    - feature-type: Vibrate
+      id: 724c247f-733e-4592-9a98-1a37a7c941ba
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 10
+  id: 1a43cd07-e5ba-4a9f-8560-d00e1d72c6df
+configurations:
+  - identifier:
+      - B2CM6
+    name: ToyCod Barzillai
+    id: 2e46e18b-5821-4665-9b07-928f4963f16d
+  - identifier:
+      - ERICA
+    name: Svakom Erica
+    id: 22c2f70c-44fa-482f-bfac-1463482bff5d
+  - identifier:
+      - Cici+ 2
+    name: Svakom Cici+ 2
+    id: 96980e8b-abcf-410e-94e6-d098b13e6192
+communication:
+  - btle:
+      names:
+        - B2CM6
+        - ERICA
+        - Cici+ 2
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb

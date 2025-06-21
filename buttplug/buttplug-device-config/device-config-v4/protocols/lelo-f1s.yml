@@ -1,0 +1,26 @@
+defaults:
+  name: Lelo F1s
+  features:
+    - feature-type: Vibrate
+      id: 006eb802-d890-4a0f-a566-288d86ec1caf
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+    - feature-type: Vibrate
+      id: 787c4a90-e78c-489a-a0eb-f66b3c70d6d2
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+  id: 83c52d23-0532-4b57-8a0b-c8132a5c52bd
+communication:
+  - btle:
+      names:
+        - F1s
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff1-0000-1000-8000-00805f9b34fb
+          rx: 00000aa4-0000-1000-8000-00805f9b34fb

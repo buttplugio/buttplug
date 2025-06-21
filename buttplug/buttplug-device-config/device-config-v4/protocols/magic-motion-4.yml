@@ -1,0 +1,120 @@
+defaults:
+  name: Magic Motion V4 Device
+  features:
+    - feature-type: Vibrate
+      id: c8ed6a4c-2dff-4be9-b1c5-b91bfd238bda
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+    - feature-type: Battery
+      description: Battery Level
+      id: 8ba2798a-4717-4a39-ae5c-f445eb8f4448
+      input:
+        Battery:
+          value-range:
+            - - 0
+              - 100
+          input-commands:
+            - Read
+  id: e53d8751-5993-410c-82d7-edca26dd4c65
+configurations:
+  - identifier:
+      - funone
+    name: MagicMotion Bunny
+    id: ae515557-67e1-4527-bd0b-762a2fb47d9b
+  - identifier:
+      - Magic Sundi
+    name: MagicMotion Sundae
+    id: 0e5c564b-02cf-4665-b8e6-d938b8b8d749
+  - identifier:
+      - Kegel Coach
+    name: MagicMotion Kegel Coach
+    id: 2ecd285e-9109-403c-b38f-3784629bd7de
+  - identifier:
+      - Magic Lotos
+    name: MagicMotion Lotos
+    id: a66cd42b-c3b3-4b00-bbb2-117961a06bcd
+  - identifier:
+      - nyx
+    name: MagicMotion Nyx
+    id: 69c95fd5-a9c2-4f7d-9fdc-a25f514ba290
+  - identifier:
+      - umi
+    name: MagicMotion Umi
+    features:
+      - feature-type: Vibrate
+        id: 008a3d35-9b61-4bc2-9554-c3c742f03e12
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: b24eee4d-b3c2-4ce4-8f54-433e3d2a08f5
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Battery
+        description: Battery Level
+        id: fdc5dc60-ece5-4f81-801c-076b1e1bad57
+        input:
+          Battery:
+            value-range:
+              - - 0
+                - 100
+            input-commands:
+              - Read
+    id: 69a69c1d-1e37-49ed-b1a4-07da72939171
+  - identifier:
+      - funkegel
+    name: MagicMotion Crystal
+    id: c22dfa34-5b4d-4c61-a972-fee67b1f60d8
+  - identifier:
+      - bobi2
+    name: MagicMotion Bobi
+    features:
+      - feature-type: Vibrate
+        id: 09d1b6fc-834d-4579-9bc7-79813f20d33f
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 04438678-4c82-48e1-a4fa-8dd916ee5469
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Battery
+        description: Battery Level
+        id: b2b3dedf-5f7a-4069-935f-f210fdf5cafc
+        input:
+          Battery:
+            value-range:
+              - - 0
+                - 100
+            input-commands:
+              - Read
+    id: 318ca3d4-0779-47e8-9580-fc3efe1a0556
+communication:
+  - btle:
+      names:
+        - funone
+        - Magic Sundi
+        - Kegel Coach
+        - Magic Lotos
+        - nyx
+        - umi
+        - funkegel
+        - bobi2
+      services:
+        78667579-7b48-43db-b8c5-7928a6b0a335:
+          tx: 78667579-a914-49a4-8333-aa3c0cd8fedc
+        0000180f-0000-1000-8000-00805f9b34fb:
+          rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb

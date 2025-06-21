@@ -1,0 +1,18 @@
+defaults:
+  name: Sensee Diandou Rabbit
+  features:
+    - feature-type: Vibrate
+      id: 1544b066-a3d3-4749-9081-1b7a26ab54ed
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+  id: a8ffccf6-2d38-4606-abdd-8802a063a2ae
+communication:
+  - btle:
+      names:
+        - CTY222S4
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff5-0000-1000-8000-00805f9b34fb

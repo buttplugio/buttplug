@@ -1,0 +1,23 @@
+defaults:
+  name: The Cowgirl Cone
+  features:
+    - feature-type: Vibrate
+      id: d9247325-2173-4ac7-95c3-6730f0d37964
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 128
+  id: 2dc2667a-2305-4dd4-a0a0-9c1dbcf119ea
+configurations:
+  - identifier:
+      - CG-CONE
+    name: The Cowgirl Cone
+    id: 72ec0578-c6dc-4835-a72d-3388816f9611
+communication:
+  - btle:
+      names:
+        - CG-CONE
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb

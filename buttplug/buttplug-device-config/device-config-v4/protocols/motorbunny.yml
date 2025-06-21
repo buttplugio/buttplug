@@ -1,0 +1,35 @@
+defaults:
+  name: Motorbunny Device
+  features:
+    - feature-type: Vibrate
+      id: cb44a214-4c5c-4a04-8b1a-0d91a73a7a3a
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+    - feature-type: RotateWithDirection
+      id: 683b450d-bb1a-4fca-b61a-83f8b56086fa
+      output:
+        RotateWithDirection:
+          step-range:
+            - 0
+            - 255
+  id: 21cb973e-c404-44de-99c8-9cf4bc5538a6
+configurations:
+  - identifier:
+      - MB Controller
+    name: Motorbunny Classic
+    id: 97362be6-5601-4d08-812a-4eb1ffa29980
+  - identifier:
+      - MB LINK 201
+    name: Motorbunny Buck
+    id: 6de31e21-d76c-4d9a-9220-afa36f29d128
+communication:
+  - btle:
+      names:
+        - MB Controller
+        - MB LINK 201
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff6-0000-1000-8000-00805f9b34fb

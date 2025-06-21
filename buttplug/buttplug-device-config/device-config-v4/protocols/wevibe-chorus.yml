@@ -1,0 +1,61 @@
+defaults:
+  name: WeVibe Chorus
+  features:
+    - feature-type: Vibrate
+      id: 52a3c84e-28d4-4750-9a7e-a8618ded617e
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 30
+    - feature-type: Vibrate
+      id: 4aa54a5f-2b85-4178-b671-f4198acf3daf
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 30
+  id: 5228aefe-bc48-445c-8129-48c3cebf6729
+configurations:
+  - identifier:
+      - Sync 2
+    name: WeVibe Sync 2
+    features:
+      - feature-type: Vibrate
+        id: db4d008b-530e-4b8b-937a-bd4e5df4058c
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 30
+      - feature-type: Vibrate
+        id: 27c95f7a-91e7-46c9-90c2-b3d37ed20d6d
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 30
+    id: 3d5f001f-d3c0-44d5-9a6a-e4c8e7beb2e1
+  - identifier:
+      - Sync Lite
+    name: WeVibe Sync Lite
+    features:
+      - feature-type: Vibrate
+        id: 62316419-7c01-4ce2-8086-0ca210d26b25
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 30
+    id: 36640498-e77c-46f5-9f94-a1b90148f939
+communication:
+  - btle:
+      names:
+        - Chorus
+        - skeena
+        - Sync 2
+        - Sync Lite
+      services:
+        f000bb03-0451-4000-b000-000000000000:
+          tx: f000c000-0451-4000-b000-000000000000
+          rx: f000b000-0451-4000-b000-000000000000

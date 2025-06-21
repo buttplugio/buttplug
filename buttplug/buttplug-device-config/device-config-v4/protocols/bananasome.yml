@@ -1,0 +1,32 @@
+defaults:
+  name: Bananasome Rocket X7
+  features:
+    - feature-type: Oscillate
+      id: 63fa90c4-1ab9-4841-bfa3-45113f2c1d18
+      output:
+        Oscillate:
+          step-range:
+            - 0
+            - 255
+    - feature-type: Vibrate
+      id: 3e738dbf-3ff1-495a-a5bf-6d57776d80e8
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+    - feature-type: Vibrate
+      id: c2a5f510-44fc-4c79-a9e2-ebf4862c45cb
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+  id: 83c998f8-1a18-48af-aa52-2f310252eb54
+communication:
+  - btle:
+      names:
+        - 火箭X7
+      services:
+        0000ae00-0000-1000-8000-00805f9b34fb:
+          tx: 0000ae01-0000-1000-8000-00805f9b34fb

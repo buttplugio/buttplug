@@ -1,0 +1,31 @@
+defaults:
+  name: JoyHub Device
+  features:
+    - feature-type: Vibrate
+      id: 9fbf30f4-3f0d-4377-a232-55132d023d11
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+    - feature-type: Constrict
+      description: Suction
+      id: a38653c9-c245-4c98-86c9-3c0da68d646c
+      output:
+        Constrict:
+          step-range:
+            - 0
+            - 9
+  id: f89fcd7a-2411-4241-ae81-f4488e926d16
+configurations:
+  - identifier:
+      - J-Melody
+    name: JoyHub Melody
+    id: 2c33b13e-9d00-4823-bc5b-fda18dbd3691
+communication:
+  - btle:
+      names:
+        - J-Melody
+      services:
+        0000ffa0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffa1-0000-1000-8000-00805f9b34fb

@@ -1,0 +1,84 @@
+defaults:
+  name: Mysteryvibe Device
+  features:
+    - feature-type: Vibrate
+      id: 40c417e0-8a0b-4017-a0b5-2b33df4f0acc
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 56
+    - feature-type: Vibrate
+      id: 84057071-af0e-4156-9f82-f7afc794bcde
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 56
+    - feature-type: Vibrate
+      id: edaa4f3d-71c2-43b3-b9c3-b6a425b27200
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 56
+    - feature-type: Vibrate
+      id: b977c4f4-1585-49c4-9980-c2e8d329f713
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 56
+    - feature-type: Vibrate
+      id: ba9c09c7-1948-4b6f-823f-d9fd1380709c
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 56
+    - feature-type: Vibrate
+      id: 5a0a0429-5fb6-4bcb-bb4c-5e14f4338677
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 56
+  id: 523391d5-1e0a-42f0-b669-5ad3f3e49902
+configurations:
+  - identifier:
+      - MV Crescendo
+    name: MysteryVibe Crescendo
+    id: 09470af5-da2f-45f4-b540-da653c4c0b40
+  - identifier:
+      - 'MV Tenuto   '
+    name: MysteryVibe Tenuto
+    id: 1cb2c947-aa77-4aaa-83d4-f987ecb33953
+  - identifier:
+      - 'MV Poco     '
+    name: MysteryVibe Poco
+    features:
+      - feature-type: Vibrate
+        id: 78d26150-7355-4633-bdc0-d2d58b2ea2aa
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 56
+      - feature-type: Vibrate
+        id: 8f0c1cc0-b269-4eb6-a87f-34aeaee28906
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 56
+    id: b72b5597-a708-4fe9-919a-99f1d38291ef
+communication:
+  - btle:
+      names:
+        - MV Crescendo
+        - 'MV Tenuto   '
+        - 'MV Poco     '
+      services:
+        f0006900-110c-478b-b74b-6f403b364a9c:
+          txmode: f0006901-110c-478b-b74b-6f403b364a9c
+          txvibrate: f0006903-110c-478b-b74b-6f403b364a9c

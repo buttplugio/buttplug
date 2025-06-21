@@ -1,0 +1,59 @@
+defaults:
+  name: metaXsire Nolan
+  features:
+    - feature-type: Vibrate
+      id: 4961e88c-5c2e-4701-95ee-16d58538b65e
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 20
+    - feature-type: Oscillate
+      id: a3cd125d-ac6c-426d-b45a-fe3c7ae1e1d2
+      output:
+        Oscillate:
+          step-range:
+            - 0
+            - 20
+  id: ce9d4fe0-6614-493d-ac77-02ec5d42947d
+configurations:
+  - identifier:
+      - LB-W01
+    name: Libo Miao
+    features:
+      - feature-type: Vibrate
+        id: 59cacf4b-ef09-42ad-b3d6-459bc195da26
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 20
+    id: 2a4a4daa-5740-425b-b1a4-72b73f746fdf
+  - identifier:
+      - HH010
+    name: metaXsire HH010
+    features:
+      - feature-type: Oscillate
+        id: 968f7306-6997-4b76-a40f-acbb431d9582
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 20
+      - feature-type: Vibrate
+        id: 018009d0-b5bf-4f97-a13d-909d0e74fabc
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 20
+    id: 0e1f9fe7-22d9-4afb-9fe5-192b8e5508c3
+communication:
+  - btle:
+      names:
+        - LY272A01
+        - LB-W01
+        - HH010
+      services:
+        0000bae0-0000-1000-8000-00805f9b34fb:
+          tx: 0000bae1-0000-1000-8000-00805f9b34fb

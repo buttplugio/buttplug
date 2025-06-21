@@ -1,0 +1,71 @@
+defaults:
+  name: Kiiroo V2.1 Initialized Device
+  features: []
+  id: bd9c7fa4-214b-4871-8373-c5266ace0b90
+configurations:
+  - identifier:
+      - Onyx2.1
+    name: Kiiroo Onyx 2.1
+    features:
+      - feature-type: PositionWithDuration
+        id: 8cd94334-adde-4d9b-aad9-c2de93adb2c0
+        output:
+          PositionWithDuration:
+            step-range:
+              - 0
+              - 99
+    id: eac00879-448c-46ed-aaa5-efe86226fb48
+  - identifier:
+      - Onyx+
+    name: Kiiroo Onyx+
+    features:
+      - feature-type: PositionWithDuration
+        id: c66d882d-f752-45b4-806e-166d3e160eb8
+        output:
+          PositionWithDuration:
+            step-range:
+              - 0
+              - 99
+    id: 40dafef9-ef94-4b03-8b8a-e9d7e9fef317
+  - identifier:
+      - KEON
+      - Keon R2
+    name: Kiiroo Keon
+    features:
+      - feature-type: PositionWithDuration
+        id: da002a11-610a-4e13-94c5-4c45d51814f2
+        output:
+          PositionWithDuration:
+            step-range:
+              - 0
+              - 99
+    id: f3675b2e-d7b8-463b-8b91-30a5ebef24f4
+  - identifier:
+      - Rey
+      - We-Vibe Rocketman
+      - Realm1.1
+    name: Kiiroo Onyx+ Realm Edition
+    features:
+      - feature-type: PositionWithDuration
+        id: 8c896f82-2e17-46f9-9db2-531cc7e42236
+        output:
+          PositionWithDuration:
+            step-range:
+              - 0
+              - 99
+    id: d2fde950-8e0a-4231-8ebc-5c39dcf3349f
+communication:
+  - btle:
+      names:
+        - Rey
+        - We-Vibe Rocketman
+        - Realm1.1
+        - Onyx2.1
+        - Onyx+
+        - KEON
+        - Keon R2
+      services:
+        00001900-0000-1000-8000-00805f9b34fb:
+          whitelist: 00001901-0000-1000-8000-00805f9b34fb
+          tx: 00001902-0000-1000-8000-00805f9b34fb
+          rx: 00001903-0000-1000-8000-00805f9b34fb

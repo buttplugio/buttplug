@@ -1,0 +1,26 @@
+defaults:
+  name: FeelingSo Flair Feel
+  features:
+    - feature-type: Vibrate
+      id: ad577b65-e74b-44c3-868b-86e3bfd53dbe
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 19
+    - feature-type: Oscillate
+      id: 5a2bd962-a9ab-4bd6-af7b-ae1fd6b39d79
+      output:
+        Oscillate:
+          step-range:
+            - 0
+            - 19
+  id: 2f2d3b3d-e832-40e4-ad74-705c0f02997d
+communication:
+  - btle:
+      names:
+        - Flair Feel
+      services:
+        42410001-0000-0101-0000-736278637a72:
+          tx: 42410002-0000-0101-0000-736278637a72
+          rx: 42410003-0000-0101-0000-736278637a72

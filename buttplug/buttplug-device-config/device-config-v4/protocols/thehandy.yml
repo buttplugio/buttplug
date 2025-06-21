@@ -1,0 +1,19 @@
+defaults:
+  name: The Handy
+  features:
+    - feature-type: PositionWithDuration
+      id: 32309a60-f980-490d-a5f4-467ccae2d586
+      output:
+        PositionWithDuration:
+          step-range:
+            - 0
+            - 100
+  id: fc9de0ed-0f9f-402e-a1b5-4d1865e7b87b
+communication:
+  - btle:
+      names:
+        - The Handy
+      services:
+        1775244d-6b43-439b-877c-060f2d9bed07:
+          firmware: 1775ff51-6b43-439b-877c-060f2d9bed07
+          tx: 1775ff55-6b43-439b-877c-060f2d9bed07

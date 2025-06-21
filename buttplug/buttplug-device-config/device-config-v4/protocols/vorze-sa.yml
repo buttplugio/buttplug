@@ -1,0 +1,102 @@
+defaults:
+  name: Vorze Device
+  features: []
+  id: 3ed42429-379c-4f48-926e-f297cbe69258
+configurations:
+  - identifier:
+      - Bach smart
+    protocol-variant: vorze-sa-vibrator
+    name: Vorze Bach
+    features:
+      - feature-type: Vibrate
+        id: 447dbcfa-c295-4880-afba-93e24499a78d
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 2923a929-572c-472a-be12-ff5970f0b2b7
+  - identifier:
+      - ROCKET
+    name: Adult Festa Rocket
+    protocol-variant: vorze-sa-vibrator
+    features:
+      - feature-type: Vibrate
+        id: 557d3c89-2e15-4b4a-8480-07f4826a8384
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 756f590f-d2aa-4a4c-ac80-e4ac75a14f15
+  - identifier:
+      - CycSA
+    name: Vorze A10 Cyclone SA
+    protocol-variant: vorze-sa-single-rotator
+    features:
+      - feature-type: RotateWithDirection
+        id: 8e249d53-8d80-4f42-bc40-e6edb7779e92
+        output:
+          RotateWithDirection:
+            step-range:
+              - 0
+              - 99
+    id: 390a0e30-0b5f-4b6c-88b4-e4f16383b8a3
+  - identifier:
+      - UFOSA
+    name: Vorze UFO SA
+    protocol-variant: vorze-sa-single-rotator
+    features:
+      - feature-type: RotateWithDirection
+        id: 2d8d1443-c394-4df4-b9bb-1659d8323b45
+        output:
+          RotateWithDirection:
+            step-range:
+              - 0
+              - 99
+    id: 2ab3b09b-1020-4dcf-86f1-ecd9d5b40ce2
+  - identifier:
+      - UFO-TW
+    name: Vorze UFO TW
+    protocol-variant: vorze-sa-dual-rotator
+    features:
+      - feature-type: RotateWithDirection
+        id: a1632ce4-314f-481d-9ae2-2a11a0c4caa4
+        output:
+          RotateWithDirection:
+            step-range:
+              - 0
+              - 99
+      - feature-type: RotateWithDirection
+        id: 4b09a02d-9a4a-4c8b-8340-8e6ca3cecfc2
+        output:
+          RotateWithDirection:
+            step-range:
+              - 0
+              - 99
+    id: 32e92986-3ae4-45f3-9aec-05d6028f1cb7
+  - identifier:
+      - VorzePiston
+    protocol-variant: vorze-sa-piston
+    name: Vorze Piston
+    features:
+      - feature-type: PositionWithDuration
+        id: 7c8d7a1d-9e2f-4a92-83f3-42a0840b90bd
+        output:
+          PositionWithDuration:
+            step-range:
+              - 0
+              - 99
+    id: b1b17b07-c5b8-4db4-97c4-ef1597cf2e59
+communication:
+  - btle:
+      names:
+        - Bach smart
+        - CycSA
+        - UFOSA
+        - UFO-TW
+        - VorzePiston
+        - ROCKET
+      services:
+        40ee1111-63ec-4b7f-8ce7-712efd55b90e:
+          tx: 40ee2222-63ec-4b7f-8ce7-712efd55b90e

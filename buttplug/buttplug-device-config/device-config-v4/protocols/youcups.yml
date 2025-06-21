@@ -1,0 +1,18 @@
+defaults:
+  name: Youcups Warrior II
+  features:
+    - feature-type: Vibrate
+      id: d0c286dc-2608-4f8a-a621-3f65927ed57e
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 8
+  id: f73311e4-69d4-43d7-9781-1294e9d5bf0d
+communication:
+  - btle:
+      names:
+        - Youcups
+      services:
+        0000fee9-0000-1000-8000-00805f9b34fb:
+          tx: d44bc439-abfd-45a2-b575-925416129600

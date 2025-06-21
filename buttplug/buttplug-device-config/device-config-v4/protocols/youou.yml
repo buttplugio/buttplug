@@ -1,0 +1,18 @@
+defaults:
+  name: Youou Wand Vibrator
+  features:
+    - feature-type: Vibrate
+      id: 19dc8b35-713c-448b-926f-4d56b14f432d
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+  id: 6b113fe0-9d26-4dd3-a997-527eb8a048b0
+communication:
+  - btle:
+      names:
+        - VX001_*
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff6-0000-1000-8000-00805f9b34fb

@@ -1,0 +1,23 @@
+defaults:
+  name: DeepSire Device
+  features:
+    - feature-type: Vibrate
+      id: 08e0cd3e-65eb-42a4-8b15-990eb2e4c855
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+  id: dd188bc6-784e-4799-b80c-3f568f8794cc
+configurations:
+  - identifier:
+      - IMP 3
+    name: Kuirkish Imp 3
+    id: ee9f0605-415e-4b07-8deb-c7252eff7053
+communication:
+  - btle:
+      names:
+        - IMP 3
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb

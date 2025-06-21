@@ -1,0 +1,39 @@
+defaults:
+  name: Kiiroo V1 Device
+  features: []
+  id: dec656b7-b312-4626-9811-fe2d51ed1242
+configurations:
+  - identifier:
+      - PEARL
+    name: Kiiroo Pearl
+    features:
+      - feature-type: Vibrate
+        id: 31eee57b-a1d8-49de-ac72-0dba46885a28
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 4
+    id: aa35c397-8827-44c8-bc9f-a9acc234fba5
+  - identifier:
+      - ONYX
+    name: Kiiroo Onyx
+    features:
+      - feature-type: PositionWithDuration
+        id: 2fe100ee-4665-4132-b4c6-d70a4037d6ac
+        output:
+          PositionWithDuration:
+            step-range:
+              - 0
+              - 4
+    id: f01513ef-a0c9-412d-ae70-b965b65379a8
+communication:
+  - btle:
+      names:
+        - ONYX
+        - PEARL
+      services:
+        49535343-fe7d-4ae5-8fa9-9fafd205e455:
+          rx: 49535343-1e4d-4bd9-ba61-23c647249616
+          tx: 49535343-8841-43f4-a8d4-ecbe34729bb3
+          command: 49535343-aca3-481c-91ec-d85e28a60318

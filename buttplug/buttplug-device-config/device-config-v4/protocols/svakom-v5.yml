@@ -1,0 +1,98 @@
+defaults:
+  name: Svakom Device v5
+  features:
+    - feature-type: Vibrate
+      id: 4f672189-8169-4114-92cd-ed7f74427548
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 10
+    - feature-type: Vibrate
+      id: bdd5e445-0d53-47c9-9b9e-c60b83d821fd
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 10
+  id: 9b304bb1-b961-4948-937e-4e3ee1b429b0
+configurations:
+  - identifier:
+      - Chika
+    name: Svakom Chika
+    id: 4ca8c463-03fc-421d-ab03-27ed6f4283da
+  - identifier:
+      - Mora Neo
+    name: Svakom Mora Neo
+    features:
+      - feature-type: Vibrate
+        id: 7d13d266-a8f3-49b5-94d2-ac6242c40b7a
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 10
+      - feature-type: Vibrate
+        id: 3b4e80ae-3ec6-4bb7-aba9-1dc48dd1614b
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 10
+      - feature-type: Oscillate
+        id: 41ecfb09-8b4c-4ec1-9f7a-29b9ff1097f7
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 3
+    id: b647f340-bcd1-4d9e-88ac-e064ce86b1ac
+  - identifier:
+      - Trysta Neo
+    name: Svakom Trysta Neo
+    features:
+      - feature-type: Vibrate
+        id: 655ec2b3-ede8-4051-96da-c40eed164372
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 10
+      - feature-type: Vibrate
+        id: 4cc06c03-36d9-4b10-9d51-46417b0d7f3d
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 10
+      - feature-type: Oscillate
+        id: f62fea13-0dfb-4706-8122-9104abf9dca5
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 3
+    id: 66d5aa90-b2aa-4552-9777-cbb80aae2b9f
+  - identifier:
+      - Mini Emma Neo
+    name: Svakom Mini Emma Neo
+    features:
+      - feature-type: Vibrate
+        id: d957a257-9ae2-45f1-80b2-dbcc4dc2886b
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 10
+    id: 396d37c3-dc1e-473d-85ca-95bd9583d9f5
+communication:
+  - btle:
+      names:
+        - Chika
+        - Mora Neo
+        - Trysta Neo
+        - Mini Emma Neo
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb

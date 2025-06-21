@@ -1,0 +1,24 @@
+defaults:
+  name: Nobra's Silicone Dreams Toy
+  features:
+    - feature-type: Vibrate
+      id: 3d9a6c96-2f9e-4105-931b-c799c1c9f3e0
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 15
+  id: b548cba6-63cd-4d4c-9124-7e13303a6dec
+communication:
+  - btle:
+      names:
+        - NobraControl*
+      services:
+        0000abf0-0000-1000-8000-00805f9b34fb:
+          tx: 0000abf1-0000-1000-8000-00805f9b34fb
+  - serial:
+      port: default
+      baud-rate: 19200
+      data-bits: 8
+      parity: 'N'
+      stop-bits: 1

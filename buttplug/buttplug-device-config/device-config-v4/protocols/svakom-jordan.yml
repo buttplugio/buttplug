@@ -1,0 +1,26 @@
+defaults:
+  name: Svakom Jordan
+  features:
+    - feature-type: Vibrate
+      id: f59261c4-39a7-4e13-b7e8-52c0a117ea7f
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 10
+    - feature-type: Oscillate
+      id: 84200741-7440-4267-b9a1-519eebe884ed
+      output:
+        Oscillate:
+          step-range:
+            - 0
+            - 5
+  id: 89877d1d-9a8f-4265-93d7-7dbe4c093a58
+communication:
+  - btle:
+      names:
+        - Jordan
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb

@@ -1,0 +1,19 @@
+defaults:
+  name: Hgod Device
+  features:
+    - feature-type: Vibrate
+      id: cd638669-9f47-400f-8dcf-80583e7e563a
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 10
+  id: d786a1cc-7a7c-4b8b-996c-1d2fce573ca2
+communication:
+  - btle:
+      names:
+        - AMN NEO
+      services:
+        0000ffe3-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb

@@ -1,0 +1,127 @@
+defaults:
+  name: Libo Vibes Device
+  features:
+    - feature-type: Vibrate
+      id: db5d9b0a-8498-4f5a-b53b-111a9940367d
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+  id: 8ba2bd4c-962b-45ff-87e1-3812084c7c1c
+configurations:
+  - identifier:
+      - XiaoLu
+    name: Libo Lottie
+    id: 9c9b46bd-ab5e-4ec2-a9db-c80571074cfb
+  - identifier:
+      - LuXiaoHan
+    name: Libo LuLu
+    id: 80deea27-6833-4bdc-9d24-02615c3197d9
+  - identifier:
+      - Yuyi
+    name: Libo Lina
+    id: 982d708e-788b-4962-b9bb-c253f49becf8
+  - identifier:
+      - LuWuShuang
+    name: Libo Adel
+    id: d761eb50-9051-44ce-82ed-d301aa532cc3
+  - identifier:
+      - LiBo
+    name: Libo Lily
+    id: f9e758fe-3327-435b-94e3-eda7445d49e1
+  - identifier:
+      - QingTing
+    name: Libo Lucy
+    id: 93ce6ac4-2f24-4a8e-ab81-7a046403eb0c
+  - identifier:
+      - Huohu
+    name: Libo Lara
+    id: f0234003-d8d3-4858-837b-8051109e6770
+  - identifier:
+      - Yuyi
+    name: Libo Feather
+    features:
+      - feature-type: Vibrate
+        id: 39eca274-5634-4433-9be5-2c688fb9b65c
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 99
+    id: c63739df-3b00-4602-8d3d-8f1080ec499c
+  - identifier:
+      - BaiHu
+    name: Libo LaLa
+    features:
+      - feature-type: Vibrate
+        id: 4239e32b-b3ad-49e2-a96e-1fb7298b1889
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 5f43a406-9567-43fc-b3b8-5383b5200bfd
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 3
+    id: 2de690ff-ad02-4272-a2c7-845c3ea8b28c
+  - identifier:
+      - Gugudai
+    name: Libo Carlos
+    features:
+      - feature-type: Vibrate
+        id: 6fc0149e-d041-4987-a66e-dbf36739331f
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 80b80fb2-b458-4661-a1e2-a8f27651d390
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 3
+    id: 8e342d89-66d4-4943-ae42-015cb268444b
+  - identifier:
+      - Haima
+    name: Libo Selina
+    features:
+      - feature-type: Vibrate
+        id: 54c02210-8494-40c6-a04c-e0a302aa735e
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: a2fb0a58-895b-49f5-bc88-b0a38bc64e68
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 3
+    id: 6d2f4df7-18a1-4568-81be-0e8e545e82a1
+communication:
+  - btle:
+      names:
+        - XiaoLu
+        - LuXiaoHan
+        - BaiHu
+        - Gugudai
+        - Yuyi
+        - LuWuShuang
+        - LiBo
+        - QingTing
+        - Huohu
+        - Yuyi
+        - Haima
+      services:
+        00006000-0000-1000-8000-00805f9b34fb:
+          tx: 00006001-0000-1000-8000-00805f9b34fb
+          txmode: 00006002-0000-1000-8000-00805f9b34fb

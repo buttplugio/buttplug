@@ -1,0 +1,29 @@
+defaults:
+  name: Adrien Lastic Device
+  features:
+    - feature-type: Vibrate
+      id: 714132f1-7ddd-420e-bf9f-6927fce0c9c3
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 16
+  id: d5c4c815-9226-430d-8b40-915c0e208483
+configurations:
+  - identifier:
+      - LVS-S001
+    name: Adrien Lastic Palpitation
+    id: 92c43355-c16f-471a-9c5d-ea30186b75a8
+  - identifier:
+      - LVS-S002
+    name: Adrien Lastic Revelation
+    id: ef491238-d560-46e4-84ed-72c902632bb2
+communication:
+  - btle:
+      names:
+        - Placeholder to avoid conflict with bad attempt to clone a Lovense Lush
+      advertised-services:
+        - 00001320-0000-1000-8000-00805f9b34fb
+      services:
+        6e400001-b5a3-f393-e0a9-e50e24dcca9e:
+          tx: 6e400002-b5a3-f393-e0a9-e50e24dcca9e

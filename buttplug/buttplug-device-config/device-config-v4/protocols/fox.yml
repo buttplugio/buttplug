@@ -1,0 +1,21 @@
+defaults:
+  name: Fox Device
+  features:
+    - feature-type: Vibrate
+      id: e43828a2-7dc6-4af1-b450-73c50441849f
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 3
+  id: 4138dc32-5276-47e8-89d4-fddc6ca42c1d
+communication:
+  - btle:
+      names:
+        - FOX
+        - FOX M70 Pro
+        - FoxM70Pro
+        - FOX M70-2
+      services:
+        0000ae00-0000-1000-8000-00805f9b34fb:
+          tx: 0000ae01-0000-1000-8000-00805f9b34fb

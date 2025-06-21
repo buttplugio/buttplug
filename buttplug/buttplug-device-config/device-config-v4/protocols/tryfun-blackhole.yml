@@ -1,0 +1,25 @@
+defaults:
+  name: TryFun Black Hole Plus
+  features:
+    - feature-type: Oscillate
+      id: 3bf4453c-8ca3-42e5-82c6-409d85cdbacf
+      output:
+        Oscillate:
+          step-range:
+            - 0
+            - 100
+    - feature-type: Vibrate
+      id: e10533e6-9aac-4a71-99c1-0b44378d9f06
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+  id: 074de6cc-7aee-4b33-8d14-474a61d26548
+communication:
+  - btle:
+      names:
+        - TF-BHPLUS
+      services:
+        0000ffac-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffb7-0000-1000-8000-00805f9b34fb

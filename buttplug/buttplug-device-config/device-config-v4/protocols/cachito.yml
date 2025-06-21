@@ -1,0 +1,35 @@
+defaults:
+  name: Cachito Device
+  features:
+    - feature-type: Vibrate
+      id: 6e5ce97a-2eae-4807-a857-0e74a9f0d095
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 5
+    - feature-type: Vibrate
+      id: 2ec18700-3fac-4f3b-91c1-ead90bf853d0
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+  id: 0ce7063c-f118-44ea-80ed-66f3edb90a57
+configurations:
+  - identifier:
+      - CCTSK
+    name: Cachito Lure Tao
+    id: 8c4ee478-8dbb-41e6-b41c-a5664eec1532
+  - identifier:
+      - CCTXueGao
+    name: Cachito Ice Cream
+    id: 57b25f6e-03d6-44ef-b378-0ef9e69170d4
+communication:
+  - btle:
+      names:
+        - CCTSK
+        - CCTXueGao
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff2-0000-1000-8000-00805f9b34fb

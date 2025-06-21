@@ -1,0 +1,19 @@
+defaults:
+  name: Fredorch Device
+  features:
+    - feature-type: PositionWithDuration
+      id: d3985f07-f95a-4f72-859e-8b0ac76f251f
+      output:
+        PositionWithDuration:
+          step-range:
+            - 0
+            - 150
+  id: cbd6a5b5-50c0-4fb5-93e3-408fd027ff4d
+communication:
+  - btle:
+      names:
+        - YXlinksSPP
+      services:
+        0000ffb0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffb1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffb2-0000-1000-8000-00805f9b34fb

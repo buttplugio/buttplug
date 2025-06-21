@@ -1,0 +1,30 @@
+defaults:
+  name: Kiiroo Spot
+  features:
+    - feature-type: Vibrate
+      id: a047482e-01d1-477a-bf67-71c1ee667f94
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+    - feature-type: Battery
+      description: Battery Level
+      id: 5171bb1b-b234-4a56-96ae-d592d3065d00
+      input:
+        Battery:
+          value-range:
+            - - 0
+              - 100
+          input-commands:
+            - Read
+  id: 850e3d26-54df-4eb3-879e-e6f6aa93d335
+communication:
+  - btle:
+      names:
+        - SPOT W1
+      services:
+        00001400-0000-1000-8000-00805f9b34fb:
+          tx: 00001401-0000-1000-8000-00805f9b34fb
+        0000180f-0000-1000-8000-00805f9b34fb:
+          rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb

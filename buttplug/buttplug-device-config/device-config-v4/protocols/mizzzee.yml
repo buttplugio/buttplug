@@ -1,0 +1,18 @@
+defaults:
+  name: Mizz Zee Device
+  features:
+    - feature-type: Vibrate
+      id: be144c33-8f81-42b7-b43b-1def688feedf
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 68
+  id: d8aa061f-f60d-4e0c-a638-cbbae4493c3b
+communication:
+  - btle:
+      names:
+        - NFY008
+      services:
+        0000eea0-0000-1000-8000-00805f9b34fb:
+          tx: 0000eea1-0000-1000-8000-00805f9b34fb

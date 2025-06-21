@@ -1,0 +1,18 @@
+defaults:
+  name: Realov Device
+  features:
+    - feature-type: Vibrate
+      id: 7d9d20cd-1a03-487f-b6c7-9b337c49e534
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 50
+  id: 79b23444-7e36-4042-bd52-86221c67c988
+communication:
+  - btle:
+      names:
+        - REALOV_VIBE
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb

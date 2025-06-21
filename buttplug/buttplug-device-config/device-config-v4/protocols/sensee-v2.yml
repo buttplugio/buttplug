@@ -1,0 +1,156 @@
+defaults:
+  name: Sensee Device
+  features:
+    - feature-type: Vibrate
+      id: b5865307-0de8-4dd9-bb1a-69e1c2f3c39c
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+    - feature-type: Constrict
+      id: cd11ed14-d9ea-4c11-b454-41e5c697f70b
+      output:
+        Constrict:
+          step-range:
+            - 0
+            - 100
+  id: d7ba651e-88d6-4452-9fa5-1562b8d8be2a
+configurations:
+  - identifier:
+      - CCPA10S2
+    name: Sensee Capsule
+    id: 4629e2a0-553f-4178-a378-8a9a5e88b038
+  - identifier:
+      - CCPA18S5
+    name: Sensee Astronaut
+    id: e9be0c9a-43d9-4e95-9d1d-67e22f940a5f
+  - identifier:
+      - Easylive NO8 Cup
+    name: Sensee No8
+    features:
+      - feature-type: Vibrate
+        id: 1094606e-1407-4249-979c-98d6a6abf97c
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Oscillate
+        id: 542d9822-9617-472c-953b-c9519a59aaac
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 100
+    id: 72dcac71-472d-47bc-a408-60567765836c
+  - identifier:
+      - CCP322S5
+    name: Easylive Vader
+    features:
+      - feature-type: Vibrate
+        id: 4a6f2a58-1760-42e6-ae17-6e0c4880a48c
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Oscillate
+        id: aeab494e-3312-49bd-8f1f-599e3bab7f4d
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 100
+    id: b925cadb-6aef-4896-8b97-1dfa44702a9e
+  - identifier:
+      - CTY508S5
+    name: Sensee Voice-Interactive Female Vibrator
+    features:
+      - feature-type: Vibrate
+        id: c9600c27-1302-449c-9a07-268d59f818f3
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Oscillate
+        id: 377780e3-e3bd-4fe0-a345-6389eb32fbbe
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 100
+    id: fea99f9b-97da-44cf-a898-17e65abf86e3
+  - identifier:
+      - PTYB22S2
+    name: Sensee Moonlight
+    features:
+      - feature-type: Vibrate
+        id: 5c8664fd-1113-4d8b-af64-d42f6f303c3e
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Constrict
+        id: 848628c7-b34e-4af4-894f-7f51645dea6a
+        output:
+          Constrict:
+            step-range:
+              - 0
+              - 100
+    id: eca4db2b-f7ff-4d59-b73d-f2124786fceb
+  - identifier:
+      - CTY823S5
+    name: Sensee Little Seahorse
+    features:
+      - feature-type: Vibrate
+        id: 87712e50-fd72-4a3c-b122-ea3866e0942a
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Constrict
+        id: 2a7ce324-34dd-477c-b3e2-6a6632ee4b59
+        output:
+          Constrict:
+            step-range:
+              - 0
+              - 100
+    id: 4e2ffbbe-8f8f-4593-9eab-3409d85645a2
+  - identifier:
+      - CTY916S4
+    name: Sensee Dream Stick
+    features:
+      - feature-type: Oscillate
+        id: 631815ee-37e9-4de6-9b33-971b9135c718
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 864ef211-1635-41bc-9618-e3989f540287
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: f8032396-8384-448f-88e9-4c754d4ae12e
+communication:
+  - btle:
+      names:
+        - CCPA10S2
+        - CCPA18S5
+        - Easylive NO8 Cup
+        - CTY508S5
+        - CTY916S4
+        - PTYB22S2
+        - CCP322S5
+        - CTY823S5
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff5-0000-1000-8000-00805f9b34fb
+          rx: 0000fff4-0000-1000-8000-00805f9b34fb

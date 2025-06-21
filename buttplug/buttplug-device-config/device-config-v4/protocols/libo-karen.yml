@@ -1,0 +1,14 @@
+defaults:
+  name: Libo Karen
+  features: []
+  id: 2d9f29c7-7d0d-4319-967c-9f7b89eb7b1d
+communication:
+  - btle:
+      names:
+        - SuoYinQiu
+      services:
+        00006000-0000-1000-8000-00805f9b34fb:
+          tx: 00006001-0000-1000-8000-00805f9b34fb
+          txmode: 00006002-0000-1000-8000-00805f9b34fb
+        00006050-0000-1000-8000-00805f9b34fb:
+          rxpressure: 00006051-0000-1000-8000-00805f9b34fb

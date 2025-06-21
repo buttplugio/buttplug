@@ -1,0 +1,75 @@
+defaults:
+  name: Next Level Racing HF8 Haptic Gaming Pad
+  features:
+    - feature-type: Vibrate
+      description: Right thigh
+      id: 178ade8c-0063-4f37-b37f-c47608f0b1e3
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+    - feature-type: Vibrate
+      description: Left thigh
+      id: f3d43a20-94e8-4e6a-a504-4b2fe87cfbe1
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+    - feature-type: Vibrate
+      description: Right buttock
+      id: 00d0b735-ffb6-4964-b963-75b1d4995c89
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+    - feature-type: Vibrate
+      description: Left buttock
+      id: 5ba0a42a-8bed-4123-95bd-0d1f4bc5333d
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+    - feature-type: Vibrate
+      description: Right back
+      id: 29820b84-4c47-443d-85a5-8706f64d38c1
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+    - feature-type: Vibrate
+      description: Left back
+      id: b930b1ae-2974-4e8f-b95c-b960d848534c
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+    - feature-type: Vibrate
+      description: Right shoulder
+      id: 225e1d14-4cc9-4c8c-b6ff-5ae024e3387a
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+    - feature-type: Vibrate
+      description: Left shoulder
+      id: e369bcd9-8e2f-4466-8773-98bdf5fad7c5
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+  id: fc830a11-de0d-4262-8155-99827cb926a9
+communication:
+  - serial:
+      port: default
+      baud-rate: 115200
+      data-bits: 8
+      parity: 'N'
+      stop-bits: 1

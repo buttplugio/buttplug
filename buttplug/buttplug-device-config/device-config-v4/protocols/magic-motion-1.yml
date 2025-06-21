@@ -1,0 +1,121 @@
+defaults:
+  name: Magic Motion V1 Device
+  features:
+    - feature-type: Vibrate
+      id: 42173db5-95ac-49b5-8a5a-73a63d91fcec
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+    - feature-type: Battery
+      description: Battery Level
+      id: bcaf7da8-2e98-47e3-b22c-2204daf40a27
+      input:
+        Battery:
+          value-range:
+            - - 0
+              - 100
+          input-commands:
+            - Read
+  id: 2525206c-8bdc-4803-9636-79576f3e692f
+configurations:
+  - identifier:
+      - Smart Bean
+    name: MagicMotion Smart Bean
+    id: ef285932-0c7e-4edb-bc81-ce0c59f41c4a
+  - identifier:
+      - Smart Bean3
+    name: FitCute Kegel Rejuve
+    id: 5adced22-1742-4e1e-bf75-225275a500b0
+  - identifier:
+      - Smart Mini Vibe
+    name: MagicMotion Smart Mini Vibe
+    id: 0a69e7c1-51ca-49c1-91a3-c58debba037e
+  - identifier:
+      - Smart Mini Vibe3
+    name: MagicMotion Vini
+    id: c006d72e-5fee-4643-b324-35fa6d56e176
+  - identifier:
+      - Flamingo
+      - Flamingo T
+    name: MagicMotion Flamingo
+    id: efa69977-2c7b-4c0f-b9e6-ffa4d9c36630
+  - identifier:
+      - Magic Bean
+    name: MagicMotion Kegel
+    id: 7239ca39-f8fd-4727-940b-04483f08cfb9
+  - identifier:
+      - Magic Cell
+    name: MagicMotion Dante/Candy/Rise
+    id: 5596e91a-e336-4f26-b6da-19858be7ab67
+  - identifier:
+      - Magic Wand
+    name: MagicMotion Wand
+    id: 91c15cc1-3021-44fb-a64d-3231c007705a
+  - identifier:
+      - Magic Fugu
+      - Fugu
+      - Fugu2
+    name: MagicMotion Fugu
+    id: 3eefb122-6f5d-4e06-99c5-a89164b1d219
+  - identifier:
+      - Gballs2
+    name: G Vibe Gballs 2
+    id: a9c33895-4f0a-4ecc-a849-2e632dbc8f29
+  - identifier:
+      - GBalls3
+    name: G Vibe Gballs 3
+    id: c802d1e6-968a-4451-86e0-248e85e3d50d
+  - identifier:
+      - FM-LILAC-101
+    name: Femometer Lilac
+    id: ef73c48c-8f6a-44e2-940a-0dd45f69cfb2
+  - identifier:
+      - Xone
+    name: MagicMotion Xone
+    features:
+      - feature-type: Oscillate
+        id: ccd72f20-d37a-4e05-bad3-122c5da80b37
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Battery
+        description: Battery Level
+        id: 98a2e5c4-c4de-4ac5-a9db-b3e24a24424a
+        input:
+          Battery:
+            value-range:
+              - - 0
+                - 100
+            input-commands:
+              - Read
+    id: b24d166f-b6e0-4c9b-a056-8296564b19a8
+  - identifier:
+      - CBT002
+    name: FunTown Caleo
+    id: b6dc5c46-0919-4a45-900e-f83afae8b942
+communication:
+  - btle:
+      names:
+        - Smart Mini Vibe*
+        - Flamingo
+        - Flamingo T
+        - Smart Bean
+        - Smart Bean3
+        - Magic Cell
+        - Magic Wand
+        - Fugu
+        - Fugu2
+        - Gballs2
+        - GBalls3
+        - FM-LILAC-101
+        - Xone
+        - CBT002
+      services:
+        78667579-7b48-43db-b8c5-7928a6b0a335:
+          tx: 78667579-a914-49a4-8333-aa3c0cd8fedc
+        0000180f-0000-1000-8000-00805f9b34fb:
+          rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb

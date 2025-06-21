@@ -1,0 +1,56 @@
+defaults:
+  name: Lovehoney Device
+  features:
+    - feature-type: Vibrate
+      id: 716bdae7-2075-4e8a-a2cb-d37b6fc35a5b
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 127
+    - feature-type: Vibrate
+      id: ce0315b0-9918-4769-af8e-6ec6258d0e1a
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 127
+  id: fabcaab7-a38b-4c24-bf36-2ca4905a1e49
+configurations:
+  - identifier:
+      - PROSTATE VIBE
+    name: Lovehoney Desire Prostate Vibrator
+    id: d7aa359d-a9f0-40b1-8e20-b55e8ef809c0
+  - identifier:
+      - KNICKER VIBE
+    name: Lovehoney Desire Knicker Vibrator
+    features:
+      - feature-type: Vibrate
+        id: 5e192f37-2beb-4e21-b182-ff113642f465
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 127
+    id: 439c5fe2-3e8d-4917-bcd7-8f24824d854b
+  - identifier:
+      - LOVE EGG
+    name: Lovehoney Desire Love Egg
+    features:
+      - feature-type: Vibrate
+        id: 980c9d39-e0bc-45d9-8d41-3e95af348d6c
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 127
+    id: 00d4e759-900d-4c37-b6a3-ce446bb8f590
+communication:
+  - btle:
+      names:
+        - PROSTATE VIBE
+        - KNICKER VIBE
+        - LOVE EGG
+      services:
+        0000ff00-0000-1000-8000-00805f9b34fb:
+          tx: 0000ff01-0000-1000-8000-00805f9b34fb

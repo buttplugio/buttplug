@@ -1,0 +1,19 @@
+defaults:
+  name: Zemalia Dice for Love
+  features:
+    - feature-type: Vibrate
+      id: 60b702d6-d3ff-4554-a3ae-f4638ddc74ef
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 255
+  id: 5845f3f5-6943-41df-93df-04b3b1ce7ce2
+communication:
+  - btle:
+      names:
+        - ZhiAi
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb

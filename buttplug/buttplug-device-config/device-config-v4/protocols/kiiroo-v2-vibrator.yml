@@ -1,0 +1,134 @@
+defaults:
+  name: Kiiroo V2 Vibrator Device
+  features:
+    - feature-type: Vibrate
+      id: 9a7b7a0b-6601-48d6-adfe-0b39a6f152a8
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+    - feature-type: Vibrate
+      id: b1c6be0a-efc9-4327-8103-5315ebf3ac95
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+    - feature-type: Vibrate
+      id: 33fd2145-87d1-48fd-aaa9-0188b218d444
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+  id: 7dd84343-dfa3-4436-88b8-d3b3cca14064
+configurations:
+  - identifier:
+      - Pearl2
+    name: Kiiroo Pearl 2
+    features:
+      - feature-type: Vibrate
+        id: e0374b68-eb67-4ecd-b566-8ca8bb74ce68
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 7581a2c2-0d94-45b4-b427-4a52b0ae3dea
+  - identifier:
+      - Fuse
+    name: OhMiBod Fuse
+    features:
+      - feature-type: Vibrate
+        id: 49587cee-c54e-41ab-9d70-0687ba4e6fec
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: a44beeed-4997-4e52-badc-7e1321338fbc
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 31e26147-c9af-45f0-8ee1-edd6c9f9e22e
+  - identifier:
+      - Virtual Rabbit
+    name: PornHub Virtual Rabbit
+    features:
+      - feature-type: Vibrate
+        id: de373981-ea04-4afb-8e58-15e392c7cbdf
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: db2f18c1-0a5f-40b2-b825-ac5a6932334e
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: 0dbe6911-f95f-4abb-9550-5041a21f2ede
+  - identifier:
+      - Virtual Blowbot
+    name: PornHub Virtual Blowbot
+    features:
+      - feature-type: Vibrate
+        id: 35c2cebd-e539-42f6-be6a-15398bb60a22
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: f6ac9d49-3d48-4709-83ac-2ae0eb5ec74b
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: d78facf3-706c-44ec-98e8-c4e7baba5966
+  - identifier:
+      - Titan
+    name: Kiiroo Titan
+    features:
+      - feature-type: Vibrate
+        id: 5c535532-d02d-4acf-9482-fb17a5bc02ad
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 7a5a79b2-ff14-4ee6-ad91-d40649ca9d98
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        id: 9fc946db-8889-403b-b7e1-ce86614b8176
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+    id: b588d818-be20-4f01-b3ef-5383f6b60684
+communication:
+  - btle:
+      names:
+        - Pearl2
+        - Fuse
+        - Virtual Blowbot
+        - Titan
+        - Virtual Rabbit
+      services:
+        88f82580-0000-01e6-aace-0002a5d5c51b:
+          tx: 88f82581-0000-01e6-aace-0002a5d5c51b
+          rxtouch: 88f82582-0000-01e6-aace-0002a5d5c51b
+          rxaccel: 88f82584-0000-01e6-aace-0002a5d5c51b

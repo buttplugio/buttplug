@@ -1,0 +1,14 @@
+defaults:
+  name: Twerking Butt
+  features: []
+  id: 83e29d7a-6f35-499a-90f8-dfba8b674379
+communication:
+  - btle:
+      names:
+        - BODIKANG
+        - Twerking Butt
+        - TwerkingButt
+      services:
+        00000a60-0000-1000-8000-00805f9b34fb:
+          tx: 00000a66-0000-1000-8000-00805f9b34fb
+          rx: 00000a67-0000-1000-8000-00805f9b34fb
