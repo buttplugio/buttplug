@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
@@ -17,7 +17,8 @@ use crate::{
   },
 };
 use async_trait::async_trait;
-use std::sync::Arc;
+use uuid::{uuid, Uuid};
+use std::{collections::BTreeMap, sync::{atomic::{AtomicU8, Ordering}, Arc}};
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -35,6 +36,8 @@ pub mod setup {
   }
 }
 
+const MONSTERPUB_PROTOCOL_UUID: Uuid = uuid!("c7fe6c69-e7c2-4fa9-822a-6bb337dece1a");
+
 #[derive(Default)]
 pub struct MonsterPubIdentifier {}
 
@@ -46,7 +49,7 @@ impl ProtocolIdentifier for MonsterPubIdentifier {
     _: ProtocolCommunicationSpecifier,
   ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     let read_resp = hardware
-      .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 32, 500))
+      .read_value(&HardwareReadCmd::new(MONSTERPUB_PROTOCOL_UUID, Endpoint::RxBLEModel, 32, 500))
       .await;
     let ident = match read_resp {
       Ok(data) => std::str::from_utf8(data.data())
@@ -75,11 +78,11 @@ impl ProtocolInitializer for MonsterPubInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &UserDeviceDefinition,
+    def: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     if hardware.endpoints().contains(&Endpoint::Rx) {
       let value = hardware
-        .read_value(&HardwareReadCmd::new(Endpoint::Rx, 16, 200))
+        .read_value(&HardwareReadCmd::new(MONSTERPUB_PROTOCOL_UUID, Endpoint::Rx, 16, 200))
         .await?;
       let keys = [
         [
@@ -111,9 +114,11 @@ impl ProtocolInitializer for MonsterPubInitializer {
       );
 
       hardware
-        .write_value(&HardwareWriteCmd::new(Endpoint::Rx, auth, true))
+        .write_value(&HardwareWriteCmd::new(MONSTERPUB_PROTOCOL_UUID, Endpoint::Rx, auth, true))
         .await?;
     }
+    let output_count = def.features().iter().filter(|x| x.output().is_some()).count();
+
     Ok(Arc::new(MonsterPub::new(
       if hardware.endpoints().contains(&Endpoint::TxVibrate) {
         Endpoint::TxVibrate
@@ -122,45 +127,39 @@ impl ProtocolInitializer for MonsterPubInitializer {
       } else {
         Endpoint::Generic0 // tracy's dog 3 vibe
       },
+      output_count as u32
     )))
   }
 }
 
 pub struct MonsterPub {
   tx: Endpoint,
+  speeds: Vec<AtomicU8>
 }
 
 impl MonsterPub {
-  pub fn new(tx: Endpoint) -> Self {
-    Self { tx }
-  }
-}
-
-impl ProtocolHandler for MonsterPub {
-  fn needs_full_command_set(&self) -> bool {
-    true
-  }
-
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  pub fn new(tx: Endpoint, num_outputs: u32) -> Self {
+    let speeds: Vec<AtomicU8> = std::iter::repeat_with(|| AtomicU8::default())
+      .take(num_outputs as usize)
+      .collect();    
+    Self { 
+      tx,
+      speeds
+    }
   }
 
-  fn handle_value_cmd(
-    &self,
-    cmds: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn form_command(&self) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut data = vec![];
     let mut stop = true;
 
     if self.tx == Endpoint::Generic0 {
       data.push(3u8);
     }
-    for cmd in cmds.iter() {
-      if let Some((_, speed)) = cmd {
-        data.push(*speed as u8);
-        if *speed != 0 {
-          stop = false;
-        }
+    for cmd in self.speeds.iter() {
+      let speed = cmd.load(Ordering::Relaxed);
+      data.push(speed as u8);
+      if speed != 0 {
+        stop = false;
       }
     }
     let tx = if self.tx == Endpoint::Tx && stop {
@@ -169,10 +168,37 @@ impl ProtocolHandler for MonsterPub {
       self.tx
     };
     Ok(vec![HardwareWriteCmd::new(
+      MONSTERPUB_PROTOCOL_UUID,
       tx,
       data,
       tx == Endpoint::TxMode,
     )
     .into()])
+  }
+}
+
+impl ProtocolHandler for MonsterPub {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
+  fn handle_output_vibrate_cmd(
+      &self,
+      feature_index: u32,
+      _feature_id: Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
+    self.form_command()
+  }
+
+  fn handle_output_oscillate_cmd(
+      &self,
+      feature_index: u32,
+      _feature_id: Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
+    self.form_command()
   }
 }
