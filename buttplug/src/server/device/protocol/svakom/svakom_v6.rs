@@ -5,28 +5,59 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use async_trait::async_trait;
 use uuid::{uuid, Uuid};
 
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::Endpoint,
-  }, generic_protocol_setup, server::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{
-      ProtocolHandler, ProtocolKeepaliveStrategy,
-    },
+    message::{Endpoint, OutputType},
+  }, generic_protocol_initializer_setup, server::device::{
+    configuration::{UserDeviceDefinition, UserDeviceIdentifier}, hardware::{Hardware, HardwareCommand, HardwareWriteCmd}, protocol::{
+      ProtocolCommunicationSpecifier, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, ProtocolKeepaliveStrategy
+    }
   }
 };
-use std::sync::atomic::{AtomicU8, Ordering};
-
-generic_protocol_setup!(SvakomV6, "svakom-v6");
+use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
 
 const SVAKOM_V6_VIBRATOR_UUID: Uuid = uuid!("4cf33d95-a3d1-4ed4-9ac6-9ba6d6ccb091");
 
+generic_protocol_initializer_setup!(SvakomV6, "svakom-v6");
+
+#[derive(Default)]
+pub struct SvakomV6Initializer {}
+
+#[async_trait]
+impl ProtocolInitializer for SvakomV6Initializer {
+  async fn initialize(
+    &mut self,
+    _: Arc<Hardware>,
+    def: &UserDeviceDefinition,
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
+    let num_vibrators = def.features().iter().filter(|x| {
+      if let Some(output_map) = x.output() {
+        output_map.contains_key(&OutputType::Vibrate)
+      } else {
+        false
+      }
+    }).count() as u8;
+    Ok(Arc::new(SvakomV6::new(num_vibrators)))
+  }
+}
+
 #[derive(Default)]
 pub struct SvakomV6 {
+  num_vibrators: u8,
   last_vibrator_speeds: [AtomicU8; 3],
+}
+
+impl SvakomV6 {
+  fn new(num_vibrators: u8) -> Self {
+    Self {
+      num_vibrators,
+      .. Default::default()
+    }
+  }
 }
 
 impl ProtocolHandler for SvakomV6 {
@@ -50,7 +81,7 @@ impl ProtocolHandler for SvakomV6 {
         [
           0x55,
           0x03,
-          if (vibe1 > 0 && vibe2 > 0) || vibe1 == vibe2 {
+          if self.num_vibrators == 1 || (vibe1 > 0 && vibe2 > 0) || vibe1 == vibe2 {
             0x00
           } else if vibe1 > 0 {
             0x01
@@ -64,6 +95,7 @@ impl ProtocolHandler for SvakomV6 {
             0x01
           },
           vibe1.max(vibe2) as u8,
+          0x00
         ]
         .to_vec(),
         false,

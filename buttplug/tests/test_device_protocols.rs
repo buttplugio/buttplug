@@ -101,15 +101,15 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 //#[test_case("test_sexverse_lg389_protocol.yaml" ; "Sexverse LG389 Protocol")]
 #[test_case("test_svakom_alex_v2.yaml" ; "Svakom Alex Neo 2")]
 #[test_case("test_svakom_alex.yaml" ; "Svakom Alex Neo")]
-//#[test_case("test_svakom_barnard.yaml" ; "Svakom (Fantasy Cup) Barnard")]
-//#[test_case("test_svakom_cocopro.yaml" ; "Svakom Coco Pro")]
-//#[test_case("test_svakom_ella.yaml" ; "Svakom V1 Protocol - Ella")]
-//#[test_case("test_svakom_iker.yaml" ; "Svakom Iker")]
-//#[test_case("test_svakom_mora_neo.yaml" ; "Svakom Mora Neo")]
-//#[test_case("test_svakom_pulse.yaml" ; "Svakom Pulse Protocol - Pulse Lite Neo")]
-//#[test_case("test_svakom_sam2.yaml" ; "Svakom Sam Neo 2 Pro")]
-//#[test_case("test_svakom_theodore.yaml" ; "Svakom V3 Protocol - Theodore")]
-//#[test_case("test_svakom_vivianna.yaml" ; "Svakom V2 Protocol - Vivianna")]
+#[test_case("test_svakom_barnard.yaml" ; "Svakom (Fantasy Cup) Barnard")]
+#[test_case("test_svakom_cocopro.yaml" ; "Svakom Coco Pro")]
+#[test_case("test_svakom_ella.yaml" ; "Svakom V1 Protocol - Ella")]
+#[test_case("test_svakom_iker.yaml" ; "Svakom Iker")]
+#[test_case("test_svakom_mora_neo.yaml" ; "Svakom Mora Neo")]
+#[test_case("test_svakom_pulse.yaml" ; "Svakom Pulse Protocol - Pulse Lite Neo")]
+#[test_case("test_svakom_sam2.yaml" ; "Svakom Sam Neo 2 Pro")]
+#[test_case("test_svakom_theodore.yaml" ; "Svakom V3 Protocol - Theodore")]
+#[test_case("test_svakom_vivianna.yaml" ; "Svakom V2 Protocol - Vivianna")]
 //#[test_case("test_synchro_protocol.yaml" ; "Synchro Protocol")]
 #[test_case("test_tcode_linear_and_vibrate.yaml" ; "TCode (Linear + Vibrate)")]
 #[test_case("test_tryfun_blackhole_protocol.yaml" ; "TryFun Protocol - Black Hole Plus")]
@@ -131,7 +131,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v4(test_file: &str) {
-  //tracing_subscriber::fmt::init();
+  tracing_subscriber::fmt::init();
   util::device_test::client::client_v4::run_embedded_test_case(&load_test_case(test_file).await)
     .await;
 }
