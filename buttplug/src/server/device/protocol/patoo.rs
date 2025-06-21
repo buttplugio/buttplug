@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
@@ -17,7 +17,8 @@ use crate::{
   },
 };
 use async_trait::async_trait;
-use std::sync::Arc;
+use uuid::{uuid, Uuid};
+use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -74,42 +75,46 @@ impl ProtocolInitializer for PatooInitializer {
   }
 }
 
+const PATOO_TX_PROTOCOL_UUID: Uuid = uuid!("2366a70f-9a7c-4fea-8ba6-8b21a7d5d641");
+const PATOO_TX_MODE_PROTOCOL_UUID: Uuid = uuid!("b17714be-fc66-4d9b-bf52-afb3b91212a4");
+
 #[derive(Default)]
-pub struct Patoo {}
+pub struct Patoo {
+  speeds: [AtomicU8; 2]
+}
 
 impl ProtocolHandler for Patoo {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
-  fn handle_value_cmd(
-    &self,
-    cmds: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_vibrate_cmd(
+      &self,
+      feature_index: u32,
+      _feature_id: uuid::Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     let mut msg_vec = vec![];
     // Default to vibes
     let mut mode: u8 = 4u8;
 
     // Use vibe 1 as speed
-    let mut speed = cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;
+    let mut speed = self.speeds[0].load(Ordering::Relaxed);
     if speed == 0 {
       mode = 0;
 
+      let speed2 = self.speeds[1].load(Ordering::Relaxed);
       // If we have a second vibe and it's not also 0, use that
-      if cmds.len() > 1 {
-        speed = cmds[1].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;
-        if speed != 0 {
-          mode |= 0x80;
-        }
+      if speed2 != 0 {
+        speed = speed2;
+        mode |= 0x80;
       }
-    } else if cmds.len() > 1 && cmds[1].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8 != 0 {
-      // Enable second vibe if it's not at 0
-      mode |= 0x80;
     }
 
-    msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, vec![speed], true).into());
-    msg_vec.push(HardwareWriteCmd::new(Endpoint::TxMode, vec![mode], true).into());
+    msg_vec.push(HardwareWriteCmd::new(PATOO_TX_PROTOCOL_UUID, Endpoint::Tx, vec![speed], true).into());
+    msg_vec.push(HardwareWriteCmd::new(PATOO_TX_MODE_PROTOCOL_UUID, Endpoint::TxMode, vec![mode], true).into());
 
-    Ok(msg_vec)
+    Ok(msg_vec)    
   }
 }
