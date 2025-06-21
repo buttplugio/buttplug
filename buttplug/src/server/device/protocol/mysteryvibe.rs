@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
+    message::Endpoint,
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
@@ -20,13 +20,14 @@ use crate::{
       ProtocolInitializer,
     },
   },
-  util::{async_manager, sleep},
 };
 use async_trait::async_trait;
-use std::{sync::Arc, time::Duration};
-use tokio::sync::RwLock;
+use uuid::{uuid, Uuid};
+use std::{sync::{atomic::{AtomicU8, Ordering}, Arc}, time::Duration};
 
 generic_protocol_initializer_setup!(MysteryVibe, "mysteryvibe");
+
+const MYSTERYVIBE_PROTOCOL_UUID: Uuid = uuid!("53bca658-2efe-4388-8ced-333789bac20b");
 
 #[derive(Default)]
 pub struct MysteryVibeInitializer {}
@@ -36,11 +37,12 @@ impl ProtocolInitializer for MysteryVibeInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &UserDeviceDefinition,
+    def: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let msg = HardwareWriteCmd::new(Endpoint::TxMode, vec![0x43u8, 0x02u8, 0x00u8], true);
+    let msg = HardwareWriteCmd::new(MYSTERYVIBE_PROTOCOL_UUID, Endpoint::TxMode, vec![0x43u8, 0x02u8, 0x00u8], true);
     hardware.write_value(&msg).await?;
-    Ok(Arc::new(MysteryVibe::new(hardware)))
+    let vibrator_count = def.features().iter().filter(|x| x.output().is_some()).count();
+    Ok(Arc::new(MysteryVibe::new(vibrator_count as u8)))
   }
 }
 
@@ -51,65 +53,38 @@ impl ProtocolInitializer for MysteryVibeInitializer {
 //
 const MYSTERYVIBE_COMMAND_DELAY_MS: u64 = 93;
 
-async fn vibration_update_handler(device: Arc<Hardware>, command_holder: Arc<RwLock<Vec<u8>>>) {
-  info!("Entering Mysteryvibe Control Loop");
-  let mut current_command = command_holder.read().await.clone();
-  while device
-    .write_value(&HardwareWriteCmd::new(
-      Endpoint::TxVibrate,
-      current_command,
-      false,
-    ))
-    .await
-    .is_ok()
-  {
-    sleep(Duration::from_millis(MYSTERYVIBE_COMMAND_DELAY_MS)).await;
-    current_command = command_holder.read().await.clone();
-    info!("MV Command: {:?}", current_command);
-  }
-  info!("Mysteryvibe control loop exiting, most likely due to device disconnection.");
-}
-
+#[derive(Default)]
 pub struct MysteryVibe {
-  current_command: Arc<RwLock<Vec<u8>>>,
+  speeds: Vec<AtomicU8>,
 }
 
 impl MysteryVibe {
-  fn new(device: Arc<Hardware>) -> Self {
-    let current_command = Arc::new(RwLock::new(vec![0u8, 0, 0, 0, 0, 0]));
-    let current_command_clone = current_command.clone();
-    async_manager::spawn(
-      async move { vibration_update_handler(device, current_command_clone).await },
-    );
-    Self { current_command }
+  pub fn new(vibrator_count: u8) -> Self {
+    Self {
+      speeds: std::iter::repeat_with(|| AtomicU8::default())
+      .take(vibrator_count as usize)
+      .collect()
+    }
   }
 }
 
 impl ProtocolHandler for MysteryVibe {
-  fn needs_full_command_set(&self) -> bool {
-    true
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_millis(MYSTERYVIBE_COMMAND_DELAY_MS))
   }
 
-  fn handle_value_cmd(
-    &self,
-    cmds: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let current_command = self.current_command.clone();
-    let cmds = cmds.to_vec();
-    async_manager::spawn(async move {
-      let write_mutex = current_command.clone();
-      let mut command_writer = write_mutex.write().await;
-      let command: Vec<u8> = cmds
-        .into_iter()
-        .map(|x| x.expect("Validity ensured via GCM match_all").1 as u8)
-        .collect();
-      *command_writer = command;
-    });
-    Ok(vec![])
+  fn handle_output_vibrate_cmd(
+      &self,
+      feature_index: u32,
+      _feature_id: Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
+    Ok(vec![HardwareWriteCmd::new(
+      MYSTERYVIBE_PROTOCOL_UUID,
+      Endpoint::TxVibrate,
+      self.speeds.iter().map(|x| x.load(Ordering::Relaxed)).collect(),
+      false,
+    ).into()])
   }
 }
-
-// TODO Write some tests!
-//
-// At least, once I figure out how to do that with the weird timing on this
-// thing.
