@@ -231,10 +231,13 @@ impl ServerDevice {
     let device = Self::new(identifier, handler, hardware, &attrs);
 
     // If we need a keepalive with a packet replay, set this up via stopping the device on connect.
-    if requires_keepalive
+    if (requires_keepalive
       && matches!(
         strategy,
         ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+      )) || matches!(
+        strategy,
+        ProtocolKeepaliveStrategy::ForceRepeatLastPacketStrategy
       )
     {
       if let Err(e) = device.handle_stop_device_cmd().await {
@@ -316,6 +319,8 @@ impl ServerDevice {
                     warn!("Error writing keepalive packet: {:?}", e);
                     break;
                   }
+                } else {
+
                 }
               }
               _ => {
