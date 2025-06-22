@@ -499,14 +499,6 @@ configurations:
       - BA
     name: Lovense Solace Pro
     features:
-      - feature-type: Oscillate
-        description: Stroker Oscillation Speed
-        id: c8bbc7f6-c520-488b-9520-215df01eae0f
-        output:
-          Oscillate:
-            step-range:
-              - 0
-              - 20
       - feature-type: PositionWithDuration
         description: Stroker Position Based Movement
         id: c4b2855d-5ecc-4010-8a8d-17fd3e51cc57
@@ -515,6 +507,10 @@ configurations:
             step-range:
               - 0
               - 100
+          Oscillate:
+            step-range:
+              - 0
+              - 20              
       - feature-type: Battery
         description: Battery Level
         id: 0b1cba39-8bb7-4f87-9bed-c59f2284d702
