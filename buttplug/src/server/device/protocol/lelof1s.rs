@@ -69,7 +69,7 @@ impl ProtocolHandler for LeloF1s {
   fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,
-    feature_id: Uuid,
+    _feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);

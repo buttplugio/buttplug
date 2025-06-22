@@ -83,7 +83,7 @@ impl ProtocolHandler for WeVibe {
   fn handle_output_vibrate_cmd(
       &self,
       feature_index: u32,
-      feature_id: uuid::Uuid,
+      _feature_id: uuid::Uuid,
       speed: u32,
     ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
