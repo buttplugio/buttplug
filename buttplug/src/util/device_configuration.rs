@@ -10,13 +10,7 @@ use crate::{
   core::errors::{ButtplugDeviceError, ButtplugError},
   server::{
     device::configuration::{
-      BaseDeviceDefinition,
-      BaseDeviceIdentifier,
-      DeviceConfigurationManager,
-      DeviceConfigurationManagerBuilder,
-      ProtocolCommunicationSpecifier,
-      UserDeviceDefinition,
-      UserDeviceIdentifier,
+      BaseDeviceDefinition, BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder, DeviceSettings, ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier
     },
     message::server_device_feature::ServerDeviceFeature,
   },
@@ -75,6 +69,8 @@ struct ProtocolAttributes {
   base_id: Option<Uuid>,
   #[serde(skip_serializing_if = "Option::is_none")]
   features: Option<Vec<ServerDeviceFeature>>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  device_settings: Option<DeviceSettings>
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
@@ -117,6 +113,7 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
           .features
           .as_ref()
           .expect("This is a default, therefore we'll always have features."),
+        &defaults.device_settings
       );
       configurations.insert(None, config_attrs);
       for config in &protocol_def.configurations {
@@ -133,6 +130,7 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
                   .as_ref()
                   .expect("Defaults always have features"),
               ),
+              &config.device_settings
             );
             configurations.insert(Some(identifier.to_owned()), config_attrs);
           }

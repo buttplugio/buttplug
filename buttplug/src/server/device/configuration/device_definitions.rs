@@ -4,6 +4,42 @@ use uuid::Uuid;
 
 use crate::{core::message::Endpoint, server::message::server_device_feature::ServerDeviceFeature};
 
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct DeviceSettings {
+  #[serde(rename = "feature-timing-gap", skip_serializing_if = "Option::is_none", default)]
+  feature_timing_gap: Option<u32>,
+}
+
+impl DeviceSettings {
+  pub fn is_none(&self) -> bool {
+    self.feature_timing_gap.is_none()
+  }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct BaseFeatureSettings {
+  #[serde(rename = "alt-protocol-index", skip_serializing_if = "Option::is_none", default)]
+  alt_protocol_index: Option<u32>,
+}
+
+impl BaseFeatureSettings {
+  pub fn is_none(&self) -> bool {
+    self.alt_protocol_index.is_none()
+  }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct UserFeatureSettings {
+  #[serde(rename = "reverse-position", skip_serializing_if = "Option::is_none", default)]
+  reverse_position: Option<bool>
+}
+
+impl UserFeatureSettings {
+  pub fn is_none(&self) -> bool {
+    self.reverse_position.is_none()
+  }
+}
+
 #[derive(Debug, Clone, Getters)]
 #[getset(get = "pub")]
 pub struct BaseDeviceDefinition {
@@ -13,16 +49,18 @@ pub struct BaseDeviceDefinition {
   features: Vec<ServerDeviceFeature>,
   id: Uuid,
   protocol_variant: Option<String>,
+  device_settings: DeviceSettings,
 }
 
 impl BaseDeviceDefinition {
   /// Create a new instance
-  pub fn new(name: &str, id: &Uuid, protocol_variant: &Option<String>, features: &[ServerDeviceFeature]) -> Self {
+  pub fn new(name: &str, id: &Uuid, protocol_variant: &Option<String>, features: &[ServerDeviceFeature], device_settings: &Option<DeviceSettings>) -> Self {
     Self {
       name: name.to_owned(),
       features: features.into(),
       id: *id,
-      protocol_variant: protocol_variant.clone()
+      protocol_variant: protocol_variant.clone(),
+      device_settings: device_settings.clone().unwrap_or_default()
     }
   }
 

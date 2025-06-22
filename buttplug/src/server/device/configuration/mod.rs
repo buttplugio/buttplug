@@ -620,6 +620,7 @@ mod test {
               FeatureType::Vibrate,
               &Some(feature_actuator.clone()),
               &None,
+              &None,
             ),
             ServerDeviceFeature::new(
               "Edge Vibration 2",
@@ -628,8 +629,10 @@ mod test {
               FeatureType::Vibrate,
               &Some(feature_actuator.clone()),
               &None,
+              &None,
             ),
           ],
+          &None
         ),
       )
       .finish()

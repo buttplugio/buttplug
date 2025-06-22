@@ -5,20 +5,12 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::{
+use crate::{core::{
   errors::ButtplugDeviceError,
   message::{
-    OutputType,
-    DeviceFeature,
-    DeviceFeatureOutput,
-    DeviceFeatureRaw,
-    DeviceFeatureInput,
-    Endpoint,
-    FeatureType,
-    InputCommandType,
-    InputType,
+    DeviceFeature, DeviceFeatureInput, DeviceFeatureOutput, DeviceFeatureRaw, Endpoint, FeatureType, InputCommandType, InputType, OutputType
   },
-};
+}, server::device::configuration::BaseFeatureSettings};
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use std::{
@@ -39,8 +31,6 @@ use uuid::Uuid;
   Clone,
   Debug,
   Default,
-  PartialEq,
-  Eq,
   Getters,
   MutGetters,
   Setters,
@@ -71,7 +61,18 @@ pub struct ServerDeviceFeature {
   #[getset(get_copy = "pub", get_mut = "pub(super)")]
   #[serde(rename = "base-id", skip_serializing_if = "Option::is_none")]
   base_id: Option<Uuid>,
+  #[getset(get = "pub")]
+  #[serde(rename = "feature-settings", skip_serializing_if = "BaseFeatureSettings::is_none", default)]
+  feature_settings: BaseFeatureSettings
 }
+
+impl PartialEq for ServerDeviceFeature {
+  fn eq(&self, other: &Self) -> bool {
+    self.id == other.id()
+  }
+}
+
+impl Eq for ServerDeviceFeature {}
 
 impl ServerDeviceFeature {
   pub fn new(
@@ -81,6 +82,7 @@ impl ServerDeviceFeature {
     feature_type: FeatureType,
     output: &Option<HashMap<OutputType, ServerDeviceFeatureOutput>>,
     input: &Option<HashMap<InputType, ServerDeviceFeatureInput>>,
+    feature_settings: &Option<BaseFeatureSettings>
   ) -> Self {
     Self {
       description: description.to_owned(),
@@ -90,6 +92,7 @@ impl ServerDeviceFeature {
       raw: None,
       id: *id,
       base_id: *base_id,
+      feature_settings: feature_settings.clone().unwrap_or_default()
     }
   }
 
@@ -135,6 +138,7 @@ impl ServerDeviceFeature {
         raw: self.raw.clone(),
         id: Uuid::new_v4(),
         base_id: Some(self.id),
+        feature_settings: self.feature_settings.clone()
       }
     }
   }
@@ -148,6 +152,7 @@ impl ServerDeviceFeature {
       raw: Some(DeviceFeatureRaw::new(endpoints)),
       id: uuid::Uuid::new_v4(),
       base_id: None,
+      feature_settings: BaseFeatureSettings::default()
     }
   }
 }
