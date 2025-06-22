@@ -49,9 +49,14 @@ device_commands:
       commands:
         - !Write
             endpoint: tx
-            # "Vibrate:10;"
-            data: [86, 105, 98, 114, 97, 116, 101, 58, 49, 48, 59]
+            # "Vibrate1:10;"
+            data: [86, 105, 98, 114, 97, 116, 101, 49, 58, 49, 48, 59]
             write_with_response: false
+        - !Write
+            endpoint: tx
+            # "Vibrate2:10;"
+            data: [86, 105, 98, 114, 97, 116, 101, 50, 58, 49, 48, 59]
+            write_with_response: false            
   - !Messages
       device_index: 0
       messages:
@@ -78,5 +83,10 @@ device_commands:
         - !Write
             endpoint: tx
             # "Vibrate:0;"
-            data: [86, 105, 98, 114, 97, 116, 101, 58, 48, 59]
+            data: [86, 105, 98, 114, 97, 116, 101, 49, 58, 48, 59]
             write_with_response: false
+        - !Write
+            endpoint: tx
+            # "Vibrate:0;"
+            data: [86, 105, 98, 114, 97, 116, 101, 50, 58, 48, 59]
+            write_with_response: false            
