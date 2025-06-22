@@ -313,6 +313,7 @@ async fn test_client_range_limits() {
             FeatureType::Vibrate,
             &Some(feature_1_actuator),
             &None,
+            &None,
           ),
           ServerDeviceFeature::new(
             "Upper half",
@@ -320,6 +321,7 @@ async fn test_client_range_limits() {
             &None,
             FeatureType::Vibrate,
             &Some(feature_2_actuator),
+            &None,
             &None,
           ),
         ],
