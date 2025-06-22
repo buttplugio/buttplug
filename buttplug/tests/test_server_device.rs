@@ -65,7 +65,7 @@ async fn test_capabilities_exposure() {
     .await
     .expect("Test, assuming infallible.");
   while let Some(msg) = recv.next().await {
-    if let ButtplugServerMessageVariant::V4(ButtplugServerMessageV4::DeviceAdded(device)) = msg {
+    if let ButtplugServerMessageVariant::V4(ButtplugServerMessageV4::DeviceAdded(_device)) = msg {
       // TODO Figure out what we're actually testing here?!
       //assert!(device.device_features().iter().any(|x| x.actuator().));
       //assert!(device.device_messages().linear_cmd().is_some());
