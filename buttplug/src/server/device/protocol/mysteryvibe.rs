@@ -39,7 +39,7 @@ impl ProtocolInitializer for MysteryVibeInitializer {
     hardware: Arc<Hardware>,
     def: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let msg = HardwareWriteCmd::new(MYSTERYVIBE_PROTOCOL_UUID, Endpoint::TxMode, vec![0x43u8, 0x02u8, 0x00u8], true);
+    let msg = HardwareWriteCmd::new(&[MYSTERYVIBE_PROTOCOL_UUID], Endpoint::TxMode, vec![0x43u8, 0x02u8, 0x00u8], true);
     hardware.write_value(&msg).await?;
     let vibrator_count = def.features().iter().filter(|x| x.output().is_some()).count();
     Ok(Arc::new(MysteryVibe::new(vibrator_count as u8)))
@@ -81,7 +81,7 @@ impl ProtocolHandler for MysteryVibe {
     ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
-      MYSTERYVIBE_PROTOCOL_UUID,
+      &[MYSTERYVIBE_PROTOCOL_UUID],
       Endpoint::TxVibrate,
       self.speeds.iter().map(|x| x.load(Ordering::Relaxed)).collect(),
       false,

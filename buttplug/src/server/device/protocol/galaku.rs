@@ -151,7 +151,7 @@ impl ProtocolHandler for Galaku {
         0,
       ];
       Ok(vec![HardwareWriteCmd::new(
-        GALAKU_PROTOCOL_UUID,
+        &[GALAKU_PROTOCOL_UUID],
         Endpoint::Tx,
         data,
         false,
@@ -172,7 +172,7 @@ impl ProtocolHandler for Galaku {
         0,
       ];
       Ok(vec![HardwareWriteCmd::new(
-        GALAKU_PROTOCOL_UUID,
+        &[GALAKU_PROTOCOL_UUID],
         Endpoint::Tx,
         send_bytes(data),
         false,
@@ -252,7 +252,7 @@ impl ProtocolHandler for Galaku {
         .await?;
       device
         .write_value(&HardwareWriteCmd::new(
-          feature_id,
+          &[feature_id],
           Endpoint::Tx,
           send_bytes(data),
           true,

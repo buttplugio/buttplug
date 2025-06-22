@@ -76,7 +76,7 @@ impl ProtocolHandler for SvakomV6 {
       let vibe1 = self.last_vibrator_speeds[0].load(Ordering::Relaxed);
       let vibe2 = self.last_vibrator_speeds[1].load(Ordering::Relaxed);
       Ok(vec![HardwareWriteCmd::new(
-        SVAKOM_V6_VIBRATOR_UUID,
+        &[SVAKOM_V6_VIBRATOR_UUID],
         Endpoint::Tx,
         [
           0x55,
@@ -104,7 +104,7 @@ impl ProtocolHandler for SvakomV6 {
     } else {
       let vibe3 = self.last_vibrator_speeds[2].load(Ordering::Relaxed);
       Ok(vec![HardwareWriteCmd::new(
-        feature_id,
+        &[feature_id],
         Endpoint::Tx,
         [
           0x55,

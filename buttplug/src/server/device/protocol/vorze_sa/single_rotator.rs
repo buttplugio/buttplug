@@ -38,7 +38,7 @@ impl ProtocolHandler for VorzeSASingleRotator {
     let clockwise = if clockwise { 1u8 } else { 0 };
     let data: u8 = (clockwise) << 7 | (speed as u8);
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![self.device_type as u8, VorzeActions::Rotate as u8, data],
       true,

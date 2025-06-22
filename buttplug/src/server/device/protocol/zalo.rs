@@ -38,7 +38,7 @@ impl ProtocolHandler for Zalo {
     let speed0: u8 = self.speeds[0].load(Ordering::Relaxed);
     let speed1: u8 = self.speeds[1].load(Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![
         if speed0 == 0 && speed1 == 0 {

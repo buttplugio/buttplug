@@ -30,7 +30,7 @@ impl ProtocolHandler for Youcups {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       format!("$SYS,{}?", speed as u8).as_bytes().to_vec(),
       false,

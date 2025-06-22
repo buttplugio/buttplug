@@ -31,7 +31,7 @@ impl ProtocolHandler for Cupido {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0xb0, 0x03, 0, 0, 0, speed as u8, 0xaa],
       false,

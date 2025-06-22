@@ -531,7 +531,7 @@ impl ServerDevice {
       let mut c = current_hardware_commands.lock().await;
       if let Some(g) = c.as_mut() {
         for command in commands {
-          g.retain(|v| v.command_id() != command.command_id());
+          g.retain(|v| !command.overlaps(v));
           g.push_back(command);
         }
       } else {
@@ -665,7 +665,7 @@ impl ServerDevice {
     write_data: &RawCommandWrite,
   ) -> ButtplugServerResultFuture {
     let fut = self.hardware.write_value(&HardwareWriteCmd::new(
-      GENERIC_RAW_COMMAND_UUID,
+      &[GENERIC_RAW_COMMAND_UUID],
       endpoint,
       write_data.data().clone(),
       write_data.write_with_response(),

@@ -67,7 +67,7 @@ impl ProtocolHandler for JeJoue {
     }
 
     Ok(vec![HardwareWriteCmd::new(
-      JEJOUE_PROTOCOL_UUID,
+      &[JEJOUE_PROTOCOL_UUID],
       Endpoint::Tx,
       vec![pattern, speed],
       false,

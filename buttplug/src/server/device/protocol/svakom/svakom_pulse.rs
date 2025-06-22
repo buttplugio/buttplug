@@ -30,7 +30,7 @@ impl ProtocolHandler for SvakomPulse {
       speed: u32,
     ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       [
         0x55,

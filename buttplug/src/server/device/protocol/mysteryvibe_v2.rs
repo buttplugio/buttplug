@@ -38,7 +38,7 @@ impl ProtocolInitializer for MysteryVibeV2Initializer {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     // The only thing that's different about MysteryVibeV2 from v1 is the initialization packet.
     // Just send that then return the older protocol version.
-    let msg = HardwareWriteCmd::new(MYSTERYVIBE_V2_PROTOCOL_UUID, Endpoint::TxMode, vec![0x03u8, 0x02u8, 0x40u8], true);
+    let msg = HardwareWriteCmd::new(&[MYSTERYVIBE_V2_PROTOCOL_UUID], Endpoint::TxMode, vec![0x03u8, 0x02u8, 0x40u8], true);
     hardware.write_value(&msg).await?;
     let vibrator_count = def.features().iter().filter(|x| x.output().is_some()).count();
     Ok(Arc::new(MysteryVibe::new(vibrator_count as u8)))

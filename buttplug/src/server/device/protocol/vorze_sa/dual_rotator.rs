@@ -39,7 +39,7 @@ impl ProtocolHandler for VorzeSADualRotator {
     let speed_right = self.speeds[1].load(Ordering::Relaxed);
     let data_right = ((speed_right >= 0) as u8) << 7 | (speed_right.unsigned_abs());
     Ok(vec![HardwareWriteCmd::new(
-      VORZE_UFO_PROTOCOL_UUID,
+      &[VORZE_UFO_PROTOCOL_UUID],
       Endpoint::Tx,
       vec![VorzeDevice::UfoTw as u8, data_left, data_right],
       true,

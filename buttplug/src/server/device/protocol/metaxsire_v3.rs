@@ -28,7 +28,7 @@ pub struct MetaXSireV3 {}
 impl MetaXSireV3 {
   fn form_command(&self, feature_index: u32, feature_id: Uuid, speed: u32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
         Endpoint::Tx,
         vec![0xa1, 0x04, speed as u8, feature_index as u8 + 1],
         true,

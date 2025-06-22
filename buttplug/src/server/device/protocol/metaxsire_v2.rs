@@ -34,7 +34,7 @@ impl ProtocolInitializer for MetaXSireV2Initializer {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
       .write_value(&HardwareWriteCmd::new(
-        METAXSIRE_V2_PROTOCOL_ID,
+        &[METAXSIRE_V2_PROTOCOL_ID],
         Endpoint::Tx,
         vec![0xaa, 0x04],
         true,
@@ -55,7 +55,7 @@ impl MetaXSireV2 {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![
         0xaa,

@@ -30,7 +30,7 @@ impl ProtocolHandler for Omobo {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0xa1, 0x04, 0x04, 0x01, speed as u8, 0xff, 0x55],
       true,

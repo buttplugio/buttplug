@@ -57,7 +57,7 @@ impl ProtocolHandler for XInput {
       ));
     }
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       cmd,
       false,

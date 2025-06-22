@@ -38,7 +38,7 @@ impl ProtocolInitializer for WeToyInitializer {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
       .write_value(&HardwareWriteCmd::new(
-        WETOY_PROTOCOL_ID,
+        &[WETOY_PROTOCOL_ID],
         Endpoint::Tx,
         vec![0x80, 0x03],
         true,
@@ -61,7 +61,7 @@ impl ProtocolHandler for WeToy {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       if speed == 0 {
         vec![0x80, 0x03]

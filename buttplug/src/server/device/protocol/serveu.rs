@@ -56,7 +56,7 @@ impl ProtocolHandler for ServeU {
     };
 
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0x01, goal_pos, speed],
       false,

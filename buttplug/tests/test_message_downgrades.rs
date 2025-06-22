@@ -173,7 +173,7 @@ async fn test_version0_singlemotorvibratecmd() {
     &Duration::from_millis(150),
     &mut device,
     HardwareCommand::Write(HardwareWriteCmd::new(
-      Uuid::nil(),
+      &[Uuid::nil()],
       Endpoint::Tx,
       vec![0xF1, 64],
       false,
@@ -249,7 +249,7 @@ async fn test_version1_singlemotorvibratecmd() {
     &Duration::from_millis(150),
     &mut device,
     HardwareCommand::Write(HardwareWriteCmd::new(
-      Uuid::nil(),
+      &[Uuid::nil()],
       Endpoint::Tx,
       vec![0xF1, 64],
       false,

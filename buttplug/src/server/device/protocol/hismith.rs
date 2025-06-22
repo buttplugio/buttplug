@@ -110,7 +110,7 @@ impl ProtocolHandler for Hismith {
     let speed: u8 = speed as u8;
 
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0xAA, idx, speed, speed + idx],
       false,
@@ -134,7 +134,7 @@ impl ProtocolHandler for Hismith {
     };
 
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0xAA, idx, speed, speed + idx],
       false,

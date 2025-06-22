@@ -65,7 +65,7 @@ async fn send_command_raw(
   // send command
   device
     .write_value(&HardwareWriteCmd::new(
-      NINTENDO_JOYCON_PROTOCOL_UUID,
+      &[NINTENDO_JOYCON_PROTOCOL_UUID],
       Endpoint::Tx,
       buf.to_vec(),
       false,

@@ -73,7 +73,7 @@ impl ProtocolHandler for KiirooV21 {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0x01, speed as u8],
       false,
@@ -96,7 +96,7 @@ impl ProtocolHandler for KiirooV21 {
     let speed = (calculate_speed(distance, duration) * 99f64) as u8;
     self.previous_position.store(position, Relaxed);
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       [0x03, 0x00, speed, position].to_vec(),
       false,

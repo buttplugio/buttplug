@@ -106,6 +106,6 @@ impl ProtocolHandler for MagicMotionV4 {
         0x01,
       ]
     };
-    Ok(vec![HardwareWriteCmd::new(MAGICMOTIONV4_PROTOCOL_UUID, Endpoint::Tx, data, true).into()])
+    Ok(vec![HardwareWriteCmd::new(&[MAGICMOTIONV4_PROTOCOL_UUID], Endpoint::Tx, data, true).into()])
   }
 }

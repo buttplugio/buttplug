@@ -1,6 +1,6 @@
 pub mod communication;
 
-use std::{fmt::Debug, sync::Arc, time::Duration};
+use std::{collections::HashSet, fmt::Debug, sync::Arc, time::Duration};
 
 use crate::{
   core::{
@@ -64,10 +64,11 @@ impl HardwareReadCmd {
 /// [Hardware](crate::device::Hardware) structures.
 #[derive(Eq, Debug, Clone, Serialize, Deserialize, Getters, CopyGetters)]
 pub struct HardwareWriteCmd {
-  /// Feature ID for this command
-  #[getset(get_copy = "pub")]
+  /// Feature ID for this command. As a write command can possibly write to multiple features in one
+  /// call, this can have multiple feature IDs.
+  #[getset(get = "pub")]
   #[serde(default)]
-  command_id: Uuid,
+  command_id: HashSet<Uuid>,
   /// Endpoint to write to
   #[getset(get_copy = "pub")]
   endpoint: Endpoint,
@@ -90,13 +91,13 @@ impl PartialEq for HardwareWriteCmd {
 impl HardwareWriteCmd {
   /// Create a new DeviceWriteCmd instance.
   pub fn new(
-    command_id: Uuid,
+    command_id: &[Uuid],
     endpoint: Endpoint,
     data: Vec<u8>,
     write_with_response: bool,
   ) -> Self {
     Self {
-      command_id,
+      command_id: HashSet::from_iter(command_id.iter().cloned()),
       endpoint,
       data,
       write_with_response,
@@ -181,11 +182,31 @@ pub enum HardwareCommand {
 }
 
 impl HardwareCommand {
-  pub fn command_id(&self) -> Uuid {
+  pub fn overlaps(&self, command: &HardwareCommand) -> bool {
+    // There is probably a cleaner way to write these match branches to drop the if/else and default
+    // out to false, but I can't figure it out right now.
     match self {
-      HardwareCommand::Write(c) => c.command_id(),
-      HardwareCommand::Subscribe(c) => c.command_id(),
-      HardwareCommand::Unsubscribe(c) => c.command_id(),
+      HardwareCommand::Write(c) => {
+        if let HardwareCommand::Write(write) = command {
+          c.command_id().intersection(&write.command_id).count() > 0
+        } else {
+          false
+        }
+      }
+      HardwareCommand::Subscribe(c) => {
+        if let HardwareCommand::Subscribe(sub) = command {
+          c.command_id() == sub.command_id
+        } else {
+          false
+        }
+      }
+      HardwareCommand::Unsubscribe(c) => {
+        if let HardwareCommand::Unsubscribe(sub) = command {
+          c.command_id() == sub.command_id
+        } else {
+          false
+        }
+      }
     }
   }
 }
@@ -212,7 +233,7 @@ impl From<CheckedRawCmdV4> for HardwareCommand {
   fn from(value: CheckedRawCmdV4) -> Self {
     match value.raw_command() {
       RawCommand::Write(x) => HardwareCommand::Write(HardwareWriteCmd {
-        command_id: GENERIC_RAW_COMMAND_UUID,
+        command_id: HashSet::from_iter([GENERIC_RAW_COMMAND_UUID].iter().cloned()),
         endpoint: *value.endpoint(),
         data: x.data().clone(),
         write_with_response: x.write_with_response(),

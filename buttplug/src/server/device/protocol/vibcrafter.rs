@@ -83,7 +83,7 @@ impl ProtocolInitializer for VibCrafterInitializer {
     let auth_msg = format!("Auth:{};", auth_str);
     hardware
       .write_value(&HardwareWriteCmd::new(
-        VIBCRAFTER_PROTOCOL_UUID,
+        &[VIBCRAFTER_PROTOCOL_UUID],
         Endpoint::Tx,
         encrypt(auth_msg),
         false,
@@ -111,7 +111,7 @@ impl ProtocolInitializer for VibCrafterInitializer {
             let auth_msg = format!("Auth:{:02x}{:02x};", result[0], result[1]);
             hardware
               .write_value(&HardwareWriteCmd::new(
-                VIBCRAFTER_PROTOCOL_UUID,
+                &[VIBCRAFTER_PROTOCOL_UUID],
                 Endpoint::Tx,
                 encrypt(auth_msg),
                 false,
@@ -156,7 +156,7 @@ impl ProtocolHandler for VibCrafter {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
 
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       encrypt(format!(
         "MtInt:{:02}{:02};",

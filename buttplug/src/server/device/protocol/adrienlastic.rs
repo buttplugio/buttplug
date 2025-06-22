@@ -30,7 +30,7 @@ impl ProtocolHandler for AdrienLastic {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       format!("MotorValue:{speed:02};").as_bytes().to_vec(),
       true,

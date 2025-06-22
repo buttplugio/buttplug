@@ -96,7 +96,7 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
           // Send with response
           hardware
             .write_value(&HardwareWriteCmd::new(
-              LELO_F1S_V2_PROTOCOL_UUID,
+              &[LELO_F1S_V2_PROTOCOL_UUID],
               sec_endpoint,
               n,
               true,

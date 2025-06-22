@@ -114,7 +114,7 @@ impl ProtocolInitializer for MonsterPubInitializer {
       );
 
       hardware
-        .write_value(&HardwareWriteCmd::new(MONSTERPUB_PROTOCOL_UUID, Endpoint::Rx, auth, true))
+        .write_value(&HardwareWriteCmd::new(&[MONSTERPUB_PROTOCOL_UUID], Endpoint::Rx, auth, true))
         .await?;
     }
     let output_count = def.features().iter().filter(|x| x.output().is_some()).count();
@@ -168,7 +168,7 @@ impl MonsterPub {
       self.tx
     };
     Ok(vec![HardwareWriteCmd::new(
-      MONSTERPUB_PROTOCOL_UUID,
+      &[MONSTERPUB_PROTOCOL_UUID],
       tx,
       data,
       tx == Endpoint::TxMode,

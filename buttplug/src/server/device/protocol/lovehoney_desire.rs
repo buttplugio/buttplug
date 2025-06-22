@@ -71,17 +71,17 @@ impl ProtocolHandler for LovehoneyDesire {
     // We'll need to check what we got back and write our
     // commands accordingly.
     if self.current_commands.len() == 1 {
-      Ok(vec![HardwareWriteCmd::new(LOVEHONEY_DESIRE_PROTOCOL_UUID, Endpoint::Tx, vec![0xF3, 0, speed as u8], true).into()])
+      Ok(vec![HardwareWriteCmd::new(&[LOVEHONEY_DESIRE_PROTOCOL_UUID], Endpoint::Tx, vec![0xF3, 0, speed as u8], true).into()])
     } else {
       self.current_commands[feature_index as usize].store(speed as u8, Ordering::Relaxed);
       let speed0 = self.current_commands[0].load(Ordering::Relaxed);
       let speed1 = self.current_commands[1].load(Ordering::Relaxed);
       if speed0 == speed1 {
-        Ok(vec![HardwareWriteCmd::new(LOVEHONEY_DESIRE_PROTOCOL_UUID, Endpoint::Tx, vec![0xF3, 0, speed0 as u8], true).into()])
+        Ok(vec![HardwareWriteCmd::new(&[LOVEHONEY_DESIRE_PROTOCOL_UUID, LOVEHONEY_DESIRE_VIBE2_PROTOCOL_UUID], Endpoint::Tx, vec![0xF3, 0, speed0 as u8], true).into()])
       } else {
         Ok(vec![
-          HardwareWriteCmd::new(LOVEHONEY_DESIRE_PROTOCOL_UUID, Endpoint::Tx, vec![0xF3, 1, speed0 as u8], true).into(),
-          HardwareWriteCmd::new(LOVEHONEY_DESIRE_VIBE2_PROTOCOL_UUID, Endpoint::Tx, vec![0xF3, 2, speed1 as u8], true).into(),
+          HardwareWriteCmd::new(&[LOVEHONEY_DESIRE_PROTOCOL_UUID], Endpoint::Tx, vec![0xF3, 1, speed0 as u8], true).into(),
+          HardwareWriteCmd::new(&[LOVEHONEY_DESIRE_VIBE2_PROTOCOL_UUID], Endpoint::Tx, vec![0xF3, 2, speed1 as u8], true).into(),
         ])
       }
     }

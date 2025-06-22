@@ -62,7 +62,7 @@ impl ProtocolHandler for MagicMotionV2 {
       0x01,
     ];
     Ok(vec![HardwareWriteCmd::new(
-      MAGIC_MOTION_2_PROTOCOL_UUID,
+      &[MAGIC_MOTION_2_PROTOCOL_UUID],
       Endpoint::Tx,
       data,
       false,

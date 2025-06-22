@@ -53,7 +53,7 @@ impl ProtocolHandler for TryFunMeta2 {
     data.push(sum);
 
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       data,
       false,
@@ -92,7 +92,7 @@ impl ProtocolHandler for TryFunMeta2 {
     sum += count;
     data.push(sum);
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       data,
       false,
@@ -126,7 +126,7 @@ impl ProtocolHandler for TryFunMeta2 {
     data.push(sum);
 
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       data,
       false,

@@ -79,6 +79,6 @@ impl ProtocolHandler for WeVibe8Bit {
         0x00,
       ]
     };
-    Ok(vec![HardwareWriteCmd::new(WEVIBE8BIT_PROTOCOL_UUID, Endpoint::Tx, data, true).into()])
+    Ok(vec![HardwareWriteCmd::new(&[WEVIBE8BIT_PROTOCOL_UUID], Endpoint::Tx, data, true).into()])
   }
 }

@@ -79,7 +79,7 @@ impl ProtocolHandler for LeloF1s {
       .iter()
       .for_each(|v| cmd_vec.push(v.load(Ordering::Relaxed)));
     Ok(vec![HardwareWriteCmd::new(
-      LELO_F1S_PROTOCOL_UUID,
+      &[LELO_F1S_PROTOCOL_UUID],
       Endpoint::Tx,
       cmd_vec,
       self.write_with_response,

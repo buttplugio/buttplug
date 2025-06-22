@@ -82,6 +82,6 @@ impl ProtocolHandler for WeVibeChorus {
         0x00,
       ]
     };
-    Ok(vec![HardwareWriteCmd::new(WEVIBE_CHORUS_PROTOCOL_UUID, Endpoint::Tx, data, true).into()])
+    Ok(vec![HardwareWriteCmd::new(&[WEVIBE_CHORUS_PROTOCOL_UUID], Endpoint::Tx, data, true).into()])
   }
 }

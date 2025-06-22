@@ -30,7 +30,7 @@ impl ProtocolHandler for Cachito {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![
         2u8 + (feature_index as u8),

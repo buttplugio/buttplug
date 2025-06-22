@@ -39,7 +39,7 @@ impl ProtocolHandler for SvakomIker {
     let vibe1 = self.last_speeds[1].load(Ordering::Relaxed);
     if vibe0 == 0 && vibe1 == 0 {
       Ok(vec![HardwareWriteCmd::new(
-        feature_id,
+        &[feature_id],
         Endpoint::Tx,
         [0x55, 0x07, 0x00, 0x00, 0x00, 0x00].to_vec(),
         false,
@@ -48,7 +48,7 @@ impl ProtocolHandler for SvakomIker {
     } else {
       let mut msgs = vec!();
       msgs.push(HardwareWriteCmd::new(
-        feature_id,
+        &[feature_id],
         Endpoint::Tx,
         [0x55, 0x03, 0x03, 0x00, 0x01, vibe0 as u8].to_vec(),
         false,
@@ -56,7 +56,7 @@ impl ProtocolHandler for SvakomIker {
       .into());
       if vibe1 > 0 {
         msgs.push(HardwareWriteCmd::new(
-          feature_id,
+          &[feature_id],
           Endpoint::Tx,
           [0x55, 0x07, 0x00, 0x00, vibe1 as u8, 0x00].to_vec(),
           false,

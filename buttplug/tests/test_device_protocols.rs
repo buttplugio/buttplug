@@ -55,20 +55,19 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_lelo_idawave.yaml" ; "Lelo Harmony Protocol - Ida Wave")]
 #[test_case("test_lelo_tianiharmony.yaml" ; "Lelo Harmony Protocol - Tiani Harmony")]
 #[test_case("test_leten_protocol.yaml" ; "Leten Protocol")]
-//#[test_case("test_longlosttouch_protocol.yaml" ; "LongLostTouch Protocol")]
 #[test_case("test_loob_protocol.yaml" ; "Joyroid Loob Protocol")]
 #[test_case("test_lovehoney_desire_egg.yaml" ; "Lovehoney Desire Protocol - Love Egg")]
 #[test_case("test_lovehoney_desire_prostate.yaml" ; "Lovehoney Desire Protocol - Prostate Vibe")]
 #[test_case("test_lovense_battery_non_default.yaml" ; "Lovense Protocol - Lovense Battery (Non-Default Devices)")]
 #[test_case("test_lovense_battery.yaml" ; "Lovense Protocol - Lovense Battery (Default Devices)")]
-//#[test_case("test_lovense_edge.yaml" ; "Lovense Protocol - Edge")]
+#[test_case("test_lovense_edge.yaml" ; "Lovense Protocol - Edge")]
 #[test_case("test_lovense_flexer_fw2.yaml" ; "Lovense Protocol - Flexer FW2")]
 //#[test_case("test_lovense_flexer_fw3.yaml" ; "Lovense Protocol - Flexer FW3")]
 #[test_case("test_lovense_max.yaml" ; "Lovense Protocol - Lovense Max (Vibrate/Constrict)")]
-//#[test_case("test_lovense_nora.yaml" ; "Lovense Protocol - Lovense Nora (Vibrate/Rotate)")]
+#[test_case("test_lovense_nora.yaml" ; "Lovense Protocol - Lovense Nora (Vibrate/Rotate)")]
 //#[test_case("test_lovense_osci3.yaml" ; "Lovense Protocol - Osci3")]
-//#[test_case("test_lovense_ridge_user_config.yaml" ; "Lovense Protocol - Lovense Ridge (User Config)")]
-//#[test_case("test_lovense_ridge.yaml" ; "Lovense Protocol - Lovense Ridge (Oscillate)")]
+#[test_case("test_lovense_ridge_user_config.yaml" ; "Lovense Protocol - Lovense Ridge (User Config)")]
+#[test_case("test_lovense_ridge.yaml" ; "Lovense Protocol - Lovense Ridge (Oscillate)")]
 #[test_case("test_lovense_single_vibrator.yaml" ; "Lovense Protocol - Single Vibrator Device")]
 #[test_case("test_luvmazer_protocol.yaml" ; "Luvmazer Protocol")]
 #[test_case("test_magic_motion_1_magic_cell.yaml" ; "MagicMotion Protocol 1 - Magic Cell")]
@@ -132,7 +131,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v4(test_file: &str) {
-  //tracing_subscriber::fmt::init();
+  tracing_subscriber::fmt::init();
   util::device_test::client::client_v4::run_embedded_test_case(&load_test_case(test_file).await)
     .await;
 }

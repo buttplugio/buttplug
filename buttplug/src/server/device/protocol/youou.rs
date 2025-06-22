@@ -113,7 +113,7 @@ impl ProtocolHandler for Youou {
     data.append(&mut data2);
 
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       data,
       false,

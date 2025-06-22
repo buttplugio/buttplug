@@ -35,7 +35,7 @@ impl Default for Cowgirl {
 impl Cowgirl {
   fn hardware_commands(&self) -> Vec<HardwareCommand> {
     vec![HardwareWriteCmd::new(
-      COWGIRL_PROTOCOL_UUID,
+      &[COWGIRL_PROTOCOL_UUID],
       Endpoint::Tx,
       vec![
         0x00,

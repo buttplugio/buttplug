@@ -343,7 +343,7 @@ async fn test_client_range_limits() {
         &Duration::from_millis(150),
         &mut device,
         HardwareCommand::Write(HardwareWriteCmd::new(
-          Uuid::nil(),
+          &[Uuid::nil()],
           Endpoint::Tx,
           vec![0xF1, 32],
           false,
@@ -356,7 +356,7 @@ async fn test_client_range_limits() {
         &Duration::from_millis(150),
         &mut device,
         HardwareCommand::Write(HardwareWriteCmd::new(
-          Uuid::nil(),
+          &[Uuid::nil()],
           Endpoint::Tx,
           vec![0xF2, 96],
           false,
@@ -372,7 +372,7 @@ async fn test_client_range_limits() {
         &Duration::from_millis(150),
         &mut device,
         HardwareCommand::Write(HardwareWriteCmd::new(
-          Uuid::nil(),
+          &[Uuid::nil()],
           Endpoint::Tx,
           vec![0xF1, 0],
           false,
@@ -385,7 +385,7 @@ async fn test_client_range_limits() {
         &Duration::from_millis(150),
         &mut device,
         HardwareCommand::Write(HardwareWriteCmd::new(
-          Uuid::nil(),
+          &[Uuid::nil()],
           Endpoint::Tx,
           vec![0xF2, 0],
           false,

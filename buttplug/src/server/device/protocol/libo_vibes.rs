@@ -34,7 +34,7 @@ impl ProtocolHandler for LiboVibes {
     if feature_index == 0 {
       msg_vec.push(
         HardwareWriteCmd::new(
-          LIBO_VIBES_PROTOCOL_UUID,
+          &[LIBO_VIBES_PROTOCOL_UUID],
           Endpoint::Tx,
           vec![speed as u8],
           false,
@@ -44,14 +44,14 @@ impl ProtocolHandler for LiboVibes {
       // If this is a single vibe device, we need to send stop to TxMode too
       if speed as u8 == 0 {
         msg_vec.push(
-          HardwareWriteCmd::new(LIBO_VIBES_PROTOCOL_UUID, Endpoint::TxMode, vec![0u8], false)
+          HardwareWriteCmd::new(&[LIBO_VIBES_PROTOCOL_UUID], Endpoint::TxMode, vec![0u8], false)
             .into(),
         );
       }
     } else if feature_index == 1 {
       msg_vec.push(
         HardwareWriteCmd::new(
-          LIBO_VIBES_PROTOCOL_UUID,
+          &[LIBO_VIBES_PROTOCOL_UUID],
           Endpoint::TxMode,
           vec![speed as u8],
           false,

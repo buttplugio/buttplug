@@ -111,8 +111,8 @@ impl ProtocolHandler for Vibratissimo {
 
     // Put the device in write mode
     Ok(vec![
-      HardwareWriteCmd::new(feature_id, Endpoint::TxMode, vec![0x03, 0xff], false).into(),
-      HardwareWriteCmd::new(feature_id, Endpoint::TxVibrate, data, false).into(),
+      HardwareWriteCmd::new(&[feature_id], Endpoint::TxMode, vec![0x03, 0xff], false).into(),
+      HardwareWriteCmd::new(&[feature_id], Endpoint::TxVibrate, data, false).into(),
     ])
   }
 }

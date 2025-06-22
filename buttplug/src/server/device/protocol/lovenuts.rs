@@ -35,7 +35,7 @@ impl ProtocolHandler for LoveNuts {
     data.push(0xff);
 
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       data,
       false,

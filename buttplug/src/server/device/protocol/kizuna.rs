@@ -30,7 +30,7 @@ impl ProtocolHandler for Kizuna {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![48 + speed as u8, b'\r', b'\n'],
       false,

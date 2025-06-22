@@ -49,7 +49,7 @@ impl ProtocolHandler for Motorbunny {
       command_vec.append(&mut vec![crc, 0xec]);
     }
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       command_vec,
       false,
@@ -77,7 +77,7 @@ impl ProtocolHandler for Motorbunny {
       command_vec.append(&mut vec![crc, 0xec]);
     }
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       command_vec,
       false,

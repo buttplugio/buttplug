@@ -75,7 +75,7 @@ async fn send_hgod_updates(device: Arc<Hardware>, data: Arc<AtomicU8>) {
     if speed > 0 {
       if let Err(e) = device
         .write_value(&HardwareWriteCmd::new(
-          HGOD_PROTOCOL_UUID,
+          &[HGOD_PROTOCOL_UUID],
           Endpoint::Tx,
           command,
           false,

@@ -276,7 +276,7 @@ async fn test_device_stop_on_ping_timeout() {
     &Duration::from_millis(150),
     &mut device,
     HardwareCommand::Write(HardwareWriteCmd::new(
-      Uuid::nil(),
+      &[Uuid::nil()],
       Endpoint::Tx,
       vec![0xF1, 64],
       false,

@@ -33,7 +33,7 @@ impl ProtocolHandler for SvakomV2 {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if feature_index == 1 {
       Ok(vec![HardwareWriteCmd::new(
-        feature_id,
+        &[feature_id],
         Endpoint::Tx,
         [0x55, 0x06, 0x01, 0x00, speed as u8, speed as u8].to_vec(),
         true,
@@ -41,7 +41,7 @@ impl ProtocolHandler for SvakomV2 {
       .into()])
     } else {
       Ok(vec![HardwareWriteCmd::new(
-        feature_id,
+        &[feature_id],
         Endpoint::Tx,
         [
           0x55,

@@ -31,7 +31,7 @@ impl ProtocolHandler for Synchro {
     clockwise: bool,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![
         0xa1,

@@ -110,8 +110,8 @@ impl ProtocolHandler for Patoo {
       }
     }
 
-    msg_vec.push(HardwareWriteCmd::new(PATOO_TX_PROTOCOL_UUID, Endpoint::Tx, vec![speed], true).into());
-    msg_vec.push(HardwareWriteCmd::new(PATOO_TX_MODE_PROTOCOL_UUID, Endpoint::TxMode, vec![mode], true).into());
+    msg_vec.push(HardwareWriteCmd::new(&[PATOO_TX_PROTOCOL_UUID], Endpoint::Tx, vec![speed], true).into());
+    msg_vec.push(HardwareWriteCmd::new(&[PATOO_TX_MODE_PROTOCOL_UUID], Endpoint::TxMode, vec![mode], true).into());
 
     Ok(msg_vec)    
   }

@@ -36,7 +36,7 @@ impl Bananasome {
   fn hardware_command(&self, feature_index: u32, speed: u32) -> Vec<HardwareCommand> {
     self.current_commands[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     vec![HardwareWriteCmd::new(
-      BANANASOME_PROTOCOL_UUID,
+      &[BANANASOME_PROTOCOL_UUID],
       Endpoint::Tx,
       vec![
         0xa0,

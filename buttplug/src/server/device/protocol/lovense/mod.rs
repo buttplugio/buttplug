@@ -5,6 +5,12 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+mod lovense_max;
+mod lovense_rotate_vibrator;
+mod lovense_single_actuator;
+mod lovense_multi_actuator;
+mod lovense_stroker;
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -13,9 +19,9 @@ use crate::{
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+    protocol::{lovense::{lovense_max::LovenseMax, lovense_multi_actuator::LovenseMultiActuator, lovense_rotate_vibrator::LovenseRotateVibrator, lovense_single_actuator::LovenseSingleActuator, lovense_stroker::LovenseStroker}, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
-  util::{async_manager, sleep},
+  util::sleep,
 };
 use async_trait::async_trait;
 use dashmap::DashMap;
@@ -29,8 +35,6 @@ use std::{
   time::Duration,
 };
 use uuid::{uuid, Uuid};
-
-use super::ProtocolCommandOutputStrategy;
 
 // Constants for dealing with the Lovense subscript/write race condition. The
 // timeout needs to be VERY long, otherwise this trips up old lovense serial
@@ -102,7 +106,7 @@ impl ProtocolIdentifier for LovenseIdentifier {
 
     loop {
       let msg = HardwareWriteCmd::new(
-        LOVENSE_PROTOCOL_UUID,
+        &[LOVENSE_PROTOCOL_UUID],
         Endpoint::Tx,
         b"DeviceType;".to_vec(),
         false,
@@ -166,16 +170,24 @@ impl ProtocolInitializer for LovenseInitializer {
       .filter(|x| [FeatureType::Vibrate, FeatureType::Oscillate].contains(&x.feature_type()))
       .count();
 
-    let actuator_count = device_definition
+    let output_count = device_definition
       .features()
       .iter()
       .filter(|x| x.output().is_some())
       .count();
 
+    let vibrator_rotator = output_count == 2 && 
+      device_definition.features().iter().filter(|x| x.feature_type() == FeatureType::Vibrate).count() == 1 &&
+      device_definition.features().iter().filter(|x| x.feature_type() == FeatureType::RotateWithDirection).count() == 1;
+
+    let lovense_max = output_count == 2 && 
+      device_definition.features().iter().filter(|x| x.feature_type() == FeatureType::Vibrate).count() == 1 &&
+      device_definition.features().iter().filter(|x| x.feature_type() == FeatureType::Constrict).count() == 1;
+
     // This might need better tuning if other complex Lovenses are released
     // Currently this only applies to the Flexer/Lapis/Solace
     let use_mply =
-      (vibrator_count == 2 && actuator_count > 2) || vibrator_count > 2 || device_type == "H";
+      (vibrator_count == 2 && output_count > 2) || vibrator_count > 2 || device_type == "H";
 
     // New Lovense devices seem to be moving to the simplified LVS:<bytearray>; command format.
     // I'm not sure if there's a good way to detect this.
@@ -188,16 +200,22 @@ impl ProtocolInitializer for LovenseInitializer {
       if use_mply { "" } else { "not " }
     );
 
-    Ok(Arc::new(Lovense::new(
-      hardware,
-      &device_type,
-      vibrator_count,
-      use_mply,
-      use_lvs,
-    )))
+    if device_type == "BA" {
+      Ok(Arc::new(LovenseStroker::new(hardware)))
+    } else if output_count == 1 {
+      Ok(Arc::new(LovenseSingleActuator::default()))
+    } else if lovense_max {
+      Ok(Arc::new(LovenseMax::default()))
+    } else if vibrator_rotator {
+      Ok(Arc::new(LovenseRotateVibrator::default()))
+    } else {
+      Ok(Arc::new(LovenseMultiActuator::new(
+        vibrator_count as u32,
+      )))
+    }
   }
 }
-
+/*
 pub struct Lovense {
   rotation_direction: AtomicBool,
   vibrator_values: Vec<AtomicU32>,
@@ -210,19 +228,12 @@ pub struct Lovense {
 
 impl Lovense {
   pub fn new(
-    hardware: Arc<Hardware>,
     device_type: &str,
     vibrator_count: usize,
     use_mply: bool,
     use_lvs: bool,
   ) -> Self {
     let linear_info = Arc::new((AtomicU32::new(0), AtomicU32::new(0)));
-    if device_type == "BA" {
-      async_manager::spawn(update_linear_movement(
-        hardware.clone(),
-        linear_info.clone(),
-      ));
-    }
 
     let mut vibrator_values = vec![];
     for _ in 0..vibrator_count {
@@ -292,10 +303,6 @@ impl Lovense {
 }
 
 impl ProtocolHandler for Lovense {
-  fn cache_strategy(&self) -> ProtocolCommandOutputStrategy {
-    ProtocolCommandOutputStrategy::FullCommand
-  }
-
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     // For Lovense, we'll just repeat the device type packet and drop the result.
     super::ProtocolKeepaliveStrategy::HardwareRequiredRepeatPacketStrategy(HardwareWriteCmd::new(
@@ -336,7 +343,7 @@ impl ProtocolHandler for Lovense {
             .to_vec()
         };
         Ok(vec![HardwareWriteCmd::new(
-          feature_id,
+          &[feature_id],
           Endpoint::Tx,
           lovense_cmd,
           false,
@@ -402,166 +409,103 @@ impl ProtocolHandler for Lovense {
     }
       */
   }
+}
+  */
 
-  fn handle_output_constrict_cmd(
-    &self,
-    _feature_index: u32,
-    feature_id: Uuid,
-    level: u32,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let lovense_cmd = format!("Air:Level:{level};").as_bytes().to_vec();
-
-    Ok(vec![HardwareWriteCmd::new(
-      feature_id,
-      Endpoint::Tx,
-      lovense_cmd,
-      false,
-    )
-    .into()])
-  }
-
-  fn handle_output_rotate_cmd(
-    &self,
+fn handle_battery_level_cmd(
+    device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.handle_rotation_with_direction_cmd(feature_index, feature_id, speed, false)
+  ) -> BoxFuture<'static, Result<InputReadingV4, ButtplugDeviceError>> {
+  let mut device_notification_receiver = device.event_stream();
+  async move {
+    let write_fut = device.write_value(&HardwareWriteCmd::new(
+      &[feature_id],
+      Endpoint::Tx,
+      b"Battery;".to_vec(),
+      false,
+    ));
+    write_fut.await?;
+    while let Ok(event) = device_notification_receiver.recv().await {
+      match event {
+        HardwareEvent::Notification(_, _, data) => {
+          if let Ok(data_str) = std::str::from_utf8(&data) {
+            debug!("Lovense event received: {}", data_str);
+            let len = data_str.len();
+            // Depending on the state of the toy, we may get an initial
+            // character of some kind, i.e. if the toy is currently vibrating
+            // then battery level comes up as "s89;" versus just "89;". We'll
+            // need to chop the semicolon and make sure we only read the
+            // numbers in the string.
+            //
+            // Contains() is casting a wider net than we need here, but it'll
+            // do for now.
+            let start_pos = usize::from(data_str.contains('s'));
+            if let Ok(level) = data_str[start_pos..(len - 1)].parse::<u8>() {
+              return Ok(message::InputReadingV4::new(
+                0,
+                feature_index,
+                message::InputType::Battery,
+                vec![level as i32],
+              ));
+            }
+          }
+        }
+        HardwareEvent::Disconnected(_) => {
+          return Err(ButtplugDeviceError::ProtocolSpecificError(
+            "Lovense".to_owned(),
+            "Lovense Device disconnected while getting Battery info.".to_owned(),
+          ))
+        }
+      }
+    }
+    Err(ButtplugDeviceError::ProtocolSpecificError(
+      "Lovense".to_owned(),
+      "Lovense Device disconnected while getting Battery info.".to_owned(),
+    ))
   }
+  .boxed()
+}
 
-  fn handle_rotation_with_direction_cmd(
-    &self,
-    _feature_index: u32,
-    feature_id: Uuid,
-    speed: u32,
-    clockwise: bool,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let mut hardware_cmds = vec![];
+pub(super) fn keepalive_strategy() -> super::ProtocolKeepaliveStrategy {
+  // For Lovense, we'll just repeat the device type packet and drop the result.
+  super::ProtocolKeepaliveStrategy::HardwareRequiredRepeatPacketStrategy(HardwareWriteCmd::new(
+    &[LOVENSE_PROTOCOL_UUID],
+    Endpoint::Tx,
+    b"DeviceType;".to_vec(),
+    false,
+  ))
+}
+
+pub(super) fn form_lovense_command(feature_id: Uuid, command: &str) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  Ok(vec![HardwareWriteCmd::new(
+    &[feature_id],
+    Endpoint::Tx,
+    command.as_bytes().to_vec(),
+    false,
+  )
+  .into()])
+}
+
+pub(super) fn form_vibrate_command(feature_id: Uuid, speed: u32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  form_lovense_command(feature_id, &format!("Vibrate:{speed};"))
+}
+
+// Due to swapping direction with lovense requiring a seperate command, we have to treat these like
+// two seperate outputs, otherwise we'll stomp on ourselves. Luckily Lovense devices currently only
+// have one rotation mechanism. 
+const LOVENSE_ROTATE_UUID: Uuid = uuid!("4a741489-922f-4f0b-a594-175b75482849");
+const LOVENSE_ROTATE_DIRECTION_UUID: Uuid = uuid!("4ad23456-2ba8-4916-bd91-9b603811f253");
+
+pub(super) fn form_rotate_with_direction_command(speed: u32, change_direction: bool) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  let mut hardware_cmds = vec![];
     let lovense_cmd = format!("Rotate:{speed};").as_bytes().to_vec();
-    hardware_cmds.push(HardwareWriteCmd::new(feature_id, Endpoint::Tx, lovense_cmd, false).into());
-    let current_dir = self.rotation_direction.load(Ordering::Relaxed);
-    if current_dir != clockwise {
-      self.rotation_direction.store(clockwise, Ordering::Relaxed);
+    hardware_cmds.push(HardwareWriteCmd::new(&[LOVENSE_ROTATE_UUID], Endpoint::Tx, lovense_cmd, false).into());
+    if change_direction {
       hardware_cmds.push(
-        HardwareWriteCmd::new(feature_id, Endpoint::Tx, b"RotateChange;".to_vec(), false).into(),
+        HardwareWriteCmd::new(&[LOVENSE_ROTATE_DIRECTION_UUID], Endpoint::Tx, b"RotateChange;".to_vec(), false).into(),
       );
     }
     trace!("{:?}", hardware_cmds);
     Ok(hardware_cmds)
-  }
-
-  fn handle_battery_level_cmd(
-    &self,
-    device: Arc<Hardware>,
-    feature_index: u32,
-    feature_id: Uuid,
-  ) -> BoxFuture<Result<InputReadingV4, ButtplugDeviceError>> {
-    let mut device_notification_receiver = device.event_stream();
-    async move {
-      let write_fut = device.write_value(&HardwareWriteCmd::new(
-        feature_id,
-        Endpoint::Tx,
-        b"Battery;".to_vec(),
-        false,
-      ));
-      write_fut.await?;
-      while let Ok(event) = device_notification_receiver.recv().await {
-        match event {
-          HardwareEvent::Notification(_, _, data) => {
-            if let Ok(data_str) = std::str::from_utf8(&data) {
-              debug!("Lovense event received: {}", data_str);
-              let len = data_str.len();
-              // Depending on the state of the toy, we may get an initial
-              // character of some kind, i.e. if the toy is currently vibrating
-              // then battery level comes up as "s89;" versus just "89;". We'll
-              // need to chop the semicolon and make sure we only read the
-              // numbers in the string.
-              //
-              // Contains() is casting a wider net than we need here, but it'll
-              // do for now.
-              let start_pos = usize::from(data_str.contains('s'));
-              if let Ok(level) = data_str[start_pos..(len - 1)].parse::<u8>() {
-                return Ok(message::InputReadingV4::new(
-                  0,
-                  feature_index,
-                  message::InputType::Battery,
-                  vec![level as i32],
-                ));
-              }
-            }
-          }
-          HardwareEvent::Disconnected(_) => {
-            return Err(ButtplugDeviceError::ProtocolSpecificError(
-              "Lovense".to_owned(),
-              "Lovense Device disconnected while getting Battery info.".to_owned(),
-            ))
-          }
-        }
-      }
-      Err(ButtplugDeviceError::ProtocolSpecificError(
-        "Lovense".to_owned(),
-        "Lovense Device disconnected while getting Battery info.".to_owned(),
-      ))
-    }
-    .boxed()
-  }
-
-  fn handle_position_with_duration_cmd(
-    &self,
-    _feature_index: u32,
-    _feature_id: Uuid,
-    position: u32,
-    duration: u32,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.linear_info.0.store(position, Ordering::Relaxed);
-    self.linear_info.1.store(duration, Ordering::Relaxed);
-    Ok(vec![])
-  }
-}
-
-async fn update_linear_movement(device: Arc<Hardware>, linear_info: Arc<(AtomicU32, AtomicU32)>) {
-  let mut last_goal_position = 0i32;
-  let mut current_move_amount = 0i32;
-  let mut current_position = 0i32;
-  loop {
-    // See if we've updated our goal position
-    let goal_position = linear_info.0.load(Ordering::Relaxed) as i32;
-    // If we have and it's not the same, recalculate based on current status.
-    if last_goal_position != goal_position {
-      last_goal_position = goal_position;
-      // We move every 100ms, so divide the movement into that many chunks.
-      // If we're moving so fast it'd be under our 100ms boundary, just move in 1 step.
-      let move_steps = (linear_info.1.load(Ordering::Relaxed) / 100).max(1);
-      current_move_amount = (goal_position - current_position) / move_steps as i32;
-    }
-
-    // If we aren't going anywhere, just pause then restart
-    if current_position == last_goal_position {
-      sleep(Duration::from_millis(100)).await;
-      continue;
-    }
-
-    // Update our position, make sure we don't overshoot
-    current_position += current_move_amount;
-    if current_move_amount < 0 {
-      if current_position < last_goal_position {
-        current_position = last_goal_position;
-      }
-    } else if current_position > last_goal_position {
-      current_position = last_goal_position;
-    }
-
-    let lovense_cmd = format!("FSetSite:{current_position};");
-
-    let hardware_cmd = HardwareWriteCmd::new(
-      LOVENSE_PROTOCOL_UUID,
-      Endpoint::Tx,
-      lovense_cmd.into_bytes(),
-      false,
-    );
-    if device.write_value(&hardware_cmd).await.is_err() {
-      return;
-    }
-    sleep(Duration::from_millis(100)).await;
-  }
 }

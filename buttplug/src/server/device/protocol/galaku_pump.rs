@@ -62,7 +62,7 @@ impl GalakuPump {
       data2.push((Wrapping((k ^ 0x23) ^ data[i]) + Wrapping(k)).0);
     }
 
-    vec![HardwareWriteCmd::new(GALAKU_PUMP_PROTOCOL_UUID, Endpoint::Tx, data2, true).into()]
+    vec![HardwareWriteCmd::new(&[GALAKU_PUMP_PROTOCOL_UUID], Endpoint::Tx, data2, true).into()]
   }
 }
 

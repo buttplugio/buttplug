@@ -52,7 +52,7 @@ impl ProtocolInitializer for AnkniInitializer {
     debug!("Ankni Checksum: {:#02X}", check);
 
     let msg = HardwareWriteCmd::new(
-      ANKNI_PROTOCOL_UUID,
+      &[ANKNI_PROTOCOL_UUID],
       Endpoint::Tx,
       vec![
         0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
@@ -62,7 +62,7 @@ impl ProtocolInitializer for AnkniInitializer {
     );
     hardware.write_value(&msg).await?;
     let msg = HardwareWriteCmd::new(
-      ANKNI_PROTOCOL_UUID,
+      &[ANKNI_PROTOCOL_UUID],
       Endpoint::Tx,
       vec![
         0x01, 0x02, check, check, check, check, check, check, check, check, check, check, check,
@@ -88,7 +88,7 @@ impl ProtocolHandler for Ankni {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![
         0x03,
