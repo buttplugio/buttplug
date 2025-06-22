@@ -22,9 +22,7 @@ use buttplug::{
     },
   },
   server::message::{
-    ButtplugClientMessageV3,
     ButtplugClientMessageVariant,
-    ButtplugServerMessageV3,
     ButtplugServerMessageVariant,
     DeviceListV3,
     ServerInfoV2,
