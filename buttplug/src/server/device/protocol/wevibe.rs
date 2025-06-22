@@ -44,7 +44,7 @@ impl ProtocolInitializer for WeVibeInitializer {
     debug!("calling WeVibe init");
     hardware
       .write_value(&HardwareWriteCmd::new(
-        WEVIBE_PROTOCOL_UUID,
+        &[WEVIBE_PROTOCOL_UUID],
         Endpoint::Tx,
         vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
         true,
@@ -52,7 +52,7 @@ impl ProtocolInitializer for WeVibeInitializer {
       .await?;
     hardware
       .write_value(&HardwareWriteCmd::new(
-        WEVIBE_PROTOCOL_UUID,
+        &[WEVIBE_PROTOCOL_UUID],
         Endpoint::Tx,
         vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
         true,
@@ -104,6 +104,6 @@ impl ProtocolHandler for WeVibe {
         0x00,
       ]
     };
-    Ok(vec![HardwareWriteCmd::new(WEVIBE_PROTOCOL_UUID, Endpoint::Tx, data, true).into()])
+    Ok(vec![HardwareWriteCmd::new(&[WEVIBE_PROTOCOL_UUID], Endpoint::Tx, data, true).into()])
   }
 }

@@ -54,7 +54,7 @@ async fn vibration_update_handler(device: Arc<Hardware>, command_holder: Arc<Ato
       let current_command = vec![0x03, 0x02, 0x00, speed];
       if device
         .write_value(&HardwareWriteCmd::new(
-          XUANHUAN_PROTOCOL_ID,
+          &[XUANHUAN_PROTOCOL_ID],
           Endpoint::Tx,
           current_command,
           true,
@@ -96,7 +96,7 @@ impl ProtocolHandler for Xuanhuan {
     self.current_command.store(speed, Ordering::Relaxed);
 
     Ok(vec![HardwareWriteCmd::new(
-      XUANHUAN_PROTOCOL_ID,
+      &[XUANHUAN_PROTOCOL_ID],
       Endpoint::Tx,
       vec![0x03, 0x02, 0x00, speed],
       true,

@@ -43,7 +43,7 @@ impl ProtocolInitializer for KiirooV21InitializedInitializer {
     debug!("calling Onyx+ init");
     hardware
       .write_value(&HardwareWriteCmd::new(
-        KIIROO_V21_INITIALIZED_PROTOCOL_UUID,
+        &[KIIROO_V21_INITIALIZED_PROTOCOL_UUID],
         Endpoint::Tx,
         vec![0x03u8, 0x00u8, 0x64u8, 0x19u8],
         true,
@@ -51,7 +51,7 @@ impl ProtocolInitializer for KiirooV21InitializedInitializer {
       .await?;
     hardware
       .write_value(&HardwareWriteCmd::new(
-        KIIROO_V21_INITIALIZED_PROTOCOL_UUID,
+        &[KIIROO_V21_INITIALIZED_PROTOCOL_UUID],
         Endpoint::Tx,
         vec![0x03u8, 0x00u8, 0x64u8, 0x00u8],
         true,
@@ -76,7 +76,7 @@ impl ProtocolHandler for KiirooV21Initialized {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0x01, speed as u8],
       false,
@@ -101,7 +101,7 @@ impl ProtocolHandler for KiirooV21Initialized {
       .previous_position
       .store(position as u8, Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       [0x03, 0x00, calculated_speed, position as u8].to_vec(),
       false,

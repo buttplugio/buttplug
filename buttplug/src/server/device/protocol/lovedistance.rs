@@ -36,14 +36,14 @@ impl ProtocolInitializer for LoveDistanceInitializer {
     _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareWriteCmd::new(
-      LOVEDISTANCE_PROTOCOL_UUID,
+      &[LOVEDISTANCE_PROTOCOL_UUID],
       Endpoint::Tx,
       vec![0xf3, 0, 0],
       false,
     );
     hardware.write_value(&msg).await?;
     let msg = HardwareWriteCmd::new(
-      LOVEDISTANCE_PROTOCOL_UUID,
+      &[LOVEDISTANCE_PROTOCOL_UUID],
       Endpoint::Tx,
       vec![0xf4, 1],
       false,
@@ -66,7 +66,7 @@ impl ProtocolHandler for LoveDistance {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0xf3, 0x00, speed as u8],
       false,

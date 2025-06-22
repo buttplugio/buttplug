@@ -49,7 +49,7 @@ impl ProtocolHandler for Maxpro {
 
     data[9] = crc;
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       data,
       false,

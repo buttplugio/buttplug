@@ -40,7 +40,7 @@ impl ProtocolInitializer for LetenInitializer {
     // sends [0x04, 0x00] and waits for [0x01] on Rx before calling [0x04, 0x01]
     hardware
       .write_value(&HardwareWriteCmd::new(
-        LETEN_PROTOCOL_UUID,
+        &[LETEN_PROTOCOL_UUID],
         Endpoint::Tx,
         vec![0x04, 0x01],
         true,
@@ -69,7 +69,7 @@ impl ProtocolHandler for Leten {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0x02, speed as u8],
       true,

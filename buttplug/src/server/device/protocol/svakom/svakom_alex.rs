@@ -32,7 +32,7 @@ impl ProtocolHandler for SvakomAlex {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       [18, 1, 3, 0, if speed == 0 { 0xFF } else { speed as u8 }, 0].to_vec(),
       false,

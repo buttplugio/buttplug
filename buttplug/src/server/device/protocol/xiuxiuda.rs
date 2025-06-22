@@ -30,7 +30,7 @@ impl ProtocolHandler for Xiuxiuda {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       [0x00, 0x00, 0x00, 0x00, 0x65, 0x3a, 0x30, speed as u8, 0x64].to_vec(),
       false,

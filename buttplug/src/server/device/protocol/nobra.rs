@@ -37,7 +37,7 @@ impl ProtocolInitializer for NobraInitializer {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
       .write_value(&HardwareWriteCmd::new(
-        NOBRA_PROTOCOL_UUID,
+        &[NOBRA_PROTOCOL_UUID],
         Endpoint::Tx,
         vec![0x70],
         false,
@@ -61,7 +61,7 @@ impl ProtocolHandler for Nobra {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let output_speed = if speed == 0 { 0x70 } else { 0x60 + speed };
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![output_speed as u8],
       false,

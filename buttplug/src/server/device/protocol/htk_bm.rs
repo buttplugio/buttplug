@@ -54,7 +54,7 @@ impl ProtocolHandler for HtkBm {
       data = 13 // right only
     }
     Ok(vec![HardwareWriteCmd::new(
-      HTK_BM_PROTOCOL_UUID,
+      &[HTK_BM_PROTOCOL_UUID],
       Endpoint::Tx,
       vec![data],
       false,

@@ -64,7 +64,7 @@ impl ProtocolHandler for Foreo {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0x01, self.mode, speed as u8],
       true,

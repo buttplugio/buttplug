@@ -31,7 +31,7 @@ impl ProtocolHandler for TCodeV03 {
 
     let command = format!("L0{position:02}\n");
     msg_vec.push(
-      HardwareWriteCmd::new(feature_id, Endpoint::Tx, command.as_bytes().to_vec(), false).into(),
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, command.as_bytes().to_vec(), false).into(),
     );
 
     Ok(msg_vec)
@@ -48,7 +48,7 @@ impl ProtocolHandler for TCodeV03 {
 
     let command = format!("L{feature_index}{position:02}I{duration}\n");
     msg_vec.push(
-      HardwareWriteCmd::new(feature_id, Endpoint::Tx, command.as_bytes().to_vec(), false).into(),
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, command.as_bytes().to_vec(), false).into(),
     );
 
     Ok(msg_vec)
@@ -61,7 +61,7 @@ impl ProtocolHandler for TCodeV03 {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       format!("V{feature_index}{speed:02}\n").as_bytes().to_vec(),
       false,

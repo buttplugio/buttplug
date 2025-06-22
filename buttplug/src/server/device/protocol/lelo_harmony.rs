@@ -82,7 +82,7 @@ impl ProtocolInitializer for LeloHarmonyInitializer {
           // Send with response
           hardware
             .write_value(&HardwareWriteCmd::new(
-              LELO_HARMONY_PROTOCOL_UUID,
+              &[LELO_HARMONY_PROTOCOL_UUID],
               Endpoint::Whitelist,
               n,
               true,
@@ -117,7 +117,7 @@ impl LeloHarmony {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![
         0x0a,

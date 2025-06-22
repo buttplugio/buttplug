@@ -30,7 +30,7 @@ impl ProtocolHandler for MetaXSireV4 {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0xbb, 0x01, speed as u8, 0x66],
       true,

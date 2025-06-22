@@ -51,7 +51,7 @@ impl ProtocolHandler for TryFunBlackHole {
     data.push(sum);
 
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       data,
       false,
@@ -83,7 +83,7 @@ impl ProtocolHandler for TryFunBlackHole {
     data.push(sum);
 
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       data,
       false,

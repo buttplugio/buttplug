@@ -129,7 +129,7 @@ impl SenseeV2 {
     data_add(2, &self.suck_map);
 
     Ok(vec![HardwareWriteCmd::new(
-      SENSEE_V2_PROTOCOL_UUID,
+      &[SENSEE_V2_PROTOCOL_UUID],
       Endpoint::Tx,
       make_cmd(self.device_type, 0xf1, data),
       false,

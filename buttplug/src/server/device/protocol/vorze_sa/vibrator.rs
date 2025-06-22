@@ -36,7 +36,7 @@ impl ProtocolHandler for VorzeSAVibrator {
     ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![{
       HardwareWriteCmd::new(
-        feature_id,
+        &[feature_id],
         Endpoint::Tx,
         vec![
           self.device_type as u8,

@@ -37,7 +37,7 @@ impl ProtocolHandler for ManNuo {
     }
     data.push(crc);
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       data,
       true,

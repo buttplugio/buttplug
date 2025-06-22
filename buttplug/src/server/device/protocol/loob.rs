@@ -37,7 +37,7 @@ impl ProtocolInitializer for LoobInitializer {
     _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareWriteCmd::new(
-      LOOB_PROTOCOL_UUID,
+      &[LOOB_PROTOCOL_UUID],
       Endpoint::Tx,
       vec![0x00, 0x01, 0x01, 0xf4],
       true,
@@ -65,7 +65,7 @@ impl ProtocolHandler for Loob {
       data.push(b);
     }
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       data,
       false,

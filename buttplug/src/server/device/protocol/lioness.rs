@@ -45,7 +45,7 @@ impl ProtocolInitializer for LionessInitializer {
 
     let res = hardware
       .write_value(&HardwareWriteCmd::new(
-        LIONESS_PROTOCOL_UUID,
+        &[LIONESS_PROTOCOL_UUID],
         Endpoint::Tx,
         vec![0x01, 0xAA, 0xAA, 0xBB, 0xCC, 0x10],
         true,
@@ -74,7 +74,7 @@ impl ProtocolHandler for Lioness {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0x02, 0xAA, 0xBB, 0xCC, 0xCC, speed as u8],
       false,

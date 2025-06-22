@@ -646,18 +646,6 @@ pub enum ProtocolValueCommandPrefilterStrategy {
   None,
 }
 
-pub enum ProtocolCommandOutputStrategy {
-  /// Protocol outputs full command every time. Any time new output happens, overwrite old output
-  /// until sent.
-  FullCommand,
-  /// Protocol outputs a command per-feature. We need to track features, remove old feature command
-  /// and push a new one if there is an update before packets are sent
-  PerFeature,
-  /// Protocol handles its own sending, outputs nothing. Used for protocols with internal timed
-  /// resends.
-  None,
-}
-
 fn print_type_of<T>(_: &T) -> &'static str {
   std::any::type_name::<T>()
 }
@@ -764,10 +752,6 @@ impl ProtocolInitializer for GenericProtocolInitializer {
 }
 
 pub trait ProtocolHandler: Sync + Send {
-  fn cache_strategy(&self) -> ProtocolCommandOutputStrategy {
-    ProtocolCommandOutputStrategy::PerFeature
-  }
-
   fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
     ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
   }

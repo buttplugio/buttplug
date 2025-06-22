@@ -37,7 +37,7 @@ impl SexverseLG389 {
     let range = if osc == 0 { 0 } else { 4u8 }; // Full range
     let anchor = if osc == 0 { 0 } else { 1u8 }; // Anchor to base
     Ok(vec![HardwareWriteCmd::new(
-      SEXVERSE_PROTOCOL_UUID,
+      &[SEXVERSE_PROTOCOL_UUID],
       Endpoint::Tx,
       vec![0xaa, 0x05, vibe, 0x14, anchor, 0x00, range, 0x00, osc, 0x00],
       true,

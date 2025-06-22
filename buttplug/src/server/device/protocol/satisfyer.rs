@@ -102,7 +102,7 @@ impl ProtocolInitializer for SatisfyerInitializer {
     hardware: Arc<Hardware>,
     device_definition: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let msg = HardwareWriteCmd::new(SATISFYER_PROTOCOL_UUID, Endpoint::Command, vec![0x01], true);
+    let msg = HardwareWriteCmd::new(&[SATISFYER_PROTOCOL_UUID], Endpoint::Command, vec![0x01], true);
     let info_fut = hardware.write_value(&msg);
     info_fut.await?;
 
@@ -158,6 +158,6 @@ impl ProtocolHandler for Satisfyer {
     self.last_command[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     let data = form_command(self.feature_count, self.last_command.clone());
 
-    Ok(vec![HardwareWriteCmd::new(SATISFYER_PROTOCOL_UUID, Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(&[SATISFYER_PROTOCOL_UUID], Endpoint::Tx, data, false).into()])
   }
 }

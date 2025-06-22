@@ -39,7 +39,7 @@ impl ProtocolInitializer for AmorelieJoyInitializer {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
       .write_value(&HardwareWriteCmd::new(
-        AMORELIE_JOY_PROTOCOL_UUID,
+        &[AMORELIE_JOY_PROTOCOL_UUID],
         Endpoint::Tx,
         vec![0x03],
         false,
@@ -62,7 +62,7 @@ impl ProtocolHandler for AmorelieJoy {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       [
         0x01,        // static header

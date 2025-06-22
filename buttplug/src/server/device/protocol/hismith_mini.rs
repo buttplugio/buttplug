@@ -117,7 +117,7 @@ impl ProtocolHandler for HismithMini {
     let speed: u8 = speed as u8;
 
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0xCC, idx, speed, speed + idx],
       false,
@@ -139,7 +139,7 @@ impl ProtocolHandler for HismithMini {
     let speed: u8 = speed as u8;
 
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0xCC, idx, speed, speed + idx],
       false,
@@ -157,7 +157,7 @@ impl ProtocolHandler for HismithMini {
     let speed: u8 = level as u8;
 
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0xCC, idx, speed, speed + idx],
       false,

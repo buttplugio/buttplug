@@ -30,7 +30,7 @@ impl ProtocolHandler for NexusRevo {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0xaa, 0x01, 0x01, 0x00, 0x01, speed as u8],
       true,
@@ -46,7 +46,7 @@ impl ProtocolHandler for NexusRevo {
     clockwise: bool,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![
         0xaa,

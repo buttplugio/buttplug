@@ -149,7 +149,7 @@ impl ProtocolInitializer for FredorchInitializer {
       debug!("Fredorch: {} - sent {:?}", data.0, data.1);
       hardware
         .write_value(&HardwareWriteCmd::new(
-          FREDORCH_PROTOCOL_UUID,
+          &[FREDORCH_PROTOCOL_UUID],
           Endpoint::Tx,
           data.1.clone(),
           false,
@@ -216,7 +216,7 @@ impl ProtocolHandler for Fredorch {
     data.push(crc[1]);
     self.previous_position.store(position, Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
-      FREDORCH_PROTOCOL_UUID,
+      &[FREDORCH_PROTOCOL_UUID],
       Endpoint::Tx,
       data,
       false,

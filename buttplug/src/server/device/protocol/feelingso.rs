@@ -37,7 +37,7 @@ impl Default for FeelingSo {
 impl FeelingSo {
   fn hardware_command(&self) -> Vec<HardwareCommand> {
     vec![HardwareWriteCmd::new(
-      FEELINGSO_PROTOCOL_UUID,
+      &[FEELINGSO_PROTOCOL_UUID],
       Endpoint::Tx,
       vec![
         0xaa,

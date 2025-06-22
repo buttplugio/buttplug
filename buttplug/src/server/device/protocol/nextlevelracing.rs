@@ -28,7 +28,7 @@ impl ProtocolHandler for NextLevelRacing {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       format!("M{feature_index}{speed}\r").into_bytes(),
       false,

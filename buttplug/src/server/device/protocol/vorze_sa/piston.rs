@@ -61,7 +61,7 @@ impl ProtocolHandler for VorzeSAPiston {
       .store(position as u8, Ordering::Relaxed);
 
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![VorzeDevice::Piston as u8, position as u8, speed],
       true,

@@ -38,7 +38,7 @@ impl ProtocolHandler for TryFun {
     sum += count;
     data.push(sum);
 
-    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, true).into()])
+    Ok(vec![HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, data, true).into()])
   }
 
   fn handle_output_rotate_cmd(
@@ -57,7 +57,7 @@ impl ProtocolHandler for TryFun {
     sum += count;
     data.push(sum);
 
-    Ok(vec![HardwareWriteCmd::new(feature_id, Endpoint::Tx, data, true).into()])
+    Ok(vec![HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, data, true).into()])
   }
 
   fn handle_output_vibrate_cmd(
@@ -67,7 +67,7 @@ impl ProtocolHandler for TryFun {
       speed: u32,
     ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id, 
+      &[feature_id], 
       Endpoint::Tx,
       vec![
         0x00,

@@ -30,7 +30,7 @@ impl ProtocolHandler for Realov {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       [0xc5u8, 0x55, speed as u8, 0xaa].to_vec(),
       false,

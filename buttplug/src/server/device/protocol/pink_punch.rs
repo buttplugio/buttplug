@@ -30,7 +30,7 @@ impl ProtocolHandler for PinkPunch {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0x09, speed as u8],
       true,

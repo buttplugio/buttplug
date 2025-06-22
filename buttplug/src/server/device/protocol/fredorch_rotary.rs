@@ -82,7 +82,7 @@ impl ProtocolInitializer for FredorchRotaryInitializer {
       debug!("FredorchRotary: {} - sent {:?}", data.0, data.1);
       hardware
         .write_value(&HardwareWriteCmd::new(
-          FREDORCH_ROTORY_PROTOCOL_UUID,
+          &[FREDORCH_ROTORY_PROTOCOL_UUID],
           Endpoint::Tx,
           data.1.clone(),
           false,
@@ -140,7 +140,7 @@ async fn speed_update_handler(
       };
       let update = device
         .write_value(&HardwareWriteCmd::new(
-          FREDORCH_ROTORY_PROTOCOL_UUID,
+          &[FREDORCH_ROTORY_PROTOCOL_UUID],
           Endpoint::Tx,
           vec![0x55u8, 0x03, cmd, cmd + 3, 0xaa],
           false,
@@ -212,7 +212,7 @@ impl ProtocolHandler for FredorchRotary {
     if speed == 0 {
       self.current_speed.store(speed, Ordering::Relaxed);
       Ok(vec![HardwareWriteCmd::new(
-        FREDORCH_ROTORY_PROTOCOL_UUID,
+        &[FREDORCH_ROTORY_PROTOCOL_UUID],
         Endpoint::Tx,
         vec![0x55, 0x03, 0x24, 0x27, 0xaa],
         false,

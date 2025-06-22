@@ -30,7 +30,7 @@ impl ProtocolHandler for MizzZeeV2 {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0x69, 0x96, 0x04, 0x02, speed as u8, 0x2c, speed as u8],
       false,

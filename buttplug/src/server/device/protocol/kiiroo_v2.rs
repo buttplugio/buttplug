@@ -40,7 +40,7 @@ impl ProtocolInitializer for KiirooV2Initializer {
     _: &UserDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareWriteCmd::new(
-      KIIROO_V2_PROTOCOL_UUID,
+      &[KIIROO_V2_PROTOCOL_UUID],
       Endpoint::Firmware,
       vec![0x0u8],
       true,
@@ -73,7 +73,7 @@ impl ProtocolHandler for KiirooV2 {
     let calculated_speed = (calculate_speed(distance, duration) * 99f64) as u8;
     self.previous_position.store(position, Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       [position, calculated_speed].to_vec(),
       false,

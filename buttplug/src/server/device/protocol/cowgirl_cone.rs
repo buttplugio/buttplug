@@ -21,9 +21,11 @@ use crate::{
 };
 use async_trait::async_trait;
 use std::{sync::Arc, time::Duration};
-use uuid::Uuid;
+use uuid::{uuid, Uuid};
 
 generic_protocol_initializer_setup!(CowgirlCone, "cowgirl-cone");
+
+const COWGIRL_CONE_PROTOCOL_UUID: Uuid = uuid!("3054b443-eca7-41a6-8ba1-b93a646636a4");
 
 #[derive(Default)]
 pub struct CowgirlConeInitializer {}
@@ -37,7 +39,7 @@ impl ProtocolInitializer for CowgirlConeInitializer {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
       .write_value(&HardwareWriteCmd::new(
-        Uuid::nil(),
+        &[COWGIRL_CONE_PROTOCOL_UUID],
         Endpoint::Tx,
         vec![0xaa, 0x56, 0x00, 0x00],
         false,
@@ -52,8 +54,6 @@ impl ProtocolInitializer for CowgirlConeInitializer {
 pub struct CowgirlCone {}
 
 impl ProtocolHandler for CowgirlCone {
-
-
   fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,
@@ -61,7 +61,7 @@ impl ProtocolHandler for CowgirlCone {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       vec![0xf1, 0x01, speed as u8, 0x00],
       false,

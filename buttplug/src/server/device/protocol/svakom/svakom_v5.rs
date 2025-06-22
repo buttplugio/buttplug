@@ -39,7 +39,7 @@ impl ProtocolHandler for SvakomV5 {
     let vibe1 = self.last_vibrator_speeds[0].load(Ordering::Relaxed);
     let vibe2 = self.last_vibrator_speeds[1].load(Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
-      SVAKOM_V5_VIBRATOR_UUID,
+      &[SVAKOM_V5_VIBRATOR_UUID],
       Endpoint::Tx,
       [
         0x55,
@@ -72,7 +72,7 @@ impl ProtocolHandler for SvakomV5 {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      feature_id,
+      &[feature_id],
       Endpoint::Tx,
       [0x55, 0x09, 0x00, 0x00, speed as u8, 0x00].to_vec(),
       false,
