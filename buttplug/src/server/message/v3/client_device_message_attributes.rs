@@ -12,7 +12,6 @@ use crate::{
     v2::{
       ClientDeviceMessageAttributesV2,
       GenericDeviceMessageAttributesV2,
-      RawDeviceMessageAttributesV2,
     },
   },
 };
@@ -61,25 +60,6 @@ pub struct ClientDeviceMessageAttributesV3 {
   #[serde(rename = "StopDeviceCmd")]
   #[serde(skip_deserializing)]
   pub(in crate::server::message) stop_device_cmd: NullDeviceMessageAttributesV1,
-
-  // Raw commands are only added post-serialization
-  #[getset(get = "pub")]
-  #[serde(rename = "RawReadCmd")]
-  #[serde(skip_deserializing)]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) raw_read_cmd: Option<RawDeviceMessageAttributesV2>,
-  // Raw commands are only added post-serialization
-  #[getset(get = "pub")]
-  #[serde(rename = "RawWriteCmd")]
-  #[serde(skip_deserializing)]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) raw_write_cmd: Option<RawDeviceMessageAttributesV2>,
-  // Raw commands are only added post-serialization
-  #[getset(get = "pub")]
-  #[serde(rename = "RawSubscribeCmd")]
-  #[serde(skip_deserializing)]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) raw_subscribe_cmd: Option<RawDeviceMessageAttributesV2>,
 
   // Needed to load from config for fallback, but unused here.
   #[getset(get = "pub")]
@@ -154,10 +134,6 @@ impl From<ClientDeviceMessageAttributesV3> for ClientDeviceMessageAttributesV2 {
         }
       },
       stop_device_cmd: other.stop_device_cmd().clone(),
-      raw_read_cmd: other.raw_read_cmd().clone(),
-      raw_write_cmd: other.raw_write_cmd().clone(),
-      raw_subscribe_cmd: other.raw_subscribe_cmd().clone(),
-      raw_unsubscribe_cmd: other.raw_subscribe_cmd().clone(),
       fleshlight_launch_fw12_cmd: other.fleshlight_launch_fw12_cmd().clone(),
       vorze_a10_cyclone_cmd: other.vorze_a10_cyclone_cmd().clone(),
     }
@@ -165,9 +141,6 @@ impl From<ClientDeviceMessageAttributesV3> for ClientDeviceMessageAttributesV2 {
 }
 
 impl ClientDeviceMessageAttributesV3 {
-  pub fn raw_unsubscribe_cmd(&self) -> &Option<RawDeviceMessageAttributesV2> {
-    self.raw_subscribe_cmd()
-  }
 
   pub fn finalize(&mut self) {
     if let Some(scalar_attrs) = &mut self.scalar_cmd {
@@ -377,14 +350,6 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
       }
     };
 
-    // Raw messages
-    let raw_attrs = features
-      .iter()
-      .find(|f| f.raw().is_some())
-      .map(|raw_feature| {
-        RawDeviceMessageAttributesV2::new(raw_feature.raw().as_ref().unwrap().endpoints())
-      });
-
     Self {
       scalar_cmd: if scalar_attrs.is_empty() {
         None
@@ -403,9 +368,6 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
       },
       sensor_read_cmd: sensor_filter,
       sensor_subscribe_cmd: None,
-      raw_read_cmd: raw_attrs.clone(),
-      raw_write_cmd: raw_attrs.clone(),
-      raw_subscribe_cmd: raw_attrs.clone(),
       ..Default::default()
     }
   }

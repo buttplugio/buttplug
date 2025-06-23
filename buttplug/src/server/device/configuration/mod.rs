@@ -93,7 +93,6 @@
 //!
 //! - Protocol device specifiers and attributes
 //! - Factory/Builder instances for [ButtplugProtocols](crate::device::protocol::ButtplugProtocol)
-//! - Whether or not Raw Messages are allowed
 //! - User configuration information (allow/deny lists, per-device protocol attributes, etc...)
 //!
 //! The [DeviceConfigurationManager] is created when a ButtplugServer comes up, and which time
@@ -132,8 +131,6 @@
 //! [ButtplugDevice](crate::device::ButtplugDevice) instance used by the
 //! [ButtplugServer](crate::server::ButtplugServer).
 //!
-//! ### Raw Messages
-//!
 //! ### User Configurations
 //!
 
@@ -145,7 +142,7 @@ mod device_definitions;
 pub use device_definitions::*;
 
 use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
+  core::errors::ButtplugDeviceError,
   server::device::protocol::{
     get_default_protocol_map,
     ProtocolIdentifierFactory,
@@ -157,16 +154,12 @@ use getset::Getters;
 use std::{
   collections::HashMap,
   fmt::{self, Debug},
-  sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-  },
+  sync::Arc,
 };
 
 #[derive(Default, Clone)]
 pub struct DeviceConfigurationManagerBuilder {
   skip_default_protocols: bool,
-  allow_raw_messages: bool,
   communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   user_communication_specifiers: DashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   base_device_definitions: HashMap<BaseDeviceIdentifier, BaseDeviceDefinition>,
@@ -240,11 +233,6 @@ impl DeviceConfigurationManagerBuilder {
     self
   }
 
-  pub fn allow_raw_messages(&mut self, allow: bool) -> &mut Self {
-    self.allow_raw_messages = allow;
-    self
-  }
-
   pub fn finish(&mut self) -> Result<DeviceConfigurationManager, ButtplugDeviceError> {
     // Map of protocol names to their respective protocol instance factories
     let mut protocol_map = if !self.skip_default_protocols {
@@ -306,7 +294,6 @@ impl DeviceConfigurationManagerBuilder {
     }
 
     Ok(DeviceConfigurationManager {
-      allow_raw_messages: Arc::new(AtomicBool::new(self.allow_raw_messages)),
       base_communication_specifiers: self.communication_specifiers.clone(),
       user_communication_specifiers: self.user_communication_specifiers.clone(),
       base_device_definitions: attribute_tree_map,
@@ -329,8 +316,6 @@ impl DeviceConfigurationManagerBuilder {
 /// parameters for those commands (number of power levels, stroke distances, etc...).
 #[derive(Getters)]
 pub struct DeviceConfigurationManager {
-  /// If true, add raw message support to connected devices
-  allow_raw_messages: Arc<AtomicBool>,
   /// Map of protocol names to their respective protocol instance factories
   protocol_map: HashMap<String, Arc<dyn ProtocolIdentifierFactory>>,
   /// Communication specifiers from the base device config, mapped from protocol name to vector of
@@ -355,7 +340,6 @@ impl Debug for DeviceConfigurationManager {
 }
 
 impl Default for DeviceConfigurationManager {
-  /// Create a new instance with Raw Message support turned off
   fn default() -> Self {
     // Unwrap allowed here because we assume our built in device config will
     // always work. System won't pass tests or possibly even build otherwise.
@@ -366,9 +350,6 @@ impl Default for DeviceConfigurationManager {
 }
 
 impl DeviceConfigurationManager {
-  pub fn set_allow_raw_messages(&self, allow: bool) {
-    self.allow_raw_messages.store(allow, Ordering::Relaxed)
-  }
 
   pub fn add_user_communication_specifier(
     &self,
@@ -534,9 +515,8 @@ impl DeviceConfigurationManager {
   pub fn device_definition(
     &self,
     identifier: &UserDeviceIdentifier,
-    raw_endpoints: &[Endpoint],
   ) -> Option<UserDeviceDefinition> {
-    let mut features = if let Some(attrs) = self.user_device_definitions.get(identifier) {
+    let features = if let Some(attrs) = self.user_device_definitions.get(identifier) {
       debug!("User device config found for {:?}", identifier);
       attrs.clone()
     } else if let Some(attrs) = self.base_device_definitions.get(&BaseDeviceIdentifier::new(
@@ -558,8 +538,7 @@ impl DeviceConfigurationManager {
       return None;
     };
 
-    // If this is a new device, it needs to be added to the user device definition map. Make sure we
-    // do this before we add raw message features.
+    // If this is a new device, it needs to be added to the user device definition map.
     //
     // Device definitions are looked up before we fully initialize a device, mostly for algorithm
     // preparation. There is a very small chance we may save the device config then error out when
@@ -568,10 +547,6 @@ impl DeviceConfigurationManager {
       self
         .user_device_definitions
         .insert(identifier.clone(), features.clone());
-    }
-
-    if self.allow_raw_messages.load(Ordering::Relaxed) {
-      features.add_raw_messages(raw_endpoints);
     }
 
     Some(features)
@@ -590,7 +565,7 @@ mod test {
     ops::RangeInclusive,
   };
 
-  fn create_unit_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
+  fn create_unit_test_dcm() -> DeviceConfigurationManager {
     let mut builder = DeviceConfigurationManagerBuilder::default();
     let specifiers = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new(
       HashSet::from(["LVS-*".to_owned(), "LovenseDummyTestName".to_owned()]),
@@ -604,7 +579,6 @@ mod test {
       ServerDeviceFeatureOutput::new(&RangeInclusive::new(0, 20), &RangeInclusive::new(0, 20)),
     );
     builder
-      .allow_raw_messages(allow_raw_messages)
       .communication_specifier("lovense", &[specifiers])
       .protocol_features(
         &BaseDeviceIdentifier::new("lovense", &Some("P".to_owned())),
@@ -641,7 +615,7 @@ mod test {
 
   #[test]
   fn test_config_equals() {
-    let config = create_unit_test_dcm(false);
+    let config = create_unit_test_dcm();
     let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       "LVS-Something",
       &HashMap::new(),
@@ -652,7 +626,7 @@ mod test {
 
   #[test]
   fn test_config_wildcard_equals() {
-    let config = create_unit_test_dcm(false);
+    let config = create_unit_test_dcm();
     let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       "LVS-Whatever",
       &HashMap::new(),
@@ -691,56 +665,6 @@ mod test {
         .step_count(),
       20
     );
-  }
-
-  #[test]
-  fn test_raw_device_config_creation() {
-    let dcm = create_unit_test_dcm(true);
-    let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
-      "LVS-Whatever",
-      &HashMap::new(),
-      &[],
-    ));
-    assert!(!dcm.protocol_specializers(&spec).is_empty());
-    let config: ProtocolDeviceAttributes = dcm
-      .device_definition(
-        &UserDeviceIdentifier::new("Whatever", "lovense", &Some("P".to_owned())),
-        &[],
-      )
-      .expect("Should be found")
-      .into();
-    // Make sure we got the right name
-    assert_eq!(config.name(), "Lovense Edge");
-    // Make sure we overwrote the default of 1
-    assert!(config.message_attributes().raw_read_cmd().is_some());
-    assert!(config.message_attributes().raw_write_cmd().is_some());
-    assert!(config.message_attributes().raw_subscribe_cmd().is_some());
-    assert!(config.message_attributes().raw_unsubscribe_cmd().is_some());
-  }
-
-  #[test]
-  fn test_non_raw_device_config_creation() {
-    let dcm = create_unit_test_dcm(false);
-    let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
-      "LVS-Whatever",
-      &HashMap::new(),
-      &[],
-    ));
-    assert!(!dcm.protocol_specializers(&spec).is_empty());
-    let config: ProtocolDeviceAttributes = dcm
-      .device_definition(
-        &UserDeviceIdentifier::new("Whatever", "lovense", &Some("P".to_owned())),
-        &[],
-      )
-      .expect("Should be found")
-      .into();
-    // Make sure we got the right name
-    assert_eq!(config.name(), "Lovense Edge");
-    // Make sure we overwrote the default of 1
-    assert!(config.message_attributes().raw_read_cmd().is_none());
-    assert!(config.message_attributes().raw_write_cmd().is_none());
-    assert!(config.message_attributes().raw_subscribe_cmd().is_none());
-    assert!(config.message_attributes().raw_unsubscribe_cmd().is_none());
   }
   */
 }

@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::message::{DeviceFeature, Endpoint},
+  core::message::DeviceFeature,
   server::message::{
     v1::{
       ClientDeviceMessageAttributesV1,
@@ -49,24 +49,6 @@ pub struct ClientDeviceMessageAttributesV2 {
   #[getset(get = "pub")]
   #[serde(rename = "StopDeviceCmd")]
   pub(in crate::server::message) stop_device_cmd: NullDeviceMessageAttributesV1,
-
-  // Raw commands are only added post-serialization
-  #[getset(get = "pub")]
-  #[serde(rename = "RawReadCmd")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) raw_read_cmd: Option<RawDeviceMessageAttributesV2>,
-  #[getset(get = "pub")]
-  #[serde(rename = "RawWriteCmd")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) raw_write_cmd: Option<RawDeviceMessageAttributesV2>,
-  #[getset(get = "pub")]
-  #[serde(rename = "RawSubscribeCmd")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) raw_subscribe_cmd: Option<RawDeviceMessageAttributesV2>,
-  #[getset(get = "pub")]
-  #[serde(rename = "RawUnsubscribeCmd")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) raw_unsubscribe_cmd: Option<RawDeviceMessageAttributesV2>,
 
   // Needed to load from config for fallback, but unused here.
   #[getset(get = "pub")]
@@ -119,21 +101,6 @@ pub struct GenericDeviceMessageAttributesV2 {
 impl From<GenericDeviceMessageAttributesV2> for GenericDeviceMessageAttributesV1 {
   fn from(attributes: GenericDeviceMessageAttributesV2) -> Self {
     Self::new(attributes.feature_count())
-  }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Default, Serialize, Deserialize, Getters, Setters)]
-pub struct RawDeviceMessageAttributesV2 {
-  #[getset(get = "pub")]
-  #[serde(rename = "Endpoints")]
-  endpoints: Vec<Endpoint>,
-}
-
-impl RawDeviceMessageAttributesV2 {
-  pub fn new(endpoints: &[Endpoint]) -> Self {
-    Self {
-      endpoints: endpoints.to_vec(),
-    }
   }
 }
 

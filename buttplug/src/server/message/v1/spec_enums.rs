@@ -168,10 +168,6 @@ pub enum ButtplugDeviceMessageNameV1 {
   LinearCmd,
   RotateCmd,
   StopDeviceCmd,
-  RawWriteCmd,
-  RawReadCmd,
-  RawSubscribeCmd,
-  RawUnsubscribeCmd,
   // Deprecated generic commands
   SingleMotorVibrateCmd,
   // Deprecated device specific commands

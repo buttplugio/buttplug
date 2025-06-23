@@ -16,8 +16,6 @@ use crate::core::message::{
   ErrorV0,
   OkV0,
   PingV0,
-  RawCmdV4,
-  RawReadingV2,
   RequestDeviceListV0,
   RequestServerInfoV4,
   ScanningFinishedV0,
@@ -56,7 +54,6 @@ pub enum ButtplugClientMessageV4 {
   StopAllDevices(StopAllDevicesV0),
   OutputCmd(OutputCmdV4),
   InputCmd(InputCmdV4),
-  RawCmd(RawCmdV4),
 }
 
 /// Represents all server-to-client messages in v3 of the Buttplug Spec
@@ -81,8 +78,6 @@ pub enum ButtplugServerMessageV4 {
   DeviceAdded(DeviceAddedV4),
   DeviceRemoved(DeviceRemovedV0),
   ScanningFinished(ScanningFinishedV0),
-  // Generic commands
-  RawReading(RawReadingV2),
   // Sensor commands
   InputReading(InputReadingV4),
 }

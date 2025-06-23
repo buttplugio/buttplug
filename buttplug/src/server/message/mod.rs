@@ -8,7 +8,6 @@ use crate::core::{
     ButtplugMessageSpecVersion,
     ButtplugMessageValidator,
     ButtplugServerMessageV4,
-    RawReadingV2,
     InputReadingV4,
   },
 };
@@ -78,10 +77,6 @@ impl ButtplugClientMessageVariant {
         ButtplugClientMessageV2::RotateCmd(a) => Some(a.device_index()),
         ButtplugClientMessageV2::LinearCmd(a) => Some(a.device_index()),
         ButtplugClientMessageV2::BatteryLevelCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV2::RawReadCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV2::RawWriteCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV2::RawSubscribeCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV2::RawUnsubscribeCmd(a) => Some(a.device_index()),
         _ => None,
       },
       Self::V3(msg) => match msg {
@@ -92,16 +87,11 @@ impl ButtplugClientMessageVariant {
         ButtplugClientMessageV3::RotateCmd(a) => Some(a.device_index()),
         ButtplugClientMessageV3::LinearCmd(a) => Some(a.device_index()),
         ButtplugClientMessageV3::SensorReadCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV3::RawReadCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV3::RawWriteCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV3::RawSubscribeCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV3::RawUnsubscribeCmd(a) => Some(a.device_index()),
         _ => None,
       },
       Self::V4(msg) => match msg {
         ButtplugClientMessageV4::OutputCmd(a) => Some(a.device_index()),
         ButtplugClientMessageV4::InputCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV4::RawCmd(a) => Some(a.device_index()),
         _ => None,
       },
     }
@@ -206,8 +196,6 @@ impl From<ButtplugServerMessageV4> for ButtplugServerMessageVariant {
   FromSpecificButtplugMessage,
 )]
 pub enum ButtplugServerDeviceMessage {
-  // Generic commands
-  RawReading(RawReadingV2),
   // Generic Sensor Reading Messages
   SensorReading(InputReadingV4),
 }
@@ -215,7 +203,6 @@ pub enum ButtplugServerDeviceMessage {
 impl From<ButtplugServerDeviceMessage> for ButtplugServerMessageV4 {
   fn from(other: ButtplugServerDeviceMessage) -> Self {
     match other {
-      ButtplugServerDeviceMessage::RawReading(msg) => ButtplugServerMessageV4::RawReading(msg),
       ButtplugServerDeviceMessage::SensorReading(msg) => {
         ButtplugServerMessageV4::InputReading(msg)
       }

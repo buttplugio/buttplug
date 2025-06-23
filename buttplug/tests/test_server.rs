@@ -69,7 +69,7 @@ async fn setup_test_server(
   ButtplugServer,
   impl Stream<Item = ButtplugServerMessageVariant>,
 ) {
-  let server = test_server(false);
+  let server = test_server();
   let recv = server.event_stream();
   // assert_eq!(server.server_name, "Test Server");
   match server
@@ -106,7 +106,7 @@ async fn test_server_handshake() {
 #[tokio::test]
 async fn test_server_handshake_not_done_first_v4() {
   let msg = ButtplugCheckedClientMessageV4::Ping(PingV0::default().into());
-  let server = test_server(false);
+  let server = test_server();
   // assert_eq!(server.server_name, "Test Server");
   let result = server.parse_checked_message(msg).await;
   assert!(result.is_err());
@@ -120,7 +120,7 @@ async fn test_server_handshake_not_done_first_v4() {
 #[tokio::test]
 async fn test_server_handshake_not_done_first_v3() {
   let msg = ButtplugClientMessageV3::Ping(PingV0::default().into());
-  let server = test_server(false);
+  let server = test_server();
   // assert_eq!(server.server_name, "Test Server");
   let result = server.parse_message(msg.try_into().unwrap()).await;
   assert!(result.is_err());
@@ -140,7 +140,7 @@ async fn test_client_version_older_than_server() {
   let msg = ButtplugClientMessageVariant::V2(
     RequestServerInfoV1::new("Test Client", ButtplugMessageSpecVersion::Version2).into(),
   );
-  let server = test_server(false);
+  let server = test_server();
   // assert_eq!(server.server_name, "Test Server");
   match server
     .parse_message(msg)
@@ -158,7 +158,7 @@ async fn test_client_version_older_than_server() {
 #[tokio::test]
 #[ignore = "Needs to be rewritten to send in via the JSON parser, otherwise we're type bound due to the enum and can't fail"]
 async fn test_server_version_older_than_client() {
-  let server = test_server(false);
+  let server = test_server();
   let msg = ButtplugClientMessageVariant::V2(
     RequestServerInfoV1::new("Test Client", ButtplugMessageSpecVersion::Version2).into(),
   );
@@ -215,7 +215,7 @@ async fn test_device_stop_on_ping_timeout() {
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
   let mut device = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
 
-  let dm_builder = ServerDeviceManagerBuilder::new(create_test_dcm(false))
+  let dm_builder = ServerDeviceManagerBuilder::new(create_test_dcm())
     .comm_manager(builder)
     .finish()
     .unwrap();
@@ -353,7 +353,7 @@ async fn test_device_index_generation() {
   let mut _device1 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
   let mut _device2 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
 
-  let server = test_server_with_comm_manager(builder, false);
+  let server = test_server_with_comm_manager(builder);
 
   let recv = server.server_version_event_stream();
   pin_mut!(recv);
@@ -403,7 +403,7 @@ async fn test_server_scanning_finished() {
   let mut _device1 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
   let mut _device2 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
 
-  let server = test_server_with_comm_manager(builder, false);
+  let server = test_server_with_comm_manager(builder);
 
   let recv = server.server_version_event_stream();
   pin_mut!(recv);

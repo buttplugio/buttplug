@@ -31,7 +31,7 @@ use std::{sync::Arc, time::Duration};
 async fn run_test_client_command(command: &TestClientCommand, device: &Arc<ButtplugClientDevice>) {
   use TestClientCommand::*;
   match command {
-    Scalar(msg) => {}
+    Scalar(_) => {}
     Vibrate(msg) => {
       device
         .vibrate(VibrateCommand::SpeedMap(

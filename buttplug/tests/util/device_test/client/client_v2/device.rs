@@ -20,7 +20,7 @@ use buttplug::{
   core::{
     connector::ButtplugConnectorError,
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    message::{ButtplugMessage, Endpoint, StopDeviceCmdV0},
+    message::{ButtplugMessage, StopDeviceCmdV0},
   },
   server::message::{
     BatteryLevelCmdV2,
@@ -31,10 +31,6 @@ use buttplug::{
     DeviceMessageInfoV2,
     LinearCmdV1,
     RSSILevelCmdV2,
-    RawReadCmdV2,
-    RawSubscribeCmdV2,
-    RawUnsubscribeCmdV2,
-    RawWriteCmdV2,
     RotateCmdV1,
     RotationSubcommandV1,
     VectorSubcommandV1,
@@ -496,93 +492,6 @@ impl ButtplugClientDevice {
         ),
       }
     })
-  }
-
-  pub fn raw_write(
-    &self,
-    endpoint: Endpoint,
-    data: Vec<u8>,
-    write_with_response: bool,
-  ) -> ButtplugClientResultFuture {
-    if self.message_attributes.raw_write_cmd().is_none() {
-      return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageNameV2::RawWriteCmd.to_string(),
-        )
-        .into(),
-      );
-    }
-    let msg = ButtplugClientMessageV2::RawWriteCmd(RawWriteCmdV2::new(
-      self.index,
-      endpoint,
-      &data,
-      write_with_response,
-    ));
-    self.send_message_expect_ok(msg)
-  }
-
-  pub fn raw_read(
-    &self,
-    endpoint: Endpoint,
-    expected_length: u32,
-    timeout: u32,
-  ) -> ButtplugClientResultFuture<Vec<u8>> {
-    if self.message_attributes.raw_read_cmd().is_none() {
-      return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageNameV2::RawReadCmd.to_string(),
-        )
-        .into(),
-      );
-    }
-    let msg = ButtplugClientMessageV2::RawReadCmd(RawReadCmdV2::new(
-      self.index,
-      endpoint,
-      expected_length,
-      timeout,
-    ));
-    let send_fut = self.send_message(msg);
-    Box::pin(async move {
-      match send_fut.await? {
-        ButtplugServerMessageV2::RawReading(reading) => Ok(reading.data().clone()),
-        ButtplugServerMessageV2::Error(err) => Err(ButtplugError::from(err).into()),
-        msg => Err(
-          ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
-            "{:?}",
-            msg
-          )))
-          .into(),
-        ),
-      }
-    })
-  }
-
-  pub fn raw_subscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
-    if self.message_attributes.raw_subscribe_cmd().is_none() {
-      return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageNameV2::RawSubscribeCmd.to_string(),
-        )
-        .into(),
-      );
-    }
-    let msg =
-      ButtplugClientMessageV2::RawSubscribeCmd(RawSubscribeCmdV2::new(self.index, endpoint));
-    self.send_message_expect_ok(msg)
-  }
-
-  pub fn raw_unsubscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
-    if self.message_attributes.raw_subscribe_cmd().is_none() {
-      return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageNameV2::RawUnsubscribeCmd.to_string(),
-        )
-        .into(),
-      );
-    }
-    let msg =
-      ButtplugClientMessageV2::RawUnsubscribeCmd(RawUnsubscribeCmdV2::new(self.index, endpoint));
-    self.send_message_expect_ok(msg)
   }
 
   /// Commands device to stop all movement.

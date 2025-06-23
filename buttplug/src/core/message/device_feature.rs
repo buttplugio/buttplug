@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::{Endpoint, InputCommandType};
+use crate::core::message::InputCommandType;
 use getset::{Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use std::{
@@ -46,8 +46,6 @@ pub enum FeatureType {
   // Accelerometer,
   // Gyro,
   //
-  // Raw Feature, for when raw messages are on
-  Raw,
 }
 
 #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash)]
@@ -182,10 +180,6 @@ pub struct DeviceFeature {
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(rename = "Input")]
   input: Option<HashMap<InputType, DeviceFeatureInput>>,
-  #[getset(get = "pub")]
-  #[serde(rename = "Raw")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  raw: Option<DeviceFeatureRaw>,
 }
 
 impl DeviceFeature {
@@ -195,7 +189,6 @@ impl DeviceFeature {
     feature_type: FeatureType,
     actuator: &Option<HashMap<OutputType, DeviceFeatureOutput>>,
     sensor: &Option<HashMap<InputType, DeviceFeatureInput>>,
-    raw: &Option<DeviceFeatureRaw>,
   ) -> Self {
     Self {
       feature_index: index,
@@ -203,18 +196,6 @@ impl DeviceFeature {
       feature_type,
       output: actuator.clone(),
       input: sensor.clone(),
-      raw: raw.clone(),
-    }
-  }
-
-  pub fn new_raw_feature(index: u32, endpoints: &[Endpoint]) -> Self {
-    Self {
-      feature_index: index,
-      description: "Raw Endpoints".to_owned(),
-      feature_type: FeatureType::Raw,
-      output: None,
-      input: None,
-      raw: Some(DeviceFeatureRaw::new(endpoints)),
     }
   }
 }
@@ -267,23 +248,6 @@ impl DeviceFeatureInput {
     Self {
       value_range: value_range.clone(),
       input_commands: sensor_commands.clone(),
-    }
-  }
-}
-
-#[derive(
-  Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize,
-)]
-pub struct DeviceFeatureRaw {
-  #[getset(get = "pub")]
-  #[serde(rename = "Endpoints")]
-  endpoints: Vec<Endpoint>,
-}
-
-impl DeviceFeatureRaw {
-  pub fn new(endpoints: &[Endpoint]) -> Self {
-    Self {
-      endpoints: endpoints.into(),
     }
   }
 }

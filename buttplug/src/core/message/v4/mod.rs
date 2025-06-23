@@ -9,7 +9,6 @@ mod output_cmd;
 mod device_added;
 mod device_list;
 mod device_message_info;
-mod raw_cmd;
 mod request_server_info;
 mod input_cmd;
 mod input_reading;
@@ -27,7 +26,6 @@ pub use {
   device_added::DeviceAddedV4,
   device_list::DeviceListV4,
   device_message_info::DeviceMessageInfoV4,
-  raw_cmd::{RawCmdEndpoint, RawCmdV4, RawCommand, RawCommandRead, RawCommandWrite},
   request_server_info::RequestServerInfoV4,
   input_cmd::{InputCmdV4, InputCommandType},
   input_reading::InputReadingV4,

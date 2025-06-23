@@ -15,7 +15,6 @@
 //! client or server.
 
 pub mod v0;
-pub mod v2;
 pub mod v4;
 
 mod device_feature;
@@ -25,7 +24,6 @@ pub mod serializer;
 pub use device_feature::*;
 pub use endpoint::Endpoint;
 pub use v0::*;
-pub use v2::*;
 pub use v4::*;
 
 use crate::core::errors::ButtplugMessageError;

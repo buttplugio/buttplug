@@ -19,7 +19,6 @@ use crate::{
     },
   },
   server::message::{
-    checked_raw_cmd::CheckedRawCmdV4,
     server_device_attributes::TryFromClientMessage,
     v0::ButtplugClientMessageV0,
     v1::ButtplugClientMessageV1,
@@ -69,8 +68,6 @@ pub enum ButtplugCheckedClientMessageV4 {
   OutputCmd(CheckedOutputCmdV4),
   // Sensor commands
   InputCmd(CheckedInputCmdV4),
-  // Raw commands
-  RawCmd(CheckedRawCmdV4),
   // Internal conversions for v1-v3 messages with subcommands
   ActuatorVecCmd(CheckedOutputVecCmdV4),
 }
@@ -126,18 +123,6 @@ impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMess
         if let Some(features) = feature_map.get(&m.device_index()) {
           Ok(ButtplugCheckedClientMessageV4::InputCmd(
             CheckedInputCmdV4::try_from_device_attributes(m, features)?,
-          ))
-        } else {
-          Err(ButtplugError::from(
-            ButtplugDeviceError::DeviceNotAvailable(m.device_index()),
-          ))
-        }
-      }
-      // Message that need device index and hardware endpoint checking
-      ButtplugClientMessageV4::RawCmd(m) => {
-        if let Some(features) = feature_map.get(&m.device_index()) {
-          Ok(ButtplugCheckedClientMessageV4::RawCmd(
-            CheckedRawCmdV4::try_from_device_attributes(m, features)?,
           ))
         } else {
           Err(ButtplugError::from(
@@ -314,18 +299,6 @@ impl TryFromClientMessage<ButtplugClientMessageV3> for ButtplugCheckedClientMess
           ButtplugDeviceError::MessageNotSupported("SensorUnsubscribeCmdV3".to_owned()),
         ))
       }
-      ButtplugClientMessageV3::RawReadCmd(m) => {
-        Ok(check_device_index_and_convert::<_, CheckedRawCmdV4>(m, features)?.into())
-      }
-      ButtplugClientMessageV3::RawWriteCmd(m) => {
-        Ok(check_device_index_and_convert::<_, CheckedRawCmdV4>(m, features)?.into())
-      }
-      ButtplugClientMessageV3::RawSubscribeCmd(m) => {
-        Ok(check_device_index_and_convert::<_, CheckedRawCmdV4>(m, features)?.into())
-      }
-      ButtplugClientMessageV3::RawUnsubscribeCmd(m) => {
-        Ok(check_device_index_and_convert::<_, CheckedRawCmdV4>(m, features)?.into())
-      }
       _ => {
         ButtplugCheckedClientMessageV4::try_from(msg).map_err(|e: ButtplugMessageError| e.into())
       }
@@ -390,7 +363,6 @@ pub enum ButtplugDeviceCommandMessageUnionV4 {
   ActuatorCmd(CheckedOutputCmdV4),
   ActuatorVecCmd(CheckedOutputVecCmdV4),
   SensorCmd(CheckedInputCmdV4),
-  RawCmd(CheckedRawCmdV4),
 }
 
 impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceCommandMessageUnionV4 {
@@ -410,9 +382,6 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceCommandMessageUni
       ButtplugCheckedClientMessageV4::InputCmd(m) => {
         Ok(ButtplugDeviceCommandMessageUnionV4::SensorCmd(m))
       }
-      ButtplugCheckedClientMessageV4::RawCmd(m) => {
-        Ok(ButtplugDeviceCommandMessageUnionV4::RawCmd(m))
-      }
       _ => Err(()),
     }
   }
@@ -421,7 +390,6 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceCommandMessageUni
 #[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display)]
 pub enum ButtplugDeviceMessageNameV4 {
   StopDeviceCmd,
-  RawCmd,
   SensorCmd,
   ActuatorCmd,
 }

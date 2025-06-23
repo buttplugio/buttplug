@@ -64,9 +64,8 @@ use crate::{
 /// build your own connector, add your device manager to those, and use the
 /// `run()` method to pass it in.
 #[cfg(all(feature = "server", feature = "client"))]
-pub async fn in_process_client(client_name: &str, allow_raw_messages: bool) -> ButtplugClient {
+pub async fn in_process_client(client_name: &str) -> ButtplugClient {
   let dcm = DeviceConfigurationManagerBuilder::default()
-    .allow_raw_messages(allow_raw_messages)
     .finish()
     .unwrap();
 
