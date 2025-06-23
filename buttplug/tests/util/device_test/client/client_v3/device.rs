@@ -15,20 +15,15 @@ use super::client::{
 use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    message::{OutputType, Endpoint, InputType, StopDeviceCmdV0},
+    message::{OutputType, InputType, StopDeviceCmdV0},
   },
   server::message::{
-    ButtplugClientMessageV3,
     ButtplugDeviceMessageNameV3,
     ButtplugServerMessageV3,
     ClientDeviceMessageAttributesV3,
     ClientGenericDeviceMessageAttributesV3,
     DeviceMessageInfoV3,
     LinearCmdV1,
-    RawReadCmdV2,
-    RawSubscribeCmdV2,
-    RawUnsubscribeCmdV2,
-    RawWriteCmdV2,
     RotateCmdV1,
     RotationSubcommandV1,
     ScalarCmdV3,
@@ -647,94 +642,6 @@ impl ButtplugClientDevice {
       let data = send_fut.await?;
       Ok(data[0])
     })
-  }
-
-  pub fn raw_write(
-    &self,
-    endpoint: Endpoint,
-    data: &[u8],
-    write_with_response: bool,
-  ) -> ButtplugClientResultFuture {
-    if self.message_attributes.raw_write_cmd().is_none() {
-      return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageNameV3::RawWriteCmd.to_string(),
-        )
-        .into(),
-      );
-    }
-    let msg = ButtplugClientMessageV3::RawWriteCmd(RawWriteCmdV2::new(
-      self.index,
-      endpoint,
-      data,
-      write_with_response,
-    ));
-    self.event_loop_sender.send_message_expect_ok(msg)
-  }
-
-  pub fn raw_read(
-    &self,
-    endpoint: Endpoint,
-    expected_length: u32,
-    timeout: u32,
-  ) -> ButtplugClientResultFuture<Vec<u8>> {
-    if self.message_attributes.raw_read_cmd().is_none() {
-      return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageNameV3::RawReadCmd.to_string(),
-        )
-        .into(),
-      );
-    }
-    let msg = ButtplugClientMessageV3::RawReadCmd(RawReadCmdV2::new(
-      self.index,
-      endpoint,
-      expected_length,
-      timeout,
-    ));
-    let send_fut = self.event_loop_sender.send_message(msg);
-    async move {
-      match send_fut.await? {
-        ButtplugServerMessageV3::RawReading(reading) => Ok(reading.data().clone()),
-        ButtplugServerMessageV3::Error(err) => Err(ButtplugError::from(err).into()),
-        msg => Err(
-          ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
-            "{:?}",
-            msg
-          )))
-          .into(),
-        ),
-      }
-    }
-    .boxed()
-  }
-
-  pub fn raw_subscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
-    if self.message_attributes.raw_subscribe_cmd().is_none() {
-      return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageNameV3::RawSubscribeCmd.to_string(),
-        )
-        .into(),
-      );
-    }
-    let msg =
-      ButtplugClientMessageV3::RawSubscribeCmd(RawSubscribeCmdV2::new(self.index, endpoint));
-    self.event_loop_sender.send_message_expect_ok(msg)
-  }
-
-  pub fn raw_unsubscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
-    if self.message_attributes.raw_subscribe_cmd().is_none() {
-      return create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageNameV3::RawSubscribeCmd.to_string(),
-        )
-        .into(),
-      );
-    }
-    let msg =
-      ButtplugClientMessageV3::RawUnsubscribeCmd(RawUnsubscribeCmdV2::new(self.index, endpoint));
-    self.event_loop_sender.send_message_expect_ok(msg)
   }
 
   /// Commands device to stop all movement.

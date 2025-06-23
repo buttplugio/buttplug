@@ -7,7 +7,7 @@
 
 //! Server Device Implementation
 //!
-//! This struct manages the trip from buttplug protocol actuator/sensor/raw message to hardware
+//! This struct manages the trip from buttplug protocol actuator/sensor message to hardware
 //! communication. This involves:
 //!
 //! - Taking buttplug device command messages from the exposed server
@@ -51,15 +51,9 @@ use crate::{
       OutputRotateWithDirection,
       OutputType,
       OutputValue,
-      ButtplugMessage,
       ButtplugServerMessageV4,
       DeviceFeature,
       DeviceMessageInfoV4,
-      Endpoint,
-      RawCommand,
-      RawCommandRead,
-      RawCommandWrite,
-      RawReadingV2,
       InputCommandType,
       InputType,
     },
@@ -73,17 +67,11 @@ use crate::{
         HardwareCommand,
         HardwareConnector,
         HardwareEvent,
-        HardwareReadCmd,
-        HardwareSubscribeCmd,
-        HardwareUnsubscribeCmd,
-        HardwareWriteCmd,
-        GENERIC_RAW_COMMAND_UUID,
       },
       protocol::ProtocolHandler,
     },
     message::{
       checked_output_cmd::CheckedOutputCmdV4,
-      checked_raw_cmd::CheckedRawCmdV4,
       checked_input_cmd::CheckedInputCmdV4,
       server_device_attributes::ServerDeviceAttributes,
       spec_enums::ButtplugDeviceCommandMessageUnionV4,
@@ -94,7 +82,7 @@ use crate::{
   util::{self, async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use core::hash::{Hash, Hasher};
-use dashmap::{DashMap, DashSet};
+use dashmap::DashMap;
 use futures::future::{self, BoxFuture, FutureExt};
 use getset::Getters;
 use tokio::sync::{Mutex, RwLock};
@@ -127,7 +115,6 @@ pub struct ServerDevice {
   /// Unique identifier for the device
   #[getset(get = "pub")]
   identifier: UserDeviceIdentifier,
-  raw_subscribed_endpoints: Arc<DashSet<Endpoint>>,
   #[getset(get = "pub")]
   legacy_attributes: ServerDeviceAttributes,
   last_output_command: DashMap<Uuid, CheckedOutputCmdV4>,
@@ -207,7 +194,7 @@ impl ServerDevice {
 
     // Check in the DeviceConfigurationManager to make sure we have attributes for this device.
     let attrs = if let Some(attrs) =
-      device_config_manager.device_definition(&identifier, &hardware.endpoints())
+      device_config_manager.device_definition(&identifier)
     {
       attrs
     } else {
@@ -399,7 +386,6 @@ impl ServerDevice {
       handler,
       hardware,
       definition: definition.clone(),
-      raw_subscribed_endpoints: Arc::new(DashSet::new()),
       // Generating legacy attributes is cheap, just do it right when we create the device.
       legacy_attributes: ServerDeviceAttributes::new(definition.features()),
       last_output_command: DashMap::new(),
@@ -425,22 +411,14 @@ impl ServerDevice {
   /// endpoints.
   pub fn event_stream(&self) -> impl futures::Stream<Item = ServerDeviceEvent> + Send {
     let identifier = self.identifier.clone();
-    let raw_endpoints = self.raw_subscribed_endpoints.clone();
     let hardware_stream = convert_broadcast_receiver_to_stream(self.hardware.event_stream())
       .filter_map(move |hardware_event| {
         let id = identifier.clone();
         match hardware_event {
           HardwareEvent::Disconnected(_) => Some(ServerDeviceEvent::Disconnected(id)),
-          HardwareEvent::Notification(_address, endpoint, data) => {
-            // TODO Figure out how we're going to parse raw data into something sendable to the client.
-            if raw_endpoints.contains(&endpoint) {
-              Some(ServerDeviceEvent::Notification(
-                id,
-                ButtplugServerDeviceMessage::RawReading(RawReadingV2::new(0, endpoint, data)),
-              ))
-            } else {
-              None
-            }
+          HardwareEvent::Notification(_address, _endpoint, _data) => {
+            // TODO Does this still need to be here? Does this need to be routed to the protocol it's part of?
+            None
           }
         }
       });
@@ -481,8 +459,6 @@ impl ServerDevice {
     command_message: ButtplugDeviceCommandMessageUnionV4,
   ) -> ButtplugServerResultFuture {
     match command_message {
-      // Raw messages
-      ButtplugDeviceCommandMessageUnionV4::RawCmd(msg) => self.handle_raw_cmd(msg),
       // Sensor messages
       ButtplugDeviceCommandMessageUnionV4::SensorCmd(msg) => self.handle_sensor_cmd(msg),
       // Actuator messages
@@ -646,99 +622,6 @@ impl ServerDevice {
         .await
         .map(|_| message::OkV0::new(1).into())
         .map_err(|e| e.into())
-    }
-    .boxed()
-  }
-
-  fn handle_raw_cmd(&self, message: CheckedRawCmdV4) -> ButtplugServerResultFuture {
-    match message.raw_command() {
-      RawCommand::Read(read_data) => self.handle_raw_read_cmd(*message.endpoint(), read_data),
-      RawCommand::Subscribe => self.handle_raw_subscribe_cmd(*message.endpoint()),
-      RawCommand::Unsubscribe => self.handle_raw_unsubscribe_cmd(*message.endpoint()),
-      RawCommand::Write(write_data) => self.handle_raw_write_cmd(*message.endpoint(), write_data),
-    }
-  }
-
-  fn handle_raw_write_cmd(
-    &self,
-    endpoint: Endpoint,
-    write_data: &RawCommandWrite,
-  ) -> ButtplugServerResultFuture {
-    let fut = self.hardware.write_value(&HardwareWriteCmd::new(
-      &[GENERIC_RAW_COMMAND_UUID],
-      endpoint,
-      write_data.data().clone(),
-      write_data.write_with_response(),
-    ));
-    async move {
-      fut
-        .await
-        .map(|_| message::OkV0::new(1).into())
-        .map_err(|err| err.into())
-    }
-    .boxed()
-  }
-
-  fn handle_raw_read_cmd(
-    &self,
-    endpoint: Endpoint,
-    read_data: &RawCommandRead,
-  ) -> ButtplugServerResultFuture {
-    let fut = self.hardware.read_value(&HardwareReadCmd::new(
-      GENERIC_RAW_COMMAND_UUID,
-      endpoint,
-      read_data.expected_length(),
-      read_data.timeout(),
-    ));
-    async move {
-      fut
-        .await
-        .map(|msg| {
-          let mut raw_msg: RawReadingV2 = msg.into();
-          raw_msg.set_id(1);
-          raw_msg.into()
-        })
-        .map_err(|err| err.into())
-    }
-    .boxed()
-  }
-
-  fn handle_raw_unsubscribe_cmd(&self, endpoint: Endpoint) -> ButtplugServerResultFuture {
-    let fut = self.hardware.unsubscribe(&HardwareUnsubscribeCmd::new(
-      GENERIC_RAW_COMMAND_UUID,
-      endpoint,
-    ));
-    let raw_endpoints = self.raw_subscribed_endpoints.clone();
-    async move {
-      if !raw_endpoints.contains(&endpoint) {
-        return Ok(message::OkV0::new(1).into());
-      }
-      let result = fut
-        .await
-        .map(|_| message::OkV0::new(1).into())
-        .map_err(|err| err.into());
-      raw_endpoints.remove(&endpoint);
-      result
-    }
-    .boxed()
-  }
-
-  fn handle_raw_subscribe_cmd(&self, endpoint: Endpoint) -> ButtplugServerResultFuture {
-    let fut = self.hardware.subscribe(&HardwareSubscribeCmd::new(
-      GENERIC_RAW_COMMAND_UUID,
-      endpoint,
-    ));
-    let raw_endpoints = self.raw_subscribed_endpoints.clone();
-    async move {
-      if raw_endpoints.contains(&endpoint) {
-        return Ok(message::OkV0::new(1).into());
-      }
-      let result = fut
-        .await
-        .map(|_| message::OkV0::new(1).into())
-        .map_err(|err| err.into());
-      raw_endpoints.insert(endpoint);
-      result
     }
     .boxed()
   }

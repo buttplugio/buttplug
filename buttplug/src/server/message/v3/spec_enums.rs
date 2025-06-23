@@ -17,7 +17,6 @@ use crate::{
       ErrorV0,
       OkV0,
       PingV0,
-      RawReadingV2,
       RequestDeviceListV0,
       ScanningFinishedV0,
       StartScanningV0,
@@ -29,10 +28,6 @@ use crate::{
   server::message::{
     v1::{LinearCmdV1, RequestServerInfoV1, RotateCmdV1, VibrateCmdV1},
     v2::{ButtplugClientMessageV2, ButtplugServerMessageV2, ServerInfoV2},
-    RawReadCmdV2,
-    RawSubscribeCmdV2,
-    RawUnsubscribeCmdV2,
-    RawWriteCmdV2,
   },
 };
 use serde::{Deserialize, Serialize};
@@ -72,11 +67,7 @@ pub enum ButtplugClientMessageV3 {
   VibrateCmd(VibrateCmdV1),
   LinearCmd(LinearCmdV1),
   RotateCmd(RotateCmdV1),
-  RawWriteCmd(RawWriteCmdV2),
-  RawReadCmd(RawReadCmdV2),
   StopDeviceCmd(StopDeviceCmdV0),
-  RawSubscribeCmd(RawSubscribeCmdV2),
-  RawUnsubscribeCmd(RawUnsubscribeCmdV2),
   ScalarCmd(ScalarCmdV3),
   // Sensor commands
   SensorReadCmd(SensorReadCmdV3),
@@ -116,14 +107,6 @@ impl TryFrom<ButtplugClientMessageV2> for ButtplugClientMessageV3 {
       ButtplugClientMessageV2::VibrateCmd(m) => Ok(ButtplugClientMessageV3::VibrateCmd(m)),
       ButtplugClientMessageV2::LinearCmd(m) => Ok(ButtplugClientMessageV3::LinearCmd(m)),
       ButtplugClientMessageV2::RotateCmd(m) => Ok(ButtplugClientMessageV3::RotateCmd(m)),
-      ButtplugClientMessageV2::RawReadCmd(m) => Ok(ButtplugClientMessageV3::RawReadCmd(m)),
-      ButtplugClientMessageV2::RawWriteCmd(m) => Ok(ButtplugClientMessageV3::RawWriteCmd(m)),
-      ButtplugClientMessageV2::RawSubscribeCmd(m) => {
-        Ok(ButtplugClientMessageV3::RawSubscribeCmd(m))
-      }
-      ButtplugClientMessageV2::RawUnsubscribeCmd(m) => {
-        Ok(ButtplugClientMessageV3::RawUnsubscribeCmd(m))
-      }
       _ => Err(ButtplugMessageError::MessageConversionError(format!(
         "Cannot convert message {value:?} to V3 message spec while lacking state."
       ))),
@@ -153,8 +136,6 @@ pub enum ButtplugServerMessageV3 {
   DeviceAdded(DeviceAddedV3),
   DeviceRemoved(DeviceRemovedV0),
   ScanningFinished(ScanningFinishedV0),
-  // Generic commands
-  RawReading(RawReadingV2),
   // Sensor commands
   SensorReading(SensorReadingV3),
 }
@@ -177,7 +158,6 @@ impl From<ButtplugServerMessageV3> for ButtplugServerMessageV2 {
       ButtplugServerMessageV3::ServerInfo(m) => ButtplugServerMessageV2::ServerInfo(m),
       ButtplugServerMessageV3::DeviceRemoved(m) => ButtplugServerMessageV2::DeviceRemoved(m),
       ButtplugServerMessageV3::ScanningFinished(m) => ButtplugServerMessageV2::ScanningFinished(m),
-      ButtplugServerMessageV3::RawReading(m) => ButtplugServerMessageV2::RawReading(m),
       ButtplugServerMessageV3::DeviceAdded(m) => ButtplugServerMessageV2::DeviceAdded(m.into()),
       ButtplugServerMessageV3::DeviceList(m) => ButtplugServerMessageV2::DeviceList(m.into()),
       ButtplugServerMessageV3::SensorReading(_) => ButtplugServerMessageV2::Error(ErrorV0::from(
@@ -204,7 +184,6 @@ impl TryFrom<ButtplugServerMessageV4> for ButtplugServerMessageV3 {
       ButtplugServerMessageV4::ScanningFinished(m) => {
         Ok(ButtplugServerMessageV3::ScanningFinished(m))
       }
-      ButtplugServerMessageV4::RawReading(m) => Ok(ButtplugServerMessageV3::RawReading(m)),
       ButtplugServerMessageV4::DeviceList(m) => Ok(ButtplugServerMessageV3::DeviceList(m.into())),
       ButtplugServerMessageV4::DeviceAdded(m) => Ok(ButtplugServerMessageV3::DeviceAdded(m.into())),
       // All other messages (SensorReading) requires device manager context.
@@ -220,10 +199,6 @@ pub enum ButtplugDeviceMessageNameV3 {
   LinearCmd,
   RotateCmd,
   StopDeviceCmd,
-  RawWriteCmd,
-  RawReadCmd,
-  RawSubscribeCmd,
-  RawUnsubscribeCmd,
   ScalarCmd,
   SensorReadCmd,
   SensorSubscribeCmd,

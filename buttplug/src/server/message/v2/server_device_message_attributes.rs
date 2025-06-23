@@ -17,8 +17,6 @@ use crate::{
 use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};
 
-use super::RawDeviceMessageAttributesV2;
-
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Getters, Setters)]
 pub struct ServerDeviceMessageAttributesV2 {
   // Generic commands
@@ -49,24 +47,6 @@ pub struct ServerDeviceMessageAttributesV2 {
   #[getset(get = "pub")]
   #[serde(rename = "StopDeviceCmd")]
   pub(in crate::server::message) stop_device_cmd: NullDeviceMessageAttributesV1,
-
-  // Raw commands are only added post-serialization
-  #[getset(get = "pub")]
-  #[serde(rename = "RawReadCmd")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) raw_read_cmd: Option<RawDeviceMessageAttributesV2>,
-  #[getset(get = "pub")]
-  #[serde(rename = "RawWriteCmd")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) raw_write_cmd: Option<RawDeviceMessageAttributesV2>,
-  #[getset(get = "pub")]
-  #[serde(rename = "RawSubscribeCmd")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) raw_subscribe_cmd: Option<RawDeviceMessageAttributesV2>,
-  #[getset(get = "pub")]
-  #[serde(rename = "RawUnsubscribeCmd")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) raw_unsubscribe_cmd: Option<RawDeviceMessageAttributesV2>,
 
   // Needed to load from config for fallback, but unused here.
   #[getset(get = "pub")]
@@ -170,10 +150,6 @@ impl From<ServerDeviceMessageAttributesV3> for ServerDeviceMessageAttributesV2 {
         }
       },
       stop_device_cmd: other.stop_device_cmd().clone(),
-      raw_read_cmd: other.raw_read_cmd().clone(),
-      raw_write_cmd: other.raw_write_cmd().clone(),
-      raw_subscribe_cmd: other.raw_subscribe_cmd().clone(),
-      raw_unsubscribe_cmd: other.raw_subscribe_cmd().clone(),
       fleshlight_launch_fw12_cmd: other.fleshlight_launch_fw12_cmd().clone(),
       vorze_a10_cyclone_cmd: other.vorze_a10_cyclone_cmd().clone(),
     }

@@ -16,7 +16,6 @@ use crate::{
       ErrorV0,
       OkV0,
       PingV0,
-      RawReadingV2,
       RequestDeviceListV0,
       ScanningFinishedV0,
       StartScanningV0,
@@ -43,10 +42,6 @@ use super::{
   DeviceListV2,
   RSSILevelCmdV2,
   RSSILevelReadingV2,
-  RawReadCmdV2,
-  RawSubscribeCmdV2,
-  RawUnsubscribeCmdV2,
-  RawWriteCmdV2,
   ServerInfoV2,
 };
 
@@ -75,11 +70,7 @@ pub enum ButtplugClientMessageV2 {
   VibrateCmd(VibrateCmdV1),
   LinearCmd(LinearCmdV1),
   RotateCmd(RotateCmdV1),
-  RawWriteCmd(RawWriteCmdV2),
-  RawReadCmd(RawReadCmdV2),
   StopDeviceCmd(StopDeviceCmdV0),
-  RawSubscribeCmd(RawSubscribeCmdV2),
-  RawUnsubscribeCmd(RawUnsubscribeCmdV2),
   // Sensor commands
   BatteryLevelCmd(BatteryLevelCmdV2),
   RSSILevelCmd(RSSILevelCmdV2),
@@ -171,8 +162,6 @@ pub enum ButtplugServerMessageV2 {
   DeviceAdded(DeviceAddedV2),
   DeviceRemoved(DeviceRemovedV0),
   ScanningFinished(ScanningFinishedV0),
-  // Generic commands
-  RawReading(RawReadingV2),
   // Sensor commands
   BatteryLevelReading(BatteryLevelReadingV2),
   RSSILevelReading(RSSILevelReadingV2),
@@ -202,11 +191,6 @@ impl From<ButtplugServerMessageV2> for ButtplugServerMessageV1 {
           ),
         )))
       }
-      ButtplugServerMessageV2::RawReading(_) => ButtplugServerMessageV1::Error(ErrorV0::from(
-        ButtplugError::from(ButtplugMessageError::MessageConversionError(
-          "RawReading cannot be converted to Buttplug Message Spec V1".to_owned(),
-        )),
-      )),
     }
   }
 }
@@ -216,10 +200,6 @@ pub enum ButtplugDeviceMessageNameV2 {
   LinearCmd,
   RotateCmd,
   StopDeviceCmd,
-  RawWriteCmd,
-  RawReadCmd,
-  RawSubscribeCmd,
-  RawUnsubscribeCmd,
   VibrateCmd,
   BatteryLevelCmd,
   RSSILevelCmd,

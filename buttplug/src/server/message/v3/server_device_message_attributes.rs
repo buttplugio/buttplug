@@ -10,7 +10,6 @@ use crate::{
   server::message::{
     server_device_feature::ServerDeviceFeature,
     v1::NullDeviceMessageAttributesV1,
-    v2::RawDeviceMessageAttributesV2,
   },
 };
 use getset::{Getters, MutGetters, Setters};
@@ -32,11 +31,6 @@ pub struct ServerDeviceMessageAttributesV3 {
 
   // StopDeviceCmd always exists
   pub(in crate::server::message) stop_device_cmd: NullDeviceMessageAttributesV1,
-
-  // Raw commands are only added post-serialization
-  pub(in crate::server::message) raw_read_cmd: Option<RawDeviceMessageAttributesV2>,
-  pub(in crate::server::message) raw_write_cmd: Option<RawDeviceMessageAttributesV2>,
-  pub(in crate::server::message) raw_subscribe_cmd: Option<RawDeviceMessageAttributesV2>,
 
   // Needed to load from config for fallback, but unused here.
   pub(in crate::server::message) fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributesV1>,
@@ -178,14 +172,6 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
       }
     };
 
-    // Raw messages
-    let raw_attrs = features
-      .iter()
-      .find(|f| f.raw().is_some())
-      .map(|raw_feature| {
-        RawDeviceMessageAttributesV2::new(raw_feature.raw().as_ref().unwrap().endpoints())
-      });
-
     Self {
       scalar_cmd: if scalar_attrs.is_empty() {
         None
@@ -204,9 +190,6 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
       },
       sensor_read_cmd: sensor_filter,
       sensor_subscribe_cmd: None,
-      raw_read_cmd: raw_attrs.clone(),
-      raw_write_cmd: raw_attrs.clone(),
-      raw_subscribe_cmd: raw_attrs.clone(),
       ..Default::default()
     }
   }

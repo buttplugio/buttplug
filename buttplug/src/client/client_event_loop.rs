@@ -241,16 +241,6 @@ where
         trace!("Scanning finished event received, forwarding to client.");
         self.send_client_event(ButtplugClientEvent::ScanningFinished);
       }
-      ButtplugServerMessageV4::RawReading(msg) => {
-        let device_idx = msg.device_index();
-        if let Some(device) = self.device_map.get(&device_idx) {
-          device
-            .value()
-            .queue_event(ButtplugClientDeviceEvent::Message(
-              ButtplugServerMessageV4::from(msg),
-            ));
-        }
-      }
       ButtplugServerMessageV4::InputReading(msg) => {
         let device_idx = msg.device_index();
         if let Some(device) = self.device_map.get(&device_idx) {

@@ -68,7 +68,7 @@ async fn test_version2_connection() {
 
 #[tokio::test]
 async fn test_version0_device_added_device_list() {
-  let (server, _) = test_server_with_device("Massage Demo", false);
+  let (server, _) = test_server_with_device("Massage Demo");
   let recv = server.event_stream();
   pin_mut!(recv);
   let serializer = ButtplugServerJSONSerializer::default();
@@ -119,7 +119,7 @@ async fn test_version0_device_added_device_list() {
 #[tokio::test]
 async fn test_version0_singlemotorvibratecmd() {
   tracing_subscriber::fmt::init();
-  let (server, mut device) = test_server_with_device("Massage Demo", false);
+  let (server, mut device) = test_server_with_device("Massage Demo");
   let recv = server.event_stream();
   pin_mut!(recv);
   let serializer = ButtplugServerJSONSerializer::default();
@@ -184,7 +184,7 @@ async fn test_version0_singlemotorvibratecmd() {
 
 #[tokio::test]
 async fn test_version1_singlemotorvibratecmd() {
-  let (server, mut device) = test_server_with_device("Massage Demo", false);
+  let (server, mut device) = test_server_with_device("Massage Demo");
   let recv = server.event_stream();
   pin_mut!(recv);
   let serializer = ButtplugServerJSONSerializer::default();
@@ -260,7 +260,7 @@ async fn test_version1_singlemotorvibratecmd() {
 
 #[tokio::test]
 async fn test_version0_oscillatoronly() {
-  let (server, mut _device) = test_server_with_device("Xone", false);
+  let (server, mut _device) = test_server_with_device("Xone");
   let recv = server.event_stream();
   pin_mut!(recv);
   let serializer = ButtplugServerJSONSerializer::default();
@@ -307,7 +307,7 @@ async fn test_version0_oscillatoronly() {
 
 #[tokio::test]
 async fn test_version1_oscilatoronly() {
-  let (server, mut _device) = test_server_with_device("Xone", false);
+  let (server, mut _device) = test_server_with_device("Xone");
   let recv = server.event_stream();
   pin_mut!(recv);
   let serializer = ButtplugServerJSONSerializer::default();

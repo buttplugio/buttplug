@@ -15,22 +15,16 @@ use super::{
 };
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+    errors::ButtplugDeviceError,
     message::{
       OutputCmdV4,
       OutputCommand,
       OutputType,
       OutputValue,
-      ButtplugClientMessageV4,
       ButtplugServerMessageV4,
       DeviceFeature,
       DeviceMessageInfoV4,
-      Endpoint,
       FeatureType,
-      RawCmdV4,
-      RawCommand,
-      RawCommandRead,
-      RawCommandWrite,
       StopDeviceCmdV0,
     },
   },
@@ -254,114 +248,6 @@ impl ButtplugClientDevice {
       create_boxed_future_client_error(
         ButtplugDeviceError::DeviceFeatureMismatch(
           "Device does not have RSSI feature available".to_owned(),
-        )
-        .into(),
-      )
-    }
-  }
-
-  pub fn raw_write(
-    &self,
-    endpoint: Endpoint,
-    data: &[u8],
-    write_with_response: bool,
-  ) -> ButtplugClientResultFuture {
-    if self
-      .device_features
-      .iter()
-      .any(|x| x.feature().raw().is_some())
-    {
-      let msg = ButtplugClientMessageV4::RawCmd(RawCmdV4::new(
-        self.index,
-        endpoint,
-        RawCommand::Write(RawCommandWrite::new(&data.to_vec(), write_with_response)),
-      ));
-      self.event_loop_sender.send_message_expect_ok(msg)
-    } else {
-      create_boxed_future_client_error(
-        ButtplugDeviceError::DeviceFeatureMismatch(
-          "Device does not have raw feature available".to_owned(),
-        )
-        .into(),
-      )
-    }
-  }
-
-  pub fn raw_read(
-    &self,
-    endpoint: Endpoint,
-    expected_length: u32,
-    timeout: u32,
-  ) -> ButtplugClientResultFuture<Vec<u8>> {
-    if self
-      .device_features
-      .iter()
-      .any(|x| x.feature().raw().is_some())
-    {
-      let msg = ButtplugClientMessageV4::RawCmd(RawCmdV4::new(
-        self.index,
-        endpoint,
-        RawCommand::Read(RawCommandRead::new(expected_length, timeout)),
-      ));
-      let send_fut = self.event_loop_sender.send_message(msg);
-      async move {
-        match send_fut.await? {
-          ButtplugServerMessageV4::RawReading(reading) => Ok(reading.data().clone()),
-          ButtplugServerMessageV4::Error(err) => Err(ButtplugError::from(err).into()),
-          msg => Err(
-            ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
-              "{msg:?}"
-            )))
-            .into(),
-          ),
-        }
-      }
-      .boxed()
-    } else {
-      create_boxed_future_client_error(
-        ButtplugDeviceError::DeviceFeatureMismatch(
-          "Device does not have raw feature available".to_owned(),
-        )
-        .into(),
-      )
-    }
-  }
-
-  pub fn raw_subscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
-    if self
-      .device_features
-      .iter()
-      .any(|x| x.feature().raw().is_some())
-    {
-      let msg =
-        ButtplugClientMessageV4::RawCmd(RawCmdV4::new(self.index, endpoint, RawCommand::Subscribe));
-      self.event_loop_sender.send_message_expect_ok(msg)
-    } else {
-      create_boxed_future_client_error(
-        ButtplugDeviceError::DeviceFeatureMismatch(
-          "Device does not have raw feature available".to_owned(),
-        )
-        .into(),
-      )
-    }
-  }
-
-  pub fn raw_unsubscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
-    if self
-      .device_features
-      .iter()
-      .any(|x| x.feature().raw().is_some())
-    {
-      let msg = ButtplugClientMessageV4::RawCmd(RawCmdV4::new(
-        self.index,
-        endpoint,
-        RawCommand::Unsubscribe,
-      ));
-      self.event_loop_sender.send_message_expect_ok(msg)
-    } else {
-      create_boxed_future_client_error(
-        ButtplugDeviceError::DeviceFeatureMismatch(
-          "Device does not have raw feature available".to_owned(),
         )
         .into(),
       )

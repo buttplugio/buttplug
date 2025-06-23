@@ -8,7 +8,7 @@
 use crate::{core::{
   errors::ButtplugDeviceError,
   message::{
-    DeviceFeature, DeviceFeatureInput, DeviceFeatureOutput, DeviceFeatureRaw, Endpoint, FeatureType, InputCommandType, InputType, OutputType
+    DeviceFeature, DeviceFeatureInput, DeviceFeatureOutput, FeatureType, InputCommandType, InputType, OutputType
   },
 }, server::device::configuration::BaseFeatureSettings};
 use getset::{CopyGetters, Getters, MutGetters, Setters};
@@ -53,9 +53,6 @@ pub struct ServerDeviceFeature {
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(rename = "input")]
   input: Option<HashMap<InputType, ServerDeviceFeatureInput>>,
-  #[getset(get = "pub")]
-  #[serde(skip)]
-  raw: Option<DeviceFeatureRaw>,
   #[getset(get_copy = "pub", get_mut = "pub(super)")]
   id: Uuid,
   #[getset(get_copy = "pub", get_mut = "pub(super)")]
@@ -89,7 +86,6 @@ impl ServerDeviceFeature {
       feature_type,
       output: output.clone(),
       input: input.clone(),
-      raw: None,
       id: *id,
       base_id: *base_id,
       feature_settings: feature_settings.clone().unwrap_or_default()
@@ -120,7 +116,6 @@ impl ServerDeviceFeature {
           .map(|(t, a)| (*t, DeviceFeatureInput::from(a.clone())))
           .collect()
       }),
-      self.raw(),
     )
   }
 
@@ -135,24 +130,10 @@ impl ServerDeviceFeature {
         feature_type: self.feature_type,
         output: self.output.clone(),
         input: self.input.clone(),
-        raw: self.raw.clone(),
         id: Uuid::new_v4(),
         base_id: Some(self.id),
         feature_settings: self.feature_settings.clone()
       }
-    }
-  }
-
-  pub fn new_raw_feature(endpoints: &[Endpoint]) -> Self {
-    Self {
-      description: "Raw Endpoints".to_owned(),
-      feature_type: FeatureType::Raw,
-      output: None,
-      input: None,
-      raw: Some(DeviceFeatureRaw::new(endpoints)),
-      id: uuid::Uuid::new_v4(),
-      base_id: None,
-      feature_settings: BaseFeatureSettings::default()
     }
   }
 }

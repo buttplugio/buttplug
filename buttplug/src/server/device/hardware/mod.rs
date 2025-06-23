@@ -5,11 +5,10 @@ use std::{collections::HashSet, fmt::Debug, sync::Arc, time::Duration};
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{Endpoint, RawCommand, RawReadingV2},
+    message::Endpoint,
   },
   server::{
     device::configuration::ProtocolCommunicationSpecifier,
-    message::checked_raw_cmd::CheckedRawCmdV4,
   },
 };
 use async_trait::async_trait;
@@ -19,12 +18,7 @@ use getset::{CopyGetters, Getters};
 use instant::Instant;
 use serde::{Deserialize, Serialize};
 use tokio::sync::{broadcast, RwLock};
-use uuid::{uuid, Uuid};
-
-// Raw commands don't have a set feature or command, they're added dynamically when the raw system is turned
-// on. Therefore we just attach a generic ID to all raw commands, as we don't really expect to need
-// to debug these either (as they're only used for dev work).
-pub const GENERIC_RAW_COMMAND_UUID: Uuid = uuid!("f5250140-8a86-4eb7-9c60-c96b71ee6330");
+use uuid::Uuid;
 
 /// Parameters for reading data from a [Hardware](crate::device::Hardware) endpoint
 ///
@@ -229,30 +223,6 @@ impl From<HardwareUnsubscribeCmd> for HardwareCommand {
   }
 }
 
-impl From<CheckedRawCmdV4> for HardwareCommand {
-  fn from(value: CheckedRawCmdV4) -> Self {
-    match value.raw_command() {
-      RawCommand::Write(x) => HardwareCommand::Write(HardwareWriteCmd {
-        command_id: HashSet::from_iter([GENERIC_RAW_COMMAND_UUID].iter().cloned()),
-        endpoint: *value.endpoint(),
-        data: x.data().clone(),
-        write_with_response: x.write_with_response(),
-      }),
-      RawCommand::Subscribe => HardwareCommand::Subscribe(HardwareSubscribeCmd {
-        command_id: GENERIC_RAW_COMMAND_UUID,
-        endpoint: *value.endpoint(),
-      }),
-      RawCommand::Unsubscribe => HardwareCommand::Unsubscribe(HardwareUnsubscribeCmd {
-        command_id: GENERIC_RAW_COMMAND_UUID,
-        endpoint: *value.endpoint(),
-      }),
-      _ => {
-        panic!("Should never try to convert a raw read command into a hardware command!");
-      }
-    }
-  }
-}
-
 #[derive(Debug, Clone, Getters)]
 #[getset(get = "pub")]
 pub struct HardwareReading {
@@ -266,12 +236,6 @@ impl HardwareReading {
       endpoint,
       data: data.to_vec(),
     }
-  }
-}
-
-impl From<HardwareReading> for RawReadingV2 {
-  fn from(reading: HardwareReading) -> Self {
-    RawReadingV2::new(0, *reading.endpoint(), reading.data().clone())
   }
 }
 

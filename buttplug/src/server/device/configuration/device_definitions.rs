@@ -2,7 +2,7 @@ use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{core::message::Endpoint, server::message::server_device_feature::ServerDeviceFeature};
+use crate::server::message::server_device_feature::ServerDeviceFeature;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct DeviceSettings {
@@ -150,11 +150,5 @@ impl UserDeviceDefinition {
         ..Default::default()
       },
     }
-  }
-
-  pub fn add_raw_messages(&mut self, endpoints: &[Endpoint]) {
-    self
-      .features
-      .push(ServerDeviceFeature::new_raw_feature(endpoints));
   }
 }

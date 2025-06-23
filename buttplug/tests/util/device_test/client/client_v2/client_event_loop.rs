@@ -16,7 +16,7 @@ use buttplug::{
   core::{
     connector::{ButtplugConnector, ButtplugConnectorStateShared},
     errors::{ButtplugDeviceError, ButtplugError},
-    message::{ButtplugDeviceMessage, ButtplugMessageValidator},
+    message::ButtplugMessageValidator,
   },
   server::message::{
     ButtplugClientMessageV2,
@@ -239,16 +239,6 @@ where
       ButtplugServerMessageV2::ScanningFinished(_) => {
         trace!("Scanning finished event received, forwarding to client.");
         self.send_client_event(ButtplugClientEvent::ScanningFinished);
-      }
-      ButtplugServerMessageV2::RawReading(msg) => {
-        let device_idx = msg.device_index();
-        if let Some(device) = self.device_map.get(&device_idx) {
-          device
-            .value()
-            .queue_event(ButtplugClientDeviceEvent::Message(
-              ButtplugServerMessageV2::RawReading(msg),
-            ));
-        }
       }
       ButtplugServerMessageV2::Error(e) => {
         self.send_client_event(ButtplugClientEvent::Error(e.into()));
