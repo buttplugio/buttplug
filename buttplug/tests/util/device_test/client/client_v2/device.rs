@@ -30,7 +30,6 @@ use buttplug::{
     ClientDeviceMessageAttributesV2,
     DeviceMessageInfoV2,
     LinearCmdV1,
-    RSSILevelCmdV2,
     RotateCmdV1,
     RotationSubcommandV1,
     VectorSubcommandV1,
@@ -456,32 +455,6 @@ impl ButtplugClientDevice {
     Box::pin(async move {
       match send_fut.await? {
         ButtplugServerMessageV2::BatteryLevelReading(reading) => Ok(reading.battery_level()),
-        ButtplugServerMessageV2::Error(err) => Err(ButtplugError::from(err).into()),
-        msg => Err(
-          ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
-            "{:?}",
-            msg
-          )))
-          .into(),
-        ),
-      }
-    })
-  }
-
-  pub fn rssi_level(&self) -> ButtplugClientResultFuture<i32> {
-    if self.message_attributes.rssi_level_cmd().is_none() {
-      return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageNameV2::RSSILevelCmd.to_string(),
-        )
-        .into(),
-      );
-    }
-    let msg = ButtplugClientMessageV2::RSSILevelCmd(RSSILevelCmdV2::new(self.index));
-    let send_fut = self.send_message(msg);
-    Box::pin(async move {
-      match send_fut.await? {
-        ButtplugServerMessageV2::RSSILevelReading(reading) => Ok(reading.rssi_level()),
         ButtplugServerMessageV2::Error(err) => Err(ButtplugError::from(err).into()),
         msg => Err(
           ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(

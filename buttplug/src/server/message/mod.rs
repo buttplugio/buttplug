@@ -56,16 +56,12 @@ impl ButtplugClientMessageVariant {
     match self {
       Self::V0(msg) => match msg {
         ButtplugClientMessageV0::FleshlightLaunchFW12Cmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV0::KiirooCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV0::LovenseCmd(a) => Some(a.device_index()),
         ButtplugClientMessageV0::SingleMotorVibrateCmd(a) => Some(a.device_index()),
         ButtplugClientMessageV0::VorzeA10CycloneCmd(a) => Some(a.device_index()),
         _ => None,
       },
       Self::V1(msg) => match msg {
         ButtplugClientMessageV1::FleshlightLaunchFW12Cmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV1::KiirooCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV1::LovenseCmd(a) => Some(a.device_index()),
         ButtplugClientMessageV1::SingleMotorVibrateCmd(a) => Some(a.device_index()),
         ButtplugClientMessageV1::VorzeA10CycloneCmd(a) => Some(a.device_index()),
         ButtplugClientMessageV1::VibrateCmd(a) => Some(a.device_index()),
@@ -73,7 +69,6 @@ impl ButtplugClientMessageVariant {
       },
       Self::V2(msg) => match msg {
         ButtplugClientMessageV2::VibrateCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV2::RSSILevelCmd(a) => Some(a.device_index()),
         ButtplugClientMessageV2::RotateCmd(a) => Some(a.device_index()),
         ButtplugClientMessageV2::LinearCmd(a) => Some(a.device_index()),
         ButtplugClientMessageV2::BatteryLevelCmd(a) => Some(a.device_index()),
