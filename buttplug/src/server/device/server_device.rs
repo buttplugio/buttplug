@@ -90,7 +90,7 @@ use tokio_stream::StreamExt;
 use uuid::Uuid;
 
 use super::{
-  configuration::{UserDeviceDefinition, UserDeviceIdentifier},
+  configuration::{DeviceDefinition, UserDeviceIdentifier},
   protocol::{
     //output_command_manager::ActuatorCommandManager,
     ProtocolKeepaliveStrategy,
@@ -110,7 +110,7 @@ pub struct ServerDevice {
   hardware: Arc<Hardware>,
   handler: Arc<dyn ProtocolHandler>,
   #[getset(get = "pub")]
-  definition: UserDeviceDefinition,
+  definition: DeviceDefinition,
   //output_command_manager: ActuatorCommandManager,
   /// Unique identifier for the device
   #[getset(get = "pub")]
@@ -242,7 +242,7 @@ impl ServerDevice {
     identifier: UserDeviceIdentifier,
     handler: Arc<dyn ProtocolHandler>,
     hardware: Arc<Hardware>,
-    definition: &UserDeviceDefinition,
+    definition: &DeviceDefinition,
   ) -> Self {
     let keepalive_packet = Arc::new(RwLock::new(None));
     let current_hardware_commands = Arc::new(Mutex::new(None));
@@ -256,7 +256,7 @@ impl ServerDevice {
       async_manager::spawn(async move {
         // Arbitrary wait time for now.
         let wait_duration = Duration::from_secs(5);
-        let bt_duration = Duration::from_millis(75);
+        let bt_duration = Duration::from_millis(20);
         loop {
           // Loop based on our 10hz estimate for most BLE toys.
           util::sleep(bt_duration).await;

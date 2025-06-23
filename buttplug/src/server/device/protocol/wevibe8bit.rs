@@ -15,7 +15,7 @@ use crate::{
     errors::ButtplugDeviceError,
     message::{Endpoint, OutputType},
   }, generic_protocol_initializer_setup, server::device::{
-    configuration::{UserDeviceDefinition, UserDeviceIdentifier}, hardware::{Hardware, HardwareCommand, HardwareWriteCmd}, protocol::{ProtocolHandler, ProtocolInitializer, ProtocolCommunicationSpecifier, ProtocolIdentifier}
+    configuration::{DeviceDefinition, UserDeviceIdentifier}, hardware::{Hardware, HardwareCommand, HardwareWriteCmd}, protocol::{ProtocolHandler, ProtocolInitializer, ProtocolCommunicationSpecifier, ProtocolIdentifier}
   }
 };
 
@@ -31,7 +31,7 @@ impl ProtocolInitializer for WeVibe8BitInitializer {
   async fn initialize(
     &mut self,
     _hardware: Arc<Hardware>,
-    def: &UserDeviceDefinition,
+    def: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let num_vibrators = def.features().iter().filter(|x| x.output().as_ref().map_or(false, |x| x.contains_key(&OutputType::Vibrate))).count() as u8;
     Ok(Arc::new(WeVibe8Bit::new(num_vibrators)))

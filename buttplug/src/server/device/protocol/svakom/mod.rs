@@ -22,7 +22,7 @@ pub mod svakom_v6;
 use crate::{
   core::errors::ButtplugDeviceError,
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceIdentifier, UserDeviceDefinition},
+    configuration::{ProtocolCommunicationSpecifier, UserDeviceIdentifier, DeviceDefinition},
     hardware::Hardware,
     protocol::{
       generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer
@@ -42,7 +42,7 @@ impl ProtocolInitializer for SvakomInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    def: &UserDeviceDefinition,
+    def: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     if let Some(variant) = def.protocol_variant() {
       match variant.as_str() {

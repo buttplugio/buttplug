@@ -11,7 +11,7 @@ use crate::{
     message::Endpoint,
   },
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup, mysteryvibe::MysteryVibe, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer
@@ -34,7 +34,7 @@ impl ProtocolInitializer for MysteryVibeV2Initializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    def: &UserDeviceDefinition,
+    def: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     // The only thing that's different about MysteryVibeV2 from v1 is the initialization packet.
     // Just send that then return the older protocol version.

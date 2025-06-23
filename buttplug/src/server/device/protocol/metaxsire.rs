@@ -14,7 +14,7 @@ use uuid::{uuid, Uuid};
 use crate::{
   core::{errors::ButtplugDeviceError, message::{Endpoint, OutputType}},
   server::device::{
-    configuration::{UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{DeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_initializer_setup, ProtocolHandler, ProtocolInitializer, ProtocolIdentifier, ProtocolCommunicationSpecifier},
   },
@@ -31,7 +31,7 @@ impl ProtocolInitializer for MetaXSireInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    def: &UserDeviceDefinition,
+    def: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut commands = vec!();
     def

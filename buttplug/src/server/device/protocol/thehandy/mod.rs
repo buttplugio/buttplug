@@ -10,7 +10,7 @@ use self::handyplug::Ping;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
@@ -44,7 +44,7 @@ impl ProtocolInitializer for TheHandyInitializer {
   async fn initialize(
     &mut self,
     _hardware: Arc<Hardware>,
-    _: &UserDeviceDefinition,
+    _: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     // Ok, somehow this whole function has been basically a no-op. The read/write lines never had an
     // await on them, so they were never run. But only now, in Rust 1.75/Buttplug 7.1.15, have we

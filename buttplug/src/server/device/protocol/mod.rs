@@ -130,7 +130,7 @@ use crate::{
   },
   server::{
     device::{
-      configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+      configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
       hardware::{Hardware, HardwareCommand, HardwareReadCmd},
     },
     message::{
@@ -689,7 +689,7 @@ pub trait ProtocolInitializer: Sync + Send {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    device_definition: &UserDeviceDefinition,
+    device_definition: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError>;
 }
 
@@ -745,7 +745,7 @@ impl ProtocolInitializer for GenericProtocolInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    _: &UserDeviceDefinition,
+    _: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(self.handler.take().unwrap())
   }

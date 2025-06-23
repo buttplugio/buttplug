@@ -1,8 +1,8 @@
-use getset::{CopyGetters, Getters, MutGetters, Setters};
+use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::server::message::server_device_feature::ServerDeviceFeature;
+use crate::server::message::server_device_feature::{ServerBaseDeviceFeature, ServerDeviceFeature, ServerUserDeviceFeature};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct DeviceSettings {
@@ -16,9 +16,10 @@ impl DeviceSettings {
   }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default, CopyGetters)]
 pub struct BaseFeatureSettings {
   #[serde(rename = "alt-protocol-index", skip_serializing_if = "Option::is_none", default)]
+  #[getset(get_copy = "pub")]
   alt_protocol_index: Option<u32>,
 }
 
@@ -40,21 +41,25 @@ impl UserFeatureSettings {
   }
 }
 
-#[derive(Debug, Clone, Getters)]
-#[getset(get = "pub")]
+#[derive(Debug, Clone, Getters, CopyGetters)]
 pub struct BaseDeviceDefinition {
+  #[getset(get = "pub")]
   /// Given name of the device this instance represents.
   name: String,
+  #[getset(get = "pub")]
   /// Message attributes for this device instance.
-  features: Vec<ServerDeviceFeature>,
+  features: Vec<ServerBaseDeviceFeature>,
+  #[getset(get_copy = "pub")]
   id: Uuid,
+  #[getset(get = "pub")]
   protocol_variant: Option<String>,
+  #[getset(get = "pub")]
   device_settings: DeviceSettings,
 }
 
 impl BaseDeviceDefinition {
   /// Create a new instance
-  pub fn new(name: &str, id: &Uuid, protocol_variant: &Option<String>, features: &[ServerDeviceFeature], device_settings: &Option<DeviceSettings>) -> Self {
+  pub fn new(name: &str, id: &Uuid, protocol_variant: &Option<String>, features: &[ServerBaseDeviceFeature], device_settings: &Option<DeviceSettings>) -> Self {
     Self {
       name: name.to_owned(),
       features: features.into(),
@@ -62,14 +67,6 @@ impl BaseDeviceDefinition {
       protocol_variant: protocol_variant.clone(),
       device_settings: device_settings.clone().unwrap_or_default()
     }
-  }
-
-  pub fn create_user_device_features(&self) -> Vec<ServerDeviceFeature> {
-    self
-      .features
-      .iter()
-      .map(|feature| feature.as_user_feature())
-      .collect()
   }
 }
 
@@ -99,56 +96,93 @@ impl UserDeviceCustomization {
       index,
     }
   }
+
+  pub fn default_with_index(index: u32) -> Self {
+    Self::new(&None, false, false, index)
+  }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Getters, Setters, MutGetters)]
-#[getset(get = "pub", set = "pub", get_mut = "pub")]
+#[derive(Debug, Clone, Getters, Serialize, Deserialize, CopyGetters)]
 pub struct UserDeviceDefinition {
-  /// Given name of the device this instance represents.
-  name: String,
+  #[getset(get_copy = "pub")]
   id: Uuid,
-  #[serde(skip_serializing_if = "Option::is_none", rename = "base-id")]
-  base_id: Option<Uuid>,
-  #[serde(skip_serializing_if = "Option::is_none", rename = "protocol-variant")]
-  protocol_variant: Option<String>,
+  #[getset(get_copy = "pub")]
+  #[serde(rename="base-id")]
+  base_id: Uuid,
+  #[getset(get = "pub")]
   /// Message attributes for this device instance.
-  features: Vec<ServerDeviceFeature>,
+  #[getset(get = "pub")]
+  features: Vec<ServerUserDeviceFeature>,
+  #[getset(get = "pub")]
+  #[serde(rename="user-config")]
   /// Per-user configurations specific to this device instance.
-  #[serde(rename = "user-config")]
   user_config: UserDeviceCustomization,
 }
 
 impl UserDeviceDefinition {
+  fn new(index: u32, base_id: Uuid, features: &Vec<ServerUserDeviceFeature>) -> Self {
+    Self {
+      id: Uuid::new_v4(),
+      base_id,
+      features: features.clone(),
+      user_config: UserDeviceCustomization::default_with_index(index)
+    }
+  }
+}
+
+#[derive(Debug, Clone, Getters, CopyGetters)]
+pub struct DeviceDefinition {
+  #[getset(get = "pub")]
+  base_device: BaseDeviceDefinition,
+  #[getset(get = "pub")]
+  user_device: UserDeviceDefinition,
+  #[getset(get = "pub")]
+  features: Vec<ServerDeviceFeature>
+}
+
+impl DeviceDefinition {
   /// Create a new instance
   pub fn new(
-    name: &str,
-    id: &Uuid,
-    base_id: &Option<Uuid>,
-    protocol_variant: &Option<String>,
-    features: &[ServerDeviceFeature],
-    user_config: &UserDeviceCustomization,
+    base_device: &BaseDeviceDefinition,
+    user_device: &UserDeviceDefinition
   ) -> Self {
+    let mut features = vec!();
+    base_device
+      .features()
+      .iter()
+      .for_each(|x| {
+        if let Some(user_feature) = user_device.features.iter().find(|user_feature| user_feature.base_id() == x.id()) {
+          features.push(ServerDeviceFeature::new(x, user_feature));
+        }
+      });
     Self {
-      name: name.to_owned(),
-      id: id.to_owned(),
-      base_id: base_id.to_owned(),
-      protocol_variant: protocol_variant.clone(),
-      features: features.into(),
-      user_config: user_config.clone(),
+      base_device: base_device.clone(),
+      user_device: user_device.clone(),
+      features
     }
   }
 
+  pub fn id(&self) -> Uuid {
+    self.user_device.id()
+  }
+
+  pub fn name(&self) -> &str {
+    self.base_device.name()
+  }
+
+  pub fn protocol_variant(&self) -> &Option<String> {
+    self.base_device.protocol_variant()
+  }
+
+  pub fn user_config(&self) -> &UserDeviceCustomization {
+    self.user_device.user_config()
+  }
+
   pub fn new_from_base_definition(def: &BaseDeviceDefinition, index: u32) -> Self {
-    Self {
-      name: def.name().clone(),
-      id: Uuid::new_v4(),
-      base_id: Some(*def.id()),
-      protocol_variant: def.protocol_variant().clone(),
-      features: def.create_user_device_features(),
-      user_config: UserDeviceCustomization {
-        index,
-        ..Default::default()
-      },
-    }
+    let user_features = def.features().iter().map(|x| x.as_user_device_feature()).collect();
+    Self::new(
+      def,
+      &UserDeviceDefinition::new(index, def.id(), &user_features)
+    )
   }
 }

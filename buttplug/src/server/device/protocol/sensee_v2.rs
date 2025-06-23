@@ -11,7 +11,7 @@ use crate::{
     message::{Endpoint, OutputType},
   },
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
@@ -37,7 +37,7 @@ impl ProtocolInitializer for SenseeV2Initializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    device_definition: &UserDeviceDefinition,
+    device_definition: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let res = hardware
       .read_value(&HardwareReadCmd::new(SENSEE_V2_PROTOCOL_UUID, Endpoint::Tx, 128, 500))

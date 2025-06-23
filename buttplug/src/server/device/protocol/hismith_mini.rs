@@ -11,7 +11,7 @@ use crate::{
     message::{Endpoint, FeatureType},
   },
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
@@ -79,7 +79,7 @@ impl ProtocolInitializer for HismithMiniInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    device_definition: &UserDeviceDefinition,
+    device_definition: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(HismithMini {
       dual_vibe: device_definition

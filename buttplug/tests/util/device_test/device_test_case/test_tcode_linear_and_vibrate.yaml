@@ -1,7 +1,7 @@
 user_device_config_file: "tcode_linear_and_vibrate_user_config.json"
 devices:
   - identifier:
-      name: "tcode-v03"
+      name: "tcode-v03-linear-vibrate"
       address: "COM7"
     expected_name: "TCode v0.3 (Single Linear Axis + Single Vibe)"
 device_commands:

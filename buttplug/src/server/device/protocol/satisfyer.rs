@@ -11,7 +11,7 @@ use crate::{
     message::Endpoint,
   },
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
@@ -100,7 +100,7 @@ impl ProtocolInitializer for SatisfyerInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    device_definition: &UserDeviceDefinition,
+    device_definition: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareWriteCmd::new(&[SATISFYER_PROTOCOL_UUID], Endpoint::Command, vec![0x01], true);
     let info_fut = hardware.write_value(&msg);

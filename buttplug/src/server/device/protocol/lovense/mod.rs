@@ -17,7 +17,7 @@ use crate::{
     message::{self, Endpoint, FeatureType, InputReadingV4},
   },
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{lovense::{lovense_max::LovenseMax, lovense_multi_actuator::LovenseMultiActuator, lovense_rotate_vibrator::LovenseRotateVibrator, lovense_single_actuator::LovenseSingleActuator, lovense_stroker::LovenseStroker}, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
@@ -160,7 +160,7 @@ impl ProtocolInitializer for LovenseInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    device_definition: &UserDeviceDefinition,
+    device_definition: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let device_type = self.device_type.clone();
 
