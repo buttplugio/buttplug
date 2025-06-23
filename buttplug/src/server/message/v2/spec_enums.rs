@@ -40,8 +40,6 @@ use super::{
   BatteryLevelReadingV2,
   DeviceAddedV2,
   DeviceListV2,
-  RSSILevelCmdV2,
-  RSSILevelReadingV2,
   ServerInfoV2,
 };
 
@@ -73,7 +71,6 @@ pub enum ButtplugClientMessageV2 {
   StopDeviceCmd(StopDeviceCmdV0),
   // Sensor commands
   BatteryLevelCmd(BatteryLevelCmdV2),
-  RSSILevelCmd(RSSILevelCmdV2),
 }
 
 // For v1 to v2, several messages were deprecated. Throw errors when trying to convert those.
@@ -109,29 +106,6 @@ impl TryFrom<ButtplugClientMessageV1> for ButtplugClientMessageV2 {
         // changes of position/speed. Yes, some Kiiroo devices really *are* that fragile.
         Err(ButtplugMessageError::MessageConversionError("FleshlightLaunchFW12Cmd is not implemented. Please update the client software to use a newer command".to_owned()))
       }
-      ButtplugClientMessageV1::RequestLog(_) => {
-        // Log was a huge security hole, as we'd just send our server logs to whomever asked, which
-        // contain all sorts of identifying information. Always return an error here.
-        Err(ButtplugMessageError::MessageConversionError(
-          "RequestLog is no longer allowed by any version of Buttplug.".to_owned(),
-        ))
-      }
-      ButtplugClientMessageV1::KiirooCmd(_) => {
-        // No device protocol implementation ever worked with KiirooCmd, so no one ever should've
-        // used it. We'll just return an error if we ever see it.
-        Err(ButtplugMessageError::MessageConversionError(
-          "KiirooCmd is not implemented. Please update the client software to use a newer command"
-            .to_owned(),
-        ))
-      }
-      ButtplugClientMessageV1::LovenseCmd(_) => {
-        // LovenseCmd allowed users to directly send strings to a Lovense device, which was a Bad
-        // Idea. Will always return an error.
-        Err(ButtplugMessageError::MessageConversionError(
-          "LovenseCmd is not implemented. Please update the client software to use a newer command"
-            .to_owned(),
-        ))
-      }
       _ => Err(ButtplugMessageError::MessageConversionError(format!(
         "Cannot convert message {value:?} to current message spec while lacking state."
       ))),
@@ -164,7 +138,6 @@ pub enum ButtplugServerMessageV2 {
   ScanningFinished(ScanningFinishedV0),
   // Sensor commands
   BatteryLevelReading(BatteryLevelReadingV2),
-  RSSILevelReading(RSSILevelReadingV2),
 }
 
 impl From<ButtplugServerMessageV2> for ButtplugServerMessageV1 {
@@ -184,13 +157,6 @@ impl From<ButtplugServerMessageV2> for ButtplugServerMessageV1 {
           ),
         )))
       }
-      ButtplugServerMessageV2::RSSILevelReading(_) => {
-        ButtplugServerMessageV1::Error(ErrorV0::from(ButtplugError::from(
-          ButtplugMessageError::MessageConversionError(
-            "RSSILevelReading cannot be converted to Buttplug Message Spec V1".to_owned(),
-          ),
-        )))
-      }
     }
   }
 }
@@ -202,5 +168,4 @@ pub enum ButtplugDeviceMessageNameV2 {
   StopDeviceCmd,
   VibrateCmd,
   BatteryLevelCmd,
-  RSSILevelCmd,
 }

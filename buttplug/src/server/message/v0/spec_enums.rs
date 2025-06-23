@@ -23,7 +23,6 @@ use serde::{Deserialize, Serialize};
   Deserialize,
 )]
 pub enum ButtplugClientMessageV0 {
-  RequestLog(RequestLogV0),
   Ping(PingV0),
   // Handshake messages
   //
@@ -41,8 +40,6 @@ pub enum ButtplugClientMessageV0 {
   SingleMotorVibrateCmd(SingleMotorVibrateCmdV0),
   // Deprecated device specific commands
   FleshlightLaunchFW12Cmd(FleshlightLaunchFW12CmdV0),
-  LovenseCmd(LovenseCmdV0),
-  KiirooCmd(KiirooCmdV0),
   VorzeA10CycloneCmd(VorzeA10CycloneCmdV0),
 }
 
@@ -61,7 +58,6 @@ pub enum ButtplugServerMessageV0 {
   // Status messages
   Ok(OkV0),
   Error(ErrorV0),
-  Log(LogV0),
   // Handshake messages
   ServerInfo(ServerInfoV0),
   // Device enumeration messages

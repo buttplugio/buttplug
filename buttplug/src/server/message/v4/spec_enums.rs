@@ -253,9 +253,6 @@ impl TryFromClientMessage<ButtplugClientMessageV2> for ButtplugCheckedClientMess
       ButtplugClientMessageV2::BatteryLevelCmd(m) => {
         Ok(check_device_index_and_convert::<_, CheckedInputCmdV4>(m, features)?.into())
       }
-      ButtplugClientMessageV2::RSSILevelCmd(_) => {
-        Err(ButtplugError::ButtplugMessageError(ButtplugMessageError::MessageConversionError("RSSILevelCmd is considered unused, and no longer supported. If you are seeing this message and need RSSILevelCmd, file an issue in the Buttplug repo.".to_owned())))
-      }
       // Convert VibrateCmd to a ScalarCmd command
       ButtplugClientMessageV2::VibrateCmd(m) => {
         Ok(check_device_index_and_convert::<_, CheckedOutputVecCmdV4>(m, features)?.into())

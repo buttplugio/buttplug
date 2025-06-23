@@ -36,7 +36,6 @@ use super::message::{
   ButtplugServerMessageV2,
   ButtplugServerMessageV3,
   ButtplugServerMessageVariant,
-  RSSILevelReadingV2,
   SensorReadingV3,
 };
 
@@ -119,10 +118,6 @@ impl ButtplugServerMessageConverter {
           &original_msg
         {
           Ok(BatteryLevelReadingV2::new(msg.device_index(), m.data()[0] as f64 / 100f64).into())
-        } else if let ButtplugClientMessageVariant::V2(ButtplugClientMessageV2::RSSILevelCmd(msg)) =
-          &original_msg
-        {
-          Ok(RSSILevelReadingV2::new(msg.device_index(), m.data()[0]).into())
         } else {
           Err(ButtplugMessageError::UnexpectedMessageType("SensorReading".to_owned()).into())
         }

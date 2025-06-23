@@ -9,7 +9,7 @@ use std::cmp::Ordering;
 
 use crate::{
   core::{
-    errors::{ButtplugError, ButtplugMessageError},
+    errors::ButtplugMessageError,
     message::{
       ButtplugMessage,
       ButtplugMessageFinalizer,
@@ -30,10 +30,6 @@ use crate::{
     ButtplugClientMessageV0,
     ButtplugServerMessageV0,
     FleshlightLaunchFW12CmdV0,
-    KiirooCmdV0,
-    LogV0,
-    LovenseCmdV0,
-    RequestLogV0,
     ServerInfoV0,
     SingleMotorVibrateCmdV0,
     VorzeA10CycloneCmdV0,
@@ -66,7 +62,6 @@ pub enum ButtplugClientMessageV1 {
   // Handshake and server messages
   RequestServerInfo(RequestServerInfoV1),
   Ping(PingV0),
-  RequestLog(RequestLogV0),
   // Device enumeration messages
   StartScanning(StartScanningV0),
   StopScanning(StopScanningV0),
@@ -81,8 +76,6 @@ pub enum ButtplugClientMessageV1 {
   SingleMotorVibrateCmd(SingleMotorVibrateCmdV0),
   // Deprecated device specific commands (not removed until v2)
   FleshlightLaunchFW12Cmd(FleshlightLaunchFW12CmdV0),
-  LovenseCmd(LovenseCmdV0),
-  KiirooCmd(KiirooCmdV0),
   VorzeA10CycloneCmd(VorzeA10CycloneCmdV0),
 }
 
@@ -104,9 +97,6 @@ impl From<ButtplugClientMessageV0> for ButtplugClientMessageV1 {
       ButtplugClientMessageV0::FleshlightLaunchFW12Cmd(m) => {
         ButtplugClientMessageV1::FleshlightLaunchFW12Cmd(m)
       }
-      ButtplugClientMessageV0::KiirooCmd(m) => ButtplugClientMessageV1::KiirooCmd(m),
-      ButtplugClientMessageV0::LovenseCmd(m) => ButtplugClientMessageV1::LovenseCmd(m),
-      ButtplugClientMessageV0::RequestLog(m) => ButtplugClientMessageV1::RequestLog(m),
       ButtplugClientMessageV0::SingleMotorVibrateCmd(m) => {
         ButtplugClientMessageV1::SingleMotorVibrateCmd(m)
       }
@@ -133,7 +123,6 @@ pub enum ButtplugServerMessageV1 {
   // Status messages
   Ok(OkV0),
   Error(ErrorV0),
-  Log(LogV0),
   // Handshake messages
   ServerInfo(ServerInfoV0),
   // Device enumeration messages
@@ -153,11 +142,6 @@ impl From<ButtplugServerMessageV1> for ButtplugServerMessageV0 {
       ButtplugServerMessageV1::ScanningFinished(m) => ButtplugServerMessageV0::ScanningFinished(m),
       ButtplugServerMessageV1::DeviceAdded(m) => ButtplugServerMessageV0::DeviceAdded(m.into()),
       ButtplugServerMessageV1::DeviceList(m) => ButtplugServerMessageV0::DeviceList(m.into()),
-      ButtplugServerMessageV1::Log(_) => ButtplugServerMessageV0::Error(ErrorV0::from(
-        ButtplugError::from(ButtplugMessageError::MessageConversionError(
-          "For security reasons, Log should never be sent from a Buttplug Server".to_owned(),
-        )),
-      )),
     }
   }
 }
