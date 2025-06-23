@@ -8,7 +8,7 @@
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
@@ -34,7 +34,7 @@ impl ProtocolInitializer for AnkniInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &UserDeviceDefinition,
+    _: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareReadCmd::new(ANKNI_PROTOCOL_UUID, Endpoint::Generic0, 16, 100);
     let reading = hardware.read_value(&msg).await?;

@@ -7,18 +7,18 @@
 
 use super::json::JSONValidator;
 use crate::{
-  core::errors::{ButtplugDeviceError, ButtplugError},
+  core::{errors::{ButtplugDeviceError, ButtplugError}, message::OutputType},
   server::{
     device::configuration::{
-      BaseDeviceDefinition, BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder, DeviceSettings, ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier
+      BaseDeviceDefinition, BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder, DeviceDefinition, DeviceSettings, ProtocolCommunicationSpecifier, UserDeviceCustomization, UserDeviceDefinition, UserDeviceIdentifier
     },
-    message::server_device_feature::ServerDeviceFeature,
+    message::server_device_feature::{ServerBaseDeviceFeature, ServerDeviceFeature},
   },
 };
 use dashmap::DashMap;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, fmt::Display};
+use std::{collections::HashMap, fmt::Display, ops::RangeInclusive};
 use uuid::Uuid;
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
@@ -65,10 +65,8 @@ struct ProtocolAttributes {
   id: Uuid,
   #[serde(skip_serializing_if = "Option::is_none", rename="protocol-variant")]
   protocol_variant: Option<String>,
-  #[serde(rename = "base-id")]
-  base_id: Option<Uuid>,
   #[serde(skip_serializing_if = "Option::is_none")]
-  features: Option<Vec<ServerDeviceFeature>>,
+  features: Option<Vec<ServerBaseDeviceFeature>>,
   #[serde(skip_serializing_if = "Option::is_none")]
   device_settings: Option<DeviceSettings>
 }
@@ -82,6 +80,35 @@ struct ProtocolDefinition {
   pub defaults: Option<ProtocolAttributes>,
   #[serde(default)]
   pub configurations: Vec<ProtocolAttributes>,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, Getters, Setters, MutGetters)]
+#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
+struct UserFeatureOutputCustomization {
+  step_limit: RangeInclusive<u32>,
+  reverse_position: bool
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, Getters, Setters, MutGetters)]
+#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
+struct UserFeatureCustomization {
+  id: Uuid,
+  #[serde(rename = "base-id")]
+  base_id: Uuid,
+  output: HashMap<OutputType, UserFeatureOutputCustomization>
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, Getters, Setters, MutGetters)]
+#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
+struct SerializedUserDeviceDefinition {
+  id: Uuid,
+  #[serde(rename = "base-id")]
+  base_id: Uuid,
+  /// Message attributes for this device instance.
+  features: Vec<UserFeatureCustomization>,
+  /// Per-user configurations specific to this device instance.
+  #[serde(rename = "user-config")]
+  user_config: UserDeviceCustomization,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Getters, Setters, MutGetters)]
@@ -116,24 +143,27 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
         &defaults.device_settings
       );
       configurations.insert(None, config_attrs);
-      for config in &protocol_def.configurations {
-        if let Some(identifiers) = &config.identifier {
-          for identifier in identifiers {
-            let config_attrs = BaseDeviceDefinition::new(
-              // Even subconfigurations always have names
-              &config.name,
-              &config.id,
-              &config.protocol_variant,
-              config.features.as_ref().unwrap_or(
-                defaults
-                  .features
-                  .as_ref()
-                  .expect("Defaults always have features"),
-              ),
-              &config.device_settings
-            );
-            configurations.insert(Some(identifier.to_owned()), config_attrs);
-          }
+    }
+    for config in &protocol_def.configurations {
+      if let Some(identifiers) = &config.identifier {
+        for identifier in identifiers {
+          let config_attrs = BaseDeviceDefinition::new(
+            // Even subconfigurations always have names
+            &config.name,
+            &config.id,
+            &config.protocol_variant,
+            config.features.as_ref().unwrap_or(
+              protocol_def
+                .defaults()
+                .as_ref()
+                .unwrap_or(&ProtocolAttributes::default())
+                .features
+                .as_ref()
+                .unwrap_or(&vec![]),
+            ),
+            &config.device_settings
+          );
+          configurations.insert(Some(identifier.to_owned()), config_attrs);
         }
       }
     }
@@ -349,10 +379,31 @@ fn load_user_config(
     .user_configs
     .expect("Just checked validity");
 
-  for (protocol, specifier) in user_config.protocols.unwrap_or_default() {
-    if let Some(comm_specifiers) = specifier.communication() {
-      dcm_builder.user_communication_specifier(&protocol, comm_specifiers);
+  let mut protocol_specifiers = HashMap::new();
+  let mut protocol_features = HashMap::new();
+
+  for (protocol_name, protocol_def) in user_config.protocols.unwrap_or_default() {
+    if let Some(comm_specifiers) = protocol_def.communication() {
+      dcm_builder.user_communication_specifier(&protocol_name, comm_specifiers);
     }
+    info!("{:?}", protocol_def);
+    info!("Adding {}", protocol_name);
+    let protocol_device_config: ProtocolDeviceConfiguration = protocol_def.into();
+    protocol_specifiers.insert(
+      protocol_name.clone(),
+      protocol_device_config.specifiers().clone(),
+    );
+    info!("{:?}", protocol_device_config);
+    for (config_ident, config) in protocol_device_config.configurations() {
+      info!("Adding {:?}", config_ident);
+      let ident = BaseDeviceIdentifier::new(&protocol_name, config_ident);
+      protocol_features.insert(ident, config.clone());
+    }
+  }
+
+  for (ident, features) in protocol_features {
+    info!("Adding {}", features.id());
+    dcm_builder.protocol_features(&ident, &features);
   }
 
   for user_device_config_pair in user_config.user_device_configs.unwrap_or_default() {
@@ -388,7 +439,7 @@ pub fn save_user_config(dcm: &DeviceConfigurationManager) -> Result<String, Butt
     .iter()
     .map(|kv| UserDeviceConfigPair {
       identifier: kv.key().clone(),
-      config: kv.value().clone(),
+      config: kv.value().user_device().clone(),
     })
     .collect();
   let user_protos = DashMap::new();

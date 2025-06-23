@@ -9,7 +9,7 @@ use crate::server::device::configuration::ProtocolCommunicationSpecifier;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-    configuration::{UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{DeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
@@ -43,7 +43,7 @@ impl ProtocolInitializer for FredorchRotaryInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &UserDeviceDefinition,
+    _: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     warn!(
       "FredorchRotary device doesn't provide state feedback. If the device beeps twice, it is powered off and must be reconnected before it can be controlled!"

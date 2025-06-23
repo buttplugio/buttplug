@@ -8,7 +8,7 @@
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
       fleshlight_launch_helper::calculate_speed,
@@ -37,7 +37,7 @@ impl ProtocolInitializer for KiirooV2Initializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &UserDeviceDefinition,
+    _: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareWriteCmd::new(
       &[KIIROO_V2_PROTOCOL_UUID],

@@ -10,7 +10,7 @@
           {
             "btle": {
               "names": [
-                "tcode-v03"
+                "tcode-v03-linear-vibrate"
               ],
               "services": {
                 "0000eea0-0000-1000-8000-00805f9b34fb": {
@@ -19,54 +19,82 @@
               }
             }
           }
-        ],
-        "configurations": []
+        ],        
+        "configurations": [
+          {
+            "identifier": [
+              "tcode-v03-linear-vibrate"
+            ],
+            "name": "TCode v0.3 (Single Linear Axis + Single Vibe)",
+            "id": "e4384a37-fd37-4b9e-8464-a510dd8410a7",
+            "features": [
+              {
+                "description": "",
+                "feature-type": "PositionWithDuration",
+                "output": {
+                  "PositionWithDuration": {
+                    "step-range": [
+                      0,
+                      100
+                    ]
+                  }
+                },
+                "id": "c5e6384e-399b-4c2b-9791-eb48abaf3bf7"
+              },
+              {
+                "description": "",
+                "feature-type": "Vibrate",
+                "output": {
+                  "Vibrate": {
+                    "step-range": [
+                      0,
+                      99
+                    ]
+                  }
+                },
+                "id": "e4384a37-fd37-4b9e-8464-a510dd8410a7"
+              }
+            ]
+          }
+        ]
       }
     },
     "devices": [
       {
         "identifier": {
           "protocol": "tcode-v03",
-          "identifier": "tcode-v03",
+          "identifier": "tcode-v03-linear-vibrate",
           "address": "COM7"
         },
         "config": {
-          "name": "TCode v0.3 (Single Linear Axis + Single Vibe)",
-          "id": "e4384a37-fd37-4b9e-8464-a510dd8410a7",
+          "id": "6d3f0643-1933-4df6-85ff-5675bf1a3dd4",
+          "base-id": "e4384a37-fd37-4b9e-8464-a510dd8410a7",
           "features": [
             {
-              "description": "",
-              "feature-type": "PositionWithDuration",
               "output": {
                 "PositionWithDuration": {
-                  "step-range": [
-                    0,
-                    100
-                  ],
                   "step-limit": [
                     0,
                     100
                   ]
                 }
               },
-              "id": "c5e6384e-399b-4c2b-9791-eb48abaf3bf7"
+              "base-id": "c5e6384e-399b-4c2b-9791-eb48abaf3bf7",
+              "id": "a9e532ff-f72f-4c2f-9ae6-02a6ddcb2d74"
             },
             {
               "description": "",
               "feature-type": "Vibrate",
               "output": {
                 "Vibrate": {
-                  "step-range": [
-                    0,
-                    99
-                  ],
                   "step-limit": [
                     0,
                     99
                   ]
                 }
               },
-              "id": "e4384a37-fd37-4b9e-8464-a510dd8410a7"
+              "base-id": "e4384a37-fd37-4b9e-8464-a510dd8410a7",
+              "id": "10deb5c9-9d44-4dab-abf3-500b7df51e9f"
             }
           ],
           "user-config": {

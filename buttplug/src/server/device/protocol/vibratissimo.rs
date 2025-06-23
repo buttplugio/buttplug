@@ -13,7 +13,7 @@ use crate::{
     message::Endpoint,
   },
   server::device::{
-    configuration::{UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{DeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
@@ -71,7 +71,7 @@ impl ProtocolInitializer for VibratissimoInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    def: &UserDeviceDefinition,
+    def: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let num_vibrators: u8 = def.features().iter().filter(|x| x.output().as_ref().map_or(false, |x| x.contains_key(&OutputType::Vibrate))).count() as u8;
     Ok(Arc::new(Vibratissimo::new(num_vibrators as u8)))

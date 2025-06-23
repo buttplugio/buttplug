@@ -258,18 +258,18 @@
           "feature-type": {
             "type": "string"
           },
-                    "output": {
+          "output": {
             "type": "object",
             "patternProperties": {
               "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|RotateWithDirection|PositionWithDuration|Heater|Led)$": {
                 "type": "object",
                 "properties": {
-                  "step-range": {
+                  "step-limit": {
                     "$ref": "#/components/step-range"
                   }
                 },
                 "required": [
-                  "step-range"
+                  "step-limit"
                 ]
               }
             }
@@ -305,7 +305,7 @@
           }
         },
         "required": [
-          "feature-type",
+          "base-id",
           "id"
         ],
         "additionalProperties": false

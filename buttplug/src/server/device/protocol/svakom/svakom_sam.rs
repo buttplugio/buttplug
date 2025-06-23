@@ -13,7 +13,7 @@ use crate::{
     message::Endpoint,
   },
   server::device::{
-    configuration::{UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{DeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
@@ -38,7 +38,7 @@ impl ProtocolInitializer for SvakomSamInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &UserDeviceDefinition,
+    _: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
       .subscribe(&HardwareSubscribeCmd::new(SVAKOM_SAM_PROTOCOL_UUID, Endpoint::Rx))

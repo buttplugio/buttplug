@@ -29,7 +29,7 @@ impl ProtocolHandler for TCodeV03 {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut msg_vec = vec![];
 
-    let command = format!("L0{position:02}\n");
+    let command = format!("L0{position:03}\nR0{position:03}\n");
     msg_vec.push(
       HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, command.as_bytes().to_vec(), false).into(),
     );

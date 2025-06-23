@@ -14,44 +14,20 @@
         "config": {
           "name": "Lovense Sex Machine",
           "id": "c8633234-07a4-4ad9-961d-a4d777b32be8",
-          "base-id": "c8633234-07a4-4ad9-961d-a4d777b32be7",
+          "base-id": "9b52eca4-0e49-426e-a543-2ef735cd803a",
           "features": [
             {
-              "feature-type": "Oscillate",
               "description": "Fucking Machine Oscillation Speed",
               "output": {
                 "Oscillate": {
-                  "step-range": [
-                    0,
-                    10
-                  ],
                   "step-limit": [
                     0,
                     10
                   ]
                 }
               },
-              "base-id": "56d94863-b321-428b-8b68-bac0197556e1",
+              "base-id": "0ab80cc0-7a82-4cb6-ba4f-0f18ddb2911f",
               "id": "56d94863-b321-428b-8b68-bac0197556e2"
-            },
-            {
-              "feature-type": "Battery",
-              "description": "Battery Level",
-              "input": {
-                "Battery": {
-                  "value-range": [
-                    [
-                      0,
-                      100
-                    ]
-                  ],
-                  "input-commands": [
-                    "Read"
-                  ]
-                }
-              },
-              "base-id": "b9899daa-7755-4ebb-88b4-13122d12745e",
-              "id": "b9899daa-7755-4ebb-88b4-13122d12745f"
             }
           ],
           "user-config": {

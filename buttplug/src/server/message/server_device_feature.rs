@@ -19,125 +19,6 @@ use std::{
 };
 use uuid::Uuid;
 
-// This will look almost exactly like ServerDeviceFeature. However, it will only contain
-// information we want the client to know, i.e. step counts versus specific step ranges. This is
-// what will be sent to the client as part of DeviceAdded/DeviceList messages. It should not be used
-// for outside configuration/serialization, rather it should be a subset of that information.
-//
-// For many messages, client and server configurations may be exactly the same. If they are not,
-// then we denote this by prefixing the type with Client/Server. Server attributes will usually be
-// hosted in the server/device/configuration module.
-#[derive(
-  Clone,
-  Debug,
-  Default,
-  Getters,
-  MutGetters,
-  Setters,
-  Serialize,
-  Deserialize,
-  CopyGetters,
-)]
-pub struct ServerDeviceFeature {
-  #[getset(get = "pub", get_mut = "pub(super)")]
-  #[serde(default)]
-  description: String,
-  #[getset(get_copy = "pub")]
-  #[serde(rename = "feature-type")]
-  feature_type: FeatureType,
-  #[getset(get = "pub")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(rename = "output")]
-  output: Option<HashMap<OutputType, ServerDeviceFeatureOutput>>,
-  #[getset(get = "pub")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(rename = "input")]
-  input: Option<HashMap<InputType, ServerDeviceFeatureInput>>,
-  #[getset(get_copy = "pub", get_mut = "pub(super)")]
-  id: Uuid,
-  #[getset(get_copy = "pub", get_mut = "pub(super)")]
-  #[serde(rename = "base-id", skip_serializing_if = "Option::is_none")]
-  base_id: Option<Uuid>,
-  #[getset(get = "pub")]
-  #[serde(rename = "feature-settings", skip_serializing_if = "BaseFeatureSettings::is_none", default)]
-  feature_settings: BaseFeatureSettings
-}
-
-impl PartialEq for ServerDeviceFeature {
-  fn eq(&self, other: &Self) -> bool {
-    self.id == other.id()
-  }
-}
-
-impl Eq for ServerDeviceFeature {}
-
-impl ServerDeviceFeature {
-  pub fn new(
-    description: &str,
-    id: &Uuid,
-    base_id: &Option<Uuid>,
-    feature_type: FeatureType,
-    output: &Option<HashMap<OutputType, ServerDeviceFeatureOutput>>,
-    input: &Option<HashMap<InputType, ServerDeviceFeatureInput>>,
-    feature_settings: &Option<BaseFeatureSettings>
-  ) -> Self {
-    Self {
-      description: description.to_owned(),
-      feature_type,
-      output: output.clone(),
-      input: input.clone(),
-      id: *id,
-      base_id: *base_id,
-      feature_settings: feature_settings.clone().unwrap_or_default()
-    }
-  }
-
-  pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
-    if let Some(output_map) = &self.output {
-      for actuator in output_map.values() {
-        actuator.is_valid()?;
-      }
-    }
-    Ok(())
-  }
-
-  pub fn as_device_feature(&self, index: u32) -> DeviceFeature {
-    DeviceFeature::new(
-      index,
-      self.description(),
-      self.feature_type(),
-      &self.output.clone().map(|x| {
-        x.iter()
-          .map(|(t, a)| (*t, DeviceFeatureOutput::from(a.clone())))
-          .collect()
-      }),
-      &self.input.clone().map(|x| {
-        x.iter()
-          .map(|(t, a)| (*t, DeviceFeatureInput::from(a.clone())))
-          .collect()
-      }),
-    )
-  }
-
-  /// If this is a base feature (i.e. base_id is None), create a new feature with a randomized id
-  /// and the current feature id as the base id. Otherwise, just pass back a copy of self.
-  pub fn as_user_feature(&self) -> Self {
-    if self.base_id.is_some() {
-      self.clone()
-    } else {
-      Self {
-        description: self.description.clone(),
-        feature_type: self.feature_type,
-        output: self.output.clone(),
-        input: self.input.clone(),
-        id: Uuid::new_v4(),
-        base_id: Some(self.id),
-        feature_settings: self.feature_settings.clone()
-      }
-    }
-  }
-}
-
 fn range_serialize<S>(range: &RangeInclusive<u32>, serializer: S) -> Result<S::Ok, S::Error>
 where
   S: Serializer,
@@ -162,66 +43,265 @@ where
   seq.end()
 }
 
-// Copy class used for deserialization, so we can have an optional step-limit
-#[derive(Clone, Debug, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize)]
-pub struct ServerDeviceFeatureActuatorSerialized {
-  #[getset(get = "pub")]
-  #[serde(rename = "step-range")]
-  #[serde(serialize_with = "range_serialize")]
-  step_range: RangeInclusive<u32>,
-  // This doesn't exist in base configs, so when we load these from the base config file, we'll just
-  // copy the step_range value.
-  #[getset(get = "pub")]
-  #[serde(rename = "step-limit")]
+#[derive(
+  Clone,
+  Debug,
+  Default,
+  Getters,
+  MutGetters,
+  Setters,
+  Serialize,
+  Deserialize,
+  CopyGetters,
+)]
+pub struct ServerBaseDeviceFeature {
+  #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(default)]
-  step_limit: Option<RangeInclusive<u32>>,
+  description: String,
+  #[getset(get_copy = "pub")]
+  #[serde(rename = "feature-type")]
+  feature_type: FeatureType,
+  #[getset(get = "pub")]
+  #[serde(skip_serializing_if = "Option::is_none")]
+  #[serde(rename = "output")]
+  output: Option<HashMap<OutputType, ServerBaseDeviceFeatureOutput>>,
+  #[getset(get = "pub")]
+  #[serde(skip_serializing_if = "Option::is_none")]
+  #[serde(rename = "input")]
+  input: Option<HashMap<InputType, ServerDeviceFeatureInput>>,
+  #[getset(get_copy = "pub")]
+  id: Uuid,
+  #[getset(get = "pub")]
+  #[serde(rename = "feature-settings", skip_serializing_if = "BaseFeatureSettings::is_none", default)]
+  feature_settings: BaseFeatureSettings
 }
 
-impl From<ServerDeviceFeatureActuatorSerialized> for ServerDeviceFeatureOutput {
-  fn from(value: ServerDeviceFeatureActuatorSerialized) -> Self {
-    Self {
-      step_range: value.step_range.clone(),
-      step_limit: value.step_limit.unwrap_or(value.step_range.clone()),
-    }
+impl ServerBaseDeviceFeature {
+  pub fn as_user_device_feature(&self) -> ServerUserDeviceFeature {
+    ServerUserDeviceFeature { id: Uuid::new_v4(), base_id: self.id, output: self.output.as_ref().and_then(|x| {
+      Some(x.keys().map(|x| (*x, ServerUserDeviceFeatureOutput::default())).collect())
+    }) }
   }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize)]
-#[serde(from = "ServerDeviceFeatureActuatorSerialized")]
-pub struct ServerDeviceFeatureOutput {
+#[derive(
+  Clone,
+  Debug,
+  Default,
+  Getters,
+  MutGetters,
+  Setters,
+  Serialize,
+  Deserialize,
+  CopyGetters,
+)]
+pub struct ServerUserDeviceFeature {
+  #[getset(get_copy = "pub")]
+  id: Uuid,
+  #[getset(get_copy = "pub")]
+  #[serde(rename = "base-id")]
+  base_id: Uuid,
+  #[getset(get = "pub")]
+  #[serde(skip_serializing_if = "Option::is_none")]
+  #[serde(rename = "output")]
+  output: Option<HashMap<OutputType, ServerUserDeviceFeatureOutput>>, 
+}
+
+#[derive(
+  Clone,
+  Debug,
+  Getters,
+  MutGetters,
+  Setters,
+  Serialize,
+  Deserialize,
+  CopyGetters,
+)]
+pub struct ServerBaseDeviceFeatureOutput {
   #[getset(get = "pub")]
   #[serde(rename = "step-range")]
   #[serde(serialize_with = "range_serialize")]
   step_range: RangeInclusive<u32>,
+}
+
+#[derive(
+  Clone,
+  Debug,
+  Default,
+  Getters,
+  MutGetters,
+  Setters,
+  Serialize,
+  Deserialize,
+  CopyGetters,
+)]
+pub struct ServerUserDeviceFeatureOutput {
   // This doesn't exist in base configs, so when we load these from the base config file, we'll just
   // copy the step_range value.
   #[getset(get = "pub")]
-  #[serde(rename = "step-limit")]
-  #[serde(serialize_with = "range_serialize")]
-  step_limit: RangeInclusive<u32>,
+  #[serde(rename = "step-limit", default, skip_serializing_if="Option::is_none")]
+  step_limit: Option<RangeInclusive<u32>>,
+  #[getset(get = "pub")]
+  #[serde(rename = "reverse-position", default, skip_serializing_if="Option::is_none")]
+  reverse_position: Option<bool>,
 }
 
-impl ServerDeviceFeatureOutput {
-  pub fn new(step_range: &RangeInclusive<u32>, step_limit: &RangeInclusive<u32>) -> Self {
+#[derive(
+  Clone,
+  Debug,
+  Default,
+  Getters,
+  MutGetters,
+  Setters,
+  CopyGetters,
+)]
+pub struct ServerDeviceFeature {
+  base_feature: ServerBaseDeviceFeature,
+  user_feature: ServerUserDeviceFeature,
+  #[getset(get = "pub")]
+  output: Option<HashMap<OutputType, ServerDeviceFeatureOutput>>,
+}
+
+impl PartialEq for ServerDeviceFeature {
+  fn eq(&self, other: &Self) -> bool {
+    self.id() == other.id()
+  }
+}
+
+impl Eq for ServerDeviceFeature {}
+
+impl ServerDeviceFeature {
+  pub fn new(
+    base_feature: &ServerBaseDeviceFeature,
+    user_feature: &ServerUserDeviceFeature
+  ) -> Self {
+    if base_feature.id() != user_feature.base_id() {
+      // TODO panic!
+    }
+    let output = {
+      if let Some(output_map) = base_feature.output() {
+        let mut output = HashMap::new();
+        if let Some(user_output_map) = user_feature.output() {
+          for (output_type, output_feature) in output_map {
+            // TODO What if we have a key in the user map that isn't in the base map? We should remove it.
+            if user_output_map.contains_key(output_type) {
+              output.insert(*output_type, ServerDeviceFeatureOutput::new(output_feature, user_output_map.get(output_type).clone().unwrap()));
+            }
+          }
+        }
+        Some(output)
+      } else {
+        None
+      }
+    };
+
     Self {
-      step_range: step_range.clone(),
-      step_limit: step_limit.clone(),
+      output,
+      base_feature: base_feature.clone(),
+      user_feature: user_feature.clone()
     }
   }
 
-  pub fn step_count(&self) -> u32 {
-    self.step_limit.end() - self.step_limit().start()
+  pub fn description(&self) -> &String {
+    self.base_feature.description()
+  }
+
+  pub fn feature_type(&self) -> FeatureType {
+    self.base_feature.feature_type  
+  }
+
+  pub fn id(&self) -> Uuid {
+    self.user_feature.id()
+  }
+
+  pub fn base_id(&self) -> Uuid {
+    self.base_feature.id()
+  }
+  
+  pub fn alt_protocol_index(&self) -> Option<u32> {
+    self.base_feature.feature_settings().alt_protocol_index()
+  }
+
+  pub fn input(&self) -> &Option<HashMap<InputType, ServerDeviceFeatureInput>> {
+    self.base_feature.input()
   }
 
   pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
-    if self.step_range.is_empty() {
+    if let Some(output_map) = &self.output {
+      for actuator in output_map.values() {
+        actuator.is_valid()?;
+      }
+    }
+    Ok(())
+  }
+
+  pub fn as_device_feature(&self, index: u32) -> DeviceFeature {
+    DeviceFeature::new(
+      index,
+      self.description(),
+      self.feature_type(),
+      &self.output.clone().map(|x| {
+        x.iter()
+          .map(|(t, a)| (*t, DeviceFeatureOutput::from(a.clone())))
+          .collect()
+      }),
+      &self.base_feature.input().clone().map(|x| {
+        x.iter()
+          .map(|(t, a)| (*t, DeviceFeatureInput::from(a.clone())))
+          .collect()
+      }),
+    )
+  }
+}
+
+#[derive(Clone, Debug)]
+pub struct ServerDeviceFeatureOutput {
+  base_feature: ServerBaseDeviceFeatureOutput,
+  user_feature: ServerUserDeviceFeatureOutput
+}
+
+impl ServerDeviceFeatureOutput {
+  pub fn new(base_feature: &ServerBaseDeviceFeatureOutput, user_feature: &ServerUserDeviceFeatureOutput) -> Self {
+    Self {
+      base_feature: base_feature.clone(),
+      user_feature: user_feature.clone()
+    }
+  }
+
+  pub fn step_limit(&self) -> &RangeInclusive<u32> {
+    self.base_feature.step_range()
+  }
+
+  pub fn step_count(&self) -> u32 {
+    if let Some(step_limit) = self.user_feature.step_limit() {
+      step_limit.end() - step_limit.start() 
+    } else {
+      self.base_feature.step_range.end() - self.base_feature.step_range.start()
+    }
+  }
+
+  pub fn reverse_position(&self) -> bool {
+    self.user_feature.reverse_position().unwrap_or_default()
+  }
+
+  pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
+    let step_range = self.base_feature.step_range();
+    if step_range.is_empty() {
       Err(ButtplugDeviceError::DeviceConfigurationError(
         "Step range empty.".to_string(),
       ))
-    } else if self.step_limit.is_empty() {
-      Err(ButtplugDeviceError::DeviceConfigurationError(
-        "Step limit empty.".to_string(),
-      ))
+    } else if let Some(step_limit) = self.user_feature.step_limit() {
+      if step_limit.is_empty() {
+        Err(ButtplugDeviceError::DeviceConfigurationError(
+          "Step limit empty.".to_string(),
+        ))
+      } else if step_limit.start() < step_range.start() || step_limit.end() > step_range.end() {
+        Err(ButtplugDeviceError::DeviceConfigurationError(
+          "Step limit outside step range.".to_string(),
+        ))         
+      } else {
+        Ok(())
+      }
     } else {
       Ok(())
     }
@@ -230,7 +310,7 @@ impl ServerDeviceFeatureOutput {
 
 impl From<ServerDeviceFeatureOutput> for DeviceFeatureOutput {
   fn from(value: ServerDeviceFeatureOutput) -> Self {
-    DeviceFeatureOutput::new(value.step_limit().end() - value.step_limit().start())
+    DeviceFeatureOutput::new(value.step_count())
   }
 }
 

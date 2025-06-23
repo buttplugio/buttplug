@@ -10,7 +10,7 @@ use crate::server::device::protocol::hismith_mini::HismithMiniInitializer;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-    configuration::{UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{DeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
@@ -88,7 +88,7 @@ impl ProtocolInitializer for HismithInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    _: &UserDeviceDefinition,
+    _: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(Hismith::default()))
   }

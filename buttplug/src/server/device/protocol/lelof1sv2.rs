@@ -8,7 +8,7 @@
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
     hardware::{
       Hardware,
       HardwareEvent,
@@ -41,7 +41,7 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &UserDeviceDefinition,
+    _: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let use_harmony = !hardware.endpoints().contains(&Endpoint::Whitelist);
     let sec_endpoint = if use_harmony {

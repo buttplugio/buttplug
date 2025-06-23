@@ -8,7 +8,7 @@
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
     hardware::{
       Hardware,
       HardwareCommand,
@@ -40,7 +40,7 @@ impl ProtocolInitializer for LeloHarmonyInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &UserDeviceDefinition,
+    _: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     // The Lelo Harmony has a very specific pairing flow:
     // * First the device is turned on in BLE mode (long press)

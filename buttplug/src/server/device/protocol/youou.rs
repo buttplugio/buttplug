@@ -9,7 +9,7 @@ use crate::server::device::configuration::ProtocolCommunicationSpecifier;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-    configuration::{UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{DeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
@@ -62,7 +62,7 @@ impl ProtocolInitializer for YououInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    _: &UserDeviceDefinition,
+    _: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(Youou::default()))
   }

@@ -13,7 +13,7 @@ use crate::{
     errors::ButtplugDeviceError,
     message::{Endpoint, OutputType},
   }, generic_protocol_initializer_setup, server::device::{
-    configuration::{UserDeviceDefinition, UserDeviceIdentifier}, hardware::{Hardware, HardwareCommand, HardwareWriteCmd}, protocol::{
+    configuration::{DeviceDefinition, UserDeviceIdentifier}, hardware::{Hardware, HardwareCommand, HardwareWriteCmd}, protocol::{
       ProtocolCommunicationSpecifier, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, ProtocolKeepaliveStrategy
     }
   }
@@ -32,7 +32,7 @@ impl ProtocolInitializer for SvakomV6Initializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    def: &UserDeviceDefinition,
+    def: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let num_vibrators = def.features().iter().filter(|x| {
       if let Some(output_map) = x.output() {

@@ -17,7 +17,7 @@ use crate::{
   },
   server::device::{
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_initializer_setup, ProtocolHandler, ProtocolInitializer, UserDeviceDefinition, ProtocolIdentifier, ProtocolCommunicationSpecifier, UserDeviceIdentifier},
+    protocol::{generic_protocol_initializer_setup, ProtocolHandler, ProtocolInitializer, DeviceDefinition, ProtocolIdentifier, ProtocolCommunicationSpecifier, UserDeviceIdentifier},
   },
 };
 
@@ -34,7 +34,7 @@ impl ProtocolInitializer for LovehoneyDesireInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    def: &UserDeviceDefinition,
+    def: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(LovehoneyDesire::new(def
     .features()

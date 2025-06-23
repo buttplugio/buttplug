@@ -11,7 +11,7 @@ use crate::{
     message::Endpoint,
   },
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
@@ -37,7 +37,7 @@ impl ProtocolInitializer for MysteryVibeInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    def: &UserDeviceDefinition,
+    def: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareWriteCmd::new(&[MYSTERYVIBE_PROTOCOL_UUID], Endpoint::TxMode, vec![0x43u8, 0x02u8, 0x00u8], true);
     hardware.write_value(&msg).await?;

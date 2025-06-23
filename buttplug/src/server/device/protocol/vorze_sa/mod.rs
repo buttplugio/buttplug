@@ -13,7 +13,7 @@ mod dual_rotator;
 use crate::{
   core::errors::ButtplugDeviceError,
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
     hardware::Hardware,
     protocol::{
       generic_protocol_initializer_setup,
@@ -36,7 +36,7 @@ impl ProtocolInitializer for VorzeSAInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    def: &UserDeviceDefinition,
+    def: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     if let Some(variant) = def.protocol_variant() {
       let hwname = hardware.name().to_ascii_lowercase();

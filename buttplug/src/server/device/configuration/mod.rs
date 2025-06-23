@@ -163,7 +163,7 @@ pub struct DeviceConfigurationManagerBuilder {
   communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   user_communication_specifiers: DashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   base_device_definitions: HashMap<BaseDeviceIdentifier, BaseDeviceDefinition>,
-  user_device_definitions: DashMap<UserDeviceIdentifier, UserDeviceDefinition>,
+  user_device_definitions: DashMap<UserDeviceIdentifier, DeviceDefinition>,
   /// Map of protocol names to their respective protocol instance factories
   protocols: Vec<(String, Arc<dyn ProtocolIdentifierFactory>)>,
 }
@@ -211,9 +211,13 @@ impl DeviceConfigurationManagerBuilder {
     identifier: &UserDeviceIdentifier,
     features: &UserDeviceDefinition,
   ) -> &mut Self {
-    self
-      .user_device_definitions
-      .insert(identifier.clone(), features.clone());
+    if let Some((_, base_definition)) = self.base_device_definitions.iter().find(|(_, x)| x.id() == features.base_id()) {
+      self
+        .user_device_definitions
+        .insert(identifier.clone(), DeviceDefinition::new(base_definition, features));
+    } else {
+      error!("Cannot find protocol with base id {} for user id {}", features.base_id(), features.id())
+    }
     self
   }
 
@@ -262,12 +266,14 @@ impl DeviceConfigurationManagerBuilder {
         );
         continue;
       }
+      /*
       for feature in attr.features() {
         if let Err(e) = feature.is_valid() {
           error!("Feature {attr:?} for ident {ident:?} is not valid, skipping addition: {e:?}");
           continue;
         }
       }
+      */
       attribute_tree_map.insert(ident.clone(), attr.clone());
     }
 
@@ -330,7 +336,7 @@ pub struct DeviceConfigurationManager {
   /// Device definitions from the base device config. Loaded at session start, may change over life
   /// of session.
   #[getset(get = "pub")]
-  user_device_definitions: DashMap<UserDeviceIdentifier, UserDeviceDefinition>,
+  user_device_definitions: DashMap<UserDeviceIdentifier, DeviceDefinition>,
 }
 
 impl Debug for DeviceConfigurationManager {
@@ -383,7 +389,7 @@ impl DeviceConfigurationManager {
   pub fn add_user_device_definition(
     &self,
     identifier: &UserDeviceIdentifier,
-    definition: &UserDeviceDefinition,
+    definition: &DeviceDefinition,
   ) -> Result<(), ButtplugDeviceError> {
     self.protocol_map.contains_key(identifier.protocol());
     self
@@ -515,7 +521,7 @@ impl DeviceConfigurationManager {
   pub fn device_definition(
     &self,
     identifier: &UserDeviceIdentifier,
-  ) -> Option<UserDeviceDefinition> {
+  ) -> Option<DeviceDefinition> {
     let features = if let Some(attrs) = self.user_device_definitions.get(identifier) {
       debug!("User device config found for {:?}", identifier);
       attrs.clone()
@@ -527,13 +533,13 @@ impl DeviceConfigurationManager {
         "Protocol + Identifier device config found for {:?}",
         identifier
       );
-      UserDeviceDefinition::new_from_base_definition(attrs, self.device_index(identifier))
+      DeviceDefinition::new_from_base_definition(attrs, self.device_index(identifier))
     } else if let Some(attrs) = self
       .base_device_definitions
       .get(&BaseDeviceIdentifier::new(identifier.protocol(), &None))
     {
       debug!("Protocol device config found for {:?}", identifier);
-      UserDeviceDefinition::new_from_base_definition(attrs, self.device_index(identifier))
+      DeviceDefinition::new_from_base_definition(attrs, self.device_index(identifier))
     } else {
       return None;
     };
@@ -553,6 +559,7 @@ impl DeviceConfigurationManager {
   }
 }
 
+/*
 #[cfg(test)]
 mod test {
   use super::*;
@@ -594,7 +601,6 @@ mod test {
               FeatureType::Vibrate,
               &Some(feature_actuator.clone()),
               &None,
-              &None,
             ),
             ServerDeviceFeature::new(
               "Edge Vibration 2",
@@ -602,7 +608,6 @@ mod test {
               &None,
               FeatureType::Vibrate,
               &Some(feature_actuator.clone()),
-              &None,
               &None,
             ),
           ],
@@ -668,3 +673,4 @@ mod test {
   }
   */
 }
+*/

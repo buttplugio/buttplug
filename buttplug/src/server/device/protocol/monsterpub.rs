@@ -11,7 +11,7 @@ use crate::{
     message::Endpoint,
   },
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
+    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
   },
@@ -78,7 +78,7 @@ impl ProtocolInitializer for MonsterPubInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    def: &UserDeviceDefinition,
+    def: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     if hardware.endpoints().contains(&Endpoint::Rx) {
       let value = hardware
