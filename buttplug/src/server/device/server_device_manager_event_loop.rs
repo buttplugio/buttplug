@@ -17,7 +17,7 @@ use crate::{
 };
 use dashmap::{DashMap, DashSet};
 use futures::{future, FutureExt, StreamExt};
-use std::sync::Arc;
+use std::sync::{atomic::AtomicBool, Arc};
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
 use tracing;
@@ -50,6 +50,8 @@ pub(super) struct ServerDeviceManagerEventLoop {
   connecting_devices: Arc<DashSet<String>>,
   /// Cancellation token for the event loop
   loop_cancellation_token: CancellationToken,
+  /// True if stop scanning message was sent, means we won't send scanning finished.
+  stop_scanning_received: AtomicBool
 }
 
 impl ServerDeviceManagerEventLoop {
@@ -76,6 +78,7 @@ impl ServerDeviceManagerEventLoop {
       scanning_started: false,
       connecting_devices: Arc::new(DashSet::new()),
       loop_cancellation_token,
+      stop_scanning_received: AtomicBool::new(false)
     }
   }
 
@@ -92,7 +95,7 @@ impl ServerDeviceManagerEventLoop {
       debug!("System already scanning, ignoring new scanning request");
       return;
     }
-
+    self.stop_scanning_received.store(false, std::sync::atomic::Ordering::Relaxed);
     info!("No scan currently in progress, starting new scan.");
     self.scanning_bringup_in_progress = true;
     self.scanning_started = true;
@@ -108,6 +111,7 @@ impl ServerDeviceManagerEventLoop {
   }
 
   async fn handle_stop_scanning(&mut self) {
+    self.stop_scanning_received.store(true, std::sync::atomic::Ordering::Relaxed);
     let fut_vec: Vec<_> = self
       .comm_managers
       .iter_mut()
@@ -127,7 +131,8 @@ impl ServerDeviceManagerEventLoop {
           debug!("Hardware Comm Manager finished before scanning was fully started, continuing event loop.");
           return;
         }
-        if !self.scanning_status() && self.scanning_started {
+        // Only send scanning finished if we haven't requested a stop.
+        if !self.scanning_status() && self.scanning_started && !self.stop_scanning_received.load(std::sync::atomic::Ordering::Relaxed) {
           debug!("All managers finished, emitting ScanningFinished");
           self.scanning_started = false;
           if self
