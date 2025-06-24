@@ -69,7 +69,7 @@ pub enum ButtplugCheckedClientMessageV4 {
   // Sensor commands
   InputCmd(CheckedInputCmdV4),
   // Internal conversions for v1-v3 messages with subcommands
-  ActuatorVecCmd(CheckedOutputVecCmdV4),
+  OutputVecCmd(CheckedOutputVecCmdV4),
 }
 
 impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMessageV4 {
@@ -357,9 +357,9 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceManagerMessageUni
 )]
 pub enum ButtplugDeviceCommandMessageUnionV4 {
   StopDeviceCmd(StopDeviceCmdV0),
-  ActuatorCmd(CheckedOutputCmdV4),
-  ActuatorVecCmd(CheckedOutputVecCmdV4),
-  SensorCmd(CheckedInputCmdV4),
+  OutputCmd(CheckedOutputCmdV4),
+  OutputVecCmd(CheckedOutputVecCmdV4),
+  InputCmd(CheckedInputCmdV4),
 }
 
 impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceCommandMessageUnionV4 {
@@ -371,13 +371,13 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceCommandMessageUni
         Ok(ButtplugDeviceCommandMessageUnionV4::StopDeviceCmd(m))
       }
       ButtplugCheckedClientMessageV4::OutputCmd(m) => {
-        Ok(ButtplugDeviceCommandMessageUnionV4::ActuatorCmd(m))
+        Ok(ButtplugDeviceCommandMessageUnionV4::OutputCmd(m))
       }
-      ButtplugCheckedClientMessageV4::ActuatorVecCmd(m) => {
-        Ok(ButtplugDeviceCommandMessageUnionV4::ActuatorVecCmd(m))
+      ButtplugCheckedClientMessageV4::OutputVecCmd(m) => {
+        Ok(ButtplugDeviceCommandMessageUnionV4::OutputVecCmd(m))
       }
       ButtplugCheckedClientMessageV4::InputCmd(m) => {
-        Ok(ButtplugDeviceCommandMessageUnionV4::SensorCmd(m))
+        Ok(ButtplugDeviceCommandMessageUnionV4::InputCmd(m))
       }
       _ => Err(()),
     }
