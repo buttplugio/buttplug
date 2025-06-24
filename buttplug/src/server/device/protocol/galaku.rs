@@ -183,6 +183,7 @@ impl ProtocolHandler for Galaku {
 
   fn handle_input_subscribe_cmd(
     &self,
+    _device_index: u32,
     device: Arc<Hardware>,
     _feature_index: u32,
     feature_id: Uuid,
@@ -237,6 +238,7 @@ impl ProtocolHandler for Galaku {
 
   fn handle_battery_level_cmd(
     &self,
+    device_index: u32,
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
@@ -265,7 +267,7 @@ impl ProtocolHandler for Galaku {
               continue;
             }
             let battery_reading = InputReadingV4::new(
-              0,
+              device_index,
               feature_index,
               InputType::Battery,
               vec![read_value(data) as i32],

@@ -555,11 +555,13 @@ impl ServerDevice {
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, ButtplugError>> {
     match message.input_command() {
       InputCommandType::Read => self.handle_input_read_cmd(
+        message.device_index(),
         message.feature_index(),
         message.feature_id(),
         message.input_type(),
       ),
       InputCommandType::Subscribe => self.handle_input_subscribe_cmd(
+        message.device_index(),
         message.feature_index(),
         message.feature_id(),
         message.input_type(),
@@ -574,6 +576,7 @@ impl ServerDevice {
 
   fn handle_input_read_cmd(
     &self,
+    device_index: u32,
     feature_index: u32,
     feature_id: Uuid,
     input_type: InputType,
@@ -582,7 +585,7 @@ impl ServerDevice {
     let handler = self.handler.clone();
     async move {
       handler
-        .handle_input_read_cmd(device, feature_index, feature_id, input_type)
+        .handle_input_read_cmd(device_index, device, feature_index, feature_id, input_type)
         .await
         .map_err(|e| e.into())
         .map(|e| e.into())
@@ -592,6 +595,7 @@ impl ServerDevice {
 
   fn handle_input_subscribe_cmd(
     &self,
+    device_index: u32,
     feature_index: u32,
     feature_id: Uuid,
     input_type: InputType,
@@ -600,7 +604,7 @@ impl ServerDevice {
     let handler = self.handler.clone();
     async move {
       handler
-        .handle_input_subscribe_cmd(device, feature_index, feature_id, input_type)
+        .handle_input_subscribe_cmd(device_index, device, feature_index, feature_id, input_type)
         .await
         .map(|_| message::OkV0::new(1).into())
         .map_err(|e| e.into())

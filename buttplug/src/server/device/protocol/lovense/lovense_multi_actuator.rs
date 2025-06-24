@@ -21,13 +21,13 @@ use uuid::Uuid;
 
 #[derive(Default)]
 pub struct LovenseMultiActuator {
-  vibrator_values: Vec<AtomicU32>,
+  _vibrator_values: Vec<AtomicU32>,
 }
 
 impl LovenseMultiActuator {
   pub fn new(num_vibrators: u32) -> Self {
     Self {
-      vibrator_values: std::iter::repeat_with(|| AtomicU32::new(0)).take(num_vibrators as usize).collect()
+      _vibrator_values: std::iter::repeat_with(|| AtomicU32::new(0)).take(num_vibrators as usize).collect()
     }
   }
 }
@@ -66,10 +66,11 @@ impl ProtocolHandler for LovenseMultiActuator {
 
   fn handle_battery_level_cmd(
     &self,
+    device_index: u32,
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
   ) -> BoxFuture<'static, Result<InputReadingV4, ButtplugDeviceError>> {
-    super::handle_battery_level_cmd(device, feature_index, feature_id)
+    super::handle_battery_level_cmd(device_index, device, feature_index, feature_id)
   }
 }

@@ -10,9 +10,9 @@ use crate::{
   core::{errors::{ButtplugDeviceError, ButtplugError}, message::OutputType},
   server::{
     device::configuration::{
-      BaseDeviceDefinition, BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder, DeviceDefinition, DeviceSettings, ProtocolCommunicationSpecifier, UserDeviceCustomization, UserDeviceDefinition, UserDeviceIdentifier
+      BaseDeviceDefinition, BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder, DeviceSettings, ProtocolCommunicationSpecifier, UserDeviceCustomization, UserDeviceDefinition, UserDeviceIdentifier
     },
-    message::server_device_feature::{ServerBaseDeviceFeature, ServerDeviceFeature},
+    message::server_device_feature::ServerBaseDeviceFeature,
   },
 };
 use dashmap::DashMap;
