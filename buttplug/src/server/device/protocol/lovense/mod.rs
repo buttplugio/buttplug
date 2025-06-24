@@ -24,12 +24,10 @@ use crate::{
   util::sleep,
 };
 use async_trait::async_trait;
-use dashmap::DashMap;
 use futures::{future::BoxFuture, FutureExt};
 use regex::Regex;
 use std::{
   sync::{
-    atomic::{AtomicBool, AtomicU32, Ordering},
     Arc,
   },
   time::Duration,
@@ -413,6 +411,7 @@ impl ProtocolHandler for Lovense {
   */
 
 fn handle_battery_level_cmd(
+    device_index: u32,
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
@@ -443,7 +442,7 @@ fn handle_battery_level_cmd(
             let start_pos = usize::from(data_str.contains('s'));
             if let Ok(level) = data_str[start_pos..(len - 1)].parse::<u8>() {
               return Ok(message::InputReadingV4::new(
-                0,
+                device_index,
                 feature_index,
                 message::InputType::Battery,
                 vec![level as i32],

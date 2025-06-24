@@ -47,10 +47,11 @@ impl ProtocolHandler for LovenseSingleActuator {
 
   fn handle_battery_level_cmd(
     &self,
+    device_index: u32,
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
   ) -> BoxFuture<'static, Result<InputReadingV4, ButtplugDeviceError>> {
-    super::handle_battery_level_cmd(device, feature_index, feature_id)
+    super::handle_battery_level_cmd(device_index, device, feature_index, feature_id)
   }
 }

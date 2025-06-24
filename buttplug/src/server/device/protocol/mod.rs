@@ -920,6 +920,7 @@ pub trait ProtocolHandler: Sync + Send {
 
   fn handle_input_subscribe_cmd(
     &self,
+    _device_index: u32,
     _device: Arc<Hardware>,
     _feature_index: u32,
     _feature_id: Uuid,
@@ -946,13 +947,14 @@ pub trait ProtocolHandler: Sync + Send {
 
   fn handle_input_read_cmd(
     &self,
+    device_index: u32,
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
     sensor_type: InputType,
   ) -> BoxFuture<Result<InputReadingV4, ButtplugDeviceError>> {
     match sensor_type {
-      InputType::Battery => self.handle_battery_level_cmd(device, feature_index, feature_id),
+      InputType::Battery => self.handle_battery_level_cmd(device_index, device, feature_index, feature_id),
       _ => future::ready(Err(ButtplugDeviceError::UnhandledCommand(
         "Command not implemented for this protocol: InputCmd (Read)".to_string(),
       )))
@@ -964,6 +966,7 @@ pub trait ProtocolHandler: Sync + Send {
   // conversion on it.
   fn handle_battery_level_cmd(
     &self,
+    device_index: u32,
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
@@ -978,7 +981,7 @@ pub trait ProtocolHandler: Sync + Send {
         let hw_msg = fut.await?;
         let battery_level = hw_msg.data()[0] as i32;
         let battery_reading =
-          InputReadingV4::new(0, feature_index, InputType::Battery, vec![battery_level]);
+          InputReadingV4::new(device_index, feature_index, InputType::Battery, vec![battery_level]);
         debug!("Got battery reading: {}", battery_level);
         Ok(battery_reading)
       }

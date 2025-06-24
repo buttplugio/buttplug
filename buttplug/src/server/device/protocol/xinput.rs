@@ -67,6 +67,7 @@ impl ProtocolHandler for XInput {
 
   fn handle_input_read_cmd(
     &self,
+    device_index: u32,
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: uuid::Uuid,
@@ -88,7 +89,7 @@ impl ProtocolHandler for XInput {
         }
       };
       Ok(message::InputReadingV4::new(
-        0,
+        device_index,
         feature_index,
         InputType::Battery,
         vec![battery],

@@ -42,6 +42,7 @@ impl ProtocolHandler for KiirooSpot {
 
   fn handle_battery_level_cmd(
     &self,
+    device_index: u32,
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
@@ -54,7 +55,7 @@ impl ProtocolHandler for KiirooSpot {
       let data = hw_msg.data();
       let battery_level = data[0] as i32;
       let battery_reading =
-        message::InputReadingV4::new(0, feature_index, InputType::Battery, vec![battery_level]);
+        message::InputReadingV4::new(device_index, feature_index, InputType::Battery, vec![battery_level]);
       debug!("Got battery reading: {}", battery_level);
       Ok(battery_reading)
     }

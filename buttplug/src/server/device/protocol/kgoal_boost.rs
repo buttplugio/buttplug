@@ -56,6 +56,7 @@ impl ProtocolHandler for KGoalBoost {
 
   fn handle_input_subscribe_cmd(
     &self,
+    device_index: u32,
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
@@ -100,7 +101,7 @@ impl ProtocolHandler for KGoalBoost {
                 let unnormalized = (data[5] as i32) << 8 | data[6] as i32;
                 if stream_sensors.contains(&0)
                   && sender
-                    .send(InputReadingV4::new(0, 0, InputType::Pressure, vec![normalized]).into())
+                    .send(InputReadingV4::new(device_index, feature_index, InputType::Pressure, vec![normalized]).into())
                     .is_err()
                 {
                   debug!(
@@ -111,7 +112,7 @@ impl ProtocolHandler for KGoalBoost {
                 if stream_sensors.contains(&1)
                   && sender
                     .send(
-                      InputReadingV4::new(0, 0, InputType::Pressure, vec![unnormalized]).into(),
+                      InputReadingV4::new(device_index, feature_index, InputType::Pressure, vec![unnormalized]).into(),
                     )
                     .is_err()
                 {
