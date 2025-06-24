@@ -459,15 +459,15 @@ impl ServerDevice {
     command_message: ButtplugDeviceCommandMessageUnionV4,
   ) -> ButtplugServerResultFuture {
     match command_message {
-      // Sensor messages
-      ButtplugDeviceCommandMessageUnionV4::SensorCmd(msg) => self.handle_sensor_cmd(msg),
+      // Input messages
+      ButtplugDeviceCommandMessageUnionV4::InputCmd(msg) => self.handle_input_cmd(msg),
       // Actuator messages
-      ButtplugDeviceCommandMessageUnionV4::ActuatorCmd(msg) => self.handle_actuatorcmd_v4(&msg),
-      ButtplugDeviceCommandMessageUnionV4::ActuatorVecCmd(msg) => {
+      ButtplugDeviceCommandMessageUnionV4::OutputCmd(msg) => self.handle_outputcmd_v4(&msg),
+      ButtplugDeviceCommandMessageUnionV4::OutputVecCmd(msg) => {
         let mut futs = vec![];
         let msg_id = msg.id();
         for m in msg.value_vec() {
-          futs.push(self.handle_actuatorcmd_v4(m))
+          futs.push(self.handle_outputcmd_v4(m))
         }
         async move {
           for f in futs {
@@ -482,7 +482,7 @@ impl ServerDevice {
     }
   }
 
-  fn handle_actuatorcmd_v4(&self, msg: &CheckedOutputCmdV4) -> ButtplugServerResultFuture {
+  fn handle_outputcmd_v4(&self, msg: &CheckedOutputCmdV4) -> ButtplugServerResultFuture {
     if let Some(last_msg) = self.last_output_command.get(&msg.feature_id()) {
       if *last_msg == *msg {
         trace!("No commands generated for incoming device packet, skipping and returning success.");
@@ -549,22 +549,22 @@ impl ServerDevice {
     .boxed()
   }
 
-  fn handle_sensor_cmd(
+  fn handle_input_cmd(
     &self,
     message: CheckedInputCmdV4,
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, ButtplugError>> {
     match message.input_command() {
-      InputCommandType::Read => self.handle_sensor_read_cmd(
+      InputCommandType::Read => self.handle_input_read_cmd(
         message.feature_index(),
         message.feature_id(),
         message.input_type(),
       ),
-      InputCommandType::Subscribe => self.handle_sensor_subscribe_cmd(
+      InputCommandType::Subscribe => self.handle_input_subscribe_cmd(
         message.feature_index(),
         message.feature_id(),
         message.input_type(),
       ),
-      InputCommandType::Unsubscribe => self.handle_sensor_unsubscribe_cmd(
+      InputCommandType::Unsubscribe => self.handle_input_unsubscribe_cmd(
         message.feature_index(),
         message.feature_id(),
         message.input_type(),
@@ -572,17 +572,17 @@ impl ServerDevice {
     }
   }
 
-  fn handle_sensor_read_cmd(
+  fn handle_input_read_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: InputType,
+    input_type: InputType,
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, ButtplugError>> {
     let device = self.hardware.clone();
     let handler = self.handler.clone();
     async move {
       handler
-        .handle_input_read_cmd(device, feature_index, feature_id, sensor_type)
+        .handle_input_read_cmd(device, feature_index, feature_id, input_type)
         .await
         .map_err(|e| e.into())
         .map(|e| e.into())
@@ -590,17 +590,17 @@ impl ServerDevice {
     .boxed()
   }
 
-  fn handle_sensor_subscribe_cmd(
+  fn handle_input_subscribe_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: InputType,
+    input_type: InputType,
   ) -> ButtplugServerResultFuture {
     let device = self.hardware.clone();
     let handler = self.handler.clone();
     async move {
       handler
-        .handle_input_subscribe_cmd(device, feature_index, feature_id, sensor_type)
+        .handle_input_subscribe_cmd(device, feature_index, feature_id, input_type)
         .await
         .map(|_| message::OkV0::new(1).into())
         .map_err(|e| e.into())
@@ -608,17 +608,17 @@ impl ServerDevice {
     .boxed()
   }
 
-  fn handle_sensor_unsubscribe_cmd(
+  fn handle_input_unsubscribe_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    sensor_type: InputType,
+    input_type: InputType,
   ) -> ButtplugServerResultFuture {
     let device = self.hardware.clone();
     let handler = self.handler.clone();
     async move {
       handler
-        .handle_input_unsubscribe_cmd(device, feature_index, feature_id, sensor_type)
+        .handle_input_unsubscribe_cmd(device, feature_index, feature_id, input_type)
         .await
         .map(|_| message::OkV0::new(1).into())
         .map_err(|e| e.into())
