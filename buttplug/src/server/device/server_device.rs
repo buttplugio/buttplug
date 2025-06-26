@@ -85,7 +85,7 @@ use core::hash::{Hash, Hasher};
 use dashmap::DashMap;
 use futures::future::{self, BoxFuture, FutureExt};
 use getset::Getters;
-use tokio::sync::{Mutex, RwLock};
+use tokio::{select, sync::{mpsc::{channel, Sender}, Mutex}, time::Instant};
 use tokio_stream::StreamExt;
 use uuid::Uuid;
 
@@ -118,8 +118,9 @@ pub struct ServerDevice {
   #[getset(get = "pub")]
   legacy_attributes: ServerDeviceAttributes,
   last_output_command: DashMap<Uuid, CheckedOutputCmdV4>,
-  current_hardware_commands: Arc<Mutex<Option<VecDeque<HardwareCommand>>>>,
+
   stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4>,
+  internal_hw_msg_sender: Sender<Vec<HardwareCommand>>
 }
 impl Debug for ServerDevice {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -244,76 +245,132 @@ impl ServerDevice {
     hardware: Arc<Hardware>,
     definition: &DeviceDefinition,
   ) -> Self {
-    let keepalive_packet = Arc::new(RwLock::new(None));
-    let current_hardware_commands = Arc::new(Mutex::new(None));
+    let (internal_hw_msg_sender, mut internal_hw_msg_recv) = channel::<Vec<HardwareCommand>>(1024);
+
+    let device_wait_duration = if definition.message_gap().is_some() {
+      definition.message_gap()
+    } else {
+      hardware.message_gap()
+    };
 
     // Set up and start the packet send task
     {
-      let current_hardware_commands = current_hardware_commands.clone();
       let hardware = hardware.clone();
       let strategy = handler.keepalive_strategy();
-      let keepalive_packet = keepalive_packet.clone();
+      let strategy_duration = if let ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(duration) = strategy {
+        Some(duration)
+      } else {
+        None
+      };
       async_manager::spawn(async move {
-        // Arbitrary wait time for now.
-        let wait_duration = Duration::from_secs(5);
-        let bt_duration = Duration::from_millis(20);
-        loop {
-          // Loop based on our 10hz estimate for most BLE toys.
-          util::sleep(bt_duration).await;
-          // Run commands in order, otherwise we may end up sending out of order. This may take a while,
-          // but it's what 99% of protocols expect. If they want something else, they can implement it
-          // themselves.
-          //
-          // If anything errors out, just bail on the command series. This most likely means the device
-          // disconnected.
-          let mut local_commands: VecDeque<HardwareCommand> = {
-            let mut c = current_hardware_commands.lock().await;
-            if let Some(command_vec) = c.take() {
-              command_vec
-            } else {
-              continue;
+        let keepalive_packet = Mutex::new(None);
+        // TODO This needs to throw system error messages
+        let send_hw_cmd = async |command| { 
+          let _ = hardware.parse_message(&command).await;
+          if hardware.requires_keepalive()
+            && matches!(
+              strategy,
+              ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
+            )
+          {
+            if let HardwareCommand::Write(command) = command {
+              *keepalive_packet.lock().await = Some(command);
             }
           };
-          while let Some(command) = local_commands.pop_front() {
-            debug!("Sending hardware command {:?}", command);
-            // TODO This needs to throw system error messages
-            let _ = hardware.parse_message(&command).await;
-            if hardware.requires_keepalive()
-              && matches!(
-                strategy,
-                ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
-              )
-            {
-              if let HardwareCommand::Write(command) = command {
-                *keepalive_packet.write().await = Some(command);
+        };
+        loop {
+          let requires_keepalive = hardware.requires_keepalive();
+          let wait_duration_fut = async move {
+            if let Some(duration) = strategy_duration {
+              util::sleep(duration).await;
+            } else if requires_keepalive {
+              // This is really only for iOS Bluetooth
+              util::sleep(Duration::from_secs(5)).await;
+            } else {
+              future::pending::<()>().await;
+            };
+          };          
+          select! {
+            msg = internal_hw_msg_recv.recv() => {
+              if msg.is_none() {
+                info!("No longer receiving message from device parent, breaking");
+                break;
               }
-            }
-          }
-          if (hardware.requires_keepalive() && hardware.time_since_last_write().await > wait_duration) ||
-            matches!(strategy, ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_))            
-          {
-            match &strategy {
-              ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(duration) => {
-                if hardware.time_since_last_write().await > *duration {
-                  if let Some(packet) = &*keepalive_packet.read().await {
-                    if let Err(e) = hardware.write_value(packet).await {
-                      warn!("Error writing keepalive packet: {:?}", e);
+              let hardware_cmd = msg.unwrap();
+              if device_wait_duration.is_none() {
+                // send and continue
+                for cmd in hardware_cmd {
+                  send_hw_cmd(cmd).await;
+                }
+                continue;
+              }
+              // Run commands in order, otherwise we may end up sending out of order. This may take a while,
+              // but it's what 99% of protocols expect. If they want something else, they can implement it
+              // themselves.
+              //
+              // If anything errors out, just bail on the command series. This most likely means the device
+              // disconnected.
+              let mut local_commands: VecDeque<HardwareCommand> = VecDeque::new();
+              local_commands.append(&mut VecDeque::from(hardware_cmd));
+
+              let sleep_until = Instant::now() + *device_wait_duration.as_ref().unwrap();
+              loop {
+                select! {
+                  msg = internal_hw_msg_recv.recv() => {
+                    if msg.is_none() {
+                      info!("No longer receiving message from device parent, breaking");
+                      local_commands.clear();
                       break;
                     }
+                    // Run commands in order, otherwise we may end up sending out of order. This may take a while,
+                    // but it's what 99% of protocols expect. If they want something else, they can implement it
+                    // themselves.
+                    //
+                    // If anything errors out, just bail on the command series. This most likely means the device
+                    // disconnected.
+                    for command in msg.unwrap() {
+                      local_commands.retain(|v| !command.overlaps(v));
+                      local_commands.push_back(command);
+                    }
+                  }
+                  _ = util::sleep(sleep_until - Instant::now()) => {
+                    break;
                   }
                 }
-              }
-              ProtocolKeepaliveStrategy::HardwareRequiredRepeatPacketStrategy(packet) => {
-                if let Err(e) = hardware.write_value(packet).await {
-                  warn!("Error writing keepalive packet: {:?}", e);
+                if sleep_until < Instant::now() {
                   break;
                 }
               }
-              ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy => {
-                if let Some(packet) = &*keepalive_packet.read().await {
+              while let Some(command) = local_commands.pop_front() {
+                debug!("Sending hardware command {:?}", command);
+                send_hw_cmd(command).await;
+              }
+            }
+            _ = wait_duration_fut => {
+              let keepalive_packet = keepalive_packet.lock().await.clone();
+              match &strategy {
+                ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(duration) => {
+                  if hardware.time_since_last_write().await > *duration {
+                    if let Some(packet) = keepalive_packet {
+                      if let Err(e) = hardware.write_value(&packet).await {
+                        warn!("Error writing keepalive packet: {:?}", e);
+                        break;
+                      }
+                    }
+                  }
+                }
+                ProtocolKeepaliveStrategy::HardwareRequiredRepeatPacketStrategy(packet) => {
                   if let Err(e) = hardware.write_value(packet).await {
                     warn!("Error writing keepalive packet: {:?}", e);
                     break;
+                  }
+                }
+                ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy => {
+                  if let Some(packet) = keepalive_packet {
+                    if let Err(e) = hardware.write_value(&packet).await {
+                      warn!("Error writing keepalive packet: {:?}", e);
+                      break;
+                    }
                   }
                 }
               }
@@ -389,8 +446,8 @@ impl ServerDevice {
       // Generating legacy attributes is cheap, just do it right when we create the device.
       legacy_attributes: ServerDeviceAttributes::new(definition.features()),
       last_output_command: DashMap::new(),
-      current_hardware_commands,
       stop_commands,
+      internal_hw_msg_sender
     }
   }
 
@@ -496,27 +553,9 @@ impl ServerDevice {
   }
 
   fn handle_hardware_commands(&self, commands: Vec<HardwareCommand>) -> ButtplugServerResultFuture {
-    let current_hardware_commands = self.current_hardware_commands.clone();
+    let sender = self.internal_hw_msg_sender.clone();
     async move {
-      // Run commands in order, otherwise we may end up sending out of order. This may take a while,
-      // but it's what 99% of protocols expect. If they want something else, they can implement it
-      // themselves.
-      //
-      // If anything errors out, just bail on the command series. This most likely means the device
-      // disconnected.
-      let mut c = current_hardware_commands.lock().await;
-      if let Some(g) = c.as_mut() {
-        for command in commands {
-          g.retain(|v| !command.overlaps(v));
-          g.push_back(command);
-        }
-      } else {
-        let mut n = VecDeque::new();
-        for command in commands {
-          n.push_back(command);
-        }
-        *c = Some(n);
-      }
+      let _ = sender.send(commands).await;
       Ok(message::OkV0::default().into())
     }
     .boxed()

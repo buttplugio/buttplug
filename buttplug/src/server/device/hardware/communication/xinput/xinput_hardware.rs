@@ -96,6 +96,8 @@ impl HardwareConnector for XInputHardwareConnector {
       &self.index.to_string(),
       &create_address(self.index),
       &[Endpoint::Tx, Endpoint::Rx],
+      &None,
+      false,
       Box::new(hardware_internal),
     );
     Ok(Box::new(GenericHardwareSpecializer::new(hardware)))

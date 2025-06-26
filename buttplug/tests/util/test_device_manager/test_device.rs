@@ -123,6 +123,8 @@ impl HardwareSpecializer for TestHardwareSpecializer {
       &device.name(),
       &device.address(),
       &endpoints,
+      &None,
+      false,
       Box::new(device),
     );
     Ok(hardware)

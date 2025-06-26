@@ -1,18 +1,21 @@
+use std::time::Duration;
+
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::server::message::server_device_feature::{ServerBaseDeviceFeature, ServerDeviceFeature, ServerUserDeviceFeature};
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default, CopyGetters)]
 pub struct DeviceSettings {
-  #[serde(rename = "feature-timing-gap", skip_serializing_if = "Option::is_none", default)]
-  feature_timing_gap: Option<u32>,
+  #[serde(rename = "message-gap-ms", skip_serializing_if = "Option::is_none", default)]
+  #[getset(get_copy = "pub")]
+  message_gap_ms: Option<u32>,
 }
 
 impl DeviceSettings {
   pub fn is_none(&self) -> bool {
-    self.feature_timing_gap.is_none()
+    self.message_gap_ms.is_none()
   }
 }
 
@@ -72,9 +75,7 @@ impl BaseDeviceDefinition {
 
 #[derive(Serialize, Deserialize, Debug, Getters, CopyGetters, Default, Clone)]
 pub struct UserDeviceCustomization {
-  #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(default)]
-  #[serde(rename = "display-name")]
+  #[serde(rename = "display-name", default, skip_serializing_if = "Option::is_none")]
   #[getset(get = "pub")]
   display_name: Option<String>,
   #[serde(default)]
@@ -85,20 +86,24 @@ pub struct UserDeviceCustomization {
   deny: bool,
   #[getset(get_copy = "pub")]
   index: u32,
+  #[getset(get_copy = "pub")]
+  #[serde(rename = "message-gap-ms", default, skip_serializing_if = "Option::is_none")]
+  message_gap_ms: Option<u32>
 }
 
 impl UserDeviceCustomization {
-  pub fn new(display_name: &Option<String>, allow: bool, deny: bool, index: u32) -> Self {
+  pub fn new(display_name: &Option<String>, allow: bool, deny: bool, index: u32, message_gap_ms: Option<u32>) -> Self {
     Self {
       display_name: display_name.clone(),
       allow,
       deny,
       index,
+      message_gap_ms,
     }
   }
 
   pub fn default_with_index(index: u32) -> Self {
-    Self::new(&None, false, false, index)
+    Self::new(&None, false, false, index, None)
   }
 }
 
@@ -176,6 +181,16 @@ impl DeviceDefinition {
 
   pub fn user_config(&self) -> &UserDeviceCustomization {
     self.user_device.user_config()
+  }
+
+  pub fn message_gap(&self) -> Option<Duration> {
+    if let Some(gap) = self.user_device.user_config().message_gap_ms() {
+      Some(Duration::from_millis(gap.into()))
+    } else if let Some(gap) = self.base_device.device_settings.message_gap_ms() {
+      Some(Duration::from_millis(gap.into()))
+    } else {
+      None
+    }
   }
 
   pub fn new_from_base_definition(def: &BaseDeviceDefinition, index: u32) -> Self {
