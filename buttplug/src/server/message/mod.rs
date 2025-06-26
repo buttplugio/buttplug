@@ -15,7 +15,6 @@ use server_device_attributes::ServerDeviceAttributes;
 
 pub mod serializer;
 pub mod server_device_attributes;
-pub mod server_device_feature;
 mod v0;
 mod v1;
 mod v2;

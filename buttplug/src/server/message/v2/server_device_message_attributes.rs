@@ -6,13 +6,12 @@
 // for full license information.
 
 use crate::{
-  core::message::{OutputType, InputType},
-  server::message::{
-    server_device_feature::ServerDeviceFeature,
+  core::message::{InputType, OutputType},
+  server::{device::server_device_feature::ServerDeviceFeature, message::{
     v1::NullDeviceMessageAttributesV1,
     ServerDeviceMessageAttributesV3,
     ServerGenericDeviceMessageAttributesV3,
-  },
+  }},
 };
 use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};

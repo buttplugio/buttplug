@@ -8,12 +8,9 @@
 use super::json::JSONValidator;
 use crate::{
   core::{errors::{ButtplugDeviceError, ButtplugError}, message::OutputType},
-  server::{
-    device::configuration::{
+  server::device::{configuration::{
       BaseDeviceDefinition, BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder, DeviceSettings, ProtocolCommunicationSpecifier, UserDeviceCustomization, UserDeviceDefinition, UserDeviceIdentifier
-    },
-    message::server_device_feature::ServerBaseDeviceFeature,
-  },
+    }, server_device_feature::ServerBaseDeviceFeature},
 };
 use dashmap::DashMap;
 use getset::{CopyGetters, Getters, MutGetters, Setters};

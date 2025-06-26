@@ -99,6 +99,7 @@ pub mod configuration;
 pub mod hardware;
 pub mod protocol;
 pub mod server_device;
+pub mod server_device_feature;
 mod server_device_manager;
 mod server_device_manager_event_loop;
 
