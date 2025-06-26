@@ -4,7 +4,7 @@ use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::server::message::server_device_feature::{ServerBaseDeviceFeature, ServerDeviceFeature, ServerUserDeviceFeature};
+use crate::server::device::server_device_feature::{ServerBaseDeviceFeature, ServerDeviceFeature, ServerUserDeviceFeature};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, CopyGetters)]
 pub struct DeviceSettings {

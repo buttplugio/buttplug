@@ -6,11 +6,8 @@
 // for full license information.
 
 use crate::{
-  core::message::{OutputType, InputType},
-  server::message::{
-    server_device_feature::ServerDeviceFeature,
-    v1::NullDeviceMessageAttributesV1,
-  },
+  core::message::{InputType, OutputType},
+  server::{device::server_device_feature::ServerDeviceFeature, message::v1::NullDeviceMessageAttributesV1},
 };
 use getset::{Getters, MutGetters, Setters};
 use std::ops::RangeInclusive;

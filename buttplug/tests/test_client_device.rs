@@ -14,10 +14,10 @@ use buttplug::{
   },
   server::{
     device::{
+      server_device_feature::{ServerDeviceFeature, ServerDeviceFeatureOutput},
       configuration::{UserDeviceCustomization, DeviceDefinition, UserDeviceIdentifier},
       hardware::{HardwareCommand, HardwareWriteCmd},
     },
-    message::server_device_feature::{ServerDeviceFeature, ServerDeviceFeatureOutput},
   },
   util::{async_manager, device_configuration::load_protocol_configs},
 };
