@@ -298,6 +298,7 @@ impl ServerDevice {
               }
               let hardware_cmd = msg.unwrap();
               if device_wait_duration.is_none() {
+                trace!("No wait duration specified, sending hardware commands {:?}", hardware_cmd);
                 // send and continue
                 for cmd in hardware_cmd {
                   send_hw_cmd(cmd).await;

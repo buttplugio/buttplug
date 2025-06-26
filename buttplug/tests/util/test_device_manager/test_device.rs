@@ -33,7 +33,7 @@ use serde::{Deserialize, Serialize};
 use std::{
   collections::{HashSet, VecDeque},
   fmt::{self, Debug},
-  sync::Arc,
+  sync::Arc, time::Duration,
 };
 use tokio::sync::{broadcast, mpsc, Mutex};
 
@@ -123,7 +123,8 @@ impl HardwareSpecializer for TestHardwareSpecializer {
       &device.name(),
       &device.address(),
       &endpoints,
-      &None,
+      // Add slight delay for protocols with multiple messages.
+      &Some(Duration::from_millis(1)),
       false,
       Box::new(device),
     );
