@@ -124,6 +124,14 @@ pub struct ServerBaseDeviceFeatureOutput {
   step_range: RangeInclusive<u32>,
 }
 
+impl ServerBaseDeviceFeatureOutput {
+  pub fn new(step_range: &RangeInclusive<u32>) -> Self {
+    Self {
+      step_range: step_range.clone()
+    }
+  }
+}
+
 #[derive(
   Clone,
   Debug,
@@ -142,8 +150,11 @@ pub struct ServerUserDeviceFeatureOutput {
   #[serde(rename = "step-limit", default, skip_serializing_if="Option::is_none")]
   step_limit: Option<RangeInclusive<u32>>,
   #[getset(get = "pub")]
-  #[serde(rename = "reverse-position", default, skip_serializing_if="Option::is_none")]
-  reverse_position: Option<bool>,
+  #[serde(rename = "reverse-position", default)]
+  reverse_position: bool,
+  #[getset(get = "pub")]
+  #[serde(rename = "ignore", default)]
+  ignore: bool,
 }
 
 #[derive(
@@ -281,7 +292,7 @@ impl ServerDeviceFeatureOutput {
   }
 
   pub fn reverse_position(&self) -> bool {
-    self.user_feature.reverse_position().unwrap_or_default()
+    *self.user_feature.reverse_position()
   }
 
   pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {

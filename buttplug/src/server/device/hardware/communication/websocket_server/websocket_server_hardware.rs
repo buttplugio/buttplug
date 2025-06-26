@@ -213,6 +213,8 @@ impl HardwareConnector for WebsocketServerHardwareConnector {
       self.info.identifier(),
       self.info.address(),
       &[Endpoint::Rx, Endpoint::Tx],
+      &None,
+      false,
       Box::new(hardware_internal),
     );
     Ok(Box::new(GenericHardwareSpecializer::new(hardware)))

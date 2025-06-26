@@ -40,7 +40,7 @@ use std::{
   sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
-  },
+  }, time::Duration,
 };
 use tokio::sync::{broadcast, mpsc};
 
@@ -103,6 +103,8 @@ impl HardwareConnector for LovenseDongleHardwareConnector {
       "Lovense Dongle Device",
       &self.id,
       &[Endpoint::Rx, Endpoint::Tx],
+      &Some(Duration::from_millis(75)),
+      false,
       Box::new(hardware_internal),
     );
     Ok(Box::new(GenericHardwareSpecializer::new(device)))

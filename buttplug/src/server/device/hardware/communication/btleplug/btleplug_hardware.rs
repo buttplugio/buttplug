@@ -41,7 +41,7 @@ use std::{
   collections::HashMap,
   fmt::{self, Debug},
   pin::Pin,
-  sync::Arc,
+  sync::Arc, time::Duration,
 };
 use tokio::sync::broadcast;
 use uuid::Uuid;
@@ -211,18 +211,14 @@ impl<T: Peripheral> HardwareSpecializer for BtleplugHardwareSpecializer<T> {
       endpoints.clone(),
       uuid_map,
     );
-    let mut hardware = Hardware::new(
+    Ok(Hardware::new(
       &self.name,
       &format!("{address:?}"),
       &endpoints.keys().cloned().collect::<Vec<Endpoint>>(),
+      &Some(Duration::from_millis(75)),
+      self.requires_keepalive,
       Box::new(device_internal_impl),
-    );
-
-    // Let the hardware know if we need command resends or whatever. Fucking iOS.
-    if self.requires_keepalive {
-      hardware.set_requires_keepalive();
-    }
-    Ok(hardware)
+    ))
   }
 }
 

@@ -71,6 +71,8 @@ impl HardwareConnector for LovenseServiceHardwareConnector {
       &self.toy_info.name,
       &self.toy_info.id,
       &[Endpoint::Tx],
+      &None,
+      false,
       Box::new(hardware_internal),
     );
     Ok(Box::new(GenericHardwareSpecializer::new(hardware)))

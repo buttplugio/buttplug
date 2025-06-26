@@ -104,6 +104,8 @@ impl HardwareSpecializer for SerialPortHardwareSpecialzier {
       &self.port_info.port_name,
       &self.port_info.port_name,
       &[Endpoint::Rx, Endpoint::Tx],
+      &None,
+      false,
       Box::new(hardware_internal),
     );
     Ok(hardware)

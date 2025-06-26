@@ -253,15 +253,23 @@ pub enum HardwareEvent {
 /// HardwareInternal, which handles all of the actual hardware communication. However, the struct
 /// also needs to carry around identifying information, so we wrap it in this type instead of
 /// requiring that all implementors of deal with name/address/endpoint accessors.
-#[derive(CopyGetters)]
+#[derive(CopyGetters, Getters)]
 pub struct Hardware {
   /// Device name
+  #[getset(get = "pub")]
   name: String,
   /// Device address
+  #[getset(get = "pub")]
   address: String,
   /// Communication endpoints
+  #[getset(get = "pub")]
   endpoints: Vec<Endpoint>,
-  /// Internal implementation details
+  /// Minimum time between two packets being sent to the device. Used to deal with congestion across
+  /// protocols like Bluetooth LE, which have guaranteed delivery but can be overloaded due to
+  /// connection intervals.
+  #[getset(get_copy = "pub")]  
+  message_gap: Option<Duration>,
+  ///  Internal implementation details
   internal_impl: Box<dyn HardwareInternal>,
   /// Requires a keepalive signal to be sent by the Server Device class
   #[getset(get_copy = "pub")]
@@ -274,39 +282,23 @@ impl Hardware {
     name: &str,
     address: &str,
     endpoints: &[Endpoint],
+    message_gap: &Option<Duration>,
+    requires_keepalive: bool,
     internal_impl: Box<dyn HardwareInternal>,
   ) -> Self {
     Self {
       name: name.to_owned(),
       address: address.to_owned(),
       endpoints: endpoints.into(),
+      message_gap: message_gap.clone(),
       internal_impl,
-      requires_keepalive: false,
+      requires_keepalive,
       last_write_time: Arc::new(RwLock::new(Instant::now())),
     }
   }
 
   pub async fn time_since_last_write(&self) -> Duration {
     Instant::now().duration_since(*self.last_write_time.read().await)
-  }
-
-  pub fn set_requires_keepalive(&mut self) {
-    self.requires_keepalive = true;
-  }
-
-  /// Returns the device name
-  pub fn name(&self) -> &str {
-    &self.name
-  }
-
-  /// Returns the device address
-  pub fn address(&self) -> &str {
-    &self.address
-  }
-
-  /// Returns the device endpoint list
-  pub fn endpoints(&self) -> Vec<Endpoint> {
-    self.endpoints.clone()
   }
 
   /// Returns a receiver for any events the device may emit.
