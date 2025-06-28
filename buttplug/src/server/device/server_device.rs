@@ -445,7 +445,7 @@ impl ServerDevice {
       hardware,
       definition: definition.clone(),
       // Generating legacy attributes is cheap, just do it right when we create the device.
-      legacy_attributes: ServerDeviceAttributes::new(definition.features()),
+      legacy_attributes: ServerDeviceAttributes::new(&definition.features()),
       last_output_command: DashMap::new(),
       stop_commands,
       internal_hw_msg_sender
