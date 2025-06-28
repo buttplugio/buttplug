@@ -1,10 +1,10 @@
 use std::time::Duration;
 
-use getset::{CopyGetters, Getters};
+use getset::{CopyGetters, Getters, MutGetters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::server::device::server_device_feature::{ServerBaseDeviceFeature, ServerDeviceFeature, ServerUserDeviceFeature};
+use crate::{core::message::OutputType, server::device::server_device_feature::{ServerBaseDeviceFeature, ServerDeviceFeature, ServerUserDeviceFeature, ServerUserDeviceFeatureOutput}};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, CopyGetters)]
 pub struct DeviceSettings {
@@ -107,7 +107,7 @@ impl UserDeviceCustomization {
   }
 }
 
-#[derive(Debug, Clone, Getters, Serialize, Deserialize, CopyGetters)]
+#[derive(Debug, Clone, Getters, MutGetters, Serialize, Deserialize, CopyGetters)]
 pub struct UserDeviceDefinition {
   #[getset(get_copy = "pub")]
   id: Uuid,
@@ -116,9 +116,9 @@ pub struct UserDeviceDefinition {
   base_id: Uuid,
   #[getset(get = "pub")]
   /// Message attributes for this device instance.
-  #[getset(get = "pub")]
+  #[getset(get = "pub", get_mut="pub")]
   features: Vec<ServerUserDeviceFeature>,
-  #[getset(get = "pub")]
+  #[getset(get = "pub", get_mut="pub")]
   #[serde(rename="user-config")]
   /// Per-user configurations specific to this device instance.
   user_config: UserDeviceCustomization,
@@ -135,14 +135,12 @@ impl UserDeviceDefinition {
   }
 }
 
-#[derive(Debug, Clone, Getters, CopyGetters)]
+#[derive(Debug, Clone, Getters, CopyGetters, MutGetters)]
 pub struct DeviceDefinition {
   #[getset(get = "pub")]
   base_device: BaseDeviceDefinition,
-  #[getset(get = "pub")]
+  #[getset(get = "pub", get_mut="pub")]
   user_device: UserDeviceDefinition,
-  #[getset(get = "pub")]
-  features: Vec<ServerDeviceFeature>
 }
 
 impl DeviceDefinition {
@@ -151,19 +149,9 @@ impl DeviceDefinition {
     base_device: &BaseDeviceDefinition,
     user_device: &UserDeviceDefinition
   ) -> Self {
-    let mut features = vec!();
-    base_device
-      .features()
-      .iter()
-      .for_each(|x| {
-        if let Some(user_feature) = user_device.features.iter().find(|user_feature| user_feature.base_id() == x.id()) {
-          features.push(ServerDeviceFeature::new(x, user_feature));
-        }
-      });
     Self {
       base_device: base_device.clone(),
       user_device: user_device.clone(),
-      features
     }
   }
 
@@ -177,6 +165,20 @@ impl DeviceDefinition {
 
   pub fn protocol_variant(&self) -> &Option<String> {
     self.base_device.protocol_variant()
+  }
+
+  pub fn features(&self) -> Vec<ServerDeviceFeature> {
+    // TODO Gross way to do this.
+    let mut features: Vec<ServerDeviceFeature> = vec!();
+    self.base_device
+      .features()
+      .iter()
+      .for_each(|x| {
+        if let Some(user_feature) = self.user_device.features.iter().find(|user_feature| user_feature.base_id() == x.id()) {
+          features.push(ServerDeviceFeature::new(x, user_feature));
+        }
+      });
+      features
   }
 
   pub fn user_config(&self) -> &UserDeviceCustomization {
@@ -199,5 +201,11 @@ impl DeviceDefinition {
       def,
       &UserDeviceDefinition::new(index, def.id(), &user_features)
     )
+  }
+
+  pub fn update_user_output(&mut self, feature_id: Uuid, output_type: OutputType, user_output: ServerUserDeviceFeatureOutput) {
+    if let Some(feature) = self.user_device.features_mut().iter_mut().find(|x| x.id() == feature_id) {
+      feature.update_output(output_type, &user_output);
+    }
   }
 }
