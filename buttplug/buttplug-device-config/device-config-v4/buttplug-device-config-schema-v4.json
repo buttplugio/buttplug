@@ -267,10 +267,7 @@
                   "step-limit": {
                     "$ref": "#/components/step-range"
                   }
-                },
-                "required": [
-                  "step-limit"
-                ]
+                }
               }
             }
           },
