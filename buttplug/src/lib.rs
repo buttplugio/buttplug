@@ -28,20 +28,3 @@
 //!   - Utilities for all portions of the library that may not be specifically related to sex toy
 //!     functionality. This includes managers for different async runtimes, configuration file
 //!     loading, utilities for streams and futures, etc...
-
-#[macro_use]
-extern crate buttplug_derive;
-#[macro_use]
-extern crate strum_macros;
-#[cfg(any(feature = "client", feature = "server"))]
-#[macro_use]
-extern crate futures;
-#[macro_use]
-extern crate tracing;
-
-#[cfg(feature = "client")]
-pub mod client;
-pub mod core;
-#[cfg(feature = "server")]
-pub mod server;
-pub mod util;
