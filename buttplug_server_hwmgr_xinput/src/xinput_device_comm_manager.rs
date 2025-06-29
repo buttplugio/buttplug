@@ -6,15 +6,13 @@
 // for full license information.
 
 use super::xinput_hardware::XInputHardwareConnector;
-use crate::{
-  core::errors::ButtplugDeviceError,
-  server::device::hardware::communication::{
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server::device::hardware::communication::{
     HardwareCommunicationManager,
     HardwareCommunicationManagerBuilder,
     HardwareCommunicationManagerEvent,
     TimedRetryCommunicationManager,
     TimedRetryCommunicationManagerImpl,
-  },
 };
 use async_trait::async_trait;
 use rusty_xinput::XInputHandle;

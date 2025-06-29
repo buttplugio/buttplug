@@ -6,12 +6,10 @@
 // for full license information.
 
 use super::xinput_device_comm_manager::XInputControllerIndex;
-use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::hardware::communication::HardwareSpecificError,
-  server::device::{
-    configuration::{ProtocolCommunicationSpecifier, XInputSpecifier},
-    hardware::{
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, XInputSpecifier};
+use buttplug_server::device::hardware::{
+      communication::HardwareSpecificError,
       GenericHardwareSpecializer,
       Hardware,
       HardwareConnector,
@@ -23,9 +21,6 @@ use crate::{
       HardwareSubscribeCmd,
       HardwareUnsubscribeCmd,
       HardwareWriteCmd,
-    },
-  },
-  util::async_manager,
 };
 use async_trait::async_trait;
 use byteorder::{LittleEndian, ReadBytesExt};
@@ -149,7 +144,7 @@ impl HardwareInternal for XInputHardware {
       let battery = handle
         .get_gamepad_battery_information(index as u32)
         .map_err(|e| {
-          ButtplugDeviceError::from(HardwareSpecificError::XInputError(format!("{e:?}")))
+          ButtplugDeviceError::from(ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::HardwareSpecificError("Xinput".to_string(), format!("{e:?}")).to_string()))
         })?;
       Ok(HardwareReading::new(
         Endpoint::Rx,
@@ -165,7 +160,7 @@ impl HardwareInternal for XInputHardware {
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let handle = self.handle.clone();
     let index = self.index;
-    let data = msg.data.clone();
+    let data = msg.data().clone();
     async move {
       let mut cursor = Cursor::new(data);
       let left_motor_speed = cursor
@@ -177,7 +172,7 @@ impl HardwareInternal for XInputHardware {
       handle
         .set_state(index as u32, left_motor_speed, right_motor_speed)
         .map_err(|e: XInputUsageError| {
-          ButtplugDeviceError::from(HardwareSpecificError::XInputError(format!("{e:?}")))
+          ButtplugDeviceError::from(ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::HardwareSpecificError("Xinput".to_string(), format!("{e:?}")).to_string()))
         })
     }
     .boxed()

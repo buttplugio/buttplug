@@ -1,0 +1,41 @@
+[package]
+name = "buttplug_server_hwmgr_xinput"
+version = "10.0.0"
+authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
+description = "Buttplug Intimate Hardware Control Library - Core Library"
+license = "BSD-3-Clause"
+homepage = "http://buttplug.io"
+repository = "https://github.com/buttplugio/buttplug.git"
+readme = "./README.md"
+keywords = ["usb", "serial", "hardware", "bluetooth", "teledildonics"]
+edition = "2021"
+exclude = ["examples/**"]
+
+[lib]
+name = "buttplug_server_hwmgr_xinput"
+path = "src/lib.rs"
+test = true
+doctest = true
+doc = true
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+buttplug_derive = "0.8.1"
+# buttplug_derive = { path = "../buttplug_derive" }
+buttplug_core = { path = "../buttplug_core" }
+buttplug_server = { path = "../buttplug_server" }
+buttplug_server_device_config = { path = "../buttplug_server_device_config" }
+futures = "0.3.31"
+futures-util = "0.3.31"
+log = "0.4.27"
+tokio = { version = "1.44.2", features = ["sync", "time"] }
+async-trait = "0.1.88"
+uuid = { version = "1.16.0", features = ["serde", "v4"] }
+dashmap = { version = "6.1.0", features = ["serde"] }
+tracing = "0.1.41"
+thiserror = "2.0.12"
+rusty-xinput = "1.3.0"
+strum_macros = "0.27.1"
+strum = "0.27.1"
+byteorder = "1.5.0"
+tokio-util = "0.7.14"
