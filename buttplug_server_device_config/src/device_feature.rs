@@ -5,12 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{core::{
+use buttplug_core::{
   errors::ButtplugDeviceError,
   message::{
     DeviceFeature, DeviceFeatureInput, DeviceFeatureOutput, FeatureType, InputCommandType, InputType, OutputType
   },
-}, server::device::configuration::BaseFeatureSettings};
+};
+use super::BaseFeatureSettings;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{ser::{self, SerializeSeq}, Deserialize, Serialize, Serializer};
 use std::{
