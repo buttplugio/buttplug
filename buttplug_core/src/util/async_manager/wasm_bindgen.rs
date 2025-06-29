@@ -36,10 +36,3 @@ where
 {
   WasmBindgenAsyncManager::default().spawn_with_handle(future)
 }
-
-pub fn block_on<F>(_: F) -> <F as Future>::Output
-where
-  F: Future,
-{
-  unimplemented!("Can't block in wasm!")
-}

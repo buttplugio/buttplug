@@ -6,7 +6,7 @@
 // for full license information.
 
 use super::DeviceAddedV4;
-use crate::core::message::DeviceFeature;
+use crate::message::DeviceFeature;
 use getset::{CopyGetters, Getters, MutGetters};
 use serde::{Deserialize, Serialize};
 

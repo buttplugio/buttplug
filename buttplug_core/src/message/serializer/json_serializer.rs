@@ -6,14 +6,14 @@
 // for full license information.
 
 use super::ButtplugSerializerError;
-use crate::core::message::{ButtplugMessage, ButtplugMessageFinalizer};
+use crate::message::{ButtplugMessage, ButtplugMessageFinalizer};
 use jsonschema::Validator;
 use serde::{Deserialize, Serialize};
 use serde_json::{Deserializer, Value};
 use std::fmt::Debug;
 
 static MESSAGE_JSON_SCHEMA: &str =
-  include_str!("../../../../buttplug-schema/schema/buttplug-schema.json");
+  include_str!("../../../../buttplug/buttplug-schema/schema/buttplug-schema.json");
 
 /// Creates a [jsonschema::JSONSchema] validator using the built in buttplug message schema.
 pub fn create_message_validator() -> Validator {

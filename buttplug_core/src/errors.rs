@@ -17,9 +17,6 @@ use super::message::{
   FeatureType,
   InputType,
 };
-#[cfg(feature = "server")]
-use crate::server::device::hardware::communication::HardwareSpecificError;
-use displaydoc::Display;
 use futures::future::BoxFuture;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -152,11 +149,6 @@ pub enum ButtplugDeviceError {
   InvalidEndpoint(Endpoint),
   /// Device does not handle command type: {0}
   UnhandledCommand(String),
-  #[cfg(feature = "server")]
-  #[error(transparent)]
-  /// Device type specific error: {0}.
-  DeviceSpecificError(#[from] HardwareSpecificError),
-  #[cfg(not(feature = "server"))]
   /// Device type specific error: {0}.
   DeviceSpecificError(String),
   /// No device available at index {0}

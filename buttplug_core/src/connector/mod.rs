@@ -16,7 +16,7 @@
 //!
 //! A Buttplug Client uses a connector to communicate with a server, be it in the same process or on
 //! another machine. The client's connector handles establishing the connection to the server, as
-//! well as sending ([possibly serialized][crate::core::messages::serializer]) messages to the
+//! well as sending ([possibly serialized][crate::messages::serializer]) messages to the
 //! server and matching replies from the server to waiting futures.
 //!
 //! Buttplug servers use connectors to receive info from clients. They usually have less to do than
@@ -67,7 +67,7 @@ pub mod remote_connector;
 pub mod transport;
 
 use crate::{
-  core::message::{serializer::ButtplugSerializedMessage, ButtplugMessage},
+  message::{serializer::ButtplugSerializedMessage, ButtplugMessage},
   util::future::{ButtplugFuture, ButtplugFutureStateShared},
 };
 use displaydoc::Display;
@@ -75,11 +75,6 @@ use futures::future::{self, BoxFuture, FutureExt};
 pub use remote_connector::ButtplugRemoteConnector;
 use thiserror::Error;
 use tokio::sync::mpsc::Sender;
-#[cfg(feature = "websockets")]
-pub use transport::ButtplugWebsocketClientTransport;
-
-#[cfg(feature = "websockets")]
-pub use transport::{ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportBuilder};
 
 pub type ButtplugConnectorResult = Result<(), ButtplugConnectorError>;
 pub type ButtplugConnectorStateShared =
@@ -123,11 +118,11 @@ where
 ///
 /// The `O` type specifies the outbound message type. This will usually be a
 /// message enum. For instance, in a client connector, this would usually be
-/// [ButtplugClientMessage][crate::core::messages::ButtplugClientMessage].
+/// [ButtplugClientMessage][crate::messages::ButtplugClientMessage].
 ///
 /// The `I` type specifies the inbound message type. This will usually be a
 /// message enum. For instance, in a client connector, this would usually be
-/// [ButtplugServerMessage][crate::core::messages::ButtplugServerMessage].
+/// [ButtplugServerMessage][crate::messages::ButtplugServerMessage].
 pub trait ButtplugConnector<OutboundMessageType, InboundMessageType>: Send + Sync
 where
   OutboundMessageType: ButtplugMessage + 'static,

@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::{
+use crate::message::{
   ButtplugMessage,
   ButtplugMessageError,
   ButtplugMessageFinalizer,
@@ -44,7 +44,7 @@ impl ButtplugMessageValidator for OkV0 {
 
 #[cfg(test)]
 mod test {
-  use crate::core::message::{ButtplugServerMessageCurrent, OkV0};
+  use crate::message::{ButtplugServerMessageCurrent, OkV0};
 
   const OK_STR: &str = "{\"Ok\":{\"Id\":0}}";
 

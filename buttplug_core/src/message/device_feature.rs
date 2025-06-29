@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::InputCommandType;
+use crate::message::InputCommandType;
 use getset::{Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use std::{
@@ -83,7 +83,7 @@ impl TryFrom<FeatureType> for OutputType {
       FeatureType::Inflate => Ok(OutputType::Inflate),
       FeatureType::Position => Ok(OutputType::Position),
       _ => Err(format!(
-        "Feature type {value} not valid for ActuatorType conversion"
+        "Feature type {value} not valid for OutputType conversion"
       )),
     }
   }
