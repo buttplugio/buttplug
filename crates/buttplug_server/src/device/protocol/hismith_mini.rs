@@ -5,16 +5,20 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::{Endpoint, FeatureType},
-  };
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
 use crate::device::{
-    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+  hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
+  protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
 };
 use async_trait::async_trait;
+use buttplug_core::{
+  errors::ButtplugDeviceError,
+  message::{Endpoint, FeatureType},
+};
+use buttplug_server_device_config::{
+  DeviceDefinition,
+  ProtocolCommunicationSpecifier,
+  UserDeviceIdentifier,
+};
 use std::sync::Arc;
 use uuid::{uuid, Uuid};
 
@@ -103,8 +107,6 @@ pub struct HismithMini {
 }
 
 impl ProtocolHandler for HismithMini {
-
-
   fn handle_output_oscillate_cmd(
     &self,
     _feature_index: u32,

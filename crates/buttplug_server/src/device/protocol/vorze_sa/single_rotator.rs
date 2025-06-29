@@ -5,34 +5,33 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{
-      vorze_sa::{VorzeActions, VorzeDevice}, ProtocolHandler,
-    },
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{
+    vorze_sa::{VorzeActions, VorzeDevice},
+    ProtocolHandler,
+  },
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
 pub struct VorzeSASingleRotator {
-  device_type: VorzeDevice
+  device_type: VorzeDevice,
 }
 
 impl VorzeSASingleRotator {
   pub fn new(device_type: VorzeDevice) -> Self {
-    Self {
-      device_type
-    }
+    Self { device_type }
   }
 }
 
 impl ProtocolHandler for VorzeSASingleRotator {
   fn handle_rotation_with_direction_cmd(
-      &self,
-      _feature_index: u32,
-      feature_id: uuid::Uuid,
-      speed: u32,
-      clockwise: bool,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    _feature_index: u32,
+    feature_id: uuid::Uuid,
+    speed: u32,
+    clockwise: bool,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let clockwise = if clockwise { 1u8 } else { 0 };
     let data: u8 = (clockwise) << 7 | (speed as u8);
     Ok(vec![HardwareWriteCmd::new(

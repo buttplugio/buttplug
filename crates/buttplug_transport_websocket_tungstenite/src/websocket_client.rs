@@ -8,16 +8,16 @@
 //! Handling of websockets using async-tungstenite
 
 use buttplug_core::{
-    connector::{
-      transport::{
-        ButtplugConnectorTransport,
-        ButtplugConnectorTransportSpecificError,
-        ButtplugTransportIncomingMessage,
-      },
-      ButtplugConnectorError,
-      ButtplugConnectorResultFuture,
+  connector::{
+    transport::{
+      ButtplugConnectorTransport,
+      ButtplugConnectorTransportSpecificError,
+      ButtplugTransportIncomingMessage,
     },
-    message::serializer::ButtplugSerializedMessage,
+    ButtplugConnectorError,
+    ButtplugConnectorResultFuture,
+  },
+  message::serializer::ButtplugSerializedMessage,
   util::async_manager,
 };
 use futures::{future::BoxFuture, FutureExt, SinkExt, StreamExt};
@@ -30,9 +30,10 @@ use std::sync::Arc;
 use tokio::{
   select,
   sync::{
-  mpsc::{Receiver, Sender},
-  Notify,
-}};
+    mpsc::{Receiver, Sender},
+    Notify,
+  },
+};
 use tokio_tungstenite::{
   connect_async,
   connect_async_tls_with_config,

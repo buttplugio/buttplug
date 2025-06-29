@@ -5,8 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::message::DeviceMessageInfoV4;
 use crate::message::v2::DeviceMessageInfoV2;
+use buttplug_core::message::DeviceMessageInfoV4;
 
 use super::*;
 use getset::{CopyGetters, Getters, MutGetters};

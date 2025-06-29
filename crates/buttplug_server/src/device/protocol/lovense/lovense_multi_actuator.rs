@@ -5,16 +5,16 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::{Endpoint, InputReadingV4},
-  };
 use crate::device::{
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{lovense::form_vibrate_command, ProtocolHandler, ProtocolKeepaliveStrategy},
+  hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+  protocol::{lovense::form_vibrate_command, ProtocolHandler, ProtocolKeepaliveStrategy},
+};
+use buttplug_core::{
+  errors::ButtplugDeviceError,
+  message::{Endpoint, InputReadingV4},
 };
 use futures::future::BoxFuture;
-use std::{sync::{atomic::AtomicU32, Arc}};
+use std::sync::{atomic::AtomicU32, Arc};
 use uuid::Uuid;
 
 #[derive(Default)]
@@ -25,7 +25,9 @@ pub struct LovenseMultiActuator {
 impl LovenseMultiActuator {
   pub fn new(num_vibrators: u32) -> Self {
     Self {
-      _vibrator_values: std::iter::repeat_with(|| AtomicU32::new(0)).take(num_vibrators as usize).collect()
+      _vibrator_values: std::iter::repeat_with(|| AtomicU32::new(0))
+        .take(num_vibrators as usize)
+        .collect(),
     }
   }
 }
@@ -54,11 +56,11 @@ impl ProtocolHandler for LovenseMultiActuator {
   }
 
   fn handle_output_oscillate_cmd(
-      &self,
-      _feature_index: u32,
-      feature_id: Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    _feature_index: u32,
+    feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     form_vibrate_command(feature_id, speed)
   }
 

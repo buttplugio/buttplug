@@ -5,13 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::{self, Endpoint, InputReadingV4, InputType},
-  };
 use crate::device::{
-    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+  hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
+};
+use buttplug_core::{
+  errors::ButtplugDeviceError,
+  message::{self, Endpoint, InputReadingV4, InputType},
 };
 use futures::{future::BoxFuture, FutureExt};
 use std::{default::Default, sync::Arc};
@@ -52,8 +52,12 @@ impl ProtocolHandler for KiirooSpot {
       let hw_msg = fut.await?;
       let data = hw_msg.data();
       let battery_level = data[0] as i32;
-      let battery_reading =
-        message::InputReadingV4::new(device_index, feature_index, InputType::Battery, vec![battery_level]);
+      let battery_reading = message::InputReadingV4::new(
+        device_index,
+        feature_index,
+        InputType::Battery,
+        vec![battery_level],
+      );
       debug!("Got battery reading: {}", battery_level);
       Ok(battery_reading)
     }

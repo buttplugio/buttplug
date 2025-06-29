@@ -7,11 +7,11 @@
 
 use uuid::{uuid, Uuid};
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
 const LIBO_VIBES_PROTOCOL_UUID: Uuid = uuid!("72a3d029-cf33-4fff-beec-1c45b85cc8ae");
 generic_protocol_setup!(LiboVibes, "libo-vibes");
@@ -20,8 +20,6 @@ generic_protocol_setup!(LiboVibes, "libo-vibes");
 pub struct LiboVibes {}
 
 impl ProtocolHandler for LiboVibes {
-
-
   fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,
@@ -42,8 +40,13 @@ impl ProtocolHandler for LiboVibes {
       // If this is a single vibe device, we need to send stop to TxMode too
       if speed as u8 == 0 {
         msg_vec.push(
-          HardwareWriteCmd::new(&[LIBO_VIBES_PROTOCOL_UUID], Endpoint::TxMode, vec![0u8], false)
-            .into(),
+          HardwareWriteCmd::new(
+            &[LIBO_VIBES_PROTOCOL_UUID],
+            Endpoint::TxMode,
+            vec![0u8],
+            false,
+          )
+          .into(),
         );
       }
     } else if feature_index == 1 {

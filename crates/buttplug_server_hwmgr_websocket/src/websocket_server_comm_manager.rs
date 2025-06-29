@@ -6,16 +6,16 @@
 // for full license information.
 
 use super::websocket_server_hardware::WebsocketServerHardwareConnector;
-use buttplug_core::{ButtplugResultFuture, util::async_manager};
+use buttplug_core::{util::async_manager, ButtplugResultFuture};
 use buttplug_server::device::hardware::communication::{
-    HardwareCommunicationManager,
-    HardwareCommunicationManagerBuilder,
-    HardwareCommunicationManagerEvent,
+  HardwareCommunicationManager,
+  HardwareCommunicationManagerBuilder,
+  HardwareCommunicationManagerEvent,
 };
 use futures::{FutureExt, StreamExt};
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
-use tokio::{select, net::TcpListener, sync::mpsc::Sender};
+use tokio::{net::TcpListener, select, sync::mpsc::Sender};
 use tokio_util::sync::CancellationToken;
 
 // Packet format received from external devices.

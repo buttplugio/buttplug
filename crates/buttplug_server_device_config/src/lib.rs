@@ -210,27 +210,36 @@ impl DeviceConfigurationManagerBuilder {
     identifier: &UserDeviceIdentifier,
     features: &UserDeviceDefinition,
   ) -> &mut Self {
-    if let Some((_, base_definition)) = self.base_device_definitions.iter().find(|(_, x)| x.id() == features.base_id()) {
-      self
-        .user_device_definitions
-        .insert(identifier.clone(), DeviceDefinition::new(base_definition, features));
+    if let Some((_, base_definition)) = self
+      .base_device_definitions
+      .iter()
+      .find(|(_, x)| x.id() == features.base_id())
+    {
+      self.user_device_definitions.insert(
+        identifier.clone(),
+        DeviceDefinition::new(base_definition, features),
+      );
     } else {
-      error!("Cannot find protocol with base id {} for user id {}", features.base_id(), features.id())
+      error!(
+        "Cannot find protocol with base id {} for user id {}",
+        features.base_id(),
+        features.id()
+      )
     }
     self
   }
-/*
-  /// Add a protocol instance factory for a [ButtplugProtocol]
-  pub fn protocol_factory<T>(&mut self, factory: T) -> &mut Self
-  where
-    T: ProtocolIdentifierFactory + 'static,
-  {
-    self
-      .protocols
-      .push((factory.identifier().to_owned(), Arc::new(factory)));
-    self
-  }
-*/
+  /*
+    /// Add a protocol instance factory for a [ButtplugProtocol]
+    pub fn protocol_factory<T>(&mut self, factory: T) -> &mut Self
+    where
+      T: ProtocolIdentifierFactory + 'static,
+    {
+      self
+        .protocols
+        .push((factory.identifier().to_owned(), Arc::new(factory)));
+      self
+    }
+  */
   pub fn skip_default_protocols(&mut self) -> &mut Self {
     self.skip_default_protocols = true;
     self
@@ -360,7 +369,6 @@ impl Default for DeviceConfigurationManager {
 }
 
 impl DeviceConfigurationManager {
-
   pub fn add_user_communication_specifier(
     &self,
     protocol: &str,
@@ -475,57 +483,54 @@ impl DeviceConfigurationManager {
   ) -> HashMap<String, Vec<ProtocolCommunicationSpecifier>> {
     self.base_communication_specifiers.clone()
   }
-/*
-  pub fn protocol_specializers(
-    &self,
-    specifier: &ProtocolCommunicationSpecifier,
-  ) -> Vec<ProtocolSpecializer> {
-    debug!(
-      "Looking for protocol that matches specifier: {:?}",
-      specifier
-    );
-    let mut specializers = vec![];
+  /*
+    pub fn protocol_specializers(
+      &self,
+      specifier: &ProtocolCommunicationSpecifier,
+    ) -> Vec<ProtocolSpecializer> {
+      debug!(
+        "Looking for protocol that matches specifier: {:?}",
+        specifier
+      );
+      let mut specializers = vec![];
 
-    let mut update_specializer_map =
-      |name: &str, specifiers: &Vec<ProtocolCommunicationSpecifier>| {
-        if specifiers.contains(specifier) {
-          info!(
-            "Found protocol {:?} for user specifier {:?}.",
-            name, specifier
-          );
-
-          if self.protocol_map.contains_key(name) {
-            specializers.push(ProtocolSpecializer::new(
-              specifiers.clone(),
-              self
-                .protocol_map
-                .get(name)
-                .expect("already checked existence")
-                .create(),
-            ));
-          } else {
-            warn!(
-              "No protocol implementation for {:?} found for specifier {:?}.",
+      let mut update_specializer_map =
+        |name: &str, specifiers: &Vec<ProtocolCommunicationSpecifier>| {
+          if specifiers.contains(specifier) {
+            info!(
+              "Found protocol {:?} for user specifier {:?}.",
               name, specifier
             );
-          }
-        }
-      };
 
-    // Loop through both maps, as chaining between DashMap and HashMap gets kinda gross.
-    for spec in self.user_communication_specifiers.iter() {
-      update_specializer_map(spec.key(), spec.value());
+            if self.protocol_map.contains_key(name) {
+              specializers.push(ProtocolSpecializer::new(
+                specifiers.clone(),
+                self
+                  .protocol_map
+                  .get(name)
+                  .expect("already checked existence")
+                  .create(),
+              ));
+            } else {
+              warn!(
+                "No protocol implementation for {:?} found for specifier {:?}.",
+                name, specifier
+              );
+            }
+          }
+        };
+
+      // Loop through both maps, as chaining between DashMap and HashMap gets kinda gross.
+      for spec in self.user_communication_specifiers.iter() {
+        update_specializer_map(spec.key(), spec.value());
+      }
+      for (name, specifiers) in self.base_communication_specifiers.iter() {
+        update_specializer_map(name, specifiers);
+      }
+      specializers
     }
-    for (name, specifiers) in self.base_communication_specifiers.iter() {
-      update_specializer_map(name, specifiers);
-    }
-    specializers
-  }
-*/
-  pub fn device_definition(
-    &self,
-    identifier: &UserDeviceIdentifier,
-  ) -> Option<DeviceDefinition> {
+  */
+  pub fn device_definition(&self, identifier: &UserDeviceIdentifier) -> Option<DeviceDefinition> {
     let features = if let Some(attrs) = self.user_device_definitions.get(identifier) {
       debug!("User device config found for {:?}", identifier);
       attrs.clone()

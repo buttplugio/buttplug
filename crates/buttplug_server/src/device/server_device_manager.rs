@@ -8,40 +8,29 @@
 //! Buttplug Device Manager, manages Device Subtype (Platform/Communication bus
 //! specific) Managers
 
-
-use buttplug_core::{
-    errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
-    message::{
-      self,
-      ButtplugDeviceMessage,
-      ButtplugMessage,
-      ButtplugServerMessageV4,
-      DeviceListV4,
-    },
-      util::{async_manager, stream::convert_broadcast_receiver_to_stream},
-
-  };
-use buttplug_server_device_config::{DeviceConfigurationManager, UserDeviceIdentifier};
 use crate::{
-    device::{
-      hardware::communication::{
-        HardwareCommunicationManager,
-        HardwareCommunicationManagerBuilder,
-      },
-      server_device_manager_event_loop::ServerDeviceManagerEventLoop,
-      ServerDevice,
+  device::{
+    hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerBuilder},
+    server_device_manager_event_loop::ServerDeviceManagerEventLoop,
+    ServerDevice,
+  },
+  message::{
+    server_device_attributes::ServerDeviceAttributes,
+    spec_enums::{
+      ButtplugCheckedClientMessageV4,
+      ButtplugDeviceCommandMessageUnionV4,
+      ButtplugDeviceManagerMessageUnion,
     },
-    message::{
-      server_device_attributes::ServerDeviceAttributes,
-      spec_enums::{
-        ButtplugCheckedClientMessageV4,
-        ButtplugDeviceCommandMessageUnionV4,
-        ButtplugDeviceManagerMessageUnion,
-      },
-    },
-    ButtplugServerError,
-    ButtplugServerResultFuture,
+  },
+  ButtplugServerError,
+  ButtplugServerResultFuture,
 };
+use buttplug_core::{
+  errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
+  message::{self, ButtplugDeviceMessage, ButtplugMessage, ButtplugServerMessageV4, DeviceListV4},
+  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+};
+use buttplug_server_device_config::{DeviceConfigurationManager, UserDeviceIdentifier};
 use dashmap::DashMap;
 use futures::{
   future::{self, FutureExt},

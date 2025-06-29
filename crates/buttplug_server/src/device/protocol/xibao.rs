@@ -7,11 +7,11 @@
 
 use uuid::Uuid;
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use std::num::Wrapping;
 
 generic_protocol_setup!(Xibao, "xibao");
@@ -20,8 +20,6 @@ generic_protocol_setup!(Xibao, "xibao");
 pub struct Xibao {}
 
 impl ProtocolHandler for Xibao {
-
-
   fn handle_output_oscillate_cmd(
     &self,
     _feature_index: u32,

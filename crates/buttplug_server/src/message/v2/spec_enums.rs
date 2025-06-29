@@ -5,41 +5,35 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::message::v1::{
+  ButtplugClientMessageV1,
+  ButtplugServerMessageV1,
+  LinearCmdV1,
+  RequestServerInfoV1,
+  RotateCmdV1,
+  VibrateCmdV1,
+};
 use buttplug_core::{
-    errors::{ButtplugError, ButtplugMessageError},
-    message::{
-      ButtplugMessage,
-      ButtplugMessageFinalizer,
-      ButtplugMessageValidator,
-      DeviceRemovedV0,
-      ErrorV0,
-      OkV0,
-      PingV0,
-      RequestDeviceListV0,
-      ScanningFinishedV0,
-      StartScanningV0,
-      StopAllDevicesV0,
-      StopDeviceCmdV0,
-      StopScanningV0,
-    },
-  };
-  use crate::message::v1::{
-    ButtplugClientMessageV1,
-    ButtplugServerMessageV1,
-    LinearCmdV1,
-    RequestServerInfoV1,
-    RotateCmdV1,
-    VibrateCmdV1,
+  errors::{ButtplugError, ButtplugMessageError},
+  message::{
+    ButtplugMessage,
+    ButtplugMessageFinalizer,
+    ButtplugMessageValidator,
+    DeviceRemovedV0,
+    ErrorV0,
+    OkV0,
+    PingV0,
+    RequestDeviceListV0,
+    ScanningFinishedV0,
+    StartScanningV0,
+    StopAllDevicesV0,
+    StopDeviceCmdV0,
+    StopScanningV0,
+  },
 };
 use serde::{Deserialize, Serialize};
 
-use super::{
-  BatteryLevelCmdV2,
-  BatteryLevelReadingV2,
-  DeviceAddedV2,
-  DeviceListV2,
-  ServerInfoV2,
-};
+use super::{BatteryLevelCmdV2, BatteryLevelReadingV2, DeviceAddedV2, DeviceListV2, ServerInfoV2};
 
 /// Represents all client-to-server messages in v2 of the Buttplug Spec
 #[derive(

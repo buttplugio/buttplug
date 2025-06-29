@@ -5,24 +5,22 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint,   util::async_manager};
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, SerialSpecifier};
-use buttplug_server::device::{
-    hardware::{
-      Hardware,
-      HardwareConnector,
-      HardwareEvent,
-      HardwareInternal,
-      HardwareReadCmd,
-      HardwareReading,
-      HardwareSpecializer,
-      communication::HardwareSpecificError,
-      HardwareSubscribeCmd,
-      HardwareUnsubscribeCmd,
-      HardwareWriteCmd,
-    },
-};
 use async_trait::async_trait;
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
+use buttplug_server::device::hardware::{
+  communication::HardwareSpecificError,
+  Hardware,
+  HardwareConnector,
+  HardwareEvent,
+  HardwareInternal,
+  HardwareReadCmd,
+  HardwareReading,
+  HardwareSpecializer,
+  HardwareSubscribeCmd,
+  HardwareUnsubscribeCmd,
+  HardwareWriteCmd,
+};
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, SerialSpecifier};
 use futures::future;
 use futures::{future::BoxFuture, FutureExt};
 use serialport::{SerialPort, SerialPortInfo};
@@ -228,7 +226,10 @@ impl SerialPortHardware {
       .await
       .expect("This will always be a Some value, we're just blocking for bringup")
       .map_err(|e| {
-        ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::HardwareSpecificError("Serial".to_owned(), e.to_string()).to_string())
+        ButtplugDeviceError::DeviceSpecificError(
+          HardwareSpecificError::HardwareSpecificError("Serial".to_owned(), e.to_string())
+            .to_string(),
+        )
       })?;
     debug!("Serial port received from thread.");
     let (writer_sender, writer_receiver) = mpsc::channel(256);

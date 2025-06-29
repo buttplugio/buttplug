@@ -10,12 +10,12 @@
 use super::message::{
   self,
   serializer::ButtplugSerializerError,
-  OutputType,
   ButtplugMessageSpecVersion,
   Endpoint,
   ErrorCode,
   FeatureType,
   InputType,
+  OutputType,
 };
 use futures::future::BoxFuture;
 use serde::{Deserialize, Serialize};

@@ -5,19 +5,19 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::message::TryFromDeviceAttributes;
 use buttplug_core::{
-    errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    message::{
-      ButtplugDeviceMessage,
-      ButtplugMessage,
-      ButtplugMessageFinalizer,
-      ButtplugMessageValidator,
-      InputCmdV4,
-      InputCommandType,
-      InputType,
-    },
-  };
-  use crate::message::TryFromDeviceAttributes;
+  errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+  message::{
+    ButtplugDeviceMessage,
+    ButtplugMessage,
+    ButtplugMessageFinalizer,
+    ButtplugMessageValidator,
+    InputCmdV4,
+    InputCommandType,
+    InputType,
+  },
+};
 use getset::CopyGetters;
 use uuid::Uuid;
 

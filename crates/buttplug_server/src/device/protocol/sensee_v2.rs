@@ -6,23 +6,33 @@
 // for full license information.
 
 use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::{Endpoint, OutputType},
-  };
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
+  errors::ButtplugDeviceError,
+  message::{Endpoint, OutputType},
+};
+use buttplug_server_device_config::{
+  DeviceDefinition,
+  ProtocolCommunicationSpecifier,
+  UserDeviceIdentifier,
+};
 
-  use crate::device::{
-    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-    protocol::{
-      generic_protocol_initializer_setup,
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
-    },
+use crate::device::{
+  hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
+  protocol::{
+    generic_protocol_initializer_setup,
+    ProtocolHandler,
+    ProtocolIdentifier,
+    ProtocolInitializer,
+  },
 };
 use async_trait::async_trait;
+use std::{
+  collections::HashMap,
+  sync::{
+    atomic::{AtomicU8, Ordering},
+    Arc,
+  },
+};
 use uuid::{uuid, Uuid};
-use std::{collections::HashMap, sync::{atomic::{AtomicU8, Ordering}, Arc}};
 
 generic_protocol_initializer_setup!(SenseeV2, "sensee-v2");
 
@@ -39,7 +49,12 @@ impl ProtocolInitializer for SenseeV2Initializer {
     device_definition: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let res = hardware
-      .read_value(&HardwareReadCmd::new(SENSEE_V2_PROTOCOL_UUID, Endpoint::Tx, 128, 500))
+      .read_value(&HardwareReadCmd::new(
+        SENSEE_V2_PROTOCOL_UUID,
+        Endpoint::Tx,
+        128,
+        500,
+      ))
       .await?;
     info!("Sensee model data: {:X?}", res.data());
 
@@ -52,16 +67,16 @@ impl ProtocolInitializer for SenseeV2Initializer {
     let feature_map = |output_type| {
       let mut map = HashMap::new();
       device_definition
-      .features()
-      .iter()
-      .enumerate()
-      .for_each(|(i, x)| {
-        if let Some(output_map) = x.output() {
-          if output_map.contains_key(&output_type) {
-            map.insert(i as u32, AtomicU8::new(0));
+        .features()
+        .iter()
+        .enumerate()
+        .for_each(|(i, x)| {
+          if let Some(output_map) = x.output() {
+            if output_map.contains_key(&output_type) {
+              map.insert(i as u32, AtomicU8::new(0));
+            }
           }
-        }
-      });
+        });
       map
     };
 
@@ -69,7 +84,12 @@ impl ProtocolInitializer for SenseeV2Initializer {
     let thrust_map = feature_map(OutputType::Oscillate);
     let suck_map = feature_map(OutputType::Constrict);
 
-    Ok(Arc::new(SenseeV2::new(device_type, vibe_map, thrust_map, suck_map)))
+    Ok(Arc::new(SenseeV2::new(
+      device_type,
+      vibe_map,
+      thrust_map,
+      suck_map,
+    )))
   }
 }
 
@@ -77,7 +97,7 @@ pub struct SenseeV2 {
   device_type: u8,
   vibe_map: HashMap<u32, AtomicU8>,
   thrust_map: HashMap<u32, AtomicU8>,
-  suck_map: HashMap<u32, AtomicU8>
+  suck_map: HashMap<u32, AtomicU8>,
 }
 
 fn make_cmd(dtype: u8, func: u8, cmd: Vec<u8>) -> Vec<u8> {
@@ -97,16 +117,21 @@ fn make_cmd(dtype: u8, func: u8, cmd: Vec<u8>) -> Vec<u8> {
 }
 
 impl SenseeV2 {
-  fn new(device_type: u8, vibe_map: HashMap<u32, AtomicU8>, thrust_map: HashMap<u32, AtomicU8>, suck_map: HashMap<u32, AtomicU8>) -> Self {
+  fn new(
+    device_type: u8,
+    vibe_map: HashMap<u32, AtomicU8>,
+    thrust_map: HashMap<u32, AtomicU8>,
+    suck_map: HashMap<u32, AtomicU8>,
+  ) -> Self {
     Self {
       device_type,
       vibe_map,
       thrust_map,
-      suck_map
+      suck_map,
     }
   }
 
-  fn compile_command(&self)  -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn compile_command(&self) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut data = vec![];
     data.push(
       if self.vibe_map.len() != 0 { 1 } else { 0 }
@@ -138,35 +163,45 @@ impl SenseeV2 {
 }
 
 impl ProtocolHandler for SenseeV2 {
-
-
   fn handle_output_vibrate_cmd(
-      &self,
-      feature_index: u32,
-      _feature_id: Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.vibe_map.get(&feature_index).unwrap().store(speed as u8, Ordering::Relaxed);
+    &self,
+    feature_index: u32,
+    _feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self
+      .vibe_map
+      .get(&feature_index)
+      .unwrap()
+      .store(speed as u8, Ordering::Relaxed);
     self.compile_command()
   }
 
   fn handle_output_oscillate_cmd(
-      &self,
-      feature_index: u32,
-      _feature_id: Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.thrust_map.get(&feature_index).unwrap().store(speed as u8, Ordering::Relaxed);
-    self.compile_command()    
+    &self,
+    feature_index: u32,
+    _feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self
+      .thrust_map
+      .get(&feature_index)
+      .unwrap()
+      .store(speed as u8, Ordering::Relaxed);
+    self.compile_command()
   }
 
   fn handle_output_constrict_cmd(
-      &self,
-      feature_index: u32,
-      _feature_id: Uuid,
-      level: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.suck_map.get(&feature_index).unwrap().store(level as u8, Ordering::Relaxed);
-    self.compile_command()        
+    &self,
+    feature_index: u32,
+    _feature_id: Uuid,
+    level: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self
+      .suck_map
+      .get(&feature_index)
+      .unwrap()
+      .store(level as u8, Ordering::Relaxed);
+    self.compile_command()
   }
 }

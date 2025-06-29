@@ -124,19 +124,21 @@ pub mod youou;
 pub mod zalo;
 
 use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::{OutputCommand, Endpoint, InputReadingV4, InputType},
-  };
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
+  errors::ButtplugDeviceError,
+  message::{Endpoint, InputReadingV4, InputType, OutputCommand},
+};
+use buttplug_server_device_config::{
+  DeviceDefinition,
+  ProtocolCommunicationSpecifier,
+  UserDeviceIdentifier,
+};
 
-  use crate::{
-    device::{
-      hardware::{Hardware, HardwareCommand, HardwareReadCmd},
-    },
-    message::{
-      checked_output_cmd::CheckedOutputCmdV4,
-      spec_enums::ButtplugDeviceCommandMessageUnionV4,
-      ButtplugServerDeviceMessage,
+use crate::{
+  device::hardware::{Hardware, HardwareCommand, HardwareReadCmd},
+  message::{
+    checked_output_cmd::CheckedOutputCmdV4,
+    spec_enums::ButtplugDeviceCommandMessageUnionV4,
+    ButtplugServerDeviceMessage,
   },
 };
 use async_trait::async_trait;
@@ -144,8 +146,8 @@ use futures::{
   future::{self, BoxFuture, FutureExt},
   StreamExt,
 };
-use std::{pin::Pin, time::Duration};
 use std::{collections::HashMap, sync::Arc};
+use std::{pin::Pin, time::Duration};
 use uuid::Uuid;
 
 /// Strategy for situations where hardware needs to get updates every so often in order to keep
@@ -953,7 +955,9 @@ pub trait ProtocolHandler: Sync + Send {
     sensor_type: InputType,
   ) -> BoxFuture<Result<InputReadingV4, ButtplugDeviceError>> {
     match sensor_type {
-      InputType::Battery => self.handle_battery_level_cmd(device_index, device, feature_index, feature_id),
+      InputType::Battery => {
+        self.handle_battery_level_cmd(device_index, device, feature_index, feature_id)
+      }
       _ => future::ready(Err(ButtplugDeviceError::UnhandledCommand(
         "Command not implemented for this protocol: InputCmd (Read)".to_string(),
       )))
@@ -979,8 +983,12 @@ pub trait ProtocolHandler: Sync + Send {
       async move {
         let hw_msg = fut.await?;
         let battery_level = hw_msg.data()[0] as i32;
-        let battery_reading =
-          InputReadingV4::new(device_index, feature_index, InputType::Battery, vec![battery_level]);
+        let battery_reading = InputReadingV4::new(
+          device_index,
+          feature_index,
+          InputType::Battery,
+          vec![battery_level],
+        );
         debug!("Got battery reading: {}", battery_level);
         Ok(battery_reading)
       }

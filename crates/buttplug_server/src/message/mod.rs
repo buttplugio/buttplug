@@ -197,9 +197,7 @@ pub enum ButtplugServerDeviceMessage {
 impl From<ButtplugServerDeviceMessage> for ButtplugServerMessageV4 {
   fn from(other: ButtplugServerDeviceMessage) -> Self {
     match other {
-      ButtplugServerDeviceMessage::SensorReading(msg) => {
-        ButtplugServerMessageV4::InputReading(msg)
-      }
+      ButtplugServerDeviceMessage::SensorReading(msg) => ButtplugServerMessageV4::InputReading(msg),
     }
   }
 }

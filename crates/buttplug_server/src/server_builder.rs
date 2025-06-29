@@ -6,18 +6,15 @@
 // for full license information.
 
 use super::{
-  device::{
-    ServerDeviceManager,
-    ServerDeviceManagerBuilder,
-  },
+  device::{ServerDeviceManager, ServerDeviceManagerBuilder},
   ping_timer::PingTimer,
   server::ButtplugServer,
   ButtplugServerError,
 };
 use buttplug_core::{
-    errors::*,
-    message::{self, ButtplugServerMessageV4},
-    util::async_manager
+  errors::*,
+  message::{self, ButtplugServerMessageV4},
+  util::async_manager,
 };
 use buttplug_server_device_config::DeviceConfigurationManagerBuilder;
 use std::sync::{

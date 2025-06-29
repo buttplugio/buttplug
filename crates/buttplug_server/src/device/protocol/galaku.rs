@@ -16,18 +16,27 @@ use futures_util::{future, FutureExt};
 use buttplug_core::message::{InputReadingV4, InputType};
 use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
-use buttplug_server_device_config::{UserDeviceIdentifier, ProtocolCommunicationSpecifier, DeviceDefinition};
+use buttplug_server_device_config::{
+  DeviceDefinition,
+  ProtocolCommunicationSpecifier,
+  UserDeviceIdentifier,
+};
 
 use crate::device::{
-    hardware::{
-      Hardware,
-      HardwareCommand,
-      HardwareEvent,
-      HardwareSubscribeCmd,
-      HardwareUnsubscribeCmd,
-      HardwareWriteCmd,
-    },
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer,   generic_protocol_initializer_setup,},
+  hardware::{
+    Hardware,
+    HardwareCommand,
+    HardwareEvent,
+    HardwareSubscribeCmd,
+    HardwareUnsubscribeCmd,
+    HardwareWriteCmd,
+  },
+  protocol::{
+    generic_protocol_initializer_setup,
+    ProtocolHandler,
+    ProtocolIdentifier,
+    ProtocolInitializer,
+  },
 };
 
 static KEY_TAB: [[u32; 12]; 4] = [

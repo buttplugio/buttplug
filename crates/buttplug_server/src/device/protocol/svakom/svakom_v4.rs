@@ -6,11 +6,11 @@
 // for full license information.
 
 use crate::device::protocol::ProtocolKeepaliveStrategy;
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
 generic_protocol_setup!(SvakomV4, "svakom-v4");
 
@@ -23,11 +23,11 @@ impl ProtocolHandler for SvakomV4 {
   }
 
   fn handle_output_vibrate_cmd(
-      &self,
-      feature_index: u32,
-      feature_id: uuid::Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    feature_index: u32,
+    feature_id: uuid::Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       &[feature_id],
       Endpoint::Tx,

@@ -9,14 +9,14 @@ use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use buttplug_server_device_config::{DeviceDefinition, UserDeviceIdentifier};
 
 use crate::device::{
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{
-      generic_protocol_initializer_setup,
-      ProtocolCommunicationSpecifier,
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
-    },
+  hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+  protocol::{
+    generic_protocol_initializer_setup,
+    ProtocolCommunicationSpecifier,
+    ProtocolHandler,
+    ProtocolIdentifier,
+    ProtocolInitializer,
+  },
 };
 use async_trait::async_trait;
 use std::sync::Arc;
@@ -52,8 +52,6 @@ impl ProtocolInitializer for AmorelieJoyInitializer {
 pub struct AmorelieJoy {}
 
 impl ProtocolHandler for AmorelieJoy {
-
-
   fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,

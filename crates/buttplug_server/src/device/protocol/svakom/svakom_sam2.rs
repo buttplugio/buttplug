@@ -5,11 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler, ProtocolKeepaliveStrategy},
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler, ProtocolKeepaliveStrategy},
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
 generic_protocol_setup!(SvakomSam2, "svakom-sam2");
 
@@ -22,11 +22,11 @@ impl ProtocolHandler for SvakomSam2 {
   }
 
   fn handle_output_vibrate_cmd(
-      &self,
-      _feature_index: u32,
-      feature_id: uuid::Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    _feature_index: u32,
+    feature_id: uuid::Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       &[feature_id],
       Endpoint::Tx,
@@ -46,11 +46,11 @@ impl ProtocolHandler for SvakomSam2 {
   }
 
   fn handle_output_constrict_cmd(
-      &self,
-      _feature_index: u32,
-      feature_id: uuid::Uuid,
-      level: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    _feature_index: u32,
+    feature_id: uuid::Uuid,
+    level: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       &[feature_id],
       Endpoint::Tx,

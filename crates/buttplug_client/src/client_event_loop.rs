@@ -27,12 +27,15 @@ use buttplug_core::{
   },
 };
 use dashmap::DashMap;
+use log::*;
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
-use tokio::{select, sync::{broadcast, mpsc}};
-use log::*;
+use tokio::{
+  select,
+  sync::{broadcast, mpsc},
+};
 
 /// Enum used for communication from the client to the event loop.
 #[derive(Clone)]

@@ -5,15 +5,14 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use 
-  buttplug_core::message::{InputType, OutputType};
-use crate::{message::{
-    v1::NullDeviceMessageAttributesV1,
-    ServerDeviceMessageAttributesV3,
-    ServerGenericDeviceMessageAttributesV3,
-  }};
+use crate::message::{
+  v1::NullDeviceMessageAttributesV1,
+  ServerDeviceMessageAttributesV3,
+  ServerGenericDeviceMessageAttributesV3,
+};
+use buttplug_core::message::{InputType, OutputType};
 
-  use buttplug_server_device_config::ServerDeviceFeature;
+use buttplug_server_device_config::ServerDeviceFeature;
 
 use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};

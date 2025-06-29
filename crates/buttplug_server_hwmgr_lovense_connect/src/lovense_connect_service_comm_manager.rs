@@ -6,15 +6,15 @@
 // for full license information.
 
 use super::lovense_connect_service_hardware::LovenseServiceHardwareConnector;
+use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::communication::{
-    HardwareCommunicationManager,
-    HardwareCommunicationManagerBuilder,
-    HardwareCommunicationManagerEvent,
-    TimedRetryCommunicationManager,
-    TimedRetryCommunicationManagerImpl,
+  HardwareCommunicationManager,
+  HardwareCommunicationManagerBuilder,
+  HardwareCommunicationManagerEvent,
+  TimedRetryCommunicationManager,
+  TimedRetryCommunicationManagerImpl,
 };
-use async_trait::async_trait;
 use dashmap::DashSet;
 use reqwest::StatusCode;
 use serde::{Deserialize, Deserializer};

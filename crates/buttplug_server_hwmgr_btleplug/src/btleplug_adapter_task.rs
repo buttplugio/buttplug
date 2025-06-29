@@ -6,11 +6,11 @@
 // for full license information.
 
 use super::btleplug_hardware::BtleplugHardwareConnector;
-use buttplug_server::device::hardware::communication::HardwareCommunicationManagerEvent;
 use btleplug::{
   api::{Central, CentralEvent, Manager as _, Peripheral, ScanFilter},
   platform::{Adapter, Manager, PeripheralId},
 };
+use buttplug_server::device::hardware::communication::HardwareCommunicationManagerEvent;
 use futures::StreamExt;
 use std::{
   collections::HashMap,
@@ -25,8 +25,8 @@ use tokio::{
   sync::mpsc::{Receiver, Sender},
   time::sleep,
 };
-use uuid::Uuid;
 use tracing::info_span;
+use uuid::Uuid;
 
 #[derive(Debug, Clone, Copy)]
 pub enum BtleplugAdapterCommand {

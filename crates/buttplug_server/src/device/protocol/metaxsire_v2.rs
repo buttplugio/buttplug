@@ -7,13 +7,17 @@
 
 use crate::device::hardware::Hardware;
 use crate::device::protocol::ProtocolInitializer;
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier},
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier},
 };
 use async_trait::async_trait;
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_server_device_config::{
+  DeviceDefinition,
+  ProtocolCommunicationSpecifier,
+  UserDeviceIdentifier,
+};
 use std::sync::Arc;
 use uuid::{uuid, Uuid};
 

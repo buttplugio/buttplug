@@ -5,19 +5,23 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  };
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_server_device_config::{
+  DeviceDefinition,
+  ProtocolCommunicationSpecifier,
+  UserDeviceIdentifier,
+};
 
-  use crate::device::{
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-  };
+use crate::device::{
+  hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+  protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+};
 use async_trait::async_trait;
+use std::sync::{
+  atomic::{AtomicU8, Ordering},
+  Arc,
+};
 use uuid::{uuid, Uuid};
-use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
 
 pub mod setup {
   use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -79,18 +83,16 @@ const PATOO_TX_MODE_PROTOCOL_UUID: Uuid = uuid!("b17714be-fc66-4d9b-bf52-afb3b91
 
 #[derive(Default)]
 pub struct Patoo {
-  speeds: [AtomicU8; 2]
+  speeds: [AtomicU8; 2],
 }
 
 impl ProtocolHandler for Patoo {
-
-
   fn handle_output_vibrate_cmd(
-      &self,
-      feature_index: u32,
-      _feature_id: uuid::Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    feature_index: u32,
+    _feature_id: uuid::Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     let mut msg_vec = vec![];
     // Default to vibes
@@ -109,9 +111,19 @@ impl ProtocolHandler for Patoo {
       }
     }
 
-    msg_vec.push(HardwareWriteCmd::new(&[PATOO_TX_PROTOCOL_UUID], Endpoint::Tx, vec![speed], true).into());
-    msg_vec.push(HardwareWriteCmd::new(&[PATOO_TX_MODE_PROTOCOL_UUID], Endpoint::TxMode, vec![mode], true).into());
+    msg_vec.push(
+      HardwareWriteCmd::new(&[PATOO_TX_PROTOCOL_UUID], Endpoint::Tx, vec![speed], true).into(),
+    );
+    msg_vec.push(
+      HardwareWriteCmd::new(
+        &[PATOO_TX_MODE_PROTOCOL_UUID],
+        Endpoint::TxMode,
+        vec![mode],
+        true,
+      )
+      .into(),
+    );
 
-    Ok(msg_vec)    
+    Ok(msg_vec)
   }
 }

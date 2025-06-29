@@ -5,21 +5,25 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::InputReadingV4,
-  };
 use crate::device::{
-    hardware::{Hardware, HardwareCommand},
-    protocol::{lovense::{form_rotate_with_direction_command, form_vibrate_command}, ProtocolHandler, ProtocolKeepaliveStrategy},
+  hardware::{Hardware, HardwareCommand},
+  protocol::{
+    lovense::{form_rotate_with_direction_command, form_vibrate_command},
+    ProtocolHandler,
+    ProtocolKeepaliveStrategy,
+  },
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::InputReadingV4};
 use futures::future::BoxFuture;
-use std::sync::{atomic::{AtomicBool, Ordering}, Arc};
+use std::sync::{
+  atomic::{AtomicBool, Ordering},
+  Arc,
+};
 use uuid::Uuid;
 
 #[derive(Default)]
 pub struct LovenseRotateVibrator {
-  clockwise: AtomicBool
+  clockwise: AtomicBool,
 }
 
 impl ProtocolHandler for LovenseRotateVibrator {

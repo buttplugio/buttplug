@@ -41,7 +41,7 @@ pub enum ErrorCode {
   Getters,
   CopyGetters,
   Serialize,
-  Deserialize
+  Deserialize,
 )]
 pub struct ErrorV0 {
   /// Message Id, used for matching message pairs in remote connection instances.

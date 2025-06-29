@@ -7,8 +7,8 @@
 
 use super::ButtplugInProcessClientConnectorBuilder;
 use buttplug_client::ButtplugClient;
-use buttplug_server_device_config::{DeviceConfigurationManagerBuilder};
 use buttplug_server::{device::ServerDeviceManagerBuilder, ButtplugServerBuilder};
+use buttplug_server_device_config::DeviceConfigurationManagerBuilder;
 
 /// Convenience function for creating in-process connectors.
 ///
@@ -50,7 +50,7 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
     .unwrap();
 
   let mut device_manager_builder = ServerDeviceManagerBuilder::new(dcm);
-  #[cfg(feature = "btleplug-manager",)]
+  #[cfg(feature = "btleplug-manager")]
   {
     use buttplug_server_hwmgr_btleplug::BtlePlugCommunicationManagerBuilder;
     device_manager_builder.comm_manager(BtlePlugCommunicationManagerBuilder::default());
@@ -81,9 +81,7 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
     any(target_os = "windows", target_os = "macos", target_os = "linux")
   ))]
   {
-    use buttplug_server_hwmgr_lovense_dongle::{
-      LovenseHIDDongleCommunicationManagerBuilder,
-    };
+    use buttplug_server_hwmgr_lovense_dongle::LovenseHIDDongleCommunicationManagerBuilder;
     device_manager_builder.comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default());
   }
   #[cfg(all(feature = "xinput-manager", target_os = "windows"))]

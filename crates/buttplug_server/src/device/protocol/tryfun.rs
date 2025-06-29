@@ -8,8 +8,8 @@
 use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler,  generic_protocol_setup,}
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
 };
 
 generic_protocol_setup!(TryFun, "tryfun");
@@ -18,14 +18,12 @@ generic_protocol_setup!(TryFun, "tryfun");
 pub struct TryFun {}
 
 impl ProtocolHandler for TryFun {
-
-
   fn handle_output_oscillate_cmd(
-      &self,
-      _feature_index: u32,
-      feature_id: uuid::Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    _feature_index: u32,
+    feature_id: uuid::Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut sum: u8 = 0xff;
     let mut data = vec![0xAA, 0x02, 0x07, speed as u8];
     let mut count = 0;
@@ -36,15 +34,21 @@ impl ProtocolHandler for TryFun {
     sum += count;
     data.push(sum);
 
-    Ok(vec![HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, data, true).into()])
+    Ok(vec![HardwareWriteCmd::new(
+      &[feature_id],
+      Endpoint::Tx,
+      data,
+      true,
+    )
+    .into()])
   }
 
   fn handle_output_rotate_cmd(
-      &self,
-      _feature_index: u32,
-      feature_id: uuid::Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    _feature_index: u32,
+    feature_id: uuid::Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut sum: u8 = 0xff;
     let mut data = vec![0xAA, 0x02, 0x08, speed as u8];
     let mut count = 0;
@@ -55,17 +59,23 @@ impl ProtocolHandler for TryFun {
     sum += count;
     data.push(sum);
 
-    Ok(vec![HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, data, true).into()])
+    Ok(vec![HardwareWriteCmd::new(
+      &[feature_id],
+      Endpoint::Tx,
+      data,
+      true,
+    )
+    .into()])
   }
 
   fn handle_output_vibrate_cmd(
-      &self,
-      _feature_index: u32,
-      feature_id: uuid::Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    _feature_index: u32,
+    feature_id: uuid::Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-      &[feature_id], 
+      &[feature_id],
       Endpoint::Tx,
       vec![
         0x00,

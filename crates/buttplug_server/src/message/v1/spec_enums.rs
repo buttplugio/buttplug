@@ -7,31 +7,31 @@
 
 use std::cmp::Ordering;
 
-use buttplug_core::{
-    errors::ButtplugMessageError,
-    message::{
-      ButtplugMessage,
-      ButtplugMessageFinalizer,
-      ButtplugMessageValidator,
-      DeviceRemovedV0,
-      ErrorV0,
-      OkV0,
-      PingV0,
-      RequestDeviceListV0,
-      ScanningFinishedV0,
-      StartScanningV0,
-      StopAllDevicesV0,
-      StopDeviceCmdV0,
-      StopScanningV0,
-    },
-  };
 use crate::message::v0::{
-    ButtplugClientMessageV0,
-    ButtplugServerMessageV0,
-    FleshlightLaunchFW12CmdV0,
-    ServerInfoV0,
-    SingleMotorVibrateCmdV0,
-    VorzeA10CycloneCmdV0,
+  ButtplugClientMessageV0,
+  ButtplugServerMessageV0,
+  FleshlightLaunchFW12CmdV0,
+  ServerInfoV0,
+  SingleMotorVibrateCmdV0,
+  VorzeA10CycloneCmdV0,
+};
+use buttplug_core::{
+  errors::ButtplugMessageError,
+  message::{
+    ButtplugMessage,
+    ButtplugMessageFinalizer,
+    ButtplugMessageValidator,
+    DeviceRemovedV0,
+    ErrorV0,
+    OkV0,
+    PingV0,
+    RequestDeviceListV0,
+    ScanningFinishedV0,
+    StartScanningV0,
+    StopAllDevicesV0,
+    StopDeviceCmdV0,
+    StopScanningV0,
+  },
 };
 use serde::{Deserialize, Serialize};
 

@@ -1,12 +1,9 @@
 pub mod communication;
 use std::{collections::HashSet, fmt::Debug, sync::Arc, time::Duration};
 
-use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  };
-use buttplug_server_device_config::ProtocolCommunicationSpecifier;
 use async_trait::async_trait;
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_server_device_config::ProtocolCommunicationSpecifier;
 use futures::future::BoxFuture;
 use futures_util::FutureExt;
 use getset::{CopyGetters, Getters};
@@ -262,7 +259,7 @@ pub struct Hardware {
   /// Minimum time between two packets being sent to the device. Used to deal with congestion across
   /// protocols like Bluetooth LE, which have guaranteed delivery but can be overloaded due to
   /// connection intervals.
-  #[getset(get_copy = "pub")]  
+  #[getset(get_copy = "pub")]
   message_gap: Option<Duration>,
   ///  Internal implementation details
   internal_impl: Box<dyn HardwareInternal>,

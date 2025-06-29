@@ -6,23 +6,23 @@
 // for full license information.
 
 use super::xinput_device_comm_manager::XInputControllerIndex;
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, XInputSpecifier};
-use buttplug_server::device::hardware::{
-      communication::HardwareSpecificError,
-      GenericHardwareSpecializer,
-      Hardware,
-      HardwareConnector,
-      HardwareEvent,
-      HardwareInternal,
-      HardwareReadCmd,
-      HardwareReading,
-      HardwareSpecializer,
-      HardwareSubscribeCmd,
-      HardwareUnsubscribeCmd,
-      HardwareWriteCmd,
-};
 use async_trait::async_trait;
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
+use buttplug_server::device::hardware::{
+  communication::HardwareSpecificError,
+  GenericHardwareSpecializer,
+  Hardware,
+  HardwareConnector,
+  HardwareEvent,
+  HardwareInternal,
+  HardwareReadCmd,
+  HardwareReading,
+  HardwareSpecializer,
+  HardwareSubscribeCmd,
+  HardwareUnsubscribeCmd,
+  HardwareWriteCmd,
+};
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, XInputSpecifier};
 use byteorder::{LittleEndian, ReadBytesExt};
 use futures::future::{self, BoxFuture, FutureExt};
 use rusty_xinput::{XInputHandle, XInputUsageError};
@@ -144,7 +144,10 @@ impl HardwareInternal for XInputHardware {
       let battery = handle
         .get_gamepad_battery_information(index as u32)
         .map_err(|e| {
-          ButtplugDeviceError::from(ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::HardwareSpecificError("Xinput".to_string(), format!("{e:?}")).to_string()))
+          ButtplugDeviceError::from(ButtplugDeviceError::DeviceSpecificError(
+            HardwareSpecificError::HardwareSpecificError("Xinput".to_string(), format!("{e:?}"))
+              .to_string(),
+          ))
         })?;
       Ok(HardwareReading::new(
         Endpoint::Rx,
@@ -172,7 +175,10 @@ impl HardwareInternal for XInputHardware {
       handle
         .set_state(index as u32, left_motor_speed, right_motor_speed)
         .map_err(|e: XInputUsageError| {
-          ButtplugDeviceError::from(ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::HardwareSpecificError("Xinput".to_string(), format!("{e:?}")).to_string()))
+          ButtplugDeviceError::from(ButtplugDeviceError::DeviceSpecificError(
+            HardwareSpecificError::HardwareSpecificError("Xinput".to_string(), format!("{e:?}"))
+              .to_string(),
+          ))
         })
     }
     .boxed()

@@ -8,11 +8,11 @@
 use buttplug_core::{
   errors::ButtplugMessageError,
   message::{
-    OutputType,
     ButtplugDeviceMessage,
     ButtplugMessage,
     ButtplugMessageFinalizer,
     ButtplugMessageValidator,
+    OutputType,
   },
 };
 use getset::{CopyGetters, Getters};

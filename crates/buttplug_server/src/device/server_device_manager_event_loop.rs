@@ -5,15 +5,17 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use 
-  buttplug_core::{message::{ButtplugServerMessageV4, DeviceAddedV4, DeviceRemovedV0, ScanningFinishedV0}, util::async_manager};
+use buttplug_core::{
+  message::{ButtplugServerMessageV4, DeviceAddedV4, DeviceRemovedV0, ScanningFinishedV0},
+  util::async_manager,
+};
 use buttplug_server_device_config::DeviceConfigurationManager;
 use tracing::info_span;
 
-  use crate::device::{
-    hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
-    ServerDevice,
-    ServerDeviceEvent,
+use crate::device::{
+  hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
+  ServerDevice,
+  ServerDeviceEvent,
 };
 use dashmap::{DashMap, DashSet};
 use futures::{future, pin_mut, FutureExt, StreamExt};
@@ -50,7 +52,7 @@ pub(super) struct ServerDeviceManagerEventLoop {
   /// Cancellation token for the event loop
   loop_cancellation_token: CancellationToken,
   /// True if stop scanning message was sent, means we won't send scanning finished.
-  stop_scanning_received: AtomicBool
+  stop_scanning_received: AtomicBool,
 }
 
 impl ServerDeviceManagerEventLoop {
@@ -77,7 +79,7 @@ impl ServerDeviceManagerEventLoop {
       scanning_started: false,
       connecting_devices: Arc::new(DashSet::new()),
       loop_cancellation_token,
-      stop_scanning_received: AtomicBool::new(false)
+      stop_scanning_received: AtomicBool::new(false),
     }
   }
 
@@ -94,7 +96,9 @@ impl ServerDeviceManagerEventLoop {
       debug!("System already scanning, ignoring new scanning request");
       return;
     }
-    self.stop_scanning_received.store(false, std::sync::atomic::Ordering::Relaxed);
+    self
+      .stop_scanning_received
+      .store(false, std::sync::atomic::Ordering::Relaxed);
     info!("No scan currently in progress, starting new scan.");
     self.scanning_bringup_in_progress = true;
     self.scanning_started = true;
@@ -110,7 +114,9 @@ impl ServerDeviceManagerEventLoop {
   }
 
   async fn handle_stop_scanning(&mut self) {
-    self.stop_scanning_received.store(true, std::sync::atomic::Ordering::Relaxed);
+    self
+      .stop_scanning_received
+      .store(true, std::sync::atomic::Ordering::Relaxed);
     let fut_vec: Vec<_> = self
       .comm_managers
       .iter_mut()
@@ -131,7 +137,12 @@ impl ServerDeviceManagerEventLoop {
           return;
         }
         // Only send scanning finished if we haven't requested a stop.
-        if !self.scanning_status() && self.scanning_started && !self.stop_scanning_received.load(std::sync::atomic::Ordering::Relaxed) {
+        if !self.scanning_status()
+          && self.scanning_started
+          && !self
+            .stop_scanning_received
+            .load(std::sync::atomic::Ordering::Relaxed)
+        {
           debug!("All managers finished, emitting ScanningFinished");
           self.scanning_started = false;
           if self
@@ -185,7 +196,7 @@ impl ServerDeviceManagerEventLoop {
           .device_config_manager
           .protocol_specializers(&creator.specifier());
         */
-        let protocol_specializers = vec!();
+        let protocol_specializers = vec![];
         // If we have no identifiers, then there's nothing to do here. Throw an error.
         if protocol_specializers.is_empty() {
           debug!(

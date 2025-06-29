@@ -47,12 +47,7 @@ pub struct SensorReadingV3 {
 }
 
 impl SensorReadingV3 {
-  pub fn new(
-    device_index: u32,
-    sensor_index: u32,
-    sensor_type: InputType,
-    data: Vec<i32>,
-  ) -> Self {
+  pub fn new(device_index: u32, sensor_index: u32, sensor_type: InputType, data: Vec<i32>) -> Self {
     Self {
       id: 0,
       device_index,

@@ -5,18 +5,22 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  };
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
 use crate::device::{
-    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+  hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
+  protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
 };
 use async_trait::async_trait;
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_server_device_config::{
+  DeviceDefinition,
+  ProtocolCommunicationSpecifier,
+  UserDeviceIdentifier,
+};
+use std::sync::{
+  atomic::{AtomicU8, Ordering},
+  Arc,
+};
 use uuid::{uuid, Uuid};
-use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
 
 pub mod setup {
   use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -47,7 +51,12 @@ impl ProtocolIdentifier for MonsterPubIdentifier {
     _: ProtocolCommunicationSpecifier,
   ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     let read_resp = hardware
-      .read_value(&HardwareReadCmd::new(MONSTERPUB_PROTOCOL_UUID, Endpoint::RxBLEModel, 32, 500))
+      .read_value(&HardwareReadCmd::new(
+        MONSTERPUB_PROTOCOL_UUID,
+        Endpoint::RxBLEModel,
+        32,
+        500,
+      ))
       .await;
     let ident = match read_resp {
       Ok(data) => std::str::from_utf8(data.data())
@@ -80,7 +89,12 @@ impl ProtocolInitializer for MonsterPubInitializer {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     if hardware.endpoints().contains(&Endpoint::Rx) {
       let value = hardware
-        .read_value(&HardwareReadCmd::new(MONSTERPUB_PROTOCOL_UUID, Endpoint::Rx, 16, 200))
+        .read_value(&HardwareReadCmd::new(
+          MONSTERPUB_PROTOCOL_UUID,
+          Endpoint::Rx,
+          16,
+          200,
+        ))
         .await?;
       let keys = [
         [
@@ -112,10 +126,19 @@ impl ProtocolInitializer for MonsterPubInitializer {
       );
 
       hardware
-        .write_value(&HardwareWriteCmd::new(&[MONSTERPUB_PROTOCOL_UUID], Endpoint::Rx, auth, true))
+        .write_value(&HardwareWriteCmd::new(
+          &[MONSTERPUB_PROTOCOL_UUID],
+          Endpoint::Rx,
+          auth,
+          true,
+        ))
         .await?;
     }
-    let output_count = def.features().iter().filter(|x| x.output().is_some()).count();
+    let output_count = def
+      .features()
+      .iter()
+      .filter(|x| x.output().is_some())
+      .count();
 
     Ok(Arc::new(MonsterPub::new(
       if hardware.endpoints().contains(&Endpoint::TxVibrate) {
@@ -125,25 +148,22 @@ impl ProtocolInitializer for MonsterPubInitializer {
       } else {
         Endpoint::Generic0 // tracy's dog 3 vibe
       },
-      output_count as u32
+      output_count as u32,
     )))
   }
 }
 
 pub struct MonsterPub {
   tx: Endpoint,
-  speeds: Vec<AtomicU8>
+  speeds: Vec<AtomicU8>,
 }
 
 impl MonsterPub {
   pub fn new(tx: Endpoint, num_outputs: u32) -> Self {
     let speeds: Vec<AtomicU8> = std::iter::repeat_with(|| AtomicU8::default())
       .take(num_outputs as usize)
-      .collect();    
-    Self { 
-      tx,
-      speeds
-    }
+      .collect();
+    Self { tx, speeds }
   }
 
   fn form_command(&self) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
@@ -176,24 +196,22 @@ impl MonsterPub {
 }
 
 impl ProtocolHandler for MonsterPub {
-
-
   fn handle_output_vibrate_cmd(
-      &self,
-      feature_index: u32,
-      _feature_id: Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    feature_index: u32,
+    _feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     self.form_command()
   }
 
   fn handle_output_oscillate_cmd(
-      &self,
-      feature_index: u32,
-      _feature_id: Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    feature_index: u32,
+    _feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     self.form_command()
   }
