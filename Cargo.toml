@@ -5,8 +5,9 @@ members = [
     "buttplug_client",
     "buttplug_core",
     "buttplug_derive",
-    "buttplug_server_device_config",
     "buttplug_server",
+    "buttplug_server_device_config",
+    "buttplug_server_hwmgr_btleplug"
 ]
 
 [profile.release]
