@@ -22,7 +22,7 @@
     "!Battery mapping"
   ],
   "rust-analyzer.linkedProjects": [
-    ".\\buttplug\\Cargo.toml"
+    ".\\Cargo.toml"
   ],
   
 }
