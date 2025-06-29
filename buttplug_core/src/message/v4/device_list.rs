@@ -6,7 +6,7 @@
 // for full license information.
 
 use super::DeviceMessageInfoV4;
-use crate::core::message::{
+use crate::message::{
   ButtplugMessage,
   ButtplugMessageError,
   ButtplugMessageFinalizer,

@@ -29,7 +29,7 @@ pub enum ButtplugSerializerError {
   MessageSpecVersionNotReceived,
 }
 
-#[derive(Debug, Display, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ButtplugSerializedMessage {
   Text(String),
   Binary(Vec<u8>),

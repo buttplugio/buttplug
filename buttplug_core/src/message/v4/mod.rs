@@ -30,5 +30,5 @@ pub use {
   input_cmd::{InputCmdV4, InputCommandType},
   input_reading::InputReadingV4,
   server_info::ServerInfoV4,
-  spec_enums::{ButtplugClientMessageV4, ButtplugServerMessageV4},
+  spec_enums::{ButtplugClientMessageV4, ButtplugServerMessageV4, ButtplugDeviceMessageNameV4},
 };

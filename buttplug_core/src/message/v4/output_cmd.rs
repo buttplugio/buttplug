@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::{
+use crate::{
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
     OutputType,

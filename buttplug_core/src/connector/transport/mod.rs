@@ -6,13 +6,7 @@
 // for full license information.
 
 //! Transports for remote (IPC/network/etc) communication between clients and servers
-
-mod stream;
-pub use stream::ButtplugStreamTransport;
-
-#[cfg(feature = "websockets")]
-mod websocket;
-use crate::core::connector::{
+use crate::connector::{
   ButtplugConnectorError,
   ButtplugConnectorResultFuture,
   ButtplugSerializedMessage,
@@ -20,13 +14,7 @@ use crate::core::connector::{
 use futures::future::BoxFuture;
 use thiserror::Error;
 use tokio::sync::mpsc::{Receiver, Sender};
-#[cfg(feature = "websockets")]
-pub use websocket::{
-  ButtplugWebsocketClientTransport,
-  ButtplugWebsocketServerTransport,
-  ButtplugWebsocketServerTransportBuilder,
-  TungsteniteError,
-};
+use displaydoc::Display;
 
 /// Messages we can receive from a connector.
 #[derive(Clone, Debug, Display)]
@@ -53,9 +41,6 @@ pub trait ButtplugConnectorTransport: Send + Sync {
 
 #[derive(Error, Debug)]
 pub enum ButtplugConnectorTransportSpecificError {
-  #[cfg(feature = "websockets")]
-  #[error("Tungstenite specific error: {0}")]
-  TungsteniteError(#[from] TungsteniteError),
   #[error("Network error: {0}")]
   GenericNetworkError(String),
 }

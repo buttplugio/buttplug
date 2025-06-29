@@ -33,10 +33,3 @@ where
 {
   unimplemented!("Dummy executor can't actually spawn!")
 }
-
-pub fn block_on<F>(_: F) -> <F as Future>::Output
-where
-  F: Future,
-{
-  unimplemented!("Dummy executor can't actually spawn!")
-}

@@ -14,7 +14,7 @@ use super::{
   ButtplugConnectorResultFuture,
 };
 use crate::{
-  core::message::{
+  message::{
     serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
     ButtplugMessage,
   },
@@ -23,6 +23,7 @@ use crate::{
 use futures::{future::BoxFuture, select, FutureExt};
 use std::marker::PhantomData;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
+use log::*;
 
 enum ButtplugRemoteConnectorMessage<T>
 where
@@ -238,7 +239,7 @@ where
           // If we connect successfully, we get back the channel from the transport
           // to send outgoing messages and receieve incoming events, all serialized.
           Ok(()) => {
-            async_manager::spawn(async move {
+            let _ = async_manager::spawn(async move {
               remote_connector_event_loop::<
                 TransportType,
                 SerializerType,

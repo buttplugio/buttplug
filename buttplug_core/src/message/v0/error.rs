@@ -7,7 +7,7 @@
 
 //! Notification of an error in the system, due to a failed external command or internal failure
 
-use crate::core::{
+use crate::{
   errors::*,
   message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
 };
@@ -116,7 +116,7 @@ impl From<ButtplugError> for ErrorV0 {
 
 #[cfg(test)]
 mod test {
-  use crate::core::message::{ButtplugServerMessageCurrent, ErrorCode, ErrorV0};
+  use crate::message::{ButtplugServerMessageCurrent, ErrorCode, ErrorV0};
 
   const ERROR_STR: &str = "{\"Error\":{\"Id\":0,\"ErrorCode\":1,\"ErrorMessage\":\"Test Error\"}}";
 

@@ -37,13 +37,3 @@ where
 {
   TokioAsyncManager::default().spawn_with_handle(future)
 }
-
-pub fn block_on<F>(f: F) -> <F as Future>::Output
-where
-  F: Future,
-{
-  let handle = tokio::runtime::Handle::current();
-  let _ = handle.enter();
-  // Execute the future, blocking the current thread until completion
-  futures::executor::block_on(f)
-}

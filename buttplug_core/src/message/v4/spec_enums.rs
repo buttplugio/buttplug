@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::message::{
+use crate::message::{
   v4::input_cmd::InputCmdV4,
   OutputCmdV4,
   ButtplugMessage,
@@ -90,4 +90,11 @@ impl ButtplugMessageFinalizer for ButtplugServerMessageV4 {
       _ => (),
     }
   }
+}
+
+#[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display)]
+pub enum ButtplugDeviceMessageNameV4 {
+  StopDeviceCmd,
+  InputCmd,
+  OutputCmd,
 }

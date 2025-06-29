@@ -7,7 +7,7 @@
 
 //! Notification that a device has disconnected from the server.
 
-use crate::core::message::{
+use crate::message::{
   ButtplugMessage,
   ButtplugMessageError,
   ButtplugMessageFinalizer,

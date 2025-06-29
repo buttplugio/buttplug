@@ -26,7 +26,7 @@ pub use endpoint::Endpoint;
 pub use v0::*;
 pub use v4::*;
 
-use crate::core::errors::ButtplugMessageError;
+use crate::errors::ButtplugMessageError;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::convert::TryFrom;
 
@@ -35,7 +35,7 @@ use super::errors::ButtplugError;
 /// Enum of possible [Buttplug Message
 /// Spec](https://buttplug-spec.docs.buttplug.io) versions.
 #[derive(
-  Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Display, Serialize_repr, Deserialize_repr,
+  Debug, Clone, Copy, Display, PartialEq, Eq, PartialOrd, Ord, Serialize_repr, Deserialize_repr,
 )]
 #[repr(u32)]
 pub enum ButtplugMessageSpecVersion {
