@@ -8,10 +8,10 @@
 use uuid::Uuid;
 
 use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
-  
+
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler,generic_protocol_setup}
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
 };
 use std::sync::atomic::{AtomicU8, Ordering};
 
@@ -23,8 +23,6 @@ pub struct TryFunBlackHole {
 }
 
 impl ProtocolHandler for TryFunBlackHole {
-
-
   fn handle_output_oscillate_cmd(
     &self,
     _feature_index: u32,

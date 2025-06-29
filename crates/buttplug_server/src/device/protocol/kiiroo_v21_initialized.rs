@@ -5,19 +5,23 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
 use crate::device::{
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{
-      fleshlight_launch_helper::calculate_speed,
-      generic_protocol_initializer_setup,
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
-    },
+  hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+  protocol::{
+    fleshlight_launch_helper::calculate_speed,
+    generic_protocol_initializer_setup,
+    ProtocolHandler,
+    ProtocolIdentifier,
+    ProtocolInitializer,
+  },
 };
 use async_trait::async_trait;
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_server_device_config::{
+  DeviceDefinition,
+  ProtocolCommunicationSpecifier,
+  UserDeviceIdentifier,
+};
 use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
@@ -65,8 +69,6 @@ pub struct KiirooV21Initialized {
 }
 
 impl ProtocolHandler for KiirooV21Initialized {
-
-
   fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,

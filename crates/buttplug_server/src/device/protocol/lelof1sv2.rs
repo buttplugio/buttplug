@@ -5,26 +5,30 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
 use crate::device::{
-    hardware::{
-      Hardware,
-      HardwareEvent,
-      HardwareSubscribeCmd,
-      HardwareUnsubscribeCmd,
-      HardwareWriteCmd,
-    },
-    protocol::{
-      generic_protocol_initializer_setup,
-      lelo_harmony::LeloHarmony,
-      lelof1s::LeloF1s,
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
-    },
+  hardware::{
+    Hardware,
+    HardwareEvent,
+    HardwareSubscribeCmd,
+    HardwareUnsubscribeCmd,
+    HardwareWriteCmd,
+  },
+  protocol::{
+    generic_protocol_initializer_setup,
+    lelo_harmony::LeloHarmony,
+    lelof1s::LeloF1s,
+    ProtocolHandler,
+    ProtocolIdentifier,
+    ProtocolInitializer,
+  },
 };
 use async_trait::async_trait;
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_server_device_config::{
+  DeviceDefinition,
+  ProtocolCommunicationSpecifier,
+  UserDeviceIdentifier,
+};
 use std::sync::Arc;
 use uuid::{uuid, Uuid};
 

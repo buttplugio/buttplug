@@ -41,6 +41,7 @@ use futures::{
   future::{self, BoxFuture, FutureExt},
   Stream,
 };
+use log::*;
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
@@ -48,7 +49,6 @@ use std::sync::{
 use thiserror::Error;
 use tokio::sync::{broadcast, mpsc, Mutex};
 use tracing_futures::Instrument;
-use log::*;
 
 /// Result type used for public APIs.
 ///

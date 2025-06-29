@@ -4,12 +4,21 @@ use getset::{CopyGetters, Getters, MutGetters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use buttplug_core::message::OutputType; 
-use super::device_feature::{ServerBaseDeviceFeature, ServerDeviceFeature, ServerUserDeviceFeature, ServerUserDeviceFeatureOutput};
+use super::device_feature::{
+  ServerBaseDeviceFeature,
+  ServerDeviceFeature,
+  ServerUserDeviceFeature,
+  ServerUserDeviceFeatureOutput,
+};
+use buttplug_core::message::OutputType;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, CopyGetters)]
 pub struct DeviceSettings {
-  #[serde(rename = "message-gap-ms", skip_serializing_if = "Option::is_none", default)]
+  #[serde(
+    rename = "message-gap-ms",
+    skip_serializing_if = "Option::is_none",
+    default
+  )]
   #[getset(get_copy = "pub")]
   message_gap_ms: Option<u32>,
 }
@@ -22,7 +31,11 @@ impl DeviceSettings {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, CopyGetters)]
 pub struct BaseFeatureSettings {
-  #[serde(rename = "alt-protocol-index", skip_serializing_if = "Option::is_none", default)]
+  #[serde(
+    rename = "alt-protocol-index",
+    skip_serializing_if = "Option::is_none",
+    default
+  )]
   #[getset(get_copy = "pub")]
   alt_protocol_index: Option<u32>,
 }
@@ -35,8 +48,12 @@ impl BaseFeatureSettings {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct UserFeatureSettings {
-  #[serde(rename = "reverse-position", skip_serializing_if = "Option::is_none", default)]
-  reverse_position: Option<bool>
+  #[serde(
+    rename = "reverse-position",
+    skip_serializing_if = "Option::is_none",
+    default
+  )]
+  reverse_position: Option<bool>,
 }
 
 impl UserFeatureSettings {
@@ -63,20 +80,30 @@ pub struct BaseDeviceDefinition {
 
 impl BaseDeviceDefinition {
   /// Create a new instance
-  pub fn new(name: &str, id: &Uuid, protocol_variant: &Option<String>, features: &[ServerBaseDeviceFeature], device_settings: &Option<DeviceSettings>) -> Self {
+  pub fn new(
+    name: &str,
+    id: &Uuid,
+    protocol_variant: &Option<String>,
+    features: &[ServerBaseDeviceFeature],
+    device_settings: &Option<DeviceSettings>,
+  ) -> Self {
     Self {
       name: name.to_owned(),
       features: features.into(),
       id: *id,
       protocol_variant: protocol_variant.clone(),
-      device_settings: device_settings.clone().unwrap_or_default()
+      device_settings: device_settings.clone().unwrap_or_default(),
     }
   }
 }
 
 #[derive(Serialize, Deserialize, Debug, Getters, CopyGetters, Default, Clone)]
 pub struct UserDeviceCustomization {
-  #[serde(rename = "display-name", default, skip_serializing_if = "Option::is_none")]
+  #[serde(
+    rename = "display-name",
+    default,
+    skip_serializing_if = "Option::is_none"
+  )]
   #[getset(get = "pub")]
   display_name: Option<String>,
   #[serde(default)]
@@ -88,12 +115,22 @@ pub struct UserDeviceCustomization {
   #[getset(get_copy = "pub")]
   index: u32,
   #[getset(get_copy = "pub")]
-  #[serde(rename = "message-gap-ms", default, skip_serializing_if = "Option::is_none")]
-  message_gap_ms: Option<u32>
+  #[serde(
+    rename = "message-gap-ms",
+    default,
+    skip_serializing_if = "Option::is_none"
+  )]
+  message_gap_ms: Option<u32>,
 }
 
 impl UserDeviceCustomization {
-  pub fn new(display_name: &Option<String>, allow: bool, deny: bool, index: u32, message_gap_ms: Option<u32>) -> Self {
+  pub fn new(
+    display_name: &Option<String>,
+    allow: bool,
+    deny: bool,
+    index: u32,
+    message_gap_ms: Option<u32>,
+  ) -> Self {
     Self {
       display_name: display_name.clone(),
       allow,
@@ -113,14 +150,14 @@ pub struct UserDeviceDefinition {
   #[getset(get_copy = "pub")]
   id: Uuid,
   #[getset(get_copy = "pub")]
-  #[serde(rename="base-id")]
+  #[serde(rename = "base-id")]
   base_id: Uuid,
   #[getset(get = "pub")]
   /// Message attributes for this device instance.
-  #[getset(get = "pub", get_mut="pub")]
+  #[getset(get = "pub", get_mut = "pub")]
   features: Vec<ServerUserDeviceFeature>,
-  #[getset(get = "pub", get_mut="pub")]
-  #[serde(rename="user-config")]
+  #[getset(get = "pub", get_mut = "pub")]
+  #[serde(rename = "user-config")]
   /// Per-user configurations specific to this device instance.
   user_config: UserDeviceCustomization,
 }
@@ -131,7 +168,7 @@ impl UserDeviceDefinition {
       id: Uuid::new_v4(),
       base_id,
       features: features.clone(),
-      user_config: UserDeviceCustomization::default_with_index(index)
+      user_config: UserDeviceCustomization::default_with_index(index),
     }
   }
 }
@@ -140,16 +177,13 @@ impl UserDeviceDefinition {
 pub struct DeviceDefinition {
   #[getset(get = "pub")]
   base_device: BaseDeviceDefinition,
-  #[getset(get = "pub", get_mut="pub")]
+  #[getset(get = "pub", get_mut = "pub")]
   user_device: UserDeviceDefinition,
 }
 
 impl DeviceDefinition {
   /// Create a new instance
-  pub fn new(
-    base_device: &BaseDeviceDefinition,
-    user_device: &UserDeviceDefinition
-  ) -> Self {
+  pub fn new(base_device: &BaseDeviceDefinition, user_device: &UserDeviceDefinition) -> Self {
     Self {
       base_device: base_device.clone(),
       user_device: user_device.clone(),
@@ -170,16 +204,18 @@ impl DeviceDefinition {
 
   pub fn features(&self) -> Vec<ServerDeviceFeature> {
     // TODO Gross way to do this.
-    let mut features: Vec<ServerDeviceFeature> = vec!();
-    self.base_device
-      .features()
-      .iter()
-      .for_each(|x| {
-        if let Some(user_feature) = self.user_device.features.iter().find(|user_feature| user_feature.base_id() == x.id()) {
-          features.push(ServerDeviceFeature::new(x, user_feature));
-        }
-      });
-      features
+    let mut features: Vec<ServerDeviceFeature> = vec![];
+    self.base_device.features().iter().for_each(|x| {
+      if let Some(user_feature) = self
+        .user_device
+        .features
+        .iter()
+        .find(|user_feature| user_feature.base_id() == x.id())
+      {
+        features.push(ServerDeviceFeature::new(x, user_feature));
+      }
+    });
+    features
   }
 
   pub fn user_config(&self) -> &UserDeviceCustomization {
@@ -197,15 +233,29 @@ impl DeviceDefinition {
   }
 
   pub fn new_from_base_definition(def: &BaseDeviceDefinition, index: u32) -> Self {
-    let user_features = def.features().iter().map(|x| x.as_user_device_feature()).collect();
+    let user_features = def
+      .features()
+      .iter()
+      .map(|x| x.as_user_device_feature())
+      .collect();
     Self::new(
       def,
-      &UserDeviceDefinition::new(index, def.id(), &user_features)
+      &UserDeviceDefinition::new(index, def.id(), &user_features),
     )
   }
 
-  pub fn update_user_output(&mut self, feature_id: Uuid, output_type: OutputType, user_output: ServerUserDeviceFeatureOutput) {
-    if let Some(feature) = self.user_device.features_mut().iter_mut().find(|x| x.id() == feature_id) {
+  pub fn update_user_output(
+    &mut self,
+    feature_id: Uuid,
+    output_type: OutputType,
+    user_output: ServerUserDeviceFeatureOutput,
+  ) {
+    if let Some(feature) = self
+      .user_device
+      .features_mut()
+      .iter_mut()
+      .find(|x| x.id() == feature_id)
+    {
       feature.update_output(output_type, &user_output);
     }
   }

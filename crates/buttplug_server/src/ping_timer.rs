@@ -14,7 +14,10 @@ use std::{
   },
   time::Duration,
 };
-use tokio::{select, sync::{mpsc, Notify}};
+use tokio::{
+  select,
+  sync::{mpsc, Notify},
+};
 
 pub enum PingMessage {
   Ping,

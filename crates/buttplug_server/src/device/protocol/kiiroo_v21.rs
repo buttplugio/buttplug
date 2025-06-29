@@ -6,26 +6,25 @@
 // for full license information.
 
 use super::fleshlight_launch_helper::calculate_speed;
-use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::{Endpoint, InputReadingV4, InputType},
-    util::{async_manager, stream::convert_broadcast_receiver_to_stream},
-  };
 use crate::{
-    device::{
-      hardware::{
-        Hardware,
-        HardwareCommand,
-        HardwareEvent,
-        HardwareReadCmd,
-        HardwareSubscribeCmd,
-        HardwareUnsubscribeCmd,
-        HardwareWriteCmd,
-      },
-      protocol::{generic_protocol_setup, ProtocolHandler},
+  device::{
+    hardware::{
+      Hardware,
+      HardwareCommand,
+      HardwareEvent,
+      HardwareReadCmd,
+      HardwareSubscribeCmd,
+      HardwareUnsubscribeCmd,
+      HardwareWriteCmd,
     },
-    message::ButtplugServerDeviceMessage,
-
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
+  message::ButtplugServerDeviceMessage,
+};
+use buttplug_core::{
+  errors::ButtplugDeviceError,
+  message::{Endpoint, InputReadingV4, InputType},
+  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use dashmap::DashSet;
 use futures::{
@@ -125,8 +124,12 @@ impl ProtocolHandler for KiirooV21 {
         ));
       }
       let battery_level = data[5] as i32;
-      let battery_reading =
-        InputReadingV4::new(device_index, feature_index, InputType::Battery, vec![battery_level]);
+      let battery_reading = InputReadingV4::new(
+        device_index,
+        feature_index,
+        InputType::Battery,
+        vec![battery_level],
+      );
       debug!("Got battery reading: {}", battery_level);
       Ok(battery_reading)
     }
@@ -141,7 +144,7 @@ impl ProtocolHandler for KiirooV21 {
 
   fn handle_input_subscribe_cmd(
     &self,
-    device_index: u32, 
+    device_index: u32,
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
@@ -199,7 +202,10 @@ impl ProtocolHandler for KiirooV21 {
                 {
                   if stream_sensors.contains(&sensor_index)
                     && sender
-                      .send(InputReadingV4::new(device_index, sensor_index, sensor_type, sensor_data).into())
+                      .send(
+                        InputReadingV4::new(device_index, sensor_index, sensor_type, sensor_data)
+                          .into(),
+                      )
                       .is_err()
                   {
                     debug!(

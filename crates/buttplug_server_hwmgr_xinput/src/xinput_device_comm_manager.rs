@@ -6,15 +6,15 @@
 // for full license information.
 
 use super::xinput_hardware::XInputHardwareConnector;
+use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::communication::{
-    HardwareCommunicationManager,
-    HardwareCommunicationManagerBuilder,
-    HardwareCommunicationManagerEvent,
-    TimedRetryCommunicationManager,
-    TimedRetryCommunicationManagerImpl,
+  HardwareCommunicationManager,
+  HardwareCommunicationManagerBuilder,
+  HardwareCommunicationManagerEvent,
+  TimedRetryCommunicationManager,
+  TimedRetryCommunicationManagerImpl,
 };
-use async_trait::async_trait;
 use rusty_xinput::XInputHandle;
 use std::string::ToString;
 use tokio::sync::mpsc;

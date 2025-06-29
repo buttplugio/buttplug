@@ -5,23 +5,25 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  };
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
 use crate::device::{
-    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+  hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
+  protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
 };
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_server_device_config::{
+  DeviceDefinition,
+  ProtocolCommunicationSpecifier,
+  UserDeviceIdentifier,
+};
 use std::{
   sync::{
     atomic::{AtomicU8, Ordering},
     Arc,
-  }, time::Duration,
+  },
+  time::Duration,
 };
+use uuid::{uuid, Uuid};
 
 const SATISFYER_PROTOCOL_UUID: Uuid = uuid!("79a0ed0d-f392-4c48-967e-f4467438c344");
 
@@ -72,7 +74,12 @@ impl ProtocolIdentifier for SatisfyerIdentifier {
     }
 
     let result = hardware
-      .read_value(&HardwareReadCmd::new(SATISFYER_PROTOCOL_UUID, Endpoint::RxBLEModel, 128, 500))
+      .read_value(&HardwareReadCmd::new(
+        SATISFYER_PROTOCOL_UUID,
+        Endpoint::RxBLEModel,
+        128,
+        500,
+      ))
       .await?;
     let device_identifier = format!(
       "{}",
@@ -100,7 +107,12 @@ impl ProtocolInitializer for SatisfyerInitializer {
     hardware: Arc<Hardware>,
     device_definition: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let msg = HardwareWriteCmd::new(&[SATISFYER_PROTOCOL_UUID], Endpoint::Command, vec![0x01], true);
+    let msg = HardwareWriteCmd::new(
+      &[SATISFYER_PROTOCOL_UUID],
+      Endpoint::Command,
+      vec![0x01],
+      true,
+    );
     let info_fut = hardware.write_value(&msg);
     info_fut.await?;
 
@@ -148,14 +160,20 @@ impl ProtocolHandler for Satisfyer {
   }
 
   fn handle_output_vibrate_cmd(
-      &self,
-      feature_index: u32,
-      _feature_id: Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    feature_index: u32,
+    _feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.last_command[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     let data = form_command(self.feature_count, self.last_command.clone());
 
-    Ok(vec![HardwareWriteCmd::new(&[SATISFYER_PROTOCOL_UUID], Endpoint::Tx, data, false).into()])
+    Ok(vec![HardwareWriteCmd::new(
+      &[SATISFYER_PROTOCOL_UUID],
+      Endpoint::Tx,
+      data,
+      false,
+    )
+    .into()])
   }
 }

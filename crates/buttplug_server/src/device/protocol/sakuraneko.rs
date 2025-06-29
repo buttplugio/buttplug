@@ -7,11 +7,11 @@
 
 use uuid::Uuid;
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
 generic_protocol_setup!(Sakuraneko, "sakuraneko");
 
@@ -19,8 +19,6 @@ generic_protocol_setup!(Sakuraneko, "sakuraneko");
 pub struct Sakuraneko {}
 
 impl ProtocolHandler for Sakuraneko {
-
-
   fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,

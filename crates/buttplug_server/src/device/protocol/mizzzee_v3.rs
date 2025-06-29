@@ -5,14 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{
-      generic_protocol_setup,
-      ProtocolHandler,
-    },
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use std::time::Duration;
 use uuid::Uuid;
 
@@ -60,7 +57,9 @@ pub struct MizzZeeV3 {}
 
 impl ProtocolHandler for MizzZeeV3 {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_millis(MIZZZEE3_COMMAND_DELAY_MS))
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_millis(
+      MIZZZEE3_COMMAND_DELAY_MS,
+    ))
   }
 
   fn handle_output_vibrate_cmd(

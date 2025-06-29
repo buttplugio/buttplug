@@ -5,29 +5,27 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint,   util::async_manager};
-use buttplug_server_device_config::{BluetoothLESpecifier, ProtocolCommunicationSpecifier};
-use buttplug_server::device::{
-    hardware::{
-      Hardware,
-      HardwareConnector,
-      HardwareEvent,
-      HardwareInternal,
-      HardwareReadCmd,
-      HardwareReading,
-      HardwareSpecializer,
-      communication::HardwareSpecificError,
-      HardwareSubscribeCmd,
-      HardwareUnsubscribeCmd,
-      HardwareWriteCmd,
-    },
-};
 use async_trait::async_trait;
 use btleplug::api::CharPropFlags;
 use btleplug::{
   api::{Central, CentralEvent, Characteristic, Peripheral, ValueNotification, WriteType},
   platform::Adapter,
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
+use buttplug_server::device::hardware::{
+  communication::HardwareSpecificError,
+  Hardware,
+  HardwareConnector,
+  HardwareEvent,
+  HardwareInternal,
+  HardwareReadCmd,
+  HardwareReading,
+  HardwareSpecializer,
+  HardwareSubscribeCmd,
+  HardwareUnsubscribeCmd,
+  HardwareWriteCmd,
+};
+use buttplug_server_device_config::{BluetoothLESpecifier, ProtocolCommunicationSpecifier};
 use dashmap::DashSet;
 use futures::{
   future::{self, BoxFuture, FutureExt},
@@ -38,7 +36,8 @@ use std::{
   collections::HashMap,
   fmt::{self, Debug},
   pin::Pin,
-  sync::Arc, time::Duration,
+  sync::Arc,
+  time::Duration,
 };
 use tokio::{select, sync::broadcast};
 use uuid::Uuid;
@@ -103,9 +102,8 @@ impl<T: Peripheral> HardwareConnector for BtleplugHardwareConnector<T> {
     {
       if let Err(e) = self.device.connect().await {
         let return_err = ButtplugDeviceError::DeviceSpecificError(
-          HardwareSpecificError::HardwareSpecificError("btleplug".to_owned(), format!(
-          "{e:?}"
-        )).to_string(),
+          HardwareSpecificError::HardwareSpecificError("btleplug".to_owned(), format!("{e:?}"))
+            .to_string(),
         );
         return Err(return_err);
       }
@@ -392,10 +390,9 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
         Err(e) => {
           error!("BTLEPlug device write error: {:?}", e);
           Err(ButtplugDeviceError::DeviceSpecificError(
-            HardwareSpecificError::HardwareSpecificError("btleplug".to_owned(), format!(
-          "{e:?}"
-        )).to_string()),
-          )
+            HardwareSpecificError::HardwareSpecificError("btleplug".to_owned(), format!("{e:?}"))
+              .to_string(),
+          ))
         }
       }
     }
@@ -424,10 +421,10 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
         }
         Err(e) => {
           error!("BTLEPlug device read error: {:?}", e);
-          Err(ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::HardwareSpecificError("btleplug".to_owned(), format!(
-          "{e:?}"
-        )).to_string()),
-          )
+          Err(ButtplugDeviceError::DeviceSpecificError(
+            HardwareSpecificError::HardwareSpecificError("btleplug".to_owned(), format!("{e:?}"))
+              .to_string(),
+          ))
         }
       }
     }
@@ -456,9 +453,10 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let device = self.device.clone();
     async move {
       device.subscribe(&characteristic).await.map_err(|e| {
-        ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::HardwareSpecificError("btleplug".to_owned(), format!(
-          "{e:?}"
-        )).to_string())
+        ButtplugDeviceError::DeviceSpecificError(
+          HardwareSpecificError::HardwareSpecificError("btleplug".to_owned(), format!("{e:?}"))
+            .to_string(),
+        )
       })?;
       endpoints.insert(endpoint);
       Ok(())
@@ -488,9 +486,10 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let device = self.device.clone();
     async move {
       device.unsubscribe(&characteristic).await.map_err(|e| {
-        ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::HardwareSpecificError("btleplug".to_owned(), format!(
-          "{e:?}"
-        )).to_string())
+        ButtplugDeviceError::DeviceSpecificError(
+          HardwareSpecificError::HardwareSpecificError("btleplug".to_owned(), format!("{e:?}"))
+            .to_string(),
+        )
       })?;
       endpoints.remove(&endpoint);
       Ok(())

@@ -7,7 +7,6 @@
 
 use crate::message::{
   v4::input_cmd::InputCmdV4,
-  OutputCmdV4,
   ButtplugMessage,
   ButtplugMessageError,
   ButtplugMessageFinalizer,
@@ -15,6 +14,7 @@ use crate::message::{
   DeviceRemovedV0,
   ErrorV0,
   OkV0,
+  OutputCmdV4,
   PingV0,
   RequestDeviceListV0,
   RequestServerInfoV4,

@@ -9,11 +9,11 @@ use std::sync::atomic::{AtomicU8, Ordering};
 
 use uuid::Uuid;
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
 generic_protocol_setup!(KiirooV2Vibrator, "kiiroo-v2-vibrator");
 
@@ -30,8 +30,6 @@ impl Default for KiirooV2Vibrator {
 }
 
 impl ProtocolHandler for KiirooV2Vibrator {
-
-
   fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,

@@ -20,13 +20,20 @@ pub mod svakom_v5;
 pub mod svakom_v6;
 
 use buttplug_core::errors::ButtplugDeviceError;
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, UserDeviceIdentifier, DeviceDefinition};
+use buttplug_server_device_config::{
+  DeviceDefinition,
+  ProtocolCommunicationSpecifier,
+  UserDeviceIdentifier,
+};
 
 use crate::device::{
-    hardware::Hardware,
-    protocol::{
-      generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer
-    },
+  hardware::Hardware,
+  protocol::{
+    generic_protocol_initializer_setup,
+    ProtocolHandler,
+    ProtocolIdentifier,
+    ProtocolInitializer,
+  },
 };
 use async_trait::async_trait;
 use std::sync::Arc;
@@ -55,7 +62,11 @@ impl ProtocolInitializer for SvakomInitializer {
         "svakom_iker" => Ok(Arc::new(svakom_iker::SvakomIker::default())),
         "svakom_jordan" => Ok(Arc::new(svakom_jordan::SvakomJordan::default())),
         "svakom_pulse" => Ok(Arc::new(svakom_pulse::SvakomPulse::default())),
-        "svakom_sam" => svakom_sam::SvakomSamInitializer::default().initialize(hardware, def).await,
+        "svakom_sam" => {
+          svakom_sam::SvakomSamInitializer::default()
+            .initialize(hardware, def)
+            .await
+        }
         "svakom_sam2" => Ok(Arc::new(svakom_sam2::SvakomSam2::default())),
         //"svakom_suitcase" => Ok(Arc::new(svakom_suitcase::SvakomSuitcase::default())),
         //"svakom_tarax" => Ok(Arc::new(svakom_tarax::SvakomTaraX::default())),

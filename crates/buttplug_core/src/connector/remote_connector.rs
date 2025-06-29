@@ -21,9 +21,9 @@ use crate::{
   util::async_manager,
 };
 use futures::{future::BoxFuture, select, FutureExt};
+use log::*;
 use std::marker::PhantomData;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
-use log::*;
 
 enum ButtplugRemoteConnectorMessage<T>
 where

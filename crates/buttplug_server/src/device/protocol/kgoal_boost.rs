@@ -5,18 +5,17 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::{Endpoint, InputReadingV4, InputType},
-    util::{async_manager, stream::convert_broadcast_receiver_to_stream},
-  };
 use crate::{
-    device::{
-      hardware::{Hardware, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd},
-      protocol::{generic_protocol_setup, ProtocolHandler},
-    },
-    message::ButtplugServerDeviceMessage,
-
+  device::{
+    hardware::{Hardware, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
+  message::ButtplugServerDeviceMessage,
+};
+use buttplug_core::{
+  errors::ButtplugDeviceError,
+  message::{Endpoint, InputReadingV4, InputType},
+  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use dashmap::DashSet;
 use futures::{
@@ -100,7 +99,15 @@ impl ProtocolHandler for KGoalBoost {
                 let unnormalized = (data[5] as i32) << 8 | data[6] as i32;
                 if stream_sensors.contains(&0)
                   && sender
-                    .send(InputReadingV4::new(device_index, feature_index, InputType::Pressure, vec![normalized]).into())
+                    .send(
+                      InputReadingV4::new(
+                        device_index,
+                        feature_index,
+                        InputType::Pressure,
+                        vec![normalized],
+                      )
+                      .into(),
+                    )
                     .is_err()
                 {
                   debug!(
@@ -111,7 +118,13 @@ impl ProtocolHandler for KGoalBoost {
                 if stream_sensors.contains(&1)
                   && sender
                     .send(
-                      InputReadingV4::new(device_index, feature_index, InputType::Pressure, vec![unnormalized]).into(),
+                      InputReadingV4::new(
+                        device_index,
+                        feature_index,
+                        InputType::Pressure,
+                        vec![unnormalized],
+                      )
+                      .into(),
                     )
                     .is_err()
                 {

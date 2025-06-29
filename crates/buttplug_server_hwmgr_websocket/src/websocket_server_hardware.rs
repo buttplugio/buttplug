@@ -6,24 +6,22 @@
 // for full license information.
 
 use super::websocket_server_comm_manager::WebsocketServerDeviceCommManagerInitInfo;
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, WebsocketSpecifier};
-use buttplug_server::device::{
-    hardware::{
-      GenericHardwareSpecializer,
-      Hardware,
-      HardwareConnector,
-      HardwareEvent,
-      HardwareInternal,
-      HardwareReadCmd,
-      HardwareReading,
-      HardwareSpecializer,
-      HardwareSubscribeCmd,
-      HardwareUnsubscribeCmd,
-      HardwareWriteCmd,
-    },
-};
 use async_trait::async_trait;
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
+use buttplug_server::device::hardware::{
+  GenericHardwareSpecializer,
+  Hardware,
+  HardwareConnector,
+  HardwareEvent,
+  HardwareInternal,
+  HardwareReadCmd,
+  HardwareReading,
+  HardwareSpecializer,
+  HardwareSubscribeCmd,
+  HardwareUnsubscribeCmd,
+  HardwareWriteCmd,
+};
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, WebsocketSpecifier};
 use futures::{
   future::{self, BoxFuture},
   FutureExt,
@@ -39,8 +37,8 @@ use std::{
   time::Duration,
 };
 use tokio::{
-  select,
   net::TcpStream,
+  select,
   sync::{
     broadcast,
     mpsc::{channel, Receiver, Sender},

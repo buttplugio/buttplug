@@ -7,11 +7,11 @@
 
 use uuid::Uuid;
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::ProtocolHandler,
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::ProtocolHandler,
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
 use super::generic_protocol_setup;
 
@@ -21,8 +21,6 @@ generic_protocol_setup!(Luvmazer, "luvmazer");
 pub struct Luvmazer {}
 
 impl ProtocolHandler for Luvmazer {
-
-
   fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,

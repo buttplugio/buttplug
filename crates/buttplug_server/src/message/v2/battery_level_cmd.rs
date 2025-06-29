@@ -5,22 +5,21 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use 
-  buttplug_core::{
-    errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    message::{
-      ButtplugDeviceMessage,
-      ButtplugMessage,
-      ButtplugMessageFinalizer,
-      ButtplugMessageValidator,
-      InputCommandType,
-      InputType,
-    },
-  };
-  use crate::message::{
-    checked_input_cmd::CheckedInputCmdV4,
-    ServerDeviceAttributes,
-    TryFromDeviceAttributes,
+use crate::message::{
+  checked_input_cmd::CheckedInputCmdV4,
+  ServerDeviceAttributes,
+  TryFromDeviceAttributes,
+};
+use buttplug_core::{
+  errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+  message::{
+    ButtplugDeviceMessage,
+    ButtplugMessage,
+    ButtplugMessageFinalizer,
+    ButtplugMessageValidator,
+    InputCommandType,
+    InputType,
+  },
 };
 use serde::{Deserialize, Serialize};
 

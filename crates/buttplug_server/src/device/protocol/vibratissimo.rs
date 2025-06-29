@@ -6,20 +6,21 @@
 // for full license information.
 
 use buttplug_core::message::OutputType;
-use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  };
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_server_device_config::{
+  DeviceDefinition,
+  ProtocolCommunicationSpecifier,
+  UserDeviceIdentifier,
+};
 
-  use crate::device::{
-    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+use crate::device::{
+  hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
+  protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
 };
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
 use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::Arc;
+use uuid::{uuid, Uuid};
 
 const VIBRATISSIMO_PROTOCOL_UUID: Uuid = uuid!("66ef7aa4-1e6a-4067-9066-dcb53c7647f2");
 
@@ -50,7 +51,12 @@ impl ProtocolIdentifier for VibratissimoIdentifier {
     _: ProtocolCommunicationSpecifier,
   ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     let result = hardware
-      .read_value(&HardwareReadCmd::new(VIBRATISSIMO_PROTOCOL_UUID, Endpoint::RxBLEModel, 128, 500))
+      .read_value(&HardwareReadCmd::new(
+        VIBRATISSIMO_PROTOCOL_UUID,
+        Endpoint::RxBLEModel,
+        128,
+        500,
+      ))
       .await?;
     let ident =
       String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| hardware.name().to_owned());
@@ -71,35 +77,41 @@ impl ProtocolInitializer for VibratissimoInitializer {
     _: Arc<Hardware>,
     def: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let num_vibrators: u8 = def.features().iter().filter(|x| x.output().as_ref().map_or(false, |x| x.contains_key(&OutputType::Vibrate))).count() as u8;
+    let num_vibrators: u8 = def
+      .features()
+      .iter()
+      .filter(|x| {
+        x.output()
+          .as_ref()
+          .map_or(false, |x| x.contains_key(&OutputType::Vibrate))
+      })
+      .count() as u8;
     Ok(Arc::new(Vibratissimo::new(num_vibrators as u8)))
   }
 }
 
 pub struct Vibratissimo {
-  speeds: Vec<AtomicU8>
+  speeds: Vec<AtomicU8>,
 }
 
 impl Vibratissimo {
   fn new(num_vibrators: u8) -> Self {
     let speeds: Vec<AtomicU8> = std::iter::repeat_with(|| AtomicU8::default())
-    .take(num_vibrators as usize)
-    .collect();
-    Self {
-      speeds
-    }
+      .take(num_vibrators as usize)
+      .collect();
+    Self { speeds }
   }
 }
 
 impl ProtocolHandler for Vibratissimo {
   fn handle_output_vibrate_cmd(
-      &self,
-      feature_index: u32,
-      feature_id: Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
-    let mut data = vec!();
+    let mut data = vec![];
     for cmd in &self.speeds {
       data.push(cmd.load(std::sync::atomic::Ordering::Relaxed));
     }

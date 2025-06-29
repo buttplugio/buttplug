@@ -8,8 +8,8 @@
 use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 
-use buttplug_core::message::DeviceFeature;
 use crate::message::{v2::ClientDeviceMessageAttributesV2, v3::ClientDeviceMessageAttributesV3};
+use buttplug_core::message::DeviceFeature;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct NullDeviceMessageAttributesV1 {}

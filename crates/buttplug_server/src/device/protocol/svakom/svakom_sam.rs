@@ -5,24 +5,25 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
 use crate::device::protocol::ProtocolKeepaliveStrategy;
-use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  };
 use crate::device::{
-    hardware::{Hardware, HardwareCommand, HardwareSubscribeCmd, HardwareWriteCmd},
-    protocol::{
-      generic_protocol_initializer_setup,
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
-    },
+  hardware::{Hardware, HardwareCommand, HardwareSubscribeCmd, HardwareWriteCmd},
+  protocol::{
+    generic_protocol_initializer_setup,
+    ProtocolHandler,
+    ProtocolIdentifier,
+    ProtocolInitializer,
+  },
 };
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_server_device_config::{
+  DeviceDefinition,
+  ProtocolCommunicationSpecifier,
+  UserDeviceIdentifier,
+};
 use std::sync::Arc;
+use uuid::{uuid, Uuid};
 
 generic_protocol_initializer_setup!(SvakomSam, "svakom-sam");
 const SVAKOM_SAM_PROTOCOL_UUID: Uuid = uuid!("e39a6b4a-230a-4669-be94-68135f97f166");
@@ -38,7 +39,10 @@ impl ProtocolInitializer for SvakomSamInitializer {
     _: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
-      .subscribe(&HardwareSubscribeCmd::new(SVAKOM_SAM_PROTOCOL_UUID, Endpoint::Rx))
+      .subscribe(&HardwareSubscribeCmd::new(
+        SVAKOM_SAM_PROTOCOL_UUID,
+        Endpoint::Rx,
+      ))
       .await?;
     let mut gen2 = hardware.endpoints().contains(&Endpoint::TxMode);
     if !gen2 && hardware.endpoints().contains(&Endpoint::Firmware) {
@@ -66,38 +70,39 @@ impl ProtocolHandler for SvakomSam {
   }
 
   fn handle_output_vibrate_cmd(
-      &self,
-      feature_index: u32,
-      feature_id: Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if feature_index == 0 {
       Ok(vec![HardwareWriteCmd::new(
         &[feature_id],
-          Endpoint::Tx,
-          if self.gen2 {
-            [
-              18,
-              1,
-              3,
-              0,
-              if speed == 0 { 0x00 } else { 0x04 },
-              speed as u8,
-            ]
-            .to_vec()
-          } else {
-            [18, 1, 3, 0, 5, speed as u8].to_vec()
-          },
-          false,
-        )
-        .into()])
+        Endpoint::Tx,
+        if self.gen2 {
+          [
+            18,
+            1,
+            3,
+            0,
+            if speed == 0 { 0x00 } else { 0x04 },
+            speed as u8,
+          ]
+          .to_vec()
+        } else {
+          [18, 1, 3, 0, 5, speed as u8].to_vec()
+        },
+        false,
+      )
+      .into()])
     } else {
       Ok(vec![HardwareWriteCmd::new(
         &[feature_id],
-        Endpoint::Tx, 
+        Endpoint::Tx,
         [18, 6, 1, speed as u8].to_vec(),
-        false).into(),
-      ])
+        false,
+      )
+      .into()])
     }
   }
 }

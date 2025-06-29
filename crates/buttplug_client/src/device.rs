@@ -14,22 +14,23 @@ use super::{
   ButtplugClientResultFuture,
 };
 use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::{
-      OutputCmdV4,
-      OutputCommand,
-      OutputType,
-      OutputValue,
-      ButtplugServerMessageV4,
-      DeviceFeature,
-      DeviceMessageInfoV4,
-      FeatureType,
-      StopDeviceCmdV0,
-    },
+  errors::ButtplugDeviceError,
+  message::{
+    ButtplugServerMessageV4,
+    DeviceFeature,
+    DeviceMessageInfoV4,
+    FeatureType,
+    OutputCmdV4,
+    OutputCommand,
+    OutputType,
+    OutputValue,
+    StopDeviceCmdV0,
+  },
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use futures::{FutureExt, Stream};
 use getset::{CopyGetters, Getters};
+use log::*;
 use std::{
   fmt,
   sync::{
@@ -38,7 +39,6 @@ use std::{
   },
 };
 use tokio::sync::broadcast;
-use log::*;
 
 /// Enum for messages going to a [ButtplugClientDevice] instance.
 #[derive(Clone, Debug)]

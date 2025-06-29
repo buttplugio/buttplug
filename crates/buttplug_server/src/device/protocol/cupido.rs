@@ -7,11 +7,11 @@
 
 use uuid::Uuid;
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler,  generic_protocol_setup}
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
 generic_protocol_setup!(Cupido, "cupido");
 
@@ -19,8 +19,6 @@ generic_protocol_setup!(Cupido, "cupido");
 pub struct Cupido {}
 
 impl ProtocolHandler for Cupido {
-
-
   fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,

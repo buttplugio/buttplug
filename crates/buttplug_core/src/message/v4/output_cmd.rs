@@ -8,12 +8,12 @@
 use crate::{
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
-    OutputType,
     ButtplugDeviceMessage,
     ButtplugMessage,
     ButtplugMessageError,
     ButtplugMessageFinalizer,
     ButtplugMessageValidator,
+    OutputType,
   },
 };
 use getset::CopyGetters;
@@ -126,10 +126,7 @@ impl OutputCommand {
     }
   }
 
-  pub fn from_output_type(
-    output_type: OutputType,
-    value: u32,
-  ) -> Result<Self, ButtplugError> {
+  pub fn from_output_type(output_type: OutputType, value: u32) -> Result<Self, ButtplugError> {
     match output_type {
       OutputType::Constrict => Ok(Self::Constrict(OutputValue::new(value))),
       OutputType::Heater => Ok(Self::Heater(OutputValue::new(value))),

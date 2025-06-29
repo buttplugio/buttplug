@@ -5,15 +5,26 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use super::BaseFeatureSettings;
 use buttplug_core::{
   errors::ButtplugDeviceError,
   message::{
-    DeviceFeature, DeviceFeatureInput, DeviceFeatureOutput, FeatureType, InputCommandType, InputType, OutputType
+    DeviceFeature,
+    DeviceFeatureInput,
+    DeviceFeatureOutput,
+    FeatureType,
+    InputCommandType,
+    InputType,
+    OutputType,
   },
 };
-use super::BaseFeatureSettings;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
-use serde::{ser::{self, SerializeSeq}, Deserialize, Serialize, Serializer};
+use serde::{
+  ser::{self, SerializeSeq},
+  Deserialize,
+  Serialize,
+  Serializer,
+};
 use std::{
   collections::{HashMap, HashSet},
   ops::RangeInclusive,
@@ -30,7 +41,9 @@ where
     seq.serialize_element(&range.end())?;
     seq.end()
   } else {
-    Err(ser::Error::custom("shouldn't be serializing if range is None"))
+    Err(ser::Error::custom(
+      "shouldn't be serializing if range is None",
+    ))
   }
 }
 
@@ -49,15 +62,7 @@ where
 }
 
 #[derive(
-  Clone,
-  Debug,
-  Default,
-  Getters,
-  MutGetters,
-  Setters,
-  Serialize,
-  Deserialize,
-  CopyGetters,
+  Clone, Debug, Default, Getters, MutGetters, Setters, Serialize, Deserialize, CopyGetters,
 )]
 pub struct ServerBaseDeviceFeature {
   #[getset(get = "pub", get_mut = "pub(super)")]
@@ -77,28 +82,32 @@ pub struct ServerBaseDeviceFeature {
   #[getset(get_copy = "pub")]
   id: Uuid,
   #[getset(get = "pub")]
-  #[serde(rename = "feature-settings", skip_serializing_if = "BaseFeatureSettings::is_none", default)]
-  feature_settings: BaseFeatureSettings
+  #[serde(
+    rename = "feature-settings",
+    skip_serializing_if = "BaseFeatureSettings::is_none",
+    default
+  )]
+  feature_settings: BaseFeatureSettings,
 }
 
 impl ServerBaseDeviceFeature {
   pub fn as_user_device_feature(&self) -> ServerUserDeviceFeature {
-    ServerUserDeviceFeature { id: Uuid::new_v4(), base_id: self.id, output: self.output.as_ref().and_then(|x| {
-      Some(x.keys().map(|x| (*x, ServerUserDeviceFeatureOutput::default())).collect())
-    }) }
+    ServerUserDeviceFeature {
+      id: Uuid::new_v4(),
+      base_id: self.id,
+      output: self.output.as_ref().and_then(|x| {
+        Some(
+          x.keys()
+            .map(|x| (*x, ServerUserDeviceFeatureOutput::default()))
+            .collect(),
+        )
+      }),
+    }
   }
 }
 
 #[derive(
-  Clone,
-  Debug,
-  Default,
-  Getters,
-  MutGetters,
-  Setters,
-  Serialize,
-  Deserialize,
-  CopyGetters,
+  Clone, Debug, Default, Getters, MutGetters, Setters, Serialize, Deserialize, CopyGetters,
 )]
 pub struct ServerUserDeviceFeature {
   #[getset(get_copy = "pub")]
@@ -108,7 +117,7 @@ pub struct ServerUserDeviceFeature {
   base_id: Uuid,
   #[getset(get = "pub")]
   #[serde(rename = "output", skip_serializing_if = "Option::is_none")]
-  output: Option<HashMap<OutputType, ServerUserDeviceFeatureOutput>>, 
+  output: Option<HashMap<OutputType, ServerUserDeviceFeatureOutput>>,
 }
 
 impl ServerUserDeviceFeature {
@@ -121,16 +130,7 @@ impl ServerUserDeviceFeature {
   }
 }
 
-#[derive(
-  Clone,
-  Debug,
-  Getters,
-  MutGetters,
-  Setters,
-  Serialize,
-  Deserialize,
-  CopyGetters,
-)]
+#[derive(Clone, Debug, Getters, MutGetters, Setters, Serialize, Deserialize, CopyGetters)]
 pub struct ServerBaseDeviceFeatureOutput {
   #[getset(get = "pub")]
   #[serde(rename = "step-range")]
@@ -140,53 +140,50 @@ pub struct ServerBaseDeviceFeatureOutput {
 impl ServerBaseDeviceFeatureOutput {
   pub fn new(step_range: &RangeInclusive<u32>) -> Self {
     Self {
-      step_range: step_range.clone()
+      step_range: step_range.clone(),
     }
   }
 }
 
 #[derive(
-  Clone,
-  Debug,
-  Default,
-  Getters,
-  MutGetters,
-  Setters,
-  Serialize,
-  Deserialize,
-  CopyGetters,
+  Clone, Debug, Default, Getters, MutGetters, Setters, Serialize, Deserialize, CopyGetters,
 )]
 pub struct ServerUserDeviceFeatureOutput {
   #[getset(get = "pub")]
-  #[serde(rename = "step-limit", default, skip_serializing_if="Option::is_none", serialize_with = "range_serialize")]
+  #[serde(
+    rename = "step-limit",
+    default,
+    skip_serializing_if = "Option::is_none",
+    serialize_with = "range_serialize"
+  )]
   step_limit: Option<RangeInclusive<u32>>,
   #[getset(get = "pub")]
-  #[serde(rename = "reverse-position", default, skip_serializing_if="Option::is_none")]
+  #[serde(
+    rename = "reverse-position",
+    default,
+    skip_serializing_if = "Option::is_none"
+  )]
   reverse_position: Option<bool>,
   #[getset(get = "pub")]
-  #[serde(rename = "ignore", default, skip_serializing_if="Option::is_none")]
+  #[serde(rename = "ignore", default, skip_serializing_if = "Option::is_none")]
   ignore: Option<bool>,
 }
 
 impl ServerUserDeviceFeatureOutput {
-  pub fn new(step_limit: Option<RangeInclusive<u32>>, reverse_position: Option<bool>, ignore: Option<bool>) -> Self {
+  pub fn new(
+    step_limit: Option<RangeInclusive<u32>>,
+    reverse_position: Option<bool>,
+    ignore: Option<bool>,
+  ) -> Self {
     Self {
       step_limit,
       reverse_position,
-      ignore
+      ignore,
     }
   }
 }
 
-#[derive(
-  Clone,
-  Debug,
-  Default,
-  Getters,
-  MutGetters,
-  Setters,
-  CopyGetters,
-)]
+#[derive(Clone, Debug, Default, Getters, MutGetters, Setters, CopyGetters)]
 pub struct ServerDeviceFeature {
   base_feature: ServerBaseDeviceFeature,
   #[getset(get_mut = "pub")]
@@ -202,12 +199,13 @@ impl PartialEq for ServerDeviceFeature {
   }
 }
 
-impl Eq for ServerDeviceFeature {}
+impl Eq for ServerDeviceFeature {
+}
 
 impl ServerDeviceFeature {
   pub fn new(
     base_feature: &ServerBaseDeviceFeature,
-    user_feature: &ServerUserDeviceFeature
+    user_feature: &ServerUserDeviceFeature,
   ) -> Self {
     if base_feature.id() != user_feature.base_id() {
       // TODO panic!
@@ -219,7 +217,13 @@ impl ServerDeviceFeature {
           for (output_type, output_feature) in output_map {
             // TODO What if we have a key in the user map that isn't in the base map? We should remove it.
             if user_output_map.contains_key(output_type) {
-              output.insert(*output_type, ServerDeviceFeatureOutput::new(output_feature, user_output_map.get(output_type).clone().unwrap()));
+              output.insert(
+                *output_type,
+                ServerDeviceFeatureOutput::new(
+                  output_feature,
+                  user_output_map.get(output_type).clone().unwrap(),
+                ),
+              );
             }
           }
         }
@@ -232,7 +236,7 @@ impl ServerDeviceFeature {
     Self {
       output,
       base_feature: base_feature.clone(),
-      user_feature: user_feature.clone()
+      user_feature: user_feature.clone(),
     }
   }
 
@@ -241,7 +245,7 @@ impl ServerDeviceFeature {
   }
 
   pub fn feature_type(&self) -> FeatureType {
-    self.base_feature.feature_type  
+    self.base_feature.feature_type
   }
 
   pub fn id(&self) -> Uuid {
@@ -251,7 +255,7 @@ impl ServerDeviceFeature {
   pub fn base_id(&self) -> Uuid {
     self.base_feature.id()
   }
-  
+
   pub fn alt_protocol_index(&self) -> Option<u32> {
     self.base_feature.feature_settings().alt_protocol_index()
   }
@@ -293,14 +297,17 @@ impl ServerDeviceFeature {
 pub struct ServerDeviceFeatureOutput {
   base_feature: ServerBaseDeviceFeatureOutput,
   #[getset(get_mut = "pub")]
-  user_feature: ServerUserDeviceFeatureOutput
+  user_feature: ServerUserDeviceFeatureOutput,
 }
 
 impl ServerDeviceFeatureOutput {
-  pub fn new(base_feature: &ServerBaseDeviceFeatureOutput, user_feature: &ServerUserDeviceFeatureOutput) -> Self {
+  pub fn new(
+    base_feature: &ServerBaseDeviceFeatureOutput,
+    user_feature: &ServerUserDeviceFeatureOutput,
+  ) -> Self {
     Self {
       base_feature: base_feature.clone(),
-      user_feature: user_feature.clone()
+      user_feature: user_feature.clone(),
     }
   }
 
@@ -318,14 +325,18 @@ impl ServerDeviceFeatureOutput {
 
   pub fn step_count(&self) -> u32 {
     if let Some(step_limit) = self.user_feature.step_limit() {
-      step_limit.end() - step_limit.start() 
+      step_limit.end() - step_limit.start()
     } else {
       self.base_feature.step_range.end() - self.base_feature.step_range.start()
     }
   }
 
   pub fn reverse_position(&self) -> bool {
-    *self.user_feature.reverse_position().as_ref().unwrap_or(&false)
+    *self
+      .user_feature
+      .reverse_position()
+      .as_ref()
+      .unwrap_or(&false)
   }
 
   pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
@@ -342,7 +353,7 @@ impl ServerDeviceFeatureOutput {
       } else if step_limit.start() < step_range.start() || step_limit.end() > step_range.end() {
         Err(ButtplugDeviceError::DeviceConfigurationError(
           "Step limit outside step range.".to_string(),
-        ))         
+        ))
       } else {
         Ok(())
       }

@@ -5,16 +5,16 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::{Endpoint, InputReadingV4},
-    util::{async_manager, sleep},
-  };
 use crate::device::{
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolKeepaliveStrategy},
+  hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+  protocol::{ProtocolHandler, ProtocolKeepaliveStrategy},
 };
-use futures::{future::BoxFuture};
+use buttplug_core::{
+  errors::ButtplugDeviceError,
+  message::{Endpoint, InputReadingV4},
+  util::{async_manager, sleep},
+};
+use futures::future::BoxFuture;
 use std::{
   sync::{
     atomic::{AtomicU32, Ordering},
@@ -37,9 +37,7 @@ impl LovenseStroker {
       hardware.clone(),
       linear_info.clone(),
     ));
-    Self {
-      linear_info
-    }
+    Self { linear_info }
   }
 }
 

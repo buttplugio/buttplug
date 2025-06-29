@@ -1,7 +1,7 @@
 use super::serializer::ButtplugClientJSONSerializer;
 use buttplug_core::{
-    connector::ButtplugRemoteConnector,
-    message::{ButtplugClientMessageV4, ButtplugServerMessageV4},
+  connector::ButtplugRemoteConnector,
+  message::{ButtplugClientMessageV4, ButtplugServerMessageV4},
 };
 
 pub type ButtplugRemoteClientConnector<

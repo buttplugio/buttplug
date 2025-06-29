@@ -6,13 +6,13 @@
 // for full license information.
 
 use super::device_message_info::DeviceMessageInfoV1;
-use buttplug_core::{
-  errors::ButtplugMessageError,
-  message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
-};  
 use crate::message::{
   v0::{DeviceListV0, DeviceMessageInfoV0},
   v2::DeviceListV2,
+};
+use buttplug_core::{
+  errors::ButtplugMessageError,
+  message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
 };
 use getset::Getters;
 use serde::{Deserialize, Serialize};

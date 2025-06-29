@@ -1,38 +1,38 @@
 use std::{collections::HashMap, fmt::Debug};
 
+use crate::message::{
+  server_device_attributes::TryFromClientMessage,
+  v0::ButtplugClientMessageV0,
+  v1::ButtplugClientMessageV1,
+  v2::ButtplugClientMessageV2,
+  v3::ButtplugClientMessageV3,
+  ButtplugClientMessageVariant,
+  RequestServerInfoV1,
+  ServerDeviceAttributes,
+  TryFromDeviceAttributes,
+};
 use buttplug_core::{
-    errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    message::{
-      ButtplugClientMessageV4,
-      ButtplugDeviceMessage,
-      ButtplugMessage,
-      ButtplugMessageFinalizer,
-      ButtplugMessageValidator,
-      PingV0,
-      RequestDeviceListV0,
-      RequestServerInfoV4,
-      StartScanningV0,
-      StopAllDevicesV0,
-      StopDeviceCmdV0,
-      StopScanningV0,
-    },
-  };
-  use crate::message::{
-    server_device_attributes::TryFromClientMessage,
-    v0::ButtplugClientMessageV0,
-    v1::ButtplugClientMessageV1,
-    v2::ButtplugClientMessageV2,
-    v3::ButtplugClientMessageV3,
-    ButtplugClientMessageVariant,
-    RequestServerInfoV1,
-    ServerDeviceAttributes,
-    TryFromDeviceAttributes,
+  errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+  message::{
+    ButtplugClientMessageV4,
+    ButtplugDeviceMessage,
+    ButtplugMessage,
+    ButtplugMessageFinalizer,
+    ButtplugMessageValidator,
+    PingV0,
+    RequestDeviceListV0,
+    RequestServerInfoV4,
+    StartScanningV0,
+    StopAllDevicesV0,
+    StopDeviceCmdV0,
+    StopScanningV0,
+  },
 };
 
 use super::{
+  checked_input_cmd::CheckedInputCmdV4,
   checked_output_cmd::CheckedOutputCmdV4,
   checked_output_vec_cmd::CheckedOutputVecCmdV4,
-  checked_input_cmd::CheckedInputCmdV4,
 };
 
 /// An CheckedClientMessage has had its contents verified and should need no further error/validity

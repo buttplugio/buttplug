@@ -9,14 +9,11 @@ use std::sync::atomic::{AtomicU8, Ordering};
 
 use uuid::{uuid, Uuid};
 
-use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::Endpoint,
-  };
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
 generic_protocol_setup!(SexverseLG389, "sexverse-lg389");
 
@@ -25,7 +22,7 @@ const SEXVERSE_PROTOCOL_UUID: Uuid = uuid!("575b2394-8f88-4367-a355-11321efda686
 #[derive(Default)]
 pub struct SexverseLG389 {
   vibe_speed: AtomicU8,
-  osc_speed: AtomicU8
+  osc_speed: AtomicU8,
 }
 
 impl SexverseLG389 {
@@ -40,29 +37,27 @@ impl SexverseLG389 {
       vec![0xaa, 0x05, vibe, 0x14, anchor, 0x00, range, 0x00, osc, 0x00],
       true,
     )
-    .into()])    
+    .into()])
   }
 }
 
 impl ProtocolHandler for SexverseLG389 {
-
-
   fn handle_output_vibrate_cmd(
-      &self,
-      _feature_index: u32,
-      _feature_id: uuid::Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    _feature_index: u32,
+    _feature_id: uuid::Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.vibe_speed.store(speed as u8, Ordering::Relaxed);
     self.generate_command()
   }
 
   fn handle_output_oscillate_cmd(
-      &self,
-      _feature_index: u32,
-      _feature_id: uuid::Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    _feature_index: u32,
+    _feature_id: uuid::Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.osc_speed.store(speed as u8, Ordering::Relaxed);
     self.generate_command()
   }

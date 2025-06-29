@@ -5,9 +5,22 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{errors::{ButtplugDeviceError, ButtplugError}, message::OutputType, util::json::JSONValidator};
 use super::{
-    ServerBaseDeviceFeature, BaseDeviceDefinition, BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder, DeviceSettings, ProtocolCommunicationSpecifier, UserDeviceCustomization, UserDeviceDefinition, UserDeviceIdentifier
+  BaseDeviceDefinition,
+  BaseDeviceIdentifier,
+  DeviceConfigurationManager,
+  DeviceConfigurationManagerBuilder,
+  DeviceSettings,
+  ProtocolCommunicationSpecifier,
+  ServerBaseDeviceFeature,
+  UserDeviceCustomization,
+  UserDeviceDefinition,
+  UserDeviceIdentifier,
+};
+use buttplug_core::{
+  errors::{ButtplugDeviceError, ButtplugError},
+  message::OutputType,
+  util::json::JSONValidator,
 };
 use dashmap::DashMap;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
@@ -57,12 +70,12 @@ struct ProtocolAttributes {
   identifier: Option<Vec<String>>,
   name: String,
   id: Uuid,
-  #[serde(skip_serializing_if = "Option::is_none", rename="protocol-variant")]
+  #[serde(skip_serializing_if = "Option::is_none", rename = "protocol-variant")]
   protocol_variant: Option<String>,
   #[serde(skip_serializing_if = "Option::is_none")]
   features: Option<Vec<ServerBaseDeviceFeature>>,
   #[serde(skip_serializing_if = "Option::is_none")]
-  device_settings: Option<DeviceSettings>
+  device_settings: Option<DeviceSettings>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
@@ -80,7 +93,7 @@ struct ProtocolDefinition {
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 struct UserFeatureOutputCustomization {
   step_limit: RangeInclusive<u32>,
-  reverse_position: bool
+  reverse_position: bool,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Getters, Setters, MutGetters)]
@@ -89,7 +102,7 @@ struct UserFeatureCustomization {
   id: Uuid,
   #[serde(rename = "base-id")]
   base_id: Uuid,
-  output: HashMap<OutputType, UserFeatureOutputCustomization>
+  output: HashMap<OutputType, UserFeatureOutputCustomization>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Getters, Setters, MutGetters)]
@@ -134,7 +147,7 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
           .features
           .as_ref()
           .expect("This is a default, therefore we'll always have features."),
-        &defaults.device_settings
+        &defaults.device_settings,
       );
       configurations.insert(None, config_attrs);
     }
@@ -155,7 +168,7 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
                 .as_ref()
                 .unwrap_or(&vec![]),
             ),
-            &config.device_settings
+            &config.device_settings,
           );
           configurations.insert(Some(identifier.to_owned()), config_attrs);
         }

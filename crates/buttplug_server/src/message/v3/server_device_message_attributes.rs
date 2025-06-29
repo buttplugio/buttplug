@@ -5,10 +5,9 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use 
-  buttplug_core::message::{InputType, OutputType};
-  use crate::{message::v1::NullDeviceMessageAttributesV1};
-  use buttplug_server_device_config::ServerDeviceFeature;
+use crate::message::v1::NullDeviceMessageAttributesV1;
+use buttplug_core::message::{InputType, OutputType};
+use buttplug_server_device_config::ServerDeviceFeature;
 
 use getset::{Getters, MutGetters, Setters};
 use std::ops::RangeInclusive;
@@ -22,10 +21,8 @@ pub struct ServerDeviceMessageAttributesV3 {
   pub(in crate::message) linear_cmd: Option<Vec<ServerGenericDeviceMessageAttributesV3>>,
 
   // Sensor Messages
-  pub(in crate::message) sensor_read_cmd:
-    Option<Vec<ServerSensorDeviceMessageAttributesV3>>,
-  pub(in crate::message) sensor_subscribe_cmd:
-    Option<Vec<ServerSensorDeviceMessageAttributesV3>>,
+  pub(in crate::message) sensor_read_cmd: Option<Vec<ServerSensorDeviceMessageAttributesV3>>,
+  pub(in crate::message) sensor_subscribe_cmd: Option<Vec<ServerSensorDeviceMessageAttributesV3>>,
 
   // StopDeviceCmd always exists
   pub(in crate::message) stop_device_cmd: NullDeviceMessageAttributesV1,

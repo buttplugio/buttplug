@@ -12,24 +12,22 @@ use super::lovense_dongle_messages::{
   LovenseDongleOutgoingMessage,
   OutgoingLovenseData,
 };
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
-use buttplug_server_device_config::{BluetoothLESpecifier, ProtocolCommunicationSpecifier};
-use buttplug_server::device::{
-    hardware::{
-      GenericHardwareSpecializer,
-      Hardware,
-      HardwareConnector,
-      HardwareEvent,
-      HardwareInternal,
-      HardwareReadCmd,
-      HardwareReading,
-      HardwareSpecializer,
-      HardwareSubscribeCmd,
-      HardwareUnsubscribeCmd,
-      HardwareWriteCmd,
-    },
-};
 use async_trait::async_trait;
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
+use buttplug_server::device::hardware::{
+  GenericHardwareSpecializer,
+  Hardware,
+  HardwareConnector,
+  HardwareEvent,
+  HardwareInternal,
+  HardwareReadCmd,
+  HardwareReading,
+  HardwareSpecializer,
+  HardwareSubscribeCmd,
+  HardwareUnsubscribeCmd,
+  HardwareWriteCmd,
+};
+use buttplug_server_device_config::{BluetoothLESpecifier, ProtocolCommunicationSpecifier};
 use futures::future::{self, BoxFuture, FutureExt};
 use std::{
   collections::HashMap,
@@ -37,7 +35,8 @@ use std::{
   sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
-  }, time::Duration,
+  },
+  time::Duration,
 };
 use tokio::sync::{broadcast, mpsc};
 

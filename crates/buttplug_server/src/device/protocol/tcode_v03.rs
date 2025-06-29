@@ -7,11 +7,11 @@
 
 use uuid::Uuid;
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
 generic_protocol_setup!(TCodeV03, "tcode-v03");
 
@@ -29,7 +29,13 @@ impl ProtocolHandler for TCodeV03 {
 
     let command = format!("L0{position:03}\nR0{position:03}\n");
     msg_vec.push(
-      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, command.as_bytes().to_vec(), false).into(),
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        command.as_bytes().to_vec(),
+        false,
+      )
+      .into(),
     );
 
     Ok(msg_vec)
@@ -46,7 +52,13 @@ impl ProtocolHandler for TCodeV03 {
 
     let command = format!("L{feature_index}{position:02}I{duration}\n");
     msg_vec.push(
-      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, command.as_bytes().to_vec(), false).into(),
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        command.as_bytes().to_vec(),
+        false,
+      )
+      .into(),
     );
 
     Ok(msg_vec)

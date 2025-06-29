@@ -13,7 +13,7 @@ use super::{
   },
   lovense_dongle_state_machine::create_lovense_dongle_machine,
 };
-use buttplug_core::{errors::ButtplugDeviceError, ButtplugResultFuture, util::async_manager};
+use buttplug_core::{errors::ButtplugDeviceError, util::async_manager, ButtplugResultFuture};
 use buttplug_server::device::hardware::communication::{
   HardwareCommunicationManager,
   HardwareCommunicationManagerBuilder,
@@ -30,8 +30,8 @@ use std::{
   thread,
 };
 use tokio::{
-  select,
   runtime,
+  select,
   sync::{
     mpsc::{channel, Receiver, Sender},
     Mutex,

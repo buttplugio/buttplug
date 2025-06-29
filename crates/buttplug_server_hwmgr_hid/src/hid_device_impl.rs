@@ -1,22 +1,20 @@
 use super::hidapi_async::HidAsyncDevice;
-use buttplug_core::{message::Endpoint, errors::ButtplugDeviceError};
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, VIDPIDSpecifier};
-use buttplug_server::device::{
-    hardware::{
-      GenericHardwareSpecializer,
-      Hardware,
-      HardwareConnector,
-      HardwareEvent,
-      HardwareInternal,
-      HardwareReadCmd,
-      HardwareReading,
-      HardwareSpecializer,
-      HardwareSubscribeCmd,
-      HardwareUnsubscribeCmd,
-      HardwareWriteCmd,
-    },
-};
 use async_trait::async_trait;
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_server::device::hardware::{
+  GenericHardwareSpecializer,
+  Hardware,
+  HardwareConnector,
+  HardwareEvent,
+  HardwareInternal,
+  HardwareReadCmd,
+  HardwareReading,
+  HardwareSpecializer,
+  HardwareSubscribeCmd,
+  HardwareUnsubscribeCmd,
+  HardwareWriteCmd,
+};
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, VIDPIDSpecifier};
 use futures::{future::BoxFuture, AsyncWriteExt};
 use hidapi::{DeviceInfo, HidApi};
 use std::{

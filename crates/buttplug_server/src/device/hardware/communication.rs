@@ -5,9 +5,12 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{{errors::ButtplugDeviceError, ButtplugResultFuture}, util::{async_manager, sleep}};
 use crate::device::hardware::HardwareConnector;
 use async_trait::async_trait;
+use buttplug_core::{
+  util::{async_manager, sleep},
+  {errors::ButtplugDeviceError, ButtplugResultFuture},
+};
 use futures::future::{self, FutureExt};
 use serde::{Deserialize, Serialize};
 use std::{sync::Arc, time::Duration};
@@ -48,7 +51,7 @@ pub trait HardwareCommunicationManager: Send + Sync {
 #[derive(Error, Debug, Clone, Display, Serialize, Deserialize, PartialEq, Eq)]
 pub enum HardwareSpecificError {
   // HardwareSpecificError: {} Error: {}
-  HardwareSpecificError(String, String)
+  HardwareSpecificError(String, String),
 }
 
 #[async_trait]

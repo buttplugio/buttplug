@@ -6,23 +6,23 @@
 // for full license information.
 
 use buttplug_core::{
-    connector::{
-      transport::{
-        ButtplugConnectorTransport,
-        ButtplugConnectorTransportSpecificError,
-        ButtplugTransportIncomingMessage,
-      },
-      ButtplugConnectorError,
-      ButtplugConnectorResultFuture,
+  connector::{
+    transport::{
+      ButtplugConnectorTransport,
+      ButtplugConnectorTransportSpecificError,
+      ButtplugTransportIncomingMessage,
     },
-    message::serializer::ButtplugSerializedMessage,
+    ButtplugConnectorError,
+    ButtplugConnectorResultFuture,
+  },
+  message::serializer::ButtplugSerializedMessage,
   util::async_manager,
 };
 use futures::{future::BoxFuture, FutureExt, SinkExt, StreamExt};
 use std::{sync::Arc, time::Duration};
 use tokio::{
-  select,
   net::{TcpListener, TcpStream},
+  select,
   sync::{
     mpsc::{Receiver, Sender},
     Notify,

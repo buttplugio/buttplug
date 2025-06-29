@@ -44,50 +44,53 @@ use std::{
 };
 
 use buttplug_core::{
-    errors::{ButtplugDeviceError, ButtplugError},
-    message::{
-      self,
-      OutputRotateWithDirection,
-      OutputType,
-      OutputValue,
-      ButtplugServerMessageV4,
-      DeviceFeature,
-      DeviceMessageInfoV4,
-      InputCommandType,
-      InputType,
-    },
-    ButtplugResultFuture,
-    util::{self, async_manager, stream::convert_broadcast_receiver_to_stream},
-  };
-  use buttplug_server_device_config::{DeviceConfigurationManager, DeviceDefinition, UserDeviceIdentifier};
-
-use  crate::{
-    device::{
-      hardware::{
-        Hardware,
-        HardwareCommand,
-        HardwareConnector,
-        HardwareEvent,
-      },
-      protocol::{ProtocolHandler,
-    ProtocolKeepaliveStrategy,
-    ProtocolSpecializer,
+  errors::{ButtplugDeviceError, ButtplugError},
+  message::{
+    self,
+    ButtplugServerMessageV4,
+    DeviceFeature,
+    DeviceMessageInfoV4,
+    InputCommandType,
+    InputType,
+    OutputRotateWithDirection,
+    OutputType,
+    OutputValue,
   },
-    },
-    message::{
-      checked_output_cmd::CheckedOutputCmdV4,
-      checked_input_cmd::CheckedInputCmdV4,
-      server_device_attributes::ServerDeviceAttributes,
-      spec_enums::ButtplugDeviceCommandMessageUnionV4,
-      ButtplugServerDeviceMessage,
-    },
-    ButtplugServerResultFuture,
+  util::{self, async_manager, stream::convert_broadcast_receiver_to_stream},
+  ButtplugResultFuture,
+};
+use buttplug_server_device_config::{
+  DeviceConfigurationManager,
+  DeviceDefinition,
+  UserDeviceIdentifier,
+};
+
+use crate::{
+  device::{
+    hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent},
+    protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, ProtocolSpecializer},
+  },
+  message::{
+    checked_input_cmd::CheckedInputCmdV4,
+    checked_output_cmd::CheckedOutputCmdV4,
+    server_device_attributes::ServerDeviceAttributes,
+    spec_enums::ButtplugDeviceCommandMessageUnionV4,
+    ButtplugServerDeviceMessage,
+  },
+  ButtplugServerResultFuture,
 };
 use core::hash::{Hash, Hasher};
 use dashmap::DashMap;
 use futures::future::{self, BoxFuture, FutureExt};
 use getset::Getters;
-use tokio::{select, sync::{mpsc::{channel, Sender}, Mutex}, time::Instant};
+use tokio::{
+  select,
+  sync::{
+    mpsc::{channel, Sender},
+    Mutex,
+  },
+  time::Instant,
+};
 use tokio_stream::StreamExt;
 use uuid::Uuid;
 
@@ -113,7 +116,7 @@ pub struct ServerDevice {
   last_output_command: DashMap<Uuid, CheckedOutputCmdV4>,
 
   stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4>,
-  internal_hw_msg_sender: Sender<Vec<HardwareCommand>>
+  internal_hw_msg_sender: Sender<Vec<HardwareCommand>>,
 }
 impl Debug for ServerDevice {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -187,9 +190,7 @@ impl ServerDevice {
     // put it in an unknown state if anything fails.
 
     // Check in the DeviceConfigurationManager to make sure we have attributes for this device.
-    let attrs = if let Some(attrs) =
-      device_config_manager.device_definition(&identifier)
-    {
+    let attrs = if let Some(attrs) = device_config_manager.device_definition(&identifier) {
       attrs
     } else {
       return Err(ButtplugDeviceError::DeviceConfigurationError(format!(
@@ -216,7 +217,8 @@ impl ServerDevice {
       && matches!(
         strategy,
         ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
-      )) || matches!(
+      ))
+      || matches!(
         strategy,
         ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_)
       )
@@ -250,15 +252,16 @@ impl ServerDevice {
     {
       let hardware = hardware.clone();
       let strategy = handler.keepalive_strategy();
-      let strategy_duration = if let ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(duration) = strategy {
-        Some(duration)
-      } else {
-        None
-      };
+      let strategy_duration =
+        if let ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(duration) = strategy {
+          Some(duration)
+        } else {
+          None
+        };
       async_manager::spawn(async move {
         let keepalive_packet = Mutex::new(None);
         // TODO This needs to throw system error messages
-        let send_hw_cmd = async |command| { 
+        let send_hw_cmd = async |command| {
           let _ = hardware.parse_message(&command).await;
           if hardware.requires_keepalive()
             && matches!(
@@ -282,7 +285,7 @@ impl ServerDevice {
             } else {
               future::pending::<()>().await;
             };
-          };          
+          };
           select! {
             msg = internal_hw_msg_recv.recv() => {
               if msg.is_none() {
@@ -382,9 +385,8 @@ impl ServerDevice {
       if let Some(output_map) = feature.output() {
         for actuator_type in output_map.keys() {
           let mut stop_cmd = |actuator_cmd| {
-            stop_commands.push(
-              CheckedOutputCmdV4::new(1, 0, index as u32, feature.id(), actuator_cmd).into(),
-            );
+            stop_commands
+              .push(CheckedOutputCmdV4::new(1, 0, index as u32, feature.id(), actuator_cmd).into());
           };
 
           // Break out of these if one is found, we only need 1 stop message per output.
@@ -441,7 +443,7 @@ impl ServerDevice {
       legacy_attributes: ServerDeviceAttributes::new(&definition.features()),
       last_output_command: DashMap::new(),
       stop_commands,
-      internal_hw_msg_sender
+      internal_hw_msg_sender,
     }
   }
 

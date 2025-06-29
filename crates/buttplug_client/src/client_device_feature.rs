@@ -4,10 +4,21 @@ use futures::{future, FutureExt};
 use getset::{CopyGetters, Getters};
 
 use buttplug_core::{
-    errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    message::{
-      ButtplugDeviceMessageNameV4, ButtplugServerMessageV4, DeviceFeature, InputCmdV4, InputCommandType, InputType, OutputCmdV4, OutputCommand, OutputPositionWithDuration, OutputRotateWithDirection, OutputType, OutputValue
-    },
+  errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+  message::{
+    ButtplugDeviceMessageNameV4,
+    ButtplugServerMessageV4,
+    DeviceFeature,
+    InputCmdV4,
+    InputCommandType,
+    InputType,
+    OutputCmdV4,
+    OutputCommand,
+    OutputPositionWithDuration,
+    OutputRotateWithDirection,
+    OutputType,
+    OutputValue,
+  },
 };
 
 use super::{

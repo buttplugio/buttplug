@@ -9,11 +9,11 @@ use std::sync::atomic::{AtomicU8, Ordering};
 
 use uuid::{uuid, Uuid};
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
 const HTK_BM_PROTOCOL_UUID: Uuid = uuid!("4c70cb95-d3d9-4288-81ab-be845f9ad1fe");
 generic_protocol_setup!(HtkBm, "htk_bm");
@@ -31,8 +31,6 @@ impl Default for HtkBm {
 }
 
 impl ProtocolHandler for HtkBm {
-
-
   fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,

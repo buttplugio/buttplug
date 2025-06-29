@@ -9,17 +9,26 @@ use async_trait::async_trait;
 use uuid::{uuid, Uuid};
 
 use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::{Endpoint, OutputType},
-  };
-  
-  use buttplug_server_device_config::{DeviceDefinition, UserDeviceIdentifier};
-use crate::device::{
-     hardware::{Hardware, HardwareCommand, HardwareWriteCmd}, protocol::{
-      ProtocolCommunicationSpecifier, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, ProtocolKeepaliveStrategy,  generic_protocol_initializer_setup,
-    }
+  errors::ButtplugDeviceError,
+  message::{Endpoint, OutputType},
 };
-use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
+
+use crate::device::{
+  hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+  protocol::{
+    generic_protocol_initializer_setup,
+    ProtocolCommunicationSpecifier,
+    ProtocolHandler,
+    ProtocolIdentifier,
+    ProtocolInitializer,
+    ProtocolKeepaliveStrategy,
+  },
+};
+use buttplug_server_device_config::{DeviceDefinition, UserDeviceIdentifier};
+use std::sync::{
+  atomic::{AtomicU8, Ordering},
+  Arc,
+};
 
 const SVAKOM_V6_VIBRATOR_UUID: Uuid = uuid!("4cf33d95-a3d1-4ed4-9ac6-9ba6d6ccb091");
 
@@ -35,13 +44,17 @@ impl ProtocolInitializer for SvakomV6Initializer {
     _: Arc<Hardware>,
     def: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let num_vibrators = def.features().iter().filter(|x| {
-      if let Some(output_map) = x.output() {
-        output_map.contains_key(&OutputType::Vibrate)
-      } else {
-        false
-      }
-    }).count() as u8;
+    let num_vibrators = def
+      .features()
+      .iter()
+      .filter(|x| {
+        if let Some(output_map) = x.output() {
+          output_map.contains_key(&OutputType::Vibrate)
+        } else {
+          false
+        }
+      })
+      .count() as u8;
     Ok(Arc::new(SvakomV6::new(num_vibrators)))
   }
 }
@@ -56,7 +69,7 @@ impl SvakomV6 {
   fn new(num_vibrators: u8) -> Self {
     Self {
       num_vibrators,
-      .. Default::default()
+      ..Default::default()
     }
   }
 }
@@ -71,7 +84,7 @@ impl ProtocolHandler for SvakomV6 {
     feature_index: u32,
     feature_id: uuid::Uuid,
     speed: u32,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {    
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.last_vibrator_speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     if feature_index < 2 {
       let vibe1 = self.last_vibrator_speeds[0].load(Ordering::Relaxed);
@@ -96,7 +109,7 @@ impl ProtocolHandler for SvakomV6 {
             0x01
           },
           vibe1.max(vibe2) as u8,
-          0x00
+          0x00,
         ]
         .to_vec(),
         false,
@@ -118,7 +131,8 @@ impl ProtocolHandler for SvakomV6 {
         ]
         .to_vec(),
         false,
-      ).into()])
+      )
+      .into()])
     }
   }
 }

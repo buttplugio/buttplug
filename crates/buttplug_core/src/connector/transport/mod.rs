@@ -12,10 +12,10 @@ use crate::connector::{
   ButtplugConnectorResultFuture,
   ButtplugSerializedMessage,
 };
+use displaydoc::Display;
 use futures::future::BoxFuture;
 use thiserror::Error;
 use tokio::sync::mpsc::{Receiver, Sender};
-use displaydoc::Display;
 
 /// Messages we can receive from a connector.
 #[derive(Clone, Debug, Display)]

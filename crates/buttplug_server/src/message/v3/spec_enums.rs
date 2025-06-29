@@ -5,29 +5,28 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use 
-  buttplug_core::{
-    errors::{ButtplugError, ButtplugMessageError},
-    message::{
-      ButtplugMessage,
-      ButtplugMessageFinalizer,
-      ButtplugMessageValidator,
-      ButtplugServerMessageV4,
-      DeviceRemovedV0,
-      ErrorV0,
-      OkV0,
-      PingV0,
-      RequestDeviceListV0,
-      ScanningFinishedV0,
-      StartScanningV0,
-      StopAllDevicesV0,
-      StopDeviceCmdV0,
-      StopScanningV0,
-    },
-  };
-  use crate::message::{
-    v1::{LinearCmdV1, RequestServerInfoV1, RotateCmdV1, VibrateCmdV1},
-    v2::{ButtplugClientMessageV2, ButtplugServerMessageV2, ServerInfoV2},
+use crate::message::{
+  v1::{LinearCmdV1, RequestServerInfoV1, RotateCmdV1, VibrateCmdV1},
+  v2::{ButtplugClientMessageV2, ButtplugServerMessageV2, ServerInfoV2},
+};
+use buttplug_core::{
+  errors::{ButtplugError, ButtplugMessageError},
+  message::{
+    ButtplugMessage,
+    ButtplugMessageFinalizer,
+    ButtplugMessageValidator,
+    ButtplugServerMessageV4,
+    DeviceRemovedV0,
+    ErrorV0,
+    OkV0,
+    PingV0,
+    RequestDeviceListV0,
+    ScanningFinishedV0,
+    StartScanningV0,
+    StopAllDevicesV0,
+    StopDeviceCmdV0,
+    StopScanningV0,
+  },
 };
 use serde::{Deserialize, Serialize};
 

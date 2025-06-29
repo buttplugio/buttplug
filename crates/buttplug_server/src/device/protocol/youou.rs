@@ -6,11 +6,15 @@
 // for full license information.
 
 use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
+use buttplug_server_device_config::{
+  DeviceDefinition,
+  ProtocolCommunicationSpecifier,
+  UserDeviceIdentifier,
+};
 
 use crate::device::{
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+  hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+  protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
 };
 use async_trait::async_trait;
 use std::sync::{

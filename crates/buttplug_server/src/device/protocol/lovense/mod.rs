@@ -6,30 +6,40 @@
 // for full license information.
 
 mod lovense_max;
+mod lovense_multi_actuator;
 mod lovense_rotate_vibrator;
 mod lovense_single_actuator;
-mod lovense_multi_actuator;
 mod lovense_stroker;
 
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
-use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::{self, Endpoint, FeatureType, InputReadingV4},
-    util::sleep
-  };
 use crate::device::{
-    hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
-    protocol::{lovense::{lovense_max::LovenseMax, lovense_multi_actuator::LovenseMultiActuator, lovense_rotate_vibrator::LovenseRotateVibrator, lovense_single_actuator::LovenseSingleActuator, lovense_stroker::LovenseStroker}, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-};
-use regex::Regex;
-use async_trait::async_trait;
-use futures::{future::BoxFuture, FutureExt};
-use std::{
-  sync::{
-    Arc,
+  hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
+  protocol::{
+    lovense::{
+      lovense_max::LovenseMax,
+      lovense_multi_actuator::LovenseMultiActuator,
+      lovense_rotate_vibrator::LovenseRotateVibrator,
+      lovense_single_actuator::LovenseSingleActuator,
+      lovense_stroker::LovenseStroker,
+    },
+    ProtocolHandler,
+    ProtocolIdentifier,
+    ProtocolInitializer,
   },
-  time::Duration,
 };
+use async_trait::async_trait;
+use buttplug_core::{
+  errors::ButtplugDeviceError,
+  message::{self, Endpoint, FeatureType, InputReadingV4},
+  util::sleep,
+};
+use buttplug_server_device_config::{
+  DeviceDefinition,
+  ProtocolCommunicationSpecifier,
+  UserDeviceIdentifier,
+};
+use futures::{future::BoxFuture, FutureExt};
+use regex::Regex;
+use std::{sync::Arc, time::Duration};
 use tokio::select;
 use uuid::{uuid, Uuid};
 
@@ -173,13 +183,33 @@ impl ProtocolInitializer for LovenseInitializer {
       .filter(|x| x.output().is_some())
       .count();
 
-    let vibrator_rotator = output_count == 2 && 
-      device_definition.features().iter().filter(|x| x.feature_type() == FeatureType::Vibrate).count() == 1 &&
-      device_definition.features().iter().filter(|x| x.feature_type() == FeatureType::RotateWithDirection).count() == 1;
+    let vibrator_rotator = output_count == 2
+      && device_definition
+        .features()
+        .iter()
+        .filter(|x| x.feature_type() == FeatureType::Vibrate)
+        .count()
+        == 1
+      && device_definition
+        .features()
+        .iter()
+        .filter(|x| x.feature_type() == FeatureType::RotateWithDirection)
+        .count()
+        == 1;
 
-    let lovense_max = output_count == 2 && 
-      device_definition.features().iter().filter(|x| x.feature_type() == FeatureType::Vibrate).count() == 1 &&
-      device_definition.features().iter().filter(|x| x.feature_type() == FeatureType::Constrict).count() == 1;
+    let lovense_max = output_count == 2
+      && device_definition
+        .features()
+        .iter()
+        .filter(|x| x.feature_type() == FeatureType::Vibrate)
+        .count()
+        == 1
+      && device_definition
+        .features()
+        .iter()
+        .filter(|x| x.feature_type() == FeatureType::Constrict)
+        .count()
+        == 1;
 
     // This might need better tuning if other complex Lovenses are released
     // Currently this only applies to the Flexer/Lapis/Solace
@@ -206,9 +236,7 @@ impl ProtocolInitializer for LovenseInitializer {
     } else if vibrator_rotator {
       Ok(Arc::new(LovenseRotateVibrator::default()))
     } else {
-      Ok(Arc::new(LovenseMultiActuator::new(
-        vibrator_count as u32,
-      )))
+      Ok(Arc::new(LovenseMultiActuator::new(vibrator_count as u32)))
     }
   }
 }
@@ -410,11 +438,11 @@ impl ProtocolHandler for Lovense {
   */
 
 fn handle_battery_level_cmd(
-    device_index: u32,
-    device: Arc<Hardware>,
-    feature_index: u32,
-    feature_id: Uuid,
-  ) -> BoxFuture<'static, Result<InputReadingV4, ButtplugDeviceError>> {
+  device_index: u32,
+  device: Arc<Hardware>,
+  feature_index: u32,
+  feature_id: Uuid,
+) -> BoxFuture<'static, Result<InputReadingV4, ButtplugDeviceError>> {
   let mut device_notification_receiver = device.event_stream();
   async move {
     let write_fut = device.write_value(&HardwareWriteCmd::new(
@@ -475,7 +503,10 @@ pub(super) fn keepalive_strategy() -> super::ProtocolKeepaliveStrategy {
   ))
 }
 
-pub(super) fn form_lovense_command(feature_id: Uuid, command: &str) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+pub(super) fn form_lovense_command(
+  feature_id: Uuid,
+  command: &str,
+) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
   Ok(vec![HardwareWriteCmd::new(
     &[feature_id],
     Endpoint::Tx,
@@ -485,25 +516,38 @@ pub(super) fn form_lovense_command(feature_id: Uuid, command: &str) -> Result<Ve
   .into()])
 }
 
-pub(super) fn form_vibrate_command(feature_id: Uuid, speed: u32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+pub(super) fn form_vibrate_command(
+  feature_id: Uuid,
+  speed: u32,
+) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
   form_lovense_command(feature_id, &format!("Vibrate:{speed};"))
 }
 
 // Due to swapping direction with lovense requiring a seperate command, we have to treat these like
 // two seperate outputs, otherwise we'll stomp on ourselves. Luckily Lovense devices currently only
-// have one rotation mechanism. 
+// have one rotation mechanism.
 const LOVENSE_ROTATE_UUID: Uuid = uuid!("4a741489-922f-4f0b-a594-175b75482849");
 const LOVENSE_ROTATE_DIRECTION_UUID: Uuid = uuid!("4ad23456-2ba8-4916-bd91-9b603811f253");
 
-pub(super) fn form_rotate_with_direction_command(speed: u32, change_direction: bool) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+pub(super) fn form_rotate_with_direction_command(
+  speed: u32,
+  change_direction: bool,
+) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
   let mut hardware_cmds = vec![];
-    let lovense_cmd = format!("Rotate:{speed};").as_bytes().to_vec();
-    hardware_cmds.push(HardwareWriteCmd::new(&[LOVENSE_ROTATE_UUID], Endpoint::Tx, lovense_cmd, false).into());
-    if change_direction {
-      hardware_cmds.push(
-        HardwareWriteCmd::new(&[LOVENSE_ROTATE_DIRECTION_UUID], Endpoint::Tx, b"RotateChange;".to_vec(), false).into(),
-      );
-    }
-    trace!("{:?}", hardware_cmds);
-    Ok(hardware_cmds)
+  let lovense_cmd = format!("Rotate:{speed};").as_bytes().to_vec();
+  hardware_cmds
+    .push(HardwareWriteCmd::new(&[LOVENSE_ROTATE_UUID], Endpoint::Tx, lovense_cmd, false).into());
+  if change_direction {
+    hardware_cmds.push(
+      HardwareWriteCmd::new(
+        &[LOVENSE_ROTATE_DIRECTION_UUID],
+        Endpoint::Tx,
+        b"RotateChange;".to_vec(),
+        false,
+      )
+      .into(),
+    );
+  }
+  trace!("{:?}", hardware_cmds);
+  Ok(hardware_cmds)
 }

@@ -9,30 +9,30 @@ use super::{
   device::ServerDeviceManager,
   message::{
     server_device_attributes::TryFromClientMessage,
-    ButtplugClientMessageVariant,
-    ButtplugServerMessageVariant,
     spec_enums::{
       ButtplugCheckedClientMessageV4,
       ButtplugDeviceCommandMessageUnionV4,
       ButtplugDeviceManagerMessageUnion,
     },
+    ButtplugClientMessageVariant,
+    ButtplugServerMessageVariant,
   },
   ping_timer::PingTimer,
   server_message_conversion::ButtplugServerMessageConverter,
   ButtplugServerResultFuture,
 };
 use buttplug_core::{
-    errors::*,
-    message::{
-      self,
-      ButtplugMessage,
-      ButtplugMessageSpecVersion,
-      ButtplugServerMessageV4,
-      ErrorV0,
-      StopAllDevicesV0,
-      StopScanningV0,
-      BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-    },
+  errors::*,
+  message::{
+    self,
+    ButtplugMessage,
+    ButtplugMessageSpecVersion,
+    ButtplugServerMessageV4,
+    ErrorV0,
+    StopAllDevicesV0,
+    StopScanningV0,
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+  },
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use futures::{
@@ -40,7 +40,6 @@ use futures::{
   Stream,
 };
 use once_cell::sync::OnceCell;
-use tracing::info_span;
 use std::{
   fmt,
   sync::{
@@ -50,6 +49,7 @@ use std::{
 };
 use tokio::sync::broadcast;
 use tokio_stream::StreamExt;
+use tracing::info_span;
 use tracing_futures::Instrument;
 
 /// The server side of the Buttplug protocol. Frontend for connection to device management and

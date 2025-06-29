@@ -5,14 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::message::{OutputType, DeviceFeature, InputCommandType, InputType};
 use crate::message::{
-    v1::NullDeviceMessageAttributesV1,
-    v2::{
-      ClientDeviceMessageAttributesV2,
-      GenericDeviceMessageAttributesV2,
-    },
+  v1::NullDeviceMessageAttributesV1,
+  v2::{ClientDeviceMessageAttributesV2, GenericDeviceMessageAttributesV2},
 };
+use buttplug_core::message::{DeviceFeature, InputCommandType, InputType, OutputType};
 use getset::{Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use std::ops::RangeInclusive;
@@ -139,7 +136,6 @@ impl From<ClientDeviceMessageAttributesV3> for ClientDeviceMessageAttributesV2 {
 }
 
 impl ClientDeviceMessageAttributesV3 {
-
   pub fn finalize(&mut self) {
     if let Some(scalar_attrs) = &mut self.scalar_cmd {
       for (i, attr) in scalar_attrs.iter_mut().enumerate() {

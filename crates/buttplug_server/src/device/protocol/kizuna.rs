@@ -7,11 +7,11 @@
 
 use uuid::Uuid;
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
 generic_protocol_setup!(Kizuna, "kizuna");
 
@@ -19,8 +19,6 @@ generic_protocol_setup!(Kizuna, "kizuna");
 pub struct Kizuna {}
 
 impl ProtocolHandler for Kizuna {
-
-
   fn handle_output_rotate_cmd(
     &self,
     _feature_index: u32,

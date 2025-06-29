@@ -6,24 +6,25 @@
 // for full license information.
 
 use super::lovense_connect_service_comm_manager::{get_local_info, LovenseServiceToyInfo};
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
-use buttplug_server_device_config::{LovenseConnectServiceSpecifier, ProtocolCommunicationSpecifier};
-use buttplug_server::device::{
-    hardware::{
-      GenericHardwareSpecializer,
-      Hardware,
-      HardwareConnector,
-      HardwareEvent,
-      HardwareInternal,
-      HardwareReadCmd,
-      HardwareReading,
-      HardwareSpecializer,
-      HardwareSubscribeCmd,
-      HardwareUnsubscribeCmd,
-      HardwareWriteCmd,
-  },
-};
 use async_trait::async_trait;
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
+use buttplug_server::device::hardware::{
+  GenericHardwareSpecializer,
+  Hardware,
+  HardwareConnector,
+  HardwareEvent,
+  HardwareInternal,
+  HardwareReadCmd,
+  HardwareReading,
+  HardwareSpecializer,
+  HardwareSubscribeCmd,
+  HardwareUnsubscribeCmd,
+  HardwareWriteCmd,
+};
+use buttplug_server_device_config::{
+  LovenseConnectServiceSpecifier,
+  ProtocolCommunicationSpecifier,
+};
 use futures::future::{self, BoxFuture, FutureExt};
 use std::{
   fmt::{self, Debug},

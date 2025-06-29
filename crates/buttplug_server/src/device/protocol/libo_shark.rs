@@ -9,11 +9,11 @@ use std::sync::atomic::{AtomicU8, Ordering};
 
 use uuid::{uuid, Uuid};
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
 const LIBO_SHARK_PROTOCOL_UUID: Uuid = uuid!("c0044425-b59c-4037-a702-0438afcaad3e");
 generic_protocol_setup!(LiboShark, "libo-shark");
@@ -24,8 +24,6 @@ pub struct LiboShark {
 }
 
 impl ProtocolHandler for LiboShark {
-
-
   fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,

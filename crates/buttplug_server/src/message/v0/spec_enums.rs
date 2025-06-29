@@ -1,11 +1,11 @@
 use std::cmp::Ordering;
 
 use super::*;
-use buttplug_core::{
-    errors::ButtplugMessageError,
-    message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, PingV0},
-  };
 use crate::message::RequestServerInfoV1;
+use buttplug_core::{
+  errors::ButtplugMessageError,
+  message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, PingV0},
+};
 
 use serde::{Deserialize, Serialize};
 

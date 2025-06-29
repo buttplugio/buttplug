@@ -9,11 +9,11 @@ use std::sync::atomic::{AtomicU8, Ordering};
 
 use uuid::{uuid, Uuid};
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
 const JEJOUE_PROTOCOL_UUID: Uuid = uuid!("d3dd2bf5-b029-4bc1-9466-39f82c2e3258");
 generic_protocol_setup!(JeJoue, "jejoue");
@@ -31,8 +31,6 @@ impl Default for JeJoue {
 }
 
 impl ProtocolHandler for JeJoue {
-
-
   fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,

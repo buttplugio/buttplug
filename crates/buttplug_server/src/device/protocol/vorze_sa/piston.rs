@@ -1,10 +1,8 @@
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{
-      vorze_sa::VorzeDevice, ProtocolHandler
-    },
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{vorze_sa::VorzeDevice, ProtocolHandler},
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
@@ -42,12 +40,12 @@ pub fn get_piston_speed(mut distance: f64, mut duration: f64) -> u8 {
 
 impl ProtocolHandler for VorzeSAPiston {
   fn handle_position_with_duration_cmd(
-      &self,
-      _feature_index: u32,
-      feature_id: uuid::Uuid,
-      position: u32,
-      duration: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    _feature_index: u32,
+    feature_id: uuid::Uuid,
+    position: u32,
+    duration: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let previous_position = self.previous_position.load(Ordering::Relaxed);
     let position = position as u8;
     let distance = (previous_position as f64 - position as f64).abs();

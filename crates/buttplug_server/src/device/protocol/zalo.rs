@@ -7,31 +7,26 @@
 
 use std::sync::atomic::{AtomicU8, Ordering};
 
-use buttplug_core::{
-    errors::ButtplugDeviceError,
-    message::{Endpoint},
-  };
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
 generic_protocol_setup!(Zalo, "zalo");
 
 #[derive(Default)]
 pub struct Zalo {
-  speeds: [AtomicU8; 2]
+  speeds: [AtomicU8; 2],
 }
 
 impl ProtocolHandler for Zalo {
-
-
   fn handle_output_vibrate_cmd(
-      &self,
-      feature_index: u32,
-      feature_id: uuid::Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    feature_index: u32,
+    feature_id: uuid::Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     let speed0: u8 = self.speeds[0].load(Ordering::Relaxed);
     let speed1: u8 = self.speeds[1].load(Ordering::Relaxed);

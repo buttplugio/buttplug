@@ -5,33 +5,32 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{
-      vorze_sa::{VorzeActions, VorzeDevice}, ProtocolHandler,
-    },
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{
+    vorze_sa::{VorzeActions, VorzeDevice},
+    ProtocolHandler,
+  },
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
 pub struct VorzeSAVibrator {
-  device_type: VorzeDevice
+  device_type: VorzeDevice,
 }
 
 impl VorzeSAVibrator {
   pub fn new(device_type: VorzeDevice) -> Self {
-    Self {
-      device_type
-    }
+    Self { device_type }
   }
 }
 
 impl ProtocolHandler for VorzeSAVibrator {
   fn handle_output_vibrate_cmd(
-      &self,
-      _feature_index: u32,
-      feature_id: uuid::Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    _feature_index: u32,
+    feature_id: uuid::Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![{
       HardwareWriteCmd::new(
         &[feature_id],

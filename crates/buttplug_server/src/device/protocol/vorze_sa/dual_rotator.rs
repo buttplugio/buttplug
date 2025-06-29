@@ -7,13 +7,11 @@
 
 use uuid::{uuid, Uuid};
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint}; 
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{
-      vorze_sa::VorzeDevice, ProtocolHandler
-    },
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{vorze_sa::VorzeDevice, ProtocolHandler},
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use std::sync::atomic::{AtomicI8, Ordering};
 
 // Vorze UFO needs a unified protocol UUID since we update both outputs in the same packet.
@@ -21,18 +19,25 @@ const VORZE_UFO_PROTOCOL_UUID: Uuid = uuid!("013c2d1f-b3c0-4372-9cf6-e5fafd3b763
 
 #[derive(Default)]
 pub struct VorzeSADualRotator {
-  speeds: [AtomicI8; 2]
+  speeds: [AtomicI8; 2],
 }
 
 impl ProtocolHandler for VorzeSADualRotator {
   fn handle_rotation_with_direction_cmd(
-      &self,
-      feature_index: u32,
-      _feature_id: uuid::Uuid,
-      speed: u32,
-      clockwise: bool,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.speeds[feature_index as usize].store(if clockwise { speed as i8 } else { -(speed as i8) }, Ordering::Relaxed);
+    &self,
+    feature_index: u32,
+    _feature_id: uuid::Uuid,
+    speed: u32,
+    clockwise: bool,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.speeds[feature_index as usize].store(
+      if clockwise {
+        speed as i8
+      } else {
+        -(speed as i8)
+      },
+      Ordering::Relaxed,
+    );
     let speed_left = self.speeds[0].load(Ordering::Relaxed);
     let data_left = ((speed_left >= 0) as u8) << 7 | (speed_left.unsigned_abs());
     let speed_right = self.speeds[1].load(Ordering::Relaxed);
@@ -45,5 +50,4 @@ impl ProtocolHandler for VorzeSADualRotator {
     )
     .into()])
   }
-
 }

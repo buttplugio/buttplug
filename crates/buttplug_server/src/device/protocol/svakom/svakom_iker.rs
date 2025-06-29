@@ -5,12 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use crate::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolKeepaliveStrategy,   generic_protocol_setup,
-},
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler, ProtocolKeepaliveStrategy},
 };
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::Arc;
 
@@ -44,22 +43,26 @@ impl ProtocolHandler for SvakomIker {
       )
       .into()])
     } else {
-      let mut msgs = vec!();
-      msgs.push(HardwareWriteCmd::new(
-        &[feature_id],
-        Endpoint::Tx,
-        [0x55, 0x03, 0x03, 0x00, 0x01, vibe0 as u8].to_vec(),
-        false,
-      )
-      .into());
-      if vibe1 > 0 {
-        msgs.push(HardwareWriteCmd::new(
+      let mut msgs = vec![];
+      msgs.push(
+        HardwareWriteCmd::new(
           &[feature_id],
           Endpoint::Tx,
-          [0x55, 0x07, 0x00, 0x00, vibe1 as u8, 0x00].to_vec(),
+          [0x55, 0x03, 0x03, 0x00, 0x01, vibe0 as u8].to_vec(),
           false,
         )
-        .into());
+        .into(),
+      );
+      if vibe1 > 0 {
+        msgs.push(
+          HardwareWriteCmd::new(
+            &[feature_id],
+            Endpoint::Tx,
+            [0x55, 0x07, 0x00, 0x00, vibe1 as u8, 0x00].to_vec(),
+            false,
+          )
+          .into(),
+        );
       }
       Ok(msgs)
     }
