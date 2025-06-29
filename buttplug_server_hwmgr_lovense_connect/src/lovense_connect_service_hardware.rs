@@ -6,10 +6,9 @@
 // for full license information.
 
 use super::lovense_connect_service_comm_manager::{get_local_info, LovenseServiceToyInfo};
-use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
-    configuration::{LovenseConnectServiceSpecifier, ProtocolCommunicationSpecifier},
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
+use buttplug_server_device_config::{LovenseConnectServiceSpecifier, ProtocolCommunicationSpecifier};
+use buttplug_server::device::{
     hardware::{
       GenericHardwareSpecializer,
       Hardware,
@@ -22,9 +21,7 @@ use crate::{
       HardwareSubscribeCmd,
       HardwareUnsubscribeCmd,
       HardwareWriteCmd,
-    },
   },
-  util::async_manager,
 };
 use async_trait::async_trait;
 use futures::future::{self, BoxFuture, FutureExt};
@@ -160,7 +157,7 @@ impl HardwareInternal for LovenseServiceHardware {
     let command_url = format!(
       "{}/{}",
       self.http_host,
-      std::str::from_utf8(&msg.data)
+      std::str::from_utf8(&msg.data())
         .expect("We build this in the protocol then have to serialize to [u8], but it's a string.")
     );
 

@@ -6,15 +6,13 @@
 // for full license information.
 
 use super::lovense_connect_service_hardware::LovenseServiceHardwareConnector;
-use crate::{
-  core::errors::ButtplugDeviceError,
-  server::device::hardware::communication::{
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server::device::hardware::communication::{
     HardwareCommunicationManager,
     HardwareCommunicationManagerBuilder,
     HardwareCommunicationManagerEvent,
     TimedRetryCommunicationManager,
     TimedRetryCommunicationManagerImpl,
-  },
 };
 use async_trait::async_trait;
 use dashmap::DashSet;
