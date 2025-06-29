@@ -1,17 +1,16 @@
-use crate::{
-  core::errors::ButtplugDeviceError,
-  server::device::hardware::communication::{
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server::device::hardware::communication::{
     HardwareCommunicationManager,
     HardwareCommunicationManagerBuilder,
     HardwareCommunicationManagerEvent,
     TimedRetryCommunicationManager,
     TimedRetryCommunicationManagerImpl,
-  },
 };
 use async_trait::async_trait;
 use hidapi::HidApi;
 use std::sync::Arc;
 use tokio::sync::mpsc::Sender;
+use log::*;
 
 use super::hid_device_impl::HidHardwareConnector;
 

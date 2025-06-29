@@ -1,10 +1,8 @@
 use super::hidapi_async::HidAsyncDevice;
-use crate::{
-  core::errors::ButtplugDeviceError,
-  server::device::{
-    configuration::{ProtocolCommunicationSpecifier, VIDPIDSpecifier},
+use buttplug_core::{message::Endpoint, errors::ButtplugDeviceError};
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, VIDPIDSpecifier};
+use buttplug_server::device::{
     hardware::{
-      Endpoint,
       GenericHardwareSpecializer,
       Hardware,
       HardwareConnector,
@@ -17,7 +15,6 @@ use crate::{
       HardwareUnsubscribeCmd,
       HardwareWriteCmd,
     },
-  },
 };
 use async_trait::async_trait;
 use futures::{future::BoxFuture, AsyncWriteExt};
@@ -130,7 +127,7 @@ impl HardwareInternal for HIDDeviceImpl {
     msg: &HardwareWriteCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let device = self.device.clone();
-    let data = msg.data.clone();
+    let data = msg.data().clone();
     Box::pin(async move {
       device.lock().await.write(&data).await.map_err(|e| {
         ButtplugDeviceError::DeviceCommunicationError(format!("Cannot write to HID Device: {e:?}."))
