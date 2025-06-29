@@ -12,6 +12,7 @@ members = [
     "buttplug_server_hwmgr_lovense_dongle",
     "buttplug_server_hwmgr_serial",
     "buttplug_server_hwmgr_websocket",
+    "buttplug_server_hwmgr_xinput",
 ]
 
 [profile.release]
