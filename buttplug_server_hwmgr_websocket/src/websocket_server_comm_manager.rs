@@ -6,19 +6,16 @@
 // for full license information.
 
 use super::websocket_server_hardware::WebsocketServerHardwareConnector;
-use crate::{
-  core::ButtplugResultFuture,
-  server::device::hardware::communication::{
+use buttplug_core::{ButtplugResultFuture, util::async_manager};
+use buttplug_server::device::hardware::communication::{
     HardwareCommunicationManager,
     HardwareCommunicationManagerBuilder,
     HardwareCommunicationManagerEvent,
-  },
-  util::async_manager,
 };
 use futures::{FutureExt, StreamExt};
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
-use tokio::{net::TcpListener, sync::mpsc::Sender};
+use tokio::{select, net::TcpListener, sync::mpsc::Sender};
 use tokio_util::sync::CancellationToken;
 
 // Packet format received from external devices.
@@ -107,7 +104,7 @@ impl WebsocketServerDeviceCommunicationManager {
       debug!("Listening on: {}", addr);
       loop {
         select! {
-          listener_result = listener.accept().fuse() => {
+          listener_result = listener.accept() => {
             let stream = if let Ok((stream, _)) = listener_result {
               stream
             } else {
@@ -162,7 +159,7 @@ impl WebsocketServerDeviceCommunicationManager {
               }
             });
           },
-          _ = child_token.cancelled().fuse() => {
+          _ = child_token.cancelled() => {
             info!("Task token cancelled, assuming websocket server comm manager shutdown.");
             break;
           }
