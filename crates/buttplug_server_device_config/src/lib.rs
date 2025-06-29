@@ -151,7 +151,6 @@ use getset::Getters;
 use std::{
   collections::HashMap,
   fmt::{self, Debug},
-  sync::Arc,
 };
 
 #[macro_use]
