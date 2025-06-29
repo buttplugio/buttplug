@@ -7,6 +7,9 @@
 
 //! Websocket connector for client/server communication
 
+#[macro_use]
+extern crate log;
+
 pub mod websocket_client;
 pub mod websocket_server;
 

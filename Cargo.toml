@@ -13,6 +13,7 @@ members = [
     "buttplug_server_hwmgr_serial",
     "buttplug_server_hwmgr_websocket",
     "buttplug_server_hwmgr_xinput",
+    "buttplug_transport_websocket_tungstenite",
 ]
 
 [profile.release]

@@ -7,8 +7,7 @@
 
 //! Handling of websockets using async-tungstenite
 
-use crate::{
-  core::{
+use buttplug_core::{
     connector::{
       transport::{
         ButtplugConnectorTransport,
@@ -19,7 +18,6 @@ use crate::{
       ButtplugConnectorResultFuture,
     },
     message::serializer::ButtplugSerializedMessage,
-  },
   util::async_manager,
 };
 use futures::{future::BoxFuture, FutureExt, SinkExt, StreamExt};
@@ -29,10 +27,12 @@ use rustls::{
   SignatureScheme,
 };
 use std::sync::Arc;
-use tokio::sync::{
+use tokio::{
+  select,
+  sync::{
   mpsc::{Receiver, Sender},
   Notify,
-};
+}};
 use tokio_tungstenite::{
   connect_async,
   connect_async_tls_with_config,
@@ -186,7 +186,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
             async move {
               loop {
                 select! {
-                  msg = outgoing_receiver.recv().fuse() => {
+                  msg = outgoing_receiver.recv() => {
                     if let Some(msg) = msg {
                       let out_msg = match msg {
                         ButtplugSerializedMessage::Text(text) => Message::Text(text.into()),
@@ -207,7 +207,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                       return;
                     }
                   },
-                  response = reader.next().fuse() => {
+                  response = reader.next() => {
                     trace!("Websocket receiving: {:?}", response);
                     if response.is_none() {
                       info!("Connector holding websocket dropped, returning");
@@ -267,7 +267,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                       }
                     }
                   }
-                  _ = disconnect_notifier.notified().fuse() => {
+                  _ = disconnect_notifier.notified() => {
                     // If we can't close, just print the error to the logs but
                     // still break out of the loop.
                     //
@@ -291,9 +291,10 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
           );
           Ok(())
         }
-        Err(websocket_error) => Err(ButtplugConnectorError::TransportSpecificError(
-          ButtplugConnectorTransportSpecificError::TungsteniteError(websocket_error),
-        )),
+        Err(err) => Err(ButtplugConnectorError::TransportSpecificError(
+              ButtplugConnectorTransportSpecificError::GenericNetworkError(err.to_string())
+        )
+),
       }
     }
     .boxed()
