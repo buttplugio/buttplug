@@ -5,8 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{
+use buttplug_core::{
     connector::{
       transport::{
         ButtplugConnectorTransport,
@@ -17,12 +16,12 @@ use crate::{
       ButtplugConnectorResultFuture,
     },
     message::serializer::ButtplugSerializedMessage,
-  },
   util::async_manager,
 };
 use futures::{future::BoxFuture, FutureExt, SinkExt, StreamExt};
 use std::{sync::Arc, time::Duration};
 use tokio::{
+  select,
   net::{TcpListener, TcpStream},
   sync::{
     mpsc::{Receiver, Sender},
@@ -235,7 +234,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
           .map_err(|err| {
             error!("Websocket server accept error: {:?}", err);
             ButtplugConnectorError::TransportSpecificError(
-              ButtplugConnectorTransportSpecificError::TungsteniteError(err),
+              ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{err:?}")),
             )
           })?;
         async_manager::spawn(async move {
