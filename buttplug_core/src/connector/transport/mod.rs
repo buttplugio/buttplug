@@ -5,7 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-//! Transports for remote (IPC/network/etc) communication between clients and servers
+pub mod stream;
+
 use crate::connector::{
   ButtplugConnectorError,
   ButtplugConnectorResultFuture,

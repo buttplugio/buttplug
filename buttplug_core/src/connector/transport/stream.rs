@@ -9,14 +9,12 @@
 //! process space.
 
 use crate::{
-  core::{
     connector::{
       transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
       ButtplugConnectorError,
       ButtplugConnectorResultFuture,
     },
     message::serializer::ButtplugSerializedMessage,
-  },
   util::async_manager,
 };
 use futures::{
