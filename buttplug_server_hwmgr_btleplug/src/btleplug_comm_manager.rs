@@ -6,14 +6,11 @@
 // for full license information.
 
 use super::btleplug_adapter_task::{BtleplugAdapterCommand, BtleplugAdapterTask};
-use crate::{
-  core::{errors::ButtplugDeviceError, ButtplugResultFuture},
-  server::device::hardware::communication::{
+use buttplug_core::{errors::ButtplugDeviceError, ButtplugResultFuture,   util::async_manager};
+use buttplug_server::device::hardware::communication::{
     HardwareCommunicationManager,
     HardwareCommunicationManagerBuilder,
     HardwareCommunicationManagerEvent,
-  },
-  util::async_manager,
 };
 use futures::future::FutureExt;
 use std::sync::{

@@ -6,12 +6,12 @@
 // for full license information.
 
 use super::btleplug_hardware::BtleplugHardwareConnector;
-use crate::server::device::hardware::communication::HardwareCommunicationManagerEvent;
+use buttplug_server::device::hardware::communication::HardwareCommunicationManagerEvent;
 use btleplug::{
   api::{Central, CentralEvent, Manager as _, Peripheral, ScanFilter},
   platform::{Adapter, Manager, PeripheralId},
 };
-use futures::{future::FutureExt, StreamExt};
+use futures::StreamExt;
 use std::{
   collections::HashMap,
   sync::{
@@ -21,9 +21,12 @@ use std::{
   time::Duration,
 };
 use tokio::{
+  select,
   sync::mpsc::{Receiver, Sender},
   time::sleep,
 };
+use uuid::Uuid;
+use tracing::info_span;
 
 #[derive(Debug, Clone, Copy)]
 pub enum BtleplugAdapterCommand {
@@ -36,7 +39,7 @@ struct PeripheralInfo {
   name: Option<String>,
   peripheral_id: PeripheralId,
   manufacturer_data: HashMap<u16, Vec<u8>>,
-  services: Vec<uuid::Uuid>,
+  services: Vec<Uuid>,
 }
 
 pub struct BtleplugAdapterTask {
@@ -230,7 +233,7 @@ impl BtleplugAdapterTask {
       let event_fut = events.next();
 
       select! {
-        event = event_fut.fuse() => {
+        event = event_fut => {
             if let Some(event) = event {
               match event {
                 CentralEvent::DeviceDiscovered(peripheral_id) | CentralEvent::DeviceUpdated(peripheral_id) => {
@@ -249,7 +252,7 @@ impl BtleplugAdapterTask {
               return;
             }
         },
-        command = self.command_receiver.recv().fuse() => {
+        command = self.command_receiver.recv() => {
           if let Some(cmd) = command {
             match cmd {
               BtleplugAdapterCommand::StartScanning => {

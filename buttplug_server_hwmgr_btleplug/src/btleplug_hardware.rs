@@ -5,11 +5,9 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::hardware::communication::HardwareSpecificError,
-  server::device::{
-    configuration::{BluetoothLESpecifier, ProtocolCommunicationSpecifier},
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint,   util::async_manager};
+use buttplug_server_device_config::{BluetoothLESpecifier, ProtocolCommunicationSpecifier};
+use buttplug_server::device::{
     hardware::{
       Hardware,
       HardwareConnector,
@@ -18,12 +16,11 @@ use crate::{
       HardwareReadCmd,
       HardwareReading,
       HardwareSpecializer,
+      communication::HardwareSpecificError,
       HardwareSubscribeCmd,
       HardwareUnsubscribeCmd,
       HardwareWriteCmd,
     },
-  },
-  util::async_manager,
 };
 use async_trait::async_trait;
 use btleplug::api::CharPropFlags;
@@ -43,7 +40,7 @@ use std::{
   pin::Pin,
   sync::Arc, time::Duration,
 };
-use tokio::sync::broadcast;
+use tokio::{select, sync::broadcast};
 use uuid::Uuid;
 
 pub(super) struct BtleplugHardwareConnector<T: Peripheral + 'static> {
@@ -104,9 +101,11 @@ impl<T: Peripheral> HardwareConnector for BtleplugHardwareConnector<T> {
       .await
       .expect("If we crash here it's Bluez's fault. Use something else please.")
     {
-      if let Err(err) = self.device.connect().await {
+      if let Err(e) = self.device.connect().await {
         let return_err = ButtplugDeviceError::DeviceSpecificError(
-          HardwareSpecificError::BtleplugError(format!("{err:?}")),
+          HardwareSpecificError::HardwareSpecificError("btleplug".to_owned(), format!(
+          "{e:?}"
+        )).to_string(),
         );
         return Err(return_err);
       }
@@ -242,11 +241,11 @@ impl<T: Peripheral + 'static> BtlePlugHardware<T> {
     let event_stream_clone = event_stream.clone();
     let address = device.id();
     let name_clone = name.to_owned();
-    async_manager::spawn(async move {
+    let _ = async_manager::spawn(async move {
       let mut error_notification = false;
       loop {
         select! {
-          notification = notification_stream.next().fuse() => {
+          notification = notification_stream.next() => {
             if let Some(notification) = notification {
               let endpoint = if let Some(endpoint) = uuid_map.get(&notification.uuid) {
                 *endpoint
@@ -277,7 +276,7 @@ impl<T: Peripheral + 'static> BtlePlugHardware<T> {
               }
             }
           }
-          adapter_event = adapter_event_stream.next().fuse() => {
+          adapter_event = adapter_event_stream.next() => {
             if let Some(CentralEvent::DeviceDisconnected(addr)) = adapter_event {
               if address == addr {
                 info!(
@@ -335,15 +334,15 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     &self,
     msg: &HardwareWriteCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    let characteristic = match self.endpoints.get(&msg.endpoint) {
+    let characteristic = match self.endpoints.get(&msg.endpoint()) {
       Some(chr) => chr.clone(),
       None => {
-        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint))).boxed();
+        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint()))).boxed();
       }
     };
 
     let device = self.device.clone();
-    let mut write_type = if msg.write_with_response {
+    let mut write_type = if msg.write_with_response() {
       WriteType::WithResponse
     } else {
       WriteType::WithoutResponse
@@ -378,7 +377,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
       }
     }
 
-    let data = msg.data.clone();
+    let data = msg.data().clone();
     async move {
       match device.write(&characteristic, &data, write_type).await {
         Ok(()) => {
@@ -390,11 +389,13 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
           );
           Ok(())
         }
-        Err(err) => {
-          error!("BTLEPlug device write error: {:?}", err);
+        Err(e) => {
+          error!("BTLEPlug device write error: {:?}", e);
           Err(ButtplugDeviceError::DeviceSpecificError(
-            HardwareSpecificError::BtleplugError(format!("{err:?}")),
-          ))
+            HardwareSpecificError::HardwareSpecificError("btleplug".to_owned(), format!(
+          "{e:?}"
+        )).to_string()),
+          )
         }
       }
     }
@@ -407,25 +408,26 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
   ) -> BoxFuture<'static, Result<HardwareReading, ButtplugDeviceError>> {
     // Right now we only need read for doing a whitelist check on devices. We
     // don't care about the data we get back.
-    let characteristic = match self.endpoints.get(&msg.endpoint) {
+    let characteristic = match self.endpoints.get(&msg.endpoint()) {
       Some(chr) => chr.clone(),
       None => {
-        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint))).boxed();
+        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint()))).boxed();
       }
     };
     let device = self.device.clone();
-    let endpoint = msg.endpoint;
+    let endpoint = msg.endpoint();
     async move {
       match device.read(&characteristic).await {
         Ok(data) => {
           trace!("Got reading: {:?}", data);
           Ok(HardwareReading::new(endpoint, &data))
         }
-        Err(err) => {
-          error!("BTLEPlug device read error: {:?}", err);
-          Err(ButtplugDeviceError::DeviceSpecificError(
-            HardwareSpecificError::BtleplugError(format!("{err:?}")),
-          ))
+        Err(e) => {
+          error!("BTLEPlug device read error: {:?}", e);
+          Err(ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::HardwareSpecificError("btleplug".to_owned(), format!(
+          "{e:?}"
+        )).to_string()),
+          )
         }
       }
     }
@@ -436,7 +438,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     &self,
     msg: &HardwareSubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    let endpoint = msg.endpoint;
+    let endpoint = msg.endpoint();
     if self.subscribed_endpoints.contains(&endpoint) {
       debug!(
         "Endpoint {} already subscribed, ignoring and returning Ok.",
@@ -447,16 +449,16 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let characteristic = match self.endpoints.get(&endpoint) {
       Some(chr) => chr.clone(),
       None => {
-        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint))).boxed();
+        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint()))).boxed();
       }
     };
     let endpoints = self.subscribed_endpoints.clone();
     let device = self.device.clone();
     async move {
       device.subscribe(&characteristic).await.map_err(|e| {
-        ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::BtleplugError(format!(
+        ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::HardwareSpecificError("btleplug".to_owned(), format!(
           "{e:?}"
-        )))
+        )).to_string())
       })?;
       endpoints.insert(endpoint);
       Ok(())
@@ -468,7 +470,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     &self,
     msg: &HardwareUnsubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    let endpoint = msg.endpoint;
+    let endpoint = msg.endpoint();
     if !self.subscribed_endpoints.contains(&endpoint) {
       debug!(
         "Endpoint {} already unsubscribed, ignoring and returning Ok.",
@@ -476,19 +478,19 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
       );
       return future::ready(Ok(())).boxed();
     }
-    let characteristic = match self.endpoints.get(&msg.endpoint) {
+    let characteristic = match self.endpoints.get(&msg.endpoint()) {
       Some(chr) => chr.clone(),
       None => {
-        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint))).boxed();
+        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint()))).boxed();
       }
     };
     let endpoints = self.subscribed_endpoints.clone();
     let device = self.device.clone();
     async move {
       device.unsubscribe(&characteristic).await.map_err(|e| {
-        ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::BtleplugError(format!(
+        ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::HardwareSpecificError("btleplug".to_owned(), format!(
           "{e:?}"
-        )))
+        )).to_string())
       })?;
       endpoints.remove(&endpoint);
       Ok(())
