@@ -13,14 +13,11 @@ use super::{
   },
   lovense_dongle_state_machine::create_lovense_dongle_machine,
 };
-use crate::{
-  core::{errors::ButtplugDeviceError, ButtplugResultFuture},
-  server::device::hardware::communication::{
-    HardwareCommunicationManager,
-    HardwareCommunicationManagerBuilder,
-    HardwareCommunicationManagerEvent,
-  },
-  util::async_manager,
+use buttplug_core::{errors::ButtplugDeviceError, ButtplugResultFuture, util::async_manager};
+use buttplug_server::device::hardware::communication::{
+  HardwareCommunicationManager,
+  HardwareCommunicationManagerBuilder,
+  HardwareCommunicationManagerEvent,
 };
 use futures::FutureExt;
 use hidapi::{HidApi, HidDevice};
@@ -33,6 +30,7 @@ use std::{
   thread,
 };
 use tokio::{
+  select,
   runtime,
   sync::{
     mpsc::{channel, Receiver, Sender},
@@ -75,8 +73,8 @@ fn hid_write_thread(
 
   while let Some(data) = rt.block_on(async {
     select! {
-      _ = token.cancelled().fuse() => None,
-      data = receiver.recv().fuse() => data
+      _ = token.cancelled() => None,
+      data = receiver.recv() => data
     }
   }) {
     match data {
