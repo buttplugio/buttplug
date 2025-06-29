@@ -8,15 +8,13 @@
 use std::time::Duration;
 
 use super::SerialPortHardwareConnector;
-use crate::{
-  core::errors::ButtplugDeviceError,
-  server::device::hardware::communication::{
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server::device::hardware::communication::{
     HardwareCommunicationManager,
     HardwareCommunicationManagerBuilder,
     HardwareCommunicationManagerEvent,
     TimedRetryCommunicationManager,
     TimedRetryCommunicationManagerImpl,
-  },
 };
 use async_trait::async_trait;
 use serialport::available_ports;

@@ -1,7 +1,6 @@
 [workspace]
 resolver = "3"
 members = [
-    "buttplug",
     "buttplug_client",
     "buttplug_core",
     "buttplug_derive",
@@ -11,6 +10,7 @@ members = [
     "buttplug_server_hwmgr_hid",
     "buttplug_server_hwmgr_lovense_connect",
     "buttplug_server_hwmgr_lovense_dongle",
+    "buttplug_server_hwmgr_serial",
 ]
 
 [profile.release]
