@@ -5,8 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{
+use 
+  buttplug_core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
       ButtplugDeviceMessage,
@@ -16,12 +16,11 @@ use crate::{
       InputCommandType,
       InputType,
     },
-  },
-  server::message::{
+  };
+  use crate::message::{
     checked_input_cmd::CheckedInputCmdV4,
     ServerDeviceAttributes,
     TryFromDeviceAttributes,
-  },
 };
 use serde::{Deserialize, Serialize};
 
@@ -62,7 +61,7 @@ impl TryFromDeviceAttributes<BatteryLevelCmdV2> for CheckedInputCmdV4 {
   fn try_from_device_attributes(
     msg: BatteryLevelCmdV2,
     features: &ServerDeviceAttributes,
-  ) -> Result<Self, crate::core::errors::ButtplugError> {
+  ) -> Result<Self, buttplug_core::errors::ButtplugError> {
     let battery_feature = features
       .attrs_v2()
       .battery_level_cmd()

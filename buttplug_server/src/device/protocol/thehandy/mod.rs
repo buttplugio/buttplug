@@ -7,10 +7,9 @@
 
 use self::handyplug::Ping;
 
-use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
-    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
+use crate::device::{
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
@@ -18,7 +17,6 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  },
 };
 use async_trait::async_trait;
 use prost::Message;

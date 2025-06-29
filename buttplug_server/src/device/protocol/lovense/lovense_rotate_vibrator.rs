@@ -5,15 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::ButtplugDeviceError,
     message::InputReadingV4,
-  },
-  server::device::{
+  };
+use crate::device::{
     hardware::{Hardware, HardwareCommand},
     protocol::{lovense::{form_rotate_with_direction_command, form_vibrate_command}, ProtocolHandler, ProtocolKeepaliveStrategy},
-  },
 };
 use futures::future::BoxFuture;
 use std::sync::{atomic::{AtomicBool, Ordering}, Arc};

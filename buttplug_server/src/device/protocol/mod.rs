@@ -123,21 +123,20 @@ pub mod youcups;
 pub mod youou;
 pub mod zalo;
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::ButtplugDeviceError,
     message::{OutputCommand, Endpoint, InputReadingV4, InputType},
-  },
-  server::{
+  };
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
+
+  use crate::{
     device::{
-      configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
       hardware::{Hardware, HardwareCommand, HardwareReadCmd},
     },
     message::{
       checked_output_cmd::CheckedOutputCmdV4,
       spec_enums::ButtplugDeviceCommandMessageUnionV4,
       ButtplugServerDeviceMessage,
-    },
   },
 };
 use async_trait::async_trait;
@@ -1019,7 +1018,7 @@ macro_rules! generic_protocol_setup {
     paste::paste! {
       pub mod setup {
         use std::sync::Arc;
-        use $crate::server::device::protocol::{
+        use $crate::device::protocol::{
           GenericProtocolIdentifier, ProtocolIdentifier, ProtocolIdentifierFactory,
         };
         #[derive(Default)]
@@ -1047,7 +1046,7 @@ macro_rules! generic_protocol_initializer_setup {
   ( $protocol_name:ident, $protocol_identifier:tt) => {
     paste::paste! {
       pub mod setup {
-        use $crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
+        use $crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
         #[derive(Default)]
         pub struct [< $protocol_name IdentifierFactory >] {}
 

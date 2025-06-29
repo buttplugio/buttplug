@@ -1,4 +1,4 @@
-use crate::core::connector::ButtplugRemoteConnector;
+use buttplug_core::connector::ButtplugRemoteConnector;
 
 use super::message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant};
 

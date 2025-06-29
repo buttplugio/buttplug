@@ -7,13 +7,10 @@
 
 use uuid::Uuid;
 
-use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
-  generic_protocol_setup,
-  server::device::{
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use crate::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::ProtocolHandler,
-  },
+    protocol::{ProtocolHandler,  generic_protocol_setup}
 };
 
 generic_protocol_setup!(Cupido, "cupido");

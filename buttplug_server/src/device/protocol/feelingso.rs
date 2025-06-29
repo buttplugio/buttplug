@@ -9,13 +9,10 @@ use std::sync::atomic::{AtomicU8, Ordering};
 
 use uuid::{uuid, Uuid};
 
-use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
-  generic_protocol_setup,
-  server::device::{
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use crate::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::ProtocolHandler,
-  },
+    protocol::{ProtocolHandler, generic_protocol_setup}
 };
 
 const FEELINGSO_PROTOCOL_UUID: Uuid = uuid!("397d4cce-3173-4f66-b7ad-6ee21e59f854");

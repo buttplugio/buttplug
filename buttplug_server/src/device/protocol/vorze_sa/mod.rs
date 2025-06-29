@@ -10,10 +10,9 @@ mod single_rotator;
 mod piston;
 mod dual_rotator;
 
-use crate::{
-  core::errors::ButtplugDeviceError,
-  server::device::{
-    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
+use crate::device::{
     hardware::Hardware,
     protocol::{
       generic_protocol_initializer_setup,
@@ -21,7 +20,6 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  },
 };
 use async_trait::async_trait;
 use std::sync::Arc;

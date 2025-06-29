@@ -10,7 +10,7 @@ use crate::{
     errors::ButtplugDeviceError,
     message::{self, ActuatorType, Endpoint, FeatureType, SensorReadingV4},
   },
-  server::{
+use crate::{
     device::{
       configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
       hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},

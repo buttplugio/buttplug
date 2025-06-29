@@ -13,13 +13,12 @@ use uuid::{uuid, Uuid};
 use futures_util::future::BoxFuture;
 use futures_util::{future, FutureExt};
 
-use crate::core::message::{InputReadingV4, InputType};
-use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
-  generic_protocol_initializer_setup,
-  server::device::{
-    configuration::UserDeviceIdentifier,
-    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition},
+use buttplug_core::message::{InputReadingV4, InputType};
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+
+use buttplug_server_device_config::{UserDeviceIdentifier, ProtocolCommunicationSpecifier, DeviceDefinition};
+
+use crate::device::{
     hardware::{
       Hardware,
       HardwareCommand,
@@ -28,8 +27,7 @@ use crate::{
       HardwareUnsubscribeCmd,
       HardwareWriteCmd,
     },
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-  },
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer,   generic_protocol_initializer_setup,},
 };
 
 static KEY_TAB: [[u32; 12]; 4] = [

@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::message::v1::{ClientDeviceMessageAttributesV1, DeviceMessageInfoV1};
+use crate::message::v1::{ClientDeviceMessageAttributesV1, DeviceMessageInfoV1};
 
 use super::*;
 use getset::{CopyGetters, Getters};
@@ -15,13 +15,13 @@ use serde::{Deserialize, Serialize};
 pub struct DeviceMessageInfoV2 {
   #[serde(rename = "DeviceIndex")]
   #[getset(get_copy = "pub")]
-  pub(in crate::server::message) device_index: u32,
+  pub(in crate::message) device_index: u32,
   #[serde(rename = "DeviceName")]
   #[getset(get = "pub")]
-  pub(in crate::server::message) device_name: String,
+  pub(in crate::message) device_name: String,
   #[serde(rename = "DeviceMessages")]
   #[getset(get = "pub")]
-  pub(in crate::server::message) device_messages: ClientDeviceMessageAttributesV2,
+  pub(in crate::message) device_messages: ClientDeviceMessageAttributesV2,
 }
 
 impl From<DeviceMessageInfoV2> for DeviceMessageInfoV1 {

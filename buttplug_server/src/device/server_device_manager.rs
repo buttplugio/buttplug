@@ -8,8 +8,8 @@
 //! Buttplug Device Manager, manages Device Subtype (Platform/Communication bus
 //! specific) Managers
 
-use crate::{
-  core::{
+
+use buttplug_core::{
     errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
     message::{
       self,
@@ -18,10 +18,12 @@ use crate::{
       ButtplugServerMessageV4,
       DeviceListV4,
     },
-  },
-  server::{
+      util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+
+  };
+use buttplug_server_device_config::{DeviceConfigurationManager, UserDeviceIdentifier};
+use crate::{
     device::{
-      configuration::{DeviceConfigurationManager, UserDeviceIdentifier},
       hardware::communication::{
         HardwareCommunicationManager,
         HardwareCommunicationManagerBuilder,
@@ -39,8 +41,6 @@ use crate::{
     },
     ButtplugServerError,
     ButtplugServerResultFuture,
-  },
-  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use dashmap::DashMap;
 use futures::{

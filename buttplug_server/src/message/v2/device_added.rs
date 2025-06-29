@@ -6,13 +6,12 @@
 // for full license information.
 
 use super::{device_message_info::DeviceMessageInfoV2, ClientDeviceMessageAttributesV2};
-use crate::{
-  core::{
+use buttplug_core::{
     errors::ButtplugMessageError,
     message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
-  },
-  server::message::v1::{DeviceAddedV1, DeviceMessageInfoV1},
-};
+  };
+use crate::message::v1::{DeviceAddedV1, DeviceMessageInfoV1};
+
 
 use getset::{CopyGetters, Getters};
 
@@ -23,16 +22,16 @@ use serde::{Deserialize, Serialize};
 )]
 pub struct DeviceAddedV2 {
   #[serde(rename = "Id")]
-  pub(in crate::server::message) id: u32,
+  pub(in crate::message) id: u32,
   #[serde(rename = "DeviceIndex")]
   #[getset(get_copy = "pub")]
-  pub(in crate::server::message) device_index: u32,
+  pub(in crate::message) device_index: u32,
   #[serde(rename = "DeviceName")]
   #[getset(get = "pub")]
-  pub(in crate::server::message) device_name: String,
+  pub(in crate::message) device_name: String,
   #[serde(rename = "DeviceMessages")]
   #[getset(get = "pub")]
-  pub(in crate::server::message) device_messages: ClientDeviceMessageAttributesV2,
+  pub(in crate::message) device_messages: ClientDeviceMessageAttributesV2,
 }
 
 impl From<DeviceAddedV2> for DeviceAddedV1 {

@@ -5,19 +5,18 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::ButtplugDeviceError,
     message::{Endpoint, InputReadingV4, InputType},
-  },
-  server::{
+    util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+  };
+use crate::{
     device::{
       hardware::{Hardware, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd},
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
     message::ButtplugServerDeviceMessage,
-  },
-  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+
 };
 use dashmap::DashSet;
 use futures::{

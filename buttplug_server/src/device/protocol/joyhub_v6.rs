@@ -5,14 +5,14 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::configuration::ProtocolCommunicationSpecifier;
+use crate::device::configuration::ProtocolCommunicationSpecifier;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{ActuatorType, Endpoint},
   },
   generic_protocol_initializer_setup,
-  server::device::{
+use crate::device::{
     configuration::{UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},

@@ -1,16 +1,11 @@
 pub mod communication;
-
 use std::{collections::HashSet, fmt::Debug, sync::Arc, time::Duration};
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::ButtplugDeviceError,
     message::Endpoint,
-  },
-  server::{
-    device::configuration::ProtocolCommunicationSpecifier,
-  },
-};
+  };
+use buttplug_server_device_config::ProtocolCommunicationSpecifier;
 use async_trait::async_trait;
 use futures::future::BoxFuture;
 use futures_util::FutureExt;

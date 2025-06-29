@@ -16,7 +16,7 @@
 //! device structures (i.e. converting from v4 device features to <= v3 message attributes for
 //! messages like DeviceAdded).
 
-use crate::core::{
+use buttplug_core::{
   errors::{ButtplugError, ButtplugMessageError},
   message::{
     ButtplugDeviceMessage,

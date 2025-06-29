@@ -5,17 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-#[cfg(feature = "wasm")]
-use crate::util;
-use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
-  generic_protocol_initializer_setup,
-  server::device::{
-    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint,   util::async_manager,};
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
+use crate::device::{
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-  },
-  util::async_manager,
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup},
 };
 use async_trait::async_trait;
 use std::{

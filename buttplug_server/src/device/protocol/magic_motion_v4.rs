@@ -10,15 +10,13 @@ use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
 use async_trait::async_trait;
 use uuid::{uuid, Uuid};
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::ButtplugDeviceError,
     message::Endpoint,
-  },
-  server::device::{
+  };
+use crate::device::{
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_initializer_setup, ProtocolHandler, ProtocolInitializer, DeviceDefinition, ProtocolIdentifier, ProtocolCommunicationSpecifier, UserDeviceIdentifier},
-  },
 };
 
 const MAGICMOTIONV4_PROTOCOL_UUID: Uuid = uuid!("d4d62d09-c3e1-44c9-8eba-caa15de5b2a7");

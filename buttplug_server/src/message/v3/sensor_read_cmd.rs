@@ -5,8 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
       ButtplugDeviceMessage,
@@ -16,12 +15,11 @@ use crate::{
       InputCommandType,
       InputType,
     },
-  },
-  server::message::{
+  };
+  use crate::message::{
     checked_input_cmd::CheckedInputCmdV4,
     ServerDeviceAttributes,
     TryFromDeviceAttributes,
-  },
 };
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
@@ -73,7 +71,7 @@ impl TryFromDeviceAttributes<SensorReadCmdV3> for CheckedInputCmdV4 {
   fn try_from_device_attributes(
     msg: SensorReadCmdV3,
     features: &ServerDeviceAttributes,
-  ) -> Result<Self, crate::core::errors::ButtplugError> {
+  ) -> Result<Self, buttplug_core::errors::ButtplugError> {
     // Reject any SensorRead that's not a battery, we never supported sensors otherwise in v3.
     if msg.sensor_type != InputType::Battery {
       Err(ButtplugError::from(

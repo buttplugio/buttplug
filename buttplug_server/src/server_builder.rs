@@ -7,7 +7,6 @@
 
 use super::{
   device::{
-    configuration::DeviceConfigurationManagerBuilder,
     ServerDeviceManager,
     ServerDeviceManagerBuilder,
   },
@@ -15,13 +14,12 @@ use super::{
   server::ButtplugServer,
   ButtplugServerError,
 };
-use crate::{
-  core::{
+use buttplug_core::{
     errors::*,
     message::{self, ButtplugServerMessageV4},
-  },
-  util::async_manager,
+    util::async_manager
 };
+use buttplug_server_device_config::DeviceConfigurationManagerBuilder;
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
@@ -84,7 +82,7 @@ impl ButtplugServerBuilder {
   }
 
   /// Set the maximum ping time, in milliseconds, for the server. If the server does not receive a
-  /// [Ping](crate::core::messages::Ping) message in this amount of time after the handshake has
+  /// [Ping](buttplug_core::messages::Ping) message in this amount of time after the handshake has
   /// succeeded, the server will automatically disconnect. If this is not called, the ping timer
   /// will not be activated.
   ///
@@ -99,7 +97,6 @@ impl ButtplugServerBuilder {
   pub fn finish(&self) -> Result<ButtplugServer, ButtplugServerError> {
     // Create the server
     debug!("Creating server '{}'", self.name);
-    info!("Buttplug Server Operating System Info: {}", os_info::get());
 
     // Set up our channels to different parts of the system.
     let (output_sender, _) = broadcast::channel(256);

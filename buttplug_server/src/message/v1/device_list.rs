@@ -6,15 +6,13 @@
 // for full license information.
 
 use super::device_message_info::DeviceMessageInfoV1;
-use crate::{
-  core::{
-    errors::ButtplugMessageError,
-    message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
-  },
-  server::message::{
-    v0::{DeviceListV0, DeviceMessageInfoV0},
-    v2::DeviceListV2,
-  },
+use buttplug_core::{
+  errors::ButtplugMessageError,
+  message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
+};  
+use crate::message::{
+  v0::{DeviceListV0, DeviceMessageInfoV0},
+  v2::DeviceListV2,
 };
 use getset::Getters;
 use serde::{Deserialize, Serialize};
@@ -24,10 +22,10 @@ use serde::{Deserialize, Serialize};
 )]
 pub struct DeviceListV1 {
   #[serde(rename = "Id")]
-  pub(in crate::server::message) id: u32,
+  pub(in crate::message) id: u32,
   #[serde(rename = "Devices")]
   #[getset(get = "pub")]
-  pub(in crate::server::message) devices: Vec<DeviceMessageInfoV1>,
+  pub(in crate::message) devices: Vec<DeviceMessageInfoV1>,
 }
 
 impl From<DeviceListV1> for DeviceListV0 {

@@ -5,8 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
       ButtplugDeviceMessage,
@@ -17,9 +16,8 @@ use crate::{
       InputCommandType,
       InputType,
     },
-  },
-  server::message::TryFromDeviceAttributes,
-};
+  };
+  use crate::message::TryFromDeviceAttributes;
 use getset::CopyGetters;
 use uuid::Uuid;
 
@@ -65,8 +63,8 @@ impl ButtplugMessageValidator for CheckedInputCmdV4 {
 impl TryFromDeviceAttributes<InputCmdV4> for CheckedInputCmdV4 {
   fn try_from_device_attributes(
     msg: InputCmdV4,
-    features: &crate::server::message::ServerDeviceAttributes,
-  ) -> Result<Self, crate::core::errors::ButtplugError> {
+    features: &crate::message::ServerDeviceAttributes,
+  ) -> Result<Self, buttplug_core::errors::ButtplugError> {
     if let Some(feature) = features.features().get(msg.feature_index() as usize) {
       if let Some(sensor_map) = feature.input() {
         if let Some(sensor) = sensor_map.get(&msg.input_type()) {

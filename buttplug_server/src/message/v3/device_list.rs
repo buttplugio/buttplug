@@ -5,13 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::ButtplugMessageError,
     message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, DeviceListV4},
-  },
-  server::message::v2::{DeviceListV2, DeviceMessageInfoV2},
-};
+  };
+  use crate::message::v2::{DeviceListV2, DeviceMessageInfoV2};
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 

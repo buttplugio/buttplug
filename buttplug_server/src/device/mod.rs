@@ -25,7 +25,7 @@
 //!   network ports, etc...)
 //! - Protocols (represented by [ButtplugProtocol]), which hold information about the capabilities
 //!   of a device (can it vibrate/rotate/etc, at what speeds, so on and so forth), and translate
-//!   from [Buttplug Device Messages](crate::core::messages::ButtplugDeviceMessage) into strings or
+//!   from [Buttplug Device Messages](buttplug_core::messages::ButtplugDeviceMessage) into strings or
 //!   binary arrays to send to devices via their implementation.
 //!
 //! # Device Lifetimes in Buttplug
@@ -95,11 +95,9 @@
 //!
 //!
 
-pub mod configuration;
 pub mod hardware;
 pub mod protocol;
 pub mod server_device;
-pub mod server_device_feature;
 mod server_device_manager;
 mod server_device_manager_event_loop;
 

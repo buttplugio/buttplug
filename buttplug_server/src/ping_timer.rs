@@ -5,8 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::util::{async_manager, sleep};
-use futures::{Future, FutureExt};
+use buttplug_core::util::{async_manager, sleep};
+use futures::Future;
 use std::{
   sync::{
     atomic::{AtomicBool, Ordering},
@@ -14,7 +14,7 @@ use std::{
   },
   time::Duration,
 };
-use tokio::sync::{mpsc, Notify};
+use tokio::{select, sync::{mpsc, Notify}};
 
 pub enum PingMessage {
   Ping,
@@ -33,7 +33,7 @@ async fn ping_timer(
   let mut pinged = false;
   loop {
     select! {
-      _ = sleep(Duration::from_millis(max_ping_time.into())).fuse() => {
+      _ = sleep(Duration::from_millis(max_ping_time.into())) => {
         if started {
           if !pinged {
             notifier.notify_waiters();
@@ -43,7 +43,7 @@ async fn ping_timer(
           pinged = false;
         }
       }
-      msg = ping_msg_receiver.recv().fuse() => {
+      msg = ping_msg_receiver.recv() => {
         if msg.is_none() {
           return;
         }

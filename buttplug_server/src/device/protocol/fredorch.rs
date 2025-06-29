@@ -5,11 +5,9 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::configuration::ProtocolCommunicationSpecifier;
-use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
-    configuration::{DeviceDefinition, UserDeviceIdentifier},
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::sleep};
+use crate::device::{
     hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
@@ -17,8 +15,6 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  },
-  util::sleep,
 };
 use async_trait::async_trait;
 use futures::FutureExt;
@@ -29,6 +25,7 @@ use std::{
   },
   time::Duration,
 };
+use tokio::select;
 use uuid::{uuid, Uuid};
 
 use super::fleshlight_launch_helper::calculate_speed;

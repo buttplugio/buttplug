@@ -11,17 +11,15 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use uuid::{uuid, Uuid};
 
-use crate::{
-  core::{errors::ButtplugDeviceError, message::{Endpoint, OutputType}},
-  server::device::{
-    configuration::{DeviceDefinition, UserDeviceIdentifier},
+use buttplug_core::{errors::ButtplugDeviceError, message::{Endpoint, OutputType}};
+use buttplug_server_device_config::{DeviceDefinition, UserDeviceIdentifier};
+
+use crate::device::{
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_initializer_setup, ProtocolHandler, ProtocolInitializer, ProtocolIdentifier, ProtocolCommunicationSpecifier},
-  },
 };
 
 generic_protocol_initializer_setup!(MetaXSire, "metaxsire");
-
 
 #[derive(Default)]
 pub struct MetaXSireInitializer {}

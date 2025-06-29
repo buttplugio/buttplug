@@ -6,12 +6,12 @@
 // for full license information.
 
 use super::fleshlight_launch_helper::calculate_speed;
-use crate::{
-  core::{
+use buttplug_core::{
     errors::ButtplugDeviceError,
     message::{Endpoint, InputReadingV4, InputType},
-  },
-  server::{
+    util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+  };
+use crate::{
     device::{
       hardware::{
         Hardware,
@@ -25,8 +25,7 @@ use crate::{
       protocol::{generic_protocol_setup, ProtocolHandler},
     },
     message::ButtplugServerDeviceMessage,
-  },
-  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+
 };
 use dashmap::DashSet;
 use futures::{

@@ -5,52 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-// Network DCMs work on all platforms
-#[cfg(feature = "lovense-connect-service-manager")]
-pub mod lovense_connect_service;
-#[cfg(feature = "websocket-server-manager")]
-pub mod websocket_server;
-
-// BTLEPlug works on anything not WASM
-#[cfg(all(
-  feature = "btleplug-manager",
-  any(
-    target_os = "windows",
-    target_os = "macos",
-    target_os = "linux",
-    target_os = "ios",
-    target_os = "android"
-  )
-))]
-pub mod btleplug;
-
-// Lovense Dongles and Serial Ports work on all desktop platforms
-#[cfg(all(
-  feature = "lovense-dongle-manager",
-  any(target_os = "windows", target_os = "macos", target_os = "linux")
-))]
-pub mod lovense_dongle;
-#[cfg(all(
-  feature = "serial-manager",
-  any(target_os = "windows", target_os = "macos", target_os = "linux")
-))]
-pub mod serialport;
-
-#[cfg(all(
-  feature = "hid-manager",
-  any(target_os = "windows", target_os = "macos", target_os = "linux")
-))]
-pub mod hid;
-
-// XInput is windows only
-#[cfg(all(feature = "xinput-manager", target_os = "windows"))]
-pub mod xinput;
-
-use crate::{
-  core::{errors::ButtplugDeviceError, ButtplugResultFuture},
-  server::device::hardware::HardwareConnector,
-  util::{async_manager, sleep},
-};
+use buttplug_core::{{errors::ButtplugDeviceError, ButtplugResultFuture}, util::{async_manager, sleep}};
+use crate::device::hardware::HardwareConnector;
 use async_trait::async_trait;
 use futures::future::{self, FutureExt};
 use serde::{Deserialize, Serialize};
@@ -89,31 +45,10 @@ pub trait HardwareCommunicationManager: Send + Sync {
   // Events happen via channel senders passed to the comm manager.
 }
 
-#[derive(Error, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Error, Debug, Clone, Display, Serialize, Deserialize, PartialEq, Eq)]
 pub enum HardwareSpecificError {
-  // XInput library doesn't derive error on its error enum. :(
-  #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
-  #[error("XInput usage error: {0}")]
-  XInputError(String),
-  // Btleplug library uses Failure, not Error, on its error enum. :(
-  #[cfg(all(
-    feature = "btleplug-manager",
-    any(
-      target_os = "windows",
-      target_os = "macos",
-      target_os = "linux",
-      target_os = "ios",
-      target_os = "android"
-    )
-  ))]
-  #[error("Btleplug error: {0}")]
-  BtleplugError(String),
-  #[cfg(all(
-    feature = "serial-manager",
-    any(target_os = "windows", target_os = "macos", target_os = "linux")
-  ))]
-  #[error("Serial error: {0}")]
-  SerialError(String),
+  // HardwareSpecificError: {} Error: {}
+  HardwareSpecificError(String, String)
 }
 
 #[async_trait]

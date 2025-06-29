@@ -5,22 +5,21 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::message::{ButtplugServerMessageV4, DeviceAddedV4, DeviceRemovedV0, ScanningFinishedV0},
-  server::device::{
-    configuration::DeviceConfigurationManager,
+use 
+  buttplug_core::{message::{ButtplugServerMessageV4, DeviceAddedV4, DeviceRemovedV0, ScanningFinishedV0}, util::async_manager};
+use buttplug_server_device_config::DeviceConfigurationManager;
+use tracing::info_span;
+
+  use crate::device::{
     hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
     ServerDevice,
     ServerDeviceEvent,
-  },
-  util::async_manager,
 };
 use dashmap::{DashMap, DashSet};
-use futures::{future, FutureExt, StreamExt};
+use futures::{future, pin_mut, FutureExt, StreamExt};
 use std::sync::{atomic::AtomicBool, Arc};
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
-use tracing;
 use tracing_futures::Instrument;
 
 use super::server_device_manager::DeviceManagerCommand;
@@ -180,10 +179,13 @@ impl ServerDeviceManagerEventLoop {
         //
         // We used to do this in build_server_device, but we shouldn't mark devices as actually
         // connecting until after this happens, so we're moving it back here.
+        // TODO FIX THIS ASAP
+        /*
         let protocol_specializers = self
           .device_config_manager
           .protocol_specializers(&creator.specifier());
-
+        */
+        let protocol_specializers = vec!();
         // If we have no identifiers, then there's nothing to do here. Throw an error.
         if protocol_specializers.is_empty() {
           debug!(
@@ -218,7 +220,7 @@ impl ServerDeviceManagerEventLoop {
           address = tracing::field::display(address.clone())
         );
 
-        async_manager::spawn(async move {
+        let _ = async_manager::spawn(async move {
           match ServerDevice::build(device_config_manager, creator, protocol_specializers).await {
             Ok(device) => {
               if device_event_sender_clone

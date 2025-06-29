@@ -8,7 +8,7 @@
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 
-use crate::server::message::{v0::DeviceMessageInfoV0, ButtplugDeviceMessageNameV0};
+use crate::message::{v0::DeviceMessageInfoV0, ButtplugDeviceMessageNameV0};
 
 use super::{ClientDeviceMessageAttributesV1, DeviceAddedV1};
 
@@ -16,13 +16,13 @@ use super::{ClientDeviceMessageAttributesV1, DeviceAddedV1};
 pub struct DeviceMessageInfoV1 {
   #[serde(rename = "DeviceIndex")]
   #[getset(get_copy = "pub")]
-  pub(in crate::server::message) device_index: u32,
+  pub(in crate::message) device_index: u32,
   #[serde(rename = "DeviceName")]
   #[getset(get = "pub")]
-  pub(in crate::server::message) device_name: String,
+  pub(in crate::message) device_name: String,
   #[serde(rename = "DeviceMessages")]
   #[getset(get = "pub")]
-  pub(in crate::server::message) device_messages: ClientDeviceMessageAttributesV1,
+  pub(in crate::message) device_messages: ClientDeviceMessageAttributesV1,
 }
 
 impl From<DeviceAddedV1> for DeviceMessageInfoV1 {

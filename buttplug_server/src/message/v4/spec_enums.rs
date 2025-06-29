@@ -1,7 +1,6 @@
 use std::{collections::HashMap, fmt::Debug};
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
       ButtplugClientMessageV4,
@@ -17,8 +16,8 @@ use crate::{
       StopDeviceCmdV0,
       StopScanningV0,
     },
-  },
-  server::message::{
+  };
+  use crate::message::{
     server_device_attributes::TryFromClientMessage,
     v0::ButtplugClientMessageV0,
     v1::ButtplugClientMessageV1,
@@ -28,7 +27,6 @@ use crate::{
     RequestServerInfoV1,
     ServerDeviceAttributes,
     TryFromDeviceAttributes,
-  },
 };
 
 use super::{
@@ -180,7 +178,7 @@ impl TryFromClientMessage<ButtplugClientMessageVariant> for ButtplugCheckedClien
   fn try_from_client_message(
     msg: ButtplugClientMessageVariant,
     features: &HashMap<u32, ServerDeviceAttributes>,
-  ) -> Result<Self, crate::core::errors::ButtplugError> {
+  ) -> Result<Self, buttplug_core::errors::ButtplugError> {
     let id = msg.id();
     let mut converted_msg = match msg {
       ButtplugClientMessageVariant::V0(m) => Self::try_from_client_message(m, features),
@@ -387,6 +385,6 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceCommandMessageUni
 #[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display)]
 pub enum ButtplugDeviceMessageNameV4 {
   StopDeviceCmd,
-  SensorCmd,
-  ActuatorCmd,
+  InputCmd,
+  OutputCmd,
 }

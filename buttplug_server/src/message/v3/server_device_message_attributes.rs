@@ -5,10 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::message::{InputType, OutputType},
-  server::{device::server_device_feature::ServerDeviceFeature, message::v1::NullDeviceMessageAttributesV1},
-};
+use 
+  buttplug_core::message::{InputType, OutputType};
+  use crate::{message::v1::NullDeviceMessageAttributesV1};
+  use buttplug_server_device_config::ServerDeviceFeature;
+
 use getset::{Getters, MutGetters, Setters};
 use std::ops::RangeInclusive;
 
@@ -16,42 +17,42 @@ use std::ops::RangeInclusive;
 #[getset(get = "pub")]
 pub struct ServerDeviceMessageAttributesV3 {
   // Generic commands
-  pub(in crate::server::message) scalar_cmd: Option<Vec<ServerGenericDeviceMessageAttributesV3>>,
-  pub(in crate::server::message) rotate_cmd: Option<Vec<ServerGenericDeviceMessageAttributesV3>>,
-  pub(in crate::server::message) linear_cmd: Option<Vec<ServerGenericDeviceMessageAttributesV3>>,
+  pub(in crate::message) scalar_cmd: Option<Vec<ServerGenericDeviceMessageAttributesV3>>,
+  pub(in crate::message) rotate_cmd: Option<Vec<ServerGenericDeviceMessageAttributesV3>>,
+  pub(in crate::message) linear_cmd: Option<Vec<ServerGenericDeviceMessageAttributesV3>>,
 
   // Sensor Messages
-  pub(in crate::server::message) sensor_read_cmd:
+  pub(in crate::message) sensor_read_cmd:
     Option<Vec<ServerSensorDeviceMessageAttributesV3>>,
-  pub(in crate::server::message) sensor_subscribe_cmd:
+  pub(in crate::message) sensor_subscribe_cmd:
     Option<Vec<ServerSensorDeviceMessageAttributesV3>>,
 
   // StopDeviceCmd always exists
-  pub(in crate::server::message) stop_device_cmd: NullDeviceMessageAttributesV1,
+  pub(in crate::message) stop_device_cmd: NullDeviceMessageAttributesV1,
 
   // Needed to load from config for fallback, but unused here.
-  pub(in crate::server::message) fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributesV1>,
-  pub(in crate::server::message) vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributesV1>,
+  pub(in crate::message) fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributesV1>,
+  pub(in crate::message) vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributesV1>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Getters, Setters)]
 #[getset(get = "pub")]
 pub struct ServerGenericDeviceMessageAttributesV3 {
-  pub(in crate::server::message) feature_descriptor: String,
-  pub(in crate::server::message) actuator_type: OutputType,
-  pub(in crate::server::message) step_count: u32,
-  pub(in crate::server::message) index: u32,
-  pub(in crate::server::message) feature: ServerDeviceFeature,
+  pub(in crate::message) feature_descriptor: String,
+  pub(in crate::message) actuator_type: OutputType,
+  pub(in crate::message) step_count: u32,
+  pub(in crate::message) index: u32,
+  pub(in crate::message) feature: ServerDeviceFeature,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Getters, Setters)]
 #[getset(get = "pub")]
 pub struct ServerSensorDeviceMessageAttributesV3 {
-  pub(in crate::server::message) feature_descriptor: String,
-  pub(in crate::server::message) sensor_type: InputType,
-  pub(in crate::server::message) sensor_range: Vec<RangeInclusive<i32>>,
-  pub(in crate::server::message) index: u32,
-  pub(in crate::server::message) feature: ServerDeviceFeature,
+  pub(in crate::message) feature_descriptor: String,
+  pub(in crate::message) sensor_type: InputType,
+  pub(in crate::message) sensor_range: Vec<RangeInclusive<i32>>,
+  pub(in crate::message) index: u32,
+  pub(in crate::message) feature: ServerDeviceFeature,
 }
 
 impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {

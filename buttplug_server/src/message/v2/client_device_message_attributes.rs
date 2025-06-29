@@ -5,16 +5,15 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::message::DeviceFeature,
-  server::message::{
+use 
+  buttplug_core::message::DeviceFeature;
+use crate::message::{
     v1::{
       ClientDeviceMessageAttributesV1,
       GenericDeviceMessageAttributesV1,
       NullDeviceMessageAttributesV1,
     },
     v3::ClientDeviceMessageAttributesV3,
-  },
 };
 use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};
@@ -25,40 +24,40 @@ pub struct ClientDeviceMessageAttributesV2 {
   #[getset(get = "pub")]
   #[serde(rename = "VibrateCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) vibrate_cmd: Option<GenericDeviceMessageAttributesV2>,
+  pub(in crate::message) vibrate_cmd: Option<GenericDeviceMessageAttributesV2>,
   #[getset(get = "pub")]
   #[serde(rename = "RotateCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) rotate_cmd: Option<GenericDeviceMessageAttributesV2>,
+  pub(in crate::message) rotate_cmd: Option<GenericDeviceMessageAttributesV2>,
   #[getset(get = "pub")]
   #[serde(rename = "LinearCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) linear_cmd: Option<GenericDeviceMessageAttributesV2>,
+  pub(in crate::message) linear_cmd: Option<GenericDeviceMessageAttributesV2>,
   #[getset(get = "pub")]
   #[serde(rename = "BatteryLevelCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) battery_level_cmd: Option<NullDeviceMessageAttributesV1>,
+  pub(in crate::message) battery_level_cmd: Option<NullDeviceMessageAttributesV1>,
 
   // RSSILevel is added post-serialization (only for bluetooth devices)
   #[getset(get = "pub")]
   #[serde(rename = "RSSILevelCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) rssi_level_cmd: Option<NullDeviceMessageAttributesV1>,
+  pub(in crate::message) rssi_level_cmd: Option<NullDeviceMessageAttributesV1>,
 
   // StopDeviceCmd always exists
   #[getset(get = "pub")]
   #[serde(rename = "StopDeviceCmd")]
-  pub(in crate::server::message) stop_device_cmd: NullDeviceMessageAttributesV1,
+  pub(in crate::message) stop_device_cmd: NullDeviceMessageAttributesV1,
 
   // Needed to load from config for fallback, but unused here.
   #[getset(get = "pub")]
   #[serde(rename = "FleshlightLaunchFW12Cmd")]
   #[serde(skip)]
-  pub(in crate::server::message) fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributesV1>,
+  pub(in crate::message) fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributesV1>,
   #[getset(get = "pub")]
   #[serde(rename = "VorzeA10CycloneCmd")]
   #[serde(skip)]
-  pub(in crate::server::message) vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributesV1>,
+  pub(in crate::message) vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributesV1>,
 }
 
 impl From<ClientDeviceMessageAttributesV2> for ClientDeviceMessageAttributesV1 {
@@ -92,10 +91,10 @@ impl From<ClientDeviceMessageAttributesV2> for ClientDeviceMessageAttributesV1 {
 pub struct GenericDeviceMessageAttributesV2 {
   #[getset(get_copy = "pub")]
   #[serde(rename = "FeatureCount")]
-  pub(in crate::server::message) feature_count: u32,
+  pub(in crate::message) feature_count: u32,
   #[getset(get = "pub")]
   #[serde(rename = "StepCount")]
-  pub(in crate::server::message) step_count: Vec<u32>,
+  pub(in crate::message) step_count: Vec<u32>,
 }
 
 impl From<GenericDeviceMessageAttributesV2> for GenericDeviceMessageAttributesV1 {
