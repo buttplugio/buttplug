@@ -6,6 +6,8 @@ members = [
     "buttplug_core",
     "buttplug_derive",
     "buttplug_server_device_config",
+    "buttplug_server",
+    "buttplug_transport_websocket_tungstenite"
 ]
 
 [profile.release]
