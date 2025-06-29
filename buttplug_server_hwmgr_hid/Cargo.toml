@@ -12,23 +12,12 @@ edition = "2021"
 exclude = ["examples/**"]
 
 [lib]
-name = "buttplug_server_hwmgr_btleplug"
+name = "buttplug_server_hwmgr_hid"
 path = "src/lib.rs"
 test = true
 doctest = true
 doc = true
 crate-type = ["cdylib", "rlib"]
-
-[features]
-default=[]
-tokio-runtime=[]
-wasm=[]
-
-# Only build docs on one platform (linux)
-[package.metadata.docs.rs]
-targets = []
-# Features to pass to Cargo (default: [])
-features = ["default", "unstable"]
 
 [dependencies]
 buttplug_derive = "0.8.1"

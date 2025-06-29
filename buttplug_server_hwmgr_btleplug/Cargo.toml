@@ -19,17 +19,6 @@ doctest = true
 doc = true
 crate-type = ["cdylib", "rlib"]
 
-[features]
-default=[]
-tokio-runtime=[]
-wasm=[]
-
-# Only build docs on one platform (linux)
-[package.metadata.docs.rs]
-targets = []
-# Features to pass to Cargo (default: [])
-features = ["default", "unstable"]
-
 [dependencies]
 buttplug_derive = "0.8.1"
 # buttplug_derive = { path = "../buttplug_derive" }
