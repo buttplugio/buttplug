@@ -12,10 +12,9 @@ use super::lovense_dongle_messages::{
   LovenseDongleOutgoingMessage,
   OutgoingLovenseData,
 };
-use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
-    configuration::{BluetoothLESpecifier, ProtocolCommunicationSpecifier},
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
+use buttplug_server_device_config::{BluetoothLESpecifier, ProtocolCommunicationSpecifier};
+use buttplug_server::device::{
     hardware::{
       GenericHardwareSpecializer,
       Hardware,
@@ -29,8 +28,6 @@ use crate::{
       HardwareUnsubscribeCmd,
       HardwareWriteCmd,
     },
-  },
-  util::async_manager,
 };
 use async_trait::async_trait;
 use futures::future::{self, BoxFuture, FutureExt};
@@ -200,7 +197,7 @@ impl HardwareInternal for LovenseDongleHardware {
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let port_sender = self.device_outgoing.clone();
     let address = self.address.clone();
-    let data = msg.data.clone();
+    let data = msg.data().clone();
     async move {
       let outgoing_msg = LovenseDongleOutgoingMessage {
         func: LovenseDongleMessageFunc::Command,

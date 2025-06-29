@@ -6,9 +6,9 @@
 // for full license information.
 
 use super::{lovense_dongle_hardware::*, lovense_dongle_messages::*};
-use crate::server::device::hardware::communication::HardwareCommunicationManagerEvent;
+use buttplug_server::device::hardware::communication::HardwareCommunicationManagerEvent;
 use async_trait::async_trait;
-use futures::{select, FutureExt};
+use futures::{pin_mut, select, FutureExt};
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
