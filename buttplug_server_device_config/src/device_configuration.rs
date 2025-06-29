@@ -5,12 +5,9 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::json::JSONValidator;
-use crate::{
-  core::{errors::{ButtplugDeviceError, ButtplugError}, message::OutputType},
-  server::device::{configuration::{
-      BaseDeviceDefinition, BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder, DeviceSettings, ProtocolCommunicationSpecifier, UserDeviceCustomization, UserDeviceDefinition, UserDeviceIdentifier
-    }, server_device_feature::ServerBaseDeviceFeature},
+use buttplug_core::{errors::{ButtplugDeviceError, ButtplugError}, message::OutputType, util::json::JSONValidator};
+use super::{
+    ServerBaseDeviceFeature, BaseDeviceDefinition, BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder, DeviceSettings, ProtocolCommunicationSpecifier, UserDeviceCustomization, UserDeviceDefinition, UserDeviceIdentifier
 };
 use dashmap::DashMap;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
@@ -19,9 +16,9 @@ use std::{collections::HashMap, fmt::Display, ops::RangeInclusive};
 use uuid::Uuid;
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
-  include_str!("../../buttplug-device-config/build-config/buttplug-device-config-v4.json");
+  include_str!("../../buttplug/buttplug-device-config/build-config/buttplug-device-config-v4.json");
 static DEVICE_CONFIGURATION_JSON_SCHEMA: &str = include_str!(
-  "../../buttplug-device-config/device-config-v4/buttplug-device-config-schema-v4.json"
+  "../../buttplug/buttplug-device-config/device-config-v4/buttplug-device-config-schema-v4.json"
 );
 
 /// The top level configuration for a protocol. Contains all data about devices that can use the

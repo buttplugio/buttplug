@@ -4,6 +4,7 @@ members = [
     "buttplug",
     "buttplug_core",
     "buttplug_derive",
+    "buttplug_server_device_config",
 ]
 
 [profile.release]

@@ -4,7 +4,8 @@ use getset::{CopyGetters, Getters, MutGetters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{core::message::OutputType, server::device::server_device_feature::{ServerBaseDeviceFeature, ServerDeviceFeature, ServerUserDeviceFeature, ServerUserDeviceFeatureOutput}};
+use buttplug_core::message::OutputType; 
+use super::device_feature::{ServerBaseDeviceFeature, ServerDeviceFeature, ServerUserDeviceFeature, ServerUserDeviceFeatureOutput};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, CopyGetters)]
 pub struct DeviceSettings {

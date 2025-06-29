@@ -140,15 +140,12 @@ mod identifiers;
 pub use identifiers::*;
 mod device_definitions;
 pub use device_definitions::*;
+mod device_feature;
+pub use device_feature::*;
+mod device_configuration;
+pub use device_configuration::*;
 
-use crate::{
-  core::errors::ButtplugDeviceError,
-  server::device::protocol::{
-    get_default_protocol_map,
-    ProtocolIdentifierFactory,
-    ProtocolSpecializer,
-  },
-};
+use buttplug_core::errors::ButtplugDeviceError;
 use dashmap::DashMap;
 use getset::Getters;
 use std::{
@@ -157,6 +154,9 @@ use std::{
   sync::Arc,
 };
 
+#[macro_use]
+extern crate log;
+
 #[derive(Default, Clone)]
 pub struct DeviceConfigurationManagerBuilder {
   skip_default_protocols: bool,
@@ -164,8 +164,8 @@ pub struct DeviceConfigurationManagerBuilder {
   user_communication_specifiers: DashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   base_device_definitions: HashMap<BaseDeviceIdentifier, BaseDeviceDefinition>,
   user_device_definitions: DashMap<UserDeviceIdentifier, DeviceDefinition>,
-  /// Map of protocol names to their respective protocol instance factories
-  protocols: Vec<(String, Arc<dyn ProtocolIdentifierFactory>)>,
+  // Map of protocol names to their respective protocol instance factories
+  // protocols: Vec<(String, Arc<dyn ProtocolIdentifierFactory>)>,
 }
 
 impl DeviceConfigurationManagerBuilder {
@@ -220,7 +220,7 @@ impl DeviceConfigurationManagerBuilder {
     }
     self
   }
-
+/*
   /// Add a protocol instance factory for a [ButtplugProtocol]
   pub fn protocol_factory<T>(&mut self, factory: T) -> &mut Self
   where
@@ -231,7 +231,7 @@ impl DeviceConfigurationManagerBuilder {
       .push((factory.identifier().to_owned(), Arc::new(factory)));
     self
   }
-
+*/
   pub fn skip_default_protocols(&mut self) -> &mut Self {
     self.skip_default_protocols = true;
     self
@@ -239,6 +239,7 @@ impl DeviceConfigurationManagerBuilder {
 
   pub fn finish(&mut self) -> Result<DeviceConfigurationManager, ButtplugDeviceError> {
     // Map of protocol names to their respective protocol instance factories
+    /*
     let mut protocol_map = if !self.skip_default_protocols {
       get_default_protocol_map()
     } else {
@@ -251,7 +252,7 @@ impl DeviceConfigurationManagerBuilder {
       }
       protocol_map.insert(name.clone(), protocol.clone());
     }
-
+    */
     // Build and validate the protocol attributes tree.
     let mut attribute_tree_map = HashMap::new();
 
@@ -259,6 +260,7 @@ impl DeviceConfigurationManagerBuilder {
     for (ident, attr) in &self.base_device_definitions {
       // If we don't have a protocol loaded for this configuration block, just drop it. We can't do
       // anything with it anyways.
+      /*
       if !protocol_map.contains_key(ident.protocol()) {
         debug!(
           "Protocol {:?} in base configurations does not exist in system, discarding definition.",
@@ -266,6 +268,7 @@ impl DeviceConfigurationManagerBuilder {
         );
         continue;
       }
+      */
       /*
       for feature in attr.features() {
         if let Err(e) = feature.is_valid() {
@@ -283,6 +286,7 @@ impl DeviceConfigurationManagerBuilder {
       let (ident, attr) = (kv.key(), kv.value());
       // If we don't have a protocol loaded for this configuration block, just drop it. We can't do
       // anything with it anyways.
+      /*
       if !protocol_map.contains_key(ident.protocol()) {
         warn!(
           "Protocol {:?} in user configurations does not exist in system, discarding definition.",
@@ -290,6 +294,7 @@ impl DeviceConfigurationManagerBuilder {
         );
         continue;
       }
+      */
       for feature in attr.features() {
         if let Err(e) = feature.is_valid() {
           error!("Feature {attr:?} for ident {ident:?} is not valid, skipping addition: {e:?}");
@@ -304,7 +309,7 @@ impl DeviceConfigurationManagerBuilder {
       user_communication_specifiers: self.user_communication_specifiers.clone(),
       base_device_definitions: attribute_tree_map,
       user_device_definitions: user_attribute_tree_map,
-      protocol_map,
+      //protocol_map,
     })
   }
 }
@@ -322,8 +327,8 @@ impl DeviceConfigurationManagerBuilder {
 /// parameters for those commands (number of power levels, stroke distances, etc...).
 #[derive(Getters)]
 pub struct DeviceConfigurationManager {
-  /// Map of protocol names to their respective protocol instance factories
-  protocol_map: HashMap<String, Arc<dyn ProtocolIdentifierFactory>>,
+  // Map of protocol names to their respective protocol instance factories
+  // protocol_map: HashMap<String, Arc<dyn ProtocolIdentifierFactory>>,
   /// Communication specifiers from the base device config, mapped from protocol name to vector of
   /// specifiers. Should not change/update during a session.
   base_communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
@@ -362,7 +367,7 @@ impl DeviceConfigurationManager {
     protocol: &str,
     specifier: &ProtocolCommunicationSpecifier,
   ) -> Result<(), ButtplugDeviceError> {
-    self.protocol_map.contains_key(protocol);
+    //self.protocol_map.contains_key(protocol);
     self
       .user_communication_specifiers
       .entry(protocol.to_owned())
@@ -391,7 +396,7 @@ impl DeviceConfigurationManager {
     identifier: &UserDeviceIdentifier,
     definition: &DeviceDefinition,
   ) -> Result<(), ButtplugDeviceError> {
-    self.protocol_map.contains_key(identifier.protocol());
+    //self.protocol_map.contains_key(identifier.protocol());
     self
       .user_device_definitions
       .entry(identifier.clone())
@@ -471,7 +476,7 @@ impl DeviceConfigurationManager {
   ) -> HashMap<String, Vec<ProtocolCommunicationSpecifier>> {
     self.base_communication_specifiers.clone()
   }
-
+/*
   pub fn protocol_specializers(
     &self,
     specifier: &ProtocolCommunicationSpecifier,
@@ -517,7 +522,7 @@ impl DeviceConfigurationManager {
     }
     specializers
   }
-
+*/
   pub fn device_definition(
     &self,
     identifier: &UserDeviceIdentifier,
