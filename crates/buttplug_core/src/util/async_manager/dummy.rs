@@ -19,7 +19,7 @@ impl Spawn for DummyAsyncManager {
   }
 }
 
-pub fn spawn<Fut>(_: Fut) -> Result<(), SpawnError>
+pub fn spawn<Fut>(_: Fut)
 where
   Fut: Future<Output = ()> + Send + 'static,
 {
