@@ -19,6 +19,10 @@ doctest = true
 doc = true
 crate-type = ["cdylib", "rlib"]
 
+[features]
+default=[]
+wasm=[]
+
 [dependencies]
 buttplug_derive = "0.8.1"
 buttplug_core = { path = "../buttplug_core" }

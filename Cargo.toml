@@ -9,6 +9,7 @@ members = [
     "buttplug_server_device_config",
     "buttplug_server_hwmgr_btleplug",
     "buttplug_server_hwmgr_hid",
+    "buttplug_server_hwmgr_lovense_connect",
 ]
 
 [profile.release]
