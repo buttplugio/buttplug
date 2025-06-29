@@ -7,8 +7,7 @@
 
 use std::cmp::Ordering;
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::ButtplugMessageError,
     message::{
       ButtplugMessage,
@@ -25,15 +24,14 @@ use crate::{
       StopDeviceCmdV0,
       StopScanningV0,
     },
-  },
-  server::message::v0::{
+  };
+use crate::message::v0::{
     ButtplugClientMessageV0,
     ButtplugServerMessageV0,
     FleshlightLaunchFW12CmdV0,
     ServerInfoV0,
     SingleMotorVibrateCmdV0,
     VorzeA10CycloneCmdV0,
-  },
 };
 use serde::{Deserialize, Serialize};
 

@@ -8,15 +8,16 @@
 use async_trait::async_trait;
 use uuid::{uuid, Uuid};
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::ButtplugDeviceError,
     message::{Endpoint, OutputType},
-  }, generic_protocol_initializer_setup, server::device::{
-    configuration::{DeviceDefinition, UserDeviceIdentifier}, hardware::{Hardware, HardwareCommand, HardwareWriteCmd}, protocol::{
-      ProtocolCommunicationSpecifier, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, ProtocolKeepaliveStrategy
+  };
+  
+  use buttplug_server_device_config::{DeviceDefinition, UserDeviceIdentifier};
+use crate::device::{
+     hardware::{Hardware, HardwareCommand, HardwareWriteCmd}, protocol::{
+      ProtocolCommunicationSpecifier, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, ProtocolKeepaliveStrategy,  generic_protocol_initializer_setup,
     }
-  }
 };
 use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
 

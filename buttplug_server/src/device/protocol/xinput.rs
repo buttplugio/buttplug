@@ -7,15 +7,13 @@
 
 use byteorder::LittleEndian;
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::ButtplugDeviceError,
     message::{self, Endpoint, InputReadingV4, InputType},
-  },
-  server::device::{
+  };
+use crate::device::{
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
 };
 use byteorder::WriteBytesExt;
 use futures::future::{BoxFuture, FutureExt};

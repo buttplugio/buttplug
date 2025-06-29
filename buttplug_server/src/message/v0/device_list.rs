@@ -6,7 +6,7 @@
 // for full license information.
 
 use super::device_message_info::DeviceMessageInfoV0;
-use crate::core::{
+use buttplug_core::{
   errors::ButtplugMessageError,
   message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
 };
@@ -18,10 +18,10 @@ use serde::{Deserialize, Serialize};
 )]
 pub struct DeviceListV0 {
   #[serde(rename = "Id")]
-  pub(in crate::server::message) id: u32,
+  pub(in crate::message) id: u32,
   #[serde(rename = "Devices")]
   #[getset(get = "pub")]
-  pub(in crate::server::message) devices: Vec<DeviceMessageInfoV0>,
+  pub(in crate::message) devices: Vec<DeviceMessageInfoV0>,
 }
 
 impl ButtplugMessageValidator for DeviceListV0 {

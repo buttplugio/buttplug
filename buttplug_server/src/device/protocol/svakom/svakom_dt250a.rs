@@ -10,7 +10,7 @@ use crate::{
     errors::ButtplugDeviceError,
     message::Endpoint,
   },
-  server::device::{
+use crate::device::{
     configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{

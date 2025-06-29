@@ -7,12 +7,10 @@
 
 use uuid::{uuid, Uuid};
 
-use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use crate::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
 };
 
 const LIBO_VIBES_PROTOCOL_UUID: Uuid = uuid!("72a3d029-cf33-4fff-beec-1c45b85cc8ae");

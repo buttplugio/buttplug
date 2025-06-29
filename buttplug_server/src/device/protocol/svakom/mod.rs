@@ -19,15 +19,14 @@ pub mod svakom_v4;
 pub mod svakom_v5;
 pub mod svakom_v6;
 
-use crate::{
-  core::errors::ButtplugDeviceError,
-  server::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceIdentifier, DeviceDefinition},
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, UserDeviceIdentifier, DeviceDefinition};
+
+use crate::device::{
     hardware::Hardware,
     protocol::{
       generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer
     },
-  },
 };
 use async_trait::async_trait;
 use std::sync::Arc;

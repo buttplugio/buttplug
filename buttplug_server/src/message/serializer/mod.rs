@@ -1,4 +1,4 @@
-use crate::core::{
+use buttplug_core::{
   errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
   message::{
     self,

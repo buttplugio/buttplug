@@ -5,18 +5,16 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::ButtplugDeviceError,
     message::Endpoint,
-  },
-  server::device::{
-    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
+  };
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
+use crate::device::{
     hardware::{Hardware, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup, mysteryvibe::MysteryVibe, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer
     },
-  },
 };
 use async_trait::async_trait;
 use uuid::{uuid, Uuid};

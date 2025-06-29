@@ -5,8 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{
+use 
+  buttplug_core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
       OutputCommand,
@@ -19,8 +19,8 @@ use crate::{
       ButtplugMessageFinalizer,
       ButtplugMessageValidator,
     },
-  },
-  server::message::{
+  };
+  use crate::message::{
     v0::SingleMotorVibrateCmdV0,
     v1::VibrateCmdV1,
     v3::ScalarCmdV3,
@@ -29,7 +29,6 @@ use crate::{
     RotateCmdV1,
     ServerDeviceAttributes,
     TryFromDeviceAttributes,
-  },
 };
 use getset::{CopyGetters, Getters};
 
@@ -81,14 +80,14 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedOutputVecCmdV4 
   fn try_from_device_attributes(
     msg: SingleMotorVibrateCmdV0,
     features: &ServerDeviceAttributes,
-  ) -> Result<Self, crate::core::errors::ButtplugError> {
+  ) -> Result<Self, buttplug_core::errors::ButtplugError> {
     let mut vibrate_features = features
       .features()
       .iter()
       .enumerate()
       .filter(|(_, feature)| {
         if let Some(output_map) = feature.output() {
-          output_map.contains_key(&crate::core::message::OutputType::Vibrate)
+          output_map.contains_key(&buttplug_core::message::OutputType::Vibrate)
         } else {
           false
         }
@@ -145,7 +144,7 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedOutputVecCmdV4 {
   fn try_from_device_attributes(
     msg: VibrateCmdV1,
     features: &ServerDeviceAttributes,
-  ) -> Result<Self, crate::core::errors::ButtplugError> {
+  ) -> Result<Self, buttplug_core::errors::ButtplugError> {
     let vibrate_attributes =
       features
         .attrs_v2()
@@ -209,7 +208,7 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedOutputVecCmdV4 {
   fn try_from_device_attributes(
     msg: ScalarCmdV3,
     attrs: &ServerDeviceAttributes,
-  ) -> Result<Self, crate::core::errors::ButtplugError> {
+  ) -> Result<Self, buttplug_core::errors::ButtplugError> {
     let mut cmds: Vec<CheckedOutputCmdV4> = vec![];
     if msg.scalars().is_empty() {
       return Err(ButtplugError::from(
@@ -292,7 +291,7 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedOutputVecCmdV4 {
   fn try_from_device_attributes(
     msg: LinearCmdV1,
     features: &ServerDeviceAttributes,
-  ) -> Result<Self, crate::core::errors::ButtplugError> {
+  ) -> Result<Self, buttplug_core::errors::ButtplugError> {
     let features = features
       .attrs_v3()
       .linear_cmd()
@@ -320,7 +319,7 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedOutputVecCmdV4 {
             "Device got LinearCmd command but has no actuators on Linear feature.".to_owned(),
           ),
         ))?
-        .get(&crate::core::message::OutputType::PositionWithDuration)
+        .get(&buttplug_core::message::OutputType::PositionWithDuration)
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceFeatureMismatch(
             "Device got LinearCmd command but has no actuators on Linear feature.".to_owned(),
@@ -359,7 +358,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
   fn try_from_device_attributes(
     msg: RotateCmdV1,
     attrs: &ServerDeviceAttributes,
-  ) -> Result<Self, crate::core::errors::ButtplugError> {
+  ) -> Result<Self, buttplug_core::errors::ButtplugError> {
     let mut cmds: Vec<CheckedOutputCmdV4> = vec![];
     for cmd in msg.rotations() {
       let rotate_attrs = attrs
@@ -390,7 +389,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceNoActuatorError("RotateCmdV1".to_owned()),
         ))?
-        .get(&crate::core::message::OutputType::RotateWithDirection)
+        .get(&buttplug_core::message::OutputType::RotateWithDirection)
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceNoActuatorError("RotateCmdV1".to_owned()),
         ))?;

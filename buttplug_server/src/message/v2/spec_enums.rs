@@ -5,8 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::{ButtplugError, ButtplugMessageError},
     message::{
       ButtplugMessage,
@@ -23,15 +22,14 @@ use crate::{
       StopDeviceCmdV0,
       StopScanningV0,
     },
-  },
-  server::message::v1::{
+  };
+  use crate::message::v1::{
     ButtplugClientMessageV1,
     ButtplugServerMessageV1,
     LinearCmdV1,
     RequestServerInfoV1,
     RotateCmdV1,
     VibrateCmdV1,
-  },
 };
 use serde::{Deserialize, Serialize};
 

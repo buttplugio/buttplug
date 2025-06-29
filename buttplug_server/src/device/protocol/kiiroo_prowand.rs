@@ -5,15 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::ButtplugDeviceError,
     message::{self, Endpoint, InputReadingV4, InputType},
-  },
-  server::device::{
+  };
+use crate::device::{
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
 };
 use futures::{future::BoxFuture, FutureExt};
 use std::{default::Default, sync::Arc};

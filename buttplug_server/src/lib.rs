@@ -45,6 +45,15 @@
 //!   - If the server object is dropped, all devices are stopped and disconnected as part
 //!     of the [DeviceManager] teardown.
 
+#[macro_use]
+extern crate log;
+
+#[macro_use]
+extern crate buttplug_derive;
+
+#[macro_use]
+extern crate strum_macros;
+
 pub mod connector;
 pub mod device;
 pub mod message;
@@ -59,7 +68,7 @@ pub use server_builder::ButtplugServerBuilder;
 use futures::future::BoxFuture;
 use thiserror::Error;
 
-use crate::core::{
+use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError},
   message::ButtplugServerMessageV4,
 };

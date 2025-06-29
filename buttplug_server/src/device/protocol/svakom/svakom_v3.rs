@@ -7,12 +7,10 @@
 
 use uuid::Uuid;
 
-use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use crate::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler, ProtocolKeepaliveStrategy},
-  },
 };
 
 generic_protocol_setup!(SvakomV3, "svakom-v3");

@@ -11,13 +11,17 @@ use super::{
     server_device_attributes::TryFromClientMessage,
     ButtplugClientMessageVariant,
     ButtplugServerMessageVariant,
+    spec_enums::{
+      ButtplugCheckedClientMessageV4,
+      ButtplugDeviceCommandMessageUnionV4,
+      ButtplugDeviceManagerMessageUnion,
+    },
   },
   ping_timer::PingTimer,
   server_message_conversion::ButtplugServerMessageConverter,
   ButtplugServerResultFuture,
 };
-use crate::{
-  core::{
+use buttplug_core::{
     errors::*,
     message::{
       self,
@@ -29,12 +33,6 @@ use crate::{
       StopScanningV0,
       BUTTPLUG_CURRENT_API_MAJOR_VERSION,
     },
-  },
-  server::message::spec_enums::{
-    ButtplugCheckedClientMessageV4,
-    ButtplugDeviceCommandMessageUnionV4,
-    ButtplugDeviceManagerMessageUnion,
-  },
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use futures::{
@@ -42,6 +40,7 @@ use futures::{
   Stream,
 };
 use once_cell::sync::OnceCell;
+use tracing::info_span;
 use std::{
   fmt,
   sync::{
@@ -60,7 +59,7 @@ pub struct ButtplugServer {
   /// confirmation in UI dialogs)
   server_name: String,
   /// The maximum ping time, in milliseconds, for the server. If the server does not receive a
-  /// [Ping](crate::core::messages::Ping) message in this amount of time after the handshake has
+  /// [Ping](buttplug_core::messages::Ping) message in this amount of time after the handshake has
   /// succeeded, the server will automatically disconnect. If this is not called, the ping timer
   /// will not be activated.
   ///
@@ -343,8 +342,8 @@ impl ButtplugServer {
     .boxed()
   }
 
-  /// Performs the [RequestServerInfo]([ServerInfo](crate::core::message::RequestServerInfo) /
-  /// [ServerInfo](crate::core::message::ServerInfo) handshake, as specified in the [Buttplug
+  /// Performs the [RequestServerInfo]([ServerInfo](buttplug_core::message::RequestServerInfo) /
+  /// [ServerInfo](buttplug_core::message::ServerInfo) handshake, as specified in the [Buttplug
   /// Protocol Spec](https://buttplug-spec.docs.buttplug.io). This is the first thing that must
   /// happens upon connection to the server, in order to make sure the server can speak the same
   /// protocol version as the client.
@@ -412,10 +411,8 @@ impl ButtplugServer {
 
 #[cfg(test)]
 mod test {
-  use crate::{
-    core::message::{self, BUTTPLUG_CURRENT_API_MAJOR_VERSION},
-    server::ButtplugServerBuilder,
-  };
+  use crate::ButtplugServerBuilder;
+  use buttplug_core::message::{self, BUTTPLUG_CURRENT_API_MAJOR_VERSION};
   #[tokio::test]
   async fn test_server_deny_reuse() {
     let server = ButtplugServerBuilder::default().finish().unwrap();

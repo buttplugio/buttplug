@@ -1,13 +1,12 @@
 use std::cmp::Ordering;
 
 use super::*;
-use crate::{
-  core::{
+use buttplug_core::{
     errors::ButtplugMessageError,
     message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, PingV0},
-  },
-  server::message::RequestServerInfoV1,
-};
+  };
+use crate::message::RequestServerInfoV1;
+
 use serde::{Deserialize, Serialize};
 
 /// Represents all client-to-server messages in v0 of the Buttplug Spec

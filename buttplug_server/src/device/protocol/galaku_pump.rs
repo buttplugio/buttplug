@@ -7,12 +7,10 @@
 
 use uuid::{uuid, Uuid};
 
-use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use crate::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
 };
 use std::num::Wrapping;
 use std::sync::atomic::{AtomicU8, Ordering};

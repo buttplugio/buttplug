@@ -5,11 +5,9 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::configuration::ProtocolCommunicationSpecifier;
-use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
-    configuration::{DeviceDefinition, UserDeviceIdentifier},
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint,   util::{async_manager, sleep},};
+use crate::device::{
     hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
@@ -17,8 +15,7 @@ use crate::{
       ProtocolIdentifier,
       ProtocolInitializer,
     },
-  },
-  util::{async_manager, sleep},
+
 };
 use async_trait::async_trait;
 use futures::FutureExt;
@@ -30,6 +27,7 @@ use std::{
   time::Duration,
 };
 use uuid::{uuid, Uuid};
+use tokio::select;
 
 const FREDORCH_COMMAND_TIMEOUT_MS: u64 = 100;
 const FREDORCH_ROTORY_PROTOCOL_UUID: Uuid = uuid!("0ec6598a-bfd1-4f47-9738-e8cd8ace6473");

@@ -5,15 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::message::{OutputType, DeviceFeature, InputCommandType, InputType},
-  server::message::{
+use buttplug_core::message::{OutputType, DeviceFeature, InputCommandType, InputType};
+use crate::message::{
     v1::NullDeviceMessageAttributesV1,
     v2::{
       ClientDeviceMessageAttributesV2,
       GenericDeviceMessageAttributesV2,
     },
-  },
 };
 use getset::{Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
@@ -35,41 +33,41 @@ pub struct ClientDeviceMessageAttributesV3 {
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(rename = "ScalarCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) scalar_cmd: Option<Vec<ClientGenericDeviceMessageAttributesV3>>,
+  pub(in crate::message) scalar_cmd: Option<Vec<ClientGenericDeviceMessageAttributesV3>>,
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(rename = "RotateCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) rotate_cmd: Option<Vec<ClientGenericDeviceMessageAttributesV3>>,
+  pub(in crate::message) rotate_cmd: Option<Vec<ClientGenericDeviceMessageAttributesV3>>,
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(rename = "LinearCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) linear_cmd: Option<Vec<ClientGenericDeviceMessageAttributesV3>>,
+  pub(in crate::message) linear_cmd: Option<Vec<ClientGenericDeviceMessageAttributesV3>>,
 
   // Sensor Messages
   #[getset(get = "pub")]
   #[serde(rename = "SensorReadCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) sensor_read_cmd: Option<Vec<SensorDeviceMessageAttributesV3>>,
+  pub(in crate::message) sensor_read_cmd: Option<Vec<SensorDeviceMessageAttributesV3>>,
   #[getset(get = "pub")]
   #[serde(rename = "SensorSubscribeCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) sensor_subscribe_cmd: Option<Vec<SensorDeviceMessageAttributesV3>>,
+  pub(in crate::message) sensor_subscribe_cmd: Option<Vec<SensorDeviceMessageAttributesV3>>,
 
   // StopDeviceCmd always exists
   #[getset(get = "pub")]
   #[serde(rename = "StopDeviceCmd")]
   #[serde(skip_deserializing)]
-  pub(in crate::server::message) stop_device_cmd: NullDeviceMessageAttributesV1,
+  pub(in crate::message) stop_device_cmd: NullDeviceMessageAttributesV1,
 
   // Needed to load from config for fallback, but unused here.
   #[getset(get = "pub")]
   #[serde(rename = "FleshlightLaunchFW12Cmd")]
   #[serde(skip_serializing)]
-  pub(in crate::server::message) fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributesV1>,
+  pub(in crate::message) fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributesV1>,
   #[getset(get = "pub")]
   #[serde(rename = "VorzeA10CycloneCmd")]
   #[serde(skip_serializing)]
-  pub(in crate::server::message) vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributesV1>,
+  pub(in crate::message) vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributesV1>,
 }
 
 pub fn vibrate_cmd_from_scalar_cmd(
@@ -170,17 +168,17 @@ pub struct ClientGenericDeviceMessageAttributesV3 {
   #[getset(get = "pub")]
   #[serde(rename = "FeatureDescriptor")]
   #[serde(default = "unspecified_feature")]
-  pub(in crate::server::message) feature_descriptor: String,
+  pub(in crate::message) feature_descriptor: String,
   #[getset(get = "pub")]
   #[serde(rename = "ActuatorType")]
-  pub(in crate::server::message) actuator_type: OutputType,
+  pub(in crate::message) actuator_type: OutputType,
   #[serde(rename = "StepCount")]
   #[getset(get = "pub")]
-  pub(in crate::server::message) step_count: u32,
+  pub(in crate::message) step_count: u32,
   // TODO This needs to actually be part of the device info relayed to the client in spec v4.
   #[getset(get = "pub")]
   #[serde(skip, default)]
-  pub(in crate::server::message) index: u32,
+  pub(in crate::message) index: u32,
 }
 
 impl From<Vec<ClientGenericDeviceMessageAttributesV3>> for GenericDeviceMessageAttributesV2 {
@@ -221,22 +219,22 @@ where
 pub struct SensorDeviceMessageAttributesV3 {
   #[getset(get = "pub")]
   #[serde(rename = "FeatureDescriptor")]
-  pub(in crate::server::message) feature_descriptor: String,
+  pub(in crate::message) feature_descriptor: String,
   #[getset(get = "pub")]
   #[serde(rename = "SensorType")]
-  pub(in crate::server::message) sensor_type: InputType,
+  pub(in crate::message) sensor_type: InputType,
   #[getset(get = "pub")]
   #[serde(rename = "SensorRange", serialize_with = "range_sequence_serialize")]
-  pub(in crate::server::message) sensor_range: Vec<RangeInclusive<i32>>,
+  pub(in crate::message) sensor_range: Vec<RangeInclusive<i32>>,
   // TODO This needs to actually be part of the device info relayed to the client in spec v4.
   #[getset(get = "pub")]
   #[serde(skip, default)]
-  pub(in crate::server::message) index: u32,
+  pub(in crate::message) index: u32,
   // Matching device feature for this attribute. Do not serialize or deserialize this, it's not part
   // of this version of the protocol, only use it for comparison when doing message conversion.
   #[getset(get = "pub")]
   #[serde(skip)]
-  pub(in crate::server::message) feature: DeviceFeature,
+  pub(in crate::message) feature: DeviceFeature,
 }
 
 // This is an almost exact copy of the conversion we do for ServerDeviceFeature ->

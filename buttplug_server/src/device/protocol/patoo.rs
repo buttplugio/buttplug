@@ -5,23 +5,22 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::ButtplugDeviceError,
     message::Endpoint,
-  },
-  server::device::{
-    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
+  };
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
+
+  use crate::device::{
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-  },
-};
+  };
 use async_trait::async_trait;
 use uuid::{uuid, Uuid};
 use std::sync::{atomic::{AtomicU8, Ordering}, Arc};
 
 pub mod setup {
-  use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
+  use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
   #[derive(Default)]
   pub struct PatooIdentifierFactory {}
 

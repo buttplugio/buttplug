@@ -7,7 +7,7 @@
 
 //! Fleshlight FW v1.2 Command (Version 0 Message, Deprecated)
 
-use crate::core::{
+use buttplug_core::{
   errors::ButtplugMessageError,
   message::{
     ButtplugDeviceMessage,

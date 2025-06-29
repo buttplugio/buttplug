@@ -9,12 +9,10 @@ use std::sync::atomic::{AtomicU8, Ordering};
 
 use uuid::{uuid, Uuid};
 
-use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use crate::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
 };
 
 const JEJOUE_PROTOCOL_UUID: Uuid = uuid!("d3dd2bf5-b029-4bc1-9466-39f82c2e3258");

@@ -9,12 +9,10 @@ use std::sync::atomic::{AtomicU8, Ordering};
 
 use uuid::{uuid, Uuid};
 
-use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use crate::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
-  },
 };
 
 const BANANASOME_PROTOCOL_UUID: Uuid = uuid!("a0a2e5f8-3692-4f6b-8add-043513ed86f6");

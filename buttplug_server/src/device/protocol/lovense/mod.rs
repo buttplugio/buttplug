@@ -11,27 +11,26 @@ mod lovense_single_actuator;
 mod lovense_multi_actuator;
 mod lovense_stroker;
 
-use crate::{
-  core::{
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier};
+use buttplug_core::{
     errors::ButtplugDeviceError,
     message::{self, Endpoint, FeatureType, InputReadingV4},
-  },
-  server::device::{
-    configuration::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier},
+    util::sleep
+  };
+use crate::device::{
     hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{lovense::{lovense_max::LovenseMax, lovense_multi_actuator::LovenseMultiActuator, lovense_rotate_vibrator::LovenseRotateVibrator, lovense_single_actuator::LovenseSingleActuator, lovense_stroker::LovenseStroker}, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-  },
-  util::sleep,
 };
+use regex::Regex;
 use async_trait::async_trait;
 use futures::{future::BoxFuture, FutureExt};
-use regex::Regex;
 use std::{
   sync::{
     Arc,
   },
   time::Duration,
 };
+use tokio::select;
 use uuid::{uuid, Uuid};
 
 // Constants for dealing with the Lovense subscript/write race condition. The
@@ -45,7 +44,7 @@ const LOVENSE_COMMAND_RETRY: u64 = 5;
 const LOVENSE_PROTOCOL_UUID: Uuid = uuid!("cfa3fac5-48bb-4d87-817e-a439965956e1");
 
 pub mod setup {
-  use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
+  use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
   #[derive(Default)]
   pub struct LovenseIdentifierFactory {}
 

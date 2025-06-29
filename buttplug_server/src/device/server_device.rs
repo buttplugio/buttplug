@@ -43,8 +43,7 @@ use std::{
   time::Duration,
 };
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::{ButtplugDeviceError, ButtplugError},
     message::{
       self,
@@ -58,17 +57,22 @@ use crate::{
       InputType,
     },
     ButtplugResultFuture,
-  },
-  server::{
+    util::{self, async_manager, stream::convert_broadcast_receiver_to_stream},
+  };
+  use buttplug_server_device_config::{DeviceConfigurationManager, DeviceDefinition, UserDeviceIdentifier};
+
+use  crate::{
     device::{
-      configuration::DeviceConfigurationManager,
       hardware::{
         Hardware,
         HardwareCommand,
         HardwareConnector,
         HardwareEvent,
       },
-      protocol::ProtocolHandler,
+      protocol::{ProtocolHandler,
+    ProtocolKeepaliveStrategy,
+    ProtocolSpecializer,
+  },
     },
     message::{
       checked_output_cmd::CheckedOutputCmdV4,
@@ -78,8 +82,6 @@ use crate::{
       ButtplugServerDeviceMessage,
     },
     ButtplugServerResultFuture,
-  },
-  util::{self, async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use core::hash::{Hash, Hasher};
 use dashmap::DashMap;
@@ -88,15 +90,6 @@ use getset::Getters;
 use tokio::{select, sync::{mpsc::{channel, Sender}, Mutex}, time::Instant};
 use tokio_stream::StreamExt;
 use uuid::Uuid;
-
-use super::{
-  configuration::{DeviceDefinition, UserDeviceIdentifier},
-  protocol::{
-    //output_command_manager::ActuatorCommandManager,
-    ProtocolKeepaliveStrategy,
-    ProtocolSpecializer,
-  },
-};
 
 #[derive(Debug)]
 pub enum ServerDeviceEvent {

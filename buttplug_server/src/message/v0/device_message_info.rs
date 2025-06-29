@@ -14,11 +14,11 @@ use super::spec_enums::ButtplugDeviceMessageNameV0;
 pub struct DeviceMessageInfoV0 {
   #[serde(rename = "DeviceIndex")]
   #[getset(get_copy = "pub")]
-  pub(in crate::server::message) device_index: u32,
+  pub(in crate::message) device_index: u32,
   #[serde(rename = "DeviceName")]
   #[getset(get = "pub")]
-  pub(in crate::server::message) device_name: String,
+  pub(in crate::message) device_name: String,
   #[serde(rename = "DeviceMessages")]
   #[getset(get = "pub")]
-  pub(in crate::server::message) device_messages: Vec<ButtplugDeviceMessageNameV0>,
+  pub(in crate::message) device_messages: Vec<ButtplugDeviceMessageNameV0>,
 }

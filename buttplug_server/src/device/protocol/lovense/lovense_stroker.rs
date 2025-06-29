@@ -5,16 +5,14 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::ButtplugDeviceError,
     message::{Endpoint, InputReadingV4},
-  },
-  server::device::{
+    util::{async_manager, sleep},
+  };
+use crate::device::{
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolKeepaliveStrategy},
-  },
-  util::{async_manager, sleep},
 };
 use futures::{future::BoxFuture};
 use std::{

@@ -8,10 +8,8 @@
 use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 
-use crate::{
-  core::message::DeviceFeature,
-  server::message::{v2::ClientDeviceMessageAttributesV2, v3::ClientDeviceMessageAttributesV3},
-};
+use buttplug_core::message::DeviceFeature;
+use crate::message::{v2::ClientDeviceMessageAttributesV2, v3::ClientDeviceMessageAttributesV3};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct NullDeviceMessageAttributesV1 {}
@@ -22,30 +20,30 @@ pub struct ClientDeviceMessageAttributesV1 {
   #[getset(get = "pub")]
   #[serde(rename = "VibrateCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) vibrate_cmd: Option<GenericDeviceMessageAttributesV1>,
+  pub(in crate::message) vibrate_cmd: Option<GenericDeviceMessageAttributesV1>,
   #[getset(get = "pub")]
   #[serde(rename = "RotateCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) rotate_cmd: Option<GenericDeviceMessageAttributesV1>,
+  pub(in crate::message) rotate_cmd: Option<GenericDeviceMessageAttributesV1>,
   #[getset(get = "pub")]
   #[serde(rename = "LinearCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) linear_cmd: Option<GenericDeviceMessageAttributesV1>,
+  pub(in crate::message) linear_cmd: Option<GenericDeviceMessageAttributesV1>,
 
   // StopDeviceCmd always exists
   #[getset(get = "pub")]
-  pub(in crate::server::message) stop_device_cmd: NullDeviceMessageAttributesV1,
+  pub(in crate::message) stop_device_cmd: NullDeviceMessageAttributesV1,
 
   // Obsolete commands are only added post-serialization
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) single_motor_vibrate_cmd: Option<NullDeviceMessageAttributesV1>,
+  pub(in crate::message) single_motor_vibrate_cmd: Option<NullDeviceMessageAttributesV1>,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributesV1>,
+  pub(in crate::message) fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributesV1>,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub(in crate::server::message) vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributesV1>,
+  pub(in crate::message) vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributesV1>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Getters, Setters)]

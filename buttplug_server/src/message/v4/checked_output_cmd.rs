@@ -5,8 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{
+use 
+  buttplug_core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
       OutputCmdV4,
@@ -16,9 +16,9 @@ use crate::{
       ButtplugMessageFinalizer,
       ButtplugMessageValidator,
     },
-  },
-  server::message::{ServerDeviceAttributes, TryFromDeviceAttributes},
-};
+  };
+  use crate::message::{ServerDeviceAttributes, TryFromDeviceAttributes};
+
 use getset::{CopyGetters, Getters};
 use uuid::Uuid;
 
@@ -136,14 +136,14 @@ impl TryFromDeviceAttributes<OutputCmdV4> for CheckedOutputCmdV4 {
       } else {
         Err(ButtplugError::from(
           ButtplugDeviceError::MessageNotSupported(
-            ButtplugDeviceMessageNameV4::ActuatorCmd.to_string(),
+            ButtplugDeviceMessageNameV4::OutputCmd.to_string(),
           ),
         ))
       }
     } else {
       Err(ButtplugError::from(
         ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageNameV4::ActuatorCmd.to_string(),
+          ButtplugDeviceMessageNameV4::OutputCmd.to_string(),
         ),
       ))
     }

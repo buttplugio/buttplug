@@ -1,7 +1,7 @@
 use super::ServerDeviceMessageAttributesV3;
 use super::v2::ServerDeviceMessageAttributesV2;
-use crate::core::errors::ButtplugError;
-use crate::server::device::server_device_feature::ServerDeviceFeature;
+use buttplug_core::errors::ButtplugError;
+use buttplug_server_device_config::ServerDeviceFeature;
 use getset::Getters;
 use std::collections::HashMap;
 

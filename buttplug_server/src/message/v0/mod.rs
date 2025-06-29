@@ -8,7 +8,7 @@ mod spec_enums;
 mod test;
 mod vorze_a10_cyclone_cmd;
 
-use crate::core::message::v0::*;
+use buttplug_core::message::v0::*;
 pub use device_added::DeviceAddedV0;
 pub use device_list::DeviceListV0;
 pub use device_message_info::DeviceMessageInfoV0;
