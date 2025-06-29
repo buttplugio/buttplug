@@ -14,7 +14,7 @@ use super::{
   ButtplugClientMessageFuturePair,
   ButtplugClientMessageSender,
 };
-use crate::core::{
+use buttplug_core::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
@@ -27,12 +27,12 @@ use crate::core::{
   },
 };
 use dashmap::DashMap;
-use futures::FutureExt;
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
-use tokio::sync::{broadcast, mpsc};
+use tokio::{select, sync::{broadcast, mpsc}};
+use log::*;
 
 /// Enum used for communication from the client to the event loop.
 #[derive(Clone)]
@@ -314,7 +314,7 @@ where
     debug!("Running client event loop.");
     loop {
       select! {
-        event = self.from_connector_receiver.recv().fuse() => match event {
+        event = self.from_connector_receiver.recv() => match event {
           None => {
             info!("Connector disconnected, exiting loop.");
             break;
@@ -323,7 +323,7 @@ where
             self.parse_connector_message(msg).await;
           }
         },
-        client = self.from_client_receiver.recv().fuse() => match client {
+        client = self.from_client_receiver.recv() => match client {
           Err(_) => {
             info!("Client disconnected, exiting loop.");
             break;

@@ -1,4 +1,4 @@
-use crate::core::message::{
+use buttplug_core::message::{
   serializer::{
     json_serializer::{create_message_validator, deserialize_to_message, vec_to_protocol_json},
     ButtplugMessageSerializer,
@@ -73,7 +73,7 @@ impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
 #[cfg(test)]
 mod test {
   use super::*;
-  use crate::core::message::{
+  use buttplug_core::message::{
     RequestServerInfoV4,
     BUTTPLUG_CURRENT_API_MAJOR_VERSION,
     BUTTPLUG_CURRENT_API_MINOR_VERSION,
