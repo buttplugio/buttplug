@@ -6,10 +6,9 @@
 // for full license information.
 
 use super::websocket_server_comm_manager::WebsocketServerDeviceCommManagerInitInfo;
-use crate::{
-  core::{errors::ButtplugDeviceError, message::Endpoint},
-  server::device::{
-    configuration::{ProtocolCommunicationSpecifier, WebsocketSpecifier},
+use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, WebsocketSpecifier};
+use buttplug_server::device::{
     hardware::{
       GenericHardwareSpecializer,
       Hardware,
@@ -23,8 +22,6 @@ use crate::{
       HardwareUnsubscribeCmd,
       HardwareWriteCmd,
     },
-  },
-  util::async_manager,
 };
 use async_trait::async_trait;
 use futures::{
@@ -42,6 +39,7 @@ use std::{
   time::Duration,
 };
 use tokio::{
+  select,
   net::TcpStream,
   sync::{
     broadcast,
@@ -68,7 +66,7 @@ async fn run_connection_loop(
 
   loop {
     select! {
-      _ = sleep(Duration::from_millis(10000)).fuse() => {
+      _ = sleep(Duration::from_millis(10000)) => {
         if pong_count == 0 {
           error!("No pongs received, considering connection closed.");
           break;
@@ -82,7 +80,7 @@ async fn run_connection_loop(
           break;
         }
       }
-      ws_msg = request_receiver.recv().fuse() => {
+      ws_msg = request_receiver.recv() => {
         if let Some(binary_msg) = ws_msg {
           if websocket_server_sender
             .send(tokio_tungstenite::tungstenite::Message::Binary(binary_msg.into()))
@@ -96,7 +94,7 @@ async fn run_connection_loop(
           break;
         }
       }
-      websocket_server_msg = websocket_server_receiver.next().fuse() => match websocket_server_msg {
+      websocket_server_msg = websocket_server_receiver.next() => match websocket_server_msg {
         Some(ws_data) => {
           match ws_data {
             Ok(msg) => {
@@ -279,7 +277,7 @@ impl HardwareInternal for WebsocketServerHardware {
     msg: &HardwareWriteCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let sender = self.outgoing_sender.clone();
-    let data = msg.data.clone();
+    let data = msg.data().clone();
     // TODO Should check endpoint validity
     async move {
       sender.send(data).await.map_err(|err| {
