@@ -20,8 +20,8 @@ doc = true
 crate-type = ["cdylib", "rlib"]
 
 [features]
-default=[]
-tokio-runtime=[]
+default=["tokio-runtime"]
+tokio-runtime=["tokio/rt"]
 wasm=[]
 
 # Only build docs on one platform (linux)
