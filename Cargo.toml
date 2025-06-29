@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
     "buttplug_client",
+    "buttplug_client_in_process",
     "buttplug_core",
     "buttplug_derive",
     "buttplug_server",
