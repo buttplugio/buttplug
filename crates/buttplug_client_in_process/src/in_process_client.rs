@@ -83,10 +83,8 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
   {
     use buttplug_server_hwmgr_lovense_dongle::{
       LovenseHIDDongleCommunicationManagerBuilder,
-      LovenseSerialDongleCommunicationManagerBuilder,
     };
     device_manager_builder.comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default());
-    device_manager_builder.comm_manager(LovenseSerialDongleCommunicationManagerBuilder::default());
   }
   #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
   {
