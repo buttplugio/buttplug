@@ -12,12 +12,13 @@ use super::{
   ButtplugClientMessageFuturePair,
   ButtplugServerMessageStateShared,
 };
-use crate::core::message::{ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageV4};
+use buttplug_core::message::{ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageV4};
 use dashmap::DashMap;
 use std::sync::{
   atomic::{AtomicU32, Ordering},
   Arc,
 };
+use log::*;
 
 /// Message sorting and pairing for remote client connectors.
 ///

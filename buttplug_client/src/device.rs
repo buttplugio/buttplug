@@ -13,8 +13,7 @@ use super::{
   ButtplugClientMessageSender,
   ButtplugClientResultFuture,
 };
-use crate::{
-  core::{
+use buttplug_core::{
     errors::ButtplugDeviceError,
     message::{
       OutputCmdV4,
@@ -27,7 +26,6 @@ use crate::{
       FeatureType,
       StopDeviceCmdV0,
     },
-  },
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use futures::{FutureExt, Stream};
@@ -40,6 +38,7 @@ use std::{
   },
 };
 use tokio::sync::broadcast;
+use log::*;
 
 /// Enum for messages going to a [ButtplugClientDevice] instance.
 #[derive(Clone, Debug)]

@@ -13,22 +13,20 @@ pub mod connector;
 pub mod device;
 pub mod serializer;
 
-use crate::{
-  core::{
-    connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
-    errors::{ButtplugError, ButtplugHandshakeError},
-    message::{
-      ButtplugClientMessageV4,
-      ButtplugServerMessageV4,
-      PingV0,
-      RequestDeviceListV0,
-      RequestServerInfoV4,
-      StartScanningV0,
-      StopAllDevicesV0,
-      StopScanningV0,
-      BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-      BUTTPLUG_CURRENT_API_MINOR_VERSION,
-    },
+use buttplug_core::{
+  connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
+  errors::{ButtplugError, ButtplugHandshakeError},
+  message::{
+    ButtplugClientMessageV4,
+    ButtplugServerMessageV4,
+    PingV0,
+    RequestDeviceListV0,
+    RequestServerInfoV4,
+    StartScanningV0,
+    StopAllDevicesV0,
+    StopScanningV0,
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+    BUTTPLUG_CURRENT_API_MINOR_VERSION,
   },
   util::{
     async_manager,
@@ -50,6 +48,7 @@ use std::sync::{
 use thiserror::Error;
 use tokio::sync::{broadcast, mpsc, Mutex};
 use tracing_futures::Instrument;
+use log::*;
 
 /// Result type used for public APIs.
 ///
@@ -140,7 +139,7 @@ pub enum ButtplugClientEvent {
 impl Unpin for ButtplugClientEvent {
 }
 
-pub(super) fn create_boxed_future_client_error<T>(
+pub(crate) fn create_boxed_future_client_error<T>(
   err: ButtplugError,
 ) -> ButtplugClientResultFuture<T>
 where
@@ -149,7 +148,7 @@ where
   future::ready(Err(ButtplugClientError::ButtplugError(err))).boxed()
 }
 
-pub(super) struct ButtplugClientMessageSender {
+pub(crate) struct ButtplugClientMessageSender {
   message_sender: broadcast::Sender<ButtplugClientRequest>,
   connected: Arc<AtomicBool>,
 }

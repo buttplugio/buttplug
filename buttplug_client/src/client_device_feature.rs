@@ -3,24 +3,11 @@ use std::sync::Arc;
 use futures::{future, FutureExt};
 use getset::{CopyGetters, Getters};
 
-use crate::{
-  core::{
+use buttplug_core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
-      OutputCmdV4,
-      OutputCommand,
-      OutputPositionWithDuration,
-      OutputRotateWithDirection,
-      OutputType,
-      OutputValue,
-      ButtplugServerMessageV4,
-      DeviceFeature,
-      InputCmdV4,
-      InputCommandType,
-      InputType,
+      ButtplugDeviceMessageNameV4, ButtplugServerMessageV4, DeviceFeature, InputCmdV4, InputCommandType, InputType, OutputCmdV4, OutputCommand, OutputPositionWithDuration, OutputRotateWithDirection, OutputType, OutputValue
     },
-  },
-  server::message::spec_enums::ButtplugDeviceMessageNameV4,
 };
 
 use super::{
@@ -192,7 +179,7 @@ impl ClientDeviceFeature {
       }
     }
     create_boxed_future_client_error(
-      ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::SensorCmd.to_string())
+      ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::InputCmd.to_string())
         .into(),
     )
   }
@@ -216,7 +203,7 @@ impl ClientDeviceFeature {
       }
     }
     create_boxed_future_client_error(
-      ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::SensorCmd.to_string())
+      ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::InputCmd.to_string())
         .into(),
     )
   }
@@ -250,7 +237,7 @@ impl ClientDeviceFeature {
       }
     }
     create_boxed_future_client_error(
-      ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::SensorCmd.to_string())
+      ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::InputCmd.to_string())
         .into(),
     )
   }
