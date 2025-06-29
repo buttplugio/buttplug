@@ -1,20 +1,20 @@
 [workspace]
 resolver = "3"
 members = [
-    "buttplug_client",
-    "buttplug_client_in_process",
-    "buttplug_core",
-    "buttplug_derive",
-    "buttplug_server",
-    "buttplug_server_device_config",
-    "buttplug_server_hwmgr_btleplug",
-    "buttplug_server_hwmgr_hid",
-    "buttplug_server_hwmgr_lovense_connect",
-    "buttplug_server_hwmgr_lovense_dongle",
-    "buttplug_server_hwmgr_serial",
-    "buttplug_server_hwmgr_websocket",
-    "buttplug_server_hwmgr_xinput",
-    "buttplug_transport_websocket_tungstenite",
+    "crates/buttplug_client",
+    "crates/buttplug_client_in_process",
+    "crates/buttplug_core",
+    "crates/buttplug_derive",
+    "crates/buttplug_server",
+    "crates/buttplug_server_device_config",
+    "crates/buttplug_server_hwmgr_btleplug",
+    "crates/buttplug_server_hwmgr_hid",
+    "crates/buttplug_server_hwmgr_lovense_connect",
+    "crates/buttplug_server_hwmgr_lovense_dongle",
+    "crates/buttplug_server_hwmgr_serial",
+    "crates/buttplug_server_hwmgr_websocket",
+    "crates/buttplug_server_hwmgr_xinput",
+    "crates/buttplug_transport_websocket_tungstenite",
 ]
 
 [profile.release]
