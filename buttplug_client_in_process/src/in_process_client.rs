@@ -5,29 +5,10 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-//! Utility module, for storing types and functions used across other modules in
-//! the library.
-
-pub mod async_manager;
-#[cfg(feature = "server")]
-pub mod device_configuration;
-pub mod future;
-pub mod json;
-pub mod logging;
-pub mod stream;
-
-#[cfg(not(feature = "wasm"))]
-pub use tokio::time::sleep;
-#[cfg(feature = "wasm")]
-pub use wasmtimer::tokio::sleep;
-
-#[cfg(all(feature = "server", feature = "client"))]
-use crate::{
-  client::connector::ButtplugInProcessClientConnectorBuilder,
-  client::ButtplugClient,
-  server::device::{configuration::DeviceConfigurationManagerBuilder, ServerDeviceManagerBuilder},
-  server::ButtplugServerBuilder,
-};
+use super::ButtplugInProcessClientConnectorBuilder;
+use buttplug_client::ButtplugClient;
+use buttplug_server_device_config::{DeviceConfigurationManagerBuilder};
+use buttplug_server::{device::ServerDeviceManagerBuilder, ButtplugServerBuilder};
 
 /// Convenience function for creating in-process connectors.
 ///
@@ -63,30 +44,20 @@ use crate::{
 /// If the library is using outside device managers, it is recommended to
 /// build your own connector, add your device manager to those, and use the
 /// `run()` method to pass it in.
-#[cfg(all(feature = "server", feature = "client"))]
 pub async fn in_process_client(client_name: &str) -> ButtplugClient {
   let dcm = DeviceConfigurationManagerBuilder::default()
     .finish()
     .unwrap();
 
   let mut device_manager_builder = ServerDeviceManagerBuilder::new(dcm);
-  #[cfg(all(
-    feature = "btleplug-manager",
-    any(
-      target_os = "windows",
-      target_os = "macos",
-      target_os = "linux",
-      target_os = "ios",
-      target_os = "android"
-    )
-  ))]
+  #[cfg(feature = "btleplug-manager",)]
   {
-    use crate::server::device::hardware::communication::btleplug::BtlePlugCommunicationManagerBuilder;
+    use buttplug_server_hwmgr_btleplug::BtlePlugCommunicationManagerBuilder;
     device_manager_builder.comm_manager(BtlePlugCommunicationManagerBuilder::default());
   }
-  #[cfg(feature = "websocket-server-manager")]
+  #[cfg(feature = "websocket-manager")]
   {
-    use crate::server::device::hardware::communication::websocket_server::websocket_server_comm_manager::WebsocketServerDeviceCommunicationManagerBuilder;
+    use buttplug_server_hwmgr_websocket::WebsocketServerDeviceCommunicationManagerBuilder;
     device_manager_builder.comm_manager(
       WebsocketServerDeviceCommunicationManagerBuilder::default().listen_on_all_interfaces(true),
     );
@@ -96,12 +67,12 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
     any(target_os = "windows", target_os = "macos", target_os = "linux")
   ))]
   {
-    use crate::server::device::hardware::communication::serialport::SerialPortCommunicationManagerBuilder;
+    use buttplug_server_hwmgr_serial::SerialPortCommunicationManagerBuilder;
     device_manager_builder.comm_manager(SerialPortCommunicationManagerBuilder::default());
   }
   #[cfg(feature = "lovense-connect-service-manager")]
   {
-    use crate::server::device::hardware::communication::lovense_connect_service::LovenseConnectServiceCommunicationManagerBuilder;
+    use buttplug_server_hwmgr_lovense_connect::LovenseConnectServiceCommunicationManagerBuilder;
     device_manager_builder
       .comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default());
   }
@@ -110,7 +81,7 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
     any(target_os = "windows", target_os = "macos", target_os = "linux")
   ))]
   {
-    use crate::server::device::hardware::communication::lovense_dongle::{
+    use buttplug_server_hwmgr_lovense_dongle::{
       LovenseHIDDongleCommunicationManagerBuilder,
       LovenseSerialDongleCommunicationManagerBuilder,
     };
@@ -119,7 +90,7 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
   }
   #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
   {
-    use crate::server::device::hardware::communication::xinput::XInputDeviceCommunicationManagerBuilder;
+    use buttplug_server_hwmgr_xinput::XInputDeviceCommunicationManagerBuilder;
     device_manager_builder.comm_manager(XInputDeviceCommunicationManagerBuilder::default());
   }
   let server_builder = ButtplugServerBuilder::new(device_manager_builder.finish().unwrap());

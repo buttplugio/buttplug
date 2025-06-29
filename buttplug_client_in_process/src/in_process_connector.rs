@@ -7,15 +7,14 @@
 
 //! In-process communication between clients and servers
 
-use crate::{
-  core::{
+use buttplug_core::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
     errors::{ButtplugError, ButtplugMessageError},
     message::{ButtplugClientMessageV4, ButtplugServerMessageV4},
-  },
-  server::{message::ButtplugServerMessageVariant, ButtplugServer, ButtplugServerBuilder},
-  util::async_manager,
-};
+    util::async_manager,
+  };
+use buttplug_server::{message::ButtplugServerMessageVariant, ButtplugServer, ButtplugServerBuilder};
+
 use futures::{
   future::{self, BoxFuture, FutureExt},
   StreamExt,
@@ -24,6 +23,7 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
+use futures_util::pin_mut;
 use tokio::sync::mpsc::{channel, Sender};
 use tracing_futures::Instrument;
 

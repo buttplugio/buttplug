@@ -10,3 +10,6 @@ extern crate log;
 
 pub mod websocket_server_comm_manager;
 pub mod websocket_server_hardware;
+
+pub use websocket_server_comm_manager::*;
+pub use websocket_server_hardware::*;
