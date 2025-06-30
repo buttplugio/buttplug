@@ -14,6 +14,7 @@ members = [
     "crates/buttplug_server_hwmgr_serial",
     "crates/buttplug_server_hwmgr_websocket",
     "crates/buttplug_server_hwmgr_xinput",
+    "crates/buttplug_tests",
     "crates/buttplug_transport_websocket_tungstenite",
 ]
 

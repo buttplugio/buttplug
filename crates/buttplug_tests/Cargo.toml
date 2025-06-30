@@ -1,0 +1,35 @@
+[package]
+name = "buttplug_tests"
+version = "10.0.0"
+authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
+description = "Buttplug Intimate Hardware Control Library - Core Library"
+license = "BSD-3-Clause"
+homepage = "http://buttplug.io"
+repository = "https://github.com/buttplugio/buttplug.git"
+readme = "./README.md"
+keywords = ["usb", "serial", "hardware", "bluetooth", "teledildonics"]
+edition = "2021"
+
+[dependencies]
+buttplug_derive = "0.8.1"
+buttplug_core = { path = "../buttplug_core" }
+buttplug_client = { path = "../buttplug_client" }
+buttplug_client_in_process = { path = "../buttplug_client_in_process", default-features = false}
+buttplug_server = { path = "../buttplug_server" }
+buttplug_server_device_config = { path = "../buttplug_server_device_config" }
+log = "0.4.27"
+tokio = { version = "1.44.2", features = ["macros"] }
+uuid = "1.16.0"
+futures = "0.3.31"
+tracing = "0.1.41"
+tracing-subscriber = "0.3.19"
+tracing-futures = "0.2.5"
+tokio-test = "0.4.4"
+serde = "1.0.219"
+async-trait = "0.1.88"
+dashmap = "6.1.0"
+thiserror = "2.0.12"
+getset = "0.1.5"
+jsonschema = { version = "0.30.0", default-features = false }
+test-case = "3.3.1"
+serde_yaml = "0.9.34"
