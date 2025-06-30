@@ -3,10 +3,12 @@ use std::collections::BTreeMap;
 use serde_yaml;
 use serde_json::{self, Value};
 use serde::{Serialize, Deserialize};
+use buttplug_core::util::json::JSONValidator;
 
 const VERSION_FILE: &str = "./device-config-v4/version.yaml";
-const OUTPUT_FILE: &str = "./build-config/build-device-config-v4.json";
+const OUTPUT_FILE: &str = "./build-config/buttplug-device-config-v4.json";
 const PROTOCOL_DIR: &str = "./device-config-v4/protocols/";
+const SCHEMA_FILE: &str = "./device-config-v4/buttplug-device-config-schema-v4.json";
 
 #[derive(Serialize, Deserialize)]
 struct VersionFile {
@@ -46,6 +48,15 @@ fn main() {
     output.protocols.insert(f.file_name().into_string().unwrap().split(".").next().unwrap().to_owned(), serde_yaml::from_str(&std::fs::read_to_string(f.path()).unwrap()).unwrap());
   }
 
+  let json = serde_json::to_string(&output).unwrap();
+  let validator = JSONValidator::new(&std::fs::read_to_string(SCHEMA_FILE).unwrap());
+  validator.validate(&json).unwrap();
+
+  // Validate
+
   // Save it to the build_config directory
-  std::fs::write(OUTPUT_FILE, serde_json::to_string(&output).unwrap().as_bytes()).unwrap();
+  std::fs::write(OUTPUT_FILE, json.as_bytes()).unwrap();
+
+  
+
 }
