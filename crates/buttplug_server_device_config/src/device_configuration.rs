@@ -29,9 +29,9 @@ use std::{collections::HashMap, fmt::Display, ops::RangeInclusive};
 use uuid::Uuid;
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
-  include_str!("../../../buttplug-device-config/build-config/buttplug-device-config-v4.json");
+  include_str!("../build-config/buttplug-device-config-v4.json");
 static DEVICE_CONFIGURATION_JSON_SCHEMA: &str = include_str!(
-  "../../../buttplug-device-config/device-config-v4/buttplug-device-config-schema-v4.json"
+  "../device-config-v4/buttplug-device-config-schema-v4.json"
 );
 
 /// The top level configuration for a protocol. Contains all data about devices that can use the
