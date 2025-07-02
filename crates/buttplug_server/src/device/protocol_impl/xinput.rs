@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use buttplug_server_device_config::Endpoint;
 use byteorder::LittleEndian;
 
 use crate::device::{
@@ -13,7 +14,7 @@ use crate::device::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{self, Endpoint, InputReadingV4, InputType},
+  message::{self, InputReadingV4, InputType},
 };
 use byteorder::WriteBytesExt;
 use futures::future::{BoxFuture, FutureExt};

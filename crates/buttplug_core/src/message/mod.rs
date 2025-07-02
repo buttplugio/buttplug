@@ -18,11 +18,9 @@ pub mod v0;
 pub mod v4;
 
 mod device_feature;
-mod endpoint;
 pub mod serializer;
 
 pub use device_feature::*;
-pub use endpoint::Endpoint;
 pub use v0::*;
 pub use v4::*;
 

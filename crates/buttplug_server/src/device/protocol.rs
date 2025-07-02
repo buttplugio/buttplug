@@ -9,9 +9,10 @@
 
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{Endpoint, InputReadingV4, InputType, OutputCommand},
+  message::{InputReadingV4, InputType, OutputCommand},
 };
 use buttplug_server_device_config::{
+  Endpoint,
   DeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,

@@ -7,7 +7,7 @@
 
 use super::lovense_connect_service_comm_manager::{get_local_info, LovenseServiceToyInfo};
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
+use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
 use buttplug_server::device::hardware::{
   GenericHardwareSpecializer,
   Hardware,
@@ -24,6 +24,7 @@ use buttplug_server::device::hardware::{
 use buttplug_server_device_config::{
   LovenseConnectServiceSpecifier,
   ProtocolCommunicationSpecifier,
+  Endpoint,
 };
 use futures::future::{self, BoxFuture, FutureExt};
 use std::{

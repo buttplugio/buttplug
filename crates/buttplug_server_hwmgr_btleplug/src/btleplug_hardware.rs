@@ -11,7 +11,7 @@ use btleplug::{
   api::{Central, CentralEvent, Characteristic, Peripheral, ValueNotification, WriteType},
   platform::Adapter,
 };
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
+use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
 use buttplug_server::device::hardware::{
   communication::HardwareSpecificError,
   Hardware,
@@ -25,7 +25,7 @@ use buttplug_server::device::hardware::{
   HardwareUnsubscribeCmd,
   HardwareWriteCmd,
 };
-use buttplug_server_device_config::{BluetoothLESpecifier, ProtocolCommunicationSpecifier};
+use buttplug_server_device_config::{BluetoothLESpecifier, ProtocolCommunicationSpecifier, Endpoint};
 use dashmap::DashSet;
 use futures::{
   future::{self, BoxFuture, FutureExt},
@@ -335,7 +335,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let characteristic = match self.endpoints.get(&msg.endpoint()) {
       Some(chr) => chr.clone(),
       None => {
-        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint()))).boxed();
+        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint().to_string()))).boxed();
       }
     };
 
@@ -408,7 +408,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let characteristic = match self.endpoints.get(&msg.endpoint()) {
       Some(chr) => chr.clone(),
       None => {
-        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint()))).boxed();
+        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint().to_string()))).boxed();
       }
     };
     let device = self.device.clone();
@@ -446,7 +446,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let characteristic = match self.endpoints.get(&endpoint) {
       Some(chr) => chr.clone(),
       None => {
-        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint()))).boxed();
+        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint().to_string()))).boxed();
       }
     };
     let endpoints = self.subscribed_endpoints.clone();
@@ -479,7 +479,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let characteristic = match self.endpoints.get(&msg.endpoint()) {
       Some(chr) => chr.clone(),
       None => {
-        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint()))).boxed();
+        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint().to_string()))).boxed();
       }
     };
     let endpoints = self.subscribed_endpoints.clone();

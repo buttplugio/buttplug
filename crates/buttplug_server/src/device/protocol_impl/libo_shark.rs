@@ -13,7 +13,8 @@ use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
   protocol::{generic_protocol_setup, ProtocolHandler},
 };
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server_device_config::Endpoint;
 
 const LIBO_SHARK_PROTOCOL_UUID: Uuid = uuid!("c0044425-b59c-4037-a702-0438afcaad3e");
 generic_protocol_setup!(LiboShark, "libo-shark");

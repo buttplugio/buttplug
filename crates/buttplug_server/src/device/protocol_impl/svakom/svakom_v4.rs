@@ -10,7 +10,8 @@ use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
   protocol::{generic_protocol_setup, ProtocolHandler},
 };
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server_device_config::Endpoint;
 
 generic_protocol_setup!(SvakomV4, "svakom-v4");
 

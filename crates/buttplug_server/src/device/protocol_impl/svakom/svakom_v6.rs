@@ -10,7 +10,7 @@ use uuid::{uuid, Uuid};
 
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{Endpoint, OutputType},
+  message::{OutputType},
 };
 
 use crate::device::{
@@ -23,7 +23,7 @@ use crate::device::{
     ProtocolKeepaliveStrategy,
   },
 };
-use buttplug_server_device_config::{DeviceDefinition, UserDeviceIdentifier, ProtocolCommunicationSpecifier};
+use buttplug_server_device_config::{DeviceDefinition, UserDeviceIdentifier, ProtocolCommunicationSpecifier, Endpoint};
 use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,

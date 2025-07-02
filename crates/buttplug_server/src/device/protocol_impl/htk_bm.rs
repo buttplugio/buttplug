@@ -13,7 +13,8 @@ use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
   protocol::{generic_protocol_setup, ProtocolHandler},
 };
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server_device_config::Endpoint;
 
 const HTK_BM_PROTOCOL_UUID: Uuid = uuid!("4c70cb95-d3d9-4288-81ab-be845f9ad1fe");
 generic_protocol_setup!(HtkBm, "htk_bm");

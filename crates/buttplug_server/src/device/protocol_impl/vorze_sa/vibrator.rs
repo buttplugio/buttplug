@@ -11,7 +11,8 @@ use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
   protocol::ProtocolHandler,
 };
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server_device_config::Endpoint;
 
 pub struct VorzeSAVibrator {
   device_type: VorzeDevice,

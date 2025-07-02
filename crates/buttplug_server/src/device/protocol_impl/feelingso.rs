@@ -13,7 +13,8 @@ use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
   protocol::{generic_protocol_setup, ProtocolHandler},
 };
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server_device_config::Endpoint;
 
 const FEELINGSO_PROTOCOL_UUID: Uuid = uuid!("397d4cce-3173-4f66-b7ad-6ee21e59f854");
 

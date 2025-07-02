@@ -6,6 +6,7 @@
 // for full license information.
 
 mod util;
+use buttplug_server_device_config::Endpoint;
 use util::test_server;
 pub use util::{
   create_test_dcm,
@@ -27,7 +28,6 @@ use buttplug_core::{
       ButtplugClientMessageV4,
       ButtplugMessageSpecVersion,
       ButtplugServerMessageV4,
-      Endpoint,
       ErrorCode,
       PingV0,
       RequestServerInfoV4,

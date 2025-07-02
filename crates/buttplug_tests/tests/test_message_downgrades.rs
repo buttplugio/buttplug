@@ -8,11 +8,11 @@
 mod util;
 use std::time::Duration;
 
+use buttplug_server_device_config::Endpoint;
 pub use util::test_device_manager::check_test_recv_value;
 
 use buttplug_core::message::{
     serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
-    Endpoint,
     StartScanningV0,
   };
 use buttplug_server::{

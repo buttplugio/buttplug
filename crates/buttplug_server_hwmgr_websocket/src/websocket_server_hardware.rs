@@ -7,7 +7,7 @@
 
 use super::websocket_server_comm_manager::WebsocketServerDeviceCommManagerInitInfo;
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
+use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
 use buttplug_server::device::hardware::{
   GenericHardwareSpecializer,
   Hardware,
@@ -21,7 +21,7 @@ use buttplug_server::device::hardware::{
   HardwareUnsubscribeCmd,
   HardwareWriteCmd,
 };
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, WebsocketSpecifier};
+use buttplug_server_device_config::{Endpoint, ProtocolCommunicationSpecifier, WebsocketSpecifier};
 use futures::{
   future::{self, BoxFuture},
   FutureExt,

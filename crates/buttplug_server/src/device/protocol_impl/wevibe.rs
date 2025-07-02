@@ -16,7 +16,8 @@ use crate::device::{
 };
 use async_trait::async_trait;
 use buttplug_core::message::OutputType;
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
   DeviceDefinition,
   ProtocolCommunicationSpecifier,
