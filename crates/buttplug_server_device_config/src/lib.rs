@@ -134,6 +134,9 @@
 //! ### User Configurations
 //!
 
+#[macro_use]
+extern crate strum_macros;
+
 mod specifier;
 pub use specifier::*;
 mod identifiers;
@@ -144,6 +147,8 @@ mod device_feature;
 pub use device_feature::*;
 mod device_configuration;
 pub use device_configuration::*;
+mod endpoint;
+pub use endpoint::*;
 
 use buttplug_core::errors::ButtplugDeviceError;
 use dashmap::DashMap;

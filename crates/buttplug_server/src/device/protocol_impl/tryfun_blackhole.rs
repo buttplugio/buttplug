@@ -7,7 +7,8 @@
 
 use uuid::Uuid;
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server_device_config::Endpoint;
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},

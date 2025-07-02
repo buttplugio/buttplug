@@ -11,7 +11,6 @@ use super::message::{
   self,
   serializer::ButtplugSerializerError,
   ButtplugMessageSpecVersion,
-  Endpoint,
   ErrorCode,
   FeatureType,
   InputType,
@@ -146,7 +145,7 @@ pub enum ButtplugDeviceError {
   /// Device got {0} message but has no sensors
   DeviceNoSensorError(String),
   /// Device does not have endpoint {0}
-  InvalidEndpoint(Endpoint),
+  InvalidEndpoint(String),
   /// Device does not handle command type: {0}
   UnhandledCommand(String),
   /// Device type specific error: {0}.

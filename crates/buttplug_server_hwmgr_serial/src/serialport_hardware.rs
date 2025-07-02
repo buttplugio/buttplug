@@ -6,7 +6,7 @@
 // for full license information.
 
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
+use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
 use buttplug_server::device::hardware::{
   communication::HardwareSpecificError,
   Hardware,
@@ -20,7 +20,7 @@ use buttplug_server::device::hardware::{
   HardwareUnsubscribeCmd,
   HardwareWriteCmd,
 };
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, SerialSpecifier};
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, SerialSpecifier, Endpoint};
 use futures::future;
 use futures::{future::BoxFuture, FutureExt};
 use serialport::{SerialPort, SerialPortInfo};

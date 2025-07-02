@@ -34,6 +34,8 @@ log = "0.4.27"
 getset = "0.1.5"
 jsonschema = { version = "0.30.0", default-features = false }
 uuid = { version = "1.16.0", features = ["serde", "v4"] }
+strum_macros = "0.27.1"
+strum = "0.27.1"
 
 [build-dependencies]
 serde_yaml = "0.9.34"

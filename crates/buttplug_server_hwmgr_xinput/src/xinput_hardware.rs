@@ -7,7 +7,7 @@
 
 use super::xinput_device_comm_manager::XInputControllerIndex;
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
+use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
 use buttplug_server::device::hardware::{
   communication::HardwareSpecificError,
   GenericHardwareSpecializer,
@@ -22,7 +22,7 @@ use buttplug_server::device::hardware::{
   HardwareUnsubscribeCmd,
   HardwareWriteCmd,
 };
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, XInputSpecifier};
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, XInputSpecifier, Endpoint};
 use byteorder::{LittleEndian, ReadBytesExt};
 use futures::future::{self, BoxFuture, FutureExt};
 use rusty_xinput::{XInputHandle, XInputUsageError};

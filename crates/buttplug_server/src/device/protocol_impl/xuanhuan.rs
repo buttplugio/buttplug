@@ -17,10 +17,10 @@ use crate::device::{
 use async_trait::async_trait;
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::Endpoint,
   util::{async_manager, sleep},
 };
 use buttplug_server_device_config::{
+  Endpoint,
   DeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,

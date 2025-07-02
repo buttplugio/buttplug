@@ -13,7 +13,8 @@ use crate::device::{
   protocol::ProtocolHandler,
   hardware::{HardwareCommand, HardwareWriteCmd},
 };
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server_device_config::Endpoint;
 use std::sync::atomic::{AtomicI8, Ordering};
 
 // Vorze UFO needs a unified protocol UUID since we update both outputs in the same packet.

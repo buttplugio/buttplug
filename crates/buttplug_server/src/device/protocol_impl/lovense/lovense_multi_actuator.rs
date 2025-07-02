@@ -12,8 +12,9 @@ use crate::device::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{Endpoint, InputReadingV4},
+  message::InputReadingV4,
 };
+use buttplug_server_device_config::Endpoint;
 use futures::future::BoxFuture;
 use std::sync::{atomic::AtomicU32, Arc};
 use uuid::Uuid;

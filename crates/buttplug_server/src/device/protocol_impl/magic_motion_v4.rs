@@ -23,7 +23,8 @@ use crate::device::{
     ProtocolInitializer,
   },
 };
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{ProtocolCommunicationSpecifier, UserDeviceIdentifier};
 const MAGICMOTIONV4_PROTOCOL_UUID: Uuid = uuid!("d4d62d09-c3e1-44c9-8eba-caa15de5b2a7");
 

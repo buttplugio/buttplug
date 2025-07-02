@@ -24,9 +24,9 @@ use crate::device::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{Endpoint, OutputType},
+  message::OutputType,
 };
-use buttplug_server_device_config::{DeviceDefinition, UserDeviceIdentifier, ProtocolCommunicationSpecifier};
+use buttplug_server_device_config::{DeviceDefinition, Endpoint, ProtocolCommunicationSpecifier, UserDeviceIdentifier};
 
 generic_protocol_initializer_setup!(WeVibeChorus, "wevibe-chorus");
 

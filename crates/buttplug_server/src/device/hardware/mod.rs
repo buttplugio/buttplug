@@ -2,8 +2,8 @@ pub mod communication;
 use std::{collections::HashSet, fmt::Debug, sync::Arc, time::Duration};
 
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
-use buttplug_server_device_config::ProtocolCommunicationSpecifier;
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, Endpoint};
 use futures::future::BoxFuture;
 use futures_util::FutureExt;
 use getset::{CopyGetters, Getters};

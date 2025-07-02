@@ -5,8 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint, util::async_manager};
-use buttplug_server_device_config::ProtocolCommunicationSpecifier;
+use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
+use buttplug_server_device_config::{Endpoint, ProtocolCommunicationSpecifier};
 use buttplug_server::device::{
     hardware::{
       Hardware,
@@ -299,7 +299,7 @@ impl HardwareInternal for TestDevice {
     msg: &HardwareWriteCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     if !self.endpoints.contains(&msg.endpoint()) {
-      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint()))).boxed();
+      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint().to_string()))).boxed();
     }
     self.send_command(msg.clone().into())
   }
@@ -309,7 +309,7 @@ impl HardwareInternal for TestDevice {
     msg: &HardwareSubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     if !self.endpoints.contains(&msg.endpoint()) {
-      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint()))).boxed();
+      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint().to_string()))).boxed();
     }
     self.subscribed_endpoints.insert(msg.endpoint());
     self.send_command((*msg).into())
@@ -320,7 +320,7 @@ impl HardwareInternal for TestDevice {
     msg: &HardwareUnsubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     if !self.endpoints.contains(&msg.endpoint()) {
-      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint()))).boxed();
+      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint().to_string()))).boxed();
     }
     self.subscribed_endpoints.remove(&msg.endpoint());
     self.send_command((*msg).into())

@@ -11,7 +11,8 @@ use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
   protocol::{ProtocolHandler, generic_protocol_setup}
 };
-use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server_device_config::Endpoint;
 
 
 generic_protocol_setup!(Luvmazer, "luvmazer");

@@ -11,9 +11,10 @@ use crate::device::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{Endpoint, InputReadingV4},
+  message::InputReadingV4,
   util::{async_manager, sleep},
 };
+use buttplug_server_device_config::Endpoint;
 use futures::future::BoxFuture;
 use std::{
   sync::{

@@ -29,13 +29,14 @@ use crate::device::{
 use async_trait::async_trait;
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{self, Endpoint, FeatureType, InputReadingV4},
+  message::{self, FeatureType, InputReadingV4},
   util::sleep,
 };
 use buttplug_server_device_config::{
   DeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
+  Endpoint
 };
 use futures::{future::BoxFuture, FutureExt};
 use regex::Regex;
