@@ -158,13 +158,10 @@ extern crate log;
 
 #[derive(Default, Clone)]
 pub struct DeviceConfigurationManagerBuilder {
-  skip_default_protocols: bool,
   communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   user_communication_specifiers: DashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   base_device_definitions: HashMap<BaseDeviceIdentifier, BaseDeviceDefinition>,
   user_device_definitions: DashMap<UserDeviceIdentifier, DeviceDefinition>,
-  // Map of protocol names to their respective protocol instance factories
-  // protocols: Vec<(String, Arc<dyn ProtocolIdentifierFactory>)>,
 }
 
 impl DeviceConfigurationManagerBuilder {
@@ -228,55 +225,13 @@ impl DeviceConfigurationManagerBuilder {
     }
     self
   }
-  /*
-    /// Add a protocol instance factory for a [ButtplugProtocol]
-    pub fn protocol_factory<T>(&mut self, factory: T) -> &mut Self
-    where
-      T: ProtocolIdentifierFactory + 'static,
-    {
-      self
-        .protocols
-        .push((factory.identifier().to_owned(), Arc::new(factory)));
-      self
-    }
-  */
-  pub fn skip_default_protocols(&mut self) -> &mut Self {
-    self.skip_default_protocols = true;
-    self
-  }
 
   pub fn finish(&mut self) -> Result<DeviceConfigurationManager, ButtplugDeviceError> {
-    // Map of protocol names to their respective protocol instance factories
-    /*
-    let mut protocol_map = if !self.skip_default_protocols {
-      get_default_protocol_map()
-    } else {
-      HashMap::new()
-    };
-
-    for (name, protocol) in &self.protocols {
-      if protocol_map.contains_key(name) {
-        // TODO Fill in error
-      }
-      protocol_map.insert(name.clone(), protocol.clone());
-    }
-    */
     // Build and validate the protocol attributes tree.
     let mut attribute_tree_map = HashMap::new();
 
     // Add all the defaults first, they won't have parent attributes.
     for (ident, attr) in &self.base_device_definitions {
-      // If we don't have a protocol loaded for this configuration block, just drop it. We can't do
-      // anything with it anyways.
-      /*
-      if !protocol_map.contains_key(ident.protocol()) {
-        debug!(
-          "Protocol {:?} in base configurations does not exist in system, discarding definition.",
-          ident.protocol()
-        );
-        continue;
-      }
-      */
       /*
       for feature in attr.features() {
         if let Err(e) = feature.is_valid() {
@@ -292,17 +247,6 @@ impl DeviceConfigurationManagerBuilder {
     // Finally, add in user configurations, which will have an address.
     for kv in &self.user_device_definitions {
       let (ident, attr) = (kv.key(), kv.value());
-      // If we don't have a protocol loaded for this configuration block, just drop it. We can't do
-      // anything with it anyways.
-      /*
-      if !protocol_map.contains_key(ident.protocol()) {
-        warn!(
-          "Protocol {:?} in user configurations does not exist in system, discarding definition.",
-          ident.protocol()
-        );
-        continue;
-      }
-      */
       for feature in attr.features() {
         if let Err(e) = feature.is_valid() {
           error!("Feature {attr:?} for ident {ident:?} is not valid, skipping addition: {e:?}");
@@ -334,9 +278,8 @@ impl DeviceConfigurationManagerBuilder {
 /// information about what commands can be sent to the device (Vibrate, Rotate, etc...), and the
 /// parameters for those commands (number of power levels, stroke distances, etc...).
 #[derive(Getters)]
+#[getset(get = "pub")]
 pub struct DeviceConfigurationManager {
-  // Map of protocol names to their respective protocol instance factories
-  // protocol_map: HashMap<String, Arc<dyn ProtocolIdentifierFactory>>,
   /// Communication specifiers from the base device config, mapped from protocol name to vector of
   /// specifiers. Should not change/update during a session.
   base_communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
@@ -344,11 +287,9 @@ pub struct DeviceConfigurationManager {
   base_device_definitions: HashMap<BaseDeviceIdentifier, BaseDeviceDefinition>,
   /// Communication specifiers provided by the user, mapped from protocol name to vector of
   /// specifiers. Loaded at session start, may change over life of session.
-  #[getset(get = "pub")]
   user_communication_specifiers: DashMap<String, Vec<ProtocolCommunicationSpecifier>>,
-  /// Device definitions from the base device config. Loaded at session start, may change over life
+  /// Device definitions from the user device config. Loaded at session start, may change over life
   /// of session.
-  #[getset(get = "pub")]
   user_device_definitions: DashMap<UserDeviceIdentifier, DeviceDefinition>,
 }
 
@@ -483,53 +424,7 @@ impl DeviceConfigurationManager {
   ) -> HashMap<String, Vec<ProtocolCommunicationSpecifier>> {
     self.base_communication_specifiers.clone()
   }
-  /*
-    pub fn protocol_specializers(
-      &self,
-      specifier: &ProtocolCommunicationSpecifier,
-    ) -> Vec<ProtocolSpecializer> {
-      debug!(
-        "Looking for protocol that matches specifier: {:?}",
-        specifier
-      );
-      let mut specializers = vec![];
 
-      let mut update_specializer_map =
-        |name: &str, specifiers: &Vec<ProtocolCommunicationSpecifier>| {
-          if specifiers.contains(specifier) {
-            info!(
-              "Found protocol {:?} for user specifier {:?}.",
-              name, specifier
-            );
-
-            if self.protocol_map.contains_key(name) {
-              specializers.push(ProtocolSpecializer::new(
-                specifiers.clone(),
-                self
-                  .protocol_map
-                  .get(name)
-                  .expect("already checked existence")
-                  .create(),
-              ));
-            } else {
-              warn!(
-                "No protocol implementation for {:?} found for specifier {:?}.",
-                name, specifier
-              );
-            }
-          }
-        };
-
-      // Loop through both maps, as chaining between DashMap and HashMap gets kinda gross.
-      for spec in self.user_communication_specifiers.iter() {
-        update_specializer_map(spec.key(), spec.value());
-      }
-      for (name, specifiers) in self.base_communication_specifiers.iter() {
-        update_specializer_map(name, specifiers);
-      }
-      specializers
-    }
-  */
   pub fn device_definition(&self, identifier: &UserDeviceIdentifier) -> Option<DeviceDefinition> {
     let features = if let Some(attrs) = self.user_device_definitions.get(identifier) {
       debug!("User device config found for {:?}", identifier);
@@ -567,119 +462,3 @@ impl DeviceConfigurationManager {
     Some(features)
   }
 }
-
-/*
-#[cfg(test)]
-mod test {
-  use super::*;
-  use crate::{
-    core::message::{OutputType, FeatureType},
-    server::message::server_device_feature::{ServerDeviceFeature, ServerDeviceFeatureOutput},
-  };
-  use std::{
-    collections::{HashMap, HashSet},
-    ops::RangeInclusive,
-  };
-
-  fn create_unit_test_dcm() -> DeviceConfigurationManager {
-    let mut builder = DeviceConfigurationManagerBuilder::default();
-    let specifiers = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new(
-      HashSet::from(["LVS-*".to_owned(), "LovenseDummyTestName".to_owned()]),
-      vec![],
-      HashSet::new(),
-      HashMap::new(),
-    ));
-    let mut feature_actuator = HashMap::new();
-    feature_actuator.insert(
-      OutputType::Vibrate,
-      ServerDeviceFeatureOutput::new(&RangeInclusive::new(0, 20), &RangeInclusive::new(0, 20)),
-    );
-    builder
-      .communication_specifier("lovense", &[specifiers])
-      .protocol_features(
-        &BaseDeviceIdentifier::new("lovense", &Some("P".to_owned())),
-        &BaseDeviceDefinition::new(
-          "Lovense Edge",
-          &uuid::Uuid::new_v4(),
-          &None,
-          &vec![
-            ServerDeviceFeature::new(
-              "Edge Vibration 1",
-              &uuid::Uuid::new_v4(),
-              &None,
-              FeatureType::Vibrate,
-              &Some(feature_actuator.clone()),
-              &None,
-            ),
-            ServerDeviceFeature::new(
-              "Edge Vibration 2",
-              &uuid::Uuid::new_v4(),
-              &None,
-              FeatureType::Vibrate,
-              &Some(feature_actuator.clone()),
-              &None,
-            ),
-          ],
-          &None
-        ),
-      )
-      .finish()
-      .unwrap()
-  }
-
-  #[test]
-  fn test_config_equals() {
-    let config = create_unit_test_dcm();
-    let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
-      "LVS-Something",
-      &HashMap::new(),
-      &[],
-    ));
-    assert!(!config.protocol_specializers(&spec).is_empty());
-  }
-
-  #[test]
-  fn test_config_wildcard_equals() {
-    let config = create_unit_test_dcm();
-    let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
-      "LVS-Whatever",
-      &HashMap::new(),
-      &[],
-    ));
-    assert!(!config.protocol_specializers(&spec).is_empty());
-  }
-  /*
-  #[test]
-  fn test_specific_device_config_creation() {
-    let dcm = create_unit_test_dcm(false);
-    let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
-      "LVS-Whatever",
-      &HashMap::new(),
-      &[],
-    ));
-    assert!(!dcm.protocol_specializers(&spec).is_empty());
-    let config: ProtocolDeviceAttributes = dcm
-      .device_definition(
-        &UserDeviceIdentifier::new("Whatever", "lovense", &Some("P".to_owned())),
-        &[],
-      )
-      .expect("Should be found")
-      .into();
-    // Make sure we got the right name
-    assert_eq!(config.name(), "Lovense Edge");
-    // Make sure we overwrote the default of 1
-    assert_eq!(
-      config
-        .message_attributes()
-        .scalar_cmd()
-        .as_ref()
-        .expect("Test, assuming infallible")
-        .get(0)
-        .expect("Test, assuming infallible")
-        .step_count(),
-      20
-    );
-  }
-  */
-}
-*/
