@@ -7,7 +7,7 @@
 
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-  protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+  protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, ProtocolKeepaliveStrategy},
 };
 use async_trait::async_trait;
 use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
@@ -155,8 +155,8 @@ impl Satisfyer {
 }
 
 impl ProtocolHandler for Satisfyer {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_secs(3))
+  fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
+    ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_secs(3))
   }
 
   fn handle_output_vibrate_cmd(

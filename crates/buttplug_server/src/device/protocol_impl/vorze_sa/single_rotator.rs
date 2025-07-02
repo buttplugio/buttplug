@@ -5,12 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use super::{VorzeActions, VorzeDevice};
+
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{
-    vorze_sa::{VorzeActions, VorzeDevice},
-    ProtocolHandler,
-  },
+  protocol::ProtocolHandler
 };
 use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 

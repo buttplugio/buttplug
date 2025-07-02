@@ -5,6 +5,10 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use super::{
+  lelo_harmony::LeloHarmony,
+  lelof1s::LeloF1s,
+};
 use crate::device::{
   hardware::{
     Hardware,
@@ -15,8 +19,6 @@ use crate::device::{
   },
   protocol::{
     generic_protocol_initializer_setup,
-    lelo_harmony::LeloHarmony,
-    lelof1s::LeloF1s,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,

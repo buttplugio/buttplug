@@ -5,10 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use super::fleshlight_launch_helper::calculate_speed;
+
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    fleshlight_launch_helper::calculate_speed,
     generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,

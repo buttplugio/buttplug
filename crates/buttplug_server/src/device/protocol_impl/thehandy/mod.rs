@@ -13,7 +13,7 @@ use crate::device::{
     generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
-    ProtocolInitializer,
+    ProtocolInitializer, ProtocolKeepaliveStrategy,
   },
 };
 use async_trait::async_trait;
@@ -108,7 +108,7 @@ impl ProtocolInitializer for TheHandyInitializer {
 pub struct TheHandy {}
 
 impl ProtocolHandler for TheHandy {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+  fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
     let ping_payload = handyplug::Payload {
       messages: vec![handyplug::Message {
         message: Some(handyplug::message::Message::Ping(Ping { id: 999 })),
@@ -119,7 +119,7 @@ impl ProtocolHandler for TheHandy {
       .encode(&mut ping_buf)
       .expect("Infallible encode.");
 
-    super::ProtocolKeepaliveStrategy::HardwareRequiredRepeatPacketStrategy(HardwareWriteCmd::new(
+    ProtocolKeepaliveStrategy::HardwareRequiredRepeatPacketStrategy(HardwareWriteCmd::new(
       &[THEHANDY_PROTOCOL_UUID],
       Endpoint::Tx,
       ping_buf,

@@ -7,7 +7,7 @@
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{generic_protocol_setup, ProtocolHandler, ProtocolKeepaliveStrategy},
 };
 use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use std::time::Duration;
@@ -38,8 +38,8 @@ impl MetaXSireV3 {
 }
 
 impl ProtocolHandler for MetaXSireV3 {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_millis(
+  fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
+    ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_millis(
       METAXSIRE_COMMAND_DELAY_MS,
     ))
   }

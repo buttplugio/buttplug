@@ -17,7 +17,6 @@ use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
     generic_protocol_initializer_setup,
-    ProtocolCommunicationSpecifier,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
@@ -27,7 +26,7 @@ use buttplug_core::{
   errors::ButtplugDeviceError,
   message::{Endpoint, OutputType},
 };
-use buttplug_server_device_config::{DeviceDefinition, UserDeviceIdentifier};
+use buttplug_server_device_config::{DeviceDefinition, UserDeviceIdentifier, ProtocolCommunicationSpecifier};
 
 generic_protocol_initializer_setup!(WeVibe8Bit, "wevibe-8bit");
 

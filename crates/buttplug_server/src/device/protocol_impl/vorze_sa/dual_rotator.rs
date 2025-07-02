@@ -7,9 +7,11 @@
 
 use uuid::{uuid, Uuid};
 
+use super::VorzeDevice;
+
 use crate::device::{
+  protocol::ProtocolHandler,
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{vorze_sa::VorzeDevice, ProtocolHandler},
 };
 use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use std::sync::atomic::{AtomicI8, Ordering};
