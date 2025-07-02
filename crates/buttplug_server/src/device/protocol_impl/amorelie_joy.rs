@@ -12,12 +12,12 @@ use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
     generic_protocol_initializer_setup,
-    ProtocolCommunicationSpecifier,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
   },
 };
+use buttplug_server_device_config::ProtocolCommunicationSpecifier;
 use async_trait::async_trait;
 use std::sync::Arc;
 use uuid::{uuid, Uuid};

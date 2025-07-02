@@ -17,14 +17,13 @@ use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
     generic_protocol_initializer_setup,
-    ProtocolCommunicationSpecifier,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
     ProtocolKeepaliveStrategy,
   },
 };
-use buttplug_server_device_config::{DeviceDefinition, UserDeviceIdentifier};
+use buttplug_server_device_config::{DeviceDefinition, UserDeviceIdentifier, ProtocolCommunicationSpecifier};
 use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,

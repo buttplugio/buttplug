@@ -5,10 +5,10 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use super::{form_lovense_command, form_vibrate_command};
 use crate::device::{
   hardware::{Hardware, HardwareCommand},
   protocol::{
-    lovense::{form_lovense_command, form_vibrate_command},
     ProtocolHandler,
     ProtocolKeepaliveStrategy,
   },

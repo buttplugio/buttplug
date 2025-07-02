@@ -17,16 +17,13 @@ use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
     generic_protocol_initializer_setup,
-    DeviceDefinition,
-    ProtocolCommunicationSpecifier,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
-    UserDeviceIdentifier,
   },
 };
 use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
-
+use buttplug_server_device_config::{DeviceDefinition, ProtocolCommunicationSpecifier, UserDeviceIdentifier};
 const LOVEHONEY_DESIRE_PROTOCOL_UUID: Uuid = uuid!("5dcd8487-4814-44cb-a768-13bf81d545c0");
 const LOVEHONEY_DESIRE_VIBE2_PROTOCOL_UUID: Uuid = uuid!("d44a99fe-903b-4fff-bee7-1141767c9cca");
 

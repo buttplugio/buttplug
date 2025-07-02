@@ -11,7 +11,7 @@ use crate::device::{
     generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
-    ProtocolInitializer,
+    ProtocolInitializer, ProtocolKeepaliveStrategy,
   },
 };
 use async_trait::async_trait;
@@ -83,8 +83,8 @@ impl MysteryVibe {
 }
 
 impl ProtocolHandler for MysteryVibe {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_millis(
+  fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
+    ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_millis(
       MYSTERYVIBE_COMMAND_DELAY_MS,
     ))
   }

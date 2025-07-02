@@ -11,7 +11,7 @@ use crate::device::{
     generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
-    ProtocolInitializer,
+    ProtocolInitializer, ProtocolKeepaliveStrategy,
   },
 };
 use async_trait::async_trait;
@@ -59,9 +59,9 @@ const LETEN_COMMAND_DELAY_MS: u64 = 1000;
 pub struct Leten {}
 
 impl ProtocolHandler for Leten {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+  fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
     // Leten keepalive is shorter
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_millis(
+    ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_millis(
       LETEN_COMMAND_DELAY_MS,
     ))
   }

@@ -1,6 +1,8 @@
+use super::VorzeDevice;
+
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{vorze_sa::VorzeDevice, ProtocolHandler},
+  protocol::ProtocolHandler,
 };
 use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use std::sync::{

@@ -7,7 +7,7 @@
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{generic_protocol_setup, ProtocolHandler, ProtocolKeepaliveStrategy},
 };
 use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 use std::time::Duration;
@@ -56,8 +56,8 @@ fn scalar_to_vector(scalar: u32) -> Vec<u8> {
 pub struct MizzZeeV3 {}
 
 impl ProtocolHandler for MizzZeeV3 {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_millis(
+  fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
+    ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_millis(
       MIZZZEE3_COMMAND_DELAY_MS,
     ))
   }

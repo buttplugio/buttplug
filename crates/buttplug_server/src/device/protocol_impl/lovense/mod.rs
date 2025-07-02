@@ -11,19 +11,19 @@ mod lovense_rotate_vibrator;
 mod lovense_single_actuator;
 mod lovense_stroker;
 
+
+use lovense_max::LovenseMax;
+use lovense_multi_actuator::LovenseMultiActuator;
+use lovense_rotate_vibrator::LovenseRotateVibrator;
+use lovense_single_actuator::LovenseSingleActuator;
+use lovense_stroker::LovenseStroker;
+
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
   protocol::{
-    lovense::{
-      lovense_max::LovenseMax,
-      lovense_multi_actuator::LovenseMultiActuator,
-      lovense_rotate_vibrator::LovenseRotateVibrator,
-      lovense_single_actuator::LovenseSingleActuator,
-      lovense_stroker::LovenseStroker,
-    },
     ProtocolHandler,
     ProtocolIdentifier,
-    ProtocolInitializer,
+    ProtocolInitializer, ProtocolKeepaliveStrategy,
   },
 };
 use async_trait::async_trait;
@@ -493,9 +493,9 @@ fn handle_battery_level_cmd(
   .boxed()
 }
 
-pub(super) fn keepalive_strategy() -> super::ProtocolKeepaliveStrategy {
+pub(super) fn keepalive_strategy() -> ProtocolKeepaliveStrategy {
   // For Lovense, we'll just repeat the device type packet and drop the result.
-  super::ProtocolKeepaliveStrategy::HardwareRequiredRepeatPacketStrategy(HardwareWriteCmd::new(
+  ProtocolKeepaliveStrategy::HardwareRequiredRepeatPacketStrategy(HardwareWriteCmd::new(
     &[LOVENSE_PROTOCOL_UUID],
     Endpoint::Tx,
     b"DeviceType;".to_vec(),

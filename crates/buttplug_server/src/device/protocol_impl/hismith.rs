@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::device::protocol::hismith_mini::HismithMiniInitializer;
+use super::hismith_mini::HismithMiniInitializer;
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
   protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},

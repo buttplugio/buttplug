@@ -5,11 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use super::mysteryvibe::MysteryVibe;
 use crate::device::{
   hardware::{Hardware, HardwareWriteCmd},
   protocol::{
     generic_protocol_initializer_setup,
-    mysteryvibe::MysteryVibe,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,

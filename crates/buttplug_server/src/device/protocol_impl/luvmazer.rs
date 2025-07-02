@@ -9,11 +9,10 @@ use uuid::Uuid;
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::ProtocolHandler,
+  protocol::{ProtocolHandler, generic_protocol_setup}
 };
 use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
 
-use super::generic_protocol_setup;
 
 generic_protocol_setup!(Luvmazer, "luvmazer");
 

@@ -5,9 +5,10 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use super::form_vibrate_command;
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-  protocol::{lovense::form_vibrate_command, ProtocolHandler, ProtocolKeepaliveStrategy},
+  protocol::{ProtocolHandler, ProtocolKeepaliveStrategy},
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,

@@ -13,20 +13,18 @@ use std::sync::{
 use async_trait::async_trait;
 use uuid::{uuid, Uuid};
 
+use buttplug_server_device_config::DeviceDefinition;
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
     generic_protocol_initializer_setup,
-    DeviceDefinition,
-    ProtocolCommunicationSpecifier,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
-    UserDeviceIdentifier,
   },
 };
 use buttplug_core::{errors::ButtplugDeviceError, message::Endpoint};
-
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, UserDeviceIdentifier};
 const MAGICMOTIONV4_PROTOCOL_UUID: Uuid = uuid!("d4d62d09-c3e1-44c9-8eba-caa15de5b2a7");
 
 generic_protocol_initializer_setup!(MagicMotionV4, "magic-motion-4");
