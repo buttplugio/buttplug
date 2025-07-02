@@ -16,9 +16,10 @@ use buttplug_server_device_config::{
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
 };
+use dashmap::DashMap;
 
 use crate::{
-  device::hardware::{Hardware, HardwareCommand, HardwareReadCmd},
+  device::{hardware::{Hardware, HardwareCommand, HardwareReadCmd}, protocol_impl::get_default_protocol_map},
   message::{
     checked_output_cmd::CheckedOutputCmdV4,
     spec_enums::ButtplugDeviceCommandMessageUnionV4,
@@ -30,9 +31,10 @@ use futures::{
   future::{self, BoxFuture, FutureExt},
   StreamExt,
 };
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 use std::{pin::Pin, time::Duration};
 use uuid::Uuid;
+use super::hardware::HardwareWriteCmd;
 
 /// Strategy for situations where hardware needs to get updates every so often in order to keep
 /// things alive. Currently this applies to iOS backgrounding with bluetooth devices, as well as
@@ -521,4 +523,179 @@ macro_rules! generic_protocol_initializer_setup {
 pub use generic_protocol_initializer_setup;
 pub use generic_protocol_setup;
 
-use super::hardware::HardwareWriteCmd;
+pub struct ProtocolManager {
+  // Map of protocol names to their respective protocol instance factories
+  protocol_map: HashMap<String, Arc<dyn ProtocolIdentifierFactory>>,
+}
+
+impl Default for ProtocolManager {
+  fn default() -> Self {
+    Self {
+      protocol_map: get_default_protocol_map()
+    }
+  }
+}
+
+impl ProtocolManager {
+  pub fn protocol_specializers(
+    &self,
+    specifier: &ProtocolCommunicationSpecifier,
+    base_communication_specifiers: &HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
+    user_communication_specifiers: &DashMap<String, Vec<ProtocolCommunicationSpecifier>>,
+  ) -> Vec<ProtocolSpecializer> {
+    debug!(
+      "Looking for protocol that matches specifier: {:?}",
+      specifier
+    );
+    let mut specializers = vec![];
+    let mut update_specializer_map =
+      |name: &str, specifiers: &Vec<ProtocolCommunicationSpecifier>| {
+        if specifiers.contains(specifier) {
+          info!(
+            "Found protocol {:?} for user specifier {:?}.",
+            name, specifier
+          );
+          if self.protocol_map.contains_key(name) {
+            specializers.push(ProtocolSpecializer::new(
+              specifiers.clone(),
+              self
+                .protocol_map
+                .get(name)
+                .expect("already checked existence")
+                .create(),
+            ));
+          } else {
+            warn!(
+              "No protocol implementation for {:?} found for specifier {:?}.",
+              name, specifier
+            );
+          }
+        }
+      };
+    // Loop through both maps, as chaining between DashMap and HashMap gets kinda gross.
+    for spec in user_communication_specifiers.iter() {
+      update_specializer_map(spec.key(), spec.value());
+    }
+    for (name, specifiers) in base_communication_specifiers.iter() {
+      update_specializer_map(name, specifiers);
+    }
+    specializers
+  }
+}
+
+
+/*
+#[cfg(test)]
+mod test {
+  use super::*;
+  use crate::{
+    core::message::{OutputType, FeatureType},
+    server::message::server_device_feature::{ServerDeviceFeature, ServerDeviceFeatureOutput},
+  };
+  use std::{
+    collections::{HashMap, HashSet},
+    ops::RangeInclusive,
+  };
+
+  fn create_unit_test_dcm() -> DeviceConfigurationManager {
+    let mut builder = DeviceConfigurationManagerBuilder::default();
+    let specifiers = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new(
+      HashSet::from(["LVS-*".to_owned(), "LovenseDummyTestName".to_owned()]),
+      vec![],
+      HashSet::new(),
+      HashMap::new(),
+    ));
+    let mut feature_actuator = HashMap::new();
+    feature_actuator.insert(
+      OutputType::Vibrate,
+      ServerDeviceFeatureOutput::new(&RangeInclusive::new(0, 20), &RangeInclusive::new(0, 20)),
+    );
+    builder
+      .communication_specifier("lovense", &[specifiers])
+      .protocol_features(
+        &BaseDeviceIdentifier::new("lovense", &Some("P".to_owned())),
+        &BaseDeviceDefinition::new(
+          "Lovense Edge",
+          &uuid::Uuid::new_v4(),
+          &None,
+          &vec![
+            ServerDeviceFeature::new(
+              "Edge Vibration 1",
+              &uuid::Uuid::new_v4(),
+              &None,
+              FeatureType::Vibrate,
+              &Some(feature_actuator.clone()),
+              &None,
+            ),
+            ServerDeviceFeature::new(
+              "Edge Vibration 2",
+              &uuid::Uuid::new_v4(),
+              &None,
+              FeatureType::Vibrate,
+              &Some(feature_actuator.clone()),
+              &None,
+            ),
+          ],
+          &None
+        ),
+      )
+      .finish()
+      .unwrap()
+  }
+
+  #[test]
+  fn test_config_equals() {
+    let config = create_unit_test_dcm();
+    let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
+      "LVS-Something",
+      &HashMap::new(),
+      &[],
+    ));
+    assert!(!config.protocol_specializers(&spec).is_empty());
+  }
+
+  #[test]
+  fn test_config_wildcard_equals() {
+    let config = create_unit_test_dcm();
+    let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
+      "LVS-Whatever",
+      &HashMap::new(),
+      &[],
+    ));
+    assert!(!config.protocol_specializers(&spec).is_empty());
+  }
+  /*
+  #[test]
+  fn test_specific_device_config_creation() {
+    let dcm = create_unit_test_dcm(false);
+    let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
+      "LVS-Whatever",
+      &HashMap::new(),
+      &[],
+    ));
+    assert!(!dcm.protocol_specializers(&spec).is_empty());
+    let config: ProtocolDeviceAttributes = dcm
+      .device_definition(
+        &UserDeviceIdentifier::new("Whatever", "lovense", &Some("P".to_owned())),
+        &[],
+      )
+      .expect("Should be found")
+      .into();
+    // Make sure we got the right name
+    assert_eq!(config.name(), "Lovense Edge");
+    // Make sure we overwrote the default of 1
+    assert_eq!(
+      config
+        .message_attributes()
+        .scalar_cmd()
+        .as_ref()
+        .expect("Test, assuming infallible")
+        .get(0)
+        .expect("Test, assuming infallible")
+        .step_count(),
+      20
+    );
+  }
+  */
+}
+*/
