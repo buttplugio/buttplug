@@ -8,6 +8,8 @@ defaults:
           step-range:
             - 0
             - 255
+      feature-settings:
+        alt-protocol-index: 1
   id: 53cf03db-266d-46c1-964e-0ef505a64200
 configurations:
   - identifier:

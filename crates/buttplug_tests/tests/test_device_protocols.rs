@@ -46,7 +46,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_itoys_protocol.yaml" ; "iToys Protocol")]
 //#[test_case("test_joyhub_moonhorn.yaml" ; "JoyHub Protocol - Moonhorn")]
 //#[test_case("test_joyhub_petalwish_compat.yaml" ; "JoyHub Protocol - Petalwish Compat")]
-//#[test_case("test_joyhub_petalwish.yaml" ; "JoyHub Protocol - Petalwish")]
+#[test_case("test_joyhub_petalwish.yaml" ; "JoyHub Protocol - Petalwish")]
 //#[test_case("test_joyhub_roselin.yaml" ; "JoyHub Protocol - RoseLin")]
 #[test_case("test_kiiroo_prowand.yaml" ; "Kiiroo ProWand Protocol")]
 #[test_case("test_kiiroo_spot.yaml" ; "Kiiroo Spot Protocol")]
@@ -131,7 +131,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v4(test_file: &str) {
-  //tracing_subscriber::fmt::init();
+  tracing_subscriber::fmt::init();
   util::device_test::client::client_v4::run_embedded_test_case(&load_test_case(test_file).await)
     .await;
 }
