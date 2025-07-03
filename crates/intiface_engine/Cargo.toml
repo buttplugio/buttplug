@@ -1,0 +1,68 @@
+[package]
+name = "intiface-engine"
+version = "3.0.8"
+authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
+description = "CLI and Library frontend for the Buttplug sex toy control library"
+license = "BSD-3-Clause"
+homepage = "http://intiface.com"
+repository = "https://github.com/intiface/intiface-engine.git"
+readme = "README.md"
+keywords = ["usb", "serial", "hardware", "bluetooth", "teledildonics"]
+edition = "2021"
+exclude = [".vscode/**"]
+
+[lib]
+name = "intiface_engine"
+path = "src/lib.rs"
+
+[[bin]]
+name = "intiface-engine"
+path = "src/bin/main.rs"
+
+[features]
+default=[]
+tokio-console=["console-subscriber"]
+
+[dependencies]
+buttplug_core = { path = "../buttplug_core" }
+buttplug_server = { path = "../buttplug_server" }
+buttplug_server_device_config = { path = "../buttplug_server_device_config" }
+buttplug_server_hwmgr_btleplug = { path = "../buttplug_server_hwmgr_btleplug" }
+buttplug_server_hwmgr_hid = { path = "../buttplug_server_hwmgr_hid" }
+buttplug_server_hwmgr_lovense_connect = { path = "../buttplug_server_hwmgr_lovense_connect" }
+buttplug_server_hwmgr_lovense_dongle = { path = "../buttplug_server_hwmgr_lovense_dongle" }
+buttplug_server_hwmgr_serial = { path = "../buttplug_server_hwmgr_serial" }
+buttplug_server_hwmgr_websocket = { path = "../buttplug_server_hwmgr_websocket" }
+buttplug_server_hwmgr_xinput = { path = "../buttplug_server_hwmgr_xinput" }
+buttplug_transport_websocket_tungstenite = { path = "../buttplug_transport_websocket_tungstenite" }
+# buttplug = "9.0.8"
+argh = "0.1.13"
+log = "0.4.27"
+futures = "0.3.31"
+tracing-fmt = "0.1.1"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter", "json"] }
+tracing = "0.1.41"
+tokio = { version = "1.45.0", features = ["sync", "rt-multi-thread", "macros", "io-std", "fs", "signal", "io-util"] }
+log-panics = { version = "2.1.0", features = ["with-backtrace"] }
+backtrace = "0.3.75"
+ctrlc = "3.4.7"
+tokio-util = "0.7.15"
+serde = "1.0.219"
+serde_json = "1.0.140"
+thiserror = "2.0.12"
+getset = "0.1.5"
+async-trait = "0.1.88"
+once_cell = "1.21.3"
+lazy_static = "1.5.0"
+console-subscriber = { version="0.4.1", optional = true }
+local-ip-address = "0.6.5"
+rand = "0.9.1"
+tokio-tungstenite = "0.26.2"
+futures-util = "0.3.31"
+url = "2.5.4"
+libmdns = "0.9.1"
+tokio-stream = "0.1.17"
+
+[build-dependencies]
+vergen-gitcl = {version = "1.0.8", features = ["build"]}
+anyhow = "1.0.98"
