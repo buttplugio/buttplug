@@ -231,6 +231,14 @@
                 "additionalProperties": false
               }
             }         
+          },
+          "feature-settings": {
+            "type": "object",
+            "properties": {
+              "alt-protocol-index": {
+                "type": "number"
+              }
+            }
           }
         },
         "required": [
