@@ -238,14 +238,14 @@ impl ButtplugRemoteServer {
     }
   }
 
-  pub fn event_stream(&self) -> impl Stream<Item = ButtplugRemoteServerEvent> {
+  pub fn event_stream(&self) -> impl Stream<Item = ButtplugRemoteServerEvent> + use<> {
     convert_broadcast_receiver_to_stream(self.event_sender.subscribe())
   }
 
   pub fn start<ConnectorType>(
     &self,
     mut connector: ConnectorType,
-  ) -> impl Future<Output = Result<(), ButtplugServerConnectorError>>
+  ) -> impl Future<Output = Result<(), ButtplugServerConnectorError>> + use<ConnectorType>
   where
     ConnectorType:
       ButtplugConnector<ButtplugServerMessageVariant, ButtplugClientMessageVariant> + 'static,
