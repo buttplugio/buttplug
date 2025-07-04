@@ -1,3 +1,9 @@
+# 0.9.0 - 2025/07/04
+
+## Features
+
+- Update to rust edition 2024
+
 # 0.8.1 - 2024/08/17
 
 ## Bugfixes
