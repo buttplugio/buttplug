@@ -462,7 +462,7 @@ impl ServerDevice {
   ///
   /// This will include connections, disconnections, and notification events from subscribed
   /// endpoints.
-  pub fn event_stream(&self) -> impl futures::Stream<Item = ServerDeviceEvent> + Send {
+  pub fn event_stream(&self) -> impl futures::Stream<Item = ServerDeviceEvent> + Send + use<> {
     let identifier = self.identifier.clone();
     let hardware_stream = convert_broadcast_receiver_to_stream(self.hardware.event_stream())
       .filter_map(move |hardware_event| {

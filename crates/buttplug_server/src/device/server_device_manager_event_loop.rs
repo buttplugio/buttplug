@@ -276,7 +276,7 @@ impl ServerDeviceManagerEventLoop {
         // address), consider it disconnected and eject it from the map. This
         // should also trigger a disconnect event before our new DeviceAdded
         // message goes out, so timing matters here.
-        if let Some((_, old_device)) = self.device_map.remove(&device_index) {
+        match self.device_map.remove(&device_index) { Some((_, old_device)) => {
           info!("Device map contains key {}.", device_index);
           // After removing the device from the array, manually disconnect it to
           // make sure the event is thrown.
@@ -285,9 +285,9 @@ impl ServerDeviceManagerEventLoop {
             // anything with it, but should at least log it.
             error!("Error during index collision disconnect: {:?}", err);
           }
-        } else {
+        } _ => {
           info!("Device map does not contain key {}.", device_index);
-        }
+        }}
 
         // Create event loop for forwarding device events into our selector.
         let event_listener = device.event_stream();

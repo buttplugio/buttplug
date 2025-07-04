@@ -103,14 +103,14 @@ impl PingTimer {
     }
   }
 
-  pub fn ping_timeout_waiter(&self) -> impl Future<Output = ()> {
+  pub fn ping_timeout_waiter(&self) -> impl Future<Output = ()> + use<> {
     let notify = self.ping_timeout_notifier.clone();
     async move {
       notify.notified().await;
     }
   }
 
-  fn send_ping_msg(&self, msg: PingMessage) -> impl Future<Output = ()> {
+  fn send_ping_msg(&self, msg: PingMessage) -> impl Future<Output = ()> + use<> {
     let ping_msg_sender = self.ping_msg_sender.clone();
     let max_ping_time = self.max_ping_time;
     async move {
@@ -123,17 +123,17 @@ impl PingTimer {
     }
   }
 
-  pub fn start_ping_timer(&self) -> impl Future<Output = ()> {
+  pub fn start_ping_timer(&self) -> impl Future<Output = ()> + use<> {
     // If we're starting the timer, clear our status.
     self.pinged_out.store(false, Ordering::Relaxed);
     self.send_ping_msg(PingMessage::StartTimer)
   }
 
-  pub fn stop_ping_timer(&self) -> impl Future<Output = ()> {
+  pub fn stop_ping_timer(&self) -> impl Future<Output = ()> + use<> {
     self.send_ping_msg(PingMessage::StopTimer)
   }
 
-  pub fn update_ping_time(&self) -> impl Future<Output = ()> {
+  pub fn update_ping_time(&self) -> impl Future<Output = ()> + use<> {
     self.send_ping_msg(PingMessage::Ping)
   }
 

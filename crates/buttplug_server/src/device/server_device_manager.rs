@@ -175,7 +175,7 @@ pub struct ServerDeviceManager {
 }
 
 impl ServerDeviceManager {
-  pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessageV4> {
+  pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessageV4> + use<> {
     // Unlike the client API, we can expect anyone using the server to pin this
     // themselves.
     convert_broadcast_receiver_to_stream(self.output_sender.subscribe())
