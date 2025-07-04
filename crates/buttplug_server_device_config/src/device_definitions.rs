@@ -97,7 +97,7 @@ impl BaseDeviceDefinition {
   }
 }
 
-#[derive(Serialize, Deserialize, Debug, Getters, CopyGetters, Default, Clone)]
+#[derive(Serialize, Deserialize, Debug, Getters, CopyGetters, Default, Clone, MutGetters)]
 pub struct UserDeviceCustomization {
   #[serde(
     rename = "display-name",
@@ -112,7 +112,7 @@ pub struct UserDeviceCustomization {
   #[serde(default)]
   #[getset(get_copy = "pub")]
   deny: bool,
-  #[getset(get_copy = "pub")]
+  #[getset(get_copy = "pub", get_mut = "pub")]
   index: u32,
   #[getset(get_copy = "pub")]
   #[serde(
