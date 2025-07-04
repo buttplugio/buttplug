@@ -8,7 +8,7 @@ homepage = "http://intiface.com"
 repository = "https://github.com/intiface/intiface-engine.git"
 readme = "README.md"
 keywords = ["usb", "serial", "hardware", "bluetooth", "teledildonics"]
-edition = "2021"
+edition = "2024"
 exclude = [".vscode/**"]
 
 [lib]
