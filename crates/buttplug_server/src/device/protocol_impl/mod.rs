@@ -425,10 +425,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     sexverse_lg389::setup::SexverseLG389IdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, serveu::setup::ServeUIdentifierFactory::default());
-  //add_to_protocol_map(
-  //  &mut map,
-  //  svakom::svakom_avaneo::setup::SvakomAvaNeoIdentifierFactory::default(),
-  //);
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_avaneo::setup::SvakomAvaNeoIdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     svakom::svakom_alex::setup::SvakomAlexIdentifierFactory::default(),
@@ -449,10 +449,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     svakom::svakom_dice::setup::SvakomDiceIdentifierFactory::default(),
   );
-  //add_to_protocol_map(
-  //  &mut map,
-  //  svakom::svakom_dt250a::setup::SvakomDT250AIdentifierFactory::default(),
-  //);
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_dt250a::setup::SvakomDT250AIdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     svakom::svakom_iker::setup::SvakomIkerIdentifierFactory::default(),
@@ -473,14 +473,14 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     svakom::svakom_sam2::setup::SvakomSam2IdentifierFactory::default(),
   );
-  //add_to_protocol_map(
-  //  &mut map,
-  //  svakom::svakom_suitcase::setup::SvakomSuitcaseIdentifierFactory::default(),
-  //);
-  //add_to_protocol_map(
-  //  &mut map,
-  //  svakom::svakom_tarax::setup::SvakomTaraXIdentifierFactory::default(),
-  //);
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_suitcase::setup::SvakomSuitcaseIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom::svakom_tarax::setup::SvakomTaraXIdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     svakom::svakom_v1::setup::SvakomV1IdentifierFactory::default(),

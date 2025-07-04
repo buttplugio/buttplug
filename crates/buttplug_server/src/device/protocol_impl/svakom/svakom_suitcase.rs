@@ -5,125 +5,48 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
-  },
-use crate::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{
-      generic_protocol_initializer_setup,
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
-    },
-  },
-  util::{async_manager, sleep},
-};
-use async_trait::async_trait;
-use std::{sync::Arc, time::Duration};
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server_device_config::Endpoint;
+use uuid::Uuid;
 
-generic_protocol_initializer_setup!(SvakomSuitcase, "svakom-suitcase");
+use crate::device::{
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
+};
+
+
+generic_protocol_setup!(SvakomSuitcase, "svakom-suitcase");
 
 #[derive(Default)]
-pub struct SvakomSuitcaseInitializer {}
-
-#[async_trait]
-impl ProtocolInitializer for SvakomSuitcaseInitializer {
-  async fn initialize(
-    &mut self,
-    hardware: Arc<Hardware>,
-    _: &UserDeviceDefinition,
-  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    Ok(Arc::new(SvakomSuitcase::new(hardware)))
-  }
-}
-
-async fn delayed_update_handler(device: Arc<Hardware>, scalar: u8) {
-  sleep(Duration::from_millis(50)).await;
-  let res = device
-    .write_value(&HardwareWriteCmd::new(
-      Endpoint::Tx,
-      [0x55, 0x09, 0x00, 0x00, scalar, 0x00].to_vec(),
-      false,
-    ))
-    .await;
-  if res.is_err() {
-    error!("Delayed Svakom Suitcase command error: {:?}", res.err());
-  }
-}
-
-pub struct SvakomSuitcase {
-  device: Arc<Hardware>,
-}
-impl SvakomSuitcase {
-  fn new(device: Arc<Hardware>) -> Self {
-    Self { device }
-  }
-}
+pub struct SvakomSuitcase {}
 
 impl ProtocolHandler for SvakomSuitcase {
-  fn handle_value_cmd(
-    &self,
-    cmds: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if cmds.is_empty() {
-      return Ok(vec![]);
-    }
-
-    let mut hcmd = None;
-    if let Some(cmd) = cmds[0] {
-      let scalar = cmd.1;
-      let mut speed = (scalar % 10) as u8;
-      let mut intensity = if scalar == 0 {
-        0u8
-      } else {
-        (scalar as f32 / 10.0).floor() as u8 + 1
-      };
-      if speed == 0 && intensity != 0 {
-        // 10 -> 2,0 -> 1,A
-        speed = 10;
-        intensity -= 1;
-      }
-
-      hcmd = Some(HardwareWriteCmd::new(
-        Endpoint::Tx,
-        [0x55, 0x03, 0x00, 0x00, intensity, speed].to_vec(),
-        false,
-      ));
-    }
-
-    if cmds.len() < 2 {
-      return if hcmd.is_some() {
-        Ok(vec![hcmd.unwrap().into()])
-      } else {
-        Ok(vec![])
-      };
-    }
-
-    if let Some(cmd) = cmds[1] {
-      let scalar = cmd.1;
-
-      if hcmd.is_none() {
-        return Ok(vec![HardwareWriteCmd::new(
-          Endpoint::Tx,
-          [0x55, 0x09, 0x00, 0x00, scalar as u8, 0x00].to_vec(),
-          false,
-        )
-        .into()]);
-      } else {
-        // Sending both commands in quick succession blots the earlier command
-        let dev = self.device.clone();
-        async_manager::spawn(async move { delayed_update_handler(dev, scalar as u8).await });
-      }
-    }
-
-    if hcmd.is_some() {
-      Ok(vec![hcmd.unwrap().into()])
+  // I am like 90% sure this is wrong since this device has two vibrators, but the original
+  // implementation made no sense in terms of knowing which command addressed which index. Putting
+  // in a best effort here and we'll see if anyone complains.
+  fn handle_output_vibrate_cmd(
+      &self,
+      _feature_index: u32,
+      feature_id: Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let scalar = speed;
+    let mut speed = (scalar % 10) as u8;
+    let mut intensity = if scalar == 0 {
+      0u8
     } else {
-      Ok(vec![])
+      (scalar as f32 / 10.0).floor() as u8 + 1
+    };
+    if speed == 0 && intensity != 0 {
+      // 10 -> 2,0 -> 1,A
+      speed = 10;
+      intensity -= 1;
     }
+    Ok(vec![HardwareWriteCmd::new(
+      &[feature_id],
+      Endpoint::Tx,
+      [0x55, 0x03, 0x00, 0x00, intensity, speed].to_vec(),
+      false,
+    ).into()])
   }
 }

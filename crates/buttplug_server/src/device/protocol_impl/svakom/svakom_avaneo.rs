@@ -5,125 +5,65 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    ,
-  },
-use crate::device::{
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{
-      generic_protocol_initializer_setup,
-      ProtocolHandler,
-      ProtocolIdentifier,
-      ProtocolInitializer,
-    },
-  },
-  util::{async_manager, sleep},
-};
-use async_trait::async_trait;
-use std::{sync::Arc, time::Duration};
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server_device_config::Endpoint;
+use uuid::Uuid;
 
-generic_protocol_initializer_setup!(SvakomAvaNeo, "svakom-avaneo");
+use crate::device::{
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
+};
+
+
+generic_protocol_setup!(SvakomAvaNeo, "svakom-avaneo");
 
 #[derive(Default)]
-pub struct SvakomAvaNeoInitializer {}
+pub struct SvakomAvaNeo {}
 
-#[async_trait]
-impl ProtocolInitializer for SvakomAvaNeoInitializer {
-  async fn initialize(
-    &mut self,
-    hardware: Arc<Hardware>,
-    _: &UserDeviceDefinition,
-  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    Ok(Arc::new(SvakomAvaNeo::new(hardware)))
-  }
-}
-
-async fn delayed_update_handler(device: Arc<Hardware>, mode: u8, scalar: u8) {
-  sleep(Duration::from_millis(35)).await;
-  let res = device
-    .write_value(&HardwareWriteCmd::new(
-      Endpoint::Tx,
-      [0x55, mode, 0x00, 0x00, scalar, 0xff].to_vec(),
-      false,
-    ))
-    .await;
-  if res.is_err() {
-    error!("Delayed Svakom Tara X command error: {:?}", res.err());
-  }
-}
-
-pub struct SvakomAvaNeo {
-  device: Arc<Hardware>,
-}
 impl SvakomAvaNeo {
-  fn new(device: Arc<Hardware>) -> Self {
-    Self { device }
+  fn form_hardware_command(
+    &self,
+    feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![HardwareWriteCmd::new(
+      &[feature_id],
+      Endpoint::Tx,
+      [
+        0x55,
+        0x03,
+        0x00,
+        0x00,
+        if speed == 0 { 0x00 } else { 0x01 },
+        speed as u8,
+      ]
+      .to_vec(),
+      false,
+    )
+    .into()])
   }
 }
 
 impl ProtocolHandler for SvakomAvaNeo {
-  fn handle_value_cmd(
+  // Note: This protocol used to have a mode byte that was set in cases where multiple commands were
+  // sent at the same time. This has been removed in the v10 line, but may cause issues. If we get
+  // bug reports on that, we may need to revisit this implementation.
+
+  fn handle_output_vibrate_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, i32)>],
+    _feature_index: u32,
+    feature_id: uuid::Uuid,
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if cmds.is_empty() {
-      return Ok(vec![]);
-    }
+    self.form_hardware_command(feature_id, speed)
+  }
 
-    let mut hcmd = None;
-    if let Some(cmd) = cmds[0] {
-      let scalar = cmd.1;
-      hcmd = Some(HardwareWriteCmd::new(
-        Endpoint::Tx,
-        [
-          0x55,
-          0x03,
-          0x00,
-          0x00,
-          if scalar == 0 { 0x00 } else { 0x01 },
-          scalar as u8,
-        ]
-        .to_vec(),
-        false,
-      ));
-    }
-
-    if cmds.len() < 2 {
-      return if hcmd.is_some() {
-        Ok(vec![hcmd.unwrap().into()])
-      } else {
-        Ok(vec![])
-      };
-    }
-
-    if let Some(cmd) = cmds[1] {
-      let scalar = cmd.1;
-      let mode = if cmd.0 == ActuatorType::Vibrate {
-        0x09
-      } else {
-        0x08
-      };
-      if hcmd.is_none() {
-        return Ok(vec![HardwareWriteCmd::new(
-          Endpoint::Tx,
-          [0x55, mode, 0x00, 0x00, scalar as u8, 0xff].to_vec(),
-          false,
-        )
-        .into()]);
-      } else {
-        // Sending both commands in quick succession blots the earlier command
-        let dev = self.device.clone();
-        async_manager::spawn(async move { delayed_update_handler(dev, mode, scalar as u8).await });
-      }
-    }
-
-    if hcmd.is_some() {
-      Ok(vec![hcmd.unwrap().into()])
-    } else {
-      Ok(vec![])
-    }
+  fn handle_output_oscillate_cmd(
+    &self,
+    _feature_index: u32,
+    feature_id: uuid::Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.form_hardware_command(feature_id, speed)
   }
 }
