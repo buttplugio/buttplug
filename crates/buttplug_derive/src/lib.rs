@@ -27,7 +27,7 @@ fn impl_buttplug_message_macro(ast: &syn::DeriveInput) -> TokenStream {
     syn::Data::Enum(ref e) => {
       let idents = e.variants.iter().map(|x| x.ident.clone());
       let idents2 = idents.clone();
-      let gen = quote! {
+      let r#gen = quote! {
           impl ButtplugMessage for #name {
               fn id(&self) -> u32 {
                   match self {
@@ -42,10 +42,10 @@ fn impl_buttplug_message_macro(ast: &syn::DeriveInput) -> TokenStream {
               }
           }
       };
-      gen.into()
+      r#gen.into()
     }
     syn::Data::Struct(_) => {
-      let gen = quote! {
+      let r#gen = quote! {
           impl ButtplugMessage for #name {
               fn id(&self) -> u32 {
                   self.id
@@ -56,7 +56,7 @@ fn impl_buttplug_message_macro(ast: &syn::DeriveInput) -> TokenStream {
               }
           }
       };
-      gen.into()
+      r#gen.into()
     }
     _ => panic!("Derivation only works on structs and enums"),
   }
@@ -78,7 +78,7 @@ fn impl_buttplug_device_message_macro(ast: &syn::DeriveInput) -> TokenStream {
   match ast.data {
     syn::Data::Enum(ref e) => {
       let idents: Vec<_> = e.variants.iter().map(|x| x.ident.clone()).collect();
-      let gen = quote! {
+      let r#gen = quote! {
           impl ButtplugDeviceMessage for #name {
               fn device_index(&self) -> u32 {
                   match self {
@@ -93,10 +93,10 @@ fn impl_buttplug_device_message_macro(ast: &syn::DeriveInput) -> TokenStream {
               }
           }
       };
-      gen.into()
+      r#gen.into()
     }
     syn::Data::Struct(_) => {
-      let gen = quote! {
+      let r#gen = quote! {
           impl ButtplugDeviceMessage for #name {
               fn device_index(&self) -> u32 {
                   self.device_index
@@ -107,7 +107,7 @@ fn impl_buttplug_device_message_macro(ast: &syn::DeriveInput) -> TokenStream {
               }
           }
       };
-      gen.into()
+      r#gen.into()
     }
     _ => panic!("Derivation only works on structs and enums"),
   }
@@ -129,7 +129,7 @@ fn impl_buttplug_message_validator_macro(ast: &syn::DeriveInput) -> TokenStream 
   match &ast.data {
     syn::Data::Enum(e) => {
       let idents: Vec<_> = e.variants.iter().map(|x| x.ident.clone()).collect();
-      let gen = quote! {
+      let r#gen = quote! {
           impl ButtplugMessageValidator for #name {
             fn is_valid(&self) -> Result<(), ButtplugMessageError> {
               match self {
@@ -138,14 +138,14 @@ fn impl_buttplug_message_validator_macro(ast: &syn::DeriveInput) -> TokenStream 
             }
           }
       };
-      gen.into()
+      r#gen.into()
     }
     syn::Data::Struct(_) => {
-      let gen = quote! {
+      let r#gen = quote! {
           impl ButtplugMessageValidator for #name {
           }
       };
-      gen.into()
+      r#gen.into()
     }
     _ => panic!("Derivation only works on structs and enums"),
   }
@@ -166,16 +166,16 @@ fn impl_buttplug_message_finalizer_macro(ast: &syn::DeriveInput) -> TokenStream 
 
   match &ast.data {
     syn::Data::Enum(_) => {
-      let gen = quote! {
+      let r#gen = quote! {
           impl ButtplugMessageFinalizer for #name {}
       };
-      gen.into()
+      r#gen.into()
     }
     syn::Data::Struct(_) => {
-      let gen = quote! {
+      let r#gen = quote! {
           impl ButtplugMessageFinalizer for #name {}
       };
-      gen.into()
+      r#gen.into()
     }
     _ => panic!("Derivation only works on structs and enums"),
   }
@@ -205,14 +205,14 @@ fn impl_from_specific_buttplug_message_derive_macro(ast: &syn::DeriveInput) -> T
         fields.push(field.ty.clone());
       }
     }
-    let gen = quote! {
+    let r#gen = quote! {
         #(impl From<#fields> for #name {
             fn from(msg: #fields) -> #name {
                 #name::#idents(msg)
             }
         })*
     };
-    gen.into()
+    r#gen.into()
   } else {
     panic!("FromButtplugMessageUnion only works on structs");
   }
