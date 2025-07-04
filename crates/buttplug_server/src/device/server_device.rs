@@ -44,40 +44,29 @@ use std::{
 };
 
 use buttplug_core::{
+  ButtplugResultFuture,
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
-    self,
-    ButtplugServerMessageV4,
-    DeviceFeature,
-    DeviceMessageInfoV4,
-    InputCommandType,
-    InputType,
-    OutputRotateWithDirection,
-    OutputType,
-    OutputValue,
+    self, ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4, InputCommandType, InputType,
+    OutputRotateWithDirection, OutputType, OutputValue,
   },
   util::{self, async_manager, stream::convert_broadcast_receiver_to_stream},
-  ButtplugResultFuture,
 };
 use buttplug_server_device_config::{
-  DeviceConfigurationManager,
-  DeviceDefinition,
-  UserDeviceIdentifier,
+  DeviceConfigurationManager, DeviceDefinition, UserDeviceIdentifier,
 };
 
 use crate::{
+  ButtplugServerResultFuture,
   device::{
     hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent},
     protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, ProtocolSpecializer},
   },
   message::{
-    checked_input_cmd::CheckedInputCmdV4,
-    checked_output_cmd::CheckedOutputCmdV4,
-    server_device_attributes::ServerDeviceAttributes,
+    ButtplugServerDeviceMessage, checked_input_cmd::CheckedInputCmdV4,
+    checked_output_cmd::CheckedOutputCmdV4, server_device_attributes::ServerDeviceAttributes,
     spec_enums::ButtplugDeviceCommandMessageUnionV4,
-    ButtplugServerDeviceMessage,
   },
-  ButtplugServerResultFuture,
 };
 use core::hash::{Hash, Hasher};
 use dashmap::DashMap;
@@ -86,8 +75,8 @@ use getset::Getters;
 use tokio::{
   select,
   sync::{
-    mpsc::{channel, Sender},
     Mutex,
+    mpsc::{Sender, channel},
   },
   time::Instant,
 };
@@ -133,8 +122,7 @@ impl Hash for ServerDevice {
   }
 }
 
-impl Eq for ServerDevice {
-}
+impl Eq for ServerDevice {}
 
 impl PartialEq for ServerDevice {
   fn eq(&self, other: &Self) -> bool {
@@ -259,6 +247,7 @@ impl ServerDevice {
           None
         };
       async_manager::spawn(async move {
+        let mut hardware_events = hardware.event_stream();
         let keepalive_packet = Mutex::new(None);
         // TODO This needs to throw system error messages
         let send_hw_cmd = async |command| {
@@ -287,6 +276,17 @@ impl ServerDevice {
             };
           };
           select! {
+            hw_event = hardware_events.recv() => {
+              if let Ok(hw_event) = hw_event {
+                if matches!(hw_event, HardwareEvent::Disconnected(_)) {
+                  info!("Hardware disconnected, shutting down keepalive");
+                  return;
+                }
+              } else {
+                  info!("Hardware disconnected, shutting down keepalive");
+                  return;
+              }
+            }
             msg = internal_hw_msg_recv.recv() => {
               if msg.is_none() {
                 info!("No longer receiving message from device parent, breaking");
@@ -313,6 +313,17 @@ impl ServerDevice {
               let sleep_until = Instant::now() + *device_wait_duration.as_ref().unwrap();
               loop {
                 select! {
+                  hw_event = hardware_events.recv() => {
+                    if let Ok(hw_event) = hw_event {
+                      if matches!(hw_event, HardwareEvent::Disconnected(_)) {
+                        info!("Hardware disconnected, shutting down keepalive");
+                        return;
+                      }
+                    } else {
+                        info!("Hardware disconnected, shutting down keepalive");
+                        return;
+                    }
+                  }
                   msg = internal_hw_msg_recv.recv() => {
                     if msg.is_none() {
                       info!("No longer receiving message from device parent, breaking");
