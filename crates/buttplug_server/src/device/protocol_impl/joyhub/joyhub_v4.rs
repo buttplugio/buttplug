@@ -6,19 +6,16 @@
 // for full license information.
 
 
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier, Endpoint};
-use buttplug_core::{
-  errors::ButtplugDeviceError,
-  util::{async_manager, sleep},
-};
+use std::sync::atomic::{AtomicU8, Ordering};
+
 use uuid::{uuid, Uuid};
-  
+
 use crate::device::{
-  hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, ProtocolKeepaliveStrategy},
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler},
 };
-use std::sync::{atomic::{AtomicU8, Ordering}, Arc, RwLock};
-use std::time::Duration;
+use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_server_device_config::Endpoint;
 
 const JOYHUB_V4_PROTOCOL_UUID: Uuid = uuid!("c99e8979-6f13-4556-9b6b-2061f527042b");
 generic_protocol_setup!(JoyHubV4, "joyhub-v4");
