@@ -5,186 +5,93 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::{ActuatorType, Endpoint},
-  },
-  generic_protocol_initializer_setup,
-use crate::device::{
-    configuration::UserDeviceIdentifier,
-    configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition},
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-  },
+
+use buttplug_server_device_config::{ProtocolCommunicationSpecifier, DeviceDefinition, UserDeviceIdentifier, Endpoint};
+use buttplug_core::{
+  errors::ButtplugDeviceError,
   util::{async_manager, sleep},
 };
-use async_trait::async_trait;
-use std::sync::{Arc, RwLock};
+use uuid::{uuid, Uuid};
+  
+use crate::device::{
+  hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+  protocol::{generic_protocol_setup, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, ProtocolKeepaliveStrategy},
+};
+use std::sync::{atomic::{AtomicU8, Ordering}, Arc, RwLock};
 use std::time::Duration;
 
-generic_protocol_initializer_setup!(JoyHubV4, "joyhub-v4");
-
-async fn delayed_constrict_handler(device: Arc<Hardware>, scalar: u8) {
-  sleep(Duration::from_millis(25)).await;
-  let res = device
-    .write_value(&HardwareWriteCmd::new(
-      Endpoint::Tx,
-      vec![
-        0xa0,
-        0x07,
-        if scalar == 0 { 0x00 } else { 0x01 },
-        0x00,
-        scalar,
-        0xff,
-      ],
-      false,
-    ))
-    .await;
-  if res.is_err() {
-    error!("Delayed JoyHub Constrict command error: {:?}", res.err());
-  }
-}
-fn vibes_changed(
-  old_commands_lock: &RwLock<Vec<Option<(ActuatorType, i32)>>>,
-  new_commands: &[Option<(ActuatorType, i32)>],
-  exclude: Vec<usize>,
-) -> bool {
-  let old_commands = old_commands_lock.read().expect("locks should work");
-  if old_commands.len() != new_commands.len() {
-    return true;
-  }
-
-  for i in 0..old_commands.len() {
-    if exclude.contains(&i) {
-      continue;
-    }
-    if let Some(ocmd) = old_commands[i] {
-      if let Some(ncmd) = new_commands[i] {
-        if ocmd.1 != ncmd.1 {
-          return true;
-        }
-      }
-    }
-  }
-  false
-}
-
-fn scalar_changed(
-  old_commands_lock: &RwLock<Vec<Option<(ActuatorType, i32)>>>,
-  new_commands: &[Option<(ActuatorType, i32)>],
-  index: usize,
-) -> bool {
-  let old_commands = old_commands_lock.read().expect("locks should work");
-  if old_commands.len() != new_commands.len() {
-    return true;
-  }
-
-  if index < old_commands.len() {
-    if let Some(ocmd) = old_commands[index] {
-      if let Some(ncmd) = new_commands[index] {
-        if ocmd.1 != ncmd.1 {
-          return true;
-        }
-      }
-    }
-  }
-  false
-}
+const JOYHUB_V4_PROTOCOL_UUID: Uuid = uuid!("c99e8979-6f13-4556-9b6b-2061f527042b");
+generic_protocol_setup!(JoyHubV4, "joyhub-v4");
 
 #[derive(Default)]
-pub struct JoyHubV4Initializer {}
-
-#[async_trait]
-impl ProtocolInitializer for JoyHubV4Initializer {
-  async fn initialize(
-    &mut self,
-    hardware: Arc<Hardware>,
-    _: &UserDeviceDefinition,
-  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    Ok(Arc::new(JoyHubV4::new(hardware)))
-  }
-}
-
 pub struct JoyHubV4 {
-  device: Arc<Hardware>,
-  last_cmds: RwLock<Vec<Option<(ActuatorType, i32)>>>,
+  last_cmds: [AtomicU8; 3]
 }
 
 impl JoyHubV4 {
-  fn new(device: Arc<Hardware>) -> Self {
-    let last_cmds = RwLock::new(vec![]);
-    Self { device, last_cmds }
-  }
-}
-
-impl ProtocolHandler for JoyHubV4 {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
-  }
-
-  fn outputs_full_command_set(&self) -> bool {
-    true
-  }
-
-  fn handle_value_cmd(
-    &self,
-    commands: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let cmd1 = commands[0];
-    let cmd2 = if commands.len() > 1 {
-      commands[1]
-    } else {
-      None
-    };
-    let mut cmd3 = if commands.len() > 2 {
-      commands[2]
-    } else {
-      None
-    };
-
-    if let Some(cmd) = cmd3 {
-      if cmd.0 == ActuatorType::Constrict {
-        cmd3 = None;
-        if !scalar_changed(&self.last_cmds, commands, 2usize) {
-          // no-op
-        } else if vibes_changed(&self.last_cmds, commands, vec![2usize]) {
-          let dev = self.device.clone();
-          async_manager::spawn(async move { delayed_constrict_handler(dev, cmd.1 as u8).await });
-        } else {
-          let mut command_writer = self.last_cmds.write().expect("Locks should work");
-          *command_writer = commands.to_vec();
-
-          return Ok(vec![HardwareWriteCmd::new(
-            Endpoint::Tx,
-            vec![
-              0xa0,
-              0x07,
-              if cmd.1 == 0 { 0x00 } else { 0x01 },
-              0x00,
-              cmd.1 as u8,
-              0xff,
-            ],
-            false,
-          )
-          .into()]);
-        }
-      }
-    }
-
-    let mut command_writer = self.last_cmds.write().expect("Locks should work");
-    *command_writer = commands.to_vec();
-
+  fn form_hardware_command(&self, index: u32, speed: u32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.last_cmds[index as usize].store(speed as u8, Ordering::Relaxed);
     Ok(vec![HardwareWriteCmd::new(
+      &[JOYHUB_V4_PROTOCOL_UUID],
       Endpoint::Tx,
       vec![
         0xa0,
         0x03,
-        cmd1.unwrap_or((ActuatorType::Vibrate, 0)).1 as u8,
+        self.last_cmds[0].load(Ordering::Relaxed),
         0x00,
-        cmd3.unwrap_or((ActuatorType::Vibrate, 0)).1 as u8,
-        cmd2.unwrap_or((ActuatorType::Rotate, 0)).1 as u8,
+        self.last_cmds[2].load(Ordering::Relaxed),
+        self.last_cmds[1].load(Ordering::Relaxed),
         0xaa,
+      ],
+      false,
+    ).into()])
+  }
+}
+
+impl ProtocolHandler for JoyHubV4 {
+  fn handle_output_vibrate_cmd(
+      &self,
+      feature_index: u32,
+      _feature_id: Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.form_hardware_command(feature_index, speed)
+  }
+
+  fn handle_output_rotate_cmd(
+      &self,
+      feature_index: u32,
+      _feature_id: Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.form_hardware_command(feature_index, speed)
+  }
+
+  fn handle_output_oscillate_cmd(
+      &self,
+      feature_index: u32,
+      _feature_id: Uuid,
+      speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.form_hardware_command(feature_index, speed)    
+  }
+
+  fn handle_output_constrict_cmd(
+      &self,
+      _feature_index: u32,
+      feature_id: Uuid,
+      level: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![HardwareWriteCmd::new(
+      &[feature_id],
+      Endpoint::Tx,
+      vec![
+        0xa0,
+        0x07,
+        if level == 0 { 0x00 } else { 0x01 },
+        0x00,
+        level as u8,
+        0xff,
       ],
       false,
     )
