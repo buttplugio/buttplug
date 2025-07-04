@@ -1,23 +1,23 @@
 use std::sync::Arc;
 
 use crate::{
-  BackdoorServer, ButtplugRemoteServer, ButtplugServerConnectorError, EngineOptions,
-  IntifaceEngineError, IntifaceError,
+  remote_server::ButtplugRemoteServerEvent, BackdoorServer, ButtplugRemoteServer, ButtplugServerConnectorError, EngineOptions, IntifaceEngineError, IntifaceError
 };
-use buttplug_transport_websocket_tungstenite::{
-       ButtplugWebsocketClientTransport,
-      ButtplugWebsocketServerTransportBuilder,
-    };
+use buttplug_server::{
+  ButtplugServerBuilder,
+  connector::ButtplugRemoteServerConnector,
+  device::{ServerDeviceManager, ServerDeviceManagerBuilder},
+  message::serializer::ButtplugServerJSONSerializer,
+};
 use buttplug_server_device_config::{DeviceConfigurationManager, load_protocol_configs};
 use buttplug_server_hwmgr_btleplug::BtlePlugCommunicationManagerBuilder;
 use buttplug_server_hwmgr_lovense_connect::LovenseConnectServiceCommunicationManagerBuilder;
 use buttplug_server_hwmgr_websocket::WebsocketServerDeviceCommunicationManagerBuilder;
-    use buttplug_server::{
-    connector::ButtplugRemoteServerConnector, device::{
-      ServerDeviceManagerBuilder,
-    }, message::serializer::ButtplugServerJSONSerializer, ButtplugServerBuilder
+use buttplug_transport_websocket_tungstenite::{
+  ButtplugWebsocketClientTransport, ButtplugWebsocketServerTransportBuilder,
 };
 use once_cell::sync::OnceCell;
+use tokio::sync::broadcast::Sender;
 // Device communication manager setup gets its own module because the includes and platform
 // specifics are such a mess.
 
@@ -75,6 +75,24 @@ pub fn setup_server_device_comm_managers(
   }
 }
 
+pub async fn reset_buttplug_server(
+  options: &EngineOptions,
+  device_manager: &Arc<ServerDeviceManager>,
+  sender: &Sender<ButtplugRemoteServerEvent>
+) -> Result<ButtplugRemoteServer, IntifaceEngineError> {
+  match ButtplugServerBuilder::with_shared_device_manager(device_manager.clone())
+    .name(options.server_name())
+    .max_ping_time(options.max_ping_time())
+    .finish()
+  {
+    Ok(server) => Ok(ButtplugRemoteServer::new(server, &Some(sender.clone()))),
+    Err(e) => {
+      error!("Error starting server: {:?}", e);
+      return Err(IntifaceEngineError::ButtplugServerError(e));
+    }
+  }
+}
+
 pub async fn setup_buttplug_server(
   options: &EngineOptions,
   backdoor_server: &OnceCell<Arc<BackdoorServer>>,
@@ -98,12 +116,12 @@ pub async fn setup_buttplug_server(
   };
 
   setup_server_device_comm_managers(options, &mut dm_builder);
-
   let mut server_builder = ButtplugServerBuilder::new(
     dm_builder
       .finish()
       .map_err(|e| IntifaceEngineError::ButtplugServerError(e))?,
   );
+
   server_builder
     .name(options.server_name())
     .max_ping_time(options.max_ping_time());
@@ -124,7 +142,7 @@ pub async fn setup_buttplug_server(
         .into(),
     )
   } else {
-    Ok(ButtplugRemoteServer::new(core_server))
+    Ok(ButtplugRemoteServer::new(core_server, &None))
   }
 }
 
@@ -154,6 +172,8 @@ pub async fn run_server(
       ))
       .await
   } else {
-    panic!("Websocket port not set, cannot create transport. Please specify a websocket port in arguments.");
+    panic!(
+      "Websocket port not set, cannot create transport. Please specify a websocket port in arguments."
+    );
   }
 }
