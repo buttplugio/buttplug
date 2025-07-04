@@ -1,6 +1,6 @@
 use crate::{
   backdoor_server::BackdoorServer,
-  buttplug_server::{run_server, setup_buttplug_server},
+  buttplug_server::{reset_buttplug_server, run_server, setup_buttplug_server},
   error::IntifaceEngineError,
   frontend::{
     frontend_external_event_loop, frontend_server_event_loop, process_messages::EngineMessage,
@@ -106,7 +106,7 @@ impl IntifaceEngine {
 
     // Hang out until those listeners get sick of listening.
     info!("Intiface CLI Setup finished, running server tasks until all joined.");
-    let server = setup_buttplug_server(options, &self.backdoor_server, &dcm).await?;
+    let mut server = setup_buttplug_server(options, &self.backdoor_server, &dcm).await?;
     let dcm = server
       .server()
       .device_manager()
@@ -193,6 +193,9 @@ impl IntifaceEngine {
         info!("Breaking out of event loop in order to exit");
         break;
       }
+      // We're not exiting, rebuild our server.
+      let dm = server.server().device_manager();
+      server = reset_buttplug_server(options, &dm, server.event_sender()).await?;
       info!("Server connection dropped, restarting");
     }
     info!("Shutting down server...");

@@ -20,7 +20,7 @@ use getset::Getters;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use thiserror::Error;
-use tokio::sync::{broadcast, mpsc, Notify};
+use tokio::sync::{broadcast::{self, Sender}, mpsc, Notify};
 
 // Clone derived here to satisfy tokio broadcast requirements.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -49,6 +49,7 @@ pub enum ButtplugServerConnectorError {
 pub struct ButtplugRemoteServer {
   #[getset(get = "pub")]
   server: Arc<ButtplugServer>,
+  #[getset(get = "pub")]
   event_sender: broadcast::Sender<ButtplugRemoteServerEvent>,
   disconnect_notifier: Arc<Notify>,
 }
@@ -210,13 +211,18 @@ impl Default for ButtplugRemoteServer {
       ButtplugServerBuilder::default()
         .finish()
         .expect("Default is infallible"),
+      &None
     )
   }
 }
 
 impl ButtplugRemoteServer {
-  pub fn new(server: ButtplugServer) -> Self {
-    let (event_sender, _) = broadcast::channel(256);
+  pub fn new(server: ButtplugServer, event_sender: &Option<Sender<ButtplugRemoteServerEvent>>) -> Self {
+    let event_sender = if let Some(sender) = event_sender {
+      sender.clone()
+    } else {
+      broadcast::channel(256).0
+    };
     // Thanks to the existence of the backdoor server, device updates can happen for the lifetime to
     // the RemoteServer instance, not just during client connect. We need to make sure these are
     // emitted to the frontend.
