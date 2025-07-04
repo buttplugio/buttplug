@@ -350,10 +350,21 @@ impl DeviceConfigurationManager {
     definition: &DeviceDefinition,
   ) -> Result<(), ButtplugDeviceError> {
     //self.protocol_map.contains_key(identifier.protocol());
+    // Check validity of device
+    let mut index = definition.user_config().index();
+    let indexes: Vec<u32> = self.user_device_definitions().iter().map(|x| x.value().user_config().index()).collect();
+    // If we just added 1 to the maximum value of the current indexes, someone decides to set an
+    // index to u32::MAX-1, then we'd have a problem. This is kind of a shit solution but it'll work
+    // quickly for anyone that's not actively fucking with us by manually playing with user config files.
+    while indexes.contains(&index) {
+      index = index.wrapping_add(1);
+    }
+    let mut def = definition.clone();
+    *def.user_device_mut().user_config_mut().index_mut() = index;
     self
       .user_device_definitions
       .entry(identifier.clone())
-      .insert(definition.clone());
+      .insert(def);
     Ok(())
   }
 
