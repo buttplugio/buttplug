@@ -119,7 +119,7 @@ impl ButtplugServer {
   /// Retreive an async stream of ButtplugServerMessages. This is how the server sends out
   /// non-query-related updates to the system, including information on devices being added/removed,
   /// client disconnection, etc...
-  pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessageVariant> {
+  pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessageVariant> + use<> {
     let spec_version = self.spec_version.clone();
     let converter = ButtplugServerMessageConverter::new(None);
     self.server_version_event_stream().map(move |m| {
@@ -138,7 +138,7 @@ impl ButtplugServer {
   /// Retreive an async stream of ButtplugServerMessages, always at the latest available message
   /// spec. This is how the server sends out non-query-related updates to the system, including
   /// information on devices being added/removed, client disconnection, etc...
-  pub fn server_version_event_stream(&self) -> impl Stream<Item = ButtplugServerMessageV4> {
+  pub fn server_version_event_stream(&self) -> impl Stream<Item = ButtplugServerMessageV4> + use<> {
     // Unlike the client API, we can expect anyone using the server to pin this
     // themselves.
     let server_receiver = convert_broadcast_receiver_to_stream(self.output_sender.subscribe());
