@@ -258,7 +258,7 @@ impl BtleplugAdapterTask {
               BtleplugAdapterCommand::StartScanning => {
                 tried_addresses.clear();
                 if let Err(err) = adapter.start_scan(ScanFilter::default()).await {
-                  error!("Start scanning request failed: {}", err);
+                  error!("Start scanning request failed. Ensure Bluetooth is enabled and permissions are granted: {}", err);
                 }
               }
               BtleplugAdapterCommand::StopScanning => {
