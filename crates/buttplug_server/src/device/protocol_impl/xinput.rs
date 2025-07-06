@@ -14,7 +14,7 @@ use crate::device::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{self, InputReadingV4, InputType},
+  message::{self, InputData, InputReadingV4, InputTypeData},
 };
 use byteorder::WriteBytesExt;
 use futures::future::{BoxFuture, FutureExt};
@@ -77,7 +77,7 @@ impl ProtocolHandler for XInput {
         .read_value(&HardwareReadCmd::new(feature_id, Endpoint::Rx, 0, 0))
         .await?;
       let battery = match reading.data()[0] {
-        0 => 0i32,
+        0 => 0u8,
         1 => 33,
         2 => 66,
         3 => 100,
@@ -90,8 +90,7 @@ impl ProtocolHandler for XInput {
       Ok(message::InputReadingV4::new(
         device_index,
         feature_index,
-        InputType::Battery,
-        vec![battery],
+        InputTypeData::Battery(InputData::new(battery)),
       ))
     }
     .boxed()

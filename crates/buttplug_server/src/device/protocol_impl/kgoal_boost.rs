@@ -14,7 +14,7 @@ use crate::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{InputReadingV4, InputType},
+  message::{InputData, InputReadingV4, InputType},
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use buttplug_server_device_config::Endpoint;
@@ -96,16 +96,15 @@ impl ProtocolHandler for KGoalBoost {
                   continue;
                 }
                 // Extract our two pressure values.
-                let normalized = (data[3] as i32) << 8 | data[4] as i32;
-                let unnormalized = (data[5] as i32) << 8 | data[6] as i32;
+                let normalized = (data[3] as u32) << 8 | data[4] as u32;
+                let unnormalized = (data[5] as u32) << 8 | data[6] as u32;
                 if stream_sensors.contains(&0)
                   && sender
                     .send(
                       InputReadingV4::new(
                         device_index,
                         feature_index,
-                        InputType::Pressure,
-                        vec![normalized],
+                        buttplug_core::message::InputTypeData::Pressure(InputData::new(normalized))
                       )
                       .into(),
                     )
@@ -122,8 +121,7 @@ impl ProtocolHandler for KGoalBoost {
                       InputReadingV4::new(
                         device_index,
                         feature_index,
-                        InputType::Pressure,
-                        vec![unnormalized],
+                        buttplug_core::message::InputTypeData::Pressure(InputData::new(unnormalized))
                       )
                       .into(),
                     )

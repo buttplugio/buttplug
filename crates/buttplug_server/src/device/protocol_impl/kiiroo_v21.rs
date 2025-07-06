@@ -23,7 +23,7 @@ use crate::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{InputReadingV4, InputType},
+  message::{InputData, InputReadingV4, InputType, InputTypeData},
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use buttplug_server_device_config::Endpoint;
@@ -124,12 +124,11 @@ impl ProtocolHandler for KiirooV21 {
           "Kiiroo battery data not expected length!".to_owned(),
         ));
       }
-      let battery_level = data[5] as i32;
+      let battery_level = data[5];
       let battery_reading = InputReadingV4::new(
         device_index,
         feature_index,
-        InputType::Battery,
-        vec![battery_level],
+        InputTypeData::Battery(InputData::new(battery_level))
       );
       debug!("Got battery reading: {}", battery_level);
       Ok(battery_reading)
@@ -143,6 +142,7 @@ impl ProtocolHandler for KiirooV21 {
     convert_broadcast_receiver_to_stream(self.event_stream.subscribe()).boxed()
   }
 
+  /*
   fn handle_input_subscribe_cmd(
     &self,
     device_index: u32,
@@ -250,4 +250,5 @@ impl ProtocolHandler for KiirooV21 {
     }
     .boxed()
   }
+  */
 }

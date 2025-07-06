@@ -143,7 +143,7 @@ impl From<ServerDeviceMessageAttributesV3> for ServerDeviceMessageAttributesV2 {
         if let Some(sensor_info) = other.sensor_read_cmd() {
           sensor_info
             .iter()
-            .find(|x| *x.sensor_type() == InputType::RSSI)
+            .find(|x| *x.sensor_type() == InputType::Rssi)
             .map(|attr| ServerSensorDeviceMessageAttributesV2::new(attr.feature()))
         } else {
           None

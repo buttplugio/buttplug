@@ -20,7 +20,7 @@ pub use {
   device_list::DeviceListV4,
   device_message_info::DeviceMessageInfoV4,
   input_cmd::{InputCmdV4, InputCommandType},
-  input_reading::InputReadingV4,
+  input_reading::{InputData, InputTypeData, InputReadingV4},
   output_cmd::{
     OutputCmdV4,
     OutputCommand,

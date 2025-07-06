@@ -11,7 +11,7 @@ use crate::device::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{self, InputReadingV4, InputType},
+  message::{self, InputData, InputReadingV4, InputType, InputTypeData},
 };
 use buttplug_server_device_config::Endpoint;
 use futures::{future::BoxFuture, FutureExt};
@@ -59,14 +59,12 @@ impl ProtocolHandler for KiirooProWand {
     async move {
       let hw_msg = fut.await?;
       let data = hw_msg.data();
-      let battery_level = data[0] as i32;
       let battery_reading = message::InputReadingV4::new(
         device_index,
         feature_index,
-        InputType::Battery,
-        vec![battery_level],
+        InputTypeData::Battery(InputData::new(data[0]))
       );
-      debug!("Got battery reading: {}", battery_level);
+      debug!("Got battery reading: {}", data[0]);
       Ok(battery_reading)
     }
     .boxed()

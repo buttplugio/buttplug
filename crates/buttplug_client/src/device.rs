@@ -236,7 +236,7 @@ impl ButtplugClientDevice {
       .any(|x| *x.feature().feature_type() == FeatureType::RSSI)
   }
 
-  pub fn rssi_level(&self) -> ButtplugClientResultFuture<u32> {
+  pub fn rssi_level(&self) -> ButtplugClientResultFuture<i8> {
     if let Some(rssi) = self
       .device_features
       .iter()

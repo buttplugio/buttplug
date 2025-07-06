@@ -631,11 +631,11 @@ impl ButtplugClientDevice {
   }
 
   pub fn has_rssi_level(&self) -> bool {
-    self.has_sensor_read(InputType::RSSI)
+    self.has_sensor_read(InputType::Rssi)
   }
 
   pub fn rssi_level(&self) -> ButtplugClientResultFuture<i32> {
-    let send_fut = self.read_single_sensor(&InputType::RSSI);
+    let send_fut = self.read_single_sensor(&InputType::Rssi);
     Box::pin(async move {
       let data = send_fut.await?;
       Ok(data[0])

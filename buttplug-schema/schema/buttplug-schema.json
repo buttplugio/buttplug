@@ -459,14 +459,14 @@
           "Id": { "$ref": "#/components/ServerId" },
           "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
           "FeatureIndex": { "type": "integer" },
-          "InputType": { "type": "string" },
           "Data": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 255
-            }
+            "type": "object",
+            "patternProperties": {
+              "^Battery|Rssi|Pressure|Button": {
+                "type": "integer"
+              }
+            },
+            "maxProperties": 1
           }
         },
         "additionalProperties": false,
@@ -474,7 +474,6 @@
           "Id",
           "DeviceIndex",
           "FeatureIndex",
-          "InputType",
           "Data"
         ]
       },
