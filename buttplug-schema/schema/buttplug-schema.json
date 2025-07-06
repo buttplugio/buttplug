@@ -377,7 +377,7 @@
           "Command": {
             "type": "object",
             "patternProperties": {
-              "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|Heater|Led)$": {
+              "^(Vibrate|Rotate|Oscillate|Constrict|Spray|Position|Heater|Led)$": {
                 "type": "object",
                 "properties": {
                   "Value": {
@@ -584,12 +584,12 @@
             "description": "Name of the client software.",
             "type": "string"
           },
-          "ApiVersionMajor": {
+          "ProtocolVersionMajor": {
             "description": "Message template version of the server software.",
             "type": "integer",
             "minimum": 0
           },
-          "ApiVersionMinor": {
+          "ProtocolVersionMinor": {
             "description": "Message template version of the server software.",
             "type": "integer",
             "minimum": 0
@@ -599,8 +599,8 @@
         "required": [
           "Id",
           "ClientName",
-          "ApiVersionMajor",
-          "ApiVersionMinor"
+          "ProtocolVersionMajor",
+          "ProtocolVersionMinor"
         ]
       },
       "ServerInfo": {
@@ -612,12 +612,12 @@
             "description": "Name of the server. Can be 0-length.",
             "type": "string"
           },
-          "ApiVersionMajor": {
+          "ProtocolVersionMajor": {
             "description": "Message template version of the server software.",
             "type": "integer",
             "minimum": 0
           },
-          "ApiVersionMinor": {
+          "ProtocolVersionMinor": {
             "description": "Message template version of the server software.",
             "type": "integer",
             "minimum": 0

@@ -357,14 +357,14 @@ impl ButtplugServer {
     info!(
       "Performing server handshake check with client {} at message version {}.{}",
       msg.client_name(),
-      msg.api_version_major(),
-      msg.api_version_minor()
+      msg.protocol_version_major(),
+      msg.protocol_version_minor()
     );
 
-    if BUTTPLUG_CURRENT_API_MAJOR_VERSION < msg.api_version_major() {
+    if BUTTPLUG_CURRENT_API_MAJOR_VERSION < msg.protocol_version_major() {
       return ButtplugHandshakeError::MessageSpecVersionMismatch(
         BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-        msg.api_version_major(),
+        msg.protocol_version_major(),
       )
       .into();
     }
@@ -374,8 +374,8 @@ impl ButtplugServer {
 
     // Due to programming/spec errors in prior versions of the protocol, anything before v4 expected
     // that it would be back a matching api version of the server. The correct response is to send back whatever the
-    let output_version = if (msg.api_version_major() as u32) < 4 {
-      msg.api_version_major()
+    let output_version = if (msg.protocol_version_major() as u32) < 4 {
+      msg.protocol_version_major()
     } else {
       BUTTPLUG_CURRENT_API_MAJOR_VERSION
     };

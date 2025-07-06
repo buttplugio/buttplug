@@ -30,12 +30,12 @@ use serde::{Deserialize, Serialize};
 pub struct ServerInfoV4 {
   #[serde(rename = "Id")]
   id: u32,
-  #[serde(rename = "ApiVersionMajor")]
+  #[serde(rename = "ProtocolVersionMajor")]
   #[getset(get_copy = "pub")]
-  api_version_major: ButtplugMessageSpecVersion,
-  #[serde(rename = "ApiVersionMinor")]
+  protocol_version_major: ButtplugMessageSpecVersion,
+  #[serde(rename = "ProtocolVersionMinor")]
   #[getset(get_copy = "pub")]
-  api_version_minor: u32,
+  protocol_version_minor: u32,
   #[serde(rename = "MaxPingTime")]
   #[getset(get_copy = "pub")]
   max_ping_time: u32,
@@ -47,14 +47,14 @@ pub struct ServerInfoV4 {
 impl ServerInfoV4 {
   pub fn new(
     server_name: &str,
-    api_version_major: ButtplugMessageSpecVersion,
-    api_version_minor: u32,
+    protocol_version_major: ButtplugMessageSpecVersion,
+    protocol_version_minor: u32,
     max_ping_time: u32,
   ) -> Self {
     Self {
       id: 1,
-      api_version_major,
-      api_version_minor,
+      protocol_version_major,
+      protocol_version_minor,
       max_ping_time,
       server_name: server_name.to_string(),
     }

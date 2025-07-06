@@ -226,8 +226,8 @@ pub trait ProtocolHandler: Sync + Send {
       OutputCommand::Constrict(x) => {
         self.handle_output_constrict_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
       }
-      OutputCommand::Inflate(x) => {
-        self.handle_output_inflate_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+      OutputCommand::Spray(x) => {
+        self.handle_output_spray_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
       }
       OutputCommand::Oscillate(x) => {
         self.handle_output_oscillate_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
@@ -289,13 +289,13 @@ pub trait ProtocolHandler: Sync + Send {
     self.command_unimplemented("OutputCmd (Oscillate Actuator)")
   }
 
-  fn handle_output_inflate_cmd(
+  fn handle_output_spray_cmd(
     &self,
     _feature_index: u32,
     _feature_id: Uuid,
     _level: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented("OutputCmd (Inflate Actuator)")
+    self.command_unimplemented("OutputCmd (Spray Actuator)")
   }
 
   fn handle_output_constrict_cmd(

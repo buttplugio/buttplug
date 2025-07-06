@@ -185,12 +185,12 @@
           },
           "feature-type": {
             "type": "string",
-            "pattern": "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|Battery|RSSI|Pressure|RotateWithDirection|PositionWithDuration|Heater|Led)$"
+            "pattern": "^(Vibrate|Rotate|Oscillate|Constrict|Spray|Position|Battery|RSSI|Pressure|RotateWithDirection|PositionWithDuration|Heater|Led)$"
           },
           "output": {
             "type": "object",
             "patternProperties": {
-              "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|RotateWithDirection|PositionWithDuration|Heater|Led)$": {
+              "^(Vibrate|Rotate|Oscillate|Constrict|Spray|Position|RotateWithDirection|PositionWithDuration|Heater|Led)$": {
                 "type": "object",
                 "properties": {
                   "step-range": {
@@ -269,7 +269,7 @@
           "output": {
             "type": "object",
             "patternProperties": {
-              "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position|RotateWithDirection|PositionWithDuration|Heater|Led)$": {
+              "^(Vibrate|Rotate|Oscillate|Constrict|Spray|Position|RotateWithDirection|PositionWithDuration|Heater|Led)$": {
                 "type": "object",
                 "properties": {
                   "step-limit": {
