@@ -51,7 +51,7 @@ struct RequestServerInfoVersion {
   _client_name: String,
   #[serde(default, rename = "MessageVersion")]
   message_version: Option<u32>,
-  #[serde(default, rename = "ApiVersionMajor")]
+  #[serde(default, rename = "ProtocolVersionMajor")]
   api_major_version: Option<u32>,
 }
 
@@ -257,8 +257,8 @@ mod test {
             "RequestServerInfo": {
                 "Id": 1,
                 "ClientName": "Test Client",
-                "ApiVersionMajor": 4,
-                "ApiVersionMinor": 0
+                "ProtocolVersionMajor": 4,
+                "ProtocolVersionMinor": 0
             }
         }]"#;
     let serializer = ButtplugServerJSONSerializer::default();
@@ -277,8 +277,8 @@ mod test {
       "RequestServerInfo": {
           "Id": 1,
           "ClientName": "Test Client",
-          "ApiVersionMajor": 100,
-          "ApiVersionMinor": 0
+          "ProtocolVersionMajor": 100,
+          "ProtocolVersionMinor": 0
       }
     }]"#;
     let serializer = ButtplugServerJSONSerializer::default();
@@ -294,24 +294,24 @@ mod test {
         "RequestServerInfo": {
           "Id": 1,
           "ClientName": "Test Client",
-          "ApiVersionMajor": 4,
-          "ApiVersionMinor": 0
+          "ProtocolVersionMajor": 4,
+          "ProtocolVersionMinor": 0
         }
       },
       {
         "RequestServerInfo": {
             "Id": 1,
             "ClientName": "Test Client",
-            "ApiVersionMajor": 4,
-            "ApiVersionMinor": 0
+            "ProtocolVersionMajor": 4,
+            "ProtocolVersionMinor": 0
         }
       },
       {
         "RequestServerInfo": {
           "Id": 1,
           "ClientName": "Test Client",
-          "ApiVersionMajor": 4,
-          "ApiVersionMinor": 0
+          "ProtocolVersionMajor": 4,
+          "ProtocolVersionMinor": 0
         }
       }
     ]"#;
@@ -329,24 +329,24 @@ mod test {
           "RequestServerInfo": {
             "Id": 1,
             "ClientName": "Test Client",
-            "ApiVersionMajor": 4,
-            "ApiVersionMinor": 0
+            "ProtocolVersionMajor": 4,
+            "ProtocolVersionMinor": 0
           }
         }]
         [{
           "RequestServerInfo": {
             "Id": 1,
             "ClientName": "Test Client",
-            "ApiVersionMajor": 4,
-            "ApiVersionMinor": 0
+            "ProtocolVersionMajor": 4,
+            "ProtocolVersionMinor": 0
           }
         }]
         [{
           "RequestServerInfo": {
             "Id": 1,
             "ClientName": "Test Client",
-            "ApiVersionMajor": 4,
-            "ApiVersionMinor": 0
+            "ProtocolVersionMajor": 4,
+            "ProtocolVersionMinor": 0
           }
         }]
     "#;
@@ -364,23 +364,23 @@ mod test {
           "RequestServerInfo": {
             "Id": 1,
             "ClientName": "Test Client",
-            "ApiVersionMajor": 4,
-            "ApiVersionMinor": 0
+            "ProtocolVersionMajor": 4,
+            "ProtocolVersionMinor": 0
           }
         }]
         [{
           "RequestServerInfo": {
             "Id": 1,
             "ClientName": "Test Client",
-            "ApiVersionMajor": 4,
-            "ApiVersionMinor": 0
+            "ProtocolVersionMajor": 4,
+            "ProtocolVersionMinor": 0
         }]
         [{
           "RequestServerInfo": {
             "Id": 1,
             "ClientName": "Test Client",
-            "ApiVersionMajor": 4,
-            "ApiVersionMinor": 0
+            "ProtocolVersionMajor": 4,
+            "ProtocolVersionMinor": 0
           }
         }]
     "#;
