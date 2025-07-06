@@ -96,7 +96,7 @@ impl TryFrom<FeatureType> for OutputType {
 pub enum InputType {
   Unknown,
   Battery,
-  RSSI,
+  Rssi,
   Button,
   Pressure,
   // Temperature,
@@ -110,7 +110,7 @@ impl TryFrom<FeatureType> for InputType {
     match value {
       FeatureType::Unknown => Ok(InputType::Unknown),
       FeatureType::Battery => Ok(InputType::Battery),
-      FeatureType::RSSI => Ok(InputType::RSSI),
+      FeatureType::RSSI => Ok(InputType::Rssi),
       FeatureType::Button => Ok(InputType::Button),
       FeatureType::Pressure => Ok(InputType::Pressure),
       _ => Err(format!(
@@ -143,7 +143,7 @@ impl From<InputType> for FeatureType {
     match value {
       InputType::Unknown => FeatureType::Unknown,
       InputType::Battery => FeatureType::Battery,
-      InputType::RSSI => FeatureType::RSSI,
+      InputType::Rssi => FeatureType::RSSI,
       InputType::Button => FeatureType::Button,
       InputType::Pressure => FeatureType::Pressure,
     }

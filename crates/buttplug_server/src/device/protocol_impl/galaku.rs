@@ -13,7 +13,7 @@ use uuid::{uuid, Uuid};
 use futures_util::future::BoxFuture;
 use futures_util::{future, FutureExt};
 
-use buttplug_core::message::{InputReadingV4, InputType};
+use buttplug_core::message::{InputData, InputReadingV4, InputType, InputTypeData};
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 
@@ -277,8 +277,7 @@ impl ProtocolHandler for Galaku {
             let battery_reading = InputReadingV4::new(
               device_index,
               feature_index,
-              InputType::Battery,
-              vec![read_value(data) as i32],
+              InputTypeData::Battery(InputData::new(data[0]))
             );
             Ok(battery_reading)
           }

@@ -118,7 +118,7 @@ impl From<ClientDeviceMessageAttributesV3> for ClientDeviceMessageAttributesV2 {
         if let Some(sensor_info) = other.sensor_read_cmd() {
           if sensor_info
             .iter()
-            .any(|x| *x.sensor_type() == InputType::RSSI)
+            .any(|x| *x.sensor_type() == InputType::Rssi)
           {
             Some(NullDeviceMessageAttributesV1::default())
           } else {

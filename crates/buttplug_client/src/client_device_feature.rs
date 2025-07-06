@@ -6,18 +6,7 @@ use getset::{CopyGetters, Getters};
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugDeviceMessageNameV4,
-    ButtplugServerMessageV4,
-    DeviceFeature,
-    InputCmdV4,
-    InputCommandType,
-    InputType,
-    OutputCmdV4,
-    OutputCommand,
-    OutputPositionWithDuration,
-    OutputRotateWithDirection,
-    OutputType,
-    OutputValue,
+    ButtplugDeviceMessageNameV4, ButtplugServerMessageV4, DeviceFeature, InputCmdV4, InputCommandType, InputType, InputTypeData, OutputCmdV4, OutputCommand, OutputPositionWithDuration, OutputRotateWithDirection, OutputType, OutputValue
   },
 };
 
@@ -219,7 +208,7 @@ impl ClientDeviceFeature {
     )
   }
 
-  fn read_sensor(&self, sensor_type: InputType) -> ButtplugClientResultFuture<Vec<i32>> {
+  fn read_sensor(&self, sensor_type: InputType) -> ButtplugClientResultFuture<InputTypeData> {
     if let Some(sensor_map) = self.feature.input() {
       if let Some(sensor) = sensor_map.get(&sensor_type) {
         if sensor.input_commands().contains(&InputCommandType::Read) {
@@ -233,13 +222,20 @@ impl ClientDeviceFeature {
           let reply = self.event_loop_sender.send_message(msg);
           return async move {
             if let ButtplugServerMessageV4::InputReading(data) = reply.await? {
-              Ok(data.data().clone())
+              if sensor_type == data.data().as_input_type() {
+                Ok(data.data())
+              } else {
+                Err(ButtplugError::ButtplugMessageError(ButtplugMessageError::UnexpectedMessageType(
+                  "InputReading".to_owned(),
+                ))
+                .into())
+              }
             } else {
               Err(
                 ButtplugError::ButtplugMessageError(ButtplugMessageError::UnexpectedMessageType(
-                  "SensorReading".to_owned(),
+                  "InputReading".to_owned(),
                 ))
-                .into(),
+                .into()
               )
             }
           }
@@ -265,7 +261,11 @@ impl ClientDeviceFeature {
       let send_fut = self.read_sensor(InputType::Battery);
       Box::pin(async move {
         let data = send_fut.await?;
-        let battery_level = data[0];
+        let battery_level = if let InputTypeData::Battery(level) = data {
+          level.data()
+        } else {
+          0
+        };
         Ok(battery_level as u32)
       })
     } else {
@@ -276,20 +276,24 @@ impl ClientDeviceFeature {
     }
   }
 
-  pub fn rssi_level(&self) -> ButtplugClientResultFuture<u32> {
+  pub fn rssi_level(&self) -> ButtplugClientResultFuture<i8> {
     if self
       .feature()
       .input()
       .as_ref()
       .ok_or(false)
       .unwrap()
-      .contains_key(&InputType::RSSI)
+      .contains_key(&InputType::Rssi)
     {
-      let send_fut = self.read_sensor(InputType::RSSI);
+      let send_fut = self.read_sensor(InputType::Rssi);
       Box::pin(async move {
         let data = send_fut.await?;
-        let battery_level = data[0];
-        Ok(battery_level as u32)
+        let rssi_level = if let InputTypeData::Rssi(level) = data {
+          level.data()
+        } else {
+          0
+        };
+        Ok(rssi_level)
       })
     } else {
       create_boxed_future_client_error(

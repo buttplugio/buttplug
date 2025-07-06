@@ -22,7 +22,7 @@ use buttplug_core::{
     ButtplugDeviceMessage,
     ButtplugMessage,
     ButtplugMessageSpecVersion,
-    ButtplugServerMessageV4,
+    ButtplugServerMessageV4, InputTypeData,
   },
 };
 
@@ -89,13 +89,18 @@ impl ButtplugServerMessageConverter {
         if let ButtplugClientMessageVariant::V3(ButtplugClientMessageV3::SensorReadCmd(msg)) =
           &original_msg
         {
-          let msg_out = SensorReadingV3::new(
-            msg.device_index(),
-            *msg.sensor_index(),
-            *msg.sensor_type(),
-            m.data().clone(),
-          );
-          Ok(msg_out.into())
+          // We only ever implemented battery in v3, so only accept that.
+          if let InputTypeData::Battery(value) = m.data() {
+            let msg_out = SensorReadingV3::new(
+              msg.device_index(),
+              *msg.sensor_index(),
+              *msg.sensor_type(),
+              vec!(value.data() as i32)
+            );
+            Ok(msg_out.into())
+          } else {
+            Err(ButtplugMessageError::UnexpectedMessageType("SensorReading".to_owned()).into())
+          }
         } else {
           Err(ButtplugMessageError::UnexpectedMessageType("SensorReading".to_owned()).into())
         }
