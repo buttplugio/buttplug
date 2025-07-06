@@ -410,8 +410,8 @@ impl ServerDevice {
               stop_cmd(message::OutputCommand::Heater(OutputValue::new(0)));
               break;
             }
-            OutputType::Inflate => {
-              stop_cmd(message::OutputCommand::Inflate(OutputValue::new(0)));
+            OutputType::Spray => {
+              stop_cmd(message::OutputCommand::Spray(OutputValue::new(0)));
               break;
             }
             OutputType::Led => {

@@ -70,7 +70,7 @@ impl From<ServerInfoV4> for ServerInfoV2 {
     Self {
       id: value.id(),
       server_name: value.server_name().clone(),
-      message_version: value.api_version_major(),
+      message_version: value.protocol_version_major(),
       max_ping_time: value.max_ping_time(),
     }
   }

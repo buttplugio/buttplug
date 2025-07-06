@@ -24,7 +24,7 @@ pub enum FeatureType {
   Rotate,
   Oscillate,
   Constrict,
-  Inflate,
+  Spray,
   Heater,
   Led,
   // For instances where we specify a position to move to ASAP. Usually servos, probably for the
@@ -58,13 +58,16 @@ pub enum OutputType {
   RotateWithDirection,
   Oscillate,
   Constrict,
-  Inflate,
   Heater,
   Led,
   // For instances where we specify a position to move to ASAP. Usually servos, probably for the
   // OSR-2/SR-6.
   Position,
   PositionWithDuration,
+  // Lube shooters
+  Spray,
+  // Things we might add in the future
+  // Inflate,
 }
 
 impl TryFrom<FeatureType> for OutputType {
@@ -80,7 +83,7 @@ impl TryFrom<FeatureType> for OutputType {
       FeatureType::PositionWithDuration => Ok(OutputType::PositionWithDuration),
       FeatureType::Oscillate => Ok(OutputType::Oscillate),
       FeatureType::Constrict => Ok(OutputType::Constrict),
-      FeatureType::Inflate => Ok(OutputType::Inflate),
+      FeatureType::Spray => Ok(OutputType::Spray),
       FeatureType::Position => Ok(OutputType::Position),
       _ => Err(format!(
         "Feature type {value} not valid for OutputType conversion"
@@ -129,7 +132,7 @@ impl From<OutputType> for FeatureType {
       OutputType::PositionWithDuration => FeatureType::PositionWithDuration,
       OutputType::Oscillate => FeatureType::Oscillate,
       OutputType::Constrict => FeatureType::Constrict,
-      OutputType::Inflate => FeatureType::Inflate,
+      OutputType::Spray => FeatureType::Spray,
       OutputType::Position => FeatureType::Position,
     }
   }

@@ -71,7 +71,7 @@ pub enum OutputCommand {
   RotateWithDirection(OutputRotateWithDirection),
   Oscillate(OutputValue),
   Constrict(OutputValue),
-  Inflate(OutputValue),
+  Spray(OutputValue),
   Heater(OutputValue),
   Led(OutputValue),
   // For instances where we specify a position to move to ASAP. Usually servos, probably for the
@@ -84,7 +84,7 @@ impl OutputCommand {
   pub fn value(&self) -> u32 {
     match self {
       OutputCommand::Constrict(x)
-      | OutputCommand::Inflate(x)
+      | OutputCommand::Spray(x)
       | OutputCommand::Heater(x)
       | OutputCommand::Led(x)
       | OutputCommand::Oscillate(x)
@@ -99,7 +99,7 @@ impl OutputCommand {
   pub fn set_value(&mut self, value: u32) {
     match self {
       OutputCommand::Constrict(x)
-      | OutputCommand::Inflate(x)
+      | OutputCommand::Spray(x)
       | OutputCommand::Heater(x)
       | OutputCommand::Led(x)
       | OutputCommand::Oscillate(x)
@@ -118,7 +118,7 @@ impl OutputCommand {
       Self::RotateWithDirection(_) => OutputType::RotateWithDirection,
       Self::Oscillate(_) => OutputType::Oscillate,
       Self::Constrict(_) => OutputType::Constrict,
-      Self::Inflate(_) => OutputType::Inflate,
+      Self::Spray(_) => OutputType::Spray,
       Self::Led(_) => OutputType::Led,
       Self::Position(_) => OutputType::Position,
       Self::PositionWithDuration(_) => OutputType::PositionWithDuration,
@@ -130,7 +130,7 @@ impl OutputCommand {
     match output_type {
       OutputType::Constrict => Ok(Self::Constrict(OutputValue::new(value))),
       OutputType::Heater => Ok(Self::Heater(OutputValue::new(value))),
-      OutputType::Inflate => Ok(Self::Inflate(OutputValue::new(value))),
+      OutputType::Spray => Ok(Self::Spray(OutputValue::new(value))),
       OutputType::Led => Ok(Self::Led(OutputValue::new(value))),
       OutputType::Oscillate => Ok(Self::Oscillate(OutputValue::new(value))),
       OutputType::Position => Ok(Self::Position(OutputValue::new(value))),

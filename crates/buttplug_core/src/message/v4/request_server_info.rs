@@ -36,25 +36,25 @@ pub struct RequestServerInfoV4 {
   #[serde(rename = "ClientName")]
   #[getset(get = "pub")]
   client_name: String,
-  #[serde(rename = "ApiVersionMajor")]
+  #[serde(rename = "ProtocolVersionMajor")]
   #[getset(get_copy = "pub")]
-  api_version_major: ButtplugMessageSpecVersion,
-  #[serde(rename = "ApiVersionMinor")]
+  protocol_version_major: ButtplugMessageSpecVersion,
+  #[serde(rename = "ProtocolVersionMinor")]
   #[getset(get_copy = "pub")]
-  api_version_minor: u32,
+  protocol_version_minor: u32,
 }
 
 impl RequestServerInfoV4 {
   pub fn new(
     client_name: &str,
-    api_version_major: ButtplugMessageSpecVersion,
-    api_version_minor: u32,
+    protocol_version_major: ButtplugMessageSpecVersion,
+    protocol_version_minor: u32,
   ) -> Self {
     Self {
       id: 1,
       client_name: client_name.to_string(),
-      api_version_major,
-      api_version_minor,
+      protocol_version_major,
+      protocol_version_minor,
     }
   }
 }

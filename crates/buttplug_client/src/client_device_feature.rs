@@ -143,8 +143,8 @@ impl ClientDeviceFeature {
     self.check_and_set_actuator(OutputCommand::Rotate(OutputValue::new(level)))
   }
 
-  pub fn inflate(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_set_actuator(OutputCommand::Inflate(OutputValue::new(level)))
+  pub fn spray(&self, level: u32) -> ButtplugClientResultFuture {
+    self.check_and_set_actuator(OutputCommand::Spray(OutputValue::new(level)))
   }
 
   pub fn constrict(&self, level: u32) -> ButtplugClientResultFuture {
