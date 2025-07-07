@@ -62,6 +62,7 @@ futures-util = "0.3.31"
 url = "2.5.4"
 libmdns = "0.9.1"
 tokio-stream = "0.1.17"
+dashmap = "6.1.0"
 
 [build-dependencies]
 vergen-gitcl = {version = "1.0.8", features = ["build"]}
