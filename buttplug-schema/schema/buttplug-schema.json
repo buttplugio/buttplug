@@ -509,37 +509,12 @@
           "Endpoint",
           "RawCommand"
         ]
-      },
-      "DeviceAdded": {
-        "type": "object",
-        "description": "List of all available devices known to the system.",
-        "properties": {
-          "Id": { "$ref": "#/components/SystemId" },
-          "DeviceName": { "$ref": "#/components/DeviceName" },
-          "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
-          "DeviceDisplayName": { "type": "string" },
-          "DeviceMessageTimingGap": { "type": "integer" },
-          "DeviceFeatures": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/DeviceFeatureV4" 
-            }
-          }
-        },
-        "additionalProperties": false,
-        "required": [
-          "Id",
-          "DeviceName",
-          "DeviceIndex",
-          "DeviceMessageTimingGap",
-          "DeviceFeatures"
-        ]
-      },      
+      },     
       "DeviceList": {
         "type": "object",
         "description": "List of all available devices known to the system.",
         "properties": {
-          "Id": { "$ref": "#/components/SystemId" },
+          "Id": { "$ref": "#/components/ServerId" },
           "Devices": {
             "description": "Array of device ids and names.",
             "type": "array",
@@ -559,7 +534,6 @@
               },
               "additionalProperties": false,
               "required": [
-                "Id",
                 "DeviceName",
                 "DeviceIndex",
                 "DeviceMessageTimingGap",
@@ -1674,9 +1648,7 @@
         "type": "object",
         "description": "All messages valid in Buttplug Spec v4",
         "properties": {
-          "DeviceAdded": { "$ref": "#/messages/SpecV4Messages/DeviceAdded" },
           "DeviceList": { "$ref": "#/messages/SpecV4Messages/DeviceList" },
-          "DeviceRemoved": { "$ref": "#/messages/SpecV0Messages/DeviceRemoved" },
           "Error": { "$ref": "#/messages/SpecV0Messages/Error" },
           "Ok": { "$ref": "#/messages/SpecV0Messages/Ok" },
           "Ping": { "$ref": "#/messages/SpecV0Messages/Ping" },

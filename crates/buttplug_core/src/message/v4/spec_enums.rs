@@ -11,7 +11,6 @@ use crate::message::{
   ButtplugMessageError,
   ButtplugMessageFinalizer,
   ButtplugMessageValidator,
-  DeviceRemovedV0,
   ErrorV0,
   OkV0,
   OutputCmdV4,
@@ -27,7 +26,7 @@ use crate::message::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::{DeviceAddedV4, DeviceListV4, InputReadingV4};
+use super::{DeviceListV4, InputReadingV4};
 
 /// Represents all client-to-server messages in v3 of the Buttplug Spec
 #[derive(
@@ -75,8 +74,6 @@ pub enum ButtplugServerMessageV4 {
   ServerInfo(ServerInfoV4),
   // Device enumeration messages
   DeviceList(DeviceListV4),
-  DeviceAdded(DeviceAddedV4),
-  DeviceRemoved(DeviceRemovedV0),
   ScanningFinished(ScanningFinishedV0),
   // Sensor commands
   InputReading(InputReadingV4),
@@ -85,7 +82,6 @@ pub enum ButtplugServerMessageV4 {
 impl ButtplugMessageFinalizer for ButtplugServerMessageV4 {
   fn finalize(&mut self) {
     match self {
-      ButtplugServerMessageV4::DeviceAdded(da) => da.finalize(),
       ButtplugServerMessageV4::DeviceList(dl) => dl.finalize(),
       _ => (),
     }

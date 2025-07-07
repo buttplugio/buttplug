@@ -19,12 +19,13 @@
 use buttplug_core::{
   errors::{ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageSpecVersion,
-    ButtplugServerMessageV4, InputTypeData,
+    ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugServerMessageV4, DeviceListV4, DeviceMessageInfoV4, DeviceRemovedV0, InputTypeData
   },
 };
+
+use dashmap::DashSet;
+
+use crate::message::{DeviceAddedV0, DeviceAddedV1, DeviceAddedV2, DeviceAddedV3};
 
 use super::message::{
   BatteryLevelReadingV2,
@@ -38,6 +39,69 @@ use super::message::{
   ButtplugServerMessageVariant,
   SensorReadingV3,
 };
+
+pub struct ButtplugServerDeviceEventMessageConverter {
+  device_indexes: DashSet<u32>
+}
+
+impl ButtplugServerDeviceEventMessageConverter {
+  pub fn new(indexes: Vec<u32>) -> Self {
+    let device_indexes = DashSet::new();
+    indexes.iter().for_each(|x| { device_indexes.insert(*x); });
+    Self {
+      device_indexes
+    }
+  }
+
+  // Due to the way we generate device events, we expect every new DeviceList to only have one
+  // change currently.
+  pub fn convert_device_list(&self, version: &ButtplugMessageSpecVersion, list: &DeviceListV4) -> ButtplugServerMessageVariant {
+    let new_indexes: Vec<u32> = list.devices().iter().map(|x| x.device_index()).collect();
+    if new_indexes.len() > self.device_indexes.len() {
+      // Device Added
+      let connected_devices: Vec<&DeviceMessageInfoV4> = list.devices().iter().filter(|x| !self.device_indexes.contains(&x.device_index())).collect();
+      self.device_indexes.insert(connected_devices[0].device_index());
+      if *version == ButtplugMessageSpecVersion::Version4 {
+        return ButtplugServerMessageVariant::V4(list.clone().into());
+      }
+      let da3 = DeviceAddedV3::from(connected_devices[0].clone());
+      if *version == ButtplugMessageSpecVersion::Version3 {
+        return ButtplugServerMessageVariant::V3(da3.into());
+      }
+      let da2 = DeviceAddedV2::from(da3);
+      if *version == ButtplugMessageSpecVersion::Version2 {
+        return ButtplugServerMessageVariant::V2(da2.into());
+      }
+      let da1 = DeviceAddedV1::from(da2);
+      if *version == ButtplugMessageSpecVersion::Version1 {
+        return ButtplugServerMessageVariant::V1(da1.into());
+      }
+      let da0 = DeviceAddedV0::from(da1);
+      return ButtplugServerMessageVariant::V0(ButtplugServerMessageV0::DeviceAdded(da0));
+    } else {
+      // Device Removed
+      let disconnected_indexes: Vec<u32> = self.device_indexes.iter().filter(|x| !new_indexes.contains(x)).map(|x| *x).collect();
+      self.device_indexes.remove(&disconnected_indexes[0]);
+      match version {
+        ButtplugMessageSpecVersion::Version0 => {
+          return ButtplugServerMessageVariant::V0(ButtplugServerMessageV0::DeviceRemoved(DeviceRemovedV0::new(disconnected_indexes[0])))
+        }
+        ButtplugMessageSpecVersion::Version1 => {
+          return ButtplugServerMessageVariant::V1(DeviceRemovedV0::new(disconnected_indexes[0]).into())
+        }
+        ButtplugMessageSpecVersion::Version2 => {
+          return ButtplugServerMessageVariant::V2(DeviceRemovedV0::new(disconnected_indexes[0]).into())
+        }
+        ButtplugMessageSpecVersion::Version3 => {
+          return ButtplugServerMessageVariant::V3(DeviceRemovedV0::new(disconnected_indexes[0]).into())
+        }
+        ButtplugMessageSpecVersion::Version4 => return ButtplugServerMessageVariant::V4(list.clone().into()),
+      }
+    }
+    // There is no == here because the only way DeviceList would be returned is via a
+    // RequestDeviceList call. Events will only ever be additions or deletions.
+  }
+}
 
 pub struct ButtplugServerMessageConverter {
   original_message: Option<ButtplugClientMessageVariant>,

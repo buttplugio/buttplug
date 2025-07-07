@@ -6,7 +6,7 @@
 // for full license information.
 
 use buttplug_core::{
-  message::{ButtplugServerMessageV4, DeviceAddedV4, DeviceRemovedV0, ScanningFinishedV0},
+  message::{ButtplugServerMessageV4, DeviceListV4, ScanningFinishedV0},
   util::async_manager,
 };
 use buttplug_server_device_config::DeviceConfigurationManager;
@@ -55,7 +55,7 @@ pub(super) struct ServerDeviceManagerEventLoop {
   /// True if stop scanning message was sent, means we won't send scanning finished.
   stop_scanning_received: AtomicBool,
   /// Protocol map, for mapping user definitions to protocols
-  protocol_manager: ProtocolManager
+  protocol_manager: ProtocolManager,
 }
 
 impl ServerDeviceManagerEventLoop {
@@ -83,7 +83,7 @@ impl ServerDeviceManagerEventLoop {
       connecting_devices: Arc::new(DashSet::new()),
       loop_cancellation_token,
       stop_scanning_received: AtomicBool::new(false),
-      protocol_manager: ProtocolManager::default()
+      protocol_manager: ProtocolManager::default(),
     }
   }
 
@@ -256,6 +256,15 @@ impl ServerDeviceManagerEventLoop {
     }
   }
 
+  fn generate_device_list(&self) -> DeviceListV4 {
+    let devices = self
+      .device_map
+      .iter()
+      .map(|device| device.value().as_device_message_info(*device.key()))
+      .collect();
+    DeviceListV4::new(devices)
+  }
+
   async fn handle_device_event(&mut self, device_event: ServerDeviceEvent) {
     trace!("Got device event: {:?}", device_event);
     match device_event {
@@ -304,13 +313,15 @@ impl ServerDeviceManagerEventLoop {
         });
 
         info!("Assigning index {} to {}", device_index, device.name());
-        let device_added_message = DeviceAddedV4::from(device.as_device_message_info(device_index));
-        self.device_map.insert(device_index, device);
+        self.device_map.insert(device_index, device.clone());
+
+        let device_update_message: ButtplugServerMessageV4 = self.generate_device_list().into();
+
         // After that, we can send out to the server's event listeners to let
         // them know a device has been added.
         if self
           .server_sender
-          .send(device_added_message.into())
+          .send(device_update_message.into())
           .is_err()
         {
           debug!("Server not currently available, dropping Device Added event.");
@@ -329,9 +340,10 @@ impl ServerDeviceManagerEventLoop {
             .device_map
             .remove(&device_index)
             .expect("Remove will always work.");
+          let device_update_message: ButtplugServerMessageV4 = self.generate_device_list().into();
           if self
             .server_sender
-            .send(DeviceRemovedV0::new(device_index).into())
+            .send(device_update_message)
             .is_err()
           {
             debug!("Server not currently available, dropping Device Removed event.");

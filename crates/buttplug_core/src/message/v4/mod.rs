@@ -5,7 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-mod device_added;
 mod device_list;
 mod device_message_info;
 mod input_cmd;
@@ -16,7 +15,6 @@ mod server_info;
 mod spec_enums;
 
 pub use {
-  device_added::DeviceAddedV4,
   device_list::DeviceListV4,
   device_message_info::DeviceMessageInfoV4,
   input_cmd::{InputCmdV4, InputCommandType},
