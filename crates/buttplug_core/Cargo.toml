@@ -29,6 +29,11 @@ targets = []
 # Features to pass to Cargo (default: [])
 features = ["default", "unstable"]
 
+[build-dependencies]
+serde = "1.0.219"
+serde_json = "1.0.140"
+jsonschema = { version = "0.30.0", default-features = false }
+
 [dependencies]
 buttplug_derive = "0.8.1"
 # buttplug_derive = { path = "../buttplug_derive" }

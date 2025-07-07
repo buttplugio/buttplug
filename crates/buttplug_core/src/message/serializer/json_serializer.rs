@@ -13,7 +13,7 @@ use serde_json::{Deserializer, Value};
 use std::fmt::Debug;
 
 static MESSAGE_JSON_SCHEMA: &str =
-  include_str!("../../../../../buttplug-schema/schema/buttplug-schema.json");
+  include_str!("../../../schema/buttplug-schema.json");
 
 /// Creates a [jsonschema::JSONSchema] validator using the built in buttplug message schema.
 pub fn create_message_validator() -> Validator {
