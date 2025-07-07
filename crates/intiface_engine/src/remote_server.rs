@@ -15,6 +15,7 @@ use buttplug_server_device_config::UserDeviceIdentifier;
 use buttplug_server::{
   message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant}, ButtplugServer, ButtplugServerBuilder
 };
+use dashmap::DashSet;
 use futures::{future::Future, pin_mut, select, FutureExt, Stream, StreamExt};
 use getset::Getters;
 use serde::{Deserialize, Serialize};
@@ -59,6 +60,8 @@ async fn run_device_event_stream(
   remote_event_sender: broadcast::Sender<ButtplugRemoteServerEvent>,
 ) {
   let server_receiver = server.server_version_event_stream();
+  let known_indexes = DashSet::<u32>::default();
+
   pin_mut!(server_receiver);
   loop {
     match server_receiver.next().await {
@@ -67,30 +70,37 @@ async fn run_device_event_stream(
         break;
       }
       Some(msg) => {
-        if remote_event_sender.receiver_count() > 0 {
-          match &msg {
-            ButtplugServerMessageV4::DeviceAdded(da) => {
-              if let Some(device_info) = server.device_manager().device_info(da.device_index()) {
-                let added_event = ButtplugRemoteServerEvent::DeviceAdded {
-                  index: da.device_index(),
-                  name: da.device_name().clone(),
-                  identifier: device_info.identifier().clone().into(),
-                  display_name: device_info.display_name().clone(),
-                };
-                if remote_event_sender.send(added_event).is_err() {
-                  error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
-                }
-              }
+        if let ButtplugServerMessageV4::DeviceList(dl) = msg && remote_event_sender.receiver_count() > 0 {
+          for da in dl.devices() {
+            if known_indexes.contains(&da.device_index()) {
+              continue;
             }
-            ButtplugServerMessageV4::DeviceRemoved(dr) => {
-              let removed_event = ButtplugRemoteServerEvent::DeviceRemoved {
-                index: dr.device_index(),
+            if let Some(device_info) = server.device_manager().device_info(da.device_index()) {
+              let added_event = ButtplugRemoteServerEvent::DeviceAdded {
+                index: da.device_index(),
+                name: da.device_name().clone(),
+                identifier: device_info.identifier().clone().into(),
+                display_name: device_info.display_name().clone(),
               };
-              if remote_event_sender.send(removed_event).is_err() {
+              if remote_event_sender.send(added_event).is_err() {
                 error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
               }
+              known_indexes.insert(da.device_index());
             }
-            _ => {}
+          }
+          let indexes = known_indexes.clone();
+          let current_indexes: Vec<u32> = dl.devices().iter().map(|x| x.device_index()).collect();
+          for dr in indexes {
+            if current_indexes.contains(&dr) {
+              continue;
+            }
+            let removed_event = ButtplugRemoteServerEvent::DeviceRemoved {
+              index: dr,
+            };
+            if remote_event_sender.send(removed_event).is_err() {
+              error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
+            }
+            known_indexes.remove(&dr);
           }
         }
       }
@@ -164,6 +174,7 @@ async fn run_server<ConnectorType>(
           break;
         }
         Some(msg) => {
+          /*
           if remote_event_sender.receiver_count() > 0 {
             match &msg {
               ButtplugServerMessageV4::DeviceAdded(da) => {
@@ -183,6 +194,7 @@ async fn run_server<ConnectorType>(
               _ => {}
             }
           }
+          */
         }
       },
       client_msg = client_version_receiver.next().fuse() => match client_msg {
