@@ -233,14 +233,14 @@ impl ButtplugClientDevice {
     self
       .device_features
       .iter()
-      .any(|x| *x.feature().feature_type() == FeatureType::RSSI)
+      .any(|x| *x.feature().feature_type() == FeatureType::Rssi)
   }
 
   pub fn rssi_level(&self) -> ButtplugClientResultFuture<i8> {
     if let Some(rssi) = self
       .device_features
       .iter()
-      .find(|x| *x.feature().feature_type() == FeatureType::RSSI)
+      .find(|x| *x.feature().feature_type() == FeatureType::Rssi)
     {
       rssi.rssi_level()
     } else {

@@ -38,7 +38,7 @@ pub enum FeatureType {
   // PositionWithSpeed
   // Sensor Types
   Battery,
-  RSSI,
+  Rssi,
   Button,
   Pressure,
   // Currently unused but possible sensor features:
@@ -110,7 +110,7 @@ impl TryFrom<FeatureType> for InputType {
     match value {
       FeatureType::Unknown => Ok(InputType::Unknown),
       FeatureType::Battery => Ok(InputType::Battery),
-      FeatureType::RSSI => Ok(InputType::Rssi),
+      FeatureType::Rssi => Ok(InputType::Rssi),
       FeatureType::Button => Ok(InputType::Button),
       FeatureType::Pressure => Ok(InputType::Pressure),
       _ => Err(format!(
@@ -143,7 +143,7 @@ impl From<InputType> for FeatureType {
     match value {
       InputType::Unknown => FeatureType::Unknown,
       InputType::Battery => FeatureType::Battery,
-      InputType::Rssi => FeatureType::RSSI,
+      InputType::Rssi => FeatureType::Rssi,
       InputType::Button => FeatureType::Button,
       InputType::Pressure => FeatureType::Pressure,
     }
