@@ -178,12 +178,10 @@ impl TryFrom<ButtplugServerMessageV4> for ButtplugServerMessageV3 {
       ButtplugServerMessageV4::Ok(m) => Ok(ButtplugServerMessageV3::Ok(m)),
       ButtplugServerMessageV4::Error(m) => Ok(ButtplugServerMessageV3::Error(m)),
       ButtplugServerMessageV4::ServerInfo(m) => Ok(ButtplugServerMessageV3::ServerInfo(m.into())),
-      ButtplugServerMessageV4::DeviceRemoved(m) => Ok(ButtplugServerMessageV3::DeviceRemoved(m)),
       ButtplugServerMessageV4::ScanningFinished(m) => {
         Ok(ButtplugServerMessageV3::ScanningFinished(m))
       }
       ButtplugServerMessageV4::DeviceList(m) => Ok(ButtplugServerMessageV3::DeviceList(m.into())),
-      ButtplugServerMessageV4::DeviceAdded(m) => Ok(ButtplugServerMessageV3::DeviceAdded(m.into())),
       // All other messages (SensorReading) requires device manager context.
       _ => Err(ButtplugMessageError::MessageConversionError(format!(
         "Cannot convert message {value:?} to current message spec while lacking state."

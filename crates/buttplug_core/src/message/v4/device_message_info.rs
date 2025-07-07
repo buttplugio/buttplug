@@ -5,7 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::DeviceAddedV4;
 use crate::message::DeviceFeature;
 use getset::{CopyGetters, Getters, MutGetters};
 use serde::{Deserialize, Serialize};
@@ -44,18 +43,6 @@ impl DeviceMessageInfoV4 {
       device_display_name: device_display_name.clone(),
       device_message_timing_gap,
       device_features: device_features.clone(),
-    }
-  }
-}
-
-impl From<DeviceAddedV4> for DeviceMessageInfoV4 {
-  fn from(device_added: DeviceAddedV4) -> Self {
-    Self {
-      device_index: device_added.device_index(),
-      device_name: device_added.device_name().clone(),
-      device_display_name: device_added.device_display_name().clone(),
-      device_message_timing_gap: device_added.device_message_timing_gap(),
-      device_features: device_added.device_features().clone(),
     }
   }
 }

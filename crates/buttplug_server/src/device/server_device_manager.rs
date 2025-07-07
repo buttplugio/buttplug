@@ -243,18 +243,22 @@ impl ServerDeviceManager {
     }
   }
 
+  fn generate_device_list(&self) -> DeviceListV4 {
+    let devices = self
+      .devices
+      .iter()
+      .map(|device| device.value().as_device_message_info(*device.key()))
+      .collect();
+    DeviceListV4::new(devices)
+  }
+
   fn parse_device_manager_message(
     &self,
     manager_msg: ButtplugDeviceManagerMessageUnion,
   ) -> ButtplugServerResultFuture {
     match manager_msg {
       ButtplugDeviceManagerMessageUnion::RequestDeviceList(msg) => {
-        let devices = self
-          .devices
-          .iter()
-          .map(|device| device.value().as_device_message_info(*device.key()))
-          .collect();
-        let mut device_list = DeviceListV4::new(devices);
+        let mut device_list = self.generate_device_list();
         device_list.set_id(msg.id());
         future::ready(Ok(device_list.into())).boxed()
       }

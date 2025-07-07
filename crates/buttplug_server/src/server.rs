@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::server_message_conversion::ButtplugServerDeviceEventMessageConverter;
+
 use super::{
   device::ServerDeviceManager,
   message::{
@@ -122,16 +124,24 @@ impl ButtplugServer {
   pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessageVariant> + use<> {
     let spec_version = self.spec_version.clone();
     let converter = ButtplugServerMessageConverter::new(None);
+    let device_indexes: Vec<u32> = self.device_manager.devices().iter().map(|x| *x.key()).collect();
+    let device_event_converter = ButtplugServerDeviceEventMessageConverter::new(device_indexes);
     self.server_version_event_stream().map(move |m| {
-      // If we get an event and don't have a spec version yet, just throw out the latest.
-      converter
-        .convert_outgoing(
-          &m,
-          spec_version
-            .get()
-            .unwrap_or(&ButtplugMessageSpecVersion::Version4),
-        )
-        .unwrap()
+      if let ButtplugServerMessageV4::DeviceList(list) = m {
+        device_event_converter.convert_device_list(spec_version
+          .get()
+          .unwrap_or(&ButtplugMessageSpecVersion::Version4), &list)
+      } else {
+        // If we get an event and don't have a spec version yet, just throw out the latest.
+        converter
+          .convert_outgoing(
+            &m,
+            spec_version
+              .get()
+              .unwrap_or(&ButtplugMessageSpecVersion::Version4),
+          )
+          .unwrap()
+      }
     })
   }
 

@@ -245,7 +245,8 @@ async fn test_device_stop_on_ping_timeout() {
   while let Some(msg) = recv.next().await {
     if let ButtplugServerMessageV4::ScanningFinished(_) = msg {
       continue;
-    } else if let ButtplugServerMessageV4::DeviceAdded(da) = msg {
+    } else if let ButtplugServerMessageV4::DeviceList(list) = msg {
+      let da = &list.devices()[0];
       assert_eq!(da.device_name(), "Aneros Vivi");
       device_index = da.device_index();
       break;
@@ -375,7 +376,8 @@ async fn test_device_index_generation() {
   while let Some(msg) = recv.next().await {
     if let ButtplugServerMessageV4::ScanningFinished(_) = msg {
       continue;
-    } else if let ButtplugServerMessageV4::DeviceAdded(da) = msg {
+    } else if let ButtplugServerMessageV4::DeviceList(list) = msg {
+      let da = &list.devices()[0];
       assert_eq!(da.device_name(), "Aneros Vivi");
       // Devices aren't guaranteed to be added in any specific order, the
       // scheduler will do whatever it wants. So check boundaries instead of

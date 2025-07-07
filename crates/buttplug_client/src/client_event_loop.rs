@@ -16,7 +16,7 @@ use super::{
 };
 use buttplug_core::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
-  errors::{ButtplugDeviceError, ButtplugError},
+  errors::ButtplugError,
   message::{
     ButtplugClientMessageV4,
     ButtplugDeviceMessage,
@@ -214,30 +214,22 @@ where
     trace!("Message future not found, assuming server event.");
     info!("{:?}", msg);
     match msg {
-      ButtplugServerMessageV4::DeviceAdded(dev) => {
-        trace!("Device added, updating map and sending to client");
-        // We already have this device. Emit an error to let the client know the
-        // server is being weird.
-        if self.device_map.get(&dev.device_index()).is_some() {
-          self.send_client_event(ButtplugClientEvent::Error(
-            ButtplugDeviceError::DeviceConnectionError(
-              "Device already exists in client. Server may be in a weird state.".to_owned(),
-            )
-            .into(),
-          ));
-          return;
+      ButtplugServerMessageV4::DeviceList(list) => {
+        trace!("Got device list, devices either added or removed");
+        for dev in list.devices() {
+          if self.device_map.contains_key(&dev.device_index()) {
+            continue;
+          }
+          trace!("Device added, updating map and sending to client");
+          let info = DeviceMessageInfoV4::from(dev.clone());
+          let device = self.create_client_device(&info);
+          self.send_client_event(ButtplugClientEvent::DeviceAdded(device));
         }
-        let info = DeviceMessageInfoV4::from(dev);
-        let device = self.create_client_device(&info);
-        self.send_client_event(ButtplugClientEvent::DeviceAdded(device));
-      }
-      ButtplugServerMessageV4::DeviceRemoved(dev) => {
-        if self.device_map.contains_key(&dev.device_index()) {
+        let new_indexes: Vec<u32> = list.devices().iter().map(|x| x.device_index()).collect();
+        let disconnected_indexes: Vec<u32> = self.device_map.iter().filter(|x| !new_indexes.contains(x.key())).map(|x| *x.key()).collect();
+        for index in disconnected_indexes {
           trace!("Device removed, updating map and sending to client");
-          self.disconnect_device(dev.device_index());
-        } else {
-          error!("Received DeviceRemoved for non-existent device index");
-          self.send_client_event(ButtplugClientEvent::Error(ButtplugDeviceError::DeviceConnectionError("Device removal requested for a device the client does not know about. Server may be in a weird state.".to_owned()).into()));
+          self.disconnect_device(index);
         }
       }
       ButtplugServerMessageV4::ScanningFinished(_) => {
