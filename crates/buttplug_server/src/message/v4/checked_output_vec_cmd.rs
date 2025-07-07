@@ -393,9 +393,9 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
           ButtplugDeviceError::DeviceNoActuatorError("RotateCmdV1".to_owned()),
         ))?;
       cmds.push(CheckedOutputCmdV4::new(
+        msg.id(),
         msg.device_index(),
         idx,
-        0,
         feature.feature.id(),
         OutputCommand::RotateWithDirection(OutputRotateWithDirection::new(
           (cmd.speed() * ((*actuator.step_limit().end() - *actuator.step_limit().start()) as f64)

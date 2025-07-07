@@ -484,7 +484,7 @@ async fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[tokio::test]
 async fn test_device_protocols_json_v3(test_file: &str) {
-  tracing_subscriber::fmt::init();
+  //tracing_subscriber::fmt::init();
   util::device_test::client::client_v3::run_json_test_case(&load_test_case(test_file).await).await;
 }
 
