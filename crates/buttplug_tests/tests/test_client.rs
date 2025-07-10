@@ -143,6 +143,10 @@ async fn test_client_scanning_finished() {
   assert!(client.start_scanning().await.is_ok());
   assert!(matches!(
     recv.next().await.expect("Test, assuming infallible."),
+    ButtplugClientEvent::DeviceListReceived
+  ));
+  assert!(matches!(
+    recv.next().await.expect("Test, assuming infallible."),
     ButtplugClientEvent::ScanningFinished
   ));
 }
