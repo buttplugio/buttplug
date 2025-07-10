@@ -117,6 +117,9 @@ pub enum ButtplugClientEvent {
   /// Emitted when a device has been removed from the server. Includes a
   /// [ButtplugClientDevice] object representing the device.
   DeviceRemoved(Arc<ButtplugClientDevice>),
+  /// Emitted when the device list is received as a response to a
+  /// DeviceListRequest call, which is sent during the handshake.
+  DeviceListReceived,
   /// Emitted when a client has not pinged the server in a sufficient amount of
   /// time.
   PingTimeout,
@@ -343,7 +346,7 @@ impl ButtplugClient {
         .message_sender
         .send_message(RequestDeviceListV0::default().into())
         .await?;
-      if let ButtplugServerMessageV3::DeviceList(m) = msg {
+      if let ButtplugServerMessageV3::DeviceList(m) = dbg!(msg) {
         self
           .message_sender
           .send_message_to_event_loop(ButtplugClientRequest::HandleDeviceList(m))
