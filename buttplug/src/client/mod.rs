@@ -357,7 +357,7 @@ impl ButtplugClient {
         .message_sender
         .send_message(RequestDeviceListV0::default().into())
         .await?;
-      if let ButtplugServerMessageV3::DeviceList(m) = dbg!(msg) {
+      if let ButtplugServerMessageV3::DeviceList(m) = msg {
         self
           .message_sender
           .send_message_to_event_loop(ButtplugClientRequest::HandleDeviceList(m))
