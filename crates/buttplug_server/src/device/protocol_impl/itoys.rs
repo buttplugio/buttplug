@@ -34,4 +34,22 @@ impl ProtocolHandler for IToys {
     )
     .into()])
   }
+
+
+    fn handle_output_oscillate_cmd(&self, _feature_index: u32, feature_id: Uuid, speed: u32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+        Ok(vec![HardwareWriteCmd::new(
+            &[feature_id],
+            Endpoint::Tx,
+            vec![
+                0xa0,
+                0x06,
+                if speed == 0 { 0x00 } else { 0x01 },
+                0x00,
+                if speed == 0 { 0x00 } else { 0x01 },
+                speed as u8,
+            ],
+            false,
+        )
+            .into()])
+    }
 }
