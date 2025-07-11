@@ -47,7 +47,7 @@ fn main() {
     output.protocols.insert(f.file_name().into_string().unwrap().split(".").next().unwrap().to_owned(), serde_yaml::from_str(&std::fs::read_to_string(f.path()).unwrap()).unwrap());
   }
 
-  let json = serde_json::to_string(&output).unwrap();
+  let json = serde_json::to_string_pretty(&output).unwrap();
 
   // Validate
   let validator = JSONValidator::new(&std::fs::read_to_string(SCHEMA_FILE).unwrap());
