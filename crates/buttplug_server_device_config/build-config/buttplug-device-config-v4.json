@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 48
+    "minor": 49
   },
   "protocols": {
     "activejoy": {
@@ -4469,7 +4469,9 @@
         {
           "btle": {
             "names": [
-              "26-021-B"
+              "26-021-B",
+              "SML-2310-SZ-B",
+              "ASF-001-BT-R"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -4477,6 +4479,69 @@
               }
             }
           }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "2eafb465-e72a-4acd-9344-b9e13fc1f2ed",
+          "identifier": [
+            "26-021-B"
+          ],
+          "name": "iToys Seagull"
+        },
+        {
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "id": "07601b03-2dc3-4996-aaa7-d23b5aa793f5",
+              "output": {
+                "Vibrate": {
+                  "step-range": [
+                    0,
+                    3
+                  ]
+                }
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "id": "6d3f5346-4947-41b1-847e-39cd2f485a0a",
+              "output": {
+                "Oscillate": {
+                  "step-range": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "f0458e98-a317-4b1c-af82-bb3f163aeff3",
+          "identifier": [
+            "SML-2310-SZ-B"
+          ],
+          "name": "iToys Twinkling Stars"
+        },
+        {
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "id": "c742d608-2110-4377-aaea-7173d7f1dc83",
+              "output": {
+                "Oscillate": {
+                  "step-range": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "0108797c-1cea-486d-9ed5-3b4412fb6593",
+          "identifier": [
+            "ASF-001-BT-R"
+          ],
+          "name": "Defyeah Horizontal Sex Machine ASFO16"
         }
       ],
       "defaults": {
@@ -4495,7 +4560,7 @@
           }
         ],
         "id": "5c58b967-b75f-4f5d-99ef-f581b2579918",
-        "name": "iToys Seagull"
+        "name": "iToys Device"
       }
     },
     "jejoue": {
