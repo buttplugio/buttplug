@@ -113,6 +113,10 @@ configurations:
     name: JoyHub Ryden
     id: 25ef0abd-31ed-497f-8fc0-ea374f600ee7
   - identifier:
+      - J-Peachy
+    name: JoyHub Peachy
+    id: eda4e5c4-4a91-4260-a14b-570926e346f6
+  - identifier:
       - J-Petalwish2
     name: JoyHub Petalwish 2
     features:
