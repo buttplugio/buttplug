@@ -12,7 +12,7 @@ use crate::message::{
 };
 use buttplug_core::{
   errors::ButtplugMessageError,
-  message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, DeviceMessageInfoV4},
+  message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, DeviceFeature, DeviceMessageInfoV4},
 };
 
 use getset::{CopyGetters, Getters};
@@ -113,12 +113,13 @@ impl From<DeviceAddedV3> for DeviceMessageInfoV2 {
 
 impl From<DeviceMessageInfoV4> for DeviceAddedV3 {
   fn from(value: DeviceMessageInfoV4) -> Self {
+    let feature_vec: Vec<DeviceFeature> = value.device_features().values().cloned().collect();
     let mut da3 = DeviceAddedV3::new(
       value.device_index(),
       value.device_name(),
       value.device_display_name(),
       value.device_message_timing_gap(),
-      &value.device_features().clone().into(),
+      &feature_vec.into()
     );
     da3.set_id(0);
     da3

@@ -217,15 +217,15 @@ where
       ButtplugServerMessageV4::DeviceList(list) => {
         trace!("Got device list, devices either added or removed");
         for dev in list.devices() {
-          if self.device_map.contains_key(&dev.device_index()) {
+          if self.device_map.contains_key(&dev.1.device_index()) {
             continue;
           }
           trace!("Device added, updating map and sending to client");
-          let info = DeviceMessageInfoV4::from(dev.clone());
+          let info = DeviceMessageInfoV4::from(dev.1.clone());
           let device = self.create_client_device(&info);
           self.send_client_event(ButtplugClientEvent::DeviceAdded(device));
         }
-        let new_indexes: Vec<u32> = list.devices().iter().map(|x| x.device_index()).collect();
+        let new_indexes: Vec<u32> = list.devices().iter().map(|x| x.1.device_index()).collect();
         let disconnected_indexes: Vec<u32> = self.device_map.iter().filter(|x| !new_indexes.contains(x.key())).map(|x| *x.key()).collect();
         for index in disconnected_indexes {
           trace!("Device removed, updating map and sending to client");
@@ -292,11 +292,11 @@ where
       }
       ButtplugClientRequest::HandleDeviceList(device_list) => {
         trace!("Device list received, updating map.");
-        for d in device_list.devices() {
-          if self.device_map.contains_key(&d.device_index()) {
+        for (i, device) in device_list.devices() {
+          if self.device_map.contains_key(i) {
             continue;
           }
-          let device = self.create_client_device(d);
+          let device = self.create_client_device(device);
           self.send_client_event(ButtplugClientEvent::DeviceAdded(device));
         }
         true

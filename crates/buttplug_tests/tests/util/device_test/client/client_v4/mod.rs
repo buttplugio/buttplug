@@ -32,7 +32,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
       let fut_vec: Vec<_> = msg
         .iter()
         .map(|cmd| {
-          let f = device.device_features()[cmd.index() as usize].clone();
+          let f = device.device_features()[&cmd.index()].clone();
           f.check_and_set_actuator_value_float(cmd.actuator_type(), cmd.scalar())
         })
         .collect();
@@ -45,7 +45,8 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
           let vibe_features: Vec<&ClientDeviceFeature> = device
             .device_features()
             .iter()
-            .filter(|f| *f.feature().feature_type() == FeatureType::Vibrate)
+            .filter(|f| f.1.feature().feature_type() == FeatureType::Vibrate)
+            .map(|(_, x)| x)
             .collect();
           let f = vibe_features[cmd.index() as usize].clone();
           f.check_and_set_actuator_value_float(OutputType::Vibrate, cmd.speed())
@@ -63,7 +64,8 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
           let rotate_features: Vec<&ClientDeviceFeature> = device
             .device_features()
             .iter()
-            .filter(|f| *f.feature().feature_type() == FeatureType::RotateWithDirection)
+            .filter(|f| f.1.feature().feature_type() == FeatureType::RotateWithDirection)
+            .map(|(_, x)| x)
             .collect();
           let f = rotate_features[cmd.index() as usize].clone();
           f.rotate_with_direction(
@@ -87,7 +89,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
       let fut_vec: Vec<_> = msg
         .iter()
         .map(|cmd| {
-          let f = device.device_features()[cmd.index() as usize].clone();
+          let f = device.device_features()[&cmd.index()].clone();
           f.position_with_duration(
             (cmd.position()
               * *f
