@@ -71,7 +71,7 @@ impl ClientDeviceFeature {
           ButtplugDeviceError::DeviceActuatorTypeMismatch(
             self.feature_index,
             actuator_type,
-            *self.feature.feature_type(),
+            self.feature.feature_type(),
           ),
         ))))
         .boxed()
@@ -81,7 +81,7 @@ impl ClientDeviceFeature {
         ButtplugDeviceError::DeviceActuatorTypeMismatch(
           self.feature_index,
           actuator_type,
-          *self.feature.feature_type(),
+          self.feature.feature_type(),
         ),
       ))))
       .boxed()
@@ -103,7 +103,7 @@ impl ClientDeviceFeature {
           ButtplugDeviceError::DeviceActuatorTypeMismatch(
             self.feature_index,
             actuator_type,
-            *self.feature.feature_type(),
+            self.feature.feature_type(),
           ),
         ))))
         .boxed()
@@ -113,7 +113,7 @@ impl ClientDeviceFeature {
         ButtplugDeviceError::DeviceActuatorTypeMismatch(
           self.feature_index,
           actuator_type,
-          *self.feature.feature_type(),
+          self.feature.feature_type(),
         ),
       ))))
       .boxed()

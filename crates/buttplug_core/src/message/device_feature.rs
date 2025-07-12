@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::message::InputCommandType;
-use getset::{Getters, MutGetters, Setters};
+use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use std::{
   collections::{HashMap, HashSet},
@@ -159,20 +159,20 @@ impl From<InputType> for FeatureType {
 // then we denote this by prefixing the type with Client/Server. Server attributes will usually be
 // hosted in the server/device/configuration module.
 #[derive(
-  Clone, Debug, Default, PartialEq, Getters, MutGetters, Setters, Serialize, Deserialize,
+  Clone, Debug, Default, PartialEq, Getters, MutGetters, CopyGetters, Setters, Serialize, Deserialize,
 )]
 pub struct DeviceFeature {
   // Index of the feature on the device. This was originally implicit as the position in the feature
   // array. We now make it explicit even though it's still just array position, because implicit
   // array positions have made life hell in so many different ways.
-  #[getset(get = "pub")]
+  #[getset(get_copy = "pub")]
   #[serde(rename = "FeatureIndex")]
   feature_index: u32,
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(default)]
   #[serde(rename = "FeatureDescription")]
   description: String,
-  #[getset(get = "pub")]
+  #[getset(get_copy = "pub")]
   #[serde(rename = "FeatureType")]
   feature_type: FeatureType,
   #[getset(get = "pub")]
