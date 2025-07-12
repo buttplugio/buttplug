@@ -190,15 +190,15 @@ impl DeviceFeature {
     index: u32,
     description: &str,
     feature_type: FeatureType,
-    actuator: &Option<HashMap<OutputType, DeviceFeatureOutput>>,
-    sensor: &Option<HashMap<InputType, DeviceFeatureInput>>,
+    output: &Option<HashMap<OutputType, DeviceFeatureOutput>>,
+    input: &Option<HashMap<InputType, DeviceFeatureInput>>,
   ) -> Self {
     Self {
       feature_index: index,
       description: description.to_owned(),
       feature_type,
-      output: actuator.clone(),
-      input: sensor.clone(),
+      output: output.clone(),
+      input: input.clone(),
     }
   }
 }

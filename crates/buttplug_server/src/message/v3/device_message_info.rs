@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::message::v2::DeviceMessageInfoV2;
-use buttplug_core::message::DeviceMessageInfoV4;
+use buttplug_core::message::{DeviceFeature, DeviceMessageInfoV4};
 
 use super::*;
 use getset::{CopyGetters, Getters, MutGetters};
@@ -75,12 +75,13 @@ impl From<DeviceMessageInfoV3> for DeviceMessageInfoV2 {
 
 impl From<DeviceMessageInfoV4> for DeviceMessageInfoV3 {
   fn from(value: DeviceMessageInfoV4) -> Self {
+    let feature_vec: Vec<DeviceFeature> = value.device_features().values().cloned().collect();
     DeviceMessageInfoV3::new(
       value.device_index(),
       value.device_name(),
       value.device_display_name(),
       value.device_message_timing_gap(),
-      value.device_features().clone().into(),
+      feature_vec.into(),
     )
   }
 }

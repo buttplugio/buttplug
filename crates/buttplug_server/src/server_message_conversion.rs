@@ -56,10 +56,10 @@ impl ButtplugServerDeviceEventMessageConverter {
   // Due to the way we generate device events, we expect every new DeviceList to only have one
   // change currently.
   pub fn convert_device_list(&self, version: &ButtplugMessageSpecVersion, list: &DeviceListV4) -> ButtplugServerMessageVariant {
-    let new_indexes: Vec<u32> = list.devices().iter().map(|x| x.device_index()).collect();
+    let new_indexes: Vec<u32> = list.devices().iter().map(|x| *x.0).collect();
     if new_indexes.len() > self.device_indexes.len() {
       // Device Added
-      let connected_devices: Vec<&DeviceMessageInfoV4> = list.devices().iter().filter(|x| !self.device_indexes.contains(&x.device_index())).collect();
+      let connected_devices: Vec<&DeviceMessageInfoV4> = list.devices().values().filter(|x| !self.device_indexes.contains(&x.device_index())).collect();
       self.device_indexes.insert(connected_devices[0].device_index());
       if *version == ButtplugMessageSpecVersion::Version4 {
         return ButtplugServerMessageVariant::V4(list.clone().into());

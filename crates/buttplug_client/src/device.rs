@@ -32,11 +32,10 @@ use futures::{FutureExt, Stream};
 use getset::{CopyGetters, Getters};
 use log::*;
 use std::{
-  fmt,
-  sync::{
+  collections::HashMap, fmt, sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
-  },
+  }
 };
 use tokio::sync::broadcast;
 
@@ -76,7 +75,7 @@ pub struct ButtplugClientDevice {
   index: u32,
   /// Actuators and sensors available on the device.
   #[getset(get = "pub")]
-  device_features: Vec<ClientDeviceFeature>,
+  device_features: HashMap<u32, ClientDeviceFeature>,
   /// Sends commands from the [ButtplugClientDevice] instance to the
   /// [ButtplugClient][super::ButtplugClient]'s event loop, which will then send
   /// the message on to the [ButtplugServer][crate::server::ButtplugServer]
@@ -110,7 +109,7 @@ impl ButtplugClientDevice {
     name: &str,
     display_name: &Option<String>,
     index: u32,
-    device_features: &Vec<DeviceFeature>,
+    device_features: &HashMap<u32, DeviceFeature>,
     message_sender: &Arc<ButtplugClientMessageSender>,
   ) -> Self {
     info!(
@@ -125,11 +124,7 @@ impl ButtplugClientDevice {
       name: name.to_owned(),
       display_name: display_name.clone(),
       index,
-      device_features: device_features
-        .iter()
-        .enumerate()
-        .map(|(i, x)| ClientDeviceFeature::new(index, i as u32, x, message_sender))
-        .collect(),
+      device_features: device_features.iter().map(|(i, x)| (*i, ClientDeviceFeature::new(index, *i, &x, &message_sender))).collect(),
       event_loop_sender: message_sender.clone(),
       internal_event_sender: event_sender,
       device_connected,
@@ -165,13 +160,15 @@ impl ButtplugClientDevice {
       .device_features
       .iter()
       .filter(|x| {
-        x.feature()
+        x.1
+          .feature()
           .output()
           .as_ref()
           .ok_or(false)
           .unwrap()
           .contains_key(&actuator_type)
       })
+      .map(|(_, x)| x)
       .cloned()
       .collect()
   }
@@ -209,16 +206,16 @@ impl ButtplugClientDevice {
     self
       .device_features
       .iter()
-      .any(|x| *x.feature().feature_type() == FeatureType::Battery)
+      .any(|x| x.1.feature().feature_type() == FeatureType::Battery)
   }
 
   pub fn battery_level(&self) -> ButtplugClientResultFuture<u32> {
     if let Some(battery) = self
       .device_features
       .iter()
-      .find(|x| *x.feature().feature_type() == FeatureType::Battery)
+      .find(|x| x.1.feature().feature_type() == FeatureType::Battery)
     {
-      battery.battery_level()
+      battery.1.battery_level()
     } else {
       create_boxed_future_client_error(
         ButtplugDeviceError::DeviceFeatureMismatch(
@@ -233,16 +230,16 @@ impl ButtplugClientDevice {
     self
       .device_features
       .iter()
-      .any(|x| *x.feature().feature_type() == FeatureType::Rssi)
+      .any(|x| x.1.feature().feature_type() == FeatureType::Rssi)
   }
 
   pub fn rssi_level(&self) -> ButtplugClientResultFuture<i8> {
     if let Some(rssi) = self
       .device_features
       .iter()
-      .find(|x| *x.feature().feature_type() == FeatureType::Rssi)
+      .find(|x| x.1.feature().feature_type() == FeatureType::Rssi)
     {
-      rssi.rssi_level()
+      rssi.1.rssi_level()
     } else {
       create_boxed_future_client_error(
         ButtplugDeviceError::DeviceFeatureMismatch(

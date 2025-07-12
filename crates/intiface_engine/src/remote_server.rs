@@ -72,24 +72,24 @@ async fn run_device_event_stream(
       Some(msg) => {
         if let ButtplugServerMessageV4::DeviceList(dl) = msg && remote_event_sender.receiver_count() > 0 {
           for da in dl.devices() {
-            if known_indexes.contains(&da.device_index()) {
+            if known_indexes.contains(&da.1.device_index()) {
               continue;
             }
-            if let Some(device_info) = server.device_manager().device_info(da.device_index()) {
+            if let Some(device_info) = server.device_manager().device_info(da.1.device_index()) {
               let added_event = ButtplugRemoteServerEvent::DeviceAdded {
-                index: da.device_index(),
-                name: da.device_name().clone(),
+                index: da.1.device_index(),
+                name: da.1.device_name().clone(),
                 identifier: device_info.identifier().clone().into(),
                 display_name: device_info.display_name().clone(),
               };
               if remote_event_sender.send(added_event).is_err() {
                 error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
               }
-              known_indexes.insert(da.device_index());
+              known_indexes.insert(da.1.device_index());
             }
           }
           let indexes = known_indexes.clone();
-          let current_indexes: Vec<u32> = dl.devices().iter().map(|x| x.device_index()).collect();
+          let current_indexes: Vec<u32> = dl.devices().keys().cloned().collect();
           for dr in indexes {
             if current_indexes.contains(&dr) {
               continue;

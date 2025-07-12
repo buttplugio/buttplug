@@ -60,7 +60,7 @@ impl From<DeviceListV3> for DeviceListV2 {
 
 impl From<DeviceListV4> for DeviceListV3 {
   fn from(value: DeviceListV4) -> Self {
-    let mut dl3 = DeviceListV3::new(value.devices().iter().map(|x| x.clone().into()).collect());
+    let mut dl3 = DeviceListV3::new(value.devices().iter().map(|x| x.1.clone().into()).collect());
     dl3.set_id(value.id());
     dl3
   }
