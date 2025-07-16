@@ -28,11 +28,11 @@ buttplug_server_device_config = { path = "../buttplug_server_device_config" }
 futures = "0.3.31"
 futures-util = "0.3.31"
 log = "0.4.27"
-tokio = { version = "1.44.2", features = ["sync", "time"] }
+tokio = { version = "1.46.1", features = ["sync", "time"] }
 async-trait = "0.1.88"
-uuid = { version = "1.16.0", features = ["serde", "v4"] }
+uuid = { version = "1.17.0", features = ["serde", "v4"] }
 dashmap = { version = "6.1.0", features = ["serde"] }
 tracing = "0.1.41"
 thiserror = "2.0.12"
-serialport = { version = "4.7.1" }
-tokio-util = "0.7.14"
+serialport = { version = "4.7.2" }
+tokio-util = "0.7.15"

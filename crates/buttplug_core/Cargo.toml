@@ -45,10 +45,10 @@ serde_repr = "0.1.20"
 thiserror = "2.0.12"
 displaydoc = "0.2.5"
 log = "0.4.27"
-getset = "0.1.5"
+getset = "0.1.6"
 jsonschema = { version = "0.30.0", default-features = false }
-cfg-if = "1.0.0"
-tokio = { version = "1.44.2", features = ["sync", "time", "macros"] }
+cfg-if = "1.0.1"
+tokio = { version = "1.46.1", features = ["sync", "time", "macros"] }
 async-stream = "0.3.6"
 strum_macros = "0.27.1"
 strum = "0.27.1"

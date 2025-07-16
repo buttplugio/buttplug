@@ -18,8 +18,8 @@ buttplug_client_in_process = { path = "../buttplug_client_in_process", default-f
 buttplug_server = { path = "../buttplug_server" }
 buttplug_server_device_config = { path = "../buttplug_server_device_config" }
 log = "0.4.27"
-tokio = { version = "1.44.2", features = ["macros"] }
-uuid = "1.16.0"
+tokio = { version = "1.46.1", features = ["macros"] }
+uuid = "1.17.0"
 futures = "0.3.31"
 tracing = "0.1.41"
 tracing-subscriber = "0.3.19"
@@ -29,7 +29,7 @@ serde = "1.0.219"
 async-trait = "0.1.88"
 dashmap = "6.1.0"
 thiserror = "2.0.12"
-getset = "0.1.5"
+getset = "0.1.6"
 jsonschema = { version = "0.30.0", default-features = false }
 test-case = "3.3.1"
 serde_yaml = "0.9.34"
