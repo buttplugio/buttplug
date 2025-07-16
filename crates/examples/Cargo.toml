@@ -1,0 +1,17 @@
+[package]
+name = "buttplug-developer-guide-examples"
+version = "0.1.0"
+authors = ["Melody Horn <melody@boringcactus.com>", "Kyle Machulis <kyle@nonpolynomial.com>"]
+edition = "2024"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+buttplug_core = { path = "../buttplug_core" }
+buttplug_client = { path = "../buttplug_client" }
+buttplug_transport_websocket_tungstenite = { path = "../buttplug_transport_websocket_tungstenite" }
+# buttplug = { path = "../../../buttplug/buttplug" }
+anyhow = "1.0.98"
+tracing-subscriber = "0.3.19"
+futures = "0.3.31"
+tokio = { version = "1.46.1", features = ["io-std", "io-util", "rt-multi-thread", "macros"] }
