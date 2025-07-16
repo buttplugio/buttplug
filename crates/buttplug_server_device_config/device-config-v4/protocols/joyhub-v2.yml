@@ -1252,6 +1252,51 @@ configurations:
               - 0
               - 255
     id: d818b1e1-4270-4e38-8b07-d723c0a97e31
+  - identifier:
+      - J-Pipes
+    name: JoyHub Pipes
+    features:
+      - feature-type: Rotate
+        id: 558425ee-cf28-48bf-b08f-12568cd3b3ee
+        output:
+          Rotate:
+            step-range:
+              - 0
+              - 255
+      - feature-type: Vibrate
+        id: 8c8f8f70-e814-4a0e-aa5c-b06b53a9ab80
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 255
+    id: 641296fe-8ccc-4a63-8487-790dd419321e
+  - identifier:
+      - J-Vigo
+    name: JoyHub Vigo
+    features:
+      - feature-type: Vibrate
+        id: 89a3e300-3640-4a11-99e4-6585dce725a4
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 255
+      - feature-type: Vibrate
+        id: a23b9a72-7b22-42ec-ab7d-7936d7141689
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 255
+      - feature-type: Oscillate
+        id: 1e6c3008-5efc-4dd1-bee5-95e7e0b016ad
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 255
+    id: 398a3a62-3bba-433e-80ad-50d129b695db
 communication:
   - btle:
       names:
@@ -1313,6 +1358,8 @@ communication:
         - J-Vita
         - J-LACH
         - J-Markel
+        - J-Pipes
+        - J-Vigo
       services:
         0000ffa0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffa1-0000-1000-8000-00805f9b34fb
