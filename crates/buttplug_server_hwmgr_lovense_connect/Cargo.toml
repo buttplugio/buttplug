@@ -35,14 +35,14 @@ buttplug_server_device_config = { path = "../buttplug_server_device_config" }
 futures = "0.3.31"
 futures-util = "0.3.31"
 log = "0.4.27"
-tokio = { version = "1.44.2", features = ["sync", "time"] }
+tokio = { version = "1.46.1", features = ["sync", "time"] }
 async-trait = "0.1.88"
-uuid = { version = "1.16.0", features = ["serde", "v4"] }
+uuid = { version = "1.17.0", features = ["serde", "v4"] }
 dashmap = { version = "6.1.0", features = ["serde"] }
 tracing = "0.1.41"
 thiserror = "2.0.12"
-reqwest = { version = "0.12.15", default-features = false, features = ["rustls-tls"] }
-rustls = { version = "0.23.26", default-features = false, features = ["ring"]}
+reqwest = { version = "0.12.22", default-features = false, features = ["rustls-tls"] }
+rustls = { version = "0.23.29", default-features = false, features = ["ring"]}
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
-serde-aux = "4.6.0"
+serde-aux = "4.7.0"

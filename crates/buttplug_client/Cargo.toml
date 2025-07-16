@@ -26,8 +26,8 @@ buttplug_core = { path = "../buttplug_core" }
 futures = "0.3.31"
 thiserror = "2.0.12"
 log = "0.4.27"
-getset = "0.1.5"
-tokio = { version = "1.44.2", features = ["macros"] }
+getset = "0.1.6"
+tokio = { version = "1.46.1", features = ["macros"] }
 dashmap = { version = "6.1.0" }
 tracing-futures = "0.2.5"
 tracing = "0.1.41"

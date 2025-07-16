@@ -28,9 +28,9 @@ buttplug_server_device_config = { path = "../buttplug_server_device_config" }
 futures = "0.3.31"
 futures-util = "0.3.31"
 log = "0.4.27"
-tokio = { version = "1.44.2", features = ["sync", "time"] }
+tokio = { version = "1.46.1", features = ["sync", "time"] }
 async-trait = "0.1.88"
-uuid = { version = "1.16.0", features = ["serde", "v4"] }
+uuid = { version = "1.17.0", features = ["serde", "v4"] }
 dashmap = { version = "6.1.0", features = ["serde"] }
 tracing = "0.1.41"
 thiserror = "2.0.12"
@@ -38,4 +38,4 @@ rusty-xinput = "1.3.0"
 strum_macros = "0.27.1"
 strum = "0.27.1"
 byteorder = "1.5.0"
-tokio-util = "0.7.14"
+tokio-util = "0.7.15"

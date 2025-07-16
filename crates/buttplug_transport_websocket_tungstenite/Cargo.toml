@@ -32,11 +32,11 @@ thiserror = "2.0.12"
 displaydoc = "0.2.5"
 dashmap = { version = "6.1.0", features = ["serde"] }
 log = "0.4.27"
-getset = "0.1.5"
+getset = "0.1.6"
 jsonschema = { version = "0.30.0", default-features = false }
-uuid = { version = "1.16.0", features = ["serde", "v4"] }
-tokio-tungstenite = { version = "0.26.2", features = ["rustls-tls-webpki-roots", "url"]}
-rustls = { version = "0.23.26", default-features = false, features = ["ring"]}
-tokio = { version = "1.44.2", features = ["sync", "macros", "io-util"] }
+uuid = { version = "1.17.0", features = ["serde", "v4"] }
+tokio-tungstenite = { version = "0.27.0", features = ["rustls-tls-webpki-roots", "url"]}
+rustls = { version = "0.23.29", default-features = false, features = ["ring"]}
+tokio = { version = "1.46.1", features = ["sync", "macros", "io-util"] }
 tracing = "0.1.41"
 url = "2.5.4"

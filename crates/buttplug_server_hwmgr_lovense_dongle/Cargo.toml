@@ -28,16 +28,16 @@ buttplug_server_device_config = { path = "../buttplug_server_device_config" }
 futures = "0.3.31"
 futures-util = "0.3.31"
 log = "0.4.27"
-tokio = { version = "1.44.2", features = ["sync", "time", "rt"] }
+tokio = { version = "1.46.1", features = ["sync", "time", "rt"] }
 async-trait = "0.1.88"
-uuid = { version = "1.16.0", features = ["serde", "v4"] }
+uuid = { version = "1.17.0", features = ["serde", "v4"] }
 dashmap = { version = "6.1.0", features = ["serde"] }
 tracing = "0.1.41"
 thiserror = "2.0.12"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 serde_repr = "0.1.20"
-tokio-util = "0.7.14"
+tokio-util = "0.7.15"
 tracing-futures = "0.2.5"
 
 [target.'cfg(target_os = "windows")'.dependencies]
