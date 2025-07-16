@@ -13,7 +13,7 @@ use std::{
   ops::RangeInclusive,
 };
 
-#[derive(Debug, Default, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Default, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, EnumIter)]
 pub enum FeatureType {
   #[default]
   // Used for when types are added that we do not know how to handle
@@ -48,7 +48,7 @@ pub enum FeatureType {
   //
 }
 
-#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash)]
+#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash, EnumIter)]
 pub enum OutputType {
   Unknown,
   Vibrate,
@@ -92,7 +92,7 @@ impl TryFrom<FeatureType> for OutputType {
   }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, Hash, EnumIter)]
 pub enum InputType {
   Unknown,
   Battery,
