@@ -1,4 +1,4 @@
-use buttplug::util::in_process_client;
+use buttplug_client_in_process::in_process_client;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -8,7 +8,7 @@ async fn main() -> anyhow::Result<()> {
   // Now when you connect here, if you've set the RUST_LOG environment variable
   // (set it to "Info" or "Debug"), you should see messages about connection
   // setup.
-  let _client = in_process_client("Example Client", false).await;
+  let _client = in_process_client("Example Client").await;
 
   Ok(())
 }

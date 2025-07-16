@@ -1,12 +1,10 @@
-use buttplug::{
-  client::{device::ScalarValueCommand, ButtplugClient, ButtplugClientError},
-  core::{
-    connector::{
-      new_json_ws_client_connector,
-    },
-    message::{ClientGenericDeviceMessageAttributes},
-  },
-};
+use std::collections::HashMap;
+
+use buttplug_client::{connector::ButtplugRemoteClientConnector, serializer::ButtplugClientJSONSerializer, ButtplugClient, ButtplugClientError};
+
+use buttplug_core::message::OutputType;
+use buttplug_transport_websocket_tungstenite::ButtplugWebsocketClientTransport;
+use strum::IntoEnumIterator;
 use tokio::io::{self, AsyncBufReadExt, BufReader};
 
 async fn wait_for_input() {
@@ -19,7 +17,12 @@ async fn wait_for_input() {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-  let connector = new_json_ws_client_connector("ws://localhost:12345");
+  let connector = ButtplugRemoteClientConnector::<
+    ButtplugWebsocketClientTransport,
+    ButtplugClientJSONSerializer,
+  >::new(ButtplugWebsocketClientTransport::new_insecure_connector(
+    "ws://127.0.0.1:12345",
+  ));
 
   let client = ButtplugClient::new("Example Client");
   client.connect(connector).await?;
@@ -38,24 +41,16 @@ async fn main() -> anyhow::Result<()> {
   wait_for_input().await;
 
   for device in client.devices() {
-    fn print_attrs(attrs: &Vec<ClientGenericDeviceMessageAttributes>) {
-      for attr in attrs {
-        println!(
-          "{}: {} - Steps: {}",
-          attr.actuator_type(),
-          attr.feature_descriptor(),
-          attr.step_count()
-        );
+    println!("{} supports these outputs:", device.name());
+    for output_type in OutputType::iter() {
+      for (_, feature) in device.device_features() { 
+        for (output, _) in feature.feature().output().as_ref().unwrap_or(&HashMap::new()) {
+          if output_type == *output {
+            println!("- {}", output);
+          }
+        }
       }
     }
-    println!("{} supports these actions:", device.name());
-    if let Some(attrs) = device.message_attributes().scalar_cmd() {
-      print_attrs(attrs);
-    }
-    print_attrs(&device.rotate_attributes());
-    print_attrs(&device.linear_attributes());
-    println!("Battery: {}", device.has_battery_level());
-    println!("RSSI: {}", device.has_rssi_level());
   }
 
   println!("Sending commands");
@@ -71,7 +66,7 @@ async fn main() -> anyhow::Result<()> {
   // send the message. This version sets all of the motors on a
   // vibrating device to the same speed.
   test_client_device
-    .vibrate(&ScalarValueCommand::ScalarValue(1.0))
+    .vibrate(10)
     .await?;
 
   // If we wanted to just set one motor on and the other off, we could
@@ -82,7 +77,7 @@ async fn main() -> anyhow::Result<()> {
   // You can get the vibrator count using the following code, though we
   // know it's 2 so we don't really have to use it.
   let vibrator_count = test_client_device
-    .vibrate_attributes()
+    .vibrate_features()
     .len();
 
   println!(
@@ -92,9 +87,9 @@ async fn main() -> anyhow::Result<()> {
   );
 
   // Just set all of the vibrators to full speed.
-  if vibrator_count > 1 {
+  if vibrator_count > 0 {
     test_client_device
-      .vibrate(&ScalarValueCommand::ScalarValueVec(vec![1.0, 0.0]))
+      .vibrate(10)
       .await?;
   } else {
     println!("Device does not have > 1 vibrators, not running multiple vibrator test.");
@@ -108,7 +103,7 @@ async fn main() -> anyhow::Result<()> {
   // If we try to send a command to a device after the client has
   // disconnected, we'll get an exception thrown.
   let vibrate_result = test_client_device
-    .vibrate(&ScalarValueCommand::ScalarValue(1.0))
+    .vibrate(30)
     .await;
   if let Err(ButtplugClientError::ButtplugConnectorError(error)) = vibrate_result {
     println!("Tried to send after disconnection! Error: ");
