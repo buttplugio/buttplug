@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 49
+    "minor": 52
   },
   "protocols": {
     "activejoy": {
@@ -4653,7 +4653,11 @@
               "J-MarsLion2",
               "J-Myrna",
               "J-Vase2",
-              "J-Martino"
+              "J-Martino",
+              "J-Enam",
+              "J-Viv",
+              "J-Vivara",
+              "J-Explorer2"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -4845,6 +4849,34 @@
             "J-Peachy"
           ],
           "name": "JoyHub Peachy"
+        },
+        {
+          "id": "b1aa4a71-1346-43c4-9de3-7ecc642607d5",
+          "identifier": [
+            "J-Enam"
+          ],
+          "name": "JoyHub Enam"
+        },
+        {
+          "id": "5a4c2185-67a9-4e15-862b-3c913aaecaad",
+          "identifier": [
+            "J-Viv"
+          ],
+          "name": "JoyHub Viv"
+        },
+        {
+          "id": "307496a5-a0e0-498e-b635-c6bc346cab1c",
+          "identifier": [
+            "J-Vivara"
+          ],
+          "name": "JoyHub Vivara"
+        },
+        {
+          "id": "f499492b-571c-4766-830c-c751706e280d",
+          "identifier": [
+            "J-Explorer2"
+          ],
+          "name": "JoyHub Explorer 2"
         },
         {
           "features": [
@@ -5411,7 +5443,9 @@
               "J-Marcela",
               "J-Vita",
               "J-LACH",
-              "J-Markel"
+              "J-Markel",
+              "J-Pipes",
+              "J-Vigo"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -7559,6 +7593,84 @@
             "J-Markel"
           ],
           "name": "JoyHub Markel"
+        },
+        {
+          "features": [
+            {
+              "feature-type": "Rotate",
+              "id": "558425ee-cf28-48bf-b08f-12568cd3b3ee",
+              "output": {
+                "Rotate": {
+                  "step-range": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "id": "8c8f8f70-e814-4a0e-aa5c-b06b53a9ab80",
+              "output": {
+                "Vibrate": {
+                  "step-range": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "641296fe-8ccc-4a63-8487-790dd419321e",
+          "identifier": [
+            "J-Pipes"
+          ],
+          "name": "JoyHub Pipes"
+        },
+        {
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "id": "89a3e300-3640-4a11-99e4-6585dce725a4",
+              "output": {
+                "Vibrate": {
+                  "step-range": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "id": "a23b9a72-7b22-42ec-ab7d-7936d7141689",
+              "output": {
+                "Vibrate": {
+                  "step-range": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "id": "1e6c3008-5efc-4dd1-bee5-95e7e0b016ad",
+              "output": {
+                "Oscillate": {
+                  "step-range": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "398a3a62-3bba-433e-80ad-50d129b695db",
+          "identifier": [
+            "J-Vigo"
+          ],
+          "name": "JoyHub Vigo"
         }
       ],
       "defaults": {

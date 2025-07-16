@@ -117,6 +117,22 @@ configurations:
     name: JoyHub Peachy
     id: eda4e5c4-4a91-4260-a14b-570926e346f6
   - identifier:
+      - J-Enam
+    name: JoyHub Enam
+    id: b1aa4a71-1346-43c4-9de3-7ecc642607d5
+  - identifier:
+      - J-Viv
+    name: JoyHub Viv
+    id: 5a4c2185-67a9-4e15-862b-3c913aaecaad
+  - identifier:
+      - J-Vivara
+    name: JoyHub Vivara
+    id: 307496a5-a0e0-498e-b635-c6bc346cab1c
+  - identifier:
+      - J-Explorer2
+    name: JoyHub Explorer 2
+    id: f499492b-571c-4766-830c-c751706e280d
+  - identifier:
       - J-Petalwish2
     name: JoyHub Petalwish 2
     features:
@@ -439,6 +455,10 @@ communication:
         - J-Myrna
         - J-Vase2
         - J-Martino
+        - J-Enam
+        - J-Viv
+        - J-Vivara
+        - J-Explorer2
       services:
         0000ffa0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffa1-0000-1000-8000-00805f9b34fb
