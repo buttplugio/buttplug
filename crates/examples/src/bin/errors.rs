@@ -1,4 +1,5 @@
-use buttplug::{client::ButtplugClientError, core::errors::ButtplugError};
+use buttplug_client::ButtplugClientError;
+use buttplug_core::errors::ButtplugError;
 
 #[allow(dead_code)]
 fn handle_error(error: ButtplugClientError) {

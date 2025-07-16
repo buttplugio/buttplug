@@ -1,5 +1,4 @@
 use buttplug_client::{connector::ButtplugRemoteClientConnector, serializer::ButtplugClientJSONSerializer, ButtplugClient, ButtplugClientEvent};
-
 use buttplug_transport_websocket_tungstenite::ButtplugWebsocketClientTransport;
 use futures::StreamExt;
 

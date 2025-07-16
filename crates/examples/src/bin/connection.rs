@@ -1,8 +1,7 @@
-use buttplug_client::{connector::ButtplugRemoteClientConnector, serializer::ButtplugClientJSONSerializer, ButtplugClient, ButtplugClientError, ButtplugClientEvent};
+use buttplug_client::{connector::ButtplugRemoteClientConnector, serializer::ButtplugClientJSONSerializer, ButtplugClient, ButtplugClientError};
 
 use buttplug_core::errors::ButtplugError;
 use buttplug_transport_websocket_tungstenite::ButtplugWebsocketClientTransport;
-use futures::StreamExt;
 use tokio::io::{self, AsyncBufReadExt, BufReader};
 
 async fn wait_for_input() {
@@ -17,7 +16,12 @@ async fn wait_for_input() {
 async fn main() -> anyhow::Result<()> {
   // After you've created a connector, the connection looks the same no
   // matter what, though the errors thrown may be different.
-  let connector = new_json_ws_client_connector("ws://127.0.0.1:12345");
+  let connector = ButtplugRemoteClientConnector::<
+    ButtplugWebsocketClientTransport,
+    ButtplugClientJSONSerializer,
+  >::new(ButtplugWebsocketClientTransport::new_insecure_connector(
+    "ws://127.0.0.1:12345",
+  ));
 
   // Now we connect. If anything goes wrong here, we'll get an Err with either
   //
