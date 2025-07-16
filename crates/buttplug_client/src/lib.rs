@@ -428,7 +428,7 @@ impl ButtplugClient {
       .send_message_expect_ok(StopAllDevicesV0::default().into())
   }
 
-  pub fn event_stream(&self) -> impl Stream<Item = ButtplugClientEvent> {
+  pub fn event_stream(&self) -> impl Stream<Item = ButtplugClientEvent> + use<>{
     let stream = convert_broadcast_receiver_to_stream(self.event_stream.subscribe());
     // We can either Box::pin here or force the user to pin_mut!() on their
     // end. While this does end up with a dynamic dispatch on our end, it
