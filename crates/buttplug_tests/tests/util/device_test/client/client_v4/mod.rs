@@ -70,7 +70,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
           let f = rotate_features[cmd.index() as usize].clone();
           f.rotate_with_direction(
             (cmd.speed()
-              * *f
+              * f
                 .feature()
                 .output()
                 .as_ref()
@@ -92,7 +92,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
           let f = device.device_features()[&cmd.index()].clone();
           f.position_with_duration(
             (cmd.position()
-              * *f
+              * f
                 .feature()
                 .output()
                 .as_ref()
