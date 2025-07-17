@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 57
+    "minor": 58
   },
   "protocols": {
     "activejoy": {
@@ -4745,7 +4745,8 @@
               "J-Enam",
               "J-Viv",
               "J-Vivara",
-              "J-Explorer2"
+              "J-Explorer2",
+              "J-Derik"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -4909,6 +4910,13 @@
             "J-Tarik"
           ],
           "name": "JoyHub Tarik"
+        },
+        {
+          "id": "7252d5cc-5f1c-49ca-b2c8-49d7502c1f6b",
+          "identifier": [
+            "J-Derik"
+          ],
+          "name": "JoyHub Urica Guard"
         },
         {
           "id": "a2f973ff-e6cd-4b70-a711-2b24f2d03b6d",
