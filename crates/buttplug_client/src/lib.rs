@@ -42,6 +42,7 @@ use futures::{
   Stream,
 };
 use log::*;
+use strum_macros::Display;
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
@@ -98,7 +99,7 @@ impl ButtplugClientMessageFuturePair {
 /// - [ButtplugConnectorError], which means there was a problem with the connection between the
 /// client and the server, like a network connection issue.
 /// - [ButtplugError], which is an error specific to the Buttplug Protocol.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Display)]
 pub enum ButtplugClientError {
   /// Connector error
   #[error(transparent)]
@@ -106,6 +107,8 @@ pub enum ButtplugClientError {
   /// Protocol error
   #[error(transparent)]
   ButtplugError(#[from] ButtplugError),
+  /// Error converting output command: {}
+  ButtplugOutputCommandConversionError(String)
 }
 
 /// Enum representing different events that can be emitted by a client.

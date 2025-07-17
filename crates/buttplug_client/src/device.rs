@@ -7,6 +7,8 @@
 
 //! Representation and management of devices connected to the server.
 
+use crate::ButtplugClientError;
+
 use super::{
   client_device_feature::ClientDeviceFeature,
   create_boxed_future_client_error,
@@ -16,15 +18,7 @@ use super::{
 use buttplug_core::{
   errors::ButtplugDeviceError,
   message::{
-    ButtplugServerMessageV4,
-    DeviceFeature,
-    DeviceMessageInfoV4,
-    FeatureType,
-    OutputCmdV4,
-    OutputCommand,
-    OutputType,
-    OutputValue,
-    StopDeviceCmdV0,
+    ButtplugServerMessageV4, DeviceFeature, DeviceFeatureOutput, DeviceMessageInfoV4, FeatureType, OutputCmdV4, OutputCommand, OutputType, OutputValue, StopDeviceCmdV0
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
@@ -52,6 +46,90 @@ pub enum ButtplugClientDeviceEvent {
   ClientDisconnect,
   /// Message was received from server for that specific device.
   Message(ButtplugServerMessageV4),
+}
+
+pub enum ClientDeviceOutputCommand {
+  // u32 types use steps, need to compare before sending
+  Vibrate(u32),
+  Rotate(u32),
+  Oscillate(u32),
+  Constrict(u32),
+  Heater(u32),
+  Led(u32),
+  Spray(u32),
+  Position(u32),
+  RotateWithDirection(u32, u32),
+  PositionWithDuration(u32, bool),
+  // f64 types are old style float, will need to convert before sending
+  VibrateFloat(f64),
+  RotateFloat(f64),
+  OscillateFloat(f64),
+  ConstrictFloat(f64),
+  HeaterFloat(f64),
+  LedFloat(f64),
+  SprayFloat(f64),
+  PositionFloat(f64),
+  RotateWithDirectionFloat(f64, u32),
+  PositionWithDurationFloat(f64, bool),
+}
+
+impl Into<OutputType> for &ClientDeviceOutputCommand {
+  fn into(self) -> OutputType {
+    match self {
+      ClientDeviceOutputCommand::Vibrate(_) | ClientDeviceOutputCommand::VibrateFloat(_) => OutputType::Vibrate,
+      ClientDeviceOutputCommand::Oscillate(_) | ClientDeviceOutputCommand::OscillateFloat(_) => OutputType::Oscillate,
+      ClientDeviceOutputCommand::Rotate(_) | ClientDeviceOutputCommand::RotateFloat(_) => OutputType::Rotate,
+      ClientDeviceOutputCommand::Constrict(_) | ClientDeviceOutputCommand::ConstrictFloat(_) => OutputType::Constrict,
+      ClientDeviceOutputCommand::Heater(_) | ClientDeviceOutputCommand::HeaterFloat(_) => OutputType::Heater,
+      ClientDeviceOutputCommand::Led(_) | ClientDeviceOutputCommand::LedFloat(_) => OutputType::Led,
+      ClientDeviceOutputCommand::Spray(_) | ClientDeviceOutputCommand::SprayFloat(_) => OutputType::Spray,
+      ClientDeviceOutputCommand::Position(_) | ClientDeviceOutputCommand::PositionFloat(_) => OutputType::Position,
+      ClientDeviceOutputCommand::PositionWithDuration(_, _) | ClientDeviceOutputCommand::PositionWithDurationFloat(_, _) => OutputType::PositionWithDuration,
+      ClientDeviceOutputCommand::RotateWithDirection(_, _) | ClientDeviceOutputCommand::RotateWithDirectionFloat(_, _) => OutputType::RotateWithDirection,
+    }
+  }
+}
+
+impl ClientDeviceOutputCommand {
+  fn convert_float_value(&self, feature_output: &DeviceFeatureOutput, float_amt: &f64) -> Result<u32, ButtplugClientError> {
+    if v < 0.0 || v > 1.0 {
+      return Err(ButtplugClientError::ButtplugOutputCommandConversionError("Float values must be between 0.0 and 1.0"));
+    }
+    let step_value = (v * output.step_count() as f64) as u32;
+  }
+
+  fn to_output_command(&self, device_index: u32, feature: &DeviceFeature) -> Result<OutputCommand, ButtplugClientError> {
+    for (t, output) in feature.output().as_ref().unwrap_or(&HashMap::new()) {
+      if *t == self.into() {
+        continue;
+      }
+
+      match self {
+        ClientDeviceOutputCommand::VibrateFloat(v) |
+        ClientDeviceOutputCommand::OscillateFloat(v) |
+        ClientDeviceOutputCommand::RotateFloat(v) |
+        ClientDeviceOutputCommand::ConstrictFloat(v) |
+        ClientDeviceOutputCommand::HeaterFloat(v) |
+        ClientDeviceOutputCommand::LedFloat(v )|
+        ClientDeviceOutputCommand::SprayFloat(v) |
+        ClientDeviceOutputCommand::PositionFloat(v) => {
+          Ok(OutputCmdV4::new(device_index, feature.feature_index(), match self {
+            ClientDeviceOutputCommand::VibrateFloat(_) => OutputCommand::Vibrate(step_value),
+            ClientDeviceOutputCommand::OscillateFloat(_) => OutputCommand::Oscillate(step_value),
+            ClientDeviceOutputCommand::RotateFloat(_) => OutputCommand::Rotate(step_value),
+            ClientDeviceOutputCommand::ConstrictFloat(_) => OutputCommand::Constrict(step_value),
+            ClientDeviceOutputCommand::HeaterFloat(_) => OutputCommand::Heater(step_value),
+            ClientDeviceOutputCommand::LedFloat(_) => OutputCommand::Led(step_value),
+            ClientDeviceOutputCommand::SprayFloat(_) => OutputCommand::Spray(step_value),
+            ClientDeviceOutputCommand::PositionFloat(_) => OutputCommand::Position(step_value)
+        }
+        ClientDeviceOutputCommand::PositionWithDuration(_, _) | ClientDeviceOutputCommand::PositionWithDurationFloat(_, _) => OutputType::PositionWithDuration,
+        ClientDeviceOutputCommand::RotateWithDirection(_, _) | ClientDeviceOutputCommand::RotateWithDirectionFloat(_, _) => OutputType::RotateWithDirection,
+
+    }
+    }
+    Err(ButtplugClientError::ButtplugOutputCommandConversionError("Feature does not accomodate type".into()))
+  }
 }
 
 #[derive(Getters, CopyGetters)]
