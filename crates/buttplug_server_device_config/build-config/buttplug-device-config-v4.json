@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 52
+    "minor": 54
   },
   "protocols": {
     "activejoy": {
@@ -1320,6 +1320,10 @@
               "CYX2",
               "RC31",
               "MD19",
+              "QD48",
+              "BGSF",
+              "BGQS",
+              "AX05",
               "G317",
               "G312",
               "G302",
@@ -1354,8 +1358,10 @@
               "QCVW",
               "QCSW",
               "QCPW",
+              "SN80",
               "TFG1",
               "GK27",
+              "GX27",
               "GK25",
               "AC695X_1(BLE)",
               "GX33",
@@ -1769,6 +1775,34 @@
             "MD19"
           ],
           "name": "Secret Lover Kevin"
+        },
+        {
+          "id": "f4cdbb77-f674-49df-9b76-75d460179c69",
+          "identifier": [
+            "QD48"
+          ],
+          "name": "Adorime Wearable Egg Vibrator"
+        },
+        {
+          "id": "c81608ec-36cc-4ca1-9a17-72e4e3ce020f",
+          "identifier": [
+            "BGSF"
+          ],
+          "name": "Adorime Male Masturbator"
+        },
+        {
+          "id": "0c62c632-fbf1-43f1-b3ab-bff41ea88c3a",
+          "identifier": [
+            "BGQS"
+          ],
+          "name": "Adorime Penis Vibrator"
+        },
+        {
+          "id": "bce17a9d-1cfa-47e7-a6fd-6471896bb1d3",
+          "identifier": [
+            "AX05"
+          ],
+          "name": "Adorime Anal Vibrator"
         },
         {
           "features": [
@@ -3577,6 +3611,59 @@
             {
               "description": "Vibrate",
               "feature-type": "Vibrate",
+              "id": "42efb235-b450-44a6-97fd-a98b3d9750ad",
+              "output": {
+                "Vibrate": {
+                  "step-range": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Vibrate",
+              "feature-type": "Vibrate",
+              "id": "76a8c59e-2001-4334-bacd-f436f6858e85",
+              "output": {
+                "Vibrate": {
+                  "step-range": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "feature-type": "Battery",
+              "id": "47b24f11-bb92-4173-9123-80a330c76041",
+              "input": {
+                "Battery": {
+                  "input-commands": [
+                    "Read"
+                  ],
+                  "value-range": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "361c0746-f630-41d3-a0bf-f993e2259217",
+          "identifier": [
+            "SN80"
+          ],
+          "name": "Adorime G-spot Rabbit Dildo Vibrator"
+        },
+        {
+          "features": [
+            {
+              "description": "Vibrate",
+              "feature-type": "Vibrate",
               "id": "2b5fdcd4-3b35-4939-b086-950a827141e1",
               "output": {
                 "Vibrate": {
@@ -3661,7 +3748,8 @@
           ],
           "id": "687bbb0e-b5a6-47d8-bca3-3395c510d996",
           "identifier": [
-            "GK27"
+            "GK27",
+            "GX27"
           ],
           "name": "Galaku Cannon-GT"
         },
