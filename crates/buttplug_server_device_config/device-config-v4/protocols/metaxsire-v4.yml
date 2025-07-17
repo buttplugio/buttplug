@@ -9,10 +9,18 @@ defaults:
             - 0
             - 99
   id: e69dc695-695d-485b-be16-59161505fd6d
+configurations:
+  - identifier:
+      - HJ2024N01
+    name: VVD Vkini
+    id: 679cdc1b-9236-4ed1-a3c4-c33b748a8cde
 communication:
   - btle:
       names:
         - CFG1 vibrator
+        - HJ2024N01
       services:
         0000cfa2-0000-1000-8000-00805f9b34fb:
           tx: 0000cf21-0000-1000-8000-00805f9b34fb
+        0000dba2-0000-1000-8000-00805f9b34fb:
+          tx: 0000db21-0000-1000-8000-00805f9b34fb
