@@ -10,6 +10,8 @@ use buttplug_core::{
   },
 };
 
+use crate::device::ClientDeviceOutputCommand;
+
 use super::{
   create_boxed_future_client_error,
   ButtplugClientError,
@@ -60,7 +62,7 @@ impl ClientDeviceFeature {
             self.feature_index,
             OutputCommand::from_output_type(
               actuator_type,
-              (value * *actuator.step_count() as f64).ceil() as u32,
+              (value * actuator.step_count() as f64).ceil() as u32,
             )
             .unwrap(),
           )
@@ -117,6 +119,15 @@ impl ClientDeviceFeature {
         ),
       ))))
       .boxed()
+    }
+  }
+
+  pub fn send_command(&self, client_device_command: &ClientDeviceOutputCommand) -> ButtplugClientResultFuture {
+    match client_device_command.to_output_command(&self.feature) {
+      Ok(cmd) => self.event_loop_sender.send_message_expect_ok(
+        OutputCmdV4::new(self.device_index, self.feature_index, cmd).into()
+      ),
+      Err(e) => future::ready(Err(e)).boxed()
     }
   }
 
