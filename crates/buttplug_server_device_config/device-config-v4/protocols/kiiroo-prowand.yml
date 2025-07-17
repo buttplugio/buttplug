@@ -19,10 +19,16 @@ defaults:
           input-commands:
             - Read
   id: d1675d72-6d25-4cc4-99dc-a42e4e4fee97
+configurations:
+  - identifier:
+      - Luxus
+    name: Luxus
+    id: a857e95b-3d5a-4034-92d2-7105c4febb8e
 communication:
   - btle:
       names:
         - ProWand
+        - Luxus
       services:
         00001400-0000-1000-8000-00805f9b34fb:
           tx: 00001401-0000-1000-8000-00805f9b34fb
