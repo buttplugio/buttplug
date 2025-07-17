@@ -217,9 +217,9 @@ where
   seq.end()
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, CopyGetters, Serialize, Deserialize)]
 pub struct DeviceFeatureOutput {
-  #[getset(get = "pub")]
+  #[getset(get_copy = "pub")]
   #[serde(rename = "StepCount")]
   step_count: u32,
 }
