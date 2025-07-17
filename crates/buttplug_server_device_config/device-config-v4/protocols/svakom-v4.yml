@@ -29,12 +29,25 @@ configurations:
       - Cici+ 2
     name: Svakom Cici+ 2
     id: 96980e8b-abcf-410e-94e6-d098b13e6192
+  - identifier:
+      - VV468A
+    name: ToyCod Clara
+    features:
+      - feature-type: Vibrate
+        id: 65f4d628-cb50-48fa-8d51-39433244ce12
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 10
+    id: 8d88601b-6791-4947-94ca-e9d66086f57e
 communication:
   - btle:
       names:
         - B2CM6
         - ERICA
         - Cici+ 2
+        - VV468A
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
