@@ -254,7 +254,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
               let attrs = ClientGenericDeviceMessageAttributesV3 {
                 feature_descriptor: feature.description().to_owned(),
                 actuator_type,
-                step_count: *actuator.step_count(),
+                step_count: actuator.step_count(),
                 index: 0,
               };
               actuator_vec.push(attrs)
@@ -278,7 +278,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
               let attrs = ClientGenericDeviceMessageAttributesV3 {
                 feature_descriptor: feature.description().to_owned(),
                 actuator_type,
-                step_count: *actuator.step_count(),
+                step_count: actuator.step_count(),
                 index: 0,
               };
               actuator_vec.push(attrs)
@@ -300,7 +300,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
               let attrs = ClientGenericDeviceMessageAttributesV3 {
                 feature_descriptor: feature.description().to_owned(),
                 actuator_type,
-                step_count: *actuator.step_count(),
+                step_count: actuator.step_count(),
                 index: 0,
               };
               actuator_vec.push(attrs)
