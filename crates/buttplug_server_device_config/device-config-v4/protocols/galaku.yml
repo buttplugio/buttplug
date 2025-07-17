@@ -21,6 +21,8 @@ defaults:
             - Read
   id: c1766383-def6-4bd0-b6ce-1e8f993fa6ae
 configurations:
+  # Type 0
+  # - V415 see galaku-pump
   - identifier:
       - V415
     name: Galaku Nebula
@@ -249,6 +251,23 @@ configurations:
       - MD19
     name: Secret Lover Kevin
     id: 546731c9-21c5-4bca-bb85-9fec1c3c627e
+  - identifier:
+      - QD48
+    name: Adorime Wearable Egg Vibrator
+    id: f4cdbb77-f674-49df-9b76-75d460179c69
+  - identifier:
+      - BGSF
+    name: Adorime Male Masturbator
+    id: c81608ec-36cc-4ca1-9a17-72e4e3ce020f
+  - identifier:
+      - BGQS
+    name: Adorime Penis Vibrator
+    id: 0c62c632-fbf1-43f1-b3ab-bff41ea88c3a
+  - identifier:
+      - AX05
+    name: Adorime Anal Vibrator
+    id: bce17a9d-1cfa-47e7-a6fd-6471896bb1d3
+  # Type 1
   - identifier:
       - G317
     name: Galaku Zaku Aircraft Cup
@@ -1304,6 +1323,38 @@ configurations:
               - Read
     id: 746b8d6f-41ba-433f-b225-b3bf98c7aec9
   - identifier:
+      - SN80
+    name: Adorime G-spot Rabbit Dildo Vibrator
+    features:
+      - feature-type: Vibrate
+        description: Vibrate
+        id: 42efb235-b450-44a6-97fd-a98b3d9750ad
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        description: Vibrate
+        id: 76a8c59e-2001-4334-bacd-f436f6858e85
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Battery
+        description: Battery Level
+        id: 47b24f11-bb92-4173-9123-80a330c76041
+        input:
+          Battery:
+            value-range:
+              - - 0
+                - 100
+            input-commands:
+              - Read
+    id: 361c0746-f630-41d3-a0bf-f993e2259217
+  # Type 2
+  - identifier:
       - TFG1
     name: Galaku Aurora Aircraft Cup
     features:
@@ -1336,6 +1387,7 @@ configurations:
     id: 0d60d3a5-bad0-4df7-99ad-4bf4ee442c5d
   - identifier:
       - GK27
+      - GX27
     name: Galaku Cannon-GT
     features:
       - feature-type: Vibrate
@@ -1452,6 +1504,8 @@ configurations:
 communication:
   - btle:
       names:
+        # Type 0
+        # - V415 see galaku-pump
         - GX85
         - GX07
         - GX17
@@ -1505,9 +1559,14 @@ communication:
         - K12A
         - K12C
         - LL18
-        - CYX2
-        - RC31
-        - MD19
+        - CYX2 # Secret Lover Simon
+        - RC31 # Secret Lover Betty
+        - MD19 # Secret Lover Kevin
+        - QD48 # Adorime Wearable Egg Vibrator
+        - BGSF # Adorime Male Masturbator
+        - BGQS # Adorime Penis Vibrator
+        - AX05 # Adorime Anal Vibrator
+        # Type 1
         - G317
         - G312
         - G302
@@ -1542,8 +1601,11 @@ communication:
         - QCVW
         - QCSW
         - QCPW
+        - SN80 # Adorime G-spot Rabbit Dildo Vibrator
+        # Type 2
         - TFG1
         - GK27
+        - GX27 # https://discord.com/channels/353303527587708932/1370367465573580881
         - GK25
         - AC695X_1(BLE)
         - GX33
