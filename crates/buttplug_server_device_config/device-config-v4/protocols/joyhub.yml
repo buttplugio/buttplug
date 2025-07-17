@@ -101,6 +101,10 @@ configurations:
     name: JoyHub Tarik
     id: f6b8c5db-eca9-4041-9e07-48521ed3a55f
   - identifier:
+      - J-Derik
+    name: JoyHub Urica Guard
+    id: 7252d5cc-5f1c-49ca-b2c8-49d7502c1f6b
+  - identifier:
       - J-UricaGuard2
     name: JoyHub Urica Guard 2
     id: a2f973ff-e6cd-4b70-a711-2b24f2d03b6d
@@ -459,6 +463,7 @@ communication:
         - J-Viv
         - J-Vivara
         - J-Explorer2
+        - J-Derik
       services:
         0000ffa0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffa1-0000-1000-8000-00805f9b34fb
