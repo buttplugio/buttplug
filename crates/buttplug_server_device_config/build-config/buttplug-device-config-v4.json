@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 54
+    "minor": 55
   },
   "protocols": {
     "activejoy": {
@@ -13290,14 +13290,27 @@
         {
           "btle": {
             "names": [
-              "CFG1 vibrator"
+              "CFG1 vibrator",
+              "HJ2024N01"
             ],
             "services": {
               "0000cfa2-0000-1000-8000-00805f9b34fb": {
                 "tx": "0000cf21-0000-1000-8000-00805f9b34fb"
+              },
+              "0000dba2-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000db21-0000-1000-8000-00805f9b34fb"
               }
             }
           }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "679cdc1b-9236-4ed1-a3c4-c33b748a8cde",
+          "identifier": [
+            "HJ2024N01"
+          ],
+          "name": "VVD Vkini"
         }
       ],
       "defaults": {
@@ -13317,6 +13330,40 @@
         ],
         "id": "e69dc695-695d-485b-be16-59161505fd6d",
         "name": "metaXsire G1 Vibrator"
+      }
+    },
+    "metaxsire-v5": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "CBW02"
+            ],
+            "services": {
+              "0000ffcb-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000cb02-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "feature-type": "Vibrate",
+            "id": "140be13c-4cb3-407f-9597-e03f046f1c1a",
+            "output": {
+              "Vibrate": {
+                "step-range": [
+                  0,
+                  100
+                ]
+              }
+            }
+          }
+        ],
+        "id": "783bc287-528c-4c58-a7ec-47a49304309e",
+        "name": "Sexverse Heart"
       }
     },
     "mizzzee": {
