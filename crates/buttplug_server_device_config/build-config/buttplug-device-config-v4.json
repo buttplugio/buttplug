@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 55
+    "minor": 56
   },
   "protocols": {
     "activejoy": {
@@ -8142,7 +8142,8 @@
         {
           "btle": {
             "names": [
-              "ProWand"
+              "ProWand",
+              "Luxus"
             ],
             "services": {
               "00001400-0000-1000-8000-00805f9b34fb": {
@@ -8153,6 +8154,15 @@
               }
             }
           }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "a857e95b-3d5a-4034-92d2-7105c4febb8e",
+          "identifier": [
+            "Luxus"
+          ],
+          "name": "Luxus"
         }
       ],
       "defaults": {
