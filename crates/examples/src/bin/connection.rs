@@ -55,6 +55,9 @@ async fn main() -> anyhow::Result<()> {
           return Ok(());
         }
       },
+      _ => {
+        // None of the other errors are valid in this instance.
+      }
     }
   };
 

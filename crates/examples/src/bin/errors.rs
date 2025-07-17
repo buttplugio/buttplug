@@ -12,6 +12,7 @@ fn handle_error(error: ButtplugClientError) {
       ButtplugError::ButtplugPingError(_details) => {}
       ButtplugError::ButtplugUnknownError(_details) => {}
     },
+    ButtplugClientError::ButtplugOutputCommandConversionError(_details) => {}
   }
 }
 
