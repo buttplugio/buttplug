@@ -1,0 +1,18 @@
+defaults:
+  name: Sexverse Heart
+  features:
+    - feature-type: Vibrate
+      id: 140be13c-4cb3-407f-9597-e03f046f1c1a
+      output:
+        Vibrate:
+          step-range:
+            - 0
+            - 100
+  id: 783bc287-528c-4c58-a7ec-47a49304309e
+communication:
+  - btle:
+      names:
+        - CBW02
+      services:
+        0000ffcb-0000-1000-8000-00805f9b34fb:
+          tx: 0000cb02-0000-1000-8000-00805f9b34fb
