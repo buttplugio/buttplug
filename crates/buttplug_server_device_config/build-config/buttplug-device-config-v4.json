@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 58
+    "minor": 59
   },
   "protocols": {
     "activejoy": {
@@ -4476,6 +4476,20 @@
           "name": "Sinloli Ethel"
         },
         {
+          "features": [
+            {
+              "feature-type": "RotateWithDirection",
+              "id": "e4fa9535-0f48-4401-a1e4-f13fbfb519a5",
+              "output": {
+                "RotateWithDirection": {
+                  "step-range": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            }
+          ],
           "id": "d9ced3ed-cc74-4731-baeb-7bbf7fda288e",
           "identifier": [
             "2205"
