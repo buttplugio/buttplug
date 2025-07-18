@@ -12842,7 +12842,8 @@
         {
           "btle": {
             "names": [
-              "CBW02"
+              "CBW02",
+              "CB-WXW03"
             ],
             "services": {
               "0000ffcb-0000-1000-8000-00805f9b34fb": {
@@ -12850,6 +12851,15 @@
               }
             }
           }
+        }
+      ],
+      "configuration": [
+        {
+          "id": "d3c4665b-d5bd-4144-ac20-b40a11a839d1",
+          "identifier": [
+            "CB-WXW03"
+          ],
+          "name": "Hannibal Kona"
         }
       ],
       "defaults": {
