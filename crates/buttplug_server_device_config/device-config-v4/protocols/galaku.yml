@@ -1353,6 +1353,37 @@ configurations:
             input-commands:
               - Read
     id: 361c0746-f630-41d3-a0bf-f993e2259217
+  - identifier:
+      - BGCD
+    name: Adorime Backy
+    features:
+      - feature-type: Vibrate
+        description: Vibrate
+        id: 72c39683-55e5-418c-94fd-3733089b76a6
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Vibrate
+        description: Vibrate
+        id: dfabda24-3995-4160-9f00-1732fc38281d
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 100
+      - feature-type: Battery
+        description: Battery Level
+        id: deb32910-37e0-4be7-8783-4dd5745be738
+        input:
+          Battery:
+            value-range:
+              - - 0
+                - 100
+            input-commands:
+              - Read
+    id: 349e64b6-931f-4e1a-b69c-4f9652f0cf2c
   # Type 2
   - identifier:
       - TFG1
@@ -1602,6 +1633,7 @@ communication:
         - QCSW
         - QCPW
         - SN80 # Adorime G-spot Rabbit Dildo Vibrator
+        - BGCD # Adorime Backy
         # Type 2
         - TFG1
         - GK27
