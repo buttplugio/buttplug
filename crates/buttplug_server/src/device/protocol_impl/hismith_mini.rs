@@ -21,6 +21,7 @@ use std::sync::Arc;
 use uuid::{Uuid, uuid};
 
 const HISMITH_MINI_PROTOCOL_UUID: Uuid = uuid!("94befc1a-9859-4bf6-99ee-5678c89237a7");
+const HISMITH_MINI_ROTATE_DIRECTIOM_UUID: Uuid = uuid!("94befc1a-9859-4bf6-99ee-5678c89237a7");
 
 pub mod setup {
   use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -171,6 +172,40 @@ impl ProtocolHandler for HismithMini {
         &[feature_id],
         Endpoint::Tx,
         vec![0xCC, idx, speed, speed + idx],
+        false,
+      )
+      .into(),
+    ])
+  }
+
+  fn handle_output_rotate_cmd(
+    &self,
+    _feature_index: u32,
+    feature_id: Uuid,
+    speed: i32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![
+          0xCC,
+          0x03,
+          speed.unsigned_abs() as u8,
+          speed.unsigned_abs() as u8 + 3,
+        ],
+        false,
+      )
+      .into(),
+      HardwareWriteCmd::new(
+        &vec![HISMITH_MINI_ROTATE_DIRECTIOM_UUID],
+        Endpoint::Tx,
+        vec![
+          0xCC,
+          0x01,
+          if speed >= 0 { 0xc0 } else { 0xc1 },
+          if speed >= 0 { 0xc1 } else { 0xc2 },
+        ],
         false,
       )
       .into(),
