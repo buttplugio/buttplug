@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 72
+    "minor": 74
   },
   "protocols": {
     "activejoy": {
@@ -1332,6 +1332,7 @@
               "QCSW",
               "QCPW",
               "SN80",
+              "BGCD",
               "TFG1",
               "GK27",
               "GX27",
@@ -3526,6 +3527,56 @@
             "SN80"
           ],
           "name": "Adorime G-spot Rabbit Dildo Vibrator"
+        },
+        {
+          "features": [
+            {
+              "description": "Vibrate",
+              "id": "72c39683-55e5-418c-94fd-3733089b76a6",
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Vibrate",
+              "id": "dfabda24-3995-4160-9f00-1732fc38281d",
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "deb32910-37e0-4be7-8783-4dd5745be738",
+              "input": {
+                "battery": {
+                  "input_commands": [
+                    "Read"
+                  ],
+                  "value_range": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "349e64b6-931f-4e1a-b69c-4f9652f0cf2c",
+          "identifier": [
+            "BGCD"
+          ],
+          "name": "Adorime Backy"
         },
         {
           "features": [
