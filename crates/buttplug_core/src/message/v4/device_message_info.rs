@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use crate::message::DeviceFeature;
 use getset::{CopyGetters, Getters, MutGetters};
@@ -28,7 +28,7 @@ pub struct DeviceMessageInfoV4 {
   device_message_timing_gap: u32,
   #[serde(rename = "DeviceFeatures")]
   #[getset(get = "pub", get_mut = "pub(super)")]
-  device_features: HashMap<u32, DeviceFeature>,
+  device_features: BTreeMap<u32, DeviceFeature>,
 }
 
 impl DeviceMessageInfoV4 {
