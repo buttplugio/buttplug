@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 use futures::{future, FutureExt};
 use getset::{CopyGetters, Getters};
@@ -6,17 +6,14 @@ use getset::{CopyGetters, Getters};
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugDeviceMessageNameV4, ButtplugServerMessageV4, DeviceFeature, InputCmdV4, InputCommandType, InputType, InputTypeData, OutputCmdV4, OutputCommand, OutputPositionWithDuration, OutputRotateWithDirection, OutputType, OutputValue
+    ButtplugDeviceMessageNameV4, ButtplugServerMessageV4, DeviceFeature, DeviceFeatureOutput, InputCmdV4, InputCommandType, InputType, InputTypeData, OutputCmdV4, OutputCommand, OutputPositionWithDuration, OutputRotateWithDirection, OutputType, OutputValue
   },
 };
 
 use super::ClientDeviceOutputCommand;
 
 use crate::{
-  create_boxed_future_client_error,
-  ButtplugClientError,
-  ButtplugClientMessageSender,
-  ButtplugClientResultFuture,
+  create_boxed_future_client_error, device::ClientDeviceCommandValue, ButtplugClientError, ButtplugClientMessageSender, ButtplugClientResultFuture
 };
 
 #[derive(Getters, CopyGetters, Clone)]
@@ -49,126 +46,131 @@ impl ClientDeviceFeature {
     }
   }
 
-  pub fn check_and_set_actuator_value_float(
-    &self,
-    actuator_type: OutputType,
-    value: f64,
-  ) -> ButtplugClientResultFuture {
-    if let Some(output_map) = self.feature().output() {
-      if let Some(actuator) = output_map.get(&actuator_type) {
-        self.event_loop_sender.send_message_expect_ok(
-          OutputCmdV4::new(
-            self.device_index,
-            self.feature_index,
-            OutputCommand::from_output_type(
-              actuator_type,
-              (value * actuator.step_count() as f64).ceil() as u32,
-            )
-            .unwrap(),
-          )
-          .into(),
-        )
-      } else {
-        future::ready(Err(ButtplugClientError::from(ButtplugError::from(
-          ButtplugDeviceError::DeviceActuatorTypeMismatch(
-            self.feature_index,
-            actuator_type,
-            self.feature.feature_type(),
-          ),
-        ))))
-        .boxed()
-      }
+  fn check_step_value(&self, feature_output: &DeviceFeatureOutput, steps: u32) -> Result<u32, ButtplugClientError> {
+    if steps < feature_output.step_count() {
+      Ok(steps)
     } else {
-      future::ready(Err(ButtplugClientError::from(ButtplugError::from(
-        ButtplugDeviceError::DeviceActuatorTypeMismatch(
-          self.feature_index,
-          actuator_type,
-          self.feature.feature_type(),
-        ),
-      ))))
-      .boxed()
+      Err(ButtplugClientError::ButtplugOutputCommandConversionError(format!("{} is larger than the maximum number of steps ({}).", steps, feature_output.step_count())))
     }
   }
 
-  pub fn check_and_set_actuator(
-    &self,
-    output_command: OutputCommand,
-  ) -> ButtplugClientResultFuture {
-    let actuator_type = output_command.as_output_type();
-    if let Some(output_map) = self.feature().output() {
-      if output_map.get(&actuator_type).is_some() {
-        self.event_loop_sender.send_message_expect_ok(
-          OutputCmdV4::new(self.device_index, self.feature_index, output_command).into(),
-        )
-      } else {
-        future::ready(Err(ButtplugClientError::from(ButtplugError::from(
-          ButtplugDeviceError::DeviceActuatorTypeMismatch(
-            self.feature_index,
-            actuator_type,
-            self.feature.feature_type(),
-          ),
-        ))))
-        .boxed()
-      }
+  fn convert_float_value(&self, feature_output: &DeviceFeatureOutput, float_amt: f64) -> Result<u32, ButtplugClientError> {
+    if float_amt < 0.0f64 || float_amt > 1.0f64 {
+      Err(ButtplugClientError::ButtplugOutputCommandConversionError("Float values must be between 0.0 and 1.0".to_owned()))
     } else {
-      future::ready(Err(ButtplugClientError::from(ButtplugError::from(
-        ButtplugDeviceError::DeviceActuatorTypeMismatch(
-          self.feature_index,
-          actuator_type,
-          self.feature.feature_type(),
-        ),
-      ))))
-      .boxed()
+      Ok((float_amt * feature_output.step_count() as f64) as u32)
     }
+  }
+
+  pub(super) fn convert_client_cmd_to_output_cmd(&self, client_cmd: &ClientDeviceOutputCommand) -> Result<OutputCmdV4, ButtplugClientError> {
+    let output_type: OutputType = client_cmd.into(); 
+    // First off, make sure we support this output.
+    let output = self
+      .feature
+      .output()
+      .as_ref()
+      .ok_or(ButtplugClientError::ButtplugOutputCommandConversionError(format!("Device feature does not support output type {}", output_type)))?
+      .get(&output_type)
+      .ok_or(ButtplugClientError::ButtplugOutputCommandConversionError(format!("Device feature does not support output type {}", output_type)))?;      
+
+    let output_cmd = match client_cmd {
+      ClientDeviceOutputCommand::VibrateFloat(v) => OutputCommand::Vibrate(OutputValue::new(self.convert_float_value(output, *v)?)),
+      ClientDeviceOutputCommand::OscillateFloat(v) => OutputCommand::Oscillate(OutputValue::new(self.convert_float_value(output, *v)?)),
+      ClientDeviceOutputCommand::RotateFloat(v) => OutputCommand::Rotate(OutputValue::new(self.convert_float_value(output, *v)?)),
+      ClientDeviceOutputCommand::ConstrictFloat(v) => OutputCommand::Constrict(OutputValue::new(self.convert_float_value(output, *v)?)),
+      ClientDeviceOutputCommand::HeaterFloat(v) => OutputCommand::Heater(OutputValue::new(self.convert_float_value(output, *v)?)),
+      ClientDeviceOutputCommand::LedFloat(v )=> OutputCommand::Led(OutputValue::new(self.convert_float_value(output, *v)?)),
+      ClientDeviceOutputCommand::SprayFloat(v) => OutputCommand::Spray(OutputValue::new(self.convert_float_value(output, *v)?)),
+      ClientDeviceOutputCommand::PositionFloat(v) => OutputCommand::Position(OutputValue::new(self.convert_float_value(output, *v)?)),
+      ClientDeviceOutputCommand::PositionWithDurationFloat(v, d) => OutputCommand::PositionWithDuration(OutputPositionWithDuration::new(self.convert_float_value(output, *v)?, *d)),
+      ClientDeviceOutputCommand::RotateWithDirectionFloat(v, d) => OutputCommand::RotateWithDirection(OutputRotateWithDirection::new(self.convert_float_value(output, *v)?, *d)),
+      ClientDeviceOutputCommand::Vibrate(v) => OutputCommand::Vibrate(OutputValue::new(self.check_step_value(output, *v)?)),
+      ClientDeviceOutputCommand::Oscillate(v) => OutputCommand::Oscillate(OutputValue::new(self.check_step_value(output, *v)?)),
+      ClientDeviceOutputCommand::Rotate(v) => OutputCommand::Rotate(OutputValue::new(self.check_step_value(output, *v)?)),
+      ClientDeviceOutputCommand::Constrict(v) => OutputCommand::Constrict(OutputValue::new(self.check_step_value(output, *v)?)),
+      ClientDeviceOutputCommand::Heater(v) => OutputCommand::Heater(OutputValue::new(self.check_step_value(output, *v)?)),
+      ClientDeviceOutputCommand::Led(v )=> OutputCommand::Led(OutputValue::new(self.check_step_value(output, *v)?)),
+      ClientDeviceOutputCommand::Spray(v) => OutputCommand::Spray(OutputValue::new(self.check_step_value(output, *v)?)),
+      ClientDeviceOutputCommand::Position(v) => OutputCommand::Position(OutputValue::new(self.check_step_value(output, *v)?)),
+      ClientDeviceOutputCommand::PositionWithDuration(v, d) => OutputCommand::PositionWithDuration(OutputPositionWithDuration::new(self.check_step_value(output, *v)?, *d)),
+      ClientDeviceOutputCommand::RotateWithDirection(v, d) => OutputCommand::RotateWithDirection(OutputRotateWithDirection::new(self.check_step_value(output, *v)?, *d)),
+    };
+    Ok(OutputCmdV4::new(self.device_index, self.feature_index, output_cmd))
   }
 
   pub fn send_command(&self, client_device_command: &ClientDeviceOutputCommand) -> ButtplugClientResultFuture {
-    match client_device_command.to_output_command(&self.feature) {
-      Ok(cmd) => self.event_loop_sender.send_message_expect_ok(
-        OutputCmdV4::new(self.device_index, self.feature_index, cmd).into()
-      ),
+    match self.convert_client_cmd_to_output_cmd(&client_device_command) {
+      Ok(cmd) => self.event_loop_sender.send_message_expect_ok(cmd.into()),
       Err(e) => future::ready(Err(e)).boxed()
     }
   }
 
-  pub fn vibrate(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_set_actuator(OutputCommand::Vibrate(OutputValue::new(level)))
+  pub fn vibrate(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
+    let val = level.into();
+    self.send_command(&match val {
+      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Vibrate(v),
+      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::VibrateFloat(f)
+    })
   }
 
-  pub fn oscillate(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_set_actuator(OutputCommand::Oscillate(OutputValue::new(level)))
+  pub fn oscillate(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
+    let val = level.into();
+    self.send_command(&match val {
+      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Oscillate(v),
+      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::OscillateFloat(f)
+    })
   }
 
-  pub fn rotate(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_set_actuator(OutputCommand::Rotate(OutputValue::new(level)))
+  pub fn rotate(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
+    let val = level.into();
+    self.send_command(&match val {
+      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Rotate(v),
+      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::RotateFloat(f)
+    })
   }
 
-  pub fn spray(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_set_actuator(OutputCommand::Spray(OutputValue::new(level)))
+  pub fn spray(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
+    let val = level.into();
+    self.send_command(&match val {
+      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Spray(v),
+      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::SprayFloat(f)
+    })
   }
 
-  pub fn constrict(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_set_actuator(OutputCommand::Constrict(OutputValue::new(level)))
+  pub fn constrict(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
+    let val = level.into();
+    self.send_command(&match val {
+      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Constrict(v),
+      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::ConstrictFloat(f)
+    })
   }
 
-  pub fn position(&self, level: u32) -> ButtplugClientResultFuture {
-    self.check_and_set_actuator(OutputCommand::Position(OutputValue::new(level)))
+  pub fn position(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
+    let val = level.into();
+    self.send_command(&match val {
+      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Position(v),
+      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::PositionFloat(f)
+    })
   }
 
   pub fn position_with_duration(
     &self,
-    position: u32,
+    position: impl Into<ClientDeviceCommandValue>,
     duration_in_ms: u32,
   ) -> ButtplugClientResultFuture {
-    self.check_and_set_actuator(OutputCommand::PositionWithDuration(
-      OutputPositionWithDuration::new(position, duration_in_ms),
-    ))
+    let val = position.into();
+    self.send_command(&match val {
+      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::PositionWithDuration(v, duration_in_ms),
+      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::PositionWithDurationFloat(f, duration_in_ms)
+    })
   }
 
-  pub fn rotate_with_direction(&self, level: u32, clockwise: bool) -> ButtplugClientResultFuture {
-    self.check_and_set_actuator(OutputCommand::RotateWithDirection(
-      OutputRotateWithDirection::new(level, clockwise),
-    ))
+  pub fn rotate_with_direction(&self, level: impl Into<ClientDeviceCommandValue>, clockwise: bool) -> ButtplugClientResultFuture {
+    let val = level.into();
+    self.send_command(&match val {
+      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::RotateWithDirection(v, clockwise),
+      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::RotateWithDirectionFloat(f, clockwise)
+    })
   }
 
   pub fn subscribe_sensor(&self, sensor_type: InputType) -> ButtplugClientResultFuture {

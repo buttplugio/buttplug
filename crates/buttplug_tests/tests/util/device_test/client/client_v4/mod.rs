@@ -4,7 +4,7 @@ use crate::util::{
   TestDeviceChannelHost,
 };
 use buttplug_client::{
-    device::ClientDeviceFeature,
+    device::{ClientDeviceFeature, ClientDeviceOutputCommand},
     ButtplugClient,
     ButtplugClientDevice,
     ButtplugClientEvent,
@@ -25,6 +25,20 @@ use futures::StreamExt;
 use log::*;
 use std::{sync::Arc, time::Duration};
 
+fn from_type_and_value(output_type: OutputType, value: f64) -> ClientDeviceOutputCommand {
+  match output_type {
+    OutputType::Constrict => ClientDeviceOutputCommand::ConstrictFloat(value),
+    OutputType::Heater => ClientDeviceOutputCommand::HeaterFloat(value),
+    OutputType::Led => ClientDeviceOutputCommand::LedFloat(value),
+    OutputType::Oscillate => ClientDeviceOutputCommand::OscillateFloat(value),
+    OutputType::Position => ClientDeviceOutputCommand::PositionFloat(value),
+    OutputType::Rotate => ClientDeviceOutputCommand::RotateFloat(value),
+    OutputType::Spray => ClientDeviceOutputCommand::SprayFloat(value),
+    OutputType::Vibrate => ClientDeviceOutputCommand::VibrateFloat(value),
+    _ => panic!("Value not translatable, test cannot run")
+  }
+}
+
 async fn run_test_client_command(command: &TestClientCommand, device: &Arc<ButtplugClientDevice>) {
   use TestClientCommand::*;
   match command {
@@ -33,7 +47,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
         .iter()
         .map(|cmd| {
           let f = device.device_features()[&cmd.index()].clone();
-          f.check_and_set_actuator_value_float(cmd.actuator_type(), cmd.scalar())
+          f.send_command(&from_type_and_value(cmd.actuator_type(), cmd.scalar()))
         })
         .collect();
       futures::future::try_join_all(fut_vec).await.unwrap();
@@ -49,7 +63,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
             .map(|(_, x)| x)
             .collect();
           let f = vibe_features[cmd.index() as usize].clone();
-          f.check_and_set_actuator_value_float(OutputType::Vibrate, cmd.speed())
+          f.send_command(&from_type_and_value(OutputType::Vibrate, cmd.speed()))
         })
         .collect();
       futures::future::try_join_all(fut_vec).await.unwrap();

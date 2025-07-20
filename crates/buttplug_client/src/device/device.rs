@@ -7,7 +7,7 @@
 
 //! Representation and management of devices connected to the server.
 
-use crate::device::ClientDeviceOutputCommand;
+use crate::device::{ClientDeviceCommandValue, ClientDeviceOutputCommand};
 
 use crate::{
   device::ClientDeviceFeature,
@@ -167,26 +167,6 @@ impl ButtplugClientDevice {
       .collect()
   }
 
-  fn set_value(&self, output_command: OutputCommand) -> ButtplugClientResultFuture {
-    let features = self.filter_device_actuators(output_command.as_output_type());
-    if features.is_empty() {
-      // TODO err
-    }
-    let fut_vec: Vec<ButtplugClientResultFuture> = features
-      .iter()
-      .map(|x| {
-        self.event_loop_sender.send_message_expect_ok(
-          OutputCmdV4::new(self.index, x.feature_index(), output_command).into(),
-        )
-      })
-      .collect();
-    async move {
-      futures::future::try_join_all(fut_vec).await?;
-      Ok(())
-    }
-    .boxed()
-  }
-
   fn set_client_value(&self, client_device_command: &ClientDeviceOutputCommand) -> ButtplugClientResultFuture {
     let features = self.filter_device_actuators(client_device_command.into());
     if features.is_empty() {
@@ -194,10 +174,10 @@ impl ButtplugClientDevice {
     }
     let mut fut_vec: Vec<ButtplugClientResultFuture> = vec!();
     for x in features {
-      let val = client_device_command.to_output_command(x.feature());
+      let val = x.convert_client_cmd_to_output_cmd(client_device_command);
       match val {
         Ok(v) => fut_vec.push(self.event_loop_sender.send_message_expect_ok(
-          OutputCmdV4::new(self.index, x.feature_index(), v).into(),
+          v.into(),
         )),
         Err(e) => return future::ready(Err(e)).boxed()
      }
@@ -218,8 +198,12 @@ impl ButtplugClientDevice {
   }
 
   /// Commands device to vibrate, assuming it has the features to do so.
-  pub fn vibrate(&self, speed: u32) -> ButtplugClientResultFuture {
-    self.set_value(OutputCommand::Vibrate(OutputValue::new(speed)))
+  pub fn vibrate(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
+    let val = level.into();
+    self.set_client_value(&match val {
+      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Vibrate(v),
+      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::VibrateFloat(f)
+    })
   }
 
   pub fn has_battery_level(&self) -> bool {
