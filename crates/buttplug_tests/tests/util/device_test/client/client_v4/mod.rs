@@ -4,7 +4,7 @@ use crate::util::{
   TestDeviceChannelHost,
 };
 use buttplug_client::{
-    client_device_feature::ClientDeviceFeature,
+    device::ClientDeviceFeature,
     ButtplugClient,
     ButtplugClientDevice,
     ButtplugClientEvent,
