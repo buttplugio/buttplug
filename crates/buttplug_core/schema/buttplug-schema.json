@@ -517,28 +517,32 @@
           "Id": { "$ref": "#/components/ServerId" },
           "Devices": {
             "description": "Array of device ids and names.",
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "DeviceName": { "$ref": "#/components/DeviceName" },
-                "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
-                "DeviceDisplayName": { "type": "string" },
-                "DeviceMessageTimingGap": { "type": "integer" },
-                "DeviceFeatures": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/DeviceFeatureV4" 
+            "type": "object",
+            "patternProperties": {
+              "^[0-9]*": {
+                "type": "object",
+                "properties": {
+                  "DeviceName": { "$ref": "#/components/DeviceName" },
+                  "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+                  "DeviceDisplayName": { "type": "string" },
+                  "DeviceMessageTimingGap": { "type": "integer" },
+                  "DeviceFeatures": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^[0-9]*": {
+                        "$ref": "#/components/DeviceFeatureV4" 
+                      }
+                    }
                   }
-                }
-              },
-              "additionalProperties": false,
-              "required": [
-                "DeviceName",
-                "DeviceIndex",
-                "DeviceMessageTimingGap",
-                "DeviceFeatures"
-              ]
+                },
+                "additionalProperties": false,
+                "required": [
+                  "DeviceName",
+                  "DeviceIndex",
+                  "DeviceMessageTimingGap",
+                  "DeviceFeatures"
+                ]
+              }
             }
           }
         },
