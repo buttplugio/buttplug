@@ -47,7 +47,7 @@ impl ClientDeviceFeature {
   }
 
   fn check_step_value(&self, feature_output: &DeviceFeatureOutput, steps: u32) -> Result<u32, ButtplugClientError> {
-    if steps < feature_output.step_count() {
+    if steps <= feature_output.step_count() {
       Ok(steps)
     } else {
       Err(ButtplugClientError::ButtplugOutputCommandConversionError(format!("{} is larger than the maximum number of steps ({}).", steps, feature_output.step_count())))
