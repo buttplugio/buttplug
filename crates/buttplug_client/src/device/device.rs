@@ -18,15 +18,16 @@ use crate::{
 use buttplug_core::{
   errors::ButtplugDeviceError,
   message::{
-    ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4, FeatureType, OutputCmdV4, OutputCommand, OutputType, OutputValue, StopDeviceCmdV0
+    ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4, FeatureType, OutputType, StopDeviceCmdV0
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use futures::{future, FutureExt, Stream};
 use getset::{CopyGetters, Getters};
 use log::*;
+use std::collections::BTreeMap;
 use std::{
-  collections::HashMap, fmt, sync::{
+  fmt, sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
   }
@@ -69,7 +70,7 @@ pub struct ButtplugClientDevice {
   index: u32,
   /// Actuators and sensors available on the device.
   #[getset(get = "pub")]
-  device_features: HashMap<u32, ClientDeviceFeature>,
+  device_features: BTreeMap<u32, ClientDeviceFeature>,
   /// Sends commands from the [ButtplugClientDevice] instance to the
   /// [ButtplugClient][super::ButtplugClient]'s event loop, which will then send
   /// the message on to the [ButtplugServer][crate::server::ButtplugServer]
@@ -103,7 +104,7 @@ impl ButtplugClientDevice {
     name: &str,
     display_name: &Option<String>,
     index: u32,
-    device_features: &HashMap<u32, DeviceFeature>,
+    device_features: &BTreeMap<u32, DeviceFeature>,
     message_sender: &Arc<ButtplugClientMessageSender>,
   ) -> Self {
     info!(
