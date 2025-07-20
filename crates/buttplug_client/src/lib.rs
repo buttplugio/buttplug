@@ -6,7 +6,6 @@
 // for full license information.
 
 //! Communications API for accessing Buttplug Servers
-pub mod client_device_feature;
 pub mod client_event_loop;
 pub mod client_message_sorter;
 pub mod connector;

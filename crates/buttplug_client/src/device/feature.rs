@@ -10,9 +10,9 @@ use buttplug_core::{
   },
 };
 
-use crate::device::ClientDeviceOutputCommand;
+use super::ClientDeviceOutputCommand;
 
-use super::{
+use crate::{
   create_boxed_future_client_error,
   ButtplugClientError,
   ButtplugClientMessageSender,
