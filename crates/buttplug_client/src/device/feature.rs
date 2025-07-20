@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 
 use futures::{future, FutureExt};
 use getset::{CopyGetters, Getters};
@@ -58,7 +58,7 @@ impl ClientDeviceFeature {
     if float_amt < 0.0f64 || float_amt > 1.0f64 {
       Err(ButtplugClientError::ButtplugOutputCommandConversionError("Float values must be between 0.0 and 1.0".to_owned()))
     } else {
-      Ok((float_amt * feature_output.step_count() as f64) as u32)
+      Ok((float_amt * feature_output.step_count() as f64).ceil() as u32)
     }
   }
 
