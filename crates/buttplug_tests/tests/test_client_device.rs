@@ -150,10 +150,8 @@ async fn test_client_device_invalid_command() {
 
   assert!(matches!(
     test_device.vibrate(1000).await.unwrap_err(),
-    ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(
-      ButtplugDeviceError::DeviceStepRangeError(..)
-    ))
-  ));
+    ButtplugClientError::ButtplugOutputCommandConversionError(_))
+  );
 }
 
 /*
