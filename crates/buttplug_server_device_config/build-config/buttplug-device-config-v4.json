@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 62
+    "minor": 63
   },
   "protocols": {
     "activejoy": {
@@ -4634,7 +4634,8 @@
               "J-Viv",
               "J-Vivara",
               "J-Explorer2",
-              "J-Derik"
+              "J-Derik",
+              "J-Peachy"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -4861,6 +4862,13 @@
             "J-Explorer2"
           ],
           "name": "JoyHub Explorer 2"
+        },
+        {
+          "id": "38def4f2-5ec4-4466-a3e3-d7a9e35f4a2b",
+          "identifier": [
+            "J-Peachy"
+          ],
+          "name": "JoyHub Peachy"
         },
         {
           "features": [
