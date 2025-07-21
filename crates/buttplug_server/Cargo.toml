@@ -17,11 +17,11 @@ path = "src/lib.rs"
 test = true
 doctest = true
 doc = true
-
+crate-type = ["cdylib", "rlib"]
 
 [features]
 default=[]
-wasm=[]
+wasm=["uuid/js"]
 
 [dependencies]
 buttplug_derive = "0.8.1"
@@ -57,3 +57,6 @@ sha2 = { version = "0.10.9", features = ["std"] }
 byteorder = "1.5.0"
 # Used by several packages, but we need to bring in the JS feature for wasm. Pinned at 0.2 until dependencies update
 rand = { version = "0.8" }
+
+[target.wasm32-unknown-unknown.dependencies]
+getrandom = { version = "0.2.15", features = ["js"]}
