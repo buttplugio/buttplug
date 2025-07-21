@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 63
+    "minor": 64
   },
   "protocols": {
     "activejoy": {
@@ -14414,7 +14414,8 @@
             "names": [
               "Pink_Punch",
               "PinkPunch_Peachu",
-              "PinkPunch_DreamBunny"
+              "PinkPunch_DreamBunny",
+              "PinkPunch_Peacaron"
             ],
             "services": {
               "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -14445,6 +14446,13 @@
             "PinkPunch_DreamBunny"
           ],
           "name": "Pink Punch Dream Bunny"
+        },
+        {
+          "id": "4f08a8b9-70a7-4a0d-b90e-67010ac21f15",
+          "identifier": [
+            "PinkPunch_Peacaron"
+          ],
+          "name": "Pink Punch Peacaron"
         }
       ],
       "defaults": {
