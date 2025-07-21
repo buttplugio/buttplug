@@ -59,4 +59,5 @@ byteorder = "1.5.0"
 rand = { version = "0.8" }
 
 [target.wasm32-unknown-unknown.dependencies]
-getrandom = { version = "0.2.15", features = ["js"]}
+getrandom = { version = "0.3.3", features = ["wasm_js"]}
+getrandom_old = { version = "0.2.15", features = ["js"], package = "getrandom"}
