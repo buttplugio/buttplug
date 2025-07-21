@@ -93,4 +93,4 @@ jobs:
       with:
         version: 'latest'
     - name: Build Dev
-      run: RUSTFLAGS='--cfg getrandom_backend="wasm_js"' wasm-pack build --dev crates/buttplug_server --no-default-features --features wasm
+      run: wasm-pack build --dev crates/buttplug_server --no-default-features --features wasm
