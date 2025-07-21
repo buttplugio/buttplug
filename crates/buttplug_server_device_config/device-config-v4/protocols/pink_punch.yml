@@ -21,12 +21,17 @@ configurations:
       - PinkPunch_DreamBunny
     name: Pink Punch Dream Bunny
     id: 85703d43-c719-4753-ba92-3bb28c150565
+  - identifier:
+      - PinkPunch_Peacaron
+    name: Pink Punch Peacaron
+    id: 4f08a8b9-70a7-4a0d-b90e-67010ac21f15
 communication:
   - btle:
       names:
         - Pink_Punch
         - PinkPunch_Peachu
         - PinkPunch_DreamBunny
+        - PinkPunch_Peacaron
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
