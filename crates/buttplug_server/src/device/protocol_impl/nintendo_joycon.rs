@@ -15,7 +15,7 @@ use crate::device::{
   },
 };
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
+use buttplug_core::{errors::ButtplugDeviceError, util::{self, async_manager}};
 use buttplug_server_device_config::{
   Endpoint,
   DeviceDefinition,
