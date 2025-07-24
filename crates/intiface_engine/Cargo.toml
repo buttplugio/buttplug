@@ -24,6 +24,8 @@ default=[]
 tokio-console=["console-subscriber"]
 
 [dependencies]
+buttplug_client = { path = "../buttplug_client" }
+buttplug_client_in_process = { path = "../buttplug_client_in_process" }
 buttplug_core = { path = "../buttplug_core" }
 buttplug_server = { path = "../buttplug_server" }
 buttplug_server_device_config = { path = "../buttplug_server_device_config" }
@@ -35,7 +37,6 @@ buttplug_server_hwmgr_serial = { path = "../buttplug_server_hwmgr_serial" }
 buttplug_server_hwmgr_websocket = { path = "../buttplug_server_hwmgr_websocket" }
 buttplug_server_hwmgr_xinput = { path = "../buttplug_server_hwmgr_xinput" }
 buttplug_transport_websocket_tungstenite = { path = "../buttplug_transport_websocket_tungstenite" }
-# buttplug = "9.0.8"
 argh = "0.1.13"
 log = "0.4.27"
 futures = "0.3.31"
@@ -63,6 +64,7 @@ url = "2.5.4"
 libmdns = "0.9.1"
 tokio-stream = "0.1.17"
 dashmap = "6.1.0"
+axum = "0.8.4"
 
 [build-dependencies]
 vergen-gitcl = {version = "1.0.8", features = ["build"]}

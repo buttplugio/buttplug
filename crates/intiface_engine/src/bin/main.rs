@@ -148,16 +148,17 @@ pub struct IntifaceCLIArguments {
   #[getset(get_copy = "pub")]
   repeater_port: Option<u16>,
 
-  /// if set, use repeater mode instead of engine mode
+  /// if set, use rest api instead of bringing up server
   #[argh(option)]
   #[getset(get = "pub")]
-  repeater_remote_address: Option<String>,
+  rest_api_port: Option<u16>,
 
   #[cfg(debug_assertions)]
   /// crash the main thread (that holds the runtime)
   #[argh(switch)]
   #[getset(get_copy = "pub")]
   crash_main_thread: bool,
+
 
   #[allow(dead_code)]
   #[cfg(debug_assertions)]
@@ -257,6 +258,9 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
     }
     if let Some(value) = args.device_websocket_server_port() {
       builder.device_websocket_server_port(value);
+    }
+    if let Some(value) = args.rest_api_port() {
+      builder.rest_api_port(*value);
     }
     if args.broadcast_server_mdns() {
       if let Some(value) = args.mdns_suffix() {
