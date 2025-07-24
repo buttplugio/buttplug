@@ -1,5 +1,5 @@
 defaults:
-  name: metaXsire Nolan
+  name: Sexverse Nolan
   features:
     - id: 4961e88c-5c2e-4701-95ee-16d58538b65e
       output:
@@ -28,7 +28,7 @@ configurations:
     id: 2a4a4daa-5740-425b-b1a4-72b73f746fdf
   - identifier:
       - HH010
-    name: metaXsire HH010
+    name: Sexverse HH010
     features:
       - id: 968f7306-6997-4b76-a40f-acbb431d9582
         output:

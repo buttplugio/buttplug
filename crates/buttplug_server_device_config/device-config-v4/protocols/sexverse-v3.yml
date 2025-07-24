@@ -1,5 +1,5 @@
 defaults:
-  name: metaXsire Tay
+  name: Sexverse Tay
   features:
     - id: 074a15d1-2efc-4cd8-8f1f-0f32f1468024
       output:
@@ -11,19 +11,19 @@ defaults:
 configurations:
   - identifier:
       - TAY001
-    name: metaXsire Tay 1
+    name: Sexverse Tay 1
     id: c7615c1d-d53f-4d24-82e1-ce08c301da66
   - identifier:
       - TAY009
-    name: metaXsire Tay 9
+    name: Sexverse Tay 9
     id: ddfe0ac7-f275-4e08-b16b-a5cd579e9a9e
   - identifier:
       - TAY006
-    name: metaXsire Tay 6
+    name: Sexverse Tay 6
     id: edfecee1-3b6f-4501-a9d9-717b2bd515a2
   - identifier:
       - TA-S001A
-    name: metaXsire Zeus
+    name: Sexverse Zeus
     features:
       - id: 11c78de9-800a-4444-9647-0ed33181e63c
         output:

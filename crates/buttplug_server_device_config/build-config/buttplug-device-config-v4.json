@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 74
+    "minor": 62
   },
   "protocols": {
     "activejoy": {
@@ -12469,468 +12469,6 @@
         "name": "Meese Device"
       }
     },
-    "metaxsire": {
-      "communication": [
-        {
-          "btle": {
-            "names": [
-              "Rex",
-              "Cali",
-              "LY165A01",
-              "Olis",
-              "LY213A01",
-              "LY199B01",
-              "LY234A01",
-              "LY271A01",
-              "LY270A01"
-            ],
-            "services": {
-              "0000ffe0-0000-1000-8000-00805f9b34fb": {
-                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb",
-                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
-              }
-            }
-          }
-        }
-      ],
-      "configurations": [
-        {
-          "id": "447c8bda-bafc-472a-9333-8f809bbc48bb",
-          "identifier": [
-            "Rex"
-          ],
-          "name": "metaXsire Rex"
-        },
-        {
-          "features": [
-            {
-              "id": "d3e17d91-94d8-449d-b049-91bd0ec3cf71",
-              "output": {
-                "vibrate": {
-                  "value": [
-                    0,
-                    255
-                  ]
-                }
-              }
-            },
-            {
-              "id": "6aceca29-6833-4f61-b5af-1005bb50bdf9",
-              "output": {
-                "constrict": {
-                  "value": [
-                    0,
-                    255
-                  ]
-                }
-              }
-            }
-          ],
-          "id": "e4bb4468-1de1-4f37-a348-5c7177923603",
-          "identifier": [
-            "Cali",
-            "LY165A01"
-          ],
-          "name": "metaXsire Cali"
-        },
-        {
-          "features": [
-            {
-              "id": "2e6d4a73-7847-4a5b-a03c-cdd6f07c39c9",
-              "output": {
-                "vibrate": {
-                  "value": [
-                    0,
-                    255
-                  ]
-                }
-              }
-            },
-            {
-              "id": "c1530d49-07b0-432b-8c08-08e1ef4d2842",
-              "output": {
-                "vibrate": {
-                  "value": [
-                    0,
-                    255
-                  ]
-                }
-              }
-            },
-            {
-              "id": "cbc1187c-2400-4e9b-9fc0-a03744bd7295",
-              "output": {
-                "rotate": {
-                  "value": [
-                    0,
-                    255
-                  ]
-                }
-              }
-            }
-          ],
-          "id": "9e874901-c5d7-49d2-910d-3849ab5ff96c",
-          "identifier": [
-            "Olis"
-          ],
-          "name": "metaXsire Olis"
-        },
-        {
-          "features": [
-            {
-              "id": "641d8a6a-b068-4089-9632-c81ab872677d",
-              "output": {
-                "oscillate": {
-                  "value": [
-                    0,
-                    255
-                  ]
-                }
-              }
-            },
-            {
-              "id": "15dcc27e-ab6d-407e-8e1a-4b51e445fa5d",
-              "output": {
-                "vibrate": {
-                  "value": [
-                    0,
-                    255
-                  ]
-                }
-              }
-            }
-          ],
-          "id": "941a41b2-78d2-45a6-b730-17a8ff8c75e0",
-          "identifier": [
-            "LY213A01"
-          ],
-          "name": "metaXsire BuCUE"
-        },
-        {
-          "id": "0f8e2cac-428a-430c-a9d8-8889ed608c24",
-          "identifier": [
-            "LY199B01"
-          ],
-          "name": "Cooxer Bullet Vibe"
-        },
-        {
-          "id": "de51460a-4c65-4173-8172-8dc7eaccc3a1",
-          "identifier": [
-            "LY234A01"
-          ],
-          "name": "metaXsire Tadpole"
-        },
-        {
-          "id": "5d061d81-98cd-4271-b896-68394a21e97a",
-          "identifier": [
-            "LY271A01"
-          ],
-          "name": "metaXsire Upton"
-        },
-        {
-          "id": "97458f06-7a6f-4f8a-bb7a-93dd6ab53157",
-          "identifier": [
-            "LY270A01"
-          ],
-          "name": "metaXsire Una"
-        }
-      ],
-      "defaults": {
-        "features": [
-          {
-            "id": "74825924-5e2a-4dd6-a91a-10a24be40c09",
-            "output": {
-              "vibrate": {
-                "value": [
-                  0,
-                  255
-                ]
-              }
-            }
-          }
-        ],
-        "id": "f595862c-fa49-460c-9667-87f0eac24a6c",
-        "name": "metaXsire Device"
-      }
-    },
-    "metaxsire-v2": {
-      "communication": [
-        {
-          "btle": {
-            "names": [
-              "LY272A01",
-              "LB-W01",
-              "HH010"
-            ],
-            "services": {
-              "0000bae0-0000-1000-8000-00805f9b34fb": {
-                "tx": "0000bae1-0000-1000-8000-00805f9b34fb"
-              }
-            }
-          }
-        }
-      ],
-      "configurations": [
-        {
-          "features": [
-            {
-              "id": "59cacf4b-ef09-42ad-b3d6-459bc195da26",
-              "output": {
-                "vibrate": {
-                  "value": [
-                    0,
-                    20
-                  ]
-                }
-              }
-            }
-          ],
-          "id": "2a4a4daa-5740-425b-b1a4-72b73f746fdf",
-          "identifier": [
-            "LB-W01"
-          ],
-          "name": "Libo Miao"
-        },
-        {
-          "features": [
-            {
-              "id": "968f7306-6997-4b76-a40f-acbb431d9582",
-              "output": {
-                "oscillate": {
-                  "value": [
-                    0,
-                    20
-                  ]
-                }
-              }
-            },
-            {
-              "id": "018009d0-b5bf-4f97-a13d-909d0e74fabc",
-              "output": {
-                "vibrate": {
-                  "value": [
-                    0,
-                    20
-                  ]
-                }
-              }
-            }
-          ],
-          "id": "0e1f9fe7-22d9-4afb-9fe5-192b8e5508c3",
-          "identifier": [
-            "HH010"
-          ],
-          "name": "metaXsire HH010"
-        }
-      ],
-      "defaults": {
-        "features": [
-          {
-            "id": "4961e88c-5c2e-4701-95ee-16d58538b65e",
-            "output": {
-              "vibrate": {
-                "value": [
-                  0,
-                  20
-                ]
-              }
-            }
-          },
-          {
-            "id": "a3cd125d-ac6c-426d-b45a-fe3c7ae1e1d2",
-            "output": {
-              "oscillate": {
-                "value": [
-                  0,
-                  20
-                ]
-              }
-            }
-          }
-        ],
-        "id": "ce9d4fe0-6614-493d-ac77-02ec5d42947d",
-        "name": "metaXsire Nolan"
-      }
-    },
-    "metaxsire-v3": {
-      "communication": [
-        {
-          "btle": {
-            "names": [
-              "TAY001",
-              "TAY006",
-              "TAY009",
-              "TA-S001A"
-            ],
-            "services": {
-              "0000fff0-0000-1000-8000-00805f9b34fb": {
-                "tx": "0000fe02-0000-1000-8000-00805f9b34fb"
-              }
-            }
-          }
-        }
-      ],
-      "configurations": [
-        {
-          "id": "c7615c1d-d53f-4d24-82e1-ce08c301da66",
-          "identifier": [
-            "TAY001"
-          ],
-          "name": "metaXsire Tay 1"
-        },
-        {
-          "id": "ddfe0ac7-f275-4e08-b16b-a5cd579e9a9e",
-          "identifier": [
-            "TAY009"
-          ],
-          "name": "metaXsire Tay 9"
-        },
-        {
-          "id": "edfecee1-3b6f-4501-a9d9-717b2bd515a2",
-          "identifier": [
-            "TAY006"
-          ],
-          "name": "metaXsire Tay 6"
-        },
-        {
-          "features": [
-            {
-              "id": "11c78de9-800a-4444-9647-0ed33181e63c",
-              "output": {
-                "vibrate": {
-                  "value": [
-                    0,
-                    20
-                  ]
-                }
-              }
-            },
-            {
-              "id": "47646747-4dea-47ba-80b2-407e2a276ae2",
-              "output": {
-                "oscillate": {
-                  "value": [
-                    0,
-                    20
-                  ]
-                }
-              }
-            }
-          ],
-          "id": "ae1e373f-1a35-476b-8da8-6017dcb7e0de",
-          "identifier": [
-            "TA-S001A"
-          ],
-          "name": "metaXsire Zeus"
-        }
-      ],
-      "defaults": {
-        "features": [
-          {
-            "id": "074a15d1-2efc-4cd8-8f1f-0f32f1468024",
-            "output": {
-              "vibrate": {
-                "value": [
-                  0,
-                  20
-                ]
-              }
-            }
-          }
-        ],
-        "id": "2e8ff651-b10d-4686-89b5-b8197e80e159",
-        "name": "metaXsire Tay"
-      }
-    },
-    "metaxsire-v4": {
-      "communication": [
-        {
-          "btle": {
-            "names": [
-              "CFG1 vibrator",
-              "HJ2024N01"
-            ],
-            "services": {
-              "0000cfa2-0000-1000-8000-00805f9b34fb": {
-                "tx": "0000cf21-0000-1000-8000-00805f9b34fb"
-              },
-              "0000dba2-0000-1000-8000-00805f9b34fb": {
-                "tx": "0000db21-0000-1000-8000-00805f9b34fb"
-              }
-            }
-          }
-        }
-      ],
-      "configurations": [
-        {
-          "id": "679cdc1b-9236-4ed1-a3c4-c33b748a8cde",
-          "identifier": [
-            "HJ2024N01"
-          ],
-          "name": "VVD Vkini"
-        }
-      ],
-      "defaults": {
-        "features": [
-          {
-            "id": "0c9c5a7d-8d28-4003-b1d4-8de5c73c8fe4",
-            "output": {
-              "vibrate": {
-                "value": [
-                  0,
-                  99
-                ]
-              }
-            }
-          }
-        ],
-        "id": "e69dc695-695d-485b-be16-59161505fd6d",
-        "name": "metaXsire G1 Vibrator"
-      }
-    },
-    "metaxsire-v5": {
-      "communication": [
-        {
-          "btle": {
-            "names": [
-              "CBW02",
-              "CB-WXW03"
-            ],
-            "services": {
-              "0000ffcb-0000-1000-8000-00805f9b34fb": {
-                "tx": "0000cb02-0000-1000-8000-00805f9b34fb"
-              }
-            }
-          }
-        }
-      ],
-      "configuration": [
-        {
-          "id": "d3c4665b-d5bd-4144-ac20-b40a11a839d1",
-          "identifier": [
-            "CB-WXW03"
-          ],
-          "name": "Hannibal Kona"
-        }
-      ],
-      "defaults": {
-        "features": [
-          {
-            "id": "140be13c-4cb3-407f-9597-e03f046f1c1a",
-            "output": {
-              "vibrate": {
-                "value": [
-                  0,
-                  100
-                ]
-              }
-            }
-          }
-        ],
-        "id": "783bc287-528c-4c58-a7ec-47a49304309e",
-        "name": "Sexverse Heart"
-      }
-    },
     "mizzzee": {
       "communication": [
         {
@@ -16843,6 +16381,468 @@
         ],
         "id": "dd6e5fe8-f53c-4b5c-9614-cedfffc0a40f",
         "name": "Sexverse LG389"
+      }
+    },
+    "sexverse-v1": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Rex",
+              "Cali",
+              "LY165A01",
+              "Olis",
+              "LY213A01",
+              "LY199B01",
+              "LY234A01",
+              "LY271A01",
+              "LY270A01"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb",
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "447c8bda-bafc-472a-9333-8f809bbc48bb",
+          "identifier": [
+            "Rex"
+          ],
+          "name": "Sexverse Rex"
+        },
+        {
+          "features": [
+            {
+              "id": "d3e17d91-94d8-449d-b049-91bd0ec3cf71",
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "6aceca29-6833-4f61-b5af-1005bb50bdf9",
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "e4bb4468-1de1-4f37-a348-5c7177923603",
+          "identifier": [
+            "Cali",
+            "LY165A01"
+          ],
+          "name": "Sexverse Cali"
+        },
+        {
+          "features": [
+            {
+              "id": "2e6d4a73-7847-4a5b-a03c-cdd6f07c39c9",
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "c1530d49-07b0-432b-8c08-08e1ef4d2842",
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "cbc1187c-2400-4e9b-9fc0-a03744bd7295",
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "9e874901-c5d7-49d2-910d-3849ab5ff96c",
+          "identifier": [
+            "Olis"
+          ],
+          "name": "Sexverse Olis"
+        },
+        {
+          "features": [
+            {
+              "id": "641d8a6a-b068-4089-9632-c81ab872677d",
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "15dcc27e-ab6d-407e-8e1a-4b51e445fa5d",
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "941a41b2-78d2-45a6-b730-17a8ff8c75e0",
+          "identifier": [
+            "LY213A01"
+          ],
+          "name": "Sexverse BuCUE"
+        },
+        {
+          "id": "0f8e2cac-428a-430c-a9d8-8889ed608c24",
+          "identifier": [
+            "LY199B01"
+          ],
+          "name": "Cooxer Bullet Vibe"
+        },
+        {
+          "id": "de51460a-4c65-4173-8172-8dc7eaccc3a1",
+          "identifier": [
+            "LY234A01"
+          ],
+          "name": "Sexverse Tadpole"
+        },
+        {
+          "id": "5d061d81-98cd-4271-b896-68394a21e97a",
+          "identifier": [
+            "LY271A01"
+          ],
+          "name": "Sexverse Upton"
+        },
+        {
+          "id": "97458f06-7a6f-4f8a-bb7a-93dd6ab53157",
+          "identifier": [
+            "LY270A01"
+          ],
+          "name": "Sexverse Una"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "74825924-5e2a-4dd6-a91a-10a24be40c09",
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  255
+                ]
+              }
+            }
+          }
+        ],
+        "id": "f595862c-fa49-460c-9667-87f0eac24a6c",
+        "name": "Sexverse Device"
+      }
+    },
+    "sexverse-v2": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "LY272A01",
+              "LB-W01",
+              "HH010"
+            ],
+            "services": {
+              "0000bae0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000bae1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "features": [
+            {
+              "id": "59cacf4b-ef09-42ad-b3d6-459bc195da26",
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    20
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "2a4a4daa-5740-425b-b1a4-72b73f746fdf",
+          "identifier": [
+            "LB-W01"
+          ],
+          "name": "Libo Miao"
+        },
+        {
+          "features": [
+            {
+              "id": "968f7306-6997-4b76-a40f-acbb431d9582",
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    20
+                  ]
+                }
+              }
+            },
+            {
+              "id": "018009d0-b5bf-4f97-a13d-909d0e74fabc",
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    20
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "0e1f9fe7-22d9-4afb-9fe5-192b8e5508c3",
+          "identifier": [
+            "HH010"
+          ],
+          "name": "Sexverse HH010"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "4961e88c-5c2e-4701-95ee-16d58538b65e",
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  20
+                ]
+              }
+            }
+          },
+          {
+            "id": "a3cd125d-ac6c-426d-b45a-fe3c7ae1e1d2",
+            "output": {
+              "oscillate": {
+                "value": [
+                  0,
+                  20
+                ]
+              }
+            }
+          }
+        ],
+        "id": "ce9d4fe0-6614-493d-ac77-02ec5d42947d",
+        "name": "Sexverse Nolan"
+      }
+    },
+    "sexverse-v3": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "TAY001",
+              "TAY006",
+              "TAY009",
+              "TA-S001A"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fe02-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "c7615c1d-d53f-4d24-82e1-ce08c301da66",
+          "identifier": [
+            "TAY001"
+          ],
+          "name": "Sexverse Tay 1"
+        },
+        {
+          "id": "ddfe0ac7-f275-4e08-b16b-a5cd579e9a9e",
+          "identifier": [
+            "TAY009"
+          ],
+          "name": "Sexverse Tay 9"
+        },
+        {
+          "id": "edfecee1-3b6f-4501-a9d9-717b2bd515a2",
+          "identifier": [
+            "TAY006"
+          ],
+          "name": "Sexverse Tay 6"
+        },
+        {
+          "features": [
+            {
+              "id": "11c78de9-800a-4444-9647-0ed33181e63c",
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    20
+                  ]
+                }
+              }
+            },
+            {
+              "id": "47646747-4dea-47ba-80b2-407e2a276ae2",
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    20
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "ae1e373f-1a35-476b-8da8-6017dcb7e0de",
+          "identifier": [
+            "TA-S001A"
+          ],
+          "name": "Sexverse Zeus"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "074a15d1-2efc-4cd8-8f1f-0f32f1468024",
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  20
+                ]
+              }
+            }
+          }
+        ],
+        "id": "2e8ff651-b10d-4686-89b5-b8197e80e159",
+        "name": "Sexverse Tay"
+      }
+    },
+    "sexverse-v4": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "CFG1 vibrator",
+              "HJ2024N01"
+            ],
+            "services": {
+              "0000cfa2-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000cf21-0000-1000-8000-00805f9b34fb"
+              },
+              "0000dba2-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000db21-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "679cdc1b-9236-4ed1-a3c4-c33b748a8cde",
+          "identifier": [
+            "HJ2024N01"
+          ],
+          "name": "VVD Vkini"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "0c9c5a7d-8d28-4003-b1d4-8de5c73c8fe4",
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  99
+                ]
+              }
+            }
+          }
+        ],
+        "id": "e69dc695-695d-485b-be16-59161505fd6d",
+        "name": "Sexverse G1 Vibrator"
+      }
+    },
+    "sexverse-v5": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "CBW02",
+              "CB-WXW03"
+            ],
+            "services": {
+              "0000ffcb-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000cb02-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "configuration": [
+        {
+          "id": "d3c4665b-d5bd-4144-ac20-b40a11a839d1",
+          "identifier": [
+            "CB-WXW03"
+          ],
+          "name": "Hannibal Kona"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "140be13c-4cb3-407f-9597-e03f046f1c1a",
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  100
+                ]
+              }
+            }
+          }
+        ],
+        "id": "783bc287-528c-4c58-a7ec-47a49304309e",
+        "name": "Sexverse Heart"
       }
     },
     "svakom-alex": {

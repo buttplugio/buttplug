@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2025 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -29,13 +29,13 @@ use crate::device::{
   },
 };
 
-generic_protocol_initializer_setup!(MetaXSire, "metaxsire");
+generic_protocol_initializer_setup!(SexverseV1, "sexverse-v1");
 
 #[derive(Default)]
-pub struct MetaXSireInitializer {}
+pub struct SexverseV1Initializer {}
 
 #[async_trait]
-impl ProtocolInitializer for MetaXSireInitializer {
+impl ProtocolInitializer for SexverseV1Initializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
@@ -49,18 +49,18 @@ impl ProtocolInitializer for MetaXSireInitializer {
         }
       }
     });
-    Ok(Arc::new(MetaXSire::new(commands)))
+    Ok(Arc::new(SexverseV1::new(commands)))
   }
 }
 
-const METAXSIRE_PROTOCOL_UUID: Uuid = uuid!("6485a762-2ea7-48c1-a4ba-ab724e618348");
+const SEXVERSE_PROTOCOL_UUID: Uuid = uuid!("6485a762-2ea7-48c1-a4ba-ab724e618348");
 
 #[derive(Default)]
-pub struct MetaXSire {
+pub struct SexverseV1 {
   commands: Vec<(OutputType, AtomicU8)>,
 }
 
-impl MetaXSire {
+impl SexverseV1 {
   fn new(commands: Vec<(OutputType, AtomicU8)>) -> Self {
     Self { commands }
   }
@@ -97,13 +97,17 @@ impl MetaXSire {
     }
     data.push(crc);
 
-    Ok(vec![
-      HardwareWriteCmd::new(&[METAXSIRE_PROTOCOL_UUID], Endpoint::Tx, data, false).into(),
-    ])
+    Ok(vec![HardwareWriteCmd::new(
+      &[SEXVERSE_PROTOCOL_UUID],
+      Endpoint::Tx,
+      data,
+      false,
+    )
+    .into()])
   }
 }
 
-impl ProtocolHandler for MetaXSire {
+impl ProtocolHandler for SexverseV1 {
   fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,
