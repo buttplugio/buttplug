@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2025 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -14,14 +14,14 @@ use buttplug_server_device_config::Endpoint;
 use std::time::Duration;
 use uuid::Uuid;
 
-generic_protocol_setup!(MetaXSireV3, "metaxsire-v3");
+generic_protocol_setup!(SexverseV3, "sexverse-v3");
 
-const METAXSIRE_COMMAND_DELAY_MS: u64 = 100;
+const SEXVERSE_COMMAND_DELAY_MS: u64 = 100;
 
 #[derive(Default)]
-pub struct MetaXSireV3 {}
+pub struct SexverseV3 {}
 
-impl MetaXSireV3 {
+impl SexverseV3 {
   fn form_command(
     &self,
     feature_index: u32,
@@ -38,10 +38,10 @@ impl MetaXSireV3 {
   }
 }
 
-impl ProtocolHandler for MetaXSireV3 {
+impl ProtocolHandler for SexverseV3 {
   fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
     ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_millis(
-      METAXSIRE_COMMAND_DELAY_MS,
+      SEXVERSE_COMMAND_DELAY_MS,
     ))
   }
 

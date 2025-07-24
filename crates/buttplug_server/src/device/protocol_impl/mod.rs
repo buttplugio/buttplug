@@ -63,11 +63,6 @@ pub mod magic_motion_v4;
 pub mod mannuo;
 pub mod maxpro;
 pub mod meese;
-pub mod metaxsire;
-pub mod metaxsire_v2;
-pub mod metaxsire_v3;
-pub mod metaxsire_v4;
-pub mod metaxsire_v5;
 pub mod mizzzee;
 pub mod mizzzee_v2;
 pub mod mizzzee_v3;
@@ -93,6 +88,11 @@ pub mod sensee_capsule;
 pub mod sensee_v2;
 pub mod serveu;
 pub mod sexverse_lg389;
+pub mod sexverse_v1;
+pub mod sexverse_v2;
+pub mod sexverse_v3;
+pub mod sexverse_v4;
+pub mod sexverse_v5;
 pub mod svakom;
 pub mod synchro;
 pub mod tcode_v03;
@@ -328,26 +328,6 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(&mut map, meese::setup::MeeseIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
-    metaxsire::setup::MetaXSireIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    metaxsire_v2::setup::MetaXSireV2IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    metaxsire_v3::setup::MetaXSireV3IdentifierFactory::default(),
-  );
-    add_to_protocol_map(
-        &mut map,
-        metaxsire_v4::setup::MetaXSireV4IdentifierFactory::default(),
-    );
-    add_to_protocol_map(
-        &mut map,
-        metaxsire_v5::setup::MetaXSireV5IdentifierFactory::default(),
-    );
-  add_to_protocol_map(
-    &mut map,
     mizzzee::setup::MizzZeeIdentifierFactory::default(),
   );
   add_to_protocol_map(
@@ -427,6 +407,26 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     sexverse_lg389::setup::SexverseLG389IdentifierFactory::default(),
   );
+    add_to_protocol_map(
+        &mut map,
+        sexverse_v1::setup::SexverseV1IdentifierFactory::default(),
+    );
+    add_to_protocol_map(
+        &mut map,
+        sexverse_v2::setup::SexverseV2IdentifierFactory::default(),
+    );
+    add_to_protocol_map(
+        &mut map,
+        sexverse_v3::setup::SexverseV3IdentifierFactory::default(),
+    );
+    add_to_protocol_map(
+        &mut map,
+        sexverse_v4::setup::SexverseV4IdentifierFactory::default(),
+    );
+    add_to_protocol_map(
+        &mut map,
+        sexverse_v5::setup::SexverseV5IdentifierFactory::default(),
+    );
   add_to_protocol_map(&mut map, serveu::setup::ServeUIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
