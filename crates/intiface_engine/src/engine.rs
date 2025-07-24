@@ -1,15 +1,8 @@
 use crate::{
-  ButtplugRepeater,
-  backdoor_server::BackdoorServer,
-  buttplug_server::{reset_buttplug_server, run_server, setup_buttplug_server},
-  error::IntifaceEngineError,
-  frontend::{
+  ButtplugRemoteServer, ButtplugRepeater, backdoor_server::BackdoorServer, buttplug_server::{reset_buttplug_server, run_server, setup_buttplug_server}, error::IntifaceEngineError, frontend::{
     Frontend, frontend_external_event_loop, frontend_server_event_loop,
     process_messages::EngineMessage,
-  },
-  mdns::IntifaceMdns,
-  options::EngineOptions,
-  remote_server::ButtplugRemoteServerEvent,
+  }, mdns::IntifaceMdns, options::EngineOptions, remote_server::ButtplugRemoteServerEvent, rest_server::IntifaceRestServer
 };
 
 use buttplug_server_device_config::{DeviceConfigurationManager, save_user_config};
@@ -108,10 +101,17 @@ impl IntifaceEngine {
     info!("Intiface CLI Setup finished, running server tasks until all joined.");
     let mut server = setup_buttplug_server(options, &self.backdoor_server, dcm).await?;
     let dcm = server
-      .server()
       .device_manager()
       .device_configuration_manager()
       .clone();
+
+    if let Some(rest_port) = options.rest_api_port() {
+      IntifaceRestServer::run(server).await;
+      return Ok(());
+    }
+
+    let mut server = ButtplugRemoteServer::new(server, &None);
+
     if let Some(config_path) = options.user_device_config_path() {
       let stream = server.event_stream();
       {

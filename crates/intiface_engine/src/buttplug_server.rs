@@ -5,10 +5,7 @@ use crate::{
   IntifaceEngineError, IntifaceError, remote_server::ButtplugRemoteServerEvent,
 };
 use buttplug_server::{
-  ButtplugServerBuilder,
-  connector::ButtplugRemoteServerConnector,
-  device::{ServerDeviceManager, ServerDeviceManagerBuilder},
-  message::serializer::ButtplugServerJSONSerializer,
+  connector::ButtplugRemoteServerConnector, device::{ServerDeviceManager, ServerDeviceManagerBuilder}, message::serializer::ButtplugServerJSONSerializer, ButtplugServer, ButtplugServerBuilder
 };
 use buttplug_server_device_config::{DeviceConfigurationManager, load_protocol_configs};
 use buttplug_server_hwmgr_btleplug::BtlePlugCommunicationManagerBuilder;
@@ -98,7 +95,7 @@ pub async fn setup_buttplug_server(
   options: &EngineOptions,
   backdoor_server: &OnceCell<Arc<BackdoorServer>>,
   dcm: &Option<Arc<DeviceConfigurationManager>>,
-) -> Result<ButtplugRemoteServer, IntifaceEngineError> {
+) -> Result<ButtplugServer, IntifaceEngineError> {
   let mut dm_builder = if let Some(dcm) = dcm {
     ServerDeviceManagerBuilder::new_with_arc(dcm.clone())
   } else {
@@ -143,7 +140,7 @@ pub async fn setup_buttplug_server(
         .into(),
     )
   } else {
-    Ok(ButtplugRemoteServer::new(core_server, &None))
+    Ok(core_server)
   }
 }
 
