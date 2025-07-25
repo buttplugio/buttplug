@@ -70,6 +70,7 @@ Buttplug-rs is currently capable of controlling toys via:
 - Lovense Connect App (Desktop and Android/iOS)
 - Websockets (for simulated and DIY devices, Desktop and Android/iOS)
 - XInput gamepads (Windows only)
+- UDP Manager
 
 See [IOSTIndex](https://iostindex.com) for a full list of supported hardware (Filter on "Buttplug Rust").
 
@@ -112,6 +113,7 @@ The following crate features are available
 | `dummy-runtime` | None | Runtime that panics on any spawn. Only used for tests. |
 | `tokio-runtime` | None | Uses tokio for futures |
 | `wasm-bindgen-runtime` | None | Uses the wasm-bindgen executor as a runtime (WASM only) |
+| `udp-manager` | `server` | UDP hardware support on Windows >=7, macOS, Linux |
 
 Default features are enough to build a full desktop system:
 
@@ -125,6 +127,7 @@ Default features are enough to build a full desktop system:
 - `lovense-dongle-manager` (feature builds as noop on iOS, Android)
 - `xinput-manager` (feature is only relevant on windows, but builds as a noop on all
   other platforms).
+- `udp-manager`
 
 ## Contributing
 
