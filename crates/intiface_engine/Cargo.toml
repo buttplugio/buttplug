@@ -65,6 +65,8 @@ libmdns = "0.9.1"
 tokio-stream = "0.1.17"
 dashmap = "6.1.0"
 axum = "0.8.4"
+anyhow = "1.0.98"
+strum = { version = "0.27.2", features = ["derive"] }
 
 [build-dependencies]
 vergen-gitcl = {version = "1.0.8", features = ["build"]}
