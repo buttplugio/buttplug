@@ -39,7 +39,7 @@ fn from_type_and_value(output_type: OutputType, value: f64) -> ClientDeviceOutpu
   }
 }
 
-async fn run_test_client_command(command: &TestClientCommand, device: &Arc<ButtplugClientDevice>) {
+async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugClientDevice) {
   use TestClientCommand::*;
   match command {
     Scalar(msg) => {

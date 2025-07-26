@@ -91,12 +91,12 @@ where
   /// Receiver for messages send from the [ButtplugServer] via the connector.
   from_connector_receiver: mpsc::Receiver<ButtplugServerMessageV4>,
   /// Map of devices shared between the client and the event loop
-  device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
+  device_map: Arc<DashMap<u32, ButtplugClientDevice>>,
   /// Sends events to the [ButtplugClient] instance.
   to_client_sender: broadcast::Sender<ButtplugClientEvent>,
   /// Sends events to the client receiver. Stored here so it can be handed to
   /// new ButtplugClientDevice instances.
-  from_client_sender: Arc<ButtplugClientMessageSender>,
+  from_client_sender: ButtplugClientMessageSender,
   /// Receives incoming messages from client instances.
   from_client_receiver: broadcast::Receiver<ButtplugClientRequest>,
   sorter: ClientMessageSorter,
@@ -116,8 +116,8 @@ where
     connector: ConnectorType,
     from_connector_receiver: mpsc::Receiver<ButtplugServerMessageV4>,
     to_client_sender: broadcast::Sender<ButtplugClientEvent>,
-    from_client_sender: Arc<ButtplugClientMessageSender>,
-    device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
+    from_client_sender: ButtplugClientMessageSender,
+    device_map: Arc<DashMap<u32, ButtplugClientDevice>>,
   ) -> Self {
     trace!("Creating ButtplugClientEventLoop instance.");
     Self {
@@ -137,7 +137,7 @@ where
   /// Given a [DeviceMessageInfo] from a [DeviceAdded] or [DeviceList] message,
   /// creates a ButtplugClientDevice and adds it the internal device map, then
   /// returns the instance.
-  fn create_client_device(&mut self, info: &DeviceMessageInfoV4) -> Arc<ButtplugClientDevice> {
+  fn create_client_device(&mut self, info: &DeviceMessageInfoV4) -> ButtplugClientDevice {
     debug!(
       "Trying to create a client device from DeviceMessageInfo: {:?}",
       info
@@ -151,10 +151,10 @@ where
       // If it doesn't, insert it.
       None => {
         debug!("Device does not exist, creating new entry.");
-        let device = Arc::new(ButtplugClientDevice::new_from_device_info(
+        let device = ButtplugClientDevice::new_from_device_info(
           info,
           &self.from_client_sender,
-        ));
+        );
         self.device_map.insert(info.device_index(), device.clone());
         device
       }
