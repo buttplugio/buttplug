@@ -24,5 +24,7 @@
   "rust-analyzer.linkedProjects": [
     "Cargo.toml"
   ],
-  
-}
+  "rust-analyzer.rustfmt.extraArgs": [
+    "+nightly"
+  ]
+}  
