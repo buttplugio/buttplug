@@ -164,10 +164,6 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
   add_to_protocol_map(
     &mut map,
-    lovense::setup::LovenseIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
     hismith::setup::HismithIdentifierFactory::default(),
   );
   add_to_protocol_map(
@@ -295,6 +291,11 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     lovedistance::setup::LoveDistanceIdentifierFactory::default(),
   );
+  add_to_protocol_map(
+    &mut map,
+    lovense::setup::LovenseIdentifierFactory::default(),
+  );
+
   //  add_to_protocol_map(
   //    &mut map,
   //    lovense_connect_service::setup::LovenseConnectServiceIdentifierFactory::default(),
