@@ -48,23 +48,33 @@ pub enum FeatureType {
   //
 }
 
-#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash, EnumIter)]
+#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash, EnumIter, EnumString)]
 pub enum OutputType {
   Unknown,
+  #[strum(serialize = "vibrate", serialize = "Vibrate")]
   Vibrate,
   // Single Direction Rotation Speed
+  #[strum(serialize = "rotate", serialize = "Rotate")]
   Rotate,
   // Two Direction Rotation Speed
+  #[strum(serialize = "rotatewithdirection", serialize = "RotateWithDirection")]
   RotateWithDirection,
+  #[strum(serialize = "oscillate", serialize = "Oscillate")]
   Oscillate,
+  #[strum(serialize = "constrict", serialize = "Constrict")]
   Constrict,
+  #[strum(serialize = "heater", serialize = "Heater")]
   Heater,
+  #[strum(serialize = "led", serialize = "Led")]
   Led,
   // For instances where we specify a position to move to ASAP. Usually servos, probably for the
   // OSR-2/SR-6.
+  #[strum(serialize = "position", serialize = "Position")]
   Position,
+  #[strum(serialize = "positionwithduration", serialize = "PositionWithDuration")]
   PositionWithDuration,
   // Lube shooters
+  #[strum(serialize = "spray", serialize = "Spray")]
   Spray,
   // Things we might add in the future
   // Inflate,
@@ -92,12 +102,16 @@ impl TryFrom<FeatureType> for OutputType {
   }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, Hash, EnumIter)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, Hash, EnumIter, EnumString)]
 pub enum InputType {
   Unknown,
+  #[strum(serialize="battery", serialize="Battery")]
   Battery,
+  #[strum(serialize="rssi", serialize="Rssi")]
   Rssi,
+  #[strum(serialize="button", serialize="Button")]
   Button,
+  #[strum(serialize="pressure", serialize="Pressure")]
   Pressure,
   // Temperature,
   // Accelerometer,
