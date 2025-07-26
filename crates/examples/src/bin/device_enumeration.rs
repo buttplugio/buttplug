@@ -62,7 +62,7 @@ async fn main() -> anyhow::Result<()> {
   // knows about for us. These devices can be accessed with the Devices
   // getter on the client.
   println!("Client currently knows about these devices:");
-  for device in client.devices() {
+  for (_, device) in client.devices() {
     println!("- {}", device.name());
   }
   wait_for_input().await;

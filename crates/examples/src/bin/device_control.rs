@@ -35,12 +35,14 @@ async fn main() -> anyhow::Result<()> {
   client.start_scanning().await?;
   client.stop_scanning().await?;
   println!("Client currently knows about these devices:");
-  for device in client.devices() {
+  let mut device_index: i32 = -1;
+  for (i, device) in client.devices() {
+    device_index = i as i32;
     println!("- {}", device.name());
   }
   wait_for_input().await;
 
-  for device in client.devices() {
+  for (_, device) in client.devices() {
     println!("{} supports these outputs:", device.name());
     for output_type in OutputType::iter() {
       for (_, feature) in device.device_features() { 
@@ -60,7 +62,8 @@ async fn main() -> anyhow::Result<()> {
   // modern generic messages, we'll go with VibrateCmd.
   //
   // There's a couple of ways to send this message.
-  let test_client_device = &client.devices()[0];
+  let devices = client.devices();
+  let test_client_device = devices.get(&(device_index as u32)).clone().unwrap();
 
   // We can use the convenience functions on ButtplugClientDevice to
   // send the message. This version sets all of the motors on a
