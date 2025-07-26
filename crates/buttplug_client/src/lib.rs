@@ -42,10 +42,10 @@ use futures::{
 };
 use log::*;
 use strum_macros::Display;
-use std::sync::{
+use std::{collections::BTreeMap, sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
-};
+}};
 use thiserror::Error;
 use tokio::sync::{broadcast, mpsc, Mutex};
 use tracing_futures::Instrument;
@@ -441,11 +441,11 @@ impl ButtplugClient {
   }
 
   /// Retreives a list of currently connected devices.
-  pub fn devices(&self) -> Vec<Arc<ButtplugClientDevice>> {
+  pub fn devices(&self) -> BTreeMap<u32, Arc<ButtplugClientDevice>> {
     self
       .device_map
       .iter()
-      .map(|map_pair| map_pair.value().clone())
+      .map(|map_pair| (*map_pair.key(), map_pair.value().clone()))
       .collect()
   }
 
