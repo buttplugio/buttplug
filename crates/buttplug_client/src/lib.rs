@@ -122,10 +122,10 @@ pub enum ButtplugClientEvent {
   ScanningFinished,
   /// Emitted when a device has been added to the server. Includes a
   /// [ButtplugClientDevice] object representing the device.
-  DeviceAdded(Arc<ButtplugClientDevice>),
+  DeviceAdded(ButtplugClientDevice),
   /// Emitted when a device has been removed from the server. Includes a
   /// [ButtplugClientDevice] object representing the device.
-  DeviceRemoved(Arc<ButtplugClientDevice>),
+  DeviceRemoved(ButtplugClientDevice),
   /// Emitted when a client has not pinged the server in a sufficient amount of
   /// time.
   PingTimeout,
@@ -150,6 +150,7 @@ where
   future::ready(Err(ButtplugClientError::ButtplugError(err))).boxed()
 }
 
+#[derive(Clone, Debug)]
 pub(crate) struct ButtplugClientMessageSender {
   message_sender: broadcast::Sender<ButtplugClientRequest>,
   connected: Arc<AtomicBool>,
@@ -255,9 +256,9 @@ pub struct ButtplugClient {
   server_name: Arc<Mutex<Option<String>>>,
   event_stream: broadcast::Sender<ButtplugClientEvent>,
   // Sender to relay messages to the internal client loop
-  message_sender: Arc<ButtplugClientMessageSender>,
+  message_sender: ButtplugClientMessageSender,
   connected: Arc<AtomicBool>,
-  device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
+  device_map: Arc<DashMap<u32, ButtplugClientDevice>>,
 }
 
 impl ButtplugClient {
@@ -269,10 +270,10 @@ impl ButtplugClient {
       client_name: name.to_owned(),
       server_name: Arc::new(Mutex::new(None)),
       event_stream,
-      message_sender: Arc::new(ButtplugClientMessageSender::new(
+      message_sender: ButtplugClientMessageSender::new(
         &message_sender,
         &connected,
-      )),
+      ),
       connected,
       device_map: Arc::new(DashMap::new()),
     }
@@ -441,7 +442,7 @@ impl ButtplugClient {
   }
 
   /// Retreives a list of currently connected devices.
-  pub fn devices(&self) -> BTreeMap<u32, Arc<ButtplugClientDevice>> {
+  pub fn devices(&self) -> BTreeMap<u32, ButtplugClientDevice> {
     self
       .device_map
       .iter()

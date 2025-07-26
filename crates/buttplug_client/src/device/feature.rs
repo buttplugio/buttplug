@@ -28,7 +28,7 @@ pub struct ClientDeviceFeature {
   /// [ButtplugClient][super::ButtplugClient]'s event loop, which will then send
   /// the message on to the [ButtplugServer][crate::server::ButtplugServer]
   /// through the connector.
-  event_loop_sender: Arc<ButtplugClientMessageSender>,
+  event_loop_sender: ButtplugClientMessageSender,
 }
 
 impl ClientDeviceFeature {
@@ -36,7 +36,7 @@ impl ClientDeviceFeature {
     device_index: u32,
     feature_index: u32,
     feature: &DeviceFeature,
-    event_loop_sender: &Arc<ButtplugClientMessageSender>,
+    event_loop_sender: &ButtplugClientMessageSender,
   ) -> Self {
     Self {
       device_index,

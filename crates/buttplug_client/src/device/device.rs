@@ -49,7 +49,7 @@ pub enum ButtplugClientDeviceEvent {
   Message(ButtplugServerMessageV4),
 }
 
-#[derive(Getters, CopyGetters)]
+#[derive(Getters, CopyGetters, Clone)]
 /// Client-usable representation of device connected to the corresponding
 /// [ButtplugServer][crate::server::ButtplugServer]
 ///
@@ -75,7 +75,7 @@ pub struct ButtplugClientDevice {
   /// [ButtplugClient][super::ButtplugClient]'s event loop, which will then send
   /// the message on to the [ButtplugServer][crate::server::ButtplugServer]
   /// through the connector.
-  event_loop_sender: Arc<ButtplugClientMessageSender>,
+  event_loop_sender: ButtplugClientMessageSender,
   internal_event_sender: broadcast::Sender<ButtplugClientDeviceEvent>,
   /// True if this [ButtplugClientDevice] is currently connected to the
   /// [ButtplugServer][crate::server::ButtplugServer].
@@ -105,7 +105,7 @@ impl ButtplugClientDevice {
     display_name: &Option<String>,
     index: u32,
     device_features: &BTreeMap<u32, DeviceFeature>,
-    message_sender: &Arc<ButtplugClientMessageSender>,
+    message_sender: &ButtplugClientMessageSender,
   ) -> Self {
     info!(
       "Creating client device {} with index {} and messages {:?}.",
@@ -119,7 +119,7 @@ impl ButtplugClientDevice {
       name: name.to_owned(),
       display_name: display_name.clone(),
       index,
-      device_features: device_features.iter().map(|(i, x)| (*i, ClientDeviceFeature::new(index, *i, &x, &message_sender))).collect(),
+      device_features: device_features.iter().map(|(i, x)| (*i, ClientDeviceFeature::new(index, *i, &x, message_sender))).collect(),
       event_loop_sender: message_sender.clone(),
       internal_event_sender: event_sender,
       device_connected,
@@ -129,7 +129,7 @@ impl ButtplugClientDevice {
 
   pub(crate) fn new_from_device_info(
     info: &DeviceMessageInfoV4,
-    sender: &Arc<ButtplugClientMessageSender>,
+    sender: &ButtplugClientMessageSender,
   ) -> Self {
     ButtplugClientDevice::new(
       info.device_name(),
