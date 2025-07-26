@@ -155,13 +155,13 @@ impl ButtplugClientDevice {
       .device_features
       .iter()
       .filter(|x| {
-        x.1
+        if let Some(output) = x.1
           .feature()
-          .output()
-          .as_ref()
-          .ok_or(false)
-          .unwrap()
-          .contains_key(&actuator_type)
+          .output() {
+          output.contains_key(&actuator_type)
+        } else { 
+          false
+        }
       })
       .map(|(_, x)| x)
       .cloned()

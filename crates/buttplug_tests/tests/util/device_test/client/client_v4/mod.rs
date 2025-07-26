@@ -332,9 +332,9 @@ pub async fn run_test_case(
         device_index,
         messages,
       } => {
-        let device = &client.devices()[*device_index as usize];
+        let device = client.devices().get(device_index).unwrap().clone();
         for message in messages {
-          run_test_client_command(message, device).await;
+          run_test_client_command(message, &device).await;
         }
       }
       TestCommand::Commands {
