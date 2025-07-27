@@ -1,18 +1,15 @@
-use std::{collections::BTreeMap, io, net::SocketAddr, str::FromStr, sync::Arc};
+use std::{collections::BTreeMap, convert::Infallible, io, net::SocketAddr, str::FromStr, sync::Arc};
 
 use axum::{
-  Json, Router,
-  extract::{Path, State, rejection::JsonRejection},
-  http::StatusCode,
-  response::{IntoResponse, Response},
-  routing::{get, put},
+  extract::{rejection::JsonRejection, Path, State}, http::StatusCode, response::{sse::{Event, KeepAlive}, IntoResponse, Response, Sse}, routing::{get, put}, Json, Router
 };
 use buttplug_client::{
-  ButtplugClient, ButtplugClientDevice, ButtplugClientError, device::ClientDeviceOutputCommand,
+  device::{ClientDeviceFeature, ClientDeviceOutputCommand}, ButtplugClient, ButtplugClientDevice, ButtplugClientError, ButtplugClientEvent
 };
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
 use buttplug_core::message::{DeviceFeature, OutputType};
 use buttplug_server::ButtplugServer;
+use futures::{Stream, StreamExt};
 use serde::Serialize;
 use strum::IntoEnumIterator;
 use thiserror::Error;
@@ -102,6 +99,18 @@ fn get_device(
     .cloned()
 }
 
+fn get_feature(
+  client: &ButtplugClient,
+  index: u32,
+  feature_index: u32
+) -> Result<ClientDeviceFeature, IntifaceRestError> {
+  get_device(client, index)?
+    .device_features()
+    .get(&feature_index)
+    .ok_or(IntifaceRestError::InvalidFeature(index, feature_index))
+    .cloned()
+}
+
 async fn start_scanning(
   State(client): State<Arc<ButtplugClient>>,
 ) -> Result<(), IntifaceRestError> {
@@ -141,17 +150,28 @@ async fn stop_device(
 
 async fn set_device_output(
   State(client): State<Arc<ButtplugClient>>,
-  Path((index, command, level)): Path<(u32, String, f64)>,
+  Path((index, command, level)): Path<(u32, OutputType, f64)>,
 ) -> Result<(), IntifaceRestError> {
-  let command_type = OutputType::from_str(&command).map_err(|_| {
-    IntifaceRestError::InvalidOutputType(command, OutputType::iter().collect::<Vec<OutputType>>())
-  })?;
-
-  let cmd = ClientDeviceOutputCommand::from_command_value_float(command_type, level)
+  let cmd =  ClientDeviceOutputCommand::from_command_value_float(command, level)
     .map_err(|e| IntifaceRestError::ButtplugClientError(e))?;
 
   Ok(
     get_device(&client, index)?
+      .send_command(&cmd)
+      .await
+      .map_err(|e| IntifaceRestError::ButtplugClientError(e))?,
+  )
+}
+
+async fn set_feature_output(
+  State(client): State<Arc<ButtplugClient>>,
+  Path((index, feature_index, command, level)): Path<(u32, u32, OutputType, f64)>,
+) -> Result<(), IntifaceRestError> {
+  let cmd =  ClientDeviceOutputCommand::from_command_value_float(command, level)
+    .map_err(|e| IntifaceRestError::ButtplugClientError(e))?;
+
+  Ok(
+    get_feature(&client, index, feature_index)?
       .send_command(&cmd)
       .await
       .map_err(|e| IntifaceRestError::ButtplugClientError(e))?,
@@ -198,7 +218,7 @@ async fn get_features(
   )
 }
 
-async fn get_feature(
+async fn get_feature_info(
   State(client): State<Arc<ButtplugClient>>,
   Path((index, feature_index)): Path<(u32, u32)>,
 ) -> Result<Json<DeviceFeature>, IntifaceRestError> {
@@ -211,6 +231,29 @@ async fn get_feature(
       .clone()
       .into(),
   )
+}
+
+async fn feature_input_command(
+  State(client): State<Arc<ButtplugClient>>,
+  Path((index, feature_index, input_type, command)): Path<(u32, u32, String, String)>,
+) -> Result<(), IntifaceRestError> {
+  /*
+  let cmd = convert_output_command(&command, level)?;
+
+  Ok(
+    get_feature(&client, index, feature_index)?
+      .send_command(&cmd)
+      .await
+      .map_err(|e| IntifaceRestError::ButtplugClientError(e))?,
+  )
+  */
+  Ok(())
+}
+
+async fn server_sse(State(client): State<Arc<ButtplugClient>>,) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
+    let stream = client.event_stream().map(|e| Ok(Event::default().data(format!("{:?}", e))));
+
+    Sse::new(stream).keep_alive(KeepAlive::default())
 }
 
 impl IntifaceRestServer {
@@ -232,27 +275,29 @@ impl IntifaceRestServer {
         .route("/devices/{index}", get(get_device_info))
         .route("/devices/{index}/stop", put(stop_device))
         .route("/devices/{index}/features", get(get_features))
-        .route("/devices/{index}/features/{index}/", put(get_feature))
+        .route("/devices/{index}/features/{index}/", put(get_feature_info))
         .route(
-          "/devices/{index}/outputs/{output_type}/",
+          "/devices/{index}/outputs/{command}/{level}",
           put(set_device_output),
+        )
+        .route(
+          "/devices/{index}/features/{index}/outputs/{output_type}/{level}",
+          put(set_feature_output),
         )
         /*
         .route(
-          "/devices/{index}/features/{index}/outputs/{output_type}/",
-          put(set_feature_output),
-        )
-        .route(
           "/devices/{index}/inputs/{input_type}/{input_command}",
-          put(set_device_input),
+          put(device_input_command),
         )
+        */
         .route(
           "/devices/{index}/features/{index}/inputs/{input_type}/{input_command}",
-          put(set_feature_input),
+          put(feature_input_command),
         )
+        /*
         .route("/devices/{index}/events", get(device_sse))
-        .route("/events", get(server_sse))
          */
+        .route("/events", get(server_sse))
         //.route("/devices/{*index}/vibrate", post(set_feature_vibrate_speed))
         .with_state(Arc::new(client)),
     );
