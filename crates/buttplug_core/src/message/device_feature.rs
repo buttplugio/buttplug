@@ -48,33 +48,33 @@ pub enum FeatureType {
   //
 }
 
-#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash, EnumIter, EnumString)]
+#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash, EnumIter)]
 pub enum OutputType {
   Unknown,
-  #[strum(serialize = "vibrate", serialize = "Vibrate")]
+  #[serde(alias = "vibrate")]
   Vibrate,
   // Single Direction Rotation Speed
-  #[strum(serialize = "rotate", serialize = "Rotate")]
+  #[serde(alias = "rotate")]
   Rotate,
   // Two Direction Rotation Speed
-  #[strum(serialize = "rotatewithdirection", serialize = "RotateWithDirection")]
+  #[serde(alias = "rotatewithdirection")]
   RotateWithDirection,
-  #[strum(serialize = "oscillate", serialize = "Oscillate")]
+  #[serde(alias = "oscillate")]
   Oscillate,
-  #[strum(serialize = "constrict", serialize = "Constrict")]
+  #[serde(alias = "constrict")]
   Constrict,
-  #[strum(serialize = "heater", serialize = "Heater")]
+  #[serde(alias = "heater")]
   Heater,
-  #[strum(serialize = "led", serialize = "Led")]
+  #[serde(alias = "led")]
   Led,
   // For instances where we specify a position to move to ASAP. Usually servos, probably for the
   // OSR-2/SR-6.
-  #[strum(serialize = "position", serialize = "Position")]
+  #[serde(alias = "position")]
   Position,
-  #[strum(serialize = "positionwithduration", serialize = "PositionWithDuration")]
+  #[serde(alias = "positionwithduration")]
   PositionWithDuration,
   // Lube shooters
-  #[strum(serialize = "spray", serialize = "Spray")]
+  #[serde(alias = "spray")]
   Spray,
   // Things we might add in the future
   // Inflate,
@@ -102,16 +102,16 @@ impl TryFrom<FeatureType> for OutputType {
   }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, Hash, EnumIter, EnumString)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, Hash, EnumIter)]
 pub enum InputType {
   Unknown,
-  #[strum(serialize="battery", serialize="Battery")]
+  #[serde(alias="battery")]
   Battery,
-  #[strum(serialize="rssi", serialize="Rssi")]
+  #[serde(alias="rssi")]
   Rssi,
-  #[strum(serialize="button", serialize="Button")]
+  #[serde(alias="button")]
   Button,
-  #[strum(serialize="pressure", serialize="Pressure")]
+  #[serde(alias="pressure")]
   Pressure,
   // Temperature,
   // Accelerometer,

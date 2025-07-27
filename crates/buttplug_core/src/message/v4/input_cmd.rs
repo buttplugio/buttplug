@@ -18,8 +18,11 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Display, PartialEq, Eq, Clone, Serialize, Deserialize, Hash, Copy)]
 pub enum InputCommandType {
+  #[serde(alias = "read")]
   Read,
+  #[serde(alias = "subscribe")]
   Subscribe,
+  #[serde(alias = "unsubscribe")]
   Unsubscribe,
 }
 
