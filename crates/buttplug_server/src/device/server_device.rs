@@ -47,13 +47,22 @@ use buttplug_core::{
   ButtplugResultFuture,
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
-    self, ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4, InputCommandType, InputType,
-    OutputRotateWithDirection, OutputType, OutputValue,
+    self,
+    ButtplugServerMessageV4,
+    DeviceFeature,
+    DeviceMessageInfoV4,
+    InputCommandType,
+    InputType,
+    OutputRotateWithDirection,
+    OutputType,
+    OutputValue,
   },
   util::{self, async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use buttplug_server_device_config::{
-  DeviceConfigurationManager, DeviceDefinition, UserDeviceIdentifier,
+  DeviceConfigurationManager,
+  DeviceDefinition,
+  UserDeviceIdentifier,
 };
 
 use crate::{
@@ -63,8 +72,10 @@ use crate::{
     protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, ProtocolSpecializer},
   },
   message::{
-    ButtplugServerDeviceMessage, checked_input_cmd::CheckedInputCmdV4,
-    checked_output_cmd::CheckedOutputCmdV4, server_device_attributes::ServerDeviceAttributes,
+    ButtplugServerDeviceMessage,
+    checked_input_cmd::CheckedInputCmdV4,
+    checked_output_cmd::CheckedOutputCmdV4,
+    server_device_attributes::ServerDeviceAttributes,
     spec_enums::ButtplugDeviceCommandMessageUnionV4,
   },
 };
@@ -122,7 +133,8 @@ impl Hash for ServerDevice {
   }
 }
 
-impl Eq for ServerDevice {}
+impl Eq for ServerDevice {
+}
 
 impl PartialEq for ServerDevice {
   fn eq(&self, other: &Self) -> bool {
@@ -239,6 +251,7 @@ impl ServerDevice {
     // Set up and start the packet send task
     {
       let hardware = hardware.clone();
+      let requires_keepalive = hardware.requires_keepalive();
       let strategy = handler.keepalive_strategy();
       let strategy_duration =
         if let ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(duration) = strategy {
@@ -252,10 +265,14 @@ impl ServerDevice {
         // TODO This needs to throw system error messages
         let send_hw_cmd = async |command| {
           let _ = hardware.parse_message(&command).await;
-          if hardware.requires_keepalive()
+          if (requires_keepalive
             && matches!(
               strategy,
               ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
+            ))
+            || matches!(
+              strategy,
+              ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_)
             )
           {
             if let HardwareCommand::Write(command) = command {
@@ -364,6 +381,8 @@ impl ServerDevice {
                         warn!("Error writing keepalive packet: {:?}", e);
                         break;
                       }
+                    } else {
+                      warn!("No keepalive packet available, device may disconnect.");
                     }
                   }
                 }
