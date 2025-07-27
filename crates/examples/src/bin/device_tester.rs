@@ -23,7 +23,7 @@ use buttplug_client::device::{ClientDeviceFeature, ClientDeviceOutputCommand};
 use buttplug_core::message::ButtplugDeviceMessageNameV4::OutputCmd;
 
 
-async fn set_level_and_wait(dev: &Arc<ButtplugClientDevice>, feature: &ClientDeviceFeature, output: &DeviceFeatureOutput, output_type: &OutputType, level: f64) {
+async fn set_level_and_wait(dev: &ButtplugClientDevice, feature: &ClientDeviceFeature, output: &DeviceFeatureOutput, output_type: &OutputType, level: f64) {
     let cmd = match (output_type) {
         OutputType::Vibrate => Ok(ClientDeviceOutputCommand::VibrateFloat(level)),
         OutputType::Rotate => Ok(ClientDeviceOutputCommand::RotateFloat(level)),
@@ -86,7 +86,7 @@ async fn device_tester() {
         return;
     }
 
-    let exercise_device = |dev: Arc<ButtplugClientDevice>| {
+    let exercise_device = |dev: ButtplugClientDevice| {
         async move {
             let mut cmds = vec![];
             dev.device_features().iter().for_each(|(_, feature)| {
