@@ -1,6 +1,5 @@
-use std::{collections::BTreeMap, io, net::SocketAddr, process::Output, str::FromStr, sync::Arc};
+use std::{collections::BTreeMap, io, net::SocketAddr, str::FromStr, sync::Arc};
 
-use anyhow::Context;
 use axum::{
   Json, Router,
   extract::{Path, State, rejection::JsonRejection},
@@ -8,7 +7,9 @@ use axum::{
   response::{IntoResponse, Response},
   routing::{get, put},
 };
-use buttplug_client::{device::ClientDeviceOutputCommand, ButtplugClient, ButtplugClientDevice, ButtplugClientError};
+use buttplug_client::{
+  ButtplugClient, ButtplugClientDevice, ButtplugClientError, device::ClientDeviceOutputCommand,
+};
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
 use buttplug_core::message::{DeviceFeature, OutputType};
 use buttplug_server::ButtplugServer;
@@ -90,16 +91,40 @@ impl From<&ButtplugClientDevice> for IntifaceRestDevice {
 
 pub struct IntifaceRestServer {}
 
-async fn start_scanning(State(client): State<Arc<ButtplugClient>>) {
-  client.start_scanning().await;
+fn get_device(
+  client: &ButtplugClient,
+  index: u32,
+) -> Result<ButtplugClientDevice, IntifaceRestError> {
+  client
+    .devices()
+    .get(&index)
+    .ok_or(IntifaceRestError::InvalidDevice(index))
+    .cloned()
 }
 
-async fn stop_scanning(State(client): State<Arc<ButtplugClient>>) {
-  client.stop_scanning().await;
+async fn start_scanning(
+  State(client): State<Arc<ButtplugClient>>,
+) -> Result<(), IntifaceRestError> {
+  client
+    .start_scanning()
+    .await
+    .map_err(|e| IntifaceRestError::ButtplugClientError(e))
 }
 
-async fn stop_all_devices(State(client): State<Arc<ButtplugClient>>) {
-  client.stop_all_devices().await;
+async fn stop_scanning(State(client): State<Arc<ButtplugClient>>) -> Result<(), IntifaceRestError> {
+  client
+    .stop_scanning()
+    .await
+    .map_err(|e| IntifaceRestError::ButtplugClientError(e))
+}
+
+async fn stop_all_devices(
+  State(client): State<Arc<ButtplugClient>>,
+) -> Result<(), IntifaceRestError> {
+  client
+    .stop_all_devices()
+    .await
+    .map_err(|e| IntifaceRestError::ButtplugClientError(e))
 }
 
 async fn stop_device(
@@ -107,10 +132,7 @@ async fn stop_device(
   Path(index): Path<u32>,
 ) -> Result<(), IntifaceRestError> {
   Ok(
-    client
-      .devices()
-      .get(&index)
-      .ok_or(IntifaceRestError::InvalidDevice(index))?
+    get_device(&client, index)?
       .stop()
       .await
       .map_err(|e| IntifaceRestError::ButtplugClientError(e))?,
@@ -121,25 +143,19 @@ async fn set_device_output(
   State(client): State<Arc<ButtplugClient>>,
   Path((index, command, level)): Path<(u32, String, f64)>,
 ) -> Result<(), IntifaceRestError> {
-  let command_type = OutputType::from_str(&command).map_err(|_| 
-    IntifaceRestError::InvalidOutputType(
-      command,
-      OutputType::iter().collect::<Vec<OutputType>>()
-    )
-  )?;
+  let command_type = OutputType::from_str(&command).map_err(|_| {
+    IntifaceRestError::InvalidOutputType(command, OutputType::iter().collect::<Vec<OutputType>>())
+  })?;
 
-  Ok(())
-  /*
-  let cmd = ClientDeviceOutputCommand::
+  let cmd = ClientDeviceOutputCommand::from_command_value_float(command_type, level)
+    .map_err(|e| IntifaceRestError::ButtplugClientError(e))?;
 
-  Ok(client
-    .devices()
-    .get(&index)
-    .ok_or(IntifaceRestError::InvalidDevice(index))?
-    .send_command(client_device_command)
-    .await
-    .map_err(|e| IntifaceRestError::ButtplugClientError(e))?)
-     */
+  Ok(
+    get_device(&client, index)?
+      .send_command(&cmd)
+      .await
+      .map_err(|e| IntifaceRestError::ButtplugClientError(e))?,
+  )
 }
 
 async fn get_devices(
@@ -153,11 +169,19 @@ async fn get_devices(
     .into()
 }
 
-async fn get_device(
+async fn get_device_info(
   State(client): State<Arc<ButtplugClient>>,
   Path(index): Path<u32>,
 ) -> Result<Json<IntifaceRestDevice>, IntifaceRestError> {
-  Ok(IntifaceRestDevice::from(client.devices().get(&index).ok_or(IntifaceRestError::InvalidDevice(index))?).into())
+  Ok(
+    IntifaceRestDevice::from(
+      client
+        .devices()
+        .get(&index)
+        .ok_or(IntifaceRestError::InvalidDevice(index))?,
+    )
+    .into(),
+  )
 }
 
 async fn get_features(
@@ -165,10 +189,7 @@ async fn get_features(
   Path(index): Path<u32>,
 ) -> Result<Json<BTreeMap<u32, DeviceFeature>>, IntifaceRestError> {
   Ok(
-    client
-      .devices()
-      .get(&index)
-      .ok_or(IntifaceRestError::InvalidDevice(index))?
+    get_device(&client, index)?
       .device_features()
       .iter()
       .map(|(i, f)| (*i, f.feature().clone()))
@@ -182,10 +203,7 @@ async fn get_feature(
   Path((index, feature_index)): Path<(u32, u32)>,
 ) -> Result<Json<DeviceFeature>, IntifaceRestError> {
   Ok(
-    client
-      .devices()
-      .get(&index)
-      .ok_or(IntifaceRestError::InvalidDevice(index))?
+    get_device(&client, index)?
       .device_features()
       .get(&feature_index)
       .ok_or(IntifaceRestError::InvalidFeature(index, feature_index))?
@@ -204,37 +222,40 @@ impl IntifaceRestServer {
     client.connect(connector).await.unwrap();
     info!("Setting up app!");
     // pass incoming GET requests on "/hello-world" to "hello_world" handler.
-    let app = Router::new()
-      .route("/start-scanning", get(start_scanning))
-      .route("/stop-scanning", get(stop_scanning))
-      .route("/devices", get(get_devices))
-      .route("/devices/stop", put(stop_all_devices))
-      .route("/devices/{index}", put(get_device))
-      .route("/devices/{index}/stop", put(stop_device))
-      .route("/devices/{index}/features", get(get_features))
-      .route("/devices/{index}/features/{index}/", put(get_feature))
-      .route(
-        "/devices/{index}/outputs/{output_type}/",
-        put(set_device_output),
-      )
-      /*
-      .route(
-        "/devices/{index}/features/{index}/outputs/{output_type}/",
-        put(set_feature_output),
-      )
-      .route(
-        "/devices/{index}/inputs/{input_type}/{input_command}",
-        put(set_device_input),
-      )
-      .route(
-        "/devices/{index}/features/{index}/inputs/{input_type}/{input_command}",
-        put(set_feature_input),
-      )
-      .route("/devices/{index}/events", get(device_sse))
-      .route("/events", get(server_sse))
-       */
-      //.route("/devices/{*index}/vibrate", post(set_feature_vibrate_speed))
-      .with_state(Arc::new(client));
+    let app = Router::new().nest(
+      "/api/v1",
+      Router::new()
+        .route("/start-scanning", get(start_scanning))
+        .route("/stop-scanning", get(stop_scanning))
+        .route("/devices", get(get_devices))
+        .route("/devices/stop", put(stop_all_devices))
+        .route("/devices/{index}", get(get_device_info))
+        .route("/devices/{index}/stop", put(stop_device))
+        .route("/devices/{index}/features", get(get_features))
+        .route("/devices/{index}/features/{index}/", put(get_feature))
+        .route(
+          "/devices/{index}/outputs/{output_type}/",
+          put(set_device_output),
+        )
+        /*
+        .route(
+          "/devices/{index}/features/{index}/outputs/{output_type}/",
+          put(set_feature_output),
+        )
+        .route(
+          "/devices/{index}/inputs/{input_type}/{input_command}",
+          put(set_device_input),
+        )
+        .route(
+          "/devices/{index}/features/{index}/inputs/{input_type}/{input_command}",
+          put(set_feature_input),
+        )
+        .route("/devices/{index}/events", get(device_sse))
+        .route("/events", get(server_sse))
+         */
+        //.route("/devices/{*index}/vibrate", post(set_feature_vibrate_speed))
+        .with_state(Arc::new(client)),
+    );
 
     // write address like this to not make typos
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
