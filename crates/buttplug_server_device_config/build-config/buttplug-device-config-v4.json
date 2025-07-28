@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 64
+    "minor": 69
   },
   "protocols": {
     "activejoy": {
@@ -1876,7 +1876,7 @@
           "identifier": [
             "G312"
           ],
-          "name": "Galaku Mecha-Original Owner's Aircraft Cup"
+          "name": "Galaku Mecha"
         },
         {
           "features": [
@@ -2326,7 +2326,7 @@
           "identifier": [
             "G354"
           ],
-          "name": "Galaku Double-A Aircraft Cup"
+          "name": "Galaku Armoured-ONE"
         },
         {
           "features": [

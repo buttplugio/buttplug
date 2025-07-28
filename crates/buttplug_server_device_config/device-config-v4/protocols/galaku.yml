@@ -296,7 +296,7 @@ configurations:
     id: 58de185f-a52c-42e0-b06f-bb7a293a9d40
   - identifier:
       - G312
-    name: Galaku Mecha-Original Owner's Aircraft Cup
+    name: Galaku Mecha
     features:
       - description: oscillate
         id: 9a04b080-4956-499c-894d-d7538322160e
@@ -548,12 +548,12 @@ configurations:
     id: 5d47e890-6093-4eae-b7e8-e637dc82a2ea
   - identifier:
       - G354
-    name: Galaku Double-A Aircraft Cup
+    name: Galaku Armoured-ONE
     features:
-      - description: vibrate
+      - description: Oscillate
         id: dc4348f2-7788-4b63-96f8-80ed74e4f9c2
         output:
-          vibrate:
+          oscillate:
             value:
               - 0
               - 100
