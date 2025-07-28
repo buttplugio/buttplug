@@ -15,6 +15,7 @@ use buttplug_core::{
     ButtplugMessageValidator,
     OutputCmdV4,
     OutputCommand,
+    OutputType,
   },
 };
 
@@ -105,7 +106,8 @@ impl TryFromDeviceAttributes<OutputCmdV4> for CheckedOutputCmdV4 {
 
     // Check to make sure the feature has an actuator that handles the data we've been passed
     if let Some(output_map) = feature.output() {
-      if let Some(actuator) = output_map.get(&cmd.command().as_output_type()) {
+      let output_type = cmd.command().as_output_type();
+      if let Some(actuator) = output_map.get(&output_type) {
         let value = cmd.command().value();
         let step_count = actuator.step_count();
         if value > step_count {
@@ -114,7 +116,12 @@ impl TryFromDeviceAttributes<OutputCmdV4> for CheckedOutputCmdV4 {
           ))
         } else {
           // Only set adjusted value if we haven't gotten zero, otherwise assume stop.
-          let new_value = if step_count != 0 && value != 0 {
+          let new_value = if [OutputType::Position, OutputType::PositionWithDuration]
+            .contains(&output_type)
+            && actuator.reverse_position()
+          {
+            actuator.step_limit().end() - value
+          } else if step_count != 0 && value != 0 {
             actuator.step_limit().start() + value
           } else {
             0
