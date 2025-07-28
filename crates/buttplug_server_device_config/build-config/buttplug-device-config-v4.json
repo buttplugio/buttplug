@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 64
+    "minor": 69
   },
   "protocols": {
     "activejoy": {
@@ -1909,7 +1909,7 @@
           "identifier": [
             "G312"
           ],
-          "name": "Galaku Mecha-Original Owner's Aircraft Cup"
+          "name": "Galaku Mecha"
         },
         {
           "features": [
@@ -2338,8 +2338,8 @@
         {
           "features": [
             {
-              "description": "Vibrate",
-              "feature-type": "Vibrate",
+              "description": "Oscillate",
+              "feature-type": "Oscillate",
               "id": "dc4348f2-7788-4b63-96f8-80ed74e4f9c2",
               "output": {
                 "Vibrate": {
@@ -2386,7 +2386,7 @@
           "identifier": [
             "G354"
           ],
-          "name": "Galaku Double-A Aircraft Cup"
+          "name": "Galaku Armoured-ONE"
         },
         {
           "features": [
