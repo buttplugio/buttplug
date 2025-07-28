@@ -1,6 +1,6 @@
 version:
   major: 3
-  minor: 15
+  minor: 16
 protocols:
   lovense:
     defaults:
@@ -2874,10 +2874,15 @@ protocols:
                 - 100
             messages:
               - SensorReadCmd
+    configurations:
+      - identifier:
+          - Luxus
+        name: Luxus
     communication:
       - btle:
           names:
             - ProWand
+            - Luxus
           services:
             00001400-0000-1000-8000-00805f9b34fb:
               tx: 00001401-0000-1000-8000-00805f9b34fb
@@ -3318,12 +3323,24 @@ protocols:
       - identifier:
           - Cici+ 2
         name: Svakom Cici+ 2
+      - identifier:
+          - VV468A
+        name: ToyCod Clara
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 10
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
             - B2CM6
             - ERICA
             - Cici+ 2
+            - VV468A
           services:
             0000ffe0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -6624,13 +6641,20 @@ protocols:
               - 99
             messages:
               - ScalarCmd
+    configurations:
+      - identifier:
+          - HJ2024N01
+        name: VVD Vkini
     communication:
       - btle:
           names:
             - CFG1 vibrator
+            - HJ2024N01
           services:
             0000cfa2-0000-1000-8000-00805f9b34fb:
               tx: 0000cf21-0000-1000-8000-00805f9b34fb
+            0000dba2-0000-1000-8000-00805f9b34fb:
+              tx: 0000db21-0000-1000-8000-00805f9b34fb
   sexverse-lg389:
     defaults:
       name: Sexverse LG389
@@ -6934,6 +6958,21 @@ protocols:
       - identifier:
           - MD19
         name: Secret Lover Kevin
+      - identifier:
+          - QD48
+        name: Adorime Wearable Egg Vibrator
+      - identifier:
+          - BGSF
+        name: Adorime Male Masturbator
+      - identifier:
+          - BGQS
+        name: Adorime Penis Vibrator
+      - identifier:
+          - AX05
+        name: Adorime Anal Vibrator
+      - identifier:
+          - DT01
+        name: Adorime Chastity Cage
       # Type 1
       - identifier:
           - G317
@@ -7887,6 +7926,62 @@ protocols:
                   - 100
               messages:
                 - SensorReadCmd
+      - identifier:
+          - SN80
+        name: Adorime G-spot Rabbit Dildo Vibrator
+        features:
+          - feature-type: Vibrate
+            description: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 100
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            description: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 100
+              messages:
+                - ScalarCmd
+          - feature-type: Battery
+            description: Battery Level
+            sensor:
+              value-range:
+                - - 0
+                  - 100
+              messages:
+                - SensorReadCmd
+      - identifier:
+          - BGCD
+        name: Adorime Backy
+        features:
+          - feature-type: Vibrate
+            description: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 100
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            description: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 100
+              messages:
+                - ScalarCmd
+          - feature-type: Battery
+            description: Battery Level
+            sensor:
+              value-range:
+                - - 0
+                  - 100
+              messages:
+                - SensorReadCmd
       # Type 2
       - identifier:
           - TFG1
@@ -7918,6 +8013,7 @@ protocols:
                 - SensorReadCmd
       - identifier:
           - GK27
+          - GX27
         name: Galaku Cannon-GT
         features:
           - feature-type: Vibrate
@@ -8077,6 +8173,11 @@ protocols:
             - CYX2 # Secret Lover Simon
             - RC31 # Secret Lover Betty
             - MD19 # Secret Lover Kevin
+            - QD48 # Adorime Wearable Egg Vibrator
+            - BGSF # Adorime Male Masturbator
+            - BGQS # Adorime Penis Vibrator
+            - AX05 # Adorime Anal Vibrator
+            - DT01 # Adorime Chasity Cage
             # Type 1
             - G317
             - G312
@@ -8112,9 +8213,12 @@ protocols:
             - QCVW
             - QCSW
             - QCPW
+            - SN80 # Adorime G-spot Rabbit Dildo Vibrator
+            - BGCD # Adorime Backy
             # Type 2
             - TFG1
             - GK27
+            - GX27 # https://discord.com/channels/353303527587708932/1370367465573580881
             - GK25
             - AC695X_1(BLE)
             - GX33
@@ -8292,6 +8396,17 @@ protocols:
                 - 100
               messages:
                 - ScalarCmd
+      - identifier:
+          - "qingnan#16"
+        name: "Qingnan #16"
+        features:
+          - feature-type: Constrict
+            actuator:
+              step-range:
+                - 0
+                - 100
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
@@ -8303,6 +8418,7 @@ protocols:
             - PTYB22S2
             - CCP322S5
             - CTY823S5
+            - "qingnan#16"
           services:
             0000fff0-0000-1000-8000-00805f9b34fb:
               tx: 0000fff5-0000-1000-8000-00805f9b34fb
@@ -8870,6 +8986,21 @@ protocols:
           - J-Ryden
         name: JoyHub Ryden
       - identifier:
+          - J-Enam
+        name: JoyHub Enam
+      - identifier:
+          - J-Viv
+        name: JoyHub Viv
+      - identifier:
+          - J-Vivara
+        name: JoyHub Vivara
+      - identifier:
+          - J-Explorer2
+        name: JoyHub Explorer 2
+      - identifier:
+          - J-Peachy
+        name: JoyHub Peachy
+      - identifier:
           - J-Petalwish2
         name: JoyHub Petalwish 2
         features:
@@ -9177,6 +9308,11 @@ protocols:
             - J-Myrna
             - J-Vase2
             - J-Martino
+            - J-Enam
+            - J-Viv
+            - J-Vivara
+            - J-Explorer2
+            - J-Peachy
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
@@ -10375,6 +10511,49 @@ protocols:
                 - 255
               messages:
                 - ScalarCmd
+      - identifier:
+          - J-Vigo
+        name: JoyHub Vigo
+        features:
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Oscillate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+      - identifier:
+          - J-Pipes
+        name: JoyHub Pipes
+        features:
+          - feature-type: Rotate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
+          - feature-type: Vibrate
+            actuator:
+              step-range:
+                - 0
+                - 255
+              messages:
+                - ScalarCmd
     communication:
       - btle:
           names:
@@ -10436,6 +10615,8 @@ protocols:
             - J-Vita
             - J-LACH
             - J-Markel
+            - J-Vigo
+            - J-Pipes
           services:
             0000ffa0-0000-1000-8000-00805f9b34fb:
               tx: 0000ffa1-0000-1000-8000-00805f9b34fb
