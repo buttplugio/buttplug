@@ -13,19 +13,17 @@ use super::{
   DeviceSettings,
   ProtocolCommunicationSpecifier,
   ServerBaseDeviceFeature,
-  UserDeviceCustomization,
   UserDeviceDefinition,
   UserDeviceIdentifier,
 };
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError},
-  message::OutputType,
   util::json::JSONValidator,
 };
 use dashmap::DashMap;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, fmt::Display, ops::RangeInclusive};
+use std::{collections::HashMap, fmt::Display};
 use uuid::Uuid;
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
@@ -87,35 +85,6 @@ struct ProtocolDefinition {
   pub defaults: Option<ProtocolAttributes>,
   #[serde(default)]
   pub configurations: Vec<ProtocolAttributes>,
-}
-
-#[derive(Deserialize, Serialize, Debug, Clone, Getters, Setters, MutGetters)]
-#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
-struct UserFeatureOutputCustomization {
-  step_limit: RangeInclusive<u32>,
-  reverse_position: bool,
-}
-
-#[derive(Deserialize, Serialize, Debug, Clone, Getters, Setters, MutGetters)]
-#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
-struct UserFeatureCustomization {
-  id: Uuid,
-  #[serde(rename = "base-id")]
-  base_id: Uuid,
-  output: HashMap<OutputType, UserFeatureOutputCustomization>,
-}
-
-#[derive(Deserialize, Serialize, Debug, Clone, Getters, Setters, MutGetters)]
-#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
-struct SerializedUserDeviceDefinition {
-  id: Uuid,
-  #[serde(rename = "base-id")]
-  base_id: Uuid,
-  /// Message attributes for this device instance.
-  features: Vec<UserFeatureCustomization>,
-  /// Per-user configurations specific to this device instance.
-  #[serde(rename = "user-config")]
-  user_config: UserDeviceCustomization,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Getters, Setters, MutGetters)]
