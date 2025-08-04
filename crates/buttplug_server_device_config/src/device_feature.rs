@@ -165,20 +165,20 @@ pub struct ServerUserDeviceFeatureOutput {
   )]
   reverse_position: Option<bool>,
   #[getset(get = "pub")]
-  #[serde(rename = "ignore", default, skip_serializing_if = "Option::is_none")]
-  ignore: Option<bool>,
+  #[serde(rename = "disabled", default, skip_serializing_if = "Option::is_none")]
+  disabled: Option<bool>,
 }
 
 impl ServerUserDeviceFeatureOutput {
   pub fn new(
     step_limit: Option<RangeInclusive<u32>>,
     reverse_position: Option<bool>,
-    ignore: Option<bool>,
+    disabled: Option<bool>,
   ) -> Self {
     Self {
       step_limit,
       reverse_position,
-      ignore,
+      disabled,
     }
   }
 }
@@ -280,6 +280,7 @@ impl ServerDeviceFeature {
       self.feature_type(),
       &self.output.clone().map(|x| {
         x.iter()
+          .filter(|(_, a)| !a.user_feature().disabled().as_ref().unwrap_or(&false))
           .map(|(t, a)| (*t, DeviceFeatureOutput::from(a.clone())))
           .collect()
       }),
