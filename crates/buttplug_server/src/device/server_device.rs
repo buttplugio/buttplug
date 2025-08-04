@@ -37,7 +37,7 @@
 //! In order to handle multiple message spec versions
 
 use std::{
-  collections::VecDeque,
+  collections::{BTreeMap, VecDeque},
   fmt::{self, Debug},
   sync::Arc,
   time::Duration,
@@ -529,8 +529,9 @@ impl ServerDevice {
         .features()
         .iter()
         .enumerate()
-        .map(|(i, x)| x.as_device_feature(i as u32))
-        .collect::<Vec<DeviceFeature>>(),
+        .map(|(i, x)| (i as u32, x.as_device_feature(i as u32)))
+        .filter(|(_, x)| x.output().as_ref().is_some_and(|x| x.len() > 0) || x.input().as_ref().is_some_and(|x| x.len() > 0))
+        .collect::<BTreeMap<u32, DeviceFeature>>(),
     )
   }
 

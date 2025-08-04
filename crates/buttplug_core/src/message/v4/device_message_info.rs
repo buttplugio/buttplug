@@ -37,15 +37,14 @@ impl DeviceMessageInfoV4 {
     device_name: &str,
     device_display_name: &Option<String>,
     device_message_timing_gap: u32,
-    device_features: &Vec<DeviceFeature>,
+    device_features: &BTreeMap<u32, DeviceFeature>,
   ) -> Self {
-    let feature_map = device_features.iter().map(|x| (x.feature_index(), x.clone())).collect();
     Self {
       device_index,
       device_name: device_name.to_owned(),
       device_display_name: device_display_name.clone(),
       device_message_timing_gap,
-      device_features: feature_map,
+      device_features: device_features.clone(),
     }
   }
 }
