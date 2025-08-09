@@ -41,8 +41,10 @@ impl ProtocolInitializer for MetaXSireInitializer {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut commands = vec![];
     def.features().iter().for_each(|x| {
-      if x.output().is_some() {
-        commands.push((x.feature_type().try_into().unwrap(), AtomicU8::default()))
+      if let Some(m) = x.output() {
+        for output in m.keys() {
+          commands.push((*output, AtomicU8::default()))
+        }
       }
     });
     Ok(Arc::new(MetaXSire::new(commands)))

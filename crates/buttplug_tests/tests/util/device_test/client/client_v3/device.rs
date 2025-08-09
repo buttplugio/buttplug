@@ -589,7 +589,7 @@ impl ButtplugClientDevice {
       .collect();
     if sensor_indexes.len() != 1 {
       return create_boxed_future_client_error(
-        ButtplugDeviceError::ProtocolSensorNotSupported(*sensor_type).into(),
+        ButtplugDeviceError::ProtocolInputNotSupported(*sensor_type).into(),
       );
     }
     let msg = SensorReadCmdV3::new(self.index, sensor_indexes[0], *sensor_type).into();

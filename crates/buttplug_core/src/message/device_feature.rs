@@ -13,41 +13,6 @@ use std::{
   ops::RangeInclusive,
 };
 
-#[derive(Debug, Default, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, EnumIter)]
-pub enum FeatureType {
-  #[default]
-  // Used for when types are added that we do not know how to handle
-  Unknown,
-  // Level/ValueCmd types
-  Vibrate,
-  // Single Direction Rotation Speed
-  Rotate,
-  Oscillate,
-  Constrict,
-  Spray,
-  Heater,
-  Led,
-  // For instances where we specify a position to move to ASAP. Usually servos, probably for the
-  // OSR-2/SR-6.
-  Position,
-  // ValueWithParameterCmd types
-  // Two Direction Rotation Speed
-  RotateWithDirection,
-  PositionWithDuration,
-  // Might be useful but dunno if we need it yet, or how to convey "speed" units
-  // PositionWithSpeed
-  // Sensor Types
-  Battery,
-  Rssi,
-  Button,
-  Pressure,
-  // Currently unused but possible sensor features:
-  // Temperature,
-  // Accelerometer,
-  // Gyro,
-  //
-}
-
 #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash, EnumIter)]
 pub enum OutputType {
   Unknown,
@@ -80,28 +45,6 @@ pub enum OutputType {
   // Inflate,
 }
 
-impl TryFrom<FeatureType> for OutputType {
-  type Error = String;
-  fn try_from(value: FeatureType) -> Result<Self, Self::Error> {
-    match value {
-      FeatureType::Unknown => Ok(OutputType::Unknown),
-      FeatureType::Vibrate => Ok(OutputType::Vibrate),
-      FeatureType::Rotate => Ok(OutputType::Rotate),
-      FeatureType::Heater => Ok(OutputType::Heater),
-      FeatureType::Led => Ok(OutputType::Led),
-      FeatureType::RotateWithDirection => Ok(OutputType::RotateWithDirection),
-      FeatureType::PositionWithDuration => Ok(OutputType::PositionWithDuration),
-      FeatureType::Oscillate => Ok(OutputType::Oscillate),
-      FeatureType::Constrict => Ok(OutputType::Constrict),
-      FeatureType::Spray => Ok(OutputType::Spray),
-      FeatureType::Position => Ok(OutputType::Position),
-      _ => Err(format!(
-        "Feature type {value} not valid for OutputType conversion"
-      )),
-    }
-  }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, Hash, EnumIter)]
 pub enum InputType {
   Unknown,
@@ -116,52 +59,6 @@ pub enum InputType {
   // Temperature,
   // Accelerometer,
   // Gyro,
-}
-
-impl TryFrom<FeatureType> for InputType {
-  type Error = String;
-  fn try_from(value: FeatureType) -> Result<Self, Self::Error> {
-    match value {
-      FeatureType::Unknown => Ok(InputType::Unknown),
-      FeatureType::Battery => Ok(InputType::Battery),
-      FeatureType::Rssi => Ok(InputType::Rssi),
-      FeatureType::Button => Ok(InputType::Button),
-      FeatureType::Pressure => Ok(InputType::Pressure),
-      _ => Err(format!(
-        "Feature type {value} not valid for SensorType conversion"
-      )),
-    }
-  }
-}
-
-impl From<OutputType> for FeatureType {
-  fn from(value: OutputType) -> Self {
-    match value {
-      OutputType::Unknown => FeatureType::Unknown,
-      OutputType::Vibrate => FeatureType::Vibrate,
-      OutputType::Rotate => FeatureType::Rotate,
-      OutputType::Heater => FeatureType::Heater,
-      OutputType::Led => FeatureType::Led,
-      OutputType::RotateWithDirection => FeatureType::RotateWithDirection,
-      OutputType::PositionWithDuration => FeatureType::PositionWithDuration,
-      OutputType::Oscillate => FeatureType::Oscillate,
-      OutputType::Constrict => FeatureType::Constrict,
-      OutputType::Spray => FeatureType::Spray,
-      OutputType::Position => FeatureType::Position,
-    }
-  }
-}
-
-impl From<InputType> for FeatureType {
-  fn from(value: InputType) -> Self {
-    match value {
-      InputType::Unknown => FeatureType::Unknown,
-      InputType::Battery => FeatureType::Battery,
-      InputType::Rssi => FeatureType::Rssi,
-      InputType::Button => FeatureType::Button,
-      InputType::Pressure => FeatureType::Pressure,
-    }
-  }
 }
 
 // This will look almost exactly like ServerDeviceFeature. However, it will only contain
@@ -186,9 +83,6 @@ pub struct DeviceFeature {
   #[serde(default)]
   #[serde(rename = "FeatureDescription")]
   description: String,
-  #[getset(get_copy = "pub")]
-  #[serde(rename = "FeatureType")]
-  feature_type: FeatureType,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(rename = "Output")]
@@ -203,14 +97,12 @@ impl DeviceFeature {
   pub fn new(
     index: u32,
     description: &str,
-    feature_type: FeatureType,
     output: &Option<HashMap<OutputType, DeviceFeatureOutput>>,
     input: &Option<HashMap<InputType, DeviceFeatureInput>>,
   ) -> Self {
     Self {
       feature_index: index,
       description: description.to_owned(),
-      feature_type,
       output: output.clone(),
       input: input.clone(),
     }

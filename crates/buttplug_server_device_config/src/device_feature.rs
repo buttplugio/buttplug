@@ -12,7 +12,6 @@ use buttplug_core::{
     DeviceFeature,
     DeviceFeatureInput,
     DeviceFeatureOutput,
-    FeatureType,
     InputCommandType,
     InputType,
     OutputType,
@@ -68,9 +67,6 @@ pub struct ServerBaseDeviceFeature {
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(default)]
   description: String,
-  #[getset(get_copy = "pub")]
-  #[serde(rename = "feature-type")]
-  feature_type: FeatureType,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(rename = "output")]
@@ -244,10 +240,6 @@ impl ServerDeviceFeature {
     self.base_feature.description()
   }
 
-  pub fn feature_type(&self) -> FeatureType {
-    self.base_feature.feature_type
-  }
-
   pub fn id(&self) -> Uuid {
     self.user_feature.id()
   }
@@ -277,7 +269,6 @@ impl ServerDeviceFeature {
     DeviceFeature::new(
       index,
       self.description(),
-      self.feature_type(),
       &self.output.clone().map(|x| {
         x.iter()
           .filter(|(_, a)| !a.user_feature().disabled().as_ref().unwrap_or(&false))

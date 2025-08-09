@@ -29,7 +29,7 @@ use crate::device::{
 use async_trait::async_trait;
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{self, FeatureType, InputData, InputReadingV4, InputTypeData},
+  message::{self, InputData, InputReadingV4, InputTypeData, OutputType},
   util::sleep,
 };
 use buttplug_server_device_config::{
@@ -175,7 +175,7 @@ impl ProtocolInitializer for LovenseInitializer {
     let vibrator_count = device_definition
       .features()
       .iter()
-      .filter(|x| [FeatureType::Vibrate, FeatureType::Oscillate].contains(&x.feature_type()))
+      .filter(|x| x.output().as_ref().is_some_and(|x| x.contains_key(&OutputType::Vibrate) || x.contains_key(&OutputType::Oscillate)))
       .count();
 
     let output_count = device_definition
@@ -188,13 +188,13 @@ impl ProtocolInitializer for LovenseInitializer {
       && device_definition
         .features()
         .iter()
-        .filter(|x| x.feature_type() == FeatureType::Vibrate)
+        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains_key(&OutputType::Vibrate)))
         .count()
         == 1
       && device_definition
         .features()
         .iter()
-        .filter(|x| x.feature_type() == FeatureType::RotateWithDirection)
+        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains_key(&OutputType::RotateWithDirection)))
         .count()
         == 1;
 
@@ -202,13 +202,13 @@ impl ProtocolInitializer for LovenseInitializer {
       && device_definition
         .features()
         .iter()
-        .filter(|x| x.feature_type() == FeatureType::Vibrate)
+        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains_key(&OutputType::Vibrate)))
         .count()
         == 1
       && device_definition
         .features()
         .iter()
-        .filter(|x| x.feature_type() == FeatureType::Constrict)
+        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains_key(&OutputType::Constrict)))
         .count()
         == 1;
 
