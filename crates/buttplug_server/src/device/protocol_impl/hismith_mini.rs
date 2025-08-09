@@ -11,8 +11,7 @@ use crate::device::{
 };
 use async_trait::async_trait;
 use buttplug_core::{
-  errors::ButtplugDeviceError,
-  message::FeatureType,
+  errors::ButtplugDeviceError, message::OutputType,
 };
 use buttplug_server_device_config::{
   Endpoint,
@@ -88,13 +87,13 @@ impl ProtocolInitializer for HismithMiniInitializer {
       dual_vibe: device_definition
         .features()
         .iter()
-        .filter(|x| x.feature_type() == FeatureType::Vibrate)
+        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains_key(&OutputType::Vibrate)))
         .count()
         >= 2,
       second_constrict: device_definition
         .features()
         .iter()
-        .position(|x| x.feature_type() == FeatureType::Constrict)
+        .position(|x| x.output().as_ref().is_some_and(|x| x.contains_key(&OutputType::Constrict)))
         .unwrap_or(0)
         == 1,
     }))

@@ -11,7 +11,7 @@ use buttplug_client::{
   };
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
 use buttplug_server_device_config::load_protocol_configs;
-use buttplug_core::{message::{OutputType, FeatureType}, util::{async_manager,}};
+use buttplug_core::{message::OutputType, util::async_manager};
 use buttplug_server::{device::ServerDeviceManagerBuilder, ButtplugServer, ButtplugServerBuilder};
 use tokio::sync::Notify;
 
@@ -59,7 +59,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
           let vibe_features: Vec<&ClientDeviceFeature> = device
             .device_features()
             .iter()
-            .filter(|f| f.1.feature().feature_type() == FeatureType::Vibrate)
+            .filter(|f| f.1.feature().output().as_ref().is_some_and(|x| x.contains_key(&OutputType::Vibrate)))
             .map(|(_, x)| x)
             .collect();
           let f = vibe_features[cmd.index() as usize].clone();
@@ -78,7 +78,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
           let rotate_features: Vec<&ClientDeviceFeature> = device
             .device_features()
             .iter()
-            .filter(|f| f.1.feature().feature_type() == FeatureType::RotateWithDirection)
+            .filter(|f| f.1.feature().output().as_ref().is_some_and(|x| x.contains_key(&OutputType::RotateWithDirection)))
             .map(|(_, x)| x)
             .collect();
           let f = rotate_features[cmd.index() as usize].clone();

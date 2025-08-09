@@ -12,7 +12,6 @@ use super::message::{
   serializer::ButtplugSerializerError,
   ButtplugMessageSpecVersion,
   ErrorCode,
-  FeatureType,
   InputType,
   OutputType,
 };
@@ -172,14 +171,14 @@ pub enum ButtplugDeviceError {
   UntypedDeserializedError(String),
   /// Device Configuration Error: {0}
   DeviceConfigurationError(String),
-  /// Actuator Type Mismatch: Index {0} got command for {1}, but expects {2}
-  DeviceActuatorTypeMismatch(u32, OutputType, FeatureType),
-  /// Sensor Type Mismatch: Index {0} got command for {1}, but expects {2}
-  DeviceSensorTypeMismatch(u32, InputType, FeatureType),
+  /// Output Type Mismatch: Index {0} got command for {1}, which is not valid
+  DeviceOutputTypeMismatch(u32, OutputType, OutputType),
+  /// Input Type Mismatch: Index {0} got command for {1}, which is not valid
+  DeviceInputTypeMismatch(u32, InputType),
   /// Protocol does not have an implementation available for Sensor Type {0}
-  ProtocolSensorNotSupported(InputType),
+  ProtocolInputNotSupported(InputType),
   /// Device does not support {0}
-  ActuatorNotSupported(OutputType),
+  OutputNotSupported(OutputType),
 }
 
 /// Unknown errors occur in exceptional circumstances where no other error type

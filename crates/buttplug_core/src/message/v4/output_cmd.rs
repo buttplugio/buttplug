@@ -137,7 +137,7 @@ impl OutputCommand {
       OutputType::Rotate => Ok(Self::Rotate(OutputValue::new(value))),
       OutputType::Vibrate => Ok(Self::Vibrate(OutputValue::new(value))),
       x => Err(ButtplugError::ButtplugDeviceError(
-        ButtplugDeviceError::ActuatorNotSupported(x),
+        ButtplugDeviceError::OutputNotSupported(x),
       )),
     }
   }
