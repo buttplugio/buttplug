@@ -1,8 +1,7 @@
 defaults:
   name: Svakom Device v3
   features:
-    - feature-type: Vibrate
-      id: 1e03f6a5-0197-4a5e-afb5-dcc1266c6a6e
+    - id: 1e03f6a5-0197-4a5e-afb5-dcc1266c6a6e
       output:
         Vibrate:
           step-range:
@@ -18,15 +17,13 @@ configurations:
       - FK008A
     name: Fantasy Cup Theodore
     features:
-      - feature-type: Vibrate
-        id: 737fe419-62fa-4e1b-b6d0-2684cbe8b31f
+      - id: 737fe419-62fa-4e1b-b6d0-2684cbe8b31f
         output:
           Vibrate:
             step-range:
               - 0
               - 10
-      - feature-type: Rotate
-        id: 5e612940-1d00-4680-aa3a-1b052755a01d
+      - id: 5e612940-1d00-4680-aa3a-1b052755a01d
         output:
           Rotate:
             step-range:
@@ -41,16 +38,14 @@ configurations:
       - QH-SX007E
     name: Svakom Alberta
     features:
-      - feature-type: Vibrate
-        description: Vibrating attachments
+      - description: Vibrating attachments
         id: 1859c6fa-1d2f-46c8-b97c-75a7ca62be8c
         output:
           Vibrate:
             step-range:
               - 0
               - 10
-      - feature-type: Vibrate
-        description: Suction lens
+      - description: Suction lens
         id: 63b84610-b32b-4526-a29a-4acb9ad4939d
         output:
           Vibrate:

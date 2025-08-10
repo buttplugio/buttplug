@@ -1,15 +1,13 @@
 defaults:
   name: TryFun Yuan Series
   features:
-    - feature-type: Oscillate
-      id: e4957d32-e069-4c35-ae3f-e3cce3de6b49
+    - id: e4957d32-e069-4c35-ae3f-e3cce3de6b49
       output:
         Oscillate:
           step-range:
             - 0
             - 9
-    - feature-type: Rotate
-      id: 0346e667-8ea2-4cde-80d4-88d498d1ee17
+    - id: 0346e667-8ea2-4cde-80d4-88d498d1ee17
       output:
         Rotate:
           step-range:
@@ -21,8 +19,7 @@ configurations:
       - TF-SPRAY
     name: TryFun Surge Pro
     features:
-      - feature-type: Vibrate
-        id: b9d4420b-9a94-4ea2-8b76-3445d06049f2
+      - id: b9d4420b-9a94-4ea2-8b76-3445d06049f2
         output:
           Vibrate:
             step-range:

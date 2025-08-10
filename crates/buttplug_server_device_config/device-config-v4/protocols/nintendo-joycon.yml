@@ -1,8 +1,7 @@
 defaults:
   name: Nintendo Joycon
   features:
-    - feature-type: Vibrate
-      id: 7a3195c9-4c04-4004-9fac-a475983f1dd4
+    - id: 7a3195c9-4c04-4004-9fac-a475983f1dd4
       output:
         Vibrate:
           step-range:

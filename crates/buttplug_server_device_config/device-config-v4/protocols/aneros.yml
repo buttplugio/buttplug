@@ -1,16 +1,14 @@
 defaults:
   name: Aneros Vivi
   features:
-    - feature-type: Vibrate
-      description: Perineum Vibrator
+    - description: Perineum Vibrator
       id: a980bc1a-5554-4293-a75f-6d17bf25ebee
       output:
         Vibrate:
           step-range:
             - 0
             - 127
-    - feature-type: Vibrate
-      description: Internal Vibrator
+    - description: Internal Vibrator
       id: 811d7d6e-6a75-4925-943a-a06042223e3a
       output:
         Vibrate:

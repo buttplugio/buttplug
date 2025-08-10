@@ -1,16 +1,14 @@
 defaults:
   name: ToyCod Tara X
   features:
-    - feature-type: Vibrate
-      description: Internal vibrator
+    - description: Internal vibrator
       id: 8638eed8-37ec-4c54-aa06-a8dd3a832057
       output:
         Vibrate:
           step-range:
             - 0
             - 3
-    - feature-type: Vibrate
-      description: External pulsator
+    - description: External pulsator
       id: a2ad09c0-0042-4f29-875f-464fb83ca916
       output:
         Vibrate:

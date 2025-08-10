@@ -1,8 +1,7 @@
 defaults:
   name: Leten Device
   features:
-    - feature-type: Vibrate
-      id: f9df3044-6d90-4767-97a9-05d15e2f97ec
+    - id: f9df3044-6d90-4767-97a9-05d15e2f97ec
       output:
         Vibrate:
           step-range:

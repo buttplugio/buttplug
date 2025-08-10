@@ -1,8 +1,7 @@
 defaults:
   name: Svakom Alex Neo
   features:
-    - feature-type: Vibrate
-      id: 323f02f5-f1ab-40b9-ba8b-eba65de178c3
+    - id: 323f02f5-f1ab-40b9-ba8b-eba65de178c3
       output:
         Vibrate:
           step-range:

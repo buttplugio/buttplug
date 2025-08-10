@@ -1,15 +1,13 @@
 defaults:
   name: JoyHub Device
   features:
-    - feature-type: Rotate
-      id: 2c03096f-8fd6-4c80-84ba-d07936f76928
+    - id: 2c03096f-8fd6-4c80-84ba-d07936f76928
       output:
         Rotate:
           step-range:
             - 0
             - 255
-    - feature-type: Constrict
-      description: Suction
+    - description: Suction
       id: e9e32817-2cc1-4365-baa6-054fb7f6aa74
       output:
         Constrict:
@@ -26,15 +24,13 @@ configurations:
       - J-Pathfinder3
     name: JoyHub Pathfinder 3
     features:
-      - feature-type: Vibrate
-        id: b91f2775-f628-43c4-bd04-a8844f74d4e1
+      - id: b91f2775-f628-43c4-bd04-a8844f74d4e1
         output:
           Vibrate:
             step-range:
               - 0
               - 255
-      - feature-type: Oscillate
-        id: 3e00301a-c942-4b8d-8f49-fe2af7ecf0b6
+      - id: 3e00301a-c942-4b8d-8f49-fe2af7ecf0b6
         output:
           Oscillate:
             step-range:

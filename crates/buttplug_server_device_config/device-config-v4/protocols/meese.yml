@@ -1,15 +1,13 @@
 defaults:
   name: Meese Device
   features:
-    - feature-type: Vibrate
-      id: 86e146ce-8aca-4df1-bfca-67dcf4d241c4
+    - id: 86e146ce-8aca-4df1-bfca-67dcf4d241c4
       output:
         Vibrate:
           step-range:
             - 0
             - 10
-    - feature-type: Vibrate
-      id: d2a0c869-d3c7-4ad7-b1fb-a8c914584abf
+    - id: d2a0c869-d3c7-4ad7-b1fb-a8c914584abf
       output:
         Vibrate:
           step-range:
@@ -25,8 +23,7 @@ configurations:
       - Meese-cd
     name: Meese Modo
     features:
-      - feature-type: Vibrate
-        id: 9bdae29d-46fc-4435-8a63-71927e5e1ada
+      - id: 9bdae29d-46fc-4435-8a63-71927e5e1ada
         output:
           Vibrate:
             step-range:

@@ -1,8 +1,7 @@
 defaults:
   name: Omobo ViVegg Vibrator
   features:
-    - feature-type: Vibrate
-      id: 6ce40ef1-a4bc-4d4f-a3f1-9059e8fd461b
+    - id: 6ce40ef1-a4bc-4d4f-a3f1-9059e8fd461b
       output:
         Vibrate:
           step-range:

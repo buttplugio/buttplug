@@ -1,8 +1,7 @@
 defaults:
   name: Xiuxiuda Device
   features:
-    - feature-type: Vibrate
-      id: da1eb27b-6159-40f8-9662-69d9ca77f768
+    - id: da1eb27b-6159-40f8-9662-69d9ca77f768
       output:
         Vibrate:
           step-range:

@@ -1,8 +1,7 @@
 defaults:
   name: IntoYou Remote Egg Vibrator
   features:
-    - feature-type: Vibrate
-      id: 1fec4773-16a2-4bec-8910-1fcd9a85edaf
+    - id: 1fec4773-16a2-4bec-8910-1fcd9a85edaf
       output:
         Vibrate:
           step-range:

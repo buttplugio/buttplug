@@ -1,8 +1,7 @@
 defaults:
   name: metaXsire Device
   features:
-    - feature-type: Vibrate
-      id: 74825924-5e2a-4dd6-a91a-10a24be40c09
+    - id: 74825924-5e2a-4dd6-a91a-10a24be40c09
       output:
         Vibrate:
           step-range:
@@ -19,15 +18,13 @@ configurations:
       - LY165A01
     name: metaXsire Cali
     features:
-      - feature-type: Vibrate
-        id: d3e17d91-94d8-449d-b049-91bd0ec3cf71
+      - id: d3e17d91-94d8-449d-b049-91bd0ec3cf71
         output:
           Vibrate:
             step-range:
               - 0
               - 255
-      - feature-type: Constrict
-        id: 6aceca29-6833-4f61-b5af-1005bb50bdf9
+      - id: 6aceca29-6833-4f61-b5af-1005bb50bdf9
         output:
           Constrict:
             step-range:
@@ -38,22 +35,19 @@ configurations:
       - Olis
     name: metaXsire Olis
     features:
-      - feature-type: Vibrate
-        id: 2e6d4a73-7847-4a5b-a03c-cdd6f07c39c9
+      - id: 2e6d4a73-7847-4a5b-a03c-cdd6f07c39c9
         output:
           Vibrate:
             step-range:
               - 0
               - 255
-      - feature-type: Vibrate
-        id: c1530d49-07b0-432b-8c08-08e1ef4d2842
+      - id: c1530d49-07b0-432b-8c08-08e1ef4d2842
         output:
           Vibrate:
             step-range:
               - 0
               - 255
-      - feature-type: Rotate
-        id: cbc1187c-2400-4e9b-9fc0-a03744bd7295
+      - id: cbc1187c-2400-4e9b-9fc0-a03744bd7295
         output:
           Rotate:
             step-range:
@@ -64,15 +58,13 @@ configurations:
       - LY213A01
     name: metaXsire BuCUE
     features:
-      - feature-type: Oscillate
-        id: 641d8a6a-b068-4089-9632-c81ab872677d
+      - id: 641d8a6a-b068-4089-9632-c81ab872677d
         output:
           Oscillate:
             step-range:
               - 0
               - 255
-      - feature-type: Vibrate
-        id: 15dcc27e-ab6d-407e-8e1a-4b51e445fa5d
+      - id: 15dcc27e-ab6d-407e-8e1a-4b51e445fa5d
         output:
           Vibrate:
             step-range:

@@ -1,8 +1,7 @@
 defaults:
   name: WeVibe Device
   features:
-    - feature-type: Vibrate
-      id: 6c0184bc-93b8-41a9-a976-934256dcdf9d
+    - id: 6c0184bc-93b8-41a9-a976-934256dcdf9d
       output:
         Vibrate:
           step-range:
@@ -47,15 +46,13 @@ configurations:
       - Classic
     name: WeVibe 4 Plus
     features:
-      - feature-type: Vibrate
-        id: c76fd58e-a38c-4f25-a04c-d798e3f892d3
+      - id: c76fd58e-a38c-4f25-a04c-d798e3f892d3
         output:
           Vibrate:
             step-range:
               - 0
               - 15
-      - feature-type: Vibrate
-        id: 027061c3-4d18-4d03-8219-13e3134b8a19
+      - id: 027061c3-4d18-4d03-8219-13e3134b8a19
         output:
           Vibrate:
             step-range:
@@ -66,15 +63,13 @@ configurations:
       - Gala
     name: WeVibe Gala
     features:
-      - feature-type: Vibrate
-        id: 22386dcd-b409-49d2-be03-ad270eae92c4
+      - id: 22386dcd-b409-49d2-be03-ad270eae92c4
         output:
           Vibrate:
             step-range:
               - 0
               - 15
-      - feature-type: Vibrate
-        id: 46f2d671-5bbf-49c0-928e-4a8b3cdd892b
+      - id: 46f2d671-5bbf-49c0-928e-4a8b3cdd892b
         output:
           Vibrate:
             step-range:
@@ -85,15 +80,13 @@ configurations:
       - Nova
     name: WeVibe Nova
     features:
-      - feature-type: Vibrate
-        id: e609247a-8c12-422e-8df7-e03373bdbf7a
+      - id: e609247a-8c12-422e-8df7-e03373bdbf7a
         output:
           Vibrate:
             step-range:
               - 0
               - 15
-      - feature-type: Vibrate
-        id: c84081f5-3a72-473a-b2b3-32500014b308
+      - id: c84081f5-3a72-473a-b2b3-32500014b308
         output:
           Vibrate:
             step-range:
@@ -104,15 +97,13 @@ configurations:
       - Sync
     name: WeVibe Sync
     features:
-      - feature-type: Vibrate
-        id: 283b2826-80e3-455f-bec6-7800ebaf2c96
+      - id: 283b2826-80e3-455f-bec6-7800ebaf2c96
         output:
           Vibrate:
             step-range:
               - 0
               - 15
-      - feature-type: Vibrate
-        id: 64f00297-e4ef-4059-a622-c0bea33d4379
+      - id: 64f00297-e4ef-4059-a622-c0bea33d4379
         output:
           Vibrate:
             step-range:

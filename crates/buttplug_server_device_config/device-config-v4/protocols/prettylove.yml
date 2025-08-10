@@ -1,8 +1,7 @@
 defaults:
   name: Pretty Love Device
   features:
-    - feature-type: Vibrate
-      id: 349df5c5-1c5d-4de2-a3d9-c9159c640aba
+    - id: 349df5c5-1c5d-4de2-a3d9-c9159c640aba
       output:
         Vibrate:
           step-range:

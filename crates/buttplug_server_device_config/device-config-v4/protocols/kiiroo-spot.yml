@@ -1,15 +1,13 @@
 defaults:
   name: Kiiroo Spot
   features:
-    - feature-type: Vibrate
-      id: a047482e-01d1-477a-bf67-71c1ee667f94
+    - id: a047482e-01d1-477a-bf67-71c1ee667f94
       output:
         Vibrate:
           step-range:
             - 0
             - 100
-    - feature-type: Battery
-      description: Battery Level
+    - description: Battery Level
       id: 5171bb1b-b234-4a56-96ae-d592d3065d00
       input:
         Battery:

@@ -1,15 +1,13 @@
 defaults:
   name: Svakom Sam Neo 2
   features:
-    - feature-type: Vibrate
-      id: 9f584905-3bcb-4a60-9a56-2c2d69c81a8c
+    - id: 9f584905-3bcb-4a60-9a56-2c2d69c81a8c
       output:
         Vibrate:
           step-range:
             - 0
             - 10
-    - feature-type: Constrict
-      id: 7580e615-c22c-4242-b599-9b4041bfa400
+    - id: 7580e615-c22c-4242-b599-9b4041bfa400
       output:
         Constrict:
           step-range:

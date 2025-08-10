@@ -1,8 +1,7 @@
 defaults:
   name: JoyHub Device
   features:
-    - feature-type: Vibrate
-      id: fc2f0fc2-fb75-4eee-b92b-20eaf7cc9a1e
+    - id: fc2f0fc2-fb75-4eee-b92b-20eaf7cc9a1e
       output:
         Vibrate:
           step-range:
@@ -140,15 +139,13 @@ configurations:
       - J-Petalwish2
     name: JoyHub Petalwish 2
     features:
-      - feature-type: Oscillate
-        id: 0d5685ae-95ea-4d2d-849e-b75b7354bc35
+      - id: 0d5685ae-95ea-4d2d-849e-b75b7354bc35
         output:
           Oscillate:
             step-range:
               - 0
               - 255
-      - feature-type: Vibrate
-        id: e092343a-c826-4bc8-a579-e179b50cf65e
+      - id: e092343a-c826-4bc8-a579-e179b50cf65e
         output:
           Vibrate:
             step-range:
@@ -159,23 +156,20 @@ configurations:
       - J-VortexTongue
     name: JoyHub Vortex Tongue
     features:
-      - feature-type: Vibrate
-        id: 95313411-9fb3-4df9-b672-c7279ca7d243
+      - id: 95313411-9fb3-4df9-b672-c7279ca7d243
         output:
           Vibrate:
             step-range:
               - 0
               - 255
-      - feature-type: Constrict
-        description: Air Pump
+      - description: Air Pump
         id: d2f66bd3-96c4-4377-b1f5-45a2f3d99c9e
         output:
           Constrict:
             step-range:
               - 0
               - 3
-      - feature-type: Rotate
-        id: 042a4817-348c-4595-9fbc-463ffa903041
+      - id: 042a4817-348c-4595-9fbc-463ffa903041
         output:
           Rotate:
             step-range:
@@ -186,23 +180,20 @@ configurations:
       - J-VibSiren
     name: JoyHub VibSiren
     features:
-      - feature-type: Vibrate
-        description: External vibrator
+      - description: External vibrator
         id: d03ea16f-3126-469d-bf85-843a7c6e2cf6
         output:
           Vibrate:
             step-range:
               - 0
               - 255
-      - feature-type: Oscillate
-        id: 115ec3d5-df22-474a-aa5a-32236fcb517e
+      - id: 115ec3d5-df22-474a-aa5a-32236fcb517e
         output:
           Oscillate:
             step-range:
               - 0
               - 255
-      - feature-type: Vibrate
-        description: Internal vibrator
+      - description: Internal vibrator
         id: cd3828ee-8fe0-4214-acce-9fc4aac9ea46
         output:
           Vibrate:
@@ -214,15 +205,13 @@ configurations:
       - J-Mysticolor
     name: JoyHub Mysticolor
     features:
-      - feature-type: Rotate
-        id: a7a34c6b-5d77-4a38-9708-780ba97cd34f
+      - id: a7a34c6b-5d77-4a38-9708-780ba97cd34f
         output:
           Rotate:
             step-range:
               - 0
               - 255
-      - feature-type: Constrict
-        description: Air Pump
+      - description: Air Pump
         id: 7891e1b3-82c3-4e83-936c-2a156f2ba826
         output:
           Constrict:
@@ -234,15 +223,13 @@ configurations:
       - J-VividWings
     name: JoyHub Vivid Wings
     features:
-      - feature-type: Vibrate
-        id: 686761a8-fcc9-4a41-9725-045d5cb0dae9
+      - id: 686761a8-fcc9-4a41-9725-045d5cb0dae9
         output:
           Vibrate:
             step-range:
               - 0
               - 255
-      - feature-type: Oscillate
-        id: 21c831d4-0956-4b9b-a90e-31a545a89708
+      - id: 21c831d4-0956-4b9b-a90e-31a545a89708
         output:
           Oscillate:
             step-range:
@@ -253,15 +240,13 @@ configurations:
       - J-Mariner
     name: JoyHub Mariner
     features:
-      - feature-type: Rotate
-        id: 439bea28-4c09-4b81-8dd5-dce2ec31781e
+      - id: 439bea28-4c09-4b81-8dd5-dce2ec31781e
         output:
           Rotate:
             step-range:
               - 0
               - 255
-      - feature-type: Constrict
-        description: Air Pump
+      - description: Air Pump
         id: 9f386242-41a2-4c86-9167-db6c58840cc7
         output:
           Constrict:
@@ -273,15 +258,13 @@ configurations:
       - J-MarsLion
     name: JoyHub MarsLion
     features:
-      - feature-type: Vibrate
-        id: e43f723f-412d-4c75-8123-2483113a06a8
+      - id: e43f723f-412d-4c75-8123-2483113a06a8
         output:
           Vibrate:
             step-range:
               - 0
               - 255
-      - feature-type: Constrict
-        description: Air Pump
+      - description: Air Pump
         id: 54e3da8e-7f97-46c7-8a1e-9fa549b877c2
         output:
           Constrict:
@@ -293,8 +276,7 @@ configurations:
       - J-Pul
     name: JoyHub Pul
     features:
-      - feature-type: Oscillate
-        id: a9b7d261-2877-4214-a539-8ce30e038386
+      - id: a9b7d261-2877-4214-a539-8ce30e038386
         output:
           Oscillate:
             step-range:
@@ -305,8 +287,7 @@ configurations:
       - J-ROSELLA3
     name: JoyHub Rose Love
     features:
-      - feature-type: Constrict
-        description: Air Pump
+      - description: Air Pump
         id: 0d3b3010-d438-4899-b1c2-d81bff0c6714
         output:
           Constrict:
@@ -318,15 +299,13 @@ configurations:
       - J-DukeDazzle2
     name: JoyHub Edasich
     features:
-      - feature-type: Vibrate
-        id: 9fde0544-3307-4a4f-8abf-88ffb1dc3caf
+      - id: 9fde0544-3307-4a4f-8abf-88ffb1dc3caf
         output:
           Vibrate:
             step-range:
               - 0
               - 255
-      - feature-type: Oscillate
-        id: e0ca1697-1e42-4822-925c-691561916bee
+      - id: e0ca1697-1e42-4822-925c-691561916bee
         output:
           Oscillate:
             step-range:
@@ -337,8 +316,7 @@ configurations:
       - J-Mars
     name: JoyHub Mars
     features:
-      - feature-type: Oscillate
-        id: a4a079b4-6cf2-47fc-bfef-0f2921c243db
+      - id: a4a079b4-6cf2-47fc-bfef-0f2921c243db
         output:
           Oscillate:
             step-range:
@@ -349,8 +327,7 @@ configurations:
       - J-Martino
     name: JoyHub Martino
     features:
-      - feature-type: Oscillate
-        id: b306148c-c1d9-4281-bae9-fe1ccd876399
+      - id: b306148c-c1d9-4281-bae9-fe1ccd876399
         output:
           Oscillate:
             step-range:
@@ -361,15 +338,13 @@ configurations:
       - J-MarsLion2
     name: JoyHub Mars Lion 2
     features:
-      - feature-type: Vibrate
-        id: b6ffc3b3-9e8a-46cd-82f2-97df7237be83
+      - id: b6ffc3b3-9e8a-46cd-82f2-97df7237be83
         output:
           Vibrate:
             step-range:
               - 0
               - 255
-      - feature-type: Constrict
-        id: ead93a87-9ad6-448f-a26a-cce980db265e
+      - id: ead93a87-9ad6-448f-a26a-cce980db265e
         output:
           Constrict:
             step-range:
@@ -380,15 +355,13 @@ configurations:
       - J-Myrna
     name: JoyHub Myrna
     features:
-      - feature-type: Vibrate
-        id: 393dfa94-e3c8-4962-a053-c39e0447e420
+      - id: 393dfa94-e3c8-4962-a053-c39e0447e420
         output:
           Vibrate:
             step-range:
               - 0
               - 255
-      - feature-type: Constrict
-        id: b6e89b8c-207d-4588-9fff-f71d42e1a1a5
+      - id: b6e89b8c-207d-4588-9fff-f71d42e1a1a5
         output:
           Constrict:
             step-range:
@@ -399,16 +372,14 @@ configurations:
       - J-Vase2
     name: JoyHub Vase 2
     features:
-      - feature-type: Vibrate
-        description: Biting lips
+      - description: Biting lips
         id: 7e13af66-c20f-42b3-ba85-764a2cdeaca0
         output:
           Vibrate:
             step-range:
               - 0
               - 255
-      - feature-type: Vibrate
-        description: Sideways flicker
+      - description: Sideways flicker
         id: f80dc564-7d53-4c6b-991e-ec18051a3207
         output:
           Vibrate:

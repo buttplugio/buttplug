@@ -7,8 +7,7 @@ configurations:
       - PEARL
     name: Kiiroo Pearl
     features:
-      - feature-type: Vibrate
-        id: 31eee57b-a1d8-49de-ac72-0dba46885a28
+      - id: 31eee57b-a1d8-49de-ac72-0dba46885a28
         output:
           Vibrate:
             step-range:
@@ -19,8 +18,7 @@ configurations:
       - ONYX
     name: Kiiroo Onyx
     features:
-      - feature-type: PositionWithDuration
-        id: 2fe100ee-4665-4132-b4c6-d70a4037d6ac
+      - id: 2fe100ee-4665-4132-b4c6-d70a4037d6ac
         output:
           PositionWithDuration:
             step-range:

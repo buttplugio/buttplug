@@ -1,8 +1,7 @@
 defaults:
   name: ServeU
   features:
-    - feature-type: PositionWithDuration
-      id: 7e756a59-b13c-4322-bc59-27dacfc73b4d
+    - id: 7e756a59-b13c-4322-bc59-27dacfc73b4d
       output:
         PositionWithDuration:
           step-range:

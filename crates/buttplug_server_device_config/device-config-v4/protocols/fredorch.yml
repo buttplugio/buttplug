@@ -1,8 +1,7 @@
 defaults:
   name: Fredorch Device
   features:
-    - feature-type: PositionWithDuration
-      id: d3985f07-f95a-4f72-859e-8b0ac76f251f
+    - id: d3985f07-f95a-4f72-859e-8b0ac76f251f
       output:
         PositionWithDuration:
           step-range:

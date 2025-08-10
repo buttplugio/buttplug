@@ -1,8 +1,7 @@
 defaults:
   name: Amorelie Joy Device
   features:
-    - feature-type: Vibrate
-      id: 9be34b27-431e-47d0-871b-fea3c116d32d
+    - id: 9be34b27-431e-47d0-871b-fea3c116d32d
       output:
         Vibrate:
           step-range:

@@ -1,8 +1,7 @@
 defaults:
   name: Love Nut
   features:
-    - feature-type: Vibrate
-      id: 45793bae-a3d5-4d76-9f20-f907e82b18df
+    - id: 45793bae-a3d5-4d76-9f20-f907e82b18df
       output:
         Vibrate:
           step-range:

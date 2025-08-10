@@ -1,8 +1,7 @@
 defaults:
   name: Muse Device
   features:
-    - feature-type: Vibrate
-      id: 6dcc57e0-8a30-4e90-ba9e-4b8dd488d166
+    - id: 6dcc57e0-8a30-4e90-ba9e-4b8dd488d166
       output:
         Vibrate:
           step-range:

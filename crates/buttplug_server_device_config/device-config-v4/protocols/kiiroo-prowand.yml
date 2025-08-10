@@ -1,15 +1,13 @@
 defaults:
   name: Kiiroo ProWand
   features:
-    - feature-type: Vibrate
-      id: 2e585349-127b-4536-85b7-9d5b90e44df4
+    - id: 2e585349-127b-4536-85b7-9d5b90e44df4
       output:
         Vibrate:
           step-range:
             - 0
             - 255
-    - feature-type: Battery
-      description: Battery Level
+    - description: Battery Level
       id: ad812cb2-e04a-4656-9103-a80766601455
       input:
         Battery:

@@ -1,8 +1,7 @@
 defaults:
   name: Hismith Mini device
   features:
-    - feature-type: Oscillate
-      description: Fucking Machine Oscillation Speed
+    - description: Fucking Machine Oscillation Speed
       id: cd95dc09-627b-489e-841a-39cd5f06bf6d
       output:
         Oscillate:
@@ -40,16 +39,14 @@ configurations:
       - '2201'
     name: Sinloli Automatic Sex Doll
     features:
-      - feature-type: Constrict
-        description: Air Pump
+      - description: Air Pump
         id: 1c45bd7c-ca54-483b-9994-f6d4c18cd59f
         output:
           Constrict:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrator
+      - description: Vibrator
         id: 23c0c1f0-af15-492d-8405-3ce3f24d13a3
         output:
           Vibrate:
@@ -61,16 +58,14 @@ configurations:
       - '3101'
     name: Eropair Rabbit Vibrator
     features:
-      - feature-type: Vibrate
-        description: Internal Vibrator
+      - description: Internal Vibrator
         id: 85ca7d86-a508-4d9e-9ee5-0223a4b68805
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: External Vibrator
+      - description: External Vibrator
         id: 950bc937-6be1-4f6c-8d18-36cbd4d25bee
         output:
           Vibrate:
@@ -82,16 +77,14 @@ configurations:
       - '3102'
     name: Eropair Thrusting Vibrating Dildo
     features:
-      - feature-type: Oscillate
-        description: Thruster
+      - description: Thruster
         id: 6255e8b0-f188-4a8b-9325-4c70af3b20be
         output:
           Oscillate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrator
+      - description: Vibrator
         id: e0eb75eb-a14b-4947-97de-0bd36517dabd
         output:
           Vibrate:
@@ -103,16 +96,14 @@ configurations:
       - '2101'
     name: Eropair Cup
     features:
-      - feature-type: Constrict
-        description: Air Pump
+      - description: Air Pump
         id: 39ed62dd-77c2-4488-ba09-33792a65b013
         output:
           Constrict:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrator
+      - description: Vibrator
         id: d36a28fd-0042-4c5c-a36c-e0a72173e0ab
         output:
           Vibrate:
@@ -124,16 +115,14 @@ configurations:
       - '2204'
     name: Sinloli Cosima
     features:
-      - feature-type: Oscillate
-        description: Stroker Oscillation Speed
+      - description: Stroker Oscillation Speed
         id: 928b7b2b-9e4e-47bc-8196-e304174e78fa
         output:
           Oscillate:
             step-range:
               - 0
               - 100
-      - feature-type: Constrict
-        description: Air Pump
+      - description: Air Pump
         id: e9b6dc68-e89a-4f7b-a74f-8a25b31346ee
         output:
           Constrict:
@@ -145,16 +134,14 @@ configurations:
       - '2202'
     name: Sinloli Ethel
     features:
-      - feature-type: Oscillate
-        description: Stroker Oscillation Speed
+      - description: Stroker Oscillation Speed
         id: 030bcd37-38f1-415f-b59e-d0013497fadf
         output:
           Oscillate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrator
+      - description: Vibrator
         id: 19ca1ed9-94ee-46f8-9b70-0e79a013db9d
         output:
           Vibrate:

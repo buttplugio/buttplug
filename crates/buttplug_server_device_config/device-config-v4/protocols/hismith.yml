@@ -1,8 +1,7 @@
 defaults:
   name: Hismith device
   features:
-    - feature-type: Oscillate
-      description: Fucking Machine Oscillation Speed
+    - description: Fucking Machine Oscillation Speed
       id: 24291feb-53a7-49ee-898a-8c42f534508f
       output:
         Oscillate:
@@ -27,16 +26,14 @@ configurations:
       - '2001'
     name: Hismith Thrusting Cup
     features:
-      - feature-type: Oscillate
-        description: Stroker Oscillation Speed
+      - description: Stroker Oscillation Speed
         id: 1663c651-cab6-444d-bbd7-39baf190d6ab
         output:
           Oscillate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        id: b6a5ed20-e10a-4370-aa9e-0cd85bf1c6f7
+      - id: b6a5ed20-e10a-4370-aa9e-0cd85bf1c6f7
         output:
           Vibrate:
             step-range:
@@ -47,16 +44,14 @@ configurations:
       - '1006'
     name: Hismith G011
     features:
-      - feature-type: Oscillate
-        description: Stroker Oscillation Speed
+      - description: Stroker Oscillation Speed
         id: 8621627f-4561-4272-9d95-231d9b8d3440
         output:
           Oscillate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        id: 5815777e-11e1-4998-b9a6-68e09656f18c
+      - id: 5815777e-11e1-4998-b9a6-68e09656f18c
         output:
           Vibrate:
             step-range:
@@ -67,8 +62,7 @@ configurations:
       - '3001'
     name: Wildolo Device
     features:
-      - feature-type: Vibrate
-        id: 5ac186f5-ada6-4ec2-a65a-910b8b2292cc
+      - id: 5ac186f5-ada6-4ec2-a65a-910b8b2292cc
         output:
           Vibrate:
             step-range:

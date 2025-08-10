@@ -1,8 +1,7 @@
 defaults:
   name: Youou Wand Vibrator
   features:
-    - feature-type: Vibrate
-      id: 19dc8b35-713c-448b-926f-4d56b14f432d
+    - id: 19dc8b35-713c-448b-926f-4d56b14f432d
       output:
         Vibrate:
           step-range:

@@ -1,8 +1,7 @@
 defaults:
   name: Fleshy Thrust Sync
   features:
-    - feature-type: PositionWithDuration
-      id: a8185061-6d41-4eea-bc24-1ff1c5c405b9
+    - id: a8185061-6d41-4eea-bc24-1ff1c5c405b9
       output:
         PositionWithDuration:
           step-range:

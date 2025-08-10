@@ -183,10 +183,6 @@
           "id": {
             "$ref": "#/components/uuid"
           },
-          "feature-type": {
-            "type": "string",
-            "pattern": "^(Vibrate|Rotate|Oscillate|Constrict|Spray|Position|Battery|RSSI|Pressure|RotateWithDirection|PositionWithDuration|Heater|Led)$"
-          },
           "output": {
             "type": "object",
             "patternProperties": {
@@ -242,7 +238,6 @@
           }
         },
         "required": [
-          "feature-type",
           "id"
         ],
         "additionalProperties": false           

@@ -1,8 +1,7 @@
 defaults:
   name: Svakom Pulse Device
   features:
-    - feature-type: Vibrate
-      id: 0ee3c15e-b05d-4c97-bb4a-523a5475c520
+    - id: 0ee3c15e-b05d-4c97-bb4a-523a5475c520
       output:
         Vibrate:
           step-range:

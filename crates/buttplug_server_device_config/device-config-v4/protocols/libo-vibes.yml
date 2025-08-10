@@ -1,8 +1,7 @@
 defaults:
   name: Libo Vibes Device
   features:
-    - feature-type: Vibrate
-      id: db5d9b0a-8498-4f5a-b53b-111a9940367d
+    - id: db5d9b0a-8498-4f5a-b53b-111a9940367d
       output:
         Vibrate:
           step-range:
@@ -42,8 +41,7 @@ configurations:
       - Yuyi
     name: Libo Feather
     features:
-      - feature-type: Vibrate
-        id: 39eca274-5634-4433-9be5-2c688fb9b65c
+      - id: 39eca274-5634-4433-9be5-2c688fb9b65c
         output:
           Vibrate:
             step-range:
@@ -54,15 +52,13 @@ configurations:
       - BaiHu
     name: Libo LaLa
     features:
-      - feature-type: Vibrate
-        id: 4239e32b-b3ad-49e2-a96e-1fb7298b1889
+      - id: 4239e32b-b3ad-49e2-a96e-1fb7298b1889
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        id: 5f43a406-9567-43fc-b3b8-5383b5200bfd
+      - id: 5f43a406-9567-43fc-b3b8-5383b5200bfd
         output:
           Vibrate:
             step-range:
@@ -73,15 +69,13 @@ configurations:
       - Gugudai
     name: Libo Carlos
     features:
-      - feature-type: Vibrate
-        id: 6fc0149e-d041-4987-a66e-dbf36739331f
+      - id: 6fc0149e-d041-4987-a66e-dbf36739331f
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        id: 80b80fb2-b458-4661-a1e2-a8f27651d390
+      - id: 80b80fb2-b458-4661-a1e2-a8f27651d390
         output:
           Vibrate:
             step-range:
@@ -92,15 +86,13 @@ configurations:
       - Haima
     name: Libo Selina
     features:
-      - feature-type: Vibrate
-        id: 54c02210-8494-40c6-a04c-e0a302aa735e
+      - id: 54c02210-8494-40c6-a04c-e0a302aa735e
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        id: a2fb0a58-895b-49f5-bc88-b0a38bc64e68
+      - id: a2fb0a58-895b-49f5-bc88-b0a38bc64e68
         output:
           Vibrate:
             step-range:

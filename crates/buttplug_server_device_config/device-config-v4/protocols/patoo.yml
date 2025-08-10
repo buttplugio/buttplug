@@ -1,8 +1,7 @@
 defaults:
   name: Patoo Device
   features:
-    - feature-type: Vibrate
-      id: 328761ed-4dd1-4535-9d37-e805f5eb1a61
+    - id: 328761ed-4dd1-4535-9d37-e805f5eb1a61
       output:
         Vibrate:
           step-range:
@@ -26,15 +25,13 @@ configurations:
       - PBT
     name: Patoo Devil
     features:
-      - feature-type: Vibrate
-        id: f2957620-0a5c-4d69-851c-f9d34544e4cc
+      - id: f2957620-0a5c-4d69-851c-f9d34544e4cc
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        id: 49f28542-fb54-46e6-a6b8-f412617ce24f
+      - id: 49f28542-fb54-46e6-a6b8-f412617ce24f
         output:
           Vibrate:
             step-range:

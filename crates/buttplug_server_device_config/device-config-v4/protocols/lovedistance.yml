@@ -1,8 +1,7 @@
 defaults:
   name: Love Distance Device
   features:
-    - feature-type: Vibrate
-      id: 3eae1a60-e996-4726-858b-2128a1ae376a
+    - id: 3eae1a60-e996-4726-858b-2128a1ae376a
       output:
         Vibrate:
           step-range:

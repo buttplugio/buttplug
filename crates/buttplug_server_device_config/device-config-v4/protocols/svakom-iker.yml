@@ -1,15 +1,13 @@
 defaults:
   name: Svakom Iker
   features:
-    - feature-type: Vibrate
-      id: 36af2b39-85ec-4463-9ecd-59fbaff3ba38
+    - id: 36af2b39-85ec-4463-9ecd-59fbaff3ba38
       output:
         Vibrate:
           step-range:
             - 0
             - 10
-    - feature-type: Vibrate
-      id: 74e5fb53-383a-4938-81ff-cb84da773882
+    - id: 74e5fb53-383a-4938-81ff-cb84da773882
       output:
         Vibrate:
           step-range:

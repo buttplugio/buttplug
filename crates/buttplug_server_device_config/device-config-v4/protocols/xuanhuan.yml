@@ -1,8 +1,7 @@
 defaults:
   name: Xuanhuan Masturbator
   features:
-    - feature-type: Vibrate
-      id: b52a4a37-3eae-40da-a4c2-abe546934900
+    - id: b52a4a37-3eae-40da-a4c2-abe546934900
       output:
         Vibrate:
           step-range:

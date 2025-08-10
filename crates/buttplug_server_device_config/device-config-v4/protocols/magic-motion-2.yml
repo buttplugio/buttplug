@@ -1,15 +1,13 @@
 defaults:
   name: Magic Motion V2 Device
   features:
-    - feature-type: Vibrate
-      id: 4fe8ab2c-2811-416c-967c-fce58cb8a2f3
+    - id: 4fe8ab2c-2811-416c-967c-fce58cb8a2f3
       output:
         Vibrate:
           step-range:
             - 0
             - 100
-    - feature-type: Battery
-      description: Battery Level
+    - description: Battery Level
       id: 014cdffe-d3d5-4bba-acf4-f26e809b45ec
       input:
         Battery:
@@ -36,22 +34,19 @@ configurations:
       - Eidolon
     name: MagicMotion Eidolon
     features:
-      - feature-type: Vibrate
-        id: 6b96f9d2-87bc-4596-810d-9a96cbd1a2fa
+      - id: 6b96f9d2-87bc-4596-810d-9a96cbd1a2fa
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        id: 86090f46-7c4c-46fe-883f-d3765f477bac
+      - id: 86090f46-7c4c-46fe-883f-d3765f477bac
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 6baefd41-de6d-4c60-aedb-0a9b55f34875
         input:
           Battery:
@@ -65,22 +60,19 @@ configurations:
       - Solstice X
     name: MagicMotion Solstice X
     features:
-      - feature-type: Vibrate
-        id: a245e29e-3f63-4c68-a5c2-c07c7c9970a4
+      - id: a245e29e-3f63-4c68-a5c2-c07c7c9970a4
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        id: 70593a3b-2b16-4258-badb-9697074bf10b
+      - id: 70593a3b-2b16-4258-badb-9697074bf10b
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: f966012c-6b68-4dc3-b4a4-16d34fdc30c7
         input:
           Battery:
@@ -98,22 +90,19 @@ configurations:
       - CBT001
     name: FunTown Jive
     features:
-      - feature-type: Vibrate
-        id: 81515d54-be1d-42a1-bc7d-5b4e9c20db37
+      - id: 81515d54-be1d-42a1-bc7d-5b4e9c20db37
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Oscillate
-        id: d514fb91-2261-4c5c-a59e-9799fce40d17
+      - id: d514fb91-2261-4c5c-a59e-9799fce40d17
         output:
           Oscillate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 123954de-a9f1-427a-823a-9b9173ad8856
         input:
           Battery:

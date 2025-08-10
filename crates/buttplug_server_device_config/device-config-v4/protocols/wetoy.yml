@@ -1,8 +1,7 @@
 defaults:
   name: WeToy MiNa
   features:
-    - feature-type: Vibrate
-      id: 693b0fbc-eee5-4948-b8f4-aa264a78bcc2
+    - id: 693b0fbc-eee5-4948-b8f4-aa264a78bcc2
       output:
         Vibrate:
           step-range:

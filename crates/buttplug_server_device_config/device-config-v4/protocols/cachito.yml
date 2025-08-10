@@ -1,15 +1,13 @@
 defaults:
   name: Cachito Device
   features:
-    - feature-type: Vibrate
-      id: 6e5ce97a-2eae-4807-a857-0e74a9f0d095
+    - id: 6e5ce97a-2eae-4807-a857-0e74a9f0d095
       output:
         Vibrate:
           step-range:
             - 0
             - 5
-    - feature-type: Vibrate
-      id: 2ec18700-3fac-4f3b-91c1-ead90bf853d0
+    - id: 2ec18700-3fac-4f3b-91c1-ead90bf853d0
       output:
         Vibrate:
           step-range:

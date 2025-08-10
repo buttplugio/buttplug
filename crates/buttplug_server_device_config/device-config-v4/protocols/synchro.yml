@@ -1,8 +1,7 @@
 defaults:
   name: Synchro
   features:
-    - feature-type: RotateWithDirection
-      id: b7495351-9101-448a-94c4-4598cf541dca
+    - id: b7495351-9101-448a-94c4-4598cf541dca
       output:
         RotateWithDirection:
           step-range:

@@ -1,8 +1,7 @@
 defaults:
   name: Pink Punch Device
   features:
-    - feature-type: Vibrate
-      id: 71813440-1a8e-4cfb-9753-bf1fdc674579
+    - id: 71813440-1a8e-4cfb-9753-bf1fdc674579
       output:
         Vibrate:
           step-range:

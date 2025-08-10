@@ -1,8 +1,7 @@
 defaults:
   name: Rez TranceVibrator
   features:
-    - feature-type: Vibrate
-      id: 01e369e0-541d-417a-9809-0600dab964c6
+    - id: 01e369e0-541d-417a-9809-0600dab964c6
       output:
         Vibrate:
           step-range:

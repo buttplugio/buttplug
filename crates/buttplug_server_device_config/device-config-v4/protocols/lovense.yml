@@ -1,15 +1,13 @@
 defaults:
   name: Lovense Device
   features:
-    - feature-type: Vibrate
-      id: 3f7a25a5-df21-42ca-bf9f-d1c52df1f37e
+    - id: 3f7a25a5-df21-42ca-bf9f-d1c52df1f37e
       output:
         Vibrate:
           step-range:
             - 0
             - 20
-    - feature-type: Battery
-      description: Battery Level
+    - description: Battery Level
       id: 14bd7637-13ed-49ba-9eb9-9c8ba9abec20
       input:
         Battery:
@@ -24,24 +22,21 @@ configurations:
       - B
     name: Lovense Max
     features:
-      - feature-type: Vibrate
-        description: Vibrator
+      - description: Vibrator
         id: d9c9b4a7-008e-4182-b28c-0984af970c32
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: Constrict
-        description: Air Pump
+      - description: Air Pump
         id: fed393a9-3ac6-4924-859d-5cb4ae059cea
         output:
           Constrict:
             step-range:
               - 0
               - 3
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: b4be6835-5b91-4540-bc7b-0c3d8dcb89fd
         input:
           Battery:
@@ -55,22 +50,19 @@ configurations:
       - P
     name: Lovense Edge
     features:
-      - feature-type: Vibrate
-        id: cb286b22-998b-4420-82f3-84e8d39db6b5
+      - id: cb286b22-998b-4420-82f3-84e8d39db6b5
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: Vibrate
-        id: c8b72e1d-d7d4-4417-8cbc-e6c0f435889a
+      - id: c8b72e1d-d7d4-4417-8cbc-e6c0f435889a
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 66b31efb-3bd9-4e3a-9972-88c66e9fca28
         input:
           Battery:
@@ -85,22 +77,19 @@ configurations:
       - C
     name: Lovense Nora
     features:
-      - feature-type: Vibrate
-        id: 2c5da93b-36a0-4209-ac8c-cead63b838c6
+      - id: 2c5da93b-36a0-4209-ac8c-cead63b838c6
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: RotateWithDirection
-        id: 515e07e2-a6e6-4ac0-a4b0-512504311260
+      - id: 515e07e2-a6e6-4ac0-a4b0-512504311260
         output:
           RotateWithDirection:
             step-range:
               - 0
               - 20
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 820d8fb1-c6ec-434d-b7c4-835bdf36552a
         input:
           Battery:
@@ -154,16 +143,14 @@ configurations:
       - F
     name: Lovense Sex Machine
     features:
-      - feature-type: Oscillate
-        description: Fucking Machine Oscillation Speed
+      - description: Fucking Machine Oscillation Speed
         id: f9506652-c4ac-43b1-b184-cd8016b64623
         output:
           Oscillate:
             step-range:
               - 0
               - 20
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 7c382c60-0ee2-4315-b8cf-cfd3ab4c9ccd
         input:
           Battery:
@@ -177,16 +164,14 @@ configurations:
       - FS
     name: Lovense Mini Sex Machine
     features:
-      - feature-type: Oscillate
-        description: Fucking Machine Oscillation Speed
+      - description: Fucking Machine Oscillation Speed
         id: aaf55cab-8ebd-42b3-9bbb-74a57efdf014
         output:
           Oscillate:
             step-range:
               - 0
               - 20
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 68defbd8-af87-4f04-97da-edfa8fb576f9
         input:
           Battery:
@@ -200,22 +185,19 @@ configurations:
       - J
     name: Lovense Dolce
     features:
-      - feature-type: Vibrate
-        id: 930b9aee-0ba5-4268-95ca-2a5691d31239
+      - id: 930b9aee-0ba5-4268-95ca-2a5691d31239
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: Vibrate
-        id: 62b2b22c-c028-4aa4-a85c-a7fe8c5f9dcb
+      - id: 62b2b22c-c028-4aa4-a85c-a7fe8c5f9dcb
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 60868f44-3d56-44ed-bcc4-00041a7b5997
         input:
           Battery:
@@ -229,22 +211,19 @@ configurations:
       - OC
     name: Lovense Osci 3
     features:
-      - feature-type: Vibrate
-        id: 4cf78058-44c7-4513-913a-37558a84b91e
+      - id: 4cf78058-44c7-4513-913a-37558a84b91e
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: Vibrate
-        id: f4ada339-8bb2-4b02-b907-69a3257bce3b
+      - id: f4ada339-8bb2-4b02-b907-69a3257bce3b
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 3933bfcb-6daf-4c33-b834-877cb29ce77d
         input:
           Battery:
@@ -266,22 +245,19 @@ configurations:
       - EB
     name: Lovense Hyphy
     features:
-      - feature-type: Vibrate
-        id: 39b063fa-958b-4d1a-bbd1-8480e105dd88
+      - id: 39b063fa-958b-4d1a-bbd1-8480e105dd88
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: Vibrate
-        id: b40accca-7c73-4bff-9819-45f806a194a8
+      - id: b40accca-7c73-4bff-9819-45f806a194a8
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 8fa6dc63-430e-42cb-9345-42d37f0c2629
         input:
           Battery:
@@ -303,32 +279,28 @@ configurations:
       - EI-FW3
     name: Lovense Flexer
     features:
-      - feature-type: Vibrate
-        description: Internal Vibe
+      - description: Internal Vibe
         id: 9b2dcb58-6c2c-46ef-abe4-81631d1a5f66
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: Vibrate
-        description: External Vibe
+      - description: External Vibe
         id: d8b571fd-614e-4d33-8595-b9fbc81b96bd
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: Rotate
-        description: Finger motion
+      - description: Finger motion
         id: eb6a2d21-93e0-4a08-9674-36fa2d299651
         output:
           Rotate:
             step-range:
               - 0
               - 20
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 6548133f-118f-419d-8900-660fde26b42f
         input:
           Battery:
@@ -342,22 +314,19 @@ configurations:
       - 'N'
     name: Lovense Gemini
     features:
-      - feature-type: Vibrate
-        id: de8d83b6-76b4-4851-b53d-616d3527040c
+      - id: de8d83b6-76b4-4851-b53d-616d3527040c
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: Vibrate
-        id: 2ea51cd8-b173-408c-bfef-f6508c5b9087
+      - id: 2ea51cd8-b173-408c-bfef-f6508c5b9087
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 710384a5-a7dd-43f1-b55c-147256dc636a
         input:
           Battery:
@@ -371,22 +340,19 @@ configurations:
       - EA
     name: Lovense Gravity
     features:
-      - feature-type: Vibrate
-        id: 93fa269e-ba3b-4c09-85d0-43385b49ee79
+      - id: 93fa269e-ba3b-4c09-85d0-43385b49ee79
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: Oscillate
-        id: 475bde3a-4aae-4e84-87be-4df3a634da26
+      - id: 475bde3a-4aae-4e84-87be-4df3a634da26
         output:
           Oscillate:
             step-range:
               - 0
               - 20
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 104da492-67f1-46fc-b412-b98871ebb518
         input:
           Battery:
@@ -404,22 +370,19 @@ configurations:
       - EL
     name: Lovense Ridge
     features:
-      - feature-type: Vibrate
-        id: 0627be5e-8553-4f20-b4cf-15f5e1896e5f
+      - id: 0627be5e-8553-4f20-b4cf-15f5e1896e5f
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: RotateWithDirection
-        id: 360d81e7-5126-4dbb-b72d-7bb60eb67400
+      - id: 360d81e7-5126-4dbb-b72d-7bb60eb67400
         output:
           RotateWithDirection:
             step-range:
               - 0
               - 20
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 50b9b31f-c2a8-459a-81fd-c54604f5184e
         input:
           Battery:
@@ -433,32 +396,28 @@ configurations:
       - U
     name: Lovense Lapis
     features:
-      - feature-type: Vibrate
-        description: Tip Vibe
+      - description: Tip Vibe
         id: 414e5c3e-e52a-4064-b367-893bc0b1fb95
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: Vibrate
-        description: Internal Vibe
+      - description: Internal Vibe
         id: be8d8608-d3aa-4fc5-ac5c-8df429f9e63c
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: Vibrate
-        description: External Vibe
+      - description: External Vibe
         id: 8bd37a96-7f7a-450f-aa4b-ffe8aa398d1e
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: ad93f903-a354-40ae-b87e-f8390606a964
         input:
           Battery:
@@ -476,16 +435,14 @@ configurations:
       - H
     name: Lovense Solace
     features:
-      - feature-type: Oscillate
-        description: Stroker Oscillation Speed
+      - description: Stroker Oscillation Speed
         id: 5100187a-40c7-44a4-a0ce-368cc24429cd
         output:
           Oscillate:
             step-range:
               - 0
               - 20
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: e4193650-2d46-4e6e-8dd8-b1d8d9a1baff
         input:
           Battery:
@@ -499,8 +456,7 @@ configurations:
       - BA
     name: Lovense Solace Pro
     features:
-      - feature-type: PositionWithDuration
-        description: Stroker Position Based Movement
+      - description: Stroker Position Based Movement
         id: c4b2855d-5ecc-4010-8a8d-17fd3e51cc57
         output:
           PositionWithDuration:
@@ -511,8 +467,7 @@ configurations:
             step-range:
               - 0
               - 20              
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 0b1cba39-8bb7-4f87-9bed-c59f2284d702
         input:
           Battery:

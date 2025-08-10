@@ -1,8 +1,7 @@
 defaults:
   name: Roselex Device
   features:
-    - feature-type: Vibrate
-      id: 2ba5d52d-0f40-4f1f-8738-955f9f7715f3
+    - id: 2ba5d52d-0f40-4f1f-8738-955f9f7715f3
       output:
         Vibrate:
           step-range:

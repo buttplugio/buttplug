@@ -1,15 +1,13 @@
 defaults:
   name: Magic Motion V1 Device
   features:
-    - feature-type: Vibrate
-      id: 42173db5-95ac-49b5-8a5a-73a63d91fcec
+    - id: 42173db5-95ac-49b5-8a5a-73a63d91fcec
       output:
         Vibrate:
           step-range:
             - 0
             - 100
-    - feature-type: Battery
-      description: Battery Level
+    - description: Battery Level
       id: bcaf7da8-2e98-47e3-b22c-2204daf40a27
       input:
         Battery:
@@ -75,15 +73,13 @@ configurations:
       - Xone
     name: MagicMotion Xone
     features:
-      - feature-type: Oscillate
-        id: ccd72f20-d37a-4e05-bad3-122c5da80b37
+      - id: ccd72f20-d37a-4e05-bad3-122c5da80b37
         output:
           Oscillate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 98a2e5c4-c4de-4ac5-a9db-b3e24a24424a
         input:
           Battery:

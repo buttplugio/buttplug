@@ -1,15 +1,13 @@
 defaults:
   name: Svakom Ava Neo
   features:
-    - feature-type: Vibrate
-      id: 9dbdf85e-6692-4a95-b8a1-da350327a9a3
+    - id: 9dbdf85e-6692-4a95-b8a1-da350327a9a3
       output:
         Vibrate:
           step-range:
             - 0
             - 10
-    - feature-type: Oscillate
-      id: 878fb1f8-8c38-4058-bd0f-859584d14cef
+    - id: 878fb1f8-8c38-4058-bd0f-859584d14cef
       output:
         Oscillate:
           step-range:

@@ -1,15 +1,13 @@
 defaults:
   name: Lovehoney Device
   features:
-    - feature-type: Vibrate
-      id: 716bdae7-2075-4e8a-a2cb-d37b6fc35a5b
+    - id: 716bdae7-2075-4e8a-a2cb-d37b6fc35a5b
       output:
         Vibrate:
           step-range:
             - 0
             - 127
-    - feature-type: Vibrate
-      id: ce0315b0-9918-4769-af8e-6ec6258d0e1a
+    - id: ce0315b0-9918-4769-af8e-6ec6258d0e1a
       output:
         Vibrate:
           step-range:
@@ -25,8 +23,7 @@ configurations:
       - KNICKER VIBE
     name: Lovehoney Desire Knicker Vibrator
     features:
-      - feature-type: Vibrate
-        id: 5e192f37-2beb-4e21-b182-ff113642f465
+      - id: 5e192f37-2beb-4e21-b182-ff113642f465
         output:
           Vibrate:
             step-range:
@@ -37,8 +34,7 @@ configurations:
       - LOVE EGG
     name: Lovehoney Desire Love Egg
     features:
-      - feature-type: Vibrate
-        id: 980c9d39-e0bc-45d9-8d41-3e95af348d6c
+      - id: 980c9d39-e0bc-45d9-8d41-3e95af348d6c
         output:
           Vibrate:
             step-range:

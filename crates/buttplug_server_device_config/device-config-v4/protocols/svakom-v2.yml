@@ -1,8 +1,7 @@
 defaults:
   name: Svakom Device v2
   features:
-    - feature-type: Vibrate
-      id: 4a225b9d-94c6-437a-a038-3deb4ded5bc5
+    - id: 4a225b9d-94c6-437a-a038-3deb4ded5bc5
       output:
         Vibrate:
           step-range:
