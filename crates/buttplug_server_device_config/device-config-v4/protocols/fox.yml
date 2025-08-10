@@ -1,8 +1,7 @@
 defaults:
   name: Fox Device
   features:
-    - feature-type: Vibrate
-      id: e43828a2-7dc6-4af1-b450-73c50441849f
+    - id: e43828a2-7dc6-4af1-b450-73c50441849f
       output:
         Vibrate:
           step-range:

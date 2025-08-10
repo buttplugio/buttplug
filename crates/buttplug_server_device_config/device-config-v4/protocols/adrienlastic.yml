@@ -1,8 +1,7 @@
 defaults:
   name: Adrien Lastic Device
   features:
-    - feature-type: Vibrate
-      id: 714132f1-7ddd-420e-bf9f-6927fce0c9c3
+    - id: 714132f1-7ddd-420e-bf9f-6927fce0c9c3
       output:
         Vibrate:
           step-range:

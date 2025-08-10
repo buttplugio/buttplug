@@ -1,15 +1,13 @@
 defaults:
   name: Je Joue Device
   features:
-    - feature-type: Vibrate
-      id: a723e382-c32d-4170-b909-50e9ecb9d17f
+    - id: a723e382-c32d-4170-b909-50e9ecb9d17f
       output:
         Vibrate:
           step-range:
             - 0
             - 5
-    - feature-type: Vibrate
-      id: 79434539-5c1d-459a-abbe-833f0a7403be
+    - id: 79434539-5c1d-459a-abbe-833f0a7403be
       output:
         Vibrate:
           step-range:

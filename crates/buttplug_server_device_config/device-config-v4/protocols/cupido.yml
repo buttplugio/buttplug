@@ -1,8 +1,7 @@
 defaults:
   name: Cupido Device
   features:
-    - feature-type: Vibrate
-      id: 7f645006-1074-415f-8b06-43aa473573c0
+    - id: 7f645006-1074-415f-8b06-43aa473573c0
       output:
         Vibrate:
           step-range:

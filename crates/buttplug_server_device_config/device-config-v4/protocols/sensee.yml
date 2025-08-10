@@ -1,8 +1,7 @@
 defaults:
   name: Sensee Diandou Rabbit
   features:
-    - feature-type: Vibrate
-      id: 1544b066-a3d3-4749-9081-1b7a26ab54ed
+    - id: 1544b066-a3d3-4749-9081-1b7a26ab54ed
       output:
         Vibrate:
           step-range:

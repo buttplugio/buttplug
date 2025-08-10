@@ -1,8 +1,7 @@
 defaults:
   name: Kiiroo v2 Device
   features:
-    - feature-type: PositionWithDuration
-      id: 49b06ca8-dd4d-4306-91c6-931143dee212
+    - id: 49b06ca8-dd4d-4306-91c6-931143dee212
       output:
         PositionWithDuration:
           step-range:

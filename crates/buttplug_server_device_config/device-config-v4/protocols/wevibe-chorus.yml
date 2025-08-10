@@ -1,15 +1,13 @@
 defaults:
   name: WeVibe Chorus
   features:
-    - feature-type: Vibrate
-      id: 52a3c84e-28d4-4750-9a7e-a8618ded617e
+    - id: 52a3c84e-28d4-4750-9a7e-a8618ded617e
       output:
         Vibrate:
           step-range:
             - 0
             - 30
-    - feature-type: Vibrate
-      id: 4aa54a5f-2b85-4178-b671-f4198acf3daf
+    - id: 4aa54a5f-2b85-4178-b671-f4198acf3daf
       output:
         Vibrate:
           step-range:
@@ -21,15 +19,13 @@ configurations:
       - Sync 2
     name: WeVibe Sync 2
     features:
-      - feature-type: Vibrate
-        id: db4d008b-530e-4b8b-937a-bd4e5df4058c
+      - id: db4d008b-530e-4b8b-937a-bd4e5df4058c
         output:
           Vibrate:
             step-range:
               - 0
               - 30
-      - feature-type: Vibrate
-        id: 27c95f7a-91e7-46c9-90c2-b3d37ed20d6d
+      - id: 27c95f7a-91e7-46c9-90c2-b3d37ed20d6d
         output:
           Vibrate:
             step-range:
@@ -40,8 +36,7 @@ configurations:
       - Sync Lite
     name: WeVibe Sync Lite
     features:
-      - feature-type: Vibrate
-        id: 62316419-7c01-4ce2-8086-0ca210d26b25
+      - id: 62316419-7c01-4ce2-8086-0ca210d26b25
         output:
           Vibrate:
             step-range:

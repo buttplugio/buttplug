@@ -1,15 +1,13 @@
 defaults:
   name: Luvmazer Finger Magic
   features:
-    - feature-type: Vibrate
-      id: af257986-e34f-47f9-a69e-7a78afd43d31
+    - id: af257986-e34f-47f9-a69e-7a78afd43d31
       output:
         Vibrate:
           step-range:
             - 0
             - 255
-    - feature-type: Rotate
-      id: 8f021f8a-a07e-4934-af3b-fa3bafd2a747
+    - id: 8f021f8a-a07e-4934-af3b-fa3bafd2a747
       output:
         Rotate:
           step-range:

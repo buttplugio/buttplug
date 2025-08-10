@@ -1,8 +1,7 @@
 defaults:
   name: WeVibe 8-bit Device
   features:
-    - feature-type: Vibrate
-      id: 7b226142-d713-41cd-872a-aea10527482b
+    - id: 7b226142-d713-41cd-872a-aea10527482b
       output:
         Vibrate:
           step-range:
@@ -14,8 +13,7 @@ configurations:
       - Melt
     name: WeVibe Melt
     features:
-      - feature-type: Vibrate
-        id: fdf47cba-4429-4944-9bb4-1db4facb8d29
+      - id: fdf47cba-4429-4944-9bb4-1db4facb8d29
         output:
           Vibrate:
             step-range:
@@ -30,15 +28,13 @@ configurations:
       - Vector
     name: WeVibe Vector
     features:
-      - feature-type: Vibrate
-        id: 8828bbe0-acf0-4529-9f33-276b23a14afd
+      - id: 8828bbe0-acf0-4529-9f33-276b23a14afd
         output:
           Vibrate:
             step-range:
               - 0
               - 12
-      - feature-type: Vibrate
-        id: 12702494-a0e9-4929-b928-050d47391cb5
+      - id: 12702494-a0e9-4929-b928-050d47391cb5
         output:
           Vibrate:
             step-range:
@@ -49,8 +45,7 @@ configurations:
       - Wand
     name: WeVibe Wand
     features:
-      - feature-type: Vibrate
-        id: 2377d39d-580c-46ea-831c-bb9cb97899d7
+      - id: 2377d39d-580c-46ea-831c-bb9cb97899d7
         output:
           Vibrate:
             step-range:
@@ -61,8 +56,7 @@ configurations:
       - Wand 2
     name: WeVibe Wand 2
     features:
-      - feature-type: Vibrate
-        id: 4d92cf70-e464-435c-897e-fd2cd5a918e9
+      - id: 4d92cf70-e464-435c-897e-fd2cd5a918e9
         output:
           Vibrate:
             step-range:
@@ -74,8 +68,7 @@ configurations:
       - Nelson
     name: WeVibe Bond
     features:
-      - feature-type: Vibrate
-        id: 240a36e0-4791-4676-aa3b-d1c407db2b1b
+      - id: 240a36e0-4791-4676-aa3b-d1c407db2b1b
         output:
           Vibrate:
             step-range:
@@ -88,15 +81,13 @@ configurations:
       - Nova 2
     name: WeVibe Nova 2
     features:
-      - feature-type: Vibrate
-        id: 22172834-1186-4ba2-b221-23f02c3fbd51
+      - id: 22172834-1186-4ba2-b221-23f02c3fbd51
         output:
           Vibrate:
             step-range:
               - 0
               - 27
-      - feature-type: Vibrate
-        id: 0972ba1f-0b0e-4738-a050-5333da537b35
+      - id: 0972ba1f-0b0e-4738-a050-5333da537b35
         output:
           Vibrate:
             step-range:

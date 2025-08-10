@@ -7,8 +7,7 @@ configurations:
       - Onyx2.1
     name: Kiiroo Onyx 2.1
     features:
-      - feature-type: PositionWithDuration
-        id: 8cd94334-adde-4d9b-aad9-c2de93adb2c0
+      - id: 8cd94334-adde-4d9b-aad9-c2de93adb2c0
         output:
           PositionWithDuration:
             step-range:
@@ -19,8 +18,7 @@ configurations:
       - Onyx+
     name: Kiiroo Onyx+
     features:
-      - feature-type: PositionWithDuration
-        id: c66d882d-f752-45b4-806e-166d3e160eb8
+      - id: c66d882d-f752-45b4-806e-166d3e160eb8
         output:
           PositionWithDuration:
             step-range:
@@ -32,8 +30,7 @@ configurations:
       - Keon R2
     name: Kiiroo Keon
     features:
-      - feature-type: PositionWithDuration
-        id: da002a11-610a-4e13-94c5-4c45d51814f2
+      - id: da002a11-610a-4e13-94c5-4c45d51814f2
         output:
           PositionWithDuration:
             step-range:
@@ -46,8 +43,7 @@ configurations:
       - Realm1.1
     name: Kiiroo Onyx+ Realm Edition
     features:
-      - feature-type: PositionWithDuration
-        id: 8c896f82-2e17-46f9-9db2-531cc7e42236
+      - id: 8c896f82-2e17-46f9-9db2-531cc7e42236
         output:
           PositionWithDuration:
             step-range:

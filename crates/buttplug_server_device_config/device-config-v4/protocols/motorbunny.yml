@@ -1,15 +1,13 @@
 defaults:
   name: Motorbunny Device
   features:
-    - feature-type: Vibrate
-      id: cb44a214-4c5c-4a04-8b1a-0d91a73a7a3a
+    - id: cb44a214-4c5c-4a04-8b1a-0d91a73a7a3a
       output:
         Vibrate:
           step-range:
             - 0
             - 255
-    - feature-type: RotateWithDirection
-      id: 683b450d-bb1a-4fca-b61a-83f8b56086fa
+    - id: 683b450d-bb1a-4fca-b61a-83f8b56086fa
       output:
         RotateWithDirection:
           step-range:

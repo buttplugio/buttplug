@@ -1,8 +1,7 @@
 defaults:
   name: Svakom Device v6
   features:
-    - feature-type: Vibrate
-      id: 5f1d84f8-a44a-43dc-b6f6-8e8682909ff1
+    - id: 5f1d84f8-a44a-43dc-b6f6-8e8682909ff1
       output:
         Vibrate:
           step-range:
@@ -26,15 +25,13 @@ configurations:
       - Vick Neo 2
     name: Svakom Vick Neo 2
     features:
-      - feature-type: Vibrate
-        id: 5ac07e29-37f4-4a7a-8a35-f5b2b59f3dbd
+      - id: 5ac07e29-37f4-4a7a-8a35-f5b2b59f3dbd
         output:
           Vibrate:
             step-range:
               - 0
               - 10
-      - feature-type: Vibrate
-        id: 263e051e-ed79-4245-b222-2d4888483849
+      - id: 263e051e-ed79-4245-b222-2d4888483849
         output:
           Vibrate:
             step-range:
@@ -45,22 +42,19 @@ configurations:
       - Iker Neo
     name: Svakom Iker Neo
     features:
-      - feature-type: Vibrate
-        id: c19b776a-363d-4468-80ec-09bc22ebd06c
+      - id: c19b776a-363d-4468-80ec-09bc22ebd06c
         output:
           Vibrate:
             step-range:
               - 0
               - 10
-      - feature-type: Vibrate
-        id: cbdd56a3-1954-4db0-98c7-535096637868
+      - id: cbdd56a3-1954-4db0-98c7-535096637868
         output:
           Vibrate:
             step-range:
               - 0
               - 10
-      - feature-type: Vibrate
-        id: b310a28e-0109-4573-bf4a-259845c518fd
+      - id: b310a28e-0109-4573-bf4a-259845c518fd
         output:
           Vibrate:
             step-range:
@@ -71,8 +65,7 @@ configurations:
       - VA617A-4
     name: BeYourLover Naughty Clock Sucker
     features:
-      - feature-type: Constrict
-        id: 38708bd1-466e-48e7-8721-8844aa177959
+      - id: 38708bd1-466e-48e7-8721-8844aa177959
         output:
           Vibrate:
             step-range:

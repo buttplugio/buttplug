@@ -1,8 +1,7 @@
 defaults:
   name: Hgod Device
   features:
-    - feature-type: Vibrate
-      id: cd638669-9f47-400f-8dcf-80583e7e563a
+    - id: cd638669-9f47-400f-8dcf-80583e7e563a
       output:
         Vibrate:
           step-range:

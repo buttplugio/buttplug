@@ -1,8 +1,7 @@
 defaults:
   name: Vorze Cyclone X10 Device
   features:
-    - feature-type: RotateWithDirection
-      id: 1d1b4dea-ab29-4426-a9f4-dda2c594eefb
+    - id: 1d1b4dea-ab29-4426-a9f4-dda2c594eefb
       output:
         RotateWithDirection:
           step-range:

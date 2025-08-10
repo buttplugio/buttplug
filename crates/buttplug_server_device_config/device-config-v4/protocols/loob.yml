@@ -1,8 +1,7 @@
 defaults:
   name: Joyroid Loob
   features:
-    - feature-type: PositionWithDuration
-      id: 7078c41e-0cd3-4264-8f54-c331ac4c81f9
+    - id: 7078c41e-0cd3-4264-8f54-c331ac4c81f9
       output:
         PositionWithDuration:
           step-range:

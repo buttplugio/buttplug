@@ -1,8 +1,7 @@
 defaults:
   name: Picobong Device
   features:
-    - feature-type: Vibrate
-      id: 6acffe62-d4ae-4a9e-8610-123d46d26dcc
+    - id: 6acffe62-d4ae-4a9e-8610-123d46d26dcc
       output:
         Vibrate:
           step-range:

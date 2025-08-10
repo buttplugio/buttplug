@@ -1,8 +1,7 @@
 defaults:
   name: metaXsire Tay
   features:
-    - feature-type: Vibrate
-      id: 074a15d1-2efc-4cd8-8f1f-0f32f1468024
+    - id: 074a15d1-2efc-4cd8-8f1f-0f32f1468024
       output:
         Vibrate:
           step-range:
@@ -26,15 +25,13 @@ configurations:
       - TA-S001A
     name: metaXsire Zeus
     features:
-      - feature-type: Vibrate
-        id: 11c78de9-800a-4444-9647-0ed33181e63c
+      - id: 11c78de9-800a-4444-9647-0ed33181e63c
         output:
           Vibrate:
             step-range:
               - 0
               - 20
-      - feature-type: Oscillate
-        id: 47646747-4dea-47ba-80b2-407e2a276ae2
+      - id: 47646747-4dea-47ba-80b2-407e2a276ae2
         output:
           Oscillate:
             step-range:

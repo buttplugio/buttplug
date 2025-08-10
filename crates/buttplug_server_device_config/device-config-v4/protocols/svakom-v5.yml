@@ -1,15 +1,13 @@
 defaults:
   name: Svakom Device v5
   features:
-    - feature-type: Vibrate
-      id: 4f672189-8169-4114-92cd-ed7f74427548
+    - id: 4f672189-8169-4114-92cd-ed7f74427548
       output:
         Vibrate:
           step-range:
             - 0
             - 10
-    - feature-type: Vibrate
-      id: bdd5e445-0d53-47c9-9b9e-c60b83d821fd
+    - id: bdd5e445-0d53-47c9-9b9e-c60b83d821fd
       output:
         Vibrate:
           step-range:
@@ -25,22 +23,19 @@ configurations:
       - Mora Neo
     name: Svakom Mora Neo
     features:
-      - feature-type: Vibrate
-        id: 7d13d266-a8f3-49b5-94d2-ac6242c40b7a
+      - id: 7d13d266-a8f3-49b5-94d2-ac6242c40b7a
         output:
           Vibrate:
             step-range:
               - 0
               - 10
-      - feature-type: Vibrate
-        id: 3b4e80ae-3ec6-4bb7-aba9-1dc48dd1614b
+      - id: 3b4e80ae-3ec6-4bb7-aba9-1dc48dd1614b
         output:
           Vibrate:
             step-range:
               - 0
               - 10
-      - feature-type: Oscillate
-        id: 41ecfb09-8b4c-4ec1-9f7a-29b9ff1097f7
+      - id: 41ecfb09-8b4c-4ec1-9f7a-29b9ff1097f7
         output:
           Oscillate:
             step-range:
@@ -51,22 +46,19 @@ configurations:
       - Trysta Neo
     name: Svakom Trysta Neo
     features:
-      - feature-type: Vibrate
-        id: 655ec2b3-ede8-4051-96da-c40eed164372
+      - id: 655ec2b3-ede8-4051-96da-c40eed164372
         output:
           Vibrate:
             step-range:
               - 0
               - 10
-      - feature-type: Vibrate
-        id: 4cc06c03-36d9-4b10-9d51-46417b0d7f3d
+      - id: 4cc06c03-36d9-4b10-9d51-46417b0d7f3d
         output:
           Vibrate:
             step-range:
               - 0
               - 10
-      - feature-type: Oscillate
-        id: f62fea13-0dfb-4706-8122-9104abf9dca5
+      - id: f62fea13-0dfb-4706-8122-9104abf9dca5
         output:
           Oscillate:
             step-range:
@@ -77,8 +69,7 @@ configurations:
       - Mini Emma Neo
     name: Svakom Mini Emma Neo
     features:
-      - feature-type: Vibrate
-        id: d957a257-9ae2-45f1-80b2-dbcc4dc2886b
+      - id: d957a257-9ae2-45f1-80b2-dbcc4dc2886b
         output:
           Vibrate:
             step-range:

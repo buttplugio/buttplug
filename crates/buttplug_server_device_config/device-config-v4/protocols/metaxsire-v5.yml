@@ -1,8 +1,7 @@
 defaults:
   name: Sexverse Heart
   features:
-    - feature-type: Vibrate
-      id: 140be13c-4cb3-407f-9597-e03f046f1c1a
+    - id: 140be13c-4cb3-407f-9597-e03f046f1c1a
       output:
         Vibrate:
           step-range:

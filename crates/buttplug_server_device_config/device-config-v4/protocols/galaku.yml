@@ -1,16 +1,14 @@
 defaults:
   name: Galaku Device
   features:
-    - feature-type: Vibrate
-      description: Vibrate
+    - description: Vibrate
       id: f650b5a9-7413-4ac9-b25e-863180daa04c
       output:
         Vibrate:
           step-range:
             - 0
             - 100
-    - feature-type: Battery
-      description: Battery Level
+    - description: Battery Level
       id: d9c34cf9-5645-4e04-bf92-51e5df708417
       input:
         Battery:
@@ -272,24 +270,21 @@ configurations:
       - G317
     name: Galaku Zaku Aircraft Cup
     features:
-      - feature-type: Oscillate
-        description: Oscillate
+      - description: Oscillate
         id: f427019a-a136-45a0-a866-dac460d8770c
         output:
           Oscillate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 0fa679ef-eb23-4b10-a456-dd1f99ed7dee
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 19ac04ae-9d77-4b3b-a706-5df8252569a7
         input:
           Battery:
@@ -303,24 +298,21 @@ configurations:
       - G312
     name: Galaku Mecha-Original Owner's Aircraft Cup
     features:
-      - feature-type: Oscillate
-        description: Oscillate
+      - description: Oscillate
         id: 9a04b080-4956-499c-894d-d7538322160e
         output:
           Oscillate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: a8a8f9c0-f406-4b80-8c8e-3ff1bf9bff72
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 769865df-58b9-4d0f-8697-4ee78304a10c
         input:
           Battery:
@@ -334,24 +326,21 @@ configurations:
       - G302
     name: Galaku Little Devil
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: c09c7502-7e42-49be-8620-44bf0dda08af
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: ccf2e0e7-4ade-4a9b-8b49-405653f72c7c
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 22792e4e-bf84-42d4-a1ec-cbffddd3d777
         input:
           Battery:
@@ -365,24 +354,21 @@ configurations:
       - G320
     name: Galaku Athena
     features:
-      - feature-type: Oscillate
-        description: Oscillate
+      - description: Oscillate
         id: c86290fd-1271-45d3-98bf-bcd168a1948a
         output:
           Oscillate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 70de4e79-4db7-45ee-a7c1-490cdf23bb33
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: a6fb0d1b-9160-40ca-81a7-905776aeff83
         input:
           Battery:
@@ -396,24 +382,21 @@ configurations:
       - G314
     name: Galaku Vitality Octopus II
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 75943039-8932-4a1c-af26-d1f075e78c01
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 05804a02-980d-4380-b407-a30f56477f8e
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: a104dc8a-7759-4dd9-8113-d3b450b24658
         input:
           Battery:
@@ -427,24 +410,21 @@ configurations:
       - G228
     name: Galaku Little Dolphin
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 7751e53b-a722-49e5-9534-5a5798de081c
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 68d399dd-a3c9-4423-b244-d231c7e0a131
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 398eb416-b3d7-4f23-90ec-2f9fb05487f7
         input:
           Battery:
@@ -458,24 +438,21 @@ configurations:
       - G315
     name: Galaku Unicorn
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 02fda4c8-b86c-4131-8d9f-447534785404
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: a21f8a77-22ce-47a3-b220-028f87d3a50d
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: e85a8553-4f3c-49ba-ae88-929d0052e04d
         input:
           Battery:
@@ -489,24 +466,21 @@ configurations:
       - G307
     name: Galaku Queen Bee Gun
     features:
-      - feature-type: Oscillate
-        description: Oscillate
+      - description: Oscillate
         id: 3525faff-24d5-4b84-9b4d-b6e92f51f2f4
         output:
           Oscillate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: c1150106-9f41-4a80-b30b-6015e1a7e80a
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 57638eed-03e4-4279-8fc1-cc03a2d9066c
         input:
           Battery:
@@ -520,24 +494,21 @@ configurations:
       - K311
     name: Galaku Freya
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: c52a581b-0838-4431-bd39-179628da18d4
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: ba7de25e-d0fd-4431-afc5-e8b72431b025
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 309ff7a2-aa2f-44e4-ace9-c1d485bf47ae
         input:
           Battery:
@@ -551,24 +522,21 @@ configurations:
       - G339
     name: Galaku Rhino Prostate Massager
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 75e8f6e5-a69b-48d4-937b-c202961b464f
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 3854e366-6eb9-4947-bc90-e246146bec11
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: be8475dd-8928-447d-9e94-1e0543056b29
         input:
           Battery:
@@ -582,24 +550,21 @@ configurations:
       - G354
     name: Galaku Double-A Aircraft Cup
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: dc4348f2-7788-4b63-96f8-80ed74e4f9c2
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: e79abb39-74ab-46cc-9363-41637a43c885
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 23e5cc47-944a-427c-be33-8611fffc70c8
         input:
           Battery:
@@ -613,24 +578,21 @@ configurations:
       - G12B
     name: Galaku Flower Season
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: e86333ca-254b-4c40-b448-eeb0e397e2f6
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: f531ad54-4f1f-4fe6-91dd-bba265307fb5
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: f989b7c6-ad5d-49fa-b103-2a21ff2213d5
         input:
           Battery:
@@ -644,24 +606,21 @@ configurations:
       - G29C
     name: Galaku Little Rubik's Cube
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: d8b78598-520b-4d28-9340-1a51d918f31a
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: ddc439b2-dc60-46bd-b6dc-4ce2b92783c0
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 34bf9651-bbd6-475f-a2ea-536b04c5db62
         input:
           Battery:
@@ -675,24 +634,21 @@ configurations:
       - G29D
     name: Galaku Small powder cake
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 8dccfd7a-397e-450c-8911-31d2258506f5
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 6031712c-95a0-457f-93b6-e24b8ab7d335
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 7e0681c6-7206-41d0-97d2-f3e01d6c8de4
         input:
           Battery:
@@ -706,24 +662,21 @@ configurations:
       - GKML
     name: Galaku Milly
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 48936afe-dfda-4a35-bd45-1da66bdc020f
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: f17eba7d-aab9-43d9-a621-4e5b3addd682
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 67430820-ef54-4821-8d43-37b7ebc6702f
         input:
           Battery:
@@ -737,24 +690,21 @@ configurations:
       - G348
     name: Galaku Rhinoceros Back Court
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 8afa26c6-e525-4afc-84f7-a9602d82ddf9
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: ed5039d6-24ea-4adb-becd-ab549aff67ce
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 8b8b2df2-1f06-4649-b575-ae0abef990dc
         input:
           Battery:
@@ -768,24 +718,21 @@ configurations:
       - G913
     name: Galaku Unicorn II
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: dff9df20-91d3-478f-b5dd-409db449d9ff
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: f23839bb-69c4-4570-9eb0-ea387a1fa87f
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 10d3c65c-e6b1-4802-b71f-5843bb6ae4bd
         input:
           Battery:
@@ -799,24 +746,21 @@ configurations:
       - G213
     name: Galaku Phantom
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 5e4c85dc-27df-45fa-a7cc-f2870596b7ed
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: cb5581ba-2f77-49e3-bf0a-856639e045e1
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: f8057621-5690-43fe-8cf9-aa2b1d4ceb07
         input:
           Battery:
@@ -830,24 +774,21 @@ configurations:
       - TFF1
     name: Galaku F1 Aircraft Cup
     features:
-      - feature-type: Oscillate
-        description: Oscillate
+      - description: Oscillate
         id: 5027b245-170a-47ca-b9b6-d93c48532d56
         output:
           Oscillate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 376aee27-8c1b-4d26-a5e3-9b92be56036d
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 42b39996-60ac-4ee7-9880-1bc8d73b543a
         input:
           Battery:
@@ -861,24 +802,21 @@ configurations:
       - G310
     name: Galaku Scepter AV Stick
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 7d6f9b0d-2296-42d6-a989-63366e943fff
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: ed69fd16-6951-4176-96b5-e267cb4213e4
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 76599534-d259-4420-acf8-f172421b684e
         input:
           Battery:
@@ -892,24 +830,21 @@ configurations:
       - K113
     name: Galaku Unicorn II
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 5debcf2d-4e98-4b5f-88b0-45f4bcd3aaf1
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 787e3d35-0ea2-407e-8b4b-ecb0680ddfa3
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: c6d8ebc8-bba3-4aaa-b616-3758a6a84b06
         input:
           Battery:
@@ -923,24 +858,21 @@ configurations:
       - G228
     name: Galaku Little Dolphin
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 484bcea7-f227-49f3-83f8-ab825c46e0f4
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 4d68f7a8-2fd1-40f3-8d5f-b932b0fb5d8f
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: f93f3c1d-8046-40f2-a4d3-4c5315c809e6
         input:
           Battery:
@@ -954,24 +886,21 @@ configurations:
       - G310
     name: Galaku Scepter AV Stick
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 525a328a-1fe1-4f54-be62-1aade3f4dcab
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 0f5a8b59-1ba2-4e0f-9de4-272ee2fae908
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 246cddf5-f04a-45e2-ba07-1f5354d15fdd
         input:
           Battery:
@@ -985,24 +914,21 @@ configurations:
       - TFF1
     name: Galaku F1 Aircraft Cup
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: e19f5460-6145-48b9-9151-c16765130341
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: f44a3499-e077-41c5-93ba-56a840c8485b
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 79874bf3-3055-4d5a-a6aa-ea183f434324
         input:
           Battery:
@@ -1016,24 +942,21 @@ configurations:
       - D358
     name: Galaku Classic vibration-absorbing AV state
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 98b72986-86e9-44dc-a48c-e4b64d5941c0
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 907f514f-4cfa-4210-88c8-2ae602cade4b
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 338f4e14-793b-4cb7-b26e-0ff47f2e72cc
         input:
           Battery:
@@ -1047,24 +970,21 @@ configurations:
       - G322
     name: Galaku Unicorn
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: d61c7b5a-b021-43bf-a246-9b7dc193cf98
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 64ecb833-2b8a-46c6-afac-28aa36d05580
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 87973aa3-f77e-47b1-92dc-1a6b32bba5d5
         input:
           Battery:
@@ -1078,24 +998,21 @@ configurations:
       - D402
     name: Galaku New series of vibrators
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: daedd54d-0d62-434f-8408-d3d9f69cd151
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 7ebb5f9d-e447-4b67-8b3a-997b46a5f2be
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: b872a7d6-df4c-4d50-8e7b-57cc7102b151
         input:
           Battery:
@@ -1109,24 +1026,21 @@ configurations:
       - G40A
     name: Galaku New series of vibrators
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 1954d249-a830-4c2f-9a54-73962b0a7f62
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: b0a5e213-8e34-4868-9f93-477d707b555a
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: f5555828-157d-44af-a6f3-61c184adc78b
         input:
           Battery:
@@ -1140,24 +1054,21 @@ configurations:
       - G403
     name: Galaku New series of vibrators
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 1db2e6ef-89a9-44a6-b4fe-858c583181cc
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: af1c0858-6f69-49bd-81e0-2b5634cba141
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 0acf4462-c96b-4dec-b283-d56fdeae3e09
         input:
           Battery:
@@ -1171,24 +1082,21 @@ configurations:
       - G43A
     name: Galaku New series of vibrators
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 9204650b-9e73-4423-9de1-94e87cf8cf7b
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 3e533985-211f-4c4e-996e-6ee5999a8f7b
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 01388799-5cdf-4127-824b-a51ae1c38e60
         input:
           Battery:
@@ -1202,24 +1110,21 @@ configurations:
       - K12B
     name: Galaku Little Turtle Stick
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 50c856df-a8d2-4840-bc3d-17f7bc2144e8
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: cc865a89-7a1f-4d9c-ac03-8822ec1ab715
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 9ecdcaa7-b228-4f67-b04b-a1ff3642ebe2
         input:
           Battery:
@@ -1233,24 +1138,21 @@ configurations:
       - QCVW
     name: Kisstoy Lost (Vibrating)
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: cf8ed969-86d5-4597-850f-35c60cfc40e8
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 13dd1aad-9102-46c9-b126-5293b5da88ad
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 421f8bf8-6732-405a-b563-139e858bc4fb
         input:
           Battery:
@@ -1264,24 +1166,21 @@ configurations:
       - QCSW
     name: Kisstoy Lost (Sucking)
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 02b1d882-d47e-4dc2-8062-91e9b6defdd4
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 1e4691ca-fda3-40da-bad9-b2f7393d5554
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 0b41e97c-17f9-475d-8a30-d8ed1f52cb67
         input:
           Battery:
@@ -1295,24 +1194,21 @@ configurations:
       - QCPW
     name: Kisstoy Lost (Insertable)
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 2d070dbf-a2ad-4072-b7ee-a13b278fe4a4
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: cddbd1f6-227d-48e3-a1bc-74332b153a24
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: ad753ac1-6c20-495a-bb0d-409b251fbe26
         input:
           Battery:
@@ -1326,24 +1222,21 @@ configurations:
       - SN80
     name: Adorime G-spot Rabbit Dildo Vibrator
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 42efb235-b450-44a6-97fd-a98b3d9750ad
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 76a8c59e-2001-4334-bacd-f436f6858e85
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 47b24f11-bb92-4173-9123-80a330c76041
         input:
           Battery:
@@ -1358,24 +1251,21 @@ configurations:
       - TFG1
     name: Galaku Aurora Aircraft Cup
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 2b5fdcd4-3b35-4939-b086-950a827141e1
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Constrict
-        description: Suction Pump
+      - description: Suction Pump
         id: 59498f0e-ad39-4701-9197-a5c7428b0acc
         output:
           Constrict:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 591ca427-79d4-4d6a-bf00-8596cd9cb493
         input:
           Battery:
@@ -1390,16 +1280,14 @@ configurations:
       - GX27
     name: Galaku Cannon-GT
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: ff51f8a4-4ac0-434c-b656-d94e0b2eec53
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: e0b9f2c7-68d9-4c7b-9327-6e0802973a44
         input:
           Battery:
@@ -1413,16 +1301,14 @@ configurations:
       - GK25
     name: Galaku Phantom PLUS
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: d8411669-9823-4755-afe4-969f7a4200cd
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: afb9c389-4624-4871-bfed-c19eccbcd3e3
         input:
           Battery:
@@ -1436,16 +1322,14 @@ configurations:
       - AC695X_1(BLE)
     name: Galaku Vision
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 8626a95c-2ebd-43b4-a592-27282c6cc275
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: b680b236-52f4-4d8e-907e-78e71a0d23e9
         input:
           Battery:
@@ -1459,16 +1343,14 @@ configurations:
       - GX33
     name: Galaku Dimension No. 1
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 90351a28-a5c0-4b77-bd61-d5e667588cf1
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: ab7abe60-7733-4391-a61d-765655275261
         input:
           Battery:
@@ -1482,16 +1364,14 @@ configurations:
       - WSXK
     name: Galaku Starry Sky CUP
     features:
-      - feature-type: Vibrate
-        description: Vibrate
+      - description: Vibrate
         id: 80d6340d-70bd-40ba-87bd-014f034a3186
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 1ef7a2d2-1725-4fd9-9e70-d8e0674ac17f
         input:
           Battery:

@@ -1,8 +1,7 @@
 defaults:
   name: Foreo Device
   features:
-    - feature-type: Vibrate
-      id: 0749f306-bd4c-48d7-9c2a-1309817a4dcc
+    - id: 0749f306-bd4c-48d7-9c2a-1309817a4dcc
       output:
         Vibrate:
           step-range:

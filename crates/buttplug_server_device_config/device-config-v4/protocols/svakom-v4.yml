@@ -1,15 +1,13 @@
 defaults:
   name: Svakom Device v4
   features:
-    - feature-type: Vibrate
-      id: b61f8bde-2ad3-40a8-8e16-fe6dcec8a887
+    - id: b61f8bde-2ad3-40a8-8e16-fe6dcec8a887
       output:
         Vibrate:
           step-range:
             - 0
             - 10
-    - feature-type: Vibrate
-      id: 724c247f-733e-4592-9a98-1a37a7c941ba
+    - id: 724c247f-733e-4592-9a98-1a37a7c941ba
       output:
         Vibrate:
           step-range:
@@ -33,8 +31,7 @@ configurations:
       - VV468A
     name: ToyCod Clara
     features:
-      - feature-type: Vibrate
-        id: 65f4d628-cb50-48fa-8d51-39433244ce12
+      - id: 65f4d628-cb50-48fa-8d51-39433244ce12
         output:
           Vibrate:
             step-range:

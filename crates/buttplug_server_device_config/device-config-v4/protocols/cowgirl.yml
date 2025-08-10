@@ -1,15 +1,13 @@
 defaults:
   name: The Cowgirl Device
   features:
-    - feature-type: Vibrate
-      id: 11c01b64-e6cc-4b19-9a4d-eaf03a317b03
+    - id: 11c01b64-e6cc-4b19-9a4d-eaf03a317b03
       output:
         Vibrate:
           step-range:
             - 0
             - 255
-    - feature-type: Rotate
-      id: 9f3e0837-26e5-4ab1-bb2c-67be33ca920d
+    - id: 9f3e0837-26e5-4ab1-bb2c-67be33ca920d
       output:
         Rotate:
           step-range:

@@ -1,8 +1,7 @@
 defaults:
   name: Mizz Zee Device
   features:
-    - feature-type: Vibrate
-      id: aa417fd0-0ab1-409f-b7a3-05f6c3ede623
+    - id: aa417fd0-0ab1-409f-b7a3-05f6c3ede623
       output:
         Vibrate:
           step-range:

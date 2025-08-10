@@ -8,8 +8,7 @@ configurations:
     protocol-variant: vorze-sa-vibrator
     name: Vorze Bach
     features:
-      - feature-type: Vibrate
-        id: 447dbcfa-c295-4880-afba-93e24499a78d
+      - id: 447dbcfa-c295-4880-afba-93e24499a78d
         output:
           Vibrate:
             step-range:
@@ -21,8 +20,7 @@ configurations:
     name: Adult Festa Rocket
     protocol-variant: vorze-sa-vibrator
     features:
-      - feature-type: Vibrate
-        id: 557d3c89-2e15-4b4a-8480-07f4826a8384
+      - id: 557d3c89-2e15-4b4a-8480-07f4826a8384
         output:
           Vibrate:
             step-range:
@@ -34,8 +32,7 @@ configurations:
     name: Vorze A10 Cyclone SA
     protocol-variant: vorze-sa-single-rotator
     features:
-      - feature-type: RotateWithDirection
-        id: 8e249d53-8d80-4f42-bc40-e6edb7779e92
+      - id: 8e249d53-8d80-4f42-bc40-e6edb7779e92
         output:
           RotateWithDirection:
             step-range:
@@ -47,8 +44,7 @@ configurations:
     name: Vorze UFO SA
     protocol-variant: vorze-sa-single-rotator
     features:
-      - feature-type: RotateWithDirection
-        id: 2d8d1443-c394-4df4-b9bb-1659d8323b45
+      - id: 2d8d1443-c394-4df4-b9bb-1659d8323b45
         output:
           RotateWithDirection:
             step-range:
@@ -60,15 +56,13 @@ configurations:
     name: Vorze UFO TW
     protocol-variant: vorze-sa-dual-rotator
     features:
-      - feature-type: RotateWithDirection
-        id: a1632ce4-314f-481d-9ae2-2a11a0c4caa4
+      - id: a1632ce4-314f-481d-9ae2-2a11a0c4caa4
         output:
           RotateWithDirection:
             step-range:
               - 0
               - 99
-      - feature-type: RotateWithDirection
-        id: 4b09a02d-9a4a-4c8b-8340-8e6ca3cecfc2
+      - id: 4b09a02d-9a4a-4c8b-8340-8e6ca3cecfc2
         output:
           RotateWithDirection:
             step-range:
@@ -80,8 +74,7 @@ configurations:
     protocol-variant: vorze-sa-piston
     name: Vorze Piston
     features:
-      - feature-type: PositionWithDuration
-        id: 7c8d7a1d-9e2f-4a92-83f3-42a0840b90bd
+      - id: 7c8d7a1d-9e2f-4a92-83f3-42a0840b90bd
         output:
           PositionWithDuration:
             step-range:

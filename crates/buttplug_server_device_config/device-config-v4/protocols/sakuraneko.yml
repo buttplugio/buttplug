@@ -1,8 +1,7 @@
 defaults:
   name: Sakuraneko Device
   features:
-    - feature-type: Vibrate
-      id: bb67be77-f219-411d-98b5-d6b358eb94c9
+    - id: bb67be77-f219-411d-98b5-d6b358eb94c9
       output:
         Vibrate:
           step-range:
@@ -26,15 +25,13 @@ configurations:
       - sakuraneko-04
     name: Sakuraneko Koikoi
     features:
-      - feature-type: Vibrate
-        id: a5eb13a7-1f14-4785-a2ea-86dde4a3e15b
+      - id: a5eb13a7-1f14-4785-a2ea-86dde4a3e15b
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Rotate
-        id: 62b84b1c-cfcd-4d9a-8dba-4d8210e5ee93
+      - id: 62b84b1c-cfcd-4d9a-8dba-4d8210e5ee93
         output:
           Rotate:
             step-range:

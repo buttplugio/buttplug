@@ -1,15 +1,13 @@
 defaults:
   name: Svakom Sam Neo
   features:
-    - feature-type: Vibrate
-      id: 260f221c-b861-4ee2-bd0f-17a0dd9a14ba
+    - id: 260f221c-b861-4ee2-bd0f-17a0dd9a14ba
       output:
         Vibrate:
           step-range:
             - 0
             - 10
-    - feature-type: Vibrate
-      id: cfdf5760-bce0-465c-a2c6-60c86fdd3c95
+    - id: cfdf5760-bce0-465c-a2c6-60c86fdd3c95
       output:
         Vibrate:
           step-range:

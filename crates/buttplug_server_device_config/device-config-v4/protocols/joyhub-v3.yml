@@ -1,8 +1,7 @@
 defaults:
   name: JoyHub Device
   features:
-    - feature-type: Vibrate
-      id: 3adea9b9-8a81-4358-8774-17b621f33907
+    - id: 3adea9b9-8a81-4358-8774-17b621f33907
       output:
         Vibrate:
           step-range:

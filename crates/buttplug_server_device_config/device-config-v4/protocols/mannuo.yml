@@ -1,8 +1,7 @@
 defaults:
   name: ManNuo Device
   features:
-    - feature-type: Vibrate
-      id: 36daf552-3c59-44b8-b00e-ff1e0e799fc6
+    - id: 36daf552-3c59-44b8-b00e-ff1e0e799fc6
       output:
         Vibrate:
           step-range:

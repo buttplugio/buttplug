@@ -1,15 +1,13 @@
 defaults:
   name: Lelo F1s V2
   features:
-    - feature-type: Vibrate
-      id: 90bd67a5-4601-4c49-97bb-0845ab7011ba
+    - id: 90bd67a5-4601-4c49-97bb-0845ab7011ba
       output:
         Vibrate:
           step-range:
             - 0
             - 100
-    - feature-type: Vibrate
-      id: 05fc758b-a3fe-4156-b3ae-9cdcb9ae95c6
+    - id: 05fc758b-a3fe-4156-b3ae-9cdcb9ae95c6
       output:
         Vibrate:
           step-range:

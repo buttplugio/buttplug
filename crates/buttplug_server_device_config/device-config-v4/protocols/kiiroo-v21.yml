@@ -7,15 +7,13 @@ configurations:
       - Pearl2.1
     name: Kiiroo Pearl 2.1
     features:
-      - feature-type: Vibrate
-        id: ba4166e4-fba3-4eb9-90a2-5b281bb02f1e
+      - id: ba4166e4-fba3-4eb9-90a2-5b281bb02f1e
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 61cf5ea0-f9d0-48f0-a337-f905fb89c2c3
         input:
           Battery:
@@ -29,8 +27,7 @@ configurations:
       - Cliona
     name: Kiiroo Cliona
     features:
-      - feature-type: Vibrate
-        id: 222c4e24-d5ee-48c3-bc9d-d3f86d666c2c
+      - id: 222c4e24-d5ee-48c3-bc9d-d3f86d666c2c
         output:
           Vibrate:
             step-range:
@@ -42,8 +39,7 @@ configurations:
       - OhMiBod ESCA
     name: OhMiBod Esca 2
     features:
-      - feature-type: Vibrate
-        id: 75940e97-626d-4016-87eb-2777c29aaec6
+      - id: 75940e97-626d-4016-87eb-2777c29aaec6
         output:
           Vibrate:
             step-range:
@@ -54,15 +50,13 @@ configurations:
       - Titan1.1
     name: Kiiroo Titan 1.1
     features:
-      - feature-type: Vibrate
-        id: a5a42b68-553c-4ba4-b68d-322c49d405bc
+      - id: a5a42b68-553c-4ba4-b68d-322c49d405bc
         output:
           Vibrate:
             step-range:
               - 0
               - 100
-      - feature-type: PositionWithDuration
-        id: b77ed4d9-9350-4868-8cb3-a6c48112f8b2
+      - id: b77ed4d9-9350-4868-8cb3-a6c48112f8b2
         output:
           PositionWithDuration:
             step-range:
@@ -73,8 +67,7 @@ configurations:
       - OhMiBod LUMEN
     name: OhMiBod Lumen
     features:
-      - feature-type: Vibrate
-        id: 7d824538-bc5c-47d9-8d4d-8a503bf35284
+      - id: 7d824538-bc5c-47d9-8d4d-8a503bf35284
         output:
           Vibrate:
             step-range:
@@ -85,8 +78,7 @@ configurations:
       - OhMiBod NEX2
     name: OhMiBod NEX|2
     features:
-      - feature-type: Vibrate
-        id: ba1e86b4-9c6e-42d8-bff5-ac28628b3092
+      - id: ba1e86b4-9c6e-42d8-bff5-ac28628b3092
         output:
           Vibrate:
             step-range:
@@ -97,8 +89,7 @@ configurations:
       - OhMiBod NEX3
     name: OhMiBod NEX|3
     features:
-      - feature-type: Vibrate
-        id: 9172bb5c-bbdc-4b56-a315-cb6b08bcb278
+      - id: 9172bb5c-bbdc-4b56-a315-cb6b08bcb278
         output:
           Vibrate:
             step-range:
@@ -109,8 +100,7 @@ configurations:
       - Pulse Interactive
     name: Hot Octopuss Pulse Solo Interactive
     features:
-      - feature-type: Vibrate
-        id: b369b6d0-5d5d-40cd-bf7f-3cb7641e1ce7
+      - id: b369b6d0-5d5d-40cd-bf7f-3cb7641e1ce7
         output:
           Vibrate:
             step-range:
@@ -121,8 +111,7 @@ configurations:
       - Fuse1.1
     name: OhMiBod Fuse 1.1
     features:
-      - feature-type: Vibrate
-        id: 0e0820e3-aeec-4df2-ae2a-b4bf82b9a823
+      - id: 0e0820e3-aeec-4df2-ae2a-b4bf82b9a823
         output:
           Vibrate:
             step-range:
@@ -133,8 +122,7 @@ configurations:
       - OhMiBod Foxy
     name: OhMiBod Foxy
     features:
-      - feature-type: Vibrate
-        id: 187e471d-3815-4dab-85bc-e81969f26d40
+      - id: 187e471d-3815-4dab-85bc-e81969f26d40
         output:
           Vibrate:
             step-range:
@@ -145,8 +133,7 @@ configurations:
       - OhMiBod Chill Panty Vibe
     name: OhMiBod Chill
     features:
-      - feature-type: Vibrate
-        id: 75ed3cd9-8d21-4567-9816-71f7925dcce4
+      - id: 75ed3cd9-8d21-4567-9816-71f7925dcce4
         output:
           Vibrate:
             step-range:
@@ -157,8 +144,7 @@ configurations:
       - OhMiBod Sphinx
     name: OhMiBod Sphinx
     features:
-      - feature-type: Vibrate
-        id: 6a78e124-8314-40ec-bcc4-45f10341eaf7
+      - id: 6a78e124-8314-40ec-bcc4-45f10341eaf7
         output:
           Vibrate:
             step-range:
@@ -170,8 +156,7 @@ configurations:
       - Pearl 2+
     name: Kiiroo Pearl 2+
     features:
-      - feature-type: Vibrate
-        id: 69d4719c-2342-4d80-a8bc-70f5008b1628
+      - id: 69d4719c-2342-4d80-a8bc-70f5008b1628
         output:
           Vibrate:
             step-range:
@@ -183,8 +168,7 @@ configurations:
       - Pearl 3
     name: Kiiroo Pearl 3
     features:
-      - feature-type: Vibrate
-        id: b3b2cea4-5987-413f-b611-aa068c76c04c
+      - id: b3b2cea4-5987-413f-b611-aa068c76c04c
         output:
           Vibrate:
             step-range:

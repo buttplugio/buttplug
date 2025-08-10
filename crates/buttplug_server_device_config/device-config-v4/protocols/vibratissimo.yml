@@ -1,15 +1,13 @@
 defaults:
   name: Vibratissimo Device
   features:
-    - feature-type: Vibrate
-      id: c4978273-df69-41b1-8ecd-0b5cdbb6d102
+    - id: c4978273-df69-41b1-8ecd-0b5cdbb6d102
       output:
         Vibrate:
           step-range:
             - 0
             - 255
-    - feature-type: Battery
-      description: Battery Level
+    - description: Battery Level
       id: e0d0a8e6-604a-4d49-bdab-d22fd8658c69
       input:
         Battery:
@@ -26,22 +24,19 @@ configurations:
       - Womenizer
     name: Vibratissimo Licker
     features:
-      - feature-type: Vibrate
-        id: 75aa2f87-0d7b-4df1-a661-dd270e92fdd8
+      - id: 75aa2f87-0d7b-4df1-a661-dd270e92fdd8
         output:
           Vibrate:
             step-range:
               - 0
               - 255
-      - feature-type: Vibrate
-        id: 56fbae53-c57e-4eed-978c-dcf3279b228b
+      - id: 56fbae53-c57e-4eed-978c-dcf3279b228b
         output:
           Vibrate:
             step-range:
               - 0
               - 255
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: 0f194120-0912-4d5d-b201-7eee4cc622fe
         input:
           Battery:
@@ -55,29 +50,25 @@ configurations:
       - Rabbit
     name: Vibratissimo Rabbit
     features:
-      - feature-type: Vibrate
-        id: 675d6ccc-8145-40d2-a901-0b683cf8233b
+      - id: 675d6ccc-8145-40d2-a901-0b683cf8233b
         output:
           Vibrate:
             step-range:
               - 0
               - 255
-      - feature-type: Vibrate
-        id: c0009e3f-4263-4761-9168-17c9d81479ee
+      - id: c0009e3f-4263-4761-9168-17c9d81479ee
         output:
           Vibrate:
             step-range:
               - 0
               - 255
-      - feature-type: Vibrate
-        id: 16b15667-1598-4194-86b3-7e711f88adab
+      - id: 16b15667-1598-4194-86b3-7e711f88adab
         output:
           Vibrate:
             step-range:
               - 0
               - 2
-      - feature-type: Battery
-        description: Battery Level
+      - description: Battery Level
         id: e70bb6fb-9e2c-4970-9483-9f9b661d6e9f
         input:
           Battery:

@@ -1,15 +1,13 @@
 defaults:
   name: Libo Shark
   features:
-    - feature-type: Vibrate
-      id: 52d614a1-4f43-4946-a7bd-9d413791e642
+    - id: 52d614a1-4f43-4946-a7bd-9d413791e642
       output:
         Vibrate:
           step-range:
             - 0
             - 3
-    - feature-type: Vibrate
-      id: 7cebc2d6-3b11-4117-aec4-ced57a738a13
+    - id: 7cebc2d6-3b11-4117-aec4-ced57a738a13
       output:
         Vibrate:
           step-range:

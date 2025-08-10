@@ -7,8 +7,7 @@ configurations:
       - SayberX
     name: SayberX
     features:
-      - feature-type: Vibrate
-        id: a62d0356-a05f-475c-8a5f-fcfec1327b2a
+      - id: a62d0356-a05f-475c-8a5f-fcfec1327b2a
         output:
           Vibrate:
             step-range:

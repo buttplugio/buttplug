@@ -1,8 +1,7 @@
 defaults:
   name: Xibao Smart Masturbation Cup
   features:
-    - feature-type: Oscillate
-      id: c91a5d82-547c-4bcb-8cd9-1a5085253d11
+    - id: c91a5d82-547c-4bcb-8cd9-1a5085253d11
       output:
         Oscillate:
           step-range:

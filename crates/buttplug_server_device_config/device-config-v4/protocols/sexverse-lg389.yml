@@ -1,15 +1,13 @@
 defaults:
   name: Sexverse LG389
   features:
-    - feature-type: Vibrate
-      id: 54ae0f52-dbd7-4fac-8463-f06199b72642
+    - id: 54ae0f52-dbd7-4fac-8463-f06199b72642
       output:
         Vibrate:
           step-range:
             - 0
             - 3
-    - feature-type: Oscillate
-      id: 394cb2f4-9ee5-4fe9-a31c-fd6652479467
+    - id: 394cb2f4-9ee5-4fe9-a31c-fd6652479467
       output:
         Oscillate:
           step-range:

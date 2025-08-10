@@ -1,8 +1,7 @@
 defaults:
   name: Kizuna Smart
   features:
-    - feature-type: Rotate
-      id: 7077cb50-d3d5-4357-8b5f-42517ffc83b8
+    - id: 7077cb50-d3d5-4357-8b5f-42517ffc83b8
       output:
         Rotate:
           step-range:

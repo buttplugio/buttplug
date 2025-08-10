@@ -1,8 +1,7 @@
 defaults:
   name: DeepSire Device
   features:
-    - feature-type: Vibrate
-      id: 08e0cd3e-65eb-42a4-8b15-990eb2e4c855
+    - id: 08e0cd3e-65eb-42a4-8b15-990eb2e4c855
       output:
         Vibrate:
           step-range:

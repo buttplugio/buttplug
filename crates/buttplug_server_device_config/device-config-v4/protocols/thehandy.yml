@@ -1,8 +1,7 @@
 defaults:
   name: The Handy
   features:
-    - feature-type: PositionWithDuration
-      id: 32309a60-f980-490d-a5f4-467ccae2d586
+    - id: 32309a60-f980-490d-a5f4-467ccae2d586
       output:
         PositionWithDuration:
           step-range:

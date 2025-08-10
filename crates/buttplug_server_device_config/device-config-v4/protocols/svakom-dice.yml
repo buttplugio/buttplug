@@ -1,8 +1,7 @@
 defaults:
   name: Zemalia Dice for Love
   features:
-    - feature-type: Vibrate
-      id: 60b702d6-d3ff-4554-a3ae-f4638ddc74ef
+    - id: 60b702d6-d3ff-4554-a3ae-f4638ddc74ef
       output:
         Vibrate:
           step-range:

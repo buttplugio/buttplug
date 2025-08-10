@@ -1,8 +1,7 @@
 defaults:
   name: Nobra's Silicone Dreams Toy
   features:
-    - feature-type: Vibrate
-      id: 3d9a6c96-2f9e-4105-931b-c799c1c9f3e0
+    - id: 3d9a6c96-2f9e-4105-931b-c799c1c9f3e0
       output:
         Vibrate:
           step-range:

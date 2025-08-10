@@ -1,15 +1,13 @@
 defaults:
   name: VibCrafter Device
   features:
-    - feature-type: Vibrate
-      id: 343a8e18-b76c-4482-b048-32d762bf87c9
+    - id: 343a8e18-b76c-4482-b048-32d762bf87c9
       output:
         Vibrate:
           step-range:
             - 0
             - 99
-    - feature-type: Vibrate
-      id: d92a031e-bd0d-4815-a0bd-6c59566dcce2
+    - id: d92a031e-bd0d-4815-a0bd-6c59566dcce2
       output:
         Vibrate:
           step-range:
@@ -33,8 +31,7 @@ configurations:
       - Janna
     name: VibCrafter Janna
     features:
-      - feature-type: Vibrate
-        id: 51e20287-006c-4dc9-941a-346b8f960715
+      - id: 51e20287-006c-4dc9-941a-346b8f960715
         output:
           Vibrate:
             step-range:
