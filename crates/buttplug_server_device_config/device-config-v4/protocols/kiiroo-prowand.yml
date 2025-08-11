@@ -3,14 +3,14 @@ defaults:
   features:
     - id: 2e585349-127b-4536-85b7-9d5b90e44df4
       output:
-        Vibrate:
-          step-range:
+        vibrate:
+          value:
             - 0
             - 255
-    - description: Battery Level
+    - description: battery Level
       id: ad812cb2-e04a-4656-9103-a80766601455
       input:
-        Battery:
+        battery:
           value-range:
             - - 0
               - 100

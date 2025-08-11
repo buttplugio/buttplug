@@ -3,9 +3,9 @@ defaults:
   features:
     - id: b7495351-9101-448a-94c4-4598cf541dca
       output:
-        RotateWithDirection:
-          step-range:
-            - 0
+        rotate_with_direction:
+          value:
+            - -6
             - 6
   id: f912a283-7308-4e56-a508-4d47d9caf7d2
 configurations:

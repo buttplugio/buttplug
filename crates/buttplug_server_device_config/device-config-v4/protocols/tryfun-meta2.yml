@@ -3,21 +3,21 @@ defaults:
   features:
     - id: 0773790b-b629-46b7-af2a-174d75c53fe3
       output:
-        Oscillate:
-          step-range:
+        oscillate:
+          value:
             - 0
             - 100
     - id: bf8f3a67-3403-4d57-90e3-027804c57c4e
       output:
-        Vibrate:
-          step-range:
+        vibrate:
+          value:
             - 0
             - 100
     - id: 26402ebe-7ee0-4c7d-ae40-205ec4f3a1b0
       output:
-        RotateWithDirection:
-          step-range:
-            - 0
+        rotate_with_direction:
+          value:
+            - -100
             - 100
   id: 6b45e5f8-5b23-4c1d-a478-43c17a54cae3
 communication:

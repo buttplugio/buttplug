@@ -4,15 +4,15 @@ defaults:
     - description: Internal vibrator
       id: 8638eed8-37ec-4c54-aa06-a8dd3a832057
       output:
-        Vibrate:
-          step-range:
+        vibrate:
+          value:
             - 0
             - 3
     - description: External pulsator
       id: a2ad09c0-0042-4f29-875f-464fb83ca916
       output:
-        Vibrate:
-          step-range:
+        vibrate:
+          value:
             - 0
             - 3
   id: 870f69ff-45db-4a13-96e7-1915eef6ac59

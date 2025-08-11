@@ -3,8 +3,8 @@ defaults:
   features:
     - id: 1e03f6a5-0197-4a5e-afb5-dcc1266c6a6e
       output:
-        Vibrate:
-          step-range:
+        vibrate:
+          value:
             - 0
             - 10
   id: 58212e06-d13e-461d-a8cd-5bd06cbe5d0c
@@ -19,14 +19,14 @@ configurations:
     features:
       - id: 737fe419-62fa-4e1b-b6d0-2684cbe8b31f
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 10
       - id: 5e612940-1d00-4680-aa3a-1b052755a01d
         output:
-          Rotate:
-            step-range:
+          rotate:
+            value:
               - 0
               - 1
     id: cdd17d02-603a-4a86-af6b-f2c97d09ed84
@@ -41,15 +41,15 @@ configurations:
       - description: Vibrating attachments
         id: 1859c6fa-1d2f-46c8-b97c-75a7ca62be8c
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 10
       - description: Suction lens
         id: 63b84610-b32b-4526-a29a-4acb9ad4939d
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 1
     id: 4e1d7b1c-133d-4d7c-9cfe-f4c4e5d0ca01

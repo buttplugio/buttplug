@@ -9,10 +9,13 @@ configurations:
     features:
       - id: 8cd94334-adde-4d9b-aad9-c2de93adb2c0
         output:
-          PositionWithDuration:
-            step-range:
+          position_with_duration:
+            position:
               - 0
               - 99
+            duration:
+              - 0
+              - 100000            
     id: eac00879-448c-46ed-aaa5-efe86226fb48
   - identifier:
       - Onyx+
@@ -20,10 +23,13 @@ configurations:
     features:
       - id: c66d882d-f752-45b4-806e-166d3e160eb8
         output:
-          PositionWithDuration:
-            step-range:
+          position_with_duration:
+            position:
               - 0
               - 99
+            duration:
+                - 0
+                - 100000            
     id: 40dafef9-ef94-4b03-8b8a-e9d7e9fef317
   - identifier:
       - KEON
@@ -32,10 +38,13 @@ configurations:
     features:
       - id: da002a11-610a-4e13-94c5-4c45d51814f2
         output:
-          PositionWithDuration:
-            step-range:
+          position_with_duration:
+            position:
               - 0
               - 99
+            duration:
+              - 0
+              - 100000
     id: f3675b2e-d7b8-463b-8b91-30a5ebef24f4
   - identifier:
       - Rey
@@ -45,10 +54,13 @@ configurations:
     features:
       - id: 8c896f82-2e17-46f9-9db2-531cc7e42236
         output:
-          PositionWithDuration:
-            step-range:
+          position_with_duration:
+            position:
               - 0
               - 99
+            duration:
+              - 0
+              - 100000
     id: d2fde950-8e0a-4231-8ebc-5c39dcf3349f
 communication:
   - btle:

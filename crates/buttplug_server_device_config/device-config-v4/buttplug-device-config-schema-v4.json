@@ -162,7 +162,7 @@
         "pairs"
       ]
     },
-    "step-range": {
+    "value-range": {
       "description": "Specifies the range of steps to use for a device. Devices will use the low end value as a stop.",
       "type": "array",
       "items": {
@@ -186,15 +186,30 @@
           "output": {
             "type": "object",
             "patternProperties": {
-              "^(Vibrate|Rotate|Oscillate|Constrict|Spray|Position|RotateWithDirection|PositionWithDuration|Heater|Led)$": {
+              "^(vibrate|rotate|oscillate|constrict|spray|position|rotate_with_direction|heater|led)$": {
                 "type": "object",
                 "properties": {
-                  "step-range": {
-                    "$ref": "#/components/step-range"
+                  "value": {
+                    "$ref": "#/components/value-range"
                   }
                 },
                 "required": [
-                  "step-range"
+                  "value"
+                ]
+              },
+              "^position_with_duration$": {
+                "type": "object",
+                "properties": {
+                  "position": {
+                    "$ref": "#/components/value-range"
+                  },
+                  "duration": {
+                    "$ref": "#/components/value-range"
+                  }
+                },
+                "required": [
+                  "position",
+                  "duration"
                 ]
               }
             }
@@ -202,13 +217,13 @@
           "input": {
             "type": "object",
             "patternProperties": {
-              "^(Battery|RSSI|Pressure)$": {
+              "^(battery|rssi|pressure)$": {
                 "type": "object",
                 "properties": {
                   "value-range": {
                     "type": "array",
                     "items": {
-                      "$ref": "#/components/step-range"
+                      "$ref": "#/components/value-range"
                     },
                     "minItems": 1
                   },
@@ -264,11 +279,42 @@
           "output": {
             "type": "object",
             "patternProperties": {
-              "^(Vibrate|Rotate|Oscillate|Constrict|Spray|Position|RotateWithDirection|PositionWithDuration|Heater|Led)$": {
+              "^(vibrate|rotate|oscillate|constrict|spray|rotate_with_direction|heater|led)$": {
                 "type": "object",
                 "properties": {
-                  "step-limit": {
-                    "$ref": "#/components/step-range"
+                  "value": {
+                    "$ref": "#/components/value-range"
+                  },
+                  "disabled": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "^position$": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "$ref": "#/components/value-range"
+                  }, 
+                  "reverse": {
+                    "type": "boolean"
+                  },
+                  "disabled": {
+                    "type": "boolean"
+                  }
+                }                
+              },
+              "^position_with_duration$": {
+                "type": "object",
+                "properties": {
+                  "position": {
+                    "$ref": "#/components/value-range"
+                  }, 
+                  "reverse": {
+                    "type": "boolean"
+                  },
+                  "disabled": {
+                    "type": "boolean"
                   }
                 }
               }
@@ -277,13 +323,13 @@
           "input": {
             "type": "object",
             "patternProperties": {
-              "^(Battery|RSSI|Pressure)$": {
+              "^(battery|rssi|pressure)$": {
                 "type": "object",
                 "properties": {
                   "value-range": {
                     "type": "array",
                     "items": {
-                      "$ref": "#/components/step-range"
+                      "$ref": "#/components/value-range"
                     },
                     "minItems": 1
                   },

@@ -3,15 +3,15 @@ defaults:
   features:
     - id: 9fbf30f4-3f0d-4377-a232-55132d023d11
       output:
-        Vibrate:
-          step-range:
+        vibrate:
+          value:
             - 0
             - 255
     - description: Suction
       id: a38653c9-c245-4c98-86c9-3c0da68d646c
       output:
-        Constrict:
-          step-range:
+        constrict:
+          value:
             - 0
             - 9
   id: f89fcd7a-2411-4241-ae81-f4488e926d16

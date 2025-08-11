@@ -3,8 +3,8 @@ defaults:
   features:
     - id: 1fec4773-16a2-4bec-8910-1fcd9a85edaf
       output:
-        Vibrate:
-          step-range:
+        vibrate:
+          value:
             - 0
             - 255
   id: 62e7b76d-ab99-42ca-89ea-865a6072451e

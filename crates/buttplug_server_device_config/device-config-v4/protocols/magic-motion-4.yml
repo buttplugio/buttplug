@@ -3,14 +3,14 @@ defaults:
   features:
     - id: c8ed6a4c-2dff-4be9-b1c5-b91bfd238bda
       output:
-        Vibrate:
-          step-range:
+        vibrate:
+          value:
             - 0
             - 100
-    - description: Battery Level
+    - description: battery Level
       id: 8ba2798a-4717-4a39-ae5c-f445eb8f4448
       input:
-        Battery:
+        battery:
           value-range:
             - - 0
               - 100
@@ -44,20 +44,20 @@ configurations:
     features:
       - id: 008a3d35-9b61-4bc2-9554-c3c742f03e12
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 100
       - id: b24eee4d-b3c2-4ce4-8f54-433e3d2a08f5
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 100
-      - description: Battery Level
+      - description: battery Level
         id: fdc5dc60-ece5-4f81-801c-076b1e1bad57
         input:
-          Battery:
+          battery:
             value-range:
               - - 0
                 - 100
@@ -74,20 +74,20 @@ configurations:
     features:
       - id: 09d1b6fc-834d-4579-9bc7-79813f20d33f
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 100
       - id: 04438678-4c82-48e1-a4fa-8dd916ee5469
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 100
-      - description: Battery Level
+      - description: battery Level
         id: b2b3dedf-5f7a-4069-935f-f210fdf5cafc
         input:
-          Battery:
+          battery:
             value-range:
               - - 0
                 - 100

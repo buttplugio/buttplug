@@ -3,8 +3,8 @@ defaults:
   features:
     - id: 6c0184bc-93b8-41a9-a976-934256dcdf9d
       output:
-        Vibrate:
-          step-range:
+        vibrate:
+          value:
             - 0
             - 15
   id: d42dc8a1-bb70-4dd6-b792-710248c00c6e
@@ -48,14 +48,14 @@ configurations:
     features:
       - id: c76fd58e-a38c-4f25-a04c-d798e3f892d3
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 15
       - id: 027061c3-4d18-4d03-8219-13e3134b8a19
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 15
     id: 11cd7b68-2c94-4fc8-837f-09d47214cee1
@@ -65,14 +65,14 @@ configurations:
     features:
       - id: 22386dcd-b409-49d2-be03-ad270eae92c4
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 15
       - id: 46f2d671-5bbf-49c0-928e-4a8b3cdd892b
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 15
     id: 400ef30a-63eb-4648-b293-c7ecc874f509
@@ -82,14 +82,14 @@ configurations:
     features:
       - id: e609247a-8c12-422e-8df7-e03373bdbf7a
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 15
       - id: c84081f5-3a72-473a-b2b3-32500014b308
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 15
     id: b667bb6a-46b1-4534-8c79-83aa0749028a
@@ -99,14 +99,14 @@ configurations:
     features:
       - id: 283b2826-80e3-455f-bec6-7800ebaf2c96
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 15
       - id: 64f00297-e4ef-4059-a622-c0bea33d4379
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 15
     id: 0e72dab3-4b87-4bae-ae02-aae0bbb0f035

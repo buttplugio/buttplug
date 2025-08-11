@@ -3,38 +3,38 @@ defaults:
   features:
     - id: 40c417e0-8a0b-4017-a0b5-2b33df4f0acc
       output:
-        Vibrate:
-          step-range:
+        vibrate:
+          value:
             - 0
             - 56
     - id: 84057071-af0e-4156-9f82-f7afc794bcde
       output:
-        Vibrate:
-          step-range:
+        vibrate:
+          value:
             - 0
             - 56
     - id: edaa4f3d-71c2-43b3-b9c3-b6a425b27200
       output:
-        Vibrate:
-          step-range:
+        vibrate:
+          value:
             - 0
             - 56
     - id: b977c4f4-1585-49c4-9980-c2e8d329f713
       output:
-        Vibrate:
-          step-range:
+        vibrate:
+          value:
             - 0
             - 56
     - id: ba9c09c7-1948-4b6f-823f-d9fd1380709c
       output:
-        Vibrate:
-          step-range:
+        vibrate:
+          value:
             - 0
             - 56
     - id: 5a0a0429-5fb6-4bcb-bb4c-5e14f4338677
       output:
-        Vibrate:
-          step-range:
+        vibrate:
+          value:
             - 0
             - 56
   id: 523391d5-1e0a-42f0-b669-5ad3f3e49902
@@ -53,14 +53,14 @@ configurations:
     features:
       - id: 78d26150-7355-4633-bdc0-d2d58b2ea2aa
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 56
       - id: 8f0c1cc0-b269-4eb6-a87f-34aeaee28906
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 56
     id: b72b5597-a708-4fe9-919a-99f1d38291ef

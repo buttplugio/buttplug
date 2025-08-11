@@ -3,10 +3,13 @@ defaults:
   features:
     - id: 49b06ca8-dd4d-4306-91c6-931143dee212
       output:
-        PositionWithDuration:
-          step-range:
+        position_with_duration:
+          position:
             - 0
             - 99
+          duration:
+            - 0
+            - 100000            
   id: 1de4322c-86c4-40b1-8e1b-1f51c30392c0
 configurations:
   - identifier:
