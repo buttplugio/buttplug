@@ -3,15 +3,15 @@ defaults:
   features:
     - id: 2c03096f-8fd6-4c80-84ba-d07936f76928
       output:
-        Rotate:
-          step-range:
+        rotate:
+          value:
             - 0
             - 255
     - description: Suction
       id: e9e32817-2cc1-4365-baa6-054fb7f6aa74
       output:
-        Constrict:
-          step-range:
+        constrict:
+          value:
             - 0
             - 1
   id: abc5309a-008d-41fd-b4db-5fd54614c582
@@ -26,14 +26,14 @@ configurations:
     features:
       - id: b91f2775-f628-43c4-bd04-a8844f74d4e1
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 255
       - id: 3e00301a-c942-4b8d-8f49-fe2af7ecf0b6
         output:
-          Oscillate:
-            step-range:
+          oscillate:
+            value:
               - 0
               - 255
     id: 6e782468-f084-442a-936f-27d7abd5f840

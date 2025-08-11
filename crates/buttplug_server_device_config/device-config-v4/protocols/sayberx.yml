@@ -9,8 +9,8 @@ configurations:
     features:
       - id: a62d0356-a05f-475c-8a5f-fcfec1327b2a
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 4
     id: 22716d89-5e28-462b-9723-60528fb7373e

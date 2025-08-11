@@ -3,10 +3,13 @@ defaults:
   features:
     - id: 32309a60-f980-490d-a5f4-467ccae2d586
       output:
-        PositionWithDuration:
-          step-range:
+        position_with_duration:
+          position:
             - 0
             - 100
+          duration:
+            - 0
+            - 100000
   id: fc9de0ed-0f9f-402e-a1b5-4d1865e7b87b
 communication:
   - btle:

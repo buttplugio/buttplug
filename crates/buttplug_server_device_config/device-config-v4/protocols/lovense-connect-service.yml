@@ -3,14 +3,14 @@ defaults:
   features:
     - id: 387829be-bbd3-4d71-98f2-738dbb685600
       output:
-        Vibrate:
-          step-range:
+        vibrate:
+          value:
             - 0
             - 20
-    - description: Battery Level
+    - description: battery Level
       id: 7202da93-c25d-460a-a863-8d4d38f41fdf
       input:
-        Battery:
+        battery:
           value-range:
             - - 0
               - 100
@@ -25,21 +25,21 @@ configurations:
       - description: Vibrator
         id: cd1a70b7-d716-41a9-b839-24e0229c25d2
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 20
       - description: Air Pump
         id: e74ae364-c17a-41c4-accf-0e4a4ee94e04
         output:
-          Constrict:
-            step-range:
+          constrict:
+            value:
               - 0
               - 3
-      - description: Battery Level
+      - description: battery Level
         id: a2d19eee-211e-4771-b7e1-cfba3e6bb55f
         input:
-          Battery:
+          battery:
             value-range:
               - - 0
                 - 100
@@ -52,20 +52,20 @@ configurations:
     features:
       - id: 26f7aaa6-4312-487d-aabb-b43e4c87b5c2
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 20
       - id: 5410094f-eff4-4b41-bfa2-b4cece3b9101
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 20
-      - description: Battery Level
+      - description: battery Level
         id: 9b31822c-7449-4a3d-bd4d-6cced8440126
         input:
-          Battery:
+          battery:
             value-range:
               - - 0
                 - 100
@@ -78,20 +78,20 @@ configurations:
     features:
       - id: 1bfa1705-0193-4393-82f7-1c458e4885b3
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 20
       - id: af885c72-ce2b-47d5-87be-3847f24d18a5
         output:
-          RotateWithDirection:
-            step-range:
-              - 0
+          rotate_with_direction:
+            value:
+              - -20
               - 20
-      - description: Battery Level
+      - description: battery Level
         id: 1fb626ec-7006-46f5-97b1-db3cc0bc5bb8
         input:
-          Battery:
+          battery:
             value-range:
               - - 0
                 - 100
@@ -141,14 +141,14 @@ configurations:
       - description: Fucking Machine Oscillation Speed
         id: 0ab80cc0-7a82-4cb6-ba4f-0f18ddb2911f
         output:
-          Oscillate:
-            step-range:
+          oscillate:
+            value:
               - 0
               - 20
-      - description: Battery Level
+      - description: battery Level
         id: 971bd4aa-d6ac-4449-bd1a-862b29ae705e
         input:
-          Battery:
+          battery:
             value-range:
               - - 0
                 - 100
@@ -161,20 +161,20 @@ configurations:
     features:
       - id: 59ec4d12-2c6d-4cd9-83b0-8ff1609563d4
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 20
       - id: 4e4eead7-9959-4fe2-b629-a535f6bc7ca4
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 20
-      - description: Battery Level
+      - description: battery Level
         id: b771d1b8-5a68-4a75-8ff2-868380d18fe7
         input:
-          Battery:
+          battery:
             value-range:
               - - 0
                 - 100
@@ -191,20 +191,20 @@ configurations:
     features:
       - id: a6ec2f52-780b-4d87-a809-0bdc2ccadcc1
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 20
       - id: c06723f1-f816-442b-8193-a5c407fecabe
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 20
-      - description: Battery Level
+      - description: battery Level
         id: 80d1e022-85a6-46ad-bbe9-1b8085b1e336
         input:
-          Battery:
+          battery:
             value-range:
               - - 0
                 - 100
@@ -222,21 +222,21 @@ configurations:
       - description: Both Vibes
         id: bd656e88-abae-49e4-ab45-f75df187bb4a
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 20
       - description: Finger motion
         id: 663dedb4-05a1-4391-a666-e59c38ead69c
         output:
-          Rotate:
-            step-range:
+          rotate:
+            value:
               - 0
               - 20
-      - description: Battery Level
+      - description: battery Level
         id: 735c2164-4fd5-4e82-835d-23251e487d68
         input:
-          Battery:
+          battery:
             value-range:
               - - 0
                 - 100
@@ -249,20 +249,20 @@ configurations:
     features:
       - id: 2c186df2-4e8c-491d-b247-fcbaeb763fee
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 20
       - id: 81657dab-5fbf-40b4-a6f8-cfecb7906757
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 20
-      - description: Battery Level
+      - description: battery Level
         id: fe19ad5c-5acb-4ee9-8a09-f6edca06f471
         input:
-          Battery:
+          battery:
             value-range:
               - - 0
                 - 100
@@ -275,20 +275,20 @@ configurations:
     features:
       - id: fba538eb-784e-4ca7-ad81-e52f3cd0d3f2
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 20
       - id: 61bd6559-c32d-4c3b-9686-988fa3cd4abf
         output:
-          Oscillate:
-            step-range:
+          oscillate:
+            value:
               - 0
               - 20
-      - description: Battery Level
+      - description: battery Level
         id: 7a794236-85e6-4b13-97c6-d17d1f091f0a
         input:
-          Battery:
+          battery:
             value-range:
               - - 0
                 - 100
@@ -301,20 +301,20 @@ configurations:
     features:
       - id: 4865ff41-25cd-42a9-b93d-00a7c1e881d5
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 20
       - id: d49001e8-5f6b-43ac-9cc7-7e68fab7c323
         output:
-          RotateWithDirection:
-            step-range:
-              - 0
+          rotate_with_direction:
+            value:
+              - -20
               - 20
-      - description: Battery Level
+      - description: battery Level
         id: 7fcb01eb-4241-42c1-9799-fdfa190b7edd
         input:
-          Battery:
+          battery:
             value-range:
               - - 0
                 - 100
@@ -328,28 +328,28 @@ configurations:
       - description: Tip Vibe
         id: f435ee40-ae30-4fba-9f80-c1143f601993
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 20
       - description: Internal Vibe
         id: 9504ed2b-1baf-4759-922b-a5dcfc16aeb7
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 20
       - description: External Vibe
         id: 1cce6f8f-0301-4e4e-a820-1ed85e11e25d
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 20
-      - description: Battery Level
+      - description: battery Level
         id: 322170f9-b493-4233-9336-e6f7f267450c
         input:
-          Battery:
+          battery:
             value-range:
               - - 0
                 - 100
@@ -367,14 +367,14 @@ configurations:
       - description: Stroker Oscillation Speed
         id: b8b240c0-182d-4889-9200-47c16399c57d
         output:
-          Oscillate:
-            step-range:
+          oscillate:
+            value:
               - 0
               - 20
-      - description: Battery Level
+      - description: battery Level
         id: 37c03e71-1701-4b5a-9697-d62d2dc56e4b
         input:
-          Battery:
+          battery:
             value-range:
               - - 0
                 - 100

@@ -3,15 +3,15 @@ defaults:
   features:
     - id: 24125960-c279-4f64-87e3-a819af7319b4
       output:
-        Vibrate:
-          step-range:
+        vibrate:
+          value:
             - 0
             - 10
     - id: fabe3961-dc17-4f32-856f-13880c0a29a3
       output:
-        RotateWithDirection:
-          step-range:
-            - 0
+        rotate_with_direction:
+          value:
+            - -2
             - 2
   id: 622f93f2-53d5-4ada-b6a7-359a9d8aedd0
 communication:

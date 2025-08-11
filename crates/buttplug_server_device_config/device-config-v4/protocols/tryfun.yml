@@ -3,14 +3,14 @@ defaults:
   features:
     - id: e4957d32-e069-4c35-ae3f-e3cce3de6b49
       output:
-        Oscillate:
-          step-range:
+        oscillate:
+          value:
             - 0
             - 9
     - id: 0346e667-8ea2-4cde-80d4-88d498d1ee17
       output:
-        Rotate:
-          step-range:
+        rotate:
+          value:
             - 0
             - 9
   id: 9b4afa16-a7cf-4fdb-bb95-5f91125ba7e1
@@ -21,8 +21,8 @@ configurations:
     features:
       - id: b9d4420b-9a94-4ea2-8b76-3445d06049f2
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 4
     id: 2cf375ae-7ae9-4d76-be3b-58eff84b67ae

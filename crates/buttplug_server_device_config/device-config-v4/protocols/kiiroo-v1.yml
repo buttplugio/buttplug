@@ -9,8 +9,8 @@ configurations:
     features:
       - id: 31eee57b-a1d8-49de-ac72-0dba46885a28
         output:
-          Vibrate:
-            step-range:
+          vibrate:
+            value:
               - 0
               - 4
     id: aa35c397-8827-44c8-bc9f-a9acc234fba5
@@ -20,10 +20,13 @@ configurations:
     features:
       - id: 2fe100ee-4665-4132-b4c6-d70a4037d6ac
         output:
-          PositionWithDuration:
-            step-range:
+          position_with_duration:
+            position:
               - 0
               - 4
+            duration:
+              - 0
+              - 100000              
     id: f01513ef-a0c9-412d-ae70-b965b65379a8
 communication:
   - btle:
