@@ -59,7 +59,6 @@ pub enum ButtplugClientMessageV4 {
 #[derive(
   Debug,
   Clone,
-  PartialEq,
   ButtplugMessage,
   ButtplugMessageValidator,
   FromSpecificButtplugMessage,

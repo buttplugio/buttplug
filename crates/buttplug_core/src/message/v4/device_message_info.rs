@@ -12,7 +12,7 @@ use getset::{CopyGetters, Getters, MutGetters};
 use serde::{Deserialize, Serialize};
 
 /// Substructure of device messages, used for attribute information (name, messages supported, etc...)
-#[derive(Clone, Debug, PartialEq, MutGetters, Getters, CopyGetters, Serialize, Deserialize)]
+#[derive(Clone, Debug, MutGetters, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct DeviceMessageInfoV4 {
   #[serde(rename = "DeviceIndex")]
   #[getset(get_copy = "pub")]
