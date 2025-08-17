@@ -22,7 +22,7 @@ pub enum OutputType {
   #[serde(alias = "rotate")]
   Rotate,
   // Two Direction Rotation Speed
-  #[serde(alias = "rotatewithdirection")]
+  #[serde(alias = "rotate_with_direction")]
   RotateWithDirection,
   #[serde(alias = "oscillate")]
   Oscillate,
@@ -36,7 +36,7 @@ pub enum OutputType {
   // OSR-2/SR-6.
   #[serde(alias = "position")]
   Position,
-  #[serde(alias = "positionwithduration")]
+  #[serde(alias = "position_with_duration")]
   PositionWithDuration,
   // Lube shooters
   #[serde(alias = "spray")]
@@ -48,13 +48,13 @@ pub enum OutputType {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, Hash, EnumIter)]
 pub enum InputType {
   Unknown,
-  #[serde(alias="battery")]
+  #[serde(alias = "battery")]
   Battery,
-  #[serde(alias="rssi")]
+  #[serde(alias = "rssi")]
   Rssi,
-  #[serde(alias="button")]
+  #[serde(alias = "button")]
   Button,
-  #[serde(alias="pressure")]
+  #[serde(alias = "pressure")]
   Pressure,
   // Temperature,
   // Accelerometer,
