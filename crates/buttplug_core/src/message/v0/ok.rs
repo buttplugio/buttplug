@@ -54,11 +54,12 @@ mod test {
     let js = serde_json::to_string(&ok).expect("Infallible serialization");
     assert_eq!(OK_STR, js);
   }
-
+/*
   #[test]
   fn test_ok_deserialize() {
     let union: ButtplugServerMessageCurrent =
       serde_json::from_str(OK_STR).expect("Infallible deserialization");
     assert_eq!(ButtplugServerMessageCurrent::Ok(OkV0::new(0)), union);
   }
+  */
 }

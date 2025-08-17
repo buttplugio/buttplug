@@ -18,7 +18,7 @@ use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 /// List of all devices currently connected to the server.
-#[derive(Default, Clone, Debug, PartialEq, ButtplugMessage, Getters, Serialize, Deserialize)]
+#[derive(Default, Clone, Debug, ButtplugMessage, Getters, Serialize, Deserialize)]
 pub struct DeviceListV4 {
   #[serde(rename = "Id")]
   id: u32,
