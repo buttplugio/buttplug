@@ -62,6 +62,21 @@ async fn set_rotate_with_direction_and_wait(dev: &Arc<ButtplugClientDevice>, fea
         if clockwise { "clockwise" } else { "anticlockwise" });
     sleep(Duration::from_secs(1)).await;
 }
+async fn set_position_with_duration_and_wait(dev: &Arc<ButtplugClientDevice>, feature: &ClientDeviceFeature, output_type: &OutputType, level: f64, duration: u32) {
+    feature.send_command(&ClientDeviceOutputCommand::PositionWithDurationFloat(level, duration)).await.unwrap();
+    println!(
+        "{} ({}) Testing feature {}: {} ({}), output {:?} - {}% {}ms",
+        dev.name(),
+        dev.index(),
+        feature.feature().feature_index(),
+        feature.feature().feature_type(),
+        feature.feature().description(),
+        output_type,
+        (level * 100.0) as u8,
+        duration);
+    sleep(Duration::from_millis(duration as u64)).await;
+    sleep(Duration::from_secs(1)).await;
+}
 
 async fn device_tester() {
     let mut dc = None;
@@ -282,7 +297,12 @@ async fn device_tester() {
                                 set_rotate_with_direction_and_wait(&dev, feature, otype, 1.0, false).await;
                                 set_rotate_with_direction_and_wait(&dev, feature, otype, 0.0, false).await;
                             },
-                            OutputType::PositionWithDuration => {}
+                            OutputType::PositionWithDuration => {
+                                set_position_with_duration_and_wait(&dev, feature, otype, 0.0, 0).await;
+                                set_position_with_duration_and_wait(&dev, feature, otype, 0.5, 1000).await;
+                                set_position_with_duration_and_wait(&dev, feature, otype, 1.0, 10).await;
+                                set_position_with_duration_and_wait(&dev, feature, otype, 0.0, 100).await;
+                            }
                         }
                     }
                 }
