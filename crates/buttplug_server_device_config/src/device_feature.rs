@@ -14,7 +14,7 @@ use buttplug_core::{
     InputCommandType,
   },
 };
-use getset::{CopyGetters, Getters};
+use getset::{CopyGetters, Getters, Setters};
 use serde::{
   Deserialize,
   Serialize,
@@ -157,7 +157,8 @@ impl ServerDeviceFeatureOutputPositionWithDurationProperties {
   }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Getters, Setters, Default)]
+#[getset(get = "pub", set = "pub(crate)")]
 pub struct ServerDeviceFeatureOutput {
   vibrate: Option<ServerDeviceFeatureOutputValueProperties>,
   rotate: Option<ServerDeviceFeatureOutputValueProperties>,
@@ -190,8 +191,8 @@ impl ServerDeviceFeatureInputProperties {
   }
 }
 
-#[derive(Clone, Debug, Getters)]
-#[getset(get = "pub")]
+#[derive(Clone, Debug, Getters, Setters, Default)]
+#[getset(get = "pub", set = "pub(crate)")]
 pub struct ServerDeviceFeatureInput {
   battery: Option<ServerDeviceFeatureInputProperties>,
   rssi: Option<ServerDeviceFeatureInputProperties>,

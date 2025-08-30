@@ -157,7 +157,6 @@ pub use endpoint::*;
 
 
 use std::ops::RangeInclusive;
-use serde::Serializer;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
