@@ -45,8 +45,10 @@ impl Into<ServerDeviceDefinition> for ConfigBaseDeviceDefinition {
     if let Some(gap) = self.message_gap_ms {
       builder.message_gap_ms(gap);
     }
-    for feature in self.features {
-      builder.add_feature(feature.into());
+    if let Some(features) = self.features {
+      for feature in features {
+        builder.add_feature(&feature.into());
+      }
     }
     builder.finish()
   }

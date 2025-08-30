@@ -4,7 +4,7 @@ use buttplug_core::message::InputCommandType;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::{ServerDeviceFeature, ServerDeviceFeatureOutput, ServerDeviceFeatureOutputPositionWithDurationProperties, ServerDeviceFeatureOutputValueProperties};
+use crate::{ServerDeviceFeature, ServerDeviceFeatureInput, ServerDeviceFeatureInputProperties, ServerDeviceFeatureOutput, ServerDeviceFeatureOutputPositionWithDurationProperties, ServerDeviceFeatureOutputValueProperties};
 
 use super::range_sequence_serialize;
 
@@ -54,14 +54,44 @@ struct BaseDeviceFeatureOutput {
   #[serde(skip_serializing_if="Option::is_none")]
   spray: Option<BaseDeviceFeatureOutputValueProperties>,
 }
-/*
+
 impl Into<ServerDeviceFeatureOutput> for BaseDeviceFeatureOutput {
   fn into(self) -> ServerDeviceFeatureOutput {
+    let mut output = ServerDeviceFeatureOutput::default();
     if let Some(vibrate) = self.vibrate {
+      output.set_vibrate(Some(vibrate.into()));
     }
+    if let Some(rotate) = self.rotate {
+      output.set_rotate(Some(rotate.into()));
+    }
+    if let Some(rotate_with_direction) = self.rotate_with_direction {
+      output.set_rotate_with_direction(Some(rotate_with_direction.into()));
+    }
+    if let Some(oscillate) = self.oscillate {
+      output.set_oscillate(Some(oscillate.into()));
+    }
+    if let Some(constrict) = self.constrict {
+      output.set_constrict(Some(constrict.into()));
+    }
+    if let Some(heater) = self.heater {
+      output.set_heater(Some(heater.into()));
+    }
+    if let Some(led) = self.led {
+      output.set_led(Some(led.into()));
+    }
+    if let Some(position) = self.position {
+      output.set_position(Some(position.into()));
+    }
+    if let Some(position_with_duration) = self.position_with_duration {
+      output.set_position_with_duration(Some(position_with_duration.into()));
+    }
+    if let Some(spray) = self.spray {
+      output.set_spray(Some(spray.into()));
+    }
+
+    output
   }
 }
-*/
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct UserDeviceFeatureOutputValueProperties {
@@ -143,6 +173,12 @@ impl DeviceFeatureInputProperties {
   }
 }
 
+impl Into<ServerDeviceFeatureInputProperties> for DeviceFeatureInputProperties {
+  fn into(self) -> ServerDeviceFeatureInputProperties {
+    ServerDeviceFeatureInputProperties::new(&self.value_range, &self.input_commands)
+  }
+}
+
 #[derive(
   Clone, Debug, Default, Getters, Serialize, Deserialize,
 )]
@@ -152,6 +188,25 @@ pub struct DeviceFeatureInput {
   rssi: Option<DeviceFeatureInputProperties>,
   pressure: Option<DeviceFeatureInputProperties>,
   button: Option<DeviceFeatureInputProperties>
+}
+
+impl Into<ServerDeviceFeatureInput> for DeviceFeatureInput {
+  fn into(self) -> ServerDeviceFeatureInput {
+    let mut input = ServerDeviceFeatureInput::default();
+    if let Some(battery) = self.battery {
+      input.set_battery(Some(battery.into()));
+    }
+    if let Some(rssi) = self.rssi {
+      input.set_rssi(Some(rssi.into()));
+    }
+    if let Some(pressure) = self.pressure {
+      input.set_pressure(Some(pressure.into()));
+    }
+    if let Some(button) = self.button {
+      input.set_button(Some(button.into()));
+    }
+    input
+  }
 }
 
 #[derive(
@@ -179,13 +234,24 @@ pub struct ConfigBaseDeviceFeature {
 
 impl Into<ServerDeviceFeature> for ConfigBaseDeviceFeature {
   fn into(self) -> ServerDeviceFeature {
+    // This isn't resolving correctly using .and_then, so having to do it the long way?
+    let output: Option<ServerDeviceFeatureOutput> = if let Some(o) = self.output {
+      Some(o.into())
+    } else {
+      None
+    };
+    let input: Option<ServerDeviceFeatureInput> = if let Some(i) = self.input {
+      Some(i.into())
+    } else {
+      None
+    };
     ServerDeviceFeature::new(
       &self.description,
       self.id,
       None,
       self.feature_settings.alt_protocol_index,
-      self.output.into(),
-      self.input.into()
+      &output,
+      &input
     ) 
   }
 }

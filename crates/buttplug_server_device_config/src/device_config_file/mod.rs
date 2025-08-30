@@ -147,13 +147,23 @@ fn load_main_config(
       dcm_builder.communication_specifier(&protocol_name, &specifiers);
     }
 
+    let mut default = None;
     if let Some(features) = protocol_def.defaults() {
-      dcm_builder.protocol_features(&BaseDeviceIdentifier::new_default(&protocol_name), features);
+      default = Some(features.clone());
+      dcm_builder.protocol_features(&BaseDeviceIdentifier::new_default(&protocol_name), &features.clone().into());
     }
 
-    for (config_ident, config) in protocol_def.configurations() {
-      let ident = BaseDeviceIdentifier::new(&protocol_name, config_ident);
-      dcm_builder.protocol_features(ident, config.clone());
+    for config in protocol_def.configurations() {
+      if let Some(idents) = config.identifier() {
+        for config_ident in idents {
+          let ident = BaseDeviceIdentifier::new(&protocol_name, config_ident);
+          if let Some(d) = &default {
+            dcm_builder.protocol_features(&ident, &d.update_with_configuration(config.clone()).into());
+          } else {
+            dcm_builder.protocol_features(&ident, &config.clone().into());
+          }
+        }
+      }
     }
   }
 
@@ -188,9 +198,13 @@ fn load_user_config(
       dcm_builder.protocol_features(&BaseDeviceIdentifier::new_default(&protocol_name), features);
     }
 
-    for (config_ident, config) in protocol_def.configurations() {
-      let ident = BaseDeviceIdentifier::new(&protocol_name, config_ident);
-      dcm_builder.protocol_features(ident, config.clone());
+    for config in protocol_def.configurations() {
+      if let Some(idents) = config.identifier() {
+        for config_ident in idents {
+          let ident = BaseDeviceIdentifier::new(&protocol_name, config_ident);
+          dcm_builder.protocol_features(ident, config.clone());
+        }
+      }
     }
   }
 
@@ -258,7 +272,9 @@ pub fn save_user_config(dcm: &DeviceConfigurationManager) -> Result<String, Butt
 
 #[cfg(test)]
 mod test {
-  use super::{load_protocol_config_from_json, DEVICE_CONFIGURATION_JSON, base::BaseConfigFile};
+  use crate::device_config_file::load_main_config;
+
+use super::{load_protocol_config_from_json, DEVICE_CONFIGURATION_JSON, base::BaseConfigFile};
 
   #[test]
   fn test_config_file_parsing() {
@@ -266,5 +282,10 @@ mod test {
       &DEVICE_CONFIGURATION_JSON.to_owned(),
       true
     ).unwrap();
+  }
+
+  #[test]
+  fn test_main_file_parsing() {
+    load_main_config(&None, false).unwrap();
   }
 }
