@@ -11,10 +11,10 @@ defaults:
       id: bcaf7da8-2e98-47e3-b22c-2204daf40a27
       input:
         battery:
-          value-range:
+          value_range:
             - - 0
               - 100
-          input-commands:
+          input_commands:
             - Read
   id: 2525206c-8bdc-4803-9636-79576f3e692f
 configurations:
@@ -83,10 +83,10 @@ configurations:
         id: 98a2e5c4-c4de-4ac5-a9db-b3e24a24424a
         input:
           battery:
-            value-range:
+            value_range:
               - - 0
                 - 100
-            input-commands:
+            input_commands:
               - Read
     id: b24d166f-b6e0-4c9b-a056-8296564b19a8
   - identifier:

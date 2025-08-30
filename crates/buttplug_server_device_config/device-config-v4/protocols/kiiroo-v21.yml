@@ -17,10 +17,10 @@ configurations:
         id: 61cf5ea0-f9d0-48f0-a337-f905fb89c2c3
         input:
           battery:
-            value-range:
+            value_range:
               - - 0
                 - 100
-            input-commands:
+            input_commands:
               - Read
     id: 1e922dde-c4f7-4ca9-96dd-d565135a184f
   - identifier:
