@@ -306,19 +306,39 @@
           "type": "string"
         },
         "Output": {
-          "type": "object",
-          "patternProperties": {
-            "^.*$": {
-              "type": "object",
-              "properties": {
-                "StepCount": {
-                  "type": "integer"              
-                }
+          "type": "array",
+          "items": {
+            "type": "object",
+            "patternProperties": {
+              "^(Vibrate|Rotate|Oscillate|Constrict|Spray|Position|Heater|Led)$": {
+                "type": "object",
+                "properties": {
+                  "Value": {
+                    "$ref": "#/components/RangeInclusive"
+                  }
+                },
+                "required": [
+                  "Value"
+                ]
               },
-              "required": [
-                "StepCount"
-              ]
-            }
+              "PositionWithDuration": {
+                "type": "object",
+                "properties": {
+                  "Position": {
+                    "$ref": "#/components/RangeInclusive"
+                  },
+                  "Duration": {
+                    "$ref": "#/components/RangeInclusive"
+                  }
+                },
+                "required": [
+                  "Position",
+                  "Duration"
+                ]
+              }
+            },
+            "minProperties": 1,
+            "maxProperties": 1
           }
         },
         "Input": {

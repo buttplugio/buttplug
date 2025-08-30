@@ -5,24 +5,21 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::BaseFeatureSettings;
+use crate::ButtplugDeviceConfigError;
+
 use buttplug_core::{
-  errors::ButtplugDeviceError,
   message::{
     DeviceFeature,
     DeviceFeatureInput,
-    DeviceFeatureOutput,
     InputCommandType,
-    InputType,
-    OutputType,
   },
 };
-use getset::{CopyGetters, Getters, MutGetters, Setters};
+use getset::{CopyGetters, Getters};
 use serde::{
-  ser::{self, SerializeSeq},
   Deserialize,
   Serialize,
   Serializer,
+  ser::{self, SerializeSeq},
 };
 use std::{
   collections::{HashMap, HashSet},
@@ -60,133 +57,162 @@ where
   seq.end()
 }
 
-#[derive(
-  Clone, Debug, Default, Getters, MutGetters, Setters, Serialize, Deserialize, CopyGetters,
-)]
-pub struct ServerBaseDeviceFeature {
-  #[getset(get = "pub", get_mut = "pub(super)")]
-  #[serde(default)]
-  description: String,
-  #[getset(get = "pub")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(rename = "output")]
-  output: Option<HashMap<OutputType, ServerBaseDeviceFeatureOutput>>,
-  #[getset(get = "pub")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(rename = "input")]
-  input: Option<HashMap<InputType, ServerDeviceFeatureInput>>,
-  #[getset(get_copy = "pub")]
-  id: Uuid,
-  #[getset(get = "pub")]
-  #[serde(
-    rename = "feature-settings",
-    skip_serializing_if = "BaseFeatureSettings::is_none",
-    default
-  )]
-  feature_settings: BaseFeatureSettings,
+#[derive(Debug, Clone)]
+pub struct RangeWithLimit<T: PartialOrd + Clone> {
+  base: RangeInclusive<T>,
+  user: Option<RangeInclusive<T>>,
 }
 
-impl ServerBaseDeviceFeature {
-  pub fn as_user_device_feature(&self) -> ServerUserDeviceFeature {
-    ServerUserDeviceFeature {
-      id: Uuid::new_v4(),
-      base_id: self.id,
-      output: self.output.as_ref().and_then(|x| {
-        Some(
-          x.keys()
-            .map(|x| (*x, ServerUserDeviceFeatureOutput::default()))
-            .collect(),
-        )
-      }),
-    }
+impl<T: PartialOrd + Clone> From<RangeInclusive<T>> for RangeWithLimit<T> {
+  fn from(value: RangeInclusive<T>) -> Self {
+    Self::new(&value)
   }
 }
 
-#[derive(
-  Clone, Debug, Default, Getters, MutGetters, Setters, Serialize, Deserialize, CopyGetters,
-)]
-pub struct ServerUserDeviceFeature {
-  #[getset(get_copy = "pub")]
-  id: Uuid,
-  #[getset(get_copy = "pub")]
-  #[serde(rename = "base-id")]
-  base_id: Uuid,
-  #[getset(get = "pub")]
-  #[serde(rename = "output", skip_serializing_if = "Option::is_none")]
-  output: Option<HashMap<OutputType, ServerUserDeviceFeatureOutput>>,
-}
+impl<T: PartialOrd + Clone> RangeWithLimit<T> {
+  pub fn new(base: &RangeInclusive<T>) -> Self {
+    Self {
+      base: base.clone(),
+      user: None
+    }
+  }
 
-impl ServerUserDeviceFeature {
-  pub fn update_output(&mut self, output_type: OutputType, output: &ServerUserDeviceFeatureOutput) {
-    if let Some(ref mut output_map) = self.output {
-      if output_map.contains_key(&output_type) {
-        output_map.insert(output_type, output.clone());
+  pub fn try_new(
+    base: &RangeInclusive<T>,
+    user: &Option<RangeInclusive<T>>,
+  ) -> Result<Self, ButtplugDeviceConfigError<T>> {
+    if let Some(user) = user {
+      if user.is_empty() {
+        Err(ButtplugDeviceConfigError::InvalidUserRange(
+          (*user).clone(),
+          (*base).clone(),
+        ))
+      } else {
+        if *user.start() < *base.start()
+          || *user.end() > *base.end()
+          || *user.start() > *base.end()
+          || *user.end() < *base.start()
+        {
+          Err(ButtplugDeviceConfigError::InvalidUserRange(
+            (*user).clone(),
+            (*base).clone(),
+          ))
+        } else {
+          Ok(Self {
+            base: (*base).clone(),
+            user: Some((*user).clone()),
+          })
+        }
+      }
+    } else {
+      if base.is_empty() {
+        Err(ButtplugDeviceConfigError::BaseRangeRequired)
+      } else {
+        Ok(Self {
+          base: (*base).clone(),
+          user: None,
+        })
       }
     }
   }
 }
 
-#[derive(Clone, Debug, Getters, MutGetters, Setters, Serialize, Deserialize, CopyGetters)]
-pub struct ServerBaseDeviceFeatureOutput {
+#[derive(Debug, Clone, Getters, CopyGetters)]
+pub struct ServerDeviceFeatureOutputValueProperties {
   #[getset(get = "pub")]
-  #[serde(rename = "step-range")]
-  step_range: RangeInclusive<u32>,
+  value: RangeWithLimit<i32>,
+  #[getset(get_copy = "pub")]
+  disabled: bool,
 }
 
-impl ServerBaseDeviceFeatureOutput {
-  pub fn new(step_range: &RangeInclusive<u32>) -> Self {
+impl ServerDeviceFeatureOutputValueProperties {
+  pub fn new(value: &RangeWithLimit<i32>, disabled: bool) -> Self {
     Self {
-      step_range: step_range.clone(),
+      value: value.clone(),
+      disabled
     }
   }
 }
 
-#[derive(
-  Clone, Debug, Default, Getters, MutGetters, Setters, Serialize, Deserialize, CopyGetters,
-)]
-pub struct ServerUserDeviceFeatureOutput {
+#[derive(Debug, Clone, Getters, CopyGetters)]
+pub struct ServerDeviceFeatureOutputPositionWithDurationProperties {
   #[getset(get = "pub")]
-  #[serde(
-    rename = "step-limit",
-    default,
-    skip_serializing_if = "Option::is_none",
-    serialize_with = "range_serialize"
-  )]
-  step_limit: Option<RangeInclusive<u32>>,
+  position: RangeWithLimit<u32>,
   #[getset(get = "pub")]
-  #[serde(
-    rename = "reverse-position",
-    default,
-    skip_serializing_if = "Option::is_none"
-  )]
-  reverse_position: Option<bool>,
-  #[getset(get = "pub")]
-  #[serde(rename = "disabled", default, skip_serializing_if = "Option::is_none")]
-  disabled: Option<bool>,
+  duration: RangeWithLimit<u32>,
+  #[getset(get_copy = "pub")]
+  disabled: bool,
+  #[getset(get_copy = "pub")]
+  reverse_position: bool,
 }
 
-impl ServerUserDeviceFeatureOutput {
+impl ServerDeviceFeatureOutputPositionWithDurationProperties {
+  pub fn new(position: &RangeWithLimit<u32>, duration: &RangeWithLimit<u32>, disabled: bool, reverse_position: bool) -> Self {
+    Self {
+      position: position.clone(),
+      duration: duration.clone(),
+      disabled,
+      reverse_position
+    }
+  }
+}
+
+#[derive(Clone, Debug)]
+pub struct ServerDeviceFeatureOutput {
+  vibrate: Option<ServerDeviceFeatureOutputValueProperties>,
+  rotate: Option<ServerDeviceFeatureOutputValueProperties>,
+  rotate_with_direction: Option<ServerDeviceFeatureOutputValueProperties>,
+  oscillate: Option<ServerDeviceFeatureOutputValueProperties>,
+  constrict: Option<ServerDeviceFeatureOutputValueProperties>,
+  heater: Option<ServerDeviceFeatureOutputValueProperties>,
+  led: Option<ServerDeviceFeatureOutputValueProperties>,
+  position: Option<ServerDeviceFeatureOutputValueProperties>,
+  position_with_duration: Option<ServerDeviceFeatureOutputPositionWithDurationProperties>,
+  spray: Option<ServerDeviceFeatureOutputValueProperties>,
+}
+
+#[derive(Clone, Debug, Getters)]
+#[getset(get = "pub")]
+pub struct ServerDeviceFeatureInputProperties {
+  value_range: Vec<RangeInclusive<i32>>,
+  input_commands: HashSet<InputCommandType>,
+}
+
+impl ServerDeviceFeatureInputProperties {
   pub fn new(
-    step_limit: Option<RangeInclusive<u32>>,
-    reverse_position: Option<bool>,
-    disabled: Option<bool>,
+    value_range: &Vec<RangeInclusive<i32>>,
+    sensor_commands: &HashSet<InputCommandType>,
   ) -> Self {
     Self {
-      step_limit,
-      reverse_position,
-      disabled,
+      value_range: value_range.clone(),
+      input_commands: sensor_commands.clone(),
     }
   }
 }
 
-#[derive(Clone, Debug, Default, Getters, MutGetters, Setters, CopyGetters)]
+#[derive(Clone, Debug, Getters)]
+#[getset(get = "pub")]
+pub struct ServerDeviceFeatureInput {
+  battery: Option<ServerDeviceFeatureInputProperties>,
+  rssi: Option<ServerDeviceFeatureInputProperties>,
+  pressure: Option<ServerDeviceFeatureInputProperties>,
+  button: Option<ServerDeviceFeatureInputProperties>,
+}
+
+#[derive(Clone, Debug, Getters, CopyGetters)]
 pub struct ServerDeviceFeature {
-  base_feature: ServerBaseDeviceFeature,
-  #[getset(get_mut = "pub")]
-  user_feature: ServerUserDeviceFeature,
   #[getset(get = "pub")]
-  output: Option<HashMap<OutputType, ServerDeviceFeatureOutput>>,
-  // input doesn't specialize across Base/User right now so we just return the base device input
+  description: String,
+  #[getset(get_copy = "pub")]
+  id: Uuid,
+  #[getset(get_copy = "pub")]
+  base_id: Option<Uuid>,
+  #[getset(get_copy = "pub")]
+  alt_protocol_index: Option<u32>,
+  #[getset(get = "pub")]
+  output: Option<ServerDeviceFeatureOutput>,
+  #[getset(get = "pub")]
+  input: Option<ServerDeviceFeatureInput>,
 }
 
 impl PartialEq for ServerDeviceFeature {
@@ -199,196 +225,40 @@ impl Eq for ServerDeviceFeature {
 }
 
 impl ServerDeviceFeature {
-  pub fn new(
-    base_feature: &ServerBaseDeviceFeature,
-    user_feature: &ServerUserDeviceFeature,
-  ) -> Self {
-    if base_feature.id() != user_feature.base_id() {
-      // TODO panic!
-    }
-    let output = {
-      if let Some(output_map) = base_feature.output() {
-        let mut output = HashMap::new();
-        if let Some(user_output_map) = user_feature.output() {
-          for (output_type, output_feature) in output_map {
-            // TODO What if we have a key in the user map that isn't in the base map? We should remove it.
-            if user_output_map.contains_key(output_type) {
-              output.insert(
-                *output_type,
-                ServerDeviceFeatureOutput::new(
-                  output_feature,
-                  user_output_map.get(output_type).clone().unwrap(),
-                ),
-              );
-            }
-          }
-        }
-        Some(output)
-      } else {
-        None
-      }
-    };
-
+  pub fn new(description: &str, id: Uuid, base_id: Option<Uuid>, alt_protocol_index: Option<u32>, output: &Option<ServerDeviceFeatureOutput>, input: &Option<ServerDeviceFeatureInput>) -> Self {
     Self {
-      output,
-      base_feature: base_feature.clone(),
-      user_feature: user_feature.clone(),
+      description: description.to_owned(),
+      id,
+      base_id,
+      alt_protocol_index,
+      output: output.clone(),
+      input: input.clone(),
     }
   }
 
-  pub fn description(&self) -> &String {
-    self.base_feature.description()
-  }
-
-  pub fn id(&self) -> Uuid {
-    self.user_feature.id()
-  }
-
-  pub fn base_id(&self) -> Uuid {
-    self.base_feature.id()
-  }
-
-  pub fn alt_protocol_index(&self) -> Option<u32> {
-    self.base_feature.feature_settings().alt_protocol_index()
-  }
-
-  pub fn input(&self) -> &Option<HashMap<InputType, ServerDeviceFeatureInput>> {
-    self.base_feature.input()
-  }
-
-  pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
+  /*
+  pub fn as_device_feature(&self, index: u32) -> Result<DeviceFeature, ButtplugDeviceConfigError> {
+    // try_collect() is still unstable so we extract the fallible-map call into a loop. This sucks.
+    let mut outputs = HashMap::new();
     if let Some(output_map) = &self.output {
-      for actuator in output_map.values() {
-        actuator.is_valid()?;
+      for (output_type, server_output) in output_map {
+        outputs.insert(
+          *output_type,
+          server_output.as_device_feature_output_variant(*output_type)?,
+        );
       }
     }
-    Ok(())
-  }
 
-  pub fn as_device_feature(&self, index: u32) -> DeviceFeature {
-    DeviceFeature::new(
+    Ok(DeviceFeature::new(
       index,
       self.description(),
-      &self.output.clone().map(|x| {
-        x.iter()
-          .filter(|(_, a)| !a.user_feature().disabled().as_ref().unwrap_or(&false))
-          .map(|(t, a)| (*t, DeviceFeatureOutput::from(a.clone())))
-          .collect()
-      }),
+      &outputs.is_empty().then_some(outputs).or(None),
       &self.base_feature.input().clone().map(|x| {
         x.iter()
           .map(|(t, a)| (*t, DeviceFeatureInput::from(a.clone())))
           .collect()
       }),
-    )
+    ))
   }
-}
-
-#[derive(Clone, Debug, Getters, MutGetters)]
-#[getset(get = "pub")]
-pub struct ServerDeviceFeatureOutput {
-  base_feature: ServerBaseDeviceFeatureOutput,
-  #[getset(get_mut = "pub")]
-  user_feature: ServerUserDeviceFeatureOutput,
-}
-
-impl ServerDeviceFeatureOutput {
-  pub fn new(
-    base_feature: &ServerBaseDeviceFeatureOutput,
-    user_feature: &ServerUserDeviceFeatureOutput,
-  ) -> Self {
-    Self {
-      base_feature: base_feature.clone(),
-      user_feature: user_feature.clone(),
-    }
-  }
-
-  pub fn step_range(&self) -> &RangeInclusive<u32> {
-    self.base_feature.step_range()
-  }
-
-  pub fn step_limit(&self) -> &RangeInclusive<u32> {
-    if let Some(limit) = self.user_feature.step_limit() {
-      limit
-    } else {
-      self.step_range()
-    }
-  }
-
-  pub fn step_count(&self) -> u32 {
-    if let Some(step_limit) = self.user_feature.step_limit() {
-      step_limit.end() - step_limit.start()
-    } else {
-      self.base_feature.step_range.end() - self.base_feature.step_range.start()
-    }
-  }
-
-  pub fn reverse_position(&self) -> bool {
-    *self
-      .user_feature
-      .reverse_position()
-      .as_ref()
-      .unwrap_or(&false)
-  }
-
-  pub fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
-    let step_range = self.base_feature.step_range();
-    if step_range.is_empty() {
-      Err(ButtplugDeviceError::DeviceConfigurationError(
-        "Step range empty.".to_string(),
-      ))
-    } else if let Some(step_limit) = self.user_feature.step_limit() {
-      if step_limit.is_empty() {
-        Err(ButtplugDeviceError::DeviceConfigurationError(
-          "Step limit empty.".to_string(),
-        ))
-      } else if step_limit.start() < step_range.start() || step_limit.end() > step_range.end() {
-        Err(ButtplugDeviceError::DeviceConfigurationError(
-          "Step limit outside step range.".to_string(),
-        ))
-      } else {
-        Ok(())
-      }
-    } else {
-      Ok(())
-    }
-  }
-}
-
-impl From<ServerDeviceFeatureOutput> for DeviceFeatureOutput {
-  fn from(value: ServerDeviceFeatureOutput) -> Self {
-    DeviceFeatureOutput::new(value.step_count())
-  }
-}
-
-#[derive(
-  Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize,
-)]
-pub struct ServerDeviceFeatureInput {
-  #[getset(get = "pub", get_mut = "pub(super)")]
-  #[serde(rename = "value-range")]
-  #[serde(serialize_with = "range_sequence_serialize")]
-  value_range: Vec<RangeInclusive<i32>>,
-  #[getset(get = "pub")]
-  #[serde(rename = "input-commands")]
-  input_commands: HashSet<InputCommandType>,
-}
-
-impl ServerDeviceFeatureInput {
-  pub fn new(
-    value_range: &Vec<RangeInclusive<i32>>,
-    sensor_commands: &HashSet<InputCommandType>,
-  ) -> Self {
-    Self {
-      value_range: value_range.clone(),
-      input_commands: sensor_commands.clone(),
-    }
-  }
-}
-
-impl From<ServerDeviceFeatureInput> for DeviceFeatureInput {
-  fn from(value: ServerDeviceFeatureInput) -> Self {
-    // Unlike actuator, this is just a straight copy.
-    DeviceFeatureInput::new(value.value_range(), value.input_commands())
-  }
+  */
 }

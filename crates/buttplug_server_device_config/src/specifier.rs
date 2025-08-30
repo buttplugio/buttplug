@@ -11,12 +11,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
-// Note: There's a ton of extra structs in here just to deserialize the json
-// file. Just leave them and build extras (for instance,
-// DeviceProtocolConfiguration) if needed elsewhere in the codebase. It's not
-// gonna hurt anything and making a ton of serde attributes is just going to get
-// confusing (see the messages impl).
-
 #[derive(Serialize, Deserialize, Debug, Clone, Getters, MutGetters, Setters, Eq)]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 pub struct BluetoothLEManufacturerData {

@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 62
+    "minor": 63
   },
   "protocols": {
     "activejoy": {
@@ -10042,7 +10042,7 @@
               "output": {
                 "rotate_with_direction": {
                   "value": [
-                    0,
+                    -20,
                     20
                   ]
                 }
@@ -10574,7 +10574,7 @@
               "output": {
                 "rotate_with_direction": {
                   "value": [
-                    0,
+                    -20,
                     20
                   ]
                 }
@@ -10920,7 +10920,7 @@
               "output": {
                 "rotate_with_direction": {
                   "value": [
-                    0,
+                    -20,
                     20
                   ]
                 }
@@ -11325,7 +11325,7 @@
               "output": {
                 "rotate_with_direction": {
                   "value": [
-                    0,
+                    -20,
                     20
                   ]
                 }
@@ -13297,7 +13297,7 @@
             "output": {
               "rotate_with_direction": {
                 "value": [
-                  0,
+                  -255,
                   255
                 ]
               }
@@ -13916,7 +13916,7 @@
             "output": {
               "rotate_with_direction": {
                 "value": [
-                  0,
+                  -2,
                   2
                 ]
               }
@@ -18226,7 +18226,7 @@
             "output": {
               "rotate_with_direction": {
                 "value": [
-                  0,
+                  -6,
                   6
                 ]
               }
@@ -18463,7 +18463,7 @@
             "output": {
               "rotate_with_direction": {
                 "value": [
-                  0,
+                  -100,
                   100
                 ]
               }
@@ -18778,7 +18778,7 @@
             "output": {
               "rotate_with_direction": {
                 "value": [
-                  0,
+                  -10,
                   10
                 ]
               }
@@ -18859,7 +18859,7 @@
               "output": {
                 "rotate_with_direction": {
                   "value": [
-                    0,
+                    -99,
                     99
                   ]
                 }
@@ -18880,7 +18880,7 @@
               "output": {
                 "rotate_with_direction": {
                   "value": [
-                    0,
+                    -99,
                     99
                   ]
                 }
@@ -18901,7 +18901,7 @@
               "output": {
                 "rotate_with_direction": {
                   "value": [
-                    0,
+                    -99,
                     99
                   ]
                 }
@@ -18912,7 +18912,7 @@
               "output": {
                 "rotate_with_direction": {
                   "value": [
-                    0,
+                    -99,
                     99
                   ]
                 }

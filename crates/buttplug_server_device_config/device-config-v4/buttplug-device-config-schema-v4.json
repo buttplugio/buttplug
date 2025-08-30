@@ -241,12 +241,12 @@
                 ],
                 "additionalProperties": false
               }
-            }         
+            }
           },
-          "feature-settings": {
+          "feature_settings": {
             "type": "object",
             "properties": {
-              "alt-protocol-index": {
+              "alt_protocol_index": {
                 "type": "number"
               }
             }
@@ -255,7 +255,7 @@
         "required": [
           "id"
         ],
-        "additionalProperties": false           
+        "additionalProperties": false
       }
     },
     "user-config-features": {
@@ -295,21 +295,24 @@
                 "properties": {
                   "value": {
                     "$ref": "#/components/value-range"
-                  }, 
+                  },
                   "reverse": {
                     "type": "boolean"
                   },
                   "disabled": {
                     "type": "boolean"
                   }
-                }                
+                }
               },
               "^position_with_duration$": {
                 "type": "object",
                 "properties": {
                   "position": {
                     "$ref": "#/components/value-range"
-                  }, 
+                  },
+                  "duration": {
+                    "$ref": "#/components/value-range"
+                  },
                   "reverse": {
                     "type": "boolean"
                   },
@@ -347,7 +350,7 @@
                 ],
                 "additionalProperties": false
               }
-            }         
+            }
           }
         },
         "required": [
@@ -379,32 +382,6 @@
         "deny",
         "index"
       ]
-    },
-    "user-config-definition": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "id": {
-          "$ref": "#/components/uuid"
-        },
-        "base-id": {
-          "$ref": "#/components/uuid"
-        },
-        "features": {
-          "$ref": "#/components/user-config-features"
-        },
-        "user-config": {
-          "$ref": "#/components/user-config-customization"
-        }
-      },
-      "required": [
-        "id",
-        "features",
-        "user-config"
-      ],
-      "additionalProperties": false
     },
     "defaults-definition": {
       "type": "object",
@@ -597,7 +574,35 @@
                 ]
               },
               "config": {
-                "$ref": "#/components/user-config-definition"
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "id": {
+                    "$ref": "#/components/uuid"
+                  },
+                  "base-id": {
+                    "$ref": "#/components/uuid"
+                  },
+                  "features": {
+                    "$ref": "#/components/user-config-features"
+                  },
+                  "user-config": {
+                    "$ref": "#/components/user-config-customization"
+                  },
+                  "message-gap-ms": {
+                    "type": "integer",
+                    "min": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "base-id",
+                  "features",
+                  "user-config"
+                ],
+                "additionalProperties": false
               }
             },
             "additionalProperties": false,
