@@ -123,7 +123,7 @@ impl From<ButtplugClientMessageV4> for ButtplugClientMessageVariant {
 }
 
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator,
+  Debug, Clone, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator,
 )]
 pub enum ButtplugServerMessageVariant {
   V0(ButtplugServerMessageV0),

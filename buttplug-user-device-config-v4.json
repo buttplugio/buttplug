@@ -1,0 +1,21 @@
+{
+  "version": {
+    "major": 4,
+    "minor": 0
+  },
+  "user-configs": {
+    "protocols": {
+      "lovense": {
+        "communication": [
+          {
+            "websocket": {
+              "name": "LVS-Test"
+            }
+          }
+        ],
+        "configurations": []
+      }
+    },
+    "devices": []
+  }
+}

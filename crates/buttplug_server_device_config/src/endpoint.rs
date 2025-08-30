@@ -13,11 +13,6 @@ use std::{
 
 use core::hash::Hash;
 
-// We need this array to be exposed in our WASM FFI, but the only way to do that
-// is to expose it at the declaration level. Therefore, we use the WASM feature
-// to assume we're building for WASM and attach our bindgen. The serde
-// de/serialization is taken care of at the FFI level.
-
 /// Endpoint names for device communication.
 ///
 /// Endpoints denote different contextual communication targets on a device. For instance, for a

@@ -9,8 +9,7 @@ use crate::message::InputCommandType;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use std::{
-  collections::{HashMap, HashSet},
-  ops::RangeInclusive,
+  collections::{HashMap, HashSet}, hash::Hash, ops::RangeInclusive
 };
 
 #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash, EnumIter)]
@@ -70,7 +69,7 @@ pub enum InputType {
 // then we denote this by prefixing the type with Client/Server. Server attributes will usually be
 // hosted in the server/device/configuration module.
 #[derive(
-  Clone, Debug, Default, PartialEq, Getters, MutGetters, CopyGetters, Setters, Serialize, Deserialize,
+  Clone, Debug, Default, Getters, MutGetters, CopyGetters, Setters, Serialize, Deserialize,
 )]
 pub struct DeviceFeature {
   // Index of the feature on the device. This was originally implicit as the position in the feature
@@ -83,10 +82,11 @@ pub struct DeviceFeature {
   #[serde(default)]
   #[serde(rename = "FeatureDescription")]
   description: String,
+  // TODO Maybe make this its own object instead of a HashMap?
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(rename = "Output")]
-  output: Option<HashMap<OutputType, DeviceFeatureOutput>>,
+  output: Option<HashSet<DeviceFeatureOutput>>,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(rename = "Input")]
@@ -97,7 +97,7 @@ impl DeviceFeature {
   pub fn new(
     index: u32,
     description: &str,
-    output: &Option<HashMap<OutputType, DeviceFeatureOutput>>,
+    output: &Option<HashSet<DeviceFeatureOutput>>,
     input: &Option<HashMap<InputType, DeviceFeatureInput>>,
   ) -> Self {
     Self {
@@ -123,16 +123,81 @@ where
   seq.end()
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, CopyGetters, Serialize, Deserialize)]
-pub struct DeviceFeatureOutput {
-  #[getset(get_copy = "pub")]
-  #[serde(rename = "StepCount")]
-  step_count: u32,
+#[derive(Serialize, Deserialize, Clone, Debug, Getters)]
+pub struct DeviceFeatureOutputValueProperties {
+  #[getset(get = "pub")]
+  #[serde(rename = "Value")]
+  value: RangeInclusive<i32>,
 }
 
-impl DeviceFeatureOutput {
-  pub fn new(step_count: u32) -> Self {
-    Self { step_count }
+impl DeviceFeatureOutputValueProperties {
+  pub fn new(value: &RangeInclusive<i32>) -> Self {
+    DeviceFeatureOutputValueProperties { value: value.clone() }
+  }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Getters)]
+pub struct DeviceFeatureOutputPositionWithDurationProperties {
+  #[getset(get = "pub")]
+  #[serde(rename = "Position")]
+  position: RangeInclusive<u32>,
+  #[getset(get = "pub")]
+  #[serde(rename = "Duration")]
+  duration: RangeInclusive<u32>,
+}
+
+impl DeviceFeatureOutputPositionWithDurationProperties {
+  pub fn new(position: &RangeInclusive<u32>, duration: &RangeInclusive<u32>) -> Self {
+    DeviceFeatureOutputPositionWithDurationProperties { position: position.clone(), duration: duration.clone() }
+  }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum DeviceFeatureOutput {
+  Unknown,
+  Vibrate(DeviceFeatureOutputValueProperties),
+  Rotate(DeviceFeatureOutputValueProperties),
+  RotateWithDirection(DeviceFeatureOutputValueProperties),
+  Oscillate(DeviceFeatureOutputValueProperties),
+  Constrict(DeviceFeatureOutputValueProperties),
+  Heater(DeviceFeatureOutputValueProperties),
+  Led(DeviceFeatureOutputValueProperties),
+  Position(DeviceFeatureOutputValueProperties),
+  PositionWithDuration(DeviceFeatureOutputPositionWithDurationProperties),
+  Spray(DeviceFeatureOutputValueProperties),
+}
+
+impl From<&DeviceFeatureOutput> for OutputType {
+  fn from(value: &DeviceFeatureOutput) -> Self {
+    match value {
+      DeviceFeatureOutput::Constrict(_) => OutputType::Constrict,
+      DeviceFeatureOutput::Heater(_) => OutputType::Heater,
+      DeviceFeatureOutput::Led(_) => OutputType::Led,
+      DeviceFeatureOutput::Oscillate(_) => OutputType::Oscillate,
+      DeviceFeatureOutput::Position(_) => OutputType::Position,
+      DeviceFeatureOutput::PositionWithDuration(_) => OutputType::PositionWithDuration,
+      DeviceFeatureOutput::Rotate(_) => OutputType::Rotate,
+      DeviceFeatureOutput::RotateWithDirection(_) => OutputType::RotateWithDirection,
+      DeviceFeatureOutput::Spray(_) => OutputType::Spray,
+      DeviceFeatureOutput::Unknown => OutputType::Unknown,
+      DeviceFeatureOutput::Vibrate(_) => OutputType::Vibrate
+    }
+  }
+}
+
+impl PartialEq for DeviceFeatureOutput {
+  fn eq(&self, other: &Self) -> bool {
+    // Just make sure our two DeviceFeatureOutput's are the same variant, their values may not match
+    // but we should never store two of the same variant in the same structure.
+    std::mem::discriminant(self) == std::mem::discriminant(other)
+  }
+}
+
+impl Eq for DeviceFeatureOutput {}
+
+impl Hash for DeviceFeatureOutput {
+  fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+    OutputType::from(self).hash(state)
   }
 }
 
