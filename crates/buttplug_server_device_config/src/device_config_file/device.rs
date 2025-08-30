@@ -9,6 +9,8 @@ use super::feature::{ConfigBaseDeviceFeature, ConfigUserDeviceFeature};
 #[derive(Debug, Clone, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct ConfigBaseDeviceDefinition {
   #[getset(get = "pub")]
+  identifier: Option<Vec<String>>,
+  #[getset(get = "pub")]
   /// Given name of the device this instance represents.
   name: String,
   #[getset(get_copy = "pub")]
@@ -18,7 +20,20 @@ pub struct ConfigBaseDeviceDefinition {
   #[getset(get_copy = "pub")]
   message_gap_ms: Option<u32>,
   #[getset(get = "pub")]
-  features: Vec<ConfigBaseDeviceFeature>,
+  features: Option<Vec<ConfigBaseDeviceFeature>>,
+}
+
+impl ConfigBaseDeviceDefinition {
+  pub fn update_with_configuration(&self, config: ConfigBaseDeviceDefinition) -> Self {
+    Self {
+      identifier: config.identifier().clone(),
+      name: config.name().clone(),
+      id: config.id(),
+      protocol_variant: config.protocol_variant.or(self.protocol_variant.clone()),
+      message_gap_ms: config.message_gap_ms.or(self.message_gap_ms),
+      features: config.features.or(self.features.clone())
+    }
+  }
 }
 
 impl Into<ServerDeviceDefinition> for ConfigBaseDeviceDefinition {

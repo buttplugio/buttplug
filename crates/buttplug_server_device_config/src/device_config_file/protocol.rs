@@ -15,5 +15,5 @@ pub(super) struct ProtocolDefinition {
   #[serde(skip_serializing_if = "Option::is_none")]
   pub defaults: Option<ConfigBaseDeviceDefinition>,
   #[serde(default)]
-  pub configurations: HashMap<String, ConfigBaseDeviceDefinition>,
+  pub configurations: Vec<ConfigBaseDeviceDefinition>,
 }
