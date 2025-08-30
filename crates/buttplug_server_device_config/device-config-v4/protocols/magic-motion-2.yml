@@ -11,10 +11,10 @@ defaults:
       id: 014cdffe-d3d5-4bba-acf4-f26e809b45ec
       input:
         battery:
-          value-range:
+          value_range:
             - - 0
               - 100
-          input-commands:
+          input_commands:
             - Read
   id: 33902551-eb44-406b-bc9a-7f9f981a972a
 configurations:
@@ -50,10 +50,10 @@ configurations:
         id: 6baefd41-de6d-4c60-aedb-0a9b55f34875
         input:
           battery:
-            value-range:
+            value_range:
               - - 0
                 - 100
-            input-commands:
+            input_commands:
               - Read
     id: 1093a17d-9596-49b7-945f-c44610244932
   - identifier:
@@ -76,10 +76,10 @@ configurations:
         id: f966012c-6b68-4dc3-b4a4-16d34fdc30c7
         input:
           battery:
-            value-range:
+            value_range:
               - - 0
                 - 100
-            input-commands:
+            input_commands:
               - Read
     id: adfc6c8c-b7e8-4c0c-9fdc-e7c2bd3b4552
   - identifier:
@@ -106,10 +106,10 @@ configurations:
         id: 123954de-a9f1-427a-823a-9b9173ad8856
         input:
           battery:
-            value-range:
+            value_range:
               - - 0
                 - 100
-            input-commands:
+            input_commands:
               - Read
     id: d872f184-a2a4-4869-9506-d34975fa34c3
 communication:

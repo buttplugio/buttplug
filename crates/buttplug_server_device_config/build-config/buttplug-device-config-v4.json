@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 63
+    "minor": 64
   },
   "protocols": {
     "activejoy": {
@@ -1808,10 +1808,10 @@
               "id": "19ac04ae-9d77-4b3b-a706-5df8252569a7",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -1858,10 +1858,10 @@
               "id": "769865df-58b9-4d0f-8697-4ee78304a10c",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -1908,10 +1908,10 @@
               "id": "22792e4e-bf84-42d4-a1ec-cbffddd3d777",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -1958,10 +1958,10 @@
               "id": "a6fb0d1b-9160-40ca-81a7-905776aeff83",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2008,10 +2008,10 @@
               "id": "a104dc8a-7759-4dd9-8113-d3b450b24658",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2058,10 +2058,10 @@
               "id": "398eb416-b3d7-4f23-90ec-2f9fb05487f7",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2108,10 +2108,10 @@
               "id": "e85a8553-4f3c-49ba-ae88-929d0052e04d",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2158,10 +2158,10 @@
               "id": "57638eed-03e4-4279-8fc1-cc03a2d9066c",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2208,10 +2208,10 @@
               "id": "309ff7a2-aa2f-44e4-ace9-c1d485bf47ae",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2258,10 +2258,10 @@
               "id": "be8475dd-8928-447d-9e94-1e0543056b29",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2308,10 +2308,10 @@
               "id": "23e5cc47-944a-427c-be33-8611fffc70c8",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2358,10 +2358,10 @@
               "id": "f989b7c6-ad5d-49fa-b103-2a21ff2213d5",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2408,10 +2408,10 @@
               "id": "34bf9651-bbd6-475f-a2ea-536b04c5db62",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2458,10 +2458,10 @@
               "id": "7e0681c6-7206-41d0-97d2-f3e01d6c8de4",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2508,10 +2508,10 @@
               "id": "67430820-ef54-4821-8d43-37b7ebc6702f",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2558,10 +2558,10 @@
               "id": "8b8b2df2-1f06-4649-b575-ae0abef990dc",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2608,10 +2608,10 @@
               "id": "10d3c65c-e6b1-4802-b71f-5843bb6ae4bd",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2658,10 +2658,10 @@
               "id": "f8057621-5690-43fe-8cf9-aa2b1d4ceb07",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2708,10 +2708,10 @@
               "id": "42b39996-60ac-4ee7-9880-1bc8d73b543a",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2758,10 +2758,10 @@
               "id": "76599534-d259-4420-acf8-f172421b684e",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2808,10 +2808,10 @@
               "id": "c6d8ebc8-bba3-4aaa-b616-3758a6a84b06",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2858,10 +2858,10 @@
               "id": "f93f3c1d-8046-40f2-a4d3-4c5315c809e6",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2908,10 +2908,10 @@
               "id": "246cddf5-f04a-45e2-ba07-1f5354d15fdd",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -2958,10 +2958,10 @@
               "id": "79874bf3-3055-4d5a-a6aa-ea183f434324",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -3008,10 +3008,10 @@
               "id": "338f4e14-793b-4cb7-b26e-0ff47f2e72cc",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -3058,10 +3058,10 @@
               "id": "87973aa3-f77e-47b1-92dc-1a6b32bba5d5",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -3108,10 +3108,10 @@
               "id": "b872a7d6-df4c-4d50-8e7b-57cc7102b151",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -3158,10 +3158,10 @@
               "id": "f5555828-157d-44af-a6f3-61c184adc78b",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -3208,10 +3208,10 @@
               "id": "0acf4462-c96b-4dec-b283-d56fdeae3e09",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -3258,10 +3258,10 @@
               "id": "01388799-5cdf-4127-824b-a51ae1c38e60",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -3308,10 +3308,10 @@
               "id": "9ecdcaa7-b228-4f67-b04b-a1ff3642ebe2",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -3358,10 +3358,10 @@
               "id": "421f8bf8-6732-405a-b563-139e858bc4fb",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -3408,10 +3408,10 @@
               "id": "0b41e97c-17f9-475d-8a30-d8ed1f52cb67",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -3458,10 +3458,10 @@
               "id": "ad753ac1-6c20-495a-bb0d-409b251fbe26",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -3508,10 +3508,10 @@
               "id": "47b24f11-bb92-4173-9123-80a330c76041",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -3558,10 +3558,10 @@
               "id": "591ca427-79d4-4d6a-bf00-8596cd9cb493",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -3596,10 +3596,10 @@
               "id": "e0b9f2c7-68d9-4c7b-9327-6e0802973a44",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -3635,10 +3635,10 @@
               "id": "afb9c389-4624-4871-bfed-c19eccbcd3e3",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -3673,10 +3673,10 @@
               "id": "b680b236-52f4-4d8e-907e-78e71a0d23e9",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -3711,10 +3711,10 @@
               "id": "ab7abe60-7733-4391-a61d-765655275261",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -3749,10 +3749,10 @@
               "id": "1ef7a2d2-1725-4fd9-9e70-d8e0674ac17f",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -3788,10 +3788,10 @@
             "id": "d9c34cf9-5645-4e04-bf92-51e5df708417",
             "input": {
               "battery": {
-                "input-commands": [
+                "input_commands": [
                   "Read"
                 ],
-                "value-range": [
+                "value_range": [
                   [
                     0,
                     100
@@ -5253,8 +5253,8 @@
       "defaults": {
         "features": [
           {
-            "feature-settings": {
-              "alt-protocol-index": 1
+            "feature_settings": {
+              "alt_protocol_index": 1
             },
             "id": "fc2f0fc2-fb75-4eee-b92b-20eaf7cc9a1e",
             "output": {
@@ -7770,10 +7770,10 @@
             "id": "59d2de82-3acf-4316-982f-c2b570afd297",
             "input": {
               "battery": {
-                "input-commands": [
+                "input_commands": [
                   "Read"
                 ],
-                "value-range": [
+                "value_range": [
                   [
                     0,
                     100
@@ -7833,10 +7833,10 @@
             "id": "ad812cb2-e04a-4656-9103-a80766601455",
             "input": {
               "battery": {
-                "input-commands": [
+                "input_commands": [
                   "Read"
                 ],
-                "value-range": [
+                "value_range": [
                   [
                     0,
                     100
@@ -7886,10 +7886,10 @@
             "id": "5171bb1b-b234-4a56-96ae-d592d3065d00",
             "input": {
               "battery": {
-                "input-commands": [
+                "input_commands": [
                   "Read"
                 ],
-                "value-range": [
+                "value_range": [
                   [
                     0,
                     100
@@ -8308,10 +8308,10 @@
               "id": "61cf5ea0-f9d0-48f0-a337-f905fb89c2c3",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -9957,10 +9957,10 @@
               "id": "b4be6835-5b91-4540-bc7b-0c3d8dcb89fd",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -10005,10 +10005,10 @@
               "id": "66b31efb-3bd9-4e3a-9972-88c66e9fca28",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -10053,10 +10053,10 @@
               "id": "820d8fb1-c6ec-434d-b7c4-835bdf36552a",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -10162,10 +10162,10 @@
               "id": "7c382c60-0ee2-4315-b8cf-cfd3ab4c9ccd",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -10200,10 +10200,10 @@
               "id": "68defbd8-af87-4f04-97da-edfa8fb576f9",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -10248,10 +10248,10 @@
               "id": "60868f44-3d56-44ed-bcc4-00041a7b5997",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -10296,10 +10296,10 @@
               "id": "3933bfcb-6daf-4c33-b834-877cb29ce77d",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -10358,10 +10358,10 @@
               "id": "8fa6dc63-430e-42cb-9345-42d37f0c2629",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -10434,10 +10434,10 @@
               "id": "6548133f-118f-419d-8900-660fde26b42f",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -10482,10 +10482,10 @@
               "id": "710384a5-a7dd-43f1-b55c-147256dc636a",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -10530,10 +10530,10 @@
               "id": "104da492-67f1-46fc-b412-b98871ebb518",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -10585,10 +10585,10 @@
               "id": "50b9b31f-c2a8-459a-81fd-c54604f5184e",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -10647,10 +10647,10 @@
               "id": "ad93f903-a354-40ae-b87e-f8390606a964",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -10692,10 +10692,10 @@
               "id": "e4193650-2d46-4e6e-8dd8-b1d8d9a1baff",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -10740,10 +10740,10 @@
               "id": "0b1cba39-8bb7-4f87-9bed-c59f2284d702",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -10778,10 +10778,10 @@
             "id": "14bd7637-13ed-49ba-9eb9-9c8ba9abec20",
             "input": {
               "battery": {
-                "input-commands": [
+                "input_commands": [
                   "Read"
                 ],
-                "value-range": [
+                "value_range": [
                   [
                     0,
                     100
@@ -10835,10 +10835,10 @@
               "id": "a2d19eee-211e-4771-b7e1-cfba3e6bb55f",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -10883,10 +10883,10 @@
               "id": "9b31822c-7449-4a3d-bd4d-6cced8440126",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -10931,10 +10931,10 @@
               "id": "1fb626ec-7006-46f5-97b1-db3cc0bc5bb8",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -11032,10 +11032,10 @@
               "id": "971bd4aa-d6ac-4449-bd1a-862b29ae705e",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -11080,10 +11080,10 @@
               "id": "b771d1b8-5a68-4a75-8ff2-868380d18fe7",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -11135,10 +11135,10 @@
               "id": "80d1e022-85a6-46ad-bbe9-1b8085b1e336",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -11192,10 +11192,10 @@
               "id": "735c2164-4fd5-4e82-835d-23251e487d68",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -11240,10 +11240,10 @@
               "id": "fe19ad5c-5acb-4ee9-8a09-f6edca06f471",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -11288,10 +11288,10 @@
               "id": "7a794236-85e6-4b13-97c6-d17d1f091f0a",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -11336,10 +11336,10 @@
               "id": "7fcb01eb-4241-42c1-9799-fdfa190b7edd",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -11398,10 +11398,10 @@
               "id": "322170f9-b493-4233-9336-e6f7f267450c",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -11443,10 +11443,10 @@
               "id": "37c03e71-1701-4b5a-9697-d62d2dc56e4b",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -11481,10 +11481,10 @@
             "id": "7202da93-c25d-460a-a863-8d4d38f41fdf",
             "input": {
               "battery": {
-                "input-commands": [
+                "input_commands": [
                   "Read"
                 ],
-                "value-range": [
+                "value_range": [
                   [
                     0,
                     100
@@ -11712,10 +11712,10 @@
               "id": "98a2e5c4-c4de-4ac5-a9db-b3e24a24424a",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -11757,10 +11757,10 @@
             "id": "bcaf7da8-2e98-47e3-b22c-2204daf40a27",
             "input": {
               "battery": {
-                "input-commands": [
+                "input_commands": [
                   "Read"
                 ],
-                "value-range": [
+                "value_range": [
                   [
                     0,
                     100
@@ -11849,10 +11849,10 @@
               "id": "6baefd41-de6d-4c60-aedb-0a9b55f34875",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -11897,10 +11897,10 @@
               "id": "f966012c-6b68-4dc3-b4a4-16d34fdc30c7",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -11952,10 +11952,10 @@
               "id": "123954de-a9f1-427a-823a-9b9173ad8856",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -11990,10 +11990,10 @@
             "id": "014cdffe-d3d5-4bba-acf4-f26e809b45ec",
             "input": {
               "battery": {
-                "input-commands": [
+                "input_commands": [
                   "Read"
                 ],
-                "value-range": [
+                "value_range": [
                   [
                     0,
                     100
@@ -12043,10 +12043,10 @@
             "id": "72bc2f2f-7f67-4636-bc5c-42ac4b55cb59",
             "input": {
               "battery": {
-                "input-commands": [
+                "input_commands": [
                   "Read"
                 ],
-                "value-range": [
+                "value_range": [
                   [
                     0,
                     100
@@ -12150,10 +12150,10 @@
               "id": "fdc5dc60-ece5-4f81-801c-076b1e1bad57",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -12205,10 +12205,10 @@
               "id": "b2b3dedf-5f7a-4069-935f-f210fdf5cafc",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -12243,10 +12243,10 @@
             "id": "8ba2798a-4717-4a39-ae5c-f445eb8f4448",
             "input": {
               "battery": {
-                "input-commands": [
+                "input_commands": [
                   "Read"
                 ],
-                "value-range": [
+                "value_range": [
                   [
                     0,
                     100
@@ -18642,10 +18642,10 @@
               "id": "0f194120-0912-4d5d-b201-7eee4cc622fe",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -18703,10 +18703,10 @@
               "id": "e70bb6fb-9e2c-4970-9483-9f9b661d6e9f",
               "input": {
                 "battery": {
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -18741,10 +18741,10 @@
             "id": "e0d0a8e6-604a-4d49-bdab-d22fd8658c69",
             "input": {
               "battery": {
-                "input-commands": [
+                "input_commands": [
                   "Read"
                 ],
-                "value-range": [
+                "value_range": [
                   [
                     0,
                     100
