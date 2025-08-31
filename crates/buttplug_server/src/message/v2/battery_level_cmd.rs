@@ -77,12 +77,7 @@ impl TryFromDeviceAttributes<BatteryLevelCmdV2> for CheckedInputCmdV4 {
       .iter()
       .enumerate()
       .find(|(_, p)| {
-        if let Some(sensor_map) = p.input() {
-          if sensor_map.contains_key(&InputType::Battery) {
-            return true;
-          }
-        }
-        false
+        p.input().as_ref().map_or(false, |x| x.battery().is_some())
       })
       .expect("Already found matching battery feature, can unwrap this.")
       .0;

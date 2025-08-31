@@ -18,7 +18,7 @@ use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
 };
@@ -43,7 +43,7 @@ impl ProtocolInitializer for MysteryVibeInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    def: &DeviceDefinition,
+    def: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareWriteCmd::new(
       &[MYSTERYVIBE_PROTOCOL_UUID],

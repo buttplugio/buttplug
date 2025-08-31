@@ -23,7 +23,7 @@ use crate::device::{
     ProtocolKeepaliveStrategy,
   },
 };
-use buttplug_server_device_config::{DeviceDefinition, UserDeviceIdentifier, ProtocolCommunicationSpecifier, Endpoint};
+use buttplug_server_device_config::{ServerDeviceDefinition, UserDeviceIdentifier, ProtocolCommunicationSpecifier, Endpoint};
 use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
@@ -41,14 +41,14 @@ impl ProtocolInitializer for SvakomV6Initializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    def: &DeviceDefinition,
+    def: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let num_vibrators = def
       .features()
       .iter()
       .filter(|x| {
         if let Some(output_map) = x.output() {
-          output_map.contains_key(&OutputType::Vibrate)
+          output_map.contains(OutputType::Vibrate)
         } else {
           false
         }

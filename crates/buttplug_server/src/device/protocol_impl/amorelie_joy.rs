@@ -7,7 +7,7 @@
 
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
-use buttplug_server_device_config::{DeviceDefinition, UserDeviceIdentifier};
+use buttplug_server_device_config::{ServerDeviceDefinition, UserDeviceIdentifier};
 
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
@@ -35,7 +35,7 @@ impl ProtocolInitializer for AmorelieJoyInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &DeviceDefinition,
+    _: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
       .write_value(&HardwareWriteCmd::new(

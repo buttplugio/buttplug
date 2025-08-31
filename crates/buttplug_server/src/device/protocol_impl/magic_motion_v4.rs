@@ -13,7 +13,7 @@ use std::sync::{
 use async_trait::async_trait;
 use uuid::{uuid, Uuid};
 
-use buttplug_server_device_config::DeviceDefinition;
+use buttplug_server_device_config::ServerDeviceDefinition;
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
@@ -38,7 +38,7 @@ impl ProtocolInitializer for MagicMotionV4Initializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    def: &DeviceDefinition,
+    def: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(MagicMotionV4::new(
       def

@@ -277,7 +277,7 @@ impl ServerDeviceManagerEventLoop {
         let _enter = span.enter();
 
         // Get the index from the device
-        let device_index = device.definition().user_config().index();
+        let device_index = device.definition().index();
         // Since we can now reuse device indexes, this means we might possibly
         // stomp on devices already in the map if they don't register a
         // disconnect before we try to insert the new device. If we have a

@@ -19,7 +19,7 @@ use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
 };
@@ -38,7 +38,7 @@ impl ProtocolInitializer for MysteryVibeV2Initializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    def: &DeviceDefinition,
+    def: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     // The only thing that's different about MysteryVibeV2 from v1 is the initialization packet.
     // Just send that then return the older protocol version.

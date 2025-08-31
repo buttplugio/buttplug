@@ -18,7 +18,7 @@ use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
 };
@@ -37,7 +37,7 @@ impl ProtocolInitializer for AnkniInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &DeviceDefinition,
+    _: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareReadCmd::new(ANKNI_PROTOCOL_UUID, Endpoint::Generic0, 16, 100);
     let reading = hardware.read_value(&msg).await?;

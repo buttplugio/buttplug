@@ -33,7 +33,7 @@ use buttplug_core::{
   util::sleep,
 };
 use buttplug_server_device_config::{
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
   Endpoint
@@ -168,14 +168,14 @@ impl ProtocolInitializer for LovenseInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    device_definition: &DeviceDefinition,
+    device_definition: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let device_type = self.device_type.clone();
 
     let vibrator_count = device_definition
       .features()
       .iter()
-      .filter(|x| x.output().as_ref().is_some_and(|x| x.contains_key(&OutputType::Vibrate) || x.contains_key(&OutputType::Oscillate)))
+      .filter(|x| x.output().as_ref().is_some_and(|x| x.contains(OutputType::Vibrate) || x.contains(OutputType::Oscillate)))
       .count();
 
     let output_count = device_definition
@@ -188,13 +188,13 @@ impl ProtocolInitializer for LovenseInitializer {
       && device_definition
         .features()
         .iter()
-        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains_key(&OutputType::Vibrate)))
+        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains(OutputType::Vibrate)))
         .count()
         == 1
       && device_definition
         .features()
         .iter()
-        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains_key(&OutputType::RotateWithDirection)))
+        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains(OutputType::RotateWithDirection)))
         .count()
         == 1;
 
@@ -202,13 +202,13 @@ impl ProtocolInitializer for LovenseInitializer {
       && device_definition
         .features()
         .iter()
-        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains_key(&OutputType::Vibrate)))
+        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains(OutputType::Vibrate)))
         .count()
         == 1
       && device_definition
         .features()
         .iter()
-        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains_key(&OutputType::Constrict)))
+        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains(OutputType::Constrict)))
         .count()
         == 1;
 

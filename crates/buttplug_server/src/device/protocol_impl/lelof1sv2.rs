@@ -28,7 +28,7 @@ use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
 };
@@ -46,7 +46,7 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &DeviceDefinition,
+    _: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let use_harmony = !hardware.endpoints().contains(&Endpoint::Whitelist);
     let sec_endpoint = if use_harmony {

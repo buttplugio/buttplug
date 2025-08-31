@@ -18,7 +18,7 @@ use async_trait::async_trait;
 use buttplug_core::{errors::ButtplugDeviceError, util::sleep};
 use buttplug_server_device_config::{
   Endpoint,
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
 };
@@ -89,7 +89,7 @@ impl ProtocolInitializer for FredorchInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &DeviceDefinition,
+    _: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut event_receiver = hardware.event_stream();
     hardware

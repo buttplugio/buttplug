@@ -18,7 +18,7 @@ use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
 };
@@ -37,7 +37,7 @@ impl ProtocolInitializer for LetenInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &DeviceDefinition,
+    _: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     // There's a more complex auth flow that the app "sometimes" goes through where it
     // sends [0x04, 0x00] and waits for [0x01] on Rx before calling [0x04, 0x01]

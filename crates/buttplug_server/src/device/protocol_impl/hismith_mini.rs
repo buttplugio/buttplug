@@ -15,7 +15,7 @@ use buttplug_core::{
 };
 use buttplug_server_device_config::{
   Endpoint,
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
 };
@@ -81,19 +81,19 @@ impl ProtocolInitializer for HismithMiniInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    device_definition: &DeviceDefinition,
+    device_definition: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(HismithMini {
       dual_vibe: device_definition
         .features()
         .iter()
-        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains_key(&OutputType::Vibrate)))
+        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains(OutputType::Vibrate)))
         .count()
         >= 2,
       second_constrict: device_definition
         .features()
         .iter()
-        .position(|x| x.output().as_ref().is_some_and(|x| x.contains_key(&OutputType::Constrict)))
+        .position(|x| x.output().as_ref().is_some_and(|x| x.contains(OutputType::Constrict)))
         .unwrap_or(0)
         == 1,
     }))

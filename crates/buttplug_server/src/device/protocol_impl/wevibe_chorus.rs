@@ -26,7 +26,7 @@ use buttplug_core::{
   errors::ButtplugDeviceError,
   message::OutputType,
 };
-use buttplug_server_device_config::{DeviceDefinition, Endpoint, ProtocolCommunicationSpecifier, UserDeviceIdentifier};
+use buttplug_server_device_config::{ServerDeviceDefinition, Endpoint, ProtocolCommunicationSpecifier, UserDeviceIdentifier};
 
 generic_protocol_initializer_setup!(WeVibeChorus, "wevibe-chorus");
 
@@ -40,7 +40,7 @@ impl ProtocolInitializer for WeVibeChorusInitializer {
   async fn initialize(
     &mut self,
     _hardware: Arc<Hardware>,
-    def: &DeviceDefinition,
+    def: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let num_vibrators = def
       .features()
@@ -48,7 +48,7 @@ impl ProtocolInitializer for WeVibeChorusInitializer {
       .filter(|x| {
         x.output()
           .as_ref()
-          .map_or(false, |x| x.contains_key(&OutputType::Vibrate))
+          .map_or(false, |x| x.contains(OutputType::Vibrate))
       })
       .count() as u8;
     Ok(Arc::new(WeVibeChorus::new(num_vibrators)))

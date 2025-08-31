@@ -178,7 +178,7 @@ async fn test_client_range_limits() {
   dcm
     .add_user_device_definition(
       &identifier,
-      &DeviceDefinition::new(
+      &ServerDeviceDefinition::new(
         "Massage Demo",
         &Uuid::new_v4(),
         &None,

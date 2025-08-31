@@ -18,7 +18,7 @@ use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 
 use buttplug_server_device_config::{
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
 };
@@ -107,7 +107,7 @@ impl ProtocolInitializer for GalakuInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &DeviceDefinition,
+    _: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut protocol = Galaku::default();
     protocol.is_caiping_pump_device = false;

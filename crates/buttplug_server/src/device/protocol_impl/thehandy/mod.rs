@@ -20,7 +20,7 @@ use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
 };
@@ -47,7 +47,7 @@ impl ProtocolInitializer for TheHandyInitializer {
   async fn initialize(
     &mut self,
     _hardware: Arc<Hardware>,
-    _: &DeviceDefinition,
+    _: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     // Ok, somehow this whole function has been basically a no-op. The read/write lines never had an
     // await on them, so they were never run. But only now, in Rust 1.75/Buttplug 7.1.15, have we

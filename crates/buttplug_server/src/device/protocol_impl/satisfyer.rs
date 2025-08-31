@@ -13,7 +13,7 @@ use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
 };
@@ -106,7 +106,7 @@ impl ProtocolInitializer for SatisfyerInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    device_definition: &DeviceDefinition,
+    device_definition: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareWriteCmd::new(
       &[SATISFYER_PROTOCOL_UUID],

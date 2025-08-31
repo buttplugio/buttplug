@@ -297,7 +297,6 @@ impl ServerDeviceManager {
       display_name: device
         .value()
         .definition()
-        .user_config()
         .display_name()
         .clone(),
     })

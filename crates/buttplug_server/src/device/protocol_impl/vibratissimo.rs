@@ -9,7 +9,7 @@ use buttplug_core::message::OutputType;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
 };
@@ -76,7 +76,7 @@ impl ProtocolInitializer for VibratissimoInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    def: &DeviceDefinition,
+    def: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let num_vibrators: u8 = def
       .features()
@@ -84,7 +84,7 @@ impl ProtocolInitializer for VibratissimoInitializer {
       .filter(|x| {
         x.output()
           .as_ref()
-          .map_or(false, |x| x.contains_key(&OutputType::Vibrate))
+          .map_or(false, |x| x.contains(OutputType::Vibrate))
       })
       .count() as u8;
     Ok(Arc::new(Vibratissimo::new(num_vibrators as u8)))

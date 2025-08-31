@@ -21,7 +21,7 @@ use buttplug_core::{
 };
 use buttplug_server_device_config::{
   Endpoint,
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
 };
@@ -45,7 +45,7 @@ impl ProtocolInitializer for XuanhuanInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &DeviceDefinition,
+    _: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(Xuanhuan::new(hardware)))
   }

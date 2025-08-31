@@ -13,7 +13,7 @@ use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
 };
@@ -86,7 +86,7 @@ impl ProtocolInitializer for MonsterPubInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    def: &DeviceDefinition,
+    def: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     if hardware.endpoints().contains(&Endpoint::Rx) {
       let value = hardware

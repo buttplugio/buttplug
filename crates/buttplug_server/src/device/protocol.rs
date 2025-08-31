@@ -13,7 +13,7 @@ use buttplug_core::{
 };
 use buttplug_server_device_config::{
   Endpoint,
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
 };
@@ -125,7 +125,7 @@ pub trait ProtocolInitializer: Sync + Send {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    device_definition: &DeviceDefinition,
+    device_definition: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError>;
 }
 
@@ -181,7 +181,7 @@ impl ProtocolInitializer for GenericProtocolInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    _: &DeviceDefinition,
+    _: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(self.handler.take().unwrap())
   }

@@ -15,7 +15,7 @@ use buttplug_core::{
   errors::ButtplugDeviceError,
   message::OutputType,
 };
-use buttplug_server_device_config::{DeviceDefinition, Endpoint, ProtocolCommunicationSpecifier, UserDeviceIdentifier};
+use buttplug_server_device_config::{ServerDeviceDefinition, Endpoint, ProtocolCommunicationSpecifier, UserDeviceIdentifier};
 
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
@@ -37,13 +37,13 @@ impl ProtocolInitializer for MetaXSireInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    def: &DeviceDefinition,
+    def: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut commands = vec![];
     def.features().iter().for_each(|x| {
       if let Some(m) = x.output() {
-        for output in m.keys() {
-          commands.push((*output, AtomicU8::default()))
+        for output in m.output_types() {
+          commands.push((output, AtomicU8::default()))
         }
       }
     });

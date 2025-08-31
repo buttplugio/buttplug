@@ -18,7 +18,7 @@ use async_trait::async_trait;
 use buttplug_core::{errors::ButtplugDeviceError, util::{self, async_manager}};
 use buttplug_server_device_config::{
   Endpoint,
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
 };
@@ -244,7 +244,7 @@ impl ProtocolInitializer for NintendoJoyconInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &DeviceDefinition,
+    _: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     send_sub_command(hardware.clone(), 0, 72, &[0x01])
       .await

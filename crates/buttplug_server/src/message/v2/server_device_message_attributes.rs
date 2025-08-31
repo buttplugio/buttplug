@@ -17,7 +17,7 @@ use buttplug_server_device_config::ServerDeviceFeature;
 use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Getters, Setters)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Getters, Setters)]
 pub struct ServerDeviceMessageAttributesV2 {
   // Generic commands
   #[getset(get = "pub")]
@@ -72,7 +72,7 @@ pub struct ServerGenericDeviceMessageAttributesV2 {
   pub(in crate::message) features: Vec<ServerDeviceFeature>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Default, Serialize, Deserialize, Getters, Setters)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Getters, Setters)]
 pub struct ServerSensorDeviceMessageAttributesV2 {
   #[getset(get = "pub")]
   #[serde(skip)]

@@ -7,13 +7,11 @@
 
 use crate::ButtplugDeviceConfigError;
 
-use buttplug_core::{
-  message::{
+use buttplug_core::message::{
     DeviceFeature,
     DeviceFeatureInput,
-    InputCommandType,
-  },
-};
+    InputCommandType, InputType, OutputType,
+  };
 use getset::{CopyGetters, Getters, Setters};
 use serde::{
   Deserialize,
@@ -187,6 +185,39 @@ pub struct ServerDeviceFeatureOutput {
   spray: Option<ServerDeviceFeatureOutputValueProperties>,
 }
 
+impl ServerDeviceFeatureOutput {
+  pub fn contains(&self, output_type: OutputType) -> bool {
+    match output_type {
+      OutputType::Constrict => self.constrict.is_some(),
+      OutputType::Heater => self.heater.is_some(),
+      OutputType::Led => self.led.is_some(),
+      OutputType::Oscillate => self.oscillate.is_some(),
+      OutputType::Position => self.position.is_some(),
+      OutputType::PositionWithDuration => self.position_with_duration.is_some(),
+      OutputType::Rotate => self.rotate.is_some(),
+      OutputType::RotateWithDirection => self.rotate_with_direction.is_some(),
+      OutputType::Spray => self.spray.is_some(),
+      OutputType::Unknown => false,
+      OutputType::Vibrate => self.vibrate.is_some()
+    }
+  }
+
+  pub fn output_types(&self) -> Vec<OutputType> {
+    let mut types = vec!();
+    self.constrict.is_some().then(|| types.push(OutputType::Constrict));
+    self.heater.is_some().then(|| types.push(OutputType::Heater));
+    self.led.is_some().then(|| types.push(OutputType::Led));
+    self.oscillate.is_some().then(|| types.push(OutputType::Oscillate));
+    self.position.is_some().then(|| types.push(OutputType::Position));
+    self.position_with_duration.is_some().then(|| types.push(OutputType::PositionWithDuration));
+    self.rotate.is_some().then(|| types.push(OutputType::Rotate));
+    self.rotate_with_direction.is_some().then(|| types.push(OutputType::RotateWithDirection));
+    self.spray.is_some().then(|| types.push(OutputType::Spray));
+    self.vibrate.is_some().then(|| types.push(OutputType::Vibrate));
+    types
+  }
+}
+
 #[derive(Clone, Debug, Getters)]
 #[getset(get = "pub")]
 pub struct ServerDeviceFeatureInputProperties {
@@ -213,6 +244,18 @@ pub struct ServerDeviceFeatureInput {
   rssi: Option<ServerDeviceFeatureInputProperties>,
   pressure: Option<ServerDeviceFeatureInputProperties>,
   button: Option<ServerDeviceFeatureInputProperties>,
+}
+
+impl ServerDeviceFeatureInput {
+  pub fn contains(&self, input_type: InputType) -> bool {
+    match input_type {
+      InputType::Battery => self.battery.is_some(),
+      InputType::Rssi => self.rssi.is_some(),
+      InputType::Pressure => self.pressure.is_some(),
+      InputType::Button => self.button.is_some(),
+      InputType::Unknown => false,
+    }
+  }
 }
 
 #[derive(Clone, Debug, Getters, CopyGetters)]

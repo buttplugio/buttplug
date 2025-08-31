@@ -17,7 +17,7 @@ use crate::device::{
 use async_trait::async_trait;
 use buttplug_core::{errors::ButtplugDeviceError, util::sleep};
 use buttplug_server_device_config::{
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
   Endpoint,
@@ -37,7 +37,7 @@ impl ProtocolInitializer for CowgirlConeInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &DeviceDefinition,
+    _: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     hardware
       .write_value(&HardwareWriteCmd::new(

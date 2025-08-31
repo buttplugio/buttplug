@@ -61,7 +61,7 @@ use buttplug_core::{
 };
 use buttplug_server_device_config::{
   DeviceConfigurationManager,
-  DeviceDefinition,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 
@@ -106,7 +106,7 @@ pub struct ServerDevice {
   hardware: Arc<Hardware>,
   handler: Arc<dyn ProtocolHandler>,
   #[getset(get = "pub")]
-  definition: DeviceDefinition,
+  definition: ServerDeviceDefinition,
   //output_command_manager: ActuatorCommandManager,
   /// Unique identifier for the device
   #[getset(get = "pub")]
@@ -238,12 +238,12 @@ impl ServerDevice {
     identifier: UserDeviceIdentifier,
     handler: Arc<dyn ProtocolHandler>,
     hardware: Arc<Hardware>,
-    definition: &DeviceDefinition,
+    definition: &ServerDeviceDefinition,
   ) -> Self {
     let (internal_hw_msg_sender, mut internal_hw_msg_recv) = channel::<Vec<HardwareCommand>>(1024);
 
-    let device_wait_duration = if definition.message_gap().is_some() {
-      definition.message_gap()
+    let device_wait_duration = if let Some(gap) = definition.message_gap_ms() {
+      Some(Duration::from_millis(gap as u64))
     } else {
       hardware.message_gap()
     };
@@ -413,7 +413,7 @@ impl ServerDevice {
     // calculate stop commands.
     for (index, feature) in definition.features().iter().enumerate() {
       if let Some(output_map) = feature.output() {
-        for actuator_type in output_map.keys() {
+        for actuator_type in output_map.output_types() {
           let mut stop_cmd = |actuator_cmd| {
             stop_commands
               .push(CheckedOutputCmdV4::new(1, 0, index as u32, feature.id(), actuator_cmd).into());
@@ -522,7 +522,7 @@ impl ServerDevice {
     DeviceMessageInfoV4::new(
       index,
       &self.name(),
-      self.definition().user_config().display_name(),
+      self.definition().display_name(),
       100,
       &self
         .definition

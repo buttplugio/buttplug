@@ -21,7 +21,7 @@ use buttplug_core::{
 };
 use buttplug_server_device_config::{
   Endpoint,
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
 };
@@ -48,7 +48,7 @@ impl ProtocolInitializer for FredorchRotaryInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &DeviceDefinition,
+    _: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     warn!(
       "FredorchRotary device doesn't provide state feedback. If the device beeps twice, it is powered off and must be reconnected before it can be controlled!"

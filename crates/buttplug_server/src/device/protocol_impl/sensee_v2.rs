@@ -10,7 +10,7 @@ use buttplug_core::{
   message::OutputType,
 };
 use buttplug_server_device_config::{
-  DeviceDefinition, Endpoint, ProtocolCommunicationSpecifier, UserDeviceIdentifier
+  ServerDeviceDefinition, Endpoint, ProtocolCommunicationSpecifier, UserDeviceIdentifier
 };
 
 use crate::device::{
@@ -44,7 +44,7 @@ impl ProtocolInitializer for SenseeV2Initializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    device_definition: &DeviceDefinition,
+    device_definition: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let res = hardware
       .read_value(&HardwareReadCmd::new(
@@ -70,7 +70,7 @@ impl ProtocolInitializer for SenseeV2Initializer {
         .enumerate()
         .for_each(|(i, x)| {
           if let Some(output_map) = x.output() {
-            if output_map.contains_key(&output_type) {
+            if output_map.contains(output_type) {
               map.insert(i as u32, AtomicU8::new(0));
             }
           }

@@ -12,7 +12,7 @@ use crate::{BaseDeviceIdentifier, ButtplugDeviceConfigError, ProtocolCommunicati
 
 #[derive(Default, Clone)]
 pub struct DeviceConfigurationManagerBuilder {
-  communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
+  base_communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   user_communication_specifiers: DashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   base_device_definitions: HashMap<BaseDeviceIdentifier, ServerDeviceDefinition>,
   user_device_definitions: DashMap<UserDeviceIdentifier, ServerDeviceDefinition>,
@@ -25,7 +25,7 @@ impl DeviceConfigurationManagerBuilder {
     specifier: &[ProtocolCommunicationSpecifier],
   ) -> &mut Self {
     self
-      .communication_specifiers
+      .base_communication_specifiers
       .entry(protocol_name.to_owned())
       .or_default()
       .extend(specifier.iter().cloned());
@@ -99,7 +99,7 @@ impl DeviceConfigurationManagerBuilder {
     }
 
     Ok(DeviceConfigurationManager {
-      base_communication_specifiers: self.communication_specifiers.clone(),
+      base_communication_specifiers: self.base_communication_specifiers.clone(),
       user_communication_specifiers: self.user_communication_specifiers.clone(),
       base_device_definitions: attribute_tree_map,
       user_device_definitions: user_attribute_tree_map,
@@ -124,11 +124,13 @@ impl DeviceConfigurationManagerBuilder {
 pub struct DeviceConfigurationManager {
   /// Communication specifiers from the base device config, mapped from protocol name to vector of
   /// specifiers. Should not change/update during a session.
+  #[getset(get = "pub")]
   base_communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   /// Device definitions from the base device config. Should not change/update during a session.
   base_device_definitions: HashMap<BaseDeviceIdentifier, ServerDeviceDefinition>,
   /// Communication specifiers provided by the user, mapped from protocol name to vector of
   /// specifiers. Loaded at session start, may change over life of session.
+  #[getset(get = "pub")]
   user_communication_specifiers: DashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   /// Device definitions from the user device config. Loaded at session start, may change over life
   /// of session.

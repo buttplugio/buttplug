@@ -26,7 +26,7 @@ use buttplug_core::{
   errors::ButtplugDeviceError,
   message::OutputType,
 };
-use buttplug_server_device_config::{Endpoint, DeviceDefinition, UserDeviceIdentifier, ProtocolCommunicationSpecifier};
+use buttplug_server_device_config::{Endpoint, ServerDeviceDefinition, UserDeviceIdentifier, ProtocolCommunicationSpecifier};
 
 generic_protocol_initializer_setup!(WeVibe8Bit, "wevibe-8bit");
 
@@ -40,7 +40,7 @@ impl ProtocolInitializer for WeVibe8BitInitializer {
   async fn initialize(
     &mut self,
     _hardware: Arc<Hardware>,
-    def: &DeviceDefinition,
+    def: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let num_vibrators = def
       .features()
@@ -48,7 +48,7 @@ impl ProtocolInitializer for WeVibe8BitInitializer {
       .filter(|x| {
         x.output()
           .as_ref()
-          .map_or(false, |x| x.contains_key(&OutputType::Vibrate))
+          .map_or(false, |x| x.contains(OutputType::Vibrate))
       })
       .count() as u8;
     Ok(Arc::new(WeVibe8Bit::new(num_vibrators)))
