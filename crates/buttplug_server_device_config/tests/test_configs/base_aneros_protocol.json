@@ -1,0 +1,54 @@
+{
+  "version": {
+    "major": 4,
+    "minor": 1
+  },
+  "protocols": {
+    "aneros": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Massage Demo"
+            ],
+            "services": {
+              "0000ff00-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ff01-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "description": "Perineum Vibrator",
+            "id": "a980bc1a-5554-4293-a75f-6d17bf25ebee",
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  127
+                ]
+              }
+            }
+          },
+          {
+            "description": "Internal Vibrator",
+            "id": "811d7d6e-6a75-4925-943a-a06042223e3a",
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  127
+                ]
+              }
+            }
+          }
+        ],
+        "id": "f023f0f4-6629-469e-84c4-171ed4939f3d",
+        "name": "Aneros Vivi"
+      }
+    }
+  }
+}

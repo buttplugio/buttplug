@@ -42,3 +42,6 @@ serde_yaml = "0.9.34"
 serde_json = "1.0.140"
 serde = { version = "1.0.219", features = ["derive"] }
 buttplug_core = { path = "../buttplug_core" }
+
+[dev-dependencies]
+test-case = "3.3.1"
