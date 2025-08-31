@@ -1,0 +1,36 @@
+{
+  "version": {
+    "major": 4,
+    "minor": 1
+  },
+  "user-configs": {
+    "protocols": {
+      "tcode-v03": {
+        "communication": [
+          {
+            "serial": {
+              "baud-rate": 115200,
+              "data-bits": 8,
+              "parity": "N",
+              "port": "COM1",
+              "stop-bits": 1
+            }
+          },
+          {
+            "btle": {
+              "names": [
+                "tcode-test"
+              ],
+              "services": {
+                "97f2cb39-8098-4ca3-b7b0-05dd9eb1bde0": {
+                  "tx": "97f2cb39-8098-4ca3-b7b0-05dd9eb1bde1",
+                  "rx": "97f2cb39-8098-4ca3-b7b0-05dd9eb1bde2"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

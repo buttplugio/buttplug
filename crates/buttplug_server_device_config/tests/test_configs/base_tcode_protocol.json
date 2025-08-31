@@ -1,0 +1,37 @@
+{
+  "version": {
+    "major": 4,
+    "minor": 1
+  },
+  "protocols": {
+    "tcode-v03": {
+      "defaults": {
+        "features": [
+          {
+            "id": "4097edde-7efb-4c3e-afdb-0aeb82a03fd9",
+            "output": {
+              "position": {
+                "value": [
+                  0,
+                  1000
+                ]
+              },
+              "position_with_duration": {
+                "position": [
+                  0,
+                  1000
+                ],
+                "duration": [
+                  0,
+                  30000
+                ]
+              }
+            }
+          }
+        ],
+        "id": "211da02e-467c-4788-96bd-689049867e85",
+        "name": "TCode v0.3 (Single Linear Axis)"
+      }
+    }
+  }
+}
