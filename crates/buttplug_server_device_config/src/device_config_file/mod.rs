@@ -13,27 +13,30 @@ mod user;
 
 use base::BaseConfigFile;
 
-use crate::device_config_file::{protocol::ProtocolDefinition, user::{UserConfigDefinition, UserConfigFile, UserDeviceConfigPair}};
-
-use super::{
-  BaseDeviceIdentifier,
-  DeviceConfigurationManager,
-  DeviceConfigurationManagerBuilder,
+use crate::device_config_file::{
+  protocol::ProtocolDefinition,
+  user::{UserConfigDefinition, UserConfigFile, UserDeviceConfigPair},
 };
+
+use super::{BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder};
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError},
   util::json::JSONValidator,
 };
 use dashmap::DashMap;
 use getset::CopyGetters;
-use serde::{Deserialize, Serialize, Serializer, ser::{self, SerializeSeq}};
+use serde::{
+  Deserialize,
+  Serialize,
+  Serializer,
+  ser::{self, SerializeSeq},
+};
 use std::{collections::HashMap, fmt::Display, ops::RangeInclusive};
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../build-config/buttplug-device-config-v4.json");
-static DEVICE_CONFIGURATION_JSON_SCHEMA: &str = include_str!(
-  "../../device-config-v4/buttplug-device-config-schema-v4.json"
-);
+static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
+  include_str!("../../device-config-v4/buttplug-device-config-schema-v4.json");
 
 fn range_serialize<S>(range: &Option<RangeInclusive<u32>>, serializer: S) -> Result<S::Ok, S::Error>
 where
@@ -81,7 +84,6 @@ impl Display for ConfigVersion {
 trait ConfigVersionGetter {
   fn version(&self) -> ConfigVersion;
 }
-
 
 fn get_internal_config_version() -> ConfigVersion {
   let config: BaseConfigFile = serde_json::from_str(DEVICE_CONFIGURATION_JSON)
@@ -150,17 +152,21 @@ fn load_main_config(
     let mut default = None;
     if let Some(features) = protocol_def.defaults() {
       default = Some(features.clone());
-      dcm_builder.protocol_features(&BaseDeviceIdentifier::new_default(&protocol_name), &features.clone().into());
+      dcm_builder.base_device_definition(
+        &BaseDeviceIdentifier::new_default(&protocol_name),
+        &features.clone().into(),
+      );
     }
 
     for config in protocol_def.configurations() {
       if let Some(idents) = config.identifier() {
         for config_ident in idents {
-          let ident = BaseDeviceIdentifier::new(&protocol_name, config_ident);
+          let ident = BaseDeviceIdentifier::new_with_identifier(&protocol_name, config_ident);
           if let Some(d) = &default {
-            dcm_builder.protocol_features(&ident, &d.update_with_configuration(config.clone()).into());
+            dcm_builder
+              .base_device_definition(&ident, &d.update_with_configuration(config.clone()).into());
           } else {
-            dcm_builder.protocol_features(&ident, &config.clone().into());
+            dcm_builder.base_device_definition(&ident, &config.clone().into());
           }
         }
       }
@@ -175,6 +181,8 @@ fn load_user_config(
   skip_version_check: bool,
   dcm_builder: &mut DeviceConfigurationManagerBuilder,
 ) -> Result<(), ButtplugDeviceError> {
+  let base_dcm = dcm_builder.clone().finish().unwrap();
+
   info!("Loading user configuration from string.");
   let user_config_file =
     load_protocol_config_from_json::<UserConfigFile>(user_config_str, skip_version_check)?;
@@ -194,25 +202,40 @@ fn load_user_config(
       dcm_builder.user_communication_specifier(&protocol_name, &specifiers);
     }
 
-    if let Some(features) = protocol_def.defaults() {
-      dcm_builder.protocol_features(&BaseDeviceIdentifier::new_default(&protocol_name), features);
-    }
+    // Defaults aren't valid in user config files. All we can do is create new configurations with
+    // valid identifiers.
 
     for config in protocol_def.configurations() {
       if let Some(idents) = config.identifier() {
         for config_ident in idents {
-          let ident = BaseDeviceIdentifier::new(&protocol_name, config_ident);
-          dcm_builder.protocol_features(ident, config.clone());
+          let ident = BaseDeviceIdentifier::new_with_identifier(&protocol_name, config_ident);
+          dcm_builder.base_device_definition(&ident, &config.clone().into());
         }
       }
     }
   }
 
-  for user_device_config_pair in user_config.user_device_configs().clone().unwrap_or_default() {
-    dcm_builder.user_protocol_features(
-      user_device_config_pair.identifier(),
-      user_device_config_pair.config(),
-    );
+  for user_device_config_pair in user_config
+    .user_device_configs()
+    .clone()
+    .unwrap_or_default()
+  {
+    if let Some(base_config) = base_dcm
+      .base_device_definitions()
+      .get(&user_device_config_pair.identifier().into())
+    {
+      if let Ok(user_config) = user_device_config_pair
+        .config()
+        .build_from_base_definition(base_config)
+      {
+        dcm_builder.user_device_definition(user_device_config_pair.identifier(), &user_config);
+      }
+    } else {
+      error!(
+        "Device identifier {:?} does not have a match base identifier that matches anything in the base config, removing from database.",
+        user_device_config_pair.identifier()
+      );
+    }
   }
 
   Ok(())
@@ -274,14 +297,12 @@ pub fn save_user_config(dcm: &DeviceConfigurationManager) -> Result<String, Butt
 mod test {
   use crate::device_config_file::load_main_config;
 
-use super::{load_protocol_config_from_json, DEVICE_CONFIGURATION_JSON, base::BaseConfigFile};
+  use super::{DEVICE_CONFIGURATION_JSON, base::BaseConfigFile, load_protocol_config_from_json};
 
   #[test]
   fn test_config_file_parsing() {
-     load_protocol_config_from_json::<BaseConfigFile>(
-      &DEVICE_CONFIGURATION_JSON.to_owned(),
-      true
-    ).unwrap();
+    load_protocol_config_from_json::<BaseConfigFile>(&DEVICE_CONFIGURATION_JSON.to_owned(), true)
+      .unwrap();
   }
 
   #[test]

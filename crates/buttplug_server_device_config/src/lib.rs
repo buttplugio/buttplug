@@ -141,7 +141,7 @@ extern crate strum_macros;
 extern crate log;
 
 mod device_config_file;
-pub use device_config_file::{load_protocol_configs, save_user_config};
+pub use device_config_file::{load_protocol_configs}; //, save_user_config};
 mod device_config_manager;
 pub use device_config_manager::*;
 mod specifier;
@@ -154,20 +154,25 @@ mod device_feature;
 pub use device_feature::*;
 mod endpoint;
 pub use endpoint::*;
+use uuid::Uuid;
 
 
-use std::ops::RangeInclusive;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum ButtplugDeviceConfigError<T> {
+pub enum ButtplugDeviceConfigError {
   /// Conversion to client type not possible with requested property type
   #[error("Conversion of {0} to client type not possible with requested property type")]
   InvalidOutputTypeConversion(String),
   /// User set range exceeds bounds of possible configuration range
-  #[error("User set range {0} exceeds bounds of possible configuration range {1}")]
-  InvalidUserRange(RangeInclusive<T>, RangeInclusive<T>),
+  #[error("User set range exceeds bounds of possible configuration range")]
+  InvalidUserRange,
   /// Base range required
   #[error("Base range required for all feature outputs")]
   BaseRangeRequired,
+  /// Base ID not found, cannot match user device/feature to a base device/feature
+  #[error("Device definition with base id {0} not found")]
+  BaseIdNotFound(Uuid),
+  #[error("Feature vectors between base and user device definitions do not match")]
+  UserFeatureMismatch
 }

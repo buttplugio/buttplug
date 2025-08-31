@@ -32,7 +32,7 @@ impl ConfigVersionGetter for BaseConfigFile {
 }
 
 impl BaseConfigFile {
-  pub fn new(major_version: u32, minor_version: u32) -> Self {
+  pub(crate) fn new(major_version: u32, minor_version: u32) -> Self {
     Self {
       version: ConfigVersion {
         major: major_version,
