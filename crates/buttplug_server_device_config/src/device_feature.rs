@@ -57,7 +57,8 @@ where
   seq.end()
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Getters)]
+#[getset(get = "pub")]
 pub struct RangeWithLimit<T: PartialOrd + Clone> {
   base: RangeInclusive<T>,
   user: Option<RangeInclusive<T>>,
@@ -80,23 +81,17 @@ impl<T: PartialOrd + Clone> RangeWithLimit<T> {
   pub fn try_new(
     base: &RangeInclusive<T>,
     user: &Option<RangeInclusive<T>>,
-  ) -> Result<Self, ButtplugDeviceConfigError<T>> {
+  ) -> Result<Self, ButtplugDeviceConfigError> {
     if let Some(user) = user {
       if user.is_empty() {
-        Err(ButtplugDeviceConfigError::InvalidUserRange(
-          (*user).clone(),
-          (*base).clone(),
-        ))
+        Err(ButtplugDeviceConfigError::InvalidUserRange)
       } else {
         if *user.start() < *base.start()
           || *user.end() > *base.end()
           || *user.start() > *base.end()
           || *user.end() < *base.start()
         {
-          Err(ButtplugDeviceConfigError::InvalidUserRange(
-            (*user).clone(),
-            (*base).clone(),
-          ))
+          Err(ButtplugDeviceConfigError::InvalidUserRange)
         } else {
           Ok(Self {
             base: (*base).clone(),
@@ -135,6 +130,26 @@ impl ServerDeviceFeatureOutputValueProperties {
 }
 
 #[derive(Debug, Clone, Getters, CopyGetters)]
+pub struct ServerDeviceFeatureOutputPositionProperties {
+  #[getset(get = "pub")]
+  position: RangeWithLimit<u32>,
+  #[getset(get_copy = "pub")]
+  disabled: bool,
+  #[getset(get_copy = "pub")]
+  reverse_position: bool,
+}
+
+impl ServerDeviceFeatureOutputPositionProperties {
+  pub fn new(position: &RangeWithLimit<u32>, disabled: bool, reverse_position: bool) -> Self {
+    Self {
+      position: position.clone(),
+      disabled,
+      reverse_position
+    }
+  }
+}
+
+#[derive(Debug, Clone, Getters, CopyGetters)]
 pub struct ServerDeviceFeatureOutputPositionWithDurationProperties {
   #[getset(get = "pub")]
   position: RangeWithLimit<u32>,
@@ -167,7 +182,7 @@ pub struct ServerDeviceFeatureOutput {
   constrict: Option<ServerDeviceFeatureOutputValueProperties>,
   heater: Option<ServerDeviceFeatureOutputValueProperties>,
   led: Option<ServerDeviceFeatureOutputValueProperties>,
-  position: Option<ServerDeviceFeatureOutputValueProperties>,
+  position: Option<ServerDeviceFeatureOutputPositionProperties>,
   position_with_duration: Option<ServerDeviceFeatureOutputPositionWithDurationProperties>,
   spray: Option<ServerDeviceFeatureOutputValueProperties>,
 }

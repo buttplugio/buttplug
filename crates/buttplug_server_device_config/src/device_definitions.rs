@@ -51,8 +51,21 @@ impl ServerDeviceDefinitionBuilder {
     }
   }
 
-  pub fn base_id(&mut self, id: &Uuid) -> &mut Self {
-    self.def.base_id = Some(id.clone());
+  pub fn from_base(value: &ServerDeviceDefinition, id: Uuid) -> Self {
+    let mut value = value.clone();
+    value.base_id = Some(value.id);
+    value.id = id;
+    value.features = vec!();
+    ServerDeviceDefinitionBuilder { def: value }
+  }
+
+  pub fn id(&mut self, id: Uuid) -> &mut Self {
+    self.def.id = id;
+    self
+  }
+
+  pub fn base_id(&mut self, id: Uuid) -> &mut Self {
+    self.def.base_id = Some(id);
     self
   }
 
@@ -91,7 +104,7 @@ impl ServerDeviceDefinitionBuilder {
     self
   }
 
-  pub fn finish(self) -> ServerDeviceDefinition {
-    self.def
+  pub fn finish(&self) -> ServerDeviceDefinition {
+    self.def.clone()
   }
 }

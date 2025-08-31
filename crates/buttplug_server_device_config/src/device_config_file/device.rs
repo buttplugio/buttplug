@@ -2,7 +2,7 @@ use getset::{CopyGetters, Getters, MutGetters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{ServerDeviceDefinition, ServerDeviceDefinitionBuilder};
+use crate::{ButtplugDeviceConfigError, ServerDeviceDefinition, ServerDeviceDefinitionBuilder};
 
 use super::feature::{ConfigBaseDeviceFeature, ConfigUserDeviceFeature};
 
@@ -95,4 +95,30 @@ pub struct ConfigUserDeviceDefinition {
   #[serde(rename = "user-config")]
   /// Per-user configurations specific to this device instance.
   user_config: ConfigUserDeviceCustomization,
+}
+
+impl ConfigUserDeviceDefinition {
+  pub fn build_from_base_definition(&self, base: &ServerDeviceDefinition) -> Result<ServerDeviceDefinition, ButtplugDeviceConfigError> {
+    let mut builder = ServerDeviceDefinitionBuilder::from_base(&base, self.id);
+    if let Some(display_name) = &self.user_config.display_name {
+      builder.display_name(display_name);
+    }
+    if let Some(message_gap_ms) = self.user_config.message_gap_ms {
+      builder.message_gap_ms(message_gap_ms);
+    }
+    self.user_config.allow.then(|| builder.allow());
+    self.user_config.deny.then(|| builder.deny());
+    builder.index(self.user_config.index);
+    if self.features().len() != base.features().len() {
+      return Err(ButtplugDeviceConfigError::UserFeatureMismatch);
+    }
+    for feature in self.features() {
+      if let Some(base_feature) = base.features().iter().find(|x| x.id() == feature.base_id()) {
+        builder.add_feature(&feature.with_base_feature(base_feature)?);
+      } else {
+        return Err(ButtplugDeviceConfigError::UserFeatureMismatch);
+      }
+    }
+    Ok(builder.finish())
+  }
 }

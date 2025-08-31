@@ -45,16 +45,17 @@ pub struct BaseDeviceIdentifier {
 
 impl BaseDeviceIdentifier {
   pub fn new_default(protocol: &str) -> Self {
-    Self {
-      protocol: protocol.to_owned(),
-      identifier: None,
-    }
+    Self::new(protocol, &None)
   }
 
-  pub fn new(protocol: &str, attributes_identifier: &str) -> Self {
+  pub fn new_with_identifier(protocol: &str, attributes_identifier: &str) -> Self {
+    Self::new(protocol, &Some(attributes_identifier.to_owned()))
+  }
+
+  pub fn new(protocol: &str, attributes_identifier: &Option<String>) -> Self {
     Self {
       protocol: protocol.to_owned(),
-      identifier: Some(attributes_identifier.to_owned()),
+      identifier: attributes_identifier.clone(),
     }
   }
 }

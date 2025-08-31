@@ -4,7 +4,7 @@ use buttplug_core::message::InputCommandType;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::{ServerDeviceFeature, ServerDeviceFeatureInput, ServerDeviceFeatureInputProperties, ServerDeviceFeatureOutput, ServerDeviceFeatureOutputPositionWithDurationProperties, ServerDeviceFeatureOutputValueProperties};
+use crate::{ButtplugDeviceConfigError, RangeWithLimit, ServerDeviceFeature, ServerDeviceFeatureInput, ServerDeviceFeatureInputProperties, ServerDeviceFeatureOutput, ServerDeviceFeatureOutputPositionProperties, ServerDeviceFeatureOutputPositionWithDurationProperties, ServerDeviceFeatureOutputValueProperties};
 
 use super::range_sequence_serialize;
 
@@ -16,6 +16,17 @@ struct BaseDeviceFeatureOutputValueProperties {
 impl Into<ServerDeviceFeatureOutputValueProperties> for BaseDeviceFeatureOutputValueProperties {
   fn into(self) -> ServerDeviceFeatureOutputValueProperties {
     ServerDeviceFeatureOutputValueProperties::new(&self.value.into(), false)
+  }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+struct BaseDeviceFeatureOutputPositionProperties {
+  value: RangeInclusive<u32>
+}
+
+impl Into<ServerDeviceFeatureOutputPositionProperties> for BaseDeviceFeatureOutputPositionProperties {
+  fn into(self) -> ServerDeviceFeatureOutputPositionProperties {
+    ServerDeviceFeatureOutputPositionProperties::new(&self.value.into(), false, false)
   }
 }
 
@@ -48,7 +59,7 @@ struct BaseDeviceFeatureOutput {
   #[serde(skip_serializing_if="Option::is_none")]
   led: Option<BaseDeviceFeatureOutputValueProperties>,
   #[serde(skip_serializing_if="Option::is_none")]
-  position: Option<BaseDeviceFeatureOutputValueProperties>,
+  position: Option<BaseDeviceFeatureOutputPositionProperties>,
   #[serde(skip_serializing_if="Option::is_none")]
   position_with_duration: Option<BaseDeviceFeatureOutputPositionWithDurationProperties>,
   #[serde(skip_serializing_if="Option::is_none")]
@@ -99,10 +110,14 @@ struct UserDeviceFeatureOutputValueProperties {
   value: Option<RangeInclusive<i32>>,
   #[serde(default)]
   disabled: bool,
-  #[serde(default)]
-  reverse: bool
 }
 
+impl UserDeviceFeatureOutputValueProperties {
+  pub fn with_base_properties(&self, base: &ServerDeviceFeatureOutputValueProperties) -> Result<ServerDeviceFeatureOutputValueProperties, ButtplugDeviceConfigError> {
+    let range = RangeWithLimit::try_new(base.value().base(), &self.value)?;
+    Ok(ServerDeviceFeatureOutputValueProperties::new(&range, self.disabled))
+  }
+}
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct UserDeviceFeatureOutputPositionProperties {
@@ -112,6 +127,13 @@ struct UserDeviceFeatureOutputPositionProperties {
   disabled: bool,
   #[serde(default)]
   reverse: bool
+}
+
+impl UserDeviceFeatureOutputPositionProperties {
+  pub fn with_base_properties(&self, base: &ServerDeviceFeatureOutputPositionProperties) -> Result<ServerDeviceFeatureOutputPositionProperties, ButtplugDeviceConfigError> {
+    let value = RangeWithLimit::try_new(base.position().base(), &self.value)?;
+    Ok(ServerDeviceFeatureOutputPositionProperties::new(&value, self.disabled, self.reverse))
+  }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -126,6 +148,13 @@ struct UserDeviceFeatureOutputPositionWithDurationProperties {
   reverse: bool
 }
 
+impl UserDeviceFeatureOutputPositionWithDurationProperties {
+  pub fn with_base_properties(&self, base: &ServerDeviceFeatureOutputPositionWithDurationProperties) -> Result<ServerDeviceFeatureOutputPositionWithDurationProperties, ButtplugDeviceConfigError> {
+    let position = RangeWithLimit::try_new(base.position().base(), &self.position)?;
+    let duration = RangeWithLimit::try_new(base.duration().base(), &self.duration)?;
+    Ok(ServerDeviceFeatureOutputPositionWithDurationProperties::new(&position, &duration, self.disabled, self.reverse))
+  }
+}
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct UserDeviceFeatureOutput {
   #[serde(skip_serializing_if="Option::is_none")]
@@ -148,6 +177,76 @@ struct UserDeviceFeatureOutput {
   position_with_duration: Option<UserDeviceFeatureOutputPositionWithDurationProperties>,
   #[serde(skip_serializing_if="Option::is_none")]
   spray: Option<UserDeviceFeatureOutputValueProperties>,
+}
+
+impl UserDeviceFeatureOutput {
+  pub fn with_base_output(&self, base_output: &ServerDeviceFeatureOutput) -> Result<ServerDeviceFeatureOutput, ButtplugDeviceConfigError> {
+    let mut output = ServerDeviceFeatureOutput::default();
+    if let Some(base_vibrate) = base_output.vibrate() {
+      if let Some(user_vibrate) = &self.vibrate {
+        output.set_vibrate(Some(user_vibrate.with_base_properties(base_vibrate)?));
+      } else {
+        output.set_vibrate(base_output.vibrate().clone());
+      }
+    }
+    if let Some(user_rotate) = &self.rotate {
+      if let Some(base_rotate) = base_output.rotate() {
+        output.set_rotate(Some(user_rotate.with_base_properties(base_rotate)?));
+      } else {
+        output.set_rotate(base_output.rotate().clone());
+      }
+    }
+    if let Some(user_oscillate) = &self.oscillate {
+      if let Some(base_oscillate) = base_output.oscillate() {
+        output.set_oscillate(Some(user_oscillate.with_base_properties(base_oscillate)?));
+      } else {
+        output.set_oscillate(base_output.oscillate().clone());
+      }
+    }
+    if let Some(user_constrict) = &self.constrict {
+      if let Some(base_constrict) = base_output.constrict() {
+        output.set_constrict(Some(user_constrict.with_base_properties(base_constrict)?));
+      } else {
+        output.set_constrict(base_output.constrict().clone());
+      }
+    }
+    if let Some(user_heater) = &self.heater {
+      if let Some(base_heater) = base_output.heater() {
+        output.set_heater(Some(user_heater.with_base_properties(base_heater)?));
+      } else {
+        output.set_heater(base_output.heater().clone());
+      }
+    }
+    if let Some(user_led) = &self.led {
+      if let Some(base_led) = base_output.led() {
+        output.set_led(Some(user_led.with_base_properties(base_led)?));
+      } else {
+        output.set_led(base_output.led().clone());
+      }
+    }
+    if let Some(user_spray) = &self.spray {
+      if let Some(base_spray) = base_output.spray() {
+        output.set_spray(Some(user_spray.with_base_properties(base_spray)?));
+      } else {
+        output.set_spray(base_output.spray().clone());
+      }
+    }
+    if let Some(user) = &self.position {
+      if let Some(base) = base_output.position() {
+        output.set_position(Some(user.with_base_properties(base)?));
+      } else {
+        output.set_position(base_output.position().clone());
+      }
+    }
+    if let Some(user) = &self.position_with_duration {
+      if let Some(base) = base_output.position_with_duration() {
+        output.set_position_with_duration(Some(user.with_base_properties(base)?));
+      } else {
+        output.set_position_with_duration(base_output.position_with_duration().clone());
+      }
+    }
+    Ok(output)
+  }
 }
 
 #[derive(
@@ -267,6 +366,21 @@ pub struct ConfigUserDeviceFeature {
   #[getset(get = "pub")]
   #[serde(rename = "output", skip_serializing_if = "Option::is_none")]
   output: Option<UserDeviceFeatureOutput>
+}
+
+impl ConfigUserDeviceFeature {
+  pub fn with_base_feature(&self, base_feature: &ServerDeviceFeature) -> Result<ServerDeviceFeature, ButtplugDeviceConfigError> {
+    let output = if let Some(o) = &self.output {
+      if let Some(base) = base_feature.output() {
+        Some(o.with_base_output(&base)?)
+      } else {
+        None
+      }
+    } else {
+      None
+    };
+    Ok(ServerDeviceFeature::new(&base_feature.description(), self.id, Some(self.base_id), base_feature.alt_protocol_index(), &output, base_feature.input()))
+  }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, CopyGetters)]
