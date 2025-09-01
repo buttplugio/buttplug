@@ -23,7 +23,7 @@ use super::{ClientDeviceMessageAttributesV3, DeviceMessageInfoV3};
 
 /// Notification that a device has been found and connected to the server.
 #[derive(
-  ButtplugMessage, PartialEq, Clone, Debug, Getters, CopyGetters, Serialize, Deserialize,
+  ButtplugMessage, Clone, Debug, Getters, CopyGetters, Serialize, Deserialize,
 )]
 pub struct DeviceAddedV3 {
   #[serde(rename = "Id")]

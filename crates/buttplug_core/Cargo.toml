@@ -52,3 +52,4 @@ tokio = { version = "1.46.1", features = ["sync", "time", "macros"] }
 async-stream = "0.3.6"
 strum_macros = "0.27.1"
 strum = "0.27.1"
+derive_builder = "0.20.2"

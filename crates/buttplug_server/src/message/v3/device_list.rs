@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 use super::DeviceMessageInfoV3;
 
 /// List of all devices currently connected to the server.
-#[derive(Default, Clone, Debug, PartialEq, ButtplugMessage, Getters, Serialize, Deserialize)]
+#[derive(Default, Clone, Debug, ButtplugMessage, Getters, Serialize, Deserialize)]
 pub struct DeviceListV3 {
   #[serde(rename = "Id")]
   id: u32,

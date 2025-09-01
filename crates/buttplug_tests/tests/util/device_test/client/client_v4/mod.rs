@@ -59,7 +59,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
           let vibe_features: Vec<&ClientDeviceFeature> = device
             .device_features()
             .iter()
-            .filter(|f| f.1.feature().output().as_ref().is_some_and(|x| x.contains_key(&OutputType::Vibrate)))
+            .filter(|f| f.1.feature().output().as_ref().is_some_and(|x| x.contains(OutputType::Vibrate)))
             .map(|(_, x)| x)
             .collect();
           let f = vibe_features[cmd.index() as usize].clone();
@@ -78,7 +78,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
           let rotate_features: Vec<&ClientDeviceFeature> = device
             .device_features()
             .iter()
-            .filter(|f| f.1.feature().output().as_ref().is_some_and(|x| x.contains_key(&OutputType::RotateWithDirection)))
+            .filter(|f| f.1.feature().output().as_ref().is_some_and(|x| x.contains(OutputType::RotateWithDirection)))
             .map(|(_, x)| x)
             .collect();
           let f = rotate_features[cmd.index() as usize].clone();
@@ -89,7 +89,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
                 .output()
                 .as_ref()
                 .unwrap()
-                .get(&OutputType::RotateWithDirection)
+                .get(OutputType::RotateWithDirection)
                 .unwrap()
                 .step_count() as f64)
               .ceil() as u32,
@@ -111,7 +111,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
                 .output()
                 .as_ref()
                 .unwrap()
-                .get(&OutputType::PositionWithDuration)
+                .get(OutputType::PositionWithDuration)
                 .unwrap()
                 .step_count() as f64)
               .ceil() as u32,

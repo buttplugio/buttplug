@@ -141,6 +141,8 @@ extern crate strum_macros;
 extern crate log;
 
 mod device_config_file;
+
+use buttplug_core::message::OutputType;
 pub use device_config_file::{load_protocol_configs}; //, save_user_config};
 mod device_config_manager;
 pub use device_config_manager::*;
@@ -150,8 +152,8 @@ mod identifiers;
 pub use identifiers::*;
 mod device_definitions;
 pub use device_definitions::*;
-mod device_feature;
-pub use device_feature::*;
+mod server_device_feature;
+pub use server_device_feature::*;
 mod endpoint;
 pub use endpoint::*;
 use uuid::Uuid;
@@ -174,5 +176,11 @@ pub enum ButtplugDeviceConfigError {
   #[error("Device definition with base id {0} not found")]
   BaseIdNotFound(Uuid),
   #[error("Feature vectors between base and user device definitions do not match")]
-  UserFeatureMismatch
+  UserFeatureMismatch,
+  #[error("Output value {0} not in range {1}")]
+  InvalidOutputValue(i32, String),
+  #[error("Output type {0} not available on device")]
+  InvalidOutput(OutputType),
+  #[error("Float value {0} is not 0 < x < 1")]
+  InvalidFloatConversion(f64)
 }

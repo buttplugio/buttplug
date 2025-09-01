@@ -2,11 +2,39 @@ use std::{collections::HashSet, ops::RangeInclusive};
 
 use buttplug_core::message::InputCommandType;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer, ser::{self, SerializeSeq}};
 use uuid::Uuid;
 use crate::{ButtplugDeviceConfigError, RangeWithLimit, ServerDeviceFeature, ServerDeviceFeatureInput, ServerDeviceFeatureInputProperties, ServerDeviceFeatureOutput, ServerDeviceFeatureOutputPositionProperties, ServerDeviceFeatureOutputPositionWithDurationProperties, ServerDeviceFeatureOutputValueProperties};
 
-use super::range_sequence_serialize;
+fn range_serialize<S>(range: &Option<RangeInclusive<u32>>, serializer: S) -> Result<S::Ok, S::Error>
+where
+  S: Serializer,
+{
+  if let Some(range) = range {
+    let mut seq = serializer.serialize_seq(Some(2))?;
+    seq.serialize_element(&range.start())?;
+    seq.serialize_element(&range.end())?;
+    seq.end()
+  } else {
+    Err(ser::Error::custom(
+      "shouldn't be serializing if range is None",
+    ))
+  }
+}
+
+fn range_sequence_serialize<S>(
+  range_vec: &Vec<RangeInclusive<i32>>,
+  serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+  S: Serializer,
+{
+  let mut seq = serializer.serialize_seq(Some(range_vec.len()))?;
+  for range in range_vec {
+    seq.serialize_element(&vec![*range.start(), *range.end()])?;
+  }
+  seq.end()
+}
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct BaseDeviceFeatureOutputValueProperties {
@@ -21,7 +49,7 @@ impl Into<ServerDeviceFeatureOutputValueProperties> for BaseDeviceFeatureOutputV
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct BaseDeviceFeatureOutputPositionProperties {
-  value: RangeInclusive<u32>
+  value: RangeInclusive<i32>
 }
 
 impl Into<ServerDeviceFeatureOutputPositionProperties> for BaseDeviceFeatureOutputPositionProperties {
@@ -32,8 +60,8 @@ impl Into<ServerDeviceFeatureOutputPositionProperties> for BaseDeviceFeatureOutp
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct BaseDeviceFeatureOutputPositionWithDurationProperties {
-  position: RangeInclusive<u32>,
-  duration: RangeInclusive<u32>,
+  position: RangeInclusive<i32>,
+  duration: RangeInclusive<i32>,
 }
 
 impl Into<ServerDeviceFeatureOutputPositionWithDurationProperties> for BaseDeviceFeatureOutputPositionWithDurationProperties {
@@ -107,7 +135,7 @@ impl Into<ServerDeviceFeatureOutput> for BaseDeviceFeatureOutput {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct UserDeviceFeatureOutputValueProperties {
   #[serde(skip_serializing_if="Option::is_none")]
-  value: Option<RangeInclusive<i32>>,
+  value: Option<RangeInclusive<u32>>,
   #[serde(default)]
   disabled: bool,
 }

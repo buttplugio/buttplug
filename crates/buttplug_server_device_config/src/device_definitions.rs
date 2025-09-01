@@ -1,7 +1,7 @@
 use getset::{CopyGetters, Getters};
 use uuid::Uuid;
 
-use super::device_feature::{
+use super::server_device_feature::{
   ServerDeviceFeature,
 };
 #[derive(Debug, Clone, Getters, CopyGetters)]

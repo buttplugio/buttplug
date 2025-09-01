@@ -116,7 +116,6 @@ impl TryFrom<ButtplugClientMessageV2> for ButtplugClientMessageV3 {
 #[derive(
   Debug,
   Clone,
-  PartialEq,
   ButtplugMessage,
   ButtplugMessageValidator,
   FromSpecificButtplugMessage,

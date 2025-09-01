@@ -1,12 +1,10 @@
-use std::sync::Arc;
-
 use futures::{future, FutureExt};
 use getset::{CopyGetters, Getters};
 
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugDeviceMessageNameV4, ButtplugServerMessageV4, DeviceFeature, DeviceFeatureOutput, InputCmdV4, InputCommandType, InputType, InputTypeData, OutputCmdV4, OutputCommand, OutputPositionWithDuration, OutputRotateWithDirection, OutputType, OutputValue
+    ButtplugDeviceMessageNameV4, ButtplugServerMessageV4, DeviceFeature, DeviceFeatureOutput, DeviceFeatureOutputLimits, InputCmdV4, InputCommandType, InputType, InputTypeData, OutputCmdV4, OutputCommand, OutputPositionWithDuration, OutputRotateWithDirection, OutputType, OutputValue
   },
 };
 
@@ -46,15 +44,15 @@ impl ClientDeviceFeature {
     }
   }
 
-  fn check_step_value(&self, feature_output: &DeviceFeatureOutput, steps: u32) -> Result<u32, ButtplugClientError> {
-    if steps <= feature_output.step_count() {
+  fn check_step_value(&self, feature_output: &dyn DeviceFeatureOutputLimits, steps: u32) -> Result<u32, ButtplugClientError> {
+    if feature_output.step_limit().contains(&(steps as i32)) {
       Ok(steps)
     } else {
       Err(ButtplugClientError::ButtplugOutputCommandConversionError(format!("{} is larger than the maximum number of steps ({}).", steps, feature_output.step_count())))
     }
   }
 
-  fn convert_float_value(&self, feature_output: &DeviceFeatureOutput, float_amt: f64) -> Result<u32, ButtplugClientError> {
+  fn convert_float_value(&self, feature_output: &dyn DeviceFeatureOutputLimits, float_amt: f64) -> Result<u32, ButtplugClientError> {
     if float_amt < 0.0f64 || float_amt > 1.0f64 {
       Err(ButtplugClientError::ButtplugOutputCommandConversionError("Float values must be between 0.0 and 1.0".to_owned()))
     } else {
@@ -70,7 +68,7 @@ impl ClientDeviceFeature {
       .output()
       .as_ref()
       .ok_or(ButtplugClientError::ButtplugOutputCommandConversionError(format!("Device feature does not support output type {}", output_type)))?
-      .get(&output_type)
+      .get(output_type)
       .ok_or(ButtplugClientError::ButtplugOutputCommandConversionError(format!("Device feature does not support output type {}", output_type)))?;      
 
     let output_cmd = match client_cmd {
@@ -175,7 +173,7 @@ impl ClientDeviceFeature {
 
   pub fn subscribe_sensor(&self, sensor_type: InputType) -> ButtplugClientResultFuture {
     if let Some(sensor_map) = self.feature.input() {
-      if let Some(sensor) = sensor_map.get(&sensor_type) {
+      if let Some(sensor) = sensor_map.get(sensor_type) {
         if sensor
           .input_commands()
           .contains(&InputCommandType::Subscribe)
@@ -199,7 +197,7 @@ impl ClientDeviceFeature {
 
   pub fn unsubscribe_sensor(&self, sensor_type: InputType) -> ButtplugClientResultFuture {
     if let Some(sensor_map) = self.feature.input() {
-      if let Some(sensor) = sensor_map.get(&sensor_type) {
+      if let Some(sensor) = sensor_map.get(sensor_type) {
         if sensor
           .input_commands()
           .contains(&InputCommandType::Subscribe)
@@ -223,7 +221,7 @@ impl ClientDeviceFeature {
 
   fn read_sensor(&self, sensor_type: InputType) -> ButtplugClientResultFuture<InputTypeData> {
     if let Some(sensor_map) = self.feature.input() {
-      if let Some(sensor) = sensor_map.get(&sensor_type) {
+      if let Some(sensor) = sensor_map.get(sensor_type) {
         if sensor.input_commands().contains(&InputCommandType::Read) {
           let msg = InputCmdV4::new(
             self.device_index,
@@ -269,7 +267,7 @@ impl ClientDeviceFeature {
       .as_ref()
       .ok_or(false)
       .unwrap()
-      .contains_key(&InputType::Battery)
+      .contains(InputType::Battery)
     {
       let send_fut = self.read_sensor(InputType::Battery);
       Box::pin(async move {
@@ -296,7 +294,7 @@ impl ClientDeviceFeature {
       .as_ref()
       .ok_or(false)
       .unwrap()
-      .contains_key(&InputType::Rssi)
+      .contains(InputType::Rssi)
     {
       let send_fut = self.read_sensor(InputType::Rssi);
       Box::pin(async move {

@@ -11,10 +11,7 @@ use crate::{
     hardware::{
       Hardware,
       HardwareCommand,
-      HardwareEvent,
       HardwareReadCmd,
-      HardwareSubscribeCmd,
-      HardwareUnsubscribeCmd,
       HardwareWriteCmd,
     },
     protocol::{generic_protocol_setup, ProtocolHandler},
@@ -23,13 +20,13 @@ use crate::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{InputData, InputReadingV4, InputType, InputTypeData},
-  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+  message::{InputData, InputReadingV4, InputTypeData},
+  util::{stream::convert_broadcast_receiver_to_stream},
 };
 use buttplug_server_device_config::Endpoint;
 use dashmap::DashSet;
 use futures::{
-  future::{self, BoxFuture},
+  future::BoxFuture,
   FutureExt,
   StreamExt,
 };

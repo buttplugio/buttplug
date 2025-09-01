@@ -159,7 +159,7 @@ impl ButtplugClientDevice {
         if let Some(output) = x.1
           .feature()
           .output() {
-          output.contains_key(&actuator_type)
+          output.contains(actuator_type)
         } else { 
           false
         }
@@ -212,14 +212,14 @@ impl ButtplugClientDevice {
     self
       .device_features
       .iter()
-      .any(|x| x.1.feature().input().as_ref().is_some_and(|x| x.contains_key(&InputType::Battery)))
+      .any(|x| x.1.feature().input().as_ref().is_some_and(|x| x.contains(InputType::Battery)))
   }
 
   pub fn battery_level(&self) -> ButtplugClientResultFuture<u32> {
     if let Some(battery) = self
       .device_features
       .iter()
-      .find(|x| x.1.feature().input().as_ref().is_some_and(|x| x.contains_key(&InputType::Battery)))
+      .find(|x| x.1.feature().input().as_ref().is_some_and(|x| x.contains(InputType::Battery)))
     {
       battery.1.battery_level()
     } else {
@@ -236,14 +236,14 @@ impl ButtplugClientDevice {
     self
       .device_features
       .iter()
-      .any(|x| x.1.feature().input().as_ref().is_some_and(|x| x.contains_key(&InputType::Rssi)))
+      .any(|x| x.1.feature().input().as_ref().is_some_and(|x| x.contains(InputType::Rssi)))
   }
 
   pub fn rssi_level(&self) -> ButtplugClientResultFuture<i8> {
     if let Some(rssi) = self
       .device_features
       .iter()
-      .find(|x| x.1.feature().input().as_ref().is_some_and(|x| x.contains_key(&InputType::Rssi)))
+      .find(|x| x.1.feature().input().as_ref().is_some_and(|x| x.contains(InputType::Rssi)))
     {
       rssi.1.rssi_level()
     } else {

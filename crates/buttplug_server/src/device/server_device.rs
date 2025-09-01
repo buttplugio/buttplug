@@ -529,8 +529,8 @@ impl ServerDevice {
         .features()
         .iter()
         .enumerate()
-        .map(|(i, x)| (i as u32, x.as_device_feature(i as u32)))
-        .filter(|(_, x)| x.output().as_ref().is_some_and(|x| x.len() > 0) || x.input().as_ref().is_some_and(|x| x.len() > 0))
+        .map(|(i, x)| (i as u32, x.as_device_feature(i as u32).expect("Infallible")))
+        .filter(|(_, x)| x.output().as_ref().is_some() || x.input().as_ref().is_some())
         .collect::<BTreeMap<u32, DeviceFeature>>(),
     )
   }

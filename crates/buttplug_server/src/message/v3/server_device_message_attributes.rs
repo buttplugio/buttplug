@@ -59,26 +59,23 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
         if let Some(output_map) = feature.output() {
-          for (actuator_type, actuator) in output_map {
-            if ![
-              OutputType::PositionWithDuration,
-              OutputType::RotateWithDirection,
-            ]
-            .contains(actuator_type)
-            {
-              let actuator_type = *actuator_type;
-              let step_limit = actuator.step_limit();
-              let step_count = step_limit.end() - step_limit.start();
-              let attrs = ServerGenericDeviceMessageAttributesV3 {
-                feature_descriptor: feature.description().to_owned(),
-                actuator_type,
-                step_count,
-                feature: feature.clone(),
-                index: 0,
-              };
-              actuator_vec.push(attrs)
-            }
-          }
+          let mut create_attribute = |actuator_type, step_count| {
+            let actuator_type = actuator_type;
+            let attrs = ServerGenericDeviceMessageAttributesV3 {
+              feature_descriptor: feature.description().to_owned(),
+              actuator_type,
+              step_count,
+              feature: feature.clone(),
+              index: 0,
+            };
+            actuator_vec.push(attrs)
+          };
+          // TODO oh come on just make a fucking iterator here. At least, once we figure out the
+          // unifying trait we can use to make an iterator on this.
+          output_map.constrict().as_ref().map(|attr| create_attribute(OutputType::Constrict, attr.value().step_count()));
+          output_map.oscillate().as_ref().map(|attr| create_attribute(OutputType::Oscillate, attr.value().step_count()));
+          output_map.position().as_ref().map(|attr| create_attribute(OutputType::Position, attr.position().step_count()));
+          output_map.rotate().as_ref().map(|attr| create_attribute(OutputType::Rotate, attr.value().step_count()));
         }
         actuator_vec
       })
@@ -91,20 +88,17 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
         if let Some(output_map) = feature.output() {
-          for (actuator_type, actuator) in output_map {
-            if *actuator_type == OutputType::RotateWithDirection {
-              let actuator_type = OutputType::Rotate;
-              let step_limit = actuator.step_limit();
-              let step_count = step_limit.end() - step_limit.start();
-              let attrs = ServerGenericDeviceMessageAttributesV3 {
-                feature_descriptor: feature.description().to_owned(),
-                actuator_type,
-                step_count,
-                feature: feature.clone(),
-                index: 0,
-              };
-              actuator_vec.push(attrs)
-            }
+          if let Some(actuator) = output_map.rotate_with_direction() {
+            let actuator_type = OutputType::Rotate;
+            let step_count = actuator.value().step_count();
+            let attrs = ServerGenericDeviceMessageAttributesV3 {
+              feature_descriptor: feature.description().to_owned(),
+              actuator_type,
+              step_count,
+              feature: feature.clone(),
+              index: 0,
+            };
+            actuator_vec.push(attrs)
           }
         }
         actuator_vec
@@ -116,11 +110,9 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
         if let Some(output_map) = feature.output() {
-          for (actuator_type, actuator) in output_map {
-            if *actuator_type == OutputType::PositionWithDuration {
+          if let Some(actuator) = output_map.position_with_duration() {
               let actuator_type = OutputType::Position;
-              let step_limit = actuator.step_limit();
-              let step_count = step_limit.end() - step_limit.start();
+              let step_count = actuator.position().step_count();
               let attrs = ServerGenericDeviceMessageAttributesV3 {
                 feature_descriptor: feature.description().to_owned(),
                 actuator_type,
@@ -131,7 +123,6 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
               actuator_vec.push(attrs)
             }
           }
-        }
         actuator_vec
       })
       .collect();
@@ -142,29 +133,23 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
         .map(|feature| {
           let mut sensor_vec = vec![];
           if let Some(sensor_map) = feature.input() {
-            for (sensor_type, sensor) in sensor_map {
+            if let Some(battery) = sensor_map.battery() {
               // Only convert Battery backwards. Other sensors weren't really built for v3 and we
               // never recommended using them or implemented much for them.
-              if *sensor_type == InputType::Battery {
-                sensor_vec.push(ServerSensorDeviceMessageAttributesV3 {
-                  feature_descriptor: feature.description().to_owned(),
-                  sensor_type: *sensor_type,
-                  sensor_range: sensor.value_range().clone(),
-                  feature: feature.clone(),
-                  index: 0,
-                });
-              }
+              sensor_vec.push(ServerSensorDeviceMessageAttributesV3 {
+                feature_descriptor: feature.description().to_owned(),
+                sensor_type: InputType::Battery,
+                sensor_range: battery.value_range().clone(),
+                feature: feature.clone(),
+                index: 0,
+              });
             }
           }
           sensor_vec
         })
         .flatten()
         .collect();
-      if !attrs.is_empty() {
-        Some(attrs)
-      } else {
-        None
-      }
+      if !attrs.is_empty() { Some(attrs) } else { None }
     };
 
     Self {

@@ -12,7 +12,7 @@ use buttplug_core::{
     message::{OutputType,},
     util::async_manager
 };
-use buttplug_server_device_config::{load_protocol_configs, UserDeviceCustomization, DeviceDefinition, UserDeviceIdentifier, ServerDeviceFeature, ServerDeviceFeatureOutput, Endpoint};
+use buttplug_server_device_config::{load_protocol_configs, ServerDeviceDefinition, UserDeviceIdentifier, ServerDeviceFeature, ServerDeviceFeatureOutput, Endpoint};
 use buttplug_server::{
     device::{
       hardware::{HardwareCommand, HardwareWriteCmd},
