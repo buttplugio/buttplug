@@ -345,6 +345,43 @@ impl PartialEq for SerialSpecifier {
   }
 }
 
+
+/// Specifier for UDP devices
+///
+/// Handles udp device identification (via address:port) and configuration.
+#[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
+#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
+pub struct UdpSpecifier {
+  address: String,
+  port: u16,
+}
+
+impl UdpSpecifier {
+  pub fn new(address: &str, port: u16) -> Self {
+    Self {
+      address: address.to_owned(),
+      port,
+    }
+  }
+}
+
+impl ToString for UdpSpecifier {
+  fn to_string(&self) -> String
+  {
+    format!("{}:{}", self.address, self.port)
+  }
+}
+
+impl PartialEq for UdpSpecifier {
+  fn eq(&self, other: &Self) -> bool {
+    if *self.address == *other.address && self.port == other.port {
+      return true;
+    }
+    false
+  }
+}
+
+
 /// Specifier for Websocket Device Manager devices
 ///
 /// The websocket device manager is a network based manager, so we have no info other than possibly
@@ -392,6 +429,8 @@ pub enum ProtocolCommunicationSpecifier {
   LovenseConnectService(LovenseConnectServiceSpecifier),
   #[serde(rename = "websocket")]
   Websocket(WebsocketSpecifier),
+  #[serde(rename = "udp")]
+  Udp(UdpSpecifier),
 }
 
 impl PartialEq for ProtocolCommunicationSpecifier {
@@ -404,6 +443,7 @@ impl PartialEq for ProtocolCommunicationSpecifier {
       (HID(self_spec), HID(other_spec)) => self_spec == other_spec,
       (XInput(self_spec), XInput(other_spec)) => self_spec == other_spec,
       (Websocket(self_spec), Websocket(other_spec)) => self_spec == other_spec,
+      (Udp(self_spec), Udp(other_spec)) => self_spec == other_spec,
       (LovenseConnectService(self_spec), LovenseConnectService(other_spec)) => {
         self_spec == other_spec
       }

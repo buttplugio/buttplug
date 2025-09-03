@@ -39,6 +39,8 @@ pub struct EngineOptions {
   #[getset(get_copy = "pub")]
   use_device_websocket_server: bool,
   #[getset(get_copy = "pub")]
+  use_udp: bool,
+  #[getset(get_copy = "pub")]
   device_websocket_server_port: Option<u16>,
   #[getset(get_copy = "pub")]
   crash_main_thread: bool,
@@ -76,6 +78,7 @@ pub struct EngineOptionsExternal {
   pub use_xinput: bool,
   pub use_lovense_connect: bool,
   pub use_device_websocket_server: bool,
+  pub use_udp: bool,
   pub device_websocket_server_port: Option<u16>,
   pub crash_main_thread: bool,
   pub crash_task_thread: bool,
@@ -107,6 +110,7 @@ impl From<EngineOptionsExternal> for EngineOptions {
       use_xinput: other.use_xinput,
       use_lovense_connect: other.use_lovense_connect,
       use_device_websocket_server: other.use_device_websocket_server,
+      use_udp: other.use_udp,
       device_websocket_server_port: other.device_websocket_server_port,
       crash_main_thread: other.crash_main_thread,
       crash_task_thread: other.crash_task_thread,
@@ -205,6 +209,11 @@ impl EngineOptionsBuilder {
 
   pub fn use_device_websocket_server(&mut self, value: bool) -> &mut Self {
     self.options.use_device_websocket_server = value;
+    self
+  }
+
+  pub fn use_udp(&mut self, value: bool) -> &mut Self {
+    self.options.use_udp = value;
     self
   }
 

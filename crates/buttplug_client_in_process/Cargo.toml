@@ -20,7 +20,7 @@ doc = true
 
 
 [features]
-default = ["btleplug-manager", "hid-manager", "lovense-dongle-manager", "lovense-connect-service-manager", "serial-manager", "websocket-manager", "xinput-manager"]
+default = ["btleplug-manager", "hid-manager", "lovense-dongle-manager", "lovense-connect-service-manager", "serial-manager", "websocket-manager", "xinput-manager", "udp-manager"]
 btleplug-manager=["buttplug_server_hwmgr_btleplug"]
 hid-manager=["buttplug_server_hwmgr_hid"]
 lovense-dongle-manager=["buttplug_server_hwmgr_lovense_dongle"]
@@ -28,6 +28,7 @@ lovense-connect-service-manager=["buttplug_server_hwmgr_lovense_connect"]
 serial-manager=["buttplug_server_hwmgr_serial"]
 websocket-manager=["buttplug_server_hwmgr_websocket"]
 xinput-manager=["buttplug_server_hwmgr_xinput"]
+udp-manager=["buttplug_server_hwmgr_udp"]
 
 [dependencies]
 buttplug_derive = "0.8.1"
@@ -42,6 +43,7 @@ buttplug_server_hwmgr_lovense_dongle = { path = "../buttplug_server_hwmgr_lovens
 buttplug_server_hwmgr_serial = { path = "../buttplug_server_hwmgr_serial", optional = true}
 buttplug_server_hwmgr_websocket = { path = "../buttplug_server_hwmgr_websocket", optional = true}
 buttplug_server_hwmgr_xinput = { path = "../buttplug_server_hwmgr_xinput", optional = true}
+buttplug_server_hwmgr_udp = { path = "../buttplug_server_hwmgr_udp", optional = true}
 futures = "0.3.31"
 futures-util = "0.3.31"
 thiserror = "2.0.12"

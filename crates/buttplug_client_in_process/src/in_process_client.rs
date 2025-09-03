@@ -89,6 +89,11 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
     use buttplug_server_hwmgr_xinput::XInputDeviceCommunicationManagerBuilder;
     device_manager_builder.comm_manager(XInputDeviceCommunicationManagerBuilder::default());
   }
+  #[cfg(all(feature = "udp-manager", target_os = "windows"))]
+  {
+    use buttplug_server_hwmgr_udp::UdpCommunicationManagerBuilder;
+    device_manager_builder.comm_manager(UdpCommunicationManagerBuilder::default());
+  }
   let server_builder = ButtplugServerBuilder::new(device_manager_builder.finish().unwrap());
   let server = server_builder.finish().unwrap();
   let connector = ButtplugInProcessClientConnectorBuilder::default()

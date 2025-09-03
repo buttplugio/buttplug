@@ -16,3 +16,6 @@ communication:
       data-bits: 8
       parity: 'N'
       stop-bits: 1
+  - udp:
+      address: default
+      port: 8000

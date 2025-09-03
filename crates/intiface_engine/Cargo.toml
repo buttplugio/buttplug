@@ -35,6 +35,7 @@ buttplug_server_hwmgr_serial = { path = "../buttplug_server_hwmgr_serial" }
 buttplug_server_hwmgr_websocket = { path = "../buttplug_server_hwmgr_websocket" }
 buttplug_server_hwmgr_xinput = { path = "../buttplug_server_hwmgr_xinput" }
 buttplug_transport_websocket_tungstenite = { path = "../buttplug_transport_websocket_tungstenite" }
+buttplug_server_hwmgr_udp = { path = "../buttplug_server_hwmgr_udp" }
 # buttplug = "9.0.8"
 argh = "0.1.13"
 log = "0.4.27"

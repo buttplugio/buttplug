@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 58
+    "minor": 59
   },
   "protocols": {
     "activejoy": {
@@ -19003,6 +19003,12 @@
             "parity": "N",
             "port": "default",
             "stop-bits": 1
+          }
+        },
+        {
+          "udp": {
+            "address": "default",
+            "port": 8000
           }
         }
       ],
