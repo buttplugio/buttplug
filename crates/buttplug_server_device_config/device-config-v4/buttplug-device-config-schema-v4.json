@@ -162,6 +162,22 @@
         "pairs"
       ]
     },
+    "udp-definition": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "address",
+        "port"
+      ],
+      "additionalProperties": false
+    },
     "step-range": {
       "description": "Specifies the range of steps to use for a device. Devices will use the low end value as a stop.",
       "type": "array",
@@ -469,6 +485,9 @@
                   },
                   "lovense-connect-service": {
                     "$ref": "#/components/lovense-connect-service-definition"
+                  },
+                  "udp": {
+                    "$ref": "#/components/udp-definition"
                   }
                 }
               },
@@ -513,6 +532,9 @@
                       },
                       "hid": {
                         "$ref": "#/components/usb-definition"
+                      },
+                      "udp": {
+                        "$ref": "#/components/udp-definition"
                       }
                     }
                   },

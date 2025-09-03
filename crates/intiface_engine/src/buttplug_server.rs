@@ -13,6 +13,7 @@ use buttplug_server_device_config::{DeviceConfigurationManager, load_protocol_co
 use buttplug_server_hwmgr_btleplug::BtlePlugCommunicationManagerBuilder;
 use buttplug_server_hwmgr_lovense_connect::LovenseConnectServiceCommunicationManagerBuilder;
 use buttplug_server_hwmgr_websocket::WebsocketServerDeviceCommunicationManagerBuilder;
+use buttplug_server_hwmgr_udp::UdpCommunicationManagerBuilder;
 use buttplug_transport_websocket_tungstenite::{
   ButtplugWebsocketClientTransport, ButtplugWebsocketServerTransportBuilder,
 };
@@ -72,6 +73,10 @@ pub fn setup_server_device_comm_managers(
       builder = builder.server_port(port);
     }
     server_builder.comm_manager(builder);
+  }
+  if args.use_udp() {
+    info!("Including UDP Support");
+    server_builder.comm_manager(UdpCommunicationManagerBuilder::default());
   }
 }
 

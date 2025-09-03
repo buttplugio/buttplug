@@ -2,7 +2,7 @@
 name = "buttplug_server_hwmgr_udp"
 version = "10.0.0"
 authors = ["Millibyte, LLC <austen@millibyte.io"]
-description = "Buttplug Intimate Hardware Control Library - Core Library"
+description = "Buttplug Intimate Hardware Control Library - UDP Communication Library"
 license = "BSD-3-Clause"
 homepage = "http://buttplug.io"
 repository = "https://github.com/buttplugio/buttplug.git"

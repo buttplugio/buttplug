@@ -1,20 +1,18 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2025 Nonpolynomial Labs LLC., Milibyte LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use std::time::Duration;
-
 use super::UdpHardwareConnector;
-use async_trait::async_trait;
-use buttplug_core::{util::async_manager, errors::ButtplugDeviceError, ButtplugResultFuture};
+use buttplug_core::{ ButtplugResultFuture};
 use buttplug_server::device::hardware::communication::{
   HardwareCommunicationManager,
   HardwareCommunicationManagerBuilder,
   HardwareCommunicationManagerEvent,
 };
+use buttplug_server_device_config::UdpSpecifier;
 use futures::{FutureExt};
 use tokio::sync::mpsc::Sender;
 
@@ -31,13 +29,13 @@ impl HardwareCommunicationManagerBuilder for UdpCommunicationManagerBuilder {
 }
 
 pub struct UdpCommunicationManager {
-  sender: Sender<HardwareCommunicationManagerEvent>,
+  sender: Sender<HardwareCommunicationManagerEvent>
 }
 
 impl UdpCommunicationManager {
-  fn new(sender: Sender<HardwareCommunicationManagerEvent>) -> Self {
+  pub fn new(sender: Sender<HardwareCommunicationManagerEvent>) -> Self {
     trace!("Udp socket created.");
-    Self { sender }
+    Self { sender, }
   }
 }
 
@@ -47,11 +45,34 @@ impl HardwareCommunicationManager for UdpCommunicationManager {
   }
 
   fn start_scanning(&mut self) -> ButtplugResultFuture {
-    debug!("Udp scan: noop");
-    async move { Ok(()) }.boxed()
+    debug!("Udp scan starting");
+    let sender_clone = self.sender.clone();
+    async move {
+      // TODO: Look through confiuration to locate configured UDP
+      let specifiers = [
+        UdpSpecifier::new("192.168.2.185", 8000)
+      ];
+      for specifier in specifiers
+      {
+        if sender_clone.send(HardwareCommunicationManagerEvent::DeviceFound {
+          name: format!("UDP Device {}", specifier.to_string()),
+          address: specifier.to_string(),
+          creator: Box::new(UdpHardwareConnector::new(
+            specifier
+          )),
+        })
+        .await
+        .is_err()
+        {
+          error!("Device manager disappeared, exiting");
+        }
+      }
+      Ok(())
+    }.boxed()
   }
 
   fn stop_scanning(&mut self) -> ButtplugResultFuture {
+    debug!("Udp scan stopping");
     async move { Ok(()) }.boxed()
   }
 
@@ -59,3 +80,4 @@ impl HardwareCommunicationManager for UdpCommunicationManager {
     true
   }
 }
+

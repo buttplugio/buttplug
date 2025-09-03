@@ -20,7 +20,7 @@ doc = true
 
 
 [features]
-default = ["btleplug-manager", "hid-manager", "lovense-dongle-manager", "lovense-connect-service-manager", "serial-manager", "websocket-manager", "xinput-manager"]
+default = ["btleplug-manager", "hid-manager", "lovense-dongle-manager", "lovense-connect-service-manager", "serial-manager", "websocket-manager", "xinput-manager", "udp-manager"]
 btleplug-manager=["buttplug_server_hwmgr_btleplug"]
 hid-manager=["buttplug_server_hwmgr_hid"]
 lovense-dongle-manager=["buttplug_server_hwmgr_lovense_dongle"]

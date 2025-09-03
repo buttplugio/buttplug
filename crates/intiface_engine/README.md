@@ -46,6 +46,7 @@ Command line options are as follows:
 | `use-lovense-connect` | Use the Lovense Connect Buttplug Device Communication Manager |
 | `use-device-websocket-server` | Use the Device Websocket Server Buttplug Device Communication Manager |
 | `device-websocket-server-port` | Port for the device websocket server |
+| `use-udp` | Use UDP Device Communication Manager |
 
 For example, to run the server on websockets at port 12345 with bluetooth device support:
 

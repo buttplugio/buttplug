@@ -123,6 +123,11 @@ pub struct IntifaceCLIArguments {
   #[getset(get_copy = "pub")]
   use_device_websocket_server: bool,
 
+  /// turn on udp device support
+  #[argh(switch)]
+  #[getset(get_copy = "pub")]
+  use_udp: bool,
+
   /// port for device websocket server comm manager (defaults to 54817)
   #[argh(option)]
   #[getset(get_copy = "pub")]
@@ -235,6 +240,7 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
       .use_xinput(args.use_xinput())
       .use_lovense_connect(args.use_lovense_connect())
       .use_device_websocket_server(args.use_device_websocket_server())
+      .use_udp(args.use_udp())
       .max_ping_time(args.max_ping_time())
       .server_name(args.server_name())
       .broadcast_server_mdns(args.broadcast_server_mdns());
