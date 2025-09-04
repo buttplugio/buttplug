@@ -1,0 +1,37 @@
+defaults:
+  name: Kiiroo V3 Device
+  features: []
+  id: b3b6151e-79b8-4aac-a777-0de6b9f2d893
+configurations:
+  - identifier:
+      - KEON WIFI
+      - Keon Wifi
+    name: Kiiroo Keon
+    features:
+      - feature-type: PositionWithDuration
+        id: f4ee99e7-1a14-4315-9870-3990bca7ff94
+        output:
+          PositionWithDuration:
+            step-range:
+              - 0
+              - 99
+      - feature-type: Battery
+        description: Battery Level
+        id: 90319514-ff68-40ae-805d-54ce392a60bd
+        input:
+          Battery:
+            value-range:
+              - - 0
+                - 100
+            input-commands:
+              - Read
+    id: 62ba81c4-0ada-41be-b49d-d53426cdc277
+communication:
+  - btle:
+      names:
+        - KEON WIFI
+        - Keon Wifi
+      services:
+        00001900-0000-1000-8000-00805f9b34fb:
+          tx: 00001800-0000-1000-8000-00805f9b34fb
+          rx: 00001903-0000-1000-8000-00805f9b34fb
