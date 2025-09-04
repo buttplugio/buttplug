@@ -36,6 +36,7 @@ pub mod kgoal_boost;
 pub mod kiiroo_prowand;
 pub mod kiiroo_spot;
 pub mod kiiroo_v2;
+pub mod kiiroo_v3;
 pub mod kiiroo_v21;
 pub mod kiiroo_v21_initialized;
 pub mod kiiroo_v2_vibrator;
@@ -241,6 +242,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     kiiroo_v2::setup::KiirooV2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    kiiroo_v3::setup::KiirooV3IdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
