@@ -161,6 +161,18 @@ configurations:
               - -100
               - 100
     id: d9ced3ed-cc74-4731-baeb-7bbf7fda288e
+  - identifier:
+      - '4002'
+    name: Sinloli Piupiu
+    features:
+      - feature-type: Spray
+        id: c24a6b8c-6665-4cf6-95f8-51140f9788b4
+        output:
+          Spray:
+            step-range:
+              - 0
+              - 1
+    id: ae9c755d-a11f-43c3-9cce-1c3797788434
 communication:
   - btle:
       names:
@@ -174,6 +186,7 @@ communication:
         - Sinloli Cosima
         - Sinloli-Ethel
         - Sinloli Aston
+        - Hismith Piupiu
       services:
         0000ffe5-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe9-0000-1000-8000-00805f9b34fb

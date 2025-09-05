@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 78
+    "minor": 80
   },
   "protocols": {
     "activejoy": {
@@ -4111,7 +4111,8 @@
               "HISMITH S3",
               "Sinloli Cosima",
               "Sinloli-Ethel",
-              "Sinloli Aston"
+              "Sinloli Aston",
+              "Hismith Piupiu"
             ],
             "services": {
               "0000ff90-0000-1000-8000-00805f9b34fb": {
@@ -4386,6 +4387,27 @@
             "2205"
           ],
           "name": "Sinloli Aston"
+        },
+        {
+          "features": [
+            {
+              "feature-type": "Spray",
+              "id": "c24a6b8c-6665-4cf6-95f8-51140f9788b4",
+              "output": {
+                "Spray": {
+                  "step-range": [
+                    0,
+                    1
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "ae9c755d-a11f-43c3-9cce-1c3797788434",
+          "identifier": [
+            "4002"
+          ],
+          "name": "Sinloli Piupiu"
         }
       ],
       "defaults": {
