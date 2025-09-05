@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 74
+    "minor": 78
   },
   "protocols": {
     "activejoy": {
@@ -16890,7 +16890,8 @@
               "CTY916S4",
               "PTYB22S2",
               "CCP322S5",
-              "CTY823S5"
+              "CTY823S5",
+              "qingnan#16"
             ],
             "services": {
               "0000fff0-0000-1000-8000-00805f9b34fb": {
@@ -17113,6 +17114,27 @@
             "CTY916S4"
           ],
           "name": "Sensee Dream Stick"
+        },
+        {
+          "features": [
+            {
+              "feature-type": "Constrict",
+              "id": "4464ae6b-20bc-4c99-9e63-bfda99b7c8cc",
+              "output": {
+                "Constrict": {
+                  "step-range": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "00dc1d7e-9ede-4ae5-95f6-bd70363de806",
+          "identifier": [
+            "qingnan#16"
+          ],
+          "name": "Qingnan #16"
         }
       ],
       "defaults": {

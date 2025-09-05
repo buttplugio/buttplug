@@ -139,6 +139,18 @@ configurations:
               - 0
               - 100
     id: f8032396-8384-448f-88e9-4c754d4ae12e
+  - identifier:
+      - "qingnan#16"
+    name: "Qingnan #16"
+    features:
+      - feature-type: Constrict
+        id: 4464ae6b-20bc-4c99-9e63-bfda99b7c8cc
+        output:
+          Constrict:
+            step-range:
+              - 0
+              - 100
+    id: 00dc1d7e-9ede-4ae5-95f6-bd70363de806
 communication:
   - btle:
       names:
@@ -150,6 +162,7 @@ communication:
         - PTYB22S2
         - CCP322S5
         - CTY823S5
+        - "qingnan#16"
       services:
         0000fff0-0000-1000-8000-00805f9b34fb:
           tx: 0000fff5-0000-1000-8000-00805f9b34fb
