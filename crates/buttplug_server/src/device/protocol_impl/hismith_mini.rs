@@ -183,4 +183,14 @@ impl ProtocolHandler for HismithMini {
             ).into(),
         ])
     }
+
+  fn handle_output_spray_cmd(&self, _feature_index: u32, feature_id: Uuid, _level: u32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![0xcc, 0x0b, 0x01, 0x0c],
+        false,
+      ).into()])
+  }
 }
