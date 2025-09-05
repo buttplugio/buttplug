@@ -265,6 +265,10 @@ configurations:
       - AX05
     name: Adorime Anal Vibrator
     id: bce17a9d-1cfa-47e7-a6fd-6471896bb1d3
+  - identifier:
+      - DT01
+    name: Adorime Chastity Cage
+    id: deb3f920-40f7-4595-92b1-8877b0ef0636
   # Type 1
   - identifier:
       - G317
@@ -1474,6 +1478,7 @@ communication:
         - BGSF # Adorime Male Masturbator
         - BGQS # Adorime Penis Vibrator
         - AX05 # Adorime Anal Vibrator
+        - DT01 # Adorime Chastity Cage
         # Type 1
         - G317
         - G312

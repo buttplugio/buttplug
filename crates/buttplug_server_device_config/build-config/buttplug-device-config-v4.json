@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 72
+    "minor": 74
   },
   "protocols": {
     "activejoy": {
@@ -1297,6 +1297,7 @@
               "BGSF",
               "BGQS",
               "AX05",
+              "DT01",
               "G317",
               "G312",
               "G302",
@@ -1777,6 +1778,13 @@
             "AX05"
           ],
           "name": "Adorime Anal Vibrator"
+        },
+        {
+          "id": "deb3f920-40f7-4595-92b1-8877b0ef0636",
+          "identifier": [
+            "DT01"
+          ],
+          "name": "Adorime Chastity Cage"
         },
         {
           "features": [
