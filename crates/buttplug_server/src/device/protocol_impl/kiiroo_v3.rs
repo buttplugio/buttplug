@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::device::{
-  hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+  hardware::Hardware,
   protocol::{
     generic_protocol_initializer_setup,
     ProtocolHandler,
@@ -23,10 +23,8 @@ use buttplug_server_device_config::{
   UserDeviceIdentifier,
 };
 use std::sync::{
-  atomic::{AtomicU8, Ordering},
   Arc,
 };
-use uuid::{uuid, Uuid};
 
 generic_protocol_initializer_setup!(KiirooV3, "kiiroo-v3");
 
@@ -37,7 +35,7 @@ pub struct KiirooV3Initializer {}
 impl ProtocolInitializer for KiirooV3Initializer {
   async fn initialize(
     &mut self,
-    hardware: Arc<Hardware>,
+    _: Arc<Hardware>,
     _: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(KiirooV21::default()))
