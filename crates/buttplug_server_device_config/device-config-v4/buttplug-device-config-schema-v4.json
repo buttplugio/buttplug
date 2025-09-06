@@ -270,11 +270,8 @@
           "id": {
             "$ref": "#/components/uuid"
           },
-          "base-id": {
+          "base_id": {
             "$ref": "#/components/uuid"
-          },
-          "feature-type": {
-            "type": "string"
           },
           "output": {
             "type": "object",
@@ -322,39 +319,10 @@
                 }
               }
             }
-          },
-          "input": {
-            "type": "object",
-            "patternProperties": {
-              "^(battery|rssi|pressure)$": {
-                "type": "object",
-                "properties": {
-                  "value-range": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/value-range"
-                    },
-                    "minItems": 1
-                  },
-                  "input-commands": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "pattern": "^(Read|Subscribe)$"
-                    }
-                  }
-                },
-                "required": [
-                  "value-range",
-                  "input-commands"
-                ],
-                "additionalProperties": false
-              }
-            }
           }
         },
         "required": [
-          "base-id",
+          "base_id",
           "id"
         ],
         "additionalProperties": false
@@ -369,7 +337,7 @@
         "deny": {
           "type": "boolean"
         },
-        "display-name": {
+        "display_name": {
           "type": "string"
         },
         "index": {
@@ -392,7 +360,7 @@
         "id": {
           "$ref": "#/components/uuid"
         },
-        "protocol-variant": {
+        "protocol_variant": {
           "type": "string"
         },
         "features": {
@@ -423,7 +391,7 @@
           "id": {
             "$ref": "#/components/uuid"
           },
-          "protocol-variant": {
+          "protocol_variant": {
             "type": "string"
           },
           "features": {
@@ -503,7 +471,7 @@
       },
       "additionalProperties": false
     },
-    "user-configs": {
+    "user_configs": {
       "type": "object",
       "properties": {
         "protocols": {
@@ -582,25 +550,25 @@
                   "id": {
                     "$ref": "#/components/uuid"
                   },
-                  "base-id": {
+                  "base_id": {
                     "$ref": "#/components/uuid"
                   },
                   "features": {
                     "$ref": "#/components/user-config-features"
                   },
-                  "user-config": {
+                  "user_config": {
                     "$ref": "#/components/user-config-customization"
                   },
-                  "message-gap-ms": {
+                  "message_gap_ms": {
                     "type": "integer",
                     "min": 0
                   }
                 },
                 "required": [
                   "id",
-                  "base-id",
+                  "base_id",
                   "features",
-                  "user-config"
+                  "user_config"
                 ],
                 "additionalProperties": false
               }

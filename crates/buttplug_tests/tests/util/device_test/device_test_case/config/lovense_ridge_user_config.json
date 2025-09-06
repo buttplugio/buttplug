@@ -3,7 +3,7 @@
     "major": 4,
     "minor": 999
   },
-  "user-configs": {
+  "user_configs": {
     "devices": [
       {
         "identifier": {
@@ -14,27 +14,32 @@
         "config": {
           "name": "Lovense Sex Machine",
           "id": "c8633234-07a4-4ad9-961d-a4d777b32be8",
-          "base-id": "9b52eca4-0e49-426e-a543-2ef735cd803a",
           "features": [
             {
               "description": "Fucking Machine Oscillation Speed",
+              "base_id": "f9506652-c4ac-43b1-b184-cd8016b64623",
+              "id": "f9506652-c4ac-43b1-b184-cd8016b64623",
               "output": {
-                "Oscillate": {
-                  "step-limit": [
+                "oscillate": {
+                  "value": [
                     0,
-                    10
+                    20
                   ]
                 }
-              },
-              "base-id": "0ab80cc0-7a82-4cb6-ba4f-0f18ddb2911f",
-              "id": "56d94863-b321-428b-8b68-bac0197556e2"
+              }
+            },
+            {
+              "description": "battery Level",
+              "base_id": "7c382c60-0ee2-4315-b8cf-cfd3ab4c9ccd",
+              "id": "77d6498b-3707-4ca6-b37d-e0d6f868d302"
             }
           ],
-          "user-config": {
+          "base_id": "8667f7b6-7baa-4e46-9d76-947fb707f0f3",
+          "user_config": {
             "allow": false,
             "deny": false,
             "index": 0,
-            "display-name": "Lovense Name Test"
+            "display_name": "Lovense Name Test"
           }
         }
       }

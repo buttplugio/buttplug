@@ -57,7 +57,6 @@ impl Into<ServerDeviceDefinition> for ConfigBaseDeviceDefinition {
 #[derive(Serialize, Deserialize, Debug, Getters, CopyGetters, Default, Clone, MutGetters)]
 pub struct ConfigUserDeviceCustomization {
   #[serde(
-    rename = "display-name",
     default,
     skip_serializing_if = "Option::is_none"
   )]
@@ -73,7 +72,6 @@ pub struct ConfigUserDeviceCustomization {
   index: u32,
   #[getset(get_copy = "pub")]
   #[serde(
-    rename = "message-gap-ms",
     default,
     skip_serializing_if = "Option::is_none"
   )]
@@ -85,14 +83,12 @@ pub struct ConfigUserDeviceDefinition {
   #[getset(get_copy = "pub")]
   id: Uuid,
   #[getset(get_copy = "pub")]
-  #[serde(rename = "base-id")]
   base_id: Uuid,
   #[getset(get = "pub")]
   /// Message attributes for this device instance.
   #[getset(get = "pub", get_mut = "pub")]
   features: Vec<ConfigUserDeviceFeature>,
   #[getset(get = "pub", get_mut = "pub")]
-  #[serde(rename = "user-config")]
   /// Per-user configurations specific to this device instance.
   user_config: ConfigUserDeviceCustomization,
 }

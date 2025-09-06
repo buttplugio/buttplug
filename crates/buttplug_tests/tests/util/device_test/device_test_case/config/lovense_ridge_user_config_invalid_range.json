@@ -3,7 +3,7 @@
     "major": 4,
     "minor": 999
   },
-  "user-configs": {
+  "user_configs": {
     "devices": [
       {
         "identifier": {
@@ -14,47 +14,47 @@
         "config": {
           "name": "Lovense Ridge",
           "id": "c8633234-07a4-4ad9-961d-a4d777b32be8",
-          "base-id": "c8633234-07a4-4ad9-961d-a4d777b32be7",
+          "base_id": "c8633234-07a4-4ad9-961d-a4d777b32be7",
           "features": [
             {
               "feature-type": "Oscillate",
               "description": "Fucking Machine Oscillation Speed",
               "output": {
-                "Oscillate": {
-                  "step-range": [
+                "oscillate": {
+                  "step_range": [
                     0,
                     30
                   ],
-                  "step-limit": [
+                  "step_limit": [
                     0,
                     30
                   ]
                 }
               },
-              "base-id": "56d94863-b321-428b-8b68-bac0197556e1",
+              "base_id": "56d94863-b321-428b-8b68-bac0197556e1",
               "id": "56d94863-b321-428b-8b68-bac0197556e2"
             },
             {
               "feature-type": "Battery",
               "description": "Battery Level",
               "input": {
-                "Battery": {
-                  "value-range": [
+                "battery": {
+                  "value_range": [
                     [
                       0,
                       100
                     ]
                   ],
-                  "input-commands": [
+                  "input_commands": [
                     "Read"
                   ]
                 }
               },
-              "base-id": "b9899daa-7755-4ebb-88b4-13122d12745e",
+              "base_id": "b9899daa-7755-4ebb-88b4-13122d12745e",
               "id": "b9899daa-7755-4ebb-88b4-13122d12745f"
             }
           ],
-          "user-config": {
+          "user_config": {
             "allow": false,
             "deny": false,
             "index": 0

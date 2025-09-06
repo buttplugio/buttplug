@@ -3,7 +3,7 @@
     "major": 4,
     "minor": 1
   },
-  "user-configs": {
+  "user_configs": {
     "protocols": {
       "tcode-v03": {
         "communication": [

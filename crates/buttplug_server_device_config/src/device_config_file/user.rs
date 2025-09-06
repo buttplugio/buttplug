@@ -26,7 +26,7 @@ pub struct UserConfigDefinition {
 #[getset(get = "pub", get_mut = "pub", set = "pub")]
 pub struct UserConfigFile {
   version: ConfigVersion,
-  #[serde(rename = "user-configs", default)]
+  #[serde(default)]
   user_configs: Option<UserConfigDefinition>,
 }
 

@@ -5,7 +5,7 @@ defaults:
 configurations:
   - identifier:
       - Bach smart
-    protocol-variant: vorze-sa-vibrator
+    protocol_variant: vorze-sa-vibrator
     name: Vorze Bach
     features:
       - id: 447dbcfa-c295-4880-afba-93e24499a78d
@@ -18,7 +18,7 @@ configurations:
   - identifier:
       - ROCKET
     name: Adult Festa Rocket
-    protocol-variant: vorze-sa-vibrator
+    protocol_variant: vorze-sa-vibrator
     features:
       - id: 557d3c89-2e15-4b4a-8480-07f4826a8384
         output:
@@ -30,7 +30,7 @@ configurations:
   - identifier:
       - CycSA
     name: Vorze A10 Cyclone SA
-    protocol-variant: vorze-sa-single-rotator
+    protocol_variant: vorze-sa-single-rotator
     features:
       - id: 8e249d53-8d80-4f42-bc40-e6edb7779e92
         output:
@@ -42,7 +42,7 @@ configurations:
   - identifier:
       - UFOSA
     name: Vorze UFO SA
-    protocol-variant: vorze-sa-single-rotator
+    protocol_variant: vorze-sa-single-rotator
     features:
       - id: 2d8d1443-c394-4df4-b9bb-1659d8323b45
         output:
@@ -54,7 +54,7 @@ configurations:
   - identifier:
       - UFO-TW
     name: Vorze UFO TW
-    protocol-variant: vorze-sa-dual-rotator
+    protocol_variant: vorze-sa-dual-rotator
     features:
       - id: a1632ce4-314f-481d-9ae2-2a11a0c4caa4
         output:
@@ -71,7 +71,7 @@ configurations:
     id: 32e92986-3ae4-45f3-9aec-05d6028f1cb7
   - identifier:
       - VorzePiston
-    protocol-variant: vorze-sa-piston
+    protocol_variant: vorze-sa-piston
     name: Vorze Piston
     features:
       - id: 7c8d7a1d-9e2f-4a92-83f3-42a0840b90bd

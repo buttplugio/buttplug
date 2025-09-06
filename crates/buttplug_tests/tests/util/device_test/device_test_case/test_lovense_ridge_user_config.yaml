@@ -36,8 +36,8 @@ device_commands:
       commands: 
         - !Write
             endpoint: tx
-            # "Vibrate:5;"
-            data: [86, 105, 98, 114, 97, 116, 101, 58, 53, 59]
+            # "Vibrate:10;"
+            data: [86, 105, 98, 114, 97, 116, 101, 58, 49, 48, 59]
             write_with_response: false
   - !Messages
       device_index: 0

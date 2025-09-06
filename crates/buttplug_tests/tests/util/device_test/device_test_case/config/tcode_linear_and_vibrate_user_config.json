@@ -3,7 +3,7 @@
     "major": 4,
     "minor": 999
   },
-  "user-configs": {
+  "user_configs": {
     "protocols": {
       "tcode-v03": {
         "communication": [
@@ -30,12 +30,15 @@
             "features": [
               {
                 "description": "",
-                "feature-type": "PositionWithDuration",
                 "output": {
-                  "PositionWithDuration": {
-                    "step-range": [
+                  "position_with_duration": {
+                    "position": [
                       0,
                       100
+                    ],
+                    "duration": [
+                      0,
+                      100000
                     ]
                   }
                 },
@@ -43,10 +46,9 @@
               },
               {
                 "description": "",
-                "feature-type": "Vibrate",
                 "output": {
-                  "Vibrate": {
-                    "step-range": [
+                  "vibrate": {
+                    "value": [
                       0,
                       99
                     ]
@@ -68,36 +70,19 @@
         },
         "config": {
           "id": "6d3f0643-1933-4df6-85ff-5675bf1a3dd4",
-          "base-id": "e4384a37-fd37-4b9e-8464-a510dd8410a7",
+          "base_id": "e4384a37-fd37-4b9e-8464-a510dd8410a7",
           "features": [
             {
-              "output": {
-                "PositionWithDuration": {
-                  "step-limit": [
-                    0,
-                    100
-                  ]
-                }
-              },
-              "base-id": "c5e6384e-399b-4c2b-9791-eb48abaf3bf7",
+              "base_id": "c5e6384e-399b-4c2b-9791-eb48abaf3bf7",
               "id": "a9e532ff-f72f-4c2f-9ae6-02a6ddcb2d74"
             },
             {
               "description": "",
-              "feature-type": "Vibrate",
-              "output": {
-                "Vibrate": {
-                  "step-limit": [
-                    0,
-                    99
-                  ]
-                }
-              },
-              "base-id": "e4384a37-fd37-4b9e-8464-a510dd8410a7",
+              "base_id": "e4384a37-fd37-4b9e-8464-a510dd8410a7",
               "id": "10deb5c9-9d44-4dab-abf3-500b7df51e9f"
             }
           ],
-          "user-config": {
+          "user_config": {
             "allow": false,
             "deny": false,
             "index": 0

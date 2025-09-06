@@ -80,7 +80,7 @@ const BASE_VALID_NULL_USER_CONFIG_JSON: &str = r#"
     "major": 4,
     "minor": 999
   },
-  "user-configs": {}
+  "user_configs": {}
 }
 "#;
 
@@ -131,7 +131,7 @@ async fn test_valid_user_config() {
       major: 3,
       minor: 0
     },
-    "user-configs": {
+    "user_configs": {
       "devices": [
         {
           "identifier": {
@@ -143,14 +143,13 @@ async fn test_valid_user_config() {
             "name": "Lovense Test Device",
             "features": [
               {
-                "feature-type": "Vibrate",
                 "description": "Test Speed",
                 "actuator": {
-                  "step-range": [
+                  "step_range": [
                     0,
                     20
                   ],
-                  "step-limit: [
+                  "step_limit: [
                     10,
                     15
                   ],
@@ -160,7 +159,6 @@ async fn test_valid_user_config() {
                 }
               },
               {
-                "feature-type": "Battery",
                 "description": "Battery Level",
                 "sensor": {
                   "value-range": [
@@ -175,11 +173,11 @@ async fn test_valid_user_config() {
                 }
               }
             ],
-            "user-config": {
+            "user_config": {
               "allow": false,
               "deny": false,
               "index": 0,
-              "display-name": "Lovense Name Test"
+              "display_name": "Lovense Name Test"
             }
           }
         }
@@ -203,7 +201,7 @@ async fn test_invalid_step_range_device_config_wrong_range_length() {
       major: 3,
       minor: 0
     },
-    "user-configs": {
+    "user_configs": {
       "devices": [
         {
           "identifier": {
@@ -215,7 +213,6 @@ async fn test_invalid_step_range_device_config_wrong_range_length() {
             "name": "Lovense Test Device",
             "features": [
               {
-                "feature-type": "Vibrate",
                 "description": "Test Speed",
                 "actuator": {
                   "step-range": [
@@ -227,7 +224,6 @@ async fn test_invalid_step_range_device_config_wrong_range_length() {
                 }
               },
               {
-                "feature-type": "Battery",
                 "description": "Battery Level",
                 "sensor": {
                   "value-range": [
@@ -242,11 +238,11 @@ async fn test_invalid_step_range_device_config_wrong_range_length() {
                 }
               }
             ],
-            "user-config": {
+            "user_config": {
               "allow": false,
               "deny": false,
               "index": 0,
-              "display-name": "Lovense Name Test"
+              "display_name": "Lovense Name Test"
             }
           }
         }
