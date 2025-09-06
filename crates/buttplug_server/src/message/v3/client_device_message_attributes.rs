@@ -285,6 +285,10 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
             .spray()
             .as_ref()
             .map(|x| create_actuator(OutputType::Spray, x));
+          output_map
+            .vibrate()
+            .as_ref()
+            .map(|x| create_actuator(OutputType::Vibrate, x));
         }
         actuator_vec
       })

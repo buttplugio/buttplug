@@ -247,7 +247,7 @@ impl ServerDeviceManagerEventLoop {
               }
             },
             Err(e) => {
-              error!("Device errored while trying to connect: {}", e);
+              error!("Device errored while trying to connect: {:?}", e);
             }
           }
           connecting_devices.remove(&address);

@@ -12,6 +12,7 @@ pub mod async_manager;
 pub mod future;
 pub mod json;
 pub mod stream;
+pub mod range_serialize;
 
 #[cfg(not(feature = "wasm"))]
 pub use tokio::time::sleep;

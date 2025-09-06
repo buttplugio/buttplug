@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::message::InputCommandType;
+use crate::{message::InputCommandType, util::range_serialize::*};
 use derive_builder::Builder;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
@@ -72,25 +72,22 @@ pub enum InputType {
 #[derive(
   Clone, Debug, Default, Getters, MutGetters, CopyGetters, Setters, Serialize, Deserialize,
 )]
+#[serde(rename_all="PascalCase")]
 pub struct DeviceFeature {
   // Index of the feature on the device. This was originally implicit as the position in the feature
   // array. We now make it explicit even though it's still just array position, because implicit
   // array positions have made life hell in so many different ways.
   #[getset(get_copy = "pub")]
-  #[serde(rename = "FeatureIndex")]
   feature_index: u32,
   #[getset(get = "pub", get_mut = "pub(super)")]
-  #[serde(default)]
-  #[serde(rename = "FeatureDescription")]
+  #[serde(default, rename = "FeatureDescription")]
   description: String,
   // TODO Maybe make this its own object instead of a HashMap?
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(rename = "Output")]
   output: Option<DeviceFeatureOutput>,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(rename = "Input")]
   input: Option<DeviceFeatureInput>,
 }
 
@@ -130,9 +127,10 @@ pub trait DeviceFeatureOutputLimits {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Getters)]
+#[serde(rename_all="PascalCase")]
 pub struct DeviceFeatureOutputValueProperties {
   #[getset(get = "pub")]
-  #[serde(rename = "Value")]
+  #[serde(serialize_with = "range_serialize")]
   value: RangeInclusive<i32>,
 }
 
@@ -156,12 +154,13 @@ impl DeviceFeatureOutputLimits for DeviceFeatureOutputValueProperties {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Getters)]
+#[serde(rename_all="PascalCase")]
 pub struct DeviceFeatureOutputPositionWithDurationProperties {
   #[getset(get = "pub")]
-  #[serde(rename = "Position")]
+  #[serde(serialize_with = "range_serialize")]
   position: RangeInclusive<i32>,
   #[getset(get = "pub")]
-  #[serde(rename = "Duration")]
+  #[serde(serialize_with = "range_serialize")]
   duration: RangeInclusive<i32>,
 }
 
@@ -187,16 +186,27 @@ impl DeviceFeatureOutputLimits for DeviceFeatureOutputPositionWithDurationProper
 #[derive(Clone, Debug, Getters, Setters, Default, Serialize, Deserialize, Builder)]
 #[builder(setter(strip_option), default)]
 #[getset(get = "pub")]
+#[serde(rename_all="PascalCase")]
 pub struct DeviceFeatureOutput {
+  #[serde(skip_serializing_if="Option::is_none")]
   vibrate: Option<DeviceFeatureOutputValueProperties>,
+  #[serde(skip_serializing_if="Option::is_none")]
   rotate: Option<DeviceFeatureOutputValueProperties>,
+  #[serde(skip_serializing_if="Option::is_none")]
   rotate_with_direction: Option<DeviceFeatureOutputValueProperties>,
+  #[serde(skip_serializing_if="Option::is_none")]
   oscillate: Option<DeviceFeatureOutputValueProperties>,
+  #[serde(skip_serializing_if="Option::is_none")]
   constrict: Option<DeviceFeatureOutputValueProperties>,
+  #[serde(skip_serializing_if="Option::is_none")]
   heater: Option<DeviceFeatureOutputValueProperties>,
+  #[serde(skip_serializing_if="Option::is_none")]
   led: Option<DeviceFeatureOutputValueProperties>,
+  #[serde(skip_serializing_if="Option::is_none")]
   position: Option<DeviceFeatureOutputValueProperties>,
+  #[serde(skip_serializing_if="Option::is_none")]
   position_with_duration: Option<DeviceFeatureOutputPositionWithDurationProperties>,
+  #[serde(skip_serializing_if="Option::is_none")]
   spray: Option<DeviceFeatureOutputValueProperties>,
 }
 
@@ -237,13 +247,12 @@ impl DeviceFeatureOutput {
 #[derive(
   Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize,
 )]
+#[serde(rename_all="PascalCase")]
 pub struct DeviceFeatureInputProperties {
   #[getset(get = "pub", get_mut = "pub(super)")]
-  #[serde(rename = "ValueRange")]
   #[serde(serialize_with = "range_sequence_serialize")]
   value_range: Vec<RangeInclusive<i32>>,
   #[getset(get = "pub")]
-  #[serde(rename = "InputCommands")]
   input_commands: HashSet<InputCommandType>,
 }
 
@@ -263,10 +272,15 @@ impl DeviceFeatureInputProperties {
 #[derive(Clone, Debug, Getters, Setters, Default, Serialize, Deserialize, Builder)]
 #[builder(setter(strip_option), default)]
 #[getset(get = "pub")]
+#[serde(rename_all="PascalCase")]
 pub struct DeviceFeatureInput {
+  #[serde(skip_serializing_if="Option::is_none")]
   battery: Option<DeviceFeatureInputProperties>,
+  #[serde(skip_serializing_if="Option::is_none")]
   rssi: Option<DeviceFeatureInputProperties>,
+  #[serde(skip_serializing_if="Option::is_none")]
   pressure: Option<DeviceFeatureInputProperties>,
+  #[serde(skip_serializing_if="Option::is_none")]
   button: Option<DeviceFeatureInputProperties>,
 }
 

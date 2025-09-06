@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 64
+    "minor": 65
   },
   "protocols": {
     "activejoy": {
@@ -18829,7 +18829,7 @@
             "Bach smart"
           ],
           "name": "Vorze Bach",
-          "protocol-variant": "vorze-sa-vibrator"
+          "protocol_variant": "vorze-sa-vibrator"
         },
         {
           "features": [
@@ -18850,7 +18850,7 @@
             "ROCKET"
           ],
           "name": "Adult Festa Rocket",
-          "protocol-variant": "vorze-sa-vibrator"
+          "protocol_variant": "vorze-sa-vibrator"
         },
         {
           "features": [
@@ -18871,7 +18871,7 @@
             "CycSA"
           ],
           "name": "Vorze A10 Cyclone SA",
-          "protocol-variant": "vorze-sa-single-rotator"
+          "protocol_variant": "vorze-sa-single-rotator"
         },
         {
           "features": [
@@ -18892,7 +18892,7 @@
             "UFOSA"
           ],
           "name": "Vorze UFO SA",
-          "protocol-variant": "vorze-sa-single-rotator"
+          "protocol_variant": "vorze-sa-single-rotator"
         },
         {
           "features": [
@@ -18924,7 +18924,7 @@
             "UFO-TW"
           ],
           "name": "Vorze UFO TW",
-          "protocol-variant": "vorze-sa-dual-rotator"
+          "protocol_variant": "vorze-sa-dual-rotator"
         },
         {
           "features": [
@@ -18949,7 +18949,7 @@
             "VorzePiston"
           ],
           "name": "Vorze Piston",
-          "protocol-variant": "vorze-sa-piston"
+          "protocol_variant": "vorze-sa-piston"
         }
       ],
       "defaults": {

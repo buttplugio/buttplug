@@ -228,7 +228,9 @@ fn load_user_config(
         .config()
         .build_from_base_definition(base_config)
       {
-        dcm_builder.user_device_definition(user_device_config_pair.identifier(), &user_config);
+        if let Err(e) = dcm_builder.user_device_definition(user_device_config_pair.identifier(), &user_config) {
+          error!("Device definition not valid, skipping:\n{:?}\n{:?}", e, user_config)
+        }
       }
     } else {
       error!(

@@ -55,7 +55,6 @@ impl ServerDeviceDefinitionBuilder {
     let mut value = value.clone();
     value.base_id = Some(value.id);
     value.id = id;
-    value.features = vec!();
     ServerDeviceDefinitionBuilder { def: value }
   }
 

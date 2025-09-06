@@ -220,15 +220,13 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedOutputVecCmdV4 {
       ));
     }
     for cmd in msg.scalars() {
-      let scalar_attrs = attrs
+      let scalar_attrs = if let Some(a) = attrs
         .attrs_v3()
-        .scalar_cmd()
-        .as_ref()
-        .ok_or(ButtplugError::from(
-          ButtplugDeviceError::MessageNotSupported(
-            ButtplugDeviceMessageNameV3::ScalarCmd.to_string(),
-          ),
-        ))?;
+        .scalar_cmd() {
+          a 
+        } else {
+          continue;
+        };
       let feature = scalar_attrs
         .get(cmd.index() as usize)
         .ok_or(ButtplugError::from(
@@ -250,7 +248,8 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedOutputVecCmdV4 {
         ))?;
       let output_value = output
         .calculate_from_float(cmd.actuator_type(), cmd.scalar())
-        .map_err(|_| {
+        .map_err(|e| {
+          error!("{:?}", e);
           ButtplugError::from(ButtplugDeviceError::DeviceNoActuatorError(
             "ScalarCmdV3".to_owned(),
           ))

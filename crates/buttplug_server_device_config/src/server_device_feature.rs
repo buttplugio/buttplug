@@ -111,11 +111,11 @@ impl ServerDeviceFeatureOutputValueProperties {
   }
 
   pub fn calculate_scaled_float(&self, value: f64) -> Result<i32, ButtplugDeviceConfigError> {
-    if value > 1.0 || value < 1.0 {
+    if value > 1.0 || value < 0.0 {
       Err(ButtplugDeviceConfigError::InvalidFloatConversion(value))
     } else {
       let value = if value < 0.000001 { 0f64 } else { value };
-      self.calculate_scaled_value((self.value.step_count() as f64 * value) as i32)
+      self.calculate_scaled_value((self.value.step_count() as f64 * value).ceil() as i32)
     }
   }
 
@@ -168,9 +168,13 @@ impl ServerDeviceFeatureOutputPositionProperties {
   }
 
   pub fn calculate_scaled_float(&self, value: f64) -> Result<i32, ButtplugDeviceConfigError> {
-    self
-      .calculate_scaled_value((self.position.step_count() as f64 * value) as u32)
-      .map(|x| x as i32)
+    if value > 1.0 || value < 0.0 {
+      Err(ButtplugDeviceConfigError::InvalidFloatConversion(value))
+    } else {
+      self
+        .calculate_scaled_value((self.position.step_count() as f64 * value).ceil() as u32)
+        .map(|x| x as i32)
+    }
   }
 
   // We'll get a number from 0-x here. We'll need to calculate it with in the range we have.
