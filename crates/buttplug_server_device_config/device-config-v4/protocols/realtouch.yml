@@ -14,5 +14,5 @@ defaults:
 communication:
   - hid:
       pairs:
-        - vendor-id: 8020
-          product-id: 1
+        - vendor_id: 8020
+          product_id: 1

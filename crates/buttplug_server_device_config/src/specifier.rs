@@ -87,10 +87,10 @@ pub struct BluetoothLESpecifier {
   /// Set of expected advertised names for this device.
   names: HashSet<String>,
   /// Array of possible manufacturer data values.
-  #[serde(default, rename = "manufacturer-data")]
+  #[serde(default)]
   manufacturer_data: Vec<BluetoothLEManufacturerData>,
   /// Set of expected advertised services for this device.
-  #[serde(default, rename = "advertised-services")]
+  #[serde(default)]
   advertised_services: HashSet<Uuid>,
   /// Services we expect the device may have. More services may be listed in a specifier than any
   /// one device may have, but we expect at least one to be matched by a device in order to consider
@@ -254,9 +254,7 @@ impl PartialEq for XInputSpecifier {
   Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy, Getters, Setters, MutGetters,
 )]
 pub struct VIDPIDPair {
-  #[serde(rename = "vendor-id")]
   vendor_id: u16,
-  #[serde(rename = "product-id")]
   product_id: u16,
 }
 
@@ -299,11 +297,8 @@ impl PartialEq for VIDPIDSpecifier {
 #[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 pub struct SerialSpecifier {
-  #[serde(rename = "baud-rate")]
   baud_rate: u32,
-  #[serde(rename = "data-bits")]
   data_bits: u8,
-  #[serde(rename = "stop-bits")]
   stop_bits: u8,
   parity: char,
   port: String,
@@ -382,7 +377,7 @@ pub enum ProtocolCommunicationSpecifier {
   Serial(SerialSpecifier),
   #[serde(rename = "xinput")]
   XInput(XInputSpecifier),
-  #[serde(rename = "lovense-connect-service")]
+  #[serde(rename = "lovense_connect_service")]
   LovenseConnectService(LovenseConnectServiceSpecifier),
   #[serde(rename = "websocket")]
   Websocket(WebsocketSpecifier),

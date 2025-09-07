@@ -11,5 +11,5 @@ defaults:
 communication:
   - hid:
       pairs:
-        - vendor-id: 1155
-          product-id: 22352
+        - vendor_id: 1155
+          product_id: 22352

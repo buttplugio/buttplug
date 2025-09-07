@@ -21,7 +21,7 @@ communication:
   - btle:
       names:
         - Placeholder to avoid conflict with bad attempt to clone a Lovense Lush
-      advertised-services:
+      advertised_services:
         - 00001320-0000-1000-8000-00805f9b34fb
       services:
         6e400001-b5a3-f393-e0a9-e50e24dcca9e:

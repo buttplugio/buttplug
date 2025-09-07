@@ -11,7 +11,7 @@ defaults:
 communication:
   - serial:
       port: default
-      baud-rate: 19200
-      data-bits: 8
+      baud_rate: 19200
+      data_bits: 8
       parity: 'N'
-      stop-bits: 1
+      stop_bits: 1

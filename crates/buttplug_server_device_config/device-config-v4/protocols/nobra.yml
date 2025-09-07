@@ -17,7 +17,7 @@ communication:
           tx: 0000abf1-0000-1000-8000-00805f9b34fb
   - serial:
       port: default
-      baud-rate: 19200
-      data-bits: 8
+      baud_rate: 19200
+      data_bits: 8
       parity: 'N'
-      stop-bits: 1
+      stop_bits: 1

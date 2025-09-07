@@ -9,11 +9,11 @@
         "communication": [
           {
             "serial": {
-              "baud-rate": 115200,
-              "data-bits": 8,
+              "baud_rate": 115200,
+              "data_bits": 8,
               "parity": "N",
               "port": "COM1",
-              "stop-bits": 1
+              "stop_bits": 1
             }
           },
           {

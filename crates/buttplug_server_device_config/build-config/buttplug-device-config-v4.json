@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 65
+    "minor": 67
   },
   "protocols": {
     "activejoy": {
@@ -42,7 +42,7 @@
       "communication": [
         {
           "btle": {
-            "advertised-services": [
+            "advertised_services": [
               "00001320-0000-1000-8000-00805f9b34fb"
             ],
             "names": [
@@ -8746,11 +8746,11 @@
       "communication": [
         {
           "serial": {
-            "baud-rate": 19200,
-            "data-bits": 8,
+            "baud_rate": 19200,
+            "data_bits": 8,
             "parity": "N",
             "port": "default",
-            "stop-bits": 1
+            "stop_bits": 1
           }
         }
       ],
@@ -9726,7 +9726,7 @@
       "communication": [
         {
           "btle": {
-            "advertised-services": [
+            "advertised_services": [
               "6e400001-b5a3-f393-e0a9-e50e24dcca9e",
               "50300001-0024-4bd4-bbd5-a6920e4c5653",
               "57300001-0023-4bd4-bbd5-a6920e4c5653",
@@ -9763,7 +9763,7 @@
               "4f430001-0023-4bd4-bbd5-a6920e4c5653",
               "455a0001-0023-4bd4-bbd5-a6920e4c5653"
             ],
-            "manufacturer-data": [
+            "manufacturer_data": [
               {
                 "company": 620,
                 "data": [
@@ -10798,7 +10798,7 @@
     "lovense-connect-service": {
       "communication": [
         {
-          "lovense-connect-service": {
+          "lovense_connect_service": {
             "exists": true
           }
         }
@@ -13772,11 +13772,11 @@
       "communication": [
         {
           "serial": {
-            "baud-rate": 115200,
-            "data-bits": 8,
+            "baud_rate": 115200,
+            "data_bits": 8,
             "parity": "N",
             "port": "default",
-            "stop-bits": 1
+            "stop_bits": 1
           }
         }
       ],
@@ -13933,16 +13933,16 @@
           "hid": {
             "pairs": [
               {
-                "product-id": 8199,
-                "vendor-id": 1406
+                "product_id": 8199,
+                "vendor_id": 1406
               },
               {
-                "product-id": 8198,
-                "vendor-id": 1406
+                "product_id": 8198,
+                "vendor_id": 1406
               },
               {
-                "product-id": 8201,
-                "vendor-id": 1406
+                "product_id": 8201,
+                "vendor_id": 1406
               }
             ]
           }
@@ -13982,11 +13982,11 @@
         },
         {
           "serial": {
-            "baud-rate": 19200,
-            "data-bits": 8,
+            "baud_rate": 19200,
+            "data_bits": 8,
             "parity": "N",
             "port": "default",
-            "stop-bits": 1
+            "stop_bits": 1
           }
         }
       ],
@@ -14342,8 +14342,8 @@
           "hid": {
             "pairs": [
               {
-                "product-id": 1,
-                "vendor-id": 8020
+                "product_id": 1,
+                "vendor_id": 8020
               }
             ]
           }
@@ -14377,8 +14377,8 @@
           "usb": {
             "pairs": [
               {
-                "product-id": 1615,
-                "vendor-id": 2889
+                "product_id": 1615,
+                "vendor_id": 2889
               }
             ]
           }
@@ -14496,7 +14496,7 @@
       "communication": [
         {
           "btle": {
-            "manufacturer-data": [
+            "manufacturer_data": [
               {
                 "company": 93,
                 "data": [
@@ -17066,7 +17066,7 @@
       "communication": [
         {
           "btle": {
-            "manufacturer-data": [
+            "manufacturer_data": [
               {
                 "company": 39,
                 "data": [
@@ -18241,11 +18241,11 @@
       "communication": [
         {
           "serial": {
-            "baud-rate": 115200,
-            "data-bits": 8,
+            "baud_rate": 115200,
+            "data_bits": 8,
             "parity": "N",
             "port": "default",
-            "stop-bits": 1
+            "stop_bits": 1
           }
         }
       ],
@@ -18764,8 +18764,8 @@
           "hid": {
             "pairs": [
               {
-                "product-id": 22352,
-                "vendor-id": 1155
+                "product_id": 22352,
+                "vendor_id": 1155
               }
             ]
           }

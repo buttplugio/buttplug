@@ -28,7 +28,7 @@
           },
           "minItems": 1
         },
-        "manufacturer-data": {
+        "manufacturer_data": {
           "type": "array",
           "items": {
             "type": "object",
@@ -36,7 +36,7 @@
               "company": {
                 "type": "integer"
               },
-              "expected-length": {
+              "expected_length": {
                 "type": "integer"
               },
               "data": {
@@ -51,7 +51,7 @@
             ]
           }
         },
-        "advertised-services": {
+        "advertised_services": {
           "type": "array",
           "items": {
             "$ref": "#/components/uuid"
@@ -92,25 +92,25 @@
         "port": {
           "type": "string"
         },
-        "baud-rate": {
+        "baud_rate": {
           "type": "integer"
         },
-        "data-bits": {
+        "data_bits": {
           "type": "integer"
         },
         "parity": {
           "type": "string"
         },
-        "stop-bits": {
+        "stop_bits": {
           "type": "integer"
         }
       },
       "required": [
         "port",
-        "baud-rate",
-        "data-bits",
+        "baud_rate",
+        "data_bits",
         "parity",
-        "stop-bits"
+        "stop_bits"
       ],
       "additionalProperties": false
     },
@@ -138,20 +138,20 @@
           "items": {
             "type": "object",
             "properties": {
-              "vendor-id": {
+              "vendor_id": {
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 65535
               },
-              "product-id": {
+              "product_id": {
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 65535
               }
             },
             "required": [
-              "vendor-id",
-              "product-id"
+              "vendor_id",
+              "product_id"
             ],
             "additionalProperties": false
           },
@@ -453,7 +453,7 @@
                   "xinput": {
                     "$ref": "#/components/xinput-definition"
                   },
-                  "lovense-connect-service": {
+                  "lovense_connect_service": {
                     "$ref": "#/components/lovense-connect-service-definition"
                   }
                 }

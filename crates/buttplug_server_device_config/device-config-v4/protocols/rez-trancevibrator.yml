@@ -11,5 +11,5 @@ defaults:
 communication:
   - usb:
       pairs:
-        - vendor-id: 2889
-          product-id: 1615
+        - vendor_id: 2889
+          product_id: 1615

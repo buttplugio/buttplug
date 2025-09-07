@@ -11,9 +11,9 @@ defaults:
 communication:
   - hid:
       pairs:
-        - vendor-id: 1406
-          product-id: 8199
-        - vendor-id: 1406
-          product-id: 8198
-        - vendor-id: 1406
-          product-id: 8201
+        - vendor_id: 1406
+          product_id: 8199
+        - vendor_id: 1406
+          product_id: 8198
+        - vendor_id: 1406
+          product_id: 8201

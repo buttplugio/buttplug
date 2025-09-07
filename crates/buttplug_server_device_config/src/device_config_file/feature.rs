@@ -430,7 +430,6 @@ impl ConfigUserDeviceFeature {
 #[derive(Serialize, Deserialize, Debug, Clone, Default, CopyGetters)]
 pub struct BaseFeatureSettings {
   #[serde(
-    rename = "alt-protocol-index",
     skip_serializing_if = "Option::is_none",
     default
   )]

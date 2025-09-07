@@ -1038,7 +1038,7 @@ communication:
   - btle:
       names:
         - SF *
-      manufacturer-data:
+      manufacturer_data:
         - company: 93
           data:
             - 0

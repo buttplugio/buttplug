@@ -485,12 +485,12 @@ communication:
       names:
         - LVS-*
         - LOVE-*
-      manufacturer-data:
+      manufacturer_data:
         - company: 620
           data:
             - 255
             - 33
-      advertised-services:
+      advertised_services:
         - 6e400001-b5a3-f393-e0a9-e50e24dcca9e
         - 50300001-0024-4bd4-bbd5-a6920e4c5653
         - 57300001-0023-4bd4-bbd5-a6920e4c5653

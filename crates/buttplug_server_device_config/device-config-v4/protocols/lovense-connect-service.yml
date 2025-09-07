@@ -382,5 +382,5 @@ configurations:
               - Read
     id: 665925e2-e895-443f-953a-cae3f371c138
 communication:
-  - lovense-connect-service:
+  - lovense_connect_service:
       exists: true
