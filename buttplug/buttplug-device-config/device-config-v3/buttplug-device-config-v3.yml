@@ -1,6 +1,6 @@
 version:
   major: 3
-  minor: 16
+  minor: 17
 protocols:
   lovense:
     defaults:
@@ -2827,7 +2827,7 @@ protocols:
           services:
             00001900-0000-1000-8000-00805f9b34fb:
               whitelist: 00001901-0000-1000-8000-00805f9b34fb
-              tx: 00001800-0000-1000-8000-00805f9b34fb
+              tx: 00001902-0000-1000-8000-00805f9b34fb
               rx: 00001903-0000-1000-8000-00805f9b34fb
   kiiroo-keonwifi:
     defaults:
