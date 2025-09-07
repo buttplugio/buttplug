@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 3,
-    "minor": 17
+    "minor": 15
   },
   "protocols": {
     "lovense": {
@@ -4920,51 +4920,6 @@
         }
       ]
     },
-    "kiiroo-keonwifi": {
-      "defaults": {
-        "name": "Kiiroo Keon Wifi",
-        "features": []
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "KEON WIFI",
-            "Keon Wifi"
-          ],
-          "name": "Kiiroo Keon",
-          "features": [
-            {
-              "feature-type": "Position",
-              "actuator": {
-                "step-range": [
-                  0,
-                  99
-                ],
-                "messages": [
-                  "LinearCmd"
-                ]
-              }
-            }
-          ]
-        }
-      ],
-      "communication": [
-        {
-          "btle": {
-            "names": [
-              "KEON WIFI",
-              "Keon Wifi"
-            ],
-            "services": {
-              "00001900-0000-1000-8000-00805f9b34fb": {
-                "tx": "00001800-0000-1000-8000-00805f9b34fb",
-                "rx": "00001903-0000-1000-8000-00805f9b34fb"
-              }
-            }
-          }
-        }
-      ]
-    },
     "kiiroo-prowand": {
       "defaults": {
         "name": "Kiiroo ProWand",
@@ -4998,20 +4953,11 @@
           }
         ]
       },
-      "configurations": [
-        {
-          "identifier": [
-            "Luxus"
-          ],
-          "name": "Luxus"
-        }
-      ],
       "communication": [
         {
           "btle": {
             "names": [
-              "ProWand",
-              "Luxus"
+              "ProWand"
             ],
             "services": {
               "00001400-0000-1000-8000-00805f9b34fb": {
@@ -5799,26 +5745,6 @@
             "Cici+ 2"
           ],
           "name": "Svakom Cici+ 2"
-        },
-        {
-          "identifier": [
-            "VV468A"
-          ],
-          "name": "ToyCod Clara",
-          "features": [
-            {
-              "feature-type": "Vibrate",
-              "actuator": {
-                "step-range": [
-                  0,
-                  10
-                ],
-                "messages": [
-                  "ScalarCmd"
-                ]
-              }
-            }
-          ]
         }
       ],
       "communication": [
@@ -5827,8 +5753,7 @@
             "names": [
               "B2CM6",
               "ERICA",
-              "Cici+ 2",
-              "VV468A"
+              "Cici+ 2"
             ],
             "services": {
               "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -11641,27 +11566,15 @@
           }
         ]
       },
-      "configurations": [
-        {
-          "identifier": [
-            "HJ2024N01"
-          ],
-          "name": "VVD Vkini"
-        }
-      ],
       "communication": [
         {
           "btle": {
             "names": [
-              "CFG1 vibrator",
-              "HJ2024N01"
+              "CFG1 vibrator"
             ],
             "services": {
               "0000cfa2-0000-1000-8000-00805f9b34fb": {
                 "tx": "0000cf21-0000-1000-8000-00805f9b34fb"
-              },
-              "0000dba2-0000-1000-8000-00805f9b34fb": {
-                "tx": "0000db21-0000-1000-8000-00805f9b34fb"
               }
             }
           }
@@ -12244,36 +12157,6 @@
             "MD19"
           ],
           "name": "Secret Lover Kevin"
-        },
-        {
-          "identifier": [
-            "QD48"
-          ],
-          "name": "Adorime Wearable Egg Vibrator"
-        },
-        {
-          "identifier": [
-            "BGSF"
-          ],
-          "name": "Adorime Male Masturbator"
-        },
-        {
-          "identifier": [
-            "BGQS"
-          ],
-          "name": "Adorime Penis Vibrator"
-        },
-        {
-          "identifier": [
-            "AX05"
-          ],
-          "name": "Adorime Anal Vibrator"
-        },
-        {
-          "identifier": [
-            "DT01"
-          ],
-          "name": "Adorime Chastity Cage"
         },
         {
           "identifier": [
@@ -13943,104 +13826,6 @@
         },
         {
           "identifier": [
-            "SN80"
-          ],
-          "name": "Adorime G-spot Rabbit Dildo Vibrator",
-          "features": [
-            {
-              "feature-type": "Vibrate",
-              "description": "Vibrate",
-              "actuator": {
-                "step-range": [
-                  0,
-                  100
-                ],
-                "messages": [
-                  "ScalarCmd"
-                ]
-              }
-            },
-            {
-              "feature-type": "Vibrate",
-              "description": "Vibrate",
-              "actuator": {
-                "step-range": [
-                  0,
-                  100
-                ],
-                "messages": [
-                  "ScalarCmd"
-                ]
-              }
-            },
-            {
-              "feature-type": "Battery",
-              "description": "Battery Level",
-              "sensor": {
-                "value-range": [
-                  [
-                    0,
-                    100
-                  ]
-                ],
-                "messages": [
-                  "SensorReadCmd"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "identifier": [
-            "BGCD"
-          ],
-          "name": "Adorime Backy",
-          "features": [
-            {
-              "feature-type": "Vibrate",
-              "description": "Vibrate",
-              "actuator": {
-                "step-range": [
-                  0,
-                  100
-                ],
-                "messages": [
-                  "ScalarCmd"
-                ]
-              }
-            },
-            {
-              "feature-type": "Vibrate",
-              "description": "Vibrate",
-              "actuator": {
-                "step-range": [
-                  0,
-                  100
-                ],
-                "messages": [
-                  "ScalarCmd"
-                ]
-              }
-            },
-            {
-              "feature-type": "Battery",
-              "description": "Battery Level",
-              "sensor": {
-                "value-range": [
-                  [
-                    0,
-                    100
-                  ]
-                ],
-                "messages": [
-                  "SensorReadCmd"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "identifier": [
             "TFG1"
           ],
           "name": "Galaku Aurora Aircraft Cup",
@@ -14090,8 +13875,7 @@
         },
         {
           "identifier": [
-            "GK27",
-            "GX27"
+            "GK27"
           ],
           "name": "Galaku Cannon-GT",
           "features": [
@@ -14330,11 +14114,6 @@
               "CYX2",
               "RC31",
               "MD19",
-              "QD48",
-              "BGSF",
-              "BGQS",
-              "AX05",
-              "DT01",
               "G317",
               "G312",
               "G302",
@@ -14369,11 +14148,8 @@
               "QCVW",
               "QCSW",
               "QCPW",
-              "SN80",
-              "BGCD",
               "TFG1",
               "GK27",
-              "GX27",
               "GK25",
               "AC695X_1(BLE)",
               "GX33",
@@ -14689,26 +14465,6 @@
               }
             }
           ]
-        },
-        {
-          "identifier": [
-            "qingnan#16"
-          ],
-          "name": "Qingnan #16",
-          "features": [
-            {
-              "feature-type": "Constrict",
-              "actuator": {
-                "step-range": [
-                  0,
-                  100
-                ],
-                "messages": [
-                  "ScalarCmd"
-                ]
-              }
-            }
-          ]
         }
       ],
       "communication": [
@@ -14722,8 +14478,7 @@
               "CTY916S4",
               "PTYB22S2",
               "CCP322S5",
-              "CTY823S5",
-              "qingnan#16"
+              "CTY823S5"
             ],
             "services": {
               "0000fff0-0000-1000-8000-00805f9b34fb": {
@@ -15705,36 +15460,6 @@
         },
         {
           "identifier": [
-            "J-Enam"
-          ],
-          "name": "JoyHub Enam"
-        },
-        {
-          "identifier": [
-            "J-Viv"
-          ],
-          "name": "JoyHub Viv"
-        },
-        {
-          "identifier": [
-            "J-Vivara"
-          ],
-          "name": "JoyHub Vivara"
-        },
-        {
-          "identifier": [
-            "J-Explorer2"
-          ],
-          "name": "JoyHub Explorer 2"
-        },
-        {
-          "identifier": [
-            "J-Peachy"
-          ],
-          "name": "JoyHub Peachy"
-        },
-        {
-          "identifier": [
             "J-Petalwish2"
           ],
           "name": "JoyHub Petalwish 2",
@@ -16242,12 +15967,7 @@
               "J-MarsLion2",
               "J-Myrna",
               "J-Vase2",
-              "J-Martino",
-              "J-Enam",
-              "J-Viv",
-              "J-Vivara",
-              "J-Explorer2",
-              "J-Peachy"
+              "J-Martino"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -18355,82 +18075,6 @@
               }
             }
           ]
-        },
-        {
-          "identifier": [
-            "J-Vigo"
-          ],
-          "name": "JoyHub Vigo",
-          "features": [
-            {
-              "feature-type": "Vibrate",
-              "actuator": {
-                "step-range": [
-                  0,
-                  255
-                ],
-                "messages": [
-                  "ScalarCmd"
-                ]
-              }
-            },
-            {
-              "feature-type": "Vibrate",
-              "actuator": {
-                "step-range": [
-                  0,
-                  255
-                ],
-                "messages": [
-                  "ScalarCmd"
-                ]
-              }
-            },
-            {
-              "feature-type": "Oscillate",
-              "actuator": {
-                "step-range": [
-                  0,
-                  255
-                ],
-                "messages": [
-                  "ScalarCmd"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "identifier": [
-            "J-Pipes"
-          ],
-          "name": "JoyHub Pipes",
-          "features": [
-            {
-              "feature-type": "Rotate",
-              "actuator": {
-                "step-range": [
-                  0,
-                  255
-                ],
-                "messages": [
-                  "ScalarCmd"
-                ]
-              }
-            },
-            {
-              "feature-type": "Vibrate",
-              "actuator": {
-                "step-range": [
-                  0,
-                  255
-                ],
-                "messages": [
-                  "ScalarCmd"
-                ]
-              }
-            }
-          ]
         }
       ],
       "communication": [
@@ -18494,9 +18138,7 @@
               "J-Marcela",
               "J-Vita",
               "J-LACH",
-              "J-Markel",
-              "J-Vigo",
-              "J-Pipes"
+              "J-Markel"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {

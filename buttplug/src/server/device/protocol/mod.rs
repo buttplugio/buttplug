@@ -46,7 +46,6 @@ pub mod joyhub_v4;
 pub mod joyhub_v5;
 pub mod joyhub_v6;
 pub mod kgoal_boost;
-pub mod kiiroo_keonwifi;
 pub mod kiiroo_prowand;
 pub mod kiiroo_spot;
 pub mod kiiroo_v2;
@@ -335,10 +334,6 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     joyhub_v6::setup::JoyHubV6IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    kiiroo_keonwifi::setup::KiirooKeonWifiIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,

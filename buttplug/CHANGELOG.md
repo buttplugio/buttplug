@@ -1,29 +1,3 @@
-# 9.0.9 (2025-09-06)
-
-## Features
-
-- Added Device Support
-  - Kiiroo Keon Wifi
-  - Luxus (Kiiroo)
-  - ToyCod Clara
-  - VVD Vkini
-  - Adorime Wearable Egg Vibrator
-  - Adorime Male Masturbator
-  - Adorime Penis Vibrator
-  - Adorime Anal Vibrator
-  - Adorime Chastity Cage
-  - Adorime G-spot Rabbit Dildo Vibrator
-  - Adorime Backy
-  - Galaku Cannon-GT (alt ID)
-  - Qingnan #16
-  - JoyHub Enam
-  - JoyHub Viv
-  - JoyHub Vivara
-  - JoyHub Explorer 2
-  - JoyHub Peachy
-  - JoyHub Vigo
-  - JoyHub Pipes
-
 # 9.0.8 (2025-04-20)
 
 ## Features
