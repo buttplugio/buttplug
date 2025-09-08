@@ -236,7 +236,7 @@ impl ServerDeviceManagerEventLoop {
           address = tracing::field::display(address.clone())
         );
 
-        let _ = async_manager::spawn(async move {
+        async_manager::spawn(async move {
           match ServerDevice::build(device_config_manager, creator, protocol_specializers).await {
             Ok(device) => {
               if device_event_sender_clone
@@ -324,7 +324,7 @@ impl ServerDeviceManagerEventLoop {
         // them know a device has been added.
         if self
           .server_sender
-          .send(device_update_message.into())
+          .send(device_update_message)
           .is_err()
         {
           debug!("Server not currently available, dropping Device Added event.");

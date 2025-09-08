@@ -94,7 +94,7 @@ impl ButtplugServerDeviceEventMessageConverter {
         return ButtplugServerMessageVariant::V1(da1.into());
       }
       let da0 = DeviceAddedV0::from(da1);
-      return ButtplugServerMessageVariant::V0(ButtplugServerMessageV0::DeviceAdded(da0));
+      ButtplugServerMessageVariant::V0(ButtplugServerMessageV0::DeviceAdded(da0))
     } else {
       // Device Removed
       let disconnected_indexes: Vec<u32> = self
@@ -106,27 +106,27 @@ impl ButtplugServerDeviceEventMessageConverter {
       self.device_indexes.remove(&disconnected_indexes[0]);
       match version {
         ButtplugMessageSpecVersion::Version0 => {
-          return ButtplugServerMessageVariant::V0(ButtplugServerMessageV0::DeviceRemoved(
+          ButtplugServerMessageVariant::V0(ButtplugServerMessageV0::DeviceRemoved(
             DeviceRemovedV0::new(disconnected_indexes[0]),
-          ));
+          ))
         }
         ButtplugMessageSpecVersion::Version1 => {
-          return ButtplugServerMessageVariant::V1(
+          ButtplugServerMessageVariant::V1(
             DeviceRemovedV0::new(disconnected_indexes[0]).into(),
-          );
+          )
         }
         ButtplugMessageSpecVersion::Version2 => {
-          return ButtplugServerMessageVariant::V2(
+          ButtplugServerMessageVariant::V2(
             DeviceRemovedV0::new(disconnected_indexes[0]).into(),
-          );
+          )
         }
         ButtplugMessageSpecVersion::Version3 => {
-          return ButtplugServerMessageVariant::V3(
+          ButtplugServerMessageVariant::V3(
             DeviceRemovedV0::new(disconnected_indexes[0]).into(),
-          );
+          )
         }
         ButtplugMessageSpecVersion::Version4 => {
-          return ButtplugServerMessageVariant::V4(list.clone().into());
+          ButtplugServerMessageVariant::V4(list.clone().into())
         }
       }
     }

@@ -36,7 +36,7 @@ impl ServerDeviceDefinitionBuilder {
     Self {
       def: ServerDeviceDefinition {
         name: name.to_owned(),
-        id: id.clone(),
+        id: *id,
         base_id: None,
         protocol_variant: None,
         message_gap_ms: None,

@@ -3,7 +3,6 @@ use std::collections::BTreeMap;
 use buttplug_core::util::json::JSONValidator;
 use serde::{Deserialize, Serialize};
 use serde_json::{self, Value};
-use serde_yaml;
 
 const VERSION_FILE: &str = "./device-config-v4/version.yaml";
 const OUTPUT_FILE: &str = "./build-config/buttplug-device-config-v4.json";

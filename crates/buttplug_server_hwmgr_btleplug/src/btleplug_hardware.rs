@@ -243,7 +243,7 @@ impl<T: Peripheral + 'static> BtlePlugHardware<T> {
     let event_stream_clone = event_stream.clone();
     let address = device.id();
     let name_clone = name.to_owned();
-    let _ = async_manager::spawn(async move {
+    async_manager::spawn(async move {
       let mut error_notification = false;
       loop {
         select! {
@@ -279,14 +279,14 @@ impl<T: Peripheral + 'static> BtlePlugHardware<T> {
             }
           }
           adapter_event = adapter_event_stream.next() => {
-            if let Some(CentralEvent::DeviceDisconnected(addr)) = adapter_event {
-              if address == addr {
+            if let Some(CentralEvent::DeviceDisconnected(addr)) = adapter_event
+              && address == addr {
                 info!(
                   "Device {:?} disconnected",
                   name_clone
                 );
-                if event_stream_clone.receiver_count() != 0 {
-                  if let Err(err) = event_stream_clone
+                if event_stream_clone.receiver_count() != 0
+                  && let Err(err) = event_stream_clone
                   .send(HardwareEvent::Disconnected(
                     format!("{address:?}")
                   )) {
@@ -295,12 +295,10 @@ impl<T: Peripheral + 'static> BtlePlugHardware<T> {
                       err
                     );
                   }
-                }
                 // At this point, we have nothing left to do because we can't reconnect a device
                 // that's been connected. Exit.
                 break;
               }
-            }
           }
         }
       }

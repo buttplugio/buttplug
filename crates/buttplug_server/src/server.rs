@@ -175,7 +175,7 @@ impl ButtplugServer {
   }
 
   /// Disconnects the server from a client, if it is connected.
-  pub fn disconnect(&self) -> BoxFuture<Result<(), message::ErrorV0>> {
+  pub fn disconnect(&self) -> BoxFuture<'_, Result<(), message::ErrorV0>> {
     debug!("Buttplug Server {} disconnect requested", self.server_name);
     let ping_timer = self.ping_timer.clone();
     // As long as StopScanning/StopAllDevices aren't changed across message specs, we can inject

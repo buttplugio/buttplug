@@ -57,7 +57,7 @@ impl ProtocolHandler for SvakomV5 {
           } else {
             0x01
           },
-          vibe1.max(vibe2) as u8,
+          { vibe1.max(vibe2) },
         ]
         .to_vec(),
         false,

@@ -60,7 +60,7 @@ impl ProtocolHandler for KGoalBoost {
     feature_index: u32,
     feature_id: Uuid,
     _sensor_type: InputType,
-  ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
+  ) -> BoxFuture<'_, Result<(), ButtplugDeviceError>> {
     if self.subscribed_sensors.contains(&feature_index) {
       return future::ready(Ok(())).boxed();
     }
@@ -88,8 +88,8 @@ impl ProtocolHandler for KGoalBoost {
             if sender.receiver_count() == 0 || stream_sensors.is_empty() {
               return;
             }
-            if let HardwareEvent::Notification(_, endpoint, data) = info {
-              if endpoint == Endpoint::RxPressure {
+            if let HardwareEvent::Notification(_, endpoint, data) = info
+              && endpoint == Endpoint::RxPressure {
                 if data.len() < 7 {
                   // Not even sure how this would happen, error and continue on.
                   error!("KGoal Boost data not expected length!");
@@ -135,7 +135,6 @@ impl ProtocolHandler for KGoalBoost {
                   return;
                 }
               }
-            }
           }
         });
       }
@@ -151,7 +150,7 @@ impl ProtocolHandler for KGoalBoost {
     feature_index: u32,
     feature_id: Uuid,
     _sensor_type: InputType,
-  ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
+  ) -> BoxFuture<'_, Result<(), ButtplugDeviceError>> {
     if !self.subscribed_sensors.contains(&feature_index) {
       return future::ready(Ok(())).boxed();
     }

@@ -34,9 +34,9 @@ struct BaseDeviceFeatureOutputValueProperties {
   value: RangeInclusive<i32>,
 }
 
-impl Into<ServerDeviceFeatureOutputValueProperties> for BaseDeviceFeatureOutputValueProperties {
-  fn into(self) -> ServerDeviceFeatureOutputValueProperties {
-    ServerDeviceFeatureOutputValueProperties::new(&self.value.into(), false)
+impl From<BaseDeviceFeatureOutputValueProperties> for ServerDeviceFeatureOutputValueProperties {
+  fn from(val: BaseDeviceFeatureOutputValueProperties) -> Self {
+    ServerDeviceFeatureOutputValueProperties::new(&val.value.into(), false)
   }
 }
 
@@ -45,11 +45,11 @@ struct BaseDeviceFeatureOutputPositionProperties {
   value: RangeInclusive<i32>,
 }
 
-impl Into<ServerDeviceFeatureOutputPositionProperties>
-  for BaseDeviceFeatureOutputPositionProperties
+impl From<BaseDeviceFeatureOutputPositionProperties>
+  for ServerDeviceFeatureOutputPositionProperties
 {
-  fn into(self) -> ServerDeviceFeatureOutputPositionProperties {
-    ServerDeviceFeatureOutputPositionProperties::new(&self.value.into(), false, false)
+  fn from(val: BaseDeviceFeatureOutputPositionProperties) -> Self {
+    ServerDeviceFeatureOutputPositionProperties::new(&val.value.into(), false, false)
   }
 }
 
@@ -59,13 +59,13 @@ struct BaseDeviceFeatureOutputPositionWithDurationProperties {
   duration: RangeInclusive<i32>,
 }
 
-impl Into<ServerDeviceFeatureOutputPositionWithDurationProperties>
-  for BaseDeviceFeatureOutputPositionWithDurationProperties
+impl From<BaseDeviceFeatureOutputPositionWithDurationProperties>
+  for ServerDeviceFeatureOutputPositionWithDurationProperties
 {
-  fn into(self) -> ServerDeviceFeatureOutputPositionWithDurationProperties {
+  fn from(val: BaseDeviceFeatureOutputPositionWithDurationProperties) -> Self {
     ServerDeviceFeatureOutputPositionWithDurationProperties::new(
-      &self.position.into(),
-      &self.duration.into(),
+      &val.position.into(),
+      &val.duration.into(),
       false,
       false,
     )
@@ -96,37 +96,37 @@ struct BaseDeviceFeatureOutput {
   spray: Option<BaseDeviceFeatureOutputValueProperties>,
 }
 
-impl Into<ServerDeviceFeatureOutput> for BaseDeviceFeatureOutput {
-  fn into(self) -> ServerDeviceFeatureOutput {
+impl From<BaseDeviceFeatureOutput> for ServerDeviceFeatureOutput {
+  fn from(val: BaseDeviceFeatureOutput) -> Self {
     let mut output = ServerDeviceFeatureOutput::default();
-    if let Some(vibrate) = self.vibrate {
+    if let Some(vibrate) = val.vibrate {
       output.set_vibrate(Some(vibrate.into()));
     }
-    if let Some(rotate) = self.rotate {
+    if let Some(rotate) = val.rotate {
       output.set_rotate(Some(rotate.into()));
     }
-    if let Some(rotate_with_direction) = self.rotate_with_direction {
+    if let Some(rotate_with_direction) = val.rotate_with_direction {
       output.set_rotate_with_direction(Some(rotate_with_direction.into()));
     }
-    if let Some(oscillate) = self.oscillate {
+    if let Some(oscillate) = val.oscillate {
       output.set_oscillate(Some(oscillate.into()));
     }
-    if let Some(constrict) = self.constrict {
+    if let Some(constrict) = val.constrict {
       output.set_constrict(Some(constrict.into()));
     }
-    if let Some(heater) = self.heater {
+    if let Some(heater) = val.heater {
       output.set_heater(Some(heater.into()));
     }
-    if let Some(led) = self.led {
+    if let Some(led) = val.led {
       output.set_led(Some(led.into()));
     }
-    if let Some(position) = self.position {
+    if let Some(position) = val.position {
       output.set_position(Some(position.into()));
     }
-    if let Some(position_with_duration) = self.position_with_duration {
+    if let Some(position_with_duration) = val.position_with_duration {
       output.set_position_with_duration(Some(position_with_duration.into()));
     }
-    if let Some(spray) = self.spray {
+    if let Some(spray) = val.spray {
       output.set_spray(Some(spray.into()));
     }
     output
@@ -380,9 +380,9 @@ impl DeviceFeatureInputProperties {
   }
 }
 
-impl Into<ServerDeviceFeatureInputProperties> for DeviceFeatureInputProperties {
-  fn into(self) -> ServerDeviceFeatureInputProperties {
-    ServerDeviceFeatureInputProperties::new(&self.value_range, &self.input_commands)
+impl From<DeviceFeatureInputProperties> for ServerDeviceFeatureInputProperties {
+  fn from(val: DeviceFeatureInputProperties) -> Self {
+    ServerDeviceFeatureInputProperties::new(&val.value_range, &val.input_commands)
   }
 }
 
@@ -395,19 +395,19 @@ pub struct DeviceFeatureInput {
   button: Option<DeviceFeatureInputProperties>,
 }
 
-impl Into<ServerDeviceFeatureInput> for DeviceFeatureInput {
-  fn into(self) -> ServerDeviceFeatureInput {
+impl From<DeviceFeatureInput> for ServerDeviceFeatureInput {
+  fn from(val: DeviceFeatureInput) -> Self {
     let mut input = ServerDeviceFeatureInput::default();
-    if let Some(battery) = self.battery {
+    if let Some(battery) = val.battery {
       input.set_battery(Some(battery.into()));
     }
-    if let Some(rssi) = self.rssi {
+    if let Some(rssi) = val.rssi {
       input.set_rssi(Some(rssi.into()));
     }
-    if let Some(pressure) = self.pressure {
+    if let Some(pressure) = val.pressure {
       input.set_pressure(Some(pressure.into()));
     }
-    if let Some(button) = self.button {
+    if let Some(button) = val.button {
       input.set_button(Some(button.into()));
     }
     input
@@ -432,24 +432,16 @@ pub struct ConfigBaseDeviceFeature {
   feature_settings: BaseFeatureSettings,
 }
 
-impl Into<ServerDeviceFeature> for ConfigBaseDeviceFeature {
-  fn into(self) -> ServerDeviceFeature {
+impl From<ConfigBaseDeviceFeature> for ServerDeviceFeature {
+  fn from(val: ConfigBaseDeviceFeature) -> Self {
     // This isn't resolving correctly using .and_then, so having to do it the long way?
-    let output: Option<ServerDeviceFeatureOutput> = if let Some(o) = self.output {
-      Some(o.into())
-    } else {
-      None
-    };
-    let input: Option<ServerDeviceFeatureInput> = if let Some(i) = self.input {
-      Some(i.into())
-    } else {
-      None
-    };
+    let output: Option<ServerDeviceFeatureOutput> = val.output.map(|o| o.into());
+    let input: Option<ServerDeviceFeatureInput> = val.input.map(|i| i.into());
     ServerDeviceFeature::new(
-      &self.description,
-      self.id,
+      &val.description,
+      val.id,
       None,
-      self.feature_settings.alt_protocol_index,
+      val.feature_settings.alt_protocol_index,
       &output,
       &input,
     )
@@ -474,7 +466,7 @@ impl ConfigUserDeviceFeature {
   ) -> Result<ServerDeviceFeature, ButtplugDeviceConfigError> {
     let output = if let Some(o) = &self.output {
       if let Some(base) = base_feature.output() {
-        Some(o.with_base_output(&base)?)
+        Some(o.with_base_output(base)?)
       } else {
         None
       }
@@ -482,7 +474,7 @@ impl ConfigUserDeviceFeature {
       None
     };
     Ok(ServerDeviceFeature::new(
-      &base_feature.description(),
+      base_feature.description(),
       self.id,
       Some(self.base_id),
       base_feature.alt_protocol_index(),

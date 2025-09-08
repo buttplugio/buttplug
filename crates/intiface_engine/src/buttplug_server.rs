@@ -89,7 +89,7 @@ pub async fn reset_buttplug_server(
     Ok(server) => Ok(ButtplugRemoteServer::new(server, &Some(sender.clone()))),
     Err(e) => {
       error!("Error starting server: {:?}", e);
-      return Err(IntifaceEngineError::ButtplugServerError(e));
+      Err(IntifaceEngineError::ButtplugServerError(e))
     }
   }
 }
@@ -120,7 +120,7 @@ pub async fn setup_buttplug_server(
   let mut server_builder = ButtplugServerBuilder::new(
     dm_builder
       .finish()
-      .map_err(|e| IntifaceEngineError::ButtplugServerError(e))?,
+      .map_err(IntifaceEngineError::ButtplugServerError)?,
   );
 
   server_builder
@@ -169,7 +169,7 @@ pub async fn run_server(
         _,
         ButtplugServerJSONSerializer,
       >::new(
-        ButtplugWebsocketClientTransport::new_insecure_connector(&addr),
+        ButtplugWebsocketClientTransport::new_insecure_connector(addr),
       ))
       .await
   } else {

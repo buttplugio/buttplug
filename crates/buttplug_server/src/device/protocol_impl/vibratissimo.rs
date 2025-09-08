@@ -84,10 +84,10 @@ impl ProtocolInitializer for VibratissimoInitializer {
       .filter(|x| {
         x.output()
           .as_ref()
-          .map_or(false, |x| x.contains(OutputType::Vibrate))
+          .is_some_and(|x| x.contains(OutputType::Vibrate))
       })
       .count() as u8;
-    Ok(Arc::new(Vibratissimo::new(num_vibrators as u8)))
+    Ok(Arc::new(Vibratissimo::new(num_vibrators)))
   }
 }
 
@@ -97,7 +97,7 @@ pub struct Vibratissimo {
 
 impl Vibratissimo {
   fn new(num_vibrators: u8) -> Self {
-    let speeds: Vec<AtomicU8> = std::iter::repeat_with(|| AtomicU8::default())
+    let speeds: Vec<AtomicU8> = std::iter::repeat_with(AtomicU8::default)
       .take(num_vibrators as usize)
       .collect();
     Self { speeds }

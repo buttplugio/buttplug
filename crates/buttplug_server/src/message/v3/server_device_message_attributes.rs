@@ -72,38 +72,30 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
           };
           // TODO oh come on just make a fucking iterator here. At least, once we figure out the
           // unifying trait we can use to make an iterator on this.
-          output_map
+          if let Some(attr) = output_map
             .constrict()
-            .as_ref()
-            .map(|attr| create_attribute(OutputType::Constrict, attr.value().step_count()));
-          output_map
+            .as_ref() { create_attribute(OutputType::Constrict, attr.value().step_count()) }
+          if let Some(attr) = output_map
             .oscillate()
-            .as_ref()
-            .map(|attr| create_attribute(OutputType::Oscillate, attr.value().step_count()));
-          output_map
+            .as_ref() { create_attribute(OutputType::Oscillate, attr.value().step_count()) }
+          if let Some(attr) = output_map
             .position()
-            .as_ref()
-            .map(|attr| create_attribute(OutputType::Position, attr.position().step_count()));
-          output_map
+            .as_ref() { create_attribute(OutputType::Position, attr.position().step_count()) }
+          if let Some(attr) = output_map
             .rotate()
-            .as_ref()
-            .map(|attr| create_attribute(OutputType::Rotate, attr.value().step_count()));
-          output_map
+            .as_ref() { create_attribute(OutputType::Rotate, attr.value().step_count()) }
+          if let Some(attr) = output_map
             .heater()
-            .as_ref()
-            .map(|attr| create_attribute(OutputType::Heater, attr.value().step_count()));
-          output_map
+            .as_ref() { create_attribute(OutputType::Heater, attr.value().step_count()) }
+          if let Some(attr) = output_map
             .led()
-            .as_ref()
-            .map(|attr| create_attribute(OutputType::Led, attr.value().step_count()));
-          output_map
+            .as_ref() { create_attribute(OutputType::Led, attr.value().step_count()) }
+          if let Some(attr) = output_map
             .vibrate()
-            .as_ref()
-            .map(|attr| create_attribute(OutputType::Vibrate, attr.value().step_count()));
-          output_map
+            .as_ref() { create_attribute(OutputType::Vibrate, attr.value().step_count()) }
+          if let Some(attr) = output_map
             .spray()
-            .as_ref()
-            .map(|attr| create_attribute(OutputType::Spray, attr.value().step_count()));
+            .as_ref() { create_attribute(OutputType::Spray, attr.value().step_count()) }
         }
         actuator_vec
       })
@@ -115,8 +107,8 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
       .iter()
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
-        if let Some(output_map) = feature.output() {
-          if let Some(actuator) = output_map.rotate_with_direction() {
+        if let Some(output_map) = feature.output()
+          && let Some(actuator) = output_map.rotate_with_direction() {
             let actuator_type = OutputType::Rotate;
             let step_count = actuator.value().step_count();
             let attrs = ServerGenericDeviceMessageAttributesV3 {
@@ -128,7 +120,6 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
             };
             actuator_vec.push(attrs)
           }
-        }
         actuator_vec
       })
       .collect();
@@ -137,8 +128,8 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
       .iter()
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
-        if let Some(output_map) = feature.output() {
-          if let Some(actuator) = output_map.position_with_duration() {
+        if let Some(output_map) = feature.output()
+          && let Some(actuator) = output_map.position_with_duration() {
             let actuator_type = OutputType::Position;
             let step_count = actuator.position().step_count();
             let attrs = ServerGenericDeviceMessageAttributesV3 {
@@ -150,7 +141,6 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
             };
             actuator_vec.push(attrs)
           }
-        }
         actuator_vec
       })
       .collect();
@@ -160,8 +150,8 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
         .iter()
         .map(|feature| {
           let mut sensor_vec = vec![];
-          if let Some(sensor_map) = feature.input() {
-            if let Some(battery) = sensor_map.battery() {
+          if let Some(sensor_map) = feature.input()
+            && let Some(battery) = sensor_map.battery() {
               // Only convert Battery backwards. Other sensors weren't really built for v3 and we
               // never recommended using them or implemented much for them.
               sensor_vec.push(ServerSensorDeviceMessageAttributesV3 {
@@ -172,7 +162,6 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
                 index: 0,
               });
             }
-          }
           sensor_vec
         })
         .flatten()

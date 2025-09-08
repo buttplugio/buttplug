@@ -80,10 +80,7 @@ pub enum ButtplugServerMessageV4 {
 
 impl ButtplugMessageFinalizer for ButtplugServerMessageV4 {
   fn finalize(&mut self) {
-    match self {
-      ButtplugServerMessageV4::DeviceList(dl) => dl.finalize(),
-      _ => (),
-    }
+    if let ButtplugServerMessageV4::DeviceList(dl) = self { dl.finalize() }
   }
 }
 

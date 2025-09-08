@@ -88,7 +88,7 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedOutputVecCmdV4 
         feature
           .output()
           .as_ref()
-          .map_or(false, |x| x.contains(OutputType::Vibrate))
+          .is_some_and(|x| x.contains(OutputType::Vibrate))
       })
       .peekable();
 

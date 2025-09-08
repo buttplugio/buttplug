@@ -72,7 +72,7 @@ impl CheckedOutputCmdV4 {
       device_index,
       feature_index,
       feature_id,
-      output_command: output_command,
+      output_command,
     }
   }
 }

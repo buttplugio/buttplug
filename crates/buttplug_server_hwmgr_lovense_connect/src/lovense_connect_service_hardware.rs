@@ -159,7 +159,7 @@ impl HardwareInternal for LovenseServiceHardware {
     let command_url = format!(
       "{}/{}",
       self.http_host,
-      std::str::from_utf8(&msg.data())
+      std::str::from_utf8(msg.data())
         .expect("We build this in the protocol then have to serialize to [u8], but it's a string.")
     );
 

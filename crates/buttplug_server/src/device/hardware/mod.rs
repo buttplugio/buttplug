@@ -282,7 +282,7 @@ impl Hardware {
       name: name.to_owned(),
       address: address.to_owned(),
       endpoints: endpoints.into(),
-      message_gap: message_gap.clone(),
+      message_gap: *message_gap,
       internal_impl,
       requires_keepalive,
       last_write_time: Arc::new(RwLock::new(Instant::now())),

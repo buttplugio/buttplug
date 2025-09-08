@@ -61,7 +61,7 @@ pub struct LovehoneyDesire {
 impl LovehoneyDesire {
   fn new(num_vibrators: u8) -> Self {
     Self {
-      current_commands: std::iter::repeat_with(|| AtomicU8::default())
+      current_commands: std::iter::repeat_with(AtomicU8::default)
         .take(num_vibrators as usize)
         .collect(),
     }
@@ -104,7 +104,7 @@ impl ProtocolHandler for LovehoneyDesire {
               LOVEHONEY_DESIRE_VIBE2_PROTOCOL_UUID,
             ],
             Endpoint::Tx,
-            vec![0xF3, 0, speed0 as u8],
+            vec![0xF3, 0, speed0],
             true,
           )
           .into(),
@@ -114,14 +114,14 @@ impl ProtocolHandler for LovehoneyDesire {
           HardwareWriteCmd::new(
             &[LOVEHONEY_DESIRE_PROTOCOL_UUID],
             Endpoint::Tx,
-            vec![0xF3, 1, speed0 as u8],
+            vec![0xF3, 1, speed0],
             true,
           )
           .into(),
           HardwareWriteCmd::new(
             &[LOVEHONEY_DESIRE_VIBE2_PROTOCOL_UUID],
             Endpoint::Tx,
-            vec![0xF3, 2, speed1 as u8],
+            vec![0xF3, 2, speed1],
             true,
           )
           .into(),

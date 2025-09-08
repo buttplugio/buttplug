@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 
 use buttplug_client::{
   ButtplugClient,
@@ -50,7 +49,7 @@ async fn main() -> anyhow::Result<()> {
   for (_, device) in client.devices() {
     println!("{} supports these outputs:", device.name());
     for output_type in OutputType::iter() {
-      for (_, feature) in device.device_features() {
+      for feature in device.device_features().values() {
         if let Some(output) = feature.feature().output()
           && output.contains(output_type)
         {
@@ -68,7 +67,7 @@ async fn main() -> anyhow::Result<()> {
   //
   // There's a couple of ways to send this message.
   let devices = client.devices();
-  let test_client_device = devices.get(&(device_index as u32)).clone().unwrap();
+  let test_client_device = devices.get(&(device_index as u32)).unwrap();
 
   // We can use the convenience functions on ButtplugClientDevice to
   // send the message. This version sets all of the motors on a

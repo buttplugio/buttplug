@@ -36,16 +36,16 @@ impl ConfigBaseDeviceDefinition {
   }
 }
 
-impl Into<ServerDeviceDefinition> for ConfigBaseDeviceDefinition {
-  fn into(self) -> ServerDeviceDefinition {
-    let mut builder = ServerDeviceDefinitionBuilder::new(&self.name, &self.id);
-    if let Some(variant) = self.protocol_variant {
+impl From<ConfigBaseDeviceDefinition> for ServerDeviceDefinition {
+  fn from(val: ConfigBaseDeviceDefinition) -> Self {
+    let mut builder = ServerDeviceDefinitionBuilder::new(&val.name, &val.id);
+    if let Some(variant) = val.protocol_variant {
       builder.protocol_variant(&variant);
     }
-    if let Some(gap) = self.message_gap_ms {
+    if let Some(gap) = val.message_gap_ms {
       builder.message_gap_ms(gap);
     }
-    if let Some(features) = self.features {
+    if let Some(features) = val.features {
       for feature in features {
         builder.add_feature(&feature.into());
       }
@@ -79,7 +79,7 @@ impl From<&ServerDeviceDefinition> for ConfigUserDeviceCustomization {
       allow: value.allow(),
       deny: value.deny(),
       index: value.index(),
-      message_gap_ms: value.message_gap_ms().clone(),
+      message_gap_ms: value.message_gap_ms(),
     }
   }
 }
@@ -104,7 +104,7 @@ impl ConfigUserDeviceDefinition {
     &self,
     base: &ServerDeviceDefinition,
   ) -> Result<ServerDeviceDefinition, ButtplugDeviceConfigError> {
-    let mut builder = ServerDeviceDefinitionBuilder::from_base(&base, self.id);
+    let mut builder = ServerDeviceDefinitionBuilder::from_base(base, self.id);
     if let Some(display_name) = &self.user_config.display_name {
       builder.display_name(display_name);
     }

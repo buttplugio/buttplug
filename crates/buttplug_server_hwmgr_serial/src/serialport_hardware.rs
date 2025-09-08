@@ -184,12 +184,11 @@ impl SerialPortHardware {
     // If we've gotten this far, we can expect we have a serial port definition.
     let mut port_def = None;
     for specifier in specifiers {
-      if let ProtocolCommunicationSpecifier::Serial(serial) = specifier {
-        if port_info.port_name == *serial.port() {
+      if let ProtocolCommunicationSpecifier::Serial(serial) = specifier
+        && port_info.port_name == *serial.port() {
           port_def = Some(serial.clone());
           break;
         }
-      }
     }
     let port_def = port_def.expect("We'll always have a port definition by this point");
 
@@ -248,8 +247,8 @@ impl SerialPortHardware {
       .spawn(move || {
         serial_read_thread(read_port, reader_sender, read_token);
         connected_clone.store(false, Ordering::Relaxed);
-        if event_stream_clone.receiver_count() != 0 {
-          if let Err(err) = event_stream_clone.send(HardwareEvent::Disconnected(format!(
+        if event_stream_clone.receiver_count() != 0
+          && let Err(err) = event_stream_clone.send(HardwareEvent::Disconnected(format!(
             "{:?}",
             &port_name_clone
           ))) {
@@ -258,7 +257,6 @@ impl SerialPortHardware {
               err
             );
           }
-        }
       })
       .expect("Should always be able to create thread");
 

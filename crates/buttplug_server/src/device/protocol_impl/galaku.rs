@@ -194,7 +194,7 @@ impl ProtocolHandler for Galaku {
     _feature_index: u32,
     feature_id: Uuid,
     sensor_type: InputType,
-  ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
+  ) -> BoxFuture<'_, Result<(), ButtplugDeviceError>> {
     match sensor_type {
       InputType::Battery => {
         async move {
@@ -221,7 +221,7 @@ impl ProtocolHandler for Galaku {
     _feature_index: u32,
     feature_id: Uuid,
     sensor_type: InputType,
-  ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
+  ) -> BoxFuture<'_, Result<(), ButtplugDeviceError>> {
     match sensor_type {
       InputType::Battery => {
         async move {
@@ -248,7 +248,7 @@ impl ProtocolHandler for Galaku {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-  ) -> BoxFuture<Result<InputReadingV4, ButtplugDeviceError>> {
+  ) -> BoxFuture<'_, Result<InputReadingV4, ButtplugDeviceError>> {
     let data: Vec<u32> = vec![90, 0, 0, 1, 19, 0, 0, 0, 0, 0];
     let mut device_notification_receiver = device.event_stream();
     async move {

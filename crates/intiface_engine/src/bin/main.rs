@@ -258,11 +258,10 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
     if let Some(value) = args.device_websocket_server_port() {
       builder.device_websocket_server_port(value);
     }
-    if args.broadcast_server_mdns() {
-      if let Some(value) = args.mdns_suffix() {
+    if args.broadcast_server_mdns()
+      && let Some(value) = args.mdns_suffix() {
         builder.mdns_suffix(value);
       }
-    }
     Ok(builder.finish())
   }
 }

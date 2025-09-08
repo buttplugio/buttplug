@@ -70,8 +70,7 @@ impl DeviceConfigurationManagerBuilder {
     if self
       .base_device_definitions
       .iter()
-      .find(|(_, x)| x.id() == device_definition.base_id().unwrap_or_default())
-      .is_some()
+      .any(|(_, x)| x.id() == device_definition.base_id().unwrap_or_default())
     {
       self
         .user_device_definitions

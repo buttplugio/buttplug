@@ -127,7 +127,7 @@ impl ButtplugClientDevice {
       index,
       device_features: device_features
         .iter()
-        .map(|(i, x)| (*i, ClientDeviceFeature::new(index, *i, &x, message_sender)))
+        .map(|(i, x)| (*i, ClientDeviceFeature::new(index, *i, x, message_sender)))
         .collect(),
       event_loop_sender: message_sender.clone(),
       internal_event_sender: event_sender,

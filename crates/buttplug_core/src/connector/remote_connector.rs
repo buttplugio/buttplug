@@ -238,7 +238,7 @@ where
           // If we connect successfully, we get back the channel from the transport
           // to send outgoing messages and receieve incoming events, all serialized.
           Ok(()) => {
-            let _ = async_manager::spawn(async move {
+            async_manager::spawn(async move {
               remote_connector_event_loop::<
                 TransportType,
                 SerializerType,

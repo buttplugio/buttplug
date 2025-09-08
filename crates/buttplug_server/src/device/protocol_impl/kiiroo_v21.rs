@@ -95,7 +95,7 @@ impl ProtocolHandler for KiirooV21 {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-  ) -> BoxFuture<Result<InputReadingV4, ButtplugDeviceError>> {
+  ) -> BoxFuture<'_, Result<InputReadingV4, ButtplugDeviceError>> {
     debug!("Trying to get battery reading.");
     // Reading the "whitelist" endpoint for this device retrieves the battery level,
     // which is byte 5. All other bytes of the 20-byte result are unknown.

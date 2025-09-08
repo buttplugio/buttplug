@@ -1,6 +1,5 @@
 use buttplug_client::{
   ButtplugClient,
-  ButtplugClientEvent,
   connector::ButtplugRemoteClientConnector,
   serializer::ButtplugClientJSONSerializer,
 };

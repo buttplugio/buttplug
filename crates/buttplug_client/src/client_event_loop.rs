@@ -218,7 +218,7 @@ where
             continue;
           }
           trace!("Device added, updating map and sending to client");
-          let info = DeviceMessageInfoV4::from(dev.1.clone());
+          let info = dev.1.clone();
           let device = self.create_client_device(&info);
           self.send_client_event(ButtplugClientEvent::DeviceAdded(device));
         }

@@ -51,7 +51,7 @@ impl ProtocolHandler for SvakomIker {
         HardwareWriteCmd::new(
           &[feature_id],
           Endpoint::Tx,
-          [0x55, 0x03, 0x03, 0x00, 0x01, vibe0 as u8].to_vec(),
+          [0x55, 0x03, 0x03, 0x00, 0x01, { vibe0 }].to_vec(),
           false,
         )
         .into(),
@@ -61,7 +61,7 @@ impl ProtocolHandler for SvakomIker {
           HardwareWriteCmd::new(
             &[feature_id],
             Endpoint::Tx,
-            [0x55, 0x07, 0x00, 0x00, vibe1 as u8, 0x00].to_vec(),
+            [0x55, 0x07, 0x00, 0x00, { vibe1 }, 0x00].to_vec(),
             false,
           )
           .into(),

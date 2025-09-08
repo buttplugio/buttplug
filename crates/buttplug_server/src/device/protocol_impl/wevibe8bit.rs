@@ -50,7 +50,7 @@ impl ProtocolInitializer for WeVibe8BitInitializer {
       .filter(|x| {
         x.output()
           .as_ref()
-          .map_or(false, |x| x.contains(OutputType::Vibrate))
+          .is_some_and(|x| x.contains(OutputType::Vibrate))
       })
       .count() as u8;
     Ok(Arc::new(WeVibe8Bit::new(num_vibrators)))

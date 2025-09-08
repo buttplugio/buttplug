@@ -161,7 +161,7 @@ pub struct MonsterPub {
 
 impl MonsterPub {
   pub fn new(tx: Endpoint, num_outputs: u32) -> Self {
-    let speeds: Vec<AtomicU8> = std::iter::repeat_with(|| AtomicU8::default())
+    let speeds: Vec<AtomicU8> = std::iter::repeat_with(AtomicU8::default)
       .take(num_outputs as usize)
       .collect();
     Self { tx, speeds }
@@ -176,7 +176,7 @@ impl MonsterPub {
     }
     for cmd in self.speeds.iter() {
       let speed = cmd.load(Ordering::Relaxed);
-      data.push(speed as u8);
+      data.push(speed);
       if speed != 0 {
         stop = false;
       }

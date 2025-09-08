@@ -31,7 +31,7 @@ use serde::{
   Serializer,
   ser::{self, SerializeSeq},
 };
-use std::{collections::HashMap, fmt::Display, ops::RangeInclusive};
+use std::{fmt::Display, ops::RangeInclusive};
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../build-config/buttplug-device-config-v4.json");
@@ -146,7 +146,7 @@ fn load_main_config(
 
   for (protocol_name, protocol_def) in main_config.protocols().clone().unwrap_or_default() {
     if let Some(specifiers) = protocol_def.communication() {
-      dcm_builder.communication_specifier(&protocol_name, &specifiers);
+      dcm_builder.communication_specifier(&protocol_name, specifiers);
     }
 
     let mut default = None;
@@ -199,7 +199,7 @@ fn load_user_config(
 
   for (protocol_name, protocol_def) in user_config.protocols().clone().unwrap_or_default() {
     if let Some(specifiers) = protocol_def.communication() {
-      dcm_builder.user_communication_specifier(&protocol_name, &specifiers);
+      dcm_builder.user_communication_specifier(&protocol_name, specifiers);
     }
 
     // Defaults aren't valid in user config files. All we can do is create new configurations with
@@ -227,8 +227,7 @@ fn load_user_config(
       if let Ok(user_config) = user_device_config_pair
         .config()
         .build_from_base_definition(base_config)
-      {
-        if let Err(e) =
+        && let Err(e) =
           dcm_builder.user_device_definition(user_device_config_pair.identifier(), &user_config)
         {
           error!(
@@ -236,7 +235,6 @@ fn load_user_config(
             e, user_config
           )
         }
-      }
     } else {
       error!(
         "Device identifier {:?} does not have a match base identifier that matches anything in the base config, removing from database.",

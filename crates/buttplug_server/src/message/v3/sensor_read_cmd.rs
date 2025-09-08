@@ -81,7 +81,7 @@ impl TryFromDeviceAttributes<SensorReadCmdV3> for CheckedInputCmdV4 {
       .features()
       .iter()
       .enumerate()
-      .find(|(_, p)| p.input().as_ref().map_or(false, |x| x.battery().is_some()))
+      .find(|(_, p)| p.input().as_ref().is_some_and(|x| x.battery().is_some()))
     {
       Ok(CheckedInputCmdV4::new(
         msg.device_index(),

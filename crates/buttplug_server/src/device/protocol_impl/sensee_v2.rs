@@ -69,11 +69,10 @@ impl ProtocolInitializer for SenseeV2Initializer {
         .iter()
         .enumerate()
         .for_each(|(i, x)| {
-          if let Some(output_map) = x.output() {
-            if output_map.contains(output_type) {
+          if let Some(output_map) = x.output()
+            && output_map.contains(output_type) {
               map.insert(i as u32, AtomicU8::new(0));
             }
-          }
         });
       map
     };
@@ -132,12 +131,12 @@ impl SenseeV2 {
   fn compile_command(&self) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut data = vec![];
     data.push(
-      if self.vibe_map.len() != 0 { 1 } else { 0 }
-        + if self.thrust_map.len() != 0 { 1 } else { 0 }
-        + if self.suck_map.len() != 0 { 1 } else { 0 } as u8,
+      if !self.vibe_map.is_empty() { 1 } else { 0 }
+        + if !self.thrust_map.is_empty() { 1 } else { 0 }
+        + if !self.suck_map.is_empty() { 1 } else { 0 } as u8,
     );
     let mut data_add = |i, m: &HashMap<u32, AtomicU8>| {
-      if m.len() > 0 {
+      if !m.is_empty() {
         data.push(i);
         data.push(m.len() as u8);
         for (i, (_, v)) in m.iter().enumerate() {

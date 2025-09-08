@@ -213,7 +213,7 @@ impl ServerDevice {
     let device = Self::new(identifier, handler, hardware, &attrs);
 
     // If we need a keepalive with a packet replay, set this up via stopping the device on connect.
-    if (requires_keepalive
+    if ((requires_keepalive
       && matches!(
         strategy,
         ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
@@ -221,14 +221,12 @@ impl ServerDevice {
       || matches!(
         strategy,
         ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_)
-      )
-    {
-      if let Err(e) = device.handle_stop_device_cmd().await {
+      ))
+      && let Err(e) = device.handle_stop_device_cmd().await {
         return Err(ButtplugDeviceError::DeviceConnectionError(format!(
           "Error setting up keepalive: {e}"
         )));
       }
-    }
 
     Ok(device)
   }
@@ -265,7 +263,7 @@ impl ServerDevice {
         // TODO This needs to throw system error messages
         let send_hw_cmd = async |command| {
           let _ = hardware.parse_message(&command).await;
-          if (requires_keepalive
+          if ((requires_keepalive
             && matches!(
               strategy,
               ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
@@ -273,12 +271,10 @@ impl ServerDevice {
             || matches!(
               strategy,
               ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_)
-            )
-          {
-            if let HardwareCommand::Write(command) = command {
+            ))
+            && let HardwareCommand::Write(command) = command {
               *keepalive_packet.lock().await = Some(command);
-            }
-          };
+            };
         };
         loop {
           let requires_keepalive = hardware.requires_keepalive();
@@ -393,12 +389,11 @@ impl ServerDevice {
                   }
                 }
                 ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy => {
-                  if let Some(packet) = keepalive_packet {
-                    if let Err(e) = hardware.write_value(&packet).await {
+                  if let Some(packet) = keepalive_packet
+                    && let Err(e) = hardware.write_value(&packet).await {
                       warn!("Error writing keepalive packet: {:?}", e);
                       break;
                     }
-                  }
                 }
               }
             }
@@ -470,7 +465,7 @@ impl ServerDevice {
       hardware,
       definition: definition.clone(),
       // Generating legacy attributes is cheap, just do it right when we create the device.
-      legacy_attributes: ServerDeviceAttributes::new(&definition.features()),
+      legacy_attributes: ServerDeviceAttributes::new(definition.features()),
       last_output_command: DashMap::new(),
       stop_commands,
       internal_hw_msg_sender,
@@ -567,12 +562,11 @@ impl ServerDevice {
   }
 
   fn handle_outputcmd_v4(&self, msg: &CheckedOutputCmdV4) -> ButtplugServerResultFuture {
-    if let Some(last_msg) = self.last_output_command.get(&msg.feature_id()) {
-      if *last_msg == *msg {
+    if let Some(last_msg) = self.last_output_command.get(&msg.feature_id())
+      && *last_msg == *msg {
         trace!("No commands generated for incoming device packet, skipping and returning success.");
         return future::ready(Ok(message::OkV0::default().into())).boxed();
       }
-    }
     self
       .last_output_command
       .insert(msg.feature_id(), msg.clone());

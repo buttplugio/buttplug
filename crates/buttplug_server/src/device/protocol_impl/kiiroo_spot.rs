@@ -47,7 +47,7 @@ impl ProtocolHandler for KiirooSpot {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-  ) -> BoxFuture<Result<InputReadingV4, ButtplugDeviceError>> {
+  ) -> BoxFuture<'_, Result<InputReadingV4, ButtplugDeviceError>> {
     debug!("Trying to get battery reading.");
     let msg = HardwareReadCmd::new(feature_id, Endpoint::RxBLEBattery, 20, 0);
     let fut = device.read_value(&msg);

@@ -75,31 +75,27 @@ impl RangeWithLimit {
     if let Some(user) = user {
       if user.is_empty() {
         Err(ButtplugDeviceConfigError::InvalidUserRange)
-      } else {
-        if *user.start() < *truncated_base.start()
-          || *user.end() > *truncated_base.end()
-          || *user.start() > *truncated_base.end()
-          || *user.end() < *truncated_base.start()
-        {
-          Err(ButtplugDeviceConfigError::InvalidUserRange)
-        } else {
-          Ok(Self {
-            base: (*base).clone(),
-            internal_base: truncated_base,
-            user: Some((*user).clone()),
-          })
-        }
-      }
-    } else {
-      if base.is_empty() {
-        Err(ButtplugDeviceConfigError::BaseRangeRequired)
+      } else if *user.start() < *truncated_base.start()
+        || *user.end() > *truncated_base.end()
+        || *user.start() > *truncated_base.end()
+        || *user.end() < *truncated_base.start()
+      {
+        Err(ButtplugDeviceConfigError::InvalidUserRange)
       } else {
         Ok(Self {
           base: (*base).clone(),
           internal_base: truncated_base,
-          user: None,
+          user: Some((*user).clone()),
         })
       }
+    } else if base.is_empty() {
+      Err(ButtplugDeviceConfigError::BaseRangeRequired)
+    } else {
+      Ok(Self {
+        base: (*base).clone(),
+        internal_base: truncated_base,
+        user: None,
+      })
     }
   }
 }
@@ -121,7 +117,7 @@ impl ServerDeviceFeatureOutputValueProperties {
   }
 
   pub fn calculate_scaled_float(&self, value: f64) -> Result<i32, ButtplugDeviceConfigError> {
-    if value > 1.0 || value < 0.0 {
+    if !(0.0..=1.0).contains(&value) {
       Err(ButtplugDeviceConfigError::InvalidFloatConversion(value))
     } else {
       let value = if value < 0.000001 { 0f64 } else { value };
@@ -137,7 +133,7 @@ impl ServerDeviceFeatureOutputValueProperties {
     } else {
       self.value.internal_base()
     };
-    let current_value = value.abs() as u32;
+    let current_value = value.unsigned_abs();
     let mult = if value < 0 { -1 } else { 1 };
     if value > 0 && range.contains(&(range.start() + current_value)) {
       Ok((range.start() + current_value) as i32 * mult)
@@ -145,16 +141,16 @@ impl ServerDeviceFeatureOutputValueProperties {
       Ok(0)
     } else {
       Err(ButtplugDeviceConfigError::InvalidOutputValue(
-        value as i32,
+        value,
         format!("{:?}", range),
       ))
     }
   }
 }
 
-impl Into<DeviceFeatureOutputValueProperties> for &ServerDeviceFeatureOutputValueProperties {
-  fn into(self) -> DeviceFeatureOutputValueProperties {
-    DeviceFeatureOutputValueProperties::new(&self.value().step_limit())
+impl From<&ServerDeviceFeatureOutputValueProperties> for DeviceFeatureOutputValueProperties {
+  fn from(val: &ServerDeviceFeatureOutputValueProperties) -> Self {
+    DeviceFeatureOutputValueProperties::new(&val.value().step_limit())
   }
 }
 
@@ -178,7 +174,7 @@ impl ServerDeviceFeatureOutputPositionProperties {
   }
 
   pub fn calculate_scaled_float(&self, value: f64) -> Result<i32, ButtplugDeviceConfigError> {
-    if value > 1.0 || value < 0.0 {
+    if !(0.0..=1.0).contains(&value) {
       Err(ButtplugDeviceConfigError::InvalidFloatConversion(value))
     } else {
       self
@@ -211,9 +207,9 @@ impl ServerDeviceFeatureOutputPositionProperties {
   }
 }
 
-impl Into<DeviceFeatureOutputValueProperties> for &ServerDeviceFeatureOutputPositionProperties {
-  fn into(self) -> DeviceFeatureOutputValueProperties {
-    DeviceFeatureOutputValueProperties::new(&self.position().step_limit())
+impl From<&ServerDeviceFeatureOutputPositionProperties> for DeviceFeatureOutputValueProperties {
+  fn from(val: &ServerDeviceFeatureOutputPositionProperties) -> Self {
+    DeviceFeatureOutputValueProperties::new(&val.position().step_limit())
   }
 }
 
@@ -272,13 +268,13 @@ impl ServerDeviceFeatureOutputPositionWithDurationProperties {
   }
 }
 
-impl Into<DeviceFeatureOutputPositionWithDurationProperties>
-  for &ServerDeviceFeatureOutputPositionWithDurationProperties
+impl From<&ServerDeviceFeatureOutputPositionWithDurationProperties>
+  for DeviceFeatureOutputPositionWithDurationProperties
 {
-  fn into(self) -> DeviceFeatureOutputPositionWithDurationProperties {
+  fn from(val: &ServerDeviceFeatureOutputPositionWithDurationProperties) -> Self {
     DeviceFeatureOutputPositionWithDurationProperties::new(
-      &self.position().step_limit(),
-      &self.duration().step_limit(),
+      &val.position().step_limit(),
+      &val.duration().step_limit(),
     )
   }
 }
@@ -429,7 +425,7 @@ impl ServerDeviceFeatureOutput {
       ),
       OutputType::Position => self.position.as_ref().map_or(
         Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_float(value).map(|x| x as i32),
+        |x| x.calculate_scaled_float(value),
       ),
       OutputType::PositionWithDuration => self.position_with_duration.as_ref().map_or(
         Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
@@ -456,25 +452,25 @@ impl ServerDeviceFeatureOutput {
   }
 }
 
-impl Into<DeviceFeatureOutput> for ServerDeviceFeatureOutput {
-  fn into(self) -> DeviceFeatureOutput {
+impl From<ServerDeviceFeatureOutput> for DeviceFeatureOutput {
+  fn from(val: ServerDeviceFeatureOutput) -> Self {
     let mut builder = DeviceFeatureOutputBuilder::default();
-    self.vibrate.as_ref().map(|x| builder.vibrate(x.into()));
-    self.rotate.as_ref().map(|x| builder.rotate(x.into()));
-    self
+    val.vibrate.as_ref().map(|x| builder.vibrate(x.into()));
+    val.rotate.as_ref().map(|x| builder.rotate(x.into()));
+    val
       .rotate_with_direction
       .as_ref()
       .map(|x| builder.rotate_with_direction(x.into()));
-    self.oscillate.as_ref().map(|x| builder.oscillate(x.into()));
-    self.constrict.as_ref().map(|x| builder.constrict(x.into()));
-    self.heater.as_ref().map(|x| builder.heater(x.into()));
-    self.led.as_ref().map(|x| builder.led(x.into()));
-    self.position.as_ref().map(|x| builder.position(x.into()));
-    self
+    val.oscillate.as_ref().map(|x| builder.oscillate(x.into()));
+    val.constrict.as_ref().map(|x| builder.constrict(x.into()));
+    val.heater.as_ref().map(|x| builder.heater(x.into()));
+    val.led.as_ref().map(|x| builder.led(x.into()));
+    val.position.as_ref().map(|x| builder.position(x.into()));
+    val
       .position_with_duration
       .as_ref()
       .map(|x| builder.position_with_duration(x.into()));
-    self.spray.as_ref().map(|x| builder.spray(x.into()));
+    val.spray.as_ref().map(|x| builder.spray(x.into()));
     builder.build().expect("Infallible")
   }
 }
@@ -498,9 +494,9 @@ impl ServerDeviceFeatureInputProperties {
   }
 }
 
-impl Into<DeviceFeatureInputProperties> for &ServerDeviceFeatureInputProperties {
-  fn into(self) -> DeviceFeatureInputProperties {
-    DeviceFeatureInputProperties::new(&self.value_range, &self.input_commands)
+impl From<&ServerDeviceFeatureInputProperties> for DeviceFeatureInputProperties {
+  fn from(val: &ServerDeviceFeatureInputProperties) -> Self {
+    DeviceFeatureInputProperties::new(&val.value_range, &val.input_commands)
   }
 }
 
@@ -525,13 +521,13 @@ impl ServerDeviceFeatureInput {
   }
 }
 
-impl Into<DeviceFeatureInput> for ServerDeviceFeatureInput {
-  fn into(self) -> DeviceFeatureInput {
+impl From<ServerDeviceFeatureInput> for DeviceFeatureInput {
+  fn from(val: ServerDeviceFeatureInput) -> Self {
     let mut builder = DeviceFeatureInputBuilder::default();
-    self.battery.as_ref().map(|x| builder.battery(x.into()));
-    self.rssi.as_ref().map(|x| builder.rssi(x.into()));
-    self.pressure.as_ref().map(|x| builder.pressure(x.into()));
-    self.button.as_ref().map(|x| builder.button(x.into()));
+    val.battery.as_ref().map(|x| builder.battery(x.into()));
+    val.rssi.as_ref().map(|x| builder.rssi(x.into()));
+    val.pressure.as_ref().map(|x| builder.pressure(x.into()));
+    val.button.as_ref().map(|x| builder.button(x.into()));
     builder.build().expect("Infallible")
   }
 }
@@ -584,8 +580,8 @@ impl ServerDeviceFeature {
     Ok(DeviceFeature::new(
       index,
       self.description(),
-      &self.output.as_ref().and_then(|x| Some(x.clone().into())),
-      &self.input.as_ref().and_then(|x| Some(x.clone().into())),
+      &self.output.as_ref().map(|x| x.clone().into()),
+      &self.input.as_ref().map(|x| x.clone().into()),
     ))
   }
 }

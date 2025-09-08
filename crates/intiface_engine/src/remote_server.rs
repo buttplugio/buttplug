@@ -86,7 +86,7 @@ async fn run_device_event_stream(
               let added_event = ButtplugRemoteServerEvent::DeviceAdded {
                 index: da.1.device_index(),
                 name: da.1.device_name().clone(),
-                identifier: device_info.identifier().clone().into(),
+                identifier: device_info.identifier().clone(),
                 display_name: device_info.display_name().clone(),
               };
               if remote_event_sender.send(added_event).is_err() {
@@ -153,19 +153,17 @@ async fn run_server<ConnectorType>(
             match server_clone.parse_message(client_message.clone()).await {
               Ok(ret_msg) => {
                 // Only send event if we just connected. Sucks to check it on every message but the boolean check should be quick.
-                if !connected && server_clone.connected() {
-                  if remote_event_sender_clone.receiver_count() > 0 {
-                    if remote_event_sender_clone.send(ButtplugRemoteServerEvent::ClientConnected(server_clone.client_name().unwrap_or("Buttplug Client (No name specified)".to_owned()).clone())).is_err() {
+                if !connected && server_clone.connected()
+                  && remote_event_sender_clone.receiver_count() > 0
+                    && remote_event_sender_clone.send(ButtplugRemoteServerEvent::ClientConnected(server_clone.client_name().unwrap_or("Buttplug Client (No name specified)".to_owned()).clone())).is_err() {
                       error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
                     }
-                  }
-                }
                 if connector_clone.send(ret_msg).await.is_err() {
                   error!("Cannot send reply to server, dropping and assuming remote server thread has exited.");
                 }
               },
               Err(err_msg) => {
-                if connector_clone.send(err_msg.into()).await.is_err() {
+                if connector_clone.send(err_msg).await.is_err() {
                   error!("Cannot send reply to server, dropping and assuming remote server thread has exited.");
                 }
               }
@@ -213,7 +211,7 @@ async fn run_server<ConnectorType>(
         }
         Some(msg) => {
           let connector_clone = shared_connector.clone();
-          if connector_clone.send(msg.into()).await.is_err() {
+          if connector_clone.send(msg).await.is_err() {
             error!("Server disappeared, exiting remote server thread.");
           }
         }
@@ -263,7 +261,7 @@ impl ButtplugRemoteServer {
     }
     Self {
       event_sender,
-      server: server,
+      server,
       disconnect_notifier: Arc::new(Notify::new()),
     }
   }

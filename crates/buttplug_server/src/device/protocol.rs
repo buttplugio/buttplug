@@ -364,7 +364,7 @@ pub trait ProtocolHandler: Sync + Send {
     _feature_index: u32,
     _feature_id: Uuid,
     _sensor_type: InputType,
-  ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
+  ) -> BoxFuture<'_, Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Command not implemented for this protocol: InputCmd (Subscribe)".to_string(),
     )))
@@ -377,7 +377,7 @@ pub trait ProtocolHandler: Sync + Send {
     _feature_index: u32,
     _feature_id: Uuid,
     _sensor_type: InputType,
-  ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
+  ) -> BoxFuture<'_, Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Command not implemented for this protocol: InputCmd (Unsubscribe)".to_string(),
     )))
@@ -391,7 +391,7 @@ pub trait ProtocolHandler: Sync + Send {
     feature_index: u32,
     feature_id: Uuid,
     sensor_type: InputType,
-  ) -> BoxFuture<Result<InputReadingV4, ButtplugDeviceError>> {
+  ) -> BoxFuture<'_, Result<InputReadingV4, ButtplugDeviceError>> {
     match sensor_type {
       InputType::Battery => {
         self.handle_battery_level_cmd(device_index, device, feature_index, feature_id)
@@ -411,7 +411,7 @@ pub trait ProtocolHandler: Sync + Send {
     device: Arc<Hardware>,
     feature_index: u32,
     feature_id: Uuid,
-  ) -> BoxFuture<Result<InputReadingV4, ButtplugDeviceError>> {
+  ) -> BoxFuture<'_, Result<InputReadingV4, ButtplugDeviceError>> {
     // If we have a standardized BLE Battery endpoint, handle that above the
     // protocol, as it'll always be the same.
     if device.endpoints().contains(&Endpoint::RxBLEBattery) {
@@ -443,7 +443,7 @@ pub trait ProtocolHandler: Sync + Send {
     _device: Arc<Hardware>,
     _feature_index: u32,
     _feature_id: Uuid,
-  ) -> BoxFuture<Result<(), ButtplugDeviceError>> {
+  ) -> BoxFuture<'_, Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Command not implemented for this protocol: SensorReadCmd".to_string(),
     )))

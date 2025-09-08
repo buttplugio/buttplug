@@ -81,7 +81,7 @@ impl IntifaceEngine {
 
       let repeater = ButtplugRepeater::new(
         options.repeater_local_port().unwrap(),
-        &options.repeater_remote_address().as_ref().unwrap(),
+        options.repeater_remote_address().as_ref().unwrap(),
         self.stop_token.child_token(),
       );
       select! {
@@ -106,7 +106,7 @@ impl IntifaceEngine {
 
     // Hang out until those listeners get sick of listening.
     info!("Intiface CLI Setup finished, running server tasks until all joined.");
-    let mut server = setup_buttplug_server(options, &self.backdoor_server, &dcm).await?;
+    let mut server = setup_buttplug_server(options, &self.backdoor_server, dcm).await?;
     let dcm = server
       .server()
       .device_manager()

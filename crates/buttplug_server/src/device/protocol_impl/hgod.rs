@@ -76,8 +76,8 @@ async fn send_hgod_updates(device: Arc<Hardware>, data: Arc<AtomicU8>) {
   loop {
     let speed = data.load(Ordering::Relaxed);
     let command = vec![0x55, 0x04, 0, 0, 0, speed];
-    if speed > 0 {
-      if let Err(e) = device
+    if speed > 0
+      && let Err(e) = device
         .write_value(&HardwareWriteCmd::new(
           &[HGOD_PROTOCOL_UUID],
           Endpoint::Tx,
@@ -92,7 +92,6 @@ async fn send_hgod_updates(device: Arc<Hardware>, data: Arc<AtomicU8>) {
         );
         break;
       }
-    }
     sleep(Duration::from_millis(HGOD_COMMAND_DELAY_MS)).await;
   }
 }

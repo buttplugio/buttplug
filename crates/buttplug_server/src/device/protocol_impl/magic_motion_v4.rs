@@ -57,7 +57,7 @@ pub struct MagicMotionV4 {
 impl MagicMotionV4 {
   fn new(num_vibrators: u8) -> Self {
     Self {
-      current_commands: std::iter::repeat_with(|| AtomicU8::default())
+      current_commands: std::iter::repeat_with(AtomicU8::default)
         .take(num_vibrators as usize)
         .collect(),
     }

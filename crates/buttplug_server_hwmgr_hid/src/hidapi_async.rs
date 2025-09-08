@@ -70,11 +70,10 @@ impl Drop for HidAsyncDevice {
         drop(req_tx);
 
         // Wait for the reader thread to finish
-        if let Some(jh) = guard.read_thread.take() {
-          if jh.join().is_ok() {
+        if let Some(jh) = guard.read_thread.take()
+          && jh.join().is_ok() {
             info!("device read thread joined")
           }
-        }
       } else {
         //error!("Failed to take lock on device");
       }

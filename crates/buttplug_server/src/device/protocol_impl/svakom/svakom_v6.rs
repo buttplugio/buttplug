@@ -110,7 +110,7 @@ impl ProtocolHandler for SvakomV6 {
             } else {
               0x01
             },
-            vibe1.max(vibe2) as u8,
+            { vibe1.max(vibe2) },
             0x00,
           ]
           .to_vec(),
@@ -130,7 +130,7 @@ impl ProtocolHandler for SvakomV6 {
             0x00,
             0x00,
             if vibe3 == 0 { 0x00 } else { 0x01 },
-            vibe3 as u8,
+            { vibe3 },
             0x00,
           ]
           .to_vec(),

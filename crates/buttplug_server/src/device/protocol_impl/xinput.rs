@@ -67,7 +67,7 @@ impl ProtocolHandler for XInput {
     feature_index: u32,
     feature_id: uuid::Uuid,
     _sensor_type: message::InputType,
-  ) -> BoxFuture<Result<InputReadingV4, ButtplugDeviceError>> {
+  ) -> BoxFuture<'_, Result<InputReadingV4, ButtplugDeviceError>> {
     async move {
       let reading = device
         .read_value(&HardwareReadCmd::new(feature_id, Endpoint::Rx, 0, 0))

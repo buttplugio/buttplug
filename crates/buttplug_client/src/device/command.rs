@@ -5,15 +5,15 @@ pub enum ClientDeviceCommandValue {
   Float(f64),
 }
 
-impl Into<ClientDeviceCommandValue> for u32 {
-  fn into(self) -> ClientDeviceCommandValue {
-    ClientDeviceCommandValue::Int(self)
+impl From<u32> for ClientDeviceCommandValue {
+  fn from(val: u32) -> Self {
+    ClientDeviceCommandValue::Int(val)
   }
 }
 
-impl Into<ClientDeviceCommandValue> for f64 {
-  fn into(self) -> ClientDeviceCommandValue {
-    ClientDeviceCommandValue::Float(self)
+impl From<f64> for ClientDeviceCommandValue {
+  fn from(val: f64) -> Self {
+    ClientDeviceCommandValue::Float(val)
   }
 }
 
@@ -42,9 +42,9 @@ pub enum ClientDeviceOutputCommand {
   PositionWithDurationFloat(f64, u32),
 }
 
-impl Into<OutputType> for &ClientDeviceOutputCommand {
-  fn into(self) -> OutputType {
-    match self {
+impl From<&ClientDeviceOutputCommand> for OutputType {
+  fn from(val: &ClientDeviceOutputCommand) -> Self {
+    match val {
       ClientDeviceOutputCommand::Vibrate(_) | ClientDeviceOutputCommand::VibrateFloat(_) => {
         OutputType::Vibrate
       }

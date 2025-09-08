@@ -52,8 +52,8 @@ where
   for msg in stream {
     match msg {
       Ok(json_msg) => {
-        if let Some(validator) = validator {
-          if !validator.is_valid(&json_msg) {
+        if let Some(validator) = validator
+          && !validator.is_valid(&json_msg) {
             // If is_valid fails, re-run validation to get our error message.
             let e = validator
               .validate(&json_msg)
@@ -62,7 +62,6 @@ where
               "Error during JSON Schema Validation - Message: {json_msg} - Error: {e:?}"
             )));
           }
-        }
         match serde_json::from_value::<Vec<T>>(json_msg) {
           Ok(mut msg_vec) => {
             for msg in msg_vec.iter_mut() {

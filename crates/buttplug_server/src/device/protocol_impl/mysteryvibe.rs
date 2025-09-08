@@ -77,7 +77,7 @@ pub struct MysteryVibe {
 impl MysteryVibe {
   pub fn new(vibrator_count: u8) -> Self {
     Self {
-      speeds: std::iter::repeat_with(|| AtomicU8::default())
+      speeds: std::iter::repeat_with(AtomicU8::default)
         .take(vibrator_count as usize)
         .collect(),
     }
