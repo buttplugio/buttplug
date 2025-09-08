@@ -1,3 +1,4 @@
+/*
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
 // Copyright 2016-2025 Nonpolynomial Labs LLC. All rights reserved.
@@ -368,3 +369,4 @@ async fn main() {
     .init();
   device_tester().await;
 }
+*/
