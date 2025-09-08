@@ -46,10 +46,8 @@ async fn main() -> anyhow::Result<()> {
     println!("{} supports these outputs:", device.name());
     for output_type in OutputType::iter() {
       for (_, feature) in device.device_features() { 
-        for (output, _) in feature.feature().output().as_ref().unwrap_or(&HashMap::new()) {
-          if output_type == *output {
-            println!("- {}", output);
-          }
+        if let Some(output) = feature.feature().output() && output.contains(output_type) {
+          println!("- {}", output_type);
         }
       }
     }
