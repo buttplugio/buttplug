@@ -1,4 +1,3 @@
-/*
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
 // Copyright 2016-2025 Nonpolynomial Labs LLC. All rights reserved.
@@ -6,6 +5,10 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+
+use tracing::Level;
+
+/*
 use buttplug_client::device::{ClientDeviceFeature, ClientDeviceOutputCommand};
 use buttplug_client::{ButtplugClient, ButtplugClientDevice, ButtplugClientEvent};
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
@@ -28,7 +31,6 @@ use log::error;
 use std::collections::{HashMap, HashSet};
 use std::{fs, sync::Arc, time::Duration};
 use tokio::time::sleep;
-use tracing::Level;
 
 async fn set_level_and_wait(
   dev: &ButtplugClientDevice,
@@ -361,12 +363,15 @@ async fn device_tester() {
   // And now we're done!
   println!("Exiting example");
 }
-
+*/
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
   tracing_subscriber::fmt()
     .with_max_level(Level::DEBUG)
     .init();
+  panic!("Reimplement me!");
+  /*
   device_tester().await;
+  */
 }
-*/
+
