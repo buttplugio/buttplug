@@ -78,6 +78,18 @@ pub struct ConfigUserDeviceCustomization {
   message_gap_ms: Option<u32>,
 }
 
+impl From<&ServerDeviceDefinition> for ConfigUserDeviceCustomization {
+  fn from(value: &ServerDeviceDefinition) -> Self {
+    Self {
+      display_name: value.display_name().clone(),
+      allow: value.allow(),
+      deny: value.deny(),
+      index: value.index(),
+      message_gap_ms: value.message_gap_ms().clone()
+    }
+  }
+}
+
 #[derive(Debug, Clone, Getters, MutGetters, Serialize, Deserialize, CopyGetters)]
 pub struct ConfigUserDeviceDefinition {
   #[getset(get_copy = "pub")]
@@ -116,5 +128,16 @@ impl ConfigUserDeviceDefinition {
       }
     }
     Ok(builder.finish())
+  }
+}
+
+impl From<&ServerDeviceDefinition> for ConfigUserDeviceDefinition {
+  fn from(value: &ServerDeviceDefinition) -> Self {
+    Self {
+      id: value.id(),
+      base_id: value.base_id().expect("Should always have a base id"),
+      features: value.features().iter().map(|x| x.into()).collect(),
+      user_config: value.into(),
+    }
   }
 }

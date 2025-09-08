@@ -4,7 +4,7 @@ use getset::{CopyGetters, Getters};
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugDeviceMessageNameV4, ButtplugServerMessageV4, DeviceFeature, DeviceFeatureOutput, DeviceFeatureOutputLimits, InputCmdV4, InputCommandType, InputType, InputTypeData, OutputCmdV4, OutputCommand, OutputPositionWithDuration, OutputRotateWithDirection, OutputType, OutputValue
+    ButtplugDeviceMessageNameV4, ButtplugServerMessageV4, DeviceFeature, DeviceFeatureOutputLimits, InputCmdV4, InputCommandType, InputType, InputTypeData, OutputCmdV4, OutputCommand, OutputPositionWithDuration, OutputRotateWithDirection, OutputType, OutputValue
   },
 };
 

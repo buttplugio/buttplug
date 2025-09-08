@@ -16,6 +16,22 @@ use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+#[derive(Serialize, Deserialize, Debug, Clone, Default, CopyGetters)]
+pub struct BaseFeatureSettings {
+  #[serde(
+    skip_serializing_if = "Option::is_none",
+    default
+  )]
+  #[getset(get_copy = "pub")]
+  alt_protocol_index: Option<u32>,
+}
+
+impl BaseFeatureSettings {
+  pub fn is_none(&self) -> bool {
+    self.alt_protocol_index.is_none()
+  }
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct BaseDeviceFeatureOutputValueProperties {
   value: RangeInclusive<i32>,
@@ -141,6 +157,15 @@ impl UserDeviceFeatureOutputValueProperties {
   }
 }
 
+impl From<&ServerDeviceFeatureOutputValueProperties> for UserDeviceFeatureOutputValueProperties {
+  fn from(value: &ServerDeviceFeatureOutputValueProperties) -> Self {
+    Self {
+      value: value.value().user().clone(),
+      disabled: value.disabled()
+    }
+  }
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct UserDeviceFeatureOutputPositionProperties {
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -162,6 +187,17 @@ impl UserDeviceFeatureOutputPositionProperties {
       self.disabled,
       self.reverse,
     ))
+  }
+}
+
+
+impl From<&ServerDeviceFeatureOutputPositionProperties> for UserDeviceFeatureOutputPositionProperties {
+  fn from(value: &ServerDeviceFeatureOutputPositionProperties) -> Self {
+    Self {
+      value: value.position().user().clone(),
+      reverse: value.reverse_position(),
+      disabled: value.disabled()
+    }
   }
 }
 
@@ -195,6 +231,18 @@ impl UserDeviceFeatureOutputPositionWithDurationProperties {
     )
   }
 }
+
+impl From<&ServerDeviceFeatureOutputPositionWithDurationProperties> for UserDeviceFeatureOutputPositionWithDurationProperties {
+  fn from(value: &ServerDeviceFeatureOutputPositionWithDurationProperties) -> Self {
+    Self {
+      position: value.position().user().clone(),
+      duration: value.duration().user().clone(),
+      reverse: value.reverse_position(),
+      disabled: value.disabled()
+    }
+  }
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct UserDeviceFeatureOutput {
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -289,6 +337,23 @@ impl UserDeviceFeatureOutput {
       }
     }
     Ok(output)
+  }
+}
+
+impl From<&ServerDeviceFeatureOutput> for UserDeviceFeatureOutput {
+  fn from(value: &ServerDeviceFeatureOutput) -> Self {
+    Self {
+      vibrate: value.vibrate().as_ref().map(|x| x.into()),
+      rotate: value.rotate().as_ref().map(|x| x.into()),
+      rotate_with_direction: value.rotate_with_direction().as_ref().map(|x| x.into()),
+      oscillate: value.oscillate().as_ref().map(|x| x.into()), 
+      constrict: value.constrict().as_ref().map(|x| x.into()), 
+      heater: value.heater().as_ref().map(|x| x.into()),
+      led: value.led().as_ref().map(|x| x.into()),
+      position: value.position().as_ref().map(|x| x.into()),
+      position_with_duration: value.position_with_duration().as_ref().map(|x| x.into()),
+      spray: value.spray().as_ref().map(|x| x.into())
+    }
   }
 }
 
@@ -427,18 +492,12 @@ impl ConfigUserDeviceFeature {
   }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default, CopyGetters)]
-pub struct BaseFeatureSettings {
-  #[serde(
-    skip_serializing_if = "Option::is_none",
-    default
-  )]
-  #[getset(get_copy = "pub")]
-  alt_protocol_index: Option<u32>,
-}
-
-impl BaseFeatureSettings {
-  pub fn is_none(&self) -> bool {
-    self.alt_protocol_index.is_none()
+impl From<&ServerDeviceFeature> for ConfigUserDeviceFeature {
+  fn from(value: &ServerDeviceFeature) -> Self {
+    Self {
+      id: value.id(),
+      base_id: value.base_id().expect("Should have base id"),
+      output: value.output().as_ref().map(|x| x.into()),
+    }
   }
 }

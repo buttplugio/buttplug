@@ -259,8 +259,6 @@ pub fn load_protocol_configs(
   Ok(dcm_builder)
 }
 
-// TODO Update save_user_config to work with new device structures
-/*
 pub fn save_user_config(dcm: &DeviceConfigurationManager) -> Result<String, ButtplugError> {
   let user_specifiers = dcm.user_communication_specifiers();
   let user_definitions_vec = dcm
@@ -268,7 +266,7 @@ pub fn save_user_config(dcm: &DeviceConfigurationManager) -> Result<String, Butt
     .iter()
     .map(|kv| UserDeviceConfigPair {
       identifier: kv.key().clone(),
-      config: kv.value().user_device().clone(),
+      config: kv.value().into(),
     })
     .collect();
   let user_protos = DashMap::new();
@@ -293,7 +291,6 @@ pub fn save_user_config(dcm: &DeviceConfigurationManager) -> Result<String, Butt
     )))
   })
 }
-*/
 
 #[cfg(test)]
 mod test {
