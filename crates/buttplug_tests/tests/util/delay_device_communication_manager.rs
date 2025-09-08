@@ -7,14 +7,14 @@
 
 use buttplug_core::ButtplugResultFuture;
 use buttplug_server::device::hardware::communication::{
-    HardwareCommunicationManager,
-    HardwareCommunicationManagerBuilder,
-    HardwareCommunicationManagerEvent,
+  HardwareCommunicationManager,
+  HardwareCommunicationManagerBuilder,
+  HardwareCommunicationManagerEvent,
 };
 use futures::FutureExt;
 use std::sync::{
-  atomic::{AtomicBool, Ordering},
   Arc,
+  atomic::{AtomicBool, Ordering},
 };
 use tokio::sync::mpsc::Sender;
 

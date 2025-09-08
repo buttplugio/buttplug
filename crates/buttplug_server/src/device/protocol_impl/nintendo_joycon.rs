@@ -8,29 +8,32 @@
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, util::{self, async_manager}};
+use buttplug_core::{
+  errors::ButtplugDeviceError,
+  util::{self, async_manager},
+};
 use buttplug_server_device_config::{
   Endpoint,
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::{
   sync::{
-    atomic::{AtomicBool, AtomicU16, Ordering},
     Arc,
+    atomic::{AtomicBool, AtomicU16, Ordering},
   },
   time::Duration,
 };
 use tokio::sync::Notify;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const NINTENDO_JOYCON_PROTOCOL_UUID: Uuid = uuid!("de9cce17-abb7-4ad5-9754-f1872733c197");
 
@@ -204,19 +207,11 @@ impl From<Rumble> for [u8; 4] {
 
     let hf_amp: u16 = {
       let hf_amp: u16 = encoded_hex_amp as u16 * 2;
-      if hf_amp > 0x01FC {
-        0x01FC
-      } else {
-        hf_amp
-      }
+      if hf_amp > 0x01FC { 0x01FC } else { hf_amp }
     }; // encoded_hex_amp<<1;
     let lf_amp: u8 = {
       let lf_amp = encoded_hex_amp / 2 + 64;
-      if lf_amp > 0x7F {
-        0x7F
-      } else {
-        lf_amp
-      }
+      if lf_amp > 0x7F { 0x7F } else { lf_amp }
     }; // (encoded_hex_amp>>1)+0x40;
 
     let mut buf = [0u8; 4];

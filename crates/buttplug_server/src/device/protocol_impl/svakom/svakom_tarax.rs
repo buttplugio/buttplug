@@ -11,7 +11,7 @@ use uuid::Uuid;
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 
 generic_protocol_setup!(SvakomTaraX, "svakom-tarax");
@@ -24,13 +24,14 @@ impl ProtocolHandler for SvakomTaraX {
   // implementation made no sense in terms of knowing which command addressed which index. Putting
   // in a best effort here and we'll see if anyone complains.
   fn handle_output_vibrate_cmd(
-      &self,
-      _feature_index: u32,
-      feature_id: Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec!(HardwareWriteCmd::new(
-      &[feature_id],
+    &self,
+    _feature_index: u32,
+    feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
         Endpoint::Tx,
         [
           0x55,
@@ -42,6 +43,8 @@ impl ProtocolHandler for SvakomTaraX {
         ]
         .to_vec(),
         false,
-      ).into()))
+      )
+      .into(),
+    ])
   }
 }

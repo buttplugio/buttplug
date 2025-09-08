@@ -1,6 +1,6 @@
 use super::hidapi_async::HidAsyncDevice;
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError};
+use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::{
   GenericHardwareSpecializer,
   Hardware,
@@ -14,17 +14,17 @@ use buttplug_server::device::hardware::{
   HardwareUnsubscribeCmd,
   HardwareWriteCmd,
 };
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, VIDPIDSpecifier, Endpoint};
-use futures::{future::BoxFuture, AsyncWriteExt};
+use buttplug_server_device_config::{Endpoint, ProtocolCommunicationSpecifier, VIDPIDSpecifier};
+use futures::{AsyncWriteExt, future::BoxFuture};
 use hidapi::{DeviceInfo, HidApi};
 use std::{
   fmt::{self, Debug},
   sync::{
-    atomic::{AtomicBool, Ordering},
     Arc,
+    atomic::{AtomicBool, Ordering},
   },
 };
-use tokio::sync::{broadcast, Mutex};
+use tokio::sync::{Mutex, broadcast};
 
 pub struct HidHardwareConnector {
   hid_instance: Arc<HidApi>,

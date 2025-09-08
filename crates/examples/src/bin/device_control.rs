@@ -1,6 +1,11 @@
 use std::collections::HashMap;
 
-use buttplug_client::{connector::ButtplugRemoteClientConnector, serializer::ButtplugClientJSONSerializer, ButtplugClient, ButtplugClientError};
+use buttplug_client::{
+  ButtplugClient,
+  ButtplugClientError,
+  connector::ButtplugRemoteClientConnector,
+  serializer::ButtplugClientJSONSerializer,
+};
 
 use buttplug_core::message::OutputType;
 use buttplug_transport_websocket_tungstenite::ButtplugWebsocketClientTransport;
@@ -45,8 +50,10 @@ async fn main() -> anyhow::Result<()> {
   for (_, device) in client.devices() {
     println!("{} supports these outputs:", device.name());
     for output_type in OutputType::iter() {
-      for (_, feature) in device.device_features() { 
-        if let Some(output) = feature.feature().output() && output.contains(output_type) {
+      for (_, feature) in device.device_features() {
+        if let Some(output) = feature.feature().output()
+          && output.contains(output_type)
+        {
           println!("- {}", output_type);
         }
       }
@@ -66,9 +73,7 @@ async fn main() -> anyhow::Result<()> {
   // We can use the convenience functions on ButtplugClientDevice to
   // send the message. This version sets all of the motors on a
   // vibrating device to the same speed.
-  test_client_device
-    .vibrate(10)
-    .await?;
+  test_client_device.vibrate(10).await?;
 
   // If we wanted to just set one motor on and the other off, we could
   // try this version that uses an array. It'll throw an exception if
@@ -77,9 +82,7 @@ async fn main() -> anyhow::Result<()> {
   //
   // You can get the vibrator count using the following code, though we
   // know it's 2 so we don't really have to use it.
-  let vibrator_count = test_client_device
-    .vibrate_features()
-    .len();
+  let vibrator_count = test_client_device.vibrate_features().len();
 
   println!(
     "{} has {} vibrators.",
@@ -89,9 +92,7 @@ async fn main() -> anyhow::Result<()> {
 
   // Just set all of the vibrators to full speed.
   if vibrator_count > 0 {
-    test_client_device
-      .vibrate(10)
-      .await?;
+    test_client_device.vibrate(10).await?;
   } else {
     println!("Device does not have > 1 vibrators, not running multiple vibrator test.");
   }
@@ -103,9 +104,7 @@ async fn main() -> anyhow::Result<()> {
   println!("Trying error");
   // If we try to send a command to a device after the client has
   // disconnected, we'll get an exception thrown.
-  let vibrate_result = test_client_device
-    .vibrate(30)
-    .await;
+  let vibrate_result = test_client_device.vibrate(30).await;
   if let Err(ButtplugClientError::ButtplugConnectorError(error)) = vibrate_result {
     println!("Tried to send after disconnection! Error: ");
     println!("{}", error);

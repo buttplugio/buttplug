@@ -8,22 +8,22 @@
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::sync::Arc;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const WETOY_PROTOCOL_ID: Uuid = uuid!("9868762e-4203-4876-abf5-83c992e024b4");
 generic_protocol_initializer_setup!(WeToy, "wetoy");
@@ -60,16 +60,18 @@ impl ProtocolHandler for WeToy {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      if speed == 0 {
-        vec![0x80, 0x03]
-      } else {
-        vec![0xb2, speed as u8 - 1]
-      },
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        if speed == 0 {
+          vec![0x80, 0x03]
+        } else {
+          vec![0xb2, speed as u8 - 1]
+        },
+        true,
+      )
+      .into(),
+    ])
   }
 }

@@ -1,7 +1,8 @@
 use std::sync::Arc;
 
 use crate::{
-  remote_server::ButtplugRemoteServerEvent, BackdoorServer, ButtplugRemoteServer, ButtplugServerConnectorError, EngineOptions, IntifaceEngineError, IntifaceError
+  BackdoorServer, ButtplugRemoteServer, ButtplugServerConnectorError, EngineOptions,
+  IntifaceEngineError, IntifaceError, remote_server::ButtplugRemoteServerEvent,
 };
 use buttplug_server::{
   ButtplugServerBuilder,
@@ -78,7 +79,7 @@ pub fn setup_server_device_comm_managers(
 pub async fn reset_buttplug_server(
   options: &EngineOptions,
   device_manager: &Arc<ServerDeviceManager>,
-  sender: &Sender<ButtplugRemoteServerEvent>
+  sender: &Sender<ButtplugRemoteServerEvent>,
 ) -> Result<ButtplugRemoteServer, IntifaceEngineError> {
   match ButtplugServerBuilder::with_shared_device_manager(device_manager.clone())
     .name(options.server_name())

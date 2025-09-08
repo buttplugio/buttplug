@@ -2,12 +2,12 @@ pub mod process_messages;
 use crate::error::IntifaceError;
 use crate::remote_server::ButtplugRemoteServerEvent;
 use async_trait::async_trait;
-use futures::{pin_mut, Stream, StreamExt};
+use futures::{Stream, StreamExt, pin_mut};
 pub use process_messages::{EngineMessage, IntifaceMessage};
 use std::sync::Arc;
 use tokio::{
   select,
-  sync::{broadcast, Notify},
+  sync::{Notify, broadcast},
 };
 use tokio_util::sync::CancellationToken;
 

@@ -7,11 +7,11 @@
 
 use std::sync::atomic::{AtomicU8, Ordering};
 
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -33,18 +33,20 @@ impl Default for Cowgirl {
 
 impl Cowgirl {
   fn hardware_commands(&self) -> Vec<HardwareCommand> {
-    vec![HardwareWriteCmd::new(
-      &[COWGIRL_PROTOCOL_UUID],
-      Endpoint::Tx,
-      vec![
-        0x00,
-        0x01,
-        self.speeds[0].load(Ordering::Relaxed),
-        self.speeds[1].load(Ordering::Relaxed),
-      ],
-      true,
-    )
-    .into()]
+    vec![
+      HardwareWriteCmd::new(
+        &[COWGIRL_PROTOCOL_UUID],
+        Endpoint::Tx,
+        vec![
+          0x00,
+          0x01,
+          self.speeds[0].load(Ordering::Relaxed),
+          self.speeds[1].load(Ordering::Relaxed),
+        ],
+        true,
+      )
+      .into(),
+    ]
   }
 }
 

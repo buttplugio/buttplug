@@ -8,22 +8,22 @@
 //! Generic remote transport handling methods and traits
 
 use super::{
-  transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
   ButtplugConnector,
   ButtplugConnectorError,
   ButtplugConnectorResultFuture,
+  transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
 };
 use crate::{
   message::{
-    serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
     ButtplugMessage,
+    serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
   },
   util::async_manager,
 };
-use futures::{future::BoxFuture, select, FutureExt};
+use futures::{FutureExt, future::BoxFuture, select};
 use log::*;
 use std::marker::PhantomData;
-use tokio::sync::mpsc::{channel, Receiver, Sender};
+use tokio::sync::mpsc::{Receiver, Sender, channel};
 
 enum ButtplugRemoteConnectorMessage<T>
 where
@@ -112,8 +112,7 @@ async fn remote_connector_event_loop<
                   "{}",
                   format!(
                     "Got invalid messages from remote Buttplug connection - Message: {:?} - Error: {:?}",
-                    serialized_msg,
-                    e
+                    serialized_msg, e
                   )
                 );
               }

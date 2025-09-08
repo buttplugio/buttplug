@@ -18,12 +18,12 @@ use buttplug_server_device_config::Endpoint;
 use futures::future::BoxFuture;
 use std::{
   sync::{
-    atomic::{AtomicU32, Ordering},
     Arc,
+    atomic::{AtomicU32, Ordering},
   },
   time::Duration,
 };
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const LOVENSE_STROKER_PROTOCOL_UUID: Uuid = uuid!("a97fc354-5561-459a-bc62-110d7c2868ac");
 

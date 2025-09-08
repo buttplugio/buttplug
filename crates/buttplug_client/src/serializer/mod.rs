@@ -1,14 +1,14 @@
 use buttplug_core::message::{
-  serializer::{
-    json_serializer::{create_message_validator, deserialize_to_message, vec_to_protocol_json},
-    ButtplugMessageSerializer,
-    ButtplugSerializedMessage,
-    ButtplugSerializerError,
-  },
   ButtplugClientMessageV4,
   ButtplugMessage,
   ButtplugMessageFinalizer,
   ButtplugServerMessageV4,
+  serializer::{
+    ButtplugMessageSerializer,
+    ButtplugSerializedMessage,
+    ButtplugSerializerError,
+    json_serializer::{create_message_validator, deserialize_to_message, vec_to_protocol_json},
+  },
 };
 use jsonschema::Validator;
 use serde::{Deserialize, Serialize};
@@ -74,9 +74,9 @@ impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
 mod test {
   use super::*;
   use buttplug_core::message::{
-    RequestServerInfoV4,
     BUTTPLUG_CURRENT_API_MAJOR_VERSION,
     BUTTPLUG_CURRENT_API_MINOR_VERSION,
+    RequestServerInfoV4,
   };
 
   #[test]
@@ -102,12 +102,14 @@ mod test {
       "[{\"Ok\":{\"NotAField\":\"NotAValue\",\"Id\":1}}]",
     ];
     let serializer = ButtplugClientJSONSerializer::default();
-    let _ = serializer.serialize(&vec![RequestServerInfoV4::new(
-      "test client",
-      BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-      BUTTPLUG_CURRENT_API_MINOR_VERSION,
-    )
-    .into()]);
+    let _ = serializer.serialize(&vec![
+      RequestServerInfoV4::new(
+        "test client",
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION,
+      )
+      .into(),
+    ]);
     for msg in incorrect_incoming_messages {
       let res = serializer.deserialize(&ButtplugSerializedMessage::Text(msg.to_owned()));
       assert!(res.is_err(), "{} should be an error", msg);

@@ -11,7 +11,6 @@ mod lovense_rotate_vibrator;
 mod lovense_single_actuator;
 mod lovense_stroker;
 
-
 use lovense_max::LovenseMax;
 use lovense_multi_actuator::LovenseMultiActuator;
 use lovense_rotate_vibrator::LovenseRotateVibrator;
@@ -20,11 +19,7 @@ use lovense_stroker::LovenseStroker;
 
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
-  protocol::{
-    ProtocolHandler,
-    ProtocolIdentifier,
-    ProtocolInitializer, ProtocolKeepaliveStrategy,
-  },
+  protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, ProtocolKeepaliveStrategy},
 };
 use async_trait::async_trait;
 use buttplug_core::{
@@ -33,16 +28,16 @@ use buttplug_core::{
   util::sleep,
 };
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
+  Endpoint,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
-  Endpoint
 };
-use futures::{future::BoxFuture, FutureExt};
+use futures::{FutureExt, future::BoxFuture};
 use regex::Regex;
 use std::{sync::Arc, time::Duration};
 use tokio::select;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 // Constants for dealing with the Lovense subscript/write race condition. The
 // timeout needs to be VERY long, otherwise this trips up old lovense serial
@@ -175,7 +170,11 @@ impl ProtocolInitializer for LovenseInitializer {
     let vibrator_count = device_definition
       .features()
       .iter()
-      .filter(|x| x.output().as_ref().is_some_and(|x| x.contains(OutputType::Vibrate) || x.contains(OutputType::Oscillate)))
+      .filter(|x| {
+        x.output()
+          .as_ref()
+          .is_some_and(|x| x.contains(OutputType::Vibrate) || x.contains(OutputType::Oscillate))
+      })
       .count();
 
     let output_count = device_definition
@@ -188,13 +187,21 @@ impl ProtocolInitializer for LovenseInitializer {
       && device_definition
         .features()
         .iter()
-        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains(OutputType::Vibrate)))
+        .filter(|x| {
+          x.output()
+            .as_ref()
+            .is_some_and(|x| x.contains(OutputType::Vibrate))
+        })
         .count()
         == 1
       && device_definition
         .features()
         .iter()
-        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains(OutputType::RotateWithDirection)))
+        .filter(|x| {
+          x.output()
+            .as_ref()
+            .is_some_and(|x| x.contains(OutputType::RotateWithDirection))
+        })
         .count()
         == 1;
 
@@ -202,13 +209,21 @@ impl ProtocolInitializer for LovenseInitializer {
       && device_definition
         .features()
         .iter()
-        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains(OutputType::Vibrate)))
+        .filter(|x| {
+          x.output()
+            .as_ref()
+            .is_some_and(|x| x.contains(OutputType::Vibrate))
+        })
         .count()
         == 1
       && device_definition
         .features()
         .iter()
-        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains(OutputType::Constrict)))
+        .filter(|x| {
+          x.output()
+            .as_ref()
+            .is_some_and(|x| x.contains(OutputType::Constrict))
+        })
         .count()
         == 1;
 
@@ -472,7 +487,7 @@ fn handle_battery_level_cmd(
               return Ok(message::InputReadingV4::new(
                 device_index,
                 feature_index,
-          InputTypeData::Battery(InputData::new(level))
+                InputTypeData::Battery(InputData::new(level)),
               ));
             }
           }
@@ -481,7 +496,7 @@ fn handle_battery_level_cmd(
           return Err(ButtplugDeviceError::ProtocolSpecificError(
             "Lovense".to_owned(),
             "Lovense Device disconnected while getting Battery info.".to_owned(),
-          ))
+          ));
         }
       }
     }
@@ -507,13 +522,15 @@ pub(super) fn form_lovense_command(
   feature_id: Uuid,
   command: &str,
 ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-  Ok(vec![HardwareWriteCmd::new(
-    &[feature_id],
-    Endpoint::Tx,
-    command.as_bytes().to_vec(),
-    false,
-  )
-  .into()])
+  Ok(vec![
+    HardwareWriteCmd::new(
+      &[feature_id],
+      Endpoint::Tx,
+      command.as_bytes().to_vec(),
+      false,
+    )
+    .into(),
+  ])
 }
 
 pub(super) fn form_vibrate_command(

@@ -1,9 +1,12 @@
 use buttplug_core::{
-    connector::transport::stream::ButtplugStreamTransport,
-    message::serializer::ButtplugSerializedMessage,
-    util::stream::convert_broadcast_receiver_to_stream,
+  connector::transport::stream::ButtplugStreamTransport,
+  message::serializer::ButtplugSerializedMessage,
+  util::stream::convert_broadcast_receiver_to_stream,
 };
-use buttplug_server::{connector::ButtplugRemoteServerConnector, device::ServerDeviceManager, message::serializer::ButtplugServerJSONSerializer, ButtplugServerBuilder};
+use buttplug_server::{
+  ButtplugServerBuilder, connector::ButtplugRemoteServerConnector, device::ServerDeviceManager,
+  message::serializer::ButtplugServerJSONSerializer,
+};
 use std::sync::Arc;
 use tokio::sync::{
   broadcast,
@@ -28,7 +31,7 @@ impl BackdoorServer {
         .name("Intiface Backdoor Server")
         .finish()
         .unwrap(),
-        &None
+      &None,
     );
     let (s_out, mut r_out) = mpsc::channel(255);
     let (s_in, r_in) = mpsc::channel(255);

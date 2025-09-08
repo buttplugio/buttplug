@@ -11,8 +11,8 @@ mod util;
 mod test {
 
   use buttplug::{
-    client::connector::ButtplugInProcessClientConnectorBuilder,
     client::ButtplugClient,
+    client::connector::ButtplugInProcessClientConnectorBuilder,
     server::device::hardware::communication::websocket_server::websocket_server_comm_manager::WebsocketServerDeviceCommunicationManagerBuilder,
   };
 

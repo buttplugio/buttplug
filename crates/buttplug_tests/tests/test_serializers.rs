@@ -9,23 +9,23 @@ mod util;
 
 use buttplug_client::ButtplugClientError;
 use buttplug_core::{
-    connector::transport::ButtplugTransportIncomingMessage,
-    errors::{ButtplugError, ButtplugUnknownError},
-    message::{
-      serializer::ButtplugSerializedMessage,
-      ButtplugClientMessageV4,
-      ButtplugMessage,
-      ButtplugServerMessageV4,
-      ErrorV0,
-      BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-    },
+  connector::transport::ButtplugTransportIncomingMessage,
+  errors::{ButtplugError, ButtplugUnknownError},
+  message::{
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+    ButtplugClientMessageV4,
+    ButtplugMessage,
+    ButtplugServerMessageV4,
+    ErrorV0,
+    serializer::ButtplugSerializedMessage,
+  },
   util::async_manager,
-  };
+};
 use buttplug_server::message::{
-    ButtplugClientMessageVariant,
-    ButtplugServerMessageVariant,
-    DeviceListV3,
-    ServerInfoV2,
+  ButtplugClientMessageVariant,
+  ButtplugServerMessageVariant,
+  DeviceListV3,
+  ServerInfoV2,
 };
 use std::sync::Arc;
 use tokio::sync::Notify;

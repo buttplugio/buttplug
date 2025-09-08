@@ -15,22 +15,22 @@ use crate::device::{
     HardwareWriteCmd,
   },
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::sync::Arc;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const LELO_HARMONY_PROTOCOL_UUID: Uuid = uuid!("220e180a-e6d5-4fd1-963e-43a6f990b717");
 generic_protocol_initializer_setup!(LeloHarmony, "lelo-harmony");
@@ -119,24 +119,26 @@ impl LeloHarmony {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![
-        0x0a,
-        0x12,
-        feature_index as u8 + 1,
-        0x08,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        speed as u8,
-        0x00,
-      ],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![
+          0x0a,
+          0x12,
+          feature_index as u8 + 1,
+          0x08,
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          speed as u8,
+          0x00,
+        ],
+        false,
+      )
+      .into(),
+    ])
   }
 }
 

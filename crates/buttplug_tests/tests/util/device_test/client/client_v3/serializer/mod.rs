@@ -1,13 +1,13 @@
 use buttplug_core::message::{
-    serializer::{
-      json_serializer::{create_message_validator, deserialize_to_message, vec_to_protocol_json},
-      ButtplugMessageSerializer,
-      ButtplugSerializedMessage,
-      ButtplugSerializerError,
-    },
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-  };
+  ButtplugMessage,
+  ButtplugMessageFinalizer,
+  serializer::{
+    ButtplugMessageSerializer,
+    ButtplugSerializedMessage,
+    ButtplugSerializerError,
+    json_serializer::{create_message_validator, deserialize_to_message, vec_to_protocol_json},
+  },
+};
 use buttplug_server::message::{ButtplugClientMessageV3, ButtplugServerMessageV3};
 
 use jsonschema::Validator;

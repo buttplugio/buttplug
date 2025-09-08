@@ -1,4 +1,9 @@
-use buttplug_client::{connector::ButtplugRemoteClientConnector, serializer::ButtplugClientJSONSerializer, ButtplugClient, ButtplugClientEvent};
+use buttplug_client::{
+  ButtplugClient,
+  ButtplugClientEvent,
+  connector::ButtplugRemoteClientConnector,
+  serializer::ButtplugClientJSONSerializer,
+};
 use buttplug_transport_websocket_tungstenite::ButtplugWebsocketClientTransport;
 use futures::StreamExt;
 use tokio::io::{self, AsyncBufReadExt, BufReader};

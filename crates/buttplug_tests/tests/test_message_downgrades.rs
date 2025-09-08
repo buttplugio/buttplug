@@ -12,15 +12,15 @@ use buttplug_server_device_config::Endpoint;
 pub use util::test_device_manager::check_test_recv_value;
 
 use buttplug_core::message::{
-    serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
-    StartScanningV0,
-  };
-use buttplug_server::{
-    device::hardware::{HardwareCommand, HardwareWriteCmd},
-    message::{serializer::ButtplugServerJSONSerializer, ButtplugClientMessageVariant},
-    ButtplugServerBuilder,
+  StartScanningV0,
+  serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
 };
-use futures::{pin_mut, StreamExt};
+use buttplug_server::{
+  ButtplugServerBuilder,
+  device::hardware::{HardwareCommand, HardwareWriteCmd},
+  message::{ButtplugClientMessageVariant, serializer::ButtplugServerJSONSerializer},
+};
+use futures::{StreamExt, pin_mut};
 use util::test_server_with_device;
 use uuid::Uuid;
 

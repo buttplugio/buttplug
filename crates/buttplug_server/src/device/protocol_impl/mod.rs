@@ -2,7 +2,6 @@ use std::{collections::HashMap, sync::Arc};
 
 use crate::device::protocol::ProtocolIdentifierFactory;
 
-
 // Utility mods
 pub mod fleshlight_launch_helper;
 
@@ -206,7 +205,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
 
   add_to_protocol_map(&mut map, itoys::setup::IToysIdentifierFactory::default());
   add_to_protocol_map(&mut map, jejoue::setup::JeJoueIdentifierFactory::default());
-  add_to_protocol_map(&mut map, joyhub::joyhub::setup::JoyHubIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    joyhub::joyhub::setup::JoyHubIdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     joyhub::joyhub_v2::setup::JoyHubV2IdentifierFactory::default(),
@@ -339,14 +341,14 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     metaxsire_v3::setup::MetaXSireV3IdentifierFactory::default(),
   );
-    add_to_protocol_map(
-        &mut map,
-        metaxsire_v4::setup::MetaXSireV4IdentifierFactory::default(),
-    );
-    add_to_protocol_map(
-        &mut map,
-        metaxsire_v5::setup::MetaXSireV5IdentifierFactory::default(),
-    );
+  add_to_protocol_map(
+    &mut map,
+    metaxsire_v4::setup::MetaXSireV4IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    metaxsire_v5::setup::MetaXSireV5IdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     mizzzee::setup::MizzZeeIdentifierFactory::default(),

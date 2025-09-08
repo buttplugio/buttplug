@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -26,26 +26,28 @@ impl ProtocolHandler for Sakuraneko {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![
-        0xa1,
-        0x08,
-        0x01,
-        0x00,
-        0x00,
-        0x00,
-        0x64,
-        speed as u8,
-        0x00,
-        0x64,
-        0xdf,
-        0x55,
-      ],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![
+          0xa1,
+          0x08,
+          0x01,
+          0x00,
+          0x00,
+          0x00,
+          0x64,
+          speed as u8,
+          0x00,
+          0x64,
+          0xdf,
+          0x55,
+        ],
+        false,
+      )
+      .into(),
+    ])
   }
 
   fn handle_output_rotate_cmd(
@@ -54,25 +56,27 @@ impl ProtocolHandler for Sakuraneko {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![
-        0xa2,
-        0x08,
-        0x01,
-        0x00,
-        0x00,
-        0x00,
-        0x64,
-        speed as u8,
-        0x00,
-        0x32,
-        0xdf,
-        0x55,
-      ],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![
+          0xa2,
+          0x08,
+          0x01,
+          0x00,
+          0x00,
+          0x00,
+          0x64,
+          speed as u8,
+          0x00,
+          0x32,
+          0xdf,
+          0x55,
+        ],
+        false,
+      )
+      .into(),
+    ])
   }
 }

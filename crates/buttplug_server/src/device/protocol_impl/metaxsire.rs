@@ -5,25 +5,27 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU8, Ordering};
 
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
-use buttplug_core::{
-  errors::ButtplugDeviceError,
-  message::OutputType,
+use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
+use buttplug_server_device_config::{
+  Endpoint,
+  ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
+  UserDeviceIdentifier,
 };
-use buttplug_server_device_config::{ServerDeviceDefinition, Endpoint, ProtocolCommunicationSpecifier, UserDeviceIdentifier};
 
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 
@@ -95,13 +97,9 @@ impl MetaXSire {
     }
     data.push(crc);
 
-    Ok(vec![HardwareWriteCmd::new(
-      &[METAXSIRE_PROTOCOL_UUID],
-      Endpoint::Tx,
-      data,
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[METAXSIRE_PROTOCOL_UUID], Endpoint::Tx, data, false).into(),
+    ])
   }
 }
 

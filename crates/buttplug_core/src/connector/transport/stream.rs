@@ -10,24 +10,24 @@
 
 use crate::{
   connector::{
-    transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
     ButtplugConnectorError,
     ButtplugConnectorResultFuture,
+    transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
   },
   message::serializer::ButtplugSerializedMessage,
   util::async_manager,
 };
 use futures::{
-  future::{self, BoxFuture},
   FutureExt,
+  future::{self, BoxFuture},
 };
 
 use std::sync::Arc;
 use tokio::{
   select,
   sync::{
-    mpsc::{Receiver, Sender},
     Mutex,
+    mpsc::{Receiver, Sender},
   },
 };
 

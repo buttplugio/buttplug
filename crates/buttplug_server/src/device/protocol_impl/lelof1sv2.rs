@@ -5,10 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{
-  lelo_harmony::LeloHarmony,
-  lelof1s::LeloF1s,
-};
+use super::{lelo_harmony::LeloHarmony, lelof1s::LeloF1s};
 use crate::device::{
   hardware::{
     Hardware,
@@ -18,22 +15,22 @@ use crate::device::{
     HardwareWriteCmd,
   },
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::sync::Arc;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const LELO_F1S_V2_PROTOCOL_UUID: Uuid = uuid!("85c59ac5-89ee-4549-8958-ce5449226a5c");
 generic_protocol_initializer_setup!(LeloF1sV2, "lelo-f1sv2");

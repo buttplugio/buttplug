@@ -13,8 +13,8 @@ use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::sync::Arc;
@@ -81,12 +81,8 @@ impl ProtocolHandler for PrettyLove {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![0x00u8, speed as u8],
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, vec![0x00u8, speed as u8], true).into(),
+    ])
   }
 }

@@ -13,7 +13,7 @@ use super::{
   },
   lovense_dongle_state_machine::create_lovense_dongle_machine,
 };
-use buttplug_core::{errors::ButtplugDeviceError, util::async_manager, ButtplugResultFuture};
+use buttplug_core::{ButtplugResultFuture, errors::ButtplugDeviceError, util::async_manager};
 use buttplug_server::device::hardware::communication::{
   HardwareCommunicationManager,
   HardwareCommunicationManagerBuilder,
@@ -24,8 +24,8 @@ use hidapi::{HidApi, HidDevice};
 use serde_json::Deserializer;
 use std::{
   sync::{
-    atomic::{AtomicBool, Ordering},
     Arc,
+    atomic::{AtomicBool, Ordering},
   },
   thread,
 };
@@ -33,8 +33,8 @@ use tokio::{
   runtime,
   select,
   sync::{
-    mpsc::{channel, Receiver, Sender},
     Mutex,
+    mpsc::{Receiver, Sender, channel},
   },
 };
 use tokio_util::sync::CancellationToken;

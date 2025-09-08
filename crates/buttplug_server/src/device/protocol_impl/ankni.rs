@@ -8,22 +8,22 @@
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::sync::Arc;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 generic_protocol_initializer_setup!(Ankni, "ankni");
 
@@ -88,34 +88,36 @@ impl ProtocolHandler for Ankni {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![
-        0x03,
-        0x12,
-        speed as u8,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-      ],
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![
+          0x03,
+          0x12,
+          speed as u8,
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+        ],
+        true,
+      )
+      .into(),
+    ])
   }
 }
 

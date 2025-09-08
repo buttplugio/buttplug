@@ -5,11 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler, ProtocolKeepaliveStrategy},
+  protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -37,31 +37,33 @@ impl ProtocolHandler for SvakomV5 {
     self.last_vibrator_speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     let vibe1 = self.last_vibrator_speeds[0].load(Ordering::Relaxed);
     let vibe2 = self.last_vibrator_speeds[1].load(Ordering::Relaxed);
-    Ok(vec![HardwareWriteCmd::new(
-      &[SVAKOM_V5_VIBRATOR_UUID],
-      Endpoint::Tx,
-      [
-        0x55,
-        0x03,
-        if (vibe1 > 0 && vibe2 > 0) || vibe1 == vibe2 {
-          0x00
-        } else if vibe1 > 0 {
-          0x01
-        } else {
-          0x02
-        },
-        0x00,
-        if vibe1 == vibe2 && vibe1 == 0 {
-          0x00
-        } else {
-          0x01
-        },
-        vibe1.max(vibe2) as u8,
-      ]
-      .to_vec(),
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[SVAKOM_V5_VIBRATOR_UUID],
+        Endpoint::Tx,
+        [
+          0x55,
+          0x03,
+          if (vibe1 > 0 && vibe2 > 0) || vibe1 == vibe2 {
+            0x00
+          } else if vibe1 > 0 {
+            0x01
+          } else {
+            0x02
+          },
+          0x00,
+          if vibe1 == vibe2 && vibe1 == 0 {
+            0x00
+          } else {
+            0x01
+          },
+          vibe1.max(vibe2) as u8,
+        ]
+        .to_vec(),
+        false,
+      )
+      .into(),
+    ])
   }
 
   fn handle_output_oscillate_cmd(
@@ -70,12 +72,14 @@ impl ProtocolHandler for SvakomV5 {
     feature_id: uuid::Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      [0x55, 0x09, 0x00, 0x00, speed as u8, 0x00].to_vec(),
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        [0x55, 0x09, 0x00, 0x00, speed as u8, 0x00].to_vec(),
+        false,
+      )
+      .into(),
+    ])
   }
 }

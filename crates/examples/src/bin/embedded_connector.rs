@@ -1,8 +1,8 @@
 use buttplug_client::ButtplugClient;
-use buttplug_server::{device::ServerDeviceManagerBuilder, ButtplugServerBuilder};
+use buttplug_client_in_process::{ButtplugInProcessClientConnectorBuilder, in_process_client};
+use buttplug_server::{ButtplugServerBuilder, device::ServerDeviceManagerBuilder};
 use buttplug_server_device_config::DeviceConfigurationManagerBuilder;
 use buttplug_server_hwmgr_btleplug::BtlePlugCommunicationManagerBuilder;
-use buttplug_client_in_process::{ButtplugInProcessClientConnectorBuilder, in_process_client};
 
 #[allow(dead_code)]
 async fn main_the_hard_way() -> anyhow::Result<()> {
@@ -14,8 +14,10 @@ async fn main_the_hard_way() -> anyhow::Result<()> {
   device_manager_builder.comm_manager(BtlePlugCommunicationManagerBuilder::default());
 
   // This is how we add Bluetooth manually. (We could also do this with any other communication manager.)
-  
-  let server = ButtplugServerBuilder::new(device_manager_builder.finish().unwrap()).finish().unwrap();
+
+  let server = ButtplugServerBuilder::new(device_manager_builder.finish().unwrap())
+    .finish()
+    .unwrap();
 
   // First off, we'll set up our Embedded Connector.
   let connector = ButtplugInProcessClientConnectorBuilder::default()

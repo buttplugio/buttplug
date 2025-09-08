@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use super::device::ConfigBaseDeviceDefinition;
 
-use crate::{ProtocolCommunicationSpecifier};
+use crate::ProtocolCommunicationSpecifier;
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]

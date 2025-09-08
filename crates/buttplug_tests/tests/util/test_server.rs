@@ -6,22 +6,21 @@
 // for full license information.
 
 use buttplug_core::{
-    connector::ButtplugConnector,
-    errors::ButtplugError,
-    message::{ButtplugMessage, ButtplugMessageValidator, ErrorV0},
-    util::async_manager,
-
-  };
-use buttplug_server::{
-    message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant},
-    ButtplugServer,
-    ButtplugServerBuilder,
+  connector::ButtplugConnector,
+  errors::ButtplugError,
+  message::{ButtplugMessage, ButtplugMessageValidator, ErrorV0},
+  util::async_manager,
 };
-use futures::{future::Future, pin_mut, select, FutureExt, StreamExt};
+use buttplug_server::{
+  ButtplugServer,
+  ButtplugServerBuilder,
+  message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant},
+};
+use futures::{FutureExt, StreamExt, future::Future, pin_mut, select};
 use log::*;
 use std::sync::Arc;
 use thiserror::Error;
-use tokio::sync::{mpsc, Notify};
+use tokio::sync::{Notify, mpsc};
 
 #[derive(Error, Debug)]
 pub enum ButtplugServerConnectorError {

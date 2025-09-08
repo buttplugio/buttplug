@@ -16,6 +16,8 @@ use buttplug_core::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
   errors::{ButtplugError, ButtplugHandshakeError},
   message::{
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+    BUTTPLUG_CURRENT_API_MINOR_VERSION,
     ButtplugClientMessageV4,
     ButtplugServerMessageV4,
     PingV0,
@@ -24,8 +26,6 @@ use buttplug_core::{
     StartScanningV0,
     StopAllDevicesV0,
     StopScanningV0,
-    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-    BUTTPLUG_CURRENT_API_MINOR_VERSION,
   },
   util::{
     async_manager,
@@ -37,17 +37,20 @@ use client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
 use dashmap::DashMap;
 pub use device::{ButtplugClientDevice, ButtplugClientDeviceEvent};
 use futures::{
-  future::{self, BoxFuture, FutureExt},
   Stream,
+  future::{self, BoxFuture, FutureExt},
 };
 use log::*;
+use std::{
+  collections::BTreeMap,
+  sync::{
+    Arc,
+    atomic::{AtomicBool, Ordering},
+  },
+};
 use strum_macros::Display;
-use std::{collections::BTreeMap, sync::{
-  atomic::{AtomicBool, Ordering},
-  Arc,
-}};
 use thiserror::Error;
-use tokio::sync::{broadcast, mpsc, Mutex};
+use tokio::sync::{Mutex, broadcast, mpsc};
 use tracing_futures::Instrument;
 
 /// Result type used for public APIs.
@@ -107,7 +110,7 @@ pub enum ButtplugClientError {
   #[error(transparent)]
   ButtplugError(#[from] ButtplugError),
   /// Error converting output command: {}
-  ButtplugOutputCommandConversionError(String)
+  ButtplugOutputCommandConversionError(String),
 }
 
 /// Enum representing different events that can be emitted by a client.
@@ -270,10 +273,7 @@ impl ButtplugClient {
       client_name: name.to_owned(),
       server_name: Arc::new(Mutex::new(None)),
       event_stream,
-      message_sender: ButtplugClientMessageSender::new(
-        &message_sender,
-        &connected,
-      ),
+      message_sender: ButtplugClientMessageSender::new(&message_sender, &connected),
       connected,
       device_map: Arc::new(DashMap::new()),
     }
@@ -431,7 +431,7 @@ impl ButtplugClient {
       .send_message_expect_ok(StopAllDevicesV0::default().into())
   }
 
-  pub fn event_stream(&self) -> impl Stream<Item = ButtplugClientEvent> + use<>{
+  pub fn event_stream(&self) -> impl Stream<Item = ButtplugClientEvent> + use<> {
     let stream = convert_broadcast_receiver_to_stream(self.event_stream.subscribe());
     // We can either Box::pin here or force the user to pin_mut!() on their
     // end. While this does end up with a dynamic dispatch on our end, it

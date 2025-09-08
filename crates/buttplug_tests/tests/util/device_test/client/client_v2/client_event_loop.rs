@@ -13,21 +13,21 @@ use super::{
   device::{ButtplugClientDevice, ButtplugClientDeviceEvent},
 };
 use buttplug_core::{
-    connector::{ButtplugConnector, ButtplugConnectorStateShared},
-    errors::{ButtplugDeviceError, ButtplugError},
-    message::ButtplugMessageValidator,
-  };
+  connector::{ButtplugConnector, ButtplugConnectorStateShared},
+  errors::{ButtplugDeviceError, ButtplugError},
+  message::ButtplugMessageValidator,
+};
 use buttplug_server::message::{
-    ButtplugClientMessageV2,
-    ButtplugServerMessageV2,
-    DeviceListV2,
-    DeviceMessageInfoV2,
+  ButtplugClientMessageV2,
+  ButtplugServerMessageV2,
+  DeviceListV2,
+  DeviceMessageInfoV2,
 };
 use dashmap::DashMap;
 use log::*;
 use std::sync::{
-  atomic::{AtomicBool, Ordering},
   Arc,
+  atomic::{AtomicBool, Ordering},
 };
 use tokio::sync::{broadcast, mpsc};
 

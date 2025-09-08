@@ -8,22 +8,22 @@
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::{errors::ButtplugDeviceError, util::sleep};
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
-  ProtocolCommunicationSpecifier,
-  UserDeviceIdentifier,
   Endpoint,
+  ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
+  UserDeviceIdentifier,
 };
 use std::{sync::Arc, time::Duration};
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 generic_protocol_initializer_setup!(CowgirlCone, "cowgirl-cone");
 
@@ -62,12 +62,14 @@ impl ProtocolHandler for CowgirlCone {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![0xf1, 0x01, speed as u8, 0x00],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![0xf1, 0x01, speed as u8, 0x00],
+        false,
+      )
+      .into(),
+    ])
   }
 }

@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -26,12 +26,14 @@ impl ProtocolHandler for Omobo {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![0xa1, 0x04, 0x04, 0x01, speed as u8, 0xff, 0x55],
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![0xa1, 0x04, 0x04, 0x01, speed as u8, 0xff, 0x55],
+        true,
+      )
+      .into(),
+    ])
   }
 }

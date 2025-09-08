@@ -7,14 +7,14 @@
 
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
   message::{self, InputData, InputReadingV4, InputTypeData},
 };
 use buttplug_server_device_config::Endpoint;
-use futures::{future::BoxFuture, FutureExt};
+use futures::{FutureExt, future::BoxFuture};
 use std::{default::Default, sync::Arc};
 use uuid::Uuid;
 
@@ -30,13 +30,15 @@ impl ProtocolHandler for KiirooSpot {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![0x00, 0xff, 0x00, 0x00, 0x00, speed as u8],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![0x00, 0xff, 0x00, 0x00, 0x00, speed as u8],
+        false,
+      )
+      .into(),
+    ])
   }
 
   fn handle_battery_level_cmd(
@@ -55,7 +57,7 @@ impl ProtocolHandler for KiirooSpot {
       let battery_reading = message::InputReadingV4::new(
         device_index,
         feature_index,
-        InputTypeData::Battery(InputData::new(data[0]))
+        InputTypeData::Battery(InputData::new(data[0])),
       );
       debug!("Got battery reading: {}", data[0]);
       Ok(battery_reading)

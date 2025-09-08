@@ -10,17 +10,15 @@ use crate::device::{
   protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
 };
 use async_trait::async_trait;
-use buttplug_core::{
-  errors::ButtplugDeviceError, message::OutputType,
-};
+use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
 use buttplug_server_device_config::{
   Endpoint,
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::sync::Arc;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const HISMITH_MINI_PROTOCOL_UUID: Uuid = uuid!("94befc1a-9859-4bf6-99ee-5678c89237a7");
 
@@ -87,13 +85,21 @@ impl ProtocolInitializer for HismithMiniInitializer {
       dual_vibe: device_definition
         .features()
         .iter()
-        .filter(|x| x.output().as_ref().is_some_and(|x| x.contains(OutputType::Vibrate)))
+        .filter(|x| {
+          x.output()
+            .as_ref()
+            .is_some_and(|x| x.contains(OutputType::Vibrate))
+        })
         .count()
         >= 2,
       second_constrict: device_definition
         .features()
         .iter()
-        .position(|x| x.output().as_ref().is_some_and(|x| x.contains(OutputType::Constrict)))
+        .position(|x| {
+          x.output()
+            .as_ref()
+            .is_some_and(|x| x.contains(OutputType::Constrict))
+        })
         .unwrap_or(0)
         == 1,
     }))
@@ -116,13 +122,15 @@ impl ProtocolHandler for HismithMini {
     let idx: u8 = 0x03;
     let speed: u8 = speed as u8;
 
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![0xCC, idx, speed, speed + idx],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![0xCC, idx, speed, speed + idx],
+        false,
+      )
+      .into(),
+    ])
   }
 
   fn handle_output_vibrate_cmd(
@@ -138,13 +146,15 @@ impl ProtocolHandler for HismithMini {
     };
     let speed: u8 = speed as u8;
 
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![0xCC, idx, speed, speed + idx],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![0xCC, idx, speed, speed + idx],
+        false,
+      )
+      .into(),
+    ])
   }
 
   fn handle_output_constrict_cmd(
@@ -156,12 +166,14 @@ impl ProtocolHandler for HismithMini {
     let idx: u8 = if self.second_constrict { 0x05 } else { 0x03 };
     let speed: u8 = level as u8;
 
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![0xCC, idx, speed, speed + idx],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![0xCC, idx, speed, speed + idx],
+        false,
+      )
+      .into(),
+    ])
   }
 }

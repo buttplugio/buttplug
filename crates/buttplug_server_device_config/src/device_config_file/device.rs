@@ -31,7 +31,7 @@ impl ConfigBaseDeviceDefinition {
       id: config.id(),
       protocol_variant: config.protocol_variant.or(self.protocol_variant.clone()),
       message_gap_ms: config.message_gap_ms.or(self.message_gap_ms),
-      features: config.features.or(self.features.clone())
+      features: config.features.or(self.features.clone()),
     }
   }
 }
@@ -56,10 +56,7 @@ impl Into<ServerDeviceDefinition> for ConfigBaseDeviceDefinition {
 
 #[derive(Serialize, Deserialize, Debug, Getters, CopyGetters, Default, Clone, MutGetters)]
 pub struct ConfigUserDeviceCustomization {
-  #[serde(
-    default,
-    skip_serializing_if = "Option::is_none"
-  )]
+  #[serde(default, skip_serializing_if = "Option::is_none")]
   #[getset(get = "pub")]
   display_name: Option<String>,
   #[serde(default)]
@@ -71,10 +68,7 @@ pub struct ConfigUserDeviceCustomization {
   #[getset(get_copy = "pub", get_mut = "pub")]
   index: u32,
   #[getset(get_copy = "pub")]
-  #[serde(
-    default,
-    skip_serializing_if = "Option::is_none"
-  )]
+  #[serde(default, skip_serializing_if = "Option::is_none")]
   message_gap_ms: Option<u32>,
 }
 
@@ -85,7 +79,7 @@ impl From<&ServerDeviceDefinition> for ConfigUserDeviceCustomization {
       allow: value.allow(),
       deny: value.deny(),
       index: value.index(),
-      message_gap_ms: value.message_gap_ms().clone()
+      message_gap_ms: value.message_gap_ms().clone(),
     }
   }
 }
@@ -106,7 +100,10 @@ pub struct ConfigUserDeviceDefinition {
 }
 
 impl ConfigUserDeviceDefinition {
-  pub fn build_from_base_definition(&self, base: &ServerDeviceDefinition) -> Result<ServerDeviceDefinition, ButtplugDeviceConfigError> {
+  pub fn build_from_base_definition(
+    &self,
+    base: &ServerDeviceDefinition,
+  ) -> Result<ServerDeviceDefinition, ButtplugDeviceConfigError> {
     let mut builder = ServerDeviceDefinitionBuilder::from_base(&base, self.id);
     if let Some(display_name) = &self.user_config.display_name {
       builder.display_name(display_name);

@@ -1,5 +1,5 @@
-use super::v2::ServerDeviceMessageAttributesV2;
 use super::ServerDeviceMessageAttributesV3;
+use super::v2::ServerDeviceMessageAttributesV2;
 use buttplug_core::errors::ButtplugError;
 use buttplug_server_device_config::ServerDeviceFeature;
 use getset::Getters;

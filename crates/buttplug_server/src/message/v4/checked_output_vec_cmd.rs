@@ -220,13 +220,11 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedOutputVecCmdV4 {
       ));
     }
     for cmd in msg.scalars() {
-      let scalar_attrs = if let Some(a) = attrs
-        .attrs_v3()
-        .scalar_cmd() {
-          a 
-        } else {
-          continue;
-        };
+      let scalar_attrs = if let Some(a) = attrs.attrs_v3().scalar_cmd() {
+        a
+      } else {
+        continue;
+      };
       let feature = scalar_attrs
         .get(cmd.index() as usize)
         .ok_or(ButtplugError::from(
@@ -318,8 +316,7 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedOutputVecCmdV4 {
         OutputCommand::PositionWithDuration(OutputPositionWithDuration::new(
           actuator.calculate_scaled_float(x.position()).map_err(|_| {
             ButtplugError::from(ButtplugMessageError::InvalidMessageContents(
-              "Position should be 0.0 < x < 1.0"
-                .to_owned(),
+              "Position should be 0.0 < x < 1.0".to_owned(),
             ))
           })?,
           x.duration().try_into().map_err(|_| {
@@ -390,8 +387,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
         OutputCommand::RotateWithDirection(OutputRotateWithDirection::new(
           actuator.calculate_scaled_float(cmd.speed()).map_err(|_| {
             ButtplugError::from(ButtplugMessageError::InvalidMessageContents(
-              "Position should be 0.0 < x < 1.0"
-                .to_owned(),
+              "Position should be 0.0 < x < 1.0".to_owned(),
             ))
           })? as u32,
           cmd.clockwise(),

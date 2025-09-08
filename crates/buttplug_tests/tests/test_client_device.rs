@@ -7,21 +7,20 @@
 
 mod util;
 use buttplug_client::{ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent};
-use buttplug_core::{
-    errors::ButtplugError,
-    message::{OutputType,},
-    util::async_manager
-};
-use buttplug_server_device_config::{load_protocol_configs, ServerDeviceDefinition, UserDeviceIdentifier, ServerDeviceFeature, ServerDeviceFeatureOutput, Endpoint};
-use buttplug_server::{
-    device::{
-      hardware::{HardwareCommand, HardwareWriteCmd},
-    },
+use buttplug_core::{errors::ButtplugError, message::OutputType, util::async_manager};
+use buttplug_server::device::hardware::{HardwareCommand, HardwareWriteCmd};
+use buttplug_server_device_config::{
+  Endpoint,
+  ServerDeviceDefinition,
+  ServerDeviceFeature,
+  ServerDeviceFeatureOutput,
+  UserDeviceIdentifier,
+  load_protocol_configs,
 };
 use futures::StreamExt;
 use std::{collections::HashMap, sync::Arc, time::Duration};
 use tokio::time::sleep;
-use util::test_device_manager::{check_test_recv_value, TestDeviceIdentifier};
+use util::test_device_manager::{TestDeviceIdentifier, check_test_recv_value};
 use util::{
   test_client_with_device,
   test_client_with_device_and_custom_dcm,
@@ -66,7 +65,6 @@ async fn test_client_device_connected_status() {
   assert!(!client.connected());
 }
 
-
 #[tokio::test]
 async fn test_client_device_client_disconnected_status() {
   let (client, _) = test_client_with_device().await;
@@ -104,7 +102,6 @@ async fn test_client_device_client_disconnected_status() {
   }
 }
 
-
 #[tokio::test]
 async fn test_client_device_connected_no_event_listener() {
   let (client, device) = test_client_with_device().await;
@@ -128,7 +125,6 @@ async fn test_client_device_connected_no_event_listener() {
   sleep(Duration::from_millis(100)).await;
 }
 
-
 #[tokio::test]
 async fn test_client_device_invalid_command() {
   use buttplug_core::errors::ButtplugDeviceError;
@@ -150,8 +146,8 @@ async fn test_client_device_invalid_command() {
 
   assert!(matches!(
     test_device.vibrate(1000).await.unwrap_err(),
-    ButtplugClientError::ButtplugOutputCommandConversionError(_))
-  );
+    ButtplugClientError::ButtplugOutputCommandConversionError(_)
+  ));
 }
 
 /*

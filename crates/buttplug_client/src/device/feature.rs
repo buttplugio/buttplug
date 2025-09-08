@@ -1,17 +1,34 @@
-use futures::{future, FutureExt};
+use futures::{FutureExt, future};
 use getset::{CopyGetters, Getters};
 
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugDeviceMessageNameV4, ButtplugServerMessageV4, DeviceFeature, DeviceFeatureOutputLimits, InputCmdV4, InputCommandType, InputType, InputTypeData, OutputCmdV4, OutputCommand, OutputPositionWithDuration, OutputRotateWithDirection, OutputType, OutputValue
+    ButtplugDeviceMessageNameV4,
+    ButtplugServerMessageV4,
+    DeviceFeature,
+    DeviceFeatureOutputLimits,
+    InputCmdV4,
+    InputCommandType,
+    InputType,
+    InputTypeData,
+    OutputCmdV4,
+    OutputCommand,
+    OutputPositionWithDuration,
+    OutputRotateWithDirection,
+    OutputType,
+    OutputValue,
   },
 };
 
 use super::ClientDeviceOutputCommand;
 
 use crate::{
-  create_boxed_future_client_error, device::ClientDeviceCommandValue, ButtplugClientError, ButtplugClientMessageSender, ButtplugClientResultFuture
+  ButtplugClientError,
+  ButtplugClientMessageSender,
+  ButtplugClientResultFuture,
+  create_boxed_future_client_error,
+  device::ClientDeviceCommandValue,
 };
 
 #[derive(Getters, CopyGetters, Clone)]
@@ -44,62 +61,144 @@ impl ClientDeviceFeature {
     }
   }
 
-  fn check_step_value(&self, feature_output: &dyn DeviceFeatureOutputLimits, steps: u32) -> Result<u32, ButtplugClientError> {
+  fn check_step_value(
+    &self,
+    feature_output: &dyn DeviceFeatureOutputLimits,
+    steps: u32,
+  ) -> Result<u32, ButtplugClientError> {
     if feature_output.step_limit().contains(&(steps as i32)) {
       Ok(steps)
     } else {
-      Err(ButtplugClientError::ButtplugOutputCommandConversionError(format!("{} is larger than the maximum number of steps ({}).", steps, feature_output.step_count())))
+      Err(ButtplugClientError::ButtplugOutputCommandConversionError(
+        format!(
+          "{} is larger than the maximum number of steps ({}).",
+          steps,
+          feature_output.step_count()
+        ),
+      ))
     }
   }
 
-  fn convert_float_value(&self, feature_output: &dyn DeviceFeatureOutputLimits, float_amt: f64) -> Result<u32, ButtplugClientError> {
+  fn convert_float_value(
+    &self,
+    feature_output: &dyn DeviceFeatureOutputLimits,
+    float_amt: f64,
+  ) -> Result<u32, ButtplugClientError> {
     if float_amt < 0.0f64 || float_amt > 1.0f64 {
-      Err(ButtplugClientError::ButtplugOutputCommandConversionError("Float values must be between 0.0 and 1.0".to_owned()))
+      Err(ButtplugClientError::ButtplugOutputCommandConversionError(
+        "Float values must be between 0.0 and 1.0".to_owned(),
+      ))
     } else {
       Ok((float_amt * feature_output.step_count() as f64).ceil() as u32)
     }
   }
 
-  pub(super) fn convert_client_cmd_to_output_cmd(&self, client_cmd: &ClientDeviceOutputCommand) -> Result<OutputCmdV4, ButtplugClientError> {
-    let output_type: OutputType = client_cmd.into(); 
+  pub(super) fn convert_client_cmd_to_output_cmd(
+    &self,
+    client_cmd: &ClientDeviceOutputCommand,
+  ) -> Result<OutputCmdV4, ButtplugClientError> {
+    let output_type: OutputType = client_cmd.into();
     // First off, make sure we support this output.
     let output = self
       .feature
       .output()
       .as_ref()
-      .ok_or(ButtplugClientError::ButtplugOutputCommandConversionError(format!("Device feature does not support output type {}", output_type)))?
+      .ok_or(ButtplugClientError::ButtplugOutputCommandConversionError(
+        format!(
+          "Device feature does not support output type {}",
+          output_type
+        ),
+      ))?
       .get(output_type)
-      .ok_or(ButtplugClientError::ButtplugOutputCommandConversionError(format!("Device feature does not support output type {}", output_type)))?;      
+      .ok_or(ButtplugClientError::ButtplugOutputCommandConversionError(
+        format!(
+          "Device feature does not support output type {}",
+          output_type
+        ),
+      ))?;
 
     let output_cmd = match client_cmd {
-      ClientDeviceOutputCommand::VibrateFloat(v) => OutputCommand::Vibrate(OutputValue::new(self.convert_float_value(output, *v)?)),
-      ClientDeviceOutputCommand::OscillateFloat(v) => OutputCommand::Oscillate(OutputValue::new(self.convert_float_value(output, *v)?)),
-      ClientDeviceOutputCommand::RotateFloat(v) => OutputCommand::Rotate(OutputValue::new(self.convert_float_value(output, *v)?)),
-      ClientDeviceOutputCommand::ConstrictFloat(v) => OutputCommand::Constrict(OutputValue::new(self.convert_float_value(output, *v)?)),
-      ClientDeviceOutputCommand::HeaterFloat(v) => OutputCommand::Heater(OutputValue::new(self.convert_float_value(output, *v)?)),
-      ClientDeviceOutputCommand::LedFloat(v )=> OutputCommand::Led(OutputValue::new(self.convert_float_value(output, *v)?)),
-      ClientDeviceOutputCommand::SprayFloat(v) => OutputCommand::Spray(OutputValue::new(self.convert_float_value(output, *v)?)),
-      ClientDeviceOutputCommand::PositionFloat(v) => OutputCommand::Position(OutputValue::new(self.convert_float_value(output, *v)?)),
-      ClientDeviceOutputCommand::PositionWithDurationFloat(v, d) => OutputCommand::PositionWithDuration(OutputPositionWithDuration::new(self.convert_float_value(output, *v)?, *d)),
-      ClientDeviceOutputCommand::RotateWithDirectionFloat(v, d) => OutputCommand::RotateWithDirection(OutputRotateWithDirection::new(self.convert_float_value(output, *v)?, *d)),
-      ClientDeviceOutputCommand::Vibrate(v) => OutputCommand::Vibrate(OutputValue::new(self.check_step_value(output, *v)?)),
-      ClientDeviceOutputCommand::Oscillate(v) => OutputCommand::Oscillate(OutputValue::new(self.check_step_value(output, *v)?)),
-      ClientDeviceOutputCommand::Rotate(v) => OutputCommand::Rotate(OutputValue::new(self.check_step_value(output, *v)?)),
-      ClientDeviceOutputCommand::Constrict(v) => OutputCommand::Constrict(OutputValue::new(self.check_step_value(output, *v)?)),
-      ClientDeviceOutputCommand::Heater(v) => OutputCommand::Heater(OutputValue::new(self.check_step_value(output, *v)?)),
-      ClientDeviceOutputCommand::Led(v )=> OutputCommand::Led(OutputValue::new(self.check_step_value(output, *v)?)),
-      ClientDeviceOutputCommand::Spray(v) => OutputCommand::Spray(OutputValue::new(self.check_step_value(output, *v)?)),
-      ClientDeviceOutputCommand::Position(v) => OutputCommand::Position(OutputValue::new(self.check_step_value(output, *v)?)),
-      ClientDeviceOutputCommand::PositionWithDuration(v, d) => OutputCommand::PositionWithDuration(OutputPositionWithDuration::new(self.check_step_value(output, *v)?, *d)),
-      ClientDeviceOutputCommand::RotateWithDirection(v, d) => OutputCommand::RotateWithDirection(OutputRotateWithDirection::new(self.check_step_value(output, *v)?, *d)),
+      ClientDeviceOutputCommand::VibrateFloat(v) => {
+        OutputCommand::Vibrate(OutputValue::new(self.convert_float_value(output, *v)?))
+      }
+      ClientDeviceOutputCommand::OscillateFloat(v) => {
+        OutputCommand::Oscillate(OutputValue::new(self.convert_float_value(output, *v)?))
+      }
+      ClientDeviceOutputCommand::RotateFloat(v) => {
+        OutputCommand::Rotate(OutputValue::new(self.convert_float_value(output, *v)?))
+      }
+      ClientDeviceOutputCommand::ConstrictFloat(v) => {
+        OutputCommand::Constrict(OutputValue::new(self.convert_float_value(output, *v)?))
+      }
+      ClientDeviceOutputCommand::HeaterFloat(v) => {
+        OutputCommand::Heater(OutputValue::new(self.convert_float_value(output, *v)?))
+      }
+      ClientDeviceOutputCommand::LedFloat(v) => {
+        OutputCommand::Led(OutputValue::new(self.convert_float_value(output, *v)?))
+      }
+      ClientDeviceOutputCommand::SprayFloat(v) => {
+        OutputCommand::Spray(OutputValue::new(self.convert_float_value(output, *v)?))
+      }
+      ClientDeviceOutputCommand::PositionFloat(v) => {
+        OutputCommand::Position(OutputValue::new(self.convert_float_value(output, *v)?))
+      }
+      ClientDeviceOutputCommand::PositionWithDurationFloat(v, d) => {
+        OutputCommand::PositionWithDuration(OutputPositionWithDuration::new(
+          self.convert_float_value(output, *v)?,
+          *d,
+        ))
+      }
+      ClientDeviceOutputCommand::RotateWithDirectionFloat(v, d) => {
+        OutputCommand::RotateWithDirection(OutputRotateWithDirection::new(
+          self.convert_float_value(output, *v)?,
+          *d,
+        ))
+      }
+      ClientDeviceOutputCommand::Vibrate(v) => {
+        OutputCommand::Vibrate(OutputValue::new(self.check_step_value(output, *v)?))
+      }
+      ClientDeviceOutputCommand::Oscillate(v) => {
+        OutputCommand::Oscillate(OutputValue::new(self.check_step_value(output, *v)?))
+      }
+      ClientDeviceOutputCommand::Rotate(v) => {
+        OutputCommand::Rotate(OutputValue::new(self.check_step_value(output, *v)?))
+      }
+      ClientDeviceOutputCommand::Constrict(v) => {
+        OutputCommand::Constrict(OutputValue::new(self.check_step_value(output, *v)?))
+      }
+      ClientDeviceOutputCommand::Heater(v) => {
+        OutputCommand::Heater(OutputValue::new(self.check_step_value(output, *v)?))
+      }
+      ClientDeviceOutputCommand::Led(v) => {
+        OutputCommand::Led(OutputValue::new(self.check_step_value(output, *v)?))
+      }
+      ClientDeviceOutputCommand::Spray(v) => {
+        OutputCommand::Spray(OutputValue::new(self.check_step_value(output, *v)?))
+      }
+      ClientDeviceOutputCommand::Position(v) => {
+        OutputCommand::Position(OutputValue::new(self.check_step_value(output, *v)?))
+      }
+      ClientDeviceOutputCommand::PositionWithDuration(v, d) => OutputCommand::PositionWithDuration(
+        OutputPositionWithDuration::new(self.check_step_value(output, *v)?, *d),
+      ),
+      ClientDeviceOutputCommand::RotateWithDirection(v, d) => OutputCommand::RotateWithDirection(
+        OutputRotateWithDirection::new(self.check_step_value(output, *v)?, *d),
+      ),
     };
-    Ok(OutputCmdV4::new(self.device_index, self.feature_index, output_cmd))
+    Ok(OutputCmdV4::new(
+      self.device_index,
+      self.feature_index,
+      output_cmd,
+    ))
   }
 
-  pub fn send_command(&self, client_device_command: &ClientDeviceOutputCommand) -> ButtplugClientResultFuture {
+  pub fn send_command(
+    &self,
+    client_device_command: &ClientDeviceOutputCommand,
+  ) -> ButtplugClientResultFuture {
     match self.convert_client_cmd_to_output_cmd(&client_device_command) {
       Ok(cmd) => self.event_loop_sender.send_message_expect_ok(cmd.into()),
-      Err(e) => future::ready(Err(e)).boxed()
+      Err(e) => future::ready(Err(e)).boxed(),
     }
   }
 
@@ -107,15 +206,18 @@ impl ClientDeviceFeature {
     let val = level.into();
     self.send_command(&match val {
       ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Vibrate(v),
-      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::VibrateFloat(f)
+      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::VibrateFloat(f),
     })
   }
 
-  pub fn oscillate(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
+  pub fn oscillate(
+    &self,
+    level: impl Into<ClientDeviceCommandValue>,
+  ) -> ButtplugClientResultFuture {
     let val = level.into();
     self.send_command(&match val {
       ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Oscillate(v),
-      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::OscillateFloat(f)
+      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::OscillateFloat(f),
     })
   }
 
@@ -123,7 +225,7 @@ impl ClientDeviceFeature {
     let val = level.into();
     self.send_command(&match val {
       ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Rotate(v),
-      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::RotateFloat(f)
+      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::RotateFloat(f),
     })
   }
 
@@ -131,15 +233,18 @@ impl ClientDeviceFeature {
     let val = level.into();
     self.send_command(&match val {
       ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Spray(v),
-      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::SprayFloat(f)
+      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::SprayFloat(f),
     })
   }
 
-  pub fn constrict(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
+  pub fn constrict(
+    &self,
+    level: impl Into<ClientDeviceCommandValue>,
+  ) -> ButtplugClientResultFuture {
     let val = level.into();
     self.send_command(&match val {
       ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Constrict(v),
-      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::ConstrictFloat(f)
+      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::ConstrictFloat(f),
     })
   }
 
@@ -147,7 +252,7 @@ impl ClientDeviceFeature {
     let val = level.into();
     self.send_command(&match val {
       ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Position(v),
-      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::PositionFloat(f)
+      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::PositionFloat(f),
     })
   }
 
@@ -158,16 +263,28 @@ impl ClientDeviceFeature {
   ) -> ButtplugClientResultFuture {
     let val = position.into();
     self.send_command(&match val {
-      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::PositionWithDuration(v, duration_in_ms),
-      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::PositionWithDurationFloat(f, duration_in_ms)
+      ClientDeviceCommandValue::Int(v) => {
+        ClientDeviceOutputCommand::PositionWithDuration(v, duration_in_ms)
+      }
+      ClientDeviceCommandValue::Float(f) => {
+        ClientDeviceOutputCommand::PositionWithDurationFloat(f, duration_in_ms)
+      }
     })
   }
 
-  pub fn rotate_with_direction(&self, level: impl Into<ClientDeviceCommandValue>, clockwise: bool) -> ButtplugClientResultFuture {
+  pub fn rotate_with_direction(
+    &self,
+    level: impl Into<ClientDeviceCommandValue>,
+    clockwise: bool,
+  ) -> ButtplugClientResultFuture {
     let val = level.into();
     self.send_command(&match val {
-      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::RotateWithDirection(v, clockwise),
-      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::RotateWithDirectionFloat(f, clockwise)
+      ClientDeviceCommandValue::Int(v) => {
+        ClientDeviceOutputCommand::RotateWithDirection(v, clockwise)
+      }
+      ClientDeviceCommandValue::Float(f) => {
+        ClientDeviceOutputCommand::RotateWithDirectionFloat(f, clockwise)
+      }
     })
   }
 
@@ -236,17 +353,19 @@ impl ClientDeviceFeature {
               if sensor_type == data.data().as_input_type() {
                 Ok(data.data())
               } else {
-                Err(ButtplugError::ButtplugMessageError(ButtplugMessageError::UnexpectedMessageType(
-                  "InputReading".to_owned(),
-                ))
-                .into())
+                Err(
+                  ButtplugError::ButtplugMessageError(ButtplugMessageError::UnexpectedMessageType(
+                    "InputReading".to_owned(),
+                  ))
+                  .into(),
+                )
               }
             } else {
               Err(
                 ButtplugError::ButtplugMessageError(ButtplugMessageError::UnexpectedMessageType(
                   "InputReading".to_owned(),
                 ))
-                .into()
+                .into(),
               )
             }
           }

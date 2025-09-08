@@ -14,7 +14,9 @@ fn test_valid_base_config(test_file: &str) {
     &None,
     false,
   )
-  .unwrap().finish().unwrap();
+  .unwrap()
+  .finish()
+  .unwrap();
 }
 
 #[test_case("base_tcode_protocol.json", "user_tcode_protocol.json" ; "TCode Protocol")]
@@ -32,7 +34,9 @@ fn test_valid_user_config(base_config: &str, user_config: &str) {
     ),
     false,
   )
-  .unwrap().finish().unwrap();
+  .unwrap()
+  .finish()
+  .unwrap();
 }
 
 #[test]
@@ -50,7 +54,11 @@ fn test_tcode_device_creation() {
     ),
     false,
   )
-  .unwrap().finish().unwrap();
-  let device = dcm.device_definition(&UserDeviceIdentifier::new("COM1", "tcode-v03", &None)).unwrap();
+  .unwrap()
+  .finish()
+  .unwrap();
+  let device = dcm
+    .device_definition(&UserDeviceIdentifier::new("COM1", "tcode-v03", &None))
+    .unwrap();
   assert_eq!(device.name(), "TCode v0.3 (Single Linear Axis)");
 }

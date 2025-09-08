@@ -7,11 +7,11 @@
 
 use std::sync::atomic::{AtomicU8, Ordering};
 
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -33,12 +33,8 @@ impl ProtocolHandler for LiboShark {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.values[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     let data = self.values[0].load(Ordering::Relaxed) << 4 | self.values[1].load(Ordering::Relaxed);
-    Ok(vec![HardwareWriteCmd::new(
-      &[LIBO_SHARK_PROTOCOL_UUID],
-      Endpoint::Tx,
-      vec![data],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[LIBO_SHARK_PROTOCOL_UUID], Endpoint::Tx, vec![data], false).into(),
+    ])
   }
 }

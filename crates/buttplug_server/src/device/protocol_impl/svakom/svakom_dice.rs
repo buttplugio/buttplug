@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler, ProtocolKeepaliveStrategy},
+  protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -30,13 +30,15 @@ impl ProtocolHandler for SvakomDice {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      [0x55, 0x04, 0x00, 0x00, 01, speed as u8, 0xaa].to_vec(),
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        [0x55, 0x04, 0x00, 0x00, 01, speed as u8, 0xaa].to_vec(),
+        false,
+      )
+      .into(),
+    ])
   }
 }
 

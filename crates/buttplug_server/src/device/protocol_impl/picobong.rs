@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -27,13 +27,15 @@ impl ProtocolHandler for Picobong {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mode: u8 = if speed == 0 { 0xff } else { 0x01 };
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      [0x01, mode, speed as u8].to_vec(),
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        [0x01, mode, speed as u8].to_vec(),
+        false,
+      )
+      .into(),
+    ])
   }
 }
 

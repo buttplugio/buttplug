@@ -7,11 +7,11 @@
 
 use std::sync::atomic::{AtomicU8, Ordering};
 
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -34,19 +34,21 @@ impl Default for Bananasome {
 impl Bananasome {
   fn hardware_command(&self, feature_index: u32, speed: u32) -> Vec<HardwareCommand> {
     self.current_commands[feature_index as usize].store(speed as u8, Ordering::Relaxed);
-    vec![HardwareWriteCmd::new(
-      &[BANANASOME_PROTOCOL_UUID],
-      Endpoint::Tx,
-      vec![
-        0xa0,
-        0x03,
-        self.current_commands[0].load(Ordering::Relaxed),
-        self.current_commands[1].load(Ordering::Relaxed),
-        self.current_commands[2].load(Ordering::Relaxed),
-      ],
-      false,
-    )
-    .into()]
+    vec![
+      HardwareWriteCmd::new(
+        &[BANANASOME_PROTOCOL_UUID],
+        Endpoint::Tx,
+        vec![
+          0xa0,
+          0x03,
+          self.current_commands[0].load(Ordering::Relaxed),
+          self.current_commands[1].load(Ordering::Relaxed),
+          self.current_commands[2].load(Ordering::Relaxed),
+        ],
+        false,
+      )
+      .into(),
+    ]
   }
 }
 

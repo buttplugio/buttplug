@@ -8,30 +8,30 @@
 //! Representation and management of devices connected to the server.
 
 use super::client::{
-  create_boxed_future_client_error,
   ButtplugClientMessageSender,
   ButtplugClientResultFuture,
+  create_boxed_future_client_error,
 };
 use buttplug_core::{
-    errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    message::{OutputType, InputType, StopDeviceCmdV0},
-    util::stream::convert_broadcast_receiver_to_stream,
+  errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+  message::{InputType, OutputType, StopDeviceCmdV0},
+  util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server::message::{
-    ButtplugDeviceMessageNameV3,
-    ButtplugServerMessageV3,
-    ClientDeviceMessageAttributesV3,
-    ClientGenericDeviceMessageAttributesV3,
-    DeviceMessageInfoV3,
-    LinearCmdV1,
-    RotateCmdV1,
-    RotationSubcommandV1,
-    ScalarCmdV3,
-    ScalarSubcommandV3,
-    SensorReadCmdV3,
-    SensorSubscribeCmdV3,
-    SensorUnsubscribeCmdV3,
-    VectorSubcommandV1,
+  ButtplugDeviceMessageNameV3,
+  ButtplugServerMessageV3,
+  ClientDeviceMessageAttributesV3,
+  ClientGenericDeviceMessageAttributesV3,
+  DeviceMessageInfoV3,
+  LinearCmdV1,
+  RotateCmdV1,
+  RotationSubcommandV1,
+  ScalarCmdV3,
+  ScalarSubcommandV3,
+  SensorReadCmdV3,
+  SensorSubscribeCmdV3,
+  SensorUnsubscribeCmdV3,
+  VectorSubcommandV1,
 };
 use futures::{FutureExt, Stream};
 use getset::{CopyGetters, Getters};
@@ -40,8 +40,8 @@ use std::{
   collections::HashMap,
   fmt,
   sync::{
-    atomic::{AtomicBool, Ordering},
     Arc,
+    atomic::{AtomicBool, Ordering},
   },
 };
 use tokio::sync::broadcast;
@@ -335,11 +335,7 @@ impl ButtplugClientDevice {
 
   /// Commands device to vibrate, assuming it has the features to do so.
   pub fn vibrate(&self, speed_cmd: &ScalarValueCommand) -> ButtplugClientResultFuture {
-    self.scalar_from_value_command(
-      speed_cmd,
-      &OutputType::Vibrate,
-      &self.vibrate_attributes(),
-    )
+    self.scalar_from_value_command(speed_cmd, &OutputType::Vibrate, &self.vibrate_attributes())
   }
 
   pub fn oscillate_attributes(&self) -> Vec<ClientGenericDeviceMessageAttributesV3> {

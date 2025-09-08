@@ -12,7 +12,7 @@ use buttplug_server_device_config::Endpoint;
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use std::sync::atomic::{AtomicU8, Ordering};
 
@@ -47,13 +47,9 @@ impl ProtocolHandler for TryFunBlackHole {
     sum += count;
     data.push(sum);
 
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      data,
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, data, false).into(),
+    ])
   }
 
   fn handle_output_vibrate_cmd(
@@ -79,12 +75,8 @@ impl ProtocolHandler for TryFunBlackHole {
     sum += count;
     data.push(sum);
 
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      data,
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, data, false).into(),
+    ])
   }
 }

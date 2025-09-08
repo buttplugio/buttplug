@@ -6,10 +6,10 @@
 // for full license information.
 
 use super::{
+  ButtplugServerError,
   device::{ServerDeviceManager, ServerDeviceManagerBuilder},
   ping_timer::PingTimer,
   server::ButtplugServer,
-  ButtplugServerError,
 };
 use buttplug_core::{
   errors::*,
@@ -18,8 +18,8 @@ use buttplug_core::{
 };
 use buttplug_server_device_config::DeviceConfigurationManagerBuilder;
 use std::sync::{
-  atomic::{AtomicBool, Ordering},
   Arc,
+  atomic::{AtomicBool, Ordering},
 };
 use tokio::sync::broadcast;
 use tracing_futures::Instrument;

@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{device_message_info::DeviceMessageInfoV2, ClientDeviceMessageAttributesV2};
+use super::{ClientDeviceMessageAttributesV2, device_message_info::DeviceMessageInfoV2};
 use crate::message::v1::{DeviceAddedV1, DeviceMessageInfoV1};
 use buttplug_core::{
   errors::ButtplugMessageError,

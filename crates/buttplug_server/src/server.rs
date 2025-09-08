@@ -8,45 +8,45 @@
 use crate::server_message_conversion::ButtplugServerDeviceEventMessageConverter;
 
 use super::{
+  ButtplugServerResultFuture,
   device::ServerDeviceManager,
   message::{
+    ButtplugClientMessageVariant,
+    ButtplugServerMessageVariant,
     server_device_attributes::TryFromClientMessage,
     spec_enums::{
       ButtplugCheckedClientMessageV4,
       ButtplugDeviceCommandMessageUnionV4,
       ButtplugDeviceManagerMessageUnion,
     },
-    ButtplugClientMessageVariant,
-    ButtplugServerMessageVariant,
   },
   ping_timer::PingTimer,
   server_message_conversion::ButtplugServerMessageConverter,
-  ButtplugServerResultFuture,
 };
 use buttplug_core::{
   errors::*,
   message::{
     self,
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
     ButtplugMessage,
     ButtplugMessageSpecVersion,
     ButtplugServerMessageV4,
     ErrorV0,
     StopAllDevicesV0,
     StopScanningV0,
-    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use futures::{
-  future::{self, BoxFuture, FutureExt},
   Stream,
+  future::{self, BoxFuture, FutureExt},
 };
 use once_cell::sync::OnceCell;
 use std::{
   fmt,
   sync::{
-    atomic::{AtomicBool, Ordering},
     Arc,
+    atomic::{AtomicBool, Ordering},
   },
 };
 use tokio::sync::broadcast;
@@ -124,13 +124,21 @@ impl ButtplugServer {
   pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessageVariant> + use<> {
     let spec_version = self.spec_version.clone();
     let converter = ButtplugServerMessageConverter::new(None);
-    let device_indexes: Vec<u32> = self.device_manager.devices().iter().map(|x| *x.key()).collect();
+    let device_indexes: Vec<u32> = self
+      .device_manager
+      .devices()
+      .iter()
+      .map(|x| *x.key())
+      .collect();
     let device_event_converter = ButtplugServerDeviceEventMessageConverter::new(device_indexes);
     self.server_version_event_stream().map(move |m| {
       if let ButtplugServerMessageV4::DeviceList(list) = m {
-        device_event_converter.convert_device_list(spec_version
-          .get()
-          .unwrap_or(&ButtplugMessageSpecVersion::Version4), &list)
+        device_event_converter.convert_device_list(
+          spec_version
+            .get()
+            .unwrap_or(&ButtplugMessageSpecVersion::Version4),
+          &list,
+        )
       } else {
         // If we get an event and don't have a spec version yet, just throw out the latest.
         converter
@@ -289,8 +297,7 @@ impl ButtplugServer {
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, message::ErrorV0>> {
     trace!(
       "Buttplug Server {} received message to client parse: {:?}",
-      self.server_name,
-      msg
+      self.server_name, msg
     );
     let id = msg.id();
     if !self.connected() {

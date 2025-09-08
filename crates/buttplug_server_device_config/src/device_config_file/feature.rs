@@ -18,10 +18,7 @@ use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, CopyGetters)]
 pub struct BaseFeatureSettings {
-  #[serde(
-    skip_serializing_if = "Option::is_none",
-    default
-  )]
+  #[serde(skip_serializing_if = "Option::is_none", default)]
   #[getset(get_copy = "pub")]
   alt_protocol_index: Option<u32>,
 }
@@ -161,7 +158,7 @@ impl From<&ServerDeviceFeatureOutputValueProperties> for UserDeviceFeatureOutput
   fn from(value: &ServerDeviceFeatureOutputValueProperties) -> Self {
     Self {
       value: value.value().user().clone(),
-      disabled: value.disabled()
+      disabled: value.disabled(),
     }
   }
 }
@@ -190,13 +187,14 @@ impl UserDeviceFeatureOutputPositionProperties {
   }
 }
 
-
-impl From<&ServerDeviceFeatureOutputPositionProperties> for UserDeviceFeatureOutputPositionProperties {
+impl From<&ServerDeviceFeatureOutputPositionProperties>
+  for UserDeviceFeatureOutputPositionProperties
+{
   fn from(value: &ServerDeviceFeatureOutputPositionProperties) -> Self {
     Self {
       value: value.position().user().clone(),
       reverse: value.reverse_position(),
-      disabled: value.disabled()
+      disabled: value.disabled(),
     }
   }
 }
@@ -232,13 +230,15 @@ impl UserDeviceFeatureOutputPositionWithDurationProperties {
   }
 }
 
-impl From<&ServerDeviceFeatureOutputPositionWithDurationProperties> for UserDeviceFeatureOutputPositionWithDurationProperties {
+impl From<&ServerDeviceFeatureOutputPositionWithDurationProperties>
+  for UserDeviceFeatureOutputPositionWithDurationProperties
+{
   fn from(value: &ServerDeviceFeatureOutputPositionWithDurationProperties) -> Self {
     Self {
       position: value.position().user().clone(),
       duration: value.duration().user().clone(),
       reverse: value.reverse_position(),
-      disabled: value.disabled()
+      disabled: value.disabled(),
     }
   }
 }
@@ -346,13 +346,13 @@ impl From<&ServerDeviceFeatureOutput> for UserDeviceFeatureOutput {
       vibrate: value.vibrate().as_ref().map(|x| x.into()),
       rotate: value.rotate().as_ref().map(|x| x.into()),
       rotate_with_direction: value.rotate_with_direction().as_ref().map(|x| x.into()),
-      oscillate: value.oscillate().as_ref().map(|x| x.into()), 
-      constrict: value.constrict().as_ref().map(|x| x.into()), 
+      oscillate: value.oscillate().as_ref().map(|x| x.into()),
+      constrict: value.constrict().as_ref().map(|x| x.into()),
       heater: value.heater().as_ref().map(|x| x.into()),
       led: value.led().as_ref().map(|x| x.into()),
       position: value.position().as_ref().map(|x| x.into()),
       position_with_duration: value.position_with_duration().as_ref().map(|x| x.into()),
-      spray: value.spray().as_ref().map(|x| x.into())
+      spray: value.spray().as_ref().map(|x| x.into()),
     }
   }
 }

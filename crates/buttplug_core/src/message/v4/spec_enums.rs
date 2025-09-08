@@ -6,7 +6,6 @@
 // for full license information.
 
 use crate::message::{
-  v4::input_cmd::InputCmdV4,
   ButtplugMessage,
   ButtplugMessageError,
   ButtplugMessageFinalizer,
@@ -23,6 +22,7 @@ use crate::message::{
   StopAllDevicesV0,
   StopDeviceCmdV0,
   StopScanningV0,
+  v4::input_cmd::InputCmdV4,
 };
 use serde::{Deserialize, Serialize};
 

@@ -5,17 +5,17 @@ pub mod connector;
 pub mod device;
 pub mod serializer;
 
+use crate::util::device_test::client::client_v3::connector::ButtplugInProcessClientConnectorBuilder;
 use crate::util::{
-  device_test::connector::build_channel_connector_v3,
   ButtplugTestServer,
   TestDeviceChannelHost,
+  device_test::connector::build_channel_connector_v3,
 };
 use client::{ButtplugClient, ButtplugClientDevice, ButtplugClientEvent};
-use crate::util::device_test::client::client_v3::connector::ButtplugInProcessClientConnectorBuilder;
 use device::{LinearCommand, RotateCommand, ScalarCommand, ScalarValueCommand};
 
-use buttplug_server::{device::ServerDeviceManagerBuilder, ButtplugServer, ButtplugServerBuilder};
 use buttplug_core::util::async_manager;
+use buttplug_server::{ButtplugServer, ButtplugServerBuilder, device::ServerDeviceManagerBuilder};
 use buttplug_server_device_config::load_protocol_configs;
 use tokio::sync::Notify;
 

@@ -1,9 +1,7 @@
 use getset::{CopyGetters, Getters};
 use uuid::Uuid;
 
-use super::server_device_feature::{
-  ServerDeviceFeature,
-};
+use super::server_device_feature::ServerDeviceFeature;
 #[derive(Debug, Clone, Getters, CopyGetters)]
 pub struct ServerDeviceDefinition {
   #[getset(get = "pub")]
@@ -26,7 +24,7 @@ pub struct ServerDeviceDefinition {
   #[getset(get_copy = "pub")]
   index: u32,
   #[getset(get = "pub")]
-  features: Vec<ServerDeviceFeature>
+  features: Vec<ServerDeviceFeature>,
 }
 
 pub struct ServerDeviceDefinitionBuilder {
@@ -46,7 +44,7 @@ impl ServerDeviceDefinitionBuilder {
         allow: false,
         deny: false,
         index: 0,
-        features: vec!()
+        features: vec![],
       },
     }
   }

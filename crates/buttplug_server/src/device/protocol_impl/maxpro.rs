@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -45,12 +45,8 @@ impl ProtocolHandler for Maxpro {
     }
 
     data[9] = crc;
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      data,
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, data, false).into(),
+    ])
   }
 }

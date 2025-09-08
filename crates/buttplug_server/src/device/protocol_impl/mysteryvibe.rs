@@ -8,28 +8,29 @@
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
-    ProtocolInitializer, ProtocolKeepaliveStrategy,
+    ProtocolInitializer,
+    ProtocolKeepaliveStrategy,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::{
   sync::{
-    atomic::{AtomicU8, Ordering},
     Arc,
+    atomic::{AtomicU8, Ordering},
   },
   time::Duration,
 };
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 generic_protocol_initializer_setup!(MysteryVibe, "mysteryvibe");
 
@@ -97,16 +98,18 @@ impl ProtocolHandler for MysteryVibe {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
-    Ok(vec![HardwareWriteCmd::new(
-      &[MYSTERYVIBE_PROTOCOL_UUID],
-      Endpoint::TxVibrate,
-      self
-        .speeds
-        .iter()
-        .map(|x| x.load(Ordering::Relaxed))
-        .collect(),
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[MYSTERYVIBE_PROTOCOL_UUID],
+        Endpoint::TxVibrate,
+        self
+          .speeds
+          .iter()
+          .map(|x| x.load(Ordering::Relaxed))
+          .collect(),
+        false,
+      )
+      .into(),
+    ])
   }
 }

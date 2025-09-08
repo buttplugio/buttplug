@@ -7,8 +7,8 @@ use crate::device::{
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use std::sync::{
-  atomic::{AtomicU8, Ordering},
   Arc,
+  atomic::{AtomicU8, Ordering},
 };
 
 #[derive(Default)]
@@ -59,12 +59,14 @@ impl ProtocolHandler for VorzeSAPiston {
       .previous_position
       .store(position as u8, Ordering::Relaxed);
 
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![VorzeDevice::Piston as u8, position as u8, speed],
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![VorzeDevice::Piston as u8, position as u8, speed],
+        true,
+      )
+      .into(),
+    ])
   }
 }

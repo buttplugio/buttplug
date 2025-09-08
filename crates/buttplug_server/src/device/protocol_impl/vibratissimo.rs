@@ -5,12 +5,12 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::message::OutputType;
 use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_core::message::OutputType;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 
@@ -19,9 +19,9 @@ use crate::device::{
   protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
 };
 use async_trait::async_trait;
-use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::Arc;
-use uuid::{uuid, Uuid};
+use std::sync::atomic::{AtomicU8, Ordering};
+use uuid::{Uuid, uuid};
 
 const VIBRATISSIMO_PROTOCOL_UUID: Uuid = uuid!("66ef7aa4-1e6a-4067-9066-dcb53c7647f2");
 

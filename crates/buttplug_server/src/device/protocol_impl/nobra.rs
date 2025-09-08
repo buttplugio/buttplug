@@ -8,22 +8,22 @@
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::sync::Arc;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const NOBRA_PROTOCOL_UUID: Uuid = uuid!("166e7d2b-b9ed-4769-aaaf-66127e4e14eb");
 generic_protocol_initializer_setup!(Nobra, "nobra");
@@ -61,12 +61,8 @@ impl ProtocolHandler for Nobra {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let output_speed = if speed == 0 { 0x70 } else { 0x60 + speed };
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![output_speed as u8],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, vec![output_speed as u8], false).into(),
+    ])
   }
 }

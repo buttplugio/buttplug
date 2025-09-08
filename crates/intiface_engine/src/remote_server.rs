@@ -6,22 +6,27 @@
 // for full license information.
 
 use buttplug_core::{
-    connector::ButtplugConnector,
-    errors::ButtplugError,
-    message::ButtplugServerMessageV4,
-      util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+  connector::ButtplugConnector,
+  errors::ButtplugError,
+  message::ButtplugServerMessageV4,
+  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+};
+use buttplug_server::{
+  ButtplugServer, ButtplugServerBuilder,
+  message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant},
 };
 use buttplug_server_device_config::UserDeviceIdentifier;
-use buttplug_server::{
-  message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant}, ButtplugServer, ButtplugServerBuilder
-};
 use dashmap::DashSet;
-use futures::{future::Future, pin_mut, select, FutureExt, Stream, StreamExt};
+use futures::{FutureExt, Stream, StreamExt, future::Future, pin_mut, select};
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use thiserror::Error;
-use tokio::sync::{broadcast::{self, Sender}, mpsc, Notify};
+use tokio::sync::{
+  Notify,
+  broadcast::{self, Sender},
+  mpsc,
+};
 
 // Clone derived here to satisfy tokio broadcast requirements.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -70,7 +75,9 @@ async fn run_device_event_stream(
         break;
       }
       Some(msg) => {
-        if let ButtplugServerMessageV4::DeviceList(dl) = msg && remote_event_sender.receiver_count() > 0 {
+        if let ButtplugServerMessageV4::DeviceList(dl) = msg
+          && remote_event_sender.receiver_count() > 0
+        {
           for da in dl.devices() {
             if known_indexes.contains(&da.1.device_index()) {
               continue;
@@ -83,7 +90,9 @@ async fn run_device_event_stream(
                 display_name: device_info.display_name().clone(),
               };
               if remote_event_sender.send(added_event).is_err() {
-                error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
+                error!(
+                  "Cannot send event to owner, dropping and assuming local server thread has exited."
+                );
               }
               known_indexes.insert(da.1.device_index());
             }
@@ -94,11 +103,11 @@ async fn run_device_event_stream(
             if current_indexes.contains(&dr) {
               continue;
             }
-            let removed_event = ButtplugRemoteServerEvent::DeviceRemoved {
-              index: dr,
-            };
+            let removed_event = ButtplugRemoteServerEvent::DeviceRemoved { index: dr };
             if remote_event_sender.send(removed_event).is_err() {
-              error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
+              error!(
+                "Cannot send event to owner, dropping and assuming local server thread has exited."
+              );
             }
             known_indexes.remove(&dr);
           }
@@ -223,13 +232,16 @@ impl Default for ButtplugRemoteServer {
       ButtplugServerBuilder::default()
         .finish()
         .expect("Default is infallible"),
-      &None
+      &None,
     )
   }
 }
 
 impl ButtplugRemoteServer {
-  pub fn new(server: ButtplugServer, event_sender: &Option<Sender<ButtplugRemoteServerEvent>>) -> Self {
+  pub fn new(
+    server: ButtplugServer,
+    event_sender: &Option<Sender<ButtplugRemoteServerEvent>>,
+  ) -> Self {
     let event_sender = if let Some(sender) = event_sender {
       sender.clone()
     } else {

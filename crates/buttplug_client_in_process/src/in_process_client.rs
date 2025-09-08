@@ -7,7 +7,7 @@
 
 use super::ButtplugInProcessClientConnectorBuilder;
 use buttplug_client::ButtplugClient;
-use buttplug_server::{device::ServerDeviceManagerBuilder, ButtplugServerBuilder};
+use buttplug_server::{ButtplugServerBuilder, device::ServerDeviceManagerBuilder};
 use buttplug_server_device_config::DeviceConfigurationManagerBuilder;
 
 /// Convenience function for creating in-process connectors.

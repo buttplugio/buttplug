@@ -8,27 +8,26 @@
 //! In-process communication between clients and servers
 
 use buttplug_core::{
-    connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
-    errors::{ButtplugError, ButtplugMessageError},
-      util::async_manager,
-
-  };
+  connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
+  errors::{ButtplugError, ButtplugMessageError},
+  util::async_manager,
+};
 use buttplug_server::{
-    message::{ButtplugClientMessageV3, ButtplugServerMessageV3, ButtplugServerMessageVariant},
-    ButtplugServer,
-    ButtplugServerBuilder,
+  ButtplugServer,
+  ButtplugServerBuilder,
+  message::{ButtplugClientMessageV3, ButtplugServerMessageV3, ButtplugServerMessageVariant},
 };
 use futures::{
+  StreamExt,
   future::{self, BoxFuture, FutureExt},
   pin_mut,
-  StreamExt,
 };
 use log::info;
 use std::sync::{
-  atomic::{AtomicBool, Ordering},
   Arc,
+  atomic::{AtomicBool, Ordering},
 };
-use tokio::sync::mpsc::{channel, Sender};
+use tokio::sync::mpsc::{Sender, channel};
 use tracing_futures::Instrument;
 
 #[derive(Default)]

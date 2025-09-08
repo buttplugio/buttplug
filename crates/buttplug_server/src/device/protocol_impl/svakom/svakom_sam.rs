@@ -9,22 +9,22 @@ use crate::device::protocol::ProtocolKeepaliveStrategy;
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareSubscribeCmd, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::sync::Arc;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 generic_protocol_initializer_setup!(SvakomSam, "svakom-sam");
 const SVAKOM_SAM_PROTOCOL_UUID: Uuid = uuid!("e39a6b4a-230a-4669-be94-68135f97f166");
@@ -48,7 +48,9 @@ impl ProtocolInitializer for SvakomSamInitializer {
     let mut gen2 = hardware.endpoints().contains(&Endpoint::TxMode);
     if !gen2 && hardware.endpoints().contains(&Endpoint::Firmware) {
       gen2 = true;
-      warn!("Svakom Sam model without speed control detected - This device will only vibrate at 1 speed");
+      warn!(
+        "Svakom Sam model without speed control detected - This device will only vibrate at 1 speed"
+      );
     }
 
     Ok(Arc::new(SvakomSam::new(gen2)))
@@ -77,33 +79,37 @@ impl ProtocolHandler for SvakomSam {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if feature_index == 0 {
-      Ok(vec![HardwareWriteCmd::new(
-        &[feature_id],
-        Endpoint::Tx,
-        if self.gen2 {
-          [
-            18,
-            1,
-            3,
-            0,
-            if speed == 0 { 0x00 } else { 0x04 },
-            speed as u8,
-          ]
-          .to_vec()
-        } else {
-          [18, 1, 3, 0, 5, speed as u8].to_vec()
-        },
-        false,
-      )
-      .into()])
+      Ok(vec![
+        HardwareWriteCmd::new(
+          &[feature_id],
+          Endpoint::Tx,
+          if self.gen2 {
+            [
+              18,
+              1,
+              3,
+              0,
+              if speed == 0 { 0x00 } else { 0x04 },
+              speed as u8,
+            ]
+            .to_vec()
+          } else {
+            [18, 1, 3, 0, 5, speed as u8].to_vec()
+          },
+          false,
+        )
+        .into(),
+      ])
     } else {
-      Ok(vec![HardwareWriteCmd::new(
-        &[feature_id],
-        Endpoint::Tx,
-        [18, 6, 1, speed as u8].to_vec(),
-        false,
-      )
-      .into()])
+      Ok(vec![
+        HardwareWriteCmd::new(
+          &[feature_id],
+          Endpoint::Tx,
+          [18, 6, 1, speed as u8].to_vec(),
+          false,
+        )
+        .into(),
+      ])
     }
   }
 }

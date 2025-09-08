@@ -9,7 +9,7 @@ use std::sync::atomic::{AtomicU8, Ordering};
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -31,20 +31,22 @@ impl ProtocolHandler for Zalo {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     let speed0: u8 = self.speeds[0].load(Ordering::Relaxed);
     let speed1: u8 = self.speeds[1].load(Ordering::Relaxed);
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![
-        if speed0 == 0 && speed1 == 0 {
-          0x02
-        } else {
-          0x01
-        },
-        if speed0 == 0 { 0x01 } else { speed0 },
-        if speed1 == 0 { 0x01 } else { speed1 },
-      ],
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![
+          if speed0 == 0 && speed1 == 0 {
+            0x02
+          } else {
+            0x01
+          },
+          if speed0 == 0 { 0x01 } else { speed0 },
+          if speed1 == 0 { 0x01 } else { speed1 },
+        ],
+        true,
+      )
+      .into(),
+    ])
   }
 }

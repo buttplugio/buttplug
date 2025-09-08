@@ -1,18 +1,18 @@
 use crate::util::{
-  device_test::connector::build_channel_connector,
   ButtplugTestServer,
   TestDeviceChannelHost,
+  device_test::connector::build_channel_connector,
 };
 use buttplug_client::{
-    device::{ClientDeviceFeature, ClientDeviceOutputCommand},
-    ButtplugClient,
-    ButtplugClientDevice,
-    ButtplugClientEvent,
-  };
+  ButtplugClient,
+  ButtplugClientDevice,
+  ButtplugClientEvent,
+  device::{ClientDeviceFeature, ClientDeviceOutputCommand},
+};
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
-use buttplug_server_device_config::load_protocol_configs;
 use buttplug_core::{message::OutputType, util::async_manager};
-use buttplug_server::{device::ServerDeviceManagerBuilder, ButtplugServer, ButtplugServerBuilder};
+use buttplug_server::{ButtplugServer, ButtplugServerBuilder, device::ServerDeviceManagerBuilder};
+use buttplug_server_device_config::load_protocol_configs;
 use tokio::sync::Notify;
 
 use super::super::{
@@ -35,7 +35,7 @@ fn from_type_and_value(output_type: OutputType, value: f64) -> ClientDeviceOutpu
     OutputType::Rotate => ClientDeviceOutputCommand::RotateFloat(value),
     OutputType::Spray => ClientDeviceOutputCommand::SprayFloat(value),
     OutputType::Vibrate => ClientDeviceOutputCommand::VibrateFloat(value),
-    _ => panic!("Value not translatable, test cannot run")
+    _ => panic!("Value not translatable, test cannot run"),
   }
 }
 
@@ -59,7 +59,13 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
           let vibe_features: Vec<&ClientDeviceFeature> = device
             .device_features()
             .iter()
-            .filter(|f| f.1.feature().output().as_ref().is_some_and(|x| x.contains(OutputType::Vibrate)))
+            .filter(|f| {
+              f.1
+                .feature()
+                .output()
+                .as_ref()
+                .is_some_and(|x| x.contains(OutputType::Vibrate))
+            })
             .map(|(_, x)| x)
             .collect();
           let f = vibe_features[cmd.index() as usize].clone();
@@ -78,7 +84,13 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
           let rotate_features: Vec<&ClientDeviceFeature> = device
             .device_features()
             .iter()
-            .filter(|f| f.1.feature().output().as_ref().is_some_and(|x| x.contains(OutputType::RotateWithDirection)))
+            .filter(|f| {
+              f.1
+                .feature()
+                .output()
+                .as_ref()
+                .is_some_and(|x| x.contains(OutputType::RotateWithDirection))
+            })
             .map(|(_, x)| x)
             .collect();
           let f = rotate_features[cmd.index() as usize].clone();

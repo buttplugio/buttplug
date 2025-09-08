@@ -1,4 +1,9 @@
-use buttplug_client::{connector::ButtplugRemoteClientConnector, serializer::ButtplugClientJSONSerializer, ButtplugClient, ButtplugClientError};
+use buttplug_client::{
+  ButtplugClient,
+  ButtplugClientError,
+  connector::ButtplugRemoteClientConnector,
+  serializer::ButtplugClientJSONSerializer,
+};
 
 use buttplug_core::errors::ButtplugError;
 use buttplug_transport_websocket_tungstenite::ButtplugWebsocketClientTransport;

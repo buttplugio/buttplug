@@ -5,7 +5,7 @@ use intiface_engine::{
 };
 use std::fs;
 use tokio::{select, signal::ctrl_c};
-use tracing::{debug, info, Level};
+use tracing::{Level, debug, info};
 use tracing_subscriber::{
   filter::{EnvFilter, LevelFilter},
   layer::SubscriberExt,
@@ -204,7 +204,7 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
           return Err(IntifaceError::new(&format!(
             "Error opening external device configuration: {:?}",
             err
-          )))
+          )));
         }
       };
     }
@@ -220,7 +220,7 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
           return Err(IntifaceError::new(&format!(
             "Error opening user device configuration: {:?}",
             err
-          )))
+          )));
         }
       };
     }

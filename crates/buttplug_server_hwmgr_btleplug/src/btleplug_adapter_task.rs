@@ -15,8 +15,8 @@ use futures::StreamExt;
 use std::{
   collections::HashMap,
   sync::{
-    atomic::{AtomicBool, Ordering},
     Arc,
+    atomic::{AtomicBool, Ordering},
   },
   time::Duration,
 };
@@ -206,7 +206,9 @@ impl BtleplugAdapterTask {
           } else {
             if adapter_found {
               self.adapter_connected.store(false, Ordering::Relaxed);
-              warn!("Bluetooth LE adapter not found, will not be using bluetooth scanning until found. Buttplug will continue polling for the adapter, but no more warning messages will be posted.");
+              warn!(
+                "Bluetooth LE adapter not found, will not be using bluetooth scanning until found. Buttplug will continue polling for the adapter, but no more warning messages will be posted."
+              );
             }
             continue;
           }

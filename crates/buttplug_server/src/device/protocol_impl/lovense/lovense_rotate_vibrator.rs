@@ -9,16 +9,13 @@ use super::{form_rotate_with_direction_command, form_vibrate_command};
 
 use crate::device::{
   hardware::{Hardware, HardwareCommand},
-  protocol::{
-    ProtocolHandler,
-    ProtocolKeepaliveStrategy,
-  },
+  protocol::{ProtocolHandler, ProtocolKeepaliveStrategy},
 };
 use buttplug_core::{errors::ButtplugDeviceError, message::InputReadingV4};
 use futures::future::BoxFuture;
 use std::sync::{
-  atomic::{AtomicBool, Ordering},
   Arc,
+  atomic::{AtomicBool, Ordering},
 };
 use uuid::Uuid;
 

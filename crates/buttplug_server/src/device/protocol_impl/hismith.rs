@@ -14,12 +14,12 @@ use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::sync::Arc;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const HISMITH_PROTOCOL_UUID: Uuid = uuid!("e59f9c5d-bb4a-4a9c-ab57-0ceb43af1da7");
 
@@ -109,13 +109,15 @@ impl ProtocolHandler for Hismith {
     let idx: u8 = 0x04;
     let speed: u8 = speed as u8;
 
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![0xAA, idx, speed, speed + idx],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![0xAA, idx, speed, speed + idx],
+        false,
+      )
+      .into(),
+    ])
   }
 
   fn handle_output_vibrate_cmd(
@@ -133,12 +135,14 @@ impl ProtocolHandler for Hismith {
       speed as u8
     };
 
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![0xAA, idx, speed, speed + idx],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![0xAA, idx, speed, speed + idx],
+        false,
+      )
+      .into(),
+    ])
   }
 }

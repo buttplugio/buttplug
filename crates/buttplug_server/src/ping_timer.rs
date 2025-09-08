@@ -9,14 +9,14 @@ use buttplug_core::util::{async_manager, sleep};
 use futures::Future;
 use std::{
   sync::{
-    atomic::{AtomicBool, Ordering},
     Arc,
+    atomic::{AtomicBool, Ordering},
   },
   time::Duration,
 };
 use tokio::{
   select,
-  sync::{mpsc, Notify},
+  sync::{Notify, mpsc},
 };
 
 pub enum PingMessage {

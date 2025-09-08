@@ -8,7 +8,6 @@
 use async_trait::async_trait;
 use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
 use buttplug_server::device::hardware::{
-  communication::HardwareSpecificError,
   Hardware,
   HardwareConnector,
   HardwareEvent,
@@ -19,22 +18,23 @@ use buttplug_server::device::hardware::{
   HardwareSubscribeCmd,
   HardwareUnsubscribeCmd,
   HardwareWriteCmd,
+  communication::HardwareSpecificError,
 };
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, SerialSpecifier, Endpoint};
+use buttplug_server_device_config::{Endpoint, ProtocolCommunicationSpecifier, SerialSpecifier};
 use futures::future;
-use futures::{future::BoxFuture, FutureExt};
+use futures::{FutureExt, future::BoxFuture};
 use serialport::{SerialPort, SerialPortInfo};
 use std::{
   fmt::{self, Debug},
   io::ErrorKind,
   sync::{
-    atomic::{AtomicBool, Ordering},
     Arc,
+    atomic::{AtomicBool, Ordering},
   },
   thread,
   time::Duration,
 };
-use tokio::sync::{broadcast, mpsc, Mutex};
+use tokio::sync::{Mutex, broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
 
 pub struct SerialPortHardwareConnector {

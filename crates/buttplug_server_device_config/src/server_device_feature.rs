@@ -8,7 +8,17 @@
 use crate::ButtplugDeviceConfigError;
 
 use buttplug_core::message::{
-  DeviceFeature, DeviceFeatureInput, DeviceFeatureInputBuilder, DeviceFeatureInputProperties, DeviceFeatureOutput, DeviceFeatureOutputBuilder, DeviceFeatureOutputPositionWithDurationProperties, DeviceFeatureOutputValueProperties, InputCommandType, InputType, OutputType
+  DeviceFeature,
+  DeviceFeatureInput,
+  DeviceFeatureInputBuilder,
+  DeviceFeatureInputProperties,
+  DeviceFeatureOutput,
+  DeviceFeatureOutputBuilder,
+  DeviceFeatureOutputPositionWithDurationProperties,
+  DeviceFeatureOutputValueProperties,
+  InputCommandType,
+  InputType,
+  OutputType,
 };
 use getset::{CopyGetters, Getters, Setters};
 use std::{collections::HashSet, ops::RangeInclusive};
@@ -19,7 +29,7 @@ use uuid::Uuid;
 /// ranges with negatives (i.e. rotate with direction) are considered to be symettric around 0, we
 /// let the system handle that conversion.
 #[derive(Debug, Clone, Getters)]
-  #[getset(get = "pub")]
+#[getset(get = "pub")]
 pub struct RangeWithLimit {
   base: RangeInclusive<i32>,
   internal_base: RangeInclusive<u32>,
@@ -262,9 +272,14 @@ impl ServerDeviceFeatureOutputPositionWithDurationProperties {
   }
 }
 
-impl Into<DeviceFeatureOutputPositionWithDurationProperties> for &ServerDeviceFeatureOutputPositionWithDurationProperties {
+impl Into<DeviceFeatureOutputPositionWithDurationProperties>
+  for &ServerDeviceFeatureOutputPositionWithDurationProperties
+{
   fn into(self) -> DeviceFeatureOutputPositionWithDurationProperties {
-    DeviceFeatureOutputPositionWithDurationProperties::new(&self.position().step_limit(), &self.duration().step_limit())
+    DeviceFeatureOutputPositionWithDurationProperties::new(
+      &self.position().step_limit(),
+      &self.duration().step_limit(),
+    )
   }
 }
 

@@ -9,48 +9,47 @@
 
 use crate::util::ButtplugTestServer;
 use buttplug_client::{
-    connector::ButtplugRemoteClientConnector,
-    serializer::ButtplugClientJSONSerializer,
-    ButtplugClient,
-    ButtplugClientError,
-  };
+  ButtplugClient,
+  ButtplugClientError,
+  connector::ButtplugRemoteClientConnector,
+  serializer::ButtplugClientJSONSerializer,
+};
 use buttplug_core::{
-    connector::{
-      transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
-      ButtplugConnectorError,
-    },
-    message::{
-      serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
-      ButtplugClientMessageV4,
-      ButtplugMessage,
-      DeviceListV4,
-      RequestServerInfoV4,
-      ServerInfoV4,
-      BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-      BUTTPLUG_CURRENT_API_MINOR_VERSION,
-    },
-      util::async_manager,
-
-  };
+  connector::{
+    ButtplugConnectorError,
+    transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
+  },
+  message::{
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+    BUTTPLUG_CURRENT_API_MINOR_VERSION,
+    ButtplugClientMessageV4,
+    ButtplugMessage,
+    DeviceListV4,
+    RequestServerInfoV4,
+    ServerInfoV4,
+    serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
+  },
+  util::async_manager,
+};
 use buttplug_server::{
-    connector::ButtplugRemoteServerConnector,
-    message::{
-      serializer::ButtplugServerJSONSerializer,
-      ButtplugClientMessageVariant,
-      ButtplugServerMessageVariant,
-    },
+  connector::ButtplugRemoteServerConnector,
+  message::{
+    ButtplugClientMessageVariant,
+    ButtplugServerMessageVariant,
+    serializer::ButtplugServerJSONSerializer,
+  },
 };
 use futures::{
+  FutureExt,
   future::{self, BoxFuture},
   select,
-  FutureExt,
 };
 use log::*;
 use std::sync::Arc;
 use tokio::sync::{
-  mpsc::{channel, Receiver, Sender},
   Mutex,
   Notify,
+  mpsc::{Receiver, Sender, channel},
 };
 
 struct ChannelTransport {

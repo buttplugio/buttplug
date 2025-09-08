@@ -5,12 +5,12 @@ mod device;
 mod in_process_connector;
 
 use crate::util::{
-  device_test::connector::build_channel_connector_v2,
   ButtplugTestServer,
   TestDeviceChannelHost,
+  device_test::connector::build_channel_connector_v2,
 };
-use buttplug_server::{device::ServerDeviceManagerBuilder, ButtplugServer, ButtplugServerBuilder};
 use buttplug_core::util::async_manager;
+use buttplug_server::{ButtplugServer, ButtplugServerBuilder, device::ServerDeviceManagerBuilder};
 use buttplug_server_device_config::load_protocol_configs;
 
 use client::{ButtplugClient, ButtplugClientEvent};

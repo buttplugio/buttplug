@@ -6,21 +6,16 @@
 // for full license information.
 
 mod util;
-use buttplug_core::{
-    message::{
-      ButtplugServerMessageV4,
-      RequestServerInfoV4,
-      StartScanningV0,
-      BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-      BUTTPLUG_CURRENT_API_MINOR_VERSION,
-    },
-  };
-use buttplug_server::message::{
-    ButtplugClientMessageVariant,
-    ButtplugServerMessageVariant,
+use buttplug_core::message::{
+  BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+  BUTTPLUG_CURRENT_API_MINOR_VERSION,
+  ButtplugServerMessageV4,
+  RequestServerInfoV4,
+  StartScanningV0,
 };
+use buttplug_server::message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant};
 
-use futures::{pin_mut, StreamExt};
+use futures::{StreamExt, pin_mut};
 pub use util::test_device_manager::TestDeviceCommunicationManagerBuilder;
 use util::test_server_with_device;
 

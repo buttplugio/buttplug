@@ -8,23 +8,23 @@
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::cmp::{max, min};
 use std::sync::Arc;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const LOOB_PROTOCOL_UUID: Uuid = uuid!("b3a02457-3bda-4c5b-8363-aead6eda74ae");
 generic_protocol_initializer_setup!(Loob, "loob");
@@ -67,12 +67,8 @@ impl ProtocolHandler for Loob {
     for b in time.to_be_bytes() {
       data.push(b);
     }
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      data,
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, data, false).into(),
+    ])
   }
 }

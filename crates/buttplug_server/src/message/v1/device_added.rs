@@ -11,7 +11,7 @@ use buttplug_core::{
   message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
 };
 
-use super::{device_message_info::DeviceMessageInfoV1, ClientDeviceMessageAttributesV1};
+use super::{ClientDeviceMessageAttributesV1, device_message_info::DeviceMessageInfoV1};
 
 use getset::{CopyGetters, Getters};
 

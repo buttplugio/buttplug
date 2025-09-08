@@ -7,11 +7,11 @@
 
 use std::sync::atomic::{AtomicU8, Ordering};
 
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -63,12 +63,14 @@ impl ProtocolHandler for JeJoue {
       pattern = 2;
     }
 
-    Ok(vec![HardwareWriteCmd::new(
-      &[JEJOUE_PROTOCOL_UUID],
-      Endpoint::Tx,
-      vec![pattern, speed],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[JEJOUE_PROTOCOL_UUID],
+        Endpoint::Tx,
+        vec![pattern, speed],
+        false,
+      )
+      .into(),
+    ])
   }
 }

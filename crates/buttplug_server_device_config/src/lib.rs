@@ -158,7 +158,6 @@ mod endpoint;
 pub use endpoint::*;
 use uuid::Uuid;
 
-
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -182,5 +181,5 @@ pub enum ButtplugDeviceConfigError {
   #[error("Output type {0} not available on device")]
   InvalidOutput(OutputType),
   #[error("Float value {0} is not 0 < x < 1")]
-  InvalidFloatConversion(f64)
+  InvalidFloatConversion(f64),
 }

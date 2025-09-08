@@ -16,7 +16,7 @@ use uuid::Uuid;
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -45,13 +45,9 @@ impl ProtocolHandler for Motorbunny {
       command_vec.append(&mut vibe_commands);
       command_vec.append(&mut vec![crc, 0xec]);
     }
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      command_vec,
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, command_vec, false).into(),
+    ])
   }
 
   fn handle_rotation_with_direction_cmd(
@@ -73,12 +69,8 @@ impl ProtocolHandler for Motorbunny {
       command_vec.append(&mut rotate_command);
       command_vec.append(&mut vec![crc, 0xec]);
     }
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      command_vec,
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, command_vec, false).into(),
+    ])
   }
 }

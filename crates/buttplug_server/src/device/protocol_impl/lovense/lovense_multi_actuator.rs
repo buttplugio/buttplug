@@ -10,13 +10,10 @@ use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{ProtocolHandler, ProtocolKeepaliveStrategy},
 };
-use buttplug_core::{
-  errors::ButtplugDeviceError,
-  message::InputReadingV4,
-};
+use buttplug_core::{errors::ButtplugDeviceError, message::InputReadingV4};
 use buttplug_server_device_config::Endpoint;
 use futures::future::BoxFuture;
-use std::sync::{atomic::AtomicU32, Arc};
+use std::sync::{Arc, atomic::AtomicU32};
 use uuid::Uuid;
 
 #[derive(Default)]
@@ -48,13 +45,9 @@ impl ProtocolHandler for LovenseMultiActuator {
     let lovense_cmd = format!("Vibrate{}:{};", feature_index + 1, speed)
       .as_bytes()
       .to_vec();
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      lovense_cmd,
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, lovense_cmd, false).into(),
+    ])
   }
 
   fn handle_output_oscillate_cmd(

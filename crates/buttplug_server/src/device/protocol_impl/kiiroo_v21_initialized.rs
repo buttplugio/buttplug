@@ -10,25 +10,25 @@ use super::fleshlight_launch_helper::calculate_speed;
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::sync::{
-  atomic::{AtomicU8, Ordering},
   Arc,
+  atomic::{AtomicU8, Ordering},
 };
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const KIIROO_V21_INITIALIZED_PROTOCOL_UUID: Uuid = uuid!("22329023-5464-41b6-a0de-673d7e993055");
 
@@ -77,13 +77,9 @@ impl ProtocolHandler for KiirooV21Initialized {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![0x01, speed as u8],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, vec![0x01, speed as u8], false).into(),
+    ])
   }
 
   fn handle_position_with_duration_cmd(
@@ -102,12 +98,14 @@ impl ProtocolHandler for KiirooV21Initialized {
     self
       .previous_position
       .store(position as u8, Ordering::Relaxed);
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      [0x03, 0x00, calculated_speed, position as u8].to_vec(),
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        [0x03, 0x00, calculated_speed, position as u8].to_vec(),
+        false,
+      )
+      .into(),
+    ])
   }
 }

@@ -8,13 +8,13 @@
 use super::{lovense_dongle_hardware::*, lovense_dongle_messages::*};
 use async_trait::async_trait;
 use buttplug_server::device::hardware::communication::HardwareCommunicationManagerEvent;
-use futures::{pin_mut, select, FutureExt};
+use futures::{FutureExt, pin_mut, select};
 use std::sync::{
-  atomic::{AtomicBool, Ordering},
   Arc,
+  atomic::{AtomicBool, Ordering},
 };
 use tokio::{
-  sync::mpsc::{channel, Receiver, Sender},
+  sync::mpsc::{Receiver, Sender, channel},
   time::sleep,
 };
 
@@ -248,7 +248,9 @@ impl LovenseDongleState for LovenseDongleWaitForDongle {
           should_scan = true;
         }
         LovenseDeviceCommand::StopScanning => {
-          debug!("Lovense dongle not found, clearing StartScanning command and emitting ScanningFinished.");
+          debug!(
+            "Lovense dongle not found, clearing StartScanning command and emitting ScanningFinished."
+          );
           self.is_scanning.store(false, Ordering::Relaxed);
           should_scan = false;
           // If we were requested to scan and then asked to stop, act like we at least tried.

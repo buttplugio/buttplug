@@ -10,23 +10,24 @@ use self::handyplug::Ping;
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
-    ProtocolInitializer, ProtocolKeepaliveStrategy,
+    ProtocolInitializer,
+    ProtocolKeepaliveStrategy,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use prost::Message;
 use std::sync::Arc;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 mod protocomm {
   include!("./protocomm.rs");
@@ -175,12 +176,8 @@ impl ProtocolHandler for TheHandy {
     linear_payload
       .encode(&mut linear_buf)
       .expect("Infallible encode.");
-    Ok(vec![HardwareWriteCmd::new(
-      &[THEHANDY_PROTOCOL_UUID],
-      Endpoint::Tx,
-      linear_buf,
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[THEHANDY_PROTOCOL_UUID], Endpoint::Tx, linear_buf, true).into(),
+    ])
   }
 }

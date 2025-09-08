@@ -11,9 +11,8 @@ use uuid::Uuid;
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
-
 
 generic_protocol_setup!(SvakomDT250A, "svakom-dt250a");
 
@@ -31,21 +30,23 @@ impl SvakomDT250A {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      [
-        0x55,
-        mode,
-        0x00,
-        0x00,
-        if speed == 0 { 0x00 } else { 0x01 },
-        speed as u8,
-      ]
-      .to_vec(),
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        [
+          0x55,
+          mode,
+          0x00,
+          0x00,
+          if speed == 0 { 0x00 } else { 0x01 },
+          speed as u8,
+        ]
+        .to_vec(),
+        false,
+      )
+      .into(),
+    ])
   }
 }
 
@@ -60,11 +61,11 @@ impl ProtocolHandler for SvakomDT250A {
   }
 
   fn handle_output_constrict_cmd(
-      &self,
-      _feature_index: u32,
-      feature_id: uuid::Uuid,
-      level: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    _feature_index: u32,
+    feature_id: uuid::Uuid,
+    level: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.form_hardware_command(0x08, feature_id, level)
   }
 }

@@ -27,14 +27,18 @@ use buttplug_server::device::hardware::{
   HardwareUnsubscribeCmd,
   HardwareWriteCmd,
 };
-use buttplug_server_device_config::{BluetoothLESpecifier, ProtocolCommunicationSpecifier, Endpoint};
+use buttplug_server_device_config::{
+  BluetoothLESpecifier,
+  Endpoint,
+  ProtocolCommunicationSpecifier,
+};
 use futures::future::{self, BoxFuture, FutureExt};
 use std::{
   collections::HashMap,
   fmt::{self, Debug},
   sync::{
-    atomic::{AtomicBool, Ordering},
     Arc,
+    atomic::{AtomicBool, Ordering},
   },
   time::Duration,
 };

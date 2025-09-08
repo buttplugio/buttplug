@@ -1,19 +1,19 @@
 use crate::{
+  ButtplugRepeater,
   backdoor_server::BackdoorServer,
   buttplug_server::{reset_buttplug_server, run_server, setup_buttplug_server},
   error::IntifaceEngineError,
   frontend::{
-    frontend_external_event_loop, frontend_server_event_loop, process_messages::EngineMessage,
-    Frontend,
+    Frontend, frontend_external_event_loop, frontend_server_event_loop,
+    process_messages::EngineMessage,
   },
   mdns::IntifaceMdns,
   options::EngineOptions,
   remote_server::ButtplugRemoteServerEvent,
-  ButtplugRepeater,
 };
 
 use buttplug_server_device_config::{DeviceConfigurationManager, save_user_config};
-use futures::{pin_mut, StreamExt};
+use futures::{StreamExt, pin_mut};
 use once_cell::sync::OnceCell;
 use std::{path::Path, sync::Arc, time::Duration};
 use tokio::{fs, select};

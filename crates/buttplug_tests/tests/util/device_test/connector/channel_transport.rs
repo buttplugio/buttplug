@@ -1,20 +1,20 @@
 use buttplug_core::{
-    connector::{
-      transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
-      ButtplugConnectorError,
-      ButtplugConnectorResultFuture,
-    },
-    message::serializer::ButtplugSerializedMessage,
+  connector::{
+    ButtplugConnectorError,
+    ButtplugConnectorResultFuture,
+    transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
+  },
+  message::serializer::ButtplugSerializedMessage,
   util::async_manager,
 };
-use futures::{future::BoxFuture, FutureExt};
+use futures::{FutureExt, future::BoxFuture};
 use std::sync::Arc;
 use tokio::{
   select,
   sync::{
-    mpsc::{Receiver, Sender},
     Mutex,
     Notify,
+    mpsc::{Receiver, Sender},
   },
 };
 

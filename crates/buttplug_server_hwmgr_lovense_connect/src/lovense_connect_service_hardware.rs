@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::lovense_connect_service_comm_manager::{get_local_info, LovenseServiceToyInfo};
+use super::lovense_connect_service_comm_manager::{LovenseServiceToyInfo, get_local_info};
 use async_trait::async_trait;
 use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
 use buttplug_server::device::hardware::{
@@ -22,16 +22,16 @@ use buttplug_server::device::hardware::{
   HardwareWriteCmd,
 };
 use buttplug_server_device_config::{
+  Endpoint,
   LovenseConnectServiceSpecifier,
   ProtocolCommunicationSpecifier,
-  Endpoint,
 };
 use futures::future::{self, BoxFuture, FutureExt};
 use std::{
   fmt::{self, Debug},
   sync::{
-    atomic::{AtomicU8, Ordering},
     Arc,
+    atomic::{AtomicU8, Ordering},
   },
   time::Duration,
 };

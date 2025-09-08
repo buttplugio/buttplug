@@ -8,26 +8,26 @@
 //! In-process communication between clients and servers
 
 use buttplug_core::{
-    connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
-    errors::{ButtplugError, ButtplugMessageError},
-    util::async_manager,
-  };
+  connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
+  errors::{ButtplugError, ButtplugMessageError},
+  util::async_manager,
+};
 use buttplug_server::{
-    message::{ButtplugClientMessageV2, ButtplugServerMessageV2, ButtplugServerMessageVariant},
-    ButtplugServer,
-    ButtplugServerBuilder,
+  ButtplugServer,
+  ButtplugServerBuilder,
+  message::{ButtplugClientMessageV2, ButtplugServerMessageV2, ButtplugServerMessageVariant},
 };
 use futures::{
+  StreamExt,
   future::{self, BoxFuture, FutureExt},
   pin_mut,
-  StreamExt,
 };
 use log::*;
 use std::sync::{
-  atomic::{AtomicBool, Ordering},
   Arc,
+  atomic::{AtomicBool, Ordering},
 };
-use tokio::sync::mpsc::{channel, Sender};
+use tokio::sync::mpsc::{Sender, channel};
 use tracing_futures::Instrument;
 
 #[derive(Default)]
@@ -75,13 +75,11 @@ pub struct ButtplugInProcessClientConnector {
   connected: Arc<AtomicBool>,
 }
 
-
 impl Default for ButtplugInProcessClientConnector {
   fn default() -> Self {
     ButtplugInProcessClientConnectorBuilder::default().finish()
   }
 }
-
 
 impl ButtplugInProcessClientConnector {
   /// Creates a new in-process connector, with a server instance.
@@ -103,7 +101,6 @@ impl ButtplugInProcessClientConnector {
     }
   }
 }
-
 
 impl ButtplugConnector<ButtplugClientMessageV2, ButtplugServerMessageV2>
   for ButtplugInProcessClientConnector

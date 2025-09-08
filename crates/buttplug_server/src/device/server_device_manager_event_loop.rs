@@ -13,14 +13,14 @@ use buttplug_server_device_config::DeviceConfigurationManager;
 use tracing::info_span;
 
 use crate::device::{
-  hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
   ServerDevice,
   ServerDeviceEvent,
-  protocol::ProtocolManager
+  hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
+  protocol::ProtocolManager,
 };
 use dashmap::{DashMap, DashSet};
-use futures::{future, pin_mut, FutureExt, StreamExt};
-use std::sync::{atomic::AtomicBool, Arc};
+use futures::{FutureExt, StreamExt, future, pin_mut};
+use std::sync::{Arc, atomic::AtomicBool};
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
 use tracing_futures::Instrument;
@@ -137,7 +137,9 @@ impl ServerDeviceManagerEventLoop {
           "System signaled that scanning was finished, check to see if all managers are finished."
         );
         if self.scanning_bringup_in_progress {
-          debug!("Hardware Comm Manager finished before scanning was fully started, continuing event loop.");
+          debug!(
+            "Hardware Comm Manager finished before scanning was fully started, continuing event loop."
+          );
           return;
         }
         // Only send scanning finished if we haven't requested a stop.
@@ -194,13 +196,11 @@ impl ServerDeviceManagerEventLoop {
         //
         // We used to do this in build_server_device, but we shouldn't mark devices as actually
         // connecting until after this happens, so we're moving it back here.
-        let protocol_specializers = self
-          .protocol_manager
-          .protocol_specializers(
-            &creator.specifier(),
-            self.device_config_manager.base_communication_specifiers(),
-            self.device_config_manager.user_communication_specifiers()
-          );
+        let protocol_specializers = self.protocol_manager.protocol_specializers(
+          &creator.specifier(),
+          self.device_config_manager.base_communication_specifiers(),
+          self.device_config_manager.user_communication_specifiers(),
+        );
 
         // If we have no identifiers, then there's nothing to do here. Throw an error.
         if protocol_specializers.is_empty() {
@@ -285,18 +285,21 @@ impl ServerDeviceManagerEventLoop {
         // address), consider it disconnected and eject it from the map. This
         // should also trigger a disconnect event before our new DeviceAdded
         // message goes out, so timing matters here.
-        match self.device_map.remove(&device_index) { Some((_, old_device)) => {
-          info!("Device map contains key {}.", device_index);
-          // After removing the device from the array, manually disconnect it to
-          // make sure the event is thrown.
-          if let Err(err) = old_device.disconnect().await {
-            // If we throw an error during the disconnect, we can't really do
-            // anything with it, but should at least log it.
-            error!("Error during index collision disconnect: {:?}", err);
+        match self.device_map.remove(&device_index) {
+          Some((_, old_device)) => {
+            info!("Device map contains key {}.", device_index);
+            // After removing the device from the array, manually disconnect it to
+            // make sure the event is thrown.
+            if let Err(err) = old_device.disconnect().await {
+              // If we throw an error during the disconnect, we can't really do
+              // anything with it, but should at least log it.
+              error!("Error during index collision disconnect: {:?}", err);
+            }
           }
-        } _ => {
-          info!("Device map does not contain key {}.", device_index);
-        }}
+          _ => {
+            info!("Device map does not contain key {}.", device_index);
+          }
+        }
 
         // Create event loop for forwarding device events into our selector.
         let event_listener = device.event_stream();
@@ -341,11 +344,7 @@ impl ServerDeviceManagerEventLoop {
             .remove(&device_index)
             .expect("Remove will always work.");
           let device_update_message: ButtplugServerMessageV4 = self.generate_device_list().into();
-          if self
-            .server_sender
-            .send(device_update_message)
-            .is_err()
-          {
+          if self.server_sender.send(device_update_message).is_err() {
             debug!("Server not currently available, dropping Device Removed event.");
           }
         }

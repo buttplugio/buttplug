@@ -11,7 +11,7 @@ use uuid::Uuid;
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -38,16 +38,18 @@ impl ProtocolHandler for KiirooV2Vibrator {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      self
-        .speeds
-        .iter()
-        .map(|v| v.load(Ordering::Relaxed))
-        .collect(),
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        self
+          .speeds
+          .iter()
+          .map(|v| v.load(Ordering::Relaxed))
+          .collect(),
+        false,
+      )
+      .into(),
+    ])
   }
 }

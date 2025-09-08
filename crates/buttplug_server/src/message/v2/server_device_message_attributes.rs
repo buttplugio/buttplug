@@ -6,9 +6,9 @@
 // for full license information.
 
 use crate::message::{
-  v1::NullDeviceMessageAttributesV1,
   ServerDeviceMessageAttributesV3,
   ServerGenericDeviceMessageAttributesV3,
+  v1::NullDeviceMessageAttributesV1,
 };
 use buttplug_core::message::{InputType, OutputType};
 

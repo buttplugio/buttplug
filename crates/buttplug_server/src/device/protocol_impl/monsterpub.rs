@@ -13,15 +13,15 @@ use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::sync::{
-  atomic::{AtomicU8, Ordering},
   Arc,
+  atomic::{AtomicU8, Ordering},
 };
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 pub mod setup {
   use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -186,13 +186,15 @@ impl MonsterPub {
     } else {
       self.tx
     };
-    Ok(vec![HardwareWriteCmd::new(
-      &[MONSTERPUB_PROTOCOL_UUID],
-      tx,
-      data,
-      tx == Endpoint::TxMode,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[MONSTERPUB_PROTOCOL_UUID],
+        tx,
+        data,
+        tx == Endpoint::TxMode,
+      )
+      .into(),
+    ])
   }
 }
 

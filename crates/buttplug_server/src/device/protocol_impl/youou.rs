@@ -8,8 +8,8 @@
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 
@@ -19,8 +19,8 @@ use crate::device::{
 };
 use async_trait::async_trait;
 use std::sync::{
-  atomic::{AtomicU8, Ordering},
   Arc,
+  atomic::{AtomicU8, Ordering},
 };
 use uuid::Uuid;
 
@@ -115,12 +115,8 @@ impl ProtocolHandler for Youou {
     let mut data2 = vec![crc, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
     data.append(&mut data2);
 
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      data,
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, data, false).into(),
+    ])
   }
 }

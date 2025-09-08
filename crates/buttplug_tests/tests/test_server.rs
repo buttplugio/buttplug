@@ -11,52 +11,52 @@ use util::test_server;
 pub use util::{
   create_test_dcm,
   test_device_manager::{
-    check_test_recv_value,
     TestDeviceCommunicationManagerBuilder,
     TestDeviceIdentifier,
+    check_test_recv_value,
   },
   test_server_with_comm_manager,
   test_server_with_device,
 };
 
 use buttplug_core::{
-    errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError},
-    message::{
-      OutputCmdV4,
-      OutputCommand,
-      OutputValue,
-      ButtplugClientMessageV4,
-      ButtplugMessageSpecVersion,
-      ButtplugServerMessageV4,
-      ErrorCode,
-      PingV0,
-      RequestServerInfoV4,
-      ServerInfoV4,
-      StartScanningV0,
-      BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-      BUTTPLUG_CURRENT_API_MINOR_VERSION,
-    },
-  };
-use buttplug_server::{
-    device::{
-      hardware::{HardwareCommand, HardwareWriteCmd},
-      ServerDeviceManagerBuilder,
-    },
-    message::{
-      checked_output_cmd::CheckedOutputCmdV4,
-      spec_enums::ButtplugCheckedClientMessageV4,
-      ButtplugClientMessageV3,
-      ButtplugClientMessageVariant,
-      ButtplugServerMessageV2,
-      ButtplugServerMessageV3,
-      ButtplugServerMessageVariant,
-      RequestServerInfoV1,
-      ServerInfoV2,
-    },
-    ButtplugServer,
-    ButtplugServerBuilder,
+  errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError},
+  message::{
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+    BUTTPLUG_CURRENT_API_MINOR_VERSION,
+    ButtplugClientMessageV4,
+    ButtplugMessageSpecVersion,
+    ButtplugServerMessageV4,
+    ErrorCode,
+    OutputCmdV4,
+    OutputCommand,
+    OutputValue,
+    PingV0,
+    RequestServerInfoV4,
+    ServerInfoV4,
+    StartScanningV0,
+  },
 };
-use futures::{pin_mut, Stream, StreamExt};
+use buttplug_server::{
+  ButtplugServer,
+  ButtplugServerBuilder,
+  device::{
+    ServerDeviceManagerBuilder,
+    hardware::{HardwareCommand, HardwareWriteCmd},
+  },
+  message::{
+    ButtplugClientMessageV3,
+    ButtplugClientMessageVariant,
+    ButtplugServerMessageV2,
+    ButtplugServerMessageV3,
+    ButtplugServerMessageVariant,
+    RequestServerInfoV1,
+    ServerInfoV2,
+    checked_output_cmd::CheckedOutputCmdV4,
+    spec_enums::ButtplugCheckedClientMessageV4,
+  },
+};
+use futures::{Stream, StreamExt, pin_mut};
 use std::time::Duration;
 use tokio::time::sleep;
 use uuid::Uuid;
@@ -356,21 +356,25 @@ async fn test_device_index_generation() {
 
   let recv = server.server_version_event_stream();
   pin_mut!(recv);
-  assert!(server
-    .parse_checked_message(
-      RequestServerInfoV4::new(
-        "Test Client",
-        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-        BUTTPLUG_CURRENT_API_MINOR_VERSION
+  assert!(
+    server
+      .parse_checked_message(
+        RequestServerInfoV4::new(
+          "Test Client",
+          BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+          BUTTPLUG_CURRENT_API_MINOR_VERSION
+        )
+        .into()
       )
-      .into()
-    )
-    .await
-    .is_ok());
-  assert!(server
-    .parse_checked_message(StartScanningV0::default().into())
-    .await
-    .is_ok());
+      .await
+      .is_ok()
+  );
+  assert!(
+    server
+      .parse_checked_message(StartScanningV0::default().into())
+      .await
+      .is_ok()
+  );
   // Check that we got an event back about a new device.
   let mut index = 0u32;
   while let Some(msg) = recv.next().await {
@@ -407,21 +411,25 @@ async fn test_server_scanning_finished() {
 
   let recv = server.server_version_event_stream();
   pin_mut!(recv);
-  assert!(server
-    .parse_checked_message(
-      RequestServerInfoV4::new(
-        "Test Client",
-        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-        BUTTPLUG_CURRENT_API_MINOR_VERSION
+  assert!(
+    server
+      .parse_checked_message(
+        RequestServerInfoV4::new(
+          "Test Client",
+          BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+          BUTTPLUG_CURRENT_API_MINOR_VERSION
+        )
+        .into()
       )
-      .into()
-    )
-    .await
-    .is_ok());
-  assert!(server
-    .parse_checked_message(StartScanningV0::default().into())
-    .await
-    .is_ok());
+      .await
+      .is_ok()
+  );
+  assert!(
+    server
+      .parse_checked_message(StartScanningV0::default().into())
+      .await
+      .is_ok()
+  );
   // Check that we got an event back about a new device.
   let mut count = 0u32;
   let mut finish_received = false;

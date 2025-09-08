@@ -7,7 +7,7 @@
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler, ProtocolKeepaliveStrategy},
+  protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -28,22 +28,24 @@ impl ProtocolHandler for SvakomSam2 {
     feature_id: uuid::Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      [
-        0x55,
-        0x03,
-        0x00,
-        0x00,
-        if speed == 0 { 0x00 } else { 0x05 },
-        speed as u8,
-        0x00,
-      ]
-      .to_vec(),
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        [
+          0x55,
+          0x03,
+          0x00,
+          0x00,
+          if speed == 0 { 0x00 } else { 0x05 },
+          speed as u8,
+          0x00,
+        ]
+        .to_vec(),
+        true,
+      )
+      .into(),
+    ])
   }
 
   fn handle_output_constrict_cmd(
@@ -52,21 +54,23 @@ impl ProtocolHandler for SvakomSam2 {
     feature_id: uuid::Uuid,
     level: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      [
-        0x55,
-        0x09,
-        0x00,
-        0x00,
-        if level == 0 { 0x00 } else { 0x01 },
-        level as u8,
-        0x00,
-      ]
-      .to_vec(),
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        [
+          0x55,
+          0x09,
+          0x00,
+          0x00,
+          if level == 0 { 0x00 } else { 0x01 },
+          level as u8,
+          0x00,
+        ]
+        .to_vec(),
+        true,
+      )
+      .into(),
+    ])
   }
 }

@@ -13,29 +13,32 @@ use buttplug_core::{
 };
 use buttplug_server_device_config::{
   Endpoint,
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use dashmap::DashMap;
 
+use super::hardware::HardwareWriteCmd;
 use crate::{
-  device::{hardware::{Hardware, HardwareCommand, HardwareReadCmd}, protocol_impl::get_default_protocol_map},
+  device::{
+    hardware::{Hardware, HardwareCommand, HardwareReadCmd},
+    protocol_impl::get_default_protocol_map,
+  },
   message::{
+    ButtplugServerDeviceMessage,
     checked_output_cmd::CheckedOutputCmdV4,
     spec_enums::ButtplugDeviceCommandMessageUnionV4,
-    ButtplugServerDeviceMessage,
   },
 };
 use async_trait::async_trait;
 use futures::{
-  future::{self, BoxFuture, FutureExt},
   StreamExt,
+  future::{self, BoxFuture, FutureExt},
 };
 use std::{collections::HashMap, sync::Arc};
 use std::{pin::Pin, time::Duration};
 use uuid::Uuid;
-use super::hardware::HardwareWriteCmd;
 
 /// Strategy for situations where hardware needs to get updates every so often in order to keep
 /// things alive. Currently this applies to iOS backgrounding with bluetooth devices, as well as
@@ -421,7 +424,7 @@ pub trait ProtocolHandler: Sync + Send {
         let battery_reading = InputReadingV4::new(
           device_index,
           feature_index,
-          buttplug_core::message::InputTypeData::Battery(InputData::new(battery_level as u8))
+          buttplug_core::message::InputTypeData::Battery(InputData::new(battery_level as u8)),
         );
         debug!("Got battery reading: {}", battery_level);
         Ok(battery_reading)
@@ -531,7 +534,7 @@ pub struct ProtocolManager {
 impl Default for ProtocolManager {
   fn default() -> Self {
     Self {
-      protocol_map: get_default_protocol_map()
+      protocol_map: get_default_protocol_map(),
     }
   }
 }
@@ -582,7 +585,6 @@ impl ProtocolManager {
     specializers
   }
 }
-
 
 /*
 #[cfg(test)]

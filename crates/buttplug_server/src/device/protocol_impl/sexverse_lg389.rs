@@ -7,11 +7,11 @@
 
 use std::sync::atomic::{AtomicU8, Ordering};
 
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -32,13 +32,15 @@ impl SexverseLG389 {
     let osc = self.osc_speed.load(Ordering::Relaxed);
     let range = if osc == 0 { 0 } else { 4u8 }; // Full range
     let anchor = if osc == 0 { 0 } else { 1u8 }; // Anchor to base
-    Ok(vec![HardwareWriteCmd::new(
-      &[SEXVERSE_PROTOCOL_UUID],
-      Endpoint::Tx,
-      vec![0xaa, 0x05, vibe, 0x14, anchor, 0x00, range, 0x00, osc, 0x00],
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[SEXVERSE_PROTOCOL_UUID],
+        Endpoint::Tx,
+        vec![0xaa, 0x05, vibe, 0x14, anchor, 0x00, range, 0x00, osc, 0x00],
+        true,
+      )
+      .into(),
+    ])
   }
 }
 

@@ -8,25 +8,25 @@
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareSubscribeCmd, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::sync::{
-  atomic::{AtomicU8, Ordering},
   Arc,
+  atomic::{AtomicU8, Ordering},
 };
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const LELO_F1S_PROTOCOL_UUID: Uuid = uuid!("4987f232-40f9-47a3-8d0c-e30b74e75310");
 generic_protocol_initializer_setup!(LeloF1s, "lelo-f1s");
@@ -81,12 +81,14 @@ impl ProtocolHandler for LeloF1s {
       .speeds
       .iter()
       .for_each(|v| cmd_vec.push(v.load(Ordering::Relaxed)));
-    Ok(vec![HardwareWriteCmd::new(
-      &[LELO_F1S_PROTOCOL_UUID],
-      Endpoint::Tx,
-      cmd_vec,
-      self.write_with_response,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[LELO_F1S_PROTOCOL_UUID],
+        Endpoint::Tx,
+        cmd_vec,
+        self.write_with_response,
+      )
+      .into(),
+    ])
   }
 }

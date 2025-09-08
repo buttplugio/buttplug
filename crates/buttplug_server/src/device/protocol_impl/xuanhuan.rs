@@ -8,10 +8,10 @@
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
@@ -21,18 +21,18 @@ use buttplug_core::{
 };
 use buttplug_server_device_config::{
   Endpoint,
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::{
   sync::{
-    atomic::{AtomicU8, Ordering},
     Arc,
+    atomic::{AtomicU8, Ordering},
   },
   time::Duration,
 };
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const XUANHUAN_PROTOCOL_ID: Uuid = uuid!("e9f9f8ab-4fd5-4573-a4ec-ab542568849b");
 generic_protocol_initializer_setup!(Xuanhuan, "xuanhuan");
@@ -100,12 +100,14 @@ impl ProtocolHandler for Xuanhuan {
     let speed = speed as u8;
     self.current_command.store(speed, Ordering::Relaxed);
 
-    Ok(vec![HardwareWriteCmd::new(
-      &[XUANHUAN_PROTOCOL_ID],
-      Endpoint::Tx,
-      vec![0x03, 0x02, 0x00, speed],
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[XUANHUAN_PROTOCOL_ID],
+        Endpoint::Tx,
+        vec![0x03, 0x02, 0x00, speed],
+        true,
+      )
+      .into(),
+    ])
   }
 }

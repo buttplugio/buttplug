@@ -17,34 +17,34 @@ use super::{
   client_event_loop::ButtplugClientRequest,
 };
 use buttplug_core::{
-    connector::ButtplugConnectorError,
-    errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    message::{ButtplugMessage, StopDeviceCmdV0},
-    util::stream::convert_broadcast_receiver_to_stream,
+  connector::ButtplugConnectorError,
+  errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+  message::{ButtplugMessage, StopDeviceCmdV0},
+  util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server::message::{
-    BatteryLevelCmdV2,
-    ButtplugClientMessageV2,
-    ButtplugDeviceMessageNameV2,
-    ButtplugServerMessageV2,
-    ClientDeviceMessageAttributesV2,
-    DeviceMessageInfoV2,
-    LinearCmdV1,
-    RotateCmdV1,
-    RotationSubcommandV1,
-    VectorSubcommandV1,
-    VibrateCmdV1,
-    VibrateSubcommandV1,
+  BatteryLevelCmdV2,
+  ButtplugClientMessageV2,
+  ButtplugDeviceMessageNameV2,
+  ButtplugServerMessageV2,
+  ClientDeviceMessageAttributesV2,
+  DeviceMessageInfoV2,
+  LinearCmdV1,
+  RotateCmdV1,
+  RotationSubcommandV1,
+  VectorSubcommandV1,
+  VibrateCmdV1,
+  VibrateSubcommandV1,
 };
-use futures::{future, Stream};
+use futures::{Stream, future};
 use getset::Getters;
 use log::*;
 use std::{
   collections::HashMap,
   fmt,
   sync::{
-    atomic::{AtomicBool, Ordering},
     Arc,
+    atomic::{AtomicBool, Ordering},
   },
 };
 use tokio::sync::broadcast;

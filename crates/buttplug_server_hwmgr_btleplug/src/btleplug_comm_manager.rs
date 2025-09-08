@@ -6,7 +6,7 @@
 // for full license information.
 
 use super::btleplug_adapter_task::{BtleplugAdapterCommand, BtleplugAdapterTask};
-use buttplug_core::{errors::ButtplugDeviceError, util::async_manager, ButtplugResultFuture};
+use buttplug_core::{ButtplugResultFuture, errors::ButtplugDeviceError, util::async_manager};
 use buttplug_server::device::hardware::communication::{
   HardwareCommunicationManager,
   HardwareCommunicationManagerBuilder,
@@ -14,10 +14,10 @@ use buttplug_server::device::hardware::communication::{
 };
 use futures::future::FutureExt;
 use std::sync::{
-  atomic::{AtomicBool, Ordering},
   Arc,
+  atomic::{AtomicBool, Ordering},
 };
-use tokio::sync::mpsc::{channel, Sender};
+use tokio::sync::mpsc::{Sender, channel};
 
 #[derive(Default, Clone)]
 pub struct BtlePlugCommunicationManagerBuilder {

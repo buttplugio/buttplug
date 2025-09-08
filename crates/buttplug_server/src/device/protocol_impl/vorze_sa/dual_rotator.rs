@@ -5,13 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 use super::VorzeDevice;
 
 use crate::device::{
-  protocol::ProtocolHandler,
   hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::ProtocolHandler,
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -45,12 +45,14 @@ impl ProtocolHandler for VorzeSADualRotator {
     let data_left = ((speed_left >= 0) as u8) << 7 | (speed_left.unsigned_abs());
     let speed_right = self.speeds[1].load(Ordering::Relaxed);
     let data_right = ((speed_right >= 0) as u8) << 7 | (speed_right.unsigned_abs());
-    Ok(vec![HardwareWriteCmd::new(
-      &[VORZE_UFO_PROTOCOL_UUID],
-      Endpoint::Tx,
-      vec![VorzeDevice::UfoTw as u8, data_left, data_right],
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[VORZE_UFO_PROTOCOL_UUID],
+        Endpoint::Tx,
+        vec![VorzeDevice::UfoTw as u8, data_left, data_right],
+        true,
+      )
+      .into(),
+    ])
   }
 }

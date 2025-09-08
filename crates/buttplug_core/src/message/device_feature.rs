@@ -8,10 +8,8 @@
 use crate::{message::InputCommandType, util::range_serialize::*};
 use derive_builder::Builder;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
-use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
-use std::{
-  collections::HashSet, hash::Hash, ops::RangeInclusive
-};
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeSeq};
+use std::{collections::HashSet, hash::Hash, ops::RangeInclusive};
 
 #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash, EnumIter)]
 pub enum OutputType {
@@ -72,7 +70,7 @@ pub enum InputType {
 #[derive(
   Clone, Debug, Default, Getters, MutGetters, CopyGetters, Setters, Serialize, Deserialize,
 )]
-#[serde(rename_all="PascalCase")]
+#[serde(rename_all = "PascalCase")]
 pub struct DeviceFeature {
   // Index of the feature on the device. This was originally implicit as the position in the feature
   // array. We now make it explicit even though it's still just array position, because implicit
@@ -127,7 +125,7 @@ pub trait DeviceFeatureOutputLimits {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Getters)]
-#[serde(rename_all="PascalCase")]
+#[serde(rename_all = "PascalCase")]
 pub struct DeviceFeatureOutputValueProperties {
   #[getset(get = "pub")]
   #[serde(serialize_with = "range_serialize")]
@@ -136,7 +134,9 @@ pub struct DeviceFeatureOutputValueProperties {
 
 impl DeviceFeatureOutputValueProperties {
   pub fn new(value: &RangeInclusive<i32>) -> Self {
-    DeviceFeatureOutputValueProperties { value: value.clone() }
+    DeviceFeatureOutputValueProperties {
+      value: value.clone(),
+    }
   }
 
   pub fn step_count(&self) -> u32 {
@@ -154,7 +154,7 @@ impl DeviceFeatureOutputLimits for DeviceFeatureOutputValueProperties {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Getters)]
-#[serde(rename_all="PascalCase")]
+#[serde(rename_all = "PascalCase")]
 pub struct DeviceFeatureOutputPositionWithDurationProperties {
   #[getset(get = "pub")]
   #[serde(serialize_with = "range_serialize")]
@@ -166,7 +166,10 @@ pub struct DeviceFeatureOutputPositionWithDurationProperties {
 
 impl DeviceFeatureOutputPositionWithDurationProperties {
   pub fn new(position: &RangeInclusive<i32>, duration: &RangeInclusive<i32>) -> Self {
-    DeviceFeatureOutputPositionWithDurationProperties { position: position.clone(), duration: duration.clone() }
+    DeviceFeatureOutputPositionWithDurationProperties {
+      position: position.clone(),
+      duration: duration.clone(),
+    }
   }
 
   pub fn step_count(&self) -> u32 {
@@ -186,27 +189,27 @@ impl DeviceFeatureOutputLimits for DeviceFeatureOutputPositionWithDurationProper
 #[derive(Clone, Debug, Getters, Setters, Default, Serialize, Deserialize, Builder)]
 #[builder(setter(strip_option), default)]
 #[getset(get = "pub")]
-#[serde(rename_all="PascalCase")]
+#[serde(rename_all = "PascalCase")]
 pub struct DeviceFeatureOutput {
-  #[serde(skip_serializing_if="Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   vibrate: Option<DeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if="Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   rotate: Option<DeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if="Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   rotate_with_direction: Option<DeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if="Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   oscillate: Option<DeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if="Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   constrict: Option<DeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if="Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   heater: Option<DeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if="Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   led: Option<DeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if="Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   position: Option<DeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if="Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   position_with_duration: Option<DeviceFeatureOutputPositionWithDurationProperties>,
-  #[serde(skip_serializing_if="Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   spray: Option<DeviceFeatureOutputValueProperties>,
 }
 
@@ -229,17 +232,47 @@ impl DeviceFeatureOutput {
 
   pub fn get(&self, output_type: OutputType) -> Option<&dyn DeviceFeatureOutputLimits> {
     match output_type {
-      OutputType::Constrict => self.constrict().as_ref().map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Heater => self.heater().as_ref().map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Led => self.led().as_ref().map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Oscillate => self.oscillate().as_ref().map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Position => self.position().as_ref().map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::PositionWithDuration => self.position_with_duration().as_ref().map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Rotate => self.rotate().as_ref().map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::RotateWithDirection => self.rotate_with_direction().as_ref().map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Spray => self.spray().as_ref().map(|x| x as &dyn DeviceFeatureOutputLimits),
+      OutputType::Constrict => self
+        .constrict()
+        .as_ref()
+        .map(|x| x as &dyn DeviceFeatureOutputLimits),
+      OutputType::Heater => self
+        .heater()
+        .as_ref()
+        .map(|x| x as &dyn DeviceFeatureOutputLimits),
+      OutputType::Led => self
+        .led()
+        .as_ref()
+        .map(|x| x as &dyn DeviceFeatureOutputLimits),
+      OutputType::Oscillate => self
+        .oscillate()
+        .as_ref()
+        .map(|x| x as &dyn DeviceFeatureOutputLimits),
+      OutputType::Position => self
+        .position()
+        .as_ref()
+        .map(|x| x as &dyn DeviceFeatureOutputLimits),
+      OutputType::PositionWithDuration => self
+        .position_with_duration()
+        .as_ref()
+        .map(|x| x as &dyn DeviceFeatureOutputLimits),
+      OutputType::Rotate => self
+        .rotate()
+        .as_ref()
+        .map(|x| x as &dyn DeviceFeatureOutputLimits),
+      OutputType::RotateWithDirection => self
+        .rotate_with_direction()
+        .as_ref()
+        .map(|x| x as &dyn DeviceFeatureOutputLimits),
+      OutputType::Spray => self
+        .spray()
+        .as_ref()
+        .map(|x| x as &dyn DeviceFeatureOutputLimits),
       OutputType::Unknown => None,
-      OutputType::Vibrate => self.vibrate().as_ref().map(|x| x as &dyn DeviceFeatureOutputLimits),
+      OutputType::Vibrate => self
+        .vibrate()
+        .as_ref()
+        .map(|x| x as &dyn DeviceFeatureOutputLimits),
     }
   }
 }
@@ -247,7 +280,7 @@ impl DeviceFeatureOutput {
 #[derive(
   Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize,
 )]
-#[serde(rename_all="PascalCase")]
+#[serde(rename_all = "PascalCase")]
 pub struct DeviceFeatureInputProperties {
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(serialize_with = "range_sequence_serialize")]
@@ -268,19 +301,18 @@ impl DeviceFeatureInputProperties {
   }
 }
 
-
 #[derive(Clone, Debug, Getters, Setters, Default, Serialize, Deserialize, Builder)]
 #[builder(setter(strip_option), default)]
 #[getset(get = "pub")]
-#[serde(rename_all="PascalCase")]
+#[serde(rename_all = "PascalCase")]
 pub struct DeviceFeatureInput {
-  #[serde(skip_serializing_if="Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   battery: Option<DeviceFeatureInputProperties>,
-  #[serde(skip_serializing_if="Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   rssi: Option<DeviceFeatureInputProperties>,
-  #[serde(skip_serializing_if="Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   pressure: Option<DeviceFeatureInputProperties>,
-  #[serde(skip_serializing_if="Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   button: Option<DeviceFeatureInputProperties>,
 }
 

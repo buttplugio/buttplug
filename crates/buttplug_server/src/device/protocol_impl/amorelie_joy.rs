@@ -12,16 +12,16 @@ use buttplug_server_device_config::{ServerDeviceDefinition, UserDeviceIdentifier
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
-use buttplug_server_device_config::ProtocolCommunicationSpecifier;
 use async_trait::async_trait;
+use buttplug_server_device_config::ProtocolCommunicationSpecifier;
 use std::sync::Arc;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const AMORELIE_JOY_PROTOCOL_UUID: Uuid = uuid!("0968017b-96f8-44ae-b113-39080dd7ed5f");
 
@@ -59,17 +59,19 @@ impl ProtocolHandler for AmorelieJoy {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      [
-        0x01,        // static header
-        0x01,        // pattern (1 = steady),
-        speed as u8, // speed 0-100
-      ]
-      .to_vec(),
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        [
+          0x01,        // static header
+          0x01,        // pattern (1 = steady),
+          speed as u8, // speed 0-100
+        ]
+        .to_vec(),
+        false,
+      )
+      .into(),
+    ])
   }
 }

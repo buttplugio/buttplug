@@ -6,22 +6,20 @@
 // for full license information.
 
 use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
-use buttplug_server_device_config::{Endpoint, ProtocolCommunicationSpecifier};
-use buttplug_server::device::{
-    hardware::{
-      Hardware,
-      HardwareCommand,
-      HardwareConnector,
-      HardwareEvent,
-      HardwareInternal,
-      HardwareReadCmd,
-      HardwareReading,
-      HardwareSpecializer,
-      HardwareSubscribeCmd,
-      HardwareUnsubscribeCmd,
-      HardwareWriteCmd,
-  },
+use buttplug_server::device::hardware::{
+  Hardware,
+  HardwareCommand,
+  HardwareConnector,
+  HardwareEvent,
+  HardwareInternal,
+  HardwareReadCmd,
+  HardwareReading,
+  HardwareSpecializer,
+  HardwareSubscribeCmd,
+  HardwareUnsubscribeCmd,
+  HardwareWriteCmd,
 };
+use buttplug_server_device_config::{Endpoint, ProtocolCommunicationSpecifier};
 
 use async_trait::async_trait;
 use dashmap::DashSet;
@@ -30,9 +28,10 @@ use serde::{Deserialize, Serialize};
 use std::{
   collections::{HashSet, VecDeque},
   fmt::{self, Debug},
-  sync::Arc, time::Duration,
+  sync::Arc,
+  time::Duration,
 };
-use tokio::sync::{broadcast, mpsc, Mutex};
+use tokio::sync::{Mutex, broadcast, mpsc};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TestHardwareNotification {
@@ -299,7 +298,10 @@ impl HardwareInternal for TestDevice {
     msg: &HardwareWriteCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     if !self.endpoints.contains(&msg.endpoint()) {
-      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint().to_string()))).boxed();
+      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(
+        msg.endpoint().to_string(),
+      )))
+      .boxed();
     }
     self.send_command(msg.clone().into())
   }
@@ -309,7 +311,10 @@ impl HardwareInternal for TestDevice {
     msg: &HardwareSubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     if !self.endpoints.contains(&msg.endpoint()) {
-      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint().to_string()))).boxed();
+      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(
+        msg.endpoint().to_string(),
+      )))
+      .boxed();
     }
     self.subscribed_endpoints.insert(msg.endpoint());
     self.send_command((*msg).into())
@@ -320,7 +325,10 @@ impl HardwareInternal for TestDevice {
     msg: &HardwareUnsubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     if !self.endpoints.contains(&msg.endpoint()) {
-      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint().to_string()))).boxed();
+      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(
+        msg.endpoint().to_string(),
+      )))
+      .boxed();
     }
     self.subscribed_endpoints.remove(&msg.endpoint());
     self.send_command((*msg).into())

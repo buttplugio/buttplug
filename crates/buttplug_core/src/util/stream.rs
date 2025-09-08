@@ -6,7 +6,7 @@
 // for full license information.
 
 use async_stream::stream;
-use futures::{pin_mut, Stream};
+use futures::{Stream, pin_mut};
 use tokio::sync::broadcast;
 
 pub fn convert_broadcast_receiver_to_stream<T>(

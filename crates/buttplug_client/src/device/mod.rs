@@ -1,7 +1,7 @@
+mod command;
 mod device;
 mod feature;
-mod command;
 
+pub use command::*;
 pub use device::*;
 pub use feature::*;
-pub use command::*;

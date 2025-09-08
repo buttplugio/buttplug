@@ -7,25 +7,25 @@
 
 use buttplug_core::{
   connector::{
+    ButtplugConnectorError,
+    ButtplugConnectorResultFuture,
     transport::{
       ButtplugConnectorTransport,
       ButtplugConnectorTransportSpecificError,
       ButtplugTransportIncomingMessage,
     },
-    ButtplugConnectorError,
-    ButtplugConnectorResultFuture,
   },
   message::serializer::ButtplugSerializedMessage,
   util::async_manager,
 };
-use futures::{future::BoxFuture, FutureExt, SinkExt, StreamExt};
+use futures::{FutureExt, SinkExt, StreamExt, future::BoxFuture};
 use std::{sync::Arc, time::Duration};
 use tokio::{
   net::{TcpListener, TcpStream},
   select,
   sync::{
-    mpsc::{Receiver, Sender},
     Notify,
+    mpsc::{Receiver, Sender},
   },
   time::sleep,
 };

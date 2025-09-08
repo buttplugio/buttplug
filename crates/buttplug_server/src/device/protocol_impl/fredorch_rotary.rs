@@ -8,10 +8,10 @@
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
@@ -21,20 +21,20 @@ use buttplug_core::{
 };
 use buttplug_server_device_config::{
   Endpoint,
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use futures::FutureExt;
 use std::{
   sync::{
-    atomic::{AtomicU8, Ordering},
     Arc,
+    atomic::{AtomicU8, Ordering},
   },
   time::Duration,
 };
 use tokio::select;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const FREDORCH_COMMAND_TIMEOUT_MS: u64 = 100;
 const FREDORCH_ROTORY_PROTOCOL_UUID: Uuid = uuid!("0ec6598a-bfd1-4f47-9738-e8cd8ace6473");
@@ -216,13 +216,15 @@ impl ProtocolHandler for FredorchRotary {
     self.target_speed.store(speed, Ordering::Relaxed);
     if speed == 0 {
       self.current_speed.store(speed, Ordering::Relaxed);
-      Ok(vec![HardwareWriteCmd::new(
-        &[FREDORCH_ROTORY_PROTOCOL_UUID],
-        Endpoint::Tx,
-        vec![0x55, 0x03, 0x24, 0x27, 0xaa],
-        false,
-      )
-      .into()])
+      Ok(vec![
+        HardwareWriteCmd::new(
+          &[FREDORCH_ROTORY_PROTOCOL_UUID],
+          Endpoint::Tx,
+          vec![0x55, 0x03, 0x24, 0x27, 0xaa],
+          false,
+        )
+        .into(),
+      ])
     } else {
       Ok(vec![])
     }

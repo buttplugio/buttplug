@@ -4,7 +4,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::UserDeviceIdentifier;
 
-use super::{get_internal_config_version, device::ConfigUserDeviceDefinition, protocol::ProtocolDefinition, ConfigVersion, ConfigVersionGetter};
+use super::{
+  ConfigVersion,
+  ConfigVersionGetter,
+  device::ConfigUserDeviceDefinition,
+  get_internal_config_version,
+  protocol::ProtocolDefinition,
+};
 
 #[derive(Deserialize, Serialize, Debug, Clone, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]

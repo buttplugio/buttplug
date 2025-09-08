@@ -9,25 +9,25 @@ use super::fleshlight_launch_helper::calculate_speed;
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::sync::{
-  atomic::{AtomicU8, Ordering},
   Arc,
+  atomic::{AtomicU8, Ordering},
 };
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const KIIROO_V2_PROTOCOL_UUID: Uuid = uuid!("05ab9d57-5e65-47b2-add4-5bad3e8663e5");
 generic_protocol_initializer_setup!(KiirooV2, "kiiroo-v2");
@@ -73,12 +73,14 @@ impl ProtocolHandler for KiirooV2 {
     let position = position as u8;
     let calculated_speed = (calculate_speed(distance, duration) * 99f64) as u8;
     self.previous_position.store(position, Ordering::Relaxed);
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      [position, calculated_speed].to_vec(),
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        [position, calculated_speed].to_vec(),
+        false,
+      )
+      .into(),
+    ])
   }
 }

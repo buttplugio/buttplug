@@ -6,20 +6,20 @@
 // for full license information.
 
 use async_trait::async_trait;
-use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::Arc;
-use uuid::{uuid, Uuid};
+use std::sync::atomic::{AtomicU8, Ordering};
+use uuid::{Uuid, uuid};
 
 use futures_util::future::BoxFuture;
-use futures_util::{future, FutureExt};
+use futures_util::{FutureExt, future};
 
-use buttplug_core::message::{InputData, InputReadingV4, InputType, InputTypeData};
 use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_core::message::{InputData, InputReadingV4, InputType, InputTypeData};
 use buttplug_server_device_config::Endpoint;
 
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 
@@ -33,10 +33,10 @@ use crate::device::{
     HardwareWriteCmd,
   },
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 
@@ -158,13 +158,9 @@ impl ProtocolHandler for Galaku {
         0,
         0,
       ];
-      Ok(vec![HardwareWriteCmd::new(
-        &[GALAKU_PROTOCOL_UUID],
-        Endpoint::Tx,
-        data,
-        false,
-      )
-      .into()])
+      Ok(vec![
+        HardwareWriteCmd::new(&[GALAKU_PROTOCOL_UUID], Endpoint::Tx, data, false).into(),
+      ])
     } else {
       self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
       let data: Vec<u32> = vec![
@@ -179,13 +175,15 @@ impl ProtocolHandler for Galaku {
         0,
         0,
       ];
-      Ok(vec![HardwareWriteCmd::new(
-        &[GALAKU_PROTOCOL_UUID],
-        Endpoint::Tx,
-        send_bytes(data),
-        false,
-      )
-      .into()])
+      Ok(vec![
+        HardwareWriteCmd::new(
+          &[GALAKU_PROTOCOL_UUID],
+          Endpoint::Tx,
+          send_bytes(data),
+          false,
+        )
+        .into(),
+      ])
     }
   }
 
@@ -277,7 +275,7 @@ impl ProtocolHandler for Galaku {
             let battery_reading = InputReadingV4::new(
               device_index,
               feature_index,
-              InputTypeData::Battery(InputData::new(data[0]))
+              InputTypeData::Battery(InputData::new(data[0])),
             );
             Ok(battery_reading)
           }

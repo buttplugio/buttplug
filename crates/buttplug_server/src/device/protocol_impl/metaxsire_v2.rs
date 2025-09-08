@@ -9,18 +9,18 @@ use crate::device::hardware::Hardware;
 use crate::device::protocol::ProtocolInitializer;
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier},
+  protocol::{ProtocolHandler, ProtocolIdentifier, generic_protocol_initializer_setup},
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::sync::Arc;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const METAXSIRE_V2_PROTOCOL_ID: Uuid = uuid!("28b934b4-ca45-4e14-85e7-4c1524b2b4c1");
 generic_protocol_initializer_setup!(MetaXSireV2, "metaxsire-v2");
@@ -57,20 +57,22 @@ impl MetaXSireV2 {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![
-        0xaa,
-        0x03,
-        0x01,
-        (feature_index + 1) as u8,
-        0x64,
-        speed as u8,
-      ],
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![
+          0xaa,
+          0x03,
+          0x01,
+          (feature_index + 1) as u8,
+          0x64,
+          speed as u8,
+        ],
+        true,
+      )
+      .into(),
+    ])
   }
 }
 

@@ -6,27 +6,29 @@
 // for full license information.
 
 use std::sync::{
-  atomic::{AtomicU8, Ordering},
   Arc,
+  atomic::{AtomicU8, Ordering},
 };
 
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
-use buttplug_core::{
-  errors::ButtplugDeviceError,
-  message::OutputType,
+use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
+use buttplug_server_device_config::{
+  Endpoint,
+  ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
+  UserDeviceIdentifier,
 };
-use buttplug_server_device_config::{Endpoint, ServerDeviceDefinition, UserDeviceIdentifier, ProtocolCommunicationSpecifier};
 
 generic_protocol_initializer_setup!(WeVibe8Bit, "wevibe-8bit");
 
@@ -96,12 +98,8 @@ impl ProtocolHandler for WeVibe8Bit {
         0x00,
       ]
     };
-    Ok(vec![HardwareWriteCmd::new(
-      &[WEVIBE8BIT_PROTOCOL_UUID],
-      Endpoint::Tx,
-      data,
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[WEVIBE8BIT_PROTOCOL_UUID], Endpoint::Tx, data, true).into(),
+    ])
   }
 }

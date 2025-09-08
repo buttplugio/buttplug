@@ -17,12 +17,18 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, CopyGetters)]
 #[getset(get_copy = "pub")]
-pub struct InputData<T> where T: Copy + Clone {
+pub struct InputData<T>
+where
+  T: Copy + Clone,
+{
   #[serde(rename = "Data")]
   data: T,
 }
 
-impl<T> InputData<T> where T: Copy + Clone {
+impl<T> InputData<T>
+where
+  T: Copy + Clone,
+{
   pub fn new(data: T) -> Self {
     Self { data }
   }
@@ -33,7 +39,7 @@ pub enum InputTypeData {
   Battery(InputData<u8>),
   Rssi(InputData<i8>),
   Button(InputData<u8>),
-  Pressure(InputData<u32>)
+  Pressure(InputData<u32>),
 }
 
 impl InputTypeData {
@@ -76,11 +82,7 @@ pub struct InputReadingV4 {
 }
 
 impl InputReadingV4 {
-  pub fn new(
-    device_index: u32,
-    feature_index: u32,
-    data: InputTypeData
-  ) -> Self {
+  pub fn new(device_index: u32, feature_index: u32, data: InputTypeData) -> Self {
     Self {
       id: 0,
       device_index,

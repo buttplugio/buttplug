@@ -8,34 +8,25 @@
 use super::fleshlight_launch_helper::calculate_speed;
 use crate::{
   device::{
-    hardware::{
-      Hardware,
-      HardwareCommand,
-      HardwareReadCmd,
-      HardwareWriteCmd,
-    },
-    protocol::{generic_protocol_setup, ProtocolHandler},
+    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
+    protocol::{ProtocolHandler, generic_protocol_setup},
   },
   message::ButtplugServerDeviceMessage,
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
   message::{InputData, InputReadingV4, InputTypeData},
-  util::{stream::convert_broadcast_receiver_to_stream},
+  util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server_device_config::Endpoint;
 use dashmap::DashSet;
-use futures::{
-  future::BoxFuture,
-  FutureExt,
-  StreamExt,
-};
+use futures::{FutureExt, StreamExt, future::BoxFuture};
 use std::{
   default::Default,
   pin::Pin,
   sync::{
-    atomic::{AtomicU8, Ordering::Relaxed},
     Arc,
+    atomic::{AtomicU8, Ordering::Relaxed},
   },
 };
 use tokio::sync::broadcast;
@@ -68,13 +59,9 @@ impl ProtocolHandler for KiirooV21 {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![0x01, speed as u8],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, vec![0x01, speed as u8], false).into(),
+    ])
   }
 
   fn handle_position_with_duration_cmd(
@@ -91,13 +78,15 @@ impl ProtocolHandler for KiirooV21 {
     let position = position as u8;
     let speed = (calculate_speed(distance, duration) * 99f64) as u8;
     self.previous_position.store(position, Relaxed);
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      [0x03, 0x00, speed, position].to_vec(),
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        [0x03, 0x00, speed, position].to_vec(),
+        false,
+      )
+      .into(),
+    ])
   }
 
   fn handle_battery_level_cmd(
@@ -125,7 +114,7 @@ impl ProtocolHandler for KiirooV21 {
       let battery_reading = InputReadingV4::new(
         device_index,
         feature_index,
-        InputTypeData::Battery(InputData::new(battery_level))
+        InputTypeData::Battery(InputData::new(battery_level)),
       );
       debug!("Got battery reading: {}", battery_level);
       Ok(battery_reading)

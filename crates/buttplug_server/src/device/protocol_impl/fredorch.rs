@@ -8,30 +8,30 @@
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::{errors::ButtplugDeviceError, util::sleep};
 use buttplug_server_device_config::{
   Endpoint,
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use futures::FutureExt;
 use std::{
   sync::{
-    atomic::{AtomicU8, Ordering},
     Arc,
+    atomic::{AtomicU8, Ordering},
   },
   time::Duration,
 };
 use tokio::select;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 use super::fleshlight_launch_helper::calculate_speed;
 
@@ -217,12 +217,8 @@ impl ProtocolHandler for Fredorch {
     data.push(crc[0]);
     data.push(crc[1]);
     self.previous_position.store(position, Ordering::Relaxed);
-    Ok(vec![HardwareWriteCmd::new(
-      &[FREDORCH_PROTOCOL_UUID],
-      Endpoint::Tx,
-      data,
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[FREDORCH_PROTOCOL_UUID], Endpoint::Tx, data, false).into(),
+    ])
   }
 }

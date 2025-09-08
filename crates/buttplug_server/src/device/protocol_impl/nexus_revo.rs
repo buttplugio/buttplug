@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -26,13 +26,15 @@ impl ProtocolHandler for NexusRevo {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![0xaa, 0x01, 0x01, 0x00, 0x01, speed as u8],
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![0xaa, 0x01, 0x01, 0x00, 0x01, speed as u8],
+        true,
+      )
+      .into(),
+    ])
   }
 
   fn handle_rotation_with_direction_cmd(
@@ -42,19 +44,21 @@ impl ProtocolHandler for NexusRevo {
     speed: u32,
     clockwise: bool,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![
-        0xaa,
-        0x01,
-        0x02,
-        0x00,
-        speed as u8 + if speed != 0 && clockwise { 2 } else { 0 },
-        0x00,
-      ],
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![
+          0xaa,
+          0x01,
+          0x02,
+          0x00,
+          speed as u8 + if speed != 0 && clockwise { 2 } else { 0 },
+          0x00,
+        ],
+        true,
+      )
+      .into(),
+    ])
   }
 }

@@ -8,10 +8,10 @@
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use aes::Aes128;
@@ -19,20 +19,20 @@ use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use ecb::cipher::block_padding::Pkcs7;
 use ecb::cipher::{BlockDecryptMut, BlockEncryptMut, KeyInit};
 use std::sync::{
-  atomic::{AtomicU8, Ordering},
   Arc,
+  atomic::{AtomicU8, Ordering},
 };
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
+use rand::{Rng, thread_rng};
 use regex::Regex;
 use sha2::{Digest, Sha256};
 
@@ -156,16 +156,18 @@ impl ProtocolHandler for VibCrafter {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
 
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      encrypt(format!(
-        "MtInt:{:02}{:02};",
-        self.speeds[0].load(Ordering::Relaxed),
-        self.speeds[1].load(Ordering::Relaxed)
-      )),
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        encrypt(format!(
+          "MtInt:{:02}{:02};",
+          self.speeds[0].load(Ordering::Relaxed),
+          self.speeds[1].load(Ordering::Relaxed)
+        )),
+        false,
+      )
+      .into(),
+    ])
   }
 }

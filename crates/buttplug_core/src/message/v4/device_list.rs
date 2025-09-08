@@ -29,8 +29,14 @@ pub struct DeviceListV4 {
 
 impl DeviceListV4 {
   pub fn new(devices: Vec<DeviceMessageInfoV4>) -> Self {
-    let device_map = devices.iter().map(|x| (x.device_index(), x.clone())).collect();
-    Self { id: 1, devices: device_map }
+    let device_map = devices
+      .iter()
+      .map(|x| (x.device_index(), x.clone()))
+      .collect();
+    Self {
+      id: 1,
+      devices: device_map,
+    }
   }
 }
 

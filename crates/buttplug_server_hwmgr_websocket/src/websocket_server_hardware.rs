@@ -23,16 +23,16 @@ use buttplug_server::device::hardware::{
 };
 use buttplug_server_device_config::{Endpoint, ProtocolCommunicationSpecifier, WebsocketSpecifier};
 use futures::{
-  future::{self, BoxFuture},
   FutureExt,
   SinkExt,
   StreamExt,
+  future::{self, BoxFuture},
 };
 use std::{
   fmt::{self, Debug},
   sync::{
-    atomic::{AtomicBool, Ordering},
     Arc,
+    atomic::{AtomicBool, Ordering},
   },
   time::Duration,
 };
@@ -40,9 +40,9 @@ use tokio::{
   net::TcpStream,
   select,
   sync::{
-    broadcast,
-    mpsc::{channel, Receiver, Sender},
     Mutex,
+    broadcast,
+    mpsc::{Receiver, Sender, channel},
   },
   time::sleep,
 };

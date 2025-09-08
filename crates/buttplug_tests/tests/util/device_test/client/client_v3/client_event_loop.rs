@@ -8,28 +8,28 @@
 //! Implementation of internal Buttplug Client event loop.
 
 use super::{
+  ButtplugClientEvent,
   client::{ButtplugClientMessageFuturePair, ButtplugClientMessageSender},
   client_message_sorter::ClientMessageSorter,
   device::{ButtplugClientDevice, ButtplugClientDeviceEvent},
-  ButtplugClientEvent,
 };
 use buttplug_core::{
-    connector::{ButtplugConnector, ButtplugConnectorStateShared},
-    errors::{ButtplugDeviceError, ButtplugError},
-    message::{ButtplugDeviceMessage, ButtplugMessageValidator},
-  };
+  connector::{ButtplugConnector, ButtplugConnectorStateShared},
+  errors::{ButtplugDeviceError, ButtplugError},
+  message::{ButtplugDeviceMessage, ButtplugMessageValidator},
+};
 use buttplug_server::message::{
-    ButtplugClientMessageV3,
-    ButtplugServerMessageV3,
-    DeviceListV3,
-    DeviceMessageInfoV3,
+  ButtplugClientMessageV3,
+  ButtplugServerMessageV3,
+  DeviceListV3,
+  DeviceMessageInfoV3,
 };
 use dashmap::DashMap;
 use futures::FutureExt;
 use log::*;
 use std::sync::{
-  atomic::{AtomicBool, Ordering},
   Arc,
+  atomic::{AtomicBool, Ordering},
 };
 use tokio::{
   select,

@@ -8,11 +8,11 @@
 //! Implementation of internal Buttplug Client event loop.
 
 use super::{
-  client_message_sorter::ClientMessageSorter,
-  device::{ButtplugClientDevice, ButtplugClientDeviceEvent},
   ButtplugClientEvent,
   ButtplugClientMessageFuturePair,
   ButtplugClientMessageSender,
+  client_message_sorter::ClientMessageSorter,
+  device::{ButtplugClientDevice, ButtplugClientDeviceEvent},
 };
 use buttplug_core::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
@@ -29,8 +29,8 @@ use buttplug_core::{
 use dashmap::DashMap;
 use log::*;
 use std::sync::{
-  atomic::{AtomicBool, Ordering},
   Arc,
+  atomic::{AtomicBool, Ordering},
 };
 use tokio::{
   select,
@@ -151,10 +151,7 @@ where
       // If it doesn't, insert it.
       None => {
         debug!("Device does not exist, creating new entry.");
-        let device = ButtplugClientDevice::new_from_device_info(
-          info,
-          &self.from_client_sender,
-        );
+        let device = ButtplugClientDevice::new_from_device_info(info, &self.from_client_sender);
         self.device_map.insert(info.device_index(), device.clone());
         device
       }
@@ -226,7 +223,12 @@ where
           self.send_client_event(ButtplugClientEvent::DeviceAdded(device));
         }
         let new_indexes: Vec<u32> = list.devices().iter().map(|x| x.1.device_index()).collect();
-        let disconnected_indexes: Vec<u32> = self.device_map.iter().filter(|x| !new_indexes.contains(x.key())).map(|x| *x.key()).collect();
+        let disconnected_indexes: Vec<u32> = self
+          .device_map
+          .iter()
+          .filter(|x| !new_indexes.contains(x.key()))
+          .map(|x| *x.key())
+          .collect();
         for index in disconnected_indexes {
           trace!("Device removed, updating map and sending to client");
           self.disconnect_device(index);

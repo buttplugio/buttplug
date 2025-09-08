@@ -5,32 +5,32 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{
-  errors::ButtplugDeviceError,
-  message::OutputType,
-};
+use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
 use buttplug_server_device_config::{
-  ServerDeviceDefinition, Endpoint, ProtocolCommunicationSpecifier, UserDeviceIdentifier
+  Endpoint,
+  ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
+  UserDeviceIdentifier,
 };
 
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use std::{
   collections::HashMap,
   sync::{
-    atomic::{AtomicU8, Ordering},
     Arc,
+    atomic::{AtomicU8, Ordering},
   },
 };
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 generic_protocol_initializer_setup!(SenseeV2, "sensee-v2");
 
@@ -150,13 +150,15 @@ impl SenseeV2 {
     data_add(1, &self.thrust_map);
     data_add(2, &self.suck_map);
 
-    Ok(vec![HardwareWriteCmd::new(
-      &[SENSEE_V2_PROTOCOL_UUID],
-      Endpoint::Tx,
-      make_cmd(self.device_type, 0xf1, data),
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[SENSEE_V2_PROTOCOL_UUID],
+        Endpoint::Tx,
+        make_cmd(self.device_type, 0xf1, data),
+        false,
+      )
+      .into(),
+    ])
   }
 }
 

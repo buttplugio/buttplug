@@ -8,10 +8,7 @@
 use super::{form_lovense_command, form_vibrate_command};
 use crate::device::{
   hardware::{Hardware, HardwareCommand},
-  protocol::{
-    ProtocolHandler,
-    ProtocolKeepaliveStrategy,
-  },
+  protocol::{ProtocolHandler, ProtocolKeepaliveStrategy},
 };
 use buttplug_core::{errors::ButtplugDeviceError, message::InputReadingV4};
 use futures::future::BoxFuture;

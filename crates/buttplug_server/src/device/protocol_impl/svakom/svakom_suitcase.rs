@@ -11,9 +11,8 @@ use uuid::Uuid;
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
-
 
 generic_protocol_setup!(SvakomSuitcase, "svakom-suitcase");
 
@@ -25,11 +24,11 @@ impl ProtocolHandler for SvakomSuitcase {
   // implementation made no sense in terms of knowing which command addressed which index. Putting
   // in a best effort here and we'll see if anyone complains.
   fn handle_output_vibrate_cmd(
-      &self,
-      _feature_index: u32,
-      feature_id: Uuid,
-      speed: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    _feature_index: u32,
+    feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let scalar = speed;
     let mut speed = (scalar % 10) as u8;
     let mut intensity = if scalar == 0 {
@@ -42,11 +41,14 @@ impl ProtocolHandler for SvakomSuitcase {
       speed = 10;
       intensity -= 1;
     }
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      [0x55, 0x03, 0x00, 0x00, intensity, speed].to_vec(),
-      false,
-    ).into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        [0x55, 0x03, 0x00, 0x00, intensity, speed].to_vec(),
+        false,
+      )
+      .into(),
+    ])
   }
 }

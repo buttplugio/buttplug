@@ -9,7 +9,7 @@ use crate::device::hardware::HardwareConnector;
 use async_trait::async_trait;
 use buttplug_core::{
   util::{async_manager, sleep},
-  {errors::ButtplugDeviceError, ButtplugResultFuture},
+  {ButtplugResultFuture, errors::ButtplugDeviceError},
 };
 use futures::future::{self, FutureExt};
 use serde::{Deserialize, Serialize};

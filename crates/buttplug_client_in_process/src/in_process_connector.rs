@@ -14,21 +14,21 @@ use buttplug_core::{
   util::async_manager,
 };
 use buttplug_server::{
-  message::ButtplugServerMessageVariant,
   ButtplugServer,
   ButtplugServerBuilder,
+  message::ButtplugServerMessageVariant,
 };
 
 use futures::{
-  future::{self, BoxFuture, FutureExt},
   StreamExt,
+  future::{self, BoxFuture, FutureExt},
 };
 use futures_util::pin_mut;
 use std::sync::{
-  atomic::{AtomicBool, Ordering},
   Arc,
+  atomic::{AtomicBool, Ordering},
 };
-use tokio::sync::mpsc::{channel, Sender};
+use tokio::sync::mpsc::{Sender, channel};
 use tracing_futures::Instrument;
 
 #[derive(Default)]

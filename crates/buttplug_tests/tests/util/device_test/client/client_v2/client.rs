@@ -9,37 +9,41 @@
 
 use super::client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
 use super::device::ButtplugClientDevice;
-use buttplug_server::message::{RequestServerInfoV1, ButtplugClientMessageV2, ButtplugServerMessageV2};
 use buttplug_core::{
-    connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
-    errors::{ButtplugError, ButtplugHandshakeError},
-    message::{
-      ButtplugMessageSpecVersion,
-      PingV0,
-      RequestDeviceListV0,
-      StartScanningV0,
-      StopAllDevicesV0,
-      StopScanningV0,
-    },
+  connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
+  errors::{ButtplugError, ButtplugHandshakeError},
+  message::{
+    ButtplugMessageSpecVersion,
+    PingV0,
+    RequestDeviceListV0,
+    StartScanningV0,
+    StopAllDevicesV0,
+    StopScanningV0,
+  },
   util::{
     async_manager,
     future::{ButtplugFuture, ButtplugFutureStateShared},
     stream::convert_broadcast_receiver_to_stream,
   },
 };
+use buttplug_server::message::{
+  ButtplugClientMessageV2,
+  ButtplugServerMessageV2,
+  RequestServerInfoV1,
+};
 use dashmap::DashMap;
 use futures::{
-  future::{self, BoxFuture},
   Stream,
+  future::{self, BoxFuture},
 };
 use log::*;
 use std::sync::{
-  atomic::{AtomicBool, Ordering},
   Arc,
+  atomic::{AtomicBool, Ordering},
 };
 use thiserror::Error;
-use tokio::sync::{broadcast, mpsc, Mutex};
-use tracing::{span, Level, Span};
+use tokio::sync::{Mutex, broadcast, mpsc};
+use tracing::{Level, Span, span};
 use tracing_futures::Instrument;
 
 /// Result type used for public APIs.

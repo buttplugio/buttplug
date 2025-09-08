@@ -9,36 +9,36 @@
 
 use buttplug_core::{
   connector::{
+    ButtplugConnectorError,
+    ButtplugConnectorResultFuture,
     transport::{
       ButtplugConnectorTransport,
       ButtplugConnectorTransportSpecificError,
       ButtplugTransportIncomingMessage,
     },
-    ButtplugConnectorError,
-    ButtplugConnectorResultFuture,
   },
   message::serializer::ButtplugSerializedMessage,
   util::async_manager,
 };
-use futures::{future::BoxFuture, FutureExt, SinkExt, StreamExt};
+use futures::{FutureExt, SinkExt, StreamExt, future::BoxFuture};
 use rustls::{
-  client::danger::{HandshakeSignatureValid, ServerCertVerified, ServerCertVerifier},
   ClientConfig,
   SignatureScheme,
+  client::danger::{HandshakeSignatureValid, ServerCertVerified, ServerCertVerifier},
 };
 use std::sync::Arc;
 use tokio::{
   select,
   sync::{
-    mpsc::{Receiver, Sender},
     Notify,
+    mpsc::{Receiver, Sender},
   },
 };
 use tokio_tungstenite::{
+  Connector,
   connect_async,
   connect_async_tls_with_config,
   tungstenite::protocol::Message,
-  Connector,
 };
 use tracing::Instrument;
 use url::Url;

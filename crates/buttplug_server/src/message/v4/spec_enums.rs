@@ -1,15 +1,15 @@
 use std::{collections::HashMap, fmt::Debug};
 
 use crate::message::{
+  ButtplugClientMessageVariant,
+  RequestServerInfoV1,
+  ServerDeviceAttributes,
+  TryFromDeviceAttributes,
   server_device_attributes::TryFromClientMessage,
   v0::ButtplugClientMessageV0,
   v1::ButtplugClientMessageV1,
   v2::ButtplugClientMessageV2,
   v3::ButtplugClientMessageV3,
-  ButtplugClientMessageVariant,
-  RequestServerInfoV1,
-  ServerDeviceAttributes,
-  TryFromDeviceAttributes,
 };
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},

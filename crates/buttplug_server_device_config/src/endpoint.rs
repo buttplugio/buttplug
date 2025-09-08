@@ -1,9 +1,9 @@
 use serde::{
-  de::{self, Visitor},
   Deserialize,
   Deserializer,
   Serialize,
   Serializer,
+  de::{self, Visitor},
 };
 use std::{
   fmt::{self, Debug},

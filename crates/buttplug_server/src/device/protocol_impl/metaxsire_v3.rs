@@ -7,7 +7,7 @@
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler, ProtocolKeepaliveStrategy},
+  protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -28,13 +28,15 @@ impl MetaXSireV3 {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![0xa1, 0x04, speed as u8, feature_index as u8 + 1],
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![0xa1, 0x04, speed as u8, feature_index as u8 + 1],
+        true,
+      )
+      .into(),
+    ])
   }
 }
 

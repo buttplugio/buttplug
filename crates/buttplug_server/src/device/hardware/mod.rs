@@ -3,13 +3,13 @@ use std::{collections::HashSet, fmt::Debug, sync::Arc, time::Duration};
 
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
-use buttplug_server_device_config::{ProtocolCommunicationSpecifier, Endpoint};
+use buttplug_server_device_config::{Endpoint, ProtocolCommunicationSpecifier};
 use futures::future::BoxFuture;
 use futures_util::FutureExt;
 use getset::{CopyGetters, Getters};
 use instant::Instant;
 use serde::{Deserialize, Serialize};
-use tokio::sync::{broadcast, RwLock};
+use tokio::sync::{RwLock, broadcast};
 use uuid::Uuid;
 
 /// Parameters for reading data from a [Hardware](crate::device::Hardware) endpoint

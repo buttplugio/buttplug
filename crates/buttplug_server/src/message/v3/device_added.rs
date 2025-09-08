@@ -12,7 +12,13 @@ use crate::message::{
 };
 use buttplug_core::{
   errors::ButtplugMessageError,
-  message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, DeviceFeature, DeviceMessageInfoV4},
+  message::{
+    ButtplugMessage,
+    ButtplugMessageFinalizer,
+    ButtplugMessageValidator,
+    DeviceFeature,
+    DeviceMessageInfoV4,
+  },
 };
 
 use getset::{CopyGetters, Getters};
@@ -22,9 +28,7 @@ use serde::{Deserialize, Serialize};
 use super::{ClientDeviceMessageAttributesV3, DeviceMessageInfoV3};
 
 /// Notification that a device has been found and connected to the server.
-#[derive(
-  ButtplugMessage, Clone, Debug, Getters, CopyGetters, Serialize, Deserialize,
-)]
+#[derive(ButtplugMessage, Clone, Debug, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct DeviceAddedV3 {
   #[serde(rename = "Id")]
   id: u32,
@@ -119,7 +123,7 @@ impl From<DeviceMessageInfoV4> for DeviceAddedV3 {
       value.device_name(),
       value.device_display_name(),
       value.device_message_timing_gap(),
-      &feature_vec.into()
+      &feature_vec.into(),
     );
     da3.set_id(0);
     da3

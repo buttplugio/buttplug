@@ -13,7 +13,6 @@ use btleplug::{
 };
 use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
 use buttplug_server::device::hardware::{
-  communication::HardwareSpecificError,
   Hardware,
   HardwareConnector,
   HardwareEvent,
@@ -24,13 +23,18 @@ use buttplug_server::device::hardware::{
   HardwareSubscribeCmd,
   HardwareUnsubscribeCmd,
   HardwareWriteCmd,
+  communication::HardwareSpecificError,
 };
-use buttplug_server_device_config::{BluetoothLESpecifier, ProtocolCommunicationSpecifier, Endpoint};
+use buttplug_server_device_config::{
+  BluetoothLESpecifier,
+  Endpoint,
+  ProtocolCommunicationSpecifier,
+};
 use dashmap::DashSet;
 use futures::{
-  future::{self, BoxFuture, FutureExt},
   Stream,
   StreamExt,
+  future::{self, BoxFuture, FutureExt},
 };
 use std::{
   collections::HashMap,
@@ -335,7 +339,10 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let characteristic = match self.endpoints.get(&msg.endpoint()) {
       Some(chr) => chr.clone(),
       None => {
-        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint().to_string()))).boxed();
+        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(
+          msg.endpoint().to_string(),
+        )))
+        .boxed();
       }
     };
 
@@ -355,13 +362,17 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
       if write_type == WriteType::WithoutResponse
         && (characteristic.properties & CharPropFlags::WRITE) == CharPropFlags::WRITE
       {
-        warn!("BTLEPlug device doesn't support write-without-response! Falling back to write-with-response!");
+        warn!(
+          "BTLEPlug device doesn't support write-without-response! Falling back to write-with-response!"
+        );
         write_type = WriteType::WithResponse
       } else if write_type == WriteType::WithResponse
         && (characteristic.properties & CharPropFlags::WRITE_WITHOUT_RESPONSE)
           == CharPropFlags::WRITE_WITHOUT_RESPONSE
       {
-        warn!("BTLEPlug device doesn't support write-with-response! Falling back to write-without-response!");
+        warn!(
+          "BTLEPlug device doesn't support write-with-response! Falling back to write-without-response!"
+        );
         write_type = WriteType::WithoutResponse
       } else {
         error!(
@@ -381,9 +392,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
         Ok(()) => {
           trace!(
             "Sent write: {:?}, {:?} to {:?}",
-            data,
-            write_type,
-            characteristic
+            data, write_type, characteristic
           );
           Ok(())
         }
@@ -408,7 +417,10 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let characteristic = match self.endpoints.get(&msg.endpoint()) {
       Some(chr) => chr.clone(),
       None => {
-        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint().to_string()))).boxed();
+        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(
+          msg.endpoint().to_string(),
+        )))
+        .boxed();
       }
     };
     let device = self.device.clone();
@@ -446,7 +458,10 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let characteristic = match self.endpoints.get(&endpoint) {
       Some(chr) => chr.clone(),
       None => {
-        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint().to_string()))).boxed();
+        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(
+          msg.endpoint().to_string(),
+        )))
+        .boxed();
       }
     };
     let endpoints = self.subscribed_endpoints.clone();
@@ -479,7 +494,10 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let characteristic = match self.endpoints.get(&msg.endpoint()) {
       Some(chr) => chr.clone(),
       None => {
-        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint().to_string()))).boxed();
+        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(
+          msg.endpoint().to_string(),
+        )))
+        .boxed();
       }
     };
     let endpoints = self.subscribed_endpoints.clone();

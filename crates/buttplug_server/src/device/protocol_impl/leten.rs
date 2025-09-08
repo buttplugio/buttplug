@@ -8,23 +8,24 @@
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
-    ProtocolInitializer, ProtocolKeepaliveStrategy,
+    ProtocolInitializer,
+    ProtocolKeepaliveStrategy,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::sync::Arc;
 use std::time::Duration;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const LETEN_PROTOCOL_UUID: Uuid = uuid!("7d899f44-2676-4a00-9c68-0c800055ee2a");
 
@@ -73,12 +74,8 @@ impl ProtocolHandler for Leten {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![0x02, speed as u8],
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, vec![0x02, speed as u8], true).into(),
+    ])
   }
 }

@@ -10,28 +10,33 @@
 use crate::device::{ClientDeviceCommandValue, ClientDeviceOutputCommand};
 
 use crate::{
-  device::ClientDeviceFeature,
-  create_boxed_future_client_error,
   ButtplugClientMessageSender,
   ButtplugClientResultFuture,
+  create_boxed_future_client_error,
+  device::ClientDeviceFeature,
 };
 use buttplug_core::message::InputType;
 use buttplug_core::{
   errors::ButtplugDeviceError,
   message::{
-    ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4, OutputType, StopDeviceCmdV0
+    ButtplugServerMessageV4,
+    DeviceFeature,
+    DeviceMessageInfoV4,
+    OutputType,
+    StopDeviceCmdV0,
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
-use futures::{future, FutureExt, Stream};
+use futures::{FutureExt, Stream, future};
 use getset::{CopyGetters, Getters};
 use log::*;
 use std::collections::BTreeMap;
 use std::{
-  fmt, sync::{
-    atomic::{AtomicBool, Ordering},
+  fmt,
+  sync::{
     Arc,
-  }
+    atomic::{AtomicBool, Ordering},
+  },
 };
 use tokio::sync::broadcast;
 
@@ -120,7 +125,10 @@ impl ButtplugClientDevice {
       name: name.to_owned(),
       display_name: display_name.clone(),
       index,
-      device_features: device_features.iter().map(|(i, x)| (*i, ClientDeviceFeature::new(index, *i, &x, message_sender))).collect(),
+      device_features: device_features
+        .iter()
+        .map(|(i, x)| (*i, ClientDeviceFeature::new(index, *i, &x, message_sender)))
+        .collect(),
       event_loop_sender: message_sender.clone(),
       internal_event_sender: event_sender,
       device_connected,
@@ -156,11 +164,9 @@ impl ButtplugClientDevice {
       .device_features
       .iter()
       .filter(|x| {
-        if let Some(output) = x.1
-          .feature()
-          .output() {
+        if let Some(output) = x.1.feature().output() {
           output.contains(actuator_type)
-        } else { 
+        } else {
           false
         }
       })
@@ -169,20 +175,21 @@ impl ButtplugClientDevice {
       .collect()
   }
 
-  fn set_client_value(&self, client_device_command: &ClientDeviceOutputCommand) -> ButtplugClientResultFuture {
+  fn set_client_value(
+    &self,
+    client_device_command: &ClientDeviceOutputCommand,
+  ) -> ButtplugClientResultFuture {
     let features = self.filter_device_actuators(client_device_command.into());
     if features.is_empty() {
       // TODO err
     }
-    let mut fut_vec: Vec<ButtplugClientResultFuture> = vec!();
+    let mut fut_vec: Vec<ButtplugClientResultFuture> = vec![];
     for x in features {
       let val = x.convert_client_cmd_to_output_cmd(client_device_command);
       match val {
-        Ok(v) => fut_vec.push(self.event_loop_sender.send_message_expect_ok(
-          v.into(),
-        )),
-        Err(e) => return future::ready(Err(e)).boxed()
-     }
+        Ok(v) => fut_vec.push(self.event_loop_sender.send_message_expect_ok(v.into())),
+        Err(e) => return future::ready(Err(e)).boxed(),
+      }
     }
     async move {
       futures::future::try_join_all(fut_vec).await?;
@@ -191,7 +198,10 @@ impl ButtplugClientDevice {
     .boxed()
   }
 
-  pub fn send_command(&self, client_device_command: &ClientDeviceOutputCommand) -> ButtplugClientResultFuture {
+  pub fn send_command(
+    &self,
+    client_device_command: &ClientDeviceOutputCommand,
+  ) -> ButtplugClientResultFuture {
     self.set_client_value(client_device_command)
   }
 
@@ -204,23 +214,28 @@ impl ButtplugClientDevice {
     let val = level.into();
     self.set_client_value(&match val {
       ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Vibrate(v),
-      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::VibrateFloat(f)
+      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::VibrateFloat(f),
     })
   }
 
   pub fn has_battery_level(&self) -> bool {
-    self
-      .device_features
-      .iter()
-      .any(|x| x.1.feature().input().as_ref().is_some_and(|x| x.contains(InputType::Battery)))
+    self.device_features.iter().any(|x| {
+      x.1
+        .feature()
+        .input()
+        .as_ref()
+        .is_some_and(|x| x.contains(InputType::Battery))
+    })
   }
 
   pub fn battery_level(&self) -> ButtplugClientResultFuture<u32> {
-    if let Some(battery) = self
-      .device_features
-      .iter()
-      .find(|x| x.1.feature().input().as_ref().is_some_and(|x| x.contains(InputType::Battery)))
-    {
+    if let Some(battery) = self.device_features.iter().find(|x| {
+      x.1
+        .feature()
+        .input()
+        .as_ref()
+        .is_some_and(|x| x.contains(InputType::Battery))
+    }) {
       battery.1.battery_level()
     } else {
       create_boxed_future_client_error(
@@ -233,18 +248,23 @@ impl ButtplugClientDevice {
   }
 
   pub fn has_rssi_level(&self) -> bool {
-    self
-      .device_features
-      .iter()
-      .any(|x| x.1.feature().input().as_ref().is_some_and(|x| x.contains(InputType::Rssi)))
+    self.device_features.iter().any(|x| {
+      x.1
+        .feature()
+        .input()
+        .as_ref()
+        .is_some_and(|x| x.contains(InputType::Rssi))
+    })
   }
 
   pub fn rssi_level(&self) -> ButtplugClientResultFuture<i8> {
-    if let Some(rssi) = self
-      .device_features
-      .iter()
-      .find(|x| x.1.feature().input().as_ref().is_some_and(|x| x.contains(InputType::Rssi)))
-    {
+    if let Some(rssi) = self.device_features.iter().find(|x| {
+      x.1
+        .feature()
+        .input()
+        .as_ref()
+        .is_some_and(|x| x.contains(InputType::Rssi))
+    }) {
       rssi.1.rssi_level()
     } else {
       create_boxed_future_client_error(

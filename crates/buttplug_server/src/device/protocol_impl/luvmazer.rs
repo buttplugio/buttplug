@@ -9,11 +9,10 @@ use uuid::Uuid;
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{ProtocolHandler, generic_protocol_setup}
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
-
 
 generic_protocol_setup!(Luvmazer, "luvmazer");
 
@@ -27,13 +26,15 @@ impl ProtocolHandler for Luvmazer {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![0xa0, 0x01, 0x00, 0x00, 0x64, speed as u8],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![0xa0, 0x01, 0x00, 0x00, 0x64, speed as u8],
+        false,
+      )
+      .into(),
+    ])
   }
 
   fn handle_output_rotate_cmd(
@@ -42,12 +43,14 @@ impl ProtocolHandler for Luvmazer {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![0xa0, 0x0f, 0x00, 0x00, 0x64, speed as u8],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![0xa0, 0x0f, 0x00, 0x00, 0x64, speed as u8],
+        false,
+      )
+      .into(),
+    ])
   }
 }

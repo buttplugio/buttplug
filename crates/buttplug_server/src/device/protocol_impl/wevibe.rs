@@ -8,24 +8,24 @@
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
-use buttplug_core::message::OutputType;
 use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_core::message::OutputType;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
-use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::Arc;
-use uuid::{uuid, Uuid};
+use std::sync::atomic::{AtomicU8, Ordering};
+use uuid::{Uuid, uuid};
 
 const WEVIBE_PROTOCOL_UUID: Uuid = uuid!("3658e33d-086d-401e-9dce-8e9e88ff791f");
 generic_protocol_initializer_setup!(WeVibe, "wevibe");
@@ -109,12 +109,8 @@ impl ProtocolHandler for WeVibe {
         0x00,
       ]
     };
-    Ok(vec![HardwareWriteCmd::new(
-      &[WEVIBE_PROTOCOL_UUID],
-      Endpoint::Tx,
-      data,
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[WEVIBE_PROTOCOL_UUID], Endpoint::Tx, data, true).into(),
+    ])
   }
 }

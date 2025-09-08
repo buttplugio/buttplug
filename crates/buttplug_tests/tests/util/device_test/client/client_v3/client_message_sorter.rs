@@ -18,8 +18,8 @@ use buttplug_server::message::ButtplugServerMessageV3;
 use dashmap::DashMap;
 use log::*;
 use std::sync::{
-  atomic::{AtomicU32, Ordering},
   Arc,
+  atomic::{AtomicU32, Ordering},
 };
 
 /// Message sorting and pairing for remote client connectors.

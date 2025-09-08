@@ -1,14 +1,20 @@
-
 use buttplug_core::errors::ButtplugDeviceError;
 use dashmap::DashMap;
 use getset::Getters;
-use uuid::Uuid;
 use std::{
   collections::HashMap,
   fmt::{self, Debug},
 };
+use uuid::Uuid;
 
-use crate::{BaseDeviceIdentifier, ButtplugDeviceConfigError, ProtocolCommunicationSpecifier, ServerDeviceDefinition, ServerDeviceDefinitionBuilder, UserDeviceIdentifier};
+use crate::{
+  BaseDeviceIdentifier,
+  ButtplugDeviceConfigError,
+  ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
+  ServerDeviceDefinitionBuilder,
+  UserDeviceIdentifier,
+};
 
 #[derive(Default, Clone)]
 pub struct DeviceConfigurationManagerBuilder {
@@ -67,10 +73,9 @@ impl DeviceConfigurationManagerBuilder {
       .find(|(_, x)| x.id() == device_definition.base_id().unwrap_or_default())
       .is_some()
     {
-      self.user_device_definitions.insert(
-        identifier.clone(),
-        device_definition.clone()
-      );
+      self
+        .user_device_definitions
+        .insert(identifier.clone(), device_definition.clone());
       Ok(self)
     } else {
       error!(
@@ -78,9 +83,10 @@ impl DeviceConfigurationManagerBuilder {
         device_definition.base_id(),
         device_definition.id()
       );
-      Err(ButtplugDeviceConfigError::BaseIdNotFound(device_definition.id()))
+      Err(ButtplugDeviceConfigError::BaseIdNotFound(
+        device_definition.id(),
+      ))
     }
-    
   }
 
   pub fn finish(&mut self) -> Result<DeviceConfigurationManager, ButtplugDeviceError> {
@@ -247,7 +253,10 @@ impl DeviceConfigurationManager {
     index
   }
 
-  pub fn device_definition(&self, identifier: &UserDeviceIdentifier) -> Option<ServerDeviceDefinition> {
+  pub fn device_definition(
+    &self,
+    identifier: &UserDeviceIdentifier,
+  ) -> Option<ServerDeviceDefinition> {
     let features = if let Some(definition) = self.user_device_definitions.get(identifier) {
       debug!("User device config found for {:?}", identifier);
       definition.clone()
@@ -265,7 +274,10 @@ impl DeviceConfigurationManager {
       .base_device_definitions
       .get(&BaseDeviceIdentifier::new(identifier.protocol(), &None))
     {
-      debug!("Protocol device config found for {:?}, creating new user device from protocol defaults", identifier);
+      debug!(
+        "Protocol device config found for {:?}, creating new user device from protocol defaults",
+        identifier
+      );
       let mut builder = ServerDeviceDefinitionBuilder::from_base(definition, Uuid::new_v4());
       builder.index(self.device_index(identifier)).finish()
     } else {
@@ -285,5 +297,4 @@ impl DeviceConfigurationManager {
 
     Some(features)
   }
-
 }

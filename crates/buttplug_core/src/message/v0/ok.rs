@@ -54,7 +54,7 @@ mod test {
     let js = serde_json::to_string(&ok).expect("Infallible serialization");
     assert_eq!(OK_STR, js);
   }
-/*
+  /*
   #[test]
   fn test_ok_deserialize() {
     let union: ButtplugServerMessageCurrent =

@@ -12,8 +12,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Deserializer, Value};
 use std::fmt::Debug;
 
-static MESSAGE_JSON_SCHEMA: &str =
-  include_str!("../../../schema/buttplug-schema.json");
+static MESSAGE_JSON_SCHEMA: &str = include_str!("../../../schema/buttplug-schema.json");
 
 /// Creates a [jsonschema::JSONSchema] validator using the built in buttplug message schema.
 pub fn create_message_validator() -> Validator {
@@ -74,14 +73,14 @@ where
           Err(e) => {
             return Err(ButtplugSerializerError::JsonSerializerError(format!(
               "Message: {msg_str} - Error: {e:?}"
-            )))
+            )));
           }
         }
       }
       Err(e) => {
         return Err(ButtplugSerializerError::JsonSerializerError(format!(
           "Message: {msg_str} - Error: {e:?}"
-        )))
+        )));
       }
     }
   }

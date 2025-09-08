@@ -2,22 +2,22 @@ use buttplug_core::{
   errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
   message::{
     self,
+    ButtplugClientMessageV4,
+    ButtplugMessageFinalizer,
+    ButtplugMessageSpecVersion,
+    ButtplugServerMessageCurrent,
+    ButtplugServerMessageV4,
     serializer::{
+      ButtplugMessageSerializer,
+      ButtplugSerializedMessage,
+      ButtplugSerializerError,
       json_serializer::{
         create_message_validator,
         deserialize_to_message,
         msg_to_protocol_json,
         vec_to_protocol_json,
       },
-      ButtplugMessageSerializer,
-      ButtplugSerializedMessage,
-      ButtplugSerializerError,
     },
-    ButtplugClientMessageV4,
-    ButtplugMessageFinalizer,
-    ButtplugMessageSpecVersion,
-    ButtplugServerMessageCurrent,
-    ButtplugServerMessageV4,
   },
 };
 use jsonschema::Validator;

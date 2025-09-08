@@ -68,13 +68,13 @@ impl TryFromDeviceAttributes<InputCmdV4> for CheckedInputCmdV4 {
     if let Some(feature) = features.features().get(msg.feature_index() as usize) {
       if let Some(sensor_map) = feature.input() {
         if sensor_map.contains(msg.input_type()) {
-            Ok(CheckedInputCmdV4::new(
-              msg.device_index(),
-              msg.feature_index(),
-              msg.input_type(),
-              msg.input_command(),
-              feature.id(),
-            ))
+          Ok(CheckedInputCmdV4::new(
+            msg.device_index(),
+            msg.feature_index(),
+            msg.input_type(),
+            msg.input_command(),
+            feature.id(),
+          ))
         } else {
           Err(ButtplugError::from(
             ButtplugDeviceError::DeviceNoSensorError("InputCmd".to_string()),

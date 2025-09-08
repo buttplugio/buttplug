@@ -8,7 +8,7 @@
 use crate::{
   device::{
     hardware::{Hardware, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+    protocol::{ProtocolHandler, generic_protocol_setup},
   },
   message::ButtplugServerDeviceMessage,
 };
@@ -20,9 +20,9 @@ use buttplug_core::{
 use buttplug_server_device_config::Endpoint;
 use dashmap::DashSet;
 use futures::{
-  future::{self, BoxFuture},
   FutureExt,
   StreamExt,
+  future::{self, BoxFuture},
 };
 use std::{pin::Pin, sync::Arc};
 use tokio::sync::broadcast;
@@ -104,7 +104,7 @@ impl ProtocolHandler for KGoalBoost {
                       InputReadingV4::new(
                         device_index,
                         feature_index,
-                        buttplug_core::message::InputTypeData::Pressure(InputData::new(normalized))
+                        buttplug_core::message::InputTypeData::Pressure(InputData::new(normalized)),
                       )
                       .into(),
                     )
@@ -121,7 +121,9 @@ impl ProtocolHandler for KGoalBoost {
                       InputReadingV4::new(
                         device_index,
                         feature_index,
-                        buttplug_core::message::InputTypeData::Pressure(InputData::new(unnormalized))
+                        buttplug_core::message::InputTypeData::Pressure(InputData::new(
+                          unnormalized,
+                        )),
                       )
                       .into(),
                     )

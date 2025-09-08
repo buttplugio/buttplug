@@ -8,22 +8,22 @@
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareSubscribeCmd, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::sync::Arc;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const LIONESS_PROTOCOL_UUID: Uuid = uuid!("1912c626-f611-4569-9d62-fb40ff8e1474");
 generic_protocol_initializer_setup!(Lioness, "lioness");
@@ -73,12 +73,14 @@ impl ProtocolHandler for Lioness {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![0x02, 0xAA, 0xBB, 0xCC, 0xCC, speed as u8],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![0x02, 0xAA, 0xBB, 0xCC, 0xCC, speed as u8],
+        false,
+      )
+      .into(),
+    ])
   }
 }

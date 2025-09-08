@@ -8,7 +8,7 @@
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 
-use crate::message::{v0::DeviceMessageInfoV0, ButtplugDeviceMessageNameV0};
+use crate::message::{ButtplugDeviceMessageNameV0, v0::DeviceMessageInfoV0};
 
 use super::{ClientDeviceMessageAttributesV1, DeviceAddedV1};
 

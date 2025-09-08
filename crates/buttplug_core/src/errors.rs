@@ -9,11 +9,11 @@
 
 use super::message::{
   self,
-  serializer::ButtplugSerializerError,
   ButtplugMessageSpecVersion,
   ErrorCode,
   InputType,
   OutputType,
+  serializer::ButtplugSerializerError,
 };
 use futures::future::BoxFuture;
 use serde::{Deserialize, Serialize};

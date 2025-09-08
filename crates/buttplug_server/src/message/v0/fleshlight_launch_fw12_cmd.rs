@@ -81,11 +81,15 @@ mod test {
   pub fn test_legacy_fleshlight_message_bounds() {
     assert!(FleshlightLaunchFW12CmdV0::new(0, 0, 0).is_valid().is_ok());
     assert!(FleshlightLaunchFW12CmdV0::new(0, 99, 99).is_valid().is_ok());
-    assert!(FleshlightLaunchFW12CmdV0::new(0, 100, 99)
-      .is_valid()
-      .is_err());
-    assert!(FleshlightLaunchFW12CmdV0::new(0, 99, 100)
-      .is_valid()
-      .is_err());
+    assert!(
+      FleshlightLaunchFW12CmdV0::new(0, 100, 99)
+        .is_valid()
+        .is_err()
+    );
+    assert!(
+      FleshlightLaunchFW12CmdV0::new(0, 99, 100)
+        .is_valid()
+        .is_err()
+    );
   }
 }

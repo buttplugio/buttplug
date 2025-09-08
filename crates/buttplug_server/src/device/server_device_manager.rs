@@ -9,10 +9,12 @@
 //! specific) Managers
 
 use crate::{
+  ButtplugServerError,
+  ButtplugServerResultFuture,
   device::{
+    ServerDevice,
     hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerBuilder},
     server_device_manager_event_loop::ServerDeviceManagerEventLoop,
-    ServerDevice,
   },
   message::{
     server_device_attributes::ServerDeviceAttributes,
@@ -22,8 +24,6 @@ use crate::{
       ButtplugDeviceManagerMessageUnion,
     },
   },
-  ButtplugServerError,
-  ButtplugServerResultFuture,
 };
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
@@ -33,16 +33,16 @@ use buttplug_core::{
 use buttplug_server_device_config::{DeviceConfigurationManager, UserDeviceIdentifier};
 use dashmap::DashMap;
 use futures::{
-  future::{self, FutureExt},
   Stream,
+  future::{self, FutureExt},
 };
 use getset::Getters;
 use std::{
   collections::HashMap,
   convert::TryFrom,
   sync::{
-    atomic::{AtomicBool, Ordering},
     Arc,
+    atomic::{AtomicBool, Ordering},
   },
 };
 use tokio::sync::{broadcast, mpsc};
@@ -131,7 +131,10 @@ impl ServerDeviceManagerBuilder {
       }
     }
     if colliding_dcms.len() > 1 {
-      warn!("The following device connection methods may collide: {}. This may mean you have lovense dongles and bluetooth dongles connected at the same time. Please disconnect the lovense dongles or turn off the Lovense HID/Serial Dongle support in Intiface/Buttplug. Lovense devices will work with the Bluetooth dongle.", colliding_dcms.join(", "));
+      warn!(
+        "The following device connection methods may collide: {}. This may mean you have lovense dongles and bluetooth dongles connected at the same time. Please disconnect the lovense dongles or turn off the Lovense HID/Serial Dongle support in Intiface/Buttplug. Lovense devices will work with the Bluetooth dongle.",
+        colliding_dcms.join(", ")
+      );
     }
 
     let devices = Arc::new(DashMap::new());
@@ -294,11 +297,7 @@ impl ServerDeviceManager {
   pub fn device_info(&self, index: u32) -> Option<ServerDeviceInfo> {
     self.devices.get(&index).map(|device| ServerDeviceInfo {
       identifier: device.value().identifier().clone(),
-      display_name: device
-        .value()
-        .definition()
-        .display_name()
-        .clone(),
+      display_name: device.value().definition().display_name().clone(),
     })
   }
 

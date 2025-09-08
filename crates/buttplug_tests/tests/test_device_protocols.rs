@@ -500,7 +500,6 @@ async fn test_device_protocols_json_v3(test_file: &str) {
   util::device_test::client::client_v3::run_json_test_case(&load_test_case(test_file).await).await;
 }
 
-
 /*
 //#[test_case("test_cowgirl_cone_protocol.yaml" ; "The Cowgirl Cone Protocol")]
 #[test_case("test_activejoy_protocol.yaml" ; "ActiveJoy Protocol")]

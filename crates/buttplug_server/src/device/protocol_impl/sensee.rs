@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -26,24 +26,26 @@ impl ProtocolHandler for Sensee {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![
-        0x55,
-        0xaa,
-        0xf0,
-        0x01,
-        0x01,
-        0x0b,
-        0x65,
-        0xf7,
-        0x01,
-        0x01,
-        speed as u8,
-      ],
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![
+          0x55,
+          0xaa,
+          0xf0,
+          0x01,
+          0x01,
+          0x0b,
+          0x65,
+          0xf7,
+          0x01,
+          0x01,
+          speed as u8,
+        ],
+        false,
+      )
+      .into(),
+    ])
   }
 }

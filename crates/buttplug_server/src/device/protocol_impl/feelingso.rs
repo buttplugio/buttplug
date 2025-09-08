@@ -7,11 +7,11 @@
 
 use std::sync::atomic::{AtomicU8, Ordering};
 
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -34,21 +34,23 @@ impl Default for FeelingSo {
 
 impl FeelingSo {
   fn hardware_command(&self) -> Vec<HardwareCommand> {
-    vec![HardwareWriteCmd::new(
-      &[FEELINGSO_PROTOCOL_UUID],
-      Endpoint::Tx,
-      vec![
-        0xaa,
-        0x40,
-        0x03,
-        self.speeds[0].load(Ordering::Relaxed),
-        self.speeds[1].load(Ordering::Relaxed),
-        0x14, // Oscillate range: 1 to 4
-        0x19, // Checksum?
-      ],
-      false,
-    )
-    .into()]
+    vec![
+      HardwareWriteCmd::new(
+        &[FEELINGSO_PROTOCOL_UUID],
+        Endpoint::Tx,
+        vec![
+          0xaa,
+          0x40,
+          0x03,
+          self.speeds[0].load(Ordering::Relaxed),
+          self.speeds[1].load(Ordering::Relaxed),
+          0x14, // Oscillate range: 1 to 4
+          0x19, // Checksum?
+        ],
+        false,
+      )
+      .into(),
+    ]
   }
 }
 

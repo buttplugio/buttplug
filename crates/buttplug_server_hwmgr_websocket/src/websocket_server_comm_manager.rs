@@ -6,7 +6,7 @@
 // for full license information.
 
 use super::websocket_server_hardware::WebsocketServerHardwareConnector;
-use buttplug_core::{util::async_manager, ButtplugResultFuture};
+use buttplug_core::{ButtplugResultFuture, util::async_manager};
 use buttplug_server::device::hardware::communication::{
   HardwareCommunicationManager,
   HardwareCommunicationManagerBuilder,

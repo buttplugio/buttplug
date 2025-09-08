@@ -6,9 +6,9 @@
 // for full license information.
 
 use crate::message::{
-  checked_input_cmd::CheckedInputCmdV4,
   ServerDeviceAttributes,
   TryFromDeviceAttributes,
+  checked_input_cmd::CheckedInputCmdV4,
 };
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
@@ -77,10 +77,11 @@ impl TryFromDeviceAttributes<SensorReadCmdV3> for CheckedInputCmdV4 {
       Err(ButtplugError::from(
         ButtplugDeviceError::MessageNotSupported("SensorReadCmdV3".to_owned()),
       ))
-    } else if let Some((feature_index, feature)) =
-      features.features().iter().enumerate().find(|(_, p)| {
-        p.input().as_ref().map_or(false, |x| x.battery().is_some())
-      })
+    } else if let Some((feature_index, feature)) = features
+      .features()
+      .iter()
+      .enumerate()
+      .find(|(_, p)| p.input().as_ref().map_or(false, |x| x.battery().is_some()))
     {
       Ok(CheckedInputCmdV4::new(
         msg.device_index(),

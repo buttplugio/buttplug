@@ -14,15 +14,15 @@ pub use delay_device_communication_manager::DelayDeviceCommunicationManagerBuild
 pub mod channel_transport;
 use buttplug_client::ButtplugClient;
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
-use buttplug_server_device_config::{load_protocol_configs, DeviceConfigurationManager};
 use buttplug_server::{
-    device::{
-      hardware::communication::HardwareCommunicationManagerBuilder,
-      ServerDeviceManagerBuilder,
-    },
-    ButtplugServer,
-    ButtplugServerBuilder,
+  ButtplugServer,
+  ButtplugServerBuilder,
+  device::{
+    ServerDeviceManagerBuilder,
+    hardware::communication::HardwareCommunicationManagerBuilder,
+  },
 };
+use buttplug_server_device_config::{DeviceConfigurationManager, load_protocol_configs};
 pub use test_device_manager::{
   TestDeviceChannelHost,
   TestDeviceCommunicationManagerBuilder,
@@ -158,27 +158,17 @@ where
 }
 
 #[allow(dead_code)]
-pub fn test_server_with_device(
-  device_type: &str,
-) -> (ButtplugServer, TestDeviceChannelHost) {
+pub fn test_server_with_device(device_type: &str) -> (ButtplugServer, TestDeviceChannelHost) {
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
   let device = builder.add_test_device(&TestDeviceIdentifier::new(device_type, None));
 
-  (
-    test_server_with_comm_manager(builder),
-    device,
-  )
+  (test_server_with_comm_manager(builder), device)
 }
 
 #[allow(dead_code)]
-pub fn test_server_v4_with_device(
-  device_type: &str,
-) -> (ButtplugServer, TestDeviceChannelHost) {
+pub fn test_server_v4_with_device(device_type: &str) -> (ButtplugServer, TestDeviceChannelHost) {
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
   let device = builder.add_test_device(&TestDeviceIdentifier::new(device_type, None));
 
-  (
-    test_server_with_comm_manager(builder),
-    device,
-  )
+  (test_server_with_comm_manager(builder), device)
 }

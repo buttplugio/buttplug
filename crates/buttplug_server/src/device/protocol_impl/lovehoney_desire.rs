@@ -6,25 +6,29 @@
 // for full license information.
 
 use std::sync::{
-  atomic::{AtomicU8, Ordering},
   Arc,
+  atomic::{AtomicU8, Ordering},
 };
 
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
-use buttplug_server_device_config::{ServerDeviceDefinition, ProtocolCommunicationSpecifier, UserDeviceIdentifier};
+use buttplug_server_device_config::{
+  ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
+  UserDeviceIdentifier,
+};
 const LOVEHONEY_DESIRE_PROTOCOL_UUID: Uuid = uuid!("5dcd8487-4814-44cb-a768-13bf81d545c0");
 const LOVEHONEY_DESIRE_VIBE2_PROTOCOL_UUID: Uuid = uuid!("d44a99fe-903b-4fff-bee7-1141767c9cca");
 
@@ -79,28 +83,32 @@ impl ProtocolHandler for LovehoneyDesire {
     // We'll need to check what we got back and write our
     // commands accordingly.
     if self.current_commands.len() == 1 {
-      Ok(vec![HardwareWriteCmd::new(
-        &[LOVEHONEY_DESIRE_PROTOCOL_UUID],
-        Endpoint::Tx,
-        vec![0xF3, 0, speed as u8],
-        true,
-      )
-      .into()])
+      Ok(vec![
+        HardwareWriteCmd::new(
+          &[LOVEHONEY_DESIRE_PROTOCOL_UUID],
+          Endpoint::Tx,
+          vec![0xF3, 0, speed as u8],
+          true,
+        )
+        .into(),
+      ])
     } else {
       self.current_commands[feature_index as usize].store(speed as u8, Ordering::Relaxed);
       let speed0 = self.current_commands[0].load(Ordering::Relaxed);
       let speed1 = self.current_commands[1].load(Ordering::Relaxed);
       if speed0 == speed1 {
-        Ok(vec![HardwareWriteCmd::new(
-          &[
-            LOVEHONEY_DESIRE_PROTOCOL_UUID,
-            LOVEHONEY_DESIRE_VIBE2_PROTOCOL_UUID,
-          ],
-          Endpoint::Tx,
-          vec![0xF3, 0, speed0 as u8],
-          true,
-        )
-        .into()])
+        Ok(vec![
+          HardwareWriteCmd::new(
+            &[
+              LOVEHONEY_DESIRE_PROTOCOL_UUID,
+              LOVEHONEY_DESIRE_VIBE2_PROTOCOL_UUID,
+            ],
+            Endpoint::Tx,
+            vec![0xF3, 0, speed0 as u8],
+            true,
+          )
+          .into(),
+        ])
       } else {
         Ok(vec![
           HardwareWriteCmd::new(

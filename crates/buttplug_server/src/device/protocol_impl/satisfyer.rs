@@ -13,18 +13,18 @@ use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
 use std::{
   sync::{
-    atomic::{AtomicU8, Ordering},
     Arc,
+    atomic::{AtomicU8, Ordering},
   },
   time::Duration,
 };
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 const SATISFYER_PROTOCOL_UUID: Uuid = uuid!("79a0ed0d-f392-4c48-967e-f4467438c344");
 
@@ -169,12 +169,8 @@ impl ProtocolHandler for Satisfyer {
     self.last_command[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     let data = form_command(self.feature_count, self.last_command.clone());
 
-    Ok(vec![HardwareWriteCmd::new(
-      &[SATISFYER_PROTOCOL_UUID],
-      Endpoint::Tx,
-      data,
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[SATISFYER_PROTOCOL_UUID], Endpoint::Tx, data, false).into(),
+    ])
   }
 }

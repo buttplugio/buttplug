@@ -6,25 +6,25 @@
 // for full license information.
 
 use std::sync::{
-  atomic::{AtomicU8, Ordering},
   Arc,
+  atomic::{AtomicU8, Ordering},
 };
 
 use async_trait::async_trait;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
-use buttplug_server_device_config::ServerDeviceDefinition;
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
+use buttplug_server_device_config::ServerDeviceDefinition;
 use buttplug_server_device_config::{ProtocolCommunicationSpecifier, UserDeviceIdentifier};
 const MAGICMOTIONV4_PROTOCOL_UUID: Uuid = uuid!("d4d62d09-c3e1-44c9-8eba-caa15de5b2a7");
 
@@ -100,12 +100,8 @@ impl ProtocolHandler for MagicMotionV4 {
         speed1, 0x64, 0x01,
       ]
     };
-    Ok(vec![HardwareWriteCmd::new(
-      &[MAGICMOTIONV4_PROTOCOL_UUID],
-      Endpoint::Tx,
-      data,
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[MAGICMOTIONV4_PROTOCOL_UUID], Endpoint::Tx, data, true).into(),
+    ])
   }
 }

@@ -6,29 +6,29 @@
 // for full license information.
 
 use super::{
+  TestDevice,
   test_device::{
-    new_device_channel,
     TestDeviceChannelDevice,
     TestDeviceChannelHost,
     TestHardwareConnector,
+    new_device_channel,
   },
-  TestDevice,
 };
 use buttplug_core::ButtplugResultFuture;
-use buttplug_server_device_config::{BluetoothLESpecifier, ProtocolCommunicationSpecifier};
 use buttplug_server::device::hardware::communication::{
-    HardwareCommunicationManager,
-    HardwareCommunicationManagerBuilder,
-    HardwareCommunicationManagerEvent,
+  HardwareCommunicationManager,
+  HardwareCommunicationManagerBuilder,
+  HardwareCommunicationManagerEvent,
 };
+use buttplug_server_device_config::{BluetoothLESpecifier, ProtocolCommunicationSpecifier};
 use futures::future::{self, FutureExt};
 use log::*;
 use serde::{Deserialize, Serialize};
 use std::{
   collections::HashMap,
   sync::{
-    atomic::{AtomicBool, Ordering},
     Arc,
+    atomic::{AtomicBool, Ordering},
   },
   time::{SystemTime, UNIX_EPOCH},
 };

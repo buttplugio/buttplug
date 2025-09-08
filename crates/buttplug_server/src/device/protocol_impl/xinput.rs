@@ -10,7 +10,7 @@ use byteorder::LittleEndian;
 
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-  protocol::{generic_protocol_setup, ProtocolHandler},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
@@ -19,8 +19,8 @@ use buttplug_core::{
 use byteorder::WriteBytesExt;
 use futures::future::{BoxFuture, FutureExt};
 use std::sync::{
-  atomic::{AtomicU16, Ordering},
   Arc,
+  atomic::{AtomicU16, Ordering},
 };
 
 generic_protocol_setup!(XInput, "xinput");
@@ -55,13 +55,9 @@ impl ProtocolHandler for XInput {
         "Cannot convert XInput value for processing".to_owned(),
       ));
     }
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      cmd,
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, cmd, false).into(),
+    ])
   }
 
   fn handle_input_read_cmd(
@@ -84,7 +80,7 @@ impl ProtocolHandler for XInput {
         _ => {
           return Err(ButtplugDeviceError::DeviceCommunicationError(
             "something went wrong".to_string(),
-          ))
+          ));
         }
       };
       Ok(message::InputReadingV4::new(

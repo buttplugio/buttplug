@@ -9,7 +9,7 @@ use super::{VorzeActions, VorzeDevice};
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::ProtocolHandler
+  protocol::ProtocolHandler,
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
@@ -34,12 +34,14 @@ impl ProtocolHandler for VorzeSASingleRotator {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let clockwise = if clockwise { 1u8 } else { 0 };
     let data: u8 = (clockwise) << 7 | (speed as u8);
-    Ok(vec![HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      vec![self.device_type as u8, VorzeActions::Rotate as u8, data],
-      true,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![self.device_type as u8, VorzeActions::Rotate as u8, data],
+        true,
+      )
+      .into(),
+    ])
   }
 }

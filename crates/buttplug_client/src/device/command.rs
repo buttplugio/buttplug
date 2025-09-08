@@ -45,16 +45,36 @@ pub enum ClientDeviceOutputCommand {
 impl Into<OutputType> for &ClientDeviceOutputCommand {
   fn into(self) -> OutputType {
     match self {
-      ClientDeviceOutputCommand::Vibrate(_) | ClientDeviceOutputCommand::VibrateFloat(_) => OutputType::Vibrate,
-      ClientDeviceOutputCommand::Oscillate(_) | ClientDeviceOutputCommand::OscillateFloat(_) => OutputType::Oscillate,
-      ClientDeviceOutputCommand::Rotate(_) | ClientDeviceOutputCommand::RotateFloat(_) => OutputType::Rotate,
-      ClientDeviceOutputCommand::Constrict(_) | ClientDeviceOutputCommand::ConstrictFloat(_) => OutputType::Constrict,
-      ClientDeviceOutputCommand::Heater(_) | ClientDeviceOutputCommand::HeaterFloat(_) => OutputType::Heater,
+      ClientDeviceOutputCommand::Vibrate(_) | ClientDeviceOutputCommand::VibrateFloat(_) => {
+        OutputType::Vibrate
+      }
+      ClientDeviceOutputCommand::Oscillate(_) | ClientDeviceOutputCommand::OscillateFloat(_) => {
+        OutputType::Oscillate
+      }
+      ClientDeviceOutputCommand::Rotate(_) | ClientDeviceOutputCommand::RotateFloat(_) => {
+        OutputType::Rotate
+      }
+      ClientDeviceOutputCommand::Constrict(_) | ClientDeviceOutputCommand::ConstrictFloat(_) => {
+        OutputType::Constrict
+      }
+      ClientDeviceOutputCommand::Heater(_) | ClientDeviceOutputCommand::HeaterFloat(_) => {
+        OutputType::Heater
+      }
       ClientDeviceOutputCommand::Led(_) | ClientDeviceOutputCommand::LedFloat(_) => OutputType::Led,
-      ClientDeviceOutputCommand::Spray(_) | ClientDeviceOutputCommand::SprayFloat(_) => OutputType::Spray,
-      ClientDeviceOutputCommand::Position(_) | ClientDeviceOutputCommand::PositionFloat(_) => OutputType::Position,
-      ClientDeviceOutputCommand::PositionWithDuration(_, _) | ClientDeviceOutputCommand::PositionWithDurationFloat(_, _) => OutputType::PositionWithDuration,
-      ClientDeviceOutputCommand::RotateWithDirection(_, _) | ClientDeviceOutputCommand::RotateWithDirectionFloat(_, _) => OutputType::RotateWithDirection,
+      ClientDeviceOutputCommand::Spray(_) | ClientDeviceOutputCommand::SprayFloat(_) => {
+        OutputType::Spray
+      }
+      ClientDeviceOutputCommand::Position(_) | ClientDeviceOutputCommand::PositionFloat(_) => {
+        OutputType::Position
+      }
+      ClientDeviceOutputCommand::PositionWithDuration(_, _)
+      | ClientDeviceOutputCommand::PositionWithDurationFloat(_, _) => {
+        OutputType::PositionWithDuration
+      }
+      ClientDeviceOutputCommand::RotateWithDirection(_, _)
+      | ClientDeviceOutputCommand::RotateWithDirectionFloat(_, _) => {
+        OutputType::RotateWithDirection
+      }
     }
   }
 }
