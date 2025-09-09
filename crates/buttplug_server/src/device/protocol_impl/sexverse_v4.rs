@@ -14,12 +14,12 @@ use crate::device::{
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 
-generic_protocol_setup!(MetaXSireV5, "metaxsire-v5");
+generic_protocol_setup!(SexverseV4, "sexverse-v4");
 
 #[derive(Default)]
-pub struct MetaXSireV5 {}
+pub struct SexverseV4 {}
 
-impl ProtocolHandler for MetaXSireV5 {
+impl ProtocolHandler for SexverseV4 {
   fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,
@@ -29,8 +29,8 @@ impl ProtocolHandler for MetaXSireV5 {
     Ok(vec![HardwareWriteCmd::new(
       &[feature_id],
       Endpoint::Tx,
-      vec![0xaa, 0x03, 0x03, speed as u8, 0x00, 0x00, 0x00],
-      false,
+      vec![0xbb, 0x01, speed as u8, 0x66],
+      true,
     )
     .into()])
   }

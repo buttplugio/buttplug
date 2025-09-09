@@ -1,5 +1,5 @@
 defaults:
-  name: metaXsire Device
+  name: Sexverse Device
   features:
     - feature-type: Vibrate
       id: 74825924-5e2a-4dd6-a91a-10a24be40c09
@@ -12,12 +12,12 @@ defaults:
 configurations:
   - identifier:
       - Rex
-    name: metaXsire Rex
+    name: Sexverse Rex
     id: 447c8bda-bafc-472a-9333-8f809bbc48bb
   - identifier:
       - Cali
       - LY165A01
-    name: metaXsire Cali
+    name: Sexverse Cali
     features:
       - feature-type: Vibrate
         id: d3e17d91-94d8-449d-b049-91bd0ec3cf71
@@ -36,7 +36,7 @@ configurations:
     id: e4bb4468-1de1-4f37-a348-5c7177923603
   - identifier:
       - Olis
-    name: metaXsire Olis
+    name: Sexverse Olis
     features:
       - feature-type: Vibrate
         id: 2e6d4a73-7847-4a5b-a03c-cdd6f07c39c9
@@ -62,7 +62,7 @@ configurations:
     id: 9e874901-c5d7-49d2-910d-3849ab5ff96c
   - identifier:
       - LY213A01
-    name: metaXsire BuCUE
+    name: Sexverse BuCUE
     features:
       - feature-type: Oscillate
         id: 641d8a6a-b068-4089-9632-c81ab872677d
@@ -85,15 +85,15 @@ configurations:
     id: 0f8e2cac-428a-430c-a9d8-8889ed608c24
   - identifier:
       - LY234A01
-    name: metaXsire Tadpole
+    name: Sexverse Tadpole
     id: de51460a-4c65-4173-8172-8dc7eaccc3a1
   - identifier:
       - LY271A01
-    name: metaXsire Upton
+    name: Sexverse Upton
     id: 5d061d81-98cd-4271-b896-68394a21e97a
   - identifier:
       - LY270A01
-    name: metaXsire Una
+    name: Sexverse Una
     id: 97458f06-7a6f-4f8a-bb7a-93dd6ab53157
 communication:
   - btle:

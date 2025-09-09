@@ -11,7 +11,7 @@ use crate::device::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{self, InputData, InputReadingV4, InputType, InputTypeData},
+  message::{self, InputData, InputReadingV4, InputTypeData},
 };
 use buttplug_server_device_config::Endpoint;
 use futures::{future::BoxFuture, FutureExt};

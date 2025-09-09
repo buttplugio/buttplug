@@ -1,7 +1,7 @@
 devices:
   - identifier: 
       name: "LY272A01"
-    expected_name: "metaXsire Nolan"
+    expected_name: "Sexverse Nolan"
 device_init:
   - !Commands
       device_index: 0
