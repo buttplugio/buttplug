@@ -27,46 +27,14 @@ use dashmap::DashMap;
 use getset::CopyGetters;
 use serde::{
   Deserialize,
-  Serialize,
-  Serializer,
-  ser::{self, SerializeSeq},
+  Serialize
 };
-use std::{fmt::Display, ops::RangeInclusive};
+use std::fmt::Display;
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../build-config/buttplug-device-config-v4.json");
 static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
   include_str!("../../device-config-v4/buttplug-device-config-schema-v4.json");
-
-fn range_serialize<S>(range: &Option<RangeInclusive<u32>>, serializer: S) -> Result<S::Ok, S::Error>
-where
-  S: Serializer,
-{
-  if let Some(range) = range {
-    let mut seq = serializer.serialize_seq(Some(2))?;
-    seq.serialize_element(&range.start())?;
-    seq.serialize_element(&range.end())?;
-    seq.end()
-  } else {
-    Err(ser::Error::custom(
-      "shouldn't be serializing if range is None",
-    ))
-  }
-}
-
-fn range_sequence_serialize<S>(
-  range_vec: &Vec<RangeInclusive<i32>>,
-  serializer: S,
-) -> Result<S::Ok, S::Error>
-where
-  S: Serializer,
-{
-  let mut seq = serializer.serialize_seq(Some(range_vec.len()))?;
-  for range in range_vec {
-    seq.serialize_element(&vec![*range.start(), *range.end()])?;
-  }
-  seq.end()
-}
 
 #[derive(Deserialize, Serialize, Debug, CopyGetters, Clone, Copy)]
 #[getset(get_copy = "pub", get_mut = "pub")]
@@ -288,7 +256,7 @@ pub fn save_user_config(dcm: &DeviceConfigurationManager) -> Result<String, Butt
   };
   let mut user_config_file = UserConfigFile::new(4, 0);
   user_config_file.set_user_configs(Some(user_config_definition));
-  serde_json::to_string(&user_config_file).map_err(|e| {
+  serde_json::to_string_pretty(&user_config_file).map_err(|e| {
     ButtplugError::from(ButtplugDeviceError::DeviceConfigurationError(format!(
       "Cannot save device configuration file: {e:?}",
     )))
