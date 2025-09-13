@@ -129,7 +129,9 @@ impl IntifaceEngine {
                 } => {
                   if let Ok(config_str) = save_user_config(&dcm) {
                     // Should probably at least log if we fail to write the config file
-                    let _ = fs::write(&Path::new(&config_path), config_str).await;
+                    if let Err(e) = fs::write(&Path::new(&config_path), config_str).await {
+                      error!("Error saving config file: {:?}", e);
+                    }
                   }
                 }
                 _ => continue,
