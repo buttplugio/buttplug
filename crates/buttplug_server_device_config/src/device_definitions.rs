@@ -49,10 +49,12 @@ impl ServerDeviceDefinitionBuilder {
     }
   }
 
+  // Used to create new user definitions from a base definition.
   pub fn from_base(value: &ServerDeviceDefinition, id: Uuid) -> Self {
     let mut value = value.clone();
     value.base_id = Some(value.id);
     value.id = id;
+    value.features = value.features().iter().map(|x| x.as_new_user_feature()).collect();
     ServerDeviceDefinitionBuilder { def: value }
   }
 

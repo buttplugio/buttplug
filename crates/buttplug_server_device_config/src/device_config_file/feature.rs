@@ -488,7 +488,7 @@ impl From<&ServerDeviceFeature> for ConfigUserDeviceFeature {
   fn from(value: &ServerDeviceFeature) -> Self {
     Self {
       id: value.id(),
-      base_id: value.base_id().expect("Should have base id"),
+      base_id: value.base_id().expect(&format!("Should have base id: {:?}", value)),
       output: value.output().as_ref().map(|x| x.into()),
     }
   }

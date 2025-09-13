@@ -576,6 +576,13 @@ impl ServerDeviceFeature {
     }
   }
 
+  pub fn as_new_user_feature(&self) -> Self {
+    let mut new_feature = self.clone();
+    new_feature.base_id = Some(self.id);
+    new_feature.id = Uuid::new_v4();
+    new_feature
+  }
+
   pub fn as_device_feature(&self, index: u32) -> Result<DeviceFeature, ButtplugDeviceConfigError> {
     Ok(DeviceFeature::new(
       index,
