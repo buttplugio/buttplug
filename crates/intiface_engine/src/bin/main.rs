@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate log;
+
 use argh::FromArgs;
 use getset::{CopyGetters, Getters};
 use intiface_engine::{
@@ -5,7 +8,7 @@ use intiface_engine::{
 };
 use std::fs;
 use tokio::{select, signal::ctrl_c};
-use tracing::{Level, debug, info};
+use tracing::Level;
 use tracing_subscriber::{
   filter::{EnvFilter, LevelFilter},
   layer::SubscriberExt,
@@ -214,13 +217,13 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
         "Intiface CLI Options: User Device Config {}",
         userdeviceconfig
       );
+      builder.user_device_config_path(&userdeviceconfig);
       match fs::read_to_string(userdeviceconfig) {
-        Ok(cfg) => builder.user_device_config_json(&cfg),
+        Ok(cfg) => {
+          builder.user_device_config_json(&cfg);
+        },
         Err(err) => {
-          return Err(IntifaceError::new(&format!(
-            "Error opening user device configuration: {:?}",
-            err
-          )));
+          warn!("Error opening user device configuration, ignoring and creating new file: {:?}", err);
         }
       };
     }
