@@ -141,6 +141,10 @@ configurations:
     name: JoyHub Peachy
     id: 38def4f2-5ec4-4466-a3e3-d7a9e35f4a2b
   - identifier:
+      - J-Divers
+    name: JoyHub Divers
+    id: 44372cb8-208a-4d11-afc7-88ee69bf65fd
+  - identifier:
       - J-Petalwish2
     name: JoyHub Petalwish 2
     features:
@@ -469,6 +473,7 @@ communication:
         - J-Explorer2
         - J-Derik
         - J-Peachy
+        - J-Divers
       services:
         0000ffa0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffa1-0000-1000-8000-00805f9b34fb
