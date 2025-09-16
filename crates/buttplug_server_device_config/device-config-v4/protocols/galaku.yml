@@ -271,6 +271,10 @@ configurations:
       - DT01
     name: Adorime Chastity Cage
     id: deb3f920-40f7-4595-92b1-8877b0ef0636
+  - identifier:
+      - BGZY
+    name: Adorime Penis Helmet Vibrator
+    id: 67bc4304-d2c3-493f-aa57-de708361e615
   # Type 1
   - identifier:
       - G317
@@ -1602,6 +1606,7 @@ communication:
         - BGQS # Adorime Penis Vibrator
         - AX05 # Adorime Anal Vibrator
         - DT01 # Adorime Chastity Cage
+        - BGZY # Adorime Penis Helmet Vibrator
         # Type 1
         - G317
         - G312
