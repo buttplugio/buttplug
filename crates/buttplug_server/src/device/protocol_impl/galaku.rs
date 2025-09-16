@@ -107,87 +107,118 @@ impl ProtocolInitializer for GalakuInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &DeviceDefinition,
+    def: &DeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut protocol = Galaku::default();
     protocol.is_caiping_pump_device = false;
     if hardware.name() == "AC695X_1(BLE)" {
       protocol.is_caiping_pump_device = true;
     }
+    for _ in 0..def.features().iter().filter(|f| f.output().is_some()).count() {
+          protocol.speeds.push(AtomicU8::new(0));
+      }
     Ok(Arc::new(protocol))
   }
 }
 
 pub struct Galaku {
   is_caiping_pump_device: bool,
-  speeds: [AtomicU8; 2],
+  speeds: Vec<AtomicU8>,
 }
 
 impl Default for Galaku {
-  fn default() -> Self {
-    Self {
-      is_caiping_pump_device: false,
-      speeds: [AtomicU8::new(0), AtomicU8::new(0)],
+    fn default() -> Self {
+        Self {
+            is_caiping_pump_device: false,
+            speeds: vec![],
+        }
     }
-  }
+}
+impl Galaku {
+    fn handle_local_output_cmd(
+        &self,
+        feature_index: u32,
+        _feature_id: Uuid,
+        speed: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+        if self.speeds.len() == 1 {
+            if self.is_caiping_pump_device {
+                let data: Vec<u8> = vec![
+                    0xAA,
+                    1,
+                    10,
+                    3,
+                    speed as u8,
+                    if speed == 0 { 0 } else { 1 },
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                ];
+                Ok(vec![HardwareWriteCmd::new(
+                    &[GALAKU_PROTOCOL_UUID],
+                    Endpoint::Tx,
+                    data,
+                    false,
+                )
+                    .into()])
+            } else {
+                let data = vec![90, 0, 0, 1, 49, speed, 0, 0, 0, 0];
+
+                Ok(vec![HardwareWriteCmd::new(
+                    &[GALAKU_PROTOCOL_UUID],
+                    Endpoint::Tx,
+                    send_bytes(data),
+                    false,
+                )
+                    .into()])
+            }
+        } else {
+            if feature_index < self.speeds.len() as u32 {
+                self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
+            } else {
+                error!("Tried to set value on out-of-bounds index {} (size {})", feature_index, self.speeds.len());
+            }
+
+            let data: Vec<u32> = vec![
+                90,
+                0,
+                0,
+                1,
+                64,
+                3,
+                self.speeds[0].load(Ordering::Relaxed) as u32,
+                self.speeds[1].load(Ordering::Relaxed) as u32,
+                0,
+                0,
+            ];
+            Ok(vec![HardwareWriteCmd::new(
+                &[GALAKU_PROTOCOL_UUID],
+                Endpoint::Tx,
+                send_bytes(data),
+                false,
+            )
+                .into()])
+        }
+    }
 }
 
 impl ProtocolHandler for Galaku {
-  fn handle_output_vibrate_cmd(
-    &self,
-    feature_index: u32,
-    _feature_id: Uuid,
-    speed: u32,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if self.is_caiping_pump_device {
-      let data: Vec<u8> = vec![
-        0xAA,
-        1,
-        10,
-        3,
-        speed as u8,
-        if speed == 0 { 0 } else { 1 },
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-      ];
-      Ok(vec![HardwareWriteCmd::new(
-        &[GALAKU_PROTOCOL_UUID],
-        Endpoint::Tx,
-        data,
-        false,
-      )
-      .into()])
-    } else {
-      self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
-      let data: Vec<u32> = vec![
-        90,
-        0,
-        0,
-        1,
-        49,
-        self.speeds[0].load(Ordering::Relaxed) as u32,
-        self.speeds[1].load(Ordering::Relaxed) as u32,
-        0,
-        0,
-        0,
-      ];
-      Ok(vec![HardwareWriteCmd::new(
-        &[GALAKU_PROTOCOL_UUID],
-        Endpoint::Tx,
-        send_bytes(data),
-        false,
-      )
-      .into()])
+    fn handle_output_oscillate_cmd(&self, feature_index: u32, feature_id: Uuid, speed: u32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+        self.handle_local_output_cmd(feature_index, feature_id, speed)
     }
-  }
+    fn handle_output_vibrate_cmd(&self, feature_index: u32, feature_id: Uuid, speed: u32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+        self.handle_local_output_cmd(feature_index, feature_id, speed)
+    }
+    fn handle_output_constrict_cmd(&self, feature_index: u32, feature_id: Uuid, level: u32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+        self.handle_local_output_cmd(feature_index, feature_id, level)
+    }
 
   fn handle_input_subscribe_cmd(
     &self,

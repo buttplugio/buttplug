@@ -56,10 +56,10 @@ impl ProtocolInitializer for SenseeV2Initializer {
       .await?;
     info!("Sensee model data: {:X?}", res.data());
 
-    let device_type = if res.data().len() >= 6 {
+    let device_type = if res.data().len() >= 6 && res.data()[6] != 0x00 {
       res.data()[6]
     } else {
-      0x66
+      0x65
     };
 
     let feature_map = |output_type| {

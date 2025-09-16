@@ -1,7 +1,7 @@
 devices:
   - identifier: 
-      name: "Olis"
-    expected_name: "metaXsire Olis"
+      name: "Cali"
+    expected_name: "Sexverse Cali"
 device_commands:
   - !Messages
       device_index: 0
@@ -14,22 +14,24 @@ device_commands:
       commands:
         - !Write
             endpoint: tx
-            data: [0x23, 0x07, 0x09, 0x81, 0x03, 0x80, 0x82, 0x03, 0x00, 0x83, 0x06, 0x00, 0x2b]
+            data: [0x23, 0x07, 0x06, 0x81, 0x03, 0x80, 0x82, 0x04, 0x00, 0xa6]
             write_with_response: false
   - !Messages
       device_index: 0
       messages:
-        - !Vibrate
+        - !Scalar
           - Index: 0
-            Speed: 0.75
+            Scalar: 0.75
+            ActuatorType: Vibrate
           - Index: 1
-            Speed: 0.5
+            Scalar: 0.5
+            ActuatorType: Constrict
   - !Commands
       device_index: 0
       commands:
         - !Write
             endpoint: tx
-            data: [0x23, 0x07, 0x09, 0x81, 0x03, 0xC0, 0x82, 0x03, 0x80, 0x83, 0x06, 0x00, 0xeb]
+            data: [0x23, 0x07, 0x06, 0x81, 0x03, 0xc0, 0x82, 0x04, 0x80, 0x66]
             write_with_response: false
   - !Messages
       device_index: 0
@@ -39,17 +41,14 @@ device_commands:
             Scalar: 0
             ActuatorType: Vibrate
           - Index: 1
-            Scalar: 0
-            ActuatorType: Vibrate
-          - Index: 2
             Scalar: 0.5
-            ActuatorType: Rotate
+            ActuatorType: Constrict
   - !Commands
       device_index: 0
       commands:
         - !Write
             endpoint: tx
-            data: [0x23, 0x07, 0x09, 0x81, 0x03, 0x00, 0x82, 0x03, 0x00, 0x83, 0x06, 0x80, 0x2b]
+            data: [0x23, 0x07, 0x06, 0x81, 0x03, 0x00, 0x82, 0x04, 0x80, 0xa6]
             write_with_response: false
   - !Messages
       device_index: 0
@@ -60,5 +59,5 @@ device_commands:
       commands:
         - !Write
             endpoint: tx
-            data: [0x23, 0x07, 0x09, 0x81, 0x03, 0x00, 0x82, 0x03, 0x00, 0x83, 0x06, 0x00, 0xab]
+            data: [0x23, 0x07, 0x06, 0x81, 0x03, 0x00, 0x82, 0x04, 0x00, 0x26]
             write_with_response: false

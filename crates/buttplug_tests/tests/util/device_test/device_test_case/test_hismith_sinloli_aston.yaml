@@ -1,0 +1,64 @@
+devices:
+  - identifier: 
+      name: "Sinloli Aston"
+    expected_name: "Sinloli Aston"
+device_init:
+  - !Events
+    device_index: 0
+    events:
+      - !Reads
+        - endpoint: rxblemodel
+          data: [0x22, 0x05]
+device_commands:
+  # Commands
+  - !Messages
+      device_index: 0
+      messages:
+        - !Rotate
+          - Index: 0
+            Speed: 0.5
+            Clockwise: true
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x03, 0x32, 0x35]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x01, 0xc0, 0xc1]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Rotate
+          - Index: 0
+            Speed: 1
+            Clockwise: false
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x03, 0x64, 0x67]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x01, 0xc1, 0xc2]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x03, 0x00, 0x03]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x01, 0xc0, 0xc1]
+            write_with_response: false
