@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 85
+    "minor": 86
   },
   "protocols": {
     "activejoy": {
@@ -1298,6 +1298,7 @@
               "BGQS",
               "AX05",
               "DT01",
+              "BGZY",
               "G317",
               "G312",
               "G302",
@@ -1785,6 +1786,13 @@
             "DT01"
           ],
           "name": "Adorime Chastity Cage"
+        },
+        {
+          "id": "67bc4304-d2c3-493f-aa57-de708361e615",
+          "identifier": [
+            "BGZY"
+          ],
+          "name": "Adorime Penis Helmet Vibrator"
         },
         {
           "features": [
