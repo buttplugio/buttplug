@@ -34,7 +34,7 @@ configurations:
     id: 18f342d3-a927-44ac-9605-cf16ec8aad74
   - identifier:
       - '1501'
-    name: Hismith PleasureDrive
+    name: Kiiroo PleasureDrive
     id: 5b98725d-56b3-499b-830d-50dc004c27c5
   - identifier:
       - '2201'
@@ -200,6 +200,7 @@ communication:
         - Sinloli-Ethel
         - Sinloli Aston
         - Hismith Piupiu
+        - PleasureDrive
       services:
         0000ffe5-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe9-0000-1000-8000-00805f9b34fb
