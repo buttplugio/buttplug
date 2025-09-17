@@ -43,12 +43,42 @@ configurations:
               - 0
               - 20
     id: 0e1f9fe7-22d9-4afb-9fe5-192b8e5508c3
+  - identifier:
+      - NBQ-B619RX
+    name: Duopeak Saphette
+    features:
+      - feature-type: Vibrate
+        description: Wearer Vibrator
+        id: 968f7306-6997-4b76-a40f-acbb431d9582
+        output:
+          Oscillate:
+            step-range:
+              - 0
+              - 20
+      - feature-type: Vibrate
+        description: Receiver Vibrator
+        id: 018009d0-b5bf-4f97-a13d-909d0e74fabc
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 20
+      - feature-type: Vibrate
+        description: Wearer Clitoral Vibrators
+        id: 018009d0-b5bf-4f97-a13d-909d0e74fabc
+        output:
+          Vibrate:
+            step-range:
+              - 0
+              - 20
+    id: 0e1f9fe7-22d9-4afb-9fe5-192b8e5508c3
 communication:
   - btle:
       names:
         - LY272A01
         - LB-W01
         - HH010
+        - NBQ-B619RX
       services:
         0000bae0-0000-1000-8000-00805f9b34fb:
           tx: 0000bae1-0000-1000-8000-00805f9b34fb
