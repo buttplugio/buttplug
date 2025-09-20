@@ -139,6 +139,7 @@ pub struct DeviceConfigurationManager {
   user_communication_specifiers: DashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   /// Device definitions from the user device config. Loaded at session start, may change over life
   /// of session.
+  #[getset(get = "pub")]
   user_device_definitions: DashMap<UserDeviceIdentifier, ServerDeviceDefinition>,
 }
 
@@ -186,6 +187,12 @@ impl DeviceConfigurationManager {
         .cloned()
         .collect();
     }
+  }
+
+  pub fn add_user_device_definition(&self, identifier: &UserDeviceIdentifier, definition: &ServerDeviceDefinition) {
+    // TODO we should actually check validity of the definition we're adding here, i.e. does it have
+    // a base id, is that ID in our base selections, etc...
+    self.user_device_definitions.insert(identifier.clone(), definition.clone());
   }
 
   pub fn remove_user_device_definition(&self, identifier: &UserDeviceIdentifier) {
