@@ -58,6 +58,10 @@ impl ServerDeviceDefinitionBuilder {
     ServerDeviceDefinitionBuilder { def: value }
   }
 
+  pub fn from_user(value: &ServerDeviceDefinition) -> Self {
+    ServerDeviceDefinitionBuilder { def: value.clone() }
+  }
+
   pub fn id(&mut self, id: Uuid) -> &mut Self {
     self.def.id = id;
     self
@@ -68,8 +72,8 @@ impl ServerDeviceDefinitionBuilder {
     self
   }
 
-  pub fn display_name(&mut self, name: &str) -> &mut Self {
-    self.def.display_name = Some(name.to_owned());
+  pub fn display_name(&mut self, name: &Option<String>) -> &mut Self {
+    self.def.display_name = name.clone();
     self
   }
 
@@ -83,13 +87,13 @@ impl ServerDeviceDefinitionBuilder {
     self
   }
 
-  pub fn allow(&mut self) -> &mut Self {
-    self.def.allow = true;
+  pub fn allow(&mut self, allow: bool) -> &mut Self {
+    self.def.allow = allow;
     self
   }
 
-  pub fn deny(&mut self) -> &mut Self {
-    self.def.deny = true;
+  pub fn deny(&mut self, deny: bool) -> &mut Self {
+    self.def.deny = deny;
     self
   }
 

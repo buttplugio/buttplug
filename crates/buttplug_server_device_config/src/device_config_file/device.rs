@@ -105,14 +105,12 @@ impl ConfigUserDeviceDefinition {
     base: &ServerDeviceDefinition,
   ) -> Result<ServerDeviceDefinition, ButtplugDeviceConfigError> {
     let mut builder = ServerDeviceDefinitionBuilder::from_base(base, self.id);
-    if let Some(display_name) = &self.user_config.display_name {
-      builder.display_name(display_name);
-    }
+    builder.display_name(&self.user_config.display_name);
     if let Some(message_gap_ms) = self.user_config.message_gap_ms {
       builder.message_gap_ms(message_gap_ms);
     }
-    self.user_config.allow.then(|| builder.allow());
-    self.user_config.deny.then(|| builder.deny());
+    self.user_config.allow.then(|| builder.allow(true));
+    self.user_config.deny.then(|| builder.deny(true));
     builder.index(self.user_config.index);
     if self.features().len() != base.features().len() {
       return Err(ButtplugDeviceConfigError::UserFeatureMismatch);
