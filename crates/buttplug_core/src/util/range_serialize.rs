@@ -1,10 +1,23 @@
 use std::ops::RangeInclusive;
 
-use serde::{Serializer, ser::SerializeSeq};
+use serde::{Serializer, Serialize, ser::SerializeSeq};
 
-pub fn range_serialize<S>(range: &RangeInclusive<i32>, serializer: S) -> Result<S::Ok, S::Error>
+pub fn option_range_serialize<S, T>(range: &Option<RangeInclusive<T>>, serializer: S) -> Result<S::Ok, S::Error>
 where
   S: Serializer,
+  T: Serialize
+{
+  if let Some(r) = range {
+    range_serialize(r, serializer)
+  } else {
+    core::option::Option::None::<T>.serialize(serializer)
+  }
+}
+
+pub fn range_serialize<S, T>(range: &RangeInclusive<T>, serializer: S) -> Result<S::Ok, S::Error>
+where
+  S: Serializer,
+  T: Serialize
 {
   let mut seq = serializer.serialize_seq(Some(2))?;
   seq.serialize_element(&range.start())?;
@@ -12,12 +25,13 @@ where
   seq.end()
 }
 
-pub fn range_sequence_serialize<S>(
-  range_vec: &Vec<RangeInclusive<i32>>,
+pub fn range_sequence_serialize<S,T>(
+  range_vec: &Vec<RangeInclusive<T>>,
   serializer: S,
 ) -> Result<S::Ok, S::Error>
 where
   S: Serializer,
+  T: Serialize + Copy + Clone,
 {
   let mut seq = serializer.serialize_seq(Some(range_vec.len()))?;
   for range in range_vec {
