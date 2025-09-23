@@ -9483,7 +9483,8 @@
             "names": [
               "F1SV2A",
               "F1SV2X",
-              "F1SV3"
+              "F1SV3",
+              "F2"
             ],
             "services": {
               "0000fff0-0000-1000-8000-00805f9b34fb": {
@@ -9512,6 +9513,13 @@
             "F1SV3"
           ],
           "name": "Lelo F1s V3"
+        },
+        {
+          "id": "5126b376-fc82-4677-bfc0-c45738549b9d",
+          "identifier": [
+            "F2"
+          ],
+          "name": "Lelo F2S"
         }
       ],
       "defaults": {
