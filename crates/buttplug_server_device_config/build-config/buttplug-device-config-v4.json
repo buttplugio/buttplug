@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 86
+    "minor": 87
   },
   "protocols": {
     "activejoy": {
@@ -1187,7 +1187,7 @@
                 ],
                 "position": [
                   0,
-                  150
+                  15
                 ]
               }
             }
