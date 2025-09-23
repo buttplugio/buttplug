@@ -253,4 +253,25 @@ impl ProtocolHandler for Fredorch {
     )
     .into()])
   }
+  
+  // TODO: Something is off... I think we need to program in both directions independently
+  fn handle_output_oscillate_cmd(&self, _feature_index: u32, _feature_id: Uuid, speed: u32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    // If we ever get oscillate with range, these should be loaded from the last set range
+    let min_pos = if speed == 0 { 0 } else { 0 };
+    let max_pos = if speed == 0 { 0 } else { 15 };
+    let mut data: Vec<u8> = vec![
+      0x01, 0x10, 0x00, 0x6B, 0x00, 0x05, 0x0a, 0x00, speed as u8, 0x00, speed as u8, 0x00, min_pos * 15, 0x00, max_pos * 15,
+      0x00, 0x01,
+    ];
+    let crc = crc16(&data);
+    data.push(crc[0]);
+    data.push(crc[1]);
+    Ok(vec![HardwareWriteCmd::new(
+      &[FREDORCH_PROTOCOL_UUID],
+      Endpoint::Tx,
+      data,
+      false,
+    )
+        .into()])
+  }
 }
