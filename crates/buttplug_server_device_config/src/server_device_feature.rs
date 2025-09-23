@@ -51,6 +51,14 @@ impl RangeWithLimit {
     }
   }
 
+  pub fn new_with_user(base: &RangeInclusive<i32>, user: &Option<RangeInclusive<u32>>) -> Self {
+    Self {
+      base: base.clone(),
+      internal_base: RangeInclusive::new(0, *base.end() as u32),
+      user: user.clone(),
+    }
+  }
+
   pub fn step_limit(&self) -> RangeInclusive<i32> {
     if *self.base.start() < 0 {
       RangeInclusive::new(-(self.step_count() as i32), self.step_count() as i32)
@@ -280,7 +288,7 @@ impl From<&ServerDeviceFeatureOutputPositionWithDurationProperties>
 }
 
 #[derive(Clone, Debug, Getters, Setters, Default)]
-#[getset(get = "pub", set = "pub(crate)")]
+#[getset(get = "pub", set = "pub")]
 pub struct ServerDeviceFeatureOutput {
   vibrate: Option<ServerDeviceFeatureOutputValueProperties>,
   rotate: Option<ServerDeviceFeatureOutputValueProperties>,
@@ -304,7 +312,7 @@ impl ServerDeviceFeatureOutput {
       OutputType::Position => self.position.is_some(),
       OutputType::PositionWithDuration => self.position_with_duration.is_some(),
       OutputType::Rotate => self.rotate.is_some(),
-      OutputType::RotateWithDirection => self.rotate_with_direction.is_some(),
+      OutputType::RotateWithDirection => self.rotate.is_some(),
       OutputType::Spray => self.spray.is_some(),
       OutputType::Unknown => false,
       OutputType::Vibrate => self.vibrate.is_some(),
@@ -532,7 +540,7 @@ impl From<ServerDeviceFeatureInput> for DeviceFeatureInput {
   }
 }
 
-#[derive(Clone, Debug, Getters, CopyGetters)]
+#[derive(Clone, Debug, Getters, CopyGetters, Setters)]
 pub struct ServerDeviceFeature {
   #[getset(get = "pub")]
   description: String,
@@ -542,7 +550,7 @@ pub struct ServerDeviceFeature {
   base_id: Option<Uuid>,
   #[getset(get_copy = "pub")]
   alt_protocol_index: Option<u32>,
-  #[getset(get = "pub")]
+  #[getset(get = "pub", set = "pub")]
   output: Option<ServerDeviceFeatureOutput>,
   #[getset(get = "pub")]
   input: Option<ServerDeviceFeatureInput>,

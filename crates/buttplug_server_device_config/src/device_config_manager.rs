@@ -274,7 +274,7 @@ impl DeviceConfigurationManager {
         "Protocol + Identifier device config found for {:?}, creating new user device from configuration",
         identifier
       );
-      let mut builder = ServerDeviceDefinitionBuilder::from_base(definition, Uuid::new_v4());
+      let mut builder = ServerDeviceDefinitionBuilder::from_base(definition, Uuid::new_v4(), true);
       builder.index(self.device_index(identifier)).finish()
     } else if let Some(definition) = self
       .base_device_definitions
@@ -284,7 +284,7 @@ impl DeviceConfigurationManager {
         "Protocol device config found for {:?}, creating new user device from protocol defaults",
         identifier
       );
-      let mut builder = ServerDeviceDefinitionBuilder::from_base(definition, Uuid::new_v4());
+      let mut builder = ServerDeviceDefinitionBuilder::from_base(definition, Uuid::new_v4(), true);
       builder.index(self.device_index(identifier)).finish()
     } else {
       return None;

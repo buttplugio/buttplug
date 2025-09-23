@@ -104,7 +104,7 @@ impl ConfigUserDeviceDefinition {
     &self,
     base: &ServerDeviceDefinition,
   ) -> Result<ServerDeviceDefinition, ButtplugDeviceConfigError> {
-    let mut builder = ServerDeviceDefinitionBuilder::from_base(base, self.id);
+    let mut builder = ServerDeviceDefinitionBuilder::from_base(base, self.id, false);
     builder.display_name(&self.user_config.display_name);
     if let Some(message_gap_ms) = self.user_config.message_gap_ms {
       builder.message_gap_ms(message_gap_ms);

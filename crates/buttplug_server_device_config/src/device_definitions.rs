@@ -27,6 +27,7 @@ pub struct ServerDeviceDefinition {
   features: Vec<ServerDeviceFeature>,
 }
 
+#[derive(Debug)]
 pub struct ServerDeviceDefinitionBuilder {
   def: ServerDeviceDefinition,
 }
@@ -50,11 +51,15 @@ impl ServerDeviceDefinitionBuilder {
   }
 
   // Used to create new user definitions from a base definition.
-  pub fn from_base(value: &ServerDeviceDefinition, id: Uuid) -> Self {
+  pub fn from_base(value: &ServerDeviceDefinition, id: Uuid, with_features: bool) -> Self {
     let mut value = value.clone();
     value.base_id = Some(value.id);
     value.id = id;
-    value.features = value.features().iter().map(|x| x.as_new_user_feature()).collect();
+    if with_features {
+      value.features = value.features().iter().map(|x| x.as_new_user_feature()).collect();
+    } else {
+      value.features = vec!();
+    }
     ServerDeviceDefinitionBuilder { def: value }
   }
 
@@ -104,6 +109,13 @@ impl ServerDeviceDefinitionBuilder {
 
   pub fn add_feature(&mut self, feature: &ServerDeviceFeature) -> &mut Self {
     self.def.features.push(feature.clone());
+    self
+  }
+
+  pub fn replace_feature(&mut self, feature: &ServerDeviceFeature) -> &mut Self {
+    if let Some(f) = self.def.features.iter_mut().find(|x| x.id() == feature.id()) {
+      *f = feature.clone();
+    }
     self
   }
 
