@@ -200,7 +200,7 @@ impl ProtocolInitializer for LovenseInitializer {
         .filter(|x| {
           x.output()
             .as_ref()
-            .is_some_and(|x| x.contains(OutputType::RotateWithDirection))
+            .is_some_and(|x| x.contains(OutputType::Rotate))
         })
         .count()
         == 1;

@@ -23,7 +23,6 @@ pub use {
     OutputCmdV4,
     OutputCommand,
     OutputPositionWithDuration,
-    OutputRotateWithDirection,
     OutputValue,
   },
   request_server_info::RequestServerInfoV4,

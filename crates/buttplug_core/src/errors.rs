@@ -157,6 +157,8 @@ pub enum ButtplugDeviceError {
   DeviceScanningAlreadyStopped,
   /// Device permission error: {0}
   DevicePermissionError(String),
+  /// Device command does not take negative numbers
+  DeviceCommandSignError,
   /// {0}
   ProtocolAttributesNotFound(String),
   /// Protocol {0} not implemented in library

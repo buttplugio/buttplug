@@ -65,7 +65,7 @@ impl ProtocolHandler for Cowgirl {
     &self,
     _feature_index: u32,
     _feature_id: Uuid,
-    speed: u32,
+    speed: i32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[1].store(speed as u8, Ordering::Relaxed);
     Ok(self.hardware_commands())

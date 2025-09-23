@@ -9,7 +9,7 @@ defaults:
             - 10
     - id: fabe3961-dc17-4f32-856f-13880c0a29a3
       output:
-        rotate_with_direction:
+        rotate:
           value:
             - -2
             - 2

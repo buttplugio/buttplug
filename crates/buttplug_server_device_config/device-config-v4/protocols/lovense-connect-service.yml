@@ -84,7 +84,7 @@ configurations:
               - 20
       - id: af885c72-ce2b-47d5-87be-3847f24d18a5
         output:
-          rotate_with_direction:
+          rotate:
             value:
               - -20
               - 20
@@ -307,7 +307,7 @@ configurations:
               - 20
       - id: d49001e8-5f6b-43ac-9cc7-7e68fab7c323
         output:
-          rotate_with_direction:
+          rotate:
             value:
               - -20
               - 20

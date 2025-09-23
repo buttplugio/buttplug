@@ -10,11 +10,7 @@ use crate::message::{
   v2::{ClientDeviceMessageAttributesV2, GenericDeviceMessageAttributesV2},
 };
 use buttplug_core::message::{
-  DeviceFeature,
-  DeviceFeatureOutputValueProperties,
-  InputCommandType,
-  InputType,
-  OutputType,
+  DeviceFeature, DeviceFeatureOutputLimits, DeviceFeatureOutputValueProperties, InputCommandType, InputType, OutputType
 };
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeSeq};
@@ -293,7 +289,8 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
         if let Some(output_map) = feature.output()
-          && let Some(actuator) = output_map.rotate_with_direction() {
+          && let Some(actuator) = output_map.rotate() 
+          && *actuator.value().start() < 0 {
             let actuator_type = OutputType::Rotate;
             let attrs = ClientGenericDeviceMessageAttributesV3 {
               feature_descriptor: feature.description().to_owned(),

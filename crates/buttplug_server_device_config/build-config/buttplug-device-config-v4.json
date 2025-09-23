@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 67
+    "minor": 69
   },
   "protocols": {
     "activejoy": {
@@ -10040,7 +10040,7 @@
             {
               "id": "515e07e2-a6e6-4ac0-a4b0-512504311260",
               "output": {
-                "rotate_with_direction": {
+                "rotate": {
                   "value": [
                     -20,
                     20
@@ -10572,7 +10572,7 @@
             {
               "id": "360d81e7-5126-4dbb-b72d-7bb60eb67400",
               "output": {
-                "rotate_with_direction": {
+                "rotate": {
                   "value": [
                     -20,
                     20
@@ -10918,7 +10918,7 @@
             {
               "id": "af885c72-ce2b-47d5-87be-3847f24d18a5",
               "output": {
-                "rotate_with_direction": {
+                "rotate": {
                   "value": [
                     -20,
                     20
@@ -11323,7 +11323,7 @@
             {
               "id": "d49001e8-5f6b-43ac-9cc7-7e68fab7c323",
               "output": {
-                "rotate_with_direction": {
+                "rotate": {
                   "value": [
                     -20,
                     20
@@ -13295,7 +13295,7 @@
           {
             "id": "683b450d-bb1a-4fca-b61a-83f8b56086fa",
             "output": {
-              "rotate_with_direction": {
+              "rotate": {
                 "value": [
                   -255,
                   255
@@ -13914,7 +13914,7 @@
           {
             "id": "fabe3961-dc17-4f32-856f-13880c0a29a3",
             "output": {
-              "rotate_with_direction": {
+              "rotate": {
                 "value": [
                   -2,
                   2
@@ -18224,7 +18224,7 @@
           {
             "id": "b7495351-9101-448a-94c4-4598cf541dca",
             "output": {
-              "rotate_with_direction": {
+              "rotate": {
                 "value": [
                   -6,
                   6
@@ -18461,7 +18461,7 @@
           {
             "id": "26402ebe-7ee0-4c7d-ae40-205ec4f3a1b0",
             "output": {
-              "rotate_with_direction": {
+              "rotate": {
                 "value": [
                   -100,
                   100
@@ -18776,7 +18776,7 @@
           {
             "id": "1d1b4dea-ab29-4426-a9f4-dda2c594eefb",
             "output": {
-              "rotate_with_direction": {
+              "rotate": {
                 "value": [
                   -10,
                   10
@@ -18857,7 +18857,7 @@
             {
               "id": "8e249d53-8d80-4f42-bc40-e6edb7779e92",
               "output": {
-                "rotate_with_direction": {
+                "rotate": {
                   "value": [
                     -99,
                     99
@@ -18878,7 +18878,7 @@
             {
               "id": "2d8d1443-c394-4df4-b9bb-1659d8323b45",
               "output": {
-                "rotate_with_direction": {
+                "rotate": {
                   "value": [
                     -99,
                     99
@@ -18899,7 +18899,7 @@
             {
               "id": "a1632ce4-314f-481d-9ae2-2a11a0c4caa4",
               "output": {
-                "rotate_with_direction": {
+                "rotate": {
                   "value": [
                     -99,
                     99
@@ -18910,7 +18910,7 @@
             {
               "id": "4b09a02d-9a4a-4c8b-8340-8e6ca3cecfc2",
               "output": {
-                "rotate_with_direction": {
+                "rotate": {
                   "value": [
                     -99,
                     99

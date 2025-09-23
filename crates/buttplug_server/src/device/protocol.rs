@@ -227,40 +227,34 @@ pub trait ProtocolHandler: Sync + Send {
     let output_command = cmd.output_command();
     match output_command {
       OutputCommand::Constrict(x) => {
-        self.handle_output_constrict_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+        self.handle_output_constrict_cmd(cmd.feature_index(), cmd.feature_id(), x.value().try_into().map_err(|e| ButtplugDeviceError::DeviceCommandSignError)?)
       }
       OutputCommand::Spray(x) => {
-        self.handle_output_spray_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+        self.handle_output_spray_cmd(cmd.feature_index(), cmd.feature_id(), x.value().try_into().map_err(|e| ButtplugDeviceError::DeviceCommandSignError)?)
       }
       OutputCommand::Oscillate(x) => {
-        self.handle_output_oscillate_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+        self.handle_output_oscillate_cmd(cmd.feature_index(), cmd.feature_id(), x.value().try_into().map_err(|e| ButtplugDeviceError::DeviceCommandSignError)?)
       }
       OutputCommand::Rotate(x) => {
         self.handle_output_rotate_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
       }
       OutputCommand::Vibrate(x) => {
-        self.handle_output_vibrate_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+        self.handle_output_vibrate_cmd(cmd.feature_index(), cmd.feature_id(), x.value().try_into().map_err(|e| ButtplugDeviceError::DeviceCommandSignError)?)
       }
       OutputCommand::Position(x) => {
-        self.handle_output_position_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+        self.handle_output_position_cmd(cmd.feature_index(), cmd.feature_id(), x.value().try_into().map_err(|e| ButtplugDeviceError::DeviceCommandSignError)?)
       }
       OutputCommand::Heater(x) => {
-        self.handle_output_heater_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+        self.handle_output_heater_cmd(cmd.feature_index(), cmd.feature_id(), x.value().try_into().map_err(|e| ButtplugDeviceError::DeviceCommandSignError)?)
       }
       OutputCommand::Led(x) => {
-        self.handle_output_led_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+        self.handle_output_led_cmd(cmd.feature_index(), cmd.feature_id(), x.value().try_into().map_err(|e| ButtplugDeviceError::DeviceCommandSignError)?)
       }
       OutputCommand::PositionWithDuration(x) => self.handle_position_with_duration_cmd(
         cmd.feature_index(),
         cmd.feature_id(),
         x.position(),
         x.duration(),
-      ),
-      OutputCommand::RotateWithDirection(x) => self.handle_rotation_with_direction_cmd(
-        cmd.feature_index(),
-        cmd.feature_id(),
-        x.speed(),
-        x.clockwise(),
       ),
     }
   }
@@ -278,7 +272,7 @@ pub trait ProtocolHandler: Sync + Send {
     &self,
     _feature_index: u32,
     _feature_id: Uuid,
-    _speed: u32,
+    _speed: i32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("OutputCmd (Rotate Actuator)")
   }

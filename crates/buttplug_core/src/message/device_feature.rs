@@ -16,12 +16,8 @@ pub enum OutputType {
   Unknown,
   #[serde(alias = "vibrate")]
   Vibrate,
-  // Single Direction Rotation Speed
   #[serde(alias = "rotate")]
   Rotate,
-  // Two Direction Rotation Speed
-  #[serde(alias = "rotate_with_direction")]
-  RotateWithDirection,
   #[serde(alias = "oscillate")]
   Oscillate,
   #[serde(alias = "constrict")]
@@ -196,8 +192,6 @@ pub struct DeviceFeatureOutput {
   #[serde(skip_serializing_if = "Option::is_none")]
   rotate: Option<DeviceFeatureOutputValueProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
-  rotate_with_direction: Option<DeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
   oscillate: Option<DeviceFeatureOutputValueProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
   constrict: Option<DeviceFeatureOutputValueProperties>,
@@ -223,7 +217,6 @@ impl DeviceFeatureOutput {
       OutputType::Position => self.position.is_some(),
       OutputType::PositionWithDuration => self.position_with_duration.is_some(),
       OutputType::Rotate => self.rotate.is_some(),
-      OutputType::RotateWithDirection => self.rotate_with_direction.is_some(),
       OutputType::Spray => self.spray.is_some(),
       OutputType::Unknown => false,
       OutputType::Vibrate => self.vibrate.is_some(),
@@ -258,10 +251,6 @@ impl DeviceFeatureOutput {
         .map(|x| x as &dyn DeviceFeatureOutputLimits),
       OutputType::Rotate => self
         .rotate()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::RotateWithDirection => self
-        .rotate_with_direction()
         .as_ref()
         .map(|x| x as &dyn DeviceFeatureOutputLimits),
       OutputType::Spray => self

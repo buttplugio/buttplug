@@ -24,7 +24,6 @@ use buttplug_core::{
     ButtplugMessageValidator,
     OutputCommand,
     OutputPositionWithDuration,
-    OutputRotateWithDirection,
     OutputType,
     OutputValue,
   },
@@ -122,7 +121,7 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedOutputVecCmdV4 
             |e: buttplug_server_device_config::ButtplugDeviceConfigError| {
               ButtplugMessageError::InvalidMessageContents(e.to_string())
             },
-          )? as u32,
+          )?,
         )),
       ))
     }
@@ -192,8 +191,7 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedOutputVecCmdV4 {
         OutputCommand::Vibrate(OutputValue::new(
           actuator
             .calculate_scaled_float(vibrate_cmd.speed())
-            .map_err(|e| ButtplugMessageError::InvalidMessageContents(e.to_string()))?
-            as u32,
+            .map_err(|e| ButtplugMessageError::InvalidMessageContents(e.to_string()))?,
         )),
       ))
     }
@@ -257,7 +255,7 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedOutputVecCmdV4 {
         msg.device_index(),
         idx,
         feature.feature.id(),
-        OutputCommand::from_output_type(cmd.actuator_type(), output_value as u32).unwrap(),
+        OutputCommand::from_output_type(cmd.actuator_type(), output_value).unwrap(),
       ));
     }
 
@@ -374,7 +372,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceNoActuatorError("RotateCmdV1".to_owned()),
         ))?
-        .rotate_with_direction()
+        .rotate()
         .as_ref()
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceNoActuatorError("RotateCmdV1".to_owned()),
@@ -384,13 +382,12 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
         msg.device_index(),
         idx,
         feature.feature.id(),
-        OutputCommand::RotateWithDirection(OutputRotateWithDirection::new(
+        OutputCommand::Rotate(OutputValue::new(
           actuator.calculate_scaled_float(cmd.speed()).map_err(|_| {
             ButtplugError::from(ButtplugMessageError::InvalidMessageContents(
               "Position should be 0.0 < x < 1.0".to_owned(),
             ))
-          })? as u32,
-          cmd.clockwise(),
+          })? as i32 * (if cmd.clockwise() { 1 } else { -1 })
         )),
       ));
     }

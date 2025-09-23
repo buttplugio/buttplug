@@ -44,7 +44,7 @@ impl ProtocolHandler for TryFun {
     &self,
     _feature_index: u32,
     feature_id: uuid::Uuid,
-    speed: u32,
+    speed: i32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut sum: u8 = 0xff;
     let mut data = vec![0xAA, 0x02, 0x08, speed as u8];

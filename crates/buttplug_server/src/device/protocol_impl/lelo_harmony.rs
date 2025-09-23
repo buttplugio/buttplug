@@ -147,9 +147,9 @@ impl ProtocolHandler for LeloHarmony {
     &self,
     feature_index: u32,
     feature_id: Uuid,
-    speed: u32,
+    speed: i32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.handle_input_cmd(feature_index, feature_id, speed)
+    self.handle_input_cmd(feature_index, feature_id, speed as u32)
   }
 
   fn handle_output_vibrate_cmd(

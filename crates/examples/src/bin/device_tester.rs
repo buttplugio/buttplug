@@ -17,7 +17,6 @@ use buttplug_core::message::{
   DeviceFeature,
   DeviceFeatureOutput,
   OutputCommand,
-  OutputRotateWithDirection,
   OutputType,
   OutputValue,
 };

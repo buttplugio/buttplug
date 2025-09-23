@@ -3,7 +3,7 @@ defaults:
   features:
     - id: b7495351-9101-448a-94c4-4598cf541dca
       output:
-        rotate_with_direction:
+        rotate:
           value:
             - -6
             - 6

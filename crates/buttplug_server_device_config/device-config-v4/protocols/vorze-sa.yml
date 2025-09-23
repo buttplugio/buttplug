@@ -34,7 +34,7 @@ configurations:
     features:
       - id: 8e249d53-8d80-4f42-bc40-e6edb7779e92
         output:
-          rotate_with_direction:
+          rotate:
             value:
               - -99
               - 99
@@ -46,7 +46,7 @@ configurations:
     features:
       - id: 2d8d1443-c394-4df4-b9bb-1659d8323b45
         output:
-          rotate_with_direction:
+          rotate:
             value:
               - -99
               - 99
@@ -58,13 +58,13 @@ configurations:
     features:
       - id: a1632ce4-314f-481d-9ae2-2a11a0c4caa4
         output:
-          rotate_with_direction:
+          rotate:
             value:
               - -99
               - 99
       - id: 4b09a02d-9a4a-4c8b-8340-8e6ca3cecfc2
         output:
-          rotate_with_direction:
+          rotate:
             value:
               - -99
               - 99

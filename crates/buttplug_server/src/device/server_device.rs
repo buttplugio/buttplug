@@ -53,7 +53,6 @@ use buttplug_core::{
     DeviceMessageInfoV4,
     InputCommandType,
     InputType,
-    OutputRotateWithDirection,
     OutputType,
     OutputValue,
   },
@@ -438,12 +437,6 @@ impl ServerDevice {
             }
             OutputType::Rotate => {
               stop_cmd(message::OutputCommand::Rotate(OutputValue::new(0)));
-              break;
-            }
-            OutputType::RotateWithDirection => {
-              stop_cmd(message::OutputCommand::RotateWithDirection(
-                OutputRotateWithDirection::new(0, true),
-              ));
               break;
             }
             OutputType::Vibrate => {

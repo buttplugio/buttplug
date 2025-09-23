@@ -292,7 +292,6 @@ impl From<&ServerDeviceFeatureOutputPositionWithDurationProperties>
 pub struct ServerDeviceFeatureOutput {
   vibrate: Option<ServerDeviceFeatureOutputValueProperties>,
   rotate: Option<ServerDeviceFeatureOutputValueProperties>,
-  rotate_with_direction: Option<ServerDeviceFeatureOutputValueProperties>,
   oscillate: Option<ServerDeviceFeatureOutputValueProperties>,
   constrict: Option<ServerDeviceFeatureOutputValueProperties>,
   heater: Option<ServerDeviceFeatureOutputValueProperties>,
@@ -312,7 +311,6 @@ impl ServerDeviceFeatureOutput {
       OutputType::Position => self.position.is_some(),
       OutputType::PositionWithDuration => self.position_with_duration.is_some(),
       OutputType::Rotate => self.rotate.is_some(),
-      OutputType::RotateWithDirection => self.rotate.is_some(),
       OutputType::Spray => self.spray.is_some(),
       OutputType::Unknown => false,
       OutputType::Vibrate => self.vibrate.is_some(),
@@ -346,10 +344,6 @@ impl ServerDeviceFeatureOutput {
       .rotate
       .is_some()
       .then(|| types.push(OutputType::Rotate));
-    self
-      .rotate_with_direction
-      .is_some()
-      .then(|| types.push(OutputType::RotateWithDirection));
     self.spray.is_some().then(|| types.push(OutputType::Spray));
     self
       .vibrate
@@ -390,10 +384,6 @@ impl ServerDeviceFeatureOutput {
         |x| x.calculate_scaled_value(value as u32).map(|x| x as i32),
       ),
       OutputType::Rotate => self.rotate.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_value(value),
-      ),
-      OutputType::RotateWithDirection => self.rotate_with_direction.as_ref().map_or(
         Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
         |x| x.calculate_scaled_value(value),
       ),
@@ -443,10 +433,6 @@ impl ServerDeviceFeatureOutput {
         Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
         |x| x.calculate_scaled_float(value),
       ),
-      OutputType::RotateWithDirection => self.rotate_with_direction.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_float(value),
-      ),
       OutputType::Spray => self.spray.as_ref().map_or(
         Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
         |x| x.calculate_scaled_float(value),
@@ -465,10 +451,6 @@ impl From<ServerDeviceFeatureOutput> for DeviceFeatureOutput {
     let mut builder = DeviceFeatureOutputBuilder::default();
     val.vibrate.as_ref().map(|x| builder.vibrate(x.into()));
     val.rotate.as_ref().map(|x| builder.rotate(x.into()));
-    val
-      .rotate_with_direction
-      .as_ref()
-      .map(|x| builder.rotate_with_direction(x.into()));
     val.oscillate.as_ref().map(|x| builder.oscillate(x.into()));
     val.constrict.as_ref().map(|x| builder.constrict(x.into()));
     val.heater.as_ref().map(|x| builder.heater(x.into()));

@@ -186,7 +186,7 @@
           "output": {
             "type": "object",
             "patternProperties": {
-              "^(vibrate|rotate|oscillate|constrict|spray|position|rotate_with_direction|heater|led)$": {
+              "^(vibrate|rotate|oscillate|constrict|spray|position|heater|led)$": {
                 "type": "object",
                 "properties": {
                   "value": {
@@ -276,7 +276,7 @@
           "output": {
             "type": "object",
             "patternProperties": {
-              "^(vibrate|rotate|oscillate|constrict|spray|rotate_with_direction|heater|led)$": {
+              "^(vibrate|rotate|oscillate|constrict|spray|heater|led)$": {
                 "type": "object",
                 "properties": {
                   "value": {

@@ -83,8 +83,6 @@ struct BaseDeviceFeatureOutput {
   #[serde(skip_serializing_if = "Option::is_none")]
   rotate: Option<BaseDeviceFeatureOutputValueProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
-  rotate_with_direction: Option<BaseDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
   oscillate: Option<BaseDeviceFeatureOutputValueProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
   constrict: Option<BaseDeviceFeatureOutputValueProperties>,
@@ -108,9 +106,6 @@ impl From<BaseDeviceFeatureOutput> for ServerDeviceFeatureOutput {
     }
     if let Some(rotate) = val.rotate {
       output.set_rotate(Some(rotate.into()));
-    }
-    if let Some(rotate_with_direction) = val.rotate_with_direction {
-      output.set_rotate_with_direction(Some(rotate_with_direction.into()));
     }
     if let Some(oscillate) = val.oscillate {
       output.set_oscillate(Some(oscillate.into()));
@@ -254,8 +249,6 @@ struct UserDeviceFeatureOutput {
   #[serde(skip_serializing_if = "Option::is_none")]
   rotate: Option<UserDeviceFeatureOutputValueProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
-  rotate_with_direction: Option<UserDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
   oscillate: Option<UserDeviceFeatureOutputValueProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
   constrict: Option<UserDeviceFeatureOutputValueProperties>,
@@ -277,6 +270,7 @@ impl UserDeviceFeatureOutput {
     base_output: &ServerDeviceFeatureOutput,
   ) -> Result<ServerDeviceFeatureOutput, ButtplugDeviceConfigError> {
     let mut output = ServerDeviceFeatureOutput::default();
+    // TODO Flip logic and output errors if user has something base doesn't, or vice versa.
     if let Some(base_vibrate) = base_output.vibrate() {
       if let Some(user_vibrate) = &self.vibrate {
         output.set_vibrate(Some(user_vibrate.with_base_properties(base_vibrate)?));
@@ -349,7 +343,6 @@ impl From<&ServerDeviceFeatureOutput> for UserDeviceFeatureOutput {
     Self {
       vibrate: value.vibrate().as_ref().map(|x| x.into()),
       rotate: value.rotate().as_ref().map(|x| x.into()),
-      rotate_with_direction: value.rotate_with_direction().as_ref().map(|x| x.into()),
       oscillate: value.oscillate().as_ref().map(|x| x.into()),
       constrict: value.constrict().as_ref().map(|x| x.into()),
       heater: value.heater().as_ref().map(|x| x.into()),

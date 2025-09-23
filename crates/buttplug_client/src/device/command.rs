@@ -29,7 +29,6 @@ pub enum ClientDeviceOutputCommand {
   Led(u32),
   Spray(u32),
   Position(u32),
-  RotateWithDirection(u32, bool),
   PositionWithDuration(u32, u32),
   // f64 types are old style float, will need to convert before sending
   VibrateFloat(f64),
@@ -40,7 +39,6 @@ pub enum ClientDeviceOutputCommand {
   LedFloat(f64),
   SprayFloat(f64),
   PositionFloat(f64),
-  RotateWithDirectionFloat(f64, bool),
   PositionWithDurationFloat(f64, u32),
 }
 
@@ -55,7 +53,7 @@ impl ClientDeviceOutputCommand {
       OutputType::Led => Ok(ClientDeviceOutputCommand::LedFloat(value)),
       OutputType::Spray => Ok(ClientDeviceOutputCommand::SprayFloat(value)),
       OutputType::Position => Ok(ClientDeviceOutputCommand::PositionFloat(value)),
-      _ => Err(ButtplugClientError::ButtplugOutputCommandConversionError("Cannot use PositionWithDuration or RotateWithDirection with this method".to_owned()))
+      _ => Err(ButtplugClientError::ButtplugOutputCommandConversionError("Cannot use PositionWithDuration with this method".to_owned()))
     }
   }
 }
@@ -78,10 +76,6 @@ impl Into<OutputType> for &ClientDeviceOutputCommand {
       ClientDeviceOutputCommand::PositionWithDuration(_, _)
       | ClientDeviceOutputCommand::PositionWithDurationFloat(_, _) => {
         OutputType::PositionWithDuration
-      }
-      ClientDeviceOutputCommand::RotateWithDirection(_, _)
-      | ClientDeviceOutputCommand::RotateWithDirectionFloat(_, _) => {
-        OutputType::RotateWithDirection
       }
     }
   }

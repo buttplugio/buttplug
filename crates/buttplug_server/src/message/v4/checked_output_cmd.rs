@@ -109,9 +109,9 @@ impl TryFromDeviceAttributes<OutputCmdV4> for CheckedOutputCmdV4 {
       let value = cmd.command().value();
       let new_value = output_map
         .calculate_from_value(output_type, value as i32)
-        .map_err(|_| ButtplugDeviceError::DeviceStepRangeError(0, value))?;
+        .map_err(|_| ButtplugDeviceError::DeviceStepRangeError(0, value.abs() as u32))?;
       let mut new_command = cmd.command();
-      new_command.set_value(new_value as u32);
+      new_command.set_value(new_value);
       // We can't make a private trait impl to turn a ValueCmd into a CheckedValueCmd, and this
       // is all about security, so we just copy. Silly, but it works for our needs in terms of
       // making this a barrier.

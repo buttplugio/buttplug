@@ -60,8 +60,8 @@ impl ProtocolHandler for MetaXSireV3 {
     &self,
     feature_index: u32,
     feature_id: uuid::Uuid,
-    speed: u32,
+    speed: i32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.form_command(feature_index, feature_id, speed)
+    self.form_command(feature_index, feature_id, speed as u32)
   }
 }

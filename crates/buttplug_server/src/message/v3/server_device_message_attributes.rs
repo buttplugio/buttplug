@@ -108,7 +108,8 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
         if let Some(output_map) = feature.output()
-          && let Some(actuator) = output_map.rotate_with_direction() {
+          && let Some(actuator) = output_map.rotate() 
+          && *actuator.value().base().start() < 0 {
             let actuator_type = OutputType::Rotate;
             let step_count = actuator.value().step_count();
             let attrs = ServerGenericDeviceMessageAttributesV3 {

@@ -23,11 +23,11 @@ use serde::{Deserialize, Serialize};
 #[getset(get_copy = "pub")]
 pub struct OutputValue {
   #[serde(rename = "Value")]
-  value: u32,
+  value: i32,
 }
 
 impl OutputValue {
-  pub fn new(value: u32) -> Self {
+  pub fn new(value: i32) -> Self {
     Self { value }
   }
 }
@@ -47,28 +47,11 @@ impl OutputPositionWithDuration {
   }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, CopyGetters)]
-#[getset(get_copy = "pub")]
-pub struct OutputRotateWithDirection {
-  #[serde(rename = "Speed")]
-  speed: u32,
-  #[serde(rename = "Clockwise")]
-  clockwise: bool,
-}
-
-impl OutputRotateWithDirection {
-  pub fn new(speed: u32, clockwise: bool) -> Self {
-    Self { speed, clockwise }
-  }
-}
-
 #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum OutputCommand {
   Vibrate(OutputValue),
   // Single Direction Rotation Speed
   Rotate(OutputValue),
-  // Two Direction Rotation Speed
-  RotateWithDirection(OutputRotateWithDirection),
   Oscillate(OutputValue),
   Constrict(OutputValue),
   Spray(OutputValue),
@@ -81,7 +64,7 @@ pub enum OutputCommand {
 }
 
 impl OutputCommand {
-  pub fn value(&self) -> u32 {
+  pub fn value(&self) -> i32 {
     match self {
       OutputCommand::Constrict(x)
       | OutputCommand::Spray(x)
@@ -91,12 +74,11 @@ impl OutputCommand {
       | OutputCommand::Position(x)
       | OutputCommand::Rotate(x)
       | OutputCommand::Vibrate(x) => x.value(),
-      OutputCommand::RotateWithDirection(x) => x.speed(),
-      OutputCommand::PositionWithDuration(x) => x.position(),
+      OutputCommand::PositionWithDuration(x) => x.position() as i32,
     }
   }
 
-  pub fn set_value(&mut self, value: u32) {
+  pub fn set_value(&mut self, value: i32) {
     match self {
       OutputCommand::Constrict(x)
       | OutputCommand::Spray(x)
@@ -106,8 +88,7 @@ impl OutputCommand {
       | OutputCommand::Position(x)
       | OutputCommand::Rotate(x)
       | OutputCommand::Vibrate(x) => x.value = value,
-      OutputCommand::RotateWithDirection(x) => x.speed = value,
-      OutputCommand::PositionWithDuration(x) => x.position = value,
+      OutputCommand::PositionWithDuration(x) => x.position = value as u32,
     }
   }
 
@@ -115,7 +96,6 @@ impl OutputCommand {
     match self {
       Self::Vibrate(_) => OutputType::Vibrate,
       Self::Rotate(_) => OutputType::Rotate,
-      Self::RotateWithDirection(_) => OutputType::RotateWithDirection,
       Self::Oscillate(_) => OutputType::Oscillate,
       Self::Constrict(_) => OutputType::Constrict,
       Self::Spray(_) => OutputType::Spray,
@@ -126,7 +106,7 @@ impl OutputCommand {
     }
   }
 
-  pub fn from_output_type(output_type: OutputType, value: u32) -> Result<Self, ButtplugError> {
+  pub fn from_output_type(output_type: OutputType, value: i32) -> Result<Self, ButtplugError> {
     match output_type {
       OutputType::Constrict => Ok(Self::Constrict(OutputValue::new(value))),
       OutputType::Heater => Ok(Self::Heater(OutputValue::new(value))),

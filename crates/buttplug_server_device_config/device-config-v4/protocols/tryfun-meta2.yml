@@ -15,7 +15,7 @@ defaults:
             - 100
     - id: 26402ebe-7ee0-4c7d-ae40-205ec4f3a1b0
       output:
-        rotate_with_direction:
+        rotate:
           value:
             - -100
             - 100

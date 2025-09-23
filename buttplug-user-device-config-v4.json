@@ -1,0 +1,51 @@
+{
+  "version": {
+    "major": 4,
+    "minor": 0
+  },
+  "user_configs": {
+    "protocols": {},
+    "devices": [
+      {
+        "identifier": {
+          "protocol": "lovense",
+          "identifier": "EL",
+          "address": "PeripheralId(81b8f016-ba95-e1ae-3a71-a2e6b1d83b21)"
+        },
+        "config": {
+          "id": "5d434198-4697-4b00-985e-33788fc955d1",
+          "base_id": "bbfd764c-b419-4c13-aeb0-e753a86318ed",
+          "features": [
+            {
+              "id": "16099312-8bf8-45f7-9a37-9c56ffd972ae",
+              "base_id": "0627be5e-8553-4f20-b4cf-15f5e1896e5f",
+              "output": {
+                "vibrate": {
+                  "disabled": false
+                }
+              }
+            },
+            {
+              "id": "c82ea967-3014-49ef-8189-e7e065c4bdbf",
+              "base_id": "360d81e7-5126-4dbb-b72d-7bb60eb67400",
+              "output": {
+                "rotate": {
+                  "disabled": false
+                }
+              }
+            },
+            {
+              "id": "3ad9adee-8c32-408f-8e8c-4a275bb9421c",
+              "base_id": "50b9b31f-c2a8-459a-81fd-c54604f5184e"
+            }
+          ],
+          "user_config": {
+            "allow": false,
+            "deny": false,
+            "index": 0
+          }
+        }
+      }
+    ]
+  }
+}
