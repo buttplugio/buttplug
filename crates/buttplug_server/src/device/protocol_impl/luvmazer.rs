@@ -23,14 +23,14 @@ pub struct Luvmazer {}
 impl ProtocolHandler for Luvmazer {
   fn handle_output_vibrate_cmd(
     &self,
-    _feature_index: u32,
+    feature_index: u32,
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       &[feature_id],
       Endpoint::Tx,
-      vec![0xa0, 0x01, 0x00, 0x00, 0x64, speed as u8],
+      vec![0xa0, 0x01, 0x00, feature_index as u8, 0x64, speed as u8],
       false,
     )
     .into()])
@@ -49,5 +49,35 @@ impl ProtocolHandler for Luvmazer {
       false,
     )
     .into()])
+  }
+
+  fn handle_output_oscillate_cmd(
+    &self,
+    _feature_index: u32,
+    feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![HardwareWriteCmd::new(
+      &[feature_id],
+      Endpoint::Tx,
+      vec![0xa0, 0x06, 0x01, 0x00, 0x64, speed as u8],
+      false,
+    )
+        .into()])
+  }
+
+  fn handle_output_constrict_cmd(
+    &self,
+    _feature_index: u32,
+    feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![HardwareWriteCmd::new(
+      &[feature_id],
+      Endpoint::Tx,
+      vec![0xa0, 0x0d, 0x00, 0x00, if speed == 0 { 0x00} else { 0x14 }, speed as u8],
+      false,
+    )
+        .into()])
   }
 }

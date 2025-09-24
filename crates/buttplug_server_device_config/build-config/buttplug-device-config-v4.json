@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 88
+    "minor": 91
   },
   "protocols": {
     "activejoy": {
@@ -12309,7 +12309,10 @@
         {
           "btle": {
             "names": [
-              "TKLM-W001-BT"
+              "TKLM-W001-BT",
+              "TKLM-W003-BT-RX",
+              "TKLM-C003-BT",
+              "TKLM-C004-BT"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -12317,6 +12320,126 @@
               }
             }
           }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "cb63c51d-ed29-4e07-81ce-aca8162e52ba",
+          "identifier": [
+            "TKLM-W001-BT"
+          ],
+          "name": "Luvmazer Finger Magic"
+        },
+        {
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "id": "8deea69f-ea53-46bb-80ae-51dd5d49bba9",
+              "output": {
+                "Vibrate": {
+                  "step-range": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "id": "5ae8bb6f-6280-4a8d-9e08-a3d5e5fb89a8",
+              "output": {
+                "Oscillate": {
+                  "step-range": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "54723a02-4d77-4d58-90ee-1e692768db9d",
+          "identifier": [
+            "TKLM-W003-BT-RX"
+          ],
+          "name": "Luvmazer Cat Paw"
+        },
+        {
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "id": "4dd378c8-a91b-400e-846b-f16e81ac5690",
+              "output": {
+                "Vibrate": {
+                  "step-range": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "id": "c04a2518-81a2-49cb-8a0a-1a5b9c163737",
+              "output": {
+                "Vibrate": {
+                  "step-range": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "3f3cb905-d570-41dc-80ed-720762770093",
+          "identifier": [
+            "TKLM-C003-BT"
+          ],
+          "name": "Luvmazer Cock Ring"
+        },
+        {
+          "features": [
+            {
+              "feature-type": "Vibrate",
+              "id": "e04ad6f5-278e-4acc-b6fa-711954c2e1ab",
+              "output": {
+                "Vibrate": {
+                  "step-range": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "feature-type": "Oscillate",
+              "id": "8a4f2884-887f-46e3-9a36-c0b91b1b1363",
+              "output": {
+                "Oscillate": {
+                  "step-range": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "feature-type": "Constrict",
+              "id": "389aa8b8-2550-462c-bd4f-1158c0981606",
+              "output": {
+                "Constrict": {
+                  "step-range": [
+                    0,
+                    54
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "d76d8d49-beca-49f3-931e-5a040b463111",
+          "identifier": [
+            "TKLM-C004-BT"
+          ],
+          "name": "Luvmazer Interstellar"
         }
       ],
       "defaults": {
