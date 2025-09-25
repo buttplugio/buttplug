@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 92
+    "minor": 94
   },
   "protocols": {
     "activejoy": {
@@ -17203,9 +17203,14 @@
           "btle": {
             "names": [
               "CFG1 vibrator",
-              "HJ2024N01"
+              "HJ2024N01",
+              "BC1847",
+              "BC1816"
             ],
             "services": {
+              "0000bca2-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000bc21-0000-1000-8000-00805f9b34fb"
+              },
               "0000cfa2-0000-1000-8000-00805f9b34fb": {
                 "tx": "0000cf21-0000-1000-8000-00805f9b34fb"
               },
@@ -17223,6 +17228,48 @@
             "HJ2024N01"
           ],
           "name": "VVD Vkini"
+        },
+        {
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "id": "15cf412a-594b-4238-bbe0-7e9693233430",
+              "output": {
+                "Vibrate": {
+                  "step-range": [
+                    0,
+                    99
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "774c0fd8-d2a5-415c-b0b0-90d244be0a05",
+          "identifier": [
+            "BC1847"
+          ],
+          "name": "Sexverse Black Knight"
+        },
+        {
+          "features": [
+            {
+              "feature-type": "Oscillate",
+              "id": "cc1f8c5c-40ff-4d44-91ca-4520042cf723",
+              "output": {
+                "Vibrate": {
+                  "step-range": [
+                    0,
+                    99
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "99333be9-450f-4092-b776-dd4de1eff244",
+          "identifier": [
+            "BC1847"
+          ],
+          "name": "Sexverse Dark Knight"
         }
       ],
       "defaults": {
