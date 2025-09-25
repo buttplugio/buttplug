@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 91
+    "minor": 92
   },
   "protocols": {
     "activejoy": {
@@ -8739,6 +8739,18 @@
             {
               "feature-type": "Vibrate",
               "id": "f6ac9d49-3d48-4709-83ac-2ae0eb5ec74b",
+              "output": {
+                "Vibrate": {
+                  "step-range": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "feature-type": "Vibrate",
+              "id": "1e1fb78c-a3bd-4782-8a96-684bbbaa4670",
               "output": {
                 "Vibrate": {
                   "step-range": [
