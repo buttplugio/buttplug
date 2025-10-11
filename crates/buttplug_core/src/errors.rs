@@ -138,7 +138,7 @@ pub enum ButtplugDeviceError {
   /// Device communication error: {0}
   DeviceCommunicationError(String),
   /// Device feature only has {0} steps for control, but {1} steps specified.
-  DeviceStepRangeError(u32, u32),
+  DeviceStepRangeError(i32, i32),
   /// Device got {0} message but has no actuators
   DeviceNoActuatorError(String),
   /// Device got {0} message but has no sensors

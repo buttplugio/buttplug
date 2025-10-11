@@ -20,13 +20,12 @@ generic_protocol_setup!(Synchro, "synchro");
 pub struct Synchro {}
 
 impl ProtocolHandler for Synchro {
-  fn handle_rotation_with_direction_cmd(
-    &self,
-    _feature_index: u32,
-    feature_id: Uuid,
-    speed: u32,
-    clockwise: bool,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_rotate_cmd(
+      &self,
+      _feature_index: u32,
+      feature_id: Uuid,
+      speed: i32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![
       HardwareWriteCmd::new(
         &[feature_id],
@@ -34,7 +33,7 @@ impl ProtocolHandler for Synchro {
         vec![
           0xa1,
           0x01,
-          speed as u8 | if clockwise || speed == 0 { 0x00 } else { 0x80 },
+          speed.unsigned_abs() as u8 | if speed >= 0 { 0x00 } else { 0x80 },
           0x77,
           0x55,
         ],

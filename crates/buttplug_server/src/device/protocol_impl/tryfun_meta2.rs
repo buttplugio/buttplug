@@ -54,18 +54,17 @@ impl ProtocolHandler for TryFunMeta2 {
     ])
   }
 
-  fn handle_rotation_with_direction_cmd(
-    &self,
-    _feature_index: u32,
-    feature_id: Uuid,
-    speed: u32,
-    clockwise: bool,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_rotate_cmd(
+      &self,
+      _feature_index: u32,
+      feature_id: Uuid,
+      speed: i32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut speed = speed as i8;
-    if clockwise {
+    if speed >= 0 {
       speed += 1;
-      speed *= -1;
     }
+    speed *= -1;
     let mut sum: u8 = 0xff;
     let mut data = vec![
       self.packet_id.fetch_add(1, Ordering::Relaxed),

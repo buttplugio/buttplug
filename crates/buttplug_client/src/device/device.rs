@@ -213,7 +213,7 @@ impl ButtplugClientDevice {
   pub fn vibrate(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
     let val = level.into();
     self.set_client_value(&match val {
-      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Vibrate(v),
+      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Vibrate(v as u32),
       ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::VibrateFloat(f),
     })
   }

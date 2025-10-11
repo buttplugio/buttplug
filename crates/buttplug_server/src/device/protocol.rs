@@ -341,16 +341,6 @@ pub trait ProtocolHandler: Sync + Send {
     self.command_unimplemented("OutputCmd (Position w/ Duration Actuator)")
   }
 
-  fn handle_rotation_with_direction_cmd(
-    &self,
-    _feature_index: u32,
-    _feature_id: Uuid,
-    _speed: u32,
-    _clockwise: bool,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented("OutputCmd (Rotation w/ Direction Actuator)")
-  }
-
   fn handle_input_subscribe_cmd(
     &self,
     _device_index: u32,

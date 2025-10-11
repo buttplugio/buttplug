@@ -47,22 +47,6 @@ impl ProtocolHandler for LovenseRotateVibrator {
     form_rotate_with_direction_command(speed.abs() as u32, speed < 0)
   }
 
-  fn handle_rotation_with_direction_cmd(
-    &self,
-    _feature_index: u32,
-    _feature_id: Uuid,
-    speed: u32,
-    clockwise: bool,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let change = if clockwise != self.clockwise.load(Ordering::Relaxed) {
-      self.clockwise.store(clockwise, Ordering::Relaxed);
-      true
-    } else {
-      false
-    };
-    form_rotate_with_direction_command(speed, change)
-  }
-
   fn handle_battery_level_cmd(
     &self,
     device_index: u32,

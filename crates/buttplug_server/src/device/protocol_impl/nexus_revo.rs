@@ -37,13 +37,12 @@ impl ProtocolHandler for NexusRevo {
     ])
   }
 
-  fn handle_rotation_with_direction_cmd(
-    &self,
-    _feature_index: u32,
-    feature_id: Uuid,
-    speed: u32,
-    clockwise: bool,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_rotate_cmd(
+      &self,
+      _feature_index: u32,
+      feature_id: Uuid,
+      speed: i32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![
       HardwareWriteCmd::new(
         &[feature_id],
@@ -53,7 +52,7 @@ impl ProtocolHandler for NexusRevo {
           0x01,
           0x02,
           0x00,
-          speed as u8 + if speed != 0 && clockwise { 2 } else { 0 },
+          speed.unsigned_abs() as u8 + if speed > 0 { 2 } else { 0 },
           0x00,
         ],
         true,

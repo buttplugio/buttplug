@@ -3,13 +3,19 @@ use buttplug_core::message::OutputType;
 use crate::ButtplugClientError;
 
 pub enum ClientDeviceCommandValue {
-  Int(u32),
+  Int(i32),
   Float(f64),
+}
+
+impl From<i32> for ClientDeviceCommandValue {
+  fn from(val: i32) -> Self {
+    ClientDeviceCommandValue::Int(val)
+  }
 }
 
 impl From<u32> for ClientDeviceCommandValue {
   fn from(val: u32) -> Self {
-    ClientDeviceCommandValue::Int(val)
+    ClientDeviceCommandValue::Int(val as i32)
   }
 }
 
@@ -22,7 +28,7 @@ impl From<f64> for ClientDeviceCommandValue {
 pub enum ClientDeviceOutputCommand {
   // u32 types use steps, need to compare before sending
   Vibrate(u32),
-  Rotate(u32),
+  Rotate(i32),
   Oscillate(u32),
   Constrict(u32),
   Heater(u32),

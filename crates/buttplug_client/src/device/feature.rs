@@ -83,12 +83,14 @@ impl ClientDeviceFeature {
     feature_output: &dyn DeviceFeatureOutputLimits,
     float_amt: f64,
   ) -> Result<i32, ButtplugClientError> {
-    if !(0.0f64..=1.0f64).contains(&float_amt) {
+    if !(-1.0f64..=1.0f64).contains(&float_amt) {
       Err(ButtplugClientError::ButtplugOutputCommandConversionError(
         "Float values must be between 0.0 and 1.0".to_owned(),
       ))
     } else {
-      Ok((float_amt * feature_output.step_count() as f64).ceil() as i32)
+      let mut val = float_amt * feature_output.step_count() as f64;
+      val = if val > 0.000001f64 { val.ceil() } else { val.floor() };
+      Ok(val as i32)
     }
   }
 
@@ -195,7 +197,7 @@ impl ClientDeviceFeature {
   pub fn vibrate(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
     let val = level.into();
     self.send_command(&match val {
-      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Vibrate(v),
+      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Vibrate(v as u32),
       ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::VibrateFloat(f),
     })
   }
@@ -206,7 +208,7 @@ impl ClientDeviceFeature {
   ) -> ButtplugClientResultFuture {
     let val = level.into();
     self.send_command(&match val {
-      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Oscillate(v),
+      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Oscillate(v as u32),
       ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::OscillateFloat(f),
     })
   }
@@ -222,7 +224,7 @@ impl ClientDeviceFeature {
   pub fn spray(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
     let val = level.into();
     self.send_command(&match val {
-      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Spray(v),
+      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Spray(v as u32),
       ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::SprayFloat(f),
     })
   }
@@ -233,7 +235,7 @@ impl ClientDeviceFeature {
   ) -> ButtplugClientResultFuture {
     let val = level.into();
     self.send_command(&match val {
-      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Constrict(v),
+      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Constrict(v as u32),
       ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::ConstrictFloat(f),
     })
   }
@@ -241,7 +243,7 @@ impl ClientDeviceFeature {
   pub fn position(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
     let val = level.into();
     self.send_command(&match val {
-      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Position(v),
+      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Position(v as u32),
       ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::PositionFloat(f),
     })
   }
@@ -254,7 +256,7 @@ impl ClientDeviceFeature {
     let val = position.into();
     self.send_command(&match val {
       ClientDeviceCommandValue::Int(v) => {
-        ClientDeviceOutputCommand::PositionWithDuration(v, duration_in_ms)
+        ClientDeviceOutputCommand::PositionWithDuration(v as u32, duration_in_ms)
       }
       ClientDeviceCommandValue::Float(f) => {
         ClientDeviceOutputCommand::PositionWithDurationFloat(f, duration_in_ms)

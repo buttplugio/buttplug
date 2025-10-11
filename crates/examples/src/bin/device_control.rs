@@ -72,7 +72,7 @@ async fn main() -> anyhow::Result<()> {
   // We can use the convenience functions on ButtplugClientDevice to
   // send the message. This version sets all of the motors on a
   // vibrating device to the same speed.
-  test_client_device.vibrate(10).await?;
+  test_client_device.vibrate(0.5f64).await?;
 
   // If we wanted to just set one motor on and the other off, we could
   // try this version that uses an array. It'll throw an exception if

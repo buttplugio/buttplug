@@ -50,19 +50,18 @@ impl ProtocolHandler for Motorbunny {
     ])
   }
 
-  fn handle_rotation_with_direction_cmd(
+  fn handle_output_rotate_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,
-    speed: u32,
-    clockwise: bool,
+    speed: i32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut command_vec: Vec<u8>;
     if speed == 0 {
       command_vec = vec![0xa0, 0x00, 0x00, 0x00, 0x00, 0xec];
     } else {
       command_vec = vec![0xaf];
-      let mut rotate_command = [if clockwise { 0x2a } else { 0x29 }, speed as u8].repeat(7);
+      let mut rotate_command = [if speed >= 0 { 0x2a } else { 0x29 }, speed.unsigned_abs() as u8].repeat(7);
       let crc = rotate_command
         .iter()
         .fold(0u8, |a, b| a.overflowing_add(*b).0);

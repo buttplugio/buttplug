@@ -26,21 +26,13 @@ pub struct VorzeSADualRotator {
 }
 
 impl ProtocolHandler for VorzeSADualRotator {
-  fn handle_rotation_with_direction_cmd(
-    &self,
-    feature_index: u32,
-    _feature_id: uuid::Uuid,
-    speed: u32,
-    clockwise: bool,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.speeds[feature_index as usize].store(
-      if clockwise {
-        speed as i8
-      } else {
-        -(speed as i8)
-      },
-      Ordering::Relaxed,
-    );
+  fn handle_output_rotate_cmd(
+      &self,
+      feature_index: u32,
+      _feature_id: Uuid,
+      speed: i32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.speeds[feature_index as usize].store(speed as i8, Ordering::Relaxed);
     let speed_left = self.speeds[0].load(Ordering::Relaxed);
     let data_left = ((speed_left >= 0) as u8) << 7 | (speed_left.unsigned_abs());
     let speed_right = self.speeds[1].load(Ordering::Relaxed);

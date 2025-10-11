@@ -25,15 +25,14 @@ impl VorzeSASingleRotator {
 }
 
 impl ProtocolHandler for VorzeSASingleRotator {
-  fn handle_rotation_with_direction_cmd(
-    &self,
-    _feature_index: u32,
-    feature_id: uuid::Uuid,
-    speed: u32,
-    clockwise: bool,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let clockwise = if clockwise { 1u8 } else { 0 };
-    let data: u8 = (clockwise) << 7 | (speed as u8);
+  fn handle_output_rotate_cmd(
+      &self,
+      _feature_index: u32,
+      feature_id: uuid::Uuid,
+      speed: i32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let clockwise = if speed >=0 { 1u8 } else { 0 };
+    let data: u8 = (clockwise) << 7 | (speed.unsigned_abs() as u8);
     Ok(vec![
       HardwareWriteCmd::new(
         &[feature_id],

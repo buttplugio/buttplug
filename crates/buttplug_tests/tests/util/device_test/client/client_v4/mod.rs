@@ -7,7 +7,7 @@ use buttplug_client::{
   ButtplugClient,
   ButtplugClientDevice,
   ButtplugClientEvent,
-  device::{ClientDeviceFeature, ClientDeviceOutputCommand},
+  device::{ClientDeviceCommandValue, ClientDeviceFeature, ClientDeviceOutputCommand},
 };
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
 use buttplug_core::{message::OutputType, util::async_manager};
@@ -89,24 +89,12 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
                 .feature()
                 .output()
                 .as_ref()
-                .is_some_and(|x| x.contains(OutputType::RotateWithDirection))
+                .is_some_and(|x| x.contains(OutputType::Rotate))
             })
             .map(|(_, x)| x)
             .collect();
           let f = rotate_features[cmd.index() as usize].clone();
-          f.rotate_with_direction(
-            (cmd.speed()
-              * f
-                .feature()
-                .output()
-                .as_ref()
-                .unwrap()
-                .get(OutputType::RotateWithDirection)
-                .unwrap()
-                .step_count() as f64)
-              .ceil() as u32,
-            cmd.clockwise(),
-          )
+          f.rotate(ClientDeviceCommandValue::Float(cmd.speed() * if cmd.clockwise() { 1f64 } else { -1f64 }))
         })
         .collect();
       futures::future::try_join_all(fut_vec).await.unwrap();

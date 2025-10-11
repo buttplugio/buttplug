@@ -143,7 +143,7 @@ impl ServerDeviceFeatureOutputValueProperties {
     };
     let current_value = value.unsigned_abs();
     let mult = if value < 0 { -1 } else { 1 };
-    if value > 0 && range.contains(&(range.start() + current_value)) {
+    if value != 0 && range.contains(&(range.start() + current_value)) {
       Ok((range.start() + current_value) as i32 * mult)
     } else if value == 0 {
       Ok(0)

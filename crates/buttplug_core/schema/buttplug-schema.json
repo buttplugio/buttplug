@@ -459,28 +459,11 @@
                 "type": "object",
                 "properties": {
                   "Value": {
-                    "type": "number",
-                    "minimum": 0
+                    "type": "number"
                   }
                 },
                 "required": [
                   "Value"
-                ]
-              },
-              "^RotateWithDirection$": {
-                "type": "object",
-                "properties": {
-                  "Speed": {
-                    "type": "number",
-                    "minimum": 0
-                  },
-                  "Clockwise": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "Speed",
-                  "Clockwise"
                 ]
               },
               "^PositionWithDuration$": {
