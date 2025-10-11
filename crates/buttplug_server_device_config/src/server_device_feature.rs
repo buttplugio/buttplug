@@ -198,14 +198,12 @@ impl ServerDeviceFeatureOutputPositionProperties {
     } else {
       self.position.internal_base()
     };
-    if value > 0 && range.contains(&(range.start() + value)) {
+    if range.contains(&(range.start() + value)) {
       if self.reverse_position {
         Ok(range.end() - value)
       } else {
         Ok(range.start() + value)
       }
-    } else if value == 0 {
-      Ok(0)
     } else {
       Err(ButtplugDeviceConfigError::InvalidOutputValue(
         value as i32,
