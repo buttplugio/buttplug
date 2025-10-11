@@ -12,11 +12,12 @@ mod protocol;
 mod user;
 
 use base::BaseConfigFile;
+use uuid::Uuid;
 
-use crate::device_config_file::{
+use crate::{UserDeviceIdentifier, device_config_file::{
   protocol::ProtocolDefinition,
   user::{UserConfigDefinition, UserConfigFile, UserDeviceConfigPair},
-};
+}};
 
 use super::{BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder};
 use buttplug_core::{
@@ -188,13 +189,14 @@ fn load_user_config(
     .clone()
     .unwrap_or_default()
   {
-    if let Some(base_config) = base_dcm
-      .base_device_definitions()
-      .get(&user_device_config_pair.identifier().into())
+    //let ident = BaseDeviceIdentifier::new(user_device_config_pair.identifier().protocol(), &None);
+    // Use device UUID instead of identifier to match here, otherwise we have to do really weird stuff with identifier hashes.
+    // TODO How do we deal with user configs derived from default here? We don't handle loading this correctly?
+    if let Some(base_config) = base_dcm.base_device_definitions().iter().find(|x| x.1.id() == user_device_config_pair.config().base_id())
     {
       if let Ok(loaded_user_config) = user_device_config_pair
         .config()
-        .build_from_base_definition(base_config) {
+        .build_from_base_definition(base_config.1) {
         if let Err(e) =
           dcm_builder.user_device_definition(user_device_config_pair.identifier(), &loaded_user_config)
         {
