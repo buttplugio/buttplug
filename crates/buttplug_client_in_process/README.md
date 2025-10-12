@@ -11,43 +11,21 @@
 [![Crates.io Downloads](https://img.shields.io/crates/d/buttplug)](https://crates.io/crates/buttplug)
 [![Crates.io License](https://img.shields.io/crates/l/buttplug)](https://crates.io/crates/buttplug)
 
-<div align="center">
-  <h3>
-    <a href="https://docs.rs/buttplug">
-      Rust API Documentation
-    </a>
-    <span> | </span>
-    <a href="https://docs.buttplug.io/docs/dev-guide">
-      Developer Guide
-    </a>
-    <span> | </span>    
-    <a href="https://docs.buttplug.io/docs/spec">
-      Protocol Spec
-    </a>
-    <span> | </span>
-    <a href="https://awesome.buttplug.io">
-      Apps and Games List
-    </a>
-  </h3>
-</div>
+# Buttplug In-Process Client Library
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: light)" srcset="../../images/buttplug_rust_docs.png">
-    <source media="(prefers-color-scheme: dark)" srcset="../../images/buttplug_rust_docs_light.png">
-    <img src="https://raw.githubusercontent.com/buttplugio/buttplug/master/images/buttplug_rust_docs.png">
-  </picture>
-</p>
+**YOU PROBABLY SHOULDN'T USE THIS,** but we're including it anyways.
 
-# Buttplug Client Library (Rehosted as Buttplug)
+If you want to build stand-alone Rust-based applications using Buttplug, you're in the right place.
 
-This is a rehosted version of the [buttplug_client](../buttplug_client/) library. We wanted to keep the crate name being something useful, but the rest of the library has been split into seperate crates.
+This library contains everything you need to scan for devices, and control their inputs and outputs.
 
-Including this library is similar to just including buttplug_client and the buttplug_transport_websocket_tungstinite libraries.
+## Why shouldn't I use this?
 
-## Where's the server side?
+Building a standalone application with this library means you'll have to update when we do. We're constantly adding device and protocol support to the library, which means changes to the core rust system. Since we may not keep APIs the same, you'll be on the hook to upgrade when we do, or else your software will fall behind in support.
 
-At this point, we're assuming anyone using the server portion of Buttplug is doing so via [Intiface Engine](../intiface_engine/) or [Intiface Central](https://intiface.com/central), as should only need the client and core portions of the project. Only those portions of the project are rehosted through this library now.
+## Then why does this exist?
+
+'cause it can make testing ideas, or just bringing up quick shitposts for sake of making a video or one-off project easier.
 
 ## License
 

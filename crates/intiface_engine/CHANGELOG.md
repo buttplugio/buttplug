@@ -1,4 +1,16 @@
+# Intiface Engine v4.0.0-beta1 (2025/10/12)
+
+## Features
+
+- Brought Engine back into the main Buttplug repo
+  - No reason to keep it seperate since it's basically the output of the repo anyways
+- Update to Buttplug v10.0.0-beta1
+  - v4 message spec update
+- Added beginnings of REST API
+
 # Intiface Engine v3.0.8 (2025/04/20)
+
+## Features
 
 - Update to Buttplug v9.0.8
   - Lots of new device support

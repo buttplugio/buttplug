@@ -41,7 +41,7 @@
 
 ## Are you in the right place?
 
-If you're just looking to hook your hardware up to something that says it "supports Buttplug/Intiface", you're in the wrong place. For that you'll most likely want to go check out [Intiface Central](https://intiface.com/central). 
+If you're just looking to hook your hardware up to something that says it "supports Buttplug/Intiface" (like one of the many apps/games in [our awesome list](https://awesome.buttplug.io)), you're in the wrong place. For that you'll most likely want to go check out [Intiface Central](https://intiface.com/central). 
 
 This is where we store all of the source code for the libraries that run your hardware. If you're a developer and interesting in that sort of thing, read on...
 
@@ -67,6 +67,12 @@ We also produce [btleplug](https://github.com/deviceplug/btleplug), the host-sid
 ## Apps, Games, and More!
 
 For a list of applications using Buttplug and Intiface, see the [awesome-buttplug repo](https://github.com/buttplugio/awesome-buttplug).
+
+## Beta on main branch?! REALLY?
+
+We've been working on the next version of our message spec for the better part of 3 years now, which has come with massive changes to the library. Rather than let this sit on our `dev` branch for another few months while we run through the beta process, we decided to promote beta to our main branch so it gets visibility. We'll still be marking beta versions in crates and releases, so package installs will still default to pre-beta version until we've released.
+
+Also I hadn't updated the README on the project in several years and didn't want to have to rewrite for both the old and new libraries. So here we are.
 
 ## Hardware Support
 
@@ -94,8 +100,9 @@ This project consists of the following crates:
 
 | Crate Name | Description |
 | ---- | ----------- |
-| buttplug | meta-crate, see README for more info |
+| buttplug | meta-crate that's just a rehost on buttplug_client, see README for more info |
 | buttplug_client | Buttplug Rust Client, useful for building application that will access Intiface Engine or Intiface Central. We recommend most developers use this. See crate README for more info. |
+| buttplug_client_in_process | Buttplug Rust Client w/ integrated Buttplug Server. Useful for building standalone applications and examples. | 
 | buttplug_core | Contains the protocol message schema, message class implementations, and structures shared by the client and server implementations. Will be rarely needed as a direct dependency. |
 | buttplug_derive | Procedural macros used in the Buttplug rust implementation. Will be rarely needed as a direct dependency. |
 | buttplug_server | The core server implementation, including server and device structures, all protocol implementations, etc... |

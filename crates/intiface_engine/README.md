@@ -7,10 +7,6 @@
 [![Twitter](https://img.shields.io/twitter/follow/buttplugio.svg?style=social&logo=twitter)](https://twitter.com/buttplugio)
 [![bluesky](https://img.shields.io/bluesky/followers/buttplug.io)](https://bsky.app/profile/buttplug.io)
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/buttplugio/buttplug/dev/images/buttplug_rust_docs.png">
-</p>
-
 CLI and Library frontend for Buttplug
 
 Intiface Engine is just a front-end for [Buttplug](https://github.com/buttplugio/buttplug),
@@ -52,7 +48,7 @@ For example, to run the server on websockets at port 12345 with bluetooth device
 ## Compiling
 
 Linux will have extra compilation dependency requirements via
-[buttplug-rs](https://github.com/buttplugio/buttplug). For pacakges required,
+[buttplug](https://github.com/buttplugio/buttplug). For pacakges required,
 please check there.
 
 ## Filing Issues and Contributing

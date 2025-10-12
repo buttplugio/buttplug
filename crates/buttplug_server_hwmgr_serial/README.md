@@ -1,4 +1,4 @@
-# Buttplug
+# Buttplug Server Serial Port Device Manager Library
 
 [![Patreon donate button](https://img.shields.io/badge/patreon-donate-yellow.svg)](https://www.patreon.com/qdot)
 [![Github donate button](https://img.shields.io/badge/github-donate-ff69b4.svg)](https://www.github.com/sponsors/qdot)
@@ -11,43 +11,7 @@
 [![Crates.io Downloads](https://img.shields.io/crates/d/buttplug)](https://crates.io/crates/buttplug)
 [![Crates.io License](https://img.shields.io/crates/l/buttplug)](https://crates.io/crates/buttplug)
 
-<div align="center">
-  <h3>
-    <a href="https://docs.rs/buttplug">
-      Rust API Documentation
-    </a>
-    <span> | </span>
-    <a href="https://docs.buttplug.io/docs/dev-guide">
-      Developer Guide
-    </a>
-    <span> | </span>    
-    <a href="https://docs.buttplug.io/docs/spec">
-      Protocol Spec
-    </a>
-    <span> | </span>
-    <a href="https://awesome.buttplug.io">
-      Apps and Games List
-    </a>
-  </h3>
-</div>
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: light)" srcset="../../images/buttplug_rust_docs.png">
-    <source media="(prefers-color-scheme: dark)" srcset="../../images/buttplug_rust_docs_light.png">
-    <img src="https://raw.githubusercontent.com/buttplugio/buttplug/master/images/buttplug_rust_docs.png">
-  </picture>
-</p>
-
-# Buttplug Client Library (Rehosted as Buttplug)
-
-This is a rehosted version of the [buttplug_client](../buttplug_client/) library. We wanted to keep the crate name being something useful, but the rest of the library has been split into seperate crates.
-
-Including this library is similar to just including buttplug_client and the buttplug_transport_websocket_tungstinite libraries.
-
-## Where's the server side?
-
-At this point, we're assuming anyone using the server portion of Buttplug is doing so via [Intiface Engine](../intiface_engine/) or [Intiface Central](https://intiface.com/central), as should only need the client and core portions of the project. Only those portions of the project are rehosted through this library now.
+This crate contains code necessary for connecting to serial ports on all desktop platforms. Mostly used by OSR-2/SR-6/SSR-1 users for direct "high-speed" connection. Yes, being able to connect over a wire at 115200 baud and get 50hz+ updates is considered high-speed in this field, in the year of our lord 2025. I fucking hate my job sometimes.
 
 ## License
 
