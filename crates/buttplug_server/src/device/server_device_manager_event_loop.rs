@@ -322,11 +322,7 @@ impl ServerDeviceManagerEventLoop {
 
         // After that, we can send out to the server's event listeners to let
         // them know a device has been added.
-        if self
-          .server_sender
-          .send(device_update_message)
-          .is_err()
-        {
+        if self.server_sender.send(device_update_message).is_err() {
           debug!("Server not currently available, dropping Device Added event.");
         }
       }

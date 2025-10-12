@@ -55,11 +55,11 @@ impl ProtocolHandler for TryFunMeta2 {
   }
 
   fn handle_output_rotate_cmd(
-      &self,
-      _feature_index: u32,
-      feature_id: Uuid,
-      speed: i32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    _feature_index: u32,
+    feature_id: Uuid,
+    speed: i32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut speed = speed as i8;
     if speed >= 0 {
       speed += 1;

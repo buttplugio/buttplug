@@ -89,52 +89,47 @@ impl ProtocolHandler for KGoalBoost {
               return;
             }
             if let HardwareEvent::Notification(_, endpoint, data) = info
-              && endpoint == Endpoint::RxPressure {
-                if data.len() < 7 {
-                  // Not even sure how this would happen, error and continue on.
-                  error!("KGoal Boost data not expected length!");
-                  continue;
-                }
-                // Extract our two pressure values.
-                let normalized = (data[3] as u32) << 8 | data[4] as u32;
-                let unnormalized = (data[5] as u32) << 8 | data[6] as u32;
-                if stream_sensors.contains(&0)
-                  && sender
-                    .send(
-                      InputReadingV4::new(
-                        device_index,
-                        feature_index,
-                        buttplug_core::message::InputTypeData::Pressure(InputData::new(normalized)),
-                      )
-                      .into(),
-                    )
-                    .is_err()
-                {
-                  debug!(
-                    "Hardware device listener for KGoal Boost shut down, returning from task."
-                  );
-                  return;
-                }
-                if stream_sensors.contains(&1)
-                  && sender
-                    .send(
-                      InputReadingV4::new(
-                        device_index,
-                        feature_index,
-                        buttplug_core::message::InputTypeData::Pressure(InputData::new(
-                          unnormalized,
-                        )),
-                      )
-                      .into(),
-                    )
-                    .is_err()
-                {
-                  debug!(
-                    "Hardware device listener for KGoal Boost shut down, returning from task."
-                  );
-                  return;
-                }
+              && endpoint == Endpoint::RxPressure
+            {
+              if data.len() < 7 {
+                // Not even sure how this would happen, error and continue on.
+                error!("KGoal Boost data not expected length!");
+                continue;
               }
+              // Extract our two pressure values.
+              let normalized = (data[3] as u32) << 8 | data[4] as u32;
+              let unnormalized = (data[5] as u32) << 8 | data[6] as u32;
+              if stream_sensors.contains(&0)
+                && sender
+                  .send(
+                    InputReadingV4::new(
+                      device_index,
+                      feature_index,
+                      buttplug_core::message::InputTypeData::Pressure(InputData::new(normalized)),
+                    )
+                    .into(),
+                  )
+                  .is_err()
+              {
+                debug!("Hardware device listener for KGoal Boost shut down, returning from task.");
+                return;
+              }
+              if stream_sensors.contains(&1)
+                && sender
+                  .send(
+                    InputReadingV4::new(
+                      device_index,
+                      feature_index,
+                      buttplug_core::message::InputTypeData::Pressure(InputData::new(unnormalized)),
+                    )
+                    .into(),
+                  )
+                  .is_err()
+              {
+                debug!("Hardware device listener for KGoal Boost shut down, returning from task.");
+                return;
+              }
+            }
           }
         });
       }

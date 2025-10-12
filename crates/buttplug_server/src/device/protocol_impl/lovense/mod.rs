@@ -562,9 +562,9 @@ pub(super) fn form_rotate_with_direction_command(
       .into(),
     );
   }
-    let lovense_cmd = format!("Rotate:{speed};").as_bytes().to_vec();
-    hardware_cmds
-        .push(HardwareWriteCmd::new(&[LOVENSE_ROTATE_UUID], Endpoint::Tx, lovense_cmd, false).into());
+  let lovense_cmd = format!("Rotate:{speed};").as_bytes().to_vec();
+  hardware_cmds
+    .push(HardwareWriteCmd::new(&[LOVENSE_ROTATE_UUID], Endpoint::Tx, lovense_cmd, false).into());
   trace!("{:?}", hardware_cmds);
   Ok(hardware_cmds)
 }

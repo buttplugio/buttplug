@@ -11,7 +11,9 @@ use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeSeq};
 use std::{collections::HashSet, hash::Hash, ops::RangeInclusive};
 
-#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash, EnumIter, EnumString)]
+#[derive(
+  Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash, EnumIter, EnumString,
+)]
 pub enum OutputType {
   Unknown,
   #[serde(alias = "vibrate")]

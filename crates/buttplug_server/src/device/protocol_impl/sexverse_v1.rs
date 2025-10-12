@@ -97,13 +97,9 @@ impl SexverseV1 {
     }
     data.push(crc);
 
-    Ok(vec![HardwareWriteCmd::new(
-      &[SEXVERSE_PROTOCOL_UUID],
-      Endpoint::Tx,
-      data,
-      false,
-    )
-    .into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[SEXVERSE_PROTOCOL_UUID], Endpoint::Tx, data, false).into(),
+    ])
   }
 }
 

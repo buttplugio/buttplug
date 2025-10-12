@@ -189,10 +189,16 @@ impl DeviceConfigurationManager {
     }
   }
 
-  pub fn add_user_device_definition(&self, identifier: &UserDeviceIdentifier, definition: &ServerDeviceDefinition) {
+  pub fn add_user_device_definition(
+    &self,
+    identifier: &UserDeviceIdentifier,
+    definition: &ServerDeviceDefinition,
+  ) {
     // TODO we should actually check validity of the definition we're adding here, i.e. does it have
     // a base id, is that ID in our base selections, etc...
-    self.user_device_definitions.insert(identifier.clone(), definition.clone());
+    self
+      .user_device_definitions
+      .insert(identifier.clone(), definition.clone());
   }
 
   pub fn remove_user_device_definition(&self, identifier: &UserDeviceIdentifier) {

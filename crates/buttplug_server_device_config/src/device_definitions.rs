@@ -56,9 +56,13 @@ impl ServerDeviceDefinitionBuilder {
     value.base_id = Some(value.id);
     value.id = id;
     if with_features {
-      value.features = value.features().iter().map(|x| x.as_new_user_feature()).collect();
+      value.features = value
+        .features()
+        .iter()
+        .map(|x| x.as_new_user_feature())
+        .collect();
     } else {
-      value.features = vec!();
+      value.features = vec![];
     }
     ServerDeviceDefinitionBuilder { def: value }
   }
@@ -113,7 +117,12 @@ impl ServerDeviceDefinitionBuilder {
   }
 
   pub fn replace_feature(&mut self, feature: &ServerDeviceFeature) -> &mut Self {
-    if let Some(f) = self.def.features.iter_mut().find(|x| x.id() == feature.id()) {
+    if let Some(f) = self
+      .def
+      .features
+      .iter_mut()
+      .find(|x| x.id() == feature.id())
+    {
       *f = feature.clone();
     }
     self

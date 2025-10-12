@@ -37,10 +37,10 @@ pub mod kiiroo_powershot;
 pub mod kiiroo_prowand;
 pub mod kiiroo_spot;
 pub mod kiiroo_v2;
-pub mod kiiroo_v3;
 pub mod kiiroo_v21;
 pub mod kiiroo_v21_initialized;
 pub mod kiiroo_v2_vibrator;
+pub mod kiiroo_v3;
 pub mod kizuna;
 pub mod lelo_harmony;
 pub mod lelof1s;
@@ -420,26 +420,26 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     sexverse_lg389::setup::SexverseLG389IdentifierFactory::default(),
   );
-    add_to_protocol_map(
-        &mut map,
-        sexverse_v1::setup::SexverseV1IdentifierFactory::default(),
-    );
-    add_to_protocol_map(
-        &mut map,
-        sexverse_v2::setup::SexverseV2IdentifierFactory::default(),
-    );
-    add_to_protocol_map(
-        &mut map,
-        sexverse_v3::setup::SexverseV3IdentifierFactory::default(),
-    );
-    add_to_protocol_map(
-        &mut map,
-        sexverse_v4::setup::SexverseV4IdentifierFactory::default(),
-    );
-    add_to_protocol_map(
-        &mut map,
-        sexverse_v5::setup::SexverseV5IdentifierFactory::default(),
-    );
+  add_to_protocol_map(
+    &mut map,
+    sexverse_v1::setup::SexverseV1IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    sexverse_v2::setup::SexverseV2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    sexverse_v3::setup::SexverseV3IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    sexverse_v4::setup::SexverseV4IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    sexverse_v5::setup::SexverseV5IdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, serveu::setup::ServeUIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,

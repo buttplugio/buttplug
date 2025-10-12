@@ -1,8 +1,16 @@
 use crate::{
-  ButtplugRemoteServer, ButtplugRepeater, backdoor_server::BackdoorServer, buttplug_server::{reset_buttplug_server, run_server, setup_buttplug_server}, error::IntifaceEngineError, frontend::{
+  ButtplugRemoteServer, ButtplugRepeater,
+  backdoor_server::BackdoorServer,
+  buttplug_server::{reset_buttplug_server, run_server, setup_buttplug_server},
+  error::IntifaceEngineError,
+  frontend::{
     Frontend, frontend_external_event_loop, frontend_server_event_loop,
     process_messages::EngineMessage,
-  }, mdns::IntifaceMdns, options::EngineOptions, remote_server::ButtplugRemoteServerEvent, rest_server::IntifaceRestServer
+  },
+  mdns::IntifaceMdns,
+  options::EngineOptions,
+  remote_server::ButtplugRemoteServerEvent,
+  rest_server::IntifaceRestServer,
 };
 
 use buttplug_server_device_config::{DeviceConfigurationManager, save_user_config};

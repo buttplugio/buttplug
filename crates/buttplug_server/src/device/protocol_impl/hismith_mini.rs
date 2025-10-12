@@ -188,7 +188,12 @@ impl ProtocolHandler for HismithMini {
       HardwareWriteCmd::new(
         &[feature_id],
         Endpoint::Tx,
-        vec![0xCC, 0x03, speed.unsigned_abs() as u8, speed.unsigned_abs() as u8 + 3],
+        vec![
+          0xCC,
+          0x03,
+          speed.unsigned_abs() as u8,
+          speed.unsigned_abs() as u8 + 3,
+        ],
         false,
       )
       .into(),

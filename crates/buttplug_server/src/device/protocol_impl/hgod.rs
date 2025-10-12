@@ -85,13 +85,13 @@ async fn send_hgod_updates(device: Arc<Hardware>, data: Arc<AtomicU8>) {
           false,
         ))
         .await
-      {
-        error!(
-          "Got an error from a hgod device, exiting control loop: {:?}",
-          e
-        );
-        break;
-      }
+    {
+      error!(
+        "Got an error from a hgod device, exiting control loop: {:?}",
+        e
+      );
+      break;
+    }
     sleep(Duration::from_millis(HGOD_COMMAND_DELAY_MS)).await;
   }
 }

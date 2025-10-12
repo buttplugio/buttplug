@@ -19,12 +19,7 @@ pub use {
   device_message_info::DeviceMessageInfoV4,
   input_cmd::{InputCmdV4, InputCommandType},
   input_reading::{InputData, InputReadingV4, InputTypeData},
-  output_cmd::{
-    OutputCmdV4,
-    OutputCommand,
-    OutputPositionWithDuration,
-    OutputValue,
-  },
+  output_cmd::{OutputCmdV4, OutputCommand, OutputPositionWithDuration, OutputValue},
   request_server_info::RequestServerInfoV4,
   server_info::ServerInfoV4,
   spec_enums::{ButtplugClientMessageV4, ButtplugDeviceMessageNameV4, ButtplugServerMessageV4},

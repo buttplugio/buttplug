@@ -49,7 +49,10 @@ pub enum ClientDeviceOutputCommand {
 }
 
 impl ClientDeviceOutputCommand {
-  pub fn from_command_value_float(output_type: OutputType, value: f64) -> Result<Self, ButtplugClientError> {
+  pub fn from_command_value_float(
+    output_type: OutputType,
+    value: f64,
+  ) -> Result<Self, ButtplugClientError> {
     match output_type {
       OutputType::Vibrate => Ok(ClientDeviceOutputCommand::VibrateFloat(value)),
       OutputType::Oscillate => Ok(ClientDeviceOutputCommand::OscillateFloat(value)),
@@ -59,7 +62,9 @@ impl ClientDeviceOutputCommand {
       OutputType::Led => Ok(ClientDeviceOutputCommand::LedFloat(value)),
       OutputType::Spray => Ok(ClientDeviceOutputCommand::SprayFloat(value)),
       OutputType::Position => Ok(ClientDeviceOutputCommand::PositionFloat(value)),
-      _ => Err(ButtplugClientError::ButtplugOutputCommandConversionError("Cannot use PositionWithDuration with this method".to_owned()))
+      _ => Err(ButtplugClientError::ButtplugOutputCommandConversionError(
+        "Cannot use PositionWithDuration with this method".to_owned(),
+      )),
     }
   }
 }
@@ -67,11 +72,21 @@ impl ClientDeviceOutputCommand {
 impl Into<OutputType> for &ClientDeviceOutputCommand {
   fn into(self) -> OutputType {
     match self {
-      ClientDeviceOutputCommand::Vibrate(_) | ClientDeviceOutputCommand::VibrateFloat(_) => OutputType::Vibrate,
-      ClientDeviceOutputCommand::Oscillate(_) | ClientDeviceOutputCommand::OscillateFloat(_) => OutputType::Oscillate,
-      ClientDeviceOutputCommand::Rotate(_) | ClientDeviceOutputCommand::RotateFloat(_) => OutputType::Rotate,
-      ClientDeviceOutputCommand::Constrict(_) | ClientDeviceOutputCommand::ConstrictFloat(_) => OutputType::Constrict,
-      ClientDeviceOutputCommand::Heater(_) | ClientDeviceOutputCommand::HeaterFloat(_) => OutputType::Heater,
+      ClientDeviceOutputCommand::Vibrate(_) | ClientDeviceOutputCommand::VibrateFloat(_) => {
+        OutputType::Vibrate
+      }
+      ClientDeviceOutputCommand::Oscillate(_) | ClientDeviceOutputCommand::OscillateFloat(_) => {
+        OutputType::Oscillate
+      }
+      ClientDeviceOutputCommand::Rotate(_) | ClientDeviceOutputCommand::RotateFloat(_) => {
+        OutputType::Rotate
+      }
+      ClientDeviceOutputCommand::Constrict(_) | ClientDeviceOutputCommand::ConstrictFloat(_) => {
+        OutputType::Constrict
+      }
+      ClientDeviceOutputCommand::Heater(_) | ClientDeviceOutputCommand::HeaterFloat(_) => {
+        OutputType::Heater
+      }
       ClientDeviceOutputCommand::Led(_) | ClientDeviceOutputCommand::LedFloat(_) => OutputType::Led,
       ClientDeviceOutputCommand::Spray(_) | ClientDeviceOutputCommand::SprayFloat(_) => {
         OutputType::Spray

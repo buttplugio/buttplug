@@ -185,10 +185,11 @@ impl SerialPortHardware {
     let mut port_def = None;
     for specifier in specifiers {
       if let ProtocolCommunicationSpecifier::Serial(serial) = specifier
-        && port_info.port_name == *serial.port() {
-          port_def = Some(serial.clone());
-          break;
-        }
+        && port_info.port_name == *serial.port()
+      {
+        port_def = Some(serial.clone());
+        break;
+      }
     }
     let port_def = port_def.expect("We'll always have a port definition by this point");
 
@@ -251,12 +252,13 @@ impl SerialPortHardware {
           && let Err(err) = event_stream_clone.send(HardwareEvent::Disconnected(format!(
             "{:?}",
             &port_name_clone
-          ))) {
-            error!(
-              "Cannot send notification, device object disappeared: {:?}",
-              err
-            );
-          }
+          )))
+        {
+          error!(
+            "Cannot send notification, device object disappeared: {:?}",
+            err
+          );
+        }
       })
       .expect("Should always be able to create thread");
 

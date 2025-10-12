@@ -5,7 +5,10 @@ use crate::{
   IntifaceEngineError, IntifaceError, remote_server::ButtplugRemoteServerEvent,
 };
 use buttplug_server::{
-  connector::ButtplugRemoteServerConnector, device::{ServerDeviceManager, ServerDeviceManagerBuilder}, message::serializer::ButtplugServerJSONSerializer, ButtplugServer, ButtplugServerBuilder
+  ButtplugServer, ButtplugServerBuilder,
+  connector::ButtplugRemoteServerConnector,
+  device::{ServerDeviceManager, ServerDeviceManagerBuilder},
+  message::serializer::ButtplugServerJSONSerializer,
 };
 use buttplug_server_device_config::{DeviceConfigurationManager, load_protocol_configs};
 use buttplug_server_hwmgr_btleplug::BtlePlugCommunicationManagerBuilder;

@@ -1,4 +1,3 @@
-
 use buttplug_client::{
   ButtplugClient,
   ButtplugClientError,

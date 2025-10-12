@@ -89,7 +89,11 @@ impl ClientDeviceFeature {
       ))
     } else {
       let mut val = float_amt * feature_output.step_count() as f64;
-      val = if val > 0.000001f64 { val.ceil() } else { val.floor() };
+      val = if val > 0.000001f64 {
+        val.ceil()
+      } else {
+        val.floor()
+      };
       Ok(val as i32)
     }
   }
@@ -267,19 +271,19 @@ impl ClientDeviceFeature {
   pub fn subscribe_sensor(&self, sensor_type: InputType) -> ButtplugClientResultFuture {
     if let Some(sensor_map) = self.feature.input()
       && let Some(sensor) = sensor_map.get(sensor_type)
-        && sensor
-          .input_commands()
-          .contains(&InputCommandType::Subscribe)
-        {
-          let msg = InputCmdV4::new(
-            self.device_index,
-            self.feature_index,
-            sensor_type,
-            InputCommandType::Subscribe,
-          )
-          .into();
-          return self.event_loop_sender.send_message_expect_ok(msg);
-        }
+      && sensor
+        .input_commands()
+        .contains(&InputCommandType::Subscribe)
+    {
+      let msg = InputCmdV4::new(
+        self.device_index,
+        self.feature_index,
+        sensor_type,
+        InputCommandType::Subscribe,
+      )
+      .into();
+      return self.event_loop_sender.send_message_expect_ok(msg);
+    }
     create_boxed_future_client_error(
       ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::InputCmd.to_string())
         .into(),
@@ -289,19 +293,19 @@ impl ClientDeviceFeature {
   pub fn unsubscribe_sensor(&self, sensor_type: InputType) -> ButtplugClientResultFuture {
     if let Some(sensor_map) = self.feature.input()
       && let Some(sensor) = sensor_map.get(sensor_type)
-        && sensor
-          .input_commands()
-          .contains(&InputCommandType::Subscribe)
-        {
-          let msg = InputCmdV4::new(
-            self.device_index,
-            self.feature_index,
-            sensor_type,
-            InputCommandType::Unsubscribe,
-          )
-          .into();
-          return self.event_loop_sender.send_message_expect_ok(msg);
-        }
+      && sensor
+        .input_commands()
+        .contains(&InputCommandType::Subscribe)
+    {
+      let msg = InputCmdV4::new(
+        self.device_index,
+        self.feature_index,
+        sensor_type,
+        InputCommandType::Unsubscribe,
+      )
+      .into();
+      return self.event_loop_sender.send_message_expect_ok(msg);
+    }
     create_boxed_future_client_error(
       ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::InputCmd.to_string())
         .into(),
@@ -311,38 +315,39 @@ impl ClientDeviceFeature {
   fn read_sensor(&self, sensor_type: InputType) -> ButtplugClientResultFuture<InputTypeData> {
     if let Some(sensor_map) = self.feature.input()
       && let Some(sensor) = sensor_map.get(sensor_type)
-        && sensor.input_commands().contains(&InputCommandType::Read) {
-          let msg = InputCmdV4::new(
-            self.device_index,
-            self.feature_index,
-            sensor_type,
-            InputCommandType::Read,
-          )
-          .into();
-          let reply = self.event_loop_sender.send_message(msg);
-          return async move {
-            if let ButtplugServerMessageV4::InputReading(data) = reply.await? {
-              if sensor_type == data.data().as_input_type() {
-                Ok(data.data())
-              } else {
-                Err(
-                  ButtplugError::ButtplugMessageError(ButtplugMessageError::UnexpectedMessageType(
-                    "InputReading".to_owned(),
-                  ))
-                  .into(),
-                )
-              }
-            } else {
-              Err(
-                ButtplugError::ButtplugMessageError(ButtplugMessageError::UnexpectedMessageType(
-                  "InputReading".to_owned(),
-                ))
-                .into(),
-              )
-            }
+      && sensor.input_commands().contains(&InputCommandType::Read)
+    {
+      let msg = InputCmdV4::new(
+        self.device_index,
+        self.feature_index,
+        sensor_type,
+        InputCommandType::Read,
+      )
+      .into();
+      let reply = self.event_loop_sender.send_message(msg);
+      return async move {
+        if let ButtplugServerMessageV4::InputReading(data) = reply.await? {
+          if sensor_type == data.data().as_input_type() {
+            Ok(data.data())
+          } else {
+            Err(
+              ButtplugError::ButtplugMessageError(ButtplugMessageError::UnexpectedMessageType(
+                "InputReading".to_owned(),
+              ))
+              .into(),
+            )
           }
-          .boxed();
+        } else {
+          Err(
+            ButtplugError::ButtplugMessageError(ButtplugMessageError::UnexpectedMessageType(
+              "InputReading".to_owned(),
+            ))
+            .into(),
+          )
         }
+      }
+      .boxed();
+    }
     create_boxed_future_client_error(
       ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::InputCmd.to_string())
         .into(),

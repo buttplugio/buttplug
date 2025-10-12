@@ -348,23 +348,24 @@ impl LovenseDongleState for LovenseDongleIdle {
         IncomingMessage::Dongle(device_msg) => match device_msg.func {
           LovenseDongleMessageFunc::IncomingStatus => {
             if let Some(incoming_data) = device_msg.data
-              && let Some(status) = incoming_data.status {
-                match status {
-                  LovenseDongleResultCode::DeviceConnectSuccess => {
-                    info!("Lovense dongle already connected to a device, registering in system.");
-                    return Some(Box::new(LovenseDongleDeviceLoop::new(
-                      self.hub,
-                      incoming_data
-                        .id
-                        .expect("Dongle protocol shouldn't change, message always has ID."),
-                    )));
-                  }
-                  _ => warn!(
-                    "LovenseDongleIdle State cannot handle dongle status {:?}",
-                    status
-                  ),
+              && let Some(status) = incoming_data.status
+            {
+              match status {
+                LovenseDongleResultCode::DeviceConnectSuccess => {
+                  info!("Lovense dongle already connected to a device, registering in system.");
+                  return Some(Box::new(LovenseDongleDeviceLoop::new(
+                    self.hub,
+                    incoming_data
+                      .id
+                      .expect("Dongle protocol shouldn't change, message always has ID."),
+                  )));
                 }
+                _ => warn!(
+                  "LovenseDongleIdle State cannot handle dongle status {:?}",
+                  status
+                ),
               }
+            }
           }
           LovenseDongleMessageFunc::Search => {
             if let Some(result) = device_msg.result {
@@ -463,25 +464,26 @@ impl LovenseDongleState for LovenseDongleScanning {
           match device_msg.func {
             LovenseDongleMessageFunc::IncomingStatus => {
               if let Some(incoming_data) = device_msg.data
-                && let Some(status) = incoming_data.status {
-                  match status {
-                    LovenseDongleResultCode::DeviceConnectSuccess => {
-                      info!("Lovense dongle already connected to a device, registering in system.");
-                      return Some(Box::new(LovenseDongleDeviceLoop::new(
-                        self.hub,
-                        incoming_data
-                          .id
-                          .expect("Dongle protocol shouldn't change, message always has ID."),
-                      )));
-                    }
-                    _ => {
-                      warn!(
-                        "LovenseDongleScanning state cannot handle dongle status {:?}",
-                        status
-                      )
-                    }
+                && let Some(status) = incoming_data.status
+              {
+                match status {
+                  LovenseDongleResultCode::DeviceConnectSuccess => {
+                    info!("Lovense dongle already connected to a device, registering in system.");
+                    return Some(Box::new(LovenseDongleDeviceLoop::new(
+                      self.hub,
+                      incoming_data
+                        .id
+                        .expect("Dongle protocol shouldn't change, message always has ID."),
+                    )));
+                  }
+                  _ => {
+                    warn!(
+                      "LovenseDongleScanning state cannot handle dongle status {:?}",
+                      status
+                    )
                   }
                 }
+              }
             }
             LovenseDongleMessageFunc::Search => {
               if let Some(result) = device_msg.result {
@@ -584,17 +586,19 @@ impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
         IncomingMessage::Dongle(device_msg) => match device_msg.func {
           LovenseDongleMessageFunc::Search => {
             if let Some(result) = device_msg.result
-              && result == LovenseDongleResultCode::SearchStopped {
-                self.hub.set_scanning_status(false);
-                break;
-              }
+              && result == LovenseDongleResultCode::SearchStopped
+            {
+              self.hub.set_scanning_status(false);
+              break;
+            }
           }
           LovenseDongleMessageFunc::StopSearch => {
             if let Some(result) = device_msg.result
-              && result == LovenseDongleResultCode::CommandSuccess {
-                // Just log and continue here.
-                debug!("Lovense dongle stop search command succeeded.");
-              }
+              && result == LovenseDongleResultCode::CommandSuccess
+            {
+              // Just log and continue here.
+              debug!("Lovense dongle stop search command succeeded.");
+            }
           }
           _ => warn!(
             "LovenseDongleStopScanningAndConnect cannot handle dongle function {:?}",
@@ -652,10 +656,11 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
           match dongle_msg.func {
             LovenseDongleMessageFunc::IncomingStatus => {
               if let Some(data) = dongle_msg.data
-                && data.status == Some(LovenseDongleResultCode::DeviceDisconnected) {
-                  // Device disconnected, emit and return to idle.
-                  return Some(Box::new(LovenseDongleIdle::new(self.hub)));
-                }
+                && data.status == Some(LovenseDongleResultCode::DeviceDisconnected)
+              {
+                // Device disconnected, emit and return to idle.
+                return Some(Box::new(LovenseDongleIdle::new(self.hub)));
+              }
             }
             _ => {
               if device_read_sender.send(dongle_msg).await.is_err() {

@@ -105,25 +105,17 @@ impl ButtplugServerDeviceEventMessageConverter {
         .collect();
       self.device_indexes.remove(&disconnected_indexes[0]);
       match version {
-        ButtplugMessageSpecVersion::Version0 => {
-          ButtplugServerMessageVariant::V0(ButtplugServerMessageV0::DeviceRemoved(
-            DeviceRemovedV0::new(disconnected_indexes[0]),
-          ))
-        }
+        ButtplugMessageSpecVersion::Version0 => ButtplugServerMessageVariant::V0(
+          ButtplugServerMessageV0::DeviceRemoved(DeviceRemovedV0::new(disconnected_indexes[0])),
+        ),
         ButtplugMessageSpecVersion::Version1 => {
-          ButtplugServerMessageVariant::V1(
-            DeviceRemovedV0::new(disconnected_indexes[0]).into(),
-          )
+          ButtplugServerMessageVariant::V1(DeviceRemovedV0::new(disconnected_indexes[0]).into())
         }
         ButtplugMessageSpecVersion::Version2 => {
-          ButtplugServerMessageVariant::V2(
-            DeviceRemovedV0::new(disconnected_indexes[0]).into(),
-          )
+          ButtplugServerMessageVariant::V2(DeviceRemovedV0::new(disconnected_indexes[0]).into())
         }
         ButtplugMessageSpecVersion::Version3 => {
-          ButtplugServerMessageVariant::V3(
-            DeviceRemovedV0::new(disconnected_indexes[0]).into(),
-          )
+          ButtplugServerMessageVariant::V3(DeviceRemovedV0::new(disconnected_indexes[0]).into())
         }
         ButtplugMessageSpecVersion::Version4 => {
           ButtplugServerMessageVariant::V4(list.clone().into())

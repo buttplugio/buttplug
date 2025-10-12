@@ -10,7 +10,11 @@ use crate::message::{
   v2::{ClientDeviceMessageAttributesV2, GenericDeviceMessageAttributesV2},
 };
 use buttplug_core::message::{
-  DeviceFeature, DeviceFeatureOutputValueProperties, InputCommandType, InputType, OutputType
+  DeviceFeature,
+  DeviceFeatureOutputValueProperties,
+  InputCommandType,
+  InputType,
+  OutputType,
 };
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeSeq};
@@ -253,30 +257,30 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
               };
               actuator_vec.push(attrs)
             };
-          if let Some(x) = output_map
-            .constrict()
-            .as_ref() { create_actuator(OutputType::Constrict, x) }
-          if let Some(x) = output_map
-            .heater()
-            .as_ref() { create_actuator(OutputType::Heater, x) }
-          if let Some(x) = output_map
-            .led()
-            .as_ref() { create_actuator(OutputType::Led, x) }
-          if let Some(x) = output_map
-            .oscillate()
-            .as_ref() { create_actuator(OutputType::Oscillate, x) }
-          if let Some(x) = output_map
-            .position()
-            .as_ref() { create_actuator(OutputType::Position, x) }
-          if let Some(x) = output_map
-            .rotate()
-            .as_ref() { create_actuator(OutputType::Rotate, x) }
-          if let Some(x) = output_map
-            .spray()
-            .as_ref() { create_actuator(OutputType::Spray, x) }
-          if let Some(x) = output_map
-            .vibrate()
-            .as_ref() { create_actuator(OutputType::Vibrate, x) }
+          if let Some(x) = output_map.constrict().as_ref() {
+            create_actuator(OutputType::Constrict, x)
+          }
+          if let Some(x) = output_map.heater().as_ref() {
+            create_actuator(OutputType::Heater, x)
+          }
+          if let Some(x) = output_map.led().as_ref() {
+            create_actuator(OutputType::Led, x)
+          }
+          if let Some(x) = output_map.oscillate().as_ref() {
+            create_actuator(OutputType::Oscillate, x)
+          }
+          if let Some(x) = output_map.position().as_ref() {
+            create_actuator(OutputType::Position, x)
+          }
+          if let Some(x) = output_map.rotate().as_ref() {
+            create_actuator(OutputType::Rotate, x)
+          }
+          if let Some(x) = output_map.spray().as_ref() {
+            create_actuator(OutputType::Spray, x)
+          }
+          if let Some(x) = output_map.vibrate().as_ref() {
+            create_actuator(OutputType::Vibrate, x)
+          }
         }
         actuator_vec
       })
@@ -289,17 +293,18 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
         if let Some(output_map) = feature.output()
-          && let Some(actuator) = output_map.rotate() 
-          && *actuator.value().start() < 0 {
-            let actuator_type = OutputType::Rotate;
-            let attrs = ClientGenericDeviceMessageAttributesV3 {
-              feature_descriptor: feature.description().to_owned(),
-              actuator_type,
-              step_count: actuator.step_count(),
-              index: 0,
-            };
-            actuator_vec.push(attrs)
-          }
+          && let Some(actuator) = output_map.rotate()
+          && *actuator.value().start() < 0
+        {
+          let actuator_type = OutputType::Rotate;
+          let attrs = ClientGenericDeviceMessageAttributesV3 {
+            feature_descriptor: feature.description().to_owned(),
+            actuator_type,
+            step_count: actuator.step_count(),
+            index: 0,
+          };
+          actuator_vec.push(attrs)
+        }
         actuator_vec
       })
       .collect();
@@ -309,16 +314,17 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
         if let Some(output_map) = feature.output()
-          && let Some(actuator) = output_map.position_with_duration() {
-            let actuator_type = OutputType::Position;
-            let attrs = ClientGenericDeviceMessageAttributesV3 {
-              feature_descriptor: feature.description().to_owned(),
-              actuator_type,
-              step_count: actuator.step_count(),
-              index: 0,
-            };
-            actuator_vec.push(attrs)
-          }
+          && let Some(actuator) = output_map.position_with_duration()
+        {
+          let actuator_type = OutputType::Position;
+          let attrs = ClientGenericDeviceMessageAttributesV3 {
+            feature_descriptor: feature.description().to_owned(),
+            actuator_type,
+            step_count: actuator.step_count(),
+            index: 0,
+          };
+          actuator_vec.push(attrs)
+        }
         actuator_vec
       })
       .collect();

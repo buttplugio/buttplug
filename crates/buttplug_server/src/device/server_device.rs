@@ -221,11 +221,12 @@ impl ServerDevice {
         strategy,
         ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_)
       ))
-      && let Err(e) = device.handle_stop_device_cmd().await {
-        return Err(ButtplugDeviceError::DeviceConnectionError(format!(
-          "Error setting up keepalive: {e}"
-        )));
-      }
+      && let Err(e) = device.handle_stop_device_cmd().await
+    {
+      return Err(ButtplugDeviceError::DeviceConnectionError(format!(
+        "Error setting up keepalive: {e}"
+      )));
+    }
 
     Ok(device)
   }
@@ -271,9 +272,10 @@ impl ServerDevice {
               strategy,
               ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_)
             ))
-            && let HardwareCommand::Write(command) = command {
-              *keepalive_packet.lock().await = Some(command);
-            };
+            && let HardwareCommand::Write(command) = command
+          {
+            *keepalive_packet.lock().await = Some(command);
+          };
         };
         loop {
           let requires_keepalive = hardware.requires_keepalive();
@@ -556,10 +558,11 @@ impl ServerDevice {
 
   fn handle_outputcmd_v4(&self, msg: &CheckedOutputCmdV4) -> ButtplugServerResultFuture {
     if let Some(last_msg) = self.last_output_command.get(&msg.feature_id())
-      && *last_msg == *msg {
-        trace!("No commands generated for incoming device packet, skipping and returning success.");
-        return future::ready(Ok(message::OkV0::default().into())).boxed();
-      }
+      && *last_msg == *msg
+    {
+      trace!("No commands generated for incoming device packet, skipping and returning success.");
+      return future::ready(Ok(message::OkV0::default().into())).boxed();
+    }
     self
       .last_output_command
       .insert(msg.feature_id(), msg.clone());

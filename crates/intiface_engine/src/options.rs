@@ -118,7 +118,7 @@ impl From<EngineOptionsExternal> for EngineOptions {
       repeater_mode: other.repeater_mode,
       repeater_local_port: other.repeater_local_port,
       repeater_remote_address: other.repeater_remote_address,
-      rest_api_port: other.rest_api_port
+      rest_api_port: other.rest_api_port,
     }
   }
 }

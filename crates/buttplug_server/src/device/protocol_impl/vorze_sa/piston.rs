@@ -55,9 +55,7 @@ impl ProtocolHandler for VorzeSAPiston {
 
     let speed = get_piston_speed(distance, duration as f64);
 
-    self
-      .previous_position
-      .store(position, Ordering::Relaxed);
+    self.previous_position.store(position, Ordering::Relaxed);
 
     Ok(vec![
       HardwareWriteCmd::new(

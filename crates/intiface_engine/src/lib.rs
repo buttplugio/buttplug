@@ -1,7 +1,6 @@
 #[macro_use]
 extern crate log;
 
-
 mod backdoor_server;
 mod buttplug_server;
 mod engine;

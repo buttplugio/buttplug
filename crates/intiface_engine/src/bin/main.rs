@@ -162,7 +162,6 @@ pub struct IntifaceCLIArguments {
   #[getset(get_copy = "pub")]
   crash_main_thread: bool,
 
-
   #[allow(dead_code)]
   #[cfg(debug_assertions)]
   /// crash the task thread (for testing logging/reporting)
@@ -222,9 +221,12 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
       match fs::read_to_string(userdeviceconfig) {
         Ok(cfg) => {
           builder.user_device_config_json(&cfg);
-        },
+        }
         Err(err) => {
-          warn!("Error opening user device configuration, ignoring and creating new file: {:?}", err);
+          warn!(
+            "Error opening user device configuration, ignoring and creating new file: {:?}",
+            err
+          );
         }
       };
     }

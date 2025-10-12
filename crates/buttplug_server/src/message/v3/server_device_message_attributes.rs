@@ -72,30 +72,30 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
           };
           // TODO oh come on just make a fucking iterator here. At least, once we figure out the
           // unifying trait we can use to make an iterator on this.
-          if let Some(attr) = output_map
-            .constrict()
-            .as_ref() { create_attribute(OutputType::Constrict, attr.value().step_count()) }
-          if let Some(attr) = output_map
-            .oscillate()
-            .as_ref() { create_attribute(OutputType::Oscillate, attr.value().step_count()) }
-          if let Some(attr) = output_map
-            .position()
-            .as_ref() { create_attribute(OutputType::Position, attr.position().step_count()) }
-          if let Some(attr) = output_map
-            .rotate()
-            .as_ref() { create_attribute(OutputType::Rotate, attr.value().step_count()) }
-          if let Some(attr) = output_map
-            .heater()
-            .as_ref() { create_attribute(OutputType::Heater, attr.value().step_count()) }
-          if let Some(attr) = output_map
-            .led()
-            .as_ref() { create_attribute(OutputType::Led, attr.value().step_count()) }
-          if let Some(attr) = output_map
-            .vibrate()
-            .as_ref() { create_attribute(OutputType::Vibrate, attr.value().step_count()) }
-          if let Some(attr) = output_map
-            .spray()
-            .as_ref() { create_attribute(OutputType::Spray, attr.value().step_count()) }
+          if let Some(attr) = output_map.constrict().as_ref() {
+            create_attribute(OutputType::Constrict, attr.value().step_count())
+          }
+          if let Some(attr) = output_map.oscillate().as_ref() {
+            create_attribute(OutputType::Oscillate, attr.value().step_count())
+          }
+          if let Some(attr) = output_map.position().as_ref() {
+            create_attribute(OutputType::Position, attr.position().step_count())
+          }
+          if let Some(attr) = output_map.rotate().as_ref() {
+            create_attribute(OutputType::Rotate, attr.value().step_count())
+          }
+          if let Some(attr) = output_map.heater().as_ref() {
+            create_attribute(OutputType::Heater, attr.value().step_count())
+          }
+          if let Some(attr) = output_map.led().as_ref() {
+            create_attribute(OutputType::Led, attr.value().step_count())
+          }
+          if let Some(attr) = output_map.vibrate().as_ref() {
+            create_attribute(OutputType::Vibrate, attr.value().step_count())
+          }
+          if let Some(attr) = output_map.spray().as_ref() {
+            create_attribute(OutputType::Spray, attr.value().step_count())
+          }
         }
         actuator_vec
       })
@@ -108,19 +108,20 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
         if let Some(output_map) = feature.output()
-          && let Some(actuator) = output_map.rotate() 
-          && *actuator.value().base().start() < 0 {
-            let actuator_type = OutputType::Rotate;
-            let step_count = actuator.value().step_count();
-            let attrs = ServerGenericDeviceMessageAttributesV3 {
-              feature_descriptor: feature.description().to_owned(),
-              actuator_type,
-              step_count,
-              feature: feature.clone(),
-              index: 0,
-            };
-            actuator_vec.push(attrs)
-          }
+          && let Some(actuator) = output_map.rotate()
+          && *actuator.value().base().start() < 0
+        {
+          let actuator_type = OutputType::Rotate;
+          let step_count = actuator.value().step_count();
+          let attrs = ServerGenericDeviceMessageAttributesV3 {
+            feature_descriptor: feature.description().to_owned(),
+            actuator_type,
+            step_count,
+            feature: feature.clone(),
+            index: 0,
+          };
+          actuator_vec.push(attrs)
+        }
         actuator_vec
       })
       .collect();
@@ -130,18 +131,19 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
         if let Some(output_map) = feature.output()
-          && let Some(actuator) = output_map.position_with_duration() {
-            let actuator_type = OutputType::Position;
-            let step_count = actuator.position().step_count();
-            let attrs = ServerGenericDeviceMessageAttributesV3 {
-              feature_descriptor: feature.description().to_owned(),
-              actuator_type,
-              step_count,
-              feature: feature.clone(),
-              index: 0,
-            };
-            actuator_vec.push(attrs)
-          }
+          && let Some(actuator) = output_map.position_with_duration()
+        {
+          let actuator_type = OutputType::Position;
+          let step_count = actuator.position().step_count();
+          let attrs = ServerGenericDeviceMessageAttributesV3 {
+            feature_descriptor: feature.description().to_owned(),
+            actuator_type,
+            step_count,
+            feature: feature.clone(),
+            index: 0,
+          };
+          actuator_vec.push(attrs)
+        }
         actuator_vec
       })
       .collect();
@@ -152,17 +154,18 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
         .map(|feature| {
           let mut sensor_vec = vec![];
           if let Some(sensor_map) = feature.input()
-            && let Some(battery) = sensor_map.battery() {
-              // Only convert Battery backwards. Other sensors weren't really built for v3 and we
-              // never recommended using them or implemented much for them.
-              sensor_vec.push(ServerSensorDeviceMessageAttributesV3 {
-                feature_descriptor: feature.description().to_owned(),
-                sensor_type: InputType::Battery,
-                sensor_range: battery.value_range().clone(),
-                feature: feature.clone(),
-                index: 0,
-              });
-            }
+            && let Some(battery) = sensor_map.battery()
+          {
+            // Only convert Battery backwards. Other sensors weren't really built for v3 and we
+            // never recommended using them or implemented much for them.
+            sensor_vec.push(ServerSensorDeviceMessageAttributesV3 {
+              feature_descriptor: feature.description().to_owned(),
+              sensor_type: InputType::Battery,
+              sensor_range: battery.value_range().clone(),
+              feature: feature.clone(),
+              index: 0,
+            });
+          }
           sensor_vec
         })
         .flatten()

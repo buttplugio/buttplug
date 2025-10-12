@@ -53,15 +53,16 @@ where
     match msg {
       Ok(json_msg) => {
         if let Some(validator) = validator
-          && !validator.is_valid(&json_msg) {
-            // If is_valid fails, re-run validation to get our error message.
-            let e = validator
-              .validate(&json_msg)
-              .expect_err("We can't get here without validity checks failing.");
-            return Err(ButtplugSerializerError::JsonSerializerError(format!(
-              "Error during JSON Schema Validation - Message: {json_msg} - Error: {e:?}"
-            )));
-          }
+          && !validator.is_valid(&json_msg)
+        {
+          // If is_valid fails, re-run validation to get our error message.
+          let e = validator
+            .validate(&json_msg)
+            .expect_err("We can't get here without validity checks failing.");
+          return Err(ButtplugSerializerError::JsonSerializerError(format!(
+            "Error during JSON Schema Validation - Message: {json_msg} - Error: {e:?}"
+          )));
+        }
         match serde_json::from_value::<Vec<T>>(json_msg) {
           Ok(mut msg_vec) => {
             for msg in msg_vec.iter_mut() {

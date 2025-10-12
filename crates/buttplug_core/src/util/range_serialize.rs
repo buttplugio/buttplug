@@ -1,11 +1,14 @@
 use std::ops::RangeInclusive;
 
-use serde::{Serializer, Serialize, ser::SerializeSeq};
+use serde::{Serialize, Serializer, ser::SerializeSeq};
 
-pub fn option_range_serialize<S, T>(range: &Option<RangeInclusive<T>>, serializer: S) -> Result<S::Ok, S::Error>
+pub fn option_range_serialize<S, T>(
+  range: &Option<RangeInclusive<T>>,
+  serializer: S,
+) -> Result<S::Ok, S::Error>
 where
   S: Serializer,
-  T: Serialize
+  T: Serialize,
 {
   if let Some(r) = range {
     range_serialize(r, serializer)
@@ -17,7 +20,7 @@ where
 pub fn range_serialize<S, T>(range: &RangeInclusive<T>, serializer: S) -> Result<S::Ok, S::Error>
 where
   S: Serializer,
-  T: Serialize
+  T: Serialize,
 {
   let mut seq = serializer.serialize_seq(Some(2))?;
   seq.serialize_element(&range.start())?;
@@ -25,7 +28,7 @@ where
   seq.end()
 }
 
-pub fn range_sequence_serialize<S,T>(
+pub fn range_sequence_serialize<S, T>(
   range_vec: &Vec<RangeInclusive<T>>,
   serializer: S,
 ) -> Result<S::Ok, S::Error>

@@ -8,23 +8,21 @@
 use crate::device::{
   hardware::Hardware,
   protocol::{
-    generic_protocol_initializer_setup,
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    generic_protocol_initializer_setup,
   },
   protocol_impl::kiiroo_v21::KiirooV21,
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::{
-  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
-use std::sync::{
-  Arc,
-};
+use std::sync::Arc;
 
 generic_protocol_initializer_setup!(KiirooV3, "kiiroo-v3");
 

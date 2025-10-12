@@ -1,10 +1,20 @@
-use std::{collections::BTreeMap, convert::Infallible, io, net::SocketAddr, str::FromStr, sync::Arc};
+use std::{
+  collections::BTreeMap, convert::Infallible, io, net::SocketAddr, str::FromStr, sync::Arc,
+};
 
 use axum::{
-  extract::{rejection::JsonRejection, Path, State}, http::StatusCode, response::{sse::{Event, KeepAlive}, IntoResponse, Response, Sse}, routing::{get, put}, Json, Router
+  Json, Router,
+  extract::{Path, State, rejection::JsonRejection},
+  http::StatusCode,
+  response::{
+    IntoResponse, Response, Sse,
+    sse::{Event, KeepAlive},
+  },
+  routing::{get, put},
 };
 use buttplug_client::{
-  device::{ClientDeviceFeature, ClientDeviceOutputCommand}, ButtplugClient, ButtplugClientDevice, ButtplugClientError, ButtplugClientEvent
+  ButtplugClient, ButtplugClientDevice, ButtplugClientError, ButtplugClientEvent,
+  device::{ClientDeviceFeature, ClientDeviceOutputCommand},
 };
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
 use buttplug_core::message::{DeviceFeature, OutputType};
@@ -102,7 +112,7 @@ fn get_device(
 fn get_feature(
   client: &ButtplugClient,
   index: u32,
-  feature_index: u32
+  feature_index: u32,
 ) -> Result<ClientDeviceFeature, IntifaceRestError> {
   get_device(client, index)?
     .device_features()
@@ -152,7 +162,7 @@ async fn set_device_output(
   State(client): State<Arc<ButtplugClient>>,
   Path((index, command, level)): Path<(u32, OutputType, f64)>,
 ) -> Result<(), IntifaceRestError> {
-  let cmd =  ClientDeviceOutputCommand::from_command_value_float(command, level)
+  let cmd = ClientDeviceOutputCommand::from_command_value_float(command, level)
     .map_err(|e| IntifaceRestError::ButtplugClientError(e))?;
 
   Ok(
@@ -167,7 +177,7 @@ async fn set_feature_output(
   State(client): State<Arc<ButtplugClient>>,
   Path((index, feature_index, command, level)): Path<(u32, u32, OutputType, f64)>,
 ) -> Result<(), IntifaceRestError> {
-  let cmd =  ClientDeviceOutputCommand::from_command_value_float(command, level)
+  let cmd = ClientDeviceOutputCommand::from_command_value_float(command, level)
     .map_err(|e| IntifaceRestError::ButtplugClientError(e))?;
 
   Ok(
@@ -250,10 +260,14 @@ async fn feature_input_command(
   Ok(())
 }
 
-async fn server_sse(State(client): State<Arc<ButtplugClient>>,) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
-    let stream = client.event_stream().map(|e| Ok(Event::default().data(format!("{:?}", e))));
+async fn server_sse(
+  State(client): State<Arc<ButtplugClient>>,
+) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
+  let stream = client
+    .event_stream()
+    .map(|e| Ok(Event::default().data(format!("{:?}", e))));
 
-    Sse::new(stream).keep_alive(KeepAlive::default())
+  Sse::new(stream).keep_alive(KeepAlive::default())
 }
 
 impl IntifaceRestServer {
