@@ -108,7 +108,7 @@ impl TryFromDeviceAttributes<OutputCmdV4> for CheckedOutputCmdV4 {
       let output_type = cmd.command().as_output_type();
       let value = cmd.command().value();
       let new_value = output_map
-        .calculate_from_value(output_type, value as i32)
+        .calculate_from_value(output_type, value)
         .map_err(|e| {
           error!("{:?}", e);
           ButtplugDeviceError::DeviceStepRangeError(0, value)

@@ -502,7 +502,7 @@ impl From<&ServerDeviceFeature> for ConfigUserDeviceFeature {
       id: value.id(),
       base_id: value
         .base_id()
-        .expect(&format!("Should have base id: {:?}", value)),
+        .unwrap_or_else(|| panic!("Should have base id: {:?}", value)),
       output: value.output().as_ref().map(|x| x.into()),
     }
   }

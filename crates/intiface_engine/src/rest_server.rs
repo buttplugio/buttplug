@@ -1,5 +1,5 @@
 use std::{
-  collections::BTreeMap, convert::Infallible, io, net::SocketAddr, str::FromStr, sync::Arc,
+  collections::BTreeMap, convert::Infallible, io, net::SocketAddr, sync::Arc,
 };
 
 use axum::{
@@ -13,7 +13,7 @@ use axum::{
   routing::{get, put},
 };
 use buttplug_client::{
-  ButtplugClient, ButtplugClientDevice, ButtplugClientError, ButtplugClientEvent,
+  ButtplugClient, ButtplugClientDevice, ButtplugClientError,
   device::{ClientDeviceFeature, ClientDeviceOutputCommand},
 };
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
@@ -127,14 +127,14 @@ async fn start_scanning(
   client
     .start_scanning()
     .await
-    .map_err(|e| IntifaceRestError::ButtplugClientError(e))
+    .map_err(IntifaceRestError::ButtplugClientError)
 }
 
 async fn stop_scanning(State(client): State<Arc<ButtplugClient>>) -> Result<(), IntifaceRestError> {
   client
     .stop_scanning()
     .await
-    .map_err(|e| IntifaceRestError::ButtplugClientError(e))
+    .map_err(IntifaceRestError::ButtplugClientError)
 }
 
 async fn stop_all_devices(
@@ -143,19 +143,17 @@ async fn stop_all_devices(
   client
     .stop_all_devices()
     .await
-    .map_err(|e| IntifaceRestError::ButtplugClientError(e))
+    .map_err(IntifaceRestError::ButtplugClientError)
 }
 
 async fn stop_device(
   State(client): State<Arc<ButtplugClient>>,
   Path(index): Path<u32>,
 ) -> Result<(), IntifaceRestError> {
-  Ok(
-    get_device(&client, index)?
+  get_device(&client, index)?
       .stop()
       .await
-      .map_err(|e| IntifaceRestError::ButtplugClientError(e))?,
-  )
+      .map_err(IntifaceRestError::ButtplugClientError)
 }
 
 async fn set_device_output(
@@ -163,14 +161,12 @@ async fn set_device_output(
   Path((index, command, level)): Path<(u32, OutputType, f64)>,
 ) -> Result<(), IntifaceRestError> {
   let cmd = ClientDeviceOutputCommand::from_command_value_float(command, level)
-    .map_err(|e| IntifaceRestError::ButtplugClientError(e))?;
+    .map_err(IntifaceRestError::ButtplugClientError)?;
 
-  Ok(
-    get_device(&client, index)?
+  get_device(&client, index)?
       .send_command(&cmd)
       .await
-      .map_err(|e| IntifaceRestError::ButtplugClientError(e))?,
-  )
+      .map_err(IntifaceRestError::ButtplugClientError)
 }
 
 async fn set_feature_output(
@@ -178,14 +174,12 @@ async fn set_feature_output(
   Path((index, feature_index, command, level)): Path<(u32, u32, OutputType, f64)>,
 ) -> Result<(), IntifaceRestError> {
   let cmd = ClientDeviceOutputCommand::from_command_value_float(command, level)
-    .map_err(|e| IntifaceRestError::ButtplugClientError(e))?;
+    .map_err(IntifaceRestError::ButtplugClientError)?;
 
-  Ok(
-    get_feature(&client, index, feature_index)?
+  get_feature(&client, index, feature_index)?
       .send_command(&cmd)
       .await
-      .map_err(|e| IntifaceRestError::ButtplugClientError(e))?,
-  )
+      .map_err(IntifaceRestError::ButtplugClientError)
 }
 
 async fn get_devices(

@@ -131,19 +131,12 @@ impl ProtocolInitializer for GalakuInitializer {
   }
 }
 
+#[derive(Default)]
 pub struct Galaku {
   is_caiping_pump_device: bool,
   speeds: Vec<AtomicU8>,
 }
 
-impl Default for Galaku {
-  fn default() -> Self {
-    Self {
-      is_caiping_pump_device: false,
-      speeds: vec![],
-    }
-  }
-}
 impl Galaku {
   fn handle_local_output_cmd(
     &self,

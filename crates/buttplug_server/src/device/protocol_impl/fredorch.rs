@@ -290,7 +290,7 @@ impl ProtocolHandler for Fredorch {
     duration: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let previous_position = self.previous_position.load(Ordering::Relaxed);
-    let distance = (previous_position as i32 - position as i32).abs() as u32;
+    let distance = (previous_position as i32 - position as i32).unsigned_abs();
     // The Fredorch only has 15 positions, but scales them to 0-150
     let pos = (position * 10) as u8;
 

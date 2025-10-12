@@ -198,7 +198,7 @@ impl ProtocolHandler for HismithMini {
       )
       .into(),
       HardwareWriteCmd::new(
-        &vec![HISMITH_MINI_ROTATE_DIRECTIOM_UUID],
+        &[HISMITH_MINI_ROTATE_DIRECTIOM_UUID],
         Endpoint::Tx,
         vec![
           0xCC,

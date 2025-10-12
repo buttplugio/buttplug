@@ -160,7 +160,7 @@ impl ClientDeviceFeature {
         OutputCommand::Oscillate(OutputValue::new(self.check_step_value(output, *v as i32)?))
       }
       ClientDeviceOutputCommand::Rotate(v) => {
-        OutputCommand::Rotate(OutputValue::new(self.check_step_value(output, *v as i32)?))
+        OutputCommand::Rotate(OutputValue::new(self.check_step_value(output, (*v))?))
       }
       ClientDeviceOutputCommand::Constrict(v) => {
         OutputCommand::Constrict(OutputValue::new(self.check_step_value(output, *v as i32)?))

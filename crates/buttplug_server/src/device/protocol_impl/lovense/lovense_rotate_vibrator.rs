@@ -39,7 +39,7 @@ impl ProtocolHandler for LovenseRotateVibrator {
     _feature_id: Uuid,
     speed: i32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    form_rotate_with_direction_command(speed.abs() as u32, speed < 0)
+    form_rotate_with_direction_command(speed.unsigned_abs(), speed < 0)
   }
 
   fn handle_battery_level_cmd(

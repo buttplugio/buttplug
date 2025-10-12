@@ -69,9 +69,9 @@ impl ClientDeviceOutputCommand {
   }
 }
 
-impl Into<OutputType> for &ClientDeviceOutputCommand {
-  fn into(self) -> OutputType {
-    match self {
+impl From<&ClientDeviceOutputCommand> for OutputType {
+  fn from(val: &ClientDeviceOutputCommand) -> Self {
+    match val {
       ClientDeviceOutputCommand::Vibrate(_) | ClientDeviceOutputCommand::VibrateFloat(_) => {
         OutputType::Vibrate
       }

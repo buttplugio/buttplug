@@ -387,7 +387,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
             ButtplugError::from(ButtplugMessageError::InvalidMessageContents(
               "Position should be 0.0 < x < 1.0".to_owned(),
             ))
-          })? as i32
+          })?
             * (if cmd.clockwise() { 1 } else { -1 }),
         )),
       ));

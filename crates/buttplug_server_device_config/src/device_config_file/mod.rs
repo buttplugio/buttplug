@@ -196,8 +196,7 @@ fn load_user_config(
       if let Ok(loaded_user_config) = user_device_config_pair
         .config()
         .build_from_base_definition(base_config.1)
-      {
-        if let Err(e) = dcm_builder
+        && let Err(e) = dcm_builder
           .user_device_definition(user_device_config_pair.identifier(), &loaded_user_config)
         {
           error!(
@@ -205,7 +204,6 @@ fn load_user_config(
             e, user_config
           )
         }
-      }
     } else {
       error!(
         "Device identifier {:?} does not have a match base identifier that matches anything in the base config, removing from database.",

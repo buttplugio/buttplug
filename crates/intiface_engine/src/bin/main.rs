@@ -217,7 +217,7 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
         "Intiface CLI Options: User Device Config {}",
         userdeviceconfig
       );
-      builder.user_device_config_path(&userdeviceconfig);
+      builder.user_device_config_path(userdeviceconfig);
       match fs::read_to_string(userdeviceconfig) {
         Ok(cfg) => {
           builder.user_device_config_json(&cfg);
@@ -267,11 +267,10 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
     if let Some(value) = args.rest_api_port() {
       builder.rest_api_port(*value);
     }
-    if args.broadcast_server_mdns() {
-      if let Some(value) = args.mdns_suffix() {
+    if args.broadcast_server_mdns()
+      && let Some(value) = args.mdns_suffix() {
         builder.mdns_suffix(value);
       }
-    }
     Ok(builder.finish())
   }
 }
