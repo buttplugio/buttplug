@@ -5,10 +5,7 @@
 [![Discourse Forums](https://img.shields.io/discourse/status?label=buttplug.io%20forums&server=https%3A%2F%2Fdiscuss.buttplug.io)](https://discuss.buttplug.io)
 [![Discord](https://img.shields.io/discord/353303527587708932.svg?logo=discord)](https://discord.buttplug.io)
 [![Twitter](https://img.shields.io/twitter/follow/buttplugio.svg?style=social&logo=twitter)](https://twitter.com/buttplugio)
-
-[![Crates.io Version](https://img.shields.io/crates/v/buttplug)](https://crates.io/crates/buttplug)
-[![Crates.io Downloads](https://img.shields.io/crates/d/buttplug)](https://crates.io/crates/buttplug)
-[![Crates.io License](https://img.shields.io/crates/l/buttplug)](https://crates.io/crates/buttplug)
+[![bluesky](https://img.shields.io/bluesky/followers/buttplugio)](https://bsky.app/profile/buttplug.io)
 
 <div align="center">
   <h3>
@@ -38,7 +35,9 @@
   </picture>
 </p>
 
-A Rust implementation of the Buttplug Intimate Hardware Control Protocol, including a client and server. This is the core implementation of Buttplug.
+A Rust implementation of the Buttplug Intimate Hardware Control Protocol, including a client and server, as well as a command line interface for the server (Intiface Central). 
+
+This is the core implementation of Buttplug.
 
 This repo is a monorepo with multiple projects, including:
 
@@ -55,4 +54,4 @@ For a list of applications using Buttplug, see the [awesome-buttplug repo](https
 
 ## Other Language Implementations
 
-See the [awesome-buttplug repo](https://github.com/buttplugio/awesome-buttplug#development-and-libraries) for a full list of implementations.
+See the [awesome-buttplug repo](https://github.com/buttplugio/awesome-buttplug#development-and-libraries) for a full list of client implementations in other programming languages.
