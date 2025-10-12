@@ -107,7 +107,7 @@ impl ProtocolInitializer for GalakuInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ServerDeviceDefinition,
+    def: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut protocol = Galaku::default();
     protocol.is_caiping_pump_device = false;

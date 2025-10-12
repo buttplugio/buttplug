@@ -213,7 +213,7 @@ async fn test_invalid_step_range_device_config_wrong_range_length() {
               {
                 "description": "Test Speed",
                 "actuator": {
-                  "step-range": [
+                  "value": [
                     10
                   ],
                   "messages": [

@@ -8,22 +8,23 @@ configurations:
       - Keon Wifi
     name: Kiiroo Keon
     features:
-      - feature-type: PositionWithDuration
-        id: f4ee99e7-1a14-4315-9870-3990bca7ff94
+      - id: f4ee99e7-1a14-4315-9870-3990bca7ff94
         output:
-          PositionWithDuration:
-            step-range:
+          position_with_duration:
+            position:
               - 0
               - 99
-      - feature-type: Battery
-        description: Battery Level
+            duration:
+              - 0
+              - 100000
+      - description: Battery Level
         id: 90319514-ff68-40ae-805d-54ce392a60bd
         input:
-          Battery:
-            value-range:
+          battery:
+            value_range:
               - - 0
                 - 100
-            input-commands:
+            input_commands:
               - Read
     id: 62ba81c4-0ada-41be-b49d-d53426cdc277
 communication:

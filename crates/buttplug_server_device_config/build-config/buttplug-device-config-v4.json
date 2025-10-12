@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 94
+    "minor": 95
   },
   "protocols": {
     "activejoy": {
@@ -2297,10 +2297,10 @@
         {
           "features": [
             {
-              "description": "vibrate",
+              "description": "Oscillate",
               "id": "dc4348f2-7788-4b63-96f8-80ed74e4f9c2",
               "output": {
-                "vibrate": {
+                "oscillate": {
                   "value": [
                     0,
                     100
@@ -4400,11 +4400,10 @@
         {
           "features": [
             {
-              "feature-type": "Spray",
               "id": "c24a6b8c-6665-4cf6-95f8-51140f9788b4",
               "output": {
-                "Spray": {
-                  "step-range": [
+                "spray": {
+                  "value": [
                     0,
                     1
                   ]
@@ -7784,11 +7783,10 @@
         {
           "features": [
             {
-              "feature-type": "Oscillate",
               "id": "12f36e6d-e9ce-439c-b6f5-3f80a4f4b47d",
               "output": {
-                "Oscillate": {
-                  "step-range": [
+                "oscillate": {
+                  "value": [
                     0,
                     255
                   ]
@@ -7796,11 +7794,10 @@
               }
             },
             {
-              "feature-type": "Vibrate",
               "id": "94025679-badf-49bb-a247-1dab022d9204",
               "output": {
-                "Vibrate": {
-                  "step-range": [
+                "vibrate": {
+                  "value": [
                     0,
                     255
                   ]
@@ -7960,11 +7957,10 @@
       "defaults": {
         "features": [
           {
-            "feature-type": "Vibrate",
             "id": "8829c78b-420c-42e0-bc3e-280f84c89362",
             "output": {
-              "Vibrate": {
-                "step-range": [
+              "vibrate": {
+                "value": [
                   0,
                   100
                 ]
@@ -7972,11 +7968,10 @@
             }
           },
           {
-            "feature-type": "Vibrate",
             "id": "019e23e5-bcba-41c8-913d-03a7da63feee",
             "output": {
-              "Vibrate": {
-                "step-range": [
+              "vibrate": {
+                "value": [
                   0,
                   100
                 ]
@@ -7985,14 +7980,13 @@
           },
           {
             "description": "Battery Level",
-            "feature-type": "Battery",
             "id": "eba92a5d-4284-4170-b5e9-3e0700e4529e",
             "input": {
-              "Battery": {
-                "input-commands": [
+              "battery": {
+                "input_commands": [
                   "Read"
                 ],
-                "value-range": [
+                "value_range": [
                   [
                     0,
                     100
@@ -8382,11 +8376,10 @@
               }
             },
             {
-              "feature-type": "Vibrate",
               "id": "1e1fb78c-a3bd-4782-8a96-684bbbaa4670",
               "output": {
-                "Vibrate": {
-                  "step-range": [
+                "vibrate": {
+                  "value": [
                     0,
                     100
                   ]
@@ -8994,11 +8987,14 @@
         {
           "features": [
             {
-              "feature-type": "PositionWithDuration",
               "id": "f4ee99e7-1a14-4315-9870-3990bca7ff94",
               "output": {
-                "PositionWithDuration": {
-                  "step-range": [
+                "position_with_duration": {
+                  "duration": [
+                    0,
+                    100000
+                  ],
+                  "position": [
                     0,
                     99
                   ]
@@ -9007,14 +9003,13 @@
             },
             {
               "description": "Battery Level",
-              "feature-type": "Battery",
               "id": "90319514-ff68-40ae-805d-54ce392a60bd",
               "input": {
-                "Battery": {
-                  "input-commands": [
+                "battery": {
+                  "input_commands": [
                     "Read"
                   ],
-                  "value-range": [
+                  "value_range": [
                     [
                       0,
                       100
@@ -11864,11 +11859,10 @@
         {
           "features": [
             {
-              "feature-type": "Vibrate",
               "id": "8deea69f-ea53-46bb-80ae-51dd5d49bba9",
               "output": {
-                "Vibrate": {
-                  "step-range": [
+                "vibrate": {
+                  "value": [
                     0,
                     255
                   ]
@@ -11876,11 +11870,10 @@
               }
             },
             {
-              "feature-type": "Oscillate",
               "id": "5ae8bb6f-6280-4a8d-9e08-a3d5e5fb89a8",
               "output": {
-                "Oscillate": {
-                  "step-range": [
+                "sscillate": {
+                  "value": [
                     0,
                     255
                   ]
@@ -11897,11 +11890,10 @@
         {
           "features": [
             {
-              "feature-type": "Vibrate",
               "id": "4dd378c8-a91b-400e-846b-f16e81ac5690",
               "output": {
-                "Vibrate": {
-                  "step-range": [
+                "vibrate": {
+                  "value": [
                     0,
                     255
                   ]
@@ -11909,11 +11901,10 @@
               }
             },
             {
-              "feature-type": "Vibrate",
               "id": "c04a2518-81a2-49cb-8a0a-1a5b9c163737",
               "output": {
-                "Vibrate": {
-                  "step-range": [
+                "vibrate": {
+                  "value": [
                     0,
                     255
                   ]
@@ -11930,11 +11921,10 @@
         {
           "features": [
             {
-              "feature-type": "Vibrate",
               "id": "e04ad6f5-278e-4acc-b6fa-711954c2e1ab",
               "output": {
-                "Vibrate": {
-                  "step-range": [
+                "vibrate": {
+                  "value": [
                     0,
                     255
                   ]
@@ -11942,11 +11932,10 @@
               }
             },
             {
-              "feature-type": "Oscillate",
               "id": "8a4f2884-887f-46e3-9a36-c0b91b1b1363",
               "output": {
-                "Oscillate": {
-                  "step-range": [
+                "oscillate": {
+                  "value": [
                     0,
                     255
                   ]
@@ -11954,11 +11943,10 @@
               }
             },
             {
-              "feature-type": "Constrict",
               "id": "389aa8b8-2550-462c-bd4f-1158c0981606",
               "output": {
-                "Constrict": {
-                  "step-range": [
+                "constrict": {
+                  "value": [
                     0,
                     54
                   ]
@@ -16645,11 +16633,10 @@
         {
           "features": [
             {
-              "feature-type": "Constrict",
               "id": "4464ae6b-20bc-4c99-9e63-bfda99b7c8cc",
               "output": {
-                "Constrict": {
-                  "step-range": [
+                "constrict": {
+                  "value": [
                     0,
                     100
                   ]
@@ -17033,11 +17020,10 @@
           "features": [
             {
               "description": "Wearer Vibrator",
-              "feature-type": "Vibrate",
               "id": "968f7306-6997-4b76-a40f-acbb431d9582",
               "output": {
-                "Oscillate": {
-                  "step-range": [
+                "oscillate": {
+                  "value": [
                     0,
                     20
                   ]
@@ -17046,11 +17032,10 @@
             },
             {
               "description": "Receiver Vibrator",
-              "feature-type": "Vibrate",
               "id": "018009d0-b5bf-4f97-a13d-909d0e74fabc",
               "output": {
-                "Vibrate": {
-                  "step-range": [
+                "vibrate": {
+                  "value": [
                     0,
                     20
                   ]
@@ -17059,11 +17044,10 @@
             },
             {
               "description": "Wearer Clitoral Vibrators",
-              "feature-type": "Vibrate",
               "id": "018009d0-b5bf-4f97-a13d-909d0e74fabc",
               "output": {
-                "Vibrate": {
-                  "step-range": [
+                "vibrate": {
+                  "value": [
                     0,
                     20
                   ]
@@ -17232,11 +17216,10 @@
         {
           "features": [
             {
-              "feature-type": "Oscillate",
               "id": "15cf412a-594b-4238-bbe0-7e9693233430",
               "output": {
-                "Vibrate": {
-                  "step-range": [
+                "vibrate": {
+                  "value": [
                     0,
                     99
                   ]
@@ -17253,11 +17236,10 @@
         {
           "features": [
             {
-              "feature-type": "Oscillate",
               "id": "cc1f8c5c-40ff-4d44-91ca-4520042cf723",
               "output": {
-                "Vibrate": {
-                  "step-range": [
+                "vibrate": {
+                  "value": [
                     0,
                     99
                   ]

@@ -165,11 +165,10 @@ configurations:
       - '4002'
     name: Sinloli Piupiu
     features:
-      - feature-type: Spray
-        id: c24a6b8c-6665-4cf6-95f8-51140f9788b4
+      - id: c24a6b8c-6665-4cf6-95f8-51140f9788b4
         output:
-          Spray:
-            step-range:
+          spray:
+            value:
               - 0
               - 1
     id: ae9c755d-a11f-43c3-9cce-1c3797788434

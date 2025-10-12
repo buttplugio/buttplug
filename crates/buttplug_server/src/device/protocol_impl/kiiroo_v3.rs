@@ -18,7 +18,7 @@ use crate::device::{
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::{
-  DeviceDefinition,
+  ServerDeviceDefinition,
   ProtocolCommunicationSpecifier,
   UserDeviceIdentifier,
 };
@@ -36,7 +36,7 @@ impl ProtocolInitializer for KiirooV3Initializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    _: &DeviceDefinition,
+    _: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(KiirooV21::default()))
   }

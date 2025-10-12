@@ -184,33 +184,11 @@ impl ProtocolHandler for HismithMini {
     feature_id: Uuid,
     speed: i32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-        Ok(vec![
-            HardwareWriteCmd::new(
-                &[feature_id],
-                Endpoint::Tx,
-                vec![0xCC, 0x03, speed as u8, speed as u8 + 3],
-                false,
-            ).into(),
-            HardwareWriteCmd::new(
-                &vec![HISMITH_MINI_ROTATE_DIRECTIOM_UUID],
-                Endpoint::Tx,
-                vec![0xCC, 0x01, if clockwise { 0xc0 } else {0xc1}, if clockwise { 0xc1 } else {0xc2}],
-                false,
-            ).into(),
-        ])
-    }
-
-  fn handle_output_spray_cmd(&self, _feature_index: u32, feature_id: Uuid, _level: u32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![
       HardwareWriteCmd::new(
         &[feature_id],
         Endpoint::Tx,
-        vec![
-          0xCC,
-          0x03,
-          speed.unsigned_abs() as u8,
-          speed.unsigned_abs() as u8 + 3,
-        ],
+        vec![0xCC, 0x03, speed.unsigned_abs() as u8, speed.unsigned_abs() as u8 + 3],
         false,
       )
       .into(),
@@ -223,6 +201,23 @@ impl ProtocolHandler for HismithMini {
           if speed >= 0 { 0xc0 } else { 0xc1 },
           if speed >= 0 { 0xc1 } else { 0xc2 },
         ],
+        false,
+      )
+      .into(),
+    ])
+  }
+
+  fn handle_output_spray_cmd(
+    &self,
+    _feature_index: u32,
+    feature_id: Uuid,
+    _level: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![0xcc, 0x0b, 0x01, 0x0c],
         false,
       )
       .into(),

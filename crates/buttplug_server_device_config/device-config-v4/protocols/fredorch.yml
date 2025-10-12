@@ -11,8 +11,8 @@ defaults:
             - 0
             - 100000
         # Disable Oscillate for now
-        # Oscillate:
-        #  step-range:
+        # oscillate:
+        #  value:
         #    - 0
         #    - 20
   id: cbd6a5b5-50c0-4fb5-93e3-408fd027ff4d

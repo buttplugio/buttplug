@@ -17,11 +17,10 @@
           "base_id": "c8633234-07a4-4ad9-961d-a4d777b32be7",
           "features": [
             {
-              "feature-type": "Oscillate",
               "description": "Fucking Machine Oscillation Speed",
               "output": {
                 "oscillate": {
-                  "step_range": [
+                  "value": [
                     0,
                     30
                   ],
@@ -35,7 +34,6 @@
               "id": "56d94863-b321-428b-8b68-bac0197556e2"
             },
             {
-              "feature-type": "Battery",
               "description": "Battery Level",
               "input": {
                 "battery": {
