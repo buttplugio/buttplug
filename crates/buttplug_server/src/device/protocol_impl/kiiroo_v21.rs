@@ -19,7 +19,7 @@ use buttplug_core::{
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server_device_config::Endpoint;
-use dashmap::DashSet;
+// use dashmap::DashSet;
 use futures::{FutureExt, StreamExt, future::BoxFuture};
 use std::{
   default::Default,
@@ -37,7 +37,7 @@ generic_protocol_setup!(KiirooV21, "kiiroo-v21");
 pub struct KiirooV21 {
   previous_position: Arc<AtomicU8>,
   // Set of sensors we've subscribed to for updates.
-  subscribed_sensors: Arc<DashSet<u32>>,
+  // subscribed_sensors: Arc<DashSet<u32>>,
   event_stream: broadcast::Sender<ButtplugServerDeviceMessage>,
 }
 
@@ -46,7 +46,7 @@ impl Default for KiirooV21 {
     let (sender, _) = broadcast::channel(256);
     Self {
       previous_position: Default::default(),
-      subscribed_sensors: Arc::new(DashSet::new()),
+      // subscribed_sensors: Arc::new(DashSet::new()),
       event_stream: sender,
     }
   }

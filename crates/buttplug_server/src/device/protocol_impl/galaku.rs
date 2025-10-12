@@ -62,16 +62,6 @@ fn encrypt(data: Vec<u32>) -> Vec<u32> {
   new_data
 }
 
-fn decrypt(data: Vec<u32>) -> Vec<u32> {
-  let mut new_data = vec![data[0]];
-  for i in 1..data.len() {
-    let a = get_tab_key(data[i - 1] as usize, i);
-    let u = (data[i] as i32 - a as i32) ^ data[0] as i32 ^ a as i32;
-    new_data.push(if u < 0 { (u + 256) as u32 } else { u as u32 });
-  }
-  new_data
-}
-
 fn send_bytes(data: Vec<u32>) -> Vec<u8> {
   let mut new_data = vec![35];
   new_data.extend(data);
@@ -82,6 +72,19 @@ fn send_bytes(data: Vec<u32>) -> Vec<u8> {
   }
   uint8_array
 }
+
+/*
+
+fn decrypt(data: Vec<u32>) -> Vec<u32> {
+  let mut new_data = vec![data[0]];
+  for i in 1..data.len() {
+    let a = get_tab_key(data[i - 1] as usize, i);
+    let u = (data[i] as i32 - a as i32) ^ data[0] as i32 ^ a as i32;
+    new_data.push(if u < 0 { (u + 256) as u32 } else { u as u32 });
+  }
+  new_data
+}
+
 
 fn read_value(data: Vec<u8>) -> u32 {
   let mut uint32_data: Vec<u32> = Vec::new();
@@ -95,6 +98,8 @@ fn read_value(data: Vec<u8>) -> u32 {
     0
   }
 }
+
+*/
 
 const GALAKU_PROTOCOL_UUID: Uuid = uuid!("766d15d5-0f43-4768-a73a-96ff48bc389e");
 generic_protocol_initializer_setup!(Galaku, "galaku");

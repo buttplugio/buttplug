@@ -34,15 +34,3 @@ impl ConfigVersionGetter for BaseConfigFile {
     self.version
   }
 }
-
-impl BaseConfigFile {
-  pub(crate) fn new(major_version: u32, minor_version: u32) -> Self {
-    Self {
-      version: ConfigVersion {
-        major: major_version,
-        minor: minor_version,
-      },
-      protocols: None,
-    }
-  }
-}

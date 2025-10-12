@@ -144,6 +144,8 @@ impl From<ButtplugServerMessageV1> for ButtplugServerMessageV0 {
   }
 }
 
+// Leave this in for consistency sake, mostly for implementing backward compat tests
+#[allow(dead_code)]
 #[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]
 pub enum ButtplugDeviceMessageNameV1 {
   VibrateCmd,

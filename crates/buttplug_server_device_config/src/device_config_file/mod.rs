@@ -12,9 +12,8 @@ mod protocol;
 mod user;
 
 use base::BaseConfigFile;
-use uuid::Uuid;
 
-use crate::{UserDeviceIdentifier, device_config_file::{
+use crate::{device_config_file::{
   protocol::ProtocolDefinition,
   user::{UserConfigDefinition, UserConfigFile, UserDeviceConfigPair},
 }};

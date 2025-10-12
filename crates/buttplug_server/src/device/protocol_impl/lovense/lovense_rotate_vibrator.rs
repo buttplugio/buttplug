@@ -13,16 +13,11 @@ use crate::device::{
 };
 use buttplug_core::{errors::ButtplugDeviceError, message::InputReadingV4};
 use futures::future::BoxFuture;
-use std::sync::{
-  Arc,
-  atomic::{AtomicBool, Ordering},
-};
+use std::sync::Arc;
 use uuid::Uuid;
 
 #[derive(Default)]
-pub struct LovenseRotateVibrator {
-  clockwise: AtomicBool,
-}
+pub struct LovenseRotateVibrator {}
 
 impl ProtocolHandler for LovenseRotateVibrator {
   fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {

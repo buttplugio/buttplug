@@ -99,7 +99,7 @@ impl IntifaceEngine {
 
     // Hang out until those listeners get sick of listening.
     info!("Intiface CLI Setup finished, running server tasks until all joined.");
-    let mut server = setup_buttplug_server(options, &self.backdoor_server, dcm).await?;
+    let server = setup_buttplug_server(options, &self.backdoor_server, dcm).await?;
     let dcm = server
       .device_manager()
       .device_configuration_manager()

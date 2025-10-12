@@ -184,7 +184,7 @@ impl ProtocolInitializer for FredorchInitializer {
   }
 }
 
-const speed_matrix: [[u32; 20]; 15] = [
+const SPEED_MATRIX: [[u32; 20]; 15] = [
 // distance, speed 1-20
 /*      1     2     3     4     5     6     7     8     9    10   11   12   13   14   15   16   17   18   19   20 */
 /* 1*/ [1000, 800,  400,  235,  200,  172,  155,  92,   60,  45,  38,  34,  32,  28,  27,  26,  25,  24,  23,  22 ],
@@ -204,13 +204,13 @@ const speed_matrix: [[u32; 20]; 15] = [
 /*15*/ [8048, 7068, 4442, 3708, 2668, 1930, 1800, 1520, 878, 618, 428, 365, 260, 255, 250, 240, 230, 220, 210, 200],
 ];
 
-fn calculate_speed(mut distance: u32, duration: u32) -> u8 {
+fn calculate_speed(distance: u32, duration: u32) -> u8 {
   let distance = distance.clamp(0,15);
   if distance == 0  {return 0;}
 
   let mut speed= 1;
   while speed < 20 {
-    if speed_matrix[distance as usize - 1][speed as usize - 1] < duration {
+    if SPEED_MATRIX[distance as usize - 1][speed as usize - 1] < duration {
       return speed;
     }
     speed += 1;

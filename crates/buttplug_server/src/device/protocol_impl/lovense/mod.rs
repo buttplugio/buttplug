@@ -234,7 +234,7 @@ impl ProtocolInitializer for LovenseInitializer {
 
     // New Lovense devices seem to be moving to the simplified LVS:<bytearray>; command format.
     // I'm not sure if there's a good way to detect this.
-    let use_lvs = device_type == "OC";
+    //let use_lvs = device_type == "OC";
 
     debug!(
       "Device type {} initialized with {} vibrators {} using Mply",
