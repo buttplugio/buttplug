@@ -1,6 +1,7 @@
 [workspace]
 resolver = "3"
 members = [
+    "crates/buttplug",
     "crates/buttplug_client",
     "crates/buttplug_client_in_process",
     "crates/buttplug_core",

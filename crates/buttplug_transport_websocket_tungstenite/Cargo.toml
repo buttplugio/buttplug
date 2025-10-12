@@ -1,6 +1,6 @@
 [package]
 name = "buttplug_transport_websocket_tungstenite"
-version = "10.0.0"
+version = "10.0.0-beta1"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Buttplug Intimate Hardware Control Library - Server Device Config Library"
 license = "BSD-3-Clause"

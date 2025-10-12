@@ -1,20 +1,57 @@
-# Buttplug Procedural Macro Library
+# Buttplug
 
 [![Patreon donate button](https://img.shields.io/badge/patreon-donate-yellow.svg)](https://www.patreon.com/qdot)
 [![Github donate button](https://img.shields.io/badge/github-donate-ff69b4.svg)](https://www.github.com/sponsors/qdot)
 [![Discourse Forums](https://img.shields.io/discourse/status?label=buttplug.io%20forums&server=https%3A%2F%2Fdiscuss.buttplug.io)](https://discuss.buttplug.io)
 [![Discord](https://img.shields.io/discord/353303527587708932.svg?logo=discord)](https://discord.buttplug.io)
 [![Twitter](https://img.shields.io/twitter/follow/buttplugio.svg?style=social&logo=twitter)](https://twitter.com/buttplugio)
+[![bluesky](https://img.shields.io/bluesky/followers/buttplug.io)](https://bsky.app/profile/buttplug.io)
 
-[![Crates.io Version](https://img.shields.io/crates/v/buttplug-derive)](https://crates.io/crates/buttplug-derive)
-[![Crates.io Downloads](https://img.shields.io/crates/d/buttplug-derive)](https://crates.io/crates/buttplug-derive)
-[![Crates.io License](https://img.shields.io/crates/l/buttplug-derive)](https://crates.io/crates/buttplug-derive)
+[![Crates.io Version](https://img.shields.io/crates/v/buttplug)](https://crates.io/crates/buttplug)
+[![Crates.io Downloads](https://img.shields.io/crates/d/buttplug)](https://crates.io/crates/buttplug)
+[![Crates.io License](https://img.shields.io/crates/l/buttplug)](https://crates.io/crates/buttplug)
 
-Procedural macros for use in the implementation of the Rust version of Buttplug. Not much interesting to see here, it's mostly just derive macros for library traits.
+<div align="center">
+  <h3>
+    <a href="https://docs.rs/buttplug">
+      Rust API Documentation
+    </a>
+    <span> | </span>
+    <a href="https://docs.buttplug.io/docs/dev-guide">
+      Developer Guide
+    </a>
+    <span> | </span>    
+    <a href="https://docs.buttplug.io/docs/spec">
+      Protocol Spec
+    </a>
+    <span> | </span>
+    <a href="https://awesome.buttplug.io">
+      Apps and Games List
+    </a>
+  </h3>
+</div>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="images/buttplug_rust_docs.png">
+    <source media="(prefers-color-scheme: dark)" srcset="images/buttplug_rust_docs_light.png">
+    <img src="https://raw.githubusercontent.com/buttplugio/buttplug/master/images/buttplug_rust_docs.png">
+  </picture>
+</p>
+
+# Buttplug Client Library (Rehosted as Buttplug)
+
+This is a rehosted version of the [buttplug_client](../buttplug_client/) library. We wanted to keep the crate name being something useful, but the rest of the library has been split into seperate crates.
+
+Including this library is similar to just including buttplug_client and the buttplug_transport_websocket_tungstinite libraries.
+
+## Where's the server side?
+
+At this point, we're assuming anyone using the server portion of Buttplug is doing so via [Intiface Engine](../intiface_engine/) or [Intiface Central](https://intiface.com/central), as should only need the client and core portions of the project. Only those portions of the project are rehosted through this library now.
 
 ## License
 
-buttplug-derive is BSD 3-Clause licensed.
+Buttplug is BSD 3-Clause licensed.
 
 ```text
 

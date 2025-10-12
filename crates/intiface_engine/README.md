@@ -5,9 +5,7 @@
 [![Discourse Forums](https://img.shields.io/discourse/status?label=buttplug.io%20forums&server=https%3A%2F%2Fdiscuss.buttplug.io)](https://discuss.buttplug.io)
 [![Discord](https://img.shields.io/discord/353303527587708932.svg?logo=discord)](https://discord.buttplug.io)
 [![Twitter](https://img.shields.io/twitter/follow/buttplugio.svg?style=social&logo=twitter)](https://twitter.com/buttplugio)
-
-![Intiface Engine Build](https://github.com/intiface/intiface-engine/workflows/Intiface%20Engine%20Build/badge.svg)  ![crates.io](https://img.shields.io/crates/v/intiface-engine.svg)
-
+[![bluesky](https://img.shields.io/bluesky/followers/buttplug.io)](https://bsky.app/profile/buttplug.io)
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/buttplugio/buttplug/dev/images/buttplug_rust_docs.png">
@@ -19,7 +17,7 @@ Intiface Engine is just a front-end for [Buttplug](https://github.com/buttplugio
 but since we're trying to not make people install a program named "Buttplug", here we are.
 
 While this program can be used standalone, it will mostly be featured as a backend/engine for
-Intiface Central.
+[Intiface Central](https://intiface.com/central).
 
 ## Running
 
@@ -54,21 +52,12 @@ For example, to run the server on websockets at port 12345 with bluetooth device
 ## Compiling
 
 Linux will have extra compilation dependency requirements via
-[buttplug-rs](https://github.com/buttplugio/buttplug-rs). For pacakges required,
+[buttplug-rs](https://github.com/buttplugio/buttplug). For pacakges required,
 please check there.
 
-## Contributing
+## Filing Issues and Contributing
 
-Right now, we mostly need code/API style reviews and feedback. We don't really have any good
-bite-sized chunks to mentor the implementation yet, but one we do, those will be marked "Help
-Wanted" in our [github issues](https://github.com/buttplugio/buttplug-rs/issues).
-
-As we need money to keep up with supporting the latest and greatest hardware, we also have multiple
-ways to donate!
-
-- [Patreon](https://patreon.com/qdot)
-- [Github Sponsors](https://github.com/sponsors/qdot)
-- [Ko-Fi](https://ko-fi.com/qdot76367)
+[See top level README for more info.](https://github.com/buttplugio/buttplug)
 
 ## License and Trademarks
 
@@ -76,7 +65,7 @@ Intiface is a Registered Trademark of Nonpolynomial Labs, LLC
 
 Buttplug and Intiface are BSD licensed.
 
-    Copyright (c) 2016-2022, Nonpolynomial Labs, LLC
+    Copyright (c) 2016-2025, Nonpolynomial Labs, LLC
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
