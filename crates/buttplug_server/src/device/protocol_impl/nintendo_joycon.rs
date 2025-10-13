@@ -264,6 +264,8 @@ impl NintendoJoycon {
     let is_stopped = Arc::new(AtomicBool::new(false));
     let is_stopped_clone = is_stopped.clone();
     async_manager::spawn(async move {
+      #[cfg(feature = "wasm")]
+      use buttplug_core::util;
       loop {
         if is_stopped_clone.load(Ordering::Relaxed) {
           return;
