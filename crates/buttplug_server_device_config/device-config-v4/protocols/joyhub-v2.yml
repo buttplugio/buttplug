@@ -27,23 +27,6 @@ configurations:
               - 255
     id: 7f324fea-ce2c-4e72-bfc2-b2227251a2c7
   - identifier:
-      - J-Pearlconch
-    name: JoyHub Pearlconch
-    features:
-      - id: e5102a93-330d-48b2-a901-79b2b1c6990c
-        output:
-          rotate:
-            value:
-              - 0
-              - 255
-      - id: 002b77e4-cef3-4718-98e3-0644cf0461d7
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-    id: 9a5b2555-5d9f-4364-8e5b-0e0c2eed9849
-  - identifier:
       - J-PearlconchL
     name: JoyHub Pearlconch L
     features:
@@ -1159,6 +1142,40 @@ configurations:
               - 0
               - 255
     id: 398a3a62-3bba-433e-80ad-50d129b695db
+  - identifier:
+      - J-Torque
+    name: JoyHub Torque
+    features:
+      - id: a0be3d5f-e6f3-4c0b-ba69-1c872b918485
+        output:
+          vibrate:
+            value:
+              - 0
+              - 255
+      - id: 0b616fad-e802-43ff-b5b2-78ba0233acc6
+        output:
+          rotate:
+            value:
+              - 0
+              - 255
+    id: 5266591c-7cee-473c-ae96-a9253be79cc4
+  - identifier:
+      - J-Mighty
+    name: JoyHub Mighty
+    features:
+      - id: 6f2e25ae-d5f0-4823-a8db-9072e8e6a0d4
+        output:
+          oscillate:
+            value:
+              - 0
+              - 255
+      - id: 9b73399f-04a8-4a3b-9e65-b98e11a47f47
+        output:
+          rotate:
+            value:
+              - 0
+              - 255
+    id: 2a0798ba-a2e3-48ce-82ab-335fb03d44a9
 communication:
   - btle:
       names:
@@ -1222,6 +1239,8 @@ communication:
         - J-Markel
         - J-Pipes
         - J-Vigo
+        - J-Torque
+        - J-Mighty
       services:
         0000ffa0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffa1-0000-1000-8000-00805f9b34fb
