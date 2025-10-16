@@ -144,6 +144,10 @@ configurations:
     name: JoyHub Divers
     id: 44372cb8-208a-4d11-afc7-88ee69bf65fd
   - identifier:
+      - J-VioletGale
+    name: JoyHub Violet Gale
+    id: 167a92b5-2e79-448d-9988-a1f7673dafe9
+  - identifier:
       - J-Petalwish2
     name: JoyHub Petalwish 2
     features:
@@ -445,6 +449,7 @@ communication:
         - J-Derik
         - J-Peachy
         - J-Divers
+        - J-VioletGale
       services:
         0000ffa0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffa1-0000-1000-8000-00805f9b34fb
