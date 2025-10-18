@@ -1,3 +1,9 @@
+# Intiface Engine v4.0.0-beta2 (2025/10/18)
+
+## Bugfixes
+
+- Allow engine to actually exit when stopping REST API
+
 # Intiface Engine v4.0.0-beta1 (2025/10/12)
 
 ## Features
