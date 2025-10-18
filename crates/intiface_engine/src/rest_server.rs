@@ -21,7 +21,6 @@ use buttplug_core::message::{DeviceFeature, OutputType};
 use buttplug_server::ButtplugServer;
 use futures::{Stream, StreamExt};
 use serde::Serialize;
-use strum::IntoEnumIterator;
 use thiserror::Error;
 use tokio::net::TcpListener;
 
@@ -35,6 +34,7 @@ enum IntifaceRestError {
   InvalidDevice(u32),
   #[error("Device index {0} feature index {1} does not refer to a valid device feature.")]
   InvalidFeature(u32, u32),
+  /*
   #[error("{0} is not a valid output type. Valid output types are: {1:?}")]
   InvalidOutputType(String, Vec<OutputType>),
   #[error("{0} is not a valid input type. Valid input types are: {1:?}")]
@@ -43,6 +43,7 @@ enum IntifaceRestError {
   InvalidInputCommand(u32, Vec<String>),
   #[error("Value {0} is not valid for the current command.)")]
   InvalidValue(u32),
+  */
 }
 
 // Tell axum how `AppError` should be converted into a response.
@@ -237,11 +238,11 @@ async fn get_feature_info(
   )
 }
 
+/*
 async fn feature_input_command(
   State(client): State<Arc<ButtplugClient>>,
   Path((index, feature_index, input_type, command)): Path<(u32, u32, String, String)>,
 ) -> Result<(), IntifaceRestError> {
-  /*
   let cmd = convert_output_command(&command, level)?;
 
   Ok(
@@ -250,9 +251,10 @@ async fn feature_input_command(
       .await
       .map_err(|e| IntifaceRestError::ButtplugClientError(e))?,
   )
-  */
+
   Ok(())
 }
+*/
 
 async fn server_sse(
   State(client): State<Arc<ButtplugClient>>,
@@ -297,12 +299,10 @@ impl IntifaceRestServer {
           "/devices/{index}/inputs/{input_type}/{input_command}",
           put(device_input_command),
         )
-        */
         .route(
           "/devices/{index}/features/{index}/inputs/{input_type}/{input_command}",
           put(feature_input_command),
         )
-        /*
         .route("/devices/{index}/events", get(device_sse))
          */
         .route("/events", get(server_sse))
