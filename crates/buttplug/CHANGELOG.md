@@ -1,3 +1,9 @@
+# 10.0.0-beta1 (2025-10-18)
+
+## Features
+
+- Move base buttplug crate to just being a metacrate
+
 # 9.0.9 (2025-09-06)
 
 ## Features
