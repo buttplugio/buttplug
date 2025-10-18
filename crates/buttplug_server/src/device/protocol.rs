@@ -264,12 +264,10 @@ pub trait ProtocolHandler: Sync + Send {
           .try_into()
           .map_err(|_| ButtplugDeviceError::DeviceCommandSignError)?,
       ),
-      OutputCommand::Heater(x) => self.handle_output_heater_cmd(
+      OutputCommand::Temperature(x) => self.handle_output_temperature_cmd(
         cmd.feature_index(),
         cmd.feature_id(),
         x.value()
-          .try_into()
-          .map_err(|_| ButtplugDeviceError::DeviceCommandSignError)?,
       ),
       OutputCommand::Led(x) => self.handle_output_led_cmd(
         cmd.feature_index(),
@@ -332,13 +330,13 @@ pub trait ProtocolHandler: Sync + Send {
     self.command_unimplemented("OutputCmd (Constrict Actuator)")
   }
 
-  fn handle_output_heater_cmd(
+  fn handle_output_temperature_cmd(
     &self,
     _feature_index: u32,
     _feature_id: Uuid,
-    _level: u32,
+    _level: i32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented("OutputCmd (Heater Actuator)")
+    self.command_unimplemented("OutputCmd (Temperature Actuator)")
   }
 
   fn handle_output_led_cmd(

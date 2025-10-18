@@ -84,8 +84,8 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
           if let Some(attr) = output_map.rotate().as_ref() {
             create_attribute(OutputType::Rotate, attr.value().step_count())
           }
-          if let Some(attr) = output_map.heater().as_ref() {
-            create_attribute(OutputType::Heater, attr.value().step_count())
+          if let Some(attr) = output_map.temperature().as_ref() {
+            create_attribute(OutputType::Temperature, attr.value().step_count())
           }
           if let Some(attr) = output_map.led().as_ref() {
             create_attribute(OutputType::Led, attr.value().step_count())

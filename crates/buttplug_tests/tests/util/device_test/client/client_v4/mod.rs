@@ -28,7 +28,7 @@ use std::{sync::Arc, time::Duration};
 fn from_type_and_value(output_type: OutputType, value: f64) -> ClientDeviceOutputCommand {
   match output_type {
     OutputType::Constrict => ClientDeviceOutputCommand::ConstrictFloat(value),
-    OutputType::Heater => ClientDeviceOutputCommand::HeaterFloat(value),
+    OutputType::Temperature => ClientDeviceOutputCommand::TemperatureFloat(value),
     OutputType::Led => ClientDeviceOutputCommand::LedFloat(value),
     OutputType::Oscillate => ClientDeviceOutputCommand::OscillateFloat(value),
     OutputType::Position => ClientDeviceOutputCommand::PositionFloat(value),

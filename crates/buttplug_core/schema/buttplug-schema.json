@@ -380,7 +380,7 @@
         "Output": {
           "type": "object",
           "patternProperties": {
-            "^(Vibrate|Rotate|Oscillate|Constrict|Spray|Position|Heater|Led)$": {
+            "^(Vibrate|Rotate|Oscillate|Constrict|Spray|Position|Temperature|Led)$": {
               "type": "object",
               "properties": {
                 "Value": {
@@ -455,7 +455,7 @@
           "Command": {
             "type": "object",
             "patternProperties": {
-              "^(Vibrate|Rotate|Oscillate|Constrict|Spray|Position|Heater|Led)$": {
+              "^(Vibrate|Rotate|Oscillate|Constrict|Spray|Position|Temperature|Led)$": {
                 "type": "object",
                 "properties": {
                   "Value": {

@@ -421,8 +421,8 @@ impl ServerDevice {
               stop_cmd(message::OutputCommand::Constrict(OutputValue::new(0)));
               break;
             }
-            OutputType::Heater => {
-              stop_cmd(message::OutputCommand::Heater(OutputValue::new(0)));
+            OutputType::Temperature => {
+              stop_cmd(message::OutputCommand::Temperature(OutputValue::new(0)));
               break;
             }
             OutputType::Spray => {

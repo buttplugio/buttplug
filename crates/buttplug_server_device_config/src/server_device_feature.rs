@@ -292,7 +292,7 @@ pub struct ServerDeviceFeatureOutput {
   rotate: Option<ServerDeviceFeatureOutputValueProperties>,
   oscillate: Option<ServerDeviceFeatureOutputValueProperties>,
   constrict: Option<ServerDeviceFeatureOutputValueProperties>,
-  heater: Option<ServerDeviceFeatureOutputValueProperties>,
+  temperature: Option<ServerDeviceFeatureOutputValueProperties>,
   led: Option<ServerDeviceFeatureOutputValueProperties>,
   position: Option<ServerDeviceFeatureOutputPositionProperties>,
   position_with_duration: Option<ServerDeviceFeatureOutputPositionWithDurationProperties>,
@@ -303,7 +303,7 @@ impl ServerDeviceFeatureOutput {
   pub fn contains(&self, output_type: OutputType) -> bool {
     match output_type {
       OutputType::Constrict => self.constrict.is_some(),
-      OutputType::Heater => self.heater.is_some(),
+      OutputType::Temperature => self.temperature.is_some(),
       OutputType::Led => self.led.is_some(),
       OutputType::Oscillate => self.oscillate.is_some(),
       OutputType::Position => self.position.is_some(),
@@ -322,9 +322,9 @@ impl ServerDeviceFeatureOutput {
       .is_some()
       .then(|| types.push(OutputType::Constrict));
     self
-      .heater
+      .temperature
       .is_some()
-      .then(|| types.push(OutputType::Heater));
+      .then(|| types.push(OutputType::Temperature));
     self.led.is_some().then(|| types.push(OutputType::Led));
     self
       .oscillate
@@ -361,7 +361,7 @@ impl ServerDeviceFeatureOutput {
         Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
         |x| x.calculate_scaled_value(value),
       ),
-      OutputType::Heater => self.heater.as_ref().map_or(
+      OutputType::Temperature => self.temperature.as_ref().map_or(
         Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
         |x| x.calculate_scaled_value(value),
       ),
@@ -407,7 +407,7 @@ impl ServerDeviceFeatureOutput {
         Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
         |x| x.calculate_scaled_float(value),
       ),
-      OutputType::Heater => self.heater.as_ref().map_or(
+      OutputType::Temperature => self.temperature.as_ref().map_or(
         Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
         |x| x.calculate_scaled_float(value),
       ),
@@ -451,7 +451,7 @@ impl From<ServerDeviceFeatureOutput> for DeviceFeatureOutput {
     val.rotate.as_ref().map(|x| builder.rotate(x.into()));
     val.oscillate.as_ref().map(|x| builder.oscillate(x.into()));
     val.constrict.as_ref().map(|x| builder.constrict(x.into()));
-    val.heater.as_ref().map(|x| builder.heater(x.into()));
+    val.temperature.as_ref().map(|x| builder.temperature(x.into()));
     val.led.as_ref().map(|x| builder.led(x.into()));
     val.position.as_ref().map(|x| builder.position(x.into()));
     val

@@ -55,7 +55,7 @@ pub enum OutputCommand {
   Oscillate(OutputValue),
   Constrict(OutputValue),
   Spray(OutputValue),
-  Heater(OutputValue),
+  Temperature(OutputValue),
   Led(OutputValue),
   // For instances where we specify a position to move to ASAP. Usually servos, probably for the
   // OSR-2/SR-6.
@@ -68,7 +68,7 @@ impl OutputCommand {
     match self {
       OutputCommand::Constrict(x)
       | OutputCommand::Spray(x)
-      | OutputCommand::Heater(x)
+      | OutputCommand::Temperature(x)
       | OutputCommand::Led(x)
       | OutputCommand::Oscillate(x)
       | OutputCommand::Position(x)
@@ -82,7 +82,7 @@ impl OutputCommand {
     match self {
       OutputCommand::Constrict(x)
       | OutputCommand::Spray(x)
-      | OutputCommand::Heater(x)
+      | OutputCommand::Temperature(x)
       | OutputCommand::Led(x)
       | OutputCommand::Oscillate(x)
       | OutputCommand::Position(x)
@@ -102,14 +102,14 @@ impl OutputCommand {
       Self::Led(_) => OutputType::Led,
       Self::Position(_) => OutputType::Position,
       Self::PositionWithDuration(_) => OutputType::PositionWithDuration,
-      Self::Heater(_) => OutputType::Heater,
+      Self::Temperature(_) => OutputType::Temperature,
     }
   }
 
   pub fn from_output_type(output_type: OutputType, value: i32) -> Result<Self, ButtplugError> {
     match output_type {
       OutputType::Constrict => Ok(Self::Constrict(OutputValue::new(value))),
-      OutputType::Heater => Ok(Self::Heater(OutputValue::new(value))),
+      OutputType::Temperature => Ok(Self::Temperature(OutputValue::new(value))),
       OutputType::Spray => Ok(Self::Spray(OutputValue::new(value))),
       OutputType::Led => Ok(Self::Led(OutputValue::new(value))),
       OutputType::Oscillate => Ok(Self::Oscillate(OutputValue::new(value))),

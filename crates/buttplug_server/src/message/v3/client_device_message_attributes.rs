@@ -260,8 +260,8 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
           if let Some(x) = output_map.constrict().as_ref() {
             create_actuator(OutputType::Constrict, x)
           }
-          if let Some(x) = output_map.heater().as_ref() {
-            create_actuator(OutputType::Heater, x)
+          if let Some(x) = output_map.temperature().as_ref() {
+            create_actuator(OutputType::Temperature, x)
           }
           if let Some(x) = output_map.led().as_ref() {
             create_actuator(OutputType::Led, x)

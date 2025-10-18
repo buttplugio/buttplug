@@ -31,7 +31,7 @@ pub enum ClientDeviceOutputCommand {
   Rotate(i32),
   Oscillate(u32),
   Constrict(u32),
-  Heater(u32),
+  Temperature(i32),
   Led(u32),
   Spray(u32),
   Position(u32),
@@ -41,7 +41,7 @@ pub enum ClientDeviceOutputCommand {
   RotateFloat(f64),
   OscillateFloat(f64),
   ConstrictFloat(f64),
-  HeaterFloat(f64),
+  TemperatureFloat(f64),
   LedFloat(f64),
   SprayFloat(f64),
   PositionFloat(f64),
@@ -58,7 +58,7 @@ impl ClientDeviceOutputCommand {
       OutputType::Oscillate => Ok(ClientDeviceOutputCommand::OscillateFloat(value)),
       OutputType::Rotate => Ok(ClientDeviceOutputCommand::RotateFloat(value)),
       OutputType::Constrict => Ok(ClientDeviceOutputCommand::ConstrictFloat(value)),
-      OutputType::Heater => Ok(ClientDeviceOutputCommand::HeaterFloat(value)),
+      OutputType::Temperature => Ok(ClientDeviceOutputCommand::TemperatureFloat(value)),
       OutputType::Led => Ok(ClientDeviceOutputCommand::LedFloat(value)),
       OutputType::Spray => Ok(ClientDeviceOutputCommand::SprayFloat(value)),
       OutputType::Position => Ok(ClientDeviceOutputCommand::PositionFloat(value)),
@@ -84,8 +84,8 @@ impl From<&ClientDeviceOutputCommand> for OutputType {
       ClientDeviceOutputCommand::Constrict(_) | ClientDeviceOutputCommand::ConstrictFloat(_) => {
         OutputType::Constrict
       }
-      ClientDeviceOutputCommand::Heater(_) | ClientDeviceOutputCommand::HeaterFloat(_) => {
-        OutputType::Heater
+      ClientDeviceOutputCommand::Temperature(_) | ClientDeviceOutputCommand::TemperatureFloat(_) => {
+        OutputType::Temperature
       }
       ClientDeviceOutputCommand::Led(_) | ClientDeviceOutputCommand::LedFloat(_) => OutputType::Led,
       ClientDeviceOutputCommand::Spray(_) | ClientDeviceOutputCommand::SprayFloat(_) => {

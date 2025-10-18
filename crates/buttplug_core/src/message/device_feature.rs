@@ -24,8 +24,8 @@ pub enum OutputType {
   Oscillate,
   #[serde(alias = "constrict")]
   Constrict,
-  #[serde(alias = "heater")]
-  Heater,
+  #[serde(alias = "temperature")]
+  Temperature,
   #[serde(alias = "led")]
   Led,
   // For instances where we specify a position to move to ASAP. Usually servos, probably for the
@@ -198,7 +198,7 @@ pub struct DeviceFeatureOutput {
   #[serde(skip_serializing_if = "Option::is_none")]
   constrict: Option<DeviceFeatureOutputValueProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
-  heater: Option<DeviceFeatureOutputValueProperties>,
+  temperature: Option<DeviceFeatureOutputValueProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
   led: Option<DeviceFeatureOutputValueProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -213,7 +213,7 @@ impl DeviceFeatureOutput {
   pub fn contains(&self, output_type: OutputType) -> bool {
     match output_type {
       OutputType::Constrict => self.constrict.is_some(),
-      OutputType::Heater => self.heater.is_some(),
+      OutputType::Temperature => self.temperature.is_some(),
       OutputType::Led => self.led.is_some(),
       OutputType::Oscillate => self.oscillate.is_some(),
       OutputType::Position => self.position.is_some(),
@@ -231,8 +231,8 @@ impl DeviceFeatureOutput {
         .constrict()
         .as_ref()
         .map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Heater => self
-        .heater()
+      OutputType::Temperature => self
+        .temperature()
         .as_ref()
         .map(|x| x as &dyn DeviceFeatureOutputLimits),
       OutputType::Led => self

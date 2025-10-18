@@ -135,8 +135,8 @@ impl ClientDeviceFeature {
       ClientDeviceOutputCommand::ConstrictFloat(v) => {
         OutputCommand::Constrict(OutputValue::new(self.convert_float_value(output, *v)?))
       }
-      ClientDeviceOutputCommand::HeaterFloat(v) => {
-        OutputCommand::Heater(OutputValue::new(self.convert_float_value(output, *v)?))
+      ClientDeviceOutputCommand::TemperatureFloat(v) => {
+        OutputCommand::Temperature(OutputValue::new(self.convert_float_value(output, *v)?))
       }
       ClientDeviceOutputCommand::LedFloat(v) => {
         OutputCommand::Led(OutputValue::new(self.convert_float_value(output, *v)?))
@@ -165,8 +165,8 @@ impl ClientDeviceFeature {
       ClientDeviceOutputCommand::Constrict(v) => {
         OutputCommand::Constrict(OutputValue::new(self.check_step_value(output, *v as i32)?))
       }
-      ClientDeviceOutputCommand::Heater(v) => {
-        OutputCommand::Heater(OutputValue::new(self.check_step_value(output, *v as i32)?))
+      ClientDeviceOutputCommand::Temperature(v) => {
+        OutputCommand::Temperature(OutputValue::new(self.check_step_value(output, *v as i32)?))
       }
       ClientDeviceOutputCommand::Led(v) => {
         OutputCommand::Led(OutputValue::new(self.check_step_value(output, *v as i32)?))

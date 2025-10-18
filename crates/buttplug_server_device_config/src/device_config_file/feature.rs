@@ -90,7 +90,7 @@ struct BaseDeviceFeatureOutput {
   #[serde(skip_serializing_if = "Option::is_none")]
   constrict: Option<BaseDeviceFeatureOutputValueProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
-  heater: Option<BaseDeviceFeatureOutputValueProperties>,
+  temperature: Option<BaseDeviceFeatureOutputValueProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
   led: Option<BaseDeviceFeatureOutputValueProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -116,8 +116,8 @@ impl From<BaseDeviceFeatureOutput> for ServerDeviceFeatureOutput {
     if let Some(constrict) = val.constrict {
       output.set_constrict(Some(constrict.into()));
     }
-    if let Some(heater) = val.heater {
-      output.set_heater(Some(heater.into()));
+    if let Some(temperature) = val.temperature {
+      output.set_temperature(Some(temperature.into()));
     }
     if let Some(led) = val.led {
       output.set_led(Some(led.into()));
@@ -268,7 +268,7 @@ struct UserDeviceFeatureOutput {
   #[serde(skip_serializing_if = "Option::is_none")]
   constrict: Option<UserDeviceFeatureOutputValueProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
-  heater: Option<UserDeviceFeatureOutputValueProperties>,
+  temperature: Option<UserDeviceFeatureOutputValueProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
   led: Option<UserDeviceFeatureOutputValueProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -314,11 +314,11 @@ impl UserDeviceFeatureOutput {
         output.set_constrict(base_output.constrict().clone());
       }
     }
-    if let Some(user_heater) = &self.heater {
-      if let Some(base_heater) = base_output.heater() {
-        output.set_heater(Some(user_heater.with_base_properties(base_heater)?));
+    if let Some(user_temperature) = &self.temperature {
+      if let Some(base_temperature) = base_output.temperature() {
+        output.set_temperature(Some(user_temperature.with_base_properties(base_temperature)?));
       } else {
-        output.set_heater(base_output.heater().clone());
+        output.set_temperature(base_output.temperature().clone());
       }
     }
     if let Some(user_led) = &self.led {
@@ -360,7 +360,7 @@ impl From<&ServerDeviceFeatureOutput> for UserDeviceFeatureOutput {
       rotate: value.rotate().as_ref().map(|x| x.into()),
       oscillate: value.oscillate().as_ref().map(|x| x.into()),
       constrict: value.constrict().as_ref().map(|x| x.into()),
-      heater: value.heater().as_ref().map(|x| x.into()),
+      temperature: value.temperature().as_ref().map(|x| x.into()),
       led: value.led().as_ref().map(|x| x.into()),
       position: value.position().as_ref().map(|x| x.into()),
       position_with_duration: value.position_with_duration().as_ref().map(|x| x.into()),
