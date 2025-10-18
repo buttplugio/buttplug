@@ -158,9 +158,9 @@ async fn stop_device(
 
 async fn set_device_output(
   State(client): State<Arc<ButtplugClient>>,
-  Path((index, command, level)): Path<(u32, OutputType, f64)>,
+  Path((index, output_type, level)): Path<(u32, OutputType, f64)>,
 ) -> Result<(), IntifaceRestError> {
-  let cmd = ClientDeviceOutputCommand::from_command_value_float(command, level)
+  let cmd = ClientDeviceOutputCommand::from_command_value_float(output_type, level)
     .map_err(IntifaceRestError::ButtplugClientError)?;
 
   get_device(&client, index)?
@@ -171,9 +171,9 @@ async fn set_device_output(
 
 async fn set_feature_output(
   State(client): State<Arc<ButtplugClient>>,
-  Path((index, feature_index, command, level)): Path<(u32, u32, OutputType, f64)>,
+  Path((index, feature_index, output_type, level)): Path<(u32, u32, OutputType, f64)>,
 ) -> Result<(), IntifaceRestError> {
-  let cmd = ClientDeviceOutputCommand::from_command_value_float(command, level)
+  let cmd = ClientDeviceOutputCommand::from_command_value_float(output_type, level)
     .map_err(IntifaceRestError::ButtplugClientError)?;
 
   get_feature(&client, index, feature_index)?
@@ -256,7 +256,7 @@ async fn feature_input_command(
 
 async fn server_sse(
   State(client): State<Arc<ButtplugClient>>,
-) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
+) -> Sse<impl Stream<Item = Result<Event, Infallible>>> { 
   let stream = client
     .event_stream()
     .map(|e| Ok(Event::default().data(format!("{:?}", e))));
@@ -265,7 +265,7 @@ async fn server_sse(
 }
 
 impl IntifaceRestServer {
-  pub async fn run(server: ButtplugServer) -> Result<(), io::Error> {
+  pub async fn run(port: u16, server: ButtplugServer) -> Result<(), io::Error> {
     let connector = ButtplugInProcessClientConnectorBuilder::default()
       .server(server)
       .finish();
@@ -285,7 +285,7 @@ impl IntifaceRestServer {
         .route("/devices/{index}/features", get(get_features))
         .route("/devices/{index}/features/{index}/", put(get_feature_info))
         .route(
-          "/devices/{index}/outputs/{command}/{level}",
+          "/devices/{index}/outputs/{output_type}/{level}",
           put(set_device_output),
         )
         .route(
@@ -311,9 +311,9 @@ impl IntifaceRestServer {
     );
 
     // write address like this to not make typos
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let addr = SocketAddr::from(([127, 0, 0, 1], port));
+    info!("Buttplug REST API Server now listening on {:?}", addr);
     let listener = TcpListener::bind(addr).await?;
-
     axum::serve(listener, app.into_make_service()).await?;
 
     Ok(())

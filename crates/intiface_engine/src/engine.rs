@@ -114,7 +114,22 @@ impl IntifaceEngine {
       .clone();
 
     if let Some(rest_port) = options.rest_api_port() {
-      IntifaceRestServer::run(server).await;
+      select! {
+        _ = self.stop_token.cancelled() => {
+          info!("Owner requested process exit, exiting.");
+        }
+        res = IntifaceRestServer::run(rest_port, server) => {
+          info!("Rest API listener stopped, exiting.");
+          if let Err(e) = res {
+            error!("Error running Intiface Central RestAPI Server: {:?}", e);
+          }
+        }
+      };
+      if let Some(frontend) = &frontend {
+        frontend.send(EngineMessage::EngineStopped {}).await;
+        tokio::time::sleep(Duration::from_millis(100)).await;
+        frontend.disconnect();
+      }
       return Ok(());
     }
 
