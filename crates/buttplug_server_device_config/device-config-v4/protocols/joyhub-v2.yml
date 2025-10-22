@@ -1165,13 +1165,13 @@ configurations:
     features:
       - id: 6f2e25ae-d5f0-4823-a8db-9072e8e6a0d4
         output:
-          oscillate:
+          rotate:
             value:
               - 0
               - 255
       - id: 9b73399f-04a8-4a3b-9e65-b98e11a47f47
         output:
-          rotate:
+          vibrate:
             value:
               - 0
               - 255

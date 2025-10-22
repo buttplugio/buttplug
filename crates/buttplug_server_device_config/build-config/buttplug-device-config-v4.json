@@ -4683,7 +4683,8 @@
               "J-Derik",
               "J-Peachy",
               "J-Divers",
-              "J-VioletGale"
+              "J-VioletGale",
+              "J-Vellum"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -4931,6 +4932,13 @@
             "J-VioletGale"
           ],
           "name": "JoyHub Violet Gale"
+        },
+        {
+          "id": "a168338f-a110-4485-94b4-8f2186a0f4b0",
+          "identifier": [
+            "J-Vellum"
+          ],
+          "name": "JoyHub Vellum"
         },
         {
           "features": [
@@ -7567,7 +7575,7 @@
             {
               "id": "6f2e25ae-d5f0-4823-a8db-9072e8e6a0d4",
               "output": {
-                "oscillate": {
+                "rotate": {
                   "value": [
                     0,
                     255
@@ -7578,7 +7586,7 @@
             {
               "id": "9b73399f-04a8-4a3b-9e65-b98e11a47f47",
               "output": {
-                "rotate": {
+                "vibrate": {
                   "value": [
                     0,
                     255
@@ -7668,7 +7676,8 @@
           "btle": {
             "names": [
               "J-RoseLin",
-              "J-Viele"
+              "J-Viele",
+              "J-MowgliII"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -7730,6 +7739,37 @@
             "J-Viele"
           ],
           "name": "JoyHub Viele"
+        },
+        {
+          "features": [
+            {
+              "id": "616ea55d-f78e-469c-82d1-92f96b1ffea3",
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "4e3b6192-d5dd-4fcf-b307-7487ca18fc1b",
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "61c8d9e2-7561-4fff-aef1-c576b57a8a18",
+          "identifier": [
+            "J-MowgliII"
+          ],
+          "name": "JoyHub Mowgli II"
         }
       ],
       "defaults": {

@@ -148,6 +148,10 @@ configurations:
     name: JoyHub Violet Gale
     id: 167a92b5-2e79-448d-9988-a1f7673dafe9
   - identifier:
+      - J-Vellum
+    name: JoyHub Vellum
+    id: a168338f-a110-4485-94b4-8f2186a0f4b0
+  - identifier:
       - J-Petalwish2
     name: JoyHub Petalwish 2
     features:
@@ -450,6 +454,7 @@ communication:
         - J-Peachy
         - J-Divers
         - J-VioletGale
+        - J-Vellum
       services:
         0000ffa0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffa1-0000-1000-8000-00805f9b34fb
