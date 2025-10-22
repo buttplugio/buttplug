@@ -1,0 +1,123 @@
+// Auto-generated on 2025-10-14 13:26:40
+syntax = "proto3";
+package hdy_rpc;
+import "constants.proto";
+//******* NOTIFICATIONS *********/
+//601 - wifi
+message NotificationWifiStatusChanged{
+    WifiState state = 2;
+    bool socket_connected = 4;
+    uint32 socket_session_id = 5;
+}
+//602 - BLE
+message NotificationBleStatusChanged{
+    BleState state = 1;
+}
+//603 - OTA complete - Sent when the OTA is completed successfully - It is now safe to reboot
+message NotificationOtaComplete{
+}
+//700
+message NotificationModeChanged{
+    Mode mode = 1;
+    uint32 mode_session_id = 2;
+}
+//701
+message NotificationStrokeChanged{
+    float min = 1;
+    float max = 2;
+    float min_absolute = 3;
+    float max_absolute = 4;
+}
+//703
+message NotificationButtonEvent{
+    Button button = 1;
+    ButtonEvent event = 2;
+}
+//705
+message NotificationBatteryChanged{
+    BatteryState state = 1;
+}
+//720
+message NotificationHampChanged{ //TODO: Make this push a hamp state message
+    HampState state = 1;
+}
+//740
+message NotificationHdspChanged{
+    HdspPlayState state = 1;
+}
+//860 - tail_point_stream_index_threashold reached
+message NotificationHspThresholdReached{
+    HspState state = 1;
+}
+message NotificationHspStateChanged{
+    HspState state = 1;
+}
+//Limited to 2 messages per second (0.5s interval) -> Prevents spamming on short scripts
+message NotificationHspLooping{
+    HspState state = 1;
+}
+message NotificationHspStarving{
+    HspState state = 1;
+}
+//When pauseOnEmptyBuffer == true and we reached starving state. When adding more data to the buffer, we will RESUME the HSP and send this notification
+message NotificationHspResumedOnNonStarving{
+    HspState state = 1;
+}
+//When pauseOnEmptyBuffer == true and we reached starving state we send this notification after PAUSE HSP
+message NotificationHspPausedOnStarving{
+    HspState state = 1;
+}
+//900
+message NotificationHvpChanged{
+    HvpState state = 1;
+}
+//920
+message NotificationHrppChanged{
+    HrppState state = 1;
+}
+// Handy error notifications starts at 800
+//800
+message NotificationTempHigh{
+}
+//801
+message NotificationTempOk{
+}
+//802
+message NotificationSliderBlocked{
+}
+//803
+message NotificationSliderUnblocked{
+}
+//Sent when a message is discarded due to low memory (we do not have memory to parse the message, so the only thing we can do to identify the message is to check the size)
+message NotificationLowMemoryError{
+    uint32 available_heap = 1;
+    uint32 largest_free_block = 2;
+    uint32 discarded_msg_size = 3;
+}
+//Triggers when we ahve very little memory left. Little is TBD
+message NotificationLowMemoryWarning{
+    uint32 available_heap = 1;
+    uint32 largest_free_block = 2;
+}
+//Generic error message
+message NotificationError{
+    int32 code = 1;
+    string message = 2;
+}
+//Triggered when a wifi scan is completed
+message NotificationWifiScanComplete{
+    uint32 nr_of_networks = 1;
+}
+//Triggers when the motor has been inactive for a while (configurable) - Battery devices will shut down and non-battery devices will disconnect WiFi
+//Will go to sleep after 60 seconds after this notification
+//Added in FW4.0.19
+message NotificationIdleTimeout{
+    IdleTimeoutState state = 1;
+    uint32 idle_time = 2; //[ms] The time the device has been idle
+    uint32 warning_time = 3; //[ms] The time until the device will go to sleep (hardcoded to 60 seconds) 
+}
+//Give all the connected clients a notification when a setting is changed - Useful for the server to know that a setting has changed in the onboarding app
+// Added in FW4.0.19
+message NotificationSettingsChanged{
+    SettingType type = 1; //The type of setting that has changed
+}
