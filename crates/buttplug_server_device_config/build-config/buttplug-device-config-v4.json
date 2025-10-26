@@ -17773,6 +17773,7 @@
               "Pulse Union",
               "Pulse Galaxie",
               "SX033APP",
+              "SX033A",
               "BX288A",
               "QH-SX045A-B",
               "SWK-SX067-B",
@@ -17812,7 +17813,8 @@
         {
           "id": "ccb6ce6f-5dc7-4ce4-bd31-3e8f3af14a4b",
           "identifier": [
-            "SX033APP"
+            "SX033APP",
+            "SX033A"
           ],
           "name": "Svakom Mimiki"
         },
