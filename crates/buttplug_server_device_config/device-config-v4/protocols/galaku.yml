@@ -273,6 +273,10 @@ configurations:
       - BGZY
     name: Adorime Penis Helmet Vibrator
     id: 67bc4304-d2c3-493f-aa57-de708361e615
+  - identifier:
+      - A531
+    name: Adorime Pink Touch
+    id: 5cfdd204-e0dd-4ec5-b133-205bd6ce660a
   # Type 1
   - identifier:
       - G317
@@ -1484,6 +1488,7 @@ communication:
         - AX05 # Adorime Anal Vibrator
         - DT01 # Adorime Chastity Cage
         - BGZY # Adorime Penis Helmet Vibrator
+        - A531 # Adorime Pink Touch
         # Type 1
         - G317
         - G312

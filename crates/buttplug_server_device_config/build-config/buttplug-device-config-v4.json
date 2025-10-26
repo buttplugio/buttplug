@@ -1299,6 +1299,7 @@
               "AX05",
               "DT01",
               "BGZY",
+              "A531",
               "G317",
               "G312",
               "G302",
@@ -1793,6 +1794,13 @@
             "BGZY"
           ],
           "name": "Adorime Penis Helmet Vibrator"
+        },
+        {
+          "id": "5cfdd204-e0dd-4ec5-b133-205bd6ce660a",
+          "identifier": [
+            "A531"
+          ],
+          "name": "Adorime Pink Touch"
         },
         {
           "features": [
@@ -18889,6 +18897,68 @@
         ],
         "id": "fc9de0ed-0f9f-402e-a1b5-4d1865e7b87b",
         "name": "The Handy"
+      }
+    },
+    "thehandy-v3": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "OHD_hw0_*",
+              "OHD_hw1_*",
+              "OHD_hw2_*"
+            ],
+            "services": {
+              "77834d26-40f7-11ee-be56-0242ac120002": {
+                "rx": "77835410-40f7-11ee-be56-0242ac120002",
+                "tx": "77835032-40f7-11ee-be56-0242ac120002"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "features": [
+            {
+              "id": "e63c0735-ac52-4e4d-adf9-d272a46e53ed",
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "b6ea38ac-ce2c-4fa0-a24f-7f0fc6a23951",
+          "identifier": [
+            "hw1"
+          ],
+          "name": "The Oh!"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "ccbbda59-cf58-477e-b1b2-e0897c4bb0ce",
+            "output": {
+              "position_with_duration": {
+                "duration": [
+                  0,
+                  100000
+                ],
+                "position": [
+                  0,
+                  100
+                ]
+              }
+            }
+          }
+        ],
+        "id": "ccbbda59-cf58-477e-b1b2-e0897c4bb0ce",
+        "name": "The Handy (FW4+)"
       }
     },
     "tryfun": {
