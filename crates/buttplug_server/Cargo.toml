@@ -54,6 +54,7 @@ paste = "1.0.15"
 aes = { version = "0.8.4" }
 ecb = { version = "0.1.2", features = ["std"] }
 sha2 = { version = "0.10.9", features = ["std"] }
+md-5 = "0.10.6"
 byteorder = "1.5.0"
 # Used by several packages, but we need to bring in the JS feature for wasm. Pinned at 0.2 until dependencies update
 rand = { version = "0.8" }
