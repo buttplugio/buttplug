@@ -43,12 +43,24 @@ configurations:
               - 0
               - 30
     id: 36640498-e77c-46f5-9f94-a1b90148f939
+  - identifier:
+      - Sync O
+    name: WeVibe Sync O
+    features:
+      - id: be63a133-ec1f-4aaf-9a70-6c26d9063b8c
+        output:
+          vibrate:
+            value:
+              - 0
+              - 30
+    id: 917d5891-c0aa-4cbd-9a5c-db888c0e2e1b
 communication:
   - btle:
       names:
         - Chorus
         - skeena
         - Sync 2
+        - Sync O
         - Sync Lite
       services:
         f000bb03-0451-4000-b000-000000000000:
