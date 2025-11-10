@@ -18901,68 +18901,6 @@
         "name": "The Handy"
       }
     },
-    "thehandy-v3": {
-      "communication": [
-        {
-          "btle": {
-            "names": [
-              "OHD_hw0_*",
-              "OHD_hw1_*",
-              "OHD_hw2_*"
-            ],
-            "services": {
-              "77834d26-40f7-11ee-be56-0242ac120002": {
-                "rx": "77835410-40f7-11ee-be56-0242ac120002",
-                "tx": "77835032-40f7-11ee-be56-0242ac120002"
-              }
-            }
-          }
-        }
-      ],
-      "configurations": [
-        {
-          "features": [
-            {
-              "id": "e63c0735-ac52-4e4d-adf9-d272a46e53ed",
-              "output": {
-                "vibrate": {
-                  "value": [
-                    0,
-                    100
-                  ]
-                }
-              }
-            }
-          ],
-          "id": "b6ea38ac-ce2c-4fa0-a24f-7f0fc6a23951",
-          "identifier": [
-            "hw1"
-          ],
-          "name": "The Oh!"
-        }
-      ],
-      "defaults": {
-        "features": [
-          {
-            "id": "ccbbda59-cf58-477e-b1b2-e0897c4bb0ce",
-            "output": {
-              "position_with_duration": {
-                "duration": [
-                  0,
-                  100000
-                ],
-                "position": [
-                  0,
-                  100
-                ]
-              }
-            }
-          }
-        ],
-        "id": "ccbbda59-cf58-477e-b1b2-e0897c4bb0ce",
-        "name": "The Handy (FW4+)"
-      }
-    },
     "tryfun": {
       "communication": [
         {
@@ -20091,6 +20029,7 @@
               "Chorus",
               "skeena",
               "Sync 2",
+              "Sync O",
               "Sync Lite"
             ],
             "services": {
@@ -20153,6 +20092,26 @@
             "Sync Lite"
           ],
           "name": "WeVibe Sync Lite"
+        },
+        {
+          "features": [
+            {
+              "id": "be63a133-ec1f-4aaf-9a70-6c26d9063b8c",
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    30
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "917d5891-c0aa-4cbd-9a5c-db888c0e2e1b",
+          "identifier": [
+            "Sync O"
+          ],
+          "name": "WeVibe Sync O"
         }
       ],
       "defaults": {
