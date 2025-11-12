@@ -5,7 +5,7 @@ defaults:
 configurations:
   - identifier:
       - Bach smart
-    protocol_variant: vorze-sa-vibrator
+    protocol_variant: vorze-sa-single-vibrator
     name: Vorze Bach
     features:
       - id: 447dbcfa-c295-4880-afba-93e24499a78d
@@ -18,7 +18,7 @@ configurations:
   - identifier:
       - ROCKET
     name: Adult Festa Rocket
-    protocol_variant: vorze-sa-vibrator
+    protocol_variant: vorze-sa-single-vibrator
     features:
       - id: 557d3c89-2e15-4b4a-8480-07f4826a8384
         output:
@@ -84,6 +84,24 @@ configurations:
               - 0
               - 100000
     id: b1b17b07-c5b8-4db4-97c4-ef1597cf2e59
+  - identifier:
+      - OMORFI
+    name: Vorze Omorfi
+    protocol_variant: vorze-sa-dual-vibrator
+    features:
+      - id: e6630f7f-42fe-4297-ac4c-1dd2f72c67ca
+        output:
+          vibrate:
+            value:
+              - 0
+              - 99
+      - id: 5579d044-42db-432d-9333-46085b5b38bd
+        output:
+          vibrate:
+            value:
+              - 0
+              - 99
+    id: aef03284-6d45-426a-b02c-efa7896d4865
 communication:
   - btle:
       names:
@@ -93,6 +111,7 @@ communication:
         - UFO-TW
         - VorzePiston
         - ROCKET
+        - OMORFI
       services:
         40ee1111-63ec-4b7f-8ce7-712efd55b90e:
           tx: 40ee2222-63ec-4b7f-8ce7-712efd55b90e

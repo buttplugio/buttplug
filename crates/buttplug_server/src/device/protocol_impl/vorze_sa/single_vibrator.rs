@@ -14,17 +14,17 @@ use crate::device::{
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 
-pub struct VorzeSAVibrator {
+pub struct VorzeSASingleVibrator {
   device_type: VorzeDevice,
 }
 
-impl VorzeSAVibrator {
+impl VorzeSASingleVibrator {
   pub fn new(device_type: VorzeDevice) -> Self {
     Self { device_type }
   }
 }
 
-impl ProtocolHandler for VorzeSAVibrator {
+impl ProtocolHandler for VorzeSASingleVibrator {
   fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,
