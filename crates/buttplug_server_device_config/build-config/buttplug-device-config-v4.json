@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 108
+    "minor": 111
   },
   "protocols": {
     "activejoy": {
@@ -19473,7 +19473,8 @@
               "UFOSA",
               "UFO-TW",
               "VorzePiston",
-              "ROCKET"
+              "ROCKET",
+              "OMORFI"
             ],
             "services": {
               "40ee1111-63ec-4b7f-8ce7-712efd55b90e": {
@@ -19503,7 +19504,7 @@
             "Bach smart"
           ],
           "name": "Vorze Bach",
-          "protocol_variant": "vorze-sa-vibrator"
+          "protocol_variant": "vorze-sa-single-vibrator"
         },
         {
           "features": [
@@ -19524,7 +19525,7 @@
             "ROCKET"
           ],
           "name": "Adult Festa Rocket",
-          "protocol_variant": "vorze-sa-vibrator"
+          "protocol_variant": "vorze-sa-single-vibrator"
         },
         {
           "features": [
@@ -19624,6 +19625,38 @@
           ],
           "name": "Vorze Piston",
           "protocol_variant": "vorze-sa-piston"
+        },
+        {
+          "features": [
+            {
+              "id": "e6630f7f-42fe-4297-ac4c-1dd2f72c67ca",
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    99
+                  ]
+                }
+              }
+            },
+            {
+              "id": "5579d044-42db-432d-9333-46085b5b38bd",
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    99
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "aef03284-6d45-426a-b02c-efa7896d4865",
+          "identifier": [
+            "OMORFI"
+          ],
+          "name": "Vorze Omorfi",
+          "protocol_variant": "vorze-sa-dual-vibrator"
         }
       ],
       "defaults": {
