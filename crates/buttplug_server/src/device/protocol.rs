@@ -264,11 +264,9 @@ pub trait ProtocolHandler: Sync + Send {
           .try_into()
           .map_err(|_| ButtplugDeviceError::DeviceCommandSignError)?,
       ),
-      OutputCommand::Temperature(x) => self.handle_output_temperature_cmd(
-        cmd.feature_index(),
-        cmd.feature_id(),
-        x.value()
-      ),
+      OutputCommand::Temperature(x) => {
+        self.handle_output_temperature_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+      }
       OutputCommand::Led(x) => self.handle_output_led_cmd(
         cmd.feature_index(),
         cmd.feature_id(),
