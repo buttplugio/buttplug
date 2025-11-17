@@ -301,6 +301,7 @@ where
           let device = self.create_client_device(device);
           self.send_client_event(ButtplugClientEvent::DeviceAdded(device));
         }
+        self.send_client_event(ButtplugClientEvent::DeviceListReceived);
         true
       }
     }
