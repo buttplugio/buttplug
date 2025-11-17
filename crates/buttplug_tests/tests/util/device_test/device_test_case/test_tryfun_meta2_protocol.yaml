@@ -1,0 +1,116 @@
+devices:
+  - identifier: 
+      name: "TF-META2"
+    expected_name: "TryFun Meta 2"
+device_commands:
+  # Commands
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 1.0
+          ActuatorType: Oscillate
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x00, 0x02, 0x00, 0x05, 0x21, 0x5, 0x0b, 0x64, 0x6b]
+        write_with_response: false
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 1
+          Scalar: 1.0
+          ActuatorType: Vibrate
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x01, 0x02, 0x00, 0x05, 0x21, 0x5, 0x08, 0x64, 0x6e]
+        write_with_response: false
+  - !Messages
+    device_index: 0
+    messages:
+      - !Rotate
+        - Index: 0
+          Speed: 1.0
+          Clockwise: true
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x02, 0x02, 0x00, 0x05, 0x21, 0x5, 0x0e, 0x9b, 0x31]
+        write_with_response: false
+  - !Messages
+    device_index: 0
+    messages:
+      - !Rotate
+        - Index: 0
+          Speed: 1.0
+          Clockwise: false
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x03, 0x02, 0x00, 0x05, 0x21, 0x5, 0x0e, 0x64, 0x68]
+        write_with_response: false
+  - !Messages
+    device_index: 0
+    messages:
+      - !Rotate
+        - Index: 0
+          Speed: 0.5
+          Clockwise: false
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x04, 0x02, 0x00, 0x05, 0x21, 0x5, 0x0e, 0x32, 0x9a]
+        write_with_response: false
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 0.5
+          ActuatorType: Oscillate
+        - Index: 1
+          Scalar: 0.5
+          ActuatorType: Vibrate
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x05, 0x02, 0x00, 0x05, 0x21, 0x5, 0x0b, 0x32, 0x9d]
+        write_with_response: false
+      - !Write
+        endpoint: tx
+        data: [0x06, 0x02, 0x00, 0x05, 0x21, 0x5, 0x08, 0x32, 0xa0]
+        write_with_response: false
+  - !Messages
+    device_index: 0
+    messages:
+      - !Stop
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x07, 0x02, 0x00, 0x05, 0x21, 0x5, 0x0b, 0x00, 0xcf]
+        write_with_response: false
+      - !Write
+        endpoint: tx
+        data: [0x08, 0x02, 0x00, 0x05, 0x21, 0x5, 0x08, 0x00, 0xd2]
+        write_with_response: false
+      - !Write
+        endpoint: tx
+        data: [0x09, 0x02, 0x00, 0x05, 0x21, 0x5, 0x0e, 0xff, 0xcd]
+        write_with_response: false

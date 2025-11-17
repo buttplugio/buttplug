@@ -1,0 +1,68 @@
+devices:
+  - identifier: 
+      name: "ServeU"
+    expected_name: "ServeU"
+device_commands:            
+  # Commands
+  #
+  # Test @ 30 u/s
+  - !Messages
+      device_index: 0
+      messages:
+        - !Linear
+          - Index: 0
+            Position: 0.30
+            Duration: 1000
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x01, 30, 15]
+            write_with_response: false
+  # Test @ 250 u/s
+  - !Messages
+      device_index: 0
+      messages:
+        - !Linear
+          - Index: 0
+            Position: 0.80
+            Duration: 200
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x01, 80, 75]
+            write_with_response: false
+  # Test @ 1000 u/s
+  - !Messages
+      device_index: 0
+      messages:
+        - !Linear
+          - Index: 0
+            Position: 1.0
+            Duration: 10
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x01, 100, 250]
+            write_with_response: false
+  # Test same position/stop
+  # NOTE: we now throw away repeat commands. Should we not for this?
+  # - !Messages
+  #     device_index: 0
+  #     messages:
+  #       - !Linear
+  #         - Index: 0
+  #           Position: 1.0
+  #           Duration: 10
+  # - !Commands
+  #     device_index: 0
+  #     commands:
+  #       - !Write
+  #           endpoint: tx
+  #           data: [0x01, 100, 0]
+  #           write_with_response: false

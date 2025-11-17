@@ -1,0 +1,23 @@
+defaults:
+  name: Sexverse Heart
+  features:
+    - id: 140be13c-4cb3-407f-9597-e03f046f1c1a
+      output:
+        vibrate:
+          value:
+            - 0
+            - 100
+  id: 783bc287-528c-4c58-a7ec-47a49304309e
+configuration:
+  - identifier:
+      - CB-WXW03
+    name: Hannibal Kona
+    id: d3c4665b-d5bd-4144-ac20-b40a11a839d1
+communication:
+  - btle:
+      names:
+        - CBW02
+        - CB-WXW03
+      services:
+        0000ffcb-0000-1000-8000-00805f9b34fb:
+          tx: 0000cb02-0000-1000-8000-00805f9b34fb

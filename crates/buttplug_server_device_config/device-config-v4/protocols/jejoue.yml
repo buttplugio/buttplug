@@ -1,0 +1,23 @@
+defaults:
+  name: Je Joue Device
+  features:
+    - id: a723e382-c32d-4170-b909-50e9ecb9d17f
+      output:
+        vibrate:
+          value:
+            - 0
+            - 5
+    - id: 79434539-5c1d-459a-abbe-833f0a7403be
+      output:
+        vibrate:
+          value:
+            - 0
+            - 5
+  id: 3ad4a393-215b-4cc7-9d77-9541b3b1dab1
+communication:
+  - btle:
+      names:
+        - Je Joue
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff1-0000-1000-8000-00805f9b34fb

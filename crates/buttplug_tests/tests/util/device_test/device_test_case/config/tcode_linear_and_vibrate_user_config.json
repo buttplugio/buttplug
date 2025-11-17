@@ -1,0 +1,94 @@
+{
+  "version": {
+    "major": 4,
+    "minor": 999
+  },
+  "user_configs": {
+    "protocols": {
+      "tcode-v03": {
+        "communication": [
+          {
+            "btle": {
+              "names": [
+                "tcode-v03-linear-vibrate"
+              ],
+              "services": {
+                "0000eea0-0000-1000-8000-00805f9b34fb": {
+                  "tx": "0000ee01-0000-1000-8000-00805f9b34fb"
+                }
+              }
+            }
+          }
+        ],        
+        "configurations": [
+          {
+            "identifier": [
+              "tcode-v03-linear-vibrate"
+            ],
+            "name": "TCode v0.3 (Single Linear Axis + Single Vibe)",
+            "id": "e4384a37-fd37-4b9e-8464-a510dd8410a7",
+            "features": [
+              {
+                "description": "",
+                "output": {
+                  "position_with_duration": {
+                    "position": [
+                      0,
+                      100
+                    ],
+                    "duration": [
+                      0,
+                      100000
+                    ]
+                  }
+                },
+                "id": "c5e6384e-399b-4c2b-9791-eb48abaf3bf7"
+              },
+              {
+                "description": "",
+                "output": {
+                  "vibrate": {
+                    "value": [
+                      0,
+                      99
+                    ]
+                  }
+                },
+                "id": "e4384a37-fd37-4b9e-8464-a510dd8410a7"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "devices": [
+      {
+        "identifier": {
+          "protocol": "tcode-v03",
+          "identifier": "tcode-v03-linear-vibrate",
+          "address": "COM7"
+        },
+        "config": {
+          "id": "6d3f0643-1933-4df6-85ff-5675bf1a3dd4",
+          "base_id": "e4384a37-fd37-4b9e-8464-a510dd8410a7",
+          "features": [
+            {
+              "base_id": "c5e6384e-399b-4c2b-9791-eb48abaf3bf7",
+              "id": "a9e532ff-f72f-4c2f-9ae6-02a6ddcb2d74"
+            },
+            {
+              "description": "",
+              "base_id": "e4384a37-fd37-4b9e-8464-a510dd8410a7",
+              "id": "10deb5c9-9d44-4dab-abf3-500b7df51e9f"
+            }
+          ],
+          "user_config": {
+            "allow": false,
+            "deny": false,
+            "index": 0
+          }
+        }
+      }
+    ]
+  }
+}

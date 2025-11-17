@@ -1,0 +1,154 @@
+name: Intiface Engine Build
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - ci
+
+concurrency:
+  group: ${{ github.head_ref ||  github.ref }}
+  cancel-in-progress: true      
+
+jobs:
+  build-stable:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Fix ~/.cargo directory permissions
+      if: startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos')
+      run: sudo chown -R $(whoami):$(id -ng) ~/.cargo/
+    - name: Update package list
+      if: startsWith(matrix.os, 'ubuntu')
+      run: sudo apt-get -y update
+    - name: Install required packages
+      if: startsWith(matrix.os, 'ubuntu')
+      run: sudo apt-get -y install libudev-dev libusb-1.0-0-dev libdbus-1-dev
+    - name: Cache cargo registry
+      uses: actions/cache@v1
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('.github/workflows/cache_version') }}
+    - name: Cache cargo build
+      uses: actions/cache@v1
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('.github/workflows/cache_version') }}
+    - name: Rust toolchain fetch
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: nightly
+        override: true
+        components: rustfmt, clippy
+    - name: Formatting check
+      continue-on-error: true
+      uses: actions-rs/cargo@v1
+      with:
+        command: fmt
+        args: --all -- --check
+    - name: Build Release
+      run: cargo build --release
+    - name: Copy executable (Linux, MacOS)
+      if: startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos')
+      run: |
+        mkdir ci-output-release
+        cp target/release/intiface-engine ci-output-release/intiface-engine
+    - name: Copy executable (Windows)
+      if: startsWith(matrix.os, 'windows')
+      run: |
+        mkdir ci-output-release
+        copy target\release\intiface-engine.exe ci-output-release\intiface-engine.exe
+    - name: Upload artifacts (release)
+      uses: actions/upload-artifact@v4
+      with:
+        name: intiface-engine-${{ runner.os }}-release
+        path: ci-output-release
+  build-v4:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Cache cargo registry
+      uses: actions/cache@v1
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('.github/workflows/cache_version') }}
+    - name: Cache cargo build
+      uses: actions/cache@v1
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('.github/workflows/cache_version') }}
+    - name: Rust toolchain fetch
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: nightly
+        override: true
+        components: rustfmt, clippy
+    - name: Formatting check
+      continue-on-error: true
+      uses: actions-rs/cargo@v1
+      with:
+        command: fmt
+        args: --all -- --check
+    - name: Build Release
+      run: cargo build --release
+    - name: Copy executable (Windows)
+      run: |
+        mkdir ci-output-release
+        copy target\release\intiface-engine.exe ci-output-release\intiface-engine.exe
+    - name: Upload artifacts (release)
+      uses: actions/upload-artifact@v4
+      with:
+        name: intiface-engine-${{ runner.os }}-unstable-v4-release
+        path: ci-output-release
+  release:
+    name: Release artifacts
+    needs: 
+      - build-stable
+      - build-v4
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+    - uses: actions/checkout@v2
+    - name: Download Artifact (Linux)
+      uses: actions/download-artifact@v4
+      with:
+        name: intiface-engine-Linux-release
+    - name: Download Artifact (Windows)
+      uses: actions/download-artifact@v4
+      with:
+        name: intiface-engine-Windows-release
+    - name: Download Artifact (Windows) (v4 Unstable)
+      uses: actions/download-artifact@v4
+      with:
+        name: intiface-engine-Windows-unstable-v4-release        
+    - name: Download Artifact (MacOS)
+      uses: actions/download-artifact@v4
+      with:
+        name: intiface-engine-macOS-release
+    - name: Zip executables
+      # This follows the naming convention from C# and JS. Use -j to junk the
+      # directory structure.
+      run: |
+        zip -j intiface-engine-linux-x64-Release.zip intiface-engine-Linux-release/intiface-engine README.md CHANGELOG.md
+        zip -j intiface-engine-win-x64-Release.zip intiface-engine-Windows-release/intiface-engine.exe README.md CHANGELOG.md
+        zip -j intiface-engine-win-x64-unstable-v4-Release.zip intiface-engine-Windows-unstable-v4-release/intiface-engine.exe README.md CHANGELOG.md
+        zip -j intiface-engine-macos-x64-Release.zip intiface-engine-macOS-release/intiface-engine README.md CHANGELOG.md Info.plist
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          intiface-engine-linux-x64-Release.zip
+          intiface-engine-win-x64-Release.zip
+          intiface-engine-win-x64-unstable-v4-Release.zip
+          intiface-engine-macos-x64-Release.zip
+          README.md
+          CHANGELOG.md
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

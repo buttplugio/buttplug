@@ -22,7 +22,9 @@
     "!Battery mapping"
   ],
   "rust-analyzer.linkedProjects": [
-    ".\\buttplug\\Cargo.toml"
+    "Cargo.toml"
   ],
-  
-}
+  "rust-analyzer.rustfmt.extraArgs": [
+    "+nightly"
+  ]
+}  
