@@ -123,6 +123,9 @@ pub enum ButtplugClientEvent {
   /// Emitted when a scanning session (started via a StartScanning call on
   /// [ButtplugClient]) has finished.
   ScanningFinished,
+  /// Emitted when the device list is received as a response to a
+  /// DeviceListRequest call, which is sent during the handshake.
+  DeviceListReceived,
   /// Emitted when a device has been added to the server. Includes a
   /// [ButtplugClientDevice] object representing the device.
   DeviceAdded(ButtplugClientDevice),
