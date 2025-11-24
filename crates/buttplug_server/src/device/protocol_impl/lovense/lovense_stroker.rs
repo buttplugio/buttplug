@@ -102,7 +102,8 @@ async fn update_linear_movement(device: Arc<Hardware>, linear_info: Arc<(AtomicU
       current_position = last_goal_position;
     }
 
-    let lovense_cmd = format!("FSetSite:{current_position};");
+    //let lovense_cmd = format!("FSetSite:{current_position};");
+    let lovense_cmd = format!("SetPoint:{current_position};");
 
     let hardware_cmd: HardwareWriteCmd = HardwareWriteCmd::new(
       &[LOVENSE_STROKER_PROTOCOL_UUID],
