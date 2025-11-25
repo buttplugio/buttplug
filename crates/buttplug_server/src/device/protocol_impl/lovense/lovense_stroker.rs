@@ -68,6 +68,25 @@ impl ProtocolHandler for LovenseStroker {
   ) -> BoxFuture<'static, Result<InputReadingV4, ButtplugDeviceError>> {
     super::handle_battery_level_cmd(device_index, device, feature_index, feature_id)
   }
+
+  fn handle_output_oscillate_cmd(
+    &self,
+    _feature_index: u32,
+    feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        format!("Mply:{}:{};", speed, if speed == 0 { 0 } else { 20 })
+          .as_bytes()
+          .to_vec(),
+        false,
+      )
+      .into(),
+    ])
+  }
 }
 
 async fn update_linear_movement(device: Arc<Hardware>, linear_info: Arc<(AtomicU32, AtomicU32)>) {
