@@ -469,7 +469,7 @@ configurations:
           oscillate:
             value:
               - 0
-              - 20              
+              - 20
       - description: battery Level
         id: 0b1cba39-8bb7-4f87-9bed-c59f2284d702
         input:
@@ -480,6 +480,34 @@ configurations:
             input_commands:
               - Read
     id: ed5f76c6-84b9-4fee-891f-28f9f4fa3632
+  - identifier:
+      - WD
+    name: Lovense Spinel
+    features:
+      - description: Attachment vibration
+        id: 0e3ff3c1-295d-47cf-a641-8d52286ac13c
+        output:
+          vibrate:
+            value:
+              - 0
+              - 20
+      - description: Thrusting movement
+        id: 7cf78858-31c9-484c-9b2e-93a5db520ece
+        output:
+          oscillate:
+            value:
+              - 0
+              - 20
+      - description: battery Level
+        id: d3cb3f91-3b19-401f-88b5-a33006f7c5bc
+        input:
+          battery:
+            value_range:
+              - - 0
+                - 100
+            input_commands:
+              - Read
+    id: b1ab0746-9659-41f3-9f51-2b4966123210
 communication:
   - btle:
       names:
@@ -526,6 +554,7 @@ communication:
         - 43410001-0023-4bd4-bbd5-a6920e4c5653
         - 4f430001-0023-4bd4-bbd5-a6920e4c5653
         - 455a0001-0023-4bd4-bbd5-a6920e4c5653
+        - 57440001-0023-4bd4-bbd5-a6920e4c5653
       services:
         0000fff0-0000-1000-8000-00805f9b34fb:
           tx: 0000fff2-0000-1000-8000-00805f9b34fb
@@ -635,3 +664,6 @@ communication:
         455a0001-0023-4bd4-bbd5-a6920e4c5653:
           tx: 455a0002-0023-4bd4-bbd5-a6920e4c5653
           rx: 455a0003-0023-4bd4-bbd5-a6920e4c5653
+        57440001-0023-4bd4-bbd5-a6920e4c5653:
+          tx: 57440002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 57440003-0023-4bd4-bbd5-a6920e4c5653

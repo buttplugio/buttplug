@@ -5,12 +5,14 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+mod lovense_dual_actuator;
 mod lovense_max;
 mod lovense_multi_actuator;
 mod lovense_rotate_vibrator;
 mod lovense_single_actuator;
 mod lovense_stroker;
 
+use lovense_dual_actuator::LovenseDualActuator;
 use lovense_max::LovenseMax;
 use lovense_multi_actuator::LovenseMultiActuator;
 use lovense_rotate_vibrator::LovenseRotateVibrator;
@@ -237,9 +239,9 @@ impl ProtocolInitializer for LovenseInitializer {
     //let use_lvs = device_type == "OC";
 
     debug!(
-      "Device type {} initialized with {} vibrators {} using Mply",
+      "Device type {} initialized with {} outputs {} using Mply",
       device_type,
-      vibrator_count,
+      output_count,
       if use_mply { "" } else { "not " }
     );
 
@@ -251,8 +253,10 @@ impl ProtocolInitializer for LovenseInitializer {
       Ok(Arc::new(LovenseMax::default()))
     } else if vibrator_rotator {
       Ok(Arc::new(LovenseRotateVibrator::default()))
+    } else if use_mply {
+      Ok(Arc::new(LovenseMultiActuator::new(output_count as u32)))
     } else {
-      Ok(Arc::new(LovenseMultiActuator::new(vibrator_count as u32)))
+      Ok(Arc::new(LovenseDualActuator::new(output_count as u32)))
     }
   }
 }

@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 114
+    "minor": 119
   },
   "protocols": {
     "activejoy": {
@@ -10149,7 +10149,8 @@
               "42410001-0023-4bd4-bbd5-a6920e4c5653",
               "43410001-0023-4bd4-bbd5-a6920e4c5653",
               "4f430001-0023-4bd4-bbd5-a6920e4c5653",
-              "455a0001-0023-4bd4-bbd5-a6920e4c5653"
+              "455a0001-0023-4bd4-bbd5-a6920e4c5653",
+              "57440001-0023-4bd4-bbd5-a6920e4c5653"
             ],
             "manufacturer_data": [
               {
@@ -10292,6 +10293,10 @@
               "57300001-0023-4bd4-bbd5-a6920e4c5653": {
                 "rx": "57300003-0023-4bd4-bbd5-a6920e4c5653",
                 "tx": "57300002-0023-4bd4-bbd5-a6920e4c5653"
+              },
+              "57440001-0023-4bd4-bbd5-a6920e4c5653": {
+                "rx": "57440003-0023-4bd4-bbd5-a6920e4c5653",
+                "tx": "57440002-0023-4bd4-bbd5-a6920e4c5653"
               },
               "58300001-0023-4bd4-bbd5-a6920e4c5653": {
                 "rx": "58300003-0023-4bd4-bbd5-a6920e4c5653",
@@ -11146,6 +11151,56 @@
             "BA"
           ],
           "name": "Lovense Solace Pro"
+        },
+        {
+          "features": [
+            {
+              "description": "Attachment vibration",
+              "id": "0e3ff3c1-295d-47cf-a641-8d52286ac13c",
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    20
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Thrusting movement",
+              "id": "7cf78858-31c9-484c-9b2e-93a5db520ece",
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    20
+                  ]
+                }
+              }
+            },
+            {
+              "description": "battery Level",
+              "id": "d3cb3f91-3b19-401f-88b5-a33006f7c5bc",
+              "input": {
+                "battery": {
+                  "input_commands": [
+                    "Read"
+                  ],
+                  "value_range": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "b1ab0746-9659-41f3-9f51-2b4966123210",
+          "identifier": [
+            "WD"
+          ],
+          "name": "Lovense Spinel"
         }
       ],
       "defaults": {

@@ -152,9 +152,9 @@ async fn stop_device(
   Path(index): Path<u32>,
 ) -> Result<(), IntifaceRestError> {
   get_device(&client, index)?
-      .stop()
-      .await
-      .map_err(IntifaceRestError::ButtplugClientError)
+    .stop()
+    .await
+    .map_err(IntifaceRestError::ButtplugClientError)
 }
 
 async fn set_device_output(
@@ -165,9 +165,9 @@ async fn set_device_output(
     .map_err(IntifaceRestError::ButtplugClientError)?;
 
   get_device(&client, index)?
-      .send_command(&cmd)
-      .await
-      .map_err(IntifaceRestError::ButtplugClientError)
+    .send_command(&cmd)
+    .await
+    .map_err(IntifaceRestError::ButtplugClientError)
 }
 
 async fn set_feature_output(
@@ -178,9 +178,9 @@ async fn set_feature_output(
     .map_err(IntifaceRestError::ButtplugClientError)?;
 
   get_feature(&client, index, feature_index)?
-      .send_command(&cmd)
-      .await
-      .map_err(IntifaceRestError::ButtplugClientError)
+    .send_command(&cmd)
+    .await
+    .map_err(IntifaceRestError::ButtplugClientError)
 }
 
 async fn get_devices(
@@ -258,7 +258,7 @@ async fn feature_input_command(
 
 async fn server_sse(
   State(client): State<Arc<ButtplugClient>>,
-) -> Sse<impl Stream<Item = Result<Event, Infallible>>> { 
+) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
   let stream = client
     .event_stream()
     .map(|e| Ok(Event::default().data(format!("{:?}", e))));
