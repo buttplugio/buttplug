@@ -12,41 +12,25 @@ use crate::device::{
 use buttplug_core::{errors::ButtplugDeviceError, message::InputReadingV4};
 use buttplug_server_device_config::Endpoint;
 use futures::future::BoxFuture;
-use std::sync::atomic::Ordering;
 use std::sync::{Arc, atomic::AtomicU32};
-use uuid::{Uuid, uuid};
+use uuid::Uuid;
 
-const LOVENSE_MPLY_PROTOCOL_UUID: Uuid = uuid!("7925d93b-15d0-4c59-bb5b-9779ec6c04e4");
 #[derive(Default)]
-pub struct LovenseMultiActuator {
-  vibrator_values: Vec<AtomicU32>,
+pub struct LovenseDualActuator {
+  _vibrator_values: Vec<AtomicU32>,
 }
 
-impl LovenseMultiActuator {
+impl LovenseDualActuator {
   pub fn new(num_vibrators: u32) -> Self {
     Self {
-      vibrator_values: std::iter::repeat_with(|| AtomicU32::new(0))
+      _vibrator_values: std::iter::repeat_with(|| AtomicU32::new(0))
         .take(num_vibrators as usize)
         .collect(),
     }
   }
-
-  fn form_packet(&self) -> Vec<u8> {
-    format!(
-      "Mply:{};",
-      self
-        .vibrator_values
-        .iter()
-        .map(|v| v.load(Ordering::Relaxed).to_string())
-        .collect::<Vec<String>>()
-        .join(":")
-    )
-    .as_bytes()
-    .to_vec()
-  }
 }
 
-impl ProtocolHandler for LovenseMultiActuator {
+impl ProtocolHandler for LovenseDualActuator {
   fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
     super::keepalive_strategy()
   }
@@ -54,36 +38,32 @@ impl ProtocolHandler for LovenseMultiActuator {
   fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,
-    _feature_id: Uuid,
+    feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.vibrator_values[feature_index as usize].store(speed, Ordering::Relaxed);
+    debug!(
+      "Lovense multi-actuator command: {}",
+      format!("Vibrate{}:{};", feature_index + 1, speed)
+    );
+    let lovense_cmd = format!("Vibrate{}:{};", feature_index + 1, speed)
+      .as_bytes()
+      .to_vec();
     Ok(vec![
-      HardwareWriteCmd::new(
-        &[LOVENSE_MPLY_PROTOCOL_UUID],
-        Endpoint::Tx,
-        self.form_packet(),
-        false,
-      )
-      .into(),
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, lovense_cmd, false).into(),
     ])
   }
 
-  fn handle_output_rotate_cmd(
+  fn handle_output_oscillate_cmd(
     &self,
     feature_index: u32,
-    _feature_id: Uuid,
-    speed: i32,
+    feature_id: Uuid,
+    speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.vibrator_values[feature_index as usize].store(speed.abs() as u32, Ordering::Relaxed);
+    let lovense_cmd = format!("Vibrate{}:{};", feature_index + 1, speed)
+      .as_bytes()
+      .to_vec();
     Ok(vec![
-      HardwareWriteCmd::new(
-        &[LOVENSE_MPLY_PROTOCOL_UUID],
-        Endpoint::Tx,
-        self.form_packet(),
-        false,
-      )
-      .into(),
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, lovense_cmd, false).into(),
     ])
   }
 
