@@ -1,6 +1,4 @@
-use std::{
-  collections::BTreeMap, convert::Infallible, io, net::SocketAddr, sync::Arc,
-};
+use std::{collections::BTreeMap, convert::Infallible, io, net::SocketAddr, sync::Arc};
 
 use axum::{
   Json, Router,

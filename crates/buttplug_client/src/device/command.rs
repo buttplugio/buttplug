@@ -84,9 +84,8 @@ impl From<&ClientDeviceOutputCommand> for OutputType {
       ClientDeviceOutputCommand::Constrict(_) | ClientDeviceOutputCommand::ConstrictFloat(_) => {
         OutputType::Constrict
       }
-      ClientDeviceOutputCommand::Temperature(_) | ClientDeviceOutputCommand::TemperatureFloat(_) => {
-        OutputType::Temperature
-      }
+      ClientDeviceOutputCommand::Temperature(_)
+      | ClientDeviceOutputCommand::TemperatureFloat(_) => OutputType::Temperature,
       ClientDeviceOutputCommand::Led(_) | ClientDeviceOutputCommand::LedFloat(_) => OutputType::Led,
       ClientDeviceOutputCommand::Spray(_) | ClientDeviceOutputCommand::SprayFloat(_) => {
         OutputType::Spray
