@@ -146,15 +146,6 @@ async fn device_tester() {
           dev.index(),
           feature.feature_index()
         );
-      } else if let Some(out) = outs.get(OutputType::Position) {
-        cmds.push(feature.position(out.step_count()));
-        println!(
-          "{} ({}) should start moving to position {} on feature {}!",
-          dev.name(),
-          dev.index(),
-          out.step_count(),
-          feature.feature_index()
-        );
       }
     });
     if cmds.len() > 0 {
@@ -210,14 +201,6 @@ async fn device_tester() {
           cmds.push(feature.send_command(&ClientDeviceOutputCommand::Temperature(0)));
           println!(
             "{} ({}) should stop heating on feature {}!",
-            dev.name(),
-            dev.index(),
-            feature.feature_index()
-          );
-        } else if outs.get(OutputType::Position).is_some() {
-          cmds.push(feature.position(0));
-          println!(
-            "{} ({}) should start moving to position 0 on feature {}!",
             dev.name(),
             dev.index(),
             feature.feature_index()

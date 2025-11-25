@@ -245,7 +245,7 @@ impl ProtocolInitializer for LovenseInitializer {
     );
 
     if device_type == "BA" || device_type == "H" {
-      Ok(Arc::new(LovenseStroker::new(hardware)))
+      Ok(Arc::new(LovenseStroker::new(hardware, device_type == "H")))
     } else if output_count == 1 {
       Ok(Arc::new(LovenseSingleActuator::default()))
     } else if lovense_max {
