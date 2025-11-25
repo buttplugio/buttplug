@@ -135,7 +135,11 @@ async fn device_tester() {
           feature.feature_index()
         );
       } else if let Some(out) = outs.get(OutputType::Temperature) {
-        cmds.push(feature.send_command(&ClientDeviceOutputCommand::Temperature(*out.step_limit().start())));
+        cmds.push(
+          feature.send_command(&ClientDeviceOutputCommand::Temperature(
+            *out.step_limit().start(),
+          )),
+        );
         println!(
           "{} ({}) should start heating on feature {}!",
           dev.name(),
@@ -157,13 +161,13 @@ async fn device_tester() {
       // If the device had any features send what used to be scalar commands async,
       // dispatch all commands now in parallel, then go back and stop them in parallel.
       futures::future::join_all(cmds)
-          .await
-          .iter()
-          .for_each(|cmd| {
-            if let Err(err) = cmd {
-              error!("{:?}", err);
-            }
-          });
+        .await
+        .iter()
+        .for_each(|cmd| {
+          if let Err(err) = cmd {
+            error!("{:?}", err);
+          }
+        });
 
       sleep(Duration::from_secs(5)).await;
 
@@ -222,13 +226,13 @@ async fn device_tester() {
       });
 
       futures::future::join_all(cmds)
-          .await
-          .iter()
-          .for_each(|cmd| {
-            if let Err(err) = cmd {
-              error!("{:?}", err);
-            }
-          });
+        .await
+        .iter()
+        .for_each(|cmd| {
+          if let Err(err) = cmd {
+            error!("{:?}", err);
+          }
+        });
 
       sleep(Duration::from_secs(2)).await;
     }
@@ -237,17 +241,20 @@ async fn device_tester() {
     for (_, feature) in dev.device_features() {
       if let Some(out) = feature.feature().output() {
         let outputs: Vec<&OutputType> = [
-        OutputType::Constrict,
-        OutputType::Temperature,
-        OutputType::Led,
-        OutputType::Oscillate,
-        OutputType::Position,
-        OutputType::PositionWithDuration,
-        OutputType::Rotate,
-        OutputType::Spray,
+          OutputType::Constrict,
+          OutputType::Temperature,
+          OutputType::Led,
+          OutputType::Oscillate,
+          OutputType::Position,
+          OutputType::PositionWithDuration,
+          OutputType::Rotate,
+          OutputType::Spray,
           OutputType::Unknown,
-        OutputType::Vibrate,
-          ].iter().filter(|o| out.contains(**o)).collect();
+          OutputType::Vibrate,
+        ]
+        .iter()
+        .filter(|o| out.contains(**o))
+        .collect();
 
         for otype in outputs {
           let output = out.get(*otype).unwrap();
@@ -276,8 +283,7 @@ async fn device_tester() {
               );
             }
             OutputType::Rotate => {
-              if output.step_limit().start() >= &0
-              {
+              if output.step_limit().start() >= &0 {
                 set_level_and_wait(&dev, feature, &otype, 0.25).await;
                 set_level_and_wait(&dev, feature, &otype, 0.5).await;
                 set_level_and_wait(&dev, feature, &otype, 0.75).await;
@@ -304,9 +310,14 @@ async fn device_tester() {
                 set_level_and_wait(&dev, feature, &otype, -1.0).await;
                 set_level_and_wait(&dev, feature, &otype, 0.0).await;
               }
-            },
+            }
             OutputType::PositionWithDuration => {
-              feature.send_command(&ClientDeviceOutputCommand::PositionWithDurationFloat(0.0,10)).await.unwrap();
+              feature
+                .send_command(&ClientDeviceOutputCommand::PositionWithDurationFloat(
+                  0.0, 10,
+                ))
+                .await
+                .unwrap();
               println!(
                 "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
                 dev.name(),
@@ -318,7 +329,12 @@ async fn device_tester() {
                 10
               );
               sleep(Duration::from_secs(1)).await;
-              feature.send_command(&ClientDeviceOutputCommand::PositionWithDurationFloat(0.5,1000)).await.unwrap();
+              feature
+                .send_command(&ClientDeviceOutputCommand::PositionWithDurationFloat(
+                  0.5, 1000,
+                ))
+                .await
+                .unwrap();
               println!(
                 "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
                 dev.name(),
@@ -330,7 +346,12 @@ async fn device_tester() {
                 1000
               );
               sleep(Duration::from_secs(1)).await;
-              feature.send_command(&ClientDeviceOutputCommand::PositionWithDurationFloat(0.0,10)).await.unwrap();
+              feature
+                .send_command(&ClientDeviceOutputCommand::PositionWithDurationFloat(
+                  0.0, 10,
+                ))
+                .await
+                .unwrap();
               println!(
                 "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
                 dev.name(),
@@ -342,7 +363,12 @@ async fn device_tester() {
                 10
               );
               sleep(Duration::from_secs(1)).await;
-              feature.send_command(&ClientDeviceOutputCommand::PositionWithDurationFloat(1.0,500)).await.unwrap();
+              feature
+                .send_command(&ClientDeviceOutputCommand::PositionWithDurationFloat(
+                  1.0, 500,
+                ))
+                .await
+                .unwrap();
               println!(
                 "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
                 dev.name(),
@@ -354,7 +380,12 @@ async fn device_tester() {
                 500
               );
               sleep(Duration::from_secs(1)).await;
-              feature.send_command(&ClientDeviceOutputCommand::PositionWithDurationFloat(0.0,1500)).await.unwrap();
+              feature
+                .send_command(&ClientDeviceOutputCommand::PositionWithDurationFloat(
+                  0.0, 1500,
+                ))
+                .await
+                .unwrap();
               println!(
                 "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
                 dev.name(),

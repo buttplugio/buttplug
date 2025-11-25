@@ -316,7 +316,9 @@ impl UserDeviceFeatureOutput {
     }
     if let Some(user_temperature) = &self.temperature {
       if let Some(base_temperature) = base_output.temperature() {
-        output.set_temperature(Some(user_temperature.with_base_properties(base_temperature)?));
+        output.set_temperature(Some(
+          user_temperature.with_base_properties(base_temperature)?,
+        ));
       } else {
         output.set_temperature(base_output.temperature().clone());
       }

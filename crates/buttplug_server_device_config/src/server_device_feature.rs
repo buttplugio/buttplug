@@ -451,7 +451,10 @@ impl From<ServerDeviceFeatureOutput> for DeviceFeatureOutput {
     val.rotate.as_ref().map(|x| builder.rotate(x.into()));
     val.oscillate.as_ref().map(|x| builder.oscillate(x.into()));
     val.constrict.as_ref().map(|x| builder.constrict(x.into()));
-    val.temperature.as_ref().map(|x| builder.temperature(x.into()));
+    val
+      .temperature
+      .as_ref()
+      .map(|x| builder.temperature(x.into()));
     val.led.as_ref().map(|x| builder.led(x.into()));
     val.position.as_ref().map(|x| builder.position(x.into()));
     val

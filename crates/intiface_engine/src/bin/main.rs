@@ -268,9 +268,10 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
       builder.rest_api_port(*value);
     }
     if args.broadcast_server_mdns()
-      && let Some(value) = args.mdns_suffix() {
-        builder.mdns_suffix(value);
-      }
+      && let Some(value) = args.mdns_suffix()
+    {
+      builder.mdns_suffix(value);
+    }
     Ok(builder.finish())
   }
 }
