@@ -31,7 +31,7 @@ configurations:
               - 255
       - id: 5ae8bb6f-6280-4a8d-9e08-a3d5e5fb89a8
         output:
-          sscillate:
+          oscillate:
             value:
               - 0
               - 255
