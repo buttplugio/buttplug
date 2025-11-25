@@ -231,8 +231,7 @@ impl ProtocolInitializer for LovenseInitializer {
 
     // This might need better tuning if other complex Lovenses are released
     // Currently this only applies to the Flexer/Lapis/Solace
-    let use_mply =
-      (vibrator_count == 2 && output_count > 2) || vibrator_count > 2 || device_type == "H";
+    let use_mply = (vibrator_count == 2 && output_count > 2) || vibrator_count > 2;
 
     // New Lovense devices seem to be moving to the simplified LVS:<bytearray>; command format.
     // I'm not sure if there's a good way to detect this.
@@ -245,7 +244,7 @@ impl ProtocolInitializer for LovenseInitializer {
       if use_mply { "" } else { "not " }
     );
 
-    if device_type == "BA" {
+    if device_type == "BA" || device_type == "H" {
       Ok(Arc::new(LovenseStroker::new(hardware)))
     } else if output_count == 1 {
       Ok(Arc::new(LovenseSingleActuator::default()))

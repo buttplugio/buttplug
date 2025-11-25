@@ -31,18 +31,26 @@ impl LovenseMultiActuator {
     }
   }
 
-  fn form_packet(&self) -> Vec<u8> {
-    format!(
-      "Mply:{};",
-      self
-        .vibrator_values
-        .iter()
-        .map(|v| v.load(Ordering::Relaxed).to_string())
-        .collect::<Vec<String>>()
-        .join(":")
-    )
-    .as_bytes()
-    .to_vec()
+  fn form_packet(&self) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[LOVENSE_MPLY_PROTOCOL_UUID],
+        Endpoint::Tx,
+        format!(
+          "Mply:{};",
+          self
+            .vibrator_values
+            .iter()
+            .map(|v| v.load(Ordering::Relaxed).to_string())
+            .collect::<Vec<String>>()
+            .join(":")
+        )
+        .as_bytes()
+        .to_vec(),
+        false,
+      )
+      .into(),
+    ])
   }
 }
 
@@ -58,15 +66,7 @@ impl ProtocolHandler for LovenseMultiActuator {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.vibrator_values[feature_index as usize].store(speed, Ordering::Relaxed);
-    Ok(vec![
-      HardwareWriteCmd::new(
-        &[LOVENSE_MPLY_PROTOCOL_UUID],
-        Endpoint::Tx,
-        self.form_packet(),
-        false,
-      )
-      .into(),
-    ])
+    self.form_packet()
   }
 
   fn handle_output_rotate_cmd(
@@ -76,15 +76,7 @@ impl ProtocolHandler for LovenseMultiActuator {
     speed: i32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.vibrator_values[feature_index as usize].store(speed.abs() as u32, Ordering::Relaxed);
-    Ok(vec![
-      HardwareWriteCmd::new(
-        &[LOVENSE_MPLY_PROTOCOL_UUID],
-        Endpoint::Tx,
-        self.form_packet(),
-        false,
-      )
-      .into(),
-    ])
+    self.form_packet()
   }
 
   fn handle_battery_level_cmd(
