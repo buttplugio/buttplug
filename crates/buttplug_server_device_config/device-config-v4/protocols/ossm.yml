@@ -1,0 +1,18 @@
+defaults:
+  name: OSSM
+  features:
+    - description: Stroke Speed
+      id: 6ff53ba2-a5c0-462e-b2d6-420badbabe69
+      output:
+        oscillate:
+          value:
+            - 0
+            - 100
+  id: 6beebf46-3dfd-4e11-b0f9-420badbabe69
+communication:
+  - btle:
+      names:
+        - OSSM
+      services:
+        522b443a-4f53-534d-0001-420badbabe69:
+          tx: 522b443a-4f53-534d-0002-420badbabe69
