@@ -171,7 +171,7 @@ impl ProtocolInitializer for LovenseInitializer {
 
     let vibrator_count = device_definition
       .features()
-      .iter()
+      .values()
       .filter(|x| {
         x.output()
           .as_ref()
@@ -181,14 +181,14 @@ impl ProtocolInitializer for LovenseInitializer {
 
     let output_count = device_definition
       .features()
-      .iter()
+      .values()
       .filter(|x| x.output().is_some())
       .count();
 
     let vibrator_rotator = output_count == 2
       && device_definition
         .features()
-        .iter()
+        .values()
         .filter(|x| {
           x.output()
             .as_ref()
@@ -198,7 +198,7 @@ impl ProtocolInitializer for LovenseInitializer {
         == 1
       && device_definition
         .features()
-        .iter()
+        .values()
         .filter(|x| {
           x.output()
             .as_ref()
@@ -210,7 +210,7 @@ impl ProtocolInitializer for LovenseInitializer {
     let lovense_max = output_count == 2
       && device_definition
         .features()
-        .iter()
+        .values()
         .filter(|x| {
           x.output()
             .as_ref()
@@ -220,7 +220,7 @@ impl ProtocolInitializer for LovenseInitializer {
         == 1
       && device_definition
         .features()
-        .iter()
+        .values()
         .filter(|x| {
           x.output()
             .as_ref()

@@ -85,7 +85,7 @@ impl ProtocolInitializer for HismithMiniInitializer {
     Ok(Arc::new(HismithMini {
       dual_vibe: device_definition
         .features()
-        .iter()
+        .values()
         .filter(|x| {
           x.output()
             .as_ref()
@@ -95,7 +95,7 @@ impl ProtocolInitializer for HismithMiniInitializer {
         >= 2,
       second_constrict: device_definition
         .features()
-        .iter()
+        .values()
         .position(|x| {
           x.output()
             .as_ref()

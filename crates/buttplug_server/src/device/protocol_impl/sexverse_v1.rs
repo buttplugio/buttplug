@@ -42,7 +42,7 @@ impl ProtocolInitializer for SexverseV1Initializer {
     def: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut commands = vec![];
-    def.features().iter().for_each(|x| {
+    def.features().values().for_each(|x| {
       if let Some(m) = x.output() {
         for output in m.output_types() {
           commands.push((output, AtomicU8::default()))

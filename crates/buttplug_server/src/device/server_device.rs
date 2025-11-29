@@ -407,12 +407,12 @@ impl ServerDevice {
     let mut stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4> = vec![];
     // We consider the feature's FeatureType to be the "main" capability of a feature. Use that to
     // calculate stop commands.
-    for (index, feature) in definition.features().iter().enumerate() {
+    for feature in definition.features().values() {
       if let Some(output_map) = feature.output() {
         for actuator_type in output_map.output_types() {
           let mut stop_cmd = |actuator_cmd| {
             stop_commands
-              .push(CheckedOutputCmdV4::new(1, 0, index as u32, feature.id(), actuator_cmd).into());
+              .push(CheckedOutputCmdV4::new(1, 0, feature.index(), feature.id(), actuator_cmd).into());
           };
 
           // Break out of these if one is found, we only need 1 stop message per output.
@@ -517,9 +517,8 @@ impl ServerDevice {
       &self
         .definition
         .features()
-        .iter()
-        .enumerate()
-        .map(|(i, x)| (i as u32, x.as_device_feature(i as u32).expect("Infallible")))
+        .values()
+        .map(|x| (x.index(), x.as_device_feature().expect("Infallible")))
         .filter(|(_, x)| x.output().as_ref().is_some() || x.input().as_ref().is_some())
         .collect::<BTreeMap<u32, DeviceFeature>>(),
     )

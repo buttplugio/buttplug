@@ -22,6 +22,7 @@
       "defaults": {
         "features": [
           {
+            "index": 0,
             "description": "Perineum Vibrator",
             "id": "a980bc1a-5554-4293-a75f-6d17bf25ebee",
             "output": {
@@ -34,6 +35,7 @@
             }
           },
           {
+            "index": 1,
             "description": "Internal Vibrator",
             "id": "811d7d6e-6a75-4925-943a-a06042223e3a",
             "output": {

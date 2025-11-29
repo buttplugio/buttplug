@@ -38,7 +38,7 @@ use futures::{
 };
 use getset::Getters;
 use std::{
-  collections::HashMap,
+  collections::BTreeMap,
   convert::TryFrom,
   sync::{
     Arc,
@@ -286,7 +286,7 @@ impl ServerDeviceManager {
     }
   }
 
-  pub(crate) fn feature_map(&self) -> HashMap<u32, ServerDeviceAttributes> {
+  pub(crate) fn feature_map(&self) -> BTreeMap<u32, ServerDeviceAttributes> {
     self
       .devices()
       .iter()

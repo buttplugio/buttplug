@@ -121,7 +121,7 @@ impl ProtocolInitializer for GalakuInitializer {
     }
     for _ in 0..def
       .features()
-      .iter()
+      .values()
       .filter(|f| f.output().is_some())
       .count()
     {

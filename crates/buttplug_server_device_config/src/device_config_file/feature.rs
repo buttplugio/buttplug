@@ -430,6 +430,8 @@ impl From<DeviceFeatureInput> for ServerDeviceFeatureInput {
 
 #[derive(Clone, Debug, Default, Getters, Serialize, Deserialize, CopyGetters)]
 pub struct ConfigBaseDeviceFeature {
+  #[getset(get_copy = "pub")]
+  index: u32,
   #[getset(get = "pub")]
   #[serde(default)]
   description: String,
@@ -452,6 +454,7 @@ impl From<ConfigBaseDeviceFeature> for ServerDeviceFeature {
     let output: Option<ServerDeviceFeatureOutput> = val.output.map(|o| o.into());
     let input: Option<ServerDeviceFeatureInput> = val.input.map(|i| i.into());
     ServerDeviceFeature::new(
+      val.index,
       &val.description,
       val.id,
       None,
@@ -488,6 +491,7 @@ impl ConfigUserDeviceFeature {
       None
     };
     Ok(ServerDeviceFeature::new(
+      base_feature.index(),
       base_feature.description(),
       self.id,
       Some(self.base_id),

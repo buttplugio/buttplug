@@ -47,7 +47,7 @@ impl ProtocolInitializer for SvakomV6Initializer {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let num_vibrators = def
       .features()
-      .iter()
+      .values()
       .filter(|x| {
         if let Some(output_map) = x.output() {
           output_map.contains(OutputType::Vibrate)

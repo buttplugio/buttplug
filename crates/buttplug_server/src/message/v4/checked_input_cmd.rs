@@ -65,7 +65,7 @@ impl TryFromDeviceAttributes<InputCmdV4> for CheckedInputCmdV4 {
     msg: InputCmdV4,
     features: &crate::message::ServerDeviceAttributes,
   ) -> Result<Self, buttplug_core::errors::ButtplugError> {
-    if let Some(feature) = features.features().get(msg.feature_index() as usize) {
+    if let Some(feature) = features.features().get(&msg.feature_index()) {
       if let Some(sensor_map) = feature.input() {
         if sensor_map.contains(msg.input_type()) {
           Ok(CheckedInputCmdV4::new(

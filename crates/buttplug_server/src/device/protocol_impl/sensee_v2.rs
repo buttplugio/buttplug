@@ -67,12 +67,11 @@ impl ProtocolInitializer for SenseeV2Initializer {
       device_definition
         .features()
         .iter()
-        .enumerate()
         .for_each(|(i, x)| {
           if let Some(output_map) = x.output()
             && output_map.contains(output_type)
           {
-            map.insert(i as u32, AtomicU8::new(0));
+            map.insert(*i, AtomicU8::new(0));
           }
         });
       map

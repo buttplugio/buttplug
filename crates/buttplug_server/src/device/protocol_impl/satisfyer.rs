@@ -119,7 +119,7 @@ impl ProtocolInitializer for SatisfyerInitializer {
 
     let feature_count = device_definition
       .features()
-      .iter()
+      .values()
       .filter(|x| x.output().is_some())
       .count();
 

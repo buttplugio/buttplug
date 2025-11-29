@@ -177,6 +177,10 @@
       "items": {
         "type": "object",
         "properties": {
+          "index": {
+            "type": "number",
+            "minimum": 0
+          },
           "description": {
             "type": "string"
           },
@@ -253,6 +257,7 @@
           }
         },
         "required": [
+          "index",
           "id"
         ],
         "additionalProperties": false

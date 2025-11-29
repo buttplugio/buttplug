@@ -43,7 +43,7 @@ impl ProtocolInitializer for MagicMotionV4Initializer {
     Ok(Arc::new(MagicMotionV4::new(
       def
         .features()
-        .iter()
+        .values()
         .filter(|x| x.output().is_some())
         .count() as u8,
     )))

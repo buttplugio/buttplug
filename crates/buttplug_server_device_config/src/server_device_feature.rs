@@ -525,6 +525,8 @@ impl From<ServerDeviceFeatureInput> for DeviceFeatureInput {
 
 #[derive(Clone, Debug, Getters, CopyGetters, Setters)]
 pub struct ServerDeviceFeature {
+  #[getset(get_copy = "pub")]
+  index: u32,
   #[getset(get = "pub")]
   description: String,
   #[getset(get_copy = "pub")]
@@ -550,6 +552,7 @@ impl Eq for ServerDeviceFeature {
 
 impl ServerDeviceFeature {
   pub fn new(
+    index: u32,
     description: &str,
     id: Uuid,
     base_id: Option<Uuid>,
@@ -558,6 +561,7 @@ impl ServerDeviceFeature {
     input: &Option<ServerDeviceFeatureInput>,
   ) -> Self {
     Self {
+      index,
       description: description.to_owned(),
       id,
       base_id,
@@ -574,9 +578,9 @@ impl ServerDeviceFeature {
     new_feature
   }
 
-  pub fn as_device_feature(&self, index: u32) -> Result<DeviceFeature, ButtplugDeviceConfigError> {
+  pub fn as_device_feature(&self) -> Result<DeviceFeature, ButtplugDeviceConfigError> {
     Ok(DeviceFeature::new(
-      index,
+      self.index,
       self.description(),
       &self.output.as_ref().map(|x| x.clone().into()),
       &self.input.as_ref().map(|x| x.clone().into()),

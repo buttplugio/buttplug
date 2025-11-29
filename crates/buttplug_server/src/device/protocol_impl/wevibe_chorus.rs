@@ -46,7 +46,7 @@ impl ProtocolInitializer for WeVibeChorusInitializer {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let num_vibrators = def
       .features()
-      .iter()
+      .values()
       .filter(|x| {
         x.output()
           .as_ref()

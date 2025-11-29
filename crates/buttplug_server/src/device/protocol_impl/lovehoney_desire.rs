@@ -47,7 +47,7 @@ impl ProtocolInitializer for LovehoneyDesireInitializer {
     Ok(Arc::new(LovehoneyDesire::new(
       def
         .features()
-        .iter()
+        .values()
         .filter(|x| x.output().is_some())
         .count() as u8,
     )))
