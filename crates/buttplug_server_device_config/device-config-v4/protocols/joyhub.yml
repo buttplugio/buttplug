@@ -1,460 +1,490 @@
+---
 defaults:
   name: JoyHub Device
   features:
-    - id: fc2f0fc2-fb75-4eee-b92b-20eaf7cc9a1e
-      output:
-        vibrate:
-          value:
-            - 0
-            - 255
-      feature_settings:
-        alt_protocol_index: 1
+  - id: fc2f0fc2-fb75-4eee-b92b-20eaf7cc9a1e
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    feature_settings:
+      alt_protocol_index: 1
+    index: 0
   id: 53cf03db-266d-46c1-964e-0ef505a64200
 configurations:
-  - identifier:
-      - JOYHUB-ROSELLA2
-    name: JoyHub Rosella 2
-    id: 5b78e797-3ff6-4ca8-be15-28a1f3983dca
-  - identifier:
-      - J-Velocity
-    name: JoyHub Velocity
-    id: bc35f659-b67b-4df5-afdd-46053c2a5366
-  - identifier:
-      - J-ElixirEgg
-    name: JoyHub ElixirEgg
-    id: 6cbbce9e-6154-4260-8d2c-69cc52edd2ee
-  - identifier:
-      - J-RetroGuard
-    name: JoyHub Retro Guard
-    id: 481344d5-9edd-48c4-8867-d0d639648d09
-  - identifier:
-      - J-TrueForm3
-    name: JoyHub TrueForm 3
-    id: 5a3c541a-2924-44cc-a92d-d48b58cf0159
-  - identifier:
-      - J-TrueForm
-    name: JoyHub TrueForm
-    id: 6368a677-6c33-4765-8baf-1cd0cd4bb06e
-  - identifier:
-      - J-Rhythmic2
-    name: JoyHub Rhythmic 2
-    id: 46533dc6-6f1b-4b17-9f31-06b076f417d6
-  - identifier:
-      - J-Rhythmic3
-    name: JoyHub Rhythmic 3
-    id: 1a5dd035-8107-4db3-924d-503113b1c600
-  - identifier:
-      - J-Rainbow
-    name: JoyHub Rainbow
-    id: 907042dc-2681-46a0-9a49-3b8564faa41a
-  - identifier:
-      - J-BlackBull
-    name: JoyHub Black Bull
-    id: b92595de-f564-4298-a444-9c8bd1a2c7f9
-  - identifier:
-      - J-Peacock
-    name: JoyHub Peacock
-    id: 1b560be9-462d-4e08-adb5-2a38690e6ab2
-  - identifier:
-      - J-Mace
-    name: JoyHub Mace
-    id: b67fe066-44ff-41be-983d-0ed3e4a7b3ee
-  - identifier:
-      - J-Tarian
-    name: JoyHub Tarian
-    id: 609b9d5a-45c2-4f6d-a396-34f21e932c12
-  - identifier:
-      - J-Euphoric
-    name: JoyHub Euphoric
-    id: c2aea3e0-551b-4e7f-90e6-819878ad6aec
-  - identifier:
-      - J-Euphoric3
-    name: JoyHub Euphoric3
-    id: 4b936259-c2d8-4459-9824-5992c0c22430
-  - identifier:
-      - J-Torrian
-    name: JoyHub Torrian
-    id: a0a65312-dc6a-4e7b-a5cb-b1b8499df070
-  - identifier:
-      - J-Rayen
-    name: JoyHub Rayen
-    id: 08956682-7cf2-4a01-85d7-7132f8b0690e
-  - identifier:
-      - J-Mackay
-    name: JoyHub Mackay
-    id: add6c7a5-7a3f-4d3d-abac-da7f9b498ef2
-  - identifier:
-      - J-Rowdy3
-    name: JoyHub Rowdy 3
-    id: f175684d-3bc2-4c8a-a36b-b68275602179
-  - identifier:
-      - J-Eclipse
-    name: JoyHub Eclipse
-    id: 26bab7e2-0a38-4790-bdf0-8d9e1927106a
-  - identifier:
-      - J-Scarlett
-    name: JoyHub Scarlett
-    id: d7176dba-ce2b-4395-bf26-1b8ab653d8b5
-  - identifier:
-      - J-Tarik
-    name: JoyHub Tarik
-    id: f6b8c5db-eca9-4041-9e07-48521ed3a55f
-  - identifier:
-      - J-Derik
-    name: JoyHub Urica Guard
-    id: 7252d5cc-5f1c-49ca-b2c8-49d7502c1f6b
-  - identifier:
-      - J-UricaGuard2
-    name: JoyHub Urica Guard 2
-    id: a2f973ff-e6cd-4b70-a711-2b24f2d03b6d
-  - identifier:
-      - J-Viva
-    name: JoyHub Viva
-    id: 6d3ee1c9-0452-4a01-8f73-75d196179e5c
-  - identifier:
-      - J-Ryden
-    name: JoyHub Ryden
-    id: 25ef0abd-31ed-497f-8fc0-ea374f600ee7
-  - identifier:
-      - J-Peachy
-    name: JoyHub Peachy
-    id: eda4e5c4-4a91-4260-a14b-570926e346f6
-  - identifier:
-      - J-Enam
-    name: JoyHub Enam
-    id: b1aa4a71-1346-43c4-9de3-7ecc642607d5
-  - identifier:
-      - J-Viv
-    name: JoyHub Viv
-    id: 5a4c2185-67a9-4e15-862b-3c913aaecaad
-  - identifier:
-      - J-Vivara
-    name: JoyHub Vivara
-    id: 307496a5-a0e0-498e-b635-c6bc346cab1c
-  - identifier:
-      - J-Explorer2
-    name: JoyHub Explorer 2
-    id: f499492b-571c-4766-830c-c751706e280d
-  - identifier:
-      - J-Peachy
-    name: JoyHub Peachy
-    id: 38def4f2-5ec4-4466-a3e3-d7a9e35f4a2b
-  - identifier:
-      - J-Divers
-    name: JoyHub Divers
-    id: 44372cb8-208a-4d11-afc7-88ee69bf65fd
-  - identifier:
-      - J-VioletGale
-    name: JoyHub Violet Gale
-    id: 167a92b5-2e79-448d-9988-a1f7673dafe9
-  - identifier:
-      - J-Vellum
-    name: JoyHub Vellum
-    id: a168338f-a110-4485-94b4-8f2186a0f4b0
-  - identifier:
-      - J-Petalwish2
-    name: JoyHub Petalwish 2
-    features:
-      - id: 0d5685ae-95ea-4d2d-849e-b75b7354bc35
-        output:
-          oscillate:
-            value:
-              - 0
-              - 255
-      - id: e092343a-c826-4bc8-a579-e179b50cf65e
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-    id: 904ef5c8-7030-4c2f-9c12-d69154ab10c3
-  - identifier:
-      - J-VortexTongue
-    name: JoyHub Vortex Tongue
-    features:
-      - id: 95313411-9fb3-4df9-b672-c7279ca7d243
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-      - description: Air Pump
-        id: d2f66bd3-96c4-4377-b1f5-45a2f3d99c9e
-        output:
-          constrict:
-            value:
-              - 0
-              - 3
-      - id: 042a4817-348c-4595-9fbc-463ffa903041
-        output:
-          rotate:
-            value:
-              - 0
-              - 255
-    id: c85fd4cf-5bc1-4300-9cb8-a4db4fa8b85f
-  - identifier:
-      - J-VibSiren
-    name: JoyHub VibSiren
-    features:
-      - description: External vibrator
-        id: d03ea16f-3126-469d-bf85-843a7c6e2cf6
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-      - id: 115ec3d5-df22-474a-aa5a-32236fcb517e
-        output:
-          oscillate:
-            value:
-              - 0
-              - 255
-      - description: Internal vibrator
-        id: cd3828ee-8fe0-4214-acce-9fc4aac9ea46
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-    id: 380428d0-73a4-4437-bf48-fb6b26663d1d
-  - identifier:
-      - J-Mysticolor
-    name: JoyHub Mysticolor
-    features:
-      - id: a7a34c6b-5d77-4a38-9708-780ba97cd34f
-        output:
-          rotate:
-            value:
-              - 0
-              - 255
-      - description: Air Pump
-        id: 7891e1b3-82c3-4e83-936c-2a156f2ba826
-        output:
-          constrict:
-            value:
-              - 0
-              - 7
-    id: 1ca6396e-bee2-42c8-901c-82e975998085
-  - identifier:
-      - J-VividWings
-    name: JoyHub Vivid Wings
-    features:
-      - id: 686761a8-fcc9-4a41-9725-045d5cb0dae9
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-      - id: 21c831d4-0956-4b9b-a90e-31a545a89708
-        output:
-          oscillate:
-            value:
-              - 0
-              - 255
-    id: 576095da-d4a5-4f19-9b14-6244cbfe8096
-  - identifier:
-      - J-Mariner
-    name: JoyHub Mariner
-    features:
-      - id: 439bea28-4c09-4b81-8dd5-dce2ec31781e
-        output:
-          rotate:
-            value:
-              - 0
-              - 255
-      - description: Air Pump
-        id: 9f386242-41a2-4c86-9167-db6c58840cc7
-        output:
-          constrict:
-            value:
-              - 0
-              - 2
-    id: 67ed28b9-c0fe-4155-b7b8-3829ec12a485
-  - identifier:
-      - J-MarsLion
-    name: JoyHub MarsLion
-    features:
-      - id: e43f723f-412d-4c75-8123-2483113a06a8
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-      - description: Air Pump
-        id: 54e3da8e-7f97-46c7-8a1e-9fa549b877c2
-        output:
-          constrict:
-            value:
-              - 0
-              - 5
-    id: 3f3b7c49-94b2-49b6-ba67-3e5539e204b9
-  - identifier:
-      - J-Pul
-    name: JoyHub Pul
-    features:
-      - id: a9b7d261-2877-4214-a539-8ce30e038386
-        output:
-          oscillate:
-            value:
-              - 0
-              - 255
-    id: db3efe9b-839c-495e-8c2e-b800b3125b36
-  - identifier:
-      - J-ROSELLA3
-    name: JoyHub Rose Love
-    features:
-      - description: Air Pump
-        id: 0d3b3010-d438-4899-b1c2-d81bff0c6714
-        output:
-          constrict:
-            value:
-              - 0
-              - 255
-    id: ca36d3a7-c305-45e3-b8f7-3106b36b233a
-  - identifier:
-      - J-DukeDazzle2
-    name: JoyHub Edasich
-    features:
-      - id: 9fde0544-3307-4a4f-8abf-88ffb1dc3caf
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-      - id: e0ca1697-1e42-4822-925c-691561916bee
-        output:
-          oscillate:
-            value:
-              - 0
-              - 255
-    id: 877a8e55-9f08-4bea-826c-20371ba57577
-  - identifier:
-      - J-Mars
-    name: JoyHub Mars
-    features:
-      - id: a4a079b4-6cf2-47fc-bfef-0f2921c243db
-        output:
-          oscillate:
-            value:
-              - 0
-              - 255
-    id: b4235543-7287-4698-a1e7-9d78c53d4c0a
-  - identifier:
-      - J-Martino
-    name: JoyHub Martino
-    features:
-      - id: b306148c-c1d9-4281-bae9-fe1ccd876399
-        output:
-          oscillate:
-            value:
-              - 0
-              - 255
-    id: 76d1ddf5-e46b-4912-bea1-a748ce28a18e
-  - identifier:
-      - J-MarsLion2
-    name: JoyHub Mars Lion 2
-    features:
-      - id: b6ffc3b3-9e8a-46cd-82f2-97df7237be83
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-      - id: ead93a87-9ad6-448f-a26a-cce980db265e
-        output:
-          constrict:
-            value:
-              - 0
-              - 5
-    id: e693fbe3-f697-446e-8fa2-87e99e9e8cb6
-  - identifier:
-      - J-Myrna
-    name: JoyHub Myrna
-    features:
-      - id: 393dfa94-e3c8-4962-a053-c39e0447e420
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-      - id: b6e89b8c-207d-4588-9fff-f71d42e1a1a5
-        output:
-          constrict:
-            value:
-              - 0
-              - 9
-    id: e6502f8e-73c3-4b1f-9080-4428d6670045
-  - identifier:
-      - J-Vase2
-    name: JoyHub Vase 2
-    features:
-      - description: Biting lips
-        id: 7e13af66-c20f-42b3-ba85-764a2cdeaca0
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-      - description: Sideways flicker
-        id: f80dc564-7d53-4c6b-991e-ec18051a3207
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-    id: cd4e9b09-367e-4ac1-8571-4f0ff4ca8996
+- identifier:
+  - JOYHUB-ROSELLA2
+  name: JoyHub Rosella 2
+  id: 5b78e797-3ff6-4ca8-be15-28a1f3983dca
+- identifier:
+  - J-Velocity
+  name: JoyHub Velocity
+  id: bc35f659-b67b-4df5-afdd-46053c2a5366
+- identifier:
+  - J-ElixirEgg
+  name: JoyHub ElixirEgg
+  id: 6cbbce9e-6154-4260-8d2c-69cc52edd2ee
+- identifier:
+  - J-RetroGuard
+  name: JoyHub Retro Guard
+  id: 481344d5-9edd-48c4-8867-d0d639648d09
+- identifier:
+  - J-TrueForm3
+  name: JoyHub TrueForm 3
+  id: 5a3c541a-2924-44cc-a92d-d48b58cf0159
+- identifier:
+  - J-TrueForm
+  name: JoyHub TrueForm
+  id: 6368a677-6c33-4765-8baf-1cd0cd4bb06e
+- identifier:
+  - J-Rhythmic2
+  name: JoyHub Rhythmic 2
+  id: 46533dc6-6f1b-4b17-9f31-06b076f417d6
+- identifier:
+  - J-Rhythmic3
+  name: JoyHub Rhythmic 3
+  id: 1a5dd035-8107-4db3-924d-503113b1c600
+- identifier:
+  - J-Rainbow
+  name: JoyHub Rainbow
+  id: 907042dc-2681-46a0-9a49-3b8564faa41a
+- identifier:
+  - J-BlackBull
+  name: JoyHub Black Bull
+  id: b92595de-f564-4298-a444-9c8bd1a2c7f9
+- identifier:
+  - J-Peacock
+  name: JoyHub Peacock
+  id: 1b560be9-462d-4e08-adb5-2a38690e6ab2
+- identifier:
+  - J-Mace
+  name: JoyHub Mace
+  id: b67fe066-44ff-41be-983d-0ed3e4a7b3ee
+- identifier:
+  - J-Tarian
+  name: JoyHub Tarian
+  id: 609b9d5a-45c2-4f6d-a396-34f21e932c12
+- identifier:
+  - J-Euphoric
+  name: JoyHub Euphoric
+  id: c2aea3e0-551b-4e7f-90e6-819878ad6aec
+- identifier:
+  - J-Euphoric3
+  name: JoyHub Euphoric3
+  id: 4b936259-c2d8-4459-9824-5992c0c22430
+- identifier:
+  - J-Torrian
+  name: JoyHub Torrian
+  id: a0a65312-dc6a-4e7b-a5cb-b1b8499df070
+- identifier:
+  - J-Rayen
+  name: JoyHub Rayen
+  id: '08956682-7cf2-4a01-85d7-7132f8b0690e'
+- identifier:
+  - J-Mackay
+  name: JoyHub Mackay
+  id: add6c7a5-7a3f-4d3d-abac-da7f9b498ef2
+- identifier:
+  - J-Rowdy3
+  name: JoyHub Rowdy 3
+  id: f175684d-3bc2-4c8a-a36b-b68275602179
+- identifier:
+  - J-Eclipse
+  name: JoyHub Eclipse
+  id: 26bab7e2-0a38-4790-bdf0-8d9e1927106a
+- identifier:
+  - J-Scarlett
+  name: JoyHub Scarlett
+  id: d7176dba-ce2b-4395-bf26-1b8ab653d8b5
+- identifier:
+  - J-Tarik
+  name: JoyHub Tarik
+  id: f6b8c5db-eca9-4041-9e07-48521ed3a55f
+- identifier:
+  - J-Derik
+  name: JoyHub Urica Guard
+  id: 7252d5cc-5f1c-49ca-b2c8-49d7502c1f6b
+- identifier:
+  - J-UricaGuard2
+  name: JoyHub Urica Guard 2
+  id: a2f973ff-e6cd-4b70-a711-2b24f2d03b6d
+- identifier:
+  - J-Viva
+  name: JoyHub Viva
+  id: 6d3ee1c9-0452-4a01-8f73-75d196179e5c
+- identifier:
+  - J-Ryden
+  name: JoyHub Ryden
+  id: 25ef0abd-31ed-497f-8fc0-ea374f600ee7
+- identifier:
+  - J-Peachy
+  name: JoyHub Peachy
+  id: eda4e5c4-4a91-4260-a14b-570926e346f6
+- identifier:
+  - J-Enam
+  name: JoyHub Enam
+  id: b1aa4a71-1346-43c4-9de3-7ecc642607d5
+- identifier:
+  - J-Viv
+  name: JoyHub Viv
+  id: 5a4c2185-67a9-4e15-862b-3c913aaecaad
+- identifier:
+  - J-Vivara
+  name: JoyHub Vivara
+  id: 307496a5-a0e0-498e-b635-c6bc346cab1c
+- identifier:
+  - J-Explorer2
+  name: JoyHub Explorer 2
+  id: f499492b-571c-4766-830c-c751706e280d
+- identifier:
+  - J-Peachy
+  name: JoyHub Peachy
+  id: 38def4f2-5ec4-4466-a3e3-d7a9e35f4a2b
+- identifier:
+  - J-Divers
+  name: JoyHub Divers
+  id: 44372cb8-208a-4d11-afc7-88ee69bf65fd
+- identifier:
+  - J-VioletGale
+  name: JoyHub Violet Gale
+  id: 167a92b5-2e79-448d-9988-a1f7673dafe9
+- identifier:
+  - J-Vellum
+  name: JoyHub Vellum
+  id: a168338f-a110-4485-94b4-8f2186a0f4b0
+- identifier:
+  - J-Petalwish2
+  name: JoyHub Petalwish 2
+  features:
+  - id: 0d5685ae-95ea-4d2d-849e-b75b7354bc35
+    output:
+      oscillate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - id: e092343a-c826-4bc8-a579-e179b50cf65e
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 1
+  id: 904ef5c8-7030-4c2f-9c12-d69154ab10c3
+- identifier:
+  - J-VortexTongue
+  name: JoyHub Vortex Tongue
+  features:
+  - id: 95313411-9fb3-4df9-b672-c7279ca7d243
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - description: Air Pump
+    id: d2f66bd3-96c4-4377-b1f5-45a2f3d99c9e
+    output:
+      constrict:
+        value:
+        - 0
+        - 3
+    index: 1
+  - id: 042a4817-348c-4595-9fbc-463ffa903041
+    output:
+      rotate:
+        value:
+        - 0
+        - 255
+    index: 2
+  id: c85fd4cf-5bc1-4300-9cb8-a4db4fa8b85f
+- identifier:
+  - J-VibSiren
+  name: JoyHub VibSiren
+  features:
+  - description: External vibrator
+    id: d03ea16f-3126-469d-bf85-843a7c6e2cf6
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - id: 115ec3d5-df22-474a-aa5a-32236fcb517e
+    output:
+      oscillate:
+        value:
+        - 0
+        - 255
+    index: 1
+  - description: Internal vibrator
+    id: cd3828ee-8fe0-4214-acce-9fc4aac9ea46
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 2
+  id: 380428d0-73a4-4437-bf48-fb6b26663d1d
+- identifier:
+  - J-Mysticolor
+  name: JoyHub Mysticolor
+  features:
+  - id: a7a34c6b-5d77-4a38-9708-780ba97cd34f
+    output:
+      rotate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - description: Air Pump
+    id: 7891e1b3-82c3-4e83-936c-2a156f2ba826
+    output:
+      constrict:
+        value:
+        - 0
+        - 7
+    index: 1
+  id: 1ca6396e-bee2-42c8-901c-82e975998085
+- identifier:
+  - J-VividWings
+  name: JoyHub Vivid Wings
+  features:
+  - id: 686761a8-fcc9-4a41-9725-045d5cb0dae9
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - id: 21c831d4-0956-4b9b-a90e-31a545a89708
+    output:
+      oscillate:
+        value:
+        - 0
+        - 255
+    index: 1
+  id: 576095da-d4a5-4f19-9b14-6244cbfe8096
+- identifier:
+  - J-Mariner
+  name: JoyHub Mariner
+  features:
+  - id: 439bea28-4c09-4b81-8dd5-dce2ec31781e
+    output:
+      rotate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - description: Air Pump
+    id: 9f386242-41a2-4c86-9167-db6c58840cc7
+    output:
+      constrict:
+        value:
+        - 0
+        - 2
+    index: 1
+  id: 67ed28b9-c0fe-4155-b7b8-3829ec12a485
+- identifier:
+  - J-MarsLion
+  name: JoyHub MarsLion
+  features:
+  - id: e43f723f-412d-4c75-8123-2483113a06a8
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - description: Air Pump
+    id: 54e3da8e-7f97-46c7-8a1e-9fa549b877c2
+    output:
+      constrict:
+        value:
+        - 0
+        - 5
+    index: 1
+  id: 3f3b7c49-94b2-49b6-ba67-3e5539e204b9
+- identifier:
+  - J-Pul
+  name: JoyHub Pul
+  features:
+  - id: a9b7d261-2877-4214-a539-8ce30e038386
+    output:
+      oscillate:
+        value:
+        - 0
+        - 255
+    index: 0
+  id: db3efe9b-839c-495e-8c2e-b800b3125b36
+- identifier:
+  - J-ROSELLA3
+  name: JoyHub Rose Love
+  features:
+  - description: Air Pump
+    id: 0d3b3010-d438-4899-b1c2-d81bff0c6714
+    output:
+      constrict:
+        value:
+        - 0
+        - 255
+    index: 0
+  id: ca36d3a7-c305-45e3-b8f7-3106b36b233a
+- identifier:
+  - J-DukeDazzle2
+  name: JoyHub Edasich
+  features:
+  - id: 9fde0544-3307-4a4f-8abf-88ffb1dc3caf
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - id: e0ca1697-1e42-4822-925c-691561916bee
+    output:
+      oscillate:
+        value:
+        - 0
+        - 255
+    index: 1
+  id: 877a8e55-9f08-4bea-826c-20371ba57577
+- identifier:
+  - J-Mars
+  name: JoyHub Mars
+  features:
+  - id: a4a079b4-6cf2-47fc-bfef-0f2921c243db
+    output:
+      oscillate:
+        value:
+        - 0
+        - 255
+    index: 0
+  id: b4235543-7287-4698-a1e7-9d78c53d4c0a
+- identifier:
+  - J-Martino
+  name: JoyHub Martino
+  features:
+  - id: b306148c-c1d9-4281-bae9-fe1ccd876399
+    output:
+      oscillate:
+        value:
+        - 0
+        - 255
+    index: 0
+  id: 76d1ddf5-e46b-4912-bea1-a748ce28a18e
+- identifier:
+  - J-MarsLion2
+  name: JoyHub Mars Lion 2
+  features:
+  - id: b6ffc3b3-9e8a-46cd-82f2-97df7237be83
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - id: ead93a87-9ad6-448f-a26a-cce980db265e
+    output:
+      constrict:
+        value:
+        - 0
+        - 5
+    index: 1
+  id: e693fbe3-f697-446e-8fa2-87e99e9e8cb6
+- identifier:
+  - J-Myrna
+  name: JoyHub Myrna
+  features:
+  - id: 393dfa94-e3c8-4962-a053-c39e0447e420
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - id: b6e89b8c-207d-4588-9fff-f71d42e1a1a5
+    output:
+      constrict:
+        value:
+        - 0
+        - 9
+    index: 1
+  id: e6502f8e-73c3-4b1f-9080-4428d6670045
+- identifier:
+  - J-Vase2
+  name: JoyHub Vase 2
+  features:
+  - description: Biting lips
+    id: 7e13af66-c20f-42b3-ba85-764a2cdeaca0
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - description: Sideways flicker
+    id: f80dc564-7d53-4c6b-991e-ec18051a3207
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 1
+  id: cd4e9b09-367e-4ac1-8571-4f0ff4ca8996
 communication:
-  - btle:
-      names:
-        - J-Petalwish2
-        - J-VortexTongue
-        - J-Velocity
-        - JOYHUB-ROSELLA2
-        - J-VibSiren
-        - J-ElixirEgg
-        - J-RetroGuard
-        - J-TrueForm
-        - J-TrueForm3
-        - J-Rhythmic2
-        - J-Rhythmic3
-        - J-Mysticolor
-        - J-VividWings
-        - J-Rainbow
-        - J-BlackBull
-        - J-Peacock
-        - J-Mariner
-        - J-Mace
-        - J-MarsLion
-        - J-Tarian
-        - J-Pul
-        - J-Euphoric
-        - J-Euphoric3
-        - J-Torrian
-        - J-Rayen
-        - J-ROSELLA3
-        - J-Mackay
-        - J-Rowdy3
-        - J-Eclipse
-        - J-DukeDazzle2
-        - J-Scarlett
-        - J-Tarik
-        - J-UricaGuard2
-        - J-Viva
-        - J-Ryden
-        - J-Mars
-        - J-MarsLion2
-        - J-Myrna
-        - J-Vase2
-        - J-Martino
-        - J-Enam
-        - J-Viv
-        - J-Vivara
-        - J-Explorer2
-        - J-Derik
-        - J-Peachy
-        - J-Divers
-        - J-VioletGale
-        - J-Vellum
-      services:
-        0000ffa0-0000-1000-8000-00805f9b34fb:
-          tx: 0000ffa1-0000-1000-8000-00805f9b34fb
+- btle:
+    names:
+    - J-Petalwish2
+    - J-VortexTongue
+    - J-Velocity
+    - JOYHUB-ROSELLA2
+    - J-VibSiren
+    - J-ElixirEgg
+    - J-RetroGuard
+    - J-TrueForm
+    - J-TrueForm3
+    - J-Rhythmic2
+    - J-Rhythmic3
+    - J-Mysticolor
+    - J-VividWings
+    - J-Rainbow
+    - J-BlackBull
+    - J-Peacock
+    - J-Mariner
+    - J-Mace
+    - J-MarsLion
+    - J-Tarian
+    - J-Pul
+    - J-Euphoric
+    - J-Euphoric3
+    - J-Torrian
+    - J-Rayen
+    - J-ROSELLA3
+    - J-Mackay
+    - J-Rowdy3
+    - J-Eclipse
+    - J-DukeDazzle2
+    - J-Scarlett
+    - J-Tarik
+    - J-UricaGuard2
+    - J-Viva
+    - J-Ryden
+    - J-Mars
+    - J-MarsLion2
+    - J-Myrna
+    - J-Vase2
+    - J-Martino
+    - J-Enam
+    - J-Viv
+    - J-Vivara
+    - J-Explorer2
+    - J-Derik
+    - J-Peachy
+    - J-Divers
+    - J-VioletGale
+    - J-Vellum
+    services:
+      0000ffa0-0000-1000-8000-00805f9b34fb:
+        tx: 0000ffa1-0000-1000-8000-00805f9b34fb

@@ -1,34 +1,37 @@
+---
 defaults:
   name: Kiiroo ProWand
   features:
-    - id: 2e585349-127b-4536-85b7-9d5b90e44df4
-      output:
-        vibrate:
-          value:
-            - 0
-            - 255
-    - description: battery Level
-      id: ad812cb2-e04a-4656-9103-a80766601455
-      input:
-        battery:
-          value_range:
-            - - 0
-              - 100
-          input_commands:
-            - Read
+  - id: 2e585349-127b-4536-85b7-9d5b90e44df4
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - description: battery Level
+    id: ad812cb2-e04a-4656-9103-a80766601455
+    input:
+      battery:
+        value_range:
+        - - 0
+          - 100
+        input_commands:
+        - Read
+    index: 1
   id: d1675d72-6d25-4cc4-99dc-a42e4e4fee97
 configurations:
-  - identifier:
-      - Luxus
-    name: Luxus
-    id: a857e95b-3d5a-4034-92d2-7105c4febb8e
+- identifier:
+  - Luxus
+  name: Luxus
+  id: a857e95b-3d5a-4034-92d2-7105c4febb8e
 communication:
-  - btle:
-      names:
-        - ProWand
-        - Luxus
-      services:
-        00001400-0000-1000-8000-00805f9b34fb:
-          tx: 00001401-0000-1000-8000-00805f9b34fb
-        0000180f-0000-1000-8000-00805f9b34fb:
-          rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb
+- btle:
+    names:
+    - ProWand
+    - Luxus
+    services:
+      00001400-0000-1000-8000-00805f9b34fb:
+        tx: 00001401-0000-1000-8000-00805f9b34fb
+      '0000180f-0000-1000-8000-00805f9b34fb':
+        rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb

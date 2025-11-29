@@ -1,20 +1,22 @@
+---
 defaults:
   name: ServeU
   features:
-    - id: 7e756a59-b13c-4322-bc59-27dacfc73b4d
-      output:
-        position_with_duration:
-          position:
-            - 0
-            - 100
-          duration:
-            - 0
-            - 100000
+  - id: 7e756a59-b13c-4322-bc59-27dacfc73b4d
+    output:
+      position_with_duration:
+        position:
+        - 0
+        - 100
+        duration:
+        - 0
+        - 100000
+    index: 0
   id: 9967414e-8b34-44ed-8b8a-20fe863e0b50
 communication:
-  - btle:
-      names:
-        - ServeU
-      services:
-        31bb1111-33e3-4f3c-a7fb-104288e7cb77:
-          tx: 31bb2222-33e3-4f3c-a7fb-104288e7cb77
+- btle:
+    names:
+    - ServeU
+    services:
+      31bb1111-33e3-4f3c-a7fb-104288e7cb77:
+        tx: 31bb2222-33e3-4f3c-a7fb-104288e7cb77

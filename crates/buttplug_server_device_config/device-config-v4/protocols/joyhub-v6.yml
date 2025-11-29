@@ -1,29 +1,32 @@
+---
 defaults:
   name: JoyHub Device
   features:
-    - id: 9fbf30f4-3f0d-4377-a232-55132d023d11
-      output:
-        vibrate:
-          value:
-            - 0
-            - 255
-    - description: Suction
-      id: a38653c9-c245-4c98-86c9-3c0da68d646c
-      output:
-        constrict:
-          value:
-            - 0
-            - 9
+  - id: 9fbf30f4-3f0d-4377-a232-55132d023d11
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - description: Suction
+    id: a38653c9-c245-4c98-86c9-3c0da68d646c
+    output:
+      constrict:
+        value:
+        - 0
+        - 9
+    index: 1
   id: f89fcd7a-2411-4241-ae81-f4488e926d16
 configurations:
-  - identifier:
-      - J-Melody
-    name: JoyHub Melody
-    id: 2c33b13e-9d00-4823-bc5b-fda18dbd3691
+- identifier:
+  - J-Melody
+  name: JoyHub Melody
+  id: 2c33b13e-9d00-4823-bc5b-fda18dbd3691
 communication:
-  - btle:
-      names:
-        - J-Melody
-      services:
-        0000ffa0-0000-1000-8000-00805f9b34fb:
-          tx: 0000ffa1-0000-1000-8000-00805f9b34fb
+- btle:
+    names:
+    - J-Melody
+    services:
+      0000ffa0-0000-1000-8000-00805f9b34fb:
+        tx: 0000ffa1-0000-1000-8000-00805f9b34fb

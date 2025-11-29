@@ -1,94 +1,98 @@
+---
 defaults:
   name: Luvmazer Finger Magic
   features:
-    - id: af257986-e34f-47f9-a69e-7a78afd43d31
-      output:
-        vibrate:
-          value:
-            - 0
-            - 255
-    - id: 8f021f8a-a07e-4934-af3b-fa3bafd2a747
-      output:
-        rotate:
-          value:
-            - 0
-            - 255
+  - id: af257986-e34f-47f9-a69e-7a78afd43d31
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - id: 8f021f8a-a07e-4934-af3b-fa3bafd2a747
+    output:
+      rotate:
+        value:
+        - 0
+        - 255
+    index: 1
   id: c6d24bef-8263-4e3b-898d-7aeb7e58cc11
 configurations:
-  - identifier:
-      - TKLM-W001-BT
-    name: Luvmazer Finger Magic
-    id: cb63c51d-ed29-4e07-81ce-aca8162e52ba
-  - identifier:
-      - TKLM-W003-BT-RX
-    name: Luvmazer Cat Paw
-    features:
-      - id: 8deea69f-ea53-46bb-80ae-51dd5d49bba9
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-      - id: 5ae8bb6f-6280-4a8d-9e08-a3d5e5fb89a8
-        output:
-          oscillate:
-            value:
-              - 0
-              - 255
-      #- id: 4a0abbbd-75b6-4034-8012-2be2f1442c1c
-      #  output:
-      #    inflate:
-      #      value:
-      #        - 0
-      #        - 1
-    id: 54723a02-4d77-4d58-90ee-1e692768db9d
-  - identifier:
-      - TKLM-C003-BT
-    name: Luvmazer Cock Ring
-    features:
-      - id: 4dd378c8-a91b-400e-846b-f16e81ac5690
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-      - id: c04a2518-81a2-49cb-8a0a-1a5b9c163737
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-    id: 3f3cb905-d570-41dc-80ed-720762770093
-  - identifier:
-      - TKLM-C004-BT
-    name: Luvmazer Interstellar
-    features:
-      - id: e04ad6f5-278e-4acc-b6fa-711954c2e1ab
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-      - id: 8a4f2884-887f-46e3-9a36-c0b91b1b1363
-        output:
-          oscillate:
-            value:
-              - 0
-              - 255
-      - id: 389aa8b8-2550-462c-bd4f-1158c0981606
-        output:
-          constrict:
-            value:
-              - 0
-              - 54
-    id: d76d8d49-beca-49f3-931e-5a040b463111
+- identifier:
+  - TKLM-W001-BT
+  name: Luvmazer Finger Magic
+  id: cb63c51d-ed29-4e07-81ce-aca8162e52ba
+- identifier:
+  - TKLM-W003-BT-RX
+  name: Luvmazer Cat Paw
+  features:
+  - id: 8deea69f-ea53-46bb-80ae-51dd5d49bba9
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - id: 5ae8bb6f-6280-4a8d-9e08-a3d5e5fb89a8
+    output:
+      oscillate:
+        value:
+        - 0
+        - 255
+    index: 1
+  id: 54723a02-4d77-4d58-90ee-1e692768db9d
+- identifier:
+  - TKLM-C003-BT
+  name: Luvmazer Cock Ring
+  features:
+  - id: 4dd378c8-a91b-400e-846b-f16e81ac5690
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - id: c04a2518-81a2-49cb-8a0a-1a5b9c163737
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 1
+  id: 3f3cb905-d570-41dc-80ed-720762770093
+- identifier:
+  - TKLM-C004-BT
+  name: Luvmazer Interstellar
+  features:
+  - id: e04ad6f5-278e-4acc-b6fa-711954c2e1ab
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - id: 8a4f2884-887f-46e3-9a36-c0b91b1b1363
+    output:
+      oscillate:
+        value:
+        - 0
+        - 255
+    index: 1
+  - id: 389aa8b8-2550-462c-bd4f-1158c0981606
+    output:
+      constrict:
+        value:
+        - 0
+        - 54
+    index: 2
+  id: d76d8d49-beca-49f3-931e-5a040b463111
 communication:
-  - btle:
-      names:
-        - TKLM-W001-BT
-        - TKLM-W003-BT-RX
-        - TKLM-C003-BT
-        - TKLM-C004-BT
-      services:
-        0000ffa0-0000-1000-8000-00805f9b34fb:
-          tx: 0000ffa1-0000-1000-8000-00805f9b34fb
+- btle:
+    names:
+    - TKLM-W001-BT
+    - TKLM-W003-BT-RX
+    - TKLM-C003-BT
+    - TKLM-C004-BT
+    services:
+      0000ffa0-0000-1000-8000-00805f9b34fb:
+        tx: 0000ffa1-0000-1000-8000-00805f9b34fb
