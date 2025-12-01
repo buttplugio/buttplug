@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 120
+    "minor": 122
   },
   "protocols": {
     "activejoy": {
@@ -17311,7 +17311,8 @@
               "PTYB22S2",
               "CCP322S5",
               "CTY823S5",
-              "qingnan#16"
+              "qingnan#16",
+              "CCPB22S5"
             ],
             "services": {
               "0000fff0-0000-1000-8000-00805f9b34fb": {
@@ -17555,6 +17556,51 @@
             "qingnan#16"
           ],
           "name": "Qingnan #16"
+        },
+        {
+          "features": [
+            {
+              "id": "a086709c-4982-443d-9c0f-fc4c4f5ef966",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "09a0b5f8-7c5c-4a84-a4d8-de466821c794",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "f9ed8f8c-633e-47dd-8594-f90402afda2a",
+              "index": 2,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "7fb6eb8a-e73a-42bb-a0d3-0db8bb9cd753",
+          "identifier": [
+            "CCPB22S5"
+          ],
+          "name": "Sensee Markel"
         }
       ],
       "defaults": {
