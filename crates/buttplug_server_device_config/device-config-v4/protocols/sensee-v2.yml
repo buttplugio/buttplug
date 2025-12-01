@@ -141,17 +141,43 @@ configurations:
     index: 1
   id: f8032396-8384-448f-88e9-4c754d4ae12e
 - identifier:
-  - qingnan#16
+    - qingnan#16
   name: 'Qingnan #16'
   features:
-  - id: 4464ae6b-20bc-4c99-9e63-bfda99b7c8cc
-    output:
-      constrict:
-        value:
-        - 0
-        - 100
-    index: 0
+    - id: 4464ae6b-20bc-4c99-9e63-bfda99b7c8cc
+      output:
+        constrict:
+          value:
+            - 0
+            - 100
+      index: 0
   id: 00dc1d7e-9ede-4ae5-95f6-bd70363de806
+- identifier:
+    - CCPB22S5
+  name: Sensee Markel
+  features:
+    - id: a086709c-4982-443d-9c0f-fc4c4f5ef966
+      output:
+        vibrate:
+          value:
+            - 0
+            - 100
+      index: 0
+    - id: 09a0b5f8-7c5c-4a84-a4d8-de466821c794
+      output:
+        oscillate:
+          value:
+            - 0
+            - 100
+      index: 1
+    - id: f9ed8f8c-633e-47dd-8594-f90402afda2a
+      output:
+        constrict:
+          value:
+            - 0
+            - 100
+      index: 2
+  id: 7fb6eb8a-e73a-42bb-a0d3-0db8bb9cd753
 communication:
 - btle:
     names:
@@ -164,6 +190,7 @@ communication:
     - CCP322S5
     - CTY823S5
     - qingnan#16
+    - CCPB22S5
     services:
       0000fff0-0000-1000-8000-00805f9b34fb:
         tx: 0000fff5-0000-1000-8000-00805f9b34fb
