@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 121
+    "minor": 125
   },
   "protocols": {
     "activejoy": {
@@ -4944,7 +4944,11 @@
               "J-Vellum",
               "J-Torque",
               "J-Mighty",
-              "J-MowgliII"
+              "J-MowgliII",
+              "J-Pinhead",
+              "J-Victor",
+              "J-Mirage3",
+              "J-Maelstrom"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -8263,6 +8267,138 @@
             "J-Melody"
           ],
           "name": "JoyHub Melody"
+        },
+        {
+          "features": [
+            {
+              "id": "04f025cd-0181-4c64-bd02-4dd4ea5b6194",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "84aa2133-189c-42bb-8e88-3e418e22e51c",
+              "index": 2,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "60582f6f-0017-4d08-98f9-2f6a3ff6b6fd",
+          "identifier": [
+            "J-Pinhead"
+          ],
+          "name": "JoyHub Pinhead"
+        },
+        {
+          "features": [
+            {
+              "id": "c44d3eca-eed7-4e9e-8752-43d9fbd370eb",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "49456548-0a3b-4f0a-8aab-1b892f198d1d",
+              "index": 1,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "9c3a767a-b227-4993-a56d-e7aa2efdba35",
+          "identifier": [
+            "J-Victor"
+          ],
+          "name": "JoyHub Victor"
+        },
+        {
+          "features": [
+            {
+              "id": "3401ff95-984d-4661-be3c-e473efe92f01",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "7b440f5f-3d18-49a4-a1da-1d0a164d0d7a",
+          "identifier": [
+            "J-Maelstrom"
+          ],
+          "name": "JoyHub Thermos"
+        },
+        {
+          "features": [
+            {
+              "id": "a0d03e23-8751-4851-862c-ab292a6452d5",
+              "index": 0,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "1a2a3afe-ba4f-400b-aa3b-50c1e284f069",
+              "index": 3,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "511da9f2-b954-484e-bf98-44c9d1be15da",
+              "index": 5,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    7
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "c3efbec1-44f4-49de-88a1-f232873215a3",
+          "identifier": [
+            "J-Mirage3"
+          ],
+          "name": "JoyHub Mirage 3"
         }
       ],
       "defaults": {
