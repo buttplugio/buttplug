@@ -15,4 +15,4 @@ communication:
         - OSSM
       services:
         522b443a-4f53-534d-0001-420badbabe69:
-          tx: 522b443a-4f53-534d-0002-420badbabe69
+          tx: 522b443a-4f53-534d-1000-420badbabe69
