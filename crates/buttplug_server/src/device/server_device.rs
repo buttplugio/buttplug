@@ -411,8 +411,9 @@ impl ServerDevice {
       if let Some(output_map) = feature.output() {
         for actuator_type in output_map.output_types() {
           let mut stop_cmd = |actuator_cmd| {
-            stop_commands
-              .push(CheckedOutputCmdV4::new(1, 0, feature.index(), feature.id(), actuator_cmd).into());
+            stop_commands.push(
+              CheckedOutputCmdV4::new(1, 0, feature.index(), feature.id(), actuator_cmd).into(),
+            );
           };
 
           // Break out of these if one is found, we only need 1 stop message per output.
