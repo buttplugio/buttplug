@@ -39,7 +39,10 @@ impl LovenseStroker {
       hardware.clone(),
       linear_info.clone(),
     ));
-    Self { linear_info, need_range_zerod }
+    Self {
+      linear_info,
+      need_range_zerod,
+    }
   }
 }
 
@@ -80,9 +83,17 @@ impl ProtocolHandler for LovenseStroker {
       HardwareWriteCmd::new(
         &[feature_id],
         Endpoint::Tx,
-        format!("Mply:{}:{};", speed, if speed == 0 && self.need_range_zerod { 0 } else { 20 })
-          .as_bytes()
-          .to_vec(),
+        format!(
+          "Mply:{}:{};",
+          speed,
+          if speed == 0 && self.need_range_zerod {
+            0
+          } else {
+            20
+          }
+        )
+        .as_bytes()
+        .to_vec(),
         false,
       )
       .into(),

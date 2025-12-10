@@ -3,7 +3,7 @@ use super::v2::ServerDeviceMessageAttributesV2;
 use buttplug_core::errors::ButtplugError;
 use buttplug_server_device_config::ServerDeviceFeature;
 use getset::Getters;
-use std::collections::{BTreeMap};
+use std::collections::BTreeMap;
 
 #[derive(Debug, Getters, Clone)]
 pub(crate) struct ServerDeviceAttributes {
