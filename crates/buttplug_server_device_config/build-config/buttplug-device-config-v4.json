@@ -855,6 +855,128 @@
         "name": "Fleshy Thrust Sync"
       }
     },
+    "fluffer": {
+      "communication": [
+        {
+          "btle": {
+            "manufacturer_data": [
+              {
+                "company": 26698
+              }
+            ],
+            "names": [
+              "fake_name_as_we_must_match_fluffer_manufacturer_data"
+            ],
+            "services": {
+              "53300031-0060-4bd4-bbe5-a6920e4c5663": {
+                "rx": "53300033-0060-4bd4-bbe5-a6920e4c5663",
+                "tx": "53300032-0060-4bd4-bbe5-a6920e4c5663"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "4044bbd4-6a87-4dd8-b773-00d7cdbeebe2",
+          "identifier": [
+            "FDGTHING"
+          ],
+          "name": "Fluffer G-Thing"
+        },
+        {
+          "id": "1a30c04a-3305-4d59-bd0b-410a2bbc31ca",
+          "identifier": [
+            "FDG2G"
+          ],
+          "name": "Fluffer G2G"
+        },
+        {
+          "features": [
+            {
+              "id": "d3f05e7a-a436-4ede-bce9-8ff56d1978d0",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "52642901-8704-4db6-ae20-7111101cab86",
+              "index": 1,
+              "output": {
+                "rotate": {
+                  "value": [
+                    -100,
+                    100
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "c469ba54-e0c1-43dc-b8b1-851b7792bf04",
+          "identifier": [
+            "MBO"
+          ],
+          "name": "MotorBunny Classic (Fluffer version)"
+        },
+        {
+          "features": [
+            {
+              "id": "79c128d3-a135-4958-8beb-6b6cc8578ece",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "7f6b1af7-3e7c-4e59-a7a6-d940d83978aa",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "eaf53618-90c7-4208-b225-1776093b9556",
+          "identifier": [
+            "MBB"
+          ],
+          "name": "MotorBunny Buck (Fluffer version)"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "eb0cb449-d936-4456-a50e-04fe1b170164",
+            "index": 0,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  100
+                ]
+              }
+            }
+          }
+        ],
+        "id": "dbea3a1a-117c-4302-bd72-f3c226e91d53",
+        "name": "Fluffer Device"
+      }
+    },
     "foreo": {
       "communication": [
         {

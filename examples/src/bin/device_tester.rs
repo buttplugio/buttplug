@@ -249,6 +249,8 @@ async fn device_tester() {
             | OutputType::Spray
             | OutputType::Led
             | OutputType::Position => {
+              set_level_and_wait(&dev, feature, &otype, 0.05).await;
+              set_level_and_wait(&dev, feature, &otype, 0.10).await;
               set_level_and_wait(&dev, feature, &otype, 0.25).await;
               set_level_and_wait(&dev, feature, &otype, 0.5).await;
               set_level_and_wait(&dev, feature, &otype, 0.75).await;
