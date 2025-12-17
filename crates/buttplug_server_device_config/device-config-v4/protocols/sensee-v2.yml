@@ -178,6 +178,32 @@ configurations:
             - 100
       index: 2
   id: 7fb6eb8a-e73a-42bb-a0d3-0db8bb9cd753
+- identifier:
+    - CCP324S2
+  name: Easylive Gamer
+  features:
+    - id: cd6b7fa7-bbeb-495b-b734-816a0fc47df3
+      output:
+        vibrate:
+          value:
+            - 0
+            - 100
+      index: 0
+    - id: f26498e5-1d90-40a9-9097-fe9ceaaeee26
+      output:
+        oscillate:
+          value:
+            - 0
+            - 100
+      index: 1
+    #- id: f26498e5-1d90-40a9-9097-fe9ceaaeee26
+    #  output:
+    #    temperature:
+    #      value:
+    #        - 0
+    #        - 100
+    #  index: 2
+  id: 3c3bf2f9-6ef7-4ed6-a274-e0e1105d242b
 communication:
 - btle:
     names:
@@ -191,6 +217,7 @@ communication:
     - CTY823S5
     - qingnan#16
     - CCPB22S5
+    - CCP324S2
     services:
       0000fff0-0000-1000-8000-00805f9b34fb:
         tx: 0000fff5-0000-1000-8000-00805f9b34fb

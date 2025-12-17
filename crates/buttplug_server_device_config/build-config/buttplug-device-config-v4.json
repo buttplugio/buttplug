@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 141
+    "minor": 142
   },
   "protocols": {
     "activejoy": {
@@ -17497,7 +17497,8 @@
               "CCP322S5",
               "CTY823S5",
               "qingnan#16",
-              "CCPB22S5"
+              "CCPB22S5",
+              "CCP324S2"
             ],
             "services": {
               "0000fff0-0000-1000-8000-00805f9b34fb": {
@@ -17786,6 +17787,39 @@
             "CCPB22S5"
           ],
           "name": "Sensee Markel"
+        },
+        {
+          "features": [
+            {
+              "id": "cd6b7fa7-bbeb-495b-b734-816a0fc47df3",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "f26498e5-1d90-40a9-9097-fe9ceaaeee26",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "3c3bf2f9-6ef7-4ed6-a274-e0e1105d242b",
+          "identifier": [
+            "CCP324S2"
+          ],
+          "name": "Easylive Gamer"
         }
       ],
       "defaults": {
