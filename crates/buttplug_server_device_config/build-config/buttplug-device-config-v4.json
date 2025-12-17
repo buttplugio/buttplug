@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 142
+    "minor": 143
   },
   "protocols": {
     "activejoy": {
@@ -1457,6 +1457,7 @@
               "DT01",
               "BGZY",
               "A531",
+              "YXSJ",
               "G317",
               "G312",
               "G302",
@@ -1958,6 +1959,13 @@
             "A531"
           ],
           "name": "Adorime Pink Touch"
+        },
+        {
+          "id": "20bfb1be-613b-47de-ae68-a6e8be7f493d",
+          "identifier": [
+            "YXSJ"
+          ],
+          "name": "Adorime Cock Ring"
         },
         {
           "features": [
