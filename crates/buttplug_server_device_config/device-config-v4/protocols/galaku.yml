@@ -22,6 +22,8 @@ defaults:
     index: 1
   id: c1766383-def6-4bd0-b6ce-1e8f993fa6ae
 configurations:
+# Type 0
+# - V415 see galaku-pump
 - identifier:
   - V415
   name: Galaku Nebula
@@ -278,6 +280,11 @@ configurations:
   - A531
   name: Adorime Pink Touch
   id: 5cfdd204-e0dd-4ec5-b133-205bd6ce660a
+- identifier:
+  - YXSJ
+  name: Adorime Cock Ring
+  id: 20bfb1be-613b-47de-ae68-a6e8be7f493d
+# Type 1
 - identifier:
   - G317
   name: Galaku Zaku Aircraft Cup
@@ -1394,6 +1401,7 @@ configurations:
         - Read
     index: 2
   id: 349e64b6-931f-4e1a-b69c-4f9652f0cf2c
+# Type 2
 - identifier:
   - TFG1
   name: Galaku Aurora Aircraft Cup
@@ -1544,6 +1552,8 @@ configurations:
 communication:
 - btle:
     names:
+    # Type 0
+    # - V415 see galaku-pump
     - GX85
     - GX07
     - GX17
@@ -1597,16 +1607,18 @@ communication:
     - K12A
     - K12C
     - LL18
-    - CYX2
-    - RC31
-    - MD19
-    - QD48
-    - BGSF
-    - BGQS
-    - AX05
-    - DT01
-    - BGZY
-    - A531
+    - CYX2 # Secret Lover Simon
+    - RC31 # Secret Lover Betty
+    - MD19 # Secret Lover Kevin
+    - QD48 # Adorime Wearable Egg Vibrator
+    - BGSF # Adorime Male Masturbator
+    - BGQS # Adorime Penis Vibrator
+    - AX05 # Adorime Anal Vibrator
+    - DT01 # Adorime Chastity Cage
+    - BGZY # Adorime Penis Helmet Vibrator
+    - A531 # Adorime Pink Touch
+    - YXSJ # Adorime Cock Ring
+    # Type 1
     - G317
     - G312
     - G302
@@ -1641,11 +1653,12 @@ communication:
     - QCVW
     - QCSW
     - QCPW
-    - SN80
-    - BGCD
+    - SN80 # Adorime G-spot Rabbit Dildo Vibrator
+    - BGCD # Adorime Backy
+    # Type 2
     - TFG1
     - GK27
-    - GX27
+    - GX27 # https://discord.com/channels/353303527587708932/1370367465573580881
     - GK25
     - AC695X_1(BLE)
     - GX33
