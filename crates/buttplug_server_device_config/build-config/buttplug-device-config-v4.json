@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 125
+    "minor": 141
   },
   "protocols": {
     "activejoy": {
@@ -14900,7 +14900,8 @@
         {
           "btle": {
             "names": [
-              "NobraControl*"
+              "NobraControl*",
+              "Nobra Control*"
             ],
             "services": {
               "0000abf0-0000-1000-8000-00805f9b34fb": {

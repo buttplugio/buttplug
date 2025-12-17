@@ -13,7 +13,8 @@ defaults:
 communication:
 - btle:
     names:
-    - NobraControl*
+      - NobraControl*
+      - Nobra Control*
     services:
       0000abf0-0000-1000-8000-00805f9b34fb:
         tx: 0000abf1-0000-1000-8000-00805f9b34fb
