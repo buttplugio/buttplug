@@ -86,6 +86,25 @@ configurations:
         - 54
     index: 2
   id: d76d8d49-beca-49f3-931e-5a040b463111
+- identifier:
+    - TKLM-C005-BT
+  name: Luvmazer Dildo
+  features:
+    - id: d4559035-06e7-4ee1-a3ac-08f46abe10a8
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 264aa9db-05ee-49dc-bf95-15ecd90bad5c
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 1
+  id: bf7f9090-02a4-43b7-9752-232c97a05a49
 communication:
 - btle:
     names:
@@ -93,6 +112,7 @@ communication:
     - TKLM-W003-BT-RX
     - TKLM-C003-BT
     - TKLM-C004-BT
+    - TKLM-C005-BT
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb

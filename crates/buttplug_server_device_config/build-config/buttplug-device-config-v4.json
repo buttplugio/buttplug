@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 151
+    "minor": 152
   },
   "protocols": {
     "activejoy": {
@@ -12799,7 +12799,8 @@
               "TKLM-W001-BT",
               "TKLM-W003-BT-RX",
               "TKLM-C003-BT",
-              "TKLM-C004-BT"
+              "TKLM-C004-BT",
+              "TKLM-C005-BT"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -12927,6 +12928,39 @@
             "TKLM-C004-BT"
           ],
           "name": "Luvmazer Interstellar"
+        },
+        {
+          "features": [
+            {
+              "id": "d4559035-06e7-4ee1-a3ac-08f46abe10a8",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "264aa9db-05ee-49dc-bf95-15ecd90bad5c",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "bf7f9090-02a4-43b7-9752-232c97a05a49",
+          "identifier": [
+            "TKLM-C005-BT"
+          ],
+          "name": "Luvmazer Dildo"
         }
       ],
       "defaults": {
