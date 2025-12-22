@@ -16,15 +16,16 @@ use crate::device::{
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 
-const JOYHUB_V4_PROTOCOL_UUID: Uuid = uuid!("c99e8979-6f13-4556-9b6b-2061f527042b");
-generic_protocol_setup!(JoyHubV4, "joyhub-v4");
+const JOYHUB_PROTOCOL_UUID: Uuid = uuid!("c0f6785a-0056-4a2a-a2a9-dc7ca4ae2a0d");
+
+generic_protocol_setup!(JoyHub, "joyhub");
 
 #[derive(Default)]
-pub struct JoyHubV4 {
-  last_cmds: [AtomicU8; 3],
+pub struct JoyHub {
+  last_cmds: [AtomicU8; 4],
 }
 
-impl JoyHubV4 {
+impl JoyHub {
   fn form_hardware_command(
     &self,
     index: u32,
@@ -33,15 +34,15 @@ impl JoyHubV4 {
     self.last_cmds[index as usize].store(speed as u8, Ordering::Relaxed);
     Ok(vec![
       HardwareWriteCmd::new(
-        &[JOYHUB_V4_PROTOCOL_UUID],
+        &[JOYHUB_PROTOCOL_UUID],
         Endpoint::Tx,
         vec![
           0xa0,
           0x03,
           self.last_cmds[0].load(Ordering::Relaxed),
-          0x00,
-          self.last_cmds[2].load(Ordering::Relaxed),
           self.last_cmds[1].load(Ordering::Relaxed),
+          self.last_cmds[2].load(Ordering::Relaxed),
+          self.last_cmds[3].load(Ordering::Relaxed),
           0xaa,
         ],
         false,
@@ -51,7 +52,7 @@ impl JoyHubV4 {
   }
 }
 
-impl ProtocolHandler for JoyHubV4 {
+impl ProtocolHandler for JoyHub {
   fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,
@@ -67,7 +68,7 @@ impl ProtocolHandler for JoyHubV4 {
     _feature_id: Uuid,
     speed: i32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.form_hardware_command(feature_index, speed as u32)
+    self.form_hardware_command(feature_index, speed.abs() as u32)
   }
 
   fn handle_output_oscillate_cmd(
@@ -81,25 +82,37 @@ impl ProtocolHandler for JoyHubV4 {
 
   fn handle_output_constrict_cmd(
     &self,
-    _feature_index: u32,
+    feature_index: u32,
     feature_id: Uuid,
     level: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![
-      HardwareWriteCmd::new(
-        &[feature_id],
-        Endpoint::Tx,
-        vec![
-          0xa0,
-          0x07,
-          if level == 0 { 0x00 } else { 0x01 },
-          0x00,
-          level as u8,
-          0xff,
-        ],
-        false,
-      )
-      .into(),
-    ])
+    if feature_index == 4 {
+      Ok(vec![
+        HardwareWriteCmd::new(
+          &[feature_id],
+          Endpoint::Tx,
+          vec![
+            0xa0,
+            0x07,
+            if level == 0 { 0x00 } else { 0x01 },
+            0x00,
+            level as u8,
+            0xff,
+          ],
+          false,
+        )
+        .into(),
+      ])
+    } else {
+      Ok(vec![
+        HardwareWriteCmd::new(
+          &[feature_id],
+          Endpoint::Tx,
+          vec![0xa0, 0x0d, 0x00, 0x00, level as u8, 0xff],
+          false,
+        )
+        .into(),
+      ])
+    }
   }
 }

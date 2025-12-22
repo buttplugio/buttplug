@@ -217,31 +217,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
 
   add_to_protocol_map(&mut map, itoys::setup::IToysIdentifierFactory::default());
   add_to_protocol_map(&mut map, jejoue::setup::JeJoueIdentifierFactory::default());
-  add_to_protocol_map(
-    &mut map,
-    joyhub::joyhub::setup::JoyHubIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    joyhub::joyhub_v2::setup::JoyHubV2IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    joyhub::joyhub_v3::setup::JoyHubV3IdentifierFactory::default(),
-  );
-
-  add_to_protocol_map(
-    &mut map,
-    joyhub::joyhub_v4::setup::JoyHubV4IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    joyhub::joyhub_v5::setup::JoyHubV5IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    joyhub::joyhub_v6::setup::JoyHubV6IdentifierFactory::default(),
-  );
+  add_to_protocol_map(&mut map, joyhub::setup::JoyHubIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     kiiroo_powershot::setup::KiirooPowerShotIdentifierFactory::default(),

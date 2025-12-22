@@ -4956,6 +4956,73 @@
         {
           "btle": {
             "names": [
+              "J-Ringstar",
+              "J-RapidTwist2",
+              "J-Melody",
+              "J-Virtuoso",
+              "J-Pathfinder3",
+              "J-RoseLin",
+              "J-Viele",
+              "J-Pearlconch",
+              "J-PearlconchL",
+              "J-PetiteRose",
+              "J-MoonHorn",
+              "J-VibTrefoil",
+              "J-Panther",
+              "J-Mecha",
+              "J-Lagoon",
+              "J-Firedragon",
+              "J-Dina",
+              "J-Vbarbie3f",
+              "J-CHERLY2c",
+              "J-Pathfinder2",
+              "J-Pathfinder",
+              "J-VibRipple",
+              "J-Verax",
+              "J-Verax2",
+              "J-Euphoric2",
+              "J-ROSEBUD",
+              "J-Morningbuds2",
+              "J-Rhythmic4",
+              "J-Virtuoso2",
+              "J-Dyllis",
+              "J-Flamewing",
+              "J-VelvetRabbit",
+              "J-VividPulse",
+              "J-VioletVine",
+              "J-VibSiren2",
+              "J-Veemy",
+              "J-Fabledragon",
+              "J-Faunus",
+              "J-VortexTongue2",
+              "J-Torin",
+              "J-VBarbiep",
+              "J-Vbarbie",
+              "J-Viball",
+              "J-Vase",
+              "J-Vortex2s",
+              "J-Royaleye",
+              "J-VBarbie2t",
+              "J-Pau",
+              "J-Petalwish3",
+              "J-Marshal",
+              "J-Piet2",
+              "J-Vince",
+              "J-Dallin",
+              "J-Mace2",
+              "J-Verax4",
+              "J-Palmyra",
+              "J-Maiden",
+              "J-Viele3",
+              "J-Xylia",
+              "J-Troi",
+              "J-Tanmouth",
+              "J-Marcela",
+              "J-Vita",
+              "J-LACH",
+              "J-Markel",
+              "J-Pipes",
+              "J-Vigo",
               "J-Petalwish2",
               "J-VortexTongue",
               "J-Velocity",
@@ -5004,7 +5071,14 @@
               "J-Peachy",
               "J-Divers",
               "J-VioletGale",
-              "J-Vellum"
+              "J-Vellum",
+              "J-Torque",
+              "J-Mighty",
+              "J-MowgliII",
+              "J-Pinhead",
+              "J-Victor",
+              "J-Mirage3",
+              "J-Maelstrom"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -5276,7 +5350,7 @@
             },
             {
               "id": "e092343a-c826-4bc8-a579-e179b50cf65e",
-              "index": 1,
+              "index": 2,
               "output": {
                 "vibrate": {
                   "value": [
@@ -5308,26 +5382,26 @@
               }
             },
             {
-              "description": "Air Pump",
-              "id": "d2f66bd3-96c4-4377-b1f5-45a2f3d99c9e",
-              "index": 1,
-              "output": {
-                "constrict": {
-                  "value": [
-                    0,
-                    3
-                  ]
-                }
-              }
-            },
-            {
               "id": "042a4817-348c-4595-9fbc-463ffa903041",
-              "index": 2,
+              "index": 1,
               "output": {
                 "rotate": {
                   "value": [
                     0,
                     255
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Air Pump",
+              "id": "d2f66bd3-96c4-4377-b1f5-45a2f3d99c9e",
+              "index": 4,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    3
                   ]
                 }
               }
@@ -5355,10 +5429,11 @@
               }
             },
             {
-              "id": "115ec3d5-df22-474a-aa5a-32236fcb517e",
+              "description": "Internal vibrator",
+              "id": "cd3828ee-8fe0-4214-acce-9fc4aac9ea46",
               "index": 1,
               "output": {
-                "oscillate": {
+                "vibrate": {
                   "value": [
                     0,
                     255
@@ -5367,11 +5442,10 @@
               }
             },
             {
-              "description": "Internal vibrator",
-              "id": "cd3828ee-8fe0-4214-acce-9fc4aac9ea46",
+              "id": "115ec3d5-df22-474a-aa5a-32236fcb517e",
               "index": 2,
               "output": {
-                "vibrate": {
+                "oscillate": {
                   "value": [
                     0,
                     255
@@ -5403,7 +5477,7 @@
             {
               "description": "Air Pump",
               "id": "7891e1b3-82c3-4e83-936c-2a156f2ba826",
-              "index": 1,
+              "index": 4,
               "output": {
                 "constrict": {
                   "value": [
@@ -5436,7 +5510,7 @@
             },
             {
               "id": "21c831d4-0956-4b9b-a90e-31a545a89708",
-              "index": 1,
+              "index": 2,
               "output": {
                 "oscillate": {
                   "value": [
@@ -5470,7 +5544,7 @@
             {
               "description": "Air Pump",
               "id": "9f386242-41a2-4c86-9167-db6c58840cc7",
-              "index": 1,
+              "index": 4,
               "output": {
                 "constrict": {
                   "value": [
@@ -5504,7 +5578,7 @@
             {
               "description": "Air Pump",
               "id": "54e3da8e-7f97-46c7-8a1e-9fa549b877c2",
-              "index": 1,
+              "index": 4,
               "output": {
                 "constrict": {
                   "value": [
@@ -5545,9 +5619,13 @@
         {
           "features": [
             {
+              "id": "7ccaa3e6-d5d3-441b-9b2d-4b97eeccbb1e",
+              "index": 3
+            },
+            {
               "description": "Air Pump",
               "id": "0d3b3010-d438-4899-b1c2-d81bff0c6714",
-              "index": 0,
+              "index": 4,
               "output": {
                 "constrict": {
                   "value": [
@@ -5580,7 +5658,7 @@
             },
             {
               "id": "e0ca1697-1e42-4822-925c-691561916bee",
-              "index": 1,
+              "index": 2,
               "output": {
                 "oscillate": {
                   "value": [
@@ -5655,7 +5733,7 @@
             },
             {
               "id": "ead93a87-9ad6-448f-a26a-cce980db265e",
-              "index": 1,
+              "index": 4,
               "output": {
                 "constrict": {
                   "value": [
@@ -5688,7 +5766,7 @@
             },
             {
               "id": "b6e89b8c-207d-4588-9fff-f71d42e1a1a5",
-              "index": 1,
+              "index": 4,
               "output": {
                 "constrict": {
                   "value": [
@@ -5723,7 +5801,7 @@
             {
               "description": "Sideways flicker",
               "id": "f80dc564-7d53-4c6b-991e-ec18051a3207",
-              "index": 1,
+              "index": 2,
               "output": {
                 "vibrate": {
                   "value": [
@@ -5739,107 +5817,7 @@
             "J-Vase2"
           ],
           "name": "JoyHub Vase 2"
-        }
-      ],
-      "defaults": {
-        "features": [
-          {
-            "feature_settings": {
-              "alt_protocol_index": 1
-            },
-            "id": "fc2f0fc2-fb75-4eee-b92b-20eaf7cc9a1e",
-            "index": 0,
-            "output": {
-              "vibrate": {
-                "value": [
-                  0,
-                  255
-                ]
-              }
-            }
-          }
-        ],
-        "id": "53cf03db-266d-46c1-964e-0ef505a64200",
-        "name": "JoyHub Device"
-      }
-    },
-    "joyhub-v2": {
-      "communication": [
-        {
-          "btle": {
-            "names": [
-              "J-Pearlconch",
-              "J-PearlconchL",
-              "J-PetiteRose",
-              "J-MoonHorn",
-              "J-VibTrefoil",
-              "J-Panther",
-              "J-Mecha",
-              "J-Lagoon",
-              "J-Firedragon",
-              "J-Dina",
-              "J-Vbarbie3f",
-              "J-CHERLY2c",
-              "J-Pathfinder2",
-              "J-Pathfinder",
-              "J-VibRipple",
-              "J-Verax",
-              "J-Verax2",
-              "J-Euphoric2",
-              "J-ROSEBUD",
-              "J-Morningbuds2",
-              "J-Rhythmic4",
-              "J-Virtuoso2",
-              "J-Dyllis",
-              "J-Flamewing",
-              "J-VelvetRabbit",
-              "J-VividPulse",
-              "J-VioletVine",
-              "J-VibSiren2",
-              "J-Veemy",
-              "J-Fabledragon",
-              "J-Faunus",
-              "J-VortexTongue2",
-              "J-Torin",
-              "J-VBarbiep",
-              "J-Vbarbie",
-              "J-Viball",
-              "J-Vase",
-              "J-Vortex2s",
-              "J-Royaleye",
-              "J-VBarbie2t",
-              "J-Pau",
-              "J-Petalwish3",
-              "J-Marshal",
-              "J-Piet2",
-              "J-Vince",
-              "J-Dallin",
-              "J-Mace2",
-              "J-Verax4",
-              "J-Palmyra",
-              "J-Maiden",
-              "J-Viele3",
-              "J-Xylia",
-              "J-Troi",
-              "J-Tanmouth",
-              "J-Marcela",
-              "J-Vita",
-              "J-LACH",
-              "J-Markel",
-              "J-Pipes",
-              "J-Vigo",
-              "J-Torque",
-              "J-Mighty"
-            ],
-            "services": {
-              "0000ffa0-0000-1000-8000-00805f9b34fb": {
-                "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
-              }
-            }
-          }
-        }
-      ],
-      "configurations": [
+        },
         {
           "features": [
             {
@@ -6020,9 +5998,13 @@
               }
             },
             {
+              "id": "a83ebd95-c56d-462b-a5de-24859c8b876e",
+              "index": 4
+            },
+            {
               "description": "Suction",
               "id": "8b6ce43b-6b60-4497-9c5b-d2b48de13c13",
-              "index": 1,
+              "index": 5,
               "output": {
                 "constrict": {
                   "value": [
@@ -6054,9 +6036,13 @@
               }
             },
             {
+              "id": "79711ccb-c38d-4fe9-8117-a5c8021198e7",
+              "index": 4
+            },
+            {
               "description": "Suction",
               "id": "d67b7e66-080e-4d2c-bbb8-d6e38392961b",
-              "index": 1,
+              "index": 5,
               "output": {
                 "constrict": {
                   "value": [
@@ -6088,9 +6074,13 @@
               }
             },
             {
+              "id": "8fd4f422-1916-4e62-9a4c-63fbf008e0f9",
+              "index": 4
+            },
+            {
               "description": "Suction",
               "id": "c663c71c-befb-4ed1-bb81-d344ee61f3c0",
-              "index": 1,
+              "index": 5,
               "output": {
                 "constrict": {
                   "value": [
@@ -6549,7 +6539,7 @@
             {
               "description": "Suction",
               "id": "c9f73966-4777-4512-91c2-30349a0bd270",
-              "index": 2,
+              "index": 5,
               "output": {
                 "constrict": {
                   "value": [
@@ -6661,7 +6651,7 @@
             {
               "description": "Suction",
               "id": "10ca15ff-70e6-4ec4-a258-d7ac8119c47a",
-              "index": 2,
+              "index": 5,
               "output": {
                 "constrict": {
                   "value": [
@@ -7151,7 +7141,7 @@
             {
               "description": "Air Pump",
               "id": "4bda889f-f1b5-4293-8bd8-f05e30ac188c",
-              "index": 2,
+              "index": 5,
               "output": {
                 "constrict": {
                   "value": [
@@ -7426,9 +7416,13 @@
               }
             },
             {
+              "id": "2ea22d54-0da1-491b-8c02-9823d9126d75",
+              "index": 4
+            },
+            {
               "description": "Air Pump",
               "id": "485b9a41-05d4-440a-a3a4-a3b2bf1ee693",
-              "index": 1,
+              "index": 5,
               "output": {
                 "constrict": {
                   "value": [
@@ -7526,9 +7520,13 @@
               }
             },
             {
+              "id": "47c40ef0-f8da-43cd-9c58-58dc2de95683",
+              "index": 4
+            },
+            {
               "description": "Air Pump",
               "id": "92fb7f24-e7a2-4bdd-8c93-27610ba1f45d",
-              "index": 1,
+              "index": 5,
               "output": {
                 "constrict": {
                   "value": [
@@ -7671,8 +7669,12 @@
               }
             },
             {
+              "id": "22443807-be73-410c-a4a8-275dd497f902",
+              "index": 4
+            },
+            {
               "id": "0663888b-60c0-491d-aa66-7ec4c2c57b08",
-              "index": 1,
+              "index": 5,
               "output": {
                 "constrict": {
                   "value": [
@@ -7881,8 +7883,12 @@
               }
             },
             {
+              "id": "f06bae9a-a0e3-4f63-969f-6c6ffcc96b97",
+              "index": 4
+            },
+            {
               "id": "5ee461b4-770f-4686-bd6c-c13f12ab0f54",
-              "index": 1,
+              "index": 5,
               "output": {
                 "constrict": {
                   "value": [
@@ -7914,19 +7920,6 @@
               }
             },
             {
-              "description": "Suction",
-              "id": "2cb024d3-33be-4369-bb0c-4c61cc39c62e",
-              "index": 1,
-              "output": {
-                "constrict": {
-                  "value": [
-                    0,
-                    9
-                  ]
-                }
-              }
-            },
-            {
               "id": "22e539e8-4bf0-49e9-883c-112a2d51ea60",
               "index": 2,
               "output": {
@@ -7934,6 +7927,19 @@
                   "value": [
                     0,
                     255
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Suction",
+              "id": "2cb024d3-33be-4369-bb0c-4c61cc39c62e",
+              "index": 5,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    9
                   ]
                 }
               }
@@ -8062,7 +8068,7 @@
               "id": "6f2e25ae-d5f0-4823-a8db-9072e8e6a0d4",
               "index": 0,
               "output": {
-                "rotate": {
+                "oscillate": {
                   "value": [
                     0,
                     255
@@ -8074,7 +8080,7 @@
               "id": "9b73399f-04a8-4a3b-9e65-b98e11a47f47",
               "index": 1,
               "output": {
-                "vibrate": {
+                "rotate": {
                   "value": [
                     0,
                     255
@@ -8088,45 +8094,22 @@
             "J-Mighty"
           ],
           "name": "JoyHub Mighty"
-        }
-      ],
-      "defaults": {
-        "features": [
-          {
-            "id": "076c95a5-a869-401b-bd5f-c51ef681c488",
-            "index": 0,
-            "output": {
-              "vibrate": {
-                "value": [
-                  0,
-                  255
-                ]
+        },
+        {
+          "features": [
+            {
+              "id": "d0e55c39-6f42-4311-87b8-81741f416bb4",
+              "index": 3,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
               }
             }
-          }
-        ],
-        "id": "e126925b-4cd6-414c-84fb-dc62464e07bb",
-        "name": "JoyHub Device"
-      }
-    },
-    "joyhub-v3": {
-      "communication": [
-        {
-          "btle": {
-            "names": [
-              "J-Ringstar",
-              "J-RapidTwist2"
-            ],
-            "services": {
-              "0000ffa0-0000-1000-8000-00805f9b34fb": {
-                "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
-              }
-            }
-          }
-        }
-      ],
-      "configurations": [
-        {
+          ],
           "id": "40241a70-ecbd-4c08-8acf-8ee70e7b5d55",
           "identifier": [
             "J-Ringstar"
@@ -8134,51 +8117,66 @@
           "name": "JoyHub Starfish"
         },
         {
+          "features": [
+            {
+              "id": "207c6bd2-77e3-41f1-8ecf-f83e2b863b23",
+              "index": 3,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
           "id": "4611fa22-18b8-46fe-bece-070e24e1b9e8",
           "identifier": [
             "J-RapidTwist2"
           ],
           "name": "JoyHub Resi Ring 2"
-        }
-      ],
-      "defaults": {
-        "features": [
-          {
-            "id": "3adea9b9-8a81-4358-8774-17b621f33907",
-            "index": 0,
-            "output": {
-              "vibrate": {
-                "value": [
-                  0,
-                  255
-                ]
+        },
+        {
+          "features": [
+            {
+              "id": "95e495dc-7b4f-43fd-91ee-b7842f047f59",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "0f6f75c5-66e8-4293-9ee0-50af9ecfc1b0",
+              "index": 3,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Suction",
+              "id": "487bb0bd-af93-40ff-a92c-6e18772e707f",
+              "index": 4,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    4
+                  ]
+                }
               }
             }
-          }
-        ],
-        "id": "acd3b85a-c842-458d-8ff8-eeaaf9be1562",
-        "name": "JoyHub Device"
-      }
-    },
-    "joyhub-v4": {
-      "communication": [
-        {
-          "btle": {
-            "names": [
-              "J-RoseLin",
-              "J-Viele",
-              "J-MowgliII"
-            ],
-            "services": {
-              "0000ffa0-0000-1000-8000-00805f9b34fb": {
-                "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
-              }
-            }
-          }
-        }
-      ],
-      "configurations": [
-        {
+          ],
           "id": "cea67021-dff3-4012-88c0-321706408a55",
           "identifier": [
             "J-RoseLin"
@@ -8203,7 +8201,7 @@
             {
               "description": "Internal Whip",
               "id": "5462e403-9c83-429f-9dd5-db099f18e4e8",
-              "index": 1,
+              "index": 2,
               "output": {
                 "vibrate": {
                   "value": [
@@ -8216,7 +8214,7 @@
             {
               "description": "Internal Vibrator",
               "id": "f4407e47-4094-41c6-95b8-41f7c20e0f04",
-              "index": 2,
+              "index": 3,
               "output": {
                 "vibrate": {
                   "value": [
@@ -8249,7 +8247,7 @@
             },
             {
               "id": "4e3b6192-d5dd-4fcf-b307-7487ca18fc1b",
-              "index": 1,
+              "index": 3,
               "output": {
                 "vibrate": {
                   "value": [
@@ -8265,71 +8263,35 @@
             "J-MowgliII"
           ],
           "name": "JoyHub Mowgli II"
-        }
-      ],
-      "defaults": {
-        "features": [
-          {
-            "id": "95e495dc-7b4f-43fd-91ee-b7842f047f59",
-            "index": 0,
-            "output": {
-              "vibrate": {
-                "value": [
-                  0,
-                  255
-                ]
-              }
-            }
-          },
-          {
-            "id": "0f6f75c5-66e8-4293-9ee0-50af9ecfc1b0",
-            "index": 1,
-            "output": {
-              "rotate": {
-                "value": [
-                  0,
-                  255
-                ]
-              }
-            }
-          },
-          {
-            "description": "Suction",
-            "id": "487bb0bd-af93-40ff-a92c-6e18772e707f",
-            "index": 2,
-            "output": {
-              "constrict": {
-                "value": [
-                  0,
-                  4
-                ]
-              }
-            }
-          }
-        ],
-        "id": "12907be0-52b2-4df1-a4d1-29c246d72f2f",
-        "name": "JoyHub Device"
-      }
-    },
-    "joyhub-v5": {
-      "communication": [
+        },
         {
-          "btle": {
-            "names": [
-              "J-Virtuoso",
-              "J-Pathfinder3",
-              "J-Perseus"
-            ],
-            "services": {
-              "0000ffa0-0000-1000-8000-00805f9b34fb": {
-                "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
+          "features": [
+            {
+              "id": "2c03096f-8fd6-4c80-84ba-d07936f76928",
+              "index": 2,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Suction",
+              "id": "e9e32817-2cc1-4365-baa6-054fb7f6aa74",
+              "index": 4,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
               }
             }
-          }
-        }
-      ],
-      "configurations": [
-        {
+          ],
           "id": "fa5a696c-780f-4763-9af2-a619cbae330c",
           "identifier": [
             "J-Virtuoso"
@@ -8339,10 +8301,10 @@
         {
           "features": [
             {
-              "id": "b91f2775-f628-43c4-bd04-a8844f74d4e1",
+              "id": "3e00301a-c942-4b8d-8f49-fe2af7ecf0b6",
               "index": 0,
               "output": {
-                "vibrate": {
+                "oscillate": {
                   "value": [
                     0,
                     255
@@ -8351,10 +8313,10 @@
               }
             },
             {
-              "id": "3e00301a-c942-4b8d-8f49-fe2af7ecf0b6",
-              "index": 1,
+              "id": "b91f2775-f628-43c4-bd04-a8844f74d4e1",
+              "index": 2,
               "output": {
-                "oscillate": {
+                "vibrate": {
                   "value": [
                     0,
                     255
@@ -8401,68 +8363,181 @@
             "J-Perseus"
           ],
           "name": "JoyHub Perseus"
-        }
-      ],
-      "defaults": {
-        "features": [
-          {
-            "id": "2c03096f-8fd6-4c80-84ba-d07936f76928",
-            "index": 0,
-            "output": {
-              "rotate": {
-                "value": [
-                  0,
-                  255
-                ]
-              }
-            }
-          },
-          {
-            "description": "Suction",
-            "id": "e9e32817-2cc1-4365-baa6-054fb7f6aa74",
-            "index": 1,
-            "output": {
-              "constrict": {
-                "value": [
-                  0,
-                  1
-                ]
-              }
-            }
-          }
-        ],
-        "id": "abc5309a-008d-41fd-b4db-5fd54614c582",
-        "name": "JoyHub Device"
-      }
-    },
-    "joyhub-v6": {
-      "communication": [
+        },
         {
-          "btle": {
-            "names": [
-              "J-Melody"
-            ],
-            "services": {
-              "0000ffa0-0000-1000-8000-00805f9b34fb": {
-                "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
+          "features": [
+            {
+              "id": "9fbf30f4-3f0d-4377-a232-55132d023d11",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Suction",
+              "id": "a38653c9-c245-4c98-86c9-3c0da68d646c",
+              "index": 4,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    9
+                  ]
+                }
               }
             }
-          }
-        }
-      ],
-      "configurations": [
-        {
+          ],
           "id": "2c33b13e-9d00-4823-bc5b-fda18dbd3691",
           "identifier": [
             "J-Melody"
           ],
           "name": "JoyHub Melody"
+        },
+        {
+          "features": [
+            {
+              "id": "04f025cd-0181-4c64-bd02-4dd4ea5b6194",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "84aa2133-189c-42bb-8e88-3e418e22e51c",
+              "index": 2,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "60582f6f-0017-4d08-98f9-2f6a3ff6b6fd",
+          "identifier": [
+            "J-Pinhead"
+          ],
+          "name": "JoyHub Pinhead"
+        },
+        {
+          "features": [
+            {
+              "id": "c44d3eca-eed7-4e9e-8752-43d9fbd370eb",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "49456548-0a3b-4f0a-8aab-1b892f198d1d",
+              "index": 1,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "9c3a767a-b227-4993-a56d-e7aa2efdba35",
+          "identifier": [
+            "J-Victor"
+          ],
+          "name": "JoyHub Victor"
+        },
+        {
+          "features": [
+            {
+              "id": "3401ff95-984d-4661-be3c-e473efe92f01",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "7b440f5f-3d18-49a4-a1da-1d0a164d0d7a",
+          "identifier": [
+            "J-Maelstrom"
+          ],
+          "name": "JoyHub Thermos"
+        },
+        {
+          "features": [
+            {
+              "id": "a0d03e23-8751-4851-862c-ab292a6452d5",
+              "index": 0,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "1a2a3afe-ba4f-400b-aa3b-50c1e284f069",
+              "index": 3,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "511da9f2-b954-484e-bf98-44c9d1be15da",
+              "index": 5,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    7
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "c3efbec1-44f4-49de-88a1-f232873215a3",
+          "identifier": [
+            "J-Mirage3"
+          ],
+          "name": "JoyHub Mirage 3"
         }
       ],
       "defaults": {
         "features": [
           {
-            "id": "9fbf30f4-3f0d-4377-a232-55132d023d11",
+            "feature_settings": {
+              "alt_protocol_index": 1
+            },
+            "id": "fc2f0fc2-fb75-4eee-b92b-20eaf7cc9a1e",
             "index": 0,
             "output": {
               "vibrate": {
@@ -8472,22 +8547,9 @@
                 ]
               }
             }
-          },
-          {
-            "description": "Suction",
-            "id": "a38653c9-c245-4c98-86c9-3c0da68d646c",
-            "index": 1,
-            "output": {
-              "constrict": {
-                "value": [
-                  0,
-                  9
-                ]
-              }
-            }
           }
         ],
-        "id": "f89fcd7a-2411-4241-ae81-f4488e926d16",
+        "id": "53cf03db-266d-46c1-964e-0ef505a64200",
         "name": "JoyHub Device"
       }
     },
