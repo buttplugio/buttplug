@@ -1,6 +1,6 @@
 [package]
 name = "buttplug_server_device_config"
-version = "10.0.0-beta2"
+version = "10.0.0-beta3"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Buttplug Intimate Hardware Control Library - Server Device Config Library"
 license = "BSD-3-Clause"
@@ -19,9 +19,8 @@ doctest = true
 doc = true
 
 [dependencies]
-buttplug_derive = "0.8.1"
-buttplug_core = { path = "../buttplug_core" }
-# buttplug_derive = { path = "../buttplug_derive" }
+buttplug_derive = { version = "0.8.1", path = "../buttplug_derive" }
+buttplug_core = { version = "10.0.0-beta2", path = "../buttplug_core" }
 futures = "0.3.31"
 futures-util = "0.3.31"
 serde = { version = "1.0.219", features = ["derive"] }
