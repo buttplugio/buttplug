@@ -1,3 +1,9 @@
+# 0.9.1 - 2025/12/26
+
+## Features
+
+- Update dependencies
+
 # 0.9.0 - 2025/07/04
 
 ## Features
