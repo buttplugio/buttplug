@@ -19,27 +19,27 @@ doctest = true
 doc = true
 
 [dependencies]
-buttplug_derive = { version = "0.8.1", path = "../buttplug_derive" }
+buttplug_derive = { version = "0.9.1", path = "../buttplug_derive" }
 buttplug_core = { version = "10.0.0-beta2", path = "../buttplug_core" }
 futures = "0.3.31"
 futures-util = "0.3.31"
-serde = { version = "1.0.219", features = ["derive"] }
-serde_json = "1.0.140"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.147"
 serde_repr = "0.1.20"
-thiserror = "2.0.12"
+thiserror = "2.0.17"
 displaydoc = "0.2.5"
 dashmap = { version = "6.1.0", features = ["serde"] }
-log = "0.4.27"
+log = "0.4.29"
 getset = "0.1.6"
-jsonschema = { version = "0.30.0", default-features = false }
-uuid = { version = "1.17.0", features = ["serde", "v4"] }
-strum_macros = "0.27.1"
-strum = "0.27.1"
+jsonschema = { version = "0.38.1", default-features = false }
+uuid = { version = "1.19.0", features = ["serde", "v4"] }
+strum_macros = "0.27.2"
+strum = "0.27.2"
 
 [build-dependencies]
 serde_yaml = "0.9.34"
-serde_json = "1.0.140"
-serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.147"
+serde = { version = "1.0.228", features = ["derive"] }
 buttplug_core = { path = "../buttplug_core" }
 
 [dev-dependencies]
