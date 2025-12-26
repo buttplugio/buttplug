@@ -1,3 +1,29 @@
+# 10.0.0-beta3 (2025-12-26)
+
+## Features
+
+- Implement explicit feature indexes for device configs
+  - This will be a breaking change between beta2 and beta3
+- Added device support
+  - The Handy 2 Pro
+  - The Oh!
+  - Adorime Pink Touch
+  - WeVibe Sync O
+  - JoyHub Torque
+  - JoyHub Mighty
+  - JoyHub Violet Gale
+  - Vorze Omorfi  
+  - Sensee Markel
+  - Easylive Gamer
+  - New(?) Nobra Controllers
+  - Fluffer devices (new MotorBunnys)
+  - Adorime Cock Ring
+
+## Bugfixes
+
+- Simplify joyhub impls using feature indexes
+- Fix Oscillation Range impl for Lovense Solace Pro
+
 # 10.0.0-beta2 (2025-10-18)
 
 ## Features
