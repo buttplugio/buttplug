@@ -2,6 +2,7 @@ use buttplug_core::message::OutputType;
 
 use crate::ButtplugClientError;
 
+#[derive(Debug, Clone, Copy)]
 pub enum ClientDeviceCommandValue {
   Int(i32),
   Float(f64),
@@ -27,41 +28,31 @@ impl From<f64> for ClientDeviceCommandValue {
 
 pub enum ClientDeviceOutputCommand {
   // u32 types use steps, need to compare before sending
-  Vibrate(u32),
-  Rotate(i32),
-  Oscillate(u32),
-  Constrict(u32),
-  Temperature(i32),
-  Led(u32),
-  Spray(u32),
-  Position(u32),
-  PositionWithDuration(u32, u32),
-  // f64 types are old style float, will need to convert before sending
-  VibrateFloat(f64),
-  RotateFloat(f64),
-  OscillateFloat(f64),
-  ConstrictFloat(f64),
-  TemperatureFloat(f64),
-  LedFloat(f64),
-  SprayFloat(f64),
-  PositionFloat(f64),
-  PositionWithDurationFloat(f64, u32),
+  Vibrate(ClientDeviceCommandValue),
+  Rotate(ClientDeviceCommandValue),
+  Oscillate(ClientDeviceCommandValue),
+  Constrict(ClientDeviceCommandValue),
+  Temperature(ClientDeviceCommandValue),
+  Led(ClientDeviceCommandValue),
+  Spray(ClientDeviceCommandValue),
+  Position(ClientDeviceCommandValue),
+  PositionWithDuration(ClientDeviceCommandValue, u32),
 }
 
 impl ClientDeviceOutputCommand {
-  pub fn from_command_value_float(
+  pub fn from_command_value(
     output_type: OutputType,
-    value: f64,
+    value: &ClientDeviceCommandValue,
   ) -> Result<Self, ButtplugClientError> {
     match output_type {
-      OutputType::Vibrate => Ok(ClientDeviceOutputCommand::VibrateFloat(value)),
-      OutputType::Oscillate => Ok(ClientDeviceOutputCommand::OscillateFloat(value)),
-      OutputType::Rotate => Ok(ClientDeviceOutputCommand::RotateFloat(value)),
-      OutputType::Constrict => Ok(ClientDeviceOutputCommand::ConstrictFloat(value)),
-      OutputType::Temperature => Ok(ClientDeviceOutputCommand::TemperatureFloat(value)),
-      OutputType::Led => Ok(ClientDeviceOutputCommand::LedFloat(value)),
-      OutputType::Spray => Ok(ClientDeviceOutputCommand::SprayFloat(value)),
-      OutputType::Position => Ok(ClientDeviceOutputCommand::PositionFloat(value)),
+      OutputType::Vibrate => Ok(ClientDeviceOutputCommand::Vibrate(*value)),
+      OutputType::Oscillate => Ok(ClientDeviceOutputCommand::Oscillate(*value)),
+      OutputType::Rotate => Ok(ClientDeviceOutputCommand::Rotate(*value)),
+      OutputType::Constrict => Ok(ClientDeviceOutputCommand::Constrict(*value)),
+      OutputType::Temperature => Ok(ClientDeviceOutputCommand::Temperature(*value)),
+      OutputType::Led => Ok(ClientDeviceOutputCommand::Led(*value)),
+      OutputType::Spray => Ok(ClientDeviceOutputCommand::Spray(*value)),
+      OutputType::Position => Ok(ClientDeviceOutputCommand::Position(*value)),
       _ => Err(ButtplugClientError::ButtplugOutputCommandConversionError(
         "Cannot use PositionWithDuration with this method".to_owned(),
       )),
@@ -72,31 +63,15 @@ impl ClientDeviceOutputCommand {
 impl From<&ClientDeviceOutputCommand> for OutputType {
   fn from(val: &ClientDeviceOutputCommand) -> Self {
     match val {
-      ClientDeviceOutputCommand::Vibrate(_) | ClientDeviceOutputCommand::VibrateFloat(_) => {
-        OutputType::Vibrate
-      }
-      ClientDeviceOutputCommand::Oscillate(_) | ClientDeviceOutputCommand::OscillateFloat(_) => {
-        OutputType::Oscillate
-      }
-      ClientDeviceOutputCommand::Rotate(_) | ClientDeviceOutputCommand::RotateFloat(_) => {
-        OutputType::Rotate
-      }
-      ClientDeviceOutputCommand::Constrict(_) | ClientDeviceOutputCommand::ConstrictFloat(_) => {
-        OutputType::Constrict
-      }
-      ClientDeviceOutputCommand::Temperature(_)
-      | ClientDeviceOutputCommand::TemperatureFloat(_) => OutputType::Temperature,
-      ClientDeviceOutputCommand::Led(_) | ClientDeviceOutputCommand::LedFloat(_) => OutputType::Led,
-      ClientDeviceOutputCommand::Spray(_) | ClientDeviceOutputCommand::SprayFloat(_) => {
-        OutputType::Spray
-      }
-      ClientDeviceOutputCommand::Position(_) | ClientDeviceOutputCommand::PositionFloat(_) => {
-        OutputType::Position
-      }
-      ClientDeviceOutputCommand::PositionWithDuration(_, _)
-      | ClientDeviceOutputCommand::PositionWithDurationFloat(_, _) => {
-        OutputType::PositionWithDuration
-      }
+      ClientDeviceOutputCommand::Vibrate(_) => OutputType::Vibrate,
+      ClientDeviceOutputCommand::Oscillate(_) => OutputType::Oscillate,
+      ClientDeviceOutputCommand::Rotate(_) => OutputType::Rotate,
+      ClientDeviceOutputCommand::Constrict(_) => OutputType::Constrict,
+      ClientDeviceOutputCommand::Temperature(_) => OutputType::Temperature,
+      ClientDeviceOutputCommand::Led(_) => OutputType::Led,
+      ClientDeviceOutputCommand::Spray(_) => OutputType::Spray,
+      ClientDeviceOutputCommand::Position(_) => OutputType::Position,
+      ClientDeviceOutputCommand::PositionWithDuration(_, _) => OutputType::PositionWithDuration,
     }
   }
 }

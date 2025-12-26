@@ -12,11 +12,7 @@ use buttplug_client::{ButtplugClient, ButtplugClientDevice, ButtplugClientEvent}
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
 use buttplug_core::message::ButtplugDeviceMessageNameV4::OutputCmd;
 use buttplug_core::message::{
-  DeviceFeature,
-  DeviceFeatureOutput,
-  OutputCommand,
-  OutputType,
-  OutputValue,
+  DeviceFeature, DeviceFeatureOutput, OutputCommand, OutputType, OutputValue,
 };
 use buttplug_server::ButtplugServerBuilder;
 use buttplug_server::device::ServerDeviceManagerBuilder;
@@ -36,14 +32,14 @@ async fn set_level_and_wait(
   level: f64,
 ) {
   let cmd = match output_type {
-    OutputType::Vibrate => Ok(ClientDeviceOutputCommand::VibrateFloat(level)),
-    OutputType::Rotate => Ok(ClientDeviceOutputCommand::RotateFloat(level)),
-    OutputType::Oscillate => Ok(ClientDeviceOutputCommand::OscillateFloat(level)),
-    OutputType::Constrict => Ok(ClientDeviceOutputCommand::ConstrictFloat(level)),
-    OutputType::Temperature => Ok(ClientDeviceOutputCommand::TemperatureFloat(level)),
-    OutputType::Led => Ok(ClientDeviceOutputCommand::LedFloat(level)),
-    OutputType::Position => Ok(ClientDeviceOutputCommand::PositionFloat(level)),
-    OutputType::Spray => Ok(ClientDeviceOutputCommand::SprayFloat(level)),
+    OutputType::Vibrate => Ok(ClientDeviceOutputCommand::Vibrate(level.into())),
+    OutputType::Rotate => Ok(ClientDeviceOutputCommand::Rotate(level.into())),
+    OutputType::Oscillate => Ok(ClientDeviceOutputCommand::Oscillate(level.into())),
+    OutputType::Constrict => Ok(ClientDeviceOutputCommand::Constrict(level.into())),
+    OutputType::Temperature => Ok(ClientDeviceOutputCommand::Temperature(level.into())),
+    OutputType::Led => Ok(ClientDeviceOutputCommand::Led(level.into())),
+    OutputType::Position => Ok(ClientDeviceOutputCommand::Position(level.into())),
+    OutputType::Spray => Ok(ClientDeviceOutputCommand::Spray(level.into())),
     _ => Err(format!("Unknown output type {:?}", output_type)),
   }
   .unwrap();
@@ -137,7 +133,7 @@ async fn device_tester() {
       } else if let Some(out) = outs.get(OutputType::Temperature) {
         cmds.push(
           feature.send_command(&ClientDeviceOutputCommand::Temperature(
-            *out.step_limit().start(),
+            (*out.step_limit().start()).into(),
           )),
         );
         println!(
@@ -198,7 +194,7 @@ async fn device_tester() {
             feature.feature_index()
           );
         } else if outs.get(OutputType::Temperature).is_some() {
-          cmds.push(feature.send_command(&ClientDeviceOutputCommand::Temperature(0)));
+          cmds.push(feature.send_command(&ClientDeviceOutputCommand::Temperature(0i32.into())));
           println!(
             "{} ({}) should stop heating on feature {}!",
             dev.name(),
@@ -298,8 +294,9 @@ async fn device_tester() {
             }
             OutputType::PositionWithDuration => {
               feature
-                .send_command(&ClientDeviceOutputCommand::PositionWithDurationFloat(
-                  0.0, 10,
+                .send_command(&ClientDeviceOutputCommand::PositionWithDuration(
+                  0.0f64.into(),
+                  10,
                 ))
                 .await
                 .unwrap();
@@ -315,8 +312,9 @@ async fn device_tester() {
               );
               sleep(Duration::from_secs(1)).await;
               feature
-                .send_command(&ClientDeviceOutputCommand::PositionWithDurationFloat(
-                  0.5, 1000,
+                .send_command(&ClientDeviceOutputCommand::PositionWithDuration(
+                  0.5f64.into(),
+                  1000,
                 ))
                 .await
                 .unwrap();
@@ -332,8 +330,9 @@ async fn device_tester() {
               );
               sleep(Duration::from_secs(1)).await;
               feature
-                .send_command(&ClientDeviceOutputCommand::PositionWithDurationFloat(
-                  0.0, 10,
+                .send_command(&ClientDeviceOutputCommand::PositionWithDuration(
+                  0.0f64.into(),
+                  10,
                 ))
                 .await
                 .unwrap();
@@ -349,8 +348,9 @@ async fn device_tester() {
               );
               sleep(Duration::from_secs(1)).await;
               feature
-                .send_command(&ClientDeviceOutputCommand::PositionWithDurationFloat(
-                  1.0, 500,
+                .send_command(&ClientDeviceOutputCommand::PositionWithDuration(
+                  1.0f64.into(),
+                  500,
                 ))
                 .await
                 .unwrap();
@@ -366,8 +366,9 @@ async fn device_tester() {
               );
               sleep(Duration::from_secs(1)).await;
               feature
-                .send_command(&ClientDeviceOutputCommand::PositionWithDurationFloat(
-                  0.0, 1500,
+                .send_command(&ClientDeviceOutputCommand::PositionWithDuration(
+                  0.0f64.into(),
+                  1500,
                 ))
                 .await
                 .unwrap();

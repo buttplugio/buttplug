@@ -1,12 +1,8 @@
 use crate::util::{
-  ButtplugTestServer,
-  TestDeviceChannelHost,
-  device_test::connector::build_channel_connector,
+  ButtplugTestServer, TestDeviceChannelHost, device_test::connector::build_channel_connector,
 };
 use buttplug_client::{
-  ButtplugClient,
-  ButtplugClientDevice,
-  ButtplugClientEvent,
+  ButtplugClient, ButtplugClientDevice, ButtplugClientEvent,
   device::{ClientDeviceCommandValue, ClientDeviceFeature, ClientDeviceOutputCommand},
 };
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
@@ -16,26 +12,23 @@ use buttplug_server_device_config::load_protocol_configs;
 use tokio::sync::Notify;
 
 use super::super::{
-  super::TestDeviceCommunicationManagerBuilder,
-  DeviceTestCase,
-  TestClientCommand,
-  TestCommand,
+  super::TestDeviceCommunicationManagerBuilder, DeviceTestCase, TestClientCommand, TestCommand,
 };
+use buttplug_core::message::{DeviceFeatureOutput, DeviceFeatureOutputLimits};
 use futures::StreamExt;
 use log::*;
 use std::{sync::Arc, time::Duration};
-use buttplug_core::message::{DeviceFeatureOutput, DeviceFeatureOutputLimits};
 
 fn from_type_and_value(output_type: OutputType, value: f64) -> ClientDeviceOutputCommand {
   match output_type {
-    OutputType::Constrict => ClientDeviceOutputCommand::ConstrictFloat(value),
-    OutputType::Temperature => ClientDeviceOutputCommand::TemperatureFloat(value),
-    OutputType::Led => ClientDeviceOutputCommand::LedFloat(value),
-    OutputType::Oscillate => ClientDeviceOutputCommand::OscillateFloat(value),
-    OutputType::Position => ClientDeviceOutputCommand::PositionFloat(value),
-    OutputType::Rotate => ClientDeviceOutputCommand::RotateFloat(value),
-    OutputType::Spray => ClientDeviceOutputCommand::SprayFloat(value),
-    OutputType::Vibrate => ClientDeviceOutputCommand::VibrateFloat(value),
+    OutputType::Constrict => ClientDeviceOutputCommand::Constrict(value.into()),
+    OutputType::Temperature => ClientDeviceOutputCommand::Temperature(value.into()),
+    OutputType::Led => ClientDeviceOutputCommand::Led(value.into()),
+    OutputType::Oscillate => ClientDeviceOutputCommand::Oscillate(value.into()),
+    OutputType::Position => ClientDeviceOutputCommand::Position(value.into()),
+    OutputType::Rotate => ClientDeviceOutputCommand::Rotate(value.into()),
+    OutputType::Spray => ClientDeviceOutputCommand::Spray(value.into()),
+    OutputType::Vibrate => ClientDeviceOutputCommand::Vibrate(value.into()),
     _ => panic!("Value not translatable, test cannot run"),
   }
 }
@@ -45,18 +38,25 @@ fn from_type_and_value(output_type: OutputType, value: f64) -> ClientDeviceOutpu
 fn get_scalar_index(device: &ButtplugClientDevice, index: u32) -> &u32 {
   let mut offset = 0;
   let mut iter = device.device_features().iter().filter(|f| {
-    let fo = f.1
-        .feature()
-        .output()
-        .clone()
-        .unwrap_or(DeviceFeatureOutput::default());
-    fo.vibrate().is_some() || fo.oscillate().is_some() || fo.constrict().is_some() || fo.rotate().as_ref().is_some_and(|r| r.step_limit().start() >= &0)
+    let fo = f
+      .1
+      .feature()
+      .output()
+      .clone()
+      .unwrap_or(DeviceFeatureOutput::default());
+    fo.vibrate().is_some()
+      || fo.oscillate().is_some()
+      || fo.constrict().is_some()
+      || fo
+        .rotate()
+        .as_ref()
+        .is_some_and(|r| r.step_limit().start() >= &0)
   });
   while let Some((idx, _)) = iter.next() {
-      if offset >= index {
-        return idx;
-      }
-      offset += 1;
+    if offset >= index {
+      return idx;
+    }
+    offset += 1;
   }
   return &0;
 }
