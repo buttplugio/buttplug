@@ -1,6 +1,6 @@
 [package]
 name = "buttplug_transport_websocket_tungstenite"
-version = "10.0.0-beta1"
+version = "10.0.0-beta3"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Buttplug Intimate Hardware Control Library - Server Device Config Library"
 license = "BSD-3-Clause"
@@ -20,23 +20,22 @@ doc = true
 
 
 [dependencies]
-buttplug_derive = "0.8.1"
-buttplug_core = { path = "../buttplug_core" }
-# buttplug_derive = { path = "../buttplug_derive" }
+buttplug_derive = { version = "0.9.1", path = "../buttplug_derive" }
+buttplug_core = { version = "10.0.0-beta3", path = "../buttplug_core" }
 futures = "0.3.31"
 futures-util = "0.3.31"
-serde = { version = "1.0.219", features = ["derive"] }
-serde_json = "1.0.140"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.147"
 serde_repr = "0.1.20"
-thiserror = "2.0.12"
+thiserror = "2.0.17"
 displaydoc = "0.2.5"
 dashmap = { version = "6.1.0", features = ["serde"] }
-log = "0.4.27"
+log = "0.4.29"
 getset = "0.1.6"
-jsonschema = { version = "0.30.0", default-features = false }
-uuid = { version = "1.17.0", features = ["serde", "v4"] }
-tokio-tungstenite = { version = "0.27.0", features = ["rustls-tls-webpki-roots", "url"]}
-rustls = { version = "0.23.29", default-features = false, features = ["ring"]}
-tokio = { version = "1.46.1", features = ["sync", "macros", "io-util"] }
-tracing = "0.1.41"
-url = "2.5.4"
+jsonschema = { version = "0.38.1", default-features = false }
+uuid = { version = "1.19.0", features = ["serde", "v4"] }
+tokio-tungstenite = { version = "0.28.0", features = ["rustls-tls-webpki-roots", "url"]}
+rustls = { version = "0.23.35", default-features = false, features = ["ring"]}
+tokio = { version = "1.48.0", features = ["sync", "macros", "io-util"] }
+tracing = "0.1.44"
+url = "2.5.7"

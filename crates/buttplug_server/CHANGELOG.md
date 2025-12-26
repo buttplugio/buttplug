@@ -18,6 +18,7 @@
   - New(?) Nobra Controllers
   - Fluffer devices (new MotorBunnys)
   - Adorime Cock Ring
+- Update dependencies
 
 ## Bugfixes
 
