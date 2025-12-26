@@ -35,8 +35,7 @@ serde_json = "1.0.140"
 jsonschema = { version = "0.30.0", default-features = false }
 
 [dependencies]
-buttplug_derive = "0.8.1"
-# buttplug_derive = { path = "../buttplug_derive" }
+buttplug_derive = { version = "0.8.1", path = "../buttplug_derive" }
 futures = "0.3.31"
 futures-util = "0.3.31"
 serde = { version = "1.0.219", features = ["derive"] }
