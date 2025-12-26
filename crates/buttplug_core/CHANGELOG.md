@@ -1,3 +1,9 @@
+# 10.0.0-beta3 (2025-12-26)
+
+## Features
+
+- Update dependencies
+
 # 10.0.0-beta2 (2025-10-18)
 
 ## Features
