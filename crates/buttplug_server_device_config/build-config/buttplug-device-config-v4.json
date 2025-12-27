@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 143
+    "minor": 145
   },
   "protocols": {
     "activejoy": {
@@ -953,7 +953,8 @@
           ],
           "id": "eaf53618-90c7-4208-b225-1776093b9556",
           "identifier": [
-            "MBB"
+            "MBB",
+            "MB Link 201"
           ],
           "name": "MotorBunny Buck (Fluffer version)"
         }

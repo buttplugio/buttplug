@@ -40,6 +40,7 @@ configurations:
     id: c469ba54-e0c1-43dc-b8b1-851b7792bf04
   - identifier:
       - MBB
+      - MB Link 201
     name: MotorBunny Buck (Fluffer version)
     features:
       - id: 79c128d3-a135-4958-8beb-6b6cc8578ece
