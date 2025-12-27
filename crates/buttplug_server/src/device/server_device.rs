@@ -161,15 +161,18 @@ impl ServerDevice {
     let mut protocol_identifier = None;
     let mut hardware_out = None;
     for protocol_specializer in protocol_specializers {
-      if let Ok(specialized_hardware) = hardware_specializer
-        .specialize(protocol_specializer.specifiers())
-        .await
-      {
-        protocol_identifier = Some(protocol_specializer.identify());
-        hardware_out = Some(specialized_hardware);
-        break;
+      match hardware_specializer.specialize(protocol_specializer.specifiers()).await {
+        Ok(specialized_hardware) => {          
+          protocol_identifier = Some(protocol_specializer.identify());
+          hardware_out = Some(specialized_hardware);
+          break;
+        }
+        Err(e) => {
+          error!("{:?}", e.to_string());
+        }
       }
     }
+
 
     if protocol_identifier.is_none() {
       return Err(ButtplugDeviceError::DeviceConfigurationError(
