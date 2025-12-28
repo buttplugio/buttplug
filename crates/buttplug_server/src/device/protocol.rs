@@ -277,7 +277,7 @@ pub trait ProtocolHandler: Sync + Send {
       OutputCommand::PositionWithDuration(x) => self.handle_position_with_duration_cmd(
         cmd.feature_index(),
         cmd.feature_id(),
-        x.position(),
+        x.value(),
         x.duration(),
       ),
     }

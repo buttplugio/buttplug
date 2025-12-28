@@ -6,8 +6,8 @@ defaults:
     output:
       position:
         value:
-        - 0
-        - 1000
+          - 0
+          - 1000
     index: 0
   id: 211da02e-467c-4788-96bd-689049867e85
 communication:

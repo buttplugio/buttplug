@@ -5,7 +5,7 @@ defaults:
   - id: 32309a60-f980-490d-a5f4-467ccae2d586
     output:
       position_with_duration:
-        position:
+        value:
         - 0
         - 100
         duration:

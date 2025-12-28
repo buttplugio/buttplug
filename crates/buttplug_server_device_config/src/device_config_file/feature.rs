@@ -61,7 +61,7 @@ impl From<BaseDeviceFeatureOutputPositionProperties>
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct BaseDeviceFeatureOutputPositionWithDurationProperties {
   #[serde(serialize_with = "range_serialize")]
-  position: RangeInclusive<i32>,
+  value: RangeInclusive<i32>,
   #[serde(serialize_with = "range_serialize")]
   duration: RangeInclusive<i32>,
 }
@@ -71,7 +71,7 @@ impl From<BaseDeviceFeatureOutputPositionWithDurationProperties>
 {
   fn from(val: BaseDeviceFeatureOutputPositionWithDurationProperties) -> Self {
     ServerDeviceFeatureOutputPositionWithDurationProperties::new(
-      &val.position.into(),
+      &val.value.into(),
       &val.duration.into(),
       false,
       false,

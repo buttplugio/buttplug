@@ -156,7 +156,7 @@ impl DeviceFeatureOutputLimits for DeviceFeatureOutputValueProperties {
 pub struct DeviceFeatureOutputPositionWithDurationProperties {
   #[getset(get = "pub")]
   #[serde(serialize_with = "range_serialize")]
-  position: RangeInclusive<i32>,
+  value: RangeInclusive<i32>,
   #[getset(get = "pub")]
   #[serde(serialize_with = "range_serialize")]
   duration: RangeInclusive<i32>,
@@ -165,13 +165,13 @@ pub struct DeviceFeatureOutputPositionWithDurationProperties {
 impl DeviceFeatureOutputPositionWithDurationProperties {
   pub fn new(position: &RangeInclusive<i32>, duration: &RangeInclusive<i32>) -> Self {
     DeviceFeatureOutputPositionWithDurationProperties {
-      position: position.clone(),
+      value: position.clone(),
       duration: duration.clone(),
     }
   }
 
   pub fn step_count(&self) -> u32 {
-    *self.position.end() as u32
+    *self.value.end() as u32
   }
 }
 
@@ -180,7 +180,7 @@ impl DeviceFeatureOutputLimits for DeviceFeatureOutputPositionWithDurationProper
     self.step_count()
   }
   fn step_limit(&self) -> RangeInclusive<i32> {
-    self.position.clone()
+    self.value.clone()
   }
 }
 

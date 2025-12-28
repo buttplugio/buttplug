@@ -504,7 +504,7 @@ configurations:
     id: c4b2855d-5ecc-4010-8a8d-17fd3e51cc57
     output:
       position_with_duration:
-        position:
+        value:
         - 0
         - 100
         duration:

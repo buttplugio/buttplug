@@ -12,7 +12,7 @@ configurations:
   - id: f4ee99e7-1a14-4315-9870-3990bca7ff94
     output:
       position_with_duration:
-        position:
+        value:
         - 0
         - 99
         duration:

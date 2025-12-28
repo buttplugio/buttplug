@@ -394,7 +394,7 @@
             "PositionWithDuration": {
               "type": "object",
               "properties": {
-                "Position": {
+                "Value": {
                   "$ref": "#/components/RangeInclusive"
                 },
                 "Duration": {
@@ -402,7 +402,7 @@
                 }
               },
               "required": [
-                "Position",
+                "Value",
                 "Duration"
               ]
             }
@@ -469,7 +469,7 @@
               "^PositionWithDuration$": {
                 "type": "object",
                 "properties": {
-                  "Position": {
+                  "Value": {
                     "type": "number",
                     "minimum": 0
                   },
@@ -479,7 +479,7 @@
                   }
                 },
                 "required": [
-                  "Position",
+                  "Value",
                   "Duration"
                 ]
               }

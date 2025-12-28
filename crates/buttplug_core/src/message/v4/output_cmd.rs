@@ -35,15 +35,15 @@ impl OutputValue {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, CopyGetters)]
 #[getset(get_copy = "pub")]
 pub struct OutputPositionWithDuration {
-  #[serde(rename = "Position")]
-  position: u32,
+  #[serde(rename = "Value")]
+  value: u32,
   #[serde(rename = "Duration")]
   duration: u32,
 }
 
 impl OutputPositionWithDuration {
-  pub fn new(position: u32, duration: u32) -> Self {
-    Self { position, duration }
+  pub fn new(value: u32, duration: u32) -> Self {
+    Self { value, duration }
   }
 }
 
@@ -73,8 +73,8 @@ impl OutputCommand {
       | OutputCommand::Oscillate(x)
       | OutputCommand::Position(x)
       | OutputCommand::Rotate(x)
-      | OutputCommand::Vibrate(x) => x.value(),
-      OutputCommand::PositionWithDuration(x) => x.position() as i32,
+      | OutputCommand::Vibrate(x) => x.value() as i32,
+      | OutputCommand::PositionWithDuration(x) => x.value() as i32,
     }
   }
 
@@ -88,7 +88,7 @@ impl OutputCommand {
       | OutputCommand::Position(x)
       | OutputCommand::Rotate(x)
       | OutputCommand::Vibrate(x) => x.value = value,
-      OutputCommand::PositionWithDuration(x) => x.position = value as u32,
+      OutputCommand::PositionWithDuration(x) => x.value = value as u32,
     }
   }
 

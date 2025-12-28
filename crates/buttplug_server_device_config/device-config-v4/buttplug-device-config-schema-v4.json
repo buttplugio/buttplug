@@ -204,15 +204,15 @@
               "^position_with_duration$": {
                 "type": "object",
                 "properties": {
-                  "position": {
+                  "value": {
                     "$ref": "#/components/value-range"
                   },
                   "duration": {
                     "$ref": "#/components/value-range"
                   }
                 },
-                "required": [
-                  "position",
+                "value": [
+                  "value",
                   "duration"
                 ]
               }
@@ -309,7 +309,7 @@
               "^position_with_duration$": {
                 "type": "object",
                 "properties": {
-                  "position": {
+                  "value": {
                     "$ref": "#/components/value-range"
                   },
                   "duration": {
