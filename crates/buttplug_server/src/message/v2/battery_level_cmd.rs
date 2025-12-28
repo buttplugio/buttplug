@@ -80,6 +80,7 @@ impl TryFromDeviceAttributes<BatteryLevelCmdV2> for CheckedInputCmdV4 {
       .0;
 
     Ok(CheckedInputCmdV4::new(
+      msg.id(),
       msg.device_index(),
       *feature_index,
       InputType::Battery,

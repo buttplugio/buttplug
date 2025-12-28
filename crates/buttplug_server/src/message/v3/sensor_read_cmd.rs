@@ -83,6 +83,7 @@ impl TryFromDeviceAttributes<SensorReadCmdV3> for CheckedInputCmdV4 {
       .find(|(_, p)| p.input().as_ref().is_some_and(|x| x.battery().is_some()))
     {
       Ok(CheckedInputCmdV4::new(
+        msg.id(),
         msg.device_index(),
         *feature_index,
         InputType::Battery,

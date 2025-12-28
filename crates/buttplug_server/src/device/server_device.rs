@@ -48,6 +48,7 @@ use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
     self,
+    ButtplugMessage,
     ButtplugServerMessageV4,
     DeviceFeature,
     DeviceMessageInfoV4,
@@ -535,9 +536,17 @@ impl ServerDevice {
     &self,
     command_message: ButtplugDeviceCommandMessageUnionV4,
   ) -> ButtplugServerResultFuture {
-    match command_message {
+    match &command_message {
       // Input messages
-      ButtplugDeviceCommandMessageUnionV4::InputCmd(msg) => self.handle_input_cmd(msg),
+      ButtplugDeviceCommandMessageUnionV4::InputCmd(msg) => {
+        let fut = self.handle_input_cmd(msg);
+        let msg_id = msg.id();
+        async move {
+          let mut msg = fut.await?;
+          msg.set_id(msg_id);
+          Ok(msg)
+        }.boxed()
+      },
       // Actuator messages
       ButtplugDeviceCommandMessageUnionV4::OutputCmd(msg) => self.handle_outputcmd_v4(&msg),
       ButtplugDeviceCommandMessageUnionV4::OutputVecCmd(msg) => {
@@ -610,7 +619,7 @@ impl ServerDevice {
 
   fn handle_input_cmd(
     &self,
-    message: CheckedInputCmdV4,
+    message: &CheckedInputCmdV4,
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, ButtplugError>> {
     match message.input_command() {
       InputCommandType::Read => self.handle_input_read_cmd(
