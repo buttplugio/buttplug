@@ -507,10 +507,10 @@
           "FeatureIndex": {
             "type": "integer"
           },
-          "InputType": {
+          "Type": {
             "type": "string"
           },
-          "InputCommand": {
+          "Command": {
             "type": "string"
           }
         },
@@ -519,8 +519,8 @@
           "Id",
           "DeviceIndex",
           "FeatureIndex",
-          "InputType",
-          "InputCommand"
+          "Type",
+          "Command"
         ]
       },
       "InputReading": {
@@ -540,7 +540,7 @@
             "type": "object",
             "patternProperties": {
               "^Battery|Rssi|Pressure|Button": {
-                "type": "integer"
+                "type": "object"
               }
             },
             "maxProperties": 1

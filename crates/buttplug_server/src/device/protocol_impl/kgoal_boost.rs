@@ -14,7 +14,7 @@ use crate::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{InputData, InputReadingV4, InputType},
+  message::{InputValue, InputReadingV4, InputType},
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use buttplug_server_device_config::Endpoint;
@@ -105,7 +105,7 @@ impl ProtocolHandler for KGoalBoost {
                     InputReadingV4::new(
                       device_index,
                       feature_index,
-                      buttplug_core::message::InputTypeData::Pressure(InputData::new(normalized)),
+                      buttplug_core::message::InputTypeReading::Pressure(InputValue::new(normalized)),
                     )
                     .into(),
                   )
@@ -120,7 +120,7 @@ impl ProtocolHandler for KGoalBoost {
                     InputReadingV4::new(
                       device_index,
                       feature_index,
-                      buttplug_core::message::InputTypeData::Pressure(InputData::new(unnormalized)),
+                      buttplug_core::message::InputTypeReading::Pressure(InputValue::new(unnormalized)),
                     )
                     .into(),
                   )

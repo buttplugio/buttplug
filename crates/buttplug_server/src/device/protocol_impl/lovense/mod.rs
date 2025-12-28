@@ -26,7 +26,7 @@ use crate::device::{
 use async_trait::async_trait;
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{self, InputData, InputReadingV4, InputTypeData, OutputType},
+  message::{self, InputValue, InputReadingV4, InputTypeReading, OutputType},
   util::sleep,
 };
 use buttplug_server_device_config::{
@@ -490,7 +490,7 @@ fn handle_battery_level_cmd(
               return Ok(message::InputReadingV4::new(
                 device_index,
                 feature_index,
-                InputTypeData::Battery(InputData::new(level)),
+                InputTypeReading::Battery(InputValue::new(level)),
               ));
             }
           }

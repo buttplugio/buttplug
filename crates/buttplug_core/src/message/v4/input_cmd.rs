@@ -47,10 +47,10 @@ pub struct InputCmdV4 {
   #[serde(rename = "FeatureIndex")]
   feature_index: u32,
   #[getset(get_copy = "pub")]
-  #[serde(rename = "InputType")]
+  #[serde(rename = "Type")]
   input_type: InputType,
   #[getset(get_copy = "pub")]
-  #[serde(rename = "InputCommand")]
+  #[serde(rename = "Command")]
   input_command: InputCommandType,
 }
 

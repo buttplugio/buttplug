@@ -5,7 +5,7 @@ use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
     ButtplugDeviceMessageNameV4, ButtplugServerMessageV4, DeviceFeature, DeviceFeatureOutputLimits,
-    InputCmdV4, InputCommandType, InputType, InputTypeData, OutputCmdV4, OutputCommand,
+    InputCmdV4, InputCommandType, InputType, InputTypeReading, OutputCmdV4, OutputCommand,
     OutputPositionWithDuration, OutputType, OutputValue,
   },
 };
@@ -244,7 +244,7 @@ impl ClientDeviceFeature {
     )
   }
 
-  fn read_sensor(&self, sensor_type: InputType) -> ButtplugClientResultFuture<InputTypeData> {
+  fn read_input(&self, sensor_type: InputType) -> ButtplugClientResultFuture<InputTypeReading> {
     if let Some(sensor_map) = self.feature.input()
       && let Some(sensor) = sensor_map.get(sensor_type)
       && sensor.input_commands().contains(&InputCommandType::Read)
@@ -259,8 +259,8 @@ impl ClientDeviceFeature {
       let reply = self.event_loop_sender.send_message(msg);
       return async move {
         if let ButtplugServerMessageV4::InputReading(data) = reply.await? {
-          if sensor_type == data.data().as_input_type() {
-            Ok(data.data())
+          if sensor_type == data.reading().into() {
+            Ok(data.reading())
           } else {
             Err(
               ButtplugError::ButtplugMessageError(ButtplugMessageError::UnexpectedMessageType(
@@ -295,10 +295,10 @@ impl ClientDeviceFeature {
       .unwrap()
       .contains(InputType::Battery)
     {
-      let send_fut = self.read_sensor(InputType::Battery);
+      let send_fut = self.read_input(InputType::Battery);
       Box::pin(async move {
         let data = send_fut.await?;
-        let battery_level = if let InputTypeData::Battery(level) = data {
+        let battery_level = if let InputTypeReading::Battery(level) = data {
           level.data()
         } else {
           0
@@ -322,10 +322,10 @@ impl ClientDeviceFeature {
       .unwrap()
       .contains(InputType::Rssi)
     {
-      let send_fut = self.read_sensor(InputType::Rssi);
+      let send_fut = self.read_input(InputType::Rssi);
       Box::pin(async move {
         let data = send_fut.await?;
-        let rssi_level = if let InputTypeData::Rssi(level) = data {
+        let rssi_level = if let InputTypeReading::Rssi(level) = data {
           level.data()
         } else {
           0

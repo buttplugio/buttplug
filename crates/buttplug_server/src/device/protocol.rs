@@ -9,7 +9,7 @@
 
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{InputData, InputReadingV4, InputType, OutputCommand},
+  message::{InputValue, InputReadingV4, InputType, OutputCommand},
 };
 use buttplug_server_device_config::{
   Endpoint,
@@ -432,7 +432,7 @@ pub trait ProtocolHandler: Sync + Send {
         let battery_reading = InputReadingV4::new(
           device_index,
           feature_index,
-          buttplug_core::message::InputTypeData::Battery(InputData::new(battery_level as u8)),
+          buttplug_core::message::InputTypeReading::Battery(InputValue::new(battery_level as u8)),
         );
         debug!("Got battery reading: {}", battery_level);
         Ok(battery_reading)

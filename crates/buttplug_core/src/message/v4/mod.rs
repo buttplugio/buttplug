@@ -18,7 +18,7 @@ pub use {
   device_list::DeviceListV4,
   device_message_info::DeviceMessageInfoV4,
   input_cmd::{InputCmdV4, InputCommandType},
-  input_reading::{InputData, InputReadingV4, InputTypeData},
+  input_reading::{InputValue, InputReadingV4, InputTypeReading},
   output_cmd::{OutputCmdV4, OutputCommand, OutputPositionWithDuration, OutputValue},
   request_server_info::RequestServerInfoV4,
   server_info::ServerInfoV4,
