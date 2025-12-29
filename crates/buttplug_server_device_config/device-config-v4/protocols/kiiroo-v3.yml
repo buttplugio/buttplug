@@ -23,10 +23,10 @@ configurations:
     id: 90319514-ff68-40ae-805d-54ce392a60bd
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 1
   id: 62ba81c4-0ada-41be-b49d-d53426cdc277

@@ -224,14 +224,14 @@
               "^(battery|rssi|pressure)$": {
                 "type": "object",
                 "properties": {
-                  "value_range": {
+                  "value": {
                     "type": "array",
                     "items": {
                       "$ref": "#/components/value-range"
                     },
                     "minItems": 1
                   },
-                  "input_commands": {
+                  "command": {
                     "type": "array",
                     "items": {
                       "type": "string",
@@ -240,8 +240,8 @@
                   }
                 },
                 "required": [
-                  "value_range",
-                  "input_commands"
+                  "value",
+                  "command"
                 ],
                 "additionalProperties": false
               }

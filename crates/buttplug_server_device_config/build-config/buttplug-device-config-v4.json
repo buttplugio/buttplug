@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 147
+    "minor": 148
   },
   "protocols": {
     "activejoy": {
@@ -2002,10 +2002,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -2055,10 +2055,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -2108,10 +2108,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -2161,10 +2161,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -2214,10 +2214,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -2267,10 +2267,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -2320,10 +2320,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -2373,10 +2373,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -2426,10 +2426,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -2479,10 +2479,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -2532,10 +2532,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -2585,10 +2585,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -2638,10 +2638,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -2691,10 +2691,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -2744,10 +2744,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -2797,10 +2797,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -2850,10 +2850,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -2903,10 +2903,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -2956,10 +2956,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3009,10 +3009,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3062,10 +3062,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3115,10 +3115,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3168,10 +3168,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3221,10 +3221,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3274,10 +3274,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3327,10 +3327,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3380,10 +3380,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3433,10 +3433,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3486,10 +3486,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3539,10 +3539,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3592,10 +3592,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3645,10 +3645,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3698,10 +3698,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3751,10 +3751,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3804,10 +3804,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3857,10 +3857,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3910,10 +3910,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3950,10 +3950,10 @@
               "index": 1,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -3991,10 +3991,10 @@
               "index": 1,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -4031,10 +4031,10 @@
               "index": 1,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -4071,10 +4071,10 @@
               "index": 1,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -4111,10 +4111,10 @@
               "index": 1,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -4152,10 +4152,10 @@
             "index": 1,
             "input": {
               "battery": {
-                "input_commands": [
+                "command": [
                   "Read"
                 ],
-                "value_range": [
+                "value": [
                   [
                     0,
                     100
@@ -8580,10 +8580,10 @@
             "index": 0,
             "input": {
               "battery": {
-                "input_commands": [
+                "command": [
                   "Read"
                 ],
-                "value_range": [
+                "value": [
                   [
                     0,
                     100
@@ -8645,10 +8645,10 @@
             "index": 2,
             "input": {
               "battery": {
-                "input_commands": [
+                "command": [
                   "Read"
                 ],
-                "value_range": [
+                "value": [
                   [
                     0,
                     100
@@ -8710,10 +8710,10 @@
             "index": 1,
             "input": {
               "battery": {
-                "input_commands": [
+                "command": [
                   "Read"
                 ],
-                "value_range": [
+                "value": [
                   [
                     0,
                     100
@@ -8765,10 +8765,10 @@
             "index": 1,
             "input": {
               "battery": {
-                "input_commands": [
+                "command": [
                   "Read"
                 ],
-                "value_range": [
+                "value": [
                   [
                     0,
                     100
@@ -9217,10 +9217,10 @@
               "index": 1,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -9711,10 +9711,10 @@
               "index": 1,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -11002,10 +11002,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -11053,10 +11053,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -11104,10 +11104,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -11215,10 +11215,10 @@
               "index": 1,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -11255,10 +11255,10 @@
               "index": 1,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -11306,10 +11306,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -11357,10 +11357,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -11422,10 +11422,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -11502,10 +11502,10 @@
               "index": 3,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -11553,10 +11553,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -11604,10 +11604,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -11662,10 +11662,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -11728,10 +11728,10 @@
               "index": 3,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -11775,10 +11775,10 @@
               "index": 1,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -11825,10 +11825,10 @@
               "index": 1,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -11878,10 +11878,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -11918,10 +11918,10 @@
             "index": 1,
             "input": {
               "battery": {
-                "input_commands": [
+                "command": [
                   "Read"
                 ],
-                "value_range": [
+                "value": [
                   [
                     0,
                     100
@@ -11978,10 +11978,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -12029,10 +12029,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -12080,10 +12080,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -12183,10 +12183,10 @@
               "index": 1,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -12234,10 +12234,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -12292,10 +12292,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -12352,10 +12352,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -12403,10 +12403,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -12454,10 +12454,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -12505,10 +12505,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -12571,10 +12571,10 @@
               "index": 3,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -12618,10 +12618,10 @@
               "index": 1,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -12658,10 +12658,10 @@
             "index": 1,
             "input": {
               "battery": {
-                "input_commands": [
+                "command": [
                   "Read"
                 ],
-                "value_range": [
+                "value": [
                   [
                     0,
                     100
@@ -13017,10 +13017,10 @@
               "index": 1,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -13064,10 +13064,10 @@
             "index": 1,
             "input": {
               "battery": {
-                "input_commands": [
+                "command": [
                   "Read"
                 ],
-                "value_range": [
+                "value": [
                   [
                     0,
                     100
@@ -13159,10 +13159,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -13210,10 +13210,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -13268,10 +13268,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -13308,10 +13308,10 @@
             "index": 1,
             "input": {
               "battery": {
-                "input_commands": [
+                "command": [
                   "Read"
                 ],
-                "value_range": [
+                "value": [
                   [
                     0,
                     100
@@ -13363,10 +13363,10 @@
             "index": 1,
             "input": {
               "battery": {
-                "input_commands": [
+                "command": [
                   "Read"
                 ],
-                "value_range": [
+                "value": [
                   [
                     0,
                     100
@@ -13473,10 +13473,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -13531,10 +13531,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -13571,10 +13571,10 @@
             "index": 1,
             "input": {
               "battery": {
-                "input_commands": [
+                "command": [
                   "Read"
                 ],
-                "value_range": [
+                "value": [
                   [
                     0,
                     100
@@ -20545,10 +20545,10 @@
               "index": 2,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -20610,10 +20610,10 @@
               "index": 3,
               "input": {
                 "battery": {
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ],
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
@@ -20650,10 +20650,10 @@
             "index": 1,
             "input": {
               "battery": {
-                "input_commands": [
+                "command": [
                   "Read"
                 ],
-                "value_range": [
+                "value": [
                   [
                     0,
                     100

@@ -204,7 +204,7 @@ impl ClientDeviceFeature {
     if let Some(sensor_map) = self.feature.input()
       && let Some(sensor) = sensor_map.get(sensor_type)
       && sensor
-        .input_commands()
+        .command()
         .contains(&InputCommandType::Subscribe)
     {
       let msg = InputCmdV4::new(
@@ -226,7 +226,7 @@ impl ClientDeviceFeature {
     if let Some(sensor_map) = self.feature.input()
       && let Some(sensor) = sensor_map.get(sensor_type)
       && sensor
-        .input_commands()
+        .command()
         .contains(&InputCommandType::Subscribe)
     {
       let msg = InputCmdV4::new(
@@ -247,7 +247,7 @@ impl ClientDeviceFeature {
   fn read_input(&self, sensor_type: InputType) -> ButtplugClientResultFuture<InputTypeReading> {
     if let Some(sensor_map) = self.feature.input()
       && let Some(sensor) = sensor_map.get(sensor_type)
-      && sensor.input_commands().contains(&InputCommandType::Read)
+      && sensor.command().contains(&InputCommandType::Read)
     {
       let msg = InputCmdV4::new(
         self.device_index,

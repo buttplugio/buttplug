@@ -161,7 +161,7 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
             sensor_vec.push(ServerSensorDeviceMessageAttributesV3 {
               feature_descriptor: feature.description().to_owned(),
               sensor_type: InputType::Battery,
-              sensor_range: battery.value_range().clone(),
+              sensor_range: battery.value().clone(),
               feature: feature.clone(),
               index: 0,
             });

@@ -469,25 +469,25 @@ impl From<ServerDeviceFeatureOutput> for DeviceFeatureOutput {
 #[derive(Clone, Debug, Getters)]
 #[getset(get = "pub")]
 pub struct ServerDeviceFeatureInputProperties {
-  value_range: Vec<RangeInclusive<i32>>,
-  input_commands: HashSet<InputCommandType>,
+  value: Vec<RangeInclusive<i32>>,
+  command: HashSet<InputCommandType>,
 }
 
 impl ServerDeviceFeatureInputProperties {
   pub fn new(
-    value_range: &Vec<RangeInclusive<i32>>,
+    value: &Vec<RangeInclusive<i32>>,
     sensor_commands: &HashSet<InputCommandType>,
   ) -> Self {
     Self {
-      value_range: value_range.clone(),
-      input_commands: sensor_commands.clone(),
+      value: value.clone(),
+      command: sensor_commands.clone(),
     }
   }
 }
 
 impl From<&ServerDeviceFeatureInputProperties> for DeviceFeatureInputProperties {
   fn from(val: &ServerDeviceFeatureInputProperties) -> Self {
-    DeviceFeatureInputProperties::new(&val.value_range, &val.input_commands)
+    DeviceFeatureInputProperties::new(&val.value, &val.command)
   }
 }
 

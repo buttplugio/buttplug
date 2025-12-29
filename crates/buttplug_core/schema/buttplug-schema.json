@@ -414,7 +414,7 @@
             "^.*$": {
               "type": "object",
               "properties": {
-                "ValueRange": {
+                "Value": {
                   "type": "array",
                   "items": {
                     "type": "array",
@@ -422,10 +422,17 @@
                       "type": "integer"
                     }
                   }
+                },
+                "Command": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 }
               },
               "required": [
-                "ValueRange"
+                "Value",
+                "Command"
               ]
             }
           }

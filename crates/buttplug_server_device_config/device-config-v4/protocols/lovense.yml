@@ -13,10 +13,10 @@ defaults:
     id: 14bd7637-13ed-49ba-9eb9-9c8ba9abec20
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 1
   id: d3b1219a-aafe-4257-9d5d-3979b5da3c9a
@@ -45,10 +45,10 @@ configurations:
     id: b4be6835-5b91-4540-bc7b-0c3d8dcb89fd
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 2
   id: 99024e29-c0ed-4c26-aede-e0db0679eae5
@@ -74,10 +74,10 @@ configurations:
     id: 66b31efb-3bd9-4e3a-9972-88c66e9fca28
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 2
   id: 2e309985-6bbf-4b75-866f-76d845b3ce42
@@ -104,10 +104,10 @@ configurations:
     id: 820d8fb1-c6ec-434d-b7c4-835bdf36552a
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 2
   id: 463a18b9-42a5-4f7b-8156-0e61346fdb8a
@@ -167,10 +167,10 @@ configurations:
     id: 7c382c60-0ee2-4315-b8cf-cfd3ab4c9ccd
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 1
   id: 8667f7b6-7baa-4e46-9d76-947fb707f0f3
@@ -190,10 +190,10 @@ configurations:
     id: 68defbd8-af87-4f04-97da-edfa8fb576f9
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 1
   id: 48d5c76b-8c0e-4152-9f3b-5ba92ebf30fe
@@ -219,10 +219,10 @@ configurations:
     id: 60868f44-3d56-44ed-bcc4-00041a7b5997
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 2
   id: 0bddb3da-2c8d-4af8-9e80-1e0038878f27
@@ -248,10 +248,10 @@ configurations:
     id: 3933bfcb-6daf-4c33-b834-877cb29ce77d
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 2
   id: a8b175a8-3447-4938-b1df-7215464b56e6
@@ -285,10 +285,10 @@ configurations:
     id: 8fa6dc63-430e-42cb-9345-42d37f0c2629
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 2
   id: a6a0c988-3e04-4fa3-89e2-4f4d2f242ffd
@@ -332,10 +332,10 @@ configurations:
     id: 6548133f-118f-419d-8900-660fde26b42f
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 3
   id: 8f93dd90-1788-4d2c-8b8f-9a339be12c0e
@@ -361,10 +361,10 @@ configurations:
     id: 710384a5-a7dd-43f1-b55c-147256dc636a
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 2
   id: 9c72451e-1df7-410a-b4b6-e133f3bd9219
@@ -390,10 +390,10 @@ configurations:
     id: 104da492-67f1-46fc-b412-b98871ebb518
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 2
   id: b57dfb65-260d-49b2-bff0-659e38947186
@@ -423,10 +423,10 @@ configurations:
     id: 50b9b31f-c2a8-459a-81fd-c54604f5184e
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 2
   id: bbfd764c-b419-4c13-aeb0-e753a86318ed
@@ -462,10 +462,10 @@ configurations:
     id: ad93f903-a354-40ae-b87e-f8390606a964
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 3
   id: 5454d487-ed23-4067-80e2-9e2f0c01fabf
@@ -489,10 +489,10 @@ configurations:
     id: e4193650-2d46-4e6e-8dd8-b1d8d9a1baff
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 1
   id: c53de5c8-fc4a-421b-9332-271ec742a156
@@ -519,10 +519,10 @@ configurations:
     id: 0b1cba39-8bb7-4f87-9bed-c59f2284d702
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 1
   id: ed5f76c6-84b9-4fee-891f-28f9f4fa3632
@@ -550,10 +550,10 @@ configurations:
     id: d3cb3f91-3b19-401f-88b5-a33006f7c5bc
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 2
   id: b1ab0746-9659-41f3-9f51-2b4966123210

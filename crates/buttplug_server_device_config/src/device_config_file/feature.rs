@@ -377,26 +377,26 @@ impl From<&ServerDeviceFeatureOutput> for UserDeviceFeatureOutput {
 pub struct DeviceFeatureInputProperties {
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(serialize_with = "range_sequence_serialize")]
-  value_range: Vec<RangeInclusive<i32>>,
+  value: Vec<RangeInclusive<i32>>,
   #[getset(get = "pub")]
-  input_commands: HashSet<InputCommandType>,
+  command: HashSet<InputCommandType>,
 }
 
 impl DeviceFeatureInputProperties {
   pub fn new(
-    value_range: &Vec<RangeInclusive<i32>>,
+    value: &Vec<RangeInclusive<i32>>,
     sensor_commands: &HashSet<InputCommandType>,
   ) -> Self {
     Self {
-      value_range: value_range.clone(),
-      input_commands: sensor_commands.clone(),
+      value: value.clone(),
+      command: sensor_commands.clone(),
     }
   }
 }
 
 impl From<DeviceFeatureInputProperties> for ServerDeviceFeatureInputProperties {
   fn from(val: DeviceFeatureInputProperties) -> Self {
-    ServerDeviceFeatureInputProperties::new(&val.value_range, &val.input_commands)
+    ServerDeviceFeatureInputProperties::new(&val.value, &val.command)
   }
 }
 

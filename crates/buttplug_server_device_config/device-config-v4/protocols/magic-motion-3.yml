@@ -13,10 +13,10 @@ defaults:
     id: 72bc2f2f-7f67-4636-bc5c-42ac4b55cb59
     input:
       battery:
-        value_range:
+        value:
         - - 0
           - 100
-        input_commands:
+        command:
         - Read
     index: 1
   id: f954c774-3e08-4569-800f-94e454ccd3ca
