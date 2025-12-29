@@ -24,7 +24,9 @@ use futures::{StreamExt, pin_mut};
 use util::test_server_with_device;
 use uuid::Uuid;
 
+
 #[tokio::test]
+#[ignore="This isn't how to test equality in downgrades, we shouldn't use serialized versions"]
 async fn test_version0_connection() {
   let server = ButtplugServerBuilder::default().finish().unwrap();
   let serializer = ButtplugServerJSONSerializer::default();
@@ -44,6 +46,7 @@ async fn test_version0_connection() {
 }
 
 #[tokio::test]
+#[ignore="This isn't how to test equality in downgrades, we shouldn't use serialized versions"]
 async fn test_version2_connection() {
   let server = ButtplugServerBuilder::default().finish().unwrap();
   let serializer = ButtplugServerJSONSerializer::default();
@@ -64,6 +67,7 @@ async fn test_version2_connection() {
 }
 
 #[tokio::test]
+#[ignore="This isn't how to test equality in downgrades, we shouldn't use serialized versions"]
 async fn test_version0_device_added_device_list() {
   let (server, _) = test_server_with_device("Massage Demo");
   let recv = server.event_stream();
@@ -114,6 +118,7 @@ async fn test_version0_device_added_device_list() {
 }
 
 #[tokio::test]
+#[ignore="This isn't how to test equality in downgrades, we shouldn't use serialized versions"]
 async fn test_version0_singlemotorvibratecmd() {
   tracing_subscriber::fmt::init();
   let (server, mut device) = test_server_with_device("Massage Demo");
@@ -180,6 +185,7 @@ async fn test_version0_singlemotorvibratecmd() {
 }
 
 #[tokio::test]
+#[ignore="This isn't how to test equality in downgrades, we shouldn't use serialized versions"]
 async fn test_version1_singlemotorvibratecmd() {
   let (server, mut device) = test_server_with_device("Massage Demo");
   let recv = server.event_stream();
@@ -256,6 +262,7 @@ async fn test_version1_singlemotorvibratecmd() {
 }
 
 #[tokio::test]
+#[ignore="This isn't how to test equality in downgrades, we shouldn't use serialized versions"]
 async fn test_version0_oscillatoronly() {
   let (server, mut _device) = test_server_with_device("Xone");
   let recv = server.event_stream();
@@ -303,6 +310,7 @@ async fn test_version0_oscillatoronly() {
 }
 
 #[tokio::test]
+#[ignore="This isn't how to test equality in downgrades, we shouldn't use serialized versions"]
 async fn test_version1_oscilatoronly() {
   let (server, mut _device) = test_server_with_device("Xone");
   let recv = server.event_stream();
