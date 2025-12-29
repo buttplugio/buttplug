@@ -214,7 +214,7 @@ impl ButtplugServer {
   ) -> BoxFuture<'static, Result<ButtplugServerMessageVariant, ButtplugServerMessageVariant>> {
     let features = self.device_manager().feature_map();
     let msg_id = msg.id();
-    debug!("Server received: {:?}", msg);
+    trace!("Server received: {:?}", msg);
     match msg {
       ButtplugClientMessageVariant::V4(msg) => {
         let internal_msg =
@@ -252,7 +252,7 @@ impl ButtplugServer {
         });
         match ButtplugCheckedClientMessageV4::try_from_client_message(msg, &features) {
           Ok(converted_msg) => {
-            debug!("Converted message: {:?}", converted_msg);
+            trace!("Converted message: {:?}", converted_msg);
             let fut = self.parse_checked_message(converted_msg);
             async move {
               let result = fut.await.map_err(|e| {
@@ -270,7 +270,7 @@ impl ButtplugServer {
                     )
                     .unwrap()
                 });
-              debug!("Server returning: {:?}", out_msg);
+              trace!("Server returning: {:?}", out_msg);
               out_msg
             }
             .boxed()
