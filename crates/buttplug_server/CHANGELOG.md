@@ -24,6 +24,7 @@
 
 - Simplify joyhub impls using feature indexes
 - Fix Oscillation Range impl for Lovense Solace Pro
+- Actually implement InputCmd :|
 
 # 10.0.0-beta2 (2025-10-18)
 
