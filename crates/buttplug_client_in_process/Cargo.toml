@@ -31,10 +31,10 @@ xinput-manager=["buttplug_server_hwmgr_xinput"]
 
 [dependencies]
 buttplug_derive = { version = "0.9.1", path = "../buttplug_derive" }
-buttplug_core = { version = "10.0.0-beta3", path = "../buttplug_core" }
+buttplug_core = { version = "10.0.0-beta4", path = "../buttplug_core" }
 buttplug_client = { version = "10.0.0-beta3", path = "../buttplug_client" }
-buttplug_server = { version = "10.0.0-beta3", path = "../buttplug_server" }
-buttplug_server_device_config = { version = "10.0.0-beta3", path = "../buttplug_server_device_config" }
+buttplug_server = { version = "10.0.0-beta4", path = "../buttplug_server" }
+buttplug_server_device_config = { version = "10.0.0-beta4", path = "../buttplug_server_device_config" }
 buttplug_server_hwmgr_btleplug = { version = "10.0.0-beta3", path = "../buttplug_server_hwmgr_btleplug", optional = true}
 buttplug_server_hwmgr_hid = { version = "10.0.0-beta3", path = "../buttplug_server_hwmgr_hid", optional = true}
 buttplug_server_hwmgr_lovense_connect = { version = "10.0.0-beta3", path = "../buttplug_server_hwmgr_lovense_connect", optional = true}

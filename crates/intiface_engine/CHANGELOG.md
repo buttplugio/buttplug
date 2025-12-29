@@ -1,3 +1,9 @@
+# Intiface Engine v4.0.0-beta4 (2025/12/29)
+
+## Bugfixes
+
+- Update various buttplug libraries to beta4, fixing input naming and message schema checking.
+
 # Intiface Engine v4.0.0-beta3 (2025/12/26)
 
 ## Features

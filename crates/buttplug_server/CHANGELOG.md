@@ -1,3 +1,14 @@
+# 10.0.0-beta4 (2025-12-29)
+
+## Features
+
+- Update name of Input property fields for DeviceList
+  - This will be a breaking change between beta3 and beta4
+
+## Bugfixes
+
+- Actually check outgoing messages against JSON schema
+
 # 10.0.0-beta3 (2025-12-26)
 
 ## Features
