@@ -6,6 +6,10 @@
 // for full license information.
 
 //! Communications API for accessing Buttplug Servers
+
+#[macro_use]
+extern crate log;
+
 pub mod client_event_loop;
 pub mod client_message_sorter;
 pub mod connector;

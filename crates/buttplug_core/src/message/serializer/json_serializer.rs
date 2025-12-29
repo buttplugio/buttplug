@@ -6,11 +6,12 @@
 // for full license information.
 
 use super::ButtplugSerializerError;
-use crate::message::{ButtplugMessage, ButtplugMessageFinalizer};
+use crate::{errors::{ButtplugError, ButtplugMessageError}, message::{ButtplugMessage, ButtplugMessageFinalizer, ErrorV0}};
 use jsonschema::Validator;
+use log::info;
 use serde::{Deserialize, Serialize};
 use serde_json::{Deserializer, Value};
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
 
 static MESSAGE_JSON_SCHEMA: &str = include_str!("../../../schema/buttplug-schema.json");
 
@@ -29,11 +30,19 @@ where
   serde_json::to_string(&[&msg]).expect("Infallible serialization")
 }
 
-pub fn vec_to_protocol_json<T>(msg: &[T]) -> String
+pub fn vec_to_protocol_json<T>(validator: &Validator, msg: &[T]) -> Result<String, ErrorV0>
 where
-  T: ButtplugMessage + Serialize + Deserialize<'static>,
+  T: ButtplugMessage + Serialize + Deserialize<'static> + Debug,
 {
-  serde_json::to_string(msg).expect("Infallible serialization")
+  info!("Serializing {:?}", msg);
+  let return_error_msg = |e: &dyn Display| {
+    let err = ButtplugMessageError::MessageSerializationError(ButtplugSerializerError::JsonSerializerError(e.to_string()));
+    // Just return the error message. For the server, we'll need to wrap it. For the client, we'll just die.
+    ErrorV0::from(ButtplugError::from(err))
+  };
+  let val =  serde_json::to_value(msg).map_err(|e| return_error_msg(&e))?;
+  validator.validate(&val).map_err(|e| return_error_msg(&e))?;
+  serde_json::to_string(&val).map_err(|e| return_error_msg(&e))
 }
 
 pub fn deserialize_to_message<T>(
