@@ -517,17 +517,29 @@ impl ServerDeviceFeatureInput {
 
   pub fn can_subscribe(&self) -> bool {
     // TODO Why did I move everything to struct based systems again? This is so gross.
-    if let Some(battery) = &self.battery && battery.command.contains(&InputCommandType::Subscribe) {
+    if let Some(battery) = &self.battery
+      && battery.command.contains(&InputCommandType::Subscribe)
+    {
       true
-    } else if let Some(rssi) = &self.rssi && rssi.command.contains(&InputCommandType::Subscribe) {
+    } else if let Some(rssi) = &self.rssi
+      && rssi.command.contains(&InputCommandType::Subscribe)
+    {
       true
-    } else if let Some(pressure) = &self.pressure && pressure.command.contains(&InputCommandType::Subscribe) {
+    } else if let Some(pressure) = &self.pressure
+      && pressure.command.contains(&InputCommandType::Subscribe)
+    {
       true
-    } else if let Some(button) = &self.button && button.command.contains(&InputCommandType::Subscribe) {
+    } else if let Some(button) = &self.button
+      && button.command.contains(&InputCommandType::Subscribe)
+    {
       true
-    } else if let Some(depth) = &self.depth && depth.command.contains(&InputCommandType::Subscribe) {
+    } else if let Some(depth) = &self.depth
+      && depth.command.contains(&InputCommandType::Subscribe)
+    {
       true
-    } else if let Some(position) = &self.position && position.command.contains(&InputCommandType::Subscribe) {
+    } else if let Some(position) = &self.position
+      && position.command.contains(&InputCommandType::Subscribe)
+    {
       true
     } else {
       false

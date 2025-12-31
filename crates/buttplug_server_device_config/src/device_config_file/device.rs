@@ -116,7 +116,11 @@ impl ConfigUserDeviceDefinition {
       return Err(ButtplugDeviceConfigError::UserFeatureMismatch);
     }
     for feature in self.features() {
-      if let Some(base_feature) = base.features().values().find(|x| x.id() == feature.base_id()) {
+      if let Some(base_feature) = base
+        .features()
+        .values()
+        .find(|x| x.id() == feature.base_id())
+      {
         builder.add_feature(&feature.with_base_feature(base_feature)?);
       } else {
         return Err(ButtplugDeviceConfigError::UserFeatureMismatch);

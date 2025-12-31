@@ -4,17 +4,30 @@ use getset::{CopyGetters, Getters};
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugDeviceMessageNameV4, ButtplugServerMessageV4, DeviceFeature, DeviceFeatureOutputLimits,
-    InputCmdV4, InputCommandType, InputType, InputTypeReading, OutputCmdV4, OutputCommand,
-    OutputPositionWithDuration, OutputType, OutputValue,
+    ButtplugDeviceMessageNameV4,
+    ButtplugServerMessageV4,
+    DeviceFeature,
+    DeviceFeatureOutputLimits,
+    InputCmdV4,
+    InputCommandType,
+    InputType,
+    InputTypeReading,
+    OutputCmdV4,
+    OutputCommand,
+    OutputPositionWithDuration,
+    OutputType,
+    OutputValue,
   },
 };
 
 use super::ClientDeviceOutputCommand;
 
 use crate::{
-  ButtplugClientError, ButtplugClientMessageSender, ButtplugClientResultFuture,
-  create_boxed_future_client_error, device::ClientDeviceCommandValue,
+  ButtplugClientError,
+  ButtplugClientMessageSender,
+  ButtplugClientResultFuture,
+  create_boxed_future_client_error,
+  device::ClientDeviceCommandValue,
 };
 
 #[derive(Getters, CopyGetters, Clone)]
@@ -203,9 +216,7 @@ impl ClientDeviceFeature {
   pub fn subscribe_sensor(&self, sensor_type: InputType) -> ButtplugClientResultFuture {
     if let Some(sensor_map) = self.feature.input()
       && let Some(sensor) = sensor_map.get(sensor_type)
-      && sensor
-        .command()
-        .contains(&InputCommandType::Subscribe)
+      && sensor.command().contains(&InputCommandType::Subscribe)
     {
       let msg = InputCmdV4::new(
         self.device_index,
@@ -225,9 +236,7 @@ impl ClientDeviceFeature {
   pub fn unsubscribe_sensor(&self, sensor_type: InputType) -> ButtplugClientResultFuture {
     if let Some(sensor_map) = self.feature.input()
       && let Some(sensor) = sensor_map.get(sensor_type)
-      && sensor
-        .command()
-        .contains(&InputCommandType::Subscribe)
+      && sensor.command().contains(&InputCommandType::Subscribe)
     {
       let msg = InputCmdV4::new(
         self.device_index,

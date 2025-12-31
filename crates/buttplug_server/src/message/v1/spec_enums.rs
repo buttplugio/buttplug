@@ -7,14 +7,18 @@
 
 use std::cmp::Ordering;
 
-use crate::message::{StopAllDevicesV0, StopDeviceCmdV0, v0::{
-  ButtplugClientMessageV0,
-  ButtplugServerMessageV0,
-  FleshlightLaunchFW12CmdV0,
-  ServerInfoV0,
-  SingleMotorVibrateCmdV0,
-  VorzeA10CycloneCmdV0,
-}};
+use crate::message::{
+  StopAllDevicesV0,
+  StopDeviceCmdV0,
+  v0::{
+    ButtplugClientMessageV0,
+    ButtplugServerMessageV0,
+    FleshlightLaunchFW12CmdV0,
+    ServerInfoV0,
+    SingleMotorVibrateCmdV0,
+    VorzeA10CycloneCmdV0,
+  },
+};
 use buttplug_core::{
   errors::ButtplugMessageError,
   message::{

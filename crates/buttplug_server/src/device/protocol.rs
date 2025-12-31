@@ -9,7 +9,7 @@
 
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{InputValue, InputReadingV4, InputType, OutputCommand},
+  message::{InputReadingV4, InputType, InputValue, OutputCommand},
 };
 use buttplug_server_device_config::{
   Endpoint,
@@ -413,10 +413,8 @@ pub trait ProtocolHandler: Sync + Send {
 
   // Used for clients that have inputs which can be subscribed. Subscribed inputs should be
   // disconnected between client sessions, but unlike keepalives are not needed to keep the
-  // system up. 
-  fn handle_client_disconnect_cmd(
-    &self,
-  ) -> BoxFuture<'_, Result<(), ButtplugDeviceError>> {
+  // system up.
+  fn handle_client_disconnect_cmd(&self) -> BoxFuture<'_, Result<(), ButtplugDeviceError>> {
     future::ready(Ok(())).boxed()
   }
 

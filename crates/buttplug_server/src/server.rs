@@ -26,7 +26,14 @@ use super::{
 use buttplug_core::{
   errors::*,
   message::{
-    self, BUTTPLUG_CURRENT_API_MAJOR_VERSION, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugServerMessageV4, ErrorV0, StopAllDevicesV4, StopScanningV0
+    self,
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+    ButtplugMessage,
+    ButtplugMessageSpecVersion,
+    ButtplugServerMessageV4,
+    ErrorV0,
+    StopAllDevicesV4,
+    StopScanningV0,
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };

@@ -48,9 +48,15 @@ use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
     self,
-    ButtplugMessage, 
-    ButtplugServerMessageV4, 
-    DeviceFeature, DeviceMessageInfoV4, InputCommandType, InputType, OutputType, OutputValue, StopDeviceCmdV4
+    ButtplugMessage,
+    ButtplugServerMessageV4,
+    DeviceFeature,
+    DeviceMessageInfoV4,
+    InputCommandType,
+    InputType,
+    OutputType,
+    OutputValue,
+    StopDeviceCmdV4,
   },
   util::{self, async_manager, stream::convert_broadcast_receiver_to_stream},
 };
@@ -157,8 +163,11 @@ impl ServerDevice {
     let mut protocol_identifier = None;
     let mut hardware_out = None;
     for protocol_specializer in protocol_specializers {
-      match hardware_specializer.specialize(protocol_specializer.specifiers()).await {
-        Ok(specialized_hardware) => {          
+      match hardware_specializer
+        .specialize(protocol_specializer.specifiers())
+        .await
+      {
+        Ok(specialized_hardware) => {
           protocol_identifier = Some(protocol_specializer.identify());
           hardware_out = Some(specialized_hardware);
           break;
@@ -168,7 +177,6 @@ impl ServerDevice {
         }
       }
     }
-
 
     if protocol_identifier.is_none() {
       return Err(ButtplugDeviceError::DeviceConfigurationError(
@@ -220,7 +228,9 @@ impl ServerDevice {
         strategy,
         ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_)
       ))
-      && let Err(e) = device.handle_stop_device_cmd(&StopDeviceCmdV4::new(0, true, true)).await
+      && let Err(e) = device
+        .handle_stop_device_cmd(&StopDeviceCmdV4::new(0, true, true))
+        .await
     {
       return Err(ButtplugDeviceError::DeviceConnectionError(format!(
         "Error setting up keepalive: {e}"
@@ -541,8 +551,9 @@ impl ServerDevice {
           let mut msg = fut.await?;
           msg.set_id(msg_id);
           Ok(msg)
-        }.boxed()
-      },
+        }
+        .boxed()
+      }
       // Actuator messages
       ButtplugDeviceCommandMessageUnionV4::OutputCmd(msg) => self.handle_outputcmd_v4(&msg),
       ButtplugDeviceCommandMessageUnionV4::OutputVecCmd(msg) => {
@@ -606,18 +617,25 @@ impl ServerDevice {
         .iter()
         .for_each(|msg| fut_vec.push(self.parse_message(msg.clone())));
     }
-    if msg.inputs()   {
-      self
-        .definition
-        .features()
-        .iter()
-        .for_each(|(i, f)| {
-          if let Some(inputs) = f.input() {
-            if inputs.can_subscribe() {
-              fut_vec.push(self.parse_message(ButtplugDeviceCommandMessageUnionV4::InputCmd(CheckedInputCmdV4::new(1,self.definition.index(), *i, InputType::Unknown, InputCommandType::Unsubscribe, f.id()))));
-            }
+    if msg.inputs() {
+      self.definition.features().iter().for_each(|(i, f)| {
+        if let Some(inputs) = f.input() {
+          if inputs.can_subscribe() {
+            fut_vec.push(
+              self.parse_message(ButtplugDeviceCommandMessageUnionV4::InputCmd(
+                CheckedInputCmdV4::new(
+                  1,
+                  self.definition.index(),
+                  *i,
+                  InputType::Unknown,
+                  InputCommandType::Unsubscribe,
+                  f.id(),
+                ),
+              )),
+            );
           }
-        });
+        }
+      });
     }
     async move {
       for fut in fut_vec {

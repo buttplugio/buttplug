@@ -26,7 +26,7 @@ use crate::device::{
 use async_trait::async_trait;
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{self, InputValue, InputReadingV4, InputTypeReading, OutputType},
+  message::{self, InputReadingV4, InputTypeReading, InputValue, OutputType},
   util::sleep,
 };
 use buttplug_server_device_config::{

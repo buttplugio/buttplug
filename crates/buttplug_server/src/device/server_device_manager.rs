@@ -27,7 +27,14 @@ use crate::{
 };
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
-  message::{self, ButtplugDeviceMessage, ButtplugMessage, ButtplugServerMessageV4, DeviceListV4, StopAllDevicesV4},
+  message::{
+    self,
+    ButtplugDeviceMessage,
+    ButtplugMessage,
+    ButtplugServerMessageV4,
+    DeviceListV4,
+    StopAllDevicesV4,
+  },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use buttplug_server_device_config::{DeviceConfigurationManager, UserDeviceIdentifier};
@@ -223,7 +230,9 @@ impl ServerDeviceManager {
         .iter()
         .map(|dev| {
           let device = dev.value();
-          device.parse_message(message::StopDeviceCmdV4::new(*dev.key(), msg.inputs(), msg.outputs()).into())
+          device.parse_message(
+            message::StopDeviceCmdV4::new(*dev.key(), msg.inputs(), msg.outputs()).into(),
+          )
         })
         .collect();
       future::join_all(fut_vec).await;

@@ -12,7 +12,11 @@ use buttplug_client::{ButtplugClient, ButtplugClientDevice, ButtplugClientEvent}
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
 use buttplug_core::message::ButtplugDeviceMessageNameV4::OutputCmd;
 use buttplug_core::message::{
-  DeviceFeature, DeviceFeatureOutput, OutputCommand, OutputType, OutputValue,
+  DeviceFeature,
+  DeviceFeatureOutput,
+  OutputCommand,
+  OutputType,
+  OutputValue,
 };
 use buttplug_server::ButtplugServerBuilder;
 use buttplug_server::device::ServerDeviceManagerBuilder;

@@ -10,14 +10,20 @@
 use crate::device::{ClientDeviceCommandValue, ClientDeviceOutputCommand};
 
 use crate::{
-  ButtplugClientMessageSender, ButtplugClientResultFuture, create_boxed_future_client_error,
+  ButtplugClientMessageSender,
+  ButtplugClientResultFuture,
+  create_boxed_future_client_error,
   device::ClientDeviceFeature,
 };
 use buttplug_core::message::InputType;
 use buttplug_core::{
   errors::ButtplugDeviceError,
   message::{
-    ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4, OutputType, StopDeviceCmdV4,
+    ButtplugServerMessageV4,
+    DeviceFeature,
+    DeviceMessageInfoV4,
+    OutputType,
+    StopDeviceCmdV4,
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
@@ -340,7 +346,8 @@ impl ButtplugClientDevice {
   }
 }
 
-impl Eq for ButtplugClientDevice {}
+impl Eq for ButtplugClientDevice {
+}
 
 impl PartialEq for ButtplugClientDevice {
   fn eq(&self, other: &Self) -> bool {

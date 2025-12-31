@@ -20,11 +20,11 @@ pub use {
   device_list::DeviceListV4,
   device_message_info::DeviceMessageInfoV4,
   input_cmd::{InputCmdV4, InputCommandType},
-  input_reading::{InputValue, InputReadingV4, InputTypeReading},
+  input_reading::{InputReadingV4, InputTypeReading, InputValue},
   output_cmd::{OutputCmdV4, OutputCommand, OutputPositionWithDuration, OutputValue},
   request_server_info::RequestServerInfoV4,
   server_info::ServerInfoV4,
   spec_enums::{ButtplugClientMessageV4, ButtplugDeviceMessageNameV4, ButtplugServerMessageV4},
   stop_all_devices::StopAllDevicesV4,
-  stop_device_cmd::StopDeviceCmdV4
+  stop_device_cmd::StopDeviceCmdV4,
 };

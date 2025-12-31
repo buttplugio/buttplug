@@ -6,7 +6,10 @@
 // for full license information.
 
 use super::ButtplugSerializerError;
-use crate::{errors::{ButtplugError, ButtplugMessageError}, message::{ButtplugMessage, ButtplugMessageFinalizer, ErrorV0}};
+use crate::{
+  errors::{ButtplugError, ButtplugMessageError},
+  message::{ButtplugMessage, ButtplugMessageFinalizer, ErrorV0},
+};
 use jsonschema::Validator;
 use serde::{Deserialize, Serialize};
 use serde_json::{Deserializer, Value};
@@ -34,11 +37,13 @@ where
   T: ButtplugMessage + Serialize + Deserialize<'static> + Debug,
 {
   let return_error_msg = |e: &dyn Display| {
-    let err = ButtplugMessageError::MessageSerializationError(ButtplugSerializerError::JsonSerializerError(e.to_string()));
+    let err = ButtplugMessageError::MessageSerializationError(
+      ButtplugSerializerError::JsonSerializerError(e.to_string()),
+    );
     // Just return the error message. For the server, we'll need to wrap it. For the client, we'll just die.
     ErrorV0::from(ButtplugError::from(err))
   };
-  let val =  serde_json::to_value(msg).map_err(|e| return_error_msg(&e))?;
+  let val = serde_json::to_value(msg).map_err(|e| return_error_msg(&e))?;
   validator.validate(&val).map_err(|e| return_error_msg(&e))?;
   serde_json::to_string(&val).map_err(|e| return_error_msg(&e))
 }

@@ -117,7 +117,10 @@ impl ButtplugServerBuilder {
           error!("Ping out signal received, stopping server");
           connected_clone.store(false, Ordering::Relaxed);
           async_manager::spawn(async move {
-            if let Err(e) = device_manager_clone.stop_all_devices(&StopAllDevicesV4::default()).await {
+            if let Err(e) = device_manager_clone
+              .stop_all_devices(&StopAllDevicesV4::default())
+              .await
+            {
               error!("Could not stop devices on ping timeout: {:?}", e);
             }
           });

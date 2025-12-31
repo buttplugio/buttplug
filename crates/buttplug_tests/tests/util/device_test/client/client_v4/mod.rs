@@ -1,8 +1,12 @@
 use crate::util::{
-  ButtplugTestServer, TestDeviceChannelHost, device_test::connector::build_channel_connector,
+  ButtplugTestServer,
+  TestDeviceChannelHost,
+  device_test::connector::build_channel_connector,
 };
 use buttplug_client::{
-  ButtplugClient, ButtplugClientDevice, ButtplugClientEvent,
+  ButtplugClient,
+  ButtplugClientDevice,
+  ButtplugClientEvent,
   device::{ClientDeviceCommandValue, ClientDeviceFeature, ClientDeviceOutputCommand},
 };
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
@@ -12,7 +16,10 @@ use buttplug_server_device_config::load_protocol_configs;
 use tokio::sync::Notify;
 
 use super::super::{
-  super::TestDeviceCommunicationManagerBuilder, DeviceTestCase, TestClientCommand, TestCommand,
+  super::TestDeviceCommunicationManagerBuilder,
+  DeviceTestCase,
+  TestClientCommand,
+  TestCommand,
 };
 use buttplug_core::message::{DeviceFeatureOutput, DeviceFeatureOutputLimits};
 use futures::StreamExt;

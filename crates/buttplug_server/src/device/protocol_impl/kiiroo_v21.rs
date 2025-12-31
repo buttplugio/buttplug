@@ -15,7 +15,7 @@ use crate::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{InputValue, InputReadingV4, InputTypeReading},
+  message::{InputReadingV4, InputTypeReading, InputValue},
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server_device_config::Endpoint;

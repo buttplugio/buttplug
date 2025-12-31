@@ -14,7 +14,7 @@ use crate::device::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{self, InputValue, InputReadingV4, InputTypeReading},
+  message::{self, InputReadingV4, InputTypeReading, InputValue},
 };
 use byteorder::WriteBytesExt;
 use futures::future::{BoxFuture, FutureExt};

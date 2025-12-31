@@ -15,7 +15,9 @@ use crate::message::{
 use getset::CopyGetters;
 use serde::{Deserialize, Serialize};
 
-fn mk_true() -> bool { true }
+fn mk_true() -> bool {
+  true
+}
 
 #[derive(
   Debug,
@@ -26,7 +28,7 @@ fn mk_true() -> bool { true }
   Clone,
   Serialize,
   Deserialize,
-  CopyGetters
+  CopyGetters,
 )]
 #[serde(rename_all = "PascalCase")]
 pub struct StopDeviceCmdV4 {
@@ -46,7 +48,7 @@ impl StopDeviceCmdV4 {
       id: 1,
       device_index,
       inputs,
-      outputs
+      outputs,
     }
   }
 }

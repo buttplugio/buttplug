@@ -11,13 +11,23 @@ use crate::message::{
   ButtplugMessageFinalizer,
   ButtplugMessageValidator,
 };
-use serde::{Deserialize, Serialize};
 use getset::CopyGetters;
+use serde::{Deserialize, Serialize};
 
-fn mk_true() -> bool { true }
+fn mk_true() -> bool {
+  true
+}
 
 #[derive(
-  Debug, ButtplugMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Serialize, Deserialize, CopyGetters
+  Debug,
+  ButtplugMessage,
+  ButtplugMessageFinalizer,
+  PartialEq,
+  Eq,
+  Clone,
+  Serialize,
+  Deserialize,
+  CopyGetters,
 )]
 #[serde(rename_all = "PascalCase")]
 pub struct StopAllDevicesV4 {
@@ -32,7 +42,11 @@ pub struct StopAllDevicesV4 {
 
 impl Default for StopAllDevicesV4 {
   fn default() -> Self {
-    Self { id: 1, inputs: true, outputs: true }
+    Self {
+      id: 1,
+      inputs: true,
+      outputs: true,
+    }
   }
 }
 

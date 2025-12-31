@@ -51,7 +51,7 @@ impl ServerDeviceDefinitionBuilder {
         allow: false,
         deny: false,
         index: 0,
-        features: BTreeMap::new()
+        features: BTreeMap::new(),
       },
     }
   }

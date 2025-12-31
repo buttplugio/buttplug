@@ -14,7 +14,7 @@ use crate::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{InputValue, InputReadingV4, InputType},
+  message::{InputReadingV4, InputType, InputValue},
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use buttplug_server_device_config::Endpoint;
@@ -23,7 +23,13 @@ use futures::{
   StreamExt,
   future::{self, BoxFuture},
 };
-use std::{pin::Pin, sync::{Arc, atomic::{AtomicU8, Ordering}}};
+use std::{
+  pin::Pin,
+  sync::{
+    Arc,
+    atomic::{AtomicU8, Ordering},
+  },
+};
 use tokio::sync::broadcast;
 use uuid::Uuid;
 
@@ -103,7 +109,10 @@ impl ProtocolHandler for KGoalBoost {
               // Extract our two pressure values.
               let normalized = (data[3] as u32) << 8 | data[4] as u32;
               let unnormalized = (data[5] as u32) << 8 | data[6] as u32;
-              info!("Kgoal Reading {} {} {}", subscribed_sensors, normalized, unnormalized);
+              info!(
+                "Kgoal Reading {} {} {}",
+                subscribed_sensors, normalized, unnormalized
+              );
               if (subscribed_sensors & (1 << 0)) > 0
                 && cached_values[0] != normalized
                 && sender
@@ -111,7 +120,9 @@ impl ProtocolHandler for KGoalBoost {
                     InputReadingV4::new(
                       device_index,
                       0,
-                      buttplug_core::message::InputTypeReading::Pressure(InputValue::new(normalized)),
+                      buttplug_core::message::InputTypeReading::Pressure(InputValue::new(
+                        normalized,
+                      )),
                     )
                     .into(),
                   )
@@ -127,7 +138,9 @@ impl ProtocolHandler for KGoalBoost {
                     InputReadingV4::new(
                       device_index,
                       1,
-                      buttplug_core::message::InputTypeReading::Pressure(InputValue::new(unnormalized)),
+                      buttplug_core::message::InputTypeReading::Pressure(InputValue::new(
+                        unnormalized,
+                      )),
                     )
                     .into(),
                   )
@@ -141,8 +154,11 @@ impl ProtocolHandler for KGoalBoost {
           }
         });
       }
-      stream_sensors.store(stream_sensors.load(Ordering::Relaxed) | (1 << feature_index), Ordering::Relaxed);
-      Ok(()) 
+      stream_sensors.store(
+        stream_sensors.load(Ordering::Relaxed) | (1 << feature_index),
+        Ordering::Relaxed,
+      );
+      Ok(())
     }
     .boxed()
   }
@@ -163,7 +179,10 @@ impl ProtocolHandler for KGoalBoost {
       // If we have no sensors we're currently subscribed to, we'll need to bring up our BLE
       // characteristic subscription.
       info!("Sensor before: {}", sensors.load(Ordering::Relaxed));
-      sensors.store(sensors.load(Ordering::Relaxed) & !(1 << feature_index), Ordering::Relaxed);
+      sensors.store(
+        sensors.load(Ordering::Relaxed) & !(1 << feature_index),
+        Ordering::Relaxed,
+      );
       info!("Sensor after: {}", sensors.load(Ordering::Relaxed));
       if sensors.load(Ordering::Relaxed) == 0 {
         device

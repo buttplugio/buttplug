@@ -14,7 +14,7 @@ use futures_util::future::BoxFuture;
 use futures_util::{FutureExt, future};
 
 use buttplug_core::errors::ButtplugDeviceError;
-use buttplug_core::message::{InputValue, InputReadingV4, InputType, InputTypeReading};
+use buttplug_core::message::{InputReadingV4, InputType, InputTypeReading, InputValue};
 use buttplug_server_device_config::Endpoint;
 
 use buttplug_server_device_config::{

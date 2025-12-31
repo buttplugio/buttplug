@@ -74,7 +74,7 @@ impl OutputCommand {
       | OutputCommand::Position(x)
       | OutputCommand::Rotate(x)
       | OutputCommand::Vibrate(x) => x.value() as i32,
-      | OutputCommand::PositionWithDuration(x) => x.value() as i32,
+      OutputCommand::PositionWithDuration(x) => x.value() as i32,
     }
   }
 

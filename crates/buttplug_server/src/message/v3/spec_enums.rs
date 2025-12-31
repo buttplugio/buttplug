@@ -6,7 +6,10 @@
 // for full license information.
 
 use crate::message::{
-  StopAllDevicesV0, StopDeviceCmdV0, v1::{LinearCmdV1, RequestServerInfoV1, RotateCmdV1, VibrateCmdV1}, v2::{ButtplugClientMessageV2, ButtplugServerMessageV2, ServerInfoV2}
+  StopAllDevicesV0,
+  StopDeviceCmdV0,
+  v1::{LinearCmdV1, RequestServerInfoV1, RotateCmdV1, VibrateCmdV1},
+  v2::{ButtplugClientMessageV2, ButtplugServerMessageV2, ServerInfoV2},
 };
 use buttplug_core::{
   errors::{ButtplugError, ButtplugMessageError},
