@@ -139,7 +139,7 @@ impl From<StopDeviceCmdV0> for StopDeviceCmdV4 {
 }
 
 impl From<StopAllDevicesV0> for StopAllDevicesV4 {
-  fn from(value: StopAllDevicesV0) -> Self {
+  fn from(_: StopAllDevicesV0) -> Self {
     StopAllDevicesV4::default()
   }
 }

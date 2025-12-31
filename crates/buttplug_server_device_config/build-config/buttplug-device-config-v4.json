@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 148
+    "minor": 149
   },
   "protocols": {
     "activejoy": {
@@ -8575,9 +8575,45 @@
       "defaults": {
         "features": [
           {
-            "description": "battery Level",
-            "id": "59d2de82-3acf-4316-982f-c2b570afd297",
+            "description": "Pressure (Normalized)",
+            "id": "a5998ca1-c33e-4739-8203-0d6050b215bf",
             "index": 0,
+            "input": {
+              "pressure": {
+                "command": [
+                  "Subscribe"
+                ],
+                "value": [
+                  [
+                    0,
+                    2000
+                  ]
+                ]
+              }
+            }
+          },
+          {
+            "description": "Pressure (Raw)",
+            "id": "da5ae965-a607-467a-bb62-c09d8e438205",
+            "index": 1,
+            "input": {
+              "pressure": {
+                "command": [
+                  "Subscribe"
+                ],
+                "value": [
+                  [
+                    0,
+                    2000
+                  ]
+                ]
+              }
+            }
+          },
+          {
+            "description": "Battery Level",
+            "id": "59d2de82-3acf-4316-982f-c2b570afd297",
+            "index": 2,
             "input": {
               "battery": {
                 "command": [

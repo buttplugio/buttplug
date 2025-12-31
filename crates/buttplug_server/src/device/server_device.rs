@@ -48,14 +48,9 @@ use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
     self,
-    ButtplugMessage,
-    ButtplugServerMessageV4,
-    DeviceFeature,
-    DeviceMessageInfoV4,
-    InputCommandType,
-    InputType,
-    OutputType,
-    OutputValue,
+    ButtplugMessage, 
+    ButtplugServerMessageV4, 
+    DeviceFeature, DeviceMessageInfoV4, InputCommandType, InputType, OutputType, OutputValue, StopDeviceCmdV4
   },
   util::{self, async_manager, stream::convert_broadcast_receiver_to_stream},
 };
@@ -225,7 +220,7 @@ impl ServerDevice {
         strategy,
         ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_)
       ))
-      && let Err(e) = device.handle_stop_device_cmd().await
+      && let Err(e) = device.handle_stop_device_cmd(&StopDeviceCmdV4::new(0, true, true)).await
     {
       return Err(ButtplugDeviceError::DeviceConnectionError(format!(
         "Error setting up keepalive: {e}"
@@ -565,7 +560,7 @@ impl ServerDevice {
         .boxed()
       }
       // Other generic messages
-      ButtplugDeviceCommandMessageUnionV4::StopDeviceCmd(_) => self.handle_stop_device_cmd(),
+      ButtplugDeviceCommandMessageUnionV4::StopDeviceCmd(msg) => self.handle_stop_device_cmd(msg),
     }
   }
 
@@ -603,12 +598,27 @@ impl ServerDevice {
     self.handle_hardware_commands(hardware_commands)
   }
 
-  fn handle_stop_device_cmd(&self) -> ButtplugServerResultFuture {
+  fn handle_stop_device_cmd(&self, msg: &StopDeviceCmdV4) -> ButtplugServerResultFuture {
     let mut fut_vec = vec![];
-    self
-      .stop_commands
-      .iter()
-      .for_each(|msg| fut_vec.push(self.parse_message(msg.clone())));
+    if msg.outputs() {
+      self
+        .stop_commands
+        .iter()
+        .for_each(|msg| fut_vec.push(self.parse_message(msg.clone())));
+    }
+    if msg.inputs()   {
+      self
+        .definition
+        .features()
+        .iter()
+        .for_each(|(i, f)| {
+          if let Some(inputs) = f.input() {
+            if inputs.can_subscribe() {
+              fut_vec.push(self.parse_message(ButtplugDeviceCommandMessageUnionV4::InputCmd(CheckedInputCmdV4::new(1,self.definition.index(), *i, InputType::Unknown, InputCommandType::Unsubscribe, f.id()))));
+            }
+          }
+        });
+    }
     async move {
       for fut in fut_vec {
         fut.await?;
