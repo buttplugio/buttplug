@@ -27,7 +27,7 @@ use crate::{
 };
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
-  message::{self, ButtplugDeviceMessage, ButtplugMessage, ButtplugServerMessageV4, DeviceListV4},
+  message::{self, ButtplugDeviceMessage, ButtplugMessage, ButtplugServerMessageV4, DeviceListV4, StopAllDevicesV4},
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use buttplug_server_device_config::{DeviceConfigurationManager, UserDeviceIdentifier};
@@ -214,15 +214,16 @@ impl ServerDeviceManager {
     .boxed()
   }
 
-  pub(crate) fn stop_all_devices(&self) -> ButtplugServerResultFuture {
+  pub(crate) fn stop_all_devices(&self, msg: &StopAllDevicesV4) -> ButtplugServerResultFuture {
     let device_map = self.devices.clone();
     // TODO This could use some error reporting.
+    let msg = msg.clone();
     async move {
       let fut_vec: Vec<_> = device_map
         .iter()
         .map(|dev| {
           let device = dev.value();
-          device.parse_message(message::StopDeviceCmdV0::new(1).into())
+          device.parse_message(message::StopDeviceCmdV4::new(*dev.key(), msg.inputs(), msg.outputs()).into())
         })
         .collect();
       future::join_all(fut_vec).await;
@@ -265,7 +266,7 @@ impl ServerDeviceManager {
         device_list.set_id(msg.id());
         future::ready(Ok(device_list.into())).boxed()
       }
-      ButtplugDeviceManagerMessageUnion::StopAllDevices(_) => self.stop_all_devices(),
+      ButtplugDeviceManagerMessageUnion::StopAllDevices(m) => self.stop_all_devices(&m),
       ButtplugDeviceManagerMessageUnion::StartScanning(_) => self.start_scanning(),
       ButtplugDeviceManagerMessageUnion::StopScanning(_) => self.stop_scanning(),
     }
@@ -312,7 +313,7 @@ impl ServerDeviceManager {
     // again. Otherwise we can have all sorts of ownership weirdness.
     self.running.store(false, Ordering::Relaxed);
     let stop_scanning = self.stop_scanning();
-    let stop_devices = self.stop_all_devices();
+    let stop_devices = self.stop_all_devices(&StopAllDevicesV4::default());
     let token = self.loop_cancellation_token.clone();
     async move {
       // Force stop scanning, otherwise we can disconnect and instantly try to reconnect while

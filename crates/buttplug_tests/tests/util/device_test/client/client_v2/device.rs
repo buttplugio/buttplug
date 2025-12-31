@@ -19,7 +19,7 @@ use super::{
 use buttplug_core::{
   connector::ButtplugConnectorError,
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-  message::{ButtplugMessage, StopDeviceCmdV0},
+  message::ButtplugMessage,
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server::message::{
@@ -32,6 +32,7 @@ use buttplug_server::message::{
   LinearCmdV1,
   RotateCmdV1,
   RotationSubcommandV1,
+  StopDeviceCmdV0,
   VectorSubcommandV1,
   VibrateCmdV1,
   VibrateSubcommandV1,

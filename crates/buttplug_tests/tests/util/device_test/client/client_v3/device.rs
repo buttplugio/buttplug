@@ -14,7 +14,7 @@ use super::client::{
 };
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-  message::{InputType, OutputType, StopDeviceCmdV0},
+  message::{InputType, OutputType},
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server::message::{
@@ -31,6 +31,7 @@ use buttplug_server::message::{
   SensorReadCmdV3,
   SensorSubscribeCmdV3,
   SensorUnsubscribeCmdV3,
+  StopDeviceCmdV0,
   VectorSubcommandV1,
 };
 use futures::{FutureExt, Stream};

@@ -670,6 +670,48 @@
             "minimum": 0
           }
         }
+      },
+      "StopDeviceCmd": {
+        "type": "object",
+        "description": "Stops the all actions currently being taken by a device.",
+        "properties": {
+          "Id": {
+            "$ref": "#/components/ClientId"
+          },
+          "DeviceIndex": {
+            "$ref": "#/components/DeviceIndex"
+          },
+          "Inputs": {
+            "type": "boolean"
+          },
+          "Outputs": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Id",
+          "DeviceIndex"
+        ]
+      },
+      "StopAllDevices": {
+        "type": "object",
+        "description": "Stops all actions currently being taken by all connected devices.",
+        "properties": {
+          "Id": {
+            "$ref": "#/components/ClientId"
+          },
+          "Inputs": {
+            "type": "boolean"
+          },
+          "Outputs": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Id"
+        ]
       }
     },
     "SpecV3Messages": {
@@ -1997,10 +2039,10 @@
             "$ref": "#/messages/SpecV0Messages/StartScanning"
           },
           "StopAllDevices": {
-            "$ref": "#/messages/SpecV0Messages/StopAllDevices"
+            "$ref": "#/messages/SpecV4Messages/StopAllDevices"
           },
           "StopDeviceCmd": {
-            "$ref": "#/messages/SpecV0Messages/StopDeviceCmd"
+            "$ref": "#/messages/SpecV4Messages/StopDeviceCmd"
           },
           "StopScanning": {
             "$ref": "#/messages/SpecV0Messages/StopScanning"

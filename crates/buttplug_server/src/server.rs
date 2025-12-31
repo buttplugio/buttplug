@@ -26,14 +26,7 @@ use super::{
 use buttplug_core::{
   errors::*,
   message::{
-    self,
-    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-    ButtplugMessage,
-    ButtplugMessageSpecVersion,
-    ButtplugServerMessageV4,
-    ErrorV0,
-    StopAllDevicesV0,
-    StopScanningV0,
+    self, BUTTPLUG_CURRENT_API_MAJOR_VERSION, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugServerMessageV4, ErrorV0, StopAllDevicesV4, StopScanningV0
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
@@ -184,7 +177,7 @@ impl ButtplugServer {
       ButtplugCheckedClientMessageV4::StopScanning(StopScanningV0::default()),
     );
     let stop_fut = self.parse_checked_message(ButtplugCheckedClientMessageV4::StopAllDevices(
-      StopAllDevicesV0::default(),
+      StopAllDevicesV4::default(),
     ));
     let connected = self.connected.clone();
     async move {

@@ -19,8 +19,8 @@ use crate::message::{
   ScanningFinishedV0,
   ServerInfoV4,
   StartScanningV0,
-  StopAllDevicesV0,
-  StopDeviceCmdV0,
+  StopAllDevicesV4,
+  StopDeviceCmdV4,
   StopScanningV0,
   v4::input_cmd::InputCmdV4,
 };
@@ -49,8 +49,8 @@ pub enum ButtplugClientMessageV4 {
   StopScanning(StopScanningV0),
   RequestDeviceList(RequestDeviceListV0),
   // Generic commands
-  StopDeviceCmd(StopDeviceCmdV0),
-  StopAllDevices(StopAllDevicesV0),
+  StopDeviceCmd(StopDeviceCmdV4),
+  StopAllDevices(StopAllDevicesV4),
   OutputCmd(OutputCmdV4),
   InputCmd(InputCmdV4),
 }

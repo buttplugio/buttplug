@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 
 use super::*;
-use crate::message::RequestServerInfoV1;
+use crate::message::{RequestServerInfoV1, v0::stop_device_cmd::StopDeviceCmdV0};
 use buttplug_core::{
   errors::ButtplugMessageError,
   message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, PingV0},

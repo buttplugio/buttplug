@@ -498,6 +498,8 @@ pub struct ServerDeviceFeatureInput {
   rssi: Option<ServerDeviceFeatureInputProperties>,
   pressure: Option<ServerDeviceFeatureInputProperties>,
   button: Option<ServerDeviceFeatureInputProperties>,
+  depth: Option<ServerDeviceFeatureInputProperties>,
+  position: Option<ServerDeviceFeatureInputProperties>,
 }
 
 impl ServerDeviceFeatureInput {
@@ -507,6 +509,8 @@ impl ServerDeviceFeatureInput {
       InputType::Rssi => self.rssi.is_some(),
       InputType::Pressure => self.pressure.is_some(),
       InputType::Button => self.button.is_some(),
+      InputType::Depth => self.depth.is_some(),
+      InputType::Position => self.position.is_some(),
       InputType::Unknown => false,
     }
   }

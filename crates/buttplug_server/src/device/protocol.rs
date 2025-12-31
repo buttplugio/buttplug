@@ -411,6 +411,15 @@ pub trait ProtocolHandler: Sync + Send {
     }
   }
 
+  // Used for clients that have inputs which can be subscribed. Subscribed inputs should be
+  // disconnected between client sessions, but unlike keepalives are not needed to keep the
+  // system up. 
+  fn handle_client_disconnect_cmd(
+    &self,
+  ) -> BoxFuture<'_, Result<(), ButtplugDeviceError>> {
+    future::ready(Ok(())).boxed()
+  }
+
   // Handle Battery Level returns a SensorReading, as we'll always need to do a sensor index
   // conversion on it.
   fn handle_battery_level_cmd(

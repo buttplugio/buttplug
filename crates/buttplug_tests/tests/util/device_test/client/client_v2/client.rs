@@ -17,7 +17,6 @@ use buttplug_core::{
     PingV0,
     RequestDeviceListV0,
     StartScanningV0,
-    StopAllDevicesV0,
     StopScanningV0,
   },
   util::{
@@ -30,6 +29,7 @@ use buttplug_server::message::{
   ButtplugClientMessageV2,
   ButtplugServerMessageV2,
   RequestServerInfoV1,
+  StopAllDevicesV0,
 };
 use dashmap::DashMap;
 use futures::{

@@ -8,7 +8,6 @@
 use super::ButtplugSerializerError;
 use crate::{errors::{ButtplugError, ButtplugMessageError}, message::{ButtplugMessage, ButtplugMessageFinalizer, ErrorV0}};
 use jsonschema::Validator;
-use log::info;
 use serde::{Deserialize, Serialize};
 use serde_json::{Deserializer, Value};
 use std::fmt::{Debug, Display};
@@ -34,7 +33,6 @@ pub fn vec_to_protocol_json<T>(validator: &Validator, msg: &[T]) -> Result<Strin
 where
   T: ButtplugMessage + Serialize + Deserialize<'static> + Debug,
 {
-  info!("Serializing {:?}", msg);
   let return_error_msg = |e: &dyn Display| {
     let err = ButtplugMessageError::MessageSerializationError(ButtplugSerializerError::JsonSerializerError(e.to_string()));
     // Just return the error message. For the server, we'll need to wrap it. For the client, we'll just die.

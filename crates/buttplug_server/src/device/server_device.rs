@@ -295,6 +295,7 @@ impl ServerDevice {
           };
           select! {
             hw_event = hardware_events.recv() => {
+              // TODO This logic doesn't make sense?
               if let Ok(hw_event) = hw_event {
                 if matches!(hw_event, HardwareEvent::Disconnected(_)) {
                   info!("Hardware disconnected, shutting down keepalive");
@@ -668,6 +669,7 @@ impl ServerDevice {
     feature_id: Uuid,
     input_type: InputType,
   ) -> ButtplugServerResultFuture {
+    info!("Handling input subscribe command");
     let device = self.hardware.clone();
     let handler = self.handler.clone();
     async move {

@@ -5,14 +5,14 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::message::v1::{
+use crate::message::{StopAllDevicesV0, StopDeviceCmdV0, v1::{
   ButtplugClientMessageV1,
   ButtplugServerMessageV1,
   LinearCmdV1,
   RequestServerInfoV1,
   RotateCmdV1,
   VibrateCmdV1,
-};
+}};
 use buttplug_core::{
   errors::{ButtplugError, ButtplugMessageError},
   message::{
@@ -26,8 +26,6 @@ use buttplug_core::{
     RequestDeviceListV0,
     ScanningFinishedV0,
     StartScanningV0,
-    StopAllDevicesV0,
-    StopDeviceCmdV0,
     StopScanningV0,
   },
 };
