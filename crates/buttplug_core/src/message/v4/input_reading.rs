@@ -34,6 +34,12 @@ where
   }
 }
 
+impl From<u8> for InputValue<u8> {
+  fn from(value: u8) -> Self {
+    InputValue::new(value)
+  }
+}
+
 #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum InputTypeReading {
   Battery(InputValue<u8>),

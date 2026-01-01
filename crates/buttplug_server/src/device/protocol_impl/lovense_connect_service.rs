@@ -5,33 +5,51 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::{self, ActuatorType, Endpoint, FeatureType, SensorReadingV4},
-  },
-use crate::{
-    device::{
-      configuration::{ProtocolCommunicationSpecifier, UserDeviceDefinition, UserDeviceIdentifier},
-      hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-      protocol::{
-        generic_protocol_initializer_setup,
-        ProtocolHandler,
-        ProtocolIdentifier,
-        ProtocolInitializer,
-      },
-    },
-    message::checked_sensor_read_cmd::CheckedSensorReadCmdV4,
-  },
-};
 use async_trait::async_trait;
+use buttplug_core::{errors::ButtplugDeviceError, message::{InputReadingV4, OutputType}};
+use buttplug_server_device_config::{Endpoint, ProtocolCommunicationSpecifier, UserDeviceIdentifier};
 use futures::future::{BoxFuture, FutureExt};
+use uuid::{Uuid, uuid};
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
 
-generic_protocol_initializer_setup!(LovenseConnectService, "lovense-connect-service");
+use buttplug_server_device_config::ServerDeviceDefinition;
+use crate::{device::{hardware::{Hardware, HardwareWriteCmd, HardwareReadCmd}, protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer}}};
+
+const LOVENSE_CONNECT_UUID: Uuid = uuid!("590bfbbf-c3b7-41ae-9679-485b190ffb87");
+
+pub mod setup {
+  use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
+  #[derive(Default)]
+  pub struct LovenseConnectIdentifierFactory {}
+
+  impl ProtocolIdentifierFactory for LovenseConnectIdentifierFactory {
+    fn identifier(&self) -> &str {
+      "lovense-connect-service"
+    }
+
+    fn create(&self) -> Box<dyn ProtocolIdentifier> {
+      Box::new(super::LovenseConnectIdentifier::default())
+    }
+  }
+}
+
+
+#[derive(Default)]
+pub struct LovenseConnectIdentifier {}
+
+#[async_trait]
+impl ProtocolIdentifier for LovenseConnectIdentifier {
+  async fn identify(
+    &mut self,
+    hardware: Arc<Hardware>,
+    _: ProtocolCommunicationSpecifier,
+  ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+    Ok((UserDeviceIdentifier::new(hardware.address(), "lovense-connect-service", &Some(hardware.name().to_owned())), Box::new(LovenseConnectServiceInitializer::default())))
+  }
+}
 
 #[derive(Default)]
 pub struct LovenseConnectServiceInitializer {}
@@ -41,19 +59,31 @@ impl ProtocolInitializer for LovenseConnectServiceInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    device_definition: &UserDeviceDefinition,
+    device_definition: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut protocol = LovenseConnectService::new(hardware.address());
 
     protocol.vibrator_count = device_definition
       .features()
       .iter()
-      .filter(|x| *x.feature_type() == FeatureType::Vibrate)
+      .filter(|x| {
+        if let Some(o) = x.1.output() {
+          o.contains(OutputType::Vibrate)
+        } else {
+          false
+        }
+      })
       .count();
     protocol.thusting_count = device_definition
       .features()
       .iter()
-      .filter(|x| *x.feature_type() == FeatureType::Oscillate)
+      .filter(|x| {
+        if let Some(o) = x.1.output() {
+          o.contains(OutputType::Oscillate)
+        } else {
+          false
+        }
+      })
       .count();
 
     // The Ridge and Gravity both oscillate, but the Ridge only oscillates but takes
@@ -71,7 +101,7 @@ impl ProtocolInitializer for LovenseConnectServiceInitializer {
         .to_vec();
 
       hardware
-        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false))
+        .write_value(&HardwareWriteCmd::new(&vec![LOVENSE_CONNECT_UUID], Endpoint::Tx, lovense_cmd, false))
         .await?;
 
       protocol.vibrator_count = 0;
@@ -100,102 +130,29 @@ impl LovenseConnectService {
 }
 
 impl ProtocolHandler for LovenseConnectService {
-  fn handle_value_cmd(
-    &self,
-    cmds: &[Option<(ActuatorType, i32)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_cmd(
+      &self,
+      cmd: &crate::message::checked_output_cmd::CheckedOutputCmdV4,
+    ) -> Result<Vec<crate::device::hardware::HardwareCommand>, ButtplugDeviceError> {
     let mut hardware_cmds = vec![];
 
-    // Handle vibration commands, these will be by far the most common. Fucking machine oscillation
-    // uses lovense vibrate commands internally too, so we can include them here.
-    let vibrate_cmds: Vec<&(ActuatorType, i32)> = cmds
-      .iter()
-      .filter(|x| {
-        if let Some(val) = x {
-          if self.thusting_count == 0 {
-            [ActuatorType::Vibrate, ActuatorType::Oscillate].contains(&val.0)
-          } else {
-            [ActuatorType::Vibrate].contains(&val.0)
-          }
-        } else {
-          false
-        }
-      })
-      .map(|x| x.as_ref().expect("Already verified is some"))
-      .collect();
-
-    if !vibrate_cmds.is_empty() {
-      // Lovense is the same situation as the Lovehoney Desire, where commands
-      // are different if we're addressing all motors or seperate motors.
-      // Difference here being that there's Lovense variants with different
-      // numbers of motors.
+    // We do all of our validity checking during message conversion to checked, so we should be able to skip validity checking here.
+    if cmd.output_command().as_output_type() == OutputType::Vibrate {
+      // Sure do hope we're keeping our vibrator indexes aligned with what lovense expects!
       //
-      // Neat way of checking if everything is the same via
-      // https://sts10.github.io/2019/06/06/is-all-equal-function.html.
-      //
-      // Just make sure we're not matching on None, 'cause if that's the case
-      // we ain't got shit to do.
-      if self.vibrator_count == vibrate_cmds.len()
-        && (self.vibrator_count == 1 || vibrate_cmds.windows(2).all(|w| w[0].1 == w[1].1))
-      {
-        let lovense_cmd = format!("Vibrate?v={}&t={}", vibrate_cmds[0].1, self.address)
-          .as_bytes()
-          .to_vec();
-        hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
-      } else {
-        for (i, cmd) in cmds.iter().enumerate() {
-          if let Some((actuator, speed)) = cmd {
-            if self.thusting_count == 0
-              && ![ActuatorType::Vibrate, ActuatorType::Oscillate].contains(actuator)
-            {
-              continue;
-            }
-            if self.thusting_count != 0 && ![ActuatorType::Vibrate].contains(actuator) {
-              continue;
-            }
-            let lovense_cmd = format!("Vibrate{}?v={}&t={}", i + 1, speed, self.address)
-              .as_bytes()
-              .to_vec();
-            hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
-          }
-        }
-      }
-    }
-
-    // Handle constriction commands.
-    let thrusting_cmds: Vec<&(ActuatorType, i32)> = cmds
-      .iter()
-      .filter(|x| {
-        if let Some(val) = x {
-          [ActuatorType::Oscillate].contains(&val.0)
-        } else {
-          false
-        }
-      })
-      .map(|x| x.as_ref().expect("Already verified is some"))
-      .collect();
-    if self.thusting_count != 0 && !thrusting_cmds.is_empty() {
-      let lovense_cmd = format!("Thrusting?v={}&t={}", thrusting_cmds[0].1, self.address)
+      // God I can't wait to fucking kill this stupid protocol.
+      let lovense_cmd = format!("Vibrate{}?v={}&t={}", cmd.feature_index() + 1, cmd.output_command().value(), self.address)
         .as_bytes()
         .to_vec();
-
-      hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
-    }
-
-    // Handle constriction commands.
-    let constrict_cmds: Vec<&(ActuatorType, i32)> = cmds
-      .iter()
-      .filter(|x| {
-        if let Some(val) = x {
-          val.0 == ActuatorType::Constrict
-        } else {
-          false
-        }
-      })
-      .map(|x| x.as_ref().expect("Already verified is some"))
-      .collect();
-
-    if !constrict_cmds.is_empty() {
+      hardware_cmds.push(HardwareWriteCmd::new(&vec![LOVENSE_CONNECT_UUID], Endpoint::Tx, lovense_cmd, false).into());
+      Ok(hardware_cmds)
+    } else if self.thusting_count != 0 && cmd.output_command().as_output_type() == OutputType::Oscillate {
+      let lovense_cmd = format!("Thrusting?v={}&t={}", cmd.output_command().value(), self.address)
+        .as_bytes()
+        .to_vec();
+      hardware_cmds.push(HardwareWriteCmd::new(&vec![LOVENSE_CONNECT_UUID], Endpoint::Tx, lovense_cmd, false).into());
+      Ok(hardware_cmds)
+    } else if cmd.output_command().as_output_type() == OutputType::Oscillate {
       // Only the max has a constriction system, and there's only one, so just parse the first command.
       /* ~ Sutekh
        * - Implemented constriction.
@@ -203,112 +160,58 @@ impl ProtocolHandler for LovenseConnectService {
        * - Using AirAuto method.
        * - Changed step count in device config file to 3.
        */
-      let lovense_cmd = format!("AirAuto?v={}&t={}", constrict_cmds[0].1, self.address)
+      let lovense_cmd = format!("AirAuto?v={}&t={}", cmd.output_command().value(), self.address)
         .as_bytes()
         .to_vec();
 
-      hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+      hardware_cmds.push(HardwareWriteCmd::new(&vec![LOVENSE_CONNECT_UUID], Endpoint::Tx, lovense_cmd, false).into());
+      Ok(hardware_cmds)
+    } else {
+      Ok(hardware_cmds)
     }
-
-    // Handle "rotation" commands: Currently just applicable as the Flexer's Fingering command
-    let rotation_cmds: Vec<&(ActuatorType, i32)> = cmds
-      .iter()
-      .filter(|x| {
-        if let Some(val) = x {
-          val.0 == ActuatorType::Rotate
-        } else {
-          false
-        }
-      })
-      .map(|x| x.as_ref().expect("Already verified is some"))
-      .collect();
-
-    if !rotation_cmds.is_empty() {
-      let lovense_cmd = format!("Fingering?v={}&t={}", rotation_cmds[0].1, self.address)
-        .as_bytes()
-        .to_vec();
-
-      hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
-    }
-
-    Ok(hardware_cmds)
-
-    /* Note from Sutekh:
-     * I removed the code below to keep the handle_scalar_cmd methods for lovense toys somewhat consistent.
-     * The patch above is almost the same as the "Lovense" ProtocolHandler implementation.
-     * I have changed the commands to the Lovense Connect API format.
-     * During my testing of the Lovense Connect app's API it seems that even though Constriction has a step range of 0-5. It only responds to values 1-3.
-     */
-
-    /*
-        // Lovense is the same situation as the Lovehoney Desire, where commands
-        // are different if we're addressing all motors or seperate motors.
-        // Difference here being that there's Lovense variants with different
-    @@ -77,26 +220,27 @@
-        // Just make sure we're not matching on None, 'cause if that's the case
-        // we ain't got shit to do.
-        let mut msg_vec = vec![];
-        if cmds[0].is_some() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
-          let lovense_cmd = format!(
-            "Vibrate?v={}&t={}",
-            cmds[0].expect("Already checked existence").1,
-            self.address
-          )
-          .as_bytes()
-          .to_vec();
-          msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
-        } else {
-          for (i, cmd) in cmds.iter().enumerate() {
-            if let Some((_, speed)) = cmd {
-              let lovense_cmd = format!("Vibrate{}?v={}&t={}", i + 1, speed, self.address)
-                .as_bytes()
-                .to_vec();
-              msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
-            }
-          }
-        }
-        Ok(msg_vec)
-        */
   }
 
-  fn handle_rotate_cmd(
-    &self,
-    cmds: &[Option<(u32, bool)>],
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_rotate_cmd(
+      &self,
+      _feature_index: u32,
+      _feature_id: Uuid,
+      speed: i32,
+    ) -> Result<Vec<crate::device::hardware::HardwareCommand>, ButtplugDeviceError> {
     let mut hardware_cmds = vec![];
-    if let Some(Some((speed, clockwise))) = cmds.first() {
-      let lovense_cmd = format!("/Rotate?v={}&t={}", speed, self.address)
-        .as_bytes()
-        .to_vec();
-      hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
-      let dir = self.rotation_direction.load(Ordering::Relaxed);
-      // TODO Should we store speed and direction as an option for rotation caching? This is weird.
-      if dir != *clockwise {
-        self.rotation_direction.store(*clockwise, Ordering::Relaxed);
-        hardware_cmds
-          .push(HardwareWriteCmd::new(Endpoint::Tx, b"RotateChange?".to_vec(), false).into());
-      }
+    let lovense_cmd = format!("/Rotate?v={}&t={}", speed, self.address)
+      .as_bytes()
+      .to_vec();
+    let clockwise = speed > 0;
+    hardware_cmds.push(HardwareWriteCmd::new(&vec![LOVENSE_CONNECT_UUID], Endpoint::Tx, lovense_cmd, false).into());
+    let dir = self.rotation_direction.load(Ordering::Relaxed);
+    // TODO Should we store speed and direction as an option for rotation caching? This is weird.
+    if dir != clockwise {
+      self.rotation_direction.store(clockwise, Ordering::Relaxed);
+      hardware_cmds
+        .push(HardwareWriteCmd::new(&vec![LOVENSE_CONNECT_UUID],Endpoint::Tx, b"RotateChange?".to_vec(), false).into());
     }
     Ok(hardware_cmds)
   }
 
-  fn handle_battery_level_cmd(
-    &self,
-    device: Arc<Hardware>,
-    msg: CheckedSensorReadCmdV4,
-  ) -> BoxFuture<Result<SensorReadingV4, ButtplugDeviceError>> {
+  fn handle_input_read_cmd(
+      &self,
+      device_index: u32,
+      device: Arc<Hardware>,
+      feature_index: u32,
+      _feature_id: Uuid,
+      _sensor_type: buttplug_core::message::InputType,
+    ) -> BoxFuture<'_, Result<buttplug_core::message::InputReadingV4, ButtplugDeviceError>> {
     async move {
       // This is a dummy read. We just store the battery level in the device
       // implementation and it's the only thing read will return.
       let reading = device
-        .read_value(&HardwareReadCmd::new(Endpoint::Rx, 0, 0))
+        .read_value(&HardwareReadCmd::new(LOVENSE_CONNECT_UUID, Endpoint::Rx, 0, 0))
         .await?;
       debug!("Battery level: {}", reading.data()[0]);
-      Ok(message::SensorReadingV4::new(
-        msg.device_index(),
-        msg.feature_index(),
-        msg.input_type(),
-        vec![reading.data()[0] as i32],
+      Ok(InputReadingV4::new(
+        device_index,
+        feature_index,
+        buttplug_core::message::InputTypeReading::Battery(reading.data()[0].into())
       ))
     }
     .boxed()
