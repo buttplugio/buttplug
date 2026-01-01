@@ -161,7 +161,7 @@ pub async fn run_server(
           .port(port)
           .listen_on_all_interfaces(options.websocket_use_all_interfaces())
           .finish(),
-      ))
+      ), options.allow_v4_spec())
       .await
   } else if let Some(addr) = options.websocket_client_address() {
     server
@@ -170,7 +170,7 @@ pub async fn run_server(
         ButtplugServerJSONSerializer,
       >::new(
         ButtplugWebsocketClientTransport::new_insecure_connector(addr),
-      ))
+      ), options.allow_v4_spec())
       .await
   } else {
     panic!(

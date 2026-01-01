@@ -168,6 +168,11 @@ pub struct IntifaceCLIArguments {
   #[argh(switch)]
   #[getset(get_copy = "pub")]
   crash_task_thread: bool,
+
+  /// allow usage of the beta v4 api spec
+  #[argh(switch)]
+  #[getset(get_copy = "pub")]
+  allow_v4_spec: bool,
 }
 
 pub fn setup_console_logging(log_level: Option<Level>) {
@@ -243,6 +248,7 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
       .use_device_websocket_server(args.use_device_websocket_server())
       .max_ping_time(args.max_ping_time())
       .server_name(args.server_name())
+      .allow_v4_spec(args.allow_v4_spec)
       .broadcast_server_mdns(args.broadcast_server_mdns());
 
     #[cfg(debug_assertions)]

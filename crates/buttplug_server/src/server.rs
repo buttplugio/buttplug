@@ -118,6 +118,10 @@ impl ButtplugServer {
     self.client_name.get().cloned()
   }
 
+  pub fn spec_version(&self) -> Option<ButtplugMessageSpecVersion> {
+    self.spec_version.get().cloned()
+  }
+
   /// Retreive an async stream of ButtplugServerMessages. This is how the server sends out
   /// non-query-related updates to the system, including information on devices being added/removed,
   /// client disconnection, etc...
@@ -215,6 +219,14 @@ impl ButtplugServer {
     let features = self.device_manager().feature_map();
     let msg_id = msg.id();
     trace!("Server received: {:?}", msg);
+    let v = msg.version();
+    let spec_version = *self.spec_version.get_or_init(|| {
+      info!(
+        "Setting Buttplug Server Message Spec version to {}",
+        v
+      );
+      v
+    });
     match msg {
       ButtplugClientMessageVariant::V4(msg) => {
         let internal_msg =
@@ -241,15 +253,7 @@ impl ButtplugServer {
         .boxed()
       }
       msg => {
-        let v = msg.version();
         let converter = ButtplugServerMessageConverter::new(Some(msg.clone()));
-        let spec_version = *self.spec_version.get_or_init(|| {
-          info!(
-            "Setting Buttplug Server Message Spec Downgrade version to {}",
-            v
-          );
-          v
-        });
         match ButtplugCheckedClientMessageV4::try_from_client_message(msg, &features) {
           Ok(converted_msg) => {
             trace!("Converted message: {:?}", converted_msg);
