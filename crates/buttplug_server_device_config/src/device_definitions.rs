@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use getset::{CopyGetters, Getters};
 use uuid::Uuid;
 
@@ -23,8 +25,12 @@ pub struct ServerDeviceDefinition {
   deny: bool,
   #[getset(get_copy = "pub")]
   index: u32,
+  // FEATURES MUST BE A BTREEMAP
+  //
+  // Older versions of the protocol expect specific ordering, so we need to make sure storage
+  // adheres to that since we do a lot of value iteration elsewhere.
   #[getset(get = "pub")]
-  features: Vec<ServerDeviceFeature>,
+  features: BTreeMap<u32, ServerDeviceFeature>,
 }
 
 #[derive(Debug)]
@@ -45,7 +51,7 @@ impl ServerDeviceDefinitionBuilder {
         allow: false,
         deny: false,
         index: 0,
-        features: vec![],
+        features: BTreeMap::new(),
       },
     }
   }
@@ -59,10 +65,13 @@ impl ServerDeviceDefinitionBuilder {
       value.features = value
         .features()
         .iter()
-        .map(|x| x.as_new_user_feature())
+        .map(|(index, x)| {
+          let feat = x.as_new_user_feature();
+          (*index, feat)
+        })
         .collect();
     } else {
-      value.features = vec![];
+      value.features = BTreeMap::new();
     }
     ServerDeviceDefinitionBuilder { def: value }
   }
@@ -112,16 +121,16 @@ impl ServerDeviceDefinitionBuilder {
   }
 
   pub fn add_feature(&mut self, feature: &ServerDeviceFeature) -> &mut Self {
-    self.def.features.push(feature.clone());
+    self.def.features.insert(feature.index(), feature.clone());
     self
   }
 
   pub fn replace_feature(&mut self, feature: &ServerDeviceFeature) -> &mut Self {
-    if let Some(f) = self
+    if let Some((_, f)) = self
       .def
       .features
       .iter_mut()
-      .find(|x| x.id() == feature.id())
+      .find(|(_, x)| x.id() == feature.id())
     {
       *f = feature.clone();
     }

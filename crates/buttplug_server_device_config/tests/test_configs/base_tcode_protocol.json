@@ -8,6 +8,7 @@
       "defaults": {
         "features": [
           {
+            "index": 0,
             "id": "4097edde-7efb-4c3e-afdb-0aeb82a03fd9",
             "output": {
               "position": {
@@ -17,7 +18,7 @@
                 ]
               },
               "position_with_duration": {
-                "position": [
+                "value": [
                   0,
                   1000
                 ],

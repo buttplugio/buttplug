@@ -1,0 +1,48 @@
+---
+defaults:
+  name: The Handy (FW4+)
+  features:
+  - id: ccbbda59-cf58-477e-b1b2-e0897c4bb0ce
+    output:
+      position_with_duration:
+        value:
+        - 0
+        - 100
+        duration:
+        - 0
+        - 100000
+    index: 0
+  id: ccbbda59-cf58-477e-b1b2-e0897c4bb0ce
+configurations:
+- identifier:
+  - hw4
+  name: The Handy 2 Pro
+  id: 156b5088-94f4-4522-a2d3-f1c665755307
+- identifier:
+  - hw3
+  name: The Handy 2 Standard
+  id: 21686593-c4b8-4772-bc7b-d8986689f394
+- identifier:
+  - hw1
+  name: The Oh!
+  features:
+  - id: e63c0735-ac52-4e4d-adf9-d272a46e53ed
+    output:
+      vibrate:
+        value:
+        - 0
+        - 100
+    index: 0
+  id: b6ea38ac-ce2c-4fa0-a24f-7f0fc6a23951
+communication:
+- btle:
+    names:
+    - OHD_hw0_*
+    - OHD_hw1_*
+    - OHD_hw2_*
+    - OHD_hw3_*
+    - OHD_hw4_*
+    services:
+      77834d26-40f7-11ee-be56-0242ac120002:
+        tx: 77835032-40f7-11ee-be56-0242ac120002
+        rx: 77835410-40f7-11ee-be56-0242ac120002

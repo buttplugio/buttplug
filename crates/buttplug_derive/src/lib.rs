@@ -23,21 +23,22 @@ pub fn buttplug_message_derive(input: TokenStream) -> TokenStream {
 fn impl_buttplug_message_macro(ast: &syn::DeriveInput) -> TokenStream {
   let name = &ast.ident;
 
-  match ast.data {
-    syn::Data::Enum(ref e) => {
+  match &ast.data {
+    syn::Data::Enum(e) => {
+      let e = e.clone();
       let idents = e.variants.iter().map(|x| x.ident.clone());
       let idents2 = idents.clone();
       let r#gen = quote! {
           impl ButtplugMessage for #name {
               fn id(&self) -> u32 {
                   match self {
-                      #( #name::#idents(ref msg) => msg.id(),)*
+                      #( #name::#idents(msg) => msg.id(),)*
 
                   }
               }
               fn set_id(&mut self, id: u32) {
                   match self {
-                      #( #name::#idents2(ref mut msg) => msg.set_id(id),)*
+                      #( #name::#idents2(msg) => msg.set_id(id),)*
                   }
               }
           }
@@ -82,13 +83,13 @@ fn impl_buttplug_device_message_macro(ast: &syn::DeriveInput) -> TokenStream {
           impl ButtplugDeviceMessage for #name {
               fn device_index(&self) -> u32 {
                   match self {
-                      #( #name::#idents(ref msg) => msg.device_index(),)*
+                      #( #name::#idents(msg) => msg.device_index(),)*
 
                   }
               }
               fn set_device_index(&mut self, id: u32) {
                   match self {
-                      #( #name::#idents(ref mut msg) => msg.set_device_index(id),)*
+                      #( #name::#idents(msg) => msg.set_device_index(id),)*
                   }
               }
           }

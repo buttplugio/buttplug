@@ -59,7 +59,7 @@ impl ProtocolInitializer for WeVibeInitializer {
       .await?;
     let num_vibrators = def
       .features()
-      .iter()
+      .values()
       .filter(|x| {
         x.output()
           .as_ref()

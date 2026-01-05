@@ -394,7 +394,7 @@
             "PositionWithDuration": {
               "type": "object",
               "properties": {
-                "Position": {
+                "Value": {
                   "$ref": "#/components/RangeInclusive"
                 },
                 "Duration": {
@@ -402,7 +402,7 @@
                 }
               },
               "required": [
-                "Position",
+                "Value",
                 "Duration"
               ]
             }
@@ -414,7 +414,7 @@
             "^.*$": {
               "type": "object",
               "properties": {
-                "ValueRange": {
+                "Value": {
                   "type": "array",
                   "items": {
                     "type": "array",
@@ -422,10 +422,17 @@
                       "type": "integer"
                     }
                   }
+                },
+                "Command": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 }
               },
               "required": [
-                "ValueRange"
+                "Value",
+                "Command"
               ]
             }
           }
@@ -469,7 +476,7 @@
               "^PositionWithDuration$": {
                 "type": "object",
                 "properties": {
-                  "Position": {
+                  "Value": {
                     "type": "number",
                     "minimum": 0
                   },
@@ -479,7 +486,7 @@
                   }
                 },
                 "required": [
-                  "Position",
+                  "Value",
                   "Duration"
                 ]
               }
@@ -507,10 +514,10 @@
           "FeatureIndex": {
             "type": "integer"
           },
-          "InputType": {
+          "Type": {
             "type": "string"
           },
-          "InputCommand": {
+          "Command": {
             "type": "string"
           }
         },
@@ -519,8 +526,8 @@
           "Id",
           "DeviceIndex",
           "FeatureIndex",
-          "InputType",
-          "InputCommand"
+          "Type",
+          "Command"
         ]
       },
       "InputReading": {
@@ -536,11 +543,11 @@
           "FeatureIndex": {
             "type": "integer"
           },
-          "Data": {
+          "Reading": {
             "type": "object",
             "patternProperties": {
               "^Battery|Rssi|Pressure|Button": {
-                "type": "integer"
+                "type": "object"
               }
             },
             "maxProperties": 1
@@ -551,7 +558,7 @@
           "Id",
           "DeviceIndex",
           "FeatureIndex",
-          "Data"
+          "Reading"
         ]
       },
       "DeviceList": {
@@ -663,6 +670,48 @@
             "minimum": 0
           }
         }
+      },
+      "StopDeviceCmd": {
+        "type": "object",
+        "description": "Stops the all actions currently being taken by a device.",
+        "properties": {
+          "Id": {
+            "$ref": "#/components/ClientId"
+          },
+          "DeviceIndex": {
+            "$ref": "#/components/DeviceIndex"
+          },
+          "Inputs": {
+            "type": "boolean"
+          },
+          "Outputs": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Id",
+          "DeviceIndex"
+        ]
+      },
+      "StopAllDevices": {
+        "type": "object",
+        "description": "Stops all actions currently being taken by all connected devices.",
+        "properties": {
+          "Id": {
+            "$ref": "#/components/ClientId"
+          },
+          "Inputs": {
+            "type": "boolean"
+          },
+          "Outputs": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "Id"
+        ]
       }
     },
     "SpecV3Messages": {
@@ -1990,10 +2039,10 @@
             "$ref": "#/messages/SpecV0Messages/StartScanning"
           },
           "StopAllDevices": {
-            "$ref": "#/messages/SpecV0Messages/StopAllDevices"
+            "$ref": "#/messages/SpecV4Messages/StopAllDevices"
           },
           "StopDeviceCmd": {
-            "$ref": "#/messages/SpecV0Messages/StopDeviceCmd"
+            "$ref": "#/messages/SpecV4Messages/StopDeviceCmd"
           },
           "StopScanning": {
             "$ref": "#/messages/SpecV0Messages/StopScanning"

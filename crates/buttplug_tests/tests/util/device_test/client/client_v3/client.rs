@@ -15,7 +15,6 @@ use buttplug_core::{
     PingV0,
     RequestDeviceListV0,
     StartScanningV0,
-    StopAllDevicesV0,
     StopScanningV0,
   },
   util::{
@@ -28,6 +27,7 @@ use buttplug_server::message::{
   ButtplugClientMessageV3,
   ButtplugServerMessageV3,
   RequestServerInfoV1,
+  StopAllDevicesV0,
 };
 use dashmap::DashMap;
 use futures::{
@@ -117,6 +117,9 @@ pub enum ButtplugClientEvent {
   /// Emitted when a device has been removed from the server. Includes a
   /// [ButtplugClientDevice] object representing the device.
   DeviceRemoved(Arc<ButtplugClientDevice>),
+  /// Emitted when the device list is received as a response to a
+  /// DeviceListRequest call, which is sent during the handshake.
+  DeviceListReceived,
   /// Emitted when a client has not pinged the server in a sufficient amount of
   /// time.
   PingTimeout,

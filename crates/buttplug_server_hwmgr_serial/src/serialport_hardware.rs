@@ -226,6 +226,7 @@ impl SerialPortHardware {
       .await
       .expect("This will always be a Some value, we're just blocking for bringup")
       .map_err(|e| {
+        error!("Serial port recv creation error: {:?}", e);
         ButtplugDeviceError::DeviceSpecificError(
           HardwareSpecificError::HardwareSpecificError("Serial".to_owned(), e.to_string())
             .to_string(),

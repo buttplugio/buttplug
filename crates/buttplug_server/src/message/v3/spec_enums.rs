@@ -6,6 +6,8 @@
 // for full license information.
 
 use crate::message::{
+  StopAllDevicesV0,
+  StopDeviceCmdV0,
   v1::{LinearCmdV1, RequestServerInfoV1, RotateCmdV1, VibrateCmdV1},
   v2::{ButtplugClientMessageV2, ButtplugServerMessageV2, ServerInfoV2},
 };
@@ -23,8 +25,6 @@ use buttplug_core::{
     RequestDeviceListV0,
     ScanningFinishedV0,
     StartScanningV0,
-    StopAllDevicesV0,
-    StopDeviceCmdV0,
     StopScanningV0,
   },
 };

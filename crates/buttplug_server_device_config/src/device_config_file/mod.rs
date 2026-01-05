@@ -198,12 +198,12 @@ fn load_user_config(
         .build_from_base_definition(base_config.1)
         && let Err(e) = dcm_builder
           .user_device_definition(user_device_config_pair.identifier(), &loaded_user_config)
-        {
-          error!(
-            "Device definition not valid, skipping:\n{:?}\n{:?}",
-            e, user_config
-          )
-        }
+      {
+        error!(
+          "Device definition not valid, skipping:\n{:?}\n{:?}",
+          e, user_config
+        )
+      }
     } else {
       error!(
         "Device identifier {:?} does not have a match base identifier that matches anything in the base config, removing from database.",

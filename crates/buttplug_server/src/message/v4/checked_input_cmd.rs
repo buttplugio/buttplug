@@ -36,6 +36,7 @@ pub struct CheckedInputCmdV4 {
 
 impl CheckedInputCmdV4 {
   pub fn new(
+    id: u32,
     device_index: u32,
     feature_index: u32,
     input_type: InputType,
@@ -43,7 +44,7 @@ impl CheckedInputCmdV4 {
     feature_id: Uuid,
   ) -> Self {
     Self {
-      id: 1,
+      id,
       device_index,
       feature_index,
       input_type,
@@ -65,10 +66,11 @@ impl TryFromDeviceAttributes<InputCmdV4> for CheckedInputCmdV4 {
     msg: InputCmdV4,
     features: &crate::message::ServerDeviceAttributes,
   ) -> Result<Self, buttplug_core::errors::ButtplugError> {
-    if let Some(feature) = features.features().get(msg.feature_index() as usize) {
+    if let Some(feature) = features.features().get(&msg.feature_index()) {
       if let Some(sensor_map) = feature.input() {
         if sensor_map.contains(msg.input_type()) {
           Ok(CheckedInputCmdV4::new(
+            msg.id(),
             msg.device_index(),
             msg.feature_index(),
             msg.input_type(),

@@ -17,15 +17,15 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, CopyGetters)]
 #[getset(get_copy = "pub")]
-pub struct InputData<T>
+pub struct InputValue<T>
 where
   T: Copy + Clone,
 {
-  #[serde(rename = "Data")]
+  #[serde(rename = "Value")]
   data: T,
 }
 
-impl<T> InputData<T>
+impl<T> InputValue<T>
 where
   T: Copy + Clone,
 {
@@ -34,16 +34,22 @@ where
   }
 }
 
-#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum InputTypeData {
-  Battery(InputData<u8>),
-  Rssi(InputData<i8>),
-  Button(InputData<u8>),
-  Pressure(InputData<u32>),
+impl From<u8> for InputValue<u8> {
+  fn from(value: u8) -> Self {
+    InputValue::new(value)
+  }
 }
 
-impl InputTypeData {
-  pub fn as_input_type(&self) -> InputType {
+#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum InputTypeReading {
+  Battery(InputValue<u8>),
+  Rssi(InputValue<i8>),
+  Button(InputValue<u8>),
+  Pressure(InputValue<u32>),
+}
+
+impl Into<InputType> for InputTypeReading {
+  fn into(self) -> InputType {
     match self {
       Self::Battery(_) => InputType::Battery,
       Self::Rssi(_) => InputType::Rssi,
@@ -76,18 +82,18 @@ pub struct InputReadingV4 {
   #[serde(rename = "FeatureIndex")]
   #[getset[get_copy="pub"]]
   feature_index: u32,
-  #[serde(rename = "Data")]
+  #[serde(rename = "Reading")]
   #[getset[get_copy="pub"]]
-  data: InputTypeData,
+  reading: InputTypeReading,
 }
 
 impl InputReadingV4 {
-  pub fn new(device_index: u32, feature_index: u32, data: InputTypeData) -> Self {
+  pub fn new(device_index: u32, feature_index: u32, data: InputTypeReading) -> Self {
     Self {
       id: 0,
       device_index,
       feature_index,
-      data,
+      reading: data,
     }
   }
 }

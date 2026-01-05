@@ -1,6 +1,6 @@
 [package]
 name = "buttplug_derive"
-version = "0.9.0"
+version = "0.9.1"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Trait Derive Macros for Buttplug Intimate Hardware Control Library"
 license = "BSD-3-Clause"
@@ -13,5 +13,6 @@ edition = "2024"
 proc-macro = true
 
 [dependencies]
-syn = "2.0.104"
+syn = "2.0.111"
+# Required to stay <= 1.0.40 to satisfy dependency in serial port hardware manager. :(
 quote = "1.0.40"

@@ -23,7 +23,7 @@ use buttplug_core::{
     DeviceFeature,
     DeviceMessageInfoV4,
     OutputType,
-    StopDeviceCmdV0,
+    StopDeviceCmdV4,
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
@@ -211,11 +211,44 @@ impl ButtplugClientDevice {
 
   /// Commands device to vibrate, assuming it has the features to do so.
   pub fn vibrate(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
-    let val = level.into();
-    self.set_client_value(&match val {
-      ClientDeviceCommandValue::Int(v) => ClientDeviceOutputCommand::Vibrate(v as u32),
-      ClientDeviceCommandValue::Float(f) => ClientDeviceOutputCommand::VibrateFloat(f),
-    })
+    self.set_client_value(&ClientDeviceOutputCommand::Vibrate(level.into()))
+  }
+
+  pub fn oscillate(
+    &self,
+    level: impl Into<ClientDeviceCommandValue>,
+  ) -> ButtplugClientResultFuture {
+    self.set_client_value(&ClientDeviceOutputCommand::Oscillate(level.into()))
+  }
+
+  pub fn rotate(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
+    self.set_client_value(&ClientDeviceOutputCommand::Rotate(level.into()))
+  }
+
+  pub fn spray(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
+    self.set_client_value(&ClientDeviceOutputCommand::Spray(level.into()))
+  }
+
+  pub fn constrict(
+    &self,
+    level: impl Into<ClientDeviceCommandValue>,
+  ) -> ButtplugClientResultFuture {
+    self.set_client_value(&ClientDeviceOutputCommand::Constrict(level.into()))
+  }
+
+  pub fn position(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
+    self.set_client_value(&ClientDeviceOutputCommand::Position(level.into()))
+  }
+
+  pub fn position_with_duration(
+    &self,
+    position: impl Into<ClientDeviceCommandValue>,
+    duration_in_ms: u32,
+  ) -> ButtplugClientResultFuture {
+    self.set_client_value(&ClientDeviceOutputCommand::PositionWithDuration(
+      position.into(),
+      duration_in_ms,
+    ))
   }
 
   pub fn has_battery_level(&self) -> bool {
@@ -281,7 +314,14 @@ impl ButtplugClientDevice {
     // All devices accept StopDeviceCmd
     self
       .event_loop_sender
-      .send_message_expect_ok(StopDeviceCmdV0::new(self.index).into())
+      .send_message_expect_ok(StopDeviceCmdV4::new(self.index, true, true).into())
+  }
+
+  pub fn stop_features(&self, inputs: bool, outputs: bool) -> ButtplugClientResultFuture {
+    // All devices accept StopDeviceCmd
+    self
+      .event_loop_sender
+      .send_message_expect_ok(StopDeviceCmdV4::new(self.index, inputs, outputs).into())
   }
 
   pub(crate) fn set_device_connected(&self, connected: bool) {

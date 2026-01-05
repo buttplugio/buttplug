@@ -451,7 +451,10 @@ impl From<ServerDeviceFeatureOutput> for DeviceFeatureOutput {
     val.rotate.as_ref().map(|x| builder.rotate(x.into()));
     val.oscillate.as_ref().map(|x| builder.oscillate(x.into()));
     val.constrict.as_ref().map(|x| builder.constrict(x.into()));
-    val.temperature.as_ref().map(|x| builder.temperature(x.into()));
+    val
+      .temperature
+      .as_ref()
+      .map(|x| builder.temperature(x.into()));
     val.led.as_ref().map(|x| builder.led(x.into()));
     val.position.as_ref().map(|x| builder.position(x.into()));
     val
@@ -466,25 +469,25 @@ impl From<ServerDeviceFeatureOutput> for DeviceFeatureOutput {
 #[derive(Clone, Debug, Getters)]
 #[getset(get = "pub")]
 pub struct ServerDeviceFeatureInputProperties {
-  value_range: Vec<RangeInclusive<i32>>,
-  input_commands: HashSet<InputCommandType>,
+  value: Vec<RangeInclusive<i32>>,
+  command: HashSet<InputCommandType>,
 }
 
 impl ServerDeviceFeatureInputProperties {
   pub fn new(
-    value_range: &Vec<RangeInclusive<i32>>,
+    value: &Vec<RangeInclusive<i32>>,
     sensor_commands: &HashSet<InputCommandType>,
   ) -> Self {
     Self {
-      value_range: value_range.clone(),
-      input_commands: sensor_commands.clone(),
+      value: value.clone(),
+      command: sensor_commands.clone(),
     }
   }
 }
 
 impl From<&ServerDeviceFeatureInputProperties> for DeviceFeatureInputProperties {
   fn from(val: &ServerDeviceFeatureInputProperties) -> Self {
-    DeviceFeatureInputProperties::new(&val.value_range, &val.input_commands)
+    DeviceFeatureInputProperties::new(&val.value, &val.command)
   }
 }
 
@@ -495,6 +498,8 @@ pub struct ServerDeviceFeatureInput {
   rssi: Option<ServerDeviceFeatureInputProperties>,
   pressure: Option<ServerDeviceFeatureInputProperties>,
   button: Option<ServerDeviceFeatureInputProperties>,
+  depth: Option<ServerDeviceFeatureInputProperties>,
+  position: Option<ServerDeviceFeatureInputProperties>,
 }
 
 impl ServerDeviceFeatureInput {
@@ -504,7 +509,40 @@ impl ServerDeviceFeatureInput {
       InputType::Rssi => self.rssi.is_some(),
       InputType::Pressure => self.pressure.is_some(),
       InputType::Button => self.button.is_some(),
+      InputType::Depth => self.depth.is_some(),
+      InputType::Position => self.position.is_some(),
       InputType::Unknown => false,
+    }
+  }
+
+  pub fn can_subscribe(&self) -> bool {
+    // TODO Why did I move everything to struct based systems again? This is so gross.
+    if let Some(battery) = &self.battery
+      && battery.command.contains(&InputCommandType::Subscribe)
+    {
+      true
+    } else if let Some(rssi) = &self.rssi
+      && rssi.command.contains(&InputCommandType::Subscribe)
+    {
+      true
+    } else if let Some(pressure) = &self.pressure
+      && pressure.command.contains(&InputCommandType::Subscribe)
+    {
+      true
+    } else if let Some(button) = &self.button
+      && button.command.contains(&InputCommandType::Subscribe)
+    {
+      true
+    } else if let Some(depth) = &self.depth
+      && depth.command.contains(&InputCommandType::Subscribe)
+    {
+      true
+    } else if let Some(position) = &self.position
+      && position.command.contains(&InputCommandType::Subscribe)
+    {
+      true
+    } else {
+      false
     }
   }
 }
@@ -516,12 +554,16 @@ impl From<ServerDeviceFeatureInput> for DeviceFeatureInput {
     val.rssi.as_ref().map(|x| builder.rssi(x.into()));
     val.pressure.as_ref().map(|x| builder.pressure(x.into()));
     val.button.as_ref().map(|x| builder.button(x.into()));
+    val.depth.as_ref().map(|x| builder.depth(x.into()));
+    val.position.as_ref().map(|x| builder.position(x.into()));
     builder.build().expect("Infallible")
   }
 }
 
 #[derive(Clone, Debug, Getters, CopyGetters, Setters)]
 pub struct ServerDeviceFeature {
+  #[getset(get_copy = "pub")]
+  index: u32,
   #[getset(get = "pub")]
   description: String,
   #[getset(get_copy = "pub")]
@@ -547,6 +589,7 @@ impl Eq for ServerDeviceFeature {
 
 impl ServerDeviceFeature {
   pub fn new(
+    index: u32,
     description: &str,
     id: Uuid,
     base_id: Option<Uuid>,
@@ -555,6 +598,7 @@ impl ServerDeviceFeature {
     input: &Option<ServerDeviceFeatureInput>,
   ) -> Self {
     Self {
+      index,
       description: description.to_owned(),
       id,
       base_id,
@@ -571,9 +615,9 @@ impl ServerDeviceFeature {
     new_feature
   }
 
-  pub fn as_device_feature(&self, index: u32) -> Result<DeviceFeature, ButtplugDeviceConfigError> {
+  pub fn as_device_feature(&self) -> Result<DeviceFeature, ButtplugDeviceConfigError> {
     Ok(DeviceFeature::new(
-      index,
+      self.index,
       self.description(),
       &self.output.as_ref().map(|x| x.clone().into()),
       &self.input.as_ref().map(|x| x.clone().into()),

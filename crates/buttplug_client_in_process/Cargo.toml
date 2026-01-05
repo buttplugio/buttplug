@@ -1,6 +1,6 @@
 [package]
 name = "buttplug_client_in_process"
-version = "10.0.0-beta1"
+version = "10.0.0-beta3"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Buttplug Intimate Hardware Control Library - Core Library"
 license = "BSD-3-Clause"
@@ -30,24 +30,24 @@ websocket-manager=["buttplug_server_hwmgr_websocket"]
 xinput-manager=["buttplug_server_hwmgr_xinput"]
 
 [dependencies]
-buttplug_derive = "0.8.1"
-buttplug_core = { path = "../buttplug_core" }
-buttplug_client = { path = "../buttplug_client" }
-buttplug_server = { path = "../buttplug_server" }
-buttplug_server_device_config = { path = "../buttplug_server_device_config" }
-buttplug_server_hwmgr_btleplug = { path = "../buttplug_server_hwmgr_btleplug", optional = true}
-buttplug_server_hwmgr_hid = { path = "../buttplug_server_hwmgr_hid", optional = true}
-buttplug_server_hwmgr_lovense_connect = { path = "../buttplug_server_hwmgr_lovense_connect", optional = true}
-buttplug_server_hwmgr_lovense_dongle = { path = "../buttplug_server_hwmgr_lovense_dongle", optional = true}
-buttplug_server_hwmgr_serial = { path = "../buttplug_server_hwmgr_serial", optional = true}
-buttplug_server_hwmgr_websocket = { path = "../buttplug_server_hwmgr_websocket", optional = true}
-buttplug_server_hwmgr_xinput = { path = "../buttplug_server_hwmgr_xinput", optional = true}
+buttplug_derive = { version = "0.9.1", path = "../buttplug_derive" }
+buttplug_core = { version = "10.0.0-beta4", path = "../buttplug_core" }
+buttplug_client = { version = "10.0.0-beta3", path = "../buttplug_client" }
+buttplug_server = { version = "10.0.0-beta4", path = "../buttplug_server" }
+buttplug_server_device_config = { version = "10.0.0-beta4", path = "../buttplug_server_device_config" }
+buttplug_server_hwmgr_btleplug = { version = "10.0.0-beta3", path = "../buttplug_server_hwmgr_btleplug", optional = true}
+buttplug_server_hwmgr_hid = { version = "10.0.0-beta3", path = "../buttplug_server_hwmgr_hid", optional = true}
+buttplug_server_hwmgr_lovense_connect = { version = "10.0.0-beta3", path = "../buttplug_server_hwmgr_lovense_connect", optional = true}
+buttplug_server_hwmgr_lovense_dongle = { version = "10.0.0-beta3", path = "../buttplug_server_hwmgr_lovense_dongle", optional = true}
+buttplug_server_hwmgr_serial = { version = "10.0.0-beta3", path = "../buttplug_server_hwmgr_serial", optional = true}
+buttplug_server_hwmgr_websocket = { version = "10.0.0-beta3", path = "../buttplug_server_hwmgr_websocket", optional = true}
+buttplug_server_hwmgr_xinput = { version = "10.0.0-beta3", path = "../buttplug_server_hwmgr_xinput", optional = true}
 futures = "0.3.31"
 futures-util = "0.3.31"
-thiserror = "2.0.12"
-log = "0.4.27"
+thiserror = "2.0.17"
+log = "0.4.29"
 getset = "0.1.6"
-tokio = { version = "1.46.1", features = ["macros"] }
+tokio = { version = "1.48.0", features = ["macros"] }
 dashmap = { version = "6.1.0" }
 tracing-futures = "0.2.5"
-tracing = "0.1.41"
+tracing = "0.1.44"

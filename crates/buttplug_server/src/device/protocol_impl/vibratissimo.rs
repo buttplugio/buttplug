@@ -80,7 +80,7 @@ impl ProtocolInitializer for VibratissimoInitializer {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let num_vibrators: u8 = def
       .features()
-      .iter()
+      .values()
       .filter(|x| {
         x.output()
           .as_ref()

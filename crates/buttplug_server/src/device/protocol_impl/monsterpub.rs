@@ -137,7 +137,7 @@ impl ProtocolInitializer for MonsterPubInitializer {
     }
     let output_count = def
       .features()
-      .iter()
+      .values()
       .filter(|x| x.output().is_some())
       .count();
 

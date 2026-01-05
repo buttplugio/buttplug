@@ -61,7 +61,7 @@ impl From<BaseDeviceFeatureOutputPositionProperties>
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct BaseDeviceFeatureOutputPositionWithDurationProperties {
   #[serde(serialize_with = "range_serialize")]
-  position: RangeInclusive<i32>,
+  value: RangeInclusive<i32>,
   #[serde(serialize_with = "range_serialize")]
   duration: RangeInclusive<i32>,
 }
@@ -71,7 +71,7 @@ impl From<BaseDeviceFeatureOutputPositionWithDurationProperties>
 {
   fn from(val: BaseDeviceFeatureOutputPositionWithDurationProperties) -> Self {
     ServerDeviceFeatureOutputPositionWithDurationProperties::new(
-      &val.position.into(),
+      &val.value.into(),
       &val.duration.into(),
       false,
       false,
@@ -316,7 +316,9 @@ impl UserDeviceFeatureOutput {
     }
     if let Some(user_temperature) = &self.temperature {
       if let Some(base_temperature) = base_output.temperature() {
-        output.set_temperature(Some(user_temperature.with_base_properties(base_temperature)?));
+        output.set_temperature(Some(
+          user_temperature.with_base_properties(base_temperature)?,
+        ));
       } else {
         output.set_temperature(base_output.temperature().clone());
       }
@@ -375,26 +377,26 @@ impl From<&ServerDeviceFeatureOutput> for UserDeviceFeatureOutput {
 pub struct DeviceFeatureInputProperties {
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(serialize_with = "range_sequence_serialize")]
-  value_range: Vec<RangeInclusive<i32>>,
+  value: Vec<RangeInclusive<i32>>,
   #[getset(get = "pub")]
-  input_commands: HashSet<InputCommandType>,
+  command: HashSet<InputCommandType>,
 }
 
 impl DeviceFeatureInputProperties {
   pub fn new(
-    value_range: &Vec<RangeInclusive<i32>>,
+    value: &Vec<RangeInclusive<i32>>,
     sensor_commands: &HashSet<InputCommandType>,
   ) -> Self {
     Self {
-      value_range: value_range.clone(),
-      input_commands: sensor_commands.clone(),
+      value: value.clone(),
+      command: sensor_commands.clone(),
     }
   }
 }
 
 impl From<DeviceFeatureInputProperties> for ServerDeviceFeatureInputProperties {
   fn from(val: DeviceFeatureInputProperties) -> Self {
-    ServerDeviceFeatureInputProperties::new(&val.value_range, &val.input_commands)
+    ServerDeviceFeatureInputProperties::new(&val.value, &val.command)
   }
 }
 
@@ -428,6 +430,8 @@ impl From<DeviceFeatureInput> for ServerDeviceFeatureInput {
 
 #[derive(Clone, Debug, Default, Getters, Serialize, Deserialize, CopyGetters)]
 pub struct ConfigBaseDeviceFeature {
+  #[getset(get_copy = "pub")]
+  index: u32,
   #[getset(get = "pub")]
   #[serde(default)]
   description: String,
@@ -450,6 +454,7 @@ impl From<ConfigBaseDeviceFeature> for ServerDeviceFeature {
     let output: Option<ServerDeviceFeatureOutput> = val.output.map(|o| o.into());
     let input: Option<ServerDeviceFeatureInput> = val.input.map(|i| i.into());
     ServerDeviceFeature::new(
+      val.index,
       &val.description,
       val.id,
       None,
@@ -486,6 +491,7 @@ impl ConfigUserDeviceFeature {
       None
     };
     Ok(ServerDeviceFeature::new(
+      base_feature.index(),
       base_feature.description(),
       self.id,
       Some(self.base_id),

@@ -1,3 +1,24 @@
+# 10.0.0-beta4 (2025-12-29)
+
+## Features
+
+- Implement Inputs
+- Update name of Input property fields for DeviceList
+  - This will be a breaking change between beta3 and beta4
+
+## Bugfixes
+
+- Actually check outgoing messages against JSON schema
+
+# 10.0.0-beta3 (2025-12-26)
+
+## Features
+
+- Simplify command structures to using embedded enums
+- Remove DeviceAdded/DeviceRemoved events, now just send DeviceListUpdated and let clients parse as
+  necessary.
+- Update dependencies
+
 # 10.0.0-beta2 (2025-10-18)
 
 ## Features

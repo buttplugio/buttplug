@@ -1,20 +1,22 @@
+---
 defaults:
   name: Fleshy Thrust Sync
   features:
-    - id: a8185061-6d41-4eea-bc24-1ff1c5c405b9
-      output:
-        position_with_duration:
-          position:
-            - 0
-            - 180
-          duration:
-            - 0
-            - 100000
+  - id: a8185061-6d41-4eea-bc24-1ff1c5c405b9
+    output:
+      position_with_duration:
+        value:
+        - 0
+        - 180
+        duration:
+        - 0
+        - 100000
+    index: 0
   id: f273ebd5-a698-4c35-9c46-0625fa442960
 communication:
-  - btle:
-      names:
-        - BT05
-      services:
-        0000ffe0-0000-1000-8000-00805f9b34fb:
-          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+- btle:
+    names:
+    - BT05
+    services:
+      0000ffe0-0000-1000-8000-00805f9b34fb:
+        tx: 0000ffe1-0000-1000-8000-00805f9b34fb

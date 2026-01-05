@@ -1,20 +1,22 @@
+---
 defaults:
   name: Joyroid Loob
   features:
-    - id: 7078c41e-0cd3-4264-8f54-c331ac4c81f9
-      output:
-        position_with_duration:
-          position:
-            - 0
-            - 1000
-          duration:
-            - 0
-            - 100000
+  - id: 7078c41e-0cd3-4264-8f54-c331ac4c81f9
+    output:
+      position_with_duration:
+        value:
+        - 0
+        - 1000
+        duration:
+        - 0
+        - 100000
+    index: 0
   id: 26c0103c-9b39-4dbb-ad33-5cbdff03c178
 communication:
-  - btle:
-      names:
-        - LOOB
-      services:
-        b75c49d2-04a3-4071-a0b5-35853eb08307:
-          tx: ba5c49d2-04a3-4071-a0b5-35853eb08307
+- btle:
+    names:
+    - LOOB
+    services:
+      b75c49d2-04a3-4071-a0b5-35853eb08307:
+        tx: ba5c49d2-04a3-4071-a0b5-35853eb08307

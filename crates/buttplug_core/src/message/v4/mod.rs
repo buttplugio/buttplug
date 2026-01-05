@@ -13,14 +13,18 @@ mod output_cmd;
 mod request_server_info;
 mod server_info;
 mod spec_enums;
+mod stop_all_devices;
+mod stop_device_cmd;
 
 pub use {
   device_list::DeviceListV4,
   device_message_info::DeviceMessageInfoV4,
   input_cmd::{InputCmdV4, InputCommandType},
-  input_reading::{InputData, InputReadingV4, InputTypeData},
+  input_reading::{InputReadingV4, InputTypeReading, InputValue},
   output_cmd::{OutputCmdV4, OutputCommand, OutputPositionWithDuration, OutputValue},
   request_server_info::RequestServerInfoV4,
   server_info::ServerInfoV4,
   spec_enums::{ButtplugClientMessageV4, ButtplugDeviceMessageNameV4, ButtplugServerMessageV4},
+  stop_all_devices::StopAllDevicesV4,
+  stop_device_cmd::StopDeviceCmdV4,
 };

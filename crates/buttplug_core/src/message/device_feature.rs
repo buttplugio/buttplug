@@ -52,6 +52,10 @@ pub enum InputType {
   Button,
   #[serde(alias = "pressure")]
   Pressure,
+  #[serde(alias = "depth")]
+  Depth,
+  #[serde(alias = "position")]
+  Position,
   // Temperature,
   // Accelerometer,
   // Gyro,
@@ -156,7 +160,7 @@ impl DeviceFeatureOutputLimits for DeviceFeatureOutputValueProperties {
 pub struct DeviceFeatureOutputPositionWithDurationProperties {
   #[getset(get = "pub")]
   #[serde(serialize_with = "range_serialize")]
-  position: RangeInclusive<i32>,
+  value: RangeInclusive<i32>,
   #[getset(get = "pub")]
   #[serde(serialize_with = "range_serialize")]
   duration: RangeInclusive<i32>,
@@ -165,13 +169,13 @@ pub struct DeviceFeatureOutputPositionWithDurationProperties {
 impl DeviceFeatureOutputPositionWithDurationProperties {
   pub fn new(position: &RangeInclusive<i32>, duration: &RangeInclusive<i32>) -> Self {
     DeviceFeatureOutputPositionWithDurationProperties {
-      position: position.clone(),
+      value: position.clone(),
       duration: duration.clone(),
     }
   }
 
   pub fn step_count(&self) -> u32 {
-    *self.position.end() as u32
+    *self.value.end() as u32
   }
 }
 
@@ -180,7 +184,7 @@ impl DeviceFeatureOutputLimits for DeviceFeatureOutputPositionWithDurationProper
     self.step_count()
   }
   fn step_limit(&self) -> RangeInclusive<i32> {
-    self.position.clone()
+    self.value.clone()
   }
 }
 
@@ -275,19 +279,19 @@ impl DeviceFeatureOutput {
 pub struct DeviceFeatureInputProperties {
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(serialize_with = "range_sequence_serialize")]
-  value_range: Vec<RangeInclusive<i32>>,
+  value: Vec<RangeInclusive<i32>>,
   #[getset(get = "pub")]
-  input_commands: HashSet<InputCommandType>,
+  command: HashSet<InputCommandType>,
 }
 
 impl DeviceFeatureInputProperties {
   pub fn new(
-    value_range: &Vec<RangeInclusive<i32>>,
+    value: &Vec<RangeInclusive<i32>>,
     sensor_commands: &HashSet<InputCommandType>,
   ) -> Self {
     Self {
-      value_range: value_range.clone(),
-      input_commands: sensor_commands.clone(),
+      value: value.clone(),
+      command: sensor_commands.clone(),
     }
   }
 }
@@ -305,6 +309,10 @@ pub struct DeviceFeatureInput {
   pressure: Option<DeviceFeatureInputProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
   button: Option<DeviceFeatureInputProperties>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  depth: Option<DeviceFeatureInputProperties>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  position: Option<DeviceFeatureInputProperties>,
 }
 
 impl DeviceFeatureInput {
@@ -314,6 +322,8 @@ impl DeviceFeatureInput {
       InputType::Rssi => self.rssi.is_some(),
       InputType::Pressure => self.pressure.is_some(),
       InputType::Button => self.button.is_some(),
+      InputType::Depth => self.depth.is_some(),
+      InputType::Position => self.position.is_some(),
       InputType::Unknown => false,
     }
   }
@@ -324,6 +334,8 @@ impl DeviceFeatureInput {
       InputType::Rssi => self.rssi(),
       InputType::Pressure => self.pressure(),
       InputType::Button => self.button(),
+      InputType::Depth => self.depth(),
+      InputType::Position => self.position(),
       InputType::Unknown => &None,
     }
   }

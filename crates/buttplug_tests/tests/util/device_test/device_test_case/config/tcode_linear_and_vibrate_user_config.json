@@ -29,10 +29,11 @@
             "id": "e4384a37-fd37-4b9e-8464-a510dd8410a7",
             "features": [
               {
+                "index": 0,
                 "description": "",
                 "output": {
                   "position_with_duration": {
-                    "position": [
+                    "value": [
                       0,
                       100
                     ],
@@ -45,6 +46,7 @@
                 "id": "c5e6384e-399b-4c2b-9791-eb48abaf3bf7"
               },
               {
+                "index": 1,
                 "description": "",
                 "output": {
                   "vibrate": {

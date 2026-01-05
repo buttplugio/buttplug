@@ -15,7 +15,7 @@ use crate::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{InputData, InputReadingV4, InputTypeData},
+  message::{InputReadingV4, InputTypeReading, InputValue},
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server_device_config::Endpoint;
@@ -114,7 +114,7 @@ impl ProtocolHandler for KiirooV21 {
       let battery_reading = InputReadingV4::new(
         device_index,
         feature_index,
-        InputTypeData::Battery(InputData::new(battery_level)),
+        InputTypeReading::Battery(InputValue::new(battery_level)),
       );
       debug!("Got battery reading: {}", battery_level);
       Ok(battery_reading)

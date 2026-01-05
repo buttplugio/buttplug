@@ -37,13 +37,13 @@
               "description": "Battery Level",
               "input": {
                 "battery": {
-                  "value_range": [
+                  "value": [
                     [
                       0,
                       100
                     ]
                   ],
-                  "input_commands": [
+                  "command": [
                     "Read"
                   ]
                 }

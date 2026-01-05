@@ -95,7 +95,7 @@ impl TryFromDeviceAttributes<OutputCmdV4> for CheckedOutputCmdV4 {
     //
     // If this message isn't the result of an upgrade from another older message, we won't have set
     // our feature id yet.
-    let (feature, _) = if let Some(feature) = features.get(cmd.feature_index() as usize) {
+    let (feature, _) = if let Some(feature) = features.get(&cmd.feature_index()) {
       (feature, feature.id())
     } else {
       return Err(ButtplugError::from(

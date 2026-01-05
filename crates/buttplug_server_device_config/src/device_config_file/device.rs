@@ -116,7 +116,11 @@ impl ConfigUserDeviceDefinition {
       return Err(ButtplugDeviceConfigError::UserFeatureMismatch);
     }
     for feature in self.features() {
-      if let Some(base_feature) = base.features().iter().find(|x| x.id() == feature.base_id()) {
+      if let Some(base_feature) = base
+        .features()
+        .values()
+        .find(|x| x.id() == feature.base_id())
+      {
         builder.add_feature(&feature.with_base_feature(base_feature)?);
       } else {
         return Err(ButtplugDeviceConfigError::UserFeatureMismatch);
@@ -131,7 +135,7 @@ impl From<&ServerDeviceDefinition> for ConfigUserDeviceDefinition {
     Self {
       id: value.id(),
       base_id: value.base_id().expect("Should always have a base id"),
-      features: value.features().iter().map(|x| x.into()).collect(),
+      features: value.features().values().map(|x| x.into()).collect(),
       user_config: value.into(),
     }
   }

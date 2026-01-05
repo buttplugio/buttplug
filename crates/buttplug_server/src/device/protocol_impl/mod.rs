@@ -19,6 +19,7 @@ pub mod cupido;
 pub mod deepsire;
 pub mod feelingso;
 pub mod fleshy_thrust;
+pub mod fluffer;
 pub mod foreo;
 pub mod fox;
 pub mod fredorch;
@@ -55,7 +56,7 @@ pub mod loob;
 pub mod lovedistance;
 pub mod lovehoney_desire;
 pub mod lovense;
-// pub mod lovense_connect_service;
+pub mod lovense_connect_service;
 pub mod lovenuts;
 pub mod luvmazer;
 pub mod magic_motion_v1;
@@ -99,6 +100,7 @@ pub mod svakom;
 pub mod synchro;
 pub mod tcode_v03;
 pub mod thehandy;
+pub mod thehandy_v3;
 pub mod tryfun;
 pub mod tryfun_blackhole;
 pub mod tryfun_meta2;
@@ -181,6 +183,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     thehandy::setup::TheHandyIdentifierFactory::default(),
   );
+  add_to_protocol_map(
+    &mut map,
+    thehandy_v3::setup::TheHandyV3IdentifierFactory::default(),
+  );
 
   add_to_protocol_map(
     &mut map,
@@ -189,6 +195,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     fleshy_thrust::setup::FleshyThrustIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    fluffer::setup::FlufferIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, foreo::setup::ForeoIdentifierFactory::default());
   add_to_protocol_map(&mut map, fox::setup::FoxIdentifierFactory::default());
@@ -212,31 +222,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
 
   add_to_protocol_map(&mut map, itoys::setup::IToysIdentifierFactory::default());
   add_to_protocol_map(&mut map, jejoue::setup::JeJoueIdentifierFactory::default());
-  add_to_protocol_map(
-    &mut map,
-    joyhub::joyhub::setup::JoyHubIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    joyhub::joyhub_v2::setup::JoyHubV2IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    joyhub::joyhub_v3::setup::JoyHubV3IdentifierFactory::default(),
-  );
-
-  add_to_protocol_map(
-    &mut map,
-    joyhub::joyhub_v4::setup::JoyHubV4IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    joyhub::joyhub_v5::setup::JoyHubV5IdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    joyhub::joyhub_v6::setup::JoyHubV6IdentifierFactory::default(),
-  );
+  add_to_protocol_map(&mut map, joyhub::setup::JoyHubIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     kiiroo_powershot::setup::KiirooPowerShotIdentifierFactory::default(),
@@ -313,10 +299,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     lovense::setup::LovenseIdentifierFactory::default(),
   );
 
-  //  add_to_protocol_map(
-  //    &mut map,
-  //    lovense_connect_service::setup::LovenseConnectServiceIdentifierFactory::default(),
-  //  );
+  add_to_protocol_map(
+    &mut map,
+    lovense_connect_service::setup::LovenseConnectIdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     lovenuts::setup::LoveNutsIdentifierFactory::default(),

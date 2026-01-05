@@ -48,6 +48,7 @@ use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
     self,
+    ButtplugMessage,
     ButtplugServerMessageV4,
     DeviceFeature,
     DeviceMessageInfoV4,
@@ -55,6 +56,7 @@ use buttplug_core::{
     InputType,
     OutputType,
     OutputValue,
+    StopDeviceCmdV4,
   },
   util::{self, async_manager, stream::convert_broadcast_receiver_to_stream},
 };
@@ -161,13 +163,18 @@ impl ServerDevice {
     let mut protocol_identifier = None;
     let mut hardware_out = None;
     for protocol_specializer in protocol_specializers {
-      if let Ok(specialized_hardware) = hardware_specializer
+      match hardware_specializer
         .specialize(protocol_specializer.specifiers())
         .await
       {
-        protocol_identifier = Some(protocol_specializer.identify());
-        hardware_out = Some(specialized_hardware);
-        break;
+        Ok(specialized_hardware) => {
+          protocol_identifier = Some(protocol_specializer.identify());
+          hardware_out = Some(specialized_hardware);
+          break;
+        }
+        Err(e) => {
+          error!("{:?}", e.to_string());
+        }
       }
     }
 
@@ -221,7 +228,9 @@ impl ServerDevice {
         strategy,
         ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_)
       ))
-      && let Err(e) = device.handle_stop_device_cmd().await
+      && let Err(e) = device
+        .handle_stop_device_cmd(&StopDeviceCmdV4::new(0, true, true))
+        .await
     {
       return Err(ButtplugDeviceError::DeviceConnectionError(format!(
         "Error setting up keepalive: {e}"
@@ -291,6 +300,7 @@ impl ServerDevice {
           };
           select! {
             hw_event = hardware_events.recv() => {
+              // TODO This logic doesn't make sense?
               if let Ok(hw_event) = hw_event {
                 if matches!(hw_event, HardwareEvent::Disconnected(_)) {
                   info!("Hardware disconnected, shutting down keepalive");
@@ -407,12 +417,13 @@ impl ServerDevice {
     let mut stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4> = vec![];
     // We consider the feature's FeatureType to be the "main" capability of a feature. Use that to
     // calculate stop commands.
-    for (index, feature) in definition.features().iter().enumerate() {
+    for feature in definition.features().values() {
       if let Some(output_map) = feature.output() {
         for actuator_type in output_map.output_types() {
           let mut stop_cmd = |actuator_cmd| {
-            stop_commands
-              .push(CheckedOutputCmdV4::new(1, 0, index as u32, feature.id(), actuator_cmd).into());
+            stop_commands.push(
+              CheckedOutputCmdV4::new(1, 0, feature.index(), feature.id(), actuator_cmd).into(),
+            );
           };
 
           // Break out of these if one is found, we only need 1 stop message per output.
@@ -517,9 +528,8 @@ impl ServerDevice {
       &self
         .definition
         .features()
-        .iter()
-        .enumerate()
-        .map(|(i, x)| (i as u32, x.as_device_feature(i as u32).expect("Infallible")))
+        .values()
+        .map(|x| (x.index(), x.as_device_feature().expect("Infallible")))
         .filter(|(_, x)| x.output().as_ref().is_some() || x.input().as_ref().is_some())
         .collect::<BTreeMap<u32, DeviceFeature>>(),
     )
@@ -532,9 +542,18 @@ impl ServerDevice {
     &self,
     command_message: ButtplugDeviceCommandMessageUnionV4,
   ) -> ButtplugServerResultFuture {
-    match command_message {
+    match &command_message {
       // Input messages
-      ButtplugDeviceCommandMessageUnionV4::InputCmd(msg) => self.handle_input_cmd(msg),
+      ButtplugDeviceCommandMessageUnionV4::InputCmd(msg) => {
+        let fut = self.handle_input_cmd(msg);
+        let msg_id = msg.id();
+        async move {
+          let mut msg = fut.await?;
+          msg.set_id(msg_id);
+          Ok(msg)
+        }
+        .boxed()
+      }
       // Actuator messages
       ButtplugDeviceCommandMessageUnionV4::OutputCmd(msg) => self.handle_outputcmd_v4(&msg),
       ButtplugDeviceCommandMessageUnionV4::OutputVecCmd(msg) => {
@@ -552,7 +571,7 @@ impl ServerDevice {
         .boxed()
       }
       // Other generic messages
-      ButtplugDeviceCommandMessageUnionV4::StopDeviceCmd(_) => self.handle_stop_device_cmd(),
+      ButtplugDeviceCommandMessageUnionV4::StopDeviceCmd(msg) => self.handle_stop_device_cmd(msg),
     }
   }
 
@@ -590,12 +609,34 @@ impl ServerDevice {
     self.handle_hardware_commands(hardware_commands)
   }
 
-  fn handle_stop_device_cmd(&self) -> ButtplugServerResultFuture {
+  fn handle_stop_device_cmd(&self, msg: &StopDeviceCmdV4) -> ButtplugServerResultFuture {
     let mut fut_vec = vec![];
-    self
-      .stop_commands
-      .iter()
-      .for_each(|msg| fut_vec.push(self.parse_message(msg.clone())));
+    if msg.outputs() {
+      self
+        .stop_commands
+        .iter()
+        .for_each(|msg| fut_vec.push(self.parse_message(msg.clone())));
+    }
+    if msg.inputs() {
+      self.definition.features().iter().for_each(|(i, f)| {
+        if let Some(inputs) = f.input() {
+          if inputs.can_subscribe() {
+            fut_vec.push(
+              self.parse_message(ButtplugDeviceCommandMessageUnionV4::InputCmd(
+                CheckedInputCmdV4::new(
+                  1,
+                  self.definition.index(),
+                  *i,
+                  InputType::Unknown,
+                  InputCommandType::Unsubscribe,
+                  f.id(),
+                ),
+              )),
+            );
+          }
+        }
+      });
+    }
     async move {
       for fut in fut_vec {
         fut.await?;
@@ -607,7 +648,7 @@ impl ServerDevice {
 
   fn handle_input_cmd(
     &self,
-    message: CheckedInputCmdV4,
+    message: &CheckedInputCmdV4,
   ) -> BoxFuture<'static, Result<ButtplugServerMessageV4, ButtplugError>> {
     match message.input_command() {
       InputCommandType::Read => self.handle_input_read_cmd(
@@ -656,6 +697,7 @@ impl ServerDevice {
     feature_id: Uuid,
     input_type: InputType,
   ) -> ButtplugServerResultFuture {
+    info!("Handling input subscribe command");
     let device = self.hardware.clone();
     let handler = self.handler.clone();
     async move {

@@ -1,23 +1,19 @@
+---
 defaults:
   name: TCode v0.3 (Single Linear Axis)
   features:
-#    - #      id: a6e25b9d-4986-4771-8e8c-579ebb472844
-#      output:
-#        position_with_duration:
-#          value:
-#            - 0
-#            - 1000
-    - id: 4097edde-7efb-4c3e-afdb-0aeb82a03fd9
-      output:
-         position:
-          value:
-            - 0
-            - 1000
+  - id: 4097edde-7efb-4c3e-afdb-0aeb82a03fd9
+    output:
+      position:
+        value:
+          - 0
+          - 1000
+    index: 0
   id: 211da02e-467c-4788-96bd-689049867e85
 communication:
-  - serial:
-      port: default
-      baud_rate: 115200
-      data_bits: 8
-      parity: 'N'
-      stop_bits: 1
+- serial:
+    port: default
+    baud_rate: 115200
+    data_bits: 8
+    parity: "N"
+    stop_bits: 1

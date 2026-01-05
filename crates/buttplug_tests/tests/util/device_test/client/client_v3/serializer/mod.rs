@@ -13,6 +13,7 @@ use buttplug_server::message::{ButtplugClientMessageV3, ButtplugServerMessageV3}
 use jsonschema::Validator;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
+use tracing::error;
 
 pub struct ButtplugClientJSONSerializerImpl {
   validator: Validator,
@@ -43,9 +44,18 @@ impl ButtplugClientJSONSerializerImpl {
 
   pub fn serialize<T>(&self, msg: &[T]) -> ButtplugSerializedMessage
   where
-    T: ButtplugMessage + Serialize + Deserialize<'static>,
+    T: ButtplugMessage + Serialize + Deserialize<'static> + Debug,
   {
-    ButtplugSerializedMessage::Text(vec_to_protocol_json(msg))
+    ButtplugSerializedMessage::Text(match vec_to_protocol_json(&self.validator, msg) {
+      Ok(m) => m,
+      Err(e) => {
+        error!(
+          "SERIALIZER AND/OR MESSAGE SCHEMA SEEMS COMPLETELY BROKEN, SENDING BACK NULL. ERROR: {:?}",
+          e
+        );
+        String::new()
+      }
+    })
   }
 }
 

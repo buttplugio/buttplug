@@ -26,7 +26,7 @@ use buttplug_core::{
     DeviceListV4,
     DeviceMessageInfoV4,
     DeviceRemovedV0,
-    InputTypeData,
+    InputTypeReading,
   },
 };
 
@@ -178,7 +178,7 @@ impl ButtplugServerMessageConverter {
           &original_msg
         {
           // We only ever implemented battery in v3, so only accept that.
-          if let InputTypeData::Battery(value) = m.data() {
+          if let InputTypeReading::Battery(value) = m.reading() {
             let msg_out = SensorReadingV3::new(
               msg.device_index(),
               *msg.sensor_index(),

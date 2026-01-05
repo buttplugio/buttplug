@@ -14,17 +14,22 @@ use crate::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{InputData, InputReadingV4, InputType},
+  message::{InputReadingV4, InputType, InputValue},
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use buttplug_server_device_config::Endpoint;
-use dashmap::DashSet;
 use futures::{
   FutureExt,
   StreamExt,
   future::{self, BoxFuture},
 };
-use std::{pin::Pin, sync::Arc};
+use std::{
+  pin::Pin,
+  sync::{
+    Arc,
+    atomic::{AtomicU8, Ordering},
+  },
+};
 use tokio::sync::broadcast;
 use uuid::Uuid;
 
@@ -32,7 +37,7 @@ generic_protocol_setup!(KGoalBoost, "kgoal-boost");
 
 pub struct KGoalBoost {
   // Set of sensors we've subscribed to for updates.
-  subscribed_sensors: Arc<DashSet<u32>>,
+  subscribed_sensors: Arc<AtomicU8>,
   event_stream: broadcast::Sender<ButtplugServerDeviceMessage>,
 }
 
@@ -40,7 +45,7 @@ impl Default for KGoalBoost {
   fn default() -> Self {
     let (sender, _) = broadcast::channel(256);
     Self {
-      subscribed_sensors: Arc::new(DashSet::new()),
+      subscribed_sensors: Arc::new(AtomicU8::new(0)),
       event_stream: sender,
     }
   }
@@ -61,31 +66,36 @@ impl ProtocolHandler for KGoalBoost {
     feature_id: Uuid,
     _sensor_type: InputType,
   ) -> BoxFuture<'_, Result<(), ButtplugDeviceError>> {
-    if self.subscribed_sensors.contains(&feature_index) {
+    let sensors = self.subscribed_sensors.load(Ordering::Relaxed);
+    if (sensors & (1 << feature_index as u8)) > 0 {
+      info!("Kgoal already subscribed, skipping");
       return future::ready(Ok(())).boxed();
     }
-    let sensors = self.subscribed_sensors.clone();
     // Readout value: 0x000104000005d3
     // Byte 0: Always 0x00
     // Byte 1: Always 0x01
     // Byte 2: Always 0x04
     // Byte 3-4: Normalized u16 Reading
     // Byte 5-6: Raw u16 Reading
+    let stream_sensors = self.subscribed_sensors.clone();
     async move {
       // If we have no sensors we're currently subscribed to, we'll need to bring up our BLE
       // characteristic subscription.
-      if sensors.is_empty() {
+      if sensors == 0 {
         device
           .subscribe(&HardwareSubscribeCmd::new(feature_id, Endpoint::RxPressure))
           .await?;
         let sender = self.event_stream.clone();
         let mut hardware_stream = device.event_stream();
-        let stream_sensors = sensors.clone();
+        let stream_sensors = stream_sensors.clone();
+        info!("Starting Kgoal subscription");
         // If we subscribe successfully, we need to set up our event handler.
         async_manager::spawn(async move {
+          let mut cached_values = vec![0u32, 0u32];
           while let Ok(info) = hardware_stream.recv().await {
+            let subscribed_sensors = stream_sensors.load(Ordering::Relaxed);
             // If we have no receivers, quit.
-            if sender.receiver_count() == 0 || stream_sensors.is_empty() {
+            if sender.receiver_count() == 0 || subscribed_sensors == 0 {
               return;
             }
             if let HardwareEvent::Notification(_, endpoint, data) = info
@@ -99,13 +109,20 @@ impl ProtocolHandler for KGoalBoost {
               // Extract our two pressure values.
               let normalized = (data[3] as u32) << 8 | data[4] as u32;
               let unnormalized = (data[5] as u32) << 8 | data[6] as u32;
-              if stream_sensors.contains(&0)
+              info!(
+                "Kgoal Reading {} {} {}",
+                subscribed_sensors, normalized, unnormalized
+              );
+              if (subscribed_sensors & (1 << 0)) > 0
+                && cached_values[0] != normalized
                 && sender
                   .send(
                     InputReadingV4::new(
                       device_index,
-                      feature_index,
-                      buttplug_core::message::InputTypeData::Pressure(InputData::new(normalized)),
+                      0,
+                      buttplug_core::message::InputTypeReading::Pressure(InputValue::new(
+                        normalized,
+                      )),
                     )
                     .into(),
                   )
@@ -114,13 +131,16 @@ impl ProtocolHandler for KGoalBoost {
                 debug!("Hardware device listener for KGoal Boost shut down, returning from task.");
                 return;
               }
-              if stream_sensors.contains(&1)
+              if (subscribed_sensors & (1 << 1)) > 0
+                && cached_values[1] != unnormalized
                 && sender
                   .send(
                     InputReadingV4::new(
                       device_index,
-                      feature_index,
-                      buttplug_core::message::InputTypeData::Pressure(InputData::new(unnormalized)),
+                      1,
+                      buttplug_core::message::InputTypeReading::Pressure(InputValue::new(
+                        unnormalized,
+                      )),
                     )
                     .into(),
                   )
@@ -129,11 +149,15 @@ impl ProtocolHandler for KGoalBoost {
                 debug!("Hardware device listener for KGoal Boost shut down, returning from task.");
                 return;
               }
+              cached_values = vec![normalized, unnormalized];
             }
           }
         });
       }
-      sensors.insert(feature_index);
+      stream_sensors.store(
+        stream_sensors.load(Ordering::Relaxed) | (1 << feature_index),
+        Ordering::Relaxed,
+      );
       Ok(())
     }
     .boxed()
@@ -146,15 +170,21 @@ impl ProtocolHandler for KGoalBoost {
     feature_id: Uuid,
     _sensor_type: InputType,
   ) -> BoxFuture<'_, Result<(), ButtplugDeviceError>> {
-    if !self.subscribed_sensors.contains(&feature_index) {
+    let sensors = self.subscribed_sensors.load(Ordering::Relaxed);
+    if (sensors & (1 << feature_index as u8)) == 0 {
       return future::ready(Ok(())).boxed();
     }
     let sensors = self.subscribed_sensors.clone();
     async move {
       // If we have no sensors we're currently subscribed to, we'll need to bring up our BLE
       // characteristic subscription.
-      sensors.remove(&feature_index);
-      if sensors.is_empty() {
+      info!("Sensor before: {}", sensors.load(Ordering::Relaxed));
+      sensors.store(
+        sensors.load(Ordering::Relaxed) & !(1 << feature_index),
+        Ordering::Relaxed,
+      );
+      info!("Sensor after: {}", sensors.load(Ordering::Relaxed));
+      if sensors.load(Ordering::Relaxed) == 0 {
         device
           .unsubscribe(&HardwareUnsubscribeCmd::new(
             feature_id,

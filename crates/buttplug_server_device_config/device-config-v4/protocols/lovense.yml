@@ -1,637 +1,718 @@
+---
 defaults:
   name: Lovense Device
   features:
-    - id: 3f7a25a5-df21-42ca-bf9f-d1c52df1f37e
-      output:
-        vibrate:
-          value:
-            - 0
-            - 20
-    - description: battery Level
-      id: 14bd7637-13ed-49ba-9eb9-9c8ba9abec20
-      input:
-        battery:
-          value_range:
-            - - 0
-              - 100
-          input_commands:
-            - Read
+  - id: 3f7a25a5-df21-42ca-bf9f-d1c52df1f37e
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 0
+  - description: battery Level
+    id: 14bd7637-13ed-49ba-9eb9-9c8ba9abec20
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 1
   id: d3b1219a-aafe-4257-9d5d-3979b5da3c9a
 configurations:
-  - identifier:
-      - B
-    name: Lovense Max
-    features:
-      - description: Vibrator
-        id: d9c9b4a7-008e-4182-b28c-0984af970c32
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - description: Air Pump
-        id: fed393a9-3ac6-4924-859d-5cb4ae059cea
-        output:
-          constrict:
-            value:
-              - 0
-              - 3
-      - description: battery Level
-        id: b4be6835-5b91-4540-bc7b-0c3d8dcb89fd
-        input:
-          battery:
-            value_range:
-              - - 0
-                - 100
-            input_commands:
-              - Read
-    id: 99024e29-c0ed-4c26-aede-e0db0679eae5
-  - identifier:
-      - P
-    name: Lovense Edge
-    features:
-      - id: cb286b22-998b-4420-82f3-84e8d39db6b5
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - id: c8b72e1d-d7d4-4417-8cbc-e6c0f435889a
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - description: battery Level
-        id: 66b31efb-3bd9-4e3a-9972-88c66e9fca28
-        input:
-          battery:
-            value_range:
-              - - 0
-                - 100
-            input_commands:
-              - Read
-    id: 2e309985-6bbf-4b75-866f-76d845b3ce42
-  - identifier:
-      - A
-      - C
-    name: Lovense Nora
-    features:
-      - id: 2c5da93b-36a0-4209-ac8c-cead63b838c6
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - id: 515e07e2-a6e6-4ac0-a4b0-512504311260
-        output:
-          rotate:
-            value:
-              - -20
-              - 20
-      - description: battery Level
-        id: 820d8fb1-c6ec-434d-b7c4-835bdf36552a
-        input:
-          battery:
-            value_range:
-              - - 0
-                - 100
-            input_commands:
-              - Read
-    id: 463a18b9-42a5-4f7b-8156-0e61346fdb8a
-  - identifier:
-      - L
-    name: Lovense Ambi
-    id: 7053fde9-0902-4aab-926d-fc51869f6ccc
-  - identifier:
-      - S
-    name: Lovense Lush
-    id: 670560f0-981e-42cb-b83d-c911dd9826e2
-  - identifier:
-      - Z
-    name: Lovense Hush
-    id: 37642e1c-a416-44d3-bada-76b6d9e245c9
-  - identifier:
-      - W
-    name: Lovense Domi
-    id: e788f8d5-037a-4ce4-a13f-6b2e8ec31fb6
-  - identifier:
-      - O
-    name: Lovense Osci
-    id: 45bf66e7-01e0-48ad-ad1c-2b48d1279da1
-  - identifier:
-      - V
-    name: Lovense Mission
-    id: 45e2fc5c-79e8-4228-beba-a97a14d84e7d
-  - identifier:
-      - CA
-    name: Lovense Mission 2
-    id: a8f36834-d8eb-48d5-9bad-237e67f6fd5b
-  - identifier:
-      - X
-    name: Lovense Ferri
-    id: 481b101b-ff4d-4045-84fe-da2b9bba93e2
-  - identifier:
-      - R
-    name: Lovense Diamo
-    id: df95c01b-88d3-49b3-b360-69777b341795
-  - identifier:
-      - ToyS
-    name: Loveai Dolp
-    id: 30830f67-4550-4133-88a9-b5eccd83083b
-  - identifier:
-      - F
-    name: Lovense Sex Machine
-    features:
-      - description: Fucking Machine Oscillation Speed
-        id: f9506652-c4ac-43b1-b184-cd8016b64623
-        output:
-          oscillate:
-            value:
-              - 0
-              - 20
-      - description: battery Level
-        id: 7c382c60-0ee2-4315-b8cf-cfd3ab4c9ccd
-        input:
-          battery:
-            value_range:
-              - - 0
-                - 100
-            input_commands:
-              - Read
-    id: 8667f7b6-7baa-4e46-9d76-947fb707f0f3
-  - identifier:
-      - FS
-    name: Lovense Mini Sex Machine
-    features:
-      - description: Fucking Machine Oscillation Speed
-        id: aaf55cab-8ebd-42b3-9bbb-74a57efdf014
-        output:
-          oscillate:
-            value:
-              - 0
-              - 20
-      - description: battery Level
-        id: 68defbd8-af87-4f04-97da-edfa8fb576f9
-        input:
-          battery:
-            value_range:
-              - - 0
-                - 100
-            input_commands:
-              - Read
-    id: 48d5c76b-8c0e-4152-9f3b-5ba92ebf30fe
-  - identifier:
-      - J
-    name: Lovense Dolce
-    features:
-      - id: 930b9aee-0ba5-4268-95ca-2a5691d31239
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - id: 62b2b22c-c028-4aa4-a85c-a7fe8c5f9dcb
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - description: battery Level
-        id: 60868f44-3d56-44ed-bcc4-00041a7b5997
-        input:
-          battery:
-            value_range:
-              - - 0
-                - 100
-            input_commands:
-              - Read
-    id: 0bddb3da-2c8d-4af8-9e80-1e0038878f27
-  - identifier:
-      - OC
-    name: Lovense Osci 3
-    features:
-      - id: 4cf78058-44c7-4513-913a-37558a84b91e
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - id: f4ada339-8bb2-4b02-b907-69a3257bce3b
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - description: battery Level
-        id: 3933bfcb-6daf-4c33-b834-877cb29ce77d
-        input:
-          battery:
-            value_range:
-              - - 0
-                - 100
-            input_commands:
-              - Read
-    id: a8b175a8-3447-4938-b1df-7215464b56e6
-  - identifier:
-      - ED
-    name: Lovense Gush
-    id: 6071cc3a-a8e7-4142-bc80-08fe122452d8
-  - identifier:
-      - EZ
-    name: Lovense Gush 2
-    id: 51de38d3-114f-453e-a440-3958918af423
-  - identifier:
-      - EB
-    name: Lovense Hyphy
-    features:
-      - id: 39b063fa-958b-4d1a-bbd1-8480e105dd88
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - id: b40accca-7c73-4bff-9819-45f806a194a8
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - description: battery Level
-        id: 8fa6dc63-430e-42cb-9345-42d37f0c2629
-        input:
-          battery:
-            value_range:
-              - - 0
-                - 100
-            input_commands:
-              - Read
-    id: a6a0c988-3e04-4fa3-89e2-4f4d2f242ffd
-  - identifier:
-      - T
-    name: Lovense Calor
-    id: bdab9bf5-25f8-4140-bf4d-3f0edf1883d2
-  - identifier:
-      - EI
-    name: Lovense Flexer (Firmware update needed)
-    id: c90a2d78-5b08-40ad-a2c9-ac7eacb43b3d
-  - identifier:
-      - EI-FW3
-    name: Lovense Flexer
-    features:
-      - description: Internal Vibe
-        id: 9b2dcb58-6c2c-46ef-abe4-81631d1a5f66
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - description: External Vibe
-        id: d8b571fd-614e-4d33-8595-b9fbc81b96bd
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - description: Finger motion
-        id: eb6a2d21-93e0-4a08-9674-36fa2d299651
-        output:
-          rotate:
-            value:
-              - 0
-              - 20
-      - description: battery Level
-        id: 6548133f-118f-419d-8900-660fde26b42f
-        input:
-          battery:
-            value_range:
-              - - 0
-                - 100
-            input_commands:
-              - Read
-    id: 8f93dd90-1788-4d2c-8b8f-9a339be12c0e
-  - identifier:
-      - 'N'
-    name: Lovense Gemini
-    features:
-      - id: de8d83b6-76b4-4851-b53d-616d3527040c
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - id: 2ea51cd8-b173-408c-bfef-f6508c5b9087
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - description: battery Level
-        id: 710384a5-a7dd-43f1-b55c-147256dc636a
-        input:
-          battery:
-            value_range:
-              - - 0
-                - 100
-            input_commands:
-              - Read
-    id: 9c72451e-1df7-410a-b4b6-e133f3bd9219
-  - identifier:
-      - EA
-    name: Lovense Gravity
-    features:
-      - id: 93fa269e-ba3b-4c09-85d0-43385b49ee79
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - id: 475bde3a-4aae-4e84-87be-4df3a634da26
-        output:
-          oscillate:
-            value:
-              - 0
-              - 20
-      - description: battery Level
-        id: 104da492-67f1-46fc-b412-b98871ebb518
-        input:
-          battery:
-            value_range:
-              - - 0
-                - 100
-            input_commands:
-              - Read
-    id: b57dfb65-260d-49b2-bff0-659e38947186
-  - identifier:
-      - Q
-    name: Lovense Tenera
-    id: abe8f908-3d93-4ba3-8bb1-3623fcd04202
-  - identifier:
-      - EL
-    name: Lovense Ridge
-    features:
-      - id: 0627be5e-8553-4f20-b4cf-15f5e1896e5f
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - id: 360d81e7-5126-4dbb-b72d-7bb60eb67400
-        output:
-          rotate:
-            value:
-              - -20
-              - 20
-      - description: battery Level
-        id: 50b9b31f-c2a8-459a-81fd-c54604f5184e
-        input:
-          battery:
-            value_range:
-              - - 0
-                - 100
-            input_commands:
-              - Read
-    id: bbfd764c-b419-4c13-aeb0-e753a86318ed
-  - identifier:
-      - U
-    name: Lovense Lapis
-    features:
-      - description: Tip Vibe
-        id: 414e5c3e-e52a-4064-b367-893bc0b1fb95
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - description: Internal Vibe
-        id: be8d8608-d3aa-4fc5-ac5c-8df429f9e63c
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - description: External Vibe
-        id: 8bd37a96-7f7a-450f-aa4b-ffe8aa398d1e
-        output:
-          vibrate:
-            value:
-              - 0
-              - 20
-      - description: battery Level
-        id: ad93f903-a354-40ae-b87e-f8390606a964
-        input:
-          battery:
-            value_range:
-              - - 0
-                - 100
-            input_commands:
-              - Read
-    id: 5454d487-ed23-4067-80e2-9e2f0c01fabf
-  - identifier:
-      - SD
-    name: Lovense Vulse
-    id: 73fcd02b-fa45-4e11-a62a-598aec256fbd
-  - identifier:
-      - H
-    name: Lovense Solace
-    features:
-      - description: Stroker Oscillation Speed
-        id: 5100187a-40c7-44a4-a0ce-368cc24429cd
-        output:
-          oscillate:
-            value:
-              - 0
-              - 20
-      - description: battery Level
-        id: e4193650-2d46-4e6e-8dd8-b1d8d9a1baff
-        input:
-          battery:
-            value_range:
-              - - 0
-                - 100
-            input_commands:
-              - Read
-    id: c53de5c8-fc4a-421b-9332-271ec742a156
-  - identifier:
-      - BA
-    name: Lovense Solace Pro
-    features:
-      - description: Stroker position Based Movement
-        id: c4b2855d-5ecc-4010-8a8d-17fd3e51cc57
-        output:
-          position_with_duration:
-            position:
-              - 0
-              - 100
-            duration:
-              - 0
-              - 100000
-          oscillate:
-            value:
-              - 0
-              - 20              
-      - description: battery Level
-        id: 0b1cba39-8bb7-4f87-9bed-c59f2284d702
-        input:
-          battery:
-            value_range:
-              - - 0
-                - 100
-            input_commands:
-              - Read
-    id: ed5f76c6-84b9-4fee-891f-28f9f4fa3632
+- identifier:
+  - B
+  name: Lovense Max
+  features:
+  - description: Vibrator
+    id: d9c9b4a7-008e-4182-b28c-0984af970c32
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 0
+  - description: Air Pump
+    id: fed393a9-3ac6-4924-859d-5cb4ae059cea
+    output:
+      constrict:
+        value:
+        - 0
+        - 3
+    index: 1
+  - description: battery Level
+    id: b4be6835-5b91-4540-bc7b-0c3d8dcb89fd
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 2
+  id: 99024e29-c0ed-4c26-aede-e0db0679eae5
+- identifier:
+  - P
+  name: Lovense Edge
+  features:
+  - id: cb286b22-998b-4420-82f3-84e8d39db6b5
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 0
+  - id: c8b72e1d-d7d4-4417-8cbc-e6c0f435889a
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 1
+  - description: battery Level
+    id: 66b31efb-3bd9-4e3a-9972-88c66e9fca28
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 2
+  id: 2e309985-6bbf-4b75-866f-76d845b3ce42
+- identifier:
+  - A
+  - C
+  name: Lovense Nora
+  features:
+  - id: 2c5da93b-36a0-4209-ac8c-cead63b838c6
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 0
+  - id: 515e07e2-a6e6-4ac0-a4b0-512504311260
+    output:
+      rotate:
+        value:
+        - -20
+        - 20
+    index: 1
+  - description: battery Level
+    id: 820d8fb1-c6ec-434d-b7c4-835bdf36552a
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 2
+  id: 463a18b9-42a5-4f7b-8156-0e61346fdb8a
+- identifier:
+  - L
+  name: Lovense Ambi
+  id: 7053fde9-0902-4aab-926d-fc51869f6ccc
+- identifier:
+  - S
+  name: Lovense Lush
+  id: 670560f0-981e-42cb-b83d-c911dd9826e2
+- identifier:
+  - Z
+  name: Lovense Hush
+  id: 37642e1c-a416-44d3-bada-76b6d9e245c9
+- identifier:
+  - W
+  name: Lovense Domi
+  id: e788f8d5-037a-4ce4-a13f-6b2e8ec31fb6
+- identifier:
+  - O
+  name: Lovense Osci
+  id: 45bf66e7-01e0-48ad-ad1c-2b48d1279da1
+- identifier:
+  - V
+  name: Lovense Mission
+  id: 45e2fc5c-79e8-4228-beba-a97a14d84e7d
+- identifier:
+  - CA
+  name: Lovense Mission 2
+  id: a8f36834-d8eb-48d5-9bad-237e67f6fd5b
+- identifier:
+  - X
+  name: Lovense Ferri
+  id: 481b101b-ff4d-4045-84fe-da2b9bba93e2
+- identifier:
+  - R
+  name: Lovense Diamo
+  id: df95c01b-88d3-49b3-b360-69777b341795
+- identifier:
+  - ToyS
+  name: Loveai Dolp
+  id: 30830f67-4550-4133-88a9-b5eccd83083b
+- identifier:
+  - F
+  name: Lovense Sex Machine
+  features:
+  - description: Fucking Machine Oscillation Speed
+    id: f9506652-c4ac-43b1-b184-cd8016b64623
+    output:
+      oscillate:
+        value:
+        - 0
+        - 20
+    index: 0
+  - description: battery Level
+    id: 7c382c60-0ee2-4315-b8cf-cfd3ab4c9ccd
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 1
+  id: 8667f7b6-7baa-4e46-9d76-947fb707f0f3
+- identifier:
+  - FS
+  name: Lovense Mini Sex Machine
+  features:
+  - description: Fucking Machine Oscillation Speed
+    id: aaf55cab-8ebd-42b3-9bbb-74a57efdf014
+    output:
+      oscillate:
+        value:
+        - 0
+        - 20
+    index: 0
+  - description: battery Level
+    id: 68defbd8-af87-4f04-97da-edfa8fb576f9
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 1
+  id: 48d5c76b-8c0e-4152-9f3b-5ba92ebf30fe
+- identifier:
+  - J
+  name: Lovense Dolce
+  features:
+  - id: 930b9aee-0ba5-4268-95ca-2a5691d31239
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 0
+  - id: 62b2b22c-c028-4aa4-a85c-a7fe8c5f9dcb
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 1
+  - description: battery Level
+    id: 60868f44-3d56-44ed-bcc4-00041a7b5997
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 2
+  id: 0bddb3da-2c8d-4af8-9e80-1e0038878f27
+- identifier:
+  - OC
+  name: Lovense Osci 3
+  features:
+  - id: 4cf78058-44c7-4513-913a-37558a84b91e
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 0
+  - id: f4ada339-8bb2-4b02-b907-69a3257bce3b
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 1
+  - description: battery Level
+    id: 3933bfcb-6daf-4c33-b834-877cb29ce77d
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 2
+  id: a8b175a8-3447-4938-b1df-7215464b56e6
+- identifier:
+  - ED
+  name: Lovense Gush
+  id: 6071cc3a-a8e7-4142-bc80-08fe122452d8
+- identifier:
+  - EZ
+  name: Lovense Gush 2
+  id: 51de38d3-114f-453e-a440-3958918af423
+- identifier:
+  - EB
+  name: Lovense Hyphy
+  features:
+  - id: 39b063fa-958b-4d1a-bbd1-8480e105dd88
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 0
+  - id: b40accca-7c73-4bff-9819-45f806a194a8
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 1
+  - description: battery Level
+    id: 8fa6dc63-430e-42cb-9345-42d37f0c2629
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 2
+  id: a6a0c988-3e04-4fa3-89e2-4f4d2f242ffd
+- identifier:
+  - T
+  name: Lovense Calor
+  id: bdab9bf5-25f8-4140-bf4d-3f0edf1883d2
+- identifier:
+  - EI
+  name: Lovense Flexer (Firmware update needed)
+  id: c90a2d78-5b08-40ad-a2c9-ac7eacb43b3d
+- identifier:
+  - EI-FW3
+  name: Lovense Flexer
+  features:
+  - description: Internal Vibe
+    id: 9b2dcb58-6c2c-46ef-abe4-81631d1a5f66
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 0
+  - description: External Vibe
+    id: d8b571fd-614e-4d33-8595-b9fbc81b96bd
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 1
+  - description: Finger motion
+    id: eb6a2d21-93e0-4a08-9674-36fa2d299651
+    output:
+      rotate:
+        value:
+        - 0
+        - 20
+    index: 2
+  - description: battery Level
+    id: 6548133f-118f-419d-8900-660fde26b42f
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 3
+  id: 8f93dd90-1788-4d2c-8b8f-9a339be12c0e
+- identifier:
+  - "N"
+  name: Lovense Gemini
+  features:
+  - id: de8d83b6-76b4-4851-b53d-616d3527040c
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 0
+  - id: 2ea51cd8-b173-408c-bfef-f6508c5b9087
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 1
+  - description: battery Level
+    id: 710384a5-a7dd-43f1-b55c-147256dc636a
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 2
+  id: 9c72451e-1df7-410a-b4b6-e133f3bd9219
+- identifier:
+  - EA
+  name: Lovense Gravity
+  features:
+  - id: 93fa269e-ba3b-4c09-85d0-43385b49ee79
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 0
+  - id: 475bde3a-4aae-4e84-87be-4df3a634da26
+    output:
+      oscillate:
+        value:
+        - 0
+        - 20
+    index: 1
+  - description: battery Level
+    id: 104da492-67f1-46fc-b412-b98871ebb518
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 2
+  id: b57dfb65-260d-49b2-bff0-659e38947186
+- identifier:
+  - Q
+  name: Lovense Tenera
+  id: abe8f908-3d93-4ba3-8bb1-3623fcd04202
+- identifier:
+  - EL
+  name: Lovense Ridge
+  features:
+  - id: 0627be5e-8553-4f20-b4cf-15f5e1896e5f
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 0
+  - id: 360d81e7-5126-4dbb-b72d-7bb60eb67400
+    output:
+      rotate:
+        value:
+        - -20
+        - 20
+    index: 1
+  - description: battery Level
+    id: 50b9b31f-c2a8-459a-81fd-c54604f5184e
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 2
+  id: bbfd764c-b419-4c13-aeb0-e753a86318ed
+- identifier:
+  - U
+  name: Lovense Lapis
+  features:
+  - description: Tip Vibe
+    id: 414e5c3e-e52a-4064-b367-893bc0b1fb95
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 0
+  - description: Internal Vibe
+    id: be8d8608-d3aa-4fc5-ac5c-8df429f9e63c
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 1
+  - description: External Vibe
+    id: 8bd37a96-7f7a-450f-aa4b-ffe8aa398d1e
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 2
+  - description: battery Level
+    id: ad93f903-a354-40ae-b87e-f8390606a964
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 3
+  id: 5454d487-ed23-4067-80e2-9e2f0c01fabf
+- identifier:
+  - SD
+  name: Lovense Vulse
+  id: 73fcd02b-fa45-4e11-a62a-598aec256fbd
+- identifier:
+  - H
+  name: Lovense Solace
+  features:
+  - description: Stroker Oscillation Speed
+    id: 5100187a-40c7-44a4-a0ce-368cc24429cd
+    output:
+      oscillate:
+        value:
+        - 0
+        - 20
+    index: 0
+  - description: battery Level
+    id: e4193650-2d46-4e6e-8dd8-b1d8d9a1baff
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 1
+  id: c53de5c8-fc4a-421b-9332-271ec742a156
+- identifier:
+  - BA
+  name: Lovense Solace Pro
+  features:
+  - description: Stroker position Based Movement
+    id: c4b2855d-5ecc-4010-8a8d-17fd3e51cc57
+    output:
+      position_with_duration:
+        value:
+        - 0
+        - 100
+        duration:
+        - 0
+        - 100000
+      oscillate:
+        value:
+        - 0
+        - 20
+    index: 0
+  - description: battery Level
+    id: 0b1cba39-8bb7-4f87-9bed-c59f2284d702
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 1
+  id: ed5f76c6-84b9-4fee-891f-28f9f4fa3632
+- identifier:
+  - WD
+  name: Lovense Spinel
+  features:
+  - description: Attachment vibration
+    id: 0e3ff3c1-295d-47cf-a641-8d52286ac13c
+    output:
+      vibrate:
+        value:
+        - 0
+        - 20
+    index: 0
+  - description: Thrusting movement
+    id: 7cf78858-31c9-484c-9b2e-93a5db520ece
+    output:
+      oscillate:
+        value:
+        - 0
+        - 20
+    index: 1
+  - description: battery Level
+    id: d3cb3f91-3b19-401f-88b5-a33006f7c5bc
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 2
+  id: b1ab0746-9659-41f3-9f51-2b4966123210
 communication:
-  - btle:
-      names:
-        - LVS-*
-        - LOVE-*
-      manufacturer_data:
-        - company: 620
-          data:
-            - 255
-            - 33
-      advertised_services:
-        - 6e400001-b5a3-f393-e0a9-e50e24dcca9e
-        - 50300001-0024-4bd4-bbd5-a6920e4c5653
-        - 57300001-0023-4bd4-bbd5-a6920e4c5653
-        - 5a300001-0024-4bd4-bbd5-a6920e4c5653
-        - 50300001-0023-4bd4-bbd5-a6920e4c5653
-        - 53300001-0023-4bd4-bbd5-a6920e4c5653
-        - 5a300001-0023-4bd4-bbd5-a6920e4c5653
-        - 4f300001-0023-4bd4-bbd5-a6920e4c5653
-        - 42300001-0023-4bd4-bbd5-a6920e4c5653
-        - 43300001-0023-4bd4-bbd5-a6920e4c5653
-        - 4c300001-0023-4bd4-bbd5-a6920e4c5653
-        - 4c410001-0023-4bd4-bbd5-a6920e4c5653
-        - 56300001-0023-4bd4-bbd5-a6920e4c5653
-        - 58300001-0023-4bd4-bbd5-a6920e4c5653
-        - 52300001-0023-4bd4-bbd5-a6920e4c5653
-        - 46300001-0023-4bd4-bbd5-a6920e4c5653
-        - 50300011-0023-4bd4-bbd5-a6920e4c5653
-        - 4a300001-0023-4bd4-bbd5-a6920e4c5653
-        - 45440001-0023-4bd4-bbd5-a6920e4c5653
-        - 45420001-0023-4bd4-bbd5-a6920e4c5653
-        - 54300001-0023-4bd4-bbd5-a6920e4c5653
-        - 45490001-0023-4bd4-bbd5-a6920e4c5653
-        - 4e300001-0023-4bd4-bbd5-a6920e4c5653
-        - 45410001-0023-4bd4-bbd5-a6920e4c5653
-        - 51300001-0023-4bd4-bbd5-a6920e4c5653
-        - 45460001-0023-4bd4-bbd5-a6920e4c5653
-        - 454c0001-0023-4bd4-bbd5-a6920e4c5653
-        - 55300001-0023-4bd4-bbd5-a6920e4c5653
-        - 53440001-0023-4bd4-bbd5-a6920e4c5653
-        - 48300001-0023-4bd4-bbd5-a6920e4c5653
-        - 46530001-0023-4bd4-bbd5-a6920e4c5653
-        - 42410001-0023-4bd4-bbd5-a6920e4c5653
-        - 43410001-0023-4bd4-bbd5-a6920e4c5653
-        - 4f430001-0023-4bd4-bbd5-a6920e4c5653
-        - 455a0001-0023-4bd4-bbd5-a6920e4c5653
-      services:
-        0000fff0-0000-1000-8000-00805f9b34fb:
-          tx: 0000fff2-0000-1000-8000-00805f9b34fb
-          rx: 0000fff1-0000-1000-8000-00805f9b34fb
-        6e400001-b5a3-f393-e0a9-e50e24dcca9e:
-          tx: 6e400002-b5a3-f393-e0a9-e50e24dcca9e
-          rx: 6e400003-b5a3-f393-e0a9-e50e24dcca9e
-        50300001-0024-4bd4-bbd5-a6920e4c5653:
-          tx: 50300002-0024-4bd4-bbd5-a6920e4c5653
-          rx: 50300003-0024-4bd4-bbd5-a6920e4c5653
-        57300001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 57300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 57300003-0023-4bd4-bbd5-a6920e4c5653
-        5a300001-0024-4bd4-bbd5-a6920e4c5653:
-          tx: 5a300002-0024-4bd4-bbd5-a6920e4c5653
-          rx: 5a300003-0024-4bd4-bbd5-a6920e4c5653
-        50300001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 50300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 50300003-0023-4bd4-bbd5-a6920e4c5653
-        53300001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 53300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 53300003-0023-4bd4-bbd5-a6920e4c5653
-        5a300001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 5a300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 5a300003-0023-4bd4-bbd5-a6920e4c5653
-        4f300001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 4f300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 4f300003-0023-4bd4-bbd5-a6920e4c5653
-        42300001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 42300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 42300003-0023-4bd4-bbd5-a6920e4c5653
-        43300001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 43300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 43300003-0023-4bd4-bbd5-a6920e4c5653
-        4c300001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 4c300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 4c300003-0023-4bd4-bbd5-a6920e4c5653
-        4c410001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 4c410002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 4c410003-0023-4bd4-bbd5-a6920e4c5653
-        56300001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 56300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 56300003-0023-4bd4-bbd5-a6920e4c5653
-        58300001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 58300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 58300003-0023-4bd4-bbd5-a6920e4c5653
-        52300001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 52300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 52300003-0023-4bd4-bbd5-a6920e4c5653
-        46300001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 46300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 46300003-0023-4bd4-bbd5-a6920e4c5653
-        50300011-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 50300012-0023-4bd4-bbd5-a6920e4c5653
-          rx: 50300013-0023-4bd4-bbd5-a6920e4c5653
-        4a300001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 4a300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 4a300003-0023-4bd4-bbd5-a6920e4c5653
-        45440001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 45440002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 45440003-0023-4bd4-bbd5-a6920e4c5653
-        45420001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 45420002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 45420003-0023-4bd4-bbd5-a6920e4c5653
-        54300001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 54300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 54300003-0023-4bd4-bbd5-a6920e4c5653
-        45490001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 45490002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 45490003-0023-4bd4-bbd5-a6920e4c5653
-        4e300001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 4e300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 4e300003-0023-4bd4-bbd5-a6920e4c5653
-        45410001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 45410002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 45410003-0023-4bd4-bbd5-a6920e4c5653
-        51300001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 51300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 51300003-0023-4bd4-bbd5-a6920e4c5653
-        45460001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 45460002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 45460003-0023-4bd4-bbd5-a6920e4c5653
-        454c0001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 454c0002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 454c0003-0023-4bd4-bbd5-a6920e4c5653
-        55300001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 55300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 55300003-0023-4bd4-bbd5-a6920e4c5653
-        53440001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 53440002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 53440003-0023-4bd4-bbd5-a6920e4c5653
-        48300001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 48300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 48300003-0023-4bd4-bbd5-a6920e4c5653
-        46530001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 46530002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 46530003-0023-4bd4-bbd5-a6920e4c5653
-        42410001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 42410002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 42410003-0023-4bd4-bbd5-a6920e4c5653
-        43410001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 43410002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 43410003-0023-4bd4-bbd5-a6920e4c5653
-        4f430001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 4f430002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 4f430003-0023-4bd4-bbd5-a6920e4c5653
-        455a0001-0023-4bd4-bbd5-a6920e4c5653:
-          tx: 455a0002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 455a0003-0023-4bd4-bbd5-a6920e4c5653
+- btle:
+    names:
+    - LVS-*
+    - LOVE-*
+    manufacturer_data:
+    - company: 620
+      data:
+      - 255
+      - 33
+    advertised_services:
+    - 6e400001-b5a3-f393-e0a9-e50e24dcca9e
+    - 50300001-0024-4bd4-bbd5-a6920e4c5653
+    - 57300001-0023-4bd4-bbd5-a6920e4c5653
+    - 5a300001-0024-4bd4-bbd5-a6920e4c5653
+    - 50300001-0023-4bd4-bbd5-a6920e4c5653
+    - 53300001-0023-4bd4-bbd5-a6920e4c5653
+    - 5a300001-0023-4bd4-bbd5-a6920e4c5653
+    - 4f300001-0023-4bd4-bbd5-a6920e4c5653
+    - 42300001-0023-4bd4-bbd5-a6920e4c5653
+    - 43300001-0023-4bd4-bbd5-a6920e4c5653
+    - 4c300001-0023-4bd4-bbd5-a6920e4c5653
+    - 4c410001-0023-4bd4-bbd5-a6920e4c5653
+    - 56300001-0023-4bd4-bbd5-a6920e4c5653
+    - 58300001-0023-4bd4-bbd5-a6920e4c5653
+    - 52300001-0023-4bd4-bbd5-a6920e4c5653
+    - 46300001-0023-4bd4-bbd5-a6920e4c5653
+    - 50300011-0023-4bd4-bbd5-a6920e4c5653
+    - 4a300001-0023-4bd4-bbd5-a6920e4c5653
+    - 45440001-0023-4bd4-bbd5-a6920e4c5653
+    - 45420001-0023-4bd4-bbd5-a6920e4c5653
+    - 54300001-0023-4bd4-bbd5-a6920e4c5653
+    - 45490001-0023-4bd4-bbd5-a6920e4c5653
+    - 4e300001-0023-4bd4-bbd5-a6920e4c5653
+    - 45410001-0023-4bd4-bbd5-a6920e4c5653
+    - 51300001-0023-4bd4-bbd5-a6920e4c5653
+    - 45460001-0023-4bd4-bbd5-a6920e4c5653
+    - 454c0001-0023-4bd4-bbd5-a6920e4c5653
+    - 55300001-0023-4bd4-bbd5-a6920e4c5653
+    - 53440001-0023-4bd4-bbd5-a6920e4c5653
+    - 48300001-0023-4bd4-bbd5-a6920e4c5653
+    - 46530001-0023-4bd4-bbd5-a6920e4c5653
+    - 42410001-0023-4bd4-bbd5-a6920e4c5653
+    - 43410001-0023-4bd4-bbd5-a6920e4c5653
+    - 4f430001-0023-4bd4-bbd5-a6920e4c5653
+    - 455a0001-0023-4bd4-bbd5-a6920e4c5653
+    - 57440001-0023-4bd4-bbd5-a6920e4c5653
+    services:
+      0000fff0-0000-1000-8000-00805f9b34fb:
+        tx: 0000fff2-0000-1000-8000-00805f9b34fb
+        rx: 0000fff1-0000-1000-8000-00805f9b34fb
+      6e400001-b5a3-f393-e0a9-e50e24dcca9e:
+        tx: 6e400002-b5a3-f393-e0a9-e50e24dcca9e
+        rx: 6e400003-b5a3-f393-e0a9-e50e24dcca9e
+      50300001-0024-4bd4-bbd5-a6920e4c5653:
+        tx: 50300002-0024-4bd4-bbd5-a6920e4c5653
+        rx: 50300003-0024-4bd4-bbd5-a6920e4c5653
+      57300001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 57300002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 57300003-0023-4bd4-bbd5-a6920e4c5653
+      5a300001-0024-4bd4-bbd5-a6920e4c5653:
+        tx: 5a300002-0024-4bd4-bbd5-a6920e4c5653
+        rx: 5a300003-0024-4bd4-bbd5-a6920e4c5653
+      50300001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 50300002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 50300003-0023-4bd4-bbd5-a6920e4c5653
+      53300001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 53300002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 53300003-0023-4bd4-bbd5-a6920e4c5653
+      5a300001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 5a300002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 5a300003-0023-4bd4-bbd5-a6920e4c5653
+      4f300001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 4f300002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 4f300003-0023-4bd4-bbd5-a6920e4c5653
+      42300001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 42300002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 42300003-0023-4bd4-bbd5-a6920e4c5653
+      43300001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 43300002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 43300003-0023-4bd4-bbd5-a6920e4c5653
+      4c300001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 4c300002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 4c300003-0023-4bd4-bbd5-a6920e4c5653
+      4c410001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 4c410002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 4c410003-0023-4bd4-bbd5-a6920e4c5653
+      56300001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 56300002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 56300003-0023-4bd4-bbd5-a6920e4c5653
+      58300001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 58300002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 58300003-0023-4bd4-bbd5-a6920e4c5653
+      52300001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 52300002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 52300003-0023-4bd4-bbd5-a6920e4c5653
+      46300001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 46300002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 46300003-0023-4bd4-bbd5-a6920e4c5653
+      50300011-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 50300012-0023-4bd4-bbd5-a6920e4c5653
+        rx: 50300013-0023-4bd4-bbd5-a6920e4c5653
+      4a300001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 4a300002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 4a300003-0023-4bd4-bbd5-a6920e4c5653
+      45440001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 45440002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 45440003-0023-4bd4-bbd5-a6920e4c5653
+      45420001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 45420002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 45420003-0023-4bd4-bbd5-a6920e4c5653
+      54300001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 54300002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 54300003-0023-4bd4-bbd5-a6920e4c5653
+      45490001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 45490002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 45490003-0023-4bd4-bbd5-a6920e4c5653
+      4e300001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 4e300002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 4e300003-0023-4bd4-bbd5-a6920e4c5653
+      45410001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 45410002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 45410003-0023-4bd4-bbd5-a6920e4c5653
+      51300001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 51300002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 51300003-0023-4bd4-bbd5-a6920e4c5653
+      45460001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 45460002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 45460003-0023-4bd4-bbd5-a6920e4c5653
+      454c0001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 454c0002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 454c0003-0023-4bd4-bbd5-a6920e4c5653
+      55300001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 55300002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 55300003-0023-4bd4-bbd5-a6920e4c5653
+      53440001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 53440002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 53440003-0023-4bd4-bbd5-a6920e4c5653
+      48300001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 48300002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 48300003-0023-4bd4-bbd5-a6920e4c5653
+      46530001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 46530002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 46530003-0023-4bd4-bbd5-a6920e4c5653
+      42410001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 42410002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 42410003-0023-4bd4-bbd5-a6920e4c5653
+      43410001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 43410002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 43410003-0023-4bd4-bbd5-a6920e4c5653
+      4f430001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 4f430002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 4f430003-0023-4bd4-bbd5-a6920e4c5653
+      455a0001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 455a0002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 455a0003-0023-4bd4-bbd5-a6920e4c5653
+      57440001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 57440002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 57440003-0023-4bd4-bbd5-a6920e4c5653

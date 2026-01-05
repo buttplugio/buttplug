@@ -82,7 +82,6 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedOutputVecCmdV4 
     let mut vibrate_features = features
       .features()
       .iter()
-      .enumerate()
       .filter(|(_, feature)| {
         feature
           .output()
@@ -114,7 +113,7 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedOutputVecCmdV4 
       cmds.push(CheckedOutputCmdV4::new(
         msg.id(),
         msg.device_index(),
-        index as u32,
+        *index,
         feature.id(),
         OutputCommand::Vibrate(OutputValue::new(
           actuator.calculate_scaled_float(msg.speed()).map_err(
@@ -168,7 +167,6 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedOutputVecCmdV4 {
       let idx = features
         .features()
         .iter()
-        .enumerate()
         .find(|(_, f)| f.id() == feature.id())
         .expect("Already checked existence")
         .0;
@@ -186,7 +184,7 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedOutputVecCmdV4 {
       cmds.push(CheckedOutputCmdV4::new(
         msg.id(),
         msg.device_index(),
-        idx as u32,
+        *idx,
         feature.id(),
         OutputCommand::Vibrate(OutputValue::new(
           actuator
@@ -231,10 +229,9 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedOutputVecCmdV4 {
       let idx = attrs
         .features()
         .iter()
-        .enumerate()
         .find(|(_, f)| f.id() == feature.feature().id())
         .expect("Already proved existence")
-        .0 as u32;
+        .0;
       let output = feature
         .feature()
         .output()
@@ -253,7 +250,7 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedOutputVecCmdV4 {
       cmds.push(CheckedOutputCmdV4::new(
         msg.id(),
         msg.device_index(),
-        idx,
+        *idx,
         feature.feature.id(),
         OutputCommand::from_output_type(cmd.actuator_type(), output_value).unwrap(),
       ));
@@ -361,10 +358,9 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
       let idx = attrs
         .features()
         .iter()
-        .enumerate()
         .find(|(_, f)| f.id() == feature.feature().id())
         .expect("Already proved existence")
-        .0 as u32;
+        .0;
       let actuator = feature
         .feature()
         .output()
@@ -380,7 +376,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
       cmds.push(CheckedOutputCmdV4::new(
         msg.id(),
         msg.device_index(),
-        idx,
+        *idx,
         feature.feature.id(),
         OutputCommand::Rotate(OutputValue::new(
           actuator.calculate_scaled_float(cmd.speed()).map_err(|_| {

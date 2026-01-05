@@ -6,6 +6,10 @@
 // for full license information.
 
 //! Communications API for accessing Buttplug Servers
+
+#[macro_use]
+extern crate log;
+
 pub mod client_event_loop;
 pub mod client_message_sorter;
 pub mod connector;
@@ -24,7 +28,7 @@ use buttplug_core::{
     RequestDeviceListV0,
     RequestServerInfoV4,
     StartScanningV0,
-    StopAllDevicesV0,
+    StopAllDevicesV4,
     StopScanningV0,
   },
   util::{
@@ -123,6 +127,9 @@ pub enum ButtplugClientEvent {
   /// Emitted when a scanning session (started via a StartScanning call on
   /// [ButtplugClient]) has finished.
   ScanningFinished,
+  /// Emitted when the device list is received as a response to a
+  /// DeviceListRequest call, which is sent during the handshake.
+  DeviceListReceived,
   /// Emitted when a device has been added to the server. Includes a
   /// [ButtplugClientDevice] object representing the device.
   DeviceAdded(ButtplugClientDevice),
@@ -428,7 +435,7 @@ impl ButtplugClient {
   pub fn stop_all_devices(&self) -> ButtplugClientResultFuture {
     self
       .message_sender
-      .send_message_expect_ok(StopAllDevicesV0::default().into())
+      .send_message_expect_ok(StopAllDevicesV4::default().into())
   }
 
   pub fn event_stream(&self) -> impl Stream<Item = ButtplugClientEvent> + use<> {

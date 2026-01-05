@@ -9,7 +9,7 @@
 
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{InputData, InputReadingV4, InputType, OutputCommand},
+  message::{InputReadingV4, InputType, InputValue, OutputCommand},
 };
 use buttplug_server_device_config::{
   Endpoint,
@@ -264,11 +264,9 @@ pub trait ProtocolHandler: Sync + Send {
           .try_into()
           .map_err(|_| ButtplugDeviceError::DeviceCommandSignError)?,
       ),
-      OutputCommand::Temperature(x) => self.handle_output_temperature_cmd(
-        cmd.feature_index(),
-        cmd.feature_id(),
-        x.value()
-      ),
+      OutputCommand::Temperature(x) => {
+        self.handle_output_temperature_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+      }
       OutputCommand::Led(x) => self.handle_output_led_cmd(
         cmd.feature_index(),
         cmd.feature_id(),
@@ -279,7 +277,7 @@ pub trait ProtocolHandler: Sync + Send {
       OutputCommand::PositionWithDuration(x) => self.handle_position_with_duration_cmd(
         cmd.feature_index(),
         cmd.feature_id(),
-        x.position(),
+        x.value(),
         x.duration(),
       ),
     }
@@ -413,6 +411,13 @@ pub trait ProtocolHandler: Sync + Send {
     }
   }
 
+  // Used for clients that have inputs which can be subscribed. Subscribed inputs should be
+  // disconnected between client sessions, but unlike keepalives are not needed to keep the
+  // system up.
+  fn handle_client_disconnect_cmd(&self) -> BoxFuture<'_, Result<(), ButtplugDeviceError>> {
+    future::ready(Ok(())).boxed()
+  }
+
   // Handle Battery Level returns a SensorReading, as we'll always need to do a sensor index
   // conversion on it.
   fn handle_battery_level_cmd(
@@ -434,7 +439,7 @@ pub trait ProtocolHandler: Sync + Send {
         let battery_reading = InputReadingV4::new(
           device_index,
           feature_index,
-          buttplug_core::message::InputTypeData::Battery(InputData::new(battery_level as u8)),
+          buttplug_core::message::InputTypeReading::Battery(InputValue::new(battery_level as u8)),
         );
         debug!("Got battery reading: {}", battery_level);
         Ok(battery_reading)

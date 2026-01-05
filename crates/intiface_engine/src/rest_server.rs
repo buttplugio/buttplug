@@ -1,6 +1,4 @@
-use std::{
-  collections::BTreeMap, convert::Infallible, io, net::SocketAddr, sync::Arc,
-};
+use std::{collections::BTreeMap, convert::Infallible, io, net::SocketAddr, sync::Arc};
 
 use axum::{
   Json, Router,
@@ -152,35 +150,35 @@ async fn stop_device(
   Path(index): Path<u32>,
 ) -> Result<(), IntifaceRestError> {
   get_device(&client, index)?
-      .stop()
-      .await
-      .map_err(IntifaceRestError::ButtplugClientError)
+    .stop()
+    .await
+    .map_err(IntifaceRestError::ButtplugClientError)
 }
 
 async fn set_device_output(
   State(client): State<Arc<ButtplugClient>>,
   Path((index, output_type, level)): Path<(u32, OutputType, f64)>,
 ) -> Result<(), IntifaceRestError> {
-  let cmd = ClientDeviceOutputCommand::from_command_value_float(output_type, level)
+  let cmd = ClientDeviceOutputCommand::from_command_value(output_type, &level.into())
     .map_err(IntifaceRestError::ButtplugClientError)?;
 
   get_device(&client, index)?
-      .send_command(&cmd)
-      .await
-      .map_err(IntifaceRestError::ButtplugClientError)
+    .send_command(&cmd)
+    .await
+    .map_err(IntifaceRestError::ButtplugClientError)
 }
 
 async fn set_feature_output(
   State(client): State<Arc<ButtplugClient>>,
   Path((index, feature_index, output_type, level)): Path<(u32, u32, OutputType, f64)>,
 ) -> Result<(), IntifaceRestError> {
-  let cmd = ClientDeviceOutputCommand::from_command_value_float(output_type, level)
+  let cmd = ClientDeviceOutputCommand::from_command_value(output_type, &level.into())
     .map_err(IntifaceRestError::ButtplugClientError)?;
 
   get_feature(&client, index, feature_index)?
-      .send_command(&cmd)
-      .await
-      .map_err(IntifaceRestError::ButtplugClientError)
+    .send_command(&cmd)
+    .await
+    .map_err(IntifaceRestError::ButtplugClientError)
 }
 
 async fn get_devices(
@@ -258,7 +256,7 @@ async fn feature_input_command(
 
 async fn server_sse(
   State(client): State<Arc<ButtplugClient>>,
-) -> Sse<impl Stream<Item = Result<Event, Infallible>>> { 
+) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
   let stream = client
     .event_stream()
     .map(|e| Ok(Event::default().data(format!("{:?}", e))));

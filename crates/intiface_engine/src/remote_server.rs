@@ -7,8 +7,8 @@
 
 use buttplug_core::{
   connector::ButtplugConnector,
-  errors::ButtplugError,
-  message::ButtplugServerMessageV4,
+  errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
+  message::{ButtplugMessageSpecVersion, ButtplugServerMessageV4},
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use buttplug_server::{
@@ -123,6 +123,7 @@ async fn run_server<ConnectorType>(
   connector: ConnectorType,
   mut connector_receiver: mpsc::Receiver<ButtplugClientMessageVariant>,
   disconnect_notifier: Arc<Notify>,
+  allow_v4_spec: bool
 ) where
   ConnectorType:
     ButtplugConnector<ButtplugServerMessageVariant, ButtplugClientMessageVariant> + 'static,
@@ -149,15 +150,26 @@ async fn run_server<ConnectorType>(
           let connected = server_clone.connected();
           let connector_clone = shared_connector.clone();
           let remote_event_sender_clone = remote_event_sender.clone();
+          let disconnect_notifier = disconnect_notifier.clone();
           async_manager::spawn(async move {
             match server_clone.parse_message(client_message.clone()).await {
               Ok(ret_msg) => {
                 // Only send event if we just connected. Sucks to check it on every message but the boolean check should be quick.
-                if !connected && server_clone.connected()
-                  && remote_event_sender_clone.receiver_count() > 0
+                if !connected && server_clone.connected() {
+                  // Check to see what message version was requested. If we're not allowing v4, kill the connection.
+                  info!("CHECKING SPEC: {} {:?}", allow_v4_spec, server_clone.spec_version());
+                  if !allow_v4_spec && server_clone.spec_version() == Some(ButtplugMessageSpecVersion::Version4) {
+                    error!("Cannot connect v4 client with this server (Allow v4 spec is off).");
+                    connector_clone.send(ButtplugServerMessageVariant::V4(ButtplugServerMessageV4::Error(ButtplugError::from(ButtplugHandshakeError::UnhandledMessageSpecVersionRequested(ButtplugMessageSpecVersion::Version4)).into()))).await;
+                    disconnect_notifier.notify_waiters();
+                    return;
+                  }
+
+                  if remote_event_sender_clone.receiver_count() > 0
                     && remote_event_sender_clone.send(ButtplugRemoteServerEvent::ClientConnected(server_clone.client_name().unwrap_or("Buttplug Client (No name specified)".to_owned()).clone())).is_err() {
                       error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
-                    }
+                  }
+                }
                 if connector_clone.send(ret_msg).await.is_err() {
                   error!("Cannot send reply to server, dropping and assuming remote server thread has exited.");
                 }
@@ -273,6 +285,7 @@ impl ButtplugRemoteServer {
   pub fn start<ConnectorType>(
     &self,
     mut connector: ConnectorType,
+    allow_v4_spec: bool
   ) -> impl Future<Output = Result<(), ButtplugServerConnectorError>> + use<ConnectorType>
   where
     ConnectorType:
@@ -296,6 +309,7 @@ impl ButtplugRemoteServer {
         connector,
         connector_receiver,
         disconnect_notifier,
+        allow_v4_spec
       )
       .await;
       Ok(())

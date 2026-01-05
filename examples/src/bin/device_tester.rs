@@ -7,7 +7,6 @@
 
 use tracing::Level;
 
-/*
 use buttplug_client::device::{ClientDeviceFeature, ClientDeviceOutputCommand};
 use buttplug_client::{ButtplugClient, ButtplugClientDevice, ButtplugClientEvent};
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
@@ -33,19 +32,18 @@ use tokio::time::sleep;
 async fn set_level_and_wait(
   dev: &ButtplugClientDevice,
   feature: &ClientDeviceFeature,
-  output: &DeviceFeatureOutput,
   output_type: &OutputType,
   level: f64,
 ) {
-  let cmd = match (output_type) {
-    OutputType::Vibrate => Ok(ClientDeviceOutputCommand::VibrateFloat(level)),
-    OutputType::Rotate => Ok(ClientDeviceOutputCommand::RotateFloat(level)),
-    OutputType::Oscillate => Ok(ClientDeviceOutputCommand::OscillateFloat(level)),
-    OutputType::Constrict => Ok(ClientDeviceOutputCommand::ConstrictFloat(level)),
-    OutputType::Heater => Ok(ClientDeviceOutputCommand::HeaterFloat(level)),
-    OutputType::Led => Ok(ClientDeviceOutputCommand::LedFloat(level)),
-    OutputType::Position => Ok(ClientDeviceOutputCommand::PositionFloat(level)),
-    OutputType::Spray => Ok(ClientDeviceOutputCommand::SprayFloat(level)),
+  let cmd = match output_type {
+    OutputType::Vibrate => Ok(ClientDeviceOutputCommand::Vibrate(level.into())),
+    OutputType::Rotate => Ok(ClientDeviceOutputCommand::Rotate(level.into())),
+    OutputType::Oscillate => Ok(ClientDeviceOutputCommand::Oscillate(level.into())),
+    OutputType::Constrict => Ok(ClientDeviceOutputCommand::Constrict(level.into())),
+    OutputType::Temperature => Ok(ClientDeviceOutputCommand::Temperature(level.into())),
+    OutputType::Led => Ok(ClientDeviceOutputCommand::Led(level.into())),
+    OutputType::Position => Ok(ClientDeviceOutputCommand::Position(level.into())),
+    OutputType::Spray => Ok(ClientDeviceOutputCommand::Spray(level.into())),
     _ => Err(format!("Unknown output type {:?}", output_type)),
   }
   .unwrap();
@@ -66,8 +64,8 @@ async fn device_tester() {
   let mut dc = None;
   let mut uc = None;
 
-  dc = None; //Some(fs::read_to_string("C:\\Users\\NickPoole\\AppData\\Roaming\\com.nonpolynomial\\intiface_central\\config\\buttplug-device-config-v3.json").expect("Should have been able to read dc"));
-  uc = None; //Some(fs::read_to_string("C:\\Users\\NickPoole\\AppData\\Roaming\\com.nonpolynomial\\intiface_central\\config\\buttplug-user-device-config-v3.json").expect("Should have been able to read uc"));
+  dc = None; //Some(fs::read_to_string("C:\\Users\\user\\AppData\\Roaming\\com.nonpolynomial\\intiface_central\\config\\buttplug-device-config-v3.json").expect("Should have been able to read dc"));
+  uc = None; //Some(fs::read_to_string("C:\\Users\\user\\AppData\\Roaming\\com.nonpolynomial\\intiface_central\\config\\buttplug-user-device-config-v3.json").expect("Should have been able to read uc"));
 
   let dcm = load_protocol_configs(&dc, &uc, false)
     .unwrap()
@@ -104,7 +102,7 @@ async fn device_tester() {
     let mut cmds = vec![];
     dev.device_features().iter().for_each(|(_, feature)| {
       let outs = feature.feature().output().clone().unwrap_or_default();
-      if let Some(out) = outs.get(&OutputType::Vibrate) {
+      if let Some(out) = outs.get(OutputType::Vibrate) {
         cmds.push(feature.vibrate(out.step_count()));
         println!(
           "{} ({}) should start vibrating on feature {}!",
@@ -112,15 +110,15 @@ async fn device_tester() {
           dev.index(),
           feature.feature_index()
         );
-      } else if let Some(out) = outs.get(&OutputType::Rotate) {
-        cmds.push(feature.rotate(out.step_count()));
+      } else if let Some(out) = outs.get(OutputType::Rotate) {
+        cmds.push(feature.rotate(out.step_limit().end().to_owned()));
         println!(
           "{} ({}) should start rotating on feature {}!",
           dev.name(),
           dev.index(),
           feature.feature_index()
         );
-      } else if let Some(out) = outs.get(&OutputType::Oscillate) {
+      } else if let Some(out) = outs.get(OutputType::Oscillate) {
         cmds.push(feature.oscillate(out.step_count()));
         println!(
           "{} ({}) should start oscillating on feature {}!",
@@ -128,7 +126,7 @@ async fn device_tester() {
           dev.index(),
           feature.feature_index()
         );
-      } else if let Some(out) = outs.get(&OutputType::Constrict) {
+      } else if let Some(out) = outs.get(OutputType::Constrict) {
         cmds.push(feature.constrict(out.step_count()));
         println!(
           "{} ({}) should start constricting on feature {}!",
@@ -136,132 +134,128 @@ async fn device_tester() {
           dev.index(),
           feature.feature_index()
         );
-      } else if let Some(out) = outs.get(&OutputType::Heater) {
-        cmds.push(feature.send_command(&ClientDeviceOutputCommand::Heater(out.step_count())));
+      } else if let Some(out) = outs.get(OutputType::Temperature) {
+        cmds.push(
+          feature.send_command(&ClientDeviceOutputCommand::Temperature(
+            (*out.step_limit().start()).into(),
+          )),
+        );
         println!(
           "{} ({}) should start heating on feature {}!",
           dev.name(),
           dev.index(),
           feature.feature_index()
         );
-      } else if let Some(out) = outs.get(&OutputType::Position) {
-        cmds.push(feature.position(out.step_count()));
-        println!(
-          "{} ({}) should start moving to position {} on feature {}!",
-          dev.name(),
-          dev.index(),
-          out.step_count(),
-          feature.feature_index()
-        );
       }
     });
-    futures::future::join_all(cmds)
-      .await
-      .iter()
-      .for_each(|cmd| {
-        if let Err(err) = cmd {
-          error!("{:?}", err);
+    if cmds.len() > 0 {
+      // If the device had any features send what used to be scalar commands async,
+      // dispatch all commands now in parallel, then go back and stop them in parallel.
+      futures::future::join_all(cmds)
+        .await
+        .iter()
+        .for_each(|cmd| {
+          if let Err(err) = cmd {
+            error!("{:?}", err);
+          }
+        });
+
+      sleep(Duration::from_secs(5)).await;
+
+      let mut cmds = vec![];
+      dev.device_features().iter().for_each(|(_, feature)| {
+        let outs = feature.feature().output().clone().unwrap_or_default();
+        if outs.get(OutputType::Vibrate).is_some() {
+          cmds.push(feature.vibrate(0));
+          println!(
+            "{} ({}) should stop vibrating on feature {}!",
+            dev.name(),
+            dev.index(),
+            feature.feature_index()
+          );
+        } else if outs.get(OutputType::Rotate).is_some() {
+          cmds.push(feature.rotate(0));
+          println!(
+            "{} ({}) should stop rotating on feature {}!",
+            dev.name(),
+            dev.index(),
+            feature.feature_index()
+          );
+        } else if outs.get(OutputType::Oscillate).is_some() {
+          cmds.push(feature.oscillate(0));
+          println!(
+            "{} ({}) should stop oscillating on feature {}!",
+            dev.name(),
+            dev.index(),
+            feature.feature_index()
+          );
+        } else if outs.get(OutputType::Constrict).is_some() {
+          cmds.push(feature.constrict(0));
+          println!(
+            "{} ({}) should stop constricting on feature {}!",
+            dev.name(),
+            dev.index(),
+            feature.feature_index()
+          );
+        } else if outs.get(OutputType::Temperature).is_some() {
+          cmds.push(feature.send_command(&ClientDeviceOutputCommand::Temperature(0i32.into())));
+          println!(
+            "{} ({}) should stop heating on feature {}!",
+            dev.name(),
+            dev.index(),
+            feature.feature_index()
+          );
         }
       });
 
-    sleep(Duration::from_secs(5)).await;
+      futures::future::join_all(cmds)
+        .await
+        .iter()
+        .for_each(|cmd| {
+          if let Err(err) = cmd {
+            error!("{:?}", err);
+          }
+        });
 
-    let mut cmds = vec![];
-    dev.device_features().iter().for_each(|(_, feature)| {
-      let outs = feature.feature().output().clone().unwrap_or_default();
-      if let Some(out) = outs.get(&OutputType::Vibrate) {
-        cmds.push(feature.vibrate(0));
-        println!(
-          "{} ({}) should stop vibrating on feature {}!",
-          dev.name(),
-          dev.index(),
-          feature.feature_index()
-        );
-      } else if let Some(out) = outs.get(&OutputType::Rotate) {
-        cmds.push(feature.rotate(0));
-        println!(
-          "{} ({}) should stop rotating on feature {}!",
-          dev.name(),
-          dev.index(),
-          feature.feature_index()
-        );
-      } else if let Some(out) = outs.get(&OutputType::Oscillate) {
-        cmds.push(feature.oscillate(0));
-        println!(
-          "{} ({}) should stop oscillating on feature {}!",
-          dev.name(),
-          dev.index(),
-          feature.feature_index()
-        );
-      } else if let Some(out) = outs.get(&OutputType::Constrict) {
-        cmds.push(feature.constrict(0));
-        println!(
-          "{} ({}) should stop constricting on feature {}!",
-          dev.name(),
-          dev.index(),
-          feature.feature_index()
-        );
-      } else if let Some(out) = outs.get(&OutputType::Heater) {
-        cmds.push(feature.send_command(&ClientDeviceOutputCommand::Heater(0)));
-        println!(
-          "{} ({}) should stop heating on feature {}!",
-          dev.name(),
-          dev.index(),
-          feature.feature_index()
-        );
-      } else if let Some(out) = outs.get(&OutputType::Position) {
-        cmds.push(feature.position(0));
-        println!(
-          "{} ({}) should start moving to position 0 on feature {}!",
-          dev.name(),
-          dev.index(),
-          feature.feature_index()
-        );
-      }
-    });
+      sleep(Duration::from_secs(2)).await;
+    }
 
-    futures::future::join_all(cmds)
-      .await
-      .iter()
-      .for_each(|cmd| {
-        if let Err(err) = cmd {
-          error!("{:?}", err);
-        }
-      });
-
-    sleep(Duration::from_secs(2)).await;
-
+    // Exercise each feature
     for (_, feature) in dev.device_features() {
-      for outputs in feature.feature().output() {
-        for otype in outputs.keys() {
-          let output = outputs.get(otype).unwrap();
-          let test_feature = async |command, output_str| {
-            feature.send_command(&command).await;
-            println!(
-              "{} ({}) Testing feature {} ({}), output {:?} - {}",
-              dev.name(),
-              dev.index(),
-              feature.feature().feature_index(),
-              feature.feature().description(),
-              otype,
-              output_str
-            );
-            sleep(Duration::from_secs(1)).await;
-          };
+      if let Some(out) = feature.feature().output() {
+        let outputs: Vec<&OutputType> = [
+          OutputType::Constrict,
+          OutputType::Temperature,
+          OutputType::Led,
+          OutputType::Oscillate,
+          OutputType::Position,
+          OutputType::PositionWithDuration,
+          OutputType::Rotate,
+          OutputType::Spray,
+          OutputType::Unknown,
+          OutputType::Vibrate,
+        ]
+        .iter()
+        .filter(|o| out.contains(**o))
+        .collect();
+
+        for otype in outputs {
+          let output = out.get(*otype).unwrap();
           match otype {
             OutputType::Vibrate
-            | OutputType::Rotate
             | OutputType::Constrict
             | OutputType::Oscillate
-            | OutputType::Heater
+            | OutputType::Temperature
             | OutputType::Spray
             | OutputType::Led
             | OutputType::Position => {
-              set_level_and_wait(&dev, feature, &output, otype, 0.25).await;
-              set_level_and_wait(&dev, feature, &output, otype, 0.5).await;
-              set_level_and_wait(&dev, feature, &output, otype, 0.75).await;
-              set_level_and_wait(&dev, feature, &output, otype, 1.0).await;
-              set_level_and_wait(&dev, feature, &output, otype, 0.0).await;
+              set_level_and_wait(&dev, feature, &otype, 0.05).await;
+              set_level_and_wait(&dev, feature, &otype, 0.10).await;
+              set_level_and_wait(&dev, feature, &otype, 0.25).await;
+              set_level_and_wait(&dev, feature, &otype, 0.5).await;
+              set_level_and_wait(&dev, feature, &otype, 0.75).await;
+              set_level_and_wait(&dev, feature, &otype, 1.0).await;
+              set_level_and_wait(&dev, feature, &otype, 0.0).await;
             }
             OutputType::Unknown => {
               error!(
@@ -273,57 +267,126 @@ async fn device_tester() {
                 otype
               );
             }
-            OutputType::RotateWithDirection => {
-              test_feature(
-                ClientDeviceOutputCommand::RotateWithDirection(output.step_count() / 4, true),
-                "25% clockwise",
-              )
-              .await;
-              test_feature(
-                ClientDeviceOutputCommand::RotateWithDirection(output.step_count() / 4, false),
-                "25% anti-clockwise",
-              )
-              .await;
-              test_feature(
-                ClientDeviceOutputCommand::RotateWithDirection(output.step_count() / 2, true),
-                "50% clockwise",
-              )
-              .await;
-              test_feature(
-                ClientDeviceOutputCommand::RotateWithDirection(output.step_count() / 2, false),
-                "50% anti-clockwise",
-              )
-              .await;
-              test_feature(
-                ClientDeviceOutputCommand::RotateWithDirection((output.step_count() / 4) * 3, true),
-                "75% clockwise",
-              )
-              .await;
-              test_feature(
-                ClientDeviceOutputCommand::RotateWithDirection(
-                  (output.step_count() / 4) * 3,
-                  false,
-                ),
-                "75% anti-clockwise",
-              )
-              .await;
-              test_feature(
-                ClientDeviceOutputCommand::RotateWithDirection(output.step_count(), true),
-                "100% clockwise",
-              )
-              .await;
-              test_feature(
-                ClientDeviceOutputCommand::RotateWithDirection(output.step_count(), false),
-                "100% anti-clockwise",
-              )
-              .await;
-              test_feature(
-                ClientDeviceOutputCommand::RotateWithDirection(0, false),
-                "stop",
-              )
-              .await;
+            OutputType::Rotate => {
+              if output.step_limit().start() >= &0 {
+                set_level_and_wait(&dev, feature, &otype, 0.25).await;
+                set_level_and_wait(&dev, feature, &otype, 0.5).await;
+                set_level_and_wait(&dev, feature, &otype, 0.75).await;
+                set_level_and_wait(&dev, feature, &otype, 1.0).await;
+                set_level_and_wait(&dev, feature, &otype, 0.0).await;
+              } else {
+                set_level_and_wait(&dev, feature, &otype, 0.25).await;
+                set_level_and_wait(&dev, feature, &otype, -0.25).await;
+                set_level_and_wait(&dev, feature, &otype, 0.5).await;
+                set_level_and_wait(&dev, feature, &otype, -0.5).await;
+                set_level_and_wait(&dev, feature, &otype, 0.75).await;
+                set_level_and_wait(&dev, feature, &otype, -0.75).await;
+                set_level_and_wait(&dev, feature, &otype, 1.0).await;
+                set_level_and_wait(&dev, feature, &otype, -1.0).await;
+                set_level_and_wait(&dev, feature, &otype, 0.0).await;
+
+                set_level_and_wait(&dev, feature, &otype, 0.25).await;
+                set_level_and_wait(&dev, feature, &otype, 0.5).await;
+                set_level_and_wait(&dev, feature, &otype, 0.75).await;
+                set_level_and_wait(&dev, feature, &otype, 1.0).await;
+                set_level_and_wait(&dev, feature, &otype, -0.25).await;
+                set_level_and_wait(&dev, feature, &otype, -0.5).await;
+                set_level_and_wait(&dev, feature, &otype, -0.75).await;
+                set_level_and_wait(&dev, feature, &otype, -1.0).await;
+                set_level_and_wait(&dev, feature, &otype, 0.0).await;
+              }
             }
-            OutputType::PositionWithDuration => {}
+            OutputType::PositionWithDuration => {
+              feature
+                .send_command(&ClientDeviceOutputCommand::PositionWithDuration(
+                  0.0f64.into(),
+                  10,
+                ))
+                .await
+                .unwrap();
+              println!(
+                "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
+                dev.name(),
+                dev.index(),
+                feature.feature().feature_index(),
+                feature.feature().description(),
+                "PositionWithDuration",
+                (0.0 * 100.0) as u8,
+                10
+              );
+              sleep(Duration::from_secs(1)).await;
+              feature
+                .send_command(&ClientDeviceOutputCommand::PositionWithDuration(
+                  0.5f64.into(),
+                  1000,
+                ))
+                .await
+                .unwrap();
+              println!(
+                "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
+                dev.name(),
+                dev.index(),
+                feature.feature().feature_index(),
+                feature.feature().description(),
+                "PositionWithDuration",
+                (0.0 * 100.0) as u8,
+                1000
+              );
+              sleep(Duration::from_secs(1)).await;
+              feature
+                .send_command(&ClientDeviceOutputCommand::PositionWithDuration(
+                  0.0f64.into(),
+                  10,
+                ))
+                .await
+                .unwrap();
+              println!(
+                "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
+                dev.name(),
+                dev.index(),
+                feature.feature().feature_index(),
+                feature.feature().description(),
+                "PositionWithDuration",
+                (0.0 * 100.0) as u8,
+                10
+              );
+              sleep(Duration::from_secs(1)).await;
+              feature
+                .send_command(&ClientDeviceOutputCommand::PositionWithDuration(
+                  1.0f64.into(),
+                  500,
+                ))
+                .await
+                .unwrap();
+              println!(
+                "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
+                dev.name(),
+                dev.index(),
+                feature.feature().feature_index(),
+                feature.feature().description(),
+                "PositionWithDuration",
+                (1.0 * 100.0) as u8,
+                500
+              );
+              sleep(Duration::from_secs(1)).await;
+              feature
+                .send_command(&ClientDeviceOutputCommand::PositionWithDuration(
+                  0.0f64.into(),
+                  1500,
+                ))
+                .await
+                .unwrap();
+              println!(
+                "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
+                dev.name(),
+                dev.index(),
+                feature.feature().feature_index(),
+                feature.feature().description(),
+                "PositionWithDuration",
+                (0.0 * 100.0) as u8,
+                1500
+              );
+            }
           }
         }
       }
@@ -361,14 +424,11 @@ async fn device_tester() {
   // And now we're done!
   println!("Exiting example");
 }
-*/
+
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
   tracing_subscriber::fmt()
     .with_max_level(Level::DEBUG)
     .init();
-  panic!("Reimplement me!");
-  /*
   device_tester().await;
-  */
 }

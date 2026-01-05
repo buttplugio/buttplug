@@ -5,12 +5,14 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+mod lovense_dual_actuator;
 mod lovense_max;
 mod lovense_multi_actuator;
 mod lovense_rotate_vibrator;
 mod lovense_single_actuator;
 mod lovense_stroker;
 
+use lovense_dual_actuator::LovenseDualActuator;
 use lovense_max::LovenseMax;
 use lovense_multi_actuator::LovenseMultiActuator;
 use lovense_rotate_vibrator::LovenseRotateVibrator;
@@ -24,7 +26,7 @@ use crate::device::{
 use async_trait::async_trait;
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{self, InputData, InputReadingV4, InputTypeData, OutputType},
+  message::{self, InputReadingV4, InputTypeReading, InputValue, OutputType},
   util::sleep,
 };
 use buttplug_server_device_config::{
@@ -169,7 +171,7 @@ impl ProtocolInitializer for LovenseInitializer {
 
     let vibrator_count = device_definition
       .features()
-      .iter()
+      .values()
       .filter(|x| {
         x.output()
           .as_ref()
@@ -179,14 +181,14 @@ impl ProtocolInitializer for LovenseInitializer {
 
     let output_count = device_definition
       .features()
-      .iter()
+      .values()
       .filter(|x| x.output().is_some())
       .count();
 
     let vibrator_rotator = output_count == 2
       && device_definition
         .features()
-        .iter()
+        .values()
         .filter(|x| {
           x.output()
             .as_ref()
@@ -196,7 +198,7 @@ impl ProtocolInitializer for LovenseInitializer {
         == 1
       && device_definition
         .features()
-        .iter()
+        .values()
         .filter(|x| {
           x.output()
             .as_ref()
@@ -208,7 +210,7 @@ impl ProtocolInitializer for LovenseInitializer {
     let lovense_max = output_count == 2
       && device_definition
         .features()
-        .iter()
+        .values()
         .filter(|x| {
           x.output()
             .as_ref()
@@ -218,7 +220,7 @@ impl ProtocolInitializer for LovenseInitializer {
         == 1
       && device_definition
         .features()
-        .iter()
+        .values()
         .filter(|x| {
           x.output()
             .as_ref()
@@ -229,229 +231,34 @@ impl ProtocolInitializer for LovenseInitializer {
 
     // This might need better tuning if other complex Lovenses are released
     // Currently this only applies to the Flexer/Lapis/Solace
-    let use_mply =
-      (vibrator_count == 2 && output_count > 2) || vibrator_count > 2 || device_type == "H";
+    let use_mply = (vibrator_count == 2 && output_count > 2) || vibrator_count > 2;
 
     // New Lovense devices seem to be moving to the simplified LVS:<bytearray>; command format.
     // I'm not sure if there's a good way to detect this.
     //let use_lvs = device_type == "OC";
 
     debug!(
-      "Device type {} initialized with {} vibrators {} using Mply",
+      "Device type {} initialized with {} outputs {} using Mply",
       device_type,
-      vibrator_count,
+      output_count,
       if use_mply { "" } else { "not " }
     );
 
-    if device_type == "BA" {
-      Ok(Arc::new(LovenseStroker::new(hardware)))
+    if device_type == "BA" || device_type == "H" {
+      Ok(Arc::new(LovenseStroker::new(hardware, device_type == "H")))
     } else if output_count == 1 {
       Ok(Arc::new(LovenseSingleActuator::default()))
     } else if lovense_max {
       Ok(Arc::new(LovenseMax::default()))
     } else if vibrator_rotator {
       Ok(Arc::new(LovenseRotateVibrator::default()))
+    } else if use_mply {
+      Ok(Arc::new(LovenseMultiActuator::new(output_count as u32)))
     } else {
-      Ok(Arc::new(LovenseMultiActuator::new(vibrator_count as u32)))
+      Ok(Arc::new(LovenseDualActuator::new(output_count as u32)))
     }
   }
 }
-/*
-pub struct Lovense {
-  rotation_direction: AtomicBool,
-  vibrator_values: Vec<AtomicU32>,
-  use_mply: bool,
-  use_lvs: bool,
-  device_type: String,
-  value_cache: DashMap<Uuid, u32>,
-  linear_info: Arc<(AtomicU32, AtomicU32)>,
-}
-
-impl Lovense {
-  pub fn new(
-    device_type: &str,
-    vibrator_count: usize,
-    use_mply: bool,
-    use_lvs: bool,
-  ) -> Self {
-    let linear_info = Arc::new((AtomicU32::new(0), AtomicU32::new(0)));
-
-    let mut vibrator_values = vec![];
-    for _ in 0..vibrator_count {
-      vibrator_values.push(AtomicU32::new(0));
-    }
-
-    Self {
-      rotation_direction: AtomicBool::new(false),
-      vibrator_values,
-      use_mply,
-      use_lvs,
-      device_type: device_type.to_owned(),
-      value_cache: DashMap::new(),
-      linear_info,
-    }
-  }
-
-  fn handle_lvs_cmd(&self) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let mut speeds = "LVS:{}".as_bytes().to_vec();
-    for i in self.vibrator_values.iter() {
-      speeds.push(i.load(Ordering::Relaxed) as u8);
-    }
-    speeds.push(0x3b);
-
-    Ok(vec![HardwareWriteCmd::new(
-      LOVENSE_PROTOCOL_UUID,
-      Endpoint::Tx,
-      speeds,
-      false,
-    )
-    .into()])
-  }
-
-  fn handle_mply_cmd(&self) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    /*
-    let mut speeds = cmds
-      .iter()
-      .map(|x| {
-        if let Some(val) = x {
-          val.1.to_string()
-        } else {
-          "-1".to_string()
-        }
-      })
-      .collect::<Vec<_>>();
-
-    if speeds.len() == 1 && self.device_type == "H" {
-      // Max range unless stopped
-      speeds.push(if speeds[0] == "0" {
-        "0".to_string()
-      } else {
-        "20".to_string()
-      });
-    }
-
-    let lovense_cmd = format!("Mply:{};", speeds.join(":")).as_bytes().to_vec();
-
-    Ok(vec![HardwareWriteCmd::new(
-      Endpoint::Tx,
-      lovense_cmd,
-      false,
-    )
-    .into()])
-    */
-    Ok(vec![])
-  }
-}
-
-impl ProtocolHandler for Lovense {
-  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    // For Lovense, we'll just repeat the device type packet and drop the result.
-    super::ProtocolKeepaliveStrategy::HardwareRequiredRepeatPacketStrategy(HardwareWriteCmd::new(
-      LOVENSE_PROTOCOL_UUID,
-      Endpoint::Tx,
-      b"DeviceType;".to_vec(),
-      false,
-    ))
-  }
-
-  fn handle_output_vibrate_cmd(
-    &self,
-    feature_index: u32,
-    feature_id: Uuid,
-    speed: u32,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let current_vibrator_value =
-      self.vibrator_values[feature_index as usize].load(Ordering::Relaxed);
-    if current_vibrator_value == speed {
-      Ok(vec![])
-    } else {
-      self.vibrator_values[feature_index as usize].store(speed, Ordering::Relaxed);
-      let speeds: Vec<u32> = self
-        .vibrator_values
-        .iter()
-        .map(|v| v.load(Ordering::Relaxed))
-        .collect();
-      if self.use_lvs {
-        self.handle_lvs_cmd()
-      } else if self.use_mply {
-        self.handle_mply_cmd()
-      } else {
-        let lovense_cmd = if self.vibrator_values.len() == 1 {
-          format!("Vibrate:{speed};").as_bytes().to_vec()
-        } else {
-          format!("Vibrate{}:{};", feature_index + 1, speed)
-            .as_bytes()
-            .to_vec()
-        };
-        Ok(vec![HardwareWriteCmd::new(
-          &[feature_id],
-          Endpoint::Tx,
-          lovense_cmd,
-          false,
-        )
-        .into()])
-      }
-    }
-    /*
-    if self.use_lvs {
-      self.handle_lvs_cmd(cmd)
-    } else if self.use_mply {
-      self.handle_mply_cmd(cmd)
-    } else {
-      // Handle vibration commands, these will be by far the most common. Fucking machine oscillation
-      // uses lovense vibrate commands internally too, so we can include them here.
-      let vibrate_cmds: Vec<> = cmds
-        .iter()
-        .filter(|x| {
-          if let Some(val) = x {
-            [ActuatorType::Vibrate, ActuatorType::Oscillate].contains(&val.0)
-          } else {
-            false
-          }
-        })
-        .map(|x| x.as_ref().expect("Already verified is some"))
-        .collect();
-            if !vibrate_cmds.is_empty() {
-      // Lovense is the same situation as the Lovehoney Desire, where commands
-      // are different if we're addressing all motors or seperate motors.
-      // Difference here being that there's Lovense variants with different
-      // numbers of motors.
-      //
-      // Neat way of checking if everything is the same via
-      // https://sts10.github.io/2019/06/06/is-all-equal-function.html.
-      //
-      // Just make sure we're not matching on None, 'cause if that's the case
-      // we ain't got shit to do.
-      //
-      // Note that the windowed comparison causes mixed types as well as mixed
-      // speeds to fall back to separate commands. This is because the Gravity's
-      // thruster on Vibrate2 is independent of Vibrate
-      if self.vibrator_count == vibrate_cmds.len()
-        && (self.vibrator_count == 1
-          || vibrate_cmds
-            .windows(2)
-            .all(|w| w[0].0 == w[1].0 && w[0].1 == w[1].1))
-      {
-        let lovense_cmd = format!("Vibrate:{};", vibrate_cmds[0].1)
-          .as_bytes()
-          .to_vec();
-        hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
-      } else {
-        for (i, cmd) in cmds.iter().enumerate() {
-          if let Some((actuator, speed)) = cmd {
-            if ![ActuatorType::Vibrate, ActuatorType::Oscillate].contains(actuator) {
-              continue;
-            }
-            let lovense_cmd = format!("Vibrate{}:{};", i + 1, speed).as_bytes().to_vec();
-            hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
-          }
-        }
-      }
-    }
-      */
-  }
-}
-  */
 
 fn handle_battery_level_cmd(
   device_index: u32,
@@ -487,7 +294,7 @@ fn handle_battery_level_cmd(
               return Ok(message::InputReadingV4::new(
                 device_index,
                 feature_index,
-                InputTypeData::Battery(InputData::new(level)),
+                InputTypeReading::Battery(InputValue::new(level)),
               ));
             }
           }

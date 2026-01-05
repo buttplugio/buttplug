@@ -3,7 +3,7 @@ use super::v2::ServerDeviceMessageAttributesV2;
 use buttplug_core::errors::ButtplugError;
 use buttplug_server_device_config::ServerDeviceFeature;
 use getset::Getters;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 #[derive(Debug, Getters, Clone)]
 pub(crate) struct ServerDeviceAttributes {
@@ -15,14 +15,15 @@ pub(crate) struct ServerDeviceAttributes {
   #[getset(get = "pub")]
   attrs_v3: ServerDeviceMessageAttributesV3,
   #[getset(get = "pub")]
-  features: Vec<ServerDeviceFeature>,
+  features: BTreeMap<u32, ServerDeviceFeature>,
 }
 
 impl ServerDeviceAttributes {
-  pub fn new(features: &Vec<ServerDeviceFeature>) -> Self {
+  pub fn new(features: &BTreeMap<u32, ServerDeviceFeature>) -> Self {
+    let f: Vec<ServerDeviceFeature> = features.values().cloned().collect();
     Self {
-      attrs_v3: ServerDeviceMessageAttributesV3::from(features.clone()),
-      attrs_v2: ServerDeviceMessageAttributesV2::from(features.clone()),
+      attrs_v3: ServerDeviceMessageAttributesV3::from(f.clone()),
+      attrs_v2: ServerDeviceMessageAttributesV2::from(f),
       /*
       attrs_v1: ClientDeviceMessageAttributesV1::from(features.clone()),
       */
@@ -37,6 +38,6 @@ where
 {
   fn try_from_client_message(
     msg: T,
-    features: &HashMap<u32, ServerDeviceAttributes>,
+    features: &BTreeMap<u32, ServerDeviceAttributes>,
   ) -> Result<Self, ButtplugError>;
 }

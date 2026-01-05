@@ -1,9 +1,11 @@
-use std::{collections::HashMap, fmt::Debug};
+use std::{collections::BTreeMap, fmt::Debug};
 
 use crate::message::{
   ButtplugClientMessageVariant,
   RequestServerInfoV1,
   ServerDeviceAttributes,
+  StopAllDevicesV0,
+  StopDeviceCmdV0,
   TryFromDeviceAttributes,
   server_device_attributes::TryFromClientMessage,
   v0::ButtplugClientMessageV0,
@@ -23,8 +25,8 @@ use buttplug_core::{
     RequestDeviceListV0,
     RequestServerInfoV4,
     StartScanningV0,
-    StopAllDevicesV0,
-    StopDeviceCmdV0,
+    StopAllDevicesV4,
+    StopDeviceCmdV4,
     StopScanningV0,
   },
 };
@@ -61,8 +63,8 @@ pub enum ButtplugCheckedClientMessageV4 {
   StopScanning(StopScanningV0),
   RequestDeviceList(RequestDeviceListV0),
   // Generic commands
-  StopDeviceCmd(StopDeviceCmdV0),
-  StopAllDevices(StopAllDevicesV0),
+  StopDeviceCmd(StopDeviceCmdV4),
+  StopAllDevices(StopAllDevicesV4),
   OutputCmd(CheckedOutputCmdV4),
   // Sensor commands
   InputCmd(CheckedInputCmdV4),
@@ -73,7 +75,7 @@ pub enum ButtplugCheckedClientMessageV4 {
 impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMessageV4 {
   fn try_from_client_message(
     value: ButtplugClientMessageV4,
-    feature_map: &HashMap<u32, ServerDeviceAttributes>,
+    feature_map: &BTreeMap<u32, ServerDeviceAttributes>,
   ) -> Result<Self, ButtplugError> {
     match value {
       // Messages that don't need checking
@@ -140,6 +142,18 @@ impl From<RequestServerInfoV1> for RequestServerInfoV4 {
   }
 }
 
+impl From<StopDeviceCmdV0> for StopDeviceCmdV4 {
+  fn from(value: StopDeviceCmdV0) -> Self {
+    StopDeviceCmdV4::new(value.device_index(), true, true)
+  }
+}
+
+impl From<StopAllDevicesV0> for StopAllDevicesV4 {
+  fn from(_: StopAllDevicesV0) -> Self {
+    StopAllDevicesV4::default()
+  }
+}
+
 // For v3 to v4, all deprecations should be treated as conversions, but will require current
 // connected device state, meaning they'll need to be implemented where they can also access the
 // device manager.
@@ -162,10 +176,10 @@ impl TryFrom<ButtplugClientMessageV3> for ButtplugCheckedClientMessageV4 {
         Ok(ButtplugCheckedClientMessageV4::RequestDeviceList(m.clone()))
       }
       ButtplugClientMessageV3::StopAllDevices(m) => {
-        Ok(ButtplugCheckedClientMessageV4::StopAllDevices(m.clone()))
+        Ok(ButtplugCheckedClientMessageV4::StopAllDevices(m.into()))
       }
       ButtplugClientMessageV3::StopDeviceCmd(m) => {
-        Ok(ButtplugCheckedClientMessageV4::StopDeviceCmd(m.clone()))
+        Ok(ButtplugCheckedClientMessageV4::StopDeviceCmd(m.into()))
       }
       _ => Err(ButtplugMessageError::MessageConversionError(format!(
         "Cannot convert message {value:?} to V4 message spec while lacking state."
@@ -177,7 +191,7 @@ impl TryFrom<ButtplugClientMessageV3> for ButtplugCheckedClientMessageV4 {
 impl TryFromClientMessage<ButtplugClientMessageVariant> for ButtplugCheckedClientMessageV4 {
   fn try_from_client_message(
     msg: ButtplugClientMessageVariant,
-    features: &HashMap<u32, ServerDeviceAttributes>,
+    features: &BTreeMap<u32, ServerDeviceAttributes>,
   ) -> Result<Self, buttplug_core::errors::ButtplugError> {
     let id = msg.id();
     let mut converted_msg = match msg {
@@ -196,7 +210,7 @@ impl TryFromClientMessage<ButtplugClientMessageVariant> for ButtplugCheckedClien
 impl TryFromClientMessage<ButtplugClientMessageV0> for ButtplugCheckedClientMessageV4 {
   fn try_from_client_message(
     msg: ButtplugClientMessageV0,
-    features: &HashMap<u32, ServerDeviceAttributes>,
+    features: &BTreeMap<u32, ServerDeviceAttributes>,
   ) -> Result<Self, ButtplugError> {
     // All v0 messages can be converted to v1 messages.
     Self::try_from_client_message(ButtplugClientMessageV1::from(msg), features)
@@ -205,7 +219,7 @@ impl TryFromClientMessage<ButtplugClientMessageV0> for ButtplugCheckedClientMess
 
 fn check_device_index_and_convert<T, U>(
   msg: T,
-  features: &HashMap<u32, ServerDeviceAttributes>,
+  features: &BTreeMap<u32, ServerDeviceAttributes>,
 ) -> Result<U, ButtplugError>
 where
   T: ButtplugDeviceMessage + Debug,
@@ -224,7 +238,7 @@ where
 impl TryFromClientMessage<ButtplugClientMessageV1> for ButtplugCheckedClientMessageV4 {
   fn try_from_client_message(
     msg: ButtplugClientMessageV1,
-    features: &HashMap<u32, ServerDeviceAttributes>,
+    features: &BTreeMap<u32, ServerDeviceAttributes>,
   ) -> Result<Self, ButtplugError> {
     // Instead of converting to v2 message attributes then to v4 device features, we move directly
     // from v0 command messages to v4 device features here. There's no reason to do the middle step.
@@ -244,7 +258,7 @@ impl TryFromClientMessage<ButtplugClientMessageV1> for ButtplugCheckedClientMess
 impl TryFromClientMessage<ButtplugClientMessageV2> for ButtplugCheckedClientMessageV4 {
   fn try_from_client_message(
     msg: ButtplugClientMessageV2,
-    features: &HashMap<u32, ServerDeviceAttributes>,
+    features: &BTreeMap<u32, ServerDeviceAttributes>,
   ) -> Result<Self, ButtplugError> {
     match msg {
       // Convert v2 specific queries to v3 generic sensor queries
@@ -263,7 +277,7 @@ impl TryFromClientMessage<ButtplugClientMessageV2> for ButtplugCheckedClientMess
 impl TryFromClientMessage<ButtplugClientMessageV3> for ButtplugCheckedClientMessageV4 {
   fn try_from_client_message(
     msg: ButtplugClientMessageV3,
-    features: &HashMap<u32, ServerDeviceAttributes>,
+    features: &BTreeMap<u32, ServerDeviceAttributes>,
   ) -> Result<Self, ButtplugError> {
     match msg {
       // Convert v1/v2 message attribute commands into device feature commands
@@ -316,7 +330,7 @@ impl TryFromClientMessage<ButtplugClientMessageV3> for ButtplugCheckedClientMess
 )]
 pub(crate) enum ButtplugDeviceManagerMessageUnion {
   RequestDeviceList(RequestDeviceListV0),
-  StopAllDevices(StopAllDevicesV0),
+  StopAllDevices(StopAllDevicesV4),
   StartScanning(StartScanningV0),
   StopScanning(StopScanningV0),
 }
@@ -354,7 +368,7 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceManagerMessageUni
   FromSpecificButtplugMessage,
 )]
 pub enum ButtplugDeviceCommandMessageUnionV4 {
-  StopDeviceCmd(StopDeviceCmdV0),
+  StopDeviceCmd(StopDeviceCmdV4),
   OutputCmd(CheckedOutputCmdV4),
   OutputVecCmd(CheckedOutputVecCmdV4),
   InputCmd(CheckedInputCmdV4),
