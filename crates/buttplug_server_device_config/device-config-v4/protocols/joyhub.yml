@@ -550,6 +550,14 @@ configurations:
         - 0
         - 9
     index: 5
+  - description: Heater
+    id: de6a3c95-b7b8-427e-9775-7c9fd612631f
+    output:
+      temperature:
+        value:
+          - 0
+          - 1
+    index: 6
   id: 46fe6203-6b1c-40c5-ba96-91748b35cdd7
 - identifier:
   - J-Mecha
@@ -572,7 +580,15 @@ configurations:
         - 0
         - 7
     index: 5
-  id: 764cd060-fd7d-454b-a0bc-10183bb34238
+  - description: Heater
+    id: de6a3c95-b7b8-427e-9775-7c9fd612631f
+    output:
+      temperature:
+        value:
+          - 0
+          - 1
+    index: 6
+  id: cfb295b4-2110-4080-a405-e66edd7aa0f5
 - identifier:
   - J-Lagoon
   name: JoyHub Lagoon
@@ -946,9 +962,16 @@ configurations:
     output:
       vibrate:
         value:
-        - 0
-        - 255
+          - 0
+          - 255
     index: 1
+  - id: 70903377-5343-411c-9570-f3d763726b0b
+    output:
+      temperature:
+        value:
+          - 0
+          - 1
+    index: 6
   id: a8278c49-58c3-416e-9ae1-072dcfe0f694
 - identifier:
   - J-Flamewing
@@ -1432,9 +1455,17 @@ configurations:
     output:
       constrict:
         value:
-        - 0
-        - 9
+          - 0
+          - 9
     index: 5
+  - description: Heater
+    id: 2a88a8fa-f765-4a9c-a2ee-3049256e135d
+    output:
+      temperature:
+        value:
+          - 0
+          - 1
+    index: 6
   id: d418dd65-6f41-4af4-a04d-4b343ec778ab
 - identifier:
   - J-Verax4
@@ -1888,8 +1919,8 @@ configurations:
     output:
       vibrate:
         value:
-        - 0
-        - 255
+          - 0
+          - 255
     index: 2
   id: 6e782468-f084-442a-936f-27d7abd5f840
 - identifier:
@@ -1929,7 +1960,15 @@ configurations:
           value:
             - 0
             - 9
-      index: 4
+      index: 5
+    - description: Heater
+      id: 8a6b866f-8e6b-48ad-95ba-c6317c3a76ee
+      output:
+        temperature:
+          value:
+            - 0
+            - 1
+      index: 6
   id: 2c33b13e-9d00-4823-bc5b-fda18dbd3691
 - identifier:
     - J-Pinhead

@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 152
+    "minor": 153
   },
   "protocols": {
     "activejoy": {
@@ -6060,6 +6060,19 @@
                   ]
                 }
               }
+            },
+            {
+              "description": "Heater",
+              "id": "de6a3c95-b7b8-427e-9775-7c9fd612631f",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
             }
           ],
           "id": "46fe6203-6b1c-40c5-ba96-91748b35cdd7",
@@ -6098,9 +6111,22 @@
                   ]
                 }
               }
+            },
+            {
+              "description": "Heater",
+              "id": "de6a3c95-b7b8-427e-9775-7c9fd612631f",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
             }
           ],
-          "id": "764cd060-fd7d-454b-a0bc-10183bb34238",
+          "id": "cfb295b4-2110-4080-a405-e66edd7aa0f5",
           "identifier": [
             "J-Mecha"
           ],
@@ -6737,6 +6763,18 @@
                   "value": [
                     0,
                     255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "70903377-5343-411c-9570-f3d763726b0b",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
                   ]
                 }
               }
@@ -7579,6 +7617,19 @@
                   "value": [
                     0,
                     9
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Heater",
+              "id": "2a88a8fa-f765-4a9c-a2ee-3049256e135d",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
                   ]
                 }
               }
@@ -8428,12 +8479,25 @@
             {
               "description": "Suction",
               "id": "a38653c9-c245-4c98-86c9-3c0da68d646c",
-              "index": 4,
+              "index": 5,
               "output": {
                 "constrict": {
                   "value": [
                     0,
                     9
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Heater",
+              "id": "8a6b866f-8e6b-48ad-95ba-c6317c3a76ee",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
                   ]
                 }
               }
