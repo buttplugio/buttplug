@@ -1,0 +1,98 @@
+defaults:
+  name: Honey Play Box Device
+  features:
+    - description: Battery Level
+      id: acfaa268-2fc3-4192-ac90-16d64f598999
+      input:
+        battery:
+          value_range:
+            - - 0
+              - 100
+          input_commands:
+            - Read
+  id: 1eca1a4f-eeae-4da0-a9b6-a8dd1bc38f74
+configurations:
+  - identifier:
+      - HPB-0520
+    name: PEARL 2
+    features:
+      - id: b29ed0d1-5eab-41e0-bdb9-487b34f979e4
+        output:
+          vibrate:
+            value:
+              - 0
+              - 100
+      - description: Battery Level
+        id: 19203ddb-c122-4bb2-a6df-c3106bfb60d8
+        input:
+          battery:
+            value_range:
+              - - 0
+                - 100
+            input_commands:
+              - Read
+    id: a0039e18-de99-40c1-950e-06572454b9b7
+  - identifier:
+      - JXT002
+    name: VIBROSA
+    features:
+      - id: a92be3ba-ac13-41b9-b199-4396c658208e
+        output:
+          vibrate:
+            value:
+              - 0
+              - 100
+      - id: 609f4878-840b-4240-a3d4-08b687527bf6
+        output:
+          vibrate:
+            value:
+              - 0
+              - 100
+      - description: Battery Level
+        id: dff15849-789e-49ee-afdd-73099d606e1c
+        input:
+          battery:
+            value_range:
+              - - 0
+                - 100
+            input_commands:
+              - Read
+    id: af0ddeec-2e45-41d1-953d-9052dd960ffb
+  - identifier:
+      - HPB-393-1
+    name: OLY 2
+    features:
+      - id: 7b6fdb3a-578e-4af8-aa5f-fa6b0cc38b46
+        output:
+          vibrate:
+            value:
+              - 0
+              - 100
+      - id: 76647712-0a86-4391-9812-c5a2c4717264
+        output:
+          vibrate:
+            value:
+              - 0
+              - 100
+      - description: Battery Level
+        id: 372549a4-2665-4bc8-9aac-f5f993f96208
+        input:
+          battery:
+            value_range:
+              - - 0
+                - 100
+            input_commands:
+              - Read
+    id: aa161c35-4074-441d-8277-d56cf56f3610
+communication:
+  - btle:
+      names:
+        - JXT002
+        - HPB-393-1
+        - HPB-0520
+      services:
+        0000ff12-0000-1000-8000-00805f9b34fb:
+          tx: 0000ff03-0000-1000-8000-00805f9b34fb
+          rx: 0000ff02-0000-1000-8000-00805f9b34fb
+        0000180f-0000-1000-8000-00805f9b34fb:
+          rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb
