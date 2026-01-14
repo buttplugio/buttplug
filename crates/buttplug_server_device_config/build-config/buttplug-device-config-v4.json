@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 149
+    "minor": 151
   },
   "protocols": {
     "activejoy": {
@@ -1962,13 +1962,6 @@
           "name": "Adorime Pink Touch"
         },
         {
-          "id": "20bfb1be-613b-47de-ae68-a6e8be7f493d",
-          "identifier": [
-            "YXSJ"
-          ],
-          "name": "Adorime Cock Ring"
-        },
-        {
           "features": [
             {
               "description": "oscillate",
@@ -2461,11 +2454,11 @@
               }
             },
             {
-              "description": "vibrate",
-              "id": "3854e366-6eb9-4947-bc90-e246146bec11",
+              "description": "rotate",
+              "id": "10007a9c-8e51-4d38-b55a-03e09954b0d2",
               "index": 1,
               "output": {
-                "vibrate": {
+                "rotate": {
                   "value": [
                     0,
                     100
@@ -3875,6 +3868,59 @@
             "BGCD"
           ],
           "name": "Adorime Backy"
+        },
+        {
+          "features": [
+            {
+              "description": "Vibrate",
+              "id": "ed25baca-3647-489d-96a8-9cf528dfbe34",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Vibrate",
+              "id": "9ffd40ba-f94e-41e2-ae42-83fd29f9d6a1",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "0b444666-695e-4ee3-a7a2-33f22259f80e",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "20bfb1be-613b-47de-ae68-a6e8be7f493d",
+          "identifier": [
+            "YXSJ"
+          ],
+          "name": "Adorime Cock Ring"
         },
         {
           "features": [

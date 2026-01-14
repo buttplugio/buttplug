@@ -280,10 +280,6 @@ configurations:
   - A531
   name: Adorime Pink Touch
   id: 5cfdd204-e0dd-4ec5-b133-205bd6ce660a
-- identifier:
-  - YXSJ
-  name: Adorime Cock Ring
-  id: 20bfb1be-613b-47de-ae68-a6e8be7f493d
 # Type 1
 - identifier:
   - G317
@@ -576,10 +572,10 @@ configurations:
         - 0
         - 100
     index: 0
-  - description: vibrate
-    id: 3854e366-6eb9-4947-bc90-e246146bec11
+  - description: rotate
+    id: 10007a9c-8e51-4d38-b55a-03e09954b0d2
     output:
-      vibrate:
+      rotate:
         value:
         - 0
         - 100
@@ -1401,6 +1397,37 @@ configurations:
         - Read
     index: 2
   id: 349e64b6-931f-4e1a-b69c-4f9652f0cf2c
+- identifier:
+    - YXSJ
+  name: Adorime Cock Ring
+  features:
+    - description: Vibrate
+      id: ed25baca-3647-489d-96a8-9cf528dfbe34
+      output:
+        vibrate:
+          value:
+            - 0
+            - 100
+      index: 0
+    - description: Vibrate
+      id: 9ffd40ba-f94e-41e2-ae42-83fd29f9d6a1
+      output:
+        vibrate:
+          value:
+            - 0
+            - 100
+      index: 1
+    - description: Battery Level
+      id: 0b444666-695e-4ee3-a7a2-33f22259f80e
+      input:
+        battery:
+          value:
+            - - 0
+              - 100
+          command:
+            - Read
+      index: 2
+  id: 20bfb1be-613b-47de-ae68-a6e8be7f493d
 # Type 2
 - identifier:
   - TFG1
