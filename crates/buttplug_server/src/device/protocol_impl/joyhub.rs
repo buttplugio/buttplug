@@ -116,15 +116,24 @@ impl ProtocolHandler for JoyHub {
     }
   }
 
-  fn handle_output_temperature_cmd(&self, _feature_index: u32, feature_id: Uuid, level: i32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_temperature_cmd(
+    &self,
+    _feature_index: u32,
+    feature_id: Uuid,
+    level: i32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![
       HardwareWriteCmd::new(
         &[feature_id],
         Endpoint::Tx,
-        if level == 0 {vec![0xa0, 0x04, 0x00, 0x00, 0x00, 0x00] } else { vec![0xa0, 0x04, 0x01, 0x00, 0x01, 0xff] },
+        if level == 0 {
+          vec![0xa0, 0x04, 0x00, 0x00, 0x00, 0x00]
+        } else {
+          vec![0xa0, 0x04, 0x01, 0x00, 0x01, 0xff]
+        },
         false,
       )
-          .into(),
+      .into(),
     ])
   }
 }

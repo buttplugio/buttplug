@@ -250,8 +250,11 @@ impl ButtplugServer {
     let features = self.device_manager().feature_map();
     let msg_id = msg.id();
     trace!("Server received: {:?}", msg);
-    // Use stored spec_version from Connected state if available, otherwise derive from message
-    let spec_version = self.spec_version().unwrap_or_else(|| msg.version());
+    let v = msg.version();
+    let spec_version = *self.spec_version.get_or_init(|| {
+      info!("Setting Buttplug Server Message Spec version to {}", v);
+      v
+    });
     match msg {
       ButtplugClientMessageVariant::V4(msg) => {
         let internal_msg =
