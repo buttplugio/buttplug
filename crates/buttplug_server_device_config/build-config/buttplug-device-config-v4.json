@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 157
+    "minor": 163
   },
   "protocols": {
     "activejoy": {
@@ -5194,6 +5194,32 @@
           "name": "JoyHub Rhythmic 3"
         },
         {
+          "features": [
+            {
+              "id": "24a7fa13-8a0a-462c-9414-b673edac3edf",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "4f8c159e-667c-400f-ae67-b030d1f364d7",
+              "index": 6,
+              "output": {
+                "led": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
+            }
+          ],
           "id": "907042dc-2681-46a0-9a49-3b8564faa41a",
           "identifier": [
             "J-Rainbow"
@@ -5208,6 +5234,32 @@
           "name": "JoyHub Black Bull"
         },
         {
+          "features": [
+            {
+              "id": "ab7538db-d2a0-4dc6-92fa-68dbab9fd42f",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "ddf87591-51ac-44b9-adff-288bd5e4b386",
+              "index": 6,
+              "output": {
+                "led": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
+            }
+          ],
           "id": "1b560be9-462d-4e08-adb5-2a38690e6ab2",
           "identifier": [
             "J-Peacock"
@@ -5500,6 +5552,18 @@
                   ]
                 }
               }
+            },
+            {
+              "id": "c99ebac0-a315-45a1-8403-562c79b37f1d",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
             }
           ],
           "id": "380428d0-73a4-4437-bf48-fb6b26663d1d",
@@ -5712,6 +5776,19 @@
                   "value": [
                     0,
                     255
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Heater",
+              "id": "3c6dd010-b9b5-4cb0-8e99-2f1ed4acfe9b",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
                   ]
                 }
               }
@@ -7100,6 +7177,18 @@
                   ]
                 }
               }
+            },
+            {
+              "id": "83f5e8e1-44c8-4a2a-820c-9197b9add2c6",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
             }
           ],
           "id": "e3646777-6550-4984-91bb-3cd738744494",
@@ -7302,6 +7391,18 @@
                   ]
                 }
               }
+            },
+            {
+              "id": "e0960a02-fcc5-4644-b2da-ad63d919c40e",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
             }
           ],
           "id": "1347963d-6bad-41c5-bf3a-314980e3316b",
@@ -7332,6 +7433,18 @@
                   "value": [
                     0,
                     255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "ae59166a-9c6c-434c-aa30-a5197a65e7ab",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
                   ]
                 }
               }
@@ -7583,6 +7696,19 @@
                   ]
                 }
               }
+            },
+            {
+              "description": "Heater",
+              "id": "e4e0597f-7cbe-4f80-9f71-3f475cacfb27",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
             }
           ],
           "id": "b559b1ec-d336-45bb-b6e6-cc22344eefd7",
@@ -7742,6 +7868,18 @@
                   "value": [
                     0,
                     255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "e35119ff-ec16-4748-aeb4-14ef508876f4",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
                   ]
                 }
               }
@@ -8691,9 +8829,6 @@
       "defaults": {
         "features": [
           {
-            "feature_settings": {
-              "alt_protocol_index": 1
-            },
             "id": "fc2f0fc2-fb75-4eee-b92b-20eaf7cc9a1e",
             "index": 0,
             "output": {

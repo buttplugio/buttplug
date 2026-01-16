@@ -7,8 +7,6 @@ defaults:
         value:
         - 0
         - 255
-    feature_settings:
-      alt_protocol_index: 1
     index: 0
   id: 53cf03db-266d-46c1-964e-0ef505a64200
 configurations:
@@ -47,6 +45,21 @@ configurations:
 - identifier:
   - J-Rainbow
   name: JoyHub Rainbow
+  features:
+    - id: 24a7fa13-8a0a-462c-9414-b673edac3edf
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 4f8c159e-667c-400f-ae67-b030d1f364d7
+      output:
+        led:
+          value:
+            - 0
+            - 1
+      index: 6
   id: 907042dc-2681-46a0-9a49-3b8564faa41a
 - identifier:
   - J-BlackBull
@@ -55,6 +68,21 @@ configurations:
 - identifier:
   - J-Peacock
   name: JoyHub Peacock
+  features:
+    - id: ab7538db-d2a0-4dc6-92fa-68dbab9fd42f
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: ddf87591-51ac-44b9-adff-288bd5e4b386
+      output:
+        led:
+          value:
+            - 0
+            - 1
+      index: 6
   id: 1b560be9-462d-4e08-adb5-2a38690e6ab2
 - identifier:
   - J-Mace
@@ -222,9 +250,16 @@ configurations:
     output:
       oscillate:
         value:
-        - 0
-        - 255
+          - 0
+          - 255
     index: 2
+  - id: c99ebac0-a315-45a1-8403-562c79b37f1d
+    output:
+      temperature:
+        value:
+          - 0
+          - 1
+    index: 6
   id: 380428d0-73a4-4437-bf48-fb6b26663d1d
 - identifier:
   - J-Mysticolor
@@ -350,6 +385,14 @@ configurations:
         - 0
         - 255
     index: 2
+  - description: Heater
+    id: 3c6dd010-b9b5-4cb0-8e99-2f1ed4acfe9b
+    output:
+      temperature:
+        value:
+          - 0
+          - 1
+    index: 6
   id: 877a8e55-9f08-4bea-826c-20371ba57577
 - identifier:
   - J-Mars
@@ -1154,9 +1197,16 @@ configurations:
     output:
       vibrate:
         value:
-        - 0
-        - 255
+          - 0
+          - 255
     index: 2
+  - id: 83f5e8e1-44c8-4a2a-820c-9197b9add2c6
+    output:
+      temperature:
+        value:
+          - 0
+          - 1
+    index: 6
   id: e3646777-6550-4984-91bb-3cd738744494
 - identifier:
   - J-Vase
@@ -1271,9 +1321,16 @@ configurations:
     output:
       vibrate:
         value:
-        - 0
-        - 255
+          - 0
+          - 255
     index: 1
+  - id: e0960a02-fcc5-4644-b2da-ad63d919c40e
+    output:
+      temperature:
+        value:
+          - 0
+          - 1
+    index: 6
   id: 1347963d-6bad-41c5-bf3a-314980e3316b
 - identifier:
   - J-Vbarbie
@@ -1293,6 +1350,13 @@ configurations:
         - 0
         - 255
     index: 1
+  - id: ae59166a-9c6c-434c-aa30-a5197a65e7ab
+    output:
+      temperature:
+        value:
+          - 0
+          - 1
+    index: 6
   id: 73a6f6a2-1fb0-45b0-b379-89eac6aefae5
 - identifier:
   - J-Royaleye
@@ -1436,6 +1500,14 @@ configurations:
         - 0
         - 255
     index: 1
+  - description: Heater
+    id: e4e0597f-7cbe-4f80-9f71-3f475cacfb27
+    output:
+      temperature:
+        value:
+          - 0
+          - 1
+    index: 6
   id: b559b1ec-d336-45bb-b6e6-cc22344eefd7
 - identifier:
   - J-Mace2
@@ -1530,6 +1602,13 @@ configurations:
         - 0
         - 255
     index: 1
+  - id: e35119ff-ec16-4748-aeb4-14ef508876f4
+    output:
+      temperature:
+        value:
+          - 0
+          - 1
+    index: 6
   id: bdc796d7-d029-4732-9d8d-037e421f19e8
 - identifier:
   - J-Maiden

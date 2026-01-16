@@ -133,7 +133,28 @@ impl ProtocolHandler for JoyHub {
         },
         false,
       )
-      .into(),
+          .into(),
+    ])
+  }
+
+  fn handle_output_led_cmd(
+    &self,
+    _feature_index: u32,
+    feature_id: Uuid,
+    level: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        if level == 0 {
+          vec![0xa0, 0x14, 0x00, 0x00, 0x00, 0x00]
+        } else {
+          vec![0xa0, 0x14, 0x01, 0x00, 0x01, 0xff]
+        },
+        false,
+      )
+          .into(),
     ])
   }
 }
