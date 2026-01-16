@@ -2046,6 +2046,32 @@ configurations:
             - 7
       index: 5
   id: c3efbec1-44f4-49de-88a1-f232873215a3
+- identifier:
+    - J-Dodge
+  name: JoyHub Dodge
+  features:
+    - id: 0f684f33-7e8a-476d-a743-c90679f1dcbd
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 78d004f2-35c4-4e62-a31d-945015241153
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+    - id: 4f24b8c1-9508-4ebc-9bba-2077b8bd26f0
+      output:
+        spray:
+          value:
+            - 0
+            - 1
+      index: 7
+  id: 2d9730d2-272b-489a-a525-22a9a5ce15dd
 communication:
 - btle:
     names:
@@ -2172,6 +2198,7 @@ communication:
     - J-Victor
     - J-Mirage3
     - J-Maelstrom
+    - J-Dodge
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
