@@ -20,35 +20,44 @@ generic_protocol_setup!(SvakomSuitcase, "svakom-suitcase");
 pub struct SvakomSuitcase {}
 
 impl ProtocolHandler for SvakomSuitcase {
-  // I am like 90% sure this is wrong since this device has two vibrators, but the original
-  // implementation made no sense in terms of knowing which command addressed which index. Putting
-  // in a best effort here and we'll see if anyone complains.
   fn handle_output_vibrate_cmd(
     &self,
-    _feature_index: u32,
+    feature_index: u32,
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let scalar = speed;
-    let mut speed = (scalar % 10) as u8;
-    let mut intensity = if scalar == 0 {
-      0u8
+    if feature_index == 0 {
+      let scalar = speed;
+      let mut speed = (scalar % 10) as u8;
+      let mut intensity = if scalar == 0 {
+        0u8
+      } else {
+        (scalar as f32 / 10.0).floor() as u8 + 1
+      };
+      if speed == 0 && intensity != 0 {
+        // 10 -> 2,0 -> 1,A
+        speed = 10;
+        intensity -= 1;
+      }
+      Ok(vec![
+        HardwareWriteCmd::new(
+          &[feature_id],
+          Endpoint::Tx,
+          [0x55, 0x03, 0x00, 0x00, intensity, speed].to_vec(),
+          false,
+        )
+        .into(),
+      ])
     } else {
-      (scalar as f32 / 10.0).floor() as u8 + 1
-    };
-    if speed == 0 && intensity != 0 {
-      // 10 -> 2,0 -> 1,A
-      speed = 10;
-      intensity -= 1;
+      Ok(vec![
+        HardwareWriteCmd::new(
+          &[feature_id],
+          Endpoint::Tx,
+          [0x55, 0x09, 0x00, 0x00, speed as u8, 0x00].to_vec(),
+          false,
+        )
+        .into(),
+      ])
     }
-    Ok(vec![
-      HardwareWriteCmd::new(
-        &[feature_id],
-        Endpoint::Tx,
-        [0x55, 0x03, 0x00, 0x00, intensity, speed].to_vec(),
-        false,
-      )
-      .into(),
-    ])
   }
 }

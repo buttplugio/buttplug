@@ -74,42 +74,47 @@ impl ProtocolHandler for SvakomSam {
 
   fn handle_output_vibrate_cmd(
     &self,
-    feature_index: u32,
+    _feature_index: u32,
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if feature_index == 0 {
-      Ok(vec![
-        HardwareWriteCmd::new(
-          &[feature_id],
-          Endpoint::Tx,
-          if self.gen2 {
-            [
-              18,
-              1,
-              3,
-              0,
-              if speed == 0 { 0x00 } else { 0x04 },
-              speed as u8,
-            ]
-            .to_vec()
-          } else {
-            [18, 1, 3, 0, 5, speed as u8].to_vec()
-          },
-          false,
-        )
-        .into(),
-      ])
-    } else {
-      Ok(vec![
-        HardwareWriteCmd::new(
-          &[feature_id],
-          Endpoint::Tx,
-          [18, 6, 1, speed as u8].to_vec(),
-          false,
-        )
-        .into(),
-      ])
-    }
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        if self.gen2 {
+          [
+            18,
+            1,
+            3,
+            0,
+            if speed == 0 { 0x00 } else { 0x04 },
+            speed as u8,
+          ]
+          .to_vec()
+        } else {
+          [18, 1, 3, 0, 5, speed as u8].to_vec()
+        },
+        false,
+      )
+      .into(),
+    ])
+  }
+
+  fn handle_output_constrict_cmd(
+    &self,
+    _feature_index: u32,
+    feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        [18, 6, 1, speed as u8].to_vec(),
+        false,
+      )
+      .into(),
+    ])
   }
 }

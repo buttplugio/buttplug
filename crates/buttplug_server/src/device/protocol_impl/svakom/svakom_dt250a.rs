@@ -39,8 +39,12 @@ impl SvakomDT250A {
           mode,
           0x00,
           0x00,
-          if speed == 0 { 0x00 } else { 0x01 },
           speed as u8,
+          if speed == 0 || mode == 0x09 {
+            0x00
+          } else {
+            0x01
+          },
         ]
         .to_vec(),
         false,
@@ -53,11 +57,15 @@ impl SvakomDT250A {
 impl ProtocolHandler for SvakomDT250A {
   fn handle_output_vibrate_cmd(
     &self,
-    _feature_index: u32,
+    feature_index: u32,
     feature_id: uuid::Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.form_hardware_command(0x03, feature_id, speed)
+    self.form_hardware_command(
+      if feature_index == 0 { 0x03 } else { 0x08 },
+      feature_id,
+      speed,
+    )
   }
 
   fn handle_output_constrict_cmd(
@@ -66,6 +74,6 @@ impl ProtocolHandler for SvakomDT250A {
     feature_id: uuid::Uuid,
     level: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.form_hardware_command(0x08, feature_id, level)
+    self.form_hardware_command(0x09, feature_id, level)
   }
 }

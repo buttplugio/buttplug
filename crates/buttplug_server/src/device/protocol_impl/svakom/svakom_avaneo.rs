@@ -52,19 +52,43 @@ impl ProtocolHandler for SvakomAvaNeo {
 
   fn handle_output_vibrate_cmd(
     &self,
-    _feature_index: u32,
+    feature_index: u32,
     feature_id: uuid::Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.form_hardware_command(feature_id, speed)
+    if feature_index == 0 {
+      self.form_hardware_command(feature_id, speed)
+    } else {
+      Ok(vec![
+        HardwareWriteCmd::new(
+          &[feature_id],
+          Endpoint::Tx,
+          [0x55, 0x09, 0x00, 0x00, speed as u8, 0xff].to_vec(),
+          false,
+        )
+        .into(),
+      ])
+    }
   }
 
   fn handle_output_oscillate_cmd(
     &self,
-    _feature_index: u32,
+    feature_index: u32,
     feature_id: uuid::Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.form_hardware_command(feature_id, speed)
+    if feature_index == 0 {
+      self.form_hardware_command(feature_id, speed)
+    } else {
+      Ok(vec![
+        HardwareWriteCmd::new(
+          &[feature_id],
+          Endpoint::Tx,
+          [0x55, 0x08, 0x00, 0x00, speed as u8, 0xff].to_vec(),
+          false,
+        )
+        .into(),
+      ])
+    }
   }
 }

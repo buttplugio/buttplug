@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 154
+    "minor": 157
   },
   "protocols": {
     "activejoy": {
@@ -5125,7 +5125,8 @@
               "J-Pinhead",
               "J-Victor",
               "J-Mirage3",
-              "J-Maelstrom"
+              "J-Maelstrom",
+              "J-Dodge"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -8640,6 +8641,51 @@
             "J-Mirage3"
           ],
           "name": "JoyHub Mirage 3"
+        },
+        {
+          "features": [
+            {
+              "id": "0f684f33-7e8a-476d-a743-c90679f1dcbd",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "78d004f2-35c4-4e62-a31d-945015241153",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "4f24b8c1-9508-4ebc-9bba-2077b8bd26f0",
+              "index": 7,
+              "output": {
+                "spray": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "2d9730d2-272b-489a-a525-22a9a5ce15dd",
+          "identifier": [
+            "J-Dodge"
+          ],
+          "name": "JoyHub Dodge"
         }
       ],
       "defaults": {
@@ -19271,7 +19317,7 @@
             "id": "cfdf5760-bce0-465c-a2c6-60c86fdd3c95",
             "index": 1,
             "output": {
-              "vibrate": {
+              "constrict": {
                 "value": [
                   0,
                   1
