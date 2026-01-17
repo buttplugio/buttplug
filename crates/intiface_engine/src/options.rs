@@ -89,7 +89,7 @@ pub struct EngineOptionsExternal {
   pub repeater_local_port: Option<u16>,
   pub repeater_remote_address: Option<String>,
   pub rest_api_port: Option<u16>,
-  pub allow_v4_spec: bool
+  pub allow_v4_spec: bool,
 }
 
 impl From<EngineOptionsExternal> for EngineOptions {
@@ -122,7 +122,7 @@ impl From<EngineOptionsExternal> for EngineOptions {
       repeater_local_port: other.repeater_local_port,
       repeater_remote_address: other.repeater_remote_address,
       rest_api_port: other.rest_api_port,
-      allow_v4_spec: other.allow_v4_spec
+      allow_v4_spec: other.allow_v4_spec,
     }
   }
 }

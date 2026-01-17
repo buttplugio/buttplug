@@ -6,17 +6,27 @@
 // for full license information.
 
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, message::{InputReadingV4, OutputType}};
-use buttplug_server_device_config::{Endpoint, ProtocolCommunicationSpecifier, UserDeviceIdentifier};
-use futures::future::{BoxFuture, FutureExt};
-use uuid::{Uuid, uuid};
-use std::sync::{
-  atomic::{AtomicBool, Ordering},
-  Arc,
+use buttplug_core::{
+  errors::ButtplugDeviceError,
+  message::{InputReadingV4, OutputType},
 };
+use buttplug_server_device_config::{
+  Endpoint,
+  ProtocolCommunicationSpecifier,
+  UserDeviceIdentifier,
+};
+use futures::future::{BoxFuture, FutureExt};
+use std::sync::{
+  Arc,
+  atomic::{AtomicBool, Ordering},
+};
+use uuid::{Uuid, uuid};
 
+use crate::device::{
+  hardware::{Hardware, HardwareReadCmd, HardwareWriteCmd},
+  protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+};
 use buttplug_server_device_config::ServerDeviceDefinition;
-use crate::{device::{hardware::{Hardware, HardwareWriteCmd, HardwareReadCmd}, protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer}}};
 
 const LOVENSE_CONNECT_UUID: Uuid = uuid!("590bfbbf-c3b7-41ae-9679-485b190ffb87");
 
@@ -36,7 +46,6 @@ pub mod setup {
   }
 }
 
-
 #[derive(Default)]
 pub struct LovenseConnectIdentifier {}
 
@@ -47,7 +56,14 @@ impl ProtocolIdentifier for LovenseConnectIdentifier {
     hardware: Arc<Hardware>,
     _: ProtocolCommunicationSpecifier,
   ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
-    Ok((UserDeviceIdentifier::new(hardware.address(), "lovense-connect-service", &Some(hardware.name().to_owned())), Box::new(LovenseConnectServiceInitializer::default())))
+    Ok((
+      UserDeviceIdentifier::new(
+        hardware.address(),
+        "lovense-connect-service",
+        &Some(hardware.name().to_owned()),
+      ),
+      Box::new(LovenseConnectServiceInitializer::default()),
+    ))
   }
 }
 
@@ -101,7 +117,12 @@ impl ProtocolInitializer for LovenseConnectServiceInitializer {
         .to_vec();
 
       hardware
-        .write_value(&HardwareWriteCmd::new(&vec![LOVENSE_CONNECT_UUID], Endpoint::Tx, lovense_cmd, false))
+        .write_value(&HardwareWriteCmd::new(
+          &vec![LOVENSE_CONNECT_UUID],
+          Endpoint::Tx,
+          lovense_cmd,
+          false,
+        ))
         .await?;
 
       protocol.vibrator_count = 0;
@@ -131,9 +152,9 @@ impl LovenseConnectService {
 
 impl ProtocolHandler for LovenseConnectService {
   fn handle_output_cmd(
-      &self,
-      cmd: &crate::message::checked_output_cmd::CheckedOutputCmdV4,
-    ) -> Result<Vec<crate::device::hardware::HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    cmd: &crate::message::checked_output_cmd::CheckedOutputCmdV4,
+  ) -> Result<Vec<crate::device::hardware::HardwareCommand>, ButtplugDeviceError> {
     let mut hardware_cmds = vec![];
 
     // We do all of our validity checking during message conversion to checked, so we should be able to skip validity checking here.
@@ -141,16 +162,43 @@ impl ProtocolHandler for LovenseConnectService {
       // Sure do hope we're keeping our vibrator indexes aligned with what lovense expects!
       //
       // God I can't wait to fucking kill this stupid protocol.
-      let lovense_cmd = format!("Vibrate{}?v={}&t={}", cmd.feature_index() + 1, cmd.output_command().value(), self.address)
-        .as_bytes()
-        .to_vec();
-      hardware_cmds.push(HardwareWriteCmd::new(&vec![LOVENSE_CONNECT_UUID], Endpoint::Tx, lovense_cmd, false).into());
+      let lovense_cmd = format!(
+        "Vibrate{}?v={}&t={}",
+        cmd.feature_index() + 1,
+        cmd.output_command().value(),
+        self.address
+      )
+      .as_bytes()
+      .to_vec();
+      hardware_cmds.push(
+        HardwareWriteCmd::new(
+          &vec![LOVENSE_CONNECT_UUID],
+          Endpoint::Tx,
+          lovense_cmd,
+          false,
+        )
+        .into(),
+      );
       Ok(hardware_cmds)
-    } else if self.thusting_count != 0 && cmd.output_command().as_output_type() == OutputType::Oscillate {
-      let lovense_cmd = format!("Thrusting?v={}&t={}", cmd.output_command().value(), self.address)
-        .as_bytes()
-        .to_vec();
-      hardware_cmds.push(HardwareWriteCmd::new(&vec![LOVENSE_CONNECT_UUID], Endpoint::Tx, lovense_cmd, false).into());
+    } else if self.thusting_count != 0
+      && cmd.output_command().as_output_type() == OutputType::Oscillate
+    {
+      let lovense_cmd = format!(
+        "Thrusting?v={}&t={}",
+        cmd.output_command().value(),
+        self.address
+      )
+      .as_bytes()
+      .to_vec();
+      hardware_cmds.push(
+        HardwareWriteCmd::new(
+          &vec![LOVENSE_CONNECT_UUID],
+          Endpoint::Tx,
+          lovense_cmd,
+          false,
+        )
+        .into(),
+      );
       Ok(hardware_cmds)
     } else if cmd.output_command().as_output_type() == OutputType::Oscillate {
       // Only the max has a constriction system, and there's only one, so just parse the first command.
@@ -160,11 +208,23 @@ impl ProtocolHandler for LovenseConnectService {
        * - Using AirAuto method.
        * - Changed step count in device config file to 3.
        */
-      let lovense_cmd = format!("AirAuto?v={}&t={}", cmd.output_command().value(), self.address)
-        .as_bytes()
-        .to_vec();
+      let lovense_cmd = format!(
+        "AirAuto?v={}&t={}",
+        cmd.output_command().value(),
+        self.address
+      )
+      .as_bytes()
+      .to_vec();
 
-      hardware_cmds.push(HardwareWriteCmd::new(&vec![LOVENSE_CONNECT_UUID], Endpoint::Tx, lovense_cmd, false).into());
+      hardware_cmds.push(
+        HardwareWriteCmd::new(
+          &vec![LOVENSE_CONNECT_UUID],
+          Endpoint::Tx,
+          lovense_cmd,
+          false,
+        )
+        .into(),
+      );
       Ok(hardware_cmds)
     } else {
       Ok(hardware_cmds)
@@ -172,46 +232,66 @@ impl ProtocolHandler for LovenseConnectService {
   }
 
   fn handle_output_rotate_cmd(
-      &self,
-      _feature_index: u32,
-      _feature_id: Uuid,
-      speed: i32,
-    ) -> Result<Vec<crate::device::hardware::HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    _feature_index: u32,
+    _feature_id: Uuid,
+    speed: i32,
+  ) -> Result<Vec<crate::device::hardware::HardwareCommand>, ButtplugDeviceError> {
     let mut hardware_cmds = vec![];
     let lovense_cmd = format!("/Rotate?v={}&t={}", speed, self.address)
       .as_bytes()
       .to_vec();
     let clockwise = speed > 0;
-    hardware_cmds.push(HardwareWriteCmd::new(&vec![LOVENSE_CONNECT_UUID], Endpoint::Tx, lovense_cmd, false).into());
+    hardware_cmds.push(
+      HardwareWriteCmd::new(
+        &vec![LOVENSE_CONNECT_UUID],
+        Endpoint::Tx,
+        lovense_cmd,
+        false,
+      )
+      .into(),
+    );
     let dir = self.rotation_direction.load(Ordering::Relaxed);
     // TODO Should we store speed and direction as an option for rotation caching? This is weird.
     if dir != clockwise {
       self.rotation_direction.store(clockwise, Ordering::Relaxed);
-      hardware_cmds
-        .push(HardwareWriteCmd::new(&vec![LOVENSE_CONNECT_UUID],Endpoint::Tx, b"RotateChange?".to_vec(), false).into());
+      hardware_cmds.push(
+        HardwareWriteCmd::new(
+          &vec![LOVENSE_CONNECT_UUID],
+          Endpoint::Tx,
+          b"RotateChange?".to_vec(),
+          false,
+        )
+        .into(),
+      );
     }
     Ok(hardware_cmds)
   }
 
   fn handle_input_read_cmd(
-      &self,
-      device_index: u32,
-      device: Arc<Hardware>,
-      feature_index: u32,
-      _feature_id: Uuid,
-      _sensor_type: buttplug_core::message::InputType,
-    ) -> BoxFuture<'_, Result<buttplug_core::message::InputReadingV4, ButtplugDeviceError>> {
+    &self,
+    device_index: u32,
+    device: Arc<Hardware>,
+    feature_index: u32,
+    _feature_id: Uuid,
+    _sensor_type: buttplug_core::message::InputType,
+  ) -> BoxFuture<'_, Result<buttplug_core::message::InputReadingV4, ButtplugDeviceError>> {
     async move {
       // This is a dummy read. We just store the battery level in the device
       // implementation and it's the only thing read will return.
       let reading = device
-        .read_value(&HardwareReadCmd::new(LOVENSE_CONNECT_UUID, Endpoint::Rx, 0, 0))
+        .read_value(&HardwareReadCmd::new(
+          LOVENSE_CONNECT_UUID,
+          Endpoint::Rx,
+          0,
+          0,
+        ))
         .await?;
       debug!("Battery level: {}", reading.data()[0]);
       Ok(InputReadingV4::new(
         device_index,
         feature_index,
-        buttplug_core::message::InputTypeReading::Battery(reading.data()[0].into())
+        buttplug_core::message::InputTypeReading::Battery(reading.data()[0].into()),
       ))
     }
     .boxed()

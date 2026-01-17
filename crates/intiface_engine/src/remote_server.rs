@@ -123,7 +123,7 @@ async fn run_server<ConnectorType>(
   connector: ConnectorType,
   mut connector_receiver: mpsc::Receiver<ButtplugClientMessageVariant>,
   disconnect_notifier: Arc<Notify>,
-  allow_v4_spec: bool
+  allow_v4_spec: bool,
 ) where
   ConnectorType:
     ButtplugConnector<ButtplugServerMessageVariant, ButtplugClientMessageVariant> + 'static,
@@ -285,7 +285,7 @@ impl ButtplugRemoteServer {
   pub fn start<ConnectorType>(
     &self,
     mut connector: ConnectorType,
-    allow_v4_spec: bool
+    allow_v4_spec: bool,
   ) -> impl Future<Output = Result<(), ButtplugServerConnectorError>> + use<ConnectorType>
   where
     ConnectorType:
@@ -309,7 +309,7 @@ impl ButtplugRemoteServer {
         connector,
         connector_receiver,
         disconnect_notifier,
-        allow_v4_spec
+        allow_v4_spec,
       )
       .await;
       Ok(())

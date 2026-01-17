@@ -221,10 +221,7 @@ impl ButtplugServer {
     trace!("Server received: {:?}", msg);
     let v = msg.version();
     let spec_version = *self.spec_version.get_or_init(|| {
-      info!(
-        "Setting Buttplug Server Message Spec version to {}",
-        v
-      );
+      info!("Setting Buttplug Server Message Spec version to {}", v);
       v
     });
     match msg {
