@@ -25,6 +25,7 @@ pub use v0::*;
 pub use v4::*;
 
 use crate::errors::ButtplugMessageError;
+use enum_dispatch::enum_dispatch;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::convert::TryFrom;
 
@@ -98,6 +99,7 @@ pub trait ButtplugMessage: ButtplugMessageValidator + Send + Sync + Clone {
 /// transmitted, as message may be formed and mutated at multiple points in the
 /// library, or may need to be checked after deserialization. Message enums will
 /// run this on whatever their variant is.
+#[enum_dispatch]
 pub trait ButtplugMessageValidator {
   /// Returns () if the message is valid, otherwise returns a message error.
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {

@@ -32,8 +32,7 @@ pub enum ButtplugClientMessageV0 {
   VorzeA10CycloneCmd(VorzeA10CycloneCmdV0),
 }
 
-impl ButtplugMessageFinalizer for ButtplugClientMessageV0 {
-}
+impl ButtplugMessageFinalizer for ButtplugClientMessageV0 {}
 
 impl ButtplugMessageValidator for ButtplugClientMessageV0 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
@@ -53,7 +52,7 @@ impl ButtplugMessageValidator for ButtplugClientMessageV0 {
 }
 
 /// Represents all server-to-client messages in v0 of the Buttplug Spec
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, derive_more::From, Serialize, Deserialize)]
 pub enum ButtplugServerMessageV0 {
   // Status messages
   Ok(OkV0),
@@ -67,8 +66,7 @@ pub enum ButtplugServerMessageV0 {
   ScanningFinished(ScanningFinishedV0),
 }
 
-impl ButtplugMessageFinalizer for ButtplugServerMessageV0 {
-}
+impl ButtplugMessageFinalizer for ButtplugServerMessageV0 {}
 
 impl ButtplugMessageValidator for ButtplugServerMessageV0 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
