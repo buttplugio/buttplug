@@ -11,14 +11,7 @@ use serde::{Deserialize, Serialize};
 
 /// Represents all client-to-server messages in v0 of the Buttplug Spec
 #[derive(
-  Debug,
-  Clone,
-  PartialEq,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  FromSpecificButtplugMessage,
-  Serialize,
-  Deserialize,
+  Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, Serialize, Deserialize,
 )]
 pub enum ButtplugClientMessageV0 {
   Ping(PingV0),
@@ -44,10 +37,25 @@ pub enum ButtplugClientMessageV0 {
 impl ButtplugMessageFinalizer for ButtplugClientMessageV0 {
 }
 
+impl ButtplugMessageValidator for ButtplugClientMessageV0 {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    match self {
+      ButtplugClientMessageV0::Ping(msg) => msg.is_valid(),
+      ButtplugClientMessageV0::RequestServerInfo(msg) => msg.is_valid(),
+      ButtplugClientMessageV0::StartScanning(msg) => msg.is_valid(),
+      ButtplugClientMessageV0::StopScanning(msg) => msg.is_valid(),
+      ButtplugClientMessageV0::RequestDeviceList(msg) => msg.is_valid(),
+      ButtplugClientMessageV0::StopAllDevices(msg) => msg.is_valid(),
+      ButtplugClientMessageV0::StopDeviceCmd(msg) => msg.is_valid(),
+      ButtplugClientMessageV0::SingleMotorVibrateCmd(msg) => msg.is_valid(),
+      ButtplugClientMessageV0::FleshlightLaunchFW12Cmd(msg) => msg.is_valid(),
+      ButtplugClientMessageV0::VorzeA10CycloneCmd(msg) => msg.is_valid(),
+    }
+  }
+}
+
 /// Represents all server-to-client messages in v0 of the Buttplug Spec
-#[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, Serialize, Deserialize,
-)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, Serialize, Deserialize)]
 pub enum ButtplugServerMessageV0 {
   // Status messages
   Ok(OkV0),
@@ -62,6 +70,20 @@ pub enum ButtplugServerMessageV0 {
 }
 
 impl ButtplugMessageFinalizer for ButtplugServerMessageV0 {
+}
+
+impl ButtplugMessageValidator for ButtplugServerMessageV0 {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    match self {
+      ButtplugServerMessageV0::Ok(msg) => msg.is_valid(),
+      ButtplugServerMessageV0::Error(msg) => msg.is_valid(),
+      ButtplugServerMessageV0::ServerInfo(msg) => msg.is_valid(),
+      ButtplugServerMessageV0::DeviceList(msg) => msg.is_valid(),
+      ButtplugServerMessageV0::DeviceAdded(msg) => msg.is_valid(),
+      ButtplugServerMessageV0::DeviceRemoved(msg) => msg.is_valid(),
+      ButtplugServerMessageV0::ScanningFinished(msg) => msg.is_valid(),
+    }
+  }
 }
 
 #[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]

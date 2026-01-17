@@ -30,14 +30,7 @@ use super::{DeviceListV4, InputReadingV4};
 
 /// Represents all client-to-server messages in v3 of the Buttplug Spec
 #[derive(
-  Debug,
-  Clone,
-  PartialEq,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  FromSpecificButtplugMessage,
-  Serialize,
-  Deserialize,
+  Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, Serialize, Deserialize,
 )]
 pub enum ButtplugClientMessageV4 {
   // Handshake messages
@@ -57,16 +50,24 @@ pub enum ButtplugClientMessageV4 {
 impl ButtplugMessageFinalizer for ButtplugClientMessageV4 {
 }
 
+impl ButtplugMessageValidator for ButtplugClientMessageV4 {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    match self {
+      ButtplugClientMessageV4::RequestServerInfo(msg) => msg.is_valid(),
+      ButtplugClientMessageV4::Ping(msg) => msg.is_valid(),
+      ButtplugClientMessageV4::StartScanning(msg) => msg.is_valid(),
+      ButtplugClientMessageV4::StopScanning(msg) => msg.is_valid(),
+      ButtplugClientMessageV4::RequestDeviceList(msg) => msg.is_valid(),
+      ButtplugClientMessageV4::StopDeviceCmd(msg) => msg.is_valid(),
+      ButtplugClientMessageV4::StopAllDevices(msg) => msg.is_valid(),
+      ButtplugClientMessageV4::OutputCmd(msg) => msg.is_valid(),
+      ButtplugClientMessageV4::InputCmd(msg) => msg.is_valid(),
+    }
+  }
+}
+
 /// Represents all server-to-client messages in v3 of the Buttplug Spec
-#[derive(
-  Debug,
-  Clone,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  FromSpecificButtplugMessage,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, Clone, ButtplugMessage, FromSpecificButtplugMessage, Serialize, Deserialize)]
 pub enum ButtplugServerMessageV4 {
   // Status messages
   Ok(OkV0),
@@ -84,6 +85,19 @@ impl ButtplugMessageFinalizer for ButtplugServerMessageV4 {
   fn finalize(&mut self) {
     if let ButtplugServerMessageV4::DeviceList(dl) = self {
       dl.finalize()
+    }
+  }
+}
+
+impl ButtplugMessageValidator for ButtplugServerMessageV4 {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    match self {
+      ButtplugServerMessageV4::Ok(msg) => msg.is_valid(),
+      ButtplugServerMessageV4::Error(msg) => msg.is_valid(),
+      ButtplugServerMessageV4::ServerInfo(msg) => msg.is_valid(),
+      ButtplugServerMessageV4::DeviceList(msg) => msg.is_valid(),
+      ButtplugServerMessageV4::ScanningFinished(msg) => msg.is_valid(),
+      ButtplugServerMessageV4::InputReading(msg) => msg.is_valid(),
     }
   }
 }

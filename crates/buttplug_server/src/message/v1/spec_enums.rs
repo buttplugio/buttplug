@@ -48,14 +48,7 @@ use super::{
 
 /// Represents all client-to-server messages in v1 of the Buttplug Spec
 #[derive(
-  Debug,
-  Clone,
-  PartialEq,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  FromSpecificButtplugMessage,
-  Serialize,
-  Deserialize,
+  Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, Serialize, Deserialize,
 )]
 pub enum ButtplugClientMessageV1 {
   // Handshake and server messages
@@ -79,6 +72,26 @@ pub enum ButtplugClientMessageV1 {
 }
 
 impl ButtplugMessageFinalizer for ButtplugClientMessageV1 {
+}
+
+impl ButtplugMessageValidator for ButtplugClientMessageV1 {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    match self {
+      ButtplugClientMessageV1::RequestServerInfo(msg) => msg.is_valid(),
+      ButtplugClientMessageV1::Ping(msg) => msg.is_valid(),
+      ButtplugClientMessageV1::StartScanning(msg) => msg.is_valid(),
+      ButtplugClientMessageV1::StopScanning(msg) => msg.is_valid(),
+      ButtplugClientMessageV1::RequestDeviceList(msg) => msg.is_valid(),
+      ButtplugClientMessageV1::StopAllDevices(msg) => msg.is_valid(),
+      ButtplugClientMessageV1::VibrateCmd(msg) => msg.is_valid(),
+      ButtplugClientMessageV1::LinearCmd(msg) => msg.is_valid(),
+      ButtplugClientMessageV1::RotateCmd(msg) => msg.is_valid(),
+      ButtplugClientMessageV1::StopDeviceCmd(msg) => msg.is_valid(),
+      ButtplugClientMessageV1::SingleMotorVibrateCmd(msg) => msg.is_valid(),
+      ButtplugClientMessageV1::FleshlightLaunchFW12Cmd(msg) => msg.is_valid(),
+      ButtplugClientMessageV1::VorzeA10CycloneCmd(msg) => msg.is_valid(),
+    }
+  }
 }
 
 // No messages were changed or deprecated before v2, so we can convert all v0 messages to v1.
@@ -111,14 +124,7 @@ impl From<ButtplugClientMessageV0> for ButtplugClientMessageV1 {
 
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
 #[derive(
-  Debug,
-  Clone,
-  PartialEq,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  FromSpecificButtplugMessage,
-  Serialize,
-  Deserialize,
+  Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, Serialize, Deserialize,
 )]
 pub enum ButtplugServerMessageV1 {
   // Status messages
@@ -131,6 +137,23 @@ pub enum ButtplugServerMessageV1 {
   DeviceAdded(DeviceAddedV1),
   DeviceRemoved(DeviceRemovedV0),
   ScanningFinished(ScanningFinishedV0),
+}
+
+impl ButtplugMessageFinalizer for ButtplugServerMessageV1 {
+}
+
+impl ButtplugMessageValidator for ButtplugServerMessageV1 {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    match self {
+      ButtplugServerMessageV1::Ok(msg) => msg.is_valid(),
+      ButtplugServerMessageV1::Error(msg) => msg.is_valid(),
+      ButtplugServerMessageV1::ServerInfo(msg) => msg.is_valid(),
+      ButtplugServerMessageV1::DeviceList(msg) => msg.is_valid(),
+      ButtplugServerMessageV1::DeviceAdded(msg) => msg.is_valid(),
+      ButtplugServerMessageV1::DeviceRemoved(msg) => msg.is_valid(),
+      ButtplugServerMessageV1::ScanningFinished(msg) => msg.is_valid(),
+    }
+  }
 }
 
 impl From<ButtplugServerMessageV1> for ButtplugServerMessageV0 {

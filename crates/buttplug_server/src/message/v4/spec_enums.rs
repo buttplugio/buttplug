@@ -44,9 +44,7 @@ use super::{
 /// version of the message spec. For any messages that don't require error checking, their regular
 /// struct can be used as an enum parameter. Any messages requiring error checking or validation
 /// will have an alternate Checked[x] form that they will need to be cast as.
-#[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, FromSpecificButtplugMessage,
-)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage)]
 pub enum ButtplugCheckedClientMessageV4 {
   // Handshake messages
   RequestServerInfo(RequestServerInfoV4),
@@ -63,6 +61,23 @@ pub enum ButtplugCheckedClientMessageV4 {
   InputCmd(CheckedInputCmdV4),
   // Internal conversions for v1-v3 messages with subcommands
   OutputVecCmd(CheckedOutputVecCmdV4),
+}
+
+impl ButtplugMessageValidator for ButtplugCheckedClientMessageV4 {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    match self {
+      ButtplugCheckedClientMessageV4::RequestServerInfo(msg) => msg.is_valid(),
+      ButtplugCheckedClientMessageV4::Ping(msg) => msg.is_valid(),
+      ButtplugCheckedClientMessageV4::StartScanning(msg) => msg.is_valid(),
+      ButtplugCheckedClientMessageV4::StopScanning(msg) => msg.is_valid(),
+      ButtplugCheckedClientMessageV4::RequestDeviceList(msg) => msg.is_valid(),
+      ButtplugCheckedClientMessageV4::StopDeviceCmd(msg) => msg.is_valid(),
+      ButtplugCheckedClientMessageV4::StopAllDevices(msg) => msg.is_valid(),
+      ButtplugCheckedClientMessageV4::OutputCmd(msg) => msg.is_valid(),
+      ButtplugCheckedClientMessageV4::InputCmd(msg) => msg.is_valid(),
+      ButtplugCheckedClientMessageV4::OutputVecCmd(msg) => msg.is_valid(),
+    }
+  }
 }
 
 impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMessageV4 {
@@ -311,20 +326,23 @@ impl TryFromClientMessage<ButtplugClientMessageV3> for ButtplugCheckedClientMess
 /// Represents messages that should go to the
 /// [DeviceManager][crate::server::device_manager::DeviceManager] of a
 /// [ButtplugServer](crate::server::ButtplugServer)
-#[derive(
-  Debug,
-  Clone,
-  PartialEq,
-  Eq,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  FromSpecificButtplugMessage,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, ButtplugMessage, FromSpecificButtplugMessage)]
 pub(crate) enum ButtplugDeviceManagerMessageUnion {
   RequestDeviceList(RequestDeviceListV0),
   StopAllDevices(StopAllDevicesV4),
   StartScanning(StartScanningV0),
   StopScanning(StopScanningV0),
+}
+
+impl ButtplugMessageValidator for ButtplugDeviceManagerMessageUnion {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    match self {
+      ButtplugDeviceManagerMessageUnion::RequestDeviceList(msg) => msg.is_valid(),
+      ButtplugDeviceManagerMessageUnion::StopAllDevices(msg) => msg.is_valid(),
+      ButtplugDeviceManagerMessageUnion::StartScanning(msg) => msg.is_valid(),
+      ButtplugDeviceManagerMessageUnion::StopScanning(msg) => msg.is_valid(),
+    }
+  }
 }
 
 impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceManagerMessageUnion {
@@ -350,19 +368,23 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceManagerMessageUni
 }
 
 /// Represents all possible device command message types.
-#[derive(
-  Debug,
-  Clone,
-  PartialEq,
-  ButtplugDeviceMessage,
-  ButtplugMessageValidator,
-  FromSpecificButtplugMessage,
-)]
+#[derive(Debug, Clone, PartialEq, ButtplugDeviceMessage, FromSpecificButtplugMessage)]
 pub enum ButtplugDeviceCommandMessageUnionV4 {
   StopDeviceCmd(StopDeviceCmdV4),
   OutputCmd(CheckedOutputCmdV4),
   OutputVecCmd(CheckedOutputVecCmdV4),
   InputCmd(CheckedInputCmdV4),
+}
+
+impl ButtplugMessageValidator for ButtplugDeviceCommandMessageUnionV4 {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    match self {
+      ButtplugDeviceCommandMessageUnionV4::StopDeviceCmd(msg) => msg.is_valid(),
+      ButtplugDeviceCommandMessageUnionV4::OutputCmd(msg) => msg.is_valid(),
+      ButtplugDeviceCommandMessageUnionV4::OutputVecCmd(msg) => msg.is_valid(),
+      ButtplugDeviceCommandMessageUnionV4::InputCmd(msg) => msg.is_valid(),
+    }
+  }
 }
 
 impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceCommandMessageUnionV4 {

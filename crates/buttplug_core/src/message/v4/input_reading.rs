@@ -56,16 +56,7 @@ impl Into<InputType> for InputTypeReading {
 // This message can have an Id of 0, as it can be emitted as part of a
 // subscription and won't have a matching task Id in that case.
 #[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageValidator,
-  Clone,
-  Getters,
-  CopyGetters,
-  PartialEq,
-  Eq,
-  Serialize,
-  Deserialize,
+  Debug, ButtplugDeviceMessage, Clone, Getters, CopyGetters, PartialEq, Eq, Serialize, Deserialize,
 )]
 pub struct InputReadingV4 {
   #[serde(rename = "Id")]
@@ -78,6 +69,9 @@ pub struct InputReadingV4 {
   #[serde(rename = "Reading")]
   #[getset[get_copy="pub"]]
   reading: InputTypeReading,
+}
+
+impl ButtplugMessageValidator for InputReadingV4 {
 }
 
 impl InputReadingV4 {

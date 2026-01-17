@@ -17,16 +17,7 @@ use serde::{Deserialize, Serialize};
 // This message can have an Id of 0, as it can be emitted as part of a
 // subscription and won't have a matching task Id in that case.
 #[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageValidator,
-  Clone,
-  Getters,
-  CopyGetters,
-  PartialEq,
-  Eq,
-  Serialize,
-  Deserialize,
+  Debug, ButtplugDeviceMessage, Clone, Getters, CopyGetters, PartialEq, Eq, Serialize, Deserialize,
 )]
 pub struct SensorReadingV3 {
   #[serde(rename = "Id")]
@@ -42,6 +33,9 @@ pub struct SensorReadingV3 {
   #[serde(rename = "Data")]
   #[getset[get="pub"]]
   data: Vec<i32>,
+}
+
+impl ButtplugMessageValidator for SensorReadingV3 {
 }
 
 impl SensorReadingV3 {

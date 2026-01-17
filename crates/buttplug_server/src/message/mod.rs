@@ -27,7 +27,7 @@ pub use v2::*;
 pub use v3::*;
 pub use v4::*;
 
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage)]
 pub enum ButtplugClientMessageVariant {
   V0(ButtplugClientMessageV0),
   V1(ButtplugClientMessageV1),
@@ -37,6 +37,18 @@ pub enum ButtplugClientMessageVariant {
 }
 
 impl ButtplugMessageFinalizer for ButtplugClientMessageVariant {
+}
+
+impl ButtplugMessageValidator for ButtplugClientMessageVariant {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    match self {
+      ButtplugClientMessageVariant::V0(msg) => msg.is_valid(),
+      ButtplugClientMessageVariant::V1(msg) => msg.is_valid(),
+      ButtplugClientMessageVariant::V2(msg) => msg.is_valid(),
+      ButtplugClientMessageVariant::V3(msg) => msg.is_valid(),
+      ButtplugClientMessageVariant::V4(msg) => msg.is_valid(),
+    }
+  }
 }
 
 impl ButtplugClientMessageVariant {
@@ -123,7 +135,7 @@ impl From<ButtplugClientMessageV4> for ButtplugClientMessageVariant {
   }
 }
 
-#[derive(Debug, Clone, ButtplugMessage, ButtplugMessageValidator)]
+#[derive(Debug, Clone, ButtplugMessage)]
 pub enum ButtplugServerMessageVariant {
   V0(ButtplugServerMessageV0),
   V1(ButtplugServerMessageV1),
@@ -133,6 +145,18 @@ pub enum ButtplugServerMessageVariant {
 }
 
 impl ButtplugMessageFinalizer for ButtplugServerMessageVariant {
+}
+
+impl ButtplugMessageValidator for ButtplugServerMessageVariant {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    match self {
+      ButtplugServerMessageVariant::V0(msg) => msg.is_valid(),
+      ButtplugServerMessageVariant::V1(msg) => msg.is_valid(),
+      ButtplugServerMessageVariant::V2(msg) => msg.is_valid(),
+      ButtplugServerMessageVariant::V3(msg) => msg.is_valid(),
+      ButtplugServerMessageVariant::V4(msg) => msg.is_valid(),
+    }
+  }
 }
 
 impl ButtplugServerMessageVariant {
@@ -181,21 +205,21 @@ impl From<ButtplugServerMessageV4> for ButtplugServerMessageVariant {
 /// [ButtplugClient][crate::client::ButtplugClient] that denote an EVENT from a device. These are
 /// only used in notifications, so read requests will not need to be added here, only messages that
 /// will require Id of 0.
-#[derive(
-  Debug,
-  Clone,
-  PartialEq,
-  Eq,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  FromSpecificButtplugMessage,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, ButtplugMessage, FromSpecificButtplugMessage)]
 pub enum ButtplugServerDeviceMessage {
   // Generic Sensor Reading Messages
   SensorReading(InputReadingV4),
 }
 
 impl ButtplugMessageFinalizer for ButtplugServerDeviceMessage {
+}
+
+impl ButtplugMessageValidator for ButtplugServerDeviceMessage {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    match self {
+      ButtplugServerDeviceMessage::SensorReading(msg) => msg.is_valid(),
+    }
+  }
 }
 
 impl From<ButtplugServerDeviceMessage> for ButtplugServerMessageV4 {
