@@ -48,7 +48,7 @@ use super::{
 
 /// Represents all client-to-server messages in v1 of the Buttplug Spec
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, Serialize, Deserialize,
+  Debug, Clone, PartialEq, ButtplugMessage, derive_more::From, Serialize, Deserialize,
 )]
 pub enum ButtplugClientMessageV1 {
   // Handshake and server messages
@@ -124,7 +124,7 @@ impl From<ButtplugClientMessageV0> for ButtplugClientMessageV1 {
 
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, Serialize, Deserialize,
+  Debug, Clone, PartialEq, ButtplugMessage, derive_more::From, Serialize, Deserialize,
 )]
 pub enum ButtplugServerMessageV1 {
   // Status messages

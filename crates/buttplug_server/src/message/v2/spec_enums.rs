@@ -39,7 +39,7 @@ use super::{BatteryLevelCmdV2, BatteryLevelReadingV2, DeviceAddedV2, DeviceListV
 
 /// Represents all client-to-server messages in v2 of the Buttplug Spec
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, Serialize, Deserialize,
+  Debug, Clone, PartialEq, ButtplugMessage, derive_more::From, Serialize, Deserialize,
 )]
 pub enum ButtplugClientMessageV2 {
   // Handshake messages
@@ -122,7 +122,7 @@ impl TryFrom<ButtplugClientMessageV1> for ButtplugClientMessageV2 {
 
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, Serialize, Deserialize,
+  Debug, Clone, PartialEq, ButtplugMessage, derive_more::From, Serialize, Deserialize,
 )]
 pub enum ButtplugServerMessageV2 {
   // Status messages

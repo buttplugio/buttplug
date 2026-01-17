@@ -205,7 +205,7 @@ impl From<ButtplugServerMessageV4> for ButtplugServerMessageVariant {
 /// [ButtplugClient][crate::client::ButtplugClient] that denote an EVENT from a device. These are
 /// only used in notifications, so read requests will not need to be added here, only messages that
 /// will require Id of 0.
-#[derive(Debug, Clone, PartialEq, Eq, ButtplugMessage, FromSpecificButtplugMessage)]
+#[derive(Debug, Clone, PartialEq, Eq, ButtplugMessage, derive_more::From)]
 pub enum ButtplugServerDeviceMessage {
   // Generic Sensor Reading Messages
   SensorReading(InputReadingV4),

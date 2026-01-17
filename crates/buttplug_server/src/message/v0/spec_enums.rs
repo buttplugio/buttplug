@@ -10,9 +10,7 @@ use buttplug_core::{
 use serde::{Deserialize, Serialize};
 
 /// Represents all client-to-server messages in v0 of the Buttplug Spec
-#[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, Serialize, Deserialize,
-)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, derive_more::From, Serialize, Deserialize)]
 pub enum ButtplugClientMessageV0 {
   Ping(PingV0),
   // Handshake messages

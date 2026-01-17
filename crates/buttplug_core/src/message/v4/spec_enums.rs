@@ -28,10 +28,8 @@ use serde::{Deserialize, Serialize};
 
 use super::{DeviceListV4, InputReadingV4};
 
-/// Represents all client-to-server messages in v3 of the Buttplug Spec
-#[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, Serialize, Deserialize,
-)]
+/// Represents all client-to-server messages in v4 of the Buttplug Spec
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, derive_more::From, Serialize, Deserialize)]
 pub enum ButtplugClientMessageV4 {
   // Handshake messages
   RequestServerInfo(RequestServerInfoV4),
@@ -66,8 +64,8 @@ impl ButtplugMessageValidator for ButtplugClientMessageV4 {
   }
 }
 
-/// Represents all server-to-client messages in v3 of the Buttplug Spec
-#[derive(Debug, Clone, ButtplugMessage, FromSpecificButtplugMessage, Serialize, Deserialize)]
+/// Represents all server-to-client messages in v4 of the Buttplug Spec
+#[derive(Debug, Clone, ButtplugMessage, derive_more::From, Serialize, Deserialize)]
 pub enum ButtplugServerMessageV4 {
   // Status messages
   Ok(OkV0),

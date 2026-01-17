@@ -44,7 +44,7 @@ use super::{
 /// version of the message spec. For any messages that don't require error checking, their regular
 /// struct can be used as an enum parameter. Any messages requiring error checking or validation
 /// will have an alternate Checked[x] form that they will need to be cast as.
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, derive_more::From)]
 pub enum ButtplugCheckedClientMessageV4 {
   // Handshake messages
   RequestServerInfo(RequestServerInfoV4),
@@ -326,7 +326,7 @@ impl TryFromClientMessage<ButtplugClientMessageV3> for ButtplugCheckedClientMess
 /// Represents messages that should go to the
 /// [DeviceManager][crate::server::device_manager::DeviceManager] of a
 /// [ButtplugServer](crate::server::ButtplugServer)
-#[derive(Debug, Clone, PartialEq, Eq, ButtplugMessage, FromSpecificButtplugMessage)]
+#[derive(Debug, Clone, PartialEq, Eq, ButtplugMessage, derive_more::From)]
 pub(crate) enum ButtplugDeviceManagerMessageUnion {
   RequestDeviceList(RequestDeviceListV0),
   StopAllDevices(StopAllDevicesV4),
@@ -368,7 +368,7 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceManagerMessageUni
 }
 
 /// Represents all possible device command message types.
-#[derive(Debug, Clone, PartialEq, ButtplugDeviceMessage, FromSpecificButtplugMessage)]
+#[derive(Debug, Clone, PartialEq, ButtplugDeviceMessage, derive_more::From)]
 pub enum ButtplugDeviceCommandMessageUnionV4 {
   StopDeviceCmd(StopDeviceCmdV4),
   OutputCmd(CheckedOutputCmdV4),
