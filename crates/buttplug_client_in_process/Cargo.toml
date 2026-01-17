@@ -30,7 +30,6 @@ websocket-manager=["buttplug_server_hwmgr_websocket"]
 xinput-manager=["buttplug_server_hwmgr_xinput"]
 
 [dependencies]
-buttplug_derive = { version = "0.9.1", path = "../buttplug_derive" }
 buttplug_core = { version = "10.0.0-beta4", path = "../buttplug_core" }
 buttplug_client = { version = "10.0.0-beta3", path = "../buttplug_client" }
 buttplug_server = { version = "10.0.0-beta4", path = "../buttplug_server" }

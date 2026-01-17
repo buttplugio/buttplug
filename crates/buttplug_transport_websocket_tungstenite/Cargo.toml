@@ -20,7 +20,6 @@ doc = true
 
 
 [dependencies]
-buttplug_derive = { version = "0.9.1", path = "../buttplug_derive" }
 buttplug_core = { version = "10.0.0-beta3", path = "../buttplug_core" }
 futures = "0.3.31"
 futures-util = "0.3.31"
