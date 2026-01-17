@@ -66,20 +66,20 @@
 pub mod remote_connector;
 pub mod transport;
 
-use crate::{
-  message::{ButtplugMessage, serializer::ButtplugSerializedMessage},
-  util::future::{ButtplugFuture, ButtplugFutureStateShared},
-};
+use crate::message::{ButtplugMessage, serializer::ButtplugSerializedMessage};
 use displaydoc::Display;
-use futures::future::{self, BoxFuture, FutureExt};
+use futures::{
+  channel::oneshot,
+  future::{self, BoxFuture, FutureExt},
+};
 pub use remote_connector::ButtplugRemoteConnector;
 use thiserror::Error;
 use tokio::sync::mpsc::Sender;
 
 pub type ButtplugConnectorResult = Result<(), ButtplugConnectorError>;
-pub type ButtplugConnectorStateShared =
-  ButtplugFutureStateShared<Result<(), ButtplugConnectorError>>;
-pub type ButtplugConnectorFuture = ButtplugFuture<Result<(), ButtplugConnectorError>>;
+// Internal types - not exposed in public API (trait methods return BoxFuture)
+pub type ButtplugConnectorStateSender = oneshot::Sender<Result<(), ButtplugConnectorError>>;
+pub type ButtplugConnectorFuture = oneshot::Receiver<Result<(), ButtplugConnectorError>>;
 pub type ButtplugConnectorResultFuture = BoxFuture<'static, ButtplugConnectorResult>;
 
 /// Errors specific to client connector structs.

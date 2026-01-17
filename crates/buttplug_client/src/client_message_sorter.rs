@@ -7,11 +7,7 @@
 
 //! Handling of remote message pairing and future resolution.
 
-use super::{
-  ButtplugClientError,
-  ButtplugClientMessageFuturePair,
-  ButtplugServerMessageStateShared,
-};
+use super::{ButtplugClientError, ButtplugClientMessageFuturePair, ButtplugServerMessageSender};
 use buttplug_core::message::{ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageV4};
 use dashmap::DashMap;
 use log::*;
@@ -52,12 +48,12 @@ use std::sync::{
 ///   error is emitted.
 ///
 pub struct ClientMessageSorter {
-  /// Map of message `id`s to their related future.
+  /// Map of message `id`s to their related sender.
   ///
   /// This is where we store message `id`s that are waiting for a return from the server. Once we
-  /// get back a response with a matching `id`, we remove the entry from this map, and use the waker
+  /// get back a response with a matching `id`, we remove the entry from this map, and use the sender
   /// to complete the future with the received response message.
-  future_map: DashMap<u32, ButtplugServerMessageStateShared>,
+  future_map: DashMap<u32, ButtplugServerMessageSender>,
 
   /// Message `id` counter
   ///
@@ -70,13 +66,15 @@ pub struct ClientMessageSorter {
 impl ClientMessageSorter {
   /// Registers a future to be resolved when we receive a response.
   ///
-  /// Given a message and its related future, set the message's `id`, and match that id with the
-  /// future to be resolved when we get a response back.
+  /// Given a message and its related sender, set the message's `id`, and match that id with the
+  /// sender to be used when we get a response back.
   pub fn register_future(&self, msg_fut: &mut ButtplugClientMessageFuturePair) {
     let id = self.current_id.load(Ordering::Relaxed);
     trace!("Setting message id to {}", id);
     msg_fut.msg.set_id(id);
-    self.future_map.insert(id, msg_fut.waker.clone());
+    if let Some(sender) = msg_fut.sender.take() {
+      self.future_map.insert(id, sender);
+    }
     self.current_id.store(id + 1, Ordering::Relaxed);
   }
 
@@ -89,15 +87,15 @@ impl ClientMessageSorter {
     let id = msg.id();
     trace!("Trying to resolve message future for id {}.", id);
     match self.future_map.remove(&id) {
-      Some((_, state)) => {
+      Some((_, sender)) => {
         trace!("Resolved id {} to a future.", id);
         if let Err(e) = msg.is_valid() {
           error!("Message not valid: {:?} - Error: {}", msg, e);
-          state.set_reply(Err(ButtplugClientError::ButtplugError(e.into())));
+          let _ = sender.send(Err(ButtplugClientError::ButtplugError(e.into())));
         } else if let ButtplugServerMessageV4::Error(e) = msg {
-          state.set_reply(Err(e.original_error().into()))
+          let _ = sender.send(Err(e.original_error().into()));
         } else {
-          state.set_reply(Ok(msg.clone()))
+          let _ = sender.send(Ok(msg.clone()));
         }
         true
       }

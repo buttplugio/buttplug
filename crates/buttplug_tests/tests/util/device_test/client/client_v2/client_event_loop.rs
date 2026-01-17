@@ -13,10 +13,10 @@ use super::{
   device::{ButtplugClientDevice, ButtplugClientDeviceEvent},
 };
 use buttplug_core::{
-  connector::{ButtplugConnector, ButtplugConnectorStateShared},
+  connector::ButtplugConnector,
   errors::{ButtplugDeviceError, ButtplugError},
-  message::ButtplugMessageValidator,
 };
+use futures::channel::oneshot;
 use buttplug_server::message::{
   ButtplugClientMessageV2,
   ButtplugServerMessageV2,
@@ -29,13 +29,16 @@ use std::sync::{
   Arc,
   atomic::{AtomicBool, Ordering},
 };
-use tokio::sync::{broadcast, mpsc};
+use tokio::sync::{broadcast, mpsc, mpsc::Sender as MpscSender};
+
+/// Type alias for disconnect sender
+pub(super) type ButtplugConnectorStateSender =
+  oneshot::Sender<Result<(), buttplug_core::connector::ButtplugConnectorError>>;
 
 /// Enum used for communication from the client to the event loop.
-#[derive(Clone)]
 pub(super) enum ButtplugClientRequest {
   /// Client request to disconnect, via already sent connector instance.
-  Disconnect(ButtplugConnectorStateShared),
+  Disconnect(ButtplugConnectorStateSender),
   /// Given a DeviceList message, update the inner loop values and create
   /// events for additions.
   HandleDeviceList(DeviceListV2),
@@ -90,9 +93,9 @@ where
   to_client_sender: broadcast::Sender<ButtplugClientEvent>,
   /// Sends events to the client receiver. Stored here so it can be handed to
   /// new ButtplugClientDevice instances.
-  from_client_sender: broadcast::Sender<ButtplugClientRequest>,
+  from_client_sender: MpscSender<ButtplugClientRequest>,
   /// Receives incoming messages from client instances.
-  from_client_receiver: broadcast::Receiver<ButtplugClientRequest>,
+  from_client_receiver: mpsc::Receiver<ButtplugClientRequest>,
   sorter: ClientMessageSorter,
 }
 
@@ -110,14 +113,15 @@ where
     connector: ConnectorType,
     from_connector_receiver: mpsc::Receiver<ButtplugServerMessageV2>,
     to_client_sender: broadcast::Sender<ButtplugClientEvent>,
-    from_client_sender: broadcast::Sender<ButtplugClientRequest>,
+    from_client_sender: MpscSender<ButtplugClientRequest>,
+    from_client_receiver: mpsc::Receiver<ButtplugClientRequest>,
     device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
   ) -> Self {
     trace!("Creating ButtplugClientEventLoop instance.");
     Self {
       connected_status,
       device_map,
-      from_client_receiver: from_client_sender.subscribe(),
+      from_client_receiver,
       from_client_sender,
       to_client_sender,
       from_connector_receiver,
@@ -200,11 +204,6 @@ where
       trace!("Message future found, returning");
       return;
     }
-    if let Err(e) = msg.is_valid() {
-      error!("Message not valid: {:?} - Error: {}", msg, e);
-      self.send_client_event(ButtplugClientEvent::Error(ButtplugError::from(e)));
-      return;
-    }
     trace!("Message future not found, assuming server event.");
     info!("{:?}", msg);
     match msg {
@@ -247,17 +246,9 @@ where
 
   /// Send a message from the [ButtplugClient] to the [ButtplugClientConnector].
   async fn send_message(&mut self, mut msg_fut: ButtplugClientMessageFuturePair) {
-    if let Err(e) = &msg_fut.msg.is_valid() {
-      error!("Message not valid: {:?} - Error: {}", msg_fut.msg, e);
-      msg_fut
-        .waker
-        .set_reply(Err(ButtplugError::from(e.clone()).into()));
-      return;
-    }
-
     trace!("Sending message to connector: {:?}", msg_fut.msg);
     self.sorter.register_future(&mut msg_fut);
-    if self.connector.send(msg_fut.msg).await.is_err() {
+    if self.connector.send(msg_fut.msg.clone()).await.is_err() {
       error!("Sending message failed, connector most likely no longer connected.");
     }
   }
@@ -277,9 +268,9 @@ where
         self.send_message(msg_fut).await;
         true
       }
-      ButtplugClientRequest::Disconnect(state) => {
+      ButtplugClientRequest::Disconnect(sender) => {
         trace!("Client requested disconnect");
-        state.set_reply(self.connector.disconnect().await);
+        let _ = sender.send(self.connector.disconnect().await);
         false
       }
       ButtplugClientRequest::HandleDeviceList(device_list) => {
@@ -312,14 +303,14 @@ where
           }
         },
         client = self.from_client_receiver.recv() => match client {
-          Err(_) => {
+          None => {
             info!("Client disconnected, exiting loop.");
             self.connected_status.store(false, Ordering::Relaxed);
             self.device_map.iter().for_each(|val| val.value().set_client_connected(false));
             self.send_client_event(ButtplugClientEvent::ServerDisconnect);
             return;
           }
-          Ok(msg) => {
+          Some(msg) => {
             if !self.parse_client_request(msg).await {
               break;
             }

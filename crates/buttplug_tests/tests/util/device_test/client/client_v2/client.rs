@@ -10,7 +10,7 @@
 use super::client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
 use super::device::ButtplugClientDevice;
 use buttplug_core::{
-  connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
+  connector::{ButtplugConnector, ButtplugConnectorError},
   errors::{ButtplugError, ButtplugHandshakeError},
   message::{
     ButtplugMessageSpecVersion,
@@ -19,12 +19,9 @@ use buttplug_core::{
     StartScanningV0,
     StopScanningV0,
   },
-  util::{
-    async_manager,
-    future::{ButtplugFuture, ButtplugFutureStateShared},
-    stream::convert_broadcast_receiver_to_stream,
-  },
+  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
+use futures::channel::oneshot;
 use buttplug_server::message::{
   ButtplugClientMessageV2,
   ButtplugServerMessageV2,
@@ -42,7 +39,7 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
 };
 use thiserror::Error;
-use tokio::sync::{Mutex, broadcast, mpsc};
+use tokio::sync::{Mutex, broadcast, mpsc, mpsc::error::SendError};
 use tracing::{Level, Span, span};
 use tracing_futures::Instrument;
 
@@ -58,11 +55,8 @@ pub(super) type ButtplugClientResultFuture<T = ()> = BoxFuture<'static, Buttplug
 pub(super) type ButtplugServerMessageResult = ButtplugClientResult<ButtplugServerMessageV2>;
 pub(super) type ButtplugServerMessageResultFuture =
   ButtplugClientResultFuture<ButtplugServerMessageV2>;
-/// Future state type for returning server responses across futures.
-pub(super) type ButtplugServerMessageStateShared =
-  ButtplugFutureStateShared<ButtplugServerMessageResult>;
-/// Future type that expects server responses.
-pub(super) type ButtplugServerMessageFuture = ButtplugFuture<ButtplugServerMessageResult>;
+/// Sender type for resolving server message futures.
+pub(super) type ButtplugServerMessageSender = oneshot::Sender<ButtplugServerMessageResult>;
 
 /// Future state for messages sent from the client that expect a server
 /// response.
@@ -72,23 +66,23 @@ pub(super) type ButtplugServerMessageFuture = ButtplugFuture<ButtplugServerMessa
 /// to wait for it. We can do so by creating a future that will be resolved when
 /// a response is received from the server.
 ///
-/// To do this, we build a [ButtplugFuture], then take its waker and pass it
-/// along with the message we send to the connector, using the
-/// [ButtplugClientMessageFuturePair] type. We can then expect the connector to
-/// get the response from the server, match it with our message (using something
-/// like the
-/// [ClientMessageSorter][crate::client::client_message_sorter::ClientMessageSorter]),
-/// and set the reply in the waker we've sent along. This will resolve the
-/// future we're waiting on and allow us to continue execution.
-#[derive(Clone)]
+/// To do this, we create a oneshot channel, then pass the sender along with the message
+/// we send to the connector, using the [ButtplugClientMessageFuturePair] type. We can then expect
+/// the connector to get the response from the server, match it with our message (using something
+/// like the ClientMessageSorter, an internal structure in the Buttplug library), and send the reply
+/// via the sender. This will resolve the receiver future we're waiting on and allow us to
+/// continue execution.
 pub struct ButtplugClientMessageFuturePair {
   pub msg: ButtplugClientMessageV2,
-  pub waker: ButtplugServerMessageStateShared,
+  pub sender: Option<ButtplugServerMessageSender>,
 }
 
 impl ButtplugClientMessageFuturePair {
-  pub fn new(msg: ButtplugClientMessageV2, waker: ButtplugServerMessageStateShared) -> Self {
-    Self { msg, waker }
+  pub fn new(msg: ButtplugClientMessageV2, sender: ButtplugServerMessageSender) -> Self {
+    Self {
+      msg,
+      sender: Some(sender),
+    }
   }
 }
 
@@ -165,17 +159,17 @@ pub struct ButtplugClient {
   server_name: Arc<Mutex<Option<String>>>,
   event_stream: broadcast::Sender<ButtplugClientEvent>,
   // Sender to relay messages to the internal client loop
-  message_sender: broadcast::Sender<ButtplugClientRequest>,
+  message_sender: mpsc::Sender<ButtplugClientRequest>,
   connected: Arc<AtomicBool>,
   _client_span: Arc<Mutex<Option<Span>>>,
   device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
 }
 
 impl ButtplugClient {
-  pub fn new(name: &str) -> Self {
-    let (message_sender, _) = broadcast::channel(256);
+  pub fn new(name: &str) -> (Self, mpsc::Receiver<ButtplugClientRequest>) {
+    let (message_sender, message_receiver) = mpsc::channel(256);
     let (event_stream, _) = broadcast::channel(256);
-    Self {
+    (Self {
       client_name: name.to_owned(),
       server_name: Arc::new(Mutex::new(None)),
       event_stream,
@@ -183,12 +177,13 @@ impl ButtplugClient {
       _client_span: Arc::new(Mutex::new(None)),
       connected: Arc::new(AtomicBool::new(false)),
       device_map: Arc::new(DashMap::new()),
-    }
+    }, message_receiver)
   }
 
   pub async fn connect<ConnectorType>(
     &self,
     mut connector: ConnectorType,
+    from_client_receiver: mpsc::Receiver<ButtplugClientRequest>,
   ) -> Result<(), ButtplugClientError>
   where
     ConnectorType: ButtplugConnector<ButtplugClientMessageV2, ButtplugServerMessageV2> + 'static,
@@ -218,6 +213,7 @@ impl ButtplugClient {
       connector_receiver,
       self.event_stream.clone(),
       self.message_sender.clone(),
+      from_client_receiver,
       self.device_map.clone(),
     );
 
@@ -293,13 +289,14 @@ impl ButtplugClient {
     // Send the connector to the internal loop for management. Once we throw
     // the connector over, the internal loop will handle connecting and any
     // further communications with the server, if connection is successful.
-    let fut = ButtplugConnectorFuture::default();
-    let msg = ButtplugClientRequest::Disconnect(fut.get_state_clone());
+    let (tx, rx) = oneshot::channel();
+    let msg = ButtplugClientRequest::Disconnect(tx);
     let send_fut = self.send_message_to_event_loop(msg);
     let connected = self.connected.clone();
     Box::pin(async move {
       send_fut.await?;
       connected.store(false, Ordering::Relaxed);
+      let _ = rx.await;
       Ok(())
     })
   }
@@ -348,13 +345,11 @@ impl ButtplugClient {
     // If we're running the event loop, we should have a message_sender.
     // Being connected to the server doesn't matter here yet because we use
     // this function in order to connect also.
-    //
-    // The message sender doesn't require an async send now, but we still want
-    // to delay execution as part of our future in order to keep task coherency.
     let message_sender = self.message_sender.clone();
     Box::pin(async move {
       message_sender
         .send(msg)
+        .await
         .map_err(|_| ButtplugConnectorError::ConnectorChannelClosed)?;
       Ok(())
     })
@@ -376,18 +371,17 @@ impl ButtplugClient {
     &self,
     msg: ButtplugClientMessageV2,
   ) -> ButtplugServerMessageResultFuture {
-    // Create a future to pair with the message being resolved.
-    let fut = ButtplugServerMessageFuture::default();
-    let internal_msg = ButtplugClientRequest::Message(ButtplugClientMessageFuturePair::new(
-      msg,
-      fut.get_state_clone(),
-    ));
+    // Create a oneshot channel for receiving the response.
+    let (tx, rx) = oneshot::channel();
+    let internal_msg =
+      ButtplugClientRequest::Message(ButtplugClientMessageFuturePair::new(msg, tx));
 
     // Send message to internal loop and wait for return.
     let send_fut = self.send_message_to_event_loop(internal_msg);
     Box::pin(async move {
       send_fut.await?;
-      fut.await
+      rx.await
+        .map_err(|_| ButtplugConnectorError::ConnectorChannelClosed)?
     })
   }
 

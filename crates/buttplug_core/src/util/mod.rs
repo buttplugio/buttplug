@@ -9,7 +9,6 @@
 //! the library.
 
 pub mod async_manager;
-pub mod future;
 pub mod json;
 pub mod range_serialize;
 pub mod stream;

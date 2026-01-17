@@ -146,11 +146,11 @@ fn build_server(test_case: &DeviceTestCase) -> (ButtplugServer, Vec<TestDeviceCh
 pub async fn run_embedded_test_case(test_case: &DeviceTestCase) {
   let (server, device_channels) = build_server(test_case);
   // Connect client
-  let client = ButtplugClient::new("Test Client");
+  let (client, receiver) = ButtplugClient::new("Test Client");
   let mut in_process_connector_builder = ButtplugInProcessClientConnectorBuilder::default();
   in_process_connector_builder.server(server);
   client
-    .connect(in_process_connector_builder.finish())
+    .connect(in_process_connector_builder.finish(), receiver)
     .await
     .expect("Test client couldn't connect to embedded process");
   run_test_case(client, device_channels, test_case).await;
@@ -171,9 +171,9 @@ pub async fn run_json_test_case(test_case: &DeviceTestCase) {
   });
 
   // Connect client
-  let client = ButtplugClient::new("Test Client");
+  let (client, receiver) = ButtplugClient::new("Test Client");
   client
-    .connect(client_connector)
+    .connect(client_connector, receiver)
     .await
     .expect("Test client couldn't connect to embedded process");
   run_test_case(client, device_channels, test_case).await;
