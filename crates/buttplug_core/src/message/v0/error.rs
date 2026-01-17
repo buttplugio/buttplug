@@ -85,11 +85,8 @@ impl ErrorV0 {
   }
 
   pub fn original_error(&self) -> ButtplugError {
-    if self.original_error.is_some() {
-      self
-        .original_error
-        .clone()
-        .expect("Already checked that it's valid.")
+    if let Some(ref original_error) = self.original_error {
+      original_error.clone()
     } else {
       // Try deserializing what's in the error_message field
       if let Ok(deserialized_msg) = serde_json::from_str(&self.error_message) {
@@ -111,7 +108,9 @@ impl From<ButtplugError> for ErrorV0 {
       ButtplugError::ButtplugHandshakeError { .. } => ErrorCode::ErrorHandshake,
       ButtplugError::ButtplugUnknownError { .. } => ErrorCode::ErrorUnknown,
     };
-    let msg = serde_json::to_string(&error).expect("All buttplug errors are serializable");
+    // SAFETY: ButtplugError derives Serialize and contains only serializable fields.
+    // Serialization failure would indicate a bug in the type definition, not a runtime condition.
+    let msg = serde_json::to_string(&error).expect("ButtplugError derives Serialize");
     ErrorV0::new(code, &msg, Some(error))
   }
 }

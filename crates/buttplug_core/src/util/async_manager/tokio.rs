@@ -25,9 +25,11 @@ pub fn spawn<Fut>(future: Fut)
 where
   Fut: Future<Output = ()> + Send + 'static,
 {
+  // SAFETY: TokioAsyncManager::spawn_obj always returns Ok(()). The Result type is only
+  // present to satisfy the Spawn trait interface.
   TokioAsyncManager::default()
     .spawn(future)
-    .expect("Infallible, only returns result to match trait")
+    .expect("TokioAsyncManager::spawn_obj always returns Ok")
 }
 
 pub fn spawn_with_handle<Fut>(future: Fut) -> Result<RemoteHandle<Fut::Output>, SpawnError>

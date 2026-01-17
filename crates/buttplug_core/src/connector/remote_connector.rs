@@ -221,11 +221,7 @@ where
     &mut self,
     connector_incoming_sender: Sender<InboundMessageType>,
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
-    if self.transport.is_some() {
-      let transport = self
-        .transport
-        .take()
-        .expect("Already checked that this would be a valid take().");
+    if let Some(transport) = self.transport.take() {
       let (connector_outgoing_sender, connector_outgoing_receiver) = channel(256);
       self.event_loop_sender = Some(connector_outgoing_sender);
       async move {

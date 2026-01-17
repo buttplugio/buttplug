@@ -24,9 +24,12 @@ impl JSONValidator {
   ///
   /// - `schema`: JSON Schema that the validator should use.
   pub fn new(schema: &str) -> Self {
+    // SAFETY: Schemas are embedded at compile time via include_str!() and validated by build.rs.
+    // These expects can only fail if there's a build/packaging error, not at runtime.
     let schema_json: serde_json::Value =
-      serde_json::from_str(schema).expect("Built in schema better be valid");
-    let schema = Validator::new(&schema_json).expect("Built in schema better be valid");
+      serde_json::from_str(schema).expect("schema must be valid JSON (validated by build.rs)");
+    let schema =
+      Validator::new(&schema_json).expect("schema must be valid JSON Schema (validated by build.rs)");
     Self { schema }
   }
 

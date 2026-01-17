@@ -19,9 +19,12 @@ static MESSAGE_JSON_SCHEMA: &str = include_str!("../../../schema/buttplug-schema
 
 /// Creates a [jsonschema::JSONSchema] validator using the built in buttplug message schema.
 pub fn create_message_validator() -> Validator {
+  // SAFETY: MESSAGE_JSON_SCHEMA is embedded at compile time via include_str!() and validated by
+  // build.rs before compilation. These expects can only fail if there's a build/packaging error,
+  // not at runtime.
   let schema: serde_json::Value =
-    serde_json::from_str(MESSAGE_JSON_SCHEMA).expect("Built in schema better be valid");
-  Validator::new(&schema).expect("Built in schema better be valid")
+    serde_json::from_str(MESSAGE_JSON_SCHEMA).expect("schema must be valid JSON (validated by build.rs)");
+  Validator::new(&schema).expect("schema must be valid JSON Schema (validated by build.rs)")
 }
 
 /// Returns the message as a string in Buttplug JSON Protocol format.
@@ -29,7 +32,10 @@ pub fn msg_to_protocol_json<T>(msg: T) -> String
 where
   T: ButtplugMessage + Serialize + Deserialize<'static>,
 {
-  serde_json::to_string(&[&msg]).expect("Infallible serialization")
+  // SAFETY: T is bounded by Serialize and all ButtplugMessage types contain only serializable
+  // fields. Serialization failure would indicate a bug in the type definition, not a runtime
+  // condition.
+  serde_json::to_string(&[&msg]).expect("ButtplugMessage types are always serializable")
 }
 
 pub fn vec_to_protocol_json<T>(validator: &Validator, msg: &[T]) -> Result<String, ErrorV0>

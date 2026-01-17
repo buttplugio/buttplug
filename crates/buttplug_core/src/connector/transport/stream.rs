@@ -58,7 +58,11 @@ impl ButtplugConnectorTransport for ButtplugStreamTransport {
     let incoming_recv = self.receiver.clone();
     let sender = self.sender.clone();
     async move {
-      let mut incoming_recv = incoming_recv.lock().await.take().unwrap();
+      let mut incoming_recv = incoming_recv
+        .lock()
+        .await
+        .take()
+        .ok_or(ButtplugConnectorError::ConnectorAlreadyConnected)?;
       async_manager::spawn(async move {
         loop {
           select! {
