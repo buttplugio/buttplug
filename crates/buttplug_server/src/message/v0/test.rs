@@ -7,22 +7,13 @@
 
 use buttplug_core::{
   errors::ButtplugMessageError,
-  message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
+  message::{ButtplugMessage, ButtplugMessageValidator},
 };
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 #[derive(
-  Debug,
-  Default,
-  ButtplugMessage,
-  ButtplugMessageFinalizer,
-  Clone,
-  PartialEq,
-  Eq,
-  Getters,
-  Serialize,
-  Deserialize,
+  Debug, Default, ButtplugMessage, Clone, PartialEq, Eq, Getters, Serialize, Deserialize,
 )]
 pub struct TestV0 {
   /// Message Id, used for matching message pairs in remote connection instances.

@@ -20,7 +20,6 @@ use buttplug_core::{
   message::{
     ButtplugDeviceMessage,
     ButtplugMessage,
-    ButtplugMessageFinalizer,
     ButtplugMessageValidator,
     OutputCommand,
     OutputPositionWithDuration,
@@ -32,16 +31,7 @@ use getset::{CopyGetters, Getters};
 
 use super::checked_output_cmd::CheckedOutputCmdV4;
 
-#[derive(
-  Debug,
-  Default,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Clone,
-  Getters,
-  CopyGetters,
-)]
+#[derive(Debug, Default, ButtplugDeviceMessage, PartialEq, Clone, Getters, CopyGetters)]
 pub struct CheckedOutputVecCmdV4 {
   #[getset(get_copy = "pub")]
   id: u32,

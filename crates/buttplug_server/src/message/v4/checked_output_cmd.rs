@@ -11,7 +11,6 @@ use buttplug_core::{
   message::{
     ButtplugDeviceMessage,
     ButtplugMessage,
-    ButtplugMessageFinalizer,
     ButtplugMessageValidator,
     OutputCmdV4,
     OutputCommand,
@@ -23,9 +22,7 @@ use uuid::Uuid;
 
 use super::spec_enums::ButtplugDeviceMessageNameV4;
 
-#[derive(
-  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, Clone, Getters, CopyGetters, Eq,
-)]
+#[derive(Debug, ButtplugDeviceMessage, Clone, Getters, CopyGetters, Eq)]
 #[getset(get_copy = "pub")]
 pub struct CheckedOutputCmdV4 {
   id: u32,

@@ -7,12 +7,7 @@
 
 use buttplug_core::{
   errors::ButtplugMessageError,
-  message::{
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-    ButtplugMessageValidator,
-  },
+  message::{ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageValidator},
 };
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
@@ -33,15 +28,7 @@ impl VibrateSubcommandV1 {
 }
 
 #[derive(
-  Debug,
-  Default,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Clone,
-  Getters,
-  Serialize,
-  Deserialize,
+  Debug, Default, ButtplugDeviceMessage, PartialEq, Clone, Getters, Serialize, Deserialize,
 )]
 pub struct VibrateCmdV1 {
   #[serde(rename = "Id")]

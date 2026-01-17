@@ -8,7 +8,7 @@
 use crate::message::v0::{DeviceAddedV0, DeviceMessageInfoV0};
 use buttplug_core::{
   errors::ButtplugMessageError,
-  message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
+  message::{ButtplugMessage, ButtplugMessageValidator},
 };
 
 use super::{ClientDeviceMessageAttributesV1, device_message_info::DeviceMessageInfoV1};
@@ -53,7 +53,4 @@ impl ButtplugMessageValidator for DeviceAddedV1 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_system_id(self.id)
   }
-}
-
-impl ButtplugMessageFinalizer for DeviceAddedV1 {
 }

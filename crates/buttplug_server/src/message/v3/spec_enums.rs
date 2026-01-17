@@ -47,7 +47,6 @@ use super::{
   PartialEq,
   ButtplugMessage,
   ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
   Serialize,
   Deserialize,
@@ -71,6 +70,9 @@ pub enum ButtplugClientMessageV3 {
   SensorReadCmd(SensorReadCmdV3),
   SensorSubscribeCmd(SensorSubscribeCmdV3),
   SensorUnsubscribeCmd(SensorUnsubscribeCmdV3),
+}
+
+impl ButtplugMessageFinalizer for ButtplugClientMessageV3 {
 }
 
 // For v2 to v3, all deprecations should be treated as conversions, but will require current

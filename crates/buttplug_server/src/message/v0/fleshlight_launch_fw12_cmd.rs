@@ -9,26 +9,13 @@
 
 use buttplug_core::{
   errors::ButtplugMessageError,
-  message::{
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-    ButtplugMessageValidator,
-  },
+  message::{ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageValidator},
 };
 use getset::CopyGetters;
 use serde::{Deserialize, Serialize};
 
 #[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Eq,
-  Clone,
-  CopyGetters,
-  Serialize,
-  Deserialize,
+  Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, CopyGetters, Serialize, Deserialize,
 )]
 pub struct FleshlightLaunchFW12CmdV0 {
   #[serde(rename = "Id")]

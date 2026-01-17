@@ -47,6 +47,4 @@ impl ButtplugMessageValidator for DeviceListV4 {
 }
 
 impl ButtplugMessageFinalizer for DeviceListV4 {
-  fn finalize(&mut self) {
-  }
 }

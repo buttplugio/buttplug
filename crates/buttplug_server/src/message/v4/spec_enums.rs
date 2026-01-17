@@ -19,7 +19,6 @@ use buttplug_core::{
     ButtplugClientMessageV4,
     ButtplugDeviceMessage,
     ButtplugMessage,
-    ButtplugMessageFinalizer,
     ButtplugMessageValidator,
     PingV0,
     RequestDeviceListV0,
@@ -46,13 +45,7 @@ use super::{
 /// struct can be used as an enum parameter. Any messages requiring error checking or validation
 /// will have an alternate Checked[x] form that they will need to be cast as.
 #[derive(
-  Debug,
-  Clone,
-  PartialEq,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
-  FromSpecificButtplugMessage,
+  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, FromSpecificButtplugMessage,
 )]
 pub enum ButtplugCheckedClientMessageV4 {
   // Handshake messages
@@ -325,7 +318,6 @@ impl TryFromClientMessage<ButtplugClientMessageV3> for ButtplugCheckedClientMess
   Eq,
   ButtplugMessage,
   ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
 )]
 pub(crate) enum ButtplugDeviceManagerMessageUnion {
@@ -364,7 +356,6 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceManagerMessageUni
   PartialEq,
   ButtplugDeviceMessage,
   ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
 )]
 pub enum ButtplugDeviceCommandMessageUnionV4 {

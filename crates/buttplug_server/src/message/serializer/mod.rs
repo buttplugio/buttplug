@@ -37,13 +37,16 @@ use super::{
   ButtplugServerMessageVariant,
 };
 
-#[derive(Deserialize, ButtplugMessageFinalizer, Clone, Debug)]
+#[derive(Deserialize, Clone, Debug)]
 struct RequestServerInfoMessage {
   #[serde(rename = "RequestServerInfo")]
   rsi: RequestServerInfoVersion,
 }
 
-#[derive(Deserialize, ButtplugMessageFinalizer, Clone, Debug)]
+impl ButtplugMessageFinalizer for RequestServerInfoMessage {
+}
+
+#[derive(Deserialize, Clone, Debug)]
 struct RequestServerInfoVersion {
   #[serde(rename = "Id")]
   _id: u32,
@@ -53,6 +56,9 @@ struct RequestServerInfoVersion {
   message_version: Option<u32>,
   #[serde(default, rename = "ProtocolVersionMajor")]
   api_major_version: Option<u32>,
+}
+
+impl ButtplugMessageFinalizer for RequestServerInfoVersion {
 }
 
 pub struct ButtplugServerJSONSerializer {

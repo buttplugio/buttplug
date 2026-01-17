@@ -83,9 +83,7 @@ pub trait ButtplugMessageFinalizer {
 /// Base trait for all Buttplug Protocol Message Structs. Handles management of
 /// message ids, as well as implementing conveinence functions for converting
 /// between message structs and various message enums, serialization, etc...
-pub trait ButtplugMessage:
-  ButtplugMessageValidator + ButtplugMessageFinalizer + Send + Sync + Clone
-{
+pub trait ButtplugMessage: ButtplugMessageValidator + Send + Sync + Clone {
   /// Returns the id number of the message
   fn id(&self) -> u32;
   /// Sets the id number of the message.

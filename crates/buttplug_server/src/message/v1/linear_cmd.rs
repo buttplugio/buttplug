@@ -7,12 +7,7 @@
 
 use buttplug_core::{
   errors::ButtplugMessageError,
-  message::{
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-    ButtplugMessageValidator,
-  },
+  message::{ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageValidator},
 };
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
@@ -39,16 +34,7 @@ impl VectorSubcommandV1 {
   }
 }
 
-#[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Clone,
-  Getters,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone, Getters, Serialize, Deserialize)]
 pub struct LinearCmdV1 {
   #[serde(rename = "Id")]
   id: u32,

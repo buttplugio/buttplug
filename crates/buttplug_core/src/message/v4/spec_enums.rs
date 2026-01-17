@@ -35,7 +35,6 @@ use super::{DeviceListV4, InputReadingV4};
   PartialEq,
   ButtplugMessage,
   ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
   Serialize,
   Deserialize,
@@ -53,6 +52,9 @@ pub enum ButtplugClientMessageV4 {
   StopAllDevices(StopAllDevicesV4),
   OutputCmd(OutputCmdV4),
   InputCmd(InputCmdV4),
+}
+
+impl ButtplugMessageFinalizer for ButtplugClientMessageV4 {
 }
 
 /// Represents all server-to-client messages in v3 of the Buttplug Spec

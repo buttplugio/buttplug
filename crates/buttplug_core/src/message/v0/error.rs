@@ -9,7 +9,7 @@
 
 use crate::{
   errors::*,
-  message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
+  message::{ButtplugMessage, ButtplugMessageValidator},
 };
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
@@ -37,7 +37,6 @@ pub enum ErrorCode {
   Clone,
   ButtplugMessage,
   ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
   Getters,
   CopyGetters,
   Serialize,

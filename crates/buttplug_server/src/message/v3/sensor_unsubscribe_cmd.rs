@@ -7,28 +7,12 @@
 
 use buttplug_core::{
   errors::ButtplugMessageError,
-  message::{
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-    ButtplugMessageValidator,
-    InputType,
-  },
+  message::{ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageValidator, InputType},
 };
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 
-#[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Eq,
-  Clone,
-  Getters,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Getters, Serialize, Deserialize)]
 pub struct SensorUnsubscribeCmdV3 {
   #[serde(rename = "Id")]
   id: u32,

@@ -9,7 +9,6 @@ use crate::message::{
   ButtplugDeviceMessage,
   ButtplugMessage,
   ButtplugMessageError,
-  ButtplugMessageFinalizer,
   ButtplugMessageValidator,
 };
 use getset::CopyGetters;
@@ -20,15 +19,7 @@ fn mk_true() -> bool {
 }
 
 #[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Eq,
-  Clone,
-  Serialize,
-  Deserialize,
-  CopyGetters,
+  Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Serialize, Deserialize, CopyGetters,
 )]
 #[serde(rename_all = "PascalCase")]
 pub struct StopDeviceCmdV4 {

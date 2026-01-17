@@ -5,16 +5,9 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::message::{
-  ButtplugMessage,
-  ButtplugMessageError,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
-};
+use crate::message::{ButtplugMessage, ButtplugMessageError, ButtplugMessageValidator};
 use serde::{Deserialize, Serialize};
-#[derive(
-  Debug, ButtplugMessage, ButtplugMessageFinalizer, Clone, PartialEq, Eq, Serialize, Deserialize,
-)]
+#[derive(Debug, ButtplugMessage, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PingV0 {
   /// Message Id, used for matching message pairs in remote connection instances.
   #[serde(rename = "Id")]

@@ -7,12 +7,7 @@
 
 use buttplug_core::{
   errors::ButtplugMessageError,
-  message::{
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-    ButtplugMessageSpecVersion,
-    ButtplugMessageValidator,
-  },
+  message::{ButtplugMessage, ButtplugMessageSpecVersion, ButtplugMessageValidator},
 };
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
@@ -25,16 +20,7 @@ fn return_version0() -> ButtplugMessageSpecVersion {
 // representations of versions require using the version enum as a type bound. Therefore we do not
 // need explicit content checking for the message.
 #[derive(
-  Debug,
-  ButtplugMessage,
-  ButtplugMessageFinalizer,
-  Clone,
-  PartialEq,
-  Eq,
-  Getters,
-  CopyGetters,
-  Serialize,
-  Deserialize,
+  Debug, ButtplugMessage, Clone, PartialEq, Eq, Getters, CopyGetters, Serialize, Deserialize,
 )]
 pub struct RequestServerInfoV1 {
   #[serde(rename = "Id")]

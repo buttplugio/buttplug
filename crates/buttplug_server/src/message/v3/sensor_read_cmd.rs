@@ -15,7 +15,6 @@ use buttplug_core::{
   message::{
     ButtplugDeviceMessage,
     ButtplugMessage,
-    ButtplugMessageFinalizer,
     ButtplugMessageValidator,
     InputCommandType,
     InputType,
@@ -25,16 +24,7 @@ use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 
 #[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Eq,
-  Clone,
-  Getters,
-  CopyGetters,
-  Serialize,
-  Deserialize,
+  Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Getters, CopyGetters, Serialize, Deserialize,
 )]
 pub struct SensorReadCmdV3 {
   #[serde(rename = "Id")]

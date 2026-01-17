@@ -5,13 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::message::{
-  ButtplugDeviceMessage,
-  ButtplugMessage,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
-  InputType,
-};
+use crate::message::{ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageValidator, InputType};
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 
@@ -65,7 +59,6 @@ impl Into<InputType> for InputTypeReading {
   Debug,
   ButtplugDeviceMessage,
   ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
   Clone,
   Getters,
   CopyGetters,

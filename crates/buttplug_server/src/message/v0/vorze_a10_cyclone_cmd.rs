@@ -7,27 +7,13 @@
 
 use buttplug_core::{
   errors::ButtplugMessageError,
-  message::{
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-    ButtplugMessageValidator,
-  },
+  message::{ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageValidator},
 };
 use getset::CopyGetters;
 use serde::{Deserialize, Serialize};
 
 #[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  Default,
-  PartialEq,
-  Eq,
-  Clone,
-  CopyGetters,
-  Serialize,
-  Deserialize,
+  Debug, ButtplugDeviceMessage, Default, PartialEq, Eq, Clone, CopyGetters, Serialize, Deserialize,
 )]
 pub struct VorzeA10CycloneCmdV0 {
   #[serde(rename = "Id")]

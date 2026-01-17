@@ -8,7 +8,6 @@
 use buttplug_core::message::{
   ButtplugDeviceMessage,
   ButtplugMessage,
-  ButtplugMessageFinalizer,
   ButtplugMessageValidator,
   InputType,
 };
@@ -21,7 +20,6 @@ use serde::{Deserialize, Serialize};
   Debug,
   ButtplugDeviceMessage,
   ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
   Clone,
   Getters,
   CopyGetters,

@@ -5,18 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::message::{
-  ButtplugMessage,
-  ButtplugMessageError,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
-};
+use crate::message::{ButtplugMessage, ButtplugMessageError, ButtplugMessageValidator};
 use serde::{Deserialize, Serialize};
 
 /// Ok message, signifying successful response to a command. [Spec link](https://buttplug-spec.docs.buttplug.io/status.html#ok).
-#[derive(
-  Debug, PartialEq, Eq, ButtplugMessage, ButtplugMessageFinalizer, Clone, Serialize, Deserialize,
-)]
+#[derive(Debug, PartialEq, Eq, ButtplugMessage, Clone, Serialize, Deserialize)]
 pub struct OkV0 {
   /// Message Id, used for matching message pairs in remote connection instances.
   #[serde(rename = "Id")]

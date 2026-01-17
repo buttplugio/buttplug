@@ -9,21 +9,11 @@ use crate::message::{
   ButtplugDeviceMessage,
   ButtplugMessage,
   ButtplugMessageError,
-  ButtplugMessageFinalizer,
   ButtplugMessageValidator,
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Eq,
-  Clone,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct StopDeviceCmdV0 {
   #[serde(rename = "Id")]
   id: u32,

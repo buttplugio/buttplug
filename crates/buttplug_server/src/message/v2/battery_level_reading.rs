@@ -7,27 +7,13 @@
 
 use buttplug_core::{
   errors::ButtplugMessageError,
-  message::{
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-    ButtplugMessageValidator,
-  },
+  message::{ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageValidator},
 };
 use getset::CopyGetters;
 use serde::{Deserialize, Serialize};
 
 /// Battery level response
-#[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Clone,
-  CopyGetters,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone, CopyGetters, Serialize, Deserialize)]
 pub struct BatteryLevelReadingV2 {
   #[serde(rename = "Id")]
   id: u32,

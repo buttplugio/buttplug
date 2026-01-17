@@ -16,7 +16,6 @@ use serde::{Deserialize, Serialize};
   PartialEq,
   ButtplugMessage,
   ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
   Serialize,
   Deserialize,
@@ -42,16 +41,12 @@ pub enum ButtplugClientMessageV0 {
   VorzeA10CycloneCmd(VorzeA10CycloneCmdV0),
 }
 
+impl ButtplugMessageFinalizer for ButtplugClientMessageV0 {
+}
+
 /// Represents all server-to-client messages in v0 of the Buttplug Spec
 #[derive(
-  Debug,
-  Clone,
-  PartialEq,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
-  Serialize,
-  Deserialize,
+  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, Serialize, Deserialize,
 )]
 pub enum ButtplugServerMessageV0 {
   // Status messages
@@ -64,6 +59,9 @@ pub enum ButtplugServerMessageV0 {
   DeviceAdded(DeviceAddedV0),
   DeviceRemoved(DeviceRemovedV0),
   ScanningFinished(ScanningFinishedV0),
+}
+
+impl ButtplugMessageFinalizer for ButtplugServerMessageV0 {
 }
 
 #[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]

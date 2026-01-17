@@ -53,7 +53,6 @@ use super::{
   PartialEq,
   ButtplugMessage,
   ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
   Serialize,
   Deserialize,
@@ -77,6 +76,9 @@ pub enum ButtplugClientMessageV1 {
   // Deprecated device specific commands (not removed until v2)
   FleshlightLaunchFW12Cmd(FleshlightLaunchFW12CmdV0),
   VorzeA10CycloneCmd(VorzeA10CycloneCmdV0),
+}
+
+impl ButtplugMessageFinalizer for ButtplugClientMessageV1 {
 }
 
 // No messages were changed or deprecated before v2, so we can convert all v0 messages to v1.
@@ -114,7 +116,6 @@ impl From<ButtplugClientMessageV0> for ButtplugClientMessageV1 {
   PartialEq,
   ButtplugMessage,
   ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
   Serialize,
   Deserialize,

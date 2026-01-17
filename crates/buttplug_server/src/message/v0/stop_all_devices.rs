@@ -5,17 +5,10 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::message::{
-  ButtplugMessage,
-  ButtplugMessageError,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
-};
+use crate::message::{ButtplugMessage, ButtplugMessageError, ButtplugMessageValidator};
 use serde::{Deserialize, Serialize};
 
-#[derive(
-  Debug, ButtplugMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Serialize, Deserialize,
-)]
+#[derive(Debug, ButtplugMessage, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct StopAllDevicesV0 {
   #[serde(rename = "Id")]
   id: u32,

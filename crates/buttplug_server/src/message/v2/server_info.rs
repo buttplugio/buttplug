@@ -7,28 +7,13 @@
 
 use buttplug_core::{
   errors::ButtplugMessageError,
-  message::{
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-    ButtplugMessageSpecVersion,
-    ButtplugMessageValidator,
-    ServerInfoV4,
-  },
+  message::{ButtplugMessage, ButtplugMessageSpecVersion, ButtplugMessageValidator, ServerInfoV4},
 };
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 
 #[derive(
-  Debug,
-  ButtplugMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Eq,
-  Clone,
-  Getters,
-  CopyGetters,
-  Serialize,
-  Deserialize,
+  Debug, ButtplugMessage, PartialEq, Eq, Clone, Getters, CopyGetters, Serialize, Deserialize,
 )]
 pub struct ServerInfoV2 {
   #[serde(rename = "Id")]

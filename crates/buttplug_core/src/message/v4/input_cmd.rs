@@ -9,7 +9,6 @@ use crate::message::{
   ButtplugDeviceMessage,
   ButtplugMessage,
   ButtplugMessageError,
-  ButtplugMessageFinalizer,
   ButtplugMessageValidator,
   InputType,
 };
@@ -27,16 +26,7 @@ pub enum InputCommandType {
 }
 
 #[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Eq,
-  Clone,
-  Copy,
-  CopyGetters,
-  Serialize,
-  Deserialize,
+  Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Copy, CopyGetters, Serialize, Deserialize,
 )]
 pub struct InputCmdV4 {
   #[serde(rename = "Id")]

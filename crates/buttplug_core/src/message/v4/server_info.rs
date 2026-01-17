@@ -8,7 +8,6 @@
 use crate::message::{
   ButtplugMessage,
   ButtplugMessageError,
-  ButtplugMessageFinalizer,
   ButtplugMessageSpecVersion,
   ButtplugMessageValidator,
 };
@@ -16,16 +15,7 @@ use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 
 #[derive(
-  Debug,
-  ButtplugMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Eq,
-  Clone,
-  Getters,
-  CopyGetters,
-  Serialize,
-  Deserialize,
+  Debug, ButtplugMessage, PartialEq, Eq, Clone, Getters, CopyGetters, Serialize, Deserialize,
 )]
 pub struct ServerInfoV4 {
   #[serde(rename = "Id")]

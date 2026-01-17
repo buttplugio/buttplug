@@ -27,15 +27,16 @@ pub use v2::*;
 pub use v3::*;
 pub use v4::*;
 
-#[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator,
-)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator)]
 pub enum ButtplugClientMessageVariant {
   V0(ButtplugClientMessageV0),
   V1(ButtplugClientMessageV1),
   V2(ButtplugClientMessageV2),
   V3(ButtplugClientMessageV3),
   V4(ButtplugClientMessageV4),
+}
+
+impl ButtplugMessageFinalizer for ButtplugClientMessageVariant {
 }
 
 impl ButtplugClientMessageVariant {
@@ -122,13 +123,16 @@ impl From<ButtplugClientMessageV4> for ButtplugClientMessageVariant {
   }
 }
 
-#[derive(Debug, Clone, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator)]
+#[derive(Debug, Clone, ButtplugMessage, ButtplugMessageValidator)]
 pub enum ButtplugServerMessageVariant {
   V0(ButtplugServerMessageV0),
   V1(ButtplugServerMessageV1),
   V2(ButtplugServerMessageV2),
   V3(ButtplugServerMessageV3),
   V4(ButtplugServerMessageV4),
+}
+
+impl ButtplugMessageFinalizer for ButtplugServerMessageVariant {
 }
 
 impl ButtplugServerMessageVariant {
@@ -184,12 +188,14 @@ impl From<ButtplugServerMessageV4> for ButtplugServerMessageVariant {
   Eq,
   ButtplugMessage,
   ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
 )]
 pub enum ButtplugServerDeviceMessage {
   // Generic Sensor Reading Messages
   SensorReading(InputReadingV4),
+}
+
+impl ButtplugMessageFinalizer for ButtplugServerDeviceMessage {
 }
 
 impl From<ButtplugServerDeviceMessage> for ButtplugServerMessageV4 {

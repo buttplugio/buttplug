@@ -11,7 +11,6 @@ use buttplug_core::{
   message::{
     ButtplugDeviceMessage,
     ButtplugMessage,
-    ButtplugMessageFinalizer,
     ButtplugMessageValidator,
     InputCmdV4,
     InputCommandType,
@@ -21,9 +20,7 @@ use buttplug_core::{
 use getset::CopyGetters;
 use uuid::Uuid;
 
-#[derive(
-  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, CopyGetters,
-)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, CopyGetters)]
 #[getset(get_copy = "pub")]
 pub struct CheckedInputCmdV4 {
   id: u32,

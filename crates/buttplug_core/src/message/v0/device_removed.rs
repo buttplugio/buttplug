@@ -7,12 +7,7 @@
 
 //! Notification that a device has disconnected from the server.
 
-use crate::message::{
-  ButtplugMessage,
-  ButtplugMessageError,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
-};
+use crate::message::{ButtplugMessage, ButtplugMessageError, ButtplugMessageValidator};
 use getset::CopyGetters;
 use serde::{Deserialize, Serialize};
 
@@ -40,7 +35,4 @@ impl ButtplugMessageValidator for DeviceRemovedV0 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_system_id(self.id)
   }
-}
-
-impl ButtplugMessageFinalizer for DeviceRemovedV0 {
 }

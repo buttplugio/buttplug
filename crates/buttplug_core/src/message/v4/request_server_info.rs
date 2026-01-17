@@ -8,7 +8,6 @@
 use crate::message::{
   ButtplugMessage,
   ButtplugMessageError,
-  ButtplugMessageFinalizer,
   ButtplugMessageSpecVersion,
   ButtplugMessageValidator,
 };
@@ -19,16 +18,7 @@ use serde::{Deserialize, Serialize};
 // representations of versions require using the version enum as a type bound. Therefore we do not
 // need explicit content checking for the message.
 #[derive(
-  Debug,
-  ButtplugMessage,
-  ButtplugMessageFinalizer,
-  Clone,
-  PartialEq,
-  Eq,
-  Getters,
-  CopyGetters,
-  Serialize,
-  Deserialize,
+  Debug, ButtplugMessage, Clone, PartialEq, Eq, Getters, CopyGetters, Serialize, Deserialize,
 )]
 pub struct RequestServerInfoV4 {
   #[serde(rename = "Id")]

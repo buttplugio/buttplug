@@ -7,12 +7,7 @@
 
 use buttplug_core::{
   errors::ButtplugMessageError,
-  message::{
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-    ButtplugMessageValidator,
-  },
+  message::{ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageValidator},
 };
 pub use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
@@ -38,16 +33,7 @@ impl RotationSubcommandV1 {
   }
 }
 
-#[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Clone,
-  Getters,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone, Getters, Serialize, Deserialize)]
 pub struct RotateCmdV1 {
   #[serde(rename = "Id")]
   id: u32,

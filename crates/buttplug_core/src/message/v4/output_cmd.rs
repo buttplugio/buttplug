@@ -11,7 +11,6 @@ use crate::{
     ButtplugDeviceMessage,
     ButtplugMessage,
     ButtplugMessageError,
-    ButtplugMessageFinalizer,
     ButtplugMessageValidator,
     OutputType,
   },
@@ -123,16 +122,7 @@ impl OutputCommand {
   }
 }
 
-#[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Clone,
-  CopyGetters,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone, CopyGetters, Serialize, Deserialize)]
 #[getset(get_copy = "pub")]
 pub struct OutputCmdV4 {
   #[serde(rename = "Id")]

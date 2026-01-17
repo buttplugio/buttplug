@@ -5,12 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::message::{
-  ButtplugMessage,
-  ButtplugMessageError,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
-};
+use crate::message::{ButtplugMessage, ButtplugMessageError, ButtplugMessageValidator};
 use getset::CopyGetters;
 use serde::{Deserialize, Serialize};
 
@@ -18,17 +13,7 @@ fn mk_true() -> bool {
   true
 }
 
-#[derive(
-  Debug,
-  ButtplugMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Eq,
-  Clone,
-  Serialize,
-  Deserialize,
-  CopyGetters,
-)]
+#[derive(Debug, ButtplugMessage, PartialEq, Eq, Clone, Serialize, Deserialize, CopyGetters)]
 #[serde(rename_all = "PascalCase")]
 pub struct StopAllDevicesV4 {
   id: u32,

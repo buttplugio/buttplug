@@ -12,7 +12,7 @@ use crate::message::{
 };
 use buttplug_core::{
   errors::ButtplugMessageError,
-  message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
+  message::{ButtplugMessage, ButtplugMessageValidator},
 };
 use getset::Getters;
 use serde::{Deserialize, Serialize};
@@ -60,7 +60,4 @@ impl ButtplugMessageValidator for DeviceListV1 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
   }
-}
-
-impl ButtplugMessageFinalizer for DeviceListV1 {
 }

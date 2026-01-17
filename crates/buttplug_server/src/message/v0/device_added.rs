@@ -7,7 +7,7 @@
 
 use buttplug_core::{
   errors::ButtplugMessageError,
-  message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
+  message::{ButtplugMessage, ButtplugMessageValidator},
 };
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
@@ -44,9 +44,6 @@ impl ButtplugMessageValidator for DeviceAddedV0 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_system_id(self.id)
   }
-}
-
-impl ButtplugMessageFinalizer for DeviceAddedV0 {
 }
 
 // TODO Test repeated message type in attributes in JSON

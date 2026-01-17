@@ -15,7 +15,6 @@ use buttplug_core::{
   message::{
     ButtplugDeviceMessage,
     ButtplugMessage,
-    ButtplugMessageFinalizer,
     ButtplugMessageValidator,
     InputCommandType,
     InputType,
@@ -24,16 +23,7 @@ use buttplug_core::{
 use serde::{Deserialize, Serialize};
 
 /// Battery level request
-#[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Eq,
-  Clone,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct BatteryLevelCmdV2 {
   #[serde(rename = "Id")]
   id: u32,

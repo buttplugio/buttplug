@@ -44,7 +44,6 @@ use super::{BatteryLevelCmdV2, BatteryLevelReadingV2, DeviceAddedV2, DeviceListV
   PartialEq,
   ButtplugMessage,
   ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
   Serialize,
   Deserialize,
@@ -65,6 +64,9 @@ pub enum ButtplugClientMessageV2 {
   StopDeviceCmd(StopDeviceCmdV0),
   // Sensor commands
   BatteryLevelCmd(BatteryLevelCmdV2),
+}
+
+impl ButtplugMessageFinalizer for ButtplugClientMessageV2 {
 }
 
 // For v1 to v2, several messages were deprecated. Throw errors when trying to convert those.
@@ -114,7 +116,6 @@ impl TryFrom<ButtplugClientMessageV1> for ButtplugClientMessageV2 {
   PartialEq,
   ButtplugMessage,
   ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
   FromSpecificButtplugMessage,
   Serialize,
   Deserialize,
@@ -132,6 +133,9 @@ pub enum ButtplugServerMessageV2 {
   ScanningFinished(ScanningFinishedV0),
   // Sensor commands
   BatteryLevelReading(BatteryLevelReadingV2),
+}
+
+impl ButtplugMessageFinalizer for ButtplugServerMessageV2 {
 }
 
 impl From<ButtplugServerMessageV2> for ButtplugServerMessageV1 {
