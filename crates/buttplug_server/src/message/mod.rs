@@ -27,13 +27,34 @@ pub use v2::*;
 pub use v3::*;
 pub use v4::*;
 
-#[derive(Debug, Clone, PartialEq, ButtplugMessage)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ButtplugClientMessageVariant {
   V0(ButtplugClientMessageV0),
   V1(ButtplugClientMessageV1),
   V2(ButtplugClientMessageV2),
   V3(ButtplugClientMessageV3),
   V4(ButtplugClientMessageV4),
+}
+
+impl ButtplugMessage for ButtplugClientMessageVariant {
+  fn id(&self) -> u32 {
+    match self {
+      ButtplugClientMessageVariant::V0(msg) => msg.id(),
+      ButtplugClientMessageVariant::V1(msg) => msg.id(),
+      ButtplugClientMessageVariant::V2(msg) => msg.id(),
+      ButtplugClientMessageVariant::V3(msg) => msg.id(),
+      ButtplugClientMessageVariant::V4(msg) => msg.id(),
+    }
+  }
+  fn set_id(&mut self, id: u32) {
+    match self {
+      ButtplugClientMessageVariant::V0(msg) => msg.set_id(id),
+      ButtplugClientMessageVariant::V1(msg) => msg.set_id(id),
+      ButtplugClientMessageVariant::V2(msg) => msg.set_id(id),
+      ButtplugClientMessageVariant::V3(msg) => msg.set_id(id),
+      ButtplugClientMessageVariant::V4(msg) => msg.set_id(id),
+    }
+  }
 }
 
 impl ButtplugMessageFinalizer for ButtplugClientMessageVariant {
@@ -135,13 +156,34 @@ impl From<ButtplugClientMessageV4> for ButtplugClientMessageVariant {
   }
 }
 
-#[derive(Debug, Clone, ButtplugMessage)]
+#[derive(Debug, Clone)]
 pub enum ButtplugServerMessageVariant {
   V0(ButtplugServerMessageV0),
   V1(ButtplugServerMessageV1),
   V2(ButtplugServerMessageV2),
   V3(ButtplugServerMessageV3),
   V4(ButtplugServerMessageV4),
+}
+
+impl ButtplugMessage for ButtplugServerMessageVariant {
+  fn id(&self) -> u32 {
+    match self {
+      ButtplugServerMessageVariant::V0(msg) => msg.id(),
+      ButtplugServerMessageVariant::V1(msg) => msg.id(),
+      ButtplugServerMessageVariant::V2(msg) => msg.id(),
+      ButtplugServerMessageVariant::V3(msg) => msg.id(),
+      ButtplugServerMessageVariant::V4(msg) => msg.id(),
+    }
+  }
+  fn set_id(&mut self, id: u32) {
+    match self {
+      ButtplugServerMessageVariant::V0(msg) => msg.set_id(id),
+      ButtplugServerMessageVariant::V1(msg) => msg.set_id(id),
+      ButtplugServerMessageVariant::V2(msg) => msg.set_id(id),
+      ButtplugServerMessageVariant::V3(msg) => msg.set_id(id),
+      ButtplugServerMessageVariant::V4(msg) => msg.set_id(id),
+    }
+  }
 }
 
 impl ButtplugMessageFinalizer for ButtplugServerMessageVariant {
@@ -205,10 +247,23 @@ impl From<ButtplugServerMessageV4> for ButtplugServerMessageVariant {
 /// [ButtplugClient][crate::client::ButtplugClient] that denote an EVENT from a device. These are
 /// only used in notifications, so read requests will not need to be added here, only messages that
 /// will require Id of 0.
-#[derive(Debug, Clone, PartialEq, Eq, ButtplugMessage, derive_more::From)]
+#[derive(Debug, Clone, PartialEq, Eq, derive_more::From)]
 pub enum ButtplugServerDeviceMessage {
   // Generic Sensor Reading Messages
   SensorReading(InputReadingV4),
+}
+
+impl ButtplugMessage for ButtplugServerDeviceMessage {
+  fn id(&self) -> u32 {
+    match self {
+      ButtplugServerDeviceMessage::SensorReading(msg) => msg.id(),
+    }
+  }
+  fn set_id(&mut self, id: u32) {
+    match self {
+      ButtplugServerDeviceMessage::SensorReading(msg) => msg.set_id(id),
+    }
+  }
 }
 
 impl ButtplugMessageFinalizer for ButtplugServerDeviceMessage {

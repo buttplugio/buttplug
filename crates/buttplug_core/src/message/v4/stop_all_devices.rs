@@ -13,7 +13,7 @@ fn mk_true() -> bool {
   true
 }
 
-#[derive(Debug, ButtplugMessage, PartialEq, Eq, Clone, Serialize, Deserialize, CopyGetters)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, CopyGetters)]
 #[serde(rename_all = "PascalCase")]
 pub struct StopAllDevicesV4 {
   id: u32,
@@ -32,6 +32,15 @@ impl Default for StopAllDevicesV4 {
       inputs: true,
       outputs: true,
     }
+  }
+}
+
+impl ButtplugMessage for StopAllDevicesV4 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
   }
 }
 

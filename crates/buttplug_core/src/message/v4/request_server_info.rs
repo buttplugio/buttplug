@@ -17,9 +17,7 @@ use serde::{Deserialize, Serialize};
 // For RequestServerInfo, serde will take care of invalid message versions from json, and internal
 // representations of versions require using the version enum as a type bound. Therefore we do not
 // need explicit content checking for the message.
-#[derive(
-  Debug, ButtplugMessage, Clone, PartialEq, Eq, Getters, CopyGetters, Serialize, Deserialize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct RequestServerInfoV4 {
   #[serde(rename = "Id")]
   id: u32,
@@ -46,6 +44,15 @@ impl RequestServerInfoV4 {
       protocol_version_major,
       protocol_version_minor,
     }
+  }
+}
+
+impl ButtplugMessage for RequestServerInfoV4 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
   }
 }
 

@@ -7,7 +7,7 @@
 
 use crate::message::{ButtplugMessage, ButtplugMessageError, ButtplugMessageValidator};
 use serde::{Deserialize, Serialize};
-#[derive(Debug, ButtplugMessage, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PingV0 {
   /// Message Id, used for matching message pairs in remote connection instances.
   #[serde(rename = "Id")]
@@ -18,6 +18,15 @@ impl Default for PingV0 {
   /// Creates a new Ping message with the given Id.
   fn default() -> Self {
     Self { id: 1 }
+  }
+}
+
+impl ButtplugMessage for PingV0 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
   }
 }
 

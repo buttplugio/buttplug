@@ -33,7 +33,7 @@ impl RotationSubcommandV1 {
   }
 }
 
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone, Getters, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Getters, Serialize, Deserialize)]
 pub struct RotateCmdV1 {
   #[serde(rename = "Id")]
   id: u32,
@@ -52,6 +52,24 @@ impl RotateCmdV1 {
       device_index,
       rotations,
     }
+  }
+}
+
+impl ButtplugMessage for RotateCmdV1 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugDeviceMessage for RotateCmdV1 {
+  fn device_index(&self) -> u32 {
+    self.device_index
+  }
+  fn set_device_index(&mut self, device_index: u32) {
+    self.device_index = device_index;
   }
 }
 

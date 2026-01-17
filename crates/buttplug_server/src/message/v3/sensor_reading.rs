@@ -16,9 +16,7 @@ use serde::{Deserialize, Serialize};
 
 // This message can have an Id of 0, as it can be emitted as part of a
 // subscription and won't have a matching task Id in that case.
-#[derive(
-  Debug, ButtplugDeviceMessage, Clone, Getters, CopyGetters, PartialEq, Eq, Serialize, Deserialize,
-)]
+#[derive(Debug, Clone, Getters, CopyGetters, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SensorReadingV3 {
   #[serde(rename = "Id")]
   id: u32,
@@ -47,5 +45,23 @@ impl SensorReadingV3 {
       sensor_type,
       data,
     }
+  }
+}
+
+impl ButtplugMessage for SensorReadingV3 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugDeviceMessage for SensorReadingV3 {
+  fn device_index(&self) -> u32 {
+    self.device_index
+  }
+  fn set_device_index(&mut self, device_index: u32) {
+    self.device_index = device_index;
   }
 }

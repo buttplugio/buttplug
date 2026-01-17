@@ -13,7 +13,7 @@ use crate::message::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct StopDeviceCmdV0 {
   #[serde(rename = "Id")]
   id: u32,
@@ -27,6 +27,24 @@ impl StopDeviceCmdV0 {
       id: 1,
       device_index,
     }
+  }
+}
+
+impl ButtplugMessage for StopDeviceCmdV0 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugDeviceMessage for StopDeviceCmdV0 {
+  fn device_index(&self) -> u32 {
+    self.device_index
+  }
+  fn set_device_index(&mut self, device_index: u32) {
+    self.device_index = device_index;
   }
 }
 

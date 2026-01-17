@@ -8,7 +8,7 @@
 use crate::message::{ButtplugMessage, ButtplugMessageError, ButtplugMessageValidator};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, ButtplugMessage, PartialEq, Eq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct StopAllDevicesV0 {
   #[serde(rename = "Id")]
   id: u32,
@@ -17,6 +17,15 @@ pub struct StopAllDevicesV0 {
 impl Default for StopAllDevicesV0 {
   fn default() -> Self {
     Self { id: 1 }
+  }
+}
+
+impl ButtplugMessage for StopAllDevicesV0 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
   }
 }
 

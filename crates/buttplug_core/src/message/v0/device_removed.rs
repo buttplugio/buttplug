@@ -11,9 +11,7 @@ use crate::message::{ButtplugMessage, ButtplugMessageError, ButtplugMessageValid
 use getset::CopyGetters;
 use serde::{Deserialize, Serialize};
 
-#[derive(
-  Debug, Default, ButtplugMessage, Clone, PartialEq, Eq, CopyGetters, Serialize, Deserialize,
-)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, CopyGetters, Serialize, Deserialize)]
 pub struct DeviceRemovedV0 {
   #[serde(rename = "Id")]
   id: u32,
@@ -28,6 +26,15 @@ impl DeviceRemovedV0 {
       id: 0,
       device_index,
     }
+  }
+}
+
+impl ButtplugMessage for DeviceRemovedV0 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
   }
 }
 

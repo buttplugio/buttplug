@@ -41,9 +41,7 @@ use super::{
 };
 
 /// Represents all client-to-server messages in v3 of the Buttplug Spec
-#[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, derive_more::From, Serialize, Deserialize,
-)]
+#[derive(Debug, Clone, PartialEq, derive_more::From, Serialize, Deserialize)]
 pub enum ButtplugClientMessageV3 {
   // Handshake messages
   RequestServerInfo(RequestServerInfoV1),
@@ -63,6 +61,45 @@ pub enum ButtplugClientMessageV3 {
   SensorReadCmd(SensorReadCmdV3),
   SensorSubscribeCmd(SensorSubscribeCmdV3),
   SensorUnsubscribeCmd(SensorUnsubscribeCmdV3),
+}
+
+impl ButtplugMessage for ButtplugClientMessageV3 {
+  fn id(&self) -> u32 {
+    match self {
+      ButtplugClientMessageV3::RequestServerInfo(msg) => msg.id(),
+      ButtplugClientMessageV3::Ping(msg) => msg.id(),
+      ButtplugClientMessageV3::StartScanning(msg) => msg.id(),
+      ButtplugClientMessageV3::StopScanning(msg) => msg.id(),
+      ButtplugClientMessageV3::RequestDeviceList(msg) => msg.id(),
+      ButtplugClientMessageV3::StopAllDevices(msg) => msg.id(),
+      ButtplugClientMessageV3::VibrateCmd(msg) => msg.id(),
+      ButtplugClientMessageV3::LinearCmd(msg) => msg.id(),
+      ButtplugClientMessageV3::RotateCmd(msg) => msg.id(),
+      ButtplugClientMessageV3::StopDeviceCmd(msg) => msg.id(),
+      ButtplugClientMessageV3::ScalarCmd(msg) => msg.id(),
+      ButtplugClientMessageV3::SensorReadCmd(msg) => msg.id(),
+      ButtplugClientMessageV3::SensorSubscribeCmd(msg) => msg.id(),
+      ButtplugClientMessageV3::SensorUnsubscribeCmd(msg) => msg.id(),
+    }
+  }
+  fn set_id(&mut self, id: u32) {
+    match self {
+      ButtplugClientMessageV3::RequestServerInfo(msg) => msg.set_id(id),
+      ButtplugClientMessageV3::Ping(msg) => msg.set_id(id),
+      ButtplugClientMessageV3::StartScanning(msg) => msg.set_id(id),
+      ButtplugClientMessageV3::StopScanning(msg) => msg.set_id(id),
+      ButtplugClientMessageV3::RequestDeviceList(msg) => msg.set_id(id),
+      ButtplugClientMessageV3::StopAllDevices(msg) => msg.set_id(id),
+      ButtplugClientMessageV3::VibrateCmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV3::LinearCmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV3::RotateCmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV3::StopDeviceCmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV3::ScalarCmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV3::SensorReadCmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV3::SensorSubscribeCmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV3::SensorUnsubscribeCmd(msg) => msg.set_id(id),
+    }
+  }
 }
 
 impl ButtplugMessageFinalizer for ButtplugClientMessageV3 {
@@ -129,7 +166,7 @@ impl TryFrom<ButtplugClientMessageV2> for ButtplugClientMessageV3 {
 }
 
 /// Represents all server-to-client messages in v3 of the Buttplug Spec
-#[derive(Debug, Clone, ButtplugMessage, derive_more::From, Serialize, Deserialize)]
+#[derive(Debug, Clone, derive_more::From, Serialize, Deserialize)]
 pub enum ButtplugServerMessageV3 {
   // Status messages
   Ok(OkV0),
@@ -143,6 +180,33 @@ pub enum ButtplugServerMessageV3 {
   ScanningFinished(ScanningFinishedV0),
   // Sensor commands
   SensorReading(SensorReadingV3),
+}
+
+impl ButtplugMessage for ButtplugServerMessageV3 {
+  fn id(&self) -> u32 {
+    match self {
+      ButtplugServerMessageV3::Ok(msg) => msg.id(),
+      ButtplugServerMessageV3::Error(msg) => msg.id(),
+      ButtplugServerMessageV3::ServerInfo(msg) => msg.id(),
+      ButtplugServerMessageV3::DeviceList(msg) => msg.id(),
+      ButtplugServerMessageV3::DeviceAdded(msg) => msg.id(),
+      ButtplugServerMessageV3::DeviceRemoved(msg) => msg.id(),
+      ButtplugServerMessageV3::ScanningFinished(msg) => msg.id(),
+      ButtplugServerMessageV3::SensorReading(msg) => msg.id(),
+    }
+  }
+  fn set_id(&mut self, id: u32) {
+    match self {
+      ButtplugServerMessageV3::Ok(msg) => msg.set_id(id),
+      ButtplugServerMessageV3::Error(msg) => msg.set_id(id),
+      ButtplugServerMessageV3::ServerInfo(msg) => msg.set_id(id),
+      ButtplugServerMessageV3::DeviceList(msg) => msg.set_id(id),
+      ButtplugServerMessageV3::DeviceAdded(msg) => msg.set_id(id),
+      ButtplugServerMessageV3::DeviceRemoved(msg) => msg.set_id(id),
+      ButtplugServerMessageV3::ScanningFinished(msg) => msg.set_id(id),
+      ButtplugServerMessageV3::SensorReading(msg) => msg.set_id(id),
+    }
+  }
 }
 
 impl ButtplugMessageValidator for ButtplugServerMessageV3 {

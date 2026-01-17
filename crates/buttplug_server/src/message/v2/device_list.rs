@@ -13,15 +13,22 @@ use buttplug_core::{
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 
-#[derive(
-  Default, Clone, Debug, PartialEq, Eq, ButtplugMessage, Getters, Serialize, Deserialize,
-)]
+#[derive(Default, Clone, Debug, PartialEq, Eq, Getters, Serialize, Deserialize)]
 pub struct DeviceListV2 {
   #[serde(rename = "Id")]
   pub(in crate::message) id: u32,
   #[serde(rename = "Devices")]
   #[getset(get = "pub")]
   pub(in crate::message) devices: Vec<DeviceMessageInfoV2>,
+}
+
+impl ButtplugMessage for DeviceListV2 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
 }
 
 impl ButtplugMessageValidator for DeviceListV2 {

@@ -47,9 +47,7 @@ use super::{
 };
 
 /// Represents all client-to-server messages in v1 of the Buttplug Spec
-#[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, derive_more::From, Serialize, Deserialize,
-)]
+#[derive(Debug, Clone, PartialEq, derive_more::From, Serialize, Deserialize)]
 pub enum ButtplugClientMessageV1 {
   // Handshake and server messages
   RequestServerInfo(RequestServerInfoV1),
@@ -69,6 +67,43 @@ pub enum ButtplugClientMessageV1 {
   // Deprecated device specific commands (not removed until v2)
   FleshlightLaunchFW12Cmd(FleshlightLaunchFW12CmdV0),
   VorzeA10CycloneCmd(VorzeA10CycloneCmdV0),
+}
+
+impl ButtplugMessage for ButtplugClientMessageV1 {
+  fn id(&self) -> u32 {
+    match self {
+      ButtplugClientMessageV1::RequestServerInfo(msg) => msg.id(),
+      ButtplugClientMessageV1::Ping(msg) => msg.id(),
+      ButtplugClientMessageV1::StartScanning(msg) => msg.id(),
+      ButtplugClientMessageV1::StopScanning(msg) => msg.id(),
+      ButtplugClientMessageV1::RequestDeviceList(msg) => msg.id(),
+      ButtplugClientMessageV1::StopAllDevices(msg) => msg.id(),
+      ButtplugClientMessageV1::VibrateCmd(msg) => msg.id(),
+      ButtplugClientMessageV1::LinearCmd(msg) => msg.id(),
+      ButtplugClientMessageV1::RotateCmd(msg) => msg.id(),
+      ButtplugClientMessageV1::StopDeviceCmd(msg) => msg.id(),
+      ButtplugClientMessageV1::SingleMotorVibrateCmd(msg) => msg.id(),
+      ButtplugClientMessageV1::FleshlightLaunchFW12Cmd(msg) => msg.id(),
+      ButtplugClientMessageV1::VorzeA10CycloneCmd(msg) => msg.id(),
+    }
+  }
+  fn set_id(&mut self, id: u32) {
+    match self {
+      ButtplugClientMessageV1::RequestServerInfo(msg) => msg.set_id(id),
+      ButtplugClientMessageV1::Ping(msg) => msg.set_id(id),
+      ButtplugClientMessageV1::StartScanning(msg) => msg.set_id(id),
+      ButtplugClientMessageV1::StopScanning(msg) => msg.set_id(id),
+      ButtplugClientMessageV1::RequestDeviceList(msg) => msg.set_id(id),
+      ButtplugClientMessageV1::StopAllDevices(msg) => msg.set_id(id),
+      ButtplugClientMessageV1::VibrateCmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV1::LinearCmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV1::RotateCmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV1::StopDeviceCmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV1::SingleMotorVibrateCmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV1::FleshlightLaunchFW12Cmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV1::VorzeA10CycloneCmd(msg) => msg.set_id(id),
+    }
+  }
 }
 
 impl ButtplugMessageFinalizer for ButtplugClientMessageV1 {
@@ -123,9 +158,7 @@ impl From<ButtplugClientMessageV0> for ButtplugClientMessageV1 {
 }
 
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
-#[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, derive_more::From, Serialize, Deserialize,
-)]
+#[derive(Debug, Clone, PartialEq, derive_more::From, Serialize, Deserialize)]
 pub enum ButtplugServerMessageV1 {
   // Status messages
   Ok(OkV0),
@@ -137,6 +170,31 @@ pub enum ButtplugServerMessageV1 {
   DeviceAdded(DeviceAddedV1),
   DeviceRemoved(DeviceRemovedV0),
   ScanningFinished(ScanningFinishedV0),
+}
+
+impl ButtplugMessage for ButtplugServerMessageV1 {
+  fn id(&self) -> u32 {
+    match self {
+      ButtplugServerMessageV1::Ok(msg) => msg.id(),
+      ButtplugServerMessageV1::Error(msg) => msg.id(),
+      ButtplugServerMessageV1::ServerInfo(msg) => msg.id(),
+      ButtplugServerMessageV1::DeviceList(msg) => msg.id(),
+      ButtplugServerMessageV1::DeviceAdded(msg) => msg.id(),
+      ButtplugServerMessageV1::DeviceRemoved(msg) => msg.id(),
+      ButtplugServerMessageV1::ScanningFinished(msg) => msg.id(),
+    }
+  }
+  fn set_id(&mut self, id: u32) {
+    match self {
+      ButtplugServerMessageV1::Ok(msg) => msg.set_id(id),
+      ButtplugServerMessageV1::Error(msg) => msg.set_id(id),
+      ButtplugServerMessageV1::ServerInfo(msg) => msg.set_id(id),
+      ButtplugServerMessageV1::DeviceList(msg) => msg.set_id(id),
+      ButtplugServerMessageV1::DeviceAdded(msg) => msg.set_id(id),
+      ButtplugServerMessageV1::DeviceRemoved(msg) => msg.set_id(id),
+      ButtplugServerMessageV1::ScanningFinished(msg) => msg.set_id(id),
+    }
+  }
 }
 
 impl ButtplugMessageFinalizer for ButtplugServerMessageV1 {

@@ -8,10 +8,19 @@
 use crate::message::{ButtplugMessage, ButtplugMessageError, ButtplugMessageValidator};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, ButtplugMessage, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ScanningFinishedV0 {
   #[serde(rename = "Id")]
   id: u32,
+}
+
+impl ButtplugMessage for ScanningFinishedV0 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
 }
 
 impl ButtplugMessageValidator for ScanningFinishedV0 {

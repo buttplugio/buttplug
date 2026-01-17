@@ -84,6 +84,7 @@ pub trait ButtplugMessageFinalizer {
 /// Base trait for all Buttplug Protocol Message Structs. Handles management of
 /// message ids, as well as implementing conveinence functions for converting
 /// between message structs and various message enums, serialization, etc...
+#[enum_dispatch]
 pub trait ButtplugMessage: ButtplugMessageValidator + Send + Sync + Clone {
   /// Returns the id number of the message
   fn id(&self) -> u32;
@@ -137,6 +138,7 @@ pub trait ButtplugMessageValidator {
 }
 
 /// Adds device index handling to the [ButtplugMessage] trait.
+#[enum_dispatch]
 pub trait ButtplugDeviceMessage: ButtplugMessage {
   fn device_index(&self) -> u32;
   fn set_device_index(&mut self, id: u32);

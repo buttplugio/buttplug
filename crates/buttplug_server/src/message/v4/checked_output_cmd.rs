@@ -22,7 +22,7 @@ use uuid::Uuid;
 
 use super::spec_enums::ButtplugDeviceMessageNameV4;
 
-#[derive(Debug, ButtplugDeviceMessage, Clone, Getters, CopyGetters, Eq)]
+#[derive(Debug, Clone, Getters, CopyGetters, Eq)]
 #[getset(get_copy = "pub")]
 pub struct CheckedOutputCmdV4 {
   id: u32,
@@ -30,6 +30,24 @@ pub struct CheckedOutputCmdV4 {
   feature_index: u32,
   feature_id: Uuid,
   output_command: OutputCommand,
+}
+
+impl ButtplugMessage for CheckedOutputCmdV4 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugDeviceMessage for CheckedOutputCmdV4 {
+  fn device_index(&self) -> u32 {
+    self.device_index
+  }
+  fn set_device_index(&mut self, device_index: u32) {
+    self.device_index = device_index;
+  }
 }
 
 impl PartialEq for CheckedOutputCmdV4 {

@@ -19,9 +19,7 @@ fn return_version0() -> ButtplugMessageSpecVersion {
 // For RequestServerInfo, serde will take care of invalid message versions from json, and internal
 // representations of versions require using the version enum as a type bound. Therefore we do not
 // need explicit content checking for the message.
-#[derive(
-  Debug, ButtplugMessage, Clone, PartialEq, Eq, Getters, CopyGetters, Serialize, Deserialize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct RequestServerInfoV1 {
   #[serde(rename = "Id")]
   id: u32,
@@ -33,6 +31,15 @@ pub struct RequestServerInfoV1 {
   #[serde(rename = "MessageVersion", default = "return_version0")]
   #[getset(get_copy = "pub")]
   message_version: ButtplugMessageSpecVersion,
+}
+
+impl ButtplugMessage for RequestServerInfoV1 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
 }
 
 impl RequestServerInfoV1 {

@@ -25,9 +25,7 @@ pub enum InputCommandType {
   Unsubscribe,
 }
 
-#[derive(
-  Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Copy, CopyGetters, Serialize, Deserialize,
-)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, CopyGetters, Serialize, Deserialize)]
 pub struct InputCmdV4 {
   #[serde(rename = "Id")]
   id: u32,
@@ -58,6 +56,24 @@ impl InputCmdV4 {
       input_type,
       input_command: input_command_type,
     }
+  }
+}
+
+impl ButtplugMessage for InputCmdV4 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugDeviceMessage for InputCmdV4 {
+  fn device_index(&self) -> u32 {
+    self.device_index
+  }
+  fn set_device_index(&mut self, device_index: u32) {
+    self.device_index = device_index;
   }
 }
 

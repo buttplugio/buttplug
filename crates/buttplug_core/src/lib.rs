@@ -13,8 +13,6 @@ pub mod message;
 pub mod util;
 
 #[macro_use]
-extern crate buttplug_derive;
-#[macro_use]
 extern crate strum_macros;
 
 use errors::ButtplugError;

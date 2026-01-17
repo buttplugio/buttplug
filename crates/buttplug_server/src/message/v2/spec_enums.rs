@@ -38,9 +38,7 @@ use serde::{Deserialize, Serialize};
 use super::{BatteryLevelCmdV2, BatteryLevelReadingV2, DeviceAddedV2, DeviceListV2, ServerInfoV2};
 
 /// Represents all client-to-server messages in v2 of the Buttplug Spec
-#[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, derive_more::From, Serialize, Deserialize,
-)]
+#[derive(Debug, Clone, PartialEq, derive_more::From, Serialize, Deserialize)]
 pub enum ButtplugClientMessageV2 {
   // Handshake messages
   RequestServerInfo(RequestServerInfoV1),
@@ -57,6 +55,39 @@ pub enum ButtplugClientMessageV2 {
   StopDeviceCmd(StopDeviceCmdV0),
   // Sensor commands
   BatteryLevelCmd(BatteryLevelCmdV2),
+}
+
+impl ButtplugMessage for ButtplugClientMessageV2 {
+  fn id(&self) -> u32 {
+    match self {
+      ButtplugClientMessageV2::RequestServerInfo(msg) => msg.id(),
+      ButtplugClientMessageV2::Ping(msg) => msg.id(),
+      ButtplugClientMessageV2::StartScanning(msg) => msg.id(),
+      ButtplugClientMessageV2::StopScanning(msg) => msg.id(),
+      ButtplugClientMessageV2::RequestDeviceList(msg) => msg.id(),
+      ButtplugClientMessageV2::StopAllDevices(msg) => msg.id(),
+      ButtplugClientMessageV2::VibrateCmd(msg) => msg.id(),
+      ButtplugClientMessageV2::LinearCmd(msg) => msg.id(),
+      ButtplugClientMessageV2::RotateCmd(msg) => msg.id(),
+      ButtplugClientMessageV2::StopDeviceCmd(msg) => msg.id(),
+      ButtplugClientMessageV2::BatteryLevelCmd(msg) => msg.id(),
+    }
+  }
+  fn set_id(&mut self, id: u32) {
+    match self {
+      ButtplugClientMessageV2::RequestServerInfo(msg) => msg.set_id(id),
+      ButtplugClientMessageV2::Ping(msg) => msg.set_id(id),
+      ButtplugClientMessageV2::StartScanning(msg) => msg.set_id(id),
+      ButtplugClientMessageV2::StopScanning(msg) => msg.set_id(id),
+      ButtplugClientMessageV2::RequestDeviceList(msg) => msg.set_id(id),
+      ButtplugClientMessageV2::StopAllDevices(msg) => msg.set_id(id),
+      ButtplugClientMessageV2::VibrateCmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV2::LinearCmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV2::RotateCmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV2::StopDeviceCmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV2::BatteryLevelCmd(msg) => msg.set_id(id),
+    }
+  }
 }
 
 impl ButtplugMessageFinalizer for ButtplugClientMessageV2 {
@@ -121,9 +152,7 @@ impl TryFrom<ButtplugClientMessageV1> for ButtplugClientMessageV2 {
 }
 
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
-#[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, derive_more::From, Serialize, Deserialize,
-)]
+#[derive(Debug, Clone, PartialEq, derive_more::From, Serialize, Deserialize)]
 pub enum ButtplugServerMessageV2 {
   // Status messages
   Ok(OkV0),
@@ -137,6 +166,33 @@ pub enum ButtplugServerMessageV2 {
   ScanningFinished(ScanningFinishedV0),
   // Sensor commands
   BatteryLevelReading(BatteryLevelReadingV2),
+}
+
+impl ButtplugMessage for ButtplugServerMessageV2 {
+  fn id(&self) -> u32 {
+    match self {
+      ButtplugServerMessageV2::Ok(msg) => msg.id(),
+      ButtplugServerMessageV2::Error(msg) => msg.id(),
+      ButtplugServerMessageV2::ServerInfo(msg) => msg.id(),
+      ButtplugServerMessageV2::DeviceList(msg) => msg.id(),
+      ButtplugServerMessageV2::DeviceAdded(msg) => msg.id(),
+      ButtplugServerMessageV2::DeviceRemoved(msg) => msg.id(),
+      ButtplugServerMessageV2::ScanningFinished(msg) => msg.id(),
+      ButtplugServerMessageV2::BatteryLevelReading(msg) => msg.id(),
+    }
+  }
+  fn set_id(&mut self, id: u32) {
+    match self {
+      ButtplugServerMessageV2::Ok(msg) => msg.set_id(id),
+      ButtplugServerMessageV2::Error(msg) => msg.set_id(id),
+      ButtplugServerMessageV2::ServerInfo(msg) => msg.set_id(id),
+      ButtplugServerMessageV2::DeviceList(msg) => msg.set_id(id),
+      ButtplugServerMessageV2::DeviceAdded(msg) => msg.set_id(id),
+      ButtplugServerMessageV2::DeviceRemoved(msg) => msg.set_id(id),
+      ButtplugServerMessageV2::ScanningFinished(msg) => msg.set_id(id),
+      ButtplugServerMessageV2::BatteryLevelReading(msg) => msg.set_id(id),
+    }
+  }
 }
 
 impl ButtplugMessageFinalizer for ButtplugServerMessageV2 {

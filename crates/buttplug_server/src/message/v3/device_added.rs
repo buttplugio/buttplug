@@ -28,7 +28,7 @@ use serde::{Deserialize, Serialize};
 use super::{ClientDeviceMessageAttributesV3, DeviceMessageInfoV3};
 
 /// Notification that a device has been found and connected to the server.
-#[derive(ButtplugMessage, Clone, Debug, Getters, CopyGetters, Serialize, Deserialize)]
+#[derive(Clone, Debug, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct DeviceAddedV3 {
   #[serde(rename = "Id")]
   id: u32,
@@ -49,6 +49,15 @@ pub struct DeviceAddedV3 {
   #[serde(rename = "DeviceMessages")]
   #[getset(get = "pub")]
   device_messages: ClientDeviceMessageAttributesV3,
+}
+
+impl ButtplugMessage for DeviceAddedV3 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
 }
 
 impl DeviceAddedV3 {

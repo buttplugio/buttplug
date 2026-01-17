@@ -32,7 +32,7 @@ pub enum ErrorCode {
 // Error is one of the few things that can have either a System ID or message
 // ID, so there's really not much to check here. Use the default trait impl for
 // ButtplugMessageValidator.
-#[derive(Debug, Clone, ButtplugMessage, Getters, CopyGetters, Serialize, Deserialize)]
+#[derive(Debug, Clone, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct ErrorV0 {
   /// Message Id, used for matching message pairs in remote connection instances.
   #[serde(rename = "Id")]
@@ -47,6 +47,15 @@ pub struct ErrorV0 {
   error_message: String,
   #[serde(skip)]
   original_error: Option<ButtplugError>,
+}
+
+impl ButtplugMessage for ErrorV0 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
 }
 
 impl ButtplugMessageValidator for ErrorV0 {

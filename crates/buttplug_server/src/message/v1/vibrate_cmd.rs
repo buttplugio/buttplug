@@ -27,9 +27,7 @@ impl VibrateSubcommandV1 {
   }
 }
 
-#[derive(
-  Debug, Default, ButtplugDeviceMessage, PartialEq, Clone, Getters, Serialize, Deserialize,
-)]
+#[derive(Debug, Default, PartialEq, Clone, Getters, Serialize, Deserialize)]
 pub struct VibrateCmdV1 {
   #[serde(rename = "Id")]
   id: u32,
@@ -38,6 +36,24 @@ pub struct VibrateCmdV1 {
   #[serde(rename = "Speeds")]
   #[getset(get = "pub")]
   speeds: Vec<VibrateSubcommandV1>,
+}
+
+impl ButtplugMessage for VibrateCmdV1 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugDeviceMessage for VibrateCmdV1 {
+  fn device_index(&self) -> u32 {
+    self.device_index
+  }
+  fn set_device_index(&mut self, device_index: u32) {
+    self.device_index = device_index;
+  }
 }
 
 impl VibrateCmdV1 {

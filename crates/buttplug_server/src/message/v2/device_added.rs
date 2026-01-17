@@ -16,9 +16,7 @@ use getset::{CopyGetters, Getters};
 
 use serde::{Deserialize, Serialize};
 
-#[derive(
-  ButtplugMessage, Clone, Debug, PartialEq, Eq, Getters, CopyGetters, Serialize, Deserialize,
-)]
+#[derive(Clone, Debug, PartialEq, Eq, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct DeviceAddedV2 {
   #[serde(rename = "Id")]
   pub(in crate::message) id: u32,
@@ -31,6 +29,15 @@ pub struct DeviceAddedV2 {
   #[serde(rename = "DeviceMessages")]
   #[getset(get = "pub")]
   pub(in crate::message) device_messages: ClientDeviceMessageAttributesV2,
+}
+
+impl ButtplugMessage for DeviceAddedV2 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
 }
 
 impl From<DeviceAddedV2> for DeviceAddedV1 {

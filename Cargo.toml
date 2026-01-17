@@ -5,7 +5,6 @@ members = [
     "crates/buttplug_client",
     "crates/buttplug_client_in_process",
     "crates/buttplug_core",
-    "crates/buttplug_derive",
     "crates/buttplug_server",
     "crates/buttplug_server_device_config",
     "crates/buttplug_server_hwmgr_btleplug",

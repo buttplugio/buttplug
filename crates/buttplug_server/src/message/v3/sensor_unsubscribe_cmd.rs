@@ -12,7 +12,7 @@ use buttplug_core::{
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Getters, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Getters, Serialize, Deserialize)]
 pub struct SensorUnsubscribeCmdV3 {
   #[serde(rename = "Id")]
   id: u32,
@@ -34,6 +34,24 @@ impl SensorUnsubscribeCmdV3 {
       sensor_index,
       sensor_type,
     }
+  }
+}
+
+impl ButtplugMessage for SensorUnsubscribeCmdV3 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugDeviceMessage for SensorUnsubscribeCmdV3 {
+  fn device_index(&self) -> u32 {
+    self.device_index
+  }
+  fn set_device_index(&mut self, device_index: u32) {
+    self.device_index = device_index;
   }
 }
 

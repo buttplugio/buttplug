@@ -14,18 +14,7 @@ use serde::{Deserialize, Serialize};
 
 use super::spec_enums::ButtplugDeviceMessageNameV0;
 
-#[derive(
-  Default,
-  ButtplugMessage,
-  Clone,
-  Debug,
-  PartialEq,
-  Eq,
-  Getters,
-  CopyGetters,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Default, Clone, Debug, PartialEq, Eq, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct DeviceAddedV0 {
   #[serde(rename = "Id")]
   pub(in crate::message) id: u32,
@@ -38,6 +27,15 @@ pub struct DeviceAddedV0 {
   #[serde(rename = "DeviceMessages")]
   #[getset(get = "pub")]
   pub(in crate::message) device_messages: Vec<ButtplugDeviceMessageNameV0>,
+}
+
+impl ButtplugMessage for DeviceAddedV0 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
 }
 
 impl ButtplugMessageValidator for DeviceAddedV0 {

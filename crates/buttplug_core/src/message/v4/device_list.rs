@@ -18,7 +18,7 @@ use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 /// List of all devices currently connected to the server.
-#[derive(Default, Clone, Debug, ButtplugMessage, Getters, Serialize, Deserialize)]
+#[derive(Default, Clone, Debug, Getters, Serialize, Deserialize)]
 pub struct DeviceListV4 {
   #[serde(rename = "Id")]
   id: u32,
@@ -37,6 +37,15 @@ impl DeviceListV4 {
       id: 1,
       devices: device_map,
     }
+  }
+}
+
+impl ButtplugMessage for DeviceListV4 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
   }
 }
 

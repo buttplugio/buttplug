@@ -31,7 +31,7 @@ use getset::{CopyGetters, Getters};
 
 use super::checked_output_cmd::CheckedOutputCmdV4;
 
-#[derive(Debug, Default, ButtplugDeviceMessage, PartialEq, Clone, Getters, CopyGetters)]
+#[derive(Debug, Default, PartialEq, Clone, Getters, CopyGetters)]
 pub struct CheckedOutputVecCmdV4 {
   #[getset(get_copy = "pub")]
   id: u32,
@@ -39,6 +39,24 @@ pub struct CheckedOutputVecCmdV4 {
   device_index: u32,
   #[getset(get = "pub")]
   value_vec: Vec<CheckedOutputCmdV4>,
+}
+
+impl ButtplugMessage for CheckedOutputVecCmdV4 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugDeviceMessage for CheckedOutputVecCmdV4 {
+  fn device_index(&self) -> u32 {
+    self.device_index
+  }
+  fn set_device_index(&mut self, device_index: u32) {
+    self.device_index = device_index;
+  }
 }
 
 impl CheckedOutputVecCmdV4 {

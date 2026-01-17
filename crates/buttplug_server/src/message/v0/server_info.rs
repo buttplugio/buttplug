@@ -14,9 +14,7 @@ use buttplug_core::{
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 
-#[derive(
-  Debug, ButtplugMessage, PartialEq, Eq, Clone, Getters, CopyGetters, Serialize, Deserialize,
-)]
+#[derive(Debug, PartialEq, Eq, Clone, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct ServerInfoV0 {
   #[serde(rename = "Id")]
   id: u32,
@@ -38,6 +36,15 @@ pub struct ServerInfoV0 {
   #[serde(rename = "ServerName")]
   #[getset(get = "pub")]
   server_name: String,
+}
+
+impl ButtplugMessage for ServerInfoV0 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
 }
 
 impl ServerInfoV0 {

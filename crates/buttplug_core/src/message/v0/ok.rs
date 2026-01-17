@@ -9,7 +9,7 @@ use crate::message::{ButtplugMessage, ButtplugMessageError, ButtplugMessageValid
 use serde::{Deserialize, Serialize};
 
 /// Ok message, signifying successful response to a command. [Spec link](https://buttplug-spec.docs.buttplug.io/status.html#ok).
-#[derive(Debug, PartialEq, Eq, ButtplugMessage, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct OkV0 {
   /// Message Id, used for matching message pairs in remote connection instances.
   #[serde(rename = "Id")]
@@ -26,6 +26,15 @@ impl OkV0 {
 impl Default for OkV0 {
   fn default() -> Self {
     Self { id: 1 }
+  }
+}
+
+impl ButtplugMessage for OkV0 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
   }
 }
 

@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 use super::DeviceMessageInfoV3;
 
 /// List of all devices currently connected to the server.
-#[derive(Default, Clone, Debug, ButtplugMessage, Getters, Serialize, Deserialize)]
+#[derive(Default, Clone, Debug, Getters, Serialize, Deserialize)]
 pub struct DeviceListV3 {
   #[serde(rename = "Id")]
   id: u32,
@@ -28,6 +28,15 @@ pub struct DeviceListV3 {
 impl DeviceListV3 {
   pub fn new(devices: Vec<DeviceMessageInfoV3>) -> Self {
     Self { id: 1, devices }
+  }
+}
+
+impl ButtplugMessage for DeviceListV3 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
   }
 }
 

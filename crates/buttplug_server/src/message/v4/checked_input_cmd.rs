@@ -20,7 +20,7 @@ use buttplug_core::{
 use getset::CopyGetters;
 use uuid::Uuid;
 
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, CopyGetters)]
+#[derive(Debug, PartialEq, Eq, Clone, CopyGetters)]
 #[getset(get_copy = "pub")]
 pub struct CheckedInputCmdV4 {
   id: u32,
@@ -29,6 +29,24 @@ pub struct CheckedInputCmdV4 {
   input_type: InputType,
   input_command: InputCommandType,
   feature_id: Uuid,
+}
+
+impl ButtplugMessage for CheckedInputCmdV4 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugDeviceMessage for CheckedInputCmdV4 {
+  fn device_index(&self) -> u32 {
+    self.device_index
+  }
+  fn set_device_index(&mut self, device_index: u32) {
+    self.device_index = device_index;
+  }
 }
 
 impl CheckedInputCmdV4 {

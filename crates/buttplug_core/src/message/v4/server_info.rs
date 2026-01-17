@@ -14,9 +14,7 @@ use crate::message::{
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 
-#[derive(
-  Debug, ButtplugMessage, PartialEq, Eq, Clone, Getters, CopyGetters, Serialize, Deserialize,
-)]
+#[derive(Debug, PartialEq, Eq, Clone, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct ServerInfoV4 {
   #[serde(rename = "Id")]
   id: u32,
@@ -48,6 +46,15 @@ impl ServerInfoV4 {
       max_ping_time,
       server_name: server_name.to_string(),
     }
+  }
+}
+
+impl ButtplugMessage for ServerInfoV4 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
   }
 }
 

@@ -49,9 +49,6 @@
 extern crate log;
 
 #[macro_use]
-extern crate buttplug_derive;
-
-#[macro_use]
 extern crate strum_macros;
 
 pub mod connector;

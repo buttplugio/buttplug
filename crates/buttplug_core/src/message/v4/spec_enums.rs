@@ -6,10 +6,7 @@
 // for full license information.
 
 use crate::message::{
-  ButtplugMessage,
-  ButtplugMessageError,
   ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
   ErrorV0,
   OkV0,
   OutputCmdV4,
@@ -30,8 +27,8 @@ use serde::{Deserialize, Serialize};
 use super::{DeviceListV4, InputReadingV4};
 
 /// Represents all client-to-server messages in v4 of the Buttplug Spec
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, Serialize, Deserialize)]
-#[enum_dispatch(ButtplugMessageValidator)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[enum_dispatch(ButtplugMessage, ButtplugMessageValidator)]
 pub enum ButtplugClientMessageV4 {
   // Handshake messages
   RequestServerInfo(RequestServerInfoV4),
@@ -47,11 +44,12 @@ pub enum ButtplugClientMessageV4 {
   InputCmd(InputCmdV4),
 }
 
-impl ButtplugMessageFinalizer for ButtplugClientMessageV4 {}
+impl ButtplugMessageFinalizer for ButtplugClientMessageV4 {
+}
 
 /// Represents all server-to-client messages in v4 of the Buttplug Spec
-#[derive(Debug, Clone, ButtplugMessage, Serialize, Deserialize)]
-#[enum_dispatch(ButtplugMessageValidator)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[enum_dispatch(ButtplugMessage, ButtplugMessageValidator)]
 pub enum ButtplugServerMessageV4 {
   // Status messages
   Ok(OkV0),

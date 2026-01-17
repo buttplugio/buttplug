@@ -10,7 +10,7 @@ use buttplug_core::{
 use serde::{Deserialize, Serialize};
 
 /// Represents all client-to-server messages in v0 of the Buttplug Spec
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, derive_more::From, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, derive_more::From, Serialize, Deserialize)]
 pub enum ButtplugClientMessageV0 {
   Ping(PingV0),
   // Handshake messages
@@ -32,7 +32,39 @@ pub enum ButtplugClientMessageV0 {
   VorzeA10CycloneCmd(VorzeA10CycloneCmdV0),
 }
 
-impl ButtplugMessageFinalizer for ButtplugClientMessageV0 {}
+impl ButtplugMessage for ButtplugClientMessageV0 {
+  fn id(&self) -> u32 {
+    match self {
+      ButtplugClientMessageV0::Ping(msg) => msg.id(),
+      ButtplugClientMessageV0::RequestServerInfo(msg) => msg.id(),
+      ButtplugClientMessageV0::StartScanning(msg) => msg.id(),
+      ButtplugClientMessageV0::StopScanning(msg) => msg.id(),
+      ButtplugClientMessageV0::RequestDeviceList(msg) => msg.id(),
+      ButtplugClientMessageV0::StopAllDevices(msg) => msg.id(),
+      ButtplugClientMessageV0::StopDeviceCmd(msg) => msg.id(),
+      ButtplugClientMessageV0::SingleMotorVibrateCmd(msg) => msg.id(),
+      ButtplugClientMessageV0::FleshlightLaunchFW12Cmd(msg) => msg.id(),
+      ButtplugClientMessageV0::VorzeA10CycloneCmd(msg) => msg.id(),
+    }
+  }
+  fn set_id(&mut self, id: u32) {
+    match self {
+      ButtplugClientMessageV0::Ping(msg) => msg.set_id(id),
+      ButtplugClientMessageV0::RequestServerInfo(msg) => msg.set_id(id),
+      ButtplugClientMessageV0::StartScanning(msg) => msg.set_id(id),
+      ButtplugClientMessageV0::StopScanning(msg) => msg.set_id(id),
+      ButtplugClientMessageV0::RequestDeviceList(msg) => msg.set_id(id),
+      ButtplugClientMessageV0::StopAllDevices(msg) => msg.set_id(id),
+      ButtplugClientMessageV0::StopDeviceCmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV0::SingleMotorVibrateCmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV0::FleshlightLaunchFW12Cmd(msg) => msg.set_id(id),
+      ButtplugClientMessageV0::VorzeA10CycloneCmd(msg) => msg.set_id(id),
+    }
+  }
+}
+
+impl ButtplugMessageFinalizer for ButtplugClientMessageV0 {
+}
 
 impl ButtplugMessageValidator for ButtplugClientMessageV0 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
@@ -52,7 +84,7 @@ impl ButtplugMessageValidator for ButtplugClientMessageV0 {
 }
 
 /// Represents all server-to-client messages in v0 of the Buttplug Spec
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, derive_more::From, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, derive_more::From, Serialize, Deserialize)]
 pub enum ButtplugServerMessageV0 {
   // Status messages
   Ok(OkV0),
@@ -66,7 +98,33 @@ pub enum ButtplugServerMessageV0 {
   ScanningFinished(ScanningFinishedV0),
 }
 
-impl ButtplugMessageFinalizer for ButtplugServerMessageV0 {}
+impl ButtplugMessage for ButtplugServerMessageV0 {
+  fn id(&self) -> u32 {
+    match self {
+      ButtplugServerMessageV0::Ok(msg) => msg.id(),
+      ButtplugServerMessageV0::Error(msg) => msg.id(),
+      ButtplugServerMessageV0::ServerInfo(msg) => msg.id(),
+      ButtplugServerMessageV0::DeviceList(msg) => msg.id(),
+      ButtplugServerMessageV0::DeviceAdded(msg) => msg.id(),
+      ButtplugServerMessageV0::DeviceRemoved(msg) => msg.id(),
+      ButtplugServerMessageV0::ScanningFinished(msg) => msg.id(),
+    }
+  }
+  fn set_id(&mut self, id: u32) {
+    match self {
+      ButtplugServerMessageV0::Ok(msg) => msg.set_id(id),
+      ButtplugServerMessageV0::Error(msg) => msg.set_id(id),
+      ButtplugServerMessageV0::ServerInfo(msg) => msg.set_id(id),
+      ButtplugServerMessageV0::DeviceList(msg) => msg.set_id(id),
+      ButtplugServerMessageV0::DeviceAdded(msg) => msg.set_id(id),
+      ButtplugServerMessageV0::DeviceRemoved(msg) => msg.set_id(id),
+      ButtplugServerMessageV0::ScanningFinished(msg) => msg.set_id(id),
+    }
+  }
+}
+
+impl ButtplugMessageFinalizer for ButtplugServerMessageV0 {
+}
 
 impl ButtplugMessageValidator for ButtplugServerMessageV0 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {

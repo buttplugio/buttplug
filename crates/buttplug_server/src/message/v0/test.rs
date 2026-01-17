@@ -12,9 +12,7 @@ use buttplug_core::{
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 
-#[derive(
-  Debug, Default, ButtplugMessage, Clone, PartialEq, Eq, Getters, Serialize, Deserialize,
-)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Getters, Serialize, Deserialize)]
 pub struct TestV0 {
   /// Message Id, used for matching message pairs in remote connection instances.
   #[serde(rename = "Id")]
@@ -23,6 +21,15 @@ pub struct TestV0 {
   #[serde(rename = "TestString")]
   #[getset(get = "pub")]
   test_string: String,
+}
+
+impl ButtplugMessage for TestV0 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
 }
 
 impl TestV0 {
