@@ -69,7 +69,7 @@ use buttplug_server_device_config::{
 use crate::{
   ButtplugServerResultFuture,
   device::{
-    hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent},
+    hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, ProtocolSpecializer},
   },
   message::{
@@ -86,10 +86,7 @@ use futures::future::{self, BoxFuture, FutureExt};
 use getset::Getters;
 use tokio::{
   select,
-  sync::{
-    Mutex,
-    mpsc::{Sender, channel},
-  },
+  sync::mpsc::{Sender, channel},
   time::Instant,
 };
 use tokio_stream::StreamExt;
@@ -268,124 +265,121 @@ impl ServerDevice {
         };
       async_manager::spawn(async move {
         let mut hardware_events = hardware.event_stream();
-        let keepalive_packet = Mutex::new(None);
-        // TODO This needs to throw system error messages
-        let send_hw_cmd = async |command| {
-          let _ = hardware.parse_message(&command).await;
-          if ((requires_keepalive
-            && matches!(
-              strategy,
-              ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
-            ))
-            || matches!(
-              strategy,
-              ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_)
-            ))
-            && let HardwareCommand::Write(command) = command
-          {
-            *keepalive_packet.lock().await = Some(command);
-          };
-        };
+
+        // Track last write command for keepalive replay
+        let track_keepalive = (requires_keepalive
+          && matches!(strategy, ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy))
+          || matches!(strategy, ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_));
+        let mut keepalive_packet: Option<HardwareWriteCmd> = None;
+
+        // Batching state: pending commands and when to flush them
+        let mut pending_commands: VecDeque<HardwareCommand> = VecDeque::new();
+        let mut batch_deadline: Option<Instant> = None;
+
         loop {
-          let requires_keepalive = hardware.requires_keepalive();
-          let wait_duration_fut = async move {
+          // Calculate keepalive timeout
+          let keepalive_fut = async {
             if let Some(duration) = strategy_duration {
               util::sleep(duration).await;
             } else if requires_keepalive {
-              // This is really only for iOS Bluetooth
-              util::sleep(Duration::from_secs(5)).await;
+              util::sleep(Duration::from_secs(5)).await; // iOS Bluetooth default
             } else {
               future::pending::<()>().await;
-            };
+            }
           };
+
+          // Calculate batch flush timeout (only if we're batching)
+          let batch_fut = async {
+            match batch_deadline {
+              Some(deadline) => tokio::time::sleep_until(deadline).await,
+              None => future::pending::<()>().await,
+            }
+          };
+
           select! {
             biased;
 
+            // Priority 1: Incoming commands
             msg = internal_hw_msg_recv.recv() => {
-              if msg.is_none() {
-                info!("No longer receiving message from device parent, breaking");
+              let Some(commands) = msg else {
+                info!("No longer receiving messages from device parent, breaking");
                 break;
-              }
-              let hardware_cmd = msg.unwrap();
+              };
+
               if device_wait_duration.is_none() {
-                trace!("No wait duration specified, sending hardware commands {:?}", hardware_cmd);
-                // send and continue
-                for cmd in hardware_cmd {
-                  send_hw_cmd(cmd).await;
-                }
-                continue;
-              }
-              // Run commands in order, otherwise we may end up sending out of order. This may take a while,
-              // but it's what 99% of protocols expect. If they want something else, they can implement it
-              // themselves.
-              //
-              // If anything errors out, just bail on the command series. This most likely means the device
-              // disconnected.
-              let mut local_commands: VecDeque<HardwareCommand> = VecDeque::new();
-              local_commands.append(&mut VecDeque::from(hardware_cmd));
-
-              let sleep_until = Instant::now() + *device_wait_duration.as_ref().unwrap();
-              loop {
-                select! {
-                  biased;
-
-                  msg = internal_hw_msg_recv.recv() => {
-                    if msg.is_none() {
-                      info!("No longer receiving message from device parent, breaking");
-                      local_commands.clear();
-                      break;
-                    }
-                    for command in msg.unwrap() {
-                      local_commands.retain(|v| !command.overlaps(v));
-                      local_commands.push_back(command);
-                    }
-                  }
-                  _ = tokio::time::sleep_until(sleep_until) => {
-                    break;
-                  }
-                  hw_event = hardware_events.recv() => {
-                    if matches!(hw_event, Ok(HardwareEvent::Disconnected(_))) || hw_event.is_err() {
-                      info!("Hardware disconnected, shutting down task");
-                      return;
+                // No batching - send immediately
+                trace!("No wait duration, sending commands immediately: {:?}", commands);
+                for cmd in commands {
+                  let _ = hardware.parse_message(&cmd).await;
+                  if track_keepalive {
+                    if let HardwareCommand::Write(ref write_cmd) = cmd {
+                      keepalive_packet = Some(write_cmd.clone());
                     }
                   }
                 }
-              }
-              while let Some(command) = local_commands.pop_front() {
-                debug!("Sending hardware command {:?}", command);
-                send_hw_cmd(command).await;
+              } else {
+                // Batching enabled
+                if pending_commands.is_empty() {
+                  // First batch - add directly without deduplication (matches old behavior)
+                  pending_commands.extend(commands);
+                  batch_deadline = Some(Instant::now() + device_wait_duration.unwrap());
+                } else {
+                  // Subsequent batches - deduplicate each command against existing
+                  for command in commands {
+                    pending_commands.retain(|existing| !command.overlaps(existing));
+                    pending_commands.push_back(command);
+                  }
+                }
               }
             }
-            _ = wait_duration_fut => {
-              let keepalive_packet = keepalive_packet.lock().await.clone();
-              match &strategy {
+
+            // Priority 2: Batch deadline reached - flush pending commands
+            _ = batch_fut => {
+              debug!("Batch deadline reached, sending {} commands", pending_commands.len());
+              while let Some(cmd) = pending_commands.pop_front() {
+                let _ = hardware.parse_message(&cmd).await;
+                if track_keepalive {
+                  if let HardwareCommand::Write(ref write_cmd) = cmd {
+                    keepalive_packet = Some(write_cmd.clone());
+                  }
+                }
+              }
+              batch_deadline = None;
+            }
+
+            // Priority 3: Keepalive timer
+            _ = keepalive_fut => {
+              let result = match &strategy {
                 ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(duration) => {
                   if hardware.time_since_last_write().await > *duration {
-                    if let Some(packet) = keepalive_packet {
-                      if let Err(e) = hardware.write_value(&packet).await {
-                        warn!("Error writing keepalive packet: {:?}", e);
-                        break;
-                      }
+                    if let Some(ref packet) = keepalive_packet {
+                      hardware.write_value(packet).await
                     } else {
                       warn!("No keepalive packet available, device may disconnect.");
+                      Ok(())
                     }
+                  } else {
+                    Ok(())
                   }
                 }
                 ProtocolKeepaliveStrategy::HardwareRequiredRepeatPacketStrategy(packet) => {
-                  if let Err(e) = hardware.write_value(packet).await {
-                    warn!("Error writing keepalive packet: {:?}", e);
-                    break;
-                  }
+                  hardware.write_value(packet).await
                 }
                 ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy => {
-                  if let Some(packet) = keepalive_packet
-                    && let Err(e) = hardware.write_value(&packet).await {
-                      warn!("Error writing keepalive packet: {:?}", e);
-                      break;
-                    }
+                  if let Some(ref packet) = keepalive_packet {
+                    hardware.write_value(packet).await
+                  } else {
+                    Ok(())
+                  }
                 }
+              };
+              if let Err(e) = result {
+                warn!("Error writing keepalive packet: {:?}", e);
+                break;
               }
             }
+
+            // Priority 4: Hardware events (disconnection)
             hw_event = hardware_events.recv() => {
               if matches!(hw_event, Ok(HardwareEvent::Disconnected(_))) || hw_event.is_err() {
                 info!("Hardware disconnected, shutting down task");
@@ -394,7 +388,7 @@ impl ServerDevice {
             }
           }
         }
-        info!("Leaving keepalive task for {}", hardware.name());
+        info!("Leaving task for {}", hardware.name());
       });
     }
 
