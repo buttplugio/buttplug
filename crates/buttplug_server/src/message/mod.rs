@@ -41,6 +41,17 @@ macro_rules! impl_message_enum_traits {
   };
 }
 
+/// Helper macro to extract device_index from versioned message enums.
+/// Returns Some(device_index) for device commands, None for other messages.
+macro_rules! extract_device_index {
+  ($msg:expr, $enum_type:ident, [$($variant:ident),* $(,)?]) => {
+    match $msg {
+      $($enum_type::$variant(a) => Some(a.device_index()),)*
+      _ => None,
+    }
+  };
+}
+
 pub mod serializer;
 pub mod server_device_attributes;
 mod v0;
@@ -79,44 +90,17 @@ impl ButtplugClientMessageVariant {
   }
 
   pub fn device_index(&self) -> Option<u32> {
-    // TODO there has to be a better way to do this. We just need to dig through our enum and see if
-    // our message impls ButtplugDeviceMessage. Manually doing this works but is so gross.
     match self {
-      Self::V0(msg) => match msg {
-        ButtplugClientMessageV0::FleshlightLaunchFW12Cmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV0::SingleMotorVibrateCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV0::VorzeA10CycloneCmd(a) => Some(a.device_index()),
-        _ => None,
-      },
-      Self::V1(msg) => match msg {
-        ButtplugClientMessageV1::FleshlightLaunchFW12Cmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV1::SingleMotorVibrateCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV1::VorzeA10CycloneCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV1::VibrateCmd(a) => Some(a.device_index()),
-        _ => None,
-      },
-      Self::V2(msg) => match msg {
-        ButtplugClientMessageV2::VibrateCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV2::RotateCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV2::LinearCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV2::BatteryLevelCmd(a) => Some(a.device_index()),
-        _ => None,
-      },
-      Self::V3(msg) => match msg {
-        ButtplugClientMessageV3::VibrateCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV3::SensorSubscribeCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV3::SensorUnsubscribeCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV3::ScalarCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV3::RotateCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV3::LinearCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV3::SensorReadCmd(a) => Some(a.device_index()),
-        _ => None,
-      },
-      Self::V4(msg) => match msg {
-        ButtplugClientMessageV4::OutputCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV4::InputCmd(a) => Some(a.device_index()),
-        _ => None,
-      },
+      Self::V0(msg) => extract_device_index!(msg, ButtplugClientMessageV0,
+        [FleshlightLaunchFW12Cmd, SingleMotorVibrateCmd, VorzeA10CycloneCmd]),
+      Self::V1(msg) => extract_device_index!(msg, ButtplugClientMessageV1,
+        [FleshlightLaunchFW12Cmd, SingleMotorVibrateCmd, VorzeA10CycloneCmd, VibrateCmd]),
+      Self::V2(msg) => extract_device_index!(msg, ButtplugClientMessageV2,
+        [VibrateCmd, RotateCmd, LinearCmd, BatteryLevelCmd]),
+      Self::V3(msg) => extract_device_index!(msg, ButtplugClientMessageV3,
+        [VibrateCmd, SensorSubscribeCmd, SensorUnsubscribeCmd, ScalarCmd, RotateCmd, LinearCmd, SensorReadCmd]),
+      Self::V4(msg) => extract_device_index!(msg, ButtplugClientMessageV4,
+        [OutputCmd, InputCmd]),
     }
   }
 }
