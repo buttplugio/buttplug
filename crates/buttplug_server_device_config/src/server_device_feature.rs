@@ -421,38 +421,20 @@ impl ServerDeviceFeatureOutput {
   }
 
   pub fn output_types(&self) -> Vec<OutputType> {
-    let mut types = vec![];
-    self
-      .constrict
-      .is_some()
-      .then(|| types.push(OutputType::Constrict));
-    self
-      .temperature
-      .is_some()
-      .then(|| types.push(OutputType::Temperature));
-    self.led.is_some().then(|| types.push(OutputType::Led));
-    self
-      .oscillate
-      .is_some()
-      .then(|| types.push(OutputType::Oscillate));
-    self
-      .position
-      .is_some()
-      .then(|| types.push(OutputType::Position));
-    self
-      .position_with_duration
-      .is_some()
-      .then(|| types.push(OutputType::PositionWithDuration));
-    self
-      .rotate
-      .is_some()
-      .then(|| types.push(OutputType::Rotate));
-    self.spray.is_some().then(|| types.push(OutputType::Spray));
-    self
-      .vibrate
-      .is_some()
-      .then(|| types.push(OutputType::Vibrate));
-    types
+    [
+      (self.vibrate.is_some(), OutputType::Vibrate),
+      (self.rotate.is_some(), OutputType::Rotate),
+      (self.oscillate.is_some(), OutputType::Oscillate),
+      (self.constrict.is_some(), OutputType::Constrict),
+      (self.temperature.is_some(), OutputType::Temperature),
+      (self.led.is_some(), OutputType::Led),
+      (self.position.is_some(), OutputType::Position),
+      (self.position_with_duration.is_some(), OutputType::PositionWithDuration),
+      (self.spray.is_some(), OutputType::Spray),
+    ]
+    .into_iter()
+    .filter_map(|(present, ot)| present.then_some(ot))
+    .collect()
   }
 
   pub fn calculate_from_value(
@@ -629,34 +611,20 @@ impl ServerDeviceFeatureInput {
   }
 
   pub fn can_subscribe(&self) -> bool {
-    // TODO Why did I move everything to struct based systems again? This is so gross.
-    if let Some(battery) = &self.battery
-      && battery.command.contains(&InputCommandType::Subscribe)
-    {
-      true
-    } else if let Some(rssi) = &self.rssi
-      && rssi.command.contains(&InputCommandType::Subscribe)
-    {
-      true
-    } else if let Some(pressure) = &self.pressure
-      && pressure.command.contains(&InputCommandType::Subscribe)
-    {
-      true
-    } else if let Some(button) = &self.button
-      && button.command.contains(&InputCommandType::Subscribe)
-    {
-      true
-    } else if let Some(depth) = &self.depth
-      && depth.command.contains(&InputCommandType::Subscribe)
-    {
-      true
-    } else if let Some(position) = &self.position
-      && position.command.contains(&InputCommandType::Subscribe)
-    {
-      true
-    } else {
-      false
-    }
+    [
+      &self.battery,
+      &self.rssi,
+      &self.pressure,
+      &self.button,
+      &self.depth,
+      &self.position,
+    ]
+    .iter()
+    .any(|input| {
+      input
+        .as_ref()
+        .map_or(false, |i| i.command.contains(&InputCommandType::Subscribe))
+    })
   }
 }
 
