@@ -13,12 +13,25 @@ use buttplug_server_device_config::DeviceConfigurationManager;
 use tracing::info_span;
 
 use crate::device::{
+  DeviceEvent,
   DeviceHandle,
-  ServerDevice,
-  ServerDeviceEvent,
   hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
   protocol::ProtocolManager,
+  server_device::build_device_handle,
 };
+use crate::message::ButtplugServerDeviceMessage;
+use buttplug_server_device_config::UserDeviceIdentifier;
+
+/// Internal event enum for the device manager event loop
+#[derive(Debug)]
+enum InternalDeviceEvent {
+  /// A new device has connected and is ready
+  Connected(DeviceHandle),
+  /// A device notification (from DeviceEvent)
+  Notification(UserDeviceIdentifier, ButtplugServerDeviceMessage),
+  /// A device has disconnected (from DeviceEvent)
+  Disconnected(UserDeviceIdentifier),
+}
 use dashmap::{DashMap, DashSet};
 use futures::{FutureExt, StreamExt, future, pin_mut};
 use std::sync::{Arc, atomic::AtomicBool};
@@ -41,9 +54,9 @@ pub(super) struct ServerDeviceManagerEventLoop {
   /// a receiver that the comm managers all send thru.
   device_comm_receiver: mpsc::Receiver<HardwareCommunicationManagerEvent>,
   /// Sender for device events, passed to new devices when they are created.
-  device_event_sender: mpsc::Sender<ServerDeviceEvent>,
+  device_event_sender: mpsc::Sender<InternalDeviceEvent>,
   /// Receiver for device events, which the event loops to handle events.
-  device_event_receiver: mpsc::Receiver<ServerDeviceEvent>,
+  device_event_receiver: mpsc::Receiver<InternalDeviceEvent>,
   /// True if StartScanning has been called but no ScanningFinished has been
   /// emitted yet.
   scanning_bringup_in_progress: bool,
@@ -238,10 +251,10 @@ impl ServerDeviceManagerEventLoop {
         );
 
         async_manager::spawn(async move {
-          match ServerDevice::build(device_config_manager, creator, protocol_specializers).await {
-            Ok(device) => {
+          match build_device_handle(device_config_manager, creator, protocol_specializers).await {
+            Ok(device_handle) => {
               if device_event_sender_clone
-                .send(ServerDeviceEvent::Connected(Arc::new(device)))
+                .send(InternalDeviceEvent::Connected(device_handle))
                 .await
                 .is_err() {
                 error!("Device manager disappeared before connection established, device will be dropped.");
@@ -266,19 +279,16 @@ impl ServerDeviceManagerEventLoop {
     DeviceListV4::new(devices)
   }
 
-  async fn handle_device_event(&mut self, device_event: ServerDeviceEvent) {
+  async fn handle_device_event(&mut self, device_event: InternalDeviceEvent) {
     trace!("Got device event: {:?}", device_event);
     match device_event {
-      ServerDeviceEvent::Connected(device) => {
+      InternalDeviceEvent::Connected(device_handle) => {
         let span = info_span!(
           "device registration",
-          name = tracing::field::display(device.name()),
-          identifier = tracing::field::debug(device.identifier())
+          name = tracing::field::display(device_handle.name()),
+          identifier = tracing::field::debug(device_handle.identifier())
         );
         let _enter = span.enter();
-
-        // Wrap the ServerDevice in a DeviceHandle
-        let device_handle = DeviceHandle::new(device);
 
         // Get the index from the device
         let device_index = device_handle.definition().index();
@@ -312,7 +322,12 @@ impl ServerDeviceManagerEventLoop {
           pin_mut!(event_listener);
           // This can fail if the event_sender loses the server before this loop dies.
           while let Some(event) = event_listener.next().await {
-            if event_sender.send(event).await.is_err() {
+            // Convert DeviceEvent to InternalDeviceEvent
+            let internal_event = match event {
+              DeviceEvent::Disconnected(id) => InternalDeviceEvent::Disconnected(id),
+              DeviceEvent::Notification(id, msg) => InternalDeviceEvent::Notification(id, msg),
+            };
+            if event_sender.send(internal_event).await.is_err() {
               info!("Event sending failure in servier device manager event loop, exiting.");
               break;
             }
@@ -330,7 +345,7 @@ impl ServerDeviceManagerEventLoop {
           debug!("Server not currently available, dropping Device Added event.");
         }
       }
-      ServerDeviceEvent::Disconnected(identifier) => {
+      InternalDeviceEvent::Disconnected(identifier) => {
         let mut device_index = None;
         for device_pair in self.device_map.iter() {
           if *device_pair.value().identifier() == identifier {
@@ -349,7 +364,7 @@ impl ServerDeviceManagerEventLoop {
           }
         }
       }
-      ServerDeviceEvent::Notification(_, message) => {
+      InternalDeviceEvent::Notification(_, message) => {
         if self.server_sender.send(message.into()).is_err() {
           debug!("Server not currently available, dropping Device Added event.");
         }
