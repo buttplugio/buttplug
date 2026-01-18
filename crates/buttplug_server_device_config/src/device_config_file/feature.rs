@@ -1,21 +1,17 @@
-use std::{collections::HashSet, ops::RangeInclusive};
+use std::ops::RangeInclusive;
 
 use crate::{
   ButtplugDeviceConfigError,
   RangeWithLimit,
   ServerDeviceFeature,
   ServerDeviceFeatureInput,
-  ServerDeviceFeatureInputProperties,
   ServerDeviceFeatureOutput,
   ServerDeviceFeatureOutputPositionProperties,
   ServerDeviceFeatureOutputPositionWithDurationProperties,
   ServerDeviceFeatureOutputValueProperties,
 };
-use buttplug_core::{
-  message::InputCommandType,
-  util::range_serialize::{option_range_serialize, range_sequence_serialize, range_serialize},
-};
-use getset::{CopyGetters, Getters, MutGetters, Setters};
+use buttplug_core::util::range_serialize::option_range_serialize;
+use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -29,109 +25,6 @@ pub struct BaseFeatureSettings {
 impl BaseFeatureSettings {
   pub fn is_none(&self) -> bool {
     self.alt_protocol_index.is_none()
-  }
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-struct BaseDeviceFeatureOutputValueProperties {
-  #[serde(serialize_with = "range_serialize")]
-  value: RangeInclusive<i32>,
-}
-
-impl From<BaseDeviceFeatureOutputValueProperties> for ServerDeviceFeatureOutputValueProperties {
-  fn from(val: BaseDeviceFeatureOutputValueProperties) -> Self {
-    ServerDeviceFeatureOutputValueProperties::new(&val.value.into(), false)
-  }
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-struct BaseDeviceFeatureOutputPositionProperties {
-  #[serde(serialize_with = "range_serialize")]
-  value: RangeInclusive<i32>,
-}
-
-impl From<BaseDeviceFeatureOutputPositionProperties>
-  for ServerDeviceFeatureOutputPositionProperties
-{
-  fn from(val: BaseDeviceFeatureOutputPositionProperties) -> Self {
-    ServerDeviceFeatureOutputPositionProperties::new(&val.value.into(), false, false)
-  }
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-struct BaseDeviceFeatureOutputPositionWithDurationProperties {
-  #[serde(serialize_with = "range_serialize")]
-  value: RangeInclusive<i32>,
-  #[serde(serialize_with = "range_serialize")]
-  duration: RangeInclusive<i32>,
-}
-
-impl From<BaseDeviceFeatureOutputPositionWithDurationProperties>
-  for ServerDeviceFeatureOutputPositionWithDurationProperties
-{
-  fn from(val: BaseDeviceFeatureOutputPositionWithDurationProperties) -> Self {
-    ServerDeviceFeatureOutputPositionWithDurationProperties::new(
-      &val.value.into(),
-      &val.duration.into(),
-      false,
-      false,
-    )
-  }
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-struct BaseDeviceFeatureOutput {
-  #[serde(skip_serializing_if = "Option::is_none")]
-  vibrate: Option<BaseDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  rotate: Option<BaseDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  oscillate: Option<BaseDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  constrict: Option<BaseDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  temperature: Option<BaseDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  led: Option<BaseDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  position: Option<BaseDeviceFeatureOutputPositionProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  position_with_duration: Option<BaseDeviceFeatureOutputPositionWithDurationProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  spray: Option<BaseDeviceFeatureOutputValueProperties>,
-}
-
-impl From<BaseDeviceFeatureOutput> for ServerDeviceFeatureOutput {
-  fn from(val: BaseDeviceFeatureOutput) -> Self {
-    let mut output = ServerDeviceFeatureOutput::default();
-    if let Some(vibrate) = val.vibrate {
-      output.set_vibrate(Some(vibrate.into()));
-    }
-    if let Some(rotate) = val.rotate {
-      output.set_rotate(Some(rotate.into()));
-    }
-    if let Some(oscillate) = val.oscillate {
-      output.set_oscillate(Some(oscillate.into()));
-    }
-    if let Some(constrict) = val.constrict {
-      output.set_constrict(Some(constrict.into()));
-    }
-    if let Some(temperature) = val.temperature {
-      output.set_temperature(Some(temperature.into()));
-    }
-    if let Some(led) = val.led {
-      output.set_led(Some(led.into()));
-    }
-    if let Some(position) = val.position {
-      output.set_position(Some(position.into()));
-    }
-    if let Some(position_with_duration) = val.position_with_duration {
-      output.set_position_with_duration(Some(position_with_duration.into()));
-    }
-    if let Some(spray) = val.spray {
-      output.set_spray(Some(spray.into()));
-    }
-    output
   }
 }
 
@@ -371,63 +264,6 @@ impl From<&ServerDeviceFeatureOutput> for UserDeviceFeatureOutput {
   }
 }
 
-#[derive(
-  Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters, Serialize, Deserialize,
-)]
-pub struct DeviceFeatureInputProperties {
-  #[getset(get = "pub", get_mut = "pub(super)")]
-  #[serde(serialize_with = "range_sequence_serialize")]
-  value: Vec<RangeInclusive<i32>>,
-  #[getset(get = "pub")]
-  command: HashSet<InputCommandType>,
-}
-
-impl DeviceFeatureInputProperties {
-  pub fn new(
-    value: &Vec<RangeInclusive<i32>>,
-    sensor_commands: &HashSet<InputCommandType>,
-  ) -> Self {
-    Self {
-      value: value.clone(),
-      command: sensor_commands.clone(),
-    }
-  }
-}
-
-impl From<DeviceFeatureInputProperties> for ServerDeviceFeatureInputProperties {
-  fn from(val: DeviceFeatureInputProperties) -> Self {
-    ServerDeviceFeatureInputProperties::new(&val.value, &val.command)
-  }
-}
-
-#[derive(Clone, Debug, Default, Getters, Serialize, Deserialize)]
-#[getset(get = "pub")]
-pub struct DeviceFeatureInput {
-  battery: Option<DeviceFeatureInputProperties>,
-  rssi: Option<DeviceFeatureInputProperties>,
-  pressure: Option<DeviceFeatureInputProperties>,
-  button: Option<DeviceFeatureInputProperties>,
-}
-
-impl From<DeviceFeatureInput> for ServerDeviceFeatureInput {
-  fn from(val: DeviceFeatureInput) -> Self {
-    let mut input = ServerDeviceFeatureInput::default();
-    if let Some(battery) = val.battery {
-      input.set_battery(Some(battery.into()));
-    }
-    if let Some(rssi) = val.rssi {
-      input.set_rssi(Some(rssi.into()));
-    }
-    if let Some(pressure) = val.pressure {
-      input.set_pressure(Some(pressure.into()));
-    }
-    if let Some(button) = val.button {
-      input.set_button(Some(button.into()));
-    }
-    input
-  }
-}
-
 #[derive(Clone, Debug, Default, Getters, Serialize, Deserialize, CopyGetters)]
 pub struct ConfigBaseDeviceFeature {
   #[getset(get_copy = "pub")]
@@ -437,10 +273,10 @@ pub struct ConfigBaseDeviceFeature {
   description: String,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  output: Option<BaseDeviceFeatureOutput>,
+  output: Option<ServerDeviceFeatureOutput>,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  input: Option<DeviceFeatureInput>,
+  input: Option<ServerDeviceFeatureInput>,
   #[getset(get_copy = "pub")]
   id: Uuid,
   #[getset(get = "pub")]
@@ -450,17 +286,14 @@ pub struct ConfigBaseDeviceFeature {
 
 impl From<ConfigBaseDeviceFeature> for ServerDeviceFeature {
   fn from(val: ConfigBaseDeviceFeature) -> Self {
-    // This isn't resolving correctly using .and_then, so having to do it the long way?
-    let output: Option<ServerDeviceFeatureOutput> = val.output.map(|o| o.into());
-    let input: Option<ServerDeviceFeatureInput> = val.input.map(|i| i.into());
     ServerDeviceFeature::new(
       val.index,
       &val.description,
       val.id,
       None,
       val.feature_settings.alt_protocol_index,
-      &output,
-      &input,
+      &val.output,
+      &val.input,
     )
   }
 }
