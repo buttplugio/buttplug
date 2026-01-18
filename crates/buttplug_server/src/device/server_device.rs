@@ -37,7 +37,7 @@
 //! In order to handle multiple message spec versions
 
 use std::{
-  collections::{BTreeMap, VecDeque},
+  collections::BTreeMap,
   fmt::{self, Debug},
   sync::Arc,
   time::Duration,
@@ -58,7 +58,7 @@ use buttplug_core::{
     OutputValue,
     StopDeviceCmdV4,
   },
-  util::{self, async_manager, stream::convert_broadcast_receiver_to_stream},
+  util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server_device_config::{
   DeviceConfigurationManager,
@@ -69,7 +69,8 @@ use buttplug_server_device_config::{
 use crate::{
   ButtplugServerResultFuture,
   device::{
-    hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent, HardwareWriteCmd},
+    device_task::{spawn_device_task, DeviceTaskConfig},
+    hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent},
     protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, ProtocolSpecializer},
   },
   message::{
@@ -84,11 +85,7 @@ use core::hash::{Hash, Hasher};
 use dashmap::DashMap;
 use futures::future::{self, BoxFuture, FutureExt};
 use getset::Getters;
-use tokio::{
-  select,
-  sync::mpsc::{Sender, channel},
-  time::Instant,
-};
+use tokio::sync::mpsc::{Sender, channel};
 use tokio_stream::StreamExt;
 use uuid::Uuid;
 
@@ -253,144 +250,16 @@ impl ServerDevice {
     };
 
     // Set up and start the packet send task
-    {
-      let hardware = hardware.clone();
-      let requires_keepalive = hardware.requires_keepalive();
-      let strategy = handler.keepalive_strategy();
-      let strategy_duration =
-        if let ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(duration) = strategy {
-          Some(duration)
-        } else {
-          None
-        };
-      async_manager::spawn(async move {
-        let mut hardware_events = hardware.event_stream();
-
-        // Track last write command for keepalive replay
-        let track_keepalive = (requires_keepalive
-          && matches!(strategy, ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy))
-          || matches!(strategy, ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_));
-        let mut keepalive_packet: Option<HardwareWriteCmd> = None;
-
-        // Batching state: pending commands and when to flush them
-        let mut pending_commands: VecDeque<HardwareCommand> = VecDeque::new();
-        let mut batch_deadline: Option<Instant> = None;
-
-        loop {
-          // Calculate keepalive timeout
-          let keepalive_fut = async {
-            if let Some(duration) = strategy_duration {
-              util::sleep(duration).await;
-            } else if requires_keepalive {
-              util::sleep(Duration::from_secs(5)).await; // iOS Bluetooth default
-            } else {
-              future::pending::<()>().await;
-            }
-          };
-
-          // Calculate batch flush timeout (only if we're batching)
-          let batch_fut = async {
-            match batch_deadline {
-              Some(deadline) => tokio::time::sleep_until(deadline).await,
-              None => future::pending::<()>().await,
-            }
-          };
-
-          select! {
-            biased;
-
-            // Priority 1: Incoming commands
-            msg = internal_hw_msg_recv.recv() => {
-              let Some(commands) = msg else {
-                info!("No longer receiving messages from device parent, breaking");
-                break;
-              };
-
-              if device_wait_duration.is_none() {
-                // No batching - send immediately
-                trace!("No wait duration, sending commands immediately: {:?}", commands);
-                for cmd in commands {
-                  let _ = hardware.parse_message(&cmd).await;
-                  if track_keepalive {
-                    if let HardwareCommand::Write(ref write_cmd) = cmd {
-                      keepalive_packet = Some(write_cmd.clone());
-                    }
-                  }
-                }
-              } else {
-                // Batching enabled
-                if pending_commands.is_empty() {
-                  // First batch - add directly without deduplication (matches old behavior)
-                  pending_commands.extend(commands);
-                  batch_deadline = Some(Instant::now() + device_wait_duration.unwrap());
-                } else {
-                  // Subsequent batches - deduplicate each command against existing
-                  for command in commands {
-                    pending_commands.retain(|existing| !command.overlaps(existing));
-                    pending_commands.push_back(command);
-                  }
-                }
-              }
-            }
-
-            // Priority 2: Batch deadline reached - flush pending commands
-            _ = batch_fut => {
-              debug!("Batch deadline reached, sending {} commands", pending_commands.len());
-              while let Some(cmd) = pending_commands.pop_front() {
-                let _ = hardware.parse_message(&cmd).await;
-                if track_keepalive {
-                  if let HardwareCommand::Write(ref write_cmd) = cmd {
-                    keepalive_packet = Some(write_cmd.clone());
-                  }
-                }
-              }
-              batch_deadline = None;
-            }
-
-            // Priority 3: Keepalive timer
-            _ = keepalive_fut => {
-              let result = match &strategy {
-                ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(duration) => {
-                  if hardware.time_since_last_write().await > *duration {
-                    if let Some(ref packet) = keepalive_packet {
-                      hardware.write_value(packet).await
-                    } else {
-                      warn!("No keepalive packet available, device may disconnect.");
-                      Ok(())
-                    }
-                  } else {
-                    Ok(())
-                  }
-                }
-                ProtocolKeepaliveStrategy::HardwareRequiredRepeatPacketStrategy(packet) => {
-                  hardware.write_value(packet).await
-                }
-                ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy => {
-                  if let Some(ref packet) = keepalive_packet {
-                    hardware.write_value(packet).await
-                  } else {
-                    Ok(())
-                  }
-                }
-              };
-              if let Err(e) = result {
-                warn!("Error writing keepalive packet: {:?}", e);
-                break;
-              }
-            }
-
-            // Priority 4: Hardware events (disconnection)
-            hw_event = hardware_events.recv() => {
-              if matches!(hw_event, Ok(HardwareEvent::Disconnected(_))) || hw_event.is_err() {
-                info!("Hardware disconnected, shutting down task");
-                return;
-              }
-            }
-          }
-        }
-        info!("Leaving task for {}", hardware.name());
-      });
-    }
+    spawn_device_task(
+      hardware.clone(),
+      handler.clone(),
+      DeviceTaskConfig {
+        message_gap: device_wait_duration,
+        requires_keepalive: hardware.requires_keepalive(),
+        keepalive_strategy: handler.keepalive_strategy(),
+      },
+      internal_hw_msg_recv,
+    );
 
     let mut stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4> = vec![];
     // We consider the feature's FeatureType to be the "main" capability of a feature. Use that to

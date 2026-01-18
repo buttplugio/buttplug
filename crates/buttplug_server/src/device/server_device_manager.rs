@@ -12,7 +12,7 @@ use crate::{
   ButtplugServerError,
   ButtplugServerResultFuture,
   device::{
-    ServerDevice,
+    DeviceHandle,
     hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerBuilder},
     server_device_manager_event_loop::ServerDeviceManagerEventLoop,
   },
@@ -177,7 +177,7 @@ pub struct ServerDeviceManager {
   #[getset(get = "pub")]
   device_configuration_manager: Arc<DeviceConfigurationManager>,
   #[getset(get = "pub(crate)")]
-  devices: Arc<DashMap<u32, Arc<ServerDevice>>>,
+  devices: Arc<DashMap<u32, DeviceHandle>>,
   device_command_sender: mpsc::Sender<DeviceManagerCommand>,
   loop_cancellation_token: CancellationToken,
   running: Arc<AtomicBool>,

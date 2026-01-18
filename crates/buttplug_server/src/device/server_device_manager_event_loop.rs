@@ -13,6 +13,7 @@ use buttplug_server_device_config::DeviceConfigurationManager;
 use tracing::info_span;
 
 use crate::device::{
+  DeviceHandle,
   ServerDevice,
   ServerDeviceEvent,
   hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
@@ -31,8 +32,8 @@ pub(super) struct ServerDeviceManagerEventLoop {
   comm_managers: Vec<Box<dyn HardwareCommunicationManager>>,
   device_config_manager: Arc<DeviceConfigurationManager>,
   device_command_receiver: mpsc::Receiver<DeviceManagerCommand>,
-  /// Maps device index (exposed to the outside world) to actual device objects held by the server.
-  device_map: Arc<DashMap<u32, Arc<ServerDevice>>>,
+  /// Maps device index (exposed to the outside world) to device handles held by the server.
+  device_map: Arc<DashMap<u32, DeviceHandle>>,
   /// Broadcaster that relays device events in the form of Buttplug Messages to
   /// whoever owns the Buttplug Server.
   server_sender: broadcast::Sender<ButtplugServerMessageV4>,
@@ -62,7 +63,7 @@ impl ServerDeviceManagerEventLoop {
   pub fn new(
     comm_managers: Vec<Box<dyn HardwareCommunicationManager>>,
     device_config_manager: Arc<DeviceConfigurationManager>,
-    device_map: Arc<DashMap<u32, Arc<ServerDevice>>>,
+    device_map: Arc<DashMap<u32, DeviceHandle>>,
     loop_cancellation_token: CancellationToken,
     server_sender: broadcast::Sender<ButtplugServerMessageV4>,
     device_comm_receiver: mpsc::Receiver<HardwareCommunicationManagerEvent>,
@@ -276,8 +277,11 @@ impl ServerDeviceManagerEventLoop {
         );
         let _enter = span.enter();
 
+        // Wrap the ServerDevice in a DeviceHandle
+        let device_handle = DeviceHandle::new(device);
+
         // Get the index from the device
-        let device_index = device.definition().index();
+        let device_index = device_handle.definition().index();
         // Since we can now reuse device indexes, this means we might possibly
         // stomp on devices already in the map if they don't register a
         // disconnect before we try to insert the new device. If we have a
@@ -302,7 +306,7 @@ impl ServerDeviceManagerEventLoop {
         }
 
         // Create event loop for forwarding device events into our selector.
-        let event_listener = device.event_stream();
+        let event_listener = device_handle.event_stream();
         let event_sender = self.device_event_sender.clone();
         async_manager::spawn(async move {
           pin_mut!(event_listener);
@@ -315,8 +319,8 @@ impl ServerDeviceManagerEventLoop {
           }
         });
 
-        info!("Assigning index {} to {}", device_index, device.name());
-        self.device_map.insert(device_index, device.clone());
+        info!("Assigning index {} to {}", device_index, device_handle.name());
+        self.device_map.insert(device_index, device_handle.clone());
 
         let device_update_message: ButtplugServerMessageV4 = self.generate_device_list().into();
 
