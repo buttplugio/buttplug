@@ -1,6 +1,6 @@
 use std::ops::RangeInclusive;
 
-use serde::{Serialize, Serializer, ser::SerializeSeq};
+use serde::{Serialize, Serializer};
 
 pub fn option_range_serialize<S, T>(
   range: &Option<RangeInclusive<T>>,
@@ -8,7 +8,7 @@ pub fn option_range_serialize<S, T>(
 ) -> Result<S::Ok, S::Error>
 where
   S: Serializer,
-  T: Serialize,
+  T: Serialize + Copy,
 {
   if let Some(r) = range {
     range_serialize(r, serializer)
@@ -20,12 +20,9 @@ where
 pub fn range_serialize<S, T>(range: &RangeInclusive<T>, serializer: S) -> Result<S::Ok, S::Error>
 where
   S: Serializer,
-  T: Serialize,
+  T: Serialize + Copy,
 {
-  let mut seq = serializer.serialize_seq(Some(2))?;
-  seq.serialize_element(&range.start())?;
-  seq.serialize_element(&range.end())?;
-  seq.end()
+  [*range.start(), *range.end()].serialize(serializer)
 }
 
 pub fn range_sequence_serialize<S, T>(
@@ -34,11 +31,8 @@ pub fn range_sequence_serialize<S, T>(
 ) -> Result<S::Ok, S::Error>
 where
   S: Serializer,
-  T: Serialize + Copy + Clone,
+  T: Serialize + Copy,
 {
-  let mut seq = serializer.serialize_seq(Some(range_vec.len()))?;
-  for range in range_vec {
-    seq.serialize_element(&vec![*range.start(), *range.end()])?;
-  }
-  seq.end()
+  let arrays: Vec<[T; 2]> = range_vec.iter().map(|r| [*r.start(), *r.end()]).collect();
+  arrays.serialize(serializer)
 }
