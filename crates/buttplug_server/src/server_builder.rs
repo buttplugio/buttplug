@@ -9,7 +9,7 @@ use super::{
   ButtplugServerError,
   device::{ServerDeviceManager, ServerDeviceManagerBuilder},
   ping_timer::PingTimer,
-  server::ButtplugServer,
+  server::{ButtplugServer, ConnectionState},
 };
 use buttplug_core::{
   errors::*,
@@ -17,10 +17,7 @@ use buttplug_core::{
   util::async_manager,
 };
 use buttplug_server_device_config::DeviceConfigurationManagerBuilder;
-use std::sync::{
-  Arc,
-  atomic::{AtomicBool, Ordering},
-};
+use std::sync::{Arc, RwLock};
 use tokio::sync::broadcast;
 use tracing_futures::Instrument;
 
@@ -99,8 +96,9 @@ impl ButtplugServerBuilder {
     let (output_sender, _) = broadcast::channel(256);
     let output_sender_clone = output_sender.clone();
 
-    let connected = Arc::new(AtomicBool::new(false));
-    let connected_clone = connected.clone();
+    // Connection state - starts in AwaitingHandshake
+    let state = Arc::new(RwLock::new(ConnectionState::default()));
+    let state_clone = state.clone();
 
     // TODO this should use a cancellation token instead of passing around the timer itself.
     let ping_time = self.max_ping_time.unwrap_or(0);
@@ -115,7 +113,10 @@ impl ButtplugServerBuilder {
           // This will only exit if we've pinged out.
           ping_timeout_notifier.await;
           error!("Ping out signal received, stopping server");
-          connected_clone.store(false, Ordering::Relaxed);
+          {
+            let mut state_guard = state_clone.write().expect("State lock poisoned");
+            *state_guard = ConnectionState::PingedOut;
+          }
           async_manager::spawn(async move {
             if let Err(e) = device_manager_clone
               .stop_all_devices(&StopAllDevicesV4::default())
@@ -144,7 +145,7 @@ impl ButtplugServerBuilder {
       ping_time,
       ping_timer,
       self.device_manager.clone(),
-      connected,
+      state,
       output_sender,
     ))
   }

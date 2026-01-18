@@ -59,7 +59,7 @@ mod server;
 mod server_builder;
 mod server_message_conversion;
 
-pub use server::ButtplugServer;
+pub use server::{ButtplugServer, ConnectionState};
 pub use server_builder::ButtplugServerBuilder;
 
 use futures::future::BoxFuture;
