@@ -131,19 +131,4 @@ mod test {
     let js = serde_json::to_string(&error).expect("Infallible serialization.");
     assert_eq!(ERROR_STR, js);
   }
-  /*
-  #[test]
-  fn test_error_deserialize() {
-    let union: ButtplugServerMessageCurrent =
-      serde_json::from_str(ERROR_STR).expect("Infallible deserialization");
-    assert_eq!(
-      ButtplugServerMessageCurrent::Error(ErrorV0::new(
-        ErrorCode::ErrorHandshake,
-        "Test Error",
-        None
-      )),
-      union
-    );
-  }
-  */
 }
