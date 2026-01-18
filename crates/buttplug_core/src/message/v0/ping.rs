@@ -5,33 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::message::{ButtplugMessage, ButtplugMessageError, ButtplugMessageValidator};
-use serde::{Deserialize, Serialize};
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct PingV0 {
-  /// Message Id, used for matching message pairs in remote connection instances.
-  #[serde(rename = "Id")]
-  id: u32,
-}
+use crate::message::simple_client_message;
 
-impl Default for PingV0 {
-  /// Creates a new Ping message with the given Id.
-  fn default() -> Self {
-    Self { id: 1 }
-  }
-}
-
-impl ButtplugMessage for PingV0 {
-  fn id(&self) -> u32 {
-    self.id
-  }
-  fn set_id(&mut self, id: u32) {
-    self.id = id;
-  }
-}
-
-impl ButtplugMessageValidator for PingV0 {
-  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
-    self.is_not_system_id(self.id)
-  }
-}
+simple_client_message!(PingV0);

@@ -148,3 +148,38 @@ pub trait ButtplugDeviceMessage: ButtplugMessage {
 pub type ButtplugClientMessageCurrent = ButtplugClientMessageV4;
 /// Type alias for the latest version of server-to-client messages.
 pub type ButtplugServerMessageCurrent = ButtplugServerMessageV4;
+
+/// Macro for creating simple client messages that only contain an ID field.
+/// These are command messages with no payload that require a non-system ID.
+macro_rules! simple_client_message {
+  ($name:ident) => {
+    #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+    pub struct $name {
+      #[serde(rename = "Id")]
+      id: u32,
+    }
+
+    impl Default for $name {
+      fn default() -> Self {
+        Self { id: 1 }
+      }
+    }
+
+    impl crate::message::ButtplugMessage for $name {
+      fn id(&self) -> u32 {
+        self.id
+      }
+      fn set_id(&mut self, id: u32) {
+        self.id = id;
+      }
+    }
+
+    impl crate::message::ButtplugMessageValidator for $name {
+      fn is_valid(&self) -> Result<(), crate::errors::ButtplugMessageError> {
+        self.is_not_system_id(self.id)
+      }
+    }
+  };
+}
+
+pub(crate) use simple_client_message;
