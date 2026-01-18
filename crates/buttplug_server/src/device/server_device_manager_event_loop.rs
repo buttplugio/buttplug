@@ -13,27 +13,14 @@ use buttplug_server_device_config::DeviceConfigurationManager;
 use tracing::info_span;
 
 use crate::device::{
-  DeviceEvent,
   DeviceHandle,
+  InternalDeviceEvent,
   device_handle::build_device_handle,
   hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
   protocol::ProtocolManager,
 };
-use crate::message::ButtplugServerDeviceMessage;
-use buttplug_server_device_config::UserDeviceIdentifier;
-
-/// Internal event enum for the device manager event loop
-#[derive(Debug)]
-enum InternalDeviceEvent {
-  /// A new device has connected and is ready
-  Connected(DeviceHandle),
-  /// A device notification (from DeviceEvent)
-  Notification(UserDeviceIdentifier, ButtplugServerDeviceMessage),
-  /// A device has disconnected (from DeviceEvent)
-  Disconnected(UserDeviceIdentifier),
-}
 use dashmap::{DashMap, DashSet};
-use futures::{FutureExt, StreamExt, future, pin_mut};
+use futures::{FutureExt, future};
 use std::sync::Arc;
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
@@ -301,8 +288,16 @@ impl ServerDeviceManagerEventLoop {
           address = tracing::field::display(address.clone())
         );
 
+        // Clone sender again for the forwarding task that build_device_handle will spawn
+        let device_event_sender_for_forwarding = self.device_event_sender.clone();
+
         async_manager::spawn(async move {
-          match build_device_handle(device_config_manager, creator, protocol_specializers).await {
+          match build_device_handle(
+            device_config_manager,
+            creator,
+            protocol_specializers,
+            device_event_sender_for_forwarding,
+          ).await {
             Ok(device_handle) => {
               if device_event_sender_clone
                 .send(InternalDeviceEvent::Connected(device_handle))
@@ -366,24 +361,8 @@ impl ServerDeviceManagerEventLoop {
           }
         }
 
-        // Create event loop for forwarding device events into our selector.
-        let event_listener = device_handle.event_stream();
-        let event_sender = self.device_event_sender.clone();
-        async_manager::spawn(async move {
-          pin_mut!(event_listener);
-          // This can fail if the event_sender loses the server before this loop dies.
-          while let Some(event) = event_listener.next().await {
-            // Convert DeviceEvent to InternalDeviceEvent
-            let internal_event = match event {
-              DeviceEvent::Disconnected(id) => InternalDeviceEvent::Disconnected(id),
-              DeviceEvent::Notification(id, msg) => InternalDeviceEvent::Notification(id, msg),
-            };
-            if event_sender.send(internal_event).await.is_err() {
-              info!("Event sending failure in servier device manager event loop, exiting.");
-              break;
-            }
-          }
-        });
+        // Note: The device event forwarding task is now spawned in build_device_handle(),
+        // so we no longer need to create it here.
 
         info!("Assigning index {} to {}", device_index, device_handle.name());
         self.device_map.insert(device_index, device_handle.clone());

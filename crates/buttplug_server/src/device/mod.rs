@@ -104,5 +104,20 @@ mod server_device_manager;
 mod server_device_manager_event_loop;
 
 pub use device_handle::{DeviceCommand, DeviceEvent, DeviceHandle};
+
+use buttplug_server_device_config::UserDeviceIdentifier;
+use crate::message::ButtplugServerDeviceMessage;
+
+/// Internal event enum for device manager communication.
+/// Used by DeviceHandle to send events to the device manager event loop.
+#[derive(Debug)]
+pub(crate) enum InternalDeviceEvent {
+  /// A new device has connected and is ready
+  Connected(DeviceHandle),
+  /// A device notification
+  Notification(UserDeviceIdentifier, ButtplugServerDeviceMessage),
+  /// A device has disconnected
+  Disconnected(UserDeviceIdentifier),
+}
 pub use protocol_impl::get_default_protocol_map;
 pub use server_device_manager::{ServerDeviceManager, ServerDeviceManagerBuilder};

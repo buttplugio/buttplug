@@ -19,7 +19,7 @@ use buttplug_core::{
     self, ButtplugMessage, ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4,
     InputCommandType, InputType, OutputType, OutputValue, StopDeviceCmdV4,
   },
-  util::stream::convert_broadcast_receiver_to_stream,
+  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use buttplug_server_device_config::{
   DeviceConfigurationManager, ServerDeviceDefinition, UserDeviceIdentifier,
@@ -42,6 +42,7 @@ use crate::{
 };
 
 use super::{
+  InternalDeviceEvent,
   device_task::{spawn_device_task, DeviceTaskConfig},
   hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent},
   protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, ProtocolSpecializer},
@@ -394,11 +395,13 @@ impl std::fmt::Debug for DeviceHandle {
 /// 2. Specializes it for the matched protocol
 /// 3. Initializes the protocol handler
 /// 4. Spawns the device communication task
-/// 5. Returns a DeviceHandle for interacting with the device
+/// 5. Spawns the device event forwarding task
+/// 6. Returns a DeviceHandle for interacting with the device
 pub(super) async fn build_device_handle(
   device_config_manager: Arc<DeviceConfigurationManager>,
   mut hardware_connector: Box<dyn HardwareConnector>,
   protocol_specializers: Vec<ProtocolSpecializer>,
+  device_event_sender: tokio::sync::mpsc::Sender<InternalDeviceEvent>,
 ) -> Result<DeviceHandle, ButtplugDeviceError> {
   // At this point, we know we've got hardware that is waiting to connect, and enough protocol
   // info to actually do something after we connect. So go ahead and connect.
@@ -556,6 +559,50 @@ pub(super) async fn build_device_handle(
       "Error setting up keepalive: {e}"
     )));
   }
+
+  // Spawn the device event forwarding task.
+  // This task listens to device events (disconnections, notifications) and forwards them
+  // to the device manager event loop via the provided sender.
+  let event_stream = device_handle.event_stream();
+  let identifier = device_handle.identifier().clone();
+  async_manager::spawn(async move {
+    futures::pin_mut!(event_stream);
+    loop {
+      let event = futures::StreamExt::next(&mut event_stream).await;
+      match event {
+        Some(DeviceEvent::Disconnected(id)) => {
+          if device_event_sender
+            .send(InternalDeviceEvent::Disconnected(id))
+            .await
+            .is_err()
+          {
+            info!(
+              "Device event sender closed for device {:?}, stopping event forwarding.",
+              identifier
+            );
+            break;
+          }
+        }
+        Some(DeviceEvent::Notification(id, msg)) => {
+          if device_event_sender
+            .send(InternalDeviceEvent::Notification(id, msg))
+            .await
+            .is_err()
+          {
+            info!(
+              "Device event sender closed for device {:?}, stopping event forwarding.",
+              identifier
+            );
+            break;
+          }
+        }
+        None => {
+          // Stream ended (device likely disconnected)
+          break;
+        }
+      }
+    }
+  });
 
   Ok(device_handle)
 }
