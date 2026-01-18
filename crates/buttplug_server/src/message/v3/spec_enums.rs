@@ -14,9 +14,7 @@ use crate::message::{
 use buttplug_core::{
   errors::{ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugMessage,
     ButtplugMessageFinalizer,
-    ButtplugMessageValidator,
     ButtplugServerMessageV4,
     DeviceRemovedV0,
     ErrorV0,
@@ -63,68 +61,23 @@ pub enum ButtplugClientMessageV3 {
   SensorUnsubscribeCmd(SensorUnsubscribeCmdV3),
 }
 
-impl ButtplugMessage for ButtplugClientMessageV3 {
-  fn id(&self) -> u32 {
-    match self {
-      ButtplugClientMessageV3::RequestServerInfo(msg) => msg.id(),
-      ButtplugClientMessageV3::Ping(msg) => msg.id(),
-      ButtplugClientMessageV3::StartScanning(msg) => msg.id(),
-      ButtplugClientMessageV3::StopScanning(msg) => msg.id(),
-      ButtplugClientMessageV3::RequestDeviceList(msg) => msg.id(),
-      ButtplugClientMessageV3::StopAllDevices(msg) => msg.id(),
-      ButtplugClientMessageV3::VibrateCmd(msg) => msg.id(),
-      ButtplugClientMessageV3::LinearCmd(msg) => msg.id(),
-      ButtplugClientMessageV3::RotateCmd(msg) => msg.id(),
-      ButtplugClientMessageV3::StopDeviceCmd(msg) => msg.id(),
-      ButtplugClientMessageV3::ScalarCmd(msg) => msg.id(),
-      ButtplugClientMessageV3::SensorReadCmd(msg) => msg.id(),
-      ButtplugClientMessageV3::SensorSubscribeCmd(msg) => msg.id(),
-      ButtplugClientMessageV3::SensorUnsubscribeCmd(msg) => msg.id(),
-    }
-  }
-  fn set_id(&mut self, id: u32) {
-    match self {
-      ButtplugClientMessageV3::RequestServerInfo(msg) => msg.set_id(id),
-      ButtplugClientMessageV3::Ping(msg) => msg.set_id(id),
-      ButtplugClientMessageV3::StartScanning(msg) => msg.set_id(id),
-      ButtplugClientMessageV3::StopScanning(msg) => msg.set_id(id),
-      ButtplugClientMessageV3::RequestDeviceList(msg) => msg.set_id(id),
-      ButtplugClientMessageV3::StopAllDevices(msg) => msg.set_id(id),
-      ButtplugClientMessageV3::VibrateCmd(msg) => msg.set_id(id),
-      ButtplugClientMessageV3::LinearCmd(msg) => msg.set_id(id),
-      ButtplugClientMessageV3::RotateCmd(msg) => msg.set_id(id),
-      ButtplugClientMessageV3::StopDeviceCmd(msg) => msg.set_id(id),
-      ButtplugClientMessageV3::ScalarCmd(msg) => msg.set_id(id),
-      ButtplugClientMessageV3::SensorReadCmd(msg) => msg.set_id(id),
-      ButtplugClientMessageV3::SensorSubscribeCmd(msg) => msg.set_id(id),
-      ButtplugClientMessageV3::SensorUnsubscribeCmd(msg) => msg.set_id(id),
-    }
-  }
-}
-
-impl ButtplugMessageFinalizer for ButtplugClientMessageV3 {
-}
-
-impl ButtplugMessageValidator for ButtplugClientMessageV3 {
-  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
-    match self {
-      ButtplugClientMessageV3::RequestServerInfo(msg) => msg.is_valid(),
-      ButtplugClientMessageV3::Ping(msg) => msg.is_valid(),
-      ButtplugClientMessageV3::StartScanning(msg) => msg.is_valid(),
-      ButtplugClientMessageV3::StopScanning(msg) => msg.is_valid(),
-      ButtplugClientMessageV3::RequestDeviceList(msg) => msg.is_valid(),
-      ButtplugClientMessageV3::StopAllDevices(msg) => msg.is_valid(),
-      ButtplugClientMessageV3::VibrateCmd(msg) => msg.is_valid(),
-      ButtplugClientMessageV3::LinearCmd(msg) => msg.is_valid(),
-      ButtplugClientMessageV3::RotateCmd(msg) => msg.is_valid(),
-      ButtplugClientMessageV3::StopDeviceCmd(msg) => msg.is_valid(),
-      ButtplugClientMessageV3::ScalarCmd(msg) => msg.is_valid(),
-      ButtplugClientMessageV3::SensorReadCmd(msg) => msg.is_valid(),
-      ButtplugClientMessageV3::SensorSubscribeCmd(msg) => msg.is_valid(),
-      ButtplugClientMessageV3::SensorUnsubscribeCmd(msg) => msg.is_valid(),
-    }
-  }
-}
+impl_message_enum_traits!(ButtplugClientMessageV3 {
+  RequestServerInfo,
+  Ping,
+  StartScanning,
+  StopScanning,
+  RequestDeviceList,
+  StopAllDevices,
+  VibrateCmd,
+  LinearCmd,
+  RotateCmd,
+  StopDeviceCmd,
+  ScalarCmd,
+  SensorReadCmd,
+  SensorSubscribeCmd,
+  SensorUnsubscribeCmd,
+});
+impl ButtplugMessageFinalizer for ButtplugClientMessageV3 {}
 
 // For v2 to v3, all deprecations should be treated as conversions, but will require current
 // connected device state, meaning they'll need to be implemented where they can also access the
@@ -182,48 +135,18 @@ pub enum ButtplugServerMessageV3 {
   SensorReading(SensorReadingV3),
 }
 
-impl ButtplugMessage for ButtplugServerMessageV3 {
-  fn id(&self) -> u32 {
-    match self {
-      ButtplugServerMessageV3::Ok(msg) => msg.id(),
-      ButtplugServerMessageV3::Error(msg) => msg.id(),
-      ButtplugServerMessageV3::ServerInfo(msg) => msg.id(),
-      ButtplugServerMessageV3::DeviceList(msg) => msg.id(),
-      ButtplugServerMessageV3::DeviceAdded(msg) => msg.id(),
-      ButtplugServerMessageV3::DeviceRemoved(msg) => msg.id(),
-      ButtplugServerMessageV3::ScanningFinished(msg) => msg.id(),
-      ButtplugServerMessageV3::SensorReading(msg) => msg.id(),
-    }
-  }
-  fn set_id(&mut self, id: u32) {
-    match self {
-      ButtplugServerMessageV3::Ok(msg) => msg.set_id(id),
-      ButtplugServerMessageV3::Error(msg) => msg.set_id(id),
-      ButtplugServerMessageV3::ServerInfo(msg) => msg.set_id(id),
-      ButtplugServerMessageV3::DeviceList(msg) => msg.set_id(id),
-      ButtplugServerMessageV3::DeviceAdded(msg) => msg.set_id(id),
-      ButtplugServerMessageV3::DeviceRemoved(msg) => msg.set_id(id),
-      ButtplugServerMessageV3::ScanningFinished(msg) => msg.set_id(id),
-      ButtplugServerMessageV3::SensorReading(msg) => msg.set_id(id),
-    }
-  }
-}
+impl_message_enum_traits!(ButtplugServerMessageV3 {
+  Ok,
+  Error,
+  ServerInfo,
+  DeviceList,
+  DeviceAdded,
+  DeviceRemoved,
+  ScanningFinished,
+  SensorReading,
+});
 
-impl ButtplugMessageValidator for ButtplugServerMessageV3 {
-  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
-    match self {
-      ButtplugServerMessageV3::Ok(msg) => msg.is_valid(),
-      ButtplugServerMessageV3::Error(msg) => msg.is_valid(),
-      ButtplugServerMessageV3::ServerInfo(msg) => msg.is_valid(),
-      ButtplugServerMessageV3::DeviceList(msg) => msg.is_valid(),
-      ButtplugServerMessageV3::DeviceAdded(msg) => msg.is_valid(),
-      ButtplugServerMessageV3::DeviceRemoved(msg) => msg.is_valid(),
-      ButtplugServerMessageV3::ScanningFinished(msg) => msg.is_valid(),
-      ButtplugServerMessageV3::SensorReading(msg) => msg.is_valid(),
-    }
-  }
-}
-
+// Custom finalize implementation - DeviceAdded and DeviceList need special handling
 impl ButtplugMessageFinalizer for ButtplugServerMessageV3 {
   fn finalize(&mut self) {
     match self {

@@ -13,6 +13,34 @@ use buttplug_core::{
 };
 use server_device_attributes::ServerDeviceAttributes;
 
+/// Macro for implementing ButtplugMessage and ButtplugMessageValidator on message enums
+/// that dispatch to their inner message types. ButtplugMessageFinalizer must be implemented
+/// separately as some enums have custom finalize() implementations.
+macro_rules! impl_message_enum_traits {
+  ($enum_name:ident { $($variant:ident),* $(,)? }) => {
+    impl buttplug_core::message::ButtplugMessage for $enum_name {
+      fn id(&self) -> u32 {
+        match self {
+          $(Self::$variant(msg) => msg.id(),)*
+        }
+      }
+      fn set_id(&mut self, id: u32) {
+        match self {
+          $(Self::$variant(msg) => msg.set_id(id),)*
+        }
+      }
+    }
+
+    impl buttplug_core::message::ButtplugMessageValidator for $enum_name {
+      fn is_valid(&self) -> Result<(), buttplug_core::errors::ButtplugMessageError> {
+        match self {
+          $(Self::$variant(msg) => msg.is_valid(),)*
+        }
+      }
+    }
+  };
+}
+
 pub mod serializer;
 pub mod server_device_attributes;
 mod v0;
@@ -36,41 +64,8 @@ pub enum ButtplugClientMessageVariant {
   V4(ButtplugClientMessageV4),
 }
 
-impl ButtplugMessage for ButtplugClientMessageVariant {
-  fn id(&self) -> u32 {
-    match self {
-      ButtplugClientMessageVariant::V0(msg) => msg.id(),
-      ButtplugClientMessageVariant::V1(msg) => msg.id(),
-      ButtplugClientMessageVariant::V2(msg) => msg.id(),
-      ButtplugClientMessageVariant::V3(msg) => msg.id(),
-      ButtplugClientMessageVariant::V4(msg) => msg.id(),
-    }
-  }
-  fn set_id(&mut self, id: u32) {
-    match self {
-      ButtplugClientMessageVariant::V0(msg) => msg.set_id(id),
-      ButtplugClientMessageVariant::V1(msg) => msg.set_id(id),
-      ButtplugClientMessageVariant::V2(msg) => msg.set_id(id),
-      ButtplugClientMessageVariant::V3(msg) => msg.set_id(id),
-      ButtplugClientMessageVariant::V4(msg) => msg.set_id(id),
-    }
-  }
-}
-
-impl ButtplugMessageFinalizer for ButtplugClientMessageVariant {
-}
-
-impl ButtplugMessageValidator for ButtplugClientMessageVariant {
-  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
-    match self {
-      ButtplugClientMessageVariant::V0(msg) => msg.is_valid(),
-      ButtplugClientMessageVariant::V1(msg) => msg.is_valid(),
-      ButtplugClientMessageVariant::V2(msg) => msg.is_valid(),
-      ButtplugClientMessageVariant::V3(msg) => msg.is_valid(),
-      ButtplugClientMessageVariant::V4(msg) => msg.is_valid(),
-    }
-  }
-}
+impl_message_enum_traits!(ButtplugClientMessageVariant { V0, V1, V2, V3, V4 });
+impl ButtplugMessageFinalizer for ButtplugClientMessageVariant {}
 
 impl ButtplugClientMessageVariant {
   pub fn version(&self) -> ButtplugMessageSpecVersion {
@@ -165,41 +160,8 @@ pub enum ButtplugServerMessageVariant {
   V4(ButtplugServerMessageV4),
 }
 
-impl ButtplugMessage for ButtplugServerMessageVariant {
-  fn id(&self) -> u32 {
-    match self {
-      ButtplugServerMessageVariant::V0(msg) => msg.id(),
-      ButtplugServerMessageVariant::V1(msg) => msg.id(),
-      ButtplugServerMessageVariant::V2(msg) => msg.id(),
-      ButtplugServerMessageVariant::V3(msg) => msg.id(),
-      ButtplugServerMessageVariant::V4(msg) => msg.id(),
-    }
-  }
-  fn set_id(&mut self, id: u32) {
-    match self {
-      ButtplugServerMessageVariant::V0(msg) => msg.set_id(id),
-      ButtplugServerMessageVariant::V1(msg) => msg.set_id(id),
-      ButtplugServerMessageVariant::V2(msg) => msg.set_id(id),
-      ButtplugServerMessageVariant::V3(msg) => msg.set_id(id),
-      ButtplugServerMessageVariant::V4(msg) => msg.set_id(id),
-    }
-  }
-}
-
-impl ButtplugMessageFinalizer for ButtplugServerMessageVariant {
-}
-
-impl ButtplugMessageValidator for ButtplugServerMessageVariant {
-  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
-    match self {
-      ButtplugServerMessageVariant::V0(msg) => msg.is_valid(),
-      ButtplugServerMessageVariant::V1(msg) => msg.is_valid(),
-      ButtplugServerMessageVariant::V2(msg) => msg.is_valid(),
-      ButtplugServerMessageVariant::V3(msg) => msg.is_valid(),
-      ButtplugServerMessageVariant::V4(msg) => msg.is_valid(),
-    }
-  }
-}
+impl_message_enum_traits!(ButtplugServerMessageVariant { V0, V1, V2, V3, V4 });
+impl ButtplugMessageFinalizer for ButtplugServerMessageVariant {}
 
 impl ButtplugServerMessageVariant {
   pub fn version(&self) -> ButtplugMessageSpecVersion {
@@ -253,29 +215,8 @@ pub enum ButtplugServerDeviceMessage {
   SensorReading(InputReadingV4),
 }
 
-impl ButtplugMessage for ButtplugServerDeviceMessage {
-  fn id(&self) -> u32 {
-    match self {
-      ButtplugServerDeviceMessage::SensorReading(msg) => msg.id(),
-    }
-  }
-  fn set_id(&mut self, id: u32) {
-    match self {
-      ButtplugServerDeviceMessage::SensorReading(msg) => msg.set_id(id),
-    }
-  }
-}
-
-impl ButtplugMessageFinalizer for ButtplugServerDeviceMessage {
-}
-
-impl ButtplugMessageValidator for ButtplugServerDeviceMessage {
-  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
-    match self {
-      ButtplugServerDeviceMessage::SensorReading(msg) => msg.is_valid(),
-    }
-  }
-}
+impl_message_enum_traits!(ButtplugServerDeviceMessage { SensorReading });
+impl ButtplugMessageFinalizer for ButtplugServerDeviceMessage {}
 
 impl From<ButtplugServerDeviceMessage> for ButtplugServerMessageV4 {
   fn from(other: ButtplugServerDeviceMessage) -> Self {

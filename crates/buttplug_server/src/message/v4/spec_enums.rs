@@ -19,7 +19,6 @@ use buttplug_core::{
     ButtplugClientMessageV4,
     ButtplugDeviceMessage,
     ButtplugMessage,
-    ButtplugMessageValidator,
     PingV0,
     RequestDeviceListV0,
     RequestServerInfoV4,
@@ -63,53 +62,18 @@ pub enum ButtplugCheckedClientMessageV4 {
   OutputVecCmd(CheckedOutputVecCmdV4),
 }
 
-impl ButtplugMessage for ButtplugCheckedClientMessageV4 {
-  fn id(&self) -> u32 {
-    match self {
-      ButtplugCheckedClientMessageV4::RequestServerInfo(msg) => msg.id(),
-      ButtplugCheckedClientMessageV4::Ping(msg) => msg.id(),
-      ButtplugCheckedClientMessageV4::StartScanning(msg) => msg.id(),
-      ButtplugCheckedClientMessageV4::StopScanning(msg) => msg.id(),
-      ButtplugCheckedClientMessageV4::RequestDeviceList(msg) => msg.id(),
-      ButtplugCheckedClientMessageV4::StopDeviceCmd(msg) => msg.id(),
-      ButtplugCheckedClientMessageV4::StopAllDevices(msg) => msg.id(),
-      ButtplugCheckedClientMessageV4::OutputCmd(msg) => msg.id(),
-      ButtplugCheckedClientMessageV4::InputCmd(msg) => msg.id(),
-      ButtplugCheckedClientMessageV4::OutputVecCmd(msg) => msg.id(),
-    }
-  }
-  fn set_id(&mut self, id: u32) {
-    match self {
-      ButtplugCheckedClientMessageV4::RequestServerInfo(msg) => msg.set_id(id),
-      ButtplugCheckedClientMessageV4::Ping(msg) => msg.set_id(id),
-      ButtplugCheckedClientMessageV4::StartScanning(msg) => msg.set_id(id),
-      ButtplugCheckedClientMessageV4::StopScanning(msg) => msg.set_id(id),
-      ButtplugCheckedClientMessageV4::RequestDeviceList(msg) => msg.set_id(id),
-      ButtplugCheckedClientMessageV4::StopDeviceCmd(msg) => msg.set_id(id),
-      ButtplugCheckedClientMessageV4::StopAllDevices(msg) => msg.set_id(id),
-      ButtplugCheckedClientMessageV4::OutputCmd(msg) => msg.set_id(id),
-      ButtplugCheckedClientMessageV4::InputCmd(msg) => msg.set_id(id),
-      ButtplugCheckedClientMessageV4::OutputVecCmd(msg) => msg.set_id(id),
-    }
-  }
-}
-
-impl ButtplugMessageValidator for ButtplugCheckedClientMessageV4 {
-  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
-    match self {
-      ButtplugCheckedClientMessageV4::RequestServerInfo(msg) => msg.is_valid(),
-      ButtplugCheckedClientMessageV4::Ping(msg) => msg.is_valid(),
-      ButtplugCheckedClientMessageV4::StartScanning(msg) => msg.is_valid(),
-      ButtplugCheckedClientMessageV4::StopScanning(msg) => msg.is_valid(),
-      ButtplugCheckedClientMessageV4::RequestDeviceList(msg) => msg.is_valid(),
-      ButtplugCheckedClientMessageV4::StopDeviceCmd(msg) => msg.is_valid(),
-      ButtplugCheckedClientMessageV4::StopAllDevices(msg) => msg.is_valid(),
-      ButtplugCheckedClientMessageV4::OutputCmd(msg) => msg.is_valid(),
-      ButtplugCheckedClientMessageV4::InputCmd(msg) => msg.is_valid(),
-      ButtplugCheckedClientMessageV4::OutputVecCmd(msg) => msg.is_valid(),
-    }
-  }
-}
+impl_message_enum_traits!(ButtplugCheckedClientMessageV4 {
+  RequestServerInfo,
+  Ping,
+  StartScanning,
+  StopScanning,
+  RequestDeviceList,
+  StopDeviceCmd,
+  StopAllDevices,
+  OutputCmd,
+  InputCmd,
+  OutputVecCmd,
+});
 
 impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMessageV4 {
   fn try_from_client_message(
@@ -365,35 +329,12 @@ pub(crate) enum ButtplugDeviceManagerMessageUnion {
   StopScanning(StopScanningV0),
 }
 
-impl ButtplugMessage for ButtplugDeviceManagerMessageUnion {
-  fn id(&self) -> u32 {
-    match self {
-      ButtplugDeviceManagerMessageUnion::RequestDeviceList(msg) => msg.id(),
-      ButtplugDeviceManagerMessageUnion::StopAllDevices(msg) => msg.id(),
-      ButtplugDeviceManagerMessageUnion::StartScanning(msg) => msg.id(),
-      ButtplugDeviceManagerMessageUnion::StopScanning(msg) => msg.id(),
-    }
-  }
-  fn set_id(&mut self, id: u32) {
-    match self {
-      ButtplugDeviceManagerMessageUnion::RequestDeviceList(msg) => msg.set_id(id),
-      ButtplugDeviceManagerMessageUnion::StopAllDevices(msg) => msg.set_id(id),
-      ButtplugDeviceManagerMessageUnion::StartScanning(msg) => msg.set_id(id),
-      ButtplugDeviceManagerMessageUnion::StopScanning(msg) => msg.set_id(id),
-    }
-  }
-}
-
-impl ButtplugMessageValidator for ButtplugDeviceManagerMessageUnion {
-  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
-    match self {
-      ButtplugDeviceManagerMessageUnion::RequestDeviceList(msg) => msg.is_valid(),
-      ButtplugDeviceManagerMessageUnion::StopAllDevices(msg) => msg.is_valid(),
-      ButtplugDeviceManagerMessageUnion::StartScanning(msg) => msg.is_valid(),
-      ButtplugDeviceManagerMessageUnion::StopScanning(msg) => msg.is_valid(),
-    }
-  }
-}
+impl_message_enum_traits!(ButtplugDeviceManagerMessageUnion {
+  RequestDeviceList,
+  StopAllDevices,
+  StartScanning,
+  StopScanning,
+});
 
 impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceManagerMessageUnion {
   type Error = ();
@@ -426,24 +367,12 @@ pub enum ButtplugDeviceCommandMessageUnionV4 {
   InputCmd(CheckedInputCmdV4),
 }
 
-impl ButtplugMessage for ButtplugDeviceCommandMessageUnionV4 {
-  fn id(&self) -> u32 {
-    match self {
-      ButtplugDeviceCommandMessageUnionV4::StopDeviceCmd(msg) => msg.id(),
-      ButtplugDeviceCommandMessageUnionV4::OutputCmd(msg) => msg.id(),
-      ButtplugDeviceCommandMessageUnionV4::OutputVecCmd(msg) => msg.id(),
-      ButtplugDeviceCommandMessageUnionV4::InputCmd(msg) => msg.id(),
-    }
-  }
-  fn set_id(&mut self, id: u32) {
-    match self {
-      ButtplugDeviceCommandMessageUnionV4::StopDeviceCmd(msg) => msg.set_id(id),
-      ButtplugDeviceCommandMessageUnionV4::OutputCmd(msg) => msg.set_id(id),
-      ButtplugDeviceCommandMessageUnionV4::OutputVecCmd(msg) => msg.set_id(id),
-      ButtplugDeviceCommandMessageUnionV4::InputCmd(msg) => msg.set_id(id),
-    }
-  }
-}
+impl_message_enum_traits!(ButtplugDeviceCommandMessageUnionV4 {
+  StopDeviceCmd,
+  OutputCmd,
+  OutputVecCmd,
+  InputCmd,
+});
 
 impl ButtplugDeviceMessage for ButtplugDeviceCommandMessageUnionV4 {
   fn device_index(&self) -> u32 {
@@ -460,17 +389,6 @@ impl ButtplugDeviceMessage for ButtplugDeviceCommandMessageUnionV4 {
       ButtplugDeviceCommandMessageUnionV4::OutputCmd(msg) => msg.set_device_index(device_index),
       ButtplugDeviceCommandMessageUnionV4::OutputVecCmd(msg) => msg.set_device_index(device_index),
       ButtplugDeviceCommandMessageUnionV4::InputCmd(msg) => msg.set_device_index(device_index),
-    }
-  }
-}
-
-impl ButtplugMessageValidator for ButtplugDeviceCommandMessageUnionV4 {
-  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
-    match self {
-      ButtplugDeviceCommandMessageUnionV4::StopDeviceCmd(msg) => msg.is_valid(),
-      ButtplugDeviceCommandMessageUnionV4::OutputCmd(msg) => msg.is_valid(),
-      ButtplugDeviceCommandMessageUnionV4::OutputVecCmd(msg) => msg.is_valid(),
-      ButtplugDeviceCommandMessageUnionV4::InputCmd(msg) => msg.is_valid(),
     }
   }
 }

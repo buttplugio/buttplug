@@ -20,9 +20,6 @@ use crate::message::{
 use buttplug_core::{
   errors::{ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-    ButtplugMessageValidator,
     DeviceRemovedV0,
     ErrorV0,
     OkV0,
@@ -57,59 +54,20 @@ pub enum ButtplugClientMessageV2 {
   BatteryLevelCmd(BatteryLevelCmdV2),
 }
 
-impl ButtplugMessage for ButtplugClientMessageV2 {
-  fn id(&self) -> u32 {
-    match self {
-      ButtplugClientMessageV2::RequestServerInfo(msg) => msg.id(),
-      ButtplugClientMessageV2::Ping(msg) => msg.id(),
-      ButtplugClientMessageV2::StartScanning(msg) => msg.id(),
-      ButtplugClientMessageV2::StopScanning(msg) => msg.id(),
-      ButtplugClientMessageV2::RequestDeviceList(msg) => msg.id(),
-      ButtplugClientMessageV2::StopAllDevices(msg) => msg.id(),
-      ButtplugClientMessageV2::VibrateCmd(msg) => msg.id(),
-      ButtplugClientMessageV2::LinearCmd(msg) => msg.id(),
-      ButtplugClientMessageV2::RotateCmd(msg) => msg.id(),
-      ButtplugClientMessageV2::StopDeviceCmd(msg) => msg.id(),
-      ButtplugClientMessageV2::BatteryLevelCmd(msg) => msg.id(),
-    }
-  }
-  fn set_id(&mut self, id: u32) {
-    match self {
-      ButtplugClientMessageV2::RequestServerInfo(msg) => msg.set_id(id),
-      ButtplugClientMessageV2::Ping(msg) => msg.set_id(id),
-      ButtplugClientMessageV2::StartScanning(msg) => msg.set_id(id),
-      ButtplugClientMessageV2::StopScanning(msg) => msg.set_id(id),
-      ButtplugClientMessageV2::RequestDeviceList(msg) => msg.set_id(id),
-      ButtplugClientMessageV2::StopAllDevices(msg) => msg.set_id(id),
-      ButtplugClientMessageV2::VibrateCmd(msg) => msg.set_id(id),
-      ButtplugClientMessageV2::LinearCmd(msg) => msg.set_id(id),
-      ButtplugClientMessageV2::RotateCmd(msg) => msg.set_id(id),
-      ButtplugClientMessageV2::StopDeviceCmd(msg) => msg.set_id(id),
-      ButtplugClientMessageV2::BatteryLevelCmd(msg) => msg.set_id(id),
-    }
-  }
-}
-
-impl ButtplugMessageFinalizer for ButtplugClientMessageV2 {
-}
-
-impl ButtplugMessageValidator for ButtplugClientMessageV2 {
-  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
-    match self {
-      ButtplugClientMessageV2::RequestServerInfo(msg) => msg.is_valid(),
-      ButtplugClientMessageV2::Ping(msg) => msg.is_valid(),
-      ButtplugClientMessageV2::StartScanning(msg) => msg.is_valid(),
-      ButtplugClientMessageV2::StopScanning(msg) => msg.is_valid(),
-      ButtplugClientMessageV2::RequestDeviceList(msg) => msg.is_valid(),
-      ButtplugClientMessageV2::StopAllDevices(msg) => msg.is_valid(),
-      ButtplugClientMessageV2::VibrateCmd(msg) => msg.is_valid(),
-      ButtplugClientMessageV2::LinearCmd(msg) => msg.is_valid(),
-      ButtplugClientMessageV2::RotateCmd(msg) => msg.is_valid(),
-      ButtplugClientMessageV2::StopDeviceCmd(msg) => msg.is_valid(),
-      ButtplugClientMessageV2::BatteryLevelCmd(msg) => msg.is_valid(),
-    }
-  }
-}
+impl_message_enum_traits!(ButtplugClientMessageV2 {
+  RequestServerInfo,
+  Ping,
+  StartScanning,
+  StopScanning,
+  RequestDeviceList,
+  StopAllDevices,
+  VibrateCmd,
+  LinearCmd,
+  RotateCmd,
+  StopDeviceCmd,
+  BatteryLevelCmd,
+});
+impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugClientMessageV2 {}
 
 // For v1 to v2, several messages were deprecated. Throw errors when trying to convert those.
 impl TryFrom<ButtplugClientMessageV1> for ButtplugClientMessageV2 {
@@ -168,50 +126,17 @@ pub enum ButtplugServerMessageV2 {
   BatteryLevelReading(BatteryLevelReadingV2),
 }
 
-impl ButtplugMessage for ButtplugServerMessageV2 {
-  fn id(&self) -> u32 {
-    match self {
-      ButtplugServerMessageV2::Ok(msg) => msg.id(),
-      ButtplugServerMessageV2::Error(msg) => msg.id(),
-      ButtplugServerMessageV2::ServerInfo(msg) => msg.id(),
-      ButtplugServerMessageV2::DeviceList(msg) => msg.id(),
-      ButtplugServerMessageV2::DeviceAdded(msg) => msg.id(),
-      ButtplugServerMessageV2::DeviceRemoved(msg) => msg.id(),
-      ButtplugServerMessageV2::ScanningFinished(msg) => msg.id(),
-      ButtplugServerMessageV2::BatteryLevelReading(msg) => msg.id(),
-    }
-  }
-  fn set_id(&mut self, id: u32) {
-    match self {
-      ButtplugServerMessageV2::Ok(msg) => msg.set_id(id),
-      ButtplugServerMessageV2::Error(msg) => msg.set_id(id),
-      ButtplugServerMessageV2::ServerInfo(msg) => msg.set_id(id),
-      ButtplugServerMessageV2::DeviceList(msg) => msg.set_id(id),
-      ButtplugServerMessageV2::DeviceAdded(msg) => msg.set_id(id),
-      ButtplugServerMessageV2::DeviceRemoved(msg) => msg.set_id(id),
-      ButtplugServerMessageV2::ScanningFinished(msg) => msg.set_id(id),
-      ButtplugServerMessageV2::BatteryLevelReading(msg) => msg.set_id(id),
-    }
-  }
-}
-
-impl ButtplugMessageFinalizer for ButtplugServerMessageV2 {
-}
-
-impl ButtplugMessageValidator for ButtplugServerMessageV2 {
-  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
-    match self {
-      ButtplugServerMessageV2::Ok(msg) => msg.is_valid(),
-      ButtplugServerMessageV2::Error(msg) => msg.is_valid(),
-      ButtplugServerMessageV2::ServerInfo(msg) => msg.is_valid(),
-      ButtplugServerMessageV2::DeviceList(msg) => msg.is_valid(),
-      ButtplugServerMessageV2::DeviceAdded(msg) => msg.is_valid(),
-      ButtplugServerMessageV2::DeviceRemoved(msg) => msg.is_valid(),
-      ButtplugServerMessageV2::ScanningFinished(msg) => msg.is_valid(),
-      ButtplugServerMessageV2::BatteryLevelReading(msg) => msg.is_valid(),
-    }
-  }
-}
+impl_message_enum_traits!(ButtplugServerMessageV2 {
+  Ok,
+  Error,
+  ServerInfo,
+  DeviceList,
+  DeviceAdded,
+  DeviceRemoved,
+  ScanningFinished,
+  BatteryLevelReading,
+});
+impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugServerMessageV2 {}
 
 impl From<ButtplugServerMessageV2> for ButtplugServerMessageV1 {
   fn from(value: ButtplugServerMessageV2) -> Self {
