@@ -19,7 +19,6 @@ use buttplug_core::{
 use buttplug_server_device_config::DeviceConfigurationManagerBuilder;
 use std::sync::{Arc, RwLock};
 use tokio::sync::broadcast;
-use tracing_futures::Instrument;
 
 /// Configures and creates [ButtplugServer] instances.
 pub struct ButtplugServerBuilder {
@@ -94,50 +93,50 @@ impl ButtplugServerBuilder {
 
     // Set up our channels to different parts of the system.
     let (output_sender, _) = broadcast::channel(256);
-    let output_sender_clone = output_sender.clone();
 
     // Connection state - starts in AwaitingHandshake
     let state = Arc::new(RwLock::new(ConnectionState::default()));
-    let state_clone = state.clone();
 
-    // TODO this should use a cancellation token instead of passing around the timer itself.
     let ping_time = self.max_ping_time.unwrap_or(0);
-    let ping_timer = Arc::new(PingTimer::new(ping_time));
-    let ping_timeout_notifier = ping_timer.ping_timeout_waiter();
 
-    // Spawn the ping timer task, assuming the ping time is > 0.
-    if ping_time > 0 {
+    // Create the ping timeout callback if ping time is configured.
+    // The callback handles: updating state, stopping devices, and sending error.
+    let ping_timeout_callback = if ping_time > 0 {
+      let state_clone = state.clone();
       let device_manager_clone = self.device_manager.clone();
-      async_manager::spawn(
-        async move {
-          // This will only exit if we've pinged out.
-          ping_timeout_notifier.await;
-          error!("Ping out signal received, stopping server");
-          {
-            let mut state_guard = state_clone.write().expect("State lock poisoned");
-            *state_guard = ConnectionState::PingedOut;
-          }
-          async_manager::spawn(async move {
-            if let Err(e) = device_manager_clone
-              .stop_all_devices(&StopAllDevicesV4::default())
-              .await
-            {
-              error!("Could not stop devices on ping timeout: {:?}", e);
-            }
-          });
-          // TODO Should the event sender return a result instead of an error message?
-          if output_sender_clone
-            .send(ButtplugServerMessageV4::Error(message::ErrorV0::from(
-              ButtplugError::from(ButtplugPingError::PingedOut),
-            )))
-            .is_err()
-          {
-            error!("Server disappeared, cannot update about ping out.");
-          };
+      let output_sender_clone = output_sender.clone();
+
+      Some(move || {
+        error!("Ping out signal received, stopping server");
+        // Update connection state to PingedOut
+        {
+          let mut state_guard = state_clone.write().expect("State lock poisoned");
+          *state_guard = ConnectionState::PingedOut;
         }
-        .instrument(tracing::info_span!("Buttplug Server Ping Timeout Task")),
-      );
-    }
+        // Stop all devices (spawn async task since callback is sync)
+        async_manager::spawn(async move {
+          if let Err(e) = device_manager_clone
+            .stop_all_devices(&StopAllDevicesV4::default())
+            .await
+          {
+            error!("Could not stop devices on ping timeout: {:?}", e);
+          }
+        });
+        // Send error to output channel
+        if output_sender_clone
+          .send(ButtplugServerMessageV4::Error(message::ErrorV0::from(
+            ButtplugError::from(ButtplugPingError::PingedOut),
+          )))
+          .is_err()
+        {
+          error!("Server disappeared, cannot update about ping out.");
+        };
+      })
+    } else {
+      None
+    };
+
+    let ping_timer = Arc::new(PingTimer::new(ping_time, ping_timeout_callback));
 
     // Assuming everything passed, return the server.
     Ok(ButtplugServer::new(
