@@ -172,78 +172,43 @@ struct UserDeviceFeatureOutput {
   spray: Option<UserDeviceFeatureOutputValueProperties>,
 }
 
+/// Macro to apply user overrides to base output fields.
+/// If base has the field, applies user override if present, otherwise keeps base value.
+macro_rules! merge_output_field {
+  ($output:expr, $base:expr, $user:expr, $field:ident, $setter:ident) => {
+    if let Some(base_val) = $base.$field() {
+      if let Some(user_val) = &$user.$field {
+        $output.$setter(Some(user_val.with_base_properties(base_val)?));
+      } else {
+        $output.$setter(Some(base_val.clone()));
+      }
+    }
+  };
+}
+
 impl UserDeviceFeatureOutput {
   pub fn with_base_output(
     &self,
     base_output: &ServerDeviceFeatureOutput,
   ) -> Result<ServerDeviceFeatureOutput, ButtplugDeviceConfigError> {
     let mut output = ServerDeviceFeatureOutput::default();
-    // TODO Flip logic and output errors if user has something base doesn't, or vice versa.
-    if let Some(base_vibrate) = base_output.vibrate() {
-      if let Some(user_vibrate) = &self.vibrate {
-        output.set_vibrate(Some(user_vibrate.with_base_properties(base_vibrate)?));
-      } else {
-        output.set_vibrate(base_output.vibrate().clone());
-      }
-    }
-    if let Some(user_rotate) = &self.rotate {
-      if let Some(base_rotate) = base_output.rotate() {
-        output.set_rotate(Some(user_rotate.with_base_properties(base_rotate)?));
-      } else {
-        output.set_rotate(base_output.rotate().clone());
-      }
-    }
-    if let Some(user_oscillate) = &self.oscillate {
-      if let Some(base_oscillate) = base_output.oscillate() {
-        output.set_oscillate(Some(user_oscillate.with_base_properties(base_oscillate)?));
-      } else {
-        output.set_oscillate(base_output.oscillate().clone());
-      }
-    }
-    if let Some(user_constrict) = &self.constrict {
-      if let Some(base_constrict) = base_output.constrict() {
-        output.set_constrict(Some(user_constrict.with_base_properties(base_constrict)?));
-      } else {
-        output.set_constrict(base_output.constrict().clone());
-      }
-    }
-    if let Some(user_temperature) = &self.temperature {
-      if let Some(base_temperature) = base_output.temperature() {
-        output.set_temperature(Some(
-          user_temperature.with_base_properties(base_temperature)?,
-        ));
-      } else {
-        output.set_temperature(base_output.temperature().clone());
-      }
-    }
-    if let Some(user_led) = &self.led {
-      if let Some(base_led) = base_output.led() {
-        output.set_led(Some(user_led.with_base_properties(base_led)?));
-      } else {
-        output.set_led(base_output.led().clone());
-      }
-    }
-    if let Some(user_spray) = &self.spray {
-      if let Some(base_spray) = base_output.spray() {
-        output.set_spray(Some(user_spray.with_base_properties(base_spray)?));
-      } else {
-        output.set_spray(base_output.spray().clone());
-      }
-    }
-    if let Some(user) = &self.position {
-      if let Some(base) = base_output.position() {
-        output.set_position(Some(user.with_base_properties(base)?));
-      } else {
-        output.set_position(base_output.position().clone());
-      }
-    }
-    if let Some(user) = &self.position_with_duration {
-      if let Some(base) = base_output.position_with_duration() {
-        output.set_position_with_duration(Some(user.with_base_properties(base)?));
-      } else {
-        output.set_position_with_duration(base_output.position_with_duration().clone());
-      }
-    }
+
+    merge_output_field!(output, base_output, self, vibrate, set_vibrate);
+    merge_output_field!(output, base_output, self, rotate, set_rotate);
+    merge_output_field!(output, base_output, self, oscillate, set_oscillate);
+    merge_output_field!(output, base_output, self, constrict, set_constrict);
+    merge_output_field!(output, base_output, self, temperature, set_temperature);
+    merge_output_field!(output, base_output, self, led, set_led);
+    merge_output_field!(output, base_output, self, spray, set_spray);
+    merge_output_field!(output, base_output, self, position, set_position);
+    merge_output_field!(
+      output,
+      base_output,
+      self,
+      position_with_duration,
+      set_position_with_duration
+    );
+
     Ok(output)
   }
 }
