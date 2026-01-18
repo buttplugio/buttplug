@@ -55,7 +55,7 @@ pub use v2::*;
 pub use v3::*;
 pub use v4::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_more::From)]
 pub enum ButtplugClientMessageVariant {
   V0(ButtplugClientMessageV0),
   V1(ButtplugClientMessageV1),
@@ -121,37 +121,7 @@ impl ButtplugClientMessageVariant {
   }
 }
 
-impl From<ButtplugClientMessageV0> for ButtplugClientMessageVariant {
-  fn from(value: ButtplugClientMessageV0) -> Self {
-    ButtplugClientMessageVariant::V0(value)
-  }
-}
-
-impl From<ButtplugClientMessageV1> for ButtplugClientMessageVariant {
-  fn from(value: ButtplugClientMessageV1) -> Self {
-    ButtplugClientMessageVariant::V1(value)
-  }
-}
-
-impl From<ButtplugClientMessageV2> for ButtplugClientMessageVariant {
-  fn from(value: ButtplugClientMessageV2) -> Self {
-    ButtplugClientMessageVariant::V2(value)
-  }
-}
-
-impl From<ButtplugClientMessageV3> for ButtplugClientMessageVariant {
-  fn from(value: ButtplugClientMessageV3) -> Self {
-    ButtplugClientMessageVariant::V3(value)
-  }
-}
-
-impl From<ButtplugClientMessageV4> for ButtplugClientMessageVariant {
-  fn from(value: ButtplugClientMessageV4) -> Self {
-    ButtplugClientMessageVariant::V4(value)
-  }
-}
-
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, derive_more::From)]
 pub enum ButtplugServerMessageVariant {
   V0(ButtplugServerMessageV0),
   V1(ButtplugServerMessageV1),
@@ -172,36 +142,6 @@ impl ButtplugServerMessageVariant {
       Self::V3(_) => ButtplugMessageSpecVersion::Version3,
       Self::V4(_) => ButtplugMessageSpecVersion::Version4,
     }
-  }
-}
-
-impl From<ButtplugServerMessageV0> for ButtplugServerMessageVariant {
-  fn from(value: ButtplugServerMessageV0) -> Self {
-    ButtplugServerMessageVariant::V0(value)
-  }
-}
-
-impl From<ButtplugServerMessageV1> for ButtplugServerMessageVariant {
-  fn from(value: ButtplugServerMessageV1) -> Self {
-    ButtplugServerMessageVariant::V1(value)
-  }
-}
-
-impl From<ButtplugServerMessageV2> for ButtplugServerMessageVariant {
-  fn from(value: ButtplugServerMessageV2) -> Self {
-    ButtplugServerMessageVariant::V2(value)
-  }
-}
-
-impl From<ButtplugServerMessageV3> for ButtplugServerMessageVariant {
-  fn from(value: ButtplugServerMessageV3) -> Self {
-    ButtplugServerMessageVariant::V3(value)
-  }
-}
-
-impl From<ButtplugServerMessageV4> for ButtplugServerMessageVariant {
-  fn from(value: ButtplugServerMessageV4) -> Self {
-    ButtplugServerMessageVariant::V4(value)
   }
 }
 
