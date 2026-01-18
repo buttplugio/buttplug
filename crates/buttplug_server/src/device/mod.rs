@@ -95,6 +95,8 @@
 //!
 //!
 
+mod device_handle;
+mod device_task;
 pub mod hardware;
 pub mod protocol;
 pub mod protocol_impl;
@@ -102,6 +104,8 @@ pub mod server_device;
 mod server_device_manager;
 mod server_device_manager_event_loop;
 
+pub use device_handle::{DeviceCommand, DeviceHandle};
+pub use device_task::{run_device_task, DeviceTaskConfig, DeviceTaskEvent};
 pub use protocol_impl::get_default_protocol_map;
 pub use server_device::{ServerDevice, ServerDeviceEvent};
 pub use server_device_manager::{ServerDeviceManager, ServerDeviceManagerBuilder};
