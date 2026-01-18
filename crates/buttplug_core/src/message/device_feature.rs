@@ -213,6 +213,13 @@ pub struct DeviceFeatureOutput {
   spray: Option<DeviceFeatureOutputValueProperties>,
 }
 
+/// Helper macro to cast an Option<T: DeviceFeatureOutputLimits> to Option<&dyn DeviceFeatureOutputLimits>
+macro_rules! as_output_limits {
+  ($opt:expr) => {
+    $opt.as_ref().map(|x| x as &dyn DeviceFeatureOutputLimits)
+  };
+}
+
 impl DeviceFeatureOutput {
   pub fn contains(&self, output_type: OutputType) -> bool {
     match output_type {
@@ -231,43 +238,16 @@ impl DeviceFeatureOutput {
 
   pub fn get(&self, output_type: OutputType) -> Option<&dyn DeviceFeatureOutputLimits> {
     match output_type {
-      OutputType::Constrict => self
-        .constrict()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Temperature => self
-        .temperature()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Led => self
-        .led()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Oscillate => self
-        .oscillate()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Position => self
-        .position()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::PositionWithDuration => self
-        .position_with_duration()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Rotate => self
-        .rotate()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Spray => self
-        .spray()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
+      OutputType::Constrict => as_output_limits!(self.constrict()),
+      OutputType::Temperature => as_output_limits!(self.temperature()),
+      OutputType::Led => as_output_limits!(self.led()),
+      OutputType::Oscillate => as_output_limits!(self.oscillate()),
+      OutputType::Position => as_output_limits!(self.position()),
+      OutputType::PositionWithDuration => as_output_limits!(self.position_with_duration()),
+      OutputType::Rotate => as_output_limits!(self.rotate()),
+      OutputType::Spray => as_output_limits!(self.spray()),
       OutputType::Unknown => None,
-      OutputType::Vibrate => self
-        .vibrate()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
+      OutputType::Vibrate => as_output_limits!(self.vibrate()),
     }
   }
 }
