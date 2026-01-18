@@ -42,13 +42,13 @@ pub enum InputTypeReading {
   Pressure(InputValue<u32>),
 }
 
-impl Into<InputType> for InputTypeReading {
-  fn into(self) -> InputType {
-    match self {
-      Self::Battery(_) => InputType::Battery,
-      Self::Rssi(_) => InputType::Rssi,
-      Self::Button(_) => InputType::Button,
-      Self::Pressure(_) => InputType::Pressure,
+impl From<InputTypeReading> for InputType {
+  fn from(reading: InputTypeReading) -> Self {
+    match reading {
+      InputTypeReading::Battery(_) => InputType::Battery,
+      InputTypeReading::Rssi(_) => InputType::Rssi,
+      InputTypeReading::Button(_) => InputType::Button,
+      InputTypeReading::Pressure(_) => InputType::Pressure,
     }
   }
 }
