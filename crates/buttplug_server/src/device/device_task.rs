@@ -12,11 +12,11 @@
 //! - Hardware events (disconnections, notifications)
 //! - Protocol events (sensor readings, etc.)
 //! - Keepalive packets (when required by hardware or protocol)
-//! - Message timing/gap enforcement
+//! - Message timing/gap enforcement with command batching
 //!
 //! This replaces the previous multi-task architecture where each device could spawn 3-5+ tasks.
 
-use std::{sync::Arc, time::Duration};
+use std::{collections::VecDeque, sync::Arc, time::Duration};
 
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError},
@@ -27,7 +27,7 @@ use buttplug_server_device_config::{
   DeviceConfigurationManager, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 use futures::StreamExt;
-use tokio::{select, sync::mpsc};
+use tokio::{select, sync::mpsc, time::Instant};
 
 use crate::{
   device::{
@@ -101,9 +101,12 @@ pub async fn run_device_task(config: DeviceTaskConfig) {
   // State for keepalive
   let mut keepalive_packet: Option<HardwareWriteCmd> = None;
 
-  // State for last output commands (for deduplication)
+  // State for last output commands (for deduplication at message level)
   let mut last_output_commands: std::collections::HashMap<uuid::Uuid, CheckedOutputCmdV4> =
     std::collections::HashMap::new();
+
+  // State for hardware command batching during message gap
+  let mut pending_hardware_commands: VecDeque<HardwareCommand> = VecDeque::new();
 
   // Hardware and protocol event streams
   let mut hardware_events = hardware.event_stream();
@@ -136,14 +139,97 @@ pub async fn run_device_task(config: DeviceTaskConfig) {
             let result = handle_output_command(
               &cmd,
               &handler,
-              &hardware,
-              &mut keepalive_packet,
+              &mut pending_hardware_commands,
               &mut last_output_commands,
-              device_wait_duration,
-              requires_keepalive,
-              &strategy,
-            ).await;
-            let _ = response.send(result);
+            );
+
+            // Send response immediately (fire and forget semantics like old code)
+            let _ = response.send(result.map_err(ButtplugError::from));
+
+            // If no message gap, send commands immediately
+            if device_wait_duration.is_none() {
+              if let Err(e) = send_pending_commands(
+                &mut pending_hardware_commands,
+                &hardware,
+                &mut keepalive_packet,
+                requires_keepalive,
+                &strategy,
+              ).await {
+                warn!("Error sending commands: {:?}", e);
+              }
+            } else {
+              // Batch commands during message gap window (inner loop like old code)
+              let sleep_until = Instant::now() + device_wait_duration.unwrap();
+              loop {
+                select! {
+                  biased;
+
+                  inner_cmd = command_rx.recv() => {
+                    match inner_cmd {
+                      Some(DeviceCommand::Output { cmd: inner_out_cmd, response: inner_response }) => {
+                        let inner_result = handle_output_command(
+                          &inner_out_cmd,
+                          &handler,
+                          &mut pending_hardware_commands,
+                          &mut last_output_commands,
+                        );
+                        let _ = inner_response.send(inner_result.map_err(ButtplugError::from));
+                      }
+                      Some(DeviceCommand::Stop { response: inner_response }) => {
+                        // Stop breaks out of batching
+                        let inner_result = handle_stop_command(
+                          &stop_commands,
+                          &handler,
+                          &mut pending_hardware_commands,
+                          &mut last_output_commands,
+                        );
+                        let _ = inner_response.send(inner_result.map_err(ButtplugError::from));
+                        break;
+                      }
+                      Some(DeviceCommand::Input { cmd: inner_in_cmd, response: inner_response }) => {
+                        let inner_result = handle_input_command(&inner_in_cmd, &handler, &hardware).await;
+                        let _ = inner_response.send(inner_result);
+                      }
+                      Some(DeviceCommand::Disconnect) => {
+                        info!("Disconnect requested during batching for {:?}", identifier);
+                        let _ = hardware.disconnect().await;
+                        return; // Exit entire task
+                      }
+                      None => {
+                        info!("DeviceHandle dropped during batching for {:?}", identifier);
+                        return; // Exit entire task
+                      }
+                    }
+                  }
+
+                  hw_event = hardware_events.recv() => {
+                    if let Ok(HardwareEvent::Disconnected(_)) = hw_event {
+                      info!("Hardware disconnected during batching: {:?}", identifier);
+                      let _ = event_tx.send(DeviceTaskEvent::Disconnected(identifier.clone())).await;
+                      return;
+                    }
+                  }
+
+                  _ = tokio::time::sleep_until(sleep_until) => {
+                    break;
+                  }
+                }
+                // Also check if we've passed the deadline
+                if Instant::now() >= sleep_until {
+                  break;
+                }
+              }
+              // Send all batched commands
+              if let Err(e) = send_pending_commands(
+                &mut pending_hardware_commands,
+                &hardware,
+                &mut keepalive_packet,
+                requires_keepalive,
+                &strategy,
+              ).await {
+                warn!("Error sending batched commands: {:?}", e);
+              }
+            }
           }
           Some(DeviceCommand::Input { cmd, response }) => {
             let result = handle_input_command(&cmd, &handler, &hardware).await;
@@ -153,15 +239,38 @@ pub async fn run_device_task(config: DeviceTaskConfig) {
             let result = handle_stop_command(
               &stop_commands,
               &handler,
-              &hardware,
-              &definition,
-              &mut keepalive_packet,
+              &mut pending_hardware_commands,
               &mut last_output_commands,
-              device_wait_duration,
+            );
+            // Stop commands should be sent immediately
+            if let Err(e) = send_pending_commands(
+              &mut pending_hardware_commands,
+              &hardware,
+              &mut keepalive_packet,
               requires_keepalive,
               &strategy,
-            ).await;
-            let _ = response.send(result);
+            ).await {
+              let _ = response.send(Err(e));
+              continue;
+            }
+
+            // Unsubscribe from all inputs
+            for (_i, f) in definition.features().iter() {
+              if let Some(inputs) = f.input() {
+                if inputs.can_subscribe() {
+                  let _ = handler
+                    .handle_input_unsubscribe_cmd(
+                      hardware.clone(),
+                      f.index(),
+                      f.id(),
+                      InputType::Unknown,
+                    )
+                    .await;
+                }
+              }
+            }
+
+            let _ = response.send(result.map_err(ButtplugError::from));
           }
           Some(DeviceCommand::Disconnect) => {
             info!("Disconnect requested for {:?}", identifier);
@@ -274,17 +383,29 @@ fn build_stop_commands(definition: &ServerDeviceDefinition) -> Vec<CheckedOutput
   stop_commands
 }
 
-/// Handle an output command with message timing
-async fn handle_output_command(
+/// Queue hardware commands with overlap deduplication
+///
+/// This matches the old ServerDevice behavior: for each new command, remove any
+/// existing commands that overlap with it, then add the new command.
+fn queue_hardware_commands(
+  commands: Vec<HardwareCommand>,
+  pending_commands: &mut VecDeque<HardwareCommand>,
+) {
+  for command in commands {
+    // Remove any existing commands that overlap with this one
+    pending_commands.retain(|existing| !command.overlaps(existing));
+    // Add the new command
+    pending_commands.push_back(command);
+  }
+}
+
+/// Handle an output command - queue hardware commands for batching
+fn handle_output_command(
   cmd: &CheckedOutputCmdV4,
   handler: &Arc<dyn ProtocolHandler>,
-  hardware: &Arc<Hardware>,
-  keepalive_packet: &mut Option<HardwareWriteCmd>,
+  pending_commands: &mut VecDeque<HardwareCommand>,
   last_output_commands: &mut std::collections::HashMap<uuid::Uuid, CheckedOutputCmdV4>,
-  device_wait_duration: Option<Duration>,
-  requires_keepalive: bool,
-  strategy: &ProtocolKeepaliveStrategy,
-) -> Result<(), ButtplugError> {
+) -> Result<(), ButtplugDeviceError> {
   // Check for duplicate command
   if let Some(last_cmd) = last_output_commands.get(&cmd.feature_id()) {
     if last_cmd == cmd {
@@ -295,20 +416,12 @@ async fn handle_output_command(
   last_output_commands.insert(cmd.feature_id(), cmd.clone());
 
   // Get hardware commands from protocol handler
-  let hardware_commands = handler
-    .handle_output_cmd(cmd)
-    .map_err(ButtplugError::from)?;
+  let hardware_commands = handler.handle_output_cmd(cmd)?;
 
-  // Send commands with optional timing gap
-  send_hardware_commands(
-    hardware_commands,
-    hardware,
-    keepalive_packet,
-    device_wait_duration,
-    requires_keepalive,
-    strategy,
-  )
-  .await
+  // Queue hardware commands with overlap deduplication
+  queue_hardware_commands(hardware_commands, pending_commands);
+
+  Ok(())
 }
 
 /// Handle an input command
@@ -361,72 +474,36 @@ async fn handle_input_command(
   }
 }
 
-/// Handle a stop command
-async fn handle_stop_command(
+/// Handle a stop command - queue stop commands for batching
+fn handle_stop_command(
   stop_commands: &[CheckedOutputCmdV4],
   handler: &Arc<dyn ProtocolHandler>,
-  hardware: &Arc<Hardware>,
-  definition: &ServerDeviceDefinition,
-  keepalive_packet: &mut Option<HardwareWriteCmd>,
+  pending_commands: &mut VecDeque<HardwareCommand>,
   last_output_commands: &mut std::collections::HashMap<uuid::Uuid, CheckedOutputCmdV4>,
-  device_wait_duration: Option<Duration>,
-  requires_keepalive: bool,
-  strategy: &ProtocolKeepaliveStrategy,
-) -> Result<(), ButtplugError> {
+) -> Result<(), ButtplugDeviceError> {
   // Stop all outputs
   for cmd in stop_commands {
     // Clear from last commands so we don't skip duplicates
     last_output_commands.remove(&cmd.feature_id());
 
-    let hardware_commands = handler
-      .handle_output_cmd(cmd)
-      .map_err(ButtplugError::from)?;
+    let hardware_commands = handler.handle_output_cmd(cmd)?;
 
-    send_hardware_commands(
-      hardware_commands,
-      hardware,
-      keepalive_packet,
-      device_wait_duration,
-      requires_keepalive,
-      strategy,
-    )
-    .await?;
-  }
-
-  // Unsubscribe from all inputs
-  for (_i, f) in definition.features().iter() {
-    if let Some(inputs) = f.input() {
-      if inputs.can_subscribe() {
-        handler
-          .handle_input_unsubscribe_cmd(
-            hardware.clone(),
-            f.index(),
-            f.id(),
-            InputType::Unknown,
-          )
-          .await
-          .map_err(ButtplugError::from)?;
-      }
-    }
+    // Queue hardware commands with overlap deduplication
+    queue_hardware_commands(hardware_commands, pending_commands);
   }
 
   Ok(())
 }
 
-/// Send hardware commands with optional message timing
-async fn send_hardware_commands(
-  commands: Vec<HardwareCommand>,
+/// Send all pending hardware commands
+async fn send_pending_commands(
+  pending_commands: &mut VecDeque<HardwareCommand>,
   hardware: &Arc<Hardware>,
   keepalive_packet: &mut Option<HardwareWriteCmd>,
-  device_wait_duration: Option<Duration>,
   requires_keepalive: bool,
   strategy: &ProtocolKeepaliveStrategy,
 ) -> Result<(), ButtplugError> {
-  if commands.is_empty() {
-    return Ok(());
-  }
-
-  // Update keepalive packet if needed
+  // Update keepalive packet tracking
   let should_track_keepalive = (requires_keepalive
     && matches!(
       strategy,
@@ -437,7 +514,7 @@ async fn send_hardware_commands(
       ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_)
     );
 
-  for command in commands {
+  while let Some(command) = pending_commands.pop_front() {
     // Track last write command for keepalive
     if should_track_keepalive {
       if let HardwareCommand::Write(ref write_cmd) = command {
@@ -446,15 +523,11 @@ async fn send_hardware_commands(
     }
 
     // Send command
+    debug!("Sending hardware command {:?}", command);
     hardware
       .parse_message(&command)
       .await
       .map_err(ButtplugError::from)?;
-
-    // Wait for message gap if specified
-    if let Some(duration) = device_wait_duration {
-      util::sleep(duration).await;
-    }
   }
 
   Ok(())

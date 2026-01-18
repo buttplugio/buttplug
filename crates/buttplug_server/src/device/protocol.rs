@@ -468,7 +468,9 @@ pub trait ProtocolHandler: Sync + Send {
   fn event_stream(
     &self,
   ) -> Pin<Box<dyn tokio_stream::Stream<Item = ButtplugServerDeviceMessage> + Send>> {
-    tokio_stream::empty().boxed()
+    // Use pending() instead of empty() - empty() completes immediately which causes
+    // busy-spinning in select! loops. pending() never completes.
+    futures::stream::pending().boxed()
   }
 }
 
