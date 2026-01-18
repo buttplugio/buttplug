@@ -100,7 +100,6 @@ mod device_task;
 pub mod hardware;
 pub mod protocol;
 pub mod protocol_impl;
-mod server_device;
 mod server_device_manager;
 mod server_device_manager_event_loop;
 

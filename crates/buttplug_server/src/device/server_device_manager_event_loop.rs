@@ -15,9 +15,9 @@ use tracing::info_span;
 use crate::device::{
   DeviceEvent,
   DeviceHandle,
+  device_handle::build_device_handle,
   hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
   protocol::ProtocolManager,
-  server_device::build_device_handle,
 };
 use crate::message::ButtplugServerDeviceMessage;
 use buttplug_server_device_config::UserDeviceIdentifier;
