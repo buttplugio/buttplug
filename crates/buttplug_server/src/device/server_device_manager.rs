@@ -12,7 +12,7 @@ use crate::{
   ButtplugServerError,
   ButtplugServerResultFuture,
   device::{
-    ServerDevice,
+    DeviceHandle,
     hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerBuilder},
     server_device_manager_event_loop::ServerDeviceManagerEventLoop,
   },
@@ -177,7 +177,7 @@ pub struct ServerDeviceManager {
   #[getset(get = "pub")]
   device_configuration_manager: Arc<DeviceConfigurationManager>,
   #[getset(get = "pub(crate)")]
-  devices: Arc<DashMap<u32, Arc<ServerDevice>>>,
+  devices: Arc<DashMap<u32, DeviceHandle>>,
   device_command_sender: mpsc::Sender<DeviceManagerCommand>,
   loop_cancellation_token: CancellationToken,
   running: Arc<AtomicBool>,
@@ -221,21 +221,18 @@ impl ServerDeviceManager {
     .boxed()
   }
 
-  pub(crate) fn stop_all_devices(&self, msg: &StopAllDevicesV4) -> ButtplugServerResultFuture {
+  pub(crate) fn stop_all_devices(&self, _msg: &StopAllDevicesV4) -> ButtplugServerResultFuture {
     let device_map = self.devices.clone();
-    // TODO This could use some error reporting.
-    let msg = msg.clone();
     async move {
       let fut_vec: Vec<_> = device_map
         .iter()
         .map(|dev| {
-          let device = dev.value();
-          device.parse_message(
-            message::StopDeviceCmdV4::new(*dev.key(), msg.inputs(), msg.outputs()).into(),
-          )
+          let handle = dev.value().clone();
+          async move { handle.stop().await }
         })
         .collect();
-      future::join_all(fut_vec).await;
+      // Ignore individual errors, just try to stop all devices
+      let _ = future::join_all(fut_vec).await;
       Ok(message::OkV0::default().into())
     }
     .boxed()
@@ -260,7 +257,7 @@ impl ServerDeviceManager {
     let devices = self
       .devices
       .iter()
-      .map(|device| device.value().as_device_message_info(*device.key()))
+      .map(|device| device.value().as_device_message_info())
       .collect();
     DeviceListV4::new(devices)
   }
@@ -307,7 +304,7 @@ impl ServerDeviceManager {
   pub fn device_info(&self, index: u32) -> Option<ServerDeviceInfo> {
     self.devices.get(&index).map(|device| ServerDeviceInfo {
       identifier: device.value().identifier().clone(),
-      display_name: device.value().definition().display_name().clone(),
+      display_name: device.value().display_name().clone(),
     })
   }
 

@@ -13,13 +13,14 @@ use buttplug_server_device_config::DeviceConfigurationManager;
 use tracing::info_span;
 
 use crate::device::{
-  ServerDevice,
-  ServerDeviceEvent,
+  DeviceHandle,
+  DeviceTaskEvent,
+  build_device,
   hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
   protocol::ProtocolManager,
 };
 use dashmap::{DashMap, DashSet};
-use futures::{FutureExt, StreamExt, future, pin_mut};
+use futures::{FutureExt, future};
 use std::sync::{Arc, atomic::AtomicBool};
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
@@ -27,22 +28,31 @@ use tracing_futures::Instrument;
 
 use super::server_device_manager::DeviceManagerCommand;
 
+/// Events for device connection state changes
+#[derive(Debug)]
+pub(super) enum DeviceConnectionEvent {
+  /// Device connected successfully with its handle
+  Connected(DeviceHandle, mpsc::Receiver<DeviceTaskEvent>),
+  /// Device task event (notification or disconnection)
+  TaskEvent(DeviceTaskEvent),
+}
+
 pub(super) struct ServerDeviceManagerEventLoop {
   comm_managers: Vec<Box<dyn HardwareCommunicationManager>>,
   device_config_manager: Arc<DeviceConfigurationManager>,
   device_command_receiver: mpsc::Receiver<DeviceManagerCommand>,
-  /// Maps device index (exposed to the outside world) to actual device objects held by the server.
-  device_map: Arc<DashMap<u32, Arc<ServerDevice>>>,
+  /// Maps device index (exposed to the outside world) to device handles.
+  device_map: Arc<DashMap<u32, DeviceHandle>>,
   /// Broadcaster that relays device events in the form of Buttplug Messages to
   /// whoever owns the Buttplug Server.
   server_sender: broadcast::Sender<ButtplugServerMessageV4>,
   /// As the device manager owns the Device Communication Managers, it will have
   /// a receiver that the comm managers all send thru.
   device_comm_receiver: mpsc::Receiver<HardwareCommunicationManagerEvent>,
-  /// Sender for device events, passed to new devices when they are created.
-  device_event_sender: mpsc::Sender<ServerDeviceEvent>,
-  /// Receiver for device events, which the event loops to handle events.
-  device_event_receiver: mpsc::Receiver<ServerDeviceEvent>,
+  /// Sender for device connection events.
+  device_event_sender: mpsc::Sender<DeviceConnectionEvent>,
+  /// Receiver for device connection events.
+  device_event_receiver: mpsc::Receiver<DeviceConnectionEvent>,
   /// True if StartScanning has been called but no ScanningFinished has been
   /// emitted yet.
   scanning_bringup_in_progress: bool,
@@ -62,7 +72,7 @@ impl ServerDeviceManagerEventLoop {
   pub fn new(
     comm_managers: Vec<Box<dyn HardwareCommunicationManager>>,
     device_config_manager: Arc<DeviceConfigurationManager>,
-    device_map: Arc<DashMap<u32, Arc<ServerDevice>>>,
+    device_map: Arc<DashMap<u32, DeviceHandle>>,
     loop_cancellation_token: CancellationToken,
     server_sender: broadcast::Sender<ButtplugServerMessageV4>,
     device_comm_receiver: mpsc::Receiver<HardwareCommunicationManagerEvent>,
@@ -237,10 +247,10 @@ impl ServerDeviceManagerEventLoop {
         );
 
         async_manager::spawn(async move {
-          match ServerDevice::build(device_config_manager, creator, protocol_specializers).await {
-            Ok(device) => {
+          match build_device(device_config_manager, creator, protocol_specializers).await {
+            Ok((handle, event_rx)) => {
               if device_event_sender_clone
-                .send(ServerDeviceEvent::Connected(Arc::new(device)))
+                .send(DeviceConnectionEvent::Connected(handle, event_rx))
                 .await
                 .is_err() {
                 error!("Device manager disappeared before connection established, device will be dropped.");
@@ -260,24 +270,24 @@ impl ServerDeviceManagerEventLoop {
     let devices = self
       .device_map
       .iter()
-      .map(|device| device.value().as_device_message_info(*device.key()))
+      .map(|device| device.value().as_device_message_info())
       .collect();
     DeviceListV4::new(devices)
   }
 
-  async fn handle_device_event(&mut self, device_event: ServerDeviceEvent) {
+  async fn handle_device_event(&mut self, device_event: DeviceConnectionEvent) {
     trace!("Got device event: {:?}", device_event);
     match device_event {
-      ServerDeviceEvent::Connected(device) => {
+      DeviceConnectionEvent::Connected(handle, mut event_rx) => {
         let span = info_span!(
           "device registration",
-          name = tracing::field::display(device.name()),
-          identifier = tracing::field::debug(device.identifier())
+          name = tracing::field::display(handle.name()),
+          identifier = tracing::field::debug(handle.identifier())
         );
         let _enter = span.enter();
 
-        // Get the index from the device
-        let device_index = device.definition().index();
+        // Get the index from the handle
+        let device_index = handle.index();
         // Since we can now reuse device indexes, this means we might possibly
         // stomp on devices already in the map if they don't register a
         // disconnect before we try to insert the new device. If we have a
@@ -286,11 +296,11 @@ impl ServerDeviceManagerEventLoop {
         // should also trigger a disconnect event before our new DeviceAdded
         // message goes out, so timing matters here.
         match self.device_map.remove(&device_index) {
-          Some((_, old_device)) => {
+          Some((_, old_handle)) => {
             info!("Device map contains key {}.", device_index);
             // After removing the device from the array, manually disconnect it to
             // make sure the event is thrown.
-            if let Err(err) = old_device.disconnect().await {
+            if let Err(err) = old_handle.disconnect().await {
               // If we throw an error during the disconnect, we can't really do
               // anything with it, but should at least log it.
               error!("Error during index collision disconnect: {:?}", err);
@@ -301,22 +311,23 @@ impl ServerDeviceManagerEventLoop {
           }
         }
 
-        // Create event loop for forwarding device events into our selector.
-        let event_listener = device.event_stream();
+        // Spawn task to forward device task events to the event loop
         let event_sender = self.device_event_sender.clone();
         async_manager::spawn(async move {
-          pin_mut!(event_listener);
-          // This can fail if the event_sender loses the server before this loop dies.
-          while let Some(event) = event_listener.next().await {
-            if event_sender.send(event).await.is_err() {
-              info!("Event sending failure in servier device manager event loop, exiting.");
+          while let Some(task_event) = event_rx.recv().await {
+            if event_sender
+              .send(DeviceConnectionEvent::TaskEvent(task_event))
+              .await
+              .is_err()
+            {
+              info!("Event sending failure in device manager event loop, exiting.");
               break;
             }
           }
         });
 
-        info!("Assigning index {} to {}", device_index, device.name());
-        self.device_map.insert(device_index, device.clone());
+        info!("Assigning index {} to {}", device_index, handle.name());
+        self.device_map.insert(device_index, handle);
 
         let device_update_message: ButtplugServerMessageV4 = self.generate_device_list().into();
 
@@ -326,28 +337,33 @@ impl ServerDeviceManagerEventLoop {
           debug!("Server not currently available, dropping Device Added event.");
         }
       }
-      ServerDeviceEvent::Disconnected(identifier) => {
-        let mut device_index = None;
-        for device_pair in self.device_map.iter() {
-          if *device_pair.value().identifier() == identifier {
-            device_index = Some(*device_pair.key());
-            break;
+      DeviceConnectionEvent::TaskEvent(task_event) => {
+        match task_event {
+          DeviceTaskEvent::Disconnected(identifier) => {
+            let mut device_index = None;
+            for device_pair in self.device_map.iter() {
+              if *device_pair.value().identifier() == identifier {
+                device_index = Some(*device_pair.key());
+                break;
+              }
+            }
+            if let Some(device_index) = device_index {
+              self
+                .device_map
+                .remove(&device_index)
+                .expect("Remove will always work.");
+              let device_update_message: ButtplugServerMessageV4 =
+                self.generate_device_list().into();
+              if self.server_sender.send(device_update_message).is_err() {
+                debug!("Server not currently available, dropping Device Removed event.");
+              }
+            }
           }
-        }
-        if let Some(device_index) = device_index {
-          self
-            .device_map
-            .remove(&device_index)
-            .expect("Remove will always work.");
-          let device_update_message: ButtplugServerMessageV4 = self.generate_device_list().into();
-          if self.server_sender.send(device_update_message).is_err() {
-            debug!("Server not currently available, dropping Device Removed event.");
+          DeviceTaskEvent::Notification(_, message) => {
+            if self.server_sender.send(message.into()).is_err() {
+              debug!("Server not currently available, dropping Notification event.");
+            }
           }
-        }
-      }
-      ServerDeviceEvent::Notification(_, message) => {
-        if self.server_sender.send(message.into()).is_err() {
-          debug!("Server not currently available, dropping Device Added event.");
         }
       }
     }

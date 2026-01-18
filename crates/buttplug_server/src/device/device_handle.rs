@@ -22,10 +22,18 @@ use buttplug_core::{
   message::{ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4},
 };
 use buttplug_server_device_config::{ServerDeviceDefinition, UserDeviceIdentifier};
+use futures::future::FutureExt;
 use getset::{CopyGetters, Getters};
 use tokio::sync::{mpsc, oneshot};
 
-use crate::message::{checked_input_cmd::CheckedInputCmdV4, checked_output_cmd::CheckedOutputCmdV4};
+use crate::{
+  ButtplugServerResultFuture,
+  message::{
+    checked_input_cmd::CheckedInputCmdV4, checked_output_cmd::CheckedOutputCmdV4,
+    server_device_attributes::ServerDeviceAttributes,
+    spec_enums::ButtplugDeviceCommandMessageUnionV4,
+  },
+};
 
 /// Commands that can be sent to a device's unified task
 #[derive(Debug)]
@@ -74,6 +82,10 @@ pub struct DeviceHandle {
 
   #[getset(get = "pub")]
   features: Vec<DeviceFeature>,
+
+  /// Legacy attributes for backward compatibility with older protocol versions
+  #[getset(get = "pub")]
+  legacy_attributes: ServerDeviceAttributes,
 }
 
 impl DeviceHandle {
@@ -92,6 +104,9 @@ impl DeviceHandle {
       .filter_map(|f| f.as_device_feature().ok())
       .collect();
 
+    // Create legacy attributes for backward compatibility
+    let legacy_attributes = ServerDeviceAttributes::new(definition.features());
+
     Ok(Self {
       command_tx,
       identifier,
@@ -99,6 +114,7 @@ impl DeviceHandle {
       name: definition.name().to_string(),
       display_name: definition.display_name().clone(),
       features,
+      legacy_attributes,
     })
   }
 
@@ -184,5 +200,58 @@ impl DeviceHandle {
       100, // message_timing_gap - standard value
       &feature_map,
     )
+  }
+
+  /// Parse and route a device command message
+  ///
+  /// This routes incoming device commands to the appropriate handler method.
+  pub fn parse_message(
+    &self,
+    command_message: ButtplugDeviceCommandMessageUnionV4,
+  ) -> ButtplugServerResultFuture {
+    use buttplug_core::message::{self, ButtplugMessage};
+
+    match command_message {
+      ButtplugDeviceCommandMessageUnionV4::InputCmd(msg) => {
+        let handle = self.clone();
+        let msg_id = msg.id();
+        async move {
+          let mut result = handle.send_input(msg).await?;
+          result.set_id(msg_id);
+          Ok(result)
+        }
+        .boxed()
+      }
+      ButtplugDeviceCommandMessageUnionV4::OutputCmd(msg) => {
+        let handle = self.clone();
+        let msg_id = msg.id();
+        async move {
+          handle.send_output(msg).await?;
+          Ok(message::OkV0::new(msg_id).into())
+        }
+        .boxed()
+      }
+      ButtplugDeviceCommandMessageUnionV4::OutputVecCmd(msg) => {
+        let handle = self.clone();
+        let msg_id = msg.id();
+        let commands = msg.value_vec().clone();
+        async move {
+          for cmd in commands {
+            handle.send_output(cmd).await?;
+          }
+          Ok(message::OkV0::new(msg_id).into())
+        }
+        .boxed()
+      }
+      ButtplugDeviceCommandMessageUnionV4::StopDeviceCmd(msg) => {
+        let handle = self.clone();
+        let msg_id = msg.id();
+        async move {
+          handle.stop().await?;
+          Ok(message::OkV0::new(msg_id).into())
+        }
+        .boxed()
+      }
+    }
   }
 }
