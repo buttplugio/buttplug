@@ -130,13 +130,19 @@ impl ConfigUserDeviceDefinition {
   }
 }
 
-impl From<&ServerDeviceDefinition> for ConfigUserDeviceDefinition {
-  fn from(value: &ServerDeviceDefinition) -> Self {
-    Self {
+impl TryFrom<&ServerDeviceDefinition> for ConfigUserDeviceDefinition {
+  type Error = ButtplugDeviceConfigError;
+
+  fn try_from(value: &ServerDeviceDefinition) -> Result<Self, Self::Error> {
+    Ok(Self {
       id: value.id(),
-      base_id: value.base_id().expect("Should always have a base id"),
-      features: value.features().values().map(|x| x.into()).collect(),
+      base_id: value.base_id().ok_or(ButtplugDeviceConfigError::MissingBaseId)?,
+      features: value
+        .features()
+        .values()
+        .map(|x| x.try_into())
+        .collect::<Result<Vec<_>, _>>()?,
       user_config: value.into(),
-    }
+    })
   }
 }

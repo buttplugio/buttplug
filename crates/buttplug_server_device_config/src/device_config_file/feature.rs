@@ -300,14 +300,14 @@ impl ConfigUserDeviceFeature {
   }
 }
 
-impl From<&ServerDeviceFeature> for ConfigUserDeviceFeature {
-  fn from(value: &ServerDeviceFeature) -> Self {
-    Self {
+impl TryFrom<&ServerDeviceFeature> for ConfigUserDeviceFeature {
+  type Error = ButtplugDeviceConfigError;
+
+  fn try_from(value: &ServerDeviceFeature) -> Result<Self, Self::Error> {
+    Ok(Self {
       id: value.id(),
-      base_id: value
-        .base_id()
-        .unwrap_or_else(|| panic!("Should have base id: {:?}", value)),
+      base_id: value.base_id().ok_or(ButtplugDeviceConfigError::MissingBaseId)?,
       output: value.output().as_ref().map(|x| x.into()),
-    }
+    })
   }
 }

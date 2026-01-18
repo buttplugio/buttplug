@@ -233,14 +233,20 @@ pub fn load_protocol_configs(
 
 pub fn save_user_config(dcm: &DeviceConfigurationManager) -> Result<String, ButtplugError> {
   let user_specifiers = dcm.user_communication_specifiers();
-  let user_definitions_vec = dcm
+  let user_definitions_vec: Vec<_> = dcm
     .user_device_definitions()
     .iter()
-    .map(|kv| UserDeviceConfigPair {
-      identifier: kv.key().clone(),
-      config: kv.value().into(),
+    .map(|kv| {
+      Ok(UserDeviceConfigPair {
+        identifier: kv.key().clone(),
+        config: kv.value().try_into().map_err(|e| {
+          ButtplugError::from(ButtplugDeviceError::DeviceConfigurationError(format!(
+            "Cannot convert device definition to user config: {e:?}",
+          )))
+        })?,
+      })
     })
-    .collect();
+    .collect::<Result<_, ButtplugError>>()?;
   let user_protos = DashMap::new();
   for spec in user_specifiers {
     user_protos.insert(
