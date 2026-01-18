@@ -21,18 +21,35 @@ use thiserror::Error;
 
 pub type ButtplugResult<T = ()> = Result<T, ButtplugError>;
 
+/// Macro for implementing `From<ErrorType> for BoxFuture<'static, Result<T, ButtplugError>>`.
+/// These implementations allow error types to be converted directly into ready futures.
+macro_rules! impl_error_to_future {
+  ($($error_type:ty),* $(,)?) => {
+    $(
+      impl<T> From<$error_type> for BoxFuture<'static, Result<T, ButtplugError>>
+      where
+        T: Send + 'static,
+      {
+        fn from(err: $error_type) -> BoxFuture<'static, Result<T, ButtplugError>> {
+          ButtplugError::from(err).into()
+        }
+      }
+    )*
+  };
+}
+
+impl_error_to_future!(
+  ButtplugHandshakeError,
+  ButtplugMessageError,
+  ButtplugPingError,
+  ButtplugDeviceError,
+  ButtplugUnknownError,
+);
+
 /// Handshake errors occur while a client is connecting to a server. This
 /// usually involves protocol handshake errors. For connector errors (i.e. when
 /// a remote network connection cannot be established), see
 /// [crate::connector::ButtplugConnectorError].
-impl<T> From<ButtplugHandshakeError> for BoxFuture<'static, Result<T, ButtplugError>>
-where
-  T: Send + 'static,
-{
-  fn from(err: ButtplugHandshakeError) -> BoxFuture<'static, Result<T, ButtplugError>> {
-    ButtplugError::from(err).into()
-  }
-}
 
 #[derive(Debug, Error, Display, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ButtplugHandshakeError {
@@ -54,15 +71,6 @@ pub enum ButtplugHandshakeError {
 
 /// Message errors occur when a message is somehow malformed on creation, or
 /// received unexpectedly by a client or server.
-impl<T> From<ButtplugMessageError> for BoxFuture<'static, Result<T, ButtplugError>>
-where
-  T: Send + 'static,
-{
-  fn from(err: ButtplugMessageError) -> BoxFuture<'static, Result<T, ButtplugError>> {
-    ButtplugError::from(err).into()
-  }
-}
-
 #[derive(Debug, Error, Display, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ButtplugMessageError {
   /// Got unexpected message type: {0}
@@ -87,15 +95,6 @@ pub enum ButtplugMessageError {
 /// Ping errors occur when a server requires a ping response (set up during
 /// connection handshake), and the client does not return a response in the
 /// alloted timeframe. This also signifies a server disconnect.
-impl<T> From<ButtplugPingError> for BoxFuture<'static, Result<T, ButtplugError>>
-where
-  T: Send + 'static,
-{
-  fn from(err: ButtplugPingError) -> BoxFuture<'static, Result<T, ButtplugError>> {
-    ButtplugError::from(err).into()
-  }
-}
-
 #[derive(Debug, Error, Display, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ButtplugPingError {
   /// Pinged timer exhausted, system has shut down.
@@ -111,14 +110,6 @@ pub enum ButtplugPingError {
 /// Device errors occur during device interactions, including sending
 /// unsupported message commands, addressing the wrong number of device
 /// attributes, etc...
-impl<T> From<ButtplugDeviceError> for BoxFuture<'static, Result<T, ButtplugError>>
-where
-  T: Send + 'static,
-{
-  fn from(err: ButtplugDeviceError) -> BoxFuture<'static, Result<T, ButtplugError>> {
-    ButtplugError::from(err).into()
-  }
-}
 #[derive(Debug, Error, Display, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ButtplugDeviceError {
   /// Device {0} not connected
@@ -185,15 +176,6 @@ pub enum ButtplugDeviceError {
 
 /// Unknown errors occur in exceptional circumstances where no other error type
 /// will suffice. These are rare and usually fatal (disconnecting) errors.
-impl<T> From<ButtplugUnknownError> for BoxFuture<'static, Result<T, ButtplugError>>
-where
-  T: Send + 'static,
-{
-  fn from(err: ButtplugUnknownError) -> BoxFuture<'static, Result<T, ButtplugError>> {
-    ButtplugError::from(err).into()
-  }
-}
-
 #[derive(Debug, Error, Display, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ButtplugUnknownError {
   /// Cannot start scanning, no device communication managers available to use for scanning.
