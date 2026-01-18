@@ -19,18 +19,20 @@
 use std::{sync::Arc, time::Duration};
 
 use buttplug_core::{
-  errors::ButtplugError,
+  errors::{ButtplugDeviceError, ButtplugError},
   message::{self, InputType, OutputType, OutputValue},
-  util,
+  util::{self, async_manager},
 };
-use buttplug_server_device_config::{ServerDeviceDefinition, UserDeviceIdentifier};
+use buttplug_server_device_config::{
+  DeviceConfigurationManager, ServerDeviceDefinition, UserDeviceIdentifier,
+};
 use futures::StreamExt;
 use tokio::{select, sync::mpsc};
 
 use crate::{
   device::{
-    hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolKeepaliveStrategy},
+    hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent, HardwareWriteCmd},
+    protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, ProtocolSpecializer},
   },
   message::{
     ButtplugServerDeviceMessage, checked_input_cmd::CheckedInputCmdV4,
@@ -38,7 +40,7 @@ use crate::{
   },
 };
 
-use super::device_handle::DeviceCommand;
+use super::device_handle::{DeviceCommand, DeviceHandle};
 
 /// Events emitted by the device task
 #[derive(Debug)]
@@ -496,4 +498,118 @@ async fn handle_keepalive(
     }
   }
   Ok(())
+}
+
+/// Build a device and spawn the unified task
+///
+/// This function handles the entire device connection process:
+/// 1. Connects to hardware via the connector
+/// 2. Specializes hardware with protocol specifiers
+/// 3. Identifies the device and gets configuration
+/// 4. Initializes the protocol handler
+/// 5. Creates a DeviceHandle and spawns the unified task
+///
+/// Returns the DeviceHandle and an event receiver for device events.
+pub async fn build_device(
+  device_config_manager: Arc<DeviceConfigurationManager>,
+  mut hardware_connector: Box<dyn HardwareConnector>,
+  protocol_specializers: Vec<ProtocolSpecializer>,
+) -> Result<(DeviceHandle, mpsc::Receiver<DeviceTaskEvent>), ButtplugDeviceError> {
+  // Connect to hardware
+  trace!("Connecting to {:?}", hardware_connector);
+  let mut hardware_specializer = hardware_connector.connect().await?;
+
+  // Try each protocol specializer until one works
+  let mut protocol_identifier = None;
+  let mut hardware_out = None;
+  for protocol_specializer in protocol_specializers {
+    match hardware_specializer
+      .specialize(protocol_specializer.specifiers())
+      .await
+    {
+      Ok(specialized_hardware) => {
+        protocol_identifier = Some(protocol_specializer.identify());
+        hardware_out = Some(specialized_hardware);
+        break;
+      }
+      Err(e) => {
+        error!("{:?}", e.to_string());
+      }
+    }
+  }
+
+  if protocol_identifier.is_none() {
+    return Err(ButtplugDeviceError::DeviceConfigurationError(
+      "No protocols with viable communication matches for hardware.".to_owned(),
+    ));
+  }
+
+  let mut protocol_identifier_stage = protocol_identifier.unwrap();
+  let hardware = Arc::new(hardware_out.unwrap());
+
+  // Identify the device
+  let (identifier, mut protocol_initializer) = protocol_identifier_stage
+    .identify(hardware.clone(), hardware_connector.specifier())
+    .await?;
+
+  // Get device configuration
+  let definition = device_config_manager
+    .device_definition(&identifier)
+    .ok_or_else(|| {
+      ButtplugDeviceError::DeviceConfigurationError(format!(
+        "No protocols with viable protocol attributes for hardware {identifier:?}."
+      ))
+    })?;
+
+  // Initialize the protocol handler
+  let handler = protocol_initializer
+    .initialize(hardware.clone(), &definition.clone())
+    .await?;
+
+  let requires_keepalive = hardware.requires_keepalive();
+  let strategy = handler.keepalive_strategy();
+
+  // Create channels for the device task
+  let (command_tx, command_rx) = mpsc::channel::<DeviceCommand>(256);
+  let (event_tx, event_rx) = mpsc::channel::<DeviceTaskEvent>(256);
+
+  // Create the device handle
+  let handle = DeviceHandle::new(command_tx, identifier.clone(), &definition)
+    .map_err(|e| ButtplugDeviceError::DeviceConnectionError(format!("{e}")))?;
+
+  // Create task configuration
+  let task_config = DeviceTaskConfig {
+    hardware: hardware.clone(),
+    handler: handler.clone(),
+    definition: definition.clone(),
+    identifier: identifier.clone(),
+    command_rx,
+    event_tx: event_tx.clone(),
+  };
+
+  // Spawn the unified device task
+  async_manager::spawn(async move {
+    run_device_task(task_config).await;
+  });
+
+  // If we need a keepalive with packet replay, send initial stop command
+  if (requires_keepalive
+    && matches!(
+      strategy,
+      ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
+    ))
+    || matches!(
+      strategy,
+      ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_)
+    )
+  {
+    // Send stop command through the handle to initialize keepalive packet
+    if let Err(e) = handle.stop().await {
+      return Err(ButtplugDeviceError::DeviceConnectionError(format!(
+        "Error setting up keepalive: {e}"
+      )));
+    }
+  }
+
+  Ok((handle, event_rx))
 }

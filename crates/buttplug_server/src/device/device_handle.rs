@@ -15,9 +15,11 @@
 //! ownership: the device task owns the actual hardware and protocol state, while handles
 //! provide a way to send commands and query cached metadata.
 
+use std::collections::BTreeMap;
+
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError},
-  message::{ButtplugServerMessageV4, DeviceFeature},
+  message::{ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4},
 };
 use buttplug_server_device_config::{ServerDeviceDefinition, UserDeviceIdentifier};
 use getset::{CopyGetters, Getters};
@@ -160,5 +162,27 @@ impl DeviceHandle {
   /// Returns false if the channel is closed (device task has exited).
   pub fn is_connected(&self) -> bool {
     !self.command_tx.is_closed()
+  }
+
+  /// Create a DeviceMessageInfoV4 for protocol messages
+  ///
+  /// This is used when generating device lists for clients.
+  pub fn as_device_message_info(&self) -> DeviceMessageInfoV4 {
+    // Create a BTreeMap of features with index as key
+    // Only include features that have output or input capabilities
+    let feature_map: BTreeMap<u32, DeviceFeature> = self
+      .features
+      .iter()
+      .filter(|f| f.output().is_some() || f.input().is_some())
+      .map(|f| (f.feature_index(), f.clone()))
+      .collect();
+
+    DeviceMessageInfoV4::new(
+      self.index,
+      &self.name,
+      &self.display_name,
+      100, // message_timing_gap - standard value
+      &feature_map,
+    )
   }
 }
