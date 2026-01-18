@@ -299,18 +299,8 @@ impl ServerDevice {
             };
           };
           select! {
-            hw_event = hardware_events.recv() => {
-              // TODO This logic doesn't make sense?
-              if let Ok(hw_event) = hw_event {
-                if matches!(hw_event, HardwareEvent::Disconnected(_)) {
-                  info!("Hardware disconnected, shutting down keepalive");
-                  return;
-                }
-              } else {
-                  info!("Hardware disconnected, shutting down keepalive");
-                  return;
-              }
-            }
+            biased;
+
             msg = internal_hw_msg_recv.recv() => {
               if msg.is_none() {
                 info!("No longer receiving message from device parent, breaking");
@@ -337,40 +327,28 @@ impl ServerDevice {
               let sleep_until = Instant::now() + *device_wait_duration.as_ref().unwrap();
               loop {
                 select! {
-                  hw_event = hardware_events.recv() => {
-                    if let Ok(hw_event) = hw_event {
-                      if matches!(hw_event, HardwareEvent::Disconnected(_)) {
-                        info!("Hardware disconnected, shutting down keepalive");
-                        return;
-                      }
-                    } else {
-                        info!("Hardware disconnected, shutting down keepalive");
-                        return;
-                    }
-                  }
+                  biased;
+
                   msg = internal_hw_msg_recv.recv() => {
                     if msg.is_none() {
                       info!("No longer receiving message from device parent, breaking");
                       local_commands.clear();
                       break;
                     }
-                    // Run commands in order, otherwise we may end up sending out of order. This may take a while,
-                    // but it's what 99% of protocols expect. If they want something else, they can implement it
-                    // themselves.
-                    //
-                    // If anything errors out, just bail on the command series. This most likely means the device
-                    // disconnected.
                     for command in msg.unwrap() {
                       local_commands.retain(|v| !command.overlaps(v));
                       local_commands.push_back(command);
                     }
                   }
-                  _ = util::sleep(sleep_until - Instant::now()) => {
+                  _ = tokio::time::sleep_until(sleep_until) => {
                     break;
                   }
-                }
-                if sleep_until < Instant::now() {
-                  break;
+                  hw_event = hardware_events.recv() => {
+                    if matches!(hw_event, Ok(HardwareEvent::Disconnected(_))) || hw_event.is_err() {
+                      info!("Hardware disconnected, shutting down task");
+                      return;
+                    }
+                  }
                 }
               }
               while let Some(command) = local_commands.pop_front() {
@@ -406,6 +384,12 @@ impl ServerDevice {
                       break;
                     }
                 }
+              }
+            }
+            hw_event = hardware_events.recv() => {
+              if matches!(hw_event, Ok(HardwareEvent::Disconnected(_))) || hw_event.is_err() {
+                info!("Hardware disconnected, shutting down task");
+                return;
               }
             }
           }
