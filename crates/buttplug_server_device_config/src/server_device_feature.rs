@@ -165,7 +165,7 @@ impl From<&ServerDeviceFeatureOutputValueProperties> for DeviceFeatureOutputValu
 #[derive(Debug, Clone, Getters, CopyGetters)]
 pub struct ServerDeviceFeatureOutputPositionProperties {
   #[getset(get = "pub")]
-  position: RangeWithLimit,
+  value: RangeWithLimit,
   #[getset(get_copy = "pub")]
   disabled: bool,
   #[getset(get_copy = "pub")]
@@ -173,40 +173,40 @@ pub struct ServerDeviceFeatureOutputPositionProperties {
 }
 
 impl ServerDeviceFeatureOutputPositionProperties {
-  pub fn new(position: &RangeWithLimit, disabled: bool, reverse_position: bool) -> Self {
+  pub fn new(value: &RangeWithLimit, disabled: bool, reverse_position: bool) -> Self {
     Self {
-      position: position.clone(),
+      value: value.clone(),
       disabled,
       reverse_position,
     }
   }
 
-  pub fn calculate_scaled_float(&self, value: f64) -> Result<i32, ButtplugDeviceConfigError> {
-    if !(0.0..=1.0).contains(&value) {
-      Err(ButtplugDeviceConfigError::InvalidFloatConversion(value))
+  pub fn calculate_scaled_float(&self, input: f64) -> Result<i32, ButtplugDeviceConfigError> {
+    if !(0.0..=1.0).contains(&input) {
+      Err(ButtplugDeviceConfigError::InvalidFloatConversion(input))
     } else {
       self
-        .calculate_scaled_value((self.position.step_count() as f64 * value).ceil() as u32)
+        .calculate_scaled_value((self.value.step_count() as f64 * input).ceil() as u32)
         .map(|x| x as i32)
     }
   }
 
   // We'll get a number from 0-x here. We'll need to calculate it with in the range we have.
-  pub fn calculate_scaled_value(&self, value: u32) -> Result<u32, ButtplugDeviceConfigError> {
-    let range = if let Some(user_range) = self.position.user() {
+  pub fn calculate_scaled_value(&self, input: u32) -> Result<u32, ButtplugDeviceConfigError> {
+    let range = if let Some(user_range) = self.value.user() {
       user_range
     } else {
-      self.position.internal_base()
+      self.value.internal_base()
     };
-    if range.contains(&(range.start() + value)) {
+    if range.contains(&(range.start() + input)) {
       if self.reverse_position {
-        Ok(range.end() - value)
+        Ok(range.end() - input)
       } else {
-        Ok(range.start() + value)
+        Ok(range.start() + input)
       }
     } else {
       Err(ButtplugDeviceConfigError::InvalidOutputValue(
-        value as i32,
+        input as i32,
         format!("{:?}", range),
       ))
     }
@@ -215,14 +215,14 @@ impl ServerDeviceFeatureOutputPositionProperties {
 
 impl From<&ServerDeviceFeatureOutputPositionProperties> for DeviceFeatureOutputValueProperties {
   fn from(val: &ServerDeviceFeatureOutputPositionProperties) -> Self {
-    DeviceFeatureOutputValueProperties::new(&val.position().step_limit())
+    DeviceFeatureOutputValueProperties::new(&val.value().step_limit())
   }
 }
 
 #[derive(Debug, Clone, Getters, CopyGetters)]
 pub struct ServerDeviceFeatureOutputPositionWithDurationProperties {
   #[getset(get = "pub")]
-  position: RangeWithLimit,
+  value: RangeWithLimit,
   #[getset(get = "pub")]
   duration: RangeWithLimit,
   #[getset(get_copy = "pub")]
@@ -233,41 +233,41 @@ pub struct ServerDeviceFeatureOutputPositionWithDurationProperties {
 
 impl ServerDeviceFeatureOutputPositionWithDurationProperties {
   pub fn new(
-    position: &RangeWithLimit,
+    value: &RangeWithLimit,
     duration: &RangeWithLimit,
     disabled: bool,
     reverse_position: bool,
   ) -> Self {
     Self {
-      position: position.clone(),
+      value: value.clone(),
       duration: duration.clone(),
       disabled,
       reverse_position,
     }
   }
 
-  pub fn calculate_scaled_float(&self, value: f64) -> Result<u32, ButtplugDeviceConfigError> {
-    self.calculate_scaled_value((self.position.step_count() as f64 * value) as u32)
+  pub fn calculate_scaled_float(&self, input: f64) -> Result<u32, ButtplugDeviceConfigError> {
+    self.calculate_scaled_value((self.value.step_count() as f64 * input) as u32)
   }
 
   // We'll get a number from 0-x here. We'll need to calculate it with in the range we have.
-  pub fn calculate_scaled_value(&self, value: u32) -> Result<u32, ButtplugDeviceConfigError> {
-    let range = if let Some(user_range) = self.position.user() {
+  pub fn calculate_scaled_value(&self, input: u32) -> Result<u32, ButtplugDeviceConfigError> {
+    let range = if let Some(user_range) = self.value.user() {
       user_range
     } else {
-      self.position.internal_base()
+      self.value.internal_base()
     };
-    if value > 0 && range.contains(&(range.start() + value)) {
+    if input > 0 && range.contains(&(range.start() + input)) {
       if self.reverse_position {
-        Ok(range.end() - value)
+        Ok(range.end() - input)
       } else {
-        Ok(range.start() + value)
+        Ok(range.start() + input)
       }
-    } else if value == 0 {
+    } else if input == 0 {
       Ok(0)
     } else {
       Err(ButtplugDeviceConfigError::InvalidOutputValue(
-        value as i32,
+        input as i32,
         format!("{:?}", range),
       ))
     }
@@ -279,7 +279,7 @@ impl From<&ServerDeviceFeatureOutputPositionWithDurationProperties>
 {
   fn from(val: &ServerDeviceFeatureOutputPositionWithDurationProperties) -> Self {
     DeviceFeatureOutputPositionWithDurationProperties::new(
-      &val.position().step_limit(),
+      &val.value().step_limit(),
       &val.duration().step_limit(),
     )
   }

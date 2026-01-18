@@ -79,7 +79,7 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
             create_attribute(OutputType::Oscillate, attr.value().step_count())
           }
           if let Some(attr) = output_map.position().as_ref() {
-            create_attribute(OutputType::Position, attr.position().step_count())
+            create_attribute(OutputType::Position, attr.value().step_count())
           }
           if let Some(attr) = output_map.rotate().as_ref() {
             create_attribute(OutputType::Rotate, attr.value().step_count())
@@ -134,7 +134,7 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
           && let Some(actuator) = output_map.position_with_duration()
         {
           let actuator_type = OutputType::Position;
-          let step_count = actuator.position().step_count();
+          let step_count = actuator.value().step_count();
           let attrs = ServerGenericDeviceMessageAttributesV3 {
             feature_descriptor: feature.description().to_owned(),
             actuator_type,

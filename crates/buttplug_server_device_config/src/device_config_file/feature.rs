@@ -186,7 +186,7 @@ impl UserDeviceFeatureOutputPositionProperties {
     &self,
     base: &ServerDeviceFeatureOutputPositionProperties,
   ) -> Result<ServerDeviceFeatureOutputPositionProperties, ButtplugDeviceConfigError> {
-    let value = RangeWithLimit::try_new(base.position().base(), &self.value)?;
+    let value = RangeWithLimit::try_new(base.value().base(), &self.value)?;
     Ok(ServerDeviceFeatureOutputPositionProperties::new(
       &value,
       self.disabled,
@@ -200,7 +200,7 @@ impl From<&ServerDeviceFeatureOutputPositionProperties>
 {
   fn from(value: &ServerDeviceFeatureOutputPositionProperties) -> Self {
     Self {
-      value: value.position().user().clone(),
+      value: value.value().user().clone(),
       reverse: value.reverse_position(),
       disabled: value.disabled(),
     }
@@ -213,7 +213,7 @@ struct UserDeviceFeatureOutputPositionWithDurationProperties {
     skip_serializing_if = "Option::is_none",
     serialize_with = "option_range_serialize"
   )]
-  position: Option<RangeInclusive<u32>>,
+  value: Option<RangeInclusive<u32>>,
   #[serde(
     skip_serializing_if = "Option::is_none",
     serialize_with = "option_range_serialize"
@@ -231,11 +231,11 @@ impl UserDeviceFeatureOutputPositionWithDurationProperties {
     base: &ServerDeviceFeatureOutputPositionWithDurationProperties,
   ) -> Result<ServerDeviceFeatureOutputPositionWithDurationProperties, ButtplugDeviceConfigError>
   {
-    let position = RangeWithLimit::try_new(base.position().base(), &self.position)?;
+    let value = RangeWithLimit::try_new(base.value().base(), &self.value)?;
     let duration = RangeWithLimit::try_new(base.duration().base(), &self.duration)?;
     Ok(
       ServerDeviceFeatureOutputPositionWithDurationProperties::new(
-        &position,
+        &value,
         &duration,
         self.disabled,
         self.reverse,
@@ -249,7 +249,7 @@ impl From<&ServerDeviceFeatureOutputPositionWithDurationProperties>
 {
   fn from(value: &ServerDeviceFeatureOutputPositionWithDurationProperties) -> Self {
     Self {
-      position: value.position().user().clone(),
+      value: value.value().user().clone(),
       duration: value.duration().user().clone(),
       reverse: value.reverse_position(),
       disabled: value.disabled(),
