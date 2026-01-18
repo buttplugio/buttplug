@@ -34,12 +34,29 @@ enum InternalDeviceEvent {
 }
 use dashmap::{DashMap, DashSet};
 use futures::{FutureExt, StreamExt, future, pin_mut};
-use std::sync::{Arc, atomic::AtomicBool};
+use std::sync::Arc;
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
 use tracing_futures::Instrument;
 
 use super::server_device_manager::DeviceManagerCommand;
+
+/// Scanning state machine for the device manager event loop.
+/// Replaces the previous combination of scanning_bringup_in_progress, scanning_started,
+/// and stop_scanning_received fields with explicit states.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+enum ScanningState {
+  /// No scanning activity. This is the initial state.
+  #[default]
+  Idle,
+  /// StartScanning called, waiting for all comm managers to start.
+  /// ScanningFinished events are ignored in this state.
+  BringupInProgress,
+  /// Actively scanning. Will emit ScanningFinished when all managers finish.
+  Active,
+  /// StopScanning was called. Will NOT emit ScanningFinished.
+  ActiveStopRequested,
+}
 
 pub(super) struct ServerDeviceManagerEventLoop {
   comm_managers: Vec<Box<dyn HardwareCommunicationManager>>,
@@ -57,17 +74,12 @@ pub(super) struct ServerDeviceManagerEventLoop {
   device_event_sender: mpsc::Sender<InternalDeviceEvent>,
   /// Receiver for device events, which the event loops to handle events.
   device_event_receiver: mpsc::Receiver<InternalDeviceEvent>,
-  /// True if StartScanning has been called but no ScanningFinished has been
-  /// emitted yet.
-  scanning_bringup_in_progress: bool,
-  /// Denote whether scanning has been started since we last sent a ScanningFinished message.
-  scanning_started: bool,
+  /// Current scanning state machine state.
+  scanning_state: ScanningState,
   /// Devices currently trying to connect.
   connecting_devices: Arc<DashSet<String>>,
   /// Cancellation token for the event loop
   loop_cancellation_token: CancellationToken,
-  /// True if stop scanning message was sent, means we won't send scanning finished.
-  stop_scanning_received: AtomicBool,
   /// Protocol map, for mapping user definitions to protocols
   protocol_manager: ProtocolManager,
 }
@@ -92,11 +104,9 @@ impl ServerDeviceManagerEventLoop {
       device_event_sender,
       device_event_receiver,
       device_command_receiver,
-      scanning_bringup_in_progress: false,
-      scanning_started: false,
+      scanning_state: ScanningState::Idle,
       connecting_devices: Arc::new(DashSet::new()),
       loop_cancellation_token,
-      stop_scanning_received: AtomicBool::new(false),
       protocol_manager: ProtocolManager::default(),
     }
   }
@@ -110,16 +120,24 @@ impl ServerDeviceManagerEventLoop {
   }
 
   async fn handle_start_scanning(&mut self) {
-    if self.scanning_status() || self.scanning_bringup_in_progress {
-      debug!("System already scanning, ignoring new scanning request");
+    // Only start from Idle state
+    if self.scanning_state != ScanningState::Idle {
+      debug!(
+        "System already scanning (state: {:?}), ignoring new scanning request",
+        self.scanning_state
+      );
       return;
     }
-    self
-      .stop_scanning_received
-      .store(false, std::sync::atomic::Ordering::Relaxed);
+
+    // Also check if hardware is still scanning (edge case: state is Idle but hardware lagging)
+    if self.scanning_status() {
+      debug!("Hardware still scanning, ignoring new scanning request");
+      return;
+    }
+
     info!("No scan currently in progress, starting new scan.");
-    self.scanning_bringup_in_progress = true;
-    self.scanning_started = true;
+    self.scanning_state = ScanningState::BringupInProgress;
+
     let fut_vec: Vec<_> = self
       .comm_managers
       .iter_mut()
@@ -127,14 +145,35 @@ impl ServerDeviceManagerEventLoop {
       .collect();
     // TODO If start_scanning fails anywhere, this will ignore it. We should maybe at least log?
     future::join_all(fut_vec).await;
+
     debug!("Scanning started for all hardware comm managers.");
-    self.scanning_bringup_in_progress = false;
+    // Check if stop was requested during bringup
+    if self.scanning_state == ScanningState::ActiveStopRequested {
+      debug!("Stop was requested during bringup, staying in ActiveStopRequested");
+    } else {
+      self.scanning_state = ScanningState::Active;
+    }
   }
 
   async fn handle_stop_scanning(&mut self) {
-    self
-      .stop_scanning_received
-      .store(true, std::sync::atomic::Ordering::Relaxed);
+    // Transition to stop-requested state (only meaningful if currently scanning)
+    match self.scanning_state {
+      ScanningState::Active => {
+        self.scanning_state = ScanningState::ActiveStopRequested;
+      }
+      ScanningState::BringupInProgress => {
+        // Edge case: stop requested during bringup.
+        // The bringup completion in handle_start_scanning will see this and not transition to Active.
+        self.scanning_state = ScanningState::ActiveStopRequested;
+      }
+      _ => {
+        debug!(
+          "Stop scanning called in state {:?}, no state change needed",
+          self.scanning_state
+        );
+      }
+    }
+
     let fut_vec: Vec<_> = self
       .comm_managers
       .iter_mut()
@@ -148,29 +187,41 @@ impl ServerDeviceManagerEventLoop {
     match event {
       HardwareCommunicationManagerEvent::ScanningFinished => {
         debug!(
-          "System signaled that scanning was finished, check to see if all managers are finished."
+          "System signaled that scanning was finished, state: {:?}",
+          self.scanning_state
         );
-        if self.scanning_bringup_in_progress {
-          debug!(
-            "Hardware Comm Manager finished before scanning was fully started, continuing event loop."
-          );
-          return;
-        }
-        // Only send scanning finished if we haven't requested a stop.
-        if !self.scanning_status()
-          && self.scanning_started
-          && !self
-            .stop_scanning_received
-            .load(std::sync::atomic::Ordering::Relaxed)
-        {
-          debug!("All managers finished, emitting ScanningFinished");
-          self.scanning_started = false;
-          if self
-            .server_sender
-            .send(ScanningFinishedV0::default().into())
-            .is_err()
-          {
-            info!("Server disappeared, exiting loop.");
+
+        match self.scanning_state {
+          ScanningState::Idle => {
+            // Spurious event, ignore
+            debug!("Received ScanningFinished in Idle state, ignoring");
+          }
+          ScanningState::BringupInProgress => {
+            // Comm manager finished before we completed bringup - ignore for now
+            debug!(
+              "Hardware Comm Manager finished before scanning was fully started, ignoring"
+            );
+          }
+          ScanningState::Active => {
+            // Check if all hardware has actually stopped
+            if !self.scanning_status() {
+              debug!("All managers finished, emitting ScanningFinished");
+              self.scanning_state = ScanningState::Idle;
+              if self
+                .server_sender
+                .send(ScanningFinishedV0::default().into())
+                .is_err()
+              {
+                info!("Server disappeared, exiting loop.");
+              }
+            }
+          }
+          ScanningState::ActiveStopRequested => {
+            // Stop was requested, don't emit ScanningFinished
+            if !self.scanning_status() {
+              debug!("All managers finished after stop request, not emitting ScanningFinished");
+              self.scanning_state = ScanningState::Idle;
+            }
           }
         }
       }
