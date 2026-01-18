@@ -21,8 +21,54 @@ use buttplug_core::message::{
   OutputType,
 };
 use getset::{CopyGetters, Getters, Setters};
-use std::{collections::HashSet, ops::RangeInclusive};
+use serde::{
+  de::{self, Deserializer, SeqAccess, Visitor},
+  ser::SerializeSeq,
+  Deserialize, Serialize, Serializer,
+};
+use std::{collections::HashSet, fmt, ops::RangeInclusive};
 use uuid::Uuid;
+
+/// Serde helper module for serializing/deserializing Vec<RangeInclusive<i32>> as [[start, end], ...]
+mod range_vec_serde {
+  use super::*;
+
+  pub fn serialize<S>(ranges: &Vec<RangeInclusive<i32>>, serializer: S) -> Result<S::Ok, S::Error>
+  where
+    S: Serializer,
+  {
+    let arrays: Vec<[i32; 2]> = ranges.iter().map(|r| [*r.start(), *r.end()]).collect();
+    arrays.serialize(serializer)
+  }
+
+  pub fn deserialize<'de, D>(deserializer: D) -> Result<Vec<RangeInclusive<i32>>, D::Error>
+  where
+    D: Deserializer<'de>,
+  {
+    struct RangeVecVisitor;
+
+    impl<'de> Visitor<'de> for RangeVecVisitor {
+      type Value = Vec<RangeInclusive<i32>>;
+
+      fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("an array of two-element arrays [[start, end], ...]")
+      }
+
+      fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+      where
+        A: SeqAccess<'de>,
+      {
+        let mut ranges = Vec::new();
+        while let Some([start, end]) = seq.next_element::<[i32; 2]>()? {
+          ranges.push(start..=end);
+        }
+        Ok(ranges)
+      }
+    }
+
+    deserializer.deserialize_seq(RangeVecVisitor)
+  }
+}
 
 /// Holds a combination of ranges. Base range is defined in the base device config, user range is
 /// defined by the user later to be a sub-range of the base range. User range only stores in u32,
@@ -108,11 +154,56 @@ impl RangeWithLimit {
   }
 }
 
-#[derive(Debug, Clone, Getters, CopyGetters)]
+impl Serialize for RangeWithLimit {
+  fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+  where
+    S: Serializer,
+  {
+    let mut seq = serializer.serialize_seq(Some(2))?;
+    seq.serialize_element(self.base.start())?;
+    seq.serialize_element(self.base.end())?;
+    seq.end()
+  }
+}
+
+impl<'de> Deserialize<'de> for RangeWithLimit {
+  fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+  where
+    D: Deserializer<'de>,
+  {
+    struct RangeVisitor;
+
+    impl<'de> Visitor<'de> for RangeVisitor {
+      type Value = RangeWithLimit;
+
+      fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("a two-element array [start, end]")
+      }
+
+      fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+      where
+        A: SeqAccess<'de>,
+      {
+        let start: i32 = seq
+          .next_element()?
+          .ok_or_else(|| de::Error::invalid_length(0, &self))?;
+        let end: i32 = seq
+          .next_element()?
+          .ok_or_else(|| de::Error::invalid_length(1, &self))?;
+        Ok(RangeWithLimit::new(&(start..=end)))
+      }
+    }
+
+    deserializer.deserialize_seq(RangeVisitor)
+  }
+}
+
+#[derive(Debug, Clone, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct ServerDeviceFeatureOutputValueProperties {
   #[getset(get = "pub")]
   value: RangeWithLimit,
   #[getset(get_copy = "pub")]
+  #[serde(default, skip_serializing_if = "std::ops::Not::not")]
   disabled: bool,
 }
 
@@ -162,13 +253,15 @@ impl From<&ServerDeviceFeatureOutputValueProperties> for DeviceFeatureOutputValu
   }
 }
 
-#[derive(Debug, Clone, Getters, CopyGetters)]
+#[derive(Debug, Clone, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct ServerDeviceFeatureOutputPositionProperties {
   #[getset(get = "pub")]
   value: RangeWithLimit,
   #[getset(get_copy = "pub")]
+  #[serde(default, skip_serializing_if = "std::ops::Not::not")]
   disabled: bool,
   #[getset(get_copy = "pub")]
+  #[serde(default, skip_serializing_if = "std::ops::Not::not")]
   reverse_position: bool,
 }
 
@@ -219,15 +312,17 @@ impl From<&ServerDeviceFeatureOutputPositionProperties> for DeviceFeatureOutputV
   }
 }
 
-#[derive(Debug, Clone, Getters, CopyGetters)]
+#[derive(Debug, Clone, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct ServerDeviceFeatureOutputPositionWithDurationProperties {
   #[getset(get = "pub")]
   value: RangeWithLimit,
   #[getset(get = "pub")]
   duration: RangeWithLimit,
   #[getset(get_copy = "pub")]
+  #[serde(default, skip_serializing_if = "std::ops::Not::not")]
   disabled: bool,
   #[getset(get_copy = "pub")]
+  #[serde(default, skip_serializing_if = "std::ops::Not::not")]
   reverse_position: bool,
 }
 
@@ -285,17 +380,27 @@ impl From<&ServerDeviceFeatureOutputPositionWithDurationProperties>
   }
 }
 
-#[derive(Clone, Debug, Getters, Setters, Default)]
+#[derive(Clone, Debug, Getters, Setters, Default, Serialize, Deserialize)]
+#[serde(default)]
 #[getset(get = "pub", set = "pub")]
 pub struct ServerDeviceFeatureOutput {
+  #[serde(skip_serializing_if = "Option::is_none")]
   vibrate: Option<ServerDeviceFeatureOutputValueProperties>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   rotate: Option<ServerDeviceFeatureOutputValueProperties>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   oscillate: Option<ServerDeviceFeatureOutputValueProperties>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   constrict: Option<ServerDeviceFeatureOutputValueProperties>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   temperature: Option<ServerDeviceFeatureOutputValueProperties>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   led: Option<ServerDeviceFeatureOutputValueProperties>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   position: Option<ServerDeviceFeatureOutputPositionProperties>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   position_with_duration: Option<ServerDeviceFeatureOutputPositionWithDurationProperties>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   spray: Option<ServerDeviceFeatureOutputValueProperties>,
 }
 
@@ -466,9 +571,10 @@ impl From<ServerDeviceFeatureOutput> for DeviceFeatureOutput {
   }
 }
 
-#[derive(Clone, Debug, Getters)]
+#[derive(Clone, Debug, Getters, Serialize, Deserialize)]
 #[getset(get = "pub")]
 pub struct ServerDeviceFeatureInputProperties {
+  #[serde(with = "range_vec_serde")]
   value: Vec<RangeInclusive<i32>>,
   command: HashSet<InputCommandType>,
 }
@@ -491,14 +597,21 @@ impl From<&ServerDeviceFeatureInputProperties> for DeviceFeatureInputProperties 
   }
 }
 
-#[derive(Clone, Debug, Getters, Setters, Default)]
+#[derive(Clone, Debug, Getters, Setters, Default, Serialize, Deserialize)]
+#[serde(default)]
 #[getset(get = "pub", set = "pub(crate)")]
 pub struct ServerDeviceFeatureInput {
+  #[serde(skip_serializing_if = "Option::is_none")]
   battery: Option<ServerDeviceFeatureInputProperties>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   rssi: Option<ServerDeviceFeatureInputProperties>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   pressure: Option<ServerDeviceFeatureInputProperties>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   button: Option<ServerDeviceFeatureInputProperties>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   depth: Option<ServerDeviceFeatureInputProperties>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   position: Option<ServerDeviceFeatureInputProperties>,
 }
 
@@ -560,21 +673,29 @@ impl From<ServerDeviceFeatureInput> for DeviceFeatureInput {
   }
 }
 
-#[derive(Clone, Debug, Getters, CopyGetters, Setters)]
+#[derive(Clone, Debug, Getters, CopyGetters, Setters, Serialize, Deserialize)]
+#[serde(default)]
 pub struct ServerDeviceFeature {
   #[getset(get_copy = "pub")]
+  #[serde(skip)]
   index: u32,
   #[getset(get = "pub")]
+  #[serde(default)]
   description: String,
   #[getset(get_copy = "pub")]
+  #[serde(skip)]
   id: Uuid,
   #[getset(get_copy = "pub")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   base_id: Option<Uuid>,
   #[getset(get_copy = "pub")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   alt_protocol_index: Option<u32>,
   #[getset(get = "pub", set = "pub")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   output: Option<ServerDeviceFeatureOutput>,
   #[getset(get = "pub")]
+  #[serde(skip_serializing_if = "Option::is_none")]
   input: Option<ServerDeviceFeatureInput>,
 }
 
@@ -584,7 +705,20 @@ impl PartialEq for ServerDeviceFeature {
   }
 }
 
-impl Eq for ServerDeviceFeature {
+impl Eq for ServerDeviceFeature {}
+
+impl Default for ServerDeviceFeature {
+  fn default() -> Self {
+    Self {
+      index: 0,
+      description: String::new(),
+      id: Uuid::new_v4(),
+      base_id: None,
+      alt_protocol_index: None,
+      output: None,
+      input: None,
+    }
+  }
 }
 
 impl ServerDeviceFeature {
