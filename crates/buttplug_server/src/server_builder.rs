@@ -13,7 +13,7 @@ use super::{
 };
 use buttplug_core::{
   errors::*,
-  message::{self, ButtplugServerMessageV4, StopAllDevicesV4},
+  message::{self, ButtplugServerMessageV4, StopCmdV4},
   util::async_manager,
 };
 use buttplug_server_device_config::DeviceConfigurationManagerBuilder;
@@ -116,7 +116,7 @@ impl ButtplugServerBuilder {
         // Stop all devices (spawn async task since callback is sync)
         async_manager::spawn(async move {
           if let Err(e) = device_manager_clone
-            .stop_all_devices(&StopAllDevicesV4::default())
+            .stop_devices(&StopCmdV4::default())
             .await
           {
             error!("Could not stop devices on ping timeout: {:?}", e);

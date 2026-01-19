@@ -17,7 +17,7 @@ use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
     self, ButtplugMessage, ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4,
-    InputCommandType, InputType, OutputType, OutputValue, StopDeviceCmdV4,
+    InputCommandType, InputType, OutputType, OutputValue, StopCmdV4,
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
@@ -189,9 +189,12 @@ impl DeviceHandle {
         }
         .boxed()
       }
-      // Other generic messages
-      ButtplugDeviceCommandMessageUnionV4::StopDeviceCmd(msg) => self.handle_stop_device_cmd(msg),
     }
+  }
+
+  pub fn stop(&self, stop_cmd: &StopCmdV4) -> ButtplugServerResultFuture {
+    // Other generic messages
+    self.handle_stop_device_cmd(stop_cmd)
   }
 
   /// Disconnect from the device
@@ -259,7 +262,7 @@ impl DeviceHandle {
     self.handle_hardware_commands(hardware_commands)
   }
 
-  fn handle_stop_device_cmd(&self, msg: &StopDeviceCmdV4) -> ButtplugServerResultFuture {
+  fn handle_stop_device_cmd(&self, msg: &StopCmdV4) -> ButtplugServerResultFuture {
     let mut fut_vec = vec![];
     if msg.outputs() {
       self
@@ -552,7 +555,7 @@ pub(super) async fn build_device_handle(
       ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_)
     ))
     && let Err(e) = device_handle
-      .parse_message(StopDeviceCmdV4::new(0, true, true).into())
+      .stop(&StopCmdV4::default())
       .await
   {
     return Err(ButtplugDeviceError::DeviceConnectionError(format!(

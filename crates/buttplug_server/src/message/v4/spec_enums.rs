@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, fmt::Debug};
+use std::{collections::BTreeMap, fmt::Debug, u32};
 
 use crate::message::{
   ButtplugClientMessageVariant,
@@ -16,16 +16,7 @@ use crate::message::{
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugClientMessageV4,
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    PingV0,
-    RequestDeviceListV0,
-    RequestServerInfoV4,
-    StartScanningV0,
-    StopAllDevicesV4,
-    StopDeviceCmdV4,
-    StopScanningV0,
+    ButtplugClientMessageV4, ButtplugDeviceMessage, ButtplugMessage, PingV0, RequestDeviceListV0, RequestServerInfoV4, StartScanningV0, StopCmdV4, StopScanningV0
   },
 };
 
@@ -53,8 +44,7 @@ pub enum ButtplugCheckedClientMessageV4 {
   StopScanning(StopScanningV0),
   RequestDeviceList(RequestDeviceListV0),
   // Generic commands
-  StopDeviceCmd(StopDeviceCmdV4),
-  StopAllDevices(StopAllDevicesV4),
+  StopCmd(StopCmdV4),
   OutputCmd(CheckedOutputCmdV4),
   // Sensor commands
   InputCmd(CheckedInputCmdV4),
@@ -68,8 +58,7 @@ impl_message_enum_traits!(ButtplugCheckedClientMessageV4 {
   StartScanning,
   StopScanning,
   RequestDeviceList,
-  StopDeviceCmd,
-  StopAllDevices,
+  StopCmd,
   OutputCmd,
   InputCmd,
   OutputVecCmd,
@@ -95,17 +84,13 @@ impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMess
       ButtplugClientMessageV4::RequestDeviceList(m) => {
         Ok(ButtplugCheckedClientMessageV4::RequestDeviceList(m))
       }
-      ButtplugClientMessageV4::StopAllDevices(m) => {
-        Ok(ButtplugCheckedClientMessageV4::StopAllDevices(m))
-      }
-
       // Messages that need device index checking
-      ButtplugClientMessageV4::StopDeviceCmd(m) => {
-        if feature_map.get(&m.device_index()).is_some() {
-          Ok(ButtplugCheckedClientMessageV4::StopDeviceCmd(m))
+      ButtplugClientMessageV4::StopCmd(m) => {
+        if m.device_index().map_or(true,|x| feature_map.get(&x).is_some()) {
+          Ok(ButtplugCheckedClientMessageV4::StopCmd(m))
         } else {
           Err(ButtplugError::from(
-            ButtplugDeviceError::DeviceNotAvailable(m.device_index()),
+            ButtplugDeviceError::DeviceNotAvailable(m.device_index().map_or(u32::MAX, |x| x)),
           ))
         }
       }
@@ -145,15 +130,15 @@ impl From<RequestServerInfoV1> for RequestServerInfoV4 {
   }
 }
 
-impl From<StopDeviceCmdV0> for StopDeviceCmdV4 {
+impl From<StopDeviceCmdV0> for StopCmdV4 {
   fn from(value: StopDeviceCmdV0) -> Self {
-    StopDeviceCmdV4::new(value.device_index(), true, true)
+    StopCmdV4::new(Some(value.device_index()), None, true, true)
   }
 }
 
-impl From<StopAllDevicesV0> for StopAllDevicesV4 {
+impl From<StopAllDevicesV0> for StopCmdV4 {
   fn from(_: StopAllDevicesV0) -> Self {
-    StopAllDevicesV4::default()
+    StopCmdV4::default()
   }
 }
 
@@ -179,10 +164,10 @@ impl TryFrom<ButtplugClientMessageV3> for ButtplugCheckedClientMessageV4 {
         Ok(ButtplugCheckedClientMessageV4::RequestDeviceList(m.clone()))
       }
       ButtplugClientMessageV3::StopAllDevices(m) => {
-        Ok(ButtplugCheckedClientMessageV4::StopAllDevices(m.into()))
+        Ok(ButtplugCheckedClientMessageV4::StopCmd(m.into()))
       }
       ButtplugClientMessageV3::StopDeviceCmd(m) => {
-        Ok(ButtplugCheckedClientMessageV4::StopDeviceCmd(m.into()))
+        Ok(ButtplugCheckedClientMessageV4::StopCmd(m.into()))
       }
       _ => Err(ButtplugMessageError::MessageConversionError(format!(
         "Cannot convert message {value:?} to V4 message spec while lacking state."
@@ -324,14 +309,14 @@ impl TryFromClientMessage<ButtplugClientMessageV3> for ButtplugCheckedClientMess
 #[derive(Debug, Clone, PartialEq, Eq, derive_more::From)]
 pub(crate) enum ButtplugDeviceManagerMessageUnion {
   RequestDeviceList(RequestDeviceListV0),
-  StopAllDevices(StopAllDevicesV4),
+  StopCmd(StopCmdV4),
   StartScanning(StartScanningV0),
   StopScanning(StopScanningV0),
 }
 
 impl_message_enum_traits!(ButtplugDeviceManagerMessageUnion {
   RequestDeviceList,
-  StopAllDevices,
+  StopCmd,
   StartScanning,
   StopScanning,
 });
@@ -344,8 +329,8 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceManagerMessageUni
       ButtplugCheckedClientMessageV4::RequestDeviceList(m) => {
         Ok(ButtplugDeviceManagerMessageUnion::RequestDeviceList(m))
       }
-      ButtplugCheckedClientMessageV4::StopAllDevices(m) => {
-        Ok(ButtplugDeviceManagerMessageUnion::StopAllDevices(m))
+      ButtplugCheckedClientMessageV4::StopCmd(m) => {
+        Ok(ButtplugDeviceManagerMessageUnion::StopCmd(m))
       }
       ButtplugCheckedClientMessageV4::StartScanning(m) => {
         Ok(ButtplugDeviceManagerMessageUnion::StartScanning(m))
@@ -361,14 +346,12 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceManagerMessageUni
 /// Represents all possible device command message types.
 #[derive(Debug, Clone, PartialEq, derive_more::From)]
 pub enum ButtplugDeviceCommandMessageUnionV4 {
-  StopDeviceCmd(StopDeviceCmdV4),
   OutputCmd(CheckedOutputCmdV4),
   OutputVecCmd(CheckedOutputVecCmdV4),
   InputCmd(CheckedInputCmdV4),
 }
 
 impl_message_enum_traits!(ButtplugDeviceCommandMessageUnionV4 {
-  StopDeviceCmd,
   OutputCmd,
   OutputVecCmd,
   InputCmd,
@@ -377,7 +360,6 @@ impl_message_enum_traits!(ButtplugDeviceCommandMessageUnionV4 {
 impl ButtplugDeviceMessage for ButtplugDeviceCommandMessageUnionV4 {
   fn device_index(&self) -> u32 {
     match self {
-      ButtplugDeviceCommandMessageUnionV4::StopDeviceCmd(msg) => msg.device_index(),
       ButtplugDeviceCommandMessageUnionV4::OutputCmd(msg) => msg.device_index(),
       ButtplugDeviceCommandMessageUnionV4::OutputVecCmd(msg) => msg.device_index(),
       ButtplugDeviceCommandMessageUnionV4::InputCmd(msg) => msg.device_index(),
@@ -385,7 +367,6 @@ impl ButtplugDeviceMessage for ButtplugDeviceCommandMessageUnionV4 {
   }
   fn set_device_index(&mut self, device_index: u32) {
     match self {
-      ButtplugDeviceCommandMessageUnionV4::StopDeviceCmd(msg) => msg.set_device_index(device_index),
       ButtplugDeviceCommandMessageUnionV4::OutputCmd(msg) => msg.set_device_index(device_index),
       ButtplugDeviceCommandMessageUnionV4::OutputVecCmd(msg) => msg.set_device_index(device_index),
       ButtplugDeviceCommandMessageUnionV4::InputCmd(msg) => msg.set_device_index(device_index),
@@ -398,9 +379,6 @@ impl TryFrom<ButtplugCheckedClientMessageV4> for ButtplugDeviceCommandMessageUni
 
   fn try_from(value: ButtplugCheckedClientMessageV4) -> Result<Self, Self::Error> {
     match value {
-      ButtplugCheckedClientMessageV4::StopDeviceCmd(m) => {
-        Ok(ButtplugDeviceCommandMessageUnionV4::StopDeviceCmd(m))
-      }
       ButtplugCheckedClientMessageV4::OutputCmd(m) => {
         Ok(ButtplugDeviceCommandMessageUnionV4::OutputCmd(m))
       }

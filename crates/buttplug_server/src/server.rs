@@ -32,7 +32,7 @@ use buttplug_core::{
     ButtplugMessageSpecVersion,
     ButtplugServerMessageV4,
     ErrorV0,
-    StopAllDevicesV4,
+    StopCmdV4,
     StopScanningV0,
   },
   util::stream::convert_broadcast_receiver_to_stream,
@@ -215,8 +215,8 @@ impl ButtplugServer {
     let stop_scanning_fut = self.parse_checked_message(
       ButtplugCheckedClientMessageV4::StopScanning(StopScanningV0::default()),
     );
-    let stop_fut = self.parse_checked_message(ButtplugCheckedClientMessageV4::StopAllDevices(
-      StopAllDevicesV4::default(),
+    let stop_fut = self.parse_checked_message(ButtplugCheckedClientMessageV4::StopCmd(
+      StopCmdV4::default(),
     ));
     let state = self.state.clone();
     async move {

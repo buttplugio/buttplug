@@ -28,7 +28,7 @@ use buttplug_core::{
     RequestDeviceListV0,
     RequestServerInfoV4,
     StartScanningV0,
-    StopAllDevicesV4,
+    StopCmdV4,
     StopScanningV0,
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
@@ -438,7 +438,7 @@ impl ButtplugClient {
   pub fn stop_all_devices(&self) -> ButtplugClientResultFuture {
     self
       .message_sender
-      .send_message_expect_ok(StopAllDevicesV4::default().into())
+      .send_message_expect_ok(StopCmdV4::default().into())
   }
 
   pub fn event_stream(&self) -> impl Stream<Item = ButtplugClientEvent> + use<> {

@@ -23,7 +23,7 @@ use buttplug_core::{
     DeviceFeature,
     DeviceMessageInfoV4,
     OutputType,
-    StopDeviceCmdV4,
+    StopCmdV4,
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
@@ -314,14 +314,14 @@ impl ButtplugClientDevice {
     // All devices accept StopDeviceCmd
     self
       .event_loop_sender
-      .send_message_expect_ok(StopDeviceCmdV4::new(self.index, true, true).into())
+      .send_message_expect_ok(StopCmdV4::new(Some(self.index), None, true, true).into())
   }
 
   pub fn stop_features(&self, inputs: bool, outputs: bool) -> ButtplugClientResultFuture {
     // All devices accept StopDeviceCmd
     self
       .event_loop_sender
-      .send_message_expect_ok(StopDeviceCmdV4::new(self.index, inputs, outputs).into())
+      .send_message_expect_ok(StopCmdV4::new(Some(self.index), None, inputs, outputs).into())
   }
 
   pub(crate) fn set_device_connected(&self, connected: bool) {
