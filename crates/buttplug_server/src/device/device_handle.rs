@@ -135,7 +135,7 @@ impl DeviceHandle {
   }
 
   /// Get the device's legacy attributes (for older API compatibility)
-  pub fn legacy_attributes(&self) -> &ServerDeviceAttributes {
+  pub(crate) fn legacy_attributes(&self) -> &ServerDeviceAttributes {
     &self.legacy_attributes
   }
 
