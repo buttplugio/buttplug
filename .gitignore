@@ -21,3 +21,5 @@ Cargo.lock
 .yarn*
 
 **/.pnp.*
+
+plans
