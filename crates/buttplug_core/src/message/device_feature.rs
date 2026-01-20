@@ -33,7 +33,7 @@ pub enum OutputType {
   #[serde(alias = "position")]
   Position,
   #[serde(alias = "hw_position_with_duration")]
-  HWPositionWithDuration,
+  HwPositionWithDuration,
   // Lube shooters
   #[serde(alias = "spray")]
   Spray,
@@ -157,7 +157,7 @@ impl DeviceFeatureOutputLimits for DeviceFeatureOutputValueProperties {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Getters)]
 #[serde(rename_all = "PascalCase")]
-pub struct DeviceFeatureOutputHWPositionWithDurationProperties {
+pub struct DeviceFeatureOutputHwPositionWithDurationProperties {
   #[getset(get = "pub")]
   #[serde(serialize_with = "range_serialize")]
   value: RangeInclusive<i32>,
@@ -166,9 +166,9 @@ pub struct DeviceFeatureOutputHWPositionWithDurationProperties {
   duration: RangeInclusive<i32>,
 }
 
-impl DeviceFeatureOutputHWPositionWithDurationProperties {
+impl DeviceFeatureOutputHwPositionWithDurationProperties {
   pub fn new(position: &RangeInclusive<i32>, duration: &RangeInclusive<i32>) -> Self {
-    DeviceFeatureOutputHWPositionWithDurationProperties {
+    DeviceFeatureOutputHwPositionWithDurationProperties {
       value: position.clone(),
       duration: duration.clone(),
     }
@@ -179,7 +179,7 @@ impl DeviceFeatureOutputHWPositionWithDurationProperties {
   }
 }
 
-impl DeviceFeatureOutputLimits for DeviceFeatureOutputHWPositionWithDurationProperties {
+impl DeviceFeatureOutputLimits for DeviceFeatureOutputHwPositionWithDurationProperties {
   fn step_count(&self) -> u32 {
     self.step_count()
   }
@@ -208,7 +208,7 @@ pub struct DeviceFeatureOutput {
   #[serde(skip_serializing_if = "Option::is_none")]
   position: Option<DeviceFeatureOutputValueProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
-  hw_position_with_duration: Option<DeviceFeatureOutputHWPositionWithDurationProperties>,
+  hw_position_with_duration: Option<DeviceFeatureOutputHwPositionWithDurationProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
   spray: Option<DeviceFeatureOutputValueProperties>,
 }
@@ -228,7 +228,7 @@ impl DeviceFeatureOutput {
       OutputType::Led => self.led.is_some(),
       OutputType::Oscillate => self.oscillate.is_some(),
       OutputType::Position => self.position.is_some(),
-      OutputType::HWPositionWithDuration => self.hw_position_with_duration.is_some(),
+      OutputType::HwPositionWithDuration => self.hw_position_with_duration.is_some(),
       OutputType::Rotate => self.rotate.is_some(),
       OutputType::Spray => self.spray.is_some(),
       OutputType::Unknown => false,
@@ -243,7 +243,7 @@ impl DeviceFeatureOutput {
       OutputType::Led => as_output_limits!(self.led()),
       OutputType::Oscillate => as_output_limits!(self.oscillate()),
       OutputType::Position => as_output_limits!(self.position()),
-      OutputType::HWPositionWithDuration => as_output_limits!(self.hw_position_with_duration()),
+      OutputType::HwPositionWithDuration => as_output_limits!(self.hw_position_with_duration()),
       OutputType::Rotate => as_output_limits!(self.rotate()),
       OutputType::Spray => as_output_limits!(self.spray()),
       OutputType::Unknown => None,

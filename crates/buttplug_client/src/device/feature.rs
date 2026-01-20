@@ -14,7 +14,7 @@ use buttplug_core::{
     InputTypeReading,
     OutputCmdV4,
     OutputCommand,
-    OutputHWPositionWithDuration,
+    OutputHwPositionWithDuration,
     OutputType,
     OutputValue,
   },
@@ -151,8 +151,8 @@ impl ClientDeviceFeature {
       ClientDeviceOutputCommand::Position(v) => {
         OutputCommand::Position(OutputValue::new(self.check_step_value(output, v)?))
       }
-      ClientDeviceOutputCommand::HWPositionWithDuration(v, d) => OutputCommand::HWPositionWithDuration(
-        OutputHWPositionWithDuration::new(self.check_step_value(output, v)? as u32, *d),
+      ClientDeviceOutputCommand::HwPositionWithDuration(v, d) => OutputCommand::HwPositionWithDuration(
+        OutputHwPositionWithDuration::new(self.check_step_value(output, v)? as u32, *d),
       ),
     };
     Ok(OutputCmdV4::new(
@@ -207,7 +207,7 @@ impl ClientDeviceFeature {
     position: impl Into<ClientDeviceCommandValue>,
     duration_in_ms: u32,
   ) -> ButtplugClientResultFuture {
-    self.send_command(&ClientDeviceOutputCommand::HWPositionWithDuration(
+    self.send_command(&ClientDeviceOutputCommand::HwPositionWithDuration(
       position.into(),
       duration_in_ms,
     ))

@@ -143,7 +143,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
                 .output()
                 .as_ref()
                 .unwrap()
-                .get(OutputType::HWPositionWithDuration)
+                .get(OutputType::HwPositionWithDuration)
                 .unwrap()
                 .step_count() as f64)
               .ceil() as u32,

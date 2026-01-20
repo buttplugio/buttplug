@@ -33,14 +33,14 @@ impl OutputValue {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, CopyGetters)]
 #[getset(get_copy = "pub")]
-pub struct OutputHWPositionWithDuration {
+pub struct OutputHwPositionWithDuration {
   #[serde(rename = "Value")]
   value: u32,
   #[serde(rename = "Duration")]
   duration: u32,
 }
 
-impl OutputHWPositionWithDuration {
+impl OutputHwPositionWithDuration {
   pub fn new(value: u32, duration: u32) -> Self {
     Self { value, duration }
   }
@@ -59,7 +59,7 @@ pub enum OutputCommand {
   // For instances where we specify a position to move to ASAP. Usually servos, probably for the
   // OSR-2/SR-6.
   Position(OutputValue),
-  HWPositionWithDuration(OutputHWPositionWithDuration),
+  HwPositionWithDuration(OutputHwPositionWithDuration),
 }
 
 impl OutputCommand {
@@ -73,7 +73,7 @@ impl OutputCommand {
       | OutputCommand::Position(x)
       | OutputCommand::Rotate(x)
       | OutputCommand::Vibrate(x) => x.value() as i32,
-      OutputCommand::HWPositionWithDuration(x) => x.value() as i32,
+      OutputCommand::HwPositionWithDuration(x) => x.value() as i32,
     }
   }
 
@@ -87,7 +87,7 @@ impl OutputCommand {
       | OutputCommand::Position(x)
       | OutputCommand::Rotate(x)
       | OutputCommand::Vibrate(x) => x.value = value,
-      OutputCommand::HWPositionWithDuration(x) => x.value = value as u32,
+      OutputCommand::HwPositionWithDuration(x) => x.value = value as u32,
     }
   }
 
@@ -100,7 +100,7 @@ impl OutputCommand {
       Self::Spray(_) => OutputType::Spray,
       Self::Led(_) => OutputType::Led,
       Self::Position(_) => OutputType::Position,
-      Self::HWPositionWithDuration(_) => OutputType::HWPositionWithDuration,
+      Self::HwPositionWithDuration(_) => OutputType::HwPositionWithDuration,
       Self::Temperature(_) => OutputType::Temperature,
     }
   }

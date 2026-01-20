@@ -22,7 +22,7 @@ use buttplug_core::{
     ButtplugMessage,
     ButtplugMessageValidator,
     OutputCommand,
-    OutputHWPositionWithDuration,
+    OutputHwPositionWithDuration,
     OutputType,
     OutputValue,
   },
@@ -316,7 +316,7 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedOutputVecCmdV4 {
         x.index(),
         0,
         f.id(),
-        OutputCommand::HWPositionWithDuration(OutputHWPositionWithDuration::new(
+        OutputCommand::HwPositionWithDuration(OutputHwPositionWithDuration::new(
           actuator.calculate_scaled_float(x.position()).map_err(|_| {
             ButtplugError::from(ButtplugMessageError::InvalidMessageContents(
               "Position should be 0.0 < x < 1.0".to_owned(),

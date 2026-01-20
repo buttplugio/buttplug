@@ -7,7 +7,7 @@ use crate::{
   ServerDeviceFeatureInput,
   ServerDeviceFeatureOutput,
   ServerDeviceFeatureOutputPositionProperties,
-  ServerDeviceFeatureOutputHWPositionWithDurationProperties,
+  ServerDeviceFeatureOutputHwPositionWithDurationProperties,
   ServerDeviceFeatureOutputValueProperties,
 };
 use buttplug_core::util::range_serialize::option_range_serialize;
@@ -101,7 +101,7 @@ impl From<&ServerDeviceFeatureOutputPositionProperties>
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-struct UserDeviceFeatureOutputHWPositionWithDurationProperties {
+struct UserDeviceFeatureOutputHwPositionWithDurationProperties {
   #[serde(
     skip_serializing_if = "Option::is_none",
     serialize_with = "option_range_serialize"
@@ -118,16 +118,16 @@ struct UserDeviceFeatureOutputHWPositionWithDurationProperties {
   reverse: bool,
 }
 
-impl UserDeviceFeatureOutputHWPositionWithDurationProperties {
+impl UserDeviceFeatureOutputHwPositionWithDurationProperties {
   pub fn with_base_properties(
     &self,
-    base: &ServerDeviceFeatureOutputHWPositionWithDurationProperties,
-  ) -> Result<ServerDeviceFeatureOutputHWPositionWithDurationProperties, ButtplugDeviceConfigError>
+    base: &ServerDeviceFeatureOutputHwPositionWithDurationProperties,
+  ) -> Result<ServerDeviceFeatureOutputHwPositionWithDurationProperties, ButtplugDeviceConfigError>
   {
     let value = RangeWithLimit::try_new(base.value().base(), &self.value)?;
     let duration = RangeWithLimit::try_new(base.duration().base(), &self.duration)?;
     Ok(
-      ServerDeviceFeatureOutputHWPositionWithDurationProperties::new(
+      ServerDeviceFeatureOutputHwPositionWithDurationProperties::new(
         &value,
         &duration,
         self.disabled,
@@ -137,10 +137,10 @@ impl UserDeviceFeatureOutputHWPositionWithDurationProperties {
   }
 }
 
-impl From<&ServerDeviceFeatureOutputHWPositionWithDurationProperties>
-  for UserDeviceFeatureOutputHWPositionWithDurationProperties
+impl From<&ServerDeviceFeatureOutputHwPositionWithDurationProperties>
+  for UserDeviceFeatureOutputHwPositionWithDurationProperties
 {
-  fn from(value: &ServerDeviceFeatureOutputHWPositionWithDurationProperties) -> Self {
+  fn from(value: &ServerDeviceFeatureOutputHwPositionWithDurationProperties) -> Self {
     Self {
       value: value.value().user().clone(),
       duration: value.duration().user().clone(),
@@ -167,7 +167,7 @@ struct UserDeviceFeatureOutput {
   #[serde(skip_serializing_if = "Option::is_none")]
   position: Option<UserDeviceFeatureOutputPositionProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
-  hw_position_with_duration: Option<UserDeviceFeatureOutputHWPositionWithDurationProperties>,
+  hw_position_with_duration: Option<UserDeviceFeatureOutputHwPositionWithDurationProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
   spray: Option<UserDeviceFeatureOutputValueProperties>,
 }

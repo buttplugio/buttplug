@@ -245,7 +245,7 @@ impl ButtplugClientDevice {
     position: impl Into<ClientDeviceCommandValue>,
     duration_in_ms: u32,
   ) -> ButtplugClientResultFuture {
-    self.set_client_value(&ClientDeviceOutputCommand::HWPositionWithDuration(
+    self.set_client_value(&ClientDeviceOutputCommand::HwPositionWithDuration(
       position.into(),
       duration_in_ms,
     ))

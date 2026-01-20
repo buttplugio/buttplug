@@ -274,7 +274,7 @@ pub trait ProtocolHandler: Sync + Send {
           .try_into()
           .map_err(|_| ButtplugDeviceError::DeviceCommandSignError)?,
       ),
-      OutputCommand::HWPositionWithDuration(x) => self.handle_hw_position_with_duration_cmd(
+      OutputCommand::HwPositionWithDuration(x) => self.handle_hw_position_with_duration_cmd(
         cmd.feature_index(),
         cmd.feature_id(),
         x.value(),

@@ -229,7 +229,7 @@ async fn device_tester() {
           OutputType::Led,
           OutputType::Oscillate,
           OutputType::Position,
-          OutputType::HWPositionWithDuration,
+          OutputType::HwPositionWithDuration,
           OutputType::Rotate,
           OutputType::Spray,
           OutputType::Unknown,
@@ -296,9 +296,9 @@ async fn device_tester() {
                 set_level_and_wait(&dev, feature, &otype, 0.0).await;
               }
             }
-            OutputType::HWPositionWithDuration => {
+            OutputType::HwPositionWithDuration => {
               feature
-                .send_command(&ClientDeviceOutputCommand::HWPositionWithDuration(
+                .send_command(&ClientDeviceOutputCommand::HwPositionWithDuration(
                   0.0f64.into(),
                   10,
                 ))
@@ -310,13 +310,13 @@ async fn device_tester() {
                 dev.index(),
                 feature.feature().feature_index(),
                 feature.feature().description(),
-                "HWPositionWithDuration",
+                "HwPositionWithDuration",
                 (0.0 * 100.0) as u8,
                 10
               );
               sleep(Duration::from_secs(1)).await;
               feature
-                .send_command(&ClientDeviceOutputCommand::HWPositionWithDuration(
+                .send_command(&ClientDeviceOutputCommand::HwPositionWithDuration(
                   0.5f64.into(),
                   1000,
                 ))
@@ -328,13 +328,13 @@ async fn device_tester() {
                 dev.index(),
                 feature.feature().feature_index(),
                 feature.feature().description(),
-                "HWPositionWithDuration",
+                "HwPositionWithDuration",
                 (0.0 * 100.0) as u8,
                 1000
               );
               sleep(Duration::from_secs(1)).await;
               feature
-                .send_command(&ClientDeviceOutputCommand::HWPositionWithDuration(
+                .send_command(&ClientDeviceOutputCommand::HwPositionWithDuration(
                   0.0f64.into(),
                   10,
                 ))
@@ -346,13 +346,13 @@ async fn device_tester() {
                 dev.index(),
                 feature.feature().feature_index(),
                 feature.feature().description(),
-                "HWPositionWithDuration",
+                "HwPositionWithDuration",
                 (0.0 * 100.0) as u8,
                 10
               );
               sleep(Duration::from_secs(1)).await;
               feature
-                .send_command(&ClientDeviceOutputCommand::HWPositionWithDuration(
+                .send_command(&ClientDeviceOutputCommand::HwPositionWithDuration(
                   1.0f64.into(),
                   500,
                 ))
@@ -364,13 +364,13 @@ async fn device_tester() {
                 dev.index(),
                 feature.feature().feature_index(),
                 feature.feature().description(),
-                "HWPositionWithDuration",
+                "HwPositionWithDuration",
                 (1.0 * 100.0) as u8,
                 500
               );
               sleep(Duration::from_secs(1)).await;
               feature
-                .send_command(&ClientDeviceOutputCommand::HWPositionWithDuration(
+                .send_command(&ClientDeviceOutputCommand::HwPositionWithDuration(
                   0.0f64.into(),
                   1500,
                 ))
@@ -382,7 +382,7 @@ async fn device_tester() {
                 dev.index(),
                 feature.feature().feature_index(),
                 feature.feature().description(),
-                "HWPositionWithDuration",
+                "HwPositionWithDuration",
                 (0.0 * 100.0) as u8,
                 1500
               );

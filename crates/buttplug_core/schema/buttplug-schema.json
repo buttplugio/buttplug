@@ -391,7 +391,7 @@
                 "Value"
               ]
             },
-            "HWPositionWithDuration": {
+            "HwPositionWithDuration": {
               "type": "object",
               "properties": {
                 "Value": {
@@ -473,7 +473,7 @@
                   "Value"
                 ]
               },
-              "^HWPositionWithDuration$": {
+              "^HwPositionWithDuration$": {
                 "type": "object",
                 "properties": {
                   "Value": {
