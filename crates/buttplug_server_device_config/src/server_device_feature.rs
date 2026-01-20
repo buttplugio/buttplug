@@ -14,7 +14,7 @@ use buttplug_core::message::{
   DeviceFeatureInputProperties,
   DeviceFeatureOutput,
   DeviceFeatureOutputBuilder,
-  DeviceFeatureOutputPositionWithDurationProperties,
+  DeviceFeatureOutputHWPositionWithDurationProperties,
   DeviceFeatureOutputValueProperties,
   InputCommandType,
   InputType,
@@ -313,7 +313,7 @@ impl From<&ServerDeviceFeatureOutputPositionProperties> for DeviceFeatureOutputV
 }
 
 #[derive(Debug, Clone, Getters, CopyGetters, Serialize, Deserialize)]
-pub struct ServerDeviceFeatureOutputPositionWithDurationProperties {
+pub struct ServerDeviceFeatureOutputHWPositionWithDurationProperties {
   #[getset(get = "pub")]
   value: RangeWithLimit,
   #[getset(get = "pub")]
@@ -326,7 +326,7 @@ pub struct ServerDeviceFeatureOutputPositionWithDurationProperties {
   reverse_position: bool,
 }
 
-impl ServerDeviceFeatureOutputPositionWithDurationProperties {
+impl ServerDeviceFeatureOutputHWPositionWithDurationProperties {
   pub fn new(
     value: &RangeWithLimit,
     duration: &RangeWithLimit,
@@ -369,11 +369,11 @@ impl ServerDeviceFeatureOutputPositionWithDurationProperties {
   }
 }
 
-impl From<&ServerDeviceFeatureOutputPositionWithDurationProperties>
-  for DeviceFeatureOutputPositionWithDurationProperties
+impl From<&ServerDeviceFeatureOutputHWPositionWithDurationProperties>
+  for DeviceFeatureOutputHWPositionWithDurationProperties
 {
-  fn from(val: &ServerDeviceFeatureOutputPositionWithDurationProperties) -> Self {
-    DeviceFeatureOutputPositionWithDurationProperties::new(
+  fn from(val: &ServerDeviceFeatureOutputHWPositionWithDurationProperties) -> Self {
+    DeviceFeatureOutputHWPositionWithDurationProperties::new(
       &val.value().step_limit(),
       &val.duration().step_limit(),
     )
@@ -399,7 +399,7 @@ pub struct ServerDeviceFeatureOutput {
   #[serde(skip_serializing_if = "Option::is_none")]
   position: Option<ServerDeviceFeatureOutputPositionProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
-  position_with_duration: Option<ServerDeviceFeatureOutputPositionWithDurationProperties>,
+  hw_position_with_duration: Option<ServerDeviceFeatureOutputHWPositionWithDurationProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
   spray: Option<ServerDeviceFeatureOutputValueProperties>,
 }
@@ -412,7 +412,7 @@ impl ServerDeviceFeatureOutput {
       OutputType::Led => self.led.is_some(),
       OutputType::Oscillate => self.oscillate.is_some(),
       OutputType::Position => self.position.is_some(),
-      OutputType::PositionWithDuration => self.position_with_duration.is_some(),
+      OutputType::HWPositionWithDuration => self.hw_position_with_duration.is_some(),
       OutputType::Rotate => self.rotate.is_some(),
       OutputType::Spray => self.spray.is_some(),
       OutputType::Unknown => false,
@@ -429,7 +429,7 @@ impl ServerDeviceFeatureOutput {
       (self.temperature.is_some(), OutputType::Temperature),
       (self.led.is_some(), OutputType::Led),
       (self.position.is_some(), OutputType::Position),
-      (self.position_with_duration.is_some(), OutputType::PositionWithDuration),
+      (self.hw_position_with_duration.is_some(), OutputType::HWPositionWithDuration),
       (self.spray.is_some(), OutputType::Spray),
     ]
     .into_iter()
@@ -464,7 +464,7 @@ impl ServerDeviceFeatureOutput {
         Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
         |x| x.calculate_scaled_value(value as u32).map(|x| x as i32),
       ),
-      OutputType::PositionWithDuration => self.position_with_duration.as_ref().map_or(
+      OutputType::HWPositionWithDuration => self.hw_position_with_duration.as_ref().map_or(
         Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
         |x| x.calculate_scaled_value(value as u32).map(|x| x as i32),
       ),
@@ -510,7 +510,7 @@ impl ServerDeviceFeatureOutput {
         Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
         |x| x.calculate_scaled_float(value),
       ),
-      OutputType::PositionWithDuration => self.position_with_duration.as_ref().map_or(
+      OutputType::HWPositionWithDuration => self.hw_position_with_duration.as_ref().map_or(
         Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
         |x| x.calculate_scaled_float(value).map(|x| x as i32),
       ),
@@ -545,9 +545,9 @@ impl From<ServerDeviceFeatureOutput> for DeviceFeatureOutput {
     val.led.as_ref().map(|x| builder.led(x.into()));
     val.position.as_ref().map(|x| builder.position(x.into()));
     val
-      .position_with_duration
+      .hw_position_with_duration
       .as_ref()
-      .map(|x| builder.position_with_duration(x.into()));
+      .map(|x| builder.hw_position_with_duration(x.into()));
     val.spray.as_ref().map(|x| builder.spray(x.into()));
     builder.build().expect("Infallible")
   }

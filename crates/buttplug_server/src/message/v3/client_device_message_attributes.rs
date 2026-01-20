@@ -314,7 +314,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
         if let Some(output_map) = feature.output()
-          && let Some(actuator) = output_map.position_with_duration()
+          && let Some(actuator) = output_map.hw_position_with_duration()
         {
           let actuator_type = OutputType::Position;
           let attrs = ClientGenericDeviceMessageAttributesV3 {

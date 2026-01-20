@@ -201,7 +201,7 @@
                   "value"
                 ]
               },
-              "^position_with_duration$": {
+              "^hw_position_with_duration$": {
                 "type": "object",
                 "properties": {
                   "value": {
@@ -306,7 +306,7 @@
                   }
                 }
               },
-              "^position_with_duration$": {
+              "^hw_position_with_duration$": {
                 "type": "object",
                 "properties": {
                   "value": {

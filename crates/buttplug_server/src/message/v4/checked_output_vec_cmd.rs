@@ -22,7 +22,7 @@ use buttplug_core::{
     ButtplugMessage,
     ButtplugMessageValidator,
     OutputCommand,
-    OutputPositionWithDuration,
+    OutputHWPositionWithDuration,
     OutputType,
     OutputValue,
   },
@@ -304,7 +304,7 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedOutputVecCmdV4 {
             "Device got LinearCmd command but has no actuators on Linear feature.".to_owned(),
           ),
         ))?
-        .position_with_duration()
+        .hw_position_with_duration()
         .as_ref()
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceFeatureMismatch(
@@ -316,7 +316,7 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedOutputVecCmdV4 {
         x.index(),
         0,
         f.id(),
-        OutputCommand::PositionWithDuration(OutputPositionWithDuration::new(
+        OutputCommand::HWPositionWithDuration(OutputHWPositionWithDuration::new(
           actuator.calculate_scaled_float(x.position()).map_err(|_| {
             ButtplugError::from(ButtplugMessageError::InvalidMessageContents(
               "Position should be 0.0 < x < 1.0".to_owned(),

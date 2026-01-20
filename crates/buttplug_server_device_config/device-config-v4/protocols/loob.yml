@@ -4,7 +4,7 @@ defaults:
   features:
   - id: 7078c41e-0cd3-4264-8f54-c331ac4c81f9
     output:
-      position_with_duration:
+      hw_position_with_duration:
         value:
         - 0
         - 1000

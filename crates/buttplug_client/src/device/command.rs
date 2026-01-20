@@ -36,7 +36,7 @@ pub enum ClientDeviceOutputCommand {
   Led(ClientDeviceCommandValue),
   Spray(ClientDeviceCommandValue),
   Position(ClientDeviceCommandValue),
-  PositionWithDuration(ClientDeviceCommandValue, u32),
+  HWPositionWithDuration(ClientDeviceCommandValue, u32),
 }
 
 impl ClientDeviceOutputCommand {
@@ -54,7 +54,7 @@ impl ClientDeviceOutputCommand {
       OutputType::Spray => Ok(ClientDeviceOutputCommand::Spray(*value)),
       OutputType::Position => Ok(ClientDeviceOutputCommand::Position(*value)),
       _ => Err(ButtplugClientError::ButtplugOutputCommandConversionError(
-        "Cannot use PositionWithDuration with this method".to_owned(),
+        "Cannot use HWPositionWithDuration with this method".to_owned(),
       )),
     }
   }
@@ -71,7 +71,7 @@ impl From<&ClientDeviceOutputCommand> for OutputType {
       ClientDeviceOutputCommand::Led(_) => OutputType::Led,
       ClientDeviceOutputCommand::Spray(_) => OutputType::Spray,
       ClientDeviceOutputCommand::Position(_) => OutputType::Position,
-      ClientDeviceOutputCommand::PositionWithDuration(_, _) => OutputType::PositionWithDuration,
+      ClientDeviceOutputCommand::HWPositionWithDuration(_, _) => OutputType::HWPositionWithDuration,
     }
   }
 }

@@ -32,7 +32,7 @@
                 "index": 0,
                 "description": "",
                 "output": {
-                  "position_with_duration": {
+                  "hw_position_with_duration": {
                     "value": [
                       0,
                       100

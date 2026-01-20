@@ -42,7 +42,7 @@ impl ProtocolHandler for TCodeV03 {
     Ok(msg_vec)
   }
 
-  fn handle_position_with_duration_cmd(
+  fn handle_hw_position_with_duration_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,

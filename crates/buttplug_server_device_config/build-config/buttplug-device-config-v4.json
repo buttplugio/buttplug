@@ -838,7 +838,7 @@
             "id": "a8185061-6d41-4eea-bc24-1ff1c5c405b9",
             "index": 0,
             "output": {
-              "position_with_duration": {
+              "hw_position_with_duration": {
                 "duration": [
                   0,
                   100000
@@ -1337,7 +1337,7 @@
             "id": "d3985f07-f95a-4f72-859e-8b0ac76f251f",
             "index": 0,
             "output": {
-              "position_with_duration": {
+              "hw_position_with_duration": {
                 "duration": [
                   0,
                   100000
@@ -8864,7 +8864,7 @@
               "id": "2fe100ee-4665-4132-b4c6-d70a4037d6ac",
               "index": 0,
               "output": {
-                "position_with_duration": {
+                "hw_position_with_duration": {
                   "duration": [
                     0,
                     100000
@@ -8935,7 +8935,7 @@
             "id": "49b06ca8-dd4d-4306-91c6-931143dee212",
             "index": 0,
             "output": {
-              "position_with_duration": {
+              "hw_position_with_duration": {
                 "duration": [
                   0,
                   100000
@@ -9333,7 +9333,7 @@
               "id": "b77ed4d9-9350-4868-8cb3-a6c48112f8b2",
               "index": 1,
               "output": {
-                "position_with_duration": {
+                "hw_position_with_duration": {
                   "duration": [
                     0,
                     100000
@@ -9601,7 +9601,7 @@
               "id": "8cd94334-adde-4d9b-aad9-c2de93adb2c0",
               "index": 0,
               "output": {
-                "position_with_duration": {
+                "hw_position_with_duration": {
                   "duration": [
                     0,
                     100000
@@ -9626,7 +9626,7 @@
               "id": "c66d882d-f752-45b4-806e-166d3e160eb8",
               "index": 0,
               "output": {
-                "position_with_duration": {
+                "hw_position_with_duration": {
                   "duration": [
                     0,
                     100000
@@ -9651,7 +9651,7 @@
               "id": "da002a11-610a-4e13-94c5-4c45d51814f2",
               "index": 0,
               "output": {
-                "position_with_duration": {
+                "hw_position_with_duration": {
                   "duration": [
                     0,
                     100000
@@ -9677,7 +9677,7 @@
               "id": "8c896f82-2e17-46f9-9db2-531cc7e42236",
               "index": 0,
               "output": {
-                "position_with_duration": {
+                "hw_position_with_duration": {
                   "duration": [
                     0,
                     100000
@@ -9729,7 +9729,7 @@
               "id": "f4ee99e7-1a14-4315-9870-3990bca7ff94",
               "index": 0,
               "output": {
-                "position_with_duration": {
+                "hw_position_with_duration": {
                   "duration": [
                     0,
                     100000
@@ -10563,7 +10563,7 @@
             "id": "7078c41e-0cd3-4264-8f54-c331ac4c81f9",
             "index": 0,
             "output": {
-              "position_with_duration": {
+              "hw_position_with_duration": {
                 "duration": [
                   0,
                   100000
@@ -11843,7 +11843,7 @@
                     20
                   ]
                 },
-                "position_with_duration": {
+                "hw_position_with_duration": {
                   "duration": [
                     0,
                     100000
@@ -15347,7 +15347,7 @@
             "id": "60da884f-131a-4036-ae93-97efc97591e2",
             "index": 0,
             "output": {
-              "position_with_duration": {
+              "hw_position_with_duration": {
                 "duration": [
                   0,
                   100000
@@ -17919,7 +17919,7 @@
             "id": "7e756a59-b13c-4322-bc59-27dacfc73b4d",
             "index": 0,
             "output": {
-              "position_with_duration": {
+              "hw_position_with_duration": {
                 "duration": [
                   0,
                   100000
@@ -20133,7 +20133,7 @@
             "id": "32309a60-f980-490d-a5f4-467ccae2d586",
             "index": 0,
             "output": {
-              "position_with_duration": {
+              "hw_position_with_duration": {
                 "duration": [
                   0,
                   100000
@@ -20213,7 +20213,7 @@
             "id": "ccbbda59-cf58-477e-b1b2-e0897c4bb0ce",
             "index": 0,
             "output": {
-              "position_with_duration": {
+              "hw_position_with_duration": {
                 "duration": [
                   0,
                   100000
@@ -20885,7 +20885,7 @@
               "id": "7c8d7a1d-9e2f-4a92-83f3-42a0840b90bd",
               "index": 0,
               "output": {
-                "position_with_duration": {
+                "hw_position_with_duration": {
                   "duration": [
                     0,
                     100000

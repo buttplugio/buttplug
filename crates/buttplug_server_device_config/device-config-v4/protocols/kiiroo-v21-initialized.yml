@@ -10,7 +10,7 @@ configurations:
   features:
   - id: 8cd94334-adde-4d9b-aad9-c2de93adb2c0
     output:
-      position_with_duration:
+      hw_position_with_duration:
         value:
         - 0
         - 99
@@ -25,7 +25,7 @@ configurations:
   features:
   - id: c66d882d-f752-45b4-806e-166d3e160eb8
     output:
-      position_with_duration:
+      hw_position_with_duration:
         value:
         - 0
         - 99
@@ -41,7 +41,7 @@ configurations:
   features:
   - id: da002a11-610a-4e13-94c5-4c45d51814f2
     output:
-      position_with_duration:
+      hw_position_with_duration:
         value:
         - 0
         - 99
@@ -58,7 +58,7 @@ configurations:
   features:
   - id: 8c896f82-2e17-46f9-9db2-531cc7e42236
     output:
-      position_with_duration:
+      hw_position_with_duration:
         value:
         - 0
         - 99

@@ -136,14 +136,14 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
         .iter()
         .map(|cmd| {
           let f = device.device_features()[&cmd.index()].clone();
-          f.position_with_duration(
+          f.hw_position_with_duration(
             (cmd.position()
               * f
                 .feature()
                 .output()
                 .as_ref()
                 .unwrap()
-                .get(OutputType::PositionWithDuration)
+                .get(OutputType::HWPositionWithDuration)
                 .unwrap()
                 .step_count() as f64)
               .ceil() as u32,

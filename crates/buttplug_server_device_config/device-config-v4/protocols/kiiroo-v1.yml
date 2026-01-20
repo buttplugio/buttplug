@@ -22,7 +22,7 @@ configurations:
   features:
   - id: 2fe100ee-4665-4132-b4c6-d70a4037d6ac
     output:
-      position_with_duration:
+      hw_position_with_duration:
         value:
         - 0
         - 4

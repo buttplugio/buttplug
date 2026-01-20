@@ -26,7 +26,7 @@ pub struct ServeU {
 }
 
 impl ProtocolHandler for ServeU {
-  fn handle_position_with_duration_cmd(
+  fn handle_hw_position_with_duration_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,

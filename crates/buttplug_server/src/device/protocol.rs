@@ -274,7 +274,7 @@ pub trait ProtocolHandler: Sync + Send {
           .try_into()
           .map_err(|_| ButtplugDeviceError::DeviceCommandSignError)?,
       ),
-      OutputCommand::PositionWithDuration(x) => self.handle_position_with_duration_cmd(
+      OutputCommand::HWPositionWithDuration(x) => self.handle_hw_position_with_duration_cmd(
         cmd.feature_index(),
         cmd.feature_id(),
         x.value(),
@@ -355,7 +355,7 @@ pub trait ProtocolHandler: Sync + Send {
     self.command_unimplemented("OutputCmd (Position Actuator)")
   }
 
-  fn handle_position_with_duration_cmd(
+  fn handle_hw_position_with_duration_cmd(
     &self,
     _feature_index: u32,
     _feature_id: Uuid,

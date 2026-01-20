@@ -51,7 +51,7 @@ impl ProtocolHandler for LovenseStroker {
     super::keepalive_strategy()
   }
 
-  fn handle_position_with_duration_cmd(
+  fn handle_hw_position_with_duration_cmd(
     &self,
     _feature_index: u32,
     _feature_id: Uuid,

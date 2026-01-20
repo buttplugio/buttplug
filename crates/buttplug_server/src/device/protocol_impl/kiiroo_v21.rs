@@ -64,7 +64,7 @@ impl ProtocolHandler for KiirooV21 {
     ])
   }
 
-  fn handle_position_with_duration_cmd(
+  fn handle_hw_position_with_duration_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,

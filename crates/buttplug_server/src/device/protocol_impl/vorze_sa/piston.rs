@@ -42,7 +42,7 @@ pub fn get_piston_speed(mut distance: f64, mut duration: f64) -> u8 {
 }
 
 impl ProtocolHandler for VorzeSAPiston {
-  fn handle_position_with_duration_cmd(
+  fn handle_hw_position_with_duration_cmd(
     &self,
     _feature_index: u32,
     feature_id: uuid::Uuid,

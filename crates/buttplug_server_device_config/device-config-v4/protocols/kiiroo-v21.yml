@@ -64,7 +64,7 @@ configurations:
     index: 0
   - id: b77ed4d9-9350-4868-8cb3-a6c48112f8b2
     output:
-      position_with_duration:
+      hw_position_with_duration:
         value:
         - 0
         - 99
