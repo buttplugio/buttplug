@@ -127,8 +127,9 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedOutputVecCmdV4 
           actuator.calculate_scaled_float(msg.speed()).map_err(
             |e: buttplug_server_device_config::ButtplugDeviceConfigError| {
               ButtplugMessageError::InvalidMessageContents(e.to_string())
-            },
+            }
           )?,
+          None
         )),
       ))
     }
@@ -198,6 +199,7 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedOutputVecCmdV4 {
           actuator
             .calculate_scaled_float(vibrate_cmd.speed())
             .map_err(|e| ButtplugMessageError::InvalidMessageContents(e.to_string()))?,
+            None
         )),
       ))
     }
@@ -393,6 +395,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
             ))
           })?
             * (if cmd.clockwise() { 1 } else { -1 }),
+            None
         )),
       ));
     }

@@ -14,13 +14,15 @@
 
 use std::{collections::VecDeque, sync::Arc, time::Duration};
 
-use buttplug_core::util::{self, async_manager};
+use buttplug_core::{message::{StopCmdV4}, util::{self, async_manager}};
 use futures::future;
 use tokio::{
   select,
   sync::mpsc::Receiver,
   time::Instant,
 };
+
+use crate::message::{checked_input_cmd::CheckedInputCmdV4, checked_output_cmd::CheckedOutputCmdV4};
 
 use super::{
   hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareWriteCmd},
@@ -37,10 +39,16 @@ pub struct DeviceTaskConfig {
   pub keepalive_strategy: ProtocolKeepaliveStrategy,
 }
 
+pub enum DeviceTaskMessage {
+  OutputCmd(CheckedOutputCmdV4),
+  InputCmd(CheckedInputCmdV4),
+  StopCmd(StopCmdV4),
+}
+
 /// Spawn the device communication task.
 ///
 /// This task handles:
-/// - Receiving hardware commands from the internal channel
+/// - Receiving Buttplug Messages from the internal channel and turning them into hardware commands
 /// - Batching and deduplicating commands when message_gap is set
 /// - Sending keepalive packets to maintain device connection
 /// - Detecting hardware disconnection
@@ -48,12 +56,12 @@ pub struct DeviceTaskConfig {
 /// Returns immediately after spawning the task.
 pub fn spawn_device_task(
   hardware: Arc<Hardware>,
-  _handler: Arc<dyn ProtocolHandler>,
+  handler: Arc<dyn ProtocolHandler>,
   config: DeviceTaskConfig,
   mut command_receiver: Receiver<Vec<HardwareCommand>>,
 ) {
   async_manager::spawn(async move {
-    run_device_task(hardware, config, &mut command_receiver).await;
+    run_device_task(hardware, handler, config, &mut command_receiver).await;
   });
 }
 
@@ -63,6 +71,7 @@ pub fn spawn_device_task(
 /// and potential future use in non-spawned contexts.
 async fn run_device_task(
   hardware: Arc<Hardware>,
+  handler: Arc<dyn ProtocolHandler>,
   config: DeviceTaskConfig,
   command_receiver: &mut Receiver<Vec<HardwareCommand>>,
 ) {

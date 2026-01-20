@@ -15,19 +15,22 @@ use crate::{
     OutputType,
   },
 };
-use getset::CopyGetters;
+use getset::{Getters, CopyGetters};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, CopyGetters)]
-#[getset(get_copy = "pub")]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, CopyGetters, Getters)]
 pub struct OutputValue {
   #[serde(rename = "Value")]
+  #[getset(get_copy = "pub")]
   value: i32,
+  #[serde(rename = "Expr", skip_serializing_if = "Option::is_none")]
+  #[getset(get = "pub")]
+  expr: Option<String>
 }
 
 impl OutputValue {
-  pub fn new(value: i32) -> Self {
-    Self { value }
+  pub fn new(value: i32, expr: Option<String>) -> Self {
+    Self { value, expr }
   }
 }
 
@@ -46,7 +49,7 @@ impl OutputPositionWithDuration {
   }
 }
 
-#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Display, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum OutputCommand {
   Vibrate(OutputValue),
   // Single Direction Rotation Speed
@@ -107,14 +110,14 @@ impl OutputCommand {
 
   pub fn from_output_type(output_type: OutputType, value: i32) -> Result<Self, ButtplugError> {
     match output_type {
-      OutputType::Constrict => Ok(Self::Constrict(OutputValue::new(value))),
-      OutputType::Temperature => Ok(Self::Temperature(OutputValue::new(value))),
-      OutputType::Spray => Ok(Self::Spray(OutputValue::new(value))),
-      OutputType::Led => Ok(Self::Led(OutputValue::new(value))),
-      OutputType::Oscillate => Ok(Self::Oscillate(OutputValue::new(value))),
-      OutputType::Position => Ok(Self::Position(OutputValue::new(value))),
-      OutputType::Rotate => Ok(Self::Rotate(OutputValue::new(value))),
-      OutputType::Vibrate => Ok(Self::Vibrate(OutputValue::new(value))),
+      OutputType::Constrict => Ok(Self::Constrict(OutputValue::new(value, None))),
+      OutputType::Temperature => Ok(Self::Temperature(OutputValue::new(value, None))),
+      OutputType::Spray => Ok(Self::Spray(OutputValue::new(value, None))),
+      OutputType::Led => Ok(Self::Led(OutputValue::new(value, None))),
+      OutputType::Oscillate => Ok(Self::Oscillate(OutputValue::new(value, None))),
+      OutputType::Position => Ok(Self::Position(OutputValue::new(value, None))),
+      OutputType::Rotate => Ok(Self::Rotate(OutputValue::new(value, None))),
+      OutputType::Vibrate => Ok(Self::Vibrate(OutputValue::new(value, None))),
       x => Err(ButtplugError::ButtplugDeviceError(
         ButtplugDeviceError::OutputNotSupported(x),
       )),
@@ -122,16 +125,19 @@ impl OutputCommand {
   }
 }
 
-#[derive(Debug, PartialEq, Clone, CopyGetters, Serialize, Deserialize)]
-#[getset(get_copy = "pub")]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize, Getters, CopyGetters)]
 pub struct OutputCmdV4 {
   #[serde(rename = "Id")]
+  #[getset(get_copy = "pub")]
   id: u32,
   #[serde(rename = "DeviceIndex")]
+  #[getset(get_copy = "pub")]
   device_index: u32,
   #[serde(rename = "FeatureIndex")]
+  #[getset(get_copy = "pub")]
   feature_index: u32,
   #[serde(rename = "Command")]
+  #[getset(get = "pub")]
   command: OutputCommand,
 }
 

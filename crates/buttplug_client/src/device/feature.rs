@@ -128,28 +128,28 @@ impl ClientDeviceFeature {
 
     let output_cmd = match client_cmd {
       ClientDeviceOutputCommand::Vibrate(v) => {
-        OutputCommand::Vibrate(OutputValue::new(self.check_step_value(output, v)?))
+        OutputCommand::Vibrate(OutputValue::new(self.check_step_value(output, v)?, None))
       }
       ClientDeviceOutputCommand::Oscillate(v) => {
-        OutputCommand::Oscillate(OutputValue::new(self.check_step_value(output, v)?))
+        OutputCommand::Oscillate(OutputValue::new(self.check_step_value(output, v)?, None))
       }
       ClientDeviceOutputCommand::Rotate(v) => {
-        OutputCommand::Rotate(OutputValue::new(self.check_step_value(output, v)?))
+        OutputCommand::Rotate(OutputValue::new(self.check_step_value(output, v)?, None))
       }
       ClientDeviceOutputCommand::Constrict(v) => {
-        OutputCommand::Constrict(OutputValue::new(self.check_step_value(output, v)?))
+        OutputCommand::Constrict(OutputValue::new(self.check_step_value(output, v)?, None))
       }
       ClientDeviceOutputCommand::Temperature(v) => {
-        OutputCommand::Temperature(OutputValue::new(self.check_step_value(output, v)?))
+        OutputCommand::Temperature(OutputValue::new(self.check_step_value(output, v)?, None))
       }
       ClientDeviceOutputCommand::Led(v) => {
-        OutputCommand::Led(OutputValue::new(self.check_step_value(output, v)?))
+        OutputCommand::Led(OutputValue::new(self.check_step_value(output, v)?, None))
       }
       ClientDeviceOutputCommand::Spray(v) => {
-        OutputCommand::Spray(OutputValue::new(self.check_step_value(output, v)?))
+        OutputCommand::Spray(OutputValue::new(self.check_step_value(output, v)?, None))
       }
       ClientDeviceOutputCommand::Position(v) => {
-        OutputCommand::Position(OutputValue::new(self.check_step_value(output, v)?))
+        OutputCommand::Position(OutputValue::new(self.check_step_value(output, v)?, None))
       }
       ClientDeviceOutputCommand::PositionWithDuration(v, d) => OutputCommand::PositionWithDuration(
         OutputPositionWithDuration::new(self.check_step_value(output, v)? as u32, *d),

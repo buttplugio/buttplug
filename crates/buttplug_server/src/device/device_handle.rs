@@ -29,6 +29,7 @@ use futures::future::{self, BoxFuture, FutureExt};
 use tokio::sync::{mpsc::{channel, Sender}, oneshot};
 use tokio_stream::StreamExt;
 use uuid::Uuid;
+use getset::Getters;
 
 use crate::{
   ButtplugServerResultFuture,
@@ -85,12 +86,15 @@ pub enum DeviceEvent {
 ///
 /// DeviceHandle owns the device state directly and handles all command
 /// processing. It is cheap to clone and can be safely shared across tasks.
-#[derive(Clone)]
+#[derive(Clone, Getters)]
 pub struct DeviceHandle {
   hardware: Arc<Hardware>,
   handler: Arc<dyn ProtocolHandler>,
+  #[getset(get="pub")]
   definition: ServerDeviceDefinition,
+  #[getset(get="pub")]
   identifier: UserDeviceIdentifier,
+  #[getset(get="pub(crate)")]
   legacy_attributes: ServerDeviceAttributes,
   last_output_command: Arc<DashMap<Uuid, CheckedOutputCmdV4>>,
   stop_commands: Arc<Vec<ButtplugDeviceCommandMessageUnionV4>>,
@@ -119,26 +123,11 @@ impl DeviceHandle {
     }
   }
 
-  /// Get the device's unique identifier
-  pub fn identifier(&self) -> &UserDeviceIdentifier {
-    &self.identifier
-  }
-
   /// Get the device's name
   pub fn name(&self) -> String {
     self.definition.name().to_owned()
   }
-
-  /// Get the device's definition (contains features, display name, etc.)
-  pub fn definition(&self) -> &ServerDeviceDefinition {
-    &self.definition
-  }
-
-  /// Get the device's legacy attributes (for older API compatibility)
-  pub(crate) fn legacy_attributes(&self) -> &ServerDeviceAttributes {
-    &self.legacy_attributes
-  }
-
+  
   /// Get the device as a DeviceMessageInfoV4 for protocol messages
   pub fn as_device_message_info(&self, index: u32) -> DeviceMessageInfoV4 {
     DeviceMessageInfoV4::new(
@@ -155,6 +144,42 @@ impl DeviceHandle {
         .collect::<BTreeMap<u32, DeviceFeature>>(),
     )
   }
+
+  pub fn stop(&self, stop_cmd: &StopCmdV4) -> ButtplugServerResultFuture {
+    // Other generic messages
+    self.handle_stop_cmd(stop_cmd)
+  }
+
+  /// Disconnect from the device
+  pub fn disconnect(&self) -> ButtplugResultFuture {
+    let fut = self.hardware.disconnect();
+    async move { fut.await.map_err(|err| err.into()) }.boxed()
+  }
+
+  /// Get the event stream for this device (disconnections, notifications)
+  pub fn event_stream(&self) -> impl futures::Stream<Item = DeviceEvent> + Send + use<> {
+    let identifier = self.identifier.clone();
+    let hardware_stream = convert_broadcast_receiver_to_stream(self.hardware.event_stream())
+      .filter_map(move |hardware_event| {
+        let id = identifier.clone();
+        match hardware_event {
+          HardwareEvent::Disconnected(_) => Some(DeviceEvent::Disconnected(id)),
+          HardwareEvent::Notification(_address, _endpoint, _data) => {
+            // TODO Does this still need to be here? Does this need to be routed to the protocol it's part of?
+            None
+          }
+        }
+      });
+
+    let identifier = self.identifier.clone();
+    let handler_mapped_stream = self.handler.event_stream().map(move |incoming_message| {
+      let id = identifier.clone();
+      DeviceEvent::Notification(id, incoming_message)
+    });
+    hardware_stream.merge(handler_mapped_stream)
+  }
+
+  // --- Private command handling methods ---
 
   /// Parse and handle a command message for this device
   pub fn parse_message(
@@ -192,42 +217,6 @@ impl DeviceHandle {
     }
   }
 
-  pub fn stop(&self, stop_cmd: &StopCmdV4) -> ButtplugServerResultFuture {
-    // Other generic messages
-    self.handle_stop_device_cmd(stop_cmd)
-  }
-
-  /// Disconnect from the device
-  pub fn disconnect(&self) -> ButtplugResultFuture {
-    let fut = self.hardware.disconnect();
-    async move { fut.await.map_err(|err| err.into()) }.boxed()
-  }
-
-  /// Get the event stream for this device (disconnections, notifications)
-  pub fn event_stream(&self) -> impl futures::Stream<Item = DeviceEvent> + Send + use<> {
-    let identifier = self.identifier.clone();
-    let hardware_stream = convert_broadcast_receiver_to_stream(self.hardware.event_stream())
-      .filter_map(move |hardware_event| {
-        let id = identifier.clone();
-        match hardware_event {
-          HardwareEvent::Disconnected(_) => Some(DeviceEvent::Disconnected(id)),
-          HardwareEvent::Notification(_address, _endpoint, _data) => {
-            // TODO Does this still need to be here? Does this need to be routed to the protocol it's part of?
-            None
-          }
-        }
-      });
-
-    let identifier = self.identifier.clone();
-    let handler_mapped_stream = self.handler.event_stream().map(move |incoming_message| {
-      let id = identifier.clone();
-      DeviceEvent::Notification(id, incoming_message)
-    });
-    hardware_stream.merge(handler_mapped_stream)
-  }
-
-  // --- Private command handling methods ---
-
   fn handle_outputcmd_v4(&self, msg: &CheckedOutputCmdV4) -> ButtplugServerResultFuture {
     if let Some(last_msg) = self.last_output_command.get(&msg.feature_id())
       && *last_msg == *msg
@@ -244,6 +233,7 @@ impl DeviceHandle {
   fn handle_hardware_commands(&self, commands: Vec<HardwareCommand>) -> ButtplugServerResultFuture {
     let sender = self.internal_hw_msg_sender.clone();
     async move {
+      // TODO If hardware command sending fails, we don't send back an error?!
       let _ = sender.send(commands).await;
       Ok(message::OkV0::default().into())
     }
@@ -262,7 +252,7 @@ impl DeviceHandle {
     self.handle_hardware_commands(hardware_commands)
   }
 
-  fn handle_stop_device_cmd(&self, msg: &StopCmdV4) -> ButtplugServerResultFuture {
+  fn handle_stop_cmd(&self, msg: &StopCmdV4) -> ButtplugServerResultFuture {
     let mut fut_vec = vec![];
     if msg.outputs() {
       self
@@ -498,31 +488,31 @@ pub(super) async fn build_device_handle(
         // Break out of these if one is found, we only need 1 stop message per output.
         match actuator_type {
           OutputType::Constrict => {
-            stop_cmd(message::OutputCommand::Constrict(OutputValue::new(0)));
+            stop_cmd(message::OutputCommand::Constrict(OutputValue::new(0, None)));
             break;
           }
           OutputType::Temperature => {
-            stop_cmd(message::OutputCommand::Temperature(OutputValue::new(0)));
+            stop_cmd(message::OutputCommand::Temperature(OutputValue::new(0, None)));
             break;
           }
           OutputType::Spray => {
-            stop_cmd(message::OutputCommand::Spray(OutputValue::new(0)));
+            stop_cmd(message::OutputCommand::Spray(OutputValue::new(0, None)));
             break;
           }
           OutputType::Led => {
-            stop_cmd(message::OutputCommand::Led(OutputValue::new(0)));
+            stop_cmd(message::OutputCommand::Led(OutputValue::new(0, None)));
             break;
           }
           OutputType::Oscillate => {
-            stop_cmd(message::OutputCommand::Oscillate(OutputValue::new(0)));
+            stop_cmd(message::OutputCommand::Oscillate(OutputValue::new(0, None)));
             break;
           }
           OutputType::Rotate => {
-            stop_cmd(message::OutputCommand::Rotate(OutputValue::new(0)));
+            stop_cmd(message::OutputCommand::Rotate(OutputValue::new(0, None)));
             break;
           }
           OutputType::Vibrate => {
-            stop_cmd(message::OutputCommand::Vibrate(OutputValue::new(0)));
+            stop_cmd(message::OutputCommand::Vibrate(OutputValue::new(0, None)));
             break;
           }
           _ => {

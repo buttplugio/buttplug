@@ -265,7 +265,7 @@ async fn test_device_stop_on_ping_timeout() {
         device_index,
         0,
         "f50a528b-b023-40f0-9906-df037443950a".try_into().unwrap(),
-        OutputCommand::Vibrate(OutputValue::new(64)),
+        OutputCommand::Vibrate(OutputValue::new(64, None)),
       ),
     ))
     .await
@@ -332,7 +332,7 @@ async fn test_invalid_device_index() {
   let (server, _) = setup_test_server(msg.into()).await;
   let err = server
     .parse_message(ButtplugClientMessageVariant::V4(
-      OutputCmdV4::new(10, 0, OutputCommand::Vibrate(OutputValue::new(0))).into(),
+      OutputCmdV4::new(10, 0, OutputCommand::Vibrate(OutputValue::new(0, None))).into(),
     ))
     .await
     .unwrap_err();

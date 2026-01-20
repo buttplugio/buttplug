@@ -23,12 +23,16 @@ use uuid::Uuid;
 use super::spec_enums::ButtplugDeviceMessageNameV4;
 
 #[derive(Debug, Clone, Getters, CopyGetters, Eq)]
-#[getset(get_copy = "pub")]
 pub struct CheckedOutputCmdV4 {
+  #[getset(get_copy = "pub")]
   id: u32,
+  #[getset(get_copy = "pub")]
   device_index: u32,
+  #[getset(get_copy = "pub")]
   feature_index: u32,
+  #[getset(get_copy = "pub")]
   feature_id: Uuid,
+  #[getset(get = "pub")]
   output_command: OutputCommand,
 }
 
@@ -128,7 +132,7 @@ impl TryFromDeviceAttributes<OutputCmdV4> for CheckedOutputCmdV4 {
           error!("{:?}", e);
           ButtplugDeviceError::DeviceStepRangeError(0, value)
         })?;
-      let mut new_command = cmd.command();
+      let mut new_command = cmd.command().clone();
       new_command.set_value(new_value);
       // We can't make a private trait impl to turn a ValueCmd into a CheckedValueCmd, and this
       // is all about security, so we just copy. Silly, but it works for our needs in terms of
@@ -138,7 +142,7 @@ impl TryFromDeviceAttributes<OutputCmdV4> for CheckedOutputCmdV4 {
         feature_id: feature.id(),
         device_index: cmd.device_index(),
         feature_index: cmd.feature_index(),
-        output_command: new_command,
+        output_command: new_command.clone(),
       })
     } else {
       Err(ButtplugError::from(

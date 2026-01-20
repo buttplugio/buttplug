@@ -467,11 +467,11 @@
                 "properties": {
                   "Value": {
                     "type": "number"
+                  },
+                  "Expr": {
+                    "type": "string"
                   }
-                },
-                "required": [
-                  "Value"
-                ]
+                }
               },
               "^PositionWithDuration$": {
                 "type": "object",
