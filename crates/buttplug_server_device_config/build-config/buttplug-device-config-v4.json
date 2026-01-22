@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 163
+    "minor": 165
   },
   "protocols": {
     "activejoy": {
@@ -6450,6 +6450,19 @@
                   ]
                 }
               }
+            },
+            {
+              "description": "Heater",
+              "id": "79d03d77-af13-4bd4-b291-ac96b58920f4",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
             }
           ],
           "id": "0b29424b-d609-4049-b206-831c00bd53c1",
@@ -7523,6 +7536,18 @@
                   "value": [
                     0,
                     255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "0e1c23a5-3d69-4ae0-ba1a-cfc76c4c52b2",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
                   ]
                 }
               }
