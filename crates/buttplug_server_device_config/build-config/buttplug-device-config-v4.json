@@ -8497,10 +8497,10 @@
         {
           "features": [
             {
-              "id": "616ea55d-f78e-469c-82d1-92f96b1ffea3",
-              "index": 0,
+              "id": "4e3b6192-d5dd-4fcf-b307-7487ca18fc1b",
+              "index": 3,
               "output": {
-                "oscillate": {
+                "rotate": {
                   "value": [
                     0,
                     255
@@ -8509,13 +8509,13 @@
               }
             },
             {
-              "id": "4e3b6192-d5dd-4fcf-b307-7487ca18fc1b",
-              "index": 3,
+              "id": "f272232f-a549-4a08-9b94-0587e2d4f467",
+              "index": 4,
               "output": {
-                "vibrate": {
+                "constrict": {
                   "value": [
                     0,
-                    255
+                    7
                   ]
                 }
               }
