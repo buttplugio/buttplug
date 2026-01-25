@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 165
+    "minor": 166
   },
   "protocols": {
     "activejoy": {
@@ -5126,7 +5126,8 @@
               "J-Victor",
               "J-Mirage3",
               "J-Maelstrom",
-              "J-Dodge"
+              "J-Dodge",
+              "J-Pyt"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -8849,6 +8850,39 @@
             "J-Dodge"
           ],
           "name": "JoyHub Dodge"
+        },
+        {
+          "features": [
+            {
+              "id": "7edb7f9a-78f3-4afb-8441-d3c8ad5d790c",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "4dd04a7e-38ac-45a0-966d-c8ba652dc1d2",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "d5bd0e69-7bdc-4ad7-80ab-6c7a2255208f",
+          "identifier": [
+            "J-Pyt"
+          ],
+          "name": "JoyHub Pyt"
         }
       ],
       "defaults": {

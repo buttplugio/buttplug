@@ -2166,6 +2166,25 @@ configurations:
             - 1
       index: 7
   id: 2d9730d2-272b-489a-a525-22a9a5ce15dd
+- identifier:
+    - J-Pyt
+  name: JoyHub Pyt
+  features:
+    - id: 7edb7f9a-78f3-4afb-8441-d3c8ad5d790c
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 4dd04a7e-38ac-45a0-966d-c8ba652dc1d2
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 1
+  id: d5bd0e69-7bdc-4ad7-80ab-6c7a2255208f
 communication:
 - btle:
     names:
@@ -2293,6 +2312,7 @@ communication:
     - J-Mirage3
     - J-Maelstrom
     - J-Dodge
+    - J-Pyt
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
