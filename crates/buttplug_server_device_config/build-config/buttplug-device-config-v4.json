@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 166
+    "minor": 167
   },
   "protocols": {
     "activejoy": {
@@ -892,6 +892,13 @@
           "name": "Fluffer G2G"
         },
         {
+          "id": "f0ccd408-ad3e-4eaf-a2e0-b686cb8f3687",
+          "identifier": [
+            "FDPR"
+          ],
+          "name": "Fluffer Rock Hard Power Ring"
+        },
+        {
           "features": [
             {
               "id": "d3f05e7a-a436-4ede-bce9-8ff56d1978d0",
@@ -920,7 +927,8 @@
           ],
           "id": "c469ba54-e0c1-43dc-b8b1-851b7792bf04",
           "identifier": [
-            "MBO"
+            "MBO",
+            "MB Controller"
           ],
           "name": "MotorBunny Classic (Fluffer version)"
         },

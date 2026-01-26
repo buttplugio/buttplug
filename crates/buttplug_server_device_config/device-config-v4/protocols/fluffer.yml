@@ -20,7 +20,12 @@ configurations:
     name: Fluffer G2G
     id: 1a30c04a-3305-4d59-bd0b-410a2bbc31ca
   - identifier:
+      - FDPR
+    name: Fluffer Rock Hard Power Ring
+    id: f0ccd408-ad3e-4eaf-a2e0-b686cb8f3687
+  - identifier:
       - MBO
+      - MB Controller
     name: MotorBunny Classic (Fluffer version)
     features:
       - id: d3f05e7a-a436-4ede-bce9-8ff56d1978d0
