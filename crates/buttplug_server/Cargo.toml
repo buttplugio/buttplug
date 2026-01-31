@@ -53,11 +53,14 @@ aes = { version = "0.8.4" }
 ecb = { version = "0.1.2", features = ["std"] }
 sha2 = { version = "0.10.9", features = ["std"] }
 byteorder = "1.5.0"
-# Used by several packages, but we need to bring in the JS feature for wasm. Pinned at 0.8 until dependencies update
+# Used by several packages, but we need to bring in the JS feature for wasm. Pinned at 0.8 until
+# dependencies update
 rand = { version = "0.8" }
 derive_more = { version = "2.1.1", features = ["from"] }
 evalexpr = { version = "13.1.0", features = ["rand"] }
 
 [target.wasm32-unknown-unknown.dependencies]
 getrandom = { version = "0.3.4", features = ["wasm_js"]}
-# getrandom_old = { version = "0.2.17", features = ["js"], package = "getrandom"}
+# This is not used anywhere in our code, rather it's to fix issues with some dependencies using
+# older versions of getrandom that won't compile for WASM otherwise. 
+getrandom_old = { version = "0.2.17", features = ["js"], package = "getrandom"}
