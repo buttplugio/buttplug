@@ -7,7 +7,7 @@
 
 use buttplug_core::{
   connector::ButtplugConnector,
-  errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
+  errors::{ButtplugError, ButtplugHandshakeError},
   message::{ButtplugMessageSpecVersion, ButtplugServerMessageV4},
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
