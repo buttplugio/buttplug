@@ -89,7 +89,7 @@ impl ClientDeviceFeature {
   ) -> Result<i32, ButtplugClientError> {
     if !(-1.0f64..=1.0f64).contains(&float_amt) {
       Err(ButtplugClientError::ButtplugOutputCommandConversionError(
-        "Float values must be between 0.0 and 1.0".to_owned(),
+        format!("Float values must be between 0.0 and 1.0, received value was {}", float_amt),
       ))
     } else {
       let mut val = float_amt * feature_output.step_count() as f64;
