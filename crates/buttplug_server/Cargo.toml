@@ -28,26 +28,26 @@ buttplug_core = { version = "10.0.0-beta3", path = "../buttplug_core" }
 buttplug_server_device_config = { version = "10.0.0-beta3", path = "../buttplug_server_device_config" }
 futures = "0.3.31"
 futures-util = "0.3.31"
-thiserror = "2.0.17"
+thiserror = "2.0.18"
 log = "0.4.29"
 getset = "0.1.6"
-tokio = { version = "1.48.0", features = ["macros"] }
+tokio = { version = "1.49.0", features = ["macros"] }
 dashmap = { version = "6.1.0" }
 tracing-futures = "0.2.5"
 tracing = "0.1.44"
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.147"
+serde_json = "1.0.149"
 jsonschema = { version = "0.38.1", default-features = false }
 once_cell = "1.21.3"
-tokio-stream = "0.1.17"
+tokio-stream = "0.1.18"
 strum_macros = "0.27.2"
 strum = "0.27.2"
-uuid = { version = "1.19.0", features = ["serde", "v4"] }
+uuid = { version = "1.20.0", features = ["serde", "v4"] }
 async-trait = "0.1.89"
 instant = "0.1.13"
-tokio-util = "0.7.17"
+tokio-util = "0.7.18"
 regex = "1.12.2"
-prost = "0.14.1"
+prost = "0.14.3"
 paste = "1.0.15"
 aes = { version = "0.8.4" }
 ecb = { version = "0.1.2", features = ["std"] }
@@ -60,4 +60,4 @@ evalexpr = { version = "13.1.0", features = ["rand"] }
 
 [target.wasm32-unknown-unknown.dependencies]
 getrandom = { version = "0.3.4", features = ["wasm_js"]}
-getrandom_old = { version = "0.2.16", features = ["js"], package = "getrandom"}
+# getrandom_old = { version = "0.2.17", features = ["js"], package = "getrandom"}
