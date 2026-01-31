@@ -66,8 +66,8 @@ impl ClientDeviceFeature {
     steps: &ClientDeviceCommandValue,
   ) -> Result<i32, ButtplugClientError> {
     let value = match steps {
-      ClientDeviceCommandValue::Float(f) => self.convert_float_value(feature_output, *f)?,
-      ClientDeviceCommandValue::Int(i) => *i,
+      ClientDeviceCommandValue::Percent(f) => self.convert_float_value(feature_output, *f)?,
+      ClientDeviceCommandValue::Steps(i) => *i,
     };
     if feature_output.step_limit().contains(&value) {
       Ok(value)
@@ -162,7 +162,7 @@ impl ClientDeviceFeature {
     ))
   }
 
-  pub fn send_command(
+  pub fn run_output(
     &self,
     client_device_command: &ClientDeviceOutputCommand,
   ) -> ButtplugClientResultFuture {
@@ -172,48 +172,7 @@ impl ClientDeviceFeature {
     }
   }
 
-  pub fn vibrate(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
-    self.send_command(&ClientDeviceOutputCommand::Vibrate(level.into()))
-  }
-
-  pub fn oscillate(
-    &self,
-    level: impl Into<ClientDeviceCommandValue>,
-  ) -> ButtplugClientResultFuture {
-    self.send_command(&ClientDeviceOutputCommand::Oscillate(level.into()))
-  }
-
-  pub fn rotate(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
-    self.send_command(&ClientDeviceOutputCommand::Rotate(level.into()))
-  }
-
-  pub fn spray(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
-    self.send_command(&ClientDeviceOutputCommand::Spray(level.into()))
-  }
-
-  pub fn constrict(
-    &self,
-    level: impl Into<ClientDeviceCommandValue>,
-  ) -> ButtplugClientResultFuture {
-    self.send_command(&ClientDeviceOutputCommand::Constrict(level.into()))
-  }
-
-  pub fn position(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
-    self.send_command(&ClientDeviceOutputCommand::Position(level.into()))
-  }
-
-  pub fn hw_position_with_duration(
-    &self,
-    position: impl Into<ClientDeviceCommandValue>,
-    duration_in_ms: u32,
-  ) -> ButtplugClientResultFuture {
-    self.send_command(&ClientDeviceOutputCommand::HwPositionWithDuration(
-      position.into(),
-      duration_in_ms,
-    ))
-  }
-
-  pub fn subscribe_sensor(&self, sensor_type: InputType) -> ButtplugClientResultFuture {
+  pub fn run_input_subscribe(&self, sensor_type: InputType) -> ButtplugClientResultFuture {
     if let Some(sensor_map) = self.feature.input()
       && let Some(sensor) = sensor_map.get(sensor_type)
       && sensor.command().contains(&InputCommandType::Subscribe)
@@ -233,7 +192,7 @@ impl ClientDeviceFeature {
     )
   }
 
-  pub fn unsubscribe_sensor(&self, sensor_type: InputType) -> ButtplugClientResultFuture {
+  pub fn run_input_unsubscribe(&self, sensor_type: InputType) -> ButtplugClientResultFuture {
     if let Some(sensor_map) = self.feature.input()
       && let Some(sensor) = sensor_map.get(sensor_type)
       && sensor.command().contains(&InputCommandType::Subscribe)
@@ -253,7 +212,7 @@ impl ClientDeviceFeature {
     )
   }
 
-  fn read_input(&self, sensor_type: InputType) -> ButtplugClientResultFuture<InputTypeReading> {
+  pub fn run_input_read(&self, sensor_type: InputType) -> ButtplugClientResultFuture<InputTypeReading> {
     if let Some(sensor_map) = self.feature.input()
       && let Some(sensor) = sensor_map.get(sensor_type)
       && sensor.command().contains(&InputCommandType::Read)
@@ -295,7 +254,7 @@ impl ClientDeviceFeature {
     )
   }
 
-  pub fn battery_level(&self) -> ButtplugClientResultFuture<u32> {
+  pub fn battery(&self) -> ButtplugClientResultFuture<u32> {
     if self
       .feature()
       .input()
@@ -304,7 +263,7 @@ impl ClientDeviceFeature {
       .unwrap()
       .contains(InputType::Battery)
     {
-      let send_fut = self.read_input(InputType::Battery);
+      let send_fut = self.run_input_read(InputType::Battery);
       Box::pin(async move {
         let data = send_fut.await?;
         let battery_level = if let InputTypeReading::Battery(level) = data {
@@ -322,7 +281,7 @@ impl ClientDeviceFeature {
     }
   }
 
-  pub fn rssi_level(&self) -> ButtplugClientResultFuture<i8> {
+  pub fn rssi(&self) -> ButtplugClientResultFuture<i8> {
     if self
       .feature()
       .input()
@@ -331,7 +290,7 @@ impl ClientDeviceFeature {
       .unwrap()
       .contains(InputType::Rssi)
     {
-      let send_fut = self.read_input(InputType::Rssi);
+      let send_fut = self.run_input_read(InputType::Rssi);
       Box::pin(async move {
         let data = send_fut.await?;
         let rssi_level = if let InputTypeReading::Rssi(level) = data {

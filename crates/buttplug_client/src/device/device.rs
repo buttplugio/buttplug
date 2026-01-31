@@ -7,24 +7,21 @@
 
 //! Representation and management of devices connected to the server.
 
-use crate::device::{ClientDeviceCommandValue, ClientDeviceOutputCommand};
+use crate::ButtplugClientError;
+use crate::device::ClientDeviceOutputCommand;
 
 use crate::{
   ButtplugClientMessageSender,
   ButtplugClientResultFuture,
-  create_boxed_future_client_error,
   device::ClientDeviceFeature,
 };
-use buttplug_core::message::InputType;
+use buttplug_core::message::{
+  InputType,
+  InputTypeReading,
+};
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{
-    ButtplugServerMessageV4,
-    DeviceFeature,
-    DeviceMessageInfoV4,
-    OutputType,
-    StopCmdV4,
-  },
+  message::{ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4, OutputType, StopCmdV4},
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use futures::{FutureExt, Stream, future};
@@ -159,7 +156,7 @@ impl ButtplugClientDevice {
     )))
   }
 
-  fn filter_device_actuators(&self, actuator_type: OutputType) -> Vec<ClientDeviceFeature> {
+  fn filter_device_outputs(&self, actuator_type: OutputType) -> Vec<ClientDeviceFeature> {
     self
       .device_features
       .iter()
@@ -179,7 +176,7 @@ impl ButtplugClientDevice {
     &self,
     client_device_command: &ClientDeviceOutputCommand,
   ) -> ButtplugClientResultFuture {
-    let features = self.filter_device_actuators(client_device_command.into());
+    let features = self.filter_device_outputs(client_device_command.into());
     if features.is_empty() {
       // TODO err
     }
@@ -198,115 +195,109 @@ impl ButtplugClientDevice {
     .boxed()
   }
 
-  pub fn send_command(
+  pub fn outputs(&self, output_type: OutputType) -> Vec<ClientDeviceFeature> {
+    self.filter_device_outputs(output_type)
+  }
+
+  pub fn output_available(&self, output_type: OutputType) -> bool {
+    !self.filter_device_outputs(output_type).is_empty()
+  }
+
+  pub fn run_output(
     &self,
     client_device_command: &ClientDeviceOutputCommand,
   ) -> ButtplugClientResultFuture {
     self.set_client_value(client_device_command)
   }
 
-  pub fn vibrate_features(&self) -> Vec<ClientDeviceFeature> {
-    self.filter_device_actuators(OutputType::Vibrate)
-  }
-
-  /// Commands device to vibrate, assuming it has the features to do so.
-  pub fn vibrate(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
-    self.set_client_value(&ClientDeviceOutputCommand::Vibrate(level.into()))
-  }
-
-  pub fn oscillate(
-    &self,
-    level: impl Into<ClientDeviceCommandValue>,
-  ) -> ButtplugClientResultFuture {
-    self.set_client_value(&ClientDeviceOutputCommand::Oscillate(level.into()))
-  }
-
-  pub fn rotate(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
-    self.set_client_value(&ClientDeviceOutputCommand::Rotate(level.into()))
-  }
-
-  pub fn spray(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
-    self.set_client_value(&ClientDeviceOutputCommand::Spray(level.into()))
-  }
-
-  pub fn constrict(
-    &self,
-    level: impl Into<ClientDeviceCommandValue>,
-  ) -> ButtplugClientResultFuture {
-    self.set_client_value(&ClientDeviceOutputCommand::Constrict(level.into()))
-  }
-
-  pub fn position(&self, level: impl Into<ClientDeviceCommandValue>) -> ButtplugClientResultFuture {
-    self.set_client_value(&ClientDeviceOutputCommand::Position(level.into()))
-  }
-
-  pub fn hw_position_with_duration(
-    &self,
-    position: impl Into<ClientDeviceCommandValue>,
-    duration_in_ms: u32,
-  ) -> ButtplugClientResultFuture {
-    self.set_client_value(&ClientDeviceOutputCommand::HwPositionWithDuration(
-      position.into(),
-      duration_in_ms,
-    ))
-  }
-
-  pub fn has_battery_level(&self) -> bool {
+  pub fn input_available(&self, input_type: InputType) -> bool {
     self.device_features.iter().any(|x| {
       x.1
         .feature()
         .input()
         .as_ref()
-        .is_some_and(|x| x.contains(InputType::Battery))
+        .is_some_and(|x| x.contains(input_type))
     })
   }
 
-  pub fn battery_level(&self) -> ButtplugClientResultFuture<u32> {
-    if let Some(battery) = self.device_features.iter().find(|x| {
-      x.1
-        .feature()
-        .input()
-        .as_ref()
-        .is_some_and(|x| x.contains(InputType::Battery))
-    }) {
-      battery.1.battery_level()
+  fn input_feature(
+    &self,
+    input_type: InputType,
+  ) -> Result<&ClientDeviceFeature, ButtplugClientError> {
+    let inputs: Vec<_> = self
+      .device_features
+      .iter()
+      .filter(|x| {
+        x.1
+          .feature()
+          .input()
+          .as_ref()
+          .is_some_and(|x| x.contains(input_type))
+      })
+      .collect();
+    let input_count = inputs.len();
+    if input_count > 1 {
+      Err(ButtplugClientError::ButtplugMultipleInputAvailableError(
+        input_type,
+      ))
+    } else if input_count == 0 {
+      Err(ButtplugClientError::ButtplugError(
+        ButtplugDeviceError::DeviceNoInputError(input_type).into(),
+      ))
     } else {
-      create_boxed_future_client_error(
-        ButtplugDeviceError::DeviceFeatureMismatch(
-          "Device does not have battery feature available".to_owned(),
-        )
-        .into(),
-      )
+      Ok(inputs[0].1)
     }
   }
 
-  pub fn has_rssi_level(&self) -> bool {
-    self.device_features.iter().any(|x| {
-      x.1
-        .feature()
-        .input()
-        .as_ref()
-        .is_some_and(|x| x.contains(InputType::Rssi))
-    })
+  pub fn run_input_read(&self, input_type: InputType) -> ButtplugClientResultFuture<InputTypeReading> {
+    match self.input_feature(input_type) {
+      Ok(dev) => dev.run_input_read(input_type).boxed(),
+      Err(e) => future::ready(Err(e)).boxed(),
+    }
   }
 
-  pub fn rssi_level(&self) -> ButtplugClientResultFuture<i8> {
-    if let Some(rssi) = self.device_features.iter().find(|x| {
-      x.1
-        .feature()
-        .input()
-        .as_ref()
-        .is_some_and(|x| x.contains(InputType::Rssi))
-    }) {
-      rssi.1.rssi_level()
-    } else {
-      create_boxed_future_client_error(
-        ButtplugDeviceError::DeviceFeatureMismatch(
-          "Device does not have RSSI feature available".to_owned(),
-        )
-        .into(),
-      )
+  pub fn run_input_subscribe(&self, input_type: InputType) -> ButtplugClientResultFuture {
+    match self.input_feature(input_type) {
+      Ok(dev) => dev.run_input_subscribe(input_type).boxed(),
+      Err(e) => future::ready(Err(e)).boxed(),
     }
+  }
+
+  pub fn run_input_unsubscribe(&self, input_type: InputType) -> ButtplugClientResultFuture {
+    match self.input_feature(input_type) {
+      Ok(dev) => dev.run_input_unsubscribe(input_type).boxed(),
+      Err(e) => future::ready(Err(e)).boxed(),
+    }
+  }
+
+  pub fn battery(&self) -> ButtplugClientResultFuture<u32> {
+    let fut = self.run_input_read(InputType::Battery);
+    async move {
+      let val = fut.await?;
+      if let InputTypeReading::Battery(x) = val {
+        Ok(x.data().into())
+      } else {
+        Err(ButtplugClientError::ButtplugError(
+          ButtplugDeviceError::DeviceNoInputError(val.into()).into(),
+        ))
+      }
+    }
+    .boxed()
+  }
+
+  pub fn rssi(&self) -> ButtplugClientResultFuture<i8> {
+    let fut = self.run_input_read(InputType::Rssi);
+    async move {
+      let val = fut.await?;
+      if let InputTypeReading::Rssi(x) = val {
+        Ok(x.data().into())
+      } else {
+        Err(ButtplugClientError::ButtplugError(
+          ButtplugDeviceError::DeviceNoInputError(val.into()).into(),
+        ))
+      }
+    }
+    .boxed()
   }
 
   /// Commands device to stop all movement.

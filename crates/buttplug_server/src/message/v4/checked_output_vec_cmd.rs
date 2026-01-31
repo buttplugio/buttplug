@@ -245,13 +245,13 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedOutputVecCmdV4 {
         .output()
         .as_ref()
         .ok_or(ButtplugError::from(
-          ButtplugDeviceError::DeviceNoActuatorError("ScalarCmdV3".to_owned()),
+          ButtplugDeviceError::MessageNotSupported("ScalarCmdV3".to_owned()),
         ))?;
       let output_value = output
         .calculate_from_float(cmd.actuator_type(), cmd.scalar())
         .map_err(|e| {
           error!("{:?}", e);
-          ButtplugError::from(ButtplugDeviceError::DeviceNoActuatorError(
+          ButtplugError::from(ButtplugDeviceError::MessageNotSupported(
             "ScalarCmdV3".to_owned(),
           ))
         })?;
@@ -374,12 +374,12 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
         .output()
         .as_ref()
         .ok_or(ButtplugError::from(
-          ButtplugDeviceError::DeviceNoActuatorError("RotateCmdV1".to_owned()),
+          ButtplugDeviceError::MessageNotSupported("RotateCmdV1".to_owned()),
         ))?
         .rotate()
         .as_ref()
         .ok_or(ButtplugError::from(
-          ButtplugDeviceError::DeviceNoActuatorError("RotateCmdV1".to_owned()),
+          ButtplugDeviceError::MessageNotSupported("RotateCmdV1".to_owned()),
         ))?;
       cmds.push(CheckedOutputCmdV4::new(
         msg.id(),

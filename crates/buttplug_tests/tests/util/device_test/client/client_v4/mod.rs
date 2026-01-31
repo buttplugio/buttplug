@@ -77,7 +77,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
         .map(|cmd| {
           let i = get_scalar_index(device, cmd.index());
           let f = device.device_features()[i].clone();
-          f.send_command(&from_type_and_value(cmd.actuator_type(), cmd.scalar()))
+          f.run_output(&from_type_and_value(cmd.actuator_type(), cmd.scalar()))
         })
         .collect();
       futures::future::try_join_all(fut_vec).await.unwrap();
@@ -99,7 +99,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
             .map(|(_, x)| x)
             .collect();
           let f = vibe_features[cmd.index() as usize].clone();
-          f.send_command(&from_type_and_value(OutputType::Vibrate, cmd.speed()))
+          f.run_output(&from_type_and_value(OutputType::Vibrate, cmd.speed()))
         })
         .collect();
       futures::future::try_join_all(fut_vec).await.unwrap();
@@ -124,9 +124,9 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
             .map(|(_, x)| x)
             .collect();
           let f = rotate_features[cmd.index() as usize].clone();
-          f.rotate(ClientDeviceCommandValue::Float(
+          f.run_output(&ClientDeviceOutputCommand::Rotate(ClientDeviceCommandValue::Percent(
             cmd.speed() * if cmd.clockwise() { 1f64 } else { -1f64 },
-          ))
+          )))
         })
         .collect();
       futures::future::try_join_all(fut_vec).await.unwrap();
@@ -136,8 +136,9 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
         .iter()
         .map(|cmd| {
           let f = device.device_features()[&cmd.index()].clone();
-          f.hw_position_with_duration(
-            (cmd.position()
+          f.run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
+            ClientDeviceCommandValue::Percent((
+            cmd.position()
               * f
                 .feature()
                 .output()
@@ -146,9 +147,9 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
                 .get(OutputType::HwPositionWithDuration)
                 .unwrap()
                 .step_count() as f64)
-              .ceil() as u32,
+              .ceil()),
             cmd.duration(),
-          )
+          ))
         })
         .collect();
       futures::future::try_join_all(fut_vec).await.unwrap();
@@ -163,12 +164,12 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
         let device = device.clone();
         let expected_power = *expected_power;
         async_manager::spawn(async move {
-          let battery_level = device.battery_level().await.unwrap() as f64 / 100f64;
+          let battery_level = device.battery().await.unwrap() as f64 / 100f64;
           assert_eq!(battery_level, expected_power);
         });
       } else {
         assert_eq!(
-          device.battery_level().await.unwrap() as f64 / 100f64,
+          device.battery().await.unwrap() as f64 / 100f64,
           *expected_power
         );
       }

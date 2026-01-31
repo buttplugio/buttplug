@@ -9,17 +9,11 @@
 // 3. Run: cargo run --bin application
 
 use buttplug_client::{
-  ButtplugClient,
-  ButtplugClientDevice,
-  ButtplugClientError,
-  ButtplugClientEvent,
-  connector::ButtplugRemoteClientConnector,
-  serializer::ButtplugClientJSONSerializer,
+  ButtplugClient, ButtplugClientDevice, ButtplugClientError, ButtplugClientEvent, connector::ButtplugRemoteClientConnector, device::ClientDeviceOutputCommand, serializer::ButtplugClientJSONSerializer
 };
-use buttplug_core::message::OutputType;
+use buttplug_core::message::{InputType, OutputType};
 use buttplug_transport_websocket_tungstenite::ButtplugWebsocketClientTransport;
 use futures::StreamExt;
-use std::sync::Arc;
 use tokio::io::{self, AsyncBufReadExt, BufReader};
 
 async fn read_line() -> String {
@@ -40,9 +34,10 @@ fn print_device_capabilities(device: &ButtplugClientDevice) {
 
   // Check output capabilities (things we can make the device do)
   let mut outputs = Vec::new();
-  if !device.vibrate_features().is_empty() {
+  if device.output_available(OutputType::Vibrate) {
     outputs.push("Vibrate");
   }
+  /*
   if !device.rotate_features().is_empty() {
     outputs.push("Rotate");
   }
@@ -52,6 +47,7 @@ fn print_device_capabilities(device: &ButtplugClientDevice) {
   if !device.position_features().is_empty() {
     outputs.push("Position");
   }
+  */
 
   if !outputs.is_empty() {
     println!("    Outputs: {}", outputs.join(", "));
@@ -59,10 +55,10 @@ fn print_device_capabilities(device: &ButtplugClientDevice) {
 
   // Check input capabilities (sensors we can read)
   let mut inputs = Vec::new();
-  if device.has_battery_level() {
+  if device.input_available(buttplug_core::message::InputType::Battery) {
     inputs.push("Battery");
   }
-  if device.has_rssi_level() {
+  if device.input_available(buttplug_core::message::InputType::Rssi) {
     inputs.push("RSSI");
   }
 
@@ -141,7 +137,7 @@ async fn main() -> anyhow::Result<()> {
   client.stop_scanning().await?;
 
   // Step 5: Check what devices we found
-  let devices: Vec<Arc<ButtplugClientDevice>> =
+  let devices: Vec<ButtplugClientDevice> =
     client.devices().into_values().collect();
 
   if devices.is_empty() {
@@ -186,8 +182,8 @@ async fn main() -> anyhow::Result<()> {
         if percent <= 100 {
           let intensity = percent as f64 / 100.0;
           for device in &devices {
-            if !device.vibrate_features().is_empty() {
-              match device.vibrate(intensity).await {
+            if !device.output_available(OutputType::Vibrate) {
+              match device.run_output(&ClientDeviceOutputCommand::Vibrate(intensity.into())).await {
                 Ok(_) => println!("  {}: vibrating at {}%", device.name(), percent),
                 Err(e) => println!("  {}: error - {}", device.name(), e),
               }
@@ -206,8 +202,8 @@ async fn main() -> anyhow::Result<()> {
     } else if input == "b" {
       // Read battery levels
       for device in &devices {
-        if device.has_battery_level() {
-          match device.battery_level().await {
+        if device.input_available(InputType::Battery) {
+          match device.battery().await {
             Ok(battery) => println!("  {}: {}% battery", device.name(), battery),
             Err(e) => println!("  {}: could not read battery - {}", device.name(), e),
           }

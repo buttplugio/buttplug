@@ -4,25 +4,25 @@ use crate::ButtplugClientError;
 
 #[derive(Debug, Clone, Copy)]
 pub enum ClientDeviceCommandValue {
-  Int(i32),
-  Float(f64),
+  Steps(i32),
+  Percent(f64),
 }
 
 impl From<i32> for ClientDeviceCommandValue {
   fn from(val: i32) -> Self {
-    ClientDeviceCommandValue::Int(val)
+    ClientDeviceCommandValue::Steps(val)
   }
 }
 
 impl From<u32> for ClientDeviceCommandValue {
   fn from(val: u32) -> Self {
-    ClientDeviceCommandValue::Int(val as i32)
+    ClientDeviceCommandValue::Steps(val as i32)
   }
 }
 
 impl From<f64> for ClientDeviceCommandValue {
   fn from(val: f64) -> Self {
-    ClientDeviceCommandValue::Float(val)
+    ClientDeviceCommandValue::Percent(val)
   }
 }
 

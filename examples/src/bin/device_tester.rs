@@ -10,23 +10,16 @@ use tracing::Level;
 use buttplug_client::device::{ClientDeviceFeature, ClientDeviceOutputCommand};
 use buttplug_client::{ButtplugClient, ButtplugClientDevice, ButtplugClientEvent};
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
-use buttplug_core::message::ButtplugDeviceMessageNameV4::OutputCmd;
 use buttplug_core::message::{
-  DeviceFeature,
-  DeviceFeatureOutput,
-  OutputCommand,
   OutputType,
-  OutputValue,
 };
 use buttplug_server::ButtplugServerBuilder;
 use buttplug_server::device::ServerDeviceManagerBuilder;
 use buttplug_server_device_config::load_protocol_configs;
 use buttplug_server_hwmgr_btleplug::BtlePlugCommunicationManagerBuilder;
 use futures::StreamExt;
-use futures::future::try_join;
 use log::error;
-use std::collections::{HashMap, HashSet};
-use std::{fs, sync::Arc, time::Duration};
+use std::time::Duration;
 use tokio::time::sleep;
 
 async fn set_level_and_wait(
@@ -47,7 +40,7 @@ async fn set_level_and_wait(
     _ => Err(format!("Unknown output type {:?}", output_type)),
   }
   .unwrap();
-  feature.send_command(&cmd).await.unwrap();
+  feature.run_output(&cmd).await.unwrap();
   println!(
     "{} ({}) Testing feature {}: {}, output {:?} - {}%",
     dev.name(),
@@ -61,8 +54,8 @@ async fn set_level_and_wait(
 }
 
 async fn device_tester() {
-  let mut dc = None;
-  let mut uc = None;
+  let dc;
+  let uc;
 
   dc = None; //Some(fs::read_to_string("C:\\Users\\user\\AppData\\Roaming\\com.nonpolynomial\\intiface_central\\config\\buttplug-device-config-v3.json").expect("Should have been able to read dc"));
   uc = None; //Some(fs::read_to_string("C:\\Users\\user\\AppData\\Roaming\\com.nonpolynomial\\intiface_central\\config\\buttplug-user-device-config-v3.json").expect("Should have been able to read uc"));
@@ -103,7 +96,7 @@ async fn device_tester() {
     dev.device_features().iter().for_each(|(_, feature)| {
       let outs = feature.feature().output().clone().unwrap_or_default();
       if let Some(out) = outs.get(OutputType::Vibrate) {
-        cmds.push(feature.vibrate(out.step_count()));
+        cmds.push(feature.run_output(&ClientDeviceOutputCommand::Vibrate((out.step_count() as i32).into())));
         println!(
           "{} ({}) should start vibrating on feature {}!",
           dev.name(),
@@ -111,7 +104,7 @@ async fn device_tester() {
           feature.feature_index()
         );
       } else if let Some(out) = outs.get(OutputType::Rotate) {
-        cmds.push(feature.rotate(out.step_limit().end().to_owned()));
+        cmds.push(feature.run_output(&ClientDeviceOutputCommand::Rotate((*out.step_limit().end()).into())));
         println!(
           "{} ({}) should start rotating on feature {}!",
           dev.name(),
@@ -119,7 +112,7 @@ async fn device_tester() {
           feature.feature_index()
         );
       } else if let Some(out) = outs.get(OutputType::Oscillate) {
-        cmds.push(feature.oscillate(out.step_count()));
+        cmds.push(feature.run_output(&ClientDeviceOutputCommand::Oscillate(out.step_count().into())));
         println!(
           "{} ({}) should start oscillating on feature {}!",
           dev.name(),
@@ -127,7 +120,7 @@ async fn device_tester() {
           feature.feature_index()
         );
       } else if let Some(out) = outs.get(OutputType::Constrict) {
-        cmds.push(feature.constrict(out.step_count()));
+        cmds.push(feature.run_output(&ClientDeviceOutputCommand::Constrict(out.step_count().into())));
         println!(
           "{} ({}) should start constricting on feature {}!",
           dev.name(),
@@ -136,9 +129,7 @@ async fn device_tester() {
         );
       } else if let Some(out) = outs.get(OutputType::Temperature) {
         cmds.push(
-          feature.send_command(&ClientDeviceOutputCommand::Temperature(
-            (*out.step_limit().start()).into(),
-          )),
+          feature.run_output(&ClientDeviceOutputCommand::Temperature((*out.step_limit().end()).into())),
         );
         println!(
           "{} ({}) should start heating on feature {}!",
@@ -166,7 +157,7 @@ async fn device_tester() {
       dev.device_features().iter().for_each(|(_, feature)| {
         let outs = feature.feature().output().clone().unwrap_or_default();
         if outs.get(OutputType::Vibrate).is_some() {
-          cmds.push(feature.vibrate(0));
+          cmds.push(feature.run_output(&ClientDeviceOutputCommand::Vibrate(0.into())));
           println!(
             "{} ({}) should stop vibrating on feature {}!",
             dev.name(),
@@ -174,7 +165,7 @@ async fn device_tester() {
             feature.feature_index()
           );
         } else if outs.get(OutputType::Rotate).is_some() {
-          cmds.push(feature.rotate(0));
+          cmds.push(feature.run_output(&ClientDeviceOutputCommand::Rotate(0.into())));
           println!(
             "{} ({}) should stop rotating on feature {}!",
             dev.name(),
@@ -182,7 +173,7 @@ async fn device_tester() {
             feature.feature_index()
           );
         } else if outs.get(OutputType::Oscillate).is_some() {
-          cmds.push(feature.oscillate(0));
+          cmds.push(feature.run_output(&ClientDeviceOutputCommand::Oscillate(0.into())));
           println!(
             "{} ({}) should stop oscillating on feature {}!",
             dev.name(),
@@ -190,7 +181,7 @@ async fn device_tester() {
             feature.feature_index()
           );
         } else if outs.get(OutputType::Constrict).is_some() {
-          cmds.push(feature.constrict(0));
+          cmds.push(feature.run_output(&ClientDeviceOutputCommand::Constrict(0.into())));
           println!(
             "{} ({}) should stop constricting on feature {}!",
             dev.name(),
@@ -198,7 +189,7 @@ async fn device_tester() {
             feature.feature_index()
           );
         } else if outs.get(OutputType::Temperature).is_some() {
-          cmds.push(feature.send_command(&ClientDeviceOutputCommand::Temperature(0i32.into())));
+          cmds.push(feature.run_output(&ClientDeviceOutputCommand::Temperature(0.into())));
           println!(
             "{} ({}) should stop heating on feature {}!",
             dev.name(),
@@ -298,7 +289,7 @@ async fn device_tester() {
             }
             OutputType::HwPositionWithDuration => {
               feature
-                .send_command(&ClientDeviceOutputCommand::HwPositionWithDuration(
+                .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
                   0.0f64.into(),
                   10,
                 ))
@@ -316,7 +307,7 @@ async fn device_tester() {
               );
               sleep(Duration::from_secs(1)).await;
               feature
-                .send_command(&ClientDeviceOutputCommand::HwPositionWithDuration(
+                .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
                   0.5f64.into(),
                   1000,
                 ))
@@ -334,7 +325,7 @@ async fn device_tester() {
               );
               sleep(Duration::from_secs(1)).await;
               feature
-                .send_command(&ClientDeviceOutputCommand::HwPositionWithDuration(
+                .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
                   0.0f64.into(),
                   10,
                 ))
@@ -352,7 +343,7 @@ async fn device_tester() {
               );
               sleep(Duration::from_secs(1)).await;
               feature
-                .send_command(&ClientDeviceOutputCommand::HwPositionWithDuration(
+                .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
                   1.0f64.into(),
                   500,
                 ))
@@ -370,7 +361,7 @@ async fn device_tester() {
               );
               sleep(Duration::from_secs(1)).await;
               feature
-                .send_command(&ClientDeviceOutputCommand::HwPositionWithDuration(
+                .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
                   0.0f64.into(),
                   1500,
                 ))

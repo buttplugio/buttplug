@@ -94,12 +94,12 @@ impl TryFromDeviceAttributes<InputCmdV4> for CheckedInputCmdV4 {
           ))
         } else {
           Err(ButtplugError::from(
-            ButtplugDeviceError::DeviceNoSensorError("InputCmd".to_string()),
+            ButtplugDeviceError::MessageNotSupported("InputCmd".to_string()),
           ))
         }
       } else {
         Err(ButtplugError::from(
-          ButtplugDeviceError::DeviceNoSensorError("InputCmd".to_string()),
+          ButtplugDeviceError::MessageNotSupported("InputCmd".to_string()),
         ))
       }
     } else {

@@ -163,7 +163,7 @@ async fn set_device_output(
     .map_err(IntifaceRestError::ButtplugClientError)?;
 
   get_device(&client, index)?
-    .send_command(&cmd)
+    .run_output(&cmd)
     .await
     .map_err(IntifaceRestError::ButtplugClientError)
 }
@@ -176,7 +176,7 @@ async fn set_feature_output(
     .map_err(IntifaceRestError::ButtplugClientError)?;
 
   get_feature(&client, index, feature_index)?
-    .send_command(&cmd)
+    .run_output(&cmd)
     .await
     .map_err(IntifaceRestError::ButtplugClientError)
 }

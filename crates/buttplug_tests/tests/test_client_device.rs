@@ -127,7 +127,6 @@ async fn test_client_device_connected_no_event_listener() {
 
 #[tokio::test]
 async fn test_client_device_invalid_command() {
-  use buttplug_core::errors::ButtplugDeviceError;
   let (client, _) = test_client_with_device().await;
 
   let mut event_stream = client.event_stream();
@@ -145,7 +144,7 @@ async fn test_client_device_invalid_command() {
   let test_device = client_device.expect("Test, assuming infallible.");
 
   assert!(matches!(
-    test_device.vibrate(1000).await.unwrap_err(),
+    test_device.run_output(&buttplug_client::device::ClientDeviceOutputCommand::Vibrate(buttplug_client::device::ClientDeviceCommandValue::Steps(1000))).await.unwrap_err(),
     ButtplugClientError::ButtplugOutputCommandConversionError(_)
   ));
 }
