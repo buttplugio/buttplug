@@ -137,8 +137,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
         .map(|cmd| {
           let f = device.device_features()[&cmd.index()].clone();
           f.run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
-            ClientDeviceCommandValue::Percent((
-            cmd.position()
+            ((cmd.position()
               * f
                 .feature()
                 .output()
@@ -147,7 +146,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
                 .get(OutputType::HwPositionWithDuration)
                 .unwrap()
                 .step_count() as f64)
-              .ceil()),
+              .ceil() as u32).into(),
             cmd.duration(),
           ))
         })
