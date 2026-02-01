@@ -1,3 +1,14 @@
+# 10.0.0 (2026-01-31)
+
+## Features
+
+- Lots of cleanup
+  - Remove buttplug_derive, add more boilerplate derives but no more proc macros
+  - Other general macro cleanup
+  - Various message renames for the final v4 spec
+    - StopAllDevices/StopDeviceCmd -> StopCmd
+    - PositionWithDuration -> HwPositionWithDuration
+
 # 10.0.0-beta4 (2025-12-29)
 
 ## Features

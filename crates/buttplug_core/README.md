@@ -13,13 +13,15 @@
 
 The basis of the Buttplug Framework. Contains definitions for all current protocol messages, as well as base traits for architecture shared between client and server (serializers, connectors, etc...) and utilities used throughout the library (async managers, stream creation, etc...).
 
+You probably won't use this library directly much, but it's the basis of the rest of the project.
+
 ## License
 
 Buttplug is BSD 3-Clause licensed.
 
 ```text
 
-Copyright (c) 2016-2025, Nonpolynomial, LLC
+Copyright (c) 2016-2026, Nonpolynomial, LLC
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

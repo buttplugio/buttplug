@@ -200,7 +200,7 @@ Buttplug is BSD 3-Clause licensed.
 
 ```text
 
-Copyright (c) 2016-2025, Nonpolynomial, LLC
+Copyright (c) 2016-2026, Nonpolynomial, LLC
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
