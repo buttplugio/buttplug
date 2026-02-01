@@ -10,7 +10,7 @@
 [![Crates.io Downloads](https://img.shields.io/crates/d/buttplug)](https://crates.io/crates/buttplug)
 [![Crates.io License](https://img.shields.io/crates/l/buttplug)](https://crates.io/crates/buttplug)
 
-This crate contains code necessary for connecting to serial ports on all desktop platforms. Mostly used by OSR-2/SR-6/SSR-1 users for direct "high-speed" connection. Yes, being able to connect over a wire at 115200 baud and get 50hz+ updates is considered high-speed in this field, in the year of our lord 2025. I fucking hate my job sometimes.
+This crate contains code necessary for connecting to serial ports on all desktop platforms. Mostly used by OSR-2/SR-6/SSR-1 users for direct "high-speed" connection. Yes, being able to connect over a wire at 115200 baud and get 50hz+ updates is considered high-speed in this field, in the year of our lord 2026. I fucking hate my job sometimes.
 
 ## License
 

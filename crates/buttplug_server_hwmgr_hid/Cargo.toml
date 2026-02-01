@@ -1,6 +1,6 @@
 [package]
 name = "buttplug_server_hwmgr_hid"
-version = "10.0.0-beta3"
+version = "10.0.0"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Buttplug Intimate Hardware Control Library - Core Library"
 license = "BSD-3-Clause"
@@ -20,9 +20,9 @@ doc = true
 
 
 [dependencies]
-buttplug_core = { version = "10.0.0-beta3", path = "../buttplug_core" }
-buttplug_server = { version = "10.0.0-beta3", path = "../buttplug_server" }
-buttplug_server_device_config = { version = "10.0.0-beta3", path = "../buttplug_server_device_config" }
+buttplug_core = { version = "10.0.0", path = "../buttplug_core" }
+buttplug_server = { version = "10.0.0", path = "../buttplug_server" }
+buttplug_server_device_config = { version = "10.0.0", path = "../buttplug_server_device_config" }
 futures = "0.3.31"
 futures-util = "0.3.31"
 log = "0.4.29"

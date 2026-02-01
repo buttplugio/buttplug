@@ -10,7 +10,7 @@
 [![Crates.io Downloads](https://img.shields.io/crates/d/buttplug)](https://crates.io/crates/buttplug)
 [![Crates.io License](https://img.shields.io/crates/l/buttplug)](https://crates.io/crates/buttplug)
 
-This crate contains code necessary for connecting to devices via the Buttplug Websocket Device Protocol. This protocol allows users to connect devices without having to add the accompanying rust code to this library. For more information, see the [Buttplug Developers Guide](https://https://docs.buttplug.io/docs/dev-guide), specifically the sections on DIY devices. 
+This crate contains code necessary for connecting to devices via the Buttplug Websocket Device Protocol. This protocol allows users to connect devices without having to add the accompanying rust code to this library. For more information, see the [Buttplug Developers Guide](https://buttplug.io/docs/dev-guide), specifically the sections on DIY devices. 
 
 ## License
 

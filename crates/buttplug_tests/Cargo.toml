@@ -11,11 +11,11 @@ keywords = ["usb", "serial", "hardware", "bluetooth", "teledildonics"]
 edition = "2024"
 
 [dependencies]
-buttplug_core = { version = "10.0.0-beta3", path = "../buttplug_core" }
-buttplug_client = { version = "10.0.0-beta3", path = "../buttplug_client" }
-buttplug_client_in_process = { version = "10.0.0-beta3", path = "../buttplug_client_in_process", default-features = false}
-buttplug_server = { version = "10.0.0-beta3", path = "../buttplug_server" }
-buttplug_server_device_config = { version = "10.0.0-beta3", path = "../buttplug_server_device_config" }
+buttplug_core = { version = "10.0.0", path = "../buttplug_core" }
+buttplug_client = { version = "10.0.0", path = "../buttplug_client" }
+buttplug_client_in_process = { version = "10.0.0", path = "../buttplug_client_in_process", default-features = false}
+buttplug_server = { version = "10.0.0", path = "../buttplug_server" }
+buttplug_server_device_config = { version = "10.0.0", path = "../buttplug_server_device_config" }
 log = "0.4.29"
 tokio = { version = "1.49.0", features = ["macros"] }
 uuid = "1.20.0"
