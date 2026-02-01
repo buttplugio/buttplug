@@ -49,8 +49,7 @@ impl BackdoorServer {
         .start(
           ButtplugRemoteServerConnector::<_, ButtplugServerJSONSerializer>::new(
             ButtplugStreamTransport::new(s_out, r_in),
-          ),
-          true,
+          )
         )
         .await
       {

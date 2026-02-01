@@ -63,8 +63,6 @@ pub struct EngineOptions {
   repeater_remote_address: Option<String>,
   #[getset(get_copy = "pub")]
   rest_api_port: Option<u16>,
-  #[getset(get_copy = "pub")]
-  allow_v4_spec: bool,
 }
 
 #[derive(Default, Debug, Clone)]
@@ -96,7 +94,6 @@ pub struct EngineOptionsExternal {
   pub repeater_local_port: Option<u16>,
   pub repeater_remote_address: Option<String>,
   pub rest_api_port: Option<u16>,
-  pub allow_v4_spec: bool,
 }
 
 impl From<EngineOptionsExternal> for EngineOptions {
@@ -129,7 +126,6 @@ impl From<EngineOptionsExternal> for EngineOptions {
       repeater_local_port: other.repeater_local_port,
       repeater_remote_address: other.repeater_remote_address,
       rest_api_port: other.rest_api_port,
-      allow_v4_spec: other.allow_v4_spec,
     }
   }
 }
@@ -280,11 +276,6 @@ impl EngineOptionsBuilder {
 
   pub fn rest_api_port(&mut self, port: u16) -> &mut Self {
     self.options.rest_api_port = Some(port);
-    self
-  }
-
-  pub fn allow_v4_spec(&mut self, allow: bool) -> &mut Self {
-    self.options.allow_v4_spec = allow;
     self
   }
 
