@@ -1,10 +1,9 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2019 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
-
 // The last version of the v2 client, taken from Buttplug v5.1.4
 
 use super::client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
