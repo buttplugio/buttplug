@@ -4,7 +4,6 @@
 [![Github donate button](https://img.shields.io/badge/github-donate-ff69b4.svg)](https://www.github.com/sponsors/qdot)
 [![Discourse Forums](https://img.shields.io/discourse/status?label=buttplug.io%20forums&server=https%3A%2F%2Fdiscuss.buttplug.io)](https://discuss.buttplug.io)
 [![Discord](https://img.shields.io/discord/353303527587708932.svg?logo=discord)](https://discord.buttplug.io)
-[![Twitter](https://img.shields.io/twitter/follow/buttplugio.svg?style=social&logo=twitter)](https://twitter.com/buttplugio)
 [![bluesky](https://img.shields.io/bluesky/followers/buttplug.io)](https://bsky.app/profile/buttplug.io)
 
 [![Crates.io Version](https://img.shields.io/crates/v/buttplug)](https://crates.io/crates/buttplug)
@@ -18,6 +17,8 @@ The server library contains
 - The server implementation (session handling, device management, etc)
 - Message parsing, including message version up/downgrading for backward compatibility 
 - Protocol implementations for all supported devices
+
+This will normally be used by way of the [Intiface Engine](../intiface_engine/) crate/binary, or via [Intiface Central](https://intiface.com). However, we leave this implementation separate as it can also be folded into embedded connectors or compiled as WASM.
 
 ## License
 
