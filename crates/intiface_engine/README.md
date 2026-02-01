@@ -61,7 +61,7 @@ Intiface is a Registered Trademark of Nonpolynomial Labs, LLC
 
 Buttplug and Intiface are BSD licensed.
 
-    Copyright (c) 2016-2025, Nonpolynomial Labs, LLC
+    Copyright (c) 2016-2026, Nonpolynomial Labs, LLC
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
