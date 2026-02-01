@@ -1,3 +1,19 @@
+# 10.0.0 (2026-01-31)
+
+## Features
+
+- Lots of Cleanup
+  - Remove buttplug_derive proc macros
+  - Rebuild device system to use 3 fewer long-running tasks
+  - Start reworking server systems into a state machine architecture
+    - This will continue post v10, we just need to ship right now
+- Device Updates
+  - Add temperature/LED support for joyhub devices
+  - Fix svakom devices
+- Fixes for Buttplug v4 Spec finalization
+  - StopAllDevices/StopDeviceCmd -> StopCmd
+  - PositionWithDuration -> HwPositionWithDuration
+
 # 10.0.0-beta4 (2025-12-29)
 
 ## Features
