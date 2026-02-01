@@ -10,34 +10,6 @@
 [![Crates.io Downloads](https://img.shields.io/crates/d/buttplug)](https://crates.io/crates/buttplug)
 [![Crates.io License](https://img.shields.io/crates/l/buttplug)](https://crates.io/crates/buttplug)
 
-<div align="center">
-  <h3>
-    <a href="https://docs.rs/buttplug">
-      Rust API Documentation
-    </a>
-    <span> | </span>
-    <a href="https://docs.buttplug.io/docs/dev-guide">
-      Developer Guide
-    </a>
-    <span> | </span>    
-    <a href="https://docs.buttplug.io/docs/spec">
-      Protocol Spec
-    </a>
-    <span> | </span>
-    <a href="https://awesome.buttplug.io">
-      Apps and Games List
-    </a>
-  </h3>
-</div>
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: light)" srcset="../../images/buttplug_rust_docs.png">
-    <source media="(prefers-color-scheme: dark)" srcset="../../images/buttplug_rust_docs_light.png">
-    <img src="https://raw.githubusercontent.com/buttplugio/buttplug/master/images/buttplug_rust_docs.png">
-  </picture>
-</p>
-
 # Buttplug Client Library (Rehosted as Buttplug)
 
 This is a rehosted version of the [buttplug_client](../buttplug_client/) library. We wanted to keep the crate name being something useful, but the rest of the library has been split into seperate crates.
