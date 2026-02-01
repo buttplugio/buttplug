@@ -251,10 +251,12 @@ impl ButtplugServer {
     let msg_id = msg.id();
     trace!("Server received: {:?}", msg);
     let v = msg.version();
-    let spec_version = *self.spec_version.get_or_init(|| {
+    let spec_version = if let Some(current_version) = self.spec_version() {
+      current_version
+    } else {
       info!("Setting Buttplug Server Message Spec version to {}", v);
-      v
-    });
+      v    
+    };
     match msg {
       ButtplugClientMessageVariant::V4(msg) => {
         let internal_msg =
