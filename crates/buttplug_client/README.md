@@ -15,6 +15,12 @@ If you want to build Rust-based applications that access programs like [Intiface
 
 This library contains everything you need to connect to Buttplug servers, scan for devices, and control their inputs and outputs.
 
+## But how do I use it?
+
+Check out [the developer guide](https://buttplug.io/docs/dev-guide) or [the examples in this repo](../../examples/).
+
+There's [api docs on docs.rs](https://docs.rs/buttplug-client/) but they're not great at the moment as I need to go through and recomment basically the whole library. Check there anyways, there's a chance I might have updated them and forgot to remove this message.
+
 ## What if I want to use another language?
 
 Check our [awesome list](https://awesome.buttplug.io) for Buttplug Client libraries in other languages.
@@ -25,7 +31,7 @@ Buttplug is BSD 3-Clause licensed.
 
 ```text
 
-Copyright (c) 2016-2025, Nonpolynomial, LLC
+Copyright (c) 2016-2026, Nonpolynomial, LLC
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

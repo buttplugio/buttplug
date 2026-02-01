@@ -1,3 +1,14 @@
+# 10.0.0 (2026-01-31)
+
+## Features
+
+- Replace ButtplugFuture w/ Oneshot channels
+  - We'd basically made a half-assed version of that anyways
+- Remove buttplug_derive completely
+- Changes around v4 spec finalization
+  - PositionWithDuration -> HwPositionWithDuration
+  - StopDeviceCmd/StopAllDevices -> StopCmd
+
 # 10.0.0-beta4 (2025-12-29)
 
 ## Features
