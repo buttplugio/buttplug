@@ -1,3 +1,9 @@
+# Intiface Engine v4.0.0 (2026/01/31)
+
+## Features
+
+- Updated all libraries to v10.
+
 # Intiface Engine v4.0.0-beta4 (2025/12/29)
 
 ## Bugfixes

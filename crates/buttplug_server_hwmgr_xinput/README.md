@@ -12,6 +12,8 @@
 
 This crate contains code necessary for connecting to XBox Gamepads **ON WINDOWS ONLY**. Our XInput system is currently only built for one platform.
 
+Please don't put the Xbox controller in your butt.
+
 ## License
 
 Buttplug is BSD 3-Clause licensed.
