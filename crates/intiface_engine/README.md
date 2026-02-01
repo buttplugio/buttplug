@@ -24,17 +24,20 @@ Command line options are as follows:
 | `server-version` | Print version and exit (kept for legacy reasons) |
 | `websocket-use-all-interfaces` | Websocket servers will listen on all interfaces (versus only on localhost, which is default) |
 | `websocket-port [port]` | Network port for connecting via non-ssl (ws://) protocols |
+| `websocket-client-address` | Address to connect to if using server-as-websocket-client mode | 
+| `repeater` | Use repeater (proxy) mode instead of being an actual server |
+| `repeater-port` | Port to list to for message proxy |
+| `rest-api-port` | Function as a REST server, using the port specified |
 | `frontend-websocket-port` | IPC JSON port for Intiface Central |
 | `server-name` | Identifying name server should emit when asked for info |
 | `device-config-file [file]` | Device configuration file to load (if omitted, uses internal) |
 | `user-device-config-file [file]` | User device configuration file to load (if omitted, none used) |
 | `max-ping-time [number]` | Milliseconds for ping time limit of server (if omitted, set to 0) |
 | `log` | Level of logs to output by default (if omitted, set to None) |
-| `allow-raw` | Allow clients to communicate using raw messages (DANGEROUS, CAN BRICK SOME DEVICES) |
 | `use-bluetooth-le` | Use the Bluetooth LE Buttplug Device Communication Manager |
 | `use-serial` | Use the Serial Port Buttplug Device Communication Manager |
 | `use-hid` | Use the HID Buttplug Device Communication Manager |
-| `use-lovense-dongle` | Use the HID Lovense Dongle Buttplug Device Communication Manager |
+| `use-lovense-dongle-hid` | Use the HID Lovense Dongle Buttplug Device Communication Manager |
 | `use-xinput` | Use the XInput Buttplug Device Communication Manager |
 | `use-lovense-connect` | Use the Lovense Connect Buttplug Device Communication Manager |
 | `use-device-websocket-server` | Use the Device Websocket Server Buttplug Device Communication Manager |
@@ -46,9 +49,11 @@ For example, to run the server on websockets at port 12345 with bluetooth device
 
 ## Compiling
 
-Linux will have extra compilation dependency requirements via
-[buttplug](https://github.com/buttplugio/buttplug). For pacakges required,
-please check there.
+Linux will have extra compilation dependency requirements for some device types. You will need your platform's equivalent of the following:
+
+- libudev-dev
+- libusb-1.0-0-dev
+- libdbus-1-dev
 
 ## Filing Issues and Contributing
 

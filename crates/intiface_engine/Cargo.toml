@@ -1,6 +1,6 @@
 [package]
 name = "intiface-engine"
-version = "4.0.0-beta4"
+version = "4.0.0"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "CLI and Library frontend for the Buttplug sex toy control library"
 license = "BSD-3-Clause"
