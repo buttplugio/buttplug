@@ -1,3 +1,17 @@
+# 10.0.0 (2026-01-31)
+
+## Features
+
+- Add devices
+  - KGoal Boost
+  - Adorime Cockring
+  - Luvmazer Dildo
+  - Add Temp/LED to Joyhub devices
+  - Lovense Lush Anal
+  - Svakom protocol fixes
+  - Joyhub Dodge
+- Fixup configurations for v4 spec final configs
+
 # 10.0.0-beta4 (2025-12-29)
 
 ## Features

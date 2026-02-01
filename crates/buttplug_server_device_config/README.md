@@ -16,6 +16,8 @@ This crate contains support for the Buttplug Device Configuration database. Whil
 
 But it's easier to do this than try to run migrations on the user's machine. :|
 
+This crate also contains the code to unpack the config files and turn them into usage programmatic structures while running the Buttplug Server.
+
 ## License
 
 Buttplug is BSD 3-Clause licensed.
