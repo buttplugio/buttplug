@@ -39,7 +39,7 @@ strum = "0.27.2"
 serde_yaml = "0.9.34"
 serde_json = "1.0.149"
 serde = { version = "1.0.228", features = ["derive"] }
-buttplug_core = { path = "../buttplug_core" }
+buttplug_core = { version = "10.0.0", path = "../buttplug_core" }
 
 [dev-dependencies]
 test-case = "3.3.1"
