@@ -125,6 +125,10 @@ On Linux, the following packages will be needed to build with all crates:
 The package names are listed as their Debian requirements, and may be different for other
 distributions.
 
+## Other Language Implementations
+
+See the [awesome-buttplug repo](https://github.com/buttplugio/awesome-buttplug#development-and-libraries) for a full list of client implementations in other programming languages.
+
 ## Filing Issues and Contributing
 
 If you have issues or feature requests, please feel free to [file an
@@ -146,9 +150,9 @@ latest and greatest hardware. We have multiple ways to donate!
 - [Github Sponsors](https://github.com/sponsors/qdot)
 - [Ko-Fi](https://ko-fi.com/qdot76367)
 
-## Other Language Implementations
+## Inclusion of LLM Generated Code
 
-See the [awesome-buttplug repo](https://github.com/buttplugio/awesome-buttplug#development-and-libraries) for a full list of client implementations in other programming languages.
+Buttplug, Intiface, and related projects may contain LLM generated ("agentic") code. All code is reviewed by a developer, no vibecoding allowed. Agentic coding is mostly used for refactors and cleanup. We will do our best to call out where this happens, usually in commit messages.
 
 ## License
 
