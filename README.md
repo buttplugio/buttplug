@@ -69,7 +69,7 @@ For a list of applications using Buttplug and Intiface, see the [awesome-buttplu
 
 ## Hardware Support
 
-Buttplug-rs is currently capable of controlling toys via:
+Buttplug is currently capable of controlling toys via:
 
 - Bluetooth LE (Desktop and Android/iOS)
 - Serial Ports (Desktop)
@@ -132,7 +132,7 @@ See the [awesome-buttplug repo](https://github.com/buttplugio/awesome-buttplug#d
 ## Filing Issues and Contributing
 
 If you have issues or feature requests, please feel free to [file an
-issue](https://github.com/buttplugio/buttplug-rs/issues).
+issue](https://github.com/buttplugio/buttplug/issues).
 
 **We are not looking for unsolicited code contributions or pull requests, and will not accept
 pull requests that do not have a matching issue where the matter was previously discussed in an issue on this repo or in one of our communication channels, listed below.** 

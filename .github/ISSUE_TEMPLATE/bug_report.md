@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Problems with Buttplug-rs modules
+about: Problems with Buttplug modules
 title: ''
 labels: bug
 assignees: 'qdot'

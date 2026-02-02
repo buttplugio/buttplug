@@ -33,7 +33,7 @@ use buttplug_server_device_config::DeviceConfigurationManagerBuilder;
 ///   For instance, we only support XInput on windows.
 /// - Did the developers add a new Device CommunicationManager type and forget
 ///   to add it to this method? _It's more likely than you think!_ [File a
-///   bug](https://github.com/buttplugio/buttplug-rs/issues).
+///   bug](https://github.com/buttplugio/buttplug/issues).
 ///
 /// # Errors
 ///
