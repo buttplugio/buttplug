@@ -1,0 +1,47 @@
+devices:
+  - identifier:
+      name: "JXT002"
+    expected_name: "VIBROSA"
+device_init:
+  # Initialization
+  - !Commands
+    device_index: 0
+    commands:
+      - !Subscribe
+        endpoint: rx
+      - !Write
+        endpoint: tx
+        data: [ 0x02, 0xA5, 0x5A, 0x55, 0xaa, 0xf0, 0x0b, 0xb1, 0x01, 0x00, 0x02, 0x00, 0x10, 0x03, 0x36, 0x86 ]
+        write_with_response: true
+  - !Events
+    device_index: 0
+    events:
+      - !Notifications
+        - endpoint: rx
+          data: [ 90, 58, 49, 49, 58, 48, 48, 56, 50, 48, 53, 57, 65, 68, 51, 66, 68, 59 ]
+device_commands:
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 0.5
+          ActuatorType: Vibrate
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x02,0xA5,0x5A,0x55,0xAA,0xF0,0x0B,0xB1,0x01,0x00,0x02,0x00,0x10,0x03,0x36,0x86]
+        write_with_response: true
+  - !Messages
+    device_index: 0
+    messages:
+      - !Stop
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x02,0xA5,0x5A,0x55,0xAA,0xF0,0x0B,0xB1,0x01,0x00,0x02,0x00,0x10,0x03,0x36,0x86]
+        write_with_response: true

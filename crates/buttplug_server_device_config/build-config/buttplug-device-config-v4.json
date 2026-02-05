@@ -4812,6 +4812,680 @@
         "name": "Hismith Mini device"
       }
     },
+    "honeyplaybox": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "JXT002",
+              "HPB-393-1",
+              "HPB-0520",
+              "HONEY-835",
+              "HPB-399",
+              "HPB-398",
+              "HPB-437",
+              "HPB-296",
+              "HPB-297",
+              "HPB-376-1",
+              "JXT001",
+              "HPB-DDT003",
+              "HPB-391",
+              "HPB-472",
+              "HPB-393",
+              "HBP-JXT001"
+            ],
+            "services": {
+              "0000180f-0000-1000-8000-00805f9b34fb": {
+                "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
+              },
+              "0000ff12-0000-1000-8000-00805f9b34fb": {
+                "rx": "0000ff02-0000-1000-8000-00805f9b34fb",
+                "tx": "0000ff03-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "da2a5051-be98-4c1b-b8a9-03836fadfd0e",
+          "identifier": [
+            "HPB-0520"
+          ],
+          "name": "Honey Play Box Pearl 2"
+        },
+        {
+          "id": "71f44e23-43b9-491b-9e7c-f38437619147",
+          "identifier": [
+            "HONEY-835"
+          ],
+          "name": "Honey Play Box Lili"
+        },
+        {
+          "id": "c205e707-9561-4016-97aa-0bde609b0edc",
+          "identifier": [
+            "HPB-398"
+          ],
+          "name": "Honey Play Box Pleasure Pivot"
+        },
+        {
+          "id": "0a9c43fb-2d58-4af9-aef2-60f48c6e7707",
+          "identifier": [
+            "HPB-296"
+          ],
+          "name": "Honey Play Box Anello"
+        },
+        {
+          "id": "0a9c43fb-2d58-4af9-aef2-60f48c6e7707",
+          "identifier": [
+            "HBP-JXT001"
+          ],
+          "name": "Honey Play Box Puff"
+        },
+        {
+          "features": [
+            {
+              "id": "a92be3ba-ac13-41b9-b199-4396c658208e",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "609f4878-840b-4240-a3d4-08b687527bf6",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "dff15849-789e-49ee-afdd-73099d606e1c",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "af0ddeec-2e45-41d1-953d-9052dd960ffb",
+          "identifier": [
+            "JXT002"
+          ],
+          "name": "Honey Play Box Vibrosa"
+        },
+        {
+          "features": [
+            {
+              "id": "7b6fdb3a-578e-4af8-aa5f-fa6b0cc38b46",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "76647712-0a86-4391-9812-c5a2c4717264",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "372549a4-2665-4bc8-9aac-f5f993f96208",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "aa161c35-4074-441d-8277-d56cf56f3610",
+          "identifier": [
+            "HPB-393"
+          ],
+          "name": "Honey Play Box Oly"
+        },
+        {
+          "features": [
+            {
+              "id": "7b6fdb3a-578e-4af8-aa5f-fa6b0cc38b46",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "76647712-0a86-4391-9812-c5a2c4717264",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "372549a4-2665-4bc8-9aac-f5f993f96208",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "aa161c35-4074-441d-8277-d56cf56f3610",
+          "identifier": [
+            "HPB-393-1"
+          ],
+          "name": "Honey Play Box Oly 2"
+        },
+        {
+          "features": [
+            {
+              "id": "6c0b2f97-df98-4469-807a-ae55aa46b420",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "617a7f86-3d2d-45cb-ac63-6bb221ab3758",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "c963e21c-e25f-4580-9b54-15e7a2e1ba66",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "7d78a68f-5825-4726-9827-ddaac5a325b2",
+          "identifier": [
+            "HPB-399"
+          ],
+          "name": "Honey Play Box Cyrus"
+        },
+        {
+          "features": [
+            {
+              "description": "Finger-Tapping Motion",
+              "id": "952c04c1-29ef-40ae-bce2-3ca171245dc2",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "4c68b1a3-4a87-41a0-ad83-792cc6ee7664",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "81276f3c-73ec-4395-b192-55b65a91ed2a",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "4c007d74-ce06-4d33-b69f-aea6f4273ba4",
+          "identifier": [
+            "HPB-437"
+          ],
+          "name": "Honey Play Box Fortexa"
+        },
+        {
+          "features": [
+            {
+              "id": "c83c1f8e-f187-4280-bea9-0353885c13cc",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Finger-Tapping Motion",
+              "id": "1f7425be-4fe6-4452-8388-81b81bc9939f",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "8a81f70c-9086-4ffa-be66-13bd33ad3d18",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "75d298b3-2ce2-4e1e-ae8d-856cde59f10f",
+          "identifier": [
+            "HPB-297"
+          ],
+          "name": "Honey Play Box Temp"
+        },
+        {
+          "features": [
+            {
+              "description": "Tongue Motion",
+              "id": "24e11b02-ddb2-44f5-8bf4-0b1bf9a7f574",
+              "index": 0,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "0a576c3b-6e73-4c46-ae55-8a11e892d8fe",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "d57d944c-1031-464e-8489-d16e9bb26a93",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "a413bfe8-d8a9-49b9-9f31-0c1b96bda69c",
+          "identifier": [
+            "HPB-376-1"
+          ],
+          "name": "Honey Play Box Joi Thrust 2"
+        },
+        {
+          "features": [
+            {
+              "id": "ef04a42e-89a3-4a2b-95c3-545d17d35c37",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "41cb0fc3-2d4f-47cd-82f4-c5db5d04303c",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "a6e1a9b9-e4c3-489c-bfc2-52dd79828911",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "58253ea4-01b9-4b00-a6cd-b92264f34eb2",
+          "identifier": [
+            "JXT001"
+          ],
+          "name": "Honey Play Box Vibrosa Mini"
+        },
+        {
+          "features": [
+            {
+              "id": "0432c17b-c8e6-49d2-b9cf-681f151fe3b2",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Finger-Tapping Motion",
+              "id": "ee368e93-ec17-46c2-a940-6cf0dca7cb11",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "25b81d5c-1269-41ea-b893-9aef1751f726",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "f2fb2c01-eb77-4e96-86f1-f3155674aac1",
+          "identifier": [
+            "HPB-DDT003"
+          ],
+          "name": "Honey Play Box Tressa"
+        },
+        {
+          "features": [
+            {
+              "id": "ff5a2649-b36d-443e-8f9c-fa6e4fe52d76",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Finger-Tapping Motion",
+              "id": "fd880ea6-5841-4e22-9412-b7d98cfd22dc",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "469140b6-e1ed-4c9b-9a0c-080c24cc0de5",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "2a4c4340-a135-4ea6-801e-2fb361beafaf",
+          "identifier": [
+            "HPB-391"
+          ],
+          "name": "Honey Play Box Trilux"
+        },
+        {
+          "features": [
+            {
+              "id": "8057dc14-df15-4397-87be-85c593821780",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "c19bb975-5fca-46cf-8f5b-f4037c42f8de",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "faefd98f-47b9-4aa8-9455-eba7d80e039d",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "0eb9cc33-e2b7-4fd5-8a37-f17e5307f01f",
+          "identifier": [
+            "HPB-472"
+          ],
+          "name": "Honey Play Box Melody"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "b29ed0d1-5eab-41e0-bdb9-487b34f979e4",
+            "index": 0,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  100
+                ]
+              }
+            }
+          },
+          {
+            "description": "Battery Level",
+            "id": "acfaa268-2fc3-4192-ac90-16d64f598999",
+            "index": 1,
+            "input": {
+              "battery": {
+                "command": [
+                  "Read"
+                ],
+                "value": [
+                  [
+                    0,
+                    100
+                  ]
+                ]
+              }
+            }
+          }
+        ],
+        "id": "1eca1a4f-eeae-4da0-a9b6-a8dd1bc38f74",
+        "name": "Honey Play Box Device"
+      }
+    },
     "htk_bm": {
       "communication": [
         {
