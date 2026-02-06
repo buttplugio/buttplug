@@ -28,8 +28,8 @@ impl JSONValidator {
     // These expects can only fail if there's a build/packaging error, not at runtime.
     let schema_json: serde_json::Value =
       serde_json::from_str(schema).expect("schema must be valid JSON (validated by build.rs)");
-    let schema =
-      Validator::new(&schema_json).expect("schema must be valid JSON Schema (validated by build.rs)");
+    let schema = Validator::new(&schema_json)
+      .expect("schema must be valid JSON Schema (validated by build.rs)");
     Self { schema }
   }
 

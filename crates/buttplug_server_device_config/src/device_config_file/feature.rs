@@ -13,8 +13,8 @@ use crate::{
   ServerDeviceFeature,
   ServerDeviceFeatureInput,
   ServerDeviceFeatureOutput,
-  ServerDeviceFeatureOutputPositionProperties,
   ServerDeviceFeatureOutputHwPositionWithDurationProperties,
+  ServerDeviceFeatureOutputPositionProperties,
   ServerDeviceFeatureOutputValueProperties,
 };
 use buttplug_core::util::range_serialize::option_range_serialize;
@@ -313,7 +313,9 @@ impl TryFrom<&ServerDeviceFeature> for ConfigUserDeviceFeature {
   fn try_from(value: &ServerDeviceFeature) -> Result<Self, Self::Error> {
     Ok(Self {
       id: value.id(),
-      base_id: value.base_id().ok_or(ButtplugDeviceConfigError::MissingBaseId)?,
+      base_id: value
+        .base_id()
+        .ok_or(ButtplugDeviceConfigError::MissingBaseId)?,
       output: value.output().as_ref().map(|x| x.into()),
     })
   }

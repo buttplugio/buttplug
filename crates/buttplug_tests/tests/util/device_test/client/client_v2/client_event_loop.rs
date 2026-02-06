@@ -15,7 +15,6 @@ use buttplug_core::{
   connector::ButtplugConnector,
   errors::{ButtplugDeviceError, ButtplugError},
 };
-use futures::channel::oneshot;
 use buttplug_server::message::{
   ButtplugClientMessageV2,
   ButtplugServerMessageV2,
@@ -23,6 +22,7 @@ use buttplug_server::message::{
   DeviceMessageInfoV2,
 };
 use dashmap::DashMap;
+use futures::channel::oneshot;
 use log::*;
 use std::sync::{
   Arc,

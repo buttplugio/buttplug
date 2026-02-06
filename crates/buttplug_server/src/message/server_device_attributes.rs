@@ -5,7 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-
 use super::ServerDeviceMessageAttributesV3;
 use super::v2::ServerDeviceMessageAttributesV2;
 use buttplug_core::errors::ButtplugError;

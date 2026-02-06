@@ -230,9 +230,12 @@ impl ServerDeviceManager {
         .iter()
         .map(|dev| {
           let device = dev.value();
-          device.stop(
-            &message::StopCmdV4::new(None, None, msg.inputs(), msg.outputs()),
-          )
+          device.stop(&message::StopCmdV4::new(
+            None,
+            None,
+            msg.inputs(),
+            msg.outputs(),
+          ))
         })
         .collect();
       future::join_all(fut_vec).await;

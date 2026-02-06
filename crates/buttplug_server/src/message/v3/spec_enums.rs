@@ -77,7 +77,8 @@ impl_message_enum_traits!(ButtplugClientMessageV3 {
   SensorSubscribeCmd,
   SensorUnsubscribeCmd,
 });
-impl ButtplugMessageFinalizer for ButtplugClientMessageV3 {}
+impl ButtplugMessageFinalizer for ButtplugClientMessageV3 {
+}
 
 // For v2 to v3, all deprecations should be treated as conversions, but will require current
 // connected device state, meaning they'll need to be implemented where they can also access the
