@@ -144,7 +144,14 @@ async fn test_client_device_invalid_command() {
   let test_device = client_device.expect("Test, assuming infallible.");
 
   assert!(matches!(
-    test_device.run_output(&buttplug_client::device::ClientDeviceOutputCommand::Vibrate(buttplug_client::device::ClientDeviceCommandValue::Steps(1000))).await.unwrap_err(),
+    test_device
+      .run_output(
+        &buttplug_client::device::ClientDeviceOutputCommand::Vibrate(
+          buttplug_client::device::ClientDeviceCommandValue::Steps(1000)
+        )
+      )
+      .await
+      .unwrap_err(),
     ButtplugClientError::ButtplugOutputCommandConversionError(_)
   ));
 }

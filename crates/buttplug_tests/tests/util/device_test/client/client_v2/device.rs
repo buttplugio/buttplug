@@ -15,7 +15,6 @@ use super::{
   },
   client_event_loop::ButtplugClientRequest,
 };
-use futures::channel::oneshot;
 use buttplug_core::{
   connector::ButtplugConnectorError,
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
@@ -37,6 +36,7 @@ use buttplug_server::message::{
   VibrateCmdV1,
   VibrateSubcommandV1,
 };
+use futures::channel::oneshot;
 use futures::{Stream, future};
 use getset::Getters;
 use log::*;
@@ -240,7 +240,9 @@ impl ButtplugClientDevice {
               ButtplugConnectorError::ConnectorChannelClosed,
             )
           })?;
-        let msg = rx.await.map_err(|_| ButtplugConnectorError::ConnectorChannelClosed)??;
+        let msg = rx
+          .await
+          .map_err(|_| ButtplugConnectorError::ConnectorChannelClosed)??;
         if let ButtplugServerMessageV2::Error(_err) = msg {
           Err(ButtplugError::from(_err).into())
         } else {

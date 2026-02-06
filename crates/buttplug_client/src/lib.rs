@@ -20,7 +20,17 @@ use buttplug_core::{
   connector::{ButtplugConnector, ButtplugConnectorError},
   errors::{ButtplugError, ButtplugHandshakeError},
   message::{
-    BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION, ButtplugClientMessageV4, ButtplugServerMessageV4, InputType, PingV0, RequestDeviceListV0, RequestServerInfoV4, StartScanningV0, StopCmdV4, StopScanningV0
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+    BUTTPLUG_CURRENT_API_MINOR_VERSION,
+    ButtplugClientMessageV4,
+    ButtplugServerMessageV4,
+    InputType,
+    PingV0,
+    RequestDeviceListV0,
+    RequestServerInfoV4,
+    StartScanningV0,
+    StopCmdV4,
+    StopScanningV0,
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
@@ -103,7 +113,7 @@ pub enum ButtplugClientError {
   /// Error converting output command: {}
   ButtplugOutputCommandConversionError(String),
   /// Multiple inputs available for {}, must use specific feature
-  ButtplugMultipleInputAvailableError(InputType)
+  ButtplugMultipleInputAvailableError(InputType),
 }
 
 /// Enum representing different events that can be emitted by a client.
@@ -286,14 +296,11 @@ impl ButtplugClient {
 
     // Take the request receiver - if None, a previous connection consumed it and we can't reconnect
     // without creating a new client (the sender is tied to this receiver)
-    let request_receiver = self
-      .request_receiver
-      .lock()
-      .await
-      .take()
-      .ok_or(ButtplugConnectorError::ConnectorGenericError(
+    let request_receiver = self.request_receiver.lock().await.take().ok_or(
+      ButtplugConnectorError::ConnectorGenericError(
         "Cannot reconnect - request channel already consumed. Create a new client.".to_string(),
-      ))?;
+      ),
+    )?;
 
     info!("Connecting to server.");
     let (connector_sender, connector_receiver) = mpsc::channel(256);

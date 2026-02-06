@@ -16,17 +16,30 @@ use buttplug_core::{
   ButtplugResultFuture,
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
-    self, ButtplugMessage, ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4,
-    InputCommandType, InputType, OutputType, OutputValue, StopCmdV4,
+    self,
+    ButtplugMessage,
+    ButtplugServerMessageV4,
+    DeviceFeature,
+    DeviceMessageInfoV4,
+    InputCommandType,
+    InputType,
+    OutputType,
+    OutputValue,
+    StopCmdV4,
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use buttplug_server_device_config::{
-  DeviceConfigurationManager, ServerDeviceDefinition, UserDeviceIdentifier,
+  DeviceConfigurationManager,
+  ServerDeviceDefinition,
+  UserDeviceIdentifier,
 };
 use dashmap::DashMap;
 use futures::future::{self, BoxFuture, FutureExt};
-use tokio::sync::{mpsc::{channel, Sender}, oneshot};
+use tokio::sync::{
+  mpsc::{Sender, channel},
+  oneshot,
+};
 use tokio_stream::StreamExt;
 use uuid::Uuid;
 
@@ -43,7 +56,7 @@ use crate::{
 
 use super::{
   InternalDeviceEvent,
-  device_task::{spawn_device_task, DeviceTaskConfig},
+  device_task::{DeviceTaskConfig, spawn_device_task},
   hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent},
   protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, ProtocolSpecializer},
 };
@@ -554,9 +567,7 @@ pub(super) async fn build_device_handle(
       strategy,
       ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_)
     ))
-    && let Err(e) = device_handle
-      .stop(&StopCmdV4::default())
-      .await
+    && let Err(e) = device_handle.stop(&StopCmdV4::default()).await
   {
     return Err(ButtplugDeviceError::DeviceConnectionError(format!(
       "Error setting up keepalive: {e}"

@@ -9,7 +9,13 @@
 // 3. Run: cargo run --bin application
 
 use buttplug_client::{
-  ButtplugClient, ButtplugClientDevice, ButtplugClientError, ButtplugClientEvent, connector::ButtplugRemoteClientConnector, device::ClientDeviceOutputCommand, serializer::ButtplugClientJSONSerializer
+  ButtplugClient,
+  ButtplugClientDevice,
+  ButtplugClientError,
+  ButtplugClientEvent,
+  connector::ButtplugRemoteClientConnector,
+  device::ClientDeviceOutputCommand,
+  serializer::ButtplugClientJSONSerializer,
 };
 use buttplug_core::message::{InputType, OutputType};
 use buttplug_transport_websocket_tungstenite::ButtplugWebsocketClientTransport;
@@ -137,8 +143,7 @@ async fn main() -> anyhow::Result<()> {
   client.stop_scanning().await?;
 
   // Step 5: Check what devices we found
-  let devices: Vec<ButtplugClientDevice> =
-    client.devices().into_values().collect();
+  let devices: Vec<ButtplugClientDevice> = client.devices().into_values().collect();
 
   if devices.is_empty() {
     println!("No devices found. Make sure your device is:");
@@ -183,7 +188,10 @@ async fn main() -> anyhow::Result<()> {
           let intensity = percent as f64 / 100.0;
           for device in &devices {
             if !device.output_available(OutputType::Vibrate) {
-              match device.run_output(&ClientDeviceOutputCommand::Vibrate(intensity.into())).await {
+              match device
+                .run_output(&ClientDeviceOutputCommand::Vibrate(intensity.into()))
+                .await
+              {
                 Ok(_) => println!("  {}: vibrating at {}%", device.name(), percent),
                 Err(e) => println!("  {}: error - {}", device.name(), e),
               }

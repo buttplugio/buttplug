@@ -5,11 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::message::{
-  ButtplugMessage,
-  ButtplugMessageError,
-  ButtplugMessageValidator,
-};
+use crate::message::{ButtplugMessage, ButtplugMessageError, ButtplugMessageValidator};
 use getset::CopyGetters;
 use serde::{Deserialize, Serialize};
 
@@ -36,7 +32,12 @@ pub struct StopCmdV4 {
 }
 
 impl StopCmdV4 {
-  pub fn new(device_index: Option<u32>, feature_index: Option<u32>, inputs: bool, outputs: bool) -> Self {
+  pub fn new(
+    device_index: Option<u32>,
+    feature_index: Option<u32>,
+    inputs: bool,
+    outputs: bool,
+  ) -> Self {
     Self {
       id: 1,
       device_index,
@@ -55,7 +56,7 @@ impl Default for StopCmdV4 {
       device_index: None,
       feature_index: None,
       inputs: true,
-      outputs: true
+      outputs: true,
     }
   }
 }
