@@ -13,6 +13,7 @@ defaults:
 configurations:
 - identifier:
   - Melt
+  - Melt 2
   name: WeVibe Melt
   features:
   - id: fdf47cba-4429-4944-9bb4-1db4facb8d29
@@ -112,6 +113,7 @@ communication:
 - btle:
     names:
     - Melt
+    - Melt 2
     - Moxie
     - Vector
     - Wand
