@@ -16,11 +16,7 @@ use std::{collections::VecDeque, sync::Arc, time::Duration};
 
 use buttplug_core::util::{self, async_manager};
 use futures::future;
-use tokio::{
-  select,
-  sync::mpsc::Receiver,
-  time::Instant,
-};
+use tokio::{select, sync::mpsc::Receiver, time::Instant};
 
 use super::{
   hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareWriteCmd},

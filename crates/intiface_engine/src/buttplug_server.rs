@@ -160,22 +160,24 @@ pub async fn run_server(
 ) -> Result<(), ButtplugServerConnectorError> {
   if let Some(port) = options.websocket_port() {
     server
-      .start(
-        ButtplugRemoteServerConnector::<_, ButtplugServerJSONSerializer>::new(
-          ButtplugWebsocketServerTransportBuilder::default()
-            .port(port)
-            .listen_on_all_interfaces(options.websocket_use_all_interfaces())
-            .finish(),
-        )
-      )
+      .start(ButtplugRemoteServerConnector::<
+        _,
+        ButtplugServerJSONSerializer,
+      >::new(
+        ButtplugWebsocketServerTransportBuilder::default()
+          .port(port)
+          .listen_on_all_interfaces(options.websocket_use_all_interfaces())
+          .finish(),
+      ))
       .await
   } else if let Some(addr) = options.websocket_client_address() {
     server
-      .start(
-        ButtplugRemoteServerConnector::<_, ButtplugServerJSONSerializer>::new(
-          ButtplugWebsocketClientTransport::new_insecure_connector(addr),
-        )
-      )
+      .start(ButtplugRemoteServerConnector::<
+        _,
+        ButtplugServerJSONSerializer,
+      >::new(
+        ButtplugWebsocketClientTransport::new_insecure_connector(addr),
+      ))
       .await
   } else {
     panic!(

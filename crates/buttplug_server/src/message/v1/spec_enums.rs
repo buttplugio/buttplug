@@ -78,7 +78,8 @@ impl_message_enum_traits!(ButtplugClientMessageV1 {
   FleshlightLaunchFW12Cmd,
   VorzeA10CycloneCmd,
 });
-impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugClientMessageV1 {}
+impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugClientMessageV1 {
+}
 
 // No messages were changed or deprecated before v2, so we can convert all v0 messages to v1.
 impl From<ButtplugClientMessageV0> for ButtplugClientMessageV1 {
@@ -132,7 +133,8 @@ impl_message_enum_traits!(ButtplugServerMessageV1 {
   DeviceRemoved,
   ScanningFinished,
 });
-impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugServerMessageV1 {}
+impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugServerMessageV1 {
+}
 
 impl From<ButtplugServerMessageV1> for ButtplugServerMessageV0 {
   fn from(value: ButtplugServerMessageV1) -> Self {

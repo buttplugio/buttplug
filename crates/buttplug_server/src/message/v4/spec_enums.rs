@@ -23,7 +23,15 @@ use crate::message::{
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugClientMessageV4, ButtplugDeviceMessage, ButtplugMessage, PingV0, RequestDeviceListV0, RequestServerInfoV4, StartScanningV0, StopCmdV4, StopScanningV0
+    ButtplugClientMessageV4,
+    ButtplugDeviceMessage,
+    ButtplugMessage,
+    PingV0,
+    RequestDeviceListV0,
+    RequestServerInfoV4,
+    StartScanningV0,
+    StopCmdV4,
+    StopScanningV0,
   },
 };
 
@@ -93,7 +101,10 @@ impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMess
       }
       // Messages that need device index checking
       ButtplugClientMessageV4::StopCmd(m) => {
-        if m.device_index().map_or(true,|x| feature_map.get(&x).is_some()) {
+        if m
+          .device_index()
+          .map_or(true, |x| feature_map.get(&x).is_some())
+        {
           Ok(ButtplugCheckedClientMessageV4::StopCmd(m))
         } else {
           Err(ButtplugError::from(

@@ -10,15 +10,8 @@
 use crate::ButtplugClientError;
 use crate::device::ClientDeviceOutputCommand;
 
-use crate::{
-  ButtplugClientMessageSender,
-  ButtplugClientResultFuture,
-  device::ClientDeviceFeature,
-};
-use buttplug_core::message::{
-  InputType,
-  InputTypeReading,
-};
+use crate::{ButtplugClientMessageSender, ButtplugClientResultFuture, device::ClientDeviceFeature};
+use buttplug_core::message::{InputType, InputTypeReading};
 use buttplug_core::{
   errors::ButtplugDeviceError,
   message::{ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4, OutputType, StopCmdV4},
@@ -249,7 +242,10 @@ impl ButtplugClientDevice {
     }
   }
 
-  pub fn run_input_read(&self, input_type: InputType) -> ButtplugClientResultFuture<InputTypeReading> {
+  pub fn run_input_read(
+    &self,
+    input_type: InputType,
+  ) -> ButtplugClientResultFuture<InputTypeReading> {
     match self.input_feature(input_type) {
       Ok(dev) => dev.run_input_read(input_type).boxed(),
       Err(e) => future::ready(Err(e)).boxed(),

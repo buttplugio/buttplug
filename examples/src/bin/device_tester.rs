@@ -10,9 +10,7 @@ use tracing::Level;
 use buttplug_client::device::{ClientDeviceFeature, ClientDeviceOutputCommand};
 use buttplug_client::{ButtplugClient, ButtplugClientDevice, ButtplugClientEvent};
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
-use buttplug_core::message::{
-  OutputType,
-};
+use buttplug_core::message::OutputType;
 use buttplug_server::ButtplugServerBuilder;
 use buttplug_server::device::ServerDeviceManagerBuilder;
 use buttplug_server_device_config::load_protocol_configs;
@@ -96,7 +94,9 @@ async fn device_tester() {
     dev.device_features().iter().for_each(|(_, feature)| {
       let outs = feature.feature().output().clone().unwrap_or_default();
       if let Some(out) = outs.get(OutputType::Vibrate) {
-        cmds.push(feature.run_output(&ClientDeviceOutputCommand::Vibrate((out.step_count() as i32).into())));
+        cmds.push(feature.run_output(&ClientDeviceOutputCommand::Vibrate(
+          (out.step_count() as i32).into(),
+        )));
         println!(
           "{} ({}) should start vibrating on feature {}!",
           dev.name(),
@@ -104,7 +104,9 @@ async fn device_tester() {
           feature.feature_index()
         );
       } else if let Some(out) = outs.get(OutputType::Rotate) {
-        cmds.push(feature.run_output(&ClientDeviceOutputCommand::Rotate((*out.step_limit().end()).into())));
+        cmds.push(feature.run_output(&ClientDeviceOutputCommand::Rotate(
+          (*out.step_limit().end()).into(),
+        )));
         println!(
           "{} ({}) should start rotating on feature {}!",
           dev.name(),
@@ -112,7 +114,9 @@ async fn device_tester() {
           feature.feature_index()
         );
       } else if let Some(out) = outs.get(OutputType::Oscillate) {
-        cmds.push(feature.run_output(&ClientDeviceOutputCommand::Oscillate(out.step_count().into())));
+        cmds.push(feature.run_output(&ClientDeviceOutputCommand::Oscillate(
+          out.step_count().into(),
+        )));
         println!(
           "{} ({}) should start oscillating on feature {}!",
           dev.name(),
@@ -120,7 +124,9 @@ async fn device_tester() {
           feature.feature_index()
         );
       } else if let Some(out) = outs.get(OutputType::Constrict) {
-        cmds.push(feature.run_output(&ClientDeviceOutputCommand::Constrict(out.step_count().into())));
+        cmds.push(feature.run_output(&ClientDeviceOutputCommand::Constrict(
+          out.step_count().into(),
+        )));
         println!(
           "{} ({}) should start constricting on feature {}!",
           dev.name(),
@@ -128,9 +134,9 @@ async fn device_tester() {
           feature.feature_index()
         );
       } else if let Some(out) = outs.get(OutputType::Temperature) {
-        cmds.push(
-          feature.run_output(&ClientDeviceOutputCommand::Temperature((*out.step_limit().end()).into())),
-        );
+        cmds.push(feature.run_output(&ClientDeviceOutputCommand::Temperature(
+          (*out.step_limit().end()).into(),
+        )));
         println!(
           "{} ({}) should start heating on feature {}!",
           dev.name(),
