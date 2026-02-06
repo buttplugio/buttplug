@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 167
+    "minor": 173
   },
   "protocols": {
     "activejoy": {
@@ -5135,7 +5135,9 @@
               "J-Mirage3",
               "J-Maelstrom",
               "J-Dodge",
-              "J-Pyt"
+              "J-Pyt",
+              "J-Perseus",
+              "J-Pogo"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -5740,15 +5742,11 @@
         {
           "features": [
             {
-              "id": "7ccaa3e6-d5d3-441b-9b2d-4b97eeccbb1e",
-              "index": 3
-            },
-            {
-              "description": "Air Pump",
+              "description": "Suction Vibrator",
               "id": "0d3b3010-d438-4899-b1c2-d81bff0c6714",
-              "index": 4,
+              "index": 0,
               "output": {
-                "constrict": {
+                "vibrate": {
                   "value": [
                     0,
                     255
@@ -8618,7 +8616,7 @@
             },
             {
               "id": "94025679-badf-49bb-a247-1dab022d9204",
-              "index": 1,
+              "index": 2,
               "output": {
                 "vibrate": {
                   "value": [
@@ -8891,6 +8889,39 @@
             "J-Pyt"
           ],
           "name": "JoyHub Pyt"
+        },
+        {
+          "features": [
+            {
+              "id": "96f2b666-1663-4b59-83a3-5b9f95097095",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "ddff38ef-a553-4e6a-85cd-40a1143452f5",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "53ce5d2f-d0c9-448b-8df5-4f739bd44a4b",
+          "identifier": [
+            "J-Pogo"
+          ],
+          "name": "JoyHub Pogo"
         }
       ],
       "defaults": {
@@ -12207,12 +12238,6 @@
               "id": "c4b2855d-5ecc-4010-8a8d-17fd3e51cc57",
               "index": 0,
               "output": {
-                "oscillate": {
-                  "value": [
-                    0,
-                    20
-                  ]
-                },
                 "hw_position_with_duration": {
                   "duration": [
                     0,
@@ -12221,6 +12246,12 @@
                   "value": [
                     0,
                     100
+                  ]
+                },
+                "oscillate": {
+                  "value": [
+                    0,
+                    20
                   ]
                 }
               }
