@@ -347,6 +347,10 @@
         },
         "index": {
           "type": "integer"
+        },
+        "message_gap_ms": {
+          "type": "integer",
+          "min": 0
         }
       },
       "additionalProperties": false,
@@ -563,10 +567,6 @@
                   },
                   "user_config": {
                     "$ref": "#/components/user-config-customization"
-                  },
-                  "message_gap_ms": {
-                    "type": "integer",
-                    "min": 0
                   }
                 },
                 "required": [

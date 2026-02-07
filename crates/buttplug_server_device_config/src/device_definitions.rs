@@ -107,8 +107,8 @@ impl ServerDeviceDefinitionBuilder {
     self
   }
 
-  pub fn message_gap_ms(&mut self, gap: u32) -> &mut Self {
-    self.def.message_gap_ms = Some(gap);
+  pub fn message_gap_ms(&mut self, gap: Option<u32>) -> &mut Self {
+    self.def.message_gap_ms = gap;
     self
   }
 

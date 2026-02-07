@@ -50,7 +50,7 @@ impl From<ConfigBaseDeviceDefinition> for ServerDeviceDefinition {
       builder.protocol_variant(&variant);
     }
     if let Some(gap) = val.message_gap_ms {
-      builder.message_gap_ms(gap);
+      builder.message_gap_ms(Some(gap));
     }
     if let Some(features) = val.features {
       for feature in features {
@@ -113,9 +113,7 @@ impl ConfigUserDeviceDefinition {
   ) -> Result<ServerDeviceDefinition, ButtplugDeviceConfigError> {
     let mut builder = ServerDeviceDefinitionBuilder::from_base(base, self.id, false);
     builder.display_name(&self.user_config.display_name);
-    if let Some(message_gap_ms) = self.user_config.message_gap_ms {
-      builder.message_gap_ms(message_gap_ms);
-    }
+    builder.message_gap_ms(self.user_config.message_gap_ms);
     self.user_config.allow.then(|| builder.allow(true));
     self.user_config.deny.then(|| builder.deny(true));
     builder.index(self.user_config.index);
