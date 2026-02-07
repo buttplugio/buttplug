@@ -1,3 +1,9 @@
+# 10.0.1 (2026-02-07)
+
+## Bugfixes
+
+- Make user-set message_gap_ms an Option, fix position in user config schema
+
 # 10.0.0 (2026-01-31)
 
 ## Features
