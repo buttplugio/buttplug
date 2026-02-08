@@ -61,69 +61,74 @@ impl ButtplugServerDeviceEventMessageConverter {
   }
 
   // Due to the way we generate device events, we expect every new DeviceList to only have one
-  // change currently.
+  // change currently. Returns None if no actual change is detected (e.g. duplicate event or race
+  // condition), so the caller can silently drop the no-op.
   pub fn convert_device_list(
     &self,
     version: &ButtplugMessageSpecVersion,
     list: &DeviceListV4,
-  ) -> ButtplugServerMessageVariant {
+  ) -> Option<ButtplugServerMessageVariant> {
     let new_indexes: Vec<u32> = list.devices().iter().map(|x| *x.0).collect();
-    if new_indexes.len() > self.device_indexes.len() {
-      // Device Added
-      let connected_devices: Vec<&DeviceMessageInfoV4> = list
-        .devices()
-        .values()
-        .filter(|x| !self.device_indexes.contains(&x.device_index()))
-        .collect();
-      self
-        .device_indexes
-        .insert(connected_devices[0].device_index());
+
+    // Check for added devices
+    let connected_devices: Vec<&DeviceMessageInfoV4> = list
+      .devices()
+      .values()
+      .filter(|x| !self.device_indexes.contains(&x.device_index()))
+      .collect();
+
+    if let Some(device) = connected_devices.first() {
+      self.device_indexes.insert(device.device_index());
       if *version == ButtplugMessageSpecVersion::Version4 {
-        return ButtplugServerMessageVariant::V4(list.clone().into());
+        return Some(ButtplugServerMessageVariant::V4(list.clone().into()));
       }
-      let da3 = DeviceAddedV3::from(connected_devices[0].clone());
+      let da3 = DeviceAddedV3::from((*device).clone());
       if *version == ButtplugMessageSpecVersion::Version3 {
-        return ButtplugServerMessageVariant::V3(da3.into());
+        return Some(ButtplugServerMessageVariant::V3(da3.into()));
       }
       let da2 = DeviceAddedV2::from(da3);
       if *version == ButtplugMessageSpecVersion::Version2 {
-        return ButtplugServerMessageVariant::V2(da2.into());
+        return Some(ButtplugServerMessageVariant::V2(da2.into()));
       }
       let da1 = DeviceAddedV1::from(da2);
       if *version == ButtplugMessageSpecVersion::Version1 {
-        return ButtplugServerMessageVariant::V1(da1.into());
+        return Some(ButtplugServerMessageVariant::V1(da1.into()));
       }
       let da0 = DeviceAddedV0::from(da1);
-      ButtplugServerMessageVariant::V0(ButtplugServerMessageV0::DeviceAdded(da0))
-    } else {
-      // Device Removed
-      let disconnected_indexes: Vec<u32> = self
-        .device_indexes
-        .iter()
-        .filter(|x| !new_indexes.contains(x))
-        .map(|x| *x)
-        .collect();
-      self.device_indexes.remove(&disconnected_indexes[0]);
-      match version {
+      return Some(ButtplugServerMessageVariant::V0(ButtplugServerMessageV0::DeviceAdded(da0)));
+    }
+
+    // Check for removed devices
+    let disconnected_indexes: Vec<u32> = self
+      .device_indexes
+      .iter()
+      .filter(|x| !new_indexes.contains(x))
+      .map(|x| *x)
+      .collect();
+
+    if let Some(&index) = disconnected_indexes.first() {
+      self.device_indexes.remove(&index);
+      return Some(match version {
         ButtplugMessageSpecVersion::Version0 => ButtplugServerMessageVariant::V0(
-          ButtplugServerMessageV0::DeviceRemoved(DeviceRemovedV0::new(disconnected_indexes[0])),
+          ButtplugServerMessageV0::DeviceRemoved(DeviceRemovedV0::new(index)),
         ),
         ButtplugMessageSpecVersion::Version1 => {
-          ButtplugServerMessageVariant::V1(DeviceRemovedV0::new(disconnected_indexes[0]).into())
+          ButtplugServerMessageVariant::V1(DeviceRemovedV0::new(index).into())
         }
         ButtplugMessageSpecVersion::Version2 => {
-          ButtplugServerMessageVariant::V2(DeviceRemovedV0::new(disconnected_indexes[0]).into())
+          ButtplugServerMessageVariant::V2(DeviceRemovedV0::new(index).into())
         }
         ButtplugMessageSpecVersion::Version3 => {
-          ButtplugServerMessageVariant::V3(DeviceRemovedV0::new(disconnected_indexes[0]).into())
+          ButtplugServerMessageVariant::V3(DeviceRemovedV0::new(index).into())
         }
         ButtplugMessageSpecVersion::Version4 => {
           ButtplugServerMessageVariant::V4(list.clone().into())
         }
-      }
+      });
     }
-    // There is no == here because the only way DeviceList would be returned is via a
-    // RequestDeviceList call. Events will only ever be additions or deletions.
+
+    // No actual change detected — suppress the event
+    None
   }
 }
 
