@@ -2202,6 +2202,25 @@ configurations:
             - 255
       index: 1
   id: 53ce5d2f-d0c9-448b-8df5-4f739bd44a4b
+- identifier:
+    - J-Pyro
+  name: JoyHub Pyro
+  features:
+    - id: 304f0407-7de2-4c6f-adfc-079c61044315
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: b7471ca3-cbd9-4caf-affd-54865699f439
+      output:
+        rotate:
+          value:
+            - 0
+            - 255
+      index: 1
+  id: 682796f5-1855-4f5c-ac58-c7a41b9f80dd
 communication:
 - btle:
     names:
@@ -2332,6 +2351,7 @@ communication:
     - J-Pyt
     - J-Perseus
     - J-Pogo
+    - J-Pyro
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
