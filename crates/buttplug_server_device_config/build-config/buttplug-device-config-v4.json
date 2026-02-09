@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 173
+    "minor": 174
   },
   "protocols": {
     "activejoy": {
@@ -5137,7 +5137,8 @@
               "J-Dodge",
               "J-Pyt",
               "J-Perseus",
-              "J-Pogo"
+              "J-Pogo",
+              "J-Pyro"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -8922,6 +8923,39 @@
             "J-Pogo"
           ],
           "name": "JoyHub Pogo"
+        },
+        {
+          "features": [
+            {
+              "id": "304f0407-7de2-4c6f-adfc-079c61044315",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "b7471ca3-cbd9-4caf-affd-54865699f439",
+              "index": 1,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "682796f5-1855-4f5c-ac58-c7a41b9f80dd",
+          "identifier": [
+            "J-Pyro"
+          ],
+          "name": "JoyHub Pyro"
         }
       ],
       "defaults": {
