@@ -46,11 +46,10 @@ impl BackdoorServer {
     tokio::spawn(async move {
       // Backdoor server can always use latest spec.
       if let Err(e) = server
-        .start(
-          ButtplugRemoteServerConnector::<_, ButtplugServerJSONSerializer>::new(
-            ButtplugStreamTransport::new(s_out, r_in),
-          )
-        )
+        .start(ButtplugRemoteServerConnector::<
+          _,
+          ButtplugServerJSONSerializer,
+        >::new(ButtplugStreamTransport::new(s_out, r_in)))
         .await
       {
         // We can't do much if the server fails, but we *can* yell into the logs!

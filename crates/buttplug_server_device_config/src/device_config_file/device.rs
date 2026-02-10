@@ -141,7 +141,9 @@ impl TryFrom<&ServerDeviceDefinition> for ConfigUserDeviceDefinition {
   fn try_from(value: &ServerDeviceDefinition) -> Result<Self, Self::Error> {
     Ok(Self {
       id: value.id(),
-      base_id: value.base_id().ok_or(ButtplugDeviceConfigError::MissingBaseId)?,
+      base_id: value
+        .base_id()
+        .ok_or(ButtplugDeviceConfigError::MissingBaseId)?,
       features: value
         .features()
         .values()

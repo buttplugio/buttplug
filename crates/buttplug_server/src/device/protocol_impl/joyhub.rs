@@ -133,7 +133,7 @@ impl ProtocolHandler for JoyHub {
         },
         false,
       )
-          .into(),
+      .into(),
     ])
   }
 
@@ -154,7 +154,7 @@ impl ProtocolHandler for JoyHub {
         },
         false,
       )
-          .into(),
+      .into(),
     ])
   }
 }

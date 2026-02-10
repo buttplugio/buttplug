@@ -22,9 +22,11 @@ use buttplug_core::message::{
 };
 use getset::{CopyGetters, Getters, Setters};
 use serde::{
+  Deserialize,
+  Serialize,
+  Serializer,
   de::{self, Deserializer, SeqAccess, Visitor},
   ser::SerializeSeq,
-  Deserialize, Serialize, Serializer,
 };
 use std::{collections::HashSet, fmt, ops::RangeInclusive};
 use uuid::Uuid;
@@ -429,7 +431,10 @@ impl ServerDeviceFeatureOutput {
       (self.temperature.is_some(), OutputType::Temperature),
       (self.led.is_some(), OutputType::Led),
       (self.position.is_some(), OutputType::Position),
-      (self.hw_position_with_duration.is_some(), OutputType::HwPositionWithDuration),
+      (
+        self.hw_position_with_duration.is_some(),
+        OutputType::HwPositionWithDuration,
+      ),
       (self.spray.is_some(), OutputType::Spray),
     ]
     .into_iter()
@@ -673,7 +678,8 @@ impl PartialEq for ServerDeviceFeature {
   }
 }
 
-impl Eq for ServerDeviceFeature {}
+impl Eq for ServerDeviceFeature {
+}
 
 impl Default for ServerDeviceFeature {
   fn default() -> Self {

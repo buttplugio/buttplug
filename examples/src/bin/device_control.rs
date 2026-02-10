@@ -1,5 +1,9 @@
 use buttplug_client::{
-  ButtplugClient, ButtplugClientError, connector::ButtplugRemoteClientConnector, device::{ClientDeviceCommandValue, ClientDeviceOutputCommand}, serializer::ButtplugClientJSONSerializer
+  ButtplugClient,
+  ButtplugClientError,
+  connector::ButtplugRemoteClientConnector,
+  device::{ClientDeviceCommandValue, ClientDeviceOutputCommand},
+  serializer::ButtplugClientJSONSerializer,
 };
 
 use buttplug_core::message::OutputType;
@@ -68,7 +72,11 @@ async fn main() -> anyhow::Result<()> {
   // We can use the convenience functions on ButtplugClientDevice to
   // send the message. This version sets all of the motors on a
   // vibrating device to the same speed.
-  test_client_device.run_output(&ClientDeviceOutputCommand::Vibrate(ClientDeviceCommandValue::Percent(0.5f64))).await?;
+  test_client_device
+    .run_output(&ClientDeviceOutputCommand::Vibrate(
+      ClientDeviceCommandValue::Percent(0.5f64),
+    ))
+    .await?;
 
   // If we wanted to just set one motor on and the other off, we could
   // try this version that uses an array. It'll throw an exception if
@@ -87,7 +95,11 @@ async fn main() -> anyhow::Result<()> {
 
   // Just set all of the vibrators to full speed.
   if vibrator_count > 0 {
-    test_client_device.run_output(&ClientDeviceOutputCommand::Vibrate(ClientDeviceCommandValue::Steps(10))).await?;
+    test_client_device
+      .run_output(&ClientDeviceOutputCommand::Vibrate(
+        ClientDeviceCommandValue::Steps(10),
+      ))
+      .await?;
   } else {
     println!("Device does not have > 1 vibrators, not running multiple vibrator test.");
   }
@@ -99,7 +111,11 @@ async fn main() -> anyhow::Result<()> {
   println!("Trying error");
   // If we try to send a command to a device after the client has
   // disconnected, we'll get an exception thrown.
-  let vibrate_result = test_client_device.run_output(&ClientDeviceOutputCommand::Vibrate(ClientDeviceCommandValue::Steps(30))).await;
+  let vibrate_result = test_client_device
+    .run_output(&ClientDeviceOutputCommand::Vibrate(
+      ClientDeviceCommandValue::Steps(30),
+    ))
+    .await;
   if let Err(ButtplugClientError::ButtplugConnectorError(error)) = vibrate_result {
     println!("Tried to send after disconnection! Error: ");
     println!("{}", error);

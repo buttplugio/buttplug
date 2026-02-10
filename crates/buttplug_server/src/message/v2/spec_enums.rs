@@ -67,7 +67,8 @@ impl_message_enum_traits!(ButtplugClientMessageV2 {
   StopDeviceCmd,
   BatteryLevelCmd,
 });
-impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugClientMessageV2 {}
+impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugClientMessageV2 {
+}
 
 // For v1 to v2, several messages were deprecated. Throw errors when trying to convert those.
 impl TryFrom<ButtplugClientMessageV1> for ButtplugClientMessageV2 {
@@ -136,7 +137,8 @@ impl_message_enum_traits!(ButtplugServerMessageV2 {
   ScanningFinished,
   BatteryLevelReading,
 });
-impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugServerMessageV2 {}
+impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugServerMessageV2 {
+}
 
 impl From<ButtplugServerMessageV2> for ButtplugServerMessageV1 {
   fn from(value: ButtplugServerMessageV2) -> Self {

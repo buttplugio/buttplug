@@ -185,9 +185,7 @@ impl ServerDeviceManagerEventLoop {
           }
           ScanningState::BringupInProgress => {
             // Comm manager finished before we completed bringup - ignore for now
-            debug!(
-              "Hardware Comm Manager finished before scanning was fully started, ignoring"
-            );
+            debug!("Hardware Comm Manager finished before scanning was fully started, ignoring");
           }
           ScanningState::Active => {
             // Check if all hardware has actually stopped
@@ -364,7 +362,11 @@ impl ServerDeviceManagerEventLoop {
         // Note: The device event forwarding task is now spawned in build_device_handle(),
         // so we no longer need to create it here.
 
-        info!("Assigning index {} to {}", device_index, device_handle.name());
+        info!(
+          "Assigning index {} to {}",
+          device_index,
+          device_handle.name()
+        );
         self.device_map.insert(device_index, device_handle.clone());
 
         let device_update_message: ButtplugServerMessageV4 = self.generate_device_list().into();

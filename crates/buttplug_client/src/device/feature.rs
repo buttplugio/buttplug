@@ -96,7 +96,10 @@ impl ClientDeviceFeature {
   ) -> Result<i32, ButtplugClientError> {
     if !(-1.0f64..=1.0f64).contains(&float_amt) {
       Err(ButtplugClientError::ButtplugOutputCommandConversionError(
-        format!("Float values must be between 0.0 and 1.0, received value was {}", float_amt),
+        format!(
+          "Float values must be between 0.0 and 1.0, received value was {}",
+          float_amt
+        ),
       ))
     } else {
       let mut val = float_amt * feature_output.step_count() as f64;
@@ -158,9 +161,12 @@ impl ClientDeviceFeature {
       ClientDeviceOutputCommand::Position(v) => {
         OutputCommand::Position(OutputValue::new(self.check_step_value(output, v)?))
       }
-      ClientDeviceOutputCommand::HwPositionWithDuration(v, d) => OutputCommand::HwPositionWithDuration(
-        OutputHwPositionWithDuration::new(self.check_step_value(output, v)? as u32, *d),
-      ),
+      ClientDeviceOutputCommand::HwPositionWithDuration(v, d) => {
+        OutputCommand::HwPositionWithDuration(OutputHwPositionWithDuration::new(
+          self.check_step_value(output, v)? as u32,
+          *d,
+        ))
+      }
     };
     Ok(OutputCmdV4::new(
       self.device_index,
@@ -219,7 +225,10 @@ impl ClientDeviceFeature {
     )
   }
 
-  pub fn run_input_read(&self, sensor_type: InputType) -> ButtplugClientResultFuture<InputTypeReading> {
+  pub fn run_input_read(
+    &self,
+    sensor_type: InputType,
+  ) -> ButtplugClientResultFuture<InputTypeReading> {
     if let Some(sensor_map) = self.feature.input()
       && let Some(sensor) = sensor_map.get(sensor_type)
       && sensor.command().contains(&InputCommandType::Read)

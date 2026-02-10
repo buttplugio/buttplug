@@ -48,7 +48,8 @@ impl_message_enum_traits!(ButtplugClientMessageV0 {
   FleshlightLaunchFW12Cmd,
   VorzeA10CycloneCmd,
 });
-impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugClientMessageV0 {}
+impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugClientMessageV0 {
+}
 
 /// Represents all server-to-client messages in v0 of the Buttplug Spec
 #[derive(Debug, Clone, PartialEq, derive_more::From, Serialize, Deserialize)]
@@ -74,7 +75,8 @@ impl_message_enum_traits!(ButtplugServerMessageV0 {
   DeviceRemoved,
   ScanningFinished,
 });
-impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugServerMessageV0 {}
+impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugServerMessageV0 {
+}
 
 #[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]
 pub enum ButtplugDeviceMessageNameV0 {

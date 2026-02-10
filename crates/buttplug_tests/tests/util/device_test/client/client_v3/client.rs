@@ -19,7 +19,6 @@ use buttplug_core::{
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
-use futures::channel::oneshot;
 use buttplug_server::message::{
   ButtplugClientMessageV3,
   ButtplugServerMessageV3,
@@ -27,6 +26,7 @@ use buttplug_server::message::{
   StopAllDevicesV0,
 };
 use dashmap::DashMap;
+use futures::channel::oneshot;
 use futures::{
   Stream,
   future::{self, BoxFuture, FutureExt},
@@ -146,10 +146,7 @@ pub(super) struct ButtplugClientMessageSender {
 }
 
 impl ButtplugClientMessageSender {
-  fn new(
-    message_sender: mpsc::Sender<ButtplugClientRequest>,
-    connected: &Arc<AtomicBool>,
-  ) -> Self {
+  fn new(message_sender: mpsc::Sender<ButtplugClientRequest>, connected: &Arc<AtomicBool>) -> Self {
     Self {
       message_sender,
       connected: connected.clone(),
@@ -248,17 +245,17 @@ impl ButtplugClient {
     let (message_sender, message_receiver) = mpsc::channel(256);
     let (event_stream, _) = broadcast::channel(256);
     let connected = Arc::new(AtomicBool::new(false));
-    (Self {
-      client_name: name.to_owned(),
-      server_name: Arc::new(Mutex::new(None)),
-      event_stream,
-      message_sender: Arc::new(ButtplugClientMessageSender::new(
-        message_sender,
-        &connected,
-      )),
-      connected,
-      device_map: Arc::new(DashMap::new()),
-    }, message_receiver)
+    (
+      Self {
+        client_name: name.to_owned(),
+        server_name: Arc::new(Mutex::new(None)),
+        event_stream,
+        message_sender: Arc::new(ButtplugClientMessageSender::new(message_sender, &connected)),
+        connected,
+        device_map: Arc::new(DashMap::new()),
+      },
+      message_receiver,
+    )
   }
 
   pub async fn connect<ConnectorType>(

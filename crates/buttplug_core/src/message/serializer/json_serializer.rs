@@ -22,8 +22,8 @@ pub fn create_message_validator() -> Validator {
   // SAFETY: MESSAGE_JSON_SCHEMA is embedded at compile time via include_str!() and validated by
   // build.rs before compilation. These expects can only fail if there's a build/packaging error,
   // not at runtime.
-  let schema: serde_json::Value =
-    serde_json::from_str(MESSAGE_JSON_SCHEMA).expect("schema must be valid JSON (validated by build.rs)");
+  let schema: serde_json::Value = serde_json::from_str(MESSAGE_JSON_SCHEMA)
+    .expect("schema must be valid JSON (validated by build.rs)");
   Validator::new(&schema).expect("schema must be valid JSON Schema (validated by build.rs)")
 }
 

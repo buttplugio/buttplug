@@ -131,9 +131,11 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
             .map(|(_, x)| x)
             .collect();
           let f = rotate_features[cmd.index() as usize].clone();
-          f.run_output(&ClientDeviceOutputCommand::Rotate(ClientDeviceCommandValue::Percent(
-            cmd.speed() * if cmd.clockwise() { 1f64 } else { -1f64 },
-          )))
+          f.run_output(&ClientDeviceOutputCommand::Rotate(
+            ClientDeviceCommandValue::Percent(
+              cmd.speed() * if cmd.clockwise() { 1f64 } else { -1f64 },
+            ),
+          ))
         })
         .collect();
       futures::future::try_join_all(fut_vec).await.unwrap();
@@ -153,7 +155,8 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
                 .get(OutputType::HwPositionWithDuration)
                 .unwrap()
                 .step_count() as f64)
-              .ceil() as u32).into(),
+              .ceil() as u32)
+              .into(),
             cmd.duration(),
           ))
         })

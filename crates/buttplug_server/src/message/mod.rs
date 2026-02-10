@@ -5,7 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-
 use buttplug_core::{
   errors::{ButtplugError, ButtplugMessageError},
   message::{
@@ -84,7 +83,8 @@ pub enum ButtplugClientMessageVariant {
 }
 
 impl_message_enum_traits!(ButtplugClientMessageVariant { V0, V1, V2, V3, V4 });
-impl ButtplugMessageFinalizer for ButtplugClientMessageVariant {}
+impl ButtplugMessageFinalizer for ButtplugClientMessageVariant {
+}
 
 impl ButtplugClientMessageVariant {
   pub fn version(&self) -> ButtplugMessageSpecVersion {
@@ -99,16 +99,44 @@ impl ButtplugClientMessageVariant {
 
   pub fn device_index(&self) -> Option<u32> {
     match self {
-      Self::V0(msg) => extract_device_index!(msg, ButtplugClientMessageV0,
-        [FleshlightLaunchFW12Cmd, SingleMotorVibrateCmd, VorzeA10CycloneCmd]),
-      Self::V1(msg) => extract_device_index!(msg, ButtplugClientMessageV1,
-        [FleshlightLaunchFW12Cmd, SingleMotorVibrateCmd, VorzeA10CycloneCmd, VibrateCmd]),
-      Self::V2(msg) => extract_device_index!(msg, ButtplugClientMessageV2,
-        [VibrateCmd, RotateCmd, LinearCmd, BatteryLevelCmd]),
-      Self::V3(msg) => extract_device_index!(msg, ButtplugClientMessageV3,
-        [VibrateCmd, SensorSubscribeCmd, SensorUnsubscribeCmd, ScalarCmd, RotateCmd, LinearCmd, SensorReadCmd]),
-      Self::V4(msg) => extract_device_index!(msg, ButtplugClientMessageV4,
-        [OutputCmd, InputCmd]),
+      Self::V0(msg) => extract_device_index!(
+        msg,
+        ButtplugClientMessageV0,
+        [
+          FleshlightLaunchFW12Cmd,
+          SingleMotorVibrateCmd,
+          VorzeA10CycloneCmd
+        ]
+      ),
+      Self::V1(msg) => extract_device_index!(
+        msg,
+        ButtplugClientMessageV1,
+        [
+          FleshlightLaunchFW12Cmd,
+          SingleMotorVibrateCmd,
+          VorzeA10CycloneCmd,
+          VibrateCmd
+        ]
+      ),
+      Self::V2(msg) => extract_device_index!(
+        msg,
+        ButtplugClientMessageV2,
+        [VibrateCmd, RotateCmd, LinearCmd, BatteryLevelCmd]
+      ),
+      Self::V3(msg) => extract_device_index!(
+        msg,
+        ButtplugClientMessageV3,
+        [
+          VibrateCmd,
+          SensorSubscribeCmd,
+          SensorUnsubscribeCmd,
+          ScalarCmd,
+          RotateCmd,
+          LinearCmd,
+          SensorReadCmd
+        ]
+      ),
+      Self::V4(msg) => extract_device_index!(msg, ButtplugClientMessageV4, [OutputCmd, InputCmd]),
     }
   }
 }
@@ -123,7 +151,8 @@ pub enum ButtplugServerMessageVariant {
 }
 
 impl_message_enum_traits!(ButtplugServerMessageVariant { V0, V1, V2, V3, V4 });
-impl ButtplugMessageFinalizer for ButtplugServerMessageVariant {}
+impl ButtplugMessageFinalizer for ButtplugServerMessageVariant {
+}
 
 impl ButtplugServerMessageVariant {
   pub fn version(&self) -> ButtplugMessageSpecVersion {
@@ -148,7 +177,8 @@ pub enum ButtplugServerDeviceMessage {
 }
 
 impl_message_enum_traits!(ButtplugServerDeviceMessage { SensorReading });
-impl ButtplugMessageFinalizer for ButtplugServerDeviceMessage {}
+impl ButtplugMessageFinalizer for ButtplugServerDeviceMessage {
+}
 
 impl From<ButtplugServerDeviceMessage> for ButtplugServerMessageV4 {
   fn from(other: ButtplugServerDeviceMessage) -> Self {

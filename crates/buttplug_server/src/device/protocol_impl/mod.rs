@@ -36,6 +36,7 @@ pub mod galaku_pump;
 pub mod hgod;
 pub mod hismith;
 pub mod hismith_mini;
+pub mod honeyplaybox;
 pub mod htk_bm;
 pub mod itoys;
 pub mod jejoue;
@@ -179,6 +180,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     hismith_mini::setup::HismithMiniIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    honeyplaybox::setup::HoneyPlayBoxIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, htk_bm::setup::HtkBmIdentifierFactory::default());
   add_to_protocol_map(

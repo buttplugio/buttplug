@@ -356,16 +356,14 @@ configurations:
   - J-ROSELLA3
   name: JoyHub Rose Love
   features:
-  - id: 7ccaa3e6-d5d3-441b-9b2d-4b97eeccbb1e
-    index: 3
-  - description: Air Pump
+  - description: Suction Vibrator
     id: 0d3b3010-d438-4899-b1c2-d81bff0c6714
     output:
-      constrict:
+      vibrate:
         value:
         - 0
         - 255
-    index: 4
+    index: 0
   id: ca36d3a7-c305-45e3-b8f7-3106b36b233a
 - identifier:
   - J-DukeDazzle2
@@ -2034,7 +2032,7 @@ configurations:
         value:
         - 0
         - 255
-    index: 1
+    index: 2
   id: c31f74b8-c859-47ab-8b1c-66745cb11355
 - identifier:
     - J-Melody
@@ -2185,6 +2183,44 @@ configurations:
             - 255
       index: 1
   id: d5bd0e69-7bdc-4ad7-80ab-6c7a2255208f
+- identifier:
+    - J-Pogo
+  name: JoyHub Pogo
+  features:
+    - id: 96f2b666-1663-4b59-83a3-5b9f95097095
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: ddff38ef-a553-4e6a-85cd-40a1143452f5
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 1
+  id: 53ce5d2f-d0c9-448b-8df5-4f739bd44a4b
+- identifier:
+    - J-Pyro
+  name: JoyHub Pyro
+  features:
+    - id: 304f0407-7de2-4c6f-adfc-079c61044315
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: b7471ca3-cbd9-4caf-affd-54865699f439
+      output:
+        rotate:
+          value:
+            - 0
+            - 255
+      index: 1
+  id: 682796f5-1855-4f5c-ac58-c7a41b9f80dd
 communication:
 - btle:
     names:
@@ -2313,6 +2349,9 @@ communication:
     - J-Maelstrom
     - J-Dodge
     - J-Pyt
+    - J-Perseus
+    - J-Pogo
+    - J-Pyro
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
