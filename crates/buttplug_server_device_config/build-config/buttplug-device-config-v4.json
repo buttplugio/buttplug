@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 174
+    "minor": 175
   },
   "protocols": {
     "activejoy": {
@@ -5812,7 +5812,8 @@
               "J-Pyt",
               "J-Perseus",
               "J-Pogo",
-              "J-Pyro"
+              "J-Pyro",
+              "J-MaxSensr"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -9630,6 +9631,51 @@
             "J-Pyro"
           ],
           "name": "JoyHub Pyro"
+        },
+        {
+          "features": [
+            {
+              "id": "dab7bb9f-eb4a-438a-a258-38ca4681e90a",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "32e2e5ba-18d5-458f-ad3e-1a2a2d843d37",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "f0d063d7-7f65-433d-8a05-2c77feae822c",
+              "index": 4,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    7
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "6760c297-4a6a-4b0b-b14f-6151b96fc6a0",
+          "identifier": [
+            "J-MaxSensr"
+          ],
+          "name": "JoyHub MaxSensr"
         }
       ],
       "defaults": {
