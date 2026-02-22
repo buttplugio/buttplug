@@ -2221,6 +2221,32 @@ configurations:
             - 255
       index: 1
   id: 682796f5-1855-4f5c-ac58-c7a41b9f80dd
+- identifier:
+    - J-MaxSensr
+  name: JoyHub MaxSensr
+  features:
+    - id: dab7bb9f-eb4a-438a-a258-38ca4681e90a
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 32e2e5ba-18d5-458f-ad3e-1a2a2d843d37
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 1
+    - id: f0d063d7-7f65-433d-8a05-2c77feae822c
+      output:
+        constrict:
+          value:
+            - 0
+            - 7
+      index: 4
+  id: 6760c297-4a6a-4b0b-b14f-6151b96fc6a0
 communication:
 - btle:
     names:
@@ -2352,6 +2378,7 @@ communication:
     - J-Perseus
     - J-Pogo
     - J-Pyro
+    - J-MaxSensr
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
