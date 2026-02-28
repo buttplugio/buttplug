@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 175
+    "minor": 176
   },
   "protocols": {
     "activejoy": {
@@ -5813,7 +5813,8 @@
               "J-Perseus",
               "J-Pogo",
               "J-Pyro",
-              "J-MaxSensr"
+              "J-MaxSensr",
+              "J-Diego"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -9676,6 +9677,51 @@
             "J-MaxSensr"
           ],
           "name": "JoyHub MaxSensr"
+        },
+        {
+          "features": [
+            {
+              "id": "606f197a-5b57-40e0-b2a6-ff5e708e8dd2",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "9b714873-28ec-490c-a3e7-11b4a70dd74b",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "70802c01-4a36-40fe-bdc2-a9e162437566",
+              "index": 5,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "d862601d-1567-48c3-9dd8-bd4596a6657e",
+          "identifier": [
+            "J-Diego"
+          ],
+          "name": "JoyHub Diego"
         }
       ],
       "defaults": {
