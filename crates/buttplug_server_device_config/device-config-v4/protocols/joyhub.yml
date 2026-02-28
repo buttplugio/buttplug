@@ -2247,6 +2247,32 @@ configurations:
             - 7
       index: 4
   id: 6760c297-4a6a-4b0b-b14f-6151b96fc6a0
+- identifier:
+    - J-Diego
+  name: JoyHub Diego
+  features:
+    - id: 606f197a-5b57-40e0-b2a6-ff5e708e8dd2
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 9b714873-28ec-490c-a3e7-11b4a70dd74b
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+    - id: 70802c01-4a36-40fe-bdc2-a9e162437566
+      output:
+        temperature:
+          value:
+            - 0
+            - 1
+      index: 5
+  id: d862601d-1567-48c3-9dd8-bd4596a6657e
 communication:
 - btle:
     names:
@@ -2379,6 +2405,7 @@ communication:
     - J-Pogo
     - J-Pyro
     - J-MaxSensr
+    - J-Diego
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
