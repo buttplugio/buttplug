@@ -26,8 +26,7 @@ use crate::device::{
 use async_trait::async_trait;
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{self, InputReadingV4, InputTypeReading, InputValue, OutputType},
-  util::sleep,
+  message::{self, InputReadingV4, InputTypeReading, InputValue, OutputType}, util::async_manager,
 };
 use buttplug_server_device_config::{
   Endpoint,
@@ -134,7 +133,7 @@ impl ProtocolIdentifier for LovenseIdentifier {
             );
           }
         }
-        _ = sleep(Duration::from_millis(LOVENSE_COMMAND_TIMEOUT_MS)).fuse() => {
+        _ = async_manager::sleep(Duration::from_millis(LOVENSE_COMMAND_TIMEOUT_MS)).fuse() => {
           count += 1;
           if count > LOVENSE_COMMAND_RETRY {
             warn!("Lovense Device timed out while getting DeviceType info. ({} retries)", LOVENSE_COMMAND_RETRY);

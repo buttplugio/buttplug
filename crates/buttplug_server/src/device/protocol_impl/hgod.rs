@@ -15,10 +15,7 @@ use crate::device::{
   },
 };
 use async_trait::async_trait;
-use buttplug_core::{
-  errors::ButtplugDeviceError,
-  util::{async_manager, sleep},
-};
+use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
 use buttplug_server_device_config::{
   Endpoint,
   ProtocolCommunicationSpecifier,
@@ -32,6 +29,7 @@ use std::{
   },
   time::Duration,
 };
+use tracing::info_span;
 use uuid::{Uuid, uuid};
 
 // Time between Hgod update commands, in milliseconds.
@@ -63,9 +61,12 @@ impl Hgod {
     let last_command = Arc::new(AtomicU8::new(0));
 
     let last_command_clone = last_command.clone();
-    async_manager::spawn(async move {
-      send_hgod_updates(hardware, last_command_clone).await;
-    });
+    async_manager::spawn(
+      async move {
+        send_hgod_updates(hardware, last_command_clone).await;
+      },
+      info_span!("Hgod::send_hgod_updates").or_current(),
+    );
 
     Self { last_command }
   }
@@ -92,7 +93,7 @@ async fn send_hgod_updates(device: Arc<Hardware>, data: Arc<AtomicU8>) {
       );
       break;
     }
-    sleep(Duration::from_millis(HGOD_COMMAND_DELAY_MS)).await;
+    async_manager::sleep(Duration::from_millis(HGOD_COMMAND_DELAY_MS)).await;
   }
 }
 

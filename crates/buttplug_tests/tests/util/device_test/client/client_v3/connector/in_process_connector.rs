@@ -131,7 +131,7 @@ impl ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3>
             }
           }
           info!("Stopping In Process Client Connector Event Sender Loop, due to channel receiver being dropped.");
-        }.instrument(tracing::info_span!("InProcessClientConnectorEventSenderLoop")));
+        }, tracing::info_span!("InProcessClientConnectorEventSenderLoop"));
         connected.store(true, Ordering::Relaxed);
         Ok(())
       }.boxed()

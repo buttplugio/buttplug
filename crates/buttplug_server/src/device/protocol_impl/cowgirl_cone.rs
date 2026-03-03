@@ -15,7 +15,7 @@ use crate::device::{
   },
 };
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, util::sleep};
+use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
 use buttplug_server_device_config::{
   Endpoint,
   ProtocolCommunicationSpecifier,
@@ -47,7 +47,7 @@ impl ProtocolInitializer for CowgirlConeInitializer {
         false,
       ))
       .await?;
-    sleep(Duration::from_millis(3000)).await;
+    async_manager::sleep(Duration::from_millis(3000)).await;
     Ok(Arc::new(CowgirlCone::default()))
   }
 }

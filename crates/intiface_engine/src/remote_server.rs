@@ -169,7 +169,7 @@ async fn run_server<ConnectorType>(
                 }
               }
             }
-          });
+          }, tracing::info_span!("RemoteServerMessageHandler").or_current());
         }
       },
       _ = disconnect_notifier.notified().fuse() => {

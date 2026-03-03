@@ -33,6 +33,7 @@ use buttplug_server_device_config::{
   ProtocolCommunicationSpecifier,
 };
 use futures::future::{self, BoxFuture, FutureExt};
+use tracing::info_span;
 use std::{
   collections::HashMap,
   fmt::{self, Debug},
@@ -128,39 +129,42 @@ impl LovenseDongleHardware {
     let address_clone = address.to_owned();
     let (device_event_sender, _) = broadcast::channel(256);
     let device_event_sender_clone = device_event_sender.clone();
-    async_manager::spawn(async move {
-      while let Some(msg) = device_incoming.recv().await {
-        if msg.func != LovenseDongleMessageFunc::ToyData {
-          continue;
+    async_manager::spawn(
+      async move {
+        while let Some(msg) = device_incoming.recv().await {
+          if msg.func != LovenseDongleMessageFunc::ToyData {
+            continue;
+          }
+          let data_str = msg
+            .data
+            .expect("USB format shouldn't change")
+            .data
+            .expect("USB format shouldn't change");
+          if device_event_sender_clone
+            .send(HardwareEvent::Notification(
+              address_clone.clone(),
+              Endpoint::Rx,
+              data_str.into_bytes(),
+            ))
+            .is_err()
+          {
+            // This sometimes happens with the serial dongle, not sure why. I
+            // think it may have to do some sort of connection timing. It seems
+            // like we can continue through it and be fine? Who knows. God I
+            // hate the lovense dongle.
+            error!("Can't send to device event sender, continuing Lovense dongle loop.");
+          }
         }
-        let data_str = msg
-          .data
-          .expect("USB format shouldn't change")
-          .data
-          .expect("USB format shouldn't change");
+        info!("Lovense dongle device disconnected",);
         if device_event_sender_clone
-          .send(HardwareEvent::Notification(
-            address_clone.clone(),
-            Endpoint::Rx,
-            data_str.into_bytes(),
-          ))
+          .send(HardwareEvent::Disconnected(address_clone.clone()))
           .is_err()
         {
-          // This sometimes happens with the serial dongle, not sure why. I
-          // think it may have to do some sort of connection timing. It seems
-          // like we can continue through it and be fine? Who knows. God I
-          // hate the lovense dongle.
-          error!("Can't send to device event sender, continuing Lovense dongle loop.");
+          error!("Device Manager no longer alive, cannot send removed event.");
         }
-      }
-      info!("Lovense dongle device disconnected",);
-      if device_event_sender_clone
-        .send(HardwareEvent::Disconnected(address_clone.clone()))
-        .is_err()
-      {
-        error!("Device Manager no longer alive, cannot send removed event.");
-      }
-    });
+      },
+      info_span!("LovenseDongleHardware::device_incoming_loop").or_current(),
+    );
     Self {
       address: address.to_owned(),
       device_outgoing,

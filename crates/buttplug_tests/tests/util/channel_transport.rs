@@ -51,6 +51,7 @@ use tokio::sync::{
   Notify,
   mpsc::{Receiver, Sender, channel},
 };
+use tracing::info_span;
 
 struct ChannelTransport {
   outside_receiver: Arc<Mutex<Option<Receiver<ButtplugTransportIncomingMessage>>>>,
@@ -80,37 +81,40 @@ impl ButtplugConnectorTransport for ChannelTransport {
     let disconnect_notifier = self.disconnect_notifier.clone();
     let outside_sender = self.outside_sender.clone();
     let outside_receiver_mutex = self.outside_receiver.clone();
-    async_manager::spawn(async move {
-      let mut outside_receiver = outside_receiver_mutex
-        .lock()
-        .await
-        .take()
-        .expect("Test, assuming infallible");
-      loop {
-        select! {
-          _ = disconnect_notifier.notified().fuse() => {
-            info!("Test requested disconnect.");
-            return;
-          }
-          outgoing = outgoing_receiver.recv().fuse() => {
-            if let Some(o) = outgoing {
-              outside_sender.send(o).await.expect("Test, assuming infallible");
-            } else {
-              info!("Test dropped stream, returning");
+    async_manager::spawn(
+      async move {
+        let mut outside_receiver = outside_receiver_mutex
+          .lock()
+          .await
+          .take()
+          .expect("Test, assuming infallible");
+        loop {
+          select! {
+            _ = disconnect_notifier.notified().fuse() => {
+              info!("Test requested disconnect.");
               return;
             }
-          }
-          incoming = outside_receiver.recv().fuse() => {
-            if let Some(i) = incoming {
-              incoming_sender.send(i).await.expect("Test, assuming infallible");
-            } else {
-              info!("Test dropped stream, returning");
-              return;
+            outgoing = outgoing_receiver.recv().fuse() => {
+              if let Some(o) = outgoing {
+                outside_sender.send(o).await.expect("Test, assuming infallible");
+              } else {
+                info!("Test dropped stream, returning");
+                return;
+              }
             }
-          }
-        };
-      }
-    });
+            incoming = outside_receiver.recv().fuse() => {
+              if let Some(i) = incoming {
+                incoming_sender.send(i).await.expect("Test, assuming infallible");
+              } else {
+                info!("Test dropped stream, returning");
+                return;
+              }
+            }
+          };
+        }
+      },
+      info_span!("ChannelTransport::connect_loop").or_current(),
+    );
     future::ready(Ok(())).boxed()
   }
 
@@ -191,12 +195,15 @@ impl ChannelClientTestHelper {
       .expect("Test, assuming infallible");
     let finish_notifier = Arc::new(Notify::new());
     let finish_notifier_clone = finish_notifier.clone();
-    async_manager::spawn(async move {
-      if let Err(e) = client_clone.connect(connector).await {
-        assert!(false, "Error connecting to client: {:?}", e);
-      }
-      finish_notifier_clone.notify_waiters();
-    });
+    async_manager::spawn(
+      async move {
+        if let Err(e) = client_clone.connect(connector).await {
+          assert!(false, "Error connecting to client: {:?}", e);
+        }
+        finish_notifier_clone.notify_waiters();
+      },
+      info_span!("ChannelClientTestHelper::simulate_successful_connect").or_current(),
+    );
     // Wait for RequestServerInfo message
     assert!(matches!(
       self.next_client_message().await,

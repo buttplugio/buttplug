@@ -24,6 +24,7 @@ use tokio::{
     mpsc::{Receiver, Sender},
   },
 };
+use tracing::info_span;
 
 pub struct ChannelTransport {
   external_sender: Sender<ButtplugSerializedMessage>,
@@ -78,7 +79,7 @@ impl ButtplugConnectorTransport for ChannelTransport {
             }
           };
         }
-      });
+      }, info_span!("ChannelTransport::message_loop").or_current());
       Ok(())
     }
     .boxed()

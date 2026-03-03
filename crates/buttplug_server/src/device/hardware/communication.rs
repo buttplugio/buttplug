@@ -8,7 +8,7 @@
 use crate::device::hardware::HardwareConnector;
 use async_trait::async_trait;
 use buttplug_core::{
-  util::{async_manager, sleep},
+  util::async_manager,
   {ButtplugResultFuture, errors::ButtplugDeviceError},
 };
 use futures::future::{self, FutureExt};
@@ -17,6 +17,7 @@ use std::{sync::Arc, time::Duration};
 use thiserror::Error;
 use tokio::sync::mpsc::Sender;
 use tokio_util::sync::CancellationToken;
+use tracing::info_span;
 
 #[derive(Debug)]
 pub enum HardwareCommunicationManagerEvent {
@@ -95,18 +96,21 @@ impl<T: TimedRetryCommunicationManagerImpl> HardwareCommunicationManager
     self.cancellation_token = Some(token);
     let duration = self.comm_manager.rescan_wait_duration();
     async move {
-      async_manager::spawn(async move {
-        loop {
-          if let Err(err) = comm_manager.scan().await {
-            error!("Timed Device Communication Manager Failure: {}", err);
-            break;
+      async_manager::spawn(
+        async move {
+          loop {
+            if let Err(err) = comm_manager.scan().await {
+              error!("Timed Device Communication Manager Failure: {}", err);
+              break;
+            }
+            tokio::select! {
+              _ = async_manager::sleep(duration) => continue,
+              _ = child_token.cancelled() => break,
+            }
           }
-          tokio::select! {
-            _ = sleep(duration) => continue,
-            _ = child_token.cancelled() => break,
-          }
-        }
-      });
+        },
+        info_span!("TimedRetryCommunicationManagerScanLoop").or_current(),
+      );
       Ok(())
     }
     .boxed()

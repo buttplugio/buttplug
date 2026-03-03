@@ -33,6 +33,7 @@ use std::{
 };
 use tokio::sync::broadcast;
 use tokio_util::sync::CancellationToken;
+use tracing::info_span;
 
 pub(super) fn create_address(index: XInputControllerIndex) -> String {
   index.to_string()
@@ -55,7 +56,7 @@ async fn check_gamepad_connectivity(
     }
     tokio::select! {
       _ = cancellation_token.cancelled() => return,
-      _ = tokio::time::sleep(Duration::from_millis(500)) => continue
+      _ = async_manager::sleep(Duration::from_millis(500)) => continue
     }
   }
 }
@@ -113,9 +114,12 @@ impl XInputHardware {
     let token = CancellationToken::new();
     let child = token.child_token();
     let sender = device_event_sender.clone();
-    async_manager::spawn(async move {
-      check_gamepad_connectivity(index, sender, child).await;
-    });
+    async_manager::spawn(
+      async move {
+        check_gamepad_connectivity(index, sender, child).await;
+      },
+      info_span!("XInputHardware::check_gamepad_connectivity").or_current(),
+    );
     Self {
       handle: rusty_xinput::XInputHandle::load_default().expect("The DLL should load as long as we're on windows, and we don't get here if we're not on windows."),
       index,

@@ -18,6 +18,7 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
 };
 use tokio::sync::mpsc::{Sender, channel};
+use tracing::info_span;
 
 #[derive(Default, Clone)]
 pub struct BtlePlugCommunicationManagerBuilder {
@@ -57,15 +58,18 @@ impl BtlePlugCommunicationManager {
     let (sender, receiver) = channel(256);
     let adapter_connected = Arc::new(AtomicBool::new(false));
     let adapter_connected_clone = adapter_connected.clone();
-    async_manager::spawn(async move {
-      let mut task = BtleplugAdapterTask::new(
-        event_sender,
-        receiver,
-        adapter_connected_clone,
-        require_keepalive,
-      );
-      task.run().await;
-    });
+    async_manager::spawn(
+      async move {
+        let mut task = BtleplugAdapterTask::new(
+          event_sender,
+          receiver,
+          adapter_connected_clone,
+          require_keepalive,
+        );
+        task.run().await;
+      },
+      info_span!("BtlePlugCommunicationManager::adapter_task").or_current(),
+    );
     Self {
       adapter_event_sender: sender,
       scanning_status: Arc::new(AtomicBool::new(false)),

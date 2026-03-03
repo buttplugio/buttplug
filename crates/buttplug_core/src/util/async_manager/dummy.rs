@@ -5,31 +5,29 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use futures::{
-  future::{Future, RemoteHandle},
-  task::{FutureObj, Spawn, SpawnError},
-};
+use async_trait::async_trait;
+use futures::task::FutureObj;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct DummyAsyncManager {}
 
-impl Spawn for DummyAsyncManager {
-  fn spawn_obj(&self, _: FutureObj<'static, ()>) -> Result<(), SpawnError> {
-    unimplemented!("Dummy executor can't actually spawn!")
+#[async_trait]
+impl super::AsyncManager for DummyAsyncManager {
+  fn spawn(&self, _future: FutureObj<'static, ()>) {
+    unimplemented!(
+      "No async runtime available. Please set a global async manager using set_global_async_manager or enable tokio-runtime or wasm feature"
+    );
   }
-}
 
-pub fn spawn<Fut>(_: Fut)
-where
-  Fut: Future<Output = ()> + Send + 'static,
-{
-  unimplemented!("Dummy executor can't actually spawn!")
-}
+  async fn sleep(&self, _duration: std::time::Duration) {
+    unimplemented!(
+      "No async runtime available. Please set a global async manager using set_global_async_manager or enable tokio-runtime or wasm feature"
+    );
+  }
 
-pub fn spawn_with_handle<Fut>(_: Fut) -> Result<RemoteHandle<Fut::Output>, SpawnError>
-where
-  Fut: Future + Send + 'static,
-  Fut::Output: Send,
-{
-  unimplemented!("Dummy executor can't actually spawn!")
+  async fn sleep_until(&self, _deadline: std::time::Instant) {
+    unimplemented!(
+      "No async runtime available. Please set a global async manager using set_global_async_manager or enable tokio-runtime or wasm feature"
+    );
+  }
 }

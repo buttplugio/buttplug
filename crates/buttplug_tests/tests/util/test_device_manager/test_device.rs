@@ -32,6 +32,7 @@ use std::{
   time::Duration,
 };
 use tokio::sync::{Mutex, broadcast, mpsc};
+use tracing::info_span;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TestHardwareNotification {
@@ -175,36 +176,39 @@ impl TestDevice {
     let subscribed_endpoints_clone = subscribed_endpoints.clone();
     let read_data = Arc::new(Mutex::new(VecDeque::new()));
     let read_data_clone = read_data.clone();
-    async_manager::spawn(async move {
-      while let Some(event) = receiver.recv().await {
-        match event {
-          TestHardwareEvent::Disconnect => {
-            event_sender_clone
-              .send(HardwareEvent::Disconnected(address_clone.clone()))
-              .expect("Test");
-          }
-          TestHardwareEvent::Notifications(notifications) => {
-            for notification in notifications {
-              if subscribed_endpoints_clone.contains(&notification.endpoint) {
-                event_sender_clone
-                  .send(HardwareEvent::Notification(
-                    address_clone.clone(),
-                    notification.endpoint,
-                    notification.data.clone(),
-                  ))
-                  .expect("Test");
+    async_manager::spawn(
+      async move {
+        while let Some(event) = receiver.recv().await {
+          match event {
+            TestHardwareEvent::Disconnect => {
+              event_sender_clone
+                .send(HardwareEvent::Disconnected(address_clone.clone()))
+                .expect("Test");
+            }
+            TestHardwareEvent::Notifications(notifications) => {
+              for notification in notifications {
+                if subscribed_endpoints_clone.contains(&notification.endpoint) {
+                  event_sender_clone
+                    .send(HardwareEvent::Notification(
+                      address_clone.clone(),
+                      notification.endpoint,
+                      notification.data.clone(),
+                    ))
+                    .expect("Test");
+                }
+              }
+            }
+            TestHardwareEvent::Reads(events) => {
+              let mut guard = read_data_clone.lock().await;
+              for read in events {
+                guard.push_front(HardwareReading::new(read.endpoint, &read.data));
               }
             }
           }
-          TestHardwareEvent::Reads(events) => {
-            let mut guard = read_data_clone.lock().await;
-            for read in events {
-              guard.push_front(HardwareReading::new(read.endpoint, &read.data));
-            }
-          }
         }
-      }
-    });
+      },
+      info_span!("TestDevice::command_loop").or_current(),
+    );
 
     Self {
       name: name.to_owned(),

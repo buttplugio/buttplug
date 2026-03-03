@@ -44,6 +44,7 @@ use std::{
   time::Duration,
 };
 use tokio::{select, sync::broadcast};
+use tracing::info_span;
 use uuid::Uuid;
 
 pub(super) struct BtleplugHardwareConnector<T: Peripheral + 'static> {
@@ -243,70 +244,73 @@ impl<T: Peripheral + 'static> BtlePlugHardware<T> {
     let event_stream_clone = event_stream.clone();
     let address = device.id();
     let name_clone = name.to_owned();
-    async_manager::spawn(async move {
-      let mut error_notification = false;
-      loop {
-        select! {
-          notification = notification_stream.next() => {
-            if let Some(notification) = notification {
-              let endpoint = if let Some(endpoint) = uuid_map.get(&notification.uuid) {
-                *endpoint
-              } else {
-                // Only print the error message once.
-                if !error_notification {
-                  error!(
-                    "Endpoint for UUID {} not found in map, assuming device has disconnected.",
-                    notification.uuid
-                  );
-                  error_notification = true;
+    async_manager::spawn(
+      async move {
+        let mut error_notification = false;
+        loop {
+          select! {
+            notification = notification_stream.next() => {
+              if let Some(notification) = notification {
+                let endpoint = if let Some(endpoint) = uuid_map.get(&notification.uuid) {
+                  *endpoint
+                } else {
+                  // Only print the error message once.
+                  if !error_notification {
+                    error!(
+                      "Endpoint for UUID {} not found in map, assuming device has disconnected.",
+                      notification.uuid
+                    );
+                    error_notification = true;
+                  }
+                  continue;
+                };
+                if event_stream_clone.receiver_count() == 0 {
+                  continue;
                 }
-                continue;
-              };
-              if event_stream_clone.receiver_count() == 0 {
-                continue;
-              }
-              if let Err(err) = event_stream_clone.send(HardwareEvent::Notification(
-                format!("{address:?}"),
-                endpoint,
-                notification.value,
-              )) {
-                error!(
-                  "Cannot send notification, device object disappeared: {:?}",
-                  err
-                );
-                break;
+                if let Err(err) = event_stream_clone.send(HardwareEvent::Notification(
+                  format!("{address:?}"),
+                  endpoint,
+                  notification.value,
+                )) {
+                  error!(
+                    "Cannot send notification, device object disappeared: {:?}",
+                    err
+                  );
+                  break;
+                }
               }
             }
-          }
-          adapter_event = adapter_event_stream.next() => {
-            if let Some(CentralEvent::DeviceDisconnected(addr)) = adapter_event
-              && address == addr {
-                info!(
-                  "Device {:?} disconnected",
-                  name_clone
-                );
-                if event_stream_clone.receiver_count() != 0
-                  && let Err(err) = event_stream_clone
-                  .send(HardwareEvent::Disconnected(
-                    format!("{address:?}")
-                  )) {
-                    error!(
-                      "Cannot send notification, device object disappeared: {:?}",
-                      err
-                    );
-                  }
-                // At this point, we have nothing left to do because we can't reconnect a device
-                // that's been connected. Exit.
-                break;
-              }
+            adapter_event = adapter_event_stream.next() => {
+              if let Some(CentralEvent::DeviceDisconnected(addr)) = adapter_event
+                && address == addr {
+                  info!(
+                    "Device {:?} disconnected",
+                    name_clone
+                  );
+                  if event_stream_clone.receiver_count() != 0
+                    && let Err(err) = event_stream_clone
+                    .send(HardwareEvent::Disconnected(
+                      format!("{address:?}")
+                    )) {
+                      error!(
+                        "Cannot send notification, device object disappeared: {:?}",
+                        err
+                      );
+                    }
+                  // At this point, we have nothing left to do because we can't reconnect a device
+                  // that's been connected. Exit.
+                  break;
+                }
+            }
           }
         }
-      }
-      info!(
-        "Exiting btleplug notification/event loop for device {:?}",
-        address
-      )
-    });
+        info!(
+          "Exiting btleplug notification/event loop for device {:?}",
+          address
+        )
+      },
+      info_span!("BtlePlugHardware::event_loop").or_current(),
+    );
     Self {
       device,
       endpoints,
@@ -517,10 +521,13 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
 impl<T: Peripheral> Drop for BtlePlugHardware<T> {
   fn drop(&mut self) {
     let disconnect_fut = self.disconnect();
-    async_manager::spawn(async move {
-      if let Err(e) = disconnect_fut.await {
-        error!("Error disconnecting btleplug device: {:?}", e);
-      }
-    });
+    async_manager::spawn(
+      async move {
+        if let Err(e) = disconnect_fut.await {
+          error!("Error disconnecting btleplug device: {:?}", e);
+        }
+      },
+      info_span!("BtlePlugHardware::drop").or_current(),
+    );
   }
 }

@@ -22,6 +22,7 @@ use buttplug_server_device_config::{
   ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
+use tracing::info_span;
 use std::{
   sync::{
     Arc,
@@ -263,36 +264,39 @@ impl NintendoJoycon {
     let notifier_clone = notifier.clone();
     let is_stopped = Arc::new(AtomicBool::new(false));
     let is_stopped_clone = is_stopped.clone();
-    async_manager::spawn(async move {
-      #[cfg(feature = "wasm")]
-      use buttplug_core::util;
-      loop {
-        if is_stopped_clone.load(Ordering::Relaxed) {
-          return;
-        }
-        let amp = speed_val_clone.load(Ordering::Relaxed) as f32 / 1000f32;
-        let rumble = if amp > 0.001 {
-          Rumble::new(200.0f32, amp)
-        } else {
-          Rumble::stop()
-        };
-
-        if let Err(_) =
-          send_command_raw(hardware.clone(), 1, 16, 0, &[], Some(rumble), Some(rumble)).await
-        {
-          error!("Joycon command failed, exiting update loop");
-          break;
-        }
-        #[cfg(not(feature = "wasm"))]
-        let _ = tokio::time::timeout(Duration::from_millis(15), notifier_clone.notified()).await;
-
-        // If we're using WASM, we can't use tokio's timeout due to lack of time library in WASM.
-        // I'm also too lazy to make this a select. So, this'll do. We can't even access this
-        // protocol in a web context yet since there's no WebHID comm manager yet.
+    async_manager::spawn(
+      async move {
         #[cfg(feature = "wasm")]
-        util::sleep(Duration::from_millis(15)).await;
-      }
-    });
+        use buttplug_core::util;
+        loop {
+          if is_stopped_clone.load(Ordering::Relaxed) {
+            return;
+          }
+          let amp = speed_val_clone.load(Ordering::Relaxed) as f32 / 1000f32;
+          let rumble = if amp > 0.001 {
+            Rumble::new(200.0f32, amp)
+          } else {
+            Rumble::stop()
+          };
+
+          if let Err(_) =
+            send_command_raw(hardware.clone(), 1, 16, 0, &[], Some(rumble), Some(rumble)).await
+          {
+            error!("Joycon command failed, exiting update loop");
+            break;
+          }
+          #[cfg(not(feature = "wasm"))]
+          let _ = tokio::time::timeout(Duration::from_millis(15), notifier_clone.notified()).await;
+
+          // If we're using WASM, we can't use tokio's timeout due to lack of time library in WASM.
+          // I'm also too lazy to make this a select. So, this'll do. We can't even access this
+          // protocol in a web context yet since there's no WebHID comm manager yet.
+          #[cfg(feature = "wasm")]
+          async_manager::sleep(Duration::from_millis(15)).await;
+        }
+      },
+      info_span!("NintendoJoyconControlLoop").or_current(),
+    );
     Self {
       //packet_number: Arc::new(AtomicU8::new(0)),
       speed_val,

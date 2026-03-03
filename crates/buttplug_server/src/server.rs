@@ -43,15 +43,11 @@ use futures::{
 };
 use std::{
   fmt,
-  sync::{
-    Arc,
-    RwLock,
-  },
+  sync::{Arc, RwLock},
 };
 use tokio::sync::broadcast;
 use tokio_stream::StreamExt;
-use tracing::info_span;
-use tracing_futures::Instrument;
+use tracing::{Instrument, info_span};
 
 /// Connection state for the ButtplugServer.
 /// Replaces separate connected/client_name/spec_version fields with explicit states.
@@ -215,9 +211,8 @@ impl ButtplugServer {
     let stop_scanning_fut = self.parse_checked_message(
       ButtplugCheckedClientMessageV4::StopScanning(StopScanningV0::default()),
     );
-    let stop_fut = self.parse_checked_message(ButtplugCheckedClientMessageV4::StopCmd(
-      StopCmdV4::default(),
-    ));
+    let stop_fut =
+      self.parse_checked_message(ButtplugCheckedClientMessageV4::StopCmd(StopCmdV4::default()));
     let state = self.state.clone();
     async move {
       {
@@ -255,7 +250,7 @@ impl ButtplugServer {
       current_version
     } else {
       info!("Setting Buttplug Server Message Spec version to {}", v);
-      v    
+      v
     };
     match msg {
       ButtplugClientMessageVariant::V4(msg) => {

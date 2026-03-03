@@ -24,6 +24,7 @@ use client::{ButtplugClient, ButtplugClientEvent};
 use device::{ButtplugClientDevice, LinearCommand, RotateCommand, VibrateCommand};
 use in_process_connector::ButtplugInProcessClientConnectorBuilder;
 use tokio::sync::Notify;
+use tracing::info_span;
 
 use super::super::{
   super::TestDeviceCommunicationManagerBuilder,
@@ -78,10 +79,13 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
         // their notification endpoint. This is a mess but it does the job.
         let device = device.clone();
         let expected_power = *expected_power;
-        async_manager::spawn(async move {
-          let battery_level = device.battery_level().await.unwrap();
-          assert_eq!(battery_level, expected_power);
-        });
+        async_manager::spawn(
+          async move {
+            let battery_level = device.battery_level().await.unwrap();
+            assert_eq!(battery_level, expected_power);
+          },
+          info_span!("BatteryLevelCheck").or_current(),
+        );
       } else {
         assert_eq!(device.battery_level().await.unwrap(), *expected_power);
       }
@@ -170,12 +174,15 @@ pub async fn run_json_test_case(test_case: &DeviceTestCase) {
 
   let (server, device_channels) = build_server(test_case);
   let remote_server = ButtplugTestServer::new(server);
-  async_manager::spawn(async move {
-    remote_server
-      .start(server_connector)
-      .await
-      .expect("Should always succeed");
-  });
+  async_manager::spawn(
+    async move {
+      remote_server
+        .start(server_connector)
+        .await
+        .expect("Should always succeed");
+    },
+    info_span!("RemoteServer").or_current(),
+  );
 
   // Connect client
   let (client, receiver) = ButtplugClient::new("Test Client");

@@ -44,6 +44,7 @@ use futures::{
   future::{self, FutureExt},
 };
 use getset::Getters;
+use tracing::info_span;
 use std::{
   collections::BTreeMap,
   convert::TryFrom,
@@ -160,7 +161,7 @@ impl ServerDeviceManagerBuilder {
     );
     async_manager::spawn(async move {
       event_loop.run().await;
-    });
+    }, info_span!("ServerDeviceManagerEventLoop").or_current());
     Ok(ServerDeviceManager {
       device_configuration_manager: self.device_configuration_manager.clone(),
       devices,

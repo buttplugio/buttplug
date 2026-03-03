@@ -7,22 +7,24 @@
 
 use async_trait::async_trait;
 use futures::task::FutureObj;
-use tracing::{Instrument, Span};
+
+use wasm_bindgen_futures::spawn_local;
+use wasm_timer::tokio::{sleep, sleep_until};
 
 #[derive(Default, Debug)]
-pub struct TokioAsyncManager {}
+pub struct WasmAsyncManager {}
 
 #[async_trait]
-impl super::AsyncManager for TokioAsyncManager {
-  fn spawn(&self, future: FutureObj<'static, ()>, span: Span) {
-    tokio::task::spawn(future.instrument(span));
+impl super::AsyncManager for WasmAsyncManager {
+  fn spawn(&self, future: FutureObj<'static, ()>) {
+    spawn_local(future);
   }
 
   async fn sleep(&self, duration: std::time::Duration) {
-    tokio::time::sleep(duration).await;
+    sleep(duration).await;
   }
 
   async fn sleep_until(&self, deadline: std::time::Instant) {
-    tokio::time::sleep_until(deadline.into()).await;
+    sleep_until(deadline).await;
   }
 }

@@ -29,7 +29,7 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
 };
 use tokio::sync::mpsc::{Sender, channel};
-use tracing_futures::Instrument;
+use tracing::info_span;
 
 #[derive(Default)]
 pub struct ButtplugInProcessClientConnectorBuilder {
@@ -116,21 +116,24 @@ impl ButtplugConnector<ButtplugClientMessageV4, ButtplugServerMessageV4>
       self.server_outbound_sender = message_sender;
       let server_recv = self.server.server_version_event_stream();
       async move {
-        async_manager::spawn(async move {
-          info!("Starting In Process Client Connector Event Sender Loop");
-          pin_mut!(server_recv);
-          while let Some(event) = server_recv.next().await {
-            // If we get an error back, it means the client dropped our event
-            // handler, so just stop trying. Otherwise, since this is an
-            // in-process conversion, we can unwrap because we know our
-            // try_into() will always succeed (which may not be the case with
-            // remote connections that have different spec versions).
-            if send.send(event).await.is_err() {
-              break;
+        async_manager::spawn(
+          async move {
+            info!("Starting In Process Client Connector Event Sender Loop");
+            pin_mut!(server_recv);
+            while let Some(event) = server_recv.next().await {
+              // If we get an error back, it means the client dropped our event
+              // handler, so just stop trying. Otherwise, since this is an
+              // in-process conversion, we can unwrap because we know our
+              // try_into() will always succeed (which may not be the case with
+              // remote connections that have different spec versions).
+              if send.send(event).await.is_err() {
+                break;
+              }
             }
-          }
-          info!("Stopping In Process Client Connector Event Sender Loop, due to channel receiver being dropped.");
-        }.instrument(tracing::info_span!("InProcessClientConnectorEventSenderLoop")));
+            info!("Stopping In Process Client Connector Event Sender Loop, due to channel receiver being dropped.");
+          },
+          info_span!("InProcessClientConnectorEventSenderLoop").or_current()
+        );
         connected.store(true, Ordering::Relaxed);
         Ok(())
       }.boxed()

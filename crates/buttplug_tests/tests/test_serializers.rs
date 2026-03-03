@@ -29,6 +29,7 @@ use buttplug_server::message::{
 };
 use std::sync::Arc;
 use tokio::sync::Notify;
+use tracing::info_span;
 use util::channel_transport::ChannelClientTestHelper;
 
 #[tokio::test]
@@ -38,13 +39,16 @@ async fn test_garbled_client_rsi_response() {
   let helper_clone = helper.clone();
   let finish_notifier = Arc::new(Notify::new());
   let finish_notifier_clone = finish_notifier.clone();
-  async_manager::spawn(async move {
-    helper_clone
-      .connect_without_reply()
-      .await
-      .expect("Test, assuming infallible.");
-    finish_notifier_clone.notify_waiters();
-  });
+  async_manager::spawn(
+    async move {
+      helper_clone
+        .connect_without_reply()
+        .await
+        .expect("Test, assuming infallible.");
+      finish_notifier_clone.notify_waiters();
+    },
+    info_span!("ChannelClientTestHelper::simulate_successful_connect").or_current(),
+  );
   // Just assume we get an RSI message
   let _ = helper.recv_outgoing().await;
   // Send back crap.
@@ -72,19 +76,22 @@ async fn test_serialized_error_relay() {
   let helper = Arc::new(ChannelClientTestHelper::new());
   helper.simulate_successful_connect().await;
   let helper_clone = helper.clone();
-  async_manager::spawn(async move {
-    assert!(matches!(
-      helper_clone.next_client_message().await,
-      ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::StartScanning(..))
-    ));
-    let mut error_msg = ButtplugServerMessageV4::Error(ErrorV0::from(ButtplugError::from(
-      ButtplugUnknownError::NoDeviceCommManagers,
-    )));
-    error_msg.set_id(3);
-    helper_clone
-      .send_client_incoming(ButtplugServerMessageVariant::V4(error_msg))
-      .await;
-  });
+  async_manager::spawn(
+    async move {
+      assert!(matches!(
+        helper_clone.next_client_message().await,
+        ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::StartScanning(..))
+      ));
+      let mut error_msg = ButtplugServerMessageV4::Error(ErrorV0::from(ButtplugError::from(
+        ButtplugUnknownError::NoDeviceCommManagers,
+      )));
+      error_msg.set_id(3);
+      helper_clone
+        .send_client_incoming(ButtplugServerMessageVariant::V4(error_msg))
+        .await;
+    },
+    info_span!("test_serialized_error_relay::client_message_sender").or_current(),
+  );
   assert!(matches!(
     helper.client().start_scanning().await.unwrap_err(),
     ButtplugClientError::ButtplugError(ButtplugError::ButtplugUnknownError(

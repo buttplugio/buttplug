@@ -20,7 +20,6 @@ use buttplug_core::{
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
-use futures::channel::oneshot;
 use buttplug_server::message::{
   ButtplugClientMessageV2,
   ButtplugServerMessageV2,
@@ -28,6 +27,7 @@ use buttplug_server::message::{
   StopAllDevicesV0,
 };
 use dashmap::DashMap;
+use futures::channel::oneshot;
 use futures::{
   Stream,
   future::{self, BoxFuture},
@@ -39,7 +39,7 @@ use std::sync::{
 };
 use thiserror::Error;
 use tokio::sync::{Mutex, broadcast, mpsc, mpsc::error::SendError};
-use tracing::{Level, Span, span};
+use tracing::{Level, Span, info_span, span};
 use tracing_futures::Instrument;
 
 /// Result type used for public APIs.
@@ -168,15 +168,18 @@ impl ButtplugClient {
   pub fn new(name: &str) -> (Self, mpsc::Receiver<ButtplugClientRequest>) {
     let (message_sender, message_receiver) = mpsc::channel(256);
     let (event_stream, _) = broadcast::channel(256);
-    (Self {
-      client_name: name.to_owned(),
-      server_name: Arc::new(Mutex::new(None)),
-      event_stream,
-      message_sender,
-      _client_span: Arc::new(Mutex::new(None)),
-      connected: Arc::new(AtomicBool::new(false)),
-      device_map: Arc::new(DashMap::new()),
-    }, message_receiver)
+    (
+      Self {
+        client_name: name.to_owned(),
+        server_name: Arc::new(Mutex::new(None)),
+        event_stream,
+        message_sender,
+        _client_span: Arc::new(Mutex::new(None)),
+        connected: Arc::new(AtomicBool::new(false)),
+        device_map: Arc::new(DashMap::new()),
+      },
+      message_receiver,
+    )
   }
 
   pub async fn connect<ConnectorType>(
@@ -220,8 +223,8 @@ impl ButtplugClient {
     async_manager::spawn(
       async move {
         client_event_loop.run().await;
-      }
-      .instrument(tracing::info_span!("Client Loop Span")),
+      },
+      info_span!("ClientLoop").or_current(),
     );
     self.run_handshake().await
   }
