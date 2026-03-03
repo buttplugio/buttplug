@@ -39,6 +39,7 @@ fn main() {
   // Open version file
   let mut version: VersionFile =
     serde_yaml::from_str(&std::fs::read_to_string(VERSION_FILE).unwrap()).unwrap();
+  save_rust_version_file(version.version);
   // Bump minor version
   version.version.minor += 1;
 
@@ -86,4 +87,15 @@ fn main() {
   )
   .unwrap();
   std::fs::write(OUTPUT_FILE, json.as_bytes()).unwrap();
+  save_rust_version_file(version.version);
+}
+
+fn save_rust_version_file(version: BuildVersion) {
+  std::fs::write(
+    format!("{}/version.rs", std::env::var("OUT_DIR").unwrap()),
+    format!(
+      "fn get_internal_config_version() -> ConfigVersion {{ ConfigVersion {{ major: {}, minor: {} }} }}",
+      version.major, version.minor
+    ),
+  ).unwrap();
 }

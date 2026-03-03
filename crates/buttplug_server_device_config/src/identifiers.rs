@@ -55,8 +55,11 @@ impl BaseDeviceIdentifier {
     Self::new(protocol, &None)
   }
 
-  pub fn new_with_identifier(protocol: &str, attributes_identifier: &str) -> Self {
-    Self::new(protocol, &Some(attributes_identifier.to_owned()))
+  pub fn new_with_identifier(protocol: &str, attributes_identifier: String) -> Self {
+    Self {
+      protocol: protocol.to_owned(),
+      identifier: Some(attributes_identifier),
+    }
   }
 
   pub fn new(protocol: &str, attributes_identifier: &Option<String>) -> Self {

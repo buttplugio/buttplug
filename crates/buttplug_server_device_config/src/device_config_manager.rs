@@ -32,6 +32,17 @@ pub struct DeviceConfigurationManagerBuilder {
 }
 
 impl DeviceConfigurationManagerBuilder {
+  pub fn new(
+    base_communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
+    base_device_definitions: HashMap<BaseDeviceIdentifier, ServerDeviceDefinition>,
+  ) -> Self {
+    Self {
+      base_communication_specifiers,
+      base_device_definitions,
+      ..Default::default()
+    }
+  }
+
   pub fn communication_specifier(
     &mut self,
     protocol_name: &str,
@@ -95,27 +106,12 @@ impl DeviceConfigurationManagerBuilder {
     }
   }
 
-  pub fn finish(&mut self) -> Result<DeviceConfigurationManager, ButtplugDeviceError> {
-    // Build and validate the protocol attributes tree.
-    let mut attribute_tree_map = HashMap::new();
-
-    // Add all the defaults first, they won't have parent attributes.
-    for (ident, attr) in &self.base_device_definitions {
-      attribute_tree_map.insert(ident.clone(), attr.clone());
-    }
-
-    let user_attribute_tree_map = DashMap::new();
-    // Finally, add in user configurations, which will have an address.
-    for kv in &self.user_device_definitions {
-      user_attribute_tree_map.insert(kv.key().clone(), kv.value().clone());
-    }
-
+  pub fn finish(self) -> Result<DeviceConfigurationManager, ButtplugDeviceError> {
     Ok(DeviceConfigurationManager {
-      base_communication_specifiers: self.base_communication_specifiers.clone(),
-      user_communication_specifiers: self.user_communication_specifiers.clone(),
-      base_device_definitions: attribute_tree_map,
-      user_device_definitions: user_attribute_tree_map,
-      //protocol_map,
+      base_communication_specifiers: self.base_communication_specifiers,
+      user_communication_specifiers: self.user_communication_specifiers,
+      base_device_definitions: self.base_device_definitions,
+      user_device_definitions: self.user_device_definitions,
     })
   }
 }

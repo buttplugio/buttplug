@@ -13,9 +13,12 @@ mod user;
 
 use base::BaseConfigFile;
 
-use crate::device_config_file::{
-  protocol::ProtocolDefinition,
-  user::{UserConfigDefinition, UserConfigFile, UserDeviceConfigPair},
+use crate::{
+  ServerDeviceDefinition,
+  device_config_file::{
+    protocol::ProtocolDefinition,
+    user::{UserConfigDefinition, UserConfigFile, UserDeviceConfigPair},
+  },
 };
 
 use super::{BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder};
@@ -25,13 +28,15 @@ use buttplug_core::{
 };
 use dashmap::DashMap;
 use getset::CopyGetters;
-use serde::{Deserialize, Serialize};
-use std::fmt::Display;
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
+use std::{collections::HashMap, fmt::Display};
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../build-config/buttplug-device-config-v4.json");
 static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
   include_str!("../../device-config-v4/buttplug-device-config-schema-v4.json");
+
+include!(concat!(env!("OUT_DIR"), "/version.rs"));
 
 #[derive(Deserialize, Serialize, Debug, CopyGetters, Clone, Copy)]
 #[getset(get_copy = "pub", get_mut = "pub")]
@@ -50,22 +55,16 @@ trait ConfigVersionGetter {
   fn version(&self) -> ConfigVersion;
 }
 
-fn get_internal_config_version() -> ConfigVersion {
-  let config: BaseConfigFile = serde_json::from_str(DEVICE_CONFIGURATION_JSON)
-    .expect("If this fails, the whole library goes with it.");
-  config.version()
-}
-
 fn load_protocol_config_from_json<'a, T>(
   config_str: &'a str,
   skip_version_check: bool,
 ) -> Result<T, ButtplugDeviceError>
 where
-  T: ConfigVersionGetter + Deserialize<'a>,
+  T: ConfigVersionGetter + DeserializeOwned,
 {
   let config_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
   match config_validator.validate(config_str) {
-    Ok(_) => match serde_json::from_str::<T>(config_str) {
+    Ok(value) => match serde_json::from_value::<T>(value) {
       Ok(protocol_config) => {
         let internal_config_version = get_internal_config_version();
         if !skip_version_check && protocol_config.version().major != internal_config_version.major {
@@ -92,53 +91,54 @@ fn load_main_config(
   main_config_str: &Option<String>,
   skip_version_check: bool,
 ) -> Result<DeviceConfigurationManagerBuilder, ButtplugDeviceError> {
-  if main_config_str.is_some() {
-    info!("Loading from custom base device configuration...")
-  } else {
-    info!("Loading from internal base device configuration...")
-  }
   // Start by loading the main config
-  let main_config = load_protocol_config_from_json::<BaseConfigFile>(
-    main_config_str
-      .as_ref()
-      .unwrap_or(&DEVICE_CONFIGURATION_JSON.to_owned()),
-    skip_version_check,
-  )?;
+  let main_config_str = match main_config_str {
+    Some(config_str) => {
+      info!("Loading main configuration from string.");
+      config_str.as_str()
+    }
+    None => {
+      info!("No main configuration provided, loading from internal config.");
+      DEVICE_CONFIGURATION_JSON
+    }
+  };
+  let mut main_config =
+    load_protocol_config_from_json::<BaseConfigFile>(main_config_str, skip_version_check)?;
 
   info!("Loaded config version {:?}", main_config.version());
 
-  let mut dcm_builder = DeviceConfigurationManagerBuilder::default();
+  let protocols = main_config.protocols_mut().take().unwrap_or_default();
 
-  for (protocol_name, protocol_def) in main_config.protocols().clone().unwrap_or_default() {
-    if let Some(specifiers) = protocol_def.communication() {
-      dcm_builder.communication_specifier(&protocol_name, specifiers);
+  let mut base_communication_specifiers = HashMap::with_capacity(protocols.len());
+  let mut base_device_definitions = HashMap::new();
+
+  for (protocol_name, protocol_def) in protocols {
+    let ProtocolDefinition {
+      communication,
+      defaults,
+      configurations,
+    } = protocol_def;
+
+    if let Some(specifiers) = communication {
+      base_communication_specifiers.insert(protocol_name.clone(), specifiers);
     }
 
-    let mut default = None;
-    if let Some(features) = protocol_def.defaults() {
-      default = Some(features.clone());
-      dcm_builder.base_device_definition(
-        &BaseDeviceIdentifier::new_default(&protocol_name),
-        &features.clone().into(),
-      );
-    }
-
-    for config in protocol_def.configurations() {
-      if let Some(idents) = config.identifier() {
+    for mut config in configurations {
+      let identifier = config.identifier.take();
+      let config: ServerDeviceDefinition = config.with_defaults(defaults.as_ref()).into();
+      if let Some(idents) = identifier {
         for config_ident in idents {
           let ident = BaseDeviceIdentifier::new_with_identifier(&protocol_name, config_ident);
-          if let Some(d) = &default {
-            dcm_builder
-              .base_device_definition(&ident, &d.update_with_configuration(config.clone()).into());
-          } else {
-            dcm_builder.base_device_definition(&ident, &config.clone().into());
-          }
+          base_device_definitions.insert(ident, config.clone());
         }
       }
     }
   }
 
-  Ok(dcm_builder)
+  Ok(DeviceConfigurationManagerBuilder::new(
+    base_communication_specifiers,
+    base_device_definitions,
+  ))
 }
 
 fn load_user_config(
@@ -173,7 +173,8 @@ fn load_user_config(
     for config in protocol_def.configurations() {
       if let Some(idents) = config.identifier() {
         for config_ident in idents {
-          let ident = BaseDeviceIdentifier::new_with_identifier(&protocol_name, config_ident);
+          let ident =
+            BaseDeviceIdentifier::new_with_identifier(&protocol_name, config_ident.clone());
           dcm_builder.base_device_definition(&ident, &config.clone().into());
         }
       }
