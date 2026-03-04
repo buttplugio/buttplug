@@ -134,10 +134,6 @@ fn load_main_config(
       configurations,
     } = protocol_def;
 
-    if let Some(specifiers) = communication {
-      base_communication_specifiers.insert(protocol_name.clone(), specifiers);
-    }
-
     for mut config in configurations {
       let identifier = config.identifier.take();
       let definition: Arc<ServerDeviceDefinition> =
@@ -148,6 +144,15 @@ fn load_main_config(
           base_device_definitions.insert(ident, definition.clone());
         }
       }
+    }
+
+    if let Some(defaults) = defaults {
+      let ident = BaseDeviceIdentifier::new_default(&protocol_name);
+      base_device_definitions.insert(ident, Arc::new(defaults.into()));
+    }
+
+    if let Some(specifiers) = communication {
+      base_communication_specifiers.insert(protocol_name, specifiers);
     }
   }
 
