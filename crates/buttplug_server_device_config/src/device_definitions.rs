@@ -46,11 +46,11 @@ pub struct ServerDeviceDefinitionBuilder {
 }
 
 impl ServerDeviceDefinitionBuilder {
-  pub fn new(name: &str, id: &Uuid) -> Self {
+  pub fn new(name: CompactString, id: Uuid) -> Self {
     Self {
       def: ServerDeviceDefinition {
-        name: name.into(),
-        id: *id,
+        name,
+        id,
         base_id: None,
         protocol_variant: None,
         message_gap_ms: None,
@@ -59,6 +59,32 @@ impl ServerDeviceDefinitionBuilder {
         deny: false,
         index: 0,
         features: LiteMap::new(),
+      },
+    }
+  }
+
+  pub fn new_with_features(
+    name: CompactString,
+    id: Uuid,
+    features_iter: impl Iterator<Item = ServerDeviceFeature>,
+  ) -> Self {
+    // LiteMap's .collect() doesn't take capacity into account
+    let mut features = LiteMap::with_capacity(features_iter.size_hint().0);
+    for feature in features_iter {
+      features.insert(feature.index(), feature);
+    }
+    Self {
+      def: ServerDeviceDefinition {
+        name,
+        id,
+        base_id: None,
+        protocol_variant: None,
+        message_gap_ms: None,
+        display_name: None,
+        allow: false,
+        deny: false,
+        index: 0,
+        features,
       },
     }
   }
@@ -87,64 +113,64 @@ impl ServerDeviceDefinitionBuilder {
     ServerDeviceDefinitionBuilder { def: value.clone() }
   }
 
-  pub fn id(&mut self, id: Uuid) -> &mut Self {
+  pub fn id(mut self, id: Uuid) -> Self {
     self.def.id = id;
     self
   }
 
-  pub fn base_id(&mut self, id: Uuid) -> &mut Self {
+  pub fn base_id(mut self, id: Uuid) -> Self {
     self.def.base_id = Some(id);
     self
   }
 
-  pub fn display_name(&mut self, name: &Option<CompactString>) -> &mut Self {
+  pub fn display_name(mut self, name: Option<CompactString>) -> Self {
     self.def.display_name = name.clone();
     self
   }
 
-  pub fn protocol_variant(&mut self, variant: &str) -> &mut Self {
-    self.def.protocol_variant = Some(variant.into());
+  pub fn protocol_variant(mut self, variant: Option<CompactString>) -> Self {
+    self.def.protocol_variant = variant;
     self
   }
 
-  pub fn message_gap_ms(&mut self, gap: Option<u32>) -> &mut Self {
+  pub fn message_gap_ms(mut self, gap: Option<u32>) -> Self {
     self.def.message_gap_ms = gap;
     self
   }
 
-  pub fn allow(&mut self, allow: bool) -> &mut Self {
+  pub fn allow(mut self, allow: bool) -> Self {
     self.def.allow = allow;
     self
   }
 
-  pub fn deny(&mut self, deny: bool) -> &mut Self {
+  pub fn deny(mut self, deny: bool) -> Self {
     self.def.deny = deny;
     self
   }
 
-  pub fn index(&mut self, index: u32) -> &mut Self {
+  pub fn index(mut self, index: u32) -> Self {
     self.def.index = index;
     self
   }
 
-  pub fn add_feature(&mut self, feature: &ServerDeviceFeature) -> &mut Self {
-    self.def.features.insert(feature.index(), feature.clone());
+  pub fn add_feature(mut self, feature: ServerDeviceFeature) -> Self {
+    self.def.features.insert(feature.index(), feature);
     self
   }
 
-  pub fn replace_feature(&mut self, feature: &ServerDeviceFeature) -> &mut Self {
+  pub fn replace_feature(mut self, feature: ServerDeviceFeature) -> Self {
     if let Some((_, f)) = self
       .def
       .features
       .iter_mut()
       .find(|(_, x)| x.id() == feature.id())
     {
-      *f = feature.clone();
+      *f = feature;
     }
     self
   }
 
-  pub fn finish(&self) -> ServerDeviceDefinition {
-    self.def.clone()
+  pub fn finish(self) -> ServerDeviceDefinition {
+    self.def
   }
 }

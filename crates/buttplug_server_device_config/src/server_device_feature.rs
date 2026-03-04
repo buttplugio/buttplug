@@ -657,21 +657,21 @@ impl Default for ServerDeviceFeature {
 impl ServerDeviceFeature {
   pub fn new(
     index: u32,
-    description: &str,
+    description: CompactString,
     id: Uuid,
     base_id: Option<Uuid>,
     alt_protocol_index: Option<u32>,
-    output: &Option<ServerDeviceFeatureOutput>,
-    input: &Option<ServerDeviceFeatureInput>,
+    output: Option<ServerDeviceFeatureOutput>,
+    input: Option<ServerDeviceFeatureInput>,
   ) -> Self {
     Self {
       index,
-      description: description.into(),
+      description,
       id,
       base_id,
       alt_protocol_index,
-      output: output.clone(),
-      input: input.clone(),
+      output,
+      input,
     }
   }
 

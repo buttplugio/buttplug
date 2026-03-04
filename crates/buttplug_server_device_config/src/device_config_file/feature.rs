@@ -256,12 +256,12 @@ impl From<ConfigBaseDeviceFeature> for ServerDeviceFeature {
   fn from(val: ConfigBaseDeviceFeature) -> Self {
     ServerDeviceFeature::new(
       val.index,
-      &val.description,
+      val.description,
       val.id,
       None,
       val.feature_settings.alt_protocol_index,
-      &val.output,
-      &val.input,
+      val.output,
+      val.input,
     )
   }
 }
@@ -293,12 +293,12 @@ impl ConfigUserDeviceFeature {
     };
     Ok(ServerDeviceFeature::new(
       base_feature.index(),
-      base_feature.description(),
+      base_feature.description().clone(),
       self.id,
       Some(self.base_id),
       base_feature.alt_protocol_index(),
-      &output,
-      base_feature.input(),
+      output,
+      base_feature.input().clone(),
     ))
   }
 }

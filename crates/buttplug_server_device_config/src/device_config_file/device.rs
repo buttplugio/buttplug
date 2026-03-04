@@ -24,7 +24,7 @@ pub struct ConfigBaseDeviceDefinition {
   #[getset(get_copy = "pub")]
   id: Uuid,
   #[getset(get = "pub")]
-  protocol_variant: Option<String>,
+  protocol_variant: Option<CompactString>,
   #[getset(get_copy = "pub")]
   message_gap_ms: Option<u32>,
   #[getset(get = "pub")]
@@ -37,28 +37,33 @@ impl ConfigBaseDeviceDefinition {
       identifier: self.identifier,
       name: self.name,
       id: self.id,
-      protocol_variant: self.protocol_variant.or_else(|| defaults.and_then(|d| d.protocol_variant.clone())),
-      message_gap_ms: self.message_gap_ms.or_else(|| defaults.and_then(|d| d.message_gap_ms)),
-      features: self.features.or_else(|| defaults.and_then(|d| d.features.clone())),
+      protocol_variant: self
+        .protocol_variant
+        .or_else(|| defaults.and_then(|d| d.protocol_variant.clone())),
+      message_gap_ms: self
+        .message_gap_ms
+        .or_else(|| defaults.and_then(|d| d.message_gap_ms)),
+      features: self
+        .features
+        .or_else(|| defaults.and_then(|d| d.features.clone())),
     }
   }
 }
 
 impl From<ConfigBaseDeviceDefinition> for ServerDeviceDefinition {
   fn from(val: ConfigBaseDeviceDefinition) -> Self {
-    let mut builder = ServerDeviceDefinitionBuilder::new(&val.name, &val.id);
-    if let Some(variant) = val.protocol_variant {
-      builder.protocol_variant(&variant);
-    }
-    if let Some(gap) = val.message_gap_ms {
-      builder.message_gap_ms(Some(gap));
-    }
-    if let Some(features) = val.features {
-      for feature in features {
-        builder.add_feature(&feature.into());
-      }
-    }
-    builder.finish()
+    ServerDeviceDefinitionBuilder::new_with_features(
+      val.name,
+      val.id,
+      val
+        .features
+        .unwrap_or_default()
+        .into_iter()
+        .map(Into::into)
+    )
+    .protocol_variant(val.protocol_variant)
+    .message_gap_ms(val.message_gap_ms)
+    .finish()
   }
 }
 
@@ -112,22 +117,24 @@ impl ConfigUserDeviceDefinition {
     &self,
     base: &ServerDeviceDefinition,
   ) -> Result<ServerDeviceDefinition, ButtplugDeviceConfigError> {
-    let mut builder = ServerDeviceDefinitionBuilder::from_base(base, self.id, false);
-    builder.display_name(&self.user_config.display_name);
-    builder.message_gap_ms(self.user_config.message_gap_ms);
-    self.user_config.allow.then(|| builder.allow(true));
-    self.user_config.deny.then(|| builder.deny(true));
-    builder.index(self.user_config.index);
     if self.features().len() != base.features().len() {
       return Err(ButtplugDeviceConfigError::UserFeatureMismatch);
     }
+
+    let mut builder = ServerDeviceDefinitionBuilder::from_base(base, self.id, false)
+      .display_name(self.user_config.display_name.clone())
+      .message_gap_ms(self.user_config.message_gap_ms)
+      .allow(self.user_config.allow)
+      .deny(self.user_config.deny)
+      .index(self.user_config.index);
+
     for feature in self.features() {
       if let Some(base_feature) = base
         .features()
         .values()
         .find(|x| x.id() == feature.base_id())
       {
-        builder.add_feature(&feature.with_base_feature(base_feature)?);
+        builder = builder.add_feature(feature.with_base_feature(base_feature)?);
       } else {
         return Err(ButtplugDeviceConfigError::UserFeatureMismatch);
       }
@@ -142,7 +149,9 @@ impl TryFrom<&ServerDeviceDefinition> for ConfigUserDeviceDefinition {
   fn try_from(value: &ServerDeviceDefinition) -> Result<Self, Self::Error> {
     Ok(Self {
       id: value.id(),
-      base_id: value.base_id().ok_or(ButtplugDeviceConfigError::MissingBaseId)?,
+      base_id: value
+        .base_id()
+        .ok_or(ButtplugDeviceConfigError::MissingBaseId)?,
       features: value
         .features()
         .values()

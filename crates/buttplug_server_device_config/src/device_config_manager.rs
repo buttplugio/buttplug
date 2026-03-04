@@ -11,7 +11,8 @@ use dashmap::DashMap;
 use getset::Getters;
 use std::{
   collections::HashMap,
-  fmt::{self, Debug}, sync::Arc
+  fmt::{self, Debug},
+  sync::Arc,
 };
 use uuid::Uuid;
 
@@ -285,8 +286,9 @@ impl DeviceConfigurationManager {
         "Protocol + Identifier device config found for {:?}, creating new user device from configuration",
         identifier
       );
-      let mut builder = ServerDeviceDefinitionBuilder::from_base(definition, Uuid::new_v4(), true);
-      builder.index(self.device_index(identifier)).finish()
+      ServerDeviceDefinitionBuilder::from_base(definition, Uuid::new_v4(), true)
+        .index(self.device_index(identifier))
+        .finish()
     } else if let Some(definition) = self
       .base_device_definitions
       .get(&BaseDeviceIdentifier::new(identifier.protocol(), &None))
@@ -295,8 +297,9 @@ impl DeviceConfigurationManager {
         "Protocol device config found for {:?}, creating new user device from protocol defaults",
         identifier
       );
-      let mut builder = ServerDeviceDefinitionBuilder::from_base(definition, Uuid::new_v4(), true);
-      builder.index(self.device_index(identifier)).finish()
+      ServerDeviceDefinitionBuilder::from_base(definition, Uuid::new_v4(), true)
+        .index(self.device_index(identifier))
+        .finish()
     } else {
       return None;
     };
