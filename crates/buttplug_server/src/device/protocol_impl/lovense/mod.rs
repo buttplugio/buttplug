@@ -35,7 +35,6 @@ use buttplug_server_device_config::{
   UserDeviceIdentifier,
 };
 use futures::{FutureExt, future::BoxFuture};
-use regex::Regex;
 use std::{sync::Arc, time::Duration};
 use tokio::select;
 use uuid::{Uuid, uuid};
@@ -137,11 +136,16 @@ impl ProtocolIdentifier for LovenseIdentifier {
           count += 1;
           if count > LOVENSE_COMMAND_RETRY {
             warn!("Lovense Device timed out while getting DeviceType info. ({} retries)", LOVENSE_COMMAND_RETRY);
-            let re = Regex::new(r"LVS-([A-Z]+)\d+").expect("Static regex shouldn't fail");
-            if let Some(caps) = re.captures(hardware.name()) {
-              info!("Lovense Device identified by BLE name");
-              return Ok((UserDeviceIdentifier::new(hardware.address(), "lovense", Some(&caps[1])), Box::new(LovenseInitializer::new(caps[1].to_string()))));
-            };
+            if let Some(pos) = hardware.name().find("LVS-") {
+              let model = hardware.name()[pos + 4..].to_string();
+              if !model.is_empty() {
+                info!("Lovense Device identified by BLE name: {}", model);
+                return Ok((
+                  UserDeviceIdentifier::new(hardware.address(), "lovense", Some(&model)),
+                  Box::new(LovenseInitializer::new(model)),
+                ));
+              }
+            }
             return Ok((UserDeviceIdentifier::new(hardware.address(), "lovense", None), Box::new(LovenseInitializer::new("".to_string()))));
           }
         }
