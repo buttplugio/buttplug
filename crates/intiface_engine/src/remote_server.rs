@@ -86,7 +86,7 @@ async fn run_device_event_stream(
                 index: da.1.device_index(),
                 name: da.1.device_name().clone(),
                 identifier: device_info.identifier().clone(),
-                display_name: device_info.display_name().clone(),
+                display_name: device_info.display_name().as_ref().map(|s| s.to_string())
               };
               if remote_event_sender.send(added_event).is_err() {
                 error!(

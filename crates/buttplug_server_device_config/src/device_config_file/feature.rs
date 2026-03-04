@@ -5,7 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use std::ops::RangeInclusive;
 
 use crate::{
   ButtplugDeviceConfigError,
@@ -17,7 +16,8 @@ use crate::{
   ServerDeviceFeatureOutputHwPositionWithDurationProperties,
   ServerDeviceFeatureOutputValueProperties,
 };
-use buttplug_core::util::range_serialize::option_range_serialize;
+use buttplug_core::util::range::RangeInclusive;
+use compact_str::CompactString;
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -39,7 +39,6 @@ impl BaseFeatureSettings {
 struct UserDeviceFeatureOutputValueProperties {
   #[serde(
     skip_serializing_if = "Option::is_none",
-    serialize_with = "option_range_serialize"
   )]
   value: Option<RangeInclusive<u32>>,
   #[serde(default)]
@@ -72,7 +71,6 @@ impl From<&ServerDeviceFeatureOutputValueProperties> for UserDeviceFeatureOutput
 struct UserDeviceFeatureOutputPositionProperties {
   #[serde(
     skip_serializing_if = "Option::is_none",
-    serialize_with = "option_range_serialize"
   )]
   value: Option<RangeInclusive<u32>>,
   #[serde(default)]
@@ -111,12 +109,10 @@ impl From<&ServerDeviceFeatureOutputPositionProperties>
 struct UserDeviceFeatureOutputHwPositionWithDurationProperties {
   #[serde(
     skip_serializing_if = "Option::is_none",
-    serialize_with = "option_range_serialize"
   )]
   value: Option<RangeInclusive<u32>>,
   #[serde(
     skip_serializing_if = "Option::is_none",
-    serialize_with = "option_range_serialize"
   )]
   duration: Option<RangeInclusive<u32>>,
   #[serde(default)]
@@ -242,7 +238,7 @@ pub struct ConfigBaseDeviceFeature {
   index: u32,
   #[getset(get = "pub")]
   #[serde(default)]
-  description: String,
+  description: CompactString,
   #[getset(get = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
   output: Option<ServerDeviceFeatureOutput>,

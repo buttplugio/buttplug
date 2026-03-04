@@ -7,6 +7,7 @@
 
 use std::collections::HashMap;
 
+use compact_str::CompactString;
 use getset::{Getters, MutGetters};
 use serde::{Deserialize, Serialize};
 
@@ -24,7 +25,7 @@ pub struct BaseConfigFile {
   version: ConfigVersion,
   #[getset(get = "pub")]
   #[serde(default, skip_serializing_if = "Option::is_none")]
-  protocols: Option<HashMap<String, ProtocolDefinition>>,
+  protocols: Option<HashMap<CompactString, ProtocolDefinition>>,
 }
 
 impl Default for BaseConfigFile {

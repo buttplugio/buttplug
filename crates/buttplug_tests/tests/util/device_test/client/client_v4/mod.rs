@@ -65,7 +65,7 @@ fn get_scalar_index(device: &ButtplugClientDevice, index: u32) -> &u32 {
       || fo
         .rotate()
         .as_ref()
-        .is_some_and(|r| r.step_limit().start() >= &0)
+        .is_some_and(|r| r.step_limit().start() >= 0)
   });
   while let Some((idx, _)) = iter.next() {
     if offset >= index {

@@ -50,7 +50,7 @@ impl ProtocolIdentifier for PrettyLoveIdentifier {
       UserDeviceIdentifier::new(
         hardware.address(),
         "prettylove",
-        &Some("Aogu BLE".to_owned()),
+        Some("Aogu BLE"),
       ),
       Box::new(PrettyLoveInitializer::default()),
     ))

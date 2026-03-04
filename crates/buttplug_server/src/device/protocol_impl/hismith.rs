@@ -70,13 +70,13 @@ impl ProtocolIdentifier for HismithIdentifier {
     if !LEGACY_HISMITHS.contains(&identifier.as_str()) {
       info!("Not a legacy Hismith, using hismith-mini protocol");
       return Ok((
-        UserDeviceIdentifier::new(hardware.address(), "hismith-mini", &Some(identifier)),
+        UserDeviceIdentifier::new(hardware.address(), "hismith-mini", Some(&identifier)),
         Box::new(HismithMiniInitializer::default()),
       ));
     }
 
     Ok((
-      UserDeviceIdentifier::new(hardware.address(), "hismith", &Some(identifier)),
+      UserDeviceIdentifier::new(hardware.address(), "hismith", Some(&identifier)),
       Box::new(HismithInitializer::default()),
     ))
   }

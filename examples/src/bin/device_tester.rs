@@ -104,7 +104,7 @@ async fn device_tester() {
           feature.feature_index()
         );
       } else if let Some(out) = outs.get(OutputType::Rotate) {
-        cmds.push(feature.run_output(&ClientDeviceOutputCommand::Rotate((*out.step_limit().end()).into())));
+        cmds.push(feature.run_output(&ClientDeviceOutputCommand::Rotate((out.step_limit().end()).into())));
         println!(
           "{} ({}) should start rotating on feature {}!",
           dev.name(),
@@ -129,7 +129,7 @@ async fn device_tester() {
         );
       } else if let Some(out) = outs.get(OutputType::Temperature) {
         cmds.push(
-          feature.run_output(&ClientDeviceOutputCommand::Temperature((*out.step_limit().end()).into())),
+          feature.run_output(&ClientDeviceOutputCommand::Temperature((out.step_limit().end()).into())),
         );
         println!(
           "{} ({}) should start heating on feature {}!",
@@ -259,7 +259,7 @@ async fn device_tester() {
               );
             }
             OutputType::Rotate => {
-              if output.step_limit().start() >= &0 {
+              if output.step_limit().start() >= 0 {
                 set_level_and_wait(&dev, feature, &otype, 0.25).await;
                 set_level_and_wait(&dev, feature, &otype, 0.5).await;
                 set_level_and_wait(&dev, feature, &otype, 0.75).await;

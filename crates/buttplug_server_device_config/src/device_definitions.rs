@@ -5,9 +5,9 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use std::collections::BTreeMap;
-
+use compact_str::CompactString;
 use getset::{CopyGetters, Getters};
+use litemap::LiteMap;
 use uuid::Uuid;
 
 use super::server_device_feature::ServerDeviceFeature;
@@ -15,17 +15,17 @@ use super::server_device_feature::ServerDeviceFeature;
 pub struct ServerDeviceDefinition {
   #[getset(get = "pub")]
   /// Given name of the device this instance represents.
-  name: String,
+  name: CompactString,
   #[getset(get_copy = "pub")]
   id: Uuid,
   #[getset(get_copy = "pub")]
   base_id: Option<Uuid>,
   #[getset(get = "pub")]
-  protocol_variant: Option<String>,
+  protocol_variant: Option<CompactString>,
   #[getset(get_copy = "pub")]
   message_gap_ms: Option<u32>,
   #[getset(get = "pub")]
-  display_name: Option<String>,
+  display_name: Option<CompactString>,
   #[getset(get_copy = "pub")]
   allow: bool,
   #[getset(get_copy = "pub")]
@@ -37,7 +37,7 @@ pub struct ServerDeviceDefinition {
   // Older versions of the protocol expect specific ordering, so we need to make sure storage
   // adheres to that since we do a lot of value iteration elsewhere.
   #[getset(get = "pub")]
-  features: BTreeMap<u32, ServerDeviceFeature>,
+  features: LiteMap<u32, ServerDeviceFeature>,
 }
 
 #[derive(Debug)]
@@ -49,7 +49,7 @@ impl ServerDeviceDefinitionBuilder {
   pub fn new(name: &str, id: &Uuid) -> Self {
     Self {
       def: ServerDeviceDefinition {
-        name: name.to_owned(),
+        name: name.into(),
         id: *id,
         base_id: None,
         protocol_variant: None,
@@ -58,7 +58,7 @@ impl ServerDeviceDefinitionBuilder {
         allow: false,
         deny: false,
         index: 0,
-        features: BTreeMap::new(),
+        features: LiteMap::new(),
       },
     }
   }
@@ -78,7 +78,7 @@ impl ServerDeviceDefinitionBuilder {
         })
         .collect();
     } else {
-      value.features = BTreeMap::new();
+      value.features = LiteMap::new();
     }
     ServerDeviceDefinitionBuilder { def: value }
   }
@@ -97,13 +97,13 @@ impl ServerDeviceDefinitionBuilder {
     self
   }
 
-  pub fn display_name(&mut self, name: &Option<String>) -> &mut Self {
+  pub fn display_name(&mut self, name: &Option<CompactString>) -> &mut Self {
     self.def.display_name = name.clone();
     self
   }
 
   pub fn protocol_variant(&mut self, variant: &str) -> &mut Self {
-    self.def.protocol_variant = Some(variant.to_owned());
+    self.def.protocol_variant = Some(variant.into());
     self
   }
 

@@ -60,7 +60,7 @@ impl ProtocolIdentifier for LovenseConnectIdentifier {
       UserDeviceIdentifier::new(
         hardware.address(),
         "lovense-connect-service",
-        &Some(hardware.name().to_owned()),
+        Some(hardware.name()),
       ),
       Box::new(LovenseConnectServiceInitializer::default()),
     ))

@@ -59,7 +59,7 @@ impl ProtocolIdentifier for PatooIdentifier {
     }
     let name: String = c[0..i].iter().collect();
     Ok((
-      UserDeviceIdentifier::new(hardware.address(), "Patoo", &Some(name)),
+      UserDeviceIdentifier::new(hardware.address(), "Patoo", Some(&name)),
       Box::new(PatooInitializer::default()),
     ))
   }

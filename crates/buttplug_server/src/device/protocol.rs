@@ -17,6 +17,7 @@ use buttplug_server_device_config::{
   ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
+use compact_str::CompactString;
 use dashmap::DashMap;
 
 use super::hardware::HardwareWriteCmd;
@@ -156,7 +157,7 @@ impl ProtocolIdentifier for GenericProtocolIdentifier {
     let device_identifier = UserDeviceIdentifier::new(
       hardware.address(),
       &self.protocol_identifier,
-      &Some(hardware.name().to_owned()),
+      Some(hardware.name()),
     );
     Ok((
       device_identifier,
@@ -531,7 +532,7 @@ macro_rules! generic_protocol_initializer_setup {
           hardware: Arc<Hardware>,
           _: ProtocolCommunicationSpecifier,
         ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
-          Ok((UserDeviceIdentifier::new(hardware.address(), $protocol_identifier, &Some(hardware.name().to_owned())), Box::new([< $protocol_name Initializer >]::default())))
+          Ok((UserDeviceIdentifier::new(hardware.address(), $protocol_identifier, Some(hardware.name())), Box::new([< $protocol_name Initializer >]::default())))
         }
       }
     }
@@ -558,8 +559,8 @@ impl ProtocolManager {
   pub fn protocol_specializers(
     &self,
     specifier: &ProtocolCommunicationSpecifier,
-    base_communication_specifiers: &HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
-    user_communication_specifiers: &DashMap<String, Vec<ProtocolCommunicationSpecifier>>,
+    base_communication_specifiers: &HashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
+    user_communication_specifiers: &DashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
   ) -> Vec<ProtocolSpecializer> {
     debug!(
       "Looking for protocol that matches specifier: {:?}",

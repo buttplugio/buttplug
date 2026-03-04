@@ -34,6 +34,7 @@ use buttplug_server_device_config::{
   ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
+use compact_str::CompactString;
 use dashmap::DashMap;
 use futures::future::{self, BoxFuture, FutureExt};
 use tokio::sync::{
@@ -139,8 +140,8 @@ impl DeviceHandle {
   }
 
   /// Get the device's name
-  pub fn name(&self) -> String {
-    self.definition.name().to_owned()
+  pub fn name(&self) -> CompactString {
+    self.definition.name().clone()
   }
 
   /// Get the device's definition (contains features, display name, etc.)
@@ -158,7 +159,7 @@ impl DeviceHandle {
     DeviceMessageInfoV4::new(
       index,
       &self.name(),
-      self.definition.display_name(),
+      &self.definition.display_name().as_ref().map(|n| n.to_string()),
       100,
       &self
         .definition

@@ -5,11 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{message::InputCommandType, util::range_serialize::*};
+use crate::{message::InputCommandTypeFlags, util::range::RangeInclusive};
 use derive_builder::Builder;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
-use serde::{Deserialize, Serialize, Serializer, ser::SerializeSeq};
-use std::{collections::HashSet, hash::Hash, ops::RangeInclusive};
+use serde::{Deserialize, Serialize};
+use std::hash::Hash;
 
 #[derive(
   Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash, EnumIter, EnumString,
@@ -107,20 +107,6 @@ impl DeviceFeature {
   }
 }
 
-fn range_sequence_serialize<S>(
-  range_vec: &Vec<RangeInclusive<i32>>,
-  serializer: S,
-) -> Result<S::Ok, S::Error>
-where
-  S: Serializer,
-{
-  let mut seq = serializer.serialize_seq(Some(range_vec.len()))?;
-  for range in range_vec {
-    seq.serialize_element(&vec![*range.start(), *range.end()])?;
-  }
-  seq.end()
-}
-
 pub trait DeviceFeatureOutputLimits {
   fn step_count(&self) -> u32;
   fn step_limit(&self) -> RangeInclusive<i32>;
@@ -130,7 +116,6 @@ pub trait DeviceFeatureOutputLimits {
 #[serde(rename_all = "PascalCase")]
 pub struct DeviceFeatureOutputValueProperties {
   #[getset(get = "pub")]
-  #[serde(serialize_with = "range_serialize")]
   value: RangeInclusive<i32>,
 }
 
@@ -142,7 +127,7 @@ impl DeviceFeatureOutputValueProperties {
   }
 
   pub fn step_count(&self) -> u32 {
-    *self.value.end() as u32
+    self.value.end() as u32
   }
 }
 
@@ -159,10 +144,8 @@ impl DeviceFeatureOutputLimits for DeviceFeatureOutputValueProperties {
 #[serde(rename_all = "PascalCase")]
 pub struct DeviceFeatureOutputHwPositionWithDurationProperties {
   #[getset(get = "pub")]
-  #[serde(serialize_with = "range_serialize")]
   value: RangeInclusive<i32>,
   #[getset(get = "pub")]
-  #[serde(serialize_with = "range_serialize")]
   duration: RangeInclusive<i32>,
 }
 
@@ -175,7 +158,7 @@ impl DeviceFeatureOutputHwPositionWithDurationProperties {
   }
 
   pub fn step_count(&self) -> u32 {
-    *self.value.end() as u32
+    self.value.end() as u32
   }
 }
 
@@ -258,17 +241,13 @@ impl DeviceFeatureOutput {
 #[serde(rename_all = "PascalCase")]
 pub struct DeviceFeatureInputProperties {
   #[getset(get = "pub", get_mut = "pub(super)")]
-  #[serde(serialize_with = "range_sequence_serialize")]
   value: Vec<RangeInclusive<i32>>,
   #[getset(get = "pub")]
-  command: HashSet<InputCommandType>,
+  command: InputCommandTypeFlags,
 }
 
 impl DeviceFeatureInputProperties {
-  pub fn new(
-    value: &Vec<RangeInclusive<i32>>,
-    sensor_commands: &HashSet<InputCommandType>,
-  ) -> Self {
+  pub fn new(value: &Vec<RangeInclusive<i32>>, sensor_commands: InputCommandTypeFlags) -> Self {
     Self {
       value: value.clone(),
       command: sensor_commands.clone(),

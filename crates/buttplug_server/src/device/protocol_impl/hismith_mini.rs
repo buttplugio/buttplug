@@ -65,7 +65,7 @@ impl ProtocolIdentifier for HismithMiniIdentifier {
     info!("Hismith Device Identifier: {}", identifier);
 
     Ok((
-      UserDeviceIdentifier::new(hardware.address(), "hismith-mini", &Some(identifier)),
+      UserDeviceIdentifier::new(hardware.address(), "hismith-mini", Some(&identifier)),
       Box::new(HismithMiniInitializer::default()),
     ))
   }

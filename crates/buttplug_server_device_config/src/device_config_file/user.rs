@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use compact_str::CompactString;
 use dashmap::DashMap;
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
@@ -30,7 +31,7 @@ pub struct UserDeviceConfigPair {
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct UserConfigDefinition {
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub protocols: Option<DashMap<String, ProtocolDefinition>>,
+  pub protocols: Option<DashMap<CompactString, ProtocolDefinition>>,
   #[serde(rename = "devices", default, skip_serializing_if = "Option::is_none")]
   pub user_device_configs: Option<Vec<UserDeviceConfigPair>>,
 }

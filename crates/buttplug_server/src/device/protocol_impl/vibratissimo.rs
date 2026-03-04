@@ -62,7 +62,7 @@ impl ProtocolIdentifier for VibratissimoIdentifier {
     let ident =
       String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| hardware.name().to_owned());
     Ok((
-      UserDeviceIdentifier::new(hardware.address(), "vibratissimo", &Some(ident)),
+      UserDeviceIdentifier::new(hardware.address(), "vibratissimo", Some(&ident)),
       Box::new(VibratissimoInitializer::default()),
     ))
   }

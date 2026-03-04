@@ -84,7 +84,7 @@ impl ProtocolIdentifier for FlufferIdentifier {
       UserDeviceIdentifier::new(
         hardware.address(),
         "fluffer",
-        &Some(hardware.name().to_owned()),
+        Some(hardware.name()),
       ),
       Box::new(FlufferInitializer::new(data)),
     ))

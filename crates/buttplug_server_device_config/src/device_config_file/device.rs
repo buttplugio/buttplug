@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use compact_str::CompactString;
 use getset::{CopyGetters, Getters, MutGetters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -16,10 +17,10 @@ use super::feature::{ConfigBaseDeviceFeature, ConfigUserDeviceFeature};
 #[derive(Debug, Clone, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct ConfigBaseDeviceDefinition {
   #[getset(get = "pub")]
-  pub identifier: Option<Vec<String>>,
+  pub identifier: Option<Vec<CompactString>>,
   #[getset(get = "pub")]
   /// Given name of the device this instance represents.
-  name: String,
+  name: CompactString,
   #[getset(get_copy = "pub")]
   id: Uuid,
   #[getset(get = "pub")]
@@ -65,7 +66,7 @@ impl From<ConfigBaseDeviceDefinition> for ServerDeviceDefinition {
 pub struct ConfigUserDeviceCustomization {
   #[serde(default, skip_serializing_if = "Option::is_none")]
   #[getset(get = "pub")]
-  display_name: Option<String>,
+  display_name: Option<CompactString>,
   #[serde(default)]
   #[getset(get_copy = "pub")]
   allow: bool,

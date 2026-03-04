@@ -6,6 +6,7 @@
 // for full license information.
 
 use buttplug_core::errors::ButtplugDeviceError;
+use compact_str::CompactString;
 use dashmap::DashMap;
 use getset::Getters;
 use std::{
@@ -25,15 +26,15 @@ use crate::{
 
 #[derive(Default, Clone)]
 pub struct DeviceConfigurationManagerBuilder {
-  base_communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
-  user_communication_specifiers: DashMap<String, Vec<ProtocolCommunicationSpecifier>>,
+  base_communication_specifiers: HashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
+  user_communication_specifiers: DashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
   base_device_definitions: HashMap<BaseDeviceIdentifier, ServerDeviceDefinition>,
   user_device_definitions: DashMap<UserDeviceIdentifier, ServerDeviceDefinition>,
 }
 
 impl DeviceConfigurationManagerBuilder {
   pub fn new(
-    base_communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
+    base_communication_specifiers: HashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
     base_device_definitions: HashMap<BaseDeviceIdentifier, ServerDeviceDefinition>,
   ) -> Self {
     Self {
@@ -50,7 +51,7 @@ impl DeviceConfigurationManagerBuilder {
   ) -> &mut Self {
     self
       .base_communication_specifiers
-      .entry(protocol_name.to_owned())
+      .entry(protocol_name.into())
       .or_default()
       .extend(specifier.iter().cloned());
     self
@@ -74,7 +75,7 @@ impl DeviceConfigurationManagerBuilder {
   ) -> &mut Self {
     self
       .user_communication_specifiers
-      .entry(protocol_name.to_owned())
+      .entry(protocol_name.into())
       .or_default()
       .extend(specifier.iter().cloned());
     self
@@ -133,13 +134,14 @@ pub struct DeviceConfigurationManager {
   /// Communication specifiers from the base device config, mapped from protocol name to vector of
   /// specifiers. Should not change/update during a session.
   #[getset(get = "pub")]
-  base_communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
+  base_communication_specifiers: HashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
   /// Device definitions from the base device config. Should not change/update during a session.
+  #[getset(get = "pub")]
   base_device_definitions: HashMap<BaseDeviceIdentifier, ServerDeviceDefinition>,
   /// Communication specifiers provided by the user, mapped from protocol name to vector of
   /// specifiers. Loaded at session start, may change over life of session.
   #[getset(get = "pub")]
-  user_communication_specifiers: DashMap<String, Vec<ProtocolCommunicationSpecifier>>,
+  user_communication_specifiers: DashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
   /// Device definitions from the user device config. Loaded at session start, may change over life
   /// of session.
   #[getset(get = "pub")]
@@ -171,7 +173,7 @@ impl DeviceConfigurationManager {
     //self.protocol_map.contains_key(protocol);
     self
       .user_communication_specifiers
-      .entry(protocol.to_owned())
+      .entry(protocol.into())
       .or_default()
       .push(specifier.clone());
     Ok(())

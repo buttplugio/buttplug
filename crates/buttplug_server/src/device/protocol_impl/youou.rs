@@ -51,7 +51,7 @@ impl ProtocolIdentifier for YououIdentifier {
     _: ProtocolCommunicationSpecifier,
   ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     Ok((
-      UserDeviceIdentifier::new(hardware.address(), "Youou", &Some("VX001_".to_owned())),
+      UserDeviceIdentifier::new(hardware.address(), "Youou", Some("VX001_")),
       Box::new(YououInitializer::default()),
     ))
   }

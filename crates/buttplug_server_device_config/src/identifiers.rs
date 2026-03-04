@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use compact_str::CompactString;
 use getset::{Getters, MutGetters};
 use serde::{Deserialize, Serialize};
 
@@ -22,20 +23,20 @@ use serde::{Deserialize, Serialize};
 #[getset(get = "pub", get_mut = "pub(crate)")]
 pub struct UserDeviceIdentifier {
   /// Name of the protocol used
-  protocol: String,
+  protocol: CompactString,
   /// Internal identifier for the protocol used
-  identifier: Option<String>,
+  identifier: Option<CompactString>,
   /// Address, as possibly serialized by whatever the managing library for the Device Communication Manager is.
-  address: String,
+  address: CompactString,
 }
 
 impl UserDeviceIdentifier {
   /// Creates a new instance
-  pub fn new(address: &str, protocol: &str, identifier: &Option<String>) -> Self {
+  pub fn new(address: &str, protocol: &str, identifier: Option<&str>) -> Self {
     Self {
-      address: address.to_owned(),
-      protocol: protocol.to_owned(),
-      identifier: identifier.clone(),
+      address: address.into(),
+      protocol: protocol.into(),
+      identifier: identifier.map(|s| s.into())
     }
   }
 }
@@ -45,9 +46,9 @@ impl UserDeviceIdentifier {
 #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
 pub struct BaseDeviceIdentifier {
   /// Name of the protocol this device uses to communicate
-  protocol: String,
+  protocol: CompactString,
   /// Some([identifier]) if there's an identifier, otherwise None if default
-  identifier: Option<String>,
+  identifier: Option<CompactString>,
 }
 
 impl BaseDeviceIdentifier {
@@ -55,16 +56,16 @@ impl BaseDeviceIdentifier {
     Self::new(protocol, &None)
   }
 
-  pub fn new_with_identifier(protocol: &str, attributes_identifier: String) -> Self {
+  pub fn new_with_identifier(protocol: &str, attributes_identifier: CompactString) -> Self {
     Self {
-      protocol: protocol.to_owned(),
+      protocol: protocol.into(),
       identifier: Some(attributes_identifier),
     }
   }
 
-  pub fn new(protocol: &str, attributes_identifier: &Option<String>) -> Self {
+  pub fn new(protocol: &str, attributes_identifier: &Option<CompactString>) -> Self {
     Self {
-      protocol: protocol.to_owned(),
+      protocol: protocol.into(),
       identifier: attributes_identifier.clone(),
     }
   }

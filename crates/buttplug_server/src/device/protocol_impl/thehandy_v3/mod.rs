@@ -60,7 +60,7 @@ impl ProtocolIdentifier for TheHandyV3Identifier {
     let bits: Vec<&str> = hardware.name().split('_').collect();
     let name = if bits.len() > 2 { bits[1] } else { "unknown" };
     Ok((
-      UserDeviceIdentifier::new(hardware.address(), "thehandy-v3", &Some(name.to_owned())),
+      UserDeviceIdentifier::new(hardware.address(), "thehandy-v3", Some(name)),
       Box::new(TheHandyV3Initializer::default()),
     ))
   }

@@ -9,16 +9,18 @@ use crate::message::{
   v1::NullDeviceMessageAttributesV1,
   v2::{ClientDeviceMessageAttributesV2, GenericDeviceMessageAttributesV2},
 };
-use buttplug_core::message::{
-  DeviceFeature,
-  DeviceFeatureOutputValueProperties,
-  InputCommandType,
-  InputType,
-  OutputType,
+use buttplug_core::{
+  message::{
+    DeviceFeature,
+    DeviceFeatureOutputValueProperties,
+    InputCommandType,
+    InputType,
+    OutputType,
+  },
+  util::range::RangeInclusive,
 };
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeSeq};
-use std::ops::RangeInclusive;
 
 // This will look almost exactly like ServerDeviceMessageAttributes. However, it will only contain
 // information we want the client to know, i.e. step counts versus specific step ranges. This is
@@ -201,20 +203,6 @@ impl ClientGenericDeviceMessageAttributesV3 {
   }
 }
 
-fn range_sequence_serialize<S>(
-  range_vec: &Vec<RangeInclusive<i32>>,
-  serializer: S,
-) -> Result<S::Ok, S::Error>
-where
-  S: Serializer,
-{
-  let mut seq = serializer.serialize_seq(Some(range_vec.len()))?;
-  for range in range_vec {
-    seq.serialize_element(&vec![*range.start(), *range.end()])?;
-  }
-  seq.end()
-}
-
 #[derive(Clone, Debug, Serialize, Deserialize, Getters, Setters)]
 pub struct SensorDeviceMessageAttributesV3 {
   #[getset(get = "pub")]
@@ -224,7 +212,7 @@ pub struct SensorDeviceMessageAttributesV3 {
   #[serde(rename = "SensorType")]
   pub(in crate::message) sensor_type: InputType,
   #[getset(get = "pub")]
-  #[serde(rename = "SensorRange", serialize_with = "range_sequence_serialize")]
+  #[serde(rename = "SensorRange")]
   pub(in crate::message) sensor_range: Vec<RangeInclusive<i32>>,
   // TODO This needs to actually be part of the device info relayed to the client in spec v4.
   #[getset(get = "pub")]
@@ -294,7 +282,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
         let mut actuator_vec = vec![];
         if let Some(output_map) = feature.output()
           && let Some(actuator) = output_map.rotate()
-          && *actuator.value().start() < 0
+          && actuator.value().start() < 0
         {
           let actuator_type = OutputType::Rotate;
           let attrs = ClientGenericDeviceMessageAttributesV3 {
@@ -338,7 +326,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
             // Only convert Battery backwards. Other sensors weren't really built for v3 and we
             // never recommended using them or implemented much for them.
             if let Some(battery) = sensor_map.battery()
-              && battery.command().contains(&InputCommandType::Read)
+              && battery.command().contains(InputCommandType::Read)
             {
               sensor_vec.push(SensorDeviceMessageAttributesV3 {
                 feature_descriptor: feature.description().to_owned(),

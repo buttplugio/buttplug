@@ -11,7 +11,7 @@ use super::v2::ServerDeviceMessageAttributesV2;
 use buttplug_core::errors::ButtplugError;
 use buttplug_server_device_config::ServerDeviceFeature;
 use getset::Getters;
-use std::collections::BTreeMap;
+use litemap::LiteMap;
 
 #[derive(Debug, Getters, Clone)]
 pub(crate) struct ServerDeviceAttributes {
@@ -23,11 +23,11 @@ pub(crate) struct ServerDeviceAttributes {
   #[getset(get = "pub")]
   attrs_v3: ServerDeviceMessageAttributesV3,
   #[getset(get = "pub")]
-  features: BTreeMap<u32, ServerDeviceFeature>,
+  features: LiteMap<u32, ServerDeviceFeature>,
 }
 
 impl ServerDeviceAttributes {
-  pub fn new(features: &BTreeMap<u32, ServerDeviceFeature>) -> Self {
+  pub fn new(features: &LiteMap<u32, ServerDeviceFeature>) -> Self {
     let f: Vec<ServerDeviceFeature> = features.values().cloned().collect();
     Self {
       attrs_v3: ServerDeviceMessageAttributesV3::from(f.clone()),
@@ -46,6 +46,6 @@ where
 {
   fn try_from_client_message(
     msg: T,
-    features: &BTreeMap<u32, ServerDeviceAttributes>,
+    features: &LiteMap<u32, ServerDeviceAttributes>,
   ) -> Result<Self, ButtplugError>;
 }

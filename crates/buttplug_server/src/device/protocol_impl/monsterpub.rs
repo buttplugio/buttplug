@@ -66,12 +66,11 @@ impl ProtocolIdentifier for MonsterPubIdentifier {
             "MonsterPub device name is non-UTF8 string.".to_owned(),
           )
         })?
-        .replace("\0", "")
-        .to_owned(),
+        .replace("\0", ""),
       Err(_) => "Unknown".to_string(),
     };
     return Ok((
-      UserDeviceIdentifier::new(hardware.address(), "monsterpub", &Some(ident)),
+      UserDeviceIdentifier::new(hardware.address(), "monsterpub", Some(&ident)),
       Box::new(MonsterPubInitializer::default()),
     ));
   }

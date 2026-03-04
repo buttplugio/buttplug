@@ -67,7 +67,7 @@ impl ProtocolIdentifier for SatisfyerIdentifier {
           );
 
           return Ok((
-            UserDeviceIdentifier::new(hardware.address(), "satisfyer", &Some(device_identifier)),
+            UserDeviceIdentifier::new(hardware.address(), "satisfyer", Some(&device_identifier)),
             Box::new(SatisfyerInitializer::default()),
           ));
         }
@@ -92,7 +92,7 @@ impl ProtocolIdentifier for SatisfyerIdentifier {
       device_identifier
     );
     return Ok((
-      UserDeviceIdentifier::new(hardware.address(), "satisfyer", &Some(device_identifier)),
+      UserDeviceIdentifier::new(hardware.address(), "satisfyer", Some(&device_identifier)),
       Box::new(SatisfyerInitializer::default()),
     ));
   }
