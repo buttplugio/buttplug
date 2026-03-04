@@ -11,7 +11,7 @@ use dashmap::DashMap;
 use getset::Getters;
 use std::{
   collections::HashMap,
-  fmt::{self, Debug},
+  fmt::{self, Debug}, sync::Arc
 };
 use uuid::Uuid;
 
@@ -28,14 +28,14 @@ use crate::{
 pub struct DeviceConfigurationManagerBuilder {
   base_communication_specifiers: HashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
   user_communication_specifiers: DashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
-  base_device_definitions: HashMap<BaseDeviceIdentifier, ServerDeviceDefinition>,
+  base_device_definitions: HashMap<BaseDeviceIdentifier, Arc<ServerDeviceDefinition>>,
   user_device_definitions: DashMap<UserDeviceIdentifier, ServerDeviceDefinition>,
 }
 
 impl DeviceConfigurationManagerBuilder {
   pub fn new(
     base_communication_specifiers: HashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
-    base_device_definitions: HashMap<BaseDeviceIdentifier, ServerDeviceDefinition>,
+    base_device_definitions: HashMap<BaseDeviceIdentifier, Arc<ServerDeviceDefinition>>,
   ) -> Self {
     Self {
       base_communication_specifiers,
@@ -64,7 +64,7 @@ impl DeviceConfigurationManagerBuilder {
   ) -> &mut Self {
     self
       .base_device_definitions
-      .insert(identifier.clone(), features.clone());
+      .insert(identifier.clone(), Arc::new(features.clone()));
     self
   }
 
@@ -137,7 +137,7 @@ pub struct DeviceConfigurationManager {
   base_communication_specifiers: HashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
   /// Device definitions from the base device config. Should not change/update during a session.
   #[getset(get = "pub")]
-  base_device_definitions: HashMap<BaseDeviceIdentifier, ServerDeviceDefinition>,
+  base_device_definitions: HashMap<BaseDeviceIdentifier, Arc<ServerDeviceDefinition>>,
   /// Communication specifiers provided by the user, mapped from protocol name to vector of
   /// specifiers. Loaded at session start, may change over life of session.
   #[getset(get = "pub")]

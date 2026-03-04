@@ -29,7 +29,7 @@ use buttplug_core::{
 use dashmap::DashMap;
 use getset::CopyGetters;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
-use std::{collections::HashMap, fmt::Display};
+use std::{collections::HashMap, fmt::Display, sync::Arc};
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../build-config/buttplug-device-config-v4.json");
@@ -110,7 +110,22 @@ fn load_main_config(
   let protocols = main_config.protocols_mut().take().unwrap_or_default();
 
   let mut base_communication_specifiers = HashMap::with_capacity(protocols.len());
-  let mut base_device_definitions = HashMap::new();
+  let base_device_definitions_capacity = protocols
+    .iter()
+    .map(|(_, def)| {
+      def
+        .configurations()
+        .iter()
+        .map(|config| {
+          config
+            .identifier()
+            .as_ref()
+            .map_or(0, |idents| idents.len())
+        })
+        .sum::<usize>()
+    })
+    .sum::<usize>();
+  let mut base_device_definitions = HashMap::with_capacity(base_device_definitions_capacity);
 
   for (protocol_name, protocol_def) in protocols {
     let ProtocolDefinition {
@@ -125,11 +140,12 @@ fn load_main_config(
 
     for mut config in configurations {
       let identifier = config.identifier.take();
-      let config: ServerDeviceDefinition = config.with_defaults(defaults.as_ref()).into();
+      let definition: Arc<ServerDeviceDefinition> =
+        Arc::new(config.with_defaults(defaults.as_ref()).into());
       if let Some(idents) = identifier {
         for config_ident in idents {
           let ident = BaseDeviceIdentifier::new_with_identifier(&protocol_name, config_ident);
-          base_device_definitions.insert(ident, config.clone());
+          base_device_definitions.insert(ident, definition.clone());
         }
       }
     }
