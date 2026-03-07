@@ -609,13 +609,11 @@ impl From<ServerDeviceFeatureInput> for DeviceFeatureInput {
 #[serde(default)]
 pub struct ServerDeviceFeature {
   #[getset(get_copy = "pub")]
-  #[serde(skip)]
   index: u32,
   #[getset(get = "pub")]
   #[serde(default)]
   description: CompactString,
   #[getset(get_copy = "pub")]
-  #[serde(skip)]
   id: Uuid,
   #[getset(get_copy = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]

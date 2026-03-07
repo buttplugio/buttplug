@@ -20,7 +20,7 @@ use buttplug_core::{
   util::range::RangeInclusive,
 };
 use getset::{Getters, MutGetters, Setters};
-use serde::{Deserialize, Serialize, Serializer, ser::SerializeSeq};
+use serde::{Deserialize, Serialize};
 
 // This will look almost exactly like ServerDeviceMessageAttributes. However, it will only contain
 // information we want the client to know, i.e. step counts versus specific step ranges. This is

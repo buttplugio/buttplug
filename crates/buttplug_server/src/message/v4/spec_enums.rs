@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use std::{collections::BTreeMap, fmt::Debug, u32};
+use std::{fmt::Debug, u32};
 
 use crate::message::{
   ButtplugClientMessageVariant,
@@ -23,7 +23,15 @@ use crate::message::{
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugClientMessageV4, ButtplugDeviceMessage, ButtplugMessage, PingV0, RequestDeviceListV0, RequestServerInfoV4, StartScanningV0, StopCmdV4, StopScanningV0
+    ButtplugClientMessageV4,
+    ButtplugDeviceMessage,
+    ButtplugMessage,
+    PingV0,
+    RequestDeviceListV0,
+    RequestServerInfoV4,
+    StartScanningV0,
+    StopCmdV4,
+    StopScanningV0,
   },
 };
 use litemap::LiteMap;
@@ -94,7 +102,10 @@ impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMess
       }
       // Messages that need device index checking
       ButtplugClientMessageV4::StopCmd(m) => {
-        if m.device_index().map_or(true,|x| feature_map.get(&x).is_some()) {
+        if m
+          .device_index()
+          .map_or(true, |x| feature_map.get(&x).is_some())
+        {
           Ok(ButtplugCheckedClientMessageV4::StopCmd(m))
         } else {
           Err(ButtplugError::from(

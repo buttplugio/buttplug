@@ -37,7 +37,7 @@ use crate::{
   device::ClientDeviceCommandValue,
 };
 
-#[derive(Getters, CopyGetters, Clone)]
+#[derive(Getters, CopyGetters, Clone, Debug)]
 pub struct ClientDeviceFeature {
   #[getset(get_copy = "pub")]
   device_index: u32,

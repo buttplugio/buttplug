@@ -40,7 +40,7 @@ use tokio_tungstenite::{
   connect_async_tls_with_config,
   tungstenite::protocol::Message,
 };
-use tracing::{Instrument, info_span};
+use tracing::info_span;
 use url::Url;
 
 pub fn get_rustls_config_dangerous() -> ClientConfig {
