@@ -27,6 +27,7 @@ pub mod deepsire;
 pub mod feelingso;
 pub mod fleshy_thrust;
 pub mod fluffer;
+pub mod fmachine;
 pub mod foreo;
 pub mod fox;
 pub mod fredorch;
@@ -206,6 +207,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     fluffer::setup::FlufferIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    fmachine::setup::FMachineIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, foreo::setup::ForeoIdentifierFactory::default());
   add_to_protocol_map(&mut map, fox::setup::FoxIdentifierFactory::default());
