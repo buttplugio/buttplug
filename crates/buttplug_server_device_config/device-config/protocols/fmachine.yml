@@ -1,0 +1,26 @@
+---
+defaults:
+  name: F-Machine Device
+  features:
+  - description: Fucking Machine Oscillation Speed
+    id: ab786223-1102-42be-8622-f41dcc4c1e21
+    output:
+      oscillate:
+        value:
+        - 0
+        - 28
+    index: 0
+  id: 5bef333e-15a5-4278-bf70-4df237f3a147
+configurations:
+- identifier:
+  - FM-G
+  name: F-Machine Gigolo BT-R
+  id: 5d8865bf-5842-46d2-bbc7-06fe77d26c20
+communication:
+- btle:
+    names:
+    - FM-*
+    services:
+      0000fff0-0000-1000-8000-00805f9b34fb:
+        tx: 0000fff1-0000-1000-8000-00805f9b34fb
+        rx: 0000fff4-0000-1000-8000-00805f9b34fb
