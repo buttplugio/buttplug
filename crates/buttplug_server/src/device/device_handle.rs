@@ -23,6 +23,7 @@ use buttplug_core::{
     DeviceMessageInfoV4,
     InputCommandType,
     InputType,
+    OutputCommand,
     OutputType,
     OutputValue,
     StopCmdV4,
@@ -159,7 +160,11 @@ impl DeviceHandle {
     DeviceMessageInfoV4::new(
       index,
       &self.name(),
-      &self.definition.display_name().as_ref().map(|n| n.to_string()),
+      &self
+        .definition
+        .display_name()
+        .as_ref()
+        .map(|n| n.to_string()),
       100,
       &self
         .definition
@@ -234,10 +239,14 @@ impl DeviceHandle {
       });
 
     let identifier = self.identifier.clone();
-    let handler_mapped_stream = self.handler.event_stream().map(move |incoming_message| {
-      let id = identifier.clone();
-      DeviceEvent::Notification(id, incoming_message)
-    });
+    let handler_mapped_stream = self
+      .handler
+      .clone()
+      .event_stream()
+      .map(move |incoming_message| {
+        let id = identifier.clone();
+        DeviceEvent::Notification(id, incoming_message)
+      });
     hardware_stream.merge(handler_mapped_stream)
   }
 
@@ -253,7 +262,80 @@ impl DeviceHandle {
     self
       .last_output_command
       .insert(msg.feature_id(), msg.clone());
-    self.handle_generic_command_result(self.handler.handle_output_cmd(msg))
+    let result = self
+      .handler
+      .handle_output_cmd(msg)
+      .unwrap_or_else(|| self.handle_outputcmd_v4_default(msg));
+    self.handle_generic_command_result(result)
+  }
+
+  fn handle_outputcmd_v4_default(
+    &self,
+    cmd: &CheckedOutputCmdV4,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let output_command = cmd.output_command();
+    match output_command {
+      OutputCommand::Constrict(x) => self.handler.handle_output_constrict_cmd(
+        cmd.feature_index(),
+        cmd.feature_id(),
+        x.value()
+          .try_into()
+          .map_err(|_| ButtplugDeviceError::DeviceCommandSignError)?,
+      ),
+      OutputCommand::Spray(x) => self.handler.handle_output_spray_cmd(
+        cmd.feature_index(),
+        cmd.feature_id(),
+        x.value()
+          .try_into()
+          .map_err(|_| ButtplugDeviceError::DeviceCommandSignError)?,
+      ),
+      OutputCommand::Oscillate(x) => self.handler.handle_output_oscillate_cmd(
+        cmd.feature_index(),
+        cmd.feature_id(),
+        x.value()
+          .try_into()
+          .map_err(|_| ButtplugDeviceError::DeviceCommandSignError)?,
+      ),
+      OutputCommand::Rotate(x) => {
+        self
+          .handler
+          .handle_output_rotate_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+      }
+      OutputCommand::Vibrate(x) => self.handler.handle_output_vibrate_cmd(
+        cmd.feature_index(),
+        cmd.feature_id(),
+        x.value()
+          .try_into()
+          .map_err(|_| ButtplugDeviceError::DeviceCommandSignError)?,
+      ),
+      OutputCommand::Position(x) => self.handler.handle_output_position_cmd(
+        cmd.feature_index(),
+        cmd.feature_id(),
+        x.value()
+          .try_into()
+          .map_err(|_| ButtplugDeviceError::DeviceCommandSignError)?,
+      ),
+      OutputCommand::Temperature(x) => {
+        self
+          .handler
+          .handle_output_temperature_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+      }
+      OutputCommand::Led(x) => self.handler.handle_output_led_cmd(
+        cmd.feature_index(),
+        cmd.feature_id(),
+        x.value()
+          .try_into()
+          .map_err(|_| ButtplugDeviceError::DeviceCommandSignError)?,
+      ),
+      OutputCommand::HwPositionWithDuration(x) => {
+        self.handler.handle_hw_position_with_duration_cmd(
+          cmd.feature_index(),
+          cmd.feature_id(),
+          x.value(),
+          x.duration(),
+        )
+      }
+    }
   }
 
   fn handle_hardware_commands(&self, commands: Vec<HardwareCommand>) -> ButtplugServerResultFuture {
