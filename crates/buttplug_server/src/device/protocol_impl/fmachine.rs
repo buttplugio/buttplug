@@ -263,20 +263,26 @@ async fn update_handler(
       is_running.store(!ir, Ordering::Relaxed);
     }
 
+    // If the target speed doesn't match the current speed, send a speed up or down command as appropriate.
+    // Don't send a command if the current speed is 1 and the target speed is 0.
+    // Don't send a command if the current speed is 0 and the target speed is 1.
+    // Both of those transitions are handled by the on/off command.
     if tp != cp {
-      let press_cmd = if tp > cp {
-        CMD_SPEED_UP
-      } else {
-        CMD_SPEED_DOWN
-      };
-      trace!("F-Machine: primary speed {} → {}", cp, tp);
-      if send_button_press_cmd(&device, press_cmd, CMD_SPEED_RELEASE)
-        .await
-        .is_err()
-      {
-        info!("F-Machine speed command error, most likely due to device disconnection.");
-        break;
-      };
+      if tp > 1 || cp > 1 {
+        let press_cmd = if tp > cp {
+          CMD_SPEED_UP
+        } else {
+          CMD_SPEED_DOWN
+        };
+        trace!("F-Machine: primary speed {} → {}", cp, tp);
+        if send_button_press_cmd(&device, press_cmd, CMD_SPEED_RELEASE)
+          .await
+          .is_err()
+        {
+          info!("F-Machine speed command error, most likely due to device disconnection.");
+          break;
+        };
+      }
       current_speed.store(if tp > cp { cp + 1 } else { cp - 1 }, Ordering::Relaxed);
     }
 
