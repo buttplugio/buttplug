@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::device::{
-  hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+  hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
   protocol::{
     ProtocolHandler,
     ProtocolIdentifier,
@@ -16,13 +16,14 @@ use crate::device::{
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
-use buttplug_core::message::OutputType;
+use buttplug_core::message::{InputReadingV4, InputTypeReading, InputValue, OutputType};
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
   ProtocolCommunicationSpecifier,
   ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
+use futures_util::{FutureExt, future::BoxFuture};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU8, Ordering};
 use uuid::{Uuid, uuid};
@@ -112,5 +113,42 @@ impl ProtocolHandler for WeVibe {
     Ok(vec![
       HardwareWriteCmd::new(&[WEVIBE_PROTOCOL_UUID], Endpoint::Tx, data, true).into(),
     ])
+  }
+
+  fn handle_battery_level_cmd(
+    &self,
+    device_index: u32,
+    device: Arc<Hardware>,
+    feature_index: u32,
+    feature_id: Uuid,
+  ) -> BoxFuture<'_, Result<InputReadingV4, ButtplugDeviceError>> {
+    debug!("Trying to get battery reading.");
+    let fut = device.read_value(&HardwareReadCmd::new(feature_id, Endpoint::Rx, 8, 500));
+    async move {
+      let hw_msw = fut.await?;
+      let data = hw_msw.data();
+      if data.len() != 8 {
+        return Err(ButtplugDeviceError::DeviceCommunicationError(
+          "Wevibe battery data not expected length!".to_owned(),
+        ));
+      }
+      // based on https://gist.github.com/bnm12/fcdcef291a500bf51cef734aa1830e4d
+      let xx = data[3] as i32;
+      let zz = data[2] as i32;
+      let mut y = (xx << 8) + zz;
+      if y < 0 {
+        y += 0x10000;
+      }
+      let battery_level = y * 100 / 0xFFFF;
+
+      let battery_reading = InputReadingV4::new(
+        device_index,
+        feature_index,
+        InputTypeReading::Battery(InputValue::new(battery_level as u8)),
+      );
+      debug!("Got battery reading: {}", battery_level);
+      Ok(battery_reading)
+    }
+    .boxed()
   }
 }

@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 176
+    "minor": 177
   },
   "protocols": {
     "activejoy": {
@@ -22321,6 +22321,24 @@
                   ]
                 }
               }
+            },
+            {
+              "description": "battery Level",
+              "id": "92acc28c-5c54-4c61-be26-d9d8443288e3",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
             }
           ],
           "id": "11cd7b68-2c94-4fc8-837f-09d47214cee1",
@@ -22359,6 +22377,24 @@
                   ]
                 }
               }
+            },
+            {
+              "description": "battery Level",
+              "id": "1a971255-fcda-446f-9a94-d1f400e0e8b9",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
             }
           ],
           "id": "400ef30a-63eb-4648-b293-c7ecc874f509",
@@ -22392,6 +22428,24 @@
                   ]
                 }
               }
+            },
+            {
+              "description": "battery Level",
+              "id": "cdf9b997-2430-4120-b836-3af64a9ad170",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
             }
           ],
           "id": "b667bb6a-46b1-4534-8c79-83aa0749028a",
@@ -22422,6 +22476,24 @@
                   "value": [
                     0,
                     15
+                  ]
+                }
+              }
+            },
+            {
+              "description": "battery Level",
+              "id": "7c0cfd3f-6bd1-4081-95b1-1a6d53b3c2d3",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
                   ]
                 }
               }

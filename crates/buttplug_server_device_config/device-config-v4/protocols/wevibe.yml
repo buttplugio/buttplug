@@ -62,6 +62,16 @@ configurations:
         - 0
         - 15
     index: 1
+  - description: battery Level
+    id: 92acc28c-5c54-4c61-be26-d9d8443288e3
+    input:
+      battery:
+        value:
+          - - 0
+            - 100
+        command:
+          - Read
+    index: 2
   id: 11cd7b68-2c94-4fc8-837f-09d47214cee1
 - identifier:
   - Gala
@@ -81,6 +91,16 @@ configurations:
         - 0
         - 15
     index: 1
+  - description: battery Level
+    id: 1a971255-fcda-446f-9a94-d1f400e0e8b9
+    input:
+      battery:
+        value:
+          - - 0
+            - 100
+        command:
+          - Read
+    index: 2
   id: 400ef30a-63eb-4648-b293-c7ecc874f509
 - identifier:
   - Nova
@@ -100,6 +120,16 @@ configurations:
         - 0
         - 15
     index: 1
+  - description: battery Level
+    id: cdf9b997-2430-4120-b836-3af64a9ad170
+    input:
+      battery:
+        value:
+          - - 0
+            - 100
+        command:
+          - Read
+    index: 2
   id: b667bb6a-46b1-4534-8c79-83aa0749028a
 - identifier:
   - Sync
@@ -119,6 +149,16 @@ configurations:
         - 0
         - 15
     index: 1
+  - description: battery Level
+    id: 7c0cfd3f-6bd1-4081-95b1-1a6d53b3c2d3
+    input:
+      battery:
+        value:
+          - - 0
+            - 100
+        command:
+          - Read
+    index: 2
   id: 0e72dab3-4b87-4bae-ae02-aae0bbb0f035
 communication:
 - btle:
