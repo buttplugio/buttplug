@@ -88,10 +88,10 @@ pub async fn frontend_server_event_loop(
                 .send(EngineMessage::ClientDisconnected{})
                 .await;
             }
-            ButtplugRemoteServerEvent::DeviceAdded { index: device_id, name: device_name, identifier: device_address, display_name: device_display_name } => {
+            ButtplugRemoteServerEvent::DeviceAdded { index: device_id, name: device_name, identifier: device_address, display_name: device_display_name, needs_keepalive: device_needs_keepalive } => {
               info!("Device Added: {} - {} - {:?}", device_id, device_name, device_address);
               frontend
-                .send(EngineMessage::DeviceConnected { name: device_name, index: device_id, identifier: device_address, display_name: device_display_name })
+                .send(EngineMessage::DeviceConnected { name: device_name, index: device_id, identifier: device_address, display_name: device_display_name, needs_keepalive: device_needs_keepalive })
                 .await;
             }
             ButtplugRemoteServerEvent::DeviceRemoved { index: device_id } => {

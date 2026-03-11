@@ -31,6 +31,7 @@ pub enum EngineMessage {
     identifier: UserDeviceIdentifier,
     #[serde(skip_serializing_if = "Option::is_none")]
     display_name: Option<String>,
+    needs_keepalive: bool,
   },
   DeviceDisconnected {
     index: u32,

@@ -37,6 +37,7 @@ pub enum ButtplugRemoteServerEvent {
     identifier: UserDeviceIdentifier,
     name: String,
     display_name: Option<String>,
+    needs_keepalive: bool,
   },
   DeviceRemoved {
     index: u32,
@@ -87,6 +88,7 @@ async fn run_device_event_stream(
                 name: da.1.device_name().clone(),
                 identifier: device_info.identifier().clone(),
                 display_name: device_info.display_name().clone(),
+                needs_keepalive: *device_info.needs_keepalive(),
               };
               if remote_event_sender.send(added_event).is_err() {
                 error!(

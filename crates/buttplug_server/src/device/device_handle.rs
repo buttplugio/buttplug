@@ -132,6 +132,23 @@ impl DeviceHandle {
     }
   }
 
+  /// Whether this device needs keepalive packets to maintain its connection.
+  ///
+  /// Returns true when the protocol handler's keepalive strategy requires periodic
+  /// packet replay — either because the hardware requires it (e.g., iOS BLE) or
+  /// because the protocol itself specifies timed keepalives.
+  pub fn needs_keepalive(&self) -> bool {
+    (self.hardware.requires_keepalive()
+      && matches!(
+        self.handler.keepalive_strategy(),
+        ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
+      ))
+      || matches!(
+        self.handler.keepalive_strategy(),
+        ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_)
+      )
+  }
+
   /// Get the device's unique identifier
   pub fn identifier(&self) -> &UserDeviceIdentifier {
     &self.identifier

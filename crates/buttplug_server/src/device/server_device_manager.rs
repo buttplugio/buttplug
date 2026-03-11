@@ -66,6 +66,7 @@ pub(super) enum DeviceManagerCommand {
 pub struct ServerDeviceInfo {
   identifier: UserDeviceIdentifier,
   display_name: Option<String>,
+  needs_keepalive: bool,
 }
 
 pub struct ServerDeviceManagerBuilder {
@@ -311,6 +312,7 @@ impl ServerDeviceManager {
     self.devices.get(&index).map(|device| ServerDeviceInfo {
       identifier: device.value().identifier().clone(),
       display_name: device.value().definition().display_name().clone(),
+      needs_keepalive: device.value().needs_keepalive(),
     })
   }
 
