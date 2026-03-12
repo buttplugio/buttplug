@@ -5,9 +5,17 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::device::{
-  hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
-  protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, ProtocolKeepaliveStrategy},
+use crate::{
+  device::{
+    hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
+    protocol::{
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+      ProtocolKeepaliveStrategy,
+    },
+  },
+  generic_protocol_setup,
 };
 use aes::Aes128;
 use async_trait::async_trait;
@@ -34,21 +42,7 @@ type Aes128EcbDec = ecb::Decryptor<Aes128>;
 const FLUFFER_PROTOCOL_UUID: Uuid = uuid!("d3721a71-a81d-461a-b404-8599ce50c00b");
 const FLUFFER_KEY: [u8; 16] = *b"jdk#Flu%y6fer32f";
 
-pub mod setup {
-  use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
-  #[derive(Default)]
-  pub struct FlufferIdentifierFactory {}
-
-  impl ProtocolIdentifierFactory for FlufferIdentifierFactory {
-    fn identifier(&self) -> &str {
-      "fluffer"
-    }
-
-    fn create(&self) -> Box<dyn ProtocolIdentifier> {
-      Box::new(super::FlufferIdentifier::default())
-    }
-  }
-}
+generic_protocol_setup!(Fluffer, "fluffer");
 
 #[derive(Default)]
 pub struct FlufferIdentifier {}
@@ -81,11 +75,7 @@ impl ProtocolIdentifier for FlufferIdentifier {
       );
     }
     Ok((
-      UserDeviceIdentifier::new(
-        hardware.address(),
-        "fluffer",
-        Some(hardware.name()),
-      ),
+      UserDeviceIdentifier::new(hardware.address(), "fluffer", Some(hardware.name())),
       Box::new(FlufferInitializer::new(data)),
     ))
   }

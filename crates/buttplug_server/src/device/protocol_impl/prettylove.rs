@@ -21,18 +21,12 @@ use std::sync::Arc;
 use uuid::Uuid;
 
 pub mod setup {
-  use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
-  #[derive(Default)]
-  pub struct PrettyLoveIdentifierFactory {}
+  use crate::device::protocol::ProtocolIdentifier;
 
-  impl ProtocolIdentifierFactory for PrettyLoveIdentifierFactory {
-    fn identifier(&self) -> &str {
-      "prettylove"
-    }
+  pub const IDENTIFIER: &str = "prettylove";
 
-    fn create(&self) -> Box<dyn ProtocolIdentifier> {
-      Box::new(super::PrettyLoveIdentifier::default())
-    }
+  pub fn create_identifier() -> Box<dyn ProtocolIdentifier> {
+    Box::new(super::PrettyLoveIdentifier::default())
   }
 }
 

@@ -23,18 +23,12 @@ use std::sync::{
 use uuid::{Uuid, uuid};
 
 pub mod setup {
-  use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
-  #[derive(Default)]
-  pub struct MonsterPubIdentifierFactory {}
+  use crate::device::protocol::ProtocolIdentifier;
 
-  impl ProtocolIdentifierFactory for MonsterPubIdentifierFactory {
-    fn identifier(&self) -> &str {
-      "monsterpub"
-    }
+  pub const IDENTIFIER: &str = "monsterpub";
 
-    fn create(&self) -> Box<dyn ProtocolIdentifier> {
-      Box::new(super::MonsterPubIdentifier::default())
-    }
+  pub fn create_identifier() -> Box<dyn ProtocolIdentifier> {
+    Box::new(super::MonsterPubIdentifier::default())
   }
 }
 

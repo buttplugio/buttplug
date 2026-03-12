@@ -31,18 +31,12 @@ use buttplug_server_device_config::ServerDeviceDefinition;
 const LOVENSE_CONNECT_UUID: Uuid = uuid!("590bfbbf-c3b7-41ae-9679-485b190ffb87");
 
 pub mod setup {
-  use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
-  #[derive(Default)]
-  pub struct LovenseConnectIdentifierFactory {}
+  use crate::device::protocol::ProtocolIdentifier;
 
-  impl ProtocolIdentifierFactory for LovenseConnectIdentifierFactory {
-    fn identifier(&self) -> &str {
-      "lovense-connect-service"
-    }
+  pub const IDENTIFIER: &str = "lovense-connect-service";
 
-    fn create(&self) -> Box<dyn ProtocolIdentifier> {
-      Box::new(super::LovenseConnectIdentifier::default())
-    }
+  pub fn create_identifier() -> Box<dyn ProtocolIdentifier> {
+    Box::new(super::LovenseConnectIdentifier::default())
   }
 }
 

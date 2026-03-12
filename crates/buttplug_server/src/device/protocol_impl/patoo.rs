@@ -25,18 +25,12 @@ use std::sync::{
 use uuid::{Uuid, uuid};
 
 pub mod setup {
-  use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
-  #[derive(Default)]
-  pub struct PatooIdentifierFactory {}
+  use crate::device::protocol::ProtocolIdentifier;
 
-  impl ProtocolIdentifierFactory for PatooIdentifierFactory {
-    fn identifier(&self) -> &str {
-      "patoo"
-    }
+  pub const IDENTIFIER: &str = "patoo";
 
-    fn create(&self) -> Box<dyn ProtocolIdentifier> {
-      Box::new(super::PatooIdentifier::default())
-    }
+  pub fn create_identifier() -> Box<dyn ProtocolIdentifier> {
+    Box::new(super::PatooIdentifier::default())
   }
 }
 

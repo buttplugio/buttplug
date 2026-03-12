@@ -31,19 +31,12 @@ const THEHANDY_V3_PROTOCOL_UUID: Uuid = uuid!("f148e5a6-91fe-4666-944f-2fcec6284
 const THEHANDY_V3_SUBSCRIBE_UUID: Uuid = uuid!("55392f4a-7dcb-435f-a33d-38ec4c1d7d7e");
 
 pub mod setup {
-  use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
+  use crate::device::protocol::ProtocolIdentifier;
 
-  #[derive(Default)]
-  pub struct TheHandyV3IdentifierFactory {}
+  pub const IDENTIFIER: &str = "thehandy-v3";
 
-  impl ProtocolIdentifierFactory for TheHandyV3IdentifierFactory {
-    fn identifier(&self) -> &str {
-      "thehandy-v3"
-    }
-
-    fn create(&self) -> Box<dyn ProtocolIdentifier> {
-      Box::new(super::TheHandyV3Identifier::default())
-    }
+  pub fn create_identifier() -> Box<dyn ProtocolIdentifier> {
+    Box::new(super::TheHandyV3Identifier::default())
   }
 }
 

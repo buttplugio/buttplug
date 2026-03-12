@@ -26,7 +26,8 @@ use crate::device::{
 use async_trait::async_trait;
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{self, InputReadingV4, InputTypeReading, InputValue, OutputType}, util::async_manager,
+  message::{self, InputReadingV4, InputTypeReading, InputValue, OutputType},
+  util::async_manager,
 };
 use buttplug_server_device_config::{
   Endpoint,
@@ -50,18 +51,12 @@ const LOVENSE_COMMAND_RETRY: u64 = 5;
 const LOVENSE_PROTOCOL_UUID: Uuid = uuid!("cfa3fac5-48bb-4d87-817e-a439965956e1");
 
 pub mod setup {
-  use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
-  #[derive(Default)]
-  pub struct LovenseIdentifierFactory {}
+  use crate::device::protocol::ProtocolIdentifier;
+  
+  pub const IDENTIFIER: &str = "lovense";
 
-  impl ProtocolIdentifierFactory for LovenseIdentifierFactory {
-    fn identifier(&self) -> &str {
-      "lovense"
-    }
-
-    fn create(&self) -> Box<dyn ProtocolIdentifier> {
-      Box::new(super::LovenseIdentifier::default())
-    }
+  pub fn create_identifier() -> Box<dyn ProtocolIdentifier> {
+    Box::new(super::LovenseIdentifier::default())
   }
 }
 

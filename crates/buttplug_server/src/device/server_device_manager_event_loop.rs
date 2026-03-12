@@ -16,8 +16,7 @@ use crate::device::{
   DeviceHandle,
   InternalDeviceEvent,
   device_handle::build_device_handle,
-  hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
-  protocol::ProtocolManager,
+  hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent}, protocol::get_protocol_specializers,
 };
 use dashmap::{DashMap, DashSet};
 use futures::{FutureExt, future};
@@ -66,8 +65,6 @@ pub(super) struct ServerDeviceManagerEventLoop {
   connecting_devices: Arc<DashSet<String>>,
   /// Cancellation token for the event loop
   loop_cancellation_token: CancellationToken,
-  /// Protocol map, for mapping user definitions to protocols
-  protocol_manager: ProtocolManager,
 }
 
 impl ServerDeviceManagerEventLoop {
@@ -93,7 +90,6 @@ impl ServerDeviceManagerEventLoop {
       scanning_state: ScanningState::Idle,
       connecting_devices: Arc::new(DashSet::new()),
       loop_cancellation_token,
-      protocol_manager: ProtocolManager::default(),
     }
   }
 
@@ -245,7 +241,7 @@ impl ServerDeviceManagerEventLoop {
         //
         // We used to do this in build_server_device, but we shouldn't mark devices as actually
         // connecting until after this happens, so we're moving it back here.
-        let protocol_specializers = self.protocol_manager.protocol_specializers(
+        let protocol_specializers = get_protocol_specializers(
           &creator.specifier(),
           self.device_config_manager.base_communication_specifiers(),
           self.device_config_manager.user_communication_specifiers(),

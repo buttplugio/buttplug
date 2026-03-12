@@ -24,7 +24,7 @@ use super::hardware::HardwareWriteCmd;
 use crate::{
   device::{
     hardware::{Hardware, HardwareCommand, HardwareReadCmd},
-    protocol_impl::get_default_protocol_map,
+    protocol_impl::get_protocol_identifier,
   },
   message::{
     ButtplugServerDeviceMessage,
@@ -133,22 +133,22 @@ pub trait ProtocolInitializer: Sync + Send {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError>;
 }
 
-pub struct GenericProtocolIdentifier {
-  handler: Option<Arc<dyn ProtocolHandler>>,
-  protocol_identifier: String,
+pub struct GenericProtocolIdentifier<T: ProtocolHandler + Default + 'static> {
+  protocol_identifier: &'static str,
+  marker: std::marker::PhantomData<T>,
 }
 
-impl GenericProtocolIdentifier {
-  pub fn new(handler: Arc<dyn ProtocolHandler>, protocol_identifier: &str) -> Self {
+impl<T: ProtocolHandler + Default + 'static> GenericProtocolIdentifier<T> {
+  pub fn new(protocol_identifier: &'static str) -> Self {
     Self {
-      handler: Some(handler),
-      protocol_identifier: protocol_identifier.to_owned(),
+      protocol_identifier,
+      marker: std::marker::PhantomData,
     }
   }
 }
 
 #[async_trait]
-impl ProtocolIdentifier for GenericProtocolIdentifier {
+impl<T: ProtocolHandler + Default + 'static> ProtocolIdentifier for GenericProtocolIdentifier<T> {
   async fn identify(
     &mut self,
     hardware: Arc<Hardware>,
@@ -161,9 +161,7 @@ impl ProtocolIdentifier for GenericProtocolIdentifier {
     );
     Ok((
       device_identifier,
-      Box::new(GenericProtocolInitializer::new(
-        self.handler.take().unwrap(),
-      )),
+      Box::new(GenericProtocolInitializer::new(Arc::new(T::default()))),
     ))
   }
 }
@@ -424,27 +422,15 @@ pub(crate) fn default_handle_battery_level_cmd(
 #[macro_export]
 macro_rules! generic_protocol_setup {
   ( $protocol_name:ident, $protocol_identifier:tt) => {
-    paste::paste! {
-      pub mod setup {
-        use std::sync::Arc;
-        use $crate::device::protocol::{
-          GenericProtocolIdentifier, ProtocolIdentifier, ProtocolIdentifierFactory,
-        };
-        #[derive(Default)]
-        pub struct [< $protocol_name IdentifierFactory >] {}
+    pub mod setup {
+      use $crate::device::protocol::{GenericProtocolIdentifier, ProtocolIdentifier};
 
-        impl ProtocolIdentifierFactory for  [< $protocol_name IdentifierFactory >] {
-          fn identifier(&self) -> &str {
-            $protocol_identifier
-          }
+      pub const IDENTIFIER: &str = $protocol_identifier;
 
-          fn create(&self) -> Box<dyn ProtocolIdentifier> {
-            Box::new(GenericProtocolIdentifier::new(
-              Arc::new(super::$protocol_name::default()),
-              self.identifier(),
-            ))
-          }
-        }
+      pub fn create_identifier() -> Box<dyn ProtocolIdentifier> {
+        Box::new(GenericProtocolIdentifier::<super::$protocol_name>::new(
+          IDENTIFIER,
+        ))
       }
     }
   };
@@ -455,18 +441,12 @@ macro_rules! generic_protocol_initializer_setup {
   ( $protocol_name:ident, $protocol_identifier:tt) => {
     paste::paste! {
       pub mod setup {
-        use $crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
-        #[derive(Default)]
-        pub struct [< $protocol_name IdentifierFactory >] {}
+        use $crate::device::protocol::ProtocolIdentifier;
 
-        impl ProtocolIdentifierFactory for [< $protocol_name IdentifierFactory >] {
-          fn identifier(&self) -> &str {
-            $protocol_identifier
-          }
+        pub const IDENTIFIER: &str = $protocol_identifier;
 
-          fn create(&self) -> Box<dyn ProtocolIdentifier> {
-            Box::new(super::[< $protocol_name Identifier >]::default())
-          }
+        pub fn create_identifier() -> Box<dyn ProtocolIdentifier> {
+          Box::new(super::[< $protocol_name Identifier >]::default())
         }
       }
 
@@ -490,64 +470,41 @@ macro_rules! generic_protocol_initializer_setup {
 pub use generic_protocol_initializer_setup;
 pub use generic_protocol_setup;
 
-pub struct ProtocolManager {
-  // Map of protocol names to their respective protocol instance factories
-  protocol_map: HashMap<String, Arc<dyn ProtocolIdentifierFactory>>,
-}
-
-impl Default for ProtocolManager {
-  fn default() -> Self {
-    Self {
-      protocol_map: get_default_protocol_map(),
-    }
-  }
-}
-
-impl ProtocolManager {
-  pub fn protocol_specializers(
-    &self,
-    specifier: &ProtocolCommunicationSpecifier,
-    base_communication_specifiers: &HashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
-    user_communication_specifiers: &DashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
-  ) -> Vec<ProtocolSpecializer> {
-    debug!(
-      "Looking for protocol that matches specifier: {:?}",
-      specifier
-    );
-    let mut specializers = vec![];
-    let mut update_specializer_map =
-      |name: &str, specifiers: &Vec<ProtocolCommunicationSpecifier>| {
-        if specifiers.contains(specifier) {
-          info!(
-            "Found protocol {:?} for user specifier {:?}.",
+pub fn get_protocol_specializers(
+  specifier: &ProtocolCommunicationSpecifier,
+  base_communication_specifiers: &HashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
+  user_communication_specifiers: &DashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
+) -> Vec<ProtocolSpecializer> {
+  debug!(
+    "Looking for protocol that matches specifier: {:?}",
+    specifier
+  );
+  let mut specializers = vec![];
+  let mut update_specializer_map =
+    |name: &str, specifiers: &Vec<ProtocolCommunicationSpecifier>| {
+      if specifiers.contains(specifier) {
+        info!(
+          "Found protocol {:?} for user specifier {:?}.",
+          name, specifier
+        );
+        if let Some(identifier) = get_protocol_identifier(name) {
+          specializers.push(ProtocolSpecializer::new(specifiers.clone(), identifier));
+        } else {
+          warn!(
+            "No protocol implementation for {:?} found for specifier {:?}.",
             name, specifier
           );
-          if self.protocol_map.contains_key(name) {
-            specializers.push(ProtocolSpecializer::new(
-              specifiers.clone(),
-              self
-                .protocol_map
-                .get(name)
-                .expect("already checked existence")
-                .create(),
-            ));
-          } else {
-            warn!(
-              "No protocol implementation for {:?} found for specifier {:?}.",
-              name, specifier
-            );
-          }
         }
-      };
-    // Loop through both maps, as chaining between DashMap and HashMap gets kinda gross.
-    for spec in user_communication_specifiers.iter() {
-      update_specializer_map(spec.key(), spec.value());
-    }
-    for (name, specifiers) in base_communication_specifiers.iter() {
-      update_specializer_map(name, specifiers);
-    }
-    specializers
+      }
+    };
+  // Loop through both maps, as chaining between DashMap and HashMap gets kinda gross.
+  for spec in user_communication_specifiers.iter() {
+    update_specializer_map(spec.key(), spec.value());
   }
+  for (name, specifiers) in base_communication_specifiers.iter() {
+    update_specializer_map(name, specifiers);
+  }
+  specializers
 }
 
 /*
