@@ -16,6 +16,7 @@ buttplug_client = { version = "10.0.0", path = "../buttplug_client" }
 buttplug_client_in_process = { version = "10.0.0", path = "../buttplug_client_in_process", default-features = false}
 buttplug_server = { version = "10.0.0", path = "../buttplug_server" }
 buttplug_server_device_config = { version = "10.0.0", path = "../buttplug_server_device_config" }
+buttplug_server_hwmgr_btleplug = { version = "10.0.0", path = "../buttplug_server_hwmgr_btleplug" }
 log = "0.4.29"
 tokio = { version = "1.49.0", features = ["macros"] }
 uuid = "1.20.0"
@@ -31,3 +32,5 @@ getset = "0.1.6"
 jsonschema = { version = "0.38.1", default-features = false }
 test-case = "3.3.1"
 serde_yaml = "0.9.34"
+tabled = "0.20"
+humansize = "2"
