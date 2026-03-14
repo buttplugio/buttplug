@@ -21,3 +21,9 @@ Cargo.lock
 .yarn*
 
 **/.pnp.*
+.claude
+storyteller-output
+plans
+docs
+.deciduous
+**/.DS_Store
