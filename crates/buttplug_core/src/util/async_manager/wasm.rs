@@ -16,7 +16,7 @@ pub struct WasmAsyncManager {}
 
 #[async_trait]
 impl super::AsyncManager for WasmAsyncManager {
-  fn spawn(&self, future: FutureObj<'static, ()>) {
+  fn spawn(&self, future: FutureObj<'static, ()>, _span: tracing::Span) {
     spawn_local(future);
   }
 

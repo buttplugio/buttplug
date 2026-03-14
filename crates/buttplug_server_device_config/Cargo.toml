@@ -19,7 +19,7 @@ doctest = true
 doc = true
 
 [dependencies]
-buttplug_core = { version = "10.0.0", path = "../buttplug_core" }
+buttplug_core = { version = "10.0.0", path = "../buttplug_core", default-features = false }
 futures = "0.3.31"
 futures-util = "0.3.31"
 serde = { version = "1.0.228", features = ["derive"] }
@@ -42,7 +42,7 @@ enumflags2 = "0.7.12"
 serde_yaml = "0.9.34"
 serde_json = "1.0.149"
 serde = { version = "1.0.228", features = ["derive"] }
-buttplug_core = { version = "10.0.0", path = "../buttplug_core" }
+buttplug_core = { version = "10.0.0", path = "../buttplug_core", default-features = false }
 
 [dev-dependencies]
 test-case = "3.3.1"

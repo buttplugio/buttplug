@@ -13,7 +13,7 @@ pub struct DummyAsyncManager {}
 
 #[async_trait]
 impl super::AsyncManager for DummyAsyncManager {
-  fn spawn(&self, _future: FutureObj<'static, ()>) {
+  fn spawn(&self, _future: FutureObj<'static, ()>, _span: tracing::Span) {
     unimplemented!(
       "No async runtime available. Please set a global async manager using set_global_async_manager or enable tokio-runtime or wasm feature"
     );
