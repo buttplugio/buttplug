@@ -146,8 +146,6 @@ fn load_user_config(
   skip_version_check: bool,
   dcm_builder: &mut DeviceConfigurationManagerBuilder,
 ) -> Result<(), ButtplugDeviceError> {
-  let base_dcm = dcm_builder.clone().finish().unwrap();
-
   info!("Loading user configuration from string.");
   let user_config_file =
     load_protocol_config_from_json::<UserConfigFile>(user_config_str, skip_version_check)?;
@@ -180,14 +178,16 @@ fn load_user_config(
     }
   }
 
+  // Snapshot taken after user-defined configurations are added so that user device config pairs
+  // whose base_id refers to a configuration defined in the same user config file can be resolved.
+  let base_dcm = dcm_builder.clone().finish().unwrap();
+
   for user_device_config_pair in user_config
     .user_device_configs()
     .clone()
     .unwrap_or_default()
   {
-    //let ident = BaseDeviceIdentifier::new(user_device_config_pair.identifier().protocol(), &None);
     // Use device UUID instead of identifier to match here, otherwise we have to do really weird stuff with identifier hashes.
-    // TODO How do we deal with user configs derived from default here? We don't handle loading this correctly?
     if let Some(base_config) = base_dcm
       .base_device_definitions()
       .iter()

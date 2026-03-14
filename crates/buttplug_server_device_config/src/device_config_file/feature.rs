@@ -293,7 +293,8 @@ impl ConfigUserDeviceFeature {
         None
       }
     } else {
-      None
+      // No user output override: inherit the base feature's output unchanged.
+      base_feature.output().clone()
     };
     Ok(ServerDeviceFeature::new(
       base_feature.index(),
