@@ -39,7 +39,7 @@ uuid = { version = "1.22.0", features = ["serde", "v4"] }
 dashmap = { version = "6.1.0", features = ["serde"] }
 tracing = "0.1.44"
 thiserror = "2.0.18"
-reqwest = { version = "0.12.28", default-features = false, features = ["rustls-tls"] }
+reqwest = { version = "0.13.2", default-features = false, features = ["rustls"] }
 rustls = { version = "0.23.37", default-features = false, features = ["ring"]}
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"

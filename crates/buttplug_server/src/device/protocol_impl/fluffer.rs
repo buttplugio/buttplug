@@ -20,7 +20,7 @@ use buttplug_server_device_config::{
 };
 use ecb::cipher::block_padding::Pkcs7;
 use ecb::cipher::{BlockDecryptMut, BlockEncryptMut, KeyInit};
-use rand::prelude::*;
+use rand::random;
 use sha2::Digest;
 use std::sync::{
   Arc,

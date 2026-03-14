@@ -29,6 +29,6 @@ async-trait = "0.1.89"
 dashmap = "6.1.0"
 thiserror = "2.0.18"
 getset = "0.1.6"
-jsonschema = { version = "0.38.1", default-features = false }
+jsonschema = { version = "0.45.0", default-features = false }
 test-case = "3.3.1"
 serde_yaml = "0.9.34"

@@ -30,6 +30,6 @@ tracing-futures = "0.2.5"
 tracing = "0.1.44"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
-jsonschema = { version = "0.38.1", default-features = false }
-strum = "0.27.2"
-strum_macros = "0.27.2"
+jsonschema = { version = "0.45.0", default-features = false }
+strum = "0.28.0"
+strum_macros = "0.28.0"
