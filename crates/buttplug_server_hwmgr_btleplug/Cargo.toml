@@ -1,6 +1,6 @@
 [package]
 name = "buttplug_server_hwmgr_btleplug"
-version = "10.0.0"
+version = "10.0.1"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Buttplug Intimate Hardware Control Library - Core Library"
 license = "BSD-3-Clause"
@@ -27,7 +27,7 @@ futures = "0.3.31"
 futures-util = "0.3.31"
 log = "0.4.29"
 tokio = { version = "1.49.0", features = ["sync", "time"] }
-btleplug = "0.11.8"
+btleplug = { version = "0.12.0", path = "../../../btleplug" }
 async-trait = "0.1.89"
 uuid = { version = "1.20.0", features = ["serde", "v4"] }
 dashmap = { version = "6.1.0", features = ["serde"] }
