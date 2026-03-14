@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 177
+    "minor": 178
   },
   "protocols": {
     "activejoy": {
@@ -21353,6 +21353,7 @@
           }
         ],
         "id": "5c1195a5-a2e4-4643-bd47-8cb3a1e067f4",
+        "message_gap_ms": 20,
         "name": "TCode v0.3 (Single Linear Axis)"
       }
     },
@@ -21392,6 +21393,7 @@
           }
         ],
         "id": "fc9de0ed-0f9f-402e-a1b5-4d1865e7b87b",
+        "message_gap_ms": 50,
         "name": "The Handy"
       }
     },
@@ -21472,6 +21474,7 @@
           }
         ],
         "id": "ccbbda59-cf58-477e-b1b2-e0897c4bb0ce",
+        "message_gap_ms": 50,
         "name": "The Handy (FW4+)"
       }
     },
