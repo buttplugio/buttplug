@@ -1,3 +1,9 @@
+# 10.0.2 (2026-03-13)
+
+- Device Support
+  - HoneyPlayBox devices
+  - Various JoyHub devices
+
 # 10.0.1 (2026-02-07)
 
 ## Bugfixes

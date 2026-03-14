@@ -1,3 +1,14 @@
+# 10.0.1 (2026-03-13)
+
+## Features
+
+- Device Updates
+  - Add battery reading for WeVibe
+- Device Protocol Support
+  - HoneyPlayBox devices
+  - Various JoyHub devices
+- Expose "needs_keepalive" to engine to minimize mobile wakelocks
+
 # 10.0.0 (2026-01-31)
 
 ## Features
