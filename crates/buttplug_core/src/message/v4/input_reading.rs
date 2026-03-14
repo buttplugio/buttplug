@@ -8,6 +8,7 @@
 use crate::message::{ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageValidator, InputType};
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
+use strum_macros::Display;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, CopyGetters)]
 #[getset(get_copy = "pub")]

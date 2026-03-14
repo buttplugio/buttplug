@@ -6,9 +6,12 @@
 // for full license information.
 
 use super::hismith_mini::HismithMiniInitializer;
-use crate::device::{
-  hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-  protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+use crate::{
+  device::{
+    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+  },
+  generic_protocol_setup,
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
@@ -23,21 +26,7 @@ use uuid::{Uuid, uuid};
 
 const HISMITH_PROTOCOL_UUID: Uuid = uuid!("e59f9c5d-bb4a-4a9c-ab57-0ceb43af1da7");
 
-pub mod setup {
-  use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
-  #[derive(Default)]
-  pub struct HismithIdentifierFactory {}
-
-  impl ProtocolIdentifierFactory for HismithIdentifierFactory {
-    fn identifier(&self) -> &str {
-      "hismith"
-    }
-
-    fn create(&self) -> Box<dyn ProtocolIdentifier> {
-      Box::new(super::HismithIdentifier::default())
-    }
-  }
-}
+generic_protocol_setup!(Hismith, "hismith");
 
 #[derive(Default)]
 pub struct HismithIdentifier {}
@@ -70,13 +59,13 @@ impl ProtocolIdentifier for HismithIdentifier {
     if !LEGACY_HISMITHS.contains(&identifier.as_str()) {
       info!("Not a legacy Hismith, using hismith-mini protocol");
       return Ok((
-        UserDeviceIdentifier::new(hardware.address(), "hismith-mini", &Some(identifier)),
+        UserDeviceIdentifier::new(hardware.address(), "hismith-mini", Some(&identifier)),
         Box::new(HismithMiniInitializer::default()),
       ));
     }
 
     Ok((
-      UserDeviceIdentifier::new(hardware.address(), "hismith", &Some(identifier)),
+      UserDeviceIdentifier::new(hardware.address(), "hismith", Some(&identifier)),
       Box::new(HismithInitializer::default()),
     ))
   }

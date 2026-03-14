@@ -15,10 +15,7 @@ use crate::device::{
   },
 };
 use async_trait::async_trait;
-use buttplug_core::{
-  errors::ButtplugDeviceError,
-  util::{async_manager, sleep},
-};
+use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
 use buttplug_server_device_config::{
   Endpoint,
   ProtocolCommunicationSpecifier,
@@ -32,6 +29,7 @@ use std::{
   },
   time::Duration,
 };
+use tracing::info_span;
 use uuid::{Uuid, uuid};
 
 const XUANHUAN_PROTOCOL_ID: Uuid = uuid!("e9f9f8ab-4fd5-4573-a4ec-ab542568849b");
@@ -70,7 +68,7 @@ async fn vibration_update_handler(device: Arc<Hardware>, command_holder: Arc<Ato
         break;
       }
     }
-    sleep(Duration::from_millis(300)).await;
+    async_manager::sleep(Duration::from_millis(300)).await;
   }
   info!("Xuanhuan control loop exiting, most likely due to device disconnection.");
 }
@@ -85,6 +83,7 @@ impl Xuanhuan {
     let current_command_clone = current_command.clone();
     async_manager::spawn(
       async move { vibration_update_handler(device, current_command_clone).await },
+      info_span!("XuanhuanControlLoop").or_current(),
     );
     Self { current_command }
   }

@@ -65,7 +65,7 @@ fn test_tcode_device_creation() {
   .finish()
   .unwrap();
   let device = dcm
-    .device_definition(&UserDeviceIdentifier::new("COM1", "tcode-v03", &None))
+    .device_definition(&UserDeviceIdentifier::new("COM1", "tcode-v03", None))
     .unwrap();
   assert_eq!(device.name(), "TCode v0.3 (Single Linear Axis)");
 }

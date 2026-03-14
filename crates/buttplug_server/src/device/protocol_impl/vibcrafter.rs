@@ -33,7 +33,6 @@ use uuid::{Uuid, uuid};
 
 use rand::distributions::Alphanumeric;
 use rand::{Rng, thread_rng};
-use regex::Regex;
 use sha2::{Digest, Sha256};
 
 type Aes128EcbEnc = ecb::Encryptor<Aes128>;
@@ -101,31 +100,21 @@ impl ProtocolInitializer for VibCrafterInitializer {
           debug!("VibCrafter authenticated!");
           return Ok(Arc::new(VibCrafter::default()));
         }
-        let challenge = Regex::new(r"^[a-zA-Z0-9]{4}:([a-zA-Z0-9]+);$")
-          .expect("This is static and should always compile");
-        if let Some(parts) = challenge.captures(decoded.as_str()) {
-          debug!("VibCrafter challenge {:?}", parts);
-          if let Some(to_hash) = parts.get(1) {
-            debug!("VibCrafter to hash {:?}", to_hash);
-            let mut sha256 = Sha256::new();
-            sha256.update(to_hash.as_str().as_bytes());
-            let result = &sha256.finalize();
+        if decoded.len() > 5 && decoded.ends_with(';') && decoded.as_bytes()[4] == b':' {
+          let to_hash = &decoded[5..decoded.len() - 1];
+          let mut sha256 = Sha256::new();
+          sha256.update(to_hash.as_bytes());
+          let result = &sha256.finalize();
 
-            let auth_msg = format!("Auth:{:02x}{:02x};", result[0], result[1]);
-            hardware
-              .write_value(&HardwareWriteCmd::new(
-                &[VIBCRAFTER_PROTOCOL_UUID],
-                Endpoint::Tx,
-                encrypt(auth_msg),
-                false,
-              ))
-              .await?;
-          } else {
-            return Err(ButtplugDeviceError::ProtocolSpecificError(
-              "VibCrafter".to_owned(),
-              "VibCrafter didn't provide a valid security handshake".to_owned(),
-            ));
-          }
+          let auth_msg = format!("Auth:{:02x}{:02x};", result[0], result[1]);
+          hardware
+            .write_value(&HardwareWriteCmd::new(
+              &[VIBCRAFTER_PROTOCOL_UUID],
+              Endpoint::Tx,
+              encrypt(auth_msg),
+              false,
+            ))
+            .await?;
         } else {
           return Err(ButtplugDeviceError::ProtocolSpecificError(
             "VibCrafter".to_owned(),

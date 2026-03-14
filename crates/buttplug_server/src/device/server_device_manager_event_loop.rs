@@ -16,15 +16,13 @@ use crate::device::{
   DeviceHandle,
   InternalDeviceEvent,
   device_handle::build_device_handle,
-  hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
-  protocol::ProtocolManager,
+  hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent}, protocol::get_protocol_specializers,
 };
 use dashmap::{DashMap, DashSet};
 use futures::{FutureExt, future};
 use std::sync::Arc;
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
-use tracing_futures::Instrument;
 
 use super::server_device_manager::DeviceManagerCommand;
 
@@ -67,8 +65,6 @@ pub(super) struct ServerDeviceManagerEventLoop {
   connecting_devices: Arc<DashSet<String>>,
   /// Cancellation token for the event loop
   loop_cancellation_token: CancellationToken,
-  /// Protocol map, for mapping user definitions to protocols
-  protocol_manager: ProtocolManager,
 }
 
 impl ServerDeviceManagerEventLoop {
@@ -94,7 +90,6 @@ impl ServerDeviceManagerEventLoop {
       scanning_state: ScanningState::Idle,
       connecting_devices: Arc::new(DashSet::new()),
       loop_cancellation_token,
-      protocol_manager: ProtocolManager::default(),
     }
   }
 
@@ -185,9 +180,7 @@ impl ServerDeviceManagerEventLoop {
           }
           ScanningState::BringupInProgress => {
             // Comm manager finished before we completed bringup - ignore for now
-            debug!(
-              "Hardware Comm Manager finished before scanning was fully started, ignoring"
-            );
+            debug!("Hardware Comm Manager finished before scanning was fully started, ignoring");
           }
           ScanningState::Active => {
             // Check if all hardware has actually stopped
@@ -248,7 +241,7 @@ impl ServerDeviceManagerEventLoop {
         //
         // We used to do this in build_server_device, but we shouldn't mark devices as actually
         // connecting until after this happens, so we're moving it back here.
-        let protocol_specializers = self.protocol_manager.protocol_specializers(
+        let protocol_specializers = get_protocol_specializers(
           &creator.specifier(),
           self.device_config_manager.base_communication_specifiers(),
           self.device_config_manager.user_communication_specifiers(),
@@ -291,27 +284,35 @@ impl ServerDeviceManagerEventLoop {
         // Clone sender again for the forwarding task that build_device_handle will spawn
         let device_event_sender_for_forwarding = self.device_event_sender.clone();
 
-        async_manager::spawn(async move {
-          match build_device_handle(
-            device_config_manager,
-            creator,
-            protocol_specializers,
-            device_event_sender_for_forwarding,
-          ).await {
-            Ok(device_handle) => {
-              if device_event_sender_clone
-                .send(InternalDeviceEvent::Connected(device_handle))
-                .await
-                .is_err() {
-                error!("Device manager disappeared before connection established, device will be dropped.");
+        async_manager::spawn(
+          async move {
+            match build_device_handle(
+              device_config_manager,
+              creator,
+              protocol_specializers,
+              device_event_sender_for_forwarding,
+            )
+            .await
+            {
+              Ok(device_handle) => {
+                if device_event_sender_clone
+                  .send(InternalDeviceEvent::Connected(device_handle))
+                  .await
+                  .is_err()
+                {
+                  error!(
+                    "Device manager disappeared before connection established, device will be dropped."
+                  );
+                }
               }
-            },
-            Err(e) => {
-              error!("Device errored while trying to connect: {:?}", e);
+              Err(e) => {
+                error!("Device errored while trying to connect: {:?}", e);
+              }
             }
-          }
-          connecting_devices.remove(&address);
-        }.instrument(span));
+            connecting_devices.remove(&address);
+          },
+          span.or_current(),
+        );
       }
     }
   }
@@ -364,7 +365,11 @@ impl ServerDeviceManagerEventLoop {
         // Note: The device event forwarding task is now spawned in build_device_handle(),
         // so we no longer need to create it here.
 
-        info!("Assigning index {} to {}", device_index, device_handle.name());
+        info!(
+          "Assigning index {} to {}",
+          device_index,
+          device_handle.name()
+        );
         self.device_map.insert(device_index, device_handle.clone());
 
         let device_update_message: ButtplugServerMessageV4 = self.generate_device_list().into();

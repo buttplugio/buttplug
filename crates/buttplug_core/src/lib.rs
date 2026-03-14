@@ -12,9 +12,6 @@ pub mod errors;
 pub mod message;
 pub mod util;
 
-#[macro_use]
-extern crate strum_macros;
-
 use errors::ButtplugError;
 use futures::future::{self, BoxFuture, FutureExt};
 

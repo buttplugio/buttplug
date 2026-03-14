@@ -6,11 +6,13 @@
 // for full license information.
 
 use buttplug_core::errors::ButtplugDeviceError;
+use compact_str::CompactString;
 use dashmap::DashMap;
 use getset::Getters;
 use std::{
   collections::HashMap,
   fmt::{self, Debug},
+  sync::Arc,
 };
 use uuid::Uuid;
 
@@ -25,13 +27,24 @@ use crate::{
 
 #[derive(Default, Clone)]
 pub struct DeviceConfigurationManagerBuilder {
-  base_communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
-  user_communication_specifiers: DashMap<String, Vec<ProtocolCommunicationSpecifier>>,
-  base_device_definitions: HashMap<BaseDeviceIdentifier, ServerDeviceDefinition>,
+  base_communication_specifiers: HashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
+  user_communication_specifiers: DashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
+  base_device_definitions: HashMap<BaseDeviceIdentifier, Arc<ServerDeviceDefinition>>,
   user_device_definitions: DashMap<UserDeviceIdentifier, ServerDeviceDefinition>,
 }
 
 impl DeviceConfigurationManagerBuilder {
+  pub fn new(
+    base_communication_specifiers: HashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
+    base_device_definitions: HashMap<BaseDeviceIdentifier, Arc<ServerDeviceDefinition>>,
+  ) -> Self {
+    Self {
+      base_communication_specifiers,
+      base_device_definitions,
+      ..Default::default()
+    }
+  }
+
   pub fn communication_specifier(
     &mut self,
     protocol_name: &str,
@@ -39,7 +52,7 @@ impl DeviceConfigurationManagerBuilder {
   ) -> &mut Self {
     self
       .base_communication_specifiers
-      .entry(protocol_name.to_owned())
+      .entry(protocol_name.into())
       .or_default()
       .extend(specifier.iter().cloned());
     self
@@ -52,7 +65,7 @@ impl DeviceConfigurationManagerBuilder {
   ) -> &mut Self {
     self
       .base_device_definitions
-      .insert(identifier.clone(), features.clone());
+      .insert(identifier.clone(), Arc::new(features.clone()));
     self
   }
 
@@ -63,7 +76,7 @@ impl DeviceConfigurationManagerBuilder {
   ) -> &mut Self {
     self
       .user_communication_specifiers
-      .entry(protocol_name.to_owned())
+      .entry(protocol_name.into())
       .or_default()
       .extend(specifier.iter().cloned());
     self
@@ -95,27 +108,12 @@ impl DeviceConfigurationManagerBuilder {
     }
   }
 
-  pub fn finish(&mut self) -> Result<DeviceConfigurationManager, ButtplugDeviceError> {
-    // Build and validate the protocol attributes tree.
-    let mut attribute_tree_map = HashMap::new();
-
-    // Add all the defaults first, they won't have parent attributes.
-    for (ident, attr) in &self.base_device_definitions {
-      attribute_tree_map.insert(ident.clone(), attr.clone());
-    }
-
-    let user_attribute_tree_map = DashMap::new();
-    // Finally, add in user configurations, which will have an address.
-    for kv in &self.user_device_definitions {
-      user_attribute_tree_map.insert(kv.key().clone(), kv.value().clone());
-    }
-
+  pub fn finish(self) -> Result<DeviceConfigurationManager, ButtplugDeviceError> {
     Ok(DeviceConfigurationManager {
-      base_communication_specifiers: self.base_communication_specifiers.clone(),
-      user_communication_specifiers: self.user_communication_specifiers.clone(),
-      base_device_definitions: attribute_tree_map,
-      user_device_definitions: user_attribute_tree_map,
-      //protocol_map,
+      base_communication_specifiers: self.base_communication_specifiers,
+      user_communication_specifiers: self.user_communication_specifiers,
+      base_device_definitions: self.base_device_definitions,
+      user_device_definitions: self.user_device_definitions,
     })
   }
 }
@@ -137,13 +135,14 @@ pub struct DeviceConfigurationManager {
   /// Communication specifiers from the base device config, mapped from protocol name to vector of
   /// specifiers. Should not change/update during a session.
   #[getset(get = "pub")]
-  base_communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
+  base_communication_specifiers: HashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
   /// Device definitions from the base device config. Should not change/update during a session.
-  base_device_definitions: HashMap<BaseDeviceIdentifier, ServerDeviceDefinition>,
+  #[getset(get = "pub")]
+  base_device_definitions: HashMap<BaseDeviceIdentifier, Arc<ServerDeviceDefinition>>,
   /// Communication specifiers provided by the user, mapped from protocol name to vector of
   /// specifiers. Loaded at session start, may change over life of session.
   #[getset(get = "pub")]
-  user_communication_specifiers: DashMap<String, Vec<ProtocolCommunicationSpecifier>>,
+  user_communication_specifiers: DashMap<CompactString, Vec<ProtocolCommunicationSpecifier>>,
   /// Device definitions from the user device config. Loaded at session start, may change over life
   /// of session.
   #[getset(get = "pub")]
@@ -175,7 +174,7 @@ impl DeviceConfigurationManager {
     //self.protocol_map.contains_key(protocol);
     self
       .user_communication_specifiers
-      .entry(protocol.to_owned())
+      .entry(protocol.into())
       .or_default()
       .push(specifier.clone());
     Ok(())
@@ -287,8 +286,9 @@ impl DeviceConfigurationManager {
         "Protocol + Identifier device config found for {:?}, creating new user device from configuration",
         identifier
       );
-      let mut builder = ServerDeviceDefinitionBuilder::from_base(definition, Uuid::new_v4(), true);
-      builder.index(self.device_index(identifier)).finish()
+      ServerDeviceDefinitionBuilder::from_base(definition, Uuid::new_v4(), true)
+        .index(self.device_index(identifier))
+        .finish()
     } else if let Some(definition) = self
       .base_device_definitions
       .get(&BaseDeviceIdentifier::new(identifier.protocol(), &None))
@@ -297,8 +297,9 @@ impl DeviceConfigurationManager {
         "Protocol device config found for {:?}, creating new user device from protocol defaults",
         identifier
       );
-      let mut builder = ServerDeviceDefinitionBuilder::from_base(definition, Uuid::new_v4(), true);
-      builder.index(self.device_index(identifier)).finish()
+      ServerDeviceDefinitionBuilder::from_base(definition, Uuid::new_v4(), true)
+        .index(self.device_index(identifier))
+        .finish()
     } else {
       return None;
     };

@@ -15,6 +15,7 @@ use super::message::{
   OutputType,
   serializer::ButtplugSerializerError,
 };
+use displaydoc::Display;
 use futures::future::BoxFuture;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -51,7 +52,7 @@ impl_error_to_future!(
 /// a remote network connection cannot be established), see
 /// [crate::connector::ButtplugConnectorError].
 
-#[derive(Debug, Error, Display, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Display, Error, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ButtplugHandshakeError {
   /// Expected either a ServerInfo or Error message, received {0}
   UnexpectedHandshakeMessageReceived(String),
@@ -130,7 +131,7 @@ pub enum ButtplugDeviceError {
   DeviceCommunicationError(String),
   /// Device feature only has {0} steps for control, but {1} steps specified.
   DeviceStepRangeError(i32, i32),
-  /// Device got {} output command but has no viable outputs
+  /// Device got {0} output command but has no viable outputs
   DeviceNoOutputError(OutputType),
   /// Device got {0} input command but has no viable inputs
   DeviceNoInputError(InputType),

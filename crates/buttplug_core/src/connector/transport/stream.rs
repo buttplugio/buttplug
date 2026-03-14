@@ -21,6 +21,7 @@ use futures::{
   FutureExt,
   future::{self, BoxFuture},
 };
+use tracing::info_span;
 
 use std::sync::Arc;
 use tokio::{
@@ -88,7 +89,7 @@ impl ButtplugConnectorTransport for ButtplugStreamTransport {
             }
           }
         }
-      });
+      }, info_span!("ButtplugStreamTransportEventLoop").or_current());
       Ok(())
     }.boxed()
   }

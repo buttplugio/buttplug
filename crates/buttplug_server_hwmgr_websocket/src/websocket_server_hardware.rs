@@ -47,6 +47,7 @@ use tokio::{
   time::sleep,
 };
 use tokio_util::sync::CancellationToken;
+use tracing::info_span;
 
 async fn run_connection_loop(
   address: &str,
@@ -173,7 +174,7 @@ impl WebsocketServerHardwareConnector {
     let (device_event_sender, _) = broadcast::channel(256);
     let device_event_sender_clone = device_event_sender.clone();
     let address = info.address().clone();
-    tokio::spawn(async move {
+    async_manager::spawn(async move {
       run_connection_loop(
         &address,
         device_event_sender_clone,
@@ -182,7 +183,7 @@ impl WebsocketServerHardwareConnector {
         incoming_broadcaster_clone,
       )
       .await;
-    });
+    }, info_span!("WebsocketServerHardwareConnector::connection_loop").or_current());
     Self {
       info,
       outgoing_sender,
@@ -305,31 +306,34 @@ impl HardwareInternal for WebsocketServerHardware {
       subscribed.store(true, Ordering::Relaxed);
       let token = CancellationToken::new();
       *(subscribed_token.lock().await) = Some(token.child_token());
-      async_manager::spawn(async move {
-        loop {
-          select! {
-            result = data_receiver.recv().fuse() => {
-              match result {
-                Ok(data) => {
-                  debug!("Got websocket data! {:?}", data);
-                  // We don't really care if there's no one to send the error to here.
-                  let _ = event_sender
-                    .send(HardwareEvent::Notification(
-                      address.clone(),
-                      Endpoint::Tx,
-                      data,
-                    ));
-                },
-                Err(_) => break,
+      async_manager::spawn(
+        async move {
+          loop {
+            select! {
+              result = data_receiver.recv().fuse() => {
+                match result {
+                  Ok(data) => {
+                    debug!("Got websocket data! {:?}", data);
+                    // We don't really care if there's no one to send the error to here.
+                    let _ = event_sender
+                      .send(HardwareEvent::Notification(
+                        address.clone(),
+                        Endpoint::Tx,
+                        data,
+                      ));
+                  },
+                  Err(_) => break,
+                }
+              },
+              _ = token.cancelled().fuse() => {
+                break;
               }
-            },
-            _ = token.cancelled().fuse() => {
-              break;
             }
           }
-        }
-        info!("Data channel closed, ending websocket server device listener task");
-      });
+          info!("Data channel closed, ending websocket server device listener task");
+        },
+        info_span!("WebsocketServerHardware::subscribe_listener").or_current(),
+      );
       Ok(())
     }
     .boxed()

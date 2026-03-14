@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use std::{collections::BTreeMap, fmt::Debug, u32};
+use std::{fmt::Debug, u32};
 
 use crate::message::{
   ButtplugClientMessageVariant,
@@ -23,9 +23,18 @@ use crate::message::{
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugClientMessageV4, ButtplugDeviceMessage, ButtplugMessage, PingV0, RequestDeviceListV0, RequestServerInfoV4, StartScanningV0, StopCmdV4, StopScanningV0
+    ButtplugClientMessageV4,
+    ButtplugDeviceMessage,
+    ButtplugMessage,
+    PingV0,
+    RequestDeviceListV0,
+    RequestServerInfoV4,
+    StartScanningV0,
+    StopCmdV4,
+    StopScanningV0,
   },
 };
+use litemap::LiteMap;
 
 use super::{
   checked_input_cmd::CheckedInputCmdV4,
@@ -74,7 +83,7 @@ impl_message_enum_traits!(ButtplugCheckedClientMessageV4 {
 impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMessageV4 {
   fn try_from_client_message(
     value: ButtplugClientMessageV4,
-    feature_map: &BTreeMap<u32, ServerDeviceAttributes>,
+    feature_map: &LiteMap<u32, ServerDeviceAttributes>,
   ) -> Result<Self, ButtplugError> {
     match value {
       // Messages that don't need checking
@@ -93,7 +102,10 @@ impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMess
       }
       // Messages that need device index checking
       ButtplugClientMessageV4::StopCmd(m) => {
-        if m.device_index().map_or(true,|x| feature_map.get(&x).is_some()) {
+        if m
+          .device_index()
+          .map_or(true, |x| feature_map.get(&x).is_some())
+        {
           Ok(ButtplugCheckedClientMessageV4::StopCmd(m))
         } else {
           Err(ButtplugError::from(
@@ -186,7 +198,7 @@ impl TryFrom<ButtplugClientMessageV3> for ButtplugCheckedClientMessageV4 {
 impl TryFromClientMessage<ButtplugClientMessageVariant> for ButtplugCheckedClientMessageV4 {
   fn try_from_client_message(
     msg: ButtplugClientMessageVariant,
-    features: &BTreeMap<u32, ServerDeviceAttributes>,
+    features: &LiteMap<u32, ServerDeviceAttributes>,
   ) -> Result<Self, buttplug_core::errors::ButtplugError> {
     let id = msg.id();
     let mut converted_msg = match msg {
@@ -205,7 +217,7 @@ impl TryFromClientMessage<ButtplugClientMessageVariant> for ButtplugCheckedClien
 impl TryFromClientMessage<ButtplugClientMessageV0> for ButtplugCheckedClientMessageV4 {
   fn try_from_client_message(
     msg: ButtplugClientMessageV0,
-    features: &BTreeMap<u32, ServerDeviceAttributes>,
+    features: &LiteMap<u32, ServerDeviceAttributes>,
   ) -> Result<Self, ButtplugError> {
     // All v0 messages can be converted to v1 messages.
     Self::try_from_client_message(ButtplugClientMessageV1::from(msg), features)
@@ -214,7 +226,7 @@ impl TryFromClientMessage<ButtplugClientMessageV0> for ButtplugCheckedClientMess
 
 fn check_device_index_and_convert<T, U>(
   msg: T,
-  features: &BTreeMap<u32, ServerDeviceAttributes>,
+  features: &LiteMap<u32, ServerDeviceAttributes>,
 ) -> Result<U, ButtplugError>
 where
   T: ButtplugDeviceMessage + Debug,
@@ -233,7 +245,7 @@ where
 impl TryFromClientMessage<ButtplugClientMessageV1> for ButtplugCheckedClientMessageV4 {
   fn try_from_client_message(
     msg: ButtplugClientMessageV1,
-    features: &BTreeMap<u32, ServerDeviceAttributes>,
+    features: &LiteMap<u32, ServerDeviceAttributes>,
   ) -> Result<Self, ButtplugError> {
     // Instead of converting to v2 message attributes then to v4 device features, we move directly
     // from v0 command messages to v4 device features here. There's no reason to do the middle step.
@@ -253,7 +265,7 @@ impl TryFromClientMessage<ButtplugClientMessageV1> for ButtplugCheckedClientMess
 impl TryFromClientMessage<ButtplugClientMessageV2> for ButtplugCheckedClientMessageV4 {
   fn try_from_client_message(
     msg: ButtplugClientMessageV2,
-    features: &BTreeMap<u32, ServerDeviceAttributes>,
+    features: &LiteMap<u32, ServerDeviceAttributes>,
   ) -> Result<Self, ButtplugError> {
     match msg {
       // Convert v2 specific queries to v3 generic sensor queries
@@ -272,7 +284,7 @@ impl TryFromClientMessage<ButtplugClientMessageV2> for ButtplugCheckedClientMess
 impl TryFromClientMessage<ButtplugClientMessageV3> for ButtplugCheckedClientMessageV4 {
   fn try_from_client_message(
     msg: ButtplugClientMessageV3,
-    features: &BTreeMap<u32, ServerDeviceAttributes>,
+    features: &LiteMap<u32, ServerDeviceAttributes>,
   ) -> Result<Self, ButtplugError> {
     match msg {
       // Convert v1/v2 message attribute commands into device feature commands

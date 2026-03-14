@@ -26,18 +26,12 @@ use uuid::{Uuid, uuid};
 const VIBRATISSIMO_PROTOCOL_UUID: Uuid = uuid!("66ef7aa4-1e6a-4067-9066-dcb53c7647f2");
 
 pub mod setup {
-  use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
-  #[derive(Default)]
-  pub struct VibratissimoIdentifierFactory {}
+  use crate::device::protocol::ProtocolIdentifier;
 
-  impl ProtocolIdentifierFactory for VibratissimoIdentifierFactory {
-    fn identifier(&self) -> &str {
-      "vibratissimo"
-    }
+  pub const IDENTIFIER: &str = "vibratissimo";
 
-    fn create(&self) -> Box<dyn ProtocolIdentifier> {
-      Box::new(super::VibratissimoIdentifier::default())
-    }
+  pub fn create_identifier() -> Box<dyn ProtocolIdentifier> {
+    Box::new(super::VibratissimoIdentifier::default())
   }
 }
 
@@ -62,7 +56,7 @@ impl ProtocolIdentifier for VibratissimoIdentifier {
     let ident =
       String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| hardware.name().to_owned());
     Ok((
-      UserDeviceIdentifier::new(hardware.address(), "vibratissimo", &Some(ident)),
+      UserDeviceIdentifier::new(hardware.address(), "vibratissimo", Some(&ident)),
       Box::new(VibratissimoInitializer::default()),
     ))
   }

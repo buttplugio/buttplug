@@ -7,7 +7,8 @@
 
 use std::collections::HashMap;
 
-use getset::Getters;
+use compact_str::CompactString;
+use getset::{Getters, MutGetters};
 use serde::{Deserialize, Serialize};
 
 use crate::device_config_file::{
@@ -17,14 +18,14 @@ use crate::device_config_file::{
   protocol::ProtocolDefinition,
 };
 
-#[derive(Deserialize, Serialize, Debug, Getters)]
+#[derive(Deserialize, Serialize, Debug, Getters, MutGetters)]
 #[getset(get_mut = "pub", set = "pub")]
 pub struct BaseConfigFile {
   #[getset(get_copy = "pub")]
   version: ConfigVersion,
   #[getset(get = "pub")]
   #[serde(default, skip_serializing_if = "Option::is_none")]
-  protocols: Option<HashMap<String, ProtocolDefinition>>,
+  protocols: Option<HashMap<CompactString, ProtocolDefinition>>,
 }
 
 impl Default for BaseConfigFile {

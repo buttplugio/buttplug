@@ -36,6 +36,7 @@ use std::{
   time::Duration,
 };
 use tokio::sync::broadcast;
+use tracing::info_span;
 
 pub struct LovenseServiceHardwareConnector {
   http_host: String,
@@ -93,33 +94,36 @@ impl LovenseServiceHardware {
     let host = http_host.to_owned();
     let battery_level = Arc::new(AtomicU8::new(100));
     let battery_level_clone = battery_level.clone();
-    async_manager::spawn(async move {
-      loop {
-        // SutekhVRC/VibeCheck patch for delay because Lovense Connect HTTP servers crash (Perma DOS)
-        tokio::time::sleep(Duration::from_secs(1)).await;
-        match get_local_info(&host).await {
-          Some(info) => {
-            for (_, toy) in info.data.iter() {
-              if toy.id != toy_id {
-                continue;
-              }
-              if !toy.connected {
-                let _ = sender_clone.send(HardwareEvent::Disconnected(toy_id.clone()));
-                info!("Exiting lovense service device connection check loop.");
+    async_manager::spawn(
+      async move {
+        loop {
+          // SutekhVRC/VibeCheck patch for delay because Lovense Connect HTTP servers crash (Perma DOS)
+          async_manager::sleep(Duration::from_secs(1)).await;
+          match get_local_info(&host).await {
+            Some(info) => {
+              for (_, toy) in info.data.iter() {
+                if toy.id != toy_id {
+                  continue;
+                }
+                if !toy.connected {
+                  let _ = sender_clone.send(HardwareEvent::Disconnected(toy_id.clone()));
+                  info!("Exiting lovense service device connection check loop.");
+                  break;
+                }
+                battery_level_clone.store(toy.battery.clamp(0, 100) as u8, Ordering::Relaxed);
                 break;
               }
-              battery_level_clone.store(toy.battery.clamp(0, 100) as u8, Ordering::Relaxed);
+            }
+            None => {
+              let _ = sender_clone.send(HardwareEvent::Disconnected(toy_id.clone()));
+              info!("Exiting lovense service device connection check loop.");
               break;
             }
           }
-          None => {
-            let _ = sender_clone.send(HardwareEvent::Disconnected(toy_id.clone()));
-            info!("Exiting lovense service device connection check loop.");
-            break;
-          }
         }
-      }
-    });
+      },
+      info_span!("LovenseServiceHardware::connection_check").or_current(),
+    );
     Self {
       event_sender: device_event_sender,
       http_host: http_host.to_owned(),
@@ -167,12 +171,15 @@ impl HardwareInternal for LovenseServiceHardware {
     async move {
       match reqwest::get(command_url).await {
         Ok(res) => {
-          async_manager::spawn(async move {
-            trace!(
-              "Got http response: {}",
-              res.text().await.unwrap_or("no response".to_string())
-            );
-          });
+          async_manager::spawn(
+            async move {
+              trace!(
+                "Got http response: {}",
+                res.text().await.unwrap_or("no response".to_string())
+              );
+            },
+            info_span!("LovenseServiceHardware::write_value_response").or_current(),
+          );
           Ok(())
         }
         Err(err) => {

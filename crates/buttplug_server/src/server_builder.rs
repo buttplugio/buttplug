@@ -19,6 +19,7 @@ use buttplug_core::{
 use buttplug_server_device_config::DeviceConfigurationManagerBuilder;
 use std::sync::{Arc, RwLock};
 use tokio::sync::broadcast;
+use tracing::info_span;
 
 /// Configures and creates [ButtplugServer] instances.
 pub struct ButtplugServerBuilder {
@@ -114,14 +115,17 @@ impl ButtplugServerBuilder {
           *state_guard = ConnectionState::PingedOut;
         }
         // Stop all devices (spawn async task since callback is sync)
-        async_manager::spawn(async move {
-          if let Err(e) = device_manager_clone
-            .stop_devices(&StopCmdV4::default())
-            .await
-          {
-            error!("Could not stop devices on ping timeout: {:?}", e);
-          }
-        });
+        async_manager::spawn(
+          async move {
+            if let Err(e) = device_manager_clone
+              .stop_devices(&StopCmdV4::default())
+              .await
+            {
+              error!("Could not stop devices on ping timeout: {:?}", e);
+            }
+          },
+          info_span!("ButtplugServerBuilder::ping_timeout_callback stop_devices").or_current(),
+        );
         // Send error to output channel
         if output_sender_clone
           .send(ButtplugServerMessageV4::Error(message::ErrorV0::from(

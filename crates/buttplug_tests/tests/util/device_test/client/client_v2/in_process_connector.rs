@@ -28,7 +28,6 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
 };
 use tokio::sync::mpsc::{Sender, channel};
-use tracing_futures::Instrument;
 
 #[derive(Default)]
 pub struct ButtplugInProcessClientConnectorBuilder {
@@ -133,7 +132,7 @@ impl ButtplugConnector<ButtplugClientMessageV2, ButtplugServerMessageV2>
             }
           }
           info!("Stopping In Process Client Connector Event Sender Loop, due to channel receiver being dropped.");
-        }.instrument(tracing::info_span!("InProcessClientConnectorEventSenderLoop")));
+        }, tracing::info_span!("InProcessClientConnectorEventSenderLoop"));
         connected.store(true, Ordering::Relaxed);
         Ok(())
       }.boxed()

@@ -25,18 +25,12 @@ use std::sync::{
 use uuid::Uuid;
 
 pub mod setup {
-  use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
-  #[derive(Default)]
-  pub struct YououIdentifierFactory {}
+  use crate::device::protocol::ProtocolIdentifier;
 
-  impl ProtocolIdentifierFactory for YououIdentifierFactory {
-    fn identifier(&self) -> &str {
-      "youou"
-    }
+  pub const IDENTIFIER: &str = "youou";
 
-    fn create(&self) -> Box<dyn ProtocolIdentifier> {
-      Box::new(super::YououIdentifier::default())
-    }
+  pub fn create_identifier() -> Box<dyn ProtocolIdentifier> {
+    Box::new(super::YououIdentifier::default())
   }
 }
 
@@ -51,7 +45,7 @@ impl ProtocolIdentifier for YououIdentifier {
     _: ProtocolCommunicationSpecifier,
   ) -> Result<(UserDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     Ok((
-      UserDeviceIdentifier::new(hardware.address(), "Youou", &Some("VX001_".to_owned())),
+      UserDeviceIdentifier::new(hardware.address(), "Youou", Some("VX001_")),
       Box::new(YououInitializer::default()),
     ))
   }

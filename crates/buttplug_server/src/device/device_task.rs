@@ -12,15 +12,12 @@
 //! - Keepalive packet management
 //! - Hardware disconnect detection
 
-use std::{collections::VecDeque, sync::Arc, time::Duration};
+use std::{collections::VecDeque, sync::Arc, time::{Duration, Instant}};
 
-use buttplug_core::util::{self, async_manager};
+use buttplug_core::util::async_manager;
 use futures::future;
-use tokio::{
-  select,
-  sync::mpsc::Receiver,
-  time::Instant,
-};
+use tokio::{select, sync::mpsc::Receiver};
+use tracing::info_span;
 
 use super::{
   hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareWriteCmd},
@@ -52,9 +49,12 @@ pub fn spawn_device_task(
   config: DeviceTaskConfig,
   mut command_receiver: Receiver<Vec<HardwareCommand>>,
 ) {
-  async_manager::spawn(async move {
-    run_device_task(hardware, config, &mut command_receiver).await;
-  });
+  async_manager::spawn(
+    async move {
+      run_device_task(hardware, config, &mut command_receiver).await;
+    },
+    info_span!("DeviceTask"),
+  );
 }
 
 /// Run the device communication task (internal implementation).
@@ -98,9 +98,9 @@ async fn run_device_task(
     // Calculate keepalive timeout
     let keepalive_fut = async {
       if let Some(duration) = strategy_duration {
-        util::sleep(duration).await;
+        async_manager::sleep(duration).await;
       } else if requires_keepalive {
-        util::sleep(Duration::from_secs(5)).await; // iOS Bluetooth default
+        async_manager::sleep(Duration::from_secs(5)).await; // iOS Bluetooth default
       } else {
         future::pending::<()>().await;
       }
@@ -109,7 +109,7 @@ async fn run_device_task(
     // Calculate batch flush timeout (only if we're batching)
     let batch_fut = async {
       match batch_deadline {
-        Some(deadline) => tokio::time::sleep_until(deadline).await,
+        Some(deadline) => async_manager::sleep_until(deadline).await,
         None => future::pending::<()>().await,
       }
     };

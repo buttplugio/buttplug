@@ -4,9 +4,12 @@
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
-use crate::device::{
-  hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-  protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+use crate::{
+  device::{
+    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+  },
+  generic_protocol_setup,
 };
 use async_trait::async_trait;
 use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
@@ -22,21 +25,7 @@ use uuid::{Uuid, uuid};
 const HISMITH_MINI_PROTOCOL_UUID: Uuid = uuid!("94befc1a-9859-4bf6-99ee-5678c89237a7");
 const HISMITH_MINI_ROTATE_DIRECTIOM_UUID: Uuid = uuid!("94befc1a-9859-4bf6-99ee-5678c89237a7");
 
-pub mod setup {
-  use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
-  #[derive(Default)]
-  pub struct HismithMiniIdentifierFactory {}
-
-  impl ProtocolIdentifierFactory for HismithMiniIdentifierFactory {
-    fn identifier(&self) -> &str {
-      "hismith-mini"
-    }
-
-    fn create(&self) -> Box<dyn ProtocolIdentifier> {
-      Box::new(super::HismithMiniIdentifier::default())
-    }
-  }
-}
+generic_protocol_setup!(HismithMini, "hismith-mini");
 
 #[derive(Default)]
 pub struct HismithMiniIdentifier {}
@@ -65,7 +54,7 @@ impl ProtocolIdentifier for HismithMiniIdentifier {
     info!("Hismith Device Identifier: {}", identifier);
 
     Ok((
-      UserDeviceIdentifier::new(hardware.address(), "hismith-mini", &Some(identifier)),
+      UserDeviceIdentifier::new(hardware.address(), "hismith-mini", Some(&identifier)),
       Box::new(HismithMiniInitializer::default()),
     ))
   }

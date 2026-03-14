@@ -37,7 +37,7 @@ use crate::{
   device::ClientDeviceCommandValue,
 };
 
-#[derive(Getters, CopyGetters, Clone)]
+#[derive(Getters, CopyGetters, Clone, Debug)]
 pub struct ClientDeviceFeature {
   #[getset(get_copy = "pub")]
   device_index: u32,
@@ -76,7 +76,7 @@ impl ClientDeviceFeature {
       ClientDeviceCommandValue::Percent(f) => self.convert_float_value(feature_output, *f)?,
       ClientDeviceCommandValue::Steps(i) => *i,
     };
-    if feature_output.step_limit().contains(&value) {
+    if feature_output.step_limit().contains(value) {
       Ok(value)
     } else {
       Err(ButtplugClientError::ButtplugOutputCommandConversionError(
@@ -182,7 +182,7 @@ impl ClientDeviceFeature {
   pub fn run_input_subscribe(&self, sensor_type: InputType) -> ButtplugClientResultFuture {
     if let Some(sensor_map) = self.feature.input()
       && let Some(sensor) = sensor_map.get(sensor_type)
-      && sensor.command().contains(&InputCommandType::Subscribe)
+      && sensor.command().contains(InputCommandType::Subscribe)
     {
       let msg = InputCmdV4::new(
         self.device_index,
@@ -202,7 +202,7 @@ impl ClientDeviceFeature {
   pub fn run_input_unsubscribe(&self, sensor_type: InputType) -> ButtplugClientResultFuture {
     if let Some(sensor_map) = self.feature.input()
       && let Some(sensor) = sensor_map.get(sensor_type)
-      && sensor.command().contains(&InputCommandType::Subscribe)
+      && sensor.command().contains(InputCommandType::Subscribe)
     {
       let msg = InputCmdV4::new(
         self.device_index,
@@ -222,7 +222,7 @@ impl ClientDeviceFeature {
   pub fn run_input_read(&self, sensor_type: InputType) -> ButtplugClientResultFuture<InputTypeReading> {
     if let Some(sensor_map) = self.feature.input()
       && let Some(sensor) = sensor_map.get(sensor_type)
-      && sensor.command().contains(&InputCommandType::Read)
+      && sensor.command().contains(InputCommandType::Read)
     {
       let msg = InputCmdV4::new(
         self.device_index,

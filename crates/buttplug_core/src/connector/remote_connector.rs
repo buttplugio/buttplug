@@ -24,6 +24,7 @@ use futures::{FutureExt, future::BoxFuture, select};
 use log::*;
 use std::marker::PhantomData;
 use tokio::sync::mpsc::{Receiver, Sender, channel};
+use tracing::info_span;
 
 enum ButtplugRemoteConnectorMessage<T>
 where
@@ -234,21 +235,24 @@ where
           // If we connect successfully, we get back the channel from the transport
           // to send outgoing messages and receieve incoming events, all serialized.
           Ok(()) => {
-            async_manager::spawn(async move {
-              remote_connector_event_loop::<
-                TransportType,
-                SerializerType,
-                OutboundMessageType,
-                InboundMessageType,
-              >(
-                connector_outgoing_receiver,
-                connector_incoming_sender,
-                transport,
-                transport_outgoing_sender,
-                transport_incoming_receiver,
-              )
-              .await
-            });
+            async_manager::spawn(
+              async move {
+                remote_connector_event_loop::<
+                  TransportType,
+                  SerializerType,
+                  OutboundMessageType,
+                  InboundMessageType,
+                >(
+                  connector_outgoing_receiver,
+                  connector_incoming_sender,
+                  transport,
+                  transport_outgoing_sender,
+                  transport_incoming_receiver,
+                )
+                .await
+              },
+              info_span!("ButtplugRemoteConnectorEventLoop").or_current(),
+            );
             Ok(())
           }
           Err(e) => Err(e),

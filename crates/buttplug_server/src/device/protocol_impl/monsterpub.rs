@@ -23,18 +23,12 @@ use std::sync::{
 use uuid::{Uuid, uuid};
 
 pub mod setup {
-  use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
-  #[derive(Default)]
-  pub struct MonsterPubIdentifierFactory {}
+  use crate::device::protocol::ProtocolIdentifier;
 
-  impl ProtocolIdentifierFactory for MonsterPubIdentifierFactory {
-    fn identifier(&self) -> &str {
-      "monsterpub"
-    }
+  pub const IDENTIFIER: &str = "monsterpub";
 
-    fn create(&self) -> Box<dyn ProtocolIdentifier> {
-      Box::new(super::MonsterPubIdentifier::default())
-    }
+  pub fn create_identifier() -> Box<dyn ProtocolIdentifier> {
+    Box::new(super::MonsterPubIdentifier::default())
   }
 }
 
@@ -66,12 +60,11 @@ impl ProtocolIdentifier for MonsterPubIdentifier {
             "MonsterPub device name is non-UTF8 string.".to_owned(),
           )
         })?
-        .replace("\0", "")
-        .to_owned(),
+        .replace("\0", ""),
       Err(_) => "Unknown".to_string(),
     };
     return Ok((
-      UserDeviceIdentifier::new(hardware.address(), "monsterpub", &Some(ident)),
+      UserDeviceIdentifier::new(hardware.address(), "monsterpub", Some(&ident)),
       Box::new(MonsterPubInitializer::default()),
     ));
   }

@@ -27,7 +27,7 @@ use async_trait::async_trait;
 use buttplug_core::{
   errors::ButtplugDeviceError,
   message::{self, InputReadingV4, InputTypeReading, InputValue, OutputType},
-  util::sleep,
+  util::async_manager,
 };
 use buttplug_server_device_config::{
   Endpoint,
@@ -36,7 +36,6 @@ use buttplug_server_device_config::{
   UserDeviceIdentifier,
 };
 use futures::{FutureExt, future::BoxFuture};
-use regex::Regex;
 use std::{sync::Arc, time::Duration};
 use tokio::select;
 use uuid::{Uuid, uuid};
@@ -52,18 +51,12 @@ const LOVENSE_COMMAND_RETRY: u64 = 5;
 const LOVENSE_PROTOCOL_UUID: Uuid = uuid!("cfa3fac5-48bb-4d87-817e-a439965956e1");
 
 pub mod setup {
-  use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
-  #[derive(Default)]
-  pub struct LovenseIdentifierFactory {}
+  use crate::device::protocol::ProtocolIdentifier;
+  
+  pub const IDENTIFIER: &str = "lovense";
 
-  impl ProtocolIdentifierFactory for LovenseIdentifierFactory {
-    fn identifier(&self) -> &str {
-      "lovense"
-    }
-
-    fn create(&self) -> Box<dyn ProtocolIdentifier> {
-      Box::new(super::LovenseIdentifier::default())
-    }
+  pub fn create_identifier() -> Box<dyn ProtocolIdentifier> {
+    Box::new(super::LovenseIdentifier::default())
   }
 }
 
@@ -124,7 +117,7 @@ impl ProtocolIdentifier for LovenseIdentifier {
             let type_response = std::str::from_utf8(&n).map_err(|_| ButtplugDeviceError::ProtocolSpecificError("lovense".to_owned(), "Lovense device init got back non-UTF8 string.".to_owned()))?.to_owned();
             debug!("Lovense Device Type Response: {}", type_response);
             let ident = lovense_model_resolver(type_response);
-            return Ok((UserDeviceIdentifier::new(hardware.address(), "lovense", &Some(ident.clone())), Box::new(LovenseInitializer::new(ident))));
+            return Ok((UserDeviceIdentifier::new(hardware.address(), "lovense", Some(&ident)), Box::new(LovenseInitializer::new(ident))));
           } else {
             return Err(
               ButtplugDeviceError::ProtocolSpecificError(
@@ -134,16 +127,21 @@ impl ProtocolIdentifier for LovenseIdentifier {
             );
           }
         }
-        _ = sleep(Duration::from_millis(LOVENSE_COMMAND_TIMEOUT_MS)).fuse() => {
+        _ = async_manager::sleep(Duration::from_millis(LOVENSE_COMMAND_TIMEOUT_MS)).fuse() => {
           count += 1;
           if count > LOVENSE_COMMAND_RETRY {
             warn!("Lovense Device timed out while getting DeviceType info. ({} retries)", LOVENSE_COMMAND_RETRY);
-            let re = Regex::new(r"LVS-([A-Z]+)\d+").expect("Static regex shouldn't fail");
-            if let Some(caps) = re.captures(hardware.name()) {
-              info!("Lovense Device identified by BLE name");
-              return Ok((UserDeviceIdentifier::new(hardware.address(), "lovense", &Some(caps[1].to_string())), Box::new(LovenseInitializer::new(caps[1].to_string()))));
-            };
-            return Ok((UserDeviceIdentifier::new(hardware.address(), "lovense", &None), Box::new(LovenseInitializer::new("".to_string()))));
+            if let Some(pos) = hardware.name().find("LVS-") {
+              let model = hardware.name()[pos + 4..].to_string();
+              if !model.is_empty() {
+                info!("Lovense Device identified by BLE name: {}", model);
+                return Ok((
+                  UserDeviceIdentifier::new(hardware.address(), "lovense", Some(&model)),
+                  Box::new(LovenseInitializer::new(model)),
+                ));
+              }
+            }
+            return Ok((UserDeviceIdentifier::new(hardware.address(), "lovense", None), Box::new(LovenseInitializer::new("".to_string()))));
           }
         }
       }

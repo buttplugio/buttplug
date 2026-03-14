@@ -28,6 +28,7 @@ use crate::errors::ButtplugMessageError;
 use enum_dispatch::enum_dispatch;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::convert::TryFrom;
+use strum_macros::Display;
 
 use super::errors::ButtplugError;
 

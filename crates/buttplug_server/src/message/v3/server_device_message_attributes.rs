@@ -6,11 +6,10 @@
 // for full license information.
 
 use crate::message::v1::NullDeviceMessageAttributesV1;
-use buttplug_core::message::{InputType, OutputType};
+use buttplug_core::{message::{InputType, OutputType}, util::range::RangeInclusive};
 use buttplug_server_device_config::ServerDeviceFeature;
 
 use getset::{Getters, MutGetters, Setters};
-use std::ops::RangeInclusive;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters)]
 #[getset(get = "pub")]
@@ -62,7 +61,7 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
           let mut create_attribute = |actuator_type, step_count| {
             let actuator_type = actuator_type;
             let attrs = ServerGenericDeviceMessageAttributesV3 {
-              feature_descriptor: feature.description().to_owned(),
+              feature_descriptor: feature.description().to_string(),
               actuator_type,
               step_count,
               feature: feature.clone(),
@@ -109,12 +108,12 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
         let mut actuator_vec = vec![];
         if let Some(output_map) = feature.output()
           && let Some(actuator) = output_map.rotate()
-          && *actuator.value().base().start() < 0
+          && actuator.value().base().start() < 0
         {
           let actuator_type = OutputType::Rotate;
           let step_count = actuator.value().step_count();
           let attrs = ServerGenericDeviceMessageAttributesV3 {
-            feature_descriptor: feature.description().to_owned(),
+            feature_descriptor: feature.description().to_string(),
             actuator_type,
             step_count,
             feature: feature.clone(),
@@ -136,7 +135,7 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
           let actuator_type = OutputType::Position;
           let step_count = actuator.value().step_count();
           let attrs = ServerGenericDeviceMessageAttributesV3 {
-            feature_descriptor: feature.description().to_owned(),
+            feature_descriptor: feature.description().to_string(),
             actuator_type,
             step_count,
             feature: feature.clone(),
@@ -159,7 +158,7 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
             // Only convert Battery backwards. Other sensors weren't really built for v3 and we
             // never recommended using them or implemented much for them.
             sensor_vec.push(ServerSensorDeviceMessageAttributesV3 {
-              feature_descriptor: feature.description().to_owned(),
+              feature_descriptor: feature.description().to_string(),
               sensor_type: InputType::Battery,
               sensor_range: battery.value().clone(),
               feature: feature.clone(),

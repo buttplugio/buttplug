@@ -5,13 +5,14 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::util::{async_manager, sleep};
+use buttplug_core::util::async_manager;
 use futures::Future;
 use std::{sync::Arc, time::Duration};
 use tokio::{
   select,
   sync::{Mutex, mpsc},
 };
+use tracing::info_span;
 
 pub enum PingMessage {
   Ping,
@@ -33,7 +34,7 @@ async fn ping_timer<F>(
   let mut pinged = false;
   loop {
     select! {
-      _ = sleep(Duration::from_millis(max_ping_time.into())) => {
+      _ = async_manager::sleep(Duration::from_millis(max_ping_time.into())) => {
         if started {
           if !pinged {
             // Ping timeout occurred - call the callback
@@ -70,11 +71,14 @@ impl Drop for PingTimer {
     // This cannot block, otherwise it will throw in WASM contexts on
     // destruction. We must use send(), not blocking_send().
     let sender = self.ping_msg_sender.clone();
-    async_manager::spawn(async move {
-      if sender.send(PingMessage::End).await.is_err() {
-        debug!("Receiver does not exist, assuming ping timer event loop already dead.");
-      }
-    });
+    async_manager::spawn(
+      async move {
+        if sender.send(PingMessage::End).await.is_err() {
+          debug!("Receiver does not exist, assuming ping timer event loop already dead.");
+        }
+      },
+      info_span!("PingTimer::drop").or_current(),
+    );
   }
 }
 
@@ -92,7 +96,7 @@ impl PingTimer {
     if max_ping_time > 0 {
       let callback = Arc::new(Mutex::new(on_ping_timeout));
       let fut = ping_timer(max_ping_time, receiver, callback);
-      async_manager::spawn(fut);
+      async_manager::spawn(fut, info_span!("ping_timer").or_current());
     }
     Self {
       max_ping_time,

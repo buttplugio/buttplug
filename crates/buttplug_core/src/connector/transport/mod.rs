@@ -12,7 +12,7 @@ use crate::connector::{
   ButtplugConnectorResultFuture,
   ButtplugSerializedMessage,
 };
-use displaydoc::Display;
+use strum_macros::Display;
 use futures::future::BoxFuture;
 use thiserror::Error;
 use tokio::sync::mpsc::{Receiver, Sender};

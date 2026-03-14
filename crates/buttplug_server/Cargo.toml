@@ -24,7 +24,7 @@ default=[]
 wasm=["uuid/js"]
 
 [dependencies]
-buttplug_core = { version = "10.0.0", path = "../buttplug_core" }
+buttplug_core = { version = "10.0.0", path = "../buttplug_core", default-features = false }
 buttplug_server_device_config = { version = "10.0.0", path = "../buttplug_server_device_config" }
 futures = "0.3.31"
 futures-util = "0.3.31"
@@ -33,12 +33,10 @@ log = "0.4.29"
 getset = "0.1.6"
 tokio = { version = "1.49.0", features = ["macros"] }
 dashmap = { version = "6.1.0" }
-tracing-futures = "0.2.5"
 tracing = "0.1.44"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 jsonschema = { version = "0.38.1", default-features = false }
-once_cell = "1.21.3"
 tokio-stream = "0.1.18"
 strum_macros = "0.27.2"
 strum = "0.27.2"
@@ -58,6 +56,8 @@ byteorder = "1.5.0"
 rand = { version = "0.8" }
 derive_more = { version = "2.1.1", features = ["from"] }
 evalexpr = { version = "13.1.0", features = ["rand"] }
+litemap = "0.8.1"
+compact_str = { version = "0.9.0", features = ["serde"] }
 
 [target.wasm32-unknown-unknown.dependencies]
 getrandom = { version = "0.3.4", features = ["wasm_js"]}

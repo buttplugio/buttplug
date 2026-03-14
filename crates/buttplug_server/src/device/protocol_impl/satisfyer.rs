@@ -29,18 +29,12 @@ use uuid::{Uuid, uuid};
 const SATISFYER_PROTOCOL_UUID: Uuid = uuid!("79a0ed0d-f392-4c48-967e-f4467438c344");
 
 pub mod setup {
-  use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
-  #[derive(Default)]
-  pub struct SatisfyerIdentifierFactory {}
+  use crate::device::protocol::ProtocolIdentifier;
 
-  impl ProtocolIdentifierFactory for SatisfyerIdentifierFactory {
-    fn identifier(&self) -> &str {
-      "satisfyer"
-    }
+  pub const IDENTIFIER: &str = "satisfyer";
 
-    fn create(&self) -> Box<dyn ProtocolIdentifier> {
-      Box::new(super::SatisfyerIdentifier::default())
-    }
+  pub fn create_identifier() -> Box<dyn ProtocolIdentifier> {
+    Box::new(super::SatisfyerIdentifier::default())
   }
 }
 
@@ -67,7 +61,7 @@ impl ProtocolIdentifier for SatisfyerIdentifier {
           );
 
           return Ok((
-            UserDeviceIdentifier::new(hardware.address(), "satisfyer", &Some(device_identifier)),
+            UserDeviceIdentifier::new(hardware.address(), "satisfyer", Some(&device_identifier)),
             Box::new(SatisfyerInitializer::default()),
           ));
         }
@@ -92,7 +86,7 @@ impl ProtocolIdentifier for SatisfyerIdentifier {
       device_identifier
     );
     return Ok((
-      UserDeviceIdentifier::new(hardware.address(), "satisfyer", &Some(device_identifier)),
+      UserDeviceIdentifier::new(hardware.address(), "satisfyer", Some(&device_identifier)),
       Box::new(SatisfyerInitializer::default()),
     ));
   }

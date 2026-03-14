@@ -21,6 +21,7 @@ use log::*;
 use std::sync::Arc;
 use thiserror::Error;
 use tokio::sync::{Notify, mpsc};
+use tracing::info_span;
 
 #[derive(Error, Debug)]
 pub enum ButtplugServerConnectorError {
@@ -57,27 +58,30 @@ async fn run_server<ConnectorType>(
           trace!("Got message from connector: {:?}", client_message);
           let server_clone = server.clone();
           let connector_clone = shared_connector.clone();
-          async_manager::spawn(async move {
-            if let Err(e) = client_message.is_valid() {
-              error!("Message not valid: {:?} - Error: {}", client_message, e);
-              let mut err_msg = ErrorV0::from(ButtplugError::from(e));
-              err_msg.set_id(client_message.id());
-              let _ = connector_clone.send(ButtplugServerMessageVariant::V3(err_msg.into())).await;
-              return;
-            }
-            match server_clone.parse_message(client_message.clone()).await {
-              Ok(ret_msg) => {
-                if connector_clone.send(ret_msg).await.is_err() {
-                  error!("Cannot send reply to server, dropping and assuming remote server thread has exited.");
-                }
-              },
-              Err(err_msg) => {
-                if connector_clone.send(err_msg).await.is_err() {
-                  error!("Cannot send reply to server, dropping and assuming remote server thread has exited.");
+          async_manager::spawn(
+            async move {
+              if let Err(e) = client_message.is_valid() {
+                error!("Message not valid: {:?} - Error: {}", client_message, e);
+                let mut err_msg = ErrorV0::from(ButtplugError::from(e));
+                err_msg.set_id(client_message.id());
+                let _ = connector_clone.send(ButtplugServerMessageVariant::V3(err_msg.into())).await;
+                return;
+              }
+              match server_clone.parse_message(client_message.clone()).await {
+                Ok(ret_msg) => {
+                  if connector_clone.send(ret_msg).await.is_err() {
+                    error!("Cannot send reply to server, dropping and assuming remote server thread has exited.");
+                  }
+                },
+                Err(err_msg) => {
+                  if connector_clone.send(err_msg).await.is_err() {
+                    error!("Cannot send reply to server, dropping and assuming remote server thread has exited.");
+                  }
                 }
               }
-            }
-          });
+            },
+            info_span!("RemoteServerMessageHandler").or_current()
+          );
         }
       },
       _ = disconnect_notifier.notified().fuse() => {

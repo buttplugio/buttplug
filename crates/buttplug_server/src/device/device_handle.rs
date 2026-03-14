@@ -16,18 +16,34 @@ use buttplug_core::{
   ButtplugResultFuture,
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
-    self, ButtplugMessage, ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4,
-    InputCommandType, InputType, OutputType, OutputValue, StopCmdV4,
+    self,
+    ButtplugMessage,
+    ButtplugServerMessageV4,
+    DeviceFeature,
+    DeviceMessageInfoV4,
+    InputCommandType,
+    InputType,
+    OutputCommand,
+    OutputType,
+    OutputValue,
+    StopCmdV4,
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use buttplug_server_device_config::{
-  DeviceConfigurationManager, ServerDeviceDefinition, UserDeviceIdentifier,
+  DeviceConfigurationManager,
+  ServerDeviceDefinition,
+  UserDeviceIdentifier,
 };
+use compact_str::CompactString;
 use dashmap::DashMap;
 use futures::future::{self, BoxFuture, FutureExt};
-use tokio::sync::{mpsc::{channel, Sender}, oneshot};
+use tokio::sync::{
+  mpsc::{Sender, channel},
+  oneshot,
+};
 use tokio_stream::StreamExt;
+use tracing::info_span;
 use uuid::Uuid;
 
 use crate::{
@@ -43,7 +59,7 @@ use crate::{
 
 use super::{
   InternalDeviceEvent,
-  device_task::{spawn_device_task, DeviceTaskConfig},
+  device_task::{DeviceTaskConfig, spawn_device_task},
   hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent},
   protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, ProtocolSpecializer},
 };
@@ -125,8 +141,8 @@ impl DeviceHandle {
   }
 
   /// Get the device's name
-  pub fn name(&self) -> String {
-    self.definition.name().to_owned()
+  pub fn name(&self) -> CompactString {
+    self.definition.name().clone()
   }
 
   /// Get the device's definition (contains features, display name, etc.)
@@ -144,7 +160,11 @@ impl DeviceHandle {
     DeviceMessageInfoV4::new(
       index,
       &self.name(),
-      self.definition.display_name(),
+      &self
+        .definition
+        .display_name()
+        .as_ref()
+        .map(|n| n.to_string()),
       100,
       &self
         .definition
@@ -219,10 +239,14 @@ impl DeviceHandle {
       });
 
     let identifier = self.identifier.clone();
-    let handler_mapped_stream = self.handler.event_stream().map(move |incoming_message| {
-      let id = identifier.clone();
-      DeviceEvent::Notification(id, incoming_message)
-    });
+    let handler_mapped_stream = self
+      .handler
+      .clone()
+      .event_stream()
+      .map(move |incoming_message| {
+        let id = identifier.clone();
+        DeviceEvent::Notification(id, incoming_message)
+      });
     hardware_stream.merge(handler_mapped_stream)
   }
 
@@ -238,7 +262,80 @@ impl DeviceHandle {
     self
       .last_output_command
       .insert(msg.feature_id(), msg.clone());
-    self.handle_generic_command_result(self.handler.handle_output_cmd(msg))
+    let result = self
+      .handler
+      .handle_output_cmd(msg)
+      .unwrap_or_else(|| self.handle_outputcmd_v4_default(msg));
+    self.handle_generic_command_result(result)
+  }
+
+  fn handle_outputcmd_v4_default(
+    &self,
+    cmd: &CheckedOutputCmdV4,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let output_command = cmd.output_command();
+    match output_command {
+      OutputCommand::Constrict(x) => self.handler.handle_output_constrict_cmd(
+        cmd.feature_index(),
+        cmd.feature_id(),
+        x.value()
+          .try_into()
+          .map_err(|_| ButtplugDeviceError::DeviceCommandSignError)?,
+      ),
+      OutputCommand::Spray(x) => self.handler.handle_output_spray_cmd(
+        cmd.feature_index(),
+        cmd.feature_id(),
+        x.value()
+          .try_into()
+          .map_err(|_| ButtplugDeviceError::DeviceCommandSignError)?,
+      ),
+      OutputCommand::Oscillate(x) => self.handler.handle_output_oscillate_cmd(
+        cmd.feature_index(),
+        cmd.feature_id(),
+        x.value()
+          .try_into()
+          .map_err(|_| ButtplugDeviceError::DeviceCommandSignError)?,
+      ),
+      OutputCommand::Rotate(x) => {
+        self
+          .handler
+          .handle_output_rotate_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+      }
+      OutputCommand::Vibrate(x) => self.handler.handle_output_vibrate_cmd(
+        cmd.feature_index(),
+        cmd.feature_id(),
+        x.value()
+          .try_into()
+          .map_err(|_| ButtplugDeviceError::DeviceCommandSignError)?,
+      ),
+      OutputCommand::Position(x) => self.handler.handle_output_position_cmd(
+        cmd.feature_index(),
+        cmd.feature_id(),
+        x.value()
+          .try_into()
+          .map_err(|_| ButtplugDeviceError::DeviceCommandSignError)?,
+      ),
+      OutputCommand::Temperature(x) => {
+        self
+          .handler
+          .handle_output_temperature_cmd(cmd.feature_index(), cmd.feature_id(), x.value())
+      }
+      OutputCommand::Led(x) => self.handler.handle_output_led_cmd(
+        cmd.feature_index(),
+        cmd.feature_id(),
+        x.value()
+          .try_into()
+          .map_err(|_| ButtplugDeviceError::DeviceCommandSignError)?,
+      ),
+      OutputCommand::HwPositionWithDuration(x) => {
+        self.handler.handle_hw_position_with_duration_cmd(
+          cmd.feature_index(),
+          cmd.feature_id(),
+          x.value(),
+          x.duration(),
+        )
+      }
+    }
   }
 
   fn handle_hardware_commands(&self, commands: Vec<HardwareCommand>) -> ButtplugServerResultFuture {
@@ -554,9 +651,7 @@ pub(super) async fn build_device_handle(
       strategy,
       ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_)
     ))
-    && let Err(e) = device_handle
-      .stop(&StopCmdV4::default())
-      .await
+    && let Err(e) = device_handle.stop(&StopCmdV4::default()).await
   {
     return Err(ButtplugDeviceError::DeviceConnectionError(format!(
       "Error setting up keepalive: {e}"
@@ -568,44 +663,47 @@ pub(super) async fn build_device_handle(
   // to the device manager event loop via the provided sender.
   let event_stream = device_handle.event_stream();
   let identifier = device_handle.identifier().clone();
-  async_manager::spawn(async move {
-    futures::pin_mut!(event_stream);
-    loop {
-      let event = futures::StreamExt::next(&mut event_stream).await;
-      match event {
-        Some(DeviceEvent::Disconnected(id)) => {
-          if device_event_sender
-            .send(InternalDeviceEvent::Disconnected(id))
-            .await
-            .is_err()
-          {
-            info!(
-              "Device event sender closed for device {:?}, stopping event forwarding.",
-              identifier
-            );
+  async_manager::spawn(
+    async move {
+      futures::pin_mut!(event_stream);
+      loop {
+        let event = futures::StreamExt::next(&mut event_stream).await;
+        match event {
+          Some(DeviceEvent::Disconnected(id)) => {
+            if device_event_sender
+              .send(InternalDeviceEvent::Disconnected(id))
+              .await
+              .is_err()
+            {
+              info!(
+                "Device event sender closed for device {:?}, stopping event forwarding.",
+                identifier
+              );
+              break;
+            }
+          }
+          Some(DeviceEvent::Notification(id, msg)) => {
+            if device_event_sender
+              .send(InternalDeviceEvent::Notification(id, msg))
+              .await
+              .is_err()
+            {
+              info!(
+                "Device event sender closed for device {:?}, stopping event forwarding.",
+                identifier
+              );
+              break;
+            }
+          }
+          None => {
+            // Stream ended (device likely disconnected)
             break;
           }
-        }
-        Some(DeviceEvent::Notification(id, msg)) => {
-          if device_event_sender
-            .send(InternalDeviceEvent::Notification(id, msg))
-            .await
-            .is_err()
-          {
-            info!(
-              "Device event sender closed for device {:?}, stopping event forwarding.",
-              identifier
-            );
-            break;
-          }
-        }
-        None => {
-          // Stream ended (device likely disconnected)
-          break;
         }
       }
-    }
-  });
+    },
+    info_span!("DeviceEventForwardingTask").or_current(),
+  );
 
   Ok(device_handle)
 }

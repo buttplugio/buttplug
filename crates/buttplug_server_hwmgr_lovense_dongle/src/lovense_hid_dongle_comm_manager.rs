@@ -38,7 +38,7 @@ use tokio::{
   },
 };
 use tokio_util::sync::CancellationToken;
-use tracing_futures::Instrument;
+use tracing::info_span;
 
 fn hid_write_thread(
   dongle: HidDevice,
@@ -193,8 +193,8 @@ impl LovenseHIDDongleCommunicationManager {
     async_manager::spawn(
       async move {
         let _ = dongle_fut.await;
-      }
-      .instrument(tracing::info_span!("Lovense HID Dongle Finder Task")),
+      },
+      info_span!("Lovense HID Dongle Finder Task").or_current(),
     );
     let mut machine =
       create_lovense_dongle_machine(event_sender, machine_receiver, mgr.is_scanning.clone());
@@ -203,8 +203,8 @@ impl LovenseHIDDongleCommunicationManager {
         while let Some(next) = machine.transition().await {
           machine = next;
         }
-      }
-      .instrument(tracing::info_span!("Lovense HID Dongle State Machine")),
+      },
+      info_span!("Lovense HID Dongle State Machine").or_current(),
     );
     mgr
   }

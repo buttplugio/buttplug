@@ -17,6 +17,7 @@ use crate::{
 };
 use getset::CopyGetters;
 use serde::{Deserialize, Serialize};
+use strum_macros::Display;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, CopyGetters)]
 #[getset(get_copy = "pub")]

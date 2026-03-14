@@ -19,6 +19,7 @@ use buttplug_core::{
   util::async_manager,
 };
 use futures::{FutureExt, SinkExt, StreamExt, future::BoxFuture};
+use tracing::info_span;
 use std::{sync::Arc, time::Duration};
 use tokio::{
   net::{TcpListener, TcpStream},
@@ -245,7 +246,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
             disconnect_notifier_clone,
           )
           .await;
-        });
+        }, info_span!("ButtplugWebsocketServerTransport::connect").or_current());
         Ok(())
       } else {
         Err(ButtplugConnectorError::ConnectorGenericError(

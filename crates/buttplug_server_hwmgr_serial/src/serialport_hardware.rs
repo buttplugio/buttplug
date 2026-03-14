@@ -24,6 +24,7 @@ use buttplug_server_device_config::{Endpoint, ProtocolCommunicationSpecifier, Se
 use futures::future;
 use futures::{FutureExt, future::BoxFuture};
 use serialport::{SerialPort, SerialPortInfo};
+use tracing::info_span;
 use std::{
   fmt::{self, Debug},
   io::ErrorKind,
@@ -348,30 +349,33 @@ impl HardwareInternal for SerialPortHardware {
     let event_sender = self.device_event_sender.clone();
     let address = self.address.clone();
     async move {
-      async_manager::spawn(async move {
-        // TODO There's only one subscribable endpoint on a serial port, so we
-        // should check to make sure we don't have multiple subscriptions so we
-        // don't deadlock.
-        let mut data_receiver_mut = data_receiver.lock().await;
-        loop {
-          match data_receiver_mut.recv().await {
-            Some(data) => {
-              info!("Got serial data! {:?}", data);
-              event_sender
-                .send(HardwareEvent::Notification(
-                  address.clone(),
-                  Endpoint::Tx,
-                  data,
-                ))
-                .expect("As long as we're subscribed we should have a listener");
-            }
-            None => {
-              info!("Data channel closed, ending serial listener task");
-              break;
+      async_manager::spawn(
+        async move {
+          // TODO There's only one subscribable endpoint on a serial port, so we
+          // should check to make sure we don't have multiple subscriptions so we
+          // don't deadlock.
+          let mut data_receiver_mut = data_receiver.lock().await;
+          loop {
+            match data_receiver_mut.recv().await {
+              Some(data) => {
+                info!("Got serial data! {:?}", data);
+                event_sender
+                  .send(HardwareEvent::Notification(
+                    address.clone(),
+                    Endpoint::Tx,
+                    data,
+                  ))
+                  .expect("As long as we're subscribed we should have a listener");
+              }
+              None => {
+                info!("Data channel closed, ending serial listener task");
+                break;
+              }
             }
           }
-        }
-      });
+        },
+        info_span!("SerialPortHardware::subscribe").or_current(),
+      );
       Ok(())
     }
     .boxed()

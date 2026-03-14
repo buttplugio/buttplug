@@ -6,6 +6,7 @@
 // for full license information.
 
 use super::Endpoint;
+use compact_str::CompactString;
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
@@ -85,7 +86,7 @@ impl PartialEq for BluetoothLEManufacturerData {
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 pub struct BluetoothLESpecifier {
   /// Set of expected advertised names for this device.
-  names: HashSet<String>,
+  names: HashSet<CompactString>,
   /// Array of possible manufacturer data values.
   #[serde(default)]
   manufacturer_data: Vec<BluetoothLEManufacturerData>,
@@ -107,8 +108,8 @@ impl PartialEq for BluetoothLESpecifier {
     // Otherwise, try wildcarded names.
     for name in &self.names {
       for other_name in &other.names {
-        let compare_name: &String;
-        let mut wildcard: String;
+        let compare_name: &CompactString;
+        let mut wildcard: CompactString;
         if name.ends_with('*') {
           wildcard = name.clone();
           compare_name = other_name;
@@ -120,7 +121,7 @@ impl PartialEq for BluetoothLESpecifier {
         }
         // Remove asterisk from the end of the wildcard
         wildcard.pop();
-        if compare_name.starts_with(&wildcard) {
+        if compare_name.starts_with(wildcard.as_str()) {
           return true;
         }
       }
@@ -149,7 +150,7 @@ impl PartialEq for BluetoothLESpecifier {
 
 impl BluetoothLESpecifier {
   pub fn new(
-    names: HashSet<String>,
+    names: HashSet<CompactString>,
     manufacturer_data: Vec<BluetoothLEManufacturerData>,
     advertised_services: HashSet<Uuid>,
     services: HashMap<Uuid, HashMap<Endpoint, Uuid>>,
@@ -169,7 +170,7 @@ impl BluetoothLESpecifier {
     advertised_services: &[Uuid],
   ) -> BluetoothLESpecifier {
     let mut name_set = HashSet::new();
-    name_set.insert(name.to_string());
+    name_set.insert(name.into());
     let mut data_vec = vec![];
     for (company, data) in manufacturer_data.iter() {
       data_vec.push(BluetoothLEManufacturerData::new(

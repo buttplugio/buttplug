@@ -7,68 +7,33 @@
 
 use crate::ButtplugDeviceConfigError;
 
-use buttplug_core::message::{
-  DeviceFeature,
-  DeviceFeatureInput,
-  DeviceFeatureInputBuilder,
-  DeviceFeatureInputProperties,
-  DeviceFeatureOutput,
-  DeviceFeatureOutputBuilder,
-  DeviceFeatureOutputHwPositionWithDurationProperties,
-  DeviceFeatureOutputValueProperties,
-  InputCommandType,
-  InputType,
-  OutputType,
+use buttplug_core::{
+  message::{
+    DeviceFeature,
+    DeviceFeatureInput,
+    DeviceFeatureInputBuilder,
+    DeviceFeatureInputProperties,
+    DeviceFeatureOutput,
+    DeviceFeatureOutputBuilder,
+    DeviceFeatureOutputHwPositionWithDurationProperties,
+    DeviceFeatureOutputValueProperties,
+    InputCommandType,
+    InputCommandTypeFlags,
+    InputType,
+    OutputType,
+  },
+  util::range::RangeInclusive,
 };
+use compact_str::CompactString;
 use getset::{CopyGetters, Getters, Setters};
 use serde::{
+  Deserialize,
+  Serialize,
+  Serializer,
   de::{self, Deserializer, SeqAccess, Visitor},
   ser::SerializeSeq,
-  Deserialize, Serialize, Serializer,
 };
-use std::{collections::HashSet, fmt, ops::RangeInclusive};
 use uuid::Uuid;
-
-/// Serde helper module for serializing/deserializing Vec<RangeInclusive<i32>> as [[start, end], ...]
-mod range_vec_serde {
-  use super::*;
-
-  pub fn serialize<S>(ranges: &Vec<RangeInclusive<i32>>, serializer: S) -> Result<S::Ok, S::Error>
-  where
-    S: Serializer,
-  {
-    let arrays: Vec<[i32; 2]> = ranges.iter().map(|r| [*r.start(), *r.end()]).collect();
-    arrays.serialize(serializer)
-  }
-
-  pub fn deserialize<'de, D>(deserializer: D) -> Result<Vec<RangeInclusive<i32>>, D::Error>
-  where
-    D: Deserializer<'de>,
-  {
-    struct RangeVecVisitor;
-
-    impl<'de> Visitor<'de> for RangeVecVisitor {
-      type Value = Vec<RangeInclusive<i32>>;
-
-      fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        formatter.write_str("an array of two-element arrays [[start, end], ...]")
-      }
-
-      fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
-      where
-        A: SeqAccess<'de>,
-      {
-        let mut ranges = Vec::new();
-        while let Some([start, end]) = seq.next_element::<[i32; 2]>()? {
-          ranges.push(start..=end);
-        }
-        Ok(ranges)
-      }
-    }
-
-    deserializer.deserialize_seq(RangeVecVisitor)
-  }
-}
 
 /// Holds a combination of ranges. Base range is defined in the base device config, user range is
 /// defined by the user later to be a sub-range of the base range. User range only stores in u32,
@@ -92,7 +57,7 @@ impl RangeWithLimit {
   pub fn new(base: &RangeInclusive<i32>) -> Self {
     Self {
       base: base.clone(),
-      internal_base: RangeInclusive::new(0, *base.end() as u32),
+      internal_base: RangeInclusive::new(0, base.end() as u32),
       user: None,
     }
   }
@@ -100,13 +65,13 @@ impl RangeWithLimit {
   pub fn new_with_user(base: &RangeInclusive<i32>, user: &Option<RangeInclusive<u32>>) -> Self {
     Self {
       base: base.clone(),
-      internal_base: RangeInclusive::new(0, *base.end() as u32),
+      internal_base: RangeInclusive::new(0, base.end() as u32),
       user: user.clone(),
     }
   }
 
   pub fn step_limit(&self) -> RangeInclusive<i32> {
-    if *self.base.start() < 0 {
+    if self.base.start() < 0 {
       RangeInclusive::new(-(self.step_count() as i32), self.step_count() as i32)
     } else {
       RangeInclusive::new(0, self.step_count() as i32)
@@ -115,9 +80,9 @@ impl RangeWithLimit {
 
   pub fn step_count(&self) -> u32 {
     if let Some(user) = &self.user {
-      *user.end() - *user.start()
+      user.end() - user.start()
     } else {
-      *self.base.end() as u32
+      self.base.end() as u32
     }
   }
 
@@ -125,14 +90,14 @@ impl RangeWithLimit {
     base: &RangeInclusive<i32>,
     user: &Option<RangeInclusive<u32>>,
   ) -> Result<Self, ButtplugDeviceConfigError> {
-    let truncated_base = RangeInclusive::new(0, *base.end() as u32);
+    let truncated_base = RangeInclusive::new(0, base.end() as u32);
     if let Some(user) = user {
       if user.is_empty() {
         Err(ButtplugDeviceConfigError::InvalidUserRange)
-      } else if *user.start() < *truncated_base.start()
-        || *user.end() > *truncated_base.end()
-        || *user.start() > *truncated_base.end()
-        || *user.end() < *truncated_base.start()
+      } else if user.start() < truncated_base.start()
+        || user.end() > truncated_base.end()
+        || user.start() > truncated_base.end()
+        || user.end() < truncated_base.start()
       {
         Err(ButtplugDeviceConfigError::InvalidUserRange)
       } else {
@@ -160,8 +125,8 @@ impl Serialize for RangeWithLimit {
     S: Serializer,
   {
     let mut seq = serializer.serialize_seq(Some(2))?;
-    seq.serialize_element(self.base.start())?;
-    seq.serialize_element(self.base.end())?;
+    seq.serialize_element(&self.base.start())?;
+    seq.serialize_element(&self.base.end())?;
     seq.end()
   }
 }
@@ -190,7 +155,7 @@ impl<'de> Deserialize<'de> for RangeWithLimit {
         let end: i32 = seq
           .next_element()?
           .ok_or_else(|| de::Error::invalid_length(1, &self))?;
-        Ok(RangeWithLimit::new(&(start..=end)))
+        Ok(RangeWithLimit::new(&RangeInclusive::new(start, end)))
       }
     }
 
@@ -234,7 +199,7 @@ impl ServerDeviceFeatureOutputValueProperties {
     };
     let current_value = value.unsigned_abs();
     let mult = if value < 0 { -1 } else { 1 };
-    if value != 0 && range.contains(&(range.start() + current_value)) {
+    if value != 0 && range.contains(range.start() + current_value) {
       Ok((range.start() + current_value) as i32 * mult)
     } else if value == 0 {
       Ok(0)
@@ -291,7 +256,7 @@ impl ServerDeviceFeatureOutputPositionProperties {
     } else {
       self.value.internal_base()
     };
-    if range.contains(&(range.start() + input)) {
+    if range.contains(range.start() + input) {
       if self.reverse_position {
         Ok(range.end() - input)
       } else {
@@ -352,7 +317,7 @@ impl ServerDeviceFeatureOutputHwPositionWithDurationProperties {
     } else {
       self.value.internal_base()
     };
-    if input > 0 && range.contains(&(range.start() + input)) {
+    if input > 0 && range.contains(range.start() + input) {
       if self.reverse_position {
         Ok(range.end() - input)
       } else {
@@ -429,7 +394,10 @@ impl ServerDeviceFeatureOutput {
       (self.temperature.is_some(), OutputType::Temperature),
       (self.led.is_some(), OutputType::Led),
       (self.position.is_some(), OutputType::Position),
-      (self.hw_position_with_duration.is_some(), OutputType::HwPositionWithDuration),
+      (
+        self.hw_position_with_duration.is_some(),
+        OutputType::HwPositionWithDuration,
+      ),
       (self.spray.is_some(), OutputType::Spray),
     ]
     .into_iter()
@@ -556,26 +524,22 @@ impl From<ServerDeviceFeatureOutput> for DeviceFeatureOutput {
 #[derive(Clone, Debug, Getters, Serialize, Deserialize)]
 #[getset(get = "pub")]
 pub struct ServerDeviceFeatureInputProperties {
-  #[serde(with = "range_vec_serde")]
   value: Vec<RangeInclusive<i32>>,
-  command: HashSet<InputCommandType>,
+  command: InputCommandTypeFlags,
 }
 
 impl ServerDeviceFeatureInputProperties {
-  pub fn new(
-    value: &Vec<RangeInclusive<i32>>,
-    sensor_commands: &HashSet<InputCommandType>,
-  ) -> Self {
+  pub fn new(value: &Vec<RangeInclusive<i32>>, sensor_commands: InputCommandTypeFlags) -> Self {
     Self {
       value: value.clone(),
-      command: sensor_commands.clone(),
+      command: sensor_commands,
     }
   }
 }
 
 impl From<&ServerDeviceFeatureInputProperties> for DeviceFeatureInputProperties {
   fn from(val: &ServerDeviceFeatureInputProperties) -> Self {
-    DeviceFeatureInputProperties::new(&val.value, &val.command)
+    DeviceFeatureInputProperties::new(&val.value, val.command.clone())
   }
 }
 
@@ -623,7 +587,7 @@ impl ServerDeviceFeatureInput {
     .any(|input| {
       input
         .as_ref()
-        .map_or(false, |i| i.command.contains(&InputCommandType::Subscribe))
+        .map_or(false, |i| i.command.contains(InputCommandType::Subscribe))
     })
   }
 }
@@ -645,13 +609,11 @@ impl From<ServerDeviceFeatureInput> for DeviceFeatureInput {
 #[serde(default)]
 pub struct ServerDeviceFeature {
   #[getset(get_copy = "pub")]
-  #[serde(skip)]
   index: u32,
   #[getset(get = "pub")]
   #[serde(default)]
-  description: String,
+  description: CompactString,
   #[getset(get_copy = "pub")]
-  #[serde(skip)]
   id: Uuid,
   #[getset(get_copy = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -673,13 +635,14 @@ impl PartialEq for ServerDeviceFeature {
   }
 }
 
-impl Eq for ServerDeviceFeature {}
+impl Eq for ServerDeviceFeature {
+}
 
 impl Default for ServerDeviceFeature {
   fn default() -> Self {
     Self {
       index: 0,
-      description: String::new(),
+      description: "".into(),
       id: Uuid::new_v4(),
       base_id: None,
       alt_protocol_index: None,
@@ -692,21 +655,21 @@ impl Default for ServerDeviceFeature {
 impl ServerDeviceFeature {
   pub fn new(
     index: u32,
-    description: &str,
+    description: CompactString,
     id: Uuid,
     base_id: Option<Uuid>,
     alt_protocol_index: Option<u32>,
-    output: &Option<ServerDeviceFeatureOutput>,
-    input: &Option<ServerDeviceFeatureInput>,
+    output: Option<ServerDeviceFeatureOutput>,
+    input: Option<ServerDeviceFeatureInput>,
   ) -> Self {
     Self {
       index,
-      description: description.to_owned(),
+      description,
       id,
       base_id,
       alt_protocol_index,
-      output: output.clone(),
-      input: input.clone(),
+      output,
+      input,
     }
   }
 

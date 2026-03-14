@@ -31,18 +31,12 @@ use buttplug_server_device_config::ServerDeviceDefinition;
 const LOVENSE_CONNECT_UUID: Uuid = uuid!("590bfbbf-c3b7-41ae-9679-485b190ffb87");
 
 pub mod setup {
-  use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
-  #[derive(Default)]
-  pub struct LovenseConnectIdentifierFactory {}
+  use crate::device::protocol::ProtocolIdentifier;
 
-  impl ProtocolIdentifierFactory for LovenseConnectIdentifierFactory {
-    fn identifier(&self) -> &str {
-      "lovense-connect-service"
-    }
+  pub const IDENTIFIER: &str = "lovense-connect-service";
 
-    fn create(&self) -> Box<dyn ProtocolIdentifier> {
-      Box::new(super::LovenseConnectIdentifier::default())
-    }
+  pub fn create_identifier() -> Box<dyn ProtocolIdentifier> {
+    Box::new(super::LovenseConnectIdentifier::default())
   }
 }
 
@@ -60,7 +54,7 @@ impl ProtocolIdentifier for LovenseConnectIdentifier {
       UserDeviceIdentifier::new(
         hardware.address(),
         "lovense-connect-service",
-        &Some(hardware.name().to_owned()),
+        Some(hardware.name()),
       ),
       Box::new(LovenseConnectServiceInitializer::default()),
     ))
@@ -154,7 +148,7 @@ impl ProtocolHandler for LovenseConnectService {
   fn handle_output_cmd(
     &self,
     cmd: &crate::message::checked_output_cmd::CheckedOutputCmdV4,
-  ) -> Result<Vec<crate::device::hardware::HardwareCommand>, ButtplugDeviceError> {
+  ) -> Option<Result<Vec<crate::device::hardware::HardwareCommand>, ButtplugDeviceError>> {
     let mut hardware_cmds = vec![];
 
     // We do all of our validity checking during message conversion to checked, so we should be able to skip validity checking here.
@@ -179,7 +173,7 @@ impl ProtocolHandler for LovenseConnectService {
         )
         .into(),
       );
-      Ok(hardware_cmds)
+      Some(Ok(hardware_cmds))
     } else if self.thusting_count != 0
       && cmd.output_command().as_output_type() == OutputType::Oscillate
     {
@@ -199,7 +193,7 @@ impl ProtocolHandler for LovenseConnectService {
         )
         .into(),
       );
-      Ok(hardware_cmds)
+      Some(Ok(hardware_cmds))
     } else if cmd.output_command().as_output_type() == OutputType::Oscillate {
       // Only the max has a constriction system, and there's only one, so just parse the first command.
       /* ~ Sutekh
@@ -225,9 +219,9 @@ impl ProtocolHandler for LovenseConnectService {
         )
         .into(),
       );
-      Ok(hardware_cmds)
+      Some(Ok(hardware_cmds))
     } else {
-      Ok(hardware_cmds)
+      Some(Ok(hardware_cmds))
     }
   }
 

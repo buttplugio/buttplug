@@ -38,14 +38,16 @@ use buttplug_core::{
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use buttplug_server_device_config::{DeviceConfigurationManager, UserDeviceIdentifier};
+use compact_str::CompactString;
 use dashmap::DashMap;
 use futures::{
   Stream,
   future::{self, FutureExt},
 };
 use getset::Getters;
+use litemap::LiteMap;
+use tracing::info_span;
 use std::{
-  collections::BTreeMap,
   convert::TryFrom,
   sync::{
     Arc,
@@ -65,7 +67,7 @@ pub(super) enum DeviceManagerCommand {
 #[getset(get = "pub")]
 pub struct ServerDeviceInfo {
   identifier: UserDeviceIdentifier,
-  display_name: Option<String>,
+  display_name: Option<CompactString>,
 }
 
 pub struct ServerDeviceManagerBuilder {
@@ -160,7 +162,7 @@ impl ServerDeviceManagerBuilder {
     );
     async_manager::spawn(async move {
       event_loop.run().await;
-    });
+    }, info_span!("ServerDeviceManagerEventLoop").or_current());
     Ok(ServerDeviceManager {
       device_configuration_manager: self.device_configuration_manager.clone(),
       devices,
@@ -296,7 +298,7 @@ impl ServerDeviceManager {
     }
   }
 
-  pub(crate) fn feature_map(&self) -> BTreeMap<u32, ServerDeviceAttributes> {
+  pub(crate) fn feature_map(&self) -> LiteMap<u32, ServerDeviceAttributes> {
     self
       .devices()
       .iter()
