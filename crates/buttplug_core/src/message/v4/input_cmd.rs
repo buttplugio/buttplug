@@ -17,6 +17,7 @@ use crate::message::{
 use getset::CopyGetters;
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de::{SeqAccess, Visitor}, ser::SerializeSeq};
 use enumflags2::{BitFlags, bitflags};
+use strum_macros::Display;
 
 #[bitflags]
 #[repr(u8)]

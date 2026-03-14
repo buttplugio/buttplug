@@ -10,6 +10,7 @@ use derive_builder::Builder;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use std::hash::Hash;
+use strum_macros::{Display, EnumIter, EnumString};
 
 #[derive(
   Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash, EnumIter, EnumString,

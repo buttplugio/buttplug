@@ -22,6 +22,7 @@ use crate::message::{
 };
 use enum_dispatch::enum_dispatch;
 use serde::{Deserialize, Serialize};
+use strum_macros::Display;
 
 use super::{DeviceListV4, InputReadingV4};
 

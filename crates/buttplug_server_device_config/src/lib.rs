@@ -159,30 +159,26 @@ pub use endpoint::*;
 use uuid::Uuid;
 
 use thiserror::Error;
+use displaydoc::Display;
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Display)]
 pub enum ButtplugDeviceConfigError {
-  /// Conversion to client type not possible with requested property type
-  #[error("Conversion of {0} to client type not possible with requested property type")]
+  /// Conversion of {0} to client type not possible with requested property type
   InvalidOutputTypeConversion(String),
   /// User set range exceeds bounds of possible configuration range
-  #[error("User set range exceeds bounds of possible configuration range")]
   InvalidUserRange,
-  /// Base range required
-  #[error("Base range required for all feature outputs")]
+  /// Base range required for all feature outputs
   BaseRangeRequired,
-  /// Base ID not found, cannot match user device/feature to a base device/feature
-  #[error("Device definition with base id {0} not found")]
+  /// Device definition with base id {0} not found
   BaseIdNotFound(Uuid),
-  #[error("Feature vectors between base and user device definitions do not match")]
+  /// Feature vectors between base and user device definitions do not match
   UserFeatureMismatch,
-  #[error("Output value {0} not in range {1}")]
+  /// Output value {0} not in range {1}
   InvalidOutputValue(i32, String),
-  #[error("Output type {0} not available on device")]
+  /// Output type {0} not available on device
   InvalidOutput(OutputType),
-  #[error("Float value {0} is not 0 < x < 1")]
+  /// Float value {0} is not 0 < x < 1
   InvalidFloatConversion(f64),
   /// Feature or device is missing required base_id for user config conversion
-  #[error("Feature or device is missing required base_id for user config conversion")]
   MissingBaseId,
 }
