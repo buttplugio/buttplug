@@ -28,7 +28,6 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
 };
 use tokio::sync::mpsc::{Sender, channel};
-use tracing_futures::Instrument;
 
 #[derive(Default)]
 pub struct ButtplugInProcessClientConnectorBuilder {

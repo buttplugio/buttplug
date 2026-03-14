@@ -40,6 +40,7 @@ use buttplug_server::message::{
 use futures::{Stream, future};
 use getset::Getters;
 use log::*;
+use tracing::Instrument;
 use std::{
   collections::HashMap,
   fmt,
@@ -49,7 +50,6 @@ use std::{
   },
 };
 use tokio::sync::{broadcast, mpsc};
-use tracing_futures::Instrument;
 
 /// Enum for messages going to a [ButtplugClientDevice] instance.
 #[derive(Clone, Debug)]

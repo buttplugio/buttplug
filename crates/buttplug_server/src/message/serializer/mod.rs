@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use std::sync::OnceLock;
+
 use buttplug_core::{
   errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
   message::{
@@ -28,7 +30,6 @@ use buttplug_core::{
   },
 };
 use jsonschema::Validator;
-use once_cell::sync::OnceCell;
 use serde::Deserialize;
 
 use super::{
@@ -69,14 +70,14 @@ impl ButtplugMessageFinalizer for RequestServerInfoVersion {
 }
 
 pub struct ButtplugServerJSONSerializer {
-  pub(super) message_version: OnceCell<message::ButtplugMessageSpecVersion>,
+  pub(super) message_version: OnceLock<message::ButtplugMessageSpecVersion>,
   validator: Validator,
 }
 
 impl Default for ButtplugServerJSONSerializer {
   fn default() -> Self {
     Self {
-      message_version: OnceCell::new(),
+      message_version: OnceLock::new(),
       validator: create_message_validator(),
     }
   }
