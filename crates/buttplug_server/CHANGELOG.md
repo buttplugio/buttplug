@@ -2,9 +2,10 @@
 
 ## Features
 
-- Device Updates
+- Update dependencies
+- Device updates
   - Add battery reading for WeVibe
-- Device Protocol Support
+- Device protocol support
   - HoneyPlayBox devices
   - Various JoyHub devices
 - Expose "needs_keepalive" to engine to minimize mobile wakelocks

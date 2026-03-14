@@ -1,3 +1,10 @@
+# v4.0.1 (2026/03/13)
+
+## Features
+
+- Update internal library dependencies
+  - Includes bluetooth updates that should fix a bunch of Android crashes
+
 # Intiface Engine v4.0.0 (2026/01/31)
 
 ## Features
