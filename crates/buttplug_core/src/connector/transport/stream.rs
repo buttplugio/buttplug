@@ -63,7 +63,7 @@ impl ButtplugConnectorTransport for ButtplugStreamTransport {
         .await
         .take()
         .ok_or(ButtplugConnectorError::ConnectorAlreadyConnected)?;
-      async_manager::spawn(async move {
+      crate::spawn!("ButtplugStreamTransport", async move {
         loop {
           select! {
             msg = outgoing_receiver.recv() => {

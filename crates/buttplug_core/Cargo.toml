@@ -20,8 +20,8 @@ doc = true
 
 [features]
 default=["tokio-runtime"]
-tokio-runtime=["tokio/rt"]
-wasm=[]
+tokio-runtime=["tokio/rt", "tokio/time"]
+wasm=["wasm-bindgen-futures", "wasmtimer"]
 
 # Only build docs on one platform (linux)
 [package.metadata.docs.rs]
@@ -46,9 +46,13 @@ log = "0.4.29"
 getset = "0.1.6"
 jsonschema = { version = "0.45.0", default-features = false }
 cfg-if = "1.0.4"
-tokio = { version = "1.50.0", features = ["sync", "time", "macros"] }
+tokio = { version = "1.50.0", features = ["sync", "macros"] }
 async-stream = "0.3.6"
 strum_macros = "0.28.0"
 strum = "0.28.0"
 derive_builder = "0.20.2"
 enum_dispatch = "0.3"
+tracing = "0.1.44"
+wasm-bindgen-futures = { version = "0.4.64", optional = true }
+wasmtimer = { version = "0.4.3", optional = true }
+
