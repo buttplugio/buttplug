@@ -6,7 +6,7 @@
 // for full license information.
 
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
+use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::{
   Hardware,
   HardwareConnector,
@@ -348,7 +348,7 @@ impl HardwareInternal for SerialPortHardware {
     let event_sender = self.device_event_sender.clone();
     let address = self.address.clone();
     async move {
-      async_manager::spawn(async move {
+      buttplug_core::spawn!("SerialPortHardware subscription", async move {
         // TODO There's only one subscribable endpoint on a serial port, so we
         // should check to make sure we don't have multiple subscriptions so we
         // don't deadlock.

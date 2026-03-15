@@ -7,7 +7,7 @@
 
 use super::xinput_device_comm_manager::XInputControllerIndex;
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
+use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::{
   GenericHardwareSpecializer,
   Hardware,
@@ -113,7 +113,7 @@ impl XInputHardware {
     let token = CancellationToken::new();
     let child = token.child_token();
     let sender = device_event_sender.clone();
-    async_manager::spawn(async move {
+    buttplug_core::spawn!("XInputHardware connectivity check", async move {
       check_gamepad_connectivity(index, sender, child).await;
     });
     Self {
