@@ -8,7 +8,7 @@ use buttplug_core::{
   connector::ButtplugConnector,
   errors::{ButtplugError, ButtplugHandshakeError},
   message::{ButtplugMessageSpecVersion, ButtplugServerMessageV4},
-  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+  util::{stream::convert_broadcast_receiver_to_stream},
 };
 use buttplug_server::{
   ButtplugServer, ButtplugServerBuilder,
@@ -151,7 +151,7 @@ async fn run_server<ConnectorType>(
           let connector_clone = shared_connector.clone();
           let remote_event_sender_clone = remote_event_sender.clone();
           let disconnect_notifier = disconnect_notifier.clone();
-          async_manager::spawn(async move {
+          buttplug_core::spawn!("ButtplugRemoteServer loop", async move {
             match server_clone.parse_message(client_message.clone()).await {
               Ok(ret_msg) => {
                 // Only send event if we just connected. Sucks to check it on every message but the boolean check should be quick.

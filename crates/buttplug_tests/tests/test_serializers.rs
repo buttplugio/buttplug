@@ -19,7 +19,6 @@ use buttplug_core::{
     ErrorV0,
     serializer::ButtplugSerializedMessage,
   },
-  util::async_manager,
 };
 use buttplug_server::message::{
   ButtplugClientMessageVariant,
@@ -38,7 +37,7 @@ async fn test_garbled_client_rsi_response() {
   let helper_clone = helper.clone();
   let finish_notifier = Arc::new(Notify::new());
   let finish_notifier_clone = finish_notifier.clone();
-  async_manager::spawn(async move {
+  buttplug_core::spawn!(async move {
     helper_clone
       .connect_without_reply()
       .await
@@ -72,7 +71,7 @@ async fn test_serialized_error_relay() {
   let helper = Arc::new(ChannelClientTestHelper::new());
   helper.simulate_successful_connect().await;
   let helper_clone = helper.clone();
-  async_manager::spawn(async move {
+  buttplug_core::spawn!(async move {
     assert!(matches!(
       helper_clone.next_client_message().await,
       ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::StartScanning(..))
