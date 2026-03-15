@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 178
+    "minor": 180
   },
   "protocols": {
     "activejoy": {
@@ -21773,6 +21773,140 @@
         "name": "VibCrafter Device"
       }
     },
+    "vibio": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Clara_Vibio",
+              "Dodson_Vibio",
+              "Elle_Vibio",
+              "Frida_Vibio",
+              "Rivera_Vibio"
+            ],
+            "services": {
+              "53300021-0050-4bd4-bbe5-a6920e4c5663": {
+                "rx": "53300023-0050-4bd4-bbe5-a6920e4c5663",
+                "tx": "53300022-0050-4bd4-bbe5-a6920e4c5663"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "features": [
+            {
+              "id": "343a8e18-b76c-4482-b048-32d762bf87c9",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    99
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "b55fef0e-baa3-44d0-9545-a4b7b0298515",
+          "identifier": [
+            "Clara_Vibio"
+          ],
+          "name": "Vibio Clara"
+        },
+        {
+          "features": [
+            {
+              "id": "343a8e18-b76c-4482-b048-32d762bf87c9",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    99
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "c66fef0e-cbb4-44d0-9545-a4b7b0298516",
+          "identifier": [
+            "Dodson_Vibio"
+          ],
+          "name": "Vibio Dodson"
+        },
+        {
+          "id": "d77fef0e-dcc5-44d0-9545-a4b7b0298517",
+          "identifier": [
+            "Rivera_Vibio"
+          ],
+          "name": "Vibio Rivera"
+        },
+        {
+          "id": "e88fef0e-edd6-44d0-9545-a4b7b0298518",
+          "identifier": [
+            "Elle_Vibio"
+          ],
+          "name": "Vibio Elle"
+        },
+        {
+          "id": "f99fef0e-fee7-44d0-9545-a4b7b0298519",
+          "identifier": [
+            "Frida_Vibio"
+          ],
+          "name": "Vibio Frida"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "343a8e18-b76c-4482-b048-32d762bf87c9",
+            "index": 0,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  99
+                ]
+              }
+            }
+          },
+          {
+            "id": "d92a031e-bd0d-4815-a0bd-6c59566dcce2",
+            "index": 1,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  99
+                ]
+              }
+            }
+          },
+          {
+            "description": "Battery Level",
+            "id": "e1a2b3c4-d5e6-f7a0-b1c2-d3e4f5a6b7c8",
+            "index": 2,
+            "input": {
+              "battery": {
+                "command": [
+                  "Read"
+                ],
+                "value": [
+                  [
+                    0,
+                    100
+                  ]
+                ]
+              }
+            }
+          }
+        ],
+        "id": "a44eef0e-b412-44d0-9545-a4b7b0298514",
+        "name": "Vibio Device"
+      }
+    },
     "vibratissimo": {
       "communication": [
         {
@@ -22472,6 +22606,7 @@
           "btle": {
             "names": [
               "Melt",
+              "Melt 2",
               "Moxie",
               "Vector",
               "Wand",
@@ -22510,7 +22645,8 @@
           ],
           "id": "4f73e55c-bea8-4069-8409-cba30fbbfc81",
           "identifier": [
-            "Melt"
+            "Melt",
+            "Melt 2"
           ],
           "name": "WeVibe Melt"
         },

@@ -112,6 +112,7 @@ pub mod tryfun;
 pub mod tryfun_blackhole;
 pub mod tryfun_meta2;
 pub mod vibcrafter;
+pub mod vibio;
 pub mod vibratissimo;
 pub mod vorze_sa;
 pub mod wetoy;
@@ -539,6 +540,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     vibcrafter::setup::VibCrafterIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    vibio::setup::VibioIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
