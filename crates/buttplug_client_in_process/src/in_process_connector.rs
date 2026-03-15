@@ -11,7 +11,6 @@ use buttplug_core::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
   errors::{ButtplugError, ButtplugMessageError},
   message::{ButtplugClientMessageV4, ButtplugServerMessageV4},
-  util::async_manager,
 };
 use buttplug_server::{
   ButtplugServer,
@@ -116,7 +115,7 @@ impl ButtplugConnector<ButtplugClientMessageV4, ButtplugServerMessageV4>
       self.server_outbound_sender = message_sender;
       let server_recv = self.server.server_version_event_stream();
       async move {
-        async_manager::spawn(async move {
+        buttplug_core::spawn!("InProcessClientConnector event sender loop", async move {
           info!("Starting In Process Client Connector Event Sender Loop");
           pin_mut!(server_recv);
           while let Some(event) = server_recv.next().await {
@@ -130,7 +129,7 @@ impl ButtplugConnector<ButtplugClientMessageV4, ButtplugServerMessageV4>
             }
           }
           info!("Stopping In Process Client Connector Event Sender Loop, due to channel receiver being dropped.");
-        }.instrument(tracing::info_span!("InProcessClientConnectorEventSenderLoop")));
+        });
         connected.store(true, Ordering::Relaxed);
         Ok(())
       }.boxed()
