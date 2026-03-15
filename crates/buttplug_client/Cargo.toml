@@ -18,8 +18,13 @@ test = true
 doctest = true
 doc = true
 
+[features]
+default = ["tokio-runtime"]
+tokio-runtime = ["buttplug_core/tokio-runtime"]
+wasm = ["buttplug_core/wasm"]
+
 [dependencies]
-buttplug_core = { version = "10.0.1", path = "../buttplug_core" }
+buttplug_core = { version = "10.0.1", path = "../buttplug_core", default-features = false }
 futures = "0.3.32"
 thiserror = "2.0.18"
 log = "0.4.29"
