@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 178
+    "minor": 179
   },
   "protocols": {
     "activejoy": {
@@ -22472,6 +22472,7 @@
           "btle": {
             "names": [
               "Melt",
+              "Melt 2",
               "Moxie",
               "Vector",
               "Wand",
@@ -22510,7 +22511,8 @@
           ],
           "id": "4f73e55c-bea8-4069-8409-cba30fbbfc81",
           "identifier": [
-            "Melt"
+            "Melt",
+            "Melt 2"
           ],
           "name": "WeVibe Melt"
         },
