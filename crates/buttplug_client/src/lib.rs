@@ -53,7 +53,6 @@ use std::{
 use strum_macros::Display;
 use thiserror::Error;
 use tokio::sync::{Mutex, broadcast, mpsc};
-use tracing_futures::Instrument;
 
 /// Result type used for public APIs.
 ///

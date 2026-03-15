@@ -10,7 +10,6 @@
 use buttplug_core::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
   errors::{ButtplugError, ButtplugMessageError},
-  util::async_manager,
 };
 use buttplug_server::{
   ButtplugServer,
@@ -28,7 +27,6 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
 };
 use tokio::sync::mpsc::{Sender, channel};
-use tracing_futures::Instrument;
 
 #[derive(Default)]
 pub struct ButtplugInProcessClientConnectorBuilder {

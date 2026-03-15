@@ -49,7 +49,7 @@ use std::{
   },
 };
 use tokio::sync::{broadcast, mpsc};
-use tracing_futures::Instrument;
+use tracing::Instrument;
 
 /// Enum for messages going to a [ButtplugClientDevice] instance.
 #[derive(Clone, Debug)]

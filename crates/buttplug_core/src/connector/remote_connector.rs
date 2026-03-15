@@ -18,7 +18,6 @@ use crate::{
     ButtplugMessage,
     serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
   },
-  util::async_manager,
 };
 use futures::{FutureExt, future::BoxFuture, select};
 use log::*;

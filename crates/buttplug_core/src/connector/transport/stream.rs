@@ -15,7 +15,6 @@ use crate::{
     transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
   },
   message::serializer::ButtplugSerializedMessage,
-  util::async_manager,
 };
 use futures::{
   FutureExt,
