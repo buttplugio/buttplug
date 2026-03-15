@@ -10,14 +10,14 @@ use std::time::Duration;
 use tracing::{Instrument, Span};
 
 #[derive(Default, Debug)]
-pub struct TokioAsyncManager {}
+pub struct WasmBindgenAsyncManager {}
 
-impl super::AsyncManager for TokioAsyncManager {
+impl super::AsyncManager for WasmBindgenAsyncManager {
   fn spawn(&self, future: FutureObj<'static, ()>, span: Span) {
-    tokio::task::spawn(future.instrument(span));
+    wasm_bindgen_futures::spawn_local(future.instrument(span));
   }
 
   fn sleep(&self, duration: Duration) -> BoxFuture<'static, ()> {
-    Box::pin(tokio::time::sleep(duration))
+    Box::pin(wasmtimer::tokio::sleep(duration))
   }
 }
