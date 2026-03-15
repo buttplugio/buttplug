@@ -21,7 +21,6 @@ use crate::util::{
 use client::{ButtplugClient, ButtplugClientDevice, ButtplugClientEvent};
 use device::{LinearCommand, RotateCommand, ScalarCommand, ScalarValueCommand};
 
-use buttplug_core::util::async_manager;
 use buttplug_server::{ButtplugServer, ButtplugServerBuilder, device::ServerDeviceManagerBuilder};
 use buttplug_server_device_config::load_protocol_configs;
 use tokio::sync::Notify;
@@ -89,7 +88,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
         // their notification endpoint. This is a mess but it does the job.
         let device = device.clone();
         let expected_power = *expected_power;
-        async_manager::spawn(async move {
+        buttplug_core::spawn!(async move {
           let battery_level = device.battery_level().await.unwrap();
           assert_eq!(battery_level, expected_power);
         });
@@ -181,7 +180,7 @@ pub async fn run_json_test_case(test_case: &DeviceTestCase) {
 
   let (server, device_channels) = build_server(test_case);
   let remote_server = ButtplugTestServer::new(server);
-  async_manager::spawn(async move {
+  buttplug_core::spawn!(async move {
     remote_server
       .start(server_connector)
       .await

@@ -85,8 +85,13 @@ pub async fn sleep(duration: Duration) {
   get_global_async_manager().sleep(duration).await;
 }
 
+/// Spawn a fire-and-forget task on the global async manager.
+/// Always prefer to add a name to the task for better tracing context.
 #[macro_export]
 macro_rules! spawn {
+  ($future:expr) => {
+    $crate::util::async_manager::spawn($future, tracing::span!(tracing::Level::INFO, "Buttplug Async Task"))
+  };
   ($name:expr, $future:expr) => {
     $crate::util::async_manager::spawn($future, tracing::span!(tracing::Level::INFO, $name))
   };

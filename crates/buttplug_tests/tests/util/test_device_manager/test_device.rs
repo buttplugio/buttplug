@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
+use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::{
   Hardware,
   HardwareCommand,
@@ -175,7 +175,7 @@ impl TestDevice {
     let subscribed_endpoints_clone = subscribed_endpoints.clone();
     let read_data = Arc::new(Mutex::new(VecDeque::new()));
     let read_data_clone = read_data.clone();
-    async_manager::spawn(async move {
+    buttplug_core::spawn!(async move {
       while let Some(event) = receiver.recv().await {
         match event {
           TestHardwareEvent::Disconnect => {
