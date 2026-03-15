@@ -13,7 +13,7 @@ use super::lovense_dongle_messages::{
   OutgoingLovenseData,
 };
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
+use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::{
   GenericHardwareSpecializer,
   Hardware,
@@ -128,7 +128,7 @@ impl LovenseDongleHardware {
     let address_clone = address.to_owned();
     let (device_event_sender, _) = broadcast::channel(256);
     let device_event_sender_clone = device_event_sender.clone();
-    async_manager::spawn(async move {
+    buttplug_core::spawn!("LovenseDongleHardware data loop", async move {
       while let Some(msg) = device_incoming.recv().await {
         if msg.func != LovenseDongleMessageFunc::ToyData {
           continue;

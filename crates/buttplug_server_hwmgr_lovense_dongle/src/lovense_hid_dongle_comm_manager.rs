@@ -13,7 +13,7 @@ use super::{
   },
   lovense_dongle_state_machine::create_lovense_dongle_machine,
 };
-use buttplug_core::{ButtplugResultFuture, errors::ButtplugDeviceError, util::async_manager};
+use buttplug_core::{ButtplugResultFuture, errors::ButtplugDeviceError};
 use buttplug_server::device::hardware::communication::{
   HardwareCommunicationManager,
   HardwareCommunicationManagerBuilder,
@@ -38,7 +38,6 @@ use tokio::{
   },
 };
 use tokio_util::sync::CancellationToken;
-use tracing_futures::Instrument;
 
 fn hid_write_thread(
   dongle: HidDevice,
@@ -190,22 +189,16 @@ impl LovenseHIDDongleCommunicationManager {
       dongle_available,
     };
     let dongle_fut = mgr.find_dongle();
-    async_manager::spawn(
-      async move {
-        let _ = dongle_fut.await;
-      }
-      .instrument(tracing::info_span!("Lovense HID Dongle Finder Task")),
-    );
+    buttplug_core::spawn!("LovenseHIDDongleCommunicationManager find dongle", async move {
+      let _ = dongle_fut.await;
+    });
     let mut machine =
       create_lovense_dongle_machine(event_sender, machine_receiver, mgr.is_scanning.clone());
-    async_manager::spawn(
-      async move {
-        while let Some(next) = machine.transition().await {
-          machine = next;
-        }
+    buttplug_core::spawn!("LovenseHIDDongleCommunicationManager state machine", async move {
+      while let Some(next) = machine.transition().await {
+        machine = next;
       }
-      .instrument(tracing::info_span!("Lovense HID Dongle State Machine")),
-    );
+    });
     mgr
   }
 

@@ -7,7 +7,7 @@
 
 use super::lovense_connect_service_comm_manager::{LovenseServiceToyInfo, get_local_info};
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
+use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::{
   GenericHardwareSpecializer,
   Hardware,
@@ -93,7 +93,7 @@ impl LovenseServiceHardware {
     let host = http_host.to_owned();
     let battery_level = Arc::new(AtomicU8::new(100));
     let battery_level_clone = battery_level.clone();
-    async_manager::spawn(async move {
+    buttplug_core::spawn!("LovenseServiceHardware loop", async move {
       loop {
         // SutekhVRC/VibeCheck patch for delay because Lovense Connect HTTP servers crash (Perma DOS)
         tokio::time::sleep(Duration::from_secs(1)).await;
@@ -167,7 +167,7 @@ impl HardwareInternal for LovenseServiceHardware {
     async move {
       match reqwest::get(command_url).await {
         Ok(res) => {
-          async_manager::spawn(async move {
+          buttplug_core::spawn!("LovenseServiceHardware HTTP Response", async move {
             trace!(
               "Got http response: {}",
               res.text().await.unwrap_or("no response".to_string())
