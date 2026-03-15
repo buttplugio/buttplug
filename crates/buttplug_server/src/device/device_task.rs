@@ -14,7 +14,7 @@
 
 use std::{collections::VecDeque, sync::Arc, time::Duration};
 
-use buttplug_core::util::{self, async_manager};
+use buttplug_core::util::async_manager;
 use futures::future;
 use tokio::{select, sync::mpsc::Receiver, time::Instant};
 
@@ -48,7 +48,7 @@ pub fn spawn_device_task(
   config: DeviceTaskConfig,
   mut command_receiver: Receiver<Vec<HardwareCommand>>,
 ) {
-  async_manager::spawn(async move {
+  buttplug_core::spawn!("DeviceTask", async move {
     run_device_task(hardware, config, &mut command_receiver).await;
   });
 }
@@ -94,9 +94,9 @@ async fn run_device_task(
     // Calculate keepalive timeout
     let keepalive_fut = async {
       if let Some(duration) = strategy_duration {
-        util::sleep(duration).await;
+        async_manager::sleep(duration).await;
       } else if requires_keepalive {
-        util::sleep(Duration::from_secs(5)).await; // iOS Bluetooth default
+        async_manager::sleep(Duration::from_secs(5)).await; // iOS Bluetooth default
       } else {
         future::pending::<()>().await;
       }

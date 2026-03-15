@@ -7,7 +7,6 @@
 
 use buttplug_core::{
   message::{ButtplugServerMessageV4, DeviceListV4, ScanningFinishedV0},
-  util::async_manager,
 };
 use buttplug_server_device_config::DeviceConfigurationManager;
 use tracing::info_span;
@@ -24,8 +23,6 @@ use futures::{FutureExt, future};
 use std::sync::Arc;
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
-use tracing_futures::Instrument;
-
 use super::server_device_manager::DeviceManagerCommand;
 
 /// Scanning state machine for the device manager event loop.
@@ -289,7 +286,7 @@ impl ServerDeviceManagerEventLoop {
         // Clone sender again for the forwarding task that build_device_handle will spawn
         let device_event_sender_for_forwarding = self.device_event_sender.clone();
 
-        async_manager::spawn(async move {
+        buttplug_core::util::async_manager::spawn(async move {
           match build_device_handle(
             device_config_manager,
             creator,
@@ -309,7 +306,7 @@ impl ServerDeviceManagerEventLoop {
             }
           }
           connecting_devices.remove(&address);
-        }.instrument(span));
+        }, span);
       }
     }
   }
