@@ -259,7 +259,7 @@ impl NintendoJoycon {
     let speed_val = Arc::new(AtomicU16::new(0));
     let speed_val_clone = speed_val.clone();
     let notifier = Arc::new(Notify::new());
-    #[cfg(not(feature = "wasm"))]
+    #[cfg(feature = "tokio-runtime")]
     let notifier_clone = notifier.clone();
     let is_stopped = Arc::new(AtomicBool::new(false));
     let is_stopped_clone = is_stopped.clone();
