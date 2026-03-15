@@ -14,7 +14,6 @@ use super::{
 use buttplug_core::{
   errors::*,
   message::{self, ButtplugServerMessageV4, StopCmdV4},
-  util::async_manager,
 };
 use buttplug_server_device_config::DeviceConfigurationManagerBuilder;
 use std::sync::{Arc, RwLock};
@@ -114,7 +113,7 @@ impl ButtplugServerBuilder {
           *state_guard = ConnectionState::PingedOut;
         }
         // Stop all devices (spawn async task since callback is sync)
-        async_manager::spawn(async move {
+        buttplug_core::spawn!("PingTimeoutStopDevices", async move {
           if let Err(e) = device_manager_clone
             .stop_devices(&StopCmdV4::default())
             .await

@@ -15,7 +15,7 @@ use crate::device::{
   },
 };
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, util::sleep};
+use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
 use buttplug_server_device_config::{
   Endpoint,
   ProtocolCommunicationSpecifier,
@@ -137,7 +137,7 @@ impl ProtocolInitializer for FredorchInitializer {
           );
         }
       }
-      _ = sleep(Duration::from_millis(FREDORCH_COMMAND_TIMEOUT_MS)).fuse() => {
+      _ = async_manager::sleep(Duration::from_millis(FREDORCH_COMMAND_TIMEOUT_MS)).fuse() => {
         // Or not?
       }
     }
@@ -169,7 +169,7 @@ impl ProtocolInitializer for FredorchInitializer {
             );
           }
         }
-        _ = sleep(Duration::from_millis(FREDORCH_COMMAND_TIMEOUT_MS)).fuse() => {
+        _ = async_manager::sleep(Duration::from_millis(FREDORCH_COMMAND_TIMEOUT_MS)).fuse() => {
           return Err(
               ButtplugDeviceError::ProtocolSpecificError(
                 "Fredorch".to_owned(),

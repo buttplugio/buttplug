@@ -47,8 +47,7 @@ use std::{
 };
 use tokio::sync::broadcast;
 use tokio_stream::StreamExt;
-use tracing::info_span;
-use tracing_futures::Instrument;
+use tracing::{Instrument, info_span};
 
 /// Connection state for the ButtplugServer.
 /// Replaces separate connected/client_name/spec_version fields with explicit states.

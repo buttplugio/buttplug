@@ -162,7 +162,7 @@ impl ProtocolHandler for KiirooV21 {
         let mut hardware_stream = device.event_stream();
         let stream_sensors = sensors.clone();
         // If we subscribe successfully, we need to set up our event handler.
-        async_manager::spawn(async move {
+        buttplug_core::spawn!("KiirooV21EventHandler", async move {
           while let Ok(info) = hardware_stream.recv().await {
             // If we have no receivers, quit.
             if sender.receiver_count() == 0 || stream_sensors.is_empty() {

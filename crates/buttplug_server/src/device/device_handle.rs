@@ -27,7 +27,7 @@ use buttplug_core::{
     OutputValue,
     StopCmdV4,
   },
-  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+  util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server_device_config::{
   DeviceConfigurationManager,
@@ -596,7 +596,7 @@ pub(super) async fn build_device_handle(
   // to the device manager event loop via the provided sender.
   let event_stream = device_handle.event_stream();
   let identifier = device_handle.identifier().clone();
-  async_manager::spawn(async move {
+  buttplug_core::spawn!("DeviceEventForwarding", async move {
     futures::pin_mut!(event_stream);
     loop {
       let event = futures::StreamExt::next(&mut event_stream).await;

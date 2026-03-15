@@ -18,7 +18,7 @@ use crate::device::{
 use async_trait::async_trait;
 use buttplug_core::message::{InputReadingV4, InputTypeReading, InputValue};
 use buttplug_core::util::async_manager;
-use buttplug_core::{errors::ButtplugDeviceError, util::sleep};
+use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
   ProtocolCommunicationSpecifier,
@@ -129,7 +129,7 @@ impl ProtocolInitializer for HoneyPlayBoxInitializer {
             );
           }
         }
-        _ = sleep(Duration::from_secs(count+1)).fuse() => {
+        _ = async_manager::sleep(Duration::from_secs(count+1)).fuse() => {
           count += 1;
           if count > HONEY_PLAYBOX_COMMAND_RETRY {
             error!("HoneyPlayBox Device timed out while waiting for handshake. ({} retries)", HONEY_PLAYBOX_COMMAND_RETRY);
@@ -204,7 +204,7 @@ async fn hpb_keepalive(
         }
       }
     }
-    sleep(Duration::from_millis(HONEY_PLAYBOX_KEEPALIVE_INTERVAL)).await;
+    async_manager::sleep(Duration::from_millis(HONEY_PLAYBOX_KEEPALIVE_INTERVAL)).await;
   }
 }
 
@@ -217,7 +217,7 @@ impl HoneyPlayBox {
     );
     let packet_id = Arc::new(AtomicU8::new(count));
     let last_send = Arc::new(RwLock::new(Instant::now()));
-    async_manager::spawn(hpb_keepalive(
+    buttplug_core::spawn!("HoneyPlayboxKeepalive", hpb_keepalive(
       hardware.clone(),
       random_key,
       last_command.clone(),
@@ -240,7 +240,7 @@ impl HoneyPlayBox {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Best effort last command time update
     let last_send = self.last_send.clone();
-    async_manager::spawn(async move {
+    buttplug_core::spawn!("HoneyPlaybox last send update", async move {
       if let Ok(mut last_time) = last_send.try_write() {
         *last_time = Instant::now();
       }
