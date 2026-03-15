@@ -18,7 +18,6 @@ use buttplug_core::{
     },
   },
   message::serializer::ButtplugSerializedMessage,
-  util::async_manager,
 };
 use futures::{FutureExt, SinkExt, StreamExt, future::BoxFuture};
 use rustls::{
@@ -183,7 +182,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
         Ok((stream, _)) => {
           let (mut writer, mut reader) = stream.split();
 
-          async_manager::spawn(
+          buttplug_core::spawn!("ButtplugWebsocketClientTransport I/O",
             async move {
               loop {
                 select! {
@@ -288,7 +287,6 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                 }
               }
             }
-            .instrument(tracing::info_span!("Websocket Client I/O Task")),
           );
           Ok(())
         }
