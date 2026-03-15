@@ -40,7 +40,6 @@ use std::sync::{
 use thiserror::Error;
 use tokio::sync::{Mutex, broadcast, mpsc, mpsc::error::SendError};
 use tracing::{Level, Span, span};
-use tracing_futures::Instrument;
 
 /// Result type used for public APIs.
 ///
