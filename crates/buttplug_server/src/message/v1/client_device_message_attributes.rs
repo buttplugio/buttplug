@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use getset::{Getters, Setters};
+use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};
 
 use crate::message::{v2::ClientDeviceMessageAttributesV2, v3::ClientDeviceMessageAttributesV3};
@@ -46,10 +46,11 @@ pub struct ClientDeviceMessageAttributesV1 {
   pub(in crate::message) vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributesV1>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Getters, Setters)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, CopyGetters, Setters)]
 pub struct GenericDeviceMessageAttributesV1 {
+  #[getset(get_copy = "pub")]
   #[serde(rename = "FeatureCount")]
-  feature_count: u32,
+  pub(in crate::message) feature_count: u32,
 }
 
 impl GenericDeviceMessageAttributesV1 {
