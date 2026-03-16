@@ -76,14 +76,6 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
     device_manager_builder
       .comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default());
   }
-  #[cfg(all(
-    feature = "lovense-dongle-manager",
-    any(target_os = "windows", target_os = "macos", target_os = "linux")
-  ))]
-  {
-    use buttplug_server_hwmgr_lovense_dongle::LovenseHIDDongleCommunicationManagerBuilder;
-    device_manager_builder.comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default());
-  }
   #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
   {
     use buttplug_server_hwmgr_xinput::XInputDeviceCommunicationManagerBuilder;

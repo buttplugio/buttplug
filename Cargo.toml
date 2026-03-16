@@ -10,7 +10,6 @@ members = [
     "crates/buttplug_server_hwmgr_btleplug",
     "crates/buttplug_server_hwmgr_hid",
     "crates/buttplug_server_hwmgr_lovense_connect",
-    "crates/buttplug_server_hwmgr_lovense_dongle",
     "crates/buttplug_server_hwmgr_serial",
     "crates/buttplug_server_hwmgr_websocket",
     "crates/buttplug_server_hwmgr_xinput",
