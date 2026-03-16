@@ -49,12 +49,7 @@ pub fn setup_server_device_comm_managers(
   #[cfg(not(any(target_os = "android", target_os = "ios")))]
   {
     use buttplug_server_hwmgr_hid::HidCommunicationManagerBuilder;
-    use buttplug_server_hwmgr_lovense_dongle::LovenseHIDDongleCommunicationManagerBuilder;
     use buttplug_server_hwmgr_serial::SerialPortCommunicationManagerBuilder;
-    if args.use_lovense_dongle_hid() {
-      info!("Including Lovense HID Dongle Support");
-      server_builder.comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default());
-    }
     if args.use_serial_port() {
       info!("Including Serial Port Support");
       server_builder.comm_manager(SerialPortCommunicationManagerBuilder::default());
