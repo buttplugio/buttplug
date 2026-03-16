@@ -94,7 +94,7 @@ impl ClientMessageSorter {
       Some((_, sender)) => {
         trace!("Resolved id {} to a future.", id);
         if let ButtplugServerMessageV0::Error(e) = msg {
-          let _ = sender.send(Err(e.into()));
+          let _ = sender.send(Err(e.original_error().into()));
         } else {
           let _ = sender.send(Ok(msg.clone()));
         }
