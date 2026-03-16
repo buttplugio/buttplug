@@ -32,16 +32,20 @@ pub struct ClientDeviceMessageAttributesV1 {
 
   // StopDeviceCmd always exists
   #[getset(get = "pub")]
+  #[serde(rename = "StopDeviceCmd")]
   pub(in crate::message) stop_device_cmd: NullDeviceMessageAttributesV1,
 
   // Obsolete commands are only added post-serialization
   #[getset(get = "pub")]
+  #[serde(rename = "SingleMotorVibrateCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
   pub(in crate::message) single_motor_vibrate_cmd: Option<NullDeviceMessageAttributesV1>,
   #[getset(get = "pub")]
+  #[serde(rename = "FleshlightLaunchFW12Cmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
   pub(in crate::message) fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributesV1>,
   #[getset(get = "pub")]
+  #[serde(rename = "VorzeA10CycloneCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
   pub(in crate::message) vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributesV1>,
 }
