@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use futures::{future::BoxFuture, task::FutureObj};
+use futures::{future::BoxFuture, task::LocalFutureObj};
 use std::time::Duration;
 use tracing::{Instrument, Span};
 
@@ -13,7 +13,7 @@ use tracing::{Instrument, Span};
 pub struct WasmBindgenAsyncManager {}
 
 impl super::AsyncManager for WasmBindgenAsyncManager {
-  fn spawn(&self, future: FutureObj<'static, ()>, span: Span) {
+  fn spawn(&self, future: LocalFutureObj<'static, ()>, span: Span) {
     wasm_bindgen_futures::spawn_local(future.instrument(span));
   }
 

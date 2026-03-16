@@ -5,7 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use futures::{future::BoxFuture, task::FutureObj};
+use futures::future::BoxFuture;
+#[cfg(not(feature = "wasm"))]
+use futures::task::FutureObj;
+#[cfg(feature = "wasm")]
+use futures::task::LocalFutureObj;
 use std::{future::Future, sync::OnceLock, time::Duration};
 use tracing::Span;
 
@@ -64,7 +68,14 @@ pub trait AsyncManager: std::fmt::Debug + Send + Sync {
   /// Spawn a fire-and-forget task on the async runtime.
   ///
   /// The `span` should be used to instrument the task with tracing context.
+  #[cfg(not(feature = "wasm"))]
   fn spawn(&self, future: FutureObj<'static, ()>, span: Span);
+
+  /// Spawn a fire-and-forget task on the async runtime (WASM, no Send required).
+  ///
+  /// The `span` should be used to instrument the task with tracing context.
+  #[cfg(feature = "wasm")]
+  fn spawn(&self, future: LocalFutureObj<'static, ()>, span: Span);
 
   /// Sleep for the given duration.
   fn sleep(&self, duration: Duration) -> BoxFuture<'static, ()>;
@@ -73,11 +84,23 @@ pub trait AsyncManager: std::fmt::Debug + Send + Sync {
 /// Spawn a fire-and-forget task on the global async manager.
 ///
 /// Prefer the [`spawn!`][crate::spawn] macro for ergonomic use with a task name.
+#[cfg(not(feature = "wasm"))]
 pub fn spawn<F>(future: F, span: Span)
 where
   F: Future<Output = ()> + Send + 'static,
 {
-  get_global_async_manager().spawn(Box::new(future).into(), span);
+  get_global_async_manager().spawn(FutureObj::new(Box::new(future)), span);
+}
+
+/// Spawn a fire-and-forget task on the global async manager (WASM, no Send required).
+///
+/// Prefer the [`spawn!`][crate::spawn] macro for ergonomic use with a task name.
+#[cfg(feature = "wasm")]
+pub fn spawn<F>(future: F, span: Span)
+where
+  F: Future<Output = ()> + 'static,
+{
+  get_global_async_manager().spawn(LocalFutureObj::new(Box::new(future)), span);
 }
 
 /// Sleep for the given duration using the global async manager.
