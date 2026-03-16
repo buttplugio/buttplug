@@ -39,7 +39,15 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
   use TestClientCommand::*;
   match command {
     Scalar(_) => {}
-    Vibrate(_) => {}
+    Vibrate(msg) => {
+      // V0 only has SingleMotorVibrateCmd — use the first subcommand's speed.
+      // This produces identical hardware output for single-vibrator devices.
+      let speed = msg.first().map(|s| s.speed()).unwrap_or(0.0);
+      device
+        .single_motor_vibrate(speed)
+        .await
+        .expect("SingleMotorVibrate failed");
+    }
     Stop => {
       device.stop().await.expect("Stop failed");
     }
