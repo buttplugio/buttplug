@@ -19,7 +19,6 @@ use buttplug_server::{
 };
 use buttplug_server_device_config::{DeviceConfigurationManager, load_protocol_configs};
 use buttplug_server_hwmgr_btleplug::BtlePlugCommunicationManagerBuilder;
-use buttplug_server_hwmgr_lovense_connect::LovenseConnectServiceCommunicationManagerBuilder;
 use buttplug_server_hwmgr_websocket::WebsocketServerDeviceCommunicationManagerBuilder;
 use buttplug_transport_websocket_tungstenite::{
   ButtplugWebsocketClientTransport, ButtplugWebsocketServerTransportBuilder,
@@ -41,10 +40,6 @@ pub fn setup_server_device_comm_managers(
     #[cfg(not(target_os = "ios"))]
     command_manager_builder.requires_keepalive(false);
     server_builder.comm_manager(command_manager_builder);
-  }
-  if args.use_lovense_connect() {
-    info!("Including Lovense Connect App Support");
-    server_builder.comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default());
   }
   #[cfg(not(any(target_os = "android", target_os = "ios")))]
   {

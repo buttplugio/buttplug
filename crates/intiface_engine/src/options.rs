@@ -36,13 +36,7 @@ pub struct EngineOptions {
   #[getset(get_copy = "pub")]
   use_hid: bool,
   #[getset(get_copy = "pub")]
-  use_lovense_dongle_serial: bool,
-  #[getset(get_copy = "pub")]
-  use_lovense_dongle_hid: bool,
-  #[getset(get_copy = "pub")]
   use_xinput: bool,
-  #[getset(get_copy = "pub")]
-  use_lovense_connect: bool,
   #[getset(get_copy = "pub")]
   use_device_websocket_server: bool,
   #[getset(get_copy = "pub")]
@@ -80,10 +74,7 @@ pub struct EngineOptionsExternal {
   pub use_bluetooth_le: bool,
   pub use_serial_port: bool,
   pub use_hid: bool,
-  pub use_lovense_dongle_serial: bool,
-  pub use_lovense_dongle_hid: bool,
   pub use_xinput: bool,
-  pub use_lovense_connect: bool,
   pub use_device_websocket_server: bool,
   pub device_websocket_server_port: Option<u16>,
   pub crash_main_thread: bool,
@@ -112,10 +103,7 @@ impl From<EngineOptionsExternal> for EngineOptions {
       use_bluetooth_le: other.use_bluetooth_le,
       use_serial_port: other.use_serial_port,
       use_hid: other.use_hid,
-      use_lovense_dongle_serial: other.use_lovense_dongle_serial,
-      use_lovense_dongle_hid: other.use_lovense_dongle_hid,
       use_xinput: other.use_xinput,
-      use_lovense_connect: other.use_lovense_connect,
       use_device_websocket_server: other.use_device_websocket_server,
       device_websocket_server_port: other.device_websocket_server_port,
       crash_main_thread: other.crash_main_thread,
@@ -194,23 +182,8 @@ impl EngineOptionsBuilder {
     self
   }
 
-  pub fn use_lovense_dongle_serial(&mut self, value: bool) -> &mut Self {
-    self.options.use_lovense_dongle_serial = value;
-    self
-  }
-
-  pub fn use_lovense_dongle_hid(&mut self, value: bool) -> &mut Self {
-    self.options.use_lovense_dongle_hid = value;
-    self
-  }
-
   pub fn use_xinput(&mut self, value: bool) -> &mut Self {
     self.options.use_xinput = value;
-    self
-  }
-
-  pub fn use_lovense_connect(&mut self, value: bool) -> &mut Self {
-    self.options.use_lovense_connect = value;
     self
   }
 

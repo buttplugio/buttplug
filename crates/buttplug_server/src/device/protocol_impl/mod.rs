@@ -63,7 +63,6 @@ pub mod loob;
 pub mod lovedistance;
 pub mod lovehoney_desire;
 pub mod lovense;
-pub mod lovense_connect_service;
 pub mod lovenuts;
 pub mod luvmazer;
 pub mod magic_motion_v1;
@@ -306,10 +305,6 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     lovense::setup::LovenseIdentifierFactory::default(),
   );
 
-  add_to_protocol_map(
-    &mut map,
-    lovense_connect_service::setup::LovenseConnectIdentifierFactory::default(),
-  );
   add_to_protocol_map(
     &mut map,
     lovenuts::setup::LoveNutsIdentifierFactory::default(),
