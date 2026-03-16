@@ -461,9 +461,6 @@
                   },
                   "xinput": {
                     "$ref": "#/components/xinput-definition"
-                  },
-                  "lovense_connect_service": {
-                    "$ref": "#/components/lovense-connect-service-definition"
                   }
                 }
               },

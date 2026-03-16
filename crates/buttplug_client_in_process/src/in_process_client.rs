@@ -70,12 +70,6 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
     use buttplug_server_hwmgr_serial::SerialPortCommunicationManagerBuilder;
     device_manager_builder.comm_manager(SerialPortCommunicationManagerBuilder::default());
   }
-  #[cfg(feature = "lovense-connect-service-manager")]
-  {
-    use buttplug_server_hwmgr_lovense_connect::LovenseConnectServiceCommunicationManagerBuilder;
-    device_manager_builder
-      .comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default());
-  }
   #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
   {
     use buttplug_server_hwmgr_xinput::XInputDeviceCommunicationManagerBuilder;
