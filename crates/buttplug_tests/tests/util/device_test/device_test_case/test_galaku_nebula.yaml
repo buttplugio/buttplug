@@ -1,5 +1,5 @@
 devices:
-  - identifier: 
+  - identifier:
       name: "V415"
     expected_name: "Galaku Nebula"
 device_commands:
@@ -16,30 +16,33 @@ device_commands:
             endpoint: tx
             data: [0x23, 0x81, 0xBB, 0xAB, 0xD2, 0x9B, 0x44, 0x33, 0xED, 0x43, 0x3B, 0x44]
             write_with_response: true
+  - !VersionGated
+      min_spec_version: 3
+      commands:
+        - !Messages
+            device_index: 0
+            messages:
+              - !Scalar
+                - Index: 0
+                  Scalar: 0.75
+                  ActuatorType: Oscillate
+                - Index: 1
+                  Scalar: 0.5
+                  ActuatorType: Vibrate
+        - !Commands
+            device_index: 0
+            commands:
+              - !Write
+                  endpoint: tx
+                  data: [0x23, 0x81, 0xBB, 0xAB, 0xD2, 0x9B, 0x44, 0x6A, 0x25, 0x43, 0x3B, 0x81]
+                  write_with_response: true
   - !Messages
       device_index: 0
       messages:
-        - !Scalar
-          - Index: 0
-            Scalar: 0.75
-            ActuatorType: Oscillate
-          - Index: 1
-            Scalar: 0.5
-            ActuatorType: Vibrate
+        - !Stop
   - !Commands
       device_index: 0
       commands:
-        - !Write
-            endpoint: tx
-            data: [0x23, 0x81, 0xBB, 0xAB, 0xD2, 0x9B, 0x44, 0x6A, 0x25, 0x43, 0x3B, 0x81]
-            write_with_response: true
-  - !Messages
-      device_index: 0
-      messages: 
-        - !Stop 
-  - !Commands
-      device_index: 0
-      commands: 
         - !Write
             endpoint: tx
             data: [0x23, 0x81, 0xBB, 0xAB, 0xD2, 0x9B, 0x44, 0x33, 0xBB, 0xA3, 0x3B, 0xD2]

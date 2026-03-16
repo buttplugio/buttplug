@@ -1,5 +1,5 @@
 devices:
-  - identifier: 
+  - identifier:
       name: "GX21"
     expected_name: "Galaku Vitality Cat"
 device_commands:
@@ -33,37 +33,38 @@ device_commands:
             data: [ 0x23, 0x81, 0xBB, 0xAB, 0xD2, 0xEC, 0x57, 0x23, 0xBB, 0xA3, 0x3B, 0x44 ]
             write_with_response: false
 
-  # Scalar 0%
-  - !Messages
-      device_index: 0
-      messages:
-        - !Scalar
-          - Index: 0
-            Scalar: 0
-            ActuatorType: Vibrate
-  - !Commands
-      device_index: 0
+  # Scalar 0% and 100%
+  - !VersionGated
+      min_spec_version: 3
       commands:
-        - !Write
-            endpoint: tx
-            data: [ 0x23, 0x81, 0xBB, 0xAB, 0xD2, 0xEC, 0x3B, 0x23, 0xBB, 0xA3, 0x3B, 0x90 ]
-            write_with_response: false
-
-  # Scalar 100%
-  - !Messages
-      device_index: 0
-      messages:
-        - !Scalar
-          - Index: 0
-            Scalar: 1
-            ActuatorType: Vibrate
-  - !Commands
-      device_index: 0
-      commands:
-        - !Write
-            endpoint: tx
-            data: [ 0x23, 0x81, 0xBB, 0xAB, 0xD2, 0xEC, 0x57, 0x23, 0xBB, 0xA3, 0x3B, 0x44 ]
-            write_with_response: false
+        - !Messages
+            device_index: 0
+            messages:
+              - !Scalar
+                - Index: 0
+                  Scalar: 0
+                  ActuatorType: Vibrate
+        - !Commands
+            device_index: 0
+            commands:
+              - !Write
+                  endpoint: tx
+                  data: [ 0x23, 0x81, 0xBB, 0xAB, 0xD2, 0xEC, 0x3B, 0x23, 0xBB, 0xA3, 0x3B, 0x90 ]
+                  write_with_response: false
+        - !Messages
+            device_index: 0
+            messages:
+              - !Scalar
+                - Index: 0
+                  Scalar: 1
+                  ActuatorType: Vibrate
+        - !Commands
+            device_index: 0
+            commands:
+              - !Write
+                  endpoint: tx
+                  data: [ 0x23, 0x81, 0xBB, 0xAB, 0xD2, 0xEC, 0x57, 0x23, 0xBB, 0xA3, 0x3B, 0x44 ]
+                  write_with_response: false
 
   # Stop
   - !Messages
