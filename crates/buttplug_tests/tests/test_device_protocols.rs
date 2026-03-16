@@ -1010,16 +1010,74 @@ async fn test_device_protocols_json_v1(test_file: &str) {
   util::device_test::client::client_v1::run_json_test_case(&load_test_case(test_file).await).await;
 }
 
-// V0 tests are blocked on wrapping all Vibrate/Rotate/Linear command pairs in
-// VersionGated(min: 1). V0 only supports SingleMotorVibrateCmd and Stop.
-// Once YAML files are updated, uncomment this block.
-/*
+// V0 supports SingleMotorVibrateCmd (single speed, all motors) and StopDeviceCmd.
+// For single-vibrator devices, SingleMotorVibrateCmd produces identical hardware
+// output to VibrateCmd, so existing YAML test assertions work without changes.
+// Excluded: multi-vibrator (bananasome), top-level Rotate/Linear devices.
+//#[test_case("test_cowgirl_cone_protocol.yaml" ; "The Cowgirl Cone Protocol")]
 #[test_case("test_activejoy_protocol.yaml" ; "ActiveJoy Protocol")]
-#[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
-#[test_case("test_bananasome_protocol.yaml" ; "Bananasome Protocol")]
+#[test_case("test_adrienlastic_protocol.yaml" ; "Adrien Lastic Protocol")]
+#[test_case("test_amorelie_joy_protocol.yaml" ; "Amorelie Joy Protocol")]
+// aneros excluded: multi-vibrator device (SingleMotorVibrateCmd addresses all motors)
+#[test_case("test_ankni_protocol_no_handshake.yaml" ; "Ankni Protocol - No Handshake")]
+#[test_case("test_ankni_protocol.yaml" ; "Ankni Protocol")]
+// bananasome excluded: multi-vibrator (top-level Vibrate Index: 1)
+// cachito excluded: multi-vibrator device
+#[test_case("test_cowgirl_protocol.yaml" ; "The Cowgirl Protocol")]
+#[test_case("test_cupido_protocol.yaml" ; "Cupido Protocol")]
+#[test_case("test_deepsire.yaml" ; "DeepSire Protocol")]
+#[test_case("test_feelingso.yaml" ; "FeelingSo Protocol")]
+// fleshy_thrust excluded: top-level Linear
+#[test_case("test_fluffer_protocol.yaml" ; "Fluffer Protocol")]
+#[test_case("test_foreo_protocol.yaml" ; "Foreo Protocol")]
+#[test_case("test_fox_protocol.yaml" ; "Fox Protocol")]
+//#[test_case("test_fredorch_protocol.yaml" ; "Fredorch Protocol")]
+#[test_case("test_galaku_nebula.yaml" ; "Galaku Pump Protocol - Nebula")]
+#[test_case("test_galaku.yaml" ; "Galaku Protocol")]
+#[test_case("test_hgod_protocol.yaml" ; "Hgod Protocol")]
 #[test_case("test_hismith_auxfun_box.yaml" ; "Hismith Mini Protocol - Auxfun Box")]
+#[test_case("test_hismith_sinloli.yaml" ; "Hismith Mini Protocol - Sinloli")]
+#[test_case("test_hismith_thrusting_cup.yaml" ; "Hismith Protocol - Thrusting Cup")]
 #[test_case("test_hismith_v4.yaml" ; "Hismith Mini Protocol - Hismith v4")]
+#[test_case("test_hismith_wildolo.yaml" ; "Hismith Protocol - Wildolo")]
+#[test_case("test_itoys_protocol.yaml" ; "iToys Protocol")]
+#[test_case("test_lelo_idawave.yaml" ; "Lelo Harmony Protocol - Ida Wave")]
+//#[test_case("test_lelo_tianiharmony.yaml" ; "Lelo Harmony Protocol - Tiani Harmony")]
+#[test_case("test_leten_protocol.yaml" ; "Leten Protocol")]
+// loob excluded: top-level Linear
+#[test_case("test_lovense_battery_non_default.yaml" ; "Lovense Protocol - Lovense Battery (Non-Default Devices)")]
+#[test_case("test_lovense_battery.yaml" ; "Lovense Protocol - Lovense Battery (Default Devices)")]
+#[test_case("test_lovense_flexer_fw2.yaml" ; "Lovense Protocol - Flexer FW2")]
+#[test_case("test_lovense_max.yaml" ; "Lovense Protocol - Lovense Max (Vibrate/Constrict)")]
+#[test_case("test_lovense_single_vibrator.yaml" ; "Lovense Protocol - Single Vibrator Device")]
+#[test_case("test_luvmazer_protocol.yaml" ; "Luvmazer Protocol")]
+#[test_case("test_magic_motion_1_magic_cell.yaml" ; "MagicMotion Protocol 1 - Magic Cell")]
+#[test_case("test_magic_motion_2_equinox.yaml" ; "MagicMotion Protocol 2 - Equinox")]
+#[test_case("test_magic_motion_3_krush.yaml" ; "MagicMotion Protocol 3 - Krush")]
+//#[test_case("test_meese_protocol.yaml" ; "Meese Protocol")]
+#[test_case("test_mizzzee_protocol.yaml" ; "Mizz Zee Protocol")]
+#[test_case("test_mizzzee_v2_protocol.yaml" ; "Mizz Zee v2 Protocol")]
+// motorbunny excluded: top-level Rotate
+// nexus_revo excluded: top-level Rotate
+#[test_case("test_nobra_protocol.yaml" ; "Nobra Protocol")]
+#[test_case("test_omobo_protocol.yaml" ; "Omobo Protocol")]
+#[test_case("test_pink_punch_protocol.yaml" ; "Pink Punch Protocol")]
+#[test_case("test_sakuraneko_koikoi.yaml" ; "Sakuraneko Protocol - Koikoi")]
+#[test_case("test_sakuraneko_protocol.yaml" ; "Sakuraneko Protocol")]
+#[test_case("test_sensee_protocol.yaml" ; "Sensee Diandou Protocol - Rabbit")]
+// serveu excluded: top-level Linear
+#[test_case("test_svakom_alex_v2.yaml" ; "Svakom Alex Neo 2")]
+#[test_case("test_svakom_alex.yaml" ; "Svakom Alex Neo")]
+// tcode excluded: top-level Linear
+#[test_case("test_wetoy_protocol.yaml" ; "WeToy Protocol")]
+//#[test_case("test_wevibe_4plus.yaml" ; "WeVibe Protocol (Legacy) - 4 Plus")]
+//#[test_case("test_wevibe_chorus.yaml" ; "WeVibe Protocol (Chorus) - Chorus")]
+#[test_case("test_wevibe_moxie.yaml" ; "WeVibe Protocol (8bit) - Moxie")]
+#[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
+//#[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
+#[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
+#[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v0(test_file: &str) {
   //tracing_subscriber::fmt::init();
@@ -1027,14 +1085,66 @@ async fn test_device_protocols_embedded_v0(test_file: &str) {
     .await;
 }
 
+//#[test_case("test_cowgirl_cone_protocol.yaml" ; "The Cowgirl Cone Protocol")]
 #[test_case("test_activejoy_protocol.yaml" ; "ActiveJoy Protocol")]
-#[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
-#[test_case("test_bananasome_protocol.yaml" ; "Bananasome Protocol")]
+#[test_case("test_adrienlastic_protocol.yaml" ; "Adrien Lastic Protocol")]
+#[test_case("test_amorelie_joy_protocol.yaml" ; "Amorelie Joy Protocol")]
+// Multi-vibrator devices excluded: SingleMotorVibrateCmd addresses all motors,
+// producing different hardware output than VibrateCmd targeting motor 0 only.
+//#[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
+#[test_case("test_ankni_protocol_no_handshake.yaml" ; "Ankni Protocol - No Handshake")]
+#[test_case("test_ankni_protocol.yaml" ; "Ankni Protocol")]
+//#[test_case("test_cachito_protocol.yaml" ; "Cachito Protocol")]
+#[test_case("test_cowgirl_protocol.yaml" ; "The Cowgirl Protocol")]
+#[test_case("test_cupido_protocol.yaml" ; "Cupido Protocol")]
+#[test_case("test_deepsire.yaml" ; "DeepSire Protocol")]
+#[test_case("test_feelingso.yaml" ; "FeelingSo Protocol")]
+#[test_case("test_fluffer_protocol.yaml" ; "Fluffer Protocol")]
+#[test_case("test_foreo_protocol.yaml" ; "Foreo Protocol")]
+#[test_case("test_fox_protocol.yaml" ; "Fox Protocol")]
+//#[test_case("test_fredorch_protocol.yaml" ; "Fredorch Protocol")]
+#[test_case("test_galaku_nebula.yaml" ; "Galaku Pump Protocol - Nebula")]
+#[test_case("test_galaku.yaml" ; "Galaku Protocol")]
+#[test_case("test_hgod_protocol.yaml" ; "Hgod Protocol")]
 #[test_case("test_hismith_auxfun_box.yaml" ; "Hismith Mini Protocol - Auxfun Box")]
+#[test_case("test_hismith_sinloli.yaml" ; "Hismith Mini Protocol - Sinloli")]
+#[test_case("test_hismith_thrusting_cup.yaml" ; "Hismith Protocol - Thrusting Cup")]
 #[test_case("test_hismith_v4.yaml" ; "Hismith Mini Protocol - Hismith v4")]
+#[test_case("test_hismith_wildolo.yaml" ; "Hismith Protocol - Wildolo")]
+#[test_case("test_itoys_protocol.yaml" ; "iToys Protocol")]
+#[test_case("test_lelo_idawave.yaml" ; "Lelo Harmony Protocol - Ida Wave")]
+//#[test_case("test_lelo_tianiharmony.yaml" ; "Lelo Harmony Protocol - Tiani Harmony")]
+#[test_case("test_leten_protocol.yaml" ; "Leten Protocol")]
+#[test_case("test_lovense_battery_non_default.yaml" ; "Lovense Protocol - Lovense Battery (Non-Default Devices)")]
+#[test_case("test_lovense_battery.yaml" ; "Lovense Protocol - Lovense Battery (Default Devices)")]
+#[test_case("test_lovense_flexer_fw2.yaml" ; "Lovense Protocol - Flexer FW2")]
+#[test_case("test_lovense_max.yaml" ; "Lovense Protocol - Lovense Max (Vibrate/Constrict)")]
+#[test_case("test_lovense_single_vibrator.yaml" ; "Lovense Protocol - Single Vibrator Device")]
+#[test_case("test_luvmazer_protocol.yaml" ; "Luvmazer Protocol")]
+#[test_case("test_magic_motion_1_magic_cell.yaml" ; "MagicMotion Protocol 1 - Magic Cell")]
+#[test_case("test_magic_motion_2_equinox.yaml" ; "MagicMotion Protocol 2 - Equinox")]
+#[test_case("test_magic_motion_3_krush.yaml" ; "MagicMotion Protocol 3 - Krush")]
+//#[test_case("test_meese_protocol.yaml" ; "Meese Protocol")]
+#[test_case("test_mizzzee_protocol.yaml" ; "Mizz Zee Protocol")]
+#[test_case("test_mizzzee_v2_protocol.yaml" ; "Mizz Zee v2 Protocol")]
+#[test_case("test_nobra_protocol.yaml" ; "Nobra Protocol")]
+#[test_case("test_omobo_protocol.yaml" ; "Omobo Protocol")]
+#[test_case("test_pink_punch_protocol.yaml" ; "Pink Punch Protocol")]
+#[test_case("test_sakuraneko_koikoi.yaml" ; "Sakuraneko Protocol - Koikoi")]
+#[test_case("test_sakuraneko_protocol.yaml" ; "Sakuraneko Protocol")]
+#[test_case("test_sensee_protocol.yaml" ; "Sensee Diandou Protocol - Rabbit")]
+#[test_case("test_svakom_alex_v2.yaml" ; "Svakom Alex Neo 2")]
+#[test_case("test_svakom_alex.yaml" ; "Svakom Alex Neo")]
+#[test_case("test_wetoy_protocol.yaml" ; "WeToy Protocol")]
+//#[test_case("test_wevibe_4plus.yaml" ; "WeVibe Protocol (Legacy) - 4 Plus")]
+//#[test_case("test_wevibe_chorus.yaml" ; "WeVibe Protocol (Chorus) - Chorus")]
+#[test_case("test_wevibe_moxie.yaml" ; "WeVibe Protocol (8bit) - Moxie")]
+#[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
+//#[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
+#[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
+#[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[tokio::test]
 async fn test_device_protocols_json_v0(test_file: &str) {
   util::device_test::client::client_v0::run_json_test_case(&load_test_case(test_file).await).await;
 }
-*/

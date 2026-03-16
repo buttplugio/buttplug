@@ -25,6 +25,7 @@ use buttplug_server::message::{
   ButtplugClientMessageV0,
   ButtplugDeviceMessageNameV0,
   ButtplugServerMessageV0,
+  SingleMotorVibrateCmdV0,
   StopDeviceCmdV0,
 };
 use futures::channel::oneshot;
@@ -224,6 +225,11 @@ impl ButtplugClientDevice {
         ),
       }
     })
+  }
+
+  /// Commands device to vibrate at a single speed (all motors).
+  pub fn single_motor_vibrate(&self, speed: f64) -> ButtplugClientResultFuture {
+    self.send_message_expect_ok(SingleMotorVibrateCmdV0::new(self.index, speed).into())
   }
 
   /// Commands device to stop all movement.
