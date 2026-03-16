@@ -27,6 +27,7 @@ use super::super::{
   DeviceTestCase,
   TestClientCommand,
   TestCommand,
+  filter_commands,
 };
 use buttplug_core::message::{DeviceFeatureOutput, DeviceFeatureOutputLimits};
 use futures::StreamExt;
@@ -297,7 +298,7 @@ pub async fn run_test_case(
 
   if let Some(device_init) = &test_case.device_init {
     // Parse send message into client calls, receives into response checks
-    for command in device_init {
+    for command in filter_commands(device_init, 4) {
       match command {
         TestCommand::Messages {
           device_index: _,
@@ -335,6 +336,7 @@ pub async fn run_test_case(
             device_sender.send(event.clone()).await.unwrap();
           }
         }
+        TestCommand::VersionGated { .. } => unreachable!("filter_commands should not yield VersionGated"),
       }
     }
   }
@@ -368,7 +370,7 @@ pub async fn run_test_case(
   }
 
   // Parse send message into client calls, receives into response checks
-  for command in &test_case.device_commands {
+  for command in filter_commands(&test_case.device_commands, 4) {
     match command {
       TestCommand::Messages {
         device_index,
@@ -408,6 +410,7 @@ pub async fn run_test_case(
           device_sender.send(event.clone()).await.unwrap();
         }
       }
+      TestCommand::VersionGated { .. } => unreachable!("filter_commands should not yield VersionGated"),
     }
   }
 }
