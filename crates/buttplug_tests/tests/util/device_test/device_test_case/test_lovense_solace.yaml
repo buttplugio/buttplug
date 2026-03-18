@@ -1,0 +1,66 @@
+devices:
+  - identifier: 
+      name: "LVS-DoesntMatter"
+    expected_name: "Lovense Solace"
+device_init: 
+  # Initialization
+  - !Commands
+      device_index: 0
+      commands:
+        - !Subscribe
+            endpoint: rx
+        - !Write
+            endpoint: tx
+            # "DeviceType;"
+            data: [68, 101, 118, 105, 99, 101, 84, 121, 112, 101, 59]
+            write_with_response: false
+  - !Events
+      device_index: 0
+      events:
+        - !Notifications
+          - endpoint: rx
+            # "H:253:0082059AD3BD;"
+            data: [72, 58, 50, 53, 50, 58, 48, 48, 56, 50, 48, 53, 57, 65, 68, 51, 66, 68, 59]
+device_commands:
+  - !Messages
+      device_index: 0
+      messages: 
+        - !Scalar
+          - Index: 0
+            Scalar: 0.5
+            ActuatorType: Oscillate
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            # "Mply:10:20;"
+            data: [77, 112, 108, 121, 58, 49, 48, 58, 50, 48, 59]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 0
+            Scalar: 0.75
+            ActuatorType: Oscillate
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            # "Mply:15:20;"
+            data: [77, 112, 108, 121, 58, 49, 53, 58, 50, 48, 59]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages: 
+        - !Stop 
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            # "Mply:0:0;"
+            data: [77, 112, 108, 121, 58, 48, 58, 48, 59]
+            write_with_response: false

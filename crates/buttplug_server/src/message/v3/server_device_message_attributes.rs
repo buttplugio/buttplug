@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -79,7 +79,7 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
             create_attribute(OutputType::Oscillate, attr.value().step_count())
           }
           if let Some(attr) = output_map.position().as_ref() {
-            create_attribute(OutputType::Position, attr.position().step_count())
+            create_attribute(OutputType::Position, attr.value().step_count())
           }
           if let Some(attr) = output_map.rotate().as_ref() {
             create_attribute(OutputType::Rotate, attr.value().step_count())
@@ -131,10 +131,10 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
         if let Some(output_map) = feature.output()
-          && let Some(actuator) = output_map.position_with_duration()
+          && let Some(actuator) = output_map.hw_position_with_duration()
         {
           let actuator_type = OutputType::Position;
-          let step_count = actuator.position().step_count();
+          let step_count = actuator.value().step_count();
           let attrs = ServerGenericDeviceMessageAttributesV3 {
             feature_descriptor: feature.description().to_owned(),
             actuator_type,
@@ -161,7 +161,7 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
             sensor_vec.push(ServerSensorDeviceMessageAttributesV3 {
               feature_descriptor: feature.description().to_owned(),
               sensor_type: InputType::Battery,
-              sensor_range: battery.value_range().clone(),
+              sensor_range: battery.value().clone(),
               feature: feature.clone(),
               index: 0,
             });

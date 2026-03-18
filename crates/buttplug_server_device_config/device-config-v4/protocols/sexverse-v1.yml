@@ -1,106 +1,114 @@
+---
 defaults:
   name: Sexverse Device
   features:
-    - id: 74825924-5e2a-4dd6-a91a-10a24be40c09
-      output:
-        vibrate:
-          value:
-            - 0
-            - 255
+  - id: 74825924-5e2a-4dd6-a91a-10a24be40c09
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 0
   id: f595862c-fa49-460c-9667-87f0eac24a6c
 configurations:
-  - identifier:
-      - Rex
-    name: Sexverse Rex
-    id: 447c8bda-bafc-472a-9333-8f809bbc48bb
-  - identifier:
-      - Cali
-      - LY165A01
-    name: Sexverse Cali
-    features:
-      - id: d3e17d91-94d8-449d-b049-91bd0ec3cf71
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-      - id: 6aceca29-6833-4f61-b5af-1005bb50bdf9
-        output:
-          constrict:
-            value:
-              - 0
-              - 255
-    id: e4bb4468-1de1-4f37-a348-5c7177923603
-  - identifier:
-      - Olis
-    name: Sexverse Olis
-    features:
-      - id: 2e6d4a73-7847-4a5b-a03c-cdd6f07c39c9
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-      - id: c1530d49-07b0-432b-8c08-08e1ef4d2842
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-      - id: cbc1187c-2400-4e9b-9fc0-a03744bd7295
-        output:
-          rotate:
-            value:
-              - 0
-              - 255
-    id: 9e874901-c5d7-49d2-910d-3849ab5ff96c
-  - identifier:
-      - LY213A01
-    name: Sexverse BuCUE
-    features:
-      - id: 641d8a6a-b068-4089-9632-c81ab872677d
-        output:
-          oscillate:
-            value:
-              - 0
-              - 255
-      - id: 15dcc27e-ab6d-407e-8e1a-4b51e445fa5d
-        output:
-          vibrate:
-            value:
-              - 0
-              - 255
-    id: 941a41b2-78d2-45a6-b730-17a8ff8c75e0
-  - identifier:
-      - LY199B01
-    name: Cooxer Bullet Vibe
-    id: 0f8e2cac-428a-430c-a9d8-8889ed608c24
-  - identifier:
-      - LY234A01
-    name: Sexverse Tadpole
-    id: de51460a-4c65-4173-8172-8dc7eaccc3a1
-  - identifier:
-      - LY271A01
-    name: Sexverse Upton
-    id: 5d061d81-98cd-4271-b896-68394a21e97a
-  - identifier:
-      - LY270A01
-    name: Sexverse Una
-    id: 97458f06-7a6f-4f8a-bb7a-93dd6ab53157
+- identifier:
+  - Rex
+  name: Sexverse Rex
+  id: 447c8bda-bafc-472a-9333-8f809bbc48bb
+- identifier:
+  - Cali
+  - LY165A01
+  name: Sexverse Cali
+  features:
+  - id: d3e17d91-94d8-449d-b049-91bd0ec3cf71
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - id: 6aceca29-6833-4f61-b5af-1005bb50bdf9
+    output:
+      constrict:
+        value:
+        - 0
+        - 255
+    index: 1
+  id: e4bb4468-1de1-4f37-a348-5c7177923603
+- identifier:
+  - Olis
+  name: Sexverse Olis
+  features:
+  - id: 2e6d4a73-7847-4a5b-a03c-cdd6f07c39c9
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - id: c1530d49-07b0-432b-8c08-08e1ef4d2842
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 1
+  - id: cbc1187c-2400-4e9b-9fc0-a03744bd7295
+    output:
+      rotate:
+        value:
+        - 0
+        - 255
+    index: 2
+  id: 9e874901-c5d7-49d2-910d-3849ab5ff96c
+- identifier:
+  - LY213A01
+  name: Sexverse BuCUE
+  features:
+  - id: 641d8a6a-b068-4089-9632-c81ab872677d
+    output:
+      oscillate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - id: 15dcc27e-ab6d-407e-8e1a-4b51e445fa5d
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 1
+  id: 941a41b2-78d2-45a6-b730-17a8ff8c75e0
+- identifier:
+  - LY199B01
+  name: Cooxer Bullet Vibe
+  id: 0f8e2cac-428a-430c-a9d8-8889ed608c24
+- identifier:
+  - LY234A01
+  name: Sexverse Tadpole
+  id: de51460a-4c65-4173-8172-8dc7eaccc3a1
+- identifier:
+  - LY271A01
+  name: Sexverse Upton
+  id: 5d061d81-98cd-4271-b896-68394a21e97a
+- identifier:
+  - LY270A01
+  name: Sexverse Una
+  id: 97458f06-7a6f-4f8a-bb7a-93dd6ab53157
 communication:
-  - btle:
-      names:
-        - Rex
-        - Cali
-        - LY165A01
-        - Olis
-        - LY213A01      
-        - LY199B01
-        - LY234A01
-        - LY271A01
-        - LY270A01
-      services:
-        0000ffe0-0000-1000-8000-00805f9b34fb:
-          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
-          rx: 0000ffe2-0000-1000-8000-00805f9b34fb    
-
+- btle:
+    names:
+    - Rex
+    - Cali
+    - LY165A01
+    - Olis
+    - LY213A01
+    - LY199B01
+    - LY234A01
+    - LY271A01
+    - LY270A01
+    services:
+      0000ffe0-0000-1000-8000-00805f9b34fb:
+        tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+        rx: 0000ffe2-0000-1000-8000-00805f9b34fb

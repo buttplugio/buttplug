@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -17,7 +17,7 @@ use crate::device::{
 use async_trait::async_trait;
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  util::{async_manager, sleep},
+  util::async_manager,
 };
 use buttplug_server_device_config::{
   Endpoint,
@@ -63,7 +63,7 @@ impl Hgod {
     let last_command = Arc::new(AtomicU8::new(0));
 
     let last_command_clone = last_command.clone();
-    async_manager::spawn(async move {
+    buttplug_core::spawn!("Hgod update loop", async move {
       send_hgod_updates(hardware, last_command_clone).await;
     });
 
@@ -92,7 +92,7 @@ async fn send_hgod_updates(device: Arc<Hardware>, data: Arc<AtomicU8>) {
       );
       break;
     }
-    sleep(Duration::from_millis(HGOD_COMMAND_DELAY_MS)).await;
+    async_manager::sleep(Duration::from_millis(HGOD_COMMAND_DELAY_MS)).await;
   }
 }
 

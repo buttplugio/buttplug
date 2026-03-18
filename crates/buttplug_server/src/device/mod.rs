@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -95,13 +95,29 @@
 //!
 //!
 
+mod device_handle;
+mod device_task;
 pub mod hardware;
 pub mod protocol;
 pub mod protocol_impl;
-pub mod server_device;
 mod server_device_manager;
 mod server_device_manager_event_loop;
 
+pub use device_handle::{DeviceCommand, DeviceEvent, DeviceHandle};
+
+use crate::message::ButtplugServerDeviceMessage;
+use buttplug_server_device_config::UserDeviceIdentifier;
+
+/// Internal event enum for device manager communication.
+/// Used by DeviceHandle to send events to the device manager event loop.
+#[derive(Debug)]
+pub(crate) enum InternalDeviceEvent {
+  /// A new device has connected and is ready
+  Connected(DeviceHandle),
+  /// A device notification
+  Notification(UserDeviceIdentifier, ButtplugServerDeviceMessage),
+  /// A device has disconnected
+  Disconnected(UserDeviceIdentifier),
+}
 pub use protocol_impl::get_default_protocol_map;
-pub use server_device::{ServerDevice, ServerDeviceEvent};
 pub use server_device_manager::{ServerDeviceManager, ServerDeviceManagerBuilder};

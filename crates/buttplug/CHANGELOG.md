@@ -1,3 +1,9 @@
+# 10.0.0 (2026-01-31)
+
+## Features
+
+- Updated dependencies, now leaving this as a metacrate.
+
 # 10.0.0-beta1 (2025-10-18)
 
 ## Features

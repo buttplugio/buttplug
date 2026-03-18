@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -32,8 +32,8 @@ pub enum OutputType {
   // OSR-2/SR-6.
   #[serde(alias = "position")]
   Position,
-  #[serde(alias = "position_with_duration")]
-  PositionWithDuration,
+  #[serde(alias = "hw_position_with_duration")]
+  HwPositionWithDuration,
   // Lube shooters
   #[serde(alias = "spray")]
   Spray,
@@ -52,6 +52,10 @@ pub enum InputType {
   Button,
   #[serde(alias = "pressure")]
   Pressure,
+  #[serde(alias = "depth")]
+  Depth,
+  #[serde(alias = "position")]
+  Position,
   // Temperature,
   // Accelerometer,
   // Gyro,
@@ -153,34 +157,34 @@ impl DeviceFeatureOutputLimits for DeviceFeatureOutputValueProperties {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Getters)]
 #[serde(rename_all = "PascalCase")]
-pub struct DeviceFeatureOutputPositionWithDurationProperties {
+pub struct DeviceFeatureOutputHwPositionWithDurationProperties {
   #[getset(get = "pub")]
   #[serde(serialize_with = "range_serialize")]
-  position: RangeInclusive<i32>,
+  value: RangeInclusive<i32>,
   #[getset(get = "pub")]
   #[serde(serialize_with = "range_serialize")]
   duration: RangeInclusive<i32>,
 }
 
-impl DeviceFeatureOutputPositionWithDurationProperties {
+impl DeviceFeatureOutputHwPositionWithDurationProperties {
   pub fn new(position: &RangeInclusive<i32>, duration: &RangeInclusive<i32>) -> Self {
-    DeviceFeatureOutputPositionWithDurationProperties {
-      position: position.clone(),
+    DeviceFeatureOutputHwPositionWithDurationProperties {
+      value: position.clone(),
       duration: duration.clone(),
     }
   }
 
   pub fn step_count(&self) -> u32 {
-    *self.position.end() as u32
+    *self.value.end() as u32
   }
 }
 
-impl DeviceFeatureOutputLimits for DeviceFeatureOutputPositionWithDurationProperties {
+impl DeviceFeatureOutputLimits for DeviceFeatureOutputHwPositionWithDurationProperties {
   fn step_count(&self) -> u32 {
     self.step_count()
   }
   fn step_limit(&self) -> RangeInclusive<i32> {
-    self.position.clone()
+    self.value.clone()
   }
 }
 
@@ -204,9 +208,16 @@ pub struct DeviceFeatureOutput {
   #[serde(skip_serializing_if = "Option::is_none")]
   position: Option<DeviceFeatureOutputValueProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
-  position_with_duration: Option<DeviceFeatureOutputPositionWithDurationProperties>,
+  hw_position_with_duration: Option<DeviceFeatureOutputHwPositionWithDurationProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
   spray: Option<DeviceFeatureOutputValueProperties>,
+}
+
+/// Helper macro to cast an Option<T: DeviceFeatureOutputLimits> to Option<&dyn DeviceFeatureOutputLimits>
+macro_rules! as_output_limits {
+  ($opt:expr) => {
+    $opt.as_ref().map(|x| x as &dyn DeviceFeatureOutputLimits)
+  };
 }
 
 impl DeviceFeatureOutput {
@@ -217,7 +228,7 @@ impl DeviceFeatureOutput {
       OutputType::Led => self.led.is_some(),
       OutputType::Oscillate => self.oscillate.is_some(),
       OutputType::Position => self.position.is_some(),
-      OutputType::PositionWithDuration => self.position_with_duration.is_some(),
+      OutputType::HwPositionWithDuration => self.hw_position_with_duration.is_some(),
       OutputType::Rotate => self.rotate.is_some(),
       OutputType::Spray => self.spray.is_some(),
       OutputType::Unknown => false,
@@ -227,43 +238,16 @@ impl DeviceFeatureOutput {
 
   pub fn get(&self, output_type: OutputType) -> Option<&dyn DeviceFeatureOutputLimits> {
     match output_type {
-      OutputType::Constrict => self
-        .constrict()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Temperature => self
-        .temperature()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Led => self
-        .led()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Oscillate => self
-        .oscillate()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Position => self
-        .position()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::PositionWithDuration => self
-        .position_with_duration()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Rotate => self
-        .rotate()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
-      OutputType::Spray => self
-        .spray()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
+      OutputType::Constrict => as_output_limits!(self.constrict()),
+      OutputType::Temperature => as_output_limits!(self.temperature()),
+      OutputType::Led => as_output_limits!(self.led()),
+      OutputType::Oscillate => as_output_limits!(self.oscillate()),
+      OutputType::Position => as_output_limits!(self.position()),
+      OutputType::HwPositionWithDuration => as_output_limits!(self.hw_position_with_duration()),
+      OutputType::Rotate => as_output_limits!(self.rotate()),
+      OutputType::Spray => as_output_limits!(self.spray()),
       OutputType::Unknown => None,
-      OutputType::Vibrate => self
-        .vibrate()
-        .as_ref()
-        .map(|x| x as &dyn DeviceFeatureOutputLimits),
+      OutputType::Vibrate => as_output_limits!(self.vibrate()),
     }
   }
 }
@@ -275,19 +259,19 @@ impl DeviceFeatureOutput {
 pub struct DeviceFeatureInputProperties {
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(serialize_with = "range_sequence_serialize")]
-  value_range: Vec<RangeInclusive<i32>>,
+  value: Vec<RangeInclusive<i32>>,
   #[getset(get = "pub")]
-  input_commands: HashSet<InputCommandType>,
+  command: HashSet<InputCommandType>,
 }
 
 impl DeviceFeatureInputProperties {
   pub fn new(
-    value_range: &Vec<RangeInclusive<i32>>,
+    value: &Vec<RangeInclusive<i32>>,
     sensor_commands: &HashSet<InputCommandType>,
   ) -> Self {
     Self {
-      value_range: value_range.clone(),
-      input_commands: sensor_commands.clone(),
+      value: value.clone(),
+      command: sensor_commands.clone(),
     }
   }
 }
@@ -305,6 +289,10 @@ pub struct DeviceFeatureInput {
   pressure: Option<DeviceFeatureInputProperties>,
   #[serde(skip_serializing_if = "Option::is_none")]
   button: Option<DeviceFeatureInputProperties>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  depth: Option<DeviceFeatureInputProperties>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  position: Option<DeviceFeatureInputProperties>,
 }
 
 impl DeviceFeatureInput {
@@ -314,6 +302,8 @@ impl DeviceFeatureInput {
       InputType::Rssi => self.rssi.is_some(),
       InputType::Pressure => self.pressure.is_some(),
       InputType::Button => self.button.is_some(),
+      InputType::Depth => self.depth.is_some(),
+      InputType::Position => self.position.is_some(),
       InputType::Unknown => false,
     }
   }
@@ -324,6 +314,8 @@ impl DeviceFeatureInput {
       InputType::Rssi => self.rssi(),
       InputType::Pressure => self.pressure(),
       InputType::Button => self.button(),
+      InputType::Depth => self.depth(),
+      InputType::Position => self.position(),
       InputType::Unknown => &None,
     }
   }

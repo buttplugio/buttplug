@@ -1,10 +1,9 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2023 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
-
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
   protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
@@ -85,7 +84,7 @@ impl ProtocolInitializer for HismithMiniInitializer {
     Ok(Arc::new(HismithMini {
       dual_vibe: device_definition
         .features()
-        .iter()
+        .values()
         .filter(|x| {
           x.output()
             .as_ref()
@@ -95,7 +94,7 @@ impl ProtocolInitializer for HismithMiniInitializer {
         >= 2,
       second_constrict: device_definition
         .features()
-        .iter()
+        .values()
         .position(|x| {
           x.output()
             .as_ref()

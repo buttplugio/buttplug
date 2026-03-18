@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -32,7 +32,7 @@ use buttplug_core::{
     ButtplugMessageSpecVersion,
     ButtplugServerMessageV4,
     ErrorV0,
-    StopAllDevicesV0,
+    StopCmdV4,
     StopScanningV0,
   },
   util::stream::convert_broadcast_receiver_to_stream,
@@ -41,18 +41,36 @@ use futures::{
   Stream,
   future::{self, BoxFuture, FutureExt},
 };
-use once_cell::sync::OnceCell;
 use std::{
   fmt,
-  sync::{
-    Arc,
-    atomic::{AtomicBool, Ordering},
-  },
+  sync::{Arc, RwLock},
 };
 use tokio::sync::broadcast;
 use tokio_stream::StreamExt;
-use tracing::info_span;
-use tracing_futures::Instrument;
+use tracing::{Instrument, info_span};
+
+/// Connection state for the ButtplugServer.
+/// Replaces separate connected/client_name/spec_version fields with explicit states.
+#[derive(Debug, Clone)]
+pub enum ConnectionState {
+  /// Initial state, waiting for RequestServerInfo handshake
+  AwaitingHandshake,
+  /// Client connected and handshake completed
+  Connected {
+    client_name: String,
+    spec_version: ButtplugMessageSpecVersion,
+  },
+  /// Client explicitly disconnected
+  Disconnected,
+  /// Connection lost due to ping timeout
+  PingedOut,
+}
+
+impl Default for ConnectionState {
+  fn default() -> Self {
+    ConnectionState::AwaitingHandshake
+  }
+}
 
 /// The server side of the Buttplug protocol. Frontend for connection to device management and
 /// communication.
@@ -72,15 +90,11 @@ pub struct ButtplugServer {
   ping_timer: Arc<PingTimer>,
   /// Manages device discovery and communication.
   device_manager: Arc<ServerDeviceManager>,
-  /// If true, client is currently connected to server
-  connected: Arc<AtomicBool>,
+  /// Connection state - tracks handshake, client info, and disconnection reason.
+  state: Arc<RwLock<ConnectionState>>,
   /// Broadcaster for server events. Receivers for this are handed out through the
   /// [ButtplugServer::event_stream()] method.
   output_sender: broadcast::Sender<ButtplugServerMessageV4>,
-  /// Name of the connected client, assuming there is one.
-  client_name: Arc<OnceCell<String>>,
-  /// Current spec version for the connected client
-  spec_version: Arc<OnceCell<ButtplugMessageSpecVersion>>,
 }
 
 impl std::fmt::Debug for ButtplugServer {
@@ -88,7 +102,7 @@ impl std::fmt::Debug for ButtplugServer {
     f.debug_struct("ButtplugServer")
       .field("server_name", &self.server_name)
       .field("max_ping_time", &self.max_ping_time)
-      .field("connected", &self.connected)
+      .field("state", &self.state)
       .finish()
   }
 }
@@ -99,7 +113,7 @@ impl ButtplugServer {
     max_ping_time: u32,
     ping_timer: Arc<PingTimer>,
     device_manager: Arc<ServerDeviceManager>,
-    connected: Arc<AtomicBool>,
+    state: Arc<RwLock<ConnectionState>>,
     output_sender: broadcast::Sender<ButtplugServerMessageV4>,
   ) -> Self {
     ButtplugServer {
@@ -107,22 +121,37 @@ impl ButtplugServer {
       max_ping_time,
       ping_timer,
       device_manager,
-      connected,
+      state,
       output_sender,
-      client_name: Arc::new(OnceCell::new()),
-      spec_version: Arc::new(OnceCell::new()),
     }
   }
 
   pub fn client_name(&self) -> Option<String> {
-    self.client_name.get().cloned()
+    let state = self.state.read().expect("State lock poisoned");
+    match &*state {
+      ConnectionState::Connected { client_name, .. } => Some(client_name.clone()),
+      _ => None,
+    }
+  }
+
+  pub fn spec_version(&self) -> Option<ButtplugMessageSpecVersion> {
+    let state = self.state.read().expect("State lock poisoned");
+    match &*state {
+      ConnectionState::Connected { spec_version, .. } => Some(*spec_version),
+      _ => None,
+    }
+  }
+
+  /// Returns the current connection state.
+  pub fn connection_state(&self) -> ConnectionState {
+    self.state.read().expect("State lock poisoned").clone()
   }
 
   /// Retreive an async stream of ButtplugServerMessages. This is how the server sends out
   /// non-query-related updates to the system, including information on devices being added/removed,
   /// client disconnection, etc...
   pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessageVariant> + use<> {
-    let spec_version = self.spec_version.clone();
+    let state = self.state.clone();
     let converter = ButtplugServerMessageConverter::new(None);
     let device_indexes: Vec<u32> = self
       .device_manager
@@ -131,24 +160,20 @@ impl ButtplugServer {
       .map(|x| *x.key())
       .collect();
     let device_event_converter = ButtplugServerDeviceEventMessageConverter::new(device_indexes);
-    self.server_version_event_stream().map(move |m| {
+    self.server_version_event_stream().filter_map(move |m| {
+      // Get spec_version from Connected state, default to Version4 if not connected
+      let spec_version = {
+        let state_guard = state.read().expect("State lock poisoned");
+        match &*state_guard {
+          ConnectionState::Connected { spec_version, .. } => *spec_version,
+          _ => ButtplugMessageSpecVersion::Version4,
+        }
+      };
       if let ButtplugServerMessageV4::DeviceList(list) = m {
-        device_event_converter.convert_device_list(
-          spec_version
-            .get()
-            .unwrap_or(&ButtplugMessageSpecVersion::Version4),
-          &list,
-        )
+        device_event_converter.convert_device_list(&spec_version, &list)
       } else {
         // If we get an event and don't have a spec version yet, just throw out the latest.
-        converter
-          .convert_outgoing(
-            &m,
-            spec_version
-              .get()
-              .unwrap_or(&ButtplugMessageSpecVersion::Version4),
-          )
-          .unwrap()
+        Some(converter.convert_outgoing(&m, &spec_version).unwrap())
       }
     })
   }
@@ -171,7 +196,10 @@ impl ButtplugServer {
 
   /// If true, client is currently connected to the server.
   pub fn connected(&self) -> bool {
-    self.connected.load(Ordering::Relaxed)
+    matches!(
+      *self.state.read().expect("State lock poisoned"),
+      ConnectionState::Connected { .. }
+    )
   }
 
   /// Disconnects the server from a client, if it is connected.
@@ -183,12 +211,14 @@ impl ButtplugServer {
     let stop_scanning_fut = self.parse_checked_message(
       ButtplugCheckedClientMessageV4::StopScanning(StopScanningV0::default()),
     );
-    let stop_fut = self.parse_checked_message(ButtplugCheckedClientMessageV4::StopAllDevices(
-      StopAllDevicesV0::default(),
-    ));
-    let connected = self.connected.clone();
+    let stop_fut =
+      self.parse_checked_message(ButtplugCheckedClientMessageV4::StopCmd(StopCmdV4::default()));
+    let state = self.state.clone();
     async move {
-      connected.store(false, Ordering::Relaxed);
+      {
+        let mut state_guard = state.write().expect("State lock poisoned");
+        *state_guard = ConnectionState::Disconnected;
+      }
       ping_timer.stop_ping_timer().await;
       // Ignore returns here, we just want to stop.
       info!("Server disconnected, stopping device scanning if it was started...");
@@ -214,7 +244,14 @@ impl ButtplugServer {
   ) -> BoxFuture<'static, Result<ButtplugServerMessageVariant, ButtplugServerMessageVariant>> {
     let features = self.device_manager().feature_map();
     let msg_id = msg.id();
-    debug!("Server received: {:?}", msg);
+    trace!("Server received: {:?}", msg);
+    let v = msg.version();
+    let spec_version = if let Some(current_version) = self.spec_version() {
+      current_version
+    } else {
+      info!("Setting Buttplug Server Message Spec version to {}", v);
+      v
+    };
     match msg {
       ButtplugClientMessageVariant::V4(msg) => {
         let internal_msg =
@@ -241,18 +278,10 @@ impl ButtplugServer {
         .boxed()
       }
       msg => {
-        let v = msg.version();
         let converter = ButtplugServerMessageConverter::new(Some(msg.clone()));
-        let spec_version = *self.spec_version.get_or_init(|| {
-          info!(
-            "Setting Buttplug Server Message Spec Downgrade version to {}",
-            v
-          );
-          v
-        });
         match ButtplugCheckedClientMessageV4::try_from_client_message(msg, &features) {
           Ok(converted_msg) => {
-            debug!("Converted message: {:?}", converted_msg);
+            trace!("Converted message: {:?}", converted_msg);
             let fut = self.parse_checked_message(converted_msg);
             async move {
               let result = fut.await.map_err(|e| {
@@ -270,7 +299,7 @@ impl ButtplugServer {
                     )
                     .unwrap()
                 });
-              debug!("Server returning: {:?}", out_msg);
+              trace!("Server returning: {:?}", out_msg);
               out_msg
             }
             .boxed()
@@ -300,26 +329,42 @@ impl ButtplugServer {
       self.server_name, msg
     );
     let id = msg.id();
-    if !self.connected() {
-      // Check for ping timeout first! There's no way we should've pinged out if
-      // we haven't received RequestServerInfo first, but we do want to know if
-      // we pinged out.
-      let error = if self.ping_timer.pinged_out() {
-        Some(message::ErrorV0::from(ButtplugError::from(
-          ButtplugPingError::PingedOut,
-        )))
-      } else if !matches!(msg, ButtplugCheckedClientMessageV4::RequestServerInfo(_)) {
-        Some(message::ErrorV0::from(ButtplugError::from(
-          ButtplugHandshakeError::RequestServerInfoExpected,
-        )))
-      } else {
-        None
+
+    // Check connection state for message validity
+    {
+      let state = self.state.read().expect("State lock poisoned");
+      let error = match &*state {
+        ConnectionState::PingedOut => {
+          // Connection lost due to ping timeout
+          Some(message::ErrorV0::from(ButtplugError::from(
+            ButtplugPingError::PingedOut,
+          )))
+        }
+        ConnectionState::Disconnected => {
+          // Already disconnected, no reconnection allowed
+          Some(message::ErrorV0::from(ButtplugError::from(
+            ButtplugHandshakeError::ReconnectDenied,
+          )))
+        }
+        ConnectionState::AwaitingHandshake => {
+          // Only RSI messages allowed before handshake
+          if !matches!(msg, ButtplugCheckedClientMessageV4::RequestServerInfo(_)) {
+            Some(message::ErrorV0::from(ButtplugError::from(
+              ButtplugHandshakeError::RequestServerInfoExpected,
+            )))
+          } else {
+            None
+          }
+        }
+        ConnectionState::Connected { .. } => {
+          // Connected, all messages allowed
+          None
+        }
       };
       if let Some(mut return_error) = error {
         return_error.set_id(msg.id());
         return future::ready(Err(return_error)).boxed();
       }
-      // If we haven't pinged out and we got an RSI message, fall thru.
     }
     // Produce whatever future is needed to reply to the message, this may be a
     // device command future, or something the server handles. All futures will
@@ -365,12 +410,22 @@ impl ButtplugServer {
   /// happens upon connection to the server, in order to make sure the server can speak the same
   /// protocol version as the client.
   fn perform_handshake(&self, msg: message::RequestServerInfoV4) -> ButtplugServerResultFuture {
-    if self.connected() {
-      return ButtplugHandshakeError::HandshakeAlreadyHappened.into();
+    // Check current state for handshake validity
+    {
+      let state = self.state.read().expect("State lock poisoned");
+      match &*state {
+        ConnectionState::Connected { .. } => {
+          return ButtplugHandshakeError::HandshakeAlreadyHappened.into();
+        }
+        ConnectionState::Disconnected | ConnectionState::PingedOut => {
+          return ButtplugHandshakeError::ReconnectDenied.into();
+        }
+        ConnectionState::AwaitingHandshake => {
+          // This is the expected state, continue with handshake
+        }
+      }
     }
-    if !self.connected() && self.client_name.get().is_some() {
-      return ButtplugHandshakeError::ReconnectDenied.into();
-    }
+
     info!(
       "Performing server handshake check with client {} at message version {}.{}",
       msg.client_name(),
@@ -398,14 +453,21 @@ impl ButtplugServer {
     };
     let out_msg =
       message::ServerInfoV4::new(&self.server_name, output_version, 0, self.max_ping_time);
-    let connected = self.connected.clone();
-    self
-      .client_name
-      .set(msg.client_name().to_owned())
-      .expect("We should never conflict on name access");
+
+    // protocol_version_major() returns ButtplugMessageSpecVersion directly
+    let spec_version = msg.protocol_version_major();
+    let client_name = msg.client_name().to_owned();
+    let state = self.state.clone();
+
     async move {
       ping_timer.start_ping_timer().await;
-      connected.store(true, Ordering::Relaxed);
+      {
+        let mut state_guard = state.write().expect("State lock poisoned");
+        *state_guard = ConnectionState::Connected {
+          client_name,
+          spec_version,
+        };
+      }
       debug!("Server handshake check successful.");
       Result::Ok(out_msg.into())
     }

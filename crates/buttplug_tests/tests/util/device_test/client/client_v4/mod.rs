@@ -1,3 +1,10 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
 use crate::util::{
   ButtplugTestServer,
   TestDeviceChannelHost,
@@ -10,7 +17,7 @@ use buttplug_client::{
   device::{ClientDeviceCommandValue, ClientDeviceFeature, ClientDeviceOutputCommand},
 };
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
-use buttplug_core::{message::OutputType, util::async_manager};
+use buttplug_core::message::OutputType;
 use buttplug_server::{ButtplugServer, ButtplugServerBuilder, device::ServerDeviceManagerBuilder};
 use buttplug_server_device_config::load_protocol_configs;
 use tokio::sync::Notify;
@@ -20,23 +27,53 @@ use super::super::{
   DeviceTestCase,
   TestClientCommand,
   TestCommand,
+  filter_commands,
 };
+use buttplug_core::message::{DeviceFeatureOutput, DeviceFeatureOutputLimits};
 use futures::StreamExt;
 use log::*;
 use std::{sync::Arc, time::Duration};
 
 fn from_type_and_value(output_type: OutputType, value: f64) -> ClientDeviceOutputCommand {
   match output_type {
-    OutputType::Constrict => ClientDeviceOutputCommand::ConstrictFloat(value),
-    OutputType::Temperature => ClientDeviceOutputCommand::TemperatureFloat(value),
-    OutputType::Led => ClientDeviceOutputCommand::LedFloat(value),
-    OutputType::Oscillate => ClientDeviceOutputCommand::OscillateFloat(value),
-    OutputType::Position => ClientDeviceOutputCommand::PositionFloat(value),
-    OutputType::Rotate => ClientDeviceOutputCommand::RotateFloat(value),
-    OutputType::Spray => ClientDeviceOutputCommand::SprayFloat(value),
-    OutputType::Vibrate => ClientDeviceOutputCommand::VibrateFloat(value),
+    OutputType::Constrict => ClientDeviceOutputCommand::Constrict(value.into()),
+    OutputType::Temperature => ClientDeviceOutputCommand::Temperature(value.into()),
+    OutputType::Led => ClientDeviceOutputCommand::Led(value.into()),
+    OutputType::Oscillate => ClientDeviceOutputCommand::Oscillate(value.into()),
+    OutputType::Position => ClientDeviceOutputCommand::Position(value.into()),
+    OutputType::Rotate => ClientDeviceOutputCommand::Rotate(value.into()),
+    OutputType::Spray => ClientDeviceOutputCommand::Spray(value.into()),
+    OutputType::Vibrate => ClientDeviceOutputCommand::Vibrate(value.into()),
     _ => panic!("Value not translatable, test cannot run"),
   }
+}
+
+// Translate ScalarCmd indexes into feature indexes by skipping over any
+// features that are not presented as ScalarCmd actuator types
+fn get_scalar_index(device: &ButtplugClientDevice, index: u32) -> &u32 {
+  let mut offset = 0;
+  let mut iter = device.device_features().iter().filter(|f| {
+    let fo = f
+      .1
+      .feature()
+      .output()
+      .clone()
+      .unwrap_or(DeviceFeatureOutput::default());
+    fo.vibrate().is_some()
+      || fo.oscillate().is_some()
+      || fo.constrict().is_some()
+      || fo
+        .rotate()
+        .as_ref()
+        .is_some_and(|r| r.step_limit().start() >= &0)
+  });
+  while let Some((idx, _)) = iter.next() {
+    if offset >= index {
+      return idx;
+    }
+    offset += 1;
+  }
+  return &0;
 }
 
 async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugClientDevice) {
@@ -46,8 +83,9 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
       let fut_vec: Vec<_> = msg
         .iter()
         .map(|cmd| {
-          let f = device.device_features()[&cmd.index()].clone();
-          f.send_command(&from_type_and_value(cmd.actuator_type(), cmd.scalar()))
+          let i = get_scalar_index(device, cmd.index());
+          let f = device.device_features()[i].clone();
+          f.run_output(&from_type_and_value(cmd.actuator_type(), cmd.scalar()))
         })
         .collect();
       futures::future::try_join_all(fut_vec).await.unwrap();
@@ -69,7 +107,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
             .map(|(_, x)| x)
             .collect();
           let f = vibe_features[cmd.index() as usize].clone();
-          f.send_command(&from_type_and_value(OutputType::Vibrate, cmd.speed()))
+          f.run_output(&from_type_and_value(OutputType::Vibrate, cmd.speed()))
         })
         .collect();
       futures::future::try_join_all(fut_vec).await.unwrap();
@@ -94,8 +132,10 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
             .map(|(_, x)| x)
             .collect();
           let f = rotate_features[cmd.index() as usize].clone();
-          f.rotate(ClientDeviceCommandValue::Float(
-            cmd.speed() * if cmd.clockwise() { 1f64 } else { -1f64 },
+          f.run_output(&ClientDeviceOutputCommand::Rotate(
+            ClientDeviceCommandValue::Percent(
+              cmd.speed() * if cmd.clockwise() { 1f64 } else { -1f64 },
+            ),
           ))
         })
         .collect();
@@ -106,19 +146,20 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
         .iter()
         .map(|cmd| {
           let f = device.device_features()[&cmd.index()].clone();
-          f.position_with_duration(
-            (cmd.position()
+          f.run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
+            ((cmd.position()
               * f
                 .feature()
                 .output()
                 .as_ref()
                 .unwrap()
-                .get(OutputType::PositionWithDuration)
+                .get(OutputType::HwPositionWithDuration)
                 .unwrap()
                 .step_count() as f64)
-              .ceil() as u32,
+              .ceil() as u32)
+              .into(),
             cmd.duration(),
-          )
+          ))
         })
         .collect();
       futures::future::try_join_all(fut_vec).await.unwrap();
@@ -132,13 +173,13 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
         // their notification endpoint. This is a mess but it does the job.
         let device = device.clone();
         let expected_power = *expected_power;
-        async_manager::spawn(async move {
-          let battery_level = device.battery_level().await.unwrap() as f64 / 100f64;
+        buttplug_core::spawn!(async move {
+          let battery_level = device.battery().await.unwrap() as f64 / 100f64;
           assert_eq!(battery_level, expected_power);
         });
       } else {
         assert_eq!(
-          device.battery_level().await.unwrap() as f64 / 100f64,
+          device.battery().await.unwrap() as f64 / 100f64,
           *expected_power
         );
       }
@@ -227,7 +268,7 @@ pub async fn run_json_test_case(test_case: &DeviceTestCase) {
 
   let (server, device_channels) = build_server(test_case);
   let remote_server = ButtplugTestServer::new(server);
-  async_manager::spawn(async move {
+  buttplug_core::spawn!(async move {
     remote_server
       .start(server_connector)
       .await
@@ -257,7 +298,7 @@ pub async fn run_test_case(
 
   if let Some(device_init) = &test_case.device_init {
     // Parse send message into client calls, receives into response checks
-    for command in device_init {
+    for command in filter_commands(device_init, 4) {
       match command {
         TestCommand::Messages {
           device_index: _,
@@ -295,6 +336,7 @@ pub async fn run_test_case(
             device_sender.send(event.clone()).await.unwrap();
           }
         }
+        TestCommand::VersionGated { .. } => unreachable!("filter_commands should not yield VersionGated"),
       }
     }
   }
@@ -328,7 +370,7 @@ pub async fn run_test_case(
   }
 
   // Parse send message into client calls, receives into response checks
-  for command in &test_case.device_commands {
+  for command in filter_commands(&test_case.device_commands, 4) {
     match command {
       TestCommand::Messages {
         device_index,
@@ -368,6 +410,7 @@ pub async fn run_test_case(
           device_sender.send(event.clone()).await.unwrap();
         }
       }
+      TestCommand::VersionGated { .. } => unreachable!("filter_commands should not yield VersionGated"),
     }
   }
 }

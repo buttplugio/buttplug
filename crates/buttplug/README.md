@@ -4,40 +4,11 @@
 [![Github donate button](https://img.shields.io/badge/github-donate-ff69b4.svg)](https://www.github.com/sponsors/qdot)
 [![Discourse Forums](https://img.shields.io/discourse/status?label=buttplug.io%20forums&server=https%3A%2F%2Fdiscuss.buttplug.io)](https://discuss.buttplug.io)
 [![Discord](https://img.shields.io/discord/353303527587708932.svg?logo=discord)](https://discord.buttplug.io)
-[![Twitter](https://img.shields.io/twitter/follow/buttplugio.svg?style=social&logo=twitter)](https://twitter.com/buttplugio)
 [![bluesky](https://img.shields.io/bluesky/followers/buttplug.io)](https://bsky.app/profile/buttplug.io)
 
 [![Crates.io Version](https://img.shields.io/crates/v/buttplug)](https://crates.io/crates/buttplug)
 [![Crates.io Downloads](https://img.shields.io/crates/d/buttplug)](https://crates.io/crates/buttplug)
 [![Crates.io License](https://img.shields.io/crates/l/buttplug)](https://crates.io/crates/buttplug)
-
-<div align="center">
-  <h3>
-    <a href="https://docs.rs/buttplug">
-      Rust API Documentation
-    </a>
-    <span> | </span>
-    <a href="https://docs.buttplug.io/docs/dev-guide">
-      Developer Guide
-    </a>
-    <span> | </span>    
-    <a href="https://docs.buttplug.io/docs/spec">
-      Protocol Spec
-    </a>
-    <span> | </span>
-    <a href="https://awesome.buttplug.io">
-      Apps and Games List
-    </a>
-  </h3>
-</div>
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: light)" srcset="../../images/buttplug_rust_docs.png">
-    <source media="(prefers-color-scheme: dark)" srcset="../../images/buttplug_rust_docs_light.png">
-    <img src="https://raw.githubusercontent.com/buttplugio/buttplug/master/images/buttplug_rust_docs.png">
-  </picture>
-</p>
 
 # Buttplug Client Library (Rehosted as Buttplug)
 
@@ -55,7 +26,7 @@ Buttplug is BSD 3-Clause licensed.
 
 ```text
 
-Copyright (c) 2016-2025, Nonpolynomial, LLC
+Copyright (c) 2016-2026, Nonpolynomial, LLC
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

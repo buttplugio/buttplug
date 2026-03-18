@@ -1,15 +1,12 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
 use crate::message::{
-  ButtplugMessage,
-  ButtplugMessageError,
   ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
   ErrorV0,
   OkV0,
   OutputCmdV4,
@@ -19,27 +16,18 @@ use crate::message::{
   ScanningFinishedV0,
   ServerInfoV4,
   StartScanningV0,
-  StopAllDevicesV0,
-  StopDeviceCmdV0,
+  StopCmdV4,
   StopScanningV0,
   v4::input_cmd::InputCmdV4,
 };
+use enum_dispatch::enum_dispatch;
 use serde::{Deserialize, Serialize};
 
 use super::{DeviceListV4, InputReadingV4};
 
-/// Represents all client-to-server messages in v3 of the Buttplug Spec
-#[derive(
-  Debug,
-  Clone,
-  PartialEq,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
-  FromSpecificButtplugMessage,
-  Serialize,
-  Deserialize,
-)]
+/// Represents all client-to-server messages in v4 of the Buttplug Spec
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[enum_dispatch(ButtplugMessage, ButtplugMessageValidator)]
 pub enum ButtplugClientMessageV4 {
   // Handshake messages
   RequestServerInfo(RequestServerInfoV4),
@@ -49,22 +37,17 @@ pub enum ButtplugClientMessageV4 {
   StopScanning(StopScanningV0),
   RequestDeviceList(RequestDeviceListV0),
   // Generic commands
-  StopDeviceCmd(StopDeviceCmdV0),
-  StopAllDevices(StopAllDevicesV0),
+  StopCmd(StopCmdV4),
   OutputCmd(OutputCmdV4),
   InputCmd(InputCmdV4),
 }
 
-/// Represents all server-to-client messages in v3 of the Buttplug Spec
-#[derive(
-  Debug,
-  Clone,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  FromSpecificButtplugMessage,
-  Serialize,
-  Deserialize,
-)]
+impl ButtplugMessageFinalizer for ButtplugClientMessageV4 {
+}
+
+/// Represents all server-to-client messages in v4 of the Buttplug Spec
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[enum_dispatch(ButtplugMessage, ButtplugMessageValidator)]
 pub enum ButtplugServerMessageV4 {
   // Status messages
   Ok(OkV0),
@@ -88,7 +71,7 @@ impl ButtplugMessageFinalizer for ButtplugServerMessageV4 {
 
 #[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display)]
 pub enum ButtplugDeviceMessageNameV4 {
-  StopDeviceCmd,
+  StopCmd,
   InputCmd,
   OutputCmd,
 }

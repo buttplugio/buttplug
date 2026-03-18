@@ -1,3 +1,10 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
 use buttplug_core::{
   connector::{
     ButtplugConnectorError,
@@ -5,7 +12,6 @@ use buttplug_core::{
     transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
   },
   message::serializer::ButtplugSerializedMessage,
-  util::async_manager,
 };
 use futures::{FutureExt, future::BoxFuture};
 use std::sync::Arc;
@@ -48,7 +54,7 @@ impl ButtplugConnectorTransport for ChannelTransport {
     let external_sender = self.external_sender.clone();
     let receiver_clone = self.external_receiver.clone();
     async move {
-      async_manager::spawn(async move {
+      buttplug_core::spawn!(async move {
         let mut receiver = receiver_clone.lock().await.take().expect("Should only run once");
         loop {
           select! {

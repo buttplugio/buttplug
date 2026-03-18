@@ -1,3 +1,10 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
 use std::sync::Arc;
 
 use crate::{
@@ -12,7 +19,6 @@ use buttplug_server::{
 };
 use buttplug_server_device_config::{DeviceConfigurationManager, load_protocol_configs};
 use buttplug_server_hwmgr_btleplug::BtlePlugCommunicationManagerBuilder;
-use buttplug_server_hwmgr_lovense_connect::LovenseConnectServiceCommunicationManagerBuilder;
 use buttplug_server_hwmgr_websocket::WebsocketServerDeviceCommunicationManagerBuilder;
 use buttplug_transport_websocket_tungstenite::{
   ButtplugWebsocketClientTransport, ButtplugWebsocketServerTransportBuilder,
@@ -35,19 +41,10 @@ pub fn setup_server_device_comm_managers(
     command_manager_builder.requires_keepalive(false);
     server_builder.comm_manager(command_manager_builder);
   }
-  if args.use_lovense_connect() {
-    info!("Including Lovense Connect App Support");
-    server_builder.comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default());
-  }
   #[cfg(not(any(target_os = "android", target_os = "ios")))]
   {
     use buttplug_server_hwmgr_hid::HidCommunicationManagerBuilder;
-    use buttplug_server_hwmgr_lovense_dongle::LovenseHIDDongleCommunicationManagerBuilder;
     use buttplug_server_hwmgr_serial::SerialPortCommunicationManagerBuilder;
-    if args.use_lovense_dongle_hid() {
-      info!("Including Lovense HID Dongle Support");
-      server_builder.comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default());
-    }
     if args.use_serial_port() {
       info!("Including Serial Port Support");
       server_builder.comm_manager(SerialPortCommunicationManagerBuilder::default());

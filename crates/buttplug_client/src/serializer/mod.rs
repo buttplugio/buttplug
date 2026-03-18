@@ -1,3 +1,10 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
 use buttplug_core::message::{
   ButtplugClientMessageV4,
   ButtplugMessage,
@@ -43,9 +50,24 @@ impl ButtplugClientJSONSerializerImpl {
 
   pub fn serialize<T>(&self, msg: &[T]) -> ButtplugSerializedMessage
   where
-    T: ButtplugMessage + Serialize + Deserialize<'static>,
+    T: ButtplugMessage + Serialize + Deserialize<'static> + Debug,
   {
-    ButtplugSerializedMessage::Text(vec_to_protocol_json(msg))
+    ButtplugSerializedMessage::Text(match vec_to_protocol_json(&self.validator, msg) {
+      Ok(m) => m,
+      Err(e) => match vec_to_protocol_json(&self.validator, &vec![e]) {
+        Ok(e) => {
+          error!("Error serializing message: {:?}", e);
+          e
+        }
+        Err(e) => {
+          error!(
+            "SERIALIZER AND/OR MESSAGE SCHEMA SEEMS COMPLETELY BROKEN, SENDING BACK NULL. ERROR: {:?}",
+            e
+          );
+          String::new()
+        }
+      },
+    })
   }
 }
 

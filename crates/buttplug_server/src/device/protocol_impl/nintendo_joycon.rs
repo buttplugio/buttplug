@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -15,7 +15,7 @@ use crate::device::{
   },
 };
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
+use buttplug_core::{errors::ButtplugDeviceError};
 use buttplug_server_device_config::{
   Endpoint,
   ProtocolCommunicationSpecifier,
@@ -259,13 +259,11 @@ impl NintendoJoycon {
     let speed_val = Arc::new(AtomicU16::new(0));
     let speed_val_clone = speed_val.clone();
     let notifier = Arc::new(Notify::new());
-    #[cfg(not(feature = "wasm"))]
+    #[cfg(feature = "tokio-runtime")]
     let notifier_clone = notifier.clone();
     let is_stopped = Arc::new(AtomicBool::new(false));
     let is_stopped_clone = is_stopped.clone();
-    async_manager::spawn(async move {
-      #[cfg(feature = "wasm")]
-      use buttplug_core::util;
+    buttplug_core::spawn!("NintendoJoycon update loop", async move {
       loop {
         if is_stopped_clone.load(Ordering::Relaxed) {
           return;
@@ -283,14 +281,14 @@ impl NintendoJoycon {
           error!("Joycon command failed, exiting update loop");
           break;
         }
-        #[cfg(not(feature = "wasm"))]
+        #[cfg(feature = "tokio-runtime")]
         let _ = tokio::time::timeout(Duration::from_millis(15), notifier_clone.notified()).await;
 
         // If we're using WASM, we can't use tokio's timeout due to lack of time library in WASM.
         // I'm also too lazy to make this a select. So, this'll do. We can't even access this
         // protocol in a web context yet since there's no WebHID comm manager yet.
-        #[cfg(feature = "wasm")]
-        util::sleep(Duration::from_millis(15)).await;
+        #[cfg(not(feature = "tokio-runtime"))]
+        unimplemented!("Nintendo Joycon protocol is not supported in non-tokio runtimes yet");
       }
     });
     Self {

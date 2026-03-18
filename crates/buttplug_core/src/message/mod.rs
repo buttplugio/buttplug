@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -25,6 +25,7 @@ pub use v0::*;
 pub use v4::*;
 
 use crate::errors::ButtplugMessageError;
+use enum_dispatch::enum_dispatch;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::convert::TryFrom;
 
@@ -83,9 +84,8 @@ pub trait ButtplugMessageFinalizer {
 /// Base trait for all Buttplug Protocol Message Structs. Handles management of
 /// message ids, as well as implementing conveinence functions for converting
 /// between message structs and various message enums, serialization, etc...
-pub trait ButtplugMessage:
-  ButtplugMessageValidator + ButtplugMessageFinalizer + Send + Sync + Clone
-{
+#[enum_dispatch]
+pub trait ButtplugMessage: ButtplugMessageValidator + Send + Sync + Clone {
   /// Returns the id number of the message
   fn id(&self) -> u32;
   /// Sets the id number of the message.
@@ -100,6 +100,7 @@ pub trait ButtplugMessage:
 /// transmitted, as message may be formed and mutated at multiple points in the
 /// library, or may need to be checked after deserialization. Message enums will
 /// run this on whatever their variant is.
+#[enum_dispatch]
 pub trait ButtplugMessageValidator {
   /// Returns () if the message is valid, otherwise returns a message error.
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
@@ -137,6 +138,7 @@ pub trait ButtplugMessageValidator {
 }
 
 /// Adds device index handling to the [ButtplugMessage] trait.
+#[enum_dispatch]
 pub trait ButtplugDeviceMessage: ButtplugMessage {
   fn device_index(&self) -> u32;
   fn set_device_index(&mut self, id: u32);
@@ -146,3 +148,38 @@ pub trait ButtplugDeviceMessage: ButtplugMessage {
 pub type ButtplugClientMessageCurrent = ButtplugClientMessageV4;
 /// Type alias for the latest version of server-to-client messages.
 pub type ButtplugServerMessageCurrent = ButtplugServerMessageV4;
+
+/// Macro for creating simple client messages that only contain an ID field.
+/// These are command messages with no payload that require a non-system ID.
+macro_rules! simple_client_message {
+  ($name:ident) => {
+    #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+    pub struct $name {
+      #[serde(rename = "Id")]
+      id: u32,
+    }
+
+    impl Default for $name {
+      fn default() -> Self {
+        Self { id: 1 }
+      }
+    }
+
+    impl crate::message::ButtplugMessage for $name {
+      fn id(&self) -> u32 {
+        self.id
+      }
+      fn set_id(&mut self, id: u32) {
+        self.id = id;
+      }
+    }
+
+    impl crate::message::ButtplugMessageValidator for $name {
+      fn is_valid(&self) -> Result<(), crate::errors::ButtplugMessageError> {
+        self.is_not_system_id(self.id)
+      }
+    }
+  };
+}
+
+pub(crate) use simple_client_message;

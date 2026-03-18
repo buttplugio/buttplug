@@ -1,17 +1,19 @@
+---
 defaults:
   name: Love Nut
   features:
-    - id: 45793bae-a3d5-4d76-9f20-f907e82b18df
-      output:
-        vibrate:
-          value:
-            - 0
-            - 15
+  - id: 45793bae-a3d5-4d76-9f20-f907e82b18df
+    output:
+      vibrate:
+        value:
+        - 0
+        - 15
+    index: 0
   id: 3d5a9edb-e393-4603-8fb9-e038d3c4c0f3
 communication:
-  - btle:
-      names:
-        - Love_Nuts
-      services:
-        0000fff0-0000-1000-8000-00805f9b34fb:
-          tx: 0000fff1-0000-1000-8000-00805f9b34fb
+- btle:
+    names:
+    - Love_Nuts
+    services:
+      0000fff0-0000-1000-8000-00805f9b34fb:
+        tx: 0000fff1-0000-1000-8000-00805f9b34fb

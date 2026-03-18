@@ -1,3 +1,10 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
 use getset::{CopyGetters, Getters, MutGetters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -43,7 +50,7 @@ impl From<ConfigBaseDeviceDefinition> for ServerDeviceDefinition {
       builder.protocol_variant(&variant);
     }
     if let Some(gap) = val.message_gap_ms {
-      builder.message_gap_ms(gap);
+      builder.message_gap_ms(Some(gap));
     }
     if let Some(features) = val.features {
       for feature in features {
@@ -106,9 +113,7 @@ impl ConfigUserDeviceDefinition {
   ) -> Result<ServerDeviceDefinition, ButtplugDeviceConfigError> {
     let mut builder = ServerDeviceDefinitionBuilder::from_base(base, self.id, false);
     builder.display_name(&self.user_config.display_name);
-    if let Some(message_gap_ms) = self.user_config.message_gap_ms {
-      builder.message_gap_ms(message_gap_ms);
-    }
+    builder.message_gap_ms(self.user_config.message_gap_ms);
     self.user_config.allow.then(|| builder.allow(true));
     self.user_config.deny.then(|| builder.deny(true));
     builder.index(self.user_config.index);
@@ -116,7 +121,11 @@ impl ConfigUserDeviceDefinition {
       return Err(ButtplugDeviceConfigError::UserFeatureMismatch);
     }
     for feature in self.features() {
-      if let Some(base_feature) = base.features().iter().find(|x| x.id() == feature.base_id()) {
+      if let Some(base_feature) = base
+        .features()
+        .values()
+        .find(|x| x.id() == feature.base_id())
+      {
         builder.add_feature(&feature.with_base_feature(base_feature)?);
       } else {
         return Err(ButtplugDeviceConfigError::UserFeatureMismatch);
@@ -126,13 +135,21 @@ impl ConfigUserDeviceDefinition {
   }
 }
 
-impl From<&ServerDeviceDefinition> for ConfigUserDeviceDefinition {
-  fn from(value: &ServerDeviceDefinition) -> Self {
-    Self {
+impl TryFrom<&ServerDeviceDefinition> for ConfigUserDeviceDefinition {
+  type Error = ButtplugDeviceConfigError;
+
+  fn try_from(value: &ServerDeviceDefinition) -> Result<Self, Self::Error> {
+    Ok(Self {
       id: value.id(),
-      base_id: value.base_id().expect("Should always have a base id"),
-      features: value.features().iter().map(|x| x.into()).collect(),
+      base_id: value
+        .base_id()
+        .ok_or(ButtplugDeviceConfigError::MissingBaseId)?,
+      features: value
+        .features()
+        .values()
+        .map(|x| x.try_into())
+        .collect::<Result<Vec<_>, _>>()?,
       user_config: value.into(),
-    }
+    })
   }
 }

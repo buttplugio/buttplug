@@ -1,13 +1,13 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
 mod util;
 use buttplug_client::{ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent};
-use buttplug_core::{errors::ButtplugError, message::OutputType, util::async_manager};
+use buttplug_core::{errors::ButtplugError, message::OutputType};
 use buttplug_server::device::hardware::{HardwareCommand, HardwareWriteCmd};
 use buttplug_server_device_config::{
   Endpoint,
@@ -127,7 +127,6 @@ async fn test_client_device_connected_no_event_listener() {
 
 #[tokio::test]
 async fn test_client_device_invalid_command() {
-  use buttplug_core::errors::ButtplugDeviceError;
   let (client, _) = test_client_with_device().await;
 
   let mut event_stream = client.event_stream();
@@ -145,7 +144,14 @@ async fn test_client_device_invalid_command() {
   let test_device = client_device.expect("Test, assuming infallible.");
 
   assert!(matches!(
-    test_device.vibrate(1000).await.unwrap_err(),
+    test_device
+      .run_output(
+        &buttplug_client::device::ClientDeviceOutputCommand::Vibrate(
+          buttplug_client::device::ClientDeviceCommandValue::Steps(1000)
+        )
+      )
+      .await
+      .unwrap_err(),
     ButtplugClientError::ButtplugOutputCommandConversionError(_)
   ));
 }

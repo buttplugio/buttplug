@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -16,7 +16,6 @@ use buttplug_core::{
     },
   },
   message::serializer::ButtplugSerializedMessage,
-  util::async_manager,
 };
 use futures::{FutureExt, SinkExt, StreamExt, future::BoxFuture};
 use std::{sync::Arc, time::Duration};
@@ -237,7 +236,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
               ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{err:?}")),
             )
           })?;
-        async_manager::spawn(async move {
+        buttplug_core::spawn!("ButtplugWebsocketServerTransport connection loop", async move {
           run_connection_loop(
             ws_stream,
             outgoing_receiver,

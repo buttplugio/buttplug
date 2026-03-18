@@ -38,19 +38,33 @@ device_commands:
             write_with_response: false
   - !Messages
       device_index: 0
+      messages:
+        - !Rotate
+          - Index: 0
+            Speed: 1.0
+            Clockwise: false
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [82, 111, 116, 97, 116, 101, 67, 104, 97, 110, 103, 101, 59]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [82, 111, 116, 97, 116, 101, 58, 50, 48, 59]
+            write_with_response: false
+  - !Messages
+      device_index: 0
       messages: 
         - !Stop 
   - !Commands
       device_index: 0
-      commands: 
+      commands:
         - !Write
             endpoint: tx
             # "Vibrate:0;"
             data: [86, 105, 98, 114, 97, 116, 101, 58, 48, 59]
-            write_with_response: false
-        - !Write
-            endpoint: tx
-            data: [82, 111, 116, 97, 116, 101, 67, 104, 97, 110, 103, 101, 59]
             write_with_response: false
         - !Write
             endpoint: tx
@@ -63,10 +77,14 @@ device_commands:
         - !Rotate
           - Index: 0
             Speed: 0.5
-            Clockwise: true
+            Clockwise: false
   - !Commands
       device_index: 0
-      commands: 
+      commands:
+        - !Write
+            endpoint: tx
+            data: [82, 111, 116, 97, 116, 101, 67, 104, 97, 110, 103, 101, 59]
+            write_with_response: false
         - !Write
             endpoint: tx
             # "Rotate:10;"

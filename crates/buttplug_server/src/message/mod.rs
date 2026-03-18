@@ -1,3 +1,10 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
 use buttplug_core::{
   errors::{ButtplugError, ButtplugMessageError},
   message::{
@@ -13,6 +20,45 @@ use buttplug_core::{
 };
 use server_device_attributes::ServerDeviceAttributes;
 
+/// Macro for implementing ButtplugMessage and ButtplugMessageValidator on message enums
+/// that dispatch to their inner message types. ButtplugMessageFinalizer must be implemented
+/// separately as some enums have custom finalize() implementations.
+macro_rules! impl_message_enum_traits {
+  ($enum_name:ident { $($variant:ident),* $(,)? }) => {
+    impl buttplug_core::message::ButtplugMessage for $enum_name {
+      fn id(&self) -> u32 {
+        match self {
+          $(Self::$variant(msg) => msg.id(),)*
+        }
+      }
+      fn set_id(&mut self, id: u32) {
+        match self {
+          $(Self::$variant(msg) => msg.set_id(id),)*
+        }
+      }
+    }
+
+    impl buttplug_core::message::ButtplugMessageValidator for $enum_name {
+      fn is_valid(&self) -> Result<(), buttplug_core::errors::ButtplugMessageError> {
+        match self {
+          $(Self::$variant(msg) => msg.is_valid(),)*
+        }
+      }
+    }
+  };
+}
+
+/// Helper macro to extract device_index from versioned message enums.
+/// Returns Some(device_index) for device commands, None for other messages.
+macro_rules! extract_device_index {
+  ($msg:expr, $enum_type:ident, [$($variant:ident),* $(,)?]) => {
+    match $msg {
+      $($enum_type::$variant(a) => Some(a.device_index()),)*
+      _ => None,
+    }
+  };
+}
+
 pub mod serializer;
 pub mod server_device_attributes;
 mod v0;
@@ -27,15 +73,17 @@ pub use v2::*;
 pub use v3::*;
 pub use v4::*;
 
-#[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator,
-)]
+#[derive(Debug, Clone, PartialEq, derive_more::From)]
 pub enum ButtplugClientMessageVariant {
   V0(ButtplugClientMessageV0),
   V1(ButtplugClientMessageV1),
   V2(ButtplugClientMessageV2),
   V3(ButtplugClientMessageV3),
   V4(ButtplugClientMessageV4),
+}
+
+impl_message_enum_traits!(ButtplugClientMessageVariant { V0, V1, V2, V3, V4 });
+impl ButtplugMessageFinalizer for ButtplugClientMessageVariant {
 }
 
 impl ButtplugClientMessageVariant {
@@ -50,85 +98,60 @@ impl ButtplugClientMessageVariant {
   }
 
   pub fn device_index(&self) -> Option<u32> {
-    // TODO there has to be a better way to do this. We just need to dig through our enum and see if
-    // our message impls ButtplugDeviceMessage. Manually doing this works but is so gross.
     match self {
-      Self::V0(msg) => match msg {
-        ButtplugClientMessageV0::FleshlightLaunchFW12Cmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV0::SingleMotorVibrateCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV0::VorzeA10CycloneCmd(a) => Some(a.device_index()),
-        _ => None,
-      },
-      Self::V1(msg) => match msg {
-        ButtplugClientMessageV1::FleshlightLaunchFW12Cmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV1::SingleMotorVibrateCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV1::VorzeA10CycloneCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV1::VibrateCmd(a) => Some(a.device_index()),
-        _ => None,
-      },
-      Self::V2(msg) => match msg {
-        ButtplugClientMessageV2::VibrateCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV2::RotateCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV2::LinearCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV2::BatteryLevelCmd(a) => Some(a.device_index()),
-        _ => None,
-      },
-      Self::V3(msg) => match msg {
-        ButtplugClientMessageV3::VibrateCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV3::SensorSubscribeCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV3::SensorUnsubscribeCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV3::ScalarCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV3::RotateCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV3::LinearCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV3::SensorReadCmd(a) => Some(a.device_index()),
-        _ => None,
-      },
-      Self::V4(msg) => match msg {
-        ButtplugClientMessageV4::OutputCmd(a) => Some(a.device_index()),
-        ButtplugClientMessageV4::InputCmd(a) => Some(a.device_index()),
-        _ => None,
-      },
+      Self::V0(msg) => extract_device_index!(
+        msg,
+        ButtplugClientMessageV0,
+        [
+          FleshlightLaunchFW12Cmd,
+          SingleMotorVibrateCmd,
+          VorzeA10CycloneCmd
+        ]
+      ),
+      Self::V1(msg) => extract_device_index!(
+        msg,
+        ButtplugClientMessageV1,
+        [
+          FleshlightLaunchFW12Cmd,
+          SingleMotorVibrateCmd,
+          VorzeA10CycloneCmd,
+          VibrateCmd
+        ]
+      ),
+      Self::V2(msg) => extract_device_index!(
+        msg,
+        ButtplugClientMessageV2,
+        [VibrateCmd, RotateCmd, LinearCmd, BatteryLevelCmd]
+      ),
+      Self::V3(msg) => extract_device_index!(
+        msg,
+        ButtplugClientMessageV3,
+        [
+          VibrateCmd,
+          SensorSubscribeCmd,
+          SensorUnsubscribeCmd,
+          ScalarCmd,
+          RotateCmd,
+          LinearCmd,
+          SensorReadCmd
+        ]
+      ),
+      Self::V4(msg) => extract_device_index!(msg, ButtplugClientMessageV4, [OutputCmd, InputCmd]),
     }
   }
 }
 
-impl From<ButtplugClientMessageV0> for ButtplugClientMessageVariant {
-  fn from(value: ButtplugClientMessageV0) -> Self {
-    ButtplugClientMessageVariant::V0(value)
-  }
-}
-
-impl From<ButtplugClientMessageV1> for ButtplugClientMessageVariant {
-  fn from(value: ButtplugClientMessageV1) -> Self {
-    ButtplugClientMessageVariant::V1(value)
-  }
-}
-
-impl From<ButtplugClientMessageV2> for ButtplugClientMessageVariant {
-  fn from(value: ButtplugClientMessageV2) -> Self {
-    ButtplugClientMessageVariant::V2(value)
-  }
-}
-
-impl From<ButtplugClientMessageV3> for ButtplugClientMessageVariant {
-  fn from(value: ButtplugClientMessageV3) -> Self {
-    ButtplugClientMessageVariant::V3(value)
-  }
-}
-
-impl From<ButtplugClientMessageV4> for ButtplugClientMessageVariant {
-  fn from(value: ButtplugClientMessageV4) -> Self {
-    ButtplugClientMessageVariant::V4(value)
-  }
-}
-
-#[derive(Debug, Clone, ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator)]
+#[derive(Debug, Clone, derive_more::From)]
 pub enum ButtplugServerMessageVariant {
   V0(ButtplugServerMessageV0),
   V1(ButtplugServerMessageV1),
   V2(ButtplugServerMessageV2),
   V3(ButtplugServerMessageV3),
   V4(ButtplugServerMessageV4),
+}
+
+impl_message_enum_traits!(ButtplugServerMessageVariant { V0, V1, V2, V3, V4 });
+impl ButtplugMessageFinalizer for ButtplugServerMessageVariant {
 }
 
 impl ButtplugServerMessageVariant {
@@ -143,53 +166,18 @@ impl ButtplugServerMessageVariant {
   }
 }
 
-impl From<ButtplugServerMessageV0> for ButtplugServerMessageVariant {
-  fn from(value: ButtplugServerMessageV0) -> Self {
-    ButtplugServerMessageVariant::V0(value)
-  }
-}
-
-impl From<ButtplugServerMessageV1> for ButtplugServerMessageVariant {
-  fn from(value: ButtplugServerMessageV1) -> Self {
-    ButtplugServerMessageVariant::V1(value)
-  }
-}
-
-impl From<ButtplugServerMessageV2> for ButtplugServerMessageVariant {
-  fn from(value: ButtplugServerMessageV2) -> Self {
-    ButtplugServerMessageVariant::V2(value)
-  }
-}
-
-impl From<ButtplugServerMessageV3> for ButtplugServerMessageVariant {
-  fn from(value: ButtplugServerMessageV3) -> Self {
-    ButtplugServerMessageVariant::V3(value)
-  }
-}
-
-impl From<ButtplugServerMessageV4> for ButtplugServerMessageVariant {
-  fn from(value: ButtplugServerMessageV4) -> Self {
-    ButtplugServerMessageVariant::V4(value)
-  }
-}
-
 /// Represents all possible messages a [ButtplugServer][crate::server::ButtplugServer] can send to a
 /// [ButtplugClient][crate::client::ButtplugClient] that denote an EVENT from a device. These are
 /// only used in notifications, so read requests will not need to be added here, only messages that
 /// will require Id of 0.
-#[derive(
-  Debug,
-  Clone,
-  PartialEq,
-  Eq,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
-  FromSpecificButtplugMessage,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, derive_more::From)]
 pub enum ButtplugServerDeviceMessage {
   // Generic Sensor Reading Messages
   SensorReading(InputReadingV4),
+}
+
+impl_message_enum_traits!(ButtplugServerDeviceMessage { SensorReading });
+impl ButtplugMessageFinalizer for ButtplugServerDeviceMessage {
 }
 
 impl From<ButtplugServerDeviceMessage> for ButtplugServerMessageV4 {

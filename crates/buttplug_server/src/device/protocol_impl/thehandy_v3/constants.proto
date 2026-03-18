@@ -1,0 +1,345 @@
+// Auto-generated on 2025-10-14 13:26:40
+syntax = "proto3";
+package hdy_rpc;
+//NB! The codes are not in order, but in groups
+enum HandyErrorCodes{
+    HANDY_ERROR_CODE_PROTO2_LEGACY_COMP_DO_NOT_USE = 0;         //DO NOT USE - 0 is ESP_OK -> only here for proto legacy compatibility
+    ERROR_UNKNOWN_REQUEST_TYPE = 100000;
+    ERROR_UNKNOWN_RESPONSE_TYPE = 100001;
+    ERROR_UNKNOWN_COMMAND = 100002;
+    ERROR_NOT_IMPLEMENTED = 100003;
+    ERROR_WRONG_MODE = 100004;                                  //This will rearly never trigger, since FW4 will set the correct mode
+    ERROR_TEMP_HIGH = 100005;                                   //Motor temp high - slider only
+    ERROR_SLIDER_BLOCKED = 100006;                              // Slider only
+    ERROR_UNKNOWN_MODE_ERROR = 100007;                          //When there is a unknown error with the mode controller. Should not happen, but might be some sloopy coding
+    ERROR_TIME_NOT_SYNCED = 100008;                             //server time not synced with on Handy
+    ERROR_NEGATIVE_NETWORK_DELAY = 100009;                      //Network delay is negative -> Some time syncing is not correct
+    ERROR_MESSAGE_SIZE_TOO_BIG = 100010;                        //Message size is too big. Max size is 1024 bytes (subject to change)
+    ERROR_MESSAGE_NOT_CONNECTED = 100011;                       //Machine is not connected
+    ERROR_MESSAGE_GENERIC_SERVER_ERROR = 100012;                //Generic server error
+    ERROR_MESSAGE_QUEUE_FULL = 100014;                          //Message queue is full
+    ERROR_OTA_STARTED = 100013;                                 //OTA is started -> mode change is not allowed
+    ERROR_OTA_QUEUE_WRITE_FAILURE = 100015;                     //OTA write failure
+    ERROR_OTA_ERROR = 100016;                                   //OTA error (any error)
+    ERROR_OTA_MEM_ERROR = 100024;                               //Failed to allocate memory for OTA chunk
+    ERROR_OTA_NOT_STARTED = 100025;                             //OTA has not started -> OTA is not allowed to proceed
+    ERROR_FUNCTION_NOT_SUPPORTED = 100017;                      //Function not supported (Ex: Slider function calls on a LRA product)
+    ERROR_RPC_MSG_POOL_FULL = 100019;                           //RPC message pool is full
+    ERROR_RPC_FAILED_TO_UNPACK = 100020;                        //Failed to unpack the RPC message
+    ERROR_RPC_NOT_ALLOWED_WITH_THIS_TRANSPORT_MODE = 100021;    //RPC is not allowed with this transport mode
+    ERROR_RPC_NETWORK_DELAY_TOO_BIG = 100022;                   //Network delay is too big. Max allowed is 24h == 86400s == 86400000ms
+    ERROR_RPC_NOT_INITIALIZED = 100029;                         //RPC is not initialized -> RPC is not allowed to proceed - Added in FW 4.0.16
+    ERROR_RPC_HANDLER_QUEUE_FULL = 100030;                      //RPC handler queue is full -> RPC is not allowed to proceed - Added in FW 4.0.16
+    ERROR_RPC_SEND_TIMEOUT = 100031;                            //RPC send timeout (5s) -> RPC is not allowed to proceed - Added in FW 4.0.16
+    ERROR_FAIL = 100023;                                        //Generic error - ESP_FAIL -> This will be converted to this error - ESP_FAIL is -1, negative values are not supported
+    ERROR_HALL_SENSOR_ERROR = 100026;                           //Hall sensor error
+    ERROR_OVERCLOCKING_NOT_SUPPORTED = 100027;                  //Added in 4.0.15 - Overclocking is not supported on this device
+    ERROR_OVERCLOCKING_IS_NOT_ENABLED = 100028;                 //Added in 4.0.15 - Trying to overclock, but overclocking is not enabled in the FW
+    ERROR_MODE_CHANGE_NOT_ALLOWED_WHEN_DISABLED = 100032;       //When in mode DISABLED, mode change is not allowed. - Added in FW 4.0.16
+    //Power OTA errors
+    ERROR_OTA_ERR_NO_OTA_PARTITION = 200001;
+    ERROR_OTA_ERR_INVALID_BIN = 20000;
+    ERROR_OTA_ERR_INVALID_PARAM = 200003;
+    ERROR_OTA_ERR_NEW_OTA_HAS_PREVIOUSLY_FAILED = 200004;        //The OTA has been successfull, but during the new FW failed to boot correctly the first boot and has been flagged as invalid
+    ERROR_OTA_ERR_NEW_OTA_SAME_AS_CURRENT = 200005;              //The new OTA is the same as the current running FW
+}
+///////////////////////// Mode related constants /////////////////////////
+enum Mode{
+    MODE_HAMP = 0;
+    MODE_HSSP = 1;
+    MODE_HDSP = 2;
+    MODE_MAINTENANCE = 3;
+    MODE_HSP = 4;
+    MODE_OTA = 5;
+    MODE_BUTTON = 6;        //Nothing happens on the device. Button presses are sent as notifications
+    MODE_IDLE = 7;          //Nothing is running -> when changing online mode this state is set to allocated correct memory pool in mode (HSP)
+    MODE_HVP = 8;
+    MODE_HRPP = 9;
+    MODE_DISABLED = 10; //Nothing works in this mode. Mode change is not possible externally or from buttons. Can only be set in the FW, not externally. Used before shutdown or in critical errors. - Added in FW 4.0.16
+}
+enum HampPlayState{
+    HAMP_STATE_STOPPED = 0;
+    HAMP_STATE_RUNNING = 1;
+}
+message HampState{
+    HampPlayState play_state = 1;
+    float velocity = 2; 
+    bool direction = 3; //Forward = false, Backward = true. Can be different on future models. No logic to convert if changed in the driver
+    float min = 4; //[0-1] Min position in % - Added in FW4.0.15
+    float max = 5; //[0-1] Max position in % - Added in FW4.0.15
+}
+enum HrppPatternType{
+    HRPP_NOT_SET = 0;
+    HRPP_SCRIPT = 1;
+    HRPP_WAVE = 2;
+}
+message HrppPattern{
+    uint32 id = 1;
+    string name = 2; //Max 16 characters
+    uint32 version = 3; //NB! uint8 on system
+    bool custom_pattern = 4;
+    uint32 slot = 5; //NB! uint8 on system
+    HrppPatternType type = 6;
+    uint32 pause_random_min = 7; //NB! uint16 on system
+    uint32 pause_random_max = 8; //NB! uint16 on system
+}
+message HrppState{
+    uint32 current_pattern_nr = 1; //NB! uint8 on system
+    HrppPattern current_pattern = 2;
+    uint32 nr_of_patterns = 3; //NB! uint8 on system
+    bool enabled = 4;
+    float amplitude = 5;
+    float playback_speed = 6;
+}
+enum HdspPlayState{
+    HDSP_STATE_STOPPED = 0;
+    HDSP_STATE_MOVING = 1;  //NB! Very short window that the state is MOVING
+    HDSP_STATE_REACHED = 2;
+}
+///////////////////////// HSP constants /////////////////////////
+enum HspPlayState{
+    HSP_STATE_NOT_INITIALIZED = 0;
+    HSP_STATE_PLAYING = 1;
+    HSP_STATE_STOPPED = 2;
+    HSP_STATE_PAUSED = 3;
+    HSP_STATE_STARVING= 4;
+}
+message HspState{
+    HspPlayState play_state = 1;
+    uint32 points = 2; //points in the buffer
+    uint32 max_points = 3; //Max nr of points in the buffer - depends on the device
+    int32 current_point = 4; //the current index to the point playing (NB! will be -1 in the response to a play command)
+    int32 current_time = 5;  //the current time playing
+    bool loop = 6;  //true if the buffer is looping after the last point
+    float playback_rate = 7; //the current playback rate
+    uint32 first_point_time = 8; //time of the first point in the buffer
+    uint32 last_point_time = 9;  //time of the last point in the buffer
+    uint32 stream_id = 10; //the stream id of the current stream
+    int32 tail_point_stream_index = 11; //the current point playing - will be -1 when playingAbsoluteIndex
+    uint32 tail_point_stream_index_threshold = 12; //When to trigger a threshold notification
+    bool pause_on_starving = 13; //[Default false] If true, the stream will pause when the buffer is empty. When data is added the stream will resume without time adjustments
+}
+message HvpState{
+    bool enabled = 1; //If the vibration is started/active
+    float amplitude = 2; //0-1 (0-100%) For LRA, ERM and Sliders with vibration adapter (percent of valid output range)
+    uint32 frequency = 3; //0-10000 (Hz) For LRA only
+    float position = 4; // (mm) Where on the slider should the vibration be. For slider with vibration adapter only. 
+}
+message Point{
+    uint32 t = 1;
+    uint32 x = 2; //uint8 0-255 max!
+}
+///////////////////////// Button constants /////////////////////////
+enum Button{
+    BUTTON_ON = 0;
+    BUTTON_UP = 1;
+    BUTTON_LEFT = 2;
+    BUTTON_RIGHT = 3;
+    BUTTON_DOWN = 4;
+    BUTTON_WIFI = 5;
+}
+enum ButtonEvent{
+    BUTTON_EVENT_PRESSED = 0; //NOT IN USE
+    BUTTON_EVENT_RELEASED = 1; //NOT IN USE
+    BUTTON_EVENT_SHORTPRESS = 2;
+    BUTTON_EVENT_LONGPRESS_START = 3;
+    BUTTON_EVENT_LONGPRESS_STEP = 4;
+    BUTTON_EVENT_LONGPRESS_STOP = 5;
+}
+///////////////////////// WIFI and connectivity constants /////////////////////////
+/*
+    Excact copy of ESP_IDF wifi_auth_mode_t 
+*/
+enum AuthModes{
+    AUTH_OPEN = 0;
+    AUTH_WEP = 1;
+    AUTH_WPA_PSK = 2;
+    AUTH_WPA2_PSK = 3;
+    AUTH_WPA_WPA2_PSK = 4;
+    AUTH_WPA2_ENTERPRISE = 5;
+    AUTH_WPA3_PSK = 6;
+    AUTH_WPA2_WPA3_PSK = 7;
+    AUTH_WAPI_PSK = 8;
+    AUTH_OWE = 9;
+    AUTH_MAX = 10;
+}
+//Matches hdyWifiConnectionStatus_t (does not matches the legacy protobuf enum from espresif)
+enum WifiState{
+    WIFI_STATE_DISCONNECTED = 0;
+    WIFI_STATE_CONNECTED = 1;
+    WIFI_STATE_CONNECTING = 2;
+    WIFI_STATE_RECONNECTING = 3; 
+    WIFI_STATE_FAILED_TO_CONNECT = 4; //or reconnecting
+    WIFI_STATE_DISCONNECTING = 5;
+}
+/*
+    Excact copy of ESP_IDF wifi_err_reason_t (except for the first one)
+*/
+enum WifiFailedReason{
+    WIFI_REASON_DO_NOT_USE                          = 0; //legacy compatibility - DO NOT USE
+    WIFI_REASON_UNSPECIFIED                        = 1;
+    WIFI_REASON_AUTH_EXPIRE                        = 2;
+    WIFI_REASON_AUTH_LEAVE                         = 3;
+    WIFI_REASON_ASSOC_EXPIRE                       = 4;
+    WIFI_REASON_ASSOC_TOOMANY                      = 5;
+    WIFI_REASON_NOT_AUTHED                         = 6;
+    WIFI_REASON_NOT_ASSOCED                        = 7;
+    WIFI_REASON_ASSOC_LEAVE                        = 8;
+    WIFI_REASON_ASSOC_NOT_AUTHED                   = 9;
+    WIFI_REASON_DISASSOC_PWRCAP_BAD                = 10;
+    WIFI_REASON_DISASSOC_SUPCHAN_BAD               = 11;
+    WIFI_REASON_BSS_TRANSITION_DISASSOC            = 12;
+    WIFI_REASON_IE_INVALID                         = 13;
+    WIFI_REASON_MIC_FAILURE                        = 14;
+    WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT             = 15;
+    WIFI_REASON_GROUP_KEY_UPDATE_TIMEOUT           = 16;
+    WIFI_REASON_IE_IN_4WAY_DIFFERS                 = 17;
+    WIFI_REASON_GROUP_CIPHER_INVALID               = 18;
+    WIFI_REASON_PAIRWISE_CIPHER_INVALID            = 19;
+    WIFI_REASON_AKMP_INVALID                       = 20;
+    WIFI_REASON_UNSUPP_RSN_IE_VERSION              = 21;
+    WIFI_REASON_INVALID_RSN_IE_CAP                 = 22;
+    WIFI_REASON_802_1X_AUTH_FAILED                 = 23;
+    WIFI_REASON_CIPHER_SUITE_REJECTED              = 24;
+    WIFI_REASON_TDLS_PEER_UNREACHABLE              = 25;
+    WIFI_REASON_TDLS_UNSPECIFIED                   = 26;
+    WIFI_REASON_SSP_REQUESTED_DISASSOC             = 27;
+    WIFI_REASON_NO_SSP_ROAMING_AGREEMENT           = 28;
+    WIFI_REASON_BAD_CIPHER_OR_AKM                  = 29;
+    WIFI_REASON_NOT_AUTHORIZED_THIS_LOCATION       = 30;
+    WIFI_REASON_SERVICE_CHANGE_PERCLUDES_TS        = 31;
+    WIFI_REASON_UNSPECIFIED_QOS                    = 32;
+    WIFI_REASON_NOT_ENOUGH_BANDWIDTH               = 33;
+    WIFI_REASON_MISSING_ACKS                       = 34;
+    WIFI_REASON_EXCEEDED_TXOP                      = 35;
+    WIFI_REASON_STA_LEAVING                        = 36;
+    WIFI_REASON_END_BA                             = 37;
+    WIFI_REASON_UNKNOWN_BA                         = 38;
+    WIFI_REASON_TIMEOUT                            = 39;
+    WIFI_REASON_PEER_INITIATED                     = 46;
+    WIFI_REASON_AP_INITIATED                       = 47;
+    WIFI_REASON_INVALID_FT_ACTION_FRAME_COUNT      = 48;
+    WIFI_REASON_INVALID_PMKID                      = 49;
+    WIFI_REASON_INVALID_MDE                        = 50;
+    WIFI_REASON_INVALID_FTE                        = 51;
+    WIFI_REASON_TRANSMISSION_LINK_ESTABLISH_FAILED = 67;
+    WIFI_REASON_ALTERATIVE_CHANNEL_OCCUPIED        = 68;
+    WIFI_REASON_BEACON_TIMEOUT                     = 200;
+    WIFI_REASON_NO_AP_FOUND                        = 201;
+    WIFI_REASON_AUTH_FAIL                          = 202;
+    WIFI_REASON_ASSOC_FAIL                         = 203;
+    WIFI_REASON_HANDSHAKE_TIMEOUT                  = 204;
+    WIFI_REASON_CONNECTION_FAIL                    = 205;
+    WIFI_REASON_AP_TSF_RESET                       = 206;
+    WIFI_REASON_ROAMING                            = 207;
+    WIFI_REASON_ASSOC_COMEBACK_TIME_TOO_LONG       = 208;
+    WIFI_REASON_SA_QUERY_TIMEOUT                   = 209;
+}
+/*
+    Can be extended with more info from wifi_ap_record_t if need:
+    typedef struct {
+        uint8_t bssid[6];                     //< MAC address of AP 
+        uint8_t ssid[33];                     //< SSID of AP 
+        uint8_t primary;                      //< channel of AP 
+        wifi_second_chan_t second;            //< secondary channel of AP 
+        int8_t  rssi;                         //< signal strength of AP 
+        wifi_auth_mode_t authmode;            //< authmode of AP 
+        wifi_cipher_type_t pairwise_cipher;   //< pairwise cipher of AP 
+        wifi_cipher_type_t group_cipher;      //< group cipher of AP 
+        wifi_ant_t ant;                       //< antenna used to receive beacon from AP 
+        uint32_t phy_11b:1;                   //< bit: 0 flag to identify if 11b mode is enabled or not 
+        uint32_t phy_11g:1;                   //< bit: 1 flag to identify if 11g mode is enabled or not 
+        uint32_t phy_11n:1;                   //< bit: 2 flag to identify if 11n mode is enabled or not 
+        uint32_t phy_lr:1;                    //< bit: 3 flag to identify if low rate is enabled or not 
+        uint32_t phy_11ax:1;                  //< bit: 4 flag to identify if 11ax mode is enabled or not 
+        uint32_t wps:1;                       //< bit: 5 flag to identify if WPS is supported or not 
+        uint32_t ftm_responder:1;             //< bit: 6 flag to identify if FTM is supported in responder mode 
+        uint32_t ftm_initiator:1;             //< bit: 7 flag to identify if FTM is supported in initiator mode 
+        uint32_t reserved:24;                 //< bit: 8..31 reserved
+        wifi_country_t country;               //< country information of AP
+        wifi_he_ap_info_t he_ap;              //< HE AP info
+    } wifi_ap_record_t;
+*/
+message ApInfo{
+    string ssid = 1;
+    string bssid = 2;       //MAC address of AP
+    uint32 channel = 3;     //[int8] 0-255 max!
+    AuthModes authmode = 4;
+    int32 rssi = 5;         //[int8] -128 - 127
+    string ip = 6;          //IP address of Handy only for connected AP (not scan results)
+}
+/*
+    Must match typedef enum hdyConfigConnection_t
+*/
+enum ConnectionMode{
+    CONNECTION_MODE_NOT_SET = 0;
+    CONNECTION_MODE_WIFI = 1;
+    CONNECTION_MODE_BLE = 2;
+    CONNECTION_MODE_WIFI_AND_BLE = 3; //NB! Extra latency when using this mode
+    CONNECTION_MODE_OFFLINE = 4;
+    CONNECTION_MODE_LEGACY_BLE = 5; //Only BLE. No legacy BLE+wifi mode
+    CONNECTION_MODE_FACTORY = 6; //(NOT IN USE!) Connects to factory wifi and server
+    CONNECTION_MODE_AUDIO = 7; //Switch to Audio FW -> Reverts on next reboot
+}
+/*
+    Must match hdy_socket_server_env_t
+*/
+enum ServerEnvironment{
+    SOCKET_SERVER_ENV_PRODUCTION = 0;
+    SOCKET_SERVER_ENV_STAGING = 1;
+    SOCKET_SERVER_ENV_DEVELOPMENT = 2;
+}
+/*
+    Must match hdyBleConnectionStatus_t
+*/
+enum BleState{
+    BLE_STATE_NOT_INITIALIZED = 0;
+    BLE_STATE_INITIALIZING = 1;
+    BLE_STATE_ADVERTISING = 2;
+    BLE_STATE_CONNECTED = 3;
+}
+// There is no need to set the transportation. This is handled in the FW.
+///////////////////////// Div constants /////////////////////////
+//Added in FW4.0.19
+enum BatteryDriver{
+    BATTERY_DRIVER_NOT_SET = 0;
+    BATTERY_DRIVER_OH = 1; //Oh
+    BATTERY_DRIVER_H2 = 2; //Handy 2
+}
+message BatteryState{
+    uint32 level = 1; //0-100
+    bool charger_connected = 2;
+    bool charging_complete = 3;
+    float usb_voltage = 4; //in V
+    float battery_voltage = 5; //in V
+    uint32 usb_adc_value = 6; //0-4095
+    uint32 battery_adc_value = 7; //0-4095
+    float battery_temperature = 8; //in C //Added in FW 4.0.16
+    uint32 battery_temperature_adc_value = 9; //0-4095 //Added in FW 4.0.16
+    bool not_supported_charger = 10; //Handy 2 only - If the charger is not supported by the device (ex: <15V) - Added in FW 4.0.16
+    bool shut_down_voltage_detected = 11; //If the device is shutting down due to low battery voltage - Added in FW 4.0.16
+    bool charger_fault_detected = 12; //Handy 2 only - If the charger is faulty (Most likely high temperature) - Added in FW 4.0.16
+    float last_fully_charged_voltage = 13; //[V] when the charger cut of last time. Used as a reference for 100% battery voltage - Added in FW 4.0.19
+    bool chgr = 14; // IC chgr status - only OH - Added in FW 4.0.19
+    bool ic_done = 15; // IC done status - only OH - Added in FW 4.0.19
+    bool pg = 16; // Power good status - only H2 - Added in FW 4.0.19
+    bool charger_disabled = 17; // Only H2 (and future Oh versions) - Charger is disabled due to battery full - Added in FW 4.0.19
+    bool charging = 18; // Charger is charging the battery - Added in FW 4.0.19
+}
+// The 3 different potential Idle timeout states
+//Added in FW4.0.19
+enum IdleTimeoutState{
+    IDLE_TIMEOUT_STATE_WARNING = 0; //Idle timeout warning - will go to sleep in 60 seconds if no interaction
+    IDLE_TIMEOUT_STATE_CANCELLED = 1; //Idle timeout cancelled - will not go to sleep
+    IDLE_TIMEOUT_STATE_SLEEPING = 2; //Idle timeout sleeping - device is now sleeping
+}
+// Used for settings changed notifications
+//Added in FW4.0.19
+enum SettingType{
+    SETTINGS_NOT_SET = 0;
+    SETTINGS_BASE = 1;
+    SETTINGS_SLIDER = 2;
+    SETTINGS_LRA = 3;
+    SETTINGS_ERM = 4;
+    SETTINGS_BATTERY = 5;
+}

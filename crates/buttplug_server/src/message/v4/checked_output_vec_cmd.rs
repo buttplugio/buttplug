@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -20,10 +20,9 @@ use buttplug_core::{
   message::{
     ButtplugDeviceMessage,
     ButtplugMessage,
-    ButtplugMessageFinalizer,
     ButtplugMessageValidator,
     OutputCommand,
-    OutputPositionWithDuration,
+    OutputHwPositionWithDuration,
     OutputType,
     OutputValue,
   },
@@ -32,16 +31,7 @@ use getset::{CopyGetters, Getters};
 
 use super::checked_output_cmd::CheckedOutputCmdV4;
 
-#[derive(
-  Debug,
-  Default,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Clone,
-  Getters,
-  CopyGetters,
-)]
+#[derive(Debug, Default, PartialEq, Clone, Getters, CopyGetters)]
 pub struct CheckedOutputVecCmdV4 {
   #[getset(get_copy = "pub")]
   id: u32,
@@ -49,6 +39,24 @@ pub struct CheckedOutputVecCmdV4 {
   device_index: u32,
   #[getset(get = "pub")]
   value_vec: Vec<CheckedOutputCmdV4>,
+}
+
+impl ButtplugMessage for CheckedOutputVecCmdV4 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugDeviceMessage for CheckedOutputVecCmdV4 {
+  fn device_index(&self) -> u32 {
+    self.device_index
+  }
+  fn set_device_index(&mut self, device_index: u32) {
+    self.device_index = device_index;
+  }
 }
 
 impl CheckedOutputVecCmdV4 {
@@ -82,7 +90,6 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedOutputVecCmdV4 
     let mut vibrate_features = features
       .features()
       .iter()
-      .enumerate()
       .filter(|(_, feature)| {
         feature
           .output()
@@ -114,7 +121,7 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedOutputVecCmdV4 
       cmds.push(CheckedOutputCmdV4::new(
         msg.id(),
         msg.device_index(),
-        index as u32,
+        *index,
         feature.id(),
         OutputCommand::Vibrate(OutputValue::new(
           actuator.calculate_scaled_float(msg.speed()).map_err(
@@ -168,7 +175,6 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedOutputVecCmdV4 {
       let idx = features
         .features()
         .iter()
-        .enumerate()
         .find(|(_, f)| f.id() == feature.id())
         .expect("Already checked existence")
         .0;
@@ -186,7 +192,7 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedOutputVecCmdV4 {
       cmds.push(CheckedOutputCmdV4::new(
         msg.id(),
         msg.device_index(),
-        idx as u32,
+        *idx,
         feature.id(),
         OutputCommand::Vibrate(OutputValue::new(
           actuator
@@ -231,29 +237,28 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedOutputVecCmdV4 {
       let idx = attrs
         .features()
         .iter()
-        .enumerate()
         .find(|(_, f)| f.id() == feature.feature().id())
         .expect("Already proved existence")
-        .0 as u32;
+        .0;
       let output = feature
         .feature()
         .output()
         .as_ref()
         .ok_or(ButtplugError::from(
-          ButtplugDeviceError::DeviceNoActuatorError("ScalarCmdV3".to_owned()),
+          ButtplugDeviceError::MessageNotSupported("ScalarCmdV3".to_owned()),
         ))?;
       let output_value = output
         .calculate_from_float(cmd.actuator_type(), cmd.scalar())
         .map_err(|e| {
           error!("{:?}", e);
-          ButtplugError::from(ButtplugDeviceError::DeviceNoActuatorError(
+          ButtplugError::from(ButtplugDeviceError::MessageNotSupported(
             "ScalarCmdV3".to_owned(),
           ))
         })?;
       cmds.push(CheckedOutputCmdV4::new(
         msg.id(),
         msg.device_index(),
-        idx,
+        *idx,
         feature.feature.id(),
         OutputCommand::from_output_type(cmd.actuator_type(), output_value).unwrap(),
       ));
@@ -299,7 +304,7 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedOutputVecCmdV4 {
             "Device got LinearCmd command but has no actuators on Linear feature.".to_owned(),
           ),
         ))?
-        .position_with_duration()
+        .hw_position_with_duration()
         .as_ref()
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceFeatureMismatch(
@@ -311,7 +316,7 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedOutputVecCmdV4 {
         x.index(),
         0,
         f.id(),
-        OutputCommand::PositionWithDuration(OutputPositionWithDuration::new(
+        OutputCommand::HwPositionWithDuration(OutputHwPositionWithDuration::new(
           actuator.calculate_scaled_float(x.position()).map_err(|_| {
             ButtplugError::from(ButtplugMessageError::InvalidMessageContents(
               "Position should be 0.0 < x < 1.0".to_owned(),
@@ -361,26 +366,25 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
       let idx = attrs
         .features()
         .iter()
-        .enumerate()
         .find(|(_, f)| f.id() == feature.feature().id())
         .expect("Already proved existence")
-        .0 as u32;
+        .0;
       let actuator = feature
         .feature()
         .output()
         .as_ref()
         .ok_or(ButtplugError::from(
-          ButtplugDeviceError::DeviceNoActuatorError("RotateCmdV1".to_owned()),
+          ButtplugDeviceError::MessageNotSupported("RotateCmdV1".to_owned()),
         ))?
         .rotate()
         .as_ref()
         .ok_or(ButtplugError::from(
-          ButtplugDeviceError::DeviceNoActuatorError("RotateCmdV1".to_owned()),
+          ButtplugDeviceError::MessageNotSupported("RotateCmdV1".to_owned()),
         ))?;
       cmds.push(CheckedOutputCmdV4::new(
         msg.id(),
         msg.device_index(),
-        idx,
+        *idx,
         feature.feature.id(),
         OutputCommand::Rotate(OutputValue::new(
           actuator.calculate_scaled_float(cmd.speed()).map_err(|_| {

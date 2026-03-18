@@ -4,7 +4,6 @@
 [![Github donate button](https://img.shields.io/badge/github-donate-ff69b4.svg)](https://www.github.com/sponsors/qdot)
 [![Discourse Forums](https://img.shields.io/discourse/status?label=buttplug.io%20forums&server=https%3A%2F%2Fdiscuss.buttplug.io)](https://discuss.buttplug.io)
 [![Discord](https://img.shields.io/discord/353303527587708932.svg?logo=discord)](https://discord.buttplug.io)
-[![Twitter](https://img.shields.io/twitter/follow/buttplugio.svg?style=social&logo=twitter)](https://twitter.com/buttplugio)
 [![bluesky](https://img.shields.io/bluesky/followers/buttplug.io)](https://bsky.app/profile/buttplug.io)
 
 [![Crates.io Version](https://img.shields.io/crates/v/buttplug)](https://crates.io/crates/buttplug)
@@ -14,6 +13,12 @@
 If you want to build Rust-based applications that access programs like [Intiface Engine](../intiface_engine/) and [Intiface Central](https://intiface.com/central), you're in the right place.
 
 This library contains everything you need to connect to Buttplug servers, scan for devices, and control their inputs and outputs.
+
+## But how do I use it?
+
+Check out [the developer guide](https://buttplug.io/docs/dev-guide) or [the examples in this repo](../../examples/).
+
+There's [api docs on docs.rs](https://docs.rs/buttplug-client/) but they're not great at the moment as I need to go through and recomment basically the whole library. Check there anyways, there's a chance I might have updated them and forgot to remove this message.
 
 ## What if I want to use another language?
 
@@ -25,7 +30,7 @@ Buttplug is BSD 3-Clause licensed.
 
 ```text
 
-Copyright (c) 2016-2025, Nonpolynomial, LLC
+Copyright (c) 2016-2026, Nonpolynomial, LLC
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

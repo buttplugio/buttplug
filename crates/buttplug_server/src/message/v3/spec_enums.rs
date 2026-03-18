@@ -1,20 +1,20 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
 use crate::message::{
+  StopAllDevicesV0,
+  StopDeviceCmdV0,
   v1::{LinearCmdV1, RequestServerInfoV1, RotateCmdV1, VibrateCmdV1},
   v2::{ButtplugClientMessageV2, ButtplugServerMessageV2, ServerInfoV2},
 };
 use buttplug_core::{
   errors::{ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugMessage,
     ButtplugMessageFinalizer,
-    ButtplugMessageValidator,
     ButtplugServerMessageV4,
     DeviceRemovedV0,
     ErrorV0,
@@ -23,8 +23,6 @@ use buttplug_core::{
     RequestDeviceListV0,
     ScanningFinishedV0,
     StartScanningV0,
-    StopAllDevicesV0,
-    StopDeviceCmdV0,
     StopScanningV0,
   },
 };
@@ -41,17 +39,7 @@ use super::{
 };
 
 /// Represents all client-to-server messages in v3 of the Buttplug Spec
-#[derive(
-  Debug,
-  Clone,
-  PartialEq,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
-  FromSpecificButtplugMessage,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, Clone, PartialEq, derive_more::From, Serialize, Deserialize)]
 pub enum ButtplugClientMessageV3 {
   // Handshake messages
   RequestServerInfo(RequestServerInfoV1),
@@ -71,6 +59,25 @@ pub enum ButtplugClientMessageV3 {
   SensorReadCmd(SensorReadCmdV3),
   SensorSubscribeCmd(SensorSubscribeCmdV3),
   SensorUnsubscribeCmd(SensorUnsubscribeCmdV3),
+}
+
+impl_message_enum_traits!(ButtplugClientMessageV3 {
+  RequestServerInfo,
+  Ping,
+  StartScanning,
+  StopScanning,
+  RequestDeviceList,
+  StopAllDevices,
+  VibrateCmd,
+  LinearCmd,
+  RotateCmd,
+  StopDeviceCmd,
+  ScalarCmd,
+  SensorReadCmd,
+  SensorSubscribeCmd,
+  SensorUnsubscribeCmd,
+});
+impl ButtplugMessageFinalizer for ButtplugClientMessageV3 {
 }
 
 // For v2 to v3, all deprecations should be treated as conversions, but will require current
@@ -113,15 +120,7 @@ impl TryFrom<ButtplugClientMessageV2> for ButtplugClientMessageV3 {
 }
 
 /// Represents all server-to-client messages in v3 of the Buttplug Spec
-#[derive(
-  Debug,
-  Clone,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  FromSpecificButtplugMessage,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, Clone, derive_more::From, Serialize, Deserialize)]
 pub enum ButtplugServerMessageV3 {
   // Status messages
   Ok(OkV0),
@@ -137,6 +136,18 @@ pub enum ButtplugServerMessageV3 {
   SensorReading(SensorReadingV3),
 }
 
+impl_message_enum_traits!(ButtplugServerMessageV3 {
+  Ok,
+  Error,
+  ServerInfo,
+  DeviceList,
+  DeviceAdded,
+  DeviceRemoved,
+  ScanningFinished,
+  SensorReading,
+});
+
+// Custom finalize implementation - DeviceAdded and DeviceList need special handling
 impl ButtplugMessageFinalizer for ButtplugServerMessageV3 {
   fn finalize(&mut self) {
     match self {

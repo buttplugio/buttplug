@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -9,7 +9,7 @@
 
 use crate::{
   errors::*,
-  message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
+  message::{ButtplugMessage, ButtplugMessageValidator},
 };
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
@@ -32,17 +32,7 @@ pub enum ErrorCode {
 // Error is one of the few things that can have either a System ID or message
 // ID, so there's really not much to check here. Use the default trait impl for
 // ButtplugMessageValidator.
-#[derive(
-  Debug,
-  Clone,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
-  Getters,
-  CopyGetters,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, Clone, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct ErrorV0 {
   /// Message Id, used for matching message pairs in remote connection instances.
   #[serde(rename = "Id")]
@@ -57,6 +47,18 @@ pub struct ErrorV0 {
   error_message: String,
   #[serde(skip)]
   original_error: Option<ButtplugError>,
+}
+
+impl ButtplugMessage for ErrorV0 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugMessageValidator for ErrorV0 {
 }
 
 impl PartialEq for ErrorV0 {
@@ -83,11 +85,8 @@ impl ErrorV0 {
   }
 
   pub fn original_error(&self) -> ButtplugError {
-    if self.original_error.is_some() {
-      self
-        .original_error
-        .clone()
-        .expect("Already checked that it's valid.")
+    if let Some(ref original_error) = self.original_error {
+      original_error.clone()
     } else {
       // Try deserializing what's in the error_message field
       if let Ok(deserialized_msg) = serde_json::from_str(&self.error_message) {
@@ -109,7 +108,9 @@ impl From<ButtplugError> for ErrorV0 {
       ButtplugError::ButtplugHandshakeError { .. } => ErrorCode::ErrorHandshake,
       ButtplugError::ButtplugUnknownError { .. } => ErrorCode::ErrorUnknown,
     };
-    let msg = serde_json::to_string(&error).expect("All buttplug errors are serializable");
+    // SAFETY: ButtplugError derives Serialize and contains only serializable fields.
+    // Serialization failure would indicate a bug in the type definition, not a runtime condition.
+    let msg = serde_json::to_string(&error).expect("ButtplugError derives Serialize");
     ErrorV0::new(code, &msg, Some(error))
   }
 }
@@ -130,19 +131,4 @@ mod test {
     let js = serde_json::to_string(&error).expect("Infallible serialization.");
     assert_eq!(ERROR_STR, js);
   }
-  /*
-  #[test]
-  fn test_error_deserialize() {
-    let union: ButtplugServerMessageCurrent =
-      serde_json::from_str(ERROR_STR).expect("Infallible deserialization");
-    assert_eq!(
-      ButtplugServerMessageCurrent::Error(ErrorV0::new(
-        ErrorCode::ErrorHandshake,
-        "Test Error",
-        None
-      )),
-      union
-    );
-  }
-  */
 }

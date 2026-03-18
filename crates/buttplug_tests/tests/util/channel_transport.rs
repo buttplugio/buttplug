@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -29,7 +29,6 @@ use buttplug_core::{
     ServerInfoV4,
     serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
   },
-  util::async_manager,
 };
 use buttplug_server::{
   connector::ButtplugRemoteServerConnector,
@@ -80,7 +79,7 @@ impl ButtplugConnectorTransport for ChannelTransport {
     let disconnect_notifier = self.disconnect_notifier.clone();
     let outside_sender = self.outside_sender.clone();
     let outside_receiver_mutex = self.outside_receiver.clone();
-    async_manager::spawn(async move {
+    buttplug_core::spawn!(async move {
       let mut outside_receiver = outside_receiver_mutex
         .lock()
         .await
@@ -191,7 +190,7 @@ impl ChannelClientTestHelper {
       .expect("Test, assuming infallible");
     let finish_notifier = Arc::new(Notify::new());
     let finish_notifier_clone = finish_notifier.clone();
-    async_manager::spawn(async move {
+    buttplug_core::spawn!(async move {
       if let Err(e) = client_clone.connect(connector).await {
         assert!(false, "Error connecting to client: {:?}", e);
       }

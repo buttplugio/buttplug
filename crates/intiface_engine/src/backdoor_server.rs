@@ -1,3 +1,10 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
 use buttplug_core::{
   connector::transport::stream::ButtplugStreamTransport,
   message::serializer::ButtplugSerializedMessage,
@@ -37,6 +44,7 @@ impl BackdoorServer {
     let (s_in, r_in) = mpsc::channel(255);
     let (s_stream, _) = broadcast::channel(255);
     tokio::spawn(async move {
+      // Backdoor server can always use latest spec.
       if let Err(e) = server
         .start(ButtplugRemoteServerConnector::<
           _,

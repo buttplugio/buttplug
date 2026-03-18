@@ -1,11 +1,11 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use getset::{Getters, Setters};
+use getset::{CopyGetters, Getters, Setters};
 use serde::{Deserialize, Serialize};
 
 use crate::message::{v2::ClientDeviceMessageAttributesV2, v3::ClientDeviceMessageAttributesV3};
@@ -32,24 +32,29 @@ pub struct ClientDeviceMessageAttributesV1 {
 
   // StopDeviceCmd always exists
   #[getset(get = "pub")]
+  #[serde(rename = "StopDeviceCmd")]
   pub(in crate::message) stop_device_cmd: NullDeviceMessageAttributesV1,
 
   // Obsolete commands are only added post-serialization
   #[getset(get = "pub")]
+  #[serde(rename = "SingleMotorVibrateCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
   pub(in crate::message) single_motor_vibrate_cmd: Option<NullDeviceMessageAttributesV1>,
   #[getset(get = "pub")]
+  #[serde(rename = "FleshlightLaunchFW12Cmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
   pub(in crate::message) fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributesV1>,
   #[getset(get = "pub")]
+  #[serde(rename = "VorzeA10CycloneCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
   pub(in crate::message) vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributesV1>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Getters, Setters)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, CopyGetters, Setters)]
 pub struct GenericDeviceMessageAttributesV1 {
+  #[getset(get_copy = "pub")]
   #[serde(rename = "FeatureCount")]
-  feature_count: u32,
+  pub(in crate::message) feature_count: u32,
 }
 
 impl GenericDeviceMessageAttributesV1 {

@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -11,7 +11,7 @@ use btleplug::{
   api::{Central, CentralEvent, Characteristic, Peripheral, ValueNotification, WriteType},
   platform::Adapter,
 };
-use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
+use buttplug_core::{errors::ButtplugDeviceError};
 use buttplug_server::device::hardware::{
   Hardware,
   HardwareConnector,
@@ -243,7 +243,7 @@ impl<T: Peripheral + 'static> BtlePlugHardware<T> {
     let event_stream_clone = event_stream.clone();
     let address = device.id();
     let name_clone = name.to_owned();
-    async_manager::spawn(async move {
+    buttplug_core::spawn!("BtlePlugHardare notification loop", async move {
       let mut error_notification = false;
       loop {
         select! {
@@ -517,7 +517,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
 impl<T: Peripheral> Drop for BtlePlugHardware<T> {
   fn drop(&mut self) {
     let disconnect_fut = self.disconnect();
-    async_manager::spawn(async move {
+    buttplug_core::spawn!("BtlePlugHardware Drop", async move {
       if let Err(e) = disconnect_fut.await {
         error!("Error disconnecting btleplug device: {:?}", e);
       }

@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -15,7 +15,7 @@ use crate::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{InputData, InputReadingV4, InputTypeData},
+  message::{InputReadingV4, InputTypeReading, InputValue},
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server_device_config::Endpoint;
@@ -64,7 +64,7 @@ impl ProtocolHandler for KiirooV21 {
     ])
   }
 
-  fn handle_position_with_duration_cmd(
+  fn handle_hw_position_with_duration_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,
@@ -114,7 +114,7 @@ impl ProtocolHandler for KiirooV21 {
       let battery_reading = InputReadingV4::new(
         device_index,
         feature_index,
-        InputTypeData::Battery(InputData::new(battery_level)),
+        InputTypeReading::Battery(InputValue::new(battery_level)),
       );
       debug!("Got battery reading: {}", battery_level);
       Ok(battery_reading)
@@ -162,7 +162,7 @@ impl ProtocolHandler for KiirooV21 {
         let mut hardware_stream = device.event_stream();
         let stream_sensors = sensors.clone();
         // If we subscribe successfully, we need to set up our event handler.
-        async_manager::spawn(async move {
+        buttplug_core::spawn!("KiirooV21EventHandler", async move {
           while let Ok(info) = hardware_stream.recv().await {
             // If we have no receivers, quit.
             if sender.receiver_count() == 0 || stream_sensors.is_empty() {

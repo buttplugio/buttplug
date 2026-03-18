@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -12,7 +12,7 @@ use crate::device::{
 use buttplug_core::{
   errors::ButtplugDeviceError,
   message::InputReadingV4,
-  util::{async_manager, sleep},
+  util::async_manager,
 };
 use buttplug_server_device_config::Endpoint;
 use futures::future::BoxFuture;
@@ -29,16 +29,20 @@ const LOVENSE_STROKER_PROTOCOL_UUID: Uuid = uuid!("a97fc354-5561-459a-bc62-110d7
 
 pub struct LovenseStroker {
   linear_info: Arc<(AtomicU32, AtomicU32)>,
+  need_range_zerod: bool,
 }
 
 impl LovenseStroker {
-  pub fn new(hardware: Arc<Hardware>) -> Self {
+  pub fn new(hardware: Arc<Hardware>, need_range_zerod: bool) -> Self {
     let linear_info = Arc::new((AtomicU32::new(0), AtomicU32::new(0)));
-    async_manager::spawn(update_linear_movement(
+    buttplug_core::spawn!("LovenseStroker update linear movement", update_linear_movement(
       hardware.clone(),
       linear_info.clone(),
     ));
-    Self { linear_info }
+    Self {
+      linear_info,
+      need_range_zerod,
+    }
   }
 }
 
@@ -47,7 +51,7 @@ impl ProtocolHandler for LovenseStroker {
     super::keepalive_strategy()
   }
 
-  fn handle_position_with_duration_cmd(
+  fn handle_hw_position_with_duration_cmd(
     &self,
     _feature_index: u32,
     _feature_id: Uuid,
@@ -67,6 +71,33 @@ impl ProtocolHandler for LovenseStroker {
     feature_id: Uuid,
   ) -> BoxFuture<'static, Result<InputReadingV4, ButtplugDeviceError>> {
     super::handle_battery_level_cmd(device_index, device, feature_index, feature_id)
+  }
+
+  fn handle_output_oscillate_cmd(
+    &self,
+    _feature_index: u32,
+    feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        format!(
+          "Mply:{}:{};",
+          speed,
+          if speed == 0 && self.need_range_zerod {
+            0
+          } else {
+            20
+          }
+        )
+        .as_bytes()
+        .to_vec(),
+        false,
+      )
+      .into(),
+    ])
   }
 }
 
@@ -88,7 +119,7 @@ async fn update_linear_movement(device: Arc<Hardware>, linear_info: Arc<(AtomicU
 
     // If we aren't going anywhere, just pause then restart
     if current_position == last_goal_position {
-      sleep(Duration::from_millis(100)).await;
+      async_manager::sleep(Duration::from_millis(100)).await;
       continue;
     }
 
@@ -113,6 +144,6 @@ async fn update_linear_movement(device: Arc<Hardware>, linear_info: Arc<(AtomicU
     if device.write_value(&hardware_cmd).await.is_err() {
       return;
     }
-    sleep(Duration::from_millis(100)).await;
+    async_manager::sleep(Duration::from_millis(100)).await;
   }
 }

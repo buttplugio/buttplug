@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -12,7 +12,7 @@ use crate::{
   ButtplugServerError,
   ButtplugServerResultFuture,
   device::{
-    ServerDevice,
+    DeviceHandle,
     hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerBuilder},
     server_device_manager_event_loop::ServerDeviceManagerEventLoop,
   },
@@ -27,8 +27,15 @@ use crate::{
 };
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
-  message::{self, ButtplugDeviceMessage, ButtplugMessage, ButtplugServerMessageV4, DeviceListV4},
-  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+  message::{
+    self,
+    ButtplugDeviceMessage,
+    ButtplugMessage,
+    ButtplugServerMessageV4,
+    DeviceListV4,
+    StopCmdV4,
+  },
+  util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server_device_config::{DeviceConfigurationManager, UserDeviceIdentifier};
 use dashmap::DashMap;
@@ -38,7 +45,7 @@ use futures::{
 };
 use getset::Getters;
 use std::{
-  collections::HashMap,
+  collections::BTreeMap,
   convert::TryFrom,
   sync::{
     Arc,
@@ -59,6 +66,7 @@ pub(super) enum DeviceManagerCommand {
 pub struct ServerDeviceInfo {
   identifier: UserDeviceIdentifier,
   display_name: Option<String>,
+  needs_keepalive: bool,
 }
 
 pub struct ServerDeviceManagerBuilder {
@@ -151,7 +159,7 @@ impl ServerDeviceManagerBuilder {
       device_event_receiver,
       device_command_receiver,
     );
-    async_manager::spawn(async move {
+    buttplug_core::spawn!("ServerDeviceManager event loop", async move {
       event_loop.run().await;
     });
     Ok(ServerDeviceManager {
@@ -170,7 +178,7 @@ pub struct ServerDeviceManager {
   #[getset(get = "pub")]
   device_configuration_manager: Arc<DeviceConfigurationManager>,
   #[getset(get = "pub(crate)")]
-  devices: Arc<DashMap<u32, Arc<ServerDevice>>>,
+  devices: Arc<DashMap<u32, DeviceHandle>>,
   device_command_sender: mpsc::Sender<DeviceManagerCommand>,
   loop_cancellation_token: CancellationToken,
   running: Arc<AtomicBool>,
@@ -214,15 +222,21 @@ impl ServerDeviceManager {
     .boxed()
   }
 
-  pub(crate) fn stop_all_devices(&self) -> ButtplugServerResultFuture {
+  pub(crate) fn stop_devices(&self, msg: &StopCmdV4) -> ButtplugServerResultFuture {
     let device_map = self.devices.clone();
     // TODO This could use some error reporting.
+    let msg = msg.clone();
     async move {
       let fut_vec: Vec<_> = device_map
         .iter()
         .map(|dev| {
           let device = dev.value();
-          device.parse_message(message::StopDeviceCmdV0::new(1).into())
+          device.stop(&message::StopCmdV4::new(
+            None,
+            None,
+            msg.inputs(),
+            msg.outputs(),
+          ))
         })
         .collect();
       future::join_all(fut_vec).await;
@@ -265,7 +279,7 @@ impl ServerDeviceManager {
         device_list.set_id(msg.id());
         future::ready(Ok(device_list.into())).boxed()
       }
-      ButtplugDeviceManagerMessageUnion::StopAllDevices(_) => self.stop_all_devices(),
+      ButtplugDeviceManagerMessageUnion::StopCmd(m) => self.stop_devices(&m),
       ButtplugDeviceManagerMessageUnion::StartScanning(_) => self.start_scanning(),
       ButtplugDeviceManagerMessageUnion::StopScanning(_) => self.stop_scanning(),
     }
@@ -286,7 +300,7 @@ impl ServerDeviceManager {
     }
   }
 
-  pub(crate) fn feature_map(&self) -> HashMap<u32, ServerDeviceAttributes> {
+  pub(crate) fn feature_map(&self) -> BTreeMap<u32, ServerDeviceAttributes> {
     self
       .devices()
       .iter()
@@ -298,6 +312,7 @@ impl ServerDeviceManager {
     self.devices.get(&index).map(|device| ServerDeviceInfo {
       identifier: device.value().identifier().clone(),
       display_name: device.value().definition().display_name().clone(),
+      needs_keepalive: device.value().needs_keepalive(),
     })
   }
 
@@ -312,7 +327,7 @@ impl ServerDeviceManager {
     // again. Otherwise we can have all sorts of ownership weirdness.
     self.running.store(false, Ordering::Relaxed);
     let stop_scanning = self.stop_scanning();
-    let stop_devices = self.stop_all_devices();
+    let stop_devices = self.stop_devices(&StopCmdV4::default());
     let token = self.loop_cancellation_token.clone();
     async move {
       // Force stop scanning, otherwise we can disconnect and instantly try to reconnect while

@@ -1,12 +1,12 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
 use super::btleplug_adapter_task::{BtleplugAdapterCommand, BtleplugAdapterTask};
-use buttplug_core::{ButtplugResultFuture, errors::ButtplugDeviceError, util::async_manager};
+use buttplug_core::{ButtplugResultFuture, errors::ButtplugDeviceError};
 use buttplug_server::device::hardware::communication::{
   HardwareCommunicationManager,
   HardwareCommunicationManagerBuilder,
@@ -57,7 +57,7 @@ impl BtlePlugCommunicationManager {
     let (sender, receiver) = channel(256);
     let adapter_connected = Arc::new(AtomicBool::new(false));
     let adapter_connected_clone = adapter_connected.clone();
-    async_manager::spawn(async move {
+    buttplug_core::spawn!("BtleplugAdapterTask", async move {
       let mut task = BtleplugAdapterTask::new(
         event_sender,
         receiver,

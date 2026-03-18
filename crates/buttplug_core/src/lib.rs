@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -12,8 +12,6 @@ pub mod errors;
 pub mod message;
 pub mod util;
 
-#[macro_use]
-extern crate buttplug_derive;
 #[macro_use]
 extern crate strum_macros;
 

@@ -1,24 +1,25 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::message::v1::{
-  ButtplugClientMessageV1,
-  ButtplugServerMessageV1,
-  LinearCmdV1,
-  RequestServerInfoV1,
-  RotateCmdV1,
-  VibrateCmdV1,
+use crate::message::{
+  StopAllDevicesV0,
+  StopDeviceCmdV0,
+  v1::{
+    ButtplugClientMessageV1,
+    ButtplugServerMessageV1,
+    LinearCmdV1,
+    RequestServerInfoV1,
+    RotateCmdV1,
+    VibrateCmdV1,
+  },
 };
 use buttplug_core::{
   errors::{ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-    ButtplugMessageValidator,
     DeviceRemovedV0,
     ErrorV0,
     OkV0,
@@ -26,8 +27,6 @@ use buttplug_core::{
     RequestDeviceListV0,
     ScanningFinishedV0,
     StartScanningV0,
-    StopAllDevicesV0,
-    StopDeviceCmdV0,
     StopScanningV0,
   },
 };
@@ -36,17 +35,7 @@ use serde::{Deserialize, Serialize};
 use super::{BatteryLevelCmdV2, BatteryLevelReadingV2, DeviceAddedV2, DeviceListV2, ServerInfoV2};
 
 /// Represents all client-to-server messages in v2 of the Buttplug Spec
-#[derive(
-  Debug,
-  Clone,
-  PartialEq,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
-  FromSpecificButtplugMessage,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, Clone, PartialEq, derive_more::From, Serialize, Deserialize)]
 pub enum ButtplugClientMessageV2 {
   // Handshake messages
   RequestServerInfo(RequestServerInfoV1),
@@ -63,6 +52,22 @@ pub enum ButtplugClientMessageV2 {
   StopDeviceCmd(StopDeviceCmdV0),
   // Sensor commands
   BatteryLevelCmd(BatteryLevelCmdV2),
+}
+
+impl_message_enum_traits!(ButtplugClientMessageV2 {
+  RequestServerInfo,
+  Ping,
+  StartScanning,
+  StopScanning,
+  RequestDeviceList,
+  StopAllDevices,
+  VibrateCmd,
+  LinearCmd,
+  RotateCmd,
+  StopDeviceCmd,
+  BatteryLevelCmd,
+});
+impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugClientMessageV2 {
 }
 
 // For v1 to v2, several messages were deprecated. Throw errors when trying to convert those.
@@ -106,17 +111,7 @@ impl TryFrom<ButtplugClientMessageV1> for ButtplugClientMessageV2 {
 }
 
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
-#[derive(
-  Debug,
-  Clone,
-  PartialEq,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
-  FromSpecificButtplugMessage,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, Clone, PartialEq, derive_more::From, Serialize, Deserialize)]
 pub enum ButtplugServerMessageV2 {
   // Status messages
   Ok(OkV0),
@@ -130,6 +125,19 @@ pub enum ButtplugServerMessageV2 {
   ScanningFinished(ScanningFinishedV0),
   // Sensor commands
   BatteryLevelReading(BatteryLevelReadingV2),
+}
+
+impl_message_enum_traits!(ButtplugServerMessageV2 {
+  Ok,
+  Error,
+  ServerInfo,
+  DeviceList,
+  DeviceAdded,
+  DeviceRemoved,
+  ScanningFinished,
+  BatteryLevelReading,
+});
+impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugServerMessageV2 {
 }
 
 impl From<ButtplugServerMessageV2> for ButtplugServerMessageV1 {

@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -8,7 +8,6 @@
 use buttplug_core::message::{
   ButtplugDeviceMessage,
   ButtplugMessage,
-  ButtplugMessageFinalizer,
   ButtplugMessageValidator,
   InputType,
 };
@@ -17,19 +16,7 @@ use serde::{Deserialize, Serialize};
 
 // This message can have an Id of 0, as it can be emitted as part of a
 // subscription and won't have a matching task Id in that case.
-#[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
-  Clone,
-  Getters,
-  CopyGetters,
-  PartialEq,
-  Eq,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, Clone, Getters, CopyGetters, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SensorReadingV3 {
   #[serde(rename = "Id")]
   id: u32,
@@ -46,6 +33,9 @@ pub struct SensorReadingV3 {
   data: Vec<i32>,
 }
 
+impl ButtplugMessageValidator for SensorReadingV3 {
+}
+
 impl SensorReadingV3 {
   pub fn new(device_index: u32, sensor_index: u32, sensor_type: InputType, data: Vec<i32>) -> Self {
     Self {
@@ -55,5 +45,23 @@ impl SensorReadingV3 {
       sensor_type,
       data,
     }
+  }
+}
+
+impl ButtplugMessage for SensorReadingV3 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugDeviceMessage for SensorReadingV3 {
+  fn device_index(&self) -> u32 {
+    self.device_index
+  }
+  fn set_device_index(&mut self, device_index: u32) {
+    self.device_index = device_index;
   }
 }

@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -18,7 +18,6 @@ use crate::{
     ButtplugMessage,
     serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
   },
-  util::async_manager,
 };
 use futures::{FutureExt, future::BoxFuture, select};
 use log::*;
@@ -221,11 +220,7 @@ where
     &mut self,
     connector_incoming_sender: Sender<InboundMessageType>,
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
-    if self.transport.is_some() {
-      let transport = self
-        .transport
-        .take()
-        .expect("Already checked that this would be a valid take().");
+    if let Some(transport) = self.transport.take() {
       let (connector_outgoing_sender, connector_outgoing_receiver) = channel(256);
       self.event_loop_sender = Some(connector_outgoing_sender);
       async move {
@@ -238,7 +233,7 @@ where
           // If we connect successfully, we get back the channel from the transport
           // to send outgoing messages and receieve incoming events, all serialized.
           Ok(()) => {
-            async_manager::spawn(async move {
+            crate::spawn!("ButtplugRemoteConnector event loop", async move {
               remote_connector_event_loop::<
                 TransportType,
                 SerializerType,

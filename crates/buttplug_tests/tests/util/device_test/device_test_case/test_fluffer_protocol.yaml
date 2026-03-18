@@ -1,0 +1,36 @@
+devices:
+  - identifier: 
+      name: "fake_name_as_we_must_match_fluffer_manufacturer_data"
+    expected_name: "Fluffer Device"
+device_init:
+  # Initialization
+  - !Commands
+    device_index: 0
+    commands:
+      - !Subscribe
+        endpoint: rx
+device_commands:
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 1.0
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x34, 0x86, 0x9a, 0x67, 0x7b, 0x8e, 0x6f, 0xa9, 0xe9, 0x2b, 0x53, 0xf8, 0x37, 0xc5, 0x25, 0x3c]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [ 0xd3, 0xaf, 0x8c, 0xb6, 0xb5, 0x05, 0x3c, 0x01, 0x7e, 0xc0, 0xd3, 0x7f, 0x5b, 0x06, 0x44, 0x21 ]
+            write_with_response: false

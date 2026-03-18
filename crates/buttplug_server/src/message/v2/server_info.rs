@@ -1,35 +1,18 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
 use buttplug_core::{
   errors::ButtplugMessageError,
-  message::{
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-    ButtplugMessageSpecVersion,
-    ButtplugMessageValidator,
-    ServerInfoV4,
-  },
+  message::{ButtplugMessage, ButtplugMessageSpecVersion, ButtplugMessageValidator, ServerInfoV4},
 };
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 
-#[derive(
-  Debug,
-  ButtplugMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Eq,
-  Clone,
-  Getters,
-  CopyGetters,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, PartialEq, Eq, Clone, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct ServerInfoV2 {
   #[serde(rename = "Id")]
   id: u32,
@@ -42,6 +25,15 @@ pub struct ServerInfoV2 {
   #[serde(rename = "ServerName")]
   #[getset(get = "pub")]
   server_name: String,
+}
+
+impl ButtplugMessage for ServerInfoV2 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
 }
 
 impl ServerInfoV2 {

@@ -1,33 +1,37 @@
+---
 defaults:
   name: Kiiroo PowerShot
   features:
-    - id: 8829c78b-420c-42e0-bc3e-280f84c89362
-      output:
-        vibrate:
-          value:
-            - 0
-            - 100
-    - id: 019e23e5-bcba-41c8-913d-03a7da63feee
-      output:
-        vibrate:
-          value:
-            - 0
-            - 100
-    - description: Battery Level
-      id: eba92a5d-4284-4170-b5e9-3e0700e4529e
-      input:
-        battery:
-          value_range:
-            - - 0
-              - 100
-          input_commands:
-            - Read
+  - id: 8829c78b-420c-42e0-bc3e-280f84c89362
+    output:
+      vibrate:
+        value:
+        - 0
+        - 100
+    index: 0
+  - id: '019e23e5-bcba-41c8-913d-03a7da63feee'
+    output:
+      vibrate:
+        value:
+        - 0
+        - 100
+    index: 1
+  - description: Battery Level
+    id: eba92a5d-4284-4170-b5e9-3e0700e4529e
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 2
   id: 1929575e-bc47-4db8-bee2-f9fc60c438b5
 communication:
-  - btle:
-      names:
-        - PowerShot
-      services:
-        00001400-0000-1000-8000-00805f9b34fb:
-          tx: 00001801-0000-1000-8000-00805f9b34fb
-          rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb
+- btle:
+    names:
+    - PowerShot
+    services:
+      00001400-0000-1000-8000-00805f9b34fb:
+        tx: '00001801-0000-1000-8000-00805f9b34fb'
+        rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb

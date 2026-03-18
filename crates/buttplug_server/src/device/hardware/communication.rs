@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -8,7 +8,7 @@
 use crate::device::hardware::HardwareConnector;
 use async_trait::async_trait;
 use buttplug_core::{
-  util::{async_manager, sleep},
+  util::async_manager,
   {ButtplugResultFuture, errors::ButtplugDeviceError},
 };
 use futures::future::{self, FutureExt};
@@ -95,14 +95,14 @@ impl<T: TimedRetryCommunicationManagerImpl> HardwareCommunicationManager
     self.cancellation_token = Some(token);
     let duration = self.comm_manager.rescan_wait_duration();
     async move {
-      async_manager::spawn(async move {
+      buttplug_core::spawn!("TimedDeviceCommunicationManager scanning", async move {
         loop {
           if let Err(err) = comm_manager.scan().await {
             error!("Timed Device Communication Manager Failure: {}", err);
             break;
           }
           tokio::select! {
-            _ = sleep(duration) => continue,
+            _ = async_manager::sleep(duration) => continue,
             _ = child_token.cancelled() => break,
           }
         }

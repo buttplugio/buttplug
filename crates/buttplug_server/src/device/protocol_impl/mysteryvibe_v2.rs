@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -51,7 +51,7 @@ impl ProtocolInitializer for MysteryVibeV2Initializer {
     hardware.write_value(&msg).await?;
     let vibrator_count = def
       .features()
-      .iter()
+      .values()
       .filter(|x| x.output().is_some())
       .count();
     Ok(Arc::new(MysteryVibe::new(vibrator_count as u8)))

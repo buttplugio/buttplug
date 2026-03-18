@@ -1,3 +1,10 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
 pub mod client;
 pub mod client_event_loop;
 pub mod client_message_sorter;
@@ -14,7 +21,6 @@ use crate::util::{
 use client::{ButtplugClient, ButtplugClientDevice, ButtplugClientEvent};
 use device::{LinearCommand, RotateCommand, ScalarCommand, ScalarValueCommand};
 
-use buttplug_core::util::async_manager;
 use buttplug_server::{ButtplugServer, ButtplugServerBuilder, device::ServerDeviceManagerBuilder};
 use buttplug_server_device_config::load_protocol_configs;
 use tokio::sync::Notify;
@@ -24,6 +30,7 @@ use super::super::{
   DeviceTestCase,
   TestClientCommand,
   TestCommand,
+  filter_commands,
 };
 use futures::StreamExt;
 use log::*;
@@ -82,7 +89,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
         // their notification endpoint. This is a mess but it does the job.
         let device = device.clone();
         let expected_power = *expected_power;
-        async_manager::spawn(async move {
+        buttplug_core::spawn!(async move {
           let battery_level = device.battery_level().await.unwrap();
           assert_eq!(battery_level, expected_power);
         });
@@ -157,11 +164,11 @@ fn build_server(test_case: &DeviceTestCase) -> (ButtplugServer, Vec<TestDeviceCh
 pub async fn run_embedded_test_case(test_case: &DeviceTestCase) {
   let (server, device_channels) = build_server(test_case);
   // Connect client
-  let client = ButtplugClient::new("Test Client");
+  let (client, receiver) = ButtplugClient::new("Test Client");
   let mut in_process_connector_builder = ButtplugInProcessClientConnectorBuilder::default();
   in_process_connector_builder.server(server);
   client
-    .connect(in_process_connector_builder.finish())
+    .connect(in_process_connector_builder.finish(), receiver)
     .await
     .expect("Test client couldn't connect to embedded process");
   run_test_case(client, device_channels, test_case).await;
@@ -174,7 +181,7 @@ pub async fn run_json_test_case(test_case: &DeviceTestCase) {
 
   let (server, device_channels) = build_server(test_case);
   let remote_server = ButtplugTestServer::new(server);
-  async_manager::spawn(async move {
+  buttplug_core::spawn!(async move {
     remote_server
       .start(server_connector)
       .await
@@ -182,9 +189,9 @@ pub async fn run_json_test_case(test_case: &DeviceTestCase) {
   });
 
   // Connect client
-  let client = ButtplugClient::new("Test Client");
+  let (client, receiver) = ButtplugClient::new("Test Client");
   client
-    .connect(client_connector)
+    .connect(client_connector, receiver)
     .await
     .expect("Test client couldn't connect to embedded process");
   run_test_case(client, device_channels, test_case).await;
@@ -204,7 +211,7 @@ pub async fn run_test_case(
 
   if let Some(device_init) = &test_case.device_init {
     // Parse send message into client calls, receives into response checks
-    for command in device_init {
+    for command in filter_commands(device_init, 3) {
       match command {
         TestCommand::Messages {
           device_index: _,
@@ -242,6 +249,7 @@ pub async fn run_test_case(
             device_sender.send(event.clone()).await.unwrap();
           }
         }
+        TestCommand::VersionGated { .. } => unreachable!("filter_commands should not yield VersionGated"),
       }
     }
   }
@@ -275,7 +283,7 @@ pub async fn run_test_case(
   }
 
   // Parse send message into client calls, receives into response checks
-  for command in &test_case.device_commands {
+  for command in filter_commands(&test_case.device_commands, 3) {
     match command {
       TestCommand::Messages {
         device_index,
@@ -315,6 +323,7 @@ pub async fn run_test_case(
           device_sender.send(event.clone()).await.unwrap();
         }
       }
+      TestCommand::VersionGated { .. } => unreachable!("filter_commands should not yield VersionGated"),
     }
   }
 }

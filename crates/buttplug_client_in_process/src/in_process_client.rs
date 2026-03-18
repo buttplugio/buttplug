@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -33,7 +33,7 @@ use buttplug_server_device_config::DeviceConfigurationManagerBuilder;
 ///   For instance, we only support XInput on windows.
 /// - Did the developers add a new Device CommunicationManager type and forget
 ///   to add it to this method? _It's more likely than you think!_ [File a
-///   bug](https://github.com/buttplugio/buttplug-rs/issues).
+///   bug](https://github.com/buttplugio/buttplug/issues).
 ///
 /// # Errors
 ///
@@ -69,20 +69,6 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
   {
     use buttplug_server_hwmgr_serial::SerialPortCommunicationManagerBuilder;
     device_manager_builder.comm_manager(SerialPortCommunicationManagerBuilder::default());
-  }
-  #[cfg(feature = "lovense-connect-service-manager")]
-  {
-    use buttplug_server_hwmgr_lovense_connect::LovenseConnectServiceCommunicationManagerBuilder;
-    device_manager_builder
-      .comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default());
-  }
-  #[cfg(all(
-    feature = "lovense-dongle-manager",
-    any(target_os = "windows", target_os = "macos", target_os = "linux")
-  ))]
-  {
-    use buttplug_server_hwmgr_lovense_dongle::LovenseHIDDongleCommunicationManagerBuilder;
-    device_manager_builder.comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default());
   }
   #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
   {

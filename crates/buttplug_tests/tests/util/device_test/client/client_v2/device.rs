@@ -1,10 +1,9 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2020 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
-
 //! Representation and management of devices connected to the server.
 
 use super::{
@@ -12,14 +11,14 @@ use super::{
     ButtplugClientError,
     ButtplugClientMessageFuturePair,
     ButtplugClientResultFuture,
-    ButtplugServerMessageFuture,
+    ButtplugServerMessageSender,
   },
   client_event_loop::ButtplugClientRequest,
 };
 use buttplug_core::{
   connector::ButtplugConnectorError,
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-  message::{ButtplugMessage, StopDeviceCmdV0},
+  message::ButtplugMessage,
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server::message::{
@@ -32,10 +31,12 @@ use buttplug_server::message::{
   LinearCmdV1,
   RotateCmdV1,
   RotationSubcommandV1,
+  StopDeviceCmdV0,
   VectorSubcommandV1,
   VibrateCmdV1,
   VibrateSubcommandV1,
 };
+use futures::channel::oneshot;
 use futures::{Stream, future};
 use getset::Getters;
 use log::*;
@@ -47,8 +48,8 @@ use std::{
     atomic::{AtomicBool, Ordering},
   },
 };
-use tokio::sync::broadcast;
-use tracing_futures::Instrument;
+use tokio::sync::{broadcast, mpsc};
+use tracing::Instrument;
 
 /// Enum for messages going to a [ButtplugClientDevice] instance.
 #[derive(Clone, Debug)]
@@ -137,7 +138,7 @@ pub struct ButtplugClientDevice {
   /// [ButtplugClient][super::ButtplugClient]'s event loop, which will then send
   /// the message on to the [ButtplugServer][crate::server::ButtplugServer]
   /// through the connector.
-  event_loop_sender: broadcast::Sender<ButtplugClientRequest>,
+  event_loop_sender: mpsc::Sender<ButtplugClientRequest>,
   internal_event_sender: broadcast::Sender<ButtplugClientDeviceEvent>,
   /// True if this [ButtplugClientDevice] is currently connected to the
   /// [ButtplugServer][crate::server::ButtplugServer].
@@ -166,7 +167,7 @@ impl ButtplugClientDevice {
     name: &str,
     index: u32,
     allowed_messages: ClientDeviceMessageAttributesV2,
-    message_sender: broadcast::Sender<ButtplugClientRequest>,
+    message_sender: mpsc::Sender<ButtplugClientRequest>,
   ) -> Self {
     info!(
       "Creating client device {} with index {} and messages {:?}.",
@@ -189,7 +190,7 @@ impl ButtplugClientDevice {
 
   pub(super) fn new_from_device_info(
     info: &DeviceMessageInfoV2,
-    sender: broadcast::Sender<ButtplugClientRequest>,
+    sender: mpsc::Sender<ButtplugClientRequest>,
   ) -> Self {
     ButtplugClientDevice::new(
       info.device_name(),
@@ -228,17 +229,20 @@ impl ButtplugClientDevice {
             ButtplugError::from(ButtplugDeviceError::DeviceNotConnected(device_name)).into(),
           );
         }
-        let fut = ButtplugServerMessageFuture::default();
+        let (tx, rx) = oneshot::channel();
         message_sender
           .send(ButtplugClientRequest::Message(
-            ButtplugClientMessageFuturePair::new(msg.clone(), fut.get_state_clone()),
+            ButtplugClientMessageFuturePair::new(msg.clone(), tx),
           ))
+          .await
           .map_err(|_| {
             ButtplugClientError::ButtplugConnectorError(
               ButtplugConnectorError::ConnectorChannelClosed,
             )
           })?;
-        let msg = fut.await?;
+        let msg = rx
+          .await
+          .map_err(|_| ButtplugConnectorError::ConnectorChannelClosed)??;
         if let ButtplugServerMessageV2::Error(_err) = msg {
           Err(ButtplugError::from(_err).into())
         } else {

@@ -1,8 +1,8 @@
 devices:
-  - identifier: 
+  - identifier:
       name: "LVS-DoesntMatter"
     expected_name: "Lovense Max"
-device_init: 
+device_init:
   # Initialization
   - !Commands
       device_index: 0
@@ -24,13 +24,13 @@ device_init:
 device_commands:
   - !Messages
       device_index: 0
-      messages: 
+      messages:
         - !Vibrate
           - Index: 0
             Speed: 0.5
   - !Commands
       device_index: 0
-      commands: 
+      commands:
         - !Write
             endpoint: tx
             # "Vibrate:10;"
@@ -38,11 +38,11 @@ device_commands:
             write_with_response: false
   - !Messages
       device_index: 0
-      messages: 
-        - !Stop 
+      messages:
+        - !Stop
   - !Commands
       device_index: 0
-      commands: 
+      commands:
         - !Write
             endpoint: tx
             # "Vibrate:0;"
@@ -52,19 +52,22 @@ device_commands:
             endpoint: tx
             # "Air:Level:0;"
             data: [65, 105, 114, 58, 76, 101, 118, 101, 108, 58, 48, 59]
-            write_with_response: false              
-  - !Messages
-      device_index: 0
-      messages: 
-        - !Scalar
-          - Index: 1
-            Scalar: 0.5
-            ActuatorType: Constrict
-  - !Commands
-      device_index: 0
-      commands: 
-        - !Write
-            endpoint: tx
-            # "Air:Level:3;"
-            data: [65, 105, 114, 58, 76, 101, 118, 101, 108, 58, 50, 59]
             write_with_response: false
+  - !VersionGated
+      min_spec_version: 3
+      commands:
+        - !Messages
+            device_index: 0
+            messages:
+              - !Scalar
+                - Index: 1
+                  Scalar: 0.5
+                  ActuatorType: Constrict
+        - !Commands
+            device_index: 0
+            commands:
+              - !Write
+                  endpoint: tx
+                  # "Air:Level:3;"
+                  data: [65, 105, 114, 58, 76, 101, 118, 101, 108, 58, 50, 59]
+                  write_with_response: false

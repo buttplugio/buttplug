@@ -1,32 +1,18 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
 use buttplug_core::{
   errors::ButtplugMessageError,
-  message::{
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-    ButtplugMessageValidator,
-  },
+  message::{ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageValidator},
 };
 use getset::CopyGetters;
 use serde::{Deserialize, Serialize};
 
-#[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Clone,
-  CopyGetters,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, PartialEq, Clone, CopyGetters, Serialize, Deserialize)]
 pub struct SingleMotorVibrateCmdV0 {
   #[serde(rename = "Id")]
   id: u32,
@@ -44,6 +30,24 @@ impl SingleMotorVibrateCmdV0 {
       device_index,
       speed,
     }
+  }
+}
+
+impl ButtplugMessage for SingleMotorVibrateCmdV0 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugDeviceMessage for SingleMotorVibrateCmdV0 {
+  fn device_index(&self) -> u32 {
+    self.device_index
+  }
+  fn set_device_index(&mut self, device_index: u32) {
+    self.device_index = device_index;
   }
 }
 

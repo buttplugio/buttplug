@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -9,7 +9,6 @@ use crate::message::{
   ButtplugDeviceMessage,
   ButtplugMessage,
   ButtplugMessageError,
-  ButtplugMessageFinalizer,
   ButtplugMessageValidator,
   InputType,
 };
@@ -26,18 +25,7 @@ pub enum InputCommandType {
   Unsubscribe,
 }
 
-#[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Eq,
-  Clone,
-  Copy,
-  CopyGetters,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, CopyGetters, Serialize, Deserialize)]
 pub struct InputCmdV4 {
   #[serde(rename = "Id")]
   id: u32,
@@ -47,10 +35,10 @@ pub struct InputCmdV4 {
   #[serde(rename = "FeatureIndex")]
   feature_index: u32,
   #[getset(get_copy = "pub")]
-  #[serde(rename = "InputType")]
+  #[serde(rename = "Type")]
   input_type: InputType,
   #[getset(get_copy = "pub")]
-  #[serde(rename = "InputCommand")]
+  #[serde(rename = "Command")]
   input_command: InputCommandType,
 }
 
@@ -68,6 +56,24 @@ impl InputCmdV4 {
       input_type,
       input_command: input_command_type,
     }
+  }
+}
+
+impl ButtplugMessage for InputCmdV4 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugDeviceMessage for InputCmdV4 {
+  fn device_index(&self) -> u32 {
+    self.device_index
+  }
+  fn set_device_index(&mut self, device_index: u32) {
+    self.device_index = device_index;
   }
 }
 

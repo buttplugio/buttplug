@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -15,7 +15,6 @@ use buttplug_core::{
   message::{
     ButtplugDeviceMessage,
     ButtplugMessage,
-    ButtplugMessageFinalizer,
     ButtplugMessageValidator,
     InputCommandType,
     InputType,
@@ -24,18 +23,7 @@ use buttplug_core::{
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 
-#[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Eq,
-  Clone,
-  Getters,
-  CopyGetters,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, PartialEq, Eq, Clone, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct SensorReadCmdV3 {
   #[serde(rename = "Id")]
   id: u32,
@@ -60,6 +48,24 @@ impl SensorReadCmdV3 {
   }
 }
 
+impl ButtplugMessage for SensorReadCmdV3 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugDeviceMessage for SensorReadCmdV3 {
+  fn device_index(&self) -> u32 {
+    self.device_index
+  }
+  fn set_device_index(&mut self, device_index: u32) {
+    self.device_index = device_index;
+  }
+}
+
 impl ButtplugMessageValidator for SensorReadCmdV3 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
@@ -80,12 +86,12 @@ impl TryFromDeviceAttributes<SensorReadCmdV3> for CheckedInputCmdV4 {
     } else if let Some((feature_index, feature)) = features
       .features()
       .iter()
-      .enumerate()
       .find(|(_, p)| p.input().as_ref().is_some_and(|x| x.battery().is_some()))
     {
       Ok(CheckedInputCmdV4::new(
+        msg.id(),
         msg.device_index(),
-        feature_index as u32,
+        *feature_index,
         InputType::Battery,
         InputCommandType::Read,
         feature.id(),

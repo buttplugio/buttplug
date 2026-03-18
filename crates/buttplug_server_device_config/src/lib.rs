@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -182,4 +182,7 @@ pub enum ButtplugDeviceConfigError {
   InvalidOutput(OutputType),
   #[error("Float value {0} is not 0 < x < 1")]
   InvalidFloatConversion(f64),
+  /// Feature or device is missing required base_id for user config conversion
+  #[error("Feature or device is missing required base_id for user config conversion")]
+  MissingBaseId,
 }

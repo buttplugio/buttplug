@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -11,7 +11,6 @@ use crate::{
     ButtplugDeviceMessage,
     ButtplugMessage,
     ButtplugMessageError,
-    ButtplugMessageFinalizer,
     ButtplugMessageValidator,
     OutputType,
   },
@@ -34,16 +33,16 @@ impl OutputValue {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, CopyGetters)]
 #[getset(get_copy = "pub")]
-pub struct OutputPositionWithDuration {
-  #[serde(rename = "Position")]
-  position: u32,
+pub struct OutputHwPositionWithDuration {
+  #[serde(rename = "Value")]
+  value: u32,
   #[serde(rename = "Duration")]
   duration: u32,
 }
 
-impl OutputPositionWithDuration {
-  pub fn new(position: u32, duration: u32) -> Self {
-    Self { position, duration }
+impl OutputHwPositionWithDuration {
+  pub fn new(value: u32, duration: u32) -> Self {
+    Self { value, duration }
   }
 }
 
@@ -60,7 +59,7 @@ pub enum OutputCommand {
   // For instances where we specify a position to move to ASAP. Usually servos, probably for the
   // OSR-2/SR-6.
   Position(OutputValue),
-  PositionWithDuration(OutputPositionWithDuration),
+  HwPositionWithDuration(OutputHwPositionWithDuration),
 }
 
 impl OutputCommand {
@@ -73,8 +72,8 @@ impl OutputCommand {
       | OutputCommand::Oscillate(x)
       | OutputCommand::Position(x)
       | OutputCommand::Rotate(x)
-      | OutputCommand::Vibrate(x) => x.value(),
-      OutputCommand::PositionWithDuration(x) => x.position() as i32,
+      | OutputCommand::Vibrate(x) => x.value() as i32,
+      OutputCommand::HwPositionWithDuration(x) => x.value() as i32,
     }
   }
 
@@ -88,7 +87,7 @@ impl OutputCommand {
       | OutputCommand::Position(x)
       | OutputCommand::Rotate(x)
       | OutputCommand::Vibrate(x) => x.value = value,
-      OutputCommand::PositionWithDuration(x) => x.position = value as u32,
+      OutputCommand::HwPositionWithDuration(x) => x.value = value as u32,
     }
   }
 
@@ -101,7 +100,7 @@ impl OutputCommand {
       Self::Spray(_) => OutputType::Spray,
       Self::Led(_) => OutputType::Led,
       Self::Position(_) => OutputType::Position,
-      Self::PositionWithDuration(_) => OutputType::PositionWithDuration,
+      Self::HwPositionWithDuration(_) => OutputType::HwPositionWithDuration,
       Self::Temperature(_) => OutputType::Temperature,
     }
   }
@@ -123,16 +122,7 @@ impl OutputCommand {
   }
 }
 
-#[derive(
-  Debug,
-  ButtplugDeviceMessage,
-  ButtplugMessageFinalizer,
-  PartialEq,
-  Clone,
-  CopyGetters,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, PartialEq, Clone, CopyGetters, Serialize, Deserialize)]
 #[getset(get_copy = "pub")]
 pub struct OutputCmdV4 {
   #[serde(rename = "Id")]
@@ -153,6 +143,24 @@ impl OutputCmdV4 {
       feature_index,
       command,
     }
+  }
+}
+
+impl ButtplugMessage for OutputCmdV4 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugDeviceMessage for OutputCmdV4 {
+  fn device_index(&self) -> u32 {
+    self.device_index
+  }
+  fn set_device_index(&mut self, device_index: u32) {
+    self.device_index = device_index;
   }
 }
 

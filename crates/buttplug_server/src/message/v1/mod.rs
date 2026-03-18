@@ -1,3 +1,10 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
 mod client_device_message_attributes;
 mod device_added;
 mod device_list;
@@ -19,5 +26,5 @@ pub use device_message_info::DeviceMessageInfoV1;
 pub use linear_cmd::{LinearCmdV1, VectorSubcommandV1};
 pub use request_server_info::RequestServerInfoV1;
 pub use rotate_cmd::{RotateCmdV1, RotationSubcommandV1};
-pub use spec_enums::{ButtplugClientMessageV1, ButtplugServerMessageV1};
+pub use spec_enums::{ButtplugClientMessageV1, ButtplugDeviceMessageNameV1, ButtplugServerMessageV1};
 pub use vibrate_cmd::{VibrateCmdV1, VibrateSubcommandV1};

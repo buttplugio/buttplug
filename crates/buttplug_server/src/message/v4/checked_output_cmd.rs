@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -11,7 +11,6 @@ use buttplug_core::{
   message::{
     ButtplugDeviceMessage,
     ButtplugMessage,
-    ButtplugMessageFinalizer,
     ButtplugMessageValidator,
     OutputCmdV4,
     OutputCommand,
@@ -23,9 +22,7 @@ use uuid::Uuid;
 
 use super::spec_enums::ButtplugDeviceMessageNameV4;
 
-#[derive(
-  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, Clone, Getters, CopyGetters, Eq,
-)]
+#[derive(Debug, Clone, Getters, CopyGetters, Eq)]
 #[getset(get_copy = "pub")]
 pub struct CheckedOutputCmdV4 {
   id: u32,
@@ -33,6 +30,24 @@ pub struct CheckedOutputCmdV4 {
   feature_index: u32,
   feature_id: Uuid,
   output_command: OutputCommand,
+}
+
+impl ButtplugMessage for CheckedOutputCmdV4 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugDeviceMessage for CheckedOutputCmdV4 {
+  fn device_index(&self) -> u32 {
+    self.device_index
+  }
+  fn set_device_index(&mut self, device_index: u32) {
+    self.device_index = device_index;
+  }
 }
 
 impl PartialEq for CheckedOutputCmdV4 {
@@ -95,7 +110,7 @@ impl TryFromDeviceAttributes<OutputCmdV4> for CheckedOutputCmdV4 {
     //
     // If this message isn't the result of an upgrade from another older message, we won't have set
     // our feature id yet.
-    let (feature, _) = if let Some(feature) = features.get(cmd.feature_index() as usize) {
+    let (feature, _) = if let Some(feature) = features.get(&cmd.feature_index()) {
       (feature, feature.id())
     } else {
       return Err(ButtplugError::from(
@@ -106,6 +121,11 @@ impl TryFromDeviceAttributes<OutputCmdV4> for CheckedOutputCmdV4 {
     // Check to make sure the feature has an actuator that handles the data we've been passed
     if let Some(output_map) = feature.output() {
       let output_type = cmd.command().as_output_type();
+      if output_map.is_disabled(output_type) {
+        return Err(ButtplugError::from(ButtplugDeviceError::MessageNotSupported(
+          format!("Output type {:?} is disabled for this device", output_type),
+        )));
+      }
       let value = cmd.command().value();
       let new_value = output_map
         .calculate_from_value(output_type, value)

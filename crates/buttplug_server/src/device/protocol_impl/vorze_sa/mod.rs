@@ -1,14 +1,15 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
 mod dual_rotator;
+mod dual_vibrator;
 mod piston;
 mod single_rotator;
-mod vibrator;
+mod single_vibrator;
 
 use crate::device::{
   hardware::Hardware,
@@ -60,13 +61,25 @@ impl ProtocolInitializer for VorzeSAInitializer {
           }
         }
         "vorze-sa-dual-rotator" => Ok(Arc::new(dual_rotator::VorzeSADualRotator::default())),
-        "vorze-sa-vibrator" => {
+        "vorze-sa-single-vibrator" => {
           if hwname.contains("bach") {
-            Ok(Arc::new(vibrator::VorzeSAVibrator::new(VorzeDevice::Bach)))
+            Ok(Arc::new(single_vibrator::VorzeSASingleVibrator::new(
+              VorzeDevice::Bach,
+            )))
           } else if hwname.contains("rocket") {
-            Ok(Arc::new(vibrator::VorzeSAVibrator::new(
+            Ok(Arc::new(single_vibrator::VorzeSASingleVibrator::new(
               VorzeDevice::Rocket,
             )))
+          } else {
+            Err(ButtplugDeviceError::ProtocolNotImplemented(format!(
+              "No protocol implementation for Vorze Device {}",
+              hardware.name()
+            )))
+          }
+        }
+        "vorze-sa-dual-vibrator" => {
+          if hwname.contains("omorfi") {
+            Ok(Arc::new(dual_vibrator::VorzeSADualVibrator::default()))
           } else {
             Err(ButtplugDeviceError::ProtocolNotImplemented(format!(
               "No protocol implementation for Vorze Device {}",
@@ -96,6 +109,7 @@ pub enum VorzeDevice {
   Piston = 3,
   Cyclone = 1,
   Rocket = 7,
+  Omorfi = 9,
   Ufo = 2,
   UfoTw = 5,
 }

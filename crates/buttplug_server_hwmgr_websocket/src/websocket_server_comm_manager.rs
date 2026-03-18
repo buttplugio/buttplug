@@ -1,12 +1,12 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
 use super::websocket_server_hardware::WebsocketServerHardwareConnector;
-use buttplug_core::{ButtplugResultFuture, util::async_manager};
+use buttplug_core::ButtplugResultFuture;
 use buttplug_server::device::hardware::communication::{
   HardwareCommunicationManager,
   HardwareCommunicationManagerBuilder,
@@ -82,7 +82,7 @@ impl WebsocketServerDeviceCommunicationManager {
     trace!("Websocket server port created.");
     let server_cancellation_token = CancellationToken::new();
     let child_token = server_cancellation_token.child_token();
-    async_manager::spawn(async move {
+    buttplug_core::spawn!("WebsocketServerDeviceCommunicationManager loop", async move {
       let base_addr = if listen_on_all_interfaces {
         "0.0.0.0"
       } else {

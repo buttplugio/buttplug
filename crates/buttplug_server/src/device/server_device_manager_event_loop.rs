@@ -1,38 +1,53 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
 use buttplug_core::{
   message::{ButtplugServerMessageV4, DeviceListV4, ScanningFinishedV0},
-  util::async_manager,
 };
 use buttplug_server_device_config::DeviceConfigurationManager;
 use tracing::info_span;
 
 use crate::device::{
-  ServerDevice,
-  ServerDeviceEvent,
+  DeviceHandle,
+  InternalDeviceEvent,
+  device_handle::build_device_handle,
   hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
   protocol::ProtocolManager,
 };
 use dashmap::{DashMap, DashSet};
-use futures::{FutureExt, StreamExt, future, pin_mut};
-use std::sync::{Arc, atomic::AtomicBool};
+use futures::{FutureExt, future};
+use std::sync::Arc;
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
-use tracing_futures::Instrument;
-
 use super::server_device_manager::DeviceManagerCommand;
+
+/// Scanning state machine for the device manager event loop.
+/// Replaces the previous combination of scanning_bringup_in_progress, scanning_started,
+/// and stop_scanning_received fields with explicit states.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+enum ScanningState {
+  /// No scanning activity. This is the initial state.
+  #[default]
+  Idle,
+  /// StartScanning called, waiting for all comm managers to start.
+  /// ScanningFinished events are ignored in this state.
+  BringupInProgress,
+  /// Actively scanning. Will emit ScanningFinished when all managers finish.
+  Active,
+  /// StopScanning was called. Will NOT emit ScanningFinished.
+  ActiveStopRequested,
+}
 
 pub(super) struct ServerDeviceManagerEventLoop {
   comm_managers: Vec<Box<dyn HardwareCommunicationManager>>,
   device_config_manager: Arc<DeviceConfigurationManager>,
   device_command_receiver: mpsc::Receiver<DeviceManagerCommand>,
-  /// Maps device index (exposed to the outside world) to actual device objects held by the server.
-  device_map: Arc<DashMap<u32, Arc<ServerDevice>>>,
+  /// Maps device index (exposed to the outside world) to device handles held by the server.
+  device_map: Arc<DashMap<u32, DeviceHandle>>,
   /// Broadcaster that relays device events in the form of Buttplug Messages to
   /// whoever owns the Buttplug Server.
   server_sender: broadcast::Sender<ButtplugServerMessageV4>,
@@ -40,20 +55,15 @@ pub(super) struct ServerDeviceManagerEventLoop {
   /// a receiver that the comm managers all send thru.
   device_comm_receiver: mpsc::Receiver<HardwareCommunicationManagerEvent>,
   /// Sender for device events, passed to new devices when they are created.
-  device_event_sender: mpsc::Sender<ServerDeviceEvent>,
+  device_event_sender: mpsc::Sender<InternalDeviceEvent>,
   /// Receiver for device events, which the event loops to handle events.
-  device_event_receiver: mpsc::Receiver<ServerDeviceEvent>,
-  /// True if StartScanning has been called but no ScanningFinished has been
-  /// emitted yet.
-  scanning_bringup_in_progress: bool,
-  /// Denote whether scanning has been started since we last sent a ScanningFinished message.
-  scanning_started: bool,
+  device_event_receiver: mpsc::Receiver<InternalDeviceEvent>,
+  /// Current scanning state machine state.
+  scanning_state: ScanningState,
   /// Devices currently trying to connect.
   connecting_devices: Arc<DashSet<String>>,
   /// Cancellation token for the event loop
   loop_cancellation_token: CancellationToken,
-  /// True if stop scanning message was sent, means we won't send scanning finished.
-  stop_scanning_received: AtomicBool,
   /// Protocol map, for mapping user definitions to protocols
   protocol_manager: ProtocolManager,
 }
@@ -62,7 +72,7 @@ impl ServerDeviceManagerEventLoop {
   pub fn new(
     comm_managers: Vec<Box<dyn HardwareCommunicationManager>>,
     device_config_manager: Arc<DeviceConfigurationManager>,
-    device_map: Arc<DashMap<u32, Arc<ServerDevice>>>,
+    device_map: Arc<DashMap<u32, DeviceHandle>>,
     loop_cancellation_token: CancellationToken,
     server_sender: broadcast::Sender<ButtplugServerMessageV4>,
     device_comm_receiver: mpsc::Receiver<HardwareCommunicationManagerEvent>,
@@ -78,11 +88,9 @@ impl ServerDeviceManagerEventLoop {
       device_event_sender,
       device_event_receiver,
       device_command_receiver,
-      scanning_bringup_in_progress: false,
-      scanning_started: false,
+      scanning_state: ScanningState::Idle,
       connecting_devices: Arc::new(DashSet::new()),
       loop_cancellation_token,
-      stop_scanning_received: AtomicBool::new(false),
       protocol_manager: ProtocolManager::default(),
     }
   }
@@ -96,16 +104,24 @@ impl ServerDeviceManagerEventLoop {
   }
 
   async fn handle_start_scanning(&mut self) {
-    if self.scanning_status() || self.scanning_bringup_in_progress {
-      debug!("System already scanning, ignoring new scanning request");
+    // Only start from Idle state
+    if self.scanning_state != ScanningState::Idle {
+      debug!(
+        "System already scanning (state: {:?}), ignoring new scanning request",
+        self.scanning_state
+      );
       return;
     }
-    self
-      .stop_scanning_received
-      .store(false, std::sync::atomic::Ordering::Relaxed);
+
+    // Also check if hardware is still scanning (edge case: state is Idle but hardware lagging)
+    if self.scanning_status() {
+      debug!("Hardware still scanning, ignoring new scanning request");
+      return;
+    }
+
     info!("No scan currently in progress, starting new scan.");
-    self.scanning_bringup_in_progress = true;
-    self.scanning_started = true;
+    self.scanning_state = ScanningState::BringupInProgress;
+
     let fut_vec: Vec<_> = self
       .comm_managers
       .iter_mut()
@@ -113,14 +129,35 @@ impl ServerDeviceManagerEventLoop {
       .collect();
     // TODO If start_scanning fails anywhere, this will ignore it. We should maybe at least log?
     future::join_all(fut_vec).await;
+
     debug!("Scanning started for all hardware comm managers.");
-    self.scanning_bringup_in_progress = false;
+    // Check if stop was requested during bringup
+    if self.scanning_state == ScanningState::ActiveStopRequested {
+      debug!("Stop was requested during bringup, staying in ActiveStopRequested");
+    } else {
+      self.scanning_state = ScanningState::Active;
+    }
   }
 
   async fn handle_stop_scanning(&mut self) {
-    self
-      .stop_scanning_received
-      .store(true, std::sync::atomic::Ordering::Relaxed);
+    // Transition to stop-requested state (only meaningful if currently scanning)
+    match self.scanning_state {
+      ScanningState::Active => {
+        self.scanning_state = ScanningState::ActiveStopRequested;
+      }
+      ScanningState::BringupInProgress => {
+        // Edge case: stop requested during bringup.
+        // The bringup completion in handle_start_scanning will see this and not transition to Active.
+        self.scanning_state = ScanningState::ActiveStopRequested;
+      }
+      _ => {
+        debug!(
+          "Stop scanning called in state {:?}, no state change needed",
+          self.scanning_state
+        );
+      }
+    }
+
     let fut_vec: Vec<_> = self
       .comm_managers
       .iter_mut()
@@ -134,29 +171,39 @@ impl ServerDeviceManagerEventLoop {
     match event {
       HardwareCommunicationManagerEvent::ScanningFinished => {
         debug!(
-          "System signaled that scanning was finished, check to see if all managers are finished."
+          "System signaled that scanning was finished, state: {:?}",
+          self.scanning_state
         );
-        if self.scanning_bringup_in_progress {
-          debug!(
-            "Hardware Comm Manager finished before scanning was fully started, continuing event loop."
-          );
-          return;
-        }
-        // Only send scanning finished if we haven't requested a stop.
-        if !self.scanning_status()
-          && self.scanning_started
-          && !self
-            .stop_scanning_received
-            .load(std::sync::atomic::Ordering::Relaxed)
-        {
-          debug!("All managers finished, emitting ScanningFinished");
-          self.scanning_started = false;
-          if self
-            .server_sender
-            .send(ScanningFinishedV0::default().into())
-            .is_err()
-          {
-            info!("Server disappeared, exiting loop.");
+
+        match self.scanning_state {
+          ScanningState::Idle => {
+            // Spurious event, ignore
+            debug!("Received ScanningFinished in Idle state, ignoring");
+          }
+          ScanningState::BringupInProgress => {
+            // Comm manager finished before we completed bringup - ignore for now
+            debug!("Hardware Comm Manager finished before scanning was fully started, ignoring");
+          }
+          ScanningState::Active => {
+            // Check if all hardware has actually stopped
+            if !self.scanning_status() {
+              debug!("All managers finished, emitting ScanningFinished");
+              self.scanning_state = ScanningState::Idle;
+              if self
+                .server_sender
+                .send(ScanningFinishedV0::default().into())
+                .is_err()
+              {
+                info!("Server disappeared, exiting loop.");
+              }
+            }
+          }
+          ScanningState::ActiveStopRequested => {
+            // Stop was requested, don't emit ScanningFinished
+            if !self.scanning_status() {
+              debug!("All managers finished after stop request, not emitting ScanningFinished");
+              self.scanning_state = ScanningState::Idle;
+            }
           }
         }
       }
@@ -236,11 +283,19 @@ impl ServerDeviceManagerEventLoop {
           address = tracing::field::display(address.clone())
         );
 
-        async_manager::spawn(async move {
-          match ServerDevice::build(device_config_manager, creator, protocol_specializers).await {
-            Ok(device) => {
+        // Clone sender again for the forwarding task that build_device_handle will spawn
+        let device_event_sender_for_forwarding = self.device_event_sender.clone();
+
+        buttplug_core::util::async_manager::spawn(async move {
+          match build_device_handle(
+            device_config_manager,
+            creator,
+            protocol_specializers,
+            device_event_sender_for_forwarding,
+          ).await {
+            Ok(device_handle) => {
               if device_event_sender_clone
-                .send(ServerDeviceEvent::Connected(Arc::new(device)))
+                .send(InternalDeviceEvent::Connected(device_handle))
                 .await
                 .is_err() {
                 error!("Device manager disappeared before connection established, device will be dropped.");
@@ -251,7 +306,7 @@ impl ServerDeviceManagerEventLoop {
             }
           }
           connecting_devices.remove(&address);
-        }.instrument(span));
+        }, span);
       }
     }
   }
@@ -265,19 +320,19 @@ impl ServerDeviceManagerEventLoop {
     DeviceListV4::new(devices)
   }
 
-  async fn handle_device_event(&mut self, device_event: ServerDeviceEvent) {
+  async fn handle_device_event(&mut self, device_event: InternalDeviceEvent) {
     trace!("Got device event: {:?}", device_event);
     match device_event {
-      ServerDeviceEvent::Connected(device) => {
+      InternalDeviceEvent::Connected(device_handle) => {
         let span = info_span!(
           "device registration",
-          name = tracing::field::display(device.name()),
-          identifier = tracing::field::debug(device.identifier())
+          name = tracing::field::display(device_handle.name()),
+          identifier = tracing::field::debug(device_handle.identifier())
         );
         let _enter = span.enter();
 
         // Get the index from the device
-        let device_index = device.definition().index();
+        let device_index = device_handle.definition().index();
         // Since we can now reuse device indexes, this means we might possibly
         // stomp on devices already in the map if they don't register a
         // disconnect before we try to insert the new device. If we have a
@@ -301,22 +356,15 @@ impl ServerDeviceManagerEventLoop {
           }
         }
 
-        // Create event loop for forwarding device events into our selector.
-        let event_listener = device.event_stream();
-        let event_sender = self.device_event_sender.clone();
-        async_manager::spawn(async move {
-          pin_mut!(event_listener);
-          // This can fail if the event_sender loses the server before this loop dies.
-          while let Some(event) = event_listener.next().await {
-            if event_sender.send(event).await.is_err() {
-              info!("Event sending failure in servier device manager event loop, exiting.");
-              break;
-            }
-          }
-        });
+        // Note: The device event forwarding task is now spawned in build_device_handle(),
+        // so we no longer need to create it here.
 
-        info!("Assigning index {} to {}", device_index, device.name());
-        self.device_map.insert(device_index, device.clone());
+        info!(
+          "Assigning index {} to {}",
+          device_index,
+          device_handle.name()
+        );
+        self.device_map.insert(device_index, device_handle.clone());
 
         let device_update_message: ButtplugServerMessageV4 = self.generate_device_list().into();
 
@@ -326,7 +374,7 @@ impl ServerDeviceManagerEventLoop {
           debug!("Server not currently available, dropping Device Added event.");
         }
       }
-      ServerDeviceEvent::Disconnected(identifier) => {
+      InternalDeviceEvent::Disconnected(identifier) => {
         let mut device_index = None;
         for device_pair in self.device_map.iter() {
           if *device_pair.value().identifier() == identifier {
@@ -345,7 +393,7 @@ impl ServerDeviceManagerEventLoop {
           }
         }
       }
-      ServerDeviceEvent::Notification(_, message) => {
+      InternalDeviceEvent::Notification(_, message) => {
         if self.server_sender.send(message.into()).is_err() {
           debug!("Server not currently available, dropping Device Added event.");
         }

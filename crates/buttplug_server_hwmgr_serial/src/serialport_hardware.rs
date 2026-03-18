@@ -1,12 +1,12 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
+use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::{
   Hardware,
   HardwareConnector,
@@ -226,6 +226,7 @@ impl SerialPortHardware {
       .await
       .expect("This will always be a Some value, we're just blocking for bringup")
       .map_err(|e| {
+        error!("Serial port recv creation error: {:?}", e);
         ButtplugDeviceError::DeviceSpecificError(
           HardwareSpecificError::HardwareSpecificError("Serial".to_owned(), e.to_string())
             .to_string(),
@@ -347,7 +348,7 @@ impl HardwareInternal for SerialPortHardware {
     let event_sender = self.device_event_sender.clone();
     let address = self.address.clone();
     async move {
-      async_manager::spawn(async move {
+      buttplug_core::spawn!("SerialPortHardware subscription", async move {
         // TODO There's only one subscribable endpoint on a serial port, so we
         // should check to make sure we don't have multiple subscriptions so we
         // don't deadlock.

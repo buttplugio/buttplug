@@ -1,0 +1,208 @@
+// Auto-generated on 2025-10-14 13:26:40
+syntax = "proto3";
+package hdy_rpc;
+import "notifications.proto";
+import "messages.proto";
+import "constants.proto";
+/*
+    Concepts
+    - All commands are sent as a request and a response
+    - All commands should give response "instantly" -> If there is a command that will take time to execute, the device should send an OK/error to the msg instantly, and then a notification when it is done.
+    - All commands should have a response
+        - Response can be blank
+    - All commands should have a unique ID for response
+        - All responses should have a result code
+        - All responses should match the request ID
+    - You can send a bundle of request in one requests message
+        - The responses will be sent back individually
+    - Some messages need to set a has_xxx flag to true for the FW to handle the corresponding value
+*/
+message Notification{
+    oneof notification {
+        //BLE specific notifications starts with 600
+        NotificationWifiScanComplete notification_wifi_scan_complete = 600;
+        NotificationWifiStatusChanged notification_wifi_status_changed = 601;
+        NotificationBleStatusChanged notification_ble_status_changed = 602;
+        NotificationOtaComplete notification_ota_complete = 603;
+        //Handy Notifications starts with 700
+        NotificationModeChanged notification_mode_changed = 700;
+        NotificationStrokeChanged notification_stroke_changed = 701;
+        NotificationButtonEvent notification_button_event = 703;
+        NotificationBatteryChanged notification_battery_changed = 705;
+        NotificationError notification_error = 706;
+        NotificationIdleTimeout notification_idle_timeout = 707; //Added in FW4.0.19
+        NotificationHampChanged notification_hamp_changed = 720;
+        NotificationHdspChanged notification_hdsp_changed = 740;
+        NotificationHspThresholdReached notification_hsp_threshold_reached = 860;
+        NotificationHspStateChanged notification_hsp_state_changed = 861;
+        NotificationHspLooping notification_hsp_looping = 862;
+        NotificationHspStarving notification_hsp_starving = 863;
+        NotificationHspResumedOnNonStarving notification_hsp_resumed_on_non_starving = 864;
+        NotificationHspPausedOnStarving notification_hsp_paused_on_starving = 865;
+        //900 - HVP
+        NotificationHvpChanged notification_hvp_changed = 900;
+        //HRPP - 920
+        NotificationHrppChanged notification_hrpp_changed = 920;
+        //Handy error notifications starts with 1000
+        NotificationTempHigh notification_temp_high = 1000;
+        NotificationTempOk notification_temp_ok = 1001;
+        NotificationSliderBlocked notification_slider_blocked = 1002;
+        NotificationSliderUnblocked notification_slider_unblocked = 1003;
+        NotificationLowMemoryError notification_low_memory_error = 1004;
+        NotificationLowMemoryWarning notification_low_memory_warning = 1005;
+        NotificationSettingsChanged notification_settings_changed = 2000; //Added in FW4.0.19
+    }
+    uint32 id = 2; //Added in FW 4.0.14
+}
+message Request {
+    oneof params {
+        RequestConnectionKeyGet request_connection_key_get = 606;
+        RequestWifiStatusGet request_wifi_status_get = 620;
+        RequestWifiSet request_wifi_set = 621;
+        RequestWifiScanStart request_wifi_scan_start = 623;
+        RequestWifiScanResultsGet request_wifi_scan_results_get = 624;
+        RequestWifiScanStop request_wifi_scan_stop = 625;
+        //client public requests starts at 700
+        RequestModeGet request_mode_get = 700;
+        RequestModeSet request_mode_set = 701;
+        RequestReboot request_reboot = 707;
+        RequestButtonPress request_button_press = 708;
+        RequestClockOffsetSet request_clock_offset_set = 709;
+        RequestBatteryGet request_battery_get = 710;
+        RequestClockOffsetGet request_clock_offset_get = 712;
+        RequestCapabilitiesGet request_capabilities_get = 713;
+        RequestSessionIdsGet request_session_ids_get = 714;
+        RequestStopCurrentMode request_stop_current_mode = 715; //Added in FW4.0.13
+        RequestConnectionModeSet request_connection_mode_set = 716; //Added in FW4.0.13
+        RequestConnectionModeGet request_connection_mode_get = 717; //Added in FW4.0.13
+        //HAMP - 720
+        RequestHampStart request_hamp_start = 720;
+        RequestHampStop request_hamp_stop = 721;
+        RequestHampVelocitySet request_hamp_velocity_set = 723;
+        RequestHampStateGet request_hamp_state_get = 724;
+        RequestHampZoneSet request_hamp_zone_set = 725; //Added in FW4.0.15
+        //HDSP - 740
+        RequestHdspXaVaSet request_hdsp_xa_va_set = 740;
+        RequestHdspXpVaSet request_hdsp_xp_va_set = 741;
+        RequestHdspXpVpSet request_hdsp_xp_vp_set = 742;
+        RequestHdspXaTSet request_hdsp_xa_t_set = 743;
+        RequestHdspXpTSet request_hdsp_xp_t_set = 744;
+        RequestHdspXaVpSet request_hdsp_xa_vp_set = 745;
+        RequestHdspStop request_hdsp_stop = 746;
+        //SLIDE - 840
+        RequestSliderStrokeGet request_slider_stroke_get = 840;
+        RequestSliderStrokeSet request_slider_stroke_set = 841;
+        RequestSliderStateGet request_slider_state_get = 842;
+        RequestSliderCalibrate request_slider_calibrate = 843; //Added in FW4.0.15
+        //HSP - 860
+        RequestHspSetup request_hsp_setup = 860;
+        RequestHspAdd request_hsp_add = 861;
+        RequestHspFlush request_hsp_flush = 862;
+        RequestHspPlay request_hsp_play = 863;
+        RequestHspStop request_hsp_stop = 864;
+        RequestHspPause request_hsp_pause = 865;
+        RequestHspResume request_hsp_resume = 866;
+        RequestHspStateGet request_hsp_state_get = 867;
+        RequestHspCurrentTimeSet request_hsp_current_time_set = 868;
+        RequestHspThresholdSet request_hsp_threshold_set = 869;
+        RequestHspPauseOnStarvingSet request_hsp_pause_on_starving_set = 870; //Added in FW4.0.13
+        //HMI (LED, screen and so on) - 880
+        RequestLedOverride request_led_override = 880;
+        // HVP (vibration) - 900
+        RequestHvpSet request_hvp_set = 900;
+        RequestHvpStop request_hvp_stop = 901;
+        RequestHvpStart request_hvp_start = 902;
+        RequestHvpStateGet request_hvp_state_get = 903;
+        //HRPP - 920
+        RequestHrppStart request_hrpp_start = 920;
+        RequestHrppStop request_hrpp_stop = 921;
+        RequestHrppAmplitudeSet request_hrpp_amplitude_set = 922;
+        RequestHrppPlaybackSpeedSet request_hrpp_playback_speed_set = 923;
+        RequestHrppPatternSet request_hrpp_pattern_set = 924;
+        RequestHrppStateGet request_hrpp_state_get = 925;
+        RequestHrppPatternsGet request_hrpp_patterns_get = 926;
+    }
+    uint32 id = 2;
+}
+//Responses are sent back individually as they are handled
+message Requests{
+    repeated Request requests = 1;
+}
+//Responses have the same ID as the request. NB! not all requests will have a result, and just return a blank response
+message Response {
+    uint32 id = 1;
+    oneof result {
+        ResponseConnectionKeyGet response_connection_key_get = 606;
+        ResponseWifiStatusGet response_wifi_status_get = 620;
+        ResponseWifiScanResultsGet response_wifi_scan_results_get = 624;
+        //client public responses starts at 700 // [PRIVATE]
+        ResponseModeGet response_mode_get = 700;
+        ResponseModeSet response_mode_set = 701;
+        ResponseClockOffsetSet response_clock_offset_set = 709;
+        ResponseBatteryGet response_battery_get = 710;
+        ResponseClockOffsetGet response_clock_offset_get = 712;
+        ResponseCapabilitiesGet response_capabilities_get = 713;
+        ResponseSessionIdsGet response_session_ids_get = 714;
+        ResponseConnectionModeGet response_connection_mode_get = 717; //Added in FW4.0.13
+        //HAMP - 720
+        ResponseHampStart response_hamp_start = 720;
+        ResponseHampStop response_hamp_stop = 721;
+        ResponseHampVelocitySet response_hamp_velocity_set = 723;
+        ResponseHampStateGet response_hamp_state_get = 724;
+        ResponseHampZoneSet response_hamp_zone_set = 725; //Added in FW4.0.15
+        //HDSP - 740
+        //Replies OK or ERROR only
+        //Slide - 840
+        ResponseSliderStrokeGet response_slider_stroke_get = 840;
+        ResponseSliderStrokeSet response_slider_stroke_set = 841;
+        ResponseSliderStateGet response_slider_state_get = 842;
+        ResponseSliderCalibrate response_slider_calibrate = 843; //Added in FW4.0.15
+        //HSP - 860
+        ResponseHspSetup response_hsp_setup = 860;
+        ResponseHspAdd response_hsp_add = 861;
+        ResponseHspFlush response_hsp_flush = 862;
+        ResponseHspPlay response_hsp_play = 863;
+        ResponseHspStop response_hsp_stop = 864;
+        ResponseHspPause response_hsp_pause = 865;
+        ResponseHspResume response_hsp_resume = 866;
+        ResponseHspStateGet response_hsp_state_get = 867;
+        ResponseHspCurrentTimeSet response_hsp_current_time_set = 868;
+        ResponseHspThresholdSet response_hsp_threshold_set = 869;
+        ResponseHspPauseOnStarvingSet response_hsp_pause_on_starving_set = 870;
+        //HVP - 900 (Vibration)
+        ResponseHvpSet response_hvp_set = 900;
+        ResponseHvpStop response_hvp_stop = 901;
+        ResponseHvpStart response_hvp_start = 902;
+        ResponseHvpStateGet response_hvp_state_get = 903;
+        //HRPP - 920
+        ResponseHrppStart response_hrpp_start = 920;
+        ResponseHrppStop response_hrpp_stop = 921;
+        ResponseHrppAmplitudeSet response_hrpp_amplitude_set = 922;
+        ResponseHrppPlaybackSpeedSet response_hrpp_playback_speed_set = 923;
+        ResponseHrppPatternSet response_hrpp_pattern_set = 924;
+        ResponseHrppStateGet response_hrpp_state_get = 925;
+        ResponseHrppPatternsGet response_hrpp_patterns_get = 926;
+    }
+    Error error = 2;
+}
+enum MessageType{
+    MESSAGE_TYPE_UNKNOWN = 0; //Must be there since enum starts with 0
+    MESSAGE_TYPE_REQUEST = 1;
+    MESSAGE_TYPE_REQUESTS = 2;
+    MESSAGE_TYPE_RESPONSE = 3;
+    MESSAGE_TYPE_NOTIFICATION = 4;
+}
+message Error {
+    int32 code = 1;         //Handy Error code or ESP Error code
+    string message = 2;     //A String providing a short description of the error. The message SHOULD be limited to a concise single sentence.
+    string data = 3;        //A Primitive or Structured value that contains additional information about the error.
+}
+message RpcMessage{
+    MessageType type = 1;
+    oneof message {
+        Request request = 2;
+        Requests requests = 3;
+        Response response = 4;
+        Notification notification = 5;
+    }
+}

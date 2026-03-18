@@ -1,15 +1,14 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2022 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
-
 use buttplug_core::{
   connector::ButtplugConnector,
-  errors::ButtplugError,
-  message::ButtplugServerMessageV4,
-  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+  errors::{ButtplugError, ButtplugHandshakeError},
+  message::{ButtplugMessageSpecVersion, ButtplugServerMessageV4},
+  util::{stream::convert_broadcast_receiver_to_stream},
 };
 use buttplug_server::{
   ButtplugServer, ButtplugServerBuilder,
@@ -38,6 +37,7 @@ pub enum ButtplugRemoteServerEvent {
     identifier: UserDeviceIdentifier,
     name: String,
     display_name: Option<String>,
+    needs_keepalive: bool,
   },
   DeviceRemoved {
     index: u32,
@@ -88,6 +88,7 @@ async fn run_device_event_stream(
                 name: da.1.device_name().clone(),
                 identifier: device_info.identifier().clone(),
                 display_name: device_info.display_name().clone(),
+                needs_keepalive: *device_info.needs_keepalive(),
               };
               if remote_event_sender.send(added_event).is_err() {
                 error!(
@@ -149,15 +150,17 @@ async fn run_server<ConnectorType>(
           let connected = server_clone.connected();
           let connector_clone = shared_connector.clone();
           let remote_event_sender_clone = remote_event_sender.clone();
-          async_manager::spawn(async move {
+          let disconnect_notifier = disconnect_notifier.clone();
+          buttplug_core::spawn!("ButtplugRemoteServer loop", async move {
             match server_clone.parse_message(client_message.clone()).await {
               Ok(ret_msg) => {
                 // Only send event if we just connected. Sucks to check it on every message but the boolean check should be quick.
-                if !connected && server_clone.connected()
-                  && remote_event_sender_clone.receiver_count() > 0
+                if !connected && server_clone.connected() {
+                  if remote_event_sender_clone.receiver_count() > 0
                     && remote_event_sender_clone.send(ButtplugRemoteServerEvent::ClientConnected(server_clone.client_name().unwrap_or("Buttplug Client (No name specified)".to_owned()).clone())).is_err() {
                       error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
-                    }
+                  }
+                }
                 if connector_clone.send(ret_msg).await.is_err() {
                   error!("Cannot send reply to server, dropping and assuming remote server thread has exited.");
                 }

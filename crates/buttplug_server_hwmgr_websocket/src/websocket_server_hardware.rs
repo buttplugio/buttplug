@@ -1,13 +1,13 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
 use super::websocket_server_comm_manager::WebsocketServerDeviceCommManagerInitInfo;
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
+use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::{
   GenericHardwareSpecializer,
   Hardware,
@@ -305,7 +305,7 @@ impl HardwareInternal for WebsocketServerHardware {
       subscribed.store(true, Ordering::Relaxed);
       let token = CancellationToken::new();
       *(subscribed_token.lock().await) = Some(token.child_token());
-      async_manager::spawn(async move {
+      buttplug_core::spawn!("WebsocketServerHardware subscription", async move {
         loop {
           select! {
             result = data_receiver.recv().fuse() => {

@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -31,8 +31,8 @@ use std::sync::{
 };
 use uuid::{Uuid, uuid};
 
-use rand::distributions::Alphanumeric;
-use rand::{Rng, thread_rng};
+use rand::distr::Alphanumeric;
+use rand::RngExt;
 use regex::Regex;
 use sha2::{Digest, Sha256};
 
@@ -78,7 +78,7 @@ impl ProtocolInitializer for VibCrafterInitializer {
       ))
       .await?;
 
-    let auth_str = thread_rng()
+    let auth_str = rand::rng()
       .sample_iter(&Alphanumeric)
       .take(6)
       .map(char::from)

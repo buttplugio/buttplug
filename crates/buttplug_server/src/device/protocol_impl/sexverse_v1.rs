@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2025 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -42,7 +42,7 @@ impl ProtocolInitializer for SexverseV1Initializer {
     def: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut commands = vec![];
-    def.features().iter().for_each(|x| {
+    def.features().values().for_each(|x| {
       if let Some(m) = x.output() {
         for output in m.output_types() {
           commands.push((output, AtomicU8::default()))

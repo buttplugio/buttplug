@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -141,6 +141,10 @@ async fn test_client_scanning_finished() {
   let (client, _) = test_client_with_device().await;
   let mut recv = client.event_stream();
   assert!(client.start_scanning().await.is_ok());
+  assert!(matches!(
+    recv.next().await.expect("Test, assuming infallible."),
+    ButtplugClientEvent::DeviceListReceived
+  ));
   assert!(matches!(
     recv.next().await.expect("Test, assuming infallible."),
     ButtplugClientEvent::ScanningFinished

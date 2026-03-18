@@ -38,7 +38,7 @@ device_commands:
         - !Write
             endpoint: tx
             # "Mply:10:10:-1;"
-            data: [77, 112, 108, 121, 58, 49, 48, 58, 49, 48, 58, 45, 49, 59]
+            data: [77, 112, 108, 121, 58, 49, 48, 58, 49, 48, 58, 48, 59]
             write_with_response: false
   - !Messages
       device_index: 0
@@ -56,7 +56,7 @@ device_commands:
         - !Write
             endpoint: tx
             # "Mply:15:-1:5;"
-            data: [77, 112, 108, 121, 58, 49, 53, 58, 45, 49, 58, 53, 59]
+            data: [77, 112, 108, 121, 58, 49, 53, 58, 49, 48, 58, 53, 59]
             write_with_response: false
   - !Messages
       device_index: 0

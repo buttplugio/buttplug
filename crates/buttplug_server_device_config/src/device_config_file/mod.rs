@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -146,8 +146,6 @@ fn load_user_config(
   skip_version_check: bool,
   dcm_builder: &mut DeviceConfigurationManagerBuilder,
 ) -> Result<(), ButtplugDeviceError> {
-  let base_dcm = dcm_builder.clone().finish().unwrap();
-
   info!("Loading user configuration from string.");
   let user_config_file =
     load_protocol_config_from_json::<UserConfigFile>(user_config_str, skip_version_check)?;
@@ -180,14 +178,16 @@ fn load_user_config(
     }
   }
 
+  // Snapshot taken after user-defined configurations are added so that user device config pairs
+  // whose base_id refers to a configuration defined in the same user config file can be resolved.
+  let base_dcm = dcm_builder.clone().finish().unwrap();
+
   for user_device_config_pair in user_config
     .user_device_configs()
     .clone()
     .unwrap_or_default()
   {
-    //let ident = BaseDeviceIdentifier::new(user_device_config_pair.identifier().protocol(), &None);
     // Use device UUID instead of identifier to match here, otherwise we have to do really weird stuff with identifier hashes.
-    // TODO How do we deal with user configs derived from default here? We don't handle loading this correctly?
     if let Some(base_config) = base_dcm
       .base_device_definitions()
       .iter()
@@ -198,12 +198,12 @@ fn load_user_config(
         .build_from_base_definition(base_config.1)
         && let Err(e) = dcm_builder
           .user_device_definition(user_device_config_pair.identifier(), &loaded_user_config)
-        {
-          error!(
-            "Device definition not valid, skipping:\n{:?}\n{:?}",
-            e, user_config
-          )
-        }
+      {
+        error!(
+          "Device definition not valid, skipping:\n{:?}\n{:?}",
+          e, user_config
+        )
+      }
     } else {
       error!(
         "Device identifier {:?} does not have a match base identifier that matches anything in the base config, removing from database.",
@@ -233,14 +233,20 @@ pub fn load_protocol_configs(
 
 pub fn save_user_config(dcm: &DeviceConfigurationManager) -> Result<String, ButtplugError> {
   let user_specifiers = dcm.user_communication_specifiers();
-  let user_definitions_vec = dcm
+  let user_definitions_vec: Vec<_> = dcm
     .user_device_definitions()
     .iter()
-    .map(|kv| UserDeviceConfigPair {
-      identifier: kv.key().clone(),
-      config: kv.value().into(),
+    .map(|kv| {
+      Ok(UserDeviceConfigPair {
+        identifier: kv.key().clone(),
+        config: kv.value().try_into().map_err(|e| {
+          ButtplugError::from(ButtplugDeviceError::DeviceConfigurationError(format!(
+            "Cannot convert device definition to user config: {e:?}",
+          )))
+        })?,
+      })
     })
-    .collect();
+    .collect::<Result<_, ButtplugError>>()?;
   let user_protos = DashMap::new();
   for spec in user_specifiers {
     user_protos.insert(

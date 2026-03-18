@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -11,7 +11,7 @@ use crate::device::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{self, InputData, InputReadingV4, InputTypeData},
+  message::{self, InputReadingV4, InputTypeReading, InputValue},
 };
 use buttplug_server_device_config::Endpoint;
 use futures::{FutureExt, future::BoxFuture};
@@ -64,7 +64,7 @@ impl ProtocolHandler for KiirooProWand {
       let battery_reading = message::InputReadingV4::new(
         device_index,
         feature_index,
-        InputTypeData::Battery(InputData::new(data[0])),
+        InputTypeReading::Battery(InputValue::new(data[0])),
       );
       debug!("Got battery reading: {}", data[0]);
       Ok(battery_reading)

@@ -1,34 +1,10 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::message::{
-  ButtplugMessage,
-  ButtplugMessageError,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
-};
-use serde::{Deserialize, Serialize};
+use crate::message::simple_client_message;
 
-#[derive(
-  Debug, ButtplugMessage, ButtplugMessageFinalizer, Clone, PartialEq, Eq, Serialize, Deserialize,
-)]
-pub struct RequestDeviceListV0 {
-  #[serde(rename = "Id")]
-  id: u32,
-}
-
-impl Default for RequestDeviceListV0 {
-  fn default() -> Self {
-    Self { id: 1 }
-  }
-}
-
-impl ButtplugMessageValidator for RequestDeviceListV0 {
-  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
-    self.is_not_system_id(self.id)
-  }
-}
+simple_client_message!(RequestDeviceListV0);

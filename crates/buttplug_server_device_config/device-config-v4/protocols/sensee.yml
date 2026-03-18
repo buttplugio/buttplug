@@ -1,17 +1,19 @@
+---
 defaults:
   name: Sensee Diandou Rabbit
   features:
-    - id: 1544b066-a3d3-4749-9081-1b7a26ab54ed
-      output:
-        vibrate:
-          value:
-            - 0
-            - 100
+  - id: 1544b066-a3d3-4749-9081-1b7a26ab54ed
+    output:
+      vibrate:
+        value:
+        - 0
+        - 100
+    index: 0
   id: a8ffccf6-2d38-4606-abdd-8802a063a2ae
 communication:
-  - btle:
-      names:
-        - CTY222S4
-      services:
-        0000fff0-0000-1000-8000-00805f9b34fb:
-          tx: 0000fff5-0000-1000-8000-00805f9b34fb
+- btle:
+    names:
+    - CTY222S4
+    services:
+      0000fff0-0000-1000-8000-00805f9b34fb:
+        tx: 0000fff5-0000-1000-8000-00805f9b34fb

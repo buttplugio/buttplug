@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -9,7 +9,6 @@ use buttplug_core::{
   connector::ButtplugConnector,
   errors::ButtplugError,
   message::{ButtplugMessage, ButtplugMessageValidator, ErrorV0},
-  util::async_manager,
 };
 use buttplug_server::{
   ButtplugServer,
@@ -57,7 +56,7 @@ async fn run_server<ConnectorType>(
           trace!("Got message from connector: {:?}", client_message);
           let server_clone = server.clone();
           let connector_clone = shared_connector.clone();
-          async_manager::spawn(async move {
+          buttplug_core::spawn!(async move {
             if let Err(e) = client_message.is_valid() {
               error!("Message not valid: {:?} - Error: {}", client_message, e);
               let mut err_msg = ErrorV0::from(ButtplugError::from(e));

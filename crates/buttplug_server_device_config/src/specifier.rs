@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -201,31 +201,6 @@ impl BluetoothLESpecifier {
   }
 }
 
-/// Specifier for [Lovense Connect
-/// Service](crate::server::device::communication_manager::lovense_connect_service) devices
-///
-/// Network based services, has no attributes because the [Lovense Connect
-/// Service](crate::server::device::communication_manager::lovense_connect_service) device communication manager
-/// handles all device discovery and identification itself.
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct LovenseConnectServiceSpecifier {
-  // Needed for proper deserialization, but clippy will complain.
-  #[allow(dead_code)]
-  exists: bool,
-}
-
-impl Default for LovenseConnectServiceSpecifier {
-  fn default() -> Self {
-    Self { exists: true }
-  }
-}
-
-impl PartialEq for LovenseConnectServiceSpecifier {
-  fn eq(&self, _other: &Self) -> bool {
-    true
-  }
-}
-
 /// Specifier for [XInput](crate::server::device::communication_manager::xinput) devices
 ///
 /// Network based services, has no attributes because the
@@ -377,8 +352,6 @@ pub enum ProtocolCommunicationSpecifier {
   Serial(SerialSpecifier),
   #[serde(rename = "xinput")]
   XInput(XInputSpecifier),
-  #[serde(rename = "lovense_connect_service")]
-  LovenseConnectService(LovenseConnectServiceSpecifier),
   #[serde(rename = "websocket")]
   Websocket(WebsocketSpecifier),
 }
@@ -393,9 +366,6 @@ impl PartialEq for ProtocolCommunicationSpecifier {
       (HID(self_spec), HID(other_spec)) => self_spec == other_spec,
       (XInput(self_spec), XInput(other_spec)) => self_spec == other_spec,
       (Websocket(self_spec), Websocket(other_spec)) => self_spec == other_spec,
-      (LovenseConnectService(self_spec), LovenseConnectService(other_spec)) => {
-        self_spec == other_spec
-      }
       _ => false,
     }
   }

@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -9,16 +9,14 @@ use super::{ClientDeviceMessageAttributesV2, device_message_info::DeviceMessageI
 use crate::message::v1::{DeviceAddedV1, DeviceMessageInfoV1};
 use buttplug_core::{
   errors::ButtplugMessageError,
-  message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator},
+  message::{ButtplugMessage, ButtplugMessageValidator},
 };
 
 use getset::{CopyGetters, Getters};
 
 use serde::{Deserialize, Serialize};
 
-#[derive(
-  ButtplugMessage, Clone, Debug, PartialEq, Eq, Getters, CopyGetters, Serialize, Deserialize,
-)]
+#[derive(Clone, Debug, PartialEq, Eq, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct DeviceAddedV2 {
   #[serde(rename = "Id")]
   pub(in crate::message) id: u32,
@@ -31,6 +29,15 @@ pub struct DeviceAddedV2 {
   #[serde(rename = "DeviceMessages")]
   #[getset(get = "pub")]
   pub(in crate::message) device_messages: ClientDeviceMessageAttributesV2,
+}
+
+impl ButtplugMessage for DeviceAddedV2 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
 }
 
 impl From<DeviceAddedV2> for DeviceAddedV1 {
@@ -52,7 +59,4 @@ impl ButtplugMessageValidator for DeviceAddedV2 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_system_id(self.id)
   }
-}
-
-impl ButtplugMessageFinalizer for DeviceAddedV2 {
 }

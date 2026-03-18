@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -14,7 +14,7 @@ use crate::device::{
 };
 use buttplug_core::{
   errors::ButtplugDeviceError,
-  message::{self, InputData, InputReadingV4, InputTypeData},
+  message::{self, InputReadingV4, InputTypeReading, InputValue},
 };
 use byteorder::WriteBytesExt;
 use futures::future::{BoxFuture, FutureExt};
@@ -86,7 +86,7 @@ impl ProtocolHandler for XInput {
       Ok(message::InputReadingV4::new(
         device_index,
         feature_index,
-        InputTypeData::Battery(InputData::new(battery)),
+        InputTypeReading::Battery(InputValue::new(battery)),
       ))
     }
     .boxed()

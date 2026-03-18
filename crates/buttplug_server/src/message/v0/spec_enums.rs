@@ -1,26 +1,20 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
 use std::cmp::Ordering;
 
 use super::*;
-use crate::message::RequestServerInfoV1;
-use buttplug_core::{
-  errors::ButtplugMessageError,
-  message::{ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, PingV0},
-};
+use crate::message::{RequestServerInfoV1, v0::stop_device_cmd::StopDeviceCmdV0};
+use buttplug_core::message::PingV0;
 
 use serde::{Deserialize, Serialize};
 
 /// Represents all client-to-server messages in v0 of the Buttplug Spec
-#[derive(
-  Debug,
-  Clone,
-  PartialEq,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
-  FromSpecificButtplugMessage,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, Clone, PartialEq, derive_more::From, Serialize, Deserialize)]
 pub enum ButtplugClientMessageV0 {
   Ping(PingV0),
   // Handshake messages
@@ -42,17 +36,23 @@ pub enum ButtplugClientMessageV0 {
   VorzeA10CycloneCmd(VorzeA10CycloneCmdV0),
 }
 
+impl_message_enum_traits!(ButtplugClientMessageV0 {
+  Ping,
+  RequestServerInfo,
+  StartScanning,
+  StopScanning,
+  RequestDeviceList,
+  StopAllDevices,
+  StopDeviceCmd,
+  SingleMotorVibrateCmd,
+  FleshlightLaunchFW12Cmd,
+  VorzeA10CycloneCmd,
+});
+impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugClientMessageV0 {
+}
+
 /// Represents all server-to-client messages in v0 of the Buttplug Spec
-#[derive(
-  Debug,
-  Clone,
-  PartialEq,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  ButtplugMessageFinalizer,
-  Serialize,
-  Deserialize,
-)]
+#[derive(Debug, Clone, PartialEq, derive_more::From, Serialize, Deserialize)]
 pub enum ButtplugServerMessageV0 {
   // Status messages
   Ok(OkV0),
@@ -64,6 +64,18 @@ pub enum ButtplugServerMessageV0 {
   DeviceAdded(DeviceAddedV0),
   DeviceRemoved(DeviceRemovedV0),
   ScanningFinished(ScanningFinishedV0),
+}
+
+impl_message_enum_traits!(ButtplugServerMessageV0 {
+  Ok,
+  Error,
+  ServerInfo,
+  DeviceList,
+  DeviceAdded,
+  DeviceRemoved,
+  ScanningFinished,
+});
+impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugServerMessageV0 {
 }
 
 #[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]

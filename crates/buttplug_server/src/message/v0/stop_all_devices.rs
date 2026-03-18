@@ -1,0 +1,36 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
+use crate::message::{ButtplugMessage, ButtplugMessageError, ButtplugMessageValidator};
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub struct StopAllDevicesV0 {
+  #[serde(rename = "Id")]
+  id: u32,
+}
+
+impl Default for StopAllDevicesV0 {
+  fn default() -> Self {
+    Self { id: 1 }
+  }
+}
+
+impl ButtplugMessage for StopAllDevicesV0 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugMessageValidator for StopAllDevicesV0 {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)
+  }
+}

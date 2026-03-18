@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -11,7 +11,6 @@ use buttplug_core::{
   message::{
     ButtplugDeviceMessage,
     ButtplugMessage,
-    ButtplugMessageFinalizer,
     ButtplugMessageValidator,
     InputCmdV4,
     InputCommandType,
@@ -21,9 +20,7 @@ use buttplug_core::{
 use getset::CopyGetters;
 use uuid::Uuid;
 
-#[derive(
-  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, CopyGetters,
-)]
+#[derive(Debug, PartialEq, Eq, Clone, CopyGetters)]
 #[getset(get_copy = "pub")]
 pub struct CheckedInputCmdV4 {
   id: u32,
@@ -34,8 +31,27 @@ pub struct CheckedInputCmdV4 {
   feature_id: Uuid,
 }
 
+impl ButtplugMessage for CheckedInputCmdV4 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
+  }
+}
+
+impl ButtplugDeviceMessage for CheckedInputCmdV4 {
+  fn device_index(&self) -> u32 {
+    self.device_index
+  }
+  fn set_device_index(&mut self, device_index: u32) {
+    self.device_index = device_index;
+  }
+}
+
 impl CheckedInputCmdV4 {
   pub fn new(
+    id: u32,
     device_index: u32,
     feature_index: u32,
     input_type: InputType,
@@ -43,7 +59,7 @@ impl CheckedInputCmdV4 {
     feature_id: Uuid,
   ) -> Self {
     Self {
-      id: 1,
+      id,
       device_index,
       feature_index,
       input_type,
@@ -65,10 +81,11 @@ impl TryFromDeviceAttributes<InputCmdV4> for CheckedInputCmdV4 {
     msg: InputCmdV4,
     features: &crate::message::ServerDeviceAttributes,
   ) -> Result<Self, buttplug_core::errors::ButtplugError> {
-    if let Some(feature) = features.features().get(msg.feature_index() as usize) {
+    if let Some(feature) = features.features().get(&msg.feature_index()) {
       if let Some(sensor_map) = feature.input() {
         if sensor_map.contains(msg.input_type()) {
           Ok(CheckedInputCmdV4::new(
+            msg.id(),
             msg.device_index(),
             msg.feature_index(),
             msg.input_type(),
@@ -77,12 +94,12 @@ impl TryFromDeviceAttributes<InputCmdV4> for CheckedInputCmdV4 {
           ))
         } else {
           Err(ButtplugError::from(
-            ButtplugDeviceError::DeviceNoSensorError("InputCmd".to_string()),
+            ButtplugDeviceError::MessageNotSupported("InputCmd".to_string()),
           ))
         }
       } else {
         Err(ButtplugError::from(
-          ButtplugDeviceError::DeviceNoSensorError("InputCmd".to_string()),
+          ButtplugDeviceError::MessageNotSupported("InputCmd".to_string()),
         ))
       }
     } else {

@@ -4,7 +4,6 @@
 [![Github donate button](https://img.shields.io/badge/github-donate-ff69b4.svg)](https://www.github.com/sponsors/qdot)
 [![Discourse Forums](https://img.shields.io/discourse/status?label=buttplug.io%20forums&server=https%3A%2F%2Fdiscuss.buttplug.io)](https://discuss.buttplug.io)
 [![Discord](https://img.shields.io/discord/353303527587708932.svg?logo=discord)](https://discord.buttplug.io)
-[![Twitter](https://img.shields.io/twitter/follow/buttplugio.svg?style=social&logo=twitter)](https://twitter.com/buttplugio)
 [![bluesky](https://img.shields.io/bluesky/followers/buttplug.io)](https://bsky.app/profile/buttplug.io)
 
 [![Crates.io Version](https://img.shields.io/crates/v/buttplug)](https://crates.io/crates/buttplug)
@@ -17,11 +16,11 @@
       Rust API Documentation
     </a>
     <span> | </span>
-    <a href="https://docs.buttplug.io/docs/dev-guide">
+    <a href="https://buttplug.io/docs/dev-guide">
       Developer Guide
     </a>
     <span> | </span>    
-    <a href="https://docs.buttplug.io/docs/spec">
+    <a href="https://buttplug.io/docs/spec">
       Protocol Spec
     </a>
     <span> | </span>
@@ -68,15 +67,9 @@ We also produce [btleplug](https://github.com/deviceplug/btleplug), the host-sid
 
 For a list of applications using Buttplug and Intiface, see the [awesome-buttplug repo](https://github.com/buttplugio/awesome-buttplug).
 
-## Beta on main branch?! REALLY?
-
-We've been working on the next version of our message spec for the better part of 3 years now, which has come with massive changes to the library. Rather than let this sit on our `dev` branch for another few months while we run through the beta process, we decided to promote beta to our main branch so it gets visibility. We'll still be marking beta versions in crates and releases, so package installs will still default to pre-beta version until we've released.
-
-Also I hadn't updated the README on the project in several years and didn't want to have to rewrite for both the old and new libraries. So here we are.
-
 ## Hardware Support
 
-Buttplug-rs is currently capable of controlling toys via:
+Buttplug is currently capable of controlling toys via:
 
 - Bluetooth LE (Desktop and Android/iOS)
 - Serial Ports (Desktop)
@@ -100,23 +93,20 @@ This project consists of the following crates:
 
 | Crate Name | Description |
 | ---- | ----------- |
-| buttplug | meta-crate that's just a rehost on buttplug_client, see README for more info |
-| buttplug_client | Buttplug Rust Client, useful for building application that will access Intiface Engine or Intiface Central. We recommend most developers use this. See crate README for more info. |
-| buttplug_client_in_process | Buttplug Rust Client w/ integrated Buttplug Server. Useful for building standalone applications and examples. | 
-| buttplug_core | Contains the protocol message schema, message class implementations, and structures shared by the client and server implementations. Will be rarely needed as a direct dependency. |
-| buttplug_derive | Procedural macros used in the Buttplug rust implementation. Will be rarely needed as a direct dependency. |
-| buttplug_server | The core server implementation, including server and device structures, all protocol implementations, etc... |
-| buttplug_server_device_config | Device configuration file loading and database implementation. |
-| buttplug_server_hwmgr_btleplug | Bluetooth LE device communication support |
-| buttplug_server_hwmgr_hid | HID device communication support |
-| buttplug_server_hwmgr_lovense_connect | Lovense Connect device communication support (soon to be deprecated) |
-| buttplug_server_hwmgr_lovense_dongle | Lovense Dongle device communication support (soon to be deprecated) |
-| buttplug_server_hwmgr_serial | Serial device communication support |
-| buttplug_server_hwmgr_websocket | Websocket device communication suppor, used for devices that may connect in ways not directly supported by other formats |
-| buttplug_server_hwmgr_xinput | XInput gamepad support (windows only) |
-| buttplug_tests | For tests that need the whole framework |
-| buttplug_transport_websocket_tungstenite | Communications transport for clients/servers using tokio-tungstenite |
-| intiface_engine | Command line interface for running a Buttplug server |
+| [buttplug](crates/buttplug) | meta-crate that's just a rehost on buttplug_client, see README for more info |
+| [buttplug_client](crates/buttplug_client/) | Buttplug Rust Client, useful for building application that will access Intiface Engine or Intiface Central. We recommend most developers use this. See crate README for more info. |
+| [buttplug_client_in_process](crates/buttplug_client_in_process/) | Buttplug Rust Client w/ integrated Buttplug Server. Useful for building standalone applications and examples. | 
+| [buttplug_core](crates/buttplug_core) | Contains the protocol message schema, message class implementations, and structures shared by the client and server implementations. Will be rarely needed as a direct dependency. |
+| [buttplug_server](crates/buttplug_server/) | The core server implementation, including server and device structures, all protocol implementations, etc... |
+| [buttplug_server_device_config](crates/buttplug_server_device_config/) | Device configuration file loading and database implementation. |
+| [buttplug_server_hwmgr_btleplug](crates/buttplug_server_hwmgr_btleplug/) | Bluetooth LE device communication support |
+| [buttplug_server_hwmgr_hid](crates/buttplug_server_hwmgr_hid/) | HID device communication support |
+| [buttplug_server_hwmgr_serial](crates/buttplug_server_hwmgr_serial/) | Serial device communication support |
+| [buttplug_server_hwmgr_websocket](crates/buttplug_server_hwmgr_websocket/) | Websocket device communication suppor, used for devices that may connect in ways not directly supported by other formats |
+| [buttplug_server_hwmgr_xinput](crates/buttplug_server_hwmgr_xinput/) | XInput gamepad support (windows only) |
+| [buttplug_tests](crates/buttplug_tests/) | For tests that need the whole framework |
+| [buttplug_transport_websocket_tungstenite](crates/buttplug_transport_websocket_tungstenite/) | Communications transport for clients/servers using tokio-tungstenite |
+| [intiface_engine](crates/intiface_engine/) | Command line interface for running a Buttplug server |
 
 For more information on each crate, check the README in its directory in this repo.
 
@@ -125,54 +115,22 @@ For more information on each crate, check the README in its directory in this re
 On Windows and macOS, running `cargo build` should suffice for building the project. All
 dependencies are vendored in.
 
-On Linux, the following packages will be needed to build with default features:
+On Linux, the following packages will be needed to build with all crates:
 
 - `libudev-dev` (Required for serial port/HID support)
 - `libusb-1.0-0-dev` (Required for serial port/HID support)
 
 The package names are listed as their Debian requirements, and may be different for other
-distributions. Removing the `lovense-dongle-manager` and `serial-manager` features should stop these
-from being required.
+distributions.
 
-## Usage
+## Other Language Implementations
 
-To use Buttplug in your Rust application or library, check out the
-[buttplug package on crates.io](https://crates.io/crates/buttplug).
-
-The following crate features are available
-
-| Feature | Other Features Used | Description |
-| --------- | ----------- | ----------- |
-| `client` | None | Buttplug client implementation (in-process connection only) |
-| `server` | None | Buttplug server implementation (in-process connection only) |
-| `websockets` | `tokio-runtime` | Websocket connectors, used to connect remote clients (Clear/SSL)/servers (Clear Only) |
-| `btleplug-manager` | `server` | Bluetooth hardware support on Windows >=10, macOS, Linux, iOS, Android |
-| `lovense-dongle-manager` | `server` | Lovense USB Dongle support on Windows >=7, macOS, Linux |
-| `serial-manager` | `server` | Serial Port hardware support on Windows >=7, macOS, Linux |
-| `xinput-manager` | `server` | XInput Gamepad support on Windows >=7 |
-| `lovense-connect-service-manager` | `server` | Lovense Connect App support (all platforms) |
-| `websocket-server-manager` | `websockets` | Support for connecting devices via Websockets (all platforms) |
-| `dummy-runtime` | None | Runtime that panics on any spawn. Only used for tests. |
-| `tokio-runtime` | None | Uses tokio for futures |
-| `wasm-bindgen-runtime` | None | Uses the wasm-bindgen executor as a runtime (WASM only) |
-
-Default features are enough to build a full desktop system:
-
-- `tokio-runtime`
-- `client`
-- `server`
-- `websocket`
-- `websocket-server-manager`
-- `btleplug-manager` (feature builds as noop on WASM)
-- `serial-manager` (feature builds as noop on iOS, Android)
-- `lovense-dongle-manager` (feature builds as noop on iOS, Android)
-- `xinput-manager` (feature is only relevant on windows, but builds as a noop on all
-  other platforms).
+See the [awesome-buttplug repo](https://github.com/buttplugio/awesome-buttplug#development-and-libraries) for a full list of client implementations in other programming languages.
 
 ## Filing Issues and Contributing
 
 If you have issues or feature requests, please feel free to [file an
-issue](https://github.com/buttplugio/buttplug-rs/issues).
+issue](https://github.com/buttplugio/buttplug/issues).
 
 **We are not looking for unsolicited code contributions or pull requests, and will not accept
 pull requests that do not have a matching issue where the matter was previously discussed in an issue on this repo or in one of our communication channels, listed below.** 
@@ -190,9 +148,9 @@ latest and greatest hardware. We have multiple ways to donate!
 - [Github Sponsors](https://github.com/sponsors/qdot)
 - [Ko-Fi](https://ko-fi.com/qdot76367)
 
-## Other Language Implementations
+## Inclusion of LLM Generated Code
 
-See the [awesome-buttplug repo](https://github.com/buttplugio/awesome-buttplug#development-and-libraries) for a full list of client implementations in other programming languages.
+Buttplug, Intiface, and related projects may contain LLM generated ("agentic") code. All code is reviewed by a developer, no vibecoding allowed. Agentic coding is mostly used for refactors and cleanup. We will do our best to call out where this happens, usually in commit messages.
 
 ## License
 
@@ -200,7 +158,7 @@ Buttplug is BSD 3-Clause licensed.
 
 ```text
 
-Copyright (c) 2016-2025, Nonpolynomial, LLC
+Copyright (c) 2016-2026, Nonpolynomial, LLC
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

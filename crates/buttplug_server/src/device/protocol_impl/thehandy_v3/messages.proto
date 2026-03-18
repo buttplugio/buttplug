@@ -1,0 +1,440 @@
+// Auto-generated on 2025-10-14 13:26:40
+syntax = "proto3";
+package hdy_rpc;
+import "constants.proto";
+//606
+message RequestConnectionKeyGet{
+}
+message ResponseConnectionKeyGet{
+    string key = 1;
+}
+///////////////////////// WIFI configuration 620-639 /////////////////////////
+//620 Port for wifi_prov_config_get_data_t - Get the current state of the wifi connection
+message RequestWifiStatusGet{
+}
+message ResponseWifiStatusGet{
+    ApInfo ap_info = 1; //Info on the current AP connection (Blank if not connected)
+    WifiState state = 2;
+    WifiFailedReason failed_reason = 3;
+    bool socket_connected = 4;
+    string ssid = 5; //Of the last configured AP stored - NB! Can be different from the connected AP SSID
+}
+//621 
+//Port for wifi_prov_config_set_data_t - Set the wifi configuration
+//If connected to WiFi, this call will disconnect the device from the current AP. It will not connect to the new AP.
+message RequestWifiSet{
+    string ssid = 1;
+    string password = 2;
+    bool save = 3; //store in NVS (currently not used -> Alwaysed stored)
+}
+//port for _hdy_pc_prov_config_config_apply is not needed since we can set the WiFi by OnlineModeSet
+//623 Port for _hdy_pc_prov_scan_start+result - Start wifi scan. Rembember to stop the scan when done! Returns OK if scan has started ok. Returns a scan complete notification when the scan is done.
+message RequestWifiScanStart{
+    bool blocking =1;                   //[default:false] If true, the system will wait for the scan to finish before sending the Blank OK. NB! This is one of the few blocking RPC calls!
+    bool passive = 2;                   //[default:false] if false or not set -> active scan
+    uint32 channel = 3;                 //[default:all channels==0]uint8_t scan the specific channel. if not set -> all channels
+    bool show_hidden = 4;               //[default:false]if true -> show hidden networks
+    uint32 passive_scan_time = 5;       //[default:regular scantime values] ms. Only used if passive is true. If not set, the default value is used. passive scan time per channel, units: millisecond, values above 1500ms may cause station to disconnect from AP and are not recommended. 
+    uint32 active_scan_time_min = 6;    //[default:regular scantime values] ms. Only used if passive is false. If not set, the default value is used.
+    uint32 active_scan_time_max = 7;    //[default:regular scantime values] ms. Only used if passive is false. If not set, the default value is used. values above 1500ms may cause station to disconnect from AP and are not recommended. 
+}
+//624
+//Due to BLE limitations, the results are sent in chunks
+message RequestWifiScanResultsGet{
+    uint32 max_results = 1;     //Max 10 (NB! can be changed in the future)
+    uint32 offset_index = 2;    //Offset index for the results
+}
+message ResponseWifiScanResultsGet{
+    repeated ApInfo ap_info = 1; //Max 10 (can be changed). Will be empty if no results or failed
+    uint32 total_results = 2; //Total number of results
+}
+//625 
+//Clean up the scan results and free memory on the device
+message RequestWifiScanStop{
+}
+/************TO HANDY - PUBLIC - 700++ ************/
+//700
+message RequestModeGet{
+}
+message ResponseModeGet{
+    Mode mode = 1;
+    uint32 mode_session_id = 2;
+}
+//701
+message RequestModeSet{
+    Mode mode = 1;
+}
+message ResponseModeSet{
+    Mode mode = 1;
+    uint32 mode_session_id = 2;
+}
+//707
+/*
+    Reboots the device.
+    The connection mode at start can be overriden by the connection_mode parameter.
+    NB! This override will only be used once. After the first boot, the connection mode will be set to the value in settings.
+*/
+message RequestReboot{
+    ConnectionMode connection_mode = 3; //how the machine will connect after boot
+}
+//708
+message RequestButtonPress{
+    uint32 button = 1;
+    ButtonEvent event = 2;
+}
+//709
+message RequestClockOffsetSet{
+    sint64 clock_offset = 1; //Clock offset in ms (difference between server (UNIX) and machine time (ms since boot)))
+    int32 rtd = 2; //send 0 (or do not send) to not set. Just storing the RTD for the machine to be used in future GET requests. Set it to the RTD used in the clockOffset calculation.
+}
+message ResponseClockOffsetSet{
+    uint32 time = 1; //Machine time (ms since boot)
+    sint64 clock_offset = 2; //Clock offset in ms (difference between server (UNIX) and machine time (ms since boot)))
+    int32 rtd = 3; //round trip delay in ms for the machine (set by client in RequestClockOffsetSet) NB! not calaculated by the machine!
+}
+//710
+message RequestBatteryGet{
+}
+message ResponseBatteryGet{
+    BatteryState state = 1;
+}
+//712
+message RequestClockOffsetGet{
+}
+message ResponseClockOffsetGet{
+    uint32 time = 1; //Machine time (ms since boot)
+    sint64 clock_offset = 2; //Clock offset in ms (difference between server (UNIX) and machine time (ms since boot)))
+    int32 rtd = 3; //round trip delay in ms for the machine (set by client in RequestClockOffsetSet) NB! not calaculated by the machine!
+}
+//713
+//Get the system capabilities
+message RequestCapabilitiesGet{
+}
+message ResponseCapabilitiesGet{
+    bool vulva_oriented = 1;        //If the device is vulva oriented. If not, then it pen** oriented or both (cannot use the p word, since copilot will block auto complete)
+    bool battery = 2;               //If the device has battery
+    uint32 slider = 3;              //[uint8]nr of sliders
+    uint32 lra = 4;                 //[uint8]nr of LRAs on the system
+    uint32 erm = 5;                 //[uint8]nr of ERMs on the system
+    bool external_memory = 6;       //If the device has external memory
+    bool rgb_led_indicator = 7;     //If the device has a RGB LED installed
+    bool led_matrix = 8;            //If the device has a LED matrix installed
+    uint32 led_matrix_leds_x = 9;   //[uint8]Nr of leds in X axis
+    uint32 led_matrix_leds_y = 10;  //[uint8]Nr of leds in Y axis
+    bool rgb_ring = 11;             //If the device has a RGB ring indicator
+    uint32 rgb_ring_leds = 12;      //[uint8]Nr of leds in the RGB ring
+    uint32 battery_capacity = 13;   //Battery capacity in mAh
+    BatteryDriver battery_driver = 14; //Battery driver type - Added in FW4.0.19
+}
+//714
+/*
+    Get the session ids (Random Int) (mode, socket and boot)
+     - Added in FW4.0.11
+*/
+message RequestSessionIdsGet{
+}
+message ResponseSessionIdsGet{
+    uint32 boot_session_id = 1;    //(Random uint32) Changes each time the device boots
+    uint32 socket_session_id = 2;  //Starts at 0 and inc on each DISCONNECT event. Each reconnect attempt will trigger a disconnect. NB! After a WiFi disconnect, the session id might get incremented by 2.
+    uint32 mode_session_id = 3;    //Starts at 0 and inc on each mode change. NB! was random in FW4.0.11 and FW4.0.12
+}
+//715 - Added in FW4.0.13
+// Stop the device no matter the mode.
+message RequestStopCurrentMode{
+}
+//716 - Added in FW4.0.13
+message RequestConnectionModeSet{
+    ConnectionMode mode = 1;
+}
+//717 - Added in FW4.0.13
+message RequestConnectionModeGet{
+}
+message ResponseConnectionModeGet{
+    ConnectionMode mode = 1;
+}
+///////////////////////// HAMP /////////////////////////
+//720
+message RequestHampStart{
+}
+message ResponseHampStart{
+    HampState state = 1;
+}
+//721
+message RequestHampStop{
+}
+message ResponseHampStop{ 
+    HampState state = 1;
+}
+//723
+message RequestHampVelocitySet{
+    float velocity = 1; //Default is 0% 
+}
+message ResponseHampVelocitySet{ 
+    HampState state = 1;
+}
+//724
+message RequestHampStateGet{
+}
+message ResponseHampStateGet{
+    HampState state = 1;
+}
+//725 - Added in FW4.0.15
+message RequestHampZoneSet{
+    float min = 1; //[0-1] Min value of the zone in %
+    float max = 2; //[0-1] Max value of the zone in %
+}
+message ResponseHampZoneSet{
+    HampState state = 1;
+}
+///////////////////////// HDSP /////////////////////////
+//NB! Absolute values are capped within limits. 
+//740
+message RequestHdspXaVaSet{
+    float xa = 1;
+    float va = 2;
+    bool stop_on_target = 3;
+}
+//741
+message RequestHdspXpVaSet{
+    float xp = 1;
+    float va = 2;
+    bool stop_on_target = 3;
+}
+//742
+message RequestHdspXpVpSet{
+    float xp = 1;
+    float vp = 2;
+    bool stop_on_target = 3;
+}
+//743
+message RequestHdspXaTSet{
+    float xa = 1;
+    uint32 t = 2;
+    bool stop_on_target = 3;
+}
+//744
+message RequestHdspXpTSet{
+    float xp = 1;
+    uint32 t = 2;
+    bool stop_on_target = 3;
+}
+//745
+message RequestHdspXaVpSet{
+    float xa = 1;
+    float vp = 2;
+    bool stop_on_target = 3;
+}
+//746
+message RequestHdspStop{
+}
+///////////////////////// Slider /////////////////////////
+//840
+message RequestSliderStrokeGet{
+}
+message ResponseSliderStrokeGet{ //TODO: Move to Slider state?
+    float min = 1;
+    float max = 2;
+    float min_absolute = 3;
+    float max_absolute = 4;
+}
+//841
+message RequestSliderStrokeSet{
+    float min = 1;
+    float max = 2;
+}
+//Return to match the notification. If not the caller does not know the state of the absolute values
+message ResponseSliderStrokeSet{ 
+    float min = 1;
+    float max = 2;
+    float min_absolute = 3;
+    float max_absolute = 4;
+}
+//842
+message RequestSliderStateGet{
+}
+message ResponseSliderStateGet{
+    float position = 1;             //[percentage]
+    float position_absolute = 2;    //[mm]
+    float motor_temp = 3;           //[Degrees C]
+    float speed_absolute = 4;       //[mm/s]
+    bool dir = 5;                   //true = forward, false = backward
+    uint32 motor_position = 6;      //hall patter signal [0-2]. In Handy H01, change results in 1/12 rotation
+    uint32 motor_temp_adc_value = 7; //0-4095. ADC value of the motor temperature sensor - Added in FW4.0.16
+}
+//843 - Moves the slider to the absolute position and reset encoder
+//Added in FW4.0.15
+message RequestSliderCalibrate{
+    bool go_to_start = 1; //If true, the slider will move to the start position (END_BUFFER ~5mm) after calibration
+}
+message ResponseSliderCalibrate{
+    bool success = 1; //If the calibration was successful
+}
+///////////////////////// HSP /////////////////////////
+//860
+message RequestHspSetup{
+    uint32 stream_id = 1;   //[Default 0] a stream id to identify the stream.
+    // bool loop = 2;       //DEPRECATED -> moved to play. [Default false] If true, the stream will loop.   
+}
+message ResponseHspSetup{
+    HspState state = 1;
+}
+//861
+message RequestHspAdd{
+    repeated Point points = 1;
+    bool flush = 2; //clear the current points before adding the new ones.
+    uint32 tail_point_stream_index = 3; //[Default points -1] Absolute point of the last point added. Used for threshold notifications and to keep track of absoulute position for the client.
+    uint32 tail_point_threshold = 5; //Added in FW4.0.13. If not 0, the device will send a notification when this point is played.
+}
+message ResponseHspAdd{
+    HspState state = 1;
+}
+//862
+message RequestHspFlush{
+}
+message ResponseHspFlush{
+    HspState state = 1;
+}
+//863
+message RequestHspPlay{
+    int32 start_time = 1;       //[DEFAULT 0] can be negative
+    uint64 server_time = 2;     //[OPTIONAL] Estimated server time on sending. Optional. If not set, there is no network latency adjustment.
+    float playback_rate = 3;    //[DEFAULT 1] playback rate (1 = normal speed), < 1 = slower, > 1 = faster. Must be positive.
+    bool loop = 4;              //[DEFAULT false]
+    bool pause_on_starving = 5; //[Default false] If true, the stream will pause when the buffer is empty. When data is added the stream will resume without time adjustments
+}
+message ResponseHspPlay{
+    HspState state = 1;
+}
+//864
+message RequestHspStop{
+}
+message ResponseHspStop{
+    HspState state = 1;
+}
+//865
+message RequestHspPause{
+}
+message ResponseHspPause{
+    HspState state = 1;
+}
+//866
+message RequestHspResume{
+    bool pick_up = 1; //[DEFAULT false] If false, then the current time will resume where it pause. If true, the stream will pick up  where it should be.
+}
+message ResponseHspResume{
+    HspState state = 1;
+}
+//867
+message RequestHspStateGet{
+}
+message ResponseHspStateGet{
+    HspState state = 1;
+}
+//868
+message RequestHspCurrentTimeSet{
+    int32 current_time = 1;
+    uint64 server_time = 2; //Estimated server time on sending. Optional. If not set, there is no network latency adjustment.
+    float filter = 3;       //[DEFAULT 0.5] [0-1] 1 will force current time. Lower values will drift into the actuall currentTime
+}
+message ResponseHspCurrentTimeSet{
+    HspState state = 1;
+}
+//869
+message RequestHspThresholdSet{
+    uint32 tail_point_threshold = 1; //If not 0, the device will send a notification when this point is played.
+}
+message ResponseHspThresholdSet{
+    HspState state = 1;
+}
+//870 - Added in FW4.0.13
+message RequestHspPauseOnStarvingSet{
+    bool pause_on_starving = 1; //If true, the stream will pause when the buffer is empty. When data is added the stream will resume without time adjustments
+}
+message ResponseHspPauseOnStarvingSet{
+    HspState state = 1;
+}
+///////////////////////// HMI 880->899 /////////////////////////
+message RequestLedOverride{
+    bool override = 1;      //If true, the system will ignore the current mode and use the override color. Must be true for the override color to be used.
+    uint32 r = 2;           //[0-255] -> uint8 in FW 
+    uint32 g = 3;           //[0-255] -> uint8 in FW
+    uint32 b = 4;           //[0-255] -> uint8 in FW
+    uint32 intensity = 5;   //[0-100] -> uint8 in FW
+}
+///////////////////////// HVP /////////////////////////
+//900
+//NB will also trigger a start
+message RequestHvpSet{
+    float amplitude = 1;    //0-1 (0-100%) For LRA, ERM and Sliders with vibration adapter (percent of valid output range)
+    uint32 frequency = 2;   //0-10000 (Hz) For LRA only
+    float position = 3;     // (mm) Where on the slider should the vibration be. For slider with vibration adapter only. 
+}
+message ResponseHvpSet{
+    HvpState state = 1;
+}
+//901
+message RequestHvpStop{
+}
+message ResponseHvpStop{
+    HvpState state = 1;
+}
+//902
+message RequestHvpStart{
+}
+message ResponseHvpStart{
+    HvpState state = 1;
+}
+//903
+message RequestHvpStateGet{
+}
+message ResponseHvpStateGet{
+    HvpState state = 1;
+}
+///////////////////////// HRPP /////////////////////////
+//Added in FW4.0.14 - But some messages where altered in FW4.0.15. So, only compatible with FW4.0.15 and later
+//920
+message RequestHrppStart{
+}
+message ResponseHrppStart{
+    HrppState state = 1;
+}
+//921
+message RequestHrppStop{
+}
+message ResponseHrppStop{
+    HrppState state = 1;
+}
+//922
+message RequestHrppAmplitudeSet{
+    float amplitude = 1; //0-1 (0-100%)
+}
+message ResponseHrppAmplitudeSet{
+    HrppState state = 1;
+}
+//923
+message RequestHrppPlaybackSpeedSet{
+    float speed = 1; //Must be bigger than 0
+}
+message ResponseHrppPlaybackSpeedSet{
+    HrppState state = 1;
+}
+//924
+message RequestHrppPatternSet{
+    uint32 pattern_nr = 1; //0-MAX_PATTERN_NR
+}
+message ResponseHrppPatternSet{
+    HrppState state = 1;
+}
+//925
+message RequestHrppStateGet{
+}
+message ResponseHrppStateGet{
+    HrppState state = 1;
+}
+//926
+message RequestHrppPatternsGet{
+}
+message ResponseHrppPatternsGet{
+    HrppState state = 1;
+    repeated HrppPattern patterns = 2;
+}

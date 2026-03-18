@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -15,7 +15,6 @@ use crate::{
     transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
   },
   message::serializer::ButtplugSerializedMessage,
-  util::async_manager,
 };
 use futures::{
   FutureExt,
@@ -58,8 +57,12 @@ impl ButtplugConnectorTransport for ButtplugStreamTransport {
     let incoming_recv = self.receiver.clone();
     let sender = self.sender.clone();
     async move {
-      let mut incoming_recv = incoming_recv.lock().await.take().unwrap();
-      async_manager::spawn(async move {
+      let mut incoming_recv = incoming_recv
+        .lock()
+        .await
+        .take()
+        .ok_or(ButtplugConnectorError::ConnectorAlreadyConnected)?;
+      crate::spawn!("ButtplugStreamTransport", async move {
         loop {
           select! {
             msg = outgoing_receiver.recv() => {

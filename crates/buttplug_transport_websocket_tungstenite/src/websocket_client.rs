@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -18,7 +18,6 @@ use buttplug_core::{
     },
   },
   message::serializer::ButtplugSerializedMessage,
-  util::async_manager,
 };
 use futures::{FutureExt, SinkExt, StreamExt, future::BoxFuture};
 use rustls::{
@@ -40,7 +39,6 @@ use tokio_tungstenite::{
   connect_async_tls_with_config,
   tungstenite::protocol::Message,
 };
-use tracing::Instrument;
 use url::Url;
 
 pub fn get_rustls_config_dangerous() -> ClientConfig {
@@ -183,7 +181,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
         Ok((stream, _)) => {
           let (mut writer, mut reader) = stream.split();
 
-          async_manager::spawn(
+          buttplug_core::spawn!("ButtplugWebsocketClientTransport I/O",
             async move {
               loop {
                 select! {
@@ -288,7 +286,6 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                 }
               }
             }
-            .instrument(tracing::info_span!("Websocket Client I/O Task")),
           );
           Ok(())
         }

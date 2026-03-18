@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -49,9 +49,6 @@
 extern crate log;
 
 #[macro_use]
-extern crate buttplug_derive;
-
-#[macro_use]
 extern crate strum_macros;
 
 pub mod connector;
@@ -62,7 +59,7 @@ mod server;
 mod server_builder;
 mod server_message_conversion;
 
-pub use server::ButtplugServer;
+pub use server::{ButtplugServer, ConnectionState};
 pub use server_builder::ButtplugServerBuilder;
 
 use futures::future::BoxFuture;

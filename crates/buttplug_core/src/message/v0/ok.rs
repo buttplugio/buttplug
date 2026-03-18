@@ -1,22 +1,15 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2024 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::message::{
-  ButtplugMessage,
-  ButtplugMessageError,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
-};
+use crate::message::{ButtplugMessage, ButtplugMessageError, ButtplugMessageValidator};
 use serde::{Deserialize, Serialize};
 
 /// Ok message, signifying successful response to a command. [Spec link](https://buttplug-spec.docs.buttplug.io/status.html#ok).
-#[derive(
-  Debug, PartialEq, Eq, ButtplugMessage, ButtplugMessageFinalizer, Clone, Serialize, Deserialize,
-)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct OkV0 {
   /// Message Id, used for matching message pairs in remote connection instances.
   #[serde(rename = "Id")]
@@ -33,6 +26,15 @@ impl OkV0 {
 impl Default for OkV0 {
   fn default() -> Self {
     Self { id: 1 }
+  }
+}
+
+impl ButtplugMessage for OkV0 {
+  fn id(&self) -> u32 {
+    self.id
+  }
+  fn set_id(&mut self, id: u32) {
+    self.id = id;
   }
 }
 
@@ -54,12 +56,4 @@ mod test {
     let js = serde_json::to_string(&ok).expect("Infallible serialization");
     assert_eq!(OK_STR, js);
   }
-  /*
-  #[test]
-  fn test_ok_deserialize() {
-    let union: ButtplugServerMessageCurrent =
-      serde_json::from_str(OK_STR).expect("Infallible deserialization");
-    assert_eq!(ButtplugServerMessageCurrent::Ok(OkV0::new(0)), union);
-  }
-  */
 }

@@ -1,3 +1,10 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
 use rand::distr::{Alphanumeric, SampleString};
 
 pub struct IntifaceMdns {
@@ -15,12 +22,7 @@ impl IntifaceMdns {
     );
 
     let (_responder, task) = libmdns::Responder::with_default_handle().unwrap();
-    let _svc = _responder.register(
-      "_intiface_engine._tcp".to_owned(),
-      instance_name,
-      12345,
-      &["path=/"],
-    );
+    let _svc = _responder.register("_intiface_engine._tcp", &instance_name, 12345, &["path=/"]);
     tokio::spawn(async move {
       info!("Entering up mDNS task");
       task.await;

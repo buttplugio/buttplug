@@ -1,3 +1,60 @@
+# 10.0.2 (2026-03-13)
+
+- Device Support
+  - HoneyPlayBox devices
+  - Various JoyHub devices
+
+# 10.0.1 (2026-02-07)
+
+## Bugfixes
+
+- Make user-set message_gap_ms an Option, fix position in user config schema
+
+# 10.0.0 (2026-01-31)
+
+## Features
+
+- Add devices
+  - KGoal Boost
+  - Adorime Cockring
+  - Luvmazer Dildo
+  - Add Temp/LED to Joyhub devices
+  - Lovense Lush Anal
+  - Svakom protocol fixes
+  - Joyhub Dodge
+- Fixup configurations for v4 spec final configs
+
+# 10.0.0-beta4 (2025-12-29)
+
+## Features
+
+- Update name of Input property fields for DeviceList
+  - This will be a breaking change between beta3 and beta4
+
+# 10.0.0-beta3 (2025-12-26)
+
+## Features
+
+- Added device support
+  - The Handy 2 Pro
+  - The Oh!
+  - Adorime Pink Touch
+  - WeVibe Sync O
+  - JoyHub Torque
+  - JoyHub Mighty
+  - JoyHub Violet Gale
+  - Vorze Omorfi  
+  - Sensee Markel
+  - Easylive Gamer
+  - New(?) Nobra Controllers
+  - Fluffer devices (new MotorBunnys)
+  - Adorime Cock Ring
+- Update Dependencies
+
+## Bugfixes
+
+- New Svakom Mimiki identifier
+
 # 10.0.0-beta2 (2025-10-18)
 
 ## Features

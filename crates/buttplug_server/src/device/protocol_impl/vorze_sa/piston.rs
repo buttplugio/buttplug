@@ -1,3 +1,10 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2026 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
 use super::VorzeDevice;
 
 use crate::device::{
@@ -42,7 +49,7 @@ pub fn get_piston_speed(mut distance: f64, mut duration: f64) -> u8 {
 }
 
 impl ProtocolHandler for VorzeSAPiston {
-  fn handle_position_with_duration_cmd(
+  fn handle_hw_position_with_duration_cmd(
     &self,
     _feature_index: u32,
     feature_id: uuid::Uuid,
