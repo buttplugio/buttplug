@@ -93,7 +93,8 @@ configurations:
     index: 0
   id: b1b17b07-c5b8-4db4-97c4-ef1597cf2e59
 - identifier:
-  - OMORFI
+    - OMORFI
+    - OMOR
   name: Vorze Omorfi
   protocol_variant: vorze-sa-dual-vibrator
   features:
@@ -122,6 +123,7 @@ communication:
     - VorzePiston
     - ROCKET
     - OMORFI
+    - OMOR
     services:
       40ee1111-63ec-4b7f-8ce7-712efd55b90e:
         tx: 40ee2222-63ec-4b7f-8ce7-712efd55b90e
