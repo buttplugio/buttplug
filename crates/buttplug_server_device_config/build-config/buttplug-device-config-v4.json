@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 180
+    "minor": 182
   },
   "protocols": {
     "activejoy": {
@@ -21254,7 +21254,8 @@
               "UFO-TW",
               "VorzePiston",
               "ROCKET",
-              "OMORFI"
+              "OMORFI",
+              "OMOR"
             ],
             "services": {
               "40ee1111-63ec-4b7f-8ce7-712efd55b90e": {
@@ -21442,7 +21443,8 @@
           ],
           "id": "aef03284-6d45-426a-b02c-efa7896d4865",
           "identifier": [
-            "OMORFI"
+            "OMORFI",
+            "OMOR"
           ],
           "name": "Vorze Omorfi",
           "protocol_variant": "vorze-sa-dual-vibrator"

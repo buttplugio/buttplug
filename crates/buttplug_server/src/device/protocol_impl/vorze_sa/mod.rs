@@ -78,7 +78,7 @@ impl ProtocolInitializer for VorzeSAInitializer {
           }
         }
         "vorze-sa-dual-vibrator" => {
-          if hwname.contains("omorfi") {
+          if hwname.contains("omor") {
             Ok(Arc::new(dual_vibrator::VorzeSADualVibrator::default()))
           } else {
             Err(ButtplugDeviceError::ProtocolNotImplemented(format!(
