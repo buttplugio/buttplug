@@ -5,27 +5,61 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use std::sync::atomic::{AtomicU8, Ordering};
-
-use uuid::{Uuid, uuid};
-
+use crate::device::hardware::{HardwareCommand, HardwareWriteCmd};
 use crate::device::{
-  hardware::{HardwareCommand, HardwareWriteCmd},
-  protocol::{ProtocolHandler, generic_protocol_setup},
+  hardware::Hardware,
+  protocol::{
+    ProtocolHandler,
+    ProtocolIdentifier,
+    ProtocolInitializer,
+    generic_protocol_initializer_setup,
+  },
 };
+use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
-use buttplug_server_device_config::Endpoint;
+use buttplug_core::util::async_manager;
+use buttplug_server_device_config::{
+  Endpoint,
+  ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition,
+  UserDeviceIdentifier,
+};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicU8, Ordering};
+use std::time::Duration;
+use uuid::{Uuid, uuid};
 
 const JOYHUB_PROTOCOL_UUID: Uuid = uuid!("c0f6785a-0056-4a2a-a2a9-dc7ca4ae2a0d");
 
-generic_protocol_setup!(JoyHub, "joyhub");
+generic_protocol_initializer_setup!(JoyHub, "joyhub");
 
 #[derive(Default)]
+pub struct JoyHubInitializer {}
+
+#[async_trait]
+impl ProtocolInitializer for JoyHubInitializer {
+  async fn initialize(
+    &mut self,
+    hardware: Arc<Hardware>,
+    _def: &ServerDeviceDefinition,
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
+    Ok(Arc::new(JoyHub::new(hardware.clone())))
+  }
+}
+
 pub struct JoyHub {
   last_cmds: [AtomicU8; 4],
+  hardware: Arc<Hardware>,
 }
 
 impl JoyHub {
+  pub fn new(hardware: Arc<Hardware>) -> Self {
+    Self {
+      last_cmds: [const { AtomicU8::new(0) }; 4],
+      hardware,
+    }
+  }
+
   fn form_hardware_command(
     &self,
     index: u32,
@@ -49,6 +83,24 @@ impl JoyHub {
       )
       .into(),
     ])
+  }
+}
+
+async fn cancel_spray(device: Arc<Hardware>, feature_id: Uuid) {
+  async_manager::sleep(Duration::from_millis(1000)).await;
+  if let Err(e) = device
+    .write_value(&HardwareWriteCmd::new(
+      &[feature_id],
+      Endpoint::Tx,
+      vec![0xa0, 0x24, 0x00, 0x00, 0x00, 0x00],
+      false,
+    ))
+    .await
+  {
+    warn!(
+      "Failed to stop the lube pump (the device has probably disconnected): {:?}",
+      e
+    );
   }
 }
 
@@ -151,6 +203,31 @@ impl ProtocolHandler for JoyHub {
           vec![0xa0, 0x14, 0x00, 0x00, 0x00, 0x00]
         } else {
           vec![0xa0, 0x14, 0x01, 0x00, 0x01, 0xff]
+        },
+        false,
+      )
+      .into(),
+    ])
+  }
+
+  fn handle_output_spray_cmd(
+    &self,
+    _feature_index: u32,
+    feature_id: Uuid,
+    level: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    buttplug_core::spawn!(
+      "JoyHub spray canceller",
+      cancel_spray(self.hardware.clone(), feature_id)
+    );
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        if level == 0 {
+          vec![0xa0, 0x24, 0x00, 0x00, 0x00, 0x00]
+        } else {
+          vec![0xa0, 0x24, 0x01, 0x00, 0x01, 0xff]
         },
         false,
       )
