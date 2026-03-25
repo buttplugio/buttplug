@@ -95,7 +95,9 @@ impl ButtplugServerDeviceEventMessageConverter {
         return Some(ButtplugServerMessageVariant::V1(da1.into()));
       }
       let da0 = DeviceAddedV0::from(da1);
-      return Some(ButtplugServerMessageVariant::V0(ButtplugServerMessageV0::DeviceAdded(da0)));
+      return Some(ButtplugServerMessageVariant::V0(
+        ButtplugServerMessageV0::DeviceAdded(da0),
+      ));
     }
 
     // Check for removed devices

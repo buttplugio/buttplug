@@ -31,8 +31,8 @@ use std::sync::{
 };
 use uuid::{Uuid, uuid};
 
-use rand::distr::Alphanumeric;
 use rand::RngExt;
+use rand::distr::Alphanumeric;
 use regex::Regex;
 use sha2::{Digest, Sha256};
 

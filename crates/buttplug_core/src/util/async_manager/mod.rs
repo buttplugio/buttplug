@@ -113,7 +113,10 @@ pub async fn sleep(duration: Duration) {
 #[macro_export]
 macro_rules! spawn {
   ($future:expr) => {
-    $crate::util::async_manager::spawn($future, tracing::span!(tracing::Level::INFO, "Buttplug Async Task"))
+    $crate::util::async_manager::spawn(
+      $future,
+      tracing::span!(tracing::Level::INFO, "Buttplug Async Task"),
+    )
   };
   ($name:expr, $future:expr) => {
     $crate::util::async_manager::spawn($future, tracing::span!(tracing::Level::INFO, $name))

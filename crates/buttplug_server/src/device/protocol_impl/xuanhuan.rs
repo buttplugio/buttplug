@@ -15,10 +15,7 @@ use crate::device::{
   },
 };
 use async_trait::async_trait;
-use buttplug_core::{
-  errors::ButtplugDeviceError,
-  util::async_manager,
-};
+use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
 use buttplug_server_device_config::{
   Endpoint,
   ProtocolCommunicationSpecifier,
@@ -83,9 +80,9 @@ impl Xuanhuan {
   fn new(device: Arc<Hardware>) -> Self {
     let current_command = Arc::new(AtomicU8::new(0));
     let current_command_clone = current_command.clone();
-    buttplug_core::spawn!("Xuanhuan vibration update",
-      async move { vibration_update_handler(device, current_command_clone).await }
-    );
+    buttplug_core::spawn!("Xuanhuan vibration update", async move {
+      vibration_update_handler(device, current_command_clone).await
+    });
     Self { current_command }
   }
 }

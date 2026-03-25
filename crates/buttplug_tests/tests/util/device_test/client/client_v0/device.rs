@@ -134,12 +134,7 @@ impl ButtplugClientDevice {
     device_messages: &Vec<ButtplugDeviceMessageNameV0>,
     sender: mpsc::Sender<ButtplugClientRequest>,
   ) -> Self {
-    ButtplugClientDevice::new(
-      device_name,
-      device_index,
-      device_messages.clone(),
-      sender,
-    )
+    ButtplugClientDevice::new(device_name, device_index, device_messages.clone(), sender)
   }
 
   pub fn connected(&self) -> bool {

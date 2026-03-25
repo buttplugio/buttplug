@@ -224,7 +224,9 @@ pub async fn run_test_case(
             device_sender.send(event.clone()).await.unwrap();
           }
         }
-        TestCommand::VersionGated { .. } => unreachable!("filter_commands should not yield VersionGated"),
+        TestCommand::VersionGated { .. } => {
+          unreachable!("filter_commands should not yield VersionGated")
+        }
       }
     }
   }
@@ -300,7 +302,9 @@ pub async fn run_test_case(
           device_sender.send(event.clone()).await.unwrap();
         }
       }
-      TestCommand::VersionGated { .. } => unreachable!("filter_commands should not yield VersionGated"),
+      TestCommand::VersionGated { .. } => {
+        unreachable!("filter_commands should not yield VersionGated")
+      }
     }
   }
 }

@@ -82,90 +82,93 @@ impl WebsocketServerDeviceCommunicationManager {
     trace!("Websocket server port created.");
     let server_cancellation_token = CancellationToken::new();
     let child_token = server_cancellation_token.child_token();
-    buttplug_core::spawn!("WebsocketServerDeviceCommunicationManager loop", async move {
-      let base_addr = if listen_on_all_interfaces {
-        "0.0.0.0"
-      } else {
-        "127.0.0.1"
-      };
+    buttplug_core::spawn!(
+      "WebsocketServerDeviceCommunicationManager loop",
+      async move {
+        let base_addr = if listen_on_all_interfaces {
+          "0.0.0.0"
+        } else {
+          "127.0.0.1"
+        };
 
-      let addr = format!("{base_addr}:{port}");
-      debug!("Trying to listen on {}", addr);
+        let addr = format!("{base_addr}:{port}");
+        debug!("Trying to listen on {}", addr);
 
-      // Create the event loop and TCP listener we'll accept connections on.
-      debug!("Socket bound.");
-      let listener = match TcpListener::bind(&addr).await {
-        Ok(listener) => listener,
-        Err(err) => {
-          error!("Cannot bind websocket server to {}: {:?}.", addr, err);
-          return;
-        }
-      };
-      debug!("Listening on: {}", addr);
-      loop {
-        select! {
-          listener_result = listener.accept() => {
-            let stream = if let Ok((stream, _)) = listener_result {
-              stream
-            } else {
-              error!("Cannot bind websocket server comm manager to address {}.", addr);
-              return;
-            };
-            info!("Got connection");
-            let ws_fut = tokio_tungstenite::accept_async(stream);
-            let mut ws_stream = match ws_fut.await {
-              Ok(ws_stream) => ws_stream,
-              Err(err) => {
-                error!("Cannot accept socket: {}", err);
-                continue;
-              }
-            };
-            // Websockets are different from the rest of the communication managers, in that we have no
-            // information about the device type when we create the connection, and therefore have to
-            // wait for the first packet. We'll have to pass our device event sender off to the newly
-            // created event loop, so that it can fire once the info packet is received.
-            let sender_clone = sender.clone();
-            tokio::spawn(async move {
-              // TODO Implement a receive timeout here so we don't wait forever
-              if let Some(Ok(tokio_tungstenite::tungstenite::Message::Text(info_message))) =
-                ws_stream.next().await
-              {
-                let info_packet: WebsocketServerDeviceCommManagerInitInfo =
-                  if let Ok(packet) = serde_json::from_str(&info_message) {
-                    packet
-                  } else {
-                    error!("Did not receive a valid JSON info packet as the first packet, disconnecting.");
-                    if let Err(err) = ws_stream.close(None).await {
-                      error!("Error closing connection: {}", err);
-                    }
-                    return;
-                  };
-                if sender_clone
-                  .send(HardwareCommunicationManagerEvent::DeviceFound {
-                    name: format!("Websocket Device {}", info_packet.identifier),
-                    address: info_packet.address.clone(),
-                    creator: Box::new(WebsocketServerHardwareConnector::new(
-                      info_packet,
-                      ws_stream,
-                    )),
-                  })
-                  .await
-                  .is_err()
-                {
-                  error!("Device manager disappeared, exiting.");
-                }
+        // Create the event loop and TCP listener we'll accept connections on.
+        debug!("Socket bound.");
+        let listener = match TcpListener::bind(&addr).await {
+          Ok(listener) => listener,
+          Err(err) => {
+            error!("Cannot bind websocket server to {}: {:?}.", addr, err);
+            return;
+          }
+        };
+        debug!("Listening on: {}", addr);
+        loop {
+          select! {
+            listener_result = listener.accept() => {
+              let stream = if let Ok((stream, _)) = listener_result {
+                stream
               } else {
-                error!("Did not receive info message as first packet, dropping connection.");
-              }
-            });
-          },
-          _ = child_token.cancelled() => {
-            info!("Task token cancelled, assuming websocket server comm manager shutdown.");
-            break;
+                error!("Cannot bind websocket server comm manager to address {}.", addr);
+                return;
+              };
+              info!("Got connection");
+              let ws_fut = tokio_tungstenite::accept_async(stream);
+              let mut ws_stream = match ws_fut.await {
+                Ok(ws_stream) => ws_stream,
+                Err(err) => {
+                  error!("Cannot accept socket: {}", err);
+                  continue;
+                }
+              };
+              // Websockets are different from the rest of the communication managers, in that we have no
+              // information about the device type when we create the connection, and therefore have to
+              // wait for the first packet. We'll have to pass our device event sender off to the newly
+              // created event loop, so that it can fire once the info packet is received.
+              let sender_clone = sender.clone();
+              tokio::spawn(async move {
+                // TODO Implement a receive timeout here so we don't wait forever
+                if let Some(Ok(tokio_tungstenite::tungstenite::Message::Text(info_message))) =
+                  ws_stream.next().await
+                {
+                  let info_packet: WebsocketServerDeviceCommManagerInitInfo =
+                    if let Ok(packet) = serde_json::from_str(&info_message) {
+                      packet
+                    } else {
+                      error!("Did not receive a valid JSON info packet as the first packet, disconnecting.");
+                      if let Err(err) = ws_stream.close(None).await {
+                        error!("Error closing connection: {}", err);
+                      }
+                      return;
+                    };
+                  if sender_clone
+                    .send(HardwareCommunicationManagerEvent::DeviceFound {
+                      name: format!("Websocket Device {}", info_packet.identifier),
+                      address: info_packet.address.clone(),
+                      creator: Box::new(WebsocketServerHardwareConnector::new(
+                        info_packet,
+                        ws_stream,
+                      )),
+                    })
+                    .await
+                    .is_err()
+                  {
+                    error!("Device manager disappeared, exiting.");
+                  }
+                } else {
+                  error!("Did not receive info message as first packet, dropping connection.");
+                }
+              });
+            },
+            _ = child_token.cancelled() => {
+              info!("Task token cancelled, assuming websocket server comm manager shutdown.");
+              break;
+            }
           }
         }
       }
-    });
+    );
     Self {
       server_cancellation_token,
     }

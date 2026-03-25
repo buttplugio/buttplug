@@ -236,15 +236,18 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
               ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{err:?}")),
             )
           })?;
-        buttplug_core::spawn!("ButtplugWebsocketServerTransport connection loop", async move {
-          run_connection_loop(
-            ws_stream,
-            outgoing_receiver,
-            response_sender_clone,
-            disconnect_notifier_clone,
-          )
-          .await;
-        });
+        buttplug_core::spawn!(
+          "ButtplugWebsocketServerTransport connection loop",
+          async move {
+            run_connection_loop(
+              ws_stream,
+              outgoing_receiver,
+              response_sender_clone,
+              disconnect_notifier_clone,
+            )
+            .await;
+          }
+        );
         Ok(())
       } else {
         Err(ButtplugConnectorError::ConnectorGenericError(
