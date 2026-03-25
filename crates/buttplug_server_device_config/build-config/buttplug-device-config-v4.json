@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 179
+    "minor": 180
   },
   "protocols": {
     "activejoy": {
@@ -21653,6 +21653,40 @@
         ],
         "id": "6b45e5f8-5b23-4c1d-a478-43c17a54cae3",
         "name": "TryFun Meta 2"
+      }
+    },
+    "tryfun-rock": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "TF-ROCK"
+            ],
+            "services": {
+              "0000ffac-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffb7-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "e27b1f9c-8a34-4d12-b76e-9f8c2a5d176b",
+            "index": 0,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  50
+                ]
+              }
+            }
+          }
+        ],
+        "id": "d2e5f7a9-1b3c-4680-bf5d-7c9a2e4f6d8b",
+        "name": "TryFun Rock"
       }
     },
     "twerkingbutt": {
