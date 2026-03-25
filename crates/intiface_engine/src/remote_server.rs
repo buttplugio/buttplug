@@ -8,7 +8,7 @@ use buttplug_core::{
   connector::ButtplugConnector,
   errors::{ButtplugError, ButtplugHandshakeError},
   message::{ButtplugMessageSpecVersion, ButtplugServerMessageV4},
-  util::{stream::convert_broadcast_receiver_to_stream},
+  util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server::{
   ButtplugServer, ButtplugServerBuilder,

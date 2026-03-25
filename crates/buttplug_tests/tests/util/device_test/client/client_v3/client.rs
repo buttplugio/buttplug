@@ -17,7 +17,7 @@ use buttplug_core::{
     StartScanningV0,
     StopScanningV0,
   },
-  util::{stream::convert_broadcast_receiver_to_stream},
+  util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server::message::{
   ButtplugClientMessageV3,

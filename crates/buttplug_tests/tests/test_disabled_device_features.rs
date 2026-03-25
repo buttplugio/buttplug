@@ -19,11 +19,8 @@ use buttplug_core::message::{
   RequestServerInfoV4,
   StartScanningV0,
 };
-use buttplug_server::{
-  ButtplugServerBuilder,
-  device::ServerDeviceManagerBuilder,
-};
 use buttplug_server::message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant};
+use buttplug_server::{ButtplugServerBuilder, device::ServerDeviceManagerBuilder};
 use buttplug_server_device_config::load_protocol_configs;
 use futures::{StreamExt, pin_mut};
 use util::{
@@ -48,8 +45,10 @@ fn load_disabled_test_dcm() -> buttplug_server_device_config::DeviceConfiguratio
 #[tokio::test]
 async fn test_disabled_output_type_not_in_device_list() {
   let dcm = load_disabled_test_dcm();
-  let identifier =
-    TestDeviceIdentifier::new("tcode-v03-disabled-test", Some("tcode-disabled-test-addr".into()));
+  let identifier = TestDeviceIdentifier::new(
+    "tcode-v03-disabled-test",
+    Some("tcode-disabled-test-addr".into()),
+  );
 
   let (client, _device_channel) = test_client_with_device_and_custom_dcm(&identifier, dcm).await;
 
@@ -83,8 +82,10 @@ async fn test_disabled_output_type_not_in_device_list() {
 #[tokio::test]
 async fn test_disabled_output_type_command_rejected() {
   let dcm = load_disabled_test_dcm();
-  let identifier =
-    TestDeviceIdentifier::new("tcode-v03-disabled-test", Some("tcode-disabled-test-addr".into()));
+  let identifier = TestDeviceIdentifier::new(
+    "tcode-v03-disabled-test",
+    Some("tcode-disabled-test-addr".into()),
+  );
 
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
   let _device_channel = builder.add_test_device(&identifier);
@@ -123,7 +124,13 @@ async fn test_disabled_output_type_command_rejected() {
   while let Some(msg) = recv.next().await {
     if let ButtplugServerMessageVariant::V4(ButtplugServerMessageV4::DeviceList(list)) = msg {
       if !list.devices().is_empty() {
-        device_index = Some(*list.devices().keys().next().expect("Checked non-empty above"));
+        device_index = Some(
+          *list
+            .devices()
+            .keys()
+            .next()
+            .expect("Checked non-empty above"),
+        );
         break;
       }
     }

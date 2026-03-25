@@ -13,11 +13,9 @@ use super::{
   ButtplugConnectorResultFuture,
   transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
 };
-use crate::{
-  message::{
-    ButtplugMessage,
-    serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
-  },
+use crate::message::{
+  ButtplugMessage,
+  serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
 };
 use futures::{FutureExt, future::BoxFuture, select};
 use log::*;

@@ -16,9 +16,9 @@ use crate::device::{
   },
 };
 use async_trait::async_trait;
+use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_core::message::{InputReadingV4, InputTypeReading, InputValue};
 use buttplug_core::util::async_manager;
-use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
   ProtocolCommunicationSpecifier,
@@ -217,13 +217,16 @@ impl HoneyPlayBox {
     );
     let packet_id = Arc::new(AtomicU8::new(count));
     let last_send = Arc::new(RwLock::new(Instant::now()));
-    buttplug_core::spawn!("HoneyPlayboxKeepalive", hpb_keepalive(
-      hardware.clone(),
-      random_key,
-      last_command.clone(),
-      packet_id.clone(),
-      last_send.clone(),
-    ));
+    buttplug_core::spawn!(
+      "HoneyPlayboxKeepalive",
+      hpb_keepalive(
+        hardware.clone(),
+        random_key,
+        last_command.clone(),
+        packet_id.clone(),
+        last_send.clone(),
+      )
+    );
 
     Self {
       random_key,

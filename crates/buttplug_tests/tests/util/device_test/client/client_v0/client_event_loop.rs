@@ -15,11 +15,7 @@ use buttplug_core::{
   connector::ButtplugConnector,
   errors::{ButtplugDeviceError, ButtplugError},
 };
-use buttplug_server::message::{
-  ButtplugClientMessageV0,
-  ButtplugServerMessageV0,
-  DeviceListV0,
-};
+use buttplug_server::message::{ButtplugClientMessageV0, ButtplugServerMessageV0, DeviceListV0};
 use dashmap::DashMap;
 use futures::channel::oneshot;
 use log::*;
@@ -225,11 +221,8 @@ where
           ));
           return;
         }
-        let device = self.create_client_device(
-          dev.device_index(),
-          dev.device_name(),
-          dev.device_messages(),
-        );
+        let device =
+          self.create_client_device(dev.device_index(), dev.device_name(), dev.device_messages());
         self.send_client_event(ButtplugClientEvent::DeviceAdded(device));
       }
       ButtplugServerMessageV0::DeviceRemoved(dev) => {
@@ -287,11 +280,8 @@ where
           if self.device_map.contains_key(&d.device_index()) {
             continue;
           }
-          let device = self.create_client_device(
-            d.device_index(),
-            d.device_name(),
-            d.device_messages(),
-          );
+          let device =
+            self.create_client_device(d.device_index(), d.device_name(), d.device_messages());
           self.send_client_event(ButtplugClientEvent::DeviceAdded(device));
         }
         true

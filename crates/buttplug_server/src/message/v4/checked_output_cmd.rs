@@ -122,9 +122,12 @@ impl TryFromDeviceAttributes<OutputCmdV4> for CheckedOutputCmdV4 {
     if let Some(output_map) = feature.output() {
       let output_type = cmd.command().as_output_type();
       if output_map.is_disabled(output_type) {
-        return Err(ButtplugError::from(ButtplugDeviceError::MessageNotSupported(
-          format!("Output type {:?} is disabled for this device", output_type),
-        )));
+        return Err(ButtplugError::from(
+          ButtplugDeviceError::MessageNotSupported(format!(
+            "Output type {:?} is disabled for this device",
+            output_type
+          )),
+        ));
       }
       let value = cmd.command().value();
       let new_value = output_map

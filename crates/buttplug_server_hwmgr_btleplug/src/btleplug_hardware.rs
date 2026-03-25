@@ -11,7 +11,7 @@ use btleplug::{
   api::{Central, CentralEvent, Characteristic, Peripheral, ValueNotification, WriteType},
   platform::Adapter,
 };
-use buttplug_core::{errors::ButtplugDeviceError};
+use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::{
   Hardware,
   HardwareConnector,
