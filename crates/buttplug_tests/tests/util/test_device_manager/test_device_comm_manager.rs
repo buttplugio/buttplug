@@ -62,6 +62,14 @@ impl TestDeviceIdentifier {
       address,
     }
   }
+
+  pub fn name(&self) -> &str {
+    &self.name
+  }
+
+  pub fn address(&self) -> &str {
+    &self.address
+  }
 }
 
 pub struct TestDeviceCommunicationManagerBuilder {
