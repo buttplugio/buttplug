@@ -165,6 +165,14 @@ impl ServerDeviceManagerEventLoop {
       .collect();
     // TODO If stop_scanning fails anywhere, this will ignore it. We should maybe at least log?
     future::join_all(fut_vec).await;
+
+    // Transition to Idle if all managers have stopped. This handles comm managers
+    // (like btleplug) that never emit ScanningFinished because they use long-running
+    // scans rather than timed retry loops.
+    if self.scanning_state == ScanningState::ActiveStopRequested && !self.scanning_status() {
+      debug!("All managers stopped after explicit stop request, transitioning to Idle");
+      self.scanning_state = ScanningState::Idle;
+    }
   }
 
   async fn handle_device_communication(&mut self, event: HardwareCommunicationManagerEvent) {
