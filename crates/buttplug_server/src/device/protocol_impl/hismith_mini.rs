@@ -9,7 +9,10 @@ use crate::device::{
   protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
 };
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
+use buttplug_core::{
+  errors::ButtplugDeviceError,
+  message::OutputType,
+};
 use buttplug_server_device_config::{
   Endpoint,
   ProtocolCommunicationSpecifier,
@@ -85,21 +88,13 @@ impl ProtocolInitializer for HismithMiniInitializer {
       dual_vibe: device_definition
         .features()
         .values()
-        .filter(|x| {
-          x.output()
-            .as_ref()
-            .is_some_and(|x| x.contains(OutputType::Vibrate))
-        })
+        .filter(|x| x.contains_output(OutputType::Vibrate))
         .count()
         >= 2,
       second_constrict: device_definition
         .features()
         .values()
-        .position(|x| {
-          x.output()
-            .as_ref()
-            .is_some_and(|x| x.contains(OutputType::Constrict))
-        })
+        .position(|x| x.contains_output(OutputType::Constrict))
         .unwrap_or(0)
         == 1,
     }))

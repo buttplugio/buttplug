@@ -120,7 +120,7 @@ impl ProtocolInitializer for SatisfyerInitializer {
     let feature_count = device_definition
       .features()
       .values()
-      .filter(|x| x.output().is_some())
+      .filter(|x| x.has_output())
       .count();
 
     Ok(Arc::new(Satisfyer::new(feature_count)))

@@ -44,7 +44,7 @@ impl ProtocolInitializer for MagicMotionV4Initializer {
       def
         .features()
         .values()
-        .filter(|x| x.output().is_some())
+        .filter(|x| x.has_output())
         .count() as u8,
     )))
   }

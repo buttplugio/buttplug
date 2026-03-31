@@ -27,6 +27,7 @@ use buttplug_core::{
     OutputValue,
   },
 };
+use buttplug_server_device_config::ServerDeviceFeatureOutput;
 use getset::{CopyGetters, Getters};
 
 use super::checked_output_cmd::CheckedOutputCmdV4;
@@ -90,12 +91,7 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedOutputVecCmdV4 
     let mut vibrate_features = features
       .features()
       .iter()
-      .filter(|(_, feature)| {
-        feature
-          .output()
-          .as_ref()
-          .is_some_and(|x| x.contains(OutputType::Vibrate))
-      })
+      .filter(|(_, feature)| feature.contains_output(OutputType::Vibrate))
       .peekable();
 
     // Check to make sure we have any vibrate attributes at all.
@@ -110,11 +106,7 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedOutputVecCmdV4 
     for (index, feature) in vibrate_features {
       // if we've made it this far, we know we have actuators in a list
       let actuator = feature
-        .output()
-        .as_ref()
-        .unwrap()
-        .vibrate()
-        .as_ref()
+        .get_output(OutputType::Vibrate)
         .expect("Already confirmed we have vibrator for this feature");
       // This doesn't need to run through a security check because we have to construct it to be
       // inherently secure anyways.
@@ -124,7 +116,7 @@ impl TryFromDeviceAttributes<SingleMotorVibrateCmdV0> for CheckedOutputVecCmdV4 
         *index,
         feature.id(),
         OutputCommand::Vibrate(OutputValue::new(
-          actuator.calculate_scaled_float(msg.speed()).map_err(
+          actuator.calculate_from_float(msg.speed()).map_err(
             |e: buttplug_server_device_config::ButtplugDeviceConfigError| {
               ButtplugMessageError::InvalidMessageContents(e.to_string())
             },
@@ -179,13 +171,7 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedOutputVecCmdV4 {
         .expect("Already checked existence")
         .0;
       let actuator = feature
-        .output()
-        .as_ref()
-        .ok_or(ButtplugDeviceError::DeviceConfigurationError(
-          "Device configuration does not have Vibrate actuator available.".to_owned(),
-        ))?
-        .vibrate()
-        .as_ref()
+        .get_output(OutputType::Vibrate)
         .ok_or(ButtplugDeviceError::DeviceConfigurationError(
           "Device configuration does not have Vibrate actuator available.".to_owned(),
         ))?;
@@ -196,7 +182,7 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedOutputVecCmdV4 {
         feature.id(),
         OutputCommand::Vibrate(OutputValue::new(
           actuator
-            .calculate_scaled_float(vibrate_cmd.speed())
+            .calculate_from_float(vibrate_cmd.speed())
             .map_err(|e| ButtplugMessageError::InvalidMessageContents(e.to_string()))?,
         )),
       ))
@@ -242,13 +228,12 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedOutputVecCmdV4 {
         .0;
       let output = feature
         .feature()
-        .output()
-        .as_ref()
+        .get_output(cmd.actuator_type())
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::MessageNotSupported("ScalarCmdV3".to_owned()),
         ))?;
       let output_value = output
-        .calculate_from_float(cmd.actuator_type(), cmd.scalar())
+        .calculate_from_float(cmd.scalar())
         .map_err(|e| {
           error!("{:?}", e);
           ButtplugError::from(ButtplugDeviceError::MessageNotSupported(
@@ -296,21 +281,19 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedOutputVecCmdV4 {
           x.index(),
         ))?
         .feature();
-      let actuator = f
-        .output()
-        .as_ref()
-        .ok_or(ButtplugError::from(
-          ButtplugDeviceError::DeviceFeatureMismatch(
-            "Device got LinearCmd command but has no actuators on Linear feature.".to_owned(),
-          ),
-        ))?
-        .hw_position_with_duration()
-        .as_ref()
+      let hw_pos = f
+        .get_output(OutputType::HwPositionWithDuration)
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceFeatureMismatch(
             "Device got LinearCmd command but has no actuators on Linear feature.".to_owned(),
           ),
         ))?;
+      let actuator =
+        if let ServerDeviceFeatureOutput::HwPositionWithDuration(p) = hw_pos {
+          p
+        } else {
+          unreachable!("get_output(HwPositionWithDuration) always returns HwPositionWithDuration")
+        };
       cmds.push(CheckedOutputCmdV4::new(
         msg.device_index(),
         x.index(),
@@ -371,13 +354,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
         .0;
       let actuator = feature
         .feature()
-        .output()
-        .as_ref()
-        .ok_or(ButtplugError::from(
-          ButtplugDeviceError::MessageNotSupported("RotateCmdV1".to_owned()),
-        ))?
-        .rotate()
-        .as_ref()
+        .get_output(OutputType::Rotate)
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::MessageNotSupported("RotateCmdV1".to_owned()),
         ))?;
@@ -387,7 +364,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
         *idx,
         feature.feature.id(),
         OutputCommand::Rotate(OutputValue::new(
-          actuator.calculate_scaled_float(cmd.speed()).map_err(|_| {
+          actuator.calculate_from_float(cmd.speed()).map_err(|_| {
             ButtplugError::from(ButtplugMessageError::InvalidMessageContents(
               "Position should be 0.0 < x < 1.0".to_owned(),
             ))

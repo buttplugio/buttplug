@@ -82,21 +82,15 @@ impl TryFromDeviceAttributes<InputCmdV4> for CheckedInputCmdV4 {
     features: &crate::message::ServerDeviceAttributes,
   ) -> Result<Self, buttplug_core::errors::ButtplugError> {
     if let Some(feature) = features.features().get(&msg.feature_index()) {
-      if let Some(sensor_map) = feature.input() {
-        if sensor_map.contains(msg.input_type()) {
-          Ok(CheckedInputCmdV4::new(
-            msg.id(),
-            msg.device_index(),
-            msg.feature_index(),
-            msg.input_type(),
-            msg.input_command(),
-            feature.id(),
-          ))
-        } else {
-          Err(ButtplugError::from(
-            ButtplugDeviceError::MessageNotSupported("InputCmd".to_string()),
-          ))
-        }
+      if feature.contains_input(msg.input_type()) {
+        Ok(CheckedInputCmdV4::new(
+          msg.id(),
+          msg.device_index(),
+          msg.feature_index(),
+          msg.input_type(),
+          msg.input_command(),
+          feature.id(),
+        ))
       } else {
         Err(ButtplugError::from(
           ButtplugDeviceError::MessageNotSupported("InputCmd".to_string()),

@@ -121,7 +121,7 @@ impl ProtocolInitializer for GalakuInitializer {
     for _ in 0..def
       .features()
       .values()
-      .filter(|f| f.output().is_some())
+      .filter(|f| f.has_output())
       .count()
     {
       protocol.speeds.push(AtomicU8::new(0));
