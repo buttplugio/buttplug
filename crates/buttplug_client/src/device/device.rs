@@ -152,15 +152,8 @@ impl ButtplugClientDevice {
   fn filter_device_outputs(&self, actuator_type: OutputType) -> Vec<ClientDeviceFeature> {
     self
       .device_features
-      .iter()
-      .filter(|x| {
-        if let Some(output) = x.1.feature().output() {
-          output.contains(actuator_type)
-        } else {
-          false
-        }
-      })
-      .map(|(_, x)| x)
+      .values()
+      .filter(|x| x.feature().contains_output(actuator_type))
       .cloned()
       .collect()
   }
@@ -204,13 +197,10 @@ impl ButtplugClientDevice {
   }
 
   pub fn input_available(&self, input_type: InputType) -> bool {
-    self.device_features.iter().any(|x| {
-      x.1
-        .feature()
-        .input()
-        .as_ref()
-        .is_some_and(|x| x.contains(input_type))
-    })
+    self
+      .device_features
+      .values()
+      .any(|x| x.feature().contains_input(input_type))
   }
 
   fn input_feature(
@@ -219,14 +209,8 @@ impl ButtplugClientDevice {
   ) -> Result<&ClientDeviceFeature, ButtplugClientError> {
     let inputs: Vec<_> = self
       .device_features
-      .iter()
-      .filter(|x| {
-        x.1
-          .feature()
-          .input()
-          .as_ref()
-          .is_some_and(|x| x.contains(input_type))
-      })
+      .values()
+      .filter(|x| x.feature().contains_input(input_type))
       .collect();
     let input_count = inputs.len();
     if input_count > 1 {
@@ -238,7 +222,7 @@ impl ButtplugClientDevice {
         ButtplugDeviceError::DeviceNoInputError(input_type).into(),
       ))
     } else {
-      Ok(inputs[0].1)
+      Ok(inputs[0])
     }
   }
 

@@ -76,7 +76,7 @@ impl ClientDeviceFeature {
       ClientDeviceCommandValue::Percent(f) => self.convert_float_value(feature_output, *f)?,
       ClientDeviceCommandValue::Steps(i) => *i,
     };
-    if feature_output.step_limit().contains(&value) {
+    if feature_output.step_limit().contains(value) {
       Ok(value)
     } else {
       Err(ButtplugClientError::ButtplugOutputCommandConversionError(
@@ -118,23 +118,12 @@ impl ClientDeviceFeature {
   ) -> Result<OutputCmdV4, ButtplugClientError> {
     let output_type: OutputType = client_cmd.into();
     // First off, make sure we support this output.
-    let output = self
-      .feature
-      .output()
-      .as_ref()
-      .ok_or(ButtplugClientError::ButtplugOutputCommandConversionError(
-        format!(
-          "Device feature does not support output type {}",
-          output_type
-        ),
-      ))?
-      .get(output_type)
-      .ok_or(ButtplugClientError::ButtplugOutputCommandConversionError(
-        format!(
-          "Device feature does not support output type {}",
-          output_type
-        ),
-      ))?;
+    let output = self.feature.get_output_limits(output_type).ok_or(
+      ButtplugClientError::ButtplugOutputCommandConversionError(format!(
+        "Device feature does not support output type {}",
+        output_type
+      )),
+    )?;
 
     let output_cmd = match client_cmd {
       ClientDeviceOutputCommand::Vibrate(v) => {
@@ -186,9 +175,8 @@ impl ClientDeviceFeature {
   }
 
   pub fn run_input_subscribe(&self, sensor_type: InputType) -> ButtplugClientResultFuture {
-    if let Some(sensor_map) = self.feature.input()
-      && let Some(sensor) = sensor_map.get(sensor_type)
-      && sensor.command().contains(&InputCommandType::Subscribe)
+    if let Some(sensor) = self.feature.get_input(sensor_type)
+      && sensor.command().contains(InputCommandType::Subscribe)
     {
       let msg = InputCmdV4::new(
         self.device_index,
@@ -206,9 +194,8 @@ impl ClientDeviceFeature {
   }
 
   pub fn run_input_unsubscribe(&self, sensor_type: InputType) -> ButtplugClientResultFuture {
-    if let Some(sensor_map) = self.feature.input()
-      && let Some(sensor) = sensor_map.get(sensor_type)
-      && sensor.command().contains(&InputCommandType::Subscribe)
+    if let Some(sensor) = self.feature.get_input(sensor_type)
+      && sensor.command().contains(InputCommandType::Subscribe)
     {
       let msg = InputCmdV4::new(
         self.device_index,
@@ -229,9 +216,8 @@ impl ClientDeviceFeature {
     &self,
     sensor_type: InputType,
   ) -> ButtplugClientResultFuture<InputTypeReading> {
-    if let Some(sensor_map) = self.feature.input()
-      && let Some(sensor) = sensor_map.get(sensor_type)
-      && sensor.command().contains(&InputCommandType::Read)
+    if let Some(sensor) = self.feature.get_input(sensor_type)
+      && sensor.command().contains(InputCommandType::Read)
     {
       let msg = InputCmdV4::new(
         self.device_index,
@@ -271,14 +257,7 @@ impl ClientDeviceFeature {
   }
 
   pub fn battery(&self) -> ButtplugClientResultFuture<u32> {
-    if self
-      .feature()
-      .input()
-      .as_ref()
-      .ok_or(false)
-      .unwrap()
-      .contains(InputType::Battery)
-    {
+    if self.feature().contains_input(InputType::Battery) {
       let send_fut = self.run_input_read(InputType::Battery);
       Box::pin(async move {
         let data = send_fut.await?;
@@ -298,14 +277,7 @@ impl ClientDeviceFeature {
   }
 
   pub fn rssi(&self) -> ButtplugClientResultFuture<i8> {
-    if self
-      .feature()
-      .input()
-      .as_ref()
-      .ok_or(false)
-      .unwrap()
-      .contains(InputType::Rssi)
-    {
+    if self.feature().contains_input(InputType::Rssi) {
       let send_fut = self.run_input_read(InputType::Rssi);
       Box::pin(async move {
         let data = send_fut.await?;

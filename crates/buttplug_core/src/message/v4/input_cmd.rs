@@ -12,9 +12,12 @@ use crate::message::{
   ButtplugMessageValidator,
   InputType,
 };
+use enumflags2::{bitflags, BitFlags};
 use getset::CopyGetters;
 use serde::{Deserialize, Serialize};
 
+#[bitflags]
+#[repr(u8)]
 #[derive(Debug, Display, PartialEq, Eq, Clone, Serialize, Deserialize, Hash, Copy)]
 pub enum InputCommandType {
   #[serde(alias = "read")]
