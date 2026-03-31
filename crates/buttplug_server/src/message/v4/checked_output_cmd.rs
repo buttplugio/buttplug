@@ -16,7 +16,6 @@ use buttplug_core::{
     OutputCommand,
   },
 };
-use buttplug_core::message::OutputType;
 
 use getset::{CopyGetters, Getters};
 use uuid::Uuid;

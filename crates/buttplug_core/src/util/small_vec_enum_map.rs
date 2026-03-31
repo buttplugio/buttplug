@@ -73,33 +73,6 @@ impl<V, const N: usize> Default for SmallVecEnumMap<V, N> {
   }
 }
 
-impl<'a, V, const N: usize> IntoIterator for &'a SmallVecEnumMap<V, N> {
-  type Item = &'a V;
-  type IntoIter = std::slice::Iter<'a, V>;
-
-  fn into_iter(self) -> Self::IntoIter {
-    self.0.iter()
-  }
-}
-
-impl<'a, V, const N: usize> IntoIterator for &'a mut SmallVecEnumMap<V, N> {
-  type Item = &'a mut V;
-  type IntoIter = std::slice::IterMut<'a, V>;
-
-  fn into_iter(self) -> Self::IntoIter {
-    self.0.iter_mut()
-  }
-}
-
-impl<V, const N: usize> IntoIterator for SmallVecEnumMap<V, N> {
-  type Item = V;
-  type IntoIter = smallvec::IntoIter<[V; N]>;
-
-  fn into_iter(self) -> Self::IntoIter {
-    self.0.into_iter()
-  }
-}
-
 impl<V, const N: usize> SmallVecEnumMap<V, N> {
   pub fn is_empty(&self) -> bool {
     self.0.is_empty()

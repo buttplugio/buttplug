@@ -303,7 +303,7 @@ impl DeviceHandle {
     if msg.inputs() {
       self.definition.features().iter().for_each(|(i, f)| {
         if f.can_subscribe() {
-          for input in &f.input {
+          for input in f.input.iter() {
             if input.can_subscribe() {
               fut_vec.push(
                 self.parse_message(ButtplugDeviceCommandMessageUnionV4::InputCmd(
@@ -519,7 +519,7 @@ pub(super) async fn build_device_handle(
   // Generate stop commands for this device
   let mut stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4> = vec![];
   for feature in definition.features().values() {
-    for output in &feature.output {
+    for output in feature.output.iter() {
       let mut stop_cmd = |actuator_cmd| {
         stop_commands
           .push(CheckedOutputCmdV4::new(1, 0, feature.index(), feature.id(), actuator_cmd).into());
