@@ -77,6 +77,7 @@ pub mod mizzzee_v2;
 pub mod mizzzee_v3;
 pub mod monsterpub;
 pub mod motorbunny;
+pub mod mymuselinkplus;
 pub mod mysteryvibe;
 pub mod mysteryvibe_v2;
 pub mod nextlevelracing;
@@ -352,6 +353,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     motorbunny::setup::MotorbunnyIdentifierFactory::default(),
   );
+  add_to_protocol_map(&mut map, mymuselinkplus::setup::MyMuseLinkPlusIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     mysteryvibe::setup::MysteryVibeIdentifierFactory::default(),

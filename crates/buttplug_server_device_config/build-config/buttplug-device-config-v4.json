@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 180
+    "minor": 183
   },
   "protocols": {
     "activejoy": {
@@ -14788,6 +14788,44 @@
         ],
         "id": "94e9d8e0-94cc-42f5-b14d-c55cc91e2e68",
         "name": "Muse Device"
+      }
+    },
+    "mymuselinkplus": {
+      "communication": [
+        {
+          "btle": {
+            "advertised_services": [
+              "0000d34e-0000-1000-8000-00805f9b34fb"
+            ],
+            "names": [
+              "MM Massager"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "description": "Vibrator",
+            "id": "b8c3a1f0-7d2e-4a19-9f6b-3e8d1c5a2b40",
+            "index": 0,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  10
+                ]
+              }
+            }
+          }
+        ],
+        "id": "a1f0b8c3-2e7d-194a-6b9f-8d3e1c5a2b40",
+        "name": "MyMuse Link Plus"
       }
     },
     "mysteryvibe": {
