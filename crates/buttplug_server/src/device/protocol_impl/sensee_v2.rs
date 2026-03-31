@@ -5,10 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{
-  errors::ButtplugDeviceError,
-  message::OutputType,
-};
+use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
 use buttplug_server_device_config::{
   Endpoint,
   ProtocolCommunicationSpecifier,

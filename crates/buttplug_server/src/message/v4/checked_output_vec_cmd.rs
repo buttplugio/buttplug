@@ -170,11 +170,11 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedOutputVecCmdV4 {
         .find(|(_, f)| f.id() == feature.id())
         .expect("Already checked existence")
         .0;
-      let actuator = feature
-        .get_output(OutputType::Vibrate)
-        .ok_or(ButtplugDeviceError::DeviceConfigurationError(
+      let actuator = feature.get_output(OutputType::Vibrate).ok_or(
+        ButtplugDeviceError::DeviceConfigurationError(
           "Device configuration does not have Vibrate actuator available.".to_owned(),
-        ))?;
+        ),
+      )?;
       cmds.push(CheckedOutputCmdV4::new(
         msg.id(),
         msg.device_index(),
@@ -232,14 +232,12 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedOutputVecCmdV4 {
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::MessageNotSupported("ScalarCmdV3".to_owned()),
         ))?;
-      let output_value = output
-        .calculate_from_float(cmd.scalar())
-        .map_err(|e| {
-          error!("{:?}", e);
-          ButtplugError::from(ButtplugDeviceError::MessageNotSupported(
-            "ScalarCmdV3".to_owned(),
-          ))
-        })?;
+      let output_value = output.calculate_from_float(cmd.scalar()).map_err(|e| {
+        error!("{:?}", e);
+        ButtplugError::from(ButtplugDeviceError::MessageNotSupported(
+          "ScalarCmdV3".to_owned(),
+        ))
+      })?;
       cmds.push(CheckedOutputCmdV4::new(
         msg.id(),
         msg.device_index(),
@@ -288,12 +286,11 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedOutputVecCmdV4 {
             "Device got LinearCmd command but has no actuators on Linear feature.".to_owned(),
           ),
         ))?;
-      let actuator =
-        if let ServerDeviceFeatureOutput::HwPositionWithDuration(p) = hw_pos {
-          p
-        } else {
-          unreachable!("get_output(HwPositionWithDuration) always returns HwPositionWithDuration")
-        };
+      let actuator = if let ServerDeviceFeatureOutput::HwPositionWithDuration(p) = hw_pos {
+        p
+      } else {
+        unreachable!("get_output(HwPositionWithDuration) always returns HwPositionWithDuration")
+      };
       cmds.push(CheckedOutputCmdV4::new(
         msg.device_index(),
         x.index(),
@@ -352,12 +349,13 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
         .find(|(_, f)| f.id() == feature.feature().id())
         .expect("Already proved existence")
         .0;
-      let actuator = feature
-        .feature()
-        .get_output(OutputType::Rotate)
-        .ok_or(ButtplugError::from(
-          ButtplugDeviceError::MessageNotSupported("RotateCmdV1".to_owned()),
-        ))?;
+      let actuator =
+        feature
+          .feature()
+          .get_output(OutputType::Rotate)
+          .ok_or(ButtplugError::from(
+            ButtplugDeviceError::MessageNotSupported("RotateCmdV1".to_owned()),
+          ))?;
       cmds.push(CheckedOutputCmdV4::new(
         msg.id(),
         msg.device_index(),

@@ -9,10 +9,7 @@ use crate::device::{
   protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
 };
 use async_trait::async_trait;
-use buttplug_core::{
-  errors::ButtplugDeviceError,
-  message::OutputType,
-};
+use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
 use buttplug_server_device_config::{
   Endpoint,
   ProtocolCommunicationSpecifier,

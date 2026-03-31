@@ -49,11 +49,7 @@ impl ProtocolInitializer for MysteryVibeV2Initializer {
       true,
     );
     hardware.write_value(&msg).await?;
-    let vibrator_count = def
-      .features()
-      .values()
-      .filter(|x| x.has_output())
-      .count();
+    let vibrator_count = def.features().values().filter(|x| x.has_output()).count();
     Ok(Arc::new(MysteryVibe::new(vibrator_count as u8)))
   }
 }

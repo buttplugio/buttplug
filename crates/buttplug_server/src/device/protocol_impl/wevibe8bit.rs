@@ -22,10 +22,7 @@ use crate::device::{
     generic_protocol_initializer_setup,
   },
 };
-use buttplug_core::{
-  errors::ButtplugDeviceError,
-  message::OutputType,
-};
+use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
 use buttplug_server_device_config::{
   Endpoint,
   ProtocolCommunicationSpecifier,
