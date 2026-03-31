@@ -29,7 +29,6 @@ use super::super::{
   TestCommand,
   filter_commands,
 };
-use buttplug_core::message::{DeviceFeatureOutput, DeviceFeatureOutputLimits};
 use futures::StreamExt;
 use log::*;
 use std::{sync::Arc, time::Duration};
@@ -53,19 +52,13 @@ fn from_type_and_value(output_type: OutputType, value: f64) -> ClientDeviceOutpu
 fn get_scalar_index(device: &ButtplugClientDevice, index: u32) -> &u32 {
   let mut offset = 0;
   let mut iter = device.device_features().iter().filter(|f| {
-    let fo = f
-      .1
-      .feature()
-      .output()
-      .clone()
-      .unwrap_or(DeviceFeatureOutput::default());
-    fo.vibrate().is_some()
-      || fo.oscillate().is_some()
-      || fo.constrict().is_some()
-      || fo
-        .rotate()
-        .as_ref()
-        .is_some_and(|r| r.step_limit().start() >= &0)
+    let feature = f.1.feature();
+    feature.contains_output(OutputType::Vibrate)
+      || feature.contains_output(OutputType::Oscillate)
+      || feature.contains_output(OutputType::Constrict)
+      || feature
+        .get_output_limits(OutputType::Rotate)
+        .is_some_and(|r| r.step_limit().start() >= 0)
   });
   while let Some((idx, _)) = iter.next() {
     if offset >= index {
@@ -96,15 +89,8 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
         .map(|cmd| {
           let vibe_features: Vec<&ClientDeviceFeature> = device
             .device_features()
-            .iter()
-            .filter(|f| {
-              f.1
-                .feature()
-                .output()
-                .as_ref()
-                .is_some_and(|x| x.contains(OutputType::Vibrate))
-            })
-            .map(|(_, x)| x)
+            .values()
+            .filter(|f| f.feature().contains_output(OutputType::Vibrate))
             .collect();
           let f = vibe_features[cmd.index() as usize].clone();
           f.run_output(&from_type_and_value(OutputType::Vibrate, cmd.speed()))
@@ -121,15 +107,8 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
         .map(|cmd| {
           let rotate_features: Vec<&ClientDeviceFeature> = device
             .device_features()
-            .iter()
-            .filter(|f| {
-              f.1
-                .feature()
-                .output()
-                .as_ref()
-                .is_some_and(|x| x.contains(OutputType::Rotate))
-            })
-            .map(|(_, x)| x)
+            .values()
+            .filter(|f| f.feature().contains_output(OutputType::Rotate))
             .collect();
           let f = rotate_features[cmd.index() as usize].clone();
           f.run_output(&ClientDeviceOutputCommand::Rotate(
@@ -146,18 +125,13 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
         .iter()
         .map(|cmd| {
           let f = device.device_features()[&cmd.index()].clone();
+          let step_count = f
+            .feature()
+            .get_output_limits(OutputType::HwPositionWithDuration)
+            .unwrap()
+            .step_count() as f64;
           f.run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
-            ((cmd.position()
-              * f
-                .feature()
-                .output()
-                .as_ref()
-                .unwrap()
-                .get(OutputType::HwPositionWithDuration)
-                .unwrap()
-                .step_count() as f64)
-              .ceil() as u32)
-              .into(),
+            ((cmd.position() * step_count).ceil() as u32).into(),
             cmd.duration(),
           ))
         })

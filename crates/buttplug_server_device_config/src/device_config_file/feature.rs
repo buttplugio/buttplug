@@ -249,10 +249,10 @@ pub struct ConfigBaseDeviceFeature {
   #[serde(default)]
   description: String,
   #[getset(get = "pub")]
-  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty")]
+  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty", default)]
   output: SmallVecEnumMap<ServerDeviceFeatureOutput, 1>,
   #[getset(get = "pub")]
-  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty")]
+  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty", default)]
   input: SmallVecEnumMap<ServerDeviceFeatureInput, 1>,
   #[getset(get_copy = "pub")]
   id: Uuid,
@@ -281,7 +281,7 @@ pub struct ConfigUserDeviceFeature {
   id: Uuid,
   #[getset(get_copy = "pub")]
   base_id: Uuid,
-  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty")]
+  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty", default)]
   output: SmallVecEnumMap<UserDeviceFeatureOutput, 1>,
 }
 
@@ -323,7 +323,7 @@ impl TryFrom<&ServerDeviceFeature> for ConfigUserDeviceFeature {
       base_id: value
         .base_id
         .ok_or(ButtplugDeviceConfigError::MissingBaseId)?,
-      output: (&value.output).into_iter().map(|o| o.into()).collect(),
+      output: value.output.iter().map(Into::into).collect(),
     })
   }
 }

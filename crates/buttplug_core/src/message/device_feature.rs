@@ -42,9 +42,9 @@ pub struct DeviceFeature {
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(default, rename = "FeatureDescription")]
   description: String,
-  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty")]
+  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty", default)]
   output: SmallVecEnumMap<DeviceFeatureOutput, 1>,
-  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty")]
+  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty", default)]
   input: SmallVecEnumMap<DeviceFeatureInput, 1>,
 }
 

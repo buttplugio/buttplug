@@ -12,7 +12,7 @@ use crate::message::{
   ButtplugMessageValidator,
   InputType,
 };
-use enumflags2::{bitflags, BitFlags};
+use enumflags2::bitflags;
 use getset::CopyGetters;
 use serde::{Deserialize, Serialize};
 

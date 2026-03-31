@@ -119,10 +119,7 @@ pub struct ServerDeviceFeatureOutputValueProperties {
 
 impl ServerDeviceFeatureOutputValueProperties {
   pub fn new(value: RangeWithLimit, disabled: bool) -> Self {
-    Self {
-      value,
-      disabled,
-    }
+    Self { value, disabled }
   }
 
   pub fn calculate_scaled_float(&self, value: f64) -> Result<i32, ButtplugDeviceConfigError> {
@@ -514,9 +511,9 @@ pub struct ServerDeviceFeature {
   pub base_id: Option<Uuid>,
   #[serde(skip_serializing_if = "Option::is_none")]
   pub alt_protocol_index: Option<u32>,
-  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty")]
+  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty", default)]
   pub output: SmallVecEnumMap<ServerDeviceFeatureOutput, 1>,
-  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty")]
+  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty", default)]
   pub input: SmallVecEnumMap<ServerDeviceFeatureInput, 1>,
 }
 
@@ -593,7 +590,7 @@ impl ServerDeviceFeature {
   }
 
   pub fn can_subscribe(&self) -> bool {
-    (&self.input).into_iter().any(|i| i.can_subscribe())
+    self.input.iter().any(|i| i.can_subscribe())
   }
 
   // --- Lifecycle ---
@@ -606,10 +603,14 @@ impl ServerDeviceFeature {
   }
 
   pub fn as_device_feature(&self) -> Result<DeviceFeature, ButtplugDeviceConfigError> {
-    let output: SmallVecEnumMap<DeviceFeatureOutput, 1> =
-      (&self.output).into_iter().map(|o| o.into()).collect();
+    let output: SmallVecEnumMap<DeviceFeatureOutput, 1> = self
+      .output
+      .iter()
+      .filter(|o| !o.is_disabled())
+      .map(|o| o.into())
+      .collect();
     let input: SmallVecEnumMap<DeviceFeatureInput, 1> =
-      (&self.input).into_iter().map(|i| i.into()).collect();
+      self.input.iter().map(|i| i.into()).collect();
     Ok(DeviceFeature::new(
       self.index,
       &self.description,
