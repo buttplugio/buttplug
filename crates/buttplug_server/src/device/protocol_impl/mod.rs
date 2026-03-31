@@ -111,7 +111,6 @@ pub mod thehandy_v3;
 pub mod tryfun;
 pub mod tryfun_blackhole;
 pub mod tryfun_meta2;
-pub mod tryfun_rock;
 pub mod vibcrafter;
 pub mod vibratissimo;
 pub mod vorze_sa;
@@ -532,10 +531,6 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     tryfun_meta2::setup::TryFunMeta2IdentifierFactory::default(),
-  );
-   add_to_protocol_map(
-    &mut map,
-    tryfun_rock::setup::TryFunRockIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
