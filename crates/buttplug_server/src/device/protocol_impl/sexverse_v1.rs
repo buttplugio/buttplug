@@ -11,10 +11,7 @@ use std::sync::atomic::{AtomicU8, Ordering};
 use async_trait::async_trait;
 use uuid::{Uuid, uuid};
 
-use buttplug_core::{
-  errors::ButtplugDeviceError,
-  message::OutputType,
-};
+use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
 use buttplug_server_device_config::{
   Endpoint,
   ProtocolCommunicationSpecifier,

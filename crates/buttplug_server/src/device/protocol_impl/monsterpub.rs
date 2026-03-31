@@ -134,11 +134,7 @@ impl ProtocolInitializer for MonsterPubInitializer {
         ))
         .await?;
     }
-    let output_count = def
-      .features()
-      .values()
-      .filter(|x| x.has_output())
-      .count();
+    let output_count = def.features().values().filter(|x| x.has_output()).count();
 
     Ok(Arc::new(MonsterPub::new(
       if hardware.endpoints().contains(&Endpoint::TxVibrate) {

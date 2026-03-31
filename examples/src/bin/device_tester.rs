@@ -281,97 +281,97 @@ async fn device_tester() {
               set_level_and_wait(&dev, feature, &output_type, 0.0).await;
             }
           }
-            OutputType::HwPositionWithDuration => {
-              feature
-                .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
-                  0.0f64.into(),
-                  10,
-                ))
-                .await
-                .unwrap();
-              println!(
-                "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
-                dev.name(),
-                dev.index(),
-                feature.feature().feature_index(),
-                feature.feature().description(),
-                "HwPositionWithDuration",
-                (0.0 * 100.0) as u8,
-                10
-              );
-              sleep(Duration::from_secs(1)).await;
-              feature
-                .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
-                  0.5f64.into(),
-                  1000,
-                ))
-                .await
-                .unwrap();
-              println!(
-                "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
-                dev.name(),
-                dev.index(),
-                feature.feature().feature_index(),
-                feature.feature().description(),
-                "HwPositionWithDuration",
-                (0.0 * 100.0) as u8,
-                1000
-              );
-              sleep(Duration::from_secs(1)).await;
-              feature
-                .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
-                  0.0f64.into(),
-                  10,
-                ))
-                .await
-                .unwrap();
-              println!(
-                "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
-                dev.name(),
-                dev.index(),
-                feature.feature().feature_index(),
-                feature.feature().description(),
-                "HwPositionWithDuration",
-                (0.0 * 100.0) as u8,
-                10
-              );
-              sleep(Duration::from_secs(1)).await;
-              feature
-                .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
-                  1.0f64.into(),
-                  500,
-                ))
-                .await
-                .unwrap();
-              println!(
-                "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
-                dev.name(),
-                dev.index(),
-                feature.feature().feature_index(),
-                feature.feature().description(),
-                "HwPositionWithDuration",
-                (1.0 * 100.0) as u8,
-                500
-              );
-              sleep(Duration::from_secs(1)).await;
-              feature
-                .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
-                  0.0f64.into(),
-                  1500,
-                ))
-                .await
-                .unwrap();
-              println!(
-                "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
-                dev.name(),
-                dev.index(),
-                feature.feature().feature_index(),
-                feature.feature().description(),
-                "HwPositionWithDuration",
-                (0.0 * 100.0) as u8,
-                1500
-              );
-            }
+          OutputType::HwPositionWithDuration => {
+            feature
+              .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
+                0.0f64.into(),
+                10,
+              ))
+              .await
+              .unwrap();
+            println!(
+              "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
+              dev.name(),
+              dev.index(),
+              feature.feature().feature_index(),
+              feature.feature().description(),
+              "HwPositionWithDuration",
+              (0.0 * 100.0) as u8,
+              10
+            );
+            sleep(Duration::from_secs(1)).await;
+            feature
+              .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
+                0.5f64.into(),
+                1000,
+              ))
+              .await
+              .unwrap();
+            println!(
+              "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
+              dev.name(),
+              dev.index(),
+              feature.feature().feature_index(),
+              feature.feature().description(),
+              "HwPositionWithDuration",
+              (0.0 * 100.0) as u8,
+              1000
+            );
+            sleep(Duration::from_secs(1)).await;
+            feature
+              .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
+                0.0f64.into(),
+                10,
+              ))
+              .await
+              .unwrap();
+            println!(
+              "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
+              dev.name(),
+              dev.index(),
+              feature.feature().feature_index(),
+              feature.feature().description(),
+              "HwPositionWithDuration",
+              (0.0 * 100.0) as u8,
+              10
+            );
+            sleep(Duration::from_secs(1)).await;
+            feature
+              .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
+                1.0f64.into(),
+                500,
+              ))
+              .await
+              .unwrap();
+            println!(
+              "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
+              dev.name(),
+              dev.index(),
+              feature.feature().feature_index(),
+              feature.feature().description(),
+              "HwPositionWithDuration",
+              (1.0 * 100.0) as u8,
+              500
+            );
+            sleep(Duration::from_secs(1)).await;
+            feature
+              .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
+                0.0f64.into(),
+                1500,
+              ))
+              .await
+              .unwrap();
+            println!(
+              "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
+              dev.name(),
+              dev.index(),
+              feature.feature().feature_index(),
+              feature.feature().description(),
+              "HwPositionWithDuration",
+              (0.0 * 100.0) as u8,
+              1500
+            );
+          }
         }
       }
     }

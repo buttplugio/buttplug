@@ -172,7 +172,9 @@ impl ProtocolInitializer for LovenseInitializer {
     let vibrator_count = device_definition
       .features()
       .values()
-      .filter(|x| x.contains_output(OutputType::Vibrate) || x.contains_output(OutputType::Oscillate))
+      .filter(|x| {
+        x.contains_output(OutputType::Vibrate) || x.contains_output(OutputType::Oscillate)
+      })
       .count();
 
     let output_count = device_definition

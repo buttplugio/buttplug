@@ -41,11 +41,7 @@ impl ProtocolInitializer for MagicMotionV4Initializer {
     def: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(MagicMotionV4::new(
-      def
-        .features()
-        .values()
-        .filter(|x| x.has_output())
-        .count() as u8,
+      def.features().values().filter(|x| x.has_output()).count() as u8,
     )))
   }
 }

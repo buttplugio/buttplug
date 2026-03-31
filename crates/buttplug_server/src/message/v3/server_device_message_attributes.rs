@@ -9,8 +9,8 @@ use crate::message::v1::NullDeviceMessageAttributesV1;
 use buttplug_core::message::{InputType, OutputType};
 use buttplug_server_device_config::{
   ServerDeviceFeature,
-  ServerDeviceFeatureOutput,
   ServerDeviceFeatureInput,
+  ServerDeviceFeatureOutput,
 };
 
 use getset::{Getters, MutGetters, Setters};
@@ -64,9 +64,7 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
         feature
           .output
           .iter()
-          .filter(|output| {
-            !matches!(output, ServerDeviceFeatureOutput::HwPositionWithDuration(_))
-          })
+          .filter(|output| !matches!(output, ServerDeviceFeatureOutput::HwPositionWithDuration(_)))
           .map(|output| {
             let actuator_type = output.output_type();
             let step_count = match output {
@@ -91,8 +89,7 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
       .iter()
       .flat_map(|feature| {
         let mut actuator_vec = vec![];
-        if let Some(ServerDeviceFeatureOutput::Rotate(r)) =
-          feature.get_output(OutputType::Rotate)
+        if let Some(ServerDeviceFeatureOutput::Rotate(r)) = feature.get_output(OutputType::Rotate)
           && r.value.base.start() < 0
         {
           actuator_vec.push(ServerGenericDeviceMessageAttributesV3 {

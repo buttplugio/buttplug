@@ -316,14 +316,19 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
         .iter()
         .map(|feature| {
           let mut sensor_vec = vec![];
-          if let Some(DeviceFeatureInput::Battery(battery)) = feature.get_input(InputType::Battery) {
+          if let Some(DeviceFeatureInput::Battery(battery)) = feature.get_input(InputType::Battery)
+          {
             // Only convert Battery backwards. Other sensors weren't really built for v3 and we
             // never recommended using them or implemented much for them.
             if battery.command().contains(InputCommandType::Read) {
               sensor_vec.push(SensorDeviceMessageAttributesV3 {
                 feature_descriptor: feature.description().to_owned(),
                 sensor_type: InputType::Battery,
-                sensor_range: battery.value().iter().map(|r| r.start()..=r.end()).collect(),
+                sensor_range: battery
+                  .value()
+                  .iter()
+                  .map(|r| r.start()..=r.end())
+                  .collect(),
                 feature: feature.clone(),
                 index: 0,
               });
