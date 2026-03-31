@@ -172,38 +172,26 @@ impl ProtocolInitializer for LovenseInitializer {
     let vibrator_count = device_definition
       .features()
       .values()
-      .filter(|x| {
-        x.output()
-          .as_ref()
-          .is_some_and(|x| x.contains(OutputType::Vibrate) || x.contains(OutputType::Oscillate))
-      })
+      .filter(|x| x.contains_output(OutputType::Vibrate) || x.contains_output(OutputType::Oscillate))
       .count();
 
     let output_count = device_definition
       .features()
       .values()
-      .filter(|x| x.output().is_some())
+      .filter(|x| x.has_output())
       .count();
 
     let vibrator_rotator = output_count == 2
       && device_definition
         .features()
         .values()
-        .filter(|x| {
-          x.output()
-            .as_ref()
-            .is_some_and(|x| x.contains(OutputType::Vibrate))
-        })
+        .filter(|x| x.contains_output(OutputType::Vibrate))
         .count()
         == 1
       && device_definition
         .features()
         .values()
-        .filter(|x| {
-          x.output()
-            .as_ref()
-            .is_some_and(|x| x.contains(OutputType::Rotate))
-        })
+        .filter(|x| x.contains_output(OutputType::Rotate))
         .count()
         == 1;
 
@@ -211,21 +199,13 @@ impl ProtocolInitializer for LovenseInitializer {
       && device_definition
         .features()
         .values()
-        .filter(|x| {
-          x.output()
-            .as_ref()
-            .is_some_and(|x| x.contains(OutputType::Vibrate))
-        })
+        .filter(|x| x.contains_output(OutputType::Vibrate))
         .count()
         == 1
       && device_definition
         .features()
         .values()
-        .filter(|x| {
-          x.output()
-            .as_ref()
-            .is_some_and(|x| x.contains(OutputType::Constrict))
-        })
+        .filter(|x| x.contains_output(OutputType::Constrict))
         .count()
         == 1;
 

@@ -7,108 +7,67 @@
 
 use crate::ButtplugDeviceConfigError;
 
-use buttplug_core::message::{
-  DeviceFeature,
-  DeviceFeatureInput,
-  DeviceFeatureInputBuilder,
-  DeviceFeatureInputProperties,
-  DeviceFeatureOutput,
-  DeviceFeatureOutputBuilder,
-  DeviceFeatureOutputHwPositionWithDurationProperties,
-  DeviceFeatureOutputValueProperties,
-  InputCommandType,
-  InputType,
-  OutputType,
+use buttplug_core::{
+  message::{
+    DeviceFeature,
+    DeviceFeatureInput,
+    DeviceFeatureInputProperties,
+    DeviceFeatureOutput,
+    DeviceFeatureOutputHwPositionWithDurationProperties,
+    DeviceFeatureOutputValueProperties,
+    InputCommandType,
+    InputType,
+    OutputType,
+  },
+  util::{
+    range::RangeInclusive,
+    small_vec_enum_map::{SmallVecEnumMap, VariantKey},
+  },
 };
-use getset::{CopyGetters, Getters, Setters};
-use serde::{
-  Deserialize,
-  Serialize,
-  Serializer,
-  de::{self, Deserializer, SeqAccess, Visitor},
-  ser::SerializeSeq,
-};
-use std::{collections::HashSet, fmt, ops::RangeInclusive};
+use enumflags2::BitFlags;
+use getset::{CopyGetters, Getters};
+use serde::{Deserialize, Serialize};
+
+use strum_macros::{Display, EnumDiscriminants, EnumIter, EnumString};
 use uuid::Uuid;
-
-/// Serde helper module for serializing/deserializing Vec<RangeInclusive<i32>> as [[start, end], ...]
-mod range_vec_serde {
-  use super::*;
-
-  pub fn serialize<S>(ranges: &Vec<RangeInclusive<i32>>, serializer: S) -> Result<S::Ok, S::Error>
-  where
-    S: Serializer,
-  {
-    let arrays: Vec<[i32; 2]> = ranges.iter().map(|r| [*r.start(), *r.end()]).collect();
-    arrays.serialize(serializer)
-  }
-
-  pub fn deserialize<'de, D>(deserializer: D) -> Result<Vec<RangeInclusive<i32>>, D::Error>
-  where
-    D: Deserializer<'de>,
-  {
-    struct RangeVecVisitor;
-
-    impl<'de> Visitor<'de> for RangeVecVisitor {
-      type Value = Vec<RangeInclusive<i32>>;
-
-      fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        formatter.write_str("an array of two-element arrays [[start, end], ...]")
-      }
-
-      fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
-      where
-        A: SeqAccess<'de>,
-      {
-        let mut ranges = Vec::new();
-        while let Some([start, end]) = seq.next_element::<[i32; 2]>()? {
-          ranges.push(start..=end);
-        }
-        Ok(ranges)
-      }
-    }
-
-    deserializer.deserialize_seq(RangeVecVisitor)
-  }
-}
 
 /// Holds a combination of ranges. Base range is defined in the base device config, user range is
 /// defined by the user later to be a sub-range of the base range. User range only stores in u32,
 /// ranges with negatives (i.e. rotate with direction) are considered to be symettric around 0, we
 /// let the system handle that conversion.
-#[derive(Debug, Clone, Getters)]
-#[getset(get = "pub")]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(transparent)]
 pub struct RangeWithLimit {
-  base: RangeInclusive<i32>,
-  internal_base: RangeInclusive<u32>,
-  user: Option<RangeInclusive<u32>>,
+  pub base: RangeInclusive<i32>,
+  #[serde(skip)]
+  pub user: Option<RangeInclusive<u32>>,
 }
 
 impl From<RangeInclusive<i32>> for RangeWithLimit {
   fn from(value: RangeInclusive<i32>) -> Self {
-    Self::new(&value)
+    Self::new(value)
   }
 }
 
 impl RangeWithLimit {
-  pub fn new(base: &RangeInclusive<i32>) -> Self {
-    Self {
-      base: base.clone(),
-      internal_base: RangeInclusive::new(0, *base.end() as u32),
-      user: None,
-    }
+  pub fn new(base: RangeInclusive<i32>) -> Self {
+    Self { base, user: None }
   }
 
-  pub fn new_with_user(base: &RangeInclusive<i32>, user: &Option<RangeInclusive<u32>>) -> Self {
-    Self {
-      base: base.clone(),
-      internal_base: RangeInclusive::new(0, *base.end() as u32),
-      user: user.clone(),
+  pub fn new_with_user(base: RangeInclusive<i32>, user: Option<RangeInclusive<u32>>) -> Self {
+    Self { base, user }
+  }
+
+  /// Returns the effective u32 range for calculations
+  pub fn internal(&self) -> RangeInclusive<u32> {
+    match self.user {
+      Some(user_range) => user_range,
+      None => RangeInclusive::new(0, self.base.end() as u32),
     }
   }
 
   pub fn step_limit(&self) -> RangeInclusive<i32> {
-    if *self.base.start() < 0 {
+    if self.base.start() < 0 {
       RangeInclusive::new(-(self.step_count() as i32), self.step_count() as i32)
     } else {
       RangeInclusive::new(0, self.step_count() as i32)
@@ -117,102 +76,51 @@ impl RangeWithLimit {
 
   pub fn step_count(&self) -> u32 {
     if let Some(user) = &self.user {
-      *user.end() - *user.start()
+      user.end() - user.start()
     } else {
-      *self.base.end() as u32
+      self.base.end() as u32
     }
   }
 
   pub fn try_new(
-    base: &RangeInclusive<i32>,
-    user: &Option<RangeInclusive<u32>>,
+    base: RangeInclusive<i32>,
+    user: Option<RangeInclusive<u32>>,
   ) -> Result<Self, ButtplugDeviceConfigError> {
-    let truncated_base = RangeInclusive::new(0, *base.end() as u32);
+    let truncated_base = RangeInclusive::new(0, base.end() as u32);
     if let Some(user) = user {
       if user.is_empty() {
         Err(ButtplugDeviceConfigError::InvalidUserRange)
-      } else if *user.start() < *truncated_base.start()
-        || *user.end() > *truncated_base.end()
-        || *user.start() > *truncated_base.end()
-        || *user.end() < *truncated_base.start()
+      } else if user.start() < truncated_base.start()
+        || user.end() > truncated_base.end()
+        || user.start() > truncated_base.end()
+        || user.end() < truncated_base.start()
       {
         Err(ButtplugDeviceConfigError::InvalidUserRange)
       } else {
         Ok(Self {
-          base: (*base).clone(),
-          internal_base: truncated_base,
-          user: Some((*user).clone()),
+          base,
+          user: Some(user),
         })
       }
     } else if base.is_empty() {
       Err(ButtplugDeviceConfigError::BaseRangeRequired)
     } else {
-      Ok(Self {
-        base: (*base).clone(),
-        internal_base: truncated_base,
-        user: None,
-      })
+      Ok(Self { base, user: None })
     }
   }
 }
 
-impl Serialize for RangeWithLimit {
-  fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-  where
-    S: Serializer,
-  {
-    let mut seq = serializer.serialize_seq(Some(2))?;
-    seq.serialize_element(self.base.start())?;
-    seq.serialize_element(self.base.end())?;
-    seq.end()
-  }
-}
-
-impl<'de> Deserialize<'de> for RangeWithLimit {
-  fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-  where
-    D: Deserializer<'de>,
-  {
-    struct RangeVisitor;
-
-    impl<'de> Visitor<'de> for RangeVisitor {
-      type Value = RangeWithLimit;
-
-      fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-        formatter.write_str("a two-element array [start, end]")
-      }
-
-      fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
-      where
-        A: SeqAccess<'de>,
-      {
-        let start: i32 = seq
-          .next_element()?
-          .ok_or_else(|| de::Error::invalid_length(0, &self))?;
-        let end: i32 = seq
-          .next_element()?
-          .ok_or_else(|| de::Error::invalid_length(1, &self))?;
-        Ok(RangeWithLimit::new(&(start..=end)))
-      }
-    }
-
-    deserializer.deserialize_seq(RangeVisitor)
-  }
-}
-
-#[derive(Debug, Clone, Getters, CopyGetters, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ServerDeviceFeatureOutputValueProperties {
-  #[getset(get = "pub")]
-  value: RangeWithLimit,
-  #[getset(get_copy = "pub")]
+  pub value: RangeWithLimit,
   #[serde(default, skip_serializing_if = "std::ops::Not::not")]
-  disabled: bool,
+  pub disabled: bool,
 }
 
 impl ServerDeviceFeatureOutputValueProperties {
-  pub fn new(value: &RangeWithLimit, disabled: bool) -> Self {
+  pub fn new(value: RangeWithLimit, disabled: bool) -> Self {
     Self {
-      value: value.clone(),
+      value,
       disabled,
     }
   }
@@ -229,14 +137,10 @@ impl ServerDeviceFeatureOutputValueProperties {
   // We'll get a number from 0-x here. We'll need to calculate it with in the range we have. We'll
   // consider negative ranges symmetric.
   pub fn calculate_scaled_value(&self, value: i32) -> Result<i32, ButtplugDeviceConfigError> {
-    let range = if let Some(user_range) = self.value.user() {
-      user_range
-    } else {
-      self.value.internal_base()
-    };
+    let range = self.value.internal();
     let current_value = value.unsigned_abs();
     let mult = if value < 0 { -1 } else { 1 };
-    if value != 0 && range.contains(&(range.start() + current_value)) {
+    if value != 0 && range.contains(range.start() + current_value) {
       Ok((range.start() + current_value) as i32 * mult)
     } else if value == 0 {
       Ok(0)
@@ -251,26 +155,23 @@ impl ServerDeviceFeatureOutputValueProperties {
 
 impl From<&ServerDeviceFeatureOutputValueProperties> for DeviceFeatureOutputValueProperties {
   fn from(val: &ServerDeviceFeatureOutputValueProperties) -> Self {
-    DeviceFeatureOutputValueProperties::new(&val.value().step_limit())
+    DeviceFeatureOutputValueProperties::new(val.value.step_limit())
   }
 }
 
 #[derive(Debug, Clone, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct ServerDeviceFeatureOutputPositionProperties {
-  #[getset(get = "pub")]
-  value: RangeWithLimit,
-  #[getset(get_copy = "pub")]
+  pub value: RangeWithLimit,
   #[serde(default, skip_serializing_if = "std::ops::Not::not")]
-  disabled: bool,
-  #[getset(get_copy = "pub")]
+  pub disabled: bool,
   #[serde(default, skip_serializing_if = "std::ops::Not::not")]
-  reverse_position: bool,
+  pub reverse_position: bool,
 }
 
 impl ServerDeviceFeatureOutputPositionProperties {
-  pub fn new(value: &RangeWithLimit, disabled: bool, reverse_position: bool) -> Self {
+  pub fn new(value: RangeWithLimit, disabled: bool, reverse_position: bool) -> Self {
     Self {
-      value: value.clone(),
+      value,
       disabled,
       reverse_position,
     }
@@ -288,12 +189,8 @@ impl ServerDeviceFeatureOutputPositionProperties {
 
   // We'll get a number from 0-x here. We'll need to calculate it with in the range we have.
   pub fn calculate_scaled_value(&self, input: u32) -> Result<u32, ButtplugDeviceConfigError> {
-    let range = if let Some(user_range) = self.value.user() {
-      user_range
-    } else {
-      self.value.internal_base()
-    };
-    if range.contains(&(range.start() + input)) {
+    let range = self.value.internal();
+    if range.contains(range.start() + input) {
       if self.reverse_position {
         Ok(range.end() - input)
       } else {
@@ -310,34 +207,30 @@ impl ServerDeviceFeatureOutputPositionProperties {
 
 impl From<&ServerDeviceFeatureOutputPositionProperties> for DeviceFeatureOutputValueProperties {
   fn from(val: &ServerDeviceFeatureOutputPositionProperties) -> Self {
-    DeviceFeatureOutputValueProperties::new(&val.value().step_limit())
+    DeviceFeatureOutputValueProperties::new(val.value.step_limit())
   }
 }
 
-#[derive(Debug, Clone, Getters, CopyGetters, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ServerDeviceFeatureOutputHwPositionWithDurationProperties {
-  #[getset(get = "pub")]
-  value: RangeWithLimit,
-  #[getset(get = "pub")]
-  duration: RangeWithLimit,
-  #[getset(get_copy = "pub")]
+  pub value: RangeWithLimit,
+  pub duration: RangeWithLimit,
   #[serde(default, skip_serializing_if = "std::ops::Not::not")]
-  disabled: bool,
-  #[getset(get_copy = "pub")]
+  pub disabled: bool,
   #[serde(default, skip_serializing_if = "std::ops::Not::not")]
-  reverse_position: bool,
+  pub reverse_position: bool,
 }
 
 impl ServerDeviceFeatureOutputHwPositionWithDurationProperties {
   pub fn new(
-    value: &RangeWithLimit,
-    duration: &RangeWithLimit,
+    value: RangeWithLimit,
+    duration: RangeWithLimit,
     disabled: bool,
     reverse_position: bool,
   ) -> Self {
     Self {
-      value: value.clone(),
-      duration: duration.clone(),
+      value,
+      duration,
       disabled,
       reverse_position,
     }
@@ -349,12 +242,8 @@ impl ServerDeviceFeatureOutputHwPositionWithDurationProperties {
 
   // We'll get a number from 0-x here. We'll need to calculate it with in the range we have.
   pub fn calculate_scaled_value(&self, input: u32) -> Result<u32, ButtplugDeviceConfigError> {
-    let range = if let Some(user_range) = self.value.user() {
-      user_range
-    } else {
-      self.value.internal_base()
-    };
-    if input > 0 && range.contains(&(range.start() + input)) {
+    let range = self.value.internal();
+    if input > 0 && range.contains(range.start() + input) {
       if self.reverse_position {
         Ok(range.end() - input)
       } else {
@@ -376,252 +265,153 @@ impl From<&ServerDeviceFeatureOutputHwPositionWithDurationProperties>
 {
   fn from(val: &ServerDeviceFeatureOutputHwPositionWithDurationProperties) -> Self {
     DeviceFeatureOutputHwPositionWithDurationProperties::new(
-      &val.value().step_limit(),
-      &val.duration().step_limit(),
+      val.value.step_limit(),
+      val.duration.step_limit(),
     )
   }
 }
 
-#[derive(Clone, Debug, Getters, Setters, Default, Serialize, Deserialize)]
-#[serde(default)]
-#[getset(get = "pub", set = "pub")]
-pub struct ServerDeviceFeatureOutput {
-  #[serde(skip_serializing_if = "Option::is_none")]
-  vibrate: Option<ServerDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  rotate: Option<ServerDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  oscillate: Option<ServerDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  constrict: Option<ServerDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  temperature: Option<ServerDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  led: Option<ServerDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  position: Option<ServerDeviceFeatureOutputPositionProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  hw_position_with_duration: Option<ServerDeviceFeatureOutputHwPositionWithDurationProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  spray: Option<ServerDeviceFeatureOutputValueProperties>,
+// ServerOutputType is auto-generated as the discriminant enum of ServerDeviceFeatureOutput.
+// Adding or renaming a ServerDeviceFeatureOutput variant automatically updates ServerOutputType.
+#[derive(Clone, Debug, Serialize, Deserialize, EnumDiscriminants)]
+#[serde(rename_all = "snake_case")]
+#[strum_discriminants(name(ServerOutputType))]
+#[strum_discriminants(vis(pub(crate)))]
+#[strum_discriminants(derive(Display, Hash, EnumIter, EnumString, Serialize, Deserialize))]
+#[strum_discriminants(serde(rename_all = "snake_case"))]
+pub enum ServerDeviceFeatureOutput {
+  Vibrate(ServerDeviceFeatureOutputValueProperties),
+  Rotate(ServerDeviceFeatureOutputValueProperties),
+  Oscillate(ServerDeviceFeatureOutputValueProperties),
+  Constrict(ServerDeviceFeatureOutputValueProperties),
+  Temperature(ServerDeviceFeatureOutputValueProperties),
+  Led(ServerDeviceFeatureOutputValueProperties),
+  Spray(ServerDeviceFeatureOutputValueProperties),
+  Position(ServerDeviceFeatureOutputPositionProperties),
+  HwPositionWithDuration(ServerDeviceFeatureOutputHwPositionWithDurationProperties),
 }
 
 impl ServerDeviceFeatureOutput {
-  pub fn contains(&self, output_type: OutputType) -> bool {
-    match output_type {
-      OutputType::Constrict => self.constrict.is_some(),
-      OutputType::Temperature => self.temperature.is_some(),
-      OutputType::Led => self.led.is_some(),
-      OutputType::Oscillate => self.oscillate.is_some(),
-      OutputType::Position => self.position.is_some(),
-      OutputType::HwPositionWithDuration => self.hw_position_with_duration.is_some(),
-      OutputType::Rotate => self.rotate.is_some(),
-      OutputType::Spray => self.spray.is_some(),
-      OutputType::Unknown => false,
-      OutputType::Vibrate => self.vibrate.is_some(),
+  pub fn output_type(&self) -> OutputType {
+    OutputType::from(ServerOutputType::from(self))
+  }
+
+  pub fn is_disabled(&self) -> bool {
+    match self {
+      Self::Vibrate(p)
+      | Self::Rotate(p)
+      | Self::Oscillate(p)
+      | Self::Constrict(p)
+      | Self::Temperature(p)
+      | Self::Led(p)
+      | Self::Spray(p) => p.disabled,
+      Self::Position(p) => p.disabled,
+      Self::HwPositionWithDuration(p) => p.disabled,
     }
   }
 
-  pub fn output_types(&self) -> Vec<OutputType> {
-    [
-      (self.vibrate.is_some(), OutputType::Vibrate),
-      (self.rotate.is_some(), OutputType::Rotate),
-      (self.oscillate.is_some(), OutputType::Oscillate),
-      (self.constrict.is_some(), OutputType::Constrict),
-      (self.temperature.is_some(), OutputType::Temperature),
-      (self.led.is_some(), OutputType::Led),
-      (self.position.is_some(), OutputType::Position),
-      (
-        self.hw_position_with_duration.is_some(),
-        OutputType::HwPositionWithDuration,
-      ),
-      (self.spray.is_some(), OutputType::Spray),
-    ]
-    .into_iter()
-    .filter_map(|(present, ot)| present.then_some(ot))
-    .collect()
-  }
-
-  pub fn calculate_from_value(
-    &self,
-    output_type: OutputType,
-    value: i32,
-  ) -> Result<i32, ButtplugDeviceConfigError> {
-    // TODO just fucking do some trait implementations for calculation methods and clean this up for fuck sake. :c
-    match output_type {
-      OutputType::Constrict => self.constrict.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_value(value),
-      ),
-      OutputType::Temperature => self.temperature.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_value(value),
-      ),
-      OutputType::Led => self.led.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_value(value),
-      ),
-      OutputType::Oscillate => self.oscillate.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_value(value),
-      ),
-      OutputType::Position => self.position.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_value(value as u32).map(|x| x as i32),
-      ),
-      OutputType::HwPositionWithDuration => self.hw_position_with_duration.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_value(value as u32).map(|x| x as i32),
-      ),
-      OutputType::Rotate => self.rotate.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_value(value),
-      ),
-      OutputType::Spray => self.spray.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_value(value),
-      ),
-      OutputType::Unknown => Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-      OutputType::Vibrate => self.vibrate.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_value(value),
-      ),
+  pub fn calculate_from_value(&self, value: i32) -> Result<i32, ButtplugDeviceConfigError> {
+    match self {
+      Self::Vibrate(p)
+      | Self::Rotate(p)
+      | Self::Oscillate(p)
+      | Self::Constrict(p)
+      | Self::Temperature(p)
+      | Self::Led(p)
+      | Self::Spray(p) => p.calculate_scaled_value(value),
+      Self::Position(p) => p.calculate_scaled_value(value as u32).map(|x| x as i32),
+      Self::HwPositionWithDuration(p) => p.calculate_scaled_value(value as u32).map(|x| x as i32),
     }
   }
 
-  pub fn is_disabled(&self, output_type: OutputType) -> bool {
-    match output_type {
-      OutputType::Vibrate => self.vibrate.as_ref().is_some_and(|x| x.disabled()),
-      OutputType::Rotate => self.rotate.as_ref().is_some_and(|x| x.disabled()),
-      OutputType::Oscillate => self.oscillate.as_ref().is_some_and(|x| x.disabled()),
-      OutputType::Constrict => self.constrict.as_ref().is_some_and(|x| x.disabled()),
-      OutputType::Temperature => self.temperature.as_ref().is_some_and(|x| x.disabled()),
-      OutputType::Led => self.led.as_ref().is_some_and(|x| x.disabled()),
-      OutputType::Position => self.position.as_ref().is_some_and(|x| x.disabled()),
-      OutputType::HwPositionWithDuration => self
-        .hw_position_with_duration
-        .as_ref()
-        .is_some_and(|x| x.disabled()),
-      OutputType::Spray => self.spray.as_ref().is_some_and(|x| x.disabled()),
-      OutputType::Unknown => false,
+  pub fn calculate_from_float(&self, value: f64) -> Result<i32, ButtplugDeviceConfigError> {
+    match self {
+      Self::Vibrate(p)
+      | Self::Rotate(p)
+      | Self::Oscillate(p)
+      | Self::Constrict(p)
+      | Self::Temperature(p)
+      | Self::Led(p)
+      | Self::Spray(p) => p.calculate_scaled_float(value),
+      Self::Position(p) => p.calculate_scaled_float(value),
+      Self::HwPositionWithDuration(p) => p.calculate_scaled_float(value).map(|x| x as i32),
     }
   }
 
-  pub fn calculate_from_float(
-    &self,
-    output_type: OutputType,
-    value: f64,
-  ) -> Result<i32, ButtplugDeviceConfigError> {
-    match output_type {
-      OutputType::Constrict => self.constrict.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_float(value),
-      ),
-      OutputType::Temperature => self.temperature.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_float(value),
-      ),
-      OutputType::Led => self.led.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_float(value),
-      ),
-      OutputType::Oscillate => self.oscillate.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_float(value),
-      ),
-      OutputType::Position => self.position.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_float(value),
-      ),
-      OutputType::HwPositionWithDuration => self.hw_position_with_duration.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_float(value).map(|x| x as i32),
-      ),
-      OutputType::Rotate => self.rotate.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_float(value),
-      ),
-      OutputType::Spray => self.spray.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_float(value),
-      ),
-      OutputType::Unknown => Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-      OutputType::Vibrate => self.vibrate.as_ref().map_or(
-        Err(ButtplugDeviceConfigError::InvalidOutput(output_type)),
-        |x| x.calculate_scaled_float(value),
-      ),
+  /// Returns the value properties if this is one of the 7 simple value-type variants.
+  pub fn as_value_properties(&self) -> Option<&ServerDeviceFeatureOutputValueProperties> {
+    match self {
+      Self::Vibrate(p)
+      | Self::Rotate(p)
+      | Self::Oscillate(p)
+      | Self::Constrict(p)
+      | Self::Temperature(p)
+      | Self::Led(p)
+      | Self::Spray(p) => Some(p),
+      _ => None,
     }
   }
 }
 
-impl From<ServerDeviceFeatureOutput> for DeviceFeatureOutput {
-  fn from(val: ServerDeviceFeatureOutput) -> Self {
-    let mut builder = DeviceFeatureOutputBuilder::default();
-    val
-      .vibrate
-      .as_ref()
-      .filter(|x| !x.disabled())
-      .map(|x| builder.vibrate(x.into()));
-    val
-      .rotate
-      .as_ref()
-      .filter(|x| !x.disabled())
-      .map(|x| builder.rotate(x.into()));
-    val
-      .oscillate
-      .as_ref()
-      .filter(|x| !x.disabled())
-      .map(|x| builder.oscillate(x.into()));
-    val
-      .constrict
-      .as_ref()
-      .filter(|x| !x.disabled())
-      .map(|x| builder.constrict(x.into()));
-    val
-      .temperature
-      .as_ref()
-      .filter(|x| !x.disabled())
-      .map(|x| builder.temperature(x.into()));
-    val
-      .led
-      .as_ref()
-      .filter(|x| !x.disabled())
-      .map(|x| builder.led(x.into()));
-    val
-      .position
-      .as_ref()
-      .filter(|x| !x.disabled())
-      .map(|x| builder.position(x.into()));
-    val
-      .hw_position_with_duration
-      .as_ref()
-      .filter(|x| !x.disabled())
-      .map(|x| builder.hw_position_with_duration(x.into()));
-    val
-      .spray
-      .as_ref()
-      .filter(|x| !x.disabled())
-      .map(|x| builder.spray(x.into()));
-    builder.build().expect("Infallible")
+impl VariantKey for ServerDeviceFeatureOutput {
+  type Key = OutputType;
+  fn variant_key(&self) -> OutputType {
+    self.output_type()
   }
 }
 
-#[derive(Clone, Debug, Getters, Serialize, Deserialize)]
-#[getset(get = "pub")]
+macro_rules! impl_output_type_conversions {
+  ($($variant:ident),+ $(,)?) => {
+    impl From<ServerOutputType> for OutputType {
+      fn from(val: ServerOutputType) -> Self {
+        match val {
+          $(ServerOutputType::$variant => OutputType::$variant,)+
+        }
+      }
+    }
+
+    impl From<OutputType> for ServerOutputType {
+      fn from(val: OutputType) -> Self {
+        match val {
+          $(OutputType::$variant => ServerOutputType::$variant,)+
+        }
+      }
+    }
+
+    impl From<&ServerDeviceFeatureOutput> for DeviceFeatureOutput {
+      fn from(val: &ServerDeviceFeatureOutput) -> Self {
+        match val {
+          $(ServerDeviceFeatureOutput::$variant(p) => DeviceFeatureOutput::$variant(p.into()),)+
+        }
+      }
+    }
+  };
+}
+
+impl_output_type_conversions![
+  Vibrate,
+  Rotate,
+  Oscillate,
+  Constrict,
+  Temperature,
+  Led,
+  Spray,
+  Position,
+  HwPositionWithDuration,
+];
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ServerDeviceFeatureInputProperties {
-  #[serde(with = "range_vec_serde")]
-  value: Vec<RangeInclusive<i32>>,
-  command: HashSet<InputCommandType>,
+  pub value: Vec<RangeInclusive<i32>>,
+  #[serde(with = "buttplug_core::util::serializers::bitflags_seq")]
+  pub command: BitFlags<InputCommandType>,
 }
 
 impl ServerDeviceFeatureInputProperties {
-  pub fn new(
-    value: &Vec<RangeInclusive<i32>>,
-    sensor_commands: &HashSet<InputCommandType>,
-  ) -> Self {
+  pub fn new(value: &[RangeInclusive<i32>], sensor_commands: &BitFlags<InputCommandType>) -> Self {
     Self {
-      value: value.clone(),
-      command: sensor_commands.clone(),
+      value: value.to_vec(),
+      command: *sensor_commands,
     }
   }
 }
@@ -632,97 +422,107 @@ impl From<&ServerDeviceFeatureInputProperties> for DeviceFeatureInputProperties 
   }
 }
 
-#[derive(Clone, Debug, Getters, Setters, Default, Serialize, Deserialize)]
-#[serde(default)]
-#[getset(get = "pub", set = "pub(crate)")]
-pub struct ServerDeviceFeatureInput {
-  #[serde(skip_serializing_if = "Option::is_none")]
-  battery: Option<ServerDeviceFeatureInputProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  rssi: Option<ServerDeviceFeatureInputProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pressure: Option<ServerDeviceFeatureInputProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  button: Option<ServerDeviceFeatureInputProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  depth: Option<ServerDeviceFeatureInputProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  position: Option<ServerDeviceFeatureInputProperties>,
+// ServerInputType is auto-generated as the discriminant enum of ServerDeviceFeatureInput.
+#[derive(Clone, Debug, Serialize, Deserialize, EnumDiscriminants)]
+#[serde(rename_all = "snake_case")]
+#[strum_discriminants(name(ServerInputType))]
+#[strum_discriminants(vis(pub(crate)))]
+#[strum_discriminants(derive(Display, Hash, EnumIter, EnumString, Serialize, Deserialize))]
+#[strum_discriminants(serde(rename_all = "snake_case"))]
+pub enum ServerDeviceFeatureInput {
+  Battery(ServerDeviceFeatureInputProperties),
+  Rssi(ServerDeviceFeatureInputProperties),
+  Button(ServerDeviceFeatureInputProperties),
+  Pressure(ServerDeviceFeatureInputProperties),
+  Depth(ServerDeviceFeatureInputProperties),
+  Position(ServerDeviceFeatureInputProperties),
 }
 
 impl ServerDeviceFeatureInput {
-  pub fn contains(&self, input_type: InputType) -> bool {
-    match input_type {
-      InputType::Battery => self.battery.is_some(),
-      InputType::Rssi => self.rssi.is_some(),
-      InputType::Pressure => self.pressure.is_some(),
-      InputType::Button => self.button.is_some(),
-      InputType::Depth => self.depth.is_some(),
-      InputType::Position => self.position.is_some(),
-      InputType::Unknown => false,
+  pub fn input_type(&self) -> InputType {
+    InputType::from(ServerInputType::from(self))
+  }
+
+  pub fn properties(&self) -> &ServerDeviceFeatureInputProperties {
+    match self {
+      Self::Battery(p)
+      | Self::Rssi(p)
+      | Self::Button(p)
+      | Self::Pressure(p)
+      | Self::Depth(p)
+      | Self::Position(p) => p,
     }
   }
 
   pub fn can_subscribe(&self) -> bool {
-    [
-      &self.battery,
-      &self.rssi,
-      &self.pressure,
-      &self.button,
-      &self.depth,
-      &self.position,
-    ]
-    .iter()
-    .any(|input| {
-      input
-        .as_ref()
-        .map_or(false, |i| i.command.contains(&InputCommandType::Subscribe))
-    })
+    self
+      .properties()
+      .command
+      .contains(InputCommandType::Subscribe)
   }
 }
 
-impl From<ServerDeviceFeatureInput> for DeviceFeatureInput {
-  fn from(val: ServerDeviceFeatureInput) -> Self {
-    let mut builder = DeviceFeatureInputBuilder::default();
-    val.battery.as_ref().map(|x| builder.battery(x.into()));
-    val.rssi.as_ref().map(|x| builder.rssi(x.into()));
-    val.pressure.as_ref().map(|x| builder.pressure(x.into()));
-    val.button.as_ref().map(|x| builder.button(x.into()));
-    val.depth.as_ref().map(|x| builder.depth(x.into()));
-    val.position.as_ref().map(|x| builder.position(x.into()));
-    builder.build().expect("Infallible")
+impl VariantKey for ServerDeviceFeatureInput {
+  type Key = InputType;
+  fn variant_key(&self) -> InputType {
+    self.input_type()
   }
 }
 
-#[derive(Clone, Debug, Getters, CopyGetters, Setters, Serialize, Deserialize)]
+macro_rules! impl_input_type_conversions {
+  ($($variant:ident),+ $(,)?) => {
+    impl From<ServerInputType> for InputType {
+      fn from(val: ServerInputType) -> Self {
+        match val {
+          $(ServerInputType::$variant => InputType::$variant,)+
+        }
+      }
+    }
+
+    impl From<InputType> for ServerInputType {
+      fn from(val: InputType) -> Self {
+        match val {
+          $(InputType::$variant => ServerInputType::$variant,)+
+        }
+      }
+    }
+
+    impl From<&ServerDeviceFeatureInput> for DeviceFeatureInput {
+      fn from(val: &ServerDeviceFeatureInput) -> Self {
+        match val {
+          $(ServerDeviceFeatureInput::$variant(p) => DeviceFeatureInput::$variant(p.into()),)+
+        }
+      }
+    }
+  };
+}
+
+impl_input_type_conversions![Battery, Rssi, Button, Pressure, Depth, Position,];
+
+#[derive(Clone, Debug, Getters, CopyGetters, Serialize, Deserialize)]
 #[serde(default)]
 pub struct ServerDeviceFeature {
   #[getset(get_copy = "pub")]
   #[serde(skip)]
   index: u32,
-  #[getset(get = "pub")]
   #[serde(default)]
-  description: String,
-  #[getset(get_copy = "pub")]
+  pub description: String,
   #[serde(skip)]
+  #[getset(get_copy = "pub")]
   id: Uuid,
-  #[getset(get_copy = "pub")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  base_id: Option<Uuid>,
-  #[getset(get_copy = "pub")]
+  pub base_id: Option<Uuid>,
   #[serde(skip_serializing_if = "Option::is_none")]
-  alt_protocol_index: Option<u32>,
-  #[getset(get = "pub", set = "pub")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  output: Option<ServerDeviceFeatureOutput>,
-  #[getset(get = "pub")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  input: Option<ServerDeviceFeatureInput>,
+  pub alt_protocol_index: Option<u32>,
+  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty")]
+  pub output: SmallVecEnumMap<ServerDeviceFeatureOutput, 1>,
+  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty")]
+  pub input: SmallVecEnumMap<ServerDeviceFeatureInput, 1>,
 }
 
 impl PartialEq for ServerDeviceFeature {
   fn eq(&self, other: &Self) -> bool {
-    self.id() == other.id()
+    self.id == other.id
   }
 }
 
@@ -737,8 +537,8 @@ impl Default for ServerDeviceFeature {
       id: Uuid::new_v4(),
       base_id: None,
       alt_protocol_index: None,
-      output: None,
-      input: None,
+      output: SmallVecEnumMap::default(),
+      input: SmallVecEnumMap::default(),
     }
   }
 }
@@ -750,8 +550,8 @@ impl ServerDeviceFeature {
     id: Uuid,
     base_id: Option<Uuid>,
     alt_protocol_index: Option<u32>,
-    output: &Option<ServerDeviceFeatureOutput>,
-    input: &Option<ServerDeviceFeatureInput>,
+    output: &SmallVecEnumMap<ServerDeviceFeatureOutput, 1>,
+    input: &SmallVecEnumMap<ServerDeviceFeatureInput, 1>,
   ) -> Self {
     Self {
       index,
@@ -764,6 +564,40 @@ impl ServerDeviceFeature {
     }
   }
 
+  // --- Output helpers ---
+
+  pub fn has_output(&self) -> bool {
+    !self.output.is_empty()
+  }
+
+  pub fn contains_output(&self, t: OutputType) -> bool {
+    self.output.contains_key(&t)
+  }
+
+  pub fn get_output(&self, t: OutputType) -> Option<&ServerDeviceFeatureOutput> {
+    self.output.find_by_key(&t)
+  }
+
+  // --- Input helpers ---
+
+  pub fn has_input(&self) -> bool {
+    !self.input.is_empty()
+  }
+
+  pub fn contains_input(&self, t: InputType) -> bool {
+    self.input.contains_key(&t)
+  }
+
+  pub fn get_input(&self, t: InputType) -> Option<&ServerDeviceFeatureInput> {
+    self.input.find_by_key(&t)
+  }
+
+  pub fn can_subscribe(&self) -> bool {
+    (&self.input).into_iter().any(|i| i.can_subscribe())
+  }
+
+  // --- Lifecycle ---
+
   pub fn as_new_user_feature(&self) -> Self {
     let mut new_feature = self.clone();
     new_feature.base_id = Some(self.id);
@@ -772,11 +606,15 @@ impl ServerDeviceFeature {
   }
 
   pub fn as_device_feature(&self) -> Result<DeviceFeature, ButtplugDeviceConfigError> {
+    let output: SmallVecEnumMap<DeviceFeatureOutput, 1> =
+      (&self.output).into_iter().map(|o| o.into()).collect();
+    let input: SmallVecEnumMap<DeviceFeatureInput, 1> =
+      (&self.input).into_iter().map(|i| i.into()).collect();
     Ok(DeviceFeature::new(
       self.index,
-      self.description(),
-      &self.output.as_ref().map(|x| x.clone().into()),
-      &self.input.as_ref().map(|x| x.clone().into()),
+      &self.description,
+      &output,
+      &input,
     ))
   }
 }

@@ -22,7 +22,10 @@ use crate::device::{
     generic_protocol_initializer_setup,
   },
 };
-use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
+use buttplug_core::{
+  errors::ButtplugDeviceError,
+  message::OutputType,
+};
 use buttplug_server_device_config::{
   Endpoint,
   ProtocolCommunicationSpecifier,
@@ -47,11 +50,7 @@ impl ProtocolInitializer for WeVibe8BitInitializer {
     let num_vibrators = def
       .features()
       .values()
-      .filter(|x| {
-        x.output()
-          .as_ref()
-          .is_some_and(|x| x.contains(OutputType::Vibrate))
-      })
+      .filter(|x| x.contains_output(OutputType::Vibrate))
       .count() as u8;
     Ok(Arc::new(WeVibe8Bit::new(num_vibrators)))
   }

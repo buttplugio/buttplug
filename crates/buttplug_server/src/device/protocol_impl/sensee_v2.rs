@@ -5,7 +5,10 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
+use buttplug_core::{
+  errors::ButtplugDeviceError,
+  message::OutputType,
+};
 use buttplug_server_device_config::{
   Endpoint,
   ProtocolCommunicationSpecifier,
@@ -62,12 +65,10 @@ impl ProtocolInitializer for SenseeV2Initializer {
       0x65
     };
 
-    let feature_map = |output_type| {
+    let feature_map = |output_type: OutputType| {
       let mut map = HashMap::new();
       device_definition.features().iter().for_each(|(i, x)| {
-        if let Some(output_map) = x.output()
-          && output_map.contains(output_type)
-        {
+        if x.contains_output(output_type) {
           map.insert(*i, AtomicU8::new(0));
         }
       });

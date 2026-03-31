@@ -8,7 +8,10 @@
 use async_trait::async_trait;
 use uuid::{Uuid, uuid};
 
-use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
+use buttplug_core::{
+  errors::ButtplugDeviceError,
+  message::OutputType,
+};
 
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
@@ -48,13 +51,7 @@ impl ProtocolInitializer for SvakomV6Initializer {
     let num_vibrators = def
       .features()
       .values()
-      .filter(|x| {
-        if let Some(output_map) = x.output() {
-          output_map.contains(OutputType::Vibrate)
-        } else {
-          false
-        }
-      })
+      .filter(|x| x.contains_output(OutputType::Vibrate))
       .count() as u8;
     Ok(Arc::new(SvakomV6::new(num_vibrators)))
   }

@@ -86,7 +86,7 @@ impl TryFromDeviceAttributes<SensorReadCmdV3> for CheckedInputCmdV4 {
     } else if let Some((feature_index, feature)) = features
       .features()
       .iter()
-      .find(|(_, p)| p.input().as_ref().is_some_and(|x| x.battery().is_some()))
+      .find(|(_, p)| p.contains_input(InputType::Battery))
     {
       Ok(CheckedInputCmdV4::new(
         msg.id(),

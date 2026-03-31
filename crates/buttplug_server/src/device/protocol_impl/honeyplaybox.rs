@@ -64,8 +64,8 @@ impl ProtocolInitializer for HoneyPlayBoxInitializer {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let feature_count = device_definition
       .features()
-      .iter()
-      .filter(|x| x.1.output().is_some())
+      .values()
+      .filter(|x| x.has_output())
       .count();
 
     let mut event_receiver = hardware.event_stream();

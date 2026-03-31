@@ -11,7 +11,10 @@ use std::sync::atomic::{AtomicU8, Ordering};
 use async_trait::async_trait;
 use uuid::{Uuid, uuid};
 
-use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
+use buttplug_core::{
+  errors::ButtplugDeviceError,
+  message::OutputType,
+};
 use buttplug_server_device_config::{
   Endpoint,
   ProtocolCommunicationSpecifier,
@@ -43,10 +46,8 @@ impl ProtocolInitializer for SexverseV1Initializer {
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut commands = vec![];
     def.features().values().for_each(|x| {
-      if let Some(m) = x.output() {
-        for output in m.output_types() {
-          commands.push((output, AtomicU8::default()))
-        }
+      for output in &x.output {
+        commands.push((output.output_type(), AtomicU8::default()))
       }
     });
     Ok(Arc::new(SexverseV1::new(commands)))

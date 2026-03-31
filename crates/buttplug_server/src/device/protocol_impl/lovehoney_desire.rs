@@ -48,7 +48,7 @@ impl ProtocolInitializer for LovehoneyDesireInitializer {
       def
         .features()
         .values()
-        .filter(|x| x.output().is_some())
+        .filter(|x| x.has_output())
         .count() as u8,
     )))
   }
