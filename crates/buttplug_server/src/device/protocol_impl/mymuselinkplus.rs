@@ -5,59 +5,16 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use uuid::Uuid;
+
 use crate::device::{
-  hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-  protocol::{
-    ProtocolHandler,
-    ProtocolIdentifier,
-    ProtocolInitializer,
-    generic_protocol_initializer_setup,
-  },
+  hardware::{HardwareCommand, HardwareWriteCmd},
+  protocol::{ProtocolHandler, generic_protocol_setup},
 };
-use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
-use buttplug_server_device_config::{
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
-};
-use std::sync::Arc;
-use uuid::{Uuid, uuid};
 
-const MYMUSELINKPLUS_PROTOCOL_UUID: Uuid = uuid!("b8c3a1f0-7d2e-4a19-9f6b-3e8d1c5a2b40");
-generic_protocol_initializer_setup!(MyMuseLinkPlus, "mymuselinkplus");
-
-#[derive(Default)]
-pub struct MyMuseLinkPlusInitializer {}
-
-#[async_trait]
-impl ProtocolInitializer for MyMuseLinkPlusInitializer {
-  async fn initialize(
-    &mut self,
-    hardware: Arc<Hardware>,
-    _: &ServerDeviceDefinition,
-  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    // Short vibration pulse to indicate the device is active
-    let on = HardwareWriteCmd::new(
-      &[MYMUSELINKPLUS_PROTOCOL_UUID],
-      Endpoint::Tx,
-      vec![0xAA, 0x55, 0x06, 0x01, 0x01, 0x01, 0x01, 0xFF],
-      false,
-    );
-    hardware.write_value(&on).await?;
-    tokio::time::sleep(std::time::Duration::from_millis(200)).await;
-    // Turn off
-    let off = HardwareWriteCmd::new(
-      &[MYMUSELINKPLUS_PROTOCOL_UUID],
-      Endpoint::Tx,
-      vec![0xAA, 0x55, 0x06, 0xAA, 0x00, 0x00, 0x00, 0x00],
-      false,
-    );
-    hardware.write_value(&off).await?;
-    Ok(Arc::new(MyMuseLinkPlus::default()))
-  }
-}
+generic_protocol_setup!(MyMuseLinkPlus, "mymuselinkplus");
 
 #[derive(Default)]
 pub struct MyMuseLinkPlus {}
@@ -69,18 +26,10 @@ impl ProtocolHandler for MyMuseLinkPlus {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    // Map 10 slider steps to 3 device intensity levels: SLOW(1), MEDIUM(2), FAST(3)
-    let mode = match speed {
-      0 => 0,
-      1..=3 => 1,   // SLOW
-      4..=6 => 2,   // MEDIUM
-      7..=10 => 3,  // FAST
-      _ => 3,
-    };
-    let data = if mode == 0 {
+    let data = if speed == 0 {
       vec![0xAA, 0x55, 0x06, 0xAA, 0x00, 0x00, 0x00, 0x00]
     } else {
-      vec![0xAA, 0x55, 0x06, 0x01, 0x01, 0x01, mode, 0xFF]
+      vec![0xAA, 0x55, 0x06, 0x01, 0x01, 0x01, speed as u8, 0xFF]
     };
 
     Ok(vec![

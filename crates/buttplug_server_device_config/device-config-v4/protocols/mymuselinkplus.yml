@@ -8,7 +8,7 @@ defaults:
       vibrate:
         value:
         - 0
-        - 10
+        - 3
     index: 0
   id: a1f0b8c3-2e7d-194a-6b9f-8d3e1c5a2b40
 communication:
