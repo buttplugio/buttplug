@@ -1,3 +1,10 @@
+# 10.0.2 (2026-04-01)
+
+## Features
+
+- Update to Buttplug libraries v10.0.2
+  - Mostly bugfixes
+
 # 10.0.0 (2026-01-31)
 
 ## Features

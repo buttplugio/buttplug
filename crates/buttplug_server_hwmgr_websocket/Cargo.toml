@@ -1,6 +1,6 @@
 [package]
 name = "buttplug_server_hwmgr_websocket"
-version = "10.0.1"
+version = "10.0.2"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Buttplug Intimate Hardware Control Library - Core Library"
 license = "BSD-3-Clause"
@@ -27,9 +27,9 @@ targets = []
 features = ["default", "unstable"]
 
 [dependencies]
-buttplug_core = { version = "10.0.1", path = "../buttplug_core", default-features = false }
-buttplug_server = { version = "10.0.1", path = "../buttplug_server", default-features = false }
-buttplug_server_device_config = { version = "10.0.2", path = "../buttplug_server_device_config" }
+buttplug_core = { version = "10.0.2", path = "../buttplug_core", default-features = false }
+buttplug_server = { version = "10.0.2", path = "../buttplug_server", default-features = false }
+buttplug_server_device_config = { version = "10.0.3", path = "../buttplug_server_device_config" }
 futures = "0.3.32"
 futures-util = "0.3.32"
 log = "0.4.29"

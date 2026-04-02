@@ -1,3 +1,11 @@
+# 4.0.2 (2026-04-01)
+
+## Features
+
+- Update internal library dependencies
+  - Bugfixes for device discovery and DeviceList usage
+  - More device support
+
 # v4.0.1 (2026/03/13)
 
 ## Features

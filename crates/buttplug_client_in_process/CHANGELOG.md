@@ -1,3 +1,9 @@
+# 10.0.2 (2026-04-01)
+
+## Features
+
+- Update to new async_manager spawn macros
+
 # 10.0.1 (2026-03-13)
 
 ## Features
