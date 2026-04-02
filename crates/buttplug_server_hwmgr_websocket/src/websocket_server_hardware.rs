@@ -173,7 +173,7 @@ impl WebsocketServerHardwareConnector {
     let (device_event_sender, _) = broadcast::channel(256);
     let device_event_sender_clone = device_event_sender.clone();
     let address = info.address().clone();
-    tokio::spawn(async move {
+    buttplug_core::spawn!(async move {
       run_connection_loop(
         &address,
         device_event_sender_clone,

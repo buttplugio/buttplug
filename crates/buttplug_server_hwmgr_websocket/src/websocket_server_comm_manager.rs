@@ -127,7 +127,7 @@ impl WebsocketServerDeviceCommunicationManager {
               // wait for the first packet. We'll have to pass our device event sender off to the newly
               // created event loop, so that it can fire once the info packet is received.
               let sender_clone = sender.clone();
-              tokio::spawn(async move {
+              buttplug_core::spawn!(async move {
                 // TODO Implement a receive timeout here so we don't wait forever
                 if let Some(Ok(tokio_tungstenite::tungstenite::Message::Text(info_message))) =
                   ws_stream.next().await
