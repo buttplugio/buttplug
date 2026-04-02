@@ -1,3 +1,16 @@
+# 10.0.2 (2026-04-01)
+
+## Features
+
+- Rebuild asyncmanager to actually be extensible
+  - Allows wacky motherfuckers who think this library should build for ESP32s to actually make that happen
+    - Thanks wacky motherfucker I mean @jsmnbom
+
+## Bugfixes
+
+- Don't require DeviceListV4 to have a non-system id, can now be both
+- Fix JSON schema for v0 messages (so tests actually work!)
+
 # 10.0.1 (2026-03-13)
 
 ## Features
