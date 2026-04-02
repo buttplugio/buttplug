@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 188
+    "minor": 189
   },
   "protocols": {
     "activejoy": {
@@ -15774,9 +15774,6 @@
       "communication": [
         {
           "btle": {
-            "advertised_services": [
-              "0000d34e-0000-1000-8000-00805f9b34fb"
-            ],
             "names": [
               "MM Massager"
             ],
