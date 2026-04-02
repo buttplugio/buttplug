@@ -27,7 +27,7 @@ use buttplug_core::{
     OutputValue,
     StopCmdV4,
   },
-  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+  util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server_device_config::{
   DeviceConfigurationManager,
@@ -130,6 +130,23 @@ impl DeviceHandle {
       stop_commands: Arc::new(stop_commands),
       internal_hw_msg_sender,
     }
+  }
+
+  /// Whether this device needs keepalive packets to maintain its connection.
+  ///
+  /// Returns true when the protocol handler's keepalive strategy requires periodic
+  /// packet replay — either because the hardware requires it (e.g., iOS BLE) or
+  /// because the protocol itself specifies timed keepalives.
+  pub fn needs_keepalive(&self) -> bool {
+    (self.hardware.requires_keepalive()
+      && matches!(
+        self.handler.keepalive_strategy(),
+        ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy
+      ))
+      || matches!(
+        self.handler.keepalive_strategy(),
+        ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(_)
+      )
   }
 
   /// Get the device's unique identifier
@@ -579,7 +596,7 @@ pub(super) async fn build_device_handle(
   // to the device manager event loop via the provided sender.
   let event_stream = device_handle.event_stream();
   let identifier = device_handle.identifier().clone();
-  async_manager::spawn(async move {
+  buttplug_core::spawn!("DeviceEventForwarding", async move {
     futures::pin_mut!(event_stream);
     loop {
       let event = futures::StreamExt::next(&mut event_stream).await;

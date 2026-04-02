@@ -7,7 +7,7 @@
 
 mod util;
 use buttplug_client::{ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent};
-use buttplug_core::{errors::ButtplugError, message::OutputType, util::async_manager};
+use buttplug_core::{errors::ButtplugError, message::OutputType};
 use buttplug_server::device::hardware::{HardwareCommand, HardwareWriteCmd};
 use buttplug_server_device_config::{
   Endpoint,

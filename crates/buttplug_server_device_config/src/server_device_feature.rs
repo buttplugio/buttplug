@@ -489,6 +489,24 @@ impl ServerDeviceFeatureOutput {
     }
   }
 
+  pub fn is_disabled(&self, output_type: OutputType) -> bool {
+    match output_type {
+      OutputType::Vibrate => self.vibrate.as_ref().is_some_and(|x| x.disabled()),
+      OutputType::Rotate => self.rotate.as_ref().is_some_and(|x| x.disabled()),
+      OutputType::Oscillate => self.oscillate.as_ref().is_some_and(|x| x.disabled()),
+      OutputType::Constrict => self.constrict.as_ref().is_some_and(|x| x.disabled()),
+      OutputType::Temperature => self.temperature.as_ref().is_some_and(|x| x.disabled()),
+      OutputType::Led => self.led.as_ref().is_some_and(|x| x.disabled()),
+      OutputType::Position => self.position.as_ref().is_some_and(|x| x.disabled()),
+      OutputType::HwPositionWithDuration => self
+        .hw_position_with_duration
+        .as_ref()
+        .is_some_and(|x| x.disabled()),
+      OutputType::Spray => self.spray.as_ref().is_some_and(|x| x.disabled()),
+      OutputType::Unknown => false,
+    }
+  }
+
   pub fn calculate_from_float(
     &self,
     output_type: OutputType,
@@ -539,21 +557,51 @@ impl ServerDeviceFeatureOutput {
 impl From<ServerDeviceFeatureOutput> for DeviceFeatureOutput {
   fn from(val: ServerDeviceFeatureOutput) -> Self {
     let mut builder = DeviceFeatureOutputBuilder::default();
-    val.vibrate.as_ref().map(|x| builder.vibrate(x.into()));
-    val.rotate.as_ref().map(|x| builder.rotate(x.into()));
-    val.oscillate.as_ref().map(|x| builder.oscillate(x.into()));
-    val.constrict.as_ref().map(|x| builder.constrict(x.into()));
+    val
+      .vibrate
+      .as_ref()
+      .filter(|x| !x.disabled())
+      .map(|x| builder.vibrate(x.into()));
+    val
+      .rotate
+      .as_ref()
+      .filter(|x| !x.disabled())
+      .map(|x| builder.rotate(x.into()));
+    val
+      .oscillate
+      .as_ref()
+      .filter(|x| !x.disabled())
+      .map(|x| builder.oscillate(x.into()));
+    val
+      .constrict
+      .as_ref()
+      .filter(|x| !x.disabled())
+      .map(|x| builder.constrict(x.into()));
     val
       .temperature
       .as_ref()
+      .filter(|x| !x.disabled())
       .map(|x| builder.temperature(x.into()));
-    val.led.as_ref().map(|x| builder.led(x.into()));
-    val.position.as_ref().map(|x| builder.position(x.into()));
+    val
+      .led
+      .as_ref()
+      .filter(|x| !x.disabled())
+      .map(|x| builder.led(x.into()));
+    val
+      .position
+      .as_ref()
+      .filter(|x| !x.disabled())
+      .map(|x| builder.position(x.into()));
     val
       .hw_position_with_duration
       .as_ref()
+      .filter(|x| !x.disabled())
       .map(|x| builder.hw_position_with_duration(x.into()));
-    val.spray.as_ref().map(|x| builder.spray(x.into()));
+    val
+      .spray
+      .as_ref()
+      .filter(|x| !x.disabled())
+      .map(|x| builder.spray(x.into()));
     builder.build().expect("Infallible")
   }
 }

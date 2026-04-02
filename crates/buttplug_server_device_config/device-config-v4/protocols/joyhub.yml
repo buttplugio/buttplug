@@ -2273,6 +2273,141 @@ configurations:
             - 1
       index: 5
   id: d862601d-1567-48c3-9dd8-bd4596a6657e
+- identifier:
+    - J-RoseVore
+  name: JoyHub Rose Vore
+  features:
+    - id: ff39d6f4-d876-4701-9746-6c7bbe4db308
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 6753b978-3d72-4a35-a81c-c9a82b868509
+      output:
+        rotate:
+          value:
+            - 0
+            - 255
+      index: 1
+    - id: 1ce54e39-94cf-4fa8-8717-a31917eaa73a
+      output:
+        constrict:
+          value:
+            - 0
+            - 7
+      index: 4
+  id: 1939df4a-2041-4d8e-bf08-0f6144f54490
+- identifier:
+    - J-Rosethorn2
+  name: JoyHub Rosethorn 2
+  features:
+    - id: 8e0414b6-87e2-4359-be06-aaf965d08e58
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: e66e5331-26c9-4b6b-b2a3-f5d13e07a60c
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+  id: 5b0614a8-857b-4d8f-b1ec-0d078d35c068
+- identifier:
+    - J-Pak
+  name: JoyHub Pak
+  features:
+    - id: bf2f834c-8aeb-4256-aca6-aa8dab875335
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 250903cb-4f2b-42c5-89a9-56f7d5a022a6
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+    - id: d4e5df1e-4a94-4046-8e15-426a50bbbd32
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 2
+  id: fc64af3a-5ce1-4306-884f-80bfe3264390
+- identifier:
+    - J-VeeLips
+  name: JoyHub VeeLips
+  features:
+    - id: c445c35e-ede0-41c8-a9a5-fdc149eaa749
+      output:
+        rotate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 8e352fda-af55-4f38-8c6a-b62765229b4f
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+    - id: 242d7a8d-cc3b-47fe-ac22-58b2392d9f4e
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 2
+  id: 7cea69f0-7451-4a9b-91bc-30029c20daad
+- identifier:
+    - J-Veeva2
+  name: JoyHub Veeva 2
+  features:
+    - id: 04a84dfd-d14b-46e1-90f8-db8d95bac592
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 48f551e8-7e1d-4705-a487-600105b9a6f4
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+  id: be0ffcb5-e529-4d6c-9002-1764631b1fb6
+- identifier:
+    - J-Punch
+  name: JoyHub Punch
+  features:
+    - id: bd5209de-3544-49c7-9c77-c612f958f78c
+      output:
+        rotate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: d4fad572-2b04-4491-9ed0-97555053b5ce
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+  id: bafdaacd-8e51-4779-9624-7b9af4a8a657
 communication:
 - btle:
     names:
@@ -2406,6 +2541,12 @@ communication:
     - J-Pyro
     - J-MaxSensr
     - J-Diego
+    - J-RoseVore
+    - J-Rosethorn2
+    - J-Pak
+    - J-VeeLips
+    - J-Veeva2
+    - J-Punch
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb

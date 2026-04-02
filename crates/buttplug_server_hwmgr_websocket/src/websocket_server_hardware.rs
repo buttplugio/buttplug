@@ -7,7 +7,7 @@
 
 use super::websocket_server_comm_manager::WebsocketServerDeviceCommManagerInitInfo;
 use async_trait::async_trait;
-use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
+use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::{
   GenericHardwareSpecializer,
   Hardware,
@@ -173,7 +173,7 @@ impl WebsocketServerHardwareConnector {
     let (device_event_sender, _) = broadcast::channel(256);
     let device_event_sender_clone = device_event_sender.clone();
     let address = info.address().clone();
-    tokio::spawn(async move {
+    buttplug_core::spawn!(async move {
       run_connection_loop(
         &address,
         device_event_sender_clone,
@@ -305,7 +305,7 @@ impl HardwareInternal for WebsocketServerHardware {
       subscribed.store(true, Ordering::Relaxed);
       let token = CancellationToken::new();
       *(subscribed_token.lock().await) = Some(token.child_token());
-      async_manager::spawn(async move {
+      buttplug_core::spawn!("WebsocketServerHardware subscription", async move {
         loop {
           select! {
             result = data_receiver.recv().fuse() => {

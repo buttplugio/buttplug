@@ -1,6 +1,6 @@
 [package]
 name = "buttplug_core"
-version = "10.0.0"
+version = "10.0.2"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Buttplug Intimate Hardware Control Library - Core Library"
 license = "BSD-3-Clause"
@@ -20,8 +20,8 @@ doc = true
 
 [features]
 default=["tokio-runtime"]
-tokio-runtime=["tokio/rt"]
-wasm=[]
+tokio-runtime=["tokio/rt", "tokio/time"]
+wasm=["wasm-bindgen-futures", "wasmtimer"]
 
 # Only build docs on one platform (linux)
 [package.metadata.docs.rs]
@@ -32,11 +32,11 @@ features = ["default", "unstable"]
 [build-dependencies]
 serde = "1.0.228"
 serde_json = "1.0.149"
-jsonschema = { version = "0.38.1", default-features = false }
+jsonschema = { version = "0.45.0", default-features = false }
 
 [dependencies]
-futures = "0.3.31"
-futures-util = "0.3.31"
+futures = "0.3.32"
+futures-util = "0.3.32"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 serde_repr = "0.1.20"
@@ -44,11 +44,15 @@ thiserror = "2.0.18"
 displaydoc = "0.2.5"
 log = "0.4.29"
 getset = "0.1.6"
-jsonschema = { version = "0.38.1", default-features = false }
+jsonschema = { version = "0.45.0", default-features = false }
 cfg-if = "1.0.4"
-tokio = { version = "1.49.0", features = ["sync", "time", "macros"] }
+tokio = { version = "1.50.0", features = ["sync", "macros"] }
 async-stream = "0.3.6"
-strum_macros = "0.27.2"
-strum = "0.27.2"
+strum_macros = "0.28.0"
+strum = "0.28.0"
 derive_builder = "0.20.2"
 enum_dispatch = "0.3"
+tracing = "0.1.44"
+wasm-bindgen-futures = { version = "0.4.64", optional = true }
+wasmtimer = { version = "0.4.3", optional = true }
+

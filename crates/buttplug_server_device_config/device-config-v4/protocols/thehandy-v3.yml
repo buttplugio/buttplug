@@ -1,6 +1,8 @@
 ---
 defaults:
   name: The Handy (FW4+)
+  # Boost to at least 20hz, as we're getting complaints about the handy being slow at 10hz.
+  message_gap_ms: 50
   features:
   - id: ccbbda59-cf58-477e-b1b2-e0897c4bb0ce
     output:

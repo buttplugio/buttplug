@@ -25,6 +25,7 @@ use buttplug_core::{
     BUTTPLUG_CURRENT_API_MAJOR_VERSION,
     BUTTPLUG_CURRENT_API_MINOR_VERSION,
     ButtplugClientMessageV4,
+    ButtplugMessage,
     ButtplugMessageSpecVersion,
     ButtplugServerMessageV4,
     ErrorCode,
@@ -32,6 +33,7 @@ use buttplug_core::{
     OutputCommand,
     OutputValue,
     PingV0,
+    RequestDeviceListV0,
     RequestServerInfoV4,
     ServerInfoV4,
     StartScanningV0,
@@ -445,6 +447,85 @@ async fn test_server_scanning_finished() {
     }
   }
   assert!(finish_received);
+}
+
+/// Tests that DeviceListV4 has the correct message id depending on context:
+/// - When sent as a system event (device added/removed), id must be 0.
+/// - When sent as a response to RequestDeviceList, id must match the request's id.
+#[tokio::test]
+async fn test_device_list_message_id_on_device_event_vs_request() {
+  let mut builder = TestDeviceCommunicationManagerBuilder::default();
+  let mut _device = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
+
+  let server = test_server_with_comm_manager(builder);
+
+  let recv = server.server_version_event_stream();
+  pin_mut!(recv);
+
+  // Handshake
+  assert!(
+    server
+      .parse_checked_message(
+        RequestServerInfoV4::new(
+          "Test Client",
+          BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+          BUTTPLUG_CURRENT_API_MINOR_VERSION
+        )
+        .into()
+      )
+      .await
+      .is_ok()
+  );
+
+  // Start scanning — this will discover the device and emit a DeviceList event
+  assert!(
+    server
+      .parse_checked_message(StartScanningV0::default().into())
+      .await
+      .is_ok()
+  );
+
+  // Collect the DeviceList event from the event stream (device added notification).
+  // This is a system message, so its id must be 0.
+  while let Some(msg) = recv.next().await {
+    if let ButtplugServerMessageV4::ScanningFinished(_) = msg {
+      continue;
+    } else if let ButtplugServerMessageV4::DeviceList(device_list) = msg {
+      assert_eq!(
+        device_list.id(),
+        0,
+        "DeviceList from device-added event should be a system message (id=0), got id={}",
+        device_list.id()
+      );
+      break;
+    } else {
+      panic!("Unexpected message: {:?}", msg);
+    }
+  }
+
+  // Now send a RequestDeviceList with a specific id and verify the response echoes it.
+  let request_id = 42;
+  let mut request = RequestDeviceListV0::default();
+  request.set_id(request_id);
+
+  let response = server
+    .parse_checked_message(ButtplugCheckedClientMessageV4::RequestDeviceList(request))
+    .await
+    .expect("RequestDeviceList should succeed");
+  if let ButtplugServerMessageV4::DeviceList(device_list) = response {
+    assert_eq!(
+      device_list.id(),
+      request_id,
+      "DeviceList response to RequestDeviceList should echo request id={}, got id={}",
+      request_id,
+      device_list.id()
+    );
+  } else {
+    panic!(
+      "Expected DeviceList response, got: {:?}",
+      response
+    );
+  }
 }
 
 // TODO Test sending system message (Id 0)

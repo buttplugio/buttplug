@@ -79,6 +79,48 @@ impl ButtplugMessageSerializer for ButtplugClientJSONSerializerV2 {
   }
 }
 
+#[derive(Default)]
+pub struct ButtplugClientJSONSerializerV1 {
+  serializer_impl: ButtplugClientJSONSerializerImpl,
+}
+
+impl ButtplugMessageSerializer for ButtplugClientJSONSerializerV1 {
+  type Inbound = ButtplugServerMessageV1;
+  type Outbound = ButtplugClientMessageV1;
+
+  fn deserialize(
+    &self,
+    msg: &ButtplugSerializedMessage,
+  ) -> Result<Vec<Self::Inbound>, ButtplugSerializerError> {
+    self.serializer_impl.deserialize(msg)
+  }
+
+  fn serialize(&self, msg: &[Self::Outbound]) -> ButtplugSerializedMessage {
+    self.serializer_impl.serialize(msg)
+  }
+}
+
+#[derive(Default)]
+pub struct ButtplugClientJSONSerializerV0 {
+  serializer_impl: ButtplugClientJSONSerializerImpl,
+}
+
+impl ButtplugMessageSerializer for ButtplugClientJSONSerializerV0 {
+  type Inbound = ButtplugServerMessageV0;
+  type Outbound = ButtplugClientMessageV0;
+
+  fn deserialize(
+    &self,
+    msg: &ButtplugSerializedMessage,
+  ) -> Result<Vec<Self::Inbound>, ButtplugSerializerError> {
+    self.serializer_impl.deserialize(msg)
+  }
+
+  fn serialize(&self, msg: &[Self::Outbound]) -> ButtplugSerializedMessage {
+    self.serializer_impl.serialize(msg)
+  }
+}
+
 pub type ChannelClientConnectorCurrent =
   ButtplugRemoteClientConnector<channel_transport::ChannelTransport, ButtplugClientJSONSerializer>;
 
@@ -98,14 +140,14 @@ pub type ChannelClientConnectorV2 = ButtplugRemoteConnector<
 
 pub type ChannelClientConnectorV1 = ButtplugRemoteConnector<
   channel_transport::ChannelTransport,
-  ButtplugClientJSONSerializer,
+  ButtplugClientJSONSerializerV1,
   ButtplugClientMessageV1,
   ButtplugServerMessageV1,
 >;
 
 pub type ChannelClientConnectorV0 = ButtplugRemoteConnector<
   channel_transport::ChannelTransport,
-  ButtplugClientJSONSerializer,
+  ButtplugClientJSONSerializerV0,
   ButtplugClientMessageV0,
   ButtplugServerMessageV0,
 >;
@@ -158,6 +200,44 @@ pub fn build_channel_connector_v2(
   let (client_sender, client_receiver) = mpsc::channel(256);
 
   let client_connector = ChannelClientConnectorV2::new(ChannelTransport::new(
+    notify,
+    server_sender,
+    client_receiver,
+  ));
+  let server_connector = ChannelServerConnector::new(ChannelTransport::new(
+    notify,
+    client_sender,
+    server_receiver,
+  ));
+  (client_connector, server_connector)
+}
+
+pub fn build_channel_connector_v1(
+  notify: &Arc<Notify>,
+) -> (ChannelClientConnectorV1, ChannelServerConnector) {
+  let (server_sender, server_receiver) = mpsc::channel(256);
+  let (client_sender, client_receiver) = mpsc::channel(256);
+
+  let client_connector = ChannelClientConnectorV1::new(ChannelTransport::new(
+    notify,
+    server_sender,
+    client_receiver,
+  ));
+  let server_connector = ChannelServerConnector::new(ChannelTransport::new(
+    notify,
+    client_sender,
+    server_receiver,
+  ));
+  (client_connector, server_connector)
+}
+
+pub fn build_channel_connector_v0(
+  notify: &Arc<Notify>,
+) -> (ChannelClientConnectorV0, ChannelServerConnector) {
+  let (server_sender, server_receiver) = mpsc::channel(256);
+  let (client_sender, client_receiver) = mpsc::channel(256);
+
+  let client_connector = ChannelClientConnectorV0::new(ChannelTransport::new(
     notify,
     server_sender,
     client_receiver,

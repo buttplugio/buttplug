@@ -1,6 +1,6 @@
 [package]
 name = "buttplug_server_hwmgr_lovense_dongle"
-version = "10.0.0"
+version = "10.0.2"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Buttplug Intimate Hardware Control Library - Core Library"
 license = "BSD-3-Clause"
@@ -20,15 +20,15 @@ doc = true
 
 
 [dependencies]
-buttplug_core = { version = "10.0.0", path = "../buttplug_core" }
-buttplug_server = { version = "10.0.0", path = "../buttplug_server" }
-buttplug_server_device_config = { version = "10.0.0", path = "../buttplug_server_device_config" }
-futures = "0.3.31"
-futures-util = "0.3.31"
+buttplug_core = { version = "10.0.2", path = "../buttplug_core", default-features = false }
+buttplug_server = { version = "10.0.2", path = "../buttplug_server", default-features = false }
+buttplug_server_device_config = { version = "10.0.3", path = "../buttplug_server_device_config" }
+futures = "0.3.32"
+futures-util = "0.3.32"
 log = "0.4.29"
-tokio = { version = "1.49.0", features = ["sync", "time", "rt"] }
+tokio = { version = "1.50.0", features = ["sync", "time", "rt"] }
 async-trait = "0.1.89"
-uuid = { version = "1.20.0", features = ["serde", "v4"] }
+uuid = { version = "1.22.0", features = ["serde", "v4"] }
 dashmap = { version = "6.1.0", features = ["serde"] }
 tracing = "0.1.44"
 thiserror = "2.0.18"
@@ -36,15 +36,14 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 serde_repr = "0.1.20"
 tokio-util = "0.7.18"
-tracing-futures = "0.2.5"
 
 [target.'cfg(target_os = "windows")'.dependencies]
-hidapi = { version = "2.6.4", default-features = false, features = ["windows-native"] }
+hidapi = { version = "2.6.5", default-features = false, features = ["windows-native"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 # Linux hidraw is needed here in order to work with the lovense dongle. libusb breaks it on linux.
 # Other platforms are not affected by the feature changes.
-hidapi = { version = "2.6.4", default-features = false, features = ["linux-static-hidraw"] }
+hidapi = { version = "2.6.5", default-features = false, features = ["linux-static-hidraw"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
-hidapi = { version = "2.6.4", default-features = false, features = ["macos-shared-device"] }
+hidapi = { version = "2.6.5", default-features = false, features = ["macos-shared-device"] }

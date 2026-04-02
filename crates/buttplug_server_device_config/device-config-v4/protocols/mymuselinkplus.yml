@@ -1,0 +1,20 @@
+---
+defaults:
+  name: MyMuse Link Plus
+  features:
+  - description: Vibrator
+    id: b8c3a1f0-7d2e-4a19-9f6b-3e8d1c5a2b40
+    output:
+      vibrate:
+        value:
+        - 0
+        - 3
+    index: 0
+  id: a1f0b8c3-2e7d-194a-6b9f-8d3e1c5a2b40
+communication:
+- btle:
+    names:
+    - MM Massager
+    services:
+      0000fff0-0000-1000-8000-00805f9b34fb:
+        tx: 0000fff1-0000-1000-8000-00805f9b34fb

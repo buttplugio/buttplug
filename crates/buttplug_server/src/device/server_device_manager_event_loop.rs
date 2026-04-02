@@ -5,13 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{
-  message::{ButtplugServerMessageV4, DeviceListV4, ScanningFinishedV0},
-  util::async_manager,
-};
+use buttplug_core::message::{ButtplugMessage, ButtplugServerMessageV4, DeviceListV4, ScanningFinishedV0};
 use buttplug_server_device_config::DeviceConfigurationManager;
 use tracing::info_span;
 
+use super::server_device_manager::DeviceManagerCommand;
 use crate::device::{
   DeviceHandle,
   InternalDeviceEvent,
@@ -24,9 +22,6 @@ use futures::{FutureExt, future};
 use std::sync::Arc;
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
-use tracing_futures::Instrument;
-
-use super::server_device_manager::DeviceManagerCommand;
 
 /// Scanning state machine for the device manager event loop.
 /// Replaces the previous combination of scanning_bringup_in_progress, scanning_started,
@@ -168,6 +163,14 @@ impl ServerDeviceManagerEventLoop {
       .collect();
     // TODO If stop_scanning fails anywhere, this will ignore it. We should maybe at least log?
     future::join_all(fut_vec).await;
+
+    // Transition to Idle if all managers have stopped. This handles comm managers
+    // (like btleplug) that never emit ScanningFinished because they use long-running
+    // scans rather than timed retry loops.
+    if self.scanning_state == ScanningState::ActiveStopRequested && !self.scanning_status() {
+      debug!("All managers stopped after explicit stop request, transitioning to Idle");
+      self.scanning_state = ScanningState::Idle;
+    }
   }
 
   async fn handle_device_communication(&mut self, event: HardwareCommunicationManagerEvent) {
@@ -289,27 +292,35 @@ impl ServerDeviceManagerEventLoop {
         // Clone sender again for the forwarding task that build_device_handle will spawn
         let device_event_sender_for_forwarding = self.device_event_sender.clone();
 
-        async_manager::spawn(async move {
-          match build_device_handle(
-            device_config_manager,
-            creator,
-            protocol_specializers,
-            device_event_sender_for_forwarding,
-          ).await {
-            Ok(device_handle) => {
-              if device_event_sender_clone
-                .send(InternalDeviceEvent::Connected(device_handle))
-                .await
-                .is_err() {
-                error!("Device manager disappeared before connection established, device will be dropped.");
+        buttplug_core::util::async_manager::spawn(
+          async move {
+            match build_device_handle(
+              device_config_manager,
+              creator,
+              protocol_specializers,
+              device_event_sender_for_forwarding,
+            )
+            .await
+            {
+              Ok(device_handle) => {
+                if device_event_sender_clone
+                  .send(InternalDeviceEvent::Connected(device_handle))
+                  .await
+                  .is_err()
+                {
+                  error!(
+                    "Device manager disappeared before connection established, device will be dropped."
+                  );
+                }
               }
-            },
-            Err(e) => {
-              error!("Device errored while trying to connect: {:?}", e);
+              Err(e) => {
+                error!("Device errored while trying to connect: {:?}", e);
+              }
             }
-          }
-          connecting_devices.remove(&address);
-        }.instrument(span));
+            connecting_devices.remove(&address);
+          },
+          span,
+        );
       }
     }
   }
@@ -320,7 +331,11 @@ impl ServerDeviceManagerEventLoop {
       .iter()
       .map(|device| device.value().as_device_message_info(*device.key()))
       .collect();
-    DeviceListV4::new(devices)
+    let mut device_list = DeviceListV4::new(devices);
+    // If we're creating a device list in the event loop, this means a device was either added or
+    // removed. Therefore this is a system message, not a reply message.
+    device_list.set_id(0);
+    device_list
   }
 
   async fn handle_device_event(&mut self, device_event: InternalDeviceEvent) {

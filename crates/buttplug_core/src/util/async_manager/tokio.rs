@@ -5,37 +5,19 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use futures::{
-  future::{Future, RemoteHandle},
-  task::{FutureObj, Spawn, SpawnError, SpawnExt},
-};
-use tokio;
+use futures::{future::BoxFuture, task::FutureObj};
+use std::time::Duration;
+use tracing::{Instrument, Span};
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct TokioAsyncManager {}
 
-impl Spawn for TokioAsyncManager {
-  fn spawn_obj(&self, future: FutureObj<'static, ()>) -> Result<(), SpawnError> {
-    tokio::spawn(future);
-    Ok(())
+impl super::AsyncManager for TokioAsyncManager {
+  fn spawn(&self, future: FutureObj<'static, ()>, span: Span) {
+    tokio::task::spawn(future.instrument(span));
   }
-}
 
-pub fn spawn<Fut>(future: Fut)
-where
-  Fut: Future<Output = ()> + Send + 'static,
-{
-  // SAFETY: TokioAsyncManager::spawn_obj always returns Ok(()). The Result type is only
-  // present to satisfy the Spawn trait interface.
-  TokioAsyncManager::default()
-    .spawn(future)
-    .expect("TokioAsyncManager::spawn_obj always returns Ok")
-}
-
-pub fn spawn_with_handle<Fut>(future: Fut) -> Result<RemoteHandle<Fut::Output>, SpawnError>
-where
-  Fut: Future + Send + 'static,
-  Fut::Output: Send,
-{
-  TokioAsyncManager::default().spawn_with_handle(future)
+  fn sleep(&self, duration: Duration) -> BoxFuture<'static, ()> {
+    Box::pin(tokio::time::sleep(duration))
+  }
 }

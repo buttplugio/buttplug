@@ -9,11 +9,7 @@ use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{ProtocolHandler, ProtocolKeepaliveStrategy},
 };
-use buttplug_core::{
-  errors::ButtplugDeviceError,
-  message::InputReadingV4,
-  util::{async_manager, sleep},
-};
+use buttplug_core::{errors::ButtplugDeviceError, message::InputReadingV4, util::async_manager};
 use buttplug_server_device_config::Endpoint;
 use futures::future::BoxFuture;
 use std::{
@@ -35,10 +31,10 @@ pub struct LovenseStroker {
 impl LovenseStroker {
   pub fn new(hardware: Arc<Hardware>, need_range_zerod: bool) -> Self {
     let linear_info = Arc::new((AtomicU32::new(0), AtomicU32::new(0)));
-    async_manager::spawn(update_linear_movement(
-      hardware.clone(),
-      linear_info.clone(),
-    ));
+    buttplug_core::spawn!(
+      "LovenseStroker update linear movement",
+      update_linear_movement(hardware.clone(), linear_info.clone(),)
+    );
     Self {
       linear_info,
       need_range_zerod,
@@ -119,7 +115,7 @@ async fn update_linear_movement(device: Arc<Hardware>, linear_info: Arc<(AtomicU
 
     // If we aren't going anywhere, just pause then restart
     if current_position == last_goal_position {
-      sleep(Duration::from_millis(100)).await;
+      async_manager::sleep(Duration::from_millis(100)).await;
       continue;
     }
 
@@ -144,6 +140,6 @@ async fn update_linear_movement(device: Arc<Hardware>, linear_info: Arc<(AtomicU
     if device.write_value(&hardware_cmd).await.is_err() {
       return;
     }
-    sleep(Duration::from_millis(100)).await;
+    async_manager::sleep(Duration::from_millis(100)).await;
   }
 }

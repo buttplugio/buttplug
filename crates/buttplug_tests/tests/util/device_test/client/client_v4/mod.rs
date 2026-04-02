@@ -17,7 +17,7 @@ use buttplug_client::{
   device::{ClientDeviceCommandValue, ClientDeviceFeature, ClientDeviceOutputCommand},
 };
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
-use buttplug_core::{message::OutputType, util::async_manager};
+use buttplug_core::message::OutputType;
 use buttplug_server::{ButtplugServer, ButtplugServerBuilder, device::ServerDeviceManagerBuilder};
 use buttplug_server_device_config::load_protocol_configs;
 use tokio::sync::Notify;
@@ -27,6 +27,7 @@ use super::super::{
   DeviceTestCase,
   TestClientCommand,
   TestCommand,
+  filter_commands,
 };
 use buttplug_core::message::{DeviceFeatureOutput, DeviceFeatureOutputLimits};
 use futures::StreamExt;
@@ -172,7 +173,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
         // their notification endpoint. This is a mess but it does the job.
         let device = device.clone();
         let expected_power = *expected_power;
-        async_manager::spawn(async move {
+        buttplug_core::spawn!(async move {
           let battery_level = device.battery().await.unwrap() as f64 / 100f64;
           assert_eq!(battery_level, expected_power);
         });
@@ -267,7 +268,7 @@ pub async fn run_json_test_case(test_case: &DeviceTestCase) {
 
   let (server, device_channels) = build_server(test_case);
   let remote_server = ButtplugTestServer::new(server);
-  async_manager::spawn(async move {
+  buttplug_core::spawn!(async move {
     remote_server
       .start(server_connector)
       .await
@@ -297,7 +298,7 @@ pub async fn run_test_case(
 
   if let Some(device_init) = &test_case.device_init {
     // Parse send message into client calls, receives into response checks
-    for command in device_init {
+    for command in filter_commands(device_init, 4) {
       match command {
         TestCommand::Messages {
           device_index: _,
@@ -335,6 +336,9 @@ pub async fn run_test_case(
             device_sender.send(event.clone()).await.unwrap();
           }
         }
+        TestCommand::VersionGated { .. } => {
+          unreachable!("filter_commands should not yield VersionGated")
+        }
       }
     }
   }
@@ -368,7 +372,7 @@ pub async fn run_test_case(
   }
 
   // Parse send message into client calls, receives into response checks
-  for command in &test_case.device_commands {
+  for command in filter_commands(&test_case.device_commands, 4) {
     match command {
       TestCommand::Messages {
         device_index,
@@ -407,6 +411,9 @@ pub async fn run_test_case(
         for event in events {
           device_sender.send(event.clone()).await.unwrap();
         }
+      }
+      TestCommand::VersionGated { .. } => {
+        unreachable!("filter_commands should not yield VersionGated")
       }
     }
   }

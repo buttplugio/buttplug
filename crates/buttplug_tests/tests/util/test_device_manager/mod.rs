@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-mod test_device;
+pub mod test_device;
 
 mod test_device_comm_manager;
 

@@ -12,7 +12,6 @@ use buttplug_core::{
     transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
   },
   message::serializer::ButtplugSerializedMessage,
-  util::async_manager,
 };
 use futures::{FutureExt, future::BoxFuture};
 use std::sync::Arc;
@@ -55,7 +54,7 @@ impl ButtplugConnectorTransport for ChannelTransport {
     let external_sender = self.external_sender.clone();
     let receiver_clone = self.external_receiver.clone();
     async move {
-      async_manager::spawn(async move {
+      buttplug_core::spawn!(async move {
         let mut receiver = receiver_clone.lock().await.take().expect("Should only run once");
         loop {
           select! {

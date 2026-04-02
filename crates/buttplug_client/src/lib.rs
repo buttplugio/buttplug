@@ -32,7 +32,7 @@ use buttplug_core::{
     StopCmdV4,
     StopScanningV0,
   },
-  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+  util::stream::convert_broadcast_receiver_to_stream,
 };
 use client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
 use dashmap::DashMap;
@@ -53,7 +53,6 @@ use std::{
 use strum_macros::Display;
 use thiserror::Error;
 use tokio::sync::{Mutex, broadcast, mpsc};
-use tracing_futures::Instrument;
 
 /// Result type used for public APIs.
 ///
@@ -320,12 +319,9 @@ impl ButtplugClient {
     );
 
     // Start the event loop before we run the handshake.
-    async_manager::spawn(
-      async move {
-        client_event_loop.run().await;
-      }
-      .instrument(tracing::info_span!("Client Loop Span")),
-    );
+    buttplug_core::spawn!("ButtplugClient event loop", async move {
+      client_event_loop.run().await;
+    });
     self.run_handshake().await
   }
 

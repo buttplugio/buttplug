@@ -31,8 +31,8 @@ use std::sync::{
 };
 use uuid::{Uuid, uuid};
 
-use rand::distributions::Alphanumeric;
-use rand::{Rng, thread_rng};
+use rand::RngExt;
+use rand::distr::Alphanumeric;
 use regex::Regex;
 use sha2::{Digest, Sha256};
 
@@ -78,7 +78,7 @@ impl ProtocolInitializer for VibCrafterInitializer {
       ))
       .await?;
 
-    let auth_str = thread_rng()
+    let auth_str = rand::rng()
       .sample_iter(&Alphanumeric)
       .take(6)
       .map(char::from)

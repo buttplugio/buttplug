@@ -156,6 +156,7 @@ impl IntifaceEngine {
                   identifier: _,
                   name: _,
                   display_name: _,
+                  needs_keepalive: _,
                 } => {
                   if let Ok(config_str) = save_user_config(&dcm) {
                     // Should probably at least log if we fail to write the config file

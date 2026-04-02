@@ -341,6 +341,7 @@
         "enum": [
           "FleshlightLaunchFW12Cmd",
           "SingleMotorVibrateCmd",
+          "StopDeviceCmd",
           "KiirooCmd",
           "LovenseCmd",
           "VorzeA10CycloneCmd"

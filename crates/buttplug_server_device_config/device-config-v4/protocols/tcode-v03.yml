@@ -1,15 +1,24 @@
 ---
 defaults:
   name: TCode v0.3 (Single Linear Axis)
+  # Assume 50hz serial. These *can* go up to 300hz but we'll document how to handle that for users that have it.
+  message_gap_ms: 20
   features:
-  - id: 4097edde-7efb-4c3e-afdb-0aeb82a03fd9
+  - id: afa1e63e-b6c7-4519-8faa-68cefe197a31
     output:
       position:
         value:
           - 0
           - 1000
+      hw_position_with_duration:
+        value:
+          - 0
+          - 1000
+        duration:
+          - 0
+          - 100000        
     index: 0
-  id: 211da02e-467c-4788-96bd-689049867e85
+  id: 5c1195a5-a2e4-4643-bd47-8cb3a1e067f4
 communication:
 - serial:
     port: default

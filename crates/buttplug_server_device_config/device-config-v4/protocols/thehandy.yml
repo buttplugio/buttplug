@@ -1,6 +1,8 @@
 ---
 defaults:
   name: The Handy
+  # Boost to at least 20hz, as we're getting complaints about the handy being slow at 10hz.
+  message_gap_ms: 50  
   features:
   - id: 32309a60-f980-490d-a5f4-467ccae2d586
     output:

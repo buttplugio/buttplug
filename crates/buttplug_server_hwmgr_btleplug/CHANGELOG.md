@@ -1,3 +1,17 @@
+# 10.0.2 (2026-04-01)
+
+## Features
+
+- Migrate to new async_manager API
+
+# 10.0.1 (2026-03-13)
+
+## Features
+
+- Update btleplug to v0.12
+  - Lots of Android fixes, should throw more exceptions instead of silent failures
+  - Lots of other bugfixes
+
 # 10.0.0 (2026-01-31)
 
 ## Features

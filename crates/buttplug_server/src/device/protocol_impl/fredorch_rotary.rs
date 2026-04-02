@@ -14,10 +14,7 @@ use crate::device::{
   },
 };
 use async_trait::async_trait;
-use buttplug_core::{
-  errors::ButtplugDeviceError,
-  util::{async_manager, sleep},
-};
+use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
 use buttplug_server_device_config::{
   Endpoint,
   ProtocolCommunicationSpecifier,
@@ -106,7 +103,7 @@ impl ProtocolInitializer for FredorchRotaryInitializer {
             );
           }
         }
-        _ = sleep(Duration::from_millis(FREDORCH_COMMAND_TIMEOUT_MS)).fuse() => {
+        _ = async_manager::sleep(Duration::from_millis(FREDORCH_COMMAND_TIMEOUT_MS)).fuse() => {
           // The after the password check, we won't get anything
         }
       }
@@ -183,7 +180,7 @@ async fn speed_update_handler(
       }
     }
 
-    sleep(Duration::from_millis(FREDORCH_COMMAND_TIMEOUT_MS)).await;
+    async_manager::sleep(Duration::from_millis(FREDORCH_COMMAND_TIMEOUT_MS)).await;
   }
   info!("FredorchRotary control loop exiting, most likely due to device disconnection.");
 }
@@ -194,7 +191,7 @@ impl FredorchRotary {
     let target_speed = Arc::new(AtomicU8::new(0));
     let current_speed_clone = current_speed.clone();
     let target_speed_clone = target_speed.clone();
-    async_manager::spawn(async move {
+    buttplug_core::spawn!("FredorchRotarySpeedUpdate", async move {
       speed_update_handler(device, current_speed_clone, target_speed_clone).await
     });
     Self {

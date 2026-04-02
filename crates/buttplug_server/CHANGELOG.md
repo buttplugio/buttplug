@@ -1,3 +1,31 @@
+# 10.0.2 (2026-04-01)
+
+## Features
+
+- Migrate to new async_manager API
+- Device protocol support
+  - Various JoyHub devices
+  - TryFun Rock
+  - MyMuse Link Plus
+
+## Bugfixes
+
+- Fix V0/V1 protocol client errors for testing
+- Fix Scanning state machine getting stuck, stopping rediscovery of disconnected devices
+- Fix message ID generation for DeviceListV4 message
+
+# 10.0.1 (2026-03-13)
+
+## Features
+
+- Update dependencies
+- Device updates
+  - Add battery reading for WeVibe
+- Device protocol support
+  - HoneyPlayBox devices
+  - Various JoyHub devices
+- Expose "needs_keepalive" to engine to minimize mobile wakelocks
+
 # 10.0.0 (2026-01-31)
 
 ## Features

@@ -40,6 +40,10 @@ enum TestCommand {
     device_index: u32,
     events: Vec<TestHardwareEvent>,
   },
+  VersionGated {
+    min_spec_version: u32,
+    commands: Vec<TestCommand>,
+  },
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -63,4 +67,25 @@ pub struct DeviceTestCase {
   user_device_config_file: Option<String>,
   device_init: Option<Vec<TestCommand>>,
   device_commands: Vec<TestCommand>,
+}
+
+/// Flattens `device_commands` for a given spec version, expanding `VersionGated` groups only
+/// when `spec_version >= min_spec_version`. Skipped groups (and their nested commands) are
+/// dropped entirely, so version-specific `Messages`+`Commands` pairs never get separated.
+fn filter_commands(commands: &[TestCommand], spec_version: u32) -> Vec<&TestCommand> {
+  let mut result = vec![];
+  for cmd in commands {
+    match cmd {
+      TestCommand::VersionGated {
+        min_spec_version,
+        commands: nested,
+      } => {
+        if spec_version >= *min_spec_version {
+          result.extend(filter_commands(nested, spec_version));
+        }
+      }
+      _ => result.push(cmd),
+    }
+  }
+  result
 }

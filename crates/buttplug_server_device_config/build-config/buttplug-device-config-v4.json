@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 176
+    "minor": 189
   },
   "protocols": {
     "activejoy": {
@@ -5814,7 +5814,13 @@
               "J-Pogo",
               "J-Pyro",
               "J-MaxSensr",
-              "J-Diego"
+              "J-Diego",
+              "J-RoseVore",
+              "J-Rosethorn2",
+              "J-Pak",
+              "J-VeeLips",
+              "J-Veeva2",
+              "J-Punch"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -9722,6 +9728,240 @@
             "J-Diego"
           ],
           "name": "JoyHub Diego"
+        },
+        {
+          "features": [
+            {
+              "id": "ff39d6f4-d876-4701-9746-6c7bbe4db308",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "6753b978-3d72-4a35-a81c-c9a82b868509",
+              "index": 1,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "1ce54e39-94cf-4fa8-8717-a31917eaa73a",
+              "index": 4,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    7
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "1939df4a-2041-4d8e-bf08-0f6144f54490",
+          "identifier": [
+            "J-RoseVore"
+          ],
+          "name": "JoyHub Rose Vore"
+        },
+        {
+          "features": [
+            {
+              "id": "8e0414b6-87e2-4359-be06-aaf965d08e58",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "e66e5331-26c9-4b6b-b2a3-f5d13e07a60c",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "5b0614a8-857b-4d8f-b1ec-0d078d35c068",
+          "identifier": [
+            "J-Rosethorn2"
+          ],
+          "name": "JoyHub Rosethorn 2"
+        },
+        {
+          "features": [
+            {
+              "id": "bf2f834c-8aeb-4256-aca6-aa8dab875335",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "250903cb-4f2b-42c5-89a9-56f7d5a022a6",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "d4e5df1e-4a94-4046-8e15-426a50bbbd32",
+              "index": 2,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "fc64af3a-5ce1-4306-884f-80bfe3264390",
+          "identifier": [
+            "J-Pak"
+          ],
+          "name": "JoyHub Pak"
+        },
+        {
+          "features": [
+            {
+              "id": "c445c35e-ede0-41c8-a9a5-fdc149eaa749",
+              "index": 0,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "8e352fda-af55-4f38-8c6a-b62765229b4f",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "242d7a8d-cc3b-47fe-ac22-58b2392d9f4e",
+              "index": 2,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "7cea69f0-7451-4a9b-91bc-30029c20daad",
+          "identifier": [
+            "J-VeeLips"
+          ],
+          "name": "JoyHub VeeLips"
+        },
+        {
+          "features": [
+            {
+              "id": "04a84dfd-d14b-46e1-90f8-db8d95bac592",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "48f551e8-7e1d-4705-a487-600105b9a6f4",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "be0ffcb5-e529-4d6c-9002-1764631b1fb6",
+          "identifier": [
+            "J-Veeva2"
+          ],
+          "name": "JoyHub Veeva 2"
+        },
+        {
+          "features": [
+            {
+              "id": "bd5209de-3544-49c7-9c77-c612f958f78c",
+              "index": 0,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "d4fad572-2b04-4491-9ed0-97555053b5ce",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "bafdaacd-8e51-4779-9624-7b9af4a8a657",
+          "identifier": [
+            "J-Punch"
+          ],
+          "name": "JoyHub Punch"
         }
       ],
       "defaults": {
@@ -15530,6 +15770,41 @@
         "name": "Muse Device"
       }
     },
+    "mymuselinkplus": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "MM Massager"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "description": "Vibrator",
+            "id": "b8c3a1f0-7d2e-4a19-9f6b-3e8d1c5a2b40",
+            "index": 0,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  3
+                ]
+              }
+            }
+          }
+        ],
+        "id": "a1f0b8c3-2e7d-194a-6b9f-8d3e1c5a2b40",
+        "name": "MyMuse Link Plus"
+      }
+    },
     "mysteryvibe": {
       "communication": [
         {
@@ -21330,9 +21605,19 @@
       "defaults": {
         "features": [
           {
-            "id": "4097edde-7efb-4c3e-afdb-0aeb82a03fd9",
+            "id": "afa1e63e-b6c7-4519-8faa-68cefe197a31",
             "index": 0,
             "output": {
+              "hw_position_with_duration": {
+                "duration": [
+                  0,
+                  100000
+                ],
+                "value": [
+                  0,
+                  1000
+                ]
+              },
               "position": {
                 "value": [
                   0,
@@ -21342,7 +21627,8 @@
             }
           }
         ],
-        "id": "211da02e-467c-4788-96bd-689049867e85",
+        "id": "5c1195a5-a2e4-4643-bd47-8cb3a1e067f4",
+        "message_gap_ms": 20,
         "name": "TCode v0.3 (Single Linear Axis)"
       }
     },
@@ -21382,6 +21668,7 @@
           }
         ],
         "id": "fc9de0ed-0f9f-402e-a1b5-4d1865e7b87b",
+        "message_gap_ms": 50,
         "name": "The Handy"
       }
     },
@@ -21462,6 +21749,7 @@
           }
         ],
         "id": "ccbbda59-cf58-477e-b1b2-e0897c4bb0ce",
+        "message_gap_ms": 50,
         "name": "The Handy (FW4+)"
       }
     },
@@ -21543,7 +21831,8 @@
         {
           "btle": {
             "names": [
-              "TF-BHPLUS"
+              "TF-BHPLUS",
+              "TF-ROCK"
             ],
             "services": {
               "0000ffac-0000-1000-8000-00805f9b34fb": {
@@ -21551,6 +21840,29 @@
               }
             }
           }
+        }
+      ],
+      "configurations": [
+        {
+          "features": [
+            {
+              "id": "e27b1f9c-8a34-4d12-b76e-9f8c2a5d176b",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    50
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "d2e5f7a9-1b3c-4680-bf5d-7c9a2e4f6d8b",
+          "identifier": [
+            "TF-ROCK"
+          ],
+          "name": "TryFun Rock"
         }
       ],
       "defaults": {
@@ -21981,7 +22293,8 @@
               "UFO-TW",
               "VorzePiston",
               "ROCKET",
-              "OMORFI"
+              "OMORFI",
+              "OMOR"
             ],
             "services": {
               "40ee1111-63ec-4b7f-8ce7-712efd55b90e": {
@@ -22169,7 +22482,8 @@
           ],
           "id": "aef03284-6d45-426a-b02c-efa7896d4865",
           "identifier": [
-            "OMORFI"
+            "OMORFI",
+            "OMOR"
           ],
           "name": "Vorze Omorfi",
           "protocol_variant": "vorze-sa-dual-vibrator"
@@ -22459,6 +22773,7 @@
           "btle": {
             "names": [
               "Melt",
+              "Melt 2",
               "Moxie",
               "Vector",
               "Wand",
@@ -22497,7 +22812,8 @@
           ],
           "id": "4f73e55c-bea8-4069-8409-cba30fbbfc81",
           "identifier": [
-            "Melt"
+            "Melt",
+            "Melt 2"
           ],
           "name": "WeVibe Melt"
         },

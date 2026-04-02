@@ -15,7 +15,7 @@ use crate::{
 use buttplug_core::{
   errors::ButtplugDeviceError,
   message::{InputReadingV4, InputType, InputValue},
-  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+  util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server_device_config::Endpoint;
 use futures::{
@@ -90,7 +90,7 @@ impl ProtocolHandler for KGoalBoost {
         let stream_sensors = stream_sensors.clone();
         info!("Starting Kgoal subscription");
         // If we subscribe successfully, we need to set up our event handler.
-        async_manager::spawn(async move {
+        buttplug_core::spawn!("Kgoal subscription event handler", async move {
           let mut cached_values = vec![0u32, 0u32];
           while let Ok(info) = hardware_stream.recv().await {
             let subscribed_sensors = stream_sensors.load(Ordering::Relaxed);

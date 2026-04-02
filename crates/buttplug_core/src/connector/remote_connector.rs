@@ -13,12 +13,9 @@ use super::{
   ButtplugConnectorResultFuture,
   transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
 };
-use crate::{
-  message::{
-    ButtplugMessage,
-    serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
-  },
-  util::async_manager,
+use crate::message::{
+  ButtplugMessage,
+  serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
 };
 use futures::{FutureExt, future::BoxFuture, select};
 use log::*;
@@ -234,7 +231,7 @@ where
           // If we connect successfully, we get back the channel from the transport
           // to send outgoing messages and receieve incoming events, all serialized.
           Ok(()) => {
-            async_manager::spawn(async move {
+            crate::spawn!("ButtplugRemoteConnector event loop", async move {
               remote_connector_event_loop::<
                 TransportType,
                 SerializerType,

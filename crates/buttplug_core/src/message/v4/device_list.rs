@@ -51,7 +51,7 @@ impl ButtplugMessage for DeviceListV4 {
 
 impl ButtplugMessageValidator for DeviceListV4 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
-    self.is_not_system_id(self.id)
+    Ok(())
   }
 }
 

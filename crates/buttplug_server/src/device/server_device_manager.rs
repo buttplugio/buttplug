@@ -35,7 +35,7 @@ use buttplug_core::{
     DeviceListV4,
     StopCmdV4,
   },
-  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+  util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server_device_config::{DeviceConfigurationManager, UserDeviceIdentifier};
 use dashmap::DashMap;
@@ -66,6 +66,7 @@ pub(super) enum DeviceManagerCommand {
 pub struct ServerDeviceInfo {
   identifier: UserDeviceIdentifier,
   display_name: Option<String>,
+  needs_keepalive: bool,
 }
 
 pub struct ServerDeviceManagerBuilder {
@@ -158,7 +159,7 @@ impl ServerDeviceManagerBuilder {
       device_event_receiver,
       device_command_receiver,
     );
-    async_manager::spawn(async move {
+    buttplug_core::spawn!("ServerDeviceManager event loop", async move {
       event_loop.run().await;
     });
     Ok(ServerDeviceManager {
@@ -311,6 +312,7 @@ impl ServerDeviceManager {
     self.devices.get(&index).map(|device| ServerDeviceInfo {
       identifier: device.value().identifier().clone(),
       display_name: device.value().definition().display_name().clone(),
+      needs_keepalive: device.value().needs_keepalive(),
     })
   }
 

@@ -47,8 +47,7 @@ use std::{
 };
 use tokio::sync::broadcast;
 use tokio_stream::StreamExt;
-use tracing::info_span;
-use tracing_futures::Instrument;
+use tracing::{Instrument, info_span};
 
 /// Connection state for the ButtplugServer.
 /// Replaces separate connected/client_name/spec_version fields with explicit states.
@@ -161,7 +160,7 @@ impl ButtplugServer {
       .map(|x| *x.key())
       .collect();
     let device_event_converter = ButtplugServerDeviceEventMessageConverter::new(device_indexes);
-    self.server_version_event_stream().map(move |m| {
+    self.server_version_event_stream().filter_map(move |m| {
       // Get spec_version from Connected state, default to Version4 if not connected
       let spec_version = {
         let state_guard = state.read().expect("State lock poisoned");
@@ -174,7 +173,7 @@ impl ButtplugServer {
         device_event_converter.convert_device_list(&spec_version, &list)
       } else {
         // If we get an event and don't have a spec version yet, just throw out the latest.
-        converter.convert_outgoing(&m, &spec_version).unwrap()
+        Some(converter.convert_outgoing(&m, &spec_version).unwrap())
       }
     })
   }

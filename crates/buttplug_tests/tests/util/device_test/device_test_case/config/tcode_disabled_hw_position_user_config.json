@@ -1,0 +1,89 @@
+{
+  "version": {
+    "major": 4,
+    "minor": 999
+  },
+  "user_configs": {
+    "protocols": {
+      "tcode-v03": {
+        "communication": [
+          {
+            "btle": {
+              "names": [
+                "tcode-v03-disabled-test"
+              ],
+              "services": {
+                "0000eea0-0000-1000-8000-00805f9b34fb": {
+                  "tx": "0000ee01-0000-1000-8000-00805f9b34fb"
+                }
+              }
+            }
+          }
+        ],
+        "configurations": [
+          {
+            "identifier": [
+              "tcode-v03-disabled-test"
+            ],
+            "name": "TCode v0.3 (Disabled HW Position Test)",
+            "id": "a1000001-0000-0000-0000-000000000001",
+            "features": [
+              {
+                "index": 0,
+                "description": "",
+                "output": {
+                  "position": {
+                    "value": [
+                      0,
+                      1000
+                    ]
+                  },
+                  "hw_position_with_duration": {
+                    "value": [
+                      0,
+                      1000
+                    ],
+                    "duration": [
+                      0,
+                      100000
+                    ]
+                  }
+                },
+                "id": "a1000002-0000-0000-0000-000000000002"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "devices": [
+      {
+        "identifier": {
+          "protocol": "tcode-v03",
+          "identifier": "tcode-v03-disabled-test",
+          "address": "tcode-disabled-test-addr"
+        },
+        "config": {
+          "id": "a1000003-0000-0000-0000-000000000003",
+          "base_id": "a1000001-0000-0000-0000-000000000001",
+          "features": [
+            {
+              "base_id": "a1000002-0000-0000-0000-000000000002",
+              "id": "a1000004-0000-0000-0000-000000000004",
+              "output": {
+                "hw_position_with_duration": {
+                  "disabled": true
+                }
+              }
+            }
+          ],
+          "user_config": {
+            "allow": false,
+            "deny": false,
+            "index": 0
+          }
+        }
+      }
+    ]
+  }
+}
