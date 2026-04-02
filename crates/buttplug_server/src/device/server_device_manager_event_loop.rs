@@ -6,7 +6,7 @@
 // for full license information.
 
 use buttplug_core::{
-  message::{ButtplugServerMessageV4, DeviceListV4, ScanningFinishedV0},
+  message::{ButtplugMessage, ButtplugServerMessageV4, DeviceListV4, ScanningFinishedV0},
 };
 use buttplug_server_device_config::DeviceConfigurationManager;
 use tracing::info_span;
@@ -325,7 +325,11 @@ impl ServerDeviceManagerEventLoop {
       .iter()
       .map(|device| device.value().as_device_message_info(*device.key()))
       .collect();
-    DeviceListV4::new(devices)
+    let mut device_list = DeviceListV4::new(devices);
+    // If we're creating a device list in the event loop, this means a device was either added or
+    // removed. Therefore this is a system message, not a reply message.
+    device_list.set_id(0);
+    device_list
   }
 
   async fn handle_device_event(&mut self, device_event: InternalDeviceEvent) {
