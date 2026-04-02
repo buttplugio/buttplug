@@ -63,7 +63,6 @@ pub mod loob;
 pub mod lovedistance;
 pub mod lovehoney_desire;
 pub mod lovense;
-pub mod lovense_connect_service;
 pub mod lovenuts;
 pub mod luvmazer;
 pub mod magic_motion_v1;
@@ -85,6 +84,7 @@ pub mod nexus_revo;
 pub mod nintendo_joycon;
 pub mod nobra;
 pub mod omobo;
+pub mod ossm;
 pub mod patoo;
 pub mod picobong;
 pub mod pink_punch;
@@ -308,10 +308,6 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
 
   add_to_protocol_map(
     &mut map,
-    lovense_connect_service::setup::LovenseConnectIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
     lovenuts::setup::LoveNutsIdentifierFactory::default(),
   );
   add_to_protocol_map(
@@ -379,6 +375,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
   add_to_protocol_map(&mut map, nobra::setup::NobraIdentifierFactory::default());
   add_to_protocol_map(&mut map, omobo::setup::OmoboIdentifierFactory::default());
+  add_to_protocol_map(&mut map, ossm::setup::OSSMIdentifierFactory::default());
   add_to_protocol_map(&mut map, patoo::setup::PatooIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,

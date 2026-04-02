@@ -108,25 +108,10 @@ pub struct IntifaceCLIArguments {
   #[getset(get_copy = "pub")]
   use_hid: bool,
 
-  /// turn off lovense dongle serial device support
-  #[argh(switch)]
-  #[getset(get_copy = "pub")]
-  use_lovense_dongle_serial: bool,
-
-  /// turn off lovense dongle hid device support
-  #[argh(switch)]
-  #[getset(get_copy = "pub")]
-  use_lovense_dongle_hid: bool,
-
   /// turn off xinput gamepad device support (windows only)
   #[argh(switch)]
   #[getset(get_copy = "pub")]
   use_xinput: bool,
-
-  /// turn on lovense connect app device support (off by default)
-  #[argh(switch)]
-  #[getset(get_copy = "pub")]
-  use_lovense_connect: bool,
 
   /// turn on websocket server device comm manager
   #[argh(switch)]
@@ -243,10 +228,7 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
       .use_bluetooth_le(args.use_bluetooth_le())
       .use_serial_port(args.use_serial())
       .use_hid(args.use_hid())
-      .use_lovense_dongle_serial(args.use_lovense_dongle_serial())
-      .use_lovense_dongle_hid(args.use_lovense_dongle_hid())
       .use_xinput(args.use_xinput())
-      .use_lovense_connect(args.use_lovense_connect())
       .use_device_websocket_server(args.use_device_websocket_server())
       .max_ping_time(args.max_ping_time())
       .server_name(args.server_name())

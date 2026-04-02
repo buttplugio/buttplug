@@ -38,7 +38,6 @@ Buttplug is a framework for interfacing with intimate hardware devices. It uses 
 **Hardware Managers** (under `buttplug_server_hwmgr_*`):
 - `btleplug` - Bluetooth LE (primary, cross-platform)
 - `serial`, `hid` - USB serial and HID devices
-- `lovense_dongle`, `lovense_connect` - Lovense-specific (deprecated)
 - `xinput` - Windows gamepad vibration
 - `websocket` - WebSocket device forwarders
 
