@@ -20,6 +20,8 @@ pub mod aneros;
 pub mod ankni;
 pub mod bananasome;
 pub mod cachito;
+#[cfg(feature = "conformance-test")]
+pub mod conformance;
 pub mod cowgirl;
 pub mod cowgirl_cone;
 pub mod cupido;
@@ -160,6 +162,11 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     cachito::setup::CachitoIdentifierFactory::default(),
+  );
+  #[cfg(feature = "conformance-test")]
+  add_to_protocol_map(
+    &mut map,
+    conformance::setup::ConformanceIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
