@@ -35,9 +35,7 @@ struct Args {
 fn main() {
   // Initialize tracing — respects RUST_LOG env var, defaults to info
   tracing_subscriber::fmt()
-    .with_env_filter(
-      EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
-    )
+    .with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")))
     .init();
 
   let args: Args = argh::from_env();
