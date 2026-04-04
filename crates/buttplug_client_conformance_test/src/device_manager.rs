@@ -16,8 +16,8 @@ use buttplug_server_device_config::{Endpoint, ProtocolCommunicationSpecifier};
 use futures::future::FutureExt;
 use std::collections::VecDeque;
 use std::sync::Arc;
-use tokio::sync::mpsc::Sender;
 use tokio::sync::Mutex;
+use tokio::sync::mpsc::Sender;
 
 /// A specification for a conformance test device
 pub struct ConformanceDeviceSpec {
@@ -154,7 +154,9 @@ impl HardwareCommunicationManager for ConformanceDeviceCommunicationManager {
       }
 
       // Emit scanning finished
-      let _ = sender.send(HardwareCommunicationManagerEvent::ScanningFinished).await;
+      let _ = sender
+        .send(HardwareCommunicationManagerEvent::ScanningFinished)
+        .await;
 
       Ok(())
     }

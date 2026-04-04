@@ -5,11 +5,14 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use uuid::Uuid;
 use std::sync::Arc;
+use uuid::Uuid;
 
 use crate::device::{
-  hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareSubscribeCmd, HardwareUnsubscribeCmd, HardwareWriteCmd},
+  hardware::{
+    Hardware, HardwareCommand, HardwareReadCmd, HardwareSubscribeCmd, HardwareUnsubscribeCmd,
+    HardwareWriteCmd,
+  },
   protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
@@ -186,7 +189,12 @@ impl ProtocolHandler for Conformance {
       HardwareWriteCmd::new(
         &[Uuid::nil()],
         Endpoint::Tx,
-        [vec![feature_index as u8], pos_bytes.to_vec(), dur_bytes.to_vec()].concat(),
+        [
+          vec![feature_index as u8],
+          pos_bytes.to_vec(),
+          dur_bytes.to_vec(),
+        ]
+        .concat(),
         false,
       )
       .into(),
@@ -236,9 +244,10 @@ impl ProtocolHandler for Conformance {
           buttplug_core::message::InputTypeReading::Pressure(InputValue::new(value as u32))
         }
         InputType::Depth | InputType::Position | InputType::Unknown => {
-          return Err(ButtplugDeviceError::UnhandledCommand(
-            format!("Sensor type not supported: {:?}", sensor_type),
-          ));
+          return Err(ButtplugDeviceError::UnhandledCommand(format!(
+            "Sensor type not supported: {:?}",
+            sensor_type
+          )));
         }
       };
 
@@ -268,10 +277,7 @@ impl ProtocolHandler for Conformance {
     };
 
     let msg = HardwareSubscribeCmd::new(feature_id, endpoint);
-    async move {
-      device.subscribe(&msg).await
-    }
-    .boxed()
+    async move { device.subscribe(&msg).await }.boxed()
   }
 
   fn handle_input_unsubscribe_cmd(
@@ -290,9 +296,6 @@ impl ProtocolHandler for Conformance {
     };
 
     let msg = HardwareUnsubscribeCmd::new(feature_id, endpoint);
-    async move {
-      device.unsubscribe(&msg).await
-    }
-    .boxed()
+    async move { device.unsubscribe(&msg).await }.boxed()
   }
 }
