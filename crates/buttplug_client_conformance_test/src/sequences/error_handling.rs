@@ -7,8 +7,8 @@
 
 use crate::step::{SideEffect, StepValidation, TestSequence, TestStep};
 use buttplug_core::message::{
-  ButtplugClientMessageV4, OutputCmdV4, OutputCommand, OutputValue, RequestServerInfoV4,
-  ButtplugMessageSpecVersion, StartScanningV0,
+  ButtplugClientMessageV4, ButtplugMessageSpecVersion, OutputCmdV4, OutputCommand, OutputValue,
+  RequestServerInfoV4, StartScanningV0,
 };
 use buttplug_server::message::ButtplugClientMessageVariant;
 use buttplug_server_device_config::Endpoint;

@@ -18,28 +18,24 @@ use buttplug_transport_websocket_tungstenite::ButtplugWebsocketServerTransport;
 use buttplug_transport_websocket_tungstenite::ButtplugWebsocketServerTransportBuilder;
 use futures::stream::StreamExt;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Instant;
 use tokio::sync::mpsc;
 use tracing::{debug, error, info};
 
-type ConcreteConnector = ButtplugRemoteServerConnector<
-  ButtplugWebsocketServerTransport,
-  ButtplugServerJSONSerializer,
->;
+type ConcreteConnector =
+  ButtplugRemoteServerConnector<ButtplugWebsocketServerTransport, ButtplugServerJSONSerializer>;
 
 /// Mutable runner state that can be rebuilt for reconnection sequences
 struct RunnerState {
   server: Arc<buttplug_server::ButtplugServer>,
-  connector: Arc<ConcreteConnector>,
   device_handles: Vec<ConformanceDeviceHandle>,
   message_loop_task: tokio::task::JoinHandle<()>,
+  connected: Arc<AtomicBool>,
 }
 
 /// Initialize a fresh server and connector, wait for client connection
-async fn init_server(
-  port: u16,
-  max_ping_time: u32,
-) -> Result<RunnerState, (StepResult, String)> {
+async fn init_server(port: u16, max_ping_time: u32) -> Result<RunnerState, (StepResult, String)> {
   // Build the server with conformance devices
   let (server, device_handles) = match build_conformance_server(max_ping_time) {
     Ok((s, h)) => (Arc::new(s), h),
@@ -97,18 +93,22 @@ async fn init_server(
   // Wrap connector in Arc so it can be shared with the message loop
   let connector = Arc::new(connector);
 
+  // Create atomic bool to track connection state
+  let connected = Arc::new(AtomicBool::new(true));
+
   // Start message loop in background
   let message_loop_task = tokio::spawn({
     let server = server.clone();
     let connector = connector.clone();
-    async move { run_message_loop(server, connector, connector_receiver).await }
+    let connected = connected.clone();
+    async move { run_message_loop(server, connector, connector_receiver, connected).await }
   });
 
   Ok(RunnerState {
     server,
-    connector,
     device_handles,
     message_loop_task,
+    connected,
   })
 }
 
@@ -116,7 +116,7 @@ async fn init_server(
 pub async fn run_sequence(
   sequence: &TestSequence,
   port: u16,
-  __default_timeout_ms: u64,
+  _default_timeout_ms: u64,
 ) -> SequenceResult {
   let sequence_name = sequence.name.to_string();
   let mut steps = Vec::new();
@@ -135,10 +135,7 @@ pub async fn run_sequence(
     }
   };
 
-  info!(
-    "Server ready, client connected on ws://127.0.0.1:{}",
-    port
-  );
+  info!("Server ready, client connected on ws://127.0.0.1:{}", port);
   info!("Client connected");
   steps.push(StepResult {
     step_name: "Connection",
@@ -235,7 +232,10 @@ pub async fn run_sequence(
         }
         SideEffect::CloseConnection => {
           debug!("Closing connection");
-          // Connection closure is handled by the client
+          // TODO: CloseConnection is not yet fully implemented.
+          // The connection only closes implicitly when RebuildServer drops the old server
+          // and connector, or when the client disconnects on its own.
+          // This side effect should actively close the WebSocket connection here.
         }
         SideEffect::Delay { ms } => {
           debug!("Delaying {} ms", ms);
@@ -247,7 +247,7 @@ pub async fn run_sequence(
     // Create a context for validations with current state
     let context = SequenceContext {
       device_handles: runner_state.device_handles.clone(),
-      server_connected: true,
+      server_connected: runner_state.connected.load(Ordering::Relaxed),
     };
 
     let result = match &step.validation {
@@ -334,9 +334,11 @@ pub async fn run_sequence(
 
   // Cleanup: Wait for message loop to complete (when client disconnects)
   // If it takes too long, we abort it
-  let _ =
-    tokio::time::timeout(std::time::Duration::from_secs(10), runner_state.message_loop_task)
-      .await;
+  let _ = tokio::time::timeout(
+    std::time::Duration::from_secs(10),
+    runner_state.message_loop_task,
+  )
+  .await;
 
   SequenceResult {
     sequence_name,
@@ -351,6 +353,7 @@ async fn run_message_loop<ConnectorType>(
   server: Arc<buttplug_server::ButtplugServer>,
   connector: Arc<ConnectorType>,
   mut connector_receiver: mpsc::Receiver<ButtplugClientMessageVariant>,
+  connected: Arc<AtomicBool>,
 ) where
   ConnectorType:
     ButtplugConnector<ButtplugServerMessageVariant, ButtplugClientMessageVariant> + 'static,
@@ -364,6 +367,7 @@ async fn run_message_loop<ConnectorType>(
         match msg {
           None => {
             debug!("Client disconnected, exiting message loop");
+            connected.store(false, Ordering::Relaxed);
             break;
           }
           Some(client_message) => {

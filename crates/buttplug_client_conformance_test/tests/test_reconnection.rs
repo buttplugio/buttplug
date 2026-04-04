@@ -19,9 +19,8 @@ async fn test_reconnection_pass() {
   let port = 25000 + (std::process::id() % 1000) as u16;
 
   // Spawn the runner in the background with generous timeout
-  let runner_task = tokio::spawn(async move {
-    run_sequence(&reconnection_sequence(), port, 45000).await
-  });
+  let runner_task =
+    tokio::spawn(async move { run_sequence(&reconnection_sequence(), port, 45000).await });
 
   // Wait for WebSocket server to start
   tokio::time::sleep(Duration::from_millis(100)).await;
@@ -38,7 +37,8 @@ async fn test_reconnection_pass() {
     .await
     {
       // Send RequestServerInfo to trigger handshake
-      let handshake_msg = r#"[{"RequestServerInfo":{"Id":1,"ClientName":"Test1","ProtocolVersionMajor":4}}]"#;
+      let handshake_msg =
+        r#"[{"RequestServerInfo":{"Id":1,"ClientName":"Test1","ProtocolVersionMajor":4}}]"#;
       if let Ok(_) = ws_stream.send(Message::Text(handshake_msg.into())).await {
         // Receive ServerInfo response
         if let Some(Ok(_msg)) = ws_stream.next().await {
@@ -50,11 +50,8 @@ async fn test_reconnection_pass() {
           tokio::time::sleep(Duration::from_secs(1)).await;
 
           // Consume scan response messages
-          while let Ok(Some(_)) = tokio::time::timeout(
-            Duration::from_millis(100),
-            ws_stream.next(),
-          )
-          .await
+          while let Ok(Some(_)) =
+            tokio::time::timeout(Duration::from_millis(100), ws_stream.next()).await
           {
             // Drain messages
           }
@@ -81,7 +78,8 @@ async fn test_reconnection_pass() {
     .await
     {
       // Send RequestServerInfo to trigger handshake on new connection
-      let handshake_msg = r#"[{"RequestServerInfo":{"Id":1,"ClientName":"Test2","ProtocolVersionMajor":4}}]"#;
+      let handshake_msg =
+        r#"[{"RequestServerInfo":{"Id":1,"ClientName":"Test2","ProtocolVersionMajor":4}}]"#;
       if let Ok(_) = ws_stream.send(Message::Text(handshake_msg.into())).await {
         // Receive ServerInfo response
         if let Some(Ok(_msg)) = ws_stream.next().await {
@@ -93,17 +91,15 @@ async fn test_reconnection_pass() {
           tokio::time::sleep(Duration::from_secs(1)).await;
 
           // Consume scan response messages
-          while let Ok(Some(_)) = tokio::time::timeout(
-            Duration::from_millis(100),
-            ws_stream.next(),
-          )
-          .await
+          while let Ok(Some(_)) =
+            tokio::time::timeout(Duration::from_millis(100), ws_stream.next()).await
           {
             // Drain messages
           }
 
           // Send device command to device 0
-          let device_cmd_msg = r#"[{"OutputCmd":{"Id":3,"DeviceIndex":0,"Endpoints":[{"Index":0,"Data":[128]}]}}]"#;
+          let device_cmd_msg =
+            r#"[{"OutputCmd":{"Id":3,"DeviceIndex":0,"Endpoints":[{"Index":0,"Data":[128]}]}}]"#;
           let _ = ws_stream.send(Message::Text(device_cmd_msg.into())).await;
 
           // Receive ok response

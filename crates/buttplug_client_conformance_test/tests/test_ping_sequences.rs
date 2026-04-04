@@ -20,9 +20,8 @@ async fn test_ping_required_pass() {
   let port = 23000 + (std::process::id() % 1000) as u16;
 
   // Spawn the runner in the background
-  let runner_task = tokio::spawn(async move {
-    run_sequence(&ping_required_sequence(), port, 10000).await
-  });
+  let runner_task =
+    tokio::spawn(async move { run_sequence(&ping_required_sequence(), port, 10000).await });
 
   // Wait for WebSocket server to start
   tokio::time::sleep(Duration::from_millis(100)).await;
@@ -38,7 +37,8 @@ async fn test_ping_required_pass() {
     .await
     {
       // Send RequestServerInfo to trigger handshake
-      let handshake_msg = r#"[{"RequestServerInfo":{"Id":1,"ClientName":"Test","ProtocolVersionMajor":4}}]"#;
+      let handshake_msg =
+        r#"[{"RequestServerInfo":{"Id":1,"ClientName":"Test","ProtocolVersionMajor":4}}]"#;
       if let Ok(_) = ws_stream.send(Message::Text(handshake_msg.into())).await {
         // Receive ServerInfo response
         if let Some(Ok(_msg)) = ws_stream.next().await {
@@ -96,9 +96,8 @@ async fn test_ping_timeout_pass() {
   let port = 23001 + (std::process::id() % 1000) as u16;
 
   // Spawn the runner in the background
-  let runner_task = tokio::spawn(async move {
-    run_sequence(&ping_timeout_sequence(), port, 15000).await
-  });
+  let runner_task =
+    tokio::spawn(async move { run_sequence(&ping_timeout_sequence(), port, 15000).await });
 
   // Wait for WebSocket server to start
   tokio::time::sleep(Duration::from_millis(100)).await;
@@ -114,7 +113,8 @@ async fn test_ping_timeout_pass() {
     .await
     {
       // Send RequestServerInfo to trigger handshake
-      let handshake_msg = r#"[{"RequestServerInfo":{"Id":1,"ClientName":"Test","ProtocolVersionMajor":4}}]"#;
+      let handshake_msg =
+        r#"[{"RequestServerInfo":{"Id":1,"ClientName":"Test","ProtocolVersionMajor":4}}]"#;
       if let Ok(_) = ws_stream.send(Message::Text(handshake_msg.into())).await {
         // Receive ServerInfo response
         if let Some(Ok(_msg)) = ws_stream.next().await {

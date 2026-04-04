@@ -19,9 +19,8 @@ async fn test_error_handling_pass() {
   let port = 24000 + (std::process::id() % 1000) as u16;
 
   // Spawn the runner in the background
-  let runner_task = tokio::spawn(async move {
-    run_sequence(&error_handling_sequence(), port, 10000).await
-  });
+  let runner_task =
+    tokio::spawn(async move { run_sequence(&error_handling_sequence(), port, 10000).await });
 
   // Wait for WebSocket server to start
   tokio::time::sleep(Duration::from_millis(100)).await;
@@ -37,18 +36,14 @@ async fn test_error_handling_pass() {
     .await
     {
       // Send RequestServerInfo to trigger handshake
-      let handshake_msg = r#"[{"RequestServerInfo":{"Id":1,"ClientName":"Test","ProtocolVersionMajor":4}}]"#;
+      let handshake_msg =
+        r#"[{"RequestServerInfo":{"Id":1,"ClientName":"Test","ProtocolVersionMajor":4}}]"#;
       if let Ok(_) = ws_stream.send(Message::Text(handshake_msg.into())).await {
         // Receive ServerInfo response
         if let Some(Ok(_msg)) = ws_stream.next().await {
           // Keep connection open and drain any incoming messages for the entire test
           loop {
-            match tokio::time::timeout(
-              Duration::from_millis(100),
-              ws_stream.next(),
-            )
-            .await
-            {
+            match tokio::time::timeout(Duration::from_millis(100), ws_stream.next()).await {
               Ok(Some(_)) => {
                 // Got a message, continue
               }
@@ -71,12 +66,11 @@ async fn test_error_handling_pass() {
 
   // Verify runner completed successfully
   if let Ok(Ok(result)) = runner_result {
-    println!("Error handling sequence completed: {}", result.sequence_name);
-    let failed_steps: Vec<_> = result
-      .steps
-      .iter()
-      .filter(|s| !s.passed)
-      .collect();
+    println!(
+      "Error handling sequence completed: {}",
+      result.sequence_name
+    );
+    let failed_steps: Vec<_> = result.steps.iter().filter(|s| !s.passed).collect();
 
     if !failed_steps.is_empty() {
       println!("Failed steps details:");
@@ -88,7 +82,12 @@ async fn test_error_handling_pass() {
     // Also print passed steps for context
     println!("All steps:");
     for step in &result.steps {
-      println!("  - {} ({}ms): {}", step.step_name, step.duration_ms, if step.passed { "PASS" } else { "FAIL" });
+      println!(
+        "  - {} ({}ms): {}",
+        step.step_name,
+        step.duration_ms,
+        if step.passed { "PASS" } else { "FAIL" }
+      );
     }
 
     assert!(
@@ -96,7 +95,11 @@ async fn test_error_handling_pass() {
       "Error handling sequence should pass. Failed steps: {:?}",
       failed_steps
         .iter()
-        .map(|s| format!("{} ({})", s.step_name, s.error.as_deref().unwrap_or("unknown")))
+        .map(|s| format!(
+          "{} ({})",
+          s.step_name,
+          s.error.as_deref().unwrap_or("unknown")
+        ))
         .collect::<Vec<_>>()
     );
   } else {
