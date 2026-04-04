@@ -73,20 +73,15 @@ impl SimulatedDevice {
 
   /// Queue a read response
   pub fn queue_read(&self, reading: HardwareReading) {
-    let queue = self.read_queue.clone();
-    tokio::spawn(async move {
-      queue.lock().await.push_back(reading);
-    });
+    // Use blocking_lock to avoid tokio::spawn which can cause race conditions in tests
+    self.read_queue.blocking_lock().push_back(reading);
   }
 
   /// Inject a notification if the endpoint is subscribed
   pub fn inject_notification(&self, endpoint: Endpoint, data: Vec<u8>) {
     if self.subscribed_endpoints.contains(&endpoint) {
       let name = (*self.name).clone();
-      let sender = self.event_sender.clone();
-      tokio::spawn(async move {
-        let _ = sender.send(HardwareEvent::Notification(name, endpoint, data));
-      });
+      let _ = self.event_sender.send(HardwareEvent::Notification(name, endpoint, data));
     }
   }
 
@@ -106,9 +101,7 @@ impl HardwareInternal for SimulatedDevice {
     let sender = self.event_sender.clone();
     let name = (*self.name).clone();
     async move {
-      sender
-        .send(HardwareEvent::Disconnected(name))
-        .expect("Failed to send disconnect event");
+      let _ = sender.send(HardwareEvent::Disconnected(name));
       Ok(())
     }
     .boxed()
