@@ -34,9 +34,7 @@ pub enum StepValidation {
     validator: std::sync::Arc<dyn Fn(&[HardwareWriteCmd]) -> Result<(), String> + Send + Sync>,
   },
   /// Wait for a server-initiated event to be received by the client
-  WaitForServerEvent {
-    description: String,
-  },
+  WaitForServerEvent { description: String },
   /// Wait for client disconnection
   WaitForDisconnect,
   /// Custom validation function

@@ -58,7 +58,10 @@ async fn main() {
 
   // Filter by --sequence if provided
   let sequences_to_run: Vec<_> = if let Some(ref name) = args.sequence {
-    sequences.iter().filter(|s| s.name == name.as_str()).collect()
+    sequences
+      .iter()
+      .filter(|s| s.name == name.as_str())
+      .collect()
   } else {
     sequences.iter().collect()
   };
@@ -66,7 +69,10 @@ async fn main() {
   let mut report = Report::new();
 
   for sequence in sequences_to_run {
-    println!("=== Waiting for client connection for: {} ===", sequence.name);
+    println!(
+      "=== Waiting for client connection for: {} ===",
+      sequence.name
+    );
     println!("    Connect to ws://127.0.0.1:{}", args.port);
     let result = run_sequence(sequence, args.port, args.timeout).await;
     report.add_result(result);
