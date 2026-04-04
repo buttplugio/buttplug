@@ -109,7 +109,7 @@ Server will push button events:
 | 2 | Heater | Temperature | -100–100 | — | — | OutputCmd |
 | 3 | LED | Led | 0–100 | — | — | OutputCmd |
 | 4 | RSSI | — | — | Rssi | -128–0 | InputCmd (Read) |
-| 5 | Pressure | — | — | Pressure | 0–65535 | InputCmd (Subscribe/Unsubscribe) |
+| 5 | Pressure | — | — | Pressure | 0–65535 | InputCmd (Subscribe) |
 
 ### Example Commands
 
@@ -174,7 +174,7 @@ After sending `StartScanning`, the client receives a complete DeviceList with al
       "0": {"FeatureIndex": 0, "FeatureDescription": "Vibrator 1", "Output": {"Vibrate": {"Value": [0, 100]}}},
       "1": {"FeatureIndex": 1, "FeatureDescription": "Vibrator 2", "Output": {"Vibrate": {"Value": [0, 100]}}},
       "2": {"FeatureIndex": 2, "FeatureDescription": "Rotator", "Output": {"Rotate": {"Value": [-100, 100]}}},
-      "3": {"FeatureIndex": 3, "FeatureDescription": "Battery", "Input": {"Battery": {"Value": [0, 100], "Command": ["Read"]}}}
+      "3": {"FeatureIndex": 3, "FeatureDescription": "Battery", "Input": {"Battery": {"Value": [[0, 100]], "Command": ["Read"]}}}
     }
   },
   "1": {
@@ -185,7 +185,7 @@ After sending `StartScanning`, the client receives a complete DeviceList with al
       "0": {"FeatureIndex": 0, "FeatureDescription": "Position", "Output": {"Position": {"Value": [0, 100]}}},
       "1": {"FeatureIndex": 1, "FeatureDescription": "Position w/ Duration", "Output": {"HwPositionWithDuration": {"Value": [0, 100], "Duration": [0, 10000]}}},
       "2": {"FeatureIndex": 2, "FeatureDescription": "Oscillator", "Output": {"Oscillate": {"Value": [0, 100]}}},
-      "3": {"FeatureIndex": 3, "FeatureDescription": "Button", "Input": {"Button": {"Value": [0, 1], "Command": ["Subscribe"]}}}
+      "3": {"FeatureIndex": 3, "FeatureDescription": "Button", "Input": {"Button": {"Value": [[0, 1]], "Command": ["Subscribe"]}}}
     }
   },
   "2": {
@@ -197,8 +197,8 @@ After sending `StartScanning`, the client receives a complete DeviceList with al
       "1": {"FeatureIndex": 1, "FeatureDescription": "Sprayer", "Output": {"Spray": {"Value": [0, 100]}}},
       "2": {"FeatureIndex": 2, "FeatureDescription": "Heater", "Output": {"Temperature": {"Value": [-100, 100]}}},
       "3": {"FeatureIndex": 3, "FeatureDescription": "LED", "Output": {"Led": {"Value": [0, 100]}}},
-      "4": {"FeatureIndex": 4, "FeatureDescription": "RSSI", "Input": {"Rssi": {"Value": [-128, 0], "Command": ["Read"]}}},
-      "5": {"FeatureIndex": 5, "FeatureDescription": "Pressure", "Input": {"Pressure": {"Value": [0, 65535], "Command": ["Subscribe", "Unsubscribe"]}}}
+      "4": {"FeatureIndex": 4, "FeatureDescription": "RSSI", "Input": {"Rssi": {"Value": [[-128, 0]], "Command": ["Read"]}}},
+      "5": {"FeatureIndex": 5, "FeatureDescription": "Pressure", "Input": {"Pressure": {"Value": [[0, 65535]], "Command": ["Subscribe"]}}}
     }
   }
 }}}]
