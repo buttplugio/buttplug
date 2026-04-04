@@ -9,8 +9,8 @@ use buttplug_client::{
   ButtplugClient,
   device::{ClientDeviceCommandValue, ClientDeviceOutputCommand},
 };
-use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
 use buttplug_client_conformance_test::server::build_conformance_server;
+use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
 use buttplug_server_device_config::Endpoint;
 use futures::StreamExt;
 use std::time::Duration;
@@ -19,8 +19,7 @@ use tokio::time::timeout;
 #[tokio::test]
 async fn test_conformance_devices_appear() {
   // Build conformance server
-  let (server, _handles) = build_conformance_server(0)
-    .expect("Failed to build conformance server");
+  let (server, _handles) = build_conformance_server(0).expect("Failed to build conformance server");
 
   // Create in-process client connector wrapping the server
   let connector = ButtplugInProcessClientConnectorBuilder::default()
@@ -29,10 +28,7 @@ async fn test_conformance_devices_appear() {
 
   // Create and connect client
   let client = ButtplugClient::new("Test Client");
-  client
-    .connect(connector)
-    .await
-    .expect("Failed to connect");
+  client.connect(connector).await.expect("Failed to connect");
 
   // Subscribe to client's device event stream before scanning
   let mut event_stream = client.event_stream();
@@ -86,8 +82,7 @@ async fn test_conformance_devices_appear() {
 #[tokio::test]
 async fn test_conformance_device_count_and_handle_access() {
   // Build conformance server and get device handles
-  let (server, handles) = build_conformance_server(0)
-    .expect("Failed to build conformance server");
+  let (server, handles) = build_conformance_server(0).expect("Failed to build conformance server");
 
   // Verify we got the correct number of handles
   assert_eq!(
@@ -103,10 +98,7 @@ async fn test_conformance_device_count_and_handle_access() {
     .finish();
 
   let client = ButtplugClient::new("Test Client");
-  client
-    .connect(connector)
-    .await
-    .expect("Failed to connect");
+  client.connect(connector).await.expect("Failed to connect");
 
   // Start scanning
   let mut event_stream = client.event_stream();
