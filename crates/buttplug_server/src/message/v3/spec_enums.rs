@@ -6,35 +6,21 @@
 // for full license information.
 
 use crate::message::{
-  StopAllDevicesV0,
-  StopDeviceCmdV0,
+  StopAllDevicesV0, StopDeviceCmdV0,
   v1::{LinearCmdV1, RequestServerInfoV1, RotateCmdV1, VibrateCmdV1},
   v2::{ButtplugClientMessageV2, ButtplugServerMessageV2, ServerInfoV2},
 };
 use buttplug_core::{
   errors::{ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugMessageFinalizer,
-    ButtplugServerMessageV4,
-    DeviceRemovedV0,
-    ErrorV0,
-    OkV0,
-    PingV0,
-    RequestDeviceListV0,
-    ScanningFinishedV0,
-    StartScanningV0,
-    StopScanningV0,
+    ButtplugMessageFinalizer, ButtplugServerMessageV4, DeviceRemovedV0, ErrorV0, OkV0, PingV0,
+    RequestDeviceListV0, ScanningFinishedV0, StartScanningV0, StopScanningV0,
   },
 };
 use serde::{Deserialize, Serialize};
 
 use super::{
-  DeviceAddedV3,
-  DeviceListV3,
-  ScalarCmdV3,
-  SensorReadCmdV3,
-  SensorReadingV3,
-  SensorSubscribeCmdV3,
+  DeviceAddedV3, DeviceListV3, ScalarCmdV3, SensorReadCmdV3, SensorReadingV3, SensorSubscribeCmdV3,
   SensorUnsubscribeCmdV3,
 };
 
@@ -77,8 +63,7 @@ impl_message_enum_traits!(ButtplugClientMessageV3 {
   SensorSubscribeCmd,
   SensorUnsubscribeCmd,
 });
-impl ButtplugMessageFinalizer for ButtplugClientMessageV3 {
-}
+impl ButtplugMessageFinalizer for ButtplugClientMessageV3 {}
 
 // For v2 to v3, all deprecations should be treated as conversions, but will require current
 // connected device state, meaning they'll need to be implemented where they can also access the

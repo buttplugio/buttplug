@@ -11,9 +11,7 @@ use buttplug_core::{
   message::{InputReadingV4, OutputType},
 };
 use buttplug_server_device_config::{
-  Endpoint,
-  ProtocolCommunicationSpecifier,
-  UserDeviceIdentifier,
+  Endpoint, ProtocolCommunicationSpecifier, UserDeviceIdentifier,
 };
 use futures::future::{BoxFuture, FutureExt};
 use std::sync::{

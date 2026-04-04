@@ -6,18 +6,12 @@
 // for full license information.
 
 use crate::message::{
-  ServerDeviceAttributes,
-  TryFromDeviceAttributes,
-  checked_input_cmd::CheckedInputCmdV4,
+  ServerDeviceAttributes, TryFromDeviceAttributes, checked_input_cmd::CheckedInputCmdV4,
 };
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageValidator,
-    InputCommandType,
-    InputType,
+    ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageValidator, InputCommandType, InputType,
   },
 };
 use getset::{CopyGetters, Getters};

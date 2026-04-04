@@ -6,12 +6,9 @@
 // for full license information.
 
 use buttplug_core::message::{
-  ButtplugMessage,
-  ButtplugMessageFinalizer,
+  ButtplugMessage, ButtplugMessageFinalizer,
   serializer::{
-    ButtplugMessageSerializer,
-    ButtplugSerializedMessage,
-    ButtplugSerializerError,
+    ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugSerializerError,
     json_serializer::{create_message_validator, deserialize_to_message, vec_to_protocol_json},
   },
 };

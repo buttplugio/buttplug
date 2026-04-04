@@ -77,8 +77,7 @@ pub const BUTTPLUG_CURRENT_API_MAJOR_VERSION: ButtplugMessageSpecVersion =
 pub const BUTTPLUG_CURRENT_API_MINOR_VERSION: u32 = 0;
 
 pub trait ButtplugMessageFinalizer {
-  fn finalize(&mut self) {
-  }
+  fn finalize(&mut self) {}
 }
 
 /// Base trait for all Buttplug Protocol Message Structs. Handles management of

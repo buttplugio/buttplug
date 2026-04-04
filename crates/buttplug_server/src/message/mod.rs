@@ -8,14 +8,8 @@
 use buttplug_core::{
   errors::{ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugClientMessageV4,
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-    ButtplugMessageSpecVersion,
-    ButtplugMessageValidator,
-    ButtplugServerMessageV4,
-    InputReadingV4,
+    ButtplugClientMessageV4, ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageFinalizer,
+    ButtplugMessageSpecVersion, ButtplugMessageValidator, ButtplugServerMessageV4, InputReadingV4,
   },
 };
 use server_device_attributes::ServerDeviceAttributes;
@@ -83,8 +77,7 @@ pub enum ButtplugClientMessageVariant {
 }
 
 impl_message_enum_traits!(ButtplugClientMessageVariant { V0, V1, V2, V3, V4 });
-impl ButtplugMessageFinalizer for ButtplugClientMessageVariant {
-}
+impl ButtplugMessageFinalizer for ButtplugClientMessageVariant {}
 
 impl ButtplugClientMessageVariant {
   pub fn version(&self) -> ButtplugMessageSpecVersion {
@@ -151,8 +144,7 @@ pub enum ButtplugServerMessageVariant {
 }
 
 impl_message_enum_traits!(ButtplugServerMessageVariant { V0, V1, V2, V3, V4 });
-impl ButtplugMessageFinalizer for ButtplugServerMessageVariant {
-}
+impl ButtplugMessageFinalizer for ButtplugServerMessageVariant {}
 
 impl ButtplugServerMessageVariant {
   pub fn version(&self) -> ButtplugMessageSpecVersion {
@@ -177,8 +169,7 @@ pub enum ButtplugServerDeviceMessage {
 }
 
 impl_message_enum_traits!(ButtplugServerDeviceMessage { SensorReading });
-impl ButtplugMessageFinalizer for ButtplugServerDeviceMessage {
-}
+impl ButtplugMessageFinalizer for ButtplugServerDeviceMessage {}
 
 impl From<ButtplugServerDeviceMessage> for ButtplugServerMessageV4 {
   fn from(other: ButtplugServerDeviceMessage) -> Self {

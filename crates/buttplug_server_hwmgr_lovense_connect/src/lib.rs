@@ -11,7 +11,6 @@ extern crate log;
 mod lovense_connect_service_comm_manager;
 mod lovense_connect_service_hardware;
 pub use lovense_connect_service_comm_manager::{
-  LovenseConnectServiceCommunicationManager,
-  LovenseConnectServiceCommunicationManagerBuilder,
+  LovenseConnectServiceCommunicationManager, LovenseConnectServiceCommunicationManagerBuilder,
 };
 pub use lovense_connect_service_hardware::LovenseServiceHardware;

@@ -8,9 +8,7 @@
 //! Implementation of internal Buttplug Client event loop.
 
 use super::{
-  ButtplugClientEvent,
-  ButtplugClientMessageFuturePair,
-  ButtplugClientMessageSender,
+  ButtplugClientEvent, ButtplugClientMessageFuturePair, ButtplugClientMessageSender,
   client_message_sorter::ClientMessageSorter,
   device::{ButtplugClientDevice, ButtplugClientDeviceEvent},
 };
@@ -18,12 +16,8 @@ use buttplug_core::{
   connector::{ButtplugConnector, ButtplugConnectorStateSender},
   errors::ButtplugError,
   message::{
-    ButtplugClientMessageV4,
-    ButtplugDeviceMessage,
-    ButtplugMessageValidator,
-    ButtplugServerMessageV4,
-    DeviceListV4,
-    DeviceMessageInfoV4,
+    ButtplugClientMessageV4, ButtplugDeviceMessage, ButtplugMessageValidator,
+    ButtplugServerMessageV4, DeviceListV4, DeviceMessageInfoV4,
   },
 };
 use dashmap::DashMap;

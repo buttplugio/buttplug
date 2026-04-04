@@ -13,23 +13,15 @@ use buttplug_client::{
 use buttplug_core::{
   connector::ButtplugRemoteConnector,
   message::serializer::{
-    ButtplugMessageSerializer,
-    ButtplugSerializedMessage,
-    ButtplugSerializerError,
+    ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugSerializerError,
   },
 };
 use buttplug_server::{
   connector::ButtplugRemoteServerConnector,
   message::{
-    ButtplugClientMessageV0,
-    ButtplugClientMessageV1,
-    ButtplugClientMessageV2,
-    ButtplugClientMessageV3,
-    ButtplugServerMessageV0,
-    ButtplugServerMessageV1,
-    ButtplugServerMessageV2,
-    ButtplugServerMessageV3,
-    serializer::ButtplugServerJSONSerializer,
+    ButtplugClientMessageV0, ButtplugClientMessageV1, ButtplugClientMessageV2,
+    ButtplugClientMessageV3, ButtplugServerMessageV0, ButtplugServerMessageV1,
+    ButtplugServerMessageV2, ButtplugServerMessageV3, serializer::ButtplugServerJSONSerializer,
   },
 };
 use std::sync::Arc;

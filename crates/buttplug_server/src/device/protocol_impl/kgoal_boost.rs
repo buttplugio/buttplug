@@ -19,8 +19,7 @@ use buttplug_core::{
 };
 use buttplug_server_device_config::Endpoint;
 use futures::{
-  FutureExt,
-  StreamExt,
+  FutureExt, StreamExt,
   future::{self, BoxFuture},
 };
 use std::{

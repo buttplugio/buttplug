@@ -14,14 +14,9 @@ use buttplug_core::{
 };
 
 use crate::{
-  ButtplugDeviceConfigError,
-  RangeWithLimit,
-  ServerDeviceFeature,
-  ServerDeviceFeatureInput,
-  ServerDeviceFeatureOutput,
-  ServerDeviceFeatureOutputHwPositionWithDurationProperties,
-  ServerDeviceFeatureOutputPositionProperties,
-  ServerDeviceFeatureOutputValueProperties,
+  ButtplugDeviceConfigError, RangeWithLimit, ServerDeviceFeature, ServerDeviceFeatureInput,
+  ServerDeviceFeatureOutput, ServerDeviceFeatureOutputHwPositionWithDurationProperties,
+  ServerDeviceFeatureOutputPositionProperties, ServerDeviceFeatureOutputValueProperties,
 };
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};

@@ -58,8 +58,7 @@ impl ButtplugMessage for ErrorV0 {
   }
 }
 
-impl ButtplugMessageValidator for ErrorV0 {
-}
+impl ButtplugMessageValidator for ErrorV0 {}
 
 impl PartialEq for ErrorV0 {
   fn eq(&self, other: &Self) -> bool {

@@ -6,10 +6,7 @@
 // for full license information.
 
 use buttplug_core::message::{
-  ButtplugDeviceMessage,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  InputType,
+  ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageValidator, InputType,
 };
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
@@ -33,8 +30,7 @@ pub struct SensorReadingV3 {
   data: Vec<i32>,
 }
 
-impl ButtplugMessageValidator for SensorReadingV3 {
-}
+impl ButtplugMessageValidator for SensorReadingV3 {}
 
 impl SensorReadingV3 {
   pub fn new(device_index: u32, sensor_index: u32, sensor_type: InputType, data: Vec<i32>) -> Self {

@@ -9,10 +9,7 @@ use std::collections::HashMap;
 
 use super::DeviceMessageInfoV4;
 use crate::message::{
-  ButtplugMessage,
-  ButtplugMessageError,
-  ButtplugMessageFinalizer,
-  ButtplugMessageValidator,
+  ButtplugMessage, ButtplugMessageError, ButtplugMessageFinalizer, ButtplugMessageValidator,
 };
 use getset::Getters;
 use serde::{Deserialize, Serialize};
@@ -55,5 +52,4 @@ impl ButtplugMessageValidator for DeviceListV4 {
   }
 }
 
-impl ButtplugMessageFinalizer for DeviceListV4 {
-}
+impl ButtplugMessageFinalizer for DeviceListV4 {}

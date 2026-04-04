@@ -6,19 +6,9 @@
 // for full license information.
 
 use crate::message::{
-  ButtplugMessageFinalizer,
-  ErrorV0,
-  OkV0,
-  OutputCmdV4,
-  PingV0,
-  RequestDeviceListV0,
-  RequestServerInfoV4,
-  ScanningFinishedV0,
-  ServerInfoV4,
-  StartScanningV0,
-  StopCmdV4,
-  StopScanningV0,
-  v4::input_cmd::InputCmdV4,
+  ButtplugMessageFinalizer, ErrorV0, OkV0, OutputCmdV4, PingV0, RequestDeviceListV0,
+  RequestServerInfoV4, ScanningFinishedV0, ServerInfoV4, StartScanningV0, StopCmdV4,
+  StopScanningV0, v4::input_cmd::InputCmdV4,
 };
 use enum_dispatch::enum_dispatch;
 use serde::{Deserialize, Serialize};
@@ -42,8 +32,7 @@ pub enum ButtplugClientMessageV4 {
   InputCmd(InputCmdV4),
 }
 
-impl ButtplugMessageFinalizer for ButtplugClientMessageV4 {
-}
+impl ButtplugMessageFinalizer for ButtplugClientMessageV4 {}
 
 /// Represents all server-to-client messages in v4 of the Buttplug Spec
 #[derive(Debug, Clone, Serialize, Deserialize)]

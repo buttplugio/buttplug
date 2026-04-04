@@ -14,9 +14,7 @@ pub mod serializer;
 
 use crate::util::device_test::client::client_v3::connector::ButtplugInProcessClientConnectorBuilder;
 use crate::util::{
-  ButtplugTestServer,
-  TestDeviceChannelHost,
-  device_test::connector::build_channel_connector_v3,
+  ButtplugTestServer, TestDeviceChannelHost, device_test::connector::build_channel_connector_v3,
 };
 use client::{ButtplugClient, ButtplugClientDevice, ButtplugClientEvent};
 use device::{LinearCommand, RotateCommand, ScalarCommand, ScalarValueCommand};
@@ -26,10 +24,7 @@ use buttplug_server_device_config::load_protocol_configs;
 use tokio::sync::Notify;
 
 use super::super::{
-  super::TestDeviceCommunicationManagerBuilder,
-  DeviceTestCase,
-  TestClientCommand,
-  TestCommand,
+  super::TestDeviceCommunicationManagerBuilder, DeviceTestCase, TestClientCommand, TestCommand,
   filter_commands,
 };
 use futures::StreamExt;

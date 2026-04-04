@@ -8,9 +8,7 @@
 use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 
 use crate::device::{

@@ -9,11 +9,7 @@ use crate::message::TryFromDeviceAttributes;
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageValidator,
-    InputCmdV4,
-    InputCommandType,
+    ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageValidator, InputCmdV4, InputCommandType,
     InputType,
   },
 };

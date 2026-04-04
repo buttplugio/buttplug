@@ -19,10 +19,7 @@ use buttplug_core::{
   message::ButtplugDeviceMessage,
 };
 use buttplug_server::message::{
-  ButtplugClientMessageV3,
-  ButtplugServerMessageV3,
-  DeviceListV3,
-  DeviceMessageInfoV3,
+  ButtplugClientMessageV3, ButtplugServerMessageV3, DeviceListV3, DeviceMessageInfoV3,
 };
 use dashmap::DashMap;
 use futures::channel::oneshot;

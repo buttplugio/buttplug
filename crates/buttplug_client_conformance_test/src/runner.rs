@@ -25,7 +25,7 @@ use tracing::{debug, error, info};
 pub async fn run_sequence(
   sequence: &TestSequence,
   port: u16,
-  default_timeout_ms: u64,
+  _default_timeout_ms: u64,
 ) -> SequenceResult {
   let sequence_name = sequence.name.to_string();
   let mut steps = Vec::new();
@@ -122,11 +122,6 @@ pub async fn run_sequence(
   // Execute each step
   for step in &sequence.steps {
     let step_start = Instant::now();
-    let _timeout_ms = if step.timeout_ms > 0 {
-      step.timeout_ms
-    } else {
-      default_timeout_ms
-    };
 
     // Execute side effects first
     for side_effect in &step.side_effects {
@@ -141,6 +136,8 @@ pub async fn run_sequence(
               debug!("Got server error response: {:?}", err_msg);
             }
           }
+          // Allow async device processing to complete
+          tokio::time::sleep(std::time::Duration::from_millis(10)).await;
         }
         SideEffect::TriggerScanning => {
           debug!("Triggering scanning");
@@ -214,21 +211,20 @@ pub async fn run_sequence(
         device_index,
         validator,
       } => {
-        let passed = if let Some(handle) = context.device_handles.get(*device_index) {
+        let (passed, error) = if let Some(handle) = context.device_handles.get(*device_index) {
           let write_log = handle.write_log.lock().await;
-          validator(write_log.as_slice()).is_ok()
+          match validator(write_log.as_slice()) {
+            Ok(()) => (true, None),
+            Err(err_msg) => (false, Some(err_msg)),
+          }
         } else {
-          false
+          (false, Some(format!("Device {} not found", device_index)))
         };
 
         StepResult {
           step_name: step.name,
           passed,
-          error: if passed {
-            None
-          } else {
-            Some("Device command validation failed".to_string())
-          },
+          error,
           duration_ms: step_start.elapsed().as_millis() as u64,
         }
       }

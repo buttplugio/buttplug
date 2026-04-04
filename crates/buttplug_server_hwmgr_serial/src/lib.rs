@@ -12,7 +12,6 @@ mod serialport_comm_manager;
 mod serialport_hardware;
 
 pub use serialport_comm_manager::{
-  SerialPortCommunicationManager,
-  SerialPortCommunicationManagerBuilder,
+  SerialPortCommunicationManager, SerialPortCommunicationManagerBuilder,
 };
 pub use serialport_hardware::{SerialPortHardware, SerialPortHardwareConnector};

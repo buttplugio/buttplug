@@ -11,12 +11,10 @@ use super::{
   ButtplugServerResultFuture,
   device::ServerDeviceManager,
   message::{
-    ButtplugClientMessageVariant,
-    ButtplugServerMessageVariant,
+    ButtplugClientMessageVariant, ButtplugServerMessageVariant,
     server_device_attributes::TryFromClientMessage,
     spec_enums::{
-      ButtplugCheckedClientMessageV4,
-      ButtplugDeviceCommandMessageUnionV4,
+      ButtplugCheckedClientMessageV4, ButtplugDeviceCommandMessageUnionV4,
       ButtplugDeviceManagerMessageUnion,
     },
   },
@@ -26,14 +24,8 @@ use super::{
 use buttplug_core::{
   errors::*,
   message::{
-    self,
-    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-    ButtplugMessage,
-    ButtplugMessageSpecVersion,
-    ButtplugServerMessageV4,
-    ErrorV0,
-    StopCmdV4,
-    StopScanningV0,
+    self, BUTTPLUG_CURRENT_API_MAJOR_VERSION, ButtplugMessage, ButtplugMessageSpecVersion,
+    ButtplugServerMessageV4, ErrorV0, StopCmdV4, StopScanningV0,
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };

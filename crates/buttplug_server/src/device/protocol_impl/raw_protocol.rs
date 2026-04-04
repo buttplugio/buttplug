@@ -12,7 +12,6 @@ generic_protocol_setup!(RawProtocol, "raw");
 #[derive(Default)]
 pub struct RawProtocol {}
 
-impl ProtocolHandler for RawProtocol {
-}
+impl ProtocolHandler for RawProtocol {}
 
 // TODO Write tests

@@ -11,8 +11,7 @@ use buttplug_core::{
   message::{ButtplugMessage, ButtplugMessageValidator, ErrorV0},
 };
 use buttplug_server::{
-  ButtplugServer,
-  ButtplugServerBuilder,
+  ButtplugServer, ButtplugServerBuilder,
   message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant},
 };
 use futures::{FutureExt, StreamExt, future::Future, pin_mut, select};

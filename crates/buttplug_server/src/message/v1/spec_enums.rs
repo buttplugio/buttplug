@@ -8,36 +8,20 @@
 use std::cmp::Ordering;
 
 use crate::message::{
-  StopAllDevicesV0,
-  StopDeviceCmdV0,
+  StopAllDevicesV0, StopDeviceCmdV0,
   v0::{
-    ButtplugClientMessageV0,
-    ButtplugServerMessageV0,
-    FleshlightLaunchFW12CmdV0,
-    ServerInfoV0,
-    SingleMotorVibrateCmdV0,
-    VorzeA10CycloneCmdV0,
+    ButtplugClientMessageV0, ButtplugServerMessageV0, FleshlightLaunchFW12CmdV0, ServerInfoV0,
+    SingleMotorVibrateCmdV0, VorzeA10CycloneCmdV0,
   },
 };
 use buttplug_core::message::{
-  DeviceRemovedV0,
-  ErrorV0,
-  OkV0,
-  PingV0,
-  RequestDeviceListV0,
-  ScanningFinishedV0,
-  StartScanningV0,
+  DeviceRemovedV0, ErrorV0, OkV0, PingV0, RequestDeviceListV0, ScanningFinishedV0, StartScanningV0,
   StopScanningV0,
 };
 use serde::{Deserialize, Serialize};
 
 use super::{
-  DeviceAddedV1,
-  DeviceListV1,
-  LinearCmdV1,
-  RequestServerInfoV1,
-  RotateCmdV1,
-  VibrateCmdV1,
+  DeviceAddedV1, DeviceListV1, LinearCmdV1, RequestServerInfoV1, RotateCmdV1, VibrateCmdV1,
 };
 
 /// Represents all client-to-server messages in v1 of the Buttplug Spec
@@ -78,8 +62,7 @@ impl_message_enum_traits!(ButtplugClientMessageV1 {
   FleshlightLaunchFW12Cmd,
   VorzeA10CycloneCmd,
 });
-impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugClientMessageV1 {
-}
+impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugClientMessageV1 {}
 
 // No messages were changed or deprecated before v2, so we can convert all v0 messages to v1.
 impl From<ButtplugClientMessageV0> for ButtplugClientMessageV1 {
@@ -133,8 +116,7 @@ impl_message_enum_traits!(ButtplugServerMessageV1 {
   DeviceRemoved,
   ScanningFinished,
 });
-impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugServerMessageV1 {
-}
+impl buttplug_core::message::ButtplugMessageFinalizer for ButtplugServerMessageV1 {}
 
 impl From<ButtplugServerMessageV1> for ButtplugServerMessageV0 {
   fn from(value: ButtplugServerMessageV1) -> Self {

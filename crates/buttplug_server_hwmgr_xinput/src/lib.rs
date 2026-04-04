@@ -20,6 +20,5 @@ mod xinput_hardware;
 
 #[cfg(target_os = "windows")]
 pub use xinput_device_comm_manager::{
-  XInputDeviceCommunicationManager,
-  XInputDeviceCommunicationManagerBuilder,
+  XInputDeviceCommunicationManager, XInputDeviceCommunicationManagerBuilder,
 };

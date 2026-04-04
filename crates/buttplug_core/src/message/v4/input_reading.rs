@@ -87,8 +87,7 @@ impl ButtplugDeviceMessage for InputReadingV4 {
   }
 }
 
-impl ButtplugMessageValidator for InputReadingV4 {
-}
+impl ButtplugMessageValidator for InputReadingV4 {}
 
 impl InputReadingV4 {
   pub fn new(device_index: u32, feature_index: u32, data: InputTypeReading) -> Self {

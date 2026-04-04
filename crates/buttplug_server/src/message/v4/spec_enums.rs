@@ -8,36 +8,21 @@
 use std::{collections::BTreeMap, fmt::Debug, u32};
 
 use crate::message::{
-  ButtplugClientMessageVariant,
-  RequestServerInfoV1,
-  ServerDeviceAttributes,
-  StopAllDevicesV0,
-  StopDeviceCmdV0,
-  TryFromDeviceAttributes,
-  server_device_attributes::TryFromClientMessage,
-  v0::ButtplugClientMessageV0,
-  v1::ButtplugClientMessageV1,
-  v2::ButtplugClientMessageV2,
+  ButtplugClientMessageVariant, RequestServerInfoV1, ServerDeviceAttributes, StopAllDevicesV0,
+  StopDeviceCmdV0, TryFromDeviceAttributes, server_device_attributes::TryFromClientMessage,
+  v0::ButtplugClientMessageV0, v1::ButtplugClientMessageV1, v2::ButtplugClientMessageV2,
   v3::ButtplugClientMessageV3,
 };
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugClientMessageV4,
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    PingV0,
-    RequestDeviceListV0,
-    RequestServerInfoV4,
-    StartScanningV0,
-    StopCmdV4,
-    StopScanningV0,
+    ButtplugClientMessageV4, ButtplugDeviceMessage, ButtplugMessage, PingV0, RequestDeviceListV0,
+    RequestServerInfoV4, StartScanningV0, StopCmdV4, StopScanningV0,
   },
 };
 
 use super::{
-  checked_input_cmd::CheckedInputCmdV4,
-  checked_output_cmd::CheckedOutputCmdV4,
+  checked_input_cmd::CheckedInputCmdV4, checked_output_cmd::CheckedOutputCmdV4,
   checked_output_vec_cmd::CheckedOutputVecCmdV4,
 };
 

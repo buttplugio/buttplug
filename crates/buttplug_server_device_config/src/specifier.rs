@@ -401,5 +401,4 @@ impl PartialEq for ProtocolCommunicationSpecifier {
   }
 }
 
-impl Eq for ProtocolCommunicationSpecifier {
-}
+impl Eq for ProtocolCommunicationSpecifier {}

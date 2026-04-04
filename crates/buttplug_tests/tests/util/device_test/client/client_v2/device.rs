@@ -8,9 +8,7 @@
 
 use super::{
   client::{
-    ButtplugClientError,
-    ButtplugClientMessageFuturePair,
-    ButtplugClientResultFuture,
+    ButtplugClientError, ButtplugClientMessageFuturePair, ButtplugClientResultFuture,
     ButtplugServerMessageSender,
   },
   client_event_loop::ButtplugClientRequest,
@@ -22,19 +20,9 @@ use buttplug_core::{
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server::message::{
-  BatteryLevelCmdV2,
-  ButtplugClientMessageV2,
-  ButtplugDeviceMessageNameV2,
-  ButtplugServerMessageV2,
-  ClientDeviceMessageAttributesV2,
-  DeviceMessageInfoV2,
-  LinearCmdV1,
-  RotateCmdV1,
-  RotationSubcommandV1,
-  StopDeviceCmdV0,
-  VectorSubcommandV1,
-  VibrateCmdV1,
-  VibrateSubcommandV1,
+  BatteryLevelCmdV2, ButtplugClientMessageV2, ButtplugDeviceMessageNameV2, ButtplugServerMessageV2,
+  ClientDeviceMessageAttributesV2, DeviceMessageInfoV2, LinearCmdV1, RotateCmdV1,
+  RotationSubcommandV1, StopDeviceCmdV0, VectorSubcommandV1, VibrateCmdV1, VibrateSubcommandV1,
 };
 use futures::channel::oneshot;
 use futures::{Stream, future};
@@ -501,8 +489,7 @@ impl ButtplugClientDevice {
   }
 }
 
-impl Eq for ButtplugClientDevice {
-}
+impl Eq for ButtplugClientDevice {}
 
 impl PartialEq for ButtplugClientDevice {
   fn eq(&self, other: &Self) -> bool {

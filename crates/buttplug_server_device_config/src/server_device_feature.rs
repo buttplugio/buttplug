@@ -9,15 +9,10 @@ use crate::ButtplugDeviceConfigError;
 
 use buttplug_core::{
   message::{
-    DeviceFeature,
-    DeviceFeatureInput,
-    DeviceFeatureInputProperties,
-    DeviceFeatureOutput,
-    DeviceFeatureOutputHwPositionWithDurationProperties,
-    DeviceFeatureOutputValueProperties,
-    InputCommandType,
-    InputType,
-    OutputType,
+    DeviceFeature, DeviceFeatureInput, DeviceFeatureInputBuilder, DeviceFeatureInputProperties,
+    DeviceFeatureOutput, DeviceFeatureOutputBuilder,
+    DeviceFeatureOutputHwPositionWithDurationProperties, DeviceFeatureOutputValueProperties,
+    InputCommandType, InputType, OutputType,
   },
   util::{
     range::RangeInclusive,
@@ -25,8 +20,13 @@ use buttplug_core::{
   },
 };
 use enumflags2::BitFlags;
-use getset::{CopyGetters, Getters};
-use serde::{Deserialize, Serialize};
+use getset::{CopyGetters, Getters, Setters};
+use serde::{
+  Deserialize, Serialize, Serializer,
+  de::{self, Deserializer, SeqAccess, Visitor},
+  ser::SerializeSeq,
+};
+use std::{collections::HashSet, fmt};
 
 use strum_macros::{Display, EnumDiscriminants, EnumIter, EnumString};
 use uuid::Uuid;
@@ -523,8 +523,7 @@ impl PartialEq for ServerDeviceFeature {
   }
 }
 
-impl Eq for ServerDeviceFeature {
-}
+impl Eq for ServerDeviceFeature {}
 
 impl Default for ServerDeviceFeature {
   fn default() -> Self {

@@ -8,9 +8,7 @@
 //! Handling of remote message pairing and future resolution.
 
 use super::client::{
-  ButtplugClientError,
-  ButtplugClientMessageFuturePair,
-  ButtplugServerMessageSender,
+  ButtplugClientError, ButtplugClientMessageFuturePair, ButtplugServerMessageSender,
 };
 use buttplug_core::message::ButtplugMessage;
 use buttplug_server::message::ButtplugServerMessageV0;

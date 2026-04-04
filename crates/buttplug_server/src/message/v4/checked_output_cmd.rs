@@ -9,11 +9,7 @@ use crate::message::{ServerDeviceAttributes, TryFromDeviceAttributes};
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageValidator,
-    OutputCmdV4,
-    OutputCommand,
+    ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageValidator, OutputCmdV4, OutputCommand,
   },
 };
 

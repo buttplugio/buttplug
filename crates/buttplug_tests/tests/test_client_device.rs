@@ -10,20 +10,15 @@ use buttplug_client::{ButtplugClientDeviceEvent, ButtplugClientError, ButtplugCl
 use buttplug_core::{errors::ButtplugError, message::OutputType};
 use buttplug_server::device::hardware::{HardwareCommand, HardwareWriteCmd};
 use buttplug_server_device_config::{
-  Endpoint,
-  ServerDeviceDefinition,
-  ServerDeviceFeature,
-  ServerDeviceFeatureOutput,
-  UserDeviceIdentifier,
-  load_protocol_configs,
+  Endpoint, ServerDeviceDefinition, ServerDeviceFeature, ServerDeviceFeatureOutput,
+  UserDeviceIdentifier, load_protocol_configs,
 };
 use futures::StreamExt;
 use std::{collections::HashMap, sync::Arc, time::Duration};
 use tokio::time::sleep;
 use util::test_device_manager::{TestDeviceIdentifier, check_test_recv_value};
 use util::{
-  test_client_with_device,
-  test_client_with_device_and_custom_dcm,
+  test_client_with_device, test_client_with_device_and_custom_dcm,
   test_device_manager::TestHardwareEvent,
 };
 use uuid::Uuid;

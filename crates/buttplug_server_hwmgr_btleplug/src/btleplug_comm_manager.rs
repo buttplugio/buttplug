@@ -8,8 +8,7 @@
 use super::btleplug_adapter_task::{BtleplugAdapterCommand, BtleplugAdapterTask};
 use buttplug_core::{ButtplugResultFuture, errors::ButtplugDeviceError};
 use buttplug_server::device::hardware::communication::{
-  HardwareCommunicationManager,
-  HardwareCommunicationManagerBuilder,
+  HardwareCommunicationManager, HardwareCommunicationManagerBuilder,
   HardwareCommunicationManagerEvent,
 };
 use futures::future::FutureExt;

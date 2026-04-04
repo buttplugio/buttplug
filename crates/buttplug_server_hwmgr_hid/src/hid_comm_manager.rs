@@ -8,10 +8,8 @@
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::communication::{
-  HardwareCommunicationManager,
-  HardwareCommunicationManagerBuilder,
-  HardwareCommunicationManagerEvent,
-  TimedRetryCommunicationManager,
+  HardwareCommunicationManager, HardwareCommunicationManagerBuilder,
+  HardwareCommunicationManagerEvent, TimedRetryCommunicationManager,
   TimedRetryCommunicationManagerImpl,
 };
 use hidapi::HidApi;

@@ -7,16 +7,13 @@
 
 use super::{
   lovense_dongle_messages::{
-    LovenseDeviceCommand,
-    LovenseDongleIncomingMessage,
-    OutgoingLovenseData,
+    LovenseDeviceCommand, LovenseDongleIncomingMessage, OutgoingLovenseData,
   },
   lovense_dongle_state_machine::create_lovense_dongle_machine,
 };
 use buttplug_core::{ButtplugResultFuture, errors::ButtplugDeviceError};
 use buttplug_server::device::hardware::communication::{
-  HardwareCommunicationManager,
-  HardwareCommunicationManagerBuilder,
+  HardwareCommunicationManager, HardwareCommunicationManagerBuilder,
   HardwareCommunicationManagerEvent,
 };
 use futures::FutureExt;
@@ -30,8 +27,7 @@ use std::{
   thread,
 };
 use tokio::{
-  runtime,
-  select,
+  runtime, select,
   sync::{
     Mutex,
     mpsc::{Receiver, Sender, channel},
@@ -189,16 +185,22 @@ impl LovenseHIDDongleCommunicationManager {
       dongle_available,
     };
     let dongle_fut = mgr.find_dongle();
-    buttplug_core::spawn!("LovenseHIDDongleCommunicationManager find dongle", async move {
-      let _ = dongle_fut.await;
-    });
+    buttplug_core::spawn!(
+      "LovenseHIDDongleCommunicationManager find dongle",
+      async move {
+        let _ = dongle_fut.await;
+      }
+    );
     let mut machine =
       create_lovense_dongle_machine(event_sender, machine_receiver, mgr.is_scanning.clone());
-    buttplug_core::spawn!("LovenseHIDDongleCommunicationManager state machine", async move {
-      while let Some(next) = machine.transition().await {
-        machine = next;
+    buttplug_core::spawn!(
+      "LovenseHIDDongleCommunicationManager state machine",
+      async move {
+        while let Some(next) = machine.transition().await {
+          machine = next;
+        }
       }
-    });
+    );
     mgr
   }
 

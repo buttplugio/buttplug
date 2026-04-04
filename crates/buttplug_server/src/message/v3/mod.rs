@@ -18,8 +18,7 @@ mod server_device_message_attributes;
 mod spec_enums;
 
 pub use client_device_message_attributes::{
-  ClientDeviceMessageAttributesV3,
-  ClientGenericDeviceMessageAttributesV3,
+  ClientDeviceMessageAttributesV3, ClientGenericDeviceMessageAttributesV3,
   SensorDeviceMessageAttributesV3,
 };
 pub use device_added::DeviceAddedV3;
@@ -31,12 +30,9 @@ pub use sensor_reading::SensorReadingV3;
 pub use sensor_subscribe_cmd::SensorSubscribeCmdV3;
 pub use sensor_unsubscribe_cmd::SensorUnsubscribeCmdV3;
 pub use server_device_message_attributes::{
-  ServerDeviceMessageAttributesV3,
-  ServerGenericDeviceMessageAttributesV3,
+  ServerDeviceMessageAttributesV3, ServerGenericDeviceMessageAttributesV3,
   ServerSensorDeviceMessageAttributesV3,
 };
 pub use spec_enums::{
-  ButtplugClientMessageV3,
-  ButtplugDeviceMessageNameV3,
-  ButtplugServerMessageV3,
+  ButtplugClientMessageV3, ButtplugDeviceMessageNameV3, ButtplugServerMessageV3,
 };
