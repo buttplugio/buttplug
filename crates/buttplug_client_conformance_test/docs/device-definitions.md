@@ -171,10 +171,10 @@ After sending `StartScanning`, the client receives a complete DeviceList with al
     "DeviceName": "Conformance Test Vibrator",
     "DeviceMessageTimingGap": 0,
     "DeviceFeatures": {
-      "0": {"FeatureIndex": 0, "FeatureType": "Vibrate"},
-      "1": {"FeatureIndex": 1, "FeatureType": "Vibrate"},
-      "2": {"FeatureIndex": 2, "FeatureType": "Rotate"},
-      "3": {"FeatureIndex": 3, "FeatureType": "Battery"}
+      "0": {"FeatureIndex": 0, "FeatureDescription": "Vibrator 1", "Output": {"Vibrate": [[0, 100]]}},
+      "1": {"FeatureIndex": 1, "FeatureDescription": "Vibrator 2", "Output": {"Vibrate": [[0, 100]]}},
+      "2": {"FeatureIndex": 2, "FeatureDescription": "Rotator", "Output": {"Rotate": [[-100, 100]]}},
+      "3": {"FeatureIndex": 3, "FeatureDescription": "Battery", "Input": {"Battery": {"Value": [[0, 100]], "Command": ["Read"]}}}
     }
   },
   "1": {
@@ -182,10 +182,10 @@ After sending `StartScanning`, the client receives a complete DeviceList with al
     "DeviceName": "Conformance Test Positioner",
     "DeviceMessageTimingGap": 0,
     "DeviceFeatures": {
-      "0": {"FeatureIndex": 0, "FeatureType": "Position"},
-      "1": {"FeatureIndex": 1, "FeatureType": "HwPositionWithDuration"},
-      "2": {"FeatureIndex": 2, "FeatureType": "Oscillate"},
-      "3": {"FeatureIndex": 3, "FeatureType": "Button"}
+      "0": {"FeatureIndex": 0, "FeatureDescription": "Position", "Output": {"Position": [[0, 100]]}},
+      "1": {"FeatureIndex": 1, "FeatureDescription": "Position w/ Duration", "Output": {"HwPositionWithDuration": {"Value": [[0, 100]], "Duration": [[0, 10000]]}}},
+      "2": {"FeatureIndex": 2, "FeatureDescription": "Oscillator", "Output": {"Oscillate": [[0, 100]]}},
+      "3": {"FeatureIndex": 3, "FeatureDescription": "Button", "Input": {"Button": {"Value": [[0, 1]], "Command": ["Subscribe", "Unsubscribe"]}}}
     }
   },
   "2": {
@@ -193,12 +193,12 @@ After sending `StartScanning`, the client receives a complete DeviceList with al
     "DeviceName": "Conformance Test Multi",
     "DeviceMessageTimingGap": 0,
     "DeviceFeatures": {
-      "0": {"FeatureIndex": 0, "FeatureType": "Constrict"},
-      "1": {"FeatureIndex": 1, "FeatureType": "Spray"},
-      "2": {"FeatureIndex": 2, "FeatureType": "Temperature"},
-      "3": {"FeatureIndex": 3, "FeatureType": "Led"},
-      "4": {"FeatureIndex": 4, "FeatureType": "Rssi"},
-      "5": {"FeatureIndex": 5, "FeatureType": "Pressure"}
+      "0": {"FeatureIndex": 0, "FeatureDescription": "Constrictor", "Output": {"Constrict": [[0, 100]]}},
+      "1": {"FeatureIndex": 1, "FeatureDescription": "Sprayer", "Output": {"Spray": [[0, 100]]}},
+      "2": {"FeatureIndex": 2, "FeatureDescription": "Heater", "Output": {"Temperature": [[-100, 100]]}},
+      "3": {"FeatureIndex": 3, "FeatureDescription": "LED", "Output": {"Led": [[0, 100]]}},
+      "4": {"FeatureIndex": 4, "FeatureDescription": "RSSI", "Input": {"Rssi": {"Value": [[-128, 0]], "Command": ["Read"]}}},
+      "5": {"FeatureIndex": 5, "FeatureDescription": "Pressure", "Input": {"Pressure": {"Value": [[0, 65535]], "Command": ["Subscribe", "Unsubscribe"]}}}
     }
   }
 }}}]

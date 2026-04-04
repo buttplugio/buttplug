@@ -154,7 +154,7 @@ All messages are wrapped in JSON arrays and sent over WebSocket text frames. Fie
 
 **Client sends:**
 ```json
-[{"OutputCmd": {"Id": 9, "DeviceIndex": 1, "FeatureIndex": 1, "Command": {"HwPositionWithDuration": {"Value": 500, "Duration": 1000}}}}]
+[{"OutputCmd": {"Id": 9, "DeviceIndex": 1, "FeatureIndex": 1, "Command": {"HwPositionWithDuration": {"Value": 75, "Duration": 1000}}}}]
 ```
 
 **Server responds:**

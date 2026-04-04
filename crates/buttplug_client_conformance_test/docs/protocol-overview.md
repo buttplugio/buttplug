@@ -67,7 +67,7 @@ If `MaxPingTime` == 0:
 ```json
 ← [{"StartScanning": {"Id": 2}}]
 → [{"Ok": {"Id": 2}}]
-→ [{"DeviceList": {"Id": 1, "Devices": {...}}}]  (when scan completes)
+→ [{"DeviceList": {"Id": 0, "Devices": {...}}}]  (unsolicited after scan completes)
 → [{"ScanningFinished": {"Id": 0}}]
 ```
 
@@ -269,8 +269,16 @@ List of connected devices. Sent after `StartScanning` completes or in response t
         "DeviceDisplayName": null,
         "DeviceMessageTimingGap": 0,
         "DeviceFeatures": {
-          "0": {"FeatureIndex": 0, "FeatureType": "Vibrate"},
-          "1": {"FeatureIndex": 1, "FeatureType": "Vibrate"}
+          "0": {
+            "FeatureIndex": 0,
+            "FeatureDescription": "Vibrator 1",
+            "Output": {"Vibrate": [[0, 100]]}
+          },
+          "1": {
+            "FeatureIndex": 1,
+            "FeatureDescription": "Vibrator 2",
+            "Output": {"Vibrate": [[0, 100]]}
+          }
         }
       }
     }
@@ -280,7 +288,7 @@ List of connected devices. Sent after `StartScanning` completes or in response t
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `Id` | u32 | Matches request ID |
+| `Id` | u32 | Matches request ID (or 0 for unsolicited messages) |
 | `Devices` | object | Map of device index → device info |
 
 **Device Info Fields:**
@@ -288,11 +296,18 @@ List of connected devices. Sent after `StartScanning` completes or in response t
 - `DeviceName` (string) — Internal name (immutable)
 - `DeviceDisplayName` (string or null) — User-facing name
 - `DeviceMessageTimingGap` (u32) — Milliseconds to wait between commands (0 = no gap)
-- `DeviceFeatures` (object) — Map of feature index → feature type
+- `DeviceFeatures` (object) — Map of feature index → feature info
 
 **Feature Info Fields:**
 - `FeatureIndex` (u32) — Feature identifier within device
-- `FeatureType` (string) — Type of feature (`Vibrate`, `Rotate`, `Output`, `Input`, etc.)
+- `FeatureDescription` (string) — Human-readable feature name
+- `Output` (object, optional) — Output capabilities with type-keyed properties
+- `Input` (object, optional) — Input capabilities with type-keyed properties
+
+Output/Input objects have type names as keys (e.g., `Vibrate`, `Battery`) with nested properties:
+- Output types (e.g., `Vibrate`): `[[min, max]]` — range array for value
+- HwPositionWithDuration: `{"Value": [[min, max]], "Duration": [[min, max]]}`
+- Input types (e.g., `Battery`): `{"Value": [[min, max]], "Command": [list of commands]}` — ranges and supported commands
 
 ### ScanningFinished (Server → Client)
 
@@ -535,7 +550,7 @@ Always check responses for errors before assuming success.
 
 → [{"StartScanning": {"Id": 2}}]
 ← [{"Ok": {"Id": 2}}]
-← [{"DeviceList": {"Id": 1, "Devices": {"0": {"DeviceIndex": 0, "DeviceName": "Device1", ...}}}}]
+← [{"DeviceList": {"Id": 0, "Devices": {"0": {"DeviceIndex": 0, "DeviceName": "Device1", ...}}}}]
 ← [{"ScanningFinished": {"Id": 0}}]
 
 → [{"OutputCmd": {"Id": 3, "DeviceIndex": 0, "FeatureIndex": 0, "Command": {"Vibrate": {"Value": 75}}}}]
