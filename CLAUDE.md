@@ -42,10 +42,16 @@ Buttplug is a framework for interfacing with intimate hardware devices. It uses 
 - `xinput` - Windows gamepad vibration
 - `websocket` - WebSocket device forwarders
 
+**Testing:**
+- `buttplug_client_conformance_test` - Conformance test harness for validating client implementations over WebSocket
+
 **Infrastructure:**
 - `buttplug_server_device_config` - Device configuration database
 - `buttplug_transport_websocket_tungstenite` - WebSocket transport
 - `intiface_engine` - CLI frontend for running servers
+
+**Feature Flags:**
+- `buttplug_server` has a `conformance-test` feature that registers a simulated "Conformance" protocol for testing
 
 ### Key Patterns
 
