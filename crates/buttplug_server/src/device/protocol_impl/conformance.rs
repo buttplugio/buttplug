@@ -198,7 +198,7 @@ impl ProtocolHandler for Conformance {
     &self,
     _device_index: u32,
     device: Arc<Hardware>,
-    feature_index: u32,
+    _feature_index: u32,
     feature_id: Uuid,
     sensor_type: InputType,
   ) -> BoxFuture<'_, Result<InputReadingV4, ButtplugDeviceError>> {
