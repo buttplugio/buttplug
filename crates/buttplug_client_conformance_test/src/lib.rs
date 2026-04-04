@@ -7,5 +7,8 @@
 
 pub mod device_definitions;
 pub mod device_manager;
+pub mod report;
+pub mod runner;
 pub mod server;
 pub mod simulated_device;
+pub mod step;

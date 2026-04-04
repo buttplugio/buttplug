@@ -34,3 +34,5 @@ uuid = { version = "1", features = ["v4"] }
 buttplug_client = { version = "10.0.2", path = "../buttplug_client" }
 buttplug_client_in_process = { version = "10.0.2", path = "../buttplug_client_in_process" }
 tokio = { version = "1.50.0", features = ["macros", "rt-multi-thread"] }
+tokio-tungstenite = "0.29.0"
+futures-util = "0.3.32"
