@@ -32,7 +32,7 @@ The binary is available at `./target/release/buttplug-client-conformance-test`.
 
 This starts the server and runs all sequences sequentially. For each sequence:
 1. Server prints the sequence name and waits for a connection
-2. Connect your client to `ws://127.0.0.1:19999`
+2. Connect your client to `ws://127.0.0.1:12345`
 3. Client is driven through the test steps
 4. Server disconnects after sequence completes
 5. Server moves to next sequence
@@ -57,7 +57,7 @@ Available sequences: `core_protocol`, `ping_required`, `error_handling`, `ping_t
 ./target/release/buttplug-client-conformance-test --format json
 ```
 
-Outputs results as JSON for automated CI/CD pipelines.
+Outputs results as JSON for automated CI/CD pipelines. Format options are `stdout` (default) or `json`.
 
 ## How It Works
 
@@ -96,16 +96,25 @@ Each sequence is independent and can be run separately.
 
 ## CLI Options
 
-```
-USAGE:
-    buttplug-client-conformance-test [OPTIONS]
+The harness accepts the following command-line options:
 
-OPTIONS:
-    -h, --help                     Print help information
-    -s, --sequence <SEQUENCE>      Run a specific sequence (core_protocol, ping_required, error_handling, ping_timeout, reconnection)
-    -p, --port <PORT>              WebSocket server port (default: 19999)
-    -f, --format <FORMAT>          Output format: human (default) or json
-    --no-color                     Disable colored output
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--port <PORT>` | `12345` | WebSocket server listen port |
+| `--sequence <SEQUENCE>` | (all) | Run only the named sequence |
+| `--format <FORMAT>` | `stdout` | Output format: `stdout` or `json` |
+| `--timeout <MILLISECONDS>` | `5000` | Default per-step timeout |
+
+**Examples:**
+```bash
+# Run on a different port
+./target/release/buttplug-client-conformance-test --port 20000
+
+# Run only the core_protocol sequence with JSON output
+./target/release/buttplug-client-conformance-test --sequence core_protocol --format json
+
+# Increase timeout to 10 seconds
+./target/release/buttplug-client-conformance-test --timeout 10000
 ```
 
 ## Output Formats
@@ -114,7 +123,7 @@ OPTIONS:
 
 ```
 Running sequence: core_protocol
-Waiting for client connection on ws://127.0.0.1:19999...
+Waiting for client connection on ws://127.0.0.1:12345...
 Client connected
 Step 1: Client sends RequestServerInfo
   ✓ PASS: Server responds with ServerInfo
@@ -160,7 +169,7 @@ Sequence passed: core_protocol
 
 1. Implement your Buttplug client
 2. Run the conformance harness: `./target/release/buttplug-client-conformance-test`
-3. Connect your client to `ws://127.0.0.1:19999`
+3. Connect your client to `ws://127.0.0.1:12345`
 4. If tests fail, check the error message and the documentation
 5. Fix your client and reconnect
 6. Repeat until all sequences pass
