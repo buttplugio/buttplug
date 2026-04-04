@@ -60,6 +60,9 @@ pub enum SideEffect {
   CloseConnection,
   /// Wait a fixed duration
   Delay { ms: u64 },
+  /// Shut down current server and transport, rebuild fresh on same port.
+  /// Used by reconnection sequence to test client reconnection after server restart.
+  RebuildServer,
 }
 
 /// Result of a single test step

@@ -6,10 +6,18 @@
 // for full license information.
 
 pub mod core_protocol;
+pub mod ping_required;
+pub mod error_handling;
+pub mod ping_timeout;
 
 use crate::step::TestSequence;
 
 /// Returns all available test sequences.
 pub fn all_sequences() -> Vec<TestSequence> {
-  vec![core_protocol::core_protocol_sequence()]
+  vec![
+    core_protocol::core_protocol_sequence(),
+    ping_required::ping_required_sequence(),
+    error_handling::error_handling_sequence(),
+    ping_timeout::ping_timeout_sequence(),
+  ]
 }

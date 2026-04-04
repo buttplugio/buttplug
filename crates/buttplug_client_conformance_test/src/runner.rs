@@ -185,6 +185,11 @@ pub async fn run_sequence(
           debug!("Delaying {} ms", ms);
           tokio::time::sleep(std::time::Duration::from_millis(*ms)).await;
         }
+        SideEffect::RebuildServer => {
+          debug!("RebuildServer side effect not yet implemented");
+          // This will be implemented when needed for the reconnection sequence (Task 4-5)
+          // For now, this is a no-op to satisfy the match
+        }
       }
     }
 
