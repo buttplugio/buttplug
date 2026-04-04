@@ -3,6 +3,7 @@ resolver = "3"
 members = [
     "crates/buttplug",
     "crates/buttplug_client",
+    "crates/buttplug_client_conformance_test",
     "crates/buttplug_client_in_process",
     "crates/buttplug_core",
     "crates/buttplug_server",
