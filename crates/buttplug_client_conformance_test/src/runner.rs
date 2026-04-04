@@ -25,7 +25,7 @@ use tracing::{debug, error, info};
 pub async fn run_sequence(
   sequence: &TestSequence,
   port: u16,
-  _default_timeout_ms: u64,
+  __default_timeout_ms: u64,
 ) -> SequenceResult {
   let sequence_name = sequence.name.to_string();
   let mut steps = Vec::new();
