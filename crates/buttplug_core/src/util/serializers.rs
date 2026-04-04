@@ -21,7 +21,7 @@ pub mod bitflags_seq {
     S: Serializer,
     T: BitFlag + Serialize,
   {
-    let mut seq = serializer.serialize_seq(None)?;
+    let mut seq = serializer.serialize_seq(Some(flags.len()))?;
     for flag in flags.iter() {
       seq.serialize_element(&flag)?;
     }

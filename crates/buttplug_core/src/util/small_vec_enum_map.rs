@@ -7,6 +7,12 @@
 //!
 //! With `N = 1`, no heap allocation is needed when a single variant is present — the common case.
 //!
+//! # Format selection
+//! When the serializer/deserializer is **human-readable** (e.g. JSON), the map-with-string-keys
+//! format is used. For **binary** formats (e.g. postcard), a plain sequence is used instead:
+//! each element is serialized using serde's standard externally-tagged enum representation
+//! (`u32` variant index + value), which avoids all string allocations and is more compact.
+//!
 //! # Constraints
 //! `V` must be an enum where every active variant is a newtype variant (single unnamed field).
 //! Unit, tuple, and struct variants are not supported and will return a serde error at runtime.
@@ -17,8 +23,8 @@ use serde::{
   Deserializer,
   Serialize,
   Serializer,
-  de::{MapAccess, Visitor},
-  ser::SerializeMap,
+  de::{MapAccess, SeqAccess, Visitor},
+  ser::{SerializeMap, SerializeSeq},
 };
 use smallvec::SmallVec;
 use std::ops::{Deref, DerefMut};
@@ -116,14 +122,25 @@ where
   where
     S: Serializer,
   {
-    let mut map = serializer.serialize_map(Some(self.0.len()))?;
-    for v in &self.0 {
-      // Route each element through MapEntrySerializer, which intercepts the
-      // serialize_newtype_variant call that serde generates for enum variants
-      // and writes it directly as a map key-value pair.
-      v.serialize(MapEntrySerializer { map: &mut map })?;
+    if serializer.is_human_readable() {
+      // Human-readable (e.g. JSON): map with string variant-name keys.
+      let mut map = serializer.serialize_map(Some(self.0.len()))?;
+      for v in &self.0 {
+        // Route each element through MapEntrySerializer, which intercepts the
+        // serialize_newtype_variant call that serde generates for enum variants
+        // and writes it directly as a map key-value pair.
+        v.serialize(MapEntrySerializer { map: &mut map })?;
+      }
+      map.end()
+    } else {
+      // Binary (e.g. postcard): plain sequence of externally-tagged enum values.
+      // Each element is encoded as (u32 variant_index, payload) — no string keys.
+      let mut seq = serializer.serialize_seq(Some(self.0.len()))?;
+      for v in &self.0 {
+        seq.serialize_element(v)?;
+      }
+      seq.end()
     }
-    map.end()
   }
 }
 
@@ -275,9 +292,9 @@ where
   where
     D: Deserializer<'de>,
   {
-    struct SmallVecEnumMapVisitor<V, const N: usize>(std::marker::PhantomData<[V; N]>);
+    struct SmallVecEnumMapMapVisitor<V, const N: usize>(std::marker::PhantomData<[V; N]>);
 
-    impl<'de, V, const N: usize> Visitor<'de> for SmallVecEnumMapVisitor<V, N>
+    impl<'de, V, const N: usize> Visitor<'de> for SmallVecEnumMapMapVisitor<V, N>
     where
       V: Deserialize<'de>,
     {
@@ -303,7 +320,35 @@ where
       }
     }
 
-    deserializer.deserialize_map(SmallVecEnumMapVisitor(std::marker::PhantomData))
+    struct SmallVecEnumMapSeqVisitor<V, const N: usize>(std::marker::PhantomData<[V; N]>);
+
+    impl<'de, V, const N: usize> Visitor<'de> for SmallVecEnumMapSeqVisitor<V, N>
+    where
+      V: Deserialize<'de>,
+    {
+      type Value = SmallVecEnumMap<V, N>;
+
+      fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("a sequence that can be converted into a SmallVecEnumMap")
+      }
+
+      fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+      where
+        A: SeqAccess<'de>,
+      {
+        let mut smallvec = SmallVec::new();
+        while let Some(v) = seq.next_element::<V>()? {
+          smallvec.push(v);
+        }
+        Ok(SmallVecEnumMap(smallvec))
+      }
+    }
+
+    if deserializer.is_human_readable() {
+      deserializer.deserialize_map(SmallVecEnumMapMapVisitor(std::marker::PhantomData))
+    } else {
+      deserializer.deserialize_seq(SmallVecEnumMapSeqVisitor(std::marker::PhantomData))
+    }
   }
 }
 
