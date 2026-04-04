@@ -6,10 +6,9 @@
 // for full license information.
 
 use buttplug_server_device_config::{
-  BaseDeviceIdentifier, Endpoint, ProtocolCommunicationSpecifier, ServerDeviceDefinition,
-  ServerDeviceDefinitionBuilder, ServerDeviceFeature, ServerDeviceFeatureInput,
-  ServerDeviceFeatureOutput, ServerDeviceFeatureOutputValueProperties, RangeWithLimit,
-  BluetoothLESpecifier,
+  BaseDeviceIdentifier, BluetoothLESpecifier, Endpoint, ProtocolCommunicationSpecifier,
+  RangeWithLimit, ServerDeviceDefinition, ServerDeviceDefinitionBuilder, ServerDeviceFeature,
+  ServerDeviceFeatureInput, ServerDeviceFeatureOutput, ServerDeviceFeatureOutputValueProperties,
 };
 use std::collections::HashMap;
 use uuid::Uuid;
@@ -43,7 +42,7 @@ fn create_test_vibrator() -> ConformanceDeviceDef {
   let name = "Conformance Test Vibrator";
   let address = "test-vibrator-0".to_string();
   let endpoints = vec![Endpoint::Tx, Endpoint::RxBLEBattery];
-  let base_id = BaseDeviceIdentifier::new_default("conformance");
+  let base_id = BaseDeviceIdentifier::new_with_identifier("conformance", name);
   let device_id = Uuid::new_v4();
 
   let mut features = Vec::new();
@@ -144,7 +143,7 @@ fn create_test_positioner() -> ConformanceDeviceDef {
   let name = "Conformance Test Positioner";
   let address = "test-positioner-1".to_string();
   let endpoints = vec![Endpoint::Tx, Endpoint::Generic1]; // Generic1 = Button
-  let base_id = BaseDeviceIdentifier::new_default("conformance");
+  let base_id = BaseDeviceIdentifier::new_with_identifier("conformance", name);
   let device_id = Uuid::new_v4();
 
   let mut features = Vec::new();
@@ -254,7 +253,7 @@ fn create_test_multi() -> ConformanceDeviceDef {
   let name = "Conformance Test Multi";
   let address = "test-multi-2".to_string();
   let endpoints = vec![Endpoint::Tx, Endpoint::Generic0, Endpoint::Generic2]; // Generic0 = Rssi, Generic2 = Pressure
-  let base_id = BaseDeviceIdentifier::new_default("conformance");
+  let base_id = BaseDeviceIdentifier::new_with_identifier("conformance", name);
   let device_id = Uuid::new_v4();
 
   let mut features = Vec::new();

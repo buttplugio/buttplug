@@ -9,8 +9,8 @@ use crate::device_definitions::conformance_device_definitions;
 use crate::device_manager::{
   ConformanceDeviceCommunicationManagerBuilder, ConformanceDeviceHandle,
 };
-use buttplug_server::{ButtplugServer, ButtplugServerBuilder, ButtplugServerError};
 use buttplug_server::device::ServerDeviceManagerBuilder;
+use buttplug_server::{ButtplugServer, ButtplugServerBuilder, ButtplugServerError};
 use buttplug_server_device_config::load_protocol_configs;
 
 /// Builds a ButtplugServer with the conformance device manager and test devices
@@ -31,7 +31,8 @@ pub fn build_conformance_server(
   }
 
   // Finish the DCM
-  let dcm = dcm_builder.finish()
+  let dcm = dcm_builder
+    .finish()
     .map_err(|e| ButtplugServerError::DeviceConfigurationManagerError(e))?;
 
   // Create the conformance device communication manager and add devices

@@ -135,7 +135,6 @@ async fn test_conformance_device_count_and_handle_access() {
 }
 
 #[tokio::test]
-#[ignore]
 async fn test_conformance_vibrate_captured() {
   // Build conformance server and get device handles
   let (server, handles) = build_conformance_server(0).expect("Failed to build conformance server");
@@ -157,22 +156,17 @@ async fn test_conformance_vibrate_captured() {
     .await
     .expect("Failed to start scanning");
 
-  // Wait for the vibrator device to appear and send vibrate command
+  // Wait for the vibrator device to appear and send vibrate command.
+  // Note: ScanningFinished can arrive before DeviceAdded because device identification
+  // is async — keep listening through ScanningFinished until we find the vibrator or timeout.
   let sent_cmd = timeout(Duration::from_secs(5), async {
     while let Some(event) = event_stream.next().await {
-      match event {
-        buttplug_client::ButtplugClientEvent::DeviceAdded(dev) => {
-          if dev.name() == "Conformance Test Vibrator" {
-            // Send vibrate command with value 75
-            let cmd = ClientDeviceOutputCommand::Vibrate(ClientDeviceCommandValue::Steps(75));
-            return dev.run_output(&cmd).await.is_ok();
-          }
+      if let buttplug_client::ButtplugClientEvent::DeviceAdded(dev) = event {
+        if dev.name() == "Conformance Test Vibrator" {
+          // Send vibrate command with value 75
+          let cmd = ClientDeviceOutputCommand::Vibrate(ClientDeviceCommandValue::Steps(75));
+          return dev.run_output(&cmd).await.is_ok();
         }
-        buttplug_client::ButtplugClientEvent::ScanningFinished => {
-          // If we get here without finding the device, return false
-          return false;
-        }
-        _ => {}
       }
     }
     false
@@ -197,21 +191,23 @@ async fn test_conformance_vibrate_captured() {
     "Expected at least one write command, but write_log is empty"
   );
 
-  // Get the last command (most recent vibrate)
-  let last_cmd = &write_log[write_log.len() - 1];
+  // Both vibrate features (index 0 and 1) should have been written.
+  // Check the first write corresponds to feature_index 0 with value 75.
+  let first_cmd = &write_log[0];
 
   // Expected format: [feature_index (u8), value_as_le_i32 (4 bytes)]
   let expected_value = (75i32).to_le_bytes().to_vec();
   let expected_data = [vec![0u8], expected_value].concat(); // feature_index 0
 
   assert_eq!(
-    last_cmd.data(),
+    first_cmd.data(),
     &expected_data,
-    "Vibrate command data does not match expected format"
+    "Vibrate command data does not match expected format (got {:?})",
+    first_cmd.data()
   );
 
   assert_eq!(
-    last_cmd.endpoint(),
+    first_cmd.endpoint(),
     Endpoint::Tx,
     "Vibrate command not on Tx endpoint"
   );
