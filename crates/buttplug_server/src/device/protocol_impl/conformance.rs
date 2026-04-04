@@ -13,8 +13,7 @@ use crate::device::{
   protocol::{ProtocolHandler, generic_protocol_setup},
 };
 use buttplug_core::errors::ButtplugDeviceError;
-use buttplug_core::message::InputType;
-use buttplug_core::message::InputReadingV4;
+use buttplug_core::message::{InputReadingV4, InputType, InputValue};
 use buttplug_server_device_config::Endpoint;
 use futures::{FutureExt, future::BoxFuture};
 
@@ -196,9 +195,9 @@ impl ProtocolHandler for Conformance {
 
   fn handle_input_read_cmd(
     &self,
-    _device_index: u32,
+    device_index: u32,
     device: Arc<Hardware>,
-    _feature_index: u32,
+    feature_index: u32,
     feature_id: Uuid,
     sensor_type: InputType,
   ) -> BoxFuture<'_, Result<InputReadingV4, ButtplugDeviceError>> {
@@ -213,11 +212,40 @@ impl ProtocolHandler for Conformance {
     let msg = HardwareReadCmd::new(feature_id, endpoint, 1, 0);
     let fut = device.read_value(&msg);
     async move {
-      let _hw_msg = fut.await?;
-      // For conformance testing, we just return a dummy reading
-      // The actual value handling is done by the simulated device
-      Err(ButtplugDeviceError::UnhandledCommand(
-        "Command not implemented for this protocol: InputCmd (Read)".to_string(),
+      let hw_msg = fut.await?;
+      // Convert the hardware reading into an InputReadingV4
+      // Extract the value from the hardware reading data
+      let value = if !hw_msg.data().is_empty() {
+        hw_msg.data()[0] as i32
+      } else {
+        0
+      };
+
+      // Build the reading based on sensor type
+      let input_type_reading = match sensor_type {
+        InputType::Battery => {
+          buttplug_core::message::InputTypeReading::Battery(InputValue::new(value as u8))
+        }
+        InputType::Rssi => {
+          buttplug_core::message::InputTypeReading::Rssi(InputValue::new(value as i8))
+        }
+        InputType::Button => {
+          buttplug_core::message::InputTypeReading::Button(InputValue::new(value as u8))
+        }
+        InputType::Pressure => {
+          buttplug_core::message::InputTypeReading::Pressure(InputValue::new(value as u32))
+        }
+        InputType::Depth | InputType::Position | InputType::Unknown => {
+          return Err(ButtplugDeviceError::UnhandledCommand(
+            format!("Sensor type not supported: {:?}", sensor_type),
+          ));
+        }
+      };
+
+      Ok(InputReadingV4::new(
+        device_index,
+        feature_index,
+        input_type_reading,
       ))
     }
     .boxed()
