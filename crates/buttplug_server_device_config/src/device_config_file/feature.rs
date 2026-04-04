@@ -5,7 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use std::ops::RangeInclusive;
+use buttplug_core::{
+  message::OutputType,
+  util::{
+    range::RangeInclusive,
+    small_vec_enum_map::{SmallVecEnumMap, VariantKey},
+  },
+};
 
 use crate::{
   ButtplugDeviceConfigError,
@@ -17,7 +23,6 @@ use crate::{
   ServerDeviceFeatureOutputPositionProperties,
   ServerDeviceFeatureOutputValueProperties,
 };
-use buttplug_core::util::range_serialize::option_range_serialize;
 use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -37,10 +42,7 @@ impl BaseFeatureSettings {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct UserDeviceFeatureOutputValueProperties {
-  #[serde(
-    skip_serializing_if = "Option::is_none",
-    serialize_with = "option_range_serialize"
-  )]
+  #[serde(skip_serializing_if = "Option::is_none")]
   value: Option<RangeInclusive<u32>>,
   #[serde(default)]
   disabled: bool,
@@ -51,9 +53,8 @@ impl UserDeviceFeatureOutputValueProperties {
     &self,
     base: &ServerDeviceFeatureOutputValueProperties,
   ) -> Result<ServerDeviceFeatureOutputValueProperties, ButtplugDeviceConfigError> {
-    let range = RangeWithLimit::try_new(base.value().base(), &self.value)?;
     Ok(ServerDeviceFeatureOutputValueProperties::new(
-      &range,
+      RangeWithLimit::try_new(base.value.base, self.value)?,
       self.disabled,
     ))
   }
@@ -62,18 +63,15 @@ impl UserDeviceFeatureOutputValueProperties {
 impl From<&ServerDeviceFeatureOutputValueProperties> for UserDeviceFeatureOutputValueProperties {
   fn from(value: &ServerDeviceFeatureOutputValueProperties) -> Self {
     Self {
-      value: value.value().user().clone(),
-      disabled: value.disabled(),
+      value: value.value.user,
+      disabled: value.disabled,
     }
   }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct UserDeviceFeatureOutputPositionProperties {
-  #[serde(
-    skip_serializing_if = "Option::is_none",
-    serialize_with = "option_range_serialize"
-  )]
+  #[serde(skip_serializing_if = "Option::is_none")]
   value: Option<RangeInclusive<u32>>,
   #[serde(default)]
   disabled: bool,
@@ -86,9 +84,8 @@ impl UserDeviceFeatureOutputPositionProperties {
     &self,
     base: &ServerDeviceFeatureOutputPositionProperties,
   ) -> Result<ServerDeviceFeatureOutputPositionProperties, ButtplugDeviceConfigError> {
-    let value = RangeWithLimit::try_new(base.value().base(), &self.value)?;
     Ok(ServerDeviceFeatureOutputPositionProperties::new(
-      &value,
+      RangeWithLimit::try_new(base.value.base, self.value)?,
       self.disabled,
       self.reverse,
     ))
@@ -100,24 +97,18 @@ impl From<&ServerDeviceFeatureOutputPositionProperties>
 {
   fn from(value: &ServerDeviceFeatureOutputPositionProperties) -> Self {
     Self {
-      value: value.value().user().clone(),
-      reverse: value.reverse_position(),
-      disabled: value.disabled(),
+      value: value.value.user,
+      reverse: value.reverse_position,
+      disabled: value.disabled,
     }
   }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct UserDeviceFeatureOutputHwPositionWithDurationProperties {
-  #[serde(
-    skip_serializing_if = "Option::is_none",
-    serialize_with = "option_range_serialize"
-  )]
+  #[serde(skip_serializing_if = "Option::is_none")]
   value: Option<RangeInclusive<u32>>,
-  #[serde(
-    skip_serializing_if = "Option::is_none",
-    serialize_with = "option_range_serialize"
-  )]
+  #[serde(skip_serializing_if = "Option::is_none")]
   duration: Option<RangeInclusive<u32>>,
   #[serde(default)]
   disabled: bool,
@@ -131,12 +122,10 @@ impl UserDeviceFeatureOutputHwPositionWithDurationProperties {
     base: &ServerDeviceFeatureOutputHwPositionWithDurationProperties,
   ) -> Result<ServerDeviceFeatureOutputHwPositionWithDurationProperties, ButtplugDeviceConfigError>
   {
-    let value = RangeWithLimit::try_new(base.value().base(), &self.value)?;
-    let duration = RangeWithLimit::try_new(base.duration().base(), &self.duration)?;
     Ok(
       ServerDeviceFeatureOutputHwPositionWithDurationProperties::new(
-        &value,
-        &duration,
+        RangeWithLimit::try_new(base.value.base, self.value)?,
+        RangeWithLimit::try_new(base.duration.base, self.duration)?,
         self.disabled,
         self.reverse,
       ),
@@ -149,89 +138,105 @@ impl From<&ServerDeviceFeatureOutputHwPositionWithDurationProperties>
 {
   fn from(value: &ServerDeviceFeatureOutputHwPositionWithDurationProperties) -> Self {
     Self {
-      value: value.value().user().clone(),
-      duration: value.duration().user().clone(),
-      reverse: value.reverse_position(),
-      disabled: value.disabled(),
+      value: value.value.user,
+      duration: value.duration.user,
+      reverse: value.reverse_position,
+      disabled: value.disabled,
     }
   }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-struct UserDeviceFeatureOutput {
-  #[serde(skip_serializing_if = "Option::is_none")]
-  vibrate: Option<UserDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  rotate: Option<UserDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  oscillate: Option<UserDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  constrict: Option<UserDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  temperature: Option<UserDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  led: Option<UserDeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  position: Option<UserDeviceFeatureOutputPositionProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  hw_position_with_duration: Option<UserDeviceFeatureOutputHwPositionWithDurationProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  spray: Option<UserDeviceFeatureOutputValueProperties>,
-}
-
-/// Macro to apply user overrides to base output fields.
-/// If base has the field, applies user override if present, otherwise keeps base value.
-macro_rules! merge_output_field {
-  ($output:expr, $base:expr, $user:expr, $field:ident, $setter:ident) => {
-    if let Some(base_val) = $base.$field() {
-      if let Some(user_val) = &$user.$field {
-        $output.$setter(Some(user_val.with_base_properties(base_val)?));
-      } else {
-        $output.$setter(Some(base_val.clone()));
-      }
-    }
-  };
+#[serde(rename_all = "snake_case")]
+enum UserDeviceFeatureOutput {
+  Vibrate(UserDeviceFeatureOutputValueProperties),
+  Rotate(UserDeviceFeatureOutputValueProperties),
+  Oscillate(UserDeviceFeatureOutputValueProperties),
+  Constrict(UserDeviceFeatureOutputValueProperties),
+  Temperature(UserDeviceFeatureOutputValueProperties),
+  Led(UserDeviceFeatureOutputValueProperties),
+  Spray(UserDeviceFeatureOutputValueProperties),
+  Position(UserDeviceFeatureOutputPositionProperties),
+  HwPositionWithDuration(UserDeviceFeatureOutputHwPositionWithDurationProperties),
 }
 
 impl UserDeviceFeatureOutput {
   pub fn with_base_output(
     &self,
-    base_output: &ServerDeviceFeatureOutput,
+    base: &ServerDeviceFeatureOutput,
   ) -> Result<ServerDeviceFeatureOutput, ButtplugDeviceConfigError> {
-    let mut output = ServerDeviceFeatureOutput::default();
+    match (self, base) {
+      (Self::Vibrate(u), ServerDeviceFeatureOutput::Vibrate(b)) => Ok(
+        ServerDeviceFeatureOutput::Vibrate(u.with_base_properties(b)?),
+      ),
+      (Self::Rotate(u), ServerDeviceFeatureOutput::Rotate(b)) => Ok(
+        ServerDeviceFeatureOutput::Rotate(u.with_base_properties(b)?),
+      ),
+      (Self::Oscillate(u), ServerDeviceFeatureOutput::Oscillate(b)) => Ok(
+        ServerDeviceFeatureOutput::Oscillate(u.with_base_properties(b)?),
+      ),
+      (Self::Constrict(u), ServerDeviceFeatureOutput::Constrict(b)) => Ok(
+        ServerDeviceFeatureOutput::Constrict(u.with_base_properties(b)?),
+      ),
+      (Self::Temperature(u), ServerDeviceFeatureOutput::Temperature(b)) => Ok(
+        ServerDeviceFeatureOutput::Temperature(u.with_base_properties(b)?),
+      ),
+      (Self::Led(u), ServerDeviceFeatureOutput::Led(b)) => {
+        Ok(ServerDeviceFeatureOutput::Led(u.with_base_properties(b)?))
+      }
+      (Self::Spray(u), ServerDeviceFeatureOutput::Spray(b)) => {
+        Ok(ServerDeviceFeatureOutput::Spray(u.with_base_properties(b)?))
+      }
+      (Self::Position(u), ServerDeviceFeatureOutput::Position(b)) => Ok(
+        ServerDeviceFeatureOutput::Position(u.with_base_properties(b)?),
+      ),
+      (Self::HwPositionWithDuration(u), ServerDeviceFeatureOutput::HwPositionWithDuration(b)) => {
+        Ok(ServerDeviceFeatureOutput::HwPositionWithDuration(
+          u.with_base_properties(b)?,
+        ))
+      }
+      _ => Err(ButtplugDeviceConfigError::InvalidOutputTypeConversion(
+        format!(
+          "user output type {:?} does not match base output type {:?}",
+          self.variant_key(),
+          base.output_type()
+        ),
+      )),
+    }
+  }
+}
 
-    merge_output_field!(output, base_output, self, vibrate, set_vibrate);
-    merge_output_field!(output, base_output, self, rotate, set_rotate);
-    merge_output_field!(output, base_output, self, oscillate, set_oscillate);
-    merge_output_field!(output, base_output, self, constrict, set_constrict);
-    merge_output_field!(output, base_output, self, temperature, set_temperature);
-    merge_output_field!(output, base_output, self, led, set_led);
-    merge_output_field!(output, base_output, self, spray, set_spray);
-    merge_output_field!(output, base_output, self, position, set_position);
-    merge_output_field!(
-      output,
-      base_output,
-      self,
-      hw_position_with_duration,
-      set_hw_position_with_duration
-    );
-
-    Ok(output)
+impl VariantKey for UserDeviceFeatureOutput {
+  type Key = OutputType;
+  fn variant_key(&self) -> OutputType {
+    match self {
+      Self::Vibrate(_) => OutputType::Vibrate,
+      Self::Rotate(_) => OutputType::Rotate,
+      Self::Oscillate(_) => OutputType::Oscillate,
+      Self::Constrict(_) => OutputType::Constrict,
+      Self::Temperature(_) => OutputType::Temperature,
+      Self::Led(_) => OutputType::Led,
+      Self::Spray(_) => OutputType::Spray,
+      Self::Position(_) => OutputType::Position,
+      Self::HwPositionWithDuration(_) => OutputType::HwPositionWithDuration,
+    }
   }
 }
 
 impl From<&ServerDeviceFeatureOutput> for UserDeviceFeatureOutput {
   fn from(value: &ServerDeviceFeatureOutput) -> Self {
-    Self {
-      vibrate: value.vibrate().as_ref().map(|x| x.into()),
-      rotate: value.rotate().as_ref().map(|x| x.into()),
-      oscillate: value.oscillate().as_ref().map(|x| x.into()),
-      constrict: value.constrict().as_ref().map(|x| x.into()),
-      temperature: value.temperature().as_ref().map(|x| x.into()),
-      led: value.led().as_ref().map(|x| x.into()),
-      position: value.position().as_ref().map(|x| x.into()),
-      hw_position_with_duration: value.hw_position_with_duration().as_ref().map(|x| x.into()),
-      spray: value.spray().as_ref().map(|x| x.into()),
+    match value {
+      ServerDeviceFeatureOutput::Vibrate(p) => Self::Vibrate(p.into()),
+      ServerDeviceFeatureOutput::Rotate(p) => Self::Rotate(p.into()),
+      ServerDeviceFeatureOutput::Oscillate(p) => Self::Oscillate(p.into()),
+      ServerDeviceFeatureOutput::Constrict(p) => Self::Constrict(p.into()),
+      ServerDeviceFeatureOutput::Temperature(p) => Self::Temperature(p.into()),
+      ServerDeviceFeatureOutput::Led(p) => Self::Led(p.into()),
+      ServerDeviceFeatureOutput::Spray(p) => Self::Spray(p.into()),
+      ServerDeviceFeatureOutput::Position(p) => Self::Position(p.into()),
+      ServerDeviceFeatureOutput::HwPositionWithDuration(p) => {
+        Self::HwPositionWithDuration(p.into())
+      }
     }
   }
 }
@@ -244,11 +249,11 @@ pub struct ConfigBaseDeviceFeature {
   #[serde(default)]
   description: String,
   #[getset(get = "pub")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  output: Option<ServerDeviceFeatureOutput>,
+  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty", default)]
+  output: SmallVecEnumMap<ServerDeviceFeatureOutput, 1>,
   #[getset(get = "pub")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  input: Option<ServerDeviceFeatureInput>,
+  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty", default)]
+  input: SmallVecEnumMap<ServerDeviceFeatureInput, 1>,
   #[getset(get_copy = "pub")]
   id: Uuid,
   #[getset(get = "pub")]
@@ -270,15 +275,14 @@ impl From<ConfigBaseDeviceFeature> for ServerDeviceFeature {
   }
 }
 
-#[derive(Clone, Debug, Default, Getters, Serialize, Deserialize, CopyGetters)]
+#[derive(Clone, Debug, Default, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct ConfigUserDeviceFeature {
   #[getset(get_copy = "pub")]
   id: Uuid,
   #[getset(get_copy = "pub")]
   base_id: Uuid,
-  #[getset(get = "pub")]
-  #[serde(rename = "output", skip_serializing_if = "Option::is_none")]
-  output: Option<UserDeviceFeatureOutput>,
+  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty", default)]
+  output: SmallVecEnumMap<UserDeviceFeatureOutput, 1>,
 }
 
 impl ConfigUserDeviceFeature {
@@ -286,24 +290,26 @@ impl ConfigUserDeviceFeature {
     &self,
     base_feature: &ServerDeviceFeature,
   ) -> Result<ServerDeviceFeature, ButtplugDeviceConfigError> {
-    let output = if let Some(o) = &self.output {
-      if let Some(base) = base_feature.output() {
-        Some(o.with_base_output(base)?)
-      } else {
-        None
-      }
-    } else {
-      // No user output override: inherit the base feature's output unchanged.
-      base_feature.output().clone()
-    };
+    let output: SmallVecEnumMap<ServerDeviceFeatureOutput, 1> = base_feature
+      .output
+      .iter()
+      .map(|base_out| {
+        let key = base_out.variant_key();
+        if let Some(user_out) = self.output.find_by_key(&key) {
+          user_out.with_base_output(base_out)
+        } else {
+          Ok(base_out.clone())
+        }
+      })
+      .collect::<Result<SmallVecEnumMap<ServerDeviceFeatureOutput, 1>, _>>()?;
     Ok(ServerDeviceFeature::new(
       base_feature.index(),
-      base_feature.description(),
+      &base_feature.description,
       self.id,
       Some(self.base_id),
-      base_feature.alt_protocol_index(),
+      base_feature.alt_protocol_index,
       &output,
-      base_feature.input(),
+      &base_feature.input,
     ))
   }
 }
@@ -315,9 +321,9 @@ impl TryFrom<&ServerDeviceFeature> for ConfigUserDeviceFeature {
     Ok(Self {
       id: value.id(),
       base_id: value
-        .base_id()
+        .base_id
         .ok_or(ButtplugDeviceConfigError::MissingBaseId)?,
-      output: value.output().as_ref().map(|x| x.into()),
+      output: value.output.iter().map(Into::into).collect(),
     })
   }
 }

@@ -48,13 +48,7 @@ impl ProtocolInitializer for SvakomBarneyInitializer {
     let num_vibrators = def
       .features()
       .values()
-      .filter(|x| {
-        if let Some(output_map) = x.output() {
-          output_map.contains(OutputType::Vibrate)
-        } else {
-          false
-        }
-      })
+      .filter(|x| x.contains_output(OutputType::Vibrate))
       .count() as u8;
     Ok(Arc::new(SvakomBarney::new(num_vibrators)))
   }

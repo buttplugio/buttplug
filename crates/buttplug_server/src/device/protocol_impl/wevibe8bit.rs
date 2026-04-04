@@ -47,11 +47,7 @@ impl ProtocolInitializer for WeVibe8BitInitializer {
     let num_vibrators = def
       .features()
       .values()
-      .filter(|x| {
-        x.output()
-          .as_ref()
-          .is_some_and(|x| x.contains(OutputType::Vibrate))
-      })
+      .filter(|x| x.contains_output(OutputType::Vibrate))
       .count() as u8;
     Ok(Arc::new(WeVibe8Bit::new(num_vibrators)))
   }

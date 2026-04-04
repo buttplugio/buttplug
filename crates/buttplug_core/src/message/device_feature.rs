@@ -5,61 +5,16 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{message::InputCommandType, util::range_serialize::*};
-use derive_builder::Builder;
+use crate::{
+  message::InputCommandType,
+  util::{
+    range::RangeInclusive,
+    small_vec_enum_map::{SmallVecEnumMap, VariantKey},
+  },
+};
+use enumflags2::BitFlags;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
-use serde::{Deserialize, Serialize, Serializer, ser::SerializeSeq};
-use std::{collections::HashSet, hash::Hash, ops::RangeInclusive};
-
-#[derive(
-  Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash, EnumIter, EnumString,
-)]
-pub enum OutputType {
-  Unknown,
-  #[serde(alias = "vibrate")]
-  Vibrate,
-  #[serde(alias = "rotate")]
-  Rotate,
-  #[serde(alias = "oscillate")]
-  Oscillate,
-  #[serde(alias = "constrict")]
-  Constrict,
-  #[serde(alias = "temperature")]
-  Temperature,
-  #[serde(alias = "led")]
-  Led,
-  // For instances where we specify a position to move to ASAP. Usually servos, probably for the
-  // OSR-2/SR-6.
-  #[serde(alias = "position")]
-  Position,
-  #[serde(alias = "hw_position_with_duration")]
-  HwPositionWithDuration,
-  // Lube shooters
-  #[serde(alias = "spray")]
-  Spray,
-  // Things we might add in the future
-  // Inflate,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, Hash, EnumIter)]
-pub enum InputType {
-  Unknown,
-  #[serde(alias = "battery")]
-  Battery,
-  #[serde(alias = "rssi")]
-  Rssi,
-  #[serde(alias = "button")]
-  Button,
-  #[serde(alias = "pressure")]
-  Pressure,
-  #[serde(alias = "depth")]
-  Depth,
-  #[serde(alias = "position")]
-  Position,
-  // Temperature,
-  // Accelerometer,
-  // Gyro,
-}
+use serde::{Deserialize, Serialize};
 
 // This will look almost exactly like ServerDeviceFeature. However, it will only contain
 // information we want the client to know, i.e. step counts versus specific step ranges. This is
@@ -69,6 +24,11 @@ pub enum InputType {
 // For many messages, client and server configurations may be exactly the same. If they are not,
 // then we denote this by prefixing the type with Client/Server. Server attributes will usually be
 // hosted in the server/device/configuration module.
+//
+// SERIALIZATION NOTE: This type and its children use PascalCase field names because they are part
+// of the wire protocol (DeviceAdded/DeviceList messages). Internal server-side types
+// (ServerDeviceFeature and friends) use snake_case. Never use DeviceFeature for internal
+// storage or config files.
 #[derive(
   Clone, Debug, Default, Getters, MutGetters, CopyGetters, Setters, Serialize, Deserialize,
 )]
@@ -82,21 +42,18 @@ pub struct DeviceFeature {
   #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(default, rename = "FeatureDescription")]
   description: String,
-  // TODO Maybe make this its own object instead of a HashMap?
-  #[getset(get = "pub")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  output: Option<DeviceFeatureOutput>,
-  #[getset(get = "pub")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  input: Option<DeviceFeatureInput>,
+  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty", default)]
+  output: SmallVecEnumMap<DeviceFeatureOutput, 1>,
+  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty", default)]
+  input: SmallVecEnumMap<DeviceFeatureInput, 1>,
 }
 
 impl DeviceFeature {
   pub fn new(
     index: u32,
     description: &str,
-    output: &Option<DeviceFeatureOutput>,
-    input: &Option<DeviceFeatureInput>,
+    output: &SmallVecEnumMap<DeviceFeatureOutput, 1>,
+    input: &SmallVecEnumMap<DeviceFeatureInput, 1>,
   ) -> Self {
     Self {
       feature_index: index,
@@ -105,20 +62,29 @@ impl DeviceFeature {
       input: input.clone(),
     }
   }
-}
 
-fn range_sequence_serialize<S>(
-  range_vec: &Vec<RangeInclusive<i32>>,
-  serializer: S,
-) -> Result<S::Ok, S::Error>
-where
-  S: Serializer,
-{
-  let mut seq = serializer.serialize_seq(Some(range_vec.len()))?;
-  for range in range_vec {
-    seq.serialize_element(&vec![*range.start(), *range.end()])?;
+  pub fn contains_output(&self, output_type: OutputType) -> bool {
+    self.output.contains_key(&output_type)
   }
-  seq.end()
+
+  pub fn contains_input(&self, input_type: InputType) -> bool {
+    self.input.contains_key(&input_type)
+  }
+
+  pub fn get_output(&self, output_type: OutputType) -> Option<&DeviceFeatureOutput> {
+    self.output.find_by_key(&output_type)
+  }
+
+  pub fn get_output_limits(
+    &self,
+    output_type: OutputType,
+  ) -> Option<&dyn DeviceFeatureOutputLimits> {
+    self.output.find_by_key(&output_type).map(|o| o.as_limits())
+  }
+
+  pub fn get_input(&self, input_type: InputType) -> Option<&DeviceFeatureInput> {
+    self.input.find_by_key(&input_type)
+  }
 }
 
 pub trait DeviceFeatureOutputLimits {
@@ -130,28 +96,21 @@ pub trait DeviceFeatureOutputLimits {
 #[serde(rename_all = "PascalCase")]
 pub struct DeviceFeatureOutputValueProperties {
   #[getset(get = "pub")]
-  #[serde(serialize_with = "range_serialize")]
   value: RangeInclusive<i32>,
 }
 
 impl DeviceFeatureOutputValueProperties {
-  pub fn new(value: &RangeInclusive<i32>) -> Self {
-    DeviceFeatureOutputValueProperties {
-      value: value.clone(),
-    }
-  }
-
-  pub fn step_count(&self) -> u32 {
-    *self.value.end() as u32
+  pub fn new(value: RangeInclusive<i32>) -> Self {
+    DeviceFeatureOutputValueProperties { value }
   }
 }
 
 impl DeviceFeatureOutputLimits for DeviceFeatureOutputValueProperties {
   fn step_count(&self) -> u32 {
-    self.step_count()
+    self.value.end() as u32
   }
   fn step_limit(&self) -> RangeInclusive<i32> {
-    self.value.clone()
+    self.value
   }
 }
 
@@ -159,96 +118,71 @@ impl DeviceFeatureOutputLimits for DeviceFeatureOutputValueProperties {
 #[serde(rename_all = "PascalCase")]
 pub struct DeviceFeatureOutputHwPositionWithDurationProperties {
   #[getset(get = "pub")]
-  #[serde(serialize_with = "range_serialize")]
   value: RangeInclusive<i32>,
   #[getset(get = "pub")]
-  #[serde(serialize_with = "range_serialize")]
   duration: RangeInclusive<i32>,
 }
 
 impl DeviceFeatureOutputHwPositionWithDurationProperties {
-  pub fn new(position: &RangeInclusive<i32>, duration: &RangeInclusive<i32>) -> Self {
+  pub fn new(position: RangeInclusive<i32>, duration: RangeInclusive<i32>) -> Self {
     DeviceFeatureOutputHwPositionWithDurationProperties {
-      value: position.clone(),
-      duration: duration.clone(),
+      value: position,
+      duration,
     }
-  }
-
-  pub fn step_count(&self) -> u32 {
-    *self.value.end() as u32
   }
 }
 
 impl DeviceFeatureOutputLimits for DeviceFeatureOutputHwPositionWithDurationProperties {
   fn step_count(&self) -> u32 {
-    self.step_count()
+    self.value.end() as u32
   }
   fn step_limit(&self) -> RangeInclusive<i32> {
-    self.value.clone()
+    self.value
   }
 }
 
-#[derive(Clone, Debug, Getters, Setters, Default, Serialize, Deserialize, Builder)]
-#[builder(setter(strip_option), default)]
-#[getset(get = "pub")]
-#[serde(rename_all = "PascalCase")]
-pub struct DeviceFeatureOutput {
-  #[serde(skip_serializing_if = "Option::is_none")]
-  vibrate: Option<DeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  rotate: Option<DeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  oscillate: Option<DeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  constrict: Option<DeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  temperature: Option<DeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  led: Option<DeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  position: Option<DeviceFeatureOutputValueProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  hw_position_with_duration: Option<DeviceFeatureOutputHwPositionWithDurationProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  spray: Option<DeviceFeatureOutputValueProperties>,
-}
-
-/// Helper macro to cast an Option<T: DeviceFeatureOutputLimits> to Option<&dyn DeviceFeatureOutputLimits>
-macro_rules! as_output_limits {
-  ($opt:expr) => {
-    $opt.as_ref().map(|x| x as &dyn DeviceFeatureOutputLimits)
-  };
+// OutputType is auto-generated as the discriminant enum of DeviceFeatureOutput.
+// Adding or renaming a DeviceFeatureOutput variant automatically updates OutputType.
+#[derive(Clone, Debug, Serialize, Deserialize, EnumDiscriminants)]
+#[strum_discriminants(name(OutputType))]
+#[strum_discriminants(vis(pub))]
+#[strum_discriminants(derive(Display, Hash, EnumIter, EnumString, Serialize, Deserialize))]
+pub enum DeviceFeatureOutput {
+  Vibrate(DeviceFeatureOutputValueProperties),
+  Rotate(DeviceFeatureOutputValueProperties),
+  Oscillate(DeviceFeatureOutputValueProperties),
+  Constrict(DeviceFeatureOutputValueProperties),
+  Temperature(DeviceFeatureOutputValueProperties),
+  Led(DeviceFeatureOutputValueProperties),
+  Position(DeviceFeatureOutputValueProperties),
+  HwPositionWithDuration(DeviceFeatureOutputHwPositionWithDurationProperties),
+  Spray(DeviceFeatureOutputValueProperties),
 }
 
 impl DeviceFeatureOutput {
-  pub fn contains(&self, output_type: OutputType) -> bool {
-    match output_type {
-      OutputType::Constrict => self.constrict.is_some(),
-      OutputType::Temperature => self.temperature.is_some(),
-      OutputType::Led => self.led.is_some(),
-      OutputType::Oscillate => self.oscillate.is_some(),
-      OutputType::Position => self.position.is_some(),
-      OutputType::HwPositionWithDuration => self.hw_position_with_duration.is_some(),
-      OutputType::Rotate => self.rotate.is_some(),
-      OutputType::Spray => self.spray.is_some(),
-      OutputType::Unknown => false,
-      OutputType::Vibrate => self.vibrate.is_some(),
-    }
+  pub fn output_type(&self) -> OutputType {
+    OutputType::from(self)
   }
 
-  pub fn get(&self, output_type: OutputType) -> Option<&dyn DeviceFeatureOutputLimits> {
-    match output_type {
-      OutputType::Constrict => as_output_limits!(self.constrict()),
-      OutputType::Temperature => as_output_limits!(self.temperature()),
-      OutputType::Led => as_output_limits!(self.led()),
-      OutputType::Oscillate => as_output_limits!(self.oscillate()),
-      OutputType::Position => as_output_limits!(self.position()),
-      OutputType::HwPositionWithDuration => as_output_limits!(self.hw_position_with_duration()),
-      OutputType::Rotate => as_output_limits!(self.rotate()),
-      OutputType::Spray => as_output_limits!(self.spray()),
-      OutputType::Unknown => None,
-      OutputType::Vibrate => as_output_limits!(self.vibrate()),
+  fn as_limits(&self) -> &dyn DeviceFeatureOutputLimits {
+    match self {
+      DeviceFeatureOutput::Vibrate(v) => v,
+      DeviceFeatureOutput::Rotate(v) => v,
+      DeviceFeatureOutput::Oscillate(v) => v,
+      DeviceFeatureOutput::Constrict(v) => v,
+      DeviceFeatureOutput::Temperature(v) => v,
+      DeviceFeatureOutput::Led(v) => v,
+      DeviceFeatureOutput::Position(v) => v,
+      DeviceFeatureOutput::HwPositionWithDuration(v) => v,
+      DeviceFeatureOutput::Spray(v) => v,
     }
+  }
+}
+
+impl VariantKey for DeviceFeatureOutput {
+  type Key = OutputType;
+  fn variant_key(&self) -> OutputType {
+    self.output_type()
   }
 }
 
@@ -258,16 +192,16 @@ impl DeviceFeatureOutput {
 #[serde(rename_all = "PascalCase")]
 pub struct DeviceFeatureInputProperties {
   #[getset(get = "pub", get_mut = "pub(super)")]
-  #[serde(serialize_with = "range_sequence_serialize")]
   value: Vec<RangeInclusive<i32>>,
   #[getset(get = "pub")]
-  command: HashSet<InputCommandType>,
+  #[serde(with = "crate::util::serializers::bitflags_seq")]
+  command: BitFlags<InputCommandType>,
 }
 
 impl DeviceFeatureInputProperties {
   pub fn new(
     value: &Vec<RangeInclusive<i32>>,
-    sensor_commands: &HashSet<InputCommandType>,
+    sensor_commands: &BitFlags<InputCommandType>,
   ) -> Self {
     Self {
       value: value.clone(),
@@ -276,47 +210,40 @@ impl DeviceFeatureInputProperties {
   }
 }
 
-#[derive(Clone, Debug, Getters, Setters, Default, Serialize, Deserialize, Builder)]
-#[builder(setter(strip_option), default)]
-#[getset(get = "pub")]
-#[serde(rename_all = "PascalCase")]
-pub struct DeviceFeatureInput {
-  #[serde(skip_serializing_if = "Option::is_none")]
-  battery: Option<DeviceFeatureInputProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  rssi: Option<DeviceFeatureInputProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pressure: Option<DeviceFeatureInputProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  button: Option<DeviceFeatureInputProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  depth: Option<DeviceFeatureInputProperties>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  position: Option<DeviceFeatureInputProperties>,
+// InputType is auto-generated as the discriminant enum of DeviceFeatureInput.
+#[derive(Clone, Debug, Serialize, Deserialize, EnumDiscriminants)]
+#[strum_discriminants(name(InputType))]
+#[strum_discriminants(vis(pub))]
+#[strum_discriminants(derive(Display, Hash, EnumIter, EnumString, Serialize, Deserialize))]
+pub enum DeviceFeatureInput {
+  Battery(DeviceFeatureInputProperties),
+  Rssi(DeviceFeatureInputProperties),
+  Button(DeviceFeatureInputProperties),
+  Pressure(DeviceFeatureInputProperties),
+  Depth(DeviceFeatureInputProperties),
+  Position(DeviceFeatureInputProperties),
 }
 
 impl DeviceFeatureInput {
-  pub fn contains(&self, input_type: InputType) -> bool {
-    match input_type {
-      InputType::Battery => self.battery.is_some(),
-      InputType::Rssi => self.rssi.is_some(),
-      InputType::Pressure => self.pressure.is_some(),
-      InputType::Button => self.button.is_some(),
-      InputType::Depth => self.depth.is_some(),
-      InputType::Position => self.position.is_some(),
-      InputType::Unknown => false,
-    }
+  pub fn input_type(&self) -> InputType {
+    InputType::from(self)
   }
 
-  pub fn get(&self, input_type: InputType) -> &Option<DeviceFeatureInputProperties> {
-    match input_type {
-      InputType::Battery => self.battery(),
-      InputType::Rssi => self.rssi(),
-      InputType::Pressure => self.pressure(),
-      InputType::Button => self.button(),
-      InputType::Depth => self.depth(),
-      InputType::Position => self.position(),
-      InputType::Unknown => &None,
+  pub fn command(&self) -> &BitFlags<InputCommandType> {
+    match self {
+      DeviceFeatureInput::Battery(p) => p.command(),
+      DeviceFeatureInput::Rssi(p) => p.command(),
+      DeviceFeatureInput::Button(p) => p.command(),
+      DeviceFeatureInput::Pressure(p) => p.command(),
+      DeviceFeatureInput::Depth(p) => p.command(),
+      DeviceFeatureInput::Position(p) => p.command(),
     }
+  }
+}
+
+impl VariantKey for DeviceFeatureInput {
+  type Key = InputType;
+  fn variant_key(&self) -> InputType {
+    self.input_type()
   }
 }

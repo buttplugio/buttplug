@@ -119,41 +119,34 @@ impl TryFromDeviceAttributes<OutputCmdV4> for CheckedOutputCmdV4 {
     };
 
     // Check to make sure the feature has an actuator that handles the data we've been passed
-    if let Some(output_map) = feature.output() {
-      let output_type = cmd.command().as_output_type();
-      if output_map.is_disabled(output_type) {
-        return Err(ButtplugError::from(
-          ButtplugDeviceError::MessageNotSupported(format!(
-            "Output type {:?} is disabled for this device",
-            output_type
-          )),
-        ));
-      }
-      let value = cmd.command().value();
-      let new_value = output_map
-        .calculate_from_value(output_type, value)
-        .map_err(|e| {
-          error!("{:?}", e);
-          ButtplugDeviceError::DeviceStepRangeError(0, value)
-        })?;
-      let mut new_command = cmd.command();
-      new_command.set_value(new_value);
-      // We can't make a private trait impl to turn a ValueCmd into a CheckedValueCmd, and this
-      // is all about security, so we just copy. Silly, but it works for our needs in terms of
-      // making this a barrier.
-      Ok(Self {
-        id: cmd.id(),
-        feature_id: feature.id(),
-        device_index: cmd.device_index(),
-        feature_index: cmd.feature_index(),
-        output_command: new_command,
-      })
-    } else {
-      Err(ButtplugError::from(
-        ButtplugDeviceError::MessageNotSupported(
-          ButtplugDeviceMessageNameV4::OutputCmd.to_string(),
-        ),
-      ))
+    let output_type = cmd.command().as_output_type();
+    let output = feature.get_output(output_type).ok_or(ButtplugError::from(
+      ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageNameV4::OutputCmd.to_string()),
+    ))?;
+    if output.is_disabled() {
+      return Err(ButtplugError::from(
+        ButtplugDeviceError::MessageNotSupported(format!(
+          "Output type {:?} is disabled for this device",
+          output_type
+        )),
+      ));
     }
+    let value = cmd.command().value();
+    let new_value = output.calculate_from_value(value).map_err(|e| {
+      error!("{:?}", e);
+      ButtplugDeviceError::DeviceStepRangeError(0, value)
+    })?;
+    let mut new_command = cmd.command();
+    new_command.set_value(new_value);
+    // We can't make a private trait impl to turn a ValueCmd into a CheckedValueCmd, and this
+    // is all about security, so we just copy. Silly, but it works for our needs in terms of
+    // making this a barrier.
+    Ok(Self {
+      id: cmd.id(),
+      feature_id: feature.id(),
+      device_index: cmd.device_index(),
+      feature_index: cmd.feature_index(),
+      output_command: new_command,
+    })
   }
 }

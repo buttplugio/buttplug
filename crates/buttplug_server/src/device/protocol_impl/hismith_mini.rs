@@ -85,21 +85,13 @@ impl ProtocolInitializer for HismithMiniInitializer {
       dual_vibe: device_definition
         .features()
         .values()
-        .filter(|x| {
-          x.output()
-            .as_ref()
-            .is_some_and(|x| x.contains(OutputType::Vibrate))
-        })
+        .filter(|x| x.contains_output(OutputType::Vibrate))
         .count()
         >= 2,
       second_constrict: device_definition
         .features()
         .values()
-        .position(|x| {
-          x.output()
-            .as_ref()
-            .is_some_and(|x| x.contains(OutputType::Constrict))
-        })
+        .position(|x| x.contains_output(OutputType::Constrict))
         .unwrap_or(0)
         == 1,
     }))

@@ -15,8 +15,7 @@ use crate::device::{
   },
 };
 use async_trait::async_trait;
-use buttplug_core::errors::ButtplugDeviceError;
-use buttplug_core::message::OutputType;
+use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
   ProtocolCommunicationSpecifier,
@@ -60,11 +59,7 @@ impl ProtocolInitializer for WeVibeInitializer {
     let num_vibrators = def
       .features()
       .values()
-      .filter(|x| {
-        x.output()
-          .as_ref()
-          .is_some_and(|x| x.contains(OutputType::Vibrate))
-      })
+      .filter(|x| x.contains_output(OutputType::Vibrate))
       .count() as u8;
     Ok(Arc::new(WeVibe::new(num_vibrators)))
   }

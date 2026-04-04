@@ -83,7 +83,7 @@ impl TryFromDeviceAttributes<BatteryLevelCmdV2> for CheckedInputCmdV4 {
     let feature_index = features
       .features()
       .iter()
-      .find(|(_, p)| p.input().as_ref().is_some_and(|x| x.battery().is_some()))
+      .find(|(_, p)| p.contains_input(InputType::Battery))
       .expect("Already found matching battery feature, can unwrap this.")
       .0;
 

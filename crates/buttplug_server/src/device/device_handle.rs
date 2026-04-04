@@ -23,7 +23,6 @@ use buttplug_core::{
     DeviceMessageInfoV4,
     InputCommandType,
     InputType,
-    OutputType,
     OutputValue,
     StopCmdV4,
   },
@@ -32,6 +31,7 @@ use buttplug_core::{
 use buttplug_server_device_config::{
   DeviceConfigurationManager,
   ServerDeviceDefinition,
+  ServerDeviceFeatureOutput,
   UserDeviceIdentifier,
 };
 use dashmap::DashMap;
@@ -180,8 +180,8 @@ impl DeviceHandle {
         .definition
         .features()
         .values()
+        .filter(|x| x.has_output() || x.has_input())
         .map(|x| (x.index(), x.as_device_feature().expect("Infallible")))
-        .filter(|(_, x)| x.output().as_ref().is_some() || x.input().as_ref().is_some())
         .collect::<BTreeMap<u32, DeviceFeature>>(),
     )
   }
@@ -302,20 +302,22 @@ impl DeviceHandle {
     }
     if msg.inputs() {
       self.definition.features().iter().for_each(|(i, f)| {
-        if let Some(inputs) = f.input() {
-          if inputs.can_subscribe() {
-            fut_vec.push(
-              self.parse_message(ButtplugDeviceCommandMessageUnionV4::InputCmd(
-                CheckedInputCmdV4::new(
-                  1,
-                  self.definition.index(),
-                  *i,
-                  InputType::Unknown,
-                  InputCommandType::Unsubscribe,
-                  f.id(),
-                ),
-              )),
-            );
+        if f.can_subscribe() {
+          for input in f.input.iter() {
+            if input.can_subscribe() {
+              fut_vec.push(
+                self.parse_message(ButtplugDeviceCommandMessageUnionV4::InputCmd(
+                  CheckedInputCmdV4::new(
+                    1,
+                    self.definition.index(),
+                    *i,
+                    input.input_type(),
+                    InputCommandType::Unsubscribe,
+                    f.id(),
+                  ),
+                )),
+              );
+            }
           }
         }
       });
@@ -517,48 +519,45 @@ pub(super) async fn build_device_handle(
   // Generate stop commands for this device
   let mut stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4> = vec![];
   for feature in definition.features().values() {
-    if let Some(output_map) = feature.output() {
-      for actuator_type in output_map.output_types() {
-        let mut stop_cmd = |actuator_cmd| {
-          stop_commands.push(
-            CheckedOutputCmdV4::new(1, 0, feature.index(), feature.id(), actuator_cmd).into(),
-          );
-        };
+    for output in feature.output.iter() {
+      let mut stop_cmd = |actuator_cmd| {
+        stop_commands
+          .push(CheckedOutputCmdV4::new(1, 0, feature.index(), feature.id(), actuator_cmd).into());
+      };
 
-        // Break out of these if one is found, we only need 1 stop message per output.
-        match actuator_type {
-          OutputType::Constrict => {
-            stop_cmd(message::OutputCommand::Constrict(OutputValue::new(0)));
-            break;
-          }
-          OutputType::Temperature => {
-            stop_cmd(message::OutputCommand::Temperature(OutputValue::new(0)));
-            break;
-          }
-          OutputType::Spray => {
-            stop_cmd(message::OutputCommand::Spray(OutputValue::new(0)));
-            break;
-          }
-          OutputType::Led => {
-            stop_cmd(message::OutputCommand::Led(OutputValue::new(0)));
-            break;
-          }
-          OutputType::Oscillate => {
-            stop_cmd(message::OutputCommand::Oscillate(OutputValue::new(0)));
-            break;
-          }
-          OutputType::Rotate => {
-            stop_cmd(message::OutputCommand::Rotate(OutputValue::new(0)));
-            break;
-          }
-          OutputType::Vibrate => {
-            stop_cmd(message::OutputCommand::Vibrate(OutputValue::new(0)));
-            break;
-          }
-          _ => {
-            // There's not much we can do about position or position w/ duration, so just continue on
-            continue;
-          }
+      // Break out of these if one is found, we only need 1 stop message per output.
+      match output {
+        ServerDeviceFeatureOutput::Constrict(_) => {
+          stop_cmd(message::OutputCommand::Constrict(OutputValue::new(0)));
+          break;
+        }
+        ServerDeviceFeatureOutput::Temperature(_) => {
+          stop_cmd(message::OutputCommand::Temperature(OutputValue::new(0)));
+          break;
+        }
+        ServerDeviceFeatureOutput::Spray(_) => {
+          stop_cmd(message::OutputCommand::Spray(OutputValue::new(0)));
+          break;
+        }
+        ServerDeviceFeatureOutput::Led(_) => {
+          stop_cmd(message::OutputCommand::Led(OutputValue::new(0)));
+          break;
+        }
+        ServerDeviceFeatureOutput::Oscillate(_) => {
+          stop_cmd(message::OutputCommand::Oscillate(OutputValue::new(0)));
+          break;
+        }
+        ServerDeviceFeatureOutput::Rotate(_) => {
+          stop_cmd(message::OutputCommand::Rotate(OutputValue::new(0)));
+          break;
+        }
+        ServerDeviceFeatureOutput::Vibrate(_) => {
+          stop_cmd(message::OutputCommand::Vibrate(OutputValue::new(0)));
+          break;
+        }
+        _ => {
+          // There's not much we can do about position or position w/ duration, so just continue on
+          continue;
         }
       }
     }

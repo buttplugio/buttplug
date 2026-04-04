@@ -118,12 +118,7 @@ impl ProtocolInitializer for GalakuInitializer {
     if hardware.name() == "AC695X_1(BLE)" {
       protocol.is_caiping_pump_device = true;
     }
-    for _ in 0..def
-      .features()
-      .values()
-      .filter(|f| f.output().is_some())
-      .count()
-    {
+    for _ in 0..def.features().values().filter(|f| f.has_output()).count() {
       protocol.speeds.push(AtomicU8::new(0));
     }
     Ok(Arc::new(protocol))

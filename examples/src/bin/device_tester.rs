@@ -92,8 +92,7 @@ async fn device_tester() {
   let exercise_device = |dev: ButtplugClientDevice| async move {
     let mut cmds = vec![];
     dev.device_features().iter().for_each(|(_, feature)| {
-      let outs = feature.feature().output().clone().unwrap_or_default();
-      if let Some(out) = outs.get(OutputType::Vibrate) {
+      if let Some(out) = feature.feature().get_output_limits(OutputType::Vibrate) {
         cmds.push(feature.run_output(&ClientDeviceOutputCommand::Vibrate(
           (out.step_count() as i32).into(),
         )));
@@ -103,9 +102,9 @@ async fn device_tester() {
           dev.index(),
           feature.feature_index()
         );
-      } else if let Some(out) = outs.get(OutputType::Rotate) {
+      } else if let Some(out) = feature.feature().get_output_limits(OutputType::Rotate) {
         cmds.push(feature.run_output(&ClientDeviceOutputCommand::Rotate(
-          (*out.step_limit().end()).into(),
+          out.step_limit().end().into(),
         )));
         println!(
           "{} ({}) should start rotating on feature {}!",
@@ -113,7 +112,7 @@ async fn device_tester() {
           dev.index(),
           feature.feature_index()
         );
-      } else if let Some(out) = outs.get(OutputType::Oscillate) {
+      } else if let Some(out) = feature.feature().get_output_limits(OutputType::Oscillate) {
         cmds.push(feature.run_output(&ClientDeviceOutputCommand::Oscillate(
           out.step_count().into(),
         )));
@@ -123,7 +122,7 @@ async fn device_tester() {
           dev.index(),
           feature.feature_index()
         );
-      } else if let Some(out) = outs.get(OutputType::Constrict) {
+      } else if let Some(out) = feature.feature().get_output_limits(OutputType::Constrict) {
         cmds.push(feature.run_output(&ClientDeviceOutputCommand::Constrict(
           out.step_count().into(),
         )));
@@ -133,9 +132,9 @@ async fn device_tester() {
           dev.index(),
           feature.feature_index()
         );
-      } else if let Some(out) = outs.get(OutputType::Temperature) {
+      } else if let Some(out) = feature.feature().get_output_limits(OutputType::Temperature) {
         cmds.push(feature.run_output(&ClientDeviceOutputCommand::Temperature(
-          (*out.step_limit().end()).into(),
+          out.step_limit().end().into(),
         )));
         println!(
           "{} ({}) should start heating on feature {}!",
@@ -161,8 +160,7 @@ async fn device_tester() {
 
       let mut cmds = vec![];
       dev.device_features().iter().for_each(|(_, feature)| {
-        let outs = feature.feature().output().clone().unwrap_or_default();
-        if outs.get(OutputType::Vibrate).is_some() {
+        if feature.feature().contains_output(OutputType::Vibrate) {
           cmds.push(feature.run_output(&ClientDeviceOutputCommand::Vibrate(0.into())));
           println!(
             "{} ({}) should stop vibrating on feature {}!",
@@ -170,7 +168,7 @@ async fn device_tester() {
             dev.index(),
             feature.feature_index()
           );
-        } else if outs.get(OutputType::Rotate).is_some() {
+        } else if feature.feature().contains_output(OutputType::Rotate) {
           cmds.push(feature.run_output(&ClientDeviceOutputCommand::Rotate(0.into())));
           println!(
             "{} ({}) should stop rotating on feature {}!",
@@ -178,7 +176,7 @@ async fn device_tester() {
             dev.index(),
             feature.feature_index()
           );
-        } else if outs.get(OutputType::Oscillate).is_some() {
+        } else if feature.feature().contains_output(OutputType::Oscillate) {
           cmds.push(feature.run_output(&ClientDeviceOutputCommand::Oscillate(0.into())));
           println!(
             "{} ({}) should stop oscillating on feature {}!",
@@ -186,7 +184,7 @@ async fn device_tester() {
             dev.index(),
             feature.feature_index()
           );
-        } else if outs.get(OutputType::Constrict).is_some() {
+        } else if feature.feature().contains_output(OutputType::Constrict) {
           cmds.push(feature.run_output(&ClientDeviceOutputCommand::Constrict(0.into())));
           println!(
             "{} ({}) should stop constricting on feature {}!",
@@ -194,7 +192,7 @@ async fn device_tester() {
             dev.index(),
             feature.feature_index()
           );
-        } else if outs.get(OutputType::Temperature).is_some() {
+        } else if feature.feature().contains_output(OutputType::Temperature) {
           cmds.push(feature.run_output(&ClientDeviceOutputCommand::Temperature(0.into())));
           println!(
             "{} ({}) should stop heating on feature {}!",
@@ -219,171 +217,160 @@ async fn device_tester() {
 
     // Exercise each feature
     for (_, feature) in dev.device_features() {
-      if let Some(out) = feature.feature().output() {
-        let outputs: Vec<&OutputType> = [
-          OutputType::Constrict,
-          OutputType::Temperature,
-          OutputType::Led,
-          OutputType::Oscillate,
-          OutputType::Position,
-          OutputType::HwPositionWithDuration,
-          OutputType::Rotate,
-          OutputType::Spray,
-          OutputType::Unknown,
-          OutputType::Vibrate,
-        ]
-        .iter()
-        .filter(|o| out.contains(**o))
-        .collect();
+      for output_type in [
+        OutputType::Constrict,
+        OutputType::Temperature,
+        OutputType::Led,
+        OutputType::Oscillate,
+        OutputType::Position,
+        OutputType::HwPositionWithDuration,
+        OutputType::Rotate,
+        OutputType::Spray,
+        OutputType::Vibrate,
+      ] {
+        if !feature.feature().contains_output(output_type) {
+          continue;
+        }
+        match output_type {
+          OutputType::Vibrate
+          | OutputType::Constrict
+          | OutputType::Oscillate
+          | OutputType::Temperature
+          | OutputType::Spray
+          | OutputType::Led
+          | OutputType::Position => {
+            set_level_and_wait(&dev, feature, &output_type, 0.05).await;
+            set_level_and_wait(&dev, feature, &output_type, 0.10).await;
+            set_level_and_wait(&dev, feature, &output_type, 0.25).await;
+            set_level_and_wait(&dev, feature, &output_type, 0.5).await;
+            set_level_and_wait(&dev, feature, &output_type, 0.75).await;
+            set_level_and_wait(&dev, feature, &output_type, 1.0).await;
+            set_level_and_wait(&dev, feature, &output_type, 0.0).await;
+          }
+          OutputType::Rotate => {
+            if feature
+              .feature()
+              .get_output_limits(OutputType::Rotate)
+              .map(|l| l.step_limit().start() < 0)
+              .unwrap_or(false)
+            {
+              set_level_and_wait(&dev, feature, &output_type, 0.25).await;
+              set_level_and_wait(&dev, feature, &output_type, -0.25).await;
+              set_level_and_wait(&dev, feature, &output_type, 0.5).await;
+              set_level_and_wait(&dev, feature, &output_type, -0.5).await;
+              set_level_and_wait(&dev, feature, &output_type, 0.75).await;
+              set_level_and_wait(&dev, feature, &output_type, -0.75).await;
+              set_level_and_wait(&dev, feature, &output_type, 1.0).await;
+              set_level_and_wait(&dev, feature, &output_type, -1.0).await;
+              set_level_and_wait(&dev, feature, &output_type, 0.0).await;
 
-        for otype in outputs {
-          let output = out.get(*otype).unwrap();
-          match otype {
-            OutputType::Vibrate
-            | OutputType::Constrict
-            | OutputType::Oscillate
-            | OutputType::Temperature
-            | OutputType::Spray
-            | OutputType::Led
-            | OutputType::Position => {
-              set_level_and_wait(&dev, feature, &otype, 0.05).await;
-              set_level_and_wait(&dev, feature, &otype, 0.10).await;
-              set_level_and_wait(&dev, feature, &otype, 0.25).await;
-              set_level_and_wait(&dev, feature, &otype, 0.5).await;
-              set_level_and_wait(&dev, feature, &otype, 0.75).await;
-              set_level_and_wait(&dev, feature, &otype, 1.0).await;
-              set_level_and_wait(&dev, feature, &otype, 0.0).await;
+              set_level_and_wait(&dev, feature, &output_type, 0.25).await;
+              set_level_and_wait(&dev, feature, &output_type, 0.5).await;
+              set_level_and_wait(&dev, feature, &output_type, 0.75).await;
+              set_level_and_wait(&dev, feature, &output_type, 1.0).await;
+              set_level_and_wait(&dev, feature, &output_type, -0.25).await;
+              set_level_and_wait(&dev, feature, &output_type, -0.5).await;
+              set_level_and_wait(&dev, feature, &output_type, -0.75).await;
+              set_level_and_wait(&dev, feature, &output_type, -1.0).await;
+              set_level_and_wait(&dev, feature, &output_type, 0.0).await;
+            } else {
+              set_level_and_wait(&dev, feature, &output_type, 0.25).await;
+              set_level_and_wait(&dev, feature, &output_type, 0.5).await;
+              set_level_and_wait(&dev, feature, &output_type, 0.75).await;
+              set_level_and_wait(&dev, feature, &output_type, 1.0).await;
+              set_level_and_wait(&dev, feature, &output_type, 0.0).await;
             }
-            OutputType::Unknown => {
-              error!(
-                "{} ({}) Can't test unknown feature {} ({}), output {:?}",
-                dev.name(),
-                dev.index(),
-                feature.feature().feature_index(),
-                feature.feature().description(),
-                otype
-              );
-            }
-            OutputType::Rotate => {
-              if output.step_limit().start() >= &0 {
-                set_level_and_wait(&dev, feature, &otype, 0.25).await;
-                set_level_and_wait(&dev, feature, &otype, 0.5).await;
-                set_level_and_wait(&dev, feature, &otype, 0.75).await;
-                set_level_and_wait(&dev, feature, &otype, 1.0).await;
-                set_level_and_wait(&dev, feature, &otype, 0.0).await;
-              } else {
-                set_level_and_wait(&dev, feature, &otype, 0.25).await;
-                set_level_and_wait(&dev, feature, &otype, -0.25).await;
-                set_level_and_wait(&dev, feature, &otype, 0.5).await;
-                set_level_and_wait(&dev, feature, &otype, -0.5).await;
-                set_level_and_wait(&dev, feature, &otype, 0.75).await;
-                set_level_and_wait(&dev, feature, &otype, -0.75).await;
-                set_level_and_wait(&dev, feature, &otype, 1.0).await;
-                set_level_and_wait(&dev, feature, &otype, -1.0).await;
-                set_level_and_wait(&dev, feature, &otype, 0.0).await;
-
-                set_level_and_wait(&dev, feature, &otype, 0.25).await;
-                set_level_and_wait(&dev, feature, &otype, 0.5).await;
-                set_level_and_wait(&dev, feature, &otype, 0.75).await;
-                set_level_and_wait(&dev, feature, &otype, 1.0).await;
-                set_level_and_wait(&dev, feature, &otype, -0.25).await;
-                set_level_and_wait(&dev, feature, &otype, -0.5).await;
-                set_level_and_wait(&dev, feature, &otype, -0.75).await;
-                set_level_and_wait(&dev, feature, &otype, -1.0).await;
-                set_level_and_wait(&dev, feature, &otype, 0.0).await;
-              }
-            }
-            OutputType::HwPositionWithDuration => {
-              feature
-                .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
-                  0.0f64.into(),
-                  10,
-                ))
-                .await
-                .unwrap();
-              println!(
-                "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
-                dev.name(),
-                dev.index(),
-                feature.feature().feature_index(),
-                feature.feature().description(),
-                "HwPositionWithDuration",
-                (0.0 * 100.0) as u8,
-                10
-              );
-              sleep(Duration::from_secs(1)).await;
-              feature
-                .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
-                  0.5f64.into(),
-                  1000,
-                ))
-                .await
-                .unwrap();
-              println!(
-                "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
-                dev.name(),
-                dev.index(),
-                feature.feature().feature_index(),
-                feature.feature().description(),
-                "HwPositionWithDuration",
-                (0.0 * 100.0) as u8,
-                1000
-              );
-              sleep(Duration::from_secs(1)).await;
-              feature
-                .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
-                  0.0f64.into(),
-                  10,
-                ))
-                .await
-                .unwrap();
-              println!(
-                "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
-                dev.name(),
-                dev.index(),
-                feature.feature().feature_index(),
-                feature.feature().description(),
-                "HwPositionWithDuration",
-                (0.0 * 100.0) as u8,
-                10
-              );
-              sleep(Duration::from_secs(1)).await;
-              feature
-                .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
-                  1.0f64.into(),
-                  500,
-                ))
-                .await
-                .unwrap();
-              println!(
-                "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
-                dev.name(),
-                dev.index(),
-                feature.feature().feature_index(),
-                feature.feature().description(),
-                "HwPositionWithDuration",
-                (1.0 * 100.0) as u8,
-                500
-              );
-              sleep(Duration::from_secs(1)).await;
-              feature
-                .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
-                  0.0f64.into(),
-                  1500,
-                ))
-                .await
-                .unwrap();
-              println!(
-                "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
-                dev.name(),
-                dev.index(),
-                feature.feature().feature_index(),
-                feature.feature().description(),
-                "HwPositionWithDuration",
-                (0.0 * 100.0) as u8,
-                1500
-              );
-            }
+          }
+          OutputType::HwPositionWithDuration => {
+            feature
+              .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
+                0.0f64.into(),
+                10,
+              ))
+              .await
+              .unwrap();
+            println!(
+              "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
+              dev.name(),
+              dev.index(),
+              feature.feature().feature_index(),
+              feature.feature().description(),
+              "HwPositionWithDuration",
+              (0.0 * 100.0) as u8,
+              10
+            );
+            sleep(Duration::from_secs(1)).await;
+            feature
+              .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
+                0.5f64.into(),
+                1000,
+              ))
+              .await
+              .unwrap();
+            println!(
+              "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
+              dev.name(),
+              dev.index(),
+              feature.feature().feature_index(),
+              feature.feature().description(),
+              "HwPositionWithDuration",
+              (0.0 * 100.0) as u8,
+              1000
+            );
+            sleep(Duration::from_secs(1)).await;
+            feature
+              .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
+                0.0f64.into(),
+                10,
+              ))
+              .await
+              .unwrap();
+            println!(
+              "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
+              dev.name(),
+              dev.index(),
+              feature.feature().feature_index(),
+              feature.feature().description(),
+              "HwPositionWithDuration",
+              (0.0 * 100.0) as u8,
+              10
+            );
+            sleep(Duration::from_secs(1)).await;
+            feature
+              .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
+                1.0f64.into(),
+                500,
+              ))
+              .await
+              .unwrap();
+            println!(
+              "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
+              dev.name(),
+              dev.index(),
+              feature.feature().feature_index(),
+              feature.feature().description(),
+              "HwPositionWithDuration",
+              (1.0 * 100.0) as u8,
+              500
+            );
+            sleep(Duration::from_secs(1)).await;
+            feature
+              .run_output(&ClientDeviceOutputCommand::HwPositionWithDuration(
+                0.0f64.into(),
+                1500,
+              ))
+              .await
+              .unwrap();
+            println!(
+              "{} ({}) Testing feature {}: {}, output {:?} - {}% {}ms",
+              dev.name(),
+              dev.index(),
+              feature.feature().feature_index(),
+              feature.feature().description(),
+              "HwPositionWithDuration",
+              (0.0 * 100.0) as u8,
+              1500
+            );
           }
         }
       }

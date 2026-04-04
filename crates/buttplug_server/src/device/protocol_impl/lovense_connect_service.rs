@@ -81,25 +81,13 @@ impl ProtocolInitializer for LovenseConnectServiceInitializer {
 
     protocol.vibrator_count = device_definition
       .features()
-      .iter()
-      .filter(|x| {
-        if let Some(o) = x.1.output() {
-          o.contains(OutputType::Vibrate)
-        } else {
-          false
-        }
-      })
+      .values()
+      .filter(|x| x.contains_output(OutputType::Vibrate))
       .count();
     protocol.thusting_count = device_definition
       .features()
-      .iter()
-      .filter(|x| {
-        if let Some(o) = x.1.output() {
-          o.contains(OutputType::Oscillate)
-        } else {
-          false
-        }
-      })
+      .values()
+      .filter(|x| x.contains_output(OutputType::Oscillate))
       .count();
 
     // The Ridge and Gravity both oscillate, but the Ridge only oscillates but takes

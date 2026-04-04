@@ -45,11 +45,7 @@ impl ProtocolInitializer for LovehoneyDesireInitializer {
     def: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(LovehoneyDesire::new(
-      def
-        .features()
-        .values()
-        .filter(|x| x.output().is_some())
-        .count() as u8,
+      def.features().values().filter(|x| x.has_output()).count() as u8,
     )))
   }
 }
