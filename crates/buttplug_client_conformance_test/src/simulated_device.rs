@@ -20,7 +20,7 @@ use std::{
   fmt::{self, Debug},
   sync::Arc,
 };
-use tokio::sync::{broadcast, Mutex};
+use tokio::sync::{Mutex, broadcast};
 
 /// A simulated hardware device that captures writes and injects reads for testing
 #[derive(Clone)]
@@ -81,7 +81,9 @@ impl SimulatedDevice {
   pub fn inject_notification(&self, endpoint: Endpoint, data: Vec<u8>) {
     if self.subscribed_endpoints.contains(&endpoint) {
       let name = (*self.name).clone();
-      let _ = self.event_sender.send(HardwareEvent::Notification(name, endpoint, data));
+      let _ = self
+        .event_sender
+        .send(HardwareEvent::Notification(name, endpoint, data));
     }
   }
 
