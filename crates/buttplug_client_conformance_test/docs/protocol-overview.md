@@ -272,12 +272,12 @@ List of connected devices. Sent after `StartScanning` completes or in response t
           "0": {
             "FeatureIndex": 0,
             "FeatureDescription": "Vibrator 1",
-            "Output": {"Vibrate": [[0, 100]]}
+            "Output": {"Vibrate": {"Value": [0, 100]}}
           },
           "1": {
             "FeatureIndex": 1,
             "FeatureDescription": "Vibrator 2",
-            "Output": {"Vibrate": [[0, 100]]}
+            "Output": {"Vibrate": {"Value": [0, 100]}}
           }
         }
       }
@@ -305,9 +305,9 @@ List of connected devices. Sent after `StartScanning` completes or in response t
 - `Input` (object, optional) — Input capabilities with type-keyed properties
 
 Output/Input objects have type names as keys (e.g., `Vibrate`, `Battery`) with nested properties:
-- Output types (e.g., `Vibrate`): `[[min, max]]` — range array for value
-- HwPositionWithDuration: `{"Value": [[min, max]], "Duration": [[min, max]]}`
-- Input types (e.g., `Battery`): `{"Value": [[min, max]], "Command": [list of commands]}` — ranges and supported commands
+- Output types (e.g., `Vibrate`): `{"Value": [min, max]}` — range array for value
+- HwPositionWithDuration: `{"Value": [min, max], "Duration": [min, max]}`
+- Input types (e.g., `Battery`): `{"Value": [min, max], "Command": [list of commands]}` — ranges and supported commands
 
 ### ScanningFinished (Server → Client)
 
