@@ -1,0 +1,27 @@
+[package]
+name = "buttplug-client-conformance-test"
+version = "0.1.0"
+authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
+description = "Conformance test harness for Buttplug client implementations"
+license = "BSD-3-Clause"
+edition = "2024"
+
+[lib]
+name = "buttplug_client_conformance_test"
+path = "src/lib.rs"
+
+[[bin]]
+name = "buttplug-client-conformance-test"
+path = "src/bin/main.rs"
+
+[dependencies]
+buttplug_core = { version = "10.0.2", path = "../buttplug_core" }
+buttplug_server = { version = "10.0.2", path = "../buttplug_server" }
+buttplug_server_device_config = { version = "10.0.3", path = "../buttplug_server_device_config" }
+buttplug_transport_websocket_tungstenite = { version = "10.0.2", path = "../buttplug_transport_websocket_tungstenite" }
+argh = "0.1.18"
+tokio = { version = "1.50.0", features = ["sync", "rt-multi-thread", "macros", "signal"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
