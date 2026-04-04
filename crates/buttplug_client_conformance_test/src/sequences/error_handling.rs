@@ -8,7 +8,7 @@
 use crate::step::{SideEffect, StepValidation, TestSequence, TestStep};
 use buttplug_core::message::{
   ButtplugClientMessageV4, OutputCmdV4, OutputCommand, OutputValue, RequestServerInfoV4,
-  ButtplugMessageSpecVersion,
+  ButtplugMessageSpecVersion, StartScanningV0,
 };
 use buttplug_server::message::ButtplugClientMessageVariant;
 use buttplug_server_device_config::Endpoint;
@@ -40,7 +40,12 @@ pub fn error_handling_sequence() -> TestSequence {
         name: "Scan and Enumerate",
         description: "Set up devices for subsequent tests",
         validation: StepValidation::WaitForScanning,
-        side_effects: vec![SideEffect::TriggerScanning],
+        side_effects: vec![
+          SideEffect::SendClientMessage(ButtplugClientMessageVariant::V4(
+            ButtplugClientMessageV4::StartScanning(StartScanningV0::default()),
+          )),
+          SideEffect::TriggerScanning,
+        ],
         timeout_ms: 5000,
         blocking: true,
       },
