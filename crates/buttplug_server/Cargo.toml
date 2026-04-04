@@ -23,6 +23,7 @@ crate-type = ["cdylib", "rlib"]
 default=["tokio-runtime"]
 tokio-runtime=["buttplug_core/tokio-runtime"]
 wasm=["buttplug_core/wasm", "uuid/js"]
+conformance-test=[]
 
 [dependencies]
 buttplug_core = { version = "10.0.2", path = "../buttplug_core", default-features = false  }
