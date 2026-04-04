@@ -8,16 +8,15 @@
 use crate::server::build_conformance_server;
 use crate::step::{SequenceContext, SequenceResult, StepResult, StepValidation, TestSequence};
 use buttplug_core::connector::ButtplugConnector;
-use buttplug_server::message::ButtplugClientMessageVariant;
 use buttplug_server::connector::ButtplugRemoteServerConnector;
 use buttplug_server::message::serializer::ButtplugServerJSONSerializer;
+use buttplug_server::message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant};
 use buttplug_transport_websocket_tungstenite::ButtplugWebsocketServerTransport;
 use buttplug_transport_websocket_tungstenite::ButtplugWebsocketServerTransportBuilder;
 use futures::stream::StreamExt;
 use std::sync::Arc;
 use std::time::Instant;
 use tokio::sync::mpsc;
-use tokio::time::timeout;
 use tracing::{debug, error, info};
 
 /// Run a test sequence against a real ButtplugServer with WebSocket transport
@@ -61,78 +60,44 @@ pub async fn run_sequence(
   // Set up the message channel for the connector
   let (connector_sender, connector_receiver) = mpsc::channel::<ButtplugClientMessageVariant>(256);
 
-  // Spawn the connector to listen for WebSocket connections
-  // This will block until a client connects, so it must run in background
-  let connector_task = tokio::spawn(async move {
-    match connector.connect(connector_sender).await {
-      Ok(_) => {
-        debug!("Connector accepted client");
-        Ok(())
-      }
-      Err(e) => {
-        error!("Connector error: {:?}", e);
-        Err(e)
-      }
-    }
+  // Connect the transport (blocks until a client connects)
+  if let Err(e) = connector.connect(connector_sender).await {
+    error!("Connector error: {:?}", e);
+    return SequenceResult {
+      sequence_name,
+      steps: vec![StepResult {
+        step_name: "Connection",
+        passed: false,
+        error: Some(format!("Connector failed: {:?}", e)),
+        duration_ms: 0,
+      }],
+      passed: false,
+    };
+  }
+
+  debug!("Connector accepted client");
+
+  // Wrap connector in Arc so it can be shared with the message loop
+  let connector = Arc::new(connector);
+
+  info!("Server ready, client connected on ws://127.0.0.1:{}", port);
+
+  // Client connected successfully (connector.connect() would have failed otherwise)
+  let server_connected = true;
+  info!("Client connected");
+  steps.push(StepResult {
+    step_name: "Connection",
+    passed: true,
+    error: None,
+    duration_ms: 0,
   });
-
-  // Give the WebSocket server time to start listening (before client tries to connect)
-  tokio::time::sleep(std::time::Duration::from_millis(200)).await;
-
-  debug!("WebSocket server listening on port {}", port);
-
-  info!("Server ready on ws://127.0.0.1:{}", port);
 
   // Start message loop in background
   let message_loop_task = tokio::spawn({
     let server = server.clone();
-    async move {
-      run_message_loop(server, connector_receiver).await
-    }
+    let connector = connector.clone();
+    async move { run_message_loop(server, connector, connector_receiver).await }
   });
-
-  // Wait for client connection with timeout
-  let connection_timeout = std::cmp::max(default_timeout_ms, 5000);
-  let mut server_connected = false;
-
-  match timeout(
-    std::time::Duration::from_millis(connection_timeout),
-    wait_for_connection(&server),
-  )
-  .await
-  {
-    Ok(_) => {
-      server_connected = true;
-      info!("Client connected");
-      steps.push(StepResult {
-        step_name: "Connection",
-        passed: true,
-        error: None,
-        duration_ms: 0,
-      });
-    }
-    Err(_) => {
-      error!("Timeout waiting for client connection");
-      steps.push(StepResult {
-        step_name: "Connection",
-        passed: false,
-        error: Some("Client connection timeout".to_string()),
-        duration_ms: connection_timeout,
-      });
-      passed = false;
-    }
-  }
-
-  // If we have a blocking failure on connection, skip remaining steps
-  if !server_connected {
-    let _ = message_loop_task.abort();
-    let _ = connector_task.abort();
-    return SequenceResult {
-      sequence_name,
-      steps,
-      passed: false,
-    };
-  }
 
   // Create context for steps (for future custom validators)
   let _context = SequenceContext {
@@ -221,7 +186,6 @@ pub async fn run_sequence(
 
   // Cleanup
   let _ = message_loop_task.abort();
-  let _ = connector_task.abort();
 
   SequenceResult {
     sequence_name,
@@ -230,24 +194,17 @@ pub async fn run_sequence(
   }
 }
 
-/// Wait for a client to connect to the server
-async fn wait_for_connection(server: &Arc<buttplug_server::ButtplugServer>) {
-  loop {
-    if server.connected() {
-      debug!("Client connected to server");
-      return;
-    }
-    tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
-  }
-}
-
 /// Run the main message loop between client and server
-async fn run_message_loop(
+/// Based on remote_server.rs run_server function
+async fn run_message_loop<ConnectorType>(
   server: Arc<buttplug_server::ButtplugServer>,
+  connector: Arc<ConnectorType>,
   mut connector_receiver: mpsc::Receiver<ButtplugClientMessageVariant>,
-) {
-  let mut server_event_stream = Box::pin(server.event_stream());
-  let mut server_version_stream = Box::pin(server.server_version_event_stream());
+) where
+  ConnectorType:
+    ButtplugConnector<ButtplugServerMessageVariant, ButtplugClientMessageVariant> + 'static,
+{
+  let mut client_version_receiver = Box::pin(server.event_stream());
 
   loop {
     tokio::select! {
@@ -261,43 +218,43 @@ async fn run_message_loop(
           Some(client_message) => {
             debug!("Got message from client: {:?}", client_message);
 
-            match server.parse_message(client_message).await {
-              Ok(_response) => {
-                // Response handling would go here
-                // For now, we just process the message
+            let server_clone = server.clone();
+            let connector_clone = connector.clone();
+
+            // Spawn message handling in background to match remote_server pattern
+            buttplug_core::spawn!("conformance_test_message", async move {
+              match server_clone.parse_message(client_message).await {
+                Ok(response) => {
+                  if connector_clone.send(response).await.is_err() {
+                    error!("Failed to send response to client");
+                  }
+                }
+                Err(err_msg) => {
+                  if connector_clone.send(err_msg).await.is_err() {
+                    error!("Failed to send error response to client");
+                  }
+                }
               }
-              Err(_err_msg) => {
-                // Error handling would go here
-              }
-            }
+            });
           }
         }
       }
 
-      // Server events (unsolicited messages)
-      msg = server_event_stream.next() => {
+      // Server version-specific events (unsolicited messages)
+      msg = client_version_receiver.next() => {
         match msg {
           None => {
             debug!("Server event stream closed");
             break;
           }
-          Some(_server_msg) => {
-            debug!("Got server event");
-            // Event forwarding would go here
-          }
-        }
-      }
-
-      // Server version-specific events
-      msg = server_version_stream.next() => {
-        match msg {
-          None => {
-            debug!("Server version stream closed");
-            break;
-          }
-          Some(_server_msg) => {
-            debug!("Got server version event");
-            // Event forwarding would go here
+          Some(server_msg) => {
+            debug!("Got server event: {:?}", server_msg);
+            let connector_clone = connector.clone();
+            buttplug_core::spawn!("conformance_test_event", async move {
+              if connector_clone.send(server_msg).await.is_err() {
+                error!("Failed to send server event to client");
+              }
+            });
           }
         }
       }

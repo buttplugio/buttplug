@@ -7,8 +7,8 @@
 
 use buttplug_client_conformance_test::runner::run_sequence;
 use buttplug_client_conformance_test::step::{StepValidation, TestSequence, TestStep};
-use futures_util::stream::StreamExt;
 use futures_util::SinkExt;
+use futures_util::stream::StreamExt;
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
 
@@ -30,15 +30,15 @@ async fn test_handshake_sequence() {
   };
 
   // Use a random high port to avoid conflicts
-  let port = 20000 + (std::time::SystemTime::now()
-    .duration_since(std::time::UNIX_EPOCH)
-    .unwrap()
-    .as_secs() % 10000) as u16;
+  let port = 20000
+    + (std::time::SystemTime::now()
+      .duration_since(std::time::UNIX_EPOCH)
+      .unwrap()
+      .as_secs()
+      % 10000) as u16;
 
   // Spawn the runner in a background task
-  let runner_task = tokio::spawn(async move {
-    run_sequence(&sequence, port, 2000).await
-  });
+  let runner_task = tokio::spawn(async move { run_sequence(&sequence, port, 2000).await });
 
   // Wait for server to start listening
   tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
@@ -49,7 +49,8 @@ async fn test_handshake_sequence() {
     match connect_async(&ws_url).await {
       Ok((mut ws, _)) => {
         // Send RequestServerInfo message
-        let handshake_msg = r#"[{"RequestServerInfo":{"Id":1,"ClientName":"Test","ProtocolVersionMajor":4}}]"#;
+        let handshake_msg =
+          r#"[{"RequestServerInfo":{"Id":1,"ClientName":"Test","ProtocolVersionMajor":4}}]"#;
         if ws.send(Message::Text(handshake_msg.into())).await.is_ok() {
           // Receive ServerInfo response (or wait for something)
           let _response = ws.next().await;
@@ -69,7 +70,11 @@ async fn test_handshake_sequence() {
     .expect("Runner task timed out")
     .expect("Runner task panicked");
 
-  // The runner should complete without panicking, even if connection times out
+  // The runner should complete without panicking and the test should pass
   // This is a baseline integration test that the runner doesn't crash
-  assert!(!runner_result.sequence_name.is_empty(), "Result should have sequence name");
+  assert!(
+    !runner_result.sequence_name.is_empty(),
+    "Result should have sequence name"
+  );
+  assert!(runner_result.passed, "Handshake sequence should pass");
 }
