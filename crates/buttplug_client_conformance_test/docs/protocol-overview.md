@@ -307,7 +307,7 @@ List of connected devices. Sent after `StartScanning` completes or in response t
 Output/Input objects have type names as keys (e.g., `Vibrate`, `Battery`) with nested properties:
 - Output types (e.g., `Vibrate`): `{"Value": [min, max]}` — range array for value
 - HwPositionWithDuration: `{"Value": [min, max], "Duration": [min, max]}`
-- Input types (e.g., `Battery`): `{"Value": [min, max], "Command": [list of commands]}` — ranges and supported commands
+- Input types (e.g., `Battery`): `{"Value": [[min, max]], "Command": [list of commands]}` — nested array for ranges and supported commands
 
 ### ScanningFinished (Server → Client)
 
