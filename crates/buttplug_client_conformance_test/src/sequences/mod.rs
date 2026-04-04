@@ -9,6 +9,7 @@ pub mod core_protocol;
 pub mod ping_required;
 pub mod error_handling;
 pub mod ping_timeout;
+pub mod reconnection;
 
 use crate::step::TestSequence;
 
@@ -19,5 +20,6 @@ pub fn all_sequences() -> Vec<TestSequence> {
     ping_required::ping_required_sequence(),
     error_handling::error_handling_sequence(),
     ping_timeout::ping_timeout_sequence(),
+    reconnection::reconnection_sequence(),
   ]
 }

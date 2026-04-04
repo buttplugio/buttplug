@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::device_manager::ConformanceDeviceHandle;
 use crate::server::build_conformance_server;
 use crate::step::{
   SequenceContext, SequenceResult, SideEffect, StepResult, StepValidation, TestSequence,
@@ -21,31 +22,38 @@ use std::time::Instant;
 use tokio::sync::mpsc;
 use tracing::{debug, error, info};
 
-/// Run a test sequence against a real ButtplugServer with WebSocket transport
-pub async fn run_sequence(
-  sequence: &TestSequence,
-  port: u16,
-  __default_timeout_ms: u64,
-) -> SequenceResult {
-  let sequence_name = sequence.name.to_string();
-  let mut steps = Vec::new();
-  let mut passed = true;
+type ConcreteConnector = ButtplugRemoteServerConnector<
+  ButtplugWebsocketServerTransport,
+  ButtplugServerJSONSerializer,
+>;
 
+/// Mutable runner state that can be rebuilt for reconnection sequences
+struct RunnerState {
+  server: Arc<buttplug_server::ButtplugServer>,
+  connector: Arc<ConcreteConnector>,
+  device_handles: Vec<ConformanceDeviceHandle>,
+  message_loop_task: tokio::task::JoinHandle<()>,
+}
+
+/// Initialize a fresh server and connector, wait for client connection
+async fn init_server(
+  port: u16,
+  max_ping_time: u32,
+) -> Result<RunnerState, (StepResult, String)> {
   // Build the server with conformance devices
-  let (server, device_handles) = match build_conformance_server(sequence.max_ping_time) {
+  let (server, device_handles) = match build_conformance_server(max_ping_time) {
     Ok((s, h)) => (Arc::new(s), h),
     Err(e) => {
-      error!("Failed to build server: {:?}", e);
-      return SequenceResult {
-        sequence_name,
-        steps: vec![StepResult {
+      let error_msg = format!("Failed to build server: {:?}", e);
+      return Err((
+        StepResult {
           step_name: "Server Setup",
           passed: false,
-          error: Some(format!("Failed to build server: {:?}", e)),
+          error: Some(error_msg.clone()),
           duration_ms: 0,
-        }],
-        passed: false,
-      };
+        },
+        error_msg,
+      ));
     }
   };
 
@@ -54,10 +62,7 @@ pub async fn run_sequence(
     .port(port)
     .finish();
 
-  let mut connector = ButtplugRemoteServerConnector::<
-    ButtplugWebsocketServerTransport,
-    ButtplugServerJSONSerializer,
-  >::new(transport);
+  let mut connector = ConcreteConnector::new(transport);
 
   // Set up the message channel for the connector
   let (connector_sender, connector_receiver) = mpsc::channel::<ButtplugClientMessageVariant>(256);
@@ -76,35 +81,21 @@ pub async fn run_sequence(
         connect_result.unwrap().unwrap_err()
       )
     };
-    error!("{}", &error_msg);
-    return SequenceResult {
-      sequence_name,
-      steps: vec![StepResult {
+    return Err((
+      StepResult {
         step_name: "Connection",
         passed: false,
-        error: Some(error_msg),
+        error: Some(error_msg.clone()),
         duration_ms: 0,
-      }],
-      passed: false,
-    };
+      },
+      error_msg,
+    ));
   }
 
   debug!("Connector accepted client");
 
   // Wrap connector in Arc so it can be shared with the message loop
   let connector = Arc::new(connector);
-
-  info!("Server ready, client connected on ws://127.0.0.1:{}", port);
-
-  // Client connected successfully (connector.connect() would have failed otherwise)
-  let server_connected = true;
-  info!("Client connected");
-  steps.push(StepResult {
-    step_name: "Connection",
-    passed: true,
-    error: None,
-    duration_ms: 0,
-  });
 
   // Start message loop in background
   let message_loop_task = tokio::spawn({
@@ -113,11 +104,48 @@ pub async fn run_sequence(
     async move { run_message_loop(server, connector, connector_receiver).await }
   });
 
-  // Create context for steps (for custom validators)
-  let context = SequenceContext {
+  Ok(RunnerState {
+    server,
+    connector,
     device_handles,
-    server_connected,
+    message_loop_task,
+  })
+}
+
+/// Run a test sequence against a real ButtplugServer with WebSocket transport
+pub async fn run_sequence(
+  sequence: &TestSequence,
+  port: u16,
+  __default_timeout_ms: u64,
+) -> SequenceResult {
+  let sequence_name = sequence.name.to_string();
+  let mut steps = Vec::new();
+  let mut passed = true;
+
+  // Initialize server and wait for client connection
+  let mut runner_state = match init_server(port, sequence.max_ping_time).await {
+    Ok(state) => state,
+    Err((step_result, error_msg)) => {
+      error!("{}", &error_msg);
+      return SequenceResult {
+        sequence_name,
+        steps: vec![step_result],
+        passed: false,
+      };
+    }
   };
+
+  info!(
+    "Server ready, client connected on ws://127.0.0.1:{}",
+    port
+  );
+  info!("Client connected");
+  steps.push(StepResult {
+    step_name: "Connection",
+    passed: true,
+    error: None,
+    duration_ms: 0,
+  });
 
   // Execute each step
   for step in &sequence.steps {
@@ -126,9 +154,37 @@ pub async fn run_sequence(
     // Execute side effects first
     for side_effect in &step.side_effects {
       match side_effect {
+        SideEffect::RebuildServer => {
+          debug!("RebuildServer: Aborting message loop and rebuilding");
+          // Abort the current message loop
+          runner_state.message_loop_task.abort();
+
+          // Build fresh server and connector on the same port
+          // Old server and connector will be dropped when runner_state is reassigned
+          match init_server(port, sequence.max_ping_time).await {
+            Ok(new_state) => {
+              runner_state = new_state;
+              debug!("RebuildServer: New server and client connection established");
+            }
+            Err((_step_result, error_msg)) => {
+              error!("RebuildServer failed: {}", error_msg);
+              steps.push(StepResult {
+                step_name: step.name,
+                passed: false,
+                error: Some(error_msg),
+                duration_ms: step_start.elapsed().as_millis() as u64,
+              });
+              passed = false;
+              if step.blocking {
+                break;
+              }
+              continue;
+            }
+          }
+        }
         SideEffect::SendClientMessage(msg) => {
           debug!("Sending client message: {:?}", msg);
-          match server.parse_message(msg.clone()).await {
+          match runner_state.server.parse_message(msg.clone()).await {
             Ok(response) => {
               debug!("Got server response: {:?}", response);
             }
@@ -150,7 +206,7 @@ pub async fn run_sequence(
           data,
         } => {
           debug!("Injecting sensor reading to device {}", device_index);
-          if let Some(handle) = context.device_handles.get(*device_index) {
+          if let Some(handle) = runner_state.device_handles.get(*device_index) {
             handle
               .event_sender
               .send(
@@ -165,7 +221,7 @@ pub async fn run_sequence(
         }
         SideEffect::RemoveDevice { device_index } => {
           debug!("Removing device {}", device_index);
-          if let Some(handle) = context.device_handles.get(*device_index) {
+          if let Some(handle) = runner_state.device_handles.get(*device_index) {
             handle
               .event_sender
               .send(
@@ -185,13 +241,14 @@ pub async fn run_sequence(
           debug!("Delaying {} ms", ms);
           tokio::time::sleep(std::time::Duration::from_millis(*ms)).await;
         }
-        SideEffect::RebuildServer => {
-          debug!("RebuildServer side effect not yet implemented");
-          // This will be implemented when needed for the reconnection sequence (Task 4-5)
-          // For now, this is a no-op to satisfy the match
-        }
       }
     }
+
+    // Create a context for validations with current state
+    let context = SequenceContext {
+      device_handles: runner_state.device_handles.clone(),
+      server_connected: true,
+    };
 
     let result = match &step.validation {
       StepValidation::WaitForConnection => {
@@ -216,7 +273,7 @@ pub async fn run_sequence(
         device_index,
         validator,
       } => {
-        let (passed, error) = if let Some(handle) = context.device_handles.get(*device_index) {
+        let (passed, error) = if let Some(handle) = runner_state.device_handles.get(*device_index) {
           let write_log = handle.write_log.lock().await;
           match validator(write_log.as_slice()) {
             Ok(()) => (true, None),
@@ -277,7 +334,9 @@ pub async fn run_sequence(
 
   // Cleanup: Wait for message loop to complete (when client disconnects)
   // If it takes too long, we abort it
-  let _ = tokio::time::timeout(std::time::Duration::from_secs(10), message_loop_task).await;
+  let _ =
+    tokio::time::timeout(std::time::Duration::from_secs(10), runner_state.message_loop_task)
+      .await;
 
   SequenceResult {
     sequence_name,

@@ -31,6 +31,7 @@ pub struct ConformanceDeviceSpec {
 }
 
 /// Handle for external control of a conformance device during tests
+#[derive(Clone)]
 pub struct ConformanceDeviceHandle {
   pub write_log: Arc<Mutex<Vec<HardwareWriteCmd>>>,
   pub read_queue: Arc<Mutex<VecDeque<HardwareReading>>>,
