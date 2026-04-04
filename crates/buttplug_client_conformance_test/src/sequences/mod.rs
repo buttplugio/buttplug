@@ -6,8 +6,8 @@
 // for full license information.
 
 pub mod core_protocol;
-pub mod ping_required;
 pub mod error_handling;
+pub mod ping_required;
 pub mod ping_timeout;
 pub mod reconnection;
 

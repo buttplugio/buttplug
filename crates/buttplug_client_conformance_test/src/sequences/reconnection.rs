@@ -112,9 +112,11 @@ pub fn reconnection_sequence() -> TestSequence {
           }),
         },
         side_effects: vec![SideEffect::SendClientMessage(
-          ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::OutputCmd(
-            OutputCmdV4::new(0, 0, OutputCommand::Vibrate(OutputValue::new(50))),
-          )),
+          ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::OutputCmd(OutputCmdV4::new(
+            0,
+            0,
+            OutputCommand::Vibrate(OutputValue::new(50)),
+          ))),
         )],
         timeout_ms: 5000,
         blocking: false,

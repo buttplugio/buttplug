@@ -37,10 +37,12 @@ pub fn ping_required_sequence() -> TestSequence {
       TestStep {
         name: "First Ping Received",
         description: "Wait for client to send first Ping within 1000ms",
-        validation: StepValidation::Custom(Arc::new(|_ctx| {
-          // The server hasn't pinged out if the sequence is still running.
-          // This validator just confirms the server is still connected.
-          Ok(())
+        validation: StepValidation::Custom(Arc::new(|ctx| {
+          if ctx.server_connected {
+            Ok(())
+          } else {
+            Err("Server disconnected during ping interval".to_string())
+          }
         })),
         side_effects: vec![SideEffect::Delay { ms: 900 }],
         timeout_ms: 1500,
@@ -49,9 +51,12 @@ pub fn ping_required_sequence() -> TestSequence {
       TestStep {
         name: "Second Ping Received",
         description: "Wait for another ping cycle",
-        validation: StepValidation::Custom(Arc::new(|_ctx| {
-          // Verify server is still connected
-          Ok(())
+        validation: StepValidation::Custom(Arc::new(|ctx| {
+          if ctx.server_connected {
+            Ok(())
+          } else {
+            Err("Server disconnected during ping interval".to_string())
+          }
         })),
         side_effects: vec![SideEffect::Delay { ms: 900 }],
         timeout_ms: 1500,
@@ -71,10 +76,7 @@ pub fn ping_required_sequence() -> TestSequence {
             ))
           }
         })),
-        side_effects: vec![
-          SideEffect::TriggerScanning,
-          SideEffect::Delay { ms: 900 },
-        ],
+        side_effects: vec![SideEffect::TriggerScanning, SideEffect::Delay { ms: 900 }],
         timeout_ms: 2000,
         blocking: false,
       },
