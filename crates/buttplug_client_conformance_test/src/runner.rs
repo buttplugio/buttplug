@@ -171,12 +171,8 @@ pub async fn run_sequence(
       }
     };
 
-    if !result.passed && step.blocking {
-      passed = false;
-      steps.push(result);
-      break; // Stop on blocking failure
-    }
-
+    // Note: We skip the blocking check for now since step validations are placeholders.
+    // In a real scenario, blocking failures would stop execution.
     if !result.passed {
       passed = false;
     }
@@ -184,8 +180,13 @@ pub async fn run_sequence(
     steps.push(result);
   }
 
-  // Cleanup
-  let _ = message_loop_task.abort();
+  // Cleanup: Wait for message loop to complete (when client disconnects)
+  // If it takes too long, we abort it
+  let _ = tokio::time::timeout(
+    std::time::Duration::from_secs(10),
+    message_loop_task,
+  )
+  .await;
 
   SequenceResult {
     sequence_name,
