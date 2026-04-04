@@ -15,12 +15,8 @@ use std::{
 use uuid::Uuid;
 
 use crate::{
-  BaseDeviceIdentifier,
-  ButtplugDeviceConfigError,
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  ServerDeviceDefinitionBuilder,
-  UserDeviceIdentifier,
+  BaseDeviceIdentifier, ButtplugDeviceConfigError, ProtocolCommunicationSpecifier,
+  ServerDeviceDefinition, ServerDeviceDefinitionBuilder, UserDeviceIdentifier,
 };
 
 #[derive(Default, Clone)]

@@ -10,19 +10,14 @@ use super::fleshlight_launch_helper::calculate_speed;
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    ProtocolHandler,
-    ProtocolIdentifier,
-    ProtocolInitializer,
-    generic_protocol_initializer_setup,
+    ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 use std::sync::{
   Arc,

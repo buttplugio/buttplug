@@ -16,18 +16,14 @@ pub mod channel_transport;
 use buttplug_client::ButtplugClient;
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
 use buttplug_server::{
-  ButtplugServer,
-  ButtplugServerBuilder,
+  ButtplugServer, ButtplugServerBuilder,
   device::{
-    ServerDeviceManagerBuilder,
-    hardware::communication::HardwareCommunicationManagerBuilder,
+    ServerDeviceManagerBuilder, hardware::communication::HardwareCommunicationManagerBuilder,
   },
 };
 use buttplug_server_device_config::{DeviceConfigurationManager, load_protocol_configs};
 pub use test_device_manager::{
-  TestDeviceChannelHost,
-  TestDeviceCommunicationManagerBuilder,
-  TestHardwareEvent,
+  TestDeviceChannelHost, TestDeviceCommunicationManagerBuilder, TestHardwareEvent,
 };
 
 use crate::util::test_device_manager::TestDeviceIdentifier;

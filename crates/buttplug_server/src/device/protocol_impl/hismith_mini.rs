@@ -11,10 +11,7 @@ use crate::device::{
 use async_trait::async_trait;
 use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
 use buttplug_server_device_config::{
-  Endpoint,
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  Endpoint, ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 use std::sync::Arc;
 use uuid::{Uuid, uuid};

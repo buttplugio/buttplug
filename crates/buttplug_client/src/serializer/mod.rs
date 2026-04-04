@@ -6,14 +6,9 @@
 // for full license information.
 
 use buttplug_core::message::{
-  ButtplugClientMessageV4,
-  ButtplugMessage,
-  ButtplugMessageFinalizer,
-  ButtplugServerMessageV4,
+  ButtplugClientMessageV4, ButtplugMessage, ButtplugMessageFinalizer, ButtplugServerMessageV4,
   serializer::{
-    ButtplugMessageSerializer,
-    ButtplugSerializedMessage,
-    ButtplugSerializerError,
+    ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugSerializerError,
     json_serializer::{create_message_validator, deserialize_to_message, vec_to_protocol_json},
   },
 };
@@ -96,9 +91,7 @@ impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
 mod test {
   use super::*;
   use buttplug_core::message::{
-    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-    BUTTPLUG_CURRENT_API_MINOR_VERSION,
-    RequestServerInfoV4,
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION, RequestServerInfoV4,
   };
 
   #[test]

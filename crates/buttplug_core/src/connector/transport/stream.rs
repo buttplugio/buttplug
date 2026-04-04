@@ -10,8 +10,7 @@
 
 use crate::{
   connector::{
-    ButtplugConnectorError,
-    ButtplugConnectorResultFuture,
+    ButtplugConnectorError, ButtplugConnectorResultFuture,
     transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
   },
   message::serializer::ButtplugSerializedMessage,

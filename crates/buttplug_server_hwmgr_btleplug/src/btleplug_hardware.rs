@@ -13,27 +13,16 @@ use btleplug::{
 };
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::{
-  Hardware,
-  HardwareConnector,
-  HardwareEvent,
-  HardwareInternal,
-  HardwareReadCmd,
-  HardwareReading,
-  HardwareSpecializer,
-  HardwareSubscribeCmd,
-  HardwareUnsubscribeCmd,
-  HardwareWriteCmd,
+  Hardware, HardwareConnector, HardwareEvent, HardwareInternal, HardwareReadCmd, HardwareReading,
+  HardwareSpecializer, HardwareSubscribeCmd, HardwareUnsubscribeCmd, HardwareWriteCmd,
   communication::HardwareSpecificError,
 };
 use buttplug_server_device_config::{
-  BluetoothLESpecifier,
-  Endpoint,
-  ProtocolCommunicationSpecifier,
+  BluetoothLESpecifier, Endpoint, ProtocolCommunicationSpecifier,
 };
 use dashmap::DashSet;
 use futures::{
-  Stream,
-  StreamExt,
+  Stream, StreamExt,
   future::{self, BoxFuture, FutureExt},
 };
 use std::{

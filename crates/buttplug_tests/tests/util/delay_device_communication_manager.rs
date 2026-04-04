@@ -7,8 +7,7 @@
 
 use buttplug_core::ButtplugResultFuture;
 use buttplug_server::device::hardware::communication::{
-  HardwareCommunicationManager,
-  HardwareCommunicationManagerBuilder,
+  HardwareCommunicationManager, HardwareCommunicationManagerBuilder,
   HardwareCommunicationManagerEvent,
 };
 use futures::FutureExt;

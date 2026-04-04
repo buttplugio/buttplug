@@ -17,8 +17,7 @@ use super::test_device_manager::{
 };
 use buttplug_core::ButtplugResultFuture;
 use buttplug_server::device::hardware::communication::{
-  HardwareCommunicationManager,
-  HardwareCommunicationManagerBuilder,
+  HardwareCommunicationManager, HardwareCommunicationManagerBuilder,
   HardwareCommunicationManagerEvent,
 };
 use buttplug_server_device_config::{BluetoothLESpecifier, ProtocolCommunicationSpecifier};

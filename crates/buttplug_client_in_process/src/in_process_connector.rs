@@ -13,9 +13,7 @@ use buttplug_core::{
   message::{ButtplugClientMessageV4, ButtplugServerMessageV4},
 };
 use buttplug_server::{
-  ButtplugServer,
-  ButtplugServerBuilder,
-  message::ButtplugServerMessageVariant,
+  ButtplugServer, ButtplugServerBuilder, message::ButtplugServerMessageVariant,
 };
 
 use futures::{

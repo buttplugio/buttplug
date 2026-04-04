@@ -28,18 +28,13 @@ pub mod svakom_v6;
 
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::{
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 
 use crate::device::{
   hardware::Hardware,
   protocol::{
-    ProtocolHandler,
-    ProtocolIdentifier,
-    ProtocolInitializer,
-    generic_protocol_initializer_setup,
+    ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;

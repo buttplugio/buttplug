@@ -13,18 +13,12 @@ use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    ProtocolHandler,
-    ProtocolIdentifier,
-    ProtocolInitializer,
-    ProtocolKeepaliveStrategy,
+    ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, ProtocolKeepaliveStrategy,
     generic_protocol_initializer_setup,
   },
 };
 use buttplug_server_device_config::{
-  Endpoint,
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  Endpoint, ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 use std::sync::{
   Arc,

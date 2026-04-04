@@ -11,10 +11,7 @@ use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::device_config_file::{
-  ConfigVersion,
-  ConfigVersionGetter,
-  get_internal_config_version,
-  protocol::ProtocolDefinition,
+  ConfigVersion, ConfigVersionGetter, get_internal_config_version, protocol::ProtocolDefinition,
 };
 
 #[derive(Deserialize, Serialize, Debug, Getters)]

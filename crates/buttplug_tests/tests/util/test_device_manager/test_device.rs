@@ -7,16 +7,8 @@
 
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::{
-  Hardware,
-  HardwareCommand,
-  HardwareConnector,
-  HardwareEvent,
-  HardwareInternal,
-  HardwareReadCmd,
-  HardwareReading,
-  HardwareSpecializer,
-  HardwareSubscribeCmd,
-  HardwareUnsubscribeCmd,
+  Hardware, HardwareCommand, HardwareConnector, HardwareEvent, HardwareInternal, HardwareReadCmd,
+  HardwareReading, HardwareSpecializer, HardwareSubscribeCmd, HardwareUnsubscribeCmd,
   HardwareWriteCmd,
 };
 use buttplug_server_device_config::{Endpoint, ProtocolCommunicationSpecifier};

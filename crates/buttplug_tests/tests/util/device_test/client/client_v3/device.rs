@@ -8,9 +8,7 @@
 //! Representation and management of devices connected to the server.
 
 use super::client::{
-  ButtplugClientMessageSender,
-  ButtplugClientResultFuture,
-  create_boxed_future_client_error,
+  ButtplugClientMessageSender, ButtplugClientResultFuture, create_boxed_future_client_error,
 };
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
@@ -18,21 +16,10 @@ use buttplug_core::{
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server::message::{
-  ButtplugDeviceMessageNameV3,
-  ButtplugServerMessageV3,
-  ClientDeviceMessageAttributesV3,
-  ClientGenericDeviceMessageAttributesV3,
-  DeviceMessageInfoV3,
-  LinearCmdV1,
-  RotateCmdV1,
-  RotationSubcommandV1,
-  ScalarCmdV3,
-  ScalarSubcommandV3,
-  SensorReadCmdV3,
-  SensorSubscribeCmdV3,
-  SensorUnsubscribeCmdV3,
-  StopDeviceCmdV0,
-  VectorSubcommandV1,
+  ButtplugDeviceMessageNameV3, ButtplugServerMessageV3, ClientDeviceMessageAttributesV3,
+  ClientGenericDeviceMessageAttributesV3, DeviceMessageInfoV3, LinearCmdV1, RotateCmdV1,
+  RotationSubcommandV1, ScalarCmdV3, ScalarSubcommandV3, SensorReadCmdV3, SensorSubscribeCmdV3,
+  SensorUnsubscribeCmdV3, StopDeviceCmdV0, VectorSubcommandV1,
 };
 use futures::{FutureExt, Stream};
 use getset::{CopyGetters, Getters};
@@ -669,8 +656,7 @@ impl ButtplugClientDevice {
   }
 }
 
-impl Eq for ButtplugClientDevice {
-}
+impl Eq for ButtplugClientDevice {}
 
 impl PartialEq for ButtplugClientDevice {
   fn eq(&self, other: &Self) -> bool {

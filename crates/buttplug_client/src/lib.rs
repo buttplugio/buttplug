@@ -20,17 +20,9 @@ use buttplug_core::{
   connector::{ButtplugConnector, ButtplugConnectorError},
   errors::{ButtplugError, ButtplugHandshakeError},
   message::{
-    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-    BUTTPLUG_CURRENT_API_MINOR_VERSION,
-    ButtplugClientMessageV4,
-    ButtplugServerMessageV4,
-    InputType,
-    PingV0,
-    RequestDeviceListV0,
-    RequestServerInfoV4,
-    StartScanningV0,
-    StopCmdV4,
-    StopScanningV0,
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION,
+    ButtplugClientMessageV4, ButtplugServerMessageV4, InputType, PingV0, RequestDeviceListV0,
+    RequestServerInfoV4, StartScanningV0, StopCmdV4, StopScanningV0,
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
@@ -146,8 +138,7 @@ pub enum ButtplugClientEvent {
   Error(ButtplugError),
 }
 
-impl Unpin for ButtplugClientEvent {
-}
+impl Unpin for ButtplugClientEvent {}
 
 pub(crate) fn create_boxed_future_client_error<T>(
   err: ButtplugError,

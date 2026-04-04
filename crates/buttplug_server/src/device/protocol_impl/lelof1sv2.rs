@@ -8,26 +8,17 @@
 use super::{lelo_harmony::LeloHarmony, lelof1s::LeloF1s};
 use crate::device::{
   hardware::{
-    Hardware,
-    HardwareEvent,
-    HardwareSubscribeCmd,
-    HardwareUnsubscribeCmd,
-    HardwareWriteCmd,
+    Hardware, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd, HardwareWriteCmd,
   },
   protocol::{
-    ProtocolHandler,
-    ProtocolIdentifier,
-    ProtocolInitializer,
-    generic_protocol_initializer_setup,
+    ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 use std::sync::Arc;
 use uuid::{Uuid, uuid};

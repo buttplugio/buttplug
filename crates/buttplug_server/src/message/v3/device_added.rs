@@ -13,10 +13,7 @@ use crate::message::{
 use buttplug_core::{
   errors::ButtplugMessageError,
   message::{
-    ButtplugMessage,
-    ButtplugMessageFinalizer,
-    ButtplugMessageValidator,
-    DeviceFeature,
+    ButtplugMessage, ButtplugMessageFinalizer, ButtplugMessageValidator, DeviceFeature,
     DeviceMessageInfoV4,
   },
 };

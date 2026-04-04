@@ -13,6 +13,5 @@ mod in_process_connector;
 
 pub use in_process_client::in_process_client;
 pub use in_process_connector::{
-  ButtplugInProcessClientConnector,
-  ButtplugInProcessClientConnectorBuilder,
+  ButtplugInProcessClientConnector, ButtplugInProcessClientConnectorBuilder,
 };

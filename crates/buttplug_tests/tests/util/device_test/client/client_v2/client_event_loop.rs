@@ -16,10 +16,7 @@ use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError},
 };
 use buttplug_server::message::{
-  ButtplugClientMessageV2,
-  ButtplugServerMessageV2,
-  DeviceListV2,
-  DeviceMessageInfoV2,
+  ButtplugClientMessageV2, ButtplugServerMessageV2, DeviceListV2, DeviceMessageInfoV2,
 };
 use dashmap::DashMap;
 use futures::channel::oneshot;

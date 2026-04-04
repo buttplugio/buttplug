@@ -6,10 +6,7 @@
 // for full license information.
 
 use serde::{
-  Deserialize,
-  Deserializer,
-  Serialize,
-  Serializer,
+  Deserialize, Deserializer, Serialize, Serializer,
   de::{self, Visitor},
 };
 use std::{

@@ -30,10 +30,7 @@ use buttplug_core::{
   util::async_manager,
 };
 use buttplug_server_device_config::{
-  Endpoint,
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  Endpoint, ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 use futures::{FutureExt, future::BoxFuture};
 use regex::Regex;

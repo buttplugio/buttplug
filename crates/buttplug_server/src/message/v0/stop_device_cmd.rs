@@ -6,10 +6,7 @@
 // for full license information.
 
 use crate::message::{
-  ButtplugDeviceMessage,
-  ButtplugMessage,
-  ButtplugMessageError,
-  ButtplugMessageValidator,
+  ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageValidator,
 };
 use serde::{Deserialize, Serialize};
 

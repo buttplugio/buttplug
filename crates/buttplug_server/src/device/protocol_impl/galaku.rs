@@ -17,25 +17,16 @@ use buttplug_core::message::{InputReadingV4, InputType, InputTypeReading, InputV
 use buttplug_server_device_config::Endpoint;
 
 use buttplug_server_device_config::{
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 
 use crate::device::{
   hardware::{
-    Hardware,
-    HardwareCommand,
-    HardwareEvent,
-    HardwareSubscribeCmd,
-    HardwareUnsubscribeCmd,
+    Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd,
     HardwareWriteCmd,
   },
   protocol::{
-    ProtocolHandler,
-    ProtocolIdentifier,
-    ProtocolInitializer,
-    generic_protocol_initializer_setup,
+    ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup,
   },
 };
 

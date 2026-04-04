@@ -8,11 +8,7 @@
 //! Buttplug Error Structs/Enums, representing protocol errors.
 
 use super::message::{
-  self,
-  ButtplugMessageSpecVersion,
-  ErrorCode,
-  InputType,
-  OutputType,
+  self, ButtplugMessageSpecVersion, ErrorCode, InputType, OutputType,
   serializer::ButtplugSerializerError,
 };
 use futures::future::BoxFuture;

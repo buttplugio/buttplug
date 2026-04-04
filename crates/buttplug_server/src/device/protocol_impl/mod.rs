@@ -365,7 +365,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     motorbunny::setup::MotorbunnyIdentifierFactory::default(),
   );
-  add_to_protocol_map(&mut map, mymuselinkplus::setup::MyMuseLinkPlusIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    mymuselinkplus::setup::MyMuseLinkPlusIdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     mysteryvibe::setup::MysteryVibeIdentifierFactory::default(),

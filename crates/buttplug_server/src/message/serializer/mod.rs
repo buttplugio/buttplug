@@ -8,20 +8,12 @@
 use buttplug_core::{
   errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
   message::{
-    self,
-    ButtplugClientMessageV4,
-    ButtplugMessageFinalizer,
-    ButtplugMessageSpecVersion,
-    ButtplugServerMessageCurrent,
-    ButtplugServerMessageV4,
+    self, ButtplugClientMessageV4, ButtplugMessageFinalizer, ButtplugMessageSpecVersion,
+    ButtplugServerMessageCurrent, ButtplugServerMessageV4,
     serializer::{
-      ButtplugMessageSerializer,
-      ButtplugSerializedMessage,
-      ButtplugSerializerError,
+      ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugSerializerError,
       json_serializer::{
-        create_message_validator,
-        deserialize_to_message,
-        msg_to_protocol_json,
+        create_message_validator, deserialize_to_message, msg_to_protocol_json,
         vec_to_protocol_json,
       },
     },
@@ -32,15 +24,9 @@ use once_cell::sync::OnceCell;
 use serde::Deserialize;
 
 use super::{
-  ButtplugClientMessageV0,
-  ButtplugClientMessageV1,
-  ButtplugClientMessageV2,
-  ButtplugClientMessageV3,
-  ButtplugClientMessageVariant,
-  ButtplugServerMessageV0,
-  ButtplugServerMessageV1,
-  ButtplugServerMessageV2,
-  ButtplugServerMessageV3,
+  ButtplugClientMessageV0, ButtplugClientMessageV1, ButtplugClientMessageV2,
+  ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageV0,
+  ButtplugServerMessageV1, ButtplugServerMessageV2, ButtplugServerMessageV3,
   ButtplugServerMessageVariant,
 };
 
@@ -50,8 +36,7 @@ struct RequestServerInfoMessage {
   rsi: RequestServerInfoVersion,
 }
 
-impl ButtplugMessageFinalizer for RequestServerInfoMessage {
-}
+impl ButtplugMessageFinalizer for RequestServerInfoMessage {}
 
 #[derive(Deserialize, Clone, Debug)]
 struct RequestServerInfoVersion {
@@ -65,8 +50,7 @@ struct RequestServerInfoVersion {
   api_major_version: Option<u32>,
 }
 
-impl ButtplugMessageFinalizer for RequestServerInfoVersion {
-}
+impl ButtplugMessageFinalizer for RequestServerInfoVersion {}
 
 pub struct ButtplugServerJSONSerializer {
   pub(super) message_version: OnceCell<message::ButtplugMessageSpecVersion>,

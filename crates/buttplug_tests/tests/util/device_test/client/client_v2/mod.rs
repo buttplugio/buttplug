@@ -12,9 +12,7 @@ mod device;
 mod in_process_connector;
 
 use crate::util::{
-  ButtplugTestServer,
-  TestDeviceChannelHost,
-  device_test::connector::build_channel_connector_v2,
+  ButtplugTestServer, TestDeviceChannelHost, device_test::connector::build_channel_connector_v2,
 };
 use buttplug_server::{ButtplugServer, ButtplugServerBuilder, device::ServerDeviceManagerBuilder};
 use buttplug_server_device_config::load_protocol_configs;
@@ -25,10 +23,7 @@ use in_process_connector::ButtplugInProcessClientConnectorBuilder;
 use tokio::sync::Notify;
 
 use super::super::{
-  super::TestDeviceCommunicationManagerBuilder,
-  DeviceTestCase,
-  TestClientCommand,
-  TestCommand,
+  super::TestDeviceCommunicationManagerBuilder, DeviceTestCase, TestClientCommand, TestCommand,
   filter_commands,
 };
 use futures::StreamExt;

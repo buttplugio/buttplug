@@ -8,14 +8,9 @@
 use std::ops::RangeInclusive;
 
 use crate::{
-  ButtplugDeviceConfigError,
-  RangeWithLimit,
-  ServerDeviceFeature,
-  ServerDeviceFeatureInput,
-  ServerDeviceFeatureOutput,
-  ServerDeviceFeatureOutputHwPositionWithDurationProperties,
-  ServerDeviceFeatureOutputPositionProperties,
-  ServerDeviceFeatureOutputValueProperties,
+  ButtplugDeviceConfigError, RangeWithLimit, ServerDeviceFeature, ServerDeviceFeatureInput,
+  ServerDeviceFeatureOutput, ServerDeviceFeatureOutputHwPositionWithDurationProperties,
+  ServerDeviceFeatureOutputPositionProperties, ServerDeviceFeatureOutputValueProperties,
 };
 use buttplug_core::util::range_serialize::option_range_serialize;
 use getset::{CopyGetters, Getters};

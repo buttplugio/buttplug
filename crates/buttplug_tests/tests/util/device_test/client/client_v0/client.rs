@@ -12,19 +12,12 @@ use buttplug_core::{
   connector::{ButtplugConnector, ButtplugConnectorError},
   errors::{ButtplugError, ButtplugHandshakeError},
   message::{
-    ButtplugMessageSpecVersion,
-    PingV0,
-    RequestDeviceListV0,
-    StartScanningV0,
-    StopScanningV0,
+    ButtplugMessageSpecVersion, PingV0, RequestDeviceListV0, StartScanningV0, StopScanningV0,
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server::message::{
-  ButtplugClientMessageV0,
-  ButtplugServerMessageV0,
-  RequestServerInfoV1,
-  StopAllDevicesV0,
+  ButtplugClientMessageV0, ButtplugServerMessageV0, RequestServerInfoV1, StopAllDevicesV0,
 };
 use dashmap::DashMap;
 use futures::channel::oneshot;
@@ -130,8 +123,7 @@ pub enum ButtplugClientEvent {
   Error(ButtplugError),
 }
 
-impl Unpin for ButtplugClientEvent {
-}
+impl Unpin for ButtplugClientEvent {}
 
 /// Struct used by applications to communicate with a Buttplug Server.
 ///

@@ -11,30 +11,17 @@ use getset::{CopyGetters, Getters};
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugDeviceMessageNameV4,
-    ButtplugServerMessageV4,
-    DeviceFeature,
-    DeviceFeatureOutputLimits,
-    InputCmdV4,
-    InputCommandType,
-    InputType,
-    InputTypeReading,
-    OutputCmdV4,
-    OutputCommand,
-    OutputHwPositionWithDuration,
-    OutputType,
-    OutputValue,
+    ButtplugDeviceMessageNameV4, ButtplugServerMessageV4, DeviceFeature, DeviceFeatureOutputLimits,
+    InputCmdV4, InputCommandType, InputType, InputTypeReading, OutputCmdV4, OutputCommand,
+    OutputHwPositionWithDuration, OutputType, OutputValue,
   },
 };
 
 use super::ClientDeviceOutputCommand;
 
 use crate::{
-  ButtplugClientError,
-  ButtplugClientMessageSender,
-  ButtplugClientResultFuture,
-  create_boxed_future_client_error,
-  device::ClientDeviceCommandValue,
+  ButtplugClientError, ButtplugClientMessageSender, ButtplugClientResultFuture,
+  create_boxed_future_client_error, device::ClientDeviceCommandValue,
 };
 
 #[derive(Getters, CopyGetters, Clone)]

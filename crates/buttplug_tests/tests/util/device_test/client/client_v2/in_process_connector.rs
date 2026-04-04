@@ -12,8 +12,7 @@ use buttplug_core::{
   errors::{ButtplugError, ButtplugMessageError},
 };
 use buttplug_server::{
-  ButtplugServer,
-  ButtplugServerBuilder,
+  ButtplugServer, ButtplugServerBuilder,
   message::{ButtplugClientMessageV2, ButtplugServerMessageV2, ButtplugServerMessageVariant},
 };
 use futures::{

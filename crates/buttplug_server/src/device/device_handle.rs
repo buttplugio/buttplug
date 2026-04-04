@@ -16,23 +16,13 @@ use buttplug_core::{
   ButtplugResultFuture,
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
-    self,
-    ButtplugMessage,
-    ButtplugServerMessageV4,
-    DeviceFeature,
-    DeviceMessageInfoV4,
-    InputCommandType,
-    InputType,
-    OutputType,
-    OutputValue,
-    StopCmdV4,
+    self, ButtplugMessage, ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4,
+    InputCommandType, InputType, OutputType, OutputValue, StopCmdV4,
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server_device_config::{
-  DeviceConfigurationManager,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  DeviceConfigurationManager, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 use dashmap::DashMap;
 use futures::future::{self, BoxFuture, FutureExt};
@@ -46,10 +36,8 @@ use uuid::Uuid;
 use crate::{
   ButtplugServerResultFuture,
   message::{
-    ButtplugServerDeviceMessage,
-    checked_input_cmd::CheckedInputCmdV4,
-    checked_output_cmd::CheckedOutputCmdV4,
-    server_device_attributes::ServerDeviceAttributes,
+    ButtplugServerDeviceMessage, checked_input_cmd::CheckedInputCmdV4,
+    checked_output_cmd::CheckedOutputCmdV4, server_device_attributes::ServerDeviceAttributes,
     spec_enums::ButtplugDeviceCommandMessageUnionV4,
   },
 };

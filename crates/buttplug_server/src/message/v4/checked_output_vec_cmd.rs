@@ -6,25 +6,14 @@
 // for full license information.
 
 use crate::message::{
-  ButtplugDeviceMessageNameV3,
-  LinearCmdV1,
-  RotateCmdV1,
-  ServerDeviceAttributes,
-  TryFromDeviceAttributes,
-  v0::SingleMotorVibrateCmdV0,
-  v1::VibrateCmdV1,
-  v3::ScalarCmdV3,
+  ButtplugDeviceMessageNameV3, LinearCmdV1, RotateCmdV1, ServerDeviceAttributes,
+  TryFromDeviceAttributes, v0::SingleMotorVibrateCmdV0, v1::VibrateCmdV1, v3::ScalarCmdV3,
 };
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageValidator,
-    OutputCommand,
-    OutputHwPositionWithDuration,
-    OutputType,
-    OutputValue,
+    ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageValidator, OutputCommand,
+    OutputHwPositionWithDuration, OutputType, OutputValue,
   },
 };
 use getset::{CopyGetters, Getters};

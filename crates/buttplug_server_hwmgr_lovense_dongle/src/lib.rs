@@ -21,6 +21,5 @@ pub mod lovense_hid_dongle_comm_manager;
 pub use lovense_dongle_hardware::{LovenseDongleHardware, LovenseDongleHardwareConnector};
 #[cfg(any(target_os = "windows", target_os = "macos", target_os = "linux"))]
 pub use lovense_hid_dongle_comm_manager::{
-  LovenseHIDDongleCommunicationManager,
-  LovenseHIDDongleCommunicationManagerBuilder,
+  LovenseHIDDongleCommunicationManager, LovenseHIDDongleCommunicationManagerBuilder,
 };

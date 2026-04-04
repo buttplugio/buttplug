@@ -19,14 +19,8 @@
 use buttplug_core::{
   errors::{ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageSpecVersion,
-    ButtplugServerMessageV4,
-    DeviceListV4,
-    DeviceMessageInfoV4,
-    DeviceRemovedV0,
-    InputTypeReading,
+    ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugServerMessageV4,
+    DeviceListV4, DeviceMessageInfoV4, DeviceRemovedV0, InputTypeReading,
   },
 };
 
@@ -35,16 +29,9 @@ use dashmap::DashSet;
 use crate::message::{DeviceAddedV0, DeviceAddedV1, DeviceAddedV2, DeviceAddedV3};
 
 use super::message::{
-  BatteryLevelReadingV2,
-  ButtplugClientMessageV2,
-  ButtplugClientMessageV3,
-  ButtplugClientMessageVariant,
-  ButtplugServerMessageV0,
-  ButtplugServerMessageV1,
-  ButtplugServerMessageV2,
-  ButtplugServerMessageV3,
-  ButtplugServerMessageVariant,
-  SensorReadingV3,
+  BatteryLevelReadingV2, ButtplugClientMessageV2, ButtplugClientMessageV3,
+  ButtplugClientMessageVariant, ButtplugServerMessageV0, ButtplugServerMessageV1,
+  ButtplugServerMessageV2, ButtplugServerMessageV3, ButtplugServerMessageVariant, SensorReadingV3,
 };
 
 pub struct ButtplugServerDeviceEventMessageConverter {

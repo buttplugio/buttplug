@@ -12,10 +12,7 @@ use buttplug_core::{
   message::{InputReadingV4, InputType, InputValue, OutputCommand},
 };
 use buttplug_server_device_config::{
-  Endpoint,
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  Endpoint, ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 use dashmap::DashMap;
 
@@ -26,8 +23,7 @@ use crate::{
     protocol_impl::get_default_protocol_map,
   },
   message::{
-    ButtplugServerDeviceMessage,
-    checked_output_cmd::CheckedOutputCmdV4,
+    ButtplugServerDeviceMessage, checked_output_cmd::CheckedOutputCmdV4,
     spec_enums::ButtplugDeviceCommandMessageUnionV4,
   },
 };

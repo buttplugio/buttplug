@@ -8,23 +8,14 @@
 use crate::ButtplugDeviceConfigError;
 
 use buttplug_core::message::{
-  DeviceFeature,
-  DeviceFeatureInput,
-  DeviceFeatureInputBuilder,
-  DeviceFeatureInputProperties,
-  DeviceFeatureOutput,
-  DeviceFeatureOutputBuilder,
-  DeviceFeatureOutputHwPositionWithDurationProperties,
-  DeviceFeatureOutputValueProperties,
-  InputCommandType,
-  InputType,
-  OutputType,
+  DeviceFeature, DeviceFeatureInput, DeviceFeatureInputBuilder, DeviceFeatureInputProperties,
+  DeviceFeatureOutput, DeviceFeatureOutputBuilder,
+  DeviceFeatureOutputHwPositionWithDurationProperties, DeviceFeatureOutputValueProperties,
+  InputCommandType, InputType, OutputType,
 };
 use getset::{CopyGetters, Getters, Setters};
 use serde::{
-  Deserialize,
-  Serialize,
-  Serializer,
+  Deserialize, Serialize, Serializer,
   de::{self, Deserializer, SeqAccess, Visitor},
   ser::SerializeSeq,
 };
@@ -726,8 +717,7 @@ impl PartialEq for ServerDeviceFeature {
   }
 }
 
-impl Eq for ServerDeviceFeature {
-}
+impl Eq for ServerDeviceFeature {}
 
 impl Default for ServerDeviceFeature {
   fn default() -> Self {

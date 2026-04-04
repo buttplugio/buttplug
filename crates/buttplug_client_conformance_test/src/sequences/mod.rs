@@ -11,7 +11,5 @@ use crate::step::TestSequence;
 
 /// Returns all available test sequences.
 pub fn all_sequences() -> Vec<TestSequence> {
-  vec![
-    core_protocol::core_protocol_sequence(),
-  ]
+  vec![core_protocol::core_protocol_sequence()]
 }

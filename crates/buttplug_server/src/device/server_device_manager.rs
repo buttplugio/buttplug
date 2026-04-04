@@ -9,8 +9,7 @@
 //! specific) Managers
 
 use crate::{
-  ButtplugServerError,
-  ButtplugServerResultFuture,
+  ButtplugServerError, ButtplugServerResultFuture,
   device::{
     DeviceHandle,
     hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerBuilder},
@@ -19,8 +18,7 @@ use crate::{
   message::{
     server_device_attributes::ServerDeviceAttributes,
     spec_enums::{
-      ButtplugCheckedClientMessageV4,
-      ButtplugDeviceCommandMessageUnionV4,
+      ButtplugCheckedClientMessageV4, ButtplugDeviceCommandMessageUnionV4,
       ButtplugDeviceManagerMessageUnion,
     },
   },
@@ -28,12 +26,7 @@ use crate::{
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
   message::{
-    self,
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugServerMessageV4,
-    DeviceListV4,
-    StopCmdV4,
+    self, ButtplugDeviceMessage, ButtplugMessage, ButtplugServerMessageV4, DeviceListV4, StopCmdV4,
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };

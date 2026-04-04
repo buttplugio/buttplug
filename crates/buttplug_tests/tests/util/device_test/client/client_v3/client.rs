@@ -11,19 +11,12 @@ use buttplug_core::{
   connector::{ButtplugConnector, ButtplugConnectorError},
   errors::{ButtplugError, ButtplugHandshakeError},
   message::{
-    ButtplugMessageSpecVersion,
-    PingV0,
-    RequestDeviceListV0,
-    StartScanningV0,
-    StopScanningV0,
+    ButtplugMessageSpecVersion, PingV0, RequestDeviceListV0, StartScanningV0, StopScanningV0,
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server::message::{
-  ButtplugClientMessageV3,
-  ButtplugServerMessageV3,
-  RequestServerInfoV1,
-  StopAllDevicesV0,
+  ButtplugClientMessageV3, ButtplugServerMessageV3, RequestServerInfoV1, StopAllDevicesV0,
 };
 use dashmap::DashMap;
 use futures::channel::oneshot;
@@ -127,8 +120,7 @@ pub enum ButtplugClientEvent {
   Error(ButtplugError),
 }
 
-impl Unpin for ButtplugClientEvent {
-}
+impl Unpin for ButtplugClientEvent {}
 
 pub(super) fn create_boxed_future_client_error<T>(
   err: ButtplugError,

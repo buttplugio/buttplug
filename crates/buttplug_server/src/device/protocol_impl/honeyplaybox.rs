@@ -9,10 +9,7 @@ use crate::device::hardware::HardwareReadCmd;
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
   protocol::{
-    ProtocolHandler,
-    ProtocolIdentifier,
-    ProtocolInitializer,
-    generic_protocol_initializer_setup,
+    ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
@@ -21,9 +18,7 @@ use buttplug_core::message::{InputReadingV4, InputTypeReading, InputValue};
 use buttplug_core::util::async_manager;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 use futures::FutureExt;
 use futures_util::future::BoxFuture;

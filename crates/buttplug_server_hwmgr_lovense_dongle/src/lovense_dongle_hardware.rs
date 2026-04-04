@@ -6,31 +6,18 @@
 // for full license information.
 
 use super::lovense_dongle_messages::{
-  LovenseDongleIncomingMessage,
-  LovenseDongleMessageFunc,
-  LovenseDongleMessageType,
-  LovenseDongleOutgoingMessage,
-  OutgoingLovenseData,
+  LovenseDongleIncomingMessage, LovenseDongleMessageFunc, LovenseDongleMessageType,
+  LovenseDongleOutgoingMessage, OutgoingLovenseData,
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::{
-  GenericHardwareSpecializer,
-  Hardware,
-  HardwareConnector,
-  HardwareEvent,
-  HardwareInternal,
-  HardwareReadCmd,
-  HardwareReading,
-  HardwareSpecializer,
-  HardwareSubscribeCmd,
-  HardwareUnsubscribeCmd,
-  HardwareWriteCmd,
+  GenericHardwareSpecializer, Hardware, HardwareConnector, HardwareEvent, HardwareInternal,
+  HardwareReadCmd, HardwareReading, HardwareSpecializer, HardwareSubscribeCmd,
+  HardwareUnsubscribeCmd, HardwareWriteCmd,
 };
 use buttplug_server_device_config::{
-  BluetoothLESpecifier,
-  Endpoint,
-  ProtocolCommunicationSpecifier,
+  BluetoothLESpecifier, Endpoint, ProtocolCommunicationSpecifier,
 };
 use futures::future::{self, BoxFuture, FutureExt};
 use std::{

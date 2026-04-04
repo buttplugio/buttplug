@@ -8,16 +8,12 @@
 use super::{
   TestDevice,
   test_device::{
-    TestDeviceChannelDevice,
-    TestDeviceChannelHost,
-    TestHardwareConnector,
-    new_device_channel,
+    TestDeviceChannelDevice, TestDeviceChannelHost, TestHardwareConnector, new_device_channel,
   },
 };
 use buttplug_core::ButtplugResultFuture;
 use buttplug_server::device::hardware::communication::{
-  HardwareCommunicationManager,
-  HardwareCommunicationManagerBuilder,
+  HardwareCommunicationManager, HardwareCommunicationManagerBuilder,
   HardwareCommunicationManagerEvent,
 };
 use buttplug_server_device_config::{BluetoothLESpecifier, ProtocolCommunicationSpecifier};

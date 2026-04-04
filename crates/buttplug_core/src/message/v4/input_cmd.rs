@@ -6,11 +6,7 @@
 // for full license information.
 
 use crate::message::{
-  ButtplugDeviceMessage,
-  ButtplugMessage,
-  ButtplugMessageError,
-  ButtplugMessageValidator,
-  InputType,
+  ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageValidator, InputType,
 };
 use getset::CopyGetters;
 use serde::{Deserialize, Serialize};

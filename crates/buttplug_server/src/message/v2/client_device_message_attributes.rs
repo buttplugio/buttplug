@@ -7,8 +7,7 @@
 
 use crate::message::{
   v1::{
-    ClientDeviceMessageAttributesV1,
-    GenericDeviceMessageAttributesV1,
+    ClientDeviceMessageAttributesV1, GenericDeviceMessageAttributesV1,
     NullDeviceMessageAttributesV1,
   },
   v3::ClientDeviceMessageAttributesV3,
