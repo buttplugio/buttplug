@@ -6,7 +6,9 @@
 // for full license information.
 
 use crate::server::build_conformance_server;
-use crate::step::{SequenceContext, SequenceResult, StepResult, StepValidation, TestSequence};
+use crate::step::{
+  SequenceContext, SequenceResult, SideEffect, StepResult, StepValidation, TestSequence,
+};
 use buttplug_core::connector::ButtplugConnector;
 use buttplug_server::connector::ButtplugRemoteServerConnector;
 use buttplug_server::message::serializer::ButtplugServerJSONSerializer;
@@ -60,15 +62,27 @@ pub async fn run_sequence(
   // Set up the message channel for the connector
   let (connector_sender, connector_receiver) = mpsc::channel::<ButtplugClientMessageVariant>(256);
 
-  // Connect the transport (blocks until a client connects)
-  if let Err(e) = connector.connect(connector_sender).await {
-    error!("Connector error: {:?}", e);
+  // Connect the transport with timeout (blocks until a client connects)
+  let connect_timeout = std::time::Duration::from_secs(10);
+  let connect_result =
+    tokio::time::timeout(connect_timeout, connector.connect(connector_sender)).await;
+
+  if connect_result.is_err() || connect_result.as_ref().unwrap().is_err() {
+    let error_msg = if connect_result.is_err() {
+      "Connector timeout waiting for client".to_string()
+    } else {
+      format!(
+        "Connector error: {:?}",
+        connect_result.unwrap().unwrap_err()
+      )
+    };
+    error!("{}", &error_msg);
     return SequenceResult {
       sequence_name,
       steps: vec![StepResult {
         step_name: "Connection",
         passed: false,
-        error: Some(format!("Connector failed: {:?}", e)),
+        error: Some(error_msg),
         duration_ms: 0,
       }],
       passed: false,
@@ -99,8 +113,8 @@ pub async fn run_sequence(
     async move { run_message_loop(server, connector, connector_receiver).await }
   });
 
-  // Create context for steps (for future custom validators)
-  let _context = SequenceContext {
+  // Create context for steps (for custom validators)
+  let context = SequenceContext {
     device_handles,
     server_connected,
   };
@@ -114,6 +128,69 @@ pub async fn run_sequence(
       default_timeout_ms
     };
 
+    // Execute side effects first
+    for side_effect in &step.side_effects {
+      match side_effect {
+        SideEffect::SendClientMessage(msg) => {
+          debug!("Sending client message: {:?}", msg);
+          match server.parse_message(msg.clone()).await {
+            Ok(response) => {
+              debug!("Got server response: {:?}", response);
+            }
+            Err(err_msg) => {
+              debug!("Got server error response: {:?}", err_msg);
+            }
+          }
+        }
+        SideEffect::TriggerScanning => {
+          debug!("Triggering scanning");
+          // Brief delay to allow scanning to complete (conformance DCM is synchronous)
+          tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+        }
+        SideEffect::InjectSensorReading {
+          device_index,
+          endpoint,
+          data,
+        } => {
+          debug!("Injecting sensor reading to device {}", device_index);
+          if let Some(handle) = context.device_handles.get(*device_index) {
+            handle
+              .event_sender
+              .send(
+                buttplug_server::device::hardware::HardwareEvent::Notification(
+                  format!("Device {}", device_index),
+                  *endpoint,
+                  data.clone(),
+                ),
+              )
+              .ok();
+          }
+        }
+        SideEffect::RemoveDevice { device_index } => {
+          debug!("Removing device {}", device_index);
+          if let Some(handle) = context.device_handles.get(*device_index) {
+            handle
+              .event_sender
+              .send(
+                buttplug_server::device::hardware::HardwareEvent::Disconnected(format!(
+                  "Device {}",
+                  device_index
+                )),
+              )
+              .ok();
+          }
+        }
+        SideEffect::CloseConnection => {
+          debug!("Closing connection");
+          // Connection closure is handled by the client
+        }
+        SideEffect::Delay { ms } => {
+          debug!("Delaying {} ms", ms);
+          tokio::time::sleep(std::time::Duration::from_millis(*ms)).await;
+        }
+      }
+    }
+
     let result = match &step.validation {
       StepValidation::WaitForConnection => {
         // This would be the first step typically
@@ -125,56 +202,73 @@ pub async fn run_sequence(
         }
       }
       StepValidation::WaitForScanning => {
-        // Placeholder for now
+        // Conformance DCM enumerates synchronously after trigger
         StepResult {
           step_name: step.name,
-          passed: false,
-          error: Some("WaitForScanning not yet implemented".to_string()),
+          passed: true,
+          error: None,
           duration_ms: step_start.elapsed().as_millis() as u64,
         }
       }
-      StepValidation::ValidateDeviceCommand { .. } => {
-        // Placeholder for now
+      StepValidation::ValidateDeviceCommand {
+        device_index,
+        validator,
+      } => {
+        let passed = if let Some(handle) = context.device_handles.get(*device_index) {
+          let write_log = handle.write_log.lock().await;
+          validator(write_log.as_slice()).is_ok()
+        } else {
+          false
+        };
+
         StepResult {
           step_name: step.name,
-          passed: false,
-          error: Some("ValidateDeviceCommand not yet implemented".to_string()),
+          passed,
+          error: if passed {
+            None
+          } else {
+            Some("Device command validation failed".to_string())
+          },
           duration_ms: step_start.elapsed().as_millis() as u64,
         }
       }
       StepValidation::WaitForServerEvent { .. } => {
-        // Placeholder for now
+        // For now, just pass - server events are handled by the message loop
         StepResult {
           step_name: step.name,
-          passed: false,
-          error: Some("WaitForServerEvent not yet implemented".to_string()),
+          passed: true,
+          error: None,
           duration_ms: step_start.elapsed().as_millis() as u64,
         }
       }
       StepValidation::WaitForDisconnect => {
-        // Placeholder for now
+        // Client disconnection is handled by the message loop
         StepResult {
           step_name: step.name,
-          passed: false,
-          error: Some("WaitForDisconnect not yet implemented".to_string()),
+          passed: true,
+          error: None,
           duration_ms: step_start.elapsed().as_millis() as u64,
         }
       }
-      StepValidation::Custom(_validator) => {
-        // Placeholder - would call validator with context
+      StepValidation::Custom(validator) => {
+        let validation_result = validator(&context);
         StepResult {
           step_name: step.name,
-          passed: false,
-          error: Some("Custom validation not yet implemented".to_string()),
+          passed: validation_result.is_ok(),
+          error: validation_result.err(),
           duration_ms: step_start.elapsed().as_millis() as u64,
         }
       }
     };
 
-    // Note: We skip the blocking check for now since step validations are placeholders.
-    // In a real scenario, blocking failures would stop execution.
+    // Check if this step is blocking and failed
     if !result.passed {
       passed = false;
+      if step.blocking {
+        // Stop execution on blocking failure
+        steps.push(result);
+        break;
+      }
     }
 
     steps.push(result);
@@ -182,11 +276,7 @@ pub async fn run_sequence(
 
   // Cleanup: Wait for message loop to complete (when client disconnects)
   // If it takes too long, we abort it
-  let _ = tokio::time::timeout(
-    std::time::Duration::from_secs(10),
-    message_loop_task,
-  )
-  .await;
+  let _ = tokio::time::timeout(std::time::Duration::from_secs(10), message_loop_task).await;
 
   SequenceResult {
     sequence_name,

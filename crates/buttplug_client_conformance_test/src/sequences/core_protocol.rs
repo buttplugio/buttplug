@@ -205,7 +205,7 @@ pub fn core_protocol_sequence() -> TestSequence {
         side_effects: vec![SideEffect::InjectSensorReading {
           device_index: 0,
           endpoint: buttplug_server_device_config::Endpoint::RxBLEBattery,
-          data: vec![85],  // 85% battery
+          data: vec![85], // 85% battery
         }],
         timeout_ms: 5000,
         blocking: false,
