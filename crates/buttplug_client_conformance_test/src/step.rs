@@ -44,6 +44,8 @@ pub enum StepValidation {
 /// Describes what the runner does before or during a step
 #[derive(Clone)]
 pub enum SideEffect {
+  /// Send a client message directly to the server (bypassing WebSocket)
+  SendClientMessage(buttplug_server::message::ButtplugClientMessageVariant),
   /// Trigger device scanning (adds pre-configured devices)
   TriggerScanning,
   /// Inject a sensor reading into a simulated device
