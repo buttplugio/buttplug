@@ -131,23 +131,47 @@ impl SdlWorker {
         controller.has_rumble()
       );
 
-      // Process commands until Quit
+      // Process commands until Quit.
+      // Buttplug sends separate write_value calls for each motor, so we
+      // drain all pending commands before applying rumble to avoid
+      // intermediate states (e.g. left=65535,right=0 followed by left=0,right=0).
       loop {
         match cmd_rx.recv() {
           Ok(SdlCommand::Rumble {
-            left,
-            right,
-            duration_ms,
+            mut left,
+            mut right,
+            mut duration_ms,
           }) => {
+            // Small delay to let both motor commands arrive before processing
+            std::thread::sleep(std::time::Duration::from_millis(5));
+            // Drain any additional pending commands
+            while let Ok(next) = cmd_rx.try_recv() {
+              match next {
+                SdlCommand::Rumble { left: l, right: r, duration_ms: d } => {
+                  left = l;
+                  right = r;
+                  duration_ms = d;
+                }
+                SdlCommand::Stop => {
+                  left = 0;
+                  right = 0;
+                  duration_ms = 10000;
+                }
+                SdlCommand::Quit => {
+                  let _ = controller.set_rumble(0, 0, 10000);
+                  return;
+                }
+              }
+            }
             if let Err(e) = controller.set_rumble(left, right, duration_ms) {
               warn!("SDL rumble failed: {e}");
             }
           }
           Ok(SdlCommand::Stop) => {
-            let _ = controller.set_rumble(0, 0, 0);
+            let _ = controller.set_rumble(0, 0, 10000);
           }
           Ok(SdlCommand::Quit) | Err(_) => {
-            let _ = controller.set_rumble(0, 0, 0);
+            let _ = controller.set_rumble(0, 0, 10000);
             break;
           }
         }
@@ -221,7 +245,8 @@ impl HardwareInternal for SdlGamepadHardware {
   }
 
   fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    self.worker.stop();
+    info!("SDL Gamepad: disconnect() called — stopping rumble");
+    self.worker.rumble(0, 0, 10000);
     future::ready(Ok(())).boxed()
   }
 
@@ -254,8 +279,10 @@ impl HardwareInternal for SdlGamepadHardware {
         .read_u16::<LittleEndian>()
         .expect("Packed in protocol, infallible");
 
-      // SDL rumble duration: use 1000ms as default, the next write_value will override
-      worker.rumble(left_motor_speed, right_motor_speed, 1000);
+      info!("SDL Gamepad: write_value left={} right={}", left_motor_speed, right_motor_speed);
+
+      // Always use long duration — SDL on macOS ignores short-duration zero rumble.
+      worker.rumble(left_motor_speed, right_motor_speed, 10000);
       Ok(())
     }
     .boxed()
