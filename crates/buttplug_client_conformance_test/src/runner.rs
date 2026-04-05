@@ -228,6 +228,11 @@ pub async fn run_sequence(
           }
         }
         SideEffect::RemoveDevice { device_index } => {
+          if client_driven {
+            // Give the client time to send all commands before removing devices
+            debug!("Client-driven mode: waiting before device removal");
+            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+          }
           debug!("Removing device {}", device_index);
           if let Some(handle) = runner_state.device_handles.get(*device_index) {
             handle
