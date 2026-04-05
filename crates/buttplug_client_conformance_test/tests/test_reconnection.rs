@@ -20,7 +20,7 @@ async fn test_reconnection_pass() {
 
   // Spawn the runner in the background with generous timeout
   let runner_task =
-    tokio::spawn(async move { run_sequence(&reconnection_sequence(), port, 45000).await });
+    tokio::spawn(async move { run_sequence(&reconnection_sequence(), port, 45000, false).await });
 
   // Wait for WebSocket server to start
   tokio::time::sleep(Duration::from_millis(100)).await;

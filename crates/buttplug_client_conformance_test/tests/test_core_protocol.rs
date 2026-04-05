@@ -17,7 +17,7 @@ async fn test_core_protocol_full_pass() {
 
   // Spawn the runner in the background
   let runner_task =
-    tokio::spawn(async move { run_sequence(&core_protocol_sequence(), port, 5000).await });
+    tokio::spawn(async move { run_sequence(&core_protocol_sequence(), port, 5000, false).await });
 
   // Wait for WebSocket server to start, then connect a minimal client
   tokio::time::sleep(Duration::from_millis(100)).await;
@@ -63,7 +63,7 @@ async fn test_core_protocol_wrong_first_message() {
 
   // Spawn the runner in the background with minimal timeout
   let runner_task =
-    tokio::spawn(async move { run_sequence(&core_protocol_sequence(), port, 500).await });
+    tokio::spawn(async move { run_sequence(&core_protocol_sequence(), port, 500, false).await });
 
   // Don't connect any client - test expects failure due to no connection
   // Await the runner task with timeout

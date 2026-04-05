@@ -15,7 +15,9 @@ use buttplug_server::message::ButtplugClientMessageVariant;
 use buttplug_server_device_config::Endpoint;
 use std::sync::Arc;
 
-/// Validates that output commands were written with the expected feature index
+/// Validates that output commands were written with the expected feature index.
+/// Checks ALL write log entries (not just the last) so that real clients sending
+/// commands in any order are handled correctly.
 fn validate_output_cmd(
   cmds: &[HardwareWriteCmd],
   expected_feature_index: u8,
@@ -26,27 +28,20 @@ fn validate_output_cmd(
       expected_feature_index
     ));
   }
-  let last_cmd = &cmds[cmds.len() - 1];
-  if last_cmd.endpoint() != Endpoint::Tx {
-    return Err(format!(
-      "Expected Endpoint::Tx, got {:?}",
-      last_cmd.endpoint()
-    ));
+  for cmd in cmds {
+    if cmd.endpoint() != Endpoint::Tx {
+      continue;
+    }
+    let data = cmd.data();
+    if data.len() >= 5 && data[0] == expected_feature_index {
+      return Ok(());
+    }
   }
-  let data = last_cmd.data();
-  if data.len() < 5 {
-    return Err(format!(
-      "Expected at least 5 bytes of data, got {}",
-      data.len()
-    ));
-  }
-  if data[0] != expected_feature_index {
-    return Err(format!(
-      "Expected feature index {}, got {}",
-      expected_feature_index, data[0]
-    ));
-  }
-  Ok(())
+  Err(format!(
+    "No Tx command with feature index {} found ({} entries checked)",
+    expected_feature_index,
+    cmds.len()
+  ))
 }
 
 pub fn core_protocol_sequence() -> TestSequence {

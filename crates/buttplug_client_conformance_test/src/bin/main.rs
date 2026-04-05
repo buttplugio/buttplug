@@ -32,6 +32,12 @@ struct Args {
   /// default per-step timeout in milliseconds
   #[argh(option, default = "5000")]
   timeout: u64,
+
+  /// client-driven mode: skip protocol side-effects and poll validations.
+  /// Use when a real client library connects and drives its own handshake,
+  /// scanning, and device commands.
+  #[argh(switch)]
+  client_driven: bool,
 }
 
 #[tokio::main]
@@ -48,6 +54,7 @@ async fn main() {
   println!("  Format:   {}", args.format);
   println!("  Sequence: {}", args.sequence.as_deref().unwrap_or("all"));
   println!("  Timeout:  {}ms", args.timeout);
+  println!("  Client-driven: {}", args.client_driven);
   println!();
 
   let sequences = buttplug_client_conformance_test::sequences::all_sequences();
@@ -70,7 +77,7 @@ async fn main() {
       sequence.name
     );
     println!("    Connect to ws://127.0.0.1:{}", args.port);
-    let result = run_sequence(sequence, args.port, args.timeout).await;
+    let result = run_sequence(sequence, args.port, args.timeout, args.client_driven).await;
     report.add_result(result);
   }
 

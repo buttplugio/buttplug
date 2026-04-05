@@ -21,7 +21,7 @@ async fn test_ping_required_pass() {
 
   // Spawn the runner in the background
   let runner_task =
-    tokio::spawn(async move { run_sequence(&ping_required_sequence(), port, 10000).await });
+    tokio::spawn(async move { run_sequence(&ping_required_sequence(), port, 10000, false).await });
 
   // Wait for WebSocket server to start
   tokio::time::sleep(Duration::from_millis(100)).await;
@@ -97,7 +97,7 @@ async fn test_ping_timeout_pass() {
 
   // Spawn the runner in the background
   let runner_task =
-    tokio::spawn(async move { run_sequence(&ping_timeout_sequence(), port, 15000).await });
+    tokio::spawn(async move { run_sequence(&ping_timeout_sequence(), port, 15000, false).await });
 
   // Wait for WebSocket server to start
   tokio::time::sleep(Duration::from_millis(100)).await;

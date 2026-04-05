@@ -38,7 +38,7 @@ async fn test_handshake_sequence() {
       % 10000) as u16;
 
   // Spawn the runner in a background task
-  let runner_task = tokio::spawn(async move { run_sequence(&sequence, port, 2000).await });
+  let runner_task = tokio::spawn(async move { run_sequence(&sequence, port, 2000, false).await });
 
   // Wait for server to start listening
   tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;

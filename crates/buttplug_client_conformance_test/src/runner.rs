@@ -112,11 +112,18 @@ async fn init_server(port: u16, max_ping_time: u32) -> Result<RunnerState, (Step
   })
 }
 
-/// Run a test sequence against a real ButtplugServer with WebSocket transport
+/// Run a test sequence against a real ButtplugServer with WebSocket transport.
+///
+/// When `client_driven` is true, `SendClientMessage` side effects are skipped
+/// (the connected client drives the protocol) and validations poll until the
+/// expected state appears or the step timeout expires. This mode is required
+/// when testing real client libraries that perform their own handshake and
+/// send their own protocol messages.
 pub async fn run_sequence(
   sequence: &TestSequence,
   port: u16,
   default_timeout_ms: u64,
+  client_driven: bool,
 ) -> SequenceResult {
   let sequence_name = sequence.name.to_string();
   let mut steps = Vec::new();
@@ -180,17 +187,21 @@ pub async fn run_sequence(
           }
         }
         SideEffect::SendClientMessage(msg) => {
-          debug!("Sending client message: {:?}", msg);
-          match runner_state.server.parse_message(msg.clone()).await {
-            Ok(response) => {
-              debug!("Got server response: {:?}", response);
+          if client_driven {
+            debug!("Client-driven mode: skipping SendClientMessage side effect");
+          } else {
+            debug!("Sending client message: {:?}", msg);
+            match runner_state.server.parse_message(msg.clone()).await {
+              Ok(response) => {
+                debug!("Got server response: {:?}", response);
+              }
+              Err(err_msg) => {
+                debug!("Got server error response: {:?}", err_msg);
+              }
             }
-            Err(err_msg) => {
-              debug!("Got server error response: {:?}", err_msg);
-            }
+            // Allow async device processing to complete
+            tokio::time::sleep(std::time::Duration::from_millis(10)).await;
           }
-          // Allow async device processing to complete
-          tokio::time::sleep(std::time::Duration::from_millis(10)).await;
         }
         SideEffect::TriggerScanning => {
           debug!("Triggering scanning");
@@ -247,7 +258,7 @@ pub async fn run_sequence(
     }
 
     // Create a context for validations with current state
-    let context = SequenceContext {
+    let mut context = SequenceContext {
       device_handles: runner_state.device_handles.clone(),
       server_connected: runner_state.connected.load(Ordering::Relaxed),
     };
@@ -285,23 +296,39 @@ pub async fn run_sequence(
         validator,
       } => {
         let validation_future = async {
-          if let Some(handle) = runner_state.device_handles.get(*device_index) {
-            let write_log = handle.write_log.lock().await;
-            match validator(write_log.as_slice()) {
-              Ok(()) => (true, None),
-              Err(err_msg) => (false, Some(err_msg)),
+          loop {
+            if let Some(handle) = runner_state.device_handles.get(*device_index) {
+              let write_log = handle.write_log.lock().await;
+              match validator(write_log.as_slice()) {
+                Ok(()) => return (true, None),
+                Err(err_msg) => {
+                  if !client_driven {
+                    return (false, Some(err_msg));
+                  }
+                  // In client-driven mode, poll until the client sends the command
+                }
+              }
+            } else {
+              return (false, Some(format!("Device {} not found", device_index)));
             }
-          } else {
-            (false, Some(format!("Device {} not found", device_index)))
+            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
           }
         };
 
         let (passed, error) = match tokio::time::timeout(step_timeout, validation_future).await {
           Ok((p, e)) => (p, e),
-          Err(_) => (
-            false,
-            Some(format!("Step timed out after {}ms", step_timeout_ms)),
-          ),
+          Err(_) => {
+            // On timeout, do one final check to get a meaningful error message
+            let err = if let Some(handle) = runner_state.device_handles.get(*device_index) {
+              let write_log = handle.write_log.lock().await;
+              validator(write_log.as_slice())
+                .err()
+                .unwrap_or_else(|| format!("Step timed out after {}ms", step_timeout_ms))
+            } else {
+              format!("Device {} not found", device_index)
+            };
+            (false, Some(err))
+          }
         };
 
         StepResult {
@@ -333,11 +360,34 @@ pub async fn run_sequence(
         }
       }
       StepValidation::Custom(validator) => {
-        let validation_future = async { validator(&context) };
+        let validation_future = async {
+          loop {
+            match validator(&context) {
+              Ok(()) => return Ok(()),
+              Err(e) => {
+                if !client_driven {
+                  return Err(e);
+                }
+                // In client-driven mode, poll until the client causes the expected state
+                tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+                context = SequenceContext {
+                  device_handles: runner_state.device_handles.clone(),
+                  server_connected: runner_state.connected.load(Ordering::Relaxed),
+                };
+              }
+            }
+          }
+        };
 
         let validation_result = match tokio::time::timeout(step_timeout, validation_future).await {
           Ok(result) => result,
-          Err(_) => Err(format!("Step timed out after {}ms", step_timeout_ms)),
+          Err(_) => {
+            // Final check for a meaningful error message
+            validator(&context)
+              .err()
+              .map(Err)
+              .unwrap_or(Err(format!("Step timed out after {}ms", step_timeout_ms)))
+          }
         };
 
         StepResult {

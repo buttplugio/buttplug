@@ -20,7 +20,7 @@ async fn test_error_handling_pass() {
 
   // Spawn the runner in the background
   let runner_task =
-    tokio::spawn(async move { run_sequence(&error_handling_sequence(), port, 10000).await });
+    tokio::spawn(async move { run_sequence(&error_handling_sequence(), port, 10000, false).await });
 
   // Wait for WebSocket server to start
   tokio::time::sleep(Duration::from_millis(100)).await;
