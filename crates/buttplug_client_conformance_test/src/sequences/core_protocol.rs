@@ -10,9 +10,44 @@ use buttplug_core::message::{
   ButtplugClientMessageV4, ButtplugMessageSpecVersion, OutputCmdV4, OutputCommand,
   OutputHwPositionWithDuration, OutputValue, RequestServerInfoV4, StartScanningV0, StopCmdV4,
 };
+use buttplug_server::device::hardware::HardwareWriteCmd;
 use buttplug_server::message::ButtplugClientMessageVariant;
 use buttplug_server_device_config::Endpoint;
 use std::sync::Arc;
+
+/// Validates that output commands were written with the expected feature index
+fn validate_output_cmd(
+  cmds: &[HardwareWriteCmd],
+  expected_feature_index: u8,
+) -> Result<(), String> {
+  if cmds.is_empty() {
+    return Err(format!(
+      "No commands written to device (expected feature index {})",
+      expected_feature_index
+    ));
+  }
+  let last_cmd = &cmds[cmds.len() - 1];
+  if last_cmd.endpoint() != Endpoint::Tx {
+    return Err(format!(
+      "Expected Endpoint::Tx, got {:?}",
+      last_cmd.endpoint()
+    ));
+  }
+  let data = last_cmd.data();
+  if data.len() < 5 {
+    return Err(format!(
+      "Expected at least 5 bytes of data, got {}",
+      data.len()
+    ));
+  }
+  if data[0] != expected_feature_index {
+    return Err(format!(
+      "Expected feature index {}, got {}",
+      expected_feature_index, data[0]
+    ));
+  }
+  Ok(())
+}
 
 pub fn core_protocol_sequence() -> TestSequence {
   TestSequence {
@@ -92,30 +127,7 @@ pub fn core_protocol_sequence() -> TestSequence {
         description: "Client sends OutputCmd with Vibrate to device 0, feature 0",
         validation: StepValidation::ValidateDeviceCommand {
           device_index: 0,
-          validator: Arc::new(|cmds| {
-            // Validate a command was written to device 0
-            if cmds.is_empty() {
-              return Err("No commands written to device 0".to_string());
-            }
-            let last_cmd = &cmds[cmds.len() - 1];
-            if last_cmd.endpoint() != Endpoint::Tx {
-              return Err(format!(
-                "Expected Endpoint::Tx, got {:?}",
-                last_cmd.endpoint()
-              ));
-            }
-            let data = last_cmd.data();
-            if data.len() < 5 {
-              return Err(format!(
-                "Expected at least 5 bytes of data, got {}",
-                data.len()
-              ));
-            }
-            if data[0] != 0 {
-              return Err(format!("Expected feature index 0, got {}", data[0]));
-            }
-            Ok(())
-          }),
+          validator: Arc::new(|cmds| validate_output_cmd(cmds, 0)),
         },
         side_effects: vec![SideEffect::SendClientMessage(
           ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::OutputCmd(OutputCmdV4::new(
@@ -132,30 +144,7 @@ pub fn core_protocol_sequence() -> TestSequence {
         description: "Client sends OutputCmd with Vibrate to device 0, feature 1 (second vibrator)",
         validation: StepValidation::ValidateDeviceCommand {
           device_index: 0,
-          validator: Arc::new(|cmds| {
-            // Validate a command was written to device 0
-            if cmds.is_empty() {
-              return Err("No commands written to device 0".to_string());
-            }
-            let last_cmd = &cmds[cmds.len() - 1];
-            if last_cmd.endpoint() != Endpoint::Tx {
-              return Err(format!(
-                "Expected Endpoint::Tx, got {:?}",
-                last_cmd.endpoint()
-              ));
-            }
-            let data = last_cmd.data();
-            if data.len() < 5 {
-              return Err(format!(
-                "Expected at least 5 bytes of data, got {}",
-                data.len()
-              ));
-            }
-            if data[0] != 1 {
-              return Err(format!("Expected feature index 1, got {}", data[0]));
-            }
-            Ok(())
-          }),
+          validator: Arc::new(|cmds| validate_output_cmd(cmds, 1)),
         },
         side_effects: vec![SideEffect::SendClientMessage(
           ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::OutputCmd(OutputCmdV4::new(
@@ -172,30 +161,7 @@ pub fn core_protocol_sequence() -> TestSequence {
         description: "Client sends OutputCmd with Rotate to device 0, feature 2",
         validation: StepValidation::ValidateDeviceCommand {
           device_index: 0,
-          validator: Arc::new(|cmds| {
-            // Validate a command was written to device 0
-            if cmds.is_empty() {
-              return Err("No commands written to device 0".to_string());
-            }
-            let last_cmd = &cmds[cmds.len() - 1];
-            if last_cmd.endpoint() != Endpoint::Tx {
-              return Err(format!(
-                "Expected Endpoint::Tx, got {:?}",
-                last_cmd.endpoint()
-              ));
-            }
-            let data = last_cmd.data();
-            if data.len() < 5 {
-              return Err(format!(
-                "Expected at least 5 bytes of data, got {}",
-                data.len()
-              ));
-            }
-            if data[0] != 2 {
-              return Err(format!("Expected feature index 2, got {}", data[0]));
-            }
-            Ok(())
-          }),
+          validator: Arc::new(|cmds| validate_output_cmd(cmds, 2)),
         },
         side_effects: vec![SideEffect::SendClientMessage(
           ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::OutputCmd(OutputCmdV4::new(
@@ -212,30 +178,7 @@ pub fn core_protocol_sequence() -> TestSequence {
         description: "Device 1 (Positioner), feature with Oscillate",
         validation: StepValidation::ValidateDeviceCommand {
           device_index: 1,
-          validator: Arc::new(|cmds| {
-            // Validate a command was written to device 1
-            if cmds.is_empty() {
-              return Err("No commands written to device 1".to_string());
-            }
-            let last_cmd = &cmds[cmds.len() - 1];
-            if last_cmd.endpoint() != Endpoint::Tx {
-              return Err(format!(
-                "Expected Endpoint::Tx, got {:?}",
-                last_cmd.endpoint()
-              ));
-            }
-            let data = last_cmd.data();
-            if data.len() < 5 {
-              return Err(format!(
-                "Expected at least 5 bytes of data, got {}",
-                data.len()
-              ));
-            }
-            if data[0] != 2 {
-              return Err(format!("Expected feature index 2, got {}", data[0]));
-            }
-            Ok(())
-          }),
+          validator: Arc::new(|cmds| validate_output_cmd(cmds, 2)),
         },
         side_effects: vec![SideEffect::SendClientMessage(
           ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::OutputCmd(OutputCmdV4::new(
@@ -252,30 +195,7 @@ pub fn core_protocol_sequence() -> TestSequence {
         description: "Device 1, Position feature",
         validation: StepValidation::ValidateDeviceCommand {
           device_index: 1,
-          validator: Arc::new(|cmds| {
-            // Validate a command was written to device 1
-            if cmds.is_empty() {
-              return Err("No commands written to device 1".to_string());
-            }
-            let last_cmd = &cmds[cmds.len() - 1];
-            if last_cmd.endpoint() != Endpoint::Tx {
-              return Err(format!(
-                "Expected Endpoint::Tx, got {:?}",
-                last_cmd.endpoint()
-              ));
-            }
-            let data = last_cmd.data();
-            if data.len() < 5 {
-              return Err(format!(
-                "Expected at least 5 bytes of data, got {}",
-                data.len()
-              ));
-            }
-            if data[0] != 0 {
-              return Err(format!("Expected feature index 0, got {}", data[0]));
-            }
-            Ok(())
-          }),
+          validator: Arc::new(|cmds| validate_output_cmd(cmds, 0)),
         },
         side_effects: vec![SideEffect::SendClientMessage(
           ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::OutputCmd(OutputCmdV4::new(
@@ -292,30 +212,7 @@ pub fn core_protocol_sequence() -> TestSequence {
         description: "Device 1, HwPositionWithDuration feature (maps to feature 0)",
         validation: StepValidation::ValidateDeviceCommand {
           device_index: 1,
-          validator: Arc::new(|cmds| {
-            // Validate a command was written to device 1
-            if cmds.is_empty() {
-              return Err("No commands written to device 1".to_string());
-            }
-            let last_cmd = &cmds[cmds.len() - 1];
-            if last_cmd.endpoint() != Endpoint::Tx {
-              return Err(format!(
-                "Expected Endpoint::Tx, got {:?}",
-                last_cmd.endpoint()
-              ));
-            }
-            let data = last_cmd.data();
-            if data.len() < 5 {
-              return Err(format!(
-                "Expected at least 5 bytes of data, got {}",
-                data.len()
-              ));
-            }
-            if data[0] != 0 {
-              return Err(format!("Expected feature index 0, got {}", data[0]));
-            }
-            Ok(())
-          }),
+          validator: Arc::new(|cmds| validate_output_cmd(cmds, 0)),
         },
         side_effects: vec![SideEffect::SendClientMessage(
           ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::OutputCmd(OutputCmdV4::new(
@@ -332,30 +229,7 @@ pub fn core_protocol_sequence() -> TestSequence {
         description: "Device 2 (Multi), Constrict",
         validation: StepValidation::ValidateDeviceCommand {
           device_index: 2,
-          validator: Arc::new(|cmds| {
-            // Validate a command was written to device 2
-            if cmds.is_empty() {
-              return Err("No commands written to device 2".to_string());
-            }
-            let last_cmd = &cmds[cmds.len() - 1];
-            if last_cmd.endpoint() != Endpoint::Tx {
-              return Err(format!(
-                "Expected Endpoint::Tx, got {:?}",
-                last_cmd.endpoint()
-              ));
-            }
-            let data = last_cmd.data();
-            if data.len() < 5 {
-              return Err(format!(
-                "Expected at least 5 bytes of data, got {}",
-                data.len()
-              ));
-            }
-            if data[0] != 0 {
-              return Err(format!("Expected feature index 0, got {}", data[0]));
-            }
-            Ok(())
-          }),
+          validator: Arc::new(|cmds| validate_output_cmd(cmds, 0)),
         },
         side_effects: vec![SideEffect::SendClientMessage(
           ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::OutputCmd(OutputCmdV4::new(
@@ -372,30 +246,7 @@ pub fn core_protocol_sequence() -> TestSequence {
         description: "Device 2, Spray",
         validation: StepValidation::ValidateDeviceCommand {
           device_index: 2,
-          validator: Arc::new(|cmds| {
-            // Validate a command was written to device 2
-            if cmds.is_empty() {
-              return Err("No commands written to device 2".to_string());
-            }
-            let last_cmd = &cmds[cmds.len() - 1];
-            if last_cmd.endpoint() != Endpoint::Tx {
-              return Err(format!(
-                "Expected Endpoint::Tx, got {:?}",
-                last_cmd.endpoint()
-              ));
-            }
-            let data = last_cmd.data();
-            if data.len() < 5 {
-              return Err(format!(
-                "Expected at least 5 bytes of data, got {}",
-                data.len()
-              ));
-            }
-            if data[0] != 1 {
-              return Err(format!("Expected feature index 1, got {}", data[0]));
-            }
-            Ok(())
-          }),
+          validator: Arc::new(|cmds| validate_output_cmd(cmds, 1)),
         },
         side_effects: vec![SideEffect::SendClientMessage(
           ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::OutputCmd(OutputCmdV4::new(
@@ -412,30 +263,7 @@ pub fn core_protocol_sequence() -> TestSequence {
         description: "Device 2, Temperature",
         validation: StepValidation::ValidateDeviceCommand {
           device_index: 2,
-          validator: Arc::new(|cmds| {
-            // Validate a command was written to device 2
-            if cmds.is_empty() {
-              return Err("No commands written to device 2".to_string());
-            }
-            let last_cmd = &cmds[cmds.len() - 1];
-            if last_cmd.endpoint() != Endpoint::Tx {
-              return Err(format!(
-                "Expected Endpoint::Tx, got {:?}",
-                last_cmd.endpoint()
-              ));
-            }
-            let data = last_cmd.data();
-            if data.len() < 5 {
-              return Err(format!(
-                "Expected at least 5 bytes of data, got {}",
-                data.len()
-              ));
-            }
-            if data[0] != 2 {
-              return Err(format!("Expected feature index 2, got {}", data[0]));
-            }
-            Ok(())
-          }),
+          validator: Arc::new(|cmds| validate_output_cmd(cmds, 2)),
         },
         side_effects: vec![SideEffect::SendClientMessage(
           ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::OutputCmd(OutputCmdV4::new(
@@ -452,30 +280,7 @@ pub fn core_protocol_sequence() -> TestSequence {
         description: "Device 2, Led",
         validation: StepValidation::ValidateDeviceCommand {
           device_index: 2,
-          validator: Arc::new(|cmds| {
-            // Validate a command was written to device 2
-            if cmds.is_empty() {
-              return Err("No commands written to device 2".to_string());
-            }
-            let last_cmd = &cmds[cmds.len() - 1];
-            if last_cmd.endpoint() != Endpoint::Tx {
-              return Err(format!(
-                "Expected Endpoint::Tx, got {:?}",
-                last_cmd.endpoint()
-              ));
-            }
-            let data = last_cmd.data();
-            if data.len() < 5 {
-              return Err(format!(
-                "Expected at least 5 bytes of data, got {}",
-                data.len()
-              ));
-            }
-            if data[0] != 3 {
-              return Err(format!("Expected feature index 3, got {}", data[0]));
-            }
-            Ok(())
-          }),
+          validator: Arc::new(|cmds| validate_output_cmd(cmds, 3)),
         },
         side_effects: vec![SideEffect::SendClientMessage(
           ButtplugClientMessageVariant::V4(ButtplugClientMessageV4::OutputCmd(OutputCmdV4::new(

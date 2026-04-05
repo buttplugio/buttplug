@@ -116,7 +116,7 @@ async fn init_server(port: u16, max_ping_time: u32) -> Result<RunnerState, (Step
 pub async fn run_sequence(
   sequence: &TestSequence,
   port: u16,
-  _default_timeout_ms: u64,
+  default_timeout_ms: u64,
 ) -> SequenceResult {
   let sequence_name = sequence.name.to_string();
   let mut steps = Vec::new();
@@ -231,7 +231,9 @@ pub async fn run_sequence(
           }
         }
         SideEffect::CloseConnection => {
-          debug!("Closing connection");
+          tracing::warn!(
+            "CloseConnection side effect is not yet implemented; connection closes implicitly via RebuildServer"
+          );
           // TODO: CloseConnection is not yet fully implemented.
           // The connection only closes implicitly when RebuildServer drops the old server
           // and connector, or when the client disconnects on its own.
@@ -250,6 +252,14 @@ pub async fn run_sequence(
       server_connected: runner_state.connected.load(Ordering::Relaxed),
     };
 
+    // Determine the timeout for this step
+    let step_timeout_ms = if step.timeout_ms > 0 {
+      step.timeout_ms
+    } else {
+      default_timeout_ms
+    };
+    let step_timeout = std::time::Duration::from_millis(step_timeout_ms);
+
     let result = match &step.validation {
       StepValidation::WaitForConnection => {
         // This would be the first step typically
@@ -262,6 +272,7 @@ pub async fn run_sequence(
       }
       StepValidation::WaitForScanning => {
         // Conformance DCM enumerates synchronously after trigger
+        // Document: relies on TriggerScanning side effect to initiate enumeration
         StepResult {
           step_name: step.name,
           passed: true,
@@ -273,14 +284,24 @@ pub async fn run_sequence(
         device_index,
         validator,
       } => {
-        let (passed, error) = if let Some(handle) = runner_state.device_handles.get(*device_index) {
-          let write_log = handle.write_log.lock().await;
-          match validator(write_log.as_slice()) {
-            Ok(()) => (true, None),
-            Err(err_msg) => (false, Some(err_msg)),
+        let validation_future = async {
+          if let Some(handle) = runner_state.device_handles.get(*device_index) {
+            let write_log = handle.write_log.lock().await;
+            match validator(write_log.as_slice()) {
+              Ok(()) => (true, None),
+              Err(err_msg) => (false, Some(err_msg)),
+            }
+          } else {
+            (false, Some(format!("Device {} not found", device_index)))
           }
-        } else {
-          (false, Some(format!("Device {} not found", device_index)))
+        };
+
+        let (passed, error) = match tokio::time::timeout(step_timeout, validation_future).await {
+          Ok((p, e)) => (p, e),
+          Err(_) => (
+            false,
+            Some(format!("Step timed out after {}ms", step_timeout_ms)),
+          ),
         };
 
         StepResult {
@@ -291,7 +312,8 @@ pub async fn run_sequence(
         }
       }
       StepValidation::WaitForServerEvent { .. } => {
-        // For now, just pass - server events are handled by the message loop
+        // Document: relies on message loop and side effects to process server events
+        // Currently a stub that passes immediately
         StepResult {
           step_name: step.name,
           passed: true,
@@ -300,7 +322,9 @@ pub async fn run_sequence(
         }
       }
       StepValidation::WaitForDisconnect => {
-        // Client disconnection is handled by the message loop
+        // Document: relies on server-side ping timeout to close the connection
+        // Client disconnection is detected by the message loop setting connected to false
+        // For now, passing immediately as the step relies on server behavior
         StepResult {
           step_name: step.name,
           passed: true,
@@ -309,7 +333,13 @@ pub async fn run_sequence(
         }
       }
       StepValidation::Custom(validator) => {
-        let validation_result = validator(&context);
+        let validation_future = async { validator(&context) };
+
+        let validation_result = match tokio::time::timeout(step_timeout, validation_future).await {
+          Ok(result) => result,
+          Err(_) => Err(format!("Step timed out after {}ms", step_timeout_ms)),
+        };
+
         StepResult {
           step_name: step.name,
           passed: validation_result.is_ok(),
