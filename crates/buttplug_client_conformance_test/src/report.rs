@@ -9,7 +9,7 @@ use crate::step::SequenceResult;
 use serde::Serialize;
 
 /// Collects and formats test results for output
-#[derive(Clone, Serialize)]
+#[derive(Clone, Default, Serialize)]
 pub struct Report {
   pub sequences: Vec<SequenceResult>,
 }
@@ -66,11 +66,5 @@ impl Report {
   /// Format the report as structured JSON
   pub fn format_json(&self) -> String {
     serde_json::to_string_pretty(self).unwrap_or_else(|_| "{}".to_string())
-  }
-}
-
-impl Default for Report {
-  fn default() -> Self {
-    Self::new()
   }
 }

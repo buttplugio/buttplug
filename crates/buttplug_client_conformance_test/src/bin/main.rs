@@ -8,7 +8,6 @@
 use argh::FromArgs;
 use buttplug_client_conformance_test::report::Report;
 use buttplug_client_conformance_test::runner::run_sequence;
-use buttplug_client_conformance_test::step::TestSequence;
 use tracing_subscriber::EnvFilter;
 
 /// Buttplug client conformance test harness.
@@ -51,10 +50,7 @@ async fn main() {
   println!("  Timeout:  {}ms", args.timeout);
   println!();
 
-  // Placeholder: create a minimal handshake-only sequence
-  let sequences: Vec<TestSequence> = vec![
-    /* will be populated in Phase 4 */
-  ];
+  let sequences = buttplug_client_conformance_test::sequences::all_sequences();
 
   // Filter by --sequence if provided
   let sequences_to_run: Vec<_> = if let Some(ref name) = args.sequence {
