@@ -37,3 +37,10 @@ serde_json = "1.0.149"
 jsonschema = { version = "0.45.0", default-features = false }
 strum = "0.28.0"
 strum_macros = "0.28.0"
+
+[dev-dependencies]
+buttplug-client-conformance-test = { version = "0.1.0", path = "../buttplug_client_conformance_test" }
+buttplug_client_in_process = { version = "10.0.2", path = "../buttplug_client_in_process" }
+buttplug_server = { version = "10.0.2", path = "../buttplug_server", features = ["conformance-test"] }
+futures = "0.3.32"
+tokio = { version = "1.50.0", features = ["macros", "rt-multi-thread", "time"] }
