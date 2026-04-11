@@ -1,0 +1,31 @@
+---
+defaults:
+  name: Utimi Device
+  features:
+  - id: a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
+    output:
+      vibrate:
+        value:
+        - 0
+        - 255
+    index: 0
+  - id: b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e
+    output:
+      oscillate:
+        value:
+        - 0
+        - 255
+    index: 1
+  id: c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f
+configurations:
+- identifier:
+  - Utimi
+  name: Utimi Prostate Massager
+  id: d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f80
+communication:
+- btle:
+    names:
+    - Utimi
+    services:
+      0000ffa0-0000-1000-8000-00805f9b34fb:
+        tx: 0000ffa1-0000-1000-8000-00805f9b34fb
