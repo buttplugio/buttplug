@@ -1,0 +1,31 @@
+[package]
+name = "buttplug_wasm"
+version = "3.0.0"
+authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
+description = "Buttplug WASM FFI crate for browser use via wasm-bindgen"
+license = "BSD-3-Clause"
+homepage = "http://buttplug.io"
+repository = "https://github.com/buttplugio/buttplug.git"
+keywords = ["bluetooth", "wasm", "webbluetooth", "teledildonics"]
+edition = "2024"
+
+[lib]
+name = "buttplug_wasm"
+crate-type = ["cdylib", "rlib"]
+path = "src/lib.rs"
+
+[dependencies]
+buttplug_core = { version = "10.0.2", path = "../buttplug_core", default-features = false, features = ["wasm"] }
+buttplug_server = { version = "10.0.2", path = "../buttplug_server", default-features = false, features = ["wasm"] }
+buttplug_server_device_config = { version = "10.0.3", path = "../buttplug_server_device_config" }
+buttplug_server_hwmgr_webbluetooth = { version = "10.0.2", path = "../buttplug_server_hwmgr_webbluetooth" }
+console_error_panic_hook = "0.1.7"
+futures = "0.3.32"
+js-sys = "0.3.77"
+tokio = { version = "1.50.0", features = ["sync"] }
+tokio-stream = "0.1.17"
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.19", default-features = false, features = ["registry"] }
+tracing-wasm = "0.2.1"
+wasm-bindgen = "0.2.100"
+wasm-bindgen-futures = "0.4.64"
