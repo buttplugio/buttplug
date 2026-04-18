@@ -5,7 +5,10 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::message::serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage};
+use buttplug_core::message::{
+  BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+  serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
+};
 use buttplug_server::{
   ButtplugServer, ButtplugServerBuilder,
   device::ServerDeviceManagerBuilder,
@@ -63,6 +66,7 @@ pub fn buttplug_create_embedded_wasm_server(callback: &FFICallback) -> *mut Butt
   let server = Arc::new(ButtplugServerBuilder::new(device_manager).finish().unwrap());
 
   let serializer = Arc::new(ButtplugServerJSONSerializer::default());
+  serializer.force_message_version(&BUTTPLUG_CURRENT_API_MAJOR_VERSION);
 
   let event_stream = server.event_stream();
   let callback_clone = callback.clone();
