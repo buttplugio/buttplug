@@ -93,5 +93,13 @@ jobs:
       uses: jetli/wasm-pack-action@v0.4.0
       with:
         version: 'latest'
-    - name: Build Dev
-      run: wasm-pack build --dev crates/buttplug_server --no-default-features --features wasm
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    - name: Build WASM crate
+      run: wasm-pack build --dev crates/buttplug_wasm --target web
+    - name: Install TS wrapper dependencies
+      run: cd wasm && npm install
+    - name: Build TS wrapper
+      run: cd wasm && npm run build:web
