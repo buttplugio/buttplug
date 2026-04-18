@@ -1,0 +1,39 @@
+[package]
+name = "buttplug_server_hwmgr_webbluetooth"
+version = "10.0.2"
+authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
+description = "Buttplug Intimate Hardware Control Library - WebBluetooth Hardware Manager for WASM"
+license = "BSD-3-Clause"
+homepage = "http://buttplug.io"
+repository = "https://github.com/buttplugio/buttplug.git"
+keywords = ["bluetooth", "hardware", "wasm", "webbluetooth", "teledildonics"]
+edition = "2024"
+
+[lib]
+name = "buttplug_server_hwmgr_webbluetooth"
+path = "src/lib.rs"
+
+[dependencies]
+buttplug_core = { version = "10.0.2", path = "../buttplug_core", default-features = false, features = ["wasm"] }
+buttplug_server = { version = "10.0.2", path = "../buttplug_server", default-features = false, features = ["wasm"] }
+buttplug_server_device_config = { version = "10.0.3", path = "../buttplug_server_device_config" }
+async-trait = "0.1.89"
+futures = "0.3.32"
+js-sys = "0.3.77"
+tokio = { version = "1.50.0", features = ["sync"] }
+tracing = "0.1.44"
+wasm-bindgen = "0.2.100"
+wasm-bindgen-futures = "0.4.64"
+web-sys = { version = "0.3.91", features = [
+  "Bluetooth",
+  "BluetoothDevice",
+  "BluetoothLeScanFilterInit",
+  "BluetoothRemoteGattCharacteristic",
+  "BluetoothRemoteGattServer",
+  "BluetoothRemoteGattService",
+  "Event",
+  "MessageEvent",
+  "Navigator",
+  "RequestDeviceOptions",
+  "Window",
+] }
