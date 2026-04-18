@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>buttplug-wasm example</title>
+    <style>
+      body {
+        font-family: monospace;
+        max-width: 620px;
+        margin: 40px auto;
+        padding: 0 20px;
+        background: #111;
+        color: #eee;
+      }
+      h2, h3 { color: #7cf; margin-bottom: 8px; }
+      section { margin-bottom: 24px; }
+      button {
+        margin: 4px;
+        padding: 6px 14px;
+        cursor: pointer;
+        background: #222;
+        color: #eee;
+        border: 1px solid #555;
+        border-radius: 4px;
+      }
+      button:hover:not(:disabled) { background: #333; border-color: #7cf; }
+      button:disabled { opacity: 0.35; cursor: default; }
+      #log {
+        border: 1px solid #333;
+        padding: 10px;
+        height: 200px;
+        overflow-y: auto;
+        font-size: 12px;
+        background: #0a0a0a;
+        white-space: pre-wrap;
+        color: #aaa;
+      }
+      #device-list { min-height: 32px; }
+      .device-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 6px 0;
+        padding: 6px;
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 4px;
+      }
+      .device-name { flex: 1; font-weight: bold; color: #7cf; }
+      input[type="range"] { width: 100px; }
+    </style>
+  </head>
+  <body>
+    <h2>buttplug-wasm example</h2>
+
+    <section>
+      <button id="btn-connect">Connect</button>
+      <button id="btn-logging" disabled>Enable Logging</button>
+      <button id="btn-scan" disabled>Start Scan</button>
+      <button id="btn-stop-scan" disabled>Stop Scan</button>
+      <button id="btn-disconnect" disabled>Disconnect</button>
+    </section>
+
+    <section>
+      <h3>Devices</h3>
+      <div id="device-list"><em style="color:#666">None connected</em></div>
+    </section>
+
+    <section>
+      <h3>Log</h3>
+      <div id="log"></div>
+    </section>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
