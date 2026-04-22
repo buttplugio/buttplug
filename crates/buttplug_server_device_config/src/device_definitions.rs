@@ -8,10 +8,11 @@
 use std::collections::BTreeMap;
 
 use getset::{CopyGetters, Getters};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::server_device_feature::ServerDeviceFeature;
-#[derive(Debug, Clone, Getters, CopyGetters)]
+#[derive(Debug, Clone, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct ServerDeviceDefinition {
   #[getset(get = "pub")]
   /// Given name of the device this instance represents.
