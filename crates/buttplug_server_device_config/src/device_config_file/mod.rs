@@ -127,12 +127,10 @@ fn load_main_config(
       if let Some(idents) = config.identifier() {
         for config_ident in idents {
           let ident = BaseDeviceIdentifier::new_with_identifier(&protocol_name, config_ident);
-          if let Some(d) = &default {
-            dcm_builder
-              .base_device_definition(&ident, &d.update_with_configuration(config.clone()).into());
-          } else {
-            dcm_builder.base_device_definition(&ident, &config.clone().into());
-          }
+          dcm_builder.base_device_definition(
+            &ident,
+            &config.clone().with_defaults(default.as_ref()).into(),
+          );
         }
       }
     }
