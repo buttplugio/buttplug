@@ -113,7 +113,7 @@ impl RangeWithLimit {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ServerDeviceFeatureOutputValueProperties {
   pub value: RangeWithLimit,
-  #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+  #[serde(default)]
   pub disabled: bool,
 }
 
@@ -159,9 +159,9 @@ impl From<&ServerDeviceFeatureOutputValueProperties> for DeviceFeatureOutputValu
 #[derive(Debug, Clone, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct ServerDeviceFeatureOutputPositionProperties {
   pub value: RangeWithLimit,
-  #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+  #[serde(default)]
   pub disabled: bool,
-  #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+  #[serde(default)]
   pub reverse_position: bool,
 }
 
@@ -212,9 +212,9 @@ impl From<&ServerDeviceFeatureOutputPositionProperties> for DeviceFeatureOutputV
 pub struct ServerDeviceFeatureOutputHwPositionWithDurationProperties {
   pub value: RangeWithLimit,
   pub duration: RangeWithLimit,
-  #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+  #[serde(default)]
   pub disabled: bool,
-  #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+  #[serde(default)]
   pub reverse_position: bool,
 }
 
@@ -500,20 +500,20 @@ impl_input_type_conversions![Battery, Rssi, Button, Pressure, Depth, Position,];
 #[serde(default)]
 pub struct ServerDeviceFeature {
   #[getset(get_copy = "pub")]
-  #[serde(skip)]
+  #[serde(default)]
   index: u32,
   #[serde(default)]
   pub description: String,
   #[serde(skip)]
   #[getset(get_copy = "pub")]
   id: Uuid,
-  #[serde(skip_serializing_if = "Option::is_none")]
+  #[serde(default)]
   pub base_id: Option<Uuid>,
-  #[serde(skip_serializing_if = "Option::is_none")]
+  #[serde(default)]
   pub alt_protocol_index: Option<u32>,
-  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty", default)]
+  #[serde(default)]
   pub output: SmallVecEnumMap<ServerDeviceFeatureOutput, 1>,
-  #[serde(skip_serializing_if = "SmallVecEnumMap::is_empty", default)]
+  #[serde(default)]
   pub input: SmallVecEnumMap<ServerDeviceFeatureInput, 1>,
 }
 
