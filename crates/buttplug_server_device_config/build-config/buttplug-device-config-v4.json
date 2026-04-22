@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 189
+    "minor": 190
   },
   "protocols": {
     "activejoy": {
@@ -12305,6 +12305,10 @@
                 "rx": "43410003-0023-4bd4-bbd5-a6920e4c5653",
                 "tx": "43410002-0023-4bd4-bbd5-a6920e4c5653"
               },
+              "43420001-0023-4bd4-bbd5-a6920e4c5653": {
+                "rx": "43420003-0023-4bd4-bbd5-a6920e4c5653",
+                "tx": "43420002-0023-4bd4-bbd5-a6920e4c5653"
+              },
               "45410001-0023-4bd4-bbd5-a6920e4c5653": {
                 "rx": "45410003-0023-4bd4-bbd5-a6920e4c5653",
                 "tx": "45410002-0023-4bd4-bbd5-a6920e4c5653"
@@ -12428,6 +12432,10 @@
               "5a300001-0024-4bd4-bbd5-a6920e4c5653": {
                 "rx": "5a300003-0024-4bd4-bbd5-a6920e4c5653",
                 "tx": "5a300002-0024-4bd4-bbd5-a6920e4c5653"
+              },
+              "5a410001-0023-4bd4-bbd5-a6920e4c5653": {
+                "rx": "5a410003-0023-4bd4-bbd5-a6920e4c5653",
+                "tx": "5a410002-0023-4bd4-bbd5-a6920e4c5653"
               },
               "6e400001-b5a3-f393-e0a9-e50e24dcca9e": {
                 "rx": "6e400003-b5a3-f393-e0a9-e50e24dcca9e",
@@ -12595,6 +12603,57 @@
           "name": "Lovense Nora"
         },
         {
+          "features": [
+            {
+              "id": "62061a3a-aad2-4509-9a6f-755b4bdf0acc",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    20
+                  ]
+                }
+              }
+            },
+            {
+              "id": "5085f9a9-df8b-4dbc-ae10-5ac53c8a626d",
+              "index": 1,
+              "output": {
+                "rotate": {
+                  "value": [
+                    -20,
+                    20
+                  ]
+                }
+              }
+            },
+            {
+              "description": "battery Level",
+              "id": "f15587c9-7a1a-41e1-8c99-7f592feaf4ed",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "dffa9fe4-51ac-404b-b0f8-f74377f81f85",
+          "identifier": [
+            "CB"
+          ],
+          "name": "Lovense Velvo"
+        },
+        {
           "id": "7053fde9-0902-4aab-926d-fc51869f6ccc",
           "identifier": [
             "L"
@@ -12621,6 +12680,13 @@
             "Z"
           ],
           "name": "Lovense Hush"
+        },
+        {
+          "id": "abe83a3e-9b52-48b5-bf08-b45fd5f3e73a",
+          "identifier": [
+            "ZA"
+          ],
+          "name": "Lovense Synth"
         },
         {
           "id": "e788f8d5-037a-4ce4-a13f-6b2e8ec31fb6",

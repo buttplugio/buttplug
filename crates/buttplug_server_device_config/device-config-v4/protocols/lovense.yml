@@ -82,35 +82,64 @@ configurations:
     index: 2
   id: 2e309985-6bbf-4b75-866f-76d845b3ce42
 - identifier:
-  - A
-  - C
+    - A
+    - C
   name: Lovense Nora
   features:
-  - id: 2c5da93b-36a0-4209-ac8c-cead63b838c6
-    output:
-      vibrate:
-        value:
-        - 0
-        - 20
-    index: 0
-  - id: 515e07e2-a6e6-4ac0-a4b0-512504311260
-    output:
-      rotate:
-        value:
-        - -20
-        - 20
-    index: 1
-  - description: battery Level
-    id: 820d8fb1-c6ec-434d-b7c4-835bdf36552a
-    input:
-      battery:
-        value:
-        - - 0
-          - 100
-        command:
-        - Read
-    index: 2
+    - id: 2c5da93b-36a0-4209-ac8c-cead63b838c6
+      output:
+        vibrate:
+          value:
+            - 0
+            - 20
+      index: 0
+    - id: 515e07e2-a6e6-4ac0-a4b0-512504311260
+      output:
+        rotate:
+          value:
+            - -20
+            - 20
+      index: 1
+    - description: battery Level
+      id: 820d8fb1-c6ec-434d-b7c4-835bdf36552a
+      input:
+        battery:
+          value:
+            - - 0
+              - 100
+          command:
+            - Read
+      index: 2
   id: 463a18b9-42a5-4f7b-8156-0e61346fdb8a
+- identifier:
+    - CB
+  name: Lovense Velvo
+  features:
+    - id: 62061a3a-aad2-4509-9a6f-755b4bdf0acc
+      output:
+        vibrate:
+          value:
+            - 0
+            - 20
+      index: 0
+    - id: 5085f9a9-df8b-4dbc-ae10-5ac53c8a626d
+      output:
+        rotate:
+          value:
+            - -20
+            - 20
+      index: 1
+    - description: battery Level
+      id: f15587c9-7a1a-41e1-8c99-7f592feaf4ed
+      input:
+        battery:
+          value:
+            - - 0
+              - 100
+          command:
+            - Read
+      index: 2
+  id: dffa9fe4-51ac-404b-b0f8-f74377f81f85
 - identifier:
   - L
   name: Lovense Ambi
@@ -124,9 +153,13 @@ configurations:
   name: Lovense Lush Anal
   id: c0879e9a-2db6-40b3-a133-4a06e2ff16cb
 - identifier:
-  - Z
+    - Z
   name: Lovense Hush
   id: 37642e1c-a416-44d3-bada-76b6d9e245c9
+- identifier:
+    - ZA
+  name: Lovense Synth
+  id: abe83a3e-9b52-48b5-bf08-b45fd5f3e73a
 - identifier:
   - W
   name: Lovense Domi
@@ -724,3 +757,9 @@ communication:
       414e0001-0023-4bd4-bbd5-a6920e4c5653:
         tx: 414e0002-0023-4bd4-bbd5-a6920e4c5653
         rx: 414e0003-0023-4bd4-bbd5-a6920e4c5653
+      5a410001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 5a410002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 5a410003-0023-4bd4-bbd5-a6920e4c5653
+      43420001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 43420002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 43420003-0023-4bd4-bbd5-a6920e4c5653
