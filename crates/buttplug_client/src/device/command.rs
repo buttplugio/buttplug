@@ -33,6 +33,7 @@ impl From<f64> for ClientDeviceCommandValue {
   }
 }
 
+#[derive(Debug, Clone)]
 pub enum ClientDeviceOutputCommand {
   // u32 types use steps, need to compare before sending
   Vibrate(ClientDeviceCommandValue),
