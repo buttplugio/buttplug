@@ -46,7 +46,7 @@ uuid = { version = "1.22.0", features = ["serde", "v4"] }
 async-trait = "0.1.89"
 instant = "0.1.13"
 tokio-util = "0.7.18"
-regex = "1.12.3"
+regex-lite = "0.1.6"
 prost = "0.14.3"
 paste = "1.0.15"
 aes = { version = "0.8.4" }

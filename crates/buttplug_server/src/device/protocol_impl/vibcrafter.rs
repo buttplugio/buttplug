@@ -33,7 +33,7 @@ use uuid::{Uuid, uuid};
 
 use rand::RngExt;
 use rand::distr::Alphanumeric;
-use regex::Regex;
+use regex_lite::Regex;
 use sha2::{Digest, Sha256};
 
 type Aes128EcbEnc = ecb::Encryptor<Aes128>;

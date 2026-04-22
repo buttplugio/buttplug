@@ -36,7 +36,7 @@ use buttplug_server_device_config::{
   UserDeviceIdentifier,
 };
 use futures::{FutureExt, future::BoxFuture};
-use regex::Regex;
+use regex_lite::Regex;
 use std::{sync::Arc, time::Duration};
 use tokio::select;
 use uuid::{Uuid, uuid};
