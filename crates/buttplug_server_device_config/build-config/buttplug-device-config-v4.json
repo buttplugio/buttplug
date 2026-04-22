@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 190
+    "minor": 194
   },
   "protocols": {
     "activejoy": {
@@ -4832,7 +4832,9 @@
               "HPB-391",
               "HPB-472",
               "HPB-393",
-              "HBP-JXT001"
+              "HBP-JXT001",
+              "HPB-376",
+              "AP-22-892"
             ],
             "services": {
               "0000180f-0000-1000-8000-00805f9b34fb": {
@@ -5245,6 +5247,58 @@
         {
           "features": [
             {
+              "id": "1da7d7ef-b0b9-43d7-a717-4543b49eee05",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Tongue Motion",
+              "id": "3f574d81-b96b-4838-b7a4-3203b2c1afc8",
+              "index": 1,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "fe4d12d4-195e-44d7-aa79-353f1bd153dc",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "5b27250b-2370-4014-85a1-ef59287a8ea9",
+          "identifier": [
+            "HPB-376"
+          ],
+          "name": "Honey Play Box Joi Thrust"
+        },
+        {
+          "features": [
+            {
               "id": "ef04a42e-89a3-4a2b-95c3-545d17d35c37",
               "index": 0,
               "output": {
@@ -5447,6 +5501,57 @@
             "HPB-472"
           ],
           "name": "Honey Play Box Melody"
+        },
+        {
+          "features": [
+            {
+              "id": "38974501-922d-415e-a36d-dc35bd9f8983",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "af19930b-5a3f-4cc3-9c65-9296a295a53f",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "1dd5a5f3-304c-4dcb-b076-980e58953873",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "ed3da58c-bf63-470b-9ebc-3b5be93c6ca2",
+          "identifier": [
+            "AP-22-892"
+          ],
+          "name": "Honey Play Box Ryder"
         }
       ],
       "defaults": {
