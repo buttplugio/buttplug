@@ -324,7 +324,15 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
   fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let device = self.device.clone();
     async move {
-      let _ = device.disconnect().await;
+      // Check is_connected first: calling peripheral.disconnect() on an
+      // already-disconnected device can hang indefinitely waiting for a
+      // D-Bus reply that will never arrive (the device is already gone).
+      let connected = device.is_connected().await.unwrap_or(false);
+      if connected {
+        // Still add a timeout in case the device disconnects *between*
+        // the is_connected check and the disconnect call.
+        let _ = tokio::time::timeout(std::time::Duration::from_secs(5), device.disconnect()).await;
+      }
       Ok(())
     }
     .boxed()
