@@ -247,6 +247,36 @@ configurations:
         index: 2
     id: a413bfe8-d8a9-49b9-9f31-0c1b96bda69c
   - identifier:
+      - HPB-376
+    name: Honey Play Box Joi Thrust
+    features:
+      - id: 1da7d7ef-b0b9-43d7-a717-4543b49eee05
+        output:
+          oscillate:
+            value:
+              - 0
+              - 100
+        index: 0
+      - description: Tongue Motion
+        id: 3f574d81-b96b-4838-b7a4-3203b2c1afc8
+        output:
+          rotate:
+            value:
+              - 0
+              - 100
+        index: 1
+      - description: Battery Level
+        id: fe4d12d4-195e-44d7-aa79-353f1bd153dc
+        input:
+          battery:
+            value:
+              - - 0
+                - 100
+            command:
+              - Read
+        index: 2
+    id: 5b27250b-2370-4014-85a1-ef59287a8ea9
+  - identifier:
       - JXT001
     name: Honey Play Box Vibrosa Mini
     features:
@@ -364,6 +394,35 @@ configurations:
               - Read
         index: 2
     id: 0eb9cc33-e2b7-4fd5-8a37-f17e5307f01f
+  - identifier:
+      - AP-22-892
+    name: Honey Play Box Ryder
+    features:
+      - id: 38974501-922d-415e-a36d-dc35bd9f8983
+        output:
+          vibrate:
+            value:
+              - 0
+              - 100
+        index: 0
+      - id: af19930b-5a3f-4cc3-9c65-9296a295a53f
+        output:
+          oscillate:
+            value:
+              - 0
+              - 100
+        index: 1
+      - description: Battery Level
+        id: 1dd5a5f3-304c-4dcb-b076-980e58953873
+        input:
+          battery:
+            value:
+              - - 0
+                - 100
+            command:
+              - Read
+        index: 2
+    id: ed3da58c-bf63-470b-9ebc-3b5be93c6ca2
 communication:
   - btle:
       names:
@@ -383,6 +442,8 @@ communication:
         - HPB-472
         - HPB-393
         - HBP-JXT001
+        - HPB-376
+        - AP-22-892
       services:
         0000ff12-0000-1000-8000-00805f9b34fb:
           tx: 0000ff03-0000-1000-8000-00805f9b34fb
