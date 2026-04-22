@@ -543,21 +543,21 @@ impl Default for ServerDeviceFeature {
 impl ServerDeviceFeature {
   pub fn new(
     index: u32,
-    description: &str,
+    description: String,
     id: Uuid,
     base_id: Option<Uuid>,
     alt_protocol_index: Option<u32>,
-    output: &SmallVecEnumMap<ServerDeviceFeatureOutput, 1>,
-    input: &SmallVecEnumMap<ServerDeviceFeatureInput, 1>,
+    output: SmallVecEnumMap<ServerDeviceFeatureOutput, 1>,
+    input: SmallVecEnumMap<ServerDeviceFeatureInput, 1>,
   ) -> Self {
     Self {
       index,
-      description: description.to_owned(),
+      description,
       id,
       base_id,
       alt_protocol_index,
-      output: output.clone(),
-      input: input.clone(),
+      output,
+      input,
     }
   }
 
