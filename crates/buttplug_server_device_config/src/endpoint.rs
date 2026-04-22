@@ -29,7 +29,8 @@ use core::hash::Hash;
 /// context. These names are used in [Device Configuration](crate::server::device::configuration)
 /// and the [Device Configuration File](crate::util::device_configuration), and are expected to
 /// de/serialize to lowercase versions of their names.
-#[derive(EnumString, Clone, Debug, PartialEq, Eq, Hash, Display, Copy)]
+#[repr(u8)]
+#[derive(EnumString, Clone, Debug, PartialEq, Eq, Hash, Display, Copy, FromRepr)]
 #[strum(serialize_all = "lowercase")]
 pub enum Endpoint {
   /// Expect to take commands, when multiple receive endpoints may be available
@@ -133,13 +134,17 @@ impl Serialize for Endpoint {
   where
     S: Serializer,
   {
-    serializer.serialize_str(&self.to_string())
+    if serializer.is_human_readable() {
+      serializer.serialize_str(&self.to_string())
+    } else {
+      serializer.serialize_u8(*self as u8)
+    }
   }
 }
 
-struct EndpointVisitor;
+struct EndpointStrVisitor;
 
-impl Visitor<'_> for EndpointVisitor {
+impl Visitor<'_> for EndpointStrVisitor {
   type Value = Endpoint;
 
   fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -159,6 +164,12 @@ impl<'de> Deserialize<'de> for Endpoint {
   where
     D: Deserializer<'de>,
   {
-    deserializer.deserialize_str(EndpointVisitor)
+    if deserializer.is_human_readable() {
+      Ok(deserializer.deserialize_str(EndpointStrVisitor)?)
+    } else {
+      let value = u8::deserialize(deserializer)?;
+      Endpoint::from_repr(value)
+        .ok_or_else(|| de::Error::custom(format!("invalid endpoint value: {value}")))
+    }
   }
 }
