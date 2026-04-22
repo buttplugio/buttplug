@@ -249,50 +249,60 @@ fn handle_battery_level_cmd(
   feature_id: Uuid,
 ) -> BoxFuture<'static, Result<InputReadingV4, ButtplugDeviceError>> {
   let mut device_notification_receiver = device.event_stream();
+
   async move {
-    let write_fut = device.write_value(&HardwareWriteCmd::new(
-      &[feature_id],
-      Endpoint::Tx,
-      b"Battery;".to_vec(),
-      false,
-    ));
-    write_fut.await?;
-    while let Ok(event) = device_notification_receiver.recv().await {
-      match event {
-        HardwareEvent::Notification(_, _, data) => {
-          if let Ok(data_str) = std::str::from_utf8(&data) {
-            debug!("Lovense event received: {}", data_str);
-            let len = data_str.len();
-            // Depending on the state of the toy, we may get an initial
-            // character of some kind, i.e. if the toy is currently vibrating
-            // then battery level comes up as "s89;" versus just "89;". We'll
-            // need to chop the semicolon and make sure we only read the
-            // numbers in the string.
-            //
-            // Contains() is casting a wider net than we need here, but it'll
-            // do for now.
-            let start_pos = usize::from(data_str.contains('s'));
-            if let Ok(level) = data_str[start_pos..(len - 1)].parse::<u8>() {
-              return Ok(message::InputReadingV4::new(
-                device_index,
-                feature_index,
-                InputTypeReading::Battery(InputValue::new(level)),
+    device
+      .write_value(&HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        b"Battery;".to_vec(),
+        false,
+      ))
+      .await?;
+    // A timeout is required here: some Lovense devices treat battery reporting
+    // as a togglable subscription and do not promptly reply to a single Battery;
+    // query, leaving this future to hang indefinitely. See:
+    // https://github.com/buttplugio/buttplug/issues/865
+    //
+    // A fixed timeout is a known-bad workaround, but it is strictly better
+    // than hanging forever.
+    loop {
+      select! {
+        biased;
+
+        event = device_notification_receiver.recv().fuse() => {
+          match event {
+            Ok(HardwareEvent::Notification(_, _, data)) => {
+              if let Ok(data_str) = std::str::from_utf8(&data) {
+                debug!("Lovense event received: {}", data_str);
+                let len = data_str.len();
+                let start_pos = usize::from(data_str.contains('s'));
+                if let Ok(level) = data_str[start_pos..(len - 1)].parse::<u8>() {
+                  return Ok(message::InputReadingV4::new(
+                    device_index,
+                    feature_index,
+                    InputTypeReading::Battery(InputValue::new(level)),
+                  ));
+                }
+              }
+            }
+            Ok(HardwareEvent::Disconnected(_)) | Err(_) => {
+              return Err(ButtplugDeviceError::ProtocolSpecificError(
+                "Lovense".to_owned(),
+                "Lovense Device disconnected while getting Battery info.".to_owned(),
               ));
             }
           }
         }
-        HardwareEvent::Disconnected(_) => {
+        _ = async_manager::sleep(Duration::from_millis(LOVENSE_COMMAND_TIMEOUT_MS)).fuse() => {
+          warn!("Lovense Device timed out while getting Battery info.");
           return Err(ButtplugDeviceError::ProtocolSpecificError(
             "Lovense".to_owned(),
-            "Lovense Device disconnected while getting Battery info.".to_owned(),
+            "Lovense Device timed out while getting Battery info.".to_owned(),
           ));
         }
       }
     }
-    Err(ButtplugDeviceError::ProtocolSpecificError(
-      "Lovense".to_owned(),
-      "Lovense Device disconnected while getting Battery info.".to_owned(),
-    ))
   }
   .boxed()
 }
