@@ -113,9 +113,13 @@ configurations:
   name: JoyHub Mackay
   id: add6c7a5-7a3f-4d3d-abac-da7f9b498ef2
 - identifier:
-  - J-Rowdy3
+    - J-Rowdy3
   name: JoyHub Rowdy 3
   id: f175684d-3bc2-4c8a-a36b-b68275602179
+- identifier:
+    - J-Rowdy
+  name: JoyHub Rowdy
+  id: 0d698855-a0d6-4ee8-80fb-4861cea0c8f4
 - identifier:
   - J-Eclipse
   name: JoyHub Eclipse
@@ -2506,6 +2510,7 @@ communication:
     - J-ROSELLA3
     - J-Mackay
     - J-Rowdy3
+    - J-Rowdy
     - J-Eclipse
     - J-DukeDazzle2
     - J-Scarlett
