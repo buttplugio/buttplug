@@ -86,17 +86,91 @@ configurations:
     index: 0
   id: e722ba98-5c2d-4f77-a56d-ac72b213ed53
 - identifier:
-  - LIV3
+    - LIV3
   name: Lelo Liv 3
   features:
-  - id: 1599b3d9-055d-4c9b-a1fe-7cef1fac4c9e
-    output:
-      vibrate:
-        value:
-        - 0
-        - 100
-    index: 0
+    - id: 1599b3d9-055d-4c9b-a1fe-7cef1fac4c9e
+      output:
+        vibrate:
+          value:
+            - 0
+            - 100
+      index: 0
   id: 0daa8498-172c-47bc-b6c4-57414589509b
+- identifier:
+    - SONA3 Cruise
+  name: Lelo Sona 3 Cruise
+  features:
+    - id: ae6da200-6f51-446c-bda7-c0fb733b000a
+      output:
+        vibrate:
+          value:
+            - 0
+            - 100
+      index: 0
+  id: 9d143dc1-654b-4363-bbc8-633210752e6e
+- identifier:
+    - Switch
+  name: Lelo Switch
+  features:
+    - id: 111e5f86-8937-45da-b311-bc254db23d79
+      output:
+        vibrate:
+          value:
+            - 0
+            - 100
+      index: 0
+    - id: aba790a5-43bd-4826-8fd3-731d71e95e48
+      output:
+        vibrate:
+          value:
+            - 0
+            - 100
+      index: 1
+  id: 7f5680f0-e5e2-49f2-b265-db7aad110526
+- identifier:
+    - F2
+  name: Lelo F2S
+  features:
+    - id: 3a91ca14-ff70-49e8-8319-18406f50b16d
+      output:
+        vibrate:
+          value:
+            - 0
+            - 100
+      index: 0
+    - id: a43b13c0-9ebf-46f2-ab74-2dd6f8772842
+      output:
+        vibrate:
+          value:
+            - 0
+            - 100
+      index: 1
+  id: d8f3c009-6712-4a2e-98f6-a75170fa4112
+- identifier:
+    - Tiani Twist
+  name: Lelo Tiani Twist
+  features:
+    - id: ea48d476-6d05-475b-bb0e-6bff3952ccaa
+      output:
+        vibrate:
+          value:
+            - 0
+            - 100
+      index: 0
+  id: d8cf8c64-863c-4080-8dd5-98255eca9a7c
+- identifier:
+    - SURFER2
+  name: Lelo Surfer 2
+  features:
+    - id: f9d5ea43-e233-4b7e-8348-7ff95439e7a9
+      output:
+        vibrate:
+          value:
+            - 0
+            - 100
+      index: 0
+  id: 2add7033-66ad-4c69-a63d-8a35b012e958
 communication:
 - btle:
     names:
@@ -104,11 +178,16 @@ communication:
     - Ida Wave
     - TianiHarmony
     - Tiani Harmony
+    - Tiani Twist
     - TOR3
     - Hugo2
     - DoubleSonic
     - GIGI3
     - LIV3
+    - SONA3 Cruise
+    - Switch
+    - SURFER2
+    - F2
     services:
       0000fff0-0000-1000-8000-00805f9b34fb:
         command: 0000fff1-0000-1000-8000-00805f9b34fb
