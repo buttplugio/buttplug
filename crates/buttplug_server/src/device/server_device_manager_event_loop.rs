@@ -5,10 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::{
-  errors::ButtplugError,
-  message::{ButtplugMessage, ButtplugServerMessageV4, DeviceListV4, ErrorV0, ScanningFinishedV0},
-};
+use buttplug_core::message::{ButtplugMessage, ButtplugServerMessageV4, DeviceListV4, ScanningFinishedV0};
 use buttplug_server_device_config::DeviceConfigurationManager;
 use tracing::info_span;
 
@@ -283,7 +280,6 @@ impl ServerDeviceManagerEventLoop {
         }
 
         let device_event_sender_clone = self.device_event_sender.clone();
-        let server_sender_clone = self.server_sender.clone();
 
         let device_config_manager = self.device_config_manager.clone();
         let connecting_devices = self.connecting_devices.clone();
@@ -319,13 +315,6 @@ impl ServerDeviceManagerEventLoop {
               }
               Err(e) => {
                 error!("Device errored while trying to connect: {:?}", e);
-                let error_msg = ErrorV0::from(ButtplugError::from(e));
-                if server_sender_clone
-                  .send(ButtplugServerMessageV4::Error(error_msg))
-                  .is_err()
-                {
-                  error!("Server disappeared before device error could be sent.");
-                }
               }
             }
             connecting_devices.remove(&address);
