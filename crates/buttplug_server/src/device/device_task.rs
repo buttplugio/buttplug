@@ -105,7 +105,9 @@ async fn run_device_task(
     // Calculate batch flush timeout (only if we're batching)
     let batch_fut = async {
       match batch_deadline {
-        Some(deadline) => tokio::time::sleep_until(deadline).await,
+        Some(deadline) => {
+          async_manager::sleep(deadline.saturating_duration_since(Instant::now())).await
+        }
         None => future::pending::<()>().await,
       }
     };

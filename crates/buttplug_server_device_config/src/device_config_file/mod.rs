@@ -18,7 +18,7 @@ use crate::device_config_file::{
   user::{UserConfigDefinition, UserConfigFile, UserDeviceConfigPair},
 };
 
-use super::{BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder};
+use super::{BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder, ServerDeviceDefinition};
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError},
   util::json::JSONValidator,
@@ -26,7 +26,7 @@ use buttplug_core::{
 use dashmap::DashMap;
 use getset::CopyGetters;
 use serde::{Deserialize, Serialize};
-use std::fmt::Display;
+use std::{fmt::Display, sync::Arc};
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../build-config/buttplug-device-config-v4.json");
@@ -119,20 +119,17 @@ fn load_main_config(
       default = Some(features.clone());
       dcm_builder.base_device_definition(
         &BaseDeviceIdentifier::new_default(&protocol_name),
-        &features.clone().into(),
+        Arc::new(ServerDeviceDefinition::from(features.clone())),
       );
     }
 
     for config in protocol_def.configurations() {
       if let Some(idents) = config.identifier() {
+        let definition: Arc<ServerDeviceDefinition> =
+          Arc::new(config.clone().with_defaults(default.as_ref()).into());
         for config_ident in idents {
           let ident = BaseDeviceIdentifier::new_with_identifier(&protocol_name, config_ident);
-          if let Some(d) = &default {
-            dcm_builder
-              .base_device_definition(&ident, &d.update_with_configuration(config.clone()).into());
-          } else {
-            dcm_builder.base_device_definition(&ident, &config.clone().into());
-          }
+          dcm_builder.base_device_definition(&ident, definition.clone());
         }
       }
     }
@@ -172,7 +169,7 @@ fn load_user_config(
       if let Some(idents) = config.identifier() {
         for config_ident in idents {
           let ident = BaseDeviceIdentifier::new_with_identifier(&protocol_name, config_ident);
-          dcm_builder.base_device_definition(&ident, &config.clone().into());
+          dcm_builder.base_device_definition(&ident, Arc::new(config.clone().into()));
         }
       }
     }

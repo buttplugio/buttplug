@@ -42,7 +42,7 @@ impl UserDeviceIdentifier {
 
 /// Set of information used for matching devices to their features and related communication protocol.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Getters, MutGetters, Serialize, Deserialize)]
-#[getset(get = "pub(crate)", get_mut = "pub(crate)")]
+#[getset(get = "pub", get_mut = "pub(crate)")]
 pub struct BaseDeviceIdentifier {
   /// Name of the protocol this device uses to communicate
   protocol: String,

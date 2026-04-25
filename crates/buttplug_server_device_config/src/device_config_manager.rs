@@ -11,6 +11,7 @@ use getset::Getters;
 use std::{
   collections::HashMap,
   fmt::{self, Debug},
+  sync::Arc,
 };
 use uuid::Uuid;
 
@@ -27,7 +28,7 @@ use crate::{
 pub struct DeviceConfigurationManagerBuilder {
   base_communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   user_communication_specifiers: DashMap<String, Vec<ProtocolCommunicationSpecifier>>,
-  base_device_definitions: HashMap<BaseDeviceIdentifier, ServerDeviceDefinition>,
+  base_device_definitions: HashMap<BaseDeviceIdentifier, Arc<ServerDeviceDefinition>>,
   user_device_definitions: DashMap<UserDeviceIdentifier, ServerDeviceDefinition>,
 }
 
@@ -48,11 +49,11 @@ impl DeviceConfigurationManagerBuilder {
   pub fn base_device_definition(
     &mut self,
     identifier: &BaseDeviceIdentifier,
-    features: &ServerDeviceDefinition,
+    definition: Arc<ServerDeviceDefinition>,
   ) -> &mut Self {
     self
       .base_device_definitions
-      .insert(identifier.clone(), features.clone());
+      .insert(identifier.clone(), definition);
     self
   }
 
@@ -139,7 +140,8 @@ pub struct DeviceConfigurationManager {
   #[getset(get = "pub")]
   base_communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   /// Device definitions from the base device config. Should not change/update during a session.
-  base_device_definitions: HashMap<BaseDeviceIdentifier, ServerDeviceDefinition>,
+  #[getset(get = "pub")]
+  base_device_definitions: HashMap<BaseDeviceIdentifier, Arc<ServerDeviceDefinition>>,
   /// Communication specifiers provided by the user, mapped from protocol name to vector of
   /// specifiers. Loaded at session start, may change over life of session.
   #[getset(get = "pub")]
@@ -167,6 +169,27 @@ impl Default for DeviceConfigurationManager {
 }
 
 impl DeviceConfigurationManager {
+  /// Construct a `DeviceConfigurationManager` directly from pre-built maps, bypassing the
+  /// builder and its validation logic.
+  ///
+  /// **Use with caution**: the builder (`DeviceConfigurationManagerBuilder::finish`) performs
+  /// validation and reconciliation steps that this constructor skips. Prefer the builder for
+  /// any config loaded from JSON. This path exists for embedded or test contexts that assemble
+  /// their own protocol/identifier maps and cannot or do not want to go through the JSON config
+  /// pipeline. If you find yourself calling this in non-embedded production code, that is
+  /// probably a sign the builder API needs extension rather than a bypass.
+  pub fn new(
+    base_communication_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
+    base_device_definitions: HashMap<BaseDeviceIdentifier, Arc<ServerDeviceDefinition>>,
+  ) -> Self {
+    Self {
+      base_communication_specifiers,
+      user_communication_specifiers: DashMap::new(),
+      base_device_definitions,
+      user_device_definitions: DashMap::new(),
+    }
+  }
+
   pub fn add_user_communication_specifier(
     &self,
     protocol: &str,
