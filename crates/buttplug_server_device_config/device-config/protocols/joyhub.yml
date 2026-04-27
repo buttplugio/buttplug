@@ -2416,6 +2416,48 @@ configurations:
             - 255
       index: 1
   id: bafdaacd-8e51-4779-9624-7b9af4a8a657
+- identifier:
+    - J-RoseStar
+  name: JoyHub Rose Star
+  features:
+    - id: df48bbd6-67c0-43f1-9a37-1cce16e3cae1
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 1
+    - id: 99a22a51-06d4-4ca3-aed4-b176745ab224
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 2
+  id: be00e6fb-cf33-4fc8-ab31-aee8cb4e4eda
+- identifier:
+    - J-Vows
+  name: JoyHub Vows
+  id: b5221199-416a-441e-9ad5-966d9aeb9065
+- identifier:
+    - J-Pixel
+  name: JoyHub Pixel
+  features:
+    - id: f2622fe8-3bf2-44fb-af6f-d1ea0c3c223f
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: abccc57b-ecc2-432f-af30-00019c371be7
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 2
+  id: 83b6f871-b99c-42b5-a0d8-11e9cf058bf1
 communication:
 - btle:
     names:
@@ -2557,6 +2599,9 @@ communication:
     - J-VeeLips
     - J-Veeva2
     - J-Punch
+    - J-RoseStar
+    - J-Vows
+    - J-Pixel
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
