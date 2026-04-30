@@ -2119,6 +2119,14 @@ configurations:
             - 0
             - 255
       index: 0
+    - description: Heater
+      id: cf0a98e6-9d1b-41f8-9d02-6139fefb4ad6
+      output:
+        temperature:
+          value:
+            - 0
+            - 1
+      index: 6
   id: 7b440f5f-3d18-49a4-a1da-1d0a164d0d7a
 - identifier:
     - J-Mirage3
@@ -2458,6 +2466,10 @@ configurations:
             - 255
       index: 2
   id: 83b6f871-b99c-42b5-a0d8-11e9cf058bf1
+- identifier:
+    - J-SyncFlare
+  name: JoyHub Sync Flare
+  id: 80f53cba-d56e-47a6-aa23-b5cca2840011
 communication:
 - btle:
     names:
@@ -2602,6 +2614,7 @@ communication:
     - J-RoseStar
     - J-Vows
     - J-Pixel
+    - J-SyncFlare
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
