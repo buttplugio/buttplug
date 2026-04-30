@@ -26,15 +26,28 @@ impl ProtocolHandler for Luvmazer {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![
-      HardwareWriteCmd::new(
-        &[feature_id],
-        Endpoint::Tx,
-        vec![0xa0, 0x01, 0x00, feature_index as u8, 0x64, speed as u8],
-        false,
-      )
-      .into(),
-    ])
+    if feature_index == 2 {
+      // "tapping" mode
+      Ok(vec![
+        HardwareWriteCmd::new(
+          &[feature_id],
+          Endpoint::Tx,
+          vec![0xa0, 0x0c, 0x00, 0x00, 0x64, speed as u8],
+          false,
+        )
+            .into(),
+      ])
+    } else {
+      Ok(vec![
+        HardwareWriteCmd::new(
+          &[feature_id],
+          Endpoint::Tx,
+          vec![0xa0, 0x01, 0x00, feature_index as u8, 0x64, speed as u8],
+          false,
+        )
+            .into(),
+      ])
+    }
   }
 
   fn handle_output_rotate_cmd(

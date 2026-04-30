@@ -131,6 +131,25 @@ configurations:
             - 255
       index: 2
   id: 4e8fc36f-2fae-4abe-9c17-fdd207f8dd74
+- identifier:
+    - TKLM-C001-BT
+  name: Luvmazer Rose Finger Vibe
+  features:
+    - id: 66e1740f-18b6-4848-ab9e-729968b767d0
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 2288452e-65ee-4c00-b0e4-3c75dbd1464b
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 2
+  id: 10030d9f-bb93-4c57-8a07-a53dabd0dde9
 communication:
 - btle:
     names:
@@ -140,6 +159,7 @@ communication:
     - TKLM-C004-BT
     - TKLM-C005-BT
     - TKLM-N001-BT
+    - TKLM-C001-BT
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
