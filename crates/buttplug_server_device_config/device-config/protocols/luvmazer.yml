@@ -105,6 +105,32 @@ configurations:
             - 255
       index: 1
   id: bf7f9090-02a4-43b7-9752-232c97a05a49
+- identifier:
+    - TKLM-N001-BT
+  name: Luvmazer Fantasy Nova
+  features:
+    - id: 238a4ab0-c4a1-4c48-b721-f7db31e68080
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 5bc79997-0425-4fd8-a873-16dc0e41f621
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 1
+    - id: 33f85933-87a8-407f-92bd-6e9db4458764
+      output:
+        constrict:
+          value:
+            - 0
+            - 255
+      index: 2
+  id: 4e8fc36f-2fae-4abe-9c17-fdd207f8dd74
 communication:
 - btle:
     names:
@@ -113,6 +139,7 @@ communication:
     - TKLM-C003-BT
     - TKLM-C004-BT
     - TKLM-C005-BT
+    - TKLM-N001-BT
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
