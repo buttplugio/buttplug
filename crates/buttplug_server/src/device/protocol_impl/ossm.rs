@@ -39,13 +39,30 @@ impl ProtocolInitializer for OSSMInitializer {
     hardware: Arc<Hardware>,
     _: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let msg = HardwareWriteCmd::new(
+    hardware.write_value(&HardwareWriteCmd::new(
       &[OSSM_PROTOCOL_UUID],
       Endpoint::Tx,
-      format!("go:strokeEngine").into_bytes(),
+      "speedKnobLimit: false".to_string().into_bytes(),
       false,
-    );
-    hardware.write_value(&msg).await?;
+    )).await?;
+    hardware.write_value(&HardwareWriteCmd::new(
+      &[OSSM_PROTOCOL_UUID],
+      Endpoint::Tx,
+      "go:strokeEngine".to_string().into_bytes(),
+      false,
+    )).await?;
+    hardware.write_value(&HardwareWriteCmd::new(
+      &[OSSM_PROTOCOL_UUID],
+      Endpoint::Tx,
+      "set:depth:100".to_string().into_bytes(),
+      false,
+    )).await?;
+    hardware.write_value(&HardwareWriteCmd::new(
+      &[OSSM_PROTOCOL_UUID],
+      Endpoint::Tx,
+      "set:stroke:100".to_string().into_bytes(),
+      false,
+    )).await?;
     Ok(Arc::new(OSSM::default()))
   }
 }
