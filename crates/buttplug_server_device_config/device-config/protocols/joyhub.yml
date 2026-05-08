@@ -2470,6 +2470,84 @@ configurations:
     - J-SyncFlare
   name: JoyHub Sync Flare
   id: 80f53cba-d56e-47a6-aa23-b5cca2840011
+- identifier:
+    - J-AuroraII
+  name: JoyHub Aurora II
+  features:
+    - id: b6b6d567-be8b-4ebe-8beb-24214807fd99
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: dffcbaa5-9339-4ee6-8a3f-00a583de5d4e
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 2
+  id: 04873217-3f77-46cc-bfd3-c6cc32008c18
+- identifier:
+    - J-Vortus
+  name: JoyHub Vortus
+  features:
+    - id: c0fa41dd-f96b-44ed-a932-ee8210cf350f
+      description: Internal vibe
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: aa63f859-4255-4da5-b012-7781d70de3df
+      description: Wand head
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+  id: 23719c0e-1c87-4120-982c-a43ff8a62255
+- identifier:
+    - J-Phantom
+  name: JoyHub Phantom
+  features:
+    - id: 2f89e300-262f-4cd1-a969-05d3487131db
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: c11fa405-aa04-42af-8f35-bc0fc6e175cd
+      output:
+        rotate:
+          value:
+            - 0
+            - 255
+      index: 1
+  id: fe8a731c-958e-4215-a4f7-f1a46eb06655
+- identifier:
+    - J-Thelma
+  name: JoyHub Thelma
+  features:
+    - id: f22c664a-cf07-42ec-b9b0-de82b51492f0
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: c53ef975-9af4-4846-b966-3b7872ee6416
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+  id: 34371342-4205-4913-96e9-e6911dbcc161
 communication:
 - btle:
     names:
@@ -2615,6 +2693,10 @@ communication:
     - J-Vows
     - J-Pixel
     - J-SyncFlare
+    - J-AuroraII
+    - J-Vortus
+    - J-Phantom
+    - J-Thelma
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
