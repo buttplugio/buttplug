@@ -57,7 +57,31 @@ impl ProtocolHandler for IToys {
         ],
         false,
       )
-      .into(),
+          .into(),
+    ])
+  }
+
+  fn handle_output_rotate_cmd(
+    &self,
+    _feature_index: u32,
+    feature_id: Uuid,
+    speed: i32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![
+          0xa0,
+          0x08,
+          if speed == 0 { 0x00 } else { 0x01 },
+          0x00,
+          speed.abs() as u8,
+          if speed == 0 { 0x00 } else { 0xff },
+        ],
+        false,
+      )
+          .into(),
     ])
   }
 }

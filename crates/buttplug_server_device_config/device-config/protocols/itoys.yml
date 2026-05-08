@@ -35,23 +35,43 @@ configurations:
         - 255
     index: 1
 - identifier:
-  - ASF-001-BT-R
+    - ASF-001-BT-R
   name: Defyeah Horizontal Sex Machine ASFO16
   id: '0108797c-1cea-486d-9ed5-3b4412fb6593'
   features:
-  - id: c742d608-2110-4377-aaea-7173d7f1dc83
-    output:
-      oscillate:
-        value:
-        - 0
-        - 255
-    index: 0
+    - id: c742d608-2110-4377-aaea-7173d7f1dc83
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 0
+- identifier:
+    - IJVB-W10-BT-RX
+  name: Bestvibe Rotational Vibration
+  id: abb51f0e-7962-454e-8584-12099258e1f1
+  features:
+    - id: 235cd946-2e47-4ec6-9a5c-93ba9618cdd8
+      output:
+        vibrate:
+          value:
+            - 0
+            - 3
+      index: 0
+    - id: 8149e48b-847f-4744-8dc6-fb263637b60d
+      output:
+        rotate:
+          value:
+            - 0
+            - 3
+      index: 1
 communication:
 - btle:
     names:
     - 26-021-B
     - SML-2310-SZ-B
     - ASF-001-BT-R
+    - IJVB-W10-BT-RX
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
