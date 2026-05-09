@@ -71,6 +71,13 @@ pub fn setup_server_device_comm_managers(
         server_builder.comm_manager(XInputDeviceCommunicationManagerBuilder::default());
       }
     }
+    {
+      use buttplug_server_hwmgr_sdl_gamepad::SdlGamepadCommunicationManagerBuilder;
+      if args.use_sdl_gamepad() {
+        info!("Including SDL Gamepad Support (cross-platform rumble)");
+        server_builder.comm_manager(SdlGamepadCommunicationManagerBuilder::default());
+      }
+    }
   }
   if args.use_device_websocket_server() {
     info!("Including Websocket Server Device Support");
