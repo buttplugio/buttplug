@@ -22,6 +22,10 @@ configurations:
   - Utimi
   name: Utimi Prostate Massager
   id: d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f80
+- identifier:
+  - Utimi000040
+  name: Utimi KnotVibe ThrustMaster
+  id: 4a418af2-74c6-4b98-9a21-80690aae4cec
 communication:
 - btle:
     names:
