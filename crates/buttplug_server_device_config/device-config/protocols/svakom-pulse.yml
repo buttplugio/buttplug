@@ -13,6 +13,7 @@ defaults:
 configurations:
 - identifier:
   - SWK-SX013A
+  - HX013H
   name: Svakom Pulse Lite Neo
   id: 5b9918c8-af63-409f-9749-f5e6faf2dca0
 - identifier:
@@ -56,6 +57,7 @@ communication:
     - QH-SX045A-B
     - SWK-SX067-B
     - QH-HX029A-B
+    - HX013H
     services:
       0000ffe0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffe1-0000-1000-8000-00805f9b34fb
