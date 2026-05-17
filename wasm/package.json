@@ -2,6 +2,26 @@
   "name": "buttplug-wasm",
   "version": "3.0.0",
   "description": "Buttplug WASM connector for running an embedded Buttplug server in the browser",
+  "license": "BSD-3-Clause",
+  "author": "Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>",
+  "homepage": "https://buttplug.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/buttplugio/buttplug.git",
+    "directory": "wasm"
+  },
+  "bugs": {
+    "url": "https://github.com/buttplugio/buttplug/issues"
+  },
+  "keywords": [
+    "buttplug",
+    "haptics",
+    "teledildonics",
+    "wasm",
+    "webbluetooth",
+    "bluetooth",
+    "browser"
+  ],
   "type": "module",
   "main": "./dist/buttplug-wasm.mjs",
   "module": "./dist/buttplug-wasm.mjs",
@@ -19,10 +39,14 @@
   "workspaces": [
     "examples/basic"
   ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build:wasm": "cd ../crates/buttplug_wasm && wasm-pack build --target web",
     "build:web": "vite build",
-    "build": "npm run build:wasm && npm run build:web"
+    "build": "npm run build:wasm && npm run build:web",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "buttplug": "^3.2.1",
