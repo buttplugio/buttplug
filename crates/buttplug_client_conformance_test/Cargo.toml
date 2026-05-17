@@ -5,6 +5,7 @@ authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Conformance test harness for Buttplug client implementations"
 license = "BSD-3-Clause"
 edition = "2024"
+publish = false
 
 [lib]
 name = "buttplug_client_conformance_test"

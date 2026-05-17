@@ -9,6 +9,7 @@ repository = "https://github.com/buttplugio/buttplug.git"
 readme = "./README.md"
 keywords = ["usb", "serial", "hardware", "bluetooth", "teledildonics"]
 edition = "2024"
+publish = false
 
 [dependencies]
 buttplug_core = { version = "10.0.1", path = "../buttplug_core" }

@@ -3,6 +3,7 @@ name = "buttplug-examples"
 version = "0.1.0"
 authors = ["Melody Horn <melody@boringcactus.com>", "Kyle Machulis <kyle@nonpolynomial.com>"]
 edition = "2024"
+publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
