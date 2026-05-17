@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 197
+    "minor": 198
   },
   "protocols": {
     "activejoy": {
@@ -22281,6 +22281,68 @@
         "features": [],
         "id": "83e29d7a-6f35-499a-90f8-dfba8b674379",
         "name": "Twerking Butt"
+      }
+    },
+    "utimi": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Utimi*"
+            ],
+            "services": {
+              "0000ffa0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f80",
+          "identifier": [
+            "Utimi"
+          ],
+          "name": "Utimi Prostate Massager"
+        },
+        {
+          "id": "4a418af2-74c6-4b98-9a21-80690aae4cec",
+          "identifier": [
+            "Utimi000040"
+          ],
+          "name": "Utimi KnotVibe ThrustMaster"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+            "index": 0,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  255
+                ]
+              }
+            }
+          },
+          {
+            "id": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
+            "index": 1,
+            "output": {
+              "oscillate": {
+                "value": [
+                  0,
+                  255
+                ]
+              }
+            }
+          }
+        ],
+        "id": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f",
+        "name": "Utimi Device"
       }
     },
     "vibcrafter": {
