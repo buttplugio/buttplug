@@ -14,6 +14,9 @@ export default defineConfig({
       formats: ['es'],
     },
     outDir: 'dist',
+    rollupOptions: {
+      external: ['env'],
+    },
   },
   resolve: {
     alias: {
