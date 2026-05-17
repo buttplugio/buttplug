@@ -27,3 +27,4 @@ plans
 docs
 .deciduous
 **/.DS_Store
+**/node_modules
