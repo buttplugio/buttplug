@@ -1,0 +1,49 @@
+{
+  "name": "buttplug-wasm-blob",
+  "version": "3.0.0",
+  "description": "Buttplug WASM server binary with typed FFI wrapper",
+  "license": "BSD-3-Clause",
+  "author": "Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>",
+  "homepage": "https://buttplug.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/buttplugio/buttplug.git",
+    "directory": "wasm/packages/blob"
+  },
+  "bugs": {
+    "url": "https://github.com/buttplugio/buttplug/issues"
+  },
+  "keywords": [
+    "buttplug",
+    "wasm",
+    "webbluetooth",
+    "teledildonics"
+  ],
+  "type": "module",
+  "main": "./dist/buttplug-wasm-blob.mjs",
+  "module": "./dist/buttplug-wasm-blob.mjs",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/buttplug-wasm-blob.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "vite build",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "vite": "^8.0.13",
+    "vite-plugin-dts": "^5.0.0",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.6.0"
+  }
+}

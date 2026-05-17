@@ -1,0 +1,52 @@
+{
+  "name": "buttplug-wasm",
+  "version": "3.0.0",
+  "description": "Buttplug WASM client connector for the official buttplug JS library",
+  "license": "BSD-3-Clause",
+  "author": "Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>",
+  "homepage": "https://buttplug.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/buttplugio/buttplug.git",
+    "directory": "wasm/packages/connector"
+  },
+  "bugs": {
+    "url": "https://github.com/buttplugio/buttplug/issues"
+  },
+  "keywords": [
+    "buttplug",
+    "wasm",
+    "connector",
+    "teledildonics"
+  ],
+  "type": "module",
+  "main": "./dist/buttplug-wasm.mjs",
+  "module": "./dist/buttplug-wasm.mjs",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/buttplug-wasm.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "vite build",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "buttplug-wasm-blob": "^3.0.0",
+    "buttplug": "^4.0.2",
+    "eventemitter3": "^5.0.4"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "vite": "^8.0.13",
+    "vite-plugin-dts": "^5.0.0"
+  }
+}

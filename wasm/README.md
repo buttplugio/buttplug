@@ -1,49 +1,37 @@
-# buttplug-wasm
+# Buttplug WASM Packages
 
-Buttplug WASM connector for running an embedded Buttplug server directly in the browser via WebAssembly and Web Bluetooth.
+This workspace contains the npm packages for running a Buttplug server in the browser via WebAssembly.
 
-## Installation
+## Packages
+
+| Package | Description |
+|---------|-------------|
+| [`buttplug-wasm-blob`](packages/blob/) | WASM server binary + typed FFI wrapper. Use this if you're building your own connector for a third-party buttplug client library. |
+| [`buttplug-wasm`](packages/connector/) | Ready-made connector for the official [`buttplug`](https://www.npmjs.com/package/buttplug) JS client library. |
+
+## Quick Start
+
+If you're using the official buttplug JS client:
 
 ```bash
 npm install buttplug-wasm buttplug
 ```
 
-## Usage
-
 ```typescript
 import { ButtplugClient } from 'buttplug';
 import { ButtplugWasmClientConnector } from 'buttplug-wasm';
 
-// Optional: enable debug logging
-await ButtplugWasmClientConnector.activateLogging("debug");
-
 const connector = new ButtplugWasmClientConnector();
 const client = new ButtplugClient("My App");
-
 await client.connect(connector);
-await client.startScanning();
-
-client.on("deviceadded", (device) => {
-  console.log(`Device connected: ${device.Name}`);
-});
 ```
 
-## How it works
+## Building
 
-This package bundles a full Buttplug server compiled to WebAssembly. When you create a `ButtplugWasmClientConnector`, it:
-
-1. Loads and initializes the WASM module (lazy, on first `connect()`)
-2. Creates an embedded Buttplug server instance
-3. Communicates with the server via JSON message passing over the WASM boundary
-4. Uses Web Bluetooth for device discovery and communication
-
-No external server process needed — everything runs in-browser.
-
-## Requirements
-
-- A browser with Web Bluetooth support (Chrome, Edge, Opera)
-- HTTPS context (Web Bluetooth requires secure origins)
-- The `buttplug` npm package (peer dependency for `ButtplugClient`)
+```bash
+npm install
+npm run build        # builds wasm-pack + both packages
+```
 
 ## License
 

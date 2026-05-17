@@ -99,7 +99,7 @@ jobs:
         node-version: '20'
     - name: Build WASM crate
       run: wasm-pack build --dev crates/buttplug_wasm --target web
-    - name: Install TS wrapper dependencies
+    - name: Install workspace dependencies
       run: cd wasm && npm install
-    - name: Build TS wrapper
-      run: cd wasm && npm run build:web
+    - name: Build packages
+      run: cd wasm && npm run build:blob && npm run build:connector

@@ -10,8 +10,8 @@ export default defineConfig({
     target: 'esnext',
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'buttplug-wasm',
-      fileName: () => 'buttplug-wasm.mjs',
+      name: 'buttplug-wasm-blob',
+      fileName: () => 'buttplug-wasm-blob.mjs',
       formats: ['es'],
     },
     outDir: 'dist',
@@ -21,7 +21,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@wasm": fileURLToPath(new URL("../crates/buttplug_wasm/pkg", import.meta.url)),
+      "@wasm": fileURLToPath(new URL("../../../crates/buttplug_wasm/pkg", import.meta.url)),
     },
   },
   plugins: [

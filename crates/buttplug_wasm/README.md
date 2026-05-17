@@ -5,16 +5,15 @@ This is the Rust FFI layer that compiles Buttplug to WebAssembly via `wasm-bindg
 ## What this crate does
 
 - Exposes Buttplug server functionality to JavaScript/TypeScript through wasm-bindgen
-- Produces WASM output consumed by the [`buttplug-wasm`](https://www.npmjs.com/package/buttplug-wasm) npm package
+- Produces WASM output consumed by the [`buttplug-wasm-blob`](https://www.npmjs.com/package/buttplug-wasm-blob) npm package
 - Includes the WebBluetooth hardware manager for browser-native device discovery
 
 ## For users
 
-Install the `buttplug-wasm` npm package instead:
+Install one of the npm packages instead:
 
-```bash
-npm install buttplug-wasm
-```
+- **Using the official buttplug JS client?** `npm install buttplug-wasm buttplug`
+- **Building your own client?** `npm install buttplug-wasm-blob`
 
 ## Building (for contributors)
 
@@ -26,4 +25,4 @@ This outputs to `pkg/` (gitignored). The output is consumed by `../../wasm/` dur
 
 ## Why `publish = false`?
 
-This crate is not useful on its own — it's a thin FFI shim over `buttplug_server`. The publishable artifact is the npm package that bundles the compiled WASM binary with a TypeScript connector class.
+This crate is not useful on its own — it's a thin FFI shim over `buttplug_server`. The publishable artifacts are the `buttplug-wasm-blob` and `buttplug-wasm` npm packages in `../../wasm/packages/`.

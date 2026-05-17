@@ -1,6 +1,0 @@
-src/
-tests/
-examples/
-node_modules/
-*.config.ts
-tsconfig.json

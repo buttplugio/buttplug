@@ -11,7 +11,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
-      "@wasm/*": ["../crates/buttplug_wasm/pkg/*"]
+      "@wasm/*": ["../../../crates/buttplug_wasm/pkg/*"]
     }
   },
   "include": ["src/**/*"],

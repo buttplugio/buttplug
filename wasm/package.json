@@ -1,62 +1,13 @@
 {
-  "name": "buttplug-wasm",
-  "version": "3.0.0",
-  "description": "Buttplug WASM connector for running an embedded Buttplug server in the browser",
-  "license": "BSD-3-Clause",
-  "author": "Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>",
-  "homepage": "https://buttplug.io",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/buttplugio/buttplug.git",
-    "directory": "wasm"
-  },
-  "bugs": {
-    "url": "https://github.com/buttplugio/buttplug/issues"
-  },
-  "keywords": [
-    "buttplug",
-    "haptics",
-    "teledildonics",
-    "wasm",
-    "webbluetooth",
-    "bluetooth",
-    "browser"
-  ],
-  "type": "module",
-  "main": "./dist/buttplug-wasm.mjs",
-  "module": "./dist/buttplug-wasm.mjs",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/buttplug-wasm.mjs",
-      "default": "./dist/buttplug-wasm.mjs"
-    }
-  },
-  "files": [
-    "dist"
-  ],
+  "private": true,
   "workspaces": [
-    "examples/basic"
+    "packages/*",
+    "examples/*"
   ],
-  "engines": {
-    "node": ">=18"
-  },
   "scripts": {
     "build:wasm": "cd ../crates/buttplug_wasm && wasm-pack build --target web",
-    "build:web": "vite build",
-    "build": "npm run build:wasm && npm run build:web",
-    "prepublishOnly": "npm run build"
-  },
-  "dependencies": {
-    "buttplug": "^3.2.1",
-    "eventemitter3": "^5.0.1"
-  },
-  "devDependencies": {
-    "typescript": "^5.3.3",
-    "vite": "^5.1.4",
-    "vite-plugin-dts": "^3.7.3",
-    "vite-plugin-top-level-await": "^1.4.1",
-    "vite-plugin-wasm": "^3.3.0"
+    "build:blob": "npm run build -w buttplug-wasm-blob",
+    "build:connector": "npm run build -w buttplug-wasm",
+    "build": "npm run build:wasm && npm run build:blob && npm run build:connector"
   }
 }

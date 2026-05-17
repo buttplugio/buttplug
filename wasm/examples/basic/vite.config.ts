@@ -21,12 +21,13 @@ function wasmEnvPlugin(): Plugin {
 export default defineConfig({
   resolve: {
     alias: {
-      "buttplug-wasm": fileURLToPath(new URL("../../src/index.ts", import.meta.url)),
+      "buttplug-wasm": fileURLToPath(new URL("../../packages/connector/src/index.ts", import.meta.url)),
+      "buttplug-wasm-blob": fileURLToPath(new URL("../../packages/blob/src/index.ts", import.meta.url)),
       "@wasm": fileURLToPath(new URL("../../../crates/buttplug_wasm/pkg", import.meta.url)),
     },
   },
   optimizeDeps: {
-    exclude: ["buttplug-wasm"],
+    exclude: ["buttplug-wasm", "buttplug-wasm-blob"],
   },
   server: {
     fs: {
