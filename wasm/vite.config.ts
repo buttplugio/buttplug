@@ -7,6 +7,7 @@ import topLevelAwait from "vite-plugin-top-level-await";
 
 export default defineConfig({
   build: {
+    target: 'esnext',
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'buttplug-wasm',
