@@ -3,6 +3,19 @@
   "version": "3.0.0",
   "description": "Buttplug WASM connector for running an embedded Buttplug server in the browser",
   "type": "module",
+  "main": "./dist/buttplug-wasm.mjs",
+  "module": "./dist/buttplug-wasm.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/buttplug-wasm.mjs",
+      "default": "./dist/buttplug-wasm.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "workspaces": [
     "examples/basic"
   ],
