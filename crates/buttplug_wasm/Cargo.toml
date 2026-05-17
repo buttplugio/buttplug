@@ -8,6 +8,7 @@ homepage = "http://buttplug.io"
 repository = "https://github.com/buttplugio/buttplug.git"
 keywords = ["bluetooth", "wasm", "webbluetooth", "teledildonics"]
 edition = "2024"
+publish = false
 
 [lib]
 name = "buttplug_wasm"
