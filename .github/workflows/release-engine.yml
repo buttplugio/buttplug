@@ -1,0 +1,103 @@
+name: Release Intiface Engine
+
+on:
+  push:
+    tags:
+      - 'intiface-engine-v*'
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }} ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            platform: linux
+            arch: x64
+            exe: intiface-engine
+            zip: intiface-engine-linux-x64-Release.zip
+
+          - runner: ubuntu-24.04-arm
+            platform: linux
+            arch: arm64
+            exe: intiface-engine
+            zip: intiface-engine-linux-arm64-Release.zip
+
+          - runner: windows-latest
+            platform: win
+            arch: x64
+            exe: intiface-engine.exe
+            zip: intiface-engine-win-x64-Release.zip
+
+          - runner: macos-latest
+            platform: macos
+            arch: arm64
+            exe: intiface-engine
+            zip: intiface-engine-macos-arm64-Release.zip
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get -y update
+          sudo apt-get -y install libudev-dev libusb-1.0-0-dev libdbus-1-dev
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@nightly
+
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.platform }}-${{ matrix.arch }}
+
+      - name: Build release binary
+        run: cargo build --release -p intiface-engine
+
+      - name: Prepare artifact
+        shell: bash
+        run: |
+          mkdir -p staging
+          cp target/release/${{ matrix.exe }} staging/
+          cp crates/intiface_engine/README.md staging/
+          cp crates/intiface_engine/CHANGELOG.md staging/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.zip }}
+          path: staging/
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Zip release packages
+        run: |
+          cd artifacts
+          for dir in */; do
+            zip_name="${dir%/}"
+            (cd "$dir" && zip -j "../${zip_name}" *)
+          done
+          ls -la *.zip
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
