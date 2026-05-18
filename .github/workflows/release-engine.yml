@@ -3,7 +3,7 @@ name: Release Intiface Engine
 on:
   push:
     tags:
-      - 'intiface-engine-v*'
+      - 'intiface-engine-[0-9]*'
 
 jobs:
   build:
