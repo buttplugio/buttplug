@@ -17,6 +17,7 @@ use tokio::{
   sync::{Notify, broadcast},
 };
 use tokio_util::sync::CancellationToken;
+use tracing::{info, trace};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -98,6 +99,12 @@ pub async fn frontend_server_event_loop(
               info!("Device Removed: {}", device_id);
               frontend
                 .send(EngineMessage::DeviceDisconnected{index: device_id})
+                .await;
+            }
+            ButtplugRemoteServerEvent::OutputObservation { device_index, feature_index, output_type, value } => {
+              trace!("Output observation: device {} feature {} {} = {}", device_index, feature_index, output_type, value);
+              frontend
+                .send(EngineMessage::DeviceOutputObservation { device_index, feature_index, output_type, value })
                 .await;
             }
           },
