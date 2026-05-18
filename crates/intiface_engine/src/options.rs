@@ -63,6 +63,8 @@ pub struct EngineOptions {
   repeater_remote_address: Option<String>,
   #[getset(get_copy = "pub")]
   rest_api_port: Option<u16>,
+  #[getset(get_copy = "pub")]
+  emit_output_observations: bool,
 }
 
 #[derive(Default, Debug, Clone)]
@@ -94,6 +96,7 @@ pub struct EngineOptionsExternal {
   pub repeater_local_port: Option<u16>,
   pub repeater_remote_address: Option<String>,
   pub rest_api_port: Option<u16>,
+  pub emit_output_observations: bool,
 }
 
 impl From<EngineOptionsExternal> for EngineOptions {
@@ -126,6 +129,7 @@ impl From<EngineOptionsExternal> for EngineOptions {
       repeater_local_port: other.repeater_local_port,
       repeater_remote_address: other.repeater_remote_address,
       rest_api_port: other.rest_api_port,
+      emit_output_observations: other.emit_output_observations,
     }
   }
 }
@@ -276,6 +280,11 @@ impl EngineOptionsBuilder {
 
   pub fn rest_api_port(&mut self, port: u16) -> &mut Self {
     self.options.rest_api_port = Some(port);
+    self
+  }
+
+  pub fn emit_output_observations(&mut self, value: bool) -> &mut Self {
+    self.options.emit_output_observations = value;
     self
   }
 
