@@ -17,25 +17,25 @@ jobs:
             platform: linux
             arch: x64
             exe: intiface-engine
-            artifact: intiface-engine-linux-x64-Release
+            artifact: linux-x64
 
           - runner: ubuntu-24.04-arm
             platform: linux
             arch: arm64
             exe: intiface-engine
-            artifact: intiface-engine-linux-arm64-Release
+            artifact: linux-arm64
 
           - runner: windows-latest
             platform: win
             arch: x64
             exe: intiface-engine.exe
-            artifact: intiface-engine-win-x64-Release
+            artifact: win-x64
 
           - runner: macos-latest
             platform: macos
             arch: arm64
             exe: intiface-engine
-            artifact: intiface-engine-macos-arm64-Release
+            artifact: macos-arm64
 
     steps:
       - uses: actions/checkout@v4
@@ -85,11 +85,15 @@ jobs:
         with:
           path: artifacts/
 
+      - name: Extract version from tag
+        run: echo "VERSION=${GITHUB_REF_NAME#intiface-engine-}" >> "$GITHUB_ENV"
+
       - name: Zip release packages
         run: |
           cd artifacts
           for dir in */; do
-            zip_name="${dir%/}.zip"
+            slug="${dir%/}"
+            zip_name="intiface-engine-v${VERSION}-${slug}.zip"
             (cd "$dir" && zip -j "../${zip_name}" *)
           done
           ls -la *.zip
