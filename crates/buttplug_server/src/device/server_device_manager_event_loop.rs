@@ -13,6 +13,7 @@ use super::server_device_manager::DeviceManagerCommand;
 use crate::device::{
   DeviceHandle,
   InternalDeviceEvent,
+  OutputObservation,
   device_handle::build_device_handle,
   hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
   protocol::ProtocolManager,
@@ -64,6 +65,8 @@ pub(super) struct ServerDeviceManagerEventLoop {
   loop_cancellation_token: CancellationToken,
   /// Protocol map, for mapping user definitions to protocols
   protocol_manager: ProtocolManager,
+  /// Optional sender for output observations, None when disabled
+  output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
 }
 
 impl ServerDeviceManagerEventLoop {
@@ -75,6 +78,7 @@ impl ServerDeviceManagerEventLoop {
     server_sender: broadcast::Sender<ButtplugServerMessageV4>,
     device_comm_receiver: mpsc::Receiver<HardwareCommunicationManagerEvent>,
     device_command_receiver: mpsc::Receiver<DeviceManagerCommand>,
+    output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
   ) -> Self {
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
     Self {
@@ -90,6 +94,7 @@ impl ServerDeviceManagerEventLoop {
       connecting_devices: Arc::new(DashSet::new()),
       loop_cancellation_token,
       protocol_manager: ProtocolManager::default(),
+      output_observation_sender,
     }
   }
 
@@ -283,6 +288,7 @@ impl ServerDeviceManagerEventLoop {
 
         let device_config_manager = self.device_config_manager.clone();
         let connecting_devices = self.connecting_devices.clone();
+        let output_observation_sender = self.output_observation_sender.clone();
         let span = info_span!(
           "device creation",
           name = tracing::field::display(name),
@@ -299,6 +305,7 @@ impl ServerDeviceManagerEventLoop {
               creator,
               protocol_specializers,
               device_event_sender_for_forwarding,
+              output_observation_sender,
             )
             .await
             {

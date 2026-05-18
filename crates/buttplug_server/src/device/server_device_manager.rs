@@ -13,6 +13,7 @@ use crate::{
   ButtplugServerResultFuture,
   device::{
     DeviceHandle,
+    OutputObservation,
     hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerBuilder},
     server_device_manager_event_loop::ServerDeviceManagerEventLoop,
   },
@@ -72,6 +73,7 @@ pub struct ServerDeviceInfo {
 pub struct ServerDeviceManagerBuilder {
   device_configuration_manager: Arc<DeviceConfigurationManager>,
   comm_managers: Vec<Box<dyn HardwareCommunicationManagerBuilder>>,
+  emit_output_observations: bool,
 }
 
 impl ServerDeviceManagerBuilder {
@@ -79,6 +81,7 @@ impl ServerDeviceManagerBuilder {
     Self {
       device_configuration_manager: Arc::new(device_configuration_manager),
       comm_managers: vec![],
+      emit_output_observations: false,
     }
   }
 
@@ -88,6 +91,7 @@ impl ServerDeviceManagerBuilder {
     Self {
       device_configuration_manager,
       comm_managers: vec![],
+      emit_output_observations: false,
     }
   }
 
@@ -96,6 +100,11 @@ impl ServerDeviceManagerBuilder {
     T: HardwareCommunicationManagerBuilder + 'static,
   {
     self.comm_managers.push(Box::new(builder));
+    self
+  }
+
+  pub fn emit_output_observations(&mut self, enabled: bool) -> &mut Self {
+    self.emit_output_observations = enabled;
     self
   }
 
@@ -149,6 +158,11 @@ impl ServerDeviceManagerBuilder {
     let loop_cancellation_token = CancellationToken::new();
 
     let output_sender = broadcast::channel(255).0;
+    let output_observation_sender = if self.emit_output_observations {
+      Some(broadcast::channel(256).0)
+    } else {
+      None
+    };
 
     let mut event_loop = ServerDeviceManagerEventLoop::new(
       comm_managers,
@@ -158,6 +172,7 @@ impl ServerDeviceManagerBuilder {
       output_sender.clone(),
       device_event_receiver,
       device_command_receiver,
+      output_observation_sender.clone(),
     );
     buttplug_core::spawn!("ServerDeviceManager event loop", async move {
       event_loop.run().await;
@@ -169,6 +184,7 @@ impl ServerDeviceManagerBuilder {
       loop_cancellation_token,
       running: Arc::new(AtomicBool::new(true)),
       output_sender,
+      output_observation_sender,
     })
   }
 }
@@ -183,6 +199,7 @@ pub struct ServerDeviceManager {
   loop_cancellation_token: CancellationToken,
   running: Arc<AtomicBool>,
   output_sender: broadcast::Sender<ButtplugServerMessageV4>,
+  output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
 }
 
 impl ServerDeviceManager {
@@ -190,6 +207,12 @@ impl ServerDeviceManager {
     // Unlike the client API, we can expect anyone using the server to pin this
     // themselves.
     convert_broadcast_receiver_to_stream(self.output_sender.subscribe())
+  }
+
+  pub fn output_observation_stream(&self) -> Option<impl Stream<Item = OutputObservation>> {
+    self.output_observation_sender.as_ref().map(|sender| {
+      convert_broadcast_receiver_to_stream(sender.subscribe())
+    })
   }
 
   fn start_scanning(&self) -> ButtplugServerResultFuture {
