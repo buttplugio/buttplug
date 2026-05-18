@@ -53,4 +53,5 @@ Tests run across multiple protocol spec versions (v0–v4) via version-specific 
 - `test_serializers.rs` — Message serialization/deserialization across protocol versions
 - `test_message_downgrades.rs` — Protocol version downgrade path tests
 - `test_disabled_device_features.rs` — Tests for user config feature disabling
+- `test_output_observations.rs` — Integration tests for output observability (observation stream, filtering, multi-device, enable/disable)
 - `test_websocket_connectors.rs` / `test_websocket_device_comm_manager.rs` — WebSocket transport integration tests
