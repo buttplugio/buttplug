@@ -17,25 +17,25 @@ jobs:
             platform: linux
             arch: x64
             exe: intiface-engine
-            zip: intiface-engine-linux-x64-Release.zip
+            artifact: intiface-engine-linux-x64-Release
 
           - runner: ubuntu-24.04-arm
             platform: linux
             arch: arm64
             exe: intiface-engine
-            zip: intiface-engine-linux-arm64-Release.zip
+            artifact: intiface-engine-linux-arm64-Release
 
           - runner: windows-latest
             platform: win
             arch: x64
             exe: intiface-engine.exe
-            zip: intiface-engine-win-x64-Release.zip
+            artifact: intiface-engine-win-x64-Release
 
           - runner: macos-latest
             platform: macos
             arch: arm64
             exe: intiface-engine
-            zip: intiface-engine-macos-arm64-Release.zip
+            artifact: intiface-engine-macos-arm64-Release
 
     steps:
       - uses: actions/checkout@v4
@@ -68,7 +68,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.zip }}
+          name: ${{ matrix.artifact }}
           path: staging/
 
   release:
@@ -89,7 +89,7 @@ jobs:
         run: |
           cd artifacts
           for dir in */; do
-            zip_name="${dir%/}"
+            zip_name="${dir%/}.zip"
             (cd "$dir" && zip -j "../${zip_name}" *)
           done
           ls -la *.zip
