@@ -7,7 +7,7 @@
   "homepage": "https://buttplug.io",
   "repository": {
     "type": "git",
-    "url": "https://github.com/buttplugio/buttplug.git",
+    "url": "git+https://github.com/buttplugio/buttplug.git",
     "directory": "wasm/packages/blob"
   },
   "bugs": {
