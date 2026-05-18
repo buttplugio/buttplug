@@ -102,8 +102,10 @@ pub mod protocol;
 pub mod protocol_impl;
 mod server_device_manager;
 mod server_device_manager_event_loop;
+mod output_observation;
 
 pub use device_handle::{DeviceCommand, DeviceEvent, DeviceHandle};
+pub use output_observation::OutputObservation;
 
 use crate::message::ButtplugServerDeviceMessage;
 use buttplug_server_device_config::UserDeviceIdentifier;
