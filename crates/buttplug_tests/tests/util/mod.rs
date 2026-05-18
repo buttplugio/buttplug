@@ -173,3 +173,21 @@ pub fn test_server_v4_with_device(device_type: &str) -> (ButtplugServer, TestDev
 
   (test_server_with_comm_manager(builder), device)
 }
+
+#[allow(dead_code)]
+pub fn test_server_with_device_and_observations(
+  device_type: &str,
+) -> (ButtplugServer, TestDeviceChannelHost) {
+  let mut builder = TestDeviceCommunicationManagerBuilder::default();
+  let device = builder.add_test_device(&TestDeviceIdentifier::new(device_type, None));
+
+  let mut dm_builder = ServerDeviceManagerBuilder::new(create_test_dcm());
+  dm_builder.comm_manager(builder);
+  dm_builder.emit_output_observations(true);
+
+  let server = ButtplugServerBuilder::new(dm_builder.finish().unwrap())
+    .finish()
+    .unwrap();
+
+  (server, device)
+}
