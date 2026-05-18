@@ -42,6 +42,12 @@ pub enum ButtplugRemoteServerEvent {
   DeviceRemoved {
     index: u32,
   },
+  OutputObservation {
+    device_index: u32,
+    feature_index: u32,
+    output_type: String,
+    value: f64,
+  },
   //DeviceCommand(ButtplugDeviceCommandMessageUnion)
 }
 
@@ -259,6 +265,25 @@ impl ButtplugRemoteServer {
         let event_sender = event_sender.clone();
         async move {
           run_device_event_stream(server, event_sender).await;
+        }
+      });
+    }
+    {
+      let server = server.clone();
+      let event_sender = event_sender.clone();
+      tokio::spawn(async move {
+        if let Some(obs_stream) = server.output_observation_stream() {
+          futures::pin_mut!(obs_stream);
+          while let Some(obs) = futures::StreamExt::next(&mut obs_stream).await {
+            if event_sender.receiver_count() > 0 {
+              let _ = event_sender.send(ButtplugRemoteServerEvent::OutputObservation {
+                device_index: obs.device_index,
+                feature_index: obs.feature_index,
+                output_type: obs.output_type,
+                value: obs.value,
+              });
+            }
+          }
         }
       });
     }

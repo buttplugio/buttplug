@@ -39,6 +39,12 @@ pub enum EngineMessage {
   ClientRejected {
     reason: String,
   },
+  DeviceOutputObservation {
+    device_index: u32,
+    feature_index: u32,
+    output_type: String,
+    value: f64,
+  },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
