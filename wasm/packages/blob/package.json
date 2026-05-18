@@ -36,7 +36,9 @@
     "node": ">=18"
   },
   "scripts": {
-    "build": "vite build",
+    "build:wasm": "cd ../../../crates/buttplug_wasm && wasm-pack build --target web",
+    "build:js": "vite build",
+    "build": "npm run build:wasm && npm run build:js",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {

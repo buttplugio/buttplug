@@ -1,0 +1,60 @@
+name: Publish WASM Packages
+
+on:
+  push:
+    tags:
+      - 'wasm-v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+    - uses: actions/checkout@v4
+    - name: Fix ~/.cargo directory permissions
+      run: sudo chown -R $(whoami):$(id -ng) ~/.cargo/
+    - name: Install required packages
+      run: sudo apt-get -y update && sudo apt-get -y install libudev-dev libusb-1.0-0-dev libdbus-1-dev
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+    - name: Cache cargo build
+      uses: actions/cache@v4
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+    - name: Rust toolchain fetch
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: nightly
+        override: true
+    - name: WASM Toolchain fetch
+      uses: jetli/wasm-pack-action@v0.4.0
+      with:
+        version: 'latest'
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        registry-url: 'https://registry.npmjs.org'
+    - name: Build WASM crate
+      run: wasm-pack build crates/buttplug_wasm --target web
+    - name: Install workspace dependencies
+      run: cd wasm && npm install
+    - name: Build blob package
+      run: cd wasm && npm run build:blob
+    - name: Build connector package
+      run: cd wasm && npm run build:connector
+    - name: Publish buttplug-wasm-blob
+      run: cd wasm/packages/blob && npm publish --provenance --access public
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    - name: Publish buttplug-wasm
+      run: cd wasm/packages/connector && npm publish --provenance --access public
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
