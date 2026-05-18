@@ -18,7 +18,7 @@ use buttplug_core::message::{
   StartScanningV0,
   StopCmdV4,
 };
-use buttplug_server::message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant};
+use buttplug_server::message::ButtplugClientMessageVariant;
 use futures::{StreamExt, pin_mut};
 use std::time::Duration;
 use tokio::time::timeout;
@@ -436,7 +436,8 @@ async fn test_ac3_3_stop_dedup() {
     panic!("Expected observation for non-zero command");
   }
 
-  // Test 2: Send StopDeviceCmd to set to zero, verify observation appears
+  // Test 2: Send StopDeviceCmd to set to zero, verify observation(s) appear
+  // The device has multiple output features, so stop generates multiple observations
   server
     .parse_message(ButtplugClientMessageVariant::V4(
       StopCmdV4::new(Some(device_index), None, false, true).into(),
@@ -444,15 +445,36 @@ async fn test_ac3_3_stop_dedup() {
     .await
     .unwrap();
 
-  if let Ok(Some(obs)) = timeout(Duration::from_millis(500), obs_stream.next()).await {
-    assert_eq!(obs.value, 0.0);
-  } else {
-    panic!("Expected observation for stop command (zero-value)");
+  // Consume all stop observations for this device (one per output feature)
+  // The Aneros Vivi has 2 vibrate features, so we expect at least 2 observations
+  let mut stop_obs_count = 0;
+  for _ in 0..10 {
+    // Allow up to 10 observations to account for any feature combinations
+    match timeout(Duration::from_millis(100), obs_stream.next()).await {
+      Ok(Some(obs)) => {
+        assert_eq!(obs.value, 0.0);
+        stop_obs_count += 1;
+        // Keep consuming until we timeout
+      }
+      Err(_) => {
+        // Timeout - no more observations
+        break;
+      }
+      Ok(None) => {
+        // Stream ended unexpectedly
+        panic!("Observation stream ended unexpectedly during Test 2");
+      }
+    }
   }
+  assert!(
+    stop_obs_count >= 1,
+    "Expected at least one zero-value observation for stop command"
+  );
 
   // Test 3: Verify that the stop command successfully set the device to zero
   // by checking that a second stop doesn't generate an observation.
   // The dedup check should prevent sending a zero-value command twice.
+  // AC3.3 requirement: "Stop dedup: no observation if already at zero."
   server
     .parse_message(ButtplugClientMessageVariant::V4(
       StopCmdV4::new(Some(device_index), None, false, true).into(),
@@ -460,24 +482,15 @@ async fn test_ac3_3_stop_dedup() {
     .await
     .unwrap();
 
-  // The behavior here depends on implementation details:
-  // - If dedup works across stop commands, no observation should appear
-  // - If stop commands generate new zero observations each time, one will appear
-  // For now, we document what we observe but don't fail on this edge case
-  match timeout(Duration::from_millis(100), obs_stream.next()).await {
-    Ok(Some(_obs)) => {
-      // A second observation was generated. This could indicate that:
-      // 1. Stop commands bypass the feature-level dedup
-      // 2. Stop commands generate observations for multiple features
-      // This is acceptable as long as the key behavior is verified above
-    }
-    Ok(None) => {
-      // Stream ended unexpectedly
-    }
-    Err(_) => {
-      // No observation for second stop - dedup worked as expected
-    }
-  }
+  // According to AC3.3, the second stop command should NOT produce an observation
+  // because the device is already at zero. The dedup logic in handle_outputcmd_v4
+  // checks if the new message matches the last message and returns early if so,
+  // preventing the observation from being sent.
+  let result = timeout(Duration::from_millis(100), obs_stream.next()).await;
+  assert!(
+    result.is_err(),
+    "Expected timeout (no observation) for deduplicated stop command when device is already at zero"
+  );
 }
 
 #[tokio::test]
