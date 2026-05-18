@@ -27,6 +27,7 @@ plans
 docs
 .deciduous
 **/.DS_Store
+.worktrees
 node_modules
 package-lock.json
 **/dist/
