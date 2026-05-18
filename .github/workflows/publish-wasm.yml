@@ -3,7 +3,7 @@ name: Publish WASM Packages
 on:
   push:
     tags:
-      - 'wasm-v*'
+      - 'buttplug-wasm-*'
 
 jobs:
   publish:

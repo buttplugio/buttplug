@@ -124,6 +124,9 @@ pub async fn setup_buttplug_server(
   };
 
   setup_server_device_comm_managers(options, &mut dm_builder);
+  if options.emit_output_observations() {
+    dm_builder.emit_output_observations(true);
+  }
   let mut server_builder = ButtplugServerBuilder::new(
     dm_builder
       .finish()
