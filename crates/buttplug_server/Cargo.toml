@@ -22,7 +22,7 @@ crate-type = ["cdylib", "rlib"]
 [features]
 default=["tokio-runtime"]
 tokio-runtime=["buttplug_core/tokio-runtime"]
-wasm=["buttplug_core/wasm", "uuid/js"]
+wasm=["buttplug_core/wasm", "uuid/js", "instant/wasm-bindgen"]
 
 [dependencies]
 buttplug_core = { version = "10.0.2", path = "../buttplug_core", default-features = false  }
