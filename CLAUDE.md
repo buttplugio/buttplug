@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+Last verified: 2026-05-17
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Build Commands
@@ -70,6 +72,15 @@ AwaitingHandshake → Connected { client_name, spec_version }
 - `Hardware` - Device communication interface
 - `DeviceCommunicationManager` - Hardware discovery
 - `ServerDeviceManager` - Orchestrates devices and protocols
+
+**Output Observability** (opt-in):
+When `emit_output_observations` is enabled, the server broadcasts `OutputObservation` events for every output command sent to a device. The data flows through broadcast channels:
+```
+DeviceHandle → ServerDeviceManager → ButtplugServer::output_observation_stream()
+             → ButtplugRemoteServer (as ButtplugRemoteServerEvent::OutputObservation)
+             → Frontend (as EngineMessage::DeviceOutputObservation)
+```
+Each observation carries `device_index`, `feature_index`, `output_type`, and `value`. Disabled by default to avoid overhead; enable via `ServerDeviceManagerBuilder::emit_output_observations(true)` or `EngineOptions::emit_output_observations`.
 
 ## Contributing
 
