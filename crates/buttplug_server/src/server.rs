@@ -9,7 +9,7 @@ use crate::server_message_conversion::ButtplugServerDeviceEventMessageConverter;
 
 use super::{
   ButtplugServerResultFuture,
-  device::ServerDeviceManager,
+  device::{OutputObservation, ServerDeviceManager},
   message::{
     ButtplugClientMessageVariant,
     ButtplugServerMessageVariant,
@@ -192,6 +192,12 @@ impl ButtplugServer {
   /// Returns a references to the internal device manager, for handling configuration.
   pub fn device_manager(&self) -> Arc<ServerDeviceManager> {
     self.device_manager.clone()
+  }
+
+  /// Returns a stream of output observations if emission is enabled, otherwise None.
+  /// This stream emits observations for all output commands processed through the server.
+  pub fn output_observation_stream(&self) -> Option<impl Stream<Item = OutputObservation>> {
+    self.device_manager.output_observation_stream()
   }
 
   /// If true, client is currently connected to the server.
