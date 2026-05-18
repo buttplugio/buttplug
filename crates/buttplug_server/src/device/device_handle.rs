@@ -37,6 +37,7 @@ use buttplug_server_device_config::{
 use dashmap::DashMap;
 use futures::future::{self, BoxFuture, FutureExt};
 use tokio::sync::{
+  broadcast,
   mpsc::{Sender, channel},
   oneshot,
 };
@@ -56,6 +57,7 @@ use crate::{
 
 use super::{
   InternalDeviceEvent,
+  OutputObservation,
   device_task::{DeviceTaskConfig, spawn_device_task},
   hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent},
   protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, ProtocolSpecializer},
@@ -108,6 +110,7 @@ pub struct DeviceHandle {
   last_output_command: Arc<DashMap<Uuid, CheckedOutputCmdV4>>,
   stop_commands: Arc<Vec<ButtplugDeviceCommandMessageUnionV4>>,
   internal_hw_msg_sender: Sender<Vec<HardwareCommand>>,
+  output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
 }
 
 impl DeviceHandle {
@@ -119,6 +122,7 @@ impl DeviceHandle {
     identifier: UserDeviceIdentifier,
     stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4>,
     internal_hw_msg_sender: Sender<Vec<HardwareCommand>>,
+    output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
   ) -> Self {
     Self {
       hardware,
@@ -129,6 +133,7 @@ impl DeviceHandle {
       last_output_command: Arc::new(DashMap::new()),
       stop_commands: Arc::new(stop_commands),
       internal_hw_msg_sender,
+      output_observation_sender,
     }
   }
 
@@ -268,6 +273,18 @@ impl DeviceHandle {
     self
       .last_output_command
       .insert(msg.feature_id(), msg.clone());
+
+    if let Some(sender) = &self.output_observation_sender {
+      // OutputType derives Display via strum, producing clean names like "Vibrate", "Rotate".
+      // The design uses format!("{:?}") but to_string() is preferred for clean output.
+      let _ = sender.send(OutputObservation {
+        device_index: msg.device_index(),
+        feature_index: msg.feature_index(),
+        output_type: msg.output_command().as_output_type().to_string(),
+        value: msg.output_command().value() as f64,
+      });
+    }
+
     self.handle_generic_command_result(self.handler.handle_output_cmd(msg))
   }
 
@@ -437,6 +454,7 @@ pub(super) async fn build_device_handle(
   mut hardware_connector: Box<dyn HardwareConnector>,
   protocol_specializers: Vec<ProtocolSpecializer>,
   device_event_sender: tokio::sync::mpsc::Sender<InternalDeviceEvent>,
+  output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
 ) -> Result<DeviceHandle, ButtplugDeviceError> {
   // At this point, we know we've got hardware that is waiting to connect, and enough protocol
   // info to actually do something after we connect. So go ahead and connect.
@@ -571,6 +589,7 @@ pub(super) async fn build_device_handle(
     identifier,
     stop_commands,
     internal_hw_msg_sender,
+    output_observation_sender,
   );
 
   // If we need a keepalive with a packet replay, set this up via stopping the device on connect.
