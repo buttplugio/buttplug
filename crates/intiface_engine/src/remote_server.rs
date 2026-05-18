@@ -284,6 +284,7 @@ impl ButtplugRemoteServer {
               });
             }
           }
+          trace!("Output observation stream ended");
         }
       });
     }

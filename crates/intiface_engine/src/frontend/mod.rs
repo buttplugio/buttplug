@@ -17,7 +17,6 @@ use tokio::{
   sync::{Notify, broadcast},
 };
 use tokio_util::sync::CancellationToken;
-use tracing::{info, trace};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
