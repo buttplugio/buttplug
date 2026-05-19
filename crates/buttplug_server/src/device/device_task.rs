@@ -151,7 +151,7 @@ async fn run_device_task(
 
       // Priority 2: Batch deadline reached - flush pending commands
       _ = batch_fut => {
-        debug!("Batch deadline reached, sending {} commands", pending_commands.len());
+        trace!("Batch deadline reached, sending {} commands", pending_commands.len());
         while let Some(cmd) = pending_commands.pop_front() {
           let _ = hardware.parse_message(&cmd).await;
           if track_keepalive {
