@@ -15,7 +15,7 @@ pub mod stream;
 pub mod small_vec_enum_map;
 pub mod serializers;
 
-#[cfg(not(feature = "wasm"))]
+#[cfg(all(not(feature = "wasm"), feature = "tokio-runtime"))]
 pub use tokio::time::sleep;
-#[cfg(feature = "wasm")]
+#[cfg(all(feature = "wasm", feature = "tokio-runtime"))]
 pub use wasmtimer::tokio::sleep;
