@@ -23,6 +23,7 @@ use crate::{
   ServerDeviceDefinitionBuilder,
   UserDeviceIdentifier,
   SimulatedDeviceConfigEntry,
+  device_config_file::{SimulatedDeviceArchetype, SimulatedDeviceFeatureSummary},
 };
 
 #[derive(Default, Clone)]
@@ -385,5 +386,43 @@ impl DeviceConfigurationManager {
     }
 
     Some(features)
+  }
+
+  pub fn available_simulated_archetypes(&self) -> Vec<SimulatedDeviceArchetype> {
+    self
+      .base_device_definitions
+      .iter()
+      .filter(|(ident, _)| ident.protocol() == "simulated" && ident.identifier().is_some())
+      .map(|(ident, def)| {
+        let identifier = ident
+          .identifier()
+          .as_ref()
+          .expect("filtered for Some above")
+          .clone();
+        let output_features = def
+          .features()
+          .values()
+          .filter(|f| !f.output.is_empty())
+          .map(|f| {
+            let output_type = f
+              .output
+              .iter()
+              .next()
+              .map(|output| output.output_type().to_string())
+              .unwrap_or_default();
+            SimulatedDeviceFeatureSummary {
+              description: f.description.clone(),
+              output_type,
+              index: f.index(),
+            }
+          })
+          .collect();
+        SimulatedDeviceArchetype {
+          identifier,
+          display_name: def.name().clone(),
+          output_features,
+        }
+      })
+      .collect()
   }
 }
