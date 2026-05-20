@@ -1,0 +1,102 @@
+---
+defaults:
+  name: Simulated Device
+  features:
+  - description: Motor
+    id: a1b2c3d4-0001-4000-8000-000000000001
+    output:
+      vibrate:
+        value:
+        - 0
+        - 100
+    index: 0
+  id: a1b2c3d4-0000-4000-8000-000000000000
+configurations:
+- identifier:
+  - simulated-1vibe
+  name: Simulated 1-Motor Vibrator
+  features:
+  - description: Motor
+    id: a1b2c3d4-1001-4000-8000-000000000001
+    output:
+      vibrate:
+        value:
+        - 0
+        - 100
+    index: 0
+  id: a1b2c3d4-1000-4000-8000-000000000000
+- identifier:
+  - simulated-2vibe
+  name: Simulated 2-Motor Vibrator
+  features:
+  - description: Motor 1
+    id: a1b2c3d4-2001-4000-8000-000000000001
+    output:
+      vibrate:
+        value:
+        - 0
+        - 100
+    index: 0
+  - description: Motor 2
+    id: a1b2c3d4-2002-4000-8000-000000000002
+    output:
+      vibrate:
+        value:
+        - 0
+        - 100
+    index: 1
+  id: a1b2c3d4-2000-4000-8000-000000000000
+- identifier:
+  - simulated-rotator
+  name: Simulated Rotator
+  features:
+  - description: Rotation Motor
+    id: a1b2c3d4-3001-4000-8000-000000000001
+    output:
+      rotate:
+        value:
+        - -100
+        - 100
+    index: 0
+  id: a1b2c3d4-3000-4000-8000-000000000000
+- identifier:
+  - simulated-oscillator
+  name: Simulated Oscillator
+  features:
+  - description: Oscillation Motor
+    id: a1b2c3d4-4001-4000-8000-000000000001
+    output:
+      oscillate:
+        value:
+        - 0
+        - 100
+    index: 0
+  id: a1b2c3d4-4000-4000-8000-000000000000
+- identifier:
+  - simulated-stroker
+  name: Simulated Stroker
+  features:
+  - description: Linear Axis
+    id: a1b2c3d4-5001-4000-8000-000000000001
+    output:
+      position:
+        value:
+        - 0
+        - 1000
+      hw_position_with_duration:
+        value:
+        - 0
+        - 1000
+        duration:
+        - 0
+        - 100000
+    index: 0
+  id: a1b2c3d4-5000-4000-8000-000000000000
+communication:
+- simulated:
+    names:
+    - simulated-1vibe
+    - simulated-2vibe
+    - simulated-rotator
+    - simulated-oscillator
+    - simulated-stroker
