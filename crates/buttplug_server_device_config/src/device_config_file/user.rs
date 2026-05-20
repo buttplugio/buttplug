@@ -8,6 +8,7 @@
 use dashmap::DashMap;
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::UserDeviceIdentifier;
 
@@ -26,6 +27,30 @@ pub struct UserDeviceConfigPair {
   pub config: ConfigUserDeviceDefinition,
 }
 
+#[derive(Deserialize, Serialize, Debug, Clone, Getters, Setters, MutGetters)]
+#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
+pub struct SimulatedDeviceConfigEntry {
+  pub identifier: String,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub display_name: Option<String>,
+  #[serde(default = "SimulatedDeviceConfigEntry::generate_address")]
+  pub address: String,
+}
+
+impl SimulatedDeviceConfigEntry {
+  pub fn new(identifier: &str, display_name: Option<String>) -> Self {
+    Self {
+      identifier: identifier.to_owned(),
+      display_name,
+      address: Self::generate_address(),
+    }
+  }
+
+  fn generate_address() -> String {
+    format!("simulated:{}", Uuid::new_v4())
+  }
+}
+
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct UserConfigDefinition {
@@ -33,6 +58,8 @@ pub struct UserConfigDefinition {
   pub protocols: Option<DashMap<String, ProtocolDefinition>>,
   #[serde(rename = "devices", default, skip_serializing_if = "Option::is_none")]
   pub user_device_configs: Option<Vec<UserDeviceConfigPair>>,
+  #[serde(default, skip_serializing_if = "Option::is_none")]
+  pub simulated_devices: Option<Vec<SimulatedDeviceConfigEntry>>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Getters, Setters)]

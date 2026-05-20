@@ -11,6 +11,8 @@ mod feature;
 mod protocol;
 mod user;
 
+pub use user::SimulatedDeviceConfigEntry;
+
 use base::BaseConfigFile;
 
 use crate::device_config_file::{
@@ -257,6 +259,7 @@ pub fn save_user_config(dcm: &DeviceConfigurationManager) -> Result<String, Butt
   let user_config_definition = UserConfigDefinition {
     protocols: Some(user_protos.clone()),
     user_device_configs: Some(user_definitions_vec),
+    simulated_devices: None,
   };
   let mut user_config_file = UserConfigFile::new(4, 0);
   user_config_file.set_user_configs(Some(user_config_definition));
