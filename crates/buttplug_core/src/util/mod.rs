@@ -17,5 +17,5 @@ pub mod serializers;
 
 #[cfg(all(not(feature = "wasm"), feature = "tokio-runtime"))]
 pub use tokio::time::sleep;
-#[cfg(all(feature = "wasm", feature = "tokio-runtime"))]
+#[cfg(feature = "wasm")]
 pub use wasmtimer::tokio::sleep;
