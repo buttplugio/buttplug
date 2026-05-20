@@ -260,10 +260,15 @@ pub fn save_user_config(dcm: &DeviceConfigurationManager) -> Result<String, Butt
       },
     );
   }
+  let simulated_devices = if dcm.simulated_devices().is_empty() {
+    None
+  } else {
+    Some(dcm.simulated_devices().clone())
+  };
   let user_config_definition = UserConfigDefinition {
     protocols: Some(user_protos.clone()),
     user_device_configs: Some(user_definitions_vec),
-    simulated_devices: None,
+    simulated_devices,
   };
   let mut user_config_file = UserConfigFile::new(4, 0);
   user_config_file.set_user_configs(Some(user_config_definition));
