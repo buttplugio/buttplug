@@ -116,3 +116,119 @@ impl UserConfigFile {
       .expect("All types below this are Serialize, so this should be infallible.")
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::load_protocol_configs;
+
+  #[test]
+  fn test_simulated_device_config_roundtrip() {
+    // AC1.2, AC5.2: Create a UserConfigFile with simulated_devices entries,
+    // serialize to JSON, deserialize back, verify fields match
+    let mut config = UserConfigDefinition::default();
+    config.simulated_devices = Some(vec![
+      SimulatedDeviceConfigEntry::new("simulated-1vibe", None),
+      SimulatedDeviceConfigEntry::new("simulated-2vibe", Some("My Custom 2-Vibe".to_string())),
+    ]);
+
+    let user_config_file = UserConfigFile {
+      version: get_internal_config_version(),
+      user_configs: Some(config),
+    };
+
+    // Serialize to JSON
+    let json_str = user_config_file.to_json();
+
+    // Deserialize back
+    let deserialized: UserConfigFile = serde_json::from_str(&json_str)
+      .expect("Roundtrip should work");
+
+    // Verify fields match
+    let user_cfg = deserialized.user_configs().clone().expect("Should have user_configs");
+    let devices = user_cfg.simulated_devices.as_ref()
+      .expect("Should have simulated_devices");
+
+    assert_eq!(devices.len(), 2);
+    assert_eq!(devices[0].identifier, "simulated-1vibe");
+    assert_eq!(devices[0].display_name, None);
+    assert!(devices[0].address.starts_with("simulated:"));
+
+    assert_eq!(devices[1].identifier, "simulated-2vibe");
+    assert_eq!(devices[1].display_name, Some("My Custom 2-Vibe".to_string()));
+    assert!(devices[1].address.starts_with("simulated:"));
+  }
+
+  #[test]
+  fn test_simulated_device_address_auto_generation() {
+    // AC5.3: Address should auto-generate with simulated: prefix and UUID
+    let entry = SimulatedDeviceConfigEntry::new("simulated-1vibe", None);
+
+    assert!(entry.address.starts_with("simulated:"));
+    assert!(entry.address.len() > "simulated:".len());
+  }
+
+  #[test]
+  fn test_simulated_device_display_name_optional() {
+    // AC5.4: Display name can be omitted from JSON when None
+    let entry_with_display_name = SimulatedDeviceConfigEntry::new("simulated-1vibe", Some("My Device".to_string()));
+    let entry_without_display_name = SimulatedDeviceConfigEntry::new("simulated-1vibe", None);
+
+    let json_with = serde_json::to_value(&entry_with_display_name).unwrap();
+    let json_without = serde_json::to_value(&entry_without_display_name).unwrap();
+
+    // Entry with display_name should have the field in JSON
+    assert!(json_with.get("display_name").is_some());
+
+    // Entry without display_name should NOT have the field in JSON (skip_serializing_if = "Option::is_none")
+    assert!(json_without.get("display_name").is_none());
+  }
+
+  #[test]
+  fn test_invalid_archetype_rejected() {
+    // AC8.1: Invalid archetype identifier should produce error at config load time
+    let mut builder = load_protocol_configs(&None, &None, false)
+      .expect("Should load base configs");
+
+    // Add an invalid simulated device entry
+    let invalid_entry = SimulatedDeviceConfigEntry::new("nonexistent-device", None);
+    builder.add_simulated_devices(vec![invalid_entry]);
+
+    // Attempt to finish should error because the archetype doesn't exist
+    let result = builder.finish();
+    assert!(
+      result.is_err(),
+      "Should reject nonexistent archetype at config load time"
+    );
+  }
+
+  #[test]
+  fn test_duplicate_address_rejected() {
+    // AC8.2: Duplicate addresses should be rejected
+    let mut builder = load_protocol_configs(&None, &None, false)
+      .expect("Should load base configs");
+
+    // Create two devices with the same explicit address
+    let addr = "simulated:duplicate-test".to_string();
+    let device1 = SimulatedDeviceConfigEntry {
+      identifier: "simulated-1vibe".to_string(),
+      display_name: None,
+      address: addr.clone(),
+    };
+    let device2 = SimulatedDeviceConfigEntry {
+      identifier: "simulated-1vibe".to_string(),
+      display_name: Some("Duplicate".to_string()),
+      address: addr.clone(),
+    };
+
+    builder.add_simulated_devices(vec![device1, device2]);
+
+    // Should error on duplicate address
+    let result = builder.finish();
+    assert!(
+      result.is_err(),
+      "Should reject duplicate addresses"
+    );
+  }
+}
+
