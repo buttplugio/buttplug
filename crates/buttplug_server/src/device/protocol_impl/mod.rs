@@ -104,6 +104,7 @@ pub mod sexverse_v2;
 pub mod sexverse_v3;
 pub mod sexverse_v4;
 pub mod sexverse_v5;
+pub mod simulated;
 pub mod svakom;
 pub mod synchro;
 pub mod tcode_v03;
@@ -440,6 +441,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     sexverse_v5::setup::SexverseV5IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    simulated::setup::SimulatedProtocolIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, serveu::setup::ServeUIdentifierFactory::default());
   add_to_protocol_map(
