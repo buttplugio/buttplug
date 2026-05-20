@@ -88,13 +88,15 @@ impl HardwareInternal for SimulatedHardwareInternal {
 pub struct SimulatedHardwareConnector {
   specifier: ProtocolCommunicationSpecifier,
   hardware: Option<SimulatedHardwareInternal>,
+  identifier: String,
 }
 
 impl SimulatedHardwareConnector {
-  pub fn new(specifier: ProtocolCommunicationSpecifier, hardware: SimulatedHardwareInternal) -> Self {
+  pub fn new(specifier: ProtocolCommunicationSpecifier, hardware: SimulatedHardwareInternal, identifier: String) -> Self {
     Self {
       specifier,
       hardware: Some(hardware),
+      identifier,
     }
   }
 }
@@ -116,12 +118,14 @@ impl HardwareConnector for SimulatedHardwareConnector {
   async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
     Ok(Box::new(SimulatedHardwareSpecializer {
       hardware: self.hardware.take(),
+      identifier: self.identifier.clone(),
     }))
   }
 }
 
 pub struct SimulatedHardwareSpecializer {
   hardware: Option<SimulatedHardwareInternal>,
+  identifier: String,
 }
 
 #[async_trait]
@@ -139,7 +143,7 @@ impl HardwareSpecializer for SimulatedHardwareSpecializer {
     let address = device.address.clone();
     let endpoints = vec![Endpoint::Tx];
     Ok(Hardware::new(
-      "Simulated Device",
+      &self.identifier,
       &address,
       &endpoints,
       &None,
@@ -212,7 +216,7 @@ impl HardwareCommunicationManager for SimulatedHardwareCommunicationManager {
         SimulatedSpecifier::new(&device.identifier),
       );
       let hardware = SimulatedHardwareInternal::new(&device.address);
-      let connector = SimulatedHardwareConnector::new(specifier, hardware);
+      let connector = SimulatedHardwareConnector::new(specifier, hardware, device.identifier.clone());
 
       events.push(HardwareCommunicationManagerEvent::DeviceFound {
         name: name.to_owned(),

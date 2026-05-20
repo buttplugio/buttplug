@@ -89,9 +89,10 @@ async fn test_simulated_1vibe_observation() {
 
 #[tokio::test]
 async fn test_simulated_2vibe_observation() {
-  // AC7.2: Multiple vibrate commands on same device produce observations
-  // Use simulated-1vibe twice to test multiple observations
-  let server = test_server_with_simulated_device("simulated-1vibe", None);
+  // AC7.2: Multi-feature devices produce observations for each feature separately.
+  // Use simulated-2vibe archetype which has 2 vibrate features (feature 0 and feature 1).
+  // Send commands to each feature and verify different feature_index values in observations.
+  let server = test_server_with_simulated_device("simulated-2vibe", None);
 
   let obs_stream = server
     .output_observation_stream()
@@ -130,7 +131,7 @@ async fn test_simulated_2vibe_observation() {
     }
   };
 
-  // Send first vibrate command at value 30
+  // Send vibrate command to feature 0 at value 30
   server
     .parse_message(ButtplugClientMessageVariant::V4(
       OutputCmdV4::new(device_index, 0, OutputCommand::Vibrate(OutputValue::new(30)))
@@ -139,7 +140,7 @@ async fn test_simulated_2vibe_observation() {
     .await
     .unwrap();
 
-  // Verify first observation
+  // Verify first observation for feature 0
   if let Ok(Some(obs)) = timeout(Duration::from_millis(500), obs_stream.next()).await {
     assert_eq!(obs.device_index, device_index);
     assert_eq!(obs.feature_index, 0);
@@ -149,23 +150,86 @@ async fn test_simulated_2vibe_observation() {
     panic!("Expected first observation but none received or timeout");
   }
 
-  // Send second vibrate command at value 70
+  // Send vibrate command to feature 1 at value 70
   server
     .parse_message(ButtplugClientMessageVariant::V4(
-      OutputCmdV4::new(device_index, 0, OutputCommand::Vibrate(OutputValue::new(70)))
+      OutputCmdV4::new(device_index, 1, OutputCommand::Vibrate(OutputValue::new(70)))
         .into(),
     ))
     .await
     .unwrap();
 
-  // Verify second observation
+  // Verify second observation for feature 1
   if let Ok(Some(obs)) = timeout(Duration::from_millis(500), obs_stream.next()).await {
     assert_eq!(obs.device_index, device_index);
-    assert_eq!(obs.feature_index, 0);
+    assert_eq!(obs.feature_index, 1);
     assert_eq!(obs.output_type, "Vibrate");
     assert_eq!(obs.value, 70.0);
   } else {
     panic!("Expected second observation but none received or timeout");
+  }
+}
+
+#[tokio::test]
+async fn test_simulated_rotator_observation() {
+  // AC7.2: Non-vibrate output types (Rotate, Oscillate, Position) produce observations
+  // with the correct output_type string. Use simulated-rotator which has a Rotate feature.
+  let server = test_server_with_simulated_device("simulated-rotator", None);
+
+  let obs_stream = server
+    .output_observation_stream()
+    .expect("should be Some when enabled");
+  pin_mut!(obs_stream);
+
+  // Handshake
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      RequestServerInfoV4::new(
+        "Test",
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION,
+      )
+      .into(),
+    ))
+    .await
+    .unwrap();
+
+  // Start scanning and wait for device
+  let event_stream = server.server_version_event_stream();
+  pin_mut!(event_stream);
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      StartScanningV0::default().into(),
+    ))
+    .await
+    .unwrap();
+
+  // Wait for DeviceList event to get device_index
+  let device_index = loop {
+    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await {
+      if let Some((&idx, _)) = dl.devices().iter().next() {
+        break idx;
+      }
+    }
+  };
+
+  // Send rotate command at value 50 to feature 0 (the rotator's rotate feature)
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      OutputCmdV4::new(device_index, 0, OutputCommand::Rotate(OutputValue::new(50)))
+        .into(),
+    ))
+    .await
+    .unwrap();
+
+  // Verify observation has correct output_type="Rotate"
+  if let Ok(Some(obs)) = timeout(Duration::from_millis(500), obs_stream.next()).await {
+    assert_eq!(obs.device_index, device_index);
+    assert_eq!(obs.feature_index, 0);
+    assert_eq!(obs.output_type, "Rotate");
+    assert_eq!(obs.value, 50.0);
+  } else {
+    panic!("Expected observation but none received or timeout");
   }
 }
 
@@ -200,16 +264,12 @@ async fn test_simulated_diverse_archetypes() {
       .unwrap();
 
     // Verify the device appears
-    let mut device_found = false;
     loop {
       if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await {
-        if dl.devices().len() > 0 {
-          device_found = true;
-          break;
-        }
+        assert!(!dl.devices().is_empty(), "Archetype {} should be discovered", archetype);
+        break;
       }
     }
-    assert!(device_found, "Archetype {} should be discovered", archetype);
   }
 }
 
@@ -321,15 +381,10 @@ async fn test_simulated_device_appears_on_scan() {
     .unwrap();
 
   // Wait for DeviceList event - device should appear
-  let mut found_device = false;
   loop {
     if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await {
-      if dl.devices().len() > 0 {
-        // At least one device was discovered
-        found_device = true;
-        break;
-      }
+      assert!(!dl.devices().is_empty(), "Device should appear in DeviceList after scanning");
+      break;
     }
   }
-  assert!(found_device, "Device should appear in DeviceList after scanning");
 }
