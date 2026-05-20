@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 4,
-    "minor": 198
+    "minor": 199
   },
   "protocols": {
     "activejoy": {
@@ -20372,6 +20372,175 @@
         ],
         "id": "783bc287-528c-4c58-a7ec-47a49304309e",
         "name": "Sexverse Heart"
+      }
+    },
+    "simulated": {
+      "communication": [
+        {
+          "simulated": {
+            "names": [
+              "simulated-1vibe",
+              "simulated-2vibe",
+              "simulated-rotator",
+              "simulated-oscillator",
+              "simulated-stroker"
+            ]
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "features": [
+            {
+              "description": "Motor",
+              "id": "a1b2c3d4-1001-4000-8000-000000000001",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "a1b2c3d4-1000-4000-8000-000000000000",
+          "identifier": [
+            "simulated-1vibe"
+          ],
+          "name": "Simulated 1-Motor Vibrator"
+        },
+        {
+          "features": [
+            {
+              "description": "Motor 1",
+              "id": "a1b2c3d4-2001-4000-8000-000000000001",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Motor 2",
+              "id": "a1b2c3d4-2002-4000-8000-000000000002",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "a1b2c3d4-2000-4000-8000-000000000000",
+          "identifier": [
+            "simulated-2vibe"
+          ],
+          "name": "Simulated 2-Motor Vibrator"
+        },
+        {
+          "features": [
+            {
+              "description": "Rotation Motor",
+              "id": "a1b2c3d4-3001-4000-8000-000000000001",
+              "index": 0,
+              "output": {
+                "rotate": {
+                  "value": [
+                    -100,
+                    100
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "a1b2c3d4-3000-4000-8000-000000000000",
+          "identifier": [
+            "simulated-rotator"
+          ],
+          "name": "Simulated Rotator"
+        },
+        {
+          "features": [
+            {
+              "description": "Oscillation Motor",
+              "id": "a1b2c3d4-4001-4000-8000-000000000001",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "a1b2c3d4-4000-4000-8000-000000000000",
+          "identifier": [
+            "simulated-oscillator"
+          ],
+          "name": "Simulated Oscillator"
+        },
+        {
+          "features": [
+            {
+              "description": "Linear Axis",
+              "id": "a1b2c3d4-5001-4000-8000-000000000001",
+              "index": 0,
+              "output": {
+                "hw_position_with_duration": {
+                  "duration": [
+                    0,
+                    100000
+                  ],
+                  "value": [
+                    0,
+                    1000
+                  ]
+                },
+                "position": {
+                  "value": [
+                    0,
+                    1000
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "a1b2c3d4-5000-4000-8000-000000000000",
+          "identifier": [
+            "simulated-stroker"
+          ],
+          "name": "Simulated Stroker"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "description": "Motor",
+            "id": "a1b2c3d4-0001-4000-8000-000000000001",
+            "index": 0,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  100
+                ]
+              }
+            }
+          }
+        ],
+        "id": "a1b2c3d4-0000-4000-8000-000000000000",
+        "name": "Simulated Device"
       }
     },
     "svakom-alex": {
