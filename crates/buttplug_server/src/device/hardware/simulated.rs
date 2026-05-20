@@ -334,7 +334,7 @@ mod tests {
   fn test_simulated_hardware_connector_specifier() {
     let specifier = ProtocolCommunicationSpecifier::Simulated(SimulatedSpecifier::new("test-id"));
     let hardware = SimulatedHardwareInternal::new("test-address");
-    let connector = SimulatedHardwareConnector::new(specifier.clone(), hardware);
+    let connector = SimulatedHardwareConnector::new(specifier.clone(), hardware, "test-id".to_string());
 
     assert_eq!(connector.specifier(), specifier);
   }
@@ -343,7 +343,7 @@ mod tests {
   async fn test_simulated_hardware_connector_connect() {
     let specifier = ProtocolCommunicationSpecifier::Simulated(SimulatedSpecifier::new("test-id"));
     let hardware = SimulatedHardwareInternal::new("test-address");
-    let mut connector = SimulatedHardwareConnector::new(specifier, hardware);
+    let mut connector = SimulatedHardwareConnector::new(specifier, hardware, "test-id".to_string());
 
     let result = connector.connect().await;
     assert!(result.is_ok());
@@ -353,7 +353,7 @@ mod tests {
   async fn test_simulated_hardware_specializer_specialize() {
     let specifier = ProtocolCommunicationSpecifier::Simulated(SimulatedSpecifier::new("test-id"));
     let hardware = SimulatedHardwareInternal::new("test-address");
-    let mut connector = SimulatedHardwareConnector::new(specifier.clone(), hardware);
+    let mut connector = SimulatedHardwareConnector::new(specifier.clone(), hardware, "test-id".to_string());
 
     let mut specializer = connector.connect().await.unwrap();
     let result = specializer.specialize(&[specifier]).await;

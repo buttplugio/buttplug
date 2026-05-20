@@ -84,7 +84,7 @@ DeviceHandle → ServerDeviceManager → ButtplugServer::output_observation_stre
 Each observation carries `device_index`, `feature_index`, `output_type`, and `value`. Disabled by default to avoid overhead; enable via `ServerDeviceManagerBuilder::emit_output_observations(true)` or `EngineOptions::emit_output_observations`.
 
 **Simulated Devices** (no-hardware testing):
-Simulated devices allow testing the full device lifecycle without real hardware. Configuration lives in the user config under `simulated_devices`, each entry referencing an archetype from `simulated.yml` (5 archetypes: single-vibe, dual-vibe, rotate, linear, multi-feature). Key contracts:
+Simulated devices allow testing the full device lifecycle without real hardware. Configuration lives in the user config under `simulated_devices`, each entry referencing an archetype from `simulated.yml` (5 archetypes: simulated-1vibe, simulated-2vibe, simulated-rotator, simulated-oscillator, simulated-stroker). Key contracts:
 - `SimulatedSpecifier` variant on `ProtocolCommunicationSpecifier` -- matches devices by archetype name
 - `SimulatedDeviceConfigEntry` in `UserConfigDefinition` -- identifier (archetype name), optional display_name, auto-generated UUID address
 - `DeviceConfigurationManager::available_simulated_archetypes()` -- lists valid archetypes with feature summaries
