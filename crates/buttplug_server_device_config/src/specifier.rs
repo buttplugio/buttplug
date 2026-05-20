@@ -381,6 +381,8 @@ pub enum ProtocolCommunicationSpecifier {
   LovenseConnectService(LovenseConnectServiceSpecifier),
   #[serde(rename = "websocket")]
   Websocket(WebsocketSpecifier),
+  #[serde(rename = "simulated")]
+  Simulated(SimulatedSpecifier),
 }
 
 impl PartialEq for ProtocolCommunicationSpecifier {
@@ -396,10 +398,34 @@ impl PartialEq for ProtocolCommunicationSpecifier {
       (LovenseConnectService(self_spec), LovenseConnectService(other_spec)) => {
         self_spec == other_spec
       }
+      (Simulated(self_spec), Simulated(other_spec)) => self_spec == other_spec,
       _ => false,
     }
   }
 }
 
 impl Eq for ProtocolCommunicationSpecifier {
+}
+
+/// Specifier for Simulated Device Manager devices
+///
+/// Used for simulated devices that match archetype names without requiring real hardware.
+#[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
+#[getset(get = "pub", set = "pub")]
+pub struct SimulatedSpecifier {
+  names: HashSet<String>,
+}
+
+impl SimulatedSpecifier {
+  pub fn new(name: &str) -> Self {
+    let mut names = HashSet::new();
+    names.insert(name.to_owned());
+    Self { names }
+  }
+}
+
+impl PartialEq for SimulatedSpecifier {
+  fn eq(&self, other: &Self) -> bool {
+    self.names.intersection(&other.names).count() > 0
+  }
 }
