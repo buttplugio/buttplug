@@ -191,3 +191,27 @@ pub fn test_server_with_device_and_observations(
 
   (server, device)
 }
+
+#[allow(dead_code)]
+pub fn test_server_with_simulated_device(
+  identifier: &str,
+  display_name: Option<String>,
+) -> ButtplugServer {
+  use buttplug_server::device::hardware::simulated::{
+    SimulatedDeviceEntry, SimulatedHardwareCommunicationManagerBuilder,
+  };
+
+  let device = SimulatedDeviceEntry {
+    identifier: identifier.to_owned(),
+    display_name,
+    address: format!("simulated:test-{}", identifier),
+  };
+
+  let mut dm_builder = ServerDeviceManagerBuilder::new(create_test_dcm());
+  dm_builder.comm_manager(SimulatedHardwareCommunicationManagerBuilder::new(vec![device]));
+  dm_builder.emit_output_observations(true);
+
+  ButtplugServerBuilder::new(dm_builder.finish().unwrap())
+    .finish()
+    .unwrap()
+}
