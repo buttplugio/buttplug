@@ -6,6 +6,7 @@
 // for full license information.
 
 pub mod communication;
+pub mod simulated;
 use std::{collections::HashSet, fmt::Debug, sync::Arc, time::Duration};
 
 use async_trait::async_trait;
