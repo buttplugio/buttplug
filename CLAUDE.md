@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Last verified: 2026-05-17
+Last verified: 2026-05-19
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -43,6 +43,7 @@ Buttplug is a framework for interfacing with intimate hardware devices. It uses 
 - `lovense_dongle`, `lovense_connect` - Lovense-specific (deprecated)
 - `xinput` - Windows gamepad vibration
 - `websocket` - WebSocket device forwarders
+- `simulated` - In-process simulated devices (no real hardware; lives in `buttplug_server`)
 
 **Infrastructure:**
 - `buttplug_server_device_config` - Device configuration database
@@ -81,6 +82,15 @@ DeviceHandle → ServerDeviceManager → ButtplugServer::output_observation_stre
              → Frontend (as EngineMessage::DeviceOutputObservation)
 ```
 Each observation carries `device_index`, `feature_index`, `output_type`, and `value`. Disabled by default to avoid overhead; enable via `ServerDeviceManagerBuilder::emit_output_observations(true)` or `EngineOptions::emit_output_observations`.
+
+**Simulated Devices** (no-hardware testing):
+Simulated devices allow testing the full device lifecycle without real hardware. Configuration lives in the user config under `simulated_devices`, each entry referencing an archetype from `simulated.yml` (5 archetypes: single-vibe, dual-vibe, rotate, linear, multi-feature). Key contracts:
+- `SimulatedSpecifier` variant on `ProtocolCommunicationSpecifier` -- matches devices by archetype name
+- `SimulatedDeviceConfigEntry` in `UserConfigDefinition` -- identifier (archetype name), optional display_name, auto-generated UUID address
+- `DeviceConfigurationManager::available_simulated_archetypes()` -- lists valid archetypes with feature summaries
+- `ServerDeviceManagerBuilder::finish()` auto-wires `SimulatedHardwareCommunicationManager` when simulated_devices is non-empty
+- Validation rejects unknown archetypes and duplicate addresses at config build time
+- `SimulatedProtocol` is a no-op handler; `SimulatedHardwareConnector` creates in-memory endpoints
 
 ## Contributing
 
