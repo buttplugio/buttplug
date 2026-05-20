@@ -211,6 +211,10 @@ fn load_user_config(
     }
   }
 
+  if let Some(simulated_devices) = user_config.simulated_devices().clone() {
+    dcm_builder.simulated_devices(simulated_devices);
+  }
+
   Ok(())
 }
 
