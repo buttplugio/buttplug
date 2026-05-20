@@ -104,6 +104,11 @@ impl DeviceConfigurationManagerBuilder {
     self
   }
 
+  pub fn add_simulated_devices(&mut self, devices: Vec<SimulatedDeviceConfigEntry>) -> &mut Self {
+    self.simulated_devices.extend(devices);
+    self
+  }
+
   pub fn finish(&mut self) -> Result<DeviceConfigurationManager, ButtplugDeviceError> {
     // Build and validate the protocol attributes tree.
     let mut attribute_tree_map = HashMap::new();
