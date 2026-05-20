@@ -118,6 +118,41 @@ impl DeviceConfigurationManagerBuilder {
       user_attribute_tree_map.insert(kv.key().clone(), kv.value().clone());
     }
 
+    // Validate simulated devices
+    if !self.simulated_devices.is_empty() {
+      let valid_archetypes: std::collections::HashSet<String> = self
+        .base_communication_specifiers
+        .get("simulated")
+        .into_iter()
+        .flat_map(|specifiers| specifiers.iter())
+        .filter_map(|spec| {
+          if let ProtocolCommunicationSpecifier::Simulated(sim) = spec {
+            Some(sim.names().iter().cloned())
+          } else {
+            None
+          }
+        })
+        .flatten()
+        .collect();
+
+      let mut seen_addresses = std::collections::HashSet::new();
+      for device in &self.simulated_devices {
+        if !valid_archetypes.contains(&device.identifier) {
+          return Err(ButtplugDeviceError::DeviceConfigurationError(format!(
+            "Invalid simulated device archetype '{}'. Valid archetypes: {:?}",
+            device.identifier,
+            valid_archetypes
+          )));
+        }
+        if !seen_addresses.insert(&device.address) {
+          return Err(ButtplugDeviceError::DeviceConfigurationError(format!(
+            "Duplicate simulated device address '{}' for archetype '{}'",
+            device.address, device.identifier
+          )));
+        }
+      }
+    }
+
     Ok(DeviceConfigurationManager {
       base_communication_specifiers: self.base_communication_specifiers.clone(),
       user_communication_specifiers: self.user_communication_specifiers.clone(),
