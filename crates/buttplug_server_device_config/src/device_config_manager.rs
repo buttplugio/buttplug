@@ -22,6 +22,7 @@ use crate::{
   ServerDeviceDefinition,
   ServerDeviceDefinitionBuilder,
   UserDeviceIdentifier,
+  SimulatedDeviceConfigEntry,
 };
 
 #[derive(Default, Clone)]
@@ -30,6 +31,7 @@ pub struct DeviceConfigurationManagerBuilder {
   user_communication_specifiers: DashMap<String, Vec<ProtocolCommunicationSpecifier>>,
   base_device_definitions: HashMap<BaseDeviceIdentifier, Arc<ServerDeviceDefinition>>,
   user_device_definitions: DashMap<UserDeviceIdentifier, ServerDeviceDefinition>,
+  simulated_devices: Vec<SimulatedDeviceConfigEntry>,
 }
 
 impl DeviceConfigurationManagerBuilder {
@@ -96,6 +98,11 @@ impl DeviceConfigurationManagerBuilder {
     }
   }
 
+  pub fn simulated_devices(&mut self, devices: Vec<SimulatedDeviceConfigEntry>) -> &mut Self {
+    self.simulated_devices = devices;
+    self
+  }
+
   pub fn finish(&mut self) -> Result<DeviceConfigurationManager, ButtplugDeviceError> {
     // Build and validate the protocol attributes tree.
     let mut attribute_tree_map = HashMap::new();
@@ -116,6 +123,7 @@ impl DeviceConfigurationManagerBuilder {
       user_communication_specifiers: self.user_communication_specifiers.clone(),
       base_device_definitions: attribute_tree_map,
       user_device_definitions: user_attribute_tree_map,
+      simulated_devices: self.simulated_devices.clone(),
       //protocol_map,
     })
   }
@@ -150,6 +158,9 @@ pub struct DeviceConfigurationManager {
   /// of session.
   #[getset(get = "pub")]
   user_device_definitions: DashMap<UserDeviceIdentifier, ServerDeviceDefinition>,
+  /// Simulated device configurations from the user config.
+  #[getset(get = "pub")]
+  simulated_devices: Vec<SimulatedDeviceConfigEntry>,
 }
 
 impl Debug for DeviceConfigurationManager {
@@ -187,6 +198,7 @@ impl DeviceConfigurationManager {
       user_communication_specifiers: DashMap::new(),
       base_device_definitions,
       user_device_definitions: DashMap::new(),
+      simulated_devices: Vec::new(),
     }
   }
 
