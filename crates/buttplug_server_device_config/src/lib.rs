@@ -143,7 +143,7 @@ extern crate log;
 mod device_config_file;
 
 use buttplug_core::message::OutputType;
-pub use device_config_file::{load_protocol_configs, save_user_config, SimulatedDeviceConfigEntry};
+pub use device_config_file::{load_protocol_configs, save_user_config, SimulatedDeviceConfigEntry, SimulatedDeviceArchetype, SimulatedDeviceFeatureSummary};
 mod device_config_manager;
 pub use device_config_manager::*;
 mod specifier;

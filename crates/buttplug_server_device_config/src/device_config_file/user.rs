@@ -51,6 +51,20 @@ impl SimulatedDeviceConfigEntry {
   }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SimulatedDeviceArchetype {
+  pub identifier: String,
+  pub display_name: String,
+  pub output_features: Vec<SimulatedDeviceFeatureSummary>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SimulatedDeviceFeatureSummary {
+  pub description: String,
+  pub output_type: String,
+  pub index: u32,
+}
+
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct UserConfigDefinition {

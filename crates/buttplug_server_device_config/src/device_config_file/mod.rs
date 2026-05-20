@@ -11,7 +11,7 @@ mod feature;
 mod protocol;
 mod user;
 
-pub use user::SimulatedDeviceConfigEntry;
+pub use user::{SimulatedDeviceConfigEntry, SimulatedDeviceArchetype, SimulatedDeviceFeatureSummary};
 
 use base::BaseConfigFile;
 
