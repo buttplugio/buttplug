@@ -108,7 +108,27 @@ impl ServerDeviceManagerBuilder {
     self
   }
 
+  pub fn add_simulated_devices_if_configured(&mut self) -> &mut Self {
+    let simulated_devices = self.device_configuration_manager.simulated_devices();
+    if !simulated_devices.is_empty() {
+      use crate::device::hardware::simulated::{
+        SimulatedDeviceEntry, SimulatedHardwareCommunicationManagerBuilder,
+      };
+      let entries: Vec<SimulatedDeviceEntry> = simulated_devices
+        .iter()
+        .map(|config| SimulatedDeviceEntry {
+          identifier: config.identifier().clone(),
+          display_name: config.display_name().clone(),
+          address: config.address().clone(),
+        })
+        .collect();
+      self.comm_manager(SimulatedHardwareCommunicationManagerBuilder::new(entries));
+    }
+    self
+  }
+
   pub fn finish(&mut self) -> Result<ServerDeviceManager, ButtplugServerError> {
+    self.add_simulated_devices_if_configured();
     let (device_command_sender, device_command_receiver) = mpsc::channel(256);
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
     let mut comm_managers: Vec<Box<dyn HardwareCommunicationManager>> = Vec::new();
