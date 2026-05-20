@@ -311,8 +311,20 @@ impl HardwareCommunicationManager for LovenseHIDDongleCommunicationManager {
   }
 }
 
+#[cfg(target_os = "macos")]
+fn reset_hidapi() {
+  unsafe extern "C" {
+    fn hid_exit() -> std::os::raw::c_int;
+  }
+  unsafe {
+    hid_exit();
+  }
+}
+
 impl Drop for LovenseHIDDongleCommunicationManager {
   fn drop(&mut self) {
     self.thread_cancellation_token.cancel();
+    #[cfg(target_os = "macos")]
+    reset_hidapi();
   }
 }
