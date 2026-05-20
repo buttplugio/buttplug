@@ -91,3 +91,20 @@ impl TimedRetryCommunicationManagerImpl for HidCommunicationManager {
     true
   }
 }
+
+#[cfg(target_os = "macos")]
+fn reset_hidapi() {
+  unsafe extern "C" {
+    fn hid_exit() -> std::os::raw::c_int;
+  }
+  unsafe {
+    hid_exit();
+  }
+}
+
+impl Drop for HidCommunicationManager {
+  fn drop(&mut self) {
+    #[cfg(target_os = "macos")]
+    reset_hidapi();
+  }
+}
