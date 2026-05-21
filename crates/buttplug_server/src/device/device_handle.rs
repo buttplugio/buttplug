@@ -278,7 +278,7 @@ impl DeviceHandle {
       // OutputType derives Display via strum, producing clean names like "Vibrate", "Rotate".
       // The design uses format!("{:?}") but to_string() is preferred for clean output.
       let _ = sender.send(OutputObservation {
-        device_index: msg.device_index(),
+        device_index: self.definition.index(),
         feature_index: msg.feature_index(),
         output_type: msg.output_command().as_output_type().to_string(),
         value: msg.output_command().value() as f64,
