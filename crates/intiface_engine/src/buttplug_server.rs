@@ -81,6 +81,10 @@ pub fn setup_server_device_comm_managers(
     }
     server_builder.comm_manager(builder);
   }
+  if args.use_simulated_devices() {
+    info!("Including Simulated Device Support");
+    server_builder.add_simulated_devices_if_configured();
+  }
 }
 
 pub async fn reset_buttplug_server(
