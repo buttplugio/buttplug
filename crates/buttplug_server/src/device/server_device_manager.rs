@@ -128,7 +128,6 @@ impl ServerDeviceManagerBuilder {
   }
 
   pub fn finish(&mut self) -> Result<ServerDeviceManager, ButtplugServerError> {
-    self.add_simulated_devices_if_configured();
     let (device_command_sender, device_command_receiver) = mpsc::channel(256);
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
     let mut comm_managers: Vec<Box<dyn HardwareCommunicationManager>> = Vec::new();
