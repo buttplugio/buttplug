@@ -364,7 +364,9 @@ impl DeviceConfigurationManager {
         identifier
       );
       let mut builder = ServerDeviceDefinitionBuilder::from_base(definition, Uuid::new_v4(), true);
-      builder.index(self.device_index(identifier)).finish()
+      builder.index(self.device_index(identifier));
+      self.apply_simulated_display_name(&mut builder, identifier);
+      builder.finish()
     } else if let Some(definition) = self
       .base_device_definitions
       .get(&BaseDeviceIdentifier::new(identifier.protocol(), &None))
@@ -374,7 +376,9 @@ impl DeviceConfigurationManager {
         identifier
       );
       let mut builder = ServerDeviceDefinitionBuilder::from_base(definition, Uuid::new_v4(), true);
-      builder.index(self.device_index(identifier)).finish()
+      builder.index(self.device_index(identifier));
+      self.apply_simulated_display_name(&mut builder, identifier);
+      builder.finish()
     } else {
       return None;
     };
@@ -391,6 +395,20 @@ impl DeviceConfigurationManager {
     }
 
     Some(features)
+  }
+
+  fn apply_simulated_display_name(
+    &self,
+    builder: &mut ServerDeviceDefinitionBuilder,
+    identifier: &UserDeviceIdentifier,
+  ) {
+    if let Some(entry) = self
+      .simulated_devices
+      .iter()
+      .find(|d| d.address() == identifier.address())
+    {
+      builder.display_name(entry.display_name());
+    }
   }
 
   pub fn available_simulated_archetypes(&self) -> Vec<SimulatedDeviceArchetype> {
