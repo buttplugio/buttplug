@@ -612,6 +612,28 @@
               "config"
             ]
           }
+        },
+        "simulated_devices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "identifier": {
+                "type": "string"
+              },
+              "display_name": {
+                "type": "string"
+              },
+              "address": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "identifier",
+              "address"
+            ],
+            "additionalProperties": false
+          }
         }
       },
       "additionalProperties": false
