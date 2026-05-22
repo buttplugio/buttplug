@@ -5,7 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-mod util;
 /*
 // The tests in this file can fail on CI if there isn't a timed retry. Seems to work reliably on
 // windows, so lock it to that platform for now.

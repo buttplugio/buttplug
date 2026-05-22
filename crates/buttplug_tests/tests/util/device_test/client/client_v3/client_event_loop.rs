@@ -15,7 +15,7 @@ use super::{
 };
 use buttplug_core::{
   connector::ButtplugConnector,
-  errors::{ButtplugDeviceError, ButtplugError},
+  errors::ButtplugDeviceError,
   message::ButtplugDeviceMessage,
 };
 use buttplug_server::message::{

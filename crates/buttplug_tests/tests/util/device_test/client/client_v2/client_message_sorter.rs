@@ -7,11 +7,7 @@
 
 //! Handling of remote message pairing and future resolution.
 
-use super::client::{
-  ButtplugClientError,
-  ButtplugClientMessageFuturePair,
-  ButtplugServerMessageSender,
-};
+use super::client::{ButtplugClientMessageFuturePair, ButtplugServerMessageSender};
 use buttplug_core::message::ButtplugMessage;
 use buttplug_server::message::ButtplugServerMessageV2;
 use dashmap::DashMap;
