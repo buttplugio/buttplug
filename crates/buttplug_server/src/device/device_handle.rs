@@ -185,8 +185,8 @@ impl DeviceHandle {
         .definition
         .features()
         .values()
-        .filter(|x| x.has_output() || x.has_input())
         .map(|x| (x.index(), x.as_device_feature().expect("Infallible")))
+        .filter(|(_, f)| f.contains_any_output() || f.contains_any_input())
         .collect::<BTreeMap<u32, DeviceFeature>>(),
     )
   }

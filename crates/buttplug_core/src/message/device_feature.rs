@@ -85,6 +85,14 @@ impl DeviceFeature {
   pub fn get_input(&self, input_type: InputType) -> Option<&DeviceFeatureInput> {
     self.input.find_by_key(&input_type)
   }
+
+  pub fn contains_any_output(&self) -> bool {
+    !self.output.is_empty()
+  }
+
+  pub fn contains_any_input(&self) -> bool {
+    !self.input.is_empty()
+  }
 }
 
 pub trait DeviceFeatureOutputLimits {
