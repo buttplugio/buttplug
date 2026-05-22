@@ -6,14 +6,19 @@
 // for full license information.
 
 use buttplug_core::message::{
-  ButtplugMessage, ButtplugServerMessageV4, DeviceListV4, ScanningFinishedV0,
+  ButtplugMessage,
+  ButtplugServerMessageV4,
+  DeviceListV4,
+  ScanningFinishedV0,
 };
 use buttplug_server_device_config::DeviceConfigurationManager;
 use tracing::info_span;
 
 use super::server_device_manager::DeviceManagerCommand;
 use crate::device::{
-  DeviceHandle, InternalDeviceEvent, OutputObservation,
+  DeviceHandle,
+  InternalDeviceEvent,
+  OutputObservation,
   device_handle::build_device_handle,
   hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
   protocol::ProtocolManager,

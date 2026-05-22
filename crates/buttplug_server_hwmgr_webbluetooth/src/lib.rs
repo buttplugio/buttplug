@@ -9,6 +9,7 @@ mod webbluetooth_comm_manager;
 mod webbluetooth_hardware;
 
 pub use webbluetooth_comm_manager::{
-  WebBluetoothCommunicationManager, WebBluetoothCommunicationManagerBuilder,
+  WebBluetoothCommunicationManager,
+  WebBluetoothCommunicationManagerBuilder,
 };
-pub use webbluetooth_hardware::{WebBluetoothHardwareConnector};
+pub use webbluetooth_hardware::WebBluetoothHardwareConnector;

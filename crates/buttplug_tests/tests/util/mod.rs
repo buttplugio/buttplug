@@ -200,7 +200,8 @@ pub fn test_server_with_simulated_device(
   display_name: Option<String>,
 ) -> ButtplugServer {
   use buttplug_server::device::hardware::simulated::{
-    SimulatedDeviceEntry, SimulatedHardwareCommunicationManagerBuilder,
+    SimulatedDeviceEntry,
+    SimulatedHardwareCommunicationManagerBuilder,
   };
 
   let device = SimulatedDeviceEntry {
@@ -210,7 +211,9 @@ pub fn test_server_with_simulated_device(
   };
 
   let mut dm_builder = ServerDeviceManagerBuilder::new(create_test_dcm());
-  dm_builder.comm_manager(SimulatedHardwareCommunicationManagerBuilder::new(vec![device]));
+  dm_builder.comm_manager(SimulatedHardwareCommunicationManagerBuilder::new(vec![
+    device,
+  ]));
   dm_builder.emit_output_observations(true);
 
   ButtplugServerBuilder::new(dm_builder.finish().unwrap())

@@ -11,30 +11,51 @@ use util::test_server;
 pub use util::{
   create_test_dcm,
   test_device_manager::{
-    TestDeviceCommunicationManagerBuilder, TestDeviceIdentifier, check_test_recv_value,
+    TestDeviceCommunicationManagerBuilder,
+    TestDeviceIdentifier,
+    check_test_recv_value,
   },
-  test_server_with_comm_manager, test_server_with_device,
+  test_server_with_comm_manager,
+  test_server_with_device,
 };
 
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError},
   message::{
-    BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION,
-    ButtplugClientMessageV4, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugServerMessageV4,
-    ErrorCode, OutputCmdV4, OutputCommand, OutputValue, PingV0, RequestDeviceListV0,
-    RequestServerInfoV4, ServerInfoV4, StartScanningV0,
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+    BUTTPLUG_CURRENT_API_MINOR_VERSION,
+    ButtplugClientMessageV4,
+    ButtplugMessage,
+    ButtplugMessageSpecVersion,
+    ButtplugServerMessageV4,
+    ErrorCode,
+    OutputCmdV4,
+    OutputCommand,
+    OutputValue,
+    PingV0,
+    RequestDeviceListV0,
+    RequestServerInfoV4,
+    ServerInfoV4,
+    StartScanningV0,
   },
 };
 use buttplug_server::{
-  ButtplugServer, ButtplugServerBuilder,
+  ButtplugServer,
+  ButtplugServerBuilder,
   device::{
     ServerDeviceManagerBuilder,
     hardware::{HardwareCommand, HardwareWriteCmd},
   },
   message::{
-    ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageV2,
-    ButtplugServerMessageV3, ButtplugServerMessageVariant, RequestServerInfoV1, ServerInfoV2,
-    checked_output_cmd::CheckedOutputCmdV4, spec_enums::ButtplugCheckedClientMessageV4,
+    ButtplugClientMessageV3,
+    ButtplugClientMessageVariant,
+    ButtplugServerMessageV2,
+    ButtplugServerMessageV3,
+    ButtplugServerMessageVariant,
+    RequestServerInfoV1,
+    ServerInfoV2,
+    checked_output_cmd::CheckedOutputCmdV4,
+    spec_enums::ButtplugCheckedClientMessageV4,
   },
 };
 use futures::{Stream, StreamExt, pin_mut};

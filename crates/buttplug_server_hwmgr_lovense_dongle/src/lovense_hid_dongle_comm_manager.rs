@@ -189,16 +189,22 @@ impl LovenseHIDDongleCommunicationManager {
       dongle_available,
     };
     let dongle_fut = mgr.find_dongle();
-    buttplug_core::spawn!("LovenseHIDDongleCommunicationManager find dongle", async move {
-      let _ = dongle_fut.await;
-    });
+    buttplug_core::spawn!(
+      "LovenseHIDDongleCommunicationManager find dongle",
+      async move {
+        let _ = dongle_fut.await;
+      }
+    );
     let mut machine =
       create_lovense_dongle_machine(event_sender, machine_receiver, mgr.is_scanning.clone());
-    buttplug_core::spawn!("LovenseHIDDongleCommunicationManager state machine", async move {
-      while let Some(next) = machine.transition().await {
-        machine = next;
+    buttplug_core::spawn!(
+      "LovenseHIDDongleCommunicationManager state machine",
+      async move {
+        while let Some(next) = machine.transition().await {
+          machine = next;
+        }
       }
-    });
+    );
     mgr
   }
 

@@ -8,7 +8,9 @@
 use crate::message::v1::NullDeviceMessageAttributesV1;
 use buttplug_core::message::{InputType, OutputType};
 use buttplug_server_device_config::{
-  ServerDeviceFeature, ServerDeviceFeatureInput, ServerDeviceFeatureOutput,
+  ServerDeviceFeature,
+  ServerDeviceFeatureInput,
+  ServerDeviceFeatureOutput,
 };
 
 use getset::{Getters, MutGetters, Setters};

@@ -8,7 +8,8 @@
 use crate::webbluetooth_hardware::WebBluetoothHardwareConnector;
 use buttplug_core::ButtplugResultFuture;
 use buttplug_server::device::hardware::communication::{
-  HardwareCommunicationManager, HardwareCommunicationManagerBuilder,
+  HardwareCommunicationManager,
+  HardwareCommunicationManagerBuilder,
   HardwareCommunicationManagerEvent,
 };
 use buttplug_server_device_config::{DeviceConfigurationManager, ProtocolCommunicationSpecifier};

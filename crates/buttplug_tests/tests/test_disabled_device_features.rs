@@ -9,8 +9,14 @@ mod util;
 
 use buttplug_client::ButtplugClientEvent;
 use buttplug_core::message::{
-  BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION, ButtplugServerMessageV4,
-  OutputCmdV4, OutputCommand, OutputHwPositionWithDuration, OutputType, RequestServerInfoV4,
+  BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+  BUTTPLUG_CURRENT_API_MINOR_VERSION,
+  ButtplugServerMessageV4,
+  OutputCmdV4,
+  OutputCommand,
+  OutputHwPositionWithDuration,
+  OutputType,
+  RequestServerInfoV4,
   StartScanningV0,
 };
 use buttplug_server::message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant};

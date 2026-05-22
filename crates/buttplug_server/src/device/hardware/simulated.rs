@@ -5,22 +5,31 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::device::hardware::{
-  Hardware, HardwareConnector, HardwareEvent, HardwareInternal, HardwareReadCmd, HardwareReading,
-  HardwareSpecializer, HardwareSubscribeCmd, HardwareUnsubscribeCmd, HardwareWriteCmd,
-};
 use crate::device::hardware::communication::{
-  HardwareCommunicationManager, HardwareCommunicationManagerBuilder,
+  HardwareCommunicationManager,
+  HardwareCommunicationManagerBuilder,
   HardwareCommunicationManagerEvent,
 };
+use crate::device::hardware::{
+  Hardware,
+  HardwareConnector,
+  HardwareEvent,
+  HardwareInternal,
+  HardwareReadCmd,
+  HardwareReading,
+  HardwareSpecializer,
+  HardwareSubscribeCmd,
+  HardwareUnsubscribeCmd,
+  HardwareWriteCmd,
+};
 use async_trait::async_trait;
-use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_core::ButtplugResultFuture;
+use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::{Endpoint, ProtocolCommunicationSpecifier, SimulatedSpecifier};
 use futures::future::{self, BoxFuture, FutureExt};
 use std::fmt::{self, Debug};
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use tokio::sync::broadcast;
 use tokio::sync::mpsc::Sender;
 use tracing::error;
@@ -92,7 +101,11 @@ pub struct SimulatedHardwareConnector {
 }
 
 impl SimulatedHardwareConnector {
-  pub fn new(specifier: ProtocolCommunicationSpecifier, hardware: SimulatedHardwareInternal, identifier: String) -> Self {
+  pub fn new(
+    specifier: ProtocolCommunicationSpecifier,
+    hardware: SimulatedHardwareInternal,
+    identifier: String,
+  ) -> Self {
     Self {
       specifier,
       hardware: Some(hardware),
@@ -208,15 +221,12 @@ impl HardwareCommunicationManager for SimulatedHardwareCommunicationManager {
     let mut events = vec![];
 
     for device in &self.devices {
-      let name = device
-        .display_name
-        .as_deref()
-        .unwrap_or(&device.identifier);
-      let specifier = ProtocolCommunicationSpecifier::Simulated(
-        SimulatedSpecifier::new(&device.identifier),
-      );
+      let name = device.display_name.as_deref().unwrap_or(&device.identifier);
+      let specifier =
+        ProtocolCommunicationSpecifier::Simulated(SimulatedSpecifier::new(&device.identifier));
       let hardware = SimulatedHardwareInternal::new(&device.address);
-      let connector = SimulatedHardwareConnector::new(specifier, hardware, device.identifier.clone());
+      let connector =
+        SimulatedHardwareConnector::new(specifier, hardware, device.identifier.clone());
 
       events.push(HardwareCommunicationManagerEvent::DeviceFound {
         name: name.to_owned(),
@@ -334,7 +344,8 @@ mod tests {
   fn test_simulated_hardware_connector_specifier() {
     let specifier = ProtocolCommunicationSpecifier::Simulated(SimulatedSpecifier::new("test-id"));
     let hardware = SimulatedHardwareInternal::new("test-address");
-    let connector = SimulatedHardwareConnector::new(specifier.clone(), hardware, "test-id".to_string());
+    let connector =
+      SimulatedHardwareConnector::new(specifier.clone(), hardware, "test-id".to_string());
 
     assert_eq!(connector.specifier(), specifier);
   }
@@ -353,7 +364,8 @@ mod tests {
   async fn test_simulated_hardware_specializer_specialize() {
     let specifier = ProtocolCommunicationSpecifier::Simulated(SimulatedSpecifier::new("test-id"));
     let hardware = SimulatedHardwareInternal::new("test-address");
-    let mut connector = SimulatedHardwareConnector::new(specifier.clone(), hardware, "test-id".to_string());
+    let mut connector =
+      SimulatedHardwareConnector::new(specifier.clone(), hardware, "test-id".to_string());
 
     let mut specializer = connector.connect().await.unwrap();
     let result = specializer.specialize(&[specifier]).await;
@@ -367,26 +379,22 @@ mod tests {
 
   #[test]
   fn test_simulated_hardware_communication_manager_builder() {
-    let devices = vec![
-      SimulatedDeviceEntry {
-        identifier: "device1".to_string(),
-        display_name: Some("Test Device 1".to_string()),
-        address: "addr1".to_string(),
-      },
-    ];
+    let devices = vec![SimulatedDeviceEntry {
+      identifier: "device1".to_string(),
+      display_name: Some("Test Device 1".to_string()),
+      address: "addr1".to_string(),
+    }];
     let builder = SimulatedHardwareCommunicationManagerBuilder::new(devices);
     assert_eq!(builder.devices.len(), 1);
   }
 
   #[tokio::test]
   async fn test_simulated_hardware_communication_manager_can_scan_with_devices() {
-    let devices = vec![
-      SimulatedDeviceEntry {
-        identifier: "device1".to_string(),
-        display_name: Some("Test Device 1".to_string()),
-        address: "addr1".to_string(),
-      },
-    ];
+    let devices = vec![SimulatedDeviceEntry {
+      identifier: "device1".to_string(),
+      display_name: Some("Test Device 1".to_string()),
+      address: "addr1".to_string(),
+    }];
     let (tx, _rx) = tokio::sync::mpsc::channel(10);
     let manager = SimulatedHardwareCommunicationManager::new(tx, devices);
 

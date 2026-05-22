@@ -112,7 +112,8 @@ impl ServerDeviceManagerBuilder {
     let simulated_devices = self.device_configuration_manager.simulated_devices();
     if !simulated_devices.is_empty() {
       use crate::device::hardware::simulated::{
-        SimulatedDeviceEntry, SimulatedHardwareCommunicationManagerBuilder,
+        SimulatedDeviceEntry,
+        SimulatedHardwareCommunicationManagerBuilder,
       };
       let entries: Vec<SimulatedDeviceEntry> = simulated_devices
         .iter()
@@ -229,9 +230,10 @@ impl ServerDeviceManager {
   }
 
   pub fn output_observation_stream(&self) -> Option<impl Stream<Item = OutputObservation>> {
-    self.output_observation_sender.as_ref().map(|sender| {
-      convert_broadcast_receiver_to_stream(sender.subscribe())
-    })
+    self
+      .output_observation_sender
+      .as_ref()
+      .map(|sender| convert_broadcast_receiver_to_stream(sender.subscribe()))
   }
 
   fn start_scanning(&self) -> ButtplugServerResultFuture {

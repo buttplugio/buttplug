@@ -10,7 +10,12 @@ use crate::message::{
   v2::{ClientDeviceMessageAttributesV2, GenericDeviceMessageAttributesV2},
 };
 use buttplug_core::message::{
-  DeviceFeature, DeviceFeatureInput, DeviceFeatureOutput, InputCommandType, InputType, OutputType,
+  DeviceFeature,
+  DeviceFeatureInput,
+  DeviceFeatureOutput,
+  InputCommandType,
+  InputType,
+  OutputType,
 };
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeSeq};

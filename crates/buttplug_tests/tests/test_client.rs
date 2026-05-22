@@ -8,7 +8,8 @@
 mod util;
 
 use buttplug_client::{
-  ButtplugClient, ButtplugClientEvent,
+  ButtplugClient,
+  ButtplugClientEvent,
   device::{ClientDeviceCommandValue, ClientDeviceOutputCommand},
 };
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
@@ -25,7 +26,9 @@ use futures::{StreamExt, future::BoxFuture};
 use std::time::Duration;
 use tokio::{sync::mpsc::Sender, time::sleep};
 use util::{
-  test_client, test_client_with_delayed_device_manager, test_client_with_device,
+  test_client,
+  test_client_with_delayed_device_manager,
+  test_client_with_device,
   test_device_manager::check_test_recv_value,
 };
 use uuid::Uuid;

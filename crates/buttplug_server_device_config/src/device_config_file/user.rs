@@ -13,8 +13,11 @@ use uuid::Uuid;
 use crate::UserDeviceIdentifier;
 
 use super::{
-  ConfigVersion, ConfigVersionGetter, device::ConfigUserDeviceDefinition,
-  get_internal_config_version, protocol::ProtocolDefinition,
+  ConfigVersion,
+  ConfigVersionGetter,
+  device::ConfigUserDeviceDefinition,
+  get_internal_config_version,
+  protocol::ProtocolDefinition,
 };
 
 #[derive(Deserialize, Serialize, Debug, Clone, Getters, Setters, MutGetters)]

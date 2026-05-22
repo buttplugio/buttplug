@@ -7,8 +7,12 @@
 
 mod util;
 use buttplug_core::message::{
-  BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION, ButtplugServerMessageV4,
-  OutputType, RequestServerInfoV4, StartScanningV0,
+  BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+  BUTTPLUG_CURRENT_API_MINOR_VERSION,
+  ButtplugServerMessageV4,
+  OutputType,
+  RequestServerInfoV4,
+  StartScanningV0,
 };
 use buttplug_server::message::ButtplugClientMessageVariant;
 

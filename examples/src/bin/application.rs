@@ -9,8 +9,12 @@
 // 3. Run: cargo run --bin application
 
 use buttplug_client::{
-  ButtplugClient, ButtplugClientDevice, ButtplugClientError, ButtplugClientEvent,
-  connector::ButtplugRemoteClientConnector, device::ClientDeviceOutputCommand,
+  ButtplugClient,
+  ButtplugClientDevice,
+  ButtplugClientError,
+  ButtplugClientEvent,
+  connector::ButtplugRemoteClientConnector,
+  device::ClientDeviceOutputCommand,
   serializer::ButtplugClientJSONSerializer,
 };
 use buttplug_core::message::{InputType, OutputType};

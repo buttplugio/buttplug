@@ -12,7 +12,9 @@ mod protocol;
 mod user;
 
 pub use user::{
-  SimulatedDeviceArchetype, SimulatedDeviceConfigEntry, SimulatedDeviceFeatureSummary,
+  SimulatedDeviceArchetype,
+  SimulatedDeviceConfigEntry,
+  SimulatedDeviceFeatureSummary,
 };
 
 use base::BaseConfigFile;
@@ -23,7 +25,9 @@ use crate::device_config_file::{
 };
 
 use super::{
-  BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder,
+  BaseDeviceIdentifier,
+  DeviceConfigurationManager,
+  DeviceConfigurationManagerBuilder,
   ServerDeviceDefinition,
 };
 use buttplug_core::{
