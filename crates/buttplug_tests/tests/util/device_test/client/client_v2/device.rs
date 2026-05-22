@@ -11,7 +11,6 @@ use super::{
     ButtplugClientError,
     ButtplugClientMessageFuturePair,
     ButtplugClientResultFuture,
-    ButtplugServerMessageSender,
   },
   client_event_loop::ButtplugClientRequest,
 };

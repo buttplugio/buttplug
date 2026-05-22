@@ -63,10 +63,12 @@ impl TestDeviceIdentifier {
     }
   }
 
+  #[allow(dead_code)]
   pub fn name(&self) -> &str {
     &self.name
   }
 
+  #[allow(dead_code)]
   pub fn address(&self) -> &str {
     &self.address
   }

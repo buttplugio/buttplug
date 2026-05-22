@@ -38,7 +38,7 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
 };
 use thiserror::Error;
-use tokio::sync::{Mutex, broadcast, mpsc, mpsc::error::SendError};
+use tokio::sync::{Mutex, broadcast, mpsc};
 use tracing::{Level, Span, span};
 
 /// Result type used for public APIs.
@@ -164,7 +164,7 @@ pub struct ButtplugClient {
 }
 
 impl ButtplugClient {
-  pub fn new(name: &str) -> (Self, mpsc::Receiver<ButtplugClientRequest>) {
+  pub(super) fn new(name: &str) -> (Self, mpsc::Receiver<ButtplugClientRequest>) {
     let (message_sender, message_receiver) = mpsc::channel(256);
     let (event_stream, _) = broadcast::channel(256);
     (
@@ -181,7 +181,7 @@ impl ButtplugClient {
     )
   }
 
-  pub async fn connect<ConnectorType>(
+  pub(super) async fn connect<ConnectorType>(
     &self,
     mut connector: ConnectorType,
     from_client_receiver: mpsc::Receiver<ButtplugClientRequest>,

@@ -11,10 +11,7 @@ use super::{
   client_message_sorter::ClientMessageSorter,
   device::{ButtplugClientDevice, ButtplugClientDeviceEvent},
 };
-use buttplug_core::{
-  connector::ButtplugConnector,
-  errors::{ButtplugDeviceError, ButtplugError},
-};
+use buttplug_core::{connector::ButtplugConnector, errors::ButtplugDeviceError};
 use buttplug_server::message::{ButtplugClientMessageV0, ButtplugServerMessageV0, DeviceListV0};
 use dashmap::DashMap;
 use futures::channel::oneshot;
