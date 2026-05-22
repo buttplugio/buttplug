@@ -11,7 +11,9 @@ mod feature;
 mod protocol;
 mod user;
 
-pub use user::{SimulatedDeviceConfigEntry, SimulatedDeviceArchetype, SimulatedDeviceFeatureSummary};
+pub use user::{
+  SimulatedDeviceArchetype, SimulatedDeviceConfigEntry, SimulatedDeviceFeatureSummary,
+};
 
 use base::BaseConfigFile;
 
@@ -20,7 +22,10 @@ use crate::device_config_file::{
   user::{UserConfigDefinition, UserConfigFile, UserDeviceConfigPair},
 };
 
-use super::{BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder, ServerDeviceDefinition};
+use super::{
+  BaseDeviceIdentifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder,
+  ServerDeviceDefinition,
+};
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError},
   util::json::JSONValidator,
@@ -271,7 +276,8 @@ pub fn save_user_config(dcm: &DeviceConfigurationManager) -> Result<String, Butt
     user_device_configs: Some(user_definitions_vec),
     simulated_devices,
   };
-  let mut user_config_file = UserConfigFile::new(4, 0);
+  let config_version = get_internal_config_version();
+  let mut user_config_file = UserConfigFile::new(config_version.major, config_version.minor);
   user_config_file.set_user_configs(Some(user_config_definition));
   serde_json::to_string_pretty(&user_config_file).map_err(|e| {
     ButtplugError::from(ButtplugDeviceError::DeviceConfigurationError(format!(
@@ -285,6 +291,7 @@ mod test {
   use crate::device_config_file::load_main_config;
 
   use super::{DEVICE_CONFIGURATION_JSON, base::BaseConfigFile, load_protocol_config_from_json};
+  use serde_json::json;
 
   #[test]
   fn test_config_file_parsing() {
@@ -295,5 +302,21 @@ mod test {
   #[test]
   fn test_main_file_parsing() {
     load_main_config(&None, false).unwrap();
+  }
+
+  #[test]
+  fn test_unknown_communication_specifier_is_ignored_on_config_load() {
+    let mut config: serde_json::Value = serde_json::from_str(DEVICE_CONFIGURATION_JSON).unwrap();
+    config["protocols"]["future-protocol"] = json!({
+      "communication": [
+        {
+          "future_connector": {
+            "some": "value"
+          }
+        }
+      ]
+    });
+
+    load_protocol_config_from_json::<BaseConfigFile>(&config.to_string(), true).unwrap();
   }
 }
