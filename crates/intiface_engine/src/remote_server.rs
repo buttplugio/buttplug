@@ -6,8 +6,8 @@
 // for full license information.
 use buttplug_core::{
   connector::ButtplugConnector,
-  errors::{ButtplugError, ButtplugHandshakeError},
-  message::{ButtplugMessageSpecVersion, ButtplugServerMessageV4},
+  errors::ButtplugError,
+  message::ButtplugServerMessageV4,
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server::{
@@ -156,7 +156,6 @@ async fn run_server<ConnectorType>(
           let connected = server_clone.connected();
           let connector_clone = shared_connector.clone();
           let remote_event_sender_clone = remote_event_sender.clone();
-          let disconnect_notifier = disconnect_notifier.clone();
           buttplug_core::spawn!("ButtplugRemoteServer loop", async move {
             match server_clone.parse_message(client_message.clone()).await {
               Ok(ret_msg) => {
@@ -189,7 +188,7 @@ async fn run_server<ConnectorType>(
           info!("Server disconnected via server disappearance, exiting loop.");
           break;
         }
-        Some(msg) => {
+        Some(_) => {
           /*
           if remote_event_sender.receiver_count() > 0 {
             match &msg {
