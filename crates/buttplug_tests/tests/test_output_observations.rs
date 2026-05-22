@@ -8,8 +8,15 @@
 mod util;
 
 use buttplug_core::message::{
-  BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION, ButtplugServerMessageV4,
-  OutputCmdV4, OutputCommand, OutputValue, RequestServerInfoV4, StartScanningV0, StopCmdV4,
+  BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+  BUTTPLUG_CURRENT_API_MINOR_VERSION,
+  ButtplugServerMessageV4,
+  OutputCmdV4,
+  OutputCommand,
+  OutputValue,
+  RequestServerInfoV4,
+  StartScanningV0,
+  StopCmdV4,
 };
 use buttplug_server::message::ButtplugClientMessageVariant;
 use futures::{StreamExt, pin_mut};

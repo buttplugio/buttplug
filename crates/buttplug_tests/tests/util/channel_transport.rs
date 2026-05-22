@@ -7,7 +7,9 @@
 
 use crate::util::ButtplugTestServer;
 use buttplug_client::{
-  ButtplugClient, ButtplugClientError, connector::ButtplugRemoteClientConnector,
+  ButtplugClient,
+  ButtplugClientError,
+  connector::ButtplugRemoteClientConnector,
   serializer::ButtplugClientJSONSerializer,
 };
 use buttplug_core::{
@@ -16,15 +18,21 @@ use buttplug_core::{
     transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
   },
   message::{
-    BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION,
-    ButtplugClientMessageV4, ButtplugMessage, DeviceListV4, RequestServerInfoV4, ServerInfoV4,
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+    BUTTPLUG_CURRENT_API_MINOR_VERSION,
+    ButtplugClientMessageV4,
+    ButtplugMessage,
+    DeviceListV4,
+    RequestServerInfoV4,
+    ServerInfoV4,
     serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
   },
 };
 use buttplug_server::{
   connector::ButtplugRemoteServerConnector,
   message::{
-    ButtplugClientMessageVariant, ButtplugServerMessageVariant,
+    ButtplugClientMessageVariant,
+    ButtplugServerMessageVariant,
     serializer::ButtplugServerJSONSerializer,
   },
 };
@@ -36,7 +44,8 @@ use futures::{
 use log::*;
 use std::sync::Arc;
 use tokio::sync::{
-  Mutex, Notify,
+  Mutex,
+  Notify,
   mpsc::{Receiver, Sender, channel},
 };
 

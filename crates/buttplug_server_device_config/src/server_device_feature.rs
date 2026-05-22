@@ -9,9 +9,15 @@ use crate::ButtplugDeviceConfigError;
 
 use buttplug_core::{
   message::{
-    DeviceFeature, DeviceFeatureInput, DeviceFeatureInputProperties, DeviceFeatureOutput,
-    DeviceFeatureOutputHwPositionWithDurationProperties, DeviceFeatureOutputValueProperties,
-    InputCommandType, InputType, OutputType,
+    DeviceFeature,
+    DeviceFeatureInput,
+    DeviceFeatureInputProperties,
+    DeviceFeatureOutput,
+    DeviceFeatureOutputHwPositionWithDurationProperties,
+    DeviceFeatureOutputValueProperties,
+    InputCommandType,
+    InputType,
+    OutputType,
   },
   util::{
     range::RangeInclusive,
@@ -516,7 +522,8 @@ impl PartialEq for ServerDeviceFeature {
   }
 }
 
-impl Eq for ServerDeviceFeature {}
+impl Eq for ServerDeviceFeature {
+}
 
 impl Default for ServerDeviceFeature {
   fn default() -> Self {

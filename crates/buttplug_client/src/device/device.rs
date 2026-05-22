@@ -317,7 +317,8 @@ impl ButtplugClientDevice {
   }
 }
 
-impl Eq for ButtplugClientDevice {}
+impl Eq for ButtplugClientDevice {
+}
 
 impl PartialEq for ButtplugClientDevice {
   fn eq(&self, other: &Self) -> bool {

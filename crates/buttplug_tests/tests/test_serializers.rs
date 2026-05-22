@@ -12,9 +12,15 @@ use buttplug_core::{
   connector::transport::ButtplugTransportIncomingMessage,
   errors::{ButtplugError, ButtplugUnknownError},
   message::{
-    BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION,
-    ButtplugClientMessageV4, ButtplugMessage, ButtplugServerMessageV4, DeviceListV4, ErrorV0,
-    ServerInfoV4, serializer::ButtplugSerializedMessage,
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+    BUTTPLUG_CURRENT_API_MINOR_VERSION,
+    ButtplugClientMessageV4,
+    ButtplugMessage,
+    ButtplugServerMessageV4,
+    DeviceListV4,
+    ErrorV0,
+    ServerInfoV4,
+    serializer::ButtplugSerializedMessage,
   },
 };
 use buttplug_server::message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant};

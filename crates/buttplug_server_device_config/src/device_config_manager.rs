@@ -147,8 +147,7 @@ impl DeviceConfigurationManagerBuilder {
         if !valid_archetypes.contains(&device.identifier) {
           return Err(ButtplugDeviceError::DeviceConfigurationError(format!(
             "Invalid simulated device archetype '{}'. Valid archetypes: {:?}",
-            device.identifier,
-            valid_archetypes
+            device.identifier, valid_archetypes
           )));
         }
         if !seen_addresses.insert(&device.address) {

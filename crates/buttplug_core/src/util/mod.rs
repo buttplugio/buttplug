@@ -11,9 +11,9 @@
 pub mod async_manager;
 pub mod json;
 pub mod range;
-pub mod stream;
-pub mod small_vec_enum_map;
 pub mod serializers;
+pub mod small_vec_enum_map;
+pub mod stream;
 
 #[cfg(all(not(feature = "wasm"), feature = "tokio-runtime"))]
 pub use tokio::time::sleep;

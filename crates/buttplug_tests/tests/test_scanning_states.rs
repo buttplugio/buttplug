@@ -25,7 +25,8 @@ use std::time::Duration;
 use util::{
   create_test_dcm,
   long_running_scan_comm_manager::{
-    LongRunningScanCommunicationManagerBuilder, LongRunningScanState,
+    LongRunningScanCommunicationManagerBuilder,
+    LongRunningScanState,
   },
   test_device_manager::TestDeviceIdentifier,
 };

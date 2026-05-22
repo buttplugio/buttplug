@@ -7,11 +7,7 @@
 //! Representation and management of devices connected to the server.
 
 use super::{
-  client::{
-    ButtplugClientError,
-    ButtplugClientMessageFuturePair,
-    ButtplugClientResultFuture,
-  },
+  client::{ButtplugClientError, ButtplugClientMessageFuturePair, ButtplugClientResultFuture},
   client_event_loop::ButtplugClientRequest,
 };
 use buttplug_core::{

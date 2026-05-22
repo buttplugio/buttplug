@@ -8,7 +8,10 @@
 use crate::{
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
-    ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageValidator,
+    ButtplugDeviceMessage,
+    ButtplugMessage,
+    ButtplugMessageError,
+    ButtplugMessageValidator,
     OutputType,
   },
 };

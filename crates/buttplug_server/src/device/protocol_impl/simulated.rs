@@ -5,9 +5,9 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::device::hardware::HardwareCommand;
 use crate::device::protocol::{ProtocolHandler, generic_protocol_setup};
 use buttplug_core::errors::ButtplugDeviceError;
-use crate::device::hardware::HardwareCommand;
 use uuid::Uuid;
 
 generic_protocol_setup!(SimulatedProtocol, "simulated");

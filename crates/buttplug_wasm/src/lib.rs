@@ -7,7 +7,8 @@
 
 use buttplug_core::message::serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage};
 use buttplug_server::{
-  ButtplugServer, ButtplugServerBuilder,
+  ButtplugServer,
+  ButtplugServerBuilder,
   device::ServerDeviceManagerBuilder,
   message::{ButtplugServerMessageVariant, serializer::ButtplugServerJSONSerializer},
 };
