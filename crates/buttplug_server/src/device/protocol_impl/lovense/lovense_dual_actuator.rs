@@ -42,8 +42,9 @@ impl ProtocolHandler for LovenseDualActuator {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     debug!(
-      "Lovense multi-actuator command: {}",
-      format!("Vibrate{}:{};", feature_index + 1, speed)
+      "Lovense multi-actuator command: Vibrate{}:{};",
+      feature_index + 1,
+      speed
     );
     let lovense_cmd = format!("Vibrate{}:{};", feature_index + 1, speed)
       .as_bytes()

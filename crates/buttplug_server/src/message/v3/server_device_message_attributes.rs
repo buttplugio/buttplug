@@ -8,9 +8,7 @@
 use crate::message::v1::NullDeviceMessageAttributesV1;
 use buttplug_core::message::{InputType, OutputType};
 use buttplug_server_device_config::{
-  ServerDeviceFeature,
-  ServerDeviceFeatureInput,
-  ServerDeviceFeatureOutput,
+  ServerDeviceFeature, ServerDeviceFeatureInput, ServerDeviceFeatureOutput,
 };
 
 use getset::{Getters, MutGetters, Setters};
@@ -126,7 +124,7 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
     let sensor_filter = {
       let attrs: Vec<ServerSensorDeviceMessageAttributesV3> = features
         .iter()
-        .map(|feature| {
+        .flat_map(|feature| {
           let mut sensor_vec = vec![];
           if let Some(ServerDeviceFeatureInput::Battery(battery)) =
             feature.get_input(InputType::Battery)
@@ -143,7 +141,6 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
           }
           sensor_vec
         })
-        .flatten()
         .collect();
       if !attrs.is_empty() { Some(attrs) } else { None }
     };

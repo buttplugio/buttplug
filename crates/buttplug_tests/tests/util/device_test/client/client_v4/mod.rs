@@ -6,14 +6,10 @@
 // for full license information.
 
 use crate::util::{
-  ButtplugTestServer,
-  TestDeviceChannelHost,
-  device_test::connector::build_channel_connector,
+  ButtplugTestServer, TestDeviceChannelHost, device_test::connector::build_channel_connector,
 };
 use buttplug_client::{
-  ButtplugClient,
-  ButtplugClientDevice,
-  ButtplugClientEvent,
+  ButtplugClient, ButtplugClientDevice, ButtplugClientEvent,
   device::{ClientDeviceCommandValue, ClientDeviceFeature, ClientDeviceOutputCommand},
 };
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
@@ -23,10 +19,7 @@ use buttplug_server_device_config::load_protocol_configs;
 use tokio::sync::Notify;
 
 use super::super::{
-  super::TestDeviceCommunicationManagerBuilder,
-  DeviceTestCase,
-  TestClientCommand,
-  TestCommand,
+  super::TestDeviceCommunicationManagerBuilder, DeviceTestCase, TestClientCommand, TestCommand,
   filter_commands,
 };
 use futures::StreamExt;
@@ -50,8 +43,7 @@ fn from_type_and_value(output_type: OutputType, value: f64) -> ClientDeviceOutpu
 // Translate ScalarCmd indexes into feature indexes by skipping over any
 // features that are not presented as ScalarCmd actuator types
 fn get_scalar_index(device: &ButtplugClientDevice, index: u32) -> &u32 {
-  let mut offset = 0;
-  let mut iter = device.device_features().iter().filter(|f| {
+  let iter = device.device_features().iter().filter(|f| {
     let feature = f.1.feature();
     feature.contains_output(OutputType::Vibrate)
       || feature.contains_output(OutputType::Oscillate)
@@ -60,13 +52,12 @@ fn get_scalar_index(device: &ButtplugClientDevice, index: u32) -> &u32 {
         .get_output_limits(OutputType::Rotate)
         .is_some_and(|r| r.step_limit().start() >= 0)
   });
-  while let Some((idx, _)) = iter.next() {
-    if offset >= index {
+  for (offset, (idx, _)) in iter.enumerate() {
+    if offset as u32 >= index {
       return idx;
     }
-    offset += 1;
   }
-  return &0;
+  &0
 }
 
 async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugClientDevice) {

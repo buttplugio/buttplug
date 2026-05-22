@@ -199,13 +199,10 @@ pub struct DeviceFeatureInputProperties {
 }
 
 impl DeviceFeatureInputProperties {
-  pub fn new(
-    value: &Vec<RangeInclusive<i32>>,
-    sensor_commands: &BitFlags<InputCommandType>,
-  ) -> Self {
+  pub fn new(value: &[RangeInclusive<i32>], sensor_commands: &BitFlags<InputCommandType>) -> Self {
     Self {
-      value: value.clone(),
-      command: sensor_commands.clone(),
+      value: value.to_owned(),
+      command: *sensor_commands,
     }
   }
 }

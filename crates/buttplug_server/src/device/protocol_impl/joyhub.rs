@@ -9,20 +9,14 @@ use crate::device::hardware::{HardwareCommand, HardwareWriteCmd};
 use crate::device::{
   hardware::Hardware,
   protocol::{
-    ProtocolHandler,
-    ProtocolIdentifier,
-    ProtocolInitializer,
-    generic_protocol_initializer_setup,
+    ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_core::util::async_manager;
 use buttplug_server_device_config::{
-  Endpoint,
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  Endpoint, ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU8, Ordering};
@@ -120,7 +114,7 @@ impl ProtocolHandler for JoyHub {
     _feature_id: Uuid,
     speed: i32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.form_hardware_command(feature_index, speed.abs() as u32)
+    self.form_hardware_command(feature_index, speed.unsigned_abs())
   }
 
   fn handle_output_oscillate_cmd(

@@ -8,20 +8,12 @@
 use buttplug_core::{
   errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
   message::{
-    self,
-    ButtplugClientMessageV4,
-    ButtplugMessageFinalizer,
-    ButtplugMessageSpecVersion,
-    ButtplugServerMessageCurrent,
-    ButtplugServerMessageV4,
+    self, ButtplugClientMessageV4, ButtplugMessageFinalizer, ButtplugMessageSpecVersion,
+    ButtplugServerMessageCurrent, ButtplugServerMessageV4,
     serializer::{
-      ButtplugMessageSerializer,
-      ButtplugSerializedMessage,
-      ButtplugSerializerError,
+      ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugSerializerError,
       json_serializer::{
-        create_message_validator,
-        deserialize_to_message,
-        msg_to_protocol_json,
+        create_message_validator, deserialize_to_message, msg_to_protocol_json,
         vec_to_protocol_json,
       },
     },
@@ -32,15 +24,9 @@ use once_cell::sync::OnceCell;
 use serde::Deserialize;
 
 use super::{
-  ButtplugClientMessageV0,
-  ButtplugClientMessageV1,
-  ButtplugClientMessageV2,
-  ButtplugClientMessageV3,
-  ButtplugClientMessageVariant,
-  ButtplugServerMessageV0,
-  ButtplugServerMessageV1,
-  ButtplugServerMessageV2,
-  ButtplugServerMessageV3,
+  ButtplugClientMessageV0, ButtplugClientMessageV1, ButtplugClientMessageV2,
+  ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageV0,
+  ButtplugServerMessageV1, ButtplugServerMessageV2, ButtplugServerMessageV3,
   ButtplugServerMessageVariant,
 };
 
@@ -50,8 +36,7 @@ struct RequestServerInfoMessage {
   rsi: RequestServerInfoVersion,
 }
 
-impl ButtplugMessageFinalizer for RequestServerInfoMessage {
-}
+impl ButtplugMessageFinalizer for RequestServerInfoMessage {}
 
 #[derive(Deserialize, Clone, Debug)]
 struct RequestServerInfoVersion {
@@ -65,8 +50,7 @@ struct RequestServerInfoVersion {
   api_major_version: Option<u32>,
 }
 
-impl ButtplugMessageFinalizer for RequestServerInfoVersion {
-}
+impl ButtplugMessageFinalizer for RequestServerInfoVersion {}
 
 pub struct ButtplugServerJSONSerializer {
   pub(super) message_version: OnceCell<message::ButtplugMessageSpecVersion>,
@@ -190,7 +174,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
             })
             .collect();
           vec_to_protocol_json(&self.validator, &msg_vec).map_err(|e| {
-            vec_to_protocol_json(&self.validator, &vec![ButtplugServerMessageV0::Error(e)])
+            vec_to_protocol_json(&self.validator, &[ButtplugServerMessageV0::Error(e)])
           })
         }
         ButtplugMessageSpecVersion::Version1 => {
@@ -206,7 +190,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
             })
             .collect();
           vec_to_protocol_json(&self.validator, &msg_vec).map_err(|e| {
-            vec_to_protocol_json(&self.validator, &vec![ButtplugServerMessageV1::Error(e)])
+            vec_to_protocol_json(&self.validator, &[ButtplugServerMessageV1::Error(e)])
           })
         }
         ButtplugMessageSpecVersion::Version2 => {
@@ -222,7 +206,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
             })
             .collect();
           vec_to_protocol_json(&self.validator, &msg_vec).map_err(|e| {
-            vec_to_protocol_json(&self.validator, &vec![ButtplugServerMessageV2::Error(e)])
+            vec_to_protocol_json(&self.validator, &[ButtplugServerMessageV2::Error(e)])
           })
         }
         ButtplugMessageSpecVersion::Version3 => {
@@ -238,7 +222,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
             })
             .collect();
           vec_to_protocol_json(&self.validator, &msg_vec).map_err(|e| {
-            vec_to_protocol_json(&self.validator, &vec![ButtplugServerMessageV3::Error(e)])
+            vec_to_protocol_json(&self.validator, &[ButtplugServerMessageV3::Error(e)])
           })
         }
         ButtplugMessageSpecVersion::Version4 => {
@@ -254,7 +238,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
             })
             .collect();
           vec_to_protocol_json(&self.validator, &msg_vec).map_err(|e| {
-            vec_to_protocol_json(&self.validator, &vec![ButtplugServerMessageV4::Error(e)])
+            vec_to_protocol_json(&self.validator, &[ButtplugServerMessageV4::Error(e)])
           })
         }
       };
@@ -422,9 +406,10 @@ mod test {
         }]
     "#;
     let serializer = ButtplugServerJSONSerializer::default();
-    assert!(matches!(
-      serializer.deserialize(&ButtplugSerializedMessage::Text(json.to_owned())),
-      Err(_)
-    ));
+    assert!(
+      serializer
+        .deserialize(&ButtplugSerializedMessage::Text(json.to_owned()))
+        .is_err()
+    );
   }
 }

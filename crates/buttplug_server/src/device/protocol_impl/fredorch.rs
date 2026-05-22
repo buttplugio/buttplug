@@ -8,19 +8,13 @@
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
   protocol::{
-    ProtocolHandler,
-    ProtocolIdentifier,
-    ProtocolInitializer,
-    generic_protocol_initializer_setup,
+    ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::{errors::ButtplugDeviceError, util::async_manager};
 use buttplug_server_device_config::{
-  Endpoint,
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  Endpoint, ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 use futures::FutureExt;
 use std::{
@@ -318,7 +312,7 @@ impl ProtocolHandler for Fredorch {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // If we ever get oscillate with range, these should be loaded from the last set range
-    let min_pos = if speed == 0 { 0 } else { 0 };
+    let min_pos = 0;
     let max_pos = if speed == 0 { 0 } else { 15 };
     let mut data: Vec<u8> = vec![
       0x01,

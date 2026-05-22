@@ -17,25 +17,16 @@ use buttplug_core::message::{InputReadingV4, InputType, InputTypeReading, InputV
 use buttplug_server_device_config::Endpoint;
 
 use buttplug_server_device_config::{
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 
 use crate::device::{
   hardware::{
-    Hardware,
-    HardwareCommand,
-    HardwareEvent,
-    HardwareSubscribeCmd,
-    HardwareUnsubscribeCmd,
+    Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd,
     HardwareWriteCmd,
   },
   protocol::{
-    ProtocolHandler,
-    ProtocolIdentifier,
-    ProtocolInitializer,
-    generic_protocol_initializer_setup,
+    ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup,
   },
 };
 
@@ -113,8 +104,10 @@ impl ProtocolInitializer for GalakuInitializer {
     hardware: Arc<Hardware>,
     def: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let mut protocol = Galaku::default();
-    protocol.is_caiping_pump_device = false;
+    let mut protocol = Galaku {
+      is_caiping_pump_device: false,
+      ..Default::default()
+    };
     if hardware.name() == "AC695X_1(BLE)" {
       protocol.is_caiping_pump_device = true;
     }

@@ -8,15 +8,8 @@
 mod util;
 
 use buttplug_core::message::{
-  BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-  BUTTPLUG_CURRENT_API_MINOR_VERSION,
-  ButtplugServerMessageV4,
-  OutputCommand,
-  OutputCmdV4,
-  OutputValue,
-  RequestServerInfoV4,
-  StartScanningV0,
-  StopCmdV4,
+  BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION, ButtplugServerMessageV4,
+  OutputCmdV4, OutputCommand, OutputValue, RequestServerInfoV4, StartScanningV0, StopCmdV4,
 };
 use buttplug_server::message::ButtplugClientMessageVariant;
 use futures::{StreamExt, pin_mut};
@@ -60,18 +53,22 @@ async fn test_simulated_1vibe_observation() {
 
   // Wait for DeviceList event to get device_index
   let device_index = loop {
-    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await {
-      if let Some((&idx, _)) = dl.devices().iter().next() {
-        break idx;
-      }
+    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await
+      && let Some((&idx, _)) = dl.devices().iter().next()
+    {
+      break idx;
     }
   };
 
   // Send vibrate command at value 50
   server
     .parse_message(ButtplugClientMessageVariant::V4(
-      OutputCmdV4::new(device_index, 0, OutputCommand::Vibrate(OutputValue::new(50)))
-        .into(),
+      OutputCmdV4::new(
+        device_index,
+        0,
+        OutputCommand::Vibrate(OutputValue::new(50)),
+      )
+      .into(),
     ))
     .await
     .unwrap();
@@ -124,18 +121,22 @@ async fn test_simulated_2vibe_observation() {
 
   // Wait for DeviceList event to get device_index
   let device_index = loop {
-    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await {
-      if let Some((&idx, _)) = dl.devices().iter().next() {
-        break idx;
-      }
+    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await
+      && let Some((&idx, _)) = dl.devices().iter().next()
+    {
+      break idx;
     }
   };
 
   // Send vibrate command to feature 0 at value 30
   server
     .parse_message(ButtplugClientMessageVariant::V4(
-      OutputCmdV4::new(device_index, 0, OutputCommand::Vibrate(OutputValue::new(30)))
-        .into(),
+      OutputCmdV4::new(
+        device_index,
+        0,
+        OutputCommand::Vibrate(OutputValue::new(30)),
+      )
+      .into(),
     ))
     .await
     .unwrap();
@@ -153,8 +154,12 @@ async fn test_simulated_2vibe_observation() {
   // Send vibrate command to feature 1 at value 70
   server
     .parse_message(ButtplugClientMessageVariant::V4(
-      OutputCmdV4::new(device_index, 1, OutputCommand::Vibrate(OutputValue::new(70)))
-        .into(),
+      OutputCmdV4::new(
+        device_index,
+        1,
+        OutputCommand::Vibrate(OutputValue::new(70)),
+      )
+      .into(),
     ))
     .await
     .unwrap();
@@ -206,18 +211,17 @@ async fn test_simulated_rotator_observation() {
 
   // Wait for DeviceList event to get device_index
   let device_index = loop {
-    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await {
-      if let Some((&idx, _)) = dl.devices().iter().next() {
-        break idx;
-      }
+    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await
+      && let Some((&idx, _)) = dl.devices().iter().next()
+    {
+      break idx;
     }
   };
 
   // Send rotate command at value 50 to feature 0 (the rotator's rotate feature)
   server
     .parse_message(ButtplugClientMessageVariant::V4(
-      OutputCmdV4::new(device_index, 0, OutputCommand::Rotate(OutputValue::new(50)))
-        .into(),
+      OutputCmdV4::new(device_index, 0, OutputCommand::Rotate(OutputValue::new(50))).into(),
     ))
     .await
     .unwrap();
@@ -237,7 +241,13 @@ async fn test_simulated_rotator_observation() {
 async fn test_simulated_diverse_archetypes() {
   // AC7.2: Verify various simulated archetypes can be created and discovered
   // (detailed feature testing happens with 1vibe tests)
-  for archetype in &["simulated-1vibe", "simulated-2vibe", "simulated-rotator", "simulated-oscillator", "simulated-stroker"] {
+  for archetype in &[
+    "simulated-1vibe",
+    "simulated-2vibe",
+    "simulated-rotator",
+    "simulated-oscillator",
+    "simulated-stroker",
+  ] {
     let server = test_server_with_simulated_device(archetype, None);
 
     // Handshake
@@ -266,7 +276,11 @@ async fn test_simulated_diverse_archetypes() {
     // Verify the device appears
     loop {
       if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await {
-        assert!(!dl.devices().is_empty(), "Archetype {} should be discovered", archetype);
+        assert!(
+          !dl.devices().is_empty(),
+          "Archetype {} should be discovered",
+          archetype
+        );
         break;
       }
     }
@@ -309,18 +323,22 @@ async fn test_simulated_stop_produces_zero_observation() {
 
   // Wait for DeviceList event to get device_index
   let device_index = loop {
-    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await {
-      if let Some((&idx, _)) = dl.devices().iter().next() {
-        break idx;
-      }
+    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await
+      && let Some((&idx, _)) = dl.devices().iter().next()
+    {
+      break idx;
     }
   };
 
   // Send vibrate command at value 50
   server
     .parse_message(ButtplugClientMessageVariant::V4(
-      OutputCmdV4::new(device_index, 0, OutputCommand::Vibrate(OutputValue::new(50)))
-        .into(),
+      OutputCmdV4::new(
+        device_index,
+        0,
+        OutputCommand::Vibrate(OutputValue::new(50)),
+      )
+      .into(),
     ))
     .await
     .unwrap();
@@ -383,7 +401,10 @@ async fn test_simulated_device_appears_on_scan() {
   // Wait for DeviceList event - device should appear
   loop {
     if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await {
-      assert!(!dl.devices().is_empty(), "Device should appear in DeviceList after scanning");
+      assert!(
+        !dl.devices().is_empty(),
+        "Device should appear in DeviceList after scanning"
+      );
       break;
     }
   }

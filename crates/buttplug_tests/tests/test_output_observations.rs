@@ -8,15 +8,8 @@
 mod util;
 
 use buttplug_core::message::{
-  BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-  BUTTPLUG_CURRENT_API_MINOR_VERSION,
-  ButtplugServerMessageV4,
-  OutputCommand,
-  OutputCmdV4,
-  OutputValue,
-  RequestServerInfoV4,
-  StartScanningV0,
-  StopCmdV4,
+  BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION, ButtplugServerMessageV4,
+  OutputCmdV4, OutputCommand, OutputValue, RequestServerInfoV4, StartScanningV0, StopCmdV4,
 };
 use buttplug_server::message::ButtplugClientMessageVariant;
 use futures::{StreamExt, pin_mut};
@@ -61,18 +54,22 @@ async fn test_ac2_1_observation_emission() {
 
   // Wait for DeviceList event to get device_index
   let device_index = loop {
-    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await {
-      if let Some((&idx, _)) = dl.devices().iter().next() {
-        break idx;
-      }
+    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await
+      && let Some((&idx, _)) = dl.devices().iter().next()
+    {
+      break idx;
     }
   };
 
   // Send vibrate command at value 50
   server
     .parse_message(ButtplugClientMessageVariant::V4(
-      OutputCmdV4::new(device_index, 0, OutputCommand::Vibrate(OutputValue::new(50)))
-        .into(),
+      OutputCmdV4::new(
+        device_index,
+        0,
+        OutputCommand::Vibrate(OutputValue::new(50)),
+      )
+      .into(),
     ))
     .await
     .unwrap();
@@ -124,18 +121,22 @@ async fn test_ac2_2_observation_dedup() {
     .unwrap();
 
   let device_index = loop {
-    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await {
-      if let Some((&idx, _)) = dl.devices().iter().next() {
-        break idx;
-      }
+    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await
+      && let Some((&idx, _)) = dl.devices().iter().next()
+    {
+      break idx;
     }
   };
 
   // Send first vibrate command at value 50
   server
     .parse_message(ButtplugClientMessageVariant::V4(
-      OutputCmdV4::new(device_index, 0, OutputCommand::Vibrate(OutputValue::new(50)))
-        .into(),
+      OutputCmdV4::new(
+        device_index,
+        0,
+        OutputCommand::Vibrate(OutputValue::new(50)),
+      )
+      .into(),
     ))
     .await
     .unwrap();
@@ -151,8 +152,12 @@ async fn test_ac2_2_observation_dedup() {
   // Send same vibrate command again at value 50
   server
     .parse_message(ButtplugClientMessageVariant::V4(
-      OutputCmdV4::new(device_index, 0, OutputCommand::Vibrate(OutputValue::new(50)))
-        .into(),
+      OutputCmdV4::new(
+        device_index,
+        0,
+        OutputCommand::Vibrate(OutputValue::new(50)),
+      )
+      .into(),
     ))
     .await
     .unwrap();
@@ -202,18 +207,22 @@ async fn test_ac2_3_observation_before_protocol() {
     .unwrap();
 
   let device_index = loop {
-    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await {
-      if let Some((&idx, _)) = dl.devices().iter().next() {
-        break idx;
-      }
+    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await
+      && let Some((&idx, _)) = dl.devices().iter().next()
+    {
+      break idx;
     }
   };
 
   // Send vibrate command
   server
     .parse_message(ButtplugClientMessageVariant::V4(
-      OutputCmdV4::new(device_index, 0, OutputCommand::Vibrate(OutputValue::new(75)))
-        .into(),
+      OutputCmdV4::new(
+        device_index,
+        0,
+        OutputCommand::Vibrate(OutputValue::new(75)),
+      )
+      .into(),
     ))
     .await
     .unwrap();
@@ -263,18 +272,22 @@ async fn test_ac3_1_stop_as_zero() {
     .unwrap();
 
   let device_index = loop {
-    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await {
-      if let Some((&idx, _)) = dl.devices().iter().next() {
-        break idx;
-      }
+    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await
+      && let Some((&idx, _)) = dl.devices().iter().next()
+    {
+      break idx;
     }
   };
 
   // Send vibrate command at value 50
   server
     .parse_message(ButtplugClientMessageVariant::V4(
-      OutputCmdV4::new(device_index, 0, OutputCommand::Vibrate(OutputValue::new(50)))
-        .into(),
+      OutputCmdV4::new(
+        device_index,
+        0,
+        OutputCommand::Vibrate(OutputValue::new(50)),
+      )
+      .into(),
     ))
     .await
     .unwrap();
@@ -340,18 +353,22 @@ async fn test_ac3_2_stop_all_devices() {
     .unwrap();
 
   let device_index = loop {
-    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await {
-      if let Some((&idx, _)) = dl.devices().iter().next() {
-        break idx;
-      }
+    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await
+      && let Some((&idx, _)) = dl.devices().iter().next()
+    {
+      break idx;
     }
   };
 
   // Send vibrate command
   server
     .parse_message(ButtplugClientMessageVariant::V4(
-      OutputCmdV4::new(device_index, 0, OutputCommand::Vibrate(OutputValue::new(50)))
-        .into(),
+      OutputCmdV4::new(
+        device_index,
+        0,
+        OutputCommand::Vibrate(OutputValue::new(50)),
+      )
+      .into(),
     ))
     .await
     .unwrap();
@@ -414,18 +431,22 @@ async fn test_ac3_3_stop_dedup() {
     .unwrap();
 
   let device_index = loop {
-    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await {
-      if let Some((&idx, _)) = dl.devices().iter().next() {
-        break idx;
-      }
+    if let Some(ButtplugServerMessageV4::DeviceList(dl)) = event_stream.next().await
+      && let Some((&idx, _)) = dl.devices().iter().next()
+    {
+      break idx;
     }
   };
 
   // Test 1: Send a non-zero command, verify observation appears
   server
     .parse_message(ButtplugClientMessageVariant::V4(
-      OutputCmdV4::new(device_index, 0, OutputCommand::Vibrate(OutputValue::new(50)))
-        .into(),
+      OutputCmdV4::new(
+        device_index,
+        0,
+        OutputCommand::Vibrate(OutputValue::new(50)),
+      )
+      .into(),
     ))
     .await
     .unwrap();

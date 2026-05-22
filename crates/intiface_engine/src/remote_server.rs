@@ -5,9 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 use buttplug_core::{
-  connector::ButtplugConnector,
-  errors::ButtplugError,
-  message::ButtplugServerMessageV4,
+  connector::ButtplugConnector, errors::ButtplugError, message::ButtplugServerMessageV4,
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server::{
@@ -160,11 +158,19 @@ async fn run_server<ConnectorType>(
             match server_clone.parse_message(client_message.clone()).await {
               Ok(ret_msg) => {
                 // Only send event if we just connected. Sucks to check it on every message but the boolean check should be quick.
-                if !connected && server_clone.connected() {
-                  if remote_event_sender_clone.receiver_count() > 0
-                    && remote_event_sender_clone.send(ButtplugRemoteServerEvent::ClientConnected(server_clone.client_name().unwrap_or("Buttplug Client (No name specified)".to_owned()).clone())).is_err() {
-                      error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
-                  }
+                if !connected
+                  && server_clone.connected()
+                  && remote_event_sender_clone.receiver_count() > 0
+                  && remote_event_sender_clone
+                    .send(ButtplugRemoteServerEvent::ClientConnected(
+                      server_clone
+                        .client_name()
+                        .unwrap_or("Buttplug Client (No name specified)".to_owned())
+                        .clone(),
+                    ))
+                    .is_err()
+                {
+                  error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
                 }
                 if connector_clone.send(ret_msg).await.is_err() {
                   error!("Cannot send reply to server, dropping and assuming remote server thread has exited.");

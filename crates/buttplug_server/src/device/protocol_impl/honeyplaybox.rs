@@ -9,10 +9,7 @@ use crate::device::hardware::HardwareReadCmd;
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
   protocol::{
-    ProtocolHandler,
-    ProtocolIdentifier,
-    ProtocolInitializer,
-    generic_protocol_initializer_setup,
+    ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
@@ -21,9 +18,7 @@ use buttplug_core::message::{InputReadingV4, InputTypeReading, InputValue};
 use buttplug_core::util::async_manager;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 use futures::FutureExt;
 use futures_util::future::BoxFuture;
@@ -161,46 +156,46 @@ async fn hpb_keepalive(
 ) {
   loop {
     {
-      if let Ok(mut last_time) = last_send.try_write() {
-        if last_time.elapsed().as_millis() >= HONEY_PLAYBOX_KEEPALIVE_DELAY as u128 {
-          *last_time = Instant::now();
-          let mut groups = vec![];
-          for i in 0..last_command.len() {
-            groups.push(VibrateGroup {
-              work_mode: 1,
-              motor_pos: i as u8,
-              time_100ms: 60,
-              freq: 0,
-              strength: last_command[i].load(Ordering::Relaxed),
-            });
-          }
+      if let Ok(mut last_time) = last_send.try_write()
+        && last_time.elapsed().as_millis() >= HONEY_PLAYBOX_KEEPALIVE_DELAY as u128
+      {
+        *last_time = Instant::now();
+        let mut groups = vec![];
+        for i in 0..last_command.len() {
+          groups.push(VibrateGroup {
+            work_mode: 1,
+            motor_pos: i as u8,
+            time_100ms: 60,
+            freq: 0,
+            strength: last_command[i].load(Ordering::Relaxed),
+          });
+        }
 
-          let payload = build_vibrate_data(&random_key, &groups)
-            .map_err(|e| ButtplugDeviceError::ProtocolSpecificError("HoneyPlayBox".into(), e));
-          packet_id.store(
-            packet_id.load(Ordering::Relaxed).wrapping_add(1),
-            Ordering::Relaxed,
-          );
-          let data = FrameCodec::build_frame(
-            0xB1,
-            0x03,
-            &payload.unwrap(),
-            packet_id.load(Ordering::Relaxed),
-          );
+        let payload = build_vibrate_data(&random_key, &groups)
+          .map_err(|e| ButtplugDeviceError::ProtocolSpecificError("HoneyPlayBox".into(), e));
+        packet_id.store(
+          packet_id.load(Ordering::Relaxed).wrapping_add(1),
+          Ordering::Relaxed,
+        );
+        let data = FrameCodec::build_frame(
+          0xB1,
+          0x03,
+          &payload.unwrap(),
+          packet_id.load(Ordering::Relaxed),
+        );
 
-          trace!("HoneyPlayBox: sending keepalive");
-          if device
-            .write_value(&HardwareWriteCmd::new(
-              &[HONEY_PLAYBOX_PROTOCOL_UUID],
-              Endpoint::Tx,
-              data,
-              true,
-            ))
-            .await
-            .is_err()
-          {
-            return;
-          }
+        trace!("HoneyPlayBox: sending keepalive");
+        if device
+          .write_value(&HardwareWriteCmd::new(
+            &[HONEY_PLAYBOX_PROTOCOL_UUID],
+            Endpoint::Tx,
+            data,
+            true,
+          ))
+          .await
+          .is_err()
+        {
+          return;
         }
       }
     }
@@ -302,7 +297,7 @@ impl ProtocolHandler for HoneyPlayBox {
     _feature_id: Uuid,
     speed: i32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.send_command(feature_index, speed.abs() as u32)
+    self.send_command(feature_index, speed.unsigned_abs())
   }
 
   fn handle_battery_level_cmd(
@@ -370,7 +365,7 @@ fn build_vibrate_data(random: &[u8], groups: &[VibrateGroup]) -> Result<Vec<u8>,
   hasher.update([(data_len >> 8) as u8]);
   hasher.update([(data_len & 0xFF) as u8]);
   hasher.update(&data);
-  hasher.update(&SECRET);
+  hasher.update(SECRET);
   hasher.update(random);
   let digest = hasher.finalize();
   let md58 = &digest.as_slice()[..8];
@@ -480,6 +475,12 @@ impl FrameCodec {
 
 pub struct FrameCollector {
   buffer: Vec<u8>,
+}
+
+impl Default for FrameCollector {
+  fn default() -> Self {
+    Self::new()
+  }
 }
 
 impl FrameCollector {

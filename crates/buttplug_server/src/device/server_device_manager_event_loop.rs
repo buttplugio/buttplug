@@ -5,15 +5,15 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::message::{ButtplugMessage, ButtplugServerMessageV4, DeviceListV4, ScanningFinishedV0};
+use buttplug_core::message::{
+  ButtplugMessage, ButtplugServerMessageV4, DeviceListV4, ScanningFinishedV0,
+};
 use buttplug_server_device_config::DeviceConfigurationManager;
 use tracing::info_span;
 
 use super::server_device_manager::DeviceManagerCommand;
 use crate::device::{
-  DeviceHandle,
-  InternalDeviceEvent,
-  OutputObservation,
+  DeviceHandle, InternalDeviceEvent, OutputObservation,
   device_handle::build_device_handle,
   hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
   protocol::ProtocolManager,
@@ -70,6 +70,7 @@ pub(super) struct ServerDeviceManagerEventLoop {
 }
 
 impl ServerDeviceManagerEventLoop {
+  #[allow(clippy::too_many_arguments)]
   pub fn new(
     comm_managers: Vec<Box<dyn HardwareCommunicationManager>>,
     device_config_manager: Arc<DeviceConfigurationManager>,
@@ -263,11 +264,8 @@ impl ServerDeviceManagerEventLoop {
         // If we have no identifiers, then there's nothing to do here. Throw an error.
         if protocol_specializers.is_empty() {
           debug!(
-            "{}",
-            format!(
-              "No viable protocols for hardware {:?}, ignoring.",
-              creator.specifier()
-            )
+            "No viable protocols for hardware {:?}, ignoring.",
+            creator.specifier()
           );
           return;
         }

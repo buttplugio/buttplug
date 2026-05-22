@@ -12,10 +12,7 @@ pub mod connector;
 use super::{TestDeviceIdentifier, TestHardwareEvent};
 use buttplug_server::device::hardware::HardwareCommand;
 use buttplug_server::message::{
-  RotationSubcommandV1,
-  ScalarSubcommandV3,
-  VectorSubcommandV1,
-  VibrateSubcommandV1,
+  RotationSubcommandV1, ScalarSubcommandV3, VectorSubcommandV1, VibrateSubcommandV1,
 };
 use serde::{Deserialize, Serialize};
 
@@ -57,6 +54,7 @@ enum TestClientCommand {
     run_async: bool,
   },
   Stop,
+  #[allow(clippy::upper_case_acronyms)]
   RSSI,
 }
 

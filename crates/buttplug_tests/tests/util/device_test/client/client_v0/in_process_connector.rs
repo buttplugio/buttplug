@@ -12,8 +12,7 @@ use buttplug_core::{
   errors::{ButtplugError, ButtplugMessageError},
 };
 use buttplug_server::{
-  ButtplugServer,
-  ButtplugServerBuilder,
+  ButtplugServer, ButtplugServerBuilder,
   message::{ButtplugClientMessageV0, ButtplugServerMessageV0, ButtplugServerMessageVariant},
 };
 use futures::{
@@ -65,7 +64,6 @@ impl ButtplugInProcessClientConnectorBuilder {
 /// develop (and we highly recommend developing that way), and also an easy way to get users up and
 /// running as quickly as possible, we recommend also including some sort of IPC Connector in order
 /// for your application to connect to newer servers when they come out.
-
 pub struct ButtplugInProcessClientConnector {
   /// Internal server object for the embedded connector.
   server: Arc<ButtplugServer>,

@@ -11,9 +11,7 @@ use buttplug_core::{
   message::{InputReadingV4, OutputType},
 };
 use buttplug_server_device_config::{
-  Endpoint,
-  ProtocolCommunicationSpecifier,
-  UserDeviceIdentifier,
+  Endpoint, ProtocolCommunicationSpecifier, UserDeviceIdentifier,
 };
 use futures::future::{BoxFuture, FutureExt};
 use std::sync::{
@@ -106,7 +104,7 @@ impl ProtocolInitializer for LovenseConnectServiceInitializer {
 
       hardware
         .write_value(&HardwareWriteCmd::new(
-          &vec![LOVENSE_CONNECT_UUID],
+          &[LOVENSE_CONNECT_UUID],
           Endpoint::Tx,
           lovense_cmd,
           false,
@@ -159,13 +157,7 @@ impl ProtocolHandler for LovenseConnectService {
       .as_bytes()
       .to_vec();
       hardware_cmds.push(
-        HardwareWriteCmd::new(
-          &vec![LOVENSE_CONNECT_UUID],
-          Endpoint::Tx,
-          lovense_cmd,
-          false,
-        )
-        .into(),
+        HardwareWriteCmd::new(&[LOVENSE_CONNECT_UUID], Endpoint::Tx, lovense_cmd, false).into(),
       );
       Ok(hardware_cmds)
     } else if self.thusting_count != 0
@@ -179,13 +171,7 @@ impl ProtocolHandler for LovenseConnectService {
       .as_bytes()
       .to_vec();
       hardware_cmds.push(
-        HardwareWriteCmd::new(
-          &vec![LOVENSE_CONNECT_UUID],
-          Endpoint::Tx,
-          lovense_cmd,
-          false,
-        )
-        .into(),
+        HardwareWriteCmd::new(&[LOVENSE_CONNECT_UUID], Endpoint::Tx, lovense_cmd, false).into(),
       );
       Ok(hardware_cmds)
     } else if cmd.output_command().as_output_type() == OutputType::Oscillate {
@@ -205,13 +191,7 @@ impl ProtocolHandler for LovenseConnectService {
       .to_vec();
 
       hardware_cmds.push(
-        HardwareWriteCmd::new(
-          &vec![LOVENSE_CONNECT_UUID],
-          Endpoint::Tx,
-          lovense_cmd,
-          false,
-        )
-        .into(),
+        HardwareWriteCmd::new(&[LOVENSE_CONNECT_UUID], Endpoint::Tx, lovense_cmd, false).into(),
       );
       Ok(hardware_cmds)
     } else {
@@ -231,13 +211,7 @@ impl ProtocolHandler for LovenseConnectService {
       .to_vec();
     let clockwise = speed > 0;
     hardware_cmds.push(
-      HardwareWriteCmd::new(
-        &vec![LOVENSE_CONNECT_UUID],
-        Endpoint::Tx,
-        lovense_cmd,
-        false,
-      )
-      .into(),
+      HardwareWriteCmd::new(&[LOVENSE_CONNECT_UUID], Endpoint::Tx, lovense_cmd, false).into(),
     );
     let dir = self.rotation_direction.load(Ordering::Relaxed);
     // TODO Should we store speed and direction as an option for rotation caching? This is weird.
@@ -245,7 +219,7 @@ impl ProtocolHandler for LovenseConnectService {
       self.rotation_direction.store(clockwise, Ordering::Relaxed);
       hardware_cmds.push(
         HardwareWriteCmd::new(
-          &vec![LOVENSE_CONNECT_UUID],
+          &[LOVENSE_CONNECT_UUID],
           Endpoint::Tx,
           b"RotateChange?".to_vec(),
           false,

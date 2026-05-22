@@ -98,11 +98,11 @@
 mod device_handle;
 mod device_task;
 pub mod hardware;
+mod output_observation;
 pub mod protocol;
 pub mod protocol_impl;
 mod server_device_manager;
 mod server_device_manager_event_loop;
-mod output_observation;
 
 pub use device_handle::{DeviceCommand, DeviceEvent, DeviceHandle};
 pub use output_observation::OutputObservation;
@@ -113,6 +113,7 @@ use buttplug_server_device_config::UserDeviceIdentifier;
 /// Internal event enum for device manager communication.
 /// Used by DeviceHandle to send events to the device manager event loop.
 #[derive(Debug)]
+#[allow(clippy::large_enum_variant)]
 pub(crate) enum InternalDeviceEvent {
   /// A new device has connected and is ready
   Connected(DeviceHandle),

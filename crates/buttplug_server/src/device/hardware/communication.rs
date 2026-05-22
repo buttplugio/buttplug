@@ -132,6 +132,6 @@ impl<T: TimedRetryCommunicationManagerImpl> Drop for TimedRetryCommunicationMana
   fn drop(&mut self) {
     // We set the cancellation token without doing anything with the future, so we're fine to ignore
     // the return.
-    let _ = self.stop_scanning();
+    std::mem::drop(self.stop_scanning());
   }
 }

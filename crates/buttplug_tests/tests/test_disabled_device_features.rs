@@ -9,14 +9,8 @@ mod util;
 
 use buttplug_client::ButtplugClientEvent;
 use buttplug_core::message::{
-  BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-  BUTTPLUG_CURRENT_API_MINOR_VERSION,
-  ButtplugServerMessageV4,
-  OutputCmdV4,
-  OutputCommand,
-  OutputHwPositionWithDuration,
-  OutputType,
-  RequestServerInfoV4,
+  BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION, ButtplugServerMessageV4,
+  OutputCmdV4, OutputCommand, OutputHwPositionWithDuration, OutputType, RequestServerInfoV4,
   StartScanningV0,
 };
 use buttplug_server::message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant};
@@ -122,17 +116,17 @@ async fn test_disabled_output_type_command_rejected() {
   // Wait for the device to appear in a DeviceList update.
   let mut device_index = None;
   while let Some(msg) = recv.next().await {
-    if let ButtplugServerMessageVariant::V4(ButtplugServerMessageV4::DeviceList(list)) = msg {
-      if !list.devices().is_empty() {
-        device_index = Some(
-          *list
-            .devices()
-            .keys()
-            .next()
-            .expect("Checked non-empty above"),
-        );
-        break;
-      }
+    if let ButtplugServerMessageVariant::V4(ButtplugServerMessageV4::DeviceList(list)) = msg
+      && !list.devices().is_empty()
+    {
+      device_index = Some(
+        *list
+          .devices()
+          .keys()
+          .next()
+          .expect("Checked non-empty above"),
+      );
+      break;
     }
   }
 

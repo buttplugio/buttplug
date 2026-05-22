@@ -12,8 +12,7 @@ use buttplug_core::{
   errors::{ButtplugError, ButtplugMessageError},
 };
 use buttplug_server::{
-  ButtplugServer,
-  ButtplugServerBuilder,
+  ButtplugServer, ButtplugServerBuilder,
   message::{ButtplugClientMessageV3, ButtplugServerMessageV3, ButtplugServerMessageVariant},
 };
 use futures::{
@@ -122,10 +121,10 @@ impl ButtplugConnector<ButtplugClientMessageV3, ButtplugServerMessageV3>
             // in-process conversion, we can unwrap because we know our
             // try_into() will always succeed (which may not be the case with
             // remote connections that have different spec versions).
-            if let ButtplugServerMessageVariant::V3(v3_msg) = event {
-              if send.send(v3_msg).await.is_err() {
-                break;
-              }
+            if let ButtplugServerMessageVariant::V3(v3_msg) = event
+              && send.send(v3_msg).await.is_err()
+            {
+              break;
             }
           }
           info!("Stopping In Process Client Connector Event Sender Loop, due to channel receiver being dropped.");

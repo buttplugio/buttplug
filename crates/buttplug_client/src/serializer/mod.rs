@@ -6,14 +6,9 @@
 // for full license information.
 
 use buttplug_core::message::{
-  ButtplugClientMessageV4,
-  ButtplugMessage,
-  ButtplugMessageFinalizer,
-  ButtplugServerMessageV4,
+  ButtplugClientMessageV4, ButtplugMessage, ButtplugMessageFinalizer, ButtplugServerMessageV4,
   serializer::{
-    ButtplugMessageSerializer,
-    ButtplugSerializedMessage,
-    ButtplugSerializerError,
+    ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugSerializerError,
     json_serializer::{create_message_validator, deserialize_to_message, vec_to_protocol_json},
   },
 };
@@ -54,7 +49,7 @@ impl ButtplugClientJSONSerializerImpl {
   {
     ButtplugSerializedMessage::Text(match vec_to_protocol_json(&self.validator, msg) {
       Ok(m) => m,
-      Err(e) => match vec_to_protocol_json(&self.validator, &vec![e]) {
+      Err(e) => match vec_to_protocol_json(&self.validator, &[e]) {
         Ok(e) => {
           error!("Error serializing message: {:?}", e);
           e
@@ -96,9 +91,7 @@ impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
 mod test {
   use super::*;
   use buttplug_core::message::{
-    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-    BUTTPLUG_CURRENT_API_MINOR_VERSION,
-    RequestServerInfoV4,
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION, RequestServerInfoV4,
   };
 
   #[test]
@@ -124,19 +117,17 @@ mod test {
       "[{\"Ok\":{\"NotAField\":\"NotAValue\",\"Id\":1}}]",
     ];
     let serializer = ButtplugClientJSONSerializer::default();
-    let _ = serializer.serialize(&vec![
-      RequestServerInfoV4::new(
-        "test client",
-        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-        BUTTPLUG_CURRENT_API_MINOR_VERSION,
-      )
-      .into(),
-    ]);
+    let _ = serializer.serialize(&[RequestServerInfoV4::new(
+      "test client",
+      BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+      BUTTPLUG_CURRENT_API_MINOR_VERSION,
+    )
+    .into()]);
     for msg in incorrect_incoming_messages {
       let res = serializer.deserialize(&ButtplugSerializedMessage::Text(msg.to_owned()));
       assert!(res.is_err(), "{} should be an error", msg);
       if let Err(ButtplugSerializerError::MessageSpecVersionNotReceived) = res {
-        assert!(false, "Wrong error!");
+        panic!("Wrong error!");
       }
     }
   }

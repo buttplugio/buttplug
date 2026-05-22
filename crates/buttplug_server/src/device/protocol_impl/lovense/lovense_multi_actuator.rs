@@ -75,7 +75,7 @@ impl ProtocolHandler for LovenseMultiActuator {
     _feature_id: Uuid,
     speed: i32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.vibrator_values[feature_index as usize].store(speed.abs() as u32, Ordering::Relaxed);
+    self.vibrator_values[feature_index as usize].store(speed.unsigned_abs(), Ordering::Relaxed);
     self.form_packet()
   }
 

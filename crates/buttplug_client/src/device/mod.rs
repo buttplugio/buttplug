@@ -6,6 +6,7 @@
 // for full license information.
 
 mod command;
+#[allow(clippy::module_inception)]
 mod device;
 mod feature;
 

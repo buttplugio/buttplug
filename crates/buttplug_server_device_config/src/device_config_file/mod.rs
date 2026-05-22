@@ -295,8 +295,7 @@ mod test {
 
   #[test]
   fn test_config_file_parsing() {
-    load_protocol_config_from_json::<BaseConfigFile>(&DEVICE_CONFIGURATION_JSON.to_owned(), true)
-      .unwrap();
+    load_protocol_config_from_json::<BaseConfigFile>(DEVICE_CONFIGURATION_JSON, true).unwrap();
   }
 
   #[test]

@@ -9,12 +9,8 @@
 // 3. Run: cargo run --bin application
 
 use buttplug_client::{
-  ButtplugClient,
-  ButtplugClientDevice,
-  ButtplugClientError,
-  ButtplugClientEvent,
-  connector::ButtplugRemoteClientConnector,
-  device::ClientDeviceOutputCommand,
+  ButtplugClient, ButtplugClientDevice, ButtplugClientError, ButtplugClientEvent,
+  connector::ButtplugRemoteClientConnector, device::ClientDeviceOutputCommand,
   serializer::ButtplugClientJSONSerializer,
 };
 use buttplug_core::message::{InputType, OutputType};
@@ -181,9 +177,9 @@ async fn main() -> anyhow::Result<()> {
       continue;
     }
 
-    if input.starts_with("v ") {
+    if let Some(stripped) = input.strip_prefix("v ") {
       // Vibrate command
-      if let Ok(percent) = input[2..].parse::<u32>() {
+      if let Ok(percent) = stripped.parse::<u32>() {
         if percent <= 100 {
           let intensity = percent as f64 / 100.0;
           for device in &devices {

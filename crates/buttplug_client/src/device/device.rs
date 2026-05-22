@@ -270,7 +270,7 @@ impl ButtplugClientDevice {
     async move {
       let val = fut.await?;
       if let InputTypeReading::Rssi(x) = val {
-        Ok(x.data().into())
+        Ok(x.data())
       } else {
         Err(ButtplugClientError::ButtplugError(
           ButtplugDeviceError::DeviceNoInputError(val.into()).into(),
@@ -317,8 +317,7 @@ impl ButtplugClientDevice {
   }
 }
 
-impl Eq for ButtplugClientDevice {
-}
+impl Eq for ButtplugClientDevice {}
 
 impl PartialEq for ButtplugClientDevice {
   fn eq(&self, other: &Self) -> bool {

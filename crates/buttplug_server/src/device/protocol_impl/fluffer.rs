@@ -13,10 +13,7 @@ use aes::Aes128;
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::{
-  Endpoint,
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  Endpoint, ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 use ecb::cipher::block_padding::Pkcs7;
 use ecb::cipher::{BlockDecryptMut, BlockEncryptMut, KeyInit};
@@ -149,7 +146,7 @@ impl ProtocolInitializer for FlufferInitializer {
       ))
       .await?;
 
-    if self.advertisment_data.len() > 0 {
+    if !self.advertisment_data.is_empty() {
       // custom logic to compute 4 bytes from the advBytes
       let adv4bytes = extract_adv(self.advertisment_data.as_slice());
 
@@ -179,35 +176,33 @@ impl ProtocolInitializer for FlufferInitializer {
         ))
         .await?;
 
-      loop {
-        let event = event_receiver.recv().await;
-        return if let Ok(HardwareEvent::Notification(_, _, n)) = event {
-          let decoded = decrypt(n);
-          if decoded.eq(&vec![0xa5, 0x01, 0x01, 0x00]) {
-            debug!("Fluffer authenticated!");
+      let event = event_receiver.recv().await;
+      if let Ok(HardwareEvent::Notification(_, _, n)) = event {
+        let decoded = decrypt(n);
+        if decoded == [0xa5, 0x01, 0x01, 0x00] {
+          debug!("Fluffer authenticated!");
 
-            hardware
-              .write_value(&HardwareWriteCmd::new(
-                &[FLUFFER_PROTOCOL_UUID],
-                Endpoint::Tx,
-                encrypt(vec![0x82, 0x0E, 0x02, 0x00, 0x01]),
-                false,
-              ))
-              .await?;
-
-            Ok(Arc::new(Fluffer::default()))
-          } else {
-            Err(ButtplugDeviceError::ProtocolSpecificError(
-              "Fluffer".to_owned(),
-              "Fluffer didn't provide a valid security handshake".to_owned(),
+          hardware
+            .write_value(&HardwareWriteCmd::new(
+              &[FLUFFER_PROTOCOL_UUID],
+              Endpoint::Tx,
+              encrypt(vec![0x82, 0x0E, 0x02, 0x00, 0x01]),
+              false,
             ))
-          }
+            .await?;
+
+          Ok(Arc::new(Fluffer::default()))
         } else {
           Err(ButtplugDeviceError::ProtocolSpecificError(
             "Fluffer".to_owned(),
             "Fluffer didn't provide a valid security handshake".to_owned(),
           ))
-        };
+        }
+      } else {
+        Err(ButtplugDeviceError::ProtocolSpecificError(
+          "Fluffer".to_owned(),
+          "Fluffer didn't provide a valid security handshake".to_owned(),
+        ))
       }
     } else {
       Ok(Arc::new(Fluffer::default()))
