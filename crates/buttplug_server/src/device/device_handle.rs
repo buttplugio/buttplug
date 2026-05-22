@@ -632,9 +632,9 @@ pub(super) async fn build_device_handle(
             break;
           }
         }
-        Some(DeviceEvent::Notification(id, msg)) => {
+        Some(DeviceEvent::Notification(_, msg)) => {
           if device_event_sender
-            .send(InternalDeviceEvent::Notification(id, msg))
+            .send(InternalDeviceEvent::Notification(msg))
             .await
             .is_err()
           {

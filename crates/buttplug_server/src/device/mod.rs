@@ -117,7 +117,7 @@ pub(crate) enum InternalDeviceEvent {
   /// A new device has connected and is ready
   Connected(DeviceHandle),
   /// A device notification
-  Notification(UserDeviceIdentifier, ButtplugServerDeviceMessage),
+  Notification(ButtplugServerDeviceMessage),
   /// A device has disconnected
   Disconnected(UserDeviceIdentifier),
 }
