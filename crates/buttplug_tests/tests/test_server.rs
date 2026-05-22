@@ -11,51 +11,30 @@ use util::test_server;
 pub use util::{
   create_test_dcm,
   test_device_manager::{
-    TestDeviceCommunicationManagerBuilder,
-    TestDeviceIdentifier,
-    check_test_recv_value,
+    TestDeviceCommunicationManagerBuilder, TestDeviceIdentifier, check_test_recv_value,
   },
-  test_server_with_comm_manager,
-  test_server_with_device,
+  test_server_with_comm_manager, test_server_with_device,
 };
 
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError},
   message::{
-    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-    BUTTPLUG_CURRENT_API_MINOR_VERSION,
-    ButtplugClientMessageV4,
-    ButtplugMessage,
-    ButtplugMessageSpecVersion,
-    ButtplugServerMessageV4,
-    ErrorCode,
-    OutputCmdV4,
-    OutputCommand,
-    OutputValue,
-    PingV0,
-    RequestDeviceListV0,
-    RequestServerInfoV4,
-    ServerInfoV4,
-    StartScanningV0,
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION,
+    ButtplugClientMessageV4, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugServerMessageV4,
+    ErrorCode, OutputCmdV4, OutputCommand, OutputValue, PingV0, RequestDeviceListV0,
+    RequestServerInfoV4, ServerInfoV4, StartScanningV0,
   },
 };
 use buttplug_server::{
-  ButtplugServer,
-  ButtplugServerBuilder,
+  ButtplugServer, ButtplugServerBuilder,
   device::{
     ServerDeviceManagerBuilder,
     hardware::{HardwareCommand, HardwareWriteCmd},
   },
   message::{
-    ButtplugClientMessageV3,
-    ButtplugClientMessageVariant,
-    ButtplugServerMessageV2,
-    ButtplugServerMessageV3,
-    ButtplugServerMessageVariant,
-    RequestServerInfoV1,
-    ServerInfoV2,
-    checked_output_cmd::CheckedOutputCmdV4,
-    spec_enums::ButtplugCheckedClientMessageV4,
+    ButtplugClientMessageV3, ButtplugClientMessageVariant, ButtplugServerMessageV2,
+    ButtplugServerMessageV3, ButtplugServerMessageVariant, RequestServerInfoV1, ServerInfoV2,
+    checked_output_cmd::CheckedOutputCmdV4, spec_enums::ButtplugCheckedClientMessageV4,
   },
 };
 use futures::{Stream, StreamExt, pin_mut};
@@ -284,20 +263,20 @@ async fn test_device_stop_on_ping_timeout() {
     )),
   )
   .await;
-  /*
+
   // Wait out the ping, we should get a stop message.
-  let mut i = 0u32;
-  while command_receiver.is_empty() {
-    Delay::new(Duration::from_millis(150)).await;
-    // Breaks out of loop if we wait for too long.
-    i += 1;
-    assert!(i < 10, "Slept for too long while waiting for stop command!");
-  }
+  sleep(Duration::from_millis(300)).await;
   check_test_recv_value(
-    &command_receiver,
-    HardwareCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false)),
-  );
-   */
+    &Duration::from_millis(150),
+    &mut device,
+    HardwareCommand::Write(HardwareWriteCmd::new(
+      &[Uuid::nil()],
+      Endpoint::Tx,
+      vec![0xF1, 0],
+      false,
+    )),
+  )
+  .await;
 }
 
 #[tokio::test]
@@ -521,10 +500,7 @@ async fn test_device_list_message_id_on_device_event_vs_request() {
       device_list.id()
     );
   } else {
-    panic!(
-      "Expected DeviceList response, got: {:?}",
-      response
-    );
+    panic!("Expected DeviceList response, got: {:?}", response);
   }
 }
 

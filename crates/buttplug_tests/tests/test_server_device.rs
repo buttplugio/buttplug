@@ -7,13 +7,10 @@
 
 mod util;
 use buttplug_core::message::{
-  BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-  BUTTPLUG_CURRENT_API_MINOR_VERSION,
-  ButtplugServerMessageV4,
-  RequestServerInfoV4,
-  StartScanningV0,
+  BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION, ButtplugServerMessageV4,
+  OutputType, RequestServerInfoV4, StartScanningV0,
 };
-use buttplug_server::message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant};
+use buttplug_server::message::ButtplugClientMessageVariant;
 
 use futures::{StreamExt, pin_mut};
 pub use util::test_device_manager::TestDeviceCommunicationManagerBuilder;
@@ -23,12 +20,10 @@ use util::test_server_with_device;
 // For instance, the Onyx+ is part of a protocol that supports vibration, but
 // the device itself does not.
 #[tokio::test]
-#[ignore = "Need to figure out what exposure we're testing here"]
 async fn test_capabilities_exposure() {
-  tracing_subscriber::fmt::init();
   // Hold the channel but don't do anything with it.
   let (server, _channel) = test_server_with_device("Onyx+");
-  let recv = server.event_stream();
+  let recv = server.server_version_event_stream();
   pin_mut!(recv);
 
   server
@@ -49,13 +44,25 @@ async fn test_capabilities_exposure() {
     .await
     .expect("Test, assuming infallible.");
   while let Some(msg) = recv.next().await {
-    if let ButtplugServerMessageVariant::V4(ButtplugServerMessageV4::DeviceList(_list)) = msg {
-      // TODO Figure out what we're actually testing here?!
-      //assert!(device.device_features().iter().any(|x| x.actuator().));
-      //assert!(device.device_messages().linear_cmd().is_some());
+    if let ButtplugServerMessageV4::DeviceList(list) = msg {
+      let device = list.devices().values().next().expect("Device expected");
+      assert_eq!(device.device_name(), "Kiiroo Onyx+");
+      assert!(
+        device
+          .device_features()
+          .values()
+          .any(|feature| feature.contains_output(OutputType::HwPositionWithDuration))
+      );
+      assert!(
+        device
+          .device_features()
+          .values()
+          .all(|feature| !feature.contains_output(OutputType::Vibrate))
+      );
       return;
     }
   }
+  panic!("DeviceList event stream ended unexpectedly");
 }
 
 /*

@@ -7,23 +7,19 @@
 
 mod util;
 use buttplug_client::{ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent};
-use buttplug_core::{errors::ButtplugError, message::OutputType};
+use buttplug_core::util::{range::RangeInclusive, small_vec_enum_map::SmallVecEnumMap};
 use buttplug_server::device::hardware::{HardwareCommand, HardwareWriteCmd};
 use buttplug_server_device_config::{
-  Endpoint,
-  ServerDeviceDefinition,
-  ServerDeviceFeature,
-  ServerDeviceFeatureOutput,
-  UserDeviceIdentifier,
+  Endpoint, RangeWithLimit, ServerDeviceDefinitionBuilder, ServerDeviceFeature,
+  ServerDeviceFeatureOutput, ServerDeviceFeatureOutputValueProperties, UserDeviceIdentifier,
   load_protocol_configs,
 };
 use futures::StreamExt;
-use std::{collections::HashMap, sync::Arc, time::Duration};
+use std::time::Duration;
 use tokio::time::sleep;
 use util::test_device_manager::{TestDeviceIdentifier, check_test_recv_value};
 use util::{
-  test_client_with_device,
-  test_client_with_device_and_custom_dcm,
+  test_client_with_device, test_client_with_device_and_custom_dcm,
   test_device_manager::TestHardwareEvent,
 };
 use uuid::Uuid;
@@ -156,7 +152,6 @@ async fn test_client_device_invalid_command() {
   ));
 }
 
-/*
 #[tokio::test]
 async fn test_client_range_limits() {
   let dcm = load_protocol_configs(&None, &None, false)
@@ -164,51 +159,55 @@ async fn test_client_range_limits() {
     .finish()
     .expect("Test, assuming infallible.");
 
-  // Add a user config that configures the test device to only user the lower and upper half for the two vibrators
+  // Add a user config that maps the two vibrators to the lower and upper half
+  // of the hardware range.
   let identifier = UserDeviceIdentifier::new("range-test", "aneros", &Some("Massage Demo".into()));
   let test_identifier = TestDeviceIdentifier::new("Massage Demo", Some("range-test".into()));
-  let mut feature_1_actuator = HashMap::new();
-  feature_1_actuator.insert(
-    OutputType::Vibrate,
-    ServerDeviceFeatureOutput::new(&(0..=127), &(0..=64)),
-  );
-  let mut feature_2_actuator = HashMap::new();
-  feature_2_actuator.insert(
-    OutputType::Vibrate,
-    ServerDeviceFeatureOutput::new(&(0..=127), &(64..=127)),
-  );
-  dcm
-    .add_user_device_definition(
-      &identifier,
-      &ServerDeviceDefinition::new(
-        "Massage Demo",
-        &Uuid::new_v4(),
-        &None,
-        &None,
-        &[
-          ServerDeviceFeature::new(
-            "Lower half",
-            &Uuid::new_v4(),
-            &None,
-            FeatureType::Vibrate,
-            &Some(feature_1_actuator),
-            &None,
-            &None,
-          ),
-          ServerDeviceFeature::new(
-            "Upper half",
-            &Uuid::new_v4(),
-            &None,
-            FeatureType::Vibrate,
-            &Some(feature_2_actuator),
-            &None,
-            &None,
-          ),
-        ],
-        &UserDeviceCustomization::default(),
+  let lower_output: SmallVecEnumMap<ServerDeviceFeatureOutput, 1> =
+    vec![ServerDeviceFeatureOutput::Vibrate(
+      ServerDeviceFeatureOutputValueProperties::new(
+        RangeWithLimit::new_with_user(
+          RangeInclusive::new(0, 127),
+          Some(RangeInclusive::new(0, 64)),
+        ),
+        false,
       ),
-    )
-    .unwrap();
+    )]
+    .into();
+  let upper_output: SmallVecEnumMap<ServerDeviceFeatureOutput, 1> =
+    vec![ServerDeviceFeatureOutput::Vibrate(
+      ServerDeviceFeatureOutputValueProperties::new(
+        RangeWithLimit::new_with_user(
+          RangeInclusive::new(0, 127),
+          Some(RangeInclusive::new(64, 127)),
+        ),
+        false,
+      ),
+    )]
+    .into();
+  let lower_feature = ServerDeviceFeature::new(
+    0,
+    "Lower half".to_owned(),
+    Uuid::new_v4(),
+    None,
+    None,
+    lower_output,
+    SmallVecEnumMap::default(),
+  );
+  let upper_feature = ServerDeviceFeature::new(
+    1,
+    "Upper half".to_owned(),
+    Uuid::new_v4(),
+    None,
+    None,
+    upper_output,
+    SmallVecEnumMap::default(),
+  );
+  let definition = ServerDeviceDefinitionBuilder::new("Massage Demo", &Uuid::new_v4())
+    .add_feature(&lower_feature)
+    .add_feature(&upper_feature)
+    .finish();
+  dcm.add_user_device_definition(&identifier, &definition);
 
   // Start the server & client
   let (client, mut device) = test_client_with_device_and_custom_dcm(&test_identifier, dcm).await;
@@ -218,7 +217,16 @@ async fn test_client_range_limits() {
   while let Some(event) = event_stream.next().await {
     if let ButtplugClientEvent::DeviceAdded(dev) = event {
       // Vibrate at half strength
-      assert!(dev.vibrate(32).await.is_ok());
+      assert!(
+        dev
+          .run_output(
+            &buttplug_client::device::ClientDeviceOutputCommand::Vibrate(
+              buttplug_client::device::ClientDeviceCommandValue::Percent(0.5)
+            )
+          )
+          .await
+          .is_ok()
+      );
 
       // Lower half
       check_test_recv_value(
@@ -247,7 +255,16 @@ async fn test_client_range_limits() {
       .await;
 
       // Disable device
-      assert!(dev.vibrate(0).await.is_ok());
+      assert!(
+        dev
+          .run_output(
+            &buttplug_client::device::ClientDeviceOutputCommand::Vibrate(
+              buttplug_client::device::ClientDeviceCommandValue::Steps(0)
+            )
+          )
+          .await
+          .is_ok()
+      );
 
       // Lower half
       check_test_recv_value(
@@ -280,7 +297,6 @@ async fn test_client_range_limits() {
   assert!(client.stop_all_devices().await.is_ok());
 }
 
- */
 // TODO Test invalid messages to device
 // TODO Test invalid parameters in message
 // TODO Test device invalidation across client connections (i.e. a device shouldn't be allowed to reconnect even if index is the same)
