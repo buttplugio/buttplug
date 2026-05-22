@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Buttplug Device Config Schema",
-  "version": 4,
+  "version": 5,
   "description": "JSON format for Buttplug Device Config Files.",
   "components": {
     "uuid": {
@@ -84,6 +84,22 @@
       "additionalProperties": false,
       "required": [
         "name"
+      ]
+    },
+    "simulated-definition": {
+      "type": "object",
+      "properties": {
+        "names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "names"
       ]
     },
     "serial-definition": {
@@ -464,6 +480,9 @@
                   },
                   "lovense_connect_service": {
                     "$ref": "#/components/lovense-connect-service-definition"
+                  },
+                  "simulated": {
+                    "$ref": "#/components/simulated-definition"
                   }
                 }
               },
@@ -508,6 +527,15 @@
                       },
                       "hid": {
                         "$ref": "#/components/usb-definition"
+                      },
+                      "xinput": {
+                        "$ref": "#/components/xinput-definition"
+                      },
+                      "lovense_connect_service": {
+                        "$ref": "#/components/lovense-connect-service-definition"
+                      },
+                      "simulated": {
+                        "$ref": "#/components/simulated-definition"
                       }
                     }
                   },
