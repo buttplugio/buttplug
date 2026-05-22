@@ -37,7 +37,7 @@ async fn test_version0_connection() {
     .parse_message(output[0].clone())
     .await
     .expect("Test, assuming infallible.");
-  let incoming_json = serializer.serialize(&vec![incoming]);
+  let incoming_json = serializer.serialize(&[incoming]);
   assert_eq!(
         incoming_json,
         r#"[{"ServerInfo":{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":0,"MaxPingTime":0,"ServerName":"Buttplug Server"}}]"#.to_owned().into(),
@@ -58,7 +58,7 @@ async fn test_version2_connection() {
     .parse_message(output[0].clone())
     .await
     .expect("Test, assuming infallible.");
-  let incoming_json = serializer.serialize(&vec![incoming]);
+  let incoming_json = serializer.serialize(&[incoming]);
   assert_eq!(
         incoming_json,
         r#"[{"ServerInfo":{"Id":1,"MessageVersion":2,"MaxPingTime":0,"ServerName":"Buttplug Server"}}]"#.to_owned().into(),
@@ -83,7 +83,7 @@ async fn test_version0_device_added_device_list() {
     .await
     .expect("Test, assuming infallible.");
   assert_eq!(
-        serializer.serialize(&vec!(output)),
+        serializer.serialize(&[output]),
         r#"[{"ServerInfo":{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":0,"MaxPingTime":0,"ServerName":"Buttplug Server"}}]"#.to_owned().into(),
       );
   // Skip JSON parsing here, we aren't converting versions.
@@ -97,10 +97,10 @@ async fn test_version0_device_added_device_list() {
   let mut msg = recv.next().await.expect("Test, assuming infallible.");
   // We should receive ScanningFinished and DeviceAdded, but the order may change.
   let possible_messages: Vec<ButtplugSerializedMessage> = vec![r#"[{"ScanningFinished":{"Id":0}}]"#.to_owned().into(), r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}}]"#.to_owned().into()];
-  assert!(possible_messages.contains(&serializer.serialize(&vec!(msg))));
+  assert!(possible_messages.contains(&serializer.serialize(&[msg])));
   msg = recv.next().await.expect("Test, assuming infallible.");
   // We should get back an aneros with only SingleMotorVibrateCmd
-  assert!(possible_messages.contains(&serializer.serialize(&vec!(msg))));
+  assert!(possible_messages.contains(&serializer.serialize(&[msg])));
   let rdl = serializer
     .deserialize(&ButtplugSerializedMessage::Text(
       r#"[{"RequestDeviceList": { "Id": 1}}]"#.to_owned(),
@@ -111,7 +111,7 @@ async fn test_version0_device_added_device_list() {
     .await
     .expect("Test, assuming infallible.");
   assert_eq!(
-        serializer.serialize(&vec!(output)),
+        serializer.serialize(&[output]),
         r#"[{"DeviceList":{"Id":1,"Devices":[{"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}]}}]"#.to_owned().into()
       );
 }
@@ -135,7 +135,7 @@ async fn test_version0_singlemotorvibratecmd() {
     .await
     .expect("Test, assuming infallible.");
   assert_eq!(
-        serializer.serialize(&vec!(output)),
+        serializer.serialize(&[output]),
         r#"[{"ServerInfo":{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":0,"MaxPingTime":0,"ServerName":"Buttplug Server"}}]"#.to_owned().into(),
       );
   // Skip JSON parsing here, we aren't converting versions.
@@ -149,10 +149,10 @@ async fn test_version0_singlemotorvibratecmd() {
   let mut msg = recv.next().await.expect("Test, assuming infallible.");
   // We should receive ScanningFinished and DeviceAdded, but the order may change.
   let possible_messages: Vec<ButtplugSerializedMessage> = vec![r#"[{"ScanningFinished":{"Id":0}}]"#.to_owned().into(), r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}}]"#.to_owned().into()];
-  assert!(possible_messages.contains(&serializer.serialize(&vec!(msg))));
+  assert!(possible_messages.contains(&serializer.serialize(&[msg])));
   msg = recv.next().await.expect("Test, assuming infallible.");
   // We should get back an aneros with only SingleMotorVibrateCmd
-  assert!(possible_messages.contains(&serializer.serialize(&vec!(msg))));
+  assert!(possible_messages.contains(&serializer.serialize(&[msg])));
   let output2 = server
     .parse_message(
       serializer
@@ -167,7 +167,7 @@ async fn test_version0_singlemotorvibratecmd() {
     .await
     .expect("Test, assuming infallible.");
   assert_eq!(
-    serializer.serialize(&vec!(output2)),
+    serializer.serialize(&[output2]),
     r#"[{"Ok":{"Id":2}}]"#.to_owned().into()
   );
   check_test_recv_value(
@@ -202,7 +202,7 @@ async fn test_version1_singlemotorvibratecmd() {
     .await
     .expect("Test, assuming infallible.");
   assert_eq!(
-        serializer.serialize(&vec!(output)),
+        serializer.serialize(&[output]),
         r#"[{"ServerInfo":{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":1,"MaxPingTime":0,"ServerName":"Buttplug Server"}}]"#.to_owned().into(),
       );
   // Skip JSON parsing here, we aren't converting versions.
@@ -214,7 +214,7 @@ async fn test_version1_singlemotorvibratecmd() {
   assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
   // Check that we got an event back about scanning finishing.
   let mut msg = recv.next().await.expect("Test, assuming infallible.");
-  let mut smsg = serializer.serialize(&vec![msg]);
+  let mut smsg = serializer.serialize(&[msg]);
   // We should receive ScanningFinished and DeviceAdded, but the order may change.
   let possible_messages: Vec<ButtplugSerializedMessage> = vec![r#"[{"ScanningFinished":{"Id":0}}]"#.to_owned().into(), r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":{"VibrateCmd":{"FeatureCount":2},"stop_device_cmd":{},"single_motor_vibrate_cmd":{}}}}]"#.to_owned().into()];
   assert!(
@@ -223,7 +223,7 @@ async fn test_version1_singlemotorvibratecmd() {
     smsg
   );
   msg = recv.next().await.expect("Test, assuming infallible.");
-  smsg = serializer.serialize(&vec![msg]);
+  smsg = serializer.serialize(&[msg]);
   // We should get back an aneros with only SingleMotorVibrateCmd
   assert!(
     possible_messages.contains(&smsg),
@@ -244,7 +244,7 @@ async fn test_version1_singlemotorvibratecmd() {
         .await
         .expect("Test, assuming infallible.");
   assert_eq!(
-    serializer.serialize(&vec!(output2)),
+    serializer.serialize(&[output2]),
     r#"[{"Ok":{"Id":2}}]"#.to_owned().into()
   );
   check_test_recv_value(
@@ -278,7 +278,7 @@ async fn test_version0_oscillatoronly() {
     .await
     .expect("Test, assuming infallible.");
   assert_eq!(
-        serializer.serialize(&vec!(output)),
+        serializer.serialize(&[output]),
         r#"[{"ServerInfo":{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":0,"MaxPingTime":0,"ServerName":"Buttplug Server"}}]"#.to_owned().into(),
       );
   // Skip JSON parsing here, we aren't converting versions.
@@ -290,7 +290,7 @@ async fn test_version0_oscillatoronly() {
   assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
   // Check that we got an event back about scanning finishing.
   let mut msg = recv.next().await.expect("Test, assuming infallible.");
-  let mut smsg = serializer.serialize(&vec![msg]);
+  let mut smsg = serializer.serialize(&[msg]);
   // We should receive ScanningFinished and DeviceAdded, but the order may change.
   let possible_messages: Vec<ButtplugSerializedMessage> = vec![r#"[{"ScanningFinished":{"Id":0}}]"#.to_owned().into(), r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"MagicMotion Xone","DeviceMessages":["StopDeviceCmd"]}}]"#.to_owned().into()];
   assert!(
@@ -299,7 +299,7 @@ async fn test_version0_oscillatoronly() {
     smsg
   );
   msg = recv.next().await.expect("Test, assuming infallible.");
-  smsg = serializer.serialize(&vec![msg]);
+  smsg = serializer.serialize(&[msg]);
   // We should get back an MagicMotion Xone with no actuators
   assert!(
     possible_messages.contains(&smsg),
@@ -327,7 +327,7 @@ async fn test_version1_oscilatoronly() {
     .await
     .expect("Test, assuming infallible.");
   assert_eq!(
-        serializer.serialize(&vec!(output)),
+        serializer.serialize(&[output]),
         r#"[{"ServerInfo":{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":1,"MaxPingTime":0,"ServerName":"Buttplug Server"}}]"#.to_owned().into(),
       );
   // Skip JSON parsing here, we aren't converting versions.
@@ -339,7 +339,7 @@ async fn test_version1_oscilatoronly() {
   assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
   // Check that we got an event back about scanning finishing.
   let mut msg = recv.next().await.expect("Test, assuming infallible.");
-  let mut smsg = serializer.serialize(&vec![msg]);
+  let mut smsg = serializer.serialize(&[msg]);
   // We should receive ScanningFinished and DeviceAdded, but the order may change.
   let possible_messages: Vec<ButtplugSerializedMessage> = vec![r#"[{"ScanningFinished":{"Id":0}}]"#.to_owned().into(), r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"MagicMotion Xone","DeviceMessages":{"stop_device_cmd":{}}}}]"#.to_owned().into()];
   assert!(
@@ -348,7 +348,7 @@ async fn test_version1_oscilatoronly() {
     smsg
   );
   msg = recv.next().await.expect("Test, assuming infallible.");
-  smsg = serializer.serialize(&vec![msg]);
+  smsg = serializer.serialize(&[msg]);
   // We should get back an MagicMotion Xone with no actuators
   assert!(
     possible_messages.contains(&smsg),

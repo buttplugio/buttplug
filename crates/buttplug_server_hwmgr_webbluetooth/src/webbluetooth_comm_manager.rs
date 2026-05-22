@@ -19,7 +19,6 @@ use tokio::sync::mpsc::Sender;
 use tracing::{error, info};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local};
-use web_sys::BluetoothDevice;
 
 pub struct WebBluetoothCommunicationManagerBuilder {
   dcm: Arc<DeviceConfigurationManager>,
@@ -93,7 +92,7 @@ impl HardwareCommunicationManager for WebBluetoothCommunicationManager {
               }
               filters.push(filter);
             }
-            for (service, _) in btle.services() {
+            for service in btle.services().keys() {
               optional_services.push(JsString::from(service.to_string().as_str()));
             }
           }
@@ -106,7 +105,7 @@ impl HardwareCommunicationManager for WebBluetoothCommunicationManager {
       let nav = web_sys::window().unwrap().navigator();
       match JsFuture::from(nav.bluetooth().unwrap().request_device(&options)).await {
         Ok(device) => {
-          let bt_device = BluetoothDevice::from(device);
+          let bt_device = device;
           if bt_device.name().is_none() {
             return;
           }

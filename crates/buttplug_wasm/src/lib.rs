@@ -13,7 +13,6 @@ use buttplug_server::{
 };
 use buttplug_server_device_config::load_protocol_configs;
 use buttplug_server_hwmgr_webbluetooth::WebBluetoothCommunicationManagerBuilder;
-use console_error_panic_hook;
 use js_sys::Uint8Array;
 use std::sync::Arc;
 use tokio_stream::StreamExt;
@@ -37,7 +36,7 @@ fn send_server_message(
   serializer: &ButtplugServerJSONSerializer,
   callback: &FFICallback,
 ) {
-  if let ButtplugSerializedMessage::Text(text) = serializer.serialize(&[msg.clone()]) {
+  if let ButtplugSerializedMessage::Text(text) = serializer.serialize(std::slice::from_ref(msg)) {
     let buf = text.as_bytes();
     let this = JsValue::null();
     let uint8buf = unsafe { Uint8Array::new(&Uint8Array::view(buf)) };
@@ -78,25 +77,37 @@ pub fn buttplug_create_embedded_wasm_server(callback: &FFICallback) -> *mut Butt
   Box::into_raw(Box::new(ButtplugWASMServer { server, serializer }))
 }
 
-#[wasm_bindgen]
-pub fn buttplug_free_embedded_wasm_server(ptr: *mut ButtplugWASMServer) {
-  if !ptr.is_null() {
-    unsafe {
-      let _ = Box::from_raw(ptr);
-    }
-  }
+unsafe fn drop_embedded_wasm_server(ptr: *mut ButtplugWASMServer) {
+  // SAFETY: The caller must pass a pointer returned by Box::into_raw for
+  // ButtplugWASMServer and ensure this function is called at most once.
+  let _ = unsafe { Box::from_raw(ptr) };
 }
 
 #[wasm_bindgen]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
+pub fn buttplug_free_embedded_wasm_server(ptr: *mut ButtplugWASMServer) {
+  if !ptr.is_null() {
+    // SAFETY: JS callers receive this pointer from buttplug_create_embedded_wasm_server.
+    unsafe { drop_embedded_wasm_server(ptr) };
+  }
+}
+
+unsafe fn embedded_wasm_server<'a>(server_ptr: *mut ButtplugWASMServer) -> &'a ButtplugWASMServer {
+  assert!(!server_ptr.is_null());
+  // SAFETY: The caller must pass a live pointer returned by
+  // buttplug_create_embedded_wasm_server.
+  unsafe { &*server_ptr }
+}
+
+#[wasm_bindgen]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub fn buttplug_client_send_json_message(
   server_ptr: *mut ButtplugWASMServer,
   buf: &[u8],
   callback: &FFICallback,
 ) {
-  let ctx = unsafe {
-    assert!(!server_ptr.is_null());
-    &*server_ptr
-  };
+  // SAFETY: JS callers receive this pointer from buttplug_create_embedded_wasm_server.
+  let ctx = unsafe { embedded_wasm_server(server_ptr) };
   let server = ctx.server.clone();
   let serializer = ctx.serializer.clone();
   let callback = callback.clone();

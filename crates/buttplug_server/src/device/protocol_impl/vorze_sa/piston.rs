@@ -37,13 +37,7 @@ pub fn get_piston_speed(mut distance: f64, mut duration: f64) -> u8 {
 
   let mut speed = (duration / 6658f64).powf(-1.21);
 
-  if speed > 100f64 {
-    speed = 100f64;
-  }
-
-  if speed < 0f64 {
-    speed = 0f64;
-  }
+  speed = speed.clamp(0f64, 100f64);
 
   speed as u8
 }

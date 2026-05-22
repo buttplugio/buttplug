@@ -8,9 +8,7 @@
 //! Generic remote transport handling methods and traits
 
 use super::{
-  ButtplugConnector,
-  ButtplugConnectorError,
-  ButtplugConnectorResultFuture,
+  ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture,
   transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
 };
 use crate::message::{
@@ -106,11 +104,8 @@ async fn remote_connector_event_loop<
               Err(e) => {
                 // TODO Not sure where to relay this.
                 error!(
-                  "{}",
-                  format!(
-                    "Got invalid messages from remote Buttplug connection - Message: {:?} - Error: {:?}",
-                    serialized_msg, e
-                  )
+                  "Got invalid messages from remote Buttplug connection - Message: {:?} - Error: {:?}",
+                  serialized_msg, e
                 );
               }
             }
@@ -132,7 +127,7 @@ async fn remote_connector_event_loop<
           ButtplugRemoteConnectorMessage::Message(msg) => {
             // Create future sets our message ID, so make sure this
             // happens before we send out the message.
-            let serialized_msg = serializer.serialize(&[msg.clone()]);
+            let serialized_msg = serializer.serialize(std::slice::from_ref(msg));
             if transport_outgoing_sender
               .send(serialized_msg)
               .await

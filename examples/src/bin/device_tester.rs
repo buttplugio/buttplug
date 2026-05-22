@@ -52,11 +52,8 @@ async fn set_level_and_wait(
 }
 
 async fn device_tester() {
-  let dc;
-  let uc;
-
-  dc = None; //Some(fs::read_to_string("C:\\Users\\user\\AppData\\Roaming\\com.nonpolynomial\\intiface_central\\config\\buttplug-device-config-v3.json").expect("Should have been able to read dc"));
-  uc = None; //Some(fs::read_to_string("C:\\Users\\user\\AppData\\Roaming\\com.nonpolynomial\\intiface_central\\config\\buttplug-user-device-config-v3.json").expect("Should have been able to read uc"));
+  let dc = None; //Some(fs::read_to_string("C:\\Users\\user\\AppData\\Roaming\\com.nonpolynomial\\intiface_central\\config\\buttplug-device-config-v3.json").expect("Should have been able to read dc"));
+  let uc = None; //Some(fs::read_to_string("C:\\Users\\user\\AppData\\Roaming\\com.nonpolynomial\\intiface_central\\config\\buttplug-user-device-config-v3.json").expect("Should have been able to read uc"));
 
   let dcm = load_protocol_configs(&dc, &uc, false)
     .unwrap()
@@ -144,7 +141,7 @@ async fn device_tester() {
         );
       }
     });
-    if cmds.len() > 0 {
+    if !cmds.is_empty() {
       // If the device had any features send what used to be scalar commands async,
       // dispatch all commands now in parallel, then go back and stop them in parallel.
       futures::future::join_all(cmds)
@@ -216,7 +213,7 @@ async fn device_tester() {
     }
 
     // Exercise each feature
-    for (_, feature) in dev.device_features() {
+    for feature in dev.device_features().values() {
       for output_type in [
         OutputType::Constrict,
         OutputType::Temperature,

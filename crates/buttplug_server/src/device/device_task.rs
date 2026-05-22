@@ -122,28 +122,28 @@ async fn run_device_task(
           break;
         };
 
-        if device_wait_duration.is_none() {
-          // No batching - send immediately
-          trace!("No wait duration, sending commands immediately: {:?}", commands);
-          for cmd in commands {
-            let _ = hardware.parse_message(&cmd).await;
-            if track_keepalive {
-              if let HardwareCommand::Write(ref write_cmd) = cmd {
-                keepalive_packet = Some(write_cmd.clone());
-              }
-            }
-          }
-        } else {
+        if let Some(device_wait_duration) = device_wait_duration {
           // Batching enabled
           if pending_commands.is_empty() {
             // First batch - add directly without deduplication (matches old behavior)
             pending_commands.extend(commands);
-            batch_deadline = Some(Instant::now() + device_wait_duration.unwrap());
+            batch_deadline = Some(Instant::now() + device_wait_duration);
           } else {
             // Subsequent batches - deduplicate each command against existing
             for command in commands {
               pending_commands.retain(|existing| !command.overlaps(existing));
               pending_commands.push_back(command);
+            }
+          }
+        } else {
+          // No batching - send immediately
+          trace!("No wait duration, sending commands immediately: {:?}", commands);
+          for cmd in commands {
+            let _ = hardware.parse_message(&cmd).await;
+            if track_keepalive
+              && let HardwareCommand::Write(ref write_cmd) = cmd
+            {
+              keepalive_packet = Some(write_cmd.clone());
             }
           }
         }
@@ -154,10 +154,10 @@ async fn run_device_task(
         trace!("Batch deadline reached, sending {} commands", pending_commands.len());
         while let Some(cmd) = pending_commands.pop_front() {
           let _ = hardware.parse_message(&cmd).await;
-          if track_keepalive {
-            if let HardwareCommand::Write(ref write_cmd) = cmd {
-              keepalive_packet = Some(write_cmd.clone());
-            }
+          if track_keepalive
+            && let HardwareCommand::Write(ref write_cmd) = cmd
+          {
+            keepalive_packet = Some(write_cmd.clone());
           }
         }
         batch_deadline = None;

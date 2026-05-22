@@ -11,12 +11,10 @@ use super::{
   ButtplugServerResultFuture,
   device::{OutputObservation, ServerDeviceManager},
   message::{
-    ButtplugClientMessageVariant,
-    ButtplugServerMessageVariant,
+    ButtplugClientMessageVariant, ButtplugServerMessageVariant,
     server_device_attributes::TryFromClientMessage,
     spec_enums::{
-      ButtplugCheckedClientMessageV4,
-      ButtplugDeviceCommandMessageUnionV4,
+      ButtplugCheckedClientMessageV4, ButtplugDeviceCommandMessageUnionV4,
       ButtplugDeviceManagerMessageUnion,
     },
   },
@@ -26,14 +24,8 @@ use super::{
 use buttplug_core::{
   errors::*,
   message::{
-    self,
-    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-    ButtplugMessage,
-    ButtplugMessageSpecVersion,
-    ButtplugServerMessageV4,
-    ErrorV0,
-    StopCmdV4,
-    StopScanningV0,
+    self, BUTTPLUG_CURRENT_API_MAJOR_VERSION, ButtplugMessage, ButtplugMessageSpecVersion,
+    ButtplugServerMessageV4, ErrorV0, StopCmdV4, StopScanningV0,
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
@@ -51,9 +43,10 @@ use tracing::{Instrument, info_span};
 
 /// Connection state for the ButtplugServer.
 /// Replaces separate connected/client_name/spec_version fields with explicit states.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub enum ConnectionState {
   /// Initial state, waiting for RequestServerInfo handshake
+  #[default]
   AwaitingHandshake,
   /// Client connected and handshake completed
   Connected {
@@ -64,12 +57,6 @@ pub enum ConnectionState {
   Disconnected,
   /// Connection lost due to ping timeout
   PingedOut,
-}
-
-impl Default for ConnectionState {
-  fn default() -> Self {
-    ConnectionState::AwaitingHandshake
-  }
 }
 
 /// The server side of the Buttplug protocol. Frontend for connection to device management and

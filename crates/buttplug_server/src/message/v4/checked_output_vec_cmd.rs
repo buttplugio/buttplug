@@ -6,25 +6,14 @@
 // for full license information.
 
 use crate::message::{
-  ButtplugDeviceMessageNameV3,
-  LinearCmdV1,
-  RotateCmdV1,
-  ServerDeviceAttributes,
-  TryFromDeviceAttributes,
-  v0::SingleMotorVibrateCmdV0,
-  v1::VibrateCmdV1,
-  v3::ScalarCmdV3,
+  ButtplugDeviceMessageNameV3, LinearCmdV1, RotateCmdV1, ServerDeviceAttributes,
+  TryFromDeviceAttributes, v0::SingleMotorVibrateCmdV0, v1::VibrateCmdV1, v3::ScalarCmdV3,
 };
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageValidator,
-    OutputCommand,
-    OutputHwPositionWithDuration,
-    OutputType,
-    OutputValue,
+    ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageValidator, OutputCommand,
+    OutputHwPositionWithDuration, OutputType, OutputValue,
   },
 };
 use buttplug_server_device_config::ServerDeviceFeatureOutput;
@@ -302,12 +291,7 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedOutputVecCmdV4 {
               "Position should be 0.0 < x < 1.0".to_owned(),
             ))
           })?,
-          x.duration().try_into().map_err(|_| {
-            ButtplugError::from(ButtplugMessageError::InvalidMessageContents(
-              "Duration should be under 2^31. You are not waiting 24 days to run this command."
-                .to_owned(),
-            ))
-          })?,
+          x.duration(),
         )),
       ));
     }

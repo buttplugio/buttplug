@@ -84,7 +84,7 @@ async fn test_server_handshake() {
 
 #[tokio::test]
 async fn test_server_handshake_not_done_first_v4() {
-  let msg = ButtplugCheckedClientMessageV4::Ping(PingV0::default().into());
+  let msg = ButtplugCheckedClientMessageV4::Ping(PingV0::default());
   let server = test_server();
   // assert_eq!(server.server_name, "Test Server");
   let result = server.parse_checked_message(msg).await;
@@ -98,10 +98,10 @@ async fn test_server_handshake_not_done_first_v4() {
 
 #[tokio::test]
 async fn test_server_handshake_not_done_first_v3() {
-  let msg = ButtplugClientMessageV3::Ping(PingV0::default().into());
+  let msg = ButtplugClientMessageV3::Ping(PingV0::default());
   let server = test_server();
   // assert_eq!(server.server_name, "Test Server");
-  let result = server.parse_message(msg.try_into().unwrap()).await;
+  let result = server.parse_message(msg.into()).await;
   assert!(result.is_err());
   if let Err(ButtplugServerMessageVariant::V3(ButtplugServerMessageV3::Error(e))) = result {
     assert!(matches!(
@@ -172,7 +172,7 @@ async fn test_ping_timeout() {
   sleep(Duration::from_millis(300)).await;
   let pingmsg = PingV0::default();
   let result = server
-    .parse_checked_message(ButtplugCheckedClientMessageV4::Ping(pingmsg.into()))
+    .parse_checked_message(ButtplugCheckedClientMessageV4::Ping(pingmsg))
     .await;
   let err = result.unwrap_err();
   if !matches!(err.original_error(), ButtplugError::ButtplugPingError(_)) {

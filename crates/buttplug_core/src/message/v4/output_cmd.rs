@@ -8,10 +8,7 @@
 use crate::{
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageError,
-    ButtplugMessageValidator,
+    ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageError, ButtplugMessageValidator,
     OutputType,
   },
 };
@@ -72,7 +69,7 @@ impl OutputCommand {
       | OutputCommand::Oscillate(x)
       | OutputCommand::Position(x)
       | OutputCommand::Rotate(x)
-      | OutputCommand::Vibrate(x) => x.value() as i32,
+      | OutputCommand::Vibrate(x) => x.value(),
       OutputCommand::HwPositionWithDuration(x) => x.value() as i32,
     }
   }

@@ -7,11 +7,7 @@
 //! Representation and management of devices connected to the server.
 
 use super::{
-  client::{
-    ButtplugClientError,
-    ButtplugClientMessageFuturePair,
-    ButtplugClientResultFuture,
-  },
+  client::{ButtplugClientError, ButtplugClientMessageFuturePair, ButtplugClientResultFuture},
   client_event_loop::ButtplugClientRequest,
 };
 use buttplug_core::{
@@ -21,11 +17,8 @@ use buttplug_core::{
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server::message::{
-  ButtplugClientMessageV0,
-  ButtplugDeviceMessageNameV0,
-  ButtplugServerMessageV0,
-  SingleMotorVibrateCmdV0,
-  StopDeviceCmdV0,
+  ButtplugClientMessageV0, ButtplugDeviceMessageNameV0, ButtplugServerMessageV0,
+  SingleMotorVibrateCmdV0, StopDeviceCmdV0,
 };
 use futures::channel::oneshot;
 use futures::{Stream, future};
@@ -130,10 +123,15 @@ impl ButtplugClientDevice {
   pub(super) fn new_from_device_fields(
     device_index: u32,
     device_name: &str,
-    device_messages: &Vec<ButtplugDeviceMessageNameV0>,
+    device_messages: &[ButtplugDeviceMessageNameV0],
     sender: mpsc::Sender<ButtplugClientRequest>,
   ) -> Self {
-    ButtplugClientDevice::new(device_name, device_index, device_messages.clone(), sender)
+    ButtplugClientDevice::new(
+      device_name,
+      device_index,
+      device_messages.to_owned(),
+      sender,
+    )
   }
 
   pub fn connected(&self) -> bool {
@@ -258,8 +256,7 @@ impl ButtplugClientDevice {
   }
 }
 
-impl Eq for ButtplugClientDevice {
-}
+impl Eq for ButtplugClientDevice {}
 
 impl PartialEq for ButtplugClientDevice {
   fn eq(&self, other: &Self) -> bool {

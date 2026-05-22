@@ -10,12 +10,7 @@ use crate::message::{
   v2::{ClientDeviceMessageAttributesV2, GenericDeviceMessageAttributesV2},
 };
 use buttplug_core::message::{
-  DeviceFeature,
-  DeviceFeatureInput,
-  DeviceFeatureOutput,
-  InputCommandType,
-  InputType,
-  OutputType,
+  DeviceFeature, DeviceFeatureInput, DeviceFeatureOutput, InputCommandType, InputType, OutputType,
 };
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeSeq};
@@ -314,7 +309,7 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
     let sensor_filter = {
       let attrs: Vec<SensorDeviceMessageAttributesV3> = features
         .iter()
-        .map(|feature| {
+        .flat_map(|feature| {
           let mut sensor_vec = vec![];
           if let Some(DeviceFeatureInput::Battery(battery)) = feature.get_input(InputType::Battery)
           {
@@ -336,7 +331,6 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
           }
           sensor_vec
         })
-        .flatten()
         .collect();
       if !attrs.is_empty() { Some(attrs) } else { None }
     };

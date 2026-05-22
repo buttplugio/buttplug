@@ -7,16 +7,8 @@
 
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::{
-  Hardware,
-  HardwareCommand,
-  HardwareConnector,
-  HardwareEvent,
-  HardwareInternal,
-  HardwareReadCmd,
-  HardwareReading,
-  HardwareSpecializer,
-  HardwareSubscribeCmd,
-  HardwareUnsubscribeCmd,
+  Hardware, HardwareCommand, HardwareConnector, HardwareEvent, HardwareInternal, HardwareReadCmd,
+  HardwareReading, HardwareSpecializer, HardwareSubscribeCmd, HardwareUnsubscribeCmd,
   HardwareWriteCmd,
 };
 use buttplug_server_device_config::{Endpoint, ProtocolCommunicationSpecifier};
@@ -272,7 +264,7 @@ impl HardwareInternal for TestDevice {
           panic!("Not getting expected read in time!");
         }
         {
-          if reads.lock().await.len() > 0 {
+          if !reads.lock().await.is_empty() {
             break;
           }
         }

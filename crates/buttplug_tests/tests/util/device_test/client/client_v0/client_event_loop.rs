@@ -130,7 +130,7 @@ where
     &mut self,
     device_index: u32,
     device_name: &str,
-    device_messages: &Vec<buttplug_server::message::ButtplugDeviceMessageNameV0>,
+    device_messages: &[buttplug_server::message::ButtplugDeviceMessageNameV0],
   ) -> Arc<ButtplugClientDevice> {
     debug!(
       "Trying to create a client device: index={}, name={}",

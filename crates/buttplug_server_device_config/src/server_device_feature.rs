@@ -9,15 +9,9 @@ use crate::ButtplugDeviceConfigError;
 
 use buttplug_core::{
   message::{
-    DeviceFeature,
-    DeviceFeatureInput,
-    DeviceFeatureInputProperties,
-    DeviceFeatureOutput,
-    DeviceFeatureOutputHwPositionWithDurationProperties,
-    DeviceFeatureOutputValueProperties,
-    InputCommandType,
-    InputType,
-    OutputType,
+    DeviceFeature, DeviceFeatureInput, DeviceFeatureInputProperties, DeviceFeatureOutput,
+    DeviceFeatureOutputHwPositionWithDurationProperties, DeviceFeatureOutputValueProperties,
+    InputCommandType, InputType, OutputType,
   },
   util::{
     range::RangeInclusive,
@@ -88,9 +82,8 @@ impl RangeWithLimit {
   ) -> Result<Self, ButtplugDeviceConfigError> {
     let truncated_base = RangeInclusive::new(0, base.end() as u32);
     if let Some(user) = user {
-      if user.is_empty() {
-        Err(ButtplugDeviceConfigError::InvalidUserRange)
-      } else if user.start() < truncated_base.start()
+      if user.is_empty()
+        || user.start() < truncated_base.start()
         || user.end() > truncated_base.end()
         || user.start() > truncated_base.end()
         || user.end() < truncated_base.start()
@@ -523,8 +516,7 @@ impl PartialEq for ServerDeviceFeature {
   }
 }
 
-impl Eq for ServerDeviceFeature {
-}
+impl Eq for ServerDeviceFeature {}
 
 impl Default for ServerDeviceFeature {
   fn default() -> Self {

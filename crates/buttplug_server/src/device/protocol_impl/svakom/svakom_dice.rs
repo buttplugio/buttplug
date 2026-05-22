@@ -34,7 +34,7 @@ impl ProtocolHandler for SvakomDice {
       HardwareWriteCmd::new(
         &[feature_id],
         Endpoint::Tx,
-        [0x55, 0x04, 0x00, 0x00, 01, speed as u8, 0xaa].to_vec(),
+        [0x55, 0x04, 0x00, 0x00, 1, speed as u8, 0xaa].to_vec(),
         false,
       )
       .into(),

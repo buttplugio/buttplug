@@ -16,7 +16,7 @@ use tracing::Span;
 #[cfg(feature = "wasm")]
 mod wasm;
 
-#[cfg(feature = "tokio-runtime")]
+#[cfg(all(feature = "tokio-runtime", not(feature = "wasm")))]
 mod tokio;
 
 static GLOBAL_ASYNC_MANAGER: OnceLock<Box<dyn AsyncManager>> = OnceLock::new();
@@ -40,7 +40,7 @@ fn get_default_async_manager() -> Box<dyn AsyncManager> {
     if #[cfg(feature = "wasm")] {
       return Box::new(wasm::WasmBindgenAsyncManager::default());
     } else if #[cfg(feature = "tokio-runtime")] {
-      return Box::new(tokio::TokioAsyncManager::default());
+      Box::new(tokio::TokioAsyncManager::default())
     } else {
       unimplemented!(
         "No async runtime configured. Enable the `tokio-runtime` or `wasm` feature, \

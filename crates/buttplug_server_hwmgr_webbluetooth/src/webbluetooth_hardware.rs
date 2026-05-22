@@ -15,7 +15,7 @@ use buttplug_server_device_config::{
   BluetoothLESpecifier, Endpoint, ProtocolCommunicationSpecifier,
 };
 use futures::future::{self, BoxFuture, FutureExt};
-use js_sys::{DataView, Uint8Array};
+use js_sys::Uint8Array;
 use std::{
   collections::HashMap,
   fmt::{self, Debug},
@@ -198,24 +198,23 @@ async fn run_webbluetooth_loop(
     };
 
   for (service_uuid, service_endpoints) in btle_protocol.services() {
-    let service =
-      if let Ok(serv) =
-        JsFuture::from(server.get_primary_service_with_str(&service_uuid.to_string())).await
-      {
-        info!(
-          "Service {} found on device {}",
-          service_uuid,
-          device.name().unwrap()
-        );
-        serv.unchecked_into::<BluetoothRemoteGattService>()
-      } else {
-        info!(
-          "Service {} not found on device {}",
-          service_uuid,
-          device.name().unwrap()
-        );
-        continue;
-      };
+    let service = if let Ok(serv) =
+      JsFuture::from(server.get_primary_service_with_str(&service_uuid.to_string())).await
+    {
+      info!(
+        "Service {} found on device {}",
+        service_uuid,
+        device.name().unwrap()
+      );
+      serv.unchecked_into::<BluetoothRemoteGattService>()
+    } else {
+      info!(
+        "Service {} not found on device {}",
+        service_uuid,
+        device.name().unwrap()
+      );
+      continue;
+    };
 
     for (chr_name, chr_uuid) in service_endpoints.iter() {
       info!("Connecting chr {} {}", chr_name, chr_uuid.to_string());
@@ -251,15 +250,12 @@ async fn run_webbluetooth_loop(
         spawn_local(async move {
           let data: Uint8Array = Uint8Array::from(write_cmd.data().as_slice());
           let result = match chr.write_value_with_u8_array(&data) {
-            Ok(promise) => JsFuture::from(promise)
-              .await
-              .map(|_| ())
-              .map_err(|e| {
-                ButtplugDeviceError::DeviceCommunicationError(format!(
-                  "WebBluetooth write failed: {:?}",
-                  e
-                ))
-              }),
+            Ok(promise) => JsFuture::from(promise).await.map(|_| ()).map_err(|e| {
+              ButtplugDeviceError::DeviceCommunicationError(format!(
+                "WebBluetooth write failed: {:?}",
+                e
+              ))
+            }),
             Err(e) => Err(ButtplugDeviceError::DeviceCommunicationError(format!(
               "WebBluetooth write setup failed: {:?}",
               e
@@ -281,8 +277,8 @@ async fn run_webbluetooth_loop(
               ))
             })
             .map(|val| {
-              let data_view = DataView::try_from(val).unwrap();
-              let mut body = vec![0u8; data_view.byte_length() as usize];
+              let data_view = val;
+              let mut body = vec![0u8; data_view.byte_length()];
               Uint8Array::new(&data_view).copy_to(&mut body[..]);
               HardwareReading::new(read_cmd.endpoint(), &body)
             });
@@ -364,7 +360,7 @@ impl HardwareInternal for WebBluetoothHardware {
     msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<HardwareReading, ButtplugDeviceError>> {
     let sender = self.device_command_sender.clone();
-    let msg = msg.clone();
+    let msg = *msg;
     async move {
       let (tx, rx) = oneshot::channel();
       sender
@@ -406,7 +402,7 @@ impl HardwareInternal for WebBluetoothHardware {
     msg: &HardwareSubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let sender = self.device_command_sender.clone();
-    let msg = msg.clone();
+    let msg = *msg;
     async move {
       let (tx, rx) = oneshot::channel();
       sender
@@ -427,7 +423,7 @@ impl HardwareInternal for WebBluetoothHardware {
     msg: &HardwareUnsubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let sender = self.device_command_sender.clone();
-    let msg = msg.clone();
+    let msg = *msg;
     async move {
       let (tx, rx) = oneshot::channel();
       sender

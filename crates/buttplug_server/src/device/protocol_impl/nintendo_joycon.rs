@@ -8,27 +8,20 @@
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    ProtocolHandler,
-    ProtocolIdentifier,
-    ProtocolInitializer,
-    generic_protocol_initializer_setup,
+    ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::{
-  Endpoint,
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  Endpoint, ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
-use std::{
-  sync::{
-    Arc,
-    atomic::{AtomicBool, AtomicU16, Ordering},
-  },
-  time::Duration,
+use std::sync::{
+  Arc,
+  atomic::{AtomicBool, AtomicU16, Ordering},
 };
+#[cfg(feature = "tokio-runtime")]
+use std::time::Duration;
 use tokio::sync::Notify;
 use uuid::{Uuid, uuid};
 
@@ -151,21 +144,8 @@ impl Rumble {
   /// Constructor of Rumble.
   /// If arguments not in line with constraints, args will be saturated.
   pub fn new(freq: f32, amp: f32) -> Self {
-    let freq = if freq < 0.0 {
-      0.0
-    } else if freq > 1252.0 {
-      1252.0
-    } else {
-      freq
-    };
-
-    let amp = if amp < 0.0 {
-      0.0
-    } else if amp > 1.799 {
-      1.799
-    } else {
-      amp
-    };
+    let freq = freq.clamp(0.0, 1252.0);
+    let amp = amp.clamp(0.0, 1.799);
 
     Self {
       frequency: freq,
@@ -264,30 +244,36 @@ impl NintendoJoycon {
     let is_stopped = Arc::new(AtomicBool::new(false));
     let is_stopped_clone = is_stopped.clone();
     buttplug_core::spawn!("NintendoJoycon update loop", async move {
-      loop {
-        if is_stopped_clone.load(Ordering::Relaxed) {
-          return;
-        }
-        let amp = speed_val_clone.load(Ordering::Relaxed) as f32 / 1000f32;
-        let rumble = if amp > 0.001 {
-          Rumble::new(200.0f32, amp)
-        } else {
-          Rumble::stop()
-        };
+      #[cfg(feature = "tokio-runtime")]
+      {
+        loop {
+          if is_stopped_clone.load(Ordering::Relaxed) {
+            return;
+          }
+          let amp = speed_val_clone.load(Ordering::Relaxed) as f32 / 1000f32;
+          let rumble = if amp > 0.001 {
+            Rumble::new(200.0f32, amp)
+          } else {
+            Rumble::stop()
+          };
 
-        if let Err(_) =
-          send_command_raw(hardware.clone(), 1, 16, 0, &[], Some(rumble), Some(rumble)).await
-        {
-          error!("Joycon command failed, exiting update loop");
-          break;
+          if send_command_raw(hardware.clone(), 1, 16, 0, &[], Some(rumble), Some(rumble))
+            .await
+            .is_err()
+          {
+            error!("Joycon command failed, exiting update loop");
+            break;
+          }
+          let _ = tokio::time::timeout(Duration::from_millis(15), notifier_clone.notified()).await;
         }
-        #[cfg(feature = "tokio-runtime")]
-        let _ = tokio::time::timeout(Duration::from_millis(15), notifier_clone.notified()).await;
+      }
 
-        // If we're using WASM, we can't use tokio's timeout due to lack of time library in WASM.
-        // I'm also too lazy to make this a select. So, this'll do. We can't even access this
-        // protocol in a web context yet since there's no WebHID comm manager yet.
-        #[cfg(not(feature = "tokio-runtime"))]
+      // If we're using WASM, we can't use tokio's timeout due to lack of time library in WASM.
+      // I'm also too lazy to make this a select. So, this'll do. We can't even access this
+      // protocol in a web context yet since there's no WebHID comm manager yet.
+      #[cfg(not(feature = "tokio-runtime"))]
+      {
+        let _ = (hardware, speed_val_clone, is_stopped_clone);
         unimplemented!("Nintendo Joycon protocol is not supported in non-tokio runtimes yet");
       }
     });

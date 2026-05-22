@@ -8,21 +8,15 @@
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
-    ProtocolHandler,
-    ProtocolIdentifier,
-    ProtocolInitializer,
-    generic_protocol_initializer_setup,
+    ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
-use std::cmp::{max, min};
 use std::sync::Arc;
 use uuid::{Uuid, uuid};
 
@@ -61,8 +55,8 @@ impl ProtocolHandler for Loob {
     position: u32,
     duration: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let pos: u16 = max(min(position as u16, 1000), 1);
-    let time: u16 = max(duration as u16, 1);
+    let pos: u16 = (position as u16).clamp(1, 1000);
+    let time: u16 = (duration as u16).max(1);
     let mut data = pos.to_be_bytes().to_vec();
     for b in time.to_be_bytes() {
       data.push(b);

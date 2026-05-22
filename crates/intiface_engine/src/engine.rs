@@ -201,7 +201,7 @@ impl IntifaceEngine {
           match result {
             Ok(_) => info!("Connection dropped, restarting stay open loop."),
             Err(e) => {
-              error!("{}", format!("Process Error: {:?}", e));
+              error!("Process Error: {:?}", e);
 
               if let Some(frontend) = &frontend {
                 frontend
