@@ -12,26 +12,17 @@ use buttplug_core::{
   connector::transport::ButtplugTransportIncomingMessage,
   errors::{ButtplugError, ButtplugUnknownError},
   message::{
-    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-    ButtplugClientMessageV4,
-    ButtplugMessage,
-    ButtplugServerMessageV4,
-    ErrorV0,
-    serializer::ButtplugSerializedMessage,
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION,
+    ButtplugClientMessageV4, ButtplugMessage, ButtplugServerMessageV4, DeviceListV4, ErrorV0,
+    ServerInfoV4, serializer::ButtplugSerializedMessage,
   },
 };
-use buttplug_server::message::{
-  ButtplugClientMessageVariant,
-  ButtplugServerMessageVariant,
-  DeviceListV3,
-  ServerInfoV2,
-};
+use buttplug_server::message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant};
 use std::sync::Arc;
 use tokio::sync::Notify;
 use util::channel_transport::ChannelClientTestHelper;
 
 #[tokio::test]
-#[ignore = "Needs update to v4"]
 async fn test_garbled_client_rsi_response() {
   let helper = Arc::new(ChannelClientTestHelper::new());
   let helper_clone = helper.clone();
@@ -53,15 +44,21 @@ async fn test_garbled_client_rsi_response() {
     ))
     .await;
   helper
-    .send_client_incoming(ButtplugServerMessageVariant::V3(
-      ServerInfoV2::new("test server", BUTTPLUG_CURRENT_API_MAJOR_VERSION, 0).into(),
+    .send_client_incoming(ButtplugServerMessageVariant::V4(
+      ServerInfoV4::new(
+        "test server",
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION,
+        0,
+      )
+      .into(),
     ))
     .await;
   let _ = helper.recv_outgoing().await;
-  let mut dl = DeviceListV3::new(vec![]);
+  let mut dl = DeviceListV4::new(vec![]);
   dl.set_id(2);
   helper
-    .send_client_incoming(ButtplugServerMessageVariant::V3(dl.into()))
+    .send_client_incoming(ButtplugServerMessageVariant::V4(dl.into()))
     .await;
   finish_notifier.notified().await;
 }

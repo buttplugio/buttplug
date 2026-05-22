@@ -5,39 +5,40 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-/*
 mod util;
-use util::{test_client, test_client_with_delayed_device_manager, test_client_with_device};
-extern crate buttplug;
-extern crate tracing;
 
-use buttplug::{
-  client::{connector::ButtplugInProcessClientConnectorBuilder, ButtplugClient, ButtplugClientError, ButtplugClientEvent},
-  core::{
-    connector::{
-      ButtplugConnector,
-      ButtplugConnectorError,
-      ButtplugConnectorResultFuture,
-    },
-    errors::{ButtplugDeviceError, ButtplugError},
-    message::{ButtplugClientMessageCurrent, ButtplugClientMessageV4, ButtplugServerMessageCurrent, ButtplugServerMessageV4},
-  },
-  server::{message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant}, ButtplugServerBuilder},
+use buttplug_client::{
+  ButtplugClient, ButtplugClientEvent,
+  device::{ClientDeviceCommandValue, ClientDeviceOutputCommand},
 };
-
-use futures::{future::BoxFuture, StreamExt};
+use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
+use buttplug_core::{
+  connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
+  message::{ButtplugClientMessageV4, ButtplugServerMessageV4},
+};
+use buttplug_server::{
+  ButtplugServerBuilder,
+  device::hardware::{HardwareCommand, HardwareWriteCmd},
+};
+use buttplug_server_device_config::Endpoint;
+use futures::{StreamExt, future::BoxFuture};
 use std::time::Duration;
 use tokio::{sync::mpsc::Sender, time::sleep};
+use util::{
+  test_client, test_client_with_delayed_device_manager, test_client_with_device,
+  test_device_manager::check_test_recv_value,
+};
+use uuid::Uuid;
 
 #[derive(Default)]
 struct ButtplugFailingConnector {}
 
-impl ButtplugConnector<ButtplugClientMessageVariant, ButtplugServerMessageVariant>
+impl ButtplugConnector<ButtplugClientMessageV4, ButtplugServerMessageV4>
   for ButtplugFailingConnector
 {
   fn connect(
     &mut self,
-    _: Sender<ButtplugServerMessageVariant>,
+    _: Sender<ButtplugServerMessageV4>,
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     ButtplugConnectorError::ConnectorNotConnected.into()
   }
@@ -46,21 +47,35 @@ impl ButtplugConnector<ButtplugClientMessageVariant, ButtplugServerMessageVarian
     ButtplugConnectorError::ConnectorNotConnected.into()
   }
 
-  fn send(&self, _msg: ButtplugClientMessageVariant) -> ButtplugConnectorResultFuture {
+  fn send(&self, _msg: ButtplugClientMessageV4) -> ButtplugConnectorResultFuture {
     panic!("Should never be called")
   }
 }
 
+async fn wait_for_device_added(client: &ButtplugClient) -> buttplug_client::ButtplugClientDevice {
+  let mut event_stream = client.event_stream();
+  client
+    .start_scanning()
+    .await
+    .expect("Test, assuming infallible.");
+  while let Some(event) = event_stream.next().await {
+    if let ButtplugClientEvent::DeviceAdded(device) = event {
+      return device;
+    }
+  }
+  panic!("DeviceAdded event stream ended unexpectedly");
+}
 
 #[tokio::test]
 async fn test_failing_connection() {
   let client = ButtplugClient::new("Test Client");
-  assert!(client
-    .connect(ButtplugFailingConnector::default())
-    .await
-    .is_err());
+  assert!(
+    client
+      .connect(ButtplugFailingConnector::default())
+      .await
+      .is_err()
+  );
 }
-
 
 #[tokio::test]
 async fn test_disconnect_status() {
@@ -69,7 +84,6 @@ async fn test_disconnect_status() {
   assert!(!client.connected());
 }
 
-
 #[tokio::test]
 async fn test_double_disconnect() {
   let client = test_client().await;
@@ -77,13 +91,11 @@ async fn test_double_disconnect() {
   assert!(client.disconnect().await.is_err());
 }
 
-
 #[tokio::test]
 async fn test_connect_init() {
   let client = test_client().await;
   assert_eq!(client.server_name(), Some("Buttplug Server".to_owned()));
 }
-
 
 #[tokio::test]
 async fn test_client_connected_status() {
@@ -95,30 +107,18 @@ async fn test_client_connected_status() {
   assert!(!client.connected());
 }
 
-
 #[tokio::test]
 async fn test_start_scanning() {
   let (client, _) = test_client_with_device().await;
   assert!(client.start_scanning().await.is_ok());
 }
 
-
 #[tokio::test]
-#[ignore = "We may want to just call this Ok now?"]
 async fn test_stop_scanning_when_not_scanning() {
   let (client, _) = test_client_with_device().await;
-  let should_be_err = client.stop_scanning().await;
-  if let Err(ButtplugClientError::ButtplugError(bp_err)) = should_be_err {
-    assert!(matches!(
-      bp_err,
-      ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceScanningAlreadyStopped)
-    ));
-  } else {
-    panic!("Should've thrown error!");
-  }
-  assert!(client.stop_scanning().await.is_err());
+  assert!(client.stop_scanning().await.is_ok());
+  assert!(client.stop_scanning().await.is_ok());
 }
-
 
 #[tokio::test]
 async fn test_start_scanning_when_already_scanning() {
@@ -127,14 +127,12 @@ async fn test_start_scanning_when_already_scanning() {
   assert!(client.start_scanning().await.is_ok());
 }
 
-
 #[tokio::test]
 async fn test_successive_start_scanning() {
   let (client, _) = test_client_with_device().await;
   assert!(client.start_scanning().await.is_ok());
   assert!(client.start_scanning().await.is_ok());
 }
-
 
 #[tokio::test]
 async fn test_client_scanning_finished() {
@@ -150,7 +148,6 @@ async fn test_client_scanning_finished() {
     ButtplugClientEvent::ScanningFinished
   ));
 }
-
 
 #[tokio::test]
 async fn test_client_ping() {
@@ -168,66 +165,109 @@ async fn test_client_ping() {
     .expect("Test, assuming infallible.");
   assert!(client.ping().await.is_ok());
   sleep(Duration::from_millis(800)).await;
-  // TODO Watch for ping events
   assert!(client.ping().await.is_err());
 }
-/*
-// Tests both the stop all devices functionality, as well as both ends of the
-// command range for is_in_command_range message validation.
 
+// Tests both the stop-all-devices functionality and the low/high ends of the
+// client command range conversion.
 #[tokio::test]
 async fn test_stop_all_devices_and_device_command_range() {
-    let (client, test_device) = test_client_with_device().await;
-    let mut event_stream = client.event_stream();
-    assert!(client.start_scanning().await.is_ok());
+  let (client, mut test_device) = test_client_with_device().await;
+  let dev = wait_for_device_added(&client).await;
 
-    while let Some(event) = event_stream.next().await {
-      if let ButtplugClientEvent::DeviceAdded(dev) = event {
-        info!("{:?}", dev.vibrate(ScalarCommand::Scalar(0.5)).await);
-        assert!(dev.vibrate(ScalarCommand::Scalar(0.5)).await.is_ok());
-        // Unlike protocol unit tests, here the endpoint doesn't exist until
-        // after device creation, so create the test receiver later.
-        let command_receiver = test_device
-          .endpoint_receiver(&Endpoint::Tx)
-          .expect("Test, assuming infallible.");
-        check_test_recv_value(
-          &command_receiver,
-          HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
-        );
-        check_test_recv_value(
-          &command_receiver,
-          HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF2, 64], false)),
-        );
-        assert!(dev.vibrate(ScalarCommand::Scalar(1.0)).await.is_ok());
-        check_test_recv_value(
-          &command_receiver,
-          HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 127], false)),
-        );
-        check_test_recv_value(
-          &command_receiver,
-          HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF2, 127], false)),
-        );
-        assert!(client.stop_all_devices().await.is_ok());
-        check_test_recv_value(
-          &command_receiver,
-          HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false)),
-        );
-        check_test_recv_value(
-          &command_receiver,
-          HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF2, 0], false)),
-        );
-        break;
-      }
-    }
-    assert!(client.stop_all_devices().await.is_ok());
+  assert!(
+    dev
+      .run_output(&ClientDeviceOutputCommand::Vibrate(
+        ClientDeviceCommandValue::Percent(0.5),
+      ))
+      .await
+      .is_ok()
+  );
+  check_test_recv_value(
+    &Duration::from_millis(150),
+    &mut test_device,
+    HardwareCommand::Write(HardwareWriteCmd::new(
+      &[Uuid::nil()],
+      Endpoint::Tx,
+      vec![0xF1, 64],
+      false,
+    )),
+  )
+  .await;
+  check_test_recv_value(
+    &Duration::from_millis(150),
+    &mut test_device,
+    HardwareCommand::Write(HardwareWriteCmd::new(
+      &[Uuid::nil()],
+      Endpoint::Tx,
+      vec![0xF2, 64],
+      false,
+    )),
+  )
+  .await;
+
+  assert!(
+    dev
+      .run_output(&ClientDeviceOutputCommand::Vibrate(
+        ClientDeviceCommandValue::Percent(1.0),
+      ))
+      .await
+      .is_ok()
+  );
+  check_test_recv_value(
+    &Duration::from_millis(150),
+    &mut test_device,
+    HardwareCommand::Write(HardwareWriteCmd::new(
+      &[Uuid::nil()],
+      Endpoint::Tx,
+      vec![0xF1, 127],
+      false,
+    )),
+  )
+  .await;
+  check_test_recv_value(
+    &Duration::from_millis(150),
+    &mut test_device,
+    HardwareCommand::Write(HardwareWriteCmd::new(
+      &[Uuid::nil()],
+      Endpoint::Tx,
+      vec![0xF2, 127],
+      false,
+    )),
+  )
+  .await;
+
+  assert!(client.stop_all_devices().await.is_ok());
+  check_test_recv_value(
+    &Duration::from_millis(150),
+    &mut test_device,
+    HardwareCommand::Write(HardwareWriteCmd::new(
+      &[Uuid::nil()],
+      Endpoint::Tx,
+      vec![0xF1, 0],
+      false,
+    )),
+  )
+  .await;
+  check_test_recv_value(
+    &Duration::from_millis(150),
+    &mut test_device,
+    HardwareCommand::Write(HardwareWriteCmd::new(
+      &[Uuid::nil()],
+      Endpoint::Tx,
+      vec![0xF2, 0],
+      false,
+    )),
+  )
+  .await;
+
+  assert!(client.stop_all_devices().await.is_ok());
 }
-*/
+
 // TODO Test calling connect twice
-// TODO Test calling disconnect twice w/o connection
 // TODO Test invalid return on RequestServerInfo
 // TODO Test invalid return on DeviceList
 // TODO Test receiving unmatched Ok (should emit error)
 // TODO Test receiving unmatched DeviceRemoved
 // TODO Test receiving Error when expecting Ok (i.e. StartScanning returns an error)
 // TODO Test receiving wrong message expecting Ok (i.e. StartScanning returns DeviceList)
-*/

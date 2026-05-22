@@ -12,45 +12,58 @@ use tokio_test::assert_ok;
 
 const BASE_CONFIG_JSON: &str = r#"
 {
-  "version": 999,
+  "version": {
+    "major": 5,
+    "minor": 999
+  },
   "protocols": {
-    "kiiroo-v21": {
-      "btle": {
-        "names": [
-          "OhMiBod LUMEN"
-        ],
-        "services": {
-          "00001900-0000-1000-8000-00805f9b34fb": {
-            "whitelist": "00001901-0000-1000-8000-00805f9b34fb",
-            "tx": "00001902-0000-1000-8000-00805f9b34fb",
-            "rx": "00001903-0000-1000-8000-00805f9b34fb"
-          },
-          "a0d70001-4c16-4ba7-977a-d394920e13a3": {
-            "tx": "a0d70002-4c16-4ba7-977a-d394920e13a3",
-            "rx": "a0d70003-4c16-4ba7-977a-d394920e13a3"
-          }
-        }
-      },
-      "defaults": {
-        "name": "Kiiroo V2.1 Device",
-        "messages": {}
-      },
-      "configurations": [
+    "aneros": {
+      "communication": [
         {
-          "identifier": [
-            "OhMiBod LUMEN"
-          ],
-          "name": "OhMiBod Lumen",
-          "messages": {
-            "ScalarCmd": [
-              {
-                "ActuatorType": "Vibrate",
-                "StepRange": [0, 100]
+          "btle": {
+            "names": [
+              "Massage Demo"
+            ],
+            "services": {
+              "0000ff00-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ff01-0000-1000-8000-00805f9b34fb"
               }
-            ]
+            }
           }
         }
-      ]
+      ],
+      "defaults": {
+        "features": [
+          {
+            "index": 0,
+            "description": "Perineum Vibrator",
+            "id": "a980bc1a-5554-4293-a75f-6d17bf25ebee",
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  127
+                ]
+              }
+            }
+          },
+          {
+            "index": 1,
+            "description": "Internal Vibrator",
+            "id": "811d7d6e-6a75-4925-943a-a06042223e3a",
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  127
+                ]
+              }
+            }
+          }
+        ],
+        "id": "f023f0f4-6629-469e-84c4-171ed4939f3d",
+        "name": "Aneros Vivi"
+      }
     }
   }
 }
@@ -115,67 +128,53 @@ async fn test_invalid_null_version_config() {
 }
 
 #[tokio::test]
-#[ignore = "Still need to update for new message format"]
 async fn test_basic_device_config() {
   assert!(load_protocol_configs(&Some(BASE_CONFIG_JSON.to_owned()), &None, false).is_ok());
 }
 
 #[tokio::test]
-#[ignore = "Needs upgrade to new config format"]
 async fn test_valid_user_config() {
   let user_config_json = r#"
   {
     "version": {
-      major: 3,
-      minor: 0
+      "major": 5,
+      "minor": 999
     },
     "user_configs": {
       "devices": [
         {
           "identifier": {
-            "address": "UserConfigTest",
-            "protocol": "lovense",
-            "identifier": "B"
+            "address": "range-test",
+            "protocol": "aneros",
+            "identifier": "Massage Demo"
           },
           "config": {
-            "name": "Lovense Test Device",
+            "name": "Aneros Vivi",
+            "id": "66bf8a8e-bc5b-4074-9a9d-48892e1c74e2",
+            "base_id": "f023f0f4-6629-469e-84c4-171ed4939f3d",
             "features": [
               {
-                "description": "Test Speed",
-                "actuator": {
-                  "step_range": [
-                    0,
-                    20
-                  ],
-                  "step_limit: [
-                    10,
-                    15
-                  ],
-                  "messages": [
-                    "ScalarCmd"
-                  ]
+                "id": "0b281420-8e58-43e6-ac35-2c3d49099255",
+                "base_id": "a980bc1a-5554-4293-a75f-6d17bf25ebee",
+                "output": {
+                  "vibrate": {
+                    "value": [
+                      0,
+                      64
+                    ]
+                  }
                 }
               },
               {
-                "description": "Battery Level",
-                "sensor": {
-                  "value-range": [
-                    [
-                      0,
-                      100
-                    ]
-                  ],
-                  "messages": [
-                    "SensorReadCmd"
-                  ]
-                }
+                "id": "5ce69580-3f2a-4d60-8ad5-5bf664ce8e5f",
+                "base_id": "811d7d6e-6a75-4925-943a-a06042223e3a"
               }
             ],
             "user_config": {
               "allow": false,
               "deny": false,
               "index": 0,
-              "display_name": "Lovense Name Test"
+              "display_name": "Range Test"
             }
           }
         }
@@ -188,54 +187,45 @@ async fn test_valid_user_config() {
       &Some(user_config_json.to_owned()),
       false
     )
-    .is_err()
+    .is_ok()
   );
 }
 
 #[tokio::test]
-#[ignore = "Needs upgrade to new config format"]
 async fn test_invalid_step_range_device_config_wrong_range_length() {
   let user_config_json = r#"
   {
     "version": {
-      major: 3,
-      minor: 0
+      "major": 5,
+      "minor": 999
     },
     "user_configs": {
       "devices": [
         {
           "identifier": {
-            "address": "UserConfigTest",
-            "protocol": "lovense",
-            "identifier": "B"
+            "address": "range-test",
+            "protocol": "aneros",
+            "identifier": "Massage Demo"
           },
           "config": {
-            "name": "Lovense Test Device",
+            "name": "Aneros Vivi",
+            "id": "66bf8a8e-bc5b-4074-9a9d-48892e1c74e2",
+            "base_id": "f023f0f4-6629-469e-84c4-171ed4939f3d",
             "features": [
               {
-                "description": "Test Speed",
-                "actuator": {
-                  "value": [
-                    10
-                  ],
-                  "messages": [
-                    "ScalarCmd"
-                  ]
+                "id": "0b281420-8e58-43e6-ac35-2c3d49099255",
+                "base_id": "a980bc1a-5554-4293-a75f-6d17bf25ebee",
+                "output": {
+                  "vibrate": {
+                    "value": [
+                      10
+                    ]
+                  }
                 }
               },
               {
-                "description": "Battery Level",
-                "sensor": {
-                  "value-range": [
-                    [
-                      0,
-                      100
-                    ]
-                  ],
-                  "messages": [
-                    "SensorReadCmd"
-                  ]
-                }
+                "id": "5ce69580-3f2a-4d60-8ad5-5bf664ce8e5f",
+                "base_id": "811d7d6e-6a75-4925-943a-a06042223e3a"
               }
             ],
             "user_config": {
@@ -271,7 +261,6 @@ async fn test_server_builder_device_config_invalid_json() {
 }
 
 #[tokio::test]
-#[ignore = "Not testing the right thing"]
 async fn test_server_builder_device_config_old_config_version() {
   // missing version block.
   let device_json = r#"{
