@@ -12,6 +12,7 @@ use std::{
   collections::HashMap,
   fmt::{self, Debug},
   sync::Arc,
+  sync::RwLock,
 };
 use uuid::Uuid;
 
@@ -21,8 +22,8 @@ use crate::{
   ProtocolCommunicationSpecifier,
   ServerDeviceDefinition,
   ServerDeviceDefinitionBuilder,
-  UserDeviceIdentifier,
   SimulatedDeviceConfigEntry,
+  UserDeviceIdentifier,
   device_config_file::{SimulatedDeviceArchetype, SimulatedDeviceFeatureSummary},
 };
 
@@ -164,7 +165,7 @@ impl DeviceConfigurationManagerBuilder {
       user_communication_specifiers: self.user_communication_specifiers.clone(),
       base_device_definitions: attribute_tree_map,
       user_device_definitions: user_attribute_tree_map,
-      simulated_devices: self.simulated_devices.clone(),
+      simulated_devices_store: RwLock::new(self.simulated_devices.clone()),
       //protocol_map,
     })
   }
@@ -200,8 +201,7 @@ pub struct DeviceConfigurationManager {
   #[getset(get = "pub")]
   user_device_definitions: DashMap<UserDeviceIdentifier, ServerDeviceDefinition>,
   /// Simulated device configurations from the user config.
-  #[getset(get = "pub")]
-  simulated_devices: Vec<SimulatedDeviceConfigEntry>,
+  simulated_devices_store: RwLock<Vec<SimulatedDeviceConfigEntry>>,
 }
 
 impl Debug for DeviceConfigurationManager {
@@ -239,8 +239,74 @@ impl DeviceConfigurationManager {
       user_communication_specifiers: DashMap::new(),
       base_device_definitions,
       user_device_definitions: DashMap::new(),
-      simulated_devices: Vec::new(),
+      simulated_devices_store: RwLock::new(Vec::new()),
     }
+  }
+
+  pub fn simulated_devices(&self) -> Vec<SimulatedDeviceConfigEntry> {
+    self
+      .simulated_devices_store
+      .read()
+      .expect("Simulated device config lock should not be poisoned")
+      .clone()
+  }
+
+  fn valid_simulated_archetypes(&self) -> std::collections::HashSet<String> {
+    self
+      .base_communication_specifiers
+      .get("simulated")
+      .into_iter()
+      .flat_map(|specifiers| specifiers.iter())
+      .filter_map(|spec| {
+        if let ProtocolCommunicationSpecifier::Simulated(sim) = spec {
+          Some(sim.names().iter().cloned())
+        } else {
+          None
+        }
+      })
+      .flatten()
+      .collect()
+  }
+
+  pub fn add_simulated_device(
+    &self,
+    device: SimulatedDeviceConfigEntry,
+  ) -> Result<(), ButtplugDeviceError> {
+    let valid_archetypes = self.valid_simulated_archetypes();
+    if !valid_archetypes.contains(&device.identifier) {
+      return Err(ButtplugDeviceError::DeviceConfigurationError(format!(
+        "Invalid simulated device archetype '{}'. Valid archetypes: {:?}",
+        device.identifier, valid_archetypes
+      )));
+    }
+
+    let mut simulated_devices = self
+      .simulated_devices_store
+      .write()
+      .expect("Simulated device config lock should not be poisoned");
+    if simulated_devices
+      .iter()
+      .any(|existing| existing.address == device.address)
+    {
+      return Err(ButtplugDeviceError::DeviceConfigurationError(format!(
+        "Duplicate simulated device address '{}' for archetype '{}'",
+        device.address, device.identifier
+      )));
+    }
+
+    simulated_devices.push(device);
+    Ok(())
+  }
+
+  pub fn remove_simulated_device(&self, address: &str) {
+    let mut simulated_devices = self
+      .simulated_devices_store
+      .write()
+      .expect("Simulated device config lock should not be poisoned");
+    simulated_devices.retain(|device| device.address != address);
+    self.user_device_definitions.retain(|identifier, _| {
+      identifier.protocol() != "simulated" || identifier.address() != address
+    });
   }
 
   pub fn add_user_communication_specifier(
@@ -403,7 +469,9 @@ impl DeviceConfigurationManager {
     identifier: &UserDeviceIdentifier,
   ) {
     if let Some(entry) = self
-      .simulated_devices
+      .simulated_devices_store
+      .read()
+      .expect("Simulated device config lock should not be poisoned")
       .iter()
       .find(|d| d.address() == identifier.address())
     {
@@ -447,5 +515,62 @@ impl DeviceConfigurationManager {
         }
       })
       .collect()
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::load_protocol_configs;
+
+  #[test]
+  fn test_add_simulated_device_validates_archetype_and_address() {
+    let dcm = load_protocol_configs(&None, &None, false)
+      .expect("Should load base configs")
+      .finish()
+      .expect("Should build DCM");
+
+    let entry = SimulatedDeviceConfigEntry::new("simulated-1vibe", None);
+    let duplicate = entry.clone();
+
+    dcm
+      .add_simulated_device(entry)
+      .expect("Valid simulated archetype should add");
+    assert_eq!(dcm.simulated_devices().len(), 1);
+
+    let duplicate_result = dcm.add_simulated_device(duplicate);
+    assert!(duplicate_result.is_err());
+
+    let invalid_result = dcm.add_simulated_device(SimulatedDeviceConfigEntry::new(
+      "not-a-simulated-device",
+      None,
+    ));
+    assert!(invalid_result.is_err());
+  }
+
+  #[test]
+  fn test_remove_simulated_device_removes_matching_user_definition() {
+    let dcm = load_protocol_configs(&None, &None, false)
+      .expect("Should load base configs")
+      .finish()
+      .expect("Should build DCM");
+
+    let entry = SimulatedDeviceConfigEntry::new("simulated-1vibe", None);
+    let address = entry.address.clone();
+    let identifier =
+      UserDeviceIdentifier::new(&address, "simulated", &Some(entry.identifier.clone()));
+
+    dcm
+      .add_simulated_device(entry)
+      .expect("Valid simulated archetype should add");
+    dcm
+      .device_definition(&identifier)
+      .expect("Simulated device definition should resolve");
+    assert!(dcm.user_device_definitions().contains_key(&identifier));
+
+    dcm.remove_simulated_device(&address);
+
+    assert!(dcm.simulated_devices().is_empty());
+    assert!(!dcm.user_device_definitions().contains_key(&identifier));
   }
 }

@@ -260,10 +260,11 @@ pub fn save_user_config(dcm: &DeviceConfigurationManager) -> Result<String, Butt
       },
     );
   }
-  let simulated_devices = if dcm.simulated_devices().is_empty() {
+  let simulated_devices = dcm.simulated_devices();
+  let simulated_devices = if simulated_devices.is_empty() {
     None
   } else {
-    Some(dcm.simulated_devices().clone())
+    Some(simulated_devices)
   };
   let user_config_definition = UserConfigDefinition {
     protocols: Some(user_protos.clone()),
