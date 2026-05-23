@@ -40,9 +40,9 @@ use serde::{Deserialize, Serialize};
 use std::{fmt::Display, sync::Arc};
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
-  include_str!("../../build-config/buttplug-device-config-v4.json");
+  include_str!("../../build-config/buttplug-device-config-v5.json");
 static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
-  include_str!("../../device-config-v4/buttplug-device-config-schema-v4.json");
+  include_str!("../../device-config/buttplug-device-config-schema-v5.json");
 
 #[derive(Deserialize, Serialize, Debug, CopyGetters, Clone, Copy)]
 #[getset(get_copy = "pub", get_mut = "pub")]

@@ -11,10 +11,10 @@ use buttplug_core::util::json::JSONValidator;
 use serde::{Deserialize, Serialize};
 use serde_json::{self, Value};
 
-const VERSION_FILE: &str = "./device-config-v4/version.yaml";
-const OUTPUT_FILE: &str = "./build-config/buttplug-device-config-v4.json";
-const PROTOCOL_DIR: &str = "./device-config-v4/protocols/";
-const SCHEMA_FILE: &str = "./device-config-v4/buttplug-device-config-schema-v4.json";
+const VERSION_FILE: &str = "./device-config/version.yaml";
+const OUTPUT_FILE: &str = "./build-config/buttplug-device-config-v5.json";
+const PROTOCOL_DIR: &str = "./device-config/protocols/";
+const SCHEMA_FILE: &str = "./device-config/buttplug-device-config-schema-v5.json";
 
 #[derive(Serialize, Deserialize, Eq, PartialEq)]
 struct VersionFile {
