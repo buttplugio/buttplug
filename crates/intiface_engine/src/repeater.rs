@@ -33,12 +33,11 @@ impl ButtplugRepeater {
     }
   }
 
-  pub async fn listen(&self) {
+  pub async fn listen(&self) -> Result<(), std::io::Error> {
     info!("Repeater loop starting");
     let addr = format!("127.0.0.1:{}", self.local_port);
 
-    let try_socket = TcpListener::bind(&addr).await;
-    let listener = try_socket.expect("Failed to bind");
+    let listener = TcpListener::bind(&addr).await?;
     info!("Listening on: {}", addr);
 
     loop {
@@ -65,6 +64,7 @@ impl ButtplugRepeater {
       }
     }
     info!("Repeater loop exiting");
+    Ok(())
   }
 
   async fn accept_connection(server_addr: String, stream: TcpStream) {

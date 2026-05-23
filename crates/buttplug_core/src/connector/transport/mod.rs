@@ -8,9 +8,7 @@
 pub mod stream;
 
 use crate::connector::{
-  ButtplugConnectorError,
-  ButtplugConnectorResultFuture,
-  ButtplugSerializedMessage,
+  ButtplugConnectorError, ButtplugConnectorResultFuture, ButtplugSerializedMessage,
 };
 use displaydoc::Display;
 use futures::future::BoxFuture;
@@ -44,4 +42,11 @@ pub trait ButtplugConnectorTransport: Send + Sync {
 pub enum ButtplugConnectorTransportSpecificError {
   #[error("Network error: {0}")]
   GenericNetworkError(String),
+  #[error("Socket bind error on {address}:{port}: {kind:?}: {message}")]
+  SocketBindError {
+    address: String,
+    port: u16,
+    kind: std::io::ErrorKind,
+    message: String,
+  },
 }

@@ -8,6 +8,12 @@
 use buttplug_server_device_config::UserDeviceIdentifier;
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(tag = "code", rename_all = "snake_case")]
+pub enum EngineErrorDetail {
+  PortInUse { address: String, port: u16 },
+}
+
 // Everything in this struct is an object, even if it has null contents. This is to make other
 // languages happy when trying to recompose JSON into objects.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -18,6 +24,8 @@ pub enum EngineMessage {
   EngineStarted {},
   EngineError {
     error: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    detail: Option<EngineErrorDetail>,
   },
   EngineServerCreated {},
   EngineStopped {},
@@ -51,4 +59,48 @@ pub enum EngineMessage {
 pub enum IntifaceMessage {
   RequestEngineVersion { expected_version: u32 },
   Stop {},
+}
+
+#[cfg(test)]
+mod test {
+  use super::{EngineErrorDetail, EngineMessage};
+  use serde_json::json;
+
+  #[test]
+  fn generic_engine_error_serializes_without_structured_fields() {
+    let message = EngineMessage::EngineError {
+      error: "startup failed".to_owned(),
+      detail: None,
+    };
+
+    assert_eq!(
+      serde_json::to_value(message).unwrap(),
+      json!({"EngineError": {"error": "startup failed"}}),
+    );
+  }
+
+  #[test]
+  fn port_in_use_engine_error_serializes_structured_fields() {
+    let message = EngineMessage::EngineError {
+      error: "address already in use".to_owned(),
+      detail: Some(EngineErrorDetail::PortInUse {
+        address: "127.0.0.1".to_owned(),
+        port: 12345,
+      }),
+    };
+
+    assert_eq!(
+      serde_json::to_value(message).unwrap(),
+      json!({
+        "EngineError": {
+          "error": "address already in use",
+          "detail": {
+            "code": "port_in_use",
+            "port": 12345,
+            "address": "127.0.0.1"
+          }
+        }
+      }),
+    );
+  }
 }

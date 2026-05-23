@@ -12,18 +12,21 @@ use crate::{
   error::IntifaceEngineError,
   frontend::{
     Frontend, frontend_external_event_loop, frontend_server_event_loop,
-    process_messages::EngineMessage,
+    process_messages::{EngineErrorDetail, EngineMessage},
   },
   mdns::IntifaceMdns,
   options::EngineOptions,
-  remote_server::ButtplugRemoteServerEvent,
+  remote_server::{ButtplugRemoteServerEvent, ButtplugServerConnectorError},
   rest_server::IntifaceRestServer,
 };
 
+use buttplug_core::connector::{
+  ButtplugConnectorError, transport::ButtplugConnectorTransportSpecificError,
+};
 use buttplug_server_device_config::{DeviceConfigurationManager, save_user_config};
 use futures::{StreamExt, pin_mut};
 use once_cell::sync::OnceCell;
-use std::{path::Path, sync::Arc, time::Duration};
+use std::{io::ErrorKind, path::Path, sync::Arc, time::Duration};
 use tokio::{fs, select};
 use tokio_util::sync::CancellationToken;
 
@@ -49,6 +52,42 @@ pub fn maybe_crash_task_thread(options: &EngineOptions) {
 pub struct IntifaceEngine {
   stop_token: Arc<CancellationToken>,
   backdoor_server: OnceCell<Arc<BackdoorServer>>,
+}
+
+fn generic_engine_error(error: String) -> EngineMessage {
+  EngineMessage::EngineError {
+    error,
+    detail: None,
+  }
+}
+
+fn port_in_use_engine_error(error: String, address: String, port: u16) -> EngineMessage {
+  EngineMessage::EngineError {
+    error,
+    detail: Some(EngineErrorDetail::PortInUse { address, port }),
+  }
+}
+
+async fn send_engine_error(frontend: &Option<Arc<dyn Frontend>>, message: EngineMessage) {
+  if let Some(frontend) = frontend {
+    frontend.send(message).await;
+  }
+}
+
+fn websocket_port_in_use_error(err: &ButtplugServerConnectorError) -> Option<(String, u16)> {
+  match err {
+    ButtplugServerConnectorError::ConnectorError(
+      ButtplugConnectorError::TransportSpecificError(
+        ButtplugConnectorTransportSpecificError::SocketBindError {
+          address,
+          port,
+          kind,
+          message: _,
+        },
+      ),
+    ) if *kind == ErrorKind::AddrInUse => Some((address.clone(), *port)),
+    _ => None,
+  }
 }
 
 impl IntifaceEngine {
@@ -96,8 +135,22 @@ impl IntifaceEngine {
         _ = self.stop_token.cancelled() => {
           info!("Owner requested process exit, exiting.");
         }
-        _ = repeater.listen() => {
+        result = repeater.listen() => {
           info!("Repeater listener stopped, exiting.");
+          if let Err(e) = result {
+            error!("Error running repeater listener: {:?}", e);
+            let error = format!("Repeater listener error: {e:?}");
+            let message = if e.kind() == ErrorKind::AddrInUse {
+              port_in_use_engine_error(
+                error,
+                "127.0.0.1".to_owned(),
+                options.repeater_local_port().unwrap(),
+              )
+            } else {
+              generic_engine_error(error)
+            };
+            send_engine_error(&frontend, message).await;
+          }
         }
       };
       if let Some(frontend) = &frontend {
@@ -129,6 +182,13 @@ impl IntifaceEngine {
           info!("Rest API listener stopped, exiting.");
           if let Err(e) = res {
             error!("Error running Intiface Central RestAPI Server: {:?}", e);
+            let error = format!("REST API listener error: {e:?}");
+            let message = if e.kind() == ErrorKind::AddrInUse {
+              port_in_use_engine_error(error, "127.0.0.1".to_owned(), rest_port)
+            } else {
+              generic_engine_error(error)
+            };
+            send_engine_error(&frontend, message).await;
           }
         }
       };
@@ -202,12 +262,15 @@ impl IntifaceEngine {
             Ok(_) => info!("Connection dropped, restarting stay open loop."),
             Err(e) => {
               error!("Process Error: {:?}", e);
-
-              if let Some(frontend) = &frontend {
-                frontend
-                  .send(EngineMessage::EngineError{ error: format!("Process Error: {:?}", e).to_owned()})
-                  .await;
-              }
+              let error = format!("Process Error: {e:?}");
+              let port_in_use = websocket_port_in_use_error(&e);
+              let message = if let Some((address, port)) = port_in_use {
+                exit_requested = true;
+                port_in_use_engine_error(error, address, port)
+              } else {
+                generic_engine_error(error)
+              };
+              send_engine_error(&frontend, message).await;
             }
           }
         }

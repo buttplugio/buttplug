@@ -7,11 +7,9 @@
 
 use buttplug_core::{
   connector::{
-    ButtplugConnectorError,
-    ButtplugConnectorResultFuture,
+    ButtplugConnectorError, ButtplugConnectorResultFuture,
     transport::{
-      ButtplugConnectorTransport,
-      ButtplugConnectorTransportSpecificError,
+      ButtplugConnectorTransport, ButtplugConnectorTransportSpecificError,
       ButtplugTransportIncomingMessage,
     },
   },
@@ -212,7 +210,9 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
       "127.0.0.1"
     };
 
-    let addr = format!("{}:{}", base_addr, self.port);
+    let address = base_addr.to_owned();
+    let port = self.port;
+    let addr = format!("{}:{}", address, port);
     debug!("Websocket: Trying to listen on {}", addr);
     let response_sender_clone = incoming_sender;
     let disconnect_notifier_clone = disconnect_notifier;
@@ -222,7 +222,12 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
       debug!("Websocket: Socket bound.");
       let listener = try_socket.map_err(|e| {
         ButtplugConnectorError::TransportSpecificError(
-          ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{e:?}")),
+          ButtplugConnectorTransportSpecificError::SocketBindError {
+            address,
+            port,
+            kind: e.kind(),
+            message: e.to_string(),
+          },
         )
       })?;
       debug!("Websocket: Listening on: {}", addr);
@@ -266,5 +271,55 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
       Ok(())
     }
     .boxed()
+  }
+}
+
+#[cfg(test)]
+mod test {
+  use super::ButtplugWebsocketServerTransportBuilder;
+  use buttplug_core::{
+    connector::{
+      ButtplugConnectorError,
+      transport::{
+        ButtplugConnectorTransport, ButtplugConnectorTransportSpecificError,
+        ButtplugTransportIncomingMessage,
+      },
+    },
+    message::serializer::ButtplugSerializedMessage,
+  };
+  use std::io::ErrorKind;
+  use tokio::{net::TcpListener, sync::mpsc};
+
+  #[tokio::test]
+  async fn bind_addr_in_use_returns_structured_error() {
+    let _listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let port = _listener.local_addr().unwrap().port();
+    let transport = ButtplugWebsocketServerTransportBuilder::default()
+      .port(port)
+      .finish();
+    let (_outgoing_sender, outgoing_receiver) = mpsc::channel::<ButtplugSerializedMessage>(1);
+    let (incoming_sender, _incoming_receiver) =
+      mpsc::channel::<ButtplugTransportIncomingMessage>(1);
+
+    let err = transport
+      .connect(outgoing_receiver, incoming_sender)
+      .await
+      .unwrap_err();
+
+    match err {
+      ButtplugConnectorError::TransportSpecificError(
+        ButtplugConnectorTransportSpecificError::SocketBindError {
+          address,
+          port: error_port,
+          kind,
+          message: _,
+        },
+      ) => {
+        assert_eq!(address, "127.0.0.1");
+        assert_eq!(error_port, port);
+        assert_eq!(kind, ErrorKind::AddrInUse);
+      }
+      other => panic!("Unexpected error: {other:?}"),
+    }
   }
 }

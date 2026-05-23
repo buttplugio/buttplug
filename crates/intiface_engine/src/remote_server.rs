@@ -5,7 +5,9 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 use buttplug_core::{
-  connector::ButtplugConnector, errors::ButtplugError, message::ButtplugServerMessageV4,
+  connector::{ButtplugConnector, ButtplugConnectorError},
+  errors::ButtplugError,
+  message::ButtplugServerMessageV4,
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use buttplug_server::{
@@ -52,7 +54,7 @@ pub enum ButtplugRemoteServerEvent {
 #[derive(Error, Debug)]
 pub enum ButtplugServerConnectorError {
   #[error("Cannot bring up server for connection: {0}")]
-  ConnectorError(String),
+  ConnectorError(ButtplugConnectorError),
 }
 
 #[derive(Getters)]
@@ -323,7 +325,7 @@ impl ButtplugRemoteServer {
       connector
         .connect(connector_sender)
         .await
-        .map_err(|e| ButtplugServerConnectorError::ConnectorError(format!("{:?}", e)))?;
+        .map_err(ButtplugServerConnectorError::ConnectorError)?;
       run_server(
         server,
         event_sender,
