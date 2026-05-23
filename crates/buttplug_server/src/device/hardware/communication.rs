@@ -48,9 +48,10 @@ pub trait HardwareCommunicationManager: Send + Sync {
   // Events happen via channel senders passed to the comm manager.
 }
 
-#[derive(Error, Debug, Clone, Display, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Error, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum HardwareSpecificError {
-  // HardwareSpecificError: {} Error: {}
+  /// Hardware-specific error.
+  #[error("{0} error: {1}")]
   HardwareSpecificError(String, String),
 }
 

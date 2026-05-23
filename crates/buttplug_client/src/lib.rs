@@ -50,7 +50,6 @@ use std::{
     atomic::{AtomicBool, Ordering},
   },
 };
-use strum_macros::Display;
 use thiserror::Error;
 use tokio::sync::{Mutex, broadcast, mpsc};
 
@@ -101,17 +100,19 @@ impl ButtplugClientMessageFuturePair {
 /// - [ButtplugConnectorError], which means there was a problem with the connection between the
 ///   client and the server, like a network connection issue.
 /// - [ButtplugError], which is an error specific to the Buttplug Protocol.
-#[derive(Debug, Error, Display)]
+#[derive(Debug, Error)]
 pub enum ButtplugClientError {
-  /// Connector error
+  /// Connector error.
   #[error(transparent)]
   ButtplugConnectorError(#[from] ButtplugConnectorError),
-  /// Protocol error
+  /// Protocol error.
   #[error(transparent)]
   ButtplugError(#[from] ButtplugError),
-  /// Error converting output command: {}
+  /// Error converting output command.
+  #[error("Error converting output command: {0}")]
   ButtplugOutputCommandConversionError(String),
-  /// Multiple inputs available for {}, must use specific feature
+  /// Multiple inputs are available, so a specific feature must be used.
+  #[error("Multiple inputs available for {0}, must use specific feature")]
   ButtplugMultipleInputAvailableError(InputType),
 }
 

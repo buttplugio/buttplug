@@ -67,7 +67,6 @@ pub mod remote_connector;
 pub mod transport;
 
 use crate::message::{ButtplugMessage, serializer::ButtplugSerializedMessage};
-use displaydoc::Display;
 use futures::{
   channel::oneshot,
   future::{self, BoxFuture, FutureExt},
@@ -86,17 +85,22 @@ pub type ButtplugConnectorResultFuture = BoxFuture<'static, ButtplugConnectorRes
 ///
 /// Errors that relate to the communication method of the client connector. Can
 /// include network/IPC protocol specific errors.
-#[derive(Debug, Error, Display)]
+#[derive(Debug, Error)]
 pub enum ButtplugConnectorError {
   /// Connector is not currently connected to a remote.
+  #[error("Connector is not currently connected to a remote.")]
   ConnectorNotConnected,
   /// Connector channel has closed, meaning disconnection is likely.
+  #[error("Connector channel has closed, meaning disconnection is likely.")]
   ConnectorChannelClosed,
   /// Connector already connected, cannot be connected twice.
+  #[error("Connector already connected, cannot be connected twice.")]
   ConnectorAlreadyConnected,
-  /// Connector error: {0}
+  /// Generic connector error.
+  #[error("Connector error: {0}")]
   ConnectorGenericError(String),
-  /// Specific error for connector type: {0}.
+  /// Specific error for connector type.
+  #[error("Specific error for connector type: {0}.")]
   TransportSpecificError(transport::ButtplugConnectorTransportSpecificError),
 }
 
