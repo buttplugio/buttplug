@@ -23,20 +23,36 @@ use uuid::{Uuid, uuid};
 
 const LOVENSE_STROKER_PROTOCOL_UUID: Uuid = uuid!("a97fc354-5561-459a-bc62-110d7c2868ac");
 
+struct LovenseStrokerState {
+  goal_position: AtomicU32,
+  current_position: AtomicU32,
+  duration: AtomicU32,
+}
+
+impl LovenseStrokerState {
+  fn new() -> Self {
+    Self {
+      goal_position: AtomicU32::new(0),
+      current_position: AtomicU32::new(0),
+      duration: AtomicU32::new(0),
+    }
+  }
+}
+
 pub struct LovenseStroker {
-  linear_info: Arc<(AtomicU32, AtomicU32)>,
+  state: Arc<LovenseStrokerState>,
   need_range_zerod: bool,
 }
 
 impl LovenseStroker {
   pub fn new(hardware: Arc<Hardware>, need_range_zerod: bool) -> Self {
-    let linear_info = Arc::new((AtomicU32::new(0), AtomicU32::new(0)));
+    let state = Arc::new(LovenseStrokerState::new());
     buttplug_core::spawn!(
       "LovenseStroker update linear movement",
-      update_linear_movement(hardware.clone(), linear_info.clone(),)
+      update_linear_movement(hardware.clone(), state.clone(),)
     );
     Self {
-      linear_info,
+      state,
       need_range_zerod,
     }
   }
@@ -54,8 +70,8 @@ impl ProtocolHandler for LovenseStroker {
     position: u32,
     duration: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.linear_info.0.store(position, Ordering::Relaxed);
-    self.linear_info.1.store(duration, Ordering::Relaxed);
+    self.state.duration.store(duration, Ordering::Relaxed);
+    self.state.goal_position.store(position, Ordering::Relaxed);
     Ok(vec![])
   }
 
@@ -75,6 +91,14 @@ impl ProtocolHandler for LovenseStroker {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    if speed == 0 {
+      let current_position = self.state.current_position.load(Ordering::Relaxed);
+      self.state.duration.store(0, Ordering::Relaxed);
+      self
+        .state
+        .goal_position
+        .store(current_position, Ordering::Relaxed);
+    }
     Ok(vec![
       HardwareWriteCmd::new(
         &[feature_id],
@@ -97,20 +121,24 @@ impl ProtocolHandler for LovenseStroker {
   }
 }
 
-async fn update_linear_movement(device: Arc<Hardware>, linear_info: Arc<(AtomicU32, AtomicU32)>) {
+async fn update_linear_movement(device: Arc<Hardware>, state: Arc<LovenseStrokerState>) {
   let mut last_goal_position = 0i32;
   let mut current_move_amount = 0i32;
   let mut current_position = 0i32;
   loop {
     // See if we've updated our goal position
-    let goal_position = linear_info.0.load(Ordering::Relaxed) as i32;
+    let goal_position = state.goal_position.load(Ordering::Relaxed) as i32;
     // If we have and it's not the same, recalculate based on current status.
     if last_goal_position != goal_position {
       last_goal_position = goal_position;
       // We move every 100ms, so divide the movement into that many chunks.
       // If we're moving so fast it'd be under our 100ms boundary, just move in 1 step.
-      let move_steps = (linear_info.1.load(Ordering::Relaxed) / 100).max(1);
-      current_move_amount = (goal_position - current_position) / move_steps as i32;
+      let move_steps = (state.duration.load(Ordering::Relaxed) / 100).max(1);
+      let distance = goal_position - current_position;
+      current_move_amount = distance / move_steps as i32;
+      if current_move_amount == 0 {
+        current_move_amount = distance.signum();
+      }
     }
 
     // If we aren't going anywhere, just pause then restart
@@ -128,6 +156,9 @@ async fn update_linear_movement(device: Arc<Hardware>, linear_info: Arc<(AtomicU
     } else if current_position > last_goal_position {
       current_position = last_goal_position;
     }
+    state
+      .current_position
+      .store(current_position as u32, Ordering::Relaxed);
 
     let lovense_cmd = format!("FSetSite:{current_position};");
 
