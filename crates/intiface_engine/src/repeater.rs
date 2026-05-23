@@ -68,14 +68,25 @@ impl ButtplugRepeater {
   }
 
   async fn accept_connection(server_addr: String, stream: TcpStream) {
-    let client_addr = stream
-      .peer_addr()
-      .expect("connected streams should have a peer address");
+    let client_addr = match stream.peer_addr() {
+      Ok(addr) => addr,
+      Err(err) => {
+        error!("Cannot get repeater client address: {:?}", err);
+        return;
+      }
+    };
     info!("Client address: {}", client_addr);
 
-    let client_ws_stream = tokio_tungstenite::accept_async(stream)
-      .await
-      .expect("Error during the websocket handshake occurred");
+    let client_ws_stream = match tokio_tungstenite::accept_async(stream).await {
+      Ok(stream) => stream,
+      Err(err) => {
+        error!(
+          "Error during repeater websocket handshake with {}: {:?}",
+          client_addr, err
+        );
+        return;
+      }
+    };
 
     info!("New WebSocket connection: {}", client_addr);
 
@@ -104,5 +115,31 @@ impl ButtplugRepeater {
       .forward(client_write);
     future::select(client_fut, server_fut).await;
     info!("Closing repeater connection.");
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use tokio::{io::AsyncWriteExt, net::TcpListener};
+
+  #[tokio::test]
+  async fn accept_connection_returns_on_incomplete_websocket_handshake() {
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let addr = listener.local_addr().unwrap();
+
+    let accept_task = tokio::spawn(async move {
+      let (stream, _) = listener.accept().await.unwrap();
+      ButtplugRepeater::accept_connection("ws://127.0.0.1:1".to_owned(), stream).await;
+    });
+
+    let mut client = TcpStream::connect(addr).await.unwrap();
+    client
+      .write_all(b"GET / HTTP/1.1\r\nHost: localhost\r\nUpgrade: websocket\r\n")
+      .await
+      .unwrap();
+    client.shutdown().await.unwrap();
+
+    assert!(accept_task.await.is_ok());
   }
 }
