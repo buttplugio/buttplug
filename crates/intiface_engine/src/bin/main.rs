@@ -118,10 +118,15 @@ pub struct IntifaceCLIArguments {
   #[getset(get_copy = "pub")]
   use_lovense_dongle_hid: bool,
 
-  /// turn off xinput gamepad device support (windows only)
+  /// turn on xinput gamepad device support (windows only)
   #[argh(switch)]
   #[getset(get_copy = "pub")]
   use_xinput: bool,
+
+  /// turn on SDL2 gamepad rumble support (cross-platform: macOS, Windows, Linux)
+  #[argh(switch)]
+  #[getset(get_copy = "pub")]
+  use_sdl_gamepad: bool,
 
   /// turn on lovense connect app device support (off by default)
   #[argh(switch)]
@@ -246,6 +251,7 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
       .use_lovense_dongle_serial(args.use_lovense_dongle_serial())
       .use_lovense_dongle_hid(args.use_lovense_dongle_hid())
       .use_xinput(args.use_xinput())
+      .use_sdl_gamepad(args.use_sdl_gamepad())
       .use_lovense_connect(args.use_lovense_connect())
       .use_device_websocket_server(args.use_device_websocket_server())
       .max_ping_time(args.max_ping_time())

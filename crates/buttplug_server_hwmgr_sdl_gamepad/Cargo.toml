@@ -1,0 +1,31 @@
+[package]
+name = "buttplug_server_hwmgr_sdl_gamepad"
+version = "10.0.2"
+authors = ["chiefautism"]
+description = "Buttplug Hardware Manager - SDL2 Gamepad (cross-platform rumble for Xbox/PS/Switch controllers)"
+license = "BSD-3-Clause"
+homepage = "http://buttplug.io"
+repository = "https://github.com/chiefautism/buttplug.git"
+keywords = ["gamepad", "rumble", "haptics", "controller", "teledildonics"]
+edition = "2024"
+
+[lib]
+name = "buttplug_server_hwmgr_sdl_gamepad"
+path = "src/lib.rs"
+
+[dependencies]
+buttplug_core = { version = "10.0.2", path = "../buttplug_core", default-features = false }
+buttplug_server = { version = "10.0.2", path = "../buttplug_server", default-features = false }
+buttplug_server_device_config = { version = "10.0.3", path = "../buttplug_server_device_config" }
+futures = "0.3.32"
+futures-util = "0.3.32"
+log = "0.4.29"
+tokio = { version = "1.50.0", features = ["sync", "time"] }
+async-trait = "0.1.89"
+tracing = "0.1.44"
+thiserror = "2.0.18"
+sdl2 = { version = "0.37", features = ["bundled", "static-link"] }
+byteorder = "1.5.0"
+tokio-util = "0.7.18"
+strum = "0.28.0"
+strum_macros = "0.28.0"
