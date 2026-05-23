@@ -32,6 +32,24 @@ use getset::{CopyGetters, Getters};
 
 use super::checked_output_cmd::CheckedOutputCmdV4;
 
+fn feature_index_for_id(
+  attrs: &ServerDeviceAttributes,
+  feature_id: uuid::Uuid,
+  command_name: &str,
+) -> Result<u32, ButtplugError> {
+  attrs
+    .features()
+    .iter()
+    .find(|(_, f)| f.id() == feature_id)
+    .map(|(idx, _)| *idx)
+    .ok_or_else(|| {
+      ButtplugDeviceError::DeviceConfigurationError(format!(
+        "Feature {feature_id} referenced by {command_name} was not found in device attributes."
+      ))
+      .into()
+    })
+}
+
 #[derive(Debug, Default, PartialEq, Clone, Getters, CopyGetters)]
 pub struct CheckedOutputVecCmdV4 {
   #[getset(get_copy = "pub")]
@@ -155,21 +173,16 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedOutputVecCmdV4 {
 
     let mut cmds: Vec<CheckedOutputCmdV4> = vec![];
     for vibrate_cmd in msg.speeds() {
-      if vibrate_cmd.index() > vibrate_attributes.features().len() as u32 {
-        return Err(ButtplugError::from(
-          ButtplugDeviceError::DeviceFeatureCountMismatch(
-            vibrate_cmd.index(),
-            msg.speeds().len() as u32,
-          ),
-        ));
-      }
-      let feature = &vibrate_attributes.features()[vibrate_cmd.index() as usize];
-      let idx = features
+      let feature = vibrate_attributes
         .features()
-        .iter()
-        .find(|(_, f)| f.id() == feature.id())
-        .expect("Already checked existence")
-        .0;
+        .get(vibrate_cmd.index() as usize)
+        .ok_or(ButtplugError::from(
+          ButtplugDeviceError::DeviceFeatureIndexError(
+            vibrate_attributes.features().len() as u32,
+            vibrate_cmd.index(),
+          ),
+        ))?;
+      let idx = feature_index_for_id(features, feature.id(), "VibrateCmdV1")?;
       let actuator = feature.get_output(OutputType::Vibrate).ok_or(
         ButtplugDeviceError::DeviceConfigurationError(
           "Device configuration does not have Vibrate actuator available.".to_owned(),
@@ -178,7 +191,7 @@ impl TryFromDeviceAttributes<VibrateCmdV1> for CheckedOutputVecCmdV4 {
       cmds.push(CheckedOutputCmdV4::new(
         msg.id(),
         msg.device_index(),
-        *idx,
+        idx,
         feature.id(),
         OutputCommand::Vibrate(OutputValue::new(
           actuator
@@ -220,12 +233,7 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedOutputVecCmdV4 {
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceFeatureIndexError(scalar_attrs.len() as u32, cmd.index()),
         ))?;
-      let idx = attrs
-        .features()
-        .iter()
-        .find(|(_, f)| f.id() == feature.feature().id())
-        .expect("Already proved existence")
-        .0;
+      let idx = feature_index_for_id(attrs, feature.feature().id(), "ScalarCmdV3")?;
       let output = feature
         .feature()
         .get_output(cmd.actuator_type())
@@ -241,7 +249,7 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedOutputVecCmdV4 {
       cmds.push(CheckedOutputCmdV4::new(
         msg.id(),
         msg.device_index(),
-        *idx,
+        idx,
         feature.feature.id(),
         OutputCommand::from_output_type(cmd.actuator_type(), output_value).unwrap(),
       ));
@@ -338,12 +346,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::DeviceFeatureIndexError(rotate_attrs.len() as u32, cmd.index()),
         ))?;
-      let idx = attrs
-        .features()
-        .iter()
-        .find(|(_, f)| f.id() == feature.feature().id())
-        .expect("Already proved existence")
-        .0;
+      let idx = feature_index_for_id(attrs, feature.feature().id(), "RotateCmdV1")?;
       let actuator =
         feature
           .feature()
@@ -354,7 +357,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
       cmds.push(CheckedOutputCmdV4::new(
         msg.id(),
         msg.device_index(),
-        *idx,
+        idx,
         feature.feature.id(),
         OutputCommand::Rotate(OutputValue::new(
           actuator.calculate_from_float(cmd.speed()).map_err(|_| {
@@ -371,5 +374,58 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
       msg.device_index(),
       cmds,
     ))
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::message::v1::VibrateSubcommandV1;
+  use buttplug_core::util::{
+    range::RangeInclusive,
+    small_vec_enum_map::SmallVecEnumMap,
+  };
+  use buttplug_server_device_config::{
+    RangeWithLimit,
+    ServerDeviceFeature,
+    ServerDeviceFeatureOutputValueProperties,
+  };
+  use std::collections::BTreeMap;
+  use uuid::Uuid;
+
+  fn attrs_with_one_vibrate_feature() -> ServerDeviceAttributes {
+    let output = vec![ServerDeviceFeatureOutput::Vibrate(
+      ServerDeviceFeatureOutputValueProperties::new(
+        RangeWithLimit::new(RangeInclusive::new(0, 100)),
+        false,
+      ),
+    )]
+    .into();
+    let input = SmallVecEnumMap::default();
+    let feature = ServerDeviceFeature::new(
+      0,
+      "Vibrate".to_owned(),
+      Uuid::new_v4(),
+      None,
+      None,
+      output,
+      input,
+    );
+    let mut features = BTreeMap::new();
+    features.insert(0, feature);
+    ServerDeviceAttributes::new(&features)
+  }
+
+  #[test]
+  fn legacy_vibrate_index_equal_to_feature_count_returns_error() {
+    let attrs = attrs_with_one_vibrate_feature();
+    let msg = VibrateCmdV1::new(0, vec![VibrateSubcommandV1::new(1, 0.5)]);
+
+    let result = CheckedOutputVecCmdV4::try_from_device_attributes(msg, &attrs);
+
+    assert_eq!(
+      result.unwrap_err(),
+      ButtplugError::from(ButtplugDeviceError::DeviceFeatureIndexError(1, 1))
+    );
   }
 }
