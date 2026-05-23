@@ -117,7 +117,7 @@ impl IntifaceEngine {
       // TODO Unregister whenever we have a live connection
 
       // TODO Support different services for engine versus repeater
-      Some(IntifaceMdns::new())
+      IntifaceMdns::new()
     } else {
       None
     };
