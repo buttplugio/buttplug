@@ -27,7 +27,16 @@ pub enum EngineMessage {
     #[serde(skip_serializing_if = "Option::is_none")]
     detail: Option<EngineErrorDetail>,
   },
-  EngineServerCreated {},
+  EngineServerCreated {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    service_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    instance_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    port: Option<u16>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    txt_records: Option<Vec<String>>,
+  },
   EngineStopped {},
   ClientConnected {
     client_name: String,
@@ -102,5 +111,43 @@ mod test {
         }
       }),
     );
+  }
+
+  #[test]
+  fn engine_server_created_serializes_optional_service_metadata() {
+    let message = EngineMessage::EngineServerCreated {
+      service_type: Some("_intiface_engine._tcp".to_owned()),
+      instance_name: Some("Intiface ABC123".to_owned()),
+      port: Some(12345),
+      txt_records: Some(vec!["path=/".to_owned()]),
+    };
+
+    assert_eq!(
+      serde_json::to_value(message).unwrap(),
+      json!({
+        "EngineServerCreated": {
+          "service_type": "_intiface_engine._tcp",
+          "instance_name": "Intiface ABC123",
+          "port": 12345,
+          "txt_records": ["path=/"]
+        }
+      }),
+    );
+  }
+
+  #[test]
+  fn engine_server_created_deserializes_legacy_empty_payload() {
+    let message: EngineMessage =
+      serde_json::from_value(json!({"EngineServerCreated": {}})).unwrap();
+
+    assert!(matches!(
+      message,
+      EngineMessage::EngineServerCreated {
+        service_type: None,
+        instance_name: None,
+        port: None,
+        txt_records: None,
+      }
+    ));
   }
 }

@@ -14,7 +14,7 @@ use crate::{
     Frontend, frontend_external_event_loop, frontend_server_event_loop,
     process_messages::{EngineErrorDetail, EngineMessage},
   },
-  mdns::IntifaceMdns,
+  mdns::{IntifaceMdns, IntifaceMdnsServiceMetadata},
   options::EngineOptions,
   remote_server::{ButtplugRemoteServerEvent, ButtplugServerConnectorError},
   rest_server::IntifaceRestServer,
@@ -26,7 +26,15 @@ use buttplug_core::connector::{
 use buttplug_server_device_config::{DeviceConfigurationManager, save_user_config};
 use futures::{StreamExt, pin_mut};
 use once_cell::sync::OnceCell;
-use std::{io::ErrorKind, path::Path, sync::Arc, time::Duration};
+use std::{
+  io::ErrorKind,
+  path::Path,
+  sync::{
+    Arc, Mutex,
+    atomic::{AtomicBool, Ordering},
+  },
+  time::Duration,
+};
 use tokio::{fs, select};
 use tokio_util::sync::CancellationToken;
 
@@ -90,6 +98,39 @@ fn websocket_port_in_use_error(err: &ButtplugServerConnectorError) -> Option<(St
   }
 }
 
+fn engine_server_created_message(
+  metadata: Option<&IntifaceMdnsServiceMetadata>,
+  port: Option<u16>,
+) -> EngineMessage {
+  if let Some(metadata) = metadata {
+    EngineMessage::EngineServerCreated {
+      service_type: Some(metadata.service_type.clone()),
+      instance_name: Some(metadata.instance_name.clone()),
+      port,
+      txt_records: Some(metadata.txt_records.clone()),
+    }
+  } else {
+    EngineMessage::EngineServerCreated {
+      service_type: None,
+      instance_name: None,
+      port: None,
+      txt_records: None,
+    }
+  }
+}
+
+async fn send_engine_server_created(
+  frontend: Option<&Arc<dyn Frontend>>,
+  metadata: Option<&IntifaceMdnsServiceMetadata>,
+  port: Option<u16>,
+) {
+  if let Some(frontend) = frontend {
+    frontend
+      .send(engine_server_created_message(metadata, port))
+      .await;
+  }
+}
+
 impl IntifaceEngine {
   pub fn backdoor_server(&self) -> Option<Arc<BackdoorServer>> {
     Some(self.backdoor_server.get()?.clone())
@@ -112,15 +153,41 @@ impl IntifaceEngine {
       frontend.send(EngineMessage::EngineStarted {}).await;
     }
 
-    // Set up mDNS
-    let _mdns_server = if options.broadcast_server_mdns() {
-      // TODO Unregister whenever we have a live connection
-
-      // TODO Support different services for engine versus repeater
-      IntifaceMdns::new()
-    } else {
-      None
-    };
+    let mdns_service_metadata =
+      if options.broadcast_server_mdns() && options.websocket_port().is_some() {
+        Some(Arc::new(IntifaceMdnsServiceMetadata::new(
+          options.mdns_suffix().as_deref(),
+        )))
+      } else {
+        None
+      };
+    let mdns_publisher = Arc::new(Mutex::new(None::<IntifaceMdns>));
+    let engine_server_created_sent = Arc::new(AtomicBool::new(false));
+    let on_listener_bound = mdns_service_metadata.as_ref().map(|metadata| {
+      let metadata = Arc::clone(metadata);
+      let frontend = frontend.clone();
+      let mdns_publisher = Arc::clone(&mdns_publisher);
+      let engine_server_created_sent = Arc::clone(&engine_server_created_sent);
+      Arc::new(move |port: u16| {
+        if !engine_server_created_sent.swap(true, Ordering::SeqCst) {
+          let metadata = Arc::clone(&metadata);
+          let frontend = frontend.clone();
+          tokio::spawn(async move {
+            send_engine_server_created(frontend.as_ref(), Some(metadata.as_ref()), Some(port))
+              .await;
+          });
+        }
+        #[cfg(target_os = "ios")]
+        info!("Skipping Rust mDNS publisher on iOS; host app is expected to publish Bonjour");
+        #[cfg(not(target_os = "ios"))]
+        {
+          let mut publisher = mdns_publisher.lock().unwrap();
+          if publisher.is_none() {
+            *publisher = IntifaceMdns::new(metadata.as_ref(), port);
+          }
+        }
+      }) as Arc<dyn Fn(u16) + Send + Sync>
+    });
 
     // Set up Repeater (if in repeater mode)
     if options.repeater_mode() {
@@ -233,7 +300,9 @@ impl IntifaceEngine {
       }
     }
     if let Some(frontend) = &frontend {
-      frontend.send(EngineMessage::EngineServerCreated {}).await;
+      if on_listener_bound.is_none() {
+        send_engine_server_created(Some(frontend), None, None).await;
+      }
       let event_receiver = server.event_stream();
       let frontend_clone = frontend.clone();
       let stop_child_token = self.stop_token.child_token();
@@ -257,7 +326,7 @@ impl IntifaceEngine {
           info!("Owner requested process exit, exiting.");
           exit_requested = true;
         }
-        result = run_server(&server, options) => {
+        result = run_server(&server, options, on_listener_bound.clone()) => {
           match result {
             Ok(_) => info!("Connection dropped, restarting stay open loop."),
             Err(e) => {

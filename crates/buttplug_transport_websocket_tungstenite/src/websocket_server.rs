@@ -16,7 +16,7 @@ use buttplug_core::{
   message::serializer::ButtplugSerializedMessage,
 };
 use futures::{FutureExt, SinkExt, StreamExt, future::BoxFuture};
-use std::{sync::Arc, time::Duration};
+use std::{fmt, sync::Arc, time::Duration};
 use tokio::{
   net::{TcpListener, TcpStream},
   select,
@@ -27,12 +27,34 @@ use tokio::{
   time::sleep,
 };
 
+#[derive(Clone)]
+struct ListenerBoundCallback(Arc<dyn Fn(u16) + Send + Sync>);
+
+impl ListenerBoundCallback {
+  fn new(callback: impl Fn(u16) + Send + Sync + 'static) -> Self {
+    Self(Arc::new(callback))
+  }
+
+  fn call(&self, port: u16) {
+    (self.0)(port);
+  }
+}
+
+impl fmt::Debug for ListenerBoundCallback {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_struct("ListenerBoundCallback")
+      .finish_non_exhaustive()
+  }
+}
+
 #[derive(Clone, Debug)]
 pub struct ButtplugWebsocketServerTransportBuilder {
   /// If true, listens all on available interfaces. Otherwise, only listens on 127.0.0.1.
   listen_on_all_interfaces: bool,
   /// Insecure port for listening for websocket connections.
   port: u16,
+  /// Optional callback fired after the listener is bound and the actual local port is known.
+  listener_bound_callback: Option<ListenerBoundCallback>,
 }
 
 impl Default for ButtplugWebsocketServerTransportBuilder {
@@ -40,6 +62,7 @@ impl Default for ButtplugWebsocketServerTransportBuilder {
     Self {
       listen_on_all_interfaces: false,
       port: 12345,
+      listener_bound_callback: None,
     }
   }
 }
@@ -55,10 +78,16 @@ impl ButtplugWebsocketServerTransportBuilder {
     self
   }
 
+  pub fn on_listener_bound(&mut self, callback: impl Fn(u16) + Send + Sync + 'static) -> &mut Self {
+    self.listener_bound_callback = Some(ListenerBoundCallback::new(callback));
+    self
+  }
+
   pub fn finish(&self) -> ButtplugWebsocketServerTransport {
     ButtplugWebsocketServerTransport {
       port: self.port,
       listen_on_all_interfaces: self.listen_on_all_interfaces,
+      listener_bound_callback: self.listener_bound_callback.clone(),
       disconnect_notifier: Arc::new(Notify::new()),
     }
   }
@@ -193,6 +222,7 @@ async fn run_connection_loop(
 pub struct ButtplugWebsocketServerTransport {
   port: u16,
   listen_on_all_interfaces: bool,
+  listener_bound_callback: Option<ListenerBoundCallback>,
   disconnect_notifier: Arc<Notify>,
 }
 
@@ -203,6 +233,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
     incoming_sender: Sender<ButtplugTransportIncomingMessage>,
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     let disconnect_notifier = self.disconnect_notifier.clone();
+    let listener_bound_callback = self.listener_bound_callback.clone();
 
     let base_addr = if self.listen_on_all_interfaces {
       "0.0.0.0"
@@ -231,6 +262,19 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
         )
       })?;
       debug!("Websocket: Listening on: {}", addr);
+      if let Some(callback) = &listener_bound_callback {
+        let local_port = listener
+          .local_addr()
+          .map_err(|e| {
+            ButtplugConnectorError::TransportSpecificError(
+              ButtplugConnectorTransportSpecificError::GenericNetworkError(format!(
+                "Could not determine websocket listener local address: {e}"
+              )),
+            )
+          })?
+          .port();
+        callback.call(local_port);
+      }
       if let Ok((stream, _)) = listener.accept().await {
         info!("Websocket: Got connection");
         let ws_stream = tokio_tungstenite::accept_async(stream)
@@ -288,6 +332,7 @@ mod test {
     message::serializer::ButtplugSerializedMessage,
   };
   use std::io::ErrorKind;
+  use std::sync::{Arc, Mutex};
   use tokio::{net::TcpListener, sync::mpsc};
 
   #[tokio::test]
@@ -321,5 +366,38 @@ mod test {
       }
       other => panic!("Unexpected error: {other:?}"),
     }
+  }
+
+  #[tokio::test]
+  async fn listener_bound_callback_receives_actual_port() {
+    let bound_port = Arc::new(Mutex::new(None));
+    let callback_port = bound_port.clone();
+    let transport = ButtplugWebsocketServerTransportBuilder::default()
+      .on_listener_bound(move |port| {
+        *callback_port.lock().unwrap() = Some(port);
+      })
+      .finish();
+    let (_outgoing_sender, outgoing_receiver) = mpsc::channel::<ButtplugSerializedMessage>(1);
+    let (incoming_sender, _incoming_receiver) =
+      mpsc::channel::<ButtplugTransportIncomingMessage>(1);
+    let connect_task = tokio::spawn(async move {
+      let _ = transport.connect(outgoing_receiver, incoming_sender).await;
+    });
+
+    tokio::time::timeout(std::time::Duration::from_secs(1), async {
+      loop {
+        if let Some(port) = *bound_port.lock().unwrap() {
+          return port;
+        }
+        tokio::task::yield_now().await;
+      }
+    })
+    .await
+    .expect("listener bound callback was not called");
+
+    let port = bound_port.lock().unwrap().unwrap();
+    assert!(port > 0);
+
+    connect_task.abort();
   }
 }

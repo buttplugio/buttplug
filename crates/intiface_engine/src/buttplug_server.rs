@@ -164,18 +164,23 @@ pub async fn setup_buttplug_server(
 pub async fn run_server(
   server: &ButtplugRemoteServer,
   options: &EngineOptions,
+  on_listener_bound: Option<Arc<dyn Fn(u16) + Send + Sync>>,
 ) -> Result<(), ButtplugServerConnectorError> {
   if let Some(port) = options.websocket_port() {
+    let mut transport_builder = ButtplugWebsocketServerTransportBuilder::default();
+    transport_builder
+      .port(port)
+      .listen_on_all_interfaces(options.websocket_use_all_interfaces());
+    if let Some(on_listener_bound) = on_listener_bound {
+      transport_builder.on_listener_bound(move |bound_port| {
+        on_listener_bound(bound_port);
+      });
+    }
     server
       .start(ButtplugRemoteServerConnector::<
         _,
         ButtplugServerJSONSerializer,
-      >::new(
-        ButtplugWebsocketServerTransportBuilder::default()
-          .port(port)
-          .listen_on_all_interfaces(options.websocket_use_all_interfaces())
-          .finish(),
-      ))
+      >::new(transport_builder.finish()))
       .await
   } else if let Some(addr) = options.websocket_client_address() {
     server
