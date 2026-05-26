@@ -1503,6 +1503,7 @@
               "QCPW",
               "SN80",
               "BGCD",
+              "AK71",
               "TFG1",
               "GK27",
               "GX27",
@@ -5647,7 +5648,8 @@
             "names": [
               "26-021-B",
               "SML-2310-SZ-B",
-              "ASF-001-BT-R"
+              "ASF-001-BT-R",
+              "IJVB-W10-BT-RX"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -5718,6 +5720,39 @@
             "ASF-001-BT-R"
           ],
           "name": "Defyeah Horizontal Sex Machine ASFO16"
+        },
+        {
+          "features": [
+            {
+              "id": "235cd946-2e47-4ec6-9a5c-93ba9618cdd8",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    3
+                  ]
+                }
+              }
+            },
+            {
+              "id": "8149e48b-847f-4744-8dc6-fb263637b60d",
+              "index": 1,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    3
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "abb51f0e-7962-454e-8584-12099258e1f1",
+          "identifier": [
+            "IJVB-W10-BT-RX"
+          ],
+          "name": "Bestvibe Rotational Vibration"
         }
       ],
       "defaults": {
@@ -5861,6 +5896,7 @@
               "J-VortexTongue",
               "J-Velocity",
               "JOYHUB-ROSELLA2",
+              "J-ROSELLA2",
               "J-VibSiren",
               "J-ElixirEgg",
               "J-Volt",
@@ -5927,7 +5963,16 @@
               "J-Pak",
               "J-VeeLips",
               "J-Veeva2",
-              "J-Punch"
+              "J-Punch",
+              "J-RoseStar",
+              "J-Vows",
+              "J-Pixel",
+              "J-SyncFlare",
+              "J-AuroraII",
+              "J-Vortus",
+              "J-Phantom",
+              "J-Thelma",
+              "J-Mystor"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -5948,7 +5993,8 @@
         {
           "id": "5b78e797-3ff6-4ca8-be15-28a1f3983dca",
           "identifier": [
-            "JOYHUB-ROSELLA2"
+            "JOYHUB-ROSELLA2",
+            "J-ROSELLA2"
           ],
           "name": "JoyHub Rosella 2"
         },
@@ -9563,6 +9609,19 @@
                   ]
                 }
               }
+            },
+            {
+              "description": "Heater",
+              "id": "cf0a98e6-9d1b-41f8-9d02-6139fefb4ad6",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
             }
           ],
           "id": "7b440f5f-3d18-49a4-a1da-1d0a164d0d7a",
@@ -10083,6 +10142,253 @@
             "J-Punch"
           ],
           "name": "JoyHub Punch"
+        },
+        {
+          "features": [
+            {
+              "id": "df48bbd6-67c0-43f1-9a37-1cce16e3cae1",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "99a22a51-06d4-4ca3-aed4-b176745ab224",
+              "index": 2,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "be00e6fb-cf33-4fc8-ab31-aee8cb4e4eda",
+          "identifier": [
+            "J-RoseStar"
+          ],
+          "name": "JoyHub Rose Star"
+        },
+        {
+          "id": "b5221199-416a-441e-9ad5-966d9aeb9065",
+          "identifier": [
+            "J-Vows"
+          ],
+          "name": "JoyHub Vows"
+        },
+        {
+          "features": [
+            {
+              "id": "f2622fe8-3bf2-44fb-af6f-d1ea0c3c223f",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "abccc57b-ecc2-432f-af30-00019c371be7",
+              "index": 2,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "83b6f871-b99c-42b5-a0d8-11e9cf058bf1",
+          "identifier": [
+            "J-Pixel"
+          ],
+          "name": "JoyHub Pixel"
+        },
+        {
+          "id": "80f53cba-d56e-47a6-aa23-b5cca2840011",
+          "identifier": [
+            "J-SyncFlare"
+          ],
+          "name": "JoyHub Sync Flare"
+        },
+        {
+          "features": [
+            {
+              "id": "b6b6d567-be8b-4ebe-8beb-24214807fd99",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "dffcbaa5-9339-4ee6-8a3f-00a583de5d4e",
+              "index": 2,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "04873217-3f77-46cc-bfd3-c6cc32008c18",
+          "identifier": [
+            "J-AuroraII"
+          ],
+          "name": "JoyHub Aurora II"
+        },
+        {
+          "features": [
+            {
+              "description": "Internal vibe",
+              "id": "c0fa41dd-f96b-44ed-a932-ee8210cf350f",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Wand head",
+              "id": "aa63f859-4255-4da5-b012-7781d70de3df",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "23719c0e-1c87-4120-982c-a43ff8a62255",
+          "identifier": [
+            "J-Vortus"
+          ],
+          "name": "JoyHub Vortus"
+        },
+        {
+          "features": [
+            {
+              "id": "2f89e300-262f-4cd1-a969-05d3487131db",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "c11fa405-aa04-42af-8f35-bc0fc6e175cd",
+              "index": 1,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "fe8a731c-958e-4215-a4f7-f1a46eb06655",
+          "identifier": [
+            "J-Phantom"
+          ],
+          "name": "JoyHub Phantom"
+        },
+        {
+          "features": [
+            {
+              "id": "f22c664a-cf07-42ec-b9b0-de82b51492f0",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "c53ef975-9af4-4846-b966-3b7872ee6416",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "34371342-4205-4913-96e9-e6911dbcc161",
+          "identifier": [
+            "J-Thelma"
+          ],
+          "name": "JoyHub Thelma"
+        },
+        {
+          "features": [
+            {
+              "id": "5d1e77b7-286c-4a16-b8ee-fd77225b423c",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "5fbd22f4-a300-467e-b7d6-90ff16690a0c",
+              "index": 4,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    10
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "0dad021f-8e31-46cd-8dc4-6a5d67a70539",
+          "identifier": [
+            "J-Mystor"
+          ],
+          "name": "JoyHub Mystor"
         }
       ],
       "defaults": {
@@ -14508,7 +14814,9 @@
               "TKLM-W003-BT-RX",
               "TKLM-C003-BT",
               "TKLM-C004-BT",
-              "TKLM-C005-BT"
+              "TKLM-C005-BT",
+              "TKLM-N001-BT",
+              "TKLM-C001-BT"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -14669,6 +14977,84 @@
             "TKLM-C005-BT"
           ],
           "name": "Luvmazer Dildo"
+        },
+        {
+          "features": [
+            {
+              "id": "238a4ab0-c4a1-4c48-b721-f7db31e68080",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "5bc79997-0425-4fd8-a873-16dc0e41f621",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "33f85933-87a8-407f-92bd-6e9db4458764",
+              "index": 2,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "4e8fc36f-2fae-4abe-9c17-fdd207f8dd74",
+          "identifier": [
+            "TKLM-N001-BT"
+          ],
+          "name": "Luvmazer Fantasy Nova"
+        },
+        {
+          "features": [
+            {
+              "id": "66e1740f-18b6-4848-ab9e-729968b767d0",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "2288452e-65ee-4c00-b0e4-3c75dbd1464b",
+              "index": 2,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "10030d9f-bb93-4c57-8a07-a53dabd0dde9",
+          "identifier": [
+            "TKLM-C001-BT"
+          ],
+          "name": "Luvmazer Rose Finger Vibe"
         }
       ],
       "defaults": {
@@ -20980,7 +21366,8 @@
               "BX288A",
               "QH-SX045A-B",
               "SWK-SX067-B",
-              "QH-HX029A-B"
+              "QH-HX029A-B",
+              "HX013H"
             ],
             "services": {
               "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -20995,7 +21382,8 @@
         {
           "id": "5b9918c8-af63-409f-9749-f5e6faf2dca0",
           "identifier": [
-            "SWK-SX013A"
+            "SWK-SX013A",
+            "HX013H"
           ],
           "name": "Svakom Pulse Lite Neo"
         },
@@ -23331,7 +23719,8 @@
               "Nova2",
               "Nova_2",
               "Nova 2",
-              "Jive 2"
+              "Jive 2",
+              "Jive Lite"
             ],
             "services": {
               "f000bb03-0451-4000-b000-000000000000": {
@@ -23510,6 +23899,13 @@
             "Jive 2"
           ],
           "name": "WeVibe Jive 2"
+        },
+        {
+          "id": "d04e09b4-889c-4626-b23f-6321396c81e9",
+          "identifier": [
+            "Jive Lite"
+          ],
+          "name": "WeVibe Jive Lite"
         }
       ],
       "defaults": {

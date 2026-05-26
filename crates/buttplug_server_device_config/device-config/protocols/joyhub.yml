@@ -2549,6 +2549,25 @@ configurations:
             - 255
       index: 1
   id: 34371342-4205-4913-96e9-e6911dbcc161
+- identifier:
+    - J-Mystor
+  name: JoyHub Mystor
+  features:
+    - id: 5d1e77b7-286c-4a16-b8ee-fd77225b423c
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 5fbd22f4-a300-467e-b7d6-90ff16690a0c
+      output:
+        constrict:
+          value:
+            - 0
+            - 10
+      index: 5
+  id: 0dad021f-8e31-46cd-8dc4-6a5d67a70539
 communication:
 - btle:
     names:
@@ -2699,6 +2718,7 @@ communication:
     - J-Vortus
     - J-Phantom
     - J-Thelma
+    - J-Mystor
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
