@@ -109,6 +109,10 @@ configurations:
   - Jive 2
   name: WeVibe Jive 2
   id: 4a0d8ff9-db32-41c7-99e5-8bb005a25bd0
+- identifier:
+    - Jive Lite
+  name: WeVibe Jive Lite
+  id: d04e09b4-889c-4626-b23f-6321396c81e9
 communication:
 - btle:
     names:
@@ -124,6 +128,7 @@ communication:
     - Nova_2
     - Nova 2
     - Jive 2
+    - Jive Lite
     services:
       f000bb03-0451-4000-b000-000000000000:
         tx: f000c000-0451-4000-b000-000000000000
