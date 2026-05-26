@@ -131,21 +131,6 @@ configurations:
 - identifier:
     - F2
   name: Lelo F2S
-  features:
-    - id: 3a91ca14-ff70-49e8-8319-18406f50b16d
-      output:
-        vibrate:
-          value:
-            - 0
-            - 100
-      index: 0
-    - id: a43b13c0-9ebf-46f2-ab74-2dd6f8772842
-      output:
-        vibrate:
-          value:
-            - 0
-            - 100
-      index: 1
   id: d8f3c009-6712-4a2e-98f6-a75170fa4112
 - identifier:
     - Tiani Twist
@@ -171,6 +156,10 @@ configurations:
             - 100
       index: 0
   id: 2add7033-66ad-4c69-a63d-8a35b012e958
+- identifier:
+    - Boomerang
+  name: Lelo Boomerang
+  id: 8f386409-748f-4bff-a863-3b9475c4b528
 communication:
 - btle:
     names:
@@ -188,6 +177,7 @@ communication:
     - Switch
     - SURFER2
     - F2
+    - Boomerang
     services:
       0000fff0-0000-1000-8000-00805f9b34fb:
         command: 0000fff1-0000-1000-8000-00805f9b34fb
