@@ -16,6 +16,7 @@ configurations:
   id: 85484a03-2782-4b6b-901d-68854fa08111
 - identifier:
   - JOYHUB-ROSELLA2
+  - J-ROSELLA2
   name: JoyHub Rosella 2
   id: 5b78e797-3ff6-4ca8-be15-28a1f3983dca
 - identifier:
@@ -2622,6 +2623,7 @@ communication:
     - J-VortexTongue
     - J-Velocity
     - JOYHUB-ROSELLA2
+    - J-ROSELLA2
     - J-VibSiren
     - J-ElixirEgg
     - J-Volt
