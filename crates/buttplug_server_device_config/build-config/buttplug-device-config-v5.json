@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 3
+    "minor": 4
   },
   "protocols": {
     "activejoy": {
@@ -4835,7 +4835,9 @@
               "HPB-393",
               "HBP-JXT001",
               "HPB-376",
-              "AP-22-892"
+              "AP-22-892",
+              "HPB-S302",
+              "HPB-501"
             ],
             "services": {
               "0000180f-0000-1000-8000-00805f9b34fb": {
@@ -5553,6 +5555,108 @@
             "AP-22-892"
           ],
           "name": "Honey Play Box Ryder"
+        },
+        {
+          "features": [
+            {
+              "id": "148d7d2d-2103-4390-bb97-dc6757750231",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "a4afa1e7-ca5a-406c-896f-c56fa344f56a",
+              "index": 1,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "3c5b6bda-5038-47b5-9a96-45017a655260",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "bb48fa76-2cc8-43ea-8b84-3c1e29cdffc2",
+          "identifier": [
+            "HPB-S302"
+          ],
+          "name": "Honey Play Box Frenzy"
+        },
+        {
+          "features": [
+            {
+              "id": "2fa7c25d-5d41-4df9-a62d-339d9b2c861c",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "49f0539b-1cff-4a9f-b964-1f8dcdf3b889",
+              "index": 1,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "7a04f849-0f4c-4635-93c1-8fe0631d3364",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "c1f4ccbe-bd43-464a-8558-60bec96fce77",
+          "identifier": [
+            "HPB-501"
+          ],
+          "name": "Honey Play Box Noah"
         }
       ],
       "defaults": {
@@ -10373,7 +10477,7 @@
             },
             {
               "id": "5fbd22f4-a300-467e-b7d6-90ff16690a0c",
-              "index": 4,
+              "index": 5,
               "output": {
                 "constrict": {
                   "value": [
