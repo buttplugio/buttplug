@@ -1,3 +1,9 @@
+# 10.0.3 (2026-05-31)
+
+## Bugfixes
+
+- Guard disconnect handling against hangs on already-disconnected devices
+
 # 10.0.2 (2026-04-01)
 
 ## Features

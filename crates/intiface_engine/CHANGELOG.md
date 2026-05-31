@@ -1,3 +1,17 @@
+# 4.0.3 (2026-05-31)
+
+## Features
+
+- Add output observation support through the frontend
+- Add simulated device engine options
+- Update internal Buttplug library dependencies
+
+## Bugfixes
+
+- Add structured port-in-use errors
+- Handle mDNS startup failures and mobile mDNS service metadata
+- Handle malformed repeater handshakes
+
 # 4.0.2 (2026-04-01)
 
 ## Features

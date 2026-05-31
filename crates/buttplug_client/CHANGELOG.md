@@ -1,3 +1,13 @@
+# 10.0.3 (2026-05-31)
+
+## Features
+
+- Add client-side output command helpers for newer device feature APIs
+
+## Bugfixes
+
+- Derive `Debug` and `Clone` for `ClientDeviceOutputCommand`
+
 # 10.0.2 (2026-04-01)
 
 ## Features

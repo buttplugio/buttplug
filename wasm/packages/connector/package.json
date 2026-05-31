@@ -1,6 +1,6 @@
 {
   "name": "buttplug-wasm",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Buttplug WASM client connector for the official buttplug JS library",
   "license": "BSD-3-Clause",
   "author": "Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>",
@@ -40,7 +40,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "buttplug-wasm-blob": "^3.0.0",
+    "buttplug-wasm-blob": "^3.0.1",
     "buttplug": "^4.0.2",
     "eventemitter3": "^5.0.4"
   },

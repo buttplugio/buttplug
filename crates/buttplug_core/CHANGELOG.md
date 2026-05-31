@@ -1,3 +1,16 @@
+# 10.0.3 (2026-05-31)
+
+## Features
+
+- Add structured connector and transport error support
+- Improve device feature range and serialization helpers
+
+## Bugfixes
+
+- Fix `sleep` exports for WASM builds without Tokio runtime support
+- Fix legacy output vector feature bounds checks
+- Use `thiserror` for error display handling
+
 # 10.0.2 (2026-04-01)
 
 ## Features
@@ -64,4 +77,3 @@
   # Earlier Versions
 
 - See [Buttplug Crate CHANGELOG.md](../buttplug/CHANGELOG.md)
-

@@ -1,3 +1,10 @@
+# 10.0.3 (2026-05-31)
+
+## Features
+
+- Update to Buttplug libraries v10.0.3
+  - Adds output observations, simulated device support, WebBluetooth/WASM work, and more device support
+
 # 10.0.2 (2026-04-01)
 
 ## Features

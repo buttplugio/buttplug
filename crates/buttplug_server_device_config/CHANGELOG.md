@@ -1,3 +1,21 @@
+# 10.0.4 (2026-05-31)
+
+## Features
+
+- Move device configuration to v5
+- Add simulated device configuration and archetype support
+- Device Support
+  - JoyHub Valora (J-Volt)
+  - JoyHub Rowdy
+  - Utimi KnotVibe ThrustMaster
+  - Additional Lelo, HoneyPlayBox, and Lovense devices
+
+## Bugfixes
+
+- Support shortened Vorze UFO TW BLE names on Windows
+- Fix TCode maximums
+- Fix disabled device feature handling and `simulated_devices` schema support
+
 # 10.0.3 (2026-04-01)
 
 ## Features

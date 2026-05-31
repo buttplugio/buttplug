@@ -1,3 +1,13 @@
+# 10.0.3 (2026-05-31)
+
+## Features
+
+- Add structured websocket port-in-use errors
+
+## Bugfixes
+
+- Fix async spawn macro usage
+
 # 10.0.2 (2026-04-01)
 
 ## Features

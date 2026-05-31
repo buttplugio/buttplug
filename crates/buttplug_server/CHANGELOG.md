@@ -1,3 +1,22 @@
+# 10.0.3 (2026-05-31)
+
+## Features
+
+- Add output observation streams for emitted device commands
+- Add simulated hardware manager, protocol handler, and runtime simulated device configuration
+- Add Utimi protocol support
+- Device protocol support
+  - JoyHub Valora (J-Volt)
+  - JoyHub Rowdy
+  - Utimi KnotVibe ThrustMaster
+  - Additional Lelo, HoneyPlayBox, and Lovense devices
+
+## Bugfixes
+
+- Fix Lovense stroker stop handling and battery timeout behaviour
+- Fix legacy output vector feature bounds checks
+- Fix several device protocol command paths and compiler warnings
+
 # 10.0.2 (2026-04-01)
 
 ## Features

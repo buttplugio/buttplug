@@ -1,3 +1,10 @@
+# 10.0.3 (2026-05-31)
+
+## Bugfixes
+
+- Defer HID API initialization until scanning starts
+- Call `hid_exit()` on macOS to avoid crashes when dropping the HID manager
+
 # 10.0.2 (2026-04-01)
 
 ## Features

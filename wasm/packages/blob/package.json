@@ -1,6 +1,6 @@
 {
   "name": "buttplug-wasm-blob",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Buttplug WASM server binary with typed FFI wrapper",
   "license": "BSD-3-Clause",
   "author": "Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>",
