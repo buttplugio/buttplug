@@ -11,6 +11,10 @@ defaults:
   id: 53cf03db-266d-46c1-964e-0ef505a64200
 configurations:
 - identifier:
+  - J-Volt
+  name: JoyHub Valora
+  id: 85484a03-2782-4b6b-901d-68854fa08111
+- identifier:
   - JOYHUB-ROSELLA2
   name: JoyHub Rosella 2
   id: 5b78e797-3ff6-4ca8-be15-28a1f3983dca
@@ -2488,6 +2492,7 @@ communication:
     - JOYHUB-ROSELLA2
     - J-VibSiren
     - J-ElixirEgg
+    - J-Volt
     - J-RetroGuard
     - J-TrueForm
     - J-TrueForm3
