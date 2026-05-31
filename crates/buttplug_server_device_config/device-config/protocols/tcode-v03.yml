@@ -9,14 +9,14 @@ defaults:
       position:
         value:
           - 0
-          - 1000
+          - 999
       hw_position_with_duration:
         value:
           - 0
-          - 1000
+          - 999
         duration:
           - 0
-          - 100000        
+          - 99999        
     index: 0
   id: 5c1195a5-a2e4-4643-bd47-8cb3a1e067f4
 communication:

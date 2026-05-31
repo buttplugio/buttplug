@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 1
+    "minor": 2
   },
   "protocols": {
     "activejoy": {
@@ -22093,17 +22093,17 @@
               "hw_position_with_duration": {
                 "duration": [
                   0,
-                  100000
+                  99999
                 ],
                 "value": [
                   0,
-                  1000
+                  999
                 ]
               },
               "position": {
                 "value": [
                   0,
-                  1000
+                  999
                 ]
               }
             }
