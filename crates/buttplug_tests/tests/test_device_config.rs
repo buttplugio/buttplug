@@ -7,8 +7,15 @@
 
 mod util;
 
+use buttplug_client::ButtplugClientEvent;
 use buttplug_server_device_config::load_protocol_configs;
+use futures::StreamExt;
+use std::time::Duration;
 use tokio_test::assert_ok;
+use util::{
+  test_client_with_device_and_custom_dcm,
+  test_device_manager::TestDeviceIdentifier,
+};
 
 const BASE_CONFIG_JSON: &str = r#"
 {
@@ -258,6 +265,48 @@ async fn test_server_builder_null_device_config() {
 #[tokio::test]
 async fn test_server_builder_device_config_invalid_json() {
   assert!(load_protocol_configs(&Some("{\"Not Valid JSON\"}".to_owned()), &None, false).is_err())
+}
+
+#[tokio::test]
+async fn test_vorze_ufo_tw_shortened_advertised_names() {
+  // Issue #892: on Windows, btleplug may expose only the BLE shortened local name
+  // for UFO TW advertisements. The device can appear as "UFO " before it pairs
+  // with the second unit, and as "UFO-" after pairing.
+  //
+  // This is useful coverage beyond the normal UFO-TW protocol fixture because
+  // Vorze uses the generic identifier path: the advertised hardware name becomes
+  // the config identifier. The aliases must therefore work for both scan-time
+  // protocol matching and device-definition lookup.
+  for name in ["UFO ", "UFO-"] {
+    let dcm = load_protocol_configs(&None, &None, false)
+      .expect("Should load base configs")
+      .finish()
+      .expect("Should build DCM");
+    let identifier = TestDeviceIdentifier::new(name, None);
+    let (client, _) = test_client_with_device_and_custom_dcm(&identifier, dcm).await;
+    let mut event_stream = client.event_stream();
+
+    client
+      .start_scanning()
+      .await
+      .expect("Scanning should start");
+
+    let device_added = tokio::time::timeout(Duration::from_millis(500), async {
+      while let Some(event) = event_stream.next().await {
+        if let ButtplugClientEvent::DeviceAdded(device) = event {
+          return device;
+        }
+      }
+      panic!("Event stream closed before device was found");
+    })
+    .await
+    .expect("Timed out waiting for shortened UFO TW name to connect");
+
+    // A successful connection is not enough here; falling through to the Vorze
+    // default definition would still be wrong. The shortened names should resolve
+    // to the same dual-rotator definition as the full "UFO-TW" name.
+    assert_eq!("Vorze UFO TW", device_added.name());
+  }
 }
 
 #[tokio::test]

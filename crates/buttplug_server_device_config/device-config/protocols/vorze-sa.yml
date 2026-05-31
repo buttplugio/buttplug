@@ -58,6 +58,8 @@ configurations:
   id: 2ab3b09b-1020-4dcf-86f1-ecd9d5b40ce2
 - identifier:
   - UFO-TW
+  - UFO-
+  - "UFO "
   name: Vorze UFO TW
   protocol_variant: vorze-sa-dual-rotator
   features:
@@ -120,6 +122,8 @@ communication:
     - CycSA
     - UFOSA
     - UFO-TW
+    - UFO-
+    - "UFO "
     - VorzePiston
     - ROCKET
     - OMORFI

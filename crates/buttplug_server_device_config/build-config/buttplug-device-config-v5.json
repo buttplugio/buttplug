@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 2
+    "minor": 3
   },
   "protocols": {
     "activejoy": {
@@ -22835,6 +22835,8 @@
               "CycSA",
               "UFOSA",
               "UFO-TW",
+              "UFO-",
+              "UFO ",
               "VorzePiston",
               "ROCKET",
               "OMORFI",
@@ -22966,7 +22968,9 @@
           ],
           "id": "32e92986-3ae4-45f3-9aec-05d6028f1cb7",
           "identifier": [
-            "UFO-TW"
+            "UFO-TW",
+            "UFO-",
+            "UFO "
           ],
           "name": "Vorze UFO TW",
           "protocol_variant": "vorze-sa-dual-rotator"
