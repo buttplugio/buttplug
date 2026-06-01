@@ -58,8 +58,9 @@ Buttplug is a framework for interfacing with intimate hardware devices. It uses 
 
 **Device Lifecycle**:
 ```
-Discovery → Identification → Protocol Matching → Connection → User Config → Operation
+Scanning → Identification → Connection → Configuration → Operation
 ```
+Identification and protocol matching are a single step — a device is identified *via* its protocol's specifiers.
 
 **Server Connection State Machine**:
 ```
@@ -91,6 +92,20 @@ Simulated devices allow testing the full device lifecycle without real hardware.
 - `ServerDeviceManagerBuilder::finish()` auto-wires `SimulatedHardwareCommunicationManager` when simulated_devices is non-empty
 - Validation rejects unknown archetypes and duplicate addresses at config build time
 - `SimulatedProtocol` is a no-op handler; `SimulatedHardwareConnector` creates in-memory endpoints
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues on `buttplugio/buttplug` via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default label vocabulary (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout — one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
 
 ## Contributing
 
