@@ -1,3 +1,14 @@
+# 10.0.4 (2026-06-01)
+
+## Features
+
+- Update to device configuration v10.1.1 with additional device support
+
+## Bugfixes
+
+- Add new JoyHub Rosella 2 and Svakom Pulse Lite Neo identifiers
+- Add heater support to JoyHub Thermos
+
 # 10.0.3 (2026-05-31)
 
 ## Features
