@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 4
+    "minor": 5
   },
   "protocols": {
     "activejoy": {
@@ -11899,7 +11899,8 @@
               "SONA3 Cruise",
               "Switch",
               "SURFER2",
-              "F2"
+              "F2",
+              "Boomerang"
             ],
             "services": {
               "0000fff0-0000-1000-8000-00805f9b34fb": {
@@ -12104,32 +12105,6 @@
           "name": "Lelo Switch"
         },
         {
-          "features": [
-            {
-              "id": "3a91ca14-ff70-49e8-8319-18406f50b16d",
-              "index": 0,
-              "output": {
-                "vibrate": {
-                  "value": [
-                    0,
-                    100
-                  ]
-                }
-              }
-            },
-            {
-              "id": "a43b13c0-9ebf-46f2-ab74-2dd6f8772842",
-              "index": 1,
-              "output": {
-                "vibrate": {
-                  "value": [
-                    0,
-                    100
-                  ]
-                }
-              }
-            }
-          ],
           "id": "d8f3c009-6712-4a2e-98f6-a75170fa4112",
           "identifier": [
             "F2"
@@ -12177,6 +12152,13 @@
             "SURFER2"
           ],
           "name": "Lelo Surfer 2"
+        },
+        {
+          "id": "8f386409-748f-4bff-a863-3b9475c4b528",
+          "identifier": [
+            "Boomerang"
+          ],
+          "name": "Lelo Boomerang"
         }
       ],
       "defaults": {
