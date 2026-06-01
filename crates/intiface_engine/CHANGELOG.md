@@ -1,3 +1,10 @@
+# 4.0.4 (2026-06-01)
+
+## Features
+
+- Update internal Buttplug library dependencies
+  - Packages device configuration v10.1.1 with additional device support
+
 # 4.0.3 (2026-05-31)
 
 ## Features
