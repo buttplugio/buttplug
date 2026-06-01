@@ -1,3 +1,9 @@
+# 3.0.2 (2026-06-01)
+
+## Features
+
+- Update internal Buttplug server and device configuration dependencies
+
 # 3.0.1 (2026-05-31)
 
 ## Features

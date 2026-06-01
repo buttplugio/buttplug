@@ -1,3 +1,31 @@
+# 10.1.1 (2026-06-01)
+
+## Features
+
+- Device Support
+  - Adorime Anal Vibrator 2
+  - Bestvibe Rotational Vibration
+  - Honey Play Box Frenzy
+  - Honey Play Box Noah
+  - JoyHub Aurora II
+  - JoyHub Mystor
+  - JoyHub Phantom
+  - JoyHub Pixel
+  - JoyHub Rose Star
+  - JoyHub Sync Flare
+  - JoyHub Thelma
+  - JoyHub Vortus
+  - JoyHub Vows
+  - Lelo Boomerang
+  - Luvmazer Fantasy Nova
+  - Luvmazer Rose Finger Vibe
+  - WeVibe Jive Lite
+
+## Bugfixes
+
+- Add new JoyHub Rosella 2 and Svakom Pulse Lite Neo identifiers
+- Add heater support to JoyHub Thermos
+
 # 10.1.0 (2026-05-31)
 
 ## Features
