@@ -12,10 +12,7 @@ use buttplug_server_device_config::load_protocol_configs;
 use futures::StreamExt;
 use std::time::Duration;
 use tokio_test::assert_ok;
-use util::{
-  test_client_with_device_and_custom_dcm,
-  test_device_manager::TestDeviceIdentifier,
-};
+use util::{test_client_with_device_and_custom_dcm, test_device_manager::TestDeviceIdentifier};
 
 const BASE_CONFIG_JSON: &str = r#"
 {

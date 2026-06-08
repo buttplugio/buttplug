@@ -57,7 +57,7 @@ impl ProtocolHandler for IToys {
         ],
         false,
       )
-          .into(),
+      .into(),
     ])
   }
 
@@ -81,7 +81,7 @@ impl ProtocolHandler for IToys {
         ],
         false,
       )
-          .into(),
+      .into(),
     ])
   }
 }

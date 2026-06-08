@@ -8,7 +8,9 @@
 pub mod stream;
 
 use crate::connector::{
-  ButtplugConnectorError, ButtplugConnectorResultFuture, ButtplugSerializedMessage,
+  ButtplugConnectorError,
+  ButtplugConnectorResultFuture,
+  ButtplugSerializedMessage,
 };
 use displaydoc::Display;
 use futures::future::BoxFuture;
