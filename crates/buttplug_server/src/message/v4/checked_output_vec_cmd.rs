@@ -381,10 +381,7 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
 mod tests {
   use super::*;
   use crate::message::v1::VibrateSubcommandV1;
-  use buttplug_core::util::{
-    range::RangeInclusive,
-    small_vec_enum_map::SmallVecEnumMap,
-  };
+  use buttplug_core::util::{range::RangeInclusive, small_vec_enum_map::SmallVecEnumMap};
   use buttplug_server_device_config::{
     RangeWithLimit,
     ServerDeviceFeature,
