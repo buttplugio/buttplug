@@ -57,7 +57,9 @@ pub enum ButtplugHandshakeError {
   #[error("Expected either a ServerInfo or Error message, received {0}")]
   UnexpectedHandshakeMessageReceived(String),
   /// Expected a RequestServerInfo message to start connection.
-  #[error("Expected a RequestServerInfo message to start connection. Message either not received or wrong message received.")]
+  #[error(
+    "Expected a RequestServerInfo message to start connection. Message either not received or wrong message received."
+  )]
   RequestServerInfoExpected,
   /// Handshake already happened, cannot run handshake again.
   #[error("Handshake already happened, cannot run handshake again.")]
