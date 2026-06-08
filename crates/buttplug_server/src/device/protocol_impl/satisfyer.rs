@@ -157,7 +157,7 @@ impl Satisfyer {
 
 impl ProtocolHandler for Satisfyer {
   fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
-    ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_secs(3))
+    ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(Duration::from_millis(500))
   }
 
   fn handle_output_vibrate_cmd(
