@@ -1,7 +1,8 @@
 mod util;
 
 use buttplug_client::{
-  ButtplugClient, ButtplugClientEvent,
+  ButtplugClient,
+  ButtplugClientEvent,
   device::{ClientDeviceCommandValue, ClientDeviceOutputCommand},
 };
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
@@ -16,7 +17,9 @@ use futures::StreamExt;
 use std::time::Duration;
 use tokio::time::timeout;
 use util::{
-  TestDeviceChannelHost, TestDeviceCommunicationManagerBuilder, TestHardwareEvent,
+  TestDeviceChannelHost,
+  TestDeviceCommunicationManagerBuilder,
+  TestHardwareEvent,
   test_device_manager::TestDeviceIdentifier,
 };
 

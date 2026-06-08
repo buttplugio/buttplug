@@ -33,17 +33,14 @@ const USER_CONFIG_DISABLED_HW_POSITION: &str = include_str!(
   "util/device_test/device_test_case/config/tcode_disabled_hw_position_user_config.json"
 );
 
-const USER_CONFIG_DISABLED_POSITION: &str = include_str!(
-  "util/device_test/device_test_case/config/tcode_disabled_position_user_config.json"
-);
+const USER_CONFIG_DISABLED_POSITION: &str =
+  include_str!("util/device_test/device_test_case/config/tcode_disabled_position_user_config.json");
 
 const USER_CONFIG_DISABLED_BOTH: &str = include_str!(
   "util/device_test/device_test_case/config/tcode_disabled_both_outputs_user_config.json"
 );
 
-fn load_dcm_with_config(
-  config: &str,
-) -> buttplug_server_device_config::DeviceConfigurationManager {
+fn load_dcm_with_config(config: &str) -> buttplug_server_device_config::DeviceConfigurationManager {
   load_protocol_configs(&None, &Some(config.to_string()), false)
     .expect("Test, assuming infallible.")
     .finish()
@@ -58,9 +55,7 @@ fn test_identifier() -> TestDeviceIdentifier {
 }
 
 /// Helper: connect a client, scan, and return the first DeviceAdded event.
-async fn get_client_device_from_config(
-  config: &str,
-) -> buttplug_client::ButtplugClientDevice {
+async fn get_client_device_from_config(config: &str) -> buttplug_client::ButtplugClientDevice {
   let dcm = load_dcm_with_config(config);
   let (client, _device_channel) =
     test_client_with_device_and_custom_dcm(&test_identifier(), dcm).await;
@@ -246,8 +241,7 @@ async fn test_disabled_position_not_in_device_list() {
 /// Verify the DeviceList structure when Position is disabled.
 #[tokio::test]
 async fn test_disabled_position_device_list_structure() {
-  let (_server, _device_index, list) =
-    get_server_device_list(USER_CONFIG_DISABLED_POSITION).await;
+  let (_server, _device_index, list) = get_server_device_list(USER_CONFIG_DISABLED_POSITION).await;
 
   let device_info = list.devices().values().next().expect("One device expected");
   let feature = device_info
@@ -268,8 +262,7 @@ async fn test_disabled_position_device_list_structure() {
 /// Verify that Position commands are rejected when Position is disabled.
 #[tokio::test]
 async fn test_disabled_position_command_rejected() {
-  let (server, device_index, _list) =
-    get_server_device_list(USER_CONFIG_DISABLED_POSITION).await;
+  let (server, device_index, _list) = get_server_device_list(USER_CONFIG_DISABLED_POSITION).await;
 
   let result = server
     .parse_message(ButtplugClientMessageVariant::V4(
@@ -291,8 +284,7 @@ async fn test_disabled_position_command_rejected() {
 /// Verify that HwPositionWithDuration commands are still accepted when only Position is disabled.
 #[tokio::test]
 async fn test_disabled_position_allows_hw_position_commands() {
-  let (server, device_index, _list) =
-    get_server_device_list(USER_CONFIG_DISABLED_POSITION).await;
+  let (server, device_index, _list) = get_server_device_list(USER_CONFIG_DISABLED_POSITION).await;
 
   let result = server
     .parse_message(ButtplugClientMessageVariant::V4(
@@ -320,8 +312,7 @@ async fn test_disabled_position_allows_hw_position_commands() {
 /// neither outputs nor inputs.
 #[tokio::test]
 async fn test_disabled_both_outputs_feature_absent() {
-  let (_server, _device_index, list) =
-    get_server_device_list(USER_CONFIG_DISABLED_BOTH).await;
+  let (_server, _device_index, list) = get_server_device_list(USER_CONFIG_DISABLED_BOTH).await;
 
   let device_info = list.devices().values().next().expect("One device expected");
   assert!(
