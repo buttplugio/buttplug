@@ -312,44 +312,62 @@ impl ServerDeviceManagerEventLoop {
         // Registry for the duration of the connection attempt.  This closes the
         // shutdown race: wait_empty_under on the devices scope can only return
         // zero after the bringup task deregisters, which happens *after*
-        // build_device_handle returns.  build_device_handle registers the
-        // io and event-forwarding tasks (via task_scope.spawn) synchronously
-        // before returning, so the registry count never momentarily hits zero
-        // while work remains:
+        // build_device_handle returns OR after cancellation is observed.
+        // build_device_handle registers the io and event-forwarding tasks (via
+        // task_scope.spawn) synchronously before returning, so on the success
+        // path the registry count never momentarily hits zero while work
+        // remains:
         //   1. bringup registers (here)
         //   2. io task registers (inside build_device_handle → spawn_device_task)
         //   3. event-forwarding task registers (inside build_device_handle)
         //   4. build_device_handle returns
         //   5. bringup deregisters
         // Step 2–3 happen before step 5, guaranteeing correct ordering.
+        //
+        // build_device_handle can stall indefinitely (e.g. a BLE connect that
+        // never completes), so the bringup MUST honor its cancellation token —
+        // otherwise ServerDeviceManager::shutdown's wait_empty_under would hang
+        // forever waiting for this task to deregister. We select on the token;
+        // on cancellation we drop the build_device_handle future, which drops
+        // device_scope and thereby cancels anything it has already spawned.
         self.devices_scope.spawn(
           &format!("bringup-{address}"),
-          move |_token| async move {
-            match build_device_handle(
-              device_config_manager,
-              creator,
-              protocol_specializers,
-              device_event_sender_for_forwarding,
-              output_observation_sender,
-              device_scope,
-            )
-            .await
-            {
-              Ok(device_handle) => {
-                if device_event_sender_clone
-                  .send(InternalDeviceEvent::Connected(device_handle))
-                  .await
-                  .is_err()
-                {
-                  error!(
-                    "Device manager disappeared before connection established, device will be dropped."
-                  );
+          move |token| async move {
+            tokio::select! {
+              biased;
+              _ = token.cancelled() => {
+                info!(
+                  "Device bringup for {address} cancelled before connection completed."
+                );
+              }
+              result = build_device_handle(
+                device_config_manager,
+                creator,
+                protocol_specializers,
+                device_event_sender_for_forwarding,
+                output_observation_sender,
+                device_scope,
+              ) => {
+                match result {
+                  Ok(device_handle) => {
+                    if device_event_sender_clone
+                      .send(InternalDeviceEvent::Connected(device_handle))
+                      .await
+                      .is_err()
+                    {
+                      error!(
+                        "Device manager disappeared before connection established, device will be dropped."
+                      );
+                    }
+                  }
+                  Err(e) => {
+                    error!("Device errored while trying to connect: {:?}", e);
+                  }
                 }
               }
-              Err(e) => {
-                error!("Device errored while trying to connect: {:?}", e);
-              }
             }
+            // Runs on every path (success, error, AND cancellation): the address
+            // must always leave the connecting set so a future scan can retry.
             connecting_devices.remove(&address);
           },
         );
