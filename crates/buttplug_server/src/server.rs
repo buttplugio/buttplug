@@ -35,7 +35,7 @@ use buttplug_core::{
     StopCmdV4,
     StopScanningV0,
   },
-  util::stream::convert_broadcast_receiver_to_stream,
+  util::{stream::convert_broadcast_receiver_to_stream, task::TaskScope},
 };
 use futures::{
   Stream,
@@ -90,6 +90,9 @@ pub struct ButtplugServer {
   /// Broadcaster for server events. Receivers for this are handed out through the
   /// [ButtplugServer::event_stream()] method.
   output_sender: broadcast::Sender<ButtplugServerMessageV4>,
+  /// Root scope owning all tasks spawned for this server instance (e.g. the
+  /// ping timer). Cancelled on shutdown.
+  task_scope: TaskScope,
 }
 
 impl std::fmt::Debug for ButtplugServer {
@@ -110,6 +113,7 @@ impl ButtplugServer {
     device_manager: Arc<ServerDeviceManager>,
     state: Arc<RwLock<ConnectionState>>,
     output_sender: broadcast::Sender<ButtplugServerMessageV4>,
+    task_scope: TaskScope,
   ) -> Self {
     ButtplugServer {
       server_name: server_name.to_owned(),
@@ -118,6 +122,7 @@ impl ButtplugServer {
       device_manager,
       state,
       output_sender,
+      task_scope,
     }
   }
 
@@ -233,8 +238,19 @@ impl ButtplugServer {
 
   pub fn shutdown(&self) -> ButtplugServerResultFuture {
     let device_manager = self.device_manager.clone();
-    //let disconnect_future = self.disconnect();
-    async move { device_manager.shutdown().await }.boxed()
+    let scope_path = self.task_scope.path().to_owned();
+    self.task_scope.cancel();
+    async move {
+      let result = device_manager.shutdown().await;
+      // Await only this server's own subtree. A shared device manager
+      // (with_shared_device_manager) outlives this server, so its subtree is
+      // NOT awaited here -- device_manager.shutdown() handles its own.
+      buttplug_core::util::task::registry()
+        .wait_empty_under(&scope_path)
+        .await;
+      result
+    }
+    .boxed()
   }
 
   /// Sends a [ButtplugClientMessage] to be parsed by the server (for handshake or ping), or passed

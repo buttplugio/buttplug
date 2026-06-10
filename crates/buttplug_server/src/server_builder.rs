@@ -14,6 +14,7 @@ use super::{
 use buttplug_core::{
   errors::*,
   message::{self, ButtplugServerMessageV4, StopCmdV4},
+  util::task::TaskScope,
 };
 use buttplug_server_device_config::DeviceConfigurationManagerBuilder;
 use std::sync::{Arc, RwLock};
@@ -98,12 +99,16 @@ impl ButtplugServerBuilder {
 
     let ping_time = self.max_ping_time.unwrap_or(0);
 
+    // Root scope owning all tasks spawned for this server instance.
+    let task_scope = TaskScope::root("server");
+
     // Create the ping timeout callback if ping time is configured.
     // The callback handles: updating state, stopping devices, and sending error.
     let ping_timeout_callback = if ping_time > 0 {
       let state_clone = state.clone();
       let device_manager_clone = self.device_manager.clone();
       let output_sender_clone = output_sender.clone();
+      let ping_timeout_scope = task_scope.child("ping-timeout");
 
       Some(move || {
         error!("Ping out signal received, stopping server");
@@ -112,8 +117,10 @@ impl ButtplugServerBuilder {
           let mut state_guard = state_clone.write().expect("State lock poisoned");
           *state_guard = ConnectionState::PingedOut;
         }
-        // Stop all devices (spawn async task since callback is sync)
-        buttplug_core::spawn!("PingTimeoutStopDevices", async move {
+        // Stop all devices (spawn async task since callback is sync). The
+        // callback is FnOnce, so the child scope moves in and is consumed by
+        // spawn_and_hold, keeping it alive for the duration of the task.
+        ping_timeout_scope.spawn_and_hold("stop-devices", move |_token| async move {
           if let Err(e) = device_manager_clone
             .stop_devices(&StopCmdV4::default())
             .await
@@ -135,7 +142,11 @@ impl ButtplugServerBuilder {
       None
     };
 
-    let ping_timer = Arc::new(PingTimer::new(ping_time, ping_timeout_callback));
+    let ping_timer = Arc::new(PingTimer::new(
+      ping_time,
+      ping_timeout_callback,
+      task_scope.child("ping-timer"),
+    ));
 
     // Assuming everything passed, return the server.
     Ok(ButtplugServer::new(
@@ -145,6 +156,7 @@ impl ButtplugServerBuilder {
       self.device_manager.clone(),
       state,
       output_sender,
+      task_scope,
     ))
   }
 }
