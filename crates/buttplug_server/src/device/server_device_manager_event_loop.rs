@@ -23,6 +23,7 @@ use crate::device::{
   hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
   protocol::ProtocolManager,
 };
+use buttplug_core::util::task::TaskScope;
 use dashmap::{DashMap, DashSet};
 use futures::{FutureExt, future};
 use std::sync::Arc;
@@ -68,6 +69,9 @@ pub(super) struct ServerDeviceManagerEventLoop {
   connecting_devices: Arc<DashSet<String>>,
   /// Cancellation token for the event loop
   loop_cancellation_token: CancellationToken,
+  /// Scope owning all per-device task subtrees. Each device's tasks are spawned
+  /// through a `device-{...}` child of this scope.
+  devices_scope: TaskScope,
   /// Protocol map, for mapping user definitions to protocols
   protocol_manager: ProtocolManager,
   /// Optional sender for output observations, None when disabled
@@ -81,6 +85,7 @@ impl ServerDeviceManagerEventLoop {
     device_config_manager: Arc<DeviceConfigurationManager>,
     device_map: Arc<DashMap<u32, DeviceHandle>>,
     loop_cancellation_token: CancellationToken,
+    devices_scope: TaskScope,
     server_sender: broadcast::Sender<ButtplugServerMessageV4>,
     device_comm_receiver: mpsc::Receiver<HardwareCommunicationManagerEvent>,
     device_command_receiver: mpsc::Receiver<DeviceManagerCommand>,
@@ -99,6 +104,7 @@ impl ServerDeviceManagerEventLoop {
       scanning_state: ScanningState::Idle,
       connecting_devices: Arc::new(DashSet::new()),
       loop_cancellation_token,
+      devices_scope,
       protocol_manager: ProtocolManager::default(),
       output_observation_sender,
     }
@@ -301,6 +307,13 @@ impl ServerDeviceManagerEventLoop {
         // Clone sender again for the forwarding task that build_device_handle will spawn
         let device_event_sender_for_forwarding = self.device_event_sender.clone();
 
+        // Create the per-device scope before spawning the (detached) bringup
+        // task, since `child()` borrows `self.devices_scope` and the bringup
+        // task cannot. The device index is not known until identification
+        // completes inside build_device_handle, so the scope is keyed by the
+        // device's stable address.
+        let device_scope = self.devices_scope.child(&format!("device-{address}"));
+
         buttplug_core::util::async_manager::spawn(
           async move {
             match build_device_handle(
@@ -309,6 +322,7 @@ impl ServerDeviceManagerEventLoop {
               protocol_specializers,
               device_event_sender_for_forwarding,
               output_observation_sender,
+              device_scope,
             )
             .await
             {

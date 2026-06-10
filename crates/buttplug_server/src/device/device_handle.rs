@@ -26,7 +26,7 @@ use buttplug_core::{
     OutputValue,
     StopCmdV4,
   },
-  util::stream::convert_broadcast_receiver_to_stream,
+  util::{stream::convert_broadcast_receiver_to_stream, task::TaskScope},
 };
 use buttplug_server_device_config::{
   DeviceConfigurationManager,
@@ -111,6 +111,9 @@ pub struct DeviceHandle {
   stop_commands: Arc<Vec<ButtplugDeviceCommandMessageUnionV4>>,
   internal_hw_msg_sender: Sender<Vec<HardwareCommand>>,
   output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
+  /// Scope owning this device's tasks. Rides in an Arc since DeviceHandle is
+  /// Clone; the subtree cancels when the last clone drops.
+  task_scope: Arc<TaskScope>,
 }
 
 impl DeviceHandle {
@@ -123,6 +126,7 @@ impl DeviceHandle {
     stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4>,
     internal_hw_msg_sender: Sender<Vec<HardwareCommand>>,
     output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
+    task_scope: Arc<TaskScope>,
   ) -> Self {
     Self {
       hardware,
@@ -134,6 +138,7 @@ impl DeviceHandle {
       stop_commands: Arc::new(stop_commands),
       internal_hw_msg_sender,
       output_observation_sender,
+      task_scope,
     }
   }
 
@@ -455,7 +460,12 @@ pub(super) async fn build_device_handle(
   protocol_specializers: Vec<ProtocolSpecializer>,
   device_event_sender: tokio::sync::mpsc::Sender<InternalDeviceEvent>,
   output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
+  task_scope: TaskScope,
 ) -> Result<DeviceHandle, ButtplugDeviceError> {
+  // DeviceHandle is Clone, so its scope rides in an Arc; the device subtree
+  // cancels when the last clone (and thus the last Arc) drops.
+  let task_scope = Arc::new(task_scope);
+
   // At this point, we know we've got hardware that is waiting to connect, and enough protocol
   // info to actually do something after we connect. So go ahead and connect.
   trace!("Connecting to {:?}", hardware_connector);
@@ -524,6 +534,7 @@ pub(super) async fn build_device_handle(
   };
 
   spawn_device_task(
+    &task_scope,
     hardware.clone(),
     handler.clone(),
     DeviceTaskConfig {
@@ -590,6 +601,7 @@ pub(super) async fn build_device_handle(
     stop_commands,
     internal_hw_msg_sender,
     output_observation_sender,
+    task_scope.clone(),
   );
 
   // If we need a keepalive with a packet replay, set this up via stopping the device on connect.
@@ -614,40 +626,47 @@ pub(super) async fn build_device_handle(
   // to the device manager event loop via the provided sender.
   let event_stream = device_handle.event_stream();
   let identifier = device_handle.identifier().clone();
-  buttplug_core::spawn!("DeviceEventForwarding", async move {
+  task_scope.spawn("event-forwarding", move |token| async move {
     futures::pin_mut!(event_stream);
     loop {
-      let event = futures::StreamExt::next(&mut event_stream).await;
-      match event {
-        Some(DeviceEvent::Disconnected(id)) => {
-          if device_event_sender
-            .send(InternalDeviceEvent::Disconnected(id))
-            .await
-            .is_err()
-          {
-            info!(
-              "Device event sender closed for device {:?}, stopping event forwarding.",
-              identifier
-            );
-            break;
-          }
-        }
-        Some(DeviceEvent::Notification(_, msg)) => {
-          if device_event_sender
-            .send(InternalDeviceEvent::Notification(msg))
-            .await
-            .is_err()
-          {
-            info!(
-              "Device event sender closed for device {:?}, stopping event forwarding.",
-              identifier
-            );
-            break;
-          }
-        }
-        None => {
-          // Stream ended (device likely disconnected)
+      tokio::select! {
+        _ = token.cancelled() => {
+          info!("Event forwarding cancelled for device {:?}", identifier);
           break;
+        }
+        event = futures::StreamExt::next(&mut event_stream) => {
+          match event {
+            Some(DeviceEvent::Disconnected(id)) => {
+              if device_event_sender
+                .send(InternalDeviceEvent::Disconnected(id))
+                .await
+                .is_err()
+              {
+                info!(
+                  "Device event sender closed for device {:?}, stopping event forwarding.",
+                  identifier
+                );
+                break;
+              }
+            }
+            Some(DeviceEvent::Notification(_, msg)) => {
+              if device_event_sender
+                .send(InternalDeviceEvent::Notification(msg))
+                .await
+                .is_err()
+              {
+                info!(
+                  "Device event sender closed for device {:?}, stopping event forwarding.",
+                  identifier
+                );
+                break;
+              }
+            }
+            None => {
+              // Stream ended (device likely disconnected)
+              break;
+            }
+          }
         }
       }
     }

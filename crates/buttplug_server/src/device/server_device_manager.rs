@@ -36,7 +36,7 @@ use buttplug_core::{
     DeviceListV4,
     StopCmdV4,
   },
-  util::stream::convert_broadcast_receiver_to_stream,
+  util::{stream::convert_broadcast_receiver_to_stream, task::TaskScope},
 };
 use buttplug_server_device_config::{DeviceConfigurationManager, UserDeviceIdentifier};
 use dashmap::DashMap;
@@ -54,7 +54,6 @@ use std::{
   },
 };
 use tokio::sync::{broadcast, mpsc};
-use tokio_util::sync::CancellationToken;
 
 #[derive(Debug)]
 pub(super) enum DeviceManagerCommand {
@@ -175,7 +174,8 @@ impl ServerDeviceManagerBuilder {
     }
 
     let devices = Arc::new(DashMap::new());
-    let loop_cancellation_token = CancellationToken::new();
+    let task_scope = TaskScope::root("device-manager");
+    let devices_scope = task_scope.child("devices");
 
     let output_sender = broadcast::channel(255).0;
     let output_observation_sender = if self.emit_output_observations {
@@ -184,24 +184,31 @@ impl ServerDeviceManagerBuilder {
       None
     };
 
-    let mut event_loop = ServerDeviceManagerEventLoop::new(
-      comm_managers,
-      self.device_configuration_manager.clone(),
-      devices.clone(),
-      loop_cancellation_token.child_token(),
-      output_sender.clone(),
-      device_event_receiver,
-      device_command_receiver,
-      output_observation_sender.clone(),
-    );
-    buttplug_core::spawn!("ServerDeviceManager event loop", async move {
+    // Clone everything the event loop needs, since the originals are still
+    // required to construct the ServerDeviceManager below.
+    let device_configuration_manager = self.device_configuration_manager.clone();
+    let devices_clone = devices.clone();
+    let output_sender_clone = output_sender.clone();
+    let output_observation_sender_clone = output_observation_sender.clone();
+    task_scope.spawn("event-loop", move |token| async move {
+      let mut event_loop = ServerDeviceManagerEventLoop::new(
+        comm_managers,
+        device_configuration_manager,
+        devices_clone,
+        token,
+        devices_scope,
+        output_sender_clone,
+        device_event_receiver,
+        device_command_receiver,
+        output_observation_sender_clone,
+      );
       event_loop.run().await;
     });
     Ok(ServerDeviceManager {
       device_configuration_manager: self.device_configuration_manager.clone(),
       devices,
       device_command_sender,
-      loop_cancellation_token,
+      task_scope,
       running: Arc::new(AtomicBool::new(true)),
       output_sender,
       output_observation_sender,
@@ -216,7 +223,7 @@ pub struct ServerDeviceManager {
   #[getset(get = "pub(crate)")]
   devices: Arc<DashMap<u32, DeviceHandle>>,
   device_command_sender: mpsc::Sender<DeviceManagerCommand>,
-  loop_cancellation_token: CancellationToken,
+  task_scope: TaskScope,
   running: Arc<AtomicBool>,
   output_sender: broadcast::Sender<ButtplugServerMessageV4>,
   output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
@@ -372,7 +379,10 @@ impl ServerDeviceManager {
     self.running.store(false, Ordering::Relaxed);
     let stop_scanning = self.stop_scanning();
     let stop_devices = self.stop_devices(&StopCmdV4::default());
-    let token = self.loop_cancellation_token.clone();
+    // TaskScope is not Clone, so capture its path and cancel here, then await
+    // the subtree draining inside the returned future via the registry.
+    let scope_path = self.task_scope.path().to_owned();
+    self.task_scope.cancel();
     async move {
       // Force stop scanning, otherwise we can disconnect and instantly try to reconnect while
       // cleaning up if we're still scanning.
@@ -381,7 +391,9 @@ impl ServerDeviceManager {
       for device in devices.iter() {
         device.value().disconnect().await?;
       }
-      token.cancel();
+      buttplug_core::util::task::registry()
+        .wait_empty_under(&scope_path)
+        .await;
       Ok(message::OkV0::default().into())
     }
     .boxed()
@@ -391,6 +403,8 @@ impl ServerDeviceManager {
 impl Drop for ServerDeviceManager {
   fn drop(&mut self) {
     info!("Dropping device manager!");
-    self.loop_cancellation_token.cancel();
+    // The task_scope field cancels its subtree on drop, so we only need to log
+    // here; explicit cancellation happens automatically when the scope drops.
+    self.task_scope.cancel();
   }
 }
