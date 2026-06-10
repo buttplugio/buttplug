@@ -11,9 +11,11 @@ cargo build                          # Debug build
 cargo build --release                # Release build (LTO enabled)
 cargo test                           # Run all tests
 cargo test -p buttplug_server        # Run tests for specific crate
-cargo fmt --all -- --check           # Check formatting
-cargo fmt                            # Auto-format (2-space indent, edition 2024)
+cargo +nightly fmt --all -- --check  # Check formatting (MUST use nightly)
+cargo +nightly fmt                   # Auto-format (2-space indent, edition 2024)
 ```
+
+**Formatting gotcha**: rustfmt.toml uses nightly-only options (`imports_layout`, `empty_item_single_line`). Running `cargo fmt` on the STABLE toolchain silently ignores them and rewrites the entire workspace into the wrong style (~190 files of import-collapsing churn). Always use `cargo +nightly fmt`. CI checks formatting with nightly.
 
 **Linux dependencies**: `libudev-dev`, `libusb-1.0-0-dev` (for serial/HID support)
 
