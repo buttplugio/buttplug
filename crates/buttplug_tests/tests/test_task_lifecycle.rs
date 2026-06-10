@@ -23,7 +23,8 @@ use buttplug_core::{
 use buttplug_server::message::ButtplugClientMessageVariant;
 use futures::{StreamExt, pin_mut};
 use std::time::Duration;
-use util::test_server_with_device;
+use util::stalling_device_communication_manager::StallingDeviceCommunicationManagerBuilder;
+use util::{test_server_with_comm_manager, test_server_with_device};
 
 /// Bring a real (test-harness) device online and confirm that, once the server
 /// is shut down and dropped, no tasks remain registered under the scope tree.
@@ -77,32 +78,31 @@ async fn test_server_shutdown_leaves_no_tasks() {
   .await
   .expect("timed out waiting for device to connect");
 
-  // Device is up: the registry must now show more tasks than baseline, and at
-  // least one of them must be a per-device task. We also derive this server's
-  // own device-manager scope prefix so subsequent leak checks inspect only this
-  // server's subtree — the registry is process-global, so other tests running
-  // in parallel must not pollute these assertions.
-  let after_connect: Vec<String> = registry().snapshot().into_iter().map(|t| t.path).collect();
-  let new_tasks: Vec<&String> = after_connect
-    .iter()
-    .filter(|p| !baseline.contains(p))
+  // Device is up. Scope all subsequent leak checks to THIS server's own
+  // device-manager subtree: the registry is process-global, so other tests
+  // running in parallel must not pollute these assertions. We ask the manager
+  // for its own scope path directly rather than guessing it from the global
+  // registry snapshot — guessing is racy, because a concurrent test's
+  // `device-manager-N` tasks are also "new" relative to our baseline and could
+  // be picked instead of ours.
+  let scope_prefix: String = server.device_manager().scope_path().to_owned();
+
+  // Sanity: the registry must now show this server spawned per-device tasks
+  // under its own subtree.
+  let new_tasks: Vec<String> = registry()
+    .snapshot()
+    .into_iter()
+    .map(|t| t.path)
+    .filter(|p| !baseline.contains(p) && p.starts_with(&format!("{scope_prefix}/")))
     .collect();
   assert!(
     !new_tasks.is_empty(),
-    "expected scope-spawned tasks after a device connected"
+    "expected scope-spawned tasks under {scope_prefix} after a device connected"
   );
   assert!(
     new_tasks.iter().any(|p| p.contains("/device-")),
     "expected a per-device task in the registry, got: {new_tasks:?}"
   );
-  let scope_prefix: String = new_tasks
-    .iter()
-    .find_map(|p| {
-      p.split_once('/')
-        .filter(|(root, _)| root.starts_with("device-manager"))
-        .map(|(root, _)| root.to_owned())
-    })
-    .expect("expected this server's device-manager scope in the registry");
 
   // `shutdown()` is contractually responsible for draining every task it
   // spawned: it cancels the scope tree and awaits the registry going empty
@@ -139,36 +139,34 @@ async fn test_server_shutdown_leaves_no_tasks() {
   });
 }
 
-/// Regression test for shutdown ordering: cleanup MUST run before the task
-/// scope is cancelled.
+/// Shutdown-under-load smoke test: with a device connected, scanning still
+/// active, and the device in a non-zero output state, `shutdown()` must drive
+/// its cleanup (stop_scanning / stop_devices / per-device disconnect) through
+/// the live event loop, drain every task under its scope, and return Ok within
+/// a bounded time — it must neither hang nor strand tasks.
 ///
-/// `shutdown()` must run stop_scanning / stop_devices / per-device disconnect
-/// and cancel the device-manager scope only afterwards. The buggy ordering
-/// cancelled the scope synchronously first: device io tasks select `biased`
-/// with their cancellation token, so queued stop commands were dropped, and the
-/// StopScanning issued into the still-running event loop raced its cancellation.
+/// SCOPE / what this does NOT verify: this is a smoke test, not a regression
+/// test for shutdown *ordering*. It does not prove that cleanup runs *before*
+/// scope cancellation — reverting the cleanup-before-cancel ordering leaves this
+/// test green, because the contract it checks (shutdown completes and its
+/// subtree drains) holds under both orderings with this harness. The
+/// cleanup-before-cancel ordering is the correct production behavior, but a
+/// test that goes RED on that specific regression is not achievable here (see
+/// NOTE). This test guards against the coarser failure mode: a shutdown that
+/// hangs or leaks tasks when invoked under realistic load.
 ///
-/// This test exercises the StopScanning-through-event-loop path the old
-/// ordering broke: a device is connected AND scanning is still active when
-/// `shutdown()` is called. `shutdown()` must drive cleanup through the live
-/// event loop, drain every scope task, and return Ok within a bounded time —
-/// i.e. it must not hang or strand tasks.
-///
-/// NOTE on variant choice: the stronger "observe the device's actual stop
-/// write" assertion proved infeasible with this harness. The test hardware sets
-/// a 1ms message_gap (see TestHardwareConnector::specialize), so the device io
-/// task batches commands; during shutdown the per-device `disconnect()` fires a
-/// `Disconnected` hardware event that tears the io task down inside that 1ms
-/// batch window, dropping the pending (batched) stop write regardless of cancel
-/// ordering. That teardown race is independent of the bug under test, so a
-/// write-observation assertion is inherently flaky here. We therefore assert the
-/// contract the cleanup-before-cancel ordering must uphold: shutdown completes
-/// successfully with cleanup driven through the live event loop.
+/// NOTE on why ordering can't be observed here: the stronger "observe the
+/// device's actual stop write" assertion is infeasible with this harness. The
+/// test hardware sets a 1ms message_gap (see TestHardwareConnector::specialize),
+/// so the device io task batches commands; during shutdown the per-device
+/// `disconnect()` fires a `Disconnected` hardware event that tears the io task
+/// down inside that 1ms batch window, dropping the pending (batched) stop write
+/// regardless of cancel ordering. That teardown race is independent of any
+/// ordering bug, so a write-observation assertion is inherently flaky here. An
+/// instrumented-ordering variant was also attempted and found inherently flaky
+/// with this harness, so it is deliberately not pursued.
 #[tokio::test]
-async fn test_shutdown_runs_cleanup_through_event_loop_before_cancel() {
-  // Capture baseline so we can confirm shutdown drains everything it spawned.
-  let baseline: Vec<String> = registry().snapshot().into_iter().map(|t| t.path).collect();
-
+async fn test_shutdown_under_load_drains_subtree() {
   // Hold the channel so the device stays connected through shutdown.
   let (server, _channel) = test_server_with_device("Massage Demo");
 
@@ -178,7 +176,7 @@ async fn test_shutdown_runs_cleanup_through_event_loop_before_cancel() {
   server
     .parse_message(ButtplugClientMessageVariant::V4(
       RequestServerInfoV4::new(
-        "Shutdown Ordering Test",
+        "Shutdown Under Load Test",
         BUTTPLUG_CURRENT_API_MAJOR_VERSION,
         BUTTPLUG_CURRENT_API_MINOR_VERSION,
       )
@@ -227,18 +225,10 @@ async fn test_shutdown_runs_cleanup_through_event_loop_before_cancel() {
 
   // Identify this server's own device-manager scope prefix so the leak check
   // below is isolated from any other test running in parallel against the
-  // global registry.
-  let scope_prefix: String = registry()
-    .snapshot()
-    .into_iter()
-    .map(|t| t.path)
-    .filter(|p| !baseline.contains(p))
-    .find_map(|p| {
-      p.split_once('/')
-        .filter(|(root, _)| root.starts_with("device-manager"))
-        .map(|(root, _)| root.to_owned())
-    })
-    .expect("expected this server's device-manager scope in the registry");
+  // global registry. We ask the manager directly rather than guessing from the
+  // global registry snapshot, which would race with concurrent tests' own
+  // `device-manager-N` roots.
+  let scope_prefix: String = server.device_manager().scope_path().to_owned();
 
   // shutdown() must drive cleanup (stop_scanning + stop_devices + disconnect)
   // through the live event loop and only then cancel the scope, returning Ok
@@ -255,4 +245,54 @@ async fn test_shutdown_runs_cleanup_through_event_loop_before_cancel() {
     leaked, 0,
     "shutdown() returned but {leaked} task(s) are still registered under {scope_prefix}"
   );
+}
+
+/// Regression test for the cancellable-bringup fix (fix 2): `shutdown()` must
+/// not hang when a device bringup is stalled in `connect()`.
+///
+/// The stalling comm manager emits one `DeviceFound` on scan; the device-manager
+/// event loop spawns a bringup task that awaits `connect()`, which never
+/// resolves. `shutdown()` cancels the device-manager scope and then
+/// `wait_empty_under`s its subtree. The bringup task only deregisters once it
+/// observes cancellation via the `biased` select on its token — without that
+/// select it would await `connect()` forever and `shutdown()` would never
+/// resolve.
+///
+/// RED evidence: replacing the bringup's `move |token|` select with the
+/// non-cancellable `move |_token|` form makes this test time out at the 10s
+/// bound and fail. With the fix in place it resolves promptly.
+#[tokio::test]
+async fn test_shutdown_resolves_with_stalled_bringup() {
+  let server = test_server_with_comm_manager(StallingDeviceCommunicationManagerBuilder::default());
+
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      RequestServerInfoV4::new(
+        "Stalled Bringup Test",
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION,
+      )
+      .into(),
+    ))
+    .await
+    .expect("server info request should succeed");
+
+  // Kick off scanning so a device is found and a bringup task begins — and then
+  // stalls in connect().
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      StartScanningV0::default().into(),
+    ))
+    .await
+    .expect("start scanning should succeed");
+
+  // Give the bringup task time to spawn and enter (and block in) connect().
+  tokio::time::sleep(Duration::from_millis(200)).await;
+
+  // shutdown() must cancel the stalled bringup and return within the bound.
+  // Without the biased select on the bringup token this hangs forever.
+  tokio::time::timeout(Duration::from_secs(10), server.shutdown())
+    .await
+    .expect("shutdown hung with a stalled device bringup — bringup is not honoring its cancellation token")
+    .expect("server shutdown errored");
 }

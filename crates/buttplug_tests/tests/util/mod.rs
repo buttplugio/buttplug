@@ -15,6 +15,8 @@ pub mod test_device_manager;
 pub use delay_device_communication_manager::DelayDeviceCommunicationManagerBuilder;
 #[allow(dead_code)]
 pub mod channel_transport;
+#[allow(dead_code)]
+pub mod stalling_device_communication_manager;
 use buttplug_client::ButtplugClient;
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
 use buttplug_server::{
