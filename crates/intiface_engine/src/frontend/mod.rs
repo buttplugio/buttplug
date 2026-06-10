@@ -9,8 +9,9 @@ pub mod process_messages;
 use crate::error::IntifaceError;
 use crate::remote_server::ButtplugRemoteServerEvent;
 use async_trait::async_trait;
+use buttplug_core::util::task::{TaskEvent, registry};
 use futures::{Stream, StreamExt, pin_mut};
-pub use process_messages::{EngineMessage, IntifaceMessage};
+pub use process_messages::{EngineMessage, IntifaceMessage, TaskListEntry};
 use std::sync::Arc;
 use tokio::{
   select,
@@ -52,7 +53,16 @@ pub async fn frontend_external_event_loop(
               break;
             },
             IntifaceMessage::RequestTaskList {} => {
-              // TODO(task-10): respond with TaskList snapshot
+              let tasks = registry()
+                .snapshot()
+                .into_iter()
+                .map(|t| TaskListEntry {
+                  id: t.id.value(),
+                  path: t.path,
+                  detached: t.detached,
+                })
+                .collect();
+              frontend.send(EngineMessage::TaskList { tasks }).await;
             },
           },
           Err(_) => {
@@ -73,8 +83,11 @@ pub async fn frontend_server_event_loop(
   receiver: impl Stream<Item = ButtplugRemoteServerEvent>,
   frontend: Arc<dyn Frontend>,
   connection_cancellation_token: CancellationToken,
+  emit_task_events: bool,
 ) {
   pin_mut!(receiver);
+
+  let mut task_events = emit_task_events.then(|| registry().event_stream());
 
   loop {
     select! {
@@ -114,6 +127,31 @@ pub async fn frontend_server_event_loop(
             info!("Lost connection with main thread, breaking.");
             break;
           },
+        }
+      },
+      task_event = async {
+        match task_events.as_mut() {
+          Some(rx) => rx.recv().await,
+          None => std::future::pending().await,
+        }
+      } => {
+        match task_event {
+          Ok(TaskEvent::Started { id, path }) => {
+            frontend.send(EngineMessage::TaskStarted { id: id.value(), path }).await;
+          }
+          Ok(TaskEvent::Ended { id, path, outcome }) => {
+            frontend.send(EngineMessage::TaskEnded {
+              id: id.value(),
+              path,
+              outcome: format!("{outcome:?}"),
+            }).await;
+          }
+          Err(broadcast::error::RecvError::Lagged(n)) => {
+            warn!("Task event stream lagged, dropped {} events", n);
+          }
+          Err(broadcast::error::RecvError::Closed) => {
+            // Global registry sender never closes; unreachable in practice.
+          }
         }
       },
       _ = connection_cancellation_token.cancelled() => {
