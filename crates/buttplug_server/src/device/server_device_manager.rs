@@ -243,6 +243,15 @@ impl ServerDeviceManager {
       .map(|sender| convert_broadcast_receiver_to_stream(sender.subscribe()))
   }
 
+  /// The hierarchical path of this manager's root Task Scope
+  /// (e.g. "device-manager-3"). Every task this manager spawns lives at or
+  /// under this prefix in the global Task Registry. Useful for scoping
+  /// registry queries to a single manager instance — the registry is
+  /// process-global, so parallel managers must filter by their own prefix.
+  pub fn scope_path(&self) -> &str {
+    self.task_scope.path()
+  }
+
   fn start_scanning(&self) -> ButtplugServerResultFuture {
     let command_sender = self.device_command_sender.clone();
     async move {
