@@ -14,9 +14,10 @@
 
 use std::{collections::VecDeque, sync::Arc, time::Duration};
 
-use buttplug_core::util::async_manager;
+use buttplug_core::util::{async_manager, task::TaskScope};
 use futures::future;
 use tokio::{select, sync::mpsc::Receiver, time::Instant};
+use tokio_util::sync::CancellationToken;
 
 use super::{
   hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareWriteCmd},
@@ -43,13 +44,14 @@ pub struct DeviceTaskConfig {
 ///
 /// Returns immediately after spawning the task.
 pub fn spawn_device_task(
+  task_scope: &TaskScope,
   hardware: Arc<Hardware>,
   _handler: Arc<dyn ProtocolHandler>,
   config: DeviceTaskConfig,
   mut command_receiver: Receiver<Vec<HardwareCommand>>,
 ) {
-  buttplug_core::spawn!("DeviceTask", async move {
-    run_device_task(hardware, config, &mut command_receiver).await;
+  task_scope.spawn("io", move |token| async move {
+    run_device_task(hardware, config, &mut command_receiver, token).await;
   });
 }
 
@@ -61,6 +63,7 @@ async fn run_device_task(
   hardware: Arc<Hardware>,
   config: DeviceTaskConfig,
   command_receiver: &mut Receiver<Vec<HardwareCommand>>,
+  token: CancellationToken,
 ) {
   let mut hardware_events = hardware.event_stream();
   let device_wait_duration = config.message_gap;
@@ -114,6 +117,12 @@ async fn run_device_task(
 
     select! {
       biased;
+
+      // Priority 0: Cooperative cancellation - wins over new work.
+      _ = token.cancelled() => {
+        info!("Device task cancelled, shutting down");
+        return;
+      }
 
       // Priority 1: Incoming commands
       msg = command_receiver.recv() => {
