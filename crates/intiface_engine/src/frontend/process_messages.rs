@@ -8,6 +8,13 @@
 use buttplug_server_device_config::UserDeviceIdentifier;
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TaskListEntry {
+  pub id: u64,
+  pub path: String,
+  pub detached: bool,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(tag = "code", rename_all = "snake_case")]
 pub enum EngineErrorDetail {
@@ -62,18 +69,47 @@ pub enum EngineMessage {
     output_type: String,
     value: f64,
   },
+  TaskStarted {
+    id: u64,
+    path: String,
+  },
+  TaskEnded {
+    id: u64,
+    path: String,
+    outcome: String,
+  },
+  TaskList {
+    tasks: Vec<TaskListEntry>,
+  },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum IntifaceMessage {
   RequestEngineVersion { expected_version: u32 },
   Stop {},
+  RequestTaskList {},
 }
 
 #[cfg(test)]
 mod test {
-  use super::{EngineErrorDetail, EngineMessage};
+  use super::{EngineErrorDetail, EngineMessage, IntifaceMessage};
   use serde_json::json;
+
+  #[test]
+  fn test_task_message_serialization() {
+    let msg = EngineMessage::TaskEnded {
+      id: 42,
+      path: "server-1/ping-timer/timer".to_owned(),
+      outcome: "Cancelled".to_owned(),
+    };
+    let json = serde_json::to_string(&msg).unwrap();
+    let back: EngineMessage = serde_json::from_str(&json).unwrap();
+    assert!(matches!(back, EngineMessage::TaskEnded { id: 42, .. }));
+
+    let req = r#"{"RequestTaskList":{}}"#;
+    let parsed: IntifaceMessage = serde_json::from_str(req).unwrap();
+    assert!(matches!(parsed, IntifaceMessage::RequestTaskList {}));
+  }
 
   #[test]
   fn generic_engine_error_serializes_without_structured_fields() {

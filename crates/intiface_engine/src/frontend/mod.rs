@@ -50,7 +50,10 @@ pub async fn frontend_external_event_loop(
               connection_cancellation_token.cancel();
               info!("Got external stop request");
               break;
-            }
+            },
+            IntifaceMessage::RequestTaskList {} => {
+              // TODO(task-10): respond with TaskList snapshot
+            },
           },
           Err(_) => {
             info!("Frontend sender dropped, assuming connection lost, breaking.");
