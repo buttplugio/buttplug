@@ -13,6 +13,11 @@ use std::sync::{
 use tokio::sync::broadcast;
 
 /// Unique identifier for a registered task. Process-lifetime unique.
+///
+/// IDs are drawn from a monotonically-incrementing `AtomicU64` counter. At
+/// 64-bit width and even at 10 million tasks per second the counter would take
+/// roughly 58,000 years to wrap, so id reuse within a single process lifetime
+/// is not a practical concern.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct TaskId(u64);
 
@@ -56,6 +61,12 @@ pub enum TaskEvent {
 
 /// The global record of every live task, populated as a side effect of
 /// spawning through a Task Scope.
+///
+/// **Memory note**: entries are removed on `deregister`, but `DashMap` does not
+/// shrink shard capacity after removals. Peak concurrent-task count therefore
+/// becomes a memory high-water mark that is held for the lifetime of the
+/// registry (i.e. the process). In practice buttplug servers run a bounded
+/// number of concurrent tasks, so this is not expected to be significant.
 #[derive(Debug)]
 pub struct TaskRegistry {
   tasks: DashMap<u64, TaskInfo>,
