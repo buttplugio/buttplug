@@ -278,8 +278,13 @@ mod test {
 
   #[tokio::test]
   async fn test_spawn_and_hold_keeps_scope_alive() {
+    use registry::TaskEvent;
+
     let root = TaskScope::root("holdtest");
     let path = root.path().to_owned();
+    // Subscribe BEFORE spawning so we observe both the Started and Ended events
+    // for the held task and can assert how it actually finished.
+    let mut events = registry().event_stream();
     let sub_scope = root.child("subscription");
     let (tx, rx) = tokio::sync::oneshot::channel();
     // Consuming spawn: the scope moves INTO the task and must not cancel it.
@@ -295,5 +300,36 @@ mod test {
     tokio::time::timeout(Duration::from_secs(1), registry().wait_empty_under(&path))
       .await
       .expect("task did not deregister");
+
+    // The held task ran to its natural end, so its reported outcome MUST be
+    // Completed — not Cancelled. (If spawn_and_hold had wired drop-cancel to the
+    // held task, it would have been cancelled mid-sleep and reported Cancelled.)
+    // Drain the event stream looking for this task's Ended event. The path is
+    // exact ("<root>/subscription/worker") so we don't match unrelated tasks
+    // from other tests sharing the global registry.
+    let task_path = format!("{path}/subscription/worker");
+    let outcome = tokio::time::timeout(Duration::from_secs(1), async {
+      loop {
+        match events.recv().await {
+          Ok(TaskEvent::Ended { path, outcome, .. }) if path == task_path => return outcome,
+          Ok(_) => continue,
+          // The registry's broadcast channel is process-global; heavy parallel
+          // test load can evict buffered events (Lagged). Keep draining — our
+          // own Ended event fires ~20ms after subscribing, so under normal load
+          // it arrives well before any eviction window matters.
+          Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => continue,
+          Err(tokio::sync::broadcast::error::RecvError::Closed) => {
+            panic!("event stream closed before held task's Ended event")
+          }
+        }
+      }
+    })
+    .await
+    .expect("did not observe Ended event for held task");
+    assert_eq!(
+      outcome,
+      TaskOutcome::Completed,
+      "normally-finishing held task should report Completed, got {outcome:?}"
+    );
   }
 }
