@@ -141,14 +141,42 @@ impl TaskScope {
   }
 }
 
+/// Deregisters a task from the global registry on drop. Created BEFORE the
+/// task future is awaited so deregistration happens even if the future panics:
+/// a panicking task unwinds through this guard, so the registry entry is removed
+/// rather than leaked (which would hang `wait_empty_under` on that subtree
+/// forever). The outcome is derived at drop time from whether we are unwinding
+/// from a panic and whether the task observed cancellation.
+///
+/// `token` is `None` for detached tasks, which have no cancellation concept:
+/// their outcome is `Panicked` on panic, else `Completed`.
+pub(super) struct DeregisterGuard {
+  id: TaskId,
+  token: Option<CancellationToken>,
+}
+
+impl DeregisterGuard {
+  pub(super) fn new(id: TaskId, token: Option<CancellationToken>) -> Self {
+    Self { id, token }
+  }
+}
+
+impl Drop for DeregisterGuard {
+  fn drop(&mut self) {
+    let outcome = if std::thread::panicking() {
+      TaskOutcome::Panicked
+    } else if self.token.as_ref().is_some_and(|t| t.is_cancelled()) {
+      TaskOutcome::Cancelled
+    } else {
+      TaskOutcome::Completed
+    };
+    registry().deregister(self.id, outcome);
+  }
+}
+
 async fn finish_task(fut: impl Future<Output = ()>, id: TaskId, token: CancellationToken) {
+  let _guard = DeregisterGuard::new(id, Some(token));
   fut.await;
-  let outcome = if token.is_cancelled() {
-    TaskOutcome::Cancelled
-  } else {
-    TaskOutcome::Completed
-  };
-  registry().deregister(id, outcome);
 }
 
 impl Drop for TaskScope {
@@ -230,6 +258,22 @@ mod test {
     tokio::time::timeout(Duration::from_secs(1), root.shutdown())
       .await
       .expect("shutdown did not resolve");
+  }
+
+  #[tokio::test]
+  async fn test_panicking_task_deregisters() {
+    // A scoped task that panics must still deregister (via the drop guard),
+    // otherwise wait_empty_under on its root would hang forever. tokio catches
+    // the panic at the task boundary, so this test itself does not fail from the
+    // spawned panic. Without the guard, this wait would time out.
+    let root = TaskScope::root("panictest");
+    let path = root.path().to_owned();
+    root.spawn("panicker", |_token| async move {
+      panic!("intentional panic for deregistration test");
+    });
+    tokio::time::timeout(Duration::from_secs(1), registry().wait_empty_under(&path))
+      .await
+      .expect("panicking task did not deregister — registry entry leaked");
   }
 
   #[tokio::test]

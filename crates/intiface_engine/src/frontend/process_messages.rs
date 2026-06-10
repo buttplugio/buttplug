@@ -76,6 +76,8 @@ pub enum EngineMessage {
   TaskEnded {
     id: u64,
     path: String,
+    /// How the task ended: "Completed" | "Cancelled" | "Panicked"
+    /// (the Debug rendering of `buttplug_core`'s `TaskOutcome`).
     outcome: String,
   },
   TaskList {
