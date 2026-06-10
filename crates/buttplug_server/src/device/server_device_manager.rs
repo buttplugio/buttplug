@@ -403,8 +403,9 @@ impl ServerDeviceManager {
 impl Drop for ServerDeviceManager {
   fn drop(&mut self) {
     info!("Dropping device manager!");
-    // The task_scope field cancels its subtree on drop, so we only need to log
-    // here; explicit cancellation happens automatically when the scope drops.
+    // Explicitly cancel the scope here for clarity and to trigger shutdown
+    // eagerly (before field drop order kicks in). Field drop would also cancel
+    // via TaskScope::drop, but the explicit call makes the intent obvious.
     self.task_scope.cancel();
   }
 }

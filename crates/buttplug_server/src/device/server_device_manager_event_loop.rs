@@ -298,24 +298,33 @@ impl ServerDeviceManagerEventLoop {
         let device_config_manager = self.device_config_manager.clone();
         let connecting_devices = self.connecting_devices.clone();
         let output_observation_sender = self.output_observation_sender.clone();
-        let span = info_span!(
-          "device creation",
-          name = tracing::field::display(name),
-          address = tracing::field::display(address.clone())
-        );
 
         // Clone sender again for the forwarding task that build_device_handle will spawn
         let device_event_sender_for_forwarding = self.device_event_sender.clone();
 
-        // Create the per-device scope before spawning the (detached) bringup
-        // task, since `child()` borrows `self.devices_scope` and the bringup
-        // task cannot. The device index is not known until identification
-        // completes inside build_device_handle, so the scope is keyed by the
-        // device's stable address.
+        // Create the per-device scope before spawning the bringup task. The
+        // device index is not known until identification completes inside
+        // build_device_handle, so both scopes are keyed by the device's stable
+        // address.
         let device_scope = self.devices_scope.child(&format!("device-{address}"));
 
-        buttplug_core::util::async_manager::spawn(
-          async move {
+        // Spawn bringup through devices_scope so it is registered in the Task
+        // Registry for the duration of the connection attempt.  This closes the
+        // shutdown race: wait_empty_under on the devices scope can only return
+        // zero after the bringup task deregisters, which happens *after*
+        // build_device_handle returns.  build_device_handle registers the
+        // io and event-forwarding tasks (via task_scope.spawn) synchronously
+        // before returning, so the registry count never momentarily hits zero
+        // while work remains:
+        //   1. bringup registers (here)
+        //   2. io task registers (inside build_device_handle → spawn_device_task)
+        //   3. event-forwarding task registers (inside build_device_handle)
+        //   4. build_device_handle returns
+        //   5. bringup deregisters
+        // Step 2–3 happen before step 5, guaranteeing correct ordering.
+        self.devices_scope.spawn(
+          &format!("bringup-{address}"),
+          move |_token| async move {
             match build_device_handle(
               device_config_manager,
               creator,
@@ -343,7 +352,6 @@ impl ServerDeviceManagerEventLoop {
             }
             connecting_devices.remove(&address);
           },
-          span,
         );
       }
     }
