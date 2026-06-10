@@ -238,10 +238,15 @@ impl ButtplugServer {
 
   pub fn shutdown(&self) -> ButtplugServerResultFuture {
     let device_manager = self.device_manager.clone();
+    // Capture the token and path synchronously, but cancel only after the
+    // device manager has finished its own cleanup. The server scope only owns
+    // the ping timer today, so cancelling early is harmless, but we align with
+    // the device manager's cleanup-before-cancel ordering for consistency.
+    let token = self.task_scope.token().clone();
     let scope_path = self.task_scope.path().to_owned();
-    self.task_scope.cancel();
     async move {
       let result = device_manager.shutdown().await;
+      token.cancel();
       // Await only this server's own subtree. A shared device manager
       // (with_shared_device_manager) outlives this server, so its subtree is
       // NOT awaited here -- device_manager.shutdown() handles its own.

@@ -379,10 +379,13 @@ impl ServerDeviceManager {
     self.running.store(false, Ordering::Relaxed);
     let stop_scanning = self.stop_scanning();
     let stop_devices = self.stop_devices(&StopCmdV4::default());
-    // TaskScope is not Clone, so capture its path and cancel here, then await
-    // the subtree draining inside the returned future via the registry.
+    // TaskScope is not Clone, but its CancellationToken is. Capture the token
+    // and path synchronously, but DO NOT cancel yet: device io tasks select
+    // biased on their token, so cancelling before the stop/disconnect commands
+    // drain would drop those queued commands and leave devices running. Run
+    // cleanup first, then cancel, then await the subtree draining.
+    let token = self.task_scope.token().clone();
     let scope_path = self.task_scope.path().to_owned();
-    self.task_scope.cancel();
     async move {
       // Force stop scanning, otherwise we can disconnect and instantly try to reconnect while
       // cleaning up if we're still scanning.
@@ -391,6 +394,9 @@ impl ServerDeviceManager {
       for device in devices.iter() {
         device.value().disconnect().await?;
       }
+      // Cleanup commands have drained; now cancel the scope and wait for every
+      // task under it to deregister.
+      token.cancel();
       buttplug_core::util::task::registry()
         .wait_empty_under(&scope_path)
         .await;
