@@ -5,19 +5,19 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use buttplug_core::util::async_manager;
+use buttplug_core::util::{async_manager, task::TaskScope};
 use futures::Future;
 use std::{sync::Arc, time::Duration};
 use tokio::{
   select,
   sync::{Mutex, mpsc},
 };
+use tokio_util::sync::CancellationToken;
 
 pub enum PingMessage {
   Ping,
   StartTimer,
   StopTimer,
-  End,
 }
 
 /// Internal ping timer task that monitors for ping timeouts.
@@ -26,6 +26,7 @@ async fn ping_timer<F>(
   max_ping_time: u32,
   mut ping_msg_receiver: mpsc::Receiver<PingMessage>,
   on_ping_timeout: Arc<Mutex<Option<F>>>,
+  token: CancellationToken,
 ) where
   F: FnOnce() + Send + 'static,
 {
@@ -33,6 +34,9 @@ async fn ping_timer<F>(
   let mut pinged = false;
   loop {
     select! {
+      _ = token.cancelled() => {
+        return;
+      }
       _ = async_manager::sleep(Duration::from_millis(max_ping_time.into())) => {
         if started {
           if !pinged {
@@ -53,7 +57,6 @@ async fn ping_timer<F>(
           PingMessage::StartTimer => started = true,
           PingMessage::StopTimer => started = false,
           PingMessage::Ping => pinged = true,
-          PingMessage::End => break,
         }
       }
     };
@@ -63,19 +66,8 @@ async fn ping_timer<F>(
 pub struct PingTimer {
   max_ping_time: u32,
   ping_msg_sender: mpsc::Sender<PingMessage>,
-}
-
-impl Drop for PingTimer {
-  fn drop(&mut self) {
-    // This cannot block, otherwise it will throw in WASM contexts on
-    // destruction. We must use send(), not blocking_send().
-    let sender = self.ping_msg_sender.clone();
-    buttplug_core::spawn!("PingTimerDrop", async move {
-      if sender.send(PingMessage::End).await.is_err() {
-        debug!("Receiver does not exist, assuming ping timer event loop already dead.");
-      }
-    });
-  }
+  // Dropping the timer drops the scope, which cancels the timer task.
+  _task_scope: TaskScope,
 }
 
 impl PingTimer {
@@ -84,19 +76,21 @@ impl PingTimer {
   /// The callback is called once when the ping timer expires without receiving
   /// a ping message. If max_ping_time is 0, the timer is disabled and the
   /// callback will never be called.
-  pub fn new<F>(max_ping_time: u32, on_ping_timeout: Option<F>) -> Self
+  pub fn new<F>(max_ping_time: u32, on_ping_timeout: Option<F>, task_scope: TaskScope) -> Self
   where
     F: FnOnce() + Send + 'static,
   {
     let (sender, receiver) = mpsc::channel(256);
     if max_ping_time > 0 {
       let callback = Arc::new(Mutex::new(on_ping_timeout));
-      let fut = ping_timer(max_ping_time, receiver, callback);
-      buttplug_core::spawn!("PingTimer", fut);
+      task_scope.spawn("timer", move |token| {
+        ping_timer(max_ping_time, receiver, callback, token)
+      });
     }
     Self {
       max_ping_time,
       ping_msg_sender: sender,
+      _task_scope: task_scope,
     }
   }
 
