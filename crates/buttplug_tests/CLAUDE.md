@@ -54,4 +54,5 @@ Tests run across multiple protocol spec versions (v0–v4) via version-specific 
 - `test_message_downgrades.rs` — Protocol version downgrade path tests
 - `test_disabled_device_features.rs` — Tests for user config feature disabling
 - `test_output_observations.rs` — Integration tests for output observability (observation stream, filtering, multi-device, enable/disable)
+- `test_task_lifecycle.rs` — Integration test asserting the global Task Registry has no live tasks under the server's scope after server shutdown (verifies `TaskScope` ownership leaves no leaked tasks)
 - `test_websocket_connectors.rs` / `test_websocket_device_comm_manager.rs` — WebSocket transport integration tests

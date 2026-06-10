@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Last verified: 2026-05-19
+Last verified: 2026-06-09
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -56,7 +56,7 @@ Buttplug is a framework for interfacing with intimate hardware devices. It uses 
 
 **Message-Based Protocol**: All client-server communication uses versioned JSON messages (v0-v4). Version negotiation happens during handshake.
 
-**Async Architecture**: Heavy use of tokio channels (mpsc, broadcast, oneshot) for communication between components. Runtime abstraction supports tokio (production) and WASM.
+**Async Architecture**: Heavy use of tokio channels (mpsc, broadcast, oneshot) for communication between components. Runtime abstraction supports tokio (production) and WASM. Spawned tasks are owned by `TaskScope`s rather than fire-and-forget `spawn!` (see Task Lifecycle below).
 
 **Device Lifecycle**:
 ```
@@ -94,6 +94,17 @@ Simulated devices allow testing the full device lifecycle without real hardware.
 - `ServerDeviceManagerBuilder::finish()` auto-wires `SimulatedHardwareCommunicationManager` when simulated_devices is non-empty
 - Validation rejects unknown archetypes and duplicate addresses at config build time
 - `SimulatedProtocol` is a no-op handler; `SimulatedHardwareConnector` creates in-memory endpoints
+
+**Task Lifecycle** (`buttplug_core::util::task`):
+Spawned async tasks are owned by a `TaskScope` ownership tree rather than fire-and-forget, giving cooperative cancellation and global introspection. Key contracts:
+- `TaskScope::root(name)` makes a root scope (path gets a unique numeric suffix, e.g. `server-2`, so parallel instances don't collide); `.child(name)` derives a sub-scope whose token is a child of the parent's.
+- `scope.spawn(name, |token| async ...)` spawns a task owned by the scope; long-running tasks MUST `select!` on the passed token. Cancelling or dropping a scope cancels its whole subtree.
+- `scope.spawn_and_hold(name, ...)` consumes the scope into the task, so drop-cancel can't fire before the task runs (used for `FnOnce` callbacks like ping-timeout and protocol subscription handlers).
+- `scope.shutdown().await` cancels the subtree and waits until every task under it has deregistered (wrap in a timeout if tasks may be uncooperative).
+- `spawn_detached(name, fut)` is a rare escape hatch: registered under `detached/{name}` but uncancellable. Prefer scopes.
+- `TaskRegistry` (global, via `registry()`) records every live task: `snapshot()`, `live_count_under(prefix)` (segment-aware prefix match), `event_stream()` (`TaskEvent::Started`/`Ended`), `wait_empty_under(prefix)`.
+- Ownership in the server: `ButtplugServer` owns a `server` root scope; `ServerDeviceManager` owns a `device-manager` root scope with per-device child scopes (io/event-forwarding/bringup); `PingTimer` is scope-owned (the old `PingMessage::End` + Drop-spawn shutdown hack is gone). `ProtocolHandler::handle_input_subscribe_cmd` now takes a `TaskScope` param.
+- `intiface_engine` exposes this to frontends when `emit_task_events` is set: registry events forward as `EngineMessage::TaskStarted`/`TaskEnded`, and `IntifaceMessage::RequestTaskList` returns `EngineMessage::TaskList` (`Vec<TaskListEntry>`).
 
 ## Agent skills
 
