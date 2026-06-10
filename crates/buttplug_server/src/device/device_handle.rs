@@ -117,7 +117,10 @@ pub struct DeviceHandle {
 }
 
 impl DeviceHandle {
-  /// Create a new DeviceHandle with direct ownership of device state
+  /// Create a new DeviceHandle with direct ownership of device state.
+  /// The arguments bundle all device-state concerns (hardware, protocol, definition, identity,
+  /// commands, I/O channel, observability, lifecycle scope) — suppressing the lint is correct here.
+  #[allow(clippy::too_many_arguments)]
   pub(crate) fn new(
     hardware: Arc<Hardware>,
     handler: Arc<dyn ProtocolHandler>,
