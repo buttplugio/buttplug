@@ -115,12 +115,16 @@ impl HardwareSpecializer for TestHardwareSpecializer {
         }
       }
     }
+    // The device carries its own message gap (default 1ms for the slight delay
+    // multi-message protocols expect). Tests that need a large batching window
+    // to make the stop-write race deterministic override it via
+    // `add_test_device_with_message_gap`.
+    let message_gap = device.message_gap();
     let hardware = Hardware::new(
       &device.name(),
       &device.address(),
       &endpoints,
-      // Add slight delay for protocols with multiple messages.
-      &Some(Duration::from_millis(1)),
+      &Some(message_gap),
       false,
       Box::new(device),
     );
@@ -153,10 +157,15 @@ pub fn new_device_channel() -> (TestDeviceChannelHost, TestDeviceChannelDevice) 
   )
 }
 
+/// Default inter-message gap for test hardware. A slight delay multi-message
+/// protocols expect; small enough that ordinary tests are unaffected.
+const DEFAULT_MESSAGE_GAP: Duration = Duration::from_millis(1);
+
 pub struct TestDevice {
   name: String,
   address: String,
   endpoints: HashSet<Endpoint>,
+  message_gap: Duration,
   test_device_channel: mpsc::Sender<HardwareCommand>,
   event_sender: broadcast::Sender<HardwareEvent>,
   subscribed_endpoints: Arc<DashSet<Endpoint>>,
@@ -166,6 +175,16 @@ pub struct TestDevice {
 impl TestDevice {
   #[allow(dead_code)]
   pub fn new(name: &str, address: &str, test_device_channel: TestDeviceChannelDevice) -> Self {
+    Self::new_with_message_gap(name, address, DEFAULT_MESSAGE_GAP, test_device_channel)
+  }
+
+  #[allow(dead_code)]
+  pub fn new_with_message_gap(
+    name: &str,
+    address: &str,
+    message_gap: Duration,
+    test_device_channel: TestDeviceChannelDevice,
+  ) -> Self {
     let (event_sender, _) = broadcast::channel(256);
 
     let event_sender_clone = event_sender.clone();
@@ -210,6 +229,7 @@ impl TestDevice {
       name: name.to_owned(),
       address: address.to_owned(),
       endpoints: HashSet::new(),
+      message_gap,
       test_device_channel: command_sender,
       event_sender,
       subscribed_endpoints,
@@ -219,6 +239,10 @@ impl TestDevice {
 
   pub fn add_endpoint(&mut self, endpoint: &Endpoint) {
     self.endpoints.insert(*endpoint);
+  }
+
+  pub fn message_gap(&self) -> Duration {
+    self.message_gap
   }
 
   pub fn name(&self) -> String {
