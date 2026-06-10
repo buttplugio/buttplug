@@ -14,6 +14,7 @@ use futures_util::{FutureExt, future};
 
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_core::message::{InputReadingV4, InputType, InputTypeReading, InputValue};
+use buttplug_core::util::task::TaskScope;
 use buttplug_server_device_config::Endpoint;
 
 use buttplug_server_device_config::{
@@ -245,6 +246,7 @@ impl ProtocolHandler for Galaku {
     _feature_index: u32,
     feature_id: Uuid,
     sensor_type: InputType,
+    _task_scope: TaskScope,
   ) -> BoxFuture<'_, Result<(), ButtplugDeviceError>> {
     match sensor_type {
       InputType::Battery => {

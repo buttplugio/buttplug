@@ -407,9 +407,17 @@ impl DeviceHandle {
     info!("Handling input subscribe command");
     let device = self.hardware.clone();
     let handler = self.handler.clone();
+    let task_scope = self.task_scope.child("subscription");
     async move {
       handler
-        .handle_input_subscribe_cmd(device_index, device, feature_index, feature_id, input_type)
+        .handle_input_subscribe_cmd(
+          device_index,
+          device,
+          feature_index,
+          feature_id,
+          input_type,
+          task_scope,
+        )
         .await
         .map(|_| message::OkV0::new(1).into())
         .map_err(|e| e.into())

@@ -15,7 +15,7 @@ use crate::{
 use buttplug_core::{
   errors::ButtplugDeviceError,
   message::{InputReadingV4, InputType, InputValue},
-  util::stream::convert_broadcast_receiver_to_stream,
+  util::{stream::convert_broadcast_receiver_to_stream, task::TaskScope},
 };
 use buttplug_server_device_config::Endpoint;
 use futures::{
@@ -65,6 +65,7 @@ impl ProtocolHandler for KGoalBoost {
     feature_index: u32,
     feature_id: Uuid,
     _sensor_type: InputType,
+    task_scope: TaskScope,
   ) -> BoxFuture<'_, Result<(), ButtplugDeviceError>> {
     let sensors = self.subscribed_sensors.load(Ordering::Relaxed);
     if (sensors & (1 << feature_index as u8)) > 0 {
@@ -90,9 +91,19 @@ impl ProtocolHandler for KGoalBoost {
         let stream_sensors = stream_sensors.clone();
         info!("Starting Kgoal subscription");
         // If we subscribe successfully, we need to set up our event handler.
-        buttplug_core::spawn!("Kgoal subscription event handler", async move {
+        task_scope.spawn_and_hold("kgoal-events", move |token| async move {
           let mut cached_values = vec![0u32, 0u32];
-          while let Ok(info) = hardware_stream.recv().await {
+          loop {
+            let info = tokio::select! {
+              biased;
+              _ = token.cancelled() => return,
+              info = hardware_stream.recv() => {
+                let Ok(info) = info else {
+                  return;
+                };
+                info
+              }
+            };
             let subscribed_sensors = stream_sensors.load(Ordering::Relaxed);
             // If we have no receivers, quit.
             if sender.receiver_count() == 0 || subscribed_sensors == 0 {
