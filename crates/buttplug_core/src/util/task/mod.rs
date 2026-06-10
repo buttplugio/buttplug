@@ -13,8 +13,7 @@
 //! scope cancels its subtree.
 
 mod registry;
-// `scope` lands in Task 2 of the task-scope-lifecycle plan.
-// mod scope;
+mod scope;
 
 pub use registry::{TaskEvent, TaskId, TaskInfo, TaskOutcome, TaskRegistry, registry};
-// pub use scope::TaskScope;
+pub use scope::TaskScope;
