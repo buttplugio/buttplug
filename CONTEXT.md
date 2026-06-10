@@ -92,6 +92,14 @@ _Avoid_: "Discovery" as a distinct stage from identification — they're the sam
 An opt-in broadcast of every output command sent to a **Device** — device index, feature index, output type, and value. Used by frontends (e.g. Intiface Central) to visually display real-time device activity, verify hardware behaviour matches commands, and let developers see what *would* happen with simulated devices. Disabled by default to avoid overhead.
 _Avoid_: Treating as internal-only debugging; it's a user-facing observability feature.
 
+**Task Scope**:
+The owner of spawned async tasks within a module. Every task is spawned through a Task Scope, which links it to a parent, derives its hierarchical name (e.g. `server/device-manager/device-3/keepalive`), registers it in the **Task Registry**, and hands it a cooperative cancellation token. Dropping a scope cancels its children. Tasks cannot be spawned without a parent scope.
+_Avoid_: "Detached task" or bare spawning as the normal pattern; detachment is the rare, explicit exception.
+
+**Task Registry**:
+The queryable record of every live task — id, hierarchical path, parent, state. Populated as a side effect of spawning through a **Task Scope**. Exposed in-process for tests and embedders, and to frontends via TaskStarted/TaskEnded **Events** plus a snapshot query (same opt-in pattern as **Output Observation**).
+_Avoid_: Treating as internal-only debugging; like Output Observations, it's user-facing observability.
+
 **Command**:
 A message from **Client** to **Server** requesting an action — controlling a device, starting a scan, requesting device lists. Always has a non-zero message ID; the server responds with an `Ok` or `Error` using the same ID.
 _Avoid_: Referring to server-initiated messages as commands.
