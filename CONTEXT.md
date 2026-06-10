@@ -93,7 +93,7 @@ An opt-in broadcast of every output command sent to a **Device** — device inde
 _Avoid_: Treating as internal-only debugging; it's a user-facing observability feature.
 
 **Task Scope**:
-The owner of spawned async tasks within a module. Every task is spawned through a Task Scope, which links it to a parent, derives its hierarchical name (e.g. `server/device-manager/device-3/keepalive`), registers it in the **Task Registry**, and hands it a cooperative cancellation token. Dropping a scope cancels its children. Tasks cannot be spawned without a parent scope.
+The owner of spawned async tasks within a module. Every task is spawned through a Task Scope, which links it to a parent, derives its hierarchical name (e.g. `device-manager-1/devices/device-3/io`), registers it in the **Task Registry**, and hands it a cooperative cancellation token. Dropping a scope cancels its children. Tasks cannot be spawned without a parent scope.
 _Avoid_: "Detached task" or bare spawning as the normal pattern; detachment is the rare, explicit exception.
 
 **Task Registry**:
