@@ -10,6 +10,7 @@
 use buttplug_core::{
   errors::ButtplugDeviceError,
   message::{InputReadingV4, InputType, InputValue, OutputCommand},
+  util::task::TaskScope,
 };
 use buttplug_server_device_config::{
   Endpoint,
@@ -372,6 +373,7 @@ pub trait ProtocolHandler: Sync + Send {
     _feature_index: u32,
     _feature_id: Uuid,
     _sensor_type: InputType,
+    _task_scope: TaskScope,
   ) -> BoxFuture<'_, Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Command not implemented for this protocol: InputCmd (Subscribe)".to_string(),
