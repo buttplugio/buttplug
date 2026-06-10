@@ -229,6 +229,13 @@ async fn test_server_shutdown_leaves_no_tasks() {
 /// ordering bug, so a write-observation assertion is inherently flaky here. An
 /// instrumented-ordering variant was also attempted and found inherently flaky
 /// with this harness, so it is deliberately not pursued.
+///
+/// UPDATE: with the stop-command write acknowledgement (DeviceTaskMessage ack)
+/// and a configurable per-device message_gap, the write observation IS now
+/// possible — see `test_stop_resolves_only_after_stop_write_reaches_hardware`
+/// and `test_shutdown_writes_stop_before_resolving` below, which retire the
+/// limitation described in the NOTE above for the acked stop path. This test
+/// remains as the coarse hang/leak smoke test.
 #[tokio::test]
 async fn test_shutdown_under_load_drains_subtree() {
   // Hold the channel so the device stays connected through shutdown.
