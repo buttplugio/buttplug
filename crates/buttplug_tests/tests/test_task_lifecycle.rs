@@ -17,14 +17,78 @@ use buttplug_core::{
     OutputValue,
     RequestServerInfoV4,
     StartScanningV0,
+    StopCmdV4,
   },
   util::task::registry,
 };
-use buttplug_server::message::ButtplugClientMessageVariant;
+use buttplug_server::{device::hardware::HardwareCommand, message::ButtplugClientMessageVariant};
 use futures::{StreamExt, pin_mut};
 use std::time::Duration;
+use util::TestDeviceChannelHost;
 use util::stalling_device_communication_manager::StallingDeviceCommunicationManagerBuilder;
-use util::{test_server_with_comm_manager, test_server_with_device};
+use util::{
+  test_server_with_comm_manager,
+  test_server_with_device,
+  test_server_with_device_and_message_gap,
+};
+
+/// The Aneros "Massage Demo" stop write for feature 0: `[0xF1, 0x00]`. A vibrate
+/// on the same feature writes `[0xF1, 0x40]`; the stop resets it to zero. See
+/// `device_test_case/test_aneros_protocol.yaml` for the full sequence.
+const ANEROS_STOP_WRITE_FEATURE_0: [u8; 2] = [0xF1, 0x00];
+
+/// Non-blockingly drain every hardware write the test device has recorded so
+/// far and return whether any of them is the feature-0 stop write. We use
+/// `try_recv` so the check reflects exactly what was on the wire *at the moment
+/// stop/shutdown resolved* — a write still sitting in the device io task's batch
+/// window has not reached the host channel yet and will not be counted.
+fn recorded_a_stop_write(host: &mut TestDeviceChannelHost) -> bool {
+  let mut saw_stop = false;
+  while let Ok(command) = host.receiver.try_recv() {
+    if let HardwareCommand::Write(write) = command
+      && write.data().as_slice() == ANEROS_STOP_WRITE_FEATURE_0
+    {
+      saw_stop = true;
+    }
+  }
+  saw_stop
+}
+
+/// Bring a "Massage Demo" device online under `server`, returning its device
+/// index. Mirrors the handshake/scan/connect dance the other lifecycle tests do.
+async fn bring_device_online(server: &buttplug_server::ButtplugServer, client_name: &str) -> u32 {
+  let recv = server.server_version_event_stream();
+  pin_mut!(recv);
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      RequestServerInfoV4::new(
+        client_name,
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION,
+      )
+      .into(),
+    ))
+    .await
+    .expect("server info request should succeed");
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      StartScanningV0::default().into(),
+    ))
+    .await
+    .expect("start scanning should succeed");
+  tokio::time::timeout(Duration::from_secs(5), async {
+    while let Some(msg) = recv.next().await {
+      if let ButtplugServerMessageV4::DeviceList(list) = msg
+        && let Some((&idx, _)) = list.devices().iter().next()
+      {
+        return idx;
+      }
+    }
+    panic!("device event stream ended before a device connected");
+  })
+  .await
+  .expect("timed out waiting for device to connect")
+}
 
 /// Bring a real (test-harness) device online and confirm that, once the server
 /// is shut down and dropped, no tasks remain registered under the scope tree.
@@ -295,4 +359,110 @@ async fn test_shutdown_resolves_with_stalled_bringup() {
     .await
     .expect("shutdown hung with a stalled device bringup — bringup is not honoring its cancellation token")
     .expect("server shutdown errored");
+}
+
+/// Test A — the stop-write-acknowledgement contract: a `StopCmd` must not
+/// resolve until the resulting stop write has actually reached the hardware,
+/// even when the device io task is batching commands over a long message gap.
+///
+/// This retires the limitation documented on `test_shutdown_under_load_drains_subtree`
+/// (the 1ms harness gap made write observation flaky). Here we deliberately give
+/// the device a 500ms message gap so the batching window is large and the race
+/// is deterministic: an active vibrate write lands, the stop write is queued
+/// into that 500ms batch, and we assert the stop write is on the wire *by the
+/// time the stop message resolves*.
+///
+/// RED (pre-fix, `git stash` Tasks 1-2): `handle_hardware_commands` fire-and-forgets
+/// the stop write into the io channel and `parse_message` for the StopCmd resolves
+/// immediately, while the write sits unflushed in the 500ms batch. `try_recv`
+/// finds no stop write and this assertion fails deterministically.
+///
+/// GREEN (with the ack-on-write fix): the stop path requests a write
+/// acknowledgement; the io task urgent-flushes the batch and fires the ack, so
+/// StopCmd only resolves after the write is on the wire.
+#[tokio::test]
+async fn test_stop_resolves_only_after_stop_write_reaches_hardware() {
+  // 500ms gap: large enough that, pre-fix, the stop write provably has not been
+  // flushed by the time StopCmd resolves (which is ~immediate).
+  let (server, mut device) =
+    test_server_with_device_and_message_gap("Massage Demo", Duration::from_millis(500));
+
+  let device_index = bring_device_online(&server, "Stop Write Ack Test").await;
+
+  // Put the device into an actively-running state so the stop has real work to
+  // flush. This vibrate write itself enters the batch window.
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      OutputCmdV4::new(
+        device_index,
+        0,
+        OutputCommand::Vibrate(OutputValue::new(50)),
+      )
+      .into(),
+    ))
+    .await
+    .expect("vibrate command should succeed");
+
+  // Stop. With ack-on-write, parse_message for StopCmd resolves only after the
+  // stop write has been flushed to hardware.
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      StopCmdV4::new(Some(device_index), None, true, true).into(),
+    ))
+    .await
+    .expect("stop command should succeed");
+
+  // The instant stop resolves, the stop write must already be on the wire. No
+  // sleep here: that is the whole point — we are asserting ordering, not
+  // eventual delivery.
+  assert!(
+    recorded_a_stop_write(&mut device),
+    "StopCmd resolved but the stop write was not yet recorded on the hardware channel — \
+     it is still sitting in the device io task's batch window"
+  );
+}
+
+/// Test B — the original incident: with a batched device in an active output
+/// state, `server.shutdown()` must drive the per-device stop write all the way
+/// to hardware before it resolves. This is the assertion the task-scope work
+/// could not make with the 1ms harness gap (the disconnect tore the io task down
+/// inside the batch window, dropping the pending stop write). With ack-on-write,
+/// stop_devices waits for the write before shutdown proceeds to disconnect.
+///
+/// RED (pre-fix): shutdown's stop_devices fire-and-forgets the stop write, then
+/// disconnect tears down the io task mid-batch and the write is dropped — no stop
+/// write is ever recorded.
+///
+/// GREEN (with the fix): the stop write is acknowledged before disconnect, so it
+/// is recorded before shutdown resolves.
+#[tokio::test]
+async fn test_shutdown_writes_stop_before_resolving() {
+  let (server, mut device) =
+    test_server_with_device_and_message_gap("Massage Demo", Duration::from_millis(500));
+
+  let device_index = bring_device_online(&server, "Shutdown Stop Write Test").await;
+
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      OutputCmdV4::new(
+        device_index,
+        0,
+        OutputCommand::Vibrate(OutputValue::new(50)),
+      )
+      .into(),
+    ))
+    .await
+    .expect("vibrate command should succeed");
+
+  tokio::time::timeout(Duration::from_secs(10), server.shutdown())
+    .await
+    .expect("shutdown did not resolve in time")
+    .expect("server shutdown errored");
+
+  // By the time shutdown resolved, the stop write must have reached hardware.
+  assert!(
+    recorded_a_stop_write(&mut device),
+    "shutdown() resolved but the device's stop write was never recorded — \
+     the pending stop write was dropped when the io task was torn down mid-batch"
+  );
 }

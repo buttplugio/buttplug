@@ -30,7 +30,7 @@ use std::{
     Arc,
     atomic::{AtomicBool, Ordering},
   },
-  time::{SystemTime, UNIX_EPOCH},
+  time::{Duration, SystemTime, UNIX_EPOCH},
 };
 use tokio::sync::mpsc::Sender;
 
@@ -74,8 +74,11 @@ impl TestDeviceIdentifier {
   }
 }
 
+/// Default inter-message gap for test hardware, matching `TestDevice`'s default.
+const DEFAULT_MESSAGE_GAP: Duration = Duration::from_millis(1);
+
 pub struct TestDeviceCommunicationManagerBuilder {
-  devices: Option<Vec<(TestDeviceIdentifier, TestDeviceChannelDevice)>>,
+  devices: Option<Vec<(TestDeviceIdentifier, Duration, TestDeviceChannelDevice)>>,
 }
 
 impl Default for TestDeviceCommunicationManagerBuilder {
@@ -88,12 +91,24 @@ impl Default for TestDeviceCommunicationManagerBuilder {
 
 impl TestDeviceCommunicationManagerBuilder {
   pub fn add_test_device(&mut self, device: &TestDeviceIdentifier) -> TestDeviceChannelHost {
+    self.add_test_device_with_message_gap(device, DEFAULT_MESSAGE_GAP)
+  }
+
+  /// Register a test device whose io task batches commands over `message_gap`.
+  /// A large gap (e.g. 500ms) makes the stop-write batching race deterministic
+  /// for tests asserting that stop commands are flushed before stop resolves.
+  #[allow(dead_code)]
+  pub fn add_test_device_with_message_gap(
+    &mut self,
+    device: &TestDeviceIdentifier,
+    message_gap: Duration,
+  ) -> TestDeviceChannelHost {
     let (host_channel, device_channel) = new_device_channel();
     self
       .devices
       .as_mut()
       .expect("Devices vec does not exist, is this running twice?")
-      .push((device.clone(), device_channel));
+      .push((device.clone(), message_gap, device_channel));
     host_channel
   }
 }
@@ -115,26 +130,28 @@ impl HardwareCommunicationManagerBuilder for TestDeviceCommunicationManagerBuild
 
 fn new_uninitialized_ble_test_device(
   identifier: &TestDeviceIdentifier,
+  message_gap: Duration,
   device_channel: TestDeviceChannelDevice,
 ) -> TestHardwareConnector {
   let address = identifier.address.clone();
   let specifier = ProtocolCommunicationSpecifier::BluetoothLE(
     BluetoothLESpecifier::new_from_device(&identifier.name, &HashMap::new(), &[]),
   );
-  let hardware = TestDevice::new(&identifier.name, &address, device_channel);
+  let hardware =
+    TestDevice::new_with_message_gap(&identifier.name, &address, message_gap, device_channel);
   TestHardwareConnector::new(specifier, hardware)
 }
 
 pub struct TestDeviceCommunicationManager {
   device_sender: Sender<HardwareCommunicationManagerEvent>,
-  devices: Vec<(TestDeviceIdentifier, TestDeviceChannelDevice)>,
+  devices: Vec<(TestDeviceIdentifier, Duration, TestDeviceChannelDevice)>,
   is_scanning: Arc<AtomicBool>,
 }
 
 impl TestDeviceCommunicationManager {
   pub fn new(
     device_sender: Sender<HardwareCommunicationManagerEvent>,
-    devices: Vec<(TestDeviceIdentifier, TestDeviceChannelDevice)>,
+    devices: Vec<(TestDeviceIdentifier, Duration, TestDeviceChannelDevice)>,
   ) -> Self {
     Self {
       device_sender,
@@ -156,8 +173,8 @@ impl HardwareCommunicationManager for TestDeviceCommunicationManager {
 
     let mut events = vec![];
 
-    while let Some((device, test_channel)) = self.devices.pop() {
-      let device_creator = new_uninitialized_ble_test_device(&device, test_channel);
+    while let Some((device, message_gap, test_channel)) = self.devices.pop() {
+      let device_creator = new_uninitialized_ble_test_device(&device, message_gap, test_channel);
 
       events.push(HardwareCommunicationManagerEvent::DeviceFound {
         name: device.name.clone(),

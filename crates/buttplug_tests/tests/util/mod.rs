@@ -170,6 +170,22 @@ pub fn test_server_with_device(device_type: &str) -> (ButtplugServer, TestDevice
   (test_server_with_comm_manager(builder), device)
 }
 
+/// Like `test_server_with_device`, but the device's io task batches commands
+/// over `message_gap`. A large gap widens the stop-write batching window so
+/// tests can deterministically observe whether stop commands are flushed to
+/// hardware before stop/shutdown resolve.
+#[allow(dead_code)]
+pub fn test_server_with_device_and_message_gap(
+  device_type: &str,
+  message_gap: std::time::Duration,
+) -> (ButtplugServer, TestDeviceChannelHost) {
+  let mut builder = TestDeviceCommunicationManagerBuilder::default();
+  let device = builder
+    .add_test_device_with_message_gap(&TestDeviceIdentifier::new(device_type, None), message_gap);
+
+  (test_server_with_comm_manager(builder), device)
+}
+
 #[allow(dead_code)]
 pub fn test_server_v4_with_device(device_type: &str) -> (ButtplugServer, TestDeviceChannelHost) {
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
