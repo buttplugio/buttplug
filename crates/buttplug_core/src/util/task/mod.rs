@@ -7,10 +7,12 @@
 
 //! Task Scope and Task Registry: ownership and introspection for spawned tasks.
 //!
-//! Every task is spawned through a [TaskScope], which links it into an
-//! ownership tree, derives its hierarchical path, registers it in the global
-//! [TaskRegistry], and hands it a cooperative [CancellationToken]. Dropping a
-//! scope cancels its subtree.
+//! A task spawned through a [TaskScope] is linked into an ownership tree, given
+//! a hierarchical path, registered in the global [TaskRegistry], and handed a
+//! cooperative [CancellationToken]; dropping a scope cancels its subtree. The
+//! `buttplug_server` crate is fully migrated onto scope-owned tasks; the
+//! hardware-manager and client crates still use the bare `spawn!` macro and
+//! migrate onto scopes in a follow-up.
 
 mod registry;
 mod scope;
@@ -35,8 +37,12 @@ where
   let span = tracing::span!(tracing::Level::INFO, "buttplug_task", task.path = %path);
   async_manager::spawn(
     async move {
+      // Deregister via a drop guard so a panicking detached task still leaves
+      // the registry (outcome Panicked) instead of leaking its entry forever.
+      // Detached tasks have no cancellation token, so the outcome is Panicked on
+      // panic, else Completed.
+      let _guard = scope::DeregisterGuard::new(id, None);
       fut.await;
-      registry().deregister(id, TaskOutcome::Completed);
     },
     span,
   );
@@ -54,8 +60,12 @@ where
   let span = tracing::span!(tracing::Level::INFO, "buttplug_task", task.path = %path);
   async_manager::spawn(
     async move {
+      // Deregister via a drop guard so a panicking detached task still leaves
+      // the registry (outcome Panicked) instead of leaking its entry forever.
+      // Detached tasks have no cancellation token, so the outcome is Panicked on
+      // panic, else Completed.
+      let _guard = scope::DeregisterGuard::new(id, None);
       fut.await;
-      registry().deregister(id, TaskOutcome::Completed);
     },
     span,
   );

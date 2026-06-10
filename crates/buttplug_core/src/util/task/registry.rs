@@ -27,12 +27,13 @@ impl TaskId {
   }
 }
 
-/// How a task ended: ran to completion on its own, or exited after observing
-/// cancellation.
+/// How a task ended: ran to completion on its own, exited after observing
+/// cancellation, or unwound from a panic.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TaskOutcome {
   Completed,
   Cancelled,
+  Panicked,
 }
 
 /// Registry entry for a live task.
