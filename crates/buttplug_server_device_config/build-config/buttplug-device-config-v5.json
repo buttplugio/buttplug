@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 6
+    "minor": 7
   },
   "protocols": {
     "activejoy": {
@@ -6078,7 +6078,8 @@
               "J-Thelma",
               "J-Mystor",
               "J-MutantX",
-              "J-Marino"
+              "J-Marino",
+              "J-Jason"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -10561,6 +10562,51 @@
             "J-Marino"
           ],
           "name": "JoyHub Marino"
+        },
+        {
+          "features": [
+            {
+              "id": "5d1778f7-46c5-43b8-8a1b-6f99982f2c0c",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "bc64740f-7b23-4c49-af90-d2d48fb8a475",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "efffd1df-55cd-498e-bf3d-0c156dbbb51c",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "adf08126-a0e5-4d35-9083-73f7f1e34256",
+          "identifier": [
+            "J-Jason"
+          ],
+          "name": "JoyHub Jason"
         }
       ],
       "defaults": {
