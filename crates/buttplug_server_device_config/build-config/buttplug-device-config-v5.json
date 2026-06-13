@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 5
+    "minor": 6
   },
   "protocols": {
     "activejoy": {
@@ -6076,7 +6076,9 @@
               "J-Vortus",
               "J-Phantom",
               "J-Thelma",
-              "J-Mystor"
+              "J-Mystor",
+              "J-MutantX",
+              "J-Marino"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -10493,6 +10495,72 @@
             "J-Mystor"
           ],
           "name": "JoyHub Mystor"
+        },
+        {
+          "features": [
+            {
+              "id": "e7335111-8303-4731-8e99-fefdead2a4a8",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "f5932afb-f7f0-40d5-abc6-a2040a7a85e3",
+              "index": 5,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    7
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "53a105e1-da01-4f46-b51e-d65ba8d3e302",
+          "identifier": [
+            "J-MutantX"
+          ],
+          "name": "JoyHub Mutant X"
+        },
+        {
+          "features": [
+            {
+              "id": "88577fa4-4cb8-4691-b5ba-194205b3c812",
+              "index": 0,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "482f1b86-7392-4fb8-bfac-22be525ea243",
+              "index": 5,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    9
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "9065a86a-0151-47d7-aca7-4bc78ec0fcd5",
+          "identifier": [
+            "J-Marino"
+          ],
+          "name": "JoyHub Marino"
         }
       ],
       "defaults": {
