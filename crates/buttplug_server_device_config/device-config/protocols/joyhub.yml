@@ -2606,6 +2606,32 @@ configurations:
             - 9
       index: 5
   id: 9065a86a-0151-47d7-aca7-4bc78ec0fcd5
+- identifier:
+    - J-Jason
+  name: JoyHub Jason
+  features:
+    - id: 5d1778f7-46c5-43b8-8a1b-6f99982f2c0c
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: bc64740f-7b23-4c49-af90-d2d48fb8a475
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+    - id: efffd1df-55cd-498e-bf3d-0c156dbbb51c
+      output:
+        temperature:
+          value:
+            - 0
+            - 1
+      index: 6
+  id: adf08126-a0e5-4d35-9083-73f7f1e34256
 communication:
 - btle:
     names:
@@ -2759,6 +2785,7 @@ communication:
     - J-Mystor
     - J-MutantX
     - J-Marino
+    - J-Jason
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
