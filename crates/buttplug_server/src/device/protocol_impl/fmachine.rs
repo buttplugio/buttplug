@@ -178,7 +178,7 @@ impl ProtocolInitializer for FMachineInitializer {
 
     // For now just log any notifications received, in future we may want to use them
     // for button hold state detection.
-    async_manager::spawn(async move {
+    buttplug_core::spawn!(async move {
       info!("F-Machine: BLE notification listener started");
       loop {
         select! {
@@ -257,7 +257,7 @@ async fn update_handler(
         .await
         .is_err()
       {
-        info!("F-Machine on/off command error, most likely due to device disconnection.");
+        warn!("F-Machine on/off command error, most likely due to device disconnection.");
         break;
       };
       is_running.store(!ir, Ordering::Relaxed);
@@ -301,7 +301,7 @@ impl FMachine {
     let current_speed_clone = current_speed.clone();
     let target_speed_clone = target_speed.clone();
 
-    async_manager::spawn(async move {
+    buttplug_core::spawn!(async move {
       update_handler(
         device,
         is_running_clone,
