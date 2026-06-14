@@ -11,10 +11,7 @@ use crate::device::{
   },
 };
 use async_trait::async_trait;
-use buttplug_core::{
-  errors::ButtplugDeviceError,
-  util::{async_manager, sleep},
-};
+use buttplug_core::{errors::ButtplugDeviceError, util::async_manager::sleep};
 use buttplug_server_device_config::{
   Endpoint, ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
@@ -88,7 +85,7 @@ fn make_cmd(command: u8) -> Vec<u8> {
 }
 
 /// Validate a received BLE packet from the device by checking its length and CRC.
-/// 
+///
 /// Packet layout:
 ///  [cmd, 0x64, 0x00, bitmask, 0x00, 0x00,
 ///   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
