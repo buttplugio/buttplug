@@ -20,6 +20,10 @@ configurations:
   - FM-T
   name: F-Machine Tremblr BT-R
   id: 49c5eb8c-c46b-44dc-b364-a6a90e10a38e
+- identifier:
+  - FM-A
+  name: F-Machine Alpha
+  id: fee761a8-c6c7-42f3-820b-6b5fa2c4ae5d
 communication:
 - btle:
     names:
