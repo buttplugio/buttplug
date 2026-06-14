@@ -16,6 +16,10 @@ configurations:
   - FM-G
   name: F-Machine Gigolo BT-R
   id: 5d8865bf-5842-46d2-bbc7-06fe77d26c20
+- identifier:
+  - FM-T
+  name: F-Machine Tremblr BT-R
+  id: 49c5eb8c-c46b-44dc-b364-a6a90e10a38e
 communication:
 - btle:
     names:
