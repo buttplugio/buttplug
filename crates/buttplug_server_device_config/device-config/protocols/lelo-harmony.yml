@@ -146,6 +146,7 @@ configurations:
   id: d8cf8c64-863c-4080-8dd5-98255eca9a7c
 - identifier:
     - SURFER2
+    - SURFER Originals
   name: Lelo Surfer 2
   features:
     - id: f9d5ea43-e233-4b7e-8348-7ff95439e7a9
@@ -176,6 +177,7 @@ communication:
     - SONA3 Cruise
     - Switch
     - SURFER2
+    - SURFER Originals
     - F2
     - Boomerang
     services:

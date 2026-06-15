@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 7
+    "minor": 8
   },
   "protocols": {
     "activejoy": {
@@ -12013,6 +12013,7 @@
               "SONA3 Cruise",
               "Switch",
               "SURFER2",
+              "SURFER Originals",
               "F2",
               "Boomerang"
             ],
@@ -12263,7 +12264,8 @@
           ],
           "id": "2add7033-66ad-4c69-a63d-8a35b012e958",
           "identifier": [
-            "SURFER2"
+            "SURFER2",
+            "SURFER Originals"
           ],
           "name": "Lelo Surfer 2"
         },
