@@ -25,3 +25,4 @@ communication:
         522b443a-4f53-534d-0001-420badbabe69:
           tx: 522b443a-4f53-534d-1000-420badbabe69
           txmode: 522b443a-4f53-534d-1010-420badbabe69
+          rx: 522b443a-4f53-534d-2000-420badbabe69
