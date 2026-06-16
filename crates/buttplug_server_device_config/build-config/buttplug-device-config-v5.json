@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 12
+    "minor": 13
   },
   "protocols": {
     "activejoy": {
@@ -17472,7 +17472,9 @@
             ],
             "services": {
               "522b443a-4f53-534d-0001-420badbabe69": {
-                "tx": "522b443a-4f53-534d-0002-420badbabe69"
+                "rx": "522b443a-4f53-534d-2000-420badbabe69",
+                "tx": "522b443a-4f53-534d-1000-420badbabe69",
+                "txmode": "522b443a-4f53-534d-1010-420badbabe69"
               }
             }
           }
@@ -17484,6 +17486,16 @@
             "id": "6ff53ba2-a5c0-462e-b2d6-420badbabe69",
             "index": 0,
             "output": {
+              "hw_position_with_duration": {
+                "duration": [
+                  0,
+                  100000
+                ],
+                "value": [
+                  0,
+                  100
+                ]
+              },
               "oscillate": {
                 "description": "Stroke Speed",
                 "value": [
@@ -17495,7 +17507,7 @@
           }
         ],
         "id": "6beebf46-3dfd-4e11-b0f9-420badbabe69",
-        "name": "OSSM"
+        "name": "Kinky Makers OSSM"
       }
     },
     "patoo": {
