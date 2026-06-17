@@ -2632,6 +2632,25 @@ configurations:
             - 1
       index: 6
   id: adf08126-a0e5-4d35-9083-73f7f1e34256
+- identifier:
+    - J-MartinoIII
+  name: JoyHub Martino III
+  features:
+    - id: de43a238-f92d-4329-aba2-8d3ff6772e5e
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 3
+    - id: e80e58f5-6c59-41fd-9644-3bbbbfa095f5
+      output:
+        constrict:
+          value:
+            - 0
+            - 7
+      index: 4
+  id: 67da4fc4-66d4-49ea-bd40-dbca9f0e5fed
 communication:
 - btle:
     names:
@@ -2786,6 +2805,7 @@ communication:
     - J-MutantX
     - J-Marino
     - J-Jason
+    - J-MartinoIII
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
