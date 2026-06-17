@@ -8,18 +8,6 @@ device_init:
       commands:
         - !Subscribe
             endpoint: rx
-        - !Write
-            endpoint: tx
-            data: [0x55, 0x04, 0x00, 0x00, 0x01, 0xFF, 0xAA]
-            write_with_response: false
-        - !Write
-            endpoint: tx
-            data: [0x55, 0x04, 0x00, 0x00, 0x00, 0x00, 0xAA]
-            write_with_response: false
-        - !Write
-            endpoint: tx
-            data: [0x55, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00]
-            write_with_response: false
 device_commands:
   - !Messages
       device_index: 0
