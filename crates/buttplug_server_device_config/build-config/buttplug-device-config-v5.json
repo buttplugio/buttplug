@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 8
+    "minor": 11
   },
   "protocols": {
     "activejoy": {
@@ -6079,7 +6079,8 @@
               "J-Mystor",
               "J-MutantX",
               "J-Marino",
-              "J-Jason"
+              "J-Jason",
+              "J-MartinoIII"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -10607,6 +10608,39 @@
             "J-Jason"
           ],
           "name": "JoyHub Jason"
+        },
+        {
+          "features": [
+            {
+              "id": "de43a238-f92d-4329-aba2-8d3ff6772e5e",
+              "index": 3,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "e80e58f5-6c59-41fd-9644-3bbbbfa095f5",
+              "index": 4,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    7
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "67da4fc4-66d4-49ea-bd40-dbca9f0e5fed",
+          "identifier": [
+            "J-MartinoIII"
+          ],
+          "name": "JoyHub Martino III"
         }
       ],
       "defaults": {
