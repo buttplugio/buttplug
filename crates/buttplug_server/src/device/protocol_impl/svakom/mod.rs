@@ -14,6 +14,7 @@ pub mod svakom_dice;
 pub mod svakom_dt250a;
 pub mod svakom_iker;
 pub mod svakom_jordan;
+pub mod svakom_klitty;
 pub mod svakom_pulse;
 pub mod svakom_sam;
 pub mod svakom_sam2;
