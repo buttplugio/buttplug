@@ -36,13 +36,6 @@ generic_protocol_initializer_setup!(SvakomKlitty, "svakom-klitty");
 const SVAKOM_KLITTY_PROTOCOL_UUID: Uuid = uuid!("62e5336b-bb9e-4528-9310-5a524c76b779");
 const KEEPALIVE_INTERVAL_MS: u64 = 50;
 const STOP_BURST_FRAMES: u8 = (2000 / KEEPALIVE_INTERVAL_MS) as u8;
-const HANDSHAKE_GAP_MS: u64 = 80;
-
-const HANDSHAKE: [[u8; 7]; 3] = [
-  [0x55, 0x04, 0x00, 0x00, 0x01, 0xFF, 0xAA],
-  [0x55, 0x04, 0x00, 0x00, 0x00, 0x00, 0xAA],
-  [0x55, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00],
-];
 
 struct MotorState {
   speed: AtomicU8,
@@ -138,20 +131,6 @@ impl ProtocolInitializer for SvakomKlittyInitializer {
         Endpoint::Rx,
       ))
       .await?;
-
-    for (index, packet) in HANDSHAKE.iter().enumerate() {
-      if index > 0 {
-        async_manager::sleep(Duration::from_millis(HANDSHAKE_GAP_MS)).await;
-      }
-      hardware
-        .write_value(&HardwareWriteCmd::new(
-          &[SVAKOM_KLITTY_PROTOCOL_UUID],
-          Endpoint::Tx,
-          packet.to_vec(),
-          false,
-        ))
-        .await?;
-    }
 
     Ok(Arc::new(SvakomKlitty::new(hardware)))
   }
