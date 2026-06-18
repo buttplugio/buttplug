@@ -2,12 +2,6 @@ devices:
   - identifier:
       name: "ST462A"
     expected_name: "Svakom Klitty"
-device_init:
-  - !Commands
-      device_index: 0
-      commands:
-        - !Subscribe
-            endpoint: rx
 device_commands:
   - !Messages
       device_index: 0
@@ -28,7 +22,7 @@ device_commands:
         - !Scalar
           - Index: 1
             Scalar: 1.0
-            ActuatorType: Oscillate
+            ActuatorType: Constrict
   - !Commands
       device_index: 0
       commands:
@@ -42,7 +36,7 @@ device_commands:
         - !Scalar
           - Index: 2
             Scalar: 0.5
-            ActuatorType: Oscillate
+            ActuatorType: Rotate
   - !Commands
       device_index: 0
       commands:
