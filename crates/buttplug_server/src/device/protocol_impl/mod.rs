@@ -482,6 +482,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
   add_to_protocol_map(
     &mut map,
+    svakom::svakom_fatima::setup::SvakomFatimaIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
     svakom::svakom_iker::setup::SvakomIkerIdentifierFactory::default(),
   );
   add_to_protocol_map(

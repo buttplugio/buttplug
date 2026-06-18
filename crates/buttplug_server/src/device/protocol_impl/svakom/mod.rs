@@ -12,6 +12,7 @@ pub mod svakom_barnard;
 pub mod svakom_barney;
 pub mod svakom_dice;
 pub mod svakom_dt250a;
+pub mod svakom_fatima;
 pub mod svakom_iker;
 pub mod svakom_jordan;
 pub mod svakom_pulse;
