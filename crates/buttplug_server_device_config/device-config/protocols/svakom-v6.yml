@@ -80,6 +80,32 @@ configurations:
         - 10
     index: 0
   id: 1e587721-7e91-44b2-9612-f9cfd88389fc
+- identifier:
+  - ST462A
+  name: Svakom Klitty
+  features:
+  - id: e420ade4-22b0-4a72-adfc-18a5e065bb53
+    output:
+      vibrate:
+        value:
+        - 0
+        - 10
+    index: 0
+  - id: 9e9ab318-33fc-44e6-96a2-53a1d4f66665
+    output:
+      constrict:
+        value:
+        - 0
+        - 3
+    index: 1
+  - id: 513fd726-9f49-4a8c-bf45-67ed2b016688
+    output:
+      rotate:
+        value:
+        - 0
+        - 10
+    index: 2
+  id: 62e5336b-bb9e-4528-9310-5a524c76b779
 communication:
 - btle:
     names:
@@ -89,6 +115,7 @@ communication:
     - Iker Neo
     - VA617A-3
     - VA617A-4
+    - ST462A
     services:
       0000ffe0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffe1-0000-1000-8000-00805f9b34fb
