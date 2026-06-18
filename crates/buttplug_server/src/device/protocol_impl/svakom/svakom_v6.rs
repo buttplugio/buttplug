@@ -134,4 +134,48 @@ impl ProtocolHandler for SvakomV6 {
       ])
     }
   }
+
+  fn handle_output_constrict_cmd(
+    &self,
+    _feature_index: u32,
+    feature_id: uuid::Uuid,
+    level: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        [0x55, 0x09, 0x00, 0x00, level as u8, 0x00, 0x00].to_vec(),
+        false,
+      )
+      .into(),
+    ])
+  }
+
+  fn handle_output_rotate_cmd(
+    &self,
+    _feature_index: u32,
+    feature_id: uuid::Uuid,
+    speed: i32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let speed = speed.unsigned_abs() as u8;
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        [
+          0x55,
+          0x14,
+          0x00,
+          0x00,
+          if speed == 0 { 0x00 } else { 0x01 },
+          speed,
+          0x00,
+        ]
+        .to_vec(),
+        false,
+      )
+      .into(),
+    ])
+  }
 }
