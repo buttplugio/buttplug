@@ -486,10 +486,6 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
   add_to_protocol_map(
     &mut map,
-    svakom::svakom_klitty::setup::SvakomKlittyIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
     svakom::svakom_jordan::setup::SvakomJordanIdentifierFactory::default(),
   );
   add_to_protocol_map(
