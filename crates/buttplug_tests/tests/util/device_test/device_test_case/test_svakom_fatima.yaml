@@ -1,0 +1,81 @@
+# Svakom Fatima Pro protocol regression test.
+# All bytes are taken from a BLE packet capture of the official app.
+# General form 55 <func> 00 00 <mode> <intensity>:
+#   vibration 03 [0,10] / suction 09 [0,10] / thrust 08 [0,7] (trailing 0xff) / heat 05 (on/off)
+
+devices:
+  - identifier:
+      name: "SL278B"
+    expected_name: "Svakom Fatima Pro"
+
+# No device_init: hardware testing showed the device drives with just connect + write
+# (no handshake / notification subscribe required), so the protocol has no initializer.
+
+device_commands:
+  # Vibration max (Speed 1.0 -> level 10): 55 03 00 00 01 0a
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 1.0
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x03, 0x00, 0x00, 0x01, 0x0a]
+            write_with_response: false
+
+  # Vibration off: 55 03 00 00 00 00
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.0
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x03, 0x00, 0x00, 0x00, 0x00]
+            write_with_response: false
+
+  # Suction max (Constrict 1.0 -> 10): 55 09 00 00 01 0a
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 1
+            Scalar: 1.0
+            ActuatorType: Constrict
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x09, 0x00, 0x00, 0x01, 0x0a]
+            write_with_response: false
+
+  # Thrust max (Oscillate 1.0 -> pattern 7): 55 08 00 00 07 ff
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 2
+            Scalar: 1.0
+            ActuatorType: Oscillate
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x08, 0x00, 0x00, 0x07, 0xff]
+            write_with_response: false
+
+  # Heat (Temperature) is not covered here: the device-test Scalar channel (v4) does not
+  # accept a Temperature actuator. The handler is implemented and the feature is exposed
+  # (value [0,1]):
+  #   on = 55 05 01 37 02 00 00 ; off = 55 05 00 00 02 00 00 -- verified against the
+  #   capture and the official app, not regression-tested on the heat actuator.
