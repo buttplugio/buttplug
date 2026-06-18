@@ -1,0 +1,59 @@
+# Svakom Fatima Pro device configuration (svakom-fatima protocol <-> svakom_fatima.rs)
+# Four functions confirmed from a packet capture of the official app:
+# vibration / suction / thrust / heat.
+defaults:
+  name: Svakom Fatima Pro
+  features:
+    - description: Vibration
+      id: 86aa193e-03ec-49ac-9ffa-2fd2a1632fee
+      output:
+        vibrate:
+          value:
+            - 0
+            - 10
+      index: 0
+    - description: Suction
+      id: dbbc3a0a-5a7e-438c-8264-21a766fdc5eb
+      output:
+        constrict:
+          value:
+            - 0
+            - 10
+      index: 1
+    - description: Thrust
+      id: 5d3a1b4a-6d5c-4cea-a39a-64f5128c4d0c
+      output:
+        oscillate:
+          value:
+            - 0
+            - 7
+      index: 2
+    - description: Heat
+      id: 3c0b4b9f-2a7a-407c-9405-c55db53c1c6f
+      output:
+        temperature:
+          value:
+            - 0
+            - 1
+      index: 3
+  id: e0422082-c98c-4ed6-b341-697de6a30eed
+
+configurations:
+  - identifier:
+      - SL278B
+    name: Svakom Fatima Pro
+    id: 332925f9-d550-4a67-ad1b-d5a6ebc47876
+
+communication:
+  - btle:
+      names:
+        - SL278B
+      services:
+        # FFE0 service: FFE1 = write. (The device also has an FFE2 notify, but it
+        # carries only a status/battery read the protocol doesn't use, so no rx is
+        # declared and nothing is subscribed — control is write-only.)
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+      # The Fatima Pro presents as two independent SL278B BLE peripherals; each
+      # registers as its own Buttplug device and is driven independently by this
+      # protocol. Connection is unstable (sometimes only one peripheral connects).
