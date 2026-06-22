@@ -1,11 +1,7 @@
 {
   "version": {
     "major": 5,
-<<<<<<< HEAD
     "minor": 13
-=======
-    "minor": 5
->>>>>>> 7961b1f1 (refactor: integrated klitty protocol to existing svakom v6 config)
   },
   "protocols": {
     "activejoy": {
