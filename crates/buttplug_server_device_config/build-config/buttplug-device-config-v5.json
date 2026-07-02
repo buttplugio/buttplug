@@ -22028,6 +22028,7 @@
               "Aogu SUV",
               "Aogu SCB",
               "Emma NEO",
+              "Emma Neo",
               "Phoenix NEO"
             ],
             "services": {
@@ -22057,7 +22058,8 @@
         {
           "id": "68d39a06-e350-47ef-8834-e3197178b00e",
           "identifier": [
-            "Emma NEO"
+            "Emma NEO",
+            "Emma Neo"
           ],
           "name": "Svakom Emma Neo"
         }

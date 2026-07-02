@@ -21,6 +21,7 @@ configurations:
   id: c9556aba-5bda-4f23-a690-623c4b9ee04b
 - identifier:
   - Emma NEO
+  - Emma Neo
   name: Svakom Emma Neo
   id: 68d39a06-e350-47ef-8834-e3197178b00e
 communication:
@@ -29,6 +30,7 @@ communication:
     - Aogu SUV
     - Aogu SCB
     - Emma NEO
+    - Emma Neo
     - Phoenix NEO
     services:
       0000ffe0-0000-1000-8000-00805f9b34fb:
