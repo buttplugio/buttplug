@@ -2028,16 +2028,16 @@ configurations:
   - J-Perseus
   name: JoyHub Perseus
   features:
-  - id: 12f36e6d-e9ce-439c-b6f5-3f80a4f4b47d
+  - id: cbd851bb-a0de-43b6-89df-947d5872454d
     output:
-      oscillate:
+      vibrate:
         value:
         - 0
         - 255
     index: 0
-  - id: 94025679-badf-49bb-a247-1dab022d9204
+  - id: 2e5385b3-82be-4047-b998-49ee07aefa5e
     output:
-      vibrate:
+      oscillate:
         value:
         - 0
         - 255
@@ -2651,6 +2651,40 @@ configurations:
             - 7
       index: 4
   id: 67da4fc4-66d4-49ea-bd40-dbca9f0e5fed
+- identifier:
+    - J-Punisher
+  name: JoyHub Punisher
+  features:
+    - id: 4272e178-cfb0-4e1f-a6cc-1083d83ede14
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: de639d48-47e2-440d-b2c7-3c46068fc13d
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+    - id: 95a9b5b2-fc5f-45e9-b307-bd2941fd6883
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 2
+  id: e437baf4-9e60-431e-a30f-5870faf5c1ad
+- identifier:
+    - J-Prismcy
+  name: JoyHub Prismcy
+  id: fcf3aa9b-8e2f-4751-8f7d-b208a62ef6c9
+- identifier:
+    - J-AresIII
+  name: JoyHub Ares III
+  id: 5f902050-ee3f-4503-abcb-d0794c27180c
 communication:
 - btle:
     names:
@@ -2806,6 +2840,9 @@ communication:
     - J-Marino
     - J-Jason
     - J-MartinoIII
+    - J-Punisher
+    - J-Prismcy
+    - J-AresIII
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
