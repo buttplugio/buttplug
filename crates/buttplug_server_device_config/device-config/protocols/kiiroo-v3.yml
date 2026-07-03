@@ -4,38 +4,67 @@ defaults:
   features: []
   id: b3b6151e-79b8-4aac-a777-0de6b9f2d893
 configurations:
-- identifier:
-  - KEON WIFI
-  - Keon Wifi
-  name: Kiiroo Keon
-  features:
-  - id: f4ee99e7-1a14-4315-9870-3990bca7ff94
-    output:
-      hw_position_with_duration:
-        value:
-        - 0
-        - 99
-        duration:
-        - 0
-        - 100000
-    index: 0
-  - description: Battery Level
-    id: 90319514-ff68-40ae-805d-54ce392a60bd
-    input:
-      battery:
-        value:
-        - - 0
-          - 100
-        command:
-        - Read
-    index: 1
-  id: 62ba81c4-0ada-41be-b49d-d53426cdc277
+  - identifier:
+      - KEON WIFI
+      - Keon Wifi
+    name: Kiiroo Keon
+    features:
+      - id: f4ee99e7-1a14-4315-9870-3990bca7ff94
+        output:
+          hw_position_with_duration:
+            value:
+              - 0
+              - 99
+            duration:
+              - 0
+              - 100000
+        index: 0
+      - description: Battery Level
+        id: 90319514-ff68-40ae-805d-54ce392a60bd
+        input:
+          battery:
+            value:
+              - - 0
+                - 100
+            command:
+              - Read
+        index: 1
+    id: 62ba81c4-0ada-41be-b49d-d53426cdc277
+  - identifier:
+      - KEON2
+    name: Kiiroo Keon 2
+    features:
+      - id: b7bd2527-b0a5-465f-98d9-f6b55aa9645b
+        output:
+          hw_position_with_duration:
+            value:
+              - 0
+              - 100
+            duration:
+              - 0
+              - 100000
+        index: 0
+      - description: Battery Level
+        id: 8ab0640d-ac9b-408b-878a-76e95082896b
+        input:
+          battery:
+            value:
+              - - 0
+                - 100
+            command:
+              - Read
+        index: 1
+    id: 23940e92-ddd2-42b4-a589-744c0d14f04b
 communication:
 - btle:
     names:
     - KEON WIFI
     - Keon Wifi
+    - KEON2
     services:
       '00001900-0000-1000-8000-00805f9b34fb':
         tx: '00001800-0000-1000-8000-00805f9b34fb'
         rx: '00001903-0000-1000-8000-00805f9b34fb'
+      '00001400-0000-1000-8000-00805f9b34fb':
+        tx: '00001801-0000-1000-8000-00805f9b34fb'
+        whitelist: '00002a19-0000-1000-8000-00805f9b34fb'
