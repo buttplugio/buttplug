@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 20
+    "minor": 27
   },
   "protocols": {
     "activejoy": {
@@ -10988,6 +10988,61 @@
         "name": "Kiiroo Spot"
       }
     },
+    "kiiroo-spot-v2": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "SPOT W2"
+            ],
+            "services": {
+              "00001400-0000-1000-8000-00805f9b34fb": {
+                "tx": "00001801-0000-1000-8000-00805f9b34fb"
+              },
+              "0000180f-0000-1000-8000-00805f9b34fb": {
+                "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "296348ed-8bfa-45d2-a4f4-771a54580eb1",
+            "index": 0,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  100
+                ]
+              }
+            }
+          },
+          {
+            "description": "battery Level",
+            "id": "adec0f91-dbb1-49d3-a135-8d1b7f8e76b1",
+            "index": 1,
+            "input": {
+              "battery": {
+                "command": [
+                  "Read"
+                ],
+                "value": [
+                  [
+                    0,
+                    100
+                  ]
+                ]
+              }
+            }
+          }
+        ],
+        "id": "91d3c325-8bbd-4843-a61d-e7175d14fae2",
+        "name": "Kiiroo Spot 2"
+      }
+    },
     "kiiroo-v1": {
       "communication": [
         {
@@ -11881,9 +11936,14 @@
           "btle": {
             "names": [
               "KEON WIFI",
-              "Keon Wifi"
+              "Keon Wifi",
+              "KEON2"
             ],
             "services": {
+              "00001400-0000-1000-8000-00805f9b34fb": {
+                "tx": "00001801-0000-1000-8000-00805f9b34fb",
+                "whitelist": "00002a19-0000-1000-8000-00805f9b34fb"
+              },
               "00001900-0000-1000-8000-00805f9b34fb": {
                 "rx": "00001903-0000-1000-8000-00805f9b34fb",
                 "tx": "00001800-0000-1000-8000-00805f9b34fb"
@@ -11936,6 +11996,49 @@
             "Keon Wifi"
           ],
           "name": "Kiiroo Keon"
+        },
+        {
+          "features": [
+            {
+              "id": "b7bd2527-b0a5-465f-98d9-f6b55aa9645b",
+              "index": 0,
+              "output": {
+                "hw_position_with_duration": {
+                  "duration": [
+                    0,
+                    100000
+                  ],
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "8ab0640d-ac9b-408b-878a-76e95082896b",
+              "index": 1,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "23940e92-ddd2-42b4-a589-744c0d14f04b",
+          "identifier": [
+            "KEON2"
+          ],
+          "name": "Kiiroo Keon 2"
         }
       ],
       "defaults": {
