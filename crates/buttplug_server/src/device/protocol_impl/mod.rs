@@ -114,6 +114,7 @@ pub mod thehandy_v3;
 pub mod tryfun;
 pub mod tryfun_blackhole;
 pub mod tryfun_meta2;
+pub mod umove;
 pub mod utimi;
 pub mod vibcrafter;
 pub mod vibratissimo;
@@ -549,6 +550,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     tcode_v03::setup::TCodeV03IdentifierFactory::default(),
   );
+  add_to_protocol_map(&mut map, umove::setup::UmoveIdentifierFactory::default());
   add_to_protocol_map(&mut map, utimi::setup::UtimiIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,

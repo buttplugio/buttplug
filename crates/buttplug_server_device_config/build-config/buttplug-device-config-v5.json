@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 16
+    "minor": 20
   },
   "protocols": {
     "activejoy": {
@@ -23239,6 +23239,151 @@
         "features": [],
         "id": "83e29d7a-6f35-499a-90f8-dfba8b674379",
         "name": "Twerking Butt"
+      }
+    },
+    "umove": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "ALVxB*",
+              "ALMiB*",
+              "ALNxB*",
+              "UMVxB*",
+              "UMMiB*",
+              "UMNxB*"
+            ],
+            "services": {
+              "6e400001-b5a3-f393-e0a9-e50e24dcca9e": {
+                "rx": "6e400003-b5a3-f393-e0a9-e50e24dcca9e",
+                "tx": "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "65dba547-9ebd-4a7a-a6a1-b4b7f34bb7e8",
+          "identifier": [
+            "Mi"
+          ],
+          "name": "Umove Mira"
+        },
+        {
+          "features": [
+            {
+              "id": "0d6dc2b6-87cf-44a1-ac79-8b3d0c50ad6f",
+              "index": 1,
+              "output": {
+                "hw_position_with_duration": {
+                  "duration": [
+                    0,
+                    10000
+                  ],
+                  "value": [
+                    0,
+                    732
+                  ]
+                },
+                "position": {
+                  "value": [
+                    0,
+                    732
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "ebfa5881-cab0-4218-a14f-592ef44fd2c8",
+          "identifier": [
+            "Vx"
+          ],
+          "name": "Umove Vero"
+        },
+        {
+          "features": [
+            {
+              "id": "8f08d8a1-0f5e-4915-af56-e02d4553ae89",
+              "index": 1,
+              "output": {
+                "hw_position_with_duration": {
+                  "duration": [
+                    0,
+                    10000
+                  ],
+                  "value": [
+                    0,
+                    1232
+                  ]
+                },
+                "position": {
+                  "value": [
+                    0,
+                    1232
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "1694dace-5a53-4d56-9620-9251be4da5ce",
+          "identifier": [
+            "Nx"
+          ],
+          "name": "Umove Nexo"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "27d5e07a-5880-4595-8c12-2f231b4ef2d2",
+            "index": 0,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  10000
+                ]
+              }
+            }
+          },
+          {
+            "id": "44cef1b2-dc95-4abf-a27b-a6d8a266d827",
+            "index": 1,
+            "output": {
+              "hw_position_with_duration": {
+                "duration": [
+                  0,
+                  10000
+                ],
+                "value": [
+                  0,
+                  632
+                ]
+              },
+              "position": {
+                "value": [
+                  0,
+                  632
+                ]
+              }
+            }
+          },
+          {
+            "id": "2d7f0be1-b41f-4cb9-aea6-585d2b0ee7ba",
+            "index": 2,
+            "output": {
+              "temperature": {
+                "value": [
+                  37,
+                  42
+                ]
+              }
+            }
+          }
+        ],
+        "id": "45648a20-cb18-43a0-9d6c-8bc4ed63ef63",
+        "name": "Umove Device"
       }
     },
     "utimi": {
