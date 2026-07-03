@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::device::hardware::{HardwareEvent, HardwareReadCmd, HardwareSubscribeCmd};
+use crate::device::hardware::{HardwareEvent, HardwareSubscribeCmd};
 use crate::device::{
   hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
   protocol::{
@@ -17,7 +17,6 @@ use crate::device::{
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
-use buttplug_core::util::sleep;
 use buttplug_server_device_config::{
   Endpoint,
   ProtocolCommunicationSpecifier,
@@ -25,13 +24,9 @@ use buttplug_server_device_config::{
   UserDeviceIdentifier,
 };
 use futures_util::FutureExt;
-use serde_json::ser::State;
 use std::collections::HashMap;
-use std::ops::Index;
-use std::str::from_utf8;
-use std::sync::atomic::{AtomicBool, AtomicU8, Ordering};
-use std::sync::{Arc, RwLock};
-use std::time::{Duration, Instant};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicU8, Ordering};
 use tokio::select;
 use uuid::{Uuid, uuid};
 
@@ -105,7 +100,6 @@ impl ProtocolInitializer for OSSMInitializer {
     hardware
       .subscribe(&HardwareSubscribeCmd::new(OSSM_PROTOCOL_UUID, Endpoint::Rx))
       .await?;
-    let state = Arc::new(RwLock::new(String::new()));
 
     buttplug_core::spawn!("OssmStateReader", ossm_statereader(hardware.clone(),));
 
