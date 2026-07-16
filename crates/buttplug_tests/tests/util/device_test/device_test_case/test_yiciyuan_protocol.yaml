@@ -1,0 +1,68 @@
+devices:
+  - identifier:
+      name: "YCY-FJB-01"
+    expected_name: "Yiciyuan FJB-01"
+device_commands:
+  # The cup exposes three actuators (Oscillate + 2× Vibrate). Protocol
+  # spec versions v0–v2 only model a single Vibrate axis per device, so
+  # we exercise the meaningful command set under v3+ where ScalarCmd /
+  # StopDeviceCmd handle multi-feature devices natively. Earlier-version
+  # tests still verify discovery, identification, and connect.
+  - !VersionGated
+      min_spec_version: 3
+      commands:
+        # Initial Stop after connect — clear any axis left running from a
+        # previous session. The protocol rebuilds the 16-byte frame from
+        # shared atomic state on every zero call, so the dispatcher emits
+        # a single all-zero motor frame regardless of feature count.
+        - !Messages
+            device_index: 0
+            messages:
+              - !Stop
+        - !Commands
+            device_index: 0
+            commands:
+              - !Write
+                  endpoint: tx
+                  data: [0x35, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+                  write_with_response: false
+
+        # Multi-feature Scalar: stroke 0.5 / vibe 0.75 / axis_c 0.25.
+        # Each axis lands on its own protocol-handler call which atomically
+        # updates one byte in the shared state and writes the full frame
+        # back. The visible write reflects the final combined state
+        # stroke=10 vibe=15 axis_c=5 in the 0..=0x14 device range.
+        - !Messages
+            device_index: 0
+            messages:
+              - !Scalar
+                - Index: 0
+                  Scalar: 0.5
+                  ActuatorType: Oscillate
+                - Index: 1
+                  Scalar: 0.75
+                  ActuatorType: Vibrate
+                - Index: 2
+                  Scalar: 0.25
+                  ActuatorType: Vibrate
+        - !Commands
+            device_index: 0
+            commands:
+              - !Write
+                  endpoint: tx
+                  data: [0x35, 0x12, 0x0A, 0x0F, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+                  write_with_response: false
+
+        # Final Stop — every actuator returns to 0. Returns the device to
+        # the same idle state the test started from.
+        - !Messages
+            device_index: 0
+            messages:
+              - !Stop
+        - !Commands
+            device_index: 0
+            commands:
+              - !Write
+                  endpoint: tx
+                  data: [0x35, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+                  write_with_response: false
