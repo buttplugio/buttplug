@@ -1,0 +1,63 @@
+---
+defaults:
+  name: Yiciyuan Device
+  features:
+  - description: stroke
+    id: 74f218e9-204e-4600-baf9-43c942b5a6a0
+    output:
+      oscillate:
+        value:
+        - 0
+        - 100
+    index: 0
+  - description: vibrate
+    id: 4bf007b8-e7df-4c4c-8fbe-ea112128a70f
+    output:
+      vibrate:
+        value:
+        - 0
+        - 100
+    index: 1
+  - description: axis c
+    id: f01acf53-731b-452e-be21-e912a65409c8
+    output:
+      vibrate:
+        value:
+        - 0
+        - 100
+    index: 2
+  - description: battery level
+    id: 5fb5b0a4-aa3f-4e22-9aa3-32a3666d5141
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 3
+  id: d5987116-2fba-4c30-a7aa-ef567a3bf35d
+configurations:
+# YCY-FJB-01 is the only model verified against physical hardware so far.
+# YCY-FJB-02 is its successor in the same product line; the official app's
+# code path for both models is identical (same vuex state, same hex-stringed
+# 16-byte motor frame, same BLE service/characteristic UUIDs). Adding it
+# here so the second model is recognised; flag confirmed device behaviour
+# in a future PR once an FJB-02 owner can verify.
+- identifier:
+  - YCY-FJB-01
+  name: Yiciyuan FJB-01
+  id: e45517ef-4358-4e65-8d78-3ff9447ea1c9
+- identifier:
+  - YCY-FJB-02
+  name: Yiciyuan FJB-02
+  id: 48108f07-5871-445b-9f2a-10ceb1809b23
+communication:
+- btle:
+    names:
+    - YCY-FJB-01
+    - YCY-FJB-02
+    services:
+      0000ff40-0000-1000-8000-00805f9b34fb:
+        tx: 0000ff41-0000-1000-8000-00805f9b34fb
+        rxblebattery: 0000ff42-0000-1000-8000-00805f9b34fb
