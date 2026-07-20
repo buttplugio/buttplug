@@ -634,7 +634,7 @@ pub(super) async fn build_device_handle(
       keepalive_strategy: handler.keepalive_strategy(),
     },
     internal_hw_msg_recv,
-  );
+  )?;
 
   // Generate stop commands for this device
   let mut stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4> = vec![];
@@ -717,51 +717,57 @@ pub(super) async fn build_device_handle(
   // to the device manager event loop via the provided sender.
   let event_stream = device_handle.event_stream();
   let identifier = device_handle.identifier().clone();
-  task_scope.spawn("event-forwarding", move |token| async move {
-    futures::pin_mut!(event_stream);
-    loop {
-      tokio::select! {
-        _ = token.cancelled() => {
-          info!("Event forwarding cancelled for device {:?}", identifier);
-          break;
-        }
-        event = futures::StreamExt::next(&mut event_stream) => {
-          match event {
-            Some(DeviceEvent::Disconnected(id)) => {
-              if device_event_sender
-                .send(InternalDeviceEvent::Disconnected(id))
-                .await
-                .is_err()
-              {
-                info!(
-                  "Device event sender closed for device {:?}, stopping event forwarding.",
-                  identifier
-                );
+  task_scope
+    .spawn("event-forwarding", move |token| async move {
+      futures::pin_mut!(event_stream);
+      loop {
+        tokio::select! {
+          _ = token.cancelled() => {
+            info!("Event forwarding cancelled for device {:?}", identifier);
+            break;
+          }
+          event = futures::StreamExt::next(&mut event_stream) => {
+            match event {
+              Some(DeviceEvent::Disconnected(id)) => {
+                if device_event_sender
+                  .send(InternalDeviceEvent::Disconnected(id))
+                  .await
+                  .is_err()
+                {
+                  info!(
+                    "Device event sender closed for device {:?}, stopping event forwarding.",
+                    identifier
+                  );
+                  break;
+                }
+              }
+              Some(DeviceEvent::Notification(_, msg)) => {
+                if device_event_sender
+                  .send(InternalDeviceEvent::Notification(msg))
+                  .await
+                  .is_err()
+                {
+                  info!(
+                    "Device event sender closed for device {:?}, stopping event forwarding.",
+                    identifier
+                  );
+                  break;
+                }
+              }
+              None => {
+                // Stream ended (device likely disconnected)
                 break;
               }
-            }
-            Some(DeviceEvent::Notification(_, msg)) => {
-              if device_event_sender
-                .send(InternalDeviceEvent::Notification(msg))
-                .await
-                .is_err()
-              {
-                info!(
-                  "Device event sender closed for device {:?}, stopping event forwarding.",
-                  identifier
-                );
-                break;
-              }
-            }
-            None => {
-              // Stream ended (device likely disconnected)
-              break;
             }
           }
         }
       }
-    }
-  });
+    })
+    .map_err(|e| {
+      ButtplugDeviceError::DeviceConnectionError(format!(
+        "Could not spawn device event forwarding task: {e}"
+      ))
+    })?;
 
   Ok(device_handle)
 }

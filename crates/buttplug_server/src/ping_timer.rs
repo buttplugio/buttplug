@@ -76,7 +76,11 @@ impl PingTimer {
   /// The callback is called once when the ping timer expires without receiving
   /// a ping message. If max_ping_time is 0, the timer is disabled and the
   /// callback will never be called.
-  pub fn new<F>(max_ping_time: u32, on_ping_timeout: Option<F>, task_scope: TaskScope) -> Self
+  pub fn new<F>(
+    max_ping_time: u32,
+    on_ping_timeout: Option<F>,
+    task_scope: TaskScope,
+  ) -> Result<Self, buttplug_core::util::task::TaskSpawnError>
   where
     F: FnOnce() + Send + 'static,
   {
@@ -85,13 +89,13 @@ impl PingTimer {
       let callback = Arc::new(Mutex::new(on_ping_timeout));
       task_scope.spawn("timer", move |token| {
         ping_timer(max_ping_time, receiver, callback, token)
-      });
+      })?;
     }
-    Self {
+    Ok(Self {
       max_ping_time,
       ping_msg_sender: sender,
       _task_scope: task_scope,
-    }
+    })
   }
 
   fn send_ping_msg(&self, msg: PingMessage) -> impl Future<Output = ()> + use<> {

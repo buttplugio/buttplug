@@ -30,12 +30,19 @@ use buttplug_server_device_config::{BluetoothLESpecifier, ProtocolCommunicationS
 use futures::FutureExt;
 use log::error;
 use std::collections::HashMap;
-use tokio::sync::mpsc::Sender;
+use tokio::sync::{Notify, mpsc::Sender};
+
+/// Shared state used to deterministically observe that bring-up entered connect().
+#[derive(Clone, Debug, Default)]
+pub struct StallingDeviceState {
+  pub connect_started: std::sync::Arc<Notify>,
+}
 
 /// A `HardwareConnector` whose `connect()` future never resolves.
 #[derive(Debug)]
 struct StallingHardwareConnector {
   specifier: ProtocolCommunicationSpecifier,
+  state: StallingDeviceState,
 }
 
 #[async_trait]
@@ -47,13 +54,22 @@ impl HardwareConnector for StallingHardwareConnector {
   async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
     // Block forever: this models a device connect that hangs and never returns.
     // The bringup task must drop this future when its cancellation token fires.
+    self.state.connect_started.notify_waiters();
     std::future::pending::<()>().await;
     unreachable!("stalling connector connect() should never resolve");
   }
 }
 
-#[derive(Default)]
-pub struct StallingDeviceCommunicationManagerBuilder {}
+#[derive(Clone, Default)]
+pub struct StallingDeviceCommunicationManagerBuilder {
+  state: StallingDeviceState,
+}
+
+impl StallingDeviceCommunicationManagerBuilder {
+  pub fn state(&self) -> StallingDeviceState {
+    self.state.clone()
+  }
+}
 
 impl HardwareCommunicationManagerBuilder for StallingDeviceCommunicationManagerBuilder {
   fn finish(
@@ -62,12 +78,14 @@ impl HardwareCommunicationManagerBuilder for StallingDeviceCommunicationManagerB
   ) -> Box<dyn HardwareCommunicationManager> {
     Box::new(StallingDeviceCommunicationManager {
       device_sender: sender,
+      state: self.state.clone(),
     })
   }
 }
 
 pub struct StallingDeviceCommunicationManager {
   device_sender: Sender<HardwareCommunicationManagerEvent>,
+  state: StallingDeviceState,
 }
 
 impl HardwareCommunicationManager for StallingDeviceCommunicationManager {
@@ -77,13 +95,17 @@ impl HardwareCommunicationManager for StallingDeviceCommunicationManager {
 
   fn start_scanning(&mut self) -> ButtplugResultFuture {
     let device_sender = self.device_sender.clone();
+    let state = self.state.clone();
     async move {
       // "Massage Demo" is a known test device name with a real protocol config,
       // so bringup proceeds into connect() (which then stalls).
       let specifier = ProtocolCommunicationSpecifier::BluetoothLE(
         BluetoothLESpecifier::new_from_device("Massage Demo", &HashMap::new(), &[]),
       );
-      let connector = StallingHardwareConnector { specifier };
+      let connector = StallingHardwareConnector {
+        specifier,
+        state: state.clone(),
+      };
       if device_sender
         .send(HardwareCommunicationManagerEvent::DeviceFound {
           name: "Massage Demo".to_owned(),

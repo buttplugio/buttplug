@@ -120,14 +120,19 @@ impl ButtplugServerBuilder {
         // Stop all devices (spawn async task since callback is sync). The
         // callback is FnOnce, so the child scope moves in and is consumed by
         // spawn_and_hold, keeping it alive for the duration of the task.
-        ping_timeout_scope.spawn_and_hold("stop-devices", move |_token| async move {
+        match ping_timeout_scope.spawn_and_hold("stop-devices", move |_token| async move {
           if let Err(e) = device_manager_clone
             .stop_devices(&StopCmdV4::default())
             .await
           {
             error!("Could not stop devices on ping timeout: {:?}", e);
           }
-        });
+        }) {
+          Ok(()) => {}
+          Err(e) => {
+            debug!("Skipping ping-timeout device stop because teardown closed its scope: {e}");
+          }
+        }
         // Send error to output channel
         if output_sender_clone
           .send(ButtplugServerMessageV4::Error(message::ErrorV0::from(
@@ -146,7 +151,7 @@ impl ButtplugServerBuilder {
       ping_time,
       ping_timeout_callback,
       task_scope.child("ping-timer"),
-    ));
+    )?);
 
     // Assuming everything passed, return the server.
     Ok(ButtplugServer::new(

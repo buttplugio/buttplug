@@ -82,6 +82,9 @@ pub type ButtplugServerResultFuture = BoxFuture<'static, ButtplugServerResult>;
 /// Error enum for Buttplug Server configuration errors.
 #[derive(Error, Debug)]
 pub enum ButtplugServerError {
+  /// A server task could not be spawned during construction.
+  #[error(transparent)]
+  TaskSpawnError(#[from] buttplug_core::util::task::TaskSpawnError),
   /// DeviceConfigurationManager could not be built.
   #[error("The DeviceConfigurationManager could not be built: {0}")]
   DeviceConfigurationManagerError(ButtplugDeviceError),

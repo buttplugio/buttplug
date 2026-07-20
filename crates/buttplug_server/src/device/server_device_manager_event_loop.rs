@@ -330,9 +330,11 @@ impl ServerDeviceManagerEventLoop {
         // forever waiting for this task to deregister. We select on the token;
         // on cancellation we drop the build_device_handle future, which drops
         // device_scope and thereby cancels anything it has already spawned.
-        self.devices_scope.spawn(
+        let bringup_address = address.clone();
+        let bringup_result = self.devices_scope.spawn(
           &format!("bringup-{address}"),
           move |token| async move {
+            let address = bringup_address;
             tokio::select! {
               biased;
               _ = token.cancelled() => {
@@ -371,6 +373,12 @@ impl ServerDeviceManagerEventLoop {
             connecting_devices.remove(&address);
           },
         );
+        if let Err(e) = bringup_result {
+          debug!("Device bringup for {address} was not started because its scope is closed: {e}");
+          // Registration was rejected synchronously, so the closure did not run
+          // and cannot perform its normal cleanup.
+          self.connecting_devices.remove(&address);
+        }
       }
     }
   }

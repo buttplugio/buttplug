@@ -190,20 +190,28 @@ impl ServerDeviceManagerBuilder {
     let devices_clone = devices.clone();
     let output_sender_clone = output_sender.clone();
     let output_observation_sender_clone = output_observation_sender.clone();
-    task_scope.spawn("event-loop", move |token| async move {
-      let mut event_loop = ServerDeviceManagerEventLoop::new(
-        comm_managers,
-        device_configuration_manager,
-        devices_clone,
-        token,
-        devices_scope,
-        output_sender_clone,
-        device_event_receiver,
-        device_command_receiver,
-        output_observation_sender_clone,
-      );
-      event_loop.run().await;
-    });
+    task_scope
+      .spawn("event-loop", move |token| async move {
+        let mut event_loop = ServerDeviceManagerEventLoop::new(
+          comm_managers,
+          device_configuration_manager,
+          devices_clone,
+          token,
+          devices_scope,
+          output_sender_clone,
+          device_event_receiver,
+          device_command_receiver,
+          output_observation_sender_clone,
+        );
+        event_loop.run().await;
+      })
+      .map_err(|e| {
+        ButtplugServerError::DeviceConfigurationManagerError(
+          ButtplugDeviceError::DeviceConnectionError(format!(
+            "Could not spawn device manager event loop: {e}"
+          )),
+        )
+      })?;
     Ok(ServerDeviceManager {
       device_configuration_manager: self.device_configuration_manager.clone(),
       devices,
