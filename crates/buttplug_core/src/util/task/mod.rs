@@ -17,7 +17,15 @@
 mod registry;
 mod scope;
 
-pub use registry::{TaskEvent, TaskId, TaskInfo, TaskOutcome, TaskRegistry, registry};
+pub use registry::{
+  TaskEvent,
+  TaskId,
+  TaskInfo,
+  TaskOutcome,
+  TaskRegistry,
+  TaskSpawnError,
+  registry,
+};
 pub use scope::TaskScope;
 
 use crate::util::async_manager;
