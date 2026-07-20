@@ -1,3 +1,19 @@
+# 5.0.0 (2026-07-19)
+
+## Breaking Changes
+
+- Added task lifecycle messages to the public engine frontend API:
+  - `EngineMessage::TaskStarted` reports a newly registered task.
+  - `EngineMessage::TaskEnded` reports task completion, cancellation, or panic.
+  - `EngineMessage::TaskList` returns a snapshot of live tasks.
+- Added `IntifaceMessage::RequestTaskList` for requesting a live-task snapshot.
+- Added the required `emit_task_events: bool` field to `EngineOptionsExternal`. Downstream code using struct literals must provide this field (or use `..Default::default()`).
+- Downstream exhaustive matches over `EngineMessage` or `IntifaceMessage` may need new arms for the task lifecycle variants.
+
+## Features
+
+- Task lifecycle event emission is opt-in. Set `emit_task_events` to `true` to receive `TaskStarted` and `TaskEnded` events; task events remain disabled by default.
+
 # 4.0.4 (2026-06-01)
 
 ## Features

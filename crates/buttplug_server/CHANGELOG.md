@@ -1,3 +1,10 @@
+## Unreleased
+
+## Compatibility Notice
+
+- `ProtocolHandler::handle_input_subscribe_cmd` now receives a `TaskScope` argument. This is technically a public Rust API signature change, so custom external implementations must update their method signature.
+- `ProtocolHandler` is currently intended for protocol implementations shipped inside this repository; it is not treated as a stable external extension interface. In line with ADR 0008, servers are not intended to be independently reimplemented. This policy does not make the public trait change non-breaking for existing external implementations.
+
 # 10.0.4 (2026-06-01)
 
 ## Features
