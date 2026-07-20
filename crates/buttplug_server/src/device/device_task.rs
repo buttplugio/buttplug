@@ -14,7 +14,10 @@
 
 use std::{collections::VecDeque, sync::Arc, time::Duration};
 
-use buttplug_core::util::{async_manager, task::TaskScope};
+use buttplug_core::{
+  errors::ButtplugDeviceError,
+  util::{async_manager, task::TaskScope},
+};
 use futures::future;
 use tokio::{select, sync::mpsc::Receiver, time::Instant};
 use tokio_util::sync::CancellationToken;
@@ -58,10 +61,14 @@ pub fn spawn_device_task(
   _handler: Arc<dyn ProtocolHandler>,
   config: DeviceTaskConfig,
   mut command_receiver: Receiver<DeviceTaskMessage>,
-) {
-  task_scope.spawn("io", move |token| async move {
-    run_device_task(hardware, config, &mut command_receiver, token).await;
-  });
+) -> Result<(), ButtplugDeviceError> {
+  task_scope
+    .spawn("io", move |token| async move {
+      run_device_task(hardware, config, &mut command_receiver, token).await;
+    })
+    .map_err(|e| {
+      ButtplugDeviceError::DeviceConnectionError(format!("Could not spawn device I/O task: {e}"))
+    })
 }
 
 /// Run the device communication task (internal implementation).

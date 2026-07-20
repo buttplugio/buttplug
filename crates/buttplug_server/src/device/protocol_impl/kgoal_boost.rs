@@ -91,79 +91,89 @@ impl ProtocolHandler for KGoalBoost {
         let stream_sensors = stream_sensors.clone();
         info!("Starting Kgoal subscription");
         // If we subscribe successfully, we need to set up our event handler.
-        task_scope.spawn_and_hold("kgoal-events", move |token| async move {
-          let mut cached_values = vec![0u32, 0u32];
-          loop {
-            let info = tokio::select! {
-              biased;
-              _ = token.cancelled() => return,
-              info = hardware_stream.recv() => {
-                let Ok(info) = info else {
+        task_scope
+          .spawn_and_hold("kgoal-events", move |token| async move {
+            let mut cached_values = vec![0u32, 0u32];
+            loop {
+              let info = tokio::select! {
+                biased;
+                _ = token.cancelled() => return,
+                info = hardware_stream.recv() => {
+                  let Ok(info) = info else {
+                    return;
+                  };
+                  info
+                }
+              };
+              let subscribed_sensors = stream_sensors.load(Ordering::Relaxed);
+              // If we have no receivers, quit.
+              if sender.receiver_count() == 0 || subscribed_sensors == 0 {
+                return;
+              }
+              if let HardwareEvent::Notification(_, endpoint, data) = info
+                && endpoint == Endpoint::RxPressure
+              {
+                if data.len() < 7 {
+                  // Not even sure how this would happen, error and continue on.
+                  error!("KGoal Boost data not expected length!");
+                  continue;
+                }
+                // Extract our two pressure values.
+                let normalized = (data[3] as u32) << 8 | data[4] as u32;
+                let unnormalized = (data[5] as u32) << 8 | data[6] as u32;
+                info!(
+                  "Kgoal Reading {} {} {}",
+                  subscribed_sensors, normalized, unnormalized
+                );
+                if (subscribed_sensors & (1 << 0)) > 0
+                  && cached_values[0] != normalized
+                  && sender
+                    .send(
+                      InputReadingV4::new(
+                        device_index,
+                        0,
+                        buttplug_core::message::InputTypeReading::Pressure(InputValue::new(
+                          normalized,
+                        )),
+                      )
+                      .into(),
+                    )
+                    .is_err()
+                {
+                  debug!(
+                    "Hardware device listener for KGoal Boost shut down, returning from task."
+                  );
                   return;
-                };
-                info
-              }
-            };
-            let subscribed_sensors = stream_sensors.load(Ordering::Relaxed);
-            // If we have no receivers, quit.
-            if sender.receiver_count() == 0 || subscribed_sensors == 0 {
-              return;
-            }
-            if let HardwareEvent::Notification(_, endpoint, data) = info
-              && endpoint == Endpoint::RxPressure
-            {
-              if data.len() < 7 {
-                // Not even sure how this would happen, error and continue on.
-                error!("KGoal Boost data not expected length!");
-                continue;
-              }
-              // Extract our two pressure values.
-              let normalized = (data[3] as u32) << 8 | data[4] as u32;
-              let unnormalized = (data[5] as u32) << 8 | data[6] as u32;
-              info!(
-                "Kgoal Reading {} {} {}",
-                subscribed_sensors, normalized, unnormalized
-              );
-              if (subscribed_sensors & (1 << 0)) > 0
-                && cached_values[0] != normalized
-                && sender
-                  .send(
-                    InputReadingV4::new(
-                      device_index,
-                      0,
-                      buttplug_core::message::InputTypeReading::Pressure(InputValue::new(
-                        normalized,
-                      )),
+                }
+                if (subscribed_sensors & (1 << 1)) > 0
+                  && cached_values[1] != unnormalized
+                  && sender
+                    .send(
+                      InputReadingV4::new(
+                        device_index,
+                        1,
+                        buttplug_core::message::InputTypeReading::Pressure(InputValue::new(
+                          unnormalized,
+                        )),
+                      )
+                      .into(),
                     )
-                    .into(),
-                  )
-                  .is_err()
-              {
-                debug!("Hardware device listener for KGoal Boost shut down, returning from task.");
-                return;
+                    .is_err()
+                {
+                  debug!(
+                    "Hardware device listener for KGoal Boost shut down, returning from task."
+                  );
+                  return;
+                }
+                cached_values = vec![normalized, unnormalized];
               }
-              if (subscribed_sensors & (1 << 1)) > 0
-                && cached_values[1] != unnormalized
-                && sender
-                  .send(
-                    InputReadingV4::new(
-                      device_index,
-                      1,
-                      buttplug_core::message::InputTypeReading::Pressure(InputValue::new(
-                        unnormalized,
-                      )),
-                    )
-                    .into(),
-                  )
-                  .is_err()
-              {
-                debug!("Hardware device listener for KGoal Boost shut down, returning from task.");
-                return;
-              }
-              cached_values = vec![normalized, unnormalized];
             }
-          }
-        });
+          })
+          .map_err(|e| {
+            ButtplugDeviceError::DeviceConnectionError(format!(
+              "Could not start Kgoal event forwarding: {e}"
+            ))
+          })?;
       }
       stream_sensors.store(
         stream_sensors.load(Ordering::Relaxed) | (1 << feature_index),

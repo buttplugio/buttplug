@@ -368,6 +368,62 @@ async fn test_shutdown_resolves_with_stalled_bringup() {
     .expect("server shutdown errored");
 }
 
+/// A bring-up that has entered `connect()` is shut down deterministically. The
+/// retained device-manager scope handle cannot register a task after shutdown,
+/// and the rejected bring-up cannot add a device after shutdown resolves.
+#[tokio::test]
+async fn test_shutdown_rejects_bringup_and_drains_manager_scope() {
+  let builder = StallingDeviceCommunicationManagerBuilder::default();
+  let state = builder.state();
+  let server = test_server_with_comm_manager(builder);
+  let scope_prefix = server.device_manager().scope_path().to_owned();
+  let events = server.server_version_event_stream();
+  pin_mut!(events);
+
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      RequestServerInfoV4::new(
+        "Bringup Shutdown Race Test",
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION,
+      )
+      .into(),
+    ))
+    .await
+    .expect("server info request should succeed");
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      StartScanningV0::default().into(),
+    ))
+    .await
+    .expect("start scanning should succeed");
+
+  tokio::time::timeout(Duration::from_secs(5), state.connect_started.notified())
+    .await
+    .expect("bring-up did not reach connect() in time");
+
+  tokio::time::timeout(Duration::from_secs(10), server.shutdown())
+    .await
+    .expect("shutdown did not resolve in time")
+    .expect("server shutdown errored");
+
+  assert_eq!(registry().live_count_under(&scope_prefix), 0);
+
+  // The stalling bring-up never reaches device construction, so shutdown must
+  // not be followed by a device-added event. Drain already-ready events only;
+  // do not sleep or loop to manufacture a race.
+  while let Ok(Some(message)) = tokio::time::timeout(Duration::from_millis(10), events.next()).await
+  {
+    if let ButtplugServerMessageV4::DeviceList(list) = message {
+      assert!(
+        list.devices().is_empty(),
+        "a device was added after shutdown resolved"
+      );
+    }
+  }
+  assert_eq!(registry().live_count_under(&scope_prefix), 0);
+}
+
 /// Test A — the stop-write-acknowledgement contract: a `StopCmd` must not
 /// resolve until the resulting stop write has actually reached the hardware,
 /// even when the device io task is batching commands over a long message gap.
