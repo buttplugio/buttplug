@@ -7,10 +7,20 @@
 
 use dashmap::DashMap;
 use std::sync::{
+  Mutex,
   OnceLock,
   atomic::{AtomicU64, Ordering},
 };
 use tokio::sync::broadcast;
+use tokio_util::sync::CancellationToken;
+
+/// Why a task could not be spawned into its scope.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]
+pub enum TaskSpawnError {
+  /// The scope was cancelled before registration could win the race.
+  #[error("task scope is closed")]
+  ScopeClosed,
+}
 
 /// Unique identifier for a registered task. Process-lifetime unique.
 ///
@@ -71,6 +81,8 @@ pub enum TaskEvent {
 #[derive(Debug)]
 pub struct TaskRegistry {
   tasks: DashMap<u64, TaskInfo>,
+  /// Short-held gate ordering registration against scope cancellation.
+  gate: Mutex<()>,
   counter: AtomicU64,
   root_counter: AtomicU64,
   events: broadcast::Sender<TaskEvent>,
@@ -86,6 +98,7 @@ impl TaskRegistry {
   pub(super) fn new() -> Self {
     Self {
       tasks: DashMap::new(),
+      gate: Mutex::new(()),
       counter: AtomicU64::new(1),
       root_counter: AtomicU64::new(1),
       events: broadcast::channel(256).0,
@@ -98,6 +111,47 @@ impl TaskRegistry {
   }
 
   pub(super) fn register(&self, path: String, detached: bool) -> TaskId {
+    let _gate = self
+      .gate
+      .lock()
+      .unwrap_or_else(|poisoned| poisoned.into_inner());
+    self.register_locked(path, detached)
+  }
+
+  pub(super) fn register_scoped(
+    &self,
+    path: String,
+    token: &CancellationToken,
+  ) -> Result<(TaskId, CancellationToken), TaskSpawnError> {
+    let _gate = self
+      .gate
+      .lock()
+      .unwrap_or_else(|poisoned| poisoned.into_inner());
+    if token.is_cancelled() {
+      return Err(TaskSpawnError::ScopeClosed);
+    }
+    let task_token = token.child_token();
+    let id = self.register_locked(path, false);
+    Ok((id, task_token))
+  }
+
+  pub(super) fn cancel(&self, token: &CancellationToken) {
+    let _gate = self
+      .gate
+      .lock()
+      .unwrap_or_else(|poisoned| poisoned.into_inner());
+    token.cancel();
+  }
+
+  #[cfg(test)]
+  pub(crate) fn test_hold_gate(&self) -> std::sync::MutexGuard<'_, ()> {
+    self
+      .gate
+      .lock()
+      .unwrap_or_else(|poisoned| poisoned.into_inner())
+  }
+
+  fn register_locked(&self, path: String, detached: bool) -> TaskId {
     let id = TaskId(self.counter.fetch_add(1, Ordering::Relaxed));
     self.tasks.insert(
       id.0,
