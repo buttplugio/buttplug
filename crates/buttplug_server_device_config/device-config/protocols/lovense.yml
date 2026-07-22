@@ -185,9 +185,13 @@ configurations:
   name: Lovense Diamo
   id: df95c01b-88d3-49b3-b360-69777b341795
 - identifier:
-  - ToyS
+    - ToyS
   name: Loveai Dolp
   id: 30830f67-4550-4133-88a9-b5eccd83083b
+- identifier:
+    - QB
+  name: Loveai Fizz
+  id: 4989e666-5bd3-4841-b19a-dbd4302d80bb
 - identifier:
   - F
   name: Lovense Sex Machine
@@ -642,6 +646,7 @@ communication:
     - 455a0001-0023-4bd4-bbd5-a6920e4c5653
     - 57440001-0023-4bd4-bbd5-a6920e4c5653
     - 414e0001-0023-4bd4-bbd5-a6920e4c5653
+    - 51420001-0023-4bd4-bbd5-a6920e4c5653
     services:
       0000fff0-0000-1000-8000-00805f9b34fb:
         tx: 0000fff2-0000-1000-8000-00805f9b34fb
@@ -763,3 +768,6 @@ communication:
       43420001-0023-4bd4-bbd5-a6920e4c5653:
         tx: 43420002-0023-4bd4-bbd5-a6920e4c5653
         rx: 43420003-0023-4bd4-bbd5-a6920e4c5653
+      51420001-0023-4bd4-bbd5-a6920e4c5653:
+        tx: 51420002-0023-4bd4-bbd5-a6920e4c5653
+        rx: 51420003-0023-4bd4-bbd5-a6920e4c5653
