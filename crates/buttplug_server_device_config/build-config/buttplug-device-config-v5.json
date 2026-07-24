@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 29
+    "minor": 30
   },
   "protocols": {
     "activejoy": {
@@ -25105,6 +25105,103 @@
         ],
         "id": "60b567f2-8b50-4673-a295-6dda343a7029",
         "name": "Xuanhuan Masturbator"
+      }
+    },
+    "yiciyuan": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "YCY-FJB-01",
+              "YCY-FJB-02"
+            ],
+            "services": {
+              "0000ff40-0000-1000-8000-00805f9b34fb": {
+                "rxblebattery": "0000ff42-0000-1000-8000-00805f9b34fb",
+                "tx": "0000ff41-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "e45517ef-4358-4e65-8d78-3ff9447ea1c9",
+          "identifier": [
+            "YCY-FJB-01"
+          ],
+          "name": "Yiciyuan FJB-01"
+        },
+        {
+          "id": "48108f07-5871-445b-9f2a-10ceb1809b23",
+          "identifier": [
+            "YCY-FJB-02"
+          ],
+          "name": "Yiciyuan FJB-02"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "description": "stroke",
+            "id": "74f218e9-204e-4600-baf9-43c942b5a6a0",
+            "index": 0,
+            "output": {
+              "oscillate": {
+                "value": [
+                  0,
+                  100
+                ]
+              }
+            }
+          },
+          {
+            "description": "vibrate",
+            "id": "4bf007b8-e7df-4c4c-8fbe-ea112128a70f",
+            "index": 1,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  100
+                ]
+              }
+            }
+          },
+          {
+            "description": "axis c",
+            "id": "f01acf53-731b-452e-be21-e912a65409c8",
+            "index": 2,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  100
+                ]
+              }
+            }
+          },
+          {
+            "description": "battery level",
+            "id": "5fb5b0a4-aa3f-4e22-9aa3-32a3666d5141",
+            "index": 3,
+            "input": {
+              "battery": {
+                "command": [
+                  "Read"
+                ],
+                "value": [
+                  [
+                    0,
+                    100
+                  ]
+                ]
+              }
+            }
+          }
+        ],
+        "id": "d5987116-2fba-4c30-a7aa-ef567a3bf35d",
+        "name": "Yiciyuan Device"
       }
     },
     "youcups": {
