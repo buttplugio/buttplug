@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 28
+    "minor": 29
   },
   "protocols": {
     "activejoy": {
@@ -21758,6 +21758,89 @@
         ],
         "id": "7897a4fc-e45a-4f23-b04f-91415b3eeef7",
         "name": "Coleur Dor DT250A"
+      }
+    },
+    "svakom-fatima": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "SL278B"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "332925f9-d550-4a67-ad1b-d5a6ebc47876",
+          "identifier": [
+            "SL278B"
+          ],
+          "name": "Svakom Fatima Pro"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "description": "Vibration",
+            "id": "86aa193e-03ec-49ac-9ffa-2fd2a1632fee",
+            "index": 0,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  10
+                ]
+              }
+            }
+          },
+          {
+            "description": "Suction",
+            "id": "dbbc3a0a-5a7e-438c-8264-21a766fdc5eb",
+            "index": 1,
+            "output": {
+              "constrict": {
+                "value": [
+                  0,
+                  10
+                ]
+              }
+            }
+          },
+          {
+            "description": "Thrust",
+            "id": "5d3a1b4a-6d5c-4cea-a39a-64f5128c4d0c",
+            "index": 2,
+            "output": {
+              "oscillate": {
+                "value": [
+                  0,
+                  7
+                ]
+              }
+            }
+          },
+          {
+            "description": "Heat",
+            "id": "3c0b4b9f-2a7a-407c-9405-c55db53c1c6f",
+            "index": 3,
+            "output": {
+              "temperature": {
+                "value": [
+                  0,
+                  1
+                ]
+              }
+            }
+          }
+        ],
+        "id": "e0422082-c98c-4ed6-b341-697de6a30eed",
+        "name": "Svakom Fatima Pro"
       }
     },
     "svakom-iker": {

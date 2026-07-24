@@ -61,7 +61,13 @@ impl ProtocolHandler for SvakomFatima {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![
-      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, Self::steady(0x03, speed), false).into(),
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        Self::steady(0x03, speed),
+        false,
+      )
+      .into(),
     ])
   }
 
@@ -73,7 +79,13 @@ impl ProtocolHandler for SvakomFatima {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![
-      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, Self::steady(0x09, speed), false).into(),
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        Self::steady(0x09, speed),
+        false,
+      )
+      .into(),
     ])
   }
 
@@ -91,7 +103,9 @@ impl ProtocolHandler for SvakomFatima {
     } else {
       vec![0x55, 0x08, 0x00, 0x00, speed as u8, 0xff]
     };
-    Ok(vec![HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, pkt, false).into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, pkt, false).into(),
+    ])
   }
 
   // Heat: on 55 05 01 37 02 00 00 ; off 55 05 00 00 02 00 00 (on/off only).
@@ -106,6 +120,8 @@ impl ProtocolHandler for SvakomFatima {
     } else {
       vec![0x55, 0x05, 0x01, 0x37, 0x02, 0x00, 0x00]
     };
-    Ok(vec![HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, pkt, false).into()])
+    Ok(vec![
+      HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, pkt, false).into(),
+    ])
   }
 }
