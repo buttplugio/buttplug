@@ -560,10 +560,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     vibcrafter::setup::VibCrafterIdentifierFactory::default(),
   );
-  add_to_protocol_map(
-    &mut map,
-    vibio::setup::VibioIdentifierFactory::default(),
-  );
+  add_to_protocol_map(&mut map, vibio::setup::VibioIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     vibratissimo::setup::VibratissimoIdentifierFactory::default(),

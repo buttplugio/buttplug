@@ -26,14 +26,14 @@ use buttplug_server_device_config::{
 use ecb::cipher::block_padding::Pkcs7;
 use ecb::cipher::{BlockDecryptMut, BlockEncryptMut, KeyInit};
 use std::sync::{
-    Arc,
-    atomic::{AtomicU8, Ordering},
+  Arc,
+  atomic::{AtomicU8, Ordering},
 };
 use uuid::{Uuid, uuid};
 
-use rand::distr::Alphanumeric;
 use rand::RngExt;
-use regex::Regex;
+use rand::distr::Alphanumeric;
+use regex_lite::Regex;
 use sha2::{Digest, Sha256};
 
 type Aes128EcbEnc = ecb::Encryptor<Aes128>;

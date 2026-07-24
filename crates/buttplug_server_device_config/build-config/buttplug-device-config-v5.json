@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 13
+    "minor": 14
   },
   "protocols": {
     "activejoy": {
@@ -984,6 +984,65 @@
         ],
         "id": "dbea3a1a-117c-4302-bd72-f3c226e91d53",
         "name": "Fluffer Device"
+      }
+    },
+    "fmachine": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "FM-*"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "rx": "0000fff4-0000-1000-8000-00805f9b34fb",
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "5d8865bf-5842-46d2-bbc7-06fe77d26c20",
+          "identifier": [
+            "FM-G"
+          ],
+          "name": "F-Machine Gigolo BT-R"
+        },
+        {
+          "id": "49c5eb8c-c46b-44dc-b364-a6a90e10a38e",
+          "identifier": [
+            "FM-T"
+          ],
+          "name": "F-Machine Tremblr BT-R"
+        },
+        {
+          "id": "fee761a8-c6c7-42f3-820b-6b5fa2c4ae5d",
+          "identifier": [
+            "FM-A"
+          ],
+          "name": "F-Machine Alpha"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "description": "Fucking Machine Oscillation Speed",
+            "id": "ab786223-1102-42be-8622-f41dcc4c1e21",
+            "index": 0,
+            "output": {
+              "oscillate": {
+                "value": [
+                  0,
+                  28
+                ]
+              }
+            }
+          }
+        ],
+        "id": "5bef333e-15a5-4278-bf70-4df237f3a147",
+        "name": "F-Machine Device"
       }
     },
     "foreo": {
@@ -23331,6 +23390,122 @@
         ],
         "id": "a44eef0e-b412-44d0-9545-a4b7b0298514",
         "name": "VibCrafter Device"
+      }
+    },
+    "vibio": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Clara_Vibio",
+              "Dodson_Vibio",
+              "Elle_Vibio",
+              "Frida_Vibio",
+              "Rivera_Vibio"
+            ],
+            "services": {
+              "53300021-0050-4bd4-bbe5-a6920e4c5663": {
+                "rx": "53300023-0050-4bd4-bbe5-a6920e4c5663",
+                "tx": "53300022-0050-4bd4-bbe5-a6920e4c5663"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "features": [
+            {
+              "id": "343a8e18-b76c-4482-b048-32d762bf87c9",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    99
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "b55fef0e-baa3-44d0-9545-a4b7b0298515",
+          "identifier": [
+            "Clara_Vibio"
+          ],
+          "name": "Vibio Clara"
+        },
+        {
+          "features": [
+            {
+              "id": "343a8e18-b76c-4482-b048-32d762bf87c9",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    99
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "c66fef0e-cbb4-44d0-9545-a4b7b0298516",
+          "identifier": [
+            "Dodson_Vibio"
+          ],
+          "name": "Vibio Dodson"
+        },
+        {
+          "id": "d77fef0e-dcc5-44d0-9545-a4b7b0298517",
+          "identifier": [
+            "Rivera_Vibio"
+          ],
+          "name": "Vibio Rivera"
+        },
+        {
+          "id": "e88fef0e-edd6-44d0-9545-a4b7b0298518",
+          "identifier": [
+            "Elle_Vibio"
+          ],
+          "name": "Vibio Elle"
+        },
+        {
+          "id": "f99fef0e-fee7-44d0-9545-a4b7b0298519",
+          "identifier": [
+            "Frida_Vibio"
+          ],
+          "name": "Vibio Frida"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "343a8e18-b76c-4482-b048-32d762bf87c9",
+            "index": 0,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  99
+                ]
+              }
+            }
+          },
+          {
+            "id": "d92a031e-bd0d-4815-a0bd-6c59566dcce2",
+            "index": 1,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  99
+                ]
+              }
+            }
+          }
+        ],
+        "id": "a44eef0e-b412-44d0-9545-a4b7b0298514",
+        "name": "Vibio Device"
       }
     },
     "vibratissimo": {
