@@ -51,9 +51,6 @@ const CMD_SPEED_RELEASE: u8 = 0x03;
 // No 0x04 Command byte
 const CMD_SPEED_UP: u8 = 0x05;
 const CMD_SPEED_DOWN: u8 = 0x06;
-const CMD_SECONDARY_UP: u8 = 0x07;
-const CMD_SECONDARY_DOWN: u8 = 0x08;
-const CMD_SECONDARY_RELEASE: u8 = 0x09;
 
 generic_protocol_initializer_setup!(FMachine, "fmachine");
 
@@ -233,8 +230,6 @@ impl ProtocolInitializer for FMachineInitializer {
 // It is currently undecided how to handle the secondary functions as unlike the primary
 // oscillation speed, they do not have discrete steps.
 pub struct FMachine {
-  is_running: Arc<AtomicBool>,
-  current_speed: Arc<AtomicU8>,
   target_speed: Arc<AtomicU8>,
 }
 
@@ -313,11 +308,7 @@ impl FMachine {
       )
       .await
     });
-    Self {
-      is_running,
-      current_speed,
-      target_speed,
-    }
+    Self { target_speed }
   }
 }
 
