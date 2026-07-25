@@ -24,7 +24,7 @@ use buttplug_server_device_config::{
   UserDeviceIdentifier,
 };
 use ecb::cipher::block_padding::Pkcs7;
-use ecb::cipher::{BlockDecryptMut, BlockEncryptMut, KeyInit};
+use ecb::cipher::{BlockModeDecrypt, BlockModeEncrypt, KeyInit};
 use std::sync::{
   Arc,
   atomic::{AtomicU8, Ordering},
@@ -49,7 +49,7 @@ pub struct VibioInitializer {}
 
 fn encrypt(command: String) -> Vec<u8> {
   let enc = Aes128EcbEnc::new(&VIBIO_KEY.into());
-  let res = enc.encrypt_padded_vec_mut::<Pkcs7>(command.as_bytes());
+  let res = enc.encrypt_padded_vec::<Pkcs7>(command.as_bytes());
 
   info!("Encoded {} to {:?}", command, res);
   res
@@ -57,7 +57,7 @@ fn encrypt(command: String) -> Vec<u8> {
 
 fn decrypt(data: Vec<u8>) -> String {
   let dec = Aes128EcbDec::new(&VIBIO_KEY.into());
-  let res = String::from_utf8(dec.decrypt_padded_vec_mut::<Pkcs7>(&data).unwrap()).unwrap();
+  let res = String::from_utf8(dec.decrypt_padded_vec::<Pkcs7>(&data).unwrap()).unwrap();
 
   info!("Decoded {} from {:?}", res, data);
   res

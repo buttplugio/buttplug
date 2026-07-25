@@ -373,7 +373,7 @@ fn build_vibrate_data(random: &[u8], groups: &[VibrateGroup]) -> Result<Vec<u8>,
   hasher.update(SECRET);
   hasher.update(random);
   let digest = hasher.finalize();
-  let md58 = &digest.as_slice()[..8];
+  let md58 = &digest[..8];
   let mut payload = data.clone();
   payload.extend_from_slice(md58);
   Ok(payload)
