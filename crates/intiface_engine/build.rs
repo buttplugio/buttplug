@@ -6,11 +6,11 @@
 // for full license information.
 
 use anyhow::Result;
-use vergen_gitcl::{BuildBuilder, Emitter, GitclBuilder};
+use vergen_gitcl::{Build, Emitter, Gitcl};
 
 fn main() -> Result<()> {
-  let build = BuildBuilder::default().build_timestamp(true).build()?;
-  let gitcl = GitclBuilder::default().sha(true).build()?;
+  let build = Build::builder().build_timestamp(true).build();
+  let gitcl = Gitcl::builder().sha(true).build();
 
   Emitter::default()
     .add_instructions(&build)?
