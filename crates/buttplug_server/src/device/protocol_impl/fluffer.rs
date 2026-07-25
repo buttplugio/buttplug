@@ -19,7 +19,7 @@ use buttplug_server_device_config::{
   UserDeviceIdentifier,
 };
 use ecb::cipher::block_padding::Pkcs7;
-use ecb::cipher::{BlockDecryptMut, BlockEncryptMut, KeyInit};
+use ecb::cipher::{BlockModeDecrypt, BlockModeEncrypt, KeyInit};
 use rand::random;
 use sha2::Digest;
 use std::sync::{
@@ -104,7 +104,7 @@ impl FlufferInitializer {
 
 fn encrypt(data: Vec<u8>) -> Vec<u8> {
   let enc = Aes128EcbEnc::new(&FLUFFER_KEY.into());
-  let res = enc.encrypt_padded_vec_mut::<Pkcs7>(data.as_slice());
+  let res = enc.encrypt_padded_vec::<Pkcs7>(&data);
 
   info!("Encoded {:?} to {:?}", data, res);
   res
@@ -112,7 +112,7 @@ fn encrypt(data: Vec<u8>) -> Vec<u8> {
 
 fn decrypt(data: Vec<u8>) -> Vec<u8> {
   let dec = Aes128EcbDec::new(&FLUFFER_KEY.into());
-  let res = dec.decrypt_padded_vec_mut::<Pkcs7>(&data).unwrap();
+  let res = dec.decrypt_padded_vec::<Pkcs7>(&data).unwrap();
 
   info!("Decoded {:?} from {:?}", res, data);
   res
@@ -277,5 +277,19 @@ impl ProtocolHandler for Fluffer {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     self.send_command()
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::{decrypt, encrypt};
+
+  #[test]
+  fn crypto_round_trip() {
+    let plaintext = vec![0x82, 0x0f, 0x05, 0x00, 0x01, 0x02, 0x00, 0x00];
+    let encrypted = encrypt(plaintext.clone());
+
+    assert_eq!(encrypted.len(), 16);
+    assert_eq!(decrypt(encrypted), plaintext);
   }
 }
