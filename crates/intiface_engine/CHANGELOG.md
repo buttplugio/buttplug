@@ -14,6 +14,10 @@
 
 - Task lifecycle event emission is opt-in. Set `emit_task_events` to `true` to receive `TaskStarted` and `TaskEnded` events; task events remain disabled by default.
 
+## Bugfixes
+
+- Correct task scope handling for closed scopes and protocol subscription signatures.
+
 # 4.0.4 (2026-06-01)
 
 ## Features

@@ -1,4 +1,16 @@
-## Unreleased
+# 10.0.5 (2026-07-25)
+
+## Features
+
+- Add task scopes for server, device manager, device, protocol subscription, and ping timer task ownership
+- Add device support for F-Machine, JoyHub, Kiiroo, Lelo, Lovense, OSSM, Svakom, Umove, Vibio, and Yiciyuan devices
+
+## Bugfixes
+
+- Make device bring-up cancellable so shutdown cannot hang
+- Flush stop commands before stop and shutdown resolve
+- Run shutdown cleanup before task scope cancellation and handle closed scopes
+- Fix protocol handling and keepalive behaviour for several devices
 
 ## Compatibility Notice
 

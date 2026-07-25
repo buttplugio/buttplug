@@ -1,3 +1,15 @@
+# 10.0.4 (2026-07-25)
+
+## Features
+
+- Add named task registration and live task introspection
+- Add hierarchical task scopes with cooperative cancellation and detached task support
+
+## Bugfixes
+
+- Deregister panicked tasks and report held-task completion correctly
+- Harden task scope lifecycle handling and cancellation cleanup
+
 # 10.0.3 (2026-05-31)
 
 ## Features

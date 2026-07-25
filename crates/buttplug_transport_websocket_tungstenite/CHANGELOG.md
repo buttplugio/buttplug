@@ -1,3 +1,9 @@
+# 10.0.4 (2026-07-25)
+
+## Bugfixes
+
+- Own websocket server connection tasks with task scopes for reliable shutdown
+
 # 10.0.3 (2026-05-31)
 
 ## Features

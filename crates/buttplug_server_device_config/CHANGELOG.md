@@ -1,3 +1,13 @@
+# 10.2.0 (2026-07-25)
+
+## Features
+
+- Add device support for F-Machine Alpha, Kiiroo Keon 2, Kiiroo Spot 2, Lovense Fizz, OSSM positional control, Umove, Vibio, Yiciyuan YCY-FJB-01 and YCY-FJB-02, and additional JoyHub, Lelo, and Svakom devices
+
+## Bugfixes
+
+- Correct and consolidate F-Machine, JoyHub, OSSM, and Svakom protocol configuration
+
 # 10.1.1 (2026-06-01)
 
 ## Features
