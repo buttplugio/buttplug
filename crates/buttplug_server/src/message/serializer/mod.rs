@@ -428,4 +428,71 @@ mod test {
         .is_err()
     );
   }
+
+  // Regression test for issue #900: legacy v1 DeviceList/DeviceAdded JSON must
+  // serialize the DeviceMessages object with schema-valid PascalCase message
+  // keys (StopDeviceCmd, SingleMotorVibrateCmd) rather than the snake_case Rust
+  // field names. The fix (commit 0f0d7dd7) added the missing #[serde(rename)]
+  // attributes; this test pins the correct behavior so a regression is caught at
+  // the serializer/schema-validation seam.
+  #[test]
+  fn test_v1_device_messages_use_schema_valid_pascalcase_keys() {
+    use crate::message::{
+      ButtplugServerMessageV1,
+      ButtplugServerMessageVariant,
+      ClientDeviceMessageAttributesV1,
+      DeviceAddedV1,
+      GenericDeviceMessageAttributesV1,
+      NullDeviceMessageAttributesV1,
+    };
+
+    let attributes = ClientDeviceMessageAttributesV1 {
+      vibrate_cmd: Some(GenericDeviceMessageAttributesV1::new(2)),
+      rotate_cmd: None,
+      linear_cmd: None,
+      stop_device_cmd: NullDeviceMessageAttributesV1::default(),
+      single_motor_vibrate_cmd: Some(NullDeviceMessageAttributesV1::default()),
+      fleshlight_launch_fw12_cmd: None,
+      vorze_a10_cyclone_cmd: None,
+    };
+
+    let device_added = DeviceAddedV1 {
+      id: 0,
+      device_index: 0,
+      device_name: "Test Device".to_owned(),
+      device_messages: attributes,
+    };
+
+    let serializer = ButtplugServerJSONSerializer::default();
+    serializer.force_message_version(&ButtplugMessageSpecVersion::Version1);
+    let output = match serializer.serialize(&[ButtplugServerMessageVariant::V1(
+      ButtplugServerMessageV1::DeviceAdded(device_added),
+    )]) {
+      ButtplugSerializedMessage::Text(text) => text,
+      _ => panic!("expected text serialization"),
+    };
+
+    // serialize() runs schema validation; on failure it returns an Error
+    // message instead of the requested DeviceAdded message.
+    assert!(
+      output.contains("DeviceAdded"),
+      "serialization should produce a schema-valid DeviceAdded message, got: {output}"
+    );
+    assert!(
+      output.contains("\"StopDeviceCmd\""),
+      "expected PascalCase StopDeviceCmd key, got: {output}"
+    );
+    assert!(
+      output.contains("\"SingleMotorVibrateCmd\""),
+      "expected PascalCase SingleMotorVibrateCmd key, got: {output}"
+    );
+    assert!(
+      !output.contains("stop_device_cmd"),
+      "snake_case stop_device_cmd key leaked into v1 output: {output}"
+    );
+    assert!(
+      !output.contains("single_motor_vibrate_cmd"),
+      "snake_case single_motor_vibrate_cmd key leaked into v1 output: {output}"
+    );
+  }
 }
