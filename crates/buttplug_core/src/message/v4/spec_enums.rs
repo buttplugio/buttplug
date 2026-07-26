@@ -18,6 +18,7 @@ use crate::message::{
   StartScanningV0,
   StopCmdV4,
   StopScanningV0,
+  v4::disconnect::DisconnectV4,
   v4::input_cmd::InputCmdV4,
 };
 use enum_dispatch::enum_dispatch;
@@ -40,6 +41,8 @@ pub enum ButtplugClientMessageV4 {
   StopCmd(StopCmdV4),
   OutputCmd(OutputCmdV4),
   InputCmd(InputCmdV4),
+  // Connection lifecycle
+  Disconnect(DisconnectV4),
 }
 
 impl ButtplugMessageFinalizer for ButtplugClientMessageV4 {

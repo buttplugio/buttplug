@@ -7,6 +7,7 @@
 
 mod device_list;
 mod device_message_info;
+mod disconnect;
 mod input_cmd;
 mod input_reading;
 mod output_cmd;
@@ -18,6 +19,7 @@ mod stop_cmd;
 pub use {
   device_list::DeviceListV4,
   device_message_info::DeviceMessageInfoV4,
+  disconnect::DisconnectV4,
   input_cmd::{InputCmdV4, InputCommandType},
   input_reading::{InputReadingV4, InputTypeReading, InputValue},
   output_cmd::{OutputCmdV4, OutputCommand, OutputHwPositionWithDuration, OutputValue},
