@@ -17,7 +17,35 @@ device_commands:
       commands: 
         - !Write
             endpoint: tx
-            data: [76, 48, 53, 49, 73, 50, 48, 48, 10]
+            data: [76, 48, 48, 53, 49, 73, 50, 48, 48, 10]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Linear
+          - Index: 0
+            Position: 0.05
+            Duration: 200
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [76, 48, 48, 48, 53, 73, 50, 48, 48, 10]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Linear
+          - Index: 0
+            Position: 0.01
+            Duration: 200
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [76, 48, 48, 48, 49, 73, 50, 48, 48, 10]
             write_with_response: false
   - !Messages
       device_index: 0

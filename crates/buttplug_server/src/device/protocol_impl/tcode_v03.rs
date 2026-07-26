@@ -51,7 +51,7 @@ impl ProtocolHandler for TCodeV03 {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut msg_vec = vec![];
 
-    let command = format!("L{feature_index}{position:02}I{duration}\n");
+    let command = format!("L{feature_index}{position:03}I{duration}\n");
     msg_vec.push(
       HardwareWriteCmd::new(
         &[feature_id],
