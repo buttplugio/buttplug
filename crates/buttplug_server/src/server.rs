@@ -206,6 +206,16 @@ impl ButtplugServer {
   /// Disconnects the server from a client, if it is connected.
   pub fn disconnect(&self) -> BoxFuture<'_, Result<(), message::ErrorV0>> {
     debug!("Buttplug Server {} disconnect requested", self.server_name);
+    self.perform_disconnect_teardown()
+  }
+
+  /// Shared teardown for both programmatic disconnect and the v4 Disconnect message.
+  ///
+  /// Transitions the connection state to Disconnected, stops the ping timer, and issues
+  /// StopScanning + StopCmd to halt all device activity. Returns a `'static` future because
+  /// `parse_checked_message` returns `'static` futures and all other captured state (cloned
+  /// `Arc`s) is owned.
+  fn perform_disconnect_teardown(&self) -> BoxFuture<'static, Result<(), message::ErrorV0>> {
     let ping_timer = self.ping_timer.clone();
     // As long as StopScanning/StopAllDevices aren't changed across message specs, we can inject
     // them using parse_checked_message and bypass version checking.
@@ -382,6 +392,7 @@ impl ButtplugServer {
           self.perform_handshake(rsi_msg)
         }
         ButtplugCheckedClientMessageV4::Ping(p) => self.handle_ping(p),
+        ButtplugCheckedClientMessageV4::Disconnect(d) => self.handle_disconnect(d),
         _ => ButtplugMessageError::UnexpectedMessageType(format!("{msg:?}")).into(),
       }
     };
@@ -487,12 +498,28 @@ impl ButtplugServer {
     }
     .boxed()
   }
+
+  /// Handles a [DisconnectV4] message by performing the shared teardown (see
+  /// [`perform_disconnect_teardown`][Self::perform_disconnect_teardown]) and returning a matching
+  /// [OkV0][message::OkV0]. Per the spec, the transport layer is responsible for actually closing
+  /// the connection after the Ok is returned; this method only performs server-side cleanup and
+  /// state transition.
+  fn handle_disconnect(&self, msg: message::DisconnectV4) -> ButtplugServerResultFuture {
+    let id = msg.id();
+    let teardown = self.perform_disconnect_teardown();
+    async move {
+      teardown.await?;
+      Result::Ok(message::OkV0::new(id).into())
+    }
+    .boxed()
+  }
 }
 
 #[cfg(test)]
 mod test {
   use crate::ButtplugServerBuilder;
-  use buttplug_core::message::{self, BUTTPLUG_CURRENT_API_MAJOR_VERSION};
+  use crate::message::spec_enums::ButtplugCheckedClientMessageV4;
+  use buttplug_core::message::{self, BUTTPLUG_CURRENT_API_MAJOR_VERSION, ButtplugMessage};
   #[tokio::test]
   async fn test_server_deny_reuse() {
     let server = ButtplugServerBuilder::default().finish().unwrap();
@@ -513,6 +540,47 @@ mod test {
     assert!(
       reply.is_err(),
       "Should get back err on handshake after disconnect: {:?}",
+      reply
+    );
+  }
+
+  #[tokio::test]
+  async fn test_server_disconnect_message() {
+    use buttplug_core::message::DisconnectV4;
+
+    let server = ButtplugServerBuilder::default().finish().unwrap();
+
+    // Perform handshake first.
+    let rsi =
+      message::RequestServerInfoV4::new("Test Client", BUTTPLUG_CURRENT_API_MAJOR_VERSION, 0);
+    let reply = server.parse_checked_message(rsi.clone().into()).await;
+    assert!(reply.is_ok(), "Handshake should succeed: {:?}", reply);
+    assert!(
+      server.connected(),
+      "Server should be connected after handshake"
+    );
+
+    // Send a v4 Disconnect with a specific Id.
+    let mut disconnect_msg = DisconnectV4::default();
+    disconnect_msg.set_id(99);
+    let reply = server
+      .parse_checked_message(ButtplugCheckedClientMessageV4::Disconnect(disconnect_msg))
+      .await;
+    assert!(reply.is_ok(), "Disconnect should return Ok: {:?}", reply);
+    let ok_msg = reply.unwrap();
+    assert_eq!(ok_msg.id(), 99, "Ok response Id should match Disconnect Id");
+
+    // Server should now be in the Disconnected state.
+    assert!(
+      !server.connected(),
+      "Server should be disconnected after Disconnect message"
+    );
+
+    // Subsequent messages should be rejected (no reconnection allowed).
+    let reply = server.parse_checked_message(rsi.into()).await;
+    assert!(
+      reply.is_err(),
+      "Messages after Disconnect should be rejected: {:?}",
       reply
     );
   }
