@@ -7,8 +7,7 @@
 
 use dashmap::DashMap;
 use std::sync::{
-  Mutex,
-  OnceLock,
+  Mutex, OnceLock,
   atomic::{AtomicU64, Ordering},
 };
 use tokio::sync::broadcast;
@@ -59,9 +58,12 @@ pub struct TaskInfo {
 /// Lifecycle events broadcast by the Task Registry.
 #[derive(Debug, Clone)]
 pub enum TaskEvent {
+  /// A task was registered and became live.
   Started {
     id: TaskId,
     path: String,
+    /// True when the task has no owning scope and was spawned detached.
+    detached: bool,
   },
   Ended {
     id: TaskId,
@@ -161,7 +163,7 @@ impl TaskRegistry {
         detached,
       },
     );
-    let _ = self.events.send(TaskEvent::Started { id, path });
+    let _ = self.events.send(TaskEvent::Started { id, path, detached });
     id
   }
 
@@ -251,12 +253,41 @@ mod test {
     reg.deregister(id, TaskOutcome::Cancelled);
     assert!(matches!(
       events.recv().await.unwrap(),
-      TaskEvent::Started { .. }
+      TaskEvent::Started {
+        detached: false,
+        ..
+      }
     ));
     let TaskEvent::Ended { outcome, .. } = events.recv().await.unwrap() else {
       panic!("expected Ended event");
     };
     assert_eq!(outcome, TaskOutcome::Cancelled);
+  }
+
+  #[tokio::test]
+  async fn test_started_event_reports_detached_state() {
+    let reg = TaskRegistry::new();
+    let mut events = reg.event_stream();
+
+    let scoped_id = reg.register("root-1/scoped".to_owned(), false);
+    let detached_id = reg.register("detached/notify".to_owned(), true);
+
+    assert!(matches!(
+      events.recv().await.unwrap(),
+      TaskEvent::Started {
+        id,
+        detached: false,
+        ..
+      } if id == scoped_id
+    ));
+    assert!(matches!(
+      events.recv().await.unwrap(),
+      TaskEvent::Started {
+        id,
+        detached: true,
+        ..
+      } if id == detached_id
+    ));
   }
 
   #[tokio::test]

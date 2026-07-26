@@ -18,6 +18,7 @@ mod options;
 mod remote_server;
 mod repeater;
 mod rest_server;
+mod task_web_server;
 pub use backdoor_server::BackdoorServer;
 pub use engine::IntifaceEngine;
 pub use error::*;

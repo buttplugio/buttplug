@@ -136,7 +136,11 @@ pub async fn frontend_server_event_loop(
         }
       } => {
         match task_event {
-          Ok(TaskEvent::Started { id, path }) => {
+          Ok(TaskEvent::Started {
+            id,
+            path,
+            detached: _,
+          }) => {
             frontend.send(EngineMessage::TaskStarted { id: id.value(), path }).await;
           }
           Ok(TaskEvent::Ended { id, path, outcome }) => {

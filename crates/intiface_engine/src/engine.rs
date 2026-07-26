@@ -9,7 +9,7 @@ use crate::{
   ButtplugRemoteServer, ButtplugRepeater,
   backdoor_server::BackdoorServer,
   buttplug_server::{reset_buttplug_server, run_server, setup_buttplug_server},
-  error::IntifaceEngineError,
+  error::{IntifaceEngineError, IntifaceError},
   frontend::{
     Frontend, frontend_external_event_loop, frontend_server_event_loop,
     process_messages::{EngineErrorDetail, EngineMessage},
@@ -18,6 +18,7 @@ use crate::{
   options::EngineOptions,
   remote_server::{ButtplugRemoteServerEvent, ButtplugServerConnectorError},
   rest_server::IntifaceRestServer,
+  task_web_server::TaskWebServer,
 };
 
 use buttplug_core::connector::{
@@ -35,7 +36,7 @@ use std::{
   },
   time::Duration,
 };
-use tokio::{fs, select};
+use tokio::{fs, select, task::JoinHandle};
 use tokio_util::sync::CancellationToken;
 
 #[cfg(debug_assertions)]
@@ -142,6 +143,12 @@ impl IntifaceEngine {
     frontend: Option<Arc<dyn Frontend>>,
     dcm: &Option<Arc<DeviceConfigurationManager>>,
   ) -> Result<(), IntifaceEngineError> {
+    if options.repeater_mode() && options.task_web_port().is_some() {
+      return Err(
+        IntifaceError::new("task web diagnostics cannot be used with repeater mode").into(),
+      );
+    }
+
     // Set up Frontend
     if let Some(frontend) = &frontend {
       let frontend_loop = frontend_external_event_loop(frontend.clone(), self.stop_token.clone());
@@ -240,6 +247,40 @@ impl IntifaceEngine {
       .device_configuration_manager()
       .clone();
 
+    let task_web_token = self.stop_token.child_token();
+    let mut task_web_handle: Option<JoinHandle<std::io::Result<()>>> = None;
+    if let Some(task_web_port) = options.task_web_port() {
+      match TaskWebServer::bind(task_web_port).await {
+        Ok(task_web_server) => {
+          let address = task_web_server.local_addr()?;
+          info!("Task diagnostics UI listening at http://{address}/");
+          let serve_token = task_web_token.clone();
+          task_web_handle = Some(tokio::spawn(async move {
+            task_web_server.serve(serve_token).await
+          }));
+        }
+        Err(e) => {
+          error!("Error binding task diagnostics listener: {e:?}");
+          let error = format!("Task diagnostics listener error: {e:?}");
+          let message = if e.kind() == ErrorKind::AddrInUse {
+            port_in_use_engine_error(error, "127.0.0.1".to_owned(), task_web_port)
+          } else {
+            generic_engine_error(error)
+          };
+          send_engine_error(&frontend, message).await;
+          if let Err(shutdown_error) = server.shutdown().await {
+            error!("Shutdown after task diagnostics bind failure failed: {shutdown_error:?}");
+          }
+          if let Some(frontend) = &frontend {
+            frontend.send(EngineMessage::EngineStopped {}).await;
+            tokio::time::sleep(Duration::from_millis(100)).await;
+            frontend.disconnect();
+          }
+          return Ok(());
+        }
+      }
+    }
+
     if let Some(rest_port) = options.rest_api_port() {
       select! {
         _ = self.stop_token.cancelled() => {
@@ -258,7 +299,21 @@ impl IntifaceEngine {
             send_engine_error(&frontend, message).await;
           }
         }
+        task_result = async {
+          match task_web_handle.as_mut() {
+            Some(handle) => Some(handle.await),
+            None => std::future::pending().await,
+          }
+        } => {
+          error!("Task diagnostics listener stopped unexpectedly: {task_result:?}");
+          let error = format!("Task diagnostics listener stopped unexpectedly: {task_result:?}");
+          send_engine_error(&frontend, generic_engine_error(error)).await;
+        }
       };
+      task_web_token.cancel();
+      if let Some(handle) = task_web_handle.take() {
+        let _ = handle.await;
+      }
       if let Some(frontend) = &frontend {
         frontend.send(EngineMessage::EngineStopped {}).await;
         tokio::time::sleep(Duration::from_millis(100)).await;
@@ -333,6 +388,17 @@ impl IntifaceEngine {
           info!("Owner requested process exit, exiting.");
           exit_requested = true;
         }
+        task_result = async {
+          match task_web_handle.as_mut() {
+            Some(handle) => Some(handle.await),
+            None => std::future::pending().await,
+          }
+        } => {
+          error!("Task diagnostics listener stopped unexpectedly: {task_result:?}");
+          let error = format!("Task diagnostics listener stopped unexpectedly: {task_result:?}");
+          send_engine_error(&frontend, generic_engine_error(error)).await;
+          exit_requested = true;
+        }
         result = run_server(&server, options, on_listener_bound.clone()) => {
           match result {
             Ok(_) => info!("Connection dropped, restarting stay open loop."),
@@ -369,6 +435,10 @@ impl IntifaceEngine {
       let dm = server.server().device_manager();
       server = reset_buttplug_server(options, &dm, server.event_sender()).await?;
       info!("Server connection dropped, restarting");
+    }
+    task_web_token.cancel();
+    if let Some(handle) = task_web_handle.take() {
+      let _ = handle.await;
     }
     info!("Shutting down server...");
     if let Err(e) = server.shutdown().await {

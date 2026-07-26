@@ -28,6 +28,7 @@ Command line options are as follows:
 | `repeater` | Use repeater (proxy) mode instead of being an actual server |
 | `repeater-port` | Port to list to for message proxy |
 | `rest-api-port` | Function as a REST server, using the port specified |
+| `task-web-port` | Serve the read-only task diagnostics UI on `127.0.0.1` at the specified port |
 | `frontend-websocket-port` | IPC JSON port for Intiface Central |
 | `server-name` | Identifying name server should emit when asked for info |
 | `device-config-file [file]` | Device configuration file to load (if omitted, uses internal) |
@@ -46,6 +47,28 @@ Command line options are as follows:
 For example, to run the server on websockets at port 12345 with bluetooth device support:
 
 `intiface-engine --websocket-port 12345 --use-bluetooth-le`
+
+## Task diagnostics web UI
+
+Task diagnostics are disabled by default. Add `--task-web-port 54818` and open
+`http://127.0.0.1:54818/` to inspect the process-global Buttplug task registry while
+the normal WebSocket server or REST API continues running. Library users can enable
+the same listener with `EngineOptionsBuilder::task_web_port` (port `0` is supported
+programmatically for an ephemeral port, but rejected by the CLI).
+
+The diagnostics listener is deliberately read-only and always binds to loopback; it
+cannot be exposed on LAN interfaces. The page shows the live slash-delimited task
+hierarchy, task IDs and paths, detached-task markers, connection state, and a bounded
+log of completed, cancelled, or panicked tasks observed since the browser connected.
+The engine does not retain completed-task history, so reloading cannot recover earlier
+endings. It also does not provide task start times, durations, runtime poll state,
+stack traces, or panic details.
+
+This port is independent of the Buttplug client WebSocket port, the Intiface Central
+`--frontend-websocket-port`/`emit_task_events` channel, and `--rest-api-port`. It may
+run alongside the normal server or REST API, but not repeater mode. An address-in-use
+error means another process already owns the selected loopback port; choose another
+nonzero port or stop that process.
 
 ## Compiling
 

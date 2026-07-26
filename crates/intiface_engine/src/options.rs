@@ -66,6 +66,8 @@ pub struct EngineOptions {
   #[getset(get_copy = "pub")]
   rest_api_port: Option<u16>,
   #[getset(get_copy = "pub")]
+  task_web_port: Option<u16>,
+  #[getset(get_copy = "pub")]
   emit_output_observations: bool,
   #[getset(get_copy = "pub")]
   emit_task_events: bool,
@@ -101,6 +103,7 @@ pub struct EngineOptionsExternal {
   pub repeater_local_port: Option<u16>,
   pub repeater_remote_address: Option<String>,
   pub rest_api_port: Option<u16>,
+  pub task_web_port: Option<u16>,
   pub emit_output_observations: bool,
   pub emit_task_events: bool,
 }
@@ -136,6 +139,7 @@ impl From<EngineOptionsExternal> for EngineOptions {
       repeater_local_port: other.repeater_local_port,
       repeater_remote_address: other.repeater_remote_address,
       rest_api_port: other.rest_api_port,
+      task_web_port: other.task_web_port,
       emit_output_observations: other.emit_output_observations,
       emit_task_events: other.emit_task_events,
     }
@@ -296,6 +300,11 @@ impl EngineOptionsBuilder {
     self
   }
 
+  pub fn task_web_port(&mut self, port: u16) -> &mut Self {
+    self.options.task_web_port = Some(port);
+    self
+  }
+
   pub fn emit_output_observations(&mut self, value: bool) -> &mut Self {
     self.options.emit_output_observations = value;
     self
@@ -308,5 +317,33 @@ impl EngineOptionsBuilder {
 
   pub fn finish(&mut self) -> EngineOptions {
     self.options.clone()
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn task_web_is_disabled_by_default() {
+    assert_eq!(EngineOptions::default().task_web_port(), None);
+  }
+
+  #[test]
+  fn builder_propagates_task_web_port() {
+    let options = EngineOptionsBuilder::default()
+      .task_web_port(12345)
+      .finish();
+    assert_eq!(options.task_web_port(), Some(12345));
+  }
+
+  #[test]
+  fn external_options_propagate_task_web_port() {
+    let external = EngineOptionsExternal {
+      task_web_port: Some(23456),
+      ..Default::default()
+    };
+    let options = EngineOptions::from(external);
+    assert_eq!(options.task_web_port(), Some(23456));
   }
 }

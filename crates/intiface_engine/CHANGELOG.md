@@ -7,11 +7,13 @@
   - `EngineMessage::TaskEnded` reports task completion, cancellation, or panic.
   - `EngineMessage::TaskList` returns a snapshot of live tasks.
 - Added `IntifaceMessage::RequestTaskList` for requesting a live-task snapshot.
-- Added the required `emit_task_events: bool` field to `EngineOptionsExternal`. Downstream code using struct literals must provide this field (or use `..Default::default()`).
+- Added the required `emit_task_events: bool` and `task_web_port: Option<u16>` fields to `EngineOptionsExternal`. Downstream code using struct literals must provide these fields (or use `..Default::default()`).
 - Downstream exhaustive matches over `EngineMessage` or `IntifaceMessage` may need new arms for the task lifecycle variants.
 
 ## Features
 
+- Add the opt-in `--task-web-port` loopback-only task diagnostics UI with a live hierarchy and browser-session outcome history.
+- Add `EngineOptionsBuilder::task_web_port` and `EngineOptionsExternal::task_web_port` for programmatic diagnostics configuration.
 - Task lifecycle event emission is opt-in. Set `emit_task_events` to `true` to receive `TaskStarted` and `TaskEnded` events; task events remain disabled by default.
 
 ## Bugfixes

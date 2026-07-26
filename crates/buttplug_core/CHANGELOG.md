@@ -1,5 +1,9 @@
 # 10.0.4 (2026-07-25)
 
+## Breaking Changes
+
+- Add `detached: bool` to the public `TaskEvent::Started` variant. Downstream exhaustive destructuring must include the field or use `..`.
+
 ## Features
 
 - Add named task registration and live task introspection

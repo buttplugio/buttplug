@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>Intiface Engine — Task Diagnostics</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <header>
+    <h1>Task Diagnostics</h1>
+    <p class="subtitle">Read-only view of the process-global Buttplug task registry.</p>
+    <dl id="status">
+      <div>
+        <dt>Connection</dt>
+        <dd id="connection-state" class="state connecting">connecting</dd>
+      </div>
+      <div>
+        <dt>Active tasks</dt>
+        <dd id="active-count">0</dd>
+      </div>
+      <div>
+        <dt>Root scopes</dt>
+        <dd id="root-count">0</dd>
+      </div>
+      <div>
+        <dt>Detached</dt>
+        <dd id="detached-count">0</dd>
+      </div>
+    </dl>
+  </header>
+
+  <main>
+    <section aria-labelledby="tree-heading">
+      <div class="section-head">
+        <h2 id="tree-heading">Live task tree</h2>
+        <button id="expand-all" type="button" aria-expanded="true">Collapse all</button>
+      </div>
+      <p id="tree-empty" class="empty">No active tasks.</p>
+      <ul id="task-tree" class="tree" role="tree"></ul>
+    </section>
+
+    <section aria-labelledby="log-heading">
+      <div class="section-head">
+        <h2 id="log-heading">Recent endings</h2>
+        <button id="clear-log" type="button">Clear</button>
+      </div>
+      <p id="log-note" class="note">
+        Shows endings observed since this page connected. History is not retained by the engine.
+      </p>
+      <ol id="event-log" class="log" aria-live="polite"></ol>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      Loopback-only. No start times, durations, poll state, or stack traces are available.
+      Outcome history is limited to the most recent entries in this browser session.
+    </p>
+  </footer>
+
+  <template id="leaf-template">
+    <li class="leaf" role="treeitem">
+      <span class="path"></span>
+      <span class="meta"></span>
+    </li>
+  </template>
+
+  <template id="branch-template">
+    <li class="branch" role="treeitem">
+      <button class="toggle" type="button" aria-expanded="true">▾</button>
+      <span class="label"></span>
+      <span class="count"></span>
+      <ul role="group"></ul>
+    </li>
+  </template>
+
+  <template id="log-row-template">
+    <li class="row">
+      <span class="outcome"></span>
+      <span class="path"></span>
+      <span class="id"></span>
+    </li>
+  </template>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>

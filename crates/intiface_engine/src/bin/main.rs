@@ -163,6 +163,11 @@ pub struct IntifaceCLIArguments {
   #[getset(get = "pub")]
   rest_api_port: Option<u16>,
 
+  /// serve the loopback-only task diagnostics UI on this nonzero port
+  #[argh(option)]
+  #[getset(get_copy = "pub")]
+  task_web_port: Option<u16>,
+
   #[cfg(debug_assertions)]
   /// crash the main thread (that holds the runtime)
   #[argh(switch)]
@@ -274,12 +279,60 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
     if let Some(value) = args.rest_api_port() {
       builder.rest_api_port(*value);
     }
+    if let Some(value) = args.task_web_port() {
+      if value == 0 {
+        return Err(IntifaceError::new("--task-web-port must be greater than 0"));
+      }
+      if args.repeater() {
+        return Err(IntifaceError::new(
+          "--task-web-port cannot be used with repeater mode",
+        ));
+      }
+      builder.task_web_port(value);
+    }
     if args.broadcast_server_mdns()
       && let Some(value) = args.mdns_suffix()
     {
       builder.mdns_suffix(value);
     }
     Ok(builder.finish())
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  fn parse(args: &[&str]) -> Result<IntifaceCLIArguments, argh::EarlyExit> {
+    IntifaceCLIArguments::from_args(&["intiface-engine"], args)
+  }
+
+  #[test]
+  fn cli_parses_task_web_port() {
+    let args = parse(&["--task-web-port", "12345"]).unwrap();
+    let options = EngineOptions::try_from(args).unwrap();
+    assert_eq!(options.task_web_port(), Some(12345));
+  }
+
+  #[test]
+  fn cli_rejects_zero_task_web_port() {
+    let args = parse(&["--task-web-port", "0"]).unwrap();
+    let error = EngineOptions::try_from(args).unwrap_err();
+    assert!(error.to_string().contains("greater than 0"));
+  }
+
+  #[test]
+  fn cli_rejects_task_web_with_repeater() {
+    let args = parse(&[
+      "--task-web-port",
+      "12345",
+      "--repeater",
+      "--repeater-port",
+      "12346",
+    ])
+    .unwrap();
+    let error = EngineOptions::try_from(args).unwrap_err();
+    assert!(error.to_string().contains("repeater mode"));
   }
 }
 
