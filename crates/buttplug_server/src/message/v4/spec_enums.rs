@@ -26,6 +26,7 @@ use buttplug_core::{
     ButtplugClientMessageV4,
     ButtplugDeviceMessage,
     ButtplugMessage,
+    DisconnectV4,
     PingV0,
     RequestDeviceListV0,
     RequestServerInfoV4,
@@ -65,6 +66,8 @@ pub enum ButtplugCheckedClientMessageV4 {
   InputCmd(CheckedInputCmdV4),
   // Internal conversions for v1-v3 messages with subcommands
   OutputVecCmd(CheckedOutputVecCmdV4),
+  // Connection lifecycle
+  Disconnect(DisconnectV4),
 }
 
 impl_message_enum_traits!(ButtplugCheckedClientMessageV4 {
@@ -77,6 +80,7 @@ impl_message_enum_traits!(ButtplugCheckedClientMessageV4 {
   OutputCmd,
   InputCmd,
   OutputVecCmd,
+  Disconnect,
 });
 
 impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMessageV4 {
@@ -136,6 +140,8 @@ impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMess
           ))
         }
       }
+      // Disconnect requires no device-state checking, just pass through.
+      ButtplugClientMessageV4::Disconnect(m) => Ok(ButtplugCheckedClientMessageV4::Disconnect(m)),
     }
   }
 }
