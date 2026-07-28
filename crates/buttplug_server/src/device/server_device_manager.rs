@@ -9,20 +9,16 @@
 //! specific) Managers
 
 use crate::{
-  ButtplugServerError,
-  ButtplugServerResult,
-  ButtplugServerResultFuture,
+  ButtplugServerError, ButtplugServerResult, ButtplugServerResultFuture,
   device::{
-    DeviceHandle,
-    OutputObservation,
+    DeviceHandle, OutputObservation,
     hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerBuilder},
     server_device_manager_event_loop::ServerDeviceManagerEventLoop,
   },
   message::{
     server_device_attributes::ServerDeviceAttributes,
     spec_enums::{
-      ButtplugCheckedClientMessageV4,
-      ButtplugDeviceCommandMessageUnionV4,
+      ButtplugCheckedClientMessageV4, ButtplugDeviceCommandMessageUnionV4,
       ButtplugDeviceManagerMessageUnion,
     },
   },
@@ -30,12 +26,7 @@ use crate::{
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError, ButtplugUnknownError},
   message::{
-    self,
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugServerMessageV4,
-    DeviceListV4,
-    StopCmdV4,
+    self, ButtplugDeviceMessage, ButtplugMessage, ButtplugServerMessageV4, DeviceListV4, StopCmdV4,
   },
   util::stream::convert_broadcast_receiver_to_stream,
   util::task::TaskGroup,
@@ -53,8 +44,7 @@ use std::{
   future::Future,
   pin::Pin,
   sync::{
-    Arc,
-    Mutex,
+    Arc, Mutex,
     atomic::{AtomicBool, Ordering},
   },
 };
@@ -117,8 +107,7 @@ impl ServerDeviceManagerBuilder {
     let simulated_devices = self.device_configuration_manager.simulated_devices();
     if !simulated_devices.is_empty() {
       use crate::device::hardware::simulated::{
-        SimulatedDeviceEntry,
-        SimulatedHardwareCommunicationManagerBuilder,
+        SimulatedDeviceEntry, SimulatedHardwareCommunicationManagerBuilder,
       };
       let entries: Vec<SimulatedDeviceEntry> = simulated_devices
         .iter()
@@ -413,6 +402,13 @@ impl ServerDeviceManager {
     let task_group = self.task_group.clone();
 
     let sequence = async move {
+      // Snapshot handles before any await so disconnect can notify the event loop
+      // without holding a DashMap read guard while it removes the device.
+      let devices = devices
+        .iter()
+        .map(|entry| entry.value().clone())
+        .collect::<Vec<_>>();
+
       // 1. Stop scanning: otherwise we can disconnect and instantly try to
       //    reconnect while cleaning up if we're still scanning.
       let _ = stop_scanning.await;
@@ -429,7 +425,7 @@ impl ServerDeviceManager {
       //    skip the task join below — disconnect failures must not strand tasks.
       let mut preserved: Option<ButtplugError> = None;
       for device in devices.iter() {
-        if let Err(e) = device.value().disconnect().await {
+        if let Err(e) = device.disconnect().await {
           if preserved.is_none() {
             preserved = Some(e);
           } else {
