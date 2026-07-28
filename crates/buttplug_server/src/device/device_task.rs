@@ -18,10 +18,7 @@ use buttplug_core::util::async_manager;
 use futures::future;
 use tokio::{
   select,
-  sync::{
-    mpsc::Receiver,
-    oneshot,
-  },
+  sync::{mpsc::Receiver, oneshot},
   time::Instant,
 };
 
@@ -119,9 +116,7 @@ async fn flush_pending(
   let mut last_write: Option<HardwareWriteCmd> = None;
   while let Some(cmd) = pending.pop_front() {
     let _ = hardware.parse_message(&cmd).await;
-    if track_keepalive
-      && let HardwareCommand::Write(ref write_cmd) = cmd
-    {
+    if track_keepalive && let HardwareCommand::Write(ref write_cmd) = cmd {
       last_write = Some(write_cmd.clone());
     }
   }
@@ -192,11 +187,8 @@ async fn run_device_task(
           info!("No longer receiving messages from device parent, breaking");
           // Best-effort flush so a stop sitting in the batch window still lands
           // when our command channel closes (e.g. during shutdown teardown).
-          if let Some(write) =
-            flush_pending(&hardware, &mut pending_commands, track_keepalive).await
-          {
-            keepalive_packet = Some(write);
-          }
+          // We are about to break, so keepalive tracking is unnecessary here.
+          let _ = flush_pending(&hardware, &mut pending_commands, false).await;
           break;
         };
         let commands = message.commands;

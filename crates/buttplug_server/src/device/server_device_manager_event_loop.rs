@@ -11,6 +11,7 @@ use buttplug_core::message::{
   DeviceListV4,
   ScanningFinishedV0,
 };
+use buttplug_core::util::task::TaskGroup;
 use buttplug_server_device_config::DeviceConfigurationManager;
 use tracing::info_span;
 
@@ -32,6 +33,17 @@ use tokio_util::sync::CancellationToken;
 /// Scanning state machine for the device manager event loop.
 /// Replaces the previous combination of scanning_bringup_in_progress, scanning_started,
 /// and stop_scanning_received fields with explicit states.
+struct ConnectingDeviceGuard {
+  connecting_devices: Arc<DashSet<String>>,
+  address: String,
+}
+
+impl Drop for ConnectingDeviceGuard {
+  fn drop(&mut self) {
+    self.connecting_devices.remove(&self.address);
+  }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 enum ScanningState {
   /// No scanning activity. This is the initial state.
@@ -68,6 +80,8 @@ pub(super) struct ServerDeviceManagerEventLoop {
   connecting_devices: Arc<DashSet<String>>,
   /// Cancellation token for the event loop
   loop_cancellation_token: CancellationToken,
+  /// Owner for device bring-up tasks accepted by this event loop.
+  task_group: TaskGroup,
   /// Protocol map, for mapping user definitions to protocols
   protocol_manager: ProtocolManager,
   /// Optional sender for output observations, None when disabled
@@ -85,6 +99,7 @@ impl ServerDeviceManagerEventLoop {
     device_comm_receiver: mpsc::Receiver<HardwareCommunicationManagerEvent>,
     device_command_receiver: mpsc::Receiver<DeviceManagerCommand>,
     output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
+    task_group: TaskGroup,
   ) -> Self {
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
     Self {
@@ -99,6 +114,7 @@ impl ServerDeviceManagerEventLoop {
       scanning_state: ScanningState::Idle,
       connecting_devices: Arc::new(DashSet::new()),
       loop_cancellation_token,
+      task_group,
       protocol_manager: ProtocolManager::default(),
       output_observation_sender,
     }
@@ -292,17 +308,18 @@ impl ServerDeviceManagerEventLoop {
         let device_config_manager = self.device_config_manager.clone();
         let connecting_devices = self.connecting_devices.clone();
         let output_observation_sender = self.output_observation_sender.clone();
-        let span = info_span!(
-          "device creation",
-          name = tracing::field::display(name),
-          address = tracing::field::display(address.clone())
-        );
-
         // Clone sender again for the forwarding task that build_device_handle will spawn
         let device_event_sender_for_forwarding = self.device_event_sender.clone();
 
-        buttplug_core::util::async_manager::spawn(
-          async move {
+        let address_for_task = address.clone();
+        let connecting_devices_for_task = connecting_devices.clone();
+        if self
+          .task_group
+          .spawn("device creation", move || async move {
+            let _guard = ConnectingDeviceGuard {
+              connecting_devices: connecting_devices_for_task,
+              address: address_for_task,
+            };
             match build_device_handle(
               device_config_manager,
               creator,
@@ -327,10 +344,11 @@ impl ServerDeviceManagerEventLoop {
                 error!("Device errored while trying to connect: {:?}", e);
               }
             }
-            connecting_devices.remove(&address);
-          },
-          span,
-        );
+          })
+          .is_err()
+        {
+          connecting_devices.remove(&address);
+        }
       }
     }
   }
