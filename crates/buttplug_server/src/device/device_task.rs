@@ -16,12 +16,63 @@ use std::{collections::VecDeque, sync::Arc, time::Duration};
 
 use buttplug_core::util::async_manager;
 use futures::future;
-use tokio::{select, sync::mpsc::Receiver, time::Instant};
+use tokio::{
+  select,
+  sync::{
+    mpsc::Receiver,
+    oneshot,
+  },
+  time::Instant,
+};
 
 use super::{
   hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareWriteCmd},
   protocol::{ProtocolHandler, ProtocolKeepaliveStrategy},
 };
+
+/// Bounded wait for a write-acknowledged command to reach hardware.
+///
+/// Stop commands (and therefore shutdown) resolve Ok after this elapses even if
+/// the device io task never reports the write, so a wedged or dead device cannot
+/// hang shutdown.
+pub(crate) const WRITE_ACK_TIMEOUT: Duration = Duration::from_secs(1);
+
+/// A unit of work handed to the device io task.
+///
+/// A message carrying an [`oneshot::Sender`] ack is *urgent*: the io task merges
+/// it into any pending batch, flushes everything to hardware immediately
+/// regardless of the batch deadline, then fires the ack. Messages without an ack
+/// keep the exact prior batching behaviour, so normal output is unchanged.
+pub struct DeviceTaskMessage {
+  /// Hardware commands to write.
+  pub commands: Vec<HardwareCommand>,
+  /// When set, the io task flushes immediately and signals once the write has
+  /// reached hardware.
+  pub write_ack: Option<oneshot::Sender<()>>,
+}
+
+impl DeviceTaskMessage {
+  /// Build a fire-and-forget message (normal output path).
+  pub fn fire_and_forget(commands: Vec<HardwareCommand>) -> Self {
+    Self {
+      commands,
+      write_ack: None,
+    }
+  }
+
+  /// Build a write-acknowledged message and return the receiver its caller
+  /// awaits to know the write reached hardware.
+  pub fn acknowledged(commands: Vec<HardwareCommand>) -> (Self, oneshot::Receiver<()>) {
+    let (tx, rx) = oneshot::channel();
+    (
+      Self {
+        commands,
+        write_ack: Some(tx),
+      },
+      rx,
+    )
+  }
+}
 
 /// Configuration for the device task
 pub struct DeviceTaskConfig {
@@ -46,7 +97,7 @@ pub fn spawn_device_task(
   hardware: Arc<Hardware>,
   _handler: Arc<dyn ProtocolHandler>,
   config: DeviceTaskConfig,
-  mut command_receiver: Receiver<Vec<HardwareCommand>>,
+  mut command_receiver: Receiver<DeviceTaskMessage>,
 ) {
   buttplug_core::spawn!("DeviceTask", async move {
     run_device_task(hardware, config, &mut command_receiver).await;
@@ -57,10 +108,30 @@ pub fn spawn_device_task(
 ///
 /// This is separated from spawn_device_task to allow for easier testing
 /// and potential future use in non-spawned contexts.
+/// Drain every pending command to hardware, returning the last write command so
+/// the caller can record it for keepalive replay. Shared by the batch-deadline
+/// and urgent-flush paths so neither duplicates the flush logic.
+async fn flush_pending(
+  hardware: &Hardware,
+  pending: &mut VecDeque<HardwareCommand>,
+  track_keepalive: bool,
+) -> Option<HardwareWriteCmd> {
+  let mut last_write: Option<HardwareWriteCmd> = None;
+  while let Some(cmd) = pending.pop_front() {
+    let _ = hardware.parse_message(&cmd).await;
+    if track_keepalive
+      && let HardwareCommand::Write(ref write_cmd) = cmd
+    {
+      last_write = Some(write_cmd.clone());
+    }
+  }
+  last_write
+}
+
 async fn run_device_task(
   hardware: Arc<Hardware>,
   config: DeviceTaskConfig,
-  command_receiver: &mut Receiver<Vec<HardwareCommand>>,
+  command_receiver: &mut Receiver<DeviceTaskMessage>,
 ) {
   let mut hardware_events = hardware.event_stream();
   let device_wait_duration = config.message_gap;
@@ -117,10 +188,19 @@ async fn run_device_task(
 
       // Priority 1: Incoming commands
       msg = command_receiver.recv() => {
-        let Some(commands) = msg else {
+        let Some(message) = msg else {
           info!("No longer receiving messages from device parent, breaking");
+          // Best-effort flush so a stop sitting in the batch window still lands
+          // when our command channel closes (e.g. during shutdown teardown).
+          if let Some(write) =
+            flush_pending(&hardware, &mut pending_commands, track_keepalive).await
+          {
+            keepalive_packet = Some(write);
+          }
           break;
         };
+        let commands = message.commands;
+        let write_ack = message.write_ack;
 
         if let Some(device_wait_duration) = device_wait_duration {
           // Batching enabled
@@ -135,6 +215,22 @@ async fn run_device_task(
               pending_commands.push_back(command);
             }
           }
+
+          // An acknowledged message is urgent: flush everything to hardware now,
+          // regardless of the batch deadline, then signal the caller.
+          if write_ack.is_some() {
+            if let Some(write) =
+              flush_pending(&hardware, &mut pending_commands, track_keepalive).await
+            {
+              keepalive_packet = Some(write);
+            }
+            batch_deadline = None;
+            // Acknowledgement is best-effort: a dropped receiver means the caller
+            // no longer cares (e.g. they raced ahead to disconnect).
+            if let Some(ack) = write_ack {
+              let _ = ack.send(());
+            }
+          }
         } else {
           // No batching - send immediately
           trace!("No wait duration, sending commands immediately: {:?}", commands);
@@ -146,19 +242,19 @@ async fn run_device_task(
               keepalive_packet = Some(write_cmd.clone());
             }
           }
+          if let Some(ack) = write_ack {
+            let _ = ack.send(());
+          }
         }
       }
 
       // Priority 2: Batch deadline reached - flush pending commands
       _ = batch_fut => {
         trace!("Batch deadline reached, sending {} commands", pending_commands.len());
-        while let Some(cmd) = pending_commands.pop_front() {
-          let _ = hardware.parse_message(&cmd).await;
-          if track_keepalive
-            && let HardwareCommand::Write(ref write_cmd) = cmd
-          {
-            keepalive_packet = Some(write_cmd.clone());
-          }
+        if let Some(write) =
+          flush_pending(&hardware, &mut pending_commands, track_keepalive).await
+        {
+          keepalive_packet = Some(write);
         }
         batch_deadline = None;
       }
