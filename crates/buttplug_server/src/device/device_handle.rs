@@ -28,6 +28,7 @@ use buttplug_core::{
   },
   util::async_manager,
   util::stream::convert_broadcast_receiver_to_stream,
+  util::task::TaskGroup,
 };
 use buttplug_server_device_config::{
   DeviceConfigurationManager,
@@ -62,7 +63,7 @@ use crate::{
 use super::{
   InternalDeviceEvent,
   OutputObservation,
-  device_task::{DeviceTaskConfig, DeviceTaskMessage, WRITE_ACK_TIMEOUT, spawn_device_task},
+  device_task::{DeviceTaskConfig, DeviceTaskMessage, WRITE_ACK_TIMEOUT, run_owned_device_task},
   hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent},
   protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, ProtocolSpecializer},
 };
@@ -115,6 +116,7 @@ pub struct DeviceHandle {
   stop_commands: Arc<Vec<ButtplugDeviceCommandMessageUnionV4>>,
   internal_hw_msg_sender: Sender<DeviceTaskMessage>,
   output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
+  task_group: TaskGroup,
 }
 
 impl DeviceHandle {
@@ -127,6 +129,7 @@ impl DeviceHandle {
     stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4>,
     internal_hw_msg_sender: Sender<DeviceTaskMessage>,
     output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
+    task_group: TaskGroup,
   ) -> Self {
     Self {
       hardware,
@@ -138,6 +141,7 @@ impl DeviceHandle {
       stop_commands: Arc::new(stop_commands),
       internal_hw_msg_sender,
       output_observation_sender,
+      task_group,
     }
   }
 
@@ -238,8 +242,15 @@ impl DeviceHandle {
 
   /// Disconnect from the device
   pub fn disconnect(&self) -> ButtplugResultFuture {
-    let fut = self.hardware.disconnect();
-    async move { fut.await.map_err(|err| err.into()) }.boxed()
+    let hardware_disconnect = self.hardware.disconnect();
+    let task_group = self.task_group.clone();
+    async move {
+      let hardware_result = hardware_disconnect.await;
+      task_group.cancel();
+      let _ = task_group.shutdown().await;
+      hardware_result.map_err(|err| err.into())
+    }
+    .boxed()
   }
 
   /// Get the event stream for this device (disconnections, notifications)
@@ -564,6 +575,7 @@ pub(super) async fn build_device_handle(
   let strategy = handler.keepalive_strategy();
 
   // Create the hardware command channel and spawn the device task
+  let task_group = TaskGroup::new();
   let (internal_hw_msg_sender, internal_hw_msg_recv) = channel::<DeviceTaskMessage>(1024);
 
   let device_wait_duration = if let Some(gap) = definition.message_gap_ms() {
@@ -572,16 +584,27 @@ pub(super) async fn build_device_handle(
     hardware.message_gap()
   };
 
-  spawn_device_task(
-    hardware.clone(),
-    handler.clone(),
-    DeviceTaskConfig {
-      message_gap: device_wait_duration,
-      requires_keepalive: hardware.requires_keepalive(),
-      keepalive_strategy: handler.keepalive_strategy(),
-    },
-    internal_hw_msg_recv,
-  );
+  let task_hardware = hardware.clone();
+  let task_handler = handler.clone();
+  let task_config = DeviceTaskConfig {
+    message_gap: device_wait_duration,
+    requires_keepalive: hardware.requires_keepalive(),
+    keepalive_strategy: handler.keepalive_strategy(),
+  };
+  task_group
+    .spawn("DeviceTask", move || {
+      run_owned_device_task(
+        task_hardware,
+        task_handler,
+        task_config,
+        internal_hw_msg_recv,
+      )
+    })
+    .map_err(|_| {
+      ButtplugDeviceError::DeviceConnectionError(
+        "Unable to spawn device task: task group is closed.".to_owned(),
+      )
+    })?;
 
   // Generate stop commands for this device
   let mut stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4> = vec![];
@@ -639,6 +662,7 @@ pub(super) async fn build_device_handle(
     stop_commands,
     internal_hw_msg_sender,
     output_observation_sender,
+    task_group.clone(),
   );
 
   // If we need a keepalive with a packet replay, set this up via stopping the device on connect.
@@ -663,44 +687,50 @@ pub(super) async fn build_device_handle(
   // to the device manager event loop via the provided sender.
   let event_stream = device_handle.event_stream();
   let identifier = device_handle.identifier().clone();
-  buttplug_core::spawn!("DeviceEventForwarding", async move {
-    futures::pin_mut!(event_stream);
-    loop {
-      let event = futures::StreamExt::next(&mut event_stream).await;
-      match event {
-        Some(DeviceEvent::Disconnected(id)) => {
-          if device_event_sender
-            .send(InternalDeviceEvent::Disconnected(id))
-            .await
-            .is_err()
-          {
-            info!(
-              "Device event sender closed for device {:?}, stopping event forwarding.",
-              identifier
-            );
+  task_group
+    .spawn("DeviceEventForwarding", move || async move {
+      futures::pin_mut!(event_stream);
+      loop {
+        let event = futures::StreamExt::next(&mut event_stream).await;
+        match event {
+          Some(DeviceEvent::Disconnected(id)) => {
+            if device_event_sender
+              .send(InternalDeviceEvent::Disconnected(id))
+              .await
+              .is_err()
+            {
+              info!(
+                "Device event sender closed for device {:?}, stopping event forwarding.",
+                identifier
+              );
+              break;
+            }
+          }
+          Some(DeviceEvent::Notification(_, msg)) => {
+            if device_event_sender
+              .send(InternalDeviceEvent::Notification(msg))
+              .await
+              .is_err()
+            {
+              info!(
+                "Device event sender closed for device {:?}, stopping event forwarding.",
+                identifier
+              );
+              break;
+            }
+          }
+          None => {
+            // Stream ended (device likely disconnected)
             break;
           }
-        }
-        Some(DeviceEvent::Notification(_, msg)) => {
-          if device_event_sender
-            .send(InternalDeviceEvent::Notification(msg))
-            .await
-            .is_err()
-          {
-            info!(
-              "Device event sender closed for device {:?}, stopping event forwarding.",
-              identifier
-            );
-            break;
-          }
-        }
-        None => {
-          // Stream ended (device likely disconnected)
-          break;
         }
       }
-    }
-  });
+    })
+    .map_err(|_| {
+      ButtplugDeviceError::DeviceConnectionError(
+        "Unable to spawn device event forwarding task: task group is closed.".to_owned(),
+      )
+    })?;
 
   Ok(device_handle)
 }
