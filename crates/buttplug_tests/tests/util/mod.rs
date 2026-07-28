@@ -11,6 +11,7 @@ pub mod long_running_scan_comm_manager;
 pub mod test_server;
 pub use test_server::ButtplugTestServer;
 pub mod device_test;
+pub mod stalling_device_communication_manager;
 pub mod test_device_manager;
 pub use delay_device_communication_manager::DelayDeviceCommunicationManagerBuilder;
 #[allow(dead_code)]

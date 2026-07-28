@@ -26,8 +26,8 @@ use buttplug_core::{
     OutputValue,
     StopCmdV4,
   },
+  util::async_manager,
   util::stream::convert_broadcast_receiver_to_stream,
-  util::{async_manager},
 };
 use buttplug_server_device_config::{
   DeviceConfigurationManager,
@@ -341,16 +341,18 @@ impl DeviceHandle {
           let feature_id = f.id();
           f.input.iter().filter_map(move |input| {
             if input.can_subscribe() {
-              Some(self.parse_message(ButtplugDeviceCommandMessageUnionV4::InputCmd(
-                CheckedInputCmdV4::new(
-                  1,
-                  self.definition.index(),
-                  i,
-                  input.input_type(),
-                  InputCommandType::Unsubscribe,
-                  feature_id,
-                ),
-              )))
+              Some(
+                self.parse_message(ButtplugDeviceCommandMessageUnionV4::InputCmd(
+                  CheckedInputCmdV4::new(
+                    1,
+                    self.definition.index(),
+                    i,
+                    input.input_type(),
+                    InputCommandType::Unsubscribe,
+                    feature_id,
+                  ),
+                )),
+              )
             } else {
               None
             }

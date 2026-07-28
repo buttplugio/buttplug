@@ -10,6 +10,7 @@
 
 use crate::{
   ButtplugServerError,
+  ButtplugServerResult,
   ButtplugServerResultFuture,
   device::{
     DeviceHandle,
@@ -27,7 +28,7 @@ use crate::{
   },
 };
 use buttplug_core::{
-  errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
+  errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError, ButtplugUnknownError},
   message::{
     self,
     ButtplugDeviceMessage,
@@ -37,6 +38,7 @@ use buttplug_core::{
     StopCmdV4,
   },
   util::stream::convert_broadcast_receiver_to_stream,
+  util::task::TaskGroup,
 };
 use buttplug_server_device_config::{DeviceConfigurationManager, UserDeviceIdentifier};
 use dashmap::DashMap;
@@ -48,8 +50,11 @@ use getset::Getters;
 use std::{
   collections::BTreeMap,
   convert::TryFrom,
+  future::Future,
+  pin::Pin,
   sync::{
     Arc,
+    Mutex,
     atomic::{AtomicBool, Ordering},
   },
 };
@@ -184,6 +189,7 @@ impl ServerDeviceManagerBuilder {
       None
     };
 
+    let task_group = TaskGroup::new();
     let mut event_loop = ServerDeviceManagerEventLoop::new(
       comm_managers,
       self.device_configuration_manager.clone(),
@@ -193,10 +199,16 @@ impl ServerDeviceManagerBuilder {
       device_event_receiver,
       device_command_receiver,
       output_observation_sender.clone(),
+      task_group.clone(),
     );
-    buttplug_core::spawn!("ServerDeviceManager event loop", async move {
-      event_loop.run().await;
-    });
+    // The event loop is the device manager's owned long-running task; spawning
+    // it into the manager's TaskGroup lets shutdown cancel-then-join it
+    // deterministically instead of fire-and-forgetting it onto the runtime.
+    task_group
+      .spawn("ServerDeviceManager event loop", move || async move {
+        event_loop.run().await;
+      })
+      .expect("device manager task group is freshly created, cannot be closed");
     Ok(ServerDeviceManager {
       device_configuration_manager: self.device_configuration_manager.clone(),
       devices,
@@ -205,6 +217,8 @@ impl ServerDeviceManagerBuilder {
       running: Arc::new(AtomicBool::new(true)),
       output_sender,
       output_observation_sender,
+      task_group,
+      shutdown_state: Arc::new(Mutex::new(None)),
     })
   }
 }
@@ -220,7 +234,18 @@ pub struct ServerDeviceManager {
   running: Arc<AtomicBool>,
   output_sender: broadcast::Sender<ButtplugServerMessageV4>,
   output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
+  /// Owner-local group for the device manager's spawned tasks (the event loop).
+  /// Shutdown cancels-then-joins this group so no task is left detached.
+  task_group: TaskGroup,
+  /// The shared, run-once shutdown sequence. The first caller to invoke
+  /// [`ServerDeviceManager::shutdown`] builds it; concurrent and repeated callers
+  /// await the same shared future, so the cleanup body runs exactly once and
+  /// every caller observes the same result.
+  shutdown_state: Arc<Mutex<Option<ShutdownFuture>>>,
 }
+
+/// Shared, run-once device-manager shutdown future.
+type ShutdownFuture = future::Shared<Pin<Box<dyn Future<Output = ButtplugServerResult> + Send>>>;
 
 impl ServerDeviceManager {
   pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessageV4> + use<> {
@@ -366,25 +391,80 @@ impl ServerDeviceManager {
   // Device Manager lifetime to the owning ButtplugServer lifetime to ensure that doesn't happen,
   // but that's going to be complicated.
   pub(crate) fn shutdown(&self) -> ButtplugServerResultFuture {
-    let devices = self.devices.clone();
-    // Make sure that, once our owning server shuts us down, no one outside can use this manager
-    // again. Otherwise we can have all sorts of ownership weirdness.
+    // Single-flight: the first caller builds the run-once shutdown sequence;
+    // concurrent and repeated callers clone the same shared future and observe
+    // the same result, so the cleanup body (stop, disconnect, cancel, join) runs
+    // exactly once.
+    let mut state = self
+      .shutdown_state
+      .lock()
+      .expect("device manager shutdown state mutex poisoned");
+    if let Some(shared) = state.as_ref().cloned() {
+      return async move { shared.await }.boxed();
+    }
+
+    // Close new work: reject further device-manager commands and scans.
     self.running.store(false, Ordering::Relaxed);
+
+    let devices = self.devices.clone();
     let stop_scanning = self.stop_scanning();
     let stop_devices = self.stop_devices(&StopCmdV4::default());
-    let token = self.loop_cancellation_token.clone();
-    async move {
-      // Force stop scanning, otherwise we can disconnect and instantly try to reconnect while
-      // cleaning up if we're still scanning.
+    let loop_token = self.loop_cancellation_token.clone();
+    let task_group = self.task_group.clone();
+
+    let sequence = async move {
+      // 1. Stop scanning: otherwise we can disconnect and instantly try to
+      //    reconnect while cleaning up if we're still scanning.
       let _ = stop_scanning.await;
-      let _ = stop_devices.await;
-      for device in devices.iter() {
-        device.value().disconnect().await?;
+
+      // 2. Send stop to every device. The stop path is write-acknowledged, so it
+      //    resolves only once the zeroing write has reached hardware (or its
+      //    bounded timeout elapses). Best-effort: a failing stop is logged but
+      //    cannot block teardown.
+      if let Err(e) = stop_devices.await {
+        warn!("Error stopping devices during shutdown: {:?}", e);
       }
-      token.cancel();
-      Ok(message::OkV0::default().into())
+
+      // 3. Attempt every disconnect, preserving the first error. No `?` here may
+      //    skip the task join below — disconnect failures must not strand tasks.
+      let mut preserved: Option<ButtplugError> = None;
+      for device in devices.iter() {
+        if let Err(e) = device.value().disconnect().await {
+          if preserved.is_none() {
+            preserved = Some(e);
+          } else {
+            warn!(
+              "Additional error during device disconnect in shutdown: {:?}",
+              e
+            );
+          }
+        }
+      }
+
+      // 4. Unconditionally cancel tasks. `cancel()` sets the group closed and
+      //    aborts every owned task; the event loop's cancellation token is also
+      //    signalled for any tasks it observes via select!.
+      loop_token.cancel();
+      task_group.cancel();
+
+      // 5. Unconditionally await shutdown (join) so no task is left detached,
+      //    regardless of any disconnect error. This is the join that no `?` may
+      //    skip.
+      let _results = task_group.shutdown().await;
+
+      // 6. Return the preserved error (or Ok).
+      match preserved {
+        Some(e) => Err(e),
+        None => Ok(message::OkV0::default().into()),
+      }
     }
     .boxed()
+    .shared();
+
+    *state = Some(sequence.clone());
+    drop(state);
+
+    async move { sequence.await }.boxed()
   }
 }
 
