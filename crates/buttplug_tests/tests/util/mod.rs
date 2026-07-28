@@ -169,6 +169,16 @@ pub fn test_server_with_device(device_type: &str) -> (ButtplugServer, TestDevice
   (test_server_with_comm_manager(builder), device)
 }
 
+pub fn test_server_with_disconnect_failure(
+  device_type: &str,
+) -> (ButtplugServer, TestDeviceChannelHost) {
+  let mut builder = TestDeviceCommunicationManagerBuilder::default();
+  let device =
+    builder.add_test_device_with_disconnect_failure(&TestDeviceIdentifier::new(device_type, None));
+
+  (test_server_with_comm_manager(builder), device)
+}
+
 #[allow(dead_code)]
 pub fn test_server_v4_with_device(device_type: &str) -> (ButtplugServer, TestDeviceChannelHost) {
   let mut builder = TestDeviceCommunicationManagerBuilder::default();

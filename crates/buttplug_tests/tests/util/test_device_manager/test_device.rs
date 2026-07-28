@@ -161,11 +161,17 @@ pub struct TestDevice {
   event_sender: broadcast::Sender<HardwareEvent>,
   subscribed_endpoints: Arc<DashSet<Endpoint>>,
   read_data: Arc<Mutex<VecDeque<HardwareReading>>>,
+  fail_disconnect: bool,
 }
 
 impl TestDevice {
   #[allow(dead_code)]
-  pub fn new(name: &str, address: &str, test_device_channel: TestDeviceChannelDevice) -> Self {
+  pub fn new(
+    name: &str,
+    address: &str,
+    test_device_channel: TestDeviceChannelDevice,
+    fail_disconnect: bool,
+  ) -> Self {
     let (event_sender, _) = broadcast::channel(256);
 
     let event_sender_clone = event_sender.clone();
@@ -214,6 +220,7 @@ impl TestDevice {
       event_sender,
       subscribed_endpoints,
       read_data,
+      fail_disconnect,
     }
   }
 
@@ -250,11 +257,18 @@ impl HardwareInternal for TestDevice {
   fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let sender = self.event_sender.clone();
     let address = self.address.clone();
+    let fail_disconnect = self.fail_disconnect;
     async move {
       sender
         .send(HardwareEvent::Disconnected(address))
         .expect("Test");
-      Ok(())
+      if fail_disconnect {
+        Err(ButtplugDeviceError::DeviceConnectionError(
+          "test disconnect failure".to_owned(),
+        ))
+      } else {
+        Ok(())
+      }
     }
     .boxed()
   }

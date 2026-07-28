@@ -81,24 +81,14 @@ pub struct DeviceTaskConfig {
   pub keepalive_strategy: ProtocolKeepaliveStrategy,
 }
 
-/// Spawn the device communication task.
-///
-/// This task handles:
-/// - Receiving hardware commands from the internal channel
-/// - Batching and deduplicating commands when message_gap is set
-/// - Sending keepalive packets to maintain device connection
-/// - Detecting hardware disconnection
-///
-/// Returns immediately after spawning the task.
-pub fn spawn_device_task(
+/// Run the device communication task under its device owner's task group.
+pub async fn run_owned_device_task(
   hardware: Arc<Hardware>,
   _handler: Arc<dyn ProtocolHandler>,
   config: DeviceTaskConfig,
   mut command_receiver: Receiver<DeviceTaskMessage>,
 ) {
-  buttplug_core::spawn!("DeviceTask", async move {
-    run_device_task(hardware, config, &mut command_receiver).await;
-  });
+  run_device_task(hardware, config, &mut command_receiver).await;
 }
 
 /// Run the device communication task (internal implementation).

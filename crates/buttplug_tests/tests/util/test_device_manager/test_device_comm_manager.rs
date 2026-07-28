@@ -75,7 +75,7 @@ impl TestDeviceIdentifier {
 }
 
 pub struct TestDeviceCommunicationManagerBuilder {
-  devices: Option<Vec<(TestDeviceIdentifier, TestDeviceChannelDevice)>>,
+  devices: Option<Vec<(TestDeviceIdentifier, TestDeviceChannelDevice, bool)>>,
 }
 
 impl Default for TestDeviceCommunicationManagerBuilder {
@@ -93,7 +93,20 @@ impl TestDeviceCommunicationManagerBuilder {
       .devices
       .as_mut()
       .expect("Devices vec does not exist, is this running twice?")
-      .push((device.clone(), device_channel));
+      .push((device.clone(), device_channel, false));
+    host_channel
+  }
+
+  pub fn add_test_device_with_disconnect_failure(
+    &mut self,
+    device: &TestDeviceIdentifier,
+  ) -> TestDeviceChannelHost {
+    let (host_channel, device_channel) = new_device_channel();
+    self
+      .devices
+      .as_mut()
+      .expect("Devices vec does not exist, is this running twice?")
+      .push((device.clone(), device_channel, true));
     host_channel
   }
 }
@@ -116,25 +129,26 @@ impl HardwareCommunicationManagerBuilder for TestDeviceCommunicationManagerBuild
 fn new_uninitialized_ble_test_device(
   identifier: &TestDeviceIdentifier,
   device_channel: TestDeviceChannelDevice,
+  fail_disconnect: bool,
 ) -> TestHardwareConnector {
   let address = identifier.address.clone();
   let specifier = ProtocolCommunicationSpecifier::BluetoothLE(
     BluetoothLESpecifier::new_from_device(&identifier.name, &HashMap::new(), &[]),
   );
-  let hardware = TestDevice::new(&identifier.name, &address, device_channel);
+  let hardware = TestDevice::new(&identifier.name, &address, device_channel, fail_disconnect);
   TestHardwareConnector::new(specifier, hardware)
 }
 
 pub struct TestDeviceCommunicationManager {
   device_sender: Sender<HardwareCommunicationManagerEvent>,
-  devices: Vec<(TestDeviceIdentifier, TestDeviceChannelDevice)>,
+  devices: Vec<(TestDeviceIdentifier, TestDeviceChannelDevice, bool)>,
   is_scanning: Arc<AtomicBool>,
 }
 
 impl TestDeviceCommunicationManager {
   pub fn new(
     device_sender: Sender<HardwareCommunicationManagerEvent>,
-    devices: Vec<(TestDeviceIdentifier, TestDeviceChannelDevice)>,
+    devices: Vec<(TestDeviceIdentifier, TestDeviceChannelDevice, bool)>,
   ) -> Self {
     Self {
       device_sender,
@@ -156,8 +170,9 @@ impl HardwareCommunicationManager for TestDeviceCommunicationManager {
 
     let mut events = vec![];
 
-    while let Some((device, test_channel)) = self.devices.pop() {
-      let device_creator = new_uninitialized_ble_test_device(&device, test_channel);
+    while let Some((device, test_channel, fail_disconnect)) = self.devices.pop() {
+      let device_creator =
+        new_uninitialized_ble_test_device(&device, test_channel, fail_disconnect);
 
       events.push(HardwareCommunicationManagerEvent::DeviceFound {
         name: device.name.clone(),

@@ -113,7 +113,7 @@ impl HardwareCommunicationManager for LongRunningScanCommunicationManager {
       let specifier = ProtocolCommunicationSpecifier::BluetoothLE(
         BluetoothLESpecifier::new_from_device(device.name(), &HashMap::new(), &[]),
       );
-      let hardware = TestDevice::new(device.name(), device.address(), device_channel);
+      let hardware = TestDevice::new(device.name(), device.address(), device_channel, false);
       let connector = TestHardwareConnector::new(specifier, hardware);
 
       events.push(HardwareCommunicationManagerEvent::DeviceFound {

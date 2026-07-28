@@ -38,6 +38,7 @@ use util::{
   test_device_manager::TestHardwareEvent,
   test_server_with_comm_manager,
   test_server_with_device,
+  test_server_with_disconnect_failure,
 };
 
 /// Brings up a real (test-hardware) device, puts it into a running state, then
@@ -226,6 +227,54 @@ async fn test_repeated_shutdown_is_idempotent() {
     .await
     .expect("second shutdown did not resolve in time")
     .expect("second shutdown errored");
+}
+
+#[tokio::test]
+async fn shutdown_error_still_completes_task_teardown() {
+  let timeout = Duration::from_secs(10);
+  let (server, _device) = test_server_with_disconnect_failure("Massage Demo");
+  let recv = server.server_version_event_stream();
+  pin_mut!(recv);
+
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      RequestServerInfoV4::new(
+        "Disconnect Failure Test",
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION,
+      )
+      .into(),
+    ))
+    .await
+    .expect("server info request should succeed");
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      StartScanningV0::default().into(),
+    ))
+    .await
+    .expect("start scanning should succeed");
+
+  tokio::time::timeout(Duration::from_secs(5), async {
+    while let Some(msg) = recv.next().await {
+      if let ButtplugServerMessageV4::DeviceList(list) = msg
+        && !list.devices().is_empty()
+      {
+        return;
+      }
+    }
+    panic!("device event stream ended before a device connected");
+  })
+  .await
+  .expect("timed out waiting for device to connect");
+
+  let error = tokio::time::timeout(timeout, server.shutdown())
+    .await
+    .expect("shutdown did not resolve after disconnect failure")
+    .expect_err("shutdown should preserve the disconnect failure");
+  assert!(
+    error.to_string().contains("test disconnect failure"),
+    "unexpected shutdown error: {error}"
+  );
 }
 
 #[tokio::test]
