@@ -27,6 +27,7 @@ use buttplug_core::{
     StopCmdV4,
   },
   util::stream::convert_broadcast_receiver_to_stream,
+  util::{async_manager},
 };
 use buttplug_server_device_config::{
   DeviceConfigurationManager,
@@ -36,10 +37,13 @@ use buttplug_server_device_config::{
 };
 use dashmap::DashMap;
 use futures::future::{self, BoxFuture, FutureExt};
-use tokio::sync::{
-  broadcast,
-  mpsc::{Sender, channel},
-  oneshot,
+use tokio::{
+  select,
+  sync::{
+    broadcast,
+    mpsc::{Sender, channel},
+    oneshot,
+  },
 };
 use tokio_stream::StreamExt;
 use uuid::Uuid;
@@ -58,7 +62,7 @@ use crate::{
 use super::{
   InternalDeviceEvent,
   OutputObservation,
-  device_task::{DeviceTaskConfig, spawn_device_task},
+  device_task::{DeviceTaskConfig, DeviceTaskMessage, WRITE_ACK_TIMEOUT, spawn_device_task},
   hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent},
   protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, ProtocolSpecializer},
 };
@@ -109,7 +113,7 @@ pub struct DeviceHandle {
   legacy_attributes: ServerDeviceAttributes,
   last_output_command: Arc<DashMap<Uuid, CheckedOutputCmdV4>>,
   stop_commands: Arc<Vec<ButtplugDeviceCommandMessageUnionV4>>,
-  internal_hw_msg_sender: Sender<Vec<HardwareCommand>>,
+  internal_hw_msg_sender: Sender<DeviceTaskMessage>,
   output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
 }
 
@@ -121,7 +125,7 @@ impl DeviceHandle {
     definition: ServerDeviceDefinition,
     identifier: UserDeviceIdentifier,
     stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4>,
-    internal_hw_msg_sender: Sender<Vec<HardwareCommand>>,
+    internal_hw_msg_sender: Sender<DeviceTaskMessage>,
     output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
   ) -> Self {
     Self {
@@ -291,7 +295,9 @@ impl DeviceHandle {
   fn handle_hardware_commands(&self, commands: Vec<HardwareCommand>) -> ButtplugServerResultFuture {
     let sender = self.internal_hw_msg_sender.clone();
     async move {
-      let _ = sender.send(commands).await;
+      let _ = sender
+        .send(DeviceTaskMessage::fire_and_forget(commands))
+        .await;
       Ok(message::OkV0::default().into())
     }
     .boxed()
@@ -310,40 +316,81 @@ impl DeviceHandle {
   }
 
   fn handle_stop_device_cmd(&self, msg: &StopCmdV4) -> ButtplugServerResultFuture {
-    let mut fut_vec = vec![];
+    let sender = self.internal_hw_msg_sender.clone();
+    // Accumulate every per-feature stop OutputCmd into a single
+    // write-acknowledged batch so the stop resolves only once the write has
+    // reached hardware. Shutdown order is stop-then-disconnect, so without this
+    // the disconnect would routinely beat the batched write and drop it.
+    let mut hardware_commands: Vec<HardwareCommand> = Vec::new();
     if msg.outputs() {
-      self
-        .stop_commands
-        .iter()
-        .for_each(|msg| fut_vec.push(self.parse_message(msg.clone())));
-    }
-    if msg.inputs() {
-      self.definition.features().iter().for_each(|(i, f)| {
-        if f.can_subscribe() {
-          for input in f.input.iter() {
-            if input.can_subscribe() {
-              fut_vec.push(
-                self.parse_message(ButtplugDeviceCommandMessageUnionV4::InputCmd(
-                  CheckedInputCmdV4::new(
-                    1,
-                    self.definition.index(),
-                    *i,
-                    input.input_type(),
-                    InputCommandType::Unsubscribe,
-                    f.id(),
-                  ),
-                )),
-              );
-            }
-          }
+      for stop_msg in self.stop_commands.iter() {
+        if let ButtplugDeviceCommandMessageUnionV4::OutputCmd(checked) = stop_msg
+          && let Ok(cmds) = self.handler.handle_output_cmd(checked)
+        {
+          hardware_commands.extend(cmds);
         }
-      });
-    }
-    async move {
-      for fut in fut_vec {
-        fut.await?;
       }
-      Ok(message::OkV0::default().into())
+    }
+    let input_futs: Vec<_> = if msg.inputs() {
+      self
+        .definition
+        .features()
+        .iter()
+        .flat_map(|(i, f)| {
+          let i = *i;
+          let feature_id = f.id();
+          f.input.iter().filter_map(move |input| {
+            if input.can_subscribe() {
+              Some(self.parse_message(ButtplugDeviceCommandMessageUnionV4::InputCmd(
+                CheckedInputCmdV4::new(
+                  1,
+                  self.definition.index(),
+                  i,
+                  input.input_type(),
+                  InputCommandType::Unsubscribe,
+                  feature_id,
+                ),
+              )))
+            } else {
+              None
+            }
+          })
+        })
+        .collect()
+    } else {
+      Vec::new()
+    };
+
+    async move {
+      // Inputs (unsubscribe) are best-effort and do not gate shutdown.
+      for fut in input_futs {
+        let _ = fut.await;
+      }
+
+      if hardware_commands.is_empty() {
+        return Ok(message::OkV0::default().into());
+      }
+
+      let (message, ack) = DeviceTaskMessage::acknowledged(hardware_commands);
+      if sender.send(message).await.is_err() {
+        // The device io task is gone (already disconnected). There is nothing to
+        // flush, so the stop is satisfied.
+        return Ok(message::OkV0::default().into());
+      }
+
+      // Bound the wait so a wedged or dead device cannot hang shutdown: a
+      // successful ack means the stop write reached hardware; an elapsed timeout
+      // still resolves Ok.
+      match select! {
+        biased;
+        result = ack => result,
+        _ = async_manager::sleep(WRITE_ACK_TIMEOUT) => Ok(()),
+      } {
+        Ok(()) => Ok(message::OkV0::default().into()),
+        // Receiver dropped without sending: the io task exited mid-flush. The
+        // stop may not have landed, but shutdown must not hang on it.
+        Err(_) => Ok(message::OkV0::default().into()),
+      }
     }
     .boxed()
   }
@@ -515,7 +562,7 @@ pub(super) async fn build_device_handle(
   let strategy = handler.keepalive_strategy();
 
   // Create the hardware command channel and spawn the device task
-  let (internal_hw_msg_sender, internal_hw_msg_recv) = channel::<Vec<HardwareCommand>>(1024);
+  let (internal_hw_msg_sender, internal_hw_msg_recv) = channel::<DeviceTaskMessage>(1024);
 
   let device_wait_duration = if let Some(gap) = definition.message_gap_ms() {
     Some(Duration::from_millis(gap as u64))
