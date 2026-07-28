@@ -10,30 +10,28 @@
 //! DeviceHandle provides the interface for sending commands to devices.
 //! It owns the device state directly and handles all command processing.
 
-use std::{collections::BTreeMap, sync::Arc, time::Duration};
+use std::{
+  collections::BTreeMap,
+  sync::{
+    Arc,
+    atomic::{AtomicBool, Ordering},
+  },
+  time::Duration,
+};
 
 use buttplug_core::{
   ButtplugResultFuture,
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
-    self,
-    ButtplugMessage,
-    ButtplugServerMessageV4,
-    DeviceFeature,
-    DeviceMessageInfoV4,
-    InputCommandType,
-    InputType,
-    OutputValue,
-    StopCmdV4,
+    self, ButtplugMessage, ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4,
+    InputCommandType, InputType, OutputValue, StopCmdV4,
   },
   util::async_manager,
   util::stream::convert_broadcast_receiver_to_stream,
   util::task::TaskGroup,
 };
 use buttplug_server_device_config::{
-  DeviceConfigurationManager,
-  ServerDeviceDefinition,
-  ServerDeviceFeatureOutput,
+  DeviceConfigurationManager, ServerDeviceDefinition, ServerDeviceFeatureOutput,
   UserDeviceIdentifier,
 };
 use dashmap::DashMap;
@@ -52,17 +50,14 @@ use uuid::Uuid;
 use crate::{
   ButtplugServerResultFuture,
   message::{
-    ButtplugServerDeviceMessage,
-    checked_input_cmd::CheckedInputCmdV4,
-    checked_output_cmd::CheckedOutputCmdV4,
-    server_device_attributes::ServerDeviceAttributes,
+    ButtplugServerDeviceMessage, checked_input_cmd::CheckedInputCmdV4,
+    checked_output_cmd::CheckedOutputCmdV4, server_device_attributes::ServerDeviceAttributes,
     spec_enums::ButtplugDeviceCommandMessageUnionV4,
   },
 };
 
 use super::{
-  InternalDeviceEvent,
-  OutputObservation,
+  InternalDeviceEvent, OutputObservation,
   device_task::{DeviceTaskConfig, DeviceTaskMessage, WRITE_ACK_TIMEOUT, run_owned_device_task},
   hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent},
   protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, ProtocolSpecializer},
@@ -115,6 +110,8 @@ pub struct DeviceHandle {
   last_output_command: Arc<DashMap<Uuid, CheckedOutputCmdV4>>,
   stop_commands: Arc<Vec<ButtplugDeviceCommandMessageUnionV4>>,
   internal_hw_msg_sender: Sender<DeviceTaskMessage>,
+  device_event_sender: Sender<InternalDeviceEvent>,
+  disconnect_notified: Arc<AtomicBool>,
   output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
   task_group: TaskGroup,
 }
@@ -128,6 +125,8 @@ impl DeviceHandle {
     identifier: UserDeviceIdentifier,
     stop_commands: Vec<ButtplugDeviceCommandMessageUnionV4>,
     internal_hw_msg_sender: Sender<DeviceTaskMessage>,
+    device_event_sender: Sender<InternalDeviceEvent>,
+    disconnect_notified: Arc<AtomicBool>,
     output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
     task_group: TaskGroup,
   ) -> Self {
@@ -140,6 +139,8 @@ impl DeviceHandle {
       last_output_command: Arc::new(DashMap::new()),
       stop_commands: Arc::new(stop_commands),
       internal_hw_msg_sender,
+      device_event_sender,
+      disconnect_notified,
       output_observation_sender,
       task_group,
     }
@@ -244,8 +245,16 @@ impl DeviceHandle {
   pub fn disconnect(&self) -> ButtplugResultFuture {
     let hardware_disconnect = self.hardware.disconnect();
     let task_group = self.task_group.clone();
+    let device_event_sender = self.device_event_sender.clone();
+    let disconnect_notified = self.disconnect_notified.clone();
+    let identifier = self.identifier.clone();
     async move {
       let hardware_result = hardware_disconnect.await;
+      if !disconnect_notified.swap(true, Ordering::AcqRel) {
+        let _ = device_event_sender
+          .send(InternalDeviceEvent::Disconnected(identifier))
+          .await;
+      }
       task_group.cancel();
       let _ = task_group.shutdown().await;
       hardware_result.map_err(|err| err.into())
@@ -653,6 +662,8 @@ pub(super) async fn build_device_handle(
     }
   }
 
+  let disconnect_notified = Arc::new(AtomicBool::new(false));
+
   // Create the DeviceHandle
   let device_handle = DeviceHandle::new(
     hardware,
@@ -661,6 +672,8 @@ pub(super) async fn build_device_handle(
     identifier,
     stop_commands,
     internal_hw_msg_sender,
+    device_event_sender.clone(),
+    disconnect_notified.clone(),
     output_observation_sender,
     task_group.clone(),
   );
@@ -694,17 +707,19 @@ pub(super) async fn build_device_handle(
         let event = futures::StreamExt::next(&mut event_stream).await;
         match event {
           Some(DeviceEvent::Disconnected(id)) => {
-            if device_event_sender
-              .send(InternalDeviceEvent::Disconnected(id))
-              .await
-              .is_err()
-            {
-              info!(
-                "Device event sender closed for device {:?}, stopping event forwarding.",
-                identifier
-              );
-              break;
+            if !disconnect_notified.swap(true, Ordering::AcqRel) {
+              if device_event_sender
+                .send(InternalDeviceEvent::Disconnected(id))
+                .await
+                .is_err()
+              {
+                info!(
+                  "Device event sender closed for device {:?}, stopping event forwarding.",
+                  identifier
+                );
+              }
             }
+            break;
           }
           Some(DeviceEvent::Notification(_, msg)) => {
             if device_event_sender
