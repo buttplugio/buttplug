@@ -13,6 +13,18 @@ use futures::task::LocalFutureObj;
 use std::{future::Future, sync::OnceLock, time::Duration};
 use tracing::Span;
 
+/// The terminal state of a spawned task.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TaskCompletionResult {
+  Completed,
+  Panicked,
+  Cancelled,
+  RuntimeAborted,
+}
+
+/// Runtime-neutral handle used to await a spawned task's completion.
+pub type TaskCompletion = BoxFuture<'static, TaskCompletionResult>;
+
 #[cfg(feature = "wasm")]
 mod wasm;
 
@@ -64,18 +76,28 @@ fn get_global_async_manager() -> &'static dyn AsyncManager {
 /// Built-in implementations are provided for Tokio (via `tokio-runtime` feature)
 /// and WASM (via `wasm` feature). For other runtimes (e.g. Embassy, esp-idf),
 /// implement this trait and call [`set_global_async_manager`] at startup.
+///
+/// Implementations must treat spawning as a transactional operation. They must return without
+/// synchronously polling the submitted future. Once the runtime accepts the future, the method
+/// must return exactly one completion handle and must not unwind. These requirements let task
+/// owners account for and join every accepted task without depending on a specific runtime.
 pub trait AsyncManager: std::fmt::Debug + Send + Sync {
-  /// Spawn a fire-and-forget task on the async runtime.
+  /// Spawn a task on the async runtime and return its runtime-neutral completion handle.
   ///
   /// The `span` should be used to instrument the task with tracing context.
   #[cfg(not(feature = "wasm"))]
-  fn spawn(&self, future: FutureObj<'static, ()>, span: Span);
+  fn spawn(&self, future: FutureObj<'static, TaskCompletionResult>, span: Span) -> TaskCompletion;
 
-  /// Spawn a fire-and-forget task on the async runtime (WASM, no Send required).
+  /// Spawn a task on the async runtime and return its runtime-neutral completion handle.
   ///
-  /// The `span` should be used to instrument the task with tracing context.
+  /// WASM runtimes cannot report task panics, so a dropped completion sender is reported as
+  /// [`TaskCompletionResult::Cancelled`].
   #[cfg(feature = "wasm")]
-  fn spawn(&self, future: LocalFutureObj<'static, ()>, span: Span);
+  fn spawn(
+    &self,
+    future: LocalFutureObj<'static, TaskCompletionResult>,
+    span: Span,
+  ) -> TaskCompletion;
 
   /// Sleep for the given duration.
   fn sleep(&self, duration: Duration) -> BoxFuture<'static, ()>;
@@ -85,22 +107,50 @@ pub trait AsyncManager: std::fmt::Debug + Send + Sync {
 ///
 /// Prefer the [`spawn!`][crate::spawn] macro for ergonomic use with a task name.
 #[cfg(not(feature = "wasm"))]
-pub fn spawn<F>(future: F, span: Span)
+pub fn spawn<F>(future: F, span: Span) -> TaskCompletion
 where
   F: Future<Output = ()> + Send + 'static,
 {
-  get_global_async_manager().spawn(FutureObj::new(Box::new(future)), span);
+  spawn_with_result(
+    async move {
+      future.await;
+      TaskCompletionResult::Completed
+    },
+    span,
+  )
+}
+
+#[cfg(not(feature = "wasm"))]
+pub(crate) fn spawn_with_result<F>(future: F, span: Span) -> TaskCompletion
+where
+  F: Future<Output = TaskCompletionResult> + Send + 'static,
+{
+  get_global_async_manager().spawn(FutureObj::new(Box::new(future)), span)
 }
 
 /// Spawn a fire-and-forget task on the global async manager (WASM, no Send required).
 ///
 /// Prefer the [`spawn!`][crate::spawn] macro for ergonomic use with a task name.
 #[cfg(feature = "wasm")]
-pub fn spawn<F>(future: F, span: Span)
+pub fn spawn<F>(future: F, span: Span) -> TaskCompletion
 where
   F: Future<Output = ()> + 'static,
 {
-  get_global_async_manager().spawn(LocalFutureObj::new(Box::new(future)), span);
+  spawn_with_result(
+    async move {
+      future.await;
+      TaskCompletionResult::Completed
+    },
+    span,
+  )
+}
+
+#[cfg(feature = "wasm")]
+pub(crate) fn spawn_with_result<F>(future: F, span: Span) -> TaskCompletion
+where
+  F: Future<Output = TaskCompletionResult> + 'static,
+{
+  get_global_async_manager().spawn(LocalFutureObj::new(Box::new(future)), span)
 }
 
 /// Sleep for the given duration using the global async manager.
@@ -112,13 +162,14 @@ pub async fn sleep(duration: Duration) {
 /// Always prefer to add a name to the task for better tracing context.
 #[macro_export]
 macro_rules! spawn {
-  ($future:expr) => {
-    $crate::util::async_manager::spawn(
+  ($future:expr) => {{
+    let _ = $crate::util::async_manager::spawn(
       $future,
       tracing::span!(tracing::Level::INFO, "Buttplug Async Task"),
-    )
-  };
-  ($name:expr, $future:expr) => {
-    $crate::util::async_manager::spawn($future, tracing::span!(tracing::Level::INFO, $name))
-  };
+    );
+  }};
+  ($name:expr, $future:expr) => {{
+    let _ =
+      $crate::util::async_manager::spawn($future, tracing::span!(tracing::Level::INFO, $name));
+  }};
 }
