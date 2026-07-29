@@ -12,12 +12,12 @@ use tokio::{
   select,
   sync::{Mutex, mpsc},
 };
+use tokio_util::sync::CancellationToken;
 
 pub enum PingMessage {
   Ping,
   StartTimer,
   StopTimer,
-  End,
 }
 
 /// Internal ping timer task that monitors for ping timeouts.
@@ -26,6 +26,7 @@ async fn ping_timer<F>(
   max_ping_time: u32,
   mut ping_msg_receiver: mpsc::Receiver<PingMessage>,
   on_ping_timeout: Arc<Mutex<Option<F>>>,
+  cancellation_token: CancellationToken,
 ) where
   F: FnOnce() + Send + 'static,
 {
@@ -33,6 +34,9 @@ async fn ping_timer<F>(
   let mut pinged = false;
   loop {
     select! {
+      _ = cancellation_token.cancelled() => {
+        return;
+      }
       _ = async_manager::sleep(Duration::from_millis(max_ping_time.into())) => {
         if started {
           if !pinged {
@@ -53,7 +57,6 @@ async fn ping_timer<F>(
           PingMessage::StartTimer => started = true,
           PingMessage::StopTimer => started = false,
           PingMessage::Ping => pinged = true,
-          PingMessage::End => break,
         }
       }
     };
@@ -63,18 +66,12 @@ async fn ping_timer<F>(
 pub struct PingTimer {
   max_ping_time: u32,
   ping_msg_sender: mpsc::Sender<PingMessage>,
+  cancellation_token: CancellationToken,
 }
 
 impl Drop for PingTimer {
   fn drop(&mut self) {
-    // This cannot block, otherwise it will throw in WASM contexts on
-    // destruction. We must use send(), not blocking_send().
-    let sender = self.ping_msg_sender.clone();
-    buttplug_core::spawn!("PingTimerDrop", async move {
-      if sender.send(PingMessage::End).await.is_err() {
-        debug!("Receiver does not exist, assuming ping timer event loop already dead.");
-      }
-    });
+    self.cancellation_token.cancel();
   }
 }
 
@@ -89,14 +86,21 @@ impl PingTimer {
     F: FnOnce() + Send + 'static,
   {
     let (sender, receiver) = mpsc::channel(256);
+    let cancellation_token = CancellationToken::new();
     if max_ping_time > 0 {
       let callback = Arc::new(Mutex::new(on_ping_timeout));
-      let fut = ping_timer(max_ping_time, receiver, callback);
+      let fut = ping_timer(
+        max_ping_time,
+        receiver,
+        callback,
+        cancellation_token.clone(),
+      );
       buttplug_core::spawn!("PingTimer", fut);
     }
     Self {
       max_ping_time,
       ping_msg_sender: sender,
+      cancellation_token,
     }
   }
 
