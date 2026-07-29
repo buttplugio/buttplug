@@ -9,16 +9,20 @@
 //! specific) Managers
 
 use crate::{
-  ButtplugServerError, ButtplugServerResult, ButtplugServerResultFuture,
+  ButtplugServerError,
+  ButtplugServerResult,
+  ButtplugServerResultFuture,
   device::{
-    DeviceHandle, OutputObservation,
+    DeviceHandle,
+    OutputObservation,
     hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerBuilder},
     server_device_manager_event_loop::ServerDeviceManagerEventLoop,
   },
   message::{
     server_device_attributes::ServerDeviceAttributes,
     spec_enums::{
-      ButtplugCheckedClientMessageV4, ButtplugDeviceCommandMessageUnionV4,
+      ButtplugCheckedClientMessageV4,
+      ButtplugDeviceCommandMessageUnionV4,
       ButtplugDeviceManagerMessageUnion,
     },
   },
@@ -26,7 +30,12 @@ use crate::{
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError, ButtplugUnknownError},
   message::{
-    self, ButtplugDeviceMessage, ButtplugMessage, ButtplugServerMessageV4, DeviceListV4, StopCmdV4,
+    self,
+    ButtplugDeviceMessage,
+    ButtplugMessage,
+    ButtplugServerMessageV4,
+    DeviceListV4,
+    StopCmdV4,
   },
   util::stream::convert_broadcast_receiver_to_stream,
   util::task::TaskGroup,
@@ -44,7 +53,8 @@ use std::{
   future::Future,
   pin::Pin,
   sync::{
-    Arc, Mutex,
+    Arc,
+    Mutex,
     atomic::{AtomicBool, Ordering},
   },
 };
@@ -107,7 +117,8 @@ impl ServerDeviceManagerBuilder {
     let simulated_devices = self.device_configuration_manager.simulated_devices();
     if !simulated_devices.is_empty() {
       use crate::device::hardware::simulated::{
-        SimulatedDeviceEntry, SimulatedHardwareCommunicationManagerBuilder,
+        SimulatedDeviceEntry,
+        SimulatedHardwareCommunicationManagerBuilder,
       };
       let entries: Vec<SimulatedDeviceEntry> = simulated_devices
         .iter()
