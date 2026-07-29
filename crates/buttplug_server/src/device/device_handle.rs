@@ -308,12 +308,20 @@ impl DeviceHandle {
 
   // --- Private command handling methods ---
 
-  fn handle_outputcmd_v4(&self, msg: &CheckedOutputCmdV4) -> ButtplugServerResultFuture {
+  /// Run an output command through last-command deduplication and observation
+  /// emission, returning the protocol handler's hardware commands. Returns None
+  /// when the command equals the feature's last command and generates no work.
+  /// Shared by the normal output path and the stop path so both keep identical
+  /// dedupe-map and observation behaviour.
+  fn output_cmd_hardware_commands(
+    &self,
+    msg: &CheckedOutputCmdV4,
+  ) -> Option<Result<Vec<HardwareCommand>, ButtplugError>> {
     if let Some(last_msg) = self.last_output_command.get(&msg.feature_id())
       && *last_msg == *msg
     {
       trace!("No commands generated for incoming device packet, skipping and returning success.");
-      return future::ready(Ok(message::OkV0::default().into())).boxed();
+      return None;
     }
     self
       .last_output_command
@@ -330,7 +338,15 @@ impl DeviceHandle {
       });
     }
 
-    self.handle_generic_command_result(self.handler.handle_output_cmd(msg))
+    Some(self.handler.handle_output_cmd(msg).map_err(|e| e.into()))
+  }
+
+  fn handle_outputcmd_v4(&self, msg: &CheckedOutputCmdV4) -> ButtplugServerResultFuture {
+    match self.output_cmd_hardware_commands(msg) {
+      None => future::ready(Ok(message::OkV0::default().into())).boxed(),
+      Some(Ok(commands)) => self.handle_hardware_commands(commands),
+      Some(Err(err)) => future::ready(Err(err)).boxed(),
+    }
   }
 
   fn handle_hardware_commands(&self, commands: Vec<HardwareCommand>) -> ButtplugServerResultFuture {
@@ -344,18 +360,6 @@ impl DeviceHandle {
     .boxed()
   }
 
-  fn handle_generic_command_result(
-    &self,
-    command_result: Result<Vec<HardwareCommand>, ButtplugDeviceError>,
-  ) -> ButtplugServerResultFuture {
-    let hardware_commands = match command_result {
-      Ok(commands) => commands,
-      Err(err) => return future::ready(Err(err.into())).boxed(),
-    };
-
-    self.handle_hardware_commands(hardware_commands)
-  }
-
   fn handle_stop_device_cmd(&self, msg: &StopCmdV4) -> ButtplugServerResultFuture {
     let sender = self.internal_hw_msg_sender.clone();
     // Accumulate every per-feature stop OutputCmd into a single
@@ -366,7 +370,7 @@ impl DeviceHandle {
     if msg.outputs() {
       for stop_msg in self.stop_commands.iter() {
         if let ButtplugDeviceCommandMessageUnionV4::OutputCmd(checked) = stop_msg
-          && let Ok(cmds) = self.handler.handle_output_cmd(checked)
+          && let Some(Ok(cmds)) = self.output_cmd_hardware_commands(checked)
         {
           hardware_commands.extend(cmds);
         }
