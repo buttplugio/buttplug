@@ -1,3 +1,21 @@
+# 11.0.0 (2026-07-28)
+
+## Features
+
+- Device manager and device tasks are owned and joined at shutdown; shutdown is single-flight and ordered (close to new work, stop scanning, stop devices, disconnect, cancel, join)
+- Add device support: F-Machine Alpha, Kiiroo Keon 2 and Spot 2, Lovense Fizz, Umove, Vibio, Yiciyuan YCY-FJB-01 and YCY-FJB-02, JoyHub Martino III, Jason, MutantX, and Marino, Svakom Emma Neo, Fatima Pro, and Klitty, Lelo Surfer Originals, and OSSM positional control
+
+## Bugfixes
+
+- Stop commands flush pending batches and resolve only once the stop write reaches hardware (bounded by a write-ack timeout)
+- A device disconnect error during shutdown no longer skips remaining disconnects or task teardown
+- Stalled device bring-up is cancellable and cannot hang shutdown
+- Preserve disconnect event ordering and suppress stale disconnect events on device index collision
+- Replace the ping timer Drop-spawn hack with direct cancellation
+- Preserve TCode position magnitude width
+- Reduce Satisfyer keepalive interval to keep devices connected
+- Migrate updated AES-ECB crypto APIs for Fluffer, HoneyPlaybox, VibCrafter, and Vibio
+
 # 10.0.4 (2026-06-01)
 
 ## Features

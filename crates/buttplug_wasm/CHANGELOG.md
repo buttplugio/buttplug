@@ -1,3 +1,9 @@
+# 4.0.0 (2026-07-28)
+
+## Other
+
+- Update buttplug crates to 11.0.0
+
 # 3.0.2 (2026-06-01)
 
 ## Features
