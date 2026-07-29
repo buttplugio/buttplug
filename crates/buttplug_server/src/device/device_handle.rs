@@ -253,6 +253,15 @@ impl DeviceHandle {
     self.handle_stop_device_cmd(stop_cmd)
   }
 
+  /// Mark the terminal disconnect notification as already delivered, so neither
+  /// the direct disconnect path nor the hardware event forwarding task will send
+  /// one. Used when the caller has already removed the device from the manager's
+  /// map itself: a queued Disconnected event would be processed after a
+  /// replacement device with the same identifier is inserted and remove it.
+  pub(super) fn suppress_disconnect_notification(&self) {
+    self.disconnect_notified.store(true, Ordering::Release);
+  }
+
   /// Disconnect from the device
   pub fn disconnect(&self) -> ButtplugResultFuture {
     let hardware_disconnect = self.hardware.disconnect();

@@ -383,14 +383,16 @@ impl ServerDeviceManagerEventLoop {
         // stomp on devices already in the map if they don't register a
         // disconnect before we try to insert the new device. If we have a
         // device already in the map with the same index (and therefore same
-        // address), consider it disconnected and eject it from the map. This
-        // should also trigger a disconnect event before our new DeviceAdded
-        // message goes out, so timing matters here.
+        // address), consider it disconnected and eject it from the map.
         match self.device_map.remove(&device_index) {
           Some((_, old_device)) => {
             info!("Device map contains key {}.", device_index);
-            // After removing the device from the array, manually disconnect it to
-            // make sure the event is thrown.
+            // We removed the entry ourselves, so suppress the old device's
+            // terminal Disconnected notification. It would be queued into this
+            // loop's own event channel (a deadlock hazard when full) and
+            // processed only after the replacement device — same identifier —
+            // is inserted below, removing the wrong device.
+            old_device.suppress_disconnect_notification();
             if let Err(err) = old_device.disconnect().await {
               // If we throw an error during the disconnect, we can't really do
               // anything with it, but should at least log it.
