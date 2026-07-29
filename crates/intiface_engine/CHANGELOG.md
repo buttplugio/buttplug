@@ -1,3 +1,13 @@
+# 4.1.0 (2026-07-28)
+
+## Features
+
+- Update buttplug crates to 11.0.0 (owner-local task lifecycle, v4 Disconnect message)
+
+## Bugfixes
+
+- Update build script for vergen 10
+
 # 4.0.4 (2026-06-01)
 
 ## Features

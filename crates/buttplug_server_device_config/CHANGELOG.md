@@ -1,3 +1,13 @@
+# 11.0.0 (2026-07-28)
+
+## Features
+
+- Add device configurations for F-Machine Alpha, Kiiroo Keon 2, Kiiroo Spot 2, Lovense Fizz, OSSM, Umove, Vibio, Yiciyuan YCY-FJB-01 and YCY-FJB-02, and additional JoyHub, Lelo, and Svakom devices
+
+## Other
+
+- Update buttplug crates to 11.0.0
+
 # 10.1.1 (2026-06-01)
 
 ## Features

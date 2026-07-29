@@ -1,3 +1,14 @@
+# 11.0.0 (2026-07-28)
+
+## Breaking Changes
+
+- `AsyncManager::spawn` now returns a `TaskCompletion` handle instead of discarding the runtime join handle. Custom `AsyncManager` implementations must return a completion handle after accepting a task, and must not synchronously drive the submitted future during submission. The `spawn!` macro remains fire-and-forget by explicitly detaching its completion.
+
+## Features
+
+- Add owner-local named `TaskGroup`: atomic close/spawn reservation, coordinated cancellation, panic-safe join, and shared repeatable shutdown
+- Add the v4 `Disconnect` client message
+
 # 10.0.3 (2026-05-31)
 
 ## Features
