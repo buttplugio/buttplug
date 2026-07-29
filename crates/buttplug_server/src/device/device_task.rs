@@ -184,7 +184,27 @@ async fn run_device_task(
         let commands = message.commands;
         let write_ack = message.write_ack;
 
-        if let Some(device_wait_duration) = device_wait_duration {
+        if let Some(ack) = write_ack {
+          // An acknowledged message is urgent (stop path): merge it into any
+          // pending batch with the standard dedupe, flush everything to hardware
+          // now regardless of the batch deadline, then signal the caller. The
+          // dedupe must apply even with an empty pending queue: a multi-feature
+          // stop accumulates one full-state write per feature in a single
+          // message, and only the final state may reach hardware.
+          for command in commands {
+            pending_commands.retain(|existing| !command.overlaps(existing));
+            pending_commands.push_back(command);
+          }
+          if let Some(write) =
+            flush_pending(&hardware, &mut pending_commands, track_keepalive).await
+          {
+            keepalive_packet = Some(write);
+          }
+          batch_deadline = None;
+          // Acknowledgement is best-effort: a dropped receiver means the caller
+          // no longer cares (e.g. they raced ahead to disconnect).
+          let _ = ack.send(());
+        } else if let Some(device_wait_duration) = device_wait_duration {
           // Batching enabled
           if pending_commands.is_empty() {
             // First batch - add directly without deduplication (matches old behavior)
@@ -195,22 +215,6 @@ async fn run_device_task(
             for command in commands {
               pending_commands.retain(|existing| !command.overlaps(existing));
               pending_commands.push_back(command);
-            }
-          }
-
-          // An acknowledged message is urgent: flush everything to hardware now,
-          // regardless of the batch deadline, then signal the caller.
-          if write_ack.is_some() {
-            if let Some(write) =
-              flush_pending(&hardware, &mut pending_commands, track_keepalive).await
-            {
-              keepalive_packet = Some(write);
-            }
-            batch_deadline = None;
-            // Acknowledgement is best-effort: a dropped receiver means the caller
-            // no longer cares (e.g. they raced ahead to disconnect).
-            if let Some(ack) = write_ack {
-              let _ = ack.send(());
             }
           }
         } else {
