@@ -11,6 +11,7 @@ pub mod long_running_scan_comm_manager;
 pub mod test_server;
 pub use test_server::ButtplugTestServer;
 pub mod device_test;
+#[allow(dead_code)]
 pub mod stalling_device_communication_manager;
 pub mod test_device_manager;
 pub use delay_device_communication_manager::DelayDeviceCommunicationManagerBuilder;
@@ -169,6 +170,7 @@ pub fn test_server_with_device(device_type: &str) -> (ButtplugServer, TestDevice
   (test_server_with_comm_manager(builder), device)
 }
 
+#[allow(dead_code)]
 pub fn test_server_with_disconnect_failure(
   device_type: &str,
 ) -> (ButtplugServer, TestDeviceChannelHost) {

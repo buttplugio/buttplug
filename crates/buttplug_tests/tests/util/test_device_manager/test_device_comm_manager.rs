@@ -97,6 +97,7 @@ impl TestDeviceCommunicationManagerBuilder {
     host_channel
   }
 
+  #[allow(dead_code)]
   pub fn add_test_device_with_disconnect_failure(
     &mut self,
     device: &TestDeviceIdentifier,
