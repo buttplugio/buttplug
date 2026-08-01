@@ -11,6 +11,7 @@ use buttplug_core::message::{
   DeviceListV4,
   ScanningFinishedV0,
 };
+use buttplug_core::task_span;
 use buttplug_core::util::task::TaskGroup;
 use buttplug_server_device_config::DeviceConfigurationManager;
 use tracing::info_span;
@@ -315,7 +316,7 @@ impl ServerDeviceManagerEventLoop {
         let connecting_devices_for_task = connecting_devices.clone();
         if self
           .task_group
-          .spawn("device creation", move || async move {
+          .spawn(task_span!("device creation"), move || async move {
             let _guard = ConnectingDeviceGuard {
               connecting_devices: connecting_devices_for_task,
               address: address_for_task,

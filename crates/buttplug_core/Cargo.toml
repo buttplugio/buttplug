@@ -29,6 +29,9 @@ targets = []
 # Features to pass to Cargo (default: [])
 features = ["default", "unstable"]
 
+[dev-dependencies]
+tracing-subscriber = "0.3.23"
+
 [build-dependencies]
 serde = "1.0.229"
 serde_json = "1.0.151"

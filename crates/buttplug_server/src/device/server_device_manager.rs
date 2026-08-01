@@ -37,6 +37,7 @@ use buttplug_core::{
     DeviceListV4,
     StopCmdV4,
   },
+  task_span,
   util::stream::convert_broadcast_receiver_to_stream,
   util::task::TaskGroup,
 };
@@ -205,9 +206,12 @@ impl ServerDeviceManagerBuilder {
     // it into the manager's TaskGroup lets shutdown cancel-then-join it
     // deterministically instead of fire-and-forgetting it onto the runtime.
     task_group
-      .spawn("ServerDeviceManager event loop", move || async move {
-        event_loop.run().await;
-      })
+      .spawn(
+        task_span!("ServerDeviceManager event loop"),
+        move || async move {
+          event_loop.run().await;
+        },
+      )
       .expect("device manager task group is freshly created, cannot be closed");
     Ok(ServerDeviceManager {
       device_configuration_manager: self.device_configuration_manager.clone(),

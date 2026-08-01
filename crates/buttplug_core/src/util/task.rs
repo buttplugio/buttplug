@@ -14,6 +14,18 @@ use std::{
   future::Future,
   sync::{Arc, Mutex},
 };
+use tracing::Span;
+
+/// Build the [`Span`] identifying a task passed to [`TaskGroup::spawn`].
+///
+/// The name must be a literal: a span's name is baked into its `'static` callsite
+/// metadata, so it cannot come from a runtime value.
+#[macro_export]
+macro_rules! task_span {
+  ($name:expr) => {
+    tracing::span!(tracing::Level::INFO, $name)
+  };
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TaskGroupClosed;
@@ -94,8 +106,20 @@ impl TaskGroup {
     Ok((abort_registration, completion_sender))
   }
 
+  /// Spawn a task into this group, identified by `span`.
+  ///
+  /// Build `span` at the call site with a literal name, via the [`task_span!`] macro or
+  /// `tracing::span!` directly. A span's name lives in its callsite metadata, which
+  /// [`AsyncManager`][async_manager::AsyncManager] implementations can read; a name passed
+  /// as a span *field* is only visible to tracing subscribers, so runtimes that allocate
+  /// per-task resources by name could not see it.
+  ///
+  /// Note that `Span::metadata()` returns `Some` only while the span is *enabled*: the
+  /// active subscriber's filter must accept the INFO-level callsite. Runtimes that read
+  /// task names from span metadata must install a subscriber that enables these spans
+  /// before spawning, or every task arrives with `metadata() == None`.
   #[cfg(not(feature = "wasm"))]
-  pub fn spawn<F, Fut>(&self, name: &'static str, task: F) -> Result<(), TaskGroupClosed>
+  pub fn spawn<F, Fut>(&self, span: Span, task: F) -> Result<(), TaskGroupClosed>
   where
     F: FnOnce() -> Fut + Send + 'static,
     Fut: Future<Output = ()> + Send + 'static,
@@ -107,16 +131,16 @@ impl TaskGroup {
         Err(_) => TaskCompletionResult::Cancelled,
       }
     };
-    let completion = async_manager::spawn_with_result(
-      future,
-      tracing::span!(tracing::Level::INFO, "Buttplug Task", task.name = name),
-    );
+    let completion = async_manager::spawn_with_result(future, span);
     let _ = completion_sender.send(completion);
     Ok(())
   }
 
+  /// Spawn a task into this group, identified by `span`.
+  ///
+  /// See the non-WASM variant for why this takes a [`Span`] rather than a name.
   #[cfg(feature = "wasm")]
-  pub fn spawn<F, Fut>(&self, name: &'static str, task: F) -> Result<(), TaskGroupClosed>
+  pub fn spawn<F, Fut>(&self, span: Span, task: F) -> Result<(), TaskGroupClosed>
   where
     F: FnOnce() -> Fut + 'static,
     Fut: Future<Output = ()> + 'static,
@@ -128,10 +152,7 @@ impl TaskGroup {
         Err(_) => TaskCompletionResult::Cancelled,
       }
     };
-    let completion = async_manager::spawn_with_result(
-      future,
-      tracing::span!(tracing::Level::INFO, "Buttplug Task", task.name = name),
-    );
+    let completion = async_manager::spawn_with_result(future, span);
     let _ = completion_sender.send(completion);
     Ok(())
   }
@@ -183,13 +204,28 @@ mod tests {
   use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
   use tokio::sync::oneshot;
 
+  /// `AsyncManager` implementations for runtimes that allocate per-task resources (stack
+  /// size on FreeRTOS, for instance) can only identify a task by its callsite metadata
+  /// name. A name passed as a span *field* is invisible to them, so every task would
+  /// arrive indistinguishable and get the same fallback allocation.
+  #[test]
+  fn task_span_carries_name_in_callsite_metadata() {
+    tracing::subscriber::with_default(tracing_subscriber::registry(), || {
+      let span = crate::task_span!("DeviceTask");
+      assert_eq!(
+        span.metadata().map(|metadata| metadata.name()),
+        Some("DeviceTask")
+      );
+    });
+  }
+
   #[tokio::test]
   async fn spawned_task_is_joined_by_shutdown() {
     let group = TaskGroup::new();
     let (started_sender, started_receiver) = oneshot::channel();
     let (dropped_sender, dropped_receiver) = oneshot::channel();
     group
-      .spawn("joined", || async move {
+      .spawn(crate::task_span!("joined"), || async move {
         let _guard = DropSignal(Some(dropped_sender));
         let _ = started_sender.send(());
         futures::future::pending::<()>().await;
@@ -212,7 +248,7 @@ mod tests {
     let invoked_for_task = invoked.clone();
 
     assert_eq!(
-      group.spawn("rejected", move || {
+      group.spawn(crate::task_span!("rejected"), move || {
         invoked_for_task.store(true, Ordering::SeqCst);
         async {}
       }),
@@ -230,7 +266,7 @@ mod tests {
     let spawn_group = group.clone();
     let invoked_for_task = invoked.clone();
     let spawn = std::thread::spawn(move || {
-      spawn_group.spawn("racing spawn", move || {
+      spawn_group.spawn(crate::task_span!("racing spawn"), move || {
         invoked_for_task.store(true, Ordering::SeqCst);
         async {}
       })
@@ -247,7 +283,7 @@ mod tests {
     let group = TaskGroup::new();
     let (started_sender, started_receiver) = oneshot::channel();
     group
-      .spawn("panic", || async move {
+      .spawn(crate::task_span!("panic"), || async move {
         let _ = started_sender.send(());
         panic!("expected panic");
       })
@@ -262,7 +298,7 @@ mod tests {
     let group = TaskGroup::new();
     let (started_sender, started_receiver) = oneshot::channel();
     group
-      .spawn("concurrent shutdown", || async move {
+      .spawn(crate::task_span!("concurrent shutdown"), || async move {
         let _ = started_sender.send(());
         futures::future::pending::<()>().await;
       })
@@ -281,7 +317,7 @@ mod tests {
     let group = TaskGroup::new();
     let (started_sender, started_receiver) = oneshot::channel();
     group
-      .spawn("sequential shutdown", || async move {
+      .spawn(crate::task_span!("sequential shutdown"), || async move {
         let _ = started_sender.send(());
         futures::future::pending::<()>().await;
       })
@@ -301,7 +337,7 @@ mod tests {
     {
       let group = TaskGroup::new();
       group
-        .spawn("drop", || async move {
+        .spawn(crate::task_span!("drop"), || async move {
           let _guard = DropSignal(Some(dropped_sender));
           let _ = started_sender.send(());
           futures::future::pending::<()>().await;
@@ -319,7 +355,7 @@ mod tests {
     let (dropped_sender, dropped_receiver) = oneshot::channel();
     let group = TaskGroup::new();
     group
-      .spawn("concurrent drops", || async move {
+      .spawn(crate::task_span!("concurrent drops"), || async move {
         let _guard = DropSignal(Some(dropped_sender));
         let _ = started_sender.send(());
         futures::future::pending::<()>().await;
@@ -356,7 +392,7 @@ mod tests {
       let (started_sender, started_receiver) = oneshot::channel();
       started.push(started_receiver);
       group
-        .spawn("duplicate", move || async move {
+        .spawn(crate::task_span!("duplicate"), move || async move {
           completed.fetch_add(1, Ordering::SeqCst);
           let _ = started_sender.send(());
         })
@@ -417,7 +453,7 @@ mod tests {
       let group = TaskGroup::new();
       let _guard = runtime.enter();
       group
-        .spawn("runtime cycle", || async {
+        .spawn(crate::task_span!("runtime cycle"), || async {
           futures::future::pending::<()>().await;
         })
         .unwrap();

@@ -33,6 +33,7 @@ use buttplug_core::{
     OutputValue,
     StopCmdV4,
   },
+  task_span,
   util::async_manager,
   util::stream::convert_broadcast_receiver_to_stream,
   util::task::TaskGroup,
@@ -626,7 +627,7 @@ pub(super) async fn build_device_handle(
     keepalive_strategy: handler.keepalive_strategy(),
   };
   task_group
-    .spawn("DeviceTask", move || {
+    .spawn(task_span!("DeviceTask"), move || {
       run_owned_device_task(
         task_hardware,
         task_handler,
@@ -726,7 +727,7 @@ pub(super) async fn build_device_handle(
   let event_stream = device_handle.event_stream();
   let identifier = device_handle.identifier().clone();
   task_group
-    .spawn("DeviceEventForwarding", move || async move {
+    .spawn(task_span!("DeviceEventForwarding"), move || async move {
       futures::pin_mut!(event_stream);
       loop {
         let event = futures::StreamExt::next(&mut event_stream).await;
