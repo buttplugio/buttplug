@@ -8,9 +8,11 @@
 #[macro_use]
 extern crate log;
 
+mod available_ports;
 mod serialport_comm_manager;
 mod serialport_hardware;
 
+pub use available_ports::{AvailableSerialPort, available_serial_ports};
 pub use serialport_comm_manager::{
   SerialPortCommunicationManager,
   SerialPortCommunicationManagerBuilder,
