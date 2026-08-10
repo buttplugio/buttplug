@@ -18,14 +18,6 @@ test = true
 doctest = true
 doc = true
 
-
-
-# Only build docs on one platform (linux)
-[package.metadata.docs.rs]
-targets = []
-# Features to pass to Cargo (default: [])
-features = ["default", "unstable"]
-
 [dependencies]
 buttplug_core = { version = "11.0.0", path = "../buttplug_core", default-features = false }
 buttplug_server = { version = "11.0.0", path = "../buttplug_server", default-features = false }

@@ -23,12 +23,6 @@ default=["tokio-runtime"]
 tokio-runtime=["tokio/rt", "tokio/time"]
 wasm=["wasm-bindgen-futures", "wasmtimer"]
 
-# Only build docs on one platform (linux)
-[package.metadata.docs.rs]
-targets = []
-# Features to pass to Cargo (default: [])
-features = ["default", "unstable"]
-
 [dev-dependencies]
 tracing-subscriber = "0.3.23"
 
