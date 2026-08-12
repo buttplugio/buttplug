@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 30
+    "minor": 32
   },
   "protocols": {
     "activejoy": {
@@ -1526,6 +1526,7 @@
               "BGZY",
               "A531",
               "YXSJ",
+              "K128",
               "G317",
               "G312",
               "G302",
@@ -2028,6 +2029,13 @@
             "A531"
           ],
           "name": "Adorime Pink Touch"
+        },
+        {
+          "id": "f81414d2-6a99-4dde-9b59-e6e77fd037df",
+          "identifier": [
+            "K128"
+          ],
+          "name": "Galaku F1"
         },
         {
           "features": [
@@ -3936,6 +3944,59 @@
             "BGCD"
           ],
           "name": "Adorime Backy"
+        },
+        {
+          "features": [
+            {
+              "description": "Thruster",
+              "id": "0a42e499-11b4-4fa6-aec8-a9d0aa3a8eff",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Vibrate",
+              "id": "ee2e67ea-12c4-4dc9-9e81-0edcefd31d6c",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "37e2c89c-17a6-4449-8d5b-629c9abaca03",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "d5a1963d-ec8c-4e89-af2f-df1572315b90",
+          "identifier": [
+            "AK71"
+          ],
+          "name": "Adorime Anal Vibrator 2"
         },
         {
           "features": [

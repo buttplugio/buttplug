@@ -280,6 +280,10 @@ configurations:
   - A531
   name: Adorime Pink Touch
   id: 5cfdd204-e0dd-4ec5-b133-205bd6ce660a
+- identifier:
+  - K128
+  name: Galaku F1
+  id: f81414d2-6a99-4dde-9b59-e6e77fd037df
 # Type 1
 - identifier:
   - G317
@@ -1398,6 +1402,37 @@ configurations:
     index: 2
   id: 349e64b6-931f-4e1a-b69c-4f9652f0cf2c
 - identifier:
+    - AK71
+  name: Adorime Anal Vibrator 2
+  features:
+    - description: Thruster
+      id: 0a42e499-11b4-4fa6-aec8-a9d0aa3a8eff
+      output:
+        oscillate:
+          value:
+            - 0
+            - 100
+      index: 0
+    - description: Vibrate
+      id: ee2e67ea-12c4-4dc9-9e81-0edcefd31d6c
+      output:
+        vibrate:
+          value:
+            - 0
+            - 100
+      index: 1
+    - description: Battery Level
+      id: 37e2c89c-17a6-4449-8d5b-629c9abaca03
+      input:
+        battery:
+          value:
+            - - 0
+              - 100
+          command:
+            - Read
+      index: 2
+  id: d5a1963d-ec8c-4e89-af2f-df1572315b90
+- identifier:
     - YXSJ
   name: Adorime Cock Ring
   features:
@@ -1645,6 +1680,7 @@ communication:
     - BGZY # Adorime Penis Helmet Vibrator
     - A531 # Adorime Pink Touch
     - YXSJ # Adorime Cock Ring
+    - K128 # Galaku F1
     # Type 1
     - G317
     - G312
