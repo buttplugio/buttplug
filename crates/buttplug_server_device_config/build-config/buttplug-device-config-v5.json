@@ -5002,6 +5002,50 @@
           "name": "Honey Play Box Pleasure Pivot"
         },
         {
+          "features": [
+            {
+              "id": "3d0f4e2e-8f23-4cf6-8b62-7c6cc1ed5a58",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "6a2a1af6-1c1b-43d6-86dc-cf1d7db1a6d8",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "5ec5bb6f-e6ef-4f9c-9fd3-13e88c8011f0",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
           "id": "0a9c43fb-2d58-4af9-aef2-60f48c6e7707",
           "identifier": [
             "HPB-296"
