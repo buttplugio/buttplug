@@ -44,9 +44,13 @@ configurations:
   name: JoyHub Rhythmic 2
   id: 46533dc6-6f1b-4b17-9f31-06b076f417d6
 - identifier:
-  - J-Rhythmic3
+    - J-Rhythmic3
   name: JoyHub Rhythmic 3
   id: 1a5dd035-8107-4db3-924d-503113b1c600
+- identifier:
+    - J-Passfree
+  name: JoyHub Passfree
+  id: a4c8897e-9aab-49d0-81c4-125b708f9939
 - identifier:
   - J-Rainbow
   name: JoyHub Rainbow
@@ -2843,6 +2847,7 @@ communication:
     - J-Punisher
     - J-Prismcy
     - J-AresIII
+    - J-Passfree
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
