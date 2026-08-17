@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 32
+    "minor": 33
   },
   "protocols": {
     "activejoy": {
@@ -6203,7 +6203,8 @@
               "J-MartinoIII",
               "J-Punisher",
               "J-Prismcy",
-              "J-AresIII"
+              "J-AresIII",
+              "J-Passfree"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -6277,6 +6278,13 @@
             "J-Rhythmic3"
           ],
           "name": "JoyHub Rhythmic 3"
+        },
+        {
+          "id": "a4c8897e-9aab-49d0-81c4-125b708f9939",
+          "identifier": [
+            "J-Passfree"
+          ],
+          "name": "JoyHub Passfree"
         },
         {
           "features": [
