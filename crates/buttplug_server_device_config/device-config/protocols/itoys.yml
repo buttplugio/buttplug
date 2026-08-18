@@ -65,6 +65,25 @@ configurations:
             - 0
             - 3
       index: 1
+- identifier:
+    - YSSY-073-BT
+  name: iToys Lach
+  id: 4a6ae74b-9960-4bec-9ef3-45cb5c0191e0
+  features:
+    - id: fc4214cc-3876-4d80-bc1c-9a42fbfb9f56
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 43f5a752-fe61-4024-8eff-b2a5f9ef495a
+      output:
+        constrict:
+          value:
+            - 0
+            - 1
+      index: 1
 communication:
 - btle:
     names:
@@ -72,6 +91,7 @@ communication:
     - SML-2310-SZ-B
     - ASF-001-BT-R
     - IJVB-W10-BT-RX
+    - YSSY-073-BT
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb

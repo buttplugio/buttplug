@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 33
+    "minor": 34
   },
   "protocols": {
     "activejoy": {
@@ -5873,7 +5873,8 @@
               "26-021-B",
               "SML-2310-SZ-B",
               "ASF-001-BT-R",
-              "IJVB-W10-BT-RX"
+              "IJVB-W10-BT-RX",
+              "YSSY-073-BT"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -5977,6 +5978,39 @@
             "IJVB-W10-BT-RX"
           ],
           "name": "Bestvibe Rotational Vibration"
+        },
+        {
+          "features": [
+            {
+              "id": "fc4214cc-3876-4d80-bc1c-9a42fbfb9f56",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "43f5a752-fe61-4024-8eff-b2a5f9ef495a",
+              "index": 1,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "4a6ae74b-9960-4bec-9ef3-45cb5c0191e0",
+          "identifier": [
+            "YSSY-073-BT"
+          ],
+          "name": "iToys Lach"
         }
       ],
       "defaults": {
