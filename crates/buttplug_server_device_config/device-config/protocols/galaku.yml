@@ -284,6 +284,10 @@ configurations:
   - K128
   name: Galaku F1
   id: f81414d2-6a99-4dde-9b59-e6e77fd037df
+- identifier:
+    - CD16
+  name: Adorime Panty Vibrator
+  id: 103cfcd7-e87b-4684-bba6-6662dfffa83b
 # Type 1
 - identifier:
   - G317
@@ -1681,6 +1685,7 @@ communication:
     - A531 # Adorime Pink Touch
     - YXSJ # Adorime Cock Ring
     - K128 # Galaku F1
+    - CD16 # Adorime Panty Vibrator
     # Type 1
     - G317
     - G312
