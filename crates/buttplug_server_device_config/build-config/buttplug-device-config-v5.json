@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 34
+    "minor": 35
   },
   "protocols": {
     "activejoy": {
@@ -1527,6 +1527,7 @@
               "A531",
               "YXSJ",
               "K128",
+              "CD16",
               "G317",
               "G312",
               "G302",
@@ -2036,6 +2037,13 @@
             "K128"
           ],
           "name": "Galaku F1"
+        },
+        {
+          "id": "103cfcd7-e87b-4684-bba6-6662dfffa83b",
+          "identifier": [
+            "CD16"
+          ],
+          "name": "Adorime Panty Vibrator"
         },
         {
           "features": [
