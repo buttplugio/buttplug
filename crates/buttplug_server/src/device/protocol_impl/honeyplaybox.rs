@@ -45,9 +45,6 @@ const HONEY_PLAYBOX_KEEPALIVE_DELAY: u64 = 500;
 const HONEY_PLAYBOX_COMMAND_RETRY: u64 = 3;
 const HONEY_PLAYBOX_PROTOCOL_UUID: Uuid = uuid!("0d1598bd-6845-4950-8aa0-416b1115fc7c");
 
-type ConstrictCommandHandler =
-  fn(&HoneyPlayBox, u32, u32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError>;
-
 // The secret key used for MD5 signing.
 const SECRET: [u8; 16] = [
   0x8b, 0xe3, 0xfd, 0x04, 0x68, 0x35, 0x09, 0x86, 0x12, 0x1a, 0xbf, 0x03, 0x30, 0xe9, 0xe3, 0xc5,
@@ -65,10 +62,6 @@ impl ProtocolInitializer for HoneyPlayBoxInitializer {
     hardware: Arc<Hardware>,
     device_definition: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let constrict_handler: Option<ConstrictCommandHandler> = match hardware.name().as_str() {
-      "HPB-274" => Some(HoneyPlayBox::handle_kaipro_constrict_cmd),
-      _ => None,
-    };
     let feature_count = device_definition
       .features()
       .values()
@@ -111,7 +104,7 @@ impl ProtocolInitializer for HoneyPlayBoxInitializer {
                             trace!("HoneyPlayBox handshake success on attempt {}", count+1);
                             if let Some(rand) = FrameCodec::extract_random(&frame) {
                                 info!("HoneyPlayBox handshake random token {:?}", rand.clone());
-                                return Ok(Arc::new(HoneyPlayBox::new(hardware, rand, feature_count, counter, constrict_handler)));
+                                return Ok(Arc::new(HoneyPlayBox::new(hardware, rand, feature_count, counter)));
                             }
                             warn!("HoneyPlayBox: No random token in frame (handshake attempt {})", count+1);
                         }
@@ -157,7 +150,6 @@ pub struct HoneyPlayBox {
   last_command: Arc<Vec<AtomicU8>>,
   packet_id: Arc<AtomicU8>,
   last_send: Arc<RwLock<Instant>>,
-  constrict_handler: Option<ConstrictCommandHandler>,
 }
 
 async fn hpb_keepalive(
@@ -217,13 +209,7 @@ async fn hpb_keepalive(
 }
 
 impl HoneyPlayBox {
-  fn new(
-    hardware: Arc<Hardware>,
-    random_key: [u8; 16],
-    feature_count: usize,
-    count: u8,
-    constrict_handler: Option<ConstrictCommandHandler>,
-  ) -> Self {
+  fn new(hardware: Arc<Hardware>, random_key: [u8; 16], feature_count: usize, count: u8) -> Self {
     let last_command = Arc::new(
       (0..feature_count)
         .map(|_| AtomicU8::new(0))
@@ -247,16 +233,7 @@ impl HoneyPlayBox {
       last_command,
       packet_id,
       last_send,
-      constrict_handler,
     }
-  }
-
-  fn handle_kaipro_constrict_cmd(
-    &self,
-    feature_index: u32,
-    level: u32,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.send_command(feature_index, if level == 0 { 0 } else { level + 100 })
   }
 
   fn send_command(
@@ -334,11 +311,7 @@ impl ProtocolHandler for HoneyPlayBox {
     _feature_id: Uuid,
     level: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if let Some(handler) = self.constrict_handler {
-      handler(self, feature_index, level)
-    } else {
-      self.command_unimplemented("OutputCmd (Constrict Actuator)")
-    }
+    self.send_command(feature_index, if level == 0 { 0 } else { level + 100 })
   }
 
   fn handle_battery_level_cmd(
