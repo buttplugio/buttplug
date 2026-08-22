@@ -277,9 +277,20 @@ async fn run_webbluetooth_loop(
               ))
             })
             .map(|val| {
-              let data_view = val;
+              // readValue resolves to a DataView. `Uint8Array::new(dataView)`
+              // treats it as array-like (length undefined) => empty array =>
+              // copy_to length assert panics and kills the wasm instance.
+              // Build the view over the underlying buffer instead (as the
+              // Subscribe handler below does), honoring the DataView's
+              // byte offset/length.
+              let data_view = js_sys::DataView::from(val);
               let mut body = vec![0u8; data_view.byte_length()];
-              Uint8Array::new(&data_view).copy_to(&mut body[..]);
+              Uint8Array::new_with_byte_offset_and_length(
+                &JsValue::from(data_view.buffer()),
+                data_view.byte_offset() as u32,
+                data_view.byte_length() as u32,
+              )
+              .copy_to(&mut body[..]);
               HardwareReading::new(read_cmd.endpoint(), &body)
             });
           let _ = reply.send(result);
