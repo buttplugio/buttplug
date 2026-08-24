@@ -25,6 +25,10 @@ pub struct ServerDeviceDefinition {
   protocol_variant: Option<String>,
   #[getset(get_copy = "pub")]
   message_gap_ms: Option<u32>,
+  #[getset(get_copy = "pub")]
+  vibrate_smoothing_enabled: bool,
+  #[getset(get_copy = "pub")]
+  vibrate_smoothing_idle_stop_ms: Option<u32>,
   #[getset(get = "pub")]
   display_name: Option<String>,
   #[getset(get_copy = "pub")]
@@ -55,6 +59,8 @@ impl ServerDeviceDefinitionBuilder {
         base_id: None,
         protocol_variant: None,
         message_gap_ms: None,
+        vibrate_smoothing_enabled: false,
+        vibrate_smoothing_idle_stop_ms: None,
         display_name: None,
         allow: false,
         deny: false,
@@ -110,6 +116,16 @@ impl ServerDeviceDefinitionBuilder {
 
   pub fn message_gap_ms(&mut self, gap: Option<u32>) -> &mut Self {
     self.def.message_gap_ms = gap;
+    self
+  }
+
+  pub fn vibrate_smoothing_enabled(&mut self, enabled: bool) -> &mut Self {
+    self.def.vibrate_smoothing_enabled = enabled;
+    self
+  }
+
+  pub fn vibrate_smoothing_idle_stop_ms(&mut self, idle_stop_ms: Option<u32>) -> &mut Self {
+    self.def.vibrate_smoothing_idle_stop_ms = idle_stop_ms;
     self
   }
 

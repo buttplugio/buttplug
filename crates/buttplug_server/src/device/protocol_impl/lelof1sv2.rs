@@ -8,26 +8,17 @@
 use super::{lelo_harmony::LeloHarmony, lelof1s::LeloF1s};
 use crate::device::{
   hardware::{
-    Hardware,
-    HardwareEvent,
-    HardwareSubscribeCmd,
-    HardwareUnsubscribeCmd,
-    HardwareWriteCmd,
+    Hardware, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd, HardwareWriteCmd,
   },
   protocol::{
-    ProtocolHandler,
-    ProtocolIdentifier,
-    ProtocolInitializer,
-    generic_protocol_initializer_setup,
+    ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup,
   },
 };
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 use std::sync::Arc;
 use uuid::{Uuid, uuid};
@@ -43,7 +34,7 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ServerDeviceDefinition,
+    def: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let use_harmony = !hardware.endpoints().contains(&Endpoint::Whitelist);
     let sec_endpoint = if use_harmony {
@@ -82,7 +73,7 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
         } else if n.eq(&authed) {
           debug!("Lelo F1s V2 is authorised!");
           if use_harmony {
-            return Ok(Arc::new(LeloHarmony::default()));
+            return Ok(Arc::new(LeloHarmony::f1sv3(hardware.clone(), def)));
           } else {
             return Ok(Arc::new(LeloF1s::new(true)));
           }

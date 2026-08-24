@@ -367,6 +367,13 @@
         "message_gap_ms": {
           "type": "integer",
           "min": 0
+        },
+        "vibrate_smoothing_enabled": {
+          "type": "boolean"
+        },
+        "vibrate_smoothing_idle_stop_ms": {
+          "type": "integer",
+          "min": 0
         }
       },
       "additionalProperties": false,

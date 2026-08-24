@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 30
+    "minor": 31
   },
   "protocols": {
     "activejoy": {
@@ -12190,8 +12190,7 @@
           "btle": {
             "names": [
               "F1SV2A",
-              "F1SV2X",
-              "F1SV3"
+              "F1SV2X"
             ],
             "services": {
               "0000fff0-0000-1000-8000-00805f9b34fb": {
@@ -12213,7 +12212,57 @@
             "F1SV2X"
           ],
           "name": "Lelo F1s V2"
-        },
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "90bd67a5-4601-4c49-97bb-0845ab7011ba",
+            "index": 0,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  100
+                ]
+              }
+            }
+          },
+          {
+            "id": "05fc758b-a3fe-4156-b3ae-9cdcb9ae95c6",
+            "index": 1,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  100
+                ]
+              }
+            }
+          }
+        ],
+        "id": "108d5cfe-2155-477f-b1b6-c48da6c4b7d8",
+        "name": "Lelo F1s V2"
+      }
+    },
+    "lelo-f1sv3": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "F1SV3"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "generic0": "00000a11-0000-1000-8000-00805f9b34fb",
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb",
+                "txvibrate": "0000fff2-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
         {
           "id": "36adf7ce-98bf-4fad-b916-b44d20a5d9e1",
           "identifier": [
@@ -12249,8 +12298,8 @@
             }
           }
         ],
-        "id": "108d5cfe-2155-477f-b1b6-c48da6c4b7d8",
-        "name": "Lelo F1s V2"
+        "id": "36adf7ce-98bf-4fad-b916-b44d20a5d9e1",
+        "name": "Lelo F1s V3"
       }
     },
     "lelo-harmony": {

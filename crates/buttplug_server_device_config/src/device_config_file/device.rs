@@ -86,6 +86,15 @@ pub struct ConfigUserDeviceCustomization {
   #[getset(get_copy = "pub")]
   #[serde(default, skip_serializing_if = "Option::is_none")]
   message_gap_ms: Option<u32>,
+  #[serde(default, skip_serializing_if = "is_false")]
+  vibrate_smoothing_enabled: bool,
+  #[getset(get_copy = "pub")]
+  #[serde(default, skip_serializing_if = "Option::is_none")]
+  vibrate_smoothing_idle_stop_ms: Option<u32>,
+}
+
+fn is_false(value: &bool) -> bool {
+  !*value
 }
 
 impl From<&ServerDeviceDefinition> for ConfigUserDeviceCustomization {
@@ -96,6 +105,8 @@ impl From<&ServerDeviceDefinition> for ConfigUserDeviceCustomization {
       deny: value.deny(),
       index: value.index(),
       message_gap_ms: value.message_gap_ms(),
+      vibrate_smoothing_enabled: value.vibrate_smoothing_enabled(),
+      vibrate_smoothing_idle_stop_ms: value.vibrate_smoothing_idle_stop_ms(),
     }
   }
 }
@@ -123,6 +134,8 @@ impl ConfigUserDeviceDefinition {
     let mut builder = ServerDeviceDefinitionBuilder::from_base(base, self.id, false);
     builder.display_name(&self.user_config.display_name);
     builder.message_gap_ms(self.user_config.message_gap_ms);
+    builder.vibrate_smoothing_enabled(self.user_config.vibrate_smoothing_enabled);
+    builder.vibrate_smoothing_idle_stop_ms(self.user_config.vibrate_smoothing_idle_stop_ms);
     self.user_config.allow.then(|| builder.allow(true));
     self.user_config.deny.then(|| builder.deny(true));
     builder.index(self.user_config.index);
