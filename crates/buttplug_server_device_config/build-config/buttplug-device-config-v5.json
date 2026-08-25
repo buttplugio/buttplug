@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 35
+    "minor": 40
   },
   "protocols": {
     "activejoy": {
@@ -6246,7 +6246,10 @@
               "J-Punisher",
               "J-Prismcy",
               "J-AresIII",
-              "J-Passfree"
+              "J-Passfree",
+              "J-Prax",
+              "J-Poptint",
+              "J-Tauros"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -6575,6 +6578,13 @@
             "J-Vellum"
           ],
           "name": "JoyHub Vellum"
+        },
+        {
+          "id": "2ec7cee3-9a50-46de-ad2b-41511d79e651",
+          "identifier": [
+            "J-Prax"
+          ],
+          "name": "JoyHub Prax"
         },
         {
           "features": [
@@ -9634,10 +9644,10 @@
         {
           "features": [
             {
-              "id": "4e3b6192-d5dd-4fcf-b307-7487ca18fc1b",
+              "id": "6503f7fe-bcb2-4929-ac1e-8234a3d7a62e",
               "index": 3,
               "output": {
-                "rotate": {
+                "oscillate": {
                   "value": [
                     0,
                     255
@@ -10719,8 +10729,8 @@
               }
             },
             {
-              "id": "482f1b86-7392-4fb8-bfac-22be525ea243",
-              "index": 5,
+              "id": "615d3f5a-a3ed-46eb-8760-caa296069baf",
+              "index": 4,
               "output": {
                 "constrict": {
                   "value": [
@@ -10873,6 +10883,84 @@
             "J-AresIII"
           ],
           "name": "JoyHub Ares III"
+        },
+        {
+          "features": [
+            {
+              "id": "f6aea1c0-f7a3-4884-8bbd-d84bf06fa177",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "4db52130-47c7-4a9f-ae79-9a98f2e35b91",
+              "index": 2,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "abb2f1f0-fcb2-4bcd-be12-2fe215b876a4",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "62adc3c9-9ef5-402e-b3e2-969a0d1701b8",
+          "identifier": [
+            "J-Poptint"
+          ],
+          "name": "JoyHub Poptint"
+        },
+        {
+          "features": [
+            {
+              "id": "56f480a9-a069-4e4f-8b37-68c74cab302a",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "f8705382-ecfd-4398-9e4c-fadbffbd694a",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "ddec69a6-d108-428a-8fd7-ab8d42457082",
+          "identifier": [
+            "J-Tauros"
+          ],
+          "name": "JoyHub Tauros"
         }
       ],
       "defaults": {

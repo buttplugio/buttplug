@@ -194,6 +194,10 @@ configurations:
   name: JoyHub Vellum
   id: a168338f-a110-4485-94b4-8f2186a0f4b0
 - identifier:
+    - J-Prax
+  name: JoyHub Prax
+  id: 2ec7cee3-9a50-46de-ad2b-41511d79e651
+- identifier:
   - J-Petalwish2
   name: JoyHub Petalwish 2
   features:
@@ -1974,9 +1978,9 @@ configurations:
   - J-MowgliII
   name: JoyHub Mowgli II
   features:
-    - id: 4e3b6192-d5dd-4fcf-b307-7487ca18fc1b
+    - id: 6503f7fe-bcb2-4929-ac1e-8234a3d7a62e
       output:
-        rotate:
+        oscillate:
           value:
             - 0
             - 255
@@ -2602,13 +2606,13 @@ configurations:
             - 0
             - 255
       index: 0
-    - id: 482f1b86-7392-4fb8-bfac-22be525ea243
+    - id: 615d3f5a-a3ed-46eb-8760-caa296069baf
       output:
         constrict:
           value:
             - 0
             - 9
-      index: 5
+      index: 4
   id: 9065a86a-0151-47d7-aca7-4bc78ec0fcd5
 - identifier:
     - J-Jason
@@ -2689,6 +2693,51 @@ configurations:
     - J-AresIII
   name: JoyHub Ares III
   id: 5f902050-ee3f-4503-abcb-d0794c27180c
+- identifier:
+    - J-Poptint
+  name: JoyHub Poptint
+  features:
+    - id: f6aea1c0-f7a3-4884-8bbd-d84bf06fa177
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 4db52130-47c7-4a9f-ae79-9a98f2e35b91
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 2
+    - id: abb2f1f0-fcb2-4bcd-be12-2fe215b876a4
+      output:
+        temperature:
+          value:
+            - 0
+            - 255
+      index: 6
+  id: 62adc3c9-9ef5-402e-b3e2-969a0d1701b8
+- identifier:
+    - J-Tauros
+  name: JoyHub Tauros
+  features:
+    - id: 56f480a9-a069-4e4f-8b37-68c74cab302a
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: f8705382-ecfd-4398-9e4c-fadbffbd694a
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+  id: ddec69a6-d108-428a-8fd7-ab8d42457082
 communication:
 - btle:
     names:
@@ -2848,6 +2897,9 @@ communication:
     - J-Prismcy
     - J-AresIII
     - J-Passfree
+    - J-Prax
+    - J-Poptint
+    - J-Tauros
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
