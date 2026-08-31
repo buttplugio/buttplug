@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 40
+    "minor": 41
   },
   "protocols": {
     "activejoy": {
@@ -6249,7 +6249,8 @@
               "J-Passfree",
               "J-Prax",
               "J-Poptint",
-              "J-Tauros"
+              "J-Tauros",
+              "J-Daquan"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -10911,13 +10912,13 @@
               }
             },
             {
-              "id": "abb2f1f0-fcb2-4bcd-be12-2fe215b876a4",
+              "id": "c10d9697-1771-43ee-bf7e-482387eb081b",
               "index": 6,
               "output": {
                 "temperature": {
                   "value": [
                     0,
-                    255
+                    1
                   ]
                 }
               }
@@ -10961,6 +10962,51 @@
             "J-Tauros"
           ],
           "name": "JoyHub Tauros"
+        },
+        {
+          "features": [
+            {
+              "id": "f8bb8d9d-f0b7-412a-9dfb-33048e806751",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "5e3dc2d3-3dca-486b-ae3e-06517c56c0a4",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "9079aa7f-3f4e-4d39-b321-9844819676fc",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "bf16b20f-87cb-4b10-86a3-d4ca27539fe4",
+          "identifier": [
+            "J-Daquan"
+          ],
+          "name": "JoyHub Daquan"
         }
       ],
       "defaults": {
