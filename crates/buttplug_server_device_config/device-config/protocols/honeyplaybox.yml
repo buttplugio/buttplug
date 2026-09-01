@@ -33,6 +33,37 @@ configurations:
     name: Honey Play Box Pleasure Pivot
     id: c205e707-9561-4016-97aa-0bde609b0edc
   - identifier:
+      - HPB-274
+    name: Honey Play Box Kaipro
+    features:
+      - description: Vibrator
+        id: 06456fc9-9ab6-425b-9cf1-9f875d21bcf3
+        output:
+          vibrate:
+            value:
+              - 0
+              - 100
+        index: 0
+      - description: Suction Pump
+        id: 09817707-f6b8-44de-8708-58101999396a
+        output:
+          constrict:
+            value:
+              - 0
+              - 4
+        index: 1
+      - description: Battery Level
+        id: 97528990-df35-4fa1-8f3c-f6f78b1b8538
+        input:
+          battery:
+            value:
+              - - 0
+                - 100
+            command:
+              - Read
+        index: 2
+    id: b33a5de9-d0c6-448b-8150-e402dd29ed4d
+  - identifier:
       - HPB-296
     name: Honey Play Box Anello
     id: 0a9c43fb-2d58-4af9-aef2-60f48c6e7707
@@ -485,6 +516,7 @@ communication:
   - btle:
       names:
         - JXT002
+        - HPB-274
         - HPB-393-1
         - HPB-0520
         - HONEY-835

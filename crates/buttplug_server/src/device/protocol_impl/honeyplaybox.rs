@@ -305,6 +305,15 @@ impl ProtocolHandler for HoneyPlayBox {
     self.send_command(feature_index, speed.unsigned_abs())
   }
 
+  fn handle_output_constrict_cmd(
+    &self,
+    feature_index: u32,
+    _feature_id: Uuid,
+    level: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.send_command(feature_index, if level == 0 { 0 } else { level + 100 })
+  }
+
   fn handle_battery_level_cmd(
     &self,
     device_index: u32,

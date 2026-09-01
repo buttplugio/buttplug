@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 30
+    "minor": 31
   },
   "protocols": {
     "activejoy": {
@@ -4878,6 +4878,7 @@
           "btle": {
             "names": [
               "JXT002",
+              "HPB-274",
               "HPB-393-1",
               "HPB-0520",
               "HONEY-835",
@@ -4931,6 +4932,59 @@
             "HPB-398"
           ],
           "name": "Honey Play Box Pleasure Pivot"
+        },
+        {
+          "features": [
+            {
+              "description": "Vibrator",
+              "id": "06456fc9-9ab6-425b-9cf1-9f875d21bcf3",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Suction Pump",
+              "id": "09817707-f6b8-44de-8708-58101999396a",
+              "index": 1,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    4
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "97528990-df35-4fa1-8f3c-f6f78b1b8538",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "b33a5de9-d0c6-448b-8150-e402dd29ed4d",
+          "identifier": [
+            "HPB-274"
+          ],
+          "name": "Honey Play Box Kaipro"
         },
         {
           "id": "0a9c43fb-2d58-4af9-aef2-60f48c6e7707",
