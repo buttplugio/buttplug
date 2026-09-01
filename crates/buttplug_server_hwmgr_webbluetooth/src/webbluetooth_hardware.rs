@@ -8,21 +8,11 @@
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::{
-  Hardware,
-  HardwareConnector,
-  HardwareEvent,
-  HardwareInternal,
-  HardwareReadCmd,
-  HardwareReading,
-  HardwareSpecializer,
-  HardwareSubscribeCmd,
-  HardwareUnsubscribeCmd,
-  HardwareWriteCmd,
+  Hardware, HardwareConnector, HardwareEvent, HardwareInternal, HardwareReadCmd, HardwareReading,
+  HardwareSpecializer, HardwareSubscribeCmd, HardwareUnsubscribeCmd, HardwareWriteCmd,
 };
 use buttplug_server_device_config::{
-  BluetoothLESpecifier,
-  Endpoint,
-  ProtocolCommunicationSpecifier,
+  BluetoothLESpecifier, Endpoint, ProtocolCommunicationSpecifier,
 };
 use futures::future::{self, BoxFuture, FutureExt};
 use js_sys::Uint8Array;
@@ -36,12 +26,8 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local};
 use web_sys::{
-  BluetoothDevice,
-  BluetoothRemoteGattCharacteristic,
-  BluetoothRemoteGattServer,
-  BluetoothRemoteGattService,
-  Event,
-  MessageEvent,
+  BluetoothDevice, BluetoothRemoteGattCharacteristic, BluetoothRemoteGattServer,
+  BluetoothRemoteGattService, Event, MessageEvent,
 };
 
 struct BluetoothDeviceWrapper {
@@ -49,10 +35,8 @@ struct BluetoothDeviceWrapper {
 }
 
 // WASM is single-threaded; these impls are sound.
-unsafe impl Send for BluetoothDeviceWrapper {
-}
-unsafe impl Sync for BluetoothDeviceWrapper {
-}
+unsafe impl Send for BluetoothDeviceWrapper {}
+unsafe impl Sync for BluetoothDeviceWrapper {}
 
 pub struct WebBluetoothHardwareConnector {
   device: Option<BluetoothDeviceWrapper>,
@@ -60,10 +44,8 @@ pub struct WebBluetoothHardwareConnector {
 }
 
 // Holds a BluetoothDeviceWrapper; safe in WASM's single-threaded context.
-unsafe impl Send for WebBluetoothHardwareConnector {
-}
-unsafe impl Sync for WebBluetoothHardwareConnector {
-}
+unsafe impl Send for WebBluetoothHardwareConnector {}
+unsafe impl Sync for WebBluetoothHardwareConnector {}
 
 impl WebBluetoothHardwareConnector {
   pub fn new(device: BluetoothDevice) -> Self {
@@ -105,10 +87,8 @@ pub struct WebBluetoothHardwareSpecializer {
 }
 
 // Holds a BluetoothDeviceWrapper; safe in WASM's single-threaded context.
-unsafe impl Send for WebBluetoothHardwareSpecializer {
-}
-unsafe impl Sync for WebBluetoothHardwareSpecializer {
-}
+unsafe impl Send for WebBluetoothHardwareSpecializer {}
+unsafe impl Sync for WebBluetoothHardwareSpecializer {}
 
 impl WebBluetoothHardwareSpecializer {
   fn new(device: BluetoothDeviceWrapper) -> Self {
