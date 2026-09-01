@@ -12,9 +12,7 @@ use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 use std::sync::{
   Arc,
@@ -112,9 +110,27 @@ impl ProtocolInitializer for MonsterPubInitializer {
         ],
       ];
 
-      let auth = value.data()[1..16]
+      let key_index = value.data().first().copied().ok_or_else(|| {
+        ButtplugDeviceError::ProtocolSpecificError(
+          "MonsterPub".into(),
+          "Authentication packet is empty".into(),
+        )
+      })? as usize;
+      let payload = value.data().get(1..16).ok_or_else(|| {
+        ButtplugDeviceError::ProtocolSpecificError(
+          "MonsterPub".into(),
+          "Authentication packet is too short".into(),
+        )
+      })?;
+      let key = keys.get(key_index).ok_or_else(|| {
+        ButtplugDeviceError::ProtocolSpecificError(
+          "MonsterPub".into(),
+          "Authentication packet has an invalid key index".into(),
+        )
+      })?;
+      let auth = payload
         .iter()
-        .zip(keys[value.data()[0] as usize].iter())
+        .zip(key.iter())
         .map(|(&x1, &x2)| x1 ^ x2)
         .collect();
 
@@ -212,5 +228,90 @@ impl ProtocolHandler for MonsterPub {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     self.form_command()
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::device::hardware::{
+    HardwareEvent, HardwareInternal, HardwareReading, HardwareSubscribeCmd, HardwareUnsubscribeCmd,
+  };
+  use buttplug_server_device_config::ServerDeviceDefinitionBuilder;
+  use futures::future::BoxFuture;
+  use futures_util::FutureExt;
+  use tokio::sync::broadcast;
+
+  struct ShortPacketHardware {
+    event_sender: broadcast::Sender<HardwareEvent>,
+  }
+
+  impl ShortPacketHardware {
+    fn new() -> Self {
+      let (event_sender, _) = broadcast::channel(1);
+      Self { event_sender }
+    }
+  }
+
+  impl HardwareInternal for ShortPacketHardware {
+    fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+      async { Ok(()) }.boxed()
+    }
+
+    fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
+      self.event_sender.subscribe()
+    }
+
+    fn read_value(
+      &self,
+      msg: &HardwareReadCmd,
+    ) -> BoxFuture<'static, Result<HardwareReading, ButtplugDeviceError>> {
+      let endpoint = msg.endpoint();
+      async move { Ok(HardwareReading::new(endpoint, &[0])) }.boxed()
+    }
+
+    fn write_value(
+      &self,
+      _msg: &HardwareWriteCmd,
+    ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+      async { Ok(()) }.boxed()
+    }
+
+    fn subscribe(
+      &self,
+      _msg: &HardwareSubscribeCmd,
+    ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+      async { Ok(()) }.boxed()
+    }
+
+    fn unsubscribe(
+      &self,
+      _msg: &HardwareUnsubscribeCmd,
+    ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+      async { Ok(()) }.boxed()
+    }
+  }
+
+  #[tokio::test]
+  async fn initialize_rejects_short_authentication_packet() {
+    let hardware = Arc::new(Hardware::new(
+      "MonsterPub",
+      "test-address",
+      &[Endpoint::Rx],
+      &None,
+      false,
+      Box::new(ShortPacketHardware::new()),
+    ));
+    let definition = ServerDeviceDefinitionBuilder::new("MonsterPub", &Uuid::new_v4()).finish();
+
+    let result = MonsterPubInitializer::default()
+      .initialize(hardware, &definition)
+      .await;
+
+    assert!(matches!(
+      result,
+      Err(ButtplugDeviceError::ProtocolSpecificError(_, message))
+        if message == "Authentication packet is too short"
+    ));
   }
 }
