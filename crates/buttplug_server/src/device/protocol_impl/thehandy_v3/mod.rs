@@ -14,9 +14,7 @@ use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server_device_config::Endpoint;
 use buttplug_server_device_config::{
-  ProtocolCommunicationSpecifier,
-  ServerDeviceDefinition,
-  UserDeviceIdentifier,
+  ProtocolCommunicationSpecifier, ServerDeviceDefinition, UserDeviceIdentifier,
 };
 use prost::Message;
 use std::sync::Arc;
@@ -188,7 +186,7 @@ impl ProtocolHandler for TheHandyV3 {
           id: self.seq.fetch_add(1, Ordering::Relaxed),
           params: Some(handy_rpc::request::Params::RequestHdspXpTSet(
             handy_rpc::RequestHdspXpTSet {
-              stop_on_target: true,
+              stop_on_target: false,
               t: duration,                  // time in ms
               xp: position as f32 / 100f32, // position 0.0-1.0
             },
@@ -233,5 +231,49 @@ impl ProtocolHandler for TheHandyV3 {
     Ok(vec![
       HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, buf, true).into(),
     ])
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::{TheHandyV3, handy_rpc};
+  use crate::device::hardware::HardwareCommand;
+  use crate::device::protocol::ProtocolHandler;
+  use buttplug_server_device_config::Endpoint;
+  use prost::Message;
+  use uuid::uuid;
+
+  #[test]
+  fn position_command_disables_stop_on_target() {
+    let position = 25;
+    let duration = 1_500;
+    let commands = TheHandyV3::default()
+      .handle_hw_position_with_duration_cmd(
+        0,
+        uuid!("00000000-0000-0000-0000-000000000001"),
+        position,
+        duration,
+      )
+      .expect("position command should be created");
+
+    let HardwareCommand::Write(write) = &commands[0] else {
+      panic!("expected a hardware write command");
+    };
+    assert_eq!(write.endpoint(), Endpoint::Tx);
+    assert!(write.write_with_response());
+
+    let message = handy_rpc::RpcMessage::decode(write.data().as_slice())
+      .expect("position command should decode as an RPC message");
+    assert_eq!(message.r#type, handy_rpc::MessageType::Request as i32);
+    let Some(handy_rpc::rpc_message::Message::Request(request)) = message.message else {
+      panic!("expected an RPC request");
+    };
+    assert_eq!(request.id, 0);
+    let Some(handy_rpc::request::Params::RequestHdspXpTSet(params)) = request.params else {
+      panic!("expected a position request");
+    };
+    assert_eq!(params.xp, 0.25);
+    assert_eq!(params.t, duration);
+    assert!(!params.stop_on_target);
   }
 }
