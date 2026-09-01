@@ -90,17 +90,20 @@ Runtime errors, incorrect return or field shapes, invalid UUIDs, and out-of-rang
 
 ## Language subset and limits
 
-Scripts use core Rhai only: integers, arithmetic and bit operations, arrays, maps, `Blob`, strings, and control flow. `import` and `eval` are disabled and rejected at parse time. Module resolution is a dummy resolver, so scripts cannot load files.
+Scripts use core Rhai only: integers, arithmetic and bit operations, arrays, maps, `Blob`, strings, and control flow. `import` and `eval` are disabled and rejected at parse time. Module resolution is a dummy resolver, so scripts cannot load files. The std package's `sleep` function is replaced with an immediate error — it would block a server thread without consuming any of the operation budget below. `print` and `debug` output is routed into the server log rather than written to stdout.
 
 The shared engine enforces these limits for each call:
 
 - Maximum 1,000,000 operations.
 - Maximum call depth of 64.
+- Maximum 1024 defined functions and 1024 live variables.
 - Maximum 4096 entries in an array.
 - Maximum 4096 entries in an object map.
 - Maximum string length of 65,536 characters.
 
-Exceeding a limit terminates the call with an error.
+Loading is also bounded: a single script file may be at most 1 MiB, and at most 256 script files are loaded from one directory (excess files are skipped with a reason). Exceeding a runtime limit terminates the call with an error.
+
+`init_state()` templates may only contain integers, floats, bools, chars, strings, Blobs, arrays, and maps; anything else (such as function pointers) is rejected at load time so that each device connection's state copy is always fully independent.
 
 ## Worked example: `maxpro.rhai`
 

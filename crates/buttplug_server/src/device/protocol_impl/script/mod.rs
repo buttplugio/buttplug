@@ -25,7 +25,7 @@
 mod engine;
 mod handler;
 mod loader;
-#[cfg(all(test, not(target_arch = "wasm32")))]
+#[cfg(test)]
 mod tests;
 
 pub use handler::{ScriptedProtocolFactory, ScriptedProtocolHandler};

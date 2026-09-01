@@ -17,12 +17,9 @@ use std::path::{Path, PathBuf};
 
 use rhai::{AST, CallFnOptions, Dynamic, Scope};
 
-use super::{
-  engine::script_engine,
-  handler::ScriptedProtocolFactory,
-};
 #[cfg(test)]
 use super::handler::ScriptedProtocolHandler;
+use super::{engine::script_engine, handler::ScriptedProtocolFactory};
 
 /// A successfully loaded script protocol.
 #[derive(Debug, Clone)]
@@ -60,6 +57,13 @@ pub struct ScriptLoadReport {
 /// The script protocol API version this build implements.
 const SUPPORTED_API_VERSION: i64 = 1;
 
+/// Maximum number of script files loaded from a single directory; excess
+/// files (in sorted order) are skipped with a reason.
+const MAX_SCRIPT_FILES: usize = 256;
+
+/// Maximum size of a single script file, in bytes.
+const MAX_SCRIPT_FILE_SIZE: u64 = 1024 * 1024;
+
 /// Loads all `*.rhai` protocol scripts from `directory`.
 ///
 /// Returns `Err` only when the directory itself cannot be read (missing
@@ -87,29 +91,68 @@ pub fn load_script_protocols(directory: &Path) -> Result<ScriptLoadReport, Strin
   }
 
   // Sort the file list so duplicate-name resolution ("first file wins") is
-  // deterministic across platforms.
-  let mut script_files: Vec<PathBuf> = match std::fs::read_dir(directory) {
-    Ok(entries) => entries
-      .filter_map(|entry| entry.ok())
-      .map(|entry| entry.path())
-      .filter(|path| {
-        path.is_file()
-          && path
-            .extension()
-            .is_some_and(|extension| extension == "rhai")
-      })
-      .collect(),
+  // deterministic across platforms. Entry-level inspection failures are
+  // recorded as skips rather than swallowed, so no file can silently
+  // disappear from the report.
+  let mut script_files: Vec<PathBuf> = vec![];
+  let mut entry_skips: Vec<SkippedScript> = vec![];
+  match std::fs::read_dir(directory) {
+    Ok(entries) => {
+      for entry in entries {
+        let entry = match entry {
+          Ok(entry) => entry,
+          Err(e) => {
+            entry_skips.push(SkippedScript {
+              source_path: directory.to_owned(),
+              reason: format!("error while reading directory entry: {e}"),
+            });
+            continue;
+          }
+        };
+        let path = entry.path();
+        match entry.metadata() {
+          Ok(metadata) => {
+            if metadata.is_file()
+              && path
+                .extension()
+                .is_some_and(|extension| extension == "rhai")
+            {
+              script_files.push(path);
+            }
+          }
+          Err(e) => {
+            entry_skips.push(SkippedScript {
+              source_path: path,
+              reason: format!("cannot inspect directory entry: {e}"),
+            });
+          }
+        }
+      }
+    }
     Err(e) => {
       return Err(format!(
         "cannot read script protocol directory {}: {e}",
         directory.display()
       ));
     }
-  };
+  }
   script_files.sort();
+  // Cap the number of loaded files so a runaway directory cannot push
+  // startup cost without bound; the excess (in sorted order) is skipped.
+  if script_files.len() > MAX_SCRIPT_FILES {
+    for path in script_files.split_off(MAX_SCRIPT_FILES) {
+      entry_skips.push(SkippedScript {
+        source_path: path,
+        reason: format!(
+          "script file count exceeds the maximum of {MAX_SCRIPT_FILES}; excess file skipped"
+        ),
+      });
+    }
+  }
 
   let engine = script_engine();
   let mut report = ScriptLoadReport::default();
+  report.skipped.extend(entry_skips);
   for script_file in script_files {
     match load_script_file(engine, &script_file) {
       Ok(loaded) => {
@@ -139,6 +182,13 @@ pub fn load_script_protocols(directory: &Path) -> Result<ScriptLoadReport, Strin
 
 /// Compiles and validates a single script file.
 fn load_script_file(engine: &rhai::Engine, path: &Path) -> Result<LoadedProtocol, String> {
+  let file_metadata =
+    std::fs::metadata(path).map_err(|e| format!("cannot read file metadata: {e}"))?;
+  if file_metadata.len() > MAX_SCRIPT_FILE_SIZE {
+    return Err(format!(
+      "script file is larger than the maximum of {MAX_SCRIPT_FILE_SIZE} bytes"
+    ));
+  }
   let source = std::fs::read_to_string(path).map_err(|e| format!("cannot read file: {e}"))?;
 
   let ast: AST = engine
@@ -179,13 +229,17 @@ fn load_script_file(engine: &rhai::Engine, path: &Path) -> Result<LoadedProtocol
   }
 
   // init_state() is optional; when present it must return a map, and it runs
-  // once here under the same operation limits as handlers.
+  // once here under the same operation limits as handlers. The template is
+  // also validated to contain only value types that clone deeply, so the
+  // per-connection copies handed to handlers can never alias each other
+  // through shared cells or captured closure environments.
   let state_template = if has_fn("init_state") {
     let state = call_script_function(engine, &ast, "init_state", vec![])
       .map_err(|e| format!("init_state() failed: {e}"))?;
     if !state.is_map() {
       return Err("init_state() must return an object map".to_owned());
     }
+    validate_state_value(&state, "state")?;
     state
   } else {
     Dynamic::from(rhai::Map::new())
@@ -216,4 +270,42 @@ fn call_script_function(
   engine
     .call_fn_with_options::<Dynamic>(options, &mut scope, ast, fn_name, args)
     .map_err(|e| e.to_string())
+}
+
+/// Recursively validates that a state template only contains value types
+/// that clone deeply (integers, floats, bools, chars, strings, Blobs, arrays,
+/// and maps thereof).
+///
+/// Anything else — function pointers, shared cells, timestamps, or any other
+/// exotic value — is rejected at load time. This is what makes the
+/// per-connection deep-copy guarantee sound: once a template contains only
+/// these types, cloning it can never leave two connections aliasing the same
+/// underlying value.
+fn validate_state_value(value: &Dynamic, path: &str) -> Result<(), String> {
+  if value.is_unit()
+    || value.is_bool()
+    || value.is_int()
+    || value.is_float()
+    || value.is_char()
+    || value.is_string()
+    || value.is_blob()
+  {
+    return Ok(());
+  }
+  if let Ok(array) = value.as_array_ref() {
+    for (index, element) in array.iter().enumerate() {
+      validate_state_value(element, &format!("{path}[{index}]"))?;
+    }
+    return Ok(());
+  }
+  if let Ok(map) = value.as_map_ref() {
+    for (key, element) in map.iter() {
+      validate_state_value(element, &format!("{path}.{key}"))?;
+    }
+    return Ok(());
+  }
+  Err(format!(
+    "init_state() contains an unsupported value of type {} at {path} (allowed: integers, floats, bools, chars, strings, Blobs, arrays, and maps)",
+    value.type_name()
+  ))
 }

@@ -536,6 +536,100 @@ fn handle_vibrate(index, speed) {
   assert_eq!(data(&commands_a_next), vec![0x33]);
 }
 
+/// Regression (review finding): nested state must also be isolated between
+/// connections — a mutated nested map/array in one handler must not affect
+/// another handler built from the same template.
+#[test]
+fn script_state_isolated_per_connection_nested() {
+  let source = r#"
+fn metadata() { #{ "protocol": "testproto", "api_version": 1 } }
+fn init_state() { #{ "nested": #{ "counts": [1, 2] } } }
+fn handle_vibrate(index, speed) {
+  let c = this.nested.counts[0];
+  this.nested.counts[0] = c + 1;
+  let out = this.nested.counts[0];
+  [ #{ "endpoint": "tx", "data": [out] } ]
+}
+"#;
+  let report = {
+    // Load through the real loader so the state template is validated.
+    let dir = write_script_dir(&[("a_nested.rhai", source)]);
+    let report = load_script_protocols(&dir).unwrap();
+    std::fs::remove_dir_all(&dir).ok();
+    report
+  };
+  assert_eq!(
+    report.loaded.len(),
+    1,
+    "skipped: {:?}",
+    report
+      .skipped
+      .iter()
+      .map(|s| (&s.source_path, &s.reason))
+      .collect::<Vec<_>>()
+  );
+  let handler_a = report.loaded[0].handler_for_test();
+  let handler_b = report.loaded[0].handler_for_test();
+
+  let data = |commands: &Vec<HardwareCommand>| match &commands[0] {
+    HardwareCommand::Write(write) => write.data().clone(),
+    _ => panic!("expected write"),
+  };
+
+  // handler_a twice: nested state persists within the connection (1 → 2 → 3).
+  assert_eq!(
+    data(
+      &handler_a
+        .handle_output_vibrate_cmd(0, Uuid::new_v4(), 0)
+        .unwrap()
+    ),
+    vec![2]
+  );
+  assert_eq!(
+    data(
+      &handler_a
+        .handle_output_vibrate_cmd(0, Uuid::new_v4(), 0)
+        .unwrap()
+    ),
+    vec![3]
+  );
+  // handler_b is unaffected by handler_a's mutations: starts fresh at 1 → 2.
+  assert_eq!(
+    data(
+      &handler_b
+        .handle_output_vibrate_cmd(0, Uuid::new_v4(), 0)
+        .unwrap()
+    ),
+    vec![2]
+  );
+}
+
+/// Regression (review finding): a state template containing a value that
+/// does not clone deeply (e.g. a function pointer) is rejected at load time,
+/// keeping the per-connection deep-copy guarantee sound.
+#[test]
+fn script_loader_rejects_non_cloneable_state() {
+  let fnptr_state = r#"
+fn metadata() { #{ "protocol": "fnptrstate", "api_version": 1 } }
+fn init_state() { #{ "callback": Fn("metadata") } }
+fn handle_vibrate(i, s) { [] }
+"#;
+  let good = r#"
+fn metadata() { #{ "protocol": "goodstate", "api_version": 1 } }
+"#;
+  let dir = write_script_dir(&[("a_fnptr_state.rhai", fnptr_state), ("b_good.rhai", good)]);
+  let report = load_script_protocols(&dir).unwrap();
+  assert_eq!(report.loaded.len(), 1);
+  assert_eq!(report.loaded[0].name, "goodstate");
+  assert_eq!(report.skipped.len(), 1);
+  assert!(
+    report.skipped[0].reason.contains("unsupported value"),
+    "reason: {}",
+    report.skipped[0].reason
+  );
+  std::fs::remove_dir_all(&dir).ok();
+}
+
 /// AC.6b: command-id semantics — default forwards the feature id; scripts can
 /// override with fixed UUIDs (jejoue's protocol UUID).
 #[test]
@@ -719,4 +813,173 @@ fn script_parity_with_rust_impls() {
     .handle_output_vibrate_cmd(1, feature_id, 0)
     .unwrap();
   assert_eq!(rust_commands, script_commands, "jejoue stop");
+}
+
+/// Review finding: `sleep` blocks threads without consuming operations, so
+/// it must be replaced with an error at both handler- and load-time.
+#[test]
+fn script_handler_sleep_is_blocked() {
+  // Handler-level: the call errors immediately instead of sleeping.
+  let handler = handler_from_source(
+    r#"
+fn metadata() { #{ "protocol": "testproto", "api_version": 1 } }
+fn handle_vibrate(index, speed) { sleep(999999999); [] }
+"#,
+  );
+  match handler.handle_output_vibrate_cmd(0, Uuid::new_v4(), 20) {
+    Err(ButtplugDeviceError::DeviceSpecificError(message)) => {
+      assert!(message.contains("sleep is disabled"), "{message}");
+    }
+    other => panic!("expected DeviceSpecificError, got {other:?}"),
+  }
+
+  // Load-level: a script that sleeps in metadata() is skipped at load time.
+  let sleeper = r#"
+fn metadata() { sleep(999999999); #{ "protocol": "sleeper", "api_version": 1 } }
+"#;
+  let good = r#"
+fn metadata() { #{ "protocol": "awake", "api_version": 1 } }
+"#;
+  let dir = write_script_dir(&[("a_sleeper.rhai", sleeper), ("b_good.rhai", good)]);
+  let report = load_script_protocols(&dir).unwrap();
+  assert_eq!(report.loaded.len(), 1);
+  assert_eq!(report.loaded[0].name, "awake");
+  assert_eq!(report.skipped.len(), 1);
+  assert!(
+    report.skipped[0].reason.contains("sleep is disabled"),
+    "reason: {}",
+    report.skipped[0].reason
+  );
+  std::fs::remove_dir_all(&dir).ok();
+}
+
+/// Review finding: pin the remaining command-conversion branches — multiple
+/// returned commands, Blob data, write_with_response, and field defaults.
+#[test]
+fn script_handler_conversion_table() {
+  let feature_id = Uuid::new_v4();
+  let handler = handler_from_source(
+    r#"
+fn metadata() { #{ "protocol": "testproto", "api_version": 1 } }
+fn handle_vibrate(index, speed) {
+  [
+    #{
+      "endpoint": "tx",
+      "data": blob(3, 0x42),
+      "write_with_response": true,
+      "command_ids": ["d3dd2bf5-b029-4bc1-9466-39f82c2e3258"],
+    },
+    #{ "endpoint": "rx", "data": [1, 2, 3] },
+  ]
+}
+"#,
+  );
+  let commands = handler
+    .handle_output_vibrate_cmd(0, feature_id, 20)
+    .unwrap();
+  assert_eq!(commands.len(), 2, "both commands are returned in order");
+
+  let HardwareCommand::Write(first) = &commands[0] else {
+    panic!("expected write");
+  };
+  assert_eq!(first.endpoint(), Endpoint::Tx);
+  assert_eq!(first.data(), &vec![0x42, 0x42, 0x42]);
+  assert!(first.write_with_response());
+  assert_eq!(
+    first.command_id(),
+    &std::collections::HashSet::from([uuid::uuid!("d3dd2bf5-b029-4bc1-9466-39f82c2e3258")])
+  );
+
+  let HardwareCommand::Write(second) = &commands[1] else {
+    panic!("expected write");
+  };
+  assert_eq!(second.endpoint(), Endpoint::Rx);
+  assert_eq!(second.data(), &vec![1, 2, 3]);
+  assert!(!second.write_with_response(), "defaults to false");
+  assert_eq!(
+    second.command_id(),
+    &std::collections::HashSet::from([feature_id]),
+    "defaults to the feature id"
+  );
+}
+
+/// Review finding: pin the signed-valued handler dispatches and the
+/// three-argument position-with-duration dispatch.
+#[test]
+fn script_handler_dispatch_variants() {
+  let feature_id = Uuid::new_v4();
+  let handler = handler_from_source(
+    r#"
+fn metadata() { #{ "protocol": "testproto", "api_version": 1 } }
+fn handle_rotate(index, speed) { [ #{ "endpoint": "tx", "data": [index, speed & 0xff] } ] }
+fn handle_temperature(index, level) { [ #{ "endpoint": "tx", "data": [index, level & 0xff] } ] }
+fn handle_position_duration(index, position, duration_ms) {
+  [ #{ "endpoint": "tx", "data": [index, position & 0xff, duration_ms & 0xff] } ]
+}
+"#,
+  );
+  let data = |commands: &Vec<HardwareCommand>| match &commands[0] {
+    HardwareCommand::Write(write) => write.data().clone(),
+    _ => panic!("expected write"),
+  };
+
+  // Signed rotate value reaches the script intact (negative wraps via & 0xff).
+  assert_eq!(
+    data(&handler.handle_output_rotate_cmd(1, feature_id, -5).unwrap()),
+    vec![1, 0xFB]
+  );
+  // Signed temperature value.
+  assert_eq!(
+    data(
+      &handler
+        .handle_output_temperature_cmd(0, feature_id, -2)
+        .unwrap()
+    ),
+    vec![0, 0xFE]
+  );
+  // Three-arg position with duration.
+  assert_eq!(
+    data(
+      &handler
+        .handle_hw_position_with_duration_cmd(2, feature_id, 200, 1234)
+        .unwrap()
+    ),
+    vec![2, 200, 210]
+  );
+}
+
+/// Review finding: rhai integer division stays integer, but a float anywhere
+/// in command data must be rejected (no silent truncation).
+#[test]
+fn script_handler_rejects_float_data() {
+  let feature_id = Uuid::new_v4();
+
+  // INT / FLOAT literal produces a float: rejected.
+  let handler = handler_from_source(
+    r#"
+fn metadata() { #{ "protocol": "testproto", "api_version": 1 } }
+fn handle_vibrate(index, speed) { [ #{ "endpoint": "tx", "data": [speed / 2.0] } ] }
+"#,
+  );
+  match handler.handle_output_vibrate_cmd(0, feature_id, 50) {
+    Err(ButtplugDeviceError::DeviceSpecificError(message)) => {
+      assert!(message.contains("must be an integer"), "{message}");
+    }
+    other => panic!("expected DeviceSpecificError, got {other:?}"),
+  }
+
+  // INT / INT stays integer division: accepted.
+  let handler = handler_from_source(
+    r#"
+fn metadata() { #{ "protocol": "testproto", "api_version": 1 } }
+fn handle_vibrate(index, speed) { [ #{ "endpoint": "tx", "data": [speed / 2] } ] }
+"#,
+  );
+  let commands = handler
+    .handle_output_vibrate_cmd(0, feature_id, 50)
+    .unwrap();
+  let HardwareCommand::Write(write) = &commands[0] else {
+    panic!("expected write");
+  };
+  assert_eq!(write.data(), &vec![25]);
 }
