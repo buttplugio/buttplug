@@ -74,8 +74,34 @@ device_commands:
             data: [0x55, 0x08, 0x00, 0x00, 0x07, 0xff]
             write_with_response: false
 
-  # Heat (Temperature) is not covered here: the device-test Scalar channel (v4) does not
-  # accept a Temperature actuator. The handler is implemented and the feature is exposed
-  # (value [0,1]):
-  #   on = 55 05 01 37 02 00 00 ; off = 55 05 00 00 02 00 00 -- verified against the
-  #   capture and the official app, not regression-tested on the heat actuator.
+  # Heat on (Temperature 1.0): 55 05 01 37 02 00 00
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 3
+            Scalar: 1.0
+            ActuatorType: Temperature
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x05, 0x01, 0x37, 0x02, 0x00, 0x00]
+            write_with_response: false
+
+  # Heat off (Temperature 0.0): 55 05 00 00 02 00 00
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 3
+            Scalar: 0.0
+            ActuatorType: Temperature
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x05, 0x00, 0x00, 0x02, 0x00, 0x00]
+            write_with_response: false

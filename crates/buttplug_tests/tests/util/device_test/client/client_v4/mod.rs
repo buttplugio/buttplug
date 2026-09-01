@@ -55,6 +55,7 @@ fn get_scalar_index(device: &ButtplugClientDevice, index: u32) -> &u32 {
     feature.contains_output(OutputType::Vibrate)
       || feature.contains_output(OutputType::Oscillate)
       || feature.contains_output(OutputType::Constrict)
+      || feature.contains_output(OutputType::Temperature)
       || feature
         .get_output_limits(OutputType::Rotate)
         .is_some_and(|r| r.step_limit().start() >= 0)
