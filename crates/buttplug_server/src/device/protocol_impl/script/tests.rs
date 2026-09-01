@@ -56,16 +56,6 @@ fn write_script_dir(scripts: &[(&str, &str)]) -> PathBuf {
   dir
 }
 
-/// Minimal valid script with a distinctive vibrate payload.
-const DISTINCTIVE_SCRIPT: &str = r#"
-fn metadata() {
-  #{ "protocol": "__distinctive__", "api_version": 1 }
-}
-fn handle_vibrate(index, speed) {
-  [ #{ "endpoint": "tx", "data": [0xAB, 0xCD, speed & 0xff] } ]
-}
-"#;
-
 /// Compiles a script from source into a handler for a protocol name.
 fn handler_from_source(source: &str) -> ScriptedProtocolHandler {
   let engine = super::engine::script_engine();

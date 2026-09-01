@@ -19,8 +19,10 @@ use rhai::{AST, CallFnOptions, Dynamic, Scope};
 
 use super::{
   engine::script_engine,
-  handler::{ScriptedProtocolFactory, ScriptedProtocolHandler},
+  handler::ScriptedProtocolFactory,
 };
+#[cfg(test)]
+use super::handler::ScriptedProtocolHandler;
 
 /// A successfully loaded script protocol.
 #[derive(Debug, Clone)]

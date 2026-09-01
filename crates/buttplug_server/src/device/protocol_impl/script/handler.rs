@@ -81,7 +81,7 @@ impl ScriptedProtocolHandler {
       .state
       .lock()
       .map_err(|_| self.script_error("internal state mutex poisoned by a previous script panic"))?;
-    let mut options = CallFnOptions::new().bind_this_ptr(&mut *state);
+    let mut options = CallFnOptions::new().bind_this_ptr(&mut state);
     // Never evaluate the AST body: only the named function may run.
     options.eval_ast = false;
     let mut scope = Scope::new();
