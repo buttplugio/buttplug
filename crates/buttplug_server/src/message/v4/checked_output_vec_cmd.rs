@@ -6,25 +6,14 @@
 // for full license information.
 
 use crate::message::{
-  ButtplugDeviceMessageNameV3,
-  LinearCmdV1,
-  RotateCmdV1,
-  ServerDeviceAttributes,
-  TryFromDeviceAttributes,
-  v0::SingleMotorVibrateCmdV0,
-  v1::VibrateCmdV1,
-  v3::ScalarCmdV3,
+  ButtplugDeviceMessageNameV3, LinearCmdV1, RotateCmdV1, ServerDeviceAttributes,
+  TryFromDeviceAttributes, v0::SingleMotorVibrateCmdV0, v1::VibrateCmdV1, v3::ScalarCmdV3,
 };
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugDeviceMessage,
-    ButtplugMessage,
-    ButtplugMessageValidator,
-    OutputCommand,
-    OutputHwPositionWithDuration,
-    OutputType,
-    OutputValue,
+    ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageValidator, OutputCommand,
+    OutputHwPositionWithDuration, OutputType, OutputValue,
   },
 };
 use buttplug_server_device_config::ServerDeviceFeatureOutput;
@@ -234,12 +223,21 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedOutputVecCmdV4 {
           ButtplugDeviceError::DeviceFeatureIndexError(scalar_attrs.len() as u32, cmd.index()),
         ))?;
       let idx = feature_index_for_id(attrs, feature.feature().id(), "ScalarCmdV3")?;
+      let output_type = cmd.actuator_type();
       let output = feature
         .feature()
-        .get_output(cmd.actuator_type())
+        .get_output(output_type)
         .ok_or(ButtplugError::from(
           ButtplugDeviceError::MessageNotSupported("ScalarCmdV3".to_owned()),
         ))?;
+      if output.is_disabled() {
+        return Err(ButtplugError::from(
+          ButtplugDeviceError::MessageNotSupported(format!(
+            "Output type {:?} is disabled for this device",
+            output_type
+          )),
+        ));
+      }
       let output_value = output.calculate_from_float(cmd.scalar()).map_err(|e| {
         error!("{:?}", e);
         ButtplugError::from(ButtplugDeviceError::MessageNotSupported(
@@ -383,9 +381,7 @@ mod tests {
   use crate::message::v1::VibrateSubcommandV1;
   use buttplug_core::util::{range::RangeInclusive, small_vec_enum_map::SmallVecEnumMap};
   use buttplug_server_device_config::{
-    RangeWithLimit,
-    ServerDeviceFeature,
-    ServerDeviceFeatureOutputValueProperties,
+    RangeWithLimit, ServerDeviceFeature, ServerDeviceFeatureOutputValueProperties,
   };
   use std::collections::BTreeMap;
   use uuid::Uuid;
