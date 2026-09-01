@@ -9,21 +9,18 @@ mod util;
 
 use buttplug_client::ButtplugClientEvent;
 use buttplug_core::message::{
-  BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-  BUTTPLUG_CURRENT_API_MINOR_VERSION,
-  ButtplugServerMessageV4,
-  OutputCmdV4,
-  OutputCommand,
-  OutputHwPositionWithDuration,
-  OutputType,
-  OutputValue,
-  RequestServerInfoV4,
-  StartScanningV0,
+  BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION, ButtplugServerMessageV4,
+  OutputCmdV4, OutputCommand, OutputHwPositionWithDuration, OutputType, OutputValue,
+  RequestServerInfoV4, StartScanningV0, StopCmdV4,
 };
-use buttplug_server::message::{ButtplugClientMessageVariant, ButtplugServerMessageVariant};
+use buttplug_server::message::{
+  ButtplugClientMessageVariant, ButtplugServerMessageVariant, ScalarCmdV3, ScalarSubcommandV3,
+};
 use buttplug_server::{ButtplugServerBuilder, device::ServerDeviceManagerBuilder};
 use buttplug_server_device_config::load_protocol_configs;
 use futures::{StreamExt, pin_mut};
+use std::time::Duration;
+use tokio::time::timeout;
 use util::{
   test_client_with_device_and_custom_dcm,
   test_device_manager::{TestDeviceCommunicationManagerBuilder, TestDeviceIdentifier},
@@ -81,10 +78,11 @@ async fn get_server_device_list(
   buttplug_server::ButtplugServer,
   u32,
   buttplug_core::message::v4::DeviceListV4,
+  util::test_device_manager::TestDeviceChannelHost,
 ) {
   let dcm = load_dcm_with_config(config);
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
-  let _device_channel = builder.add_test_device(&test_identifier());
+  let device_channel = builder.add_test_device(&test_identifier());
 
   let mut dm_builder = ServerDeviceManagerBuilder::new(dcm);
   dm_builder.comm_manager(builder);
@@ -124,7 +122,7 @@ async fn get_server_device_list(
         .keys()
         .next()
         .expect("Checked non-empty above");
-      return (server, device_index, list);
+      return (server, device_index, list, device_channel);
     }
   }
   panic!("No DeviceList received");
@@ -154,7 +152,7 @@ async fn test_disabled_hw_position_not_in_device_list() {
 /// (Position) and no HwPositionWithDuration when hw_position_with_duration is disabled.
 #[tokio::test]
 async fn test_disabled_hw_position_device_list_structure() {
-  let (_server, _device_index, list) =
+  let (_server, _device_index, list, _device_channel) =
     get_server_device_list(USER_CONFIG_DISABLED_HW_POSITION).await;
 
   let device_info = list.devices().values().next().expect("One device expected");
@@ -177,7 +175,7 @@ async fn test_disabled_hw_position_device_list_structure() {
 /// constructs one directly. This guards against stale cached feature lists on older clients.
 #[tokio::test]
 async fn test_disabled_hw_position_command_rejected() {
-  let (server, device_index, _list) =
+  let (server, device_index, _list, _device_channel) =
     get_server_device_list(USER_CONFIG_DISABLED_HW_POSITION).await;
 
   let result = server
@@ -197,10 +195,36 @@ async fn test_disabled_hw_position_command_rejected() {
   );
 }
 
+/// Verify the V3 scalar vector path also rejects commands targeting disabled output types.
+#[tokio::test]
+async fn test_disabled_hw_position_scalar_v3_command_rejected() {
+  let (server, device_index, _list, _device_channel) =
+    get_server_device_list(USER_CONFIG_DISABLED_HW_POSITION).await;
+
+  let result = server
+    .parse_message(ButtplugClientMessageVariant::V3(
+      ScalarCmdV3::new(
+        device_index,
+        vec![ScalarSubcommandV3::new(
+          0,
+          0.5,
+          OutputType::HwPositionWithDuration,
+        )],
+      )
+      .into(),
+    ))
+    .await;
+
+  assert!(
+    result.is_err(),
+    "Server should reject V3 scalar command targeting disabled output type hw_position_with_duration"
+  );
+}
+
 /// Verify that Position commands are still accepted when only HwPositionWithDuration is disabled.
 #[tokio::test]
 async fn test_disabled_hw_position_allows_position_commands() {
-  let (server, device_index, _list) =
+  let (server, device_index, _list, _device_channel) =
     get_server_device_list(USER_CONFIG_DISABLED_HW_POSITION).await;
 
   let result = server
@@ -241,7 +265,8 @@ async fn test_disabled_position_not_in_device_list() {
 /// Verify the DeviceList structure when Position is disabled.
 #[tokio::test]
 async fn test_disabled_position_device_list_structure() {
-  let (_server, _device_index, list) = get_server_device_list(USER_CONFIG_DISABLED_POSITION).await;
+  let (_server, _device_index, list, _device_channel) =
+    get_server_device_list(USER_CONFIG_DISABLED_POSITION).await;
 
   let device_info = list.devices().values().next().expect("One device expected");
   let feature = device_info
@@ -262,7 +287,8 @@ async fn test_disabled_position_device_list_structure() {
 /// Verify that Position commands are rejected when Position is disabled.
 #[tokio::test]
 async fn test_disabled_position_command_rejected() {
-  let (server, device_index, _list) = get_server_device_list(USER_CONFIG_DISABLED_POSITION).await;
+  let (server, device_index, _list, _device_channel) =
+    get_server_device_list(USER_CONFIG_DISABLED_POSITION).await;
 
   let result = server
     .parse_message(ButtplugClientMessageVariant::V4(
@@ -284,7 +310,8 @@ async fn test_disabled_position_command_rejected() {
 /// Verify that HwPositionWithDuration commands are still accepted when only Position is disabled.
 #[tokio::test]
 async fn test_disabled_position_allows_hw_position_commands() {
-  let (server, device_index, _list) = get_server_device_list(USER_CONFIG_DISABLED_POSITION).await;
+  let (server, device_index, _list, _device_channel) =
+    get_server_device_list(USER_CONFIG_DISABLED_POSITION).await;
 
   let result = server
     .parse_message(ButtplugClientMessageVariant::V4(
@@ -312,12 +339,34 @@ async fn test_disabled_position_allows_hw_position_commands() {
 /// neither outputs nor inputs.
 #[tokio::test]
 async fn test_disabled_both_outputs_feature_absent() {
-  let (_server, _device_index, list) = get_server_device_list(USER_CONFIG_DISABLED_BOTH).await;
+  let (_server, _device_index, list, _device_channel) =
+    get_server_device_list(USER_CONFIG_DISABLED_BOTH).await;
 
   let device_info = list.devices().values().next().expect("One device expected");
   assert!(
     device_info.device_features().is_empty(),
     "Device should have no features when all outputs are disabled and no inputs exist"
+  );
+}
+
+/// Stopping a device with only disabled outputs must not emit zero-value hardware commands.
+#[tokio::test]
+async fn test_disabled_both_outputs_stop_emits_no_commands() {
+  let (server, device_index, _list, mut device_channel) =
+    get_server_device_list(USER_CONFIG_DISABLED_BOTH).await;
+
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      StopCmdV4::new(Some(device_index), None, false, true).into(),
+    ))
+    .await
+    .expect("Stop should succeed even when all outputs are disabled");
+
+  assert!(
+    timeout(Duration::from_millis(150), device_channel.receiver.recv())
+      .await
+      .is_err(),
+    "Stop must not emit hardware commands for disabled outputs"
   );
 }
 

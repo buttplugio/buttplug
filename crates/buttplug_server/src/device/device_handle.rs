@@ -23,15 +23,8 @@ use buttplug_core::{
   ButtplugResultFuture,
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
-    self,
-    ButtplugMessage,
-    ButtplugServerMessageV4,
-    DeviceFeature,
-    DeviceMessageInfoV4,
-    InputCommandType,
-    InputType,
-    OutputValue,
-    StopCmdV4,
+    self, ButtplugMessage, ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4,
+    InputCommandType, InputType, OutputValue, StopCmdV4,
   },
   task_span,
   util::async_manager,
@@ -39,9 +32,7 @@ use buttplug_core::{
   util::task::TaskGroup,
 };
 use buttplug_server_device_config::{
-  DeviceConfigurationManager,
-  ServerDeviceDefinition,
-  ServerDeviceFeatureOutput,
+  DeviceConfigurationManager, ServerDeviceDefinition, ServerDeviceFeatureOutput,
   UserDeviceIdentifier,
 };
 use dashmap::DashMap;
@@ -60,17 +51,14 @@ use uuid::Uuid;
 use crate::{
   ButtplugServerResultFuture,
   message::{
-    ButtplugServerDeviceMessage,
-    checked_input_cmd::CheckedInputCmdV4,
-    checked_output_cmd::CheckedOutputCmdV4,
-    server_device_attributes::ServerDeviceAttributes,
+    ButtplugServerDeviceMessage, checked_input_cmd::CheckedInputCmdV4,
+    checked_output_cmd::CheckedOutputCmdV4, server_device_attributes::ServerDeviceAttributes,
     spec_enums::ButtplugDeviceCommandMessageUnionV4,
   },
 };
 
 use super::{
-  InternalDeviceEvent,
-  OutputObservation,
+  InternalDeviceEvent, OutputObservation,
   device_task::{DeviceTaskConfig, DeviceTaskMessage, WRITE_ACK_TIMEOUT, run_owned_device_task},
   hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent},
   protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, ProtocolSpecializer},
