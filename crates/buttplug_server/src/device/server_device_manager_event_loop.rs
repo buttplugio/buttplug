@@ -101,6 +101,7 @@ impl ServerDeviceManagerEventLoop {
     device_command_receiver: mpsc::Receiver<DeviceManagerCommand>,
     output_observation_sender: Option<broadcast::Sender<OutputObservation>>,
     task_group: TaskGroup,
+    protocol_manager: ProtocolManager,
   ) -> Self {
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
     Self {
@@ -116,7 +117,7 @@ impl ServerDeviceManagerEventLoop {
       connecting_devices: Arc::new(DashSet::new()),
       loop_cancellation_token,
       task_group,
-      protocol_manager: ProtocolManager::default(),
+      protocol_manager,
       output_observation_sender,
     }
   }

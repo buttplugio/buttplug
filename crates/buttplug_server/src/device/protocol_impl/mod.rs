@@ -97,6 +97,8 @@ pub mod raw_protocol;
 pub mod realov;
 pub mod sakuraneko;
 pub mod satisfyer;
+#[cfg(feature = "rhai-protocols")]
+pub mod script;
 pub mod sensee;
 pub mod sensee_capsule;
 pub mod sensee_v2;
