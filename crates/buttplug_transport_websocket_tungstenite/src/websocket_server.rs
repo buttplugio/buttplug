@@ -7,11 +7,9 @@
 
 use buttplug_core::{
   connector::{
-    ButtplugConnectorError,
-    ButtplugConnectorResultFuture,
+    ButtplugConnectorError, ButtplugConnectorResultFuture,
     transport::{
-      ButtplugConnectorTransport,
-      ButtplugConnectorTransportSpecificError,
+      ButtplugConnectorTransport, ButtplugConnectorTransportSpecificError,
       ButtplugTransportIncomingMessage,
     },
   },
@@ -277,16 +275,27 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
           .port();
         callback.call(local_port);
       }
-      if let Ok((stream, _)) = listener.accept().await {
-        info!("Websocket: Got connection");
-        let ws_stream = tokio_tungstenite::accept_async(stream)
-          .await
-          .map_err(|err| {
-            error!("Websocket server accept error: {:?}", err);
+      loop {
+        let (stream, _) = tokio::select! {
+          result = listener.accept() => result.map_err(|e| {
             ButtplugConnectorError::TransportSpecificError(
-              ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{err:?}")),
+              ButtplugConnectorTransportSpecificError::GenericNetworkError(format!(
+                "Could not accept websocket connection: {e}"
+              )),
             )
-          })?;
+          })?,
+          _ = disconnect_notifier_clone.notified() => {
+            return Ok(());
+          }
+        };
+        info!("Websocket: Got connection");
+        let ws_stream = match tokio_tungstenite::accept_async(stream).await {
+          Ok(ws_stream) => ws_stream,
+          Err(err) => {
+            error!("Websocket server accept error: {:?}", err);
+            continue;
+          }
+        };
         buttplug_core::spawn!(
           "ButtplugWebsocketServerTransport connection loop",
           async move {
@@ -299,11 +308,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
             .await;
           }
         );
-        Ok(())
-      } else {
-        Err(ButtplugConnectorError::ConnectorGenericError(
-          "Could not run accept for port".to_owned(),
-        ))
+        return Ok(());
       }
     };
 
@@ -327,8 +332,7 @@ mod test {
     connector::{
       ButtplugConnectorError,
       transport::{
-        ButtplugConnectorTransport,
-        ButtplugConnectorTransportSpecificError,
+        ButtplugConnectorTransport, ButtplugConnectorTransportSpecificError,
         ButtplugTransportIncomingMessage,
       },
     },
@@ -336,7 +340,12 @@ mod test {
   };
   use std::io::ErrorKind;
   use std::sync::{Arc, Mutex};
-  use tokio::{net::TcpListener, sync::mpsc};
+  use tokio::{
+    io::AsyncWriteExt,
+    net::{TcpListener, TcpStream},
+    sync::mpsc,
+  };
+  use tokio_tungstenite::connect_async;
 
   #[tokio::test]
   async fn bind_addr_in_use_returns_structured_error() {
@@ -402,5 +411,45 @@ mod test {
     assert!(port > 0);
 
     connect_task.abort();
+  }
+
+  #[tokio::test]
+  async fn malformed_handshake_does_not_stop_listener() {
+    let bound_port = Arc::new(Mutex::new(None));
+    let callback_port = bound_port.clone();
+    let transport = ButtplugWebsocketServerTransportBuilder::default()
+      .port(0)
+      .on_listener_bound(move |port| {
+        *callback_port.lock().unwrap() = Some(port);
+      })
+      .finish();
+    let (_outgoing_sender, outgoing_receiver) = mpsc::channel::<ButtplugSerializedMessage>(1);
+    let (incoming_sender, _incoming_receiver) =
+      mpsc::channel::<ButtplugTransportIncomingMessage>(1);
+    let connect_task =
+      tokio::spawn(async move { transport.connect(outgoing_receiver, incoming_sender).await });
+
+    let port = tokio::time::timeout(std::time::Duration::from_secs(1), async {
+      loop {
+        if let Some(port) = *bound_port.lock().unwrap() {
+          return port;
+        }
+        tokio::task::yield_now().await;
+      }
+    })
+    .await
+    .expect("listener bound callback was not called");
+
+    let mut malformed_client = TcpStream::connect(("127.0.0.1", port)).await.unwrap();
+    malformed_client
+      .write_all(b"not a websocket handshake")
+      .await
+      .unwrap();
+    malformed_client.shutdown().await.unwrap();
+
+    let (_websocket, _) = connect_async(format!("ws://127.0.0.1:{port}"))
+      .await
+      .unwrap();
+    assert!(connect_task.await.unwrap().is_ok());
   }
 }
