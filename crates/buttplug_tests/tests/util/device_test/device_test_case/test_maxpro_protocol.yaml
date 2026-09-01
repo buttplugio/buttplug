@@ -1,42 +1,39 @@
 devices:
-  - identifier: 
-      name: "Massage Demo"
-    expected_name: "Aneros Vivi"
+  - identifier:
+      name: "M2"
+    expected_name: "MaxPro 2"
 script_protocol_directory: "../../buttplug_server/scripts/protocols"
 device_commands:
-  # Commands
-  - !Messages
-      device_index: 0
-      messages: 
-        - !Vibrate
-          - Index: 0
-            Speed: 0.5
-  - !Commands
-      device_index: 0
-      commands: 
-        - !Write
-            endpoint: tx
-            data: [0xF1, 0x40]
-            write_with_response: false
+  # 50% speed (device units: 50). CRC is the wrapping sum of the first nine
+  # bytes: (0x55 + 0x04 + 0x07 + 0xff + 0xff + 0x3f + 0x32 + 0x5f + 0x32) & 0xff = 0x60
   - !Messages
       device_index: 0
       messages:
         - !Vibrate
           - Index: 0
-            Speed: 0.1
-          - Index: 1
             Speed: 0.5
   - !Commands
       device_index: 0
       commands:
         - !Write
             endpoint: tx
-            data: [0xF1, 0x0d]
+            data: [0x55, 0x04, 0x07, 0xff, 0xff, 0x3f, 0x32, 0x5f, 0x32, 0x60]
             write_with_response: false
+  # 20% speed (device units: 20). CRC: (0x55 + 0x04 + 0x07 + 0xff + 0xff + 0x3f + 0x14 + 0x5f + 0x14) & 0xff = 0x24
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.2
+  - !Commands
+      device_index: 0
+      commands:
         - !Write
             endpoint: tx
-            data: [0xF2, 0x40]
+            data: [0x55, 0x04, 0x07, 0xff, 0xff, 0x3f, 0x14, 0x5f, 0x14, 0x24]
             write_with_response: false
+  # Stop. CRC: (0x55 + 0x04 + 0x07 + 0xff + 0xff + 0x3f + 0x00 + 0x5f + 0x00) & 0xff = 0xFC
   - !Messages
       device_index: 0
       messages:
@@ -46,9 +43,5 @@ device_commands:
       commands:
         - !Write
             endpoint: tx
-            data: [0xF1, 0x00]
+            data: [0x55, 0x04, 0x07, 0xff, 0xff, 0x3f, 0x00, 0x5f, 0x00, 0xFC]
             write_with_response: false
-        - !Write
-            endpoint: tx
-            data: [0xF2, 0x00]
-            write_with_response: false      

@@ -105,10 +105,17 @@ fn build_server(test_case: &DeviceTestCase) -> (ButtplugServer, Vec<TestDeviceCh
     info!("identifier: {:?}", device.identifier);
     device_channels.push(builder.add_test_device(&device.identifier));
   }
-  let dm = ServerDeviceManagerBuilder::new(dcm)
-    .comm_manager(builder)
-    .finish()
-    .unwrap();
+  let mut server_device_manager_builder = ServerDeviceManagerBuilder::new(dcm);
+  server_device_manager_builder.comm_manager(builder);
+  if let Some(script_protocol_directory) = &test_case.script_protocol_directory {
+    server_device_manager_builder.script_protocol_directory(
+      std::path::Path::new(
+        &std::env::var("CARGO_MANIFEST_DIR").expect("Should have manifest path"),
+      )
+      .join(script_protocol_directory),
+    );
+  }
+  let dm = server_device_manager_builder.finish().unwrap();
 
   (
     ButtplugServerBuilder::new(dm)
