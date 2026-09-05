@@ -13,6 +13,7 @@ use crate::device::{
     ProtocolHandler,
     ProtocolIdentifier,
     ProtocolInitializer,
+    ProtocolKeepaliveStrategy,
     generic_protocol_initializer_setup,
   },
 };
@@ -28,9 +29,11 @@ use std::sync::{
   Arc,
   atomic::{AtomicU8, Ordering},
 };
+use std::time::Duration;
 use uuid::{Uuid, uuid};
 
 const KIIROO_V21_INITIALIZED_PROTOCOL_UUID: Uuid = uuid!("22329023-5464-41b6-a0de-673d7e993055");
+const KIIROO_V21_INITIALIZED_KEEPALIVE_INTERVAL: Duration = Duration::from_millis(2000);
 
 generic_protocol_initializer_setup!(KiirooV21Initialized, "kiiroo-v21-initialized");
 
@@ -71,6 +74,12 @@ pub struct KiirooV21Initialized {
 }
 
 impl ProtocolHandler for KiirooV21Initialized {
+  fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
+    ProtocolKeepaliveStrategy::RepeatLastPacketStrategyWithTiming(
+      KIIROO_V21_INITIALIZED_KEEPALIVE_INTERVAL,
+    )
+  }
+
   fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,
