@@ -161,6 +161,10 @@ configurations:
     - Boomerang
   name: Lelo Boomerang
   id: 8f386409-748f-4bff-a863-3b9475c4b528
+- identifier:
+    - F1SV3
+  name: Lelo F1s V3
+  id: 36adf7ce-98bf-4fad-b916-b44d20a5d9e1
 communication:
 - btle:
     names:
@@ -180,6 +184,7 @@ communication:
     - SURFER Originals
     - F2
     - Boomerang
+    - F1SV3
     services:
       0000fff0-0000-1000-8000-00805f9b34fb:
         command: 0000fff1-0000-1000-8000-00805f9b34fb

@@ -23,16 +23,11 @@ configurations:
   - F1SV2X
   name: Lelo F1s V2
   id: 64505ced-309b-4a32-93a8-13ee55e2da2c
-- identifier:
-  - F1SV3
-  name: Lelo F1s V3
-  id: 36adf7ce-98bf-4fad-b916-b44d20a5d9e1
 communication:
 - btle:
     names:
     - F1SV2A
     - F1SV2X
-    - F1SV3
     services:
       0000fff0-0000-1000-8000-00805f9b34fb:
         tx: 0000fff1-0000-1000-8000-00805f9b34fb

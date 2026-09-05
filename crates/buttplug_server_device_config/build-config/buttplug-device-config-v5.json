@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 41
+    "minor": 42
   },
   "protocols": {
     "activejoy": {
@@ -12435,8 +12435,7 @@
           "btle": {
             "names": [
               "F1SV2A",
-              "F1SV2X",
-              "F1SV3"
+              "F1SV2X"
             ],
             "services": {
               "0000fff0-0000-1000-8000-00805f9b34fb": {
@@ -12458,13 +12457,6 @@
             "F1SV2X"
           ],
           "name": "Lelo F1s V2"
-        },
-        {
-          "id": "36adf7ce-98bf-4fad-b916-b44d20a5d9e1",
-          "identifier": [
-            "F1SV3"
-          ],
-          "name": "Lelo F1s V3"
         }
       ],
       "defaults": {
@@ -12518,7 +12510,8 @@
               "SURFER2",
               "SURFER Originals",
               "F2",
-              "Boomerang"
+              "Boomerang",
+              "F1SV3"
             ],
             "services": {
               "0000fff0-0000-1000-8000-00805f9b34fb": {
@@ -12778,6 +12771,13 @@
             "Boomerang"
           ],
           "name": "Lelo Boomerang"
+        },
+        {
+          "id": "36adf7ce-98bf-4fad-b916-b44d20a5d9e1",
+          "identifier": [
+            "F1SV3"
+          ],
+          "name": "Lelo F1s V3"
         }
       ],
       "defaults": {
