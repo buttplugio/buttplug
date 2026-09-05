@@ -555,6 +555,18 @@ impl Default for ProtocolManager {
 }
 
 impl ProtocolManager {
+  /// Builds a protocol manager from a pre-populated protocol map.
+  ///
+  /// Used for augmenting the built-in protocol set (e.g. with script
+  /// protocols); the [`Default`] implementation remains the plain built-in
+  /// set. The map field stays private — callers hand us a complete map and
+  /// never manipulate the internals directly.
+  pub fn from_map(protocol_map: HashMap<String, Arc<dyn ProtocolIdentifierFactory>>) -> Self {
+    Self { protocol_map }
+  }
+}
+
+impl ProtocolManager {
   pub fn protocol_specializers(
     &self,
     specifier: &ProtocolCommunicationSpecifier,

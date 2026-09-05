@@ -1,0 +1,43 @@
+{
+  "version": {
+    "major": 5,
+    "minor": 41
+  },
+  "protocols": {
+    "scripttest": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Script Test Device"
+            ],
+            "services": {
+              "0000ff00-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ff01-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "defaults": {
+        "name": "Script Test Device",
+        "id": "9d1a2a68-3f77-4a75-8f0e-2c3ca7f10001",
+        "features": [
+          {
+            "index": 0,
+            "description": "Script Test Vibrator",
+            "id": "9d1a2a68-3f77-4a75-8f0e-2c3ca7f10002",
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  100
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
