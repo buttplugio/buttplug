@@ -166,11 +166,16 @@ pub async fn run_server(
   options: &EngineOptions,
   on_listener_bound: Option<Arc<dyn Fn(u16) + Send + Sync>>,
 ) -> Result<(), ButtplugServerConnectorError> {
-  if let Some(port) = options.websocket_port() {
+  if let Some(listen_address) = options.websocket_listen_address() {
     let mut transport_builder = ButtplugWebsocketServerTransportBuilder::default();
-    transport_builder
-      .port(port)
-      .listen_on_all_interfaces(options.websocket_use_all_interfaces());
+
+    let parsed_listen_address = listen_address.parse().map_err(|pe| {
+      ButtplugServerConnectorError::ConnectorError(
+        buttplug_core::connector::ButtplugConnectorError::ConnectorGenericError(
+          format!("Could not parse provided websocket-listen-address: {pe}")
+        ))})?;
+
+    transport_builder.listen_address(parsed_listen_address);
     if let Some(on_listener_bound) = on_listener_bound {
       transport_builder.on_listener_bound(move |bound_port| {
         on_listener_bound(bound_port);

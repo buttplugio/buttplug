@@ -45,12 +45,17 @@ pub struct IntifaceCLIArguments {
   /// listen on 127.0.0.1.
   #[argh(switch)]
   #[getset(get_copy = "pub")]
-  websocket_use_all_interfaces: bool,
+  websocket_use_all_interfaces: Option<bool>,
 
   /// insecure port for websocket servers.
   #[argh(option)]
   #[getset(get_copy = "pub")]
   websocket_port: Option<u16>,
+
+  /// address on which the websocket server listens for insecure connections
+  #[argh(option)]
+  #[getset(get = "pub")]
+  websocket_listen_address: Option<String>,
 
   /// insecure address for connecting to websocket servers.
   #[argh(option)]
@@ -239,7 +244,6 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
     }
 
     builder
-      .websocket_use_all_interfaces(args.websocket_use_all_interfaces())
       .use_bluetooth_le(args.use_bluetooth_le())
       .use_serial_port(args.use_serial())
       .use_hid(args.use_hid())
@@ -259,9 +263,44 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
         .crash_task_thread(args.crash_task_thread());
     }
 
-    if let Some(value) = args.websocket_port() {
-      builder.websocket_port(value);
+    /*
+     * websocket_listen_address supplants websocket_use_all_interfaces and
+     * websocket_port, but we want to keep the latter two for backwards
+     * compatibility.  Ensure that, if the former is given, neither of the
+     * latter two have been.
+     */
+    let maybe_listen_address = match args.websocket_listen_address() {
+      None => {
+        match args.websocket_port() {
+          None => Ok(None), // no listen address & no port: don't listen
+          Some(port) => {
+            let base_addr =
+             if args.websocket_use_all_interfaces().unwrap_or(false) {
+                "0.0.0.0"
+              } else {
+                "127.0.0.1"
+              };
+            Ok(Some(format!("{base_addr}:{port}")))
+          }
+        }
+      }
+      Some(address) => match (args.websocket_use_all_interfaces(), args.websocket_port()) {
+        (None, None) => Ok(Some(address.to_owned())),
+        (Some(_), None) => Err(IntifaceError::new(
+          "websocket-use-all-interfaces conflicts with websocket-listen-address",
+        )),
+        (None, Some(_)) => Err(IntifaceError::new(
+          "websocket-use-all-interfaces conflicts with websocket-port",
+        )),
+        (Some(_), Some(_)) => Err(IntifaceError::new(
+          "websocket-use-all-interfaces conflicts with both websocket-port and websocket-use-all-interfaces",
+        )),
+      },
+    };
+    if let Some(listen_address) = maybe_listen_address? {
+      builder.websocket_listen_address(&listen_address);
     }
+
     if let Some(value) = args.websocket_client_address() {
       builder.websocket_client_address(value);
     }

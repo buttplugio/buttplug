@@ -15,6 +15,7 @@ use crate::connector::{
 use displaydoc::Display;
 use futures::future::BoxFuture;
 use thiserror::Error;
+use std::net::SocketAddr;
 use tokio::sync::mpsc::{Receiver, Sender};
 
 /// Messages we can receive from a connector.
@@ -44,10 +45,9 @@ pub trait ButtplugConnectorTransport: Send + Sync {
 pub enum ButtplugConnectorTransportSpecificError {
   #[error("Network error: {0}")]
   GenericNetworkError(String),
-  #[error("Socket bind error on {address}:{port}: {kind:?}: {message}")]
+  #[error("Socket bind error on {address}: {kind:?}: {message}")]
   SocketBindError {
-    address: String,
-    port: u16,
+    address: SocketAddr,
     kind: std::io::ErrorKind,
     message: String,
   },

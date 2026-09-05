@@ -16,7 +16,7 @@ use buttplug_core::{
   message::serializer::ButtplugSerializedMessage,
 };
 use futures::{FutureExt, SinkExt, StreamExt, future::BoxFuture};
-use std::{fmt, sync::Arc, time::Duration};
+use std::{fmt, net::SocketAddr, sync::Arc, time::Duration};
 use tokio::{
   net::{TcpListener, TcpStream},
   select,
@@ -49,10 +49,8 @@ impl fmt::Debug for ListenerBoundCallback {
 
 #[derive(Clone, Debug)]
 pub struct ButtplugWebsocketServerTransportBuilder {
-  /// If true, listens all on available interfaces. Otherwise, only listens on 127.0.0.1.
-  listen_on_all_interfaces: bool,
-  /// Insecure port for listening for websocket connections.
-  port: u16,
+  /// TCP/IP address for listening for insecure websocket connections; defaults to localhost:12345
+  listen_address: SocketAddr,
   /// Optional callback fired after the listener is bound and the actual local port is known.
   listener_bound_callback: Option<ListenerBoundCallback>,
 }
@@ -60,21 +58,18 @@ pub struct ButtplugWebsocketServerTransportBuilder {
 impl Default for ButtplugWebsocketServerTransportBuilder {
   fn default() -> Self {
     Self {
-      listen_on_all_interfaces: false,
-      port: 12345,
+      listen_address: SocketAddr::new(
+        std::net::IpAddr::V4(std::net::Ipv4Addr::new(127, 0, 0, 1)),
+        12345,
+      ),
       listener_bound_callback: None,
     }
   }
 }
 
 impl ButtplugWebsocketServerTransportBuilder {
-  pub fn listen_on_all_interfaces(&mut self, listen_on_all_interfaces: bool) -> &mut Self {
-    self.listen_on_all_interfaces = listen_on_all_interfaces;
-    self
-  }
-
-  pub fn port(&mut self, port: u16) -> &mut Self {
-    self.port = port;
+  pub fn listen_address(&mut self, listen_address: SocketAddr) -> &mut Self {
+    self.listen_address = listen_address;
     self
   }
 
@@ -85,8 +80,7 @@ impl ButtplugWebsocketServerTransportBuilder {
 
   pub fn finish(&self) -> ButtplugWebsocketServerTransport {
     ButtplugWebsocketServerTransport {
-      port: self.port,
-      listen_on_all_interfaces: self.listen_on_all_interfaces,
+      listen_address: self.listen_address.clone(),
       listener_bound_callback: self.listener_bound_callback.clone(),
       disconnect_notifier: Arc::new(Notify::new()),
     }
@@ -220,8 +214,7 @@ async fn run_connection_loop(
 
 /// Websocket connector for ButtplugClients, using [tokio_tungstenite]
 pub struct ButtplugWebsocketServerTransport {
-  port: u16,
-  listen_on_all_interfaces: bool,
+  listen_address: SocketAddr,
   listener_bound_callback: Option<ListenerBoundCallback>,
   disconnect_notifier: Arc<Notify>,
 }
@@ -235,15 +228,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
     let disconnect_notifier = self.disconnect_notifier.clone();
     let listener_bound_callback = self.listener_bound_callback.clone();
 
-    let base_addr = if self.listen_on_all_interfaces {
-      "0.0.0.0"
-    } else {
-      "127.0.0.1"
-    };
-
-    let address = base_addr.to_owned();
-    let port = self.port;
-    let addr = format!("{}:{}", address, port);
+    let addr = self.listen_address.clone();
     debug!("Websocket: Trying to listen on {}", addr);
     let response_sender_clone = incoming_sender;
     let disconnect_notifier_clone = disconnect_notifier;
@@ -254,8 +239,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
       let listener = try_socket.map_err(|e| {
         ButtplugConnectorError::TransportSpecificError(
           ButtplugConnectorTransportSpecificError::SocketBindError {
-            address,
-            port,
+            address: addr,
             kind: e.kind(),
             message: e.to_string(),
           },
