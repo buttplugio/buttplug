@@ -88,12 +88,11 @@ fn websocket_port_in_use_error(err: &ButtplugServerConnectorError) -> Option<(St
       ButtplugConnectorError::TransportSpecificError(
         ButtplugConnectorTransportSpecificError::SocketBindError {
           address,
-          port,
           kind,
           message: _,
         },
       ),
-    ) if *kind == ErrorKind::AddrInUse => Some((address.clone(), *port)),
+    ) if *kind == ErrorKind::AddrInUse => Some((address.ip().to_string(), address.port())),
     _ => None,
   }
 }
@@ -154,7 +153,7 @@ impl IntifaceEngine {
     }
 
     let mdns_service_metadata =
-      if options.broadcast_server_mdns() && options.websocket_port().is_some() {
+      if options.broadcast_server_mdns() && options.websocket_listen_address().is_some() {
         Some(Arc::new(IntifaceMdnsServiceMetadata::new(
           options.mdns_suffix().as_deref(),
         )))

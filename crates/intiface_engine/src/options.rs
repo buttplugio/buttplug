@@ -17,10 +17,8 @@ pub struct EngineOptions {
   user_device_config_path: Option<String>,
   #[getset(get = "pub")]
   server_name: String,
-  #[getset(get_copy = "pub")]
-  websocket_use_all_interfaces: bool,
-  #[getset(get_copy = "pub")]
-  websocket_port: Option<u16>,
+  #[getset(get = "pub")]
+  websocket_listen_address: Option<String>,
   #[getset(get = "pub")]
   websocket_client_address: Option<String>,
   #[getset(get_copy = "pub")]
@@ -75,8 +73,7 @@ pub struct EngineOptionsExternal {
   pub user_device_config_json: Option<String>,
   pub user_device_config_path: Option<String>,
   pub server_name: String,
-  pub websocket_use_all_interfaces: bool,
-  pub websocket_port: Option<u16>,
+  pub websocket_listen_address: Option<String>,
   pub websocket_client_address: Option<String>,
   pub frontend_websocket_port: Option<u16>,
   pub frontend_in_process_channel: bool,
@@ -109,8 +106,7 @@ impl From<EngineOptionsExternal> for EngineOptions {
       user_device_config_json: other.user_device_config_json,
       user_device_config_path: other.user_device_config_path,
       server_name: other.server_name,
-      websocket_use_all_interfaces: other.websocket_use_all_interfaces,
-      websocket_port: other.websocket_port,
+      websocket_listen_address: other.websocket_listen_address,
       websocket_client_address: other.websocket_client_address,
       frontend_websocket_port: other.frontend_websocket_port,
       frontend_in_process_channel: other.frontend_in_process_channel,
@@ -182,8 +178,8 @@ impl EngineOptionsBuilder {
     self
   }
 
-  pub fn websocket_use_all_interfaces(&mut self, value: bool) -> &mut Self {
-    self.options.websocket_use_all_interfaces = value;
+  pub fn websocket_listen_address(&mut self, address: &str) -> &mut Self {
+    self.options.websocket_listen_address = Some(address.to_owned());
     self
   }
 
@@ -229,11 +225,6 @@ impl EngineOptionsBuilder {
 
   pub fn use_simulated_devices(&mut self, value: bool) -> &mut Self {
     self.options.use_simulated_devices = value;
-    self
-  }
-
-  pub fn websocket_port(&mut self, port: u16) -> &mut Self {
-    self.options.websocket_port = Some(port);
     self
   }
 
