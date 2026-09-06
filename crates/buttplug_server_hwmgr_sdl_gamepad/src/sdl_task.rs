@@ -95,9 +95,22 @@ pub(crate) trait SdlDriver {
 }
 
 /// An opened gamepad on the SDL thread. Dropping closes it.
+/// Transport of an opened gamepad, as far as SDL reports it. Used on macOS to
+/// skip wired pads (see the scan handler for the rationale).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum DriverConnection {
+  Wired,
+  Wireless,
+  Unknown,
+}
+
 pub(crate) trait DriverGamepad {
   fn rumble(&mut self, low: u16, high: u16, duration_ms: u32) -> Result<(), String>;
   fn connected(&self) -> bool;
+  /// Default `Unknown` so fakes only override it where relevant.
+  fn connection_state(&self) -> DriverConnection {
+    DriverConnection::Unknown
+  }
 }
 
 /// Clock seam so rumble-refresh and poll timing are unit-testable. `Send`
@@ -398,7 +411,31 @@ fn sdl_thread_loop(
           let reply_value = result.map(|ids| {
             ids
               .into_iter()
-              .map(|id| {
+              .filter_map(|id| {
+                // macOS: wired pads enumerate via hidapi but cannot rumble -
+                // Apple exposes only read-only shortened HID reports for them,
+                // and working rumble requires GCController, whose discovery
+                // only fires from a main-thread runloop this architecture
+                // deliberately does not host. Skip wired pads so no dead
+                // devices appear; Bluetooth pads work fully. Users with a
+                // wired controller can pair the same pad via Bluetooth.
+                #[cfg(target_os = "macos")]
+                {
+                  if !open_pads.contains_key(&id) {
+                    let wired = match driver.open(id) {
+                      // The probe handle drops immediately, closing it again.
+                      Ok(pad) => pad.connection_state() == DriverConnection::Wired,
+                      Err(_) => false,
+                    };
+                    if wired {
+                      warn!(
+                        "Skipping wired SDL gamepad {} on macOS: wired rumble is not possible without GCController (pair the controller via Bluetooth instead).",
+                        id.0
+                      );
+                      return None;
+                    }
+                  }
+                }
                 let name = match driver.name_for_id(id) {
                   Ok(name) => name,
                   Err(e) => {
@@ -408,7 +445,7 @@ fn sdl_thread_loop(
                     format!("SDL Gamepad {}", id.0)
                   }
                 };
-                SdlGamepadDesc { id, name }
+                Some(SdlGamepadDesc { id, name })
               })
               .collect::<Vec<_>>()
           });
@@ -605,6 +642,14 @@ impl DriverGamepad for Sdl3Gamepad {
   fn connected(&self) -> bool {
     self.pad.connected()
   }
+
+  fn connection_state(&self) -> DriverConnection {
+    match self.pad.connection_state() {
+      Ok(sdl3::joystick::ConnectionState::Wired) => DriverConnection::Wired,
+      Ok(sdl3::joystick::ConnectionState::Wireless) => DriverConnection::Wireless,
+      _ => DriverConnection::Unknown,
+    }
+  }
 }
 
 /// Production factory: sets the background-events hint (SDL guidance is to do
@@ -791,6 +836,7 @@ mod tests {
     // Log of (id, low, high, duration) rumble calls.
     rumble_log: Vec<(JoystickId, u16, u16, u32)>,
     rumble_fail: bool,
+    wired_ids: Vec<JoystickId>,
   }
 
   struct FakeDriver(Arc<Mutex<FakeDriverState>>);
@@ -808,6 +854,15 @@ mod tests {
       }
       state.rumble_log.push((self.id, low, high, duration_ms));
       Ok(())
+    }
+
+    fn connection_state(&self) -> DriverConnection {
+      let state = self.state.lock().unwrap();
+      if state.wired_ids.contains(&self.id) {
+        DriverConnection::Wired
+      } else {
+        DriverConnection::Wireless
+      }
     }
 
     fn connected(&self) -> bool {
@@ -925,6 +980,27 @@ mod tests {
     // Failed name lookup falls back to the deterministic name; the device is
     // still returned.
     assert_eq!(descs[1].name, "SDL Gamepad 3");
+  }
+
+  // macOS-only behavior: wired pads are skipped at scan time because their
+  // rumble cannot work under this architecture (see the scan handler).
+  #[cfg(target_os = "macos")]
+  #[tokio::test]
+  async fn sdl_task_macos_scan_skips_wired_pads() {
+    let state = Arc::new(Mutex::new(FakeDriverState {
+      enumerate_ids: vec![id(20), id(21), id(22)],
+      wired_ids: vec![id(21)],
+      ..Default::default()
+    }));
+    let handle = spawn_fake(state, FakeClock::default());
+
+    let descs = handle.scan().await.expect("scan should succeed");
+    // 21 is wired and must be skipped; the wireless pads (and an
+    // already-leased pad, not applicable here) come through.
+    assert_eq!(
+      descs.iter().map(|d| d.id).collect::<Vec<_>>(),
+      vec![id(20), id(22)]
+    );
   }
 
   // -------------------------------------------------------------------

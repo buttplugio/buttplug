@@ -20,6 +20,10 @@ use std::thread;
 use std::time::Duration;
 
 fn main() {
+  // Built-in verbose SDL logging so a single run of this example is a
+  // complete diagnostic (no SDL_LOGGING env var needed) - essential for
+  // diagnosing backend claiming on other platforms.
+  sdl3::log::set_log_priorities(sdl3::log::Priority::Verbose);
   let handle = thread::Builder::new()
     .name("sdl3-spike".to_string())
     .spawn(|| {
@@ -37,7 +41,37 @@ fn main() {
         .expect("gamepad subsystem must initialize headless");
       println!("[sdl-thread] gamepad subsystem OK");
       match gamepad.gamepads() {
-        Ok(ids) => println!("[sdl-thread] gamepads() -> {} gamepad(s)", ids.len()),
+        Ok(ids) => {
+          println!("[sdl-thread] gamepads() -> {} gamepad(s)", ids.len());
+          // Connection state is what the macOS wired-skip keys on; printing
+          // it makes every spike run a complete transport diagnostic.
+          for id in &ids {
+            match gamepad.open(*id) {
+              Ok(pad) => {
+                let connection = match pad.connection_state() {
+                  Ok(sdl3::joystick::ConnectionState::Wired) => "Wired",
+                  Ok(sdl3::joystick::ConnectionState::Wireless) => "Wireless",
+                  Ok(_) => "Unknown",
+                  Err(e) => {
+                    println!(
+                      "[sdl-thread] gamepad {} connection query failed: {e:?}",
+                      id.0
+                    );
+                    "Error"
+                  }
+                };
+                println!(
+                  "[sdl-thread] gamepad {} '{}' connection: {}",
+                  id.0,
+                  pad.name().unwrap_or_default(),
+                  connection
+                );
+                // pad drops here, closing the probe handle
+              }
+              Err(e) => println!("[sdl-thread] gamepad {} open failed: {e:?}", id.0),
+            }
+          }
+        }
         Err(e) => {
           eprintln!("[sdl-thread] gamepads() failed: {e:?}");
           std::process::exit(2);

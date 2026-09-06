@@ -55,6 +55,18 @@ smooth continuous rumble with the refresh-before-expiry scheme — must be
 validated manually on each platform before release; see the manual validation
 checklist in the repository's pull request for this feature.
 
+## Platform support
+
+- **Windows / Linux**: wired and Bluetooth controllers via SDL's hidapi and
+  platform backends.
+- **macOS**: **Bluetooth controllers only.** Apple exposes wired gamepads to
+  hidapi with read-only shortened HID reports, so rumble is impossible that
+  way; working wired rumble requires GCController, whose discovery only fires
+  from a main-thread runloop that this library deliberately does not host.
+  Wired pads are skipped at scan time with a logged explanation - pair the
+  same controller via Bluetooth for full support. (A future main-thread
+  integration could lift this; the limitation is Apple's, and SDL2 shares it.)
+
 ## Coexistence with XInput
 
 On Windows, both the XInput manager and this manager can be enabled at the
