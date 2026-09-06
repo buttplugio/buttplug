@@ -19,6 +19,7 @@ const KNOWN_COMMUNICATION_SPECIFIERS: &[&str] = &[
   "usb",
   "serial",
   "xinput",
+  "sdl-gamepad",
   "lovense_connect_service",
   "websocket",
   "simulated",

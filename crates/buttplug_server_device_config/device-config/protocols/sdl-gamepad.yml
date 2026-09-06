@@ -1,0 +1,21 @@
+defaults:
+  name: SDL Gamepad
+  features:
+  - id: f56852c8-cb3b-4703-90b6-6291df0c6314
+    output:
+      vibrate:
+        value:
+        - 0
+        - 65535
+    index: 0
+  - id: e13388f9-a1b6-4c4c-a7b4-c68eeed293d8
+    output:
+      vibrate:
+        value:
+        - 0
+        - 65535
+    index: 1
+  id: b35f2adf-16bc-4425-9276-5d191aeaf107
+communication:
+- sdl-gamepad:
+    exists: true
