@@ -44,6 +44,7 @@ Buttplug is a framework for interfacing with intimate hardware devices. It uses 
 - `serial`, `hid` - USB serial and HID devices
 - `lovense_dongle`, `lovense_connect` - Lovense-specific (deprecated)
 - `xinput` - Windows gamepad vibration
+- `sdl_gamepad` - Cross-platform gamepad rumble via SDL3 (opt-in)
 - `websocket` - WebSocket device forwarders
 - `simulated` - In-process simulated devices (no real hardware; lives in `buttplug_server`)
 
