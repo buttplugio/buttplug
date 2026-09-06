@@ -97,6 +97,7 @@ pub mod raw_protocol;
 pub mod realov;
 pub mod sakuraneko;
 pub mod satisfyer;
+pub mod sdl_gamepad;
 pub mod sensee;
 pub mod sensee_capsule;
 pub mod sensee_v2;
@@ -598,6 +599,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
   add_to_protocol_map(&mut map, xibao::setup::XibaoIdentifierFactory::default());
   add_to_protocol_map(&mut map, xinput::setup::XInputIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    sdl_gamepad::setup::SdlGamepadIdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     xiuxiuda::setup::XiuxiudaIdentifierFactory::default(),
