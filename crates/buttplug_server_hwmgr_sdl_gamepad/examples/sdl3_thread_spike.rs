@@ -25,6 +25,10 @@ fn main() {
     .spawn(|| {
       println!("[sdl-thread] setting JOYSTICK_ALLOW_BACKGROUND_EVENTS hint (pre-init)");
       sdl3::hint::set(sdl3::hint::names::JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
+      // Mirror the production factory's platform policy (see
+      // production_sdl_factory in src/sdl_task.rs for the full rationale).
+      #[cfg(target_os = "macos")]
+      sdl3::hint::set(sdl3::hint::names::JOYSTICK_MFI, "0");
       println!("[sdl-thread] sdl3::init()");
       let sdl = sdl3::init().expect("sdl3::init() must work on a dedicated thread");
       println!("[sdl-thread] init OK; initializing gamepad subsystem (headless)");

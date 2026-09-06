@@ -610,8 +610,21 @@ impl DriverGamepad for Sdl3Gamepad {
 /// Production factory: sets the background-events hint (SDL guidance is to do
 /// this before initialization so hotplug works while unfocused/headless),
 /// initializes SDL + the gamepad subsystem, and builds the driver.
+///
+/// On macOS, SDL3 routes wired gamepads to GCController (MFI) by default, and
+/// hidapi device drivers decline them while MFI is enabled (see the
+/// `SDL_PLATFORM_MACOS && SDL_JOYSTICK_MFI` guard in SDL's hidapi drivers:
+/// wired pads enumerate with DevSrvsID paths). GCController discovery is
+/// delivered through Cocoa runloop notifications, which this headless,
+/// no-video process never spins - so with the default policy no gamepads are
+/// ever discovered here. Disabling MFI routes gamepads to hidapi, which
+/// enumerates synchronously and works headless (verified on hardware: a wired
+/// Xbox One S enumerates and `set_rumble` succeeds with this hint). iOS keeps
+/// the MFI default, where GCController is the only gamepad backend.
 fn production_sdl_factory() -> Result<Box<dyn SdlDriver>, SdlTaskInitError> {
   sdl3::hint::set(sdl3::hint::names::JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
+  #[cfg(target_os = "macos")]
+  sdl3::hint::set(sdl3::hint::names::JOYSTICK_MFI, "0");
   let sdl = sdl3::init().map_err(|e| SdlTaskInitError(e.to_string()))?;
   let gamepads = sdl.gamepad().map_err(|e| SdlTaskInitError(e.to_string()))?;
   Ok(Box::new(Sdl3Driver {
