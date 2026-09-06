@@ -53,7 +53,9 @@ example (headless init + no-pump enumeration on a spawned thread), which CI
 runs on all three operating systems. Real-controller behavior — notably
 smooth continuous rumble with the refresh-before-expiry scheme — must be
 validated manually on each platform before release; see the manual validation
-checklist in the repository's pull request for this feature.
+checklist in the repository's pull request for this feature. Confirmed on
+hardware so far: Bluetooth DualSense on macOS discovers and rumbles (with the
+one-second keepalive re-arming the effect).
 
 ## Platform support
 

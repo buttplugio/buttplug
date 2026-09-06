@@ -35,9 +35,13 @@ use tokio::sync::{oneshot, watch};
 /// crate documents `u32::MAX` as overflowing and ending the effect immediately.
 pub(crate) const RUMBLE_DURATION_MS: u32 = 60_000;
 
-/// Elapsed time (ms) after which a still-active (non-zero) rumble is re-armed.
-/// Comfortably before [`RUMBLE_DURATION_MS`] so the effect never lapses.
-const RUMBLE_REFRESH_AFTER_MS: u64 = 50_000;
+/// Interval (ms) at which a still-active (non-zero) rumble is re-armed. A
+/// one-second keepalive, not a near-expiry refresh: on-hardware testing
+/// showed some controllers (Bluetooth DualSense) stop rumbling after a few
+/// seconds despite a long arm, so the current command is simply re-sent
+/// every second while active. The long finite arm remains as a safety net
+/// if a keepalive is missed.
+const RUMBLE_KEEPALIVE_INTERVAL_MS: u64 = 1_000;
 
 /// Interval (ms) at which open gamepads have their connected state polled.
 const CONNECTED_POLL_INTERVAL_MS: u64 = 500;
@@ -312,12 +316,12 @@ struct OpenPadState {
 ///
 /// Zero-speed commands never refresh (the gamepad is stopped; letting the
 /// effect lapse is exactly what we want). Non-zero commands re-arm after
-/// [`RUMBLE_REFRESH_AFTER_MS`], safely before the finite arm duration lapses.
+/// [`RUMBLE_KEEPALIVE_INTERVAL_MS`], safely before the finite arm duration lapses.
 fn refresh_decision(last_rumble: (u16, u16), last_set_at: u64, now_ms: u64) -> Option<(u16, u16)> {
   if last_rumble == (0, 0) {
     return None;
   }
-  if now_ms.saturating_sub(last_set_at) >= RUMBLE_REFRESH_AFTER_MS {
+  if now_ms.saturating_sub(last_set_at) >= RUMBLE_KEEPALIVE_INTERVAL_MS {
     Some(last_rumble)
   } else {
     None
@@ -1223,12 +1227,12 @@ mod tests {
     assert_eq!(refresh_decision((0, 0), 0, 1_000_000), None);
     // Before the deadline: no refresh.
     assert_eq!(
-      refresh_decision((100, 200), 1_000, 1_000 + RUMBLE_REFRESH_AFTER_MS - 1),
+      refresh_decision((100, 200), 1_000, 1_000 + RUMBLE_KEEPALIVE_INTERVAL_MS - 1),
       None
     );
     // At the deadline: re-arm with the same speeds.
     assert_eq!(
-      refresh_decision((100, 200), 1_000, 1_000 + RUMBLE_REFRESH_AFTER_MS),
+      refresh_decision((100, 200), 1_000, 1_000 + RUMBLE_KEEPALIVE_INTERVAL_MS),
       Some((100, 200))
     );
     // Long past the deadline (e.g. after a stall): still re-arms.
@@ -1258,7 +1262,7 @@ mod tests {
     );
 
     // Just before the refresh deadline: no re-arm.
-    clock.advance_to(RUMBLE_REFRESH_AFTER_MS - 1);
+    clock.advance_to(RUMBLE_KEEPALIVE_INTERVAL_MS - 1);
     handle.scan().await.expect("probe scan should succeed");
     assert_eq!(
       state.lock().unwrap().rumble_log.len(),
@@ -1268,7 +1272,7 @@ mod tests {
 
     // Reaching the deadline triggers exactly one re-send with the same
     // parameters, comfortably before the finite arm lapses.
-    clock.advance_to(RUMBLE_REFRESH_AFTER_MS);
+    clock.advance_to(RUMBLE_KEEPALIVE_INTERVAL_MS);
     handle.scan().await.expect("probe scan should succeed");
     assert_eq!(
       state.lock().unwrap().rumble_log,
@@ -1301,9 +1305,9 @@ mod tests {
         .expect("zero rumble should succeed");
       assert_eq!(state.lock().unwrap().rumble_log.len(), 2);
       for t in [
-        RUMBLE_REFRESH_AFTER_MS,
-        RUMBLE_REFRESH_AFTER_MS * 2,
-        RUMBLE_REFRESH_AFTER_MS * 3,
+        RUMBLE_KEEPALIVE_INTERVAL_MS,
+        RUMBLE_KEEPALIVE_INTERVAL_MS * 2,
+        RUMBLE_KEEPALIVE_INTERVAL_MS * 3,
       ] {
         clock.advance_to(t);
         handle.scan().await.expect("probe scan should succeed");
@@ -1327,7 +1331,7 @@ mod tests {
         .expect("rumble should succeed");
       opened.close().await.expect("close should succeed");
       // Close while rumbling emits the zero-speed stop, then nothing more.
-      clock.advance_to(RUMBLE_REFRESH_AFTER_MS * 2);
+      clock.advance_to(RUMBLE_KEEPALIVE_INTERVAL_MS * 2);
       handle.scan().await.expect("probe scan should succeed");
       assert_eq!(
         state.lock().unwrap().rumble_log,
@@ -1350,7 +1354,7 @@ mod tests {
         .await
         .expect("rumble should succeed");
       state.lock().unwrap().connected.insert(id(12), false);
-      clock.advance_to(RUMBLE_REFRESH_AFTER_MS * 2);
+      clock.advance_to(RUMBLE_KEEPALIVE_INTERVAL_MS * 2);
       handle.scan().await.expect("probe scan should succeed");
       assert_eq!(
         state.lock().unwrap().rumble_log,

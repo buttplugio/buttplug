@@ -7,4 +7,4 @@
 ## Platform notes
 
 - macOS: **Bluetooth controllers only.** Wired pads are skipped at scan time with a logged explanation: Apple gives hidapi read-only shortened reports for wired gamepads, so rumble cannot work that way, and the working path (GCController) requires a main-thread runloop this architecture does not host. SDL2 shares this Apple limitation. Windows/Linux support wired and Bluetooth controllers.
-- Rumble is armed finitely (60s) and refreshed before expiry; an explicit zero-speed stop is sent on close or removal.
+- Rumble is armed finitely (60s) and re-armed every second as a keepalive (some controllers, e.g. Bluetooth DualSense, stop early despite a long arm); an explicit zero-speed stop is sent on close or removal.
