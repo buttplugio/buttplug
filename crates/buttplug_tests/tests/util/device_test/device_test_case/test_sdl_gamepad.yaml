@@ -1,0 +1,52 @@
+devices:
+  - identifier:
+      name: "sdl-gamepad"
+    expected_name: "SDL Gamepad"
+device_commands:
+  # Vibrate low motor (feature 0) at 0.5: ceil(65535 * 0.5) = 32768 = 0x8000.
+  # High motor stays at 0, and both speeds are packed little-endian.
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x00, 0x80, 0x00, 0x00]
+            write_with_response: false
+  # Vibrate high motor (feature 1) at max: 65535 = 0xffff. The packet must
+  # carry BOTH stored speeds (low motor keeps its previous value).
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 1
+            Speed: 1.0
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x00, 0x80, 0xff, 0xff]
+            write_with_response: false
+  # Stop zeroes both motors; the stop path emits one write per feature, each
+  # carrying the full current motor state.
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x00, 0x00, 0xff, 0xff]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [0x00, 0x00, 0x00, 0x00]
+            write_with_response: false

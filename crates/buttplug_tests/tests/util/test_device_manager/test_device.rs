@@ -114,6 +114,13 @@ impl HardwareSpecializer for TestHardwareSpecializer {
           endpoints.push(*endpoint);
         }
       }
+    } else if let Some(ProtocolCommunicationSpecifier::SdlGamepad(_)) = specifiers
+      .iter()
+      .find(|x| matches!(x, ProtocolCommunicationSpecifier::SdlGamepad(_)))
+    {
+      // SDL gamepad hardware only exposes the Tx endpoint.
+      device.add_endpoint(&Endpoint::Tx);
+      endpoints.push(Endpoint::Tx);
     }
     let hardware = Hardware::new(
       &device.name(),
