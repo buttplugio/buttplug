@@ -50,45 +50,7 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
     .unwrap();
 
   let mut device_manager_builder = ServerDeviceManagerBuilder::new(dcm);
-  #[cfg(feature = "btleplug-manager")]
-  {
-    use buttplug_server_hwmgr_btleplug::BtlePlugCommunicationManagerBuilder;
-    device_manager_builder.comm_manager(BtlePlugCommunicationManagerBuilder::default());
-  }
-  #[cfg(feature = "websocket-manager")]
-  {
-    use buttplug_server_hwmgr_websocket::WebsocketServerDeviceCommunicationManagerBuilder;
-    device_manager_builder.comm_manager(
-      WebsocketServerDeviceCommunicationManagerBuilder::default().listen_on_all_interfaces(true),
-    );
-  }
-  #[cfg(all(
-    feature = "serial-manager",
-    any(target_os = "windows", target_os = "macos", target_os = "linux")
-  ))]
-  {
-    use buttplug_server_hwmgr_serial::SerialPortCommunicationManagerBuilder;
-    device_manager_builder.comm_manager(SerialPortCommunicationManagerBuilder::default());
-  }
-  #[cfg(feature = "lovense-connect-service-manager")]
-  {
-    use buttplug_server_hwmgr_lovense_connect::LovenseConnectServiceCommunicationManagerBuilder;
-    device_manager_builder
-      .comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default());
-  }
-  #[cfg(all(
-    feature = "lovense-dongle-manager",
-    any(target_os = "windows", target_os = "macos", target_os = "linux")
-  ))]
-  {
-    use buttplug_server_hwmgr_lovense_dongle::LovenseHIDDongleCommunicationManagerBuilder;
-    device_manager_builder.comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default());
-  }
-  #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
-  {
-    use buttplug_server_hwmgr_xinput::XInputDeviceCommunicationManagerBuilder;
-    device_manager_builder.comm_manager(XInputDeviceCommunicationManagerBuilder::default());
-  }
+  register_comm_managers(&mut device_manager_builder);
   let server_builder = ButtplugServerBuilder::new(device_manager_builder.finish().unwrap());
   let server = server_builder.finish().unwrap();
   let connector = ButtplugInProcessClientConnectorBuilder::default()
@@ -97,4 +59,89 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
   let client = ButtplugClient::new(client_name);
   client.connect(connector).await.unwrap();
   client
+}
+
+/// Registers every comm manager selected by this crate's cargo features, and
+/// returns the names of the managers that were registered so tests can assert
+/// feature wiring (single source of truth: `in_process_client` uses this and
+/// ignores the result).
+// With no manager features enabled (how e.g. buttplug_tests consumes this
+// crate), nothing is registered and the builder parameter goes unused.
+#[allow(unused_mut, unused_variables)]
+fn register_comm_managers(
+  device_manager_builder: &mut ServerDeviceManagerBuilder,
+) -> Vec<&'static str> {
+  let mut registered = vec![];
+  #[cfg(feature = "btleplug-manager")]
+  {
+    use buttplug_server_hwmgr_btleplug::BtlePlugCommunicationManagerBuilder;
+    device_manager_builder.comm_manager(BtlePlugCommunicationManagerBuilder::default());
+    registered.push("btleplug");
+  }
+  #[cfg(feature = "websocket-manager")]
+  {
+    use buttplug_server_hwmgr_websocket::WebsocketServerDeviceCommunicationManagerBuilder;
+    device_manager_builder.comm_manager(
+      WebsocketServerDeviceCommunicationManagerBuilder::default().listen_on_all_interfaces(true),
+    );
+    registered.push("websocket-server");
+  }
+  #[cfg(all(
+    feature = "serial-manager",
+    any(target_os = "windows", target_os = "macos", target_os = "linux")
+  ))]
+  {
+    use buttplug_server_hwmgr_serial::SerialPortCommunicationManagerBuilder;
+    device_manager_builder.comm_manager(SerialPortCommunicationManagerBuilder::default());
+    registered.push("serial");
+  }
+  #[cfg(feature = "lovense-connect-service-manager")]
+  {
+    use buttplug_server_hwmgr_lovense_connect::LovenseConnectServiceCommunicationManagerBuilder;
+    device_manager_builder
+      .comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default());
+    registered.push("lovense-connect-service");
+  }
+  #[cfg(all(
+    feature = "lovense-dongle-manager",
+    any(target_os = "windows", target_os = "macos", target_os = "linux")
+  ))]
+  {
+    use buttplug_server_hwmgr_lovense_dongle::LovenseHIDDongleCommunicationManagerBuilder;
+    device_manager_builder.comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default());
+    registered.push("lovense-dongle");
+  }
+  #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
+  {
+    use buttplug_server_hwmgr_xinput::XInputDeviceCommunicationManagerBuilder;
+    device_manager_builder.comm_manager(XInputDeviceCommunicationManagerBuilder::default());
+    registered.push("xinput");
+  }
+  // SDL gamepad manager is opt-in (not in the default feature set) and, unlike
+  // XInput, is cross-platform: no OS gate.
+  #[cfg(feature = "sdl-gamepad-manager")]
+  {
+    use buttplug_server_hwmgr_sdl_gamepad::SdlGamepadCommunicationManagerBuilder;
+    device_manager_builder.comm_manager(SdlGamepadCommunicationManagerBuilder::default());
+    registered.push("sdl-gamepad");
+  }
+  registered
+}
+
+#[cfg(all(test, feature = "sdl-gamepad-manager"))]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn feature_registers_sdl_manager() {
+    let dcm = DeviceConfigurationManagerBuilder::default()
+      .finish()
+      .unwrap();
+    let mut builder = ServerDeviceManagerBuilder::new(dcm);
+    let registered = register_comm_managers(&mut builder);
+    assert!(
+      registered.contains(&"sdl-gamepad"),
+      "SDL gamepad manager must be registered when the feature is enabled, got {registered:?}"
+    );
+  }
 }

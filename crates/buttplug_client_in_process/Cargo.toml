@@ -28,6 +28,9 @@ lovense-connect-service-manager=["buttplug_server_hwmgr_lovense_connect"]
 serial-manager=["buttplug_server_hwmgr_serial"]
 websocket-manager=["buttplug_server_hwmgr_websocket"]
 xinput-manager=["buttplug_server_hwmgr_xinput"]
+# Opt-in cross-platform gamepad manager via SDL3. Deliberately NOT in default:
+# building SDL3 from source is too heavy for default library consumers.
+sdl-gamepad-manager=["buttplug_server_hwmgr_sdl_gamepad"]
 tokio-runtime = ["buttplug_core/tokio-runtime", "buttplug_client/tokio-runtime", "buttplug_server/tokio-runtime"]
 wasm = ["buttplug_core/wasm", "buttplug_client/wasm", "buttplug_server/wasm"]
 
@@ -43,6 +46,7 @@ buttplug_server_hwmgr_lovense_dongle = { version = "11.0.0", path = "../buttplug
 buttplug_server_hwmgr_serial = { version = "11.0.0", path = "../buttplug_server_hwmgr_serial", optional = true}
 buttplug_server_hwmgr_websocket = { version = "11.0.0", path = "../buttplug_server_hwmgr_websocket", optional = true}
 buttplug_server_hwmgr_xinput = { version = "11.0.0", path = "../buttplug_server_hwmgr_xinput", optional = true}
+buttplug_server_hwmgr_sdl_gamepad = { version = "11.0.0", path = "../buttplug_server_hwmgr_sdl_gamepad", optional = true}
 futures = "0.3.33"
 futures-util = "0.3.33"
 thiserror = "2.0.19"
