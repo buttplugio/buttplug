@@ -128,6 +128,11 @@ pub struct IntifaceCLIArguments {
   #[getset(get_copy = "pub")]
   use_xinput: bool,
 
+  /// turn on sdl gamepad (cross-platform) device support (default off)
+  #[argh(switch)]
+  #[getset(get_copy = "pub")]
+  use_sdl_gamepad: bool,
+
   /// turn on lovense connect app device support (off by default)
   #[argh(switch)]
   #[getset(get_copy = "pub")]
@@ -250,6 +255,7 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
       .use_lovense_dongle_serial(args.use_lovense_dongle_serial())
       .use_lovense_dongle_hid(args.use_lovense_dongle_hid())
       .use_xinput(args.use_xinput())
+      .use_sdl_gamepad(args.use_sdl_gamepad())
       .use_lovense_connect(args.use_lovense_connect())
       .use_device_websocket_server(args.use_device_websocket_server())
       .max_ping_time(args.max_ping_time())
@@ -361,4 +367,27 @@ async fn main() -> Result<(), IntifaceEngineError> {
   }
 
   Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn cli_use_sdl_gamepad_flows_to_registration() {
+    // argh parses the flag...
+    let args = IntifaceCLIArguments::from_args(&["intiface-engine"], &["--use-sdl-gamepad"])
+      .expect("flag should parse");
+    assert!(args.use_sdl_gamepad());
+    // ...and the TryFrom conversion into EngineOptions keeps it.
+    let options = EngineOptions::try_from(args).expect("options should build");
+    assert!(options.use_sdl_gamepad());
+
+    // Without the flag, it's off.
+    let args =
+      IntifaceCLIArguments::from_args(&["intiface-engine"], &[]).expect("empty args should parse");
+    assert!(!args.use_sdl_gamepad());
+    let options = EngineOptions::try_from(args).expect("options should build");
+    assert!(!options.use_sdl_gamepad());
+  }
 }
