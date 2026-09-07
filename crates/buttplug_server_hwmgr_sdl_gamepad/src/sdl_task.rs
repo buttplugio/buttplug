@@ -671,6 +671,11 @@ impl DriverGamepad for Sdl3Gamepad {
 /// Xbox One S enumerates and `set_rumble` succeeds with this hint). iOS keeps
 /// the MFI default, where GCController is the only gamepad backend.
 fn production_sdl_factory() -> Result<Box<dyn SdlDriver>, SdlTaskInitError> {
+  // SDL installs SIGINT/SIGTERM handlers by default and turns those signals
+  // into SDL quit events. This backend is headless and intentionally never
+  // pumps SDL events, so leave signal ownership with the host application
+  // (intiface-engine uses Tokio's ctrl_c handler).
+  sdl3::hint::set(sdl3::hint::names::NO_SIGNAL_HANDLERS, "1");
   sdl3::hint::set(sdl3::hint::names::JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
   #[cfg(target_os = "macos")]
   sdl3::hint::set(sdl3::hint::names::JOYSTICK_MFI, "0");
