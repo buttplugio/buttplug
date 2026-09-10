@@ -1879,16 +1879,16 @@ configurations:
   - J-Mighty
   name: JoyHub Mighty
   features:
-  - id: 6f2e25ae-d5f0-4823-a8db-9072e8e6a0d4
+  - id: 8a0b6680-b90d-4851-9d40-c2c04916a32a
     output:
-      oscillate:
+      rotate:
         value:
         - 0
         - 255
     index: 0
-  - id: 9b73399f-04a8-4a3b-9e65-b98e11a47f47
+  - id: 9f9a3a2f-fad3-4037-8b42-b089d9be1479
     output:
-      rotate:
+      oscillate:
         value:
         - 0
         - 255
