@@ -1,0 +1,59 @@
+---
+defaults:
+  name: Sexverse V6
+  features:
+  - id: 0f9477c6-1461-49da-a902-2a619cf91bc5
+    output:
+      vibrate:
+        value:
+        - 0
+        - 100
+    index: 0
+  - id: 8c2235aa-c1d2-4775-8c55-3d1461123924
+    output:
+      oscillate:
+        value:
+        - 0
+        - 100
+    index: 1
+  id: 7d28e15e-4364-438e-9b65-b3c859f216f2
+configurations:
+  - identifier:
+      - A06K01C
+    name: Sexverse Aether
+    id: a86278b6-7502-474e-89dd-22465c8a2af3
+  - identifier:
+      - A14M01C
+    name: Sexverse Sirius
+    features:
+      - id: c74fb1ff-c8cc-46d8-9b7f-515787dd4d3f
+        output:
+          vibrate:
+            value:
+              - 0
+              - 100
+        index: 0
+      - id: 926d9faf-8d0a-4f0c-ae62-e9bfebb9eb59
+        output:
+          oscillate:
+            value:
+              - 0
+              - 100
+        index: 1
+      - id: 8196c72a-6c75-4811-80df-af8edf1854ef
+        output:
+          constrict:
+            value:
+              - 0
+              - 100
+        index: 2
+    id: 7c6f7087-9d02-43e6-9b53-1b149d915893
+communication:
+- btle:
+    names:
+    - A06K01C
+    - A14M01C
+    services:
+      0000ffaa-0000-1000-8000-00805f9b34fb:
+        tx: 0000aa02-0000-1000-8000-00805f9b34fb
+        rx: 0000aa04-0000-1000-8000-00805f9b34fb

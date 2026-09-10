@@ -107,6 +107,7 @@ pub mod sexverse_v2;
 pub mod sexverse_v3;
 pub mod sexverse_v4;
 pub mod sexverse_v5;
+pub mod sexverse_v6;
 pub mod simulated;
 pub mod svakom;
 pub mod synchro;
@@ -459,6 +460,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     sexverse_v5::setup::SexverseV5IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    sexverse_v6::setup::SexverseV6IdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,

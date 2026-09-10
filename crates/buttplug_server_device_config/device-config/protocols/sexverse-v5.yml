@@ -10,7 +10,7 @@ defaults:
         - 100
     index: 0
   id: 783bc287-528c-4c58-a7ec-47a49304309e
-configuration:
+configurations:
 - identifier:
   - CB-WXW03
   name: Hannibal Kona

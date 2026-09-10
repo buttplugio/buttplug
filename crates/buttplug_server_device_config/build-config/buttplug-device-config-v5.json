@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 42
+    "minor": 50
   },
   "protocols": {
     "activejoy": {
@@ -21602,7 +21602,7 @@
           }
         }
       ],
-      "configuration": [
+      "configurations": [
         {
           "id": "d3c4665b-d5bd-4144-ac20-b40a11a839d1",
           "identifier": [
@@ -21628,6 +21628,108 @@
         ],
         "id": "783bc287-528c-4c58-a7ec-47a49304309e",
         "name": "Sexverse Heart"
+      }
+    },
+    "sexverse-v6": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "A06K01C",
+              "A14M01C"
+            ],
+            "services": {
+              "0000ffaa-0000-1000-8000-00805f9b34fb": {
+                "rx": "0000aa04-0000-1000-8000-00805f9b34fb",
+                "tx": "0000aa02-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "a86278b6-7502-474e-89dd-22465c8a2af3",
+          "identifier": [
+            "A06K01C"
+          ],
+          "name": "Sexverse Aether"
+        },
+        {
+          "features": [
+            {
+              "id": "c74fb1ff-c8cc-46d8-9b7f-515787dd4d3f",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "926d9faf-8d0a-4f0c-ae62-e9bfebb9eb59",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "8196c72a-6c75-4811-80df-af8edf1854ef",
+              "index": 2,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "7c6f7087-9d02-43e6-9b53-1b149d915893",
+          "identifier": [
+            "A14M01C"
+          ],
+          "name": "Sexverse Sirius"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "0f9477c6-1461-49da-a902-2a619cf91bc5",
+            "index": 0,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  100
+                ]
+              }
+            }
+          },
+          {
+            "id": "8c2235aa-c1d2-4775-8c55-3d1461123924",
+            "index": 1,
+            "output": {
+              "oscillate": {
+                "value": [
+                  0,
+                  100
+                ]
+              }
+            }
+          }
+        ],
+        "id": "7d28e15e-4364-438e-9b65-b3c859f216f2",
+        "name": "Sexverse V6"
       }
     },
     "simulated": {
