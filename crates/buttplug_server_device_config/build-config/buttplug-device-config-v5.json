@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 50
+    "minor": 52
   },
   "protocols": {
     "activejoy": {
@@ -15631,7 +15631,8 @@
               "TKLM-C004-BT",
               "TKLM-C005-BT",
               "TKLM-N001-BT",
-              "TKLM-C001-BT"
+              "TKLM-C001-BT",
+              "TKLM-CZ01"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -15870,6 +15871,39 @@
             "TKLM-C001-BT"
           ],
           "name": "Luvmazer Rose Finger Vibe"
+        },
+        {
+          "features": [
+            {
+              "id": "f98578cf-e7b8-4179-bead-ce8b25290990",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "e9c572c7-40cc-467a-a6be-f0931c71e479",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "a53e908a-d157-43a1-9403-1ca1c0607318",
+          "identifier": [
+            "TKLM-CZ01"
+          ],
+          "name": "Luvmazer Passion Tether Ring"
         }
       ],
       "defaults": {

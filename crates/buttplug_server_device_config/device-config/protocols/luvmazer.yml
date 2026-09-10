@@ -150,6 +150,25 @@ configurations:
             - 255
       index: 2
   id: 10030d9f-bb93-4c57-8a07-a53dabd0dde9
+- identifier:
+    - TKLM-CZ01
+  name: Luvmazer Passion Tether Ring
+  features:
+    - id: f98578cf-e7b8-4179-bead-ce8b25290990
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: e9c572c7-40cc-467a-a6be-f0931c71e479
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+  id: a53e908a-d157-43a1-9403-1ca1c0607318
 communication:
 - btle:
     names:
@@ -160,6 +179,7 @@ communication:
     - TKLM-C005-BT
     - TKLM-N001-BT
     - TKLM-C001-BT
+    - TKLM-CZ01
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
