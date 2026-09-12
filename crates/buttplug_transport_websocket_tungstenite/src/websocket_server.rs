@@ -323,6 +323,7 @@ mod test {
     message::serializer::ButtplugSerializedMessage,
   };
   use std::io::ErrorKind;
+  use std::net::SocketAddr;
   use std::sync::{Arc, Mutex};
   use tokio::{
     io::AsyncWriteExt,
@@ -335,8 +336,9 @@ mod test {
   async fn bind_addr_in_use_returns_structured_error() {
     let _listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let port = _listener.local_addr().unwrap().port();
+    let listen_address: SocketAddr = format!("127.0.0.1:{port}").parse().unwrap();
     let transport = ButtplugWebsocketServerTransportBuilder::default()
-      .port(port)
+      .listen_address(listen_address)
       .finish();
     let (_outgoing_sender, outgoing_receiver) = mpsc::channel::<ButtplugSerializedMessage>(1);
     let (incoming_sender, _incoming_receiver) =
@@ -351,13 +353,11 @@ mod test {
       ButtplugConnectorError::TransportSpecificError(
         ButtplugConnectorTransportSpecificError::SocketBindError {
           address,
-          port: error_port,
           kind,
           message: _,
         },
       ) => {
-        assert_eq!(address, "127.0.0.1");
-        assert_eq!(error_port, port);
+        assert_eq!(address, listen_address);
         assert_eq!(kind, ErrorKind::AddrInUse);
       }
       other => panic!("Unexpected error: {other:?}"),
@@ -402,7 +402,7 @@ mod test {
     let bound_port = Arc::new(Mutex::new(None));
     let callback_port = bound_port.clone();
     let transport = ButtplugWebsocketServerTransportBuilder::default()
-      .port(0)
+      .listen_address("127.0.0.1:0".parse().unwrap())
       .on_listener_bound(move |port| {
         *callback_port.lock().unwrap() = Some(port);
       })
