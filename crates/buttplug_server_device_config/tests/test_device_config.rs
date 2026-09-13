@@ -49,9 +49,36 @@ fn test_sdl_gamepad_protocol_in_generated_config() {
   assert_eq!(features.len(), 2);
   for (i, feature) in features.iter().enumerate() {
     assert_eq!(feature["index"], i as u64);
+    assert!(!feature["description"].as_str().unwrap().is_empty());
+    assert_eq!(
+      feature["description"],
+      ["Low-frequency rumble", "High-frequency rumble"][i]
+    );
     assert_eq!(feature["output"]["vibrate"]["value"][0], 0);
     assert_eq!(feature["output"]["vibrate"]["value"][1], 65535);
   }
+  let configurations = protocol["configurations"].as_array().unwrap();
+  assert_eq!(configurations.len(), 2);
+  assert_eq!(
+    configurations[0]["identifier"][0],
+    "__sdl-rumble-and-triggers"
+  );
+  assert_eq!(
+    configurations[0]["id"],
+    "c1d2e3f4-3333-4a7b-8c9d-1e2f3a4b5c6d"
+  );
+  assert_eq!(
+    configurations[0]["protocol_variant"],
+    "sdl-rumble-and-triggers"
+  );
+  assert_eq!(configurations[0]["features"].as_array().unwrap().len(), 4);
+  assert_eq!(configurations[1]["identifier"][0], "__sdl-triggers-only");
+  assert_eq!(
+    configurations[1]["id"],
+    "d2e3f4a5-4444-4b8c-9dae-2f3a4b5c6d7e"
+  );
+  assert_eq!(configurations[1]["protocol_variant"], "sdl-triggers-only");
+  assert_eq!(configurations[1]["features"].as_array().unwrap().len(), 2);
   let communication = protocol["communication"][0]["sdl-gamepad"].clone();
   assert_eq!(communication["exists"], true);
 }

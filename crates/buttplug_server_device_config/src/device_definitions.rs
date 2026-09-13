@@ -12,6 +12,40 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::server_device_feature::ServerDeviceFeature;
+
+/// Neutral, protocol-agnostic metadata attached to connected hardware naming the base definition
+/// selected by the connector and the device's canonical (hardware-reported) name. A `None`
+/// `base_identifier` selects the protocol's default base definition. This value is never persisted
+/// and is never part of device identity.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DeviceDefinitionSelection {
+  protocol: String,
+  base_identifier: Option<String>,
+  canonical_name: String,
+}
+
+impl DeviceDefinitionSelection {
+  pub fn new(protocol: &str, base_identifier: Option<&str>, canonical_name: &str) -> Self {
+    Self {
+      protocol: protocol.to_owned(),
+      base_identifier: base_identifier.map(str::to_owned),
+      canonical_name: canonical_name.to_owned(),
+    }
+  }
+
+  pub fn protocol(&self) -> &str {
+    &self.protocol
+  }
+
+  pub fn base_identifier(&self) -> &Option<String> {
+    &self.base_identifier
+  }
+
+  pub fn canonical_name(&self) -> &str {
+    &self.canonical_name
+  }
+}
+
 #[derive(Debug, Clone, Getters, CopyGetters, Serialize, Deserialize)]
 pub struct ServerDeviceDefinition {
   #[getset(get = "pub")]
@@ -95,6 +129,12 @@ impl ServerDeviceDefinitionBuilder {
 
   pub fn base_id(&mut self, id: Uuid) -> &mut Self {
     self.def.base_id = Some(id);
+    self
+  }
+
+  /// Sets the canonical (hardware-reported) device name; display_name is the user override and is set separately.
+  pub fn name(&mut self, name: &str) -> &mut Self {
+    self.def.name = name.to_owned();
     self
   }
 
