@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 52
+    "minor": 53
   },
   "protocols": {
     "activejoy": {
@@ -20597,6 +20597,147 @@
         "features": [],
         "id": "9635a829-753b-4e5b-825c-24249526af09",
         "name": "SayberX Device"
+      }
+    },
+    "sdl-gamepad": {
+      "communication": [
+        {
+          "sdl-gamepad": {
+            "exists": true
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "features": [
+            {
+              "description": "Low-frequency rumble",
+              "id": "f56852c8-cb3b-4703-90b6-6291df0c6314",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    65535
+                  ]
+                }
+              }
+            },
+            {
+              "description": "High-frequency rumble",
+              "id": "e13388f9-a1b6-4c4c-a7b4-c68eeed293d8",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    65535
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Left-trigger rumble",
+              "id": "a1b2c3d4-1111-4e5f-8a6b-9c0d1e2f3a4b",
+              "index": 2,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    65535
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Right-trigger rumble",
+              "id": "b2c3d4e5-2222-4f6a-9b7c-0d1e2f3a4b5c",
+              "index": 3,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    65535
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "c1d2e3f4-3333-4a7b-8c9d-1e2f3a4b5c6d",
+          "identifier": [
+            "__sdl-rumble-and-triggers"
+          ],
+          "name": "SDL Gamepad (Rumble and Triggers)",
+          "protocol_variant": "sdl-rumble-and-triggers"
+        },
+        {
+          "features": [
+            {
+              "description": "Left-trigger rumble",
+              "id": "a1b2c3d4-1111-4e5f-8a6b-9c0d1e2f3a4b",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    65535
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Right-trigger rumble",
+              "id": "b2c3d4e5-2222-4f6a-9b7c-0d1e2f3a4b5c",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    65535
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "d2e3f4a5-4444-4b8c-9dae-2f3a4b5c6d7e",
+          "identifier": [
+            "__sdl-triggers-only"
+          ],
+          "name": "SDL Gamepad (Triggers Only)",
+          "protocol_variant": "sdl-triggers-only"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "description": "Low-frequency rumble",
+            "id": "f56852c8-cb3b-4703-90b6-6291df0c6314",
+            "index": 0,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  65535
+                ]
+              }
+            }
+          },
+          {
+            "description": "High-frequency rumble",
+            "id": "e13388f9-a1b6-4c4c-a7b4-c68eeed293d8",
+            "index": 1,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  65535
+                ]
+              }
+            }
+          }
+        ],
+        "id": "b35f2adf-16bc-4425-9276-5d191aeaf107",
+        "name": "SDL Gamepad"
       }
     },
     "sensee": {
