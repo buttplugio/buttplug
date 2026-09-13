@@ -1,3 +1,9 @@
+# 4.2.0 (2026-09-05)
+
+## Features
+
+- Add `--use-sdl-gamepad` flag (default off): cross-platform gamepad rumble via SDL3, coexisting with XInput on Windows (a warning is logged when both are enabled, since the same physical controller may appear as two devices). Structural inspiration credit: chiefautism's abandoned PR #860.
+
 # 4.1.0 (2026-07-28)
 
 ## Features

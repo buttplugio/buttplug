@@ -1,3 +1,9 @@
+# 11.0.1 (2026-09-05)
+
+## Features
+
+- Add `sdl-gamepad` protocol and communication specifier: cross-platform gamepad rumble via SDL3 (two 0-65535 vibrate features, low/high frequency motors). Device config version bumped to 5.43. Structural inspiration credit: chiefautism's abandoned PR #860.
+
 # 11.0.0 (2026-07-28)
 
 ## Features

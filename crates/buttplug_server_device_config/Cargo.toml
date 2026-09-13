@@ -44,3 +44,5 @@ buttplug_core = { version = "11.0.0", path = "../buttplug_core" }
 
 [dev-dependencies]
 test-case = "3.3.1"
+serde_json = "1.0"
+serde_yaml = "0.9"

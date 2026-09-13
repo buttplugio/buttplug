@@ -8,6 +8,7 @@
 mod base;
 mod device;
 mod feature;
+pub(crate) use feature::ConfigUserDeviceFeature;
 mod protocol;
 mod user;
 

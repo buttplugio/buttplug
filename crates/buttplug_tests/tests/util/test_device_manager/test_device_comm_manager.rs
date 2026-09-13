@@ -20,7 +20,11 @@ use buttplug_server::device::hardware::communication::{
   HardwareCommunicationManagerBuilder,
   HardwareCommunicationManagerEvent,
 };
-use buttplug_server_device_config::{BluetoothLESpecifier, ProtocolCommunicationSpecifier};
+use buttplug_server_device_config::{
+  BluetoothLESpecifier,
+  ProtocolCommunicationSpecifier,
+  SdlGamepadSpecifier,
+};
 use futures::future::{self, FutureExt};
 use log::*;
 use serde::{Deserialize, Serialize};
@@ -50,6 +54,8 @@ pub struct TestDeviceIdentifier {
   name: String,
   #[serde(default = "generate_address")]
   address: String,
+  #[serde(default, skip_serializing_if = "Option::is_none")]
+  sdl_selection: Option<String>,
 }
 
 impl TestDeviceIdentifier {
@@ -60,6 +66,7 @@ impl TestDeviceIdentifier {
     Self {
       name: name.to_owned(),
       address,
+      sdl_selection: None,
     }
   }
 
@@ -133,11 +140,21 @@ fn new_uninitialized_ble_test_device(
   fail_disconnect: bool,
 ) -> TestHardwareConnector {
   let address = identifier.address.clone();
-  let specifier = ProtocolCommunicationSpecifier::BluetoothLE(
-    BluetoothLESpecifier::new_from_device(&identifier.name, &HashMap::new(), &[]),
-  );
+  // Test devices are BLE by default. The "sdl-gamepad" identifier name is the
+  // sentinel for SDL gamepad test devices, which present the SDL gamepad
+  // specifier so the sdl-gamepad protocol matches them.
+  let specifier = if identifier.name == "sdl-gamepad" {
+    ProtocolCommunicationSpecifier::SdlGamepad(SdlGamepadSpecifier::default())
+  } else {
+    ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
+      &identifier.name,
+      &HashMap::new(),
+      &[],
+    ))
+  };
   let hardware = TestDevice::new(&identifier.name, &address, device_channel, fail_disconnect);
   TestHardwareConnector::new(specifier, hardware)
+    .with_sdl_selection(identifier.sdl_selection.clone())
 }
 
 pub struct TestDeviceCommunicationManager {

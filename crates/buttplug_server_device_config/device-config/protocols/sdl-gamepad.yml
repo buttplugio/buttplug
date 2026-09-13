@@ -1,0 +1,84 @@
+defaults:
+  name: SDL Gamepad
+  features:
+  - id: f56852c8-cb3b-4703-90b6-6291df0c6314
+    description: Low-frequency rumble
+    output:
+      vibrate:
+        value:
+        - 0
+        - 65535
+    index: 0
+  - id: e13388f9-a1b6-4c4c-a7b4-c68eeed293d8
+    description: High-frequency rumble
+    output:
+      vibrate:
+        value:
+        - 0
+        - 65535
+    index: 1
+  id: b35f2adf-16bc-4425-9276-5d191aeaf107
+configurations:
+- identifier:
+  - __sdl-rumble-and-triggers
+  name: SDL Gamepad (Rumble and Triggers)
+  id: c1d2e3f4-3333-4a7b-8c9d-1e2f3a4b5c6d
+  protocol_variant: sdl-rumble-and-triggers
+  features:
+  - id: f56852c8-cb3b-4703-90b6-6291df0c6314
+    description: Low-frequency rumble
+    output:
+      vibrate:
+        value:
+        - 0
+        - 65535
+    index: 0
+  - id: e13388f9-a1b6-4c4c-a7b4-c68eeed293d8
+    description: High-frequency rumble
+    output:
+      vibrate:
+        value:
+        - 0
+        - 65535
+    index: 1
+  - id: a1b2c3d4-1111-4e5f-8a6b-9c0d1e2f3a4b
+    description: Left-trigger rumble
+    output:
+      vibrate:
+        value:
+        - 0
+        - 65535
+    index: 2
+  - id: b2c3d4e5-2222-4f6a-9b7c-0d1e2f3a4b5c
+    description: Right-trigger rumble
+    output:
+      vibrate:
+        value:
+        - 0
+        - 65535
+    index: 3
+- identifier:
+  - __sdl-triggers-only
+  name: SDL Gamepad (Triggers Only)
+  id: d2e3f4a5-4444-4b8c-9dae-2f3a4b5c6d7e
+  protocol_variant: sdl-triggers-only
+  features:
+  - id: a1b2c3d4-1111-4e5f-8a6b-9c0d1e2f3a4b
+    description: Left-trigger rumble
+    output:
+      vibrate:
+        value:
+        - 0
+        - 65535
+    index: 0
+  - id: b2c3d4e5-2222-4f6a-9b7c-0d1e2f3a4b5c
+    description: Right-trigger rumble
+    output:
+      vibrate:
+        value:
+        - 0
+        - 65535
+    index: 1
+communication:
+- sdl-gamepad:
+    exists: true

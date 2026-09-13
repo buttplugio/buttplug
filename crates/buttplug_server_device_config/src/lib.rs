@@ -158,6 +158,8 @@ mod identifiers;
 pub use identifiers::*;
 mod device_definitions;
 pub use device_definitions::*;
+mod sdl_layout;
+pub use sdl_layout::*;
 mod server_device_feature;
 pub use server_device_feature::*;
 mod endpoint;
@@ -180,6 +182,8 @@ pub enum ButtplugDeviceConfigError {
   /// Base ID not found, cannot match user device/feature to a base device/feature
   #[error("Device definition with base id {0} not found")]
   BaseIdNotFound(Uuid),
+  #[error("Device definition selection is invalid: {0}")]
+  DeviceSelectionInvalid(String),
   #[error("Feature vectors between base and user device definitions do not match")]
   UserFeatureMismatch,
   #[error("Output value {0} not in range {1}")]

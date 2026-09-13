@@ -7,8 +7,146 @@
 
 mod util;
 //use buttplug::util::async_manager;
+use buttplug_client::{ButtplugClient, ButtplugClientDevice, ButtplugClientEvent};
+use buttplug_core::message::OutputType;
+use futures::StreamExt;
+use std::time::Duration;
 use test_case::test_case;
 use util::device_test::DeviceTestCase;
+
+async fn scan_sdl_case(test_case: &DeviceTestCase) -> (ButtplugClient, ButtplugClientDevice) {
+  let (server, _channels) = util::device_test::client::client_v4::build_server(test_case);
+  let client = ButtplugClient::new("SDL advertisement test");
+  let mut connector =
+    buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder::default();
+  connector.server(server);
+  client.connect(connector.finish()).await.unwrap();
+  let device = {
+    let mut events = client.event_stream();
+    client.start_scanning().await.unwrap();
+    tokio::time::timeout(Duration::from_secs(5), async {
+      loop {
+        if let Some(ButtplugClientEvent::DeviceAdded(device)) = events.next().await {
+          break device;
+        }
+      }
+    })
+    .await
+    .expect("SDL device should be discovered")
+  };
+  (client, device)
+}
+
+#[tokio::test]
+async fn sdl_selection_harness_propagates_metadata() {
+  for (file, expected_count) in [
+    ("test_sdl_gamepad_main_trigger.yaml", 4),
+    ("test_sdl_gamepad.yaml", 2),
+  ] {
+    let case = load_test_case(file).await;
+    let (client, device) = scan_sdl_case(&case).await;
+    assert_eq!(
+      device
+        .device_features()
+        .values()
+        .filter(|f| f.feature().contains_output(OutputType::Vibrate))
+        .count(),
+      expected_count
+    );
+    client.disconnect().await.unwrap();
+  }
+}
+
+#[tokio::test]
+async fn sdl_advertised_definition_v4() {
+  let case = load_test_case("test_sdl_gamepad_main_trigger.yaml").await;
+  let (client, device) = scan_sdl_case(&case).await;
+  let features: Vec<_> = device
+    .device_features()
+    .values()
+    .filter(|f| f.feature().contains_output(OutputType::Vibrate))
+    .collect();
+  assert_eq!(
+    features
+      .iter()
+      .map(|f| f.feature_index())
+      .collect::<Vec<_>>(),
+    vec![0, 1, 2, 3]
+  );
+  assert_eq!(
+    features
+      .iter()
+      .map(|f| f.feature().description().as_str())
+      .collect::<Vec<_>>(),
+    vec![
+      "Low-frequency rumble",
+      "High-frequency rumble",
+      "Left-trigger rumble",
+      "Right-trigger rumble",
+    ]
+  );
+  client.disconnect().await.unwrap();
+}
+
+#[tokio::test]
+async fn sdl_advertised_definition_v3() {
+  use util::device_test::client::client_v3::{client, connector};
+  let case = load_test_case("test_sdl_gamepad_main_trigger.yaml").await;
+  let (server, _channels) = util::device_test::client::client_v4::build_server(&case);
+  let (client, receiver) = client::ButtplugClient::new("SDL v3 advertisement test");
+  let mut connector = connector::ButtplugInProcessClientConnectorBuilder::default();
+  connector.server(server);
+  client.connect(connector.finish(), receiver).await.unwrap();
+  let mut events = client.event_stream();
+  client.start_scanning().await.unwrap();
+  let device = tokio::time::timeout(Duration::from_secs(5), async {
+    loop {
+      if let Some(client::ButtplugClientEvent::DeviceAdded(device)) = events.next().await {
+        break device;
+      }
+    }
+  })
+  .await
+  .expect("SDL v3 device should be discovered");
+  assert_eq!(device.name(), "sdl-gamepad");
+  let attributes = device.scalar_attributes();
+  assert_eq!(
+    attributes.iter().map(|a| *a.index()).collect::<Vec<_>>(),
+    vec![0, 1, 2, 3]
+  );
+  assert!(
+    attributes
+      .iter()
+      .all(|a| *a.actuator_type() == OutputType::Vibrate)
+  );
+  client.disconnect().await.unwrap();
+  util::device_test::client::client_v3::run_embedded_test_case(&case).await;
+}
+
+#[tokio::test]
+async fn sdl_client_channel_routing() {
+  let case = load_test_case("test_sdl_gamepad_disabled_channel.yaml").await;
+  let (client, device) = scan_sdl_case(&case).await;
+  let features: Vec<_> = device
+    .device_features()
+    .values()
+    .filter(|f| f.feature().contains_output(OutputType::Vibrate))
+    .collect();
+  assert_eq!(features.len(), 3);
+  assert_eq!(
+    features
+      .iter()
+      .map(|f| f.feature().description().as_str())
+      .collect::<Vec<_>>(),
+    vec![
+      "Low-frequency rumble",
+      "Left-trigger rumble",
+      "Right-trigger rumble",
+    ]
+  );
+  client.disconnect().await.unwrap();
+  util::device_test::client::client_v4::run_embedded_test_case(&case).await;
+}
 
 async fn load_test_case(test_file: &str) -> DeviceTestCase {
   // Load the file list from the test cases directory
@@ -146,10 +284,13 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
 #[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
+#[test_case("test_sdl_gamepad.yaml" ; "SDL Gamepad Protocol")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[test_case("test_yiciyuan_protocol.yaml" ; "Yiciyuan Protocol")]
 #[test_case("test_yiciyuan_protocol_fjb02.yaml" ; "Yiciyuan Protocol - FJB-02")]
+#[test_case("test_sdl_gamepad_main_trigger.yaml" ; "SDL Gamepad Main And Triggers")]
+#[test_case("test_sdl_gamepad_triggers_only.yaml" ; "SDL Gamepad Triggers Only")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v4(test_file: &str) {
   //tracing_subscriber::fmt::init();
@@ -278,6 +419,7 @@ async fn test_device_protocols_embedded_v4(test_file: &str) {
 #[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
 #[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
+#[test_case("test_sdl_gamepad.yaml" ; "SDL Gamepad Protocol")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[test_case("test_yiciyuan_protocol.yaml" ; "Yiciyuan Protocol")]
@@ -409,10 +551,13 @@ async fn test_device_protocols_json_v4(test_file: &str) {
 #[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
 #[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
+#[test_case("test_sdl_gamepad.yaml" ; "SDL Gamepad Protocol")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[test_case("test_yiciyuan_protocol.yaml" ; "Yiciyuan Protocol")]
 #[test_case("test_yiciyuan_protocol_fjb02.yaml" ; "Yiciyuan Protocol - FJB-02")]
+#[test_case("test_sdl_gamepad_main_trigger.yaml" ; "SDL Gamepad Main And Triggers")]
+#[test_case("test_sdl_gamepad_triggers_only.yaml" ; "SDL Gamepad Triggers Only")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
@@ -541,6 +686,7 @@ async fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
 #[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
+#[test_case("test_sdl_gamepad.yaml" ; "SDL Gamepad Protocol")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[test_case("test_yiciyuan_protocol.yaml" ; "Yiciyuan Protocol")]
@@ -663,6 +809,7 @@ async fn test_device_protocols_json_v3(test_file: &str) {
 #[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
 #[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
+#[test_case("test_sdl_gamepad.yaml" ; "SDL Gamepad Protocol")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[test_case("test_yiciyuan_protocol.yaml" ; "Yiciyuan Protocol")]
@@ -786,6 +933,7 @@ async fn test_device_protocols_embedded_v2(test_file: &str) {
 #[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
 #[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
+#[test_case("test_sdl_gamepad.yaml" ; "SDL Gamepad Protocol")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[test_case("test_yiciyuan_protocol.yaml" ; "Yiciyuan Protocol")]
@@ -907,6 +1055,7 @@ async fn test_device_protocols_json_v2(test_file: &str) {
 #[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
 #[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
+#[test_case("test_sdl_gamepad.yaml" ; "SDL Gamepad Protocol")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[test_case("test_yiciyuan_protocol.yaml" ; "Yiciyuan Protocol")]
@@ -1029,6 +1178,7 @@ async fn test_device_protocols_embedded_v1(test_file: &str) {
 #[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
 #[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
+#[test_case("test_sdl_gamepad.yaml" ; "SDL Gamepad Protocol")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[test_case("test_yiciyuan_protocol.yaml" ; "Yiciyuan Protocol")]
@@ -1104,6 +1254,10 @@ async fn test_device_protocols_json_v1(test_file: &str) {
 #[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
 //#[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
+// v0 excluded: SingleMotorVibrateCmd broadcasts one speed to all motors and
+// cannot express the per-motor addressing this test verifies (same reason
+// multi-motor Lovense Edge is excluded from the v0 lists).
+//#[test_case("test_sdl_gamepad.yaml" ; "SDL Gamepad Protocol")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[test_case("test_yiciyuan_protocol.yaml" ; "Yiciyuan Protocol")]
@@ -1172,6 +1326,9 @@ async fn test_device_protocols_embedded_v0(test_file: &str) {
 #[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
 //#[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
+// v0 excluded: SingleMotorVibrateCmd broadcasts one speed to all motors and
+// cannot express the per-motor addressing this test verifies.
+//#[test_case("test_sdl_gamepad.yaml" ; "SDL Gamepad Protocol")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[test_case("test_yiciyuan_protocol.yaml" ; "Yiciyuan Protocol")]

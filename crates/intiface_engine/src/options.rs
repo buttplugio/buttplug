@@ -40,6 +40,8 @@ pub struct EngineOptions {
   #[getset(get_copy = "pub")]
   use_xinput: bool,
   #[getset(get_copy = "pub")]
+  use_sdl_gamepad: bool,
+  #[getset(get_copy = "pub")]
   use_lovense_connect: bool,
   #[getset(get_copy = "pub")]
   use_device_websocket_server: bool,
@@ -84,6 +86,7 @@ pub struct EngineOptionsExternal {
   pub use_lovense_dongle_serial: bool,
   pub use_lovense_dongle_hid: bool,
   pub use_xinput: bool,
+  pub use_sdl_gamepad: bool,
   pub use_lovense_connect: bool,
   pub use_device_websocket_server: bool,
   pub use_simulated_devices: bool,
@@ -117,6 +120,7 @@ impl From<EngineOptionsExternal> for EngineOptions {
       use_lovense_dongle_serial: other.use_lovense_dongle_serial,
       use_lovense_dongle_hid: other.use_lovense_dongle_hid,
       use_xinput: other.use_xinput,
+      use_sdl_gamepad: other.use_sdl_gamepad,
       use_lovense_connect: other.use_lovense_connect,
       use_device_websocket_server: other.use_device_websocket_server,
       use_simulated_devices: other.use_simulated_devices,
@@ -213,6 +217,11 @@ impl EngineOptionsBuilder {
     self
   }
 
+  pub fn use_sdl_gamepad(&mut self, value: bool) -> &mut Self {
+    self.options.use_sdl_gamepad = value;
+    self
+  }
+
   pub fn use_lovense_connect(&mut self, value: bool) -> &mut Self {
     self.options.use_lovense_connect = value;
     self
@@ -290,5 +299,28 @@ impl EngineOptionsBuilder {
 
   pub fn finish(&mut self) -> EngineOptions {
     self.options.clone()
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn engine_options_use_sdl_gamepad_defaults_false() {
+    // Derives Default; the SDL gamepad manager is opt-in.
+    let options = EngineOptions::default();
+    assert!(!options.use_sdl_gamepad());
+
+    // The external form also defaults off (serde).
+    let external: EngineOptionsExternal = Default::default();
+    let from_external = EngineOptions::from(external);
+    assert!(!from_external.use_sdl_gamepad());
+
+    // And the builder setter round-trips.
+    let options = EngineOptionsBuilder::default()
+      .use_sdl_gamepad(true)
+      .finish();
+    assert!(options.use_sdl_gamepad());
   }
 }

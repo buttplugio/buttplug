@@ -138,6 +138,14 @@
         }
       }
     },
+    "sdl-gamepad-definition": {
+      "type": "object",
+      "properties": {
+        "exists": {
+          "type": "boolean"
+        }
+      }
+    },
     "lovense-connect-service-definition": {
       "type": "object",
       "properties": {
@@ -478,6 +486,9 @@
                   "xinput": {
                     "$ref": "#/components/xinput-definition"
                   },
+                  "sdl-gamepad": {
+                    "$ref": "#/components/sdl-gamepad-definition"
+                  },
                   "lovense_connect_service": {
                     "$ref": "#/components/lovense-connect-service-definition"
                   },
@@ -530,6 +541,9 @@
                       },
                       "xinput": {
                         "$ref": "#/components/xinput-definition"
+                      },
+                      "sdl-gamepad": {
+                        "$ref": "#/components/sdl-gamepad-definition"
                       },
                       "lovense_connect_service": {
                         "$ref": "#/components/lovense-connect-service-definition"

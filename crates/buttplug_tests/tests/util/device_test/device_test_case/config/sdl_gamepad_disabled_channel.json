@@ -1,0 +1,44 @@
+{
+  "version": { "major": 5, "minor": 999 },
+  "user_configs": {
+    "devices": [{
+      "identifier": {
+        "address": "SdlDisabledChannelTest",
+        "protocol": "sdl-gamepad",
+        "identifier": "sdl-gamepad"
+      },
+      "config": {
+        "name": "sdl-gamepad",
+        "id": "c1d2e3f4-3333-4a7b-8c9d-1e2f3a4b5c6d",
+        "base_id": "c1d2e3f4-3333-4a7b-8c9d-1e2f3a4b5c6d",
+        "features": [
+          {
+            "description": "Low-frequency rumble",
+            "id": "f56852c8-cb3b-4703-90b6-6291df0c6314",
+            "base_id": "f56852c8-cb3b-4703-90b6-6291df0c6314",
+            "output": { "vibrate": { "value": [0, 65535] } }
+          },
+          {
+            "description": "High-frequency rumble",
+            "id": "e13388f9-a1b6-4c4c-a7b4-c68eeed293d8",
+            "base_id": "e13388f9-a1b6-4c4c-a7b4-c68eeed293d8",
+            "output": { "vibrate": { "value": [0, 65535], "disabled": true } }
+          },
+          {
+            "description": "Left-trigger rumble",
+            "id": "a1b2c3d4-1111-4e5f-8a6b-9c0d1e2f3a4b",
+            "base_id": "a1b2c3d4-1111-4e5f-8a6b-9c0d1e2f3a4b",
+            "output": { "vibrate": { "value": [0, 65535] } }
+          },
+          {
+            "description": "Right-trigger rumble",
+            "id": "b2c3d4e5-2222-4f6a-9b7c-0d1e2f3a4b5c",
+            "base_id": "b2c3d4e5-2222-4f6a-9b7c-0d1e2f3a4b5c",
+            "output": { "vibrate": { "value": [0, 65535] } }
+          }
+        ],
+        "user_config": { "allow": false, "deny": false, "index": 0 }
+      }
+    }]
+  }
+}

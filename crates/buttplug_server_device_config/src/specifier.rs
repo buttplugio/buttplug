@@ -250,6 +250,30 @@ impl PartialEq for XInputSpecifier {
   }
 }
 
+/// Specifier for SDL3 gamepad devices
+///
+/// Cross-platform gamepad rumble via SDL3. Has no attributes because the
+/// SDL gamepad device communication manager handles all device discovery and
+/// identification itself, using SDL3 instance IDs as addresses.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+pub struct SdlGamepadSpecifier {
+  // Needed for deserialization but unused.
+  #[allow(dead_code)]
+  exists: bool,
+}
+
+impl Default for SdlGamepadSpecifier {
+  fn default() -> Self {
+    Self { exists: true }
+  }
+}
+
+impl PartialEq for SdlGamepadSpecifier {
+  fn eq(&self, _other: &Self) -> bool {
+    true
+  }
+}
+
 #[derive(
   Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy, Getters, Setters, MutGetters,
 )]
@@ -377,6 +401,8 @@ pub enum ProtocolCommunicationSpecifier {
   Serial(SerialSpecifier),
   #[serde(rename = "xinput")]
   XInput(XInputSpecifier),
+  #[serde(rename = "sdl-gamepad")]
+  SdlGamepad(SdlGamepadSpecifier),
   #[serde(rename = "lovense_connect_service")]
   LovenseConnectService(LovenseConnectServiceSpecifier),
   #[serde(rename = "websocket")]
@@ -394,6 +420,7 @@ impl PartialEq for ProtocolCommunicationSpecifier {
       (BluetoothLE(self_spec), BluetoothLE(other_spec)) => self_spec == other_spec,
       (HID(self_spec), HID(other_spec)) => self_spec == other_spec,
       (XInput(self_spec), XInput(other_spec)) => self_spec == other_spec,
+      (SdlGamepad(self_spec), SdlGamepad(other_spec)) => self_spec == other_spec,
       (Websocket(self_spec), Websocket(other_spec)) => self_spec == other_spec,
       (LovenseConnectService(self_spec), LovenseConnectService(other_spec)) => {
         self_spec == other_spec
