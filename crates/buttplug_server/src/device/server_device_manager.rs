@@ -80,6 +80,7 @@ pub struct ServerDeviceManagerBuilder {
   device_configuration_manager: Arc<DeviceConfigurationManager>,
   comm_managers: Vec<Box<dyn HardwareCommunicationManagerBuilder>>,
   emit_output_observations: bool,
+  script_protocol_directory: Option<std::path::PathBuf>,
 }
 
 impl ServerDeviceManagerBuilder {
@@ -88,6 +89,7 @@ impl ServerDeviceManagerBuilder {
       device_configuration_manager: Arc::new(device_configuration_manager),
       comm_managers: vec![],
       emit_output_observations: false,
+      script_protocol_directory: None,
     }
   }
 
@@ -98,7 +100,17 @@ impl ServerDeviceManagerBuilder {
       device_configuration_manager,
       comm_managers: vec![],
       emit_output_observations: false,
+      script_protocol_directory: None,
     }
+  }
+
+  /// Directory to load rhai script protocols from (requires the
+  /// `rhai-protocols` feature). Script protocols are registered alongside the
+  /// built-in protocols and override same-name built-ins. A missing directory
+  /// is a no-op; an unreadable/non-directory path fails `finish()`.
+  pub fn script_protocol_directory(&mut self, directory: std::path::PathBuf) -> &mut Self {
+    self.script_protocol_directory = Some(directory);
+    self
   }
 
   pub fn comm_manager<T>(&mut self, builder: T) -> &mut Self
@@ -132,6 +144,30 @@ impl ServerDeviceManagerBuilder {
       self.comm_manager(SimulatedHardwareCommunicationManagerBuilder::new(entries));
     }
     self
+  }
+
+  /// Builds the protocol manager for the event loop, incorporating script
+  /// protocols when a script protocol directory is configured and script
+  /// protocol support is compiled in.
+  fn build_protocol_manager(
+    &self,
+  ) -> Result<crate::device::protocol::ProtocolManager, ButtplugServerError> {
+    #[cfg(all(feature = "rhai-protocols", not(target_arch = "wasm32")))]
+    {
+      use crate::device::protocol_impl::script::build_script_protocol_manager;
+      build_script_protocol_manager(self.script_protocol_directory.as_deref())
+        .map_err(ButtplugServerError::ScriptProtocolLoadError)
+    }
+    #[cfg(not(all(feature = "rhai-protocols", not(target_arch = "wasm32"))))]
+    {
+      if let Some(directory) = &self.script_protocol_directory {
+        warn!(
+          "Script protocol support is not compiled into this build; ignoring script protocol directory {}",
+          directory.display()
+        );
+      }
+      Ok(crate::device::protocol::ProtocolManager::default())
+    }
   }
 
   pub fn finish(&mut self) -> Result<ServerDeviceManager, ButtplugServerError> {
@@ -191,6 +227,7 @@ impl ServerDeviceManagerBuilder {
     };
 
     let task_group = TaskGroup::new();
+    let protocol_manager = self.build_protocol_manager()?;
     let mut event_loop = ServerDeviceManagerEventLoop::new(
       comm_managers,
       self.device_configuration_manager.clone(),
@@ -201,6 +238,7 @@ impl ServerDeviceManagerBuilder {
       device_command_receiver,
       output_observation_sender.clone(),
       task_group.clone(),
+      protocol_manager,
     );
     // The event loop is the device manager's owned long-running task; spawning
     // it into the manager's TaskGroup lets shutdown cancel-then-join it

@@ -27,6 +27,7 @@ The bulk of this crate is **data-driven device protocol tests** in `tests/test_d
 YAML test case structure (`DeviceTestCase`):
 - `devices` — list of test device identifiers and expected names
 - `device_config_file` / `user_device_config_file` — optional custom config overrides
+- `script_protocol_directory` — optional directory of `.rhai` protocol scripts loaded into the server for the test, resolved relative to the crate manifest; see [Script Protocol API v1](../buttplug_server/docs/script-protocols.md)
 - `device_init` — initialization sequence (subscribe, write handshake bytes, receive notifications)
 - `device_commands` — sequence of `Messages` (client commands like Vibrate/Scalar/Stop), `Commands` (expected hardware writes), and `Events` (simulated device notifications)
 

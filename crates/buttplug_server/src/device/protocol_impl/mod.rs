@@ -97,6 +97,8 @@ pub mod raw_protocol;
 pub mod realov;
 pub mod sakuraneko;
 pub mod satisfyer;
+#[cfg(all(feature = "rhai-protocols", not(target_arch = "wasm32")))]
+pub mod script;
 pub mod sensee;
 pub mod sensee_capsule;
 pub mod sensee_v2;

@@ -66,6 +66,9 @@ pub struct DeviceTestCase {
   devices: Vec<TestDevice>,
   device_config_file: Option<String>,
   user_device_config_file: Option<String>,
+  /// Directory of `.rhai` protocol scripts to load into the server (resolved
+  /// relative to the crate manifest, like the config file fields).
+  script_protocol_directory: Option<String>,
   device_init: Option<Vec<TestCommand>>,
   device_commands: Vec<TestCommand>,
 }

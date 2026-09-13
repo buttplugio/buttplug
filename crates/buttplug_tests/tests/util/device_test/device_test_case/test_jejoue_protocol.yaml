@@ -2,6 +2,7 @@ devices:
   - identifier:
       name: "Je Joue"
     expected_name: "Je Joue Device"
+script_protocol_directory: "../../buttplug_server/scripts/protocols"
 device_commands:
   # Set vibration to 50%
   - !Messages

@@ -1,3 +1,10 @@
+# 11.1.0 (2026-09-01)
+
+## Features
+
+- Add optional `rhai-protocols` script protocol loading from a directory, including the loader, handler, and `ServerDeviceManagerBuilder` option
+- Add `ButtplugServerError::ScriptProtocolLoadError(String)`, `ProtocolManager::from_map`, and `ServerDeviceManagerBuilder::script_protocol_directory`
+
 # 11.0.0 (2026-07-28)
 
 ## Features

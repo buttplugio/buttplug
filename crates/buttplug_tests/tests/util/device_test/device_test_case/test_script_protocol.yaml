@@ -1,0 +1,36 @@
+devices:
+  - identifier:
+      name: "Script Test Device"
+    expected_name: "Script Test Device"
+# Novel-name script protocol (see scripts/novel/scripttest.rhai): no Rust
+# fallback exists, so this case proves the script_protocol_directory plumbing
+# end to end.
+device_config_file: "script_test_config.json"
+script_protocol_directory: "tests/util/device_test/device_test_case/scripts/novel"
+device_commands:
+  # 50% speed (device units: 50) → distinctive scripted bytes
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xC0, 0xFF, 0xEE, 0x32]
+            write_with_response: false
+  # Stop (device units: 0)
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xC0, 0xFF, 0xEE, 0x00]
+            write_with_response: false

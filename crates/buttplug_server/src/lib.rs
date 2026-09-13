@@ -94,4 +94,9 @@ pub enum ButtplugServerError {
   /// Requested protocol has not been registered with the system.
   #[error("Buttplug Protocol of type {0} does not exist in the system and cannot be removed.")]
   ProtocolDoesNotExist(String),
+  /// Script protocol directory could not be loaded (unreadable or not a
+  /// directory). Individual script files that fail validation are skipped
+  /// with a warning instead of raising this error.
+  #[error("Script protocol directory could not be loaded: {0}")]
+  ScriptProtocolLoadError(String),
 }

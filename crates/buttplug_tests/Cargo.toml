@@ -14,7 +14,7 @@ edition = "2024"
 buttplug_core = { version = "11.0.0", path = "../buttplug_core" }
 buttplug_client = { version = "11.0.0", path = "../buttplug_client" }
 buttplug_client_in_process = { version = "11.0.0", path = "../buttplug_client_in_process", default-features = false}
-buttplug_server = { version = "11.0.0", path = "../buttplug_server" }
+buttplug_server = { version = "11.0.0", path = "../buttplug_server", features = ["rhai-protocols"] }
 buttplug_server_device_config = { version = "11.0.0", path = "../buttplug_server_device_config" }
 log = "0.4.33"
 tokio = { version = "1.53.1", features = ["macros"] }

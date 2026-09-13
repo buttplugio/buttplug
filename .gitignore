@@ -25,6 +25,8 @@ Cargo.lock
 storyteller-output
 plans
 docs
+# Track crate-level source docs (the bare `docs` rule above is for generated output)
+!crates/buttplug_server/docs/
 .deciduous
 **/.DS_Store
 .worktrees
