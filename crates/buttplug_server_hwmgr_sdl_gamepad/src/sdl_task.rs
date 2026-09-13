@@ -1487,14 +1487,22 @@ mod tests {
       .await
       .unwrap()
       .unwrap();
-    tokio::time::timeout(
-      Duration::from_secs(5),
-      tokio::task::spawn_blocking(move || join.join()),
-    )
-    .await
-    .unwrap()
-    .unwrap()
-    .unwrap();
+    // Bound the join without an uncancellable blocking task: poll
+    // `is_finished` on the async timer and only call `join` once the thread
+    // has actually exited, so a hung thread fails the test instead of
+    // wedging the test runtime.
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(5);
+    loop {
+      if join.is_finished() {
+        join.join().expect("SDL thread should not panic");
+        break;
+      }
+      assert!(
+        tokio::time::Instant::now() < deadline,
+        "SDL thread did not exit after shutdown"
+      );
+      tokio::time::sleep(Duration::from_millis(10)).await;
+    }
     assert!(*removed.borrow());
     let state = state.lock().unwrap();
     assert_eq!(
