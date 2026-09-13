@@ -1,0 +1,32 @@
+devices:
+  - identifier:
+      name: "sdl-gamepad"
+      sdl_selection: "__sdl-triggers-only"
+    expected_name: "sdl-gamepad"
+device_commands:
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 1
+            Speed: 1.0
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0xff]
+            write_with_response: false

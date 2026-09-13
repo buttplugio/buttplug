@@ -54,6 +54,8 @@ pub struct TestDeviceIdentifier {
   name: String,
   #[serde(default = "generate_address")]
   address: String,
+  #[serde(default, skip_serializing_if = "Option::is_none")]
+  sdl_selection: Option<String>,
 }
 
 impl TestDeviceIdentifier {
@@ -64,6 +66,7 @@ impl TestDeviceIdentifier {
     Self {
       name: name.to_owned(),
       address,
+      sdl_selection: None,
     }
   }
 
@@ -151,6 +154,7 @@ fn new_uninitialized_ble_test_device(
   };
   let hardware = TestDevice::new(&identifier.name, &address, device_channel, fail_disconnect);
   TestHardwareConnector::new(specifier, hardware)
+    .with_sdl_selection(identifier.sdl_selection.clone())
 }
 
 pub struct TestDeviceCommunicationManager {

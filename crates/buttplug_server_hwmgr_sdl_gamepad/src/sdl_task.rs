@@ -14,13 +14,15 @@
 //! enumeration, and removal detection is per-device connected-state polling.
 //!
 //! Gamepads are identified by SDL3 instance ID ([`JoystickId`]), which is
-//! stable for the lifetime of a connection. Conversion to buttplug's string
-//! address space (`sdl-gamepad-{instance_id}`) happens only at the
-//! communication-manager boundary.
+//! stable only for the lifetime of a connection. Conversion to buttplug's
+//! string address space (`sdl-gamepad-{instance_id}`) happens only at the
+//! communication-manager boundary; reconnects may receive a new instance ID
+//! and reported name, so identity is connection-scoped.
 //!
 //! Rumble is armed with a finite duration (the sdl3 crate documents that
-//! `u32::MAX` overflows and ends the effect immediately) and refreshed by the
-//! thread before expiry, so one-shot ScalarCmd commands hold indefinitely.
+//! `u32::MAX` overflows and ends the effect immediately). Each active main or
+//! trigger pair is refreshed independently by the thread before expiry, so
+//! one-shot ScalarCmd commands hold indefinitely.
 
 use sdl3::joystick::JoystickId;
 use std::{
@@ -356,11 +358,12 @@ struct OpenPadState {
   triggers_set_at: u64,
 }
 
-/// Pure rumble-refresh decision: given the last accepted rumble command, when
-/// it was armed, and the current time, decide whether it must be re-armed.
+/// Pure rumble-refresh decision for one independent main or trigger pair:
+/// given the last accepted command, when it was armed, and the current time,
+/// decide whether that pair must be re-armed.
 ///
-/// Zero-speed commands never refresh (the gamepad is stopped; letting the
-/// effect lapse is exactly what we want). Non-zero commands re-arm after
+/// Zero-speed commands never refresh (the pair is stopped; letting the effect
+/// lapse is exactly what we want). Non-zero commands re-arm after
 /// [`RUMBLE_KEEPALIVE_INTERVAL_MS`], safely before the finite arm duration lapses.
 fn refresh_decision(last_rumble: (u16, u16), last_set_at: u64, now_ms: u64) -> Option<(u16, u16)> {
   if last_rumble == (0, 0) {
