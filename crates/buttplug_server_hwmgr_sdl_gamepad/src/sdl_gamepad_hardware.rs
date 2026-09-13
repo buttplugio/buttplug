@@ -7,7 +7,14 @@
 
 //! Hardware connector and hardware implementation for SDL3 gamepads.
 
-use super::sdl_task::{RUMBLE_DURATION_MS, SdlGamepadBackend, SdlOpenedGamepad, SdlTaskError};
+use super::sdl_task::{
+  RUMBLE_DURATION_MS,
+  SdlGamepadBackend,
+  SdlOpenedGamepad,
+  SdlRumbleCapabilities,
+  SdlRumbleState,
+  SdlTaskError,
+};
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
 use buttplug_server::device::hardware::{
@@ -25,8 +32,12 @@ use buttplug_server::device::hardware::{
   communication::HardwareSpecificError,
 };
 use buttplug_server_device_config::{
+  DeviceDefinitionSelection,
   Endpoint,
   ProtocolCommunicationSpecifier,
+  SDL_PROTOCOL_NAME,
+  SDL_RUMBLE_AND_TRIGGERS_SELECTOR,
+  SDL_TRIGGERS_ONLY_SELECTOR,
   SdlGamepadSpecifier,
 };
 use byteorder::{LittleEndian, ReadBytesExt};
@@ -45,6 +56,7 @@ pub(crate) struct SdlGamepadHardwareConnector {
   id: JoystickId,
   name: String,
   address: String,
+  capabilities: SdlRumbleCapabilities,
 }
 
 impl SdlGamepadHardwareConnector {
@@ -53,12 +65,14 @@ impl SdlGamepadHardwareConnector {
     id: JoystickId,
     name: String,
     address: String,
+    capabilities: SdlRumbleCapabilities,
   ) -> Self {
     Self {
       backend,
       id,
       name,
       address,
+      capabilities,
     }
   }
 }
@@ -68,6 +82,7 @@ impl Debug for SdlGamepadHardwareConnector {
     f.debug_struct("SdlGamepadHardwareConnector")
       .field("id", &self.id.0)
       .field("name", &self.name)
+      .field("capabilities", &self.capabilities)
       .finish()
   }
 }
@@ -90,12 +105,24 @@ impl HardwareConnector for SdlGamepadHardwareConnector {
 
   async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
     debug!("Emitting a new SDL gamepad device impl ({})", self.address);
-    let opened = self
+    let (opened, caps) = self
       .backend
       .open(self.id)
       .await
       .map_err(|e| hardware_error("open", e))?;
-    let hardware_internal = SdlGamepadHardware::new(opened, self.address.clone());
+    let base_identifier = match (caps.rumble, caps.trigger_rumble) {
+      (true, true) => Some(SDL_RUMBLE_AND_TRIGGERS_SELECTOR),
+      (true, false) => None,
+      (false, true) => Some(SDL_TRIGGERS_ONLY_SELECTOR),
+      (false, false) => {
+        opened.close_now();
+        return Err(hardware_error(
+          "open",
+          SdlTaskError::NoRumbleCapability(self.id),
+        ));
+      }
+    };
+    let hardware_internal = SdlGamepadHardware::new(opened, self.address.clone(), caps);
     let hardware = Hardware::new(
       &self.name,
       &self.address,
@@ -103,7 +130,12 @@ impl HardwareConnector for SdlGamepadHardwareConnector {
       &None,
       false,
       Box::new(hardware_internal),
-    );
+    )
+    .with_definition_selection(DeviceDefinitionSelection::new(
+      SDL_PROTOCOL_NAME,
+      base_identifier,
+      &self.name,
+    ));
     Ok(Box::new(GenericHardwareSpecializer::new(hardware)))
   }
 }
@@ -137,12 +169,17 @@ async fn watch_removal(
 
 pub(crate) struct SdlGamepadHardware {
   opened: Option<Arc<dyn SdlOpenedGamepad>>,
+  capabilities: SdlRumbleCapabilities,
   event_sender: broadcast::Sender<HardwareEvent>,
   cancellation_token: CancellationToken,
 }
 
 impl SdlGamepadHardware {
-  fn new(opened: Arc<dyn SdlOpenedGamepad>, address: String) -> Self {
+  fn new(
+    opened: Arc<dyn SdlOpenedGamepad>,
+    address: String,
+    capabilities: SdlRumbleCapabilities,
+  ) -> Self {
     let (device_event_sender, _) = broadcast::channel(256);
     let token = CancellationToken::new();
     let child = token.child_token();
@@ -154,6 +191,7 @@ impl SdlGamepadHardware {
     });
     Self {
       opened: Some(opened),
+      capabilities,
       event_sender: device_event_sender,
       cancellation_token: token,
     }
@@ -203,23 +241,45 @@ impl HardwareInternal for SdlGamepadHardware {
     };
     let opened = opened.clone();
     let data = msg.data().clone();
+    let caps = self.capabilities;
     async move {
-      // The protocol guarantees 4 bytes (two u16 LE motor speeds), but a
-      // short read must error, not panic.
+      if data.len() != 8 {
+        return Err(ButtplugDeviceError::DeviceCommunicationError(
+          "SDL gamepad write payload must be 8 bytes (four u16 LE channel values)".to_owned(),
+        ));
+      }
       let mut cursor = Cursor::new(data);
-      let (low, high) = match (
+      let state = match (
+        cursor.read_u16::<LittleEndian>(),
+        cursor.read_u16::<LittleEndian>(),
         cursor.read_u16::<LittleEndian>(),
         cursor.read_u16::<LittleEndian>(),
       ) {
-        (Ok(low), Ok(high)) => (low, high),
+        (Ok(low), Ok(high), Ok(left_trigger), Ok(right_trigger)) => SdlRumbleState {
+          low,
+          high,
+          left_trigger,
+          right_trigger,
+        },
         _ => {
           return Err(ButtplugDeviceError::DeviceCommunicationError(
-            "SDL gamepad write payload must be 4 bytes (two u16 LE motor speeds)".to_owned(),
+            "SDL gamepad write payload must be 8 bytes (four u16 LE channel values)".to_owned(),
           ));
         }
       };
+      let [low, high, left, right] = state.slots();
+      if !caps.rumble && (low != 0 || high != 0) {
+        return Err(ButtplugDeviceError::DeviceCommunicationError(
+          "SDL gamepad does not support main rumble".to_owned(),
+        ));
+      }
+      if !caps.trigger_rumble && (left != 0 || right != 0) {
+        return Err(ButtplugDeviceError::DeviceCommunicationError(
+          "SDL gamepad does not support trigger rumble".to_owned(),
+        ));
+      }
       opened
-        .rumble(low, high, RUMBLE_DURATION_MS)
+        .set_rumble_state(state, RUMBLE_DURATION_MS)
         .await
         .map_err(|e| hardware_error("rumble", e))
     }
@@ -267,19 +327,58 @@ mod tests {
   #[derive(Debug)]
   struct MockOpenedGamepad {
     rumble_calls: Mutex<Vec<(u16, u16, u32)>>,
+    trigger_calls: Mutex<Vec<(u16, u16, u32)>>,
+    rumble_attempts: Mutex<Vec<(u16, u16, u32)>>,
+    trigger_attempts: Mutex<Vec<(u16, u16, u32)>>,
+    fail: Mutex<bool>,
+    commands: Mutex<usize>,
+    caps: SdlRumbleCapabilities,
     closed: Mutex<usize>,
     removed_tx: watch::Sender<bool>,
   }
 
   #[async_trait]
   impl SdlOpenedGamepad for MockOpenedGamepad {
-    async fn rumble(&self, low: u16, high: u16, duration_ms: u32) -> Result<(), SdlTaskError> {
-      self
-        .rumble_calls
-        .lock()
-        .unwrap()
-        .push((low, high, duration_ms));
-      Ok(())
+    async fn set_rumble_state(
+      &self,
+      state: SdlRumbleState,
+      duration_ms: u32,
+    ) -> Result<(), SdlTaskError> {
+      *self.commands.lock().unwrap() += 1;
+      let fail = *self.fail.lock().unwrap();
+      if self.caps.rumble {
+        self
+          .rumble_attempts
+          .lock()
+          .unwrap()
+          .push((state.low, state.high, duration_ms));
+        if !fail {
+          self
+            .rumble_calls
+            .lock()
+            .unwrap()
+            .push((state.low, state.high, duration_ms));
+        }
+      }
+      if self.caps.trigger_rumble {
+        self.trigger_attempts.lock().unwrap().push((
+          state.left_trigger,
+          state.right_trigger,
+          duration_ms,
+        ));
+        if !fail {
+          self.trigger_calls.lock().unwrap().push((
+            state.left_trigger,
+            state.right_trigger,
+            duration_ms,
+          ));
+        }
+      }
+      if fail {
+        Err(SdlTaskError::Rumble("mock failure".to_owned()))
+      } else {
+        Ok(())
+      }
     }
 
     async fn close(&self) -> Result<(), SdlTaskError> {
@@ -313,20 +412,42 @@ mod tests {
       Ok(self.gamepads.lock().unwrap().clone())
     }
 
-    async fn open(&self, _id: JoystickId) -> Result<Arc<dyn SdlOpenedGamepad>, SdlTaskError> {
+    async fn open(
+      &self,
+      _id: JoystickId,
+    ) -> Result<(Arc<dyn SdlOpenedGamepad>, SdlRumbleCapabilities), SdlTaskError> {
       self
         .opened
         .lock()
         .unwrap()
         .clone()
-        .map(|pad| pad as Arc<dyn SdlOpenedGamepad>)
+        .map(|pad| {
+          let caps = pad.caps;
+          (pad as Arc<dyn SdlOpenedGamepad>, caps)
+        })
         .ok_or_else(|| SdlTaskError::Open("no mock gamepad".to_owned()))
     }
   }
 
   async fn connect_mock_hardware() -> (Arc<MockOpenedGamepad>, Hardware, Arc<MockBackend>) {
+    connect_mock_caps(SdlRumbleCapabilities {
+      rumble: true,
+      trigger_rumble: false,
+    })
+    .await
+  }
+
+  async fn connect_mock_caps(
+    caps: SdlRumbleCapabilities,
+  ) -> (Arc<MockOpenedGamepad>, Hardware, Arc<MockBackend>) {
     let mock_pad = Arc::new(MockOpenedGamepad {
+      caps,
       rumble_calls: Mutex::new(Vec::new()),
+      trigger_calls: Mutex::new(Vec::new()),
+      rumble_attempts: Mutex::new(Vec::new()),
+      trigger_attempts: Mutex::new(Vec::new()),
+      fail: Mutex::new(false),
+      commands: Mutex::new(0),
       closed: Mutex::new(0),
       removed_tx: watch::channel(false).0,
     });
@@ -339,6 +460,7 @@ mod tests {
       joystick_id(21),
       "SDL Gamepad".to_owned(),
       create_address(joystick_id(21)),
+      caps,
     );
     assert_eq!(
       connector.specifier(),
@@ -359,12 +481,12 @@ mod tests {
   async fn hardware_write_value_forwards_motor_pair() {
     let (mock_pad, hardware, _backend) = connect_mock_hardware().await;
 
-    // 1:1 passthrough of the two parsed u16 LE values.
+    // Main-only pads receive only their supported pair.
     hardware
       .write_value(&HardwareWriteCmd::new(
         &[uuid::Uuid::new_v4()],
         Endpoint::Tx,
-        vec![0x00, 0x80, 0xff, 0x7f],
+        vec![0x00, 0x80, 0xff, 0x7f, 0, 0, 0, 0],
         false,
       ))
       .await
@@ -373,6 +495,9 @@ mod tests {
       *mock_pad.rumble_calls.lock().unwrap(),
       vec![(0x8000, 0x7fff, RUMBLE_DURATION_MS)]
     );
+
+    assert!(mock_pad.trigger_attempts.lock().unwrap().is_empty());
+    assert_eq!(*mock_pad.commands.lock().unwrap(), 1);
 
     // Short payloads error rather than panic.
     let err = hardware
@@ -398,6 +523,111 @@ mod tests {
         .await
         .is_err()
     );
+  }
+
+  fn packet(data: Vec<u8>) -> HardwareWriteCmd {
+    HardwareWriteCmd::new(&[uuid::Uuid::new_v4()], Endpoint::Tx, data, false)
+  }
+
+  #[tokio::test]
+  async fn sdl_hardware_packet_validation() {
+    for caps in [
+      SdlRumbleCapabilities {
+        rumble: true,
+        trigger_rumble: false,
+      },
+      SdlRumbleCapabilities {
+        rumble: false,
+        trigger_rumble: true,
+      },
+    ] {
+      let (pad, hardware, _) = connect_mock_caps(caps).await;
+      for bytes in [vec![0; 4], vec![0; 9]] {
+        assert!(hardware.write_value(&packet(bytes)).await.is_err());
+      }
+      let mut unsupported = vec![0; 8];
+      unsupported[if caps.rumble { 4 } else { 0 }] = 1;
+      let error = hardware
+        .write_value(&packet(unsupported))
+        .await
+        .unwrap_err()
+        .to_string();
+      assert!(error.contains(if caps.rumble {
+        "does not support trigger rumble"
+      } else {
+        "does not support main rumble"
+      }));
+      assert!(pad.rumble_calls.lock().unwrap().is_empty());
+      assert!(pad.trigger_calls.lock().unwrap().is_empty());
+      assert_eq!(*pad.commands.lock().unwrap(), 0);
+    }
+  }
+
+  #[tokio::test]
+  async fn sdl_backend_supported_pair_dispatch() {
+    for caps in [
+      SdlRumbleCapabilities {
+        rumble: true,
+        trigger_rumble: false,
+      },
+      SdlRumbleCapabilities {
+        rumble: false,
+        trigger_rumble: true,
+      },
+      SdlRumbleCapabilities {
+        rumble: true,
+        trigger_rumble: true,
+      },
+    ] {
+      let (pad, hardware, _) = connect_mock_caps(caps).await;
+      let state = SdlRumbleState {
+        low: if caps.rumble { 500 } else { 0 },
+        right_trigger: if caps.trigger_rumble { 700 } else { 0 },
+        ..Default::default()
+      };
+      hardware
+        .write_value(&packet(
+          state
+            .slots()
+            .into_iter()
+            .flat_map(u16::to_le_bytes)
+            .collect(),
+        ))
+        .await
+        .unwrap();
+      hardware.write_value(&packet(vec![0; 8])).await.unwrap();
+      assert_eq!(
+        pad.rumble_calls.lock().unwrap().len(),
+        if caps.rumble { 2 } else { 0 }
+      );
+      assert_eq!(
+        pad.trigger_calls.lock().unwrap().len(),
+        if caps.trigger_rumble { 2 } else { 0 }
+      );
+      if caps.rumble {
+        assert_eq!(
+          *pad.rumble_calls.lock().unwrap(),
+          vec![(500, 0, RUMBLE_DURATION_MS), (0, 0, RUMBLE_DURATION_MS)]
+        );
+      }
+      if caps.trigger_rumble {
+        assert_eq!(
+          *pad.trigger_calls.lock().unwrap(),
+          vec![(0, 700, RUMBLE_DURATION_MS), (0, 0, RUMBLE_DURATION_MS)]
+        );
+      }
+      assert_eq!(*pad.commands.lock().unwrap(), 2);
+      *pad.fail.lock().unwrap() = true;
+      assert!(hardware.write_value(&packet(vec![0; 8])).await.is_err());
+      assert_eq!(
+        pad.rumble_attempts.lock().unwrap().len(),
+        if caps.rumble { 3 } else { 0 }
+      );
+      assert_eq!(
+        pad.trigger_attempts.lock().unwrap().len(),
+        if caps.trigger_rumble { 3 } else { 0 }
+      );
+    }
   }
 
   #[tokio::test]

@@ -60,11 +60,22 @@ fn main() {
                     "Error"
                   }
                 };
+                // Capability booleans mirror what the production manager reads
+                // (SDL_PROP_GAMEPAD_CAP_RUMBLE_BOOLEAN and
+                // SDL_PROP_GAMEPAD_CAP_TRIGGER_RUMBLE_BOOLEAN). Pure
+                // property queries: they never actuate motors.
+                // SAFETY: property-table reads of this opened gamepad on the
+                // thread that exclusively owns it; no concurrent SDL access.
+                let has_rumble = unsafe { pad.has_rumble() };
+                // SAFETY: see above.
+                let has_trigger_rumble = unsafe { pad.has_rumble_triggers() };
                 println!(
-                  "[sdl-thread] gamepad {} '{}' connection: {}",
+                  "[sdl-thread] gamepad {} '{}' connection: {} rumble: {} trigger-rumble: {}",
                   id.0,
                   pad.name().unwrap_or_default(),
-                  connection
+                  connection,
+                  has_rumble,
+                  has_trigger_rumble
                 );
                 // pad drops here, closing the probe handle
               }

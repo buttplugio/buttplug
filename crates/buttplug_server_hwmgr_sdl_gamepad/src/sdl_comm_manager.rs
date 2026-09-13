@@ -83,6 +83,7 @@ impl SdlGamepadCommunicationManager {
             gamepad.id,
             gamepad.name,
             address,
+            gamepad.capabilities,
           )),
         })
         .await
@@ -185,7 +186,13 @@ mod tests {
     async fn open(
       &self,
       _id: JoystickId,
-    ) -> Result<Arc<dyn crate::sdl_task::SdlOpenedGamepad>, SdlTaskError> {
+    ) -> Result<
+      (
+        Arc<dyn crate::sdl_task::SdlOpenedGamepad>,
+        crate::sdl_task::SdlRumbleCapabilities,
+      ),
+      SdlTaskError,
+    > {
       panic!("open is not exercised through this mock")
     }
   }
@@ -210,6 +217,10 @@ mod tests {
     SdlGamepadDesc {
       id: joystick_id(id),
       name: name.to_owned(),
+      capabilities: crate::sdl_task::SdlRumbleCapabilities {
+        rumble: true,
+        trigger_rumble: false,
+      },
     }
   }
 

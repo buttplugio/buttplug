@@ -50,12 +50,41 @@ const CONNECTED_POLL_INTERVAL_MS: u64 = 500;
 /// for connected-poll and rumble-refresh checks.
 const COMMAND_WAKE_MS: u64 = 100;
 
+/// Which independent rumble pairs an opened gamepad reported. Logical output
+/// channels, not physical motor counts; can vary by OS/transport.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub(crate) struct SdlRumbleCapabilities {
+  pub rumble: bool,
+  pub trigger_rumble: bool,
+}
+
+impl SdlRumbleCapabilities {
+  pub fn any(self) -> bool {
+    self.rumble || self.trigger_rumble
+  }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub(crate) struct SdlRumbleState {
+  pub low: u16,
+  pub high: u16,
+  pub left_trigger: u16,
+  pub right_trigger: u16,
+}
+
+impl SdlRumbleState {
+  pub fn slots(&self) -> [u16; 4] {
+    [self.low, self.high, self.left_trigger, self.right_trigger]
+  }
+}
+
 /// A gamepad discovered by a scan, with its SDL-reported name (or the
 /// deterministic fallback name when the name lookup failed).
 #[derive(Debug, Clone)]
 pub(crate) struct SdlGamepadDesc {
   pub id: JoystickId,
   pub name: String,
+  pub capabilities: SdlRumbleCapabilities,
 }
 
 /// Construct a [JoystickId] from its raw u32 value. `JoystickId` is a type
@@ -71,6 +100,8 @@ pub(crate) enum SdlTaskError {
   Init(String),
   #[error("SDL gamepad scan failed: {0}")]
   Scan(String),
+  #[error("SDL gamepad {0} has no rumble capability")]
+  NoRumbleCapability(JoystickId),
   #[error("SDL gamepad {0} is already open")]
   AlreadyOpen(JoystickId),
   #[error("SDL gamepad {0} has been removed")]
@@ -109,7 +140,10 @@ pub(crate) enum DriverConnection {
 }
 
 pub(crate) trait DriverGamepad {
+  fn has_rumble(&self) -> bool;
+  fn has_rumble_triggers(&self) -> bool;
   fn rumble(&mut self, low: u16, high: u16, duration_ms: u32) -> Result<(), String>;
+  fn rumble_triggers(&mut self, left: u16, right: u16, duration_ms: u32) -> Result<(), String>;
   fn connected(&self) -> bool;
   /// Default `Unknown` so fakes only override it where relevant.
   fn connection_state(&self) -> DriverConnection {
@@ -142,13 +176,14 @@ enum SdlCommand {
   },
   Open {
     id: JoystickId,
-    reply: oneshot::Sender<Result<SdlOpenedGamepadHandle, SdlTaskError>>,
+    reply: oneshot::Sender<Result<(SdlOpenedGamepadHandle, SdlRumbleCapabilities), SdlTaskError>>,
   },
-  Rumble {
+  #[cfg(test)]
+  Shutdown { reply: oneshot::Sender<()> },
+  SetRumbleState {
     id: JoystickId,
     generation: u64,
-    low: u16,
-    high: u16,
+    state: SdlRumbleState,
     duration: u32,
     reply: oneshot::Sender<Result<(), SdlTaskError>>,
   },
@@ -186,15 +221,14 @@ impl SdlOpenedGamepadHandle {
     self.removed_rx.clone()
   }
 
-  pub(crate) async fn rumble(
+  pub(crate) async fn set_rumble_state(
     &self,
-    low: u16,
-    high: u16,
+    state: SdlRumbleState,
     duration_ms: u32,
   ) -> Result<(), SdlTaskError> {
     self
       .task
-      .rumble(self.id, self.generation, low, high, duration_ms)
+      .set_rumble_state(self.id, self.generation, state, duration_ms)
       .await
   }
 
@@ -210,8 +244,9 @@ impl SdlOpenedGamepadHandle {
 
 /// Cloneable handle to the SDL thread's command channel.
 ///
-/// If all handles drop, the thread exits (which drops the SDL context). The
-/// process-global publication keeps one handle alive for the process lifetime.
+/// The loop retains its own sender, so external handle drops do not stop it.
+/// Production lives until process exit; tests explicitly use the Shutdown seam.
+/// Channel disconnection is a defensive teardown path.
 #[derive(Clone)]
 pub(crate) struct SdlTaskHandle {
   cmd_tx: mpsc::Sender<SdlCommand>,
@@ -242,26 +277,34 @@ impl SdlTaskHandle {
       .await?
   }
 
-  pub(crate) async fn open(&self, id: JoystickId) -> Result<SdlOpenedGamepadHandle, SdlTaskError> {
+  pub(crate) async fn open(
+    &self,
+    id: JoystickId,
+  ) -> Result<(SdlOpenedGamepadHandle, SdlRumbleCapabilities), SdlTaskError> {
     self
       .send_and_await(|reply| SdlCommand::Open { id, reply })
       .await?
   }
 
-  pub(crate) async fn rumble(
+  #[cfg(test)]
+  async fn shutdown(&self) -> Result<(), SdlTaskError> {
+    self
+      .send_and_await(|reply| SdlCommand::Shutdown { reply })
+      .await
+  }
+
+  pub(crate) async fn set_rumble_state(
     &self,
     id: JoystickId,
     generation: u64,
-    low: u16,
-    high: u16,
+    state: SdlRumbleState,
     duration: u32,
   ) -> Result<(), SdlTaskError> {
     self
-      .send_and_await(|reply| SdlCommand::Rumble {
+      .send_and_await(|reply| SdlCommand::SetRumbleState {
         id,
         generation,
-        low,
-        high,
+        state,
         duration,
         reply,
       })
@@ -307,8 +350,10 @@ struct OpenPadState {
   pad: Box<dyn DriverGamepad>,
   generation: u64,
   removed_tx: watch::Sender<bool>,
-  last_rumble: (u16, u16),
-  last_set_at: u64,
+  last_main: (u16, u16),
+  main_set_at: u64,
+  last_triggers: (u16, u16),
+  triggers_set_at: u64,
 }
 
 /// Pure rumble-refresh decision: given the last accepted rumble command, when
@@ -339,10 +384,19 @@ fn mark_removed(state: OpenPadState) {
 /// if this fails, but an explicit stop avoids up to a full arm period of
 /// vibration after a disconnect while rumbling.
 fn stop_and_drop(mut state: OpenPadState) {
-  if state.last_rumble != (0, 0) {
+  if state.pad.has_rumble() {
     let _ = state.pad.rumble(0, 0, RUMBLE_DURATION_MS);
   }
+  if state.pad.has_rumble_triggers() {
+    let _ = state.pad.rumble_triggers(0, 0, RUMBLE_DURATION_MS);
+  }
   mark_removed(state);
+}
+
+fn teardown(open_pads: &mut HashMap<JoystickId, OpenPadState>) {
+  for (_, state) in open_pads.drain() {
+    stop_and_drop(state);
+  }
 }
 
 /// The SDL thread's command loop.
@@ -381,19 +435,37 @@ fn sdl_thread_loop(
 
     // Refresh any non-zero rumble whose re-arm deadline has arrived. Errors
     // are treated as device loss: mark removed and drop the pad.
-    let mut rumbles_to_refresh: Vec<(JoystickId, (u16, u16))> = Vec::new();
+    let mut rumbles_to_refresh = Vec::new();
     for (id, state) in open_pads.iter() {
-      if let Some(cmd) = refresh_decision(state.last_rumble, state.last_set_at, now) {
-        rumbles_to_refresh.push((*id, cmd));
+      if let Some(cmd) = refresh_decision(state.last_main, state.main_set_at, now) {
+        rumbles_to_refresh.push((*id, false, cmd));
+      }
+      if let Some(cmd) = refresh_decision(state.last_triggers, state.triggers_set_at, now) {
+        rumbles_to_refresh.push((*id, true, cmd));
       }
     }
-    for (id, (low, high)) in rumbles_to_refresh {
+    for (id, triggers, (low, high)) in rumbles_to_refresh {
       let Some(state) = open_pads.get_mut(&id) else {
         continue;
       };
-      match state.pad.rumble(low, high, RUMBLE_DURATION_MS) {
+      let result = if triggers {
+        if !state.pad.has_rumble_triggers() {
+          continue;
+        }
+        state.pad.rumble_triggers(low, high, RUMBLE_DURATION_MS)
+      } else {
+        if !state.pad.has_rumble() {
+          continue;
+        }
+        state.pad.rumble(low, high, RUMBLE_DURATION_MS)
+      };
+      match result {
         Ok(()) => {
-          state.last_set_at = now;
+          if triggers {
+            state.triggers_set_at = now;
+          } else {
+            state.main_set_at = now;
+          }
         }
         Err(e) => {
           warn!("SDL gamepad {} rumble refresh failed: {}", id.0, e);
@@ -407,6 +479,12 @@ fn sdl_thread_loop(
     // Wait for the next command (or wake timeout), then handle it.
     match cmd_rx.recv_timeout(Duration::from_millis(COMMAND_WAKE_MS)) {
       Ok(cmd) => match cmd {
+        #[cfg(test)]
+        SdlCommand::Shutdown { reply } => {
+          teardown(&mut open_pads);
+          let _ = reply.send(());
+          break;
+        }
         SdlCommand::Scan { reply } => {
           let result = driver.enumerate().map_err(|e| {
             warn!("SDL gamepad enumeration failed: {}", e);
@@ -423,25 +501,47 @@ fn sdl_thread_loop(
                 // deliberately does not host. Skip wired pads so no dead
                 // devices appear; Bluetooth pads work fully. Users with a
                 // wired controller can pair the same pad via Bluetooth.
-                #[cfg(target_os = "macos")]
-                {
-                  if !open_pads.contains_key(&id) {
-                    let wired = match driver.open(id) {
-                      // The probe handle drops immediately, closing it again.
-                      Ok(pad) => pad.connection_state() == DriverConnection::Wired,
-                      Err(_) => false,
-                    };
-                    if wired {
-                      warn!(
-                        "Skipping wired SDL gamepad {} on macOS: wired rumble is not possible without GCController (pair the controller via Bluetooth instead).",
-                        id.0
-                      );
+                let capabilities = if let Some(state) = open_pads.get(&id) {
+                  SdlRumbleCapabilities {
+                    rumble: state.pad.has_rumble(),
+                    trigger_rumble: state.pad.has_rumble_triggers(),
+                  }
+                } else {
+                  let pad = match driver.open(id) {
+                    Ok(pad) => pad,
+                    Err(e) => {
+                      warn!("SDL gamepad {} probe open failed: {}", id.0, e);
                       return None;
                     }
+                  };
+                  let connection = pad.connection_state();
+                  #[cfg(target_os = "macos")]
+                  if connection == DriverConnection::Wired {
+                    warn!(
+                      "Skipping wired SDL gamepad {} on macOS: wired rumble is not possible without GCController (pair the controller via Bluetooth instead).",
+                      id.0
+                    );
+                    return None;
                   }
-                }
+                  #[cfg(not(target_os = "macos"))]
+                  let _ = connection;
+                  let capabilities = SdlRumbleCapabilities {
+                    rumble: pad.has_rumble(),
+                    trigger_rumble: pad.has_rumble_triggers(),
+                  };
+                  drop(pad);
+                  if !capabilities.any() {
+                    info!("SDL gamepad {} has no rumble capability, skipping", id.0);
+                    return None;
+                  }
+                  capabilities
+                };
                 let name = match driver.name_for_id(id) {
-                  Ok(name) => name,
+                  Ok(name) if !name.trim().is_empty() => name,
+                  Ok(_) => {
+                    warn!("SDL gamepad {} name lookup returned an empty name", id.0);
+                    format!("SDL Gamepad {}", id.0)
+                  },
                   Err(e) => {
                     // A failed name lookup never drops the device: log and
                     // fall back to a deterministic name.
@@ -449,7 +549,7 @@ fn sdl_thread_loop(
                     format!("SDL Gamepad {}", id.0)
                   }
                 };
-                Some(SdlGamepadDesc { id, name })
+                Some(SdlGamepadDesc { id, name, capabilities })
               })
               .collect::<Vec<_>>()
           });
@@ -465,6 +565,15 @@ fn sdl_thread_loop(
           }
           match driver.open(id) {
             Ok(pad) => {
+              let capabilities = SdlRumbleCapabilities {
+                rumble: pad.has_rumble(),
+                trigger_rumble: pad.has_rumble_triggers(),
+              };
+              if !capabilities.any() {
+                drop(pad);
+                let _ = reply.send(Err(SdlTaskError::NoRumbleCapability(id)));
+                continue;
+              }
               next_generation += 1;
               let generation = next_generation;
               let (removed_tx, removed_rx) = watch::channel(false);
@@ -474,8 +583,10 @@ fn sdl_thread_loop(
                   pad,
                   generation,
                   removed_tx,
-                  last_rumble: (0, 0),
-                  last_set_at: now,
+                  last_main: (0, 0),
+                  main_set_at: now,
+                  last_triggers: (0, 0),
+                  triggers_set_at: now,
                 },
               );
               let handle = SdlOpenedGamepadHandle {
@@ -484,7 +595,7 @@ fn sdl_thread_loop(
                 task: task_tx.clone(),
                 removed_rx,
               };
-              if reply.send(Ok(handle)).is_err() {
+              if reply.send(Ok((handle, capabilities))).is_err() {
                 // The connect waiter is gone (future cancelled): nobody can
                 // ever command or close this pad. Drop the lease now instead
                 // of blocking future opens with AlreadyOpen until the device
@@ -499,11 +610,10 @@ fn sdl_thread_loop(
             }
           }
         }
-        SdlCommand::Rumble {
+        SdlCommand::SetRumbleState {
           id,
           generation,
-          low,
-          high,
+          state: desired,
           duration,
           reply,
         } => {
@@ -516,15 +626,37 @@ fn sdl_thread_loop(
             let _ = reply.send(Err(SdlTaskError::Removed(id)));
             continue;
           }
-          let reply_value = state
-            .pad
-            .rumble(low, high, duration)
-            .map_err(|e| SdlTaskError::Rumble(e));
-          if reply_value.is_ok() {
-            state.last_rumble = (low, high);
-            state.last_set_at = clock.now_ms();
+          let now = clock.now_ms();
+          let mut errors = Vec::new();
+          if state.pad.has_rumble() {
+            match state.pad.rumble(desired.low, desired.high, duration) {
+              Ok(()) => {
+                state.last_main = (desired.low, desired.high);
+                state.main_set_at = now;
+              }
+              Err(e) => errors.push(format!("main: {e}")),
+            }
           }
-          let _ = reply.send(reply_value);
+          if state.pad.has_rumble_triggers() {
+            match state
+              .pad
+              .rumble_triggers(desired.left_trigger, desired.right_trigger, duration)
+            {
+              Ok(()) => {
+                state.last_triggers = (desired.left_trigger, desired.right_trigger);
+                state.triggers_set_at = now;
+              }
+              Err(e) => errors.push(format!("triggers: {e}")),
+            }
+          }
+          if errors.is_empty() {
+            let _ = reply.send(Ok(()));
+          } else {
+            let _ = reply.send(Err(SdlTaskError::Rumble(errors.join("; "))));
+            if let Some(state) = open_pads.remove(&id) {
+              stop_and_drop(state);
+            }
+          }
         }
         SdlCommand::Close {
           id,
@@ -548,11 +680,8 @@ fn sdl_thread_loop(
         // Plain wake; periodic work will be re-checked at the top of the loop.
       }
       Err(mpsc::RecvTimeoutError::Disconnected) => {
-        // All handles dropped; shut the thread (and SDL context) down.
         info!("SDL gamepad thread command channel closed; exiting.");
-        for (_, state) in open_pads.drain() {
-          stop_and_drop(state);
-        }
+        teardown(&mut open_pads);
         break;
       }
     }
@@ -571,12 +700,33 @@ pub(crate) fn spawn_sdl_task<F>(
 where
   F: FnOnce() -> Result<Box<dyn SdlDriver>, SdlTaskInitError> + Send + 'static,
 {
+  spawn_sdl_task_inner(factory, clock).map(|(handle, _join)| handle)
+}
+
+#[cfg(test)]
+fn spawn_sdl_task_with_join<F>(
+  factory: F,
+  clock: Box<dyn SdlClock>,
+) -> Result<(SdlTaskHandle, std::thread::JoinHandle<()>), SdlTaskInitError>
+where
+  F: FnOnce() -> Result<Box<dyn SdlDriver>, SdlTaskInitError> + Send + 'static,
+{
+  spawn_sdl_task_inner(factory, clock)
+}
+
+fn spawn_sdl_task_inner<F>(
+  factory: F,
+  clock: Box<dyn SdlClock>,
+) -> Result<(SdlTaskHandle, std::thread::JoinHandle<()>), SdlTaskInitError>
+where
+  F: FnOnce() -> Result<Box<dyn SdlDriver>, SdlTaskInitError> + Send + 'static,
+{
   let (cmd_tx, cmd_rx) = mpsc::channel::<SdlCommand>();
   let (init_tx, init_rx) = mpsc::channel::<Result<(), SdlTaskInitError>>();
   let loop_tx = SdlTaskHandle {
     cmd_tx: cmd_tx.clone(),
   };
-  std::thread::Builder::new()
+  let join = std::thread::Builder::new()
     .name("buttplug-sdl-gamepad".to_string())
     .spawn(move || {
       let driver = match factory() {
@@ -599,7 +749,7 @@ where
     .recv()
     .map_err(|_| SdlTaskInitError("SDL thread exited before initialization".to_owned()))?
     .map_err(|e| e)?;
-  Ok(SdlTaskHandle { cmd_tx })
+  Ok((SdlTaskHandle { cmd_tx }, join))
 }
 
 // ---------------------------------------------------------------------------
@@ -636,6 +786,27 @@ struct Sdl3Gamepad {
 }
 
 impl DriverGamepad for Sdl3Gamepad {
+  fn has_rumble(&self) -> bool {
+    // SAFETY: Pure property-table read of this opened gamepad, exclusively
+    // owned by this SDL thread, so no concurrent SDL access is possible.
+    // Missing properties resolve to false; this does not activate motors.
+    unsafe { self.pad.has_rumble() }
+  }
+
+  fn has_rumble_triggers(&self) -> bool {
+    // SAFETY: Pure property-table read of this opened gamepad, exclusively
+    // owned by this SDL thread, so no concurrent SDL access is possible.
+    // Missing properties resolve to false; this does not activate motors.
+    unsafe { self.pad.has_rumble_triggers() }
+  }
+
+  fn rumble_triggers(&mut self, left: u16, right: u16, duration_ms: u32) -> Result<(), String> {
+    self
+      .pad
+      .set_rumble_triggers(left, right, duration_ms)
+      .map_err(|e| e.to_string())
+  }
+
   fn rumble(&mut self, low: u16, high: u16, duration_ms: u32) -> Result<(), String> {
     self
       .pad
@@ -740,7 +911,11 @@ use async_trait::async_trait;
 /// dependency. Production wraps [`SdlOpenedGamepadHandle`].
 #[async_trait]
 pub(crate) trait SdlOpenedGamepad: Send + Sync + std::fmt::Debug {
-  async fn rumble(&self, low: u16, high: u16, duration_ms: u32) -> Result<(), SdlTaskError>;
+  async fn set_rumble_state(
+    &self,
+    state: SdlRumbleState,
+    duration_ms: u32,
+  ) -> Result<(), SdlTaskError>;
   async fn close(&self) -> Result<(), SdlTaskError>;
   /// Fire-and-forget close usable from synchronous contexts (e.g. `Drop`).
   fn close_now(&self);
@@ -759,7 +934,10 @@ pub(crate) trait SdlGamepadBackend: Send + Sync {
   /// Whether the underlying SDL task initialized successfully.
   fn initialized(&self) -> bool;
   async fn gamepads(&self) -> Result<Vec<SdlGamepadDesc>, SdlTaskError>;
-  async fn open(&self, id: JoystickId) -> Result<Arc<dyn SdlOpenedGamepad>, SdlTaskError>;
+  async fn open(
+    &self,
+    id: JoystickId,
+  ) -> Result<(Arc<dyn SdlOpenedGamepad>, SdlRumbleCapabilities), SdlTaskError>;
 }
 
 /// Production opened-gamepad wrapper over the task handle.
@@ -770,8 +948,12 @@ struct TaskOpenedGamepad {
 
 #[async_trait]
 impl SdlOpenedGamepad for TaskOpenedGamepad {
-  async fn rumble(&self, low: u16, high: u16, duration_ms: u32) -> Result<(), SdlTaskError> {
-    self.handle.rumble(low, high, duration_ms).await
+  async fn set_rumble_state(
+    &self,
+    state: SdlRumbleState,
+    duration_ms: u32,
+  ) -> Result<(), SdlTaskError> {
+    self.handle.set_rumble_state(state, duration_ms).await
   }
 
   async fn close(&self) -> Result<(), SdlTaskError> {
@@ -813,11 +995,15 @@ impl SdlGamepadBackend for SdlTaskBackend {
     }
   }
 
-  async fn open(&self, id: JoystickId) -> Result<Arc<dyn SdlOpenedGamepad>, SdlTaskError> {
+  async fn open(
+    &self,
+    id: JoystickId,
+  ) -> Result<(Arc<dyn SdlOpenedGamepad>, SdlRumbleCapabilities), SdlTaskError> {
     match self.publication {
-      Ok(handle) => Ok(Arc::new(TaskOpenedGamepad {
-        handle: handle.open(id).await?,
-      })),
+      Ok(handle) => {
+        let (handle, capabilities) = handle.open(id).await?;
+        Ok((Arc::new(TaskOpenedGamepad { handle }), capabilities))
+      }
       Err(e) => Err(SdlTaskError::Init(e.to_string())),
     }
   }
@@ -845,6 +1031,12 @@ mod tests {
     // Log of (id, low, high, duration) rumble calls.
     rumble_log: Vec<(JoystickId, u16, u16, u32)>,
     rumble_fail: bool,
+    trigger_rumble_fail: bool,
+    rumble_caps: HashMap<JoystickId, SdlRumbleCapabilities>,
+    name_override: HashMap<JoystickId, String>,
+    rumble_attempts: Vec<(JoystickId, u16, u16, u32)>,
+    trigger_rumble_attempts: Vec<(JoystickId, u16, u16, u32)>,
+    trigger_rumble_log: Vec<(JoystickId, u16, u16, u32)>,
     wired_ids: Vec<JoystickId>,
   }
 
@@ -856,8 +1048,47 @@ mod tests {
   }
 
   impl DriverGamepad for FakeGamepad {
+    fn has_rumble(&self) -> bool {
+      self
+        .state
+        .lock()
+        .unwrap()
+        .rumble_caps
+        .get(&self.id)
+        .map(|caps| caps.rumble)
+        .unwrap_or(true)
+    }
+
+    fn has_rumble_triggers(&self) -> bool {
+      self
+        .state
+        .lock()
+        .unwrap()
+        .rumble_caps
+        .get(&self.id)
+        .map(|caps| caps.trigger_rumble)
+        .unwrap_or(false)
+    }
+
+    fn rumble_triggers(&mut self, left: u16, right: u16, duration_ms: u32) -> Result<(), String> {
+      let mut state = self.state.lock().unwrap();
+      state
+        .trigger_rumble_attempts
+        .push((self.id, left, right, duration_ms));
+      if state.trigger_rumble_fail {
+        return Err("trigger rumble failed".to_owned());
+      }
+      state
+        .trigger_rumble_log
+        .push((self.id, left, right, duration_ms));
+      Ok(())
+    }
+
     fn rumble(&mut self, low: u16, high: u16, duration_ms: u32) -> Result<(), String> {
       let mut state = self.state.lock().unwrap();
+      state
+        .rumble_attempts
+        .push((self.id, low, high, duration_ms));
       if state.rumble_fail {
         return Err("rumble failed".to_owned());
       }
@@ -900,7 +1131,13 @@ mod tests {
       if state.name_fail_ids.contains(&id) {
         Err("name lookup failed".to_owned())
       } else {
-        Ok(format!("SDL Fake Pad {}", id.0))
+        Ok(
+          state
+            .name_override
+            .get(&id)
+            .cloned()
+            .unwrap_or_else(|| format!("SDL Fake Pad {}", id.0)),
+        )
       }
     }
 
@@ -946,6 +1183,345 @@ mod tests {
 
   fn id(n: u32) -> JoystickId {
     joystick_id(n)
+  }
+
+  fn caps(rumble: bool, trigger_rumble: bool) -> SdlRumbleCapabilities {
+    SdlRumbleCapabilities {
+      rumble,
+      trigger_rumble,
+    }
+  }
+
+  async fn barrier(handle: &SdlTaskHandle) {
+    // Two commands guarantee a loop-top periodic pass after the clock change.
+    handle.scan().await.unwrap();
+    handle.scan().await.unwrap();
+  }
+
+  #[tokio::test]
+  async fn sdl_scan_capability_matrix() {
+    let state = Arc::new(Mutex::new(FakeDriverState {
+      enumerate_ids: vec![id(1), id(2), id(3), id(4)],
+      rumble_caps: HashMap::from([
+        (id(1), caps(true, false)),
+        (id(2), caps(false, true)),
+        (id(3), caps(true, true)),
+        (id(4), caps(false, false)),
+      ]),
+      ..Default::default()
+    }));
+    let handle = spawn_fake(state.clone(), FakeClock::default());
+    let found = handle.scan().await.unwrap();
+    assert_eq!(
+      found
+        .iter()
+        .map(|pad| (pad.id, pad.capabilities))
+        .collect::<Vec<_>>(),
+      vec![
+        (id(1), caps(true, false)),
+        (id(2), caps(false, true)),
+        (id(3), caps(true, true))
+      ]
+    );
+    assert!(state.lock().unwrap().rumble_attempts.is_empty());
+    assert!(state.lock().unwrap().trigger_rumble_attempts.is_empty());
+    handle.shutdown().await.unwrap();
+  }
+
+  #[tokio::test]
+  async fn sdl_probe_failure_retries() {
+    let state = Arc::new(Mutex::new(FakeDriverState {
+      enumerate_ids: vec![id(1)],
+      open_fail_ids: vec![id(1)],
+      ..Default::default()
+    }));
+    let handle = spawn_fake(state.clone(), FakeClock::default());
+    assert!(handle.scan().await.unwrap().is_empty());
+    state.lock().unwrap().open_fail_ids.clear();
+    assert_eq!(handle.scan().await.unwrap().len(), 1);
+    handle.shutdown().await.unwrap();
+  }
+
+  #[tokio::test]
+  async fn sdl_connect_rechecks_capabilities() {
+    let state = Arc::new(Mutex::new(FakeDriverState {
+      enumerate_ids: vec![id(1)],
+      rumble_caps: HashMap::from([(id(1), caps(true, true))]),
+      ..Default::default()
+    }));
+    let handle = spawn_fake(state.clone(), FakeClock::default());
+    assert_eq!(
+      handle.scan().await.unwrap()[0].capabilities,
+      caps(true, true)
+    );
+    state
+      .lock()
+      .unwrap()
+      .rumble_caps
+      .insert(id(1), caps(true, false));
+    let (opened, actual) = handle.open(id(1)).await.unwrap();
+    assert_eq!(actual, caps(true, false));
+    opened.close().await.unwrap();
+    state
+      .lock()
+      .unwrap()
+      .rumble_caps
+      .insert(id(1), caps(false, false));
+    assert!(matches!(
+      handle.open(id(1)).await,
+      Err(SdlTaskError::NoRumbleCapability(_))
+    ));
+    state
+      .lock()
+      .unwrap()
+      .rumble_caps
+      .insert(id(1), caps(false, true));
+    assert_eq!(handle.open(id(1)).await.unwrap().1, caps(false, true));
+    handle.shutdown().await.unwrap();
+  }
+
+  #[tokio::test]
+  async fn sdl_name_fallback_matrix() {
+    let state = Arc::new(Mutex::new(FakeDriverState {
+      enumerate_ids: vec![id(1), id(2), id(3)],
+      name_fail_ids: vec![id(2)],
+      name_override: HashMap::from([
+        (id(1), " Valid Pad ".to_owned()),
+        (id(3), " \t ".to_owned()),
+      ]),
+      ..Default::default()
+    }));
+    let handle = spawn_fake(state, FakeClock::default());
+    assert_eq!(
+      handle
+        .scan()
+        .await
+        .unwrap()
+        .iter()
+        .map(|p| p.name.as_str())
+        .collect::<Vec<_>>(),
+      vec![" Valid Pad ", "SDL Gamepad 2", "SDL Gamepad 3"]
+    );
+    handle.shutdown().await.unwrap();
+  }
+
+  #[tokio::test]
+  async fn sdl_lifecycle_pair_matrix() {
+    for capability in [caps(true, false), caps(false, true), caps(true, true)] {
+      let state = Arc::new(Mutex::new(FakeDriverState {
+        rumble_caps: HashMap::from([(id(1), capability)]),
+        ..Default::default()
+      }));
+      let handle = spawn_fake(state.clone(), FakeClock::default());
+      let (opened, _) = handle.open(id(1)).await.unwrap();
+      opened
+        .set_rumble_state(
+          SdlRumbleState {
+            low: 500,
+            right_trigger: 700,
+            ..Default::default()
+          },
+          RUMBLE_DURATION_MS,
+        )
+        .await
+        .unwrap();
+      opened
+        .set_rumble_state(SdlRumbleState::default(), RUMBLE_DURATION_MS)
+        .await
+        .unwrap();
+      opened.close().await.unwrap();
+      {
+        let state = state.lock().unwrap();
+        assert_eq!(
+          state.rumble_attempts.len(),
+          if capability.rumble { 3 } else { 0 }
+        );
+        assert_eq!(
+          state.trigger_rumble_attempts.len(),
+          if capability.trigger_rumble { 3 } else { 0 }
+        );
+        if capability.rumble {
+          assert_eq!(
+            state.rumble_attempts.last(),
+            Some(&(id(1), 0, 0, RUMBLE_DURATION_MS))
+          );
+        }
+        if capability.trigger_rumble {
+          assert_eq!(
+            state.trigger_rumble_attempts.last(),
+            Some(&(id(1), 0, 0, RUMBLE_DURATION_MS))
+          );
+        }
+      }
+      handle.shutdown().await.unwrap();
+    }
+  }
+
+  #[tokio::test]
+  async fn sdl_keepalive_pair_matrix() {
+    for capability in [caps(true, false), caps(false, true), caps(true, true)] {
+      for active_triggers in [false, true] {
+        let state = Arc::new(Mutex::new(FakeDriverState {
+          rumble_caps: HashMap::from([(id(1), capability)]),
+          ..Default::default()
+        }));
+        let clock = FakeClock::default();
+        let handle = spawn_fake(state.clone(), clock.clone());
+        let (opened, _) = handle.open(id(1)).await.unwrap();
+        let desired = SdlRumbleState {
+          low: if active_triggers { 0 } else { 500 },
+          right_trigger: if active_triggers { 700 } else { 0 },
+          ..Default::default()
+        };
+        opened
+          .set_rumble_state(desired, RUMBLE_DURATION_MS)
+          .await
+          .unwrap();
+        clock.advance_to(RUMBLE_KEEPALIVE_INTERVAL_MS + 1);
+        barrier(&handle).await;
+        barrier(&handle).await;
+        {
+          let state = state.lock().unwrap();
+          assert_eq!(
+            state.rumble_attempts.len(),
+            if capability.rumble {
+              if active_triggers { 1 } else { 2 }
+            } else {
+              0
+            }
+          );
+          assert_eq!(
+            state.trigger_rumble_attempts.len(),
+            if capability.trigger_rumble {
+              if active_triggers { 2 } else { 1 }
+            } else {
+              0
+            }
+          );
+        }
+        handle.shutdown().await.unwrap();
+      }
+    }
+  }
+
+  #[tokio::test]
+  async fn sdl_pair_failure_cleanup() {
+    for main_failure in [false, true] {
+      let state = Arc::new(Mutex::new(FakeDriverState {
+        rumble_caps: HashMap::from([(id(1), caps(true, true))]),
+        ..Default::default()
+      }));
+      let handle = spawn_fake(state.clone(), FakeClock::default());
+      let (opened, _) = handle.open(id(1)).await.unwrap();
+      let removed = opened.removed();
+      let desired = SdlRumbleState {
+        low: 500,
+        right_trigger: 700,
+        ..Default::default()
+      };
+      opened
+        .set_rumble_state(desired, RUMBLE_DURATION_MS)
+        .await
+        .unwrap();
+      {
+        let mut state = state.lock().unwrap();
+        state.rumble_fail = main_failure;
+        state.trigger_rumble_fail = !main_failure;
+      }
+      assert!(matches!(
+        opened.set_rumble_state(desired, RUMBLE_DURATION_MS).await,
+        Err(SdlTaskError::Rumble(_))
+      ));
+      barrier(&handle).await;
+      assert!(*removed.borrow());
+      assert!(matches!(
+        opened.set_rumble_state(desired, RUMBLE_DURATION_MS).await,
+        Err(SdlTaskError::Removed(_))
+      ));
+      {
+        let state = state.lock().unwrap();
+        assert_eq!(
+          state.rumble_attempts.last(),
+          Some(&(id(1), 0, 0, RUMBLE_DURATION_MS))
+        );
+        assert_eq!(
+          state.trigger_rumble_attempts.last(),
+          Some(&(id(1), 0, 0, RUMBLE_DURATION_MS))
+        );
+        assert_eq!(state.rumble_attempts.len(), 3);
+        assert_eq!(state.trigger_rumble_attempts.len(), 3);
+      }
+      handle.shutdown().await.unwrap();
+    }
+  }
+
+  async fn shutdown_case(main_failure: bool) {
+    let state = Arc::new(Mutex::new(FakeDriverState {
+      rumble_caps: HashMap::from([(id(1), caps(true, true))]),
+      ..Default::default()
+    }));
+    let driver_state = state.clone();
+    let (handle, join) = spawn_sdl_task_with_join(
+      move || Ok(Box::new(FakeDriver(driver_state))),
+      Box::new(FakeClock::default()),
+    )
+    .unwrap();
+    let (opened, _) = handle.open(id(1)).await.unwrap();
+    let removed = opened.removed();
+    opened
+      .set_rumble_state(
+        SdlRumbleState {
+          low: 500,
+          right_trigger: 700,
+          ..Default::default()
+        },
+        RUMBLE_DURATION_MS,
+      )
+      .await
+      .unwrap();
+    state.lock().unwrap().rumble_fail = main_failure;
+    tokio::time::timeout(Duration::from_secs(5), handle.shutdown())
+      .await
+      .unwrap()
+      .unwrap();
+    tokio::time::timeout(
+      Duration::from_secs(5),
+      tokio::task::spawn_blocking(move || join.join()),
+    )
+    .await
+    .unwrap()
+    .unwrap()
+    .unwrap();
+    assert!(*removed.borrow());
+    let state = state.lock().unwrap();
+    assert_eq!(
+      state.rumble_attempts.last(),
+      Some(&(id(1), 0, 0, RUMBLE_DURATION_MS))
+    );
+    assert_eq!(
+      state.trigger_rumble_attempts.last(),
+      Some(&(id(1), 0, 0, RUMBLE_DURATION_MS))
+    );
+    assert_eq!(
+      state.trigger_rumble_log.last(),
+      Some(&(id(1), 0, 0, RUMBLE_DURATION_MS))
+    );
+    if !main_failure {
+      assert_eq!(
+        state.rumble_log.last(),
+        Some(&(id(1), 0, 0, RUMBLE_DURATION_MS))
+      );
+    }
+  }
+
+  #[tokio::test]
+  async fn sdl_task_shutdown_stops_both_pairs() {
+    shutdown_case(true).await;
+  }
+
+  #[tokio::test]
+  async fn sdl_task_shutdown_successful_teardown() {
+    shutdown_case(false).await;
   }
 
   // -------------------------------------------------------------------
@@ -1037,7 +1613,7 @@ mod tests {
     let state = Arc::new(Mutex::new(FakeDriverState::default()));
     let handle = spawn_fake(state, FakeClock::default());
 
-    let opened = handle.open(id(4)).await.expect("open should succeed");
+    let (opened, _) = handle.open(id(4)).await.expect("open should succeed");
     let removed = opened.removed();
     opened.close().await.expect("close should succeed");
     assert!(*removed.borrow());
@@ -1063,7 +1639,16 @@ mod tests {
     handle.close(id(5), 1).await.expect("close should succeed");
 
     let err = handle
-      .rumble(id(5), 0, 100, 100, RUMBLE_DURATION_MS)
+      .set_rumble_state(
+        id(5),
+        0,
+        SdlRumbleState {
+          low: 100,
+          high: 100,
+          ..Default::default()
+        },
+        RUMBLE_DURATION_MS,
+      )
       .await
       .expect_err("rumble after close should fail");
     assert!(
@@ -1080,9 +1665,16 @@ mod tests {
 
     // Explicit close while rumbling emits a zero-speed stop before the pad
     // is dropped, so hardware does not vibrate out the remaining arm period.
-    let opened = handle.open(id(13)).await.expect("open should succeed");
+    let (opened, _) = handle.open(id(13)).await.expect("open should succeed");
     opened
-      .rumble(100, 100, RUMBLE_DURATION_MS)
+      .set_rumble_state(
+        SdlRumbleState {
+          low: 100,
+          high: 100,
+          ..Default::default()
+        },
+        RUMBLE_DURATION_MS,
+      )
       .await
       .expect("rumble should succeed");
     opened.close().await.expect("close should succeed");
@@ -1095,9 +1687,16 @@ mod tests {
     );
 
     // Connected-state removal while rumbling stops too.
-    let opened = handle.open(id(14)).await.expect("open should succeed");
+    let (opened, _) = handle.open(id(14)).await.expect("open should succeed");
     opened
-      .rumble(100, 100, RUMBLE_DURATION_MS)
+      .set_rumble_state(
+        SdlRumbleState {
+          low: 100,
+          high: 100,
+          ..Default::default()
+        },
+        RUMBLE_DURATION_MS,
+      )
       .await
       .expect("rumble should succeed");
     state.lock().unwrap().connected.insert(id(14), false);
@@ -1138,33 +1737,65 @@ mod tests {
   }
 
   #[tokio::test]
-  async fn sdl_task_stale_generation_is_inert() {
-    let state = Arc::new(Mutex::new(FakeDriverState::default()));
+  async fn sdl_stale_generation_pair_isolation() {
+    let state = Arc::new(Mutex::new(FakeDriverState {
+      rumble_caps: HashMap::from([(id(15), caps(true, true))]),
+      ..Default::default()
+    }));
     let handle = spawn_fake(state.clone(), FakeClock::default());
 
     // First lease: open, rumble, close (device stays connected).
-    let stale = handle.open(id(15)).await.expect("open should succeed");
+    let (stale, _) = handle.open(id(15)).await.expect("open should succeed");
     stale
-      .rumble(100, 100, RUMBLE_DURATION_MS)
+      .set_rumble_state(
+        SdlRumbleState {
+          low: 100,
+          high: 100,
+          ..Default::default()
+        },
+        RUMBLE_DURATION_MS,
+      )
       .await
       .expect("rumble should succeed");
     stale.close().await.expect("close should succeed");
     let log_len_after_first_lease = state.lock().unwrap().rumble_log.len();
 
     // Second lease for the same still-connected id.
-    let fresh = handle.open(id(15)).await.expect("reopen should succeed");
+    let (fresh, _) = handle.open(id(15)).await.expect("reopen should succeed");
 
     // Stale-handle rumble is rejected...
     let err = stale
-      .rumble(1, 1, RUMBLE_DURATION_MS)
+      .set_rumble_state(
+        SdlRumbleState {
+          low: 1,
+          high: 1,
+          ..Default::default()
+        },
+        RUMBLE_DURATION_MS,
+      )
       .await
       .expect_err("stale rumble must fail");
     assert!(matches!(err, SdlTaskError::Removed(_)), "got {err:?}");
     // ...stale close is an Ok no-op that must NOT tear down the new lease...
     stale.close().await.expect("stale close is a no-op ok");
+    assert_eq!(
+      state.lock().unwrap().rumble_attempts.len(),
+      log_len_after_first_lease
+    );
+    assert_eq!(
+      state.lock().unwrap().trigger_rumble_attempts.len(),
+      log_len_after_first_lease
+    );
     // ...and the fresh lease still works.
     fresh
-      .rumble(50, 50, RUMBLE_DURATION_MS)
+      .set_rumble_state(
+        SdlRumbleState {
+          low: 50,
+          high: 50,
+          ..Default::default()
+        },
+        RUMBLE_DURATION_MS,
+      )
       .await
       .expect("fresh lease rumble should succeed");
 
@@ -1185,7 +1816,7 @@ mod tests {
     let clock = FakeClock::default();
     let handle = spawn_fake(state.clone(), clock.clone());
 
-    let opened = handle.open(id(6)).await.expect("open should succeed");
+    let (opened, _) = handle.open(id(6)).await.expect("open should succeed");
     let mut removed = opened.removed();
 
     // Flip the device to disconnected, then advance the clock past the poll
@@ -1212,7 +1843,16 @@ mod tests {
     // After removal, rumble reports the typed Removed error, and close stays
     // idempotent.
     let err = handle
-      .rumble(id(6), 0, 1, 1, RUMBLE_DURATION_MS)
+      .set_rumble_state(
+        id(6),
+        0,
+        SdlRumbleState {
+          low: 1,
+          high: 1,
+          ..Default::default()
+        },
+        RUMBLE_DURATION_MS,
+      )
       .await
       .expect_err("rumble after removal should fail");
     assert!(matches!(err, SdlTaskError::Removed(_)));
@@ -1255,9 +1895,16 @@ mod tests {
     let clock = FakeClock::default();
     let handle = spawn_fake(state.clone(), clock.clone());
 
-    let opened = handle.open(id(7)).await.expect("open should succeed");
+    let (opened, _) = handle.open(id(7)).await.expect("open should succeed");
     opened
-      .rumble(0x8000, 0x7fff, RUMBLE_DURATION_MS)
+      .set_rumble_state(
+        SdlRumbleState {
+          low: 0x8000,
+          high: 0x7fff,
+          ..Default::default()
+        },
+        RUMBLE_DURATION_MS,
+      )
       .await
       .expect("initial rumble should succeed");
     assert_eq!(
@@ -1299,13 +1946,20 @@ mod tests {
       let state = Arc::new(Mutex::new(FakeDriverState::default()));
       let clock = FakeClock::default();
       let handle = spawn_fake(state.clone(), clock.clone());
-      let opened = handle.open(id(10)).await.expect("open should succeed");
+      let (opened, _) = handle.open(id(10)).await.expect("open should succeed");
       opened
-        .rumble(100, 100, RUMBLE_DURATION_MS)
+        .set_rumble_state(
+          SdlRumbleState {
+            low: 100,
+            high: 100,
+            ..Default::default()
+          },
+          RUMBLE_DURATION_MS,
+        )
         .await
         .expect("rumble should succeed");
       opened
-        .rumble(0, 0, RUMBLE_DURATION_MS)
+        .set_rumble_state(SdlRumbleState::default(), RUMBLE_DURATION_MS)
         .await
         .expect("zero rumble should succeed");
       assert_eq!(state.lock().unwrap().rumble_log.len(), 2);
@@ -1329,9 +1983,16 @@ mod tests {
       let state = Arc::new(Mutex::new(FakeDriverState::default()));
       let clock = FakeClock::default();
       let handle = spawn_fake(state.clone(), clock.clone());
-      let opened = handle.open(id(11)).await.expect("open should succeed");
+      let (opened, _) = handle.open(id(11)).await.expect("open should succeed");
       opened
-        .rumble(100, 100, RUMBLE_DURATION_MS)
+        .set_rumble_state(
+          SdlRumbleState {
+            low: 100,
+            high: 100,
+            ..Default::default()
+          },
+          RUMBLE_DURATION_MS,
+        )
         .await
         .expect("rumble should succeed");
       opened.close().await.expect("close should succeed");
@@ -1353,9 +2014,16 @@ mod tests {
       let state = Arc::new(Mutex::new(FakeDriverState::default()));
       let clock = FakeClock::default();
       let handle = spawn_fake(state.clone(), clock.clone());
-      let opened = handle.open(id(12)).await.expect("open should succeed");
+      let (opened, _) = handle.open(id(12)).await.expect("open should succeed");
       opened
-        .rumble(100, 100, RUMBLE_DURATION_MS)
+        .set_rumble_state(
+          SdlRumbleState {
+            low: 100,
+            high: 100,
+            ..Default::default()
+          },
+          RUMBLE_DURATION_MS,
+        )
         .await
         .expect("rumble should succeed");
       state.lock().unwrap().connected.insert(id(12), false);
