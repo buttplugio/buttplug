@@ -166,7 +166,9 @@ async fn run_test_client_command(command: &TestClientCommand, device: &ButtplugC
   }
 }
 
-fn build_server(test_case: &DeviceTestCase) -> (ButtplugServer, Vec<TestDeviceChannelHost>) {
+pub(crate) fn build_server(
+  test_case: &DeviceTestCase,
+) -> (ButtplugServer, Vec<TestDeviceChannelHost>) {
   let base_cfg = if let Some(device_config_file) = &test_case.device_config_file {
     let config_file_path = std::path::Path::new(
       &std::env::var("CARGO_MANIFEST_DIR").expect("Should have manifest path"),

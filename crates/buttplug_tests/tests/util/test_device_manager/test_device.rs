@@ -19,7 +19,12 @@ use buttplug_server::device::hardware::{
   HardwareUnsubscribeCmd,
   HardwareWriteCmd,
 };
-use buttplug_server_device_config::{Endpoint, ProtocolCommunicationSpecifier};
+use buttplug_server_device_config::{
+  DeviceDefinitionSelection,
+  Endpoint,
+  ProtocolCommunicationSpecifier,
+  SDL_PROTOCOL_NAME,
+};
 
 use async_trait::async_trait;
 use dashmap::DashSet;
@@ -51,6 +56,7 @@ pub enum TestHardwareEvent {
 pub struct TestHardwareConnector {
   specifier: ProtocolCommunicationSpecifier,
   hardware: Option<TestDevice>,
+  sdl_selection: Option<String>,
 }
 
 impl TestHardwareConnector {
@@ -59,7 +65,13 @@ impl TestHardwareConnector {
     Self {
       specifier,
       hardware: Some(hardware),
+      sdl_selection: None,
     }
+  }
+
+  pub fn with_sdl_selection(mut self, selection: Option<String>) -> Self {
+    self.sdl_selection = selection;
+    self
   }
 }
 
@@ -80,18 +92,21 @@ impl HardwareConnector for TestHardwareConnector {
   async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
     Ok(Box::new(TestHardwareSpecializer::new(
       self.hardware.take().expect("Test"),
+      self.sdl_selection.take(),
     )))
   }
 }
 
 pub struct TestHardwareSpecializer {
   hardware: Option<TestDevice>,
+  sdl_selection: Option<String>,
 }
 
 impl TestHardwareSpecializer {
-  fn new(hardware: TestDevice) -> Self {
+  fn new(hardware: TestDevice, sdl_selection: Option<String>) -> Self {
     Self {
       hardware: Some(hardware),
+      sdl_selection,
     }
   }
 }
@@ -104,6 +119,7 @@ impl HardwareSpecializer for TestHardwareSpecializer {
   ) -> Result<Hardware, ButtplugDeviceError> {
     let mut device = self.hardware.take().expect("Test");
     let mut endpoints = vec![];
+    let mut definition_selection = None;
     if let Some(ProtocolCommunicationSpecifier::BluetoothLE(btle)) = specifiers
       .iter()
       .find(|x| matches!(x, ProtocolCommunicationSpecifier::BluetoothLE(_)))
@@ -121,6 +137,9 @@ impl HardwareSpecializer for TestHardwareSpecializer {
       // SDL gamepad hardware only exposes the Tx endpoint.
       device.add_endpoint(&Endpoint::Tx);
       endpoints.push(Endpoint::Tx);
+      definition_selection = self.sdl_selection.as_deref().map(|selection| {
+        DeviceDefinitionSelection::new(SDL_PROTOCOL_NAME, Some(selection), &device.name())
+      });
     }
     let hardware = Hardware::new(
       &device.name(),
@@ -131,7 +150,11 @@ impl HardwareSpecializer for TestHardwareSpecializer {
       false,
       Box::new(device),
     );
-    Ok(hardware)
+    Ok(if let Some(selection) = definition_selection {
+      hardware.with_definition_selection(selection)
+    } else {
+      hardware
+    })
   }
 }
 
