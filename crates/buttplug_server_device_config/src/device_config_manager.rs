@@ -413,6 +413,88 @@ impl DeviceConfigurationManager {
     index
   }
 
+  /// Resolves a definition when a connector supplies explicit selection metadata. This reconciles
+  /// even exact cached entries against the selected base before returning, reports invalid or
+  /// missing selections explicitly rather than silently falling back, preserves user identity,
+  /// index, overrides, message gap, and surviving feature customizations, and updates the canonical
+  /// name and base ID. Selection is in-memory only; feature descriptions are not serialized, so
+  /// reloads use descriptions from the selected base.
+  pub fn device_definition_with_selection(
+    &self,
+    identifier: &UserDeviceIdentifier,
+    selection: &crate::DeviceDefinitionSelection,
+  ) -> Result<ServerDeviceDefinition, ButtplugDeviceConfigError> {
+    if selection.protocol() != identifier.protocol() {
+      return Err(ButtplugDeviceConfigError::DeviceSelectionInvalid(format!(
+        "selection protocol '{}' does not match identifier protocol '{}'",
+        selection.protocol(),
+        identifier.protocol()
+      )));
+    }
+    let base_key = BaseDeviceIdentifier::new(selection.protocol(), selection.base_identifier());
+    let base_definition = self
+      .base_device_definitions
+      .get(&base_key)
+      .ok_or_else(|| {
+        ButtplugDeviceConfigError::DeviceSelectionInvalid(format!(
+          "base definition {:?} not found for protocol '{}'",
+          base_key,
+          selection.protocol()
+        ))
+      })?
+      .clone();
+
+    if let Some(old_definition) = self
+      .user_device_definitions
+      .get(identifier)
+      .map(|x| x.clone())
+    {
+      let mut builder =
+        ServerDeviceDefinitionBuilder::from_base(&base_definition, old_definition.id(), false);
+      builder
+        .name(selection.canonical_name())
+        .display_name(old_definition.display_name())
+        .allow(old_definition.allow())
+        .deny(old_definition.deny())
+        .message_gap_ms(old_definition.message_gap_ms())
+        .index(old_definition.index());
+      for base_feature in base_definition.features().values() {
+        let feature = if let Some(old_feature) = old_definition
+          .features()
+          .values()
+          .find(|x| x.base_id == Some(base_feature.id()))
+        {
+          let mut feature =
+            crate::device_config_file::ConfigUserDeviceFeature::try_from(old_feature)?
+              .with_base_feature(base_feature)?;
+          if !old_feature.description.is_empty() {
+            feature.description = old_feature.description.clone();
+          }
+          feature
+        } else {
+          base_feature.as_new_user_feature()
+        };
+        builder.add_feature(&feature);
+      }
+      let rebuilt = builder.finish();
+      self
+        .user_device_definitions
+        .insert(identifier.clone(), rebuilt.clone());
+      Ok(rebuilt)
+    } else {
+      let mut builder =
+        ServerDeviceDefinitionBuilder::from_base(&base_definition, Uuid::new_v4(), true);
+      builder
+        .name(selection.canonical_name())
+        .index(self.device_index(identifier));
+      let definition = builder.finish();
+      self
+        .user_device_definitions
+        .insert(identifier.clone(), definition.clone());
+      Ok(definition)
+    }
+  }
+
   pub fn device_definition(
     &self,
     identifier: &UserDeviceIdentifier,

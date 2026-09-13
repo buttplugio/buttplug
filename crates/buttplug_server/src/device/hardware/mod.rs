@@ -11,7 +11,11 @@ use std::{collections::HashSet, fmt::Debug, sync::Arc, time::Duration};
 
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
-use buttplug_server_device_config::{Endpoint, ProtocolCommunicationSpecifier};
+use buttplug_server_device_config::{
+  DeviceDefinitionSelection,
+  Endpoint,
+  ProtocolCommunicationSpecifier,
+};
 use futures::future::BoxFuture;
 use futures_util::FutureExt;
 use getset::{CopyGetters, Getters};
@@ -258,6 +262,13 @@ pub struct Hardware {
   /// Device name
   #[getset(get = "pub")]
   name: String,
+  /// Optional connected-definition selection metadata, set by connectors that
+  /// pick a device definition themselves (e.g. SDL gamepad rumble layout
+  /// selection). When present, device configuration resolves against the
+  /// selected base definition instead of the ordinary identifier lookup. Not
+  /// persisted and never part of device identity.
+  #[getset(get = "pub")]
+  definition_selection: Option<DeviceDefinitionSelection>,
   /// Device address
   #[getset(get = "pub")]
   address: String,
@@ -293,8 +304,16 @@ impl Hardware {
       message_gap: *message_gap,
       internal_impl,
       requires_keepalive,
+      definition_selection: None,
       last_write_time: Arc::new(RwLock::new(Instant::now())),
     }
+  }
+
+  /// Attach connected-definition selection metadata (builder style), to be
+  /// called by the connector before the `Hardware` is shared.
+  pub fn with_definition_selection(mut self, selection: DeviceDefinitionSelection) -> Self {
+    self.definition_selection = Some(selection);
+    self
   }
 
   pub async fn time_since_last_write(&self) -> Duration {

@@ -23,8 +23,15 @@ use buttplug_core::{
   ButtplugResultFuture,
   errors::{ButtplugDeviceError, ButtplugError},
   message::{
-    self, ButtplugMessage, ButtplugServerMessageV4, DeviceFeature, DeviceMessageInfoV4,
-    InputCommandType, InputType, OutputValue, StopCmdV4,
+    self,
+    ButtplugMessage,
+    ButtplugServerMessageV4,
+    DeviceFeature,
+    DeviceMessageInfoV4,
+    InputCommandType,
+    InputType,
+    OutputValue,
+    StopCmdV4,
   },
   task_span,
   util::async_manager,
@@ -32,7 +39,9 @@ use buttplug_core::{
   util::task::TaskGroup,
 };
 use buttplug_server_device_config::{
-  DeviceConfigurationManager, ServerDeviceDefinition, ServerDeviceFeatureOutput,
+  DeviceConfigurationManager,
+  ServerDeviceDefinition,
+  ServerDeviceFeatureOutput,
   UserDeviceIdentifier,
 };
 use dashmap::DashMap;
@@ -51,14 +60,17 @@ use uuid::Uuid;
 use crate::{
   ButtplugServerResultFuture,
   message::{
-    ButtplugServerDeviceMessage, checked_input_cmd::CheckedInputCmdV4,
-    checked_output_cmd::CheckedOutputCmdV4, server_device_attributes::ServerDeviceAttributes,
+    ButtplugServerDeviceMessage,
+    checked_input_cmd::CheckedInputCmdV4,
+    checked_output_cmd::CheckedOutputCmdV4,
+    server_device_attributes::ServerDeviceAttributes,
     spec_enums::ButtplugDeviceCommandMessageUnionV4,
   },
 };
 
 use super::{
-  InternalDeviceEvent, OutputObservation,
+  InternalDeviceEvent,
+  OutputObservation,
   device_task::{DeviceTaskConfig, DeviceTaskMessage, WRITE_ACK_TIMEOUT, run_owned_device_task},
   hardware::{Hardware, HardwareCommand, HardwareConnector, HardwareEvent},
   protocol::{ProtocolHandler, ProtocolKeepaliveStrategy, ProtocolSpecializer},
@@ -581,7 +593,14 @@ pub(super) async fn build_device_handle(
   // put it in an unknown state if anything fails.
 
   // Check in the DeviceConfigurationManager to make sure we have attributes for this device.
-  let definition = if let Some(attrs) = device_config_manager.device_definition(&identifier) {
+  // Connectors may carry explicit selection metadata naming the base definition they chose
+  // (e.g. SDL gamepad rumble layout); when present, resolve and reconcile against that base.
+  // An invalid selection is a connection failure, never a silent fallback to defaults.
+  let definition = if let Some(selection) = hardware.definition_selection() {
+    device_config_manager
+      .device_definition_with_selection(&identifier, selection)
+      .map_err(|e| ButtplugDeviceError::DeviceConfigurationError(e.to_string()))?
+  } else if let Some(attrs) = device_config_manager.device_definition(&identifier) {
     attrs
   } else {
     return Err(ButtplugDeviceError::DeviceConfigurationError(format!(
