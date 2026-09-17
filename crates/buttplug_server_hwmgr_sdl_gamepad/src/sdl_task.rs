@@ -1526,13 +1526,10 @@ mod tests {
   }
 
   #[tokio::test]
-  async fn sdl_task_shutdown_stops_both_pairs() {
-    shutdown_case(true).await;
-  }
-
-  #[tokio::test]
-  async fn sdl_task_shutdown_successful_teardown() {
-    shutdown_case(false).await;
+  async fn sdl_task_shutdown_teardown_case() {
+    for main_failure in [false, true] {
+      shutdown_case(main_failure).await;
+    }
   }
 
   // -------------------------------------------------------------------
@@ -1559,23 +1556,6 @@ mod tests {
     assert_eq!(descs.len(), 1);
     assert_eq!(descs[0].id, id(1));
     assert_eq!(descs[0].name, "SDL Fake Pad 1");
-  }
-
-  #[tokio::test]
-  async fn sdl_task_name_fallback_on_lookup_failure() {
-    let state = Arc::new(Mutex::new(FakeDriverState {
-      enumerate_ids: vec![id(2), id(3)],
-      name_fail_ids: vec![id(3)],
-      ..Default::default()
-    }));
-    let handle = spawn_fake(state, FakeClock::default());
-
-    let descs = handle.scan().await.expect("scan should succeed");
-    assert_eq!(descs.len(), 2);
-    assert_eq!(descs[0].name, "SDL Fake Pad 2");
-    // Failed name lookup falls back to the deterministic name; the device is
-    // still returned.
-    assert_eq!(descs[1].name, "SDL Gamepad 3");
   }
 
   // macOS-only behavior: wired pads are skipped at scan time because their

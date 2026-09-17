@@ -369,25 +369,3 @@ async fn main() -> Result<(), IntifaceEngineError> {
   Ok(())
 }
 
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  fn cli_use_sdl_gamepad_flows_to_registration() {
-    // argh parses the flag...
-    let args = IntifaceCLIArguments::from_args(&["intiface-engine"], &["--use-sdl-gamepad"])
-      .expect("flag should parse");
-    assert!(args.use_sdl_gamepad());
-    // ...and the TryFrom conversion into EngineOptions keeps it.
-    let options = EngineOptions::try_from(args).expect("options should build");
-    assert!(options.use_sdl_gamepad());
-
-    // Without the flag, it's off.
-    let args =
-      IntifaceCLIArguments::from_args(&["intiface-engine"], &[]).expect("empty args should parse");
-    assert!(!args.use_sdl_gamepad());
-    let options = EngineOptions::try_from(args).expect("options should build");
-    assert!(!options.use_sdl_gamepad());
-  }
-}

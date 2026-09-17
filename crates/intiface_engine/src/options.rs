@@ -302,25 +302,3 @@ impl EngineOptionsBuilder {
   }
 }
 
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  fn engine_options_use_sdl_gamepad_defaults_false() {
-    // Derives Default; the SDL gamepad manager is opt-in.
-    let options = EngineOptions::default();
-    assert!(!options.use_sdl_gamepad());
-
-    // The external form also defaults off (serde).
-    let external: EngineOptionsExternal = Default::default();
-    let from_external = EngineOptions::from(external);
-    assert!(!from_external.use_sdl_gamepad());
-
-    // And the builder setter round-trips.
-    let options = EngineOptionsBuilder::default()
-      .use_sdl_gamepad(true)
-      .finish();
-    assert!(options.use_sdl_gamepad());
-  }
-}

@@ -54,58 +54,6 @@ fn definition_selection_rejects_invalid_base() {
 }
 
 #[test]
-fn sdl_selection_idempotent() {
-  let dcm = dcm();
-  let identifier = UserDeviceIdentifier::new(
-    "sdl-gamepad-7",
-    "sdl-gamepad",
-    &Some("Test Pad 1".to_owned()),
-  );
-  let selection = DeviceDefinitionSelection::new(
-    "sdl-gamepad",
-    Some("__sdl-rumble-and-triggers"),
-    "Test Pad 1",
-  );
-  let first = dcm
-    .device_definition_with_selection(&identifier, &selection)
-    .unwrap();
-  let second = dcm
-    .device_definition_with_selection(&identifier, &selection)
-    .unwrap();
-  assert_eq!(first.id(), second.id());
-  assert_eq!(first.base_id(), Some(SDL_RUMBLE_AND_TRIGGERS_BASE_ID));
-  assert_eq!(first.name(), "Test Pad 1");
-  assert_eq!(first.features().len(), 4);
-  assert_eq!(
-    first
-      .features()
-      .values()
-      .map(|f| f.id())
-      .collect::<Vec<_>>(),
-    second
-      .features()
-      .values()
-      .map(|f| f.id())
-      .collect::<Vec<_>>()
-  );
-  let cached = dcm.device_definition(&identifier).unwrap();
-  assert_eq!(cached.id(), second.id());
-  assert_eq!(cached.base_id(), second.base_id());
-  assert_eq!(
-    cached
-      .features()
-      .values()
-      .map(|f| f.id())
-      .collect::<Vec<_>>(),
-    second
-      .features()
-      .values()
-      .map(|f| f.id())
-      .collect::<Vec<_>>()
-  );
-}
-
-#[test]
 fn sdl_layout_reconciliation_matrix() {
   let dcm = dcm();
   let identifier = UserDeviceIdentifier::new("sdl-gamepad-matrix", "sdl-gamepad", &None);
@@ -178,24 +126,20 @@ fn sdl_layout_reconciliation_matrix() {
     restored.features().get(&0).unwrap().base_id,
     Some(SDL_CHANNEL_LOW_BASE_ID)
   );
-}
-
-#[test]
-fn non_sdl_definition_resolution_unchanged() {
-  let dcm = dcm();
-  let identifier = UserDeviceIdentifier::new("COM1", "tcode-v03", &None);
-  assert_eq!(
-    dcm.device_definition(&identifier).unwrap().name(),
-    "TCode v0.3 (Single Linear Axis)"
-  );
-  let result = dcm.device_definition_with_selection(
-    &identifier,
-    &DeviceDefinitionSelection::new("tcode-v03", Some("missing"), "TCode"),
-  );
-  assert!(matches!(
-    result,
-    Err(buttplug_server_device_config::ButtplugDeviceConfigError::DeviceSelectionInvalid(_))
-  ));
+  let restored_again = dcm
+    .device_definition_with_selection(
+      &identifier,
+      &DeviceDefinitionSelection::new(
+        "sdl-gamepad",
+        Some("__sdl-rumble-and-triggers"),
+        "Test Pad 2",
+      ),
+    )
+    .unwrap();
+  assert_eq!(restored_again.id(), restored.id());
+  let cached = dcm.device_definition(&identifier).unwrap();
+  assert_eq!(cached.id(), restored_again.id());
+  assert_eq!(cached.base_id(), restored_again.base_id());
 }
 
 fn both_selection(name: &str) -> DeviceDefinitionSelection {

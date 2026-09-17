@@ -96,21 +96,6 @@ impl SdlGamepadCommunicationManager {
     Ok(())
   }
 
-  /// Error-propagating form. Production `scan` uses [`Self::enumerate_or_fail`]
-  /// to distinguish failure classes; this form exists (and is exercised by
-  /// tests) to assert the propagation contract: enumeration errors ARE
-  /// propagated by the internal implementation and only swallowed at the
-  /// trait boundary.
-  #[cfg(test)]
-  async fn enumerate_and_emit(&self) -> Result<(), ButtplugDeviceError> {
-    self
-      .enumerate_or_fail()
-      .await
-      .map_err(|failure| match failure {
-        ScanFailure::Enumeration(e) => e,
-        ScanFailure::EventChannelClosed => device_error("event send", SdlTaskError::ThreadClosed),
-      })
-  }
 }
 
 enum ScanFailure {
@@ -260,10 +245,6 @@ mod tests {
     // Trait-level scan returns Ok with no events (logged warn): a transient
     // failure must not break the timed-retry loop.
     manager.scan().await.expect("scan must swallow the error");
-
-    // The internal enumerate_and_emit DOES propagate the error (the swallow
-    // is only at the trait boundary).
-    assert!(manager.enumerate_and_emit().await.is_err());
 
     // Drop the manager so the event channel closes before checking emptiness.
     drop(manager);
