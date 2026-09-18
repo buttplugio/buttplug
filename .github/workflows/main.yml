@@ -26,8 +26,10 @@ jobs:
       if: startsWith(matrix.os, 'ubuntu')
       run: sudo apt-get -y update
     - name: Install required packages
+      # The SDL3 gamepad manager builds SDL from source via cmake, which
+      # requires X11 or Wayland development libraries to configure on Linux.
       if: startsWith(matrix.os, 'ubuntu')
-      run: sudo apt-get -y install libudev-dev libusb-1.0-0-dev libdbus-1-dev
+      run: sudo apt-get -y install libudev-dev libusb-1.0-0-dev libdbus-1-dev libasound2-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxkbcommon-dev libwayland-dev wayland-protocols
     - name: Cache cargo registry
       uses: actions/cache@v4
       with:
