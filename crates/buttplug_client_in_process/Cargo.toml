@@ -47,10 +47,10 @@ buttplug_server_hwmgr_serial = { version = "11.0.0", path = "../buttplug_server_
 buttplug_server_hwmgr_websocket = { version = "11.0.0", path = "../buttplug_server_hwmgr_websocket", optional = true}
 buttplug_server_hwmgr_xinput = { version = "11.0.0", path = "../buttplug_server_hwmgr_xinput", optional = true}
 buttplug_server_hwmgr_sdl_gamepad = { version = "11.0.0", path = "../buttplug_server_hwmgr_sdl_gamepad", optional = true}
-futures = "0.3.33"
-futures-util = "0.3.33"
-thiserror = "2.0.19"
-log = "0.4.33"
+futures = "0.3.34"
+futures-util = "0.3.34"
+thiserror = "2.0.20"
+log = "0.4.34"
 getset = "0.1.7"
 tokio = { version = "1.53.1", features = ["macros"] }
 dashmap = { version = "6.2.1" }

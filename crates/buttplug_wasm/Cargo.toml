@@ -21,12 +21,12 @@ buttplug_server = { version = "11.0.0", path = "../buttplug_server", default-fea
 buttplug_server_device_config = { version = "11.0.0", path = "../buttplug_server_device_config" }
 buttplug_server_hwmgr_webbluetooth = { version = "11.0.0", path = "../buttplug_server_hwmgr_webbluetooth" }
 console_error_panic_hook = "0.1.7"
-futures = "0.3.33"
-js-sys = "0.3.103"
+futures = "0.3.34"
+js-sys = "0.3.105"
 tokio = { version = "1.53.1", features = ["sync"] }
 tokio-stream = "0.1.19"
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", default-features = false, features = ["registry"] }
 tracing-wasm = "0.2.1"
-wasm-bindgen = "0.2.126"
-wasm-bindgen-futures = "0.4.76"
+wasm-bindgen = "0.2.128"
+wasm-bindgen-futures = "0.4.78"
