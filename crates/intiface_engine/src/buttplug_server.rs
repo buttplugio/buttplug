@@ -204,9 +204,11 @@ pub async fn run_server(
 
     let parsed_listen_address = listen_address.parse().map_err(|pe| {
       ButtplugServerConnectorError::ConnectorError(
-        buttplug_core::connector::ButtplugConnectorError::ConnectorGenericError(
-          format!("Could not parse provided websocket-listen-address: {pe}")
-        ))})?;
+        buttplug_core::connector::ButtplugConnectorError::ConnectorGenericError(format!(
+          "Could not parse provided websocket-listen-address: {pe}"
+        )),
+      )
+    })?;
 
     transport_builder.listen_address(parsed_listen_address);
     if let Some(on_listener_bound) = on_listener_bound {

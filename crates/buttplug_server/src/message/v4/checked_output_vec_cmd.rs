@@ -6,14 +6,25 @@
 // for full license information.
 
 use crate::message::{
-  ButtplugDeviceMessageNameV3, LinearCmdV1, RotateCmdV1, ServerDeviceAttributes,
-  TryFromDeviceAttributes, v0::SingleMotorVibrateCmdV0, v1::VibrateCmdV1, v3::ScalarCmdV3,
+  ButtplugDeviceMessageNameV3,
+  LinearCmdV1,
+  RotateCmdV1,
+  ServerDeviceAttributes,
+  TryFromDeviceAttributes,
+  v0::SingleMotorVibrateCmdV0,
+  v1::VibrateCmdV1,
+  v3::ScalarCmdV3,
 };
 use buttplug_core::{
   errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
   message::{
-    ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageValidator, OutputCommand,
-    OutputHwPositionWithDuration, OutputType, OutputValue,
+    ButtplugDeviceMessage,
+    ButtplugMessage,
+    ButtplugMessageValidator,
+    OutputCommand,
+    OutputHwPositionWithDuration,
+    OutputType,
+    OutputValue,
   },
 };
 use buttplug_server_device_config::ServerDeviceFeatureOutput;
@@ -381,7 +392,9 @@ mod tests {
   use crate::message::v1::VibrateSubcommandV1;
   use buttplug_core::util::{range::RangeInclusive, small_vec_enum_map::SmallVecEnumMap};
   use buttplug_server_device_config::{
-    RangeWithLimit, ServerDeviceFeature, ServerDeviceFeatureOutputValueProperties,
+    RangeWithLimit,
+    ServerDeviceFeature,
+    ServerDeviceFeatureOutputValueProperties,
   };
   use std::collections::BTreeMap;
   use uuid::Uuid;

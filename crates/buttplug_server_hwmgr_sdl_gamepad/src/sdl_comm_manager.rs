@@ -102,7 +102,6 @@ impl SdlGamepadCommunicationManager {
     }
     Ok(())
   }
-
 }
 
 enum ScanFailure {

@@ -274,12 +274,11 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
         match args.websocket_port() {
           None => Ok(None), // no listen address & no port: don't listen
           Some(port) => {
-            let base_addr =
-             if args.websocket_use_all_interfaces().unwrap_or(false) {
-                "0.0.0.0"
-              } else {
-                "127.0.0.1"
-              };
+            let base_addr = if args.websocket_use_all_interfaces().unwrap_or(false) {
+              "0.0.0.0"
+            } else {
+              "127.0.0.1"
+            };
             Ok(Some(format!("{base_addr}:{port}")))
           }
         }
@@ -362,4 +361,3 @@ async fn main() -> Result<(), IntifaceEngineError> {
 
   Ok(())
 }
-

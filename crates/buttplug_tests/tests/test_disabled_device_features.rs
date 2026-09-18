@@ -9,12 +9,23 @@ mod util;
 
 use buttplug_client::ButtplugClientEvent;
 use buttplug_core::message::{
-  BUTTPLUG_CURRENT_API_MAJOR_VERSION, BUTTPLUG_CURRENT_API_MINOR_VERSION, ButtplugServerMessageV4,
-  OutputCmdV4, OutputCommand, OutputHwPositionWithDuration, OutputType, OutputValue,
-  RequestServerInfoV4, StartScanningV0, StopCmdV4,
+  BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+  BUTTPLUG_CURRENT_API_MINOR_VERSION,
+  ButtplugServerMessageV4,
+  OutputCmdV4,
+  OutputCommand,
+  OutputHwPositionWithDuration,
+  OutputType,
+  OutputValue,
+  RequestServerInfoV4,
+  StartScanningV0,
+  StopCmdV4,
 };
 use buttplug_server::message::{
-  ButtplugClientMessageVariant, ButtplugServerMessageVariant, ScalarCmdV3, ScalarSubcommandV3,
+  ButtplugClientMessageVariant,
+  ButtplugServerMessageVariant,
+  ScalarCmdV3,
+  ScalarSubcommandV3,
 };
 use buttplug_server::{ButtplugServerBuilder, device::ServerDeviceManagerBuilder};
 use buttplug_server_device_config::load_protocol_configs;

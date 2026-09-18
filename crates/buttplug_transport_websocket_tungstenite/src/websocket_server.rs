@@ -7,9 +7,11 @@
 
 use buttplug_core::{
   connector::{
-    ButtplugConnectorError, ButtplugConnectorResultFuture,
+    ButtplugConnectorError,
+    ButtplugConnectorResultFuture,
     transport::{
-      ButtplugConnectorTransport, ButtplugConnectorTransportSpecificError,
+      ButtplugConnectorTransport,
+      ButtplugConnectorTransportSpecificError,
       ButtplugTransportIncomingMessage,
     },
   },
@@ -316,7 +318,8 @@ mod test {
     connector::{
       ButtplugConnectorError,
       transport::{
-        ButtplugConnectorTransport, ButtplugConnectorTransportSpecificError,
+        ButtplugConnectorTransport,
+        ButtplugConnectorTransportSpecificError,
         ButtplugTransportIncomingMessage,
       },
     },

@@ -6,7 +6,7 @@
 // for full license information.
 
 use std::sync::atomic::{AtomicU8, Ordering};
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
@@ -38,7 +38,7 @@ impl SexverseV6 {
         vec![0xaa, 0x03, 0x03, vibe, osc, suck],
         false,
       )
-          .into(),
+      .into(),
     ])
   }
 }

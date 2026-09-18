@@ -85,7 +85,12 @@ impl ProtocolHandler for IToys {
     ])
   }
 
-  fn handle_output_constrict_cmd(&self, _feature_index: u32, feature_id: Uuid, level: u32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_constrict_cmd(
+    &self,
+    _feature_index: u32,
+    feature_id: Uuid,
+    level: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![
       HardwareWriteCmd::new(
         &[feature_id],
@@ -100,6 +105,7 @@ impl ProtocolHandler for IToys {
         ],
         false,
       )
-          .into(),
-    ])  }
+      .into(),
+    ])
+  }
 }

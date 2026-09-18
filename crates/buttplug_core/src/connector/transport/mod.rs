@@ -14,8 +14,8 @@ use crate::connector::{
 };
 use displaydoc::Display;
 use futures::future::BoxFuture;
-use thiserror::Error;
 use std::net::SocketAddr;
+use thiserror::Error;
 use tokio::sync::mpsc::{Receiver, Sender};
 
 /// Messages we can receive from a connector.
