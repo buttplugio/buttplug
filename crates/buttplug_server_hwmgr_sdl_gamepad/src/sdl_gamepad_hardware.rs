@@ -80,7 +80,7 @@ impl SdlGamepadHardwareConnector {
 impl Debug for SdlGamepadHardwareConnector {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     f.debug_struct("SdlGamepadHardwareConnector")
-      .field("id", &self.id.0)
+      .field("id", &self.id.raw())
       .field("name", &self.name)
       .field("capabilities", &self.capabilities)
       .finish()

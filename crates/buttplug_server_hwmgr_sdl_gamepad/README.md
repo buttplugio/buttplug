@@ -73,17 +73,18 @@ downloaded and built (and statically linked) at crate build time. This requires
 Static linking keeps the single-binary release pipeline unchanged; expect the
 resulting binary to grow by a few MB.
 
-### Why `sdl3` is pinned to 0.18.x
+### SDL version pin
 
-The manager was written on 2026-09-05, when `sdl3` 0.18.4 (May 2026) was the
-current release; 0.19.0 and 0.20.0 landed the following two days, so this pin
-is "current at authoring time", not a considered rejection of the newer line.
-Moving to 0.20.x is a double jump: the safe wrapper (0.18 → 0.20) *and* the C
-runtime (`sdl3-sys` 0.6.8/SDL 3.4.14 → 0.7.1/SDL 3.4.16). Before upgrading,
-re-verify the direct `sdl3-sys` feature set in this crate's Cargo.toml
-(subsystem pruning and `sdl-unix-console-build`) against the 0.7.x feature
-names, and repeat the manual hardware validation below — the keepalive and
-dithering behavior documented there was validated against SDL 3.4.14.
+The manager currently builds against `sdl3` 0.20.x (`sdl3-sys` 0.7.1, SDL
+3.4.16), upgraded from `sdl3` 0.18.4 (SDL 3.4.14). Runtime revalidation of
+the keepalive/dither rumble workaround and general hardware behavior on SDL
+3.4.16 is **pending**. The last full runtime validation was performed against
+SDL 3.4.14.
+
+The direct `sdl3-sys` feature set in this crate's Cargo.toml (subsystem
+pruning and `sdl-unix-console-build`) was re-verified against the 0.7.x
+feature names when upgrading; the feature sets of 0.6.8 and 0.7.1 are
+identical.
 
 ## Testing without hardware
 

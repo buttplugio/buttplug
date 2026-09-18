@@ -28,7 +28,7 @@ use tokio::sync::mpsc;
 /// Creates a buttplug device address from an SDL3 instance ID. This is the
 /// only place instance IDs become part of the buttplug address space.
 pub(crate) fn create_address(id: JoystickId) -> String {
-  format!("sdl-gamepad-{}", id.0)
+  format!("sdl-gamepad-{}", id.raw())
 }
 
 #[derive(Default, Clone)]
@@ -75,7 +75,7 @@ impl SdlGamepadCommunicationManager {
       .gamepads()
       .await
       .map_err(|e: SdlTaskError| ScanFailure::Enumeration(device_error("scan", e)))?;
-    let current_ids: HashSet<u32> = gamepads.iter().map(|gamepad| gamepad.id.0).collect();
+    let current_ids: HashSet<u32> = gamepads.iter().map(|gamepad| gamepad.id.raw()).collect();
     self
       .announced
       .lock()
@@ -97,7 +97,7 @@ impl SdlGamepadCommunicationManager {
         );
         continue;
       }
-      if self.announced.lock().unwrap().contains(&gamepad.id.0) {
+      if self.announced.lock().unwrap().contains(&gamepad.id.raw()) {
         debug!(
           "SDL gamepad manager already announced device {} at address {}, skipping",
           gamepad.name, address
@@ -127,7 +127,7 @@ impl SdlGamepadCommunicationManager {
         error!("Error sending device found message from SDL gamepad manager.");
         return Err(ScanFailure::EventChannelClosed);
       }
-      self.announced.lock().unwrap().insert(gamepad.id.0);
+      self.announced.lock().unwrap().insert(gamepad.id.raw());
     }
     Ok(())
   }

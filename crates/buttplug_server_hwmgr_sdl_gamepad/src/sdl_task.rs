@@ -213,7 +213,7 @@ pub(crate) struct SdlOpenedGamepadHandle {
 impl std::fmt::Debug for SdlOpenedGamepadHandle {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SdlOpenedGamepadHandle")
-      .field("id", &self.id.0)
+      .field("id", &self.id.raw())
       .finish()
   }
 }
@@ -343,7 +343,7 @@ impl SdlTaskHandle {
     {
       warn!(
         "SDL gamepad thread already stopped; cannot close gamepad {}",
-        id.0
+        id.raw()
       );
     }
   }
@@ -446,7 +446,7 @@ fn sdl_thread_loop(
       let mut removed = Vec::new();
       for (id, state) in open_pads.iter_mut() {
         if !state.pad.connected() {
-          info!("SDL gamepad {} has disconnected.", id.0);
+          info!("SDL gamepad {} has disconnected.", id.raw());
           removed.push(*id);
         }
       }
@@ -501,7 +501,7 @@ fn sdl_thread_loop(
           }
         }
         Err(e) => {
-          warn!("SDL gamepad {} rumble refresh failed: {}", id.0, e);
+          warn!("SDL gamepad {} rumble refresh failed: {}", id.raw(), e);
           if let Some(state) = open_pads.remove(&id) {
             stop_and_drop(state);
           }
@@ -543,7 +543,7 @@ fn sdl_thread_loop(
                   let pad = match driver.open(id) {
                     Ok(pad) => pad,
                     Err(e) => {
-                      warn!("SDL gamepad {} probe open failed: {}", id.0, e);
+                      warn!("SDL gamepad {} probe open failed: {}", id.raw(), e);
                       return None;
                     }
                   };
@@ -552,7 +552,7 @@ fn sdl_thread_loop(
                   if connection == DriverConnection::Wired {
                     warn!(
                       "Skipping wired SDL gamepad {} on macOS: wired rumble is not possible without GCController (pair the controller via Bluetooth instead).",
-                      id.0
+                      id.raw()
                     );
                     return None;
                   }
@@ -564,7 +564,7 @@ fn sdl_thread_loop(
                   };
                   drop(pad);
                   if !capabilities.any() {
-                    info!("SDL gamepad {} has no rumble capability, skipping", id.0);
+                    info!("SDL gamepad {} has no rumble capability, skipping", id.raw());
                     return None;
                   }
                   capabilities
@@ -572,14 +572,14 @@ fn sdl_thread_loop(
                 let name = match driver.name_for_id(id) {
                   Ok(name) if !name.trim().is_empty() => name,
                   Ok(_) => {
-                    warn!("SDL gamepad {} name lookup returned an empty name", id.0);
-                    format!("SDL Gamepad {}", id.0)
+                    warn!("SDL gamepad {} name lookup returned an empty name", id.raw());
+                    format!("SDL Gamepad {}", id.raw())
                   },
                   Err(e) => {
                     // A failed name lookup never drops the device: log and
                     // fall back to a deterministic name.
-                    warn!("SDL gamepad {} name lookup failed: {}", id.0, e);
-                    format!("SDL Gamepad {}", id.0)
+                    warn!("SDL gamepad {} name lookup failed: {}", id.raw(), e);
+                    format!("SDL Gamepad {}", id.raw())
                   }
                 };
                 Some(SdlGamepadDesc {
@@ -1177,7 +1177,7 @@ mod tests {
             .name_override
             .get(&id)
             .cloned()
-            .unwrap_or_else(|| format!("SDL Fake Pad {}", id.0)),
+            .unwrap_or_else(|| format!("SDL Fake Pad {}", id.raw())),
         )
       }
     }
