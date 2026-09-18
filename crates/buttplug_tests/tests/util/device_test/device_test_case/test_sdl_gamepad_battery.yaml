@@ -1,0 +1,22 @@
+devices:
+  - identifier:
+      name: "sdl-gamepad"
+    expected_name: "SDL Gamepad"
+device_commands:
+  # Battery is a pull read on rx: queue the canned hardware response first,
+  # then issue the client battery read and expect the canned percent (57 -> 0.57).
+  - !VersionGated
+      min_spec_version: 2
+      commands:
+        - !Events
+            device_index: 0
+            events:
+              - !Reads
+                - endpoint: rx
+                  data: [57]
+        - !Messages
+            device_index: 0
+            messages:
+              - !Battery
+                expected_power: 0.57
+                run_async: false

@@ -8,7 +8,7 @@
 mod util;
 //use buttplug::util::async_manager;
 use buttplug_client::{ButtplugClient, ButtplugClientDevice, ButtplugClientEvent};
-use buttplug_core::message::OutputType;
+use buttplug_core::message::{InputType, OutputType};
 use futures::StreamExt;
 use std::time::Duration;
 use test_case::test_case;
@@ -39,9 +39,10 @@ async fn scan_sdl_case(test_case: &DeviceTestCase) -> (ButtplugClient, ButtplugC
 
 #[tokio::test]
 async fn sdl_advertised_definition_v4() {
-  for (file, expected_count) in [
-    ("test_sdl_gamepad_main_trigger.yaml", 4),
-    ("test_sdl_gamepad.yaml", 2),
+  for (file, expected_count, expected_battery_index) in [
+    ("test_sdl_gamepad_main_trigger.yaml", 4, 4),
+    ("test_sdl_gamepad.yaml", 2, 2),
+    ("test_sdl_gamepad_triggers_only.yaml", 2, 2),
   ] {
     let case = load_test_case(file).await;
     let (client, device) = scan_sdl_case(&case).await;
@@ -72,6 +73,14 @@ async fn sdl_advertised_definition_v4() {
         ]
       );
     }
+    let battery_features: Vec<_> = device
+      .device_features()
+      .values()
+      .filter(|f| f.feature().contains_input(InputType::Battery))
+      .collect();
+    assert_eq!(battery_features.len(), 1);
+    assert_eq!(battery_features[0].feature_index(), expected_battery_index);
+    assert_eq!(battery_features[0].feature().description(), "Battery level");
     client.disconnect().await.unwrap();
   }
 }
@@ -107,6 +116,7 @@ async fn sdl_advertised_definition_v3() {
       .iter()
       .all(|a| *a.actuator_type() == OutputType::Vibrate)
   );
+  assert!(device.has_battery_level());
   client.disconnect().await.unwrap();
 }
 
@@ -255,6 +265,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
 #[test_case("test_sdl_gamepad.yaml" ; "SDL Gamepad Protocol")]
+#[test_case("test_sdl_gamepad_battery.yaml" ; "SDL Gamepad Battery")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[test_case("test_yiciyuan_protocol.yaml" ; "Yiciyuan Protocol")]
@@ -390,6 +401,7 @@ async fn test_device_protocols_embedded_v4(test_file: &str) {
 #[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
 #[test_case("test_sdl_gamepad.yaml" ; "SDL Gamepad Protocol")]
+#[test_case("test_sdl_gamepad_battery.yaml" ; "SDL Gamepad Battery")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[test_case("test_yiciyuan_protocol.yaml" ; "Yiciyuan Protocol")]
@@ -522,6 +534,7 @@ async fn test_device_protocols_json_v4(test_file: &str) {
 #[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
 #[test_case("test_sdl_gamepad.yaml" ; "SDL Gamepad Protocol")]
+#[test_case("test_sdl_gamepad_battery.yaml" ; "SDL Gamepad Battery")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[test_case("test_yiciyuan_protocol.yaml" ; "Yiciyuan Protocol")]
@@ -657,6 +670,7 @@ async fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
 #[test_case("test_sdl_gamepad.yaml" ; "SDL Gamepad Protocol")]
+#[test_case("test_sdl_gamepad_battery.yaml" ; "SDL Gamepad Battery")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[test_case("test_yiciyuan_protocol.yaml" ; "Yiciyuan Protocol")]
@@ -780,6 +794,7 @@ async fn test_device_protocols_json_v3(test_file: &str) {
 #[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
 #[test_case("test_sdl_gamepad.yaml" ; "SDL Gamepad Protocol")]
+#[test_case("test_sdl_gamepad_battery.yaml" ; "SDL Gamepad Battery")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[test_case("test_yiciyuan_protocol.yaml" ; "Yiciyuan Protocol")]
@@ -904,6 +919,7 @@ async fn test_device_protocols_embedded_v2(test_file: &str) {
 #[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
 #[test_case("test_sdl_gamepad.yaml" ; "SDL Gamepad Protocol")]
+#[test_case("test_sdl_gamepad_battery.yaml" ; "SDL Gamepad Battery")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 #[test_case("test_xuanhuan_protocol.yaml" ; "Xuanhuan Protocol")]
 #[test_case("test_yiciyuan_protocol.yaml" ; "Yiciyuan Protocol")]

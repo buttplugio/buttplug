@@ -17,6 +17,16 @@ defaults:
         - 0
         - 65535
     index: 1
+  - description: Battery level
+    id: 57d8a4ca-76c6-49cc-8683-b9c0bae72f1b
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 2
   id: b35f2adf-16bc-4425-9276-5d191aeaf107
 configurations:
 - identifier:
@@ -57,6 +67,16 @@ configurations:
         - 0
         - 65535
     index: 3
+  - description: Battery level
+    id: 57d8a4ca-76c6-49cc-8683-b9c0bae72f1b
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 4
 - identifier:
   - __sdl-triggers-only
   name: SDL Gamepad (Triggers Only)
@@ -79,6 +99,16 @@ configurations:
         - 0
         - 65535
     index: 1
+  - description: Battery level
+    id: 57d8a4ca-76c6-49cc-8683-b9c0bae72f1b
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 2
 communication:
 - sdl-gamepad:
     exists: true

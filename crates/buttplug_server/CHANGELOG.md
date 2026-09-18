@@ -1,3 +1,9 @@
+# 11.0.1 (2026-09-18)
+
+## Bugfixes
+
+- Battery level replies to v2 clients convert directly from the v4 input reading instead of routing through v3 (which required a v3 SensorReadCmd request context a v2 client never sends); previously the reply conversion always failed and the v2 client's BatteryLevelCmd never resolved.
+
 # 11.0.0 (2026-07-28)
 
 ## Features

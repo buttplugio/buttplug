@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 54
+    "minor": 55
   },
   "protocols": {
     "activejoy": {
@@ -20661,6 +20661,24 @@
                   ]
                 }
               }
+            },
+            {
+              "description": "Battery level",
+              "id": "57d8a4ca-76c6-49cc-8683-b9c0bae72f1b",
+              "index": 4,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
             }
           ],
           "id": "c1d2e3f4-3333-4a7b-8c9d-1e2f3a4b5c6d",
@@ -20694,6 +20712,24 @@
                   "value": [
                     0,
                     65535
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery level",
+              "id": "57d8a4ca-76c6-49cc-8683-b9c0bae72f1b",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
                   ]
                 }
               }
@@ -20731,6 +20767,24 @@
                 "value": [
                   0,
                   65535
+                ]
+              }
+            }
+          },
+          {
+            "description": "Battery level",
+            "id": "57d8a4ca-76c6-49cc-8683-b9c0bae72f1b",
+            "index": 2,
+            "input": {
+              "battery": {
+                "command": [
+                  "Read"
+                ],
+                "value": [
+                  [
+                    0,
+                    100
+                  ]
                 ]
               }
             }

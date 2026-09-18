@@ -35,6 +35,11 @@
             "id": "b2c3d4e5-2222-4f6a-9b7c-0d1e2f3a4b5c",
             "base_id": "b2c3d4e5-2222-4f6a-9b7c-0d1e2f3a4b5c",
             "output": { "vibrate": { "value": [0, 65535] } }
+          },
+          {
+            "description": "Battery level",
+            "id": "57d8a4ca-76c6-49cc-8683-b9c0bae72f1b",
+            "base_id": "57d8a4ca-76c6-49cc-8683-b9c0bae72f1b"
           }
         ],
         "user_config": { "allow": false, "deny": false, "index": 0 }

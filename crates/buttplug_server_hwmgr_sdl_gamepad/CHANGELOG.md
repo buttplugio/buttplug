@@ -4,6 +4,10 @@
 
 - Upgraded the SDL runtime from SDL 3.4.14 to SDL 3.4.16 (`sdl3` 0.18.4 → 0.20.0, `sdl3-sys` 0.6.8 → 0.7.1), picking up upstream joystick fixes including the Joy-Con partial-user-calibration handling (SDL upstream issue 8085 class).
 
+## Features
+
+- Gamepads now report battery level through the standard buttplug battery command: a one-byte percent read on a new rx endpoint, sourced from SDL's gamepad power info (wired/no-battery and unknown states report an error instead of a value; charging states report their current percent).
+
 ## Fixes
 
 - Rumble keepalives now actually reach the controller: SDL skips transmission of an unchanged (low, high) rumble pair, so keepalive re-arms alternate one motor channel's lowest bit (imperceptible) to force a real output report. The keepalive interval is also tightened from 1s to 100ms; Bluetooth DualSense and Joy-Con no longer stall effects mid-arm.

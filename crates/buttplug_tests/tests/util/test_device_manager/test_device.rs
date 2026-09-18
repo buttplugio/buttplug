@@ -134,9 +134,11 @@ impl HardwareSpecializer for TestHardwareSpecializer {
       .iter()
       .find(|x| matches!(x, ProtocolCommunicationSpecifier::SdlGamepad(_)))
     {
-      // SDL gamepad hardware only exposes the Tx endpoint.
+      // SDL gamepad hardware exposes Tx for rumble writes and Rx for battery reads.
       device.add_endpoint(&Endpoint::Tx);
       endpoints.push(Endpoint::Tx);
+      device.add_endpoint(&Endpoint::Rx);
+      endpoints.push(Endpoint::Rx);
       definition_selection = self.sdl_selection.as_deref().map(|selection| {
         DeviceDefinitionSelection::new(SDL_PROTOCOL_NAME, Some(selection), &device.name())
       });

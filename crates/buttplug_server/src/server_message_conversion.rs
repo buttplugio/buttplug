@@ -208,6 +208,23 @@ impl ButtplugServerMessageConverter {
     &self,
     msg: &ButtplugServerMessageV4,
   ) -> Result<ButtplugServerMessageV2, ButtplugError> {
+    // v2 has no generic sensor readings, only BatteryLevelReading/RssiReading,
+    // so input readings convert from v4 directly using the original request
+    // context. Routing through v3 first would require a v3 SensorReadCmd
+    // original, which a v2 client (BatteryLevelCmd) never sent.
+    if let ButtplugServerMessageV4::InputReading(m) = msg {
+      let original_msg = self.original_message.as_ref().unwrap();
+      if let ButtplugClientMessageVariant::V2(ButtplugClientMessageV2::BatteryLevelCmd(msg)) =
+        &original_msg
+      {
+        if let InputTypeReading::Battery(value) = m.reading() {
+          return Ok(
+            BatteryLevelReadingV2::new(msg.device_index(), value.data() as f64 / 100f64).into(),
+          );
+        }
+      }
+      return Err(ButtplugMessageError::UnexpectedMessageType("SensorReading".to_owned()).into());
+    }
     let msg_v3 = self.convert_servermessagev4_to_servermessagev3(msg)?;
     match msg_v3 {
       ButtplugServerMessageV3::SensorReading(m) => {
