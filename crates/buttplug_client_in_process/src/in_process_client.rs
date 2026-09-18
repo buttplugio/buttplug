@@ -30,7 +30,6 @@ use buttplug_server_device_config::DeviceConfigurationManagerBuilder;
 /// the devices you want, there are a couple of things to check:
 ///
 /// - Are you on a platform that the device communication manager supports?
-///   For instance, we only support XInput on windows.
 /// - Did the developers add a new Device CommunicationManager type and forget
 ///   to add it to this method? _It's more likely than you think!_ [File a
 ///   bug](https://github.com/buttplugio/buttplug/issues).
@@ -111,14 +110,8 @@ fn register_comm_managers(
     device_manager_builder.comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default());
     registered.push("lovense-dongle");
   }
-  #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
-  {
-    use buttplug_server_hwmgr_xinput::XInputDeviceCommunicationManagerBuilder;
-    device_manager_builder.comm_manager(XInputDeviceCommunicationManagerBuilder::default());
-    registered.push("xinput");
-  }
-  // SDL gamepad manager is opt-in (not in the default feature set) and, unlike
-  // XInput, is cross-platform: no OS gate.
+  // SDL gamepad manager is opt-in (not in the default feature set) and is
+  // cross-platform: no OS gate.
   #[cfg(feature = "sdl-gamepad-manager")]
   {
     use buttplug_server_hwmgr_sdl_gamepad::SdlGamepadCommunicationManagerBuilder;
