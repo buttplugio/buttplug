@@ -1,3 +1,10 @@
+# 11.0.1 (2026-09-05)
+
+## Fixes
+
+- Rumble keepalives now actually reach the controller: SDL skips transmission of an unchanged (low, high) rumble pair, so keepalive re-arms alternate one motor channel's lowest bit (imperceptible) to force a real output report. The keepalive interval is also tightened from 1s to 100ms; Bluetooth DualSense and Joy-Con no longer stall effects mid-arm.
+- Scanning announces each gamepad once per enumeration appearance instead of re-announcing unconnected devices on every scan tick, matching the btleplug manager's behavior.
+
 # 11.0.0 (2026-09-05)
 
 ## Features
