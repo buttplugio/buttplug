@@ -69,6 +69,13 @@ impl SdlGamepadCommunicationManager {
       .map_err(|e: SdlTaskError| ScanFailure::Enumeration(device_error("scan", e)))?;
     for gamepad in gamepads {
       let address = create_address(gamepad.id);
+      if gamepad.is_open {
+        debug!(
+          "SDL gamepad manager skipping already connected device {} at address {}",
+          gamepad.name, address
+        );
+        continue;
+      }
       info!(
         "SDL gamepad manager found device {} at address {}",
         gamepad.name, address
@@ -206,6 +213,7 @@ mod tests {
         rumble: true,
         trigger_rumble: false,
       },
+      is_open: false,
     }
   }
 
@@ -234,6 +242,25 @@ mod tests {
 
     // No further events: drop the manager so its event sender closes the
     // channel (recv only yields None once every sender is gone).
+    drop(manager);
+    assert!(rx.recv().await.is_none());
+  }
+
+  #[tokio::test]
+  async fn comm_manager_scan_skips_already_open_devices() {
+    let mut open = desc(11, "Already Connected");
+    open.is_open = true;
+    let (mut rx, manager) = manager_with(Ok(vec![desc(3, "Unopened"), open]));
+
+    manager.scan().await.expect("scan should succeed");
+
+    let event = rx.recv().await.expect("unopened device event");
+    let HardwareCommunicationManagerEvent::DeviceFound { name, address, .. } = event else {
+      panic!("expected DeviceFound, got {event:?}");
+    };
+    assert_eq!(name, "Unopened");
+    assert_eq!(address, "sdl-gamepad-3");
+
     drop(manager);
     assert!(rx.recv().await.is_none());
   }

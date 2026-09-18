@@ -87,6 +87,7 @@ pub(crate) struct SdlGamepadDesc {
   pub id: JoystickId,
   pub name: String,
   pub capabilities: SdlRumbleCapabilities,
+  pub is_open: bool,
 }
 
 /// Construct a [JoystickId] from its raw u32 value. `JoystickId` is a type
@@ -552,7 +553,12 @@ fn sdl_thread_loop(
                     format!("SDL Gamepad {}", id.0)
                   }
                 };
-                Some(SdlGamepadDesc { id, name, capabilities })
+                Some(SdlGamepadDesc {
+                  id,
+                  name,
+                  capabilities,
+                  is_open: open_pads.contains_key(&id),
+                })
               })
               .collect::<Vec<_>>()
           });
