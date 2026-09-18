@@ -58,7 +58,6 @@ byteorder = "1.5.0"
 # dependencies update
 rand = { version = "0.10" }
 derive_more = { version = "2.1.1", features = ["from"] }
-evalexpr = { version = "13.1.0", features = ["rand"] }
 
 [target.wasm32-unknown-unknown.dependencies]
 getrandom = { version = "0.4.3", features = ["wasm_js"]}
