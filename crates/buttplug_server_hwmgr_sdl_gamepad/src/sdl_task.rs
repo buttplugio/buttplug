@@ -1692,7 +1692,7 @@ mod tests {
       .expect("rumble should succeed");
     state.lock().unwrap().connected.insert(id(14), false);
     clock.advance_to(CONNECTED_POLL_INTERVAL_MS * 10);
-    handle.scan().await.expect("probe scan should succeed");
+    barrier(&handle).await;
     assert_eq!(
       state.lock().unwrap().rumble_log.last(),
       Some(&(id(14), 0, 0, RUMBLE_DURATION_MS)),
@@ -1914,9 +1914,11 @@ mod tests {
     );
 
     // Reaching the deadline triggers exactly one re-send with the same
-    // parameters, comfortably before the finite arm lapses.
+    // parameters, comfortably before the finite arm lapses. A barrier rather
+    // than a single scan: the refresh runs in the loop-top pass after the
+    // scan's reply, so only the second command guarantees it has run.
     clock.advance_to(RUMBLE_KEEPALIVE_INTERVAL_MS);
-    handle.scan().await.expect("probe scan should succeed");
+    barrier(&handle).await;
     assert_eq!(
       state.lock().unwrap().rumble_log,
       vec![
@@ -2019,7 +2021,7 @@ mod tests {
         .expect("rumble should succeed");
       state.lock().unwrap().connected.insert(id(12), false);
       clock.advance_to(RUMBLE_KEEPALIVE_INTERVAL_MS * 2);
-      handle.scan().await.expect("probe scan should succeed");
+      barrier(&handle).await;
       assert_eq!(
         state.lock().unwrap().rumble_log,
         vec![
