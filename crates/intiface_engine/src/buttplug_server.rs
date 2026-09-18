@@ -30,23 +30,6 @@ use tokio::sync::broadcast::Sender;
 // Device communication manager setup gets its own module because the includes and platform
 // specifics are such a mess.
 
-/// Warning emitted (on Windows) when both XInput and SDL gamepad managers are
-/// enabled: the same physical controller can then appear as two Buttplug
-/// devices. Pure decision function so it is testable on every platform; the
-/// logging call site is Windows-gated.
-pub fn gamepad_dual_manager_warning(
-  use_xinput: bool,
-  use_sdl_gamepad: bool,
-) -> Option<&'static str> {
-  if use_xinput && use_sdl_gamepad {
-    Some(
-      "Both XInput and SDL gamepad managers are enabled; the same physical controller may appear as two devices.",
-    )
-  } else {
-    None
-  }
-}
-
 /// Testable core of [`setup_server_device_comm_managers`]: returns the names
 /// of the comm manager builders the options select. The real builder starts
 /// hardware managers (which `#[cfg(test)]` cannot easily exercise), so the
@@ -70,10 +53,6 @@ fn selected_comm_manager_names(args: &EngineOptions) -> Vec<&'static str> {
     }
     if args.use_hid() {
       names.push("hid");
-    }
-    #[cfg(target_os = "windows")]
-    if args.use_xinput() {
-      names.push("xinput");
     }
   }
   if args.use_sdl_gamepad() {
@@ -119,30 +98,12 @@ pub fn setup_server_device_comm_managers(
       info!("Including Hid Support");
       server_builder.comm_manager(HidCommunicationManagerBuilder::default());
     }
-    #[cfg(target_os = "windows")]
-    {
-      use buttplug_server_hwmgr_xinput::XInputDeviceCommunicationManagerBuilder;
-      if args.use_xinput() {
-        info!("Including XInput Gamepad Support");
-        server_builder.comm_manager(XInputDeviceCommunicationManagerBuilder::default());
-      }
-    }
   }
-  // Cross-platform gamepad support via SDL3. No OS gate: unlike XInput, the
-  // SDL manager builds everywhere the engine does.
+  // Cross-platform gamepad support via SDL3. No OS gate: the SDL manager
+  // builds everywhere the engine does.
   if args.use_sdl_gamepad() {
     info!("Including SDL Gamepad Support");
     server_builder.comm_manager(SdlGamepadCommunicationManagerBuilder::default());
-  }
-  // The same physical controller can be picked up by both managers on
-  // Windows when both flags are set; warn there, where the overlap exists.
-  // The decision itself runs on every platform (cheap, keeps the helper
-  // exercised and testable on all OSes); only the logging is Windows-gated.
-  if let Some(warning) = gamepad_dual_manager_warning(args.use_xinput(), args.use_sdl_gamepad()) {
-    #[cfg(target_os = "windows")]
-    warn!("{}", warning);
-    #[cfg(not(target_os = "windows"))]
-    let _ = warning;
   }
   if args.use_device_websocket_server() {
     info!("Including Websocket Server Device Support");
@@ -279,18 +240,6 @@ pub async fn run_server(
 mod tests {
   use super::*;
   use crate::options::EngineOptionsBuilder;
-
-  #[test]
-  fn dual_gamepad_warning_truth_table() {
-    // Some(message) exactly when both managers are on; None otherwise.
-    assert!(gamepad_dual_manager_warning(true, true).is_some());
-    assert!(gamepad_dual_manager_warning(true, false).is_none());
-    assert!(gamepad_dual_manager_warning(false, true).is_none());
-    assert!(gamepad_dual_manager_warning(false, false).is_none());
-
-    let message = gamepad_dual_manager_warning(true, true).expect("both flags warn");
-    assert!(message.contains("XInput") && message.contains("SDL"));
-  }
 
   #[test]
   fn engine_registers_sdl_manager_iff_flag() {

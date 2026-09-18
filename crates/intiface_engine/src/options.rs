@@ -38,8 +38,6 @@ pub struct EngineOptions {
   #[getset(get_copy = "pub")]
   use_lovense_dongle_hid: bool,
   #[getset(get_copy = "pub")]
-  use_xinput: bool,
-  #[getset(get_copy = "pub")]
   use_sdl_gamepad: bool,
   #[getset(get_copy = "pub")]
   use_lovense_connect: bool,
@@ -85,7 +83,6 @@ pub struct EngineOptionsExternal {
   pub use_hid: bool,
   pub use_lovense_dongle_serial: bool,
   pub use_lovense_dongle_hid: bool,
-  pub use_xinput: bool,
   pub use_sdl_gamepad: bool,
   pub use_lovense_connect: bool,
   pub use_device_websocket_server: bool,
@@ -119,7 +116,6 @@ impl From<EngineOptionsExternal> for EngineOptions {
       use_hid: other.use_hid,
       use_lovense_dongle_serial: other.use_lovense_dongle_serial,
       use_lovense_dongle_hid: other.use_lovense_dongle_hid,
-      use_xinput: other.use_xinput,
       use_sdl_gamepad: other.use_sdl_gamepad,
       use_lovense_connect: other.use_lovense_connect,
       use_device_websocket_server: other.use_device_websocket_server,
@@ -209,11 +205,6 @@ impl EngineOptionsBuilder {
 
   pub fn use_lovense_dongle_hid(&mut self, value: bool) -> &mut Self {
     self.options.use_lovense_dongle_hid = value;
-    self
-  }
-
-  pub fn use_xinput(&mut self, value: bool) -> &mut Self {
-    self.options.use_xinput = value;
     self
   }
 

@@ -38,7 +38,6 @@ Command line options are as follows:
 | `use-serial` | Use the Serial Port Buttplug Device Communication Manager |
 | `use-hid` | Use the HID Buttplug Device Communication Manager |
 | `use-lovense-dongle-hid` | Use the HID Lovense Dongle Buttplug Device Communication Manager |
-| `use-xinput` | Use the XInput Buttplug Device Communication Manager |
 | `use-lovense-connect` | Use the Lovense Connect Buttplug Device Communication Manager |
 | `use-device-websocket-server` | Use the Device Websocket Server Buttplug Device Communication Manager |
 | `device-websocket-server-port` | Port for the device websocket server |
