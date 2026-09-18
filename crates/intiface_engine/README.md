@@ -40,6 +40,7 @@ Command line options are as follows:
 | `use-lovense-dongle-hid` | Use the HID Lovense Dongle Buttplug Device Communication Manager |
 | `use-lovense-connect` | Use the Lovense Connect Buttplug Device Communication Manager |
 | `use-device-websocket-server` | Use the Device Websocket Server Buttplug Device Communication Manager |
+| `use-sdl-gamepad` | Use the SDL Gamepad Buttplug Device Communication Manager |
 | `device-websocket-server-port` | Port for the device websocket server |
 
 For example, to run the server on websockets at port 12345 with bluetooth device support:
