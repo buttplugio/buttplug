@@ -38,12 +38,12 @@ use tokio::sync::{oneshot, watch};
 pub(crate) const RUMBLE_DURATION_MS: u32 = 60_000;
 
 /// Interval (ms) at which a still-active (non-zero) rumble is re-armed. A
-/// one-second keepalive, not a near-expiry refresh: on-hardware testing
-/// showed some controllers (Bluetooth DualSense) stop rumbling after a few
-/// seconds despite a long arm, so the current command is simply re-sent
-/// every second while active. The long finite arm remains as a safety net
-/// if a keepalive is missed.
-const RUMBLE_KEEPALIVE_INTERVAL_MS: u64 = 1_000;
+/// 100-millisecond keepalive, not a near-expiry refresh: on-hardware testing
+/// showed Bluetooth controllers (DualSense, Joy-Con) stall effects between
+/// one-second refreshes, so the current command is simply re-sent on every
+/// loop wake while active (the loop already wakes at this cadence). The long
+/// finite arm remains as a safety net if a keepalive is missed.
+const RUMBLE_KEEPALIVE_INTERVAL_MS: u64 = 100;
 
 /// Interval (ms) at which open gamepads have their connected state polled.
 const CONNECTED_POLL_INTERVAL_MS: u64 = 500;
@@ -2026,11 +2026,17 @@ mod tests {
         .await
         .expect("rumble should succeed");
       state.lock().unwrap().connected.insert(id(12), false);
+      // Keepalives re-arm while the pad still appears connected (each wake
+      // at the 100ms cadence); the connected poll then observes the drop and
+      // stop_and_drop emits the zero-speed stop, after which nothing further.
       clock.advance_to(RUMBLE_KEEPALIVE_INTERVAL_MS * 2);
+      barrier(&handle).await;
+      clock.advance_to(CONNECTED_POLL_INTERVAL_MS);
       barrier(&handle).await;
       assert_eq!(
         state.lock().unwrap().rumble_log,
         vec![
+          (id(12), 100, 100, RUMBLE_DURATION_MS),
           (id(12), 100, 100, RUMBLE_DURATION_MS),
           (id(12), 0, 0, RUMBLE_DURATION_MS),
         ],
