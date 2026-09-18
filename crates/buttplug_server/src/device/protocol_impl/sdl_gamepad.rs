@@ -7,6 +7,7 @@
 
 use async_trait::async_trait;
 use buttplug_core::errors::ButtplugDeviceError;
+use buttplug_core::message::{InputReadingV4, InputTypeReading, InputValue};
 use buttplug_server_device_config::{Endpoint, ProtocolCommunicationSpecifier};
 use buttplug_server_device_config::{
   SdlGamepadLayout,
@@ -14,10 +15,11 @@ use buttplug_server_device_config::{
   UserDeviceIdentifier,
 };
 use byteorder::{LittleEndian, WriteBytesExt};
+use futures::{FutureExt, future::BoxFuture};
 use std::sync::{Arc, Mutex};
 
 use crate::device::{
-  hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+  hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
   protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolIdentifierFactory, ProtocolInitializer},
 };
 
@@ -107,6 +109,30 @@ impl Default for SdlGamepad {
 }
 
 impl ProtocolHandler for SdlGamepad {
+  fn handle_battery_level_cmd(
+    &self,
+    device_index: u32,
+    device: Arc<Hardware>,
+    feature_index: u32,
+    feature_id: uuid::Uuid,
+  ) -> BoxFuture<'_, Result<InputReadingV4, ButtplugDeviceError>> {
+    debug!("Trying to get SDL gamepad battery reading.");
+    let msg = HardwareReadCmd::new(feature_id, Endpoint::Rx, 1, 0);
+    let fut = device.read_value(&msg);
+    async move {
+      let hw_msg = fut.await?;
+      let battery_level = hw_msg.data()[0] as i32;
+      let battery_reading = InputReadingV4::new(
+        device_index,
+        feature_index,
+        InputTypeReading::Battery(InputValue::new(battery_level as u8)),
+      );
+      debug!("Got SDL gamepad battery reading: {}", battery_level);
+      Ok(battery_reading)
+    }
+    .boxed()
+  }
+
   fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,
@@ -145,6 +171,87 @@ impl ProtocolHandler for SdlGamepad {
 #[cfg(test)]
 mod tests {
   use super::*;
+  use crate::device::hardware::{
+    HardwareEvent,
+    HardwareInternal,
+    HardwareReading,
+    HardwareSubscribeCmd,
+    HardwareUnsubscribeCmd,
+  };
+  use buttplug_core::message::ButtplugDeviceMessage;
+  use futures::future;
+  use tokio::sync::broadcast;
+
+  struct BatteryHardware;
+
+  impl HardwareInternal for BatteryHardware {
+    fn disconnect(&self) -> futures::future::BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+      future::ready(Ok(())).boxed()
+    }
+
+    fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
+      broadcast::channel(1).0.subscribe()
+    }
+
+    fn read_value(
+      &self,
+      _msg: &HardwareReadCmd,
+    ) -> futures::future::BoxFuture<'static, Result<HardwareReading, ButtplugDeviceError>> {
+      future::ready(Ok(HardwareReading::new(Endpoint::Rx, &[77]))).boxed()
+    }
+
+    fn write_value(
+      &self,
+      _msg: &HardwareWriteCmd,
+    ) -> futures::future::BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+      future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+        "write".to_owned(),
+      )))
+      .boxed()
+    }
+
+    fn subscribe(
+      &self,
+      _msg: &HardwareSubscribeCmd,
+    ) -> futures::future::BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+      future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+        "subscribe".to_owned(),
+      )))
+      .boxed()
+    }
+
+    fn unsubscribe(
+      &self,
+      _msg: &HardwareUnsubscribeCmd,
+    ) -> futures::future::BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+      future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+        "unsubscribe".to_owned(),
+      )))
+      .boxed()
+    }
+  }
+
+  #[tokio::test]
+  async fn sdl_protocol_battery_read_wraps_input_reading() {
+    let hardware = Arc::new(Hardware::new(
+      "SDL Gamepad",
+      "sdl-gamepad-1",
+      &[Endpoint::Tx, Endpoint::Rx],
+      &None,
+      false,
+      Box::new(BatteryHardware),
+    ));
+    let reading = SdlGamepad::new(SdlGamepadLayout::MainOnly)
+      .handle_battery_level_cmd(3, hardware, 2, uuid::Uuid::new_v4())
+      .await
+      .expect("battery protocol read should succeed");
+    assert_eq!(reading.device_index(), 3);
+    assert_eq!(reading.feature_index(), 2);
+    assert_eq!(
+      reading.reading(),
+      InputTypeReading::Battery(InputValue::new(77))
+    );
+  }
 
   fn vibrate(handler: &SdlGamepad, feature_index: u32, speed: u32) -> Vec<u8> {
     let cmds = handler

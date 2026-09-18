@@ -126,7 +126,7 @@ impl HardwareConnector for SdlGamepadHardwareConnector {
     let hardware = Hardware::new(
       &self.name,
       &self.address,
-      &[Endpoint::Tx],
+      &[Endpoint::Tx, Endpoint::Rx],
       &None,
       false,
       Box::new(hardware_internal),
@@ -221,11 +221,28 @@ impl HardwareInternal for SdlGamepadHardware {
 
   fn read_value(
     &self,
-    _msg: &HardwareReadCmd,
+    msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<HardwareReading, ButtplugDeviceError>> {
-    future::ready(Err(ButtplugDeviceError::UnhandledCommand(
-      "SDL gamepad hardware does not support read".to_owned(),
-    )))
+    if msg.endpoint() != Endpoint::Rx {
+      return future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+        "SDL gamepad hardware only supports battery reads on rx".to_owned(),
+      )))
+      .boxed();
+    }
+    let Some(opened) = &self.opened else {
+      return future::ready(Err(ButtplugDeviceError::DeviceCommunicationError(
+        "SDL gamepad hardware is already closed".to_owned(),
+      )))
+      .boxed();
+    };
+    let opened = opened.clone();
+    async move {
+      let percent = opened
+        .battery_level()
+        .await
+        .map_err(|e| hardware_error("battery", e))?;
+      Ok(HardwareReading::new(Endpoint::Rx, &[percent]))
+    }
     .boxed()
   }
 
@@ -334,6 +351,7 @@ mod tests {
     commands: Mutex<usize>,
     caps: SdlRumbleCapabilities,
     closed: Mutex<usize>,
+    battery: Mutex<Result<u8, SdlTaskError>>,
     removed_tx: watch::Sender<bool>,
   }
 
@@ -382,7 +400,7 @@ mod tests {
     }
 
     async fn battery_level(&self) -> Result<u8, SdlTaskError> {
-      Ok(80)
+      self.battery.lock().unwrap().clone()
     }
 
     async fn close(&self) -> Result<(), SdlTaskError> {
@@ -453,6 +471,7 @@ mod tests {
       fail: Mutex::new(false),
       commands: Mutex::new(0),
       closed: Mutex::new(0),
+      battery: Mutex::new(Ok(80)),
       removed_tx: watch::channel(false).0,
     });
     let backend = Arc::new(MockBackend {
@@ -477,7 +496,7 @@ mod tests {
       .expect("specialize should succeed");
     assert_eq!(hardware.name(), "SDL Gamepad");
     assert_eq!(hardware.address(), "sdl-gamepad-21");
-    assert_eq!(hardware.endpoints(), &[Endpoint::Tx]);
+    assert_eq!(hardware.endpoints(), &[Endpoint::Tx, Endpoint::Rx]);
     (mock_pad, hardware, backend)
   }
 
@@ -527,6 +546,54 @@ mod tests {
         .await
         .is_err()
     );
+  }
+
+  #[tokio::test]
+  async fn sdl_hardware_battery_rx_read() {
+    let (mock_pad, hardware, _backend) = connect_mock_hardware().await;
+    *mock_pad.battery.lock().unwrap() = Ok(64);
+    let reading = hardware
+      .read_value(&HardwareReadCmd::new(
+        uuid::Uuid::new_v4(),
+        Endpoint::Rx,
+        1,
+        0,
+      ))
+      .await
+      .expect("battery read should succeed");
+    assert_eq!(*reading.endpoint(), Endpoint::Rx);
+    assert_eq!(reading.data(), &[64]);
+
+    *mock_pad.battery.lock().unwrap() = Err(SdlTaskError::Battery("nope".to_owned()));
+    let error = hardware
+      .read_value(&HardwareReadCmd::new(
+        uuid::Uuid::new_v4(),
+        Endpoint::Rx,
+        1,
+        0,
+      ))
+      .await
+      .expect_err("battery failure should be returned");
+    assert!(error.to_string().contains("battery"));
+  }
+
+  #[tokio::test]
+  async fn sdl_hardware_read_rejects_non_rx_endpoint() {
+    let (_mock_pad, hardware, _backend) = connect_mock_hardware().await;
+    for endpoint in [Endpoint::Tx, Endpoint::RxBLEBattery] {
+      assert!(
+        hardware
+          .read_value(&HardwareReadCmd::new(uuid::Uuid::new_v4(), endpoint, 1, 0))
+          .await
+          .is_err()
+      );
+    }
+  }
+
+  #[tokio::test]
+  async fn sdl_hardware_endpoints_include_rx() {
+    let (_mock_pad, hardware, _backend) = connect_mock_hardware().await;
+    assert_eq!(hardware.endpoints(), &[Endpoint::Tx, Endpoint::Rx]);
   }
 
   fn packet(data: Vec<u8>) -> HardwareWriteCmd {
