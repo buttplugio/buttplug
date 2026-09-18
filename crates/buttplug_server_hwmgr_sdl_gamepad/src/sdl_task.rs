@@ -357,6 +357,10 @@ struct OpenPadState {
   main_set_at: u64,
   last_triggers: (u16, u16),
   triggers_set_at: u64,
+  /// Toggle for keepalive dithering; see `dithered_keepalive`. Reset on each
+  /// accepted client command so the first re-arm after new input always
+  /// differs from it.
+  next_keepalive_dither: bool,
 }
 
 /// Pure rumble-refresh decision for one independent main or trigger pair:
@@ -374,6 +378,22 @@ fn refresh_decision(last_rumble: (u16, u16), last_set_at: u64, now_ms: u64) -> O
     Some(last_rumble)
   } else {
     None
+  }
+}
+
+/// The command to send for a keepalive re-arm. SDL's rumble entry point skips
+/// transmission when the (low, high) pair equals the previously sent one (it
+/// only updates the expiration), so an identical re-arm never reaches the
+/// controller and Bluetooth pads (DualSense, Joy-Con) stall their effects.
+/// Flip the lowest bit of one non-zero component instead: a 1/65535 change,
+/// imperceptible, but always different from the pair before it when the
+/// caller alternates.
+fn dithered_keepalive(cmd: (u16, u16)) -> (u16, u16) {
+  let (low, high) = cmd;
+  if low != 0 {
+    (low ^ 1, high)
+  } else {
+    (low, high ^ 1)
   }
 }
 
@@ -452,6 +472,15 @@ fn sdl_thread_loop(
       let Some(state) = open_pads.get_mut(&id) else {
         continue;
       };
+      // SDL skips transmission of an unchanged (low, high) pair, so keepalive
+      // re-arms alternate the sent values by one least-significant bit; see
+      // `dithered_keepalive`.
+      let (low, high) = if state.next_keepalive_dither {
+        dithered_keepalive((low, high))
+      } else {
+        (low, high)
+      };
+      state.next_keepalive_dither = !state.next_keepalive_dither;
       let result = if triggers {
         if !state.pad.has_rumble_triggers() {
           continue;
@@ -596,6 +625,7 @@ fn sdl_thread_loop(
                   main_set_at: now,
                   last_triggers: (0, 0),
                   triggers_set_at: now,
+                  next_keepalive_dither: true,
                 },
               );
               let handle = SdlOpenedGamepadHandle {
@@ -642,6 +672,7 @@ fn sdl_thread_loop(
               Ok(()) => {
                 state.last_main = (desired.low, desired.high);
                 state.main_set_at = now;
+                state.next_keepalive_dither = true;
               }
               Err(e) => errors.push(format!("main: {e}")),
             }
@@ -654,6 +685,7 @@ fn sdl_thread_loop(
               Ok(()) => {
                 state.last_triggers = (desired.left_trigger, desired.right_trigger);
                 state.triggers_set_at = now;
+                state.next_keepalive_dither = true;
               }
               Err(e) => errors.push(format!("triggers: {e}")),
             }
@@ -1919,17 +1951,19 @@ mod tests {
       "no re-arm before the deadline"
     );
 
-    // Reaching the deadline triggers exactly one re-send with the same
-    // parameters, comfortably before the finite arm lapses. A barrier rather
-    // than a single scan: the refresh runs in the loop-top pass after the
-    // scan's reply, so only the second command guarantees it has run.
+    // Reaching the deadline triggers exactly one re-send, comfortably before
+    // the finite arm lapses. The re-send flips the low component's lowest
+    // bit: SDL skips transmission of an identical (low, high) pair, so the
+    // keepalive must differ to actually reach the controller. A barrier
+    // rather than a single scan: the refresh runs in the loop-top pass after
+    // the scan's reply, so only the second command guarantees it has run.
     clock.advance_to(RUMBLE_KEEPALIVE_INTERVAL_MS);
     barrier(&handle).await;
     assert_eq!(
       state.lock().unwrap().rumble_log,
       vec![
         (id(7), 0x8000, 0x7fff, RUMBLE_DURATION_MS),
-        (id(7), 0x8000, 0x7fff, RUMBLE_DURATION_MS),
+        (id(7), 0x8001, 0x7fff, RUMBLE_DURATION_MS),
       ]
     );
 
@@ -2037,7 +2071,7 @@ mod tests {
         state.lock().unwrap().rumble_log,
         vec![
           (id(12), 100, 100, RUMBLE_DURATION_MS),
-          (id(12), 100, 100, RUMBLE_DURATION_MS),
+          (id(12), 101, 100, RUMBLE_DURATION_MS),
           (id(12), 0, 0, RUMBLE_DURATION_MS),
         ],
         "removed gamepad must not be refreshed"
