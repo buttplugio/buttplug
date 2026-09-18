@@ -71,12 +71,6 @@ jobs:
           echo "::error::sdl3 missing from buttplug_client_in_process with sdl-gamepad-manager enabled"
           exit 1
         }
-    # SDL3 threading spike (automated half): headless init + no-pump
-    # enumeration on a dedicated spawned thread, on every CI OS. Empty gamepad
-    # set is acceptable (CI runners have no controllers).
-    - name: SDL3 threading spike
-      shell: bash
-      run: cargo run -p buttplug_server_hwmgr_sdl_gamepad --example sdl3_thread_spike
     # Only run doc gen on windows. It has the most code to build anyways, all other projects are a subset of it.
     - name: Run doc gen
       if: startsWith(matrix.os, 'windows')

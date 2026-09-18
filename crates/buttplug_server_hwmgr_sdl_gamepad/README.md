@@ -78,9 +78,7 @@ resulting binary to grow by a few MB.
 CI runners have no physical gamepads and the `sdl3` crate has no simulation
 layer. Buttplug-side behavior (discovery, addressing, command forwarding,
 lifecycle, and layout selection) is unit-tested in this crate against mock
-drivers/backends. The `examples/sdl3_thread_spike.rs` diagnostic prints the
-SDL-reported name, connection state, and both capability booleans without
-actuating anything.
+drivers/backends.
 
 ## Manual release validation
 

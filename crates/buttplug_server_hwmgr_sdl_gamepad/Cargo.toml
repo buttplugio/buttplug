@@ -9,7 +9,6 @@ repository = "https://github.com/buttplugio/buttplug.git"
 readme = "./README.md"
 keywords = ["usb", "serial", "hardware", "bluetooth", "teledildonics"]
 edition = "2024"
-exclude = ["examples/**"]
 
 [lib]
 name = "buttplug_server_hwmgr_sdl_gamepad"
@@ -17,10 +16,6 @@ path = "src/lib.rs"
 test = true
 doctest = true
 doc = true
-
-[[example]]
-name = "sdl3_thread_spike"
-path = "examples/sdl3_thread_spike.rs"
 
 [dependencies]
 buttplug_core = { version = "11.0.0", path = "../buttplug_core", default-features = false }
