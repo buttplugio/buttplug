@@ -32,8 +32,6 @@ pub struct EngineOptions {
   #[getset(get_copy = "pub")]
   use_serial_port: bool,
   #[getset(get_copy = "pub")]
-  use_hid: bool,
-  #[getset(get_copy = "pub")]
   use_lovense_dongle_serial: bool,
   #[getset(get_copy = "pub")]
   use_lovense_dongle_hid: bool,
@@ -80,7 +78,6 @@ pub struct EngineOptionsExternal {
   pub max_ping_time: u32,
   pub use_bluetooth_le: bool,
   pub use_serial_port: bool,
-  pub use_hid: bool,
   pub use_lovense_dongle_serial: bool,
   pub use_lovense_dongle_hid: bool,
   pub use_sdl_gamepad: bool,
@@ -113,7 +110,6 @@ impl From<EngineOptionsExternal> for EngineOptions {
       max_ping_time: other.max_ping_time,
       use_bluetooth_le: other.use_bluetooth_le,
       use_serial_port: other.use_serial_port,
-      use_hid: other.use_hid,
       use_lovense_dongle_serial: other.use_lovense_dongle_serial,
       use_lovense_dongle_hid: other.use_lovense_dongle_hid,
       use_sdl_gamepad: other.use_sdl_gamepad,
@@ -190,11 +186,6 @@ impl EngineOptionsBuilder {
 
   pub fn use_serial_port(&mut self, value: bool) -> &mut Self {
     self.options.use_serial_port = value;
-    self
-  }
-
-  pub fn use_hid(&mut self, value: bool) -> &mut Self {
-    self.options.use_hid = value;
     self
   }
 

@@ -51,9 +51,6 @@ fn selected_comm_manager_names(args: &EngineOptions) -> Vec<&'static str> {
     if args.use_serial_port() {
       names.push("serial");
     }
-    if args.use_hid() {
-      names.push("hid");
-    }
   }
   if args.use_sdl_gamepad() {
     names.push("sdl_gamepad");
@@ -83,7 +80,6 @@ pub fn setup_server_device_comm_managers(
   }
   #[cfg(not(any(target_os = "android", target_os = "ios")))]
   {
-    use buttplug_server_hwmgr_hid::HidCommunicationManagerBuilder;
     use buttplug_server_hwmgr_lovense_dongle::LovenseHIDDongleCommunicationManagerBuilder;
     use buttplug_server_hwmgr_serial::SerialPortCommunicationManagerBuilder;
     if args.use_lovense_dongle_hid() {
@@ -93,10 +89,6 @@ pub fn setup_server_device_comm_managers(
     if args.use_serial_port() {
       info!("Including Serial Port Support");
       server_builder.comm_manager(SerialPortCommunicationManagerBuilder::default());
-    }
-    if args.use_hid() {
-      info!("Including Hid Support");
-      server_builder.comm_manager(HidCommunicationManagerBuilder::default());
     }
   }
   // Cross-platform gamepad support via SDL3. No OS gate: the SDL manager

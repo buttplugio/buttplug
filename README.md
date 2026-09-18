@@ -99,7 +99,6 @@ This project consists of the following crates:
 | [buttplug_server](crates/buttplug_server/) | The core server implementation, including server and device structures, all protocol implementations, etc... |
 | [buttplug_server_device_config](crates/buttplug_server_device_config/) | Device configuration file loading and database implementation. |
 | [buttplug_server_hwmgr_btleplug](crates/buttplug_server_hwmgr_btleplug/) | Bluetooth LE device communication support |
-| [buttplug_server_hwmgr_hid](crates/buttplug_server_hwmgr_hid/) | HID device communication support |
 | [buttplug_server_hwmgr_lovense_connect](crates/buttplug_server_hwmgr_lovense_connect/) | Lovense Connect device communication support (soon to be deprecated) |
 | [buttplug_server_hwmgr_lovense_dongle](crates/buttplug_server_hwmgr_lovense_dongle/) | Lovense Dongle device communication support (soon to be deprecated) |
 | [buttplug_server_hwmgr_serial](crates/buttplug_server_hwmgr_serial/) | Serial device communication support |

@@ -85,7 +85,6 @@ pub mod mysteryvibe;
 pub mod mysteryvibe_v2;
 pub mod nextlevelracing;
 pub mod nexus_revo;
-pub mod nintendo_joycon;
 pub mod nobra;
 pub mod omobo;
 pub mod ossm;
@@ -394,10 +393,6 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     nextlevelracing::setup::NextLevelRacingIdentifierFactory::default(),
-  );
-  add_to_protocol_map(
-    &mut map,
-    nintendo_joycon::setup::NintendoJoyconIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, nobra::setup::NobraIdentifierFactory::default());
   add_to_protocol_map(&mut map, omobo::setup::OmoboIdentifierFactory::default());

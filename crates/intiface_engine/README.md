@@ -36,7 +36,6 @@ Command line options are as follows:
 | `log` | Level of logs to output by default (if omitted, set to None) |
 | `use-bluetooth-le` | Use the Bluetooth LE Buttplug Device Communication Manager |
 | `use-serial` | Use the Serial Port Buttplug Device Communication Manager |
-| `use-hid` | Use the HID Buttplug Device Communication Manager |
 | `use-lovense-dongle-hid` | Use the HID Lovense Dongle Buttplug Device Communication Manager |
 | `use-lovense-connect` | Use the Lovense Connect Buttplug Device Communication Manager |
 | `use-device-websocket-server` | Use the Device Websocket Server Buttplug Device Communication Manager |

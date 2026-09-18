@@ -20,9 +20,8 @@ doc = true
 
 
 [features]
-default = ["tokio-runtime", "btleplug-manager", "hid-manager", "lovense-dongle-manager", "lovense-connect-service-manager", "serial-manager", "websocket-manager", "sdl-gamepad-manager"]
+default = ["tokio-runtime", "btleplug-manager", "lovense-dongle-manager", "lovense-connect-service-manager", "serial-manager", "websocket-manager", "sdl-gamepad-manager"]
 btleplug-manager=["buttplug_server_hwmgr_btleplug"]
-hid-manager=["buttplug_server_hwmgr_hid"]
 lovense-dongle-manager=["buttplug_server_hwmgr_lovense_dongle"]
 lovense-connect-service-manager=["buttplug_server_hwmgr_lovense_connect"]
 serial-manager=["buttplug_server_hwmgr_serial"]
@@ -37,7 +36,6 @@ buttplug_client = { version = "11.0.0", path = "../buttplug_client", default-fea
 buttplug_server = { version = "11.0.0", path = "../buttplug_server", default-features = false }
 buttplug_server_device_config = { version = "11.0.0", path = "../buttplug_server_device_config" }
 buttplug_server_hwmgr_btleplug = { version = "11.0.0", path = "../buttplug_server_hwmgr_btleplug", optional = true}
-buttplug_server_hwmgr_hid = { version = "11.0.0", path = "../buttplug_server_hwmgr_hid", optional = true}
 buttplug_server_hwmgr_lovense_connect = { version = "11.0.0", path = "../buttplug_server_hwmgr_lovense_connect", optional = true}
 buttplug_server_hwmgr_lovense_dongle = { version = "11.0.0", path = "../buttplug_server_hwmgr_lovense_dongle", optional = true}
 buttplug_server_hwmgr_serial = { version = "11.0.0", path = "../buttplug_server_hwmgr_serial", optional = true}

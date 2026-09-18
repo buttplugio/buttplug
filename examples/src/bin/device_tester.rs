@@ -66,7 +66,6 @@ async fn device_tester() {
   //server_builder.comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default());
   //server_builder.comm_manager(LovenseSerialDongleCommunicationManagerBuilder::default());
   //server_builder.comm_manager(WebsocketServerDeviceCommunicationManagerBuilder::default());
-  //server_builder.comm_manager(HidCommunicationManagerBuilder::default());
   //server_builder.comm_manager(SerialPortCommunicationManagerBuilder::default());
 
   let sb = ButtplugServerBuilder::new(server_builder.finish().unwrap());

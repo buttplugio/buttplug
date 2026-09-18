@@ -88,7 +88,7 @@ fn sdl_layout_reconciliation_matrix() {
       &DeviceDefinitionSelection::new("sdl-gamepad", None, "Test Pad 1"),
     )
     .unwrap();
-  assert_eq!(main_again.features().len(), 2);
+  assert_eq!(main_again.features().len(), 3);
   assert_eq!(main_again.features().get(&0).unwrap().id(), low);
   assert_eq!(main_again.features().get(&1).unwrap().id(), high);
   let triggers = dcm
@@ -163,7 +163,7 @@ fn sdl_legacy_config_roundtrip() {
   );
   let def = dcm.device_definition(&identifier).unwrap();
   assert_eq!(def.base_id(), Some(SDL_MAIN_ONLY_BASE_ID));
-  assert_eq!(def.features().len(), 2);
+  assert_eq!(def.features().len(), 3);
   // Display-name override plus canonical name as hardware would report it.
   let mut builder = ServerDeviceDefinitionBuilder::from_user(&def);
   builder.display_name(&Some("My Precious Pad".to_owned()));
@@ -178,7 +178,7 @@ fn sdl_legacy_config_roundtrip() {
   let back = reloaded.device_definition(&identifier).unwrap();
   assert_eq!(back.id(), def.id());
   assert_eq!(back.base_id(), Some(SDL_MAIN_ONLY_BASE_ID));
-  assert_eq!(back.features().len(), 2);
+  assert_eq!(back.features().len(), 3);
   assert_eq!(
     back.features().values().map(|f| f.id()).collect::<Vec<_>>(),
     def.features().values().map(|f| f.id()).collect::<Vec<_>>()
@@ -203,12 +203,12 @@ fn sdl_selected_config_roundtrip() {
     (
       both_selection("Selected Pad"),
       SDL_RUMBLE_AND_TRIGGERS_BASE_ID,
-      4,
+      5,
     ),
     (
       DeviceDefinitionSelection::new("sdl-gamepad", Some("__sdl-triggers-only"), "Selected Pad"),
       SDL_TRIGGERS_ONLY_BASE_ID,
-      2,
+      3,
     ),
   ] {
     let dcm = dcm();

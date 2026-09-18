@@ -107,12 +107,6 @@ pub struct IntifaceCLIArguments {
   #[getset(get_copy = "pub")]
   use_serial: bool,
 
-  /// turn off hid device support
-  #[allow(dead_code)]
-  #[argh(switch)]
-  #[getset(get_copy = "pub")]
-  use_hid: bool,
-
   /// turn off lovense dongle serial device support
   #[argh(switch)]
   #[getset(get_copy = "pub")]
@@ -246,7 +240,6 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
     builder
       .use_bluetooth_le(args.use_bluetooth_le())
       .use_serial_port(args.use_serial())
-      .use_hid(args.use_hid())
       .use_lovense_dongle_serial(args.use_lovense_dongle_serial())
       .use_lovense_dongle_hid(args.use_lovense_dongle_hid())
       .use_sdl_gamepad(args.use_sdl_gamepad())
