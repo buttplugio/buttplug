@@ -14,9 +14,8 @@
 //! (SDL3 documents `SDL_PumpEvents` as main-thread-only, and this manager
 //! does not consume controller input).
 //!
-//! This manager is opt-in: use `--use-sdl-gamepad` with intiface-engine, or
-//! the non-default `sdl-gamepad-manager` cargo feature of
-//! buttplug_client_in_process.
+//! Use `--use-sdl-gamepad` with intiface-engine; in buttplug_client_in_process,
+//! the `sdl-gamepad-manager` cargo feature is part of the default feature set.
 
 #[macro_use]
 extern crate log;

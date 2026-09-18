@@ -20,15 +20,13 @@ doc = true
 
 
 [features]
-default = ["tokio-runtime", "btleplug-manager", "hid-manager", "lovense-dongle-manager", "lovense-connect-service-manager", "serial-manager", "websocket-manager"]
+default = ["tokio-runtime", "btleplug-manager", "hid-manager", "lovense-dongle-manager", "lovense-connect-service-manager", "serial-manager", "websocket-manager", "sdl-gamepad-manager"]
 btleplug-manager=["buttplug_server_hwmgr_btleplug"]
 hid-manager=["buttplug_server_hwmgr_hid"]
 lovense-dongle-manager=["buttplug_server_hwmgr_lovense_dongle"]
 lovense-connect-service-manager=["buttplug_server_hwmgr_lovense_connect"]
 serial-manager=["buttplug_server_hwmgr_serial"]
 websocket-manager=["buttplug_server_hwmgr_websocket"]
-# Opt-in cross-platform gamepad manager via SDL3. Deliberately NOT in default:
-# building SDL3 from source is too heavy for default library consumers.
 sdl-gamepad-manager=["buttplug_server_hwmgr_sdl_gamepad"]
 tokio-runtime = ["buttplug_core/tokio-runtime", "buttplug_client/tokio-runtime", "buttplug_server/tokio-runtime"]
 wasm = ["buttplug_core/wasm", "buttplug_client/wasm", "buttplug_server/wasm"]

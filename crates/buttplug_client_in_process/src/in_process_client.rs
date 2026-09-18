@@ -110,7 +110,7 @@ fn register_comm_managers(
     device_manager_builder.comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default());
     registered.push("lovense-dongle");
   }
-  // SDL gamepad manager is opt-in (not in the default feature set) and is
+  // SDL gamepad manager is in the default feature set and is
   // cross-platform: no OS gate.
   #[cfg(feature = "sdl-gamepad-manager")]
   {

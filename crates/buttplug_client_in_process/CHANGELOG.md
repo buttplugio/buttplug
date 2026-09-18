@@ -4,6 +4,7 @@
 
 - Remove the `xinput-manager` feature and the `buttplug_server_hwmgr_xinput` dependency.
 - Remove `xinput-manager` from the default feature set; Windows embedders relying on defaults lose XInput hardware support.
+- Add `sdl-gamepad-manager` to the default feature set; default builds register the SDL3 gamepad manager on all supported platforms.
 
 # 11.0.0 (2026-07-28)
 

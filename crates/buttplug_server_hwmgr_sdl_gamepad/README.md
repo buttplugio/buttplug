@@ -120,8 +120,6 @@ gamepad rumble through SDL3.
 
 ## Registration
 
-This manager is **opt-in everywhere**:
-
-- In `intiface-engine`, pass `--use-sdl-gamepad`.
-- In `buttplug_client_in_process`, enable the non-default
-  `sdl-gamepad-manager` cargo feature.
+- In `intiface-engine`, pass `--use-sdl-gamepad` (opt-in).
+- In `buttplug_client_in_process`, the `sdl-gamepad-manager` cargo feature is
+  part of the default feature set.
