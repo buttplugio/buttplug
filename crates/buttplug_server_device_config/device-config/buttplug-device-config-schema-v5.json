@@ -130,14 +130,6 @@
       ],
       "additionalProperties": false
     },
-    "xinput-definition": {
-      "type": "object",
-      "properties": {
-        "exists": {
-          "type": "boolean"
-        }
-      }
-    },
     "sdl-gamepad-definition": {
       "type": "object",
       "properties": {
@@ -483,9 +475,6 @@
                   "hid": {
                     "$ref": "#/components/usb-definition"
                   },
-                  "xinput": {
-                    "$ref": "#/components/xinput-definition"
-                  },
                   "sdl-gamepad": {
                     "$ref": "#/components/sdl-gamepad-definition"
                   },
@@ -538,9 +527,6 @@
                       },
                       "hid": {
                         "$ref": "#/components/usb-definition"
-                      },
-                      "xinput": {
-                        "$ref": "#/components/xinput-definition"
                       },
                       "sdl-gamepad": {
                         "$ref": "#/components/sdl-gamepad-definition"
