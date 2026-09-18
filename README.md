@@ -77,7 +77,6 @@ Buttplug is currently capable of controlling toys via:
 - Lovense Devices via the Lovense Dongle (HID and Serial dongles, Desktop)
 - Lovense Connect App (Desktop and Android/iOS)
 - Websockets (for simulated and DIY devices, Desktop and Android/iOS)
-- XInput gamepads (Windows only)
 
 See [IOSTIndex](https://iostindex.com) for a full list of supported hardware (Filter on "Buttplug Rust").
 
@@ -105,7 +104,6 @@ This project consists of the following crates:
 | [buttplug_server_hwmgr_lovense_dongle](crates/buttplug_server_hwmgr_lovense_dongle/) | Lovense Dongle device communication support (soon to be deprecated) |
 | [buttplug_server_hwmgr_serial](crates/buttplug_server_hwmgr_serial/) | Serial device communication support |
 | [buttplug_server_hwmgr_websocket](crates/buttplug_server_hwmgr_websocket/) | Websocket device communication suppor, used for devices that may connect in ways not directly supported by other formats |
-| [buttplug_server_hwmgr_xinput](crates/buttplug_server_hwmgr_xinput/) | XInput gamepad support (windows only) |
 | [buttplug_server_hwmgr_sdl_gamepad](crates/buttplug_server_hwmgr_sdl_gamepad/) | Cross-platform gamepad rumble via SDL3 (opt-in) |
 | [buttplug_tests](crates/buttplug_tests/) | For tests that need the whole framework |
 | [buttplug_transport_websocket_tungstenite](crates/buttplug_transport_websocket_tungstenite/) | Communications transport for clients/servers using tokio-tungstenite |

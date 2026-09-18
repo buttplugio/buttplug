@@ -141,7 +141,7 @@ impl HardwareConnector for SdlGamepadHardwareConnector {
 }
 
 /// Watches the backend's removal signal and emits Disconnected on the
-/// device's broadcast event stream (pattern from the XInput manager).
+/// device's broadcast event stream.
 async fn watch_removal(
   mut removed: watch::Receiver<bool>,
   sender: broadcast::Sender<HardwareEvent>,

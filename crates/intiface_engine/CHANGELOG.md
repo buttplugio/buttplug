@@ -2,7 +2,8 @@
 
 ## Features
 
-- Add `--use-sdl-gamepad` flag (default off): cross-platform gamepad rumble via SDL3, coexisting with XInput on Windows (a warning is logged when both are enabled, since the same physical controller may appear as two devices). Structural inspiration credit: chiefautism's abandoned PR #860.
+- Add `--use-sdl-gamepad` flag (default off): cross-platform gamepad rumble via SDL3. Structural inspiration credit: chiefautism's abandoned PR #860.
+- Remove the XInput manager, the `--use-xinput` CLI flag, and the dual-gamepad-manager warning; SDL gamepad is now the sole gamepad manager.
 
 # 4.1.0 (2026-07-28)
 

@@ -113,12 +113,10 @@ must not be used to infer trigger-rumble support.
   controller via Bluetooth for full support. (A future main-thread integration
   could lift this; the limitation is Apple's, and SDL2 shares it.)
 
-## Coexistence with XInput
+## Sole Gamepad Manager
 
-On Windows, both the XInput manager and this manager can be enabled at the same
-time; the same physical controller may then appear as two Buttplug devices
-(once via each manager). `intiface-engine` logs a warning when both flags are
-set. Outside Windows, only this manager is available.
+This is the only gamepad manager in the workspace. It provides cross-platform
+gamepad rumble through SDL3.
 
 ## Registration
 

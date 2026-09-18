@@ -17,7 +17,7 @@ The link between a **Client** and a **Server**. Encapsulates two concerns: the c
 _Avoid_: "Transport" (not a domain term in buttplug).
 
 **Hardware Manager**:
-A component that discovers and communicates with devices over a specific communication bus — Bluetooth LE, HID, Serial, USB, etc. Each bus has its own manager implementation (`HardwareCommunicationManager` trait). Named by bus: `btleplug` (BLE), `serial`, `hid`, `xinput`, etc.
+A component that discovers and communicates with devices over a specific communication bus — Bluetooth LE, HID, Serial, USB, etc. Each bus has its own manager implementation (`HardwareCommunicationManager` trait). Named by bus: `btleplug` (BLE), `serial`, `hid`, etc.
 _Avoid_: "Transport" when referring to hardware communication.
 
 **Client**:
