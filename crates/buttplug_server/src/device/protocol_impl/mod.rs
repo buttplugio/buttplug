@@ -129,7 +129,6 @@ pub mod wevibe;
 pub mod wevibe8bit;
 pub mod wevibe_chorus;
 pub mod xibao;
-pub mod xinput;
 pub mod xiuxiuda;
 pub mod xuanhuan;
 pub mod yiciyuan;
@@ -598,7 +597,6 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     wevibe_chorus::setup::WeVibeChorusIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, xibao::setup::XibaoIdentifierFactory::default());
-  add_to_protocol_map(&mut map, xinput::setup::XInputIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     sdl_gamepad::setup::SdlGamepadIdentifierFactory::default(),

@@ -58,7 +58,7 @@
 //!
 //! - When the server receives a StartScanning message, all comm managers start looking for devices.
 //!   Strategies for scanning can vary between [DeviceCommunicationManager]s, either using long term
-//!   scans (bluetooth) or repeated timed scans (USB, HID, XInput, etc... which check their
+//!   scans (bluetooth) or repeated timed scans (USB, HID, etc... which check their
 //!   respective busses once per second) for new devices.
 //! - For each device that is found in any [DeviceCommunicationManager], we emit a DeviceFound event
 //!   with that device's identifying information. This information is sent to the
