@@ -381,6 +381,10 @@ mod tests {
       }
     }
 
+    async fn battery_level(&self) -> Result<u8, SdlTaskError> {
+      Ok(80)
+    }
+
     async fn close(&self) -> Result<(), SdlTaskError> {
       *self.closed.lock().unwrap() += 1;
       let _ = self.removed_tx.send(true);

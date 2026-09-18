@@ -113,6 +113,8 @@ pub(crate) enum SdlTaskError {
   Open(String),
   #[error("SDL gamepad rumble failed: {0}")]
   Rumble(String),
+  #[error("SDL gamepad battery read failed: {0}")]
+  Battery(String),
   #[error("SDL gamepad thread is not running")]
   ThreadClosed,
 }
@@ -152,6 +154,10 @@ pub(crate) trait DriverGamepad {
   fn connection_state(&self) -> DriverConnection {
     DriverConnection::Unknown
   }
+  /// Battery percentage 0-100; default errs so fakes opt in only where needed.
+  fn battery_percent(&self) -> Result<u8, String> {
+    Err("battery not supported".to_owned())
+  }
 }
 
 /// Clock seam so rumble-refresh and poll timing are unit-testable. `Send`
@@ -189,6 +195,11 @@ enum SdlCommand {
     state: SdlRumbleState,
     duration: u32,
     reply: oneshot::Sender<Result<(), SdlTaskError>>,
+  },
+  BatteryLevel {
+    id: JoystickId,
+    generation: u64,
+    reply: oneshot::Sender<Result<u8, SdlTaskError>>,
   },
   Close {
     id: JoystickId,
@@ -233,6 +244,10 @@ impl SdlOpenedGamepadHandle {
       .task
       .set_rumble_state(self.id, self.generation, state, duration_ms)
       .await
+  }
+
+  pub(crate) async fn battery_level(&self) -> Result<u8, SdlTaskError> {
+    self.task.battery_level(self.id, self.generation).await
   }
 
   pub(crate) async fn close(&self) -> Result<(), SdlTaskError> {
@@ -309,6 +324,20 @@ impl SdlTaskHandle {
         generation,
         state,
         duration,
+        reply,
+      })
+      .await?
+  }
+
+  pub(crate) async fn battery_level(
+    &self,
+    id: JoystickId,
+    generation: u64,
+  ) -> Result<u8, SdlTaskError> {
+    self
+      .send_and_await(|reply| SdlCommand::BatteryLevel {
+        id,
+        generation,
         reply,
       })
       .await?
@@ -394,6 +423,25 @@ fn dithered_keepalive(cmd: (u16, u16)) -> (u16, u16) {
     (low ^ 1, high)
   } else {
     (low, high ^ 1)
+  }
+}
+
+/// Map SDL joystick power state to a battery percentage. Returns Err for
+/// states with no meaningful percent (wired/no battery, unknown, error, or a
+/// battery state reporting no percentage); callers surface the message.
+fn power_info_to_percent(info: &sdl3::joystick::PowerInfo) -> Result<u8, String> {
+  match info.state {
+    sdl3::joystick::PowerLevel::Charged => Ok(100),
+    sdl3::joystick::PowerLevel::OnBattery | sdl3::joystick::PowerLevel::Charging => {
+      if info.percentage >= 0 {
+        Ok(info.percentage.clamp(0, 100) as u8)
+      } else {
+        Err("battery percentage unknown".to_owned())
+      }
+    }
+    sdl3::joystick::PowerLevel::NoBattery => Err("wired gamepad has no battery".to_owned()),
+    sdl3::joystick::PowerLevel::Unknown => Err("battery state unknown".to_owned()),
+    sdl3::joystick::PowerLevel::Error => Err("battery state error".to_owned()),
   }
 }
 
@@ -699,6 +747,23 @@ fn sdl_thread_loop(
             }
           }
         }
+        SdlCommand::BatteryLevel {
+          id,
+          generation,
+          reply,
+        } => {
+          let Some(state) = open_pads.get(&id) else {
+            let _ = reply.send(Err(SdlTaskError::Removed(id)));
+            continue;
+          };
+          if state.generation != generation {
+            let _ = reply.send(Err(SdlTaskError::Removed(id)));
+            continue;
+          }
+          // Battery probe failures are reporting errors, not device loss.
+          let result = state.pad.battery_percent().map_err(SdlTaskError::Battery);
+          let _ = reply.send(result);
+        }
         SdlCommand::Close {
           id,
           generation,
@@ -866,6 +931,10 @@ impl DriverGamepad for Sdl3Gamepad {
       _ => DriverConnection::Unknown,
     }
   }
+
+  fn battery_percent(&self) -> Result<u8, String> {
+    power_info_to_percent(&self.pad.power_info())
+  }
 }
 
 /// Production factory: sets the background-events hint (SDL guidance is to do
@@ -957,6 +1026,7 @@ pub(crate) trait SdlOpenedGamepad: Send + Sync + std::fmt::Debug {
     state: SdlRumbleState,
     duration_ms: u32,
   ) -> Result<(), SdlTaskError>;
+  async fn battery_level(&self) -> Result<u8, SdlTaskError>;
   async fn close(&self) -> Result<(), SdlTaskError>;
   /// Fire-and-forget close usable from synchronous contexts (e.g. `Drop`).
   fn close_now(&self);
@@ -995,6 +1065,10 @@ impl SdlOpenedGamepad for TaskOpenedGamepad {
     duration_ms: u32,
   ) -> Result<(), SdlTaskError> {
     self.handle.set_rumble_state(state, duration_ms).await
+  }
+
+  async fn battery_level(&self) -> Result<u8, SdlTaskError> {
+    self.handle.battery_level().await
   }
 
   async fn close(&self) -> Result<(), SdlTaskError> {
@@ -1069,6 +1143,7 @@ mod tests {
     name_fail_ids: Vec<JoystickId>,
     open_fail_ids: Vec<JoystickId>,
     connected: HashMap<JoystickId, bool>,
+    battery_result: HashMap<JoystickId, Result<u8, String>>,
     // Log of (id, low, high, duration) rumble calls.
     rumble_log: Vec<(JoystickId, u16, u16, u32)>,
     rumble_fail: bool,
@@ -1144,6 +1219,17 @@ mod tests {
       } else {
         DriverConnection::Wireless
       }
+    }
+
+    fn battery_percent(&self) -> Result<u8, String> {
+      self
+        .state
+        .lock()
+        .unwrap()
+        .battery_result
+        .get(&self.id)
+        .cloned()
+        .unwrap_or_else(|| Err("battery not supported".to_owned()))
     }
 
     fn connected(&self) -> bool {
@@ -1684,6 +1770,122 @@ mod tests {
       matches!(err, SdlTaskError::Removed(found) if found == id(5)),
       "got {err:?}"
     );
+  }
+
+  #[test]
+  fn sdl_power_info_to_percent_policy() {
+    use sdl3::joystick::PowerLevel;
+
+    for state in [
+      PowerLevel::Unknown,
+      PowerLevel::Error,
+      PowerLevel::NoBattery,
+    ] {
+      for percentage in [-1, 0, 50, 100, 250] {
+        assert!(power_info_to_percent(&sdl3::joystick::PowerInfo { state, percentage }).is_err());
+      }
+    }
+    for state in [PowerLevel::OnBattery, PowerLevel::Charging] {
+      assert!(
+        power_info_to_percent(&sdl3::joystick::PowerInfo {
+          state,
+          percentage: -1,
+        })
+        .is_err()
+      );
+      for (percentage, expected) in [(0, 0), (50, 50), (100, 100), (250, 100)] {
+        assert_eq!(
+          power_info_to_percent(&sdl3::joystick::PowerInfo { state, percentage }),
+          Ok(expected)
+        );
+      }
+    }
+    for percentage in [-1, 0, 50, 100, 250] {
+      assert_eq!(
+        power_info_to_percent(&sdl3::joystick::PowerInfo {
+          state: PowerLevel::Charged,
+          percentage,
+        }),
+        Ok(100)
+      );
+    }
+    let err = power_info_to_percent(&sdl3::joystick::PowerInfo {
+      state: PowerLevel::NoBattery,
+      percentage: 50,
+    })
+    .unwrap_err();
+    assert!(err.contains("no battery"));
+  }
+
+  #[tokio::test]
+  async fn sdl_task_battery_level_round_trip() {
+    let state = Arc::new(Mutex::new(FakeDriverState {
+      battery_result: HashMap::from([(id(20), Ok(57))]),
+      ..Default::default()
+    }));
+    let handle = spawn_fake(state, FakeClock::default());
+    let (opened, _) = handle.open(id(20)).await.unwrap();
+    assert_eq!(opened.battery_level().await.unwrap(), 57);
+    assert_eq!(
+      handle
+        .battery_level(id(20), opened.generation)
+        .await
+        .unwrap(),
+      57
+    );
+    handle.shutdown().await.unwrap();
+  }
+
+  #[tokio::test]
+  async fn sdl_task_battery_level_default_unsupported_errors() {
+    let handle = spawn_fake(
+      Arc::new(Mutex::new(FakeDriverState::default())),
+      FakeClock::default(),
+    );
+    let (opened, _) = handle.open(id(21)).await.unwrap();
+    let err = opened.battery_level().await.unwrap_err();
+    assert!(
+      matches!(err, SdlTaskError::Battery(message) if message.contains("battery not supported"))
+    );
+    handle.shutdown().await.unwrap();
+  }
+
+  #[tokio::test]
+  async fn sdl_task_battery_level_rejects_stale_generation() {
+    let state = Arc::new(Mutex::new(FakeDriverState {
+      battery_result: HashMap::from([(id(22), Ok(42))]),
+      ..Default::default()
+    }));
+    let handle = spawn_fake(state, FakeClock::default());
+    let (stale, _) = handle.open(id(22)).await.unwrap();
+    stale.close().await.unwrap();
+    let (fresh, _) = handle.open(id(22)).await.unwrap();
+    assert!(
+      matches!(stale.battery_level().await, Err(SdlTaskError::Removed(found)) if found == id(22))
+    );
+    assert_eq!(fresh.battery_level().await.unwrap(), 42);
+    assert!(
+      matches!(handle.battery_level(id(23), 1).await, Err(SdlTaskError::Removed(found)) if found == id(23))
+    );
+    handle.shutdown().await.unwrap();
+  }
+
+  #[tokio::test]
+  async fn sdl_task_battery_level_error_does_not_evict_pad() {
+    let state = Arc::new(Mutex::new(FakeDriverState {
+      battery_result: HashMap::from([(id(24), Err("probe failed".to_owned()))]),
+      ..Default::default()
+    }));
+    let handle = spawn_fake(state, FakeClock::default());
+    let (opened, _) = handle.open(id(24)).await.unwrap();
+    assert!(
+      matches!(opened.battery_level().await, Err(SdlTaskError::Battery(message)) if message == "probe failed")
+    );
+    opened
+      .set_rumble_state(SdlRumbleState::default(), RUMBLE_DURATION_MS)
+      .await
+      .expect("battery failure must not evict the pad");
+    handle.shutdown().await.unwrap();
   }
 
   #[tokio::test]
