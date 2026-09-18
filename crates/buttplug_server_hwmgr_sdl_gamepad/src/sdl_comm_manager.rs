@@ -21,7 +21,8 @@ use buttplug_server::device::hardware::communication::{
   TimedRetryCommunicationManagerImpl,
 };
 use sdl3::joystick::JoystickId;
-use std::sync::Arc;
+use std::collections::HashSet;
+use std::sync::{Arc, Mutex as StdMutex};
 use tokio::sync::mpsc;
 
 /// Creates a buttplug device address from an SDL3 instance ID. This is the
@@ -47,6 +48,12 @@ impl HardwareCommunicationManagerBuilder for SdlGamepadCommunicationManagerBuild
 pub struct SdlGamepadCommunicationManager {
   sender: mpsc::Sender<HardwareCommunicationManagerEvent>,
   backend: Arc<dyn SdlGamepadBackend>,
+  /// Instance IDs already announced during this scan session. Mirrors the
+  /// btleplug manager's tried-addresses pattern: each gamepad is announced
+  /// once per appearance, so a device whose connect attempt fails is not
+  /// re-announced (and re-connected) every scan tick. IDs are forgotten when
+  /// they leave enumeration, so a re-paired device announces again.
+  announced: StdMutex<HashSet<u32>>,
 }
 
 impl SdlGamepadCommunicationManager {
@@ -54,6 +61,7 @@ impl SdlGamepadCommunicationManager {
     Self {
       sender,
       backend: Arc::new(SdlTaskBackend::global()),
+      announced: StdMutex::new(HashSet::new()),
     }
   }
 
@@ -67,11 +75,31 @@ impl SdlGamepadCommunicationManager {
       .gamepads()
       .await
       .map_err(|e: SdlTaskError| ScanFailure::Enumeration(device_error("scan", e)))?;
+    let current_ids: HashSet<u32> = gamepads.iter().map(|gamepad| gamepad.id.0).collect();
+    self
+      .announced
+      .lock()
+      .unwrap()
+      .retain(|id| current_ids.contains(id));
+    // A dead event consumer is terminal regardless of announcement state:
+    // announced-skip below would otherwise suppress the send that surfaces
+    // the closed channel, and the retry loop would spin instead of stopping.
+    if self.sender.is_closed() {
+      error!("SDL gamepad manager event channel closed; stopping scan loop.");
+      return Err(ScanFailure::EventChannelClosed);
+    }
     for gamepad in gamepads {
       let address = create_address(gamepad.id);
       if gamepad.is_open {
         debug!(
           "SDL gamepad manager skipping already connected device {} at address {}",
+          gamepad.name, address
+        );
+        continue;
+      }
+      if self.announced.lock().unwrap().contains(&gamepad.id.0) {
+        debug!(
+          "SDL gamepad manager already announced device {} at address {}, skipping",
           gamepad.name, address
         );
         continue;
@@ -99,6 +127,7 @@ impl SdlGamepadCommunicationManager {
         error!("Error sending device found message from SDL gamepad manager.");
         return Err(ScanFailure::EventChannelClosed);
       }
+      self.announced.lock().unwrap().insert(gamepad.id.0);
     }
     Ok(())
   }
@@ -193,15 +222,18 @@ mod tests {
   ) -> (
     mpsc::Receiver<HardwareCommunicationManagerEvent>,
     SdlGamepadCommunicationManager,
+    Arc<MockBackend>,
   ) {
+    let backend = Arc::new(MockBackend {
+      gamepads: StdMutex::new(gamepads),
+    });
     let (tx, rx) = mpsc::channel(32);
     let manager = SdlGamepadCommunicationManager {
       sender: tx,
-      backend: Arc::new(MockBackend {
-        gamepads: StdMutex::new(gamepads),
-      }),
+      backend: backend.clone(),
+      announced: StdMutex::new(HashSet::new()),
     };
-    (rx, manager)
+    (rx, manager, backend)
   }
 
   fn desc(id: u32, name: &str) -> SdlGamepadDesc {
@@ -218,7 +250,7 @@ mod tests {
 
   #[tokio::test]
   async fn comm_manager_scan_emits_device_found_with_stable_addresses() {
-    let (mut rx, manager) = manager_with(Ok(vec![
+    let (mut rx, manager, _) = manager_with(Ok(vec![
       desc(3, "Xbox Wireless Controller"),
       desc(11, "DualSense Wireless Controller"),
     ]));
@@ -249,7 +281,7 @@ mod tests {
   async fn comm_manager_scan_skips_already_open_devices() {
     let mut open = desc(11, "Already Connected");
     open.is_open = true;
-    let (mut rx, manager) = manager_with(Ok(vec![desc(3, "Unopened"), open]));
+    let (mut rx, manager, _) = manager_with(Ok(vec![desc(3, "Unopened"), open]));
 
     manager.scan().await.expect("scan should succeed");
 
@@ -265,8 +297,44 @@ mod tests {
   }
 
   #[tokio::test]
+  async fn comm_manager_scan_announces_each_gamepad_once_per_appearance() {
+    let (mut rx, manager, backend) = manager_with(Ok(vec![desc(3, "Pad")]));
+
+    manager.scan().await.expect("first scan should succeed");
+    assert!(matches!(
+      rx.try_recv(),
+      Ok(HardwareCommunicationManagerEvent::DeviceFound { .. })
+    ));
+
+    // The same device still enumerated on later scan ticks is not
+    // re-announced, even though it is not open (connect failed or pending).
+    manager.scan().await.expect("second scan should succeed");
+    assert!(
+      rx.try_recv().is_err(),
+      "device must not be re-announced while it stays enumerated"
+    );
+
+    // Leaving enumeration clears the announcement, so a returning device
+    // announces again (regardless of instance ID reuse).
+    *backend.gamepads.lock().unwrap() = Ok(vec![]);
+    manager.scan().await.expect("empty scan should succeed");
+    *backend.gamepads.lock().unwrap() = Ok(vec![desc(3, "Pad")]);
+    manager
+      .scan()
+      .await
+      .expect("reappearance scan should succeed");
+    assert!(matches!(
+      rx.try_recv(),
+      Ok(HardwareCommunicationManagerEvent::DeviceFound { .. })
+    ));
+
+    drop(manager);
+    assert!(rx.recv().await.is_none());
+  }
+
+  #[tokio::test]
   async fn comm_manager_scan_swallows_transient_enumeration_error() {
-    let (mut rx, manager) = manager_with(Err(SdlTaskError::Scan("boom".to_owned())));
+    let (mut rx, manager, _) = manager_with(Err(SdlTaskError::Scan("boom".to_owned())));
 
     // Trait-level scan returns Ok with no events (logged warn): a transient
     // failure must not break the timed-retry loop.
@@ -277,7 +345,7 @@ mod tests {
     assert!(rx.recv().await.is_none());
 
     // Recovery on the next scan emits devices; the retry loop stays intact.
-    let (mut rx2, manager2) = manager_with(Ok(vec![desc(1, "SDL Gamepad 1")]));
+    let (mut rx2, manager2, _) = manager_with(Ok(vec![desc(1, "SDL Gamepad 1")]));
     manager2.scan().await.expect("scan should succeed");
     let event = rx2.recv().await.expect("event after recovery");
     let HardwareCommunicationManagerEvent::DeviceFound { name, address, .. } = event else {
