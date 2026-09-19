@@ -7,8 +7,8 @@
 
 //! Methods for establishing connections between Buttplug Clients and Servers
 //!
-//! Buttplug is made to work in many different circumstances. The [crate::client::ButtplugClient]
-//! and [crate::server::ButtplugServer] may be in the same process, in different process
+//! Buttplug is made to work in many different circumstances. The `ButtplugClient`
+//! and `ButtplugServer` may be in the same process, in different process
 //! communicating over some sort of IPC, or on different machines using a network connection.
 //! Connectors are what make these setups possible.
 //!
@@ -16,7 +16,7 @@
 //!
 //! A Buttplug Client uses a connector to communicate with a server, be it in the same process or on
 //! another machine. The client's connector handles establishing the connection to the server, as
-//! well as sending ([possibly serialized][crate::messages::serializer]) messages to the
+//! well as sending (possibly serialized) messages to the
 //! server and matching replies from the server to waiting futures.
 //!
 //! Buttplug servers use connectors to receive info from clients. They usually have less to do than
@@ -30,9 +30,9 @@
 //! (since they all follow the [crate::connector::ButtplugConnector] trait), but will varying in
 //! latency, message passing techniques, etc...
 //!
-//! There is only 1 in-process connector, the [ButtplugInProcessClientConnector]. This is used when
+//! There is only 1 in-process connector, the `ButtplugInProcessClientConnector`. This is used when
 //! the client and server live in the same process, which is useful for multiple reasons (see
-//! [ButtplugInProcessClientConnector] documentation for more info). As in-process connectors can
+//! `ButtplugInProcessClientConnector` documentation for more info). As in-process connectors can
 //! just send message objects back and forth, there is no need for message serialization.
 //!
 //! Remote connectors refer to any connector that connects to something outside of the current
@@ -122,11 +122,11 @@ where
 ///
 /// The `O` type specifies the outbound message type. This will usually be a
 /// message enum. For instance, in a client connector, this would usually be
-/// [ButtplugClientMessage][crate::messages::ButtplugClientMessage].
+/// `ButtplugClientMessage`.
 ///
 /// The `I` type specifies the inbound message type. This will usually be a
 /// message enum. For instance, in a client connector, this would usually be
-/// [ButtplugServerMessage][crate::messages::ButtplugServerMessage].
+/// `ButtplugServerMessage`.
 pub trait ButtplugConnector<OutboundMessageType, InboundMessageType>: Send + Sync
 where
   OutboundMessageType: ButtplugMessage + 'static,

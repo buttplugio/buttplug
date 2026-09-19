@@ -11,8 +11,8 @@
 //! itself doesn't do much other than configuring the device system and handling a few non-device
 //! related tasks like [initial connection
 //! handshake](https://buttplug-spec.docs.buttplug.io/architecture.html#stages) and system timeouts.
-//! Once a connection is made from a [ButtplugClient](crate::client::ButtplugClient) to a
-//! [ButtplugServer], the server mostly acts as a pass-thru frontend to the [DeviceManager].
+//! Once a connection is made from a client to the [`ButtplugServer`], the server mostly acts as a
+//! pass-thru frontend to the `ServerDeviceManager`.
 //!
 //! ## Server Lifetime
 //!
@@ -25,25 +25,23 @@
 //!     to the system, either via configuration files or through manual API calls.
 //! - Connection
 //!   - After configuration is done, the server can be put into a listening mode (assuming
-//!     [RemoteServer](ButtplugRemoteServer) is being used. for [in-process
-//!     servers](crate::connector::ButtplugInProcessClientConnector), the client own the server and just
-//!     connects to it directly). At this point, a [ButtplugClient](crate::client::ButtplugClient)
-//!     can connect and start the
+//!     `ButtplugRemoteServer` is being used. For in-process servers, the client owns the server and just
+//!     connects to it directly. At this point, a client can connect and start the
 //!     [handshake](https://buttplug-spec.docs.buttplug.io/architecture.html#stages) process.
 //! - Pass-thru
 //!   - Once the handshake has succeeded, the server basically becomes a pass-thru to the
-//!     [DeviceManager], which manages discovery of and communication with devices. The only thing
-//!     the server instance manages at this point is ownership of the [DeviceManager] and
+//!     `ServerDeviceManager`, which manages discovery of and communication with devices. The only thing
+//!     the server instance manages at this point is ownership of the `ServerDeviceManager` and
 //!     ping timer, but doesn't really do much itself. The server remains in this state until the
 //!     connection to the client is severed, at which point all devices connected to the device
 //!     manager will be stopped.
 //! - Disconnection
 //!   - The server can be put back in Connection mode without being recreated after disconnection,
 //!     to listen for another client connection while still maintaining connection to whatever
-//!     devices the [DeviceManager] has.
+//!     devices the `ServerDeviceManager` has.
 //! - Destruction
 //!   - If the server object is dropped, all devices are stopped and disconnected as part
-//!     of the [DeviceManager] teardown.
+//!     of the `ServerDeviceManager` teardown.
 
 #[macro_use]
 extern crate log;
@@ -71,11 +69,11 @@ use buttplug_core::{
 };
 
 /// Result type for Buttplug Server methods, as the server will always communicate in
-/// [ButtplugServerMessage] instances in order to follow the [Buttplug
+/// `ButtplugServerMessageV4` instances in order to follow the [Buttplug
 /// Spec](http://buttplug-spec.docs.buttplug.io).
 pub type ButtplugServerResult = Result<ButtplugServerMessageV4, ButtplugError>;
 /// Future type for Buttplug Server futures, as the server will always communicate in
-/// [ButtplugServerMessage] instances in order to follow the [Buttplug
+/// `ButtplugServerMessageV4` instances in order to follow the [Buttplug
 /// Spec](http://buttplug-spec.docs.buttplug.io).
 pub type ButtplugServerResultFuture = BoxFuture<'static, ButtplugServerResult>;
 

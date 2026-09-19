@@ -47,10 +47,10 @@ pub enum ButtplugClientDeviceEvent {
 
 #[derive(Getters, CopyGetters, Clone)]
 /// Client-usable representation of device connected to the corresponding
-/// [ButtplugServer][crate::server::ButtplugServer]
+/// `ButtplugServer`
 ///
 /// [ButtplugClientDevice] instances are obtained from the
-/// [ButtplugClient][super::ButtplugClient], and allow the user to send commands
+/// [ButtplugClient][crate::ButtplugClient], and allow the user to send commands
 /// to a device connected to the server.
 pub struct ButtplugClientDevice {
   /// Name of the device
@@ -60,25 +60,25 @@ pub struct ButtplugClientDevice {
   #[getset(get = "pub")]
   display_name: Option<String>,
   /// Index of the device, matching the index in the
-  /// [ButtplugServer][crate::server::ButtplugServer]'s
-  /// [DeviceManager][crate::server::device_manager::DeviceManager].
+  /// `ButtplugServer`'s
+  /// `DeviceManager`.
   #[getset(get_copy = "pub")]
   index: u32,
   /// Actuators and sensors available on the device.
   #[getset(get = "pub")]
   device_features: BTreeMap<u32, ClientDeviceFeature>,
   /// Sends commands from the [ButtplugClientDevice] instance to the
-  /// [ButtplugClient][super::ButtplugClient]'s event loop, which will then send
-  /// the message on to the [ButtplugServer][crate::server::ButtplugServer]
+  /// [ButtplugClient][crate::ButtplugClient]'s event loop, which will then send
+  /// the message on to the `ButtplugServer`
   /// through the connector.
   event_loop_sender: ButtplugClientMessageSender,
   internal_event_sender: broadcast::Sender<ButtplugClientDeviceEvent>,
   /// True if this [ButtplugClientDevice] is currently connected to the
-  /// [ButtplugServer][crate::server::ButtplugServer].
+  /// `ButtplugServer`.
   device_connected: Arc<AtomicBool>,
-  /// True if the [ButtplugClient][super::ButtplugClient] that generated this
+  /// True if the [ButtplugClient][crate::ButtplugClient] that generated this
   /// [ButtplugClientDevice] instance is still connected to the
-  /// [ButtplugServer][crate::server::ButtplugServer].
+  /// `ButtplugServer`.
   client_connected: Arc<AtomicBool>,
 }
 
@@ -92,7 +92,7 @@ impl ButtplugClientDevice {
   /// # Why is this pub(super)?
   ///
   /// There's really no reason for anyone but a
-  /// [ButtplugClient][super::ButtplugClient] to create a
+  /// [ButtplugClient][crate::ButtplugClient] to create a
   /// [ButtplugClientDevice]. A [ButtplugClientDevice] is mostly a shim around
   /// the [ButtplugClient] that generated it, with some added convenience
   /// functions for forming device control messages.

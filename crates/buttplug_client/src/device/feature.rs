@@ -47,7 +47,7 @@ pub struct ClientDeviceFeature {
   feature: DeviceFeature,
   /// Sends commands from the [ButtplugClientDevice] instance to the
   /// [ButtplugClient][super::ButtplugClient]'s event loop, which will then send
-  /// the message on to the [ButtplugServer][crate::server::ButtplugServer]
+  /// the message on to the `ButtplugServer`
   /// through the connector.
   event_loop_sender: ButtplugClientMessageSender,
 }

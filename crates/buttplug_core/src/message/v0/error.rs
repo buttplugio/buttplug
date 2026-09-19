@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 /// Error codes pertaining to error classes that can be represented in the
-/// Buttplug [Error] message.
+/// Buttplug `Error` message.
 #[derive(Debug, Clone, PartialEq, Eq, Copy, Serialize_repr, Deserialize_repr)]
 #[repr(u8)]
 pub enum ErrorCode {
@@ -99,7 +99,7 @@ impl ErrorV0 {
 
 impl From<ButtplugError> for ErrorV0 {
   /// Converts a [ButtplugError] object into a Buttplug Protocol
-  /// [Error] message.
+  /// `Error` message.
   fn from(error: ButtplugError) -> Self {
     let code = match error {
       ButtplugError::ButtplugDeviceError { .. } => ErrorCode::ErrorDevice,

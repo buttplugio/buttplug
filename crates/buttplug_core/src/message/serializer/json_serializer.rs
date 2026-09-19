@@ -17,7 +17,7 @@ use std::fmt::{Debug, Display};
 
 static MESSAGE_JSON_SCHEMA: &str = include_str!("../../../schema/buttplug-schema.json");
 
-/// Creates a [jsonschema::JSONSchema] validator using the built in buttplug message schema.
+/// Creates a `jsonschema` validator using the built-in Buttplug message schema.
 pub fn create_message_validator() -> Validator {
   // SAFETY: MESSAGE_JSON_SCHEMA is embedded at compile time via include_str!() and validated by
   // build.rs before compilation. These expects can only fail if there's a build/packaging error,

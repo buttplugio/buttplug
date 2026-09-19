@@ -9,8 +9,8 @@
 //!
 //! Welcome to the guts of Buttplug.
 //!
-//! Structs in the device module are used by the [Buttplug Server](crate::server) (specifically the
-//! [Device Manager](crate::server::device_manager::DeviceManager)) to identify devices that
+//! Structs in the device module are used by the [Buttplug Server](crate::ButtplugServer) (specifically the
+//! `ServerDeviceManager`) to identify devices that
 //! Buttplug can connect to, and match them to supported protocols in order to establish
 //! communication, translate ButtplugMessages to raw hardware commands, and send those commands to
 //! the hardware.
@@ -19,13 +19,13 @@
 //!
 //! Devices in buttplug consist of two components:
 //!
-//! - Implementations (represented by [Hardware]), which handle the actual communication with
-//!   hardware. Implementations are created by a [DeviceCommunicationManager], which handles the
+//! - Implementations (represented by [`hardware::Hardware`]), which handle the actual communication with
+//!   hardware. Implementations are created by a `HardwareCommunicationManager`, which handles the
 //!   discovery method for that type of hardware (Bluetooth scanning, USB bus scanning, listening on
 //!   network ports, etc...)
-//! - Protocols (represented by [ButtplugProtocol]), which hold information about the capabilities
+//! - Protocols (represented by [`ProtocolHandler`](protocol::ProtocolHandler)), which hold information about the capabilities
 //!   of a device (can it vibrate/rotate/etc, at what speeds, so on and so forth), and translate
-//!   from [Buttplug Device Messages](buttplug_core::messages::ButtplugDeviceMessage) into strings or
+//!   from Buttplug Device Messages into strings or
 //!   binary arrays to send to devices via their implementation.
 //!
 //! # Device Lifetimes in Buttplug
@@ -38,7 +38,7 @@
 //! ## Configuration and Bringup
 //!
 //! Configuration of the device creation system happens when we bring up a
-//! [ButtplugServer](crate::server::ButtplugServer) and configure the [DeviceManager] that is owns.
+//! [`ButtplugServer`](crate::ButtplugServer) and configure the `ServerDeviceManager` that it owns.
 //! Information that needs to be added for device creation includes:
 //!
 //! - Protocols that the library implements, or that developers add themselves.
@@ -46,10 +46,10 @@
 //!   that are compatible with them.
 //! - Lists of device addresses that we will either never connect to or only connect to.
 //!
-//! This information is entered via the public [DeviceManager] API, and stored between the
-//! [DeviceManager] and the [DeviceConfigurationManager] (which is owned by the [DeviceManager]).
+//! This information is entered via the public `ServerDeviceManager` API, and stored between the
+//! `ServerDeviceManager` and the `DeviceConfigurationManager`.
 //!
-//! After all of the information is added, the [DeviceManager] is considered ready to discover
+//! After all of the information is added, the `ServerDeviceManager` is considered ready to discover
 //! devices.
 //!
 //! ## Device Discovery and Creation
@@ -57,12 +57,12 @@
 //! To create a device, we go through the following steps:
 //!
 //! - When the server receives a StartScanning message, all comm managers start looking for devices.
-//!   Strategies for scanning can vary between [DeviceCommunicationManager]s, either using long term
+//!   Strategies for scanning can vary between hardware communication managers, either using long term
 //!   scans (bluetooth) or repeated timed scans (USB, HID, etc... which check their
 //!   respective busses once per second) for new devices.
-//! - For each device that is found in any [DeviceCommunicationManager], we emit a DeviceFound event
+//! - For each device that is found by any hardware communication manager, we emit a DeviceFound event
 //!   with that device's identifying information. This information is sent to the
-//!   [DeviceConfigurationManager], in order to make sure we can connect (we won't try to connect to
+//!   the device configuration manager, in order to make sure we can connect (we won't try to connect to
 //!   devices we're already connected to, or to devices on the deny list, or to any device that
 //!   /isn't/ on the allow list if it exists) identify protocols that may work with the device. With
 //!   some protocols and types of communication, we require being connected to the device to discern
@@ -87,8 +87,8 @@
 //!   if there are any user configurations to apply to the device. This is where users can set
 //!   limits different aspects of specific devices, like vibration speed, stroke length, etc...
 //!
-//! Once we've made it through this, the device is handed to the [DeviceManager], and the
-//! [ButtplugServer] notifies the [ButtplugClient] (if one is connected) of the new device via the
+//! Once we've made it through this, the device is handed to the `ServerDeviceManager`, and the
+//! `ButtplugServer` notifies the connected client (if one is connected) of the new device via the
 //! DeviceAdded message.
 //!
 //! ## Commanding

@@ -247,8 +247,8 @@ impl ButtplugServer {
     async move { device_manager.shutdown().await }.boxed()
   }
 
-  /// Sends a [ButtplugClientMessage] to be parsed by the server (for handshake or ping), or passed
-  /// into the server's [DeviceManager] for communication with devices.
+  /// Sends a `ButtplugClientMessageVariant` to be parsed by the server (for handshake or ping), or passed
+  /// into the server's device manager for communication with devices.
   pub fn parse_message(
     &self,
     msg: ButtplugClientMessageVariant,

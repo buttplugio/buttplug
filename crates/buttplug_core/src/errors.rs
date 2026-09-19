@@ -258,7 +258,7 @@ pub enum ButtplugError {
 }
 
 impl From<message::ErrorV0> for ButtplugError {
-  /// Turns a Buttplug Protocol Error Message [super::messages::Error] into a [ButtplugError] type.
+  /// Turns a Buttplug Protocol Error Message `Error` into a [ButtplugError] type.
   fn from(error: message::ErrorV0) -> Self {
     match error.error_code() {
       ErrorCode::ErrorDevice => {

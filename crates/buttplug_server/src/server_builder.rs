@@ -74,7 +74,7 @@ impl ButtplugServerBuilder {
   }
 
   /// Set the maximum ping time, in milliseconds, for the server. If the server does not receive a
-  /// [Ping](buttplug_core::messages::Ping) message in this amount of time after the handshake has
+  /// `Ping` message in this amount of time after the handshake has
   /// succeeded, the server will automatically disconnect. If this is not called, the ping timer
   /// will not be activated.
   ///

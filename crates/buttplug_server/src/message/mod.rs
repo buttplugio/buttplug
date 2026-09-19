@@ -167,7 +167,7 @@ impl ButtplugServerMessageVariant {
 }
 
 /// Represents all possible messages a [ButtplugServer][crate::server::ButtplugServer] can send to a
-/// [ButtplugClient][crate::client::ButtplugClient] that denote an EVENT from a device. These are
+/// the connected client that denote an EVENT from a device. These are
 /// only used in notifications, so read requests will not need to be added here, only messages that
 /// will require Id of 0.
 #[derive(Debug, Clone, PartialEq, Eq, derive_more::From)]

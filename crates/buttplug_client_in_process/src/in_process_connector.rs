@@ -48,17 +48,17 @@ impl ButtplugInProcessClientConnectorBuilder {
 /// In-process Buttplug Server Connector
 ///
 /// The In-Process Connector contains a [ButtplugServer], meaning that both the
-/// [ButtplugClient][crate::client::ButtplugClient] and [ButtplugServer] will exist in the same
+/// `ButtplugClient` and [ButtplugServer] will exist in the same
 /// process. This is useful for developing applications, or for distributing an applications without
 /// requiring access to an outside [ButtplugServer].
 ///
 /// # Notes
 ///
 /// Buttplug is built in a way that tries to make sure all programs will work with new versions of
-/// the library. This is why we have [ButtplugClient][crate::client::ButtplugClient] for
+/// the library. This is why we have `ButtplugClient` for
 /// applications, and Connectors to access out-of-process [ButtplugServer]s over IPC, network, etc.
 /// It means that the out-of-process server can be upgraded by the user at any time, even if the
-/// [ButtplugClient][crate::client::ButtplugClient] using application hasn't been upgraded. This
+/// `ButtplugClient` using application hasn't been upgraded. This
 /// allows the program to support hardware that may not have even been released when it was
 /// published.
 ///

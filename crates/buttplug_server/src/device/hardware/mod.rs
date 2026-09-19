@@ -24,11 +24,11 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::{RwLock, broadcast};
 use uuid::Uuid;
 
-/// Parameters for reading data from a [Hardware](crate::device::Hardware) endpoint
+/// Parameters for reading data from a [`Hardware`] endpoint
 ///
 /// Low level read command structure, used by
-/// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
-/// [Hardware](crate::device::Hardware) structures.
+/// [`ProtocolHandler`](crate::device::protocol::ProtocolHandler) implementations when working with
+/// [`Hardware`] structures.
 #[derive(PartialEq, Eq, Debug, Clone, Copy, Serialize, Deserialize, CopyGetters)]
 #[getset(get_copy = "pub")]
 pub struct HardwareReadCmd {
@@ -55,11 +55,11 @@ impl HardwareReadCmd {
   }
 }
 
-/// Parameters for writing data to a [Hardware](crate::device::Hardware) endpoint
+/// Parameters for writing data to a [`Hardware`] endpoint
 ///
 /// Low level write command structure, used by
-/// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
-/// [Hardware](crate::device::Hardware) structures.
+/// [`ProtocolHandler`](crate::device::protocol::ProtocolHandler) implementations when working with
+/// [`Hardware`] structures.
 #[derive(Eq, Debug, Clone, Serialize, Deserialize, Getters, CopyGetters)]
 pub struct HardwareWriteCmd {
   /// Feature ID for this command. As a write command can possibly write to multiple features in one
@@ -103,11 +103,11 @@ impl HardwareWriteCmd {
   }
 }
 
-/// Parameters for subscribing to a [Hardware](crate::device::Hardware) endpoint
+/// Parameters for subscribing to a [`Hardware`] endpoint
 ///
 /// Low level subscribe structure, used by
-/// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
-/// [Hardware](crate::device::Hardware) structures.
+/// [`ProtocolHandler`](crate::device::protocol::ProtocolHandler) implementations when working with
+/// [`Hardware`] structures.
 ///
 /// While usually related to notify/indicate characteristics on Bluetooth LE devices, can be used
 /// with any read endpoint to signal that any information received should be automatically passed to
@@ -139,12 +139,12 @@ impl HardwareSubscribeCmd {
   }
 }
 
-/// Parameters for unsubscribing from a [Hardware](crate::device::Hardware) endpoint that has
+/// Parameters for unsubscribing from a [`Hardware`] endpoint that has
 /// previously been subscribed.
 ///
 /// Low level subscribe structure, used by
-/// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
-/// [Hardware](crate::device::Hardware) structures.
+/// [`ProtocolHandler`](crate::device::protocol::ProtocolHandler) implementations when working with
+/// [`Hardware`] structures.
 #[derive(Eq, Debug, Clone, Copy, Serialize, Deserialize, CopyGetters)]
 #[getset(get_copy = "pub")]
 pub struct HardwareUnsubscribeCmd {
@@ -170,7 +170,7 @@ impl HardwareUnsubscribeCmd {
 }
 
 /// Enumeration of all possible commands that can be sent to a
-/// [Hardware](crate::device::Hardware).
+/// [`Hardware`].
 #[derive(PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub enum HardwareCommand {
   Write(HardwareWriteCmd),
@@ -243,7 +243,7 @@ impl HardwareReading {
   }
 }
 
-/// Events that can be emitted from a [Hardware](crate::device::Hardware).
+/// Events that can be emitted from a [`Hardware`].
 #[derive(Debug, Clone)]
 pub enum HardwareEvent {
   /// Device received data
@@ -253,7 +253,7 @@ pub enum HardwareEvent {
 }
 
 /// Hardware implementation and communication portion of a
-/// [ButtplugDevice](crate::device::ButtplugDevice) instance. The Hardware contains a
+/// a server device instance. The Hardware contains a
 /// HardwareInternal, which handles all of the actual hardware communication. However, the struct
 /// also needs to carry around identifying information, so we wrap it in this type instead of
 /// requiring that all implementors of deal with name/address/endpoint accessors.
@@ -390,7 +390,7 @@ impl Hardware {
 /// Internal representation of device implementations
 ///
 /// This trait is implemented by
-/// [DeviceCommunicationManager](crate::server::device::communication_manager::DeviceCommunicationManager) modules
+/// hardware communication-manager modules
 /// to represent and communicate with devices. It provides an abstract way to represent devices
 /// without having to consider what type of communication bus they may be using.
 pub trait HardwareInternal: Sync + Send {
@@ -433,7 +433,7 @@ pub trait HardwareSpecializer: Sync + Send {
   /// Try to initialize a device.
   ///
   /// Given a
-  /// [ProtocolDeviceConfiguration](crate::server::device::configuration::ProtocolDeviceConfiguration)
+  /// protocol device configuration
   /// which will contain information about what a protocol needs to communicate with a device, try
   /// to identify all required endpoints on the hardware.
   async fn specialize(

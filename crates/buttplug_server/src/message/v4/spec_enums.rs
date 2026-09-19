@@ -49,7 +49,7 @@ use super::{
 /// There should only be one version of CheckedClientMessage in the library, matching the latest
 /// version of the message spec. For any messages that don't require error checking, their regular
 /// struct can be used as an enum parameter. Any messages requiring error checking or validation
-/// will have an alternate Checked[x] form that they will need to be cast as.
+/// will have an alternate checked form that they will need to be cast as.
 #[derive(Debug, Clone, PartialEq, derive_more::From)]
 pub enum ButtplugCheckedClientMessageV4 {
   // Handshake messages
