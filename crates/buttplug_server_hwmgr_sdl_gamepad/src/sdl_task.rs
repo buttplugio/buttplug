@@ -941,16 +941,15 @@ impl DriverGamepad for Sdl3Gamepad {
 /// this before initialization so hotplug works while unfocused/headless),
 /// initializes SDL + the gamepad subsystem, and builds the driver.
 ///
-/// On macOS, SDL3 routes wired gamepads to GCController (MFI) by default, and
-/// hidapi device drivers decline them while MFI is enabled (see the
-/// `SDL_PLATFORM_MACOS && SDL_JOYSTICK_MFI` guard in SDL's hidapi drivers:
-/// wired pads enumerate with DevSrvsID paths). GCController discovery is
-/// delivered through Cocoa runloop notifications, which this headless,
-/// no-video process never spins - so with the default policy no gamepads are
-/// ever discovered here. Disabling MFI routes gamepads to hidapi, which
-/// enumerates synchronously and works headless (verified on hardware: a wired
-/// Xbox One S enumerates and `set_rumble` succeeds with this hint). iOS keeps
-/// the MFI default, where GCController is the only gamepad backend.
+/// On macOS, SDL3 routes gamepads to GCController (MFI) by default, and
+/// hidapi device drivers decline them while MFI is enabled. GCController
+/// discovery is delivered through Cocoa runloop notifications, and the
+/// framework only starts tracking controllers once touched from the main
+/// thread of a process with a serviced main run loop (see
+/// `game_controller_warmup`): GUI hosts engage it and discovery works through
+/// SDL's MFI observers, while fully headless hosts never do and see no MFI
+/// pads. Wired pads additionally report their rumble through GCController on
+/// macOS, so they are skipped there when they report a wired connection.
 fn production_sdl_factory() -> Result<Box<dyn SdlDriver>, SdlTaskInitError> {
   // SDL installs SIGINT/SIGTERM handlers by default and turns those signals
   // into SDL quit events. This backend is headless and intentionally never
@@ -958,8 +957,11 @@ fn production_sdl_factory() -> Result<Box<dyn SdlDriver>, SdlTaskInitError> {
   // (intiface-engine uses Tokio's ctrl_c handler).
   sdl3::hint::set(sdl3::hint::names::NO_SIGNAL_HANDLERS, "1");
   sdl3::hint::set(sdl3::hint::names::JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
+  // GameController must be touched from the main thread before it tracks any
+  // controllers; schedule that touch now so SDL's MFI observers (registered
+  // by SDL_Init below) start receiving connect events in GUI hosts.
   #[cfg(target_os = "macos")]
-  sdl3::hint::set(sdl3::hint::names::JOYSTICK_MFI, "0");
+  crate::game_controller_warmup::engage_from_main_queue();
   let sdl = sdl3::init().map_err(|e| SdlTaskInitError(e.to_string()))?;
   let gamepads = sdl.gamepad().map_err(|e| SdlTaskInitError(e.to_string()))?;
   Ok(Box::new(Sdl3Driver {

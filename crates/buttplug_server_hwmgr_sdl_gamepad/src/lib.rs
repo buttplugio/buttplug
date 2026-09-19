@@ -20,6 +20,8 @@
 #[macro_use]
 extern crate log;
 
+#[cfg(target_os = "macos")]
+mod game_controller_warmup;
 mod sdl_comm_manager;
 mod sdl_gamepad_hardware;
 mod sdl_task;

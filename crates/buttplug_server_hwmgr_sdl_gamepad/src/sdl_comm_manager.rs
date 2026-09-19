@@ -91,14 +91,14 @@ impl SdlGamepadCommunicationManager {
     for gamepad in gamepads {
       let address = create_address(gamepad.id);
       if gamepad.is_open {
-        debug!(
+        trace!(
           "SDL gamepad manager skipping already connected device {} at address {}",
           gamepad.name, address
         );
         continue;
       }
       if self.announced.lock().unwrap().contains(&gamepad.id.raw()) {
-        debug!(
+        trace!(
           "SDL gamepad manager already announced device {} at address {}, skipping",
           gamepad.name, address
         );
