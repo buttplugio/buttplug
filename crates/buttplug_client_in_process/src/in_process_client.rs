@@ -103,7 +103,7 @@ fn register_comm_managers(
   }
   #[cfg(all(
     feature = "lovense-dongle-manager",
-    any(target_os = "windows", target_os = "macos", target_os = "linux")
+    any(target_os = "windows", target_os = "linux")
   ))]
   {
     use buttplug_server_hwmgr_lovense_dongle::LovenseHIDDongleCommunicationManagerBuilder;

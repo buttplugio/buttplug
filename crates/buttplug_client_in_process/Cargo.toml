@@ -37,7 +37,6 @@ buttplug_server = { version = "12.0.0", path = "../buttplug_server", default-fea
 buttplug_server_device_config = { version = "12.0.0", path = "../buttplug_server_device_config" }
 buttplug_server_hwmgr_btleplug = { version = "12.0.0", path = "../buttplug_server_hwmgr_btleplug", optional = true}
 buttplug_server_hwmgr_lovense_connect = { version = "12.0.0", path = "../buttplug_server_hwmgr_lovense_connect", optional = true}
-buttplug_server_hwmgr_lovense_dongle = { version = "12.0.0", path = "../buttplug_server_hwmgr_lovense_dongle", optional = true}
 buttplug_server_hwmgr_serial = { version = "12.0.0", path = "../buttplug_server_hwmgr_serial", optional = true}
 buttplug_server_hwmgr_websocket = { version = "12.0.0", path = "../buttplug_server_hwmgr_websocket", optional = true}
 buttplug_server_hwmgr_sdl_gamepad = { version = "12.0.0", path = "../buttplug_server_hwmgr_sdl_gamepad", optional = true}
@@ -49,3 +48,8 @@ getset = "0.1.7"
 tokio = { version = "1.53.1", features = ["macros"] }
 dashmap = { version = "6.2.1" }
 tracing = "0.1.44"
+
+# The HID dongle manager is gated off macOS: SDL's bundled hidapi exports
+# hid_darwin_* symbols that collide with the hidapi crate at link time.
+[target.'cfg(any(target_os = "windows", target_os = "linux"))'.dependencies]
+buttplug_server_hwmgr_lovense_dongle = { version = "12.0.0", path = "../buttplug_server_hwmgr_lovense_dongle", optional = true}

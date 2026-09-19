@@ -45,5 +45,7 @@ hidapi = { version = "2.6.7", default-features = false, features = ["windows-nat
 # Other platforms are not affected by the feature changes.
 hidapi = { version = "2.6.7", default-features = false, features = ["linux-static-hidraw"] }
 
-[target.'cfg(target_os = "macos")'.dependencies]
-hidapi = { version = "2.6.7", default-features = false, features = ["macos-shared-device"] }
+# No macOS hidapi dependency: SDL's bundled hidapi exports the same
+# hid_darwin_* symbols, so the two cannot link into one binary. The HID
+# dongle manager is gated out of macOS builds until SDL renames its
+# internal hidapi symbols.
