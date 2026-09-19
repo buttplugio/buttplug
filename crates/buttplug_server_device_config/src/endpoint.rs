@@ -26,8 +26,7 @@ use core::hash::Hash;
 /// device that uses UART style communication (serial, a lot of Bluetooth LE devices, etc...) most
 /// devices will just have a Tx and Rx endpoint. However, on other devices that can have varying
 /// numbers of endpoints and configurations (USB, Bluetooth LE, etc...) we add some names with more
-/// context. These names are used in [Device Configuration](crate::server::device::configuration)
-/// and the [Device Configuration File](crate::util::device_configuration), and are expected to
+/// context. These names are used in device configuration and device configuration files, and are expected to
 /// de/serialize to lowercase versions of their names.
 #[repr(u8)]
 #[derive(EnumString, Clone, Debug, PartialEq, Eq, Hash, Display, Copy, FromRepr)]

@@ -10,8 +10,8 @@
 //! Buttplug can handle device communication over several different mediums, including bluetooth,
 //! usb, serial, various network protocols, and others. The library also provides multiple protocols
 //! to communicate with this hardware. All of this information is stored in the
-//! [DeviceConfigurationManager] (aka the DCM), a structure that is built whenever a [buttplug
-//! server](crate::server::ButtplugServer) instance is created, and which is immutable for the life
+//! [DeviceConfigurationManager] (aka the DCM), a structure that is built whenever a Buttplug
+//! server instance is created, and which is immutable for the life
 //! of the server instance.
 //!
 //! The [DeviceConfigurationManager]'s main job is to take a newly discovered piece of hardware and
@@ -28,13 +28,13 @@
 //! - Their protocol name
 //! - Their protocol identifier
 //!
-//! These values are held in [ProtocolDeviceIdentifier] instances, and used around the codebase to
+//! These values are held in `ProtocolDeviceIdentifier` instances, and used around the codebase to
 //! identify a device. This identifier is used so that if a device somehow shares addresses with
 //! another device but identifies under a different protocol, they will still be seen as separate
 //! devices.
 //!
 //! As an example, let's say we have a Lovense Hush. The protocol will be "lovense" (which is
-//! configuration string version of the [Lovense Protocol](crate::device::protocol::lovense) name),
+//! configuration string version of the Lovense protocol name),
 //! its identifier will be "Z" (the identification letter for Hush in Lovense's proprietary
 //! protocol), and the address will be something like "AA:BB:CC:DD:EE:FF", which is the BLE address
 //! of the device on platforms that provide BLE addresses. Using these 3 values means that, even if
@@ -79,8 +79,8 @@
 //! Similarly, GUIs and other utilities have been created to facilitate creation of User
 //! Configurations, and these are also stored to files and loadable by the library.
 //!
-//! These files are handled in the [Device Configuration File Module in the Utils portion of the
-//! library](crate::util::device_configuration). More information on the file format and loading
+//! These files are handled in the device configuration file module. More information on the file
+//! format and loading
 //! strategies can be found there.
 //!
 //! ## Architecture
@@ -92,7 +92,7 @@
 //! information:
 //!
 //! - Protocol device specifiers and attributes
-//! - Factory/Builder instances for [ButtplugProtocols](crate::device::protocol::ButtplugProtocol)
+//! - Factory/Builder instances for Buttplug protocols
 //! - User configuration information (allow/deny lists, per-device protocol attributes, etc...)
 //!
 //! The [DeviceConfigurationManager] is created when a ButtplugServer comes up, and which time
@@ -107,10 +107,10 @@
 //! ### Protocol Device Specifiers
 //!
 //! In order to know if a discovered device can be used by Buttplug, it needs to be checked for
-//! identifying information. The library use "specifiers" (like [BluetoothLESpecifier],
-//! [USBSpecifier], etc...) for this. Specifiers contain device identification and connection
+//! identifying information. The library uses "specifiers" (like [`BluetoothLESpecifier`],
+//! `USBSpecifier`, etc...) for this. Specifiers contain device identification and connection
 //! information, and we compare groups of specifiers in protocol configurations (as part of the
-//! [ProtocolDeviceConfiguration] instance) with a specifier built from discovered devices to see if
+//! `ProtocolDeviceConfiguration` instance) with a specifier built from discovered devices to see if
 //! there are any matches.
 //!
 //! For instance, we know the Bluetooth LE information for WeVibe toys, all of which is stored with
@@ -128,8 +128,7 @@
 //! where each matched protocol is given a chance to see if it can identify and communicate with the
 //! device. If a protocol and device are matched, and connection is successful the initialized
 //! protocol instance is returned, and becomes part of the
-//! [ButtplugDevice](crate::device::ButtplugDevice) instance used by the
-//! [ButtplugServer](crate::server::ButtplugServer).
+//! server device instance used by the Buttplug server.
 //!
 //! ### User Configurations
 //!

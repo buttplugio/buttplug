@@ -172,9 +172,9 @@ impl DeviceConfigurationManagerBuilder {
 
 /// Correlates information about protocols and which devices they support.
 ///
-/// The [DeviceConfigurationManager] handles stores information about which device protocols the
-/// library supports, as well as which devices can use those protocols. When a
-/// [DeviceCommunicationManager](crate::server::device::communication_manager) finds a device during scanning,
+/// The [DeviceConfigurationManager] stores information about which device protocols the
+/// library supports, as well as which devices can use those protocols. When a hardware
+/// communication manager finds a device during scanning,
 /// device information is given to the [DeviceConfigurationManager] to decide whether Buttplug
 /// should try to connect to and communicate with the device.
 ///

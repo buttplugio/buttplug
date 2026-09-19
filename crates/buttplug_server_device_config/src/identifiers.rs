@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 /// Identifying information for devices that are currently connected or have connected in the past.
 ///
 /// Contains the 3 fields needed to uniquely identify a device in the system. Unlike
-/// [ConfigurationDeviceIdentifier]s, [UserDeviceIdentifier] will always have a device address
+/// configuration device identifiers, [`UserDeviceIdentifier`] will always have a device address
 /// available.
 ///
 /// NOTE: UserDeviceIdentifiers are NOT portable across platforms. For instance, bluetooth addresses
@@ -46,7 +46,7 @@ impl UserDeviceIdentifier {
 pub struct BaseDeviceIdentifier {
   /// Name of the protocol this device uses to communicate
   protocol: String,
-  /// Some([identifier]) if there's an identifier, otherwise None if default
+  /// `Some(identifier)` if there's an identifier, otherwise `None` if default
   identifier: Option<String>,
 }
 

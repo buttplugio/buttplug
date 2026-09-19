@@ -201,11 +201,9 @@ impl BluetoothLESpecifier {
   }
 }
 
-/// Specifier for [Lovense Connect
-/// Service](crate::server::device::communication_manager::lovense_connect_service) devices
+/// Specifier for Lovense Connect Service devices
 ///
-/// Network based services, has no attributes because the [Lovense Connect
-/// Service](crate::server::device::communication_manager::lovense_connect_service) device communication manager
+/// Network based services, has no attributes because the Lovense Connect Service device communication manager
 /// handles all device discovery and identification itself.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LovenseConnectServiceSpecifier {
