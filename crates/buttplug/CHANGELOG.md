@@ -1,3 +1,13 @@
+# 12.0.0 (2026-09-18)
+
+## Breaking Changes
+
+- The facade now re-exports the 12.x websocket transport API. Update websocket builders to use listen addresses and rebuild integrations against the coordinated 12.x manager/config contracts.
+
+## Other
+
+- Update internal dependencies to the coordinated release lines.
+
 # 11.0.0 (2026-07-28)
 
 ## Other

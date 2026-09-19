@@ -1,3 +1,9 @@
+# 4.0.1 (2026-09-18)
+
+## Other
+
+- Update internal dependencies to the coordinated 12.x server and device-config line; the WASM/FFI surface remains on its independent 4.x artifact line.
+
 # 4.0.0 (2026-07-28)
 
 ## Other

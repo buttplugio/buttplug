@@ -1,10 +1,14 @@
-# 11.0.1 (2026-09-05)
+# 12.0.0 (2026-09-18)
+
+## Breaking Changes
+
+- Replace the Rust `XInputSpecifier` and `ProtocolCommunicationSpecifier::XInput` with SDL gamepad equivalents.
+- Replace the serialized `xinput` protocol/config tag with `sdl-gamepad`; saved configs using the removed schema may be invalid and must be rebuilt or migrated.
 
 ## Features
 
-- Add `sdl-gamepad` protocol and communication specifier: cross-platform gamepad rumble via SDL3 (two 0-65535 vibrate features, low/high frequency motors). Device config version bumped to 5.43. Structural inspiration credit: chiefautism's abandoned PR #860.
-- Remove the `xinput` protocol and its communication specifier; device config version bumped to 5.54.
-- Add battery level input feature to all three sdl-gamepad device definitions (shared feature id, index 2/4/2 across layouts); device config version bumped to 5.55. Saved user configs for sdl-gamepad devices are invalidated by the new feature count and will be rebuilt from the base definitions on next save.
+- Add SDL gamepad definitions, capability-based layout selection, and battery input support. The new battery features change SDL gamepad feature counts; saved SDL gamepad configs may be invalidated and rebuilt from base definitions on their next save.
+
 
 # 11.0.0 (2026-07-28)
 

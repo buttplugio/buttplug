@@ -1,6 +1,6 @@
 [package]
 name = "buttplug_transport_websocket_tungstenite"
-version = "11.0.0"
+version = "12.0.0"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Buttplug Intimate Hardware Control Library - Server Device Config Library"
 license = "BSD-3-Clause"
@@ -20,7 +20,7 @@ doc = true
 
 
 [dependencies]
-buttplug_core = { version = "11.0.0", path = "../buttplug_core" }
+buttplug_core = { version = "11.0.1", path = "../buttplug_core" }
 futures = "0.3.34"
 futures-util = "0.3.34"
 serde = { version = "1.0.229", features = ["derive"] }

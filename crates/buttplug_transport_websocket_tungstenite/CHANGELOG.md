@@ -1,3 +1,13 @@
+# 12.0.0 (2026-09-18)
+
+## Breaking Changes
+
+- Update websocket server builders and consumers to the listen-address API; the former interface/port construction methods and error shape are no longer available.
+
+## Other
+
+- Update Buttplug core dependencies to the coordinated 11.0.1/12.x release lines.
+
 # 11.0.0 (2026-07-28)
 
 ## Other

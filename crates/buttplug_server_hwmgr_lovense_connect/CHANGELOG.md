@@ -1,3 +1,9 @@
+# 12.0.0 (2026-09-18)
+
+## Breaking Changes
+
+- Rebuild public manager and connector integrations against the coordinated 12.x server and device-config contracts.
+
 # 11.0.0 (2026-07-28)
 
 ## Other

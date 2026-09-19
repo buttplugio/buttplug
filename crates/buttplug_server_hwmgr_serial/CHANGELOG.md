@@ -1,3 +1,13 @@
+# 12.0.0 (2026-09-18)
+
+## Breaking Changes
+
+- Rebuild public serial manager integrations against the coordinated 12.x server and device-config contracts.
+
+## Features
+
+- Expose serial-port enumeration through the public manager API.
+
 # 11.0.0 (2026-07-28)
 
 ## Other

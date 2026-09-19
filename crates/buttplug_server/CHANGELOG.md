@@ -1,4 +1,8 @@
-# 11.0.1 (2026-09-18)
+# 12.0.0 (2026-09-18)
+
+## Breaking Changes
+
+- Public hardware connector and specializer traits now use the coordinated 12.x device-config protocol identities; rebuild implementations against the SDL gamepad specifier and updated serialized config.
 
 ## Bugfixes
 

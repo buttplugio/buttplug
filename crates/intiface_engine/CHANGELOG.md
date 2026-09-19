@@ -1,9 +1,15 @@
-# 4.2.0 (2026-09-05)
+# 5.0.0 (2026-09-18)
+
+## Breaking Changes
+
+- Replace the removed XInput and HID manager options with SDL gamepad configuration; migrate `--use-xinput`/`use_xinput` and `use_hid` callers to SDL gamepad options.
+- Replace websocket interface/port configuration with listen-address configuration, and update `EngineOptions`/`EngineOptionsBuilder` callers for the removed methods.
 
 ## Features
 
-- Add `--use-sdl-gamepad` flag (default off): cross-platform gamepad rumble via SDL3. Structural inspiration credit: chiefautism's abandoned PR #860.
-- Remove the XInput manager, the `--use-xinput` CLI flag, and the dual-gamepad-manager warning; SDL gamepad is now the sole gamepad manager.
+- Add `--use-sdl-gamepad` and public serial-port enumeration support.
+- Internal Buttplug dependencies move to the coordinated 12.x release line.
+
 
 # 4.1.0 (2026-07-28)
 

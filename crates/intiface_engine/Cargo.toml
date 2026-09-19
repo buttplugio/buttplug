@@ -1,6 +1,6 @@
 [package]
 name = "intiface-engine"
-version = "4.1.0"
+version = "5.0.0"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "CLI and Library frontend for the Buttplug sex toy control library"
 license = "BSD-3-Clause"
@@ -24,18 +24,18 @@ default=[]
 tokio-console=["console-subscriber"]
 
 [dependencies]
-buttplug_client = { version = "11.0.0", path = "../buttplug_client" }
-buttplug_client_in_process = { version = "11.0.0", path = "../buttplug_client_in_process" }
-buttplug_core = { version = "11.0.0", path = "../buttplug_core" }
-buttplug_server = { version = "11.0.0", path = "../buttplug_server" }
-buttplug_server_device_config = { version = "11.0.0", path = "../buttplug_server_device_config" }
-buttplug_server_hwmgr_btleplug = { version = "11.0.0", path = "../buttplug_server_hwmgr_btleplug" }
-buttplug_server_hwmgr_lovense_connect = { version = "11.0.0", path = "../buttplug_server_hwmgr_lovense_connect" }
-buttplug_server_hwmgr_lovense_dongle = { version = "11.0.0", path = "../buttplug_server_hwmgr_lovense_dongle" }
-buttplug_server_hwmgr_serial = { version = "11.0.0", path = "../buttplug_server_hwmgr_serial" }
-buttplug_server_hwmgr_websocket = { version = "11.0.0", path = "../buttplug_server_hwmgr_websocket" }
-buttplug_server_hwmgr_sdl_gamepad = { version = "11.0.0", path = "../buttplug_server_hwmgr_sdl_gamepad" }
-buttplug_transport_websocket_tungstenite = { version = "11.0.0", path = "../buttplug_transport_websocket_tungstenite" }
+buttplug_client = { version = "11.0.1", path = "../buttplug_client" }
+buttplug_client_in_process = { version = "12.0.0", path = "../buttplug_client_in_process" }
+buttplug_core = { version = "11.0.1", path = "../buttplug_core" }
+buttplug_server = { version = "12.0.0", path = "../buttplug_server" }
+buttplug_server_device_config = { version = "12.0.0", path = "../buttplug_server_device_config" }
+buttplug_server_hwmgr_btleplug = { version = "12.0.0", path = "../buttplug_server_hwmgr_btleplug" }
+buttplug_server_hwmgr_lovense_connect = { version = "12.0.0", path = "../buttplug_server_hwmgr_lovense_connect" }
+buttplug_server_hwmgr_lovense_dongle = { version = "12.0.0", path = "../buttplug_server_hwmgr_lovense_dongle" }
+buttplug_server_hwmgr_serial = { version = "12.0.0", path = "../buttplug_server_hwmgr_serial" }
+buttplug_server_hwmgr_websocket = { version = "12.0.0", path = "../buttplug_server_hwmgr_websocket" }
+buttplug_server_hwmgr_sdl_gamepad = { version = "12.0.0", path = "../buttplug_server_hwmgr_sdl_gamepad" }
+buttplug_transport_websocket_tungstenite = { version = "12.0.0", path = "../buttplug_transport_websocket_tungstenite" }
 argh = "0.1.19"
 log = "0.4.34"
 futures = "0.3.34"

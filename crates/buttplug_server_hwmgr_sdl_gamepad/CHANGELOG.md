@@ -1,14 +1,15 @@
-# 11.0.1 (2026-09-05)
+# 12.0.0 (2026-09-18)
 
-## Changes
+## Breaking Changes
 
-- Upgraded the SDL runtime from SDL 3.4.14 to SDL 3.4.16 (`sdl3` 0.18.4 → 0.20.0, `sdl3-sys` 0.6.8 → 0.7.1), picking up upstream joystick fixes including the Joy-Con partial-user-calibration handling (SDL upstream issue 8085 class).
+- Initial coordinated 12.x release aligned with the server and device-config trait/specifier changes. The removed standalone HID/XInput packages are not replaced by compatible package names; use this SDL gamepad manager instead.
 
 ## Features
 
+- SDL3 gamepad rumble, battery reporting, capability-specific layouts, and the upstream SDL runtime refresh.
 - Gamepads now report battery level through the standard buttplug battery command: a one-byte percent read on a new rx endpoint, sourced from SDL's gamepad power info (wired/no-battery and unknown states report an error instead of a value; charging states report their current percent).
 
-## Fixes
+## Bugfixes
 
 - Rumble keepalives now actually reach the controller: SDL skips transmission of an unchanged (low, high) rumble pair, so keepalive re-arms alternate one motor channel's lowest bit (imperceptible) to force a real output report. The keepalive interval is also tightened from 1s to 100ms; Bluetooth DualSense and Joy-Con no longer stall effects mid-arm.
 - Scanning announces each gamepad once per enumeration appearance instead of re-announcing unconnected devices on every scan tick, matching the btleplug manager's behavior.

@@ -1,3 +1,9 @@
+# 11.0.1 (2026-09-18)
+
+## Other
+
+- Patch release for the coordinated workspace dependency update; the client public contract remains compatible.
+
 # 11.0.0 (2026-07-28)
 
 ## Other

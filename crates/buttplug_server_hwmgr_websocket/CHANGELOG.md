@@ -1,3 +1,9 @@
+# 12.0.0 (2026-09-18)
+
+## Breaking Changes
+
+- Rebuild public websocket manager connectors against the coordinated 12.x server and listen-address transport API.
+
 # 11.0.0 (2026-07-28)
 
 ## Other

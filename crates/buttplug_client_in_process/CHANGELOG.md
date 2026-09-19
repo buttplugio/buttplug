@@ -1,10 +1,11 @@
-# 11.0.1 (2026-09-05)
+# 12.0.0 (2026-09-18)
 
-## Features
+## Breaking Changes
 
-- Remove the `xinput-manager` feature and the `buttplug_server_hwmgr_xinput` dependency.
-- Remove `xinput-manager` from the default feature set; Windows embedders relying on defaults lose XInput hardware support.
-- Add `sdl-gamepad-manager` to the default feature set; default builds register the SDL3 gamepad manager on all supported platforms.
+- Remove the public `xinput-manager` feature and standalone XInput manager dependency; migrate consumers to `sdl-gamepad-manager`.
+- Add SDL gamepad to the default feature set, so default builds register SDL3 gamepads instead of XInput hardware.
+- The in-process client now uses the coordinated 12.x server, device-config, and manager contracts.
+
 
 # 11.0.0 (2026-07-28)
 
