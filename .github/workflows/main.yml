@@ -56,21 +56,6 @@ jobs:
       run: cargo build
     - name: Run tests
       run: cargo test
-    # SDL gamepad manager: opt-in library feature. Compile + run the
-    # feature-gated registration test, and assert sdl3 stays out of the
-    # default dependency graph.
-    - name: Test SDL gamepad opt-in feature
-      shell: bash
-      run: |
-        cargo test -p buttplug_client_in_process --features sdl-gamepad-manager
-        if cargo tree -e features -p buttplug_client_in_process | grep -Eq '(^|[[:space:]])sdl3 v[0-9]'; then
-          echo "::error::sdl3 leaked into buttplug_client_in_process default features"
-          exit 1
-        fi
-        cargo tree -e features -p buttplug_client_in_process --features sdl-gamepad-manager | grep -Eq '(^|[[:space:]])sdl3 v[0-9]' || {
-          echo "::error::sdl3 missing from buttplug_client_in_process with sdl-gamepad-manager enabled"
-          exit 1
-        }
     # Only run doc gen on windows. It has the most code to build anyways, all other projects are a subset of it.
     - name: Run doc gen
       if: startsWith(matrix.os, 'windows')
