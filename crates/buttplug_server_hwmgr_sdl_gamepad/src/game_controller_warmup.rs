@@ -51,7 +51,8 @@ const BLOCK_HAS_DESCRIPTOR: c_int = 1 << 29;
 // callback only performs Objective-C message sends, which are process-global
 // and thread-agnostic, and `dispatch_async` copies global blocks by reference
 // without allocation.
-unsafe impl Sync for BlockLiteral {}
+unsafe impl Sync for BlockLiteral {
+}
 
 static BLOCK_DESCRIPTOR: BlockDescriptor = BlockDescriptor {
   reserved: 0,
@@ -74,10 +75,7 @@ unsafe extern "C" {
   fn dispatch_async(queue: *mut c_void, block: *mut c_void);
   fn objc_getClass(name: *const c_char) -> *mut c_void;
   fn sel_registerName(name: *const c_char) -> *const c_void;
-  fn objc_msgSend(
-    receiver: *mut c_void,
-    sel: *const c_void,
-  ) -> *mut c_void;
+  fn objc_msgSend(receiver: *mut c_void, sel: *const c_void) -> *mut c_void;
 }
 
 /// Touching the `controllers` array is the point: it makes the framework

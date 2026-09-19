@@ -1,3 +1,9 @@
+# 12.0.1 (2026-09-19)
+
+## Bugfixes
+
+- Remove the macOS hidapi dependency because the manager is no longer built on macOS alongside SDL's bundled hidapi.
+
 # 12.0.0 (2026-09-18)
 
 ## Breaking Changes

@@ -80,9 +80,9 @@ pub fn setup_server_device_comm_managers(
   }
   #[cfg(not(any(target_os = "android", target_os = "ios")))]
   {
-    use buttplug_server_hwmgr_serial::SerialPortCommunicationManagerBuilder;
     #[cfg(not(target_os = "macos"))]
     use buttplug_server_hwmgr_lovense_dongle::LovenseHIDDongleCommunicationManagerBuilder;
+    use buttplug_server_hwmgr_serial::SerialPortCommunicationManagerBuilder;
     #[cfg(not(target_os = "macos"))]
     if args.use_lovense_dongle_hid() {
       info!("Including Lovense HID Dongle Support");
@@ -94,7 +94,9 @@ pub fn setup_server_device_comm_managers(
     // symbols.
     #[cfg(target_os = "macos")]
     if args.use_lovense_dongle_hid() {
-      info!("Lovense HID Dongle Support is unavailable on macOS; disabled while SDL's bundled hidapi collides with the hidapi crate.");
+      info!(
+        "Lovense HID Dongle Support is unavailable on macOS; disabled while SDL's bundled hidapi collides with the hidapi crate."
+      );
     }
     if args.use_serial_port() {
       info!("Including Serial Port Support");

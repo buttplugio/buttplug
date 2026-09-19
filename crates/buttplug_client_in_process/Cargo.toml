@@ -1,6 +1,6 @@
 [package]
 name = "buttplug_client_in_process"
-version = "12.0.0"
+version = "12.0.1"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Buttplug Intimate Hardware Control Library - Core Library"
 license = "BSD-3-Clause"

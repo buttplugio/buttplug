@@ -1,3 +1,9 @@
+# 12.0.1 (2026-09-19)
+
+## Bugfixes
+
+- Gate the Lovense HID dongle manager to Windows and Linux so macOS builds do not link SDL's bundled hidapi against the dongle manager's hidapi symbols.
+
 # 12.0.0 (2026-09-18)
 
 ## Breaking Changes

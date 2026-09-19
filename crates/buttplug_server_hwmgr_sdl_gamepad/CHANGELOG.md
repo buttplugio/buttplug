@@ -1,3 +1,9 @@
+# 12.0.1 (2026-09-19)
+
+## Bugfixes
+
+- Warm up SDL's GameController event loop on the main queue so macOS GUI hosts can receive MFI controller discovery events.
+
 # 12.0.0 (2026-09-18)
 
 ## Breaking Changes

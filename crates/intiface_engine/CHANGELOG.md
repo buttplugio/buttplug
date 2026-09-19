@@ -1,3 +1,9 @@
+# 5.0.1 (2026-09-19)
+
+## Bugfixes
+
+- Disable Lovense HID dongle support on macOS to avoid a link-time collision between SDL's bundled hidapi and the dongle manager's hidapi dependency.
+
 # 5.0.0 (2026-09-18)
 
 ## Breaking Changes
