@@ -34,7 +34,6 @@ buttplug_server_hwmgr_lovense_connect = { version = "12.0.0", path = "../buttplu
 buttplug_server_hwmgr_lovense_dongle = { version = "12.0.0", path = "../buttplug_server_hwmgr_lovense_dongle" }
 buttplug_server_hwmgr_serial = { version = "12.0.0", path = "../buttplug_server_hwmgr_serial" }
 buttplug_server_hwmgr_websocket = { version = "12.0.0", path = "../buttplug_server_hwmgr_websocket" }
-buttplug_server_hwmgr_sdl_gamepad = { version = "12.0.0", path = "../buttplug_server_hwmgr_sdl_gamepad" }
 buttplug_transport_websocket_tungstenite = { version = "12.0.0", path = "../buttplug_transport_websocket_tungstenite" }
 argh = "0.1.19"
 log = "0.4.34"
@@ -70,3 +69,10 @@ strum = { version = "0.28.0", features = ["derive"] }
 [build-dependencies]
 vergen-gitcl = {version = "10.0.3", features = ["build"]}
 anyhow = "1.0.104"
+
+# SDL3 gamepads are desktop-only: SDL's C build has no mobile story in this
+# stack (it fails CMake configuration on android, and mobile gamepads route
+# through platform game controller APIs instead). The registration and the
+# testable names mirror in buttplug_server.rs carry the same gate.
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+buttplug_server_hwmgr_sdl_gamepad = { version = "12.0.0", path = "../buttplug_server_hwmgr_sdl_gamepad" }

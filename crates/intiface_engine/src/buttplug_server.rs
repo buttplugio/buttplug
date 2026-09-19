@@ -20,6 +20,7 @@ use buttplug_server::{
 use buttplug_server_device_config::{DeviceConfigurationManager, load_protocol_configs};
 use buttplug_server_hwmgr_btleplug::BtlePlugCommunicationManagerBuilder;
 use buttplug_server_hwmgr_lovense_connect::LovenseConnectServiceCommunicationManagerBuilder;
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 use buttplug_server_hwmgr_sdl_gamepad::SdlGamepadCommunicationManagerBuilder;
 use buttplug_server_hwmgr_websocket::WebsocketServerDeviceCommunicationManagerBuilder;
 use buttplug_transport_websocket_tungstenite::{
@@ -52,6 +53,7 @@ fn selected_comm_manager_names(args: &EngineOptions) -> Vec<&'static str> {
       names.push("serial");
     }
   }
+  #[cfg(not(any(target_os = "android", target_os = "ios")))]
   if args.use_sdl_gamepad() {
     names.push("sdl_gamepad");
   }
@@ -103,8 +105,10 @@ pub fn setup_server_device_comm_managers(
       server_builder.comm_manager(SerialPortCommunicationManagerBuilder::default());
     }
   }
-  // Cross-platform gamepad support via SDL3. No OS gate: the SDL manager
-  // builds everywhere the engine does.
+  // SDL3 gamepad support, desktop only: SDL's C build has no mobile story in
+  // this stack, and mobile platforms route gamepads through their own game
+  // controller APIs. The dependency is target-gated in Cargo.toml to match.
+  #[cfg(not(any(target_os = "android", target_os = "ios")))]
   if args.use_sdl_gamepad() {
     info!("Including SDL Gamepad Support");
     server_builder.comm_manager(SdlGamepadCommunicationManagerBuilder::default());
@@ -252,18 +256,28 @@ mod tests {
     let with_sdl = EngineOptionsBuilder::default()
       .use_sdl_gamepad(true)
       .finish();
-    assert!(
-      selected_comm_manager_names(&with_sdl).contains(&"sdl_gamepad"),
-      "SDL manager must be registered when the flag is set"
-    );
-
     let without_sdl = EngineOptionsBuilder::default().finish();
-    assert!(
-      !selected_comm_manager_names(&without_sdl).contains(&"sdl_gamepad"),
-      "SDL manager must not be registered when the flag is unset"
-    );
 
-    // On all platforms, no OS gate on SDL registration.
-    assert!(selected_comm_manager_names(&with_sdl).contains(&"sdl_gamepad"));
+    // SDL gamepads are desktop-only: mobile builds gate the manager out of
+    // the engine entirely.
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+      assert!(
+        selected_comm_manager_names(&with_sdl).contains(&"sdl_gamepad"),
+        "SDL manager must be registered when the flag is set"
+      );
+      assert!(
+        !selected_comm_manager_names(&without_sdl).contains(&"sdl_gamepad"),
+        "SDL manager must not be registered when the flag is unset"
+      );
+    }
+    #[cfg(any(target_os = "android", target_os = "ios"))]
+    {
+      let _ = &with_sdl;
+      assert!(
+        !selected_comm_manager_names(&with_sdl).contains(&"sdl_gamepad"),
+        "SDL manager must not be registered on mobile platforms"
+      );
+    }
   }
 }

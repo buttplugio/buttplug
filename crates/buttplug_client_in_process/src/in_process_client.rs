@@ -110,9 +110,13 @@ fn register_comm_managers(
     device_manager_builder.comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default());
     registered.push("lovense-dongle");
   }
-  // SDL gamepad manager is in the default feature set and is
-  // cross-platform: no OS gate.
-  #[cfg(feature = "sdl-gamepad-manager")]
+  // SDL gamepad manager is in the default feature set but desktop-only:
+  // SDL's C build has no mobile story in this stack, so the dependency is
+  // target-gated in Cargo.toml and the registration carries the same gate.
+  #[cfg(all(
+    feature = "sdl-gamepad-manager",
+    not(any(target_os = "android", target_os = "ios"))
+  ))]
   {
     use buttplug_server_hwmgr_sdl_gamepad::SdlGamepadCommunicationManagerBuilder;
     device_manager_builder.comm_manager(SdlGamepadCommunicationManagerBuilder::default());
@@ -121,7 +125,11 @@ fn register_comm_managers(
   registered
 }
 
-#[cfg(all(test, feature = "sdl-gamepad-manager"))]
+#[cfg(all(
+  test,
+  feature = "sdl-gamepad-manager",
+  not(any(target_os = "android", target_os = "ios"))
+))]
 mod tests {
   use super::*;
 
