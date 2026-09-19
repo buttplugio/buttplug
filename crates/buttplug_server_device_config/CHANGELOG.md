@@ -8,7 +8,8 @@
 ## Features
 
 - Add SDL gamepad definitions, capability-based layout selection, and battery input support. The new battery features change SDL gamepad feature counts; saved SDL gamepad configs may be invalidated and rebuilt from base definitions on their next save.
-
+- Add device configurations for HoneyPlayBox KaiPro, more Sexverse devices, Luvmazer Passion    
+  Tether Ring, iToys Lach, Adorime Panty Vibration, Various Galaku/Joyhub devices
 
 # 11.0.0 (2026-07-28)
 
