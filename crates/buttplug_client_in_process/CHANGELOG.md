@@ -1,3 +1,9 @@
+# 12.0.2 (2026-09-20)
+
+## Bugfixes
+
+- Update btleplug to fix leak in windows when de/allocating adapters constantly
+
 # 12.0.1 (2026-09-19)
 
 ## Bugfixes
