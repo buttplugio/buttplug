@@ -98,6 +98,7 @@
 mod device_handle;
 mod device_task;
 pub mod hardware;
+mod latest_device_task;
 mod output_observation;
 pub mod protocol;
 pub mod protocol_impl;
