@@ -38,12 +38,11 @@ defaults:
     index: 3
   id: d5987116-2fba-4c30-a7aa-ef567a3bf35d
 configurations:
-# YCY-FJB-01 is the only model verified against physical hardware so far.
-# YCY-FJB-02 is its successor in the same product line; the official app's
-# code path for both models is identical (same vuex state, same hex-stringed
-# 16-byte motor frame, same BLE service/characteristic UUIDs). Adding it
-# here so the second model is recognised; flag confirmed device behaviour
-# in a future PR once an FJB-02 owner can verify.
+# BLE device-info replies confirm that FJB-02 has motor A (8 fixed modes)
+# and no B/C motors. Its stroke and rotation move together under one control.
+# FJB-03 physical testing identified A as stroke, B as suction and C as
+# independent vibration. C responds to its seven fixed modes (35 11 04 N),
+# not to real-time levels in the 35 12 packet.
 - identifier:
   - YCY-FJB-01
   name: Yiciyuan FJB-01
@@ -52,11 +51,72 @@ configurations:
   - YCY-FJB-02
   name: Yiciyuan FJB-02
   id: 48108f07-5871-445b-9f2a-10ceb1809b23
+  features:
+  - description: coupled stroke and rotation
+    id: 7d1de07f-0609-40de-aa1c-e6fe41b97d06
+    output:
+      oscillate:
+        value:
+        - 0
+        - 100
+    index: 0
+  - description: battery level
+    id: e284dbd3-d18d-409f-894c-bc5bbfeab060
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 1
+- identifier:
+  - YCY-FJB-03
+  name: Yiciyuan FJB-03
+  id: 825357dd-9ed1-4f0f-ab74-7885a2d1bac2
+  # Host mode controller owns direction. No artificial pacing or zero hold.
+  message_gap_ms: 0
+  features:
+  - description: coupled stroke and rotation
+    id: 74f218e9-204e-4600-baf9-43c942b5a6a0
+    output:
+      oscillate:
+        value:
+        - 0
+        - 100
+    index: 0
+  - description: suction
+    id: 4bf007b8-e7df-4c4c-8fbe-ea112128a70f
+    output:
+      constrict:
+        value:
+        - 0
+        - 100
+    index: 1
+  - description: vibration (7 fixed modes)
+    id: f01acf53-731b-452e-be21-e912a65409c8
+    output:
+      vibrate:
+        value:
+        - 0
+        - 100
+    index: 2
+  - description: battery level
+    id: 5fb5b0a4-aa3f-4e22-9aa3-32a3666d5141
+    input:
+      battery:
+        value:
+        - - 0
+          - 100
+        command:
+        - Read
+    index: 3
 communication:
 - btle:
     names:
     - YCY-FJB-01
     - YCY-FJB-02
+    - YCY-FJB-03
     services:
       0000ff40-0000-1000-8000-00805f9b34fb:
         tx: 0000ff41-0000-1000-8000-00805f9b34fb

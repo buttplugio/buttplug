@@ -419,6 +419,10 @@
           "protocol_variant": {
             "type": "string"
           },
+          "message_gap_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
           "features": {
             "$ref": "#/components/features"
           }

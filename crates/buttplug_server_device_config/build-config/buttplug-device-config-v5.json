@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 56
+    "minor": 58
   },
   "protocols": {
     "activejoy": {
@@ -25708,7 +25708,8 @@
           "btle": {
             "names": [
               "YCY-FJB-01",
-              "YCY-FJB-02"
+              "YCY-FJB-02",
+              "YCY-FJB-03"
             ],
             "services": {
               "0000ff40-0000-1000-8000-00805f9b34fb": {
@@ -25728,11 +25729,111 @@
           "name": "Yiciyuan FJB-01"
         },
         {
+          "features": [
+            {
+              "description": "coupled stroke and rotation",
+              "id": "7d1de07f-0609-40de-aa1c-e6fe41b97d06",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "battery level",
+              "id": "e284dbd3-d18d-409f-894c-bc5bbfeab060",
+              "index": 1,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
           "id": "48108f07-5871-445b-9f2a-10ceb1809b23",
           "identifier": [
             "YCY-FJB-02"
           ],
           "name": "Yiciyuan FJB-02"
+        },
+        {
+          "features": [
+            {
+              "description": "coupled stroke and rotation",
+              "id": "74f218e9-204e-4600-baf9-43c942b5a6a0",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "suction",
+              "id": "4bf007b8-e7df-4c4c-8fbe-ea112128a70f",
+              "index": 1,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "vibration (7 fixed modes)",
+              "id": "f01acf53-731b-452e-be21-e912a65409c8",
+              "index": 2,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "battery level",
+              "id": "5fb5b0a4-aa3f-4e22-9aa3-32a3666d5141",
+              "index": 3,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "825357dd-9ed1-4f0f-ab74-7885a2d1bac2",
+          "identifier": [
+            "YCY-FJB-03"
+          ],
+          "message_gap_ms": 0,
+          "name": "Yiciyuan FJB-03"
         }
       ],
       "defaults": {

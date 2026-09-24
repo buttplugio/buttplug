@@ -67,6 +67,9 @@ pub struct DeviceTestCase {
   device_config_file: Option<String>,
   user_device_config_file: Option<String>,
   device_init: Option<Vec<TestCommand>>,
+  // Some protocols intentionally settle between initialization operations.
+  // Keep the historical 500ms default for all other fixtures.
+  device_init_timeout_ms: Option<u64>,
   device_commands: Vec<TestCommand>,
 }
 
