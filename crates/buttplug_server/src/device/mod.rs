@@ -98,11 +98,13 @@
 mod device_handle;
 mod device_task;
 pub mod hardware;
+mod latest_device_task;
 mod output_observation;
 pub mod protocol;
 pub mod protocol_impl;
 mod server_device_manager;
 mod server_device_manager_event_loop;
+pub mod yiciyuan_motion;
 
 pub use device_handle::{DeviceCommand, DeviceEvent, DeviceHandle};
 pub use output_observation::OutputObservation;

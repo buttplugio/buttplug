@@ -2,11 +2,21 @@ devices:
   - identifier:
       name: "YCY-FJB-02"
     expected_name: "Yiciyuan FJB-02"
+
+device_init_timeout_ms: 3000
+device_init:
+  - !Commands
+      device_index: 0
+      commands:
+        - !Subscribe
+            endpoint: rxblebattery
+        - !Write
+            endpoint: tx
+            data: [0x35, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+            write_with_response: false
 device_commands:
-  # Same protocol verification as test_yiciyuan_protocol.yaml — FJB-02 uses
-  # an identical control packet to FJB-01, so we re-run the multi-feature
-  # Scalar / Stop sequence to make sure the additional device identifier
-  # routes through the same handler without regression.
+  # FJB-02 reports motor counts 8/0/0. Its single control moves stroke and
+  # rotation together; B/C fields remain zero in the 16-byte frame.
   - !VersionGated
       min_spec_version: 3
       commands:
@@ -29,18 +39,12 @@ device_commands:
                 - Index: 0
                   Scalar: 0.5
                   ActuatorType: Oscillate
-                - Index: 1
-                  Scalar: 0.75
-                  ActuatorType: Vibrate
-                - Index: 2
-                  Scalar: 0.25
-                  ActuatorType: Vibrate
         - !Commands
             device_index: 0
             commands:
               - !Write
                   endpoint: tx
-                  data: [0x35, 0x12, 0x0A, 0x0F, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+                  data: [0x35, 0x12, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
                   write_with_response: false
 
         - !Messages

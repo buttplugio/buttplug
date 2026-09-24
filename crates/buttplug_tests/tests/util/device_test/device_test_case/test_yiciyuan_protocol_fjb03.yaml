@@ -1,0 +1,152 @@
+devices:
+  - identifier:
+      name: "YCY-FJB-03"
+    expected_name: "Yiciyuan FJB-03"
+device_init_timeout_ms: 3000
+device_init:
+  - !Commands
+      device_index: 0
+      commands:
+        - !Subscribe
+            endpoint: rxblebattery
+        - !Write
+            endpoint: tx
+            data: [0x35, 0x10, 0x00, 0x00, 0x00, 0x45]
+            write_with_response: false
+device_commands:
+  # A couples stroke and rotation with proportional speed; B is suction, C vibration.
+  # Each message is separate so the expected command order is deterministic.
+  - !VersionGated
+      min_spec_version: 3
+      commands:
+        - !Messages
+            device_index: 0
+            messages:
+              - !Scalar
+                - Index: 0
+                  Scalar: 0.5
+                  ActuatorType: Oscillate
+        - !Commands
+            device_index: 0
+            commands:
+              - !Write
+                  endpoint: tx
+                  data: [0x35, 0x12, 0x0A, 0x00, 0x00, 0x51]
+                  write_with_response: false
+
+        - !Messages
+            device_index: 0
+            messages:
+              - !Scalar
+                - Index: 1
+                  Scalar: 0.75
+                  ActuatorType: Constrict
+        - !Commands
+            device_index: 0
+            commands:
+              - !Write
+                  endpoint: tx
+                  data: [0x35, 0x12, 0x0A, 0x0F, 0x00, 0x60]
+                  write_with_response: false
+
+        - !Messages
+            device_index: 0
+            messages:
+              - !Scalar
+                - Index: 2
+                  Scalar: 0.25
+                  ActuatorType: Vibrate
+        - !Commands
+            device_index: 0
+            commands:
+              - !Write
+                  endpoint: tx
+                  data: [0x35, 0x11, 0x04, 0x02, 0x4C]
+                  write_with_response: false
+
+        - !Messages
+            device_index: 0
+            messages:
+              - !Scalar
+                - Index: 0
+                  Scalar: 1.0
+                  ActuatorType: Oscillate
+        - !Commands
+            device_index: 0
+            commands:
+              - !Write
+                  endpoint: tx
+                  data: [0x35, 0x12, 0x14, 0x0F, 0x00, 0x6A]
+                  write_with_response: false
+              - !Write
+                  endpoint: tx
+                  data: [0x35, 0x11, 0x04, 0x02, 0x4C]
+                  write_with_response: false
+
+        - !Messages
+            device_index: 0
+            messages:
+              - !Scalar
+                - Index: 1
+                  Scalar: 1.0
+                  ActuatorType: Constrict
+        - !Commands
+            device_index: 0
+            commands:
+              - !Write
+                  endpoint: tx
+                  data: [0x35, 0x12, 0x14, 0x14, 0x00, 0x6F]
+                  write_with_response: false
+              - !Write
+                  endpoint: tx
+                  data: [0x35, 0x11, 0x04, 0x02, 0x4C]
+                  write_with_response: false
+
+        - !Messages
+            device_index: 0
+            messages:
+              - !Scalar
+                - Index: 2
+                  Scalar: 1.0
+                  ActuatorType: Vibrate
+        - !Commands
+            device_index: 0
+            commands:
+              - !Write
+                  endpoint: tx
+                  data: [0x35, 0x11, 0x04, 0x07, 0x51]
+                  write_with_response: false
+
+        - !Messages
+            device_index: 0
+            messages:
+              - !Scalar
+                - Index: 2
+                  Scalar: 0.0
+                  ActuatorType: Vibrate
+        - !Commands
+            device_index: 0
+            commands:
+              - !Write
+                  endpoint: tx
+                  data: [0x35, 0x11, 0x04, 0x00, 0x4A]
+                  write_with_response: false
+              - !Write
+                  endpoint: tx
+                  data: [0x35, 0x12, 0x14, 0x14, 0x00, 0x6F]
+                  write_with_response: false
+
+        - !Messages
+            device_index: 0
+            messages:
+              - !Scalar
+                - Index: 1
+                  Scalar: 0.0
+                  ActuatorType: Constrict
+        - !Commands
+            device_index: 0
+            commands:
+              - !Write
+                  endpoint: tx
+                  data: [0x35, 0x12, 0x14, 0x00, 0x00, 0x5B]
+                  write_with_response: false

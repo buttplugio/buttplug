@@ -283,6 +283,23 @@ pub trait ProtocolHandler: Sync + Send {
     }
   }
 
+  /// Opt into latest-state output scheduling. Only suitable for protocols whose
+  /// overlapping commands are replaceable state snapshots, without keepalives.
+  /// Other protocols retain the existing device task and stop behavior.
+  fn use_latest_output_scheduler(&self) -> bool {
+    false
+  }
+
+  /// Handle an explicit device stop. The default is identical to an ordinary
+  /// output command; protocols with waveform conditioning can override it to
+  /// guarantee that safety stops are never filtered or delayed.
+  fn handle_stop_output_cmd(
+    &self,
+    cmd: &CheckedOutputCmdV4,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.handle_output_cmd(cmd)
+  }
+
   fn handle_output_vibrate_cmd(
     &self,
     _feature_index: u32,

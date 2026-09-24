@@ -210,6 +210,7 @@ pub async fn run_test_case(
     .expect("Scanning should work.");
 
   if let Some(device_init) = &test_case.device_init {
+    let init_timeout = Duration::from_millis(test_case.device_init_timeout_ms.unwrap_or(500));
     // Parse send message into client calls, receives into response checks
     for command in filter_commands(device_init, 3) {
       match command {
@@ -226,7 +227,7 @@ pub async fn run_test_case(
           let device_receiver = &mut device_channels[*device_index as usize].receiver;
           for command in commands {
             tokio::select! {
-              _ = tokio::time::sleep(Duration::from_millis(500)) => {
+              _ = tokio::time::sleep(init_timeout) => {
                 panic!("Timeout while waiting for device output!")
               }
               event = device_receiver.recv() => {
