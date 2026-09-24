@@ -84,10 +84,14 @@ pub struct DeviceTaskConfig {
 /// Run the device communication task under its device owner's task group.
 pub async fn run_owned_device_task(
   hardware: Arc<Hardware>,
-  _handler: Arc<dyn ProtocolHandler>,
+  handler: Arc<dyn ProtocolHandler>,
   config: DeviceTaskConfig,
   mut command_receiver: Receiver<DeviceTaskMessage>,
 ) {
+  if handler.use_latest_output_scheduler() && !config.requires_keepalive {
+    super::latest_device_task::run_latest_device_task(hardware, config, command_receiver).await;
+    return;
+  }
   run_device_task(hardware, config, &mut command_receiver).await;
 }
 

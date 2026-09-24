@@ -309,20 +309,14 @@ impl DeviceHandle {
 
   // --- Private command handling methods ---
 
-  /// Run an output command through last-command deduplication and observation
-  /// emission, returning the protocol handler's hardware commands. Returns None
-  /// when the command equals the feature's last command and generates no work.
-  /// Shared by the normal output path and the stop path so both keep identical
-  /// dedupe-map and observation behaviour.
-  fn output_cmd_hardware_commands(
-    &self,
-    msg: &CheckedOutputCmdV4,
-  ) -> Option<Result<Vec<HardwareCommand>, ButtplugError>> {
+  /// Record an accepted output command and emit its observation. Returns false
+  /// when the command is identical to the feature's last command.
+  fn record_output_cmd(&self, msg: &CheckedOutputCmdV4) -> bool {
     if let Some(last_msg) = self.last_output_command.get(&msg.feature_id())
       && *last_msg == *msg
     {
       trace!("No commands generated for incoming device packet, skipping and returning success.");
-      return None;
+      return false;
     }
     self
       .last_output_command
@@ -339,14 +333,35 @@ impl DeviceHandle {
       });
     }
 
-    Some(self.handler.handle_output_cmd(msg).map_err(|e| e.into()))
+    true
   }
 
   fn handle_outputcmd_v4(&self, msg: &CheckedOutputCmdV4) -> ButtplugServerResultFuture {
-    match self.output_cmd_hardware_commands(msg) {
-      None => future::ready(Ok(message::OkV0::default().into())).boxed(),
-      Some(Ok(commands)) => self.handle_hardware_commands(commands),
-      Some(Err(err)) => future::ready(Err(err)).boxed(),
+    if !self.record_output_cmd(msg) {
+      return future::ready(Ok(message::OkV0::default().into())).boxed();
+    }
+
+    match self.handler.handle_output_cmd(msg) {
+      Ok(commands)
+        if self.handler.use_latest_output_scheduler()
+          && msg.output_command().value() == 0
+          && !matches!(
+            msg.output_command(),
+            message::OutputCommand::HwPositionWithDuration(_) | message::OutputCommand::Position(_)
+          ) =>
+      {
+        let sender = self.internal_hw_msg_sender.clone();
+        async move {
+          // Slider zero is an urgent barrier, not another replaceable sample.
+          let (message, ack) = DeviceTaskMessage::acknowledged(commands);
+          drop(ack);
+          let _ = sender.send(message).await;
+          Ok(message::OkV0::default().into())
+        }
+        .boxed()
+      }
+      Ok(commands) => self.handle_hardware_commands(commands),
+      Err(err) => future::ready(Err(err.into())).boxed(),
     }
   }
 
@@ -370,10 +385,28 @@ impl DeviceHandle {
     let mut hardware_commands: Vec<HardwareCommand> = Vec::new();
     if msg.outputs() {
       for stop_msg in self.stop_commands.iter() {
-        if let ButtplugDeviceCommandMessageUnionV4::OutputCmd(checked) = stop_msg
-          && let Some(Ok(cmds)) = self.output_cmd_hardware_commands(checked)
-        {
-          hardware_commands.extend(cmds);
+        if let ButtplugDeviceCommandMessageUnionV4::OutputCmd(checked) = stop_msg {
+          // Only opted-in state protocols force every explicit stop through deduplication.
+          if self.handler.use_latest_output_scheduler() {
+            // The source value may already have been recorded as zero while its
+            // hardware write is still pending. Force this one safety stop now.
+            self
+              .last_output_command
+              .insert(checked.feature_id(), checked.clone());
+            if let Some(sender) = &self.output_observation_sender {
+              let _ = sender.send(OutputObservation {
+                device_index: self.definition.index(),
+                feature_index: checked.feature_index(),
+                output_type: checked.output_command().as_output_type().to_string(),
+                value: checked.output_command().value() as f64,
+              });
+            }
+          } else if !self.record_output_cmd(checked) {
+            continue;
+          }
+          if let Ok(cmds) = self.handler.handle_stop_output_cmd(checked) {
+            hardware_commands.extend(cmds);
+          }
         }
       }
     }
