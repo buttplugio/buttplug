@@ -30,7 +30,7 @@ use std::{
     atomic::{AtomicU8, Ordering},
   },
 };
-use tokio::sync::broadcast;
+use tokio::sync::broadcast::{self, error::RecvError};
 use uuid::Uuid;
 
 generic_protocol_setup!(KGoalBoost, "kgoal-boost");
@@ -92,7 +92,15 @@ impl ProtocolHandler for KGoalBoost {
         // If we subscribe successfully, we need to set up our event handler.
         buttplug_core::spawn!("Kgoal subscription event handler", async move {
           let mut cached_values = vec![0u32, 0u32];
-          while let Ok(info) = hardware_stream.recv().await {
+          loop {
+            let info = match hardware_stream.recv().await {
+              Ok(info) => info,
+              Err(RecvError::Lagged(n)) => {
+                warn!("Kgoal subscription lagged, dropped {} messages", n);
+                continue;
+              }
+              Err(RecvError::Closed) => break,
+            };
             let subscribed_sensors = stream_sensors.load(Ordering::Relaxed);
             // If we have no receivers, quit.
             if sender.receiver_count() == 0 || subscribed_sensors == 0 {

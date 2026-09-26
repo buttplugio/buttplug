@@ -274,26 +274,24 @@ impl IntifaceEngine {
         let config_path = config_path.to_owned();
         tokio::spawn(async move {
           pin_mut!(stream);
-          loop {
-            if let Some(event) = stream.next().await {
-              match event {
-                ButtplugRemoteServerEvent::DeviceAdded {
-                  index: _,
-                  identifier: _,
-                  name: _,
-                  display_name: _,
-                  needs_keepalive: _,
-                } => {
-                  if let Ok(config_str) = save_user_config(&dcm) {
-                    // Should probably at least log if we fail to write the config file
-                    if let Err(e) = fs::write(&Path::new(&config_path), config_str).await {
-                      error!("Error saving config file: {:?}", e);
-                    }
+          while let Some(event) = stream.next().await {
+            match event {
+              ButtplugRemoteServerEvent::DeviceAdded {
+                index: _,
+                identifier: _,
+                name: _,
+                display_name: _,
+                needs_keepalive: _,
+              } => match save_user_config(&dcm) {
+                Ok(config_str) => {
+                  if let Err(e) = fs::write(&Path::new(&config_path), config_str).await {
+                    error!("Error saving config file: {:?}", e);
                   }
                 }
-                _ => continue,
-              }
-            };
+                Err(e) => error!("Error serializing user config: {:?}", e),
+              },
+              _ => continue,
+            }
           }
         });
       }
