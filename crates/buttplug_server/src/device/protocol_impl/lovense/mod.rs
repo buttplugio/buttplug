@@ -343,7 +343,6 @@ pub(super) fn form_vibrate_command(
 // two seperate outputs, otherwise we'll stomp on ourselves. Luckily Lovense devices currently only
 // have one rotation mechanism.
 const LOVENSE_ROTATE_UUID: Uuid = uuid!("4a741489-922f-4f0b-a594-175b75482849");
-const LOVENSE_ROTATE_DIRECTION_UUID: Uuid = uuid!("4ad23456-2ba8-4916-bd91-9b603811f253");
 
 pub(super) fn form_rotate_with_direction_command(
   speed: u32,
@@ -351,9 +350,10 @@ pub(super) fn form_rotate_with_direction_command(
 ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
   let mut hardware_cmds = vec![];
   if change_direction {
+    // RotateChange; is a toggle, so a unique id keeps device task batching from deduping it.
     hardware_cmds.push(
       HardwareWriteCmd::new(
-        &[LOVENSE_ROTATE_DIRECTION_UUID],
+        &[Uuid::new_v4()],
         Endpoint::Tx,
         b"RotateChange;".to_vec(),
         false,
