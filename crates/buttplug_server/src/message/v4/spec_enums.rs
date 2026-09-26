@@ -104,18 +104,38 @@ impl TryFromClientMessage<ButtplugClientMessageV4> for ButtplugCheckedClientMess
         Ok(ButtplugCheckedClientMessageV4::RequestDeviceList(m))
       }
       // Messages that need device index checking
-      ButtplugClientMessageV4::StopCmd(m) => {
-        if m
-          .device_index()
-          .is_none_or(|x| feature_map.get(&x).is_some())
-        {
-          Ok(ButtplugCheckedClientMessageV4::StopCmd(m))
-        } else {
-          Err(ButtplugError::from(
-            ButtplugDeviceError::DeviceNotAvailable(m.device_index().map_or(u32::MAX, |x| x)),
-          ))
+      ButtplugClientMessageV4::StopCmd(m) => match m.device_index() {
+        Some(device_index) => {
+          if let Some(attrs) = feature_map.get(&device_index) {
+            if let Some(feature_index) = m.feature_index()
+              && !attrs.features().contains_key(&feature_index)
+            {
+              return Err(ButtplugError::from(
+                ButtplugDeviceError::DeviceFeatureIndexError(
+                  attrs.features().len() as u32,
+                  feature_index,
+                ),
+              ));
+            }
+            Ok(ButtplugCheckedClientMessageV4::StopCmd(m))
+          } else {
+            Err(ButtplugError::from(
+              ButtplugDeviceError::DeviceNotAvailable(device_index),
+            ))
+          }
         }
-      }
+        None => {
+          if m.feature_index().is_some() {
+            Err(ButtplugError::from(
+              ButtplugMessageError::InvalidMessageContents(
+                "StopCmd feature_index requires a device_index".to_owned(),
+              ),
+            ))
+          } else {
+            Ok(ButtplugCheckedClientMessageV4::StopCmd(m))
+          }
+        }
+      },
 
       // Message that need device index and feature checking
       ButtplugClientMessageV4::OutputCmd(m) => {

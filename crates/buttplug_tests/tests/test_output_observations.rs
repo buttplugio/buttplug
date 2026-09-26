@@ -7,22 +7,58 @@
 
 mod util;
 
-use buttplug_core::message::{
-  BUTTPLUG_CURRENT_API_MAJOR_VERSION,
-  BUTTPLUG_CURRENT_API_MINOR_VERSION,
-  ButtplugServerMessageV4,
-  OutputCmdV4,
-  OutputCommand,
-  OutputValue,
-  RequestServerInfoV4,
-  StartScanningV0,
-  StopCmdV4,
+use buttplug_core::{
+  errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+  message::{
+    BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+    BUTTPLUG_CURRENT_API_MINOR_VERSION,
+    ButtplugMessageSpecVersion,
+    ButtplugServerMessageV4,
+    OutputCmdV4,
+    OutputCommand,
+    OutputType,
+    OutputValue,
+    RequestServerInfoV4,
+    StartScanningV0,
+    StopCmdV4,
+  },
 };
-use buttplug_server::message::ButtplugClientMessageVariant;
-use futures::{StreamExt, pin_mut};
-use std::time::Duration;
+use buttplug_server::message::{
+  ButtplugClientMessageVariant,
+  ButtplugServerMessageV3,
+  ButtplugServerMessageVariant,
+  RequestServerInfoV1,
+  ScalarCmdV3,
+  ScalarSubcommandV3,
+  StopDeviceCmdV0,
+  spec_enums::ButtplugCheckedClientMessageV4,
+};
+use futures::{FutureExt, Stream, StreamExt, pin_mut};
+use std::{collections::BTreeSet, time::Duration};
 use tokio::time::timeout;
 use util::test_server_with_device_and_observations;
+
+/// Waits for `count` distinct device indexes, failing instead of hanging on a stalled stream.
+async fn wait_for_device_indexes(
+  event_stream: &mut (impl Stream<Item = ButtplugServerMessageV4> + Unpin),
+  count: usize,
+) -> Vec<u32> {
+  timeout(Duration::from_secs(5), async {
+    let mut indexes = BTreeSet::new();
+    while indexes.len() < count {
+      match event_stream.next().await {
+        Some(ButtplugServerMessageV4::DeviceList(dl)) => {
+          indexes.extend(dl.devices().keys().copied());
+        }
+        Some(_) => {}
+        None => panic!("event stream ended while waiting for device list"),
+      }
+    }
+    indexes.into_iter().collect()
+  })
+  .await
+  .expect("timed out waiting for device list")
+}
 
 #[tokio::test]
 async fn test_ac2_1_observation_emission() {
@@ -519,6 +555,413 @@ async fn test_ac3_3_stop_dedup() {
     result.is_err(),
     "Expected timeout (no observation) for deduplicated stop command when device is already at zero"
   );
+}
+
+#[tokio::test]
+async fn test_stop_cmd_targets_single_device() {
+  let (server, _devices) =
+    util::test_servers_with_devices_and_observations(&["Massage Demo", "Massage Demo"]);
+
+  let obs_stream = server
+    .output_observation_stream()
+    .expect("should be Some when enabled");
+  pin_mut!(obs_stream);
+
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      RequestServerInfoV4::new(
+        "Test",
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION,
+      )
+      .into(),
+    ))
+    .await
+    .unwrap();
+
+  let event_stream = server.server_version_event_stream();
+  pin_mut!(event_stream);
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      StartScanningV0::default().into(),
+    ))
+    .await
+    .unwrap();
+
+  let mut device_indexes = wait_for_device_indexes(&mut event_stream, 2)
+    .await
+    .into_iter();
+  let device_a_index = device_indexes.next().unwrap();
+  let device_b_index = device_indexes.next().unwrap();
+
+  // Vibrate both devices
+  for index in [device_a_index, device_b_index] {
+    server
+      .parse_message(ButtplugClientMessageVariant::V4(
+        OutputCmdV4::new(index, 0, OutputCommand::Vibrate(OutputValue::new(50))).into(),
+      ))
+      .await
+      .unwrap();
+    if let Ok(Some(obs)) = timeout(Duration::from_millis(500), obs_stream.next()).await {
+      assert_eq!(obs.value, 50.0);
+    } else {
+      panic!("Expected vibrate observation for device {index}");
+    }
+  }
+
+  // Stop only device_b
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      StopCmdV4::new(Some(device_b_index), None, false, true).into(),
+    ))
+    .await
+    .unwrap();
+
+  // Stop observations are buffered before parse_message resolves, so now_or_never is deterministic.
+  let mut saw_device_b_observation = false;
+  while let Some(Some(obs)) = obs_stream.next().now_or_never() {
+    assert_eq!(
+      obs.device_index, device_b_index,
+      "stop leaked to a device that was not targeted"
+    );
+    assert_eq!(obs.value, 0.0);
+    saw_device_b_observation = true;
+  }
+  assert!(
+    saw_device_b_observation,
+    "Expected at least one zero-value observation for the stopped device"
+  );
+}
+
+#[tokio::test]
+async fn test_stop_cmd_unknown_device_returns_error() {
+  // v4 validation rejects unknown indexes up front, so only the legacy path reaches stop_devices.
+  let (server, _device) = util::test_server_with_device_and_observations("Massage Demo");
+
+  server
+    .parse_message(ButtplugClientMessageVariant::V3(
+      RequestServerInfoV1::new("Test", ButtplugMessageSpecVersion::Version3).into(),
+    ))
+    .await
+    .unwrap();
+
+  let err = server
+    .parse_message(ButtplugClientMessageVariant::V3(
+      StopDeviceCmdV0::new(999).into(),
+    ))
+    .await
+    .unwrap_err();
+
+  if let ButtplugServerMessageVariant::V3(ButtplugServerMessageV3::Error(e)) = err {
+    assert!(matches!(
+      e.original_error(),
+      ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceNotAvailable(999))
+    ));
+  } else {
+    panic!("Expected a V3 error message, got {err:?}");
+  }
+}
+
+#[tokio::test]
+async fn test_legacy_stop_device_cmd_targets_single_device() {
+  let (server, _devices) =
+    util::test_servers_with_devices_and_observations(&["Massage Demo", "Massage Demo"]);
+
+  let obs_stream = server
+    .output_observation_stream()
+    .expect("should be Some when enabled");
+  pin_mut!(obs_stream);
+
+  server
+    .parse_message(ButtplugClientMessageVariant::V3(
+      RequestServerInfoV1::new("Test", ButtplugMessageSpecVersion::Version3).into(),
+    ))
+    .await
+    .unwrap();
+
+  let event_stream = server.server_version_event_stream();
+  pin_mut!(event_stream);
+  server
+    .parse_message(ButtplugClientMessageVariant::V3(
+      StartScanningV0::default().into(),
+    ))
+    .await
+    .unwrap();
+
+  let mut device_indexes = wait_for_device_indexes(&mut event_stream, 2)
+    .await
+    .into_iter();
+  let device_a_index = device_indexes.next().unwrap();
+  let device_b_index = device_indexes.next().unwrap();
+
+  for index in [device_a_index, device_b_index] {
+    server
+      .parse_message(ButtplugClientMessageVariant::V3(
+        ScalarCmdV3::new(
+          index,
+          vec![ScalarSubcommandV3::new(0, 0.5, OutputType::Vibrate)],
+        )
+        .into(),
+      ))
+      .await
+      .unwrap();
+    if let Ok(Some(obs)) = timeout(Duration::from_millis(500), obs_stream.next()).await {
+      assert!(obs.value > 0.0);
+    } else {
+      panic!("Expected vibrate observation for device {index}");
+    }
+  }
+
+  // Legacy v3 StopDeviceCmd targeting only device_b.
+  server
+    .parse_message(ButtplugClientMessageVariant::V3(
+      StopDeviceCmdV0::new(device_b_index).into(),
+    ))
+    .await
+    .unwrap();
+
+  let mut saw_device_b_observation = false;
+  while let Some(Some(obs)) = obs_stream.next().now_or_never() {
+    assert_eq!(
+      obs.device_index, device_b_index,
+      "legacy StopDeviceCmd leaked to a device that was not targeted"
+    );
+    assert_eq!(obs.value, 0.0);
+    saw_device_b_observation = true;
+  }
+  assert!(
+    saw_device_b_observation,
+    "Expected at least one zero-value observation for the stopped device"
+  );
+}
+
+#[tokio::test]
+async fn test_stop_cmd_feature_scoped() {
+  let (server, _device) = util::test_server_with_device_and_observations("Massage Demo");
+
+  let obs_stream = server
+    .output_observation_stream()
+    .expect("should be Some when enabled");
+  pin_mut!(obs_stream);
+
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      RequestServerInfoV4::new(
+        "Test",
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION,
+      )
+      .into(),
+    ))
+    .await
+    .unwrap();
+
+  let event_stream = server.server_version_event_stream();
+  pin_mut!(event_stream);
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      StartScanningV0::default().into(),
+    ))
+    .await
+    .unwrap();
+
+  let device_index = wait_for_device_indexes(&mut event_stream, 1).await[0];
+
+  // Massage Demo (Aneros protocol) has two vibrate features, index 0 and 1.
+  for feature_index in [0u32, 1u32] {
+    server
+      .parse_message(ButtplugClientMessageVariant::V4(
+        OutputCmdV4::new(
+          device_index,
+          feature_index,
+          OutputCommand::Vibrate(OutputValue::new(50)),
+        )
+        .into(),
+      ))
+      .await
+      .unwrap();
+    if let Ok(Some(obs)) = timeout(Duration::from_millis(500), obs_stream.next()).await {
+      assert_eq!(obs.feature_index, feature_index);
+      assert_eq!(obs.value, 50.0);
+    } else {
+      panic!("Expected vibrate observation for feature {feature_index}");
+    }
+  }
+
+  // Stop only feature 0
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      StopCmdV4::new(Some(device_index), Some(0), false, true).into(),
+    ))
+    .await
+    .unwrap();
+
+  if let Ok(Some(obs)) = timeout(Duration::from_millis(500), obs_stream.next()).await {
+    assert_eq!(obs.feature_index, 0);
+    assert_eq!(obs.value, 0.0);
+  } else {
+    panic!("Expected zero-value observation for stopped feature");
+  }
+
+  // Feature 1 should still be running.
+  assert!(
+    obs_stream.next().now_or_never().is_none(),
+    "Expected no observation for feature 1, but feature-scoped stop leaked to it"
+  );
+}
+
+#[tokio::test]
+async fn test_stop_cmd_unknown_feature_returns_error() {
+  let (server, _device) = util::test_server_with_device_and_observations("Massage Demo");
+
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      RequestServerInfoV4::new(
+        "Test",
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION,
+      )
+      .into(),
+    ))
+    .await
+    .unwrap();
+
+  let event_stream = server.server_version_event_stream();
+  pin_mut!(event_stream);
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      StartScanningV0::default().into(),
+    ))
+    .await
+    .unwrap();
+
+  let device_index = wait_for_device_indexes(&mut event_stream, 1).await[0];
+
+  let err = server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      StopCmdV4::new(Some(device_index), Some(999), false, true).into(),
+    ))
+    .await
+    .unwrap_err();
+
+  if let ButtplugServerMessageVariant::V4(ButtplugServerMessageV4::Error(e)) = err {
+    assert!(matches!(
+      e.original_error(),
+      ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceFeatureIndexError(2, 999))
+    ));
+  } else {
+    panic!("Expected a V4 error message, got {err:?}");
+  }
+}
+
+#[tokio::test]
+async fn test_stop_cmd_feature_index_without_device_index_rejected() {
+  let (server, _device) = util::test_server_with_device_and_observations("Massage Demo");
+
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      RequestServerInfoV4::new(
+        "Test",
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION,
+      )
+      .into(),
+    ))
+    .await
+    .unwrap();
+
+  let err = server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      StopCmdV4::new(None, Some(0), false, true).into(),
+    ))
+    .await
+    .unwrap_err();
+
+  if let ButtplugServerMessageVariant::V4(ButtplugServerMessageV4::Error(e)) = err {
+    assert!(matches!(
+      e.original_error(),
+      ButtplugError::ButtplugMessageError(ButtplugMessageError::InvalidMessageContents(_))
+    ));
+  } else {
+    panic!("Expected a V4 error message, got {err:?}");
+  }
+}
+
+#[tokio::test]
+async fn test_parse_checked_message_bypasses_spec_enums_unknown_feature() {
+  // parse_checked_message skips spec_enums validation, so the device handle guard must catch this.
+  let (server, _device) = util::test_server_with_device_and_observations("Massage Demo");
+
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      RequestServerInfoV4::new(
+        "Test",
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION,
+      )
+      .into(),
+    ))
+    .await
+    .unwrap();
+
+  let event_stream = server.server_version_event_stream();
+  pin_mut!(event_stream);
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      StartScanningV0::default().into(),
+    ))
+    .await
+    .unwrap();
+
+  let device_index = wait_for_device_indexes(&mut event_stream, 1).await[0];
+
+  let err = server
+    .parse_checked_message(ButtplugCheckedClientMessageV4::StopCmd(StopCmdV4::new(
+      Some(device_index),
+      Some(999),
+      true,
+      true,
+    )))
+    .await
+    .unwrap_err();
+
+  assert!(matches!(
+    err.original_error(),
+    ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceFeatureIndexError(2, 999))
+  ));
+}
+
+#[tokio::test]
+async fn test_parse_checked_message_bypasses_spec_enums_feature_without_device() {
+  // parse_checked_message skips spec_enums validation, so stop_devices must reject this itself.
+  let (server, _device) = util::test_server_with_device_and_observations("Massage Demo");
+
+  server
+    .parse_message(ButtplugClientMessageVariant::V4(
+      RequestServerInfoV4::new(
+        "Test",
+        BUTTPLUG_CURRENT_API_MAJOR_VERSION,
+        BUTTPLUG_CURRENT_API_MINOR_VERSION,
+      )
+      .into(),
+    ))
+    .await
+    .unwrap();
+
+  let err = server
+    .parse_checked_message(ButtplugCheckedClientMessageV4::StopCmd(StopCmdV4::new(
+      None,
+      Some(0),
+      true,
+      true,
+    )))
+    .await
+    .unwrap_err();
+
+  assert!(matches!(
+    err.original_error(),
+    ButtplugError::ButtplugMessageError(ButtplugMessageError::InvalidMessageContents(_))
+  ));
 }
 
 #[tokio::test]

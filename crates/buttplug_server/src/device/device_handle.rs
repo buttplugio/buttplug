@@ -362,6 +362,15 @@ impl DeviceHandle {
   }
 
   fn handle_stop_device_cmd(&self, msg: &StopCmdV4) -> ButtplugServerResultFuture {
+    if let Some(feature_index) = msg.feature_index()
+      && !self.definition.features().contains_key(&feature_index)
+    {
+      return ButtplugDeviceError::DeviceFeatureIndexError(
+        self.definition.features().len() as u32,
+        feature_index,
+      )
+      .into();
+    }
     let sender = self.internal_hw_msg_sender.clone();
     // Accumulate every per-feature stop OutputCmd into a single
     // write-acknowledged batch so the stop resolves only once the write has
@@ -371,6 +380,9 @@ impl DeviceHandle {
     if msg.outputs() {
       for stop_msg in self.stop_commands.iter() {
         if let ButtplugDeviceCommandMessageUnionV4::OutputCmd(checked) = stop_msg
+          && msg
+            .feature_index()
+            .is_none_or(|i| i == checked.feature_index())
           && let Some(Ok(cmds)) = self.output_cmd_hardware_commands(checked)
         {
           hardware_commands.extend(cmds);
@@ -382,6 +394,7 @@ impl DeviceHandle {
         .definition
         .features()
         .iter()
+        .filter(|(i, _)| msg.feature_index().is_none_or(|idx| idx == **i))
         .flat_map(|(i, f)| {
           let i = *i;
           let feature_id = f.id();
