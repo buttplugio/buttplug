@@ -1,3 +1,9 @@
+# 5.0.4 (2026-09-27)
+
+## Bugfixes
+
+- Remove the unused, deprecated `tracing-fmt` dependency, which pulled in `tracing-subscriber` 0.1 and `owning_ref` (RUSTSEC-2022-0040, RUSTSEC-2025-0055).
+
 # 5.0.3 (2026-09-27)
 
 ## Bugfixes
