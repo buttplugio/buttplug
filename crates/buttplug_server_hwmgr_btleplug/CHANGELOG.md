@@ -1,3 +1,14 @@
+# 12.0.2 (2026-09-27)
+
+## Bugfixes
+
+- Update btleplug to 0.13.3
+  - Fix Android JNI adapter race causing SIGSEGV/SIGBUS crashes
+  - Fix Android connect failures (GATT 133), hung command queues on disconnect, and GATT read/write failures reported as success
+  - Fix CoreBluetooth hangs and panics during service discovery, concurrent connect/disconnect, and service invalidation
+  - Fix Windows deadlock on concurrent GATT operations, GATT failures after reconnect, and scanner crash on truncated service data
+  - Fix BlueZ `mtu()` panic on BlueZ older than 5.62 and unsubscribe errors on unsubscribed characteristics
+
 # 12.0.1 (2026-09-20)
 
 ## Bugfixes
