@@ -1,3 +1,9 @@
+# 11.0.2 (2026-09-27)
+
+## Bugfixes
+
+- Broadcast-backed event streams no longer end when a receiver lags; lagged messages are dropped with a warning and the stream only ends when the channel closes.
+
 # 11.0.1 (2026-09-18)
 
 ## Other

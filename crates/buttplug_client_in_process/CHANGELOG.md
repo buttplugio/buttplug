@@ -1,3 +1,9 @@
+# 12.0.3 (2026-09-27)
+
+## Bugfixes
+
+- Update buttplug_core, buttplug_server, buttplug_server_device_config, and buttplug_server_hwmgr_btleplug for StopCmd routing, Lovense rotation, event stream lag, and btleplug 0.13.3 fixes.
+
 # 12.0.2 (2026-09-20)
 
 ## Bugfixes

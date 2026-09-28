@@ -1,3 +1,9 @@
+# 12.0.1 (2026-09-27)
+
+## Bugfixes
+
+- Re-add the `xinput` protocol definition (device config v5.57) so gamepads keep working with clients that still expect it.
+
 # 12.0.0 (2026-09-18)
 
 ## Breaking Changes

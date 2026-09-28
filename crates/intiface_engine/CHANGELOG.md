@@ -1,3 +1,10 @@
+# 5.0.3 (2026-09-27)
+
+## Bugfixes
+
+- Fix the user config save loop busy-spinning once its event stream ends, and log config serialization errors.
+- Update buttplug dependencies for StopCmd routing, Lovense rotation, event stream lag, and btleplug 0.13.3 fixes.
+
 # 5.0.2 (2026-09-20)
 
 ## Bugfixes

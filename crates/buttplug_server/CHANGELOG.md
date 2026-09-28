@@ -1,3 +1,13 @@
+# 12.0.1 (2026-09-27)
+
+## Bugfixes
+
+- `StopCmd`/`StopDeviceCmd` with a device index now only stops that device (and only the given feature when a feature index is set), instead of stopping every device.
+- Fix legacy `LinearCmd` conversion sending every axis to feature 0 with the wrong message id.
+- Fix Lovense rotation direction toggling on every negative speed command; direction is now tracked per device for BLE and Lovense Connect.
+- Fix kGoal Boost sensor subscriptions ending when notifications arrive faster than they are consumed.
+- Update buttplug_core for event stream lag handling.
+
 # 12.0.0 (2026-09-18)
 
 ## Breaking Changes
