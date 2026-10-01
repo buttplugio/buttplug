@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Buttplug Device Configuration (v5)",
-  "description": "Base device configuration (`buttplug-device-config-v5.json`). It defines how hardware is matched to protocols and what each device can do. The library's built-in copy is compiled from `device-config/protocols/*.yml` and is used when no base config is supplied. Applications may supply a newer one; Intiface Central downloads it from intiface-engine-device-config.intiface.com. Keys not declared in this schema are ignored by the loader, which logs a warning for each so they can be found before a future version rejects them. The exceptions are `output` and `input` maps, where an unknown type is an error. Objects that set `additionalProperties: true` accept unknown keys on purpose, and those keys are not warned about.",
+  "title": "Buttplug User Device Configuration (v5)",
+  "description": "User device configuration (`buttplug-user-device-config-v5.json`). It holds per-device customizations, extra communication specifiers and simulated devices. intiface-engine rewrites it whenever a device connects (when given a user config path), and frontends such as Intiface Central rewrite it after settings changes. Keys not declared in this schema are ignored by the loader, which logs a warning for each so they can be found before a future version rejects them. The exceptions are `output` and `input` maps, where an unknown type is an error. Objects that set `additionalProperties: true` accept unknown keys on purpose, and those keys are not warned about.",
   "type": "object",
   "properties": {
     "$schema": {
@@ -11,13 +11,51 @@
     "version": {
       "$ref": "#/$defs/version"
     },
-    "protocols": {
+    "user_configs": {
       "anyOf": [
         {
-          "description": "Map of protocol name to definition. The name must match a protocol implementation in buttplug_server, or matching devices are ignored.",
           "type": "object",
-          "additionalProperties": {
-            "$ref": "#/$defs/protocol"
+          "properties": {
+            "protocols": {
+              "anyOf": [
+                {
+                  "description": "Map of protocol name to user additions. Only `communication` is written back on save.",
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/$defs/userProtocol"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "devices": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/userDevice"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "simulated_devices": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/simulatedDevice"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
           }
         },
         {
@@ -417,7 +455,7 @@
       ]
     },
     "configuration": {
-      "description": "Definition for a specific device model, selected by the identifier the protocol reports.",
+      "description": "User-defined device model. Unlike the base file, protocol `defaults` are NOT merged in, so this must be complete. Loaded on startup, but not written back on save: the first save removes it.",
       "type": "object",
       "properties": {
         "identifier": {
@@ -679,7 +717,7 @@
         "command"
       ]
     },
-    "protocol": {
+    "userProtocol": {
       "type": "object",
       "properties": {
         "communication": {
@@ -700,7 +738,8 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "Not used: the loader ignores this key. User files can't set protocol defaults. It must still be a valid definition, or the file fails to load."
         },
         "configurations": {
           "type": "array",
@@ -710,6 +749,299 @@
           "default": []
         }
       }
+    },
+    "userDeviceIdentifier": {
+      "description": "Identifies one physical device. `address` is platform-specific (for example, BLE addresses differ between OSes), so entries do not carry over between machines.",
+      "type": "object",
+      "properties": {
+        "protocol": {
+          "type": "string"
+        },
+        "identifier": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Protocol-reported identifier. `null` means the protocol defaults were used."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "address": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol",
+        "address"
+      ]
+    },
+    "u32RangeInclusive": {
+      "description": "Inclusive range `[start, end]` with `start <= end`, within `[0, base end]`. An invalid range drops the whole device entry on load.",
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/u32"
+        },
+        {
+          "$ref": "#/$defs/u32"
+        }
+      ],
+      "minItems": 2,
+      "maxItems": 2,
+      "items": false
+    },
+    "userValueOutput": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/u32RangeInclusive"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "User step limit. If omitted, the full base range is used."
+        },
+        "disabled": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "userPositionOutput": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/u32RangeInclusive"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "disabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "reverse": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "userHwPositionWithDurationOutput": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/u32RangeInclusive"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "duration": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/u32RangeInclusive"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "disabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "reverse": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "userFeature": {
+      "description": "Per-device overrides for one base feature. The index, description, input and settings always come from the base feature.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "base_id": {
+          "$ref": "#/$defs/uuid",
+          "description": "`id` of the base feature."
+        },
+        "output": {
+          "description": "Output overrides. Output types left out inherit the base output unchanged. Keys for output types the base feature doesn't have are ignored. A key that isn't an output type at all is a load error.",
+          "type": "object",
+          "properties": {
+            "vibrate": {
+              "$ref": "#/$defs/userValueOutput"
+            },
+            "rotate": {
+              "$ref": "#/$defs/userValueOutput"
+            },
+            "oscillate": {
+              "$ref": "#/$defs/userValueOutput"
+            },
+            "constrict": {
+              "$ref": "#/$defs/userValueOutput"
+            },
+            "temperature": {
+              "$ref": "#/$defs/userValueOutput"
+            },
+            "led": {
+              "$ref": "#/$defs/userValueOutput"
+            },
+            "spray": {
+              "$ref": "#/$defs/userValueOutput"
+            },
+            "position": {
+              "$ref": "#/$defs/userPositionOutput"
+            },
+            "hw_position_with_duration": {
+              "$ref": "#/$defs/userHwPositionWithDurationOutput"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "base_id"
+      ]
+    },
+    "userCustomization": {
+      "type": "object",
+      "properties": {
+        "display_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "allow": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow list. If any device is allowed, only allowed addresses can connect. Matching is by address only."
+        },
+        "deny": {
+          "type": "boolean",
+          "default": false,
+          "description": "Deny list. Denied addresses never connect; this is checked before `allow`."
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295,
+          "description": "Stable device index. New devices get the lowest unused index."
+        },
+        "message_gap_ms": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295,
+              "description": "Overrides the base value. It REPLACES rather than inherits: if omitted, the device has no message gap. It is set from the base value when the device is first seen."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "index"
+      ]
+    },
+    "userDevice": {
+      "type": "object",
+      "properties": {
+        "identifier": {
+          "$ref": "#/$defs/userDeviceIdentifier"
+        },
+        "config": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Not used: the loader ignores this key. Listed in older schemas. The name comes from the base definition."
+            },
+            "id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "base_id": {
+              "$ref": "#/$defs/uuid",
+              "description": "`id` of a base definition (`defaults` or `configurations`), or of a configuration in this file. If none matches, the entry is dropped."
+            },
+            "features": {
+              "description": "Must contain one entry per base feature. On a count mismatch or an unknown `base_id`, the entry is silently dropped.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/userFeature"
+              }
+            },
+            "user_config": {
+              "$ref": "#/$defs/userCustomization"
+            }
+          },
+          "required": [
+            "id",
+            "base_id",
+            "features",
+            "user_config"
+          ]
+        }
+      },
+      "required": [
+        "identifier",
+        "config"
+      ]
+    },
+    "simulatedDevice": {
+      "type": "object",
+      "properties": {
+        "identifier": {
+          "type": "string",
+          "description": "Archetype name. It must be listed in the base config's `simulated` protocol `communication[].simulated.names`, or the whole file is rejected. This can't be checked here because the base file can change; the examples are the archetypes in `device-config/protocols/simulated.yml`.",
+          "examples": [
+            "simulated-1vibe",
+            "simulated-2vibe",
+            "simulated-oscillator",
+            "simulated-rotator",
+            "simulated-stroker"
+          ]
+        },
+        "display_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "address": {
+          "type": "string",
+          "description": "Unique address. If omitted, `simulated:<uuid v4>` is generated. A duplicate rejects the whole file."
+        }
+      },
+      "required": [
+        "identifier"
+      ]
     }
   }
 }

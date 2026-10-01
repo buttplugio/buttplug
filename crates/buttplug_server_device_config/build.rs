@@ -35,6 +35,7 @@ struct JsonOutputFile {
 
 fn main() {
   println!("cargo:rerun-if-changed={}", PROTOCOL_DIR);
+  println!("cargo:rerun-if-changed={}", SCHEMA_FILE);
 
   // Open version file
   let mut version: VersionFile =
