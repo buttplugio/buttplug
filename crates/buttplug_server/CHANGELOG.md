@@ -1,3 +1,9 @@
+# 12.0.2 (2026-10-03)
+
+## Bugfixes
+
+- Fix OSSM switching out of its current mode when sent a stop (zero value) command (#961).
+
 # 12.0.1 (2026-09-27)
 
 ## Bugfixes

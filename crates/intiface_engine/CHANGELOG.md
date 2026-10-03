@@ -1,3 +1,9 @@
+# 5.0.5 (2026-10-03)
+
+## Bugfixes
+
+- Update buttplug dependencies for the OSSM stop command mode switch fix (#961) and btleplug 0.13.4, fixing missed device discovery on some Windows Bluetooth adapters.
+
 # 5.0.4 (2026-09-27)
 
 ## Bugfixes
