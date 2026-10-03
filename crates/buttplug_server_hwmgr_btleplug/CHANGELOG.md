@@ -1,3 +1,10 @@
+# 12.0.3 (2026-10-03)
+
+## Bugfixes
+
+- Update btleplug to 0.13.4
+  - Stop requesting Coded PHY scanning by default on Windows, which caused some adapters to drop most 1M PHY advertisements and miss nearby devices
+
 # 12.0.2 (2026-09-27)
 
 ## Bugfixes
