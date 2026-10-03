@@ -37,13 +37,28 @@ use buttplug_core::{
 };
 use dashmap::DashMap;
 use getset::CopyGetters;
+use jsonschema::{ValidationError, error::ValidationErrorKind};
 use serde::{Deserialize, Serialize};
-use std::{fmt::Display, sync::Arc};
+use serde_json::Value;
+use std::{collections::BTreeSet, fmt::Display, sync::Arc};
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../build-config/buttplug-device-config-v5.json");
-static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
-  include_str!("../../device-config/buttplug-device-config-schema-v5.json");
+
+/// JSON schema for a configuration file, with a name to use in log messages.
+struct ConfigSchema {
+  name: &'static str,
+  schema: &'static str,
+}
+
+static DEVICE_CONFIGURATION_JSON_SCHEMA: ConfigSchema = ConfigSchema {
+  name: "base device configuration",
+  schema: include_str!("../../device-config/buttplug-device-config-schema-v5.json"),
+};
+static USER_DEVICE_CONFIGURATION_JSON_SCHEMA: ConfigSchema = ConfigSchema {
+  name: "user device configuration",
+  schema: include_str!("../../device-config/buttplug-user-device-config-schema-v5.json"),
+};
 
 #[derive(Deserialize, Serialize, Debug, CopyGetters, Clone, Copy)]
 #[getset(get_copy = "pub", get_mut = "pub")]
@@ -68,14 +83,84 @@ fn get_internal_config_version() -> ConfigVersion {
   config.version()
 }
 
+/// Returns a copy of `schema` where every object schema that lists `properties` but doesn't set
+/// `additionalProperties` rejects keys it doesn't list. Object schemas that set
+/// `additionalProperties`, including `true` for intentionally open objects, are left as is.
+fn strict_schema(schema: &Value) -> Value {
+  match schema {
+    Value::Object(object) => {
+      let mut strict: serde_json::Map<String, Value> = object
+        .iter()
+        .map(|(key, value)| (key.clone(), strict_schema(value)))
+        .collect();
+      if strict.contains_key("properties") && !strict.contains_key("additionalProperties") {
+        strict.insert("additionalProperties".to_owned(), Value::Bool(false));
+      }
+      Value::Object(strict)
+    }
+    Value::Array(items) => Value::Array(items.iter().map(strict_schema).collect()),
+    other => other.clone(),
+  }
+}
+
+/// Collects the JSON pointers of keys rejected by `additionalProperties`, including those found
+/// while trying `anyOf`/`oneOf` branches.
+fn collect_undocumented_keys(error: &ValidationError, keys: &mut BTreeSet<String>) {
+  match error.kind() {
+    ValidationErrorKind::AdditionalProperties { unexpected } => {
+      for key in unexpected {
+        keys.insert(format!(
+          "{}/{}",
+          error.instance_path().as_str(),
+          key.replace('~', "~0").replace('/', "~1")
+        ));
+      }
+    }
+    ValidationErrorKind::AnyOf { context }
+    | ValidationErrorKind::OneOfNotValid { context }
+    | ValidationErrorKind::OneOfMultipleValid { context } => {
+      for branch_error in context.iter().flatten() {
+        collect_undocumented_keys(branch_error, keys);
+      }
+    }
+    _ => {}
+  }
+}
+
+/// Returns the JSON pointers of keys in `config_str` that `schema` doesn't declare. The schemas
+/// accept these keys and the loader ignores them, but a future, stricter schema may reject them.
+fn undocumented_keys(schema: &str, config_str: &str) -> BTreeSet<String> {
+  let mut keys = BTreeSet::new();
+  // Unparseable configs are reported by the regular validation that follows.
+  let (Ok(schema), Ok(config)) = (
+    serde_json::from_str::<Value>(schema),
+    serde_json::from_str::<Value>(config_str),
+  ) else {
+    return keys;
+  };
+  let validator = jsonschema::validator_for(&strict_schema(&schema))
+    .expect("schema must be valid JSON Schema (validated by build.rs)");
+  for error in validator.iter_errors(&config) {
+    collect_undocumented_keys(&error, &mut keys);
+  }
+  keys
+}
+
 fn load_protocol_config_from_json<'a, T>(
   config_str: &'a str,
+  schema: &ConfigSchema,
   skip_version_check: bool,
 ) -> Result<T, ButtplugDeviceError>
 where
   T: ConfigVersionGetter + Deserialize<'a>,
 {
-  let config_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
+  for key in undocumented_keys(schema.schema, config_str) {
+    warn!(
+      "Ignoring undocumented key '{}' in {}. Future versions may reject it.",
+      key, schema.name
+    );
+  }
+  let config_validator = JSONValidator::new(schema.schema);
   match config_validator.validate(config_str) {
     Ok(_) => match serde_json::from_str::<T>(config_str) {
       Ok(protocol_config) => {
@@ -114,6 +199,7 @@ fn load_main_config(
     main_config_str
       .as_ref()
       .unwrap_or(&DEVICE_CONFIGURATION_JSON.to_owned()),
+    &DEVICE_CONFIGURATION_JSON_SCHEMA,
     skip_version_check,
   )?;
 
@@ -156,8 +242,11 @@ fn load_user_config(
   dcm_builder: &mut DeviceConfigurationManagerBuilder,
 ) -> Result<(), ButtplugDeviceError> {
   info!("Loading user configuration from string.");
-  let user_config_file =
-    load_protocol_config_from_json::<UserConfigFile>(user_config_str, skip_version_check)?;
+  let user_config_file = load_protocol_config_from_json::<UserConfigFile>(
+    user_config_str,
+    &USER_DEVICE_CONFIGURATION_JSON_SCHEMA,
+    skip_version_check,
+  )?;
 
   if user_config_file.user_configs().is_none() {
     info!("No user configurations provided in user config.");
@@ -293,14 +382,47 @@ pub fn save_user_config(dcm: &DeviceConfigurationManager) -> Result<String, Butt
 
 #[cfg(test)]
 mod test {
-  use crate::device_config_file::load_main_config;
+  use crate::{
+    ProtocolCommunicationSpecifier,
+    SimulatedDeviceConfigEntry,
+    UserDeviceIdentifier,
+    WebsocketSpecifier,
+    device_config_file::{load_main_config, load_protocol_configs, save_user_config},
+  };
 
-  use super::{DEVICE_CONFIGURATION_JSON, base::BaseConfigFile, load_protocol_config_from_json};
+  use super::{
+    DEVICE_CONFIGURATION_JSON,
+    DEVICE_CONFIGURATION_JSON_SCHEMA,
+    USER_DEVICE_CONFIGURATION_JSON_SCHEMA,
+    base::BaseConfigFile,
+    load_protocol_config_from_json,
+    strict_schema,
+    undocumented_keys,
+  };
   use serde_json::json;
+  use std::collections::BTreeSet;
+
+  fn undocumented_base_keys(config: &serde_json::Value) -> BTreeSet<String> {
+    undocumented_keys(DEVICE_CONFIGURATION_JSON_SCHEMA.schema, &config.to_string())
+  }
+
+  fn user_config_with_schema_key(schema_key: serde_json::Value) -> String {
+    json!({
+      "$schema": schema_key,
+      "version": { "major": 5, "minor": 0 },
+      "user_configs": {}
+    })
+    .to_string()
+  }
 
   #[test]
   fn test_config_file_parsing() {
-    load_protocol_config_from_json::<BaseConfigFile>(DEVICE_CONFIGURATION_JSON, true).unwrap();
+    load_protocol_config_from_json::<BaseConfigFile>(
+      DEVICE_CONFIGURATION_JSON,
+      &DEVICE_CONFIGURATION_JSON_SCHEMA,
+      true,
+    )
+    .unwrap();
   }
 
   #[test]
@@ -321,6 +443,161 @@ mod test {
       ]
     });
 
-    load_protocol_config_from_json::<BaseConfigFile>(&config.to_string(), true).unwrap();
+    load_protocol_config_from_json::<BaseConfigFile>(
+      &config.to_string(),
+      &DEVICE_CONFIGURATION_JSON_SCHEMA,
+      true,
+    )
+    .unwrap();
+  }
+
+  #[test]
+  fn test_base_config_accepts_schema_key() {
+    let mut config: serde_json::Value = serde_json::from_str(DEVICE_CONFIGURATION_JSON).unwrap();
+    config["$schema"] = json!("./buttplug-device-config-schema-v5.json");
+    load_main_config(&Some(config.to_string()), false).unwrap();
+  }
+
+  #[test]
+  fn test_base_config_is_validated_against_base_schema() {
+    // serde ignores `$schema`, so only schema validation can reject a non-string value.
+    let mut config: serde_json::Value = serde_json::from_str(DEVICE_CONFIGURATION_JSON).unwrap();
+    config["$schema"] = json!(5);
+    assert!(load_main_config(&Some(config.to_string()), false).is_err());
+  }
+
+  #[test]
+  fn test_user_config_accepts_schema_key() {
+    let user_config =
+      user_config_with_schema_key(json!("./buttplug-user-device-config-schema-v5.json"));
+    load_protocol_configs(&None, &Some(user_config), false)
+      .unwrap()
+      .finish()
+      .unwrap();
+  }
+
+  #[test]
+  fn test_user_config_is_validated_against_user_schema() {
+    // serde ignores `$schema`, so only schema validation can reject a non-string value.
+    let user_config = user_config_with_schema_key(json!(5));
+    assert!(load_protocol_configs(&None, &Some(user_config), false).is_err());
+  }
+
+  #[test]
+  fn test_strict_schema_closes_only_unset_objects() {
+    let schema = json!({
+      "type": "object",
+      "properties": { "closed": { "type": "object", "properties": {} } },
+      "$defs": {
+        "open": { "type": "object", "properties": {}, "additionalProperties": true },
+        "map": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    });
+    let strict = strict_schema(&schema);
+    assert_eq!(strict["additionalProperties"], json!(false));
+    assert_eq!(
+      strict["properties"]["closed"]["additionalProperties"],
+      json!(false)
+    );
+    assert_eq!(strict["$defs"]["open"]["additionalProperties"], json!(true));
+    assert_eq!(
+      strict["$defs"]["map"]["additionalProperties"],
+      json!({ "type": "string" })
+    );
+  }
+
+  #[test]
+  fn test_internal_config_has_no_undocumented_keys() {
+    let config: serde_json::Value = serde_json::from_str(DEVICE_CONFIGURATION_JSON).unwrap();
+    assert_eq!(undocumented_base_keys(&config), BTreeSet::new());
+  }
+
+  #[test]
+  fn test_undocumented_keys_are_found() {
+    let mut config: serde_json::Value = serde_json::from_str(DEVICE_CONFIGURATION_JSON).unwrap();
+    config["top_level"] = json!(1);
+    config["protocols"]["lovense"]["defaults"]["features"][0]["output"]["vibrate"]["a/b"] =
+      json!(1);
+    config["protocols"]["lovense"]["communication"][0]["btle"]["extra"] = json!(1);
+    assert_eq!(
+      undocumented_base_keys(&config),
+      BTreeSet::from([
+        "/protocols/lovense/communication/0/btle/extra".to_owned(),
+        "/protocols/lovense/defaults/features/0/output/vibrate/a~1b".to_owned(),
+        "/top_level".to_owned(),
+      ])
+    );
+    // Undocumented keys are only reported, the config still loads.
+    load_main_config(&Some(config.to_string()), false).unwrap();
+  }
+
+  #[test]
+  fn test_documented_keys_are_not_reported() {
+    let mut config: serde_json::Value = serde_json::from_str(DEVICE_CONFIGURATION_JSON).unwrap();
+    // Declared in the schema, but unused by the loader.
+    config["$schema"] = json!("./buttplug-device-config-schema-v5.json");
+    config["protocols"]["lovense"]["defaults"]["features"][0]["output"]["vibrate"]["description"] =
+      json!("unused");
+    // Unknown connector types are open on purpose, and warned about separately.
+    config["protocols"]["lovense"]["communication"]
+      .as_array_mut()
+      .unwrap()
+      .push(json!({ "future_connector": { "some": "value" } }));
+    assert_eq!(undocumented_base_keys(&config), BTreeSet::new());
+  }
+
+  #[test]
+  fn test_undocumented_user_config_keys_are_found() {
+    let user_config = json!({
+      "version": { "major": 5, "minor": 0 },
+      "user_configs": {
+        "simulated_devices": [{ "identifier": "simulated-1vibe", "extra": 1 }]
+      }
+    });
+    assert_eq!(
+      undocumented_keys(
+        USER_DEVICE_CONFIGURATION_JSON_SCHEMA.schema,
+        &user_config.to_string()
+      ),
+      BTreeSet::from(["/user_configs/simulated_devices/0/extra".to_owned()])
+    );
+  }
+
+  #[test]
+  fn test_saved_user_config_reloads() {
+    let dcm = load_protocol_configs(&None, &None, false)
+      .unwrap()
+      .finish()
+      .unwrap();
+    let simulated =
+      SimulatedDeviceConfigEntry::new("simulated-stroker", Some("Stroker".to_owned()));
+    let identifier = UserDeviceIdentifier::new(
+      simulated.address(),
+      "simulated",
+      &Some(simulated.identifier().clone()),
+    );
+    dcm.add_simulated_device(simulated).unwrap();
+    dcm
+      .add_user_communication_specifier(
+        "lovense",
+        &ProtocolCommunicationSpecifier::Websocket(WebsocketSpecifier::new("LVSDevice")),
+      )
+      .unwrap();
+    dcm
+      .device_definition(&identifier)
+      .expect("Simulated stroker should resolve a definition");
+
+    let saved = save_user_config(&dcm).unwrap();
+    assert_eq!(
+      undocumented_keys(USER_DEVICE_CONFIGURATION_JSON_SCHEMA.schema, &saved),
+      BTreeSet::new()
+    );
+    let reloaded = load_protocol_configs(&None, &Some(saved), false)
+      .unwrap()
+      .finish()
+      .unwrap();
+    assert_eq!(reloaded.user_device_definitions().len(), 1);
+    assert_eq!(reloaded.simulated_devices().len(), 1);
+    assert_eq!(reloaded.user_communication_specifiers().len(), 1);
   }
 }
