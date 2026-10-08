@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 57
+    "minor": 58
   },
   "protocols": {
     "activejoy": {
@@ -6348,7 +6348,8 @@
               "J-Prax",
               "J-Poptint",
               "J-Tauros",
-              "J-Daquan"
+              "J-Daquan",
+              "J-Eudora"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -11105,6 +11106,13 @@
             "J-Daquan"
           ],
           "name": "JoyHub Daquan"
+        },
+        {
+          "id": "ed0545f9-c80e-4fbf-878f-afe6cb0f1c06",
+          "identifier": [
+            "J-Eudora"
+          ],
+          "name": "JoyHub Eudora"
         }
       ],
       "defaults": {

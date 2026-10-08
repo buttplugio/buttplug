@@ -2764,6 +2764,10 @@ configurations:
             - 1
       index: 6
   id: bf16b20f-87cb-4b10-86a3-d4ca27539fe4
+- identifier:
+    - J-Eudora
+  name: JoyHub Eudora
+  id: ed0545f9-c80e-4fbf-878f-afe6cb0f1c06
 communication:
 - btle:
     names:
@@ -2927,6 +2931,7 @@ communication:
     - J-Poptint
     - J-Tauros
     - J-Daquan
+    - J-Eudora
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
