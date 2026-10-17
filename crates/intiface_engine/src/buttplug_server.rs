@@ -115,8 +115,8 @@ pub fn setup_server_device_comm_managers(
   }
   if args.use_device_websocket_server() {
     info!("Including Websocket Server Device Support");
-    let mut builder =
-      WebsocketServerDeviceCommunicationManagerBuilder::default().listen_on_all_interfaces(true);
+    let mut builder = WebsocketServerDeviceCommunicationManagerBuilder::default()
+      .listen_on_all_interfaces(!args.device_websocket_server_loopback_only());
     if let Some(port) = args.device_websocket_server_port() {
       builder = builder.server_port(port);
     }
