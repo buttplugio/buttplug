@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 57
+    "minor": 58
   },
   "protocols": {
     "activejoy": {
@@ -24337,6 +24337,278 @@
         ],
         "id": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f",
         "name": "Utimi Device"
+      }
+    },
+    "velvet": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "VR-*"
+            ],
+            "services": {
+              "53306c9a-0b82-4faa-9686-06a720c3b175": {
+                "rx": "e2a371f4-77f1-4bfc-b1aa-128d6478e395",
+                "tx": "8b3c35a4-1d6f-4d15-bb3d-8a8b7b41b4f1"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "c4de8321-17d0-47a7-a961-b3c3f1cffce8",
+          "identifier": [
+            "VR-Pixie"
+          ],
+          "name": "Velvet Pixie"
+        },
+        {
+          "id": "a0756cdd-2d89-4e72-8d24-a37e107cf5af",
+          "identifier": [
+            "VR-Rouge"
+          ],
+          "name": "Velvet Rouge"
+        },
+        {
+          "id": "201c3ab7-759d-485c-92d1-ea3c199ee8d1",
+          "identifier": [
+            "VR-Orion"
+          ],
+          "name": "Velvet Orion"
+        },
+        {
+          "id": "b53dc51d-7009-474d-aca4-b7bec7afd7dc",
+          "identifier": [
+            "VR-Eon"
+          ],
+          "name": "Velvet Eon"
+        },
+        {
+          "id": "0993d9d9-88c2-470d-8ae6-072e5108df13",
+          "identifier": [
+            "VR-Vortex"
+          ],
+          "name": "Velvet Vortex"
+        },
+        {
+          "id": "2836e0cc-20e7-4f60-a565-54046e292a12",
+          "identifier": [
+            "VR-Whisper"
+          ],
+          "name": "Velvet Whisper"
+        },
+        {
+          "features": [
+            {
+              "description": "vibrate",
+              "id": "0df1146d-7441-4697-b7f2-ef4d317c363e",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "description": "heat (low, high)",
+              "id": "3cd28cdf-5a22-4683-bd2a-e91a32b105d9",
+              "index": 1,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    2
+                  ]
+                }
+              }
+            },
+            {
+              "description": "battery level",
+              "id": "db4b9e4b-f363-4def-85f0-a6a49c24b70b",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "3e7477b1-99d0-43e2-bfbf-7cb4708ffe7e",
+          "identifier": [
+            "VR-Ember"
+          ],
+          "name": "Velvet Ember"
+        },
+        {
+          "id": "09866aee-1932-464f-a4e8-7057d48545d5",
+          "identifier": [
+            "VR-Pearl"
+          ],
+          "name": "Velvet Pearl"
+        },
+        {
+          "id": "5ed5b4de-a747-4559-ab4c-2842d1dce35a",
+          "identifier": [
+            "VR-Naiomy"
+          ],
+          "name": "Velvet Naiomy"
+        },
+        {
+          "features": [
+            {
+              "description": "outer motor",
+              "id": "e790ee01-c72c-490b-88e3-e91bd8450b3e",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "description": "insertable motor",
+              "id": "de090d4a-160c-4424-92f9-eb075cd857e5",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "description": "battery level",
+              "id": "dc0afa42-8813-410a-ab17-6d05d4a10752",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "6c1c72f5-9789-4a32-b841-84cac2a4e82f",
+          "identifier": [
+            "VR-Eclipse"
+          ],
+          "name": "Velvet Eclipse"
+        },
+        {
+          "features": [
+            {
+              "description": "suction",
+              "id": "08c45306-750e-419e-8353-d0a8f15c4280",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "description": "battery level",
+              "id": "367ffd8b-237f-469e-8dd3-b82232a43453",
+              "index": 1,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "60f15f4b-01a2-4a47-ac6e-7d82fa5181bf",
+          "identifier": [
+            "VR-Aurora"
+          ],
+          "name": "Velvet Aurora"
+        },
+        {
+          "id": "60660e5d-c7d5-41cf-bfd6-c52e5d070b0a",
+          "identifier": [
+            "VR-Estelle"
+          ],
+          "name": "Velvet Estelle"
+        },
+        {
+          "id": "e9858bbd-c212-4986-9af4-43b693fc7397",
+          "identifier": [
+            "VR-Celeste"
+          ],
+          "name": "Velvet Celeste"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "description": "vibrate",
+            "id": "37467c5c-bce1-4f3a-afc1-d21ffb23ae17",
+            "index": 0,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  255
+                ]
+              }
+            }
+          },
+          {
+            "description": "battery level",
+            "id": "272cd505-c7e0-42c9-a46d-cad97f15b560",
+            "index": 1,
+            "input": {
+              "battery": {
+                "command": [
+                  "Read"
+                ],
+                "value": [
+                  [
+                    0,
+                    100
+                  ]
+                ]
+              }
+            }
+          }
+        ],
+        "id": "493443d2-7bf4-41ba-84ba-c48d2749b215",
+        "name": "Velvet Device"
       }
     },
     "vibcrafter": {
