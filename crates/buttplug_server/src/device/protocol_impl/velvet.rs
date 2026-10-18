@@ -8,8 +8,10 @@
 //! Velvet Rituals toys (BLE names `VR-*`). Same firmware family as Cupido (`B0 03 … AA`), with
 //! Velvet's own service and these frames (verified on hardware by Velvet, Oct 2026):
 //!
-//! - Motors: `B0 03 00 00 <motor2> <motor1> AA`. Single-motor toys get both bytes (the
-//!   Velvet apps and SDK send A = B). Motor 1 is Eclipse's outer motor, motor 2 the insertable.
+//! - Motors: `B0 03 00 00 <motor2> <motor1> AA`. Motor 1 is Eclipse's outer motor, motor 2 the
+//!   insertable. Single-motor toys get motor 1 only (motor 2 = 0), as Cupido does: with the level
+//!   in both bytes (what the Velvet apps send) Aurora's suction ignored strength changes
+//!   (hardware test 18 Oct), while motor-1-only drives Pixie, Aurora and Ember correctly.
 //! - Heat (Ember): `B0 04 <on> 00 <level 0–2> 00`, no `AA` trailer.
 //! - Battery: write `B0 00`, the reply on rx is `B0 00 …` with the percentage at byte 5.
 //! - Frames sent back to back are lost: the toys only take write-without-response, and a second
@@ -185,7 +187,7 @@ impl ProtocolHandler for Velvet {
 
     if !self.dual {
       self.motors[0].store(level, Ordering::Relaxed);
-      return self.send(MOTOR, motor_frame(level, level));
+      return self.send(MOTOR, motor_frame(level, 0));
     }
 
     let slot = if feature_index == 1 { 1 } else { 0 };
