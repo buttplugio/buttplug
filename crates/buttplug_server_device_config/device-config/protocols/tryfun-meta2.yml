@@ -24,6 +24,27 @@ defaults:
         - 100
     index: 2
   id: 6b45e5f8-5b23-4c1d-a478-43c17a54cae3
+configurations:
+- identifier:
+  - TF-META2SE
+  - DK-META2SE
+  name: TryFun Meta 2 SE
+  features:
+  - id: 958795d8-7c18-4318-aeae-0264677c6cdf
+    output:
+      oscillate:
+        value:
+        - 0
+        - 100
+    index: 0
+  - id: edee0242-c1ec-4280-a280-a93fe631c72a
+    output:
+      rotate:
+        value:
+        - -100
+        - 100
+    index: 1
+  id: 0d268453-cb8e-48be-8d2c-7db080c6b54c
 communication:
 - btle:
     names:
