@@ -31,6 +31,8 @@ const POSITION_FEATURE_STROKE_START: u32 = 1; // opcode 0x07
 const POSITION_FEATURE_STROKE_END: u32 = 2; // opcode 0x08
 const POSITION_FEATURE_DIRECT: u32 = 3; // opcode 0x0A, move to this depth now
 const POSITION_FEATURE_SMOOTHNESS: u32 = 4; // opcode 0x09, 0-10
+const POSITION_FEATURE_RUN_MODE: u32 = 5; // opcode 0x01, 0 = auto (0xA0), 1 = manual (0xA1)
+const POSITION_FEATURE_PRESET_MODE: u32 = 6; // opcode 0x04, built-in modes 1-8, 0 = none
 
 // The official app never lets the stroke end get closer than this to the stroke start.
 const MIN_STROKE_GAP: u8 = 10;
@@ -238,6 +240,9 @@ impl ProtocolHandler for HismithMini {
   //   index 2 -> stroke end (outer limit), 0x08
   //   index 3 -> direct position, move to this depth now, 0x0A
   //   index 4 -> smoothness, 0x09 (0-10)
+  //   index 5 -> run mode, 0x01: 0 = auto (machine strokes on its own), 1 = manual (follows
+  //              the direct position)
+  //   index 6 -> built-in preset mode 1-8, 0x04 (0 sends nothing; a speed command leaves the mode)
   // The stroke window is kept at least MIN_STROKE_GAP wide, as the official app does.
   fn handle_output_position_cmd(
     &self,
@@ -245,7 +250,25 @@ impl ProtocolHandler for HismithMini {
     feature_id: Uuid,
     position: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    // The run mode command is the only one with a fixed value pair: CC 01 A0 / CC 01 A1.
+    if feature_index == POSITION_FEATURE_RUN_MODE {
+      let mode: u8 = if position == 0 { 0xA0 } else { 0xA1 };
+      return Ok(vec![
+        HardwareWriteCmd::new(
+          &[feature_id],
+          Endpoint::Tx,
+          vec![0xCC, 0x01, mode, mode + 1],
+          false,
+        )
+        .into(),
+      ]);
+    }
+    if feature_index == POSITION_FEATURE_PRESET_MODE && position == 0 {
+      return Ok(vec![]);
+    }
+
     let (idx, value): (u8, u8) = match feature_index {
+      POSITION_FEATURE_PRESET_MODE => (0x04, position.min(8) as u8),
       POSITION_FEATURE_STROKE_START => {
         let end = self.stroke_end.load(Ordering::Relaxed);
         let start = (position.min(100) as u8).min(end.saturating_sub(MIN_STROKE_GAP));
@@ -382,5 +405,51 @@ mod test {
       .handle_output_position_cmd(2, Uuid::nil(), 0)
       .unwrap();
     assert_eq!(written(cmds), vec![0xCC, 0x08, 0x32, 0x3A]);
+  }
+
+  #[test]
+  fn run_mode_switches_between_auto_and_manual() {
+    let handler = HismithMini::default();
+    let cmds = handler
+      .handle_output_position_cmd(5, Uuid::nil(), 0)
+      .unwrap();
+    assert_eq!(written(cmds), vec![0xCC, 0x01, 0xA0, 0xA1]);
+    let cmds = handler
+      .handle_output_position_cmd(5, Uuid::nil(), 1)
+      .unwrap();
+    assert_eq!(written(cmds), vec![0xCC, 0x01, 0xA1, 0xA2]);
+  }
+
+  #[test]
+  fn preset_modes_one_to_eight_match_the_app() {
+    // The app's product catalog for the S2 lists CC040105 ... CC04080C.
+    let expected: [[u8; 4]; 8] = [
+      [0xCC, 0x04, 0x01, 0x05],
+      [0xCC, 0x04, 0x02, 0x06],
+      [0xCC, 0x04, 0x03, 0x07],
+      [0xCC, 0x04, 0x04, 0x08],
+      [0xCC, 0x04, 0x05, 0x09],
+      [0xCC, 0x04, 0x06, 0x0A],
+      [0xCC, 0x04, 0x07, 0x0B],
+      [0xCC, 0x04, 0x08, 0x0C],
+    ];
+    let handler = HismithMini::default();
+    for (i, frame) in expected.iter().enumerate() {
+      let cmds = handler
+        .handle_output_position_cmd(6, Uuid::nil(), i as u32 + 1)
+        .unwrap();
+      assert_eq!(&written(cmds), frame);
+    }
+  }
+
+  #[test]
+  fn preset_mode_zero_sends_nothing() {
+    let handler = HismithMini::default();
+    assert!(
+      handler
+        .handle_output_position_cmd(6, Uuid::nil(), 0)
+        .unwrap()
+        .is_empty()
+    );
   }
 }

@@ -69,6 +69,22 @@ configurations:
         - 0
         - 10
     index: 4
+  - description: Run mode (0 = auto, 1 = manual)
+    id: d30b2ece-bac4-4223-8670-629902524494
+    output:
+      position:
+        value:
+        - 0
+        - 1
+    index: 5
+  - description: Preset mode (1-8, 0 = none)
+    id: 694ff338-bd50-42a4-bfbb-b142cc33644d
+    output:
+      position:
+        value:
+        - 0
+        - 8
+    index: 6
   id: 330de697-9702-4bc7-89d6-3faf603f0238
 - identifier:
   - '1402'

@@ -13,12 +13,12 @@
         },
         "config": {
           "name": "Hismith Servo Sex Machine",
-          "id": "4123158e-0378-425a-8439-342c6a6922db",
+          "id": "424d7b25-db82-4a6d-be00-3a74ea831f08",
           "features": [
             {
               "description": "Fucking Machine Oscillation Speed",
               "base_id": "6c2d8c56-4fbf-4578-bbe8-c40b97e9d313",
-              "id": "9535ed5a-008f-480f-976b-4bd37c2a6ffe",
+              "id": "a612379b-dc66-4ca4-b4eb-63cd19ac93a5",
               "output": {
                 "oscillate": {
                   "value": [
@@ -31,7 +31,7 @@
             {
               "description": "Stroke Start (inner depth limit)",
               "base_id": "89e29d8a-9b97-45f5-b97a-a9912b55cdde",
-              "id": "ee030bcf-128d-4b09-a94a-e4495c8f1598",
+              "id": "062be78d-11c7-4035-b2f7-53911e2dccc7",
               "output": {
                 "position": {
                   "value": [
@@ -44,7 +44,7 @@
             {
               "description": "Stroke End (outer depth limit)",
               "base_id": "867c86aa-fdda-447d-bcd2-85a27f346a23",
-              "id": "65259c2f-9ff2-474f-8b6e-ce5003f781df",
+              "id": "ba88e402-e026-4626-8fa5-6364ac1e29eb",
               "output": {
                 "position": {
                   "value": [
@@ -57,7 +57,7 @@
             {
               "description": "Position (move to depth now)",
               "base_id": "5b1c1185-2c2d-42d2-9e9c-b864483eb0ca",
-              "id": "404dc875-ec03-4b68-affd-0640ebb4f7c0",
+              "id": "444e6084-8134-4e4a-828a-f0c2277b9cf6",
               "output": {
                 "position": {
                   "value": [
@@ -70,12 +70,38 @@
             {
               "description": "Smoothness",
               "base_id": "764c3f85-894b-40e2-b6c4-5448a48b1439",
-              "id": "aef1b56a-474a-4733-b89c-eb649b7dfc12",
+              "id": "a36ecb4e-ffbf-4737-a94e-57a3aa69ff2b",
               "output": {
                 "position": {
                   "value": [
                     0,
                     10
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Run mode (0 = auto, 1 = manual)",
+              "base_id": "d30b2ece-bac4-4223-8670-629902524494",
+              "id": "a42b4b66-ced4-4517-88a7-b0fd554213c8",
+              "output": {
+                "position": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Preset mode (1-8, 0 = none)",
+              "base_id": "694ff338-bd50-42a4-bfbb-b142cc33644d",
+              "id": "eb56aa50-2f16-475b-af6f-2b364781d621",
+              "output": {
+                "position": {
+                  "value": [
+                    0,
+                    8
                   ]
                 }
               }

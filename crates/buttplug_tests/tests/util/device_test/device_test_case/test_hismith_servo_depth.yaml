@@ -11,7 +11,8 @@ device_init:
           data: [0x11, 0x01]
 device_commands:
   # v3 ScalarCmd indexes: 0 = speed (Oscillate), 1 = stroke start, 2 = stroke end,
-  # 3 = direct position, 4 = smoothness. This is the path MultiFunPlayer uses.
+  # 3 = direct position, 4 = smoothness, 5 = run mode (0 auto / 1 manual),
+  # 6 = built-in preset mode 1-8. This is the path MultiFunPlayer uses.
   - !Messages
       device_index: 0
       messages:
@@ -81,4 +82,60 @@ device_commands:
         - !Write
             endpoint: tx
             data: [0xCC, 0x09, 0x05, 0x0E]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 5
+            Scalar: 1.0
+            ActuatorType: Position
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x01, 0xA1, 0xA2]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 5
+            Scalar: 0.0
+            ActuatorType: Position
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x01, 0xA0, 0xA1]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 6
+            Scalar: 0.375
+            ActuatorType: Position
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x04, 0x03, 0x07]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 6
+            Scalar: 1.0
+            ActuatorType: Position
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x04, 0x08, 0x0C]
             write_with_response: false
