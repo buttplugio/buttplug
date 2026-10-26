@@ -1,0 +1,84 @@
+devices:
+  - identifier:
+      name: "HISMITH S2"
+    expected_name: "Hismith Servo Sex Machine"
+device_init:
+  - !Events
+    device_index: 0
+    events:
+      - !Reads
+        - endpoint: rxblemodel
+          data: [0x11, 0x01]
+device_commands:
+  # v3 ScalarCmd indexes: 0 = speed (Oscillate), 1 = stroke start, 2 = stroke end,
+  # 3 = direct position, 4 = smoothness. This is the path MultiFunPlayer uses.
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 0
+            Scalar: 0.5
+            ActuatorType: Oscillate
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x03, 0x32, 0x35]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 1
+            Scalar: 0.2
+            ActuatorType: Position
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x07, 0x14, 0x1B]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 2
+            Scalar: 0.8
+            ActuatorType: Position
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x08, 0x50, 0x58]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 3
+            Scalar: 0.5
+            ActuatorType: Position
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x0A, 0x32, 0x3C]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 4
+            Scalar: 0.5
+            ActuatorType: Position
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x09, 0x05, 0x0E]
+            write_with_response: false
