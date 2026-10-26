@@ -28,6 +28,31 @@ configurations:
 - identifier:
   - '1101'
   name: Hismith Servo Sex Machine
+  features:
+  - description: Fucking Machine Oscillation Speed
+    id: 6c2d8c56-4fbf-4578-bbe8-c40b97e9d313
+    output:
+      oscillate:
+        value:
+        - 0
+        - 100
+    index: 0
+  - description: Stroke Start (inner depth limit)
+    id: 89e29d8a-9b97-45f5-b97a-a9912b55cdde
+    output:
+      position:
+        value:
+        - 0
+        - 100
+    index: 1
+  - description: Stroke End (outer depth limit)
+    id: 867c86aa-fdda-447d-bcd2-85a27f346a23
+    output:
+      position:
+        value:
+        - 0
+        - 100
+    index: 2
   id: 330de697-9702-4bc7-89d6-3faf603f0238
 - identifier:
   - '1402'

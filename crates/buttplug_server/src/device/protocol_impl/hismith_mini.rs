@@ -203,6 +203,29 @@ impl ProtocolHandler for HismithMini {
     ])
   }
 
+  // Stroke window of the servo machines (HISMITH S2 / Servo). Feature index 1 sets the start of
+  // the stroke (opcode 0x07), index 2 sets the end of the stroke (opcode 0x08). Both are
+  // percentages of the machine's travel (0-100). The official app keeps end - start >= 10.
+  fn handle_output_position_cmd(
+    &self,
+    feature_index: u32,
+    feature_id: Uuid,
+    position: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let idx: u8 = if feature_index == 1 { 0x07 } else { 0x08 };
+    let position: u8 = position.min(100) as u8;
+
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![0xCC, idx, position, position + idx],
+        false,
+      )
+      .into(),
+    ])
+  }
+
   fn handle_output_spray_cmd(
     &self,
     _feature_index: u32,
@@ -218,5 +241,53 @@ impl ProtocolHandler for HismithMini {
       )
       .into(),
     ])
+  }
+}
+
+#[cfg(test)]
+mod test {
+  use super::*;
+
+  fn written(cmds: Vec<HardwareCommand>) -> Vec<u8> {
+    match cmds.into_iter().next().unwrap() {
+      HardwareCommand::Write(w) => w.data().clone(),
+      _ => panic!("expected a write command"),
+    }
+  }
+
+  #[test]
+  fn stroke_start_uses_opcode_07() {
+    let handler = HismithMini::default();
+    let cmds = handler
+      .handle_output_position_cmd(1, Uuid::nil(), 20)
+      .unwrap();
+    assert_eq!(written(cmds), vec![0xCC, 0x07, 0x14, 0x1B]);
+  }
+
+  #[test]
+  fn stroke_end_uses_opcode_08() {
+    let handler = HismithMini::default();
+    let cmds = handler
+      .handle_output_position_cmd(2, Uuid::nil(), 80)
+      .unwrap();
+    assert_eq!(written(cmds), vec![0xCC, 0x08, 0x50, 0x58]);
+  }
+
+  #[test]
+  fn stroke_position_is_clamped_to_100() {
+    let handler = HismithMini::default();
+    let cmds = handler
+      .handle_output_position_cmd(2, Uuid::nil(), 250)
+      .unwrap();
+    assert_eq!(written(cmds), vec![0xCC, 0x08, 0x64, 0x6C]);
+  }
+
+  #[test]
+  fn speed_command_is_unchanged() {
+    let handler = HismithMini::default();
+    let cmds = handler
+      .handle_output_oscillate_cmd(0, Uuid::nil(), 50)
+      .unwrap();
+    assert_eq!(written(cmds), vec![0xCC, 0x03, 0x32, 0x35]);
   }
 }
