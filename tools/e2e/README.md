@@ -26,3 +26,15 @@ python tools\e2e\fake_hismith.py              (or --piupiu for the Lube Launcher
 
 MultiFunPlayer then sees "Hismith Servo Sex Machine" with all seven actuators; every slider,
 key press, sequence step and voice command shows up as bytes in the fake device's window.
+
+## Last recorded run (Linux, this fork, no hardware)
+
+`run_e2e.sh`: **PASS** for both fake devices, 18/18 byte checks:
+
+* S2: `CC 03 32 35`, `CC 07 14 1B`, `CC 08 50 58`, `CC 0A 32 3C`, `CC 09 05 0E`, `CC 01 A1 A2`,
+  `CC 01 A0 A1`, `CC 04 03 07`; identical preset repeated -> nothing; `0` then `3` -> `CC 04 03 07`;
+  Stop -> only `CC 03 00 03`. Engine log: `Hismith Device Identifier: 1101`.
+* Lube Launcher: `1` -> `CC 0B 01 0C`; `1` again -> nothing (server de-duplication); `0` -> nothing;
+  `1` -> second shot; `1,0,1` inside 100 ms -> one shot (rate limit); Stop -> nothing.
+* The live `DeviceAdded` of both devices parses with the Buttplug.Net client library MultiFunPlayer
+  uses (7 and 1 scalar actuators).

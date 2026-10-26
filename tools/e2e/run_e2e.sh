@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # End-to-end check without hardware: intiface_engine from this fork + fake device + spec v3 client.
-# Usage: tools/e2e/run_e2e.sh [path-to-intiface_engine]   (default: builds target/release/intiface_engine)
+# Usage: tools/e2e/run_e2e.sh [path-to-intiface_engine]   (default: builds target/release/intiface-engine)
 set -u
 cd "$(dirname "$0")/../.."
-ENGINE="${1:-target/release/intiface_engine}"
+ENGINE="${1:-target/release/intiface-engine}"
 if [ ! -x "$ENGINE" ]; then
   cargo build --release -p intiface-engine || exit 1
 fi
