@@ -235,11 +235,16 @@ configurations:
   id: d9ced3ed-cc74-4731-baeb-7bbf7fda288e
 - identifier:
   - '4002'
-  name: Sinloli Piupiu
+  name: Hismith Lube Launcher (PiuPiu)
   features:
-  - id: c24a6b8c-6665-4cf6-95f8-51140f9788b4
+  - description: Spray (0 = off, any value above 0 = squirt)
+    id: c24a6b8c-6665-4cf6-95f8-51140f9788b4
     output:
       spray:
+        value:
+        - 0
+        - 1
+      position:
         value:
         - 0
         - 1

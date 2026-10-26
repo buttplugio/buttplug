@@ -64,7 +64,14 @@ impl From<Vec<ServerDeviceFeature>> for ServerDeviceMessageAttributesV3 {
         feature
           .output
           .iter()
-          .filter(|output| !matches!(output, ServerDeviceFeatureOutput::HwPositionWithDuration(_)))
+          // Spray does not exist in spec v3 (clients such as Buttplug.Net reject the whole device when
+          // they see an unknown actuator type), so it is not offered to v3 clients.
+          .filter(|output| {
+            !matches!(
+              output,
+              ServerDeviceFeatureOutput::HwPositionWithDuration(_) | ServerDeviceFeatureOutput::Spray(_)
+            )
+          })
           .map(|output| {
             let actuator_type = output.output_type();
             let step_count = match output {

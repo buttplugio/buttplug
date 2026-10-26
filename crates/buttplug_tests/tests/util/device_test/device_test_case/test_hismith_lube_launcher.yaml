@@ -1,0 +1,28 @@
+devices:
+  - identifier:
+      name: "Hismith Piupiu"
+    expected_name: "Hismith Lube Launcher (PiuPiu)"
+device_init:
+  - !Events
+    device_index: 0
+    events:
+      - !Reads
+        - endpoint: rxblemodel
+          data: [0x40, 0x02]
+device_commands:
+  # Spec v3 clients (MultiFunPlayer) do not get the Spray actuator, only Position, so Scalar
+  # index 0 is the spray trigger. Any non-zero value is one squirt: CC 0B 01 0C.
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 0
+            Scalar: 1.0
+            ActuatorType: Position
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x0B, 0x01, 0x0C]
+            write_with_response: false

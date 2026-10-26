@@ -254,7 +254,6 @@ impl From<Vec<DeviceFeature>> for ClientDeviceMessageAttributesV3 {
           OutputType::Oscillate,
           OutputType::Position,
           OutputType::Rotate,
-          OutputType::Spray,
           OutputType::Vibrate,
         ] {
           if let Some(limits) = feature.get_output_limits(output_type) {

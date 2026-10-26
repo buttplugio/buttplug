@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 62
+    "minor": 63
   },
   "protocols": {
     "activejoy": {
@@ -4995,9 +4995,16 @@
         {
           "features": [
             {
+              "description": "Spray (0 = off, any value above 0 = squirt)",
               "id": "c24a6b8c-6665-4cf6-95f8-51140f9788b4",
               "index": 0,
               "output": {
+                "position": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                },
                 "spray": {
                   "value": [
                     0,
@@ -5011,7 +5018,7 @@
           "identifier": [
             "4002"
           ],
-          "name": "Sinloli Piupiu"
+          "name": "Hismith Lube Launcher (PiuPiu)"
         }
       ],
       "defaults": {

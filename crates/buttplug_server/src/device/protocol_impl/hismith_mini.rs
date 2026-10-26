@@ -16,9 +16,14 @@ use buttplug_server_device_config::{
   ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
-use std::sync::{
-  Arc,
-  atomic::{AtomicU8, Ordering},
+use instant::Instant;
+use std::{
+  sync::{
+    Arc,
+    Mutex,
+    atomic::{AtomicU8, Ordering},
+  },
+  time::Duration,
 };
 use uuid::{Uuid, uuid};
 
@@ -36,6 +41,15 @@ const POSITION_FEATURE_PRESET_MODE: u32 = 6; // opcode 0x04, built-in modes 1-8,
 
 // The official app never lets the stroke end get closer than this to the stroke start.
 const MIN_STROKE_GAP: u8 = 10;
+
+// Lube Launcher / "PiuPiu" (model 4002): one CC 0B 01 0C frame is one squirt. The app repeats the
+// frame every 100 ms while its button is held and never sends the "off" frame, so we only fire
+// for a non-zero level and not more often than that.
+const SPRAY_FRAME: [u8; 4] = [0xCC, 0x0B, 0x01, 0x0C];
+const SPRAY_MIN_INTERVAL: Duration = Duration::from_millis(100);
+// On the PiuPiu, the Position feature at index 0 is the spray trigger. (Servo machines use
+// index 0 for speed, which is not a Position feature.)
+const POSITION_FEATURE_SPRAY: u32 = 0;
 
 pub mod setup {
   use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -99,6 +113,7 @@ impl ProtocolInitializer for HismithMiniInitializer {
     Ok(Arc::new(HismithMini {
       stroke_start: AtomicU8::new(0),
       stroke_end: AtomicU8::new(100),
+      last_spray: Mutex::new(None),
       dual_vibe: device_definition
         .features()
         .values()
@@ -122,6 +137,24 @@ pub struct HismithMini {
   // keep end >= start + MIN_STROKE_GAP like the official app does.
   stroke_start: AtomicU8,
   stroke_end: AtomicU8,
+  last_spray: Mutex<Option<Instant>>,
+}
+
+impl HismithMini {
+  fn spray(&self, feature_id: Uuid, level: u32) -> Vec<HardwareCommand> {
+    if level == 0 {
+      return vec![];
+    }
+    let mut last_spray = self.last_spray.lock().unwrap();
+    let now = Instant::now();
+    if let Some(last) = *last_spray
+      && now.duration_since(last) < SPRAY_MIN_INTERVAL
+    {
+      return vec![];
+    }
+    *last_spray = Some(now);
+    vec![HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, SPRAY_FRAME.to_vec(), false).into()]
+  }
 }
 
 impl Default for HismithMini {
@@ -131,6 +164,7 @@ impl Default for HismithMini {
       second_constrict: false,
       stroke_start: AtomicU8::new(0),
       stroke_end: AtomicU8::new(100),
+      last_spray: Mutex::new(None),
     }
   }
 }
@@ -250,6 +284,10 @@ impl ProtocolHandler for HismithMini {
     feature_id: Uuid,
     position: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    if feature_index == POSITION_FEATURE_SPRAY {
+      return Ok(self.spray(feature_id, position));
+    }
+
     // The run mode command is the only one with a fixed value pair: CC 01 A0 / CC 01 A1.
     if feature_index == POSITION_FEATURE_RUN_MODE {
       let mode: u8 = if position == 0 { 0xA0 } else { 0xA1 };
@@ -297,21 +335,14 @@ impl ProtocolHandler for HismithMini {
     ])
   }
 
+  // Lube Launcher: any non-zero level squirts once. Level 0 (also what a Stop sends) does nothing.
   fn handle_output_spray_cmd(
     &self,
     _feature_index: u32,
     feature_id: Uuid,
-    _level: u32,
+    level: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![
-      HardwareWriteCmd::new(
-        &[feature_id],
-        Endpoint::Tx,
-        vec![0xcc, 0x0b, 0x01, 0x0c],
-        false,
-      )
-      .into(),
-    ])
+    Ok(self.spray(feature_id, level))
   }
 }
 
@@ -448,6 +479,51 @@ mod test {
     assert!(
       handler
         .handle_output_position_cmd(6, Uuid::nil(), 0)
+        .unwrap()
+        .is_empty()
+    );
+  }
+
+  #[test]
+  fn spray_fires_the_app_frame_for_nonzero_level() {
+    let handler = HismithMini::default();
+    let cmds = handler.handle_output_spray_cmd(0, Uuid::nil(), 1).unwrap();
+    assert_eq!(written(cmds), vec![0xCC, 0x0B, 0x01, 0x0C]);
+  }
+
+  #[test]
+  fn spray_level_zero_does_nothing() {
+    // Stop sends level 0; it must not squirt.
+    let handler = HismithMini::default();
+    assert!(handler.handle_output_spray_cmd(0, Uuid::nil(), 0).unwrap().is_empty());
+  }
+
+  #[test]
+  fn spray_is_rate_limited_to_the_apps_100ms() {
+    let handler = HismithMini::default();
+    assert_eq!(
+      handler.handle_output_spray_cmd(0, Uuid::nil(), 1).unwrap().len(),
+      1
+    );
+    assert!(handler.handle_output_spray_cmd(0, Uuid::nil(), 1).unwrap().is_empty());
+    std::thread::sleep(SPRAY_MIN_INTERVAL + Duration::from_millis(20));
+    assert_eq!(
+      handler.handle_output_spray_cmd(0, Uuid::nil(), 1).unwrap().len(),
+      1
+    );
+  }
+
+  #[test]
+  fn spray_through_the_position_feature_for_v3_clients() {
+    let handler = HismithMini::default();
+    let cmds = handler
+      .handle_output_position_cmd(0, Uuid::nil(), 1)
+      .unwrap();
+    assert_eq!(written(cmds), vec![0xCC, 0x0B, 0x01, 0x0C]);
+    let handler = HismithMini::default();
+    assert!(
+      handler
+        .handle_output_position_cmd(0, Uuid::nil(), 0)
         .unwrap()
         .is_empty()
     );
