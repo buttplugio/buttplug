@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 58
+    "minor": 59
   },
   "protocols": {
     "activejoy": {
@@ -4447,7 +4447,7 @@
         {
           "btle": {
             "names": [
-              "HISMITH",
+              "HISMITH*",
               "Wildolo",
               "\u0007HISMITH"
             ],
