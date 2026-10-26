@@ -79,7 +79,7 @@ configurations:
 communication:
 - btle:
     names:
-    - HISMITH
+    - HISMITH*
     - Wildolo
     - "\aHISMITH"
     services:
