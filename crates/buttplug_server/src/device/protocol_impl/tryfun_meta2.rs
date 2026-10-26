@@ -60,11 +60,17 @@ impl ProtocolHandler for TryFunMeta2 {
     feature_id: Uuid,
     speed: i32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let mut speed = speed as i8;
-    if speed >= 0 {
-      speed += 1;
-    }
-    speed *= -1;
+    // Vendor app encoding, verified on hardware against the vendor app's
+    // rotaryToBLE (2026-10-26): positive speed maps to byte 0..100, negative
+    // speed maps to the vendor's reverse band 155..255 via (255 + v) & 0xFF.
+    // The previous transform inverted the direction relative to the vendor
+    // app: upstream +50 produced byte 0xCD, which the firmware treats as
+    // vendor -50 (the device rotated the opposite way from the vendor app).
+    let speed: u8 = if speed >= 0 {
+      speed.clamp(0, 100) as u8
+    } else {
+      (255 + speed.clamp(-100, 0)) as u8
+    };
     let mut sum: u8 = 0xff;
     let mut data = vec![
       self.packet_id.fetch_add(1, Ordering::Relaxed),
