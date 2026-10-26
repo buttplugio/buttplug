@@ -30,6 +30,52 @@ configurations:
         - 50
     index: 1
   id: d2e5f7a9-1b3c-4680-bf5d-7c9a2e4f6d8b
+- identifier:
+  - TF-BH2PRO
+  - DK-BH2PRO
+  name: TryFun Black Hole 2 Pro
+  features:
+  - id: a7ea7ee3-f4dd-445a-8988-6f42f2787d28
+    output:
+      vibrate:
+        value:
+        - 0
+        - 100
+    index: 0
+  - id: d45f9bc0-de4f-4be4-8e45-7d0883ad74ee
+    output:
+      oscillate:
+        value:
+        - 0
+        - 100
+    index: 1
+  id: 560470d3-6a19-41ac-91f9-9a39b864a2ec
+- identifier:
+  - TF-BHSE
+  - DK-BHSE
+  name: TryFun BH SE
+  features:
+  - id: 471e5592-0497-493b-81a2-844a44300d50
+    output:
+      oscillate:
+        value:
+        - 0
+        - 100
+    index: 0
+  id: e684144e-7968-45dc-a5a2-c7bb1e797aaf
+- identifier:
+  - TF-BHMAX
+  - DK-BHMAX
+  name: TryFun BH Max
+  features:
+  - id: b0803d6d-1862-4aad-93ce-8e7a1b31dbf1
+    output:
+      oscillate:
+        value:
+        - 0
+        - 100
+    index: 0
+  id: 8b18a0c4-640b-4950-8264-fa2c1b3b5aba
 communication:
 - btle:
     names:
