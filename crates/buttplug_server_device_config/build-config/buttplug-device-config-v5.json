@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 59
+    "minor": 61
   },
   "protocols": {
     "activejoy": {
@@ -4683,6 +4683,32 @@
                   "value": [
                     0,
                     100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Position (move to depth now)",
+              "id": "5b1c1185-2c2d-42d2-9e9c-b864483eb0ca",
+              "index": 3,
+              "output": {
+                "position": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Smoothness",
+              "id": "764c3f85-894b-40e2-b6c4-5448a48b1439",
+              "index": 4,
+              "output": {
+                "position": {
+                  "value": [
+                    0,
+                    10
                   ]
                 }
               }

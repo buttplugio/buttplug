@@ -16,11 +16,24 @@ use buttplug_server_device_config::{
   ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
-use std::sync::Arc;
+use std::sync::{
+  Arc,
+  atomic::{AtomicU8, Ordering},
+};
 use uuid::{Uuid, uuid};
 
 const HISMITH_MINI_PROTOCOL_UUID: Uuid = uuid!("94befc1a-9859-4bf6-99ee-5678c89237a7");
 const HISMITH_MINI_ROTATE_DIRECTIOM_UUID: Uuid = uuid!("94befc1a-9859-4bf6-99ee-5678c89237a7");
+
+// Servo machines (HISMITH S2 / Servo) expose these Position features, by feature index. The
+// opcodes come from the official app's CC command set.
+const POSITION_FEATURE_STROKE_START: u32 = 1; // opcode 0x07
+const POSITION_FEATURE_STROKE_END: u32 = 2; // opcode 0x08
+const POSITION_FEATURE_DIRECT: u32 = 3; // opcode 0x0A, move to this depth now
+const POSITION_FEATURE_SMOOTHNESS: u32 = 4; // opcode 0x09, 0-10
+
+// The official app never lets the stroke end get closer than this to the stroke start.
+const MIN_STROKE_GAP: u8 = 10;
 
 pub mod setup {
   use crate::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -82,6 +95,8 @@ impl ProtocolInitializer for HismithMiniInitializer {
     device_definition: &ServerDeviceDefinition,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(HismithMini {
+      stroke_start: AtomicU8::new(0),
+      stroke_end: AtomicU8::new(100),
       dual_vibe: device_definition
         .features()
         .values()
@@ -98,10 +113,24 @@ impl ProtocolInitializer for HismithMiniInitializer {
   }
 }
 
-#[derive(Default)]
 pub struct HismithMini {
   dual_vibe: bool,
   second_constrict: bool,
+  // Last stroke window we sent (the machine boots with 0-100 unless the app changed it). Used to
+  // keep end >= start + MIN_STROKE_GAP like the official app does.
+  stroke_start: AtomicU8,
+  stroke_end: AtomicU8,
+}
+
+impl Default for HismithMini {
+  fn default() -> Self {
+    Self {
+      dual_vibe: false,
+      second_constrict: false,
+      stroke_start: AtomicU8::new(0),
+      stroke_end: AtomicU8::new(100),
+    }
+  }
 }
 
 impl ProtocolHandler for HismithMini {
@@ -203,23 +232,42 @@ impl ProtocolHandler for HismithMini {
     ])
   }
 
-  // Stroke window of the servo machines (HISMITH S2 / Servo). Feature index 1 sets the start of
-  // the stroke (opcode 0x07), index 2 sets the end of the stroke (opcode 0x08). Both are
-  // percentages of the machine's travel (0-100). The official app keeps end - start >= 10.
+  // Depth/stroke control of the servo machines (HISMITH S2 / Servo), values are 0-100 percent of
+  // the machine's travel:
+  //   index 1 -> stroke start (inner limit), 0x07
+  //   index 2 -> stroke end (outer limit), 0x08
+  //   index 3 -> direct position, move to this depth now, 0x0A
+  //   index 4 -> smoothness, 0x09 (0-10)
+  // The stroke window is kept at least MIN_STROKE_GAP wide, as the official app does.
   fn handle_output_position_cmd(
     &self,
     feature_index: u32,
     feature_id: Uuid,
     position: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let idx: u8 = if feature_index == 1 { 0x07 } else { 0x08 };
-    let position: u8 = position.min(100) as u8;
+    let (idx, value): (u8, u8) = match feature_index {
+      POSITION_FEATURE_STROKE_START => {
+        let end = self.stroke_end.load(Ordering::Relaxed);
+        let start = (position.min(100) as u8).min(end.saturating_sub(MIN_STROKE_GAP));
+        self.stroke_start.store(start, Ordering::Relaxed);
+        (0x07, start)
+      }
+      POSITION_FEATURE_DIRECT => (0x0A, position.min(100) as u8),
+      POSITION_FEATURE_SMOOTHNESS => (0x09, position.min(10) as u8),
+      // POSITION_FEATURE_STROKE_END and anything unexpected
+      _ => {
+        let start = self.stroke_start.load(Ordering::Relaxed);
+        let end = (position.min(100) as u8).max((start + MIN_STROKE_GAP).min(100));
+        self.stroke_end.store(end, Ordering::Relaxed);
+        (0x08, end)
+      }
+    };
 
     Ok(vec![
       HardwareWriteCmd::new(
         &[feature_id],
         Endpoint::Tx,
-        vec![0xCC, idx, position, position + idx],
+        vec![0xCC, idx, value, value + idx],
         false,
       )
       .into(),
@@ -289,5 +337,50 @@ mod test {
       .handle_output_oscillate_cmd(0, Uuid::nil(), 50)
       .unwrap();
     assert_eq!(written(cmds), vec![0xCC, 0x03, 0x32, 0x35]);
+  }
+
+  #[test]
+  fn direct_position_uses_opcode_0a() {
+    let handler = HismithMini::default();
+    let cmds = handler
+      .handle_output_position_cmd(3, Uuid::nil(), 50)
+      .unwrap();
+    assert_eq!(written(cmds), vec![0xCC, 0x0A, 0x32, 0x3C]);
+  }
+
+  #[test]
+  fn smoothness_uses_opcode_09_and_clamps_to_10() {
+    let handler = HismithMini::default();
+    let cmds = handler
+      .handle_output_position_cmd(4, Uuid::nil(), 7)
+      .unwrap();
+    assert_eq!(written(cmds), vec![0xCC, 0x09, 0x07, 0x10]);
+    let cmds = handler
+      .handle_output_position_cmd(4, Uuid::nil(), 99)
+      .unwrap();
+    assert_eq!(written(cmds), vec![0xCC, 0x09, 0x0A, 0x13]);
+  }
+
+  #[test]
+  fn stroke_start_cannot_pass_end_minus_gap() {
+    let handler = HismithMini::default();
+    // end defaults to 100, so start is limited to 90
+    let cmds = handler
+      .handle_output_position_cmd(1, Uuid::nil(), 100)
+      .unwrap();
+    assert_eq!(written(cmds), vec![0xCC, 0x07, 0x5A, 0x61]);
+  }
+
+  #[test]
+  fn stroke_end_cannot_pass_start_plus_gap() {
+    let handler = HismithMini::default();
+    handler
+      .handle_output_position_cmd(1, Uuid::nil(), 40)
+      .unwrap();
+    // start is 40, so end is limited to 50
+    let cmds = handler
+      .handle_output_position_cmd(2, Uuid::nil(), 0)
+      .unwrap();
+    assert_eq!(written(cmds), vec![0xCC, 0x08, 0x32, 0x3A]);
   }
 }

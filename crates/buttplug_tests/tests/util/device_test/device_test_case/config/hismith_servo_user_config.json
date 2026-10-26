@@ -1,0 +1,95 @@
+{
+  "version": {
+    "major": 5,
+    "minor": 999
+  },
+  "user_configs": {
+    "devices": [
+      {
+        "identifier": {
+          "address": "UserConfigTest",
+          "protocol": "hismith-mini",
+          "identifier": "1101"
+        },
+        "config": {
+          "name": "Hismith Servo Sex Machine",
+          "id": "4123158e-0378-425a-8439-342c6a6922db",
+          "features": [
+            {
+              "description": "Fucking Machine Oscillation Speed",
+              "base_id": "6c2d8c56-4fbf-4578-bbe8-c40b97e9d313",
+              "id": "9535ed5a-008f-480f-976b-4bd37c2a6ffe",
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    20
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Stroke Start (inner depth limit)",
+              "base_id": "89e29d8a-9b97-45f5-b97a-a9912b55cdde",
+              "id": "ee030bcf-128d-4b09-a94a-e4495c8f1598",
+              "output": {
+                "position": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Stroke End (outer depth limit)",
+              "base_id": "867c86aa-fdda-447d-bcd2-85a27f346a23",
+              "id": "65259c2f-9ff2-474f-8b6e-ce5003f781df",
+              "output": {
+                "position": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Position (move to depth now)",
+              "base_id": "5b1c1185-2c2d-42d2-9e9c-b864483eb0ca",
+              "id": "404dc875-ec03-4b68-affd-0640ebb4f7c0",
+              "output": {
+                "position": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Smoothness",
+              "base_id": "764c3f85-894b-40e2-b6c4-5448a48b1439",
+              "id": "aef1b56a-474a-4733-b89c-eb649b7dfc12",
+              "output": {
+                "position": {
+                  "value": [
+                    0,
+                    10
+                  ]
+                }
+              }
+            }
+          ],
+          "base_id": "330de697-9702-4bc7-89d6-3faf603f0238",
+          "user_config": {
+            "allow": false,
+            "deny": false,
+            "index": 0,
+            "display_name": "My S2"
+          }
+        }
+      }
+    ]
+  }
+}

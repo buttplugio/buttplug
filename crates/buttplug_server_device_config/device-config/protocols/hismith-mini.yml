@@ -53,6 +53,22 @@ configurations:
         - 0
         - 100
     index: 2
+  - description: Position (move to depth now)
+    id: 5b1c1185-2c2d-42d2-9e9c-b864483eb0ca
+    output:
+      position:
+        value:
+        - 0
+        - 100
+    index: 3
+  - description: Smoothness
+    id: 764c3f85-894b-40e2-b6c4-5448a48b1439
+    output:
+      position:
+        value:
+        - 0
+        - 10
+    index: 4
   id: 330de697-9702-4bc7-89d6-3faf603f0238
 - identifier:
   - '1402'

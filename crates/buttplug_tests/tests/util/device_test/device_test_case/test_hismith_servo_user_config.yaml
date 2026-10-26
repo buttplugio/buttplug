@@ -1,0 +1,30 @@
+user_device_config_file: "hismith_servo_user_config.json"
+devices:
+  - identifier:
+      name: "HISMITH S2"
+      address: "UserConfigTest"
+    expected_name: "Hismith Servo Sex Machine"
+    expected_display_name: "My S2"
+device_init:
+  - !Events
+    device_index: 0
+    events:
+      - !Reads
+        - endpoint: rxblemodel
+          data: [0x11, 0x01]
+device_commands:
+  # Speed is capped to 0-20 by the user config, so 100% sends 20 (0x14).
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 0
+            Scalar: 1.0
+            ActuatorType: Oscillate
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x03, 0x14, 0x17]
+            write_with_response: false
