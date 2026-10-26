@@ -315,8 +315,8 @@ impl ProtocolHandler for HismithMini {
       }
       POSITION_FEATURE_DIRECT => (0x0A, position.min(100) as u8),
       POSITION_FEATURE_SMOOTHNESS => (0x09, position.min(10) as u8),
-      // POSITION_FEATURE_STROKE_END and anything unexpected
-      _ => {
+      // anything unexpected is treated as the stroke end as well
+      POSITION_FEATURE_STROKE_END | _ => {
         let start = self.stroke_start.load(Ordering::Relaxed);
         let end = (position.min(100) as u8).max((start + MIN_STROKE_GAP).min(100));
         self.stroke_end.store(end, Ordering::Relaxed);

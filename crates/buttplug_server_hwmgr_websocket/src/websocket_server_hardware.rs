@@ -205,10 +205,16 @@ impl HardwareConnector for WebsocketServerHardwareConnector {
       self.outgoing_sender.clone(),
       self.incoming_broadcaster.clone(),
     );
+    let mut endpoints = vec![Endpoint::Rx, Endpoint::Tx];
+    for endpoint in hardware_internal.read_endpoints() {
+      if !endpoints.contains(&endpoint) {
+        endpoints.push(endpoint);
+      }
+    }
     let hardware = Hardware::new(
       self.info.identifier(),
       self.info.address(),
-      &[Endpoint::Rx, Endpoint::Tx],
+      &endpoints,
       &None,
       false,
       Box::new(hardware_internal),
@@ -244,6 +250,47 @@ impl WebsocketServerHardware {
       subscribe_token: Arc::new(Mutex::new(None)),
     }
   }
+
+  /// Endpoints with a canned read answer from the init packet, with their bytes. Entries whose
+  /// endpoint name or hex string is invalid are skipped with a warning.
+  fn canned_reads(&self) -> Vec<(Endpoint, Vec<u8>)> {
+    self
+      .info
+      .reads()
+      .iter()
+      .filter_map(|(name, hex)| {
+        let endpoint = match name.parse::<Endpoint>() {
+          Ok(endpoint) => endpoint,
+          Err(_) => {
+            warn!("Ignoring canned read for unknown endpoint \"{name}\"");
+            return None;
+          }
+        };
+        match parse_hex(hex) {
+          Some(bytes) => Some((endpoint, bytes)),
+          None => {
+            warn!("Ignoring canned read for endpoint \"{name}\": \"{hex}\" is not a hex string");
+            None
+          }
+        }
+      })
+      .collect()
+  }
+
+  fn read_endpoints(&self) -> Vec<Endpoint> {
+    self.canned_reads().into_iter().map(|(endpoint, _)| endpoint).collect()
+  }
+}
+
+fn parse_hex(hex: &str) -> Option<Vec<u8>> {
+  let hex: String = hex.chars().filter(|c| !c.is_whitespace()).collect();
+  if hex.len() % 2 != 0 {
+    return None;
+  }
+  (0..hex.len())
+    .step_by(2)
+    .map(|i| u8::from_str_radix(&hex[i..i + 2], 16).ok())
+    .collect()
 }
 
 impl HardwareInternal for WebsocketServerHardware {
@@ -262,11 +309,20 @@ impl HardwareInternal for WebsocketServerHardware {
 
   fn read_value(
     &self,
-    _msg: &HardwareReadCmd,
+    msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<HardwareReading, ButtplugDeviceError>> {
-    future::ready(Err(ButtplugDeviceError::UnhandledCommand(
-      "Websocket Hardware does not support read".to_owned(),
-    )))
+    let endpoint = msg.endpoint();
+    let canned = self
+      .canned_reads()
+      .into_iter()
+      .find(|(e, _)| *e == endpoint)
+      .map(|(_, bytes)| bytes);
+    future::ready(match canned {
+      Some(bytes) => Ok(HardwareReading::new(endpoint, &bytes)),
+      None => Err(ButtplugDeviceError::UnhandledCommand(
+        "Websocket Hardware does not support read".to_owned(),
+      )),
+    })
     .boxed()
   }
 
@@ -357,5 +413,70 @@ impl HardwareInternal for WebsocketServerHardware {
       )))
       .boxed()
     }
+  }
+}
+
+#[cfg(test)]
+mod test {
+  use super::*;
+
+  #[test]
+  fn init_info_without_reads_still_parses() {
+    let info: WebsocketServerDeviceCommManagerInitInfo =
+      serde_json::from_str(r#"{"identifier":"x","address":"y","version":1}"#).unwrap();
+    assert!(info.reads().is_empty());
+  }
+
+  #[test]
+  fn init_info_with_reads_parses() {
+    let info: WebsocketServerDeviceCommManagerInitInfo = serde_json::from_str(
+      r#"{"identifier":"HISMITH S2","address":"fake","version":1,"reads":{"rxblemodel":"1101"}}"#,
+    )
+    .unwrap();
+    assert_eq!(info.reads().get("rxblemodel").unwrap(), "1101");
+  }
+
+  #[test]
+  fn hex_parsing() {
+    assert_eq!(parse_hex("1101"), Some(vec![0x11, 0x01]));
+    assert_eq!(parse_hex("40 02"), Some(vec![0x40, 0x02]));
+    assert_eq!(parse_hex("abc"), None);
+    assert_eq!(parse_hex("zz"), None);
+    assert_eq!(parse_hex(""), Some(vec![]));
+  }
+
+  fn hardware(reads: &str) -> WebsocketServerHardware {
+    let info: WebsocketServerDeviceCommManagerInitInfo = serde_json::from_str(&format!(
+      r#"{{"identifier":"HISMITH S2","address":"fake","version":1,"reads":{reads}}}"#
+    ))
+    .unwrap();
+    let (event_sender, _) = broadcast::channel(4);
+    let (outgoing_sender, _outgoing_receiver) = channel(4);
+    let (incoming_broadcaster, _) = broadcast::channel(4);
+    WebsocketServerHardware::new(event_sender, info, outgoing_sender, incoming_broadcaster)
+  }
+
+  #[test]
+  fn canned_read_is_served_and_others_still_fail() {
+    use futures::executor::block_on;
+    let hardware = hardware(r#"{"rxblemodel":"1101","bogus":"01","rx":"xyz"}"#);
+    assert_eq!(hardware.read_endpoints(), vec![Endpoint::RxBLEModel]);
+    let reading = block_on(hardware.read_value(&HardwareReadCmd::new(
+      uuid::Uuid::nil(),
+      Endpoint::RxBLEModel,
+      128,
+      500,
+    )))
+    .unwrap();
+    assert_eq!(reading.data(), &vec![0x11u8, 0x01]);
+    assert!(
+      block_on(hardware.read_value(&HardwareReadCmd::new(
+        uuid::Uuid::nil(),
+        Endpoint::Rx,
+        128,
+        500
+      )))
+      .is_err()
+    );
   }
 }

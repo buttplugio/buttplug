@@ -1,0 +1,13 @@
+{
+  "version": { "major": 5, "minor": 999 },
+  "user_configs": {
+    "protocols": {
+      "hismith-mini": {
+        "communication": [
+          { "websocket": { "name": "HISMITH S2" } },
+          { "websocket": { "name": "Hismith Piupiu" } }
+        ]
+      }
+    }
+  }
+}

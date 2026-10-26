@@ -139,3 +139,16 @@ device_commands:
             endpoint: tx
             data: [0xCC, 0x04, 0x08, 0x0C]
             write_with_response: false
+  # Stop only sets the speed to 0; the Position features (stroke window, position, modes) are
+  # left alone, so exactly one frame is written.
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x03, 0x00, 0x03]
+            write_with_response: false

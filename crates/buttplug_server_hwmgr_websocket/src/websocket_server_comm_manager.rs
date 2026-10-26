@@ -27,6 +27,12 @@ pub struct WebsocketServerDeviceCommManagerInitInfo {
   address: String,
   #[getset(get_copy = "pub")]
   version: u32,
+  /// Optional canned answers for endpoint reads, endpoint name (lowercase, e.g. "rxblemodel") to
+  /// hex string (e.g. "1101"). Lets a fake device stand in for hardware whose protocol identifies
+  /// itself by reading a characteristic. Reads of endpoints not listed here fail as before.
+  #[serde(default)]
+  #[getset(get = "pub")]
+  reads: std::collections::HashMap<String, String>,
 }
 
 #[derive(Clone)]
