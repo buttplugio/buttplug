@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 57
+    "minor": 60
   },
   "protocols": {
     "activejoy": {
@@ -4447,7 +4447,7 @@
         {
           "btle": {
             "names": [
-              "HISMITH",
+              "HISMITH*",
               "Wildolo",
               "\u0007HISMITH"
             ],
@@ -6348,7 +6348,9 @@
               "J-Prax",
               "J-Poptint",
               "J-Tauros",
-              "J-Daquan"
+              "J-Daquan",
+              "J-Eudora",
+              "J-Pelor"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -11105,6 +11107,46 @@
             "J-Daquan"
           ],
           "name": "JoyHub Daquan"
+        },
+        {
+          "id": "ed0545f9-c80e-4fbf-878f-afe6cb0f1c06",
+          "identifier": [
+            "J-Eudora"
+          ],
+          "name": "JoyHub Eudora"
+        },
+        {
+          "features": [
+            {
+              "id": "bfdb533a-f30d-4d4f-ae1d-d52f943c56e8",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "7f838789-9219-4bfd-809a-84e39c5505c5",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "32bdb5c1-ff98-43cf-8c18-b2d5e7b891ee",
+          "identifier": [
+            "J-Pelor"
+          ],
+          "name": "JoyHub Pelor"
         }
       ],
       "defaults": {

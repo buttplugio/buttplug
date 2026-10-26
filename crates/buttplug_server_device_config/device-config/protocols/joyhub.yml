@@ -2764,6 +2764,29 @@ configurations:
             - 1
       index: 6
   id: bf16b20f-87cb-4b10-86a3-d4ca27539fe4
+- identifier:
+    - J-Eudora
+  name: JoyHub Eudora
+  id: ed0545f9-c80e-4fbf-878f-afe6cb0f1c06
+- identifier:
+    - J-Pelor
+  name: JoyHub Pelor
+  features:
+    - id: bfdb533a-f30d-4d4f-ae1d-d52f943c56e8
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 7f838789-9219-4bfd-809a-84e39c5505c5
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+  id: 32bdb5c1-ff98-43cf-8c18-b2d5e7b891ee
 communication:
 - btle:
     names:
@@ -2927,6 +2950,8 @@ communication:
     - J-Poptint
     - J-Tauros
     - J-Daquan
+    - J-Eudora
+    - J-Pelor
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
