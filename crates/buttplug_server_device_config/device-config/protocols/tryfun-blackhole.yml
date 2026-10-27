@@ -29,6 +29,13 @@ configurations:
         - 0
         - 50
     index: 1
+  - id: 2fc2446f-d292-493f-8596-573d687ccd23
+    output:
+      temperature:
+        value:
+        - 0
+        - 1
+    index: 2
   id: d2e5f7a9-1b3c-4680-bf5d-7c9a2e4f6d8b
 communication:
 - btle:
