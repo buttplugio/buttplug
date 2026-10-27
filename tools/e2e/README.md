@@ -1,5 +1,12 @@
 # End-to-end check without hardware
 
+> **Note:** since the "two sliders" change the stock HISMITH S2 definition is only speed (Oscillate,
+> index 0) and depth (Position, index 1; depth 0..100 slides a 40-wide stroke window). The checks
+> below were recorded against the earlier seven-actuator S2 and use `user-config-websocket.json`,
+> which still describes those seven features; they have not been re-run or updated for the new
+> definition. The unit and device tests for the new behaviour are in `hismith_mini.rs` and
+> `test_hismith_servo_depth.yaml`.
+
 `run_e2e.sh` builds `intiface_engine` from this fork, starts it with the **websocket device**
 hardware manager, connects a fake HISMITH S2 (then a fake Lube Launcher) to it, and drives the
 server with a spec v3 client that sends the same JSON MultiFunPlayer / Buttplug.Net sends. The

@@ -10,9 +10,10 @@ device_init:
         - endpoint: rxblemodel
           data: [0x11, 0x01]
 device_commands:
-  # v3 ScalarCmd indexes: 0 = speed (Oscillate), 1 = stroke start, 2 = stroke end,
-  # 3 = direct position, 4 = smoothness, 5 = run mode (0 auto / 1 manual),
-  # 6 = built-in preset mode 1-8. This is the path MultiFunPlayer uses.
+  # Two-slider S2: v3 ScalarCmd index 0 = speed (Oscillate), index 1 = depth (Position, 0 = shallow,
+  # 1 = deep). Depth slides a 40-wide stroke window: 0 -> 0..40, 0.5 -> 30..70, 1 -> 60..100. The
+  # limits are written in the order that keeps the window valid (deeper: end then start, shallower:
+  # start then end). This is the path MultiFunPlayer uses.
   - !Messages
       device_index: 0
       messages:
@@ -32,62 +33,6 @@ device_commands:
       messages:
         - !Scalar
           - Index: 1
-            Scalar: 0.2
-            ActuatorType: Position
-  - !Commands
-      device_index: 0
-      commands:
-        - !Write
-            endpoint: tx
-            data: [0xCC, 0x07, 0x14, 0x1B]
-            write_with_response: false
-  - !Messages
-      device_index: 0
-      messages:
-        - !Scalar
-          - Index: 2
-            Scalar: 0.8
-            ActuatorType: Position
-  - !Commands
-      device_index: 0
-      commands:
-        - !Write
-            endpoint: tx
-            data: [0xCC, 0x08, 0x50, 0x58]
-            write_with_response: false
-  - !Messages
-      device_index: 0
-      messages:
-        - !Scalar
-          - Index: 3
-            Scalar: 0.5
-            ActuatorType: Position
-  - !Commands
-      device_index: 0
-      commands:
-        - !Write
-            endpoint: tx
-            data: [0xCC, 0x0A, 0x32, 0x3C]
-            write_with_response: false
-  - !Messages
-      device_index: 0
-      messages:
-        - !Scalar
-          - Index: 4
-            Scalar: 0.5
-            ActuatorType: Position
-  - !Commands
-      device_index: 0
-      commands:
-        - !Write
-            endpoint: tx
-            data: [0xCC, 0x09, 0x05, 0x0E]
-            write_with_response: false
-  - !Messages
-      device_index: 0
-      messages:
-        - !Scalar
-          - Index: 5
             Scalar: 1.0
             ActuatorType: Position
   - !Commands
@@ -95,13 +40,17 @@ device_commands:
       commands:
         - !Write
             endpoint: tx
-            data: [0xCC, 0x01, 0xA1, 0xA2]
+            data: [0xCC, 0x08, 0x64, 0x6C]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x07, 0x3C, 0x43]
             write_with_response: false
   - !Messages
       device_index: 0
       messages:
         - !Scalar
-          - Index: 5
+          - Index: 1
             Scalar: 0.0
             ActuatorType: Position
   - !Commands
@@ -109,38 +58,31 @@ device_commands:
       commands:
         - !Write
             endpoint: tx
-            data: [0xCC, 0x01, 0xA0, 0xA1]
+            data: [0xCC, 0x07, 0x00, 0x07]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x08, 0x28, 0x30]
             write_with_response: false
   - !Messages
       device_index: 0
       messages:
         - !Scalar
-          - Index: 6
-            Scalar: 0.375
+          - Index: 1
+            Scalar: 0.5
             ActuatorType: Position
   - !Commands
       device_index: 0
       commands:
         - !Write
             endpoint: tx
-            data: [0xCC, 0x04, 0x03, 0x07]
+            data: [0xCC, 0x08, 0x46, 0x4E]
             write_with_response: false
-  - !Messages
-      device_index: 0
-      messages:
-        - !Scalar
-          - Index: 6
-            Scalar: 1.0
-            ActuatorType: Position
-  - !Commands
-      device_index: 0
-      commands:
         - !Write
             endpoint: tx
-            data: [0xCC, 0x04, 0x08, 0x0C]
+            data: [0xCC, 0x07, 0x1E, 0x25]
             write_with_response: false
-  # Stop only sets the speed to 0; the Position features (stroke window, position, modes) are
-  # left alone, so exactly one frame is written.
+  # Stop only sets the speed to 0; the depth window is left alone, so exactly one frame is written.
   - !Messages
       device_index: 0
       messages:

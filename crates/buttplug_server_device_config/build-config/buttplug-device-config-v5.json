@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 63
+    "minor": 64
   },
   "protocols": {
     "activejoy": {
@@ -4662,7 +4662,7 @@
               }
             },
             {
-              "description": "Stroke Start (inner depth limit)",
+              "description": "Depth (0 = shallow, 100 = deep; moves a fixed-width stroke window)",
               "id": "89e29d8a-9b97-45f5-b97a-a9912b55cdde",
               "index": 1,
               "output": {
@@ -4670,71 +4670,6 @@
                   "value": [
                     0,
                     100
-                  ]
-                }
-              }
-            },
-            {
-              "description": "Stroke End (outer depth limit)",
-              "id": "867c86aa-fdda-447d-bcd2-85a27f346a23",
-              "index": 2,
-              "output": {
-                "position": {
-                  "value": [
-                    0,
-                    100
-                  ]
-                }
-              }
-            },
-            {
-              "description": "Position (move to depth now)",
-              "id": "5b1c1185-2c2d-42d2-9e9c-b864483eb0ca",
-              "index": 3,
-              "output": {
-                "position": {
-                  "value": [
-                    0,
-                    100
-                  ]
-                }
-              }
-            },
-            {
-              "description": "Smoothness",
-              "id": "764c3f85-894b-40e2-b6c4-5448a48b1439",
-              "index": 4,
-              "output": {
-                "position": {
-                  "value": [
-                    0,
-                    10
-                  ]
-                }
-              }
-            },
-            {
-              "description": "Run mode (0 = auto, 1 = manual)",
-              "id": "d30b2ece-bac4-4223-8670-629902524494",
-              "index": 5,
-              "output": {
-                "position": {
-                  "value": [
-                    0,
-                    1
-                  ]
-                }
-              }
-            },
-            {
-              "description": "Preset mode (1-8, 0 = none)",
-              "id": "694ff338-bd50-42a4-bfbb-b142cc33644d",
-              "index": 6,
-              "output": {
-                "position": {
-                  "value": [
-                    0,
-                    8
                   ]
                 }
               }

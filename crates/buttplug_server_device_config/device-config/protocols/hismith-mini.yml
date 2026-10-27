@@ -37,7 +37,7 @@ configurations:
         - 0
         - 100
     index: 0
-  - description: Stroke Start (inner depth limit)
+  - description: Depth (0 = shallow, 100 = deep; moves a fixed-width stroke window)
     id: 89e29d8a-9b97-45f5-b97a-a9912b55cdde
     output:
       position:
@@ -45,46 +45,6 @@ configurations:
         - 0
         - 100
     index: 1
-  - description: Stroke End (outer depth limit)
-    id: 867c86aa-fdda-447d-bcd2-85a27f346a23
-    output:
-      position:
-        value:
-        - 0
-        - 100
-    index: 2
-  - description: Position (move to depth now)
-    id: 5b1c1185-2c2d-42d2-9e9c-b864483eb0ca
-    output:
-      position:
-        value:
-        - 0
-        - 100
-    index: 3
-  - description: Smoothness
-    id: 764c3f85-894b-40e2-b6c4-5448a48b1439
-    output:
-      position:
-        value:
-        - 0
-        - 10
-    index: 4
-  - description: Run mode (0 = auto, 1 = manual)
-    id: d30b2ece-bac4-4223-8670-629902524494
-    output:
-      position:
-        value:
-        - 0
-        - 1
-    index: 5
-  - description: Preset mode (1-8, 0 = none)
-    id: 694ff338-bd50-42a4-bfbb-b142cc33644d
-    output:
-      position:
-        value:
-        - 0
-        - 8
-    index: 6
   id: 330de697-9702-4bc7-89d6-3faf603f0238
 - identifier:
   - '1402'
