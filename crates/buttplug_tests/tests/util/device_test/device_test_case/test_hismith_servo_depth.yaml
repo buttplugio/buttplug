@@ -82,6 +82,56 @@ device_commands:
             endpoint: tx
             data: [0xCC, 0x07, 0x1E, 0x25]
             write_with_response: false
+  # Stroke width (index 2, 10..100): 0.0 -> width 10; at depth 0.5 the window becomes 45..55
+  # (start moves deeper, so the end is written first).
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 2
+            Scalar: 0.0
+            ActuatorType: Position
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x08, 0x37, 0x3F]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x07, 0x2D, 0x34]
+            write_with_response: false
+  # Run mode (index 3): 1 = manual
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 3
+            Scalar: 1.0
+            ActuatorType: Position
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x01, 0xA1, 0xA2]
+            write_with_response: false
+  # Preset mode (index 4, 0..8): 0.375 -> mode 3
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 4
+            Scalar: 0.375
+            ActuatorType: Position
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xCC, 0x04, 0x03, 0x07]
+            write_with_response: false
   # Stop only sets the speed to 0; the depth window is left alone, so exactly one frame is written.
   - !Messages
       device_index: 0

@@ -99,18 +99,21 @@ async def run_s2(c, dev, frames_path):
         got = [h for _, h in await settle(frames_path, before)]
         results.append((label, expected, got))
 
-    # Oscillate/0 speed 50 % (step count 100) -> CC 03 32 35
+    # Two-slider layout: 0 speed (Oscillate), 1 depth, 2 stroke width (0..100, minimum 10), 3 run mode, 4 preset mode.
+    # Speed 50 % (step count 100) -> CC 03 32 35
     await step("speed 0.5", lambda: c.scalar(idx, 0, 0.5, "Oscillate"), ["CC 03 32 35"])
-    await step("stroke start 0.2", lambda: c.scalar(idx, 1, 0.2, "Position"), ["CC 07 14 1B"])
-    await step("stroke end 0.8", lambda: c.scalar(idx, 2, 0.8, "Position"), ["CC 08 50 58"])
-    await step("position 0.5", lambda: c.scalar(idx, 3, 0.5, "Position"), ["CC 0A 32 3C"])
-    await step("smoothness 0.5 (of 10)", lambda: c.scalar(idx, 4, 0.5, "Position"), ["CC 09 05 0E"])
-    await step("run mode manual", lambda: c.scalar(idx, 5, 1.0, "Position"), ["CC 01 A1 A2"])
-    await step("run mode auto", lambda: c.scalar(idx, 5, 0.0, "Position"), ["CC 01 A0 A1"])
-    await step("preset mode 3 (3/8)", lambda: c.scalar(idx, 6, 3 / PRESET_MODE_MAX, "Position"), ["CC 04 03 07"])
-    await step("preset mode 3 again (server de-dupes identical commands)", lambda: c.scalar(idx, 6, 3 / PRESET_MODE_MAX, "Position"), [])
-    await step("preset mode 0 then 3 (how MultiFunPlayer re-selects)", lambda: (c.scalar(idx, 6, 0.0, "Position")), [])
-    await step("preset mode 3 after 0", lambda: c.scalar(idx, 6, 3 / PRESET_MODE_MAX, "Position"), ["CC 04 03 07"])
+    await step("depth 1.0 (window 60..100, end first)", lambda: c.scalar(idx, 1, 1.0, "Position"), ["CC 08 64 6C", "CC 07 3C 43"])
+    await step("depth 0.0 (window 0..40, start first)", lambda: c.scalar(idx, 1, 0.0, "Position"), ["CC 07 00 07", "CC 08 28 30"])
+    await step("width 0 -> clamped to 10 at depth 0 (window 0..10)", lambda: c.scalar(idx, 2, 0.0, "Position"), ["CC 08 0A 12", "CC 07 00 07"])
+    await step("width 100 at depth 0 (window 0..100)", lambda: c.scalar(idx, 2, 1.0, "Position"), ["CC 08 64 6C", "CC 07 00 07"])
+    await step("width 40 again (window 0..40)", lambda: c.scalar(idx, 2, 0.4, "Position"), ["CC 08 28 30", "CC 07 00 07"])
+    await step("depth 0.5 at width 40 (window 30..70)", lambda: c.scalar(idx, 1, 0.5, "Position"), ["CC 08 46 4E", "CC 07 1E 25"])
+    await step("run mode manual", lambda: c.scalar(idx, 3, 1.0, "Position"), ["CC 01 A1 A2"])
+    await step("run mode auto", lambda: c.scalar(idx, 3, 0.0, "Position"), ["CC 01 A0 A1"])
+    await step("preset mode 3 (3/8)", lambda: c.scalar(idx, 4, 3 / PRESET_MODE_MAX, "Position"), ["CC 04 03 07"])
+    await step("preset mode 3 again (server de-dupes identical commands)", lambda: c.scalar(idx, 4, 3 / PRESET_MODE_MAX, "Position"), [])
+    await step("preset mode 0 (sends nothing)", lambda: c.scalar(idx, 4, 0.0, "Position"), [])
+    await step("preset mode 3 after 0 (how MultiFunPlayer re-selects)", lambda: c.scalar(idx, 4, 3 / PRESET_MODE_MAX, "Position"), ["CC 04 03 07"])
     await step("stop (speed 0 only)", lambda: c.stop(idx), ["CC 03 00 03"])
     return actuators, results
 

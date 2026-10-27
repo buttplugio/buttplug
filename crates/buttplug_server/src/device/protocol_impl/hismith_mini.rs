@@ -45,8 +45,15 @@ const MIN_STROKE_GAP: u8 = 10;
 // Simple two-slider S2 (speed + depth): the single Position feature at index 1 is "depth". Depth
 // 0..100 slides a stroke window of DEPTH_WINDOW_WIDTH along the machine's travel (0 = shallow
 // end, 100 = deep end): 0 -> 0..40, 50 -> 30..70, 100 -> 60..100.
+//
+// The two-slider S2 can also carry "stroke width" (index 2, window size 0-100, clamped to 10), "run mode"
+// (index 3) and "preset mode" (index 4); the layout is recognised by its Position feature count
+// (1 or 4) and uses fixed indices, see handle_output_position_cmd.
 const POSITION_FEATURE_DEPTH: u32 = 1;
+const POSITION_FEATURE_WIDTH: u32 = 2;
 const DEPTH_WINDOW_WIDTH: u8 = 40;
+// Same minimum as MIN_STROKE_GAP: the official app never lets the window get narrower.
+const MIN_WINDOW_WIDTH: u8 = 10;
 
 // Lube Launcher / "PiuPiu" (model 4002): one CC 0B 01 0C frame is one squirt. The app repeats the
 // frame every 100 ms while its button is held and never sends the "off" frame, so we only fire
@@ -131,8 +138,10 @@ impl ProtocolInitializer for HismithMiniInitializer {
     Ok(Arc::new(HismithMini {
       stroke_start: AtomicU8::new(0),
       stroke_end: AtomicU8::new(100),
-      depth_axis: has_oscillate && position_features == 1,
+      depth_axis: has_oscillate && (position_features == 1 || position_features == 4),
       depth_sent: AtomicBool::new(false),
+      window_width: AtomicU8::new(DEPTH_WINDOW_WIDTH),
+      depth_value: AtomicU8::new(0),
       last_spray: Mutex::new(None),
       dual_vibe: device_definition
         .features()
@@ -162,6 +171,10 @@ pub struct HismithMini {
   // The machine's real window is unknown until the first depth command, so that one always writes
   // both limits; later ones skip identical windows.
   depth_sent: AtomicBool,
+  // Width of the sliding window (default DEPTH_WINDOW_WIDTH) and the last depth 0..100, so that a
+  // width change can re-place the window.
+  window_width: AtomicU8,
+  depth_value: AtomicU8,
   last_spray: Mutex<Option<Instant>>,
 }
 
@@ -169,12 +182,31 @@ impl HismithMini {
   // Slide the stroke window for a depth value 0..100. The two limits are written in the order that
   // keeps the window valid while it moves: deeper = end first, shallower = start first.
   fn depth_window(&self, feature_id: Uuid, depth: u32) -> Vec<HardwareCommand> {
-    let span = (100 - DEPTH_WINDOW_WIDTH) as u32;
-    let start = ((depth.min(100) * span + 50) / 100) as u8;
-    let end = start + DEPTH_WINDOW_WIDTH;
-    let old_start = self.stroke_start.load(Ordering::Relaxed);
+    let depth = depth.min(100) as u8;
+    self.depth_value.store(depth, Ordering::Relaxed);
     let first = !self.depth_sent.swap(true, Ordering::Relaxed);
-    if !first && start == old_start {
+    self.place_window(feature_id, first)
+  }
+
+  // Change the window width (10..100) and re-place the window for the last depth. Always writes.
+  fn window_width_cmd(&self, feature_id: Uuid, width: u32) -> Vec<HardwareCommand> {
+    let width = width.clamp(MIN_WINDOW_WIDTH as u32, 100) as u8;
+    if self.window_width.swap(width, Ordering::Relaxed) == width && self.depth_sent.load(Ordering::Relaxed) {
+      return vec![];
+    }
+    self.depth_sent.store(true, Ordering::Relaxed);
+    self.place_window(feature_id, true)
+  }
+
+  fn place_window(&self, feature_id: Uuid, force: bool) -> Vec<HardwareCommand> {
+    let width = self.window_width.load(Ordering::Relaxed);
+    let span = (100 - width) as u32;
+    let depth = self.depth_value.load(Ordering::Relaxed) as u32;
+    let start = ((depth * span + 50) / 100) as u8;
+    let end = start + width;
+    let old_start = self.stroke_start.load(Ordering::Relaxed);
+    let old_end = self.stroke_end.load(Ordering::Relaxed);
+    if !force && start == old_start && end == old_end {
       return vec![];
     }
     self.stroke_start.store(start, Ordering::Relaxed);
@@ -220,6 +252,8 @@ impl Default for HismithMini {
       stroke_end: AtomicU8::new(100),
       depth_axis: false,
       depth_sent: AtomicBool::new(false),
+      window_width: AtomicU8::new(DEPTH_WINDOW_WIDTH),
+      depth_value: AtomicU8::new(0),
       last_spray: Mutex::new(None),
     }
   }
@@ -346,6 +380,15 @@ impl ProtocolHandler for HismithMini {
     if self.depth_axis && feature_index == POSITION_FEATURE_DEPTH {
       return Ok(self.depth_window(feature_id, position));
     }
+    if self.depth_axis && feature_index == POSITION_FEATURE_WIDTH {
+      return Ok(self.window_width_cmd(feature_id, position));
+    }
+    // two-slider layout: index 3 = run mode, index 4 = preset mode
+    let feature_index = match (self.depth_axis, feature_index) {
+      (true, 3) => POSITION_FEATURE_RUN_MODE,
+      (true, 4) => POSITION_FEATURE_PRESET_MODE,
+      _ => feature_index,
+    };
 
     // The run mode command is the only one with a fixed value pair: CC 01 A0 / CC 01 A1.
     if feature_index == POSITION_FEATURE_RUN_MODE {
@@ -649,6 +692,56 @@ mod test {
       2
     );
     assert!(handler.handle_output_position_cmd(1, Uuid::nil(), 0).unwrap().is_empty());
+  }
+
+  #[test]
+  fn width_10_at_deepest_is_a_90_to_100_window() {
+    let handler = depth_handler();
+    handler.handle_output_position_cmd(1, Uuid::nil(), 100).unwrap();
+    let cmds = handler.handle_output_position_cmd(2, Uuid::nil(), 10).unwrap();
+    // start moves deeper (60 -> 90): end first, then start
+    assert_eq!(
+      writes(cmds),
+      vec![vec![0xCC, 0x08, 0x64, 0x6C], vec![0xCC, 0x07, 0x5A, 0x61]]
+    );
+  }
+
+  #[test]
+  fn width_is_clamped_to_10_and_repeat_is_ignored() {
+    let handler = depth_handler();
+    handler.handle_output_position_cmd(1, Uuid::nil(), 100).unwrap();
+    handler.handle_output_position_cmd(2, Uuid::nil(), 0).unwrap();
+    assert_eq!(handler.window_width.load(Ordering::Relaxed), MIN_WINDOW_WIDTH);
+    assert!(handler.handle_output_position_cmd(2, Uuid::nil(), 3).unwrap().is_empty());
+  }
+
+  #[test]
+  fn depth_uses_the_current_width() {
+    let handler = depth_handler();
+    handler.handle_output_position_cmd(2, Uuid::nil(), 10).unwrap();
+    let cmds = handler.handle_output_position_cmd(1, Uuid::nil(), 100).unwrap();
+    assert_eq!(
+      writes(cmds),
+      vec![vec![0xCC, 0x08, 0x64, 0x6C], vec![0xCC, 0x07, 0x5A, 0x61]]
+    );
+  }
+
+  #[test]
+  fn two_slider_layout_run_and_preset_mode_use_indices_3_and_4() {
+    let handler = depth_handler();
+    assert_eq!(
+      written(handler.handle_output_position_cmd(3, Uuid::nil(), 0).unwrap()),
+      vec![0xCC, 0x01, 0xA0, 0xA1]
+    );
+    assert_eq!(
+      written(handler.handle_output_position_cmd(3, Uuid::nil(), 1).unwrap()),
+      vec![0xCC, 0x01, 0xA1, 0xA2]
+    );
+    assert_eq!(
+      written(handler.handle_output_position_cmd(4, Uuid::nil(), 3).unwrap()),
+      vec![0xCC, 0x04, 0x03, 0x07]
+    );
+    assert!(handler.handle_output_position_cmd(4, Uuid::nil(), 0).unwrap().is_empty());
   }
 
   #[test]

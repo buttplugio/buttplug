@@ -40,6 +40,45 @@
                   ]
                 }
               }
+            },
+            {
+              "description": "Stroke width (size of the depth window, 0-100; the machine never goes below 10)",
+              "base_id": "2b0c39a1-6f6f-4ed1-8c2d-4c1f6a1f7a10",
+              "id": "c1c0a7d2-3a51-4a39-9b43-0e8d1f6a7b01",
+              "output": {
+                "position": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Run mode (0 = auto, 1 = manual)",
+              "base_id": "d30b2ece-bac4-4223-8670-629902524494",
+              "id": "c1c0a7d2-3a51-4a39-9b43-0e8d1f6a7b02",
+              "output": {
+                "position": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Preset mode (1-8, 0 = none)",
+              "base_id": "694ff338-bd50-42a4-bfbb-b142cc33644d",
+              "id": "c1c0a7d2-3a51-4a39-9b43-0e8d1f6a7b03",
+              "output": {
+                "position": {
+                  "value": [
+                    0,
+                    8
+                  ]
+                }
+              }
             }
           ],
           "base_id": "330de697-9702-4bc7-89d6-3faf603f0238",

@@ -1,17 +1,15 @@
 # End-to-end check without hardware
 
-> **Note:** since the "two sliders" change the stock HISMITH S2 definition is only speed (Oscillate,
-> index 0) and depth (Position, index 1; depth 0..100 slides a 40-wide stroke window). The checks
-> below were recorded against the earlier seven-actuator S2 and use `user-config-websocket.json`,
-> which still describes those seven features; they have not been re-run or updated for the new
-> definition. The unit and device tests for the new behaviour are in `hismith_mini.rs` and
-> `test_hismith_servo_depth.yaml`.
+> The stock HISMITH S2 definition has five features: speed (Oscillate, index 0), depth (Position,
+> 1; 0..100 slides a stroke window), stroke width (Position, 2; clamped to a minimum of 10), run
+> mode (Position, 3; 0 auto / 1 manual) and preset mode (Position, 4; 0..8). `v3_client_check.py`
+> checks exactly these.
 
 `run_e2e.sh` builds `intiface_engine` from this fork, starts it with the **websocket device**
 hardware manager, connects a fake HISMITH S2 (then a fake Lube Launcher) to it, and drives the
 server with a spec v3 client that sends the same JSON MultiFunPlayer / Buttplug.Net sends. The
 fake device prints every frame the server writes; the client compares them with the expected
-`CC ..` bytes (speed, stroke window, position, smoothness, run mode, preset modes, stop, spray,
+`CC ..` bytes (speed, stroke window, window width, run mode, preset modes, stop, spray,
 de-duplication and the 100 ms spray rate limit).
 
 ```
@@ -45,3 +43,15 @@ key press, sequence step and voice command shows up as bytes in the fake device'
   `1` -> second shot; `1,0,1` inside 100 ms -> one shot (rate limit); Stop -> nothing.
 * The live `DeviceAdded` of both devices parses with the Buttplug.Net client library MultiFunPlayer
   uses (7 and 1 scalar actuators).
+
+## Last recorded run (Linux, this fork, no hardware)
+
+`run_e2e.sh`: **PASS** for both fake devices.
+
+* S2 (5 features): `CC 03 32 35`; depth 1.0 -> `CC 08 64 6C`, `CC 07 3C 43`; depth 0.0 -> `CC 07 00 07`,
+  `CC 08 28 30`; width 0 (clamped to 10) -> `CC 08 0A 12`, `CC 07 00 07`; width 100 -> `CC 08 64 6C`,
+  `CC 07 00 07`; width 40 -> `CC 08 28 30`, `CC 07 00 07`; depth 0.5 at width 40 -> `CC 08 46 4E`,
+  `CC 07 1E 25`; run mode `CC 01 A1 A2` / `CC 01 A0 A1`; preset 3 -> `CC 04 03 07` (identical repeat and
+  `0` send nothing); Stop -> only `CC 03 00 03`.
+* Lube Launcher unchanged: `1` -> `CC 0B 01 0C`; repeats and `0` -> nothing; `1,0,1` inside 100 ms -> one shot.
+* The live `DeviceAdded` of the S2 (5 scalar actuators) parses with Buttplug.Net.

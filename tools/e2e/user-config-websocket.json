@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 63
+    "minor": 67
   },
   "user_configs": {
     "protocols": {
@@ -22,6 +22,73 @@
       }
     },
     "devices": [
+      {
+        "identifier": {
+          "protocol": "hismith-mini",
+          "identifier": "1101",
+          "address": "fake-hismith-s2"
+        },
+        "config": {
+          "id": "3666e31b-83d9-4cd9-85b1-d5e69b7e582d",
+          "base_id": "330de697-9702-4bc7-89d6-3faf603f0238",
+          "features": [
+            {
+              "id": "24e4257f-1ee6-4246-9a63-4c3f605056aa",
+              "base_id": "6c2d8c56-4fbf-4578-bbe8-c40b97e9d313",
+              "output": {
+                "oscillate": {
+                  "disabled": false
+                }
+              }
+            },
+            {
+              "id": "ebdff47e-e861-4dfb-a225-295cad3e15c7",
+              "base_id": "89e29d8a-9b97-45f5-b97a-a9912b55cdde",
+              "output": {
+                "position": {
+                  "disabled": false,
+                  "reverse": false
+                }
+              }
+            },
+            {
+              "id": "4f451a65-ae6e-407f-a5c3-b4c16163310c",
+              "base_id": "2b0c39a1-6f6f-4ed1-8c2d-4c1f6a1f7a10",
+              "output": {
+                "position": {
+                  "disabled": false,
+                  "reverse": false
+                }
+              }
+            },
+            {
+              "id": "1929abcd-a9ab-425f-bb59-da44e4fb8194",
+              "base_id": "d30b2ece-bac4-4223-8670-629902524494",
+              "output": {
+                "position": {
+                  "disabled": false,
+                  "reverse": false
+                }
+              }
+            },
+            {
+              "id": "8add44b6-7cb3-4ebe-87c0-91cb854124c5",
+              "base_id": "694ff338-bd50-42a4-bfbb-b142cc33644d",
+              "output": {
+                "position": {
+                  "disabled": false,
+                  "reverse": false
+                }
+              }
+            }
+          ],
+          "user_config": {
+            "allow": false,
+            "deny": false,
+            "index": 0
+          }
+        }
+      },
       {
         "identifier": {
           "protocol": "hismith-mini",
@@ -50,93 +117,6 @@
             "allow": false,
             "deny": false,
             "index": 1
-          }
-        }
-      },
-      {
-        "identifier": {
-          "protocol": "hismith-mini",
-          "identifier": "1101",
-          "address": "fake-hismith-s2"
-        },
-        "config": {
-          "id": "56452ea5-2b52-421d-8532-608da767b057",
-          "base_id": "330de697-9702-4bc7-89d6-3faf603f0238",
-          "features": [
-            {
-              "id": "f4bd40b9-730b-4b9e-aa2a-3b64fb619d8e",
-              "base_id": "6c2d8c56-4fbf-4578-bbe8-c40b97e9d313",
-              "output": {
-                "oscillate": {
-                  "disabled": false
-                }
-              }
-            },
-            {
-              "id": "e6a6215c-616b-411a-b5b8-f7a394bf8b9a",
-              "base_id": "89e29d8a-9b97-45f5-b97a-a9912b55cdde",
-              "output": {
-                "position": {
-                  "disabled": false,
-                  "reverse": false
-                }
-              }
-            },
-            {
-              "id": "77366e71-3755-4f0a-9af3-a0ba19c49ebc",
-              "base_id": "867c86aa-fdda-447d-bcd2-85a27f346a23",
-              "output": {
-                "position": {
-                  "disabled": false,
-                  "reverse": false
-                }
-              }
-            },
-            {
-              "id": "edc2064a-cc90-49cb-82e6-f5e05756722a",
-              "base_id": "5b1c1185-2c2d-42d2-9e9c-b864483eb0ca",
-              "output": {
-                "position": {
-                  "disabled": false,
-                  "reverse": false
-                }
-              }
-            },
-            {
-              "id": "7ac34137-76ee-4146-a71b-aa088a785a5c",
-              "base_id": "764c3f85-894b-40e2-b6c4-5448a48b1439",
-              "output": {
-                "position": {
-                  "disabled": false,
-                  "reverse": false
-                }
-              }
-            },
-            {
-              "id": "23fd76fe-fa05-4e39-9cb5-30163c95e27f",
-              "base_id": "d30b2ece-bac4-4223-8670-629902524494",
-              "output": {
-                "position": {
-                  "disabled": false,
-                  "reverse": false
-                }
-              }
-            },
-            {
-              "id": "1a1c766f-1609-4c67-9ad8-79e0ce98ad7a",
-              "base_id": "694ff338-bd50-42a4-bfbb-b142cc33644d",
-              "output": {
-                "position": {
-                  "disabled": false,
-                  "reverse": false
-                }
-              }
-            }
-          ],
-          "user_config": {
-            "allow": false,
-            "deny": false,
-            "index": 0
           }
         }
       }
