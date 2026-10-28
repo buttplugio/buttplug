@@ -120,6 +120,7 @@ pub mod tingon;
 pub mod tryfun;
 pub mod tryfun_blackhole;
 pub mod tryfun_meta2;
+pub mod tryfun_rock;
 pub mod umove;
 pub mod utimi;
 pub mod vibcrafter;
@@ -570,6 +571,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     tryfun_meta2::setup::TryFunMeta2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    tryfun_rock::setup::TryFunRockIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
