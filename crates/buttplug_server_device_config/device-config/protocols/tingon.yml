@@ -1,0 +1,24 @@
+---
+defaults:
+  name: Tingon Device
+  features:
+  - id: 8f39a485-1f3a-4138-a393-f04498df55e3
+    output:
+      oscillate:
+        value:
+        - 0
+        - 10
+    index: 0
+  id: 3d883278-759f-423f-b81d-00fd6551bc8f
+configurations:
+- identifier:
+  - XiYu
+  name: Tingon
+  id: fbc4014a-a72a-4bc4-bd94-e3692416260a
+communication:
+- btle:
+    names:
+    - XiYu
+    services:
+      0000ee01-0000-1000-8000-00805f9b34fb:
+        tx: 0000ee02-0000-1000-8000-00805f9b34fb
