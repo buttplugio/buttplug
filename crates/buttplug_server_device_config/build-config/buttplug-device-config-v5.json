@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 60
+    "minor": 62
   },
   "protocols": {
     "activejoy": {
@@ -23947,6 +23947,49 @@
         "id": "ccbbda59-cf58-477e-b1b2-e0897c4bb0ce",
         "message_gap_ms": 50,
         "name": "The Handy (FW4+)"
+      }
+    },
+    "tingon": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "XiYu"
+            ],
+            "services": {
+              "0000ee01-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ee02-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "fbc4014a-a72a-4bc4-bd94-e3692416260a",
+          "identifier": [
+            "XiYu"
+          ],
+          "name": "Tingon"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "8f39a485-1f3a-4138-a393-f04498df55e3",
+            "index": 0,
+            "output": {
+              "oscillate": {
+                "value": [
+                  0,
+                  10
+                ]
+              }
+            }
+          }
+        ],
+        "id": "3d883278-759f-423f-b81d-00fd6551bc8f",
+        "name": "Tingon Device"
       }
     },
     "tryfun": {

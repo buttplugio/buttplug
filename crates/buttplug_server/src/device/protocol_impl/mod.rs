@@ -114,6 +114,7 @@ pub mod synchro;
 pub mod tcode_v03;
 pub mod thehandy;
 pub mod thehandy_v3;
+pub mod tingon;
 pub mod tryfun;
 pub mod tryfun_blackhole;
 pub mod tryfun_meta2;
@@ -553,6 +554,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     synchro::setup::SynchroIdentifierFactory::default(),
   );
+  add_to_protocol_map(&mut map, tingon::setup::TingonIdentifierFactory::default());
   add_to_protocol_map(&mut map, tryfun::setup::TryFunIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
