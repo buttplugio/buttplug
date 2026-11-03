@@ -65,7 +65,11 @@ const HEAT_WRITE_GAP: Duration = Duration::from_millis(250);
 
 /// How long to leave the line quiet after writing `frame`.
 fn gap_after(frame: &[u8]) -> Duration {
-  if frame.get(1) == Some(&0x04) { HEAT_WRITE_GAP } else { WRITE_GAP }
+  if frame.get(1) == Some(&0x04) {
+    HEAT_WRITE_GAP
+  } else {
+    WRITE_GAP
+  }
 }
 const MOTOR: usize = 0;
 const HEAT: usize = 1;
@@ -88,7 +92,9 @@ impl Pacer {
         async_manager::sleep(gap).await;
         pacer.drain().await;
       });
-      return Some(HardwareWriteCmd::new(&[VELVET_PROTOCOL_UUID], Endpoint::Tx, frame, false).into());
+      return Some(
+        HardwareWriteCmd::new(&[VELVET_PROTOCOL_UUID], Endpoint::Tx, frame, false).into(),
+      );
     }
     self.slots.lock().expect("velvet pacer lock")[channel] = Some(frame);
     None
@@ -105,17 +111,30 @@ impl Pacer {
           let gap = gap_after(&frame);
           if let Err(e) = self
             .hardware
-            .write_value(&HardwareWriteCmd::new(&[VELVET_PROTOCOL_UUID], Endpoint::Tx, frame, false))
+            .write_value(&HardwareWriteCmd::new(
+              &[VELVET_PROTOCOL_UUID],
+              Endpoint::Tx,
+              frame,
+              false,
+            ))
             .await
           {
-            warn!("Velvet: write failed (device probably disconnected): {:?}", e);
+            warn!(
+              "Velvet: write failed (device probably disconnected): {:?}",
+              e
+            );
           }
           async_manager::sleep(gap).await;
         }
         None => {
           self.busy.store(false, Ordering::SeqCst);
           // A frame queued between the take and the store would be stranded: pick it up.
-          let pending = self.slots.lock().expect("velvet pacer lock").iter().any(Option::is_some);
+          let pending = self
+            .slots
+            .lock()
+            .expect("velvet pacer lock")
+            .iter()
+            .any(Option::is_some);
           if !(pending && !self.busy.swap(true, Ordering::SeqCst)) {
             return;
           }
@@ -163,14 +182,22 @@ fn motor_frame(motor1: u8, motor2: u8) -> Vec<u8> {
 impl Velvet {
   fn new(hardware: Arc<Hardware>, dual: bool) -> Self {
     Self {
-      pacer: Arc::new(Pacer { hardware, slots: Mutex::new([None, None]), busy: AtomicBool::new(false) }),
+      pacer: Arc::new(Pacer {
+        hardware,
+        slots: Mutex::new([None, None]),
+        busy: AtomicBool::new(false),
+      }),
       dual,
       motors: Arc::new([const { AtomicU8::new(0) }; 2]),
       generation: Arc::new(AtomicU32::new(0)),
     }
   }
 
-  fn send(&self, channel: usize, frame: Vec<u8>) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn send(
+    &self,
+    channel: usize,
+    frame: Vec<u8>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(self.pacer.send(channel, frame).into_iter().collect())
   }
 }
@@ -214,9 +241,13 @@ impl ProtocolHandler for Velvet {
       if current.load(Ordering::SeqCst) != generation {
         return;
       }
-      if let Some(HardwareCommand::Write(cmd)) = pacer.send(MOTOR, motor_frame(after[0], after[1])) {
+      if let Some(HardwareCommand::Write(cmd)) = pacer.send(MOTOR, motor_frame(after[0], after[1]))
+      {
         if let Err(e) = pacer.hardware.write_value(&cmd).await {
-          warn!("Velvet: delayed motor frame failed (device probably disconnected): {:?}", e);
+          warn!(
+            "Velvet: delayed motor frame failed (device probably disconnected): {:?}",
+            e
+          );
         }
       }
     });
@@ -232,7 +263,14 @@ impl ProtocolHandler for Velvet {
     let level = level.clamp(0, 2) as u8;
     self.send(
       HEAT,
-      vec![0xb0, 0x04, if level == 0 { 0x00 } else { 0x01 }, 0x00, level, 0x00],
+      vec![
+        0xb0,
+        0x04,
+        if level == 0 { 0x00 } else { 0x01 },
+        0x00,
+        level,
+        0x00,
+      ],
     )
   }
 
