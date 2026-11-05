@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 69
+    "minor": 71
   },
   "protocols": {
     "activejoy": {
@@ -11397,11 +11397,13 @@
           "btle": {
             "names": [
               "ProWand",
-              "Luxus"
+              "Luxus",
+              "Julio"
             ],
             "services": {
               "00001400-0000-1000-8000-00805f9b34fb": {
-                "tx": "00001401-0000-1000-8000-00805f9b34fb"
+                "tx": "00001401-0000-1000-8000-00805f9b34fb",
+                "txmode": "00001402-0000-1000-8000-00805f9b34fb"
               },
               "0000180f-0000-1000-8000-00805f9b34fb": {
                 "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
@@ -11417,6 +11419,57 @@
             "Luxus"
           ],
           "name": "Luxus"
+        },
+        {
+          "features": [
+            {
+              "id": "781a1aa3-1b0a-46c4-afa1-4e1ee77930e4",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "2ff3e6ae-4156-476d-b6a6-e63f415c4195",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    5
+                  ]
+                }
+              }
+            },
+            {
+              "description": "battery Level",
+              "id": "0b51dfbc-424f-4bb7-9087-f9ec490693d0",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "db9295b5-8cf5-481f-b00c-a88e1a8d02ff",
+          "identifier": [
+            "Julio"
+          ],
+          "name": "Kiiroo Julio"
         }
       ],
       "defaults": {
