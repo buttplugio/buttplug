@@ -1,0 +1,34 @@
+---
+defaults:
+  name: Momonii Skull Man
+  features:
+    - id: ae70b64d-ece2-4ac1-ab3d-c13674271d31
+      output:
+        vibrate:
+          value:
+            - 0
+            - 10
+      index: 0
+    - id: 9771bd76-23bc-4108-81be-f0370eeea453
+      output:
+        oscillate:
+          value:
+            - 0
+            - 2
+      index: 1
+    - id: aa2e5f24-2560-4132-bd61-3998bd251c7e
+      output:
+        temperature:
+          value:
+            - 0
+            - 1
+      index: 2
+  id: e7f48792-d792-401e-8093-6a9c47617c77
+communication:
+- btle:
+    names:
+    - MF414A
+    services:
+      0000ffe0-0000-1000-8000-00805f9b34fb:
+        tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+        rx: 0000ffe2-0000-1000-8000-00805f9b34fb

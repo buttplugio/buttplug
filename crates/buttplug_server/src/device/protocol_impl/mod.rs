@@ -8,6 +8,7 @@
 use std::{collections::HashMap, sync::Arc};
 
 use crate::device::protocol::ProtocolIdentifierFactory;
+use crate::device::protocol_impl::svakom::mononii_skullman;
 
 // Utility mods
 pub mod fleshlight_launch_helper;
@@ -366,6 +367,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     mizzzee_v3::setup::MizzZeeV3IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    mononii_skullman::setup::MononiiSkullmanIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
