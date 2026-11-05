@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 65
+    "minor": 66
   },
   "protocols": {
     "activejoy": {
@@ -60,7 +60,7 @@
           "identifier": [
             "TQ003-BLE-V1.0"
           ],
-          "name": "IntoYou Prostate Massager"
+          "name": "IntoYou Dual Feature Device"
         }
       ],
       "defaults": {
@@ -6393,7 +6393,8 @@
               "J-Tauros",
               "J-Daquan",
               "J-Eudora",
-              "J-Pelor"
+              "J-Pelor",
+              "J-VEGAR"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -11190,6 +11191,41 @@
             "J-Pelor"
           ],
           "name": "JoyHub Pelor"
+        },
+        {
+          "features": [
+            {
+              "description": "Insertable Handle Vibrator",
+              "id": "10bffc00-06b8-41b9-ab1a-d53e463179f6",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Wand Head Vibrator",
+              "id": "4986c4ff-1a79-49a0-a713-60719aafff50",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "3c6b6bc0-dbd3-4667-93ab-9a84e38cf266",
+          "identifier": [
+            "J-VEGAR"
+          ],
+          "name": "JoyHub Vegar"
         }
       ],
       "defaults": {
