@@ -48,6 +48,25 @@ impl ProtocolHandler for KiirooProWand {
     ])
   }
 
+  fn handle_output_oscillate_cmd(
+    &self,
+    _feature_index: u32,
+    feature_id: Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::TxMode,
+        vec![
+          speed as u8,
+        ],
+        false,
+      )
+          .into(),
+    ])
+  }
+
   fn handle_battery_level_cmd(
     &self,
     device_index: u32,
