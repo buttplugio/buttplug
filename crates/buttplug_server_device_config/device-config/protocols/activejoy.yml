@@ -1,6 +1,6 @@
 ---
 defaults:
-  name: IntoYou Remote Egg Vibrator
+  name: IntoYou Device
   features:
   - id: 1fec4773-16a2-4bec-8910-1fcd9a85edaf
     output:
@@ -9,11 +9,36 @@ defaults:
         - 0
         - 255
     index: 0
+  id: a68856ef-ac5e-4082-9f53-eb110d498558
+configurations:
+- identifier:
+    - SS-TD-YDTD-001
+  name: IntoYou Vibrator
   id: 62e7b76d-ab99-42ca-89ea-865a6072451e
+- identifier:
+  - TQ003-BLE-V1.0
+  name: IntoYou Dual Feature Device
+  features:
+    - id: 06e88333-a9da-4af2-a824-31ddcf81e648
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 023b796d-66e4-42b5-b0ce-be3e74ac07ad
+      output:
+        rotate:
+          value:
+            - 0
+            - 255
+      index: 1
+  id: 1f544a4c-62d5-4b71-9e4e-e168506241c2
 communication:
 - btle:
     names:
     - SS-TD-YDTD-001
+    - TQ003-BLE-V1.0
     services:
       0000f0b0-0000-1000-8000-00805f9b34fb:
         tx: 0000f0b1-0000-1000-8000-00805f9b34fb

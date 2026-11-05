@@ -1,7 +1,7 @@
 devices:
   - identifier: 
       name: "SS-TD-YDTD-001"
-    expected_name: "IntoYou Remote Egg Vibrator"
+    expected_name: "IntoYou Vibrator"
 device_commands:
   - !Messages
       device_index: 0

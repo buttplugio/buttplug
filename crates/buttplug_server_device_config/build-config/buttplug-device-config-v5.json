@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 62
+    "minor": 65
   },
   "protocols": {
     "activejoy": {
@@ -9,7 +9,8 @@
         {
           "btle": {
             "names": [
-              "SS-TD-YDTD-001"
+              "SS-TD-YDTD-001",
+              "TQ003-BLE-V1.0"
             ],
             "services": {
               "0000f0b0-0000-1000-8000-00805f9b34fb": {
@@ -18,6 +19,48 @@
               }
             }
           }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "62e7b76d-ab99-42ca-89ea-865a6072451e",
+          "identifier": [
+            "SS-TD-YDTD-001"
+          ],
+          "name": "IntoYou Vibrator"
+        },
+        {
+          "features": [
+            {
+              "id": "06e88333-a9da-4af2-a824-31ddcf81e648",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "023b796d-66e4-42b5-b0ce-be3e74ac07ad",
+              "index": 1,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "1f544a4c-62d5-4b71-9e4e-e168506241c2",
+          "identifier": [
+            "TQ003-BLE-V1.0"
+          ],
+          "name": "IntoYou Prostate Massager"
         }
       ],
       "defaults": {
@@ -35,8 +78,8 @@
             }
           }
         ],
-        "id": "62e7b76d-ab99-42ca-89ea-865a6072451e",
-        "name": "IntoYou Remote Egg Vibrator"
+        "id": "a68856ef-ac5e-4082-9f53-eb110d498558",
+        "name": "IntoYou Device"
       }
     },
     "adrienlastic": {

@@ -43,4 +43,28 @@ impl ProtocolHandler for ActiveJoy {
       .into(),
     ])
   }
+  fn handle_output_rotate_cmd(
+    &self,
+    feature_index: u32,
+    feature_id: Uuid,
+    speed: i32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        [
+          0xb0,                // static header
+          0x0a,                // mode: 1=vibe, 5=shock, 6=thrust, 7=suction, 8=rotation, 16=swing,
+          0x01,                // strong mode = 1 (thrust, suction, swing, rotate)
+          feature_index as u8, // 0 unless vibe2
+          if speed == 0 { 0x00 } else { 0x01 },
+          speed as u8,
+        ]
+            .to_vec(),
+        false,
+      )
+          .into(),
+    ])
+  }
 }
