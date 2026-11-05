@@ -2787,6 +2787,27 @@ configurations:
             - 255
       index: 1
   id: 32bdb5c1-ff98-43cf-8c18-b2d5e7b891ee
+- identifier:
+    - J-VEGAR
+  name: JoyHub Vegar
+  features:
+    - id: 10bffc00-06b8-41b9-ab1a-d53e463179f6
+      description: Insertable Handle Vibrator
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 4986c4ff-1a79-49a0-a713-60719aafff50
+      description: Wand Head Vibrator
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+  id: 3c6b6bc0-dbd3-4667-93ab-9a84e38cf266
 communication:
 - btle:
     names:
@@ -2952,6 +2973,7 @@ communication:
     - J-Daquan
     - J-Eudora
     - J-Pelor
+    - J-VEGAR
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
