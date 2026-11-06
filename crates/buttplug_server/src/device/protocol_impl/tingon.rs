@@ -4,7 +4,7 @@
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
-use uuid::{Uuid};
+use uuid::Uuid;
 
 use crate::device::{
   hardware::{HardwareCommand, HardwareWriteCmd},
@@ -16,8 +16,7 @@ use buttplug_server_device_config::Endpoint;
 generic_protocol_setup!(Tingon, "tingon");
 
 #[derive(Default)]
-pub struct Tingon {
-}
+pub struct Tingon {}
 
 impl ProtocolHandler for Tingon {
   fn handle_output_oscillate_cmd(
@@ -26,12 +25,20 @@ impl ProtocolHandler for Tingon {
     feature_id: Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, vec![
-      0x0A,
-      0x02, // Oscillation
-      0x02, // Unknown
-      0x65, // 0x60 Unknown && 0x05 full range
-      speed as u8
-    ], true).into()])
+    Ok(vec![
+      HardwareWriteCmd::new(
+        &[feature_id],
+        Endpoint::Tx,
+        vec![
+          0x0A,
+          0x02, // Oscillation
+          0x02, // Unknown
+          0x65, // 0x60 Unknown && 0x05 full range
+          speed as u8,
+        ],
+        true,
+      )
+      .into(),
+    ])
   }
 }

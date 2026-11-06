@@ -61,10 +61,10 @@ impl ProtocolHandler for ActiveJoy {
           if speed == 0 { 0x00 } else { 0x01 },
           speed as u8,
         ]
-            .to_vec(),
+        .to_vec(),
         false,
       )
-          .into(),
+      .into(),
     ])
   }
 }
