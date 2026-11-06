@@ -61,20 +61,28 @@ impl ProtocolHandler for MononiiSkullman {
         [0x55, 0x08, 0x00, 0x00, speed as u8, 0x00].to_vec(),
         false,
       )
-          .into(),
+      .into(),
     ])
   }
 
-  fn handle_output_temperature_cmd(&self, _feature_index: u32, feature_id: Uuid, level: i32) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn handle_output_temperature_cmd(
+    &self,
+    _feature_index: u32,
+    feature_id: Uuid,
+    level: i32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![
       HardwareWriteCmd::new(
         &[feature_id],
         Endpoint::Tx,
-        if level == 0 { vec![0x55, 0x05, 0x00, 0x00, 0x00, 0x00]} else {
-        vec![0x55, 0x05, 0x01, 0x37, 0x00, 0x00] },
+        if level == 0 {
+          vec![0x55, 0x05, 0x00, 0x00, 0x00, 0x00]
+        } else {
+          vec![0x55, 0x05, 0x01, 0x37, 0x00, 0x00]
+        },
         false,
       )
-          .into(),
+      .into(),
     ])
   }
 }

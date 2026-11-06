@@ -55,15 +55,7 @@ impl ProtocolHandler for KiirooProWand {
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![
-      HardwareWriteCmd::new(
-        &[feature_id],
-        Endpoint::TxMode,
-        vec![
-          speed as u8,
-        ],
-        false,
-      )
-          .into(),
+      HardwareWriteCmd::new(&[feature_id], Endpoint::TxMode, vec![speed as u8], false).into(),
     ])
   }
 
