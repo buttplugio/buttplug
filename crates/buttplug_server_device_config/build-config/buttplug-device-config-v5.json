@@ -6348,7 +6348,8 @@
               "J-Prax",
               "J-Poptint",
               "J-Tauros",
-              "J-Daquan"
+              "J-Daquan",
+              "J-Ping"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -11105,7 +11106,64 @@
             "J-Daquan"
           ],
           "name": "JoyHub Daquan"
-        }
+        },
+        {
+          "features": [
+            {
+              "id": "d93a6ed9-f519-41bb-a2b4-fbef3378f842",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "de008517-104e-46cb-9486-a8c25b7f5605",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "6649085d-6397-45ef-ac69-71f6cc7468c2",
+              "index": 2,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "86fb9d22-2a48-4eb9-bd53-2729a4957cca",
+              "index": 3,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "682ea18f-398e-4b32-9d73-dd6abd6aef06",
+          "identifier": [
+            "J-Ping"
+          ],
+          "name": "JoyHub Ping"
+        } 
       ],
       "defaults": {
         "features": [
