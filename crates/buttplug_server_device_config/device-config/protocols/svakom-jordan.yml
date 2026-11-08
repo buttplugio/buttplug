@@ -14,7 +14,7 @@ defaults:
       oscillate:
         value:
         - 0
-        - 5
+        - 255
     index: 1
   id: 89877d1d-9a8f-4265-93d7-7dbe4c093a58
 communication:

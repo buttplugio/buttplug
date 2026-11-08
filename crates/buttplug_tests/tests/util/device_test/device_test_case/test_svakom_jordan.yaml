@@ -1,0 +1,55 @@
+devices:
+  - identifier:
+      name: "Jordan"
+    expected_name: "Svakom Jordan"
+device_commands:
+  # Vibrate only: 0.5 of 0-10 -> 5
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 0
+            Scalar: 0.5
+            ActuatorType: Vibrate
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x03, 0x00, 0x00, 0x01, 0x05, 0x00]
+            write_with_response: false
+  # Oscillate: master level (0.5 of 0-255 -> 128), then restore vibrate (5)
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 1
+            Scalar: 0.5
+            ActuatorType: Oscillate
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x04, 0x00, 0x00, 0x00, 0x80, 0xaa]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x03, 0x00, 0x00, 0x01, 0x05, 0x00]
+            write_with_response: false
+  # Stop: vibrate off, thrust off (dedicated 0x08 frame)
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00]
+            write_with_response: false

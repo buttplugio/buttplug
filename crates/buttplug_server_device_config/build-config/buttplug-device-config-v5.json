@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 83
+    "minor": 84
   },
   "protocols": {
     "activejoy": {
@@ -23036,7 +23036,7 @@
               "oscillate": {
                 "value": [
                   0,
-                  5
+                  255
                 ]
               }
             }
