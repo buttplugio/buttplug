@@ -2808,6 +2808,39 @@ configurations:
             - 255
       index: 1
   id: 3c6b6bc0-dbd3-4667-93ab-9a84e38cf266
+- identifier:
+    - J-Ping
+  name: JoyHub Ping
+  features:
+    - id: afc2dd16-2fb7-4b38-b148-73e444da4bb3
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: cd664b76-8001-4c2f-bd09-290940f2f8b3
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 1
+    - id: cd664b76-8001-4c2f-bd09-290940f2f8b3
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 2
+    - id: 7804b8aa-1912-4a66-ad2f-d40e6e4989fe
+      output:
+        temperature:
+          value:
+            - 0
+            - 1
+      index: 6
+  id: 8dce2c37-d04d-47f1-aa35-3ff129e65f67
 communication:
 - btle:
     names:
@@ -2974,6 +3007,7 @@ communication:
     - J-Eudora
     - J-Pelor
     - J-VEGAR
+    - J-Ping
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb
