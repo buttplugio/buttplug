@@ -1,0 +1,39 @@
+# Velvet Eclipse (2 motors): the firmware ignores a change of which motor runs
+# unless it gets the zero frame first (300 ms message gap, see velvet.yml).
+devices:
+  - identifier:
+      name: "VR-Eclipse"
+    expected_name: "Velvet Eclipse"
+device_commands:
+  # Eclipse: outer motor alone.
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xb0, 0x03, 0x00, 0x00, 0x00, 0x80, 0xaa]
+            write_with_response: false
+  # Eclipse: insertable motor joins, so the zero frame goes first.
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 1
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xb0, 0x03, 0x00, 0x00, 0x00, 0x00, 0xaa]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [0xb0, 0x03, 0x00, 0x00, 0x80, 0x80, 0xaa]
+            write_with_response: false

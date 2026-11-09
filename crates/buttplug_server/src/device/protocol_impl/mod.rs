@@ -119,6 +119,7 @@ pub mod tryfun_blackhole;
 pub mod tryfun_meta2;
 pub mod umove;
 pub mod utimi;
+pub mod velvet;
 pub mod vibcrafter;
 pub mod vibio;
 pub mod vibratissimo;
@@ -568,6 +569,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
   add_to_protocol_map(&mut map, umove::setup::UmoveIdentifierFactory::default());
   add_to_protocol_map(&mut map, utimi::setup::UtimiIdentifierFactory::default());
+  add_to_protocol_map(&mut map, velvet::setup::VelvetIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     vibcrafter::setup::VibCrafterIdentifierFactory::default(),
