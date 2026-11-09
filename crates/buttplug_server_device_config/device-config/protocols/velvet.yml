@@ -121,7 +121,7 @@ configurations:
   - VR-Aurora
   name: Velvet Aurora
   features:
-  - description: suction
+  - description: suction (air pulse)
     id: 08c45306-750e-419e-8353-d0a8f15c4280
     output:
       vibrate:
@@ -151,7 +151,19 @@ configurations:
 communication:
 - btle:
     names:
-    - VR-*
+    - VR-Pixie
+    - VR-Rouge
+    - VR-Orion
+    - VR-Eon
+    - VR-Vortex
+    - VR-Whisper
+    - VR-Ember
+    - VR-Pearl
+    - VR-Naiomy
+    - VR-Eclipse
+    - VR-Aurora
+    - VR-Estelle
+    - VR-Celeste
     services:
       53306c9a-0b82-4faa-9686-06a720c3b175:
         tx: 8b3c35a4-1d6f-4d15-bb3d-8a8b7b41b4f1
