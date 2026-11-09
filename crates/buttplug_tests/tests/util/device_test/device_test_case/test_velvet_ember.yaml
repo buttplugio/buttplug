@@ -1,0 +1,51 @@
+# Velvet Ember (motor + heat): the firmware drops a frame sent right after a heat
+# frame, so a stop must space motor-off and heat-off (250 ms message gap, see velvet.yml).
+devices:
+  - identifier:
+      name: "VR-Ember"
+    expected_name: "Velvet Ember"
+device_commands:
+  # Ember: motor, then heat high.
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xb0, 0x03, 0x00, 0x00, 0x00, 0x80, 0xaa]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 1
+            Scalar: 1.0
+            ActuatorType: Temperature
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xb0, 0x04, 0x01, 0x00, 0x02, 0x00]
+            write_with_response: false
+  # Ember stop: motor off and heat off both reach the toy.
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xb0, 0x03, 0x00, 0x00, 0x00, 0x00, 0xaa]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [0xb0, 0x04, 0x00, 0x00, 0x00, 0x00]
+            write_with_response: false

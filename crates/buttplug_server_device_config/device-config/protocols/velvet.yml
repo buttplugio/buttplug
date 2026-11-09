@@ -2,6 +2,8 @@
 # Velvet Rituals toys: Cupido firmware family with Velvet's own BLE service (see velvet.rs).
 defaults:
   name: Velvet Device
+  # The firmware drops a frame that follows another too closely.
+  message_gap_ms: 60
   features:
   - description: vibrate
     id: 37467c5c-bce1-4f3a-afc1-d21ffb23ae17
@@ -50,6 +52,8 @@ configurations:
 - identifier:
   - VR-Ember
   name: Velvet Ember
+  # Ember needs 250 ms after a heat frame before it takes the next one.
+  message_gap_ms: 250
   features:
   - description: vibrate
     id: 0df1146d-7441-4697-b7f2-ef4d317c363e
@@ -89,6 +93,8 @@ configurations:
 - identifier:
   - VR-Eclipse
   name: Velvet Eclipse
+  # Switching motors needs the zero frame, then 300 ms, then the new frame.
+  message_gap_ms: 300
   features:
   - description: outer motor
     id: e790ee01-c72c-490b-88e3-e91bd8450b3e

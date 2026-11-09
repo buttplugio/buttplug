@@ -24461,6 +24461,7 @@
           "identifier": [
             "VR-Ember"
           ],
+          "message_gap_ms": 250,
           "name": "Velvet Ember"
         },
         {
@@ -24528,6 +24529,7 @@
           "identifier": [
             "VR-Eclipse"
           ],
+          "message_gap_ms": 300,
           "name": "Velvet Eclipse"
         },
         {
@@ -24620,6 +24622,7 @@
           }
         ],
         "id": "493443d2-7bf4-41ba-84ba-c48d2749b215",
+        "message_gap_ms": 60,
         "name": "Velvet Device"
       }
     },
