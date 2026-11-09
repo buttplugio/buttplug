@@ -187,7 +187,7 @@ async fn main() -> anyhow::Result<()> {
         if percent <= 100 {
           let intensity = percent as f64 / 100.0;
           for device in &devices {
-            if !device.output_available(OutputType::Vibrate) {
+            if device.output_available(OutputType::Vibrate) {
               match device
                 .run_output(&ClientDeviceOutputCommand::Vibrate(intensity.into()))
                 .await
