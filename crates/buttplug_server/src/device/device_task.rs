@@ -98,19 +98,51 @@ pub async fn run_owned_device_task(
 /// Drain every pending command to hardware, returning the last write command so
 /// the caller can record it for keepalive replay. Shared by the batch-deadline
 /// and urgent-flush paths so neither duplicates the flush logic.
+///
+/// With a message gap, writes are also spaced at least that far apart, both
+/// within one flush and from the previous flush (see [`WriteSpacing`]).
 async fn flush_pending(
   hardware: &Hardware,
   pending: &mut VecDeque<HardwareCommand>,
   track_keepalive: bool,
+  spacing: &mut WriteSpacing,
 ) -> Option<HardwareWriteCmd> {
   let mut last_write: Option<HardwareWriteCmd> = None;
   while let Some(cmd) = pending.pop_front() {
+    let is_write = matches!(cmd, HardwareCommand::Write(_));
+    if is_write {
+      spacing.wait().await;
+    }
     let _ = hardware.parse_message(&cmd).await;
+    if is_write {
+      spacing.last_write = Some(Instant::now());
+    }
     if track_keepalive && let HardwareCommand::Write(ref write_cmd) = cmd {
       last_write = Some(write_cmd.clone());
     }
   }
   last_write
+}
+
+/// Keeps batched writes at least the device's message gap apart.
+///
+/// Some firmware drops a frame that arrives right after another one, so a batch
+/// holding writes for two features (or an urgent stop right after a regular
+/// write) would otherwise lose one. Without a message gap this never waits.
+struct WriteSpacing {
+  gap: Option<Duration>,
+  last_write: Option<Instant>,
+}
+
+impl WriteSpacing {
+  async fn wait(&self) {
+    if let (Some(gap), Some(last)) = (self.gap, self.last_write) {
+      let since = last.elapsed();
+      if since < gap {
+        async_manager::sleep(gap - since).await;
+      }
+    }
+  }
 }
 
 async fn run_device_task(
@@ -120,6 +152,10 @@ async fn run_device_task(
 ) {
   let mut hardware_events = hardware.event_stream();
   let device_wait_duration = config.message_gap;
+  let mut spacing = WriteSpacing {
+    gap: device_wait_duration,
+    last_write: None,
+  };
   let requires_keepalive = config.requires_keepalive;
   let strategy = config.keepalive_strategy;
 
@@ -178,7 +214,7 @@ async fn run_device_task(
           // Best-effort flush so a stop sitting in the batch window still lands
           // when our command channel closes (e.g. during shutdown teardown).
           // We are about to break, so keepalive tracking is unnecessary here.
-          let _ = flush_pending(&hardware, &mut pending_commands, false).await;
+          let _ = flush_pending(&hardware, &mut pending_commands, false, &mut spacing).await;
           break;
         };
         let commands = message.commands;
@@ -196,7 +232,7 @@ async fn run_device_task(
             pending_commands.push_back(command);
           }
           if let Some(write) =
-            flush_pending(&hardware, &mut pending_commands, track_keepalive).await
+            flush_pending(&hardware, &mut pending_commands, track_keepalive, &mut spacing).await
           {
             keepalive_packet = Some(write);
           }
@@ -238,7 +274,7 @@ async fn run_device_task(
       _ = batch_fut => {
         trace!("Batch deadline reached, sending {} commands", pending_commands.len());
         if let Some(write) =
-          flush_pending(&hardware, &mut pending_commands, track_keepalive).await
+          flush_pending(&hardware, &mut pending_commands, track_keepalive, &mut spacing).await
         {
           keepalive_packet = Some(write);
         }
@@ -441,5 +477,98 @@ mod tests {
       toggle_count, 2,
       "Both direction toggles must reach hardware"
     );
+  }
+
+  fn spawn_gapped_task(
+    gap_ms: u64,
+  ) -> (
+    Arc<StdMutex<Vec<HardwareWriteCmd>>>,
+    tokio::sync::mpsc::Sender<DeviceTaskMessage>,
+    tokio::task::JoinHandle<()>,
+  ) {
+    let writes = Arc::new(StdMutex::new(Vec::new()));
+    let hardware = Arc::new(Hardware::new(
+      "test",
+      "test-address",
+      &[Endpoint::Tx],
+      &None,
+      false,
+      Box::new(RecordingHardwareInternal::new(writes.clone())),
+    ));
+    let (sender, mut receiver) = tokio::sync::mpsc::channel(16);
+    let config = DeviceTaskConfig {
+      message_gap: Some(Duration::from_millis(gap_ms)),
+      requires_keepalive: false,
+      keepalive_strategy: ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy,
+    };
+    let task = tokio::spawn(async move {
+      run_device_task(hardware, config, &mut receiver).await;
+    });
+    (writes, sender, task)
+  }
+
+  fn write_count(writes: &Arc<StdMutex<Vec<HardwareWriteCmd>>>) -> usize {
+    writes.lock().expect("Test mutex poisoned").len()
+  }
+
+  #[tokio::test]
+  async fn writes_in_one_batch_are_spaced_by_the_message_gap() {
+    let (writes, sender, task) = spawn_gapped_task(100);
+
+    // Two writes for different features in one batch: both must reach hardware,
+    // but not back to back.
+    sender
+      .send(DeviceTaskMessage::fire_and_forget(vec![
+        rotate_speed_write(10),
+        rotate_direction_toggle_write(),
+      ]))
+      .await
+      .unwrap();
+
+    async_manager::sleep(Duration::from_millis(150)).await;
+    assert_eq!(
+      write_count(&writes),
+      1,
+      "Second write must wait out the gap"
+    );
+    async_manager::sleep(Duration::from_millis(200)).await;
+    assert_eq!(
+      write_count(&writes),
+      2,
+      "Second write must follow after the gap"
+    );
+
+    drop(sender);
+    let _ = task.await;
+  }
+
+  #[tokio::test]
+  async fn urgent_write_waits_for_the_message_gap() {
+    let (writes, sender, task) = spawn_gapped_task(100);
+
+    sender
+      .send(DeviceTaskMessage::fire_and_forget(vec![
+        rotate_speed_write(10),
+      ]))
+      .await
+      .unwrap();
+    while write_count(&writes) == 0 {
+      async_manager::sleep(Duration::from_millis(5)).await;
+    }
+
+    // A stop right after a write still goes out, but only once the gap has passed.
+    let started = Instant::now();
+    let (message, ack) = DeviceTaskMessage::acknowledged(vec![rotate_speed_write(0)]);
+    sender.send(message).await.unwrap();
+    ack.await.unwrap();
+    assert!(
+      started.elapsed() >= Duration::from_millis(60),
+      "Urgent write went out {:?} after the previous one",
+      started.elapsed()
+    );
+    assert_eq!(write_count(&writes), 2);
+
+    drop(sender);
+    let _ = task.await;
   }
 }
