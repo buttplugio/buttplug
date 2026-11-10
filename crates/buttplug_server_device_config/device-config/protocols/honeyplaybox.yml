@@ -334,6 +334,7 @@ configurations:
     id: 5b27250b-2370-4014-85a1-ef59287a8ea9
   - identifier:
       - JXT001
+      - HPB-134
     name: Honey Play Box Vibrosa Mini
     features:
       - id: ef04a42e-89a3-4a2b-95c3-545d17d35c37
@@ -552,6 +553,7 @@ communication:
         - HPB-297
         - HPB-376-1
         - JXT001
+        - HPB-134
         - HPB-DDT003
         - HPB-391
         - HPB-472
