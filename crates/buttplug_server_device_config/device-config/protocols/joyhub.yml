@@ -1,5 +1,7 @@
 defaults:
   name: JoyHub Device
+  # Dual feature devices drop the second command if it arrives back to back with the first.
+  min_command_interval_ms: 50
   features:
   - id: fc2f0fc2-fb75-4eee-b92b-20eaf7cc9a1e
     output:

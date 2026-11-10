@@ -457,6 +457,7 @@ impl DeviceConfigurationManager {
         .allow(old_definition.allow())
         .deny(old_definition.deny())
         .message_gap_ms(old_definition.message_gap_ms())
+        .min_command_interval_ms(old_definition.min_command_interval_ms())
         .index(old_definition.index());
       for base_feature in base_definition.features().values() {
         let feature = if let Some(old_feature) = old_definition

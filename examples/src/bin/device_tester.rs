@@ -298,6 +298,86 @@ async fn device_tester() {
         sleep(Duration::from_secs(2)).await;
       }
 
+
+      let mut cmds = vec![];
+      dev.device_features().iter().for_each(|(_, feature)| {
+        if let Some(out) = feature.feature().get_output_limits(OutputType::Vibrate) {
+          cmds.push(feature.run_output(&ClientDeviceOutputCommand::Vibrate(
+            (out.step_count() as i32).into(),
+          )));
+          println!(
+            "{} ({}) should start vibrating on feature {}!",
+            dev.name(),
+            dev.index(),
+            feature.feature_index()
+          );
+        } else if let Some(out) = feature.feature().get_output_limits(OutputType::Rotate) {
+          cmds.push(feature.run_output(&ClientDeviceOutputCommand::Rotate(
+            out.step_limit().end().into(),
+          )));
+          println!(
+            "{} ({}) should start rotating on feature {}!",
+            dev.name(),
+            dev.index(),
+            feature.feature_index()
+          );
+        } else if let Some(out) = feature.feature().get_output_limits(OutputType::Oscillate) {
+          cmds.push(feature.run_output(&ClientDeviceOutputCommand::Oscillate(
+            out.step_count().into(),
+          )));
+          println!(
+            "{} ({}) should start oscillating on feature {}!",
+            dev.name(),
+            dev.index(),
+            feature.feature_index()
+          );
+        } else if let Some(out) = feature.feature().get_output_limits(OutputType::Constrict) {
+          cmds.push(feature.run_output(&ClientDeviceOutputCommand::Constrict(
+            out.step_count().into(),
+          )));
+          println!(
+            "{} ({}) should start constricting on feature {}!",
+            dev.name(),
+            dev.index(),
+            feature.feature_index()
+          );
+        } else if let Some(out) = feature.feature().get_output_limits(OutputType::Temperature) {
+          cmds.push(feature.run_output(&ClientDeviceOutputCommand::Temperature(
+            out.step_limit().end().into(),
+          )));
+          println!(
+            "{} ({}) should start heating on feature {}!",
+            dev.name(),
+            dev.index(),
+            feature.feature_index()
+          );
+        }
+      });
+      if !cmds.is_empty() {
+        // If the device had any features send what used to be scalar commands async,
+        // dispatch all commands now in parallel, then go back and stop them in parallel.
+        futures::future::join_all(cmds)
+            .await
+            .iter()
+            .for_each(|cmd| {
+              if let Err(err) = cmd {
+                error!("{:?}", err);
+              }
+            });
+
+        sleep(Duration::from_secs(1)).await;
+        if let Err(err) = dev.stop().await {
+          error!("{:?}", err);
+        };
+        println!(
+          "{} ({}) should have stopped all features!",
+          dev.name(),
+          dev.index(),
+        );
+
+        sleep(Duration::from_secs(2)).await;
+      }
+
       // Exercise each feature
       for feature in dev.device_features().values() {
         for output_type in [

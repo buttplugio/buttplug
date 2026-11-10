@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 79
+    "minor": 80
   },
   "protocols": {
     "activejoy": {
@@ -79,6 +79,7 @@
           }
         ],
         "id": "a68856ef-ac5e-4082-9f53-eb110d498558",
+        "min_command_interval_ms": 50,
         "name": "IntoYou Device"
       }
     },
@@ -11466,6 +11467,7 @@
           }
         ],
         "id": "53cf03db-266d-46c1-964e-0ef505a64200",
+        "min_command_interval_ms": 50,
         "name": "JoyHub Device"
       }
     },
