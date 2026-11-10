@@ -25,6 +25,7 @@ pub mod cowgirl;
 pub mod cowgirl_cone;
 pub mod cupido;
 pub mod deepsire;
+pub mod dglab;
 pub mod feelingso;
 pub mod fleshy_thrust;
 pub mod fluffer;
@@ -184,6 +185,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     deepsire::setup::DeepSireIdentifierFactory::default(),
   );
+  add_to_protocol_map(&mut map, dglab::setup::DGLabIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     hismith::setup::HismithIdentifierFactory::default(),
