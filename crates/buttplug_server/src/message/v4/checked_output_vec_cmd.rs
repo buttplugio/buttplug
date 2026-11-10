@@ -275,9 +275,9 @@ impl TryFromDeviceAttributes<ScalarCmdV3> for CheckedOutputVecCmdV4 {
 impl TryFromDeviceAttributes<LinearCmdV1> for CheckedOutputVecCmdV4 {
   fn try_from_device_attributes(
     msg: LinearCmdV1,
-    features: &ServerDeviceAttributes,
+    attrs: &ServerDeviceAttributes,
   ) -> Result<Self, buttplug_core::errors::ButtplugError> {
-    let features = features
+    let linear_attrs = attrs
       .attrs_v3()
       .linear_cmd()
       .as_ref()
@@ -289,13 +289,14 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedOutputVecCmdV4 {
 
     let mut cmds = vec![];
     for x in msg.vectors() {
-      let f = features
+      let f = linear_attrs
         .get(x.index() as usize)
         .ok_or(ButtplugDeviceError::DeviceFeatureIndexError(
-          features.len() as u32,
+          linear_attrs.len() as u32,
           x.index(),
         ))?
         .feature();
+      let idx = feature_index_for_id(attrs, f.id(), "LinearCmdV1")?;
       let hw_pos = f
         .get_output(OutputType::HwPositionWithDuration)
         .ok_or(ButtplugError::from(
@@ -309,9 +310,9 @@ impl TryFromDeviceAttributes<LinearCmdV1> for CheckedOutputVecCmdV4 {
         unreachable!("get_output(HwPositionWithDuration) always returns HwPositionWithDuration")
       };
       cmds.push(CheckedOutputCmdV4::new(
+        msg.id(),
         msg.device_index(),
-        x.index(),
-        0,
+        idx,
         f.id(),
         OutputCommand::HwPositionWithDuration(OutputHwPositionWithDuration::new(
           actuator.calculate_scaled_float(x.position()).map_err(|_| {
@@ -389,11 +390,16 @@ impl TryFromDeviceAttributes<RotateCmdV1> for CheckedOutputVecCmdV4 {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::message::v1::VibrateSubcommandV1;
-  use buttplug_core::util::{range::RangeInclusive, small_vec_enum_map::SmallVecEnumMap};
+  use crate::message::v1::{VectorSubcommandV1, VibrateSubcommandV1};
+  use buttplug_core::{
+    message::OutputCommand,
+    util::{range::RangeInclusive, small_vec_enum_map::SmallVecEnumMap},
+  };
   use buttplug_server_device_config::{
     RangeWithLimit,
     ServerDeviceFeature,
+    ServerDeviceFeatureOutput,
+    ServerDeviceFeatureOutputHwPositionWithDurationProperties,
     ServerDeviceFeatureOutputValueProperties,
   };
   use std::collections::BTreeMap;
@@ -422,6 +428,76 @@ mod tests {
     ServerDeviceAttributes::new(&features)
   }
 
+  struct LinearFixture {
+    linear_1_id: Uuid,
+    linear_2_id: Uuid,
+    attrs: ServerDeviceAttributes,
+  }
+
+  fn attrs_with_vibrate_and_two_linear_features() -> LinearFixture {
+    let mut features = BTreeMap::new();
+    let linear_1_id = Uuid::new_v4();
+    let linear_2_id = Uuid::new_v4();
+
+    let vibrate_output: SmallVecEnumMap<_, _> = vec![ServerDeviceFeatureOutput::Vibrate(
+      ServerDeviceFeatureOutputValueProperties::new(
+        RangeWithLimit::new(RangeInclusive::new(0, 100)),
+        false,
+      ),
+    )]
+    .into();
+    let input = SmallVecEnumMap::default();
+    let vibrate_feature = ServerDeviceFeature::new(
+      0,
+      "Vibrate".to_owned(),
+      Uuid::new_v4(),
+      None,
+      None,
+      vibrate_output,
+      input.clone(),
+    );
+    features.insert(0, vibrate_feature);
+
+    let linear_output: SmallVecEnumMap<_, _> =
+      vec![ServerDeviceFeatureOutput::HwPositionWithDuration(
+        ServerDeviceFeatureOutputHwPositionWithDurationProperties::new(
+          RangeWithLimit::new(RangeInclusive::new(0, 100)),
+          RangeWithLimit::new(RangeInclusive::new(0, 10000)),
+          false,
+          false,
+        ),
+      )]
+      .into();
+
+    let linear_1_feature = ServerDeviceFeature::new(
+      1,
+      "Linear1".to_owned(),
+      linear_1_id,
+      None,
+      None,
+      linear_output.clone(),
+      input.clone(),
+    );
+    features.insert(1, linear_1_feature);
+
+    let linear_2_feature = ServerDeviceFeature::new(
+      2,
+      "Linear2".to_owned(),
+      linear_2_id,
+      None,
+      None,
+      linear_output,
+      input,
+    );
+    features.insert(2, linear_2_feature);
+
+    LinearFixture {
+      linear_1_id,
+      linear_2_id,
+      attrs: ServerDeviceAttributes::new(&features),
+    }
+  }
+
   #[test]
   fn legacy_vibrate_index_equal_to_feature_count_returns_error() {
     let attrs = attrs_with_one_vibrate_feature();
@@ -432,6 +508,65 @@ mod tests {
     assert_eq!(
       result.unwrap_err(),
       ButtplugError::from(ButtplugDeviceError::DeviceFeatureIndexError(1, 1))
+    );
+  }
+
+  #[test]
+  fn legacy_linear_cmd_conversion_uses_correct_argument_order() {
+    let fixture = attrs_with_vibrate_and_two_linear_features();
+    let msg_id = 42;
+    let device_index = 5;
+    let mut msg = LinearCmdV1::new(
+      device_index,
+      vec![
+        VectorSubcommandV1::new(0, 1000, 0.5),
+        VectorSubcommandV1::new(1, 2000, 0.75),
+      ],
+    );
+    msg.set_id(msg_id);
+
+    let checked_cmd = CheckedOutputVecCmdV4::try_from_device_attributes(msg, &fixture.attrs)
+      .expect("LinearCmd conversion should succeed");
+
+    assert_eq!(checked_cmd.id(), msg_id);
+    assert_eq!(checked_cmd.device_index(), device_index);
+    assert_eq!(checked_cmd.value_vec().len(), 2);
+
+    let cmd_0 = &checked_cmd.value_vec()[0];
+    assert_eq!(cmd_0.id(), msg_id);
+    assert_eq!(cmd_0.device_index(), device_index);
+    assert_eq!(cmd_0.feature_index(), 1);
+    assert_eq!(cmd_0.feature_id(), fixture.linear_1_id);
+    if let OutputCommand::HwPositionWithDuration(pos) = cmd_0.output_command() {
+      assert_eq!(pos.value(), 50);
+      assert_eq!(pos.duration(), 1000);
+    } else {
+      panic!("Expected HwPositionWithDuration command");
+    }
+
+    let cmd_1 = &checked_cmd.value_vec()[1];
+    assert_eq!(cmd_1.id(), msg_id);
+    assert_eq!(cmd_1.device_index(), device_index);
+    assert_eq!(cmd_1.feature_index(), 2);
+    assert_eq!(cmd_1.feature_id(), fixture.linear_2_id);
+    if let OutputCommand::HwPositionWithDuration(pos) = cmd_1.output_command() {
+      assert_eq!(pos.value(), 75);
+      assert_eq!(pos.duration(), 2000);
+    } else {
+      panic!("Expected HwPositionWithDuration command");
+    }
+  }
+
+  #[test]
+  fn legacy_linear_index_equal_to_linear_count_returns_error() {
+    let fixture = attrs_with_vibrate_and_two_linear_features();
+    let msg = LinearCmdV1::new(0, vec![VectorSubcommandV1::new(2, 1000, 0.5)]);
+
+    let result = CheckedOutputVecCmdV4::try_from_device_attributes(msg, &fixture.attrs);
+
+    assert_eq!(
+      result.unwrap_err(),
+      ButtplugError::from(ButtplugDeviceError::DeviceFeatureIndexError(2, 2))
     );
   }
 }

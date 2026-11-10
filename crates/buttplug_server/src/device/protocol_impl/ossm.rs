@@ -128,6 +128,12 @@ impl ProtocolHandler for OSSM {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut cmds = vec![];
     if self.mode.load(Ordering::Relaxed) != OSSM_MODE_OSCILLATE {
+
+      if value == 0 {
+        // Don't swap modes to stop
+        return Ok(cmds);
+      }
+
       cmds.push(
         HardwareWriteCmd::new(
           &[OSSM_PROTOCOL_UUID],

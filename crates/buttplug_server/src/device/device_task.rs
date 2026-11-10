@@ -288,3 +288,158 @@ async fn run_device_task(
   }
   info!("Leaving task for {}", hardware.name());
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::device::{
+    hardware::{
+      HardwareInternal,
+      HardwareReadCmd,
+      HardwareReading,
+      HardwareSubscribeCmd,
+      HardwareUnsubscribeCmd,
+    },
+    protocol::ProtocolKeepaliveStrategy,
+  };
+  use buttplug_server_device_config::Endpoint;
+  use futures::future::{self, BoxFuture, FutureExt};
+  use std::sync::Mutex as StdMutex;
+  use tokio::sync::broadcast;
+  use uuid::Uuid;
+
+  struct RecordingHardwareInternal {
+    writes: Arc<StdMutex<Vec<HardwareWriteCmd>>>,
+    event_sender: broadcast::Sender<HardwareEvent>,
+  }
+
+  impl RecordingHardwareInternal {
+    fn new(writes: Arc<StdMutex<Vec<HardwareWriteCmd>>>) -> Self {
+      let (event_sender, _) = broadcast::channel(256);
+      Self {
+        writes,
+        event_sender,
+      }
+    }
+  }
+
+  impl HardwareInternal for RecordingHardwareInternal {
+    fn disconnect(
+      &self,
+    ) -> BoxFuture<'static, Result<(), buttplug_core::errors::ButtplugDeviceError>> {
+      future::ready(Ok(())).boxed()
+    }
+
+    fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
+      self.event_sender.subscribe()
+    }
+
+    fn read_value(
+      &self,
+      msg: &HardwareReadCmd,
+    ) -> BoxFuture<'static, Result<HardwareReading, buttplug_core::errors::ButtplugDeviceError>>
+    {
+      future::ready(Ok(HardwareReading::new(msg.endpoint(), &[]))).boxed()
+    }
+
+    fn write_value(
+      &self,
+      msg: &HardwareWriteCmd,
+    ) -> BoxFuture<'static, Result<(), buttplug_core::errors::ButtplugDeviceError>> {
+      self
+        .writes
+        .lock()
+        .expect("Test mutex poisoned")
+        .push(msg.clone());
+      future::ready(Ok(())).boxed()
+    }
+
+    fn subscribe(
+      &self,
+      _msg: &HardwareSubscribeCmd,
+    ) -> BoxFuture<'static, Result<(), buttplug_core::errors::ButtplugDeviceError>> {
+      future::ready(Ok(())).boxed()
+    }
+
+    fn unsubscribe(
+      &self,
+      _msg: &HardwareUnsubscribeCmd,
+    ) -> BoxFuture<'static, Result<(), buttplug_core::errors::ButtplugDeviceError>> {
+      future::ready(Ok(())).boxed()
+    }
+  }
+
+  fn rotate_direction_toggle_write() -> HardwareCommand {
+    HardwareWriteCmd::new(
+      &[Uuid::new_v4()],
+      Endpoint::Tx,
+      b"RotateChange;".to_vec(),
+      false,
+    )
+    .into()
+  }
+
+  fn rotate_speed_write(speed: u32) -> HardwareCommand {
+    const SPEED_COMMAND_UUID: Uuid = uuid::uuid!("11111111-1111-1111-1111-111111111111");
+    HardwareWriteCmd::new(
+      &[SPEED_COMMAND_UUID],
+      Endpoint::Tx,
+      format!("Rotate:{speed};").into_bytes(),
+      false,
+    )
+    .into()
+  }
+
+  #[tokio::test]
+  async fn batched_direction_toggles_all_survive() {
+    let writes = Arc::new(StdMutex::new(Vec::new()));
+    let hardware = Arc::new(Hardware::new(
+      "test",
+      "test-address",
+      &[Endpoint::Tx],
+      &None,
+      false,
+      Box::new(RecordingHardwareInternal::new(writes.clone())),
+    ));
+
+    let (sender, mut receiver) = tokio::sync::mpsc::channel(16);
+    let config = DeviceTaskConfig {
+      message_gap: Some(Duration::from_millis(75)),
+      requires_keepalive: false,
+      keepalive_strategy: ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy,
+    };
+    let task = tokio::spawn(async move {
+      run_device_task(hardware, config, &mut receiver).await;
+    });
+
+    // Both messages land inside the 75ms batching window.
+    sender
+      .send(DeviceTaskMessage::fire_and_forget(vec![
+        rotate_direction_toggle_write(),
+        rotate_speed_write(10),
+      ]))
+      .await
+      .unwrap();
+    sender
+      .send(DeviceTaskMessage::fire_and_forget(vec![
+        rotate_direction_toggle_write(),
+        rotate_speed_write(10),
+      ]))
+      .await
+      .unwrap();
+
+    async_manager::sleep(Duration::from_millis(150)).await;
+    drop(sender);
+    let _ = task.await;
+
+    let recorded = writes.lock().expect("Test mutex poisoned");
+    let toggle_count = recorded
+      .iter()
+      .filter(|cmd| cmd.data() == b"RotateChange;")
+      .count();
+    assert_eq!(
+      toggle_count, 2,
+      "Both direction toggles must reach hardware"
+    );
+  }
+}

@@ -1,3 +1,28 @@
+# 5.0.5 (2026-10-03)
+
+## Bugfixes
+
+- Update buttplug dependencies for the OSSM stop command mode switch fix (#961) and btleplug 0.13.4, fixing missed device discovery on some Windows Bluetooth adapters.
+
+# 5.0.4 (2026-09-27)
+
+## Bugfixes
+
+- Remove the unused, deprecated `tracing-fmt` dependency, which pulled in `tracing-subscriber` 0.1 and `owning_ref` (RUSTSEC-2022-0040, RUSTSEC-2025-0055).
+
+# 5.0.3 (2026-09-27)
+
+## Bugfixes
+
+- Fix the user config save loop busy-spinning once its event stream ends, and log config serialization errors.
+- Update buttplug dependencies for StopCmd routing, Lovense rotation, event stream lag, and btleplug 0.13.3 fixes.
+
+# 5.0.2 (2026-09-20)
+
+## Bugfixes
+
+- Update btleplug to fix leak in windows when de/allocating adapters constantly
+
 # 5.0.1 (2026-09-19)
 
 ## Bugfixes

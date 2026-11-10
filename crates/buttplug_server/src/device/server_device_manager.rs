@@ -296,9 +296,27 @@ impl ServerDeviceManager {
   }
 
   pub(crate) fn stop_devices(&self, msg: &StopCmdV4) -> ButtplugServerResultFuture {
-    let device_map = self.devices.clone();
-    // TODO This could use some error reporting.
+    if let Some(device_index) = msg.device_index() {
+      return match self.devices.get(&device_index) {
+        Some(device) => {
+          let stop_fut = device.value().stop(msg);
+          async move {
+            stop_fut.await?;
+            Ok(message::OkV0::default().into())
+          }
+          .boxed()
+        }
+        None => ButtplugDeviceError::DeviceNotAvailable(device_index).into(),
+      };
+    }
+    if msg.feature_index().is_some() {
+      return ButtplugMessageError::InvalidMessageContents(
+        "StopCmd feature_index requires a device_index".to_owned(),
+      )
+      .into();
+    }
     let msg = msg.clone();
+    let device_map = self.devices.clone();
     async move {
       let fut_vec: Vec<_> = device_map
         .iter()

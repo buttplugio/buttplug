@@ -190,11 +190,14 @@ pub fn test_server_v4_with_device(device_type: &str) -> (ButtplugServer, TestDev
 }
 
 #[allow(dead_code)]
-pub fn test_server_with_device_and_observations(
-  device_type: &str,
-) -> (ButtplugServer, TestDeviceChannelHost) {
+pub fn test_servers_with_devices_and_observations(
+  device_types: &[&str],
+) -> (ButtplugServer, Vec<TestDeviceChannelHost>) {
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
-  let device = builder.add_test_device(&TestDeviceIdentifier::new(device_type, None));
+  let devices = device_types
+    .iter()
+    .map(|device_type| builder.add_test_device(&TestDeviceIdentifier::new(device_type, None)))
+    .collect();
 
   let mut dm_builder = ServerDeviceManagerBuilder::new(create_test_dcm());
   dm_builder.comm_manager(builder);
@@ -204,7 +207,15 @@ pub fn test_server_with_device_and_observations(
     .finish()
     .unwrap();
 
-  (server, device)
+  (server, devices)
+}
+
+#[allow(dead_code)]
+pub fn test_server_with_device_and_observations(
+  device_type: &str,
+) -> (ButtplugServer, TestDeviceChannelHost) {
+  let (server, mut devices) = test_servers_with_devices_and_observations(&[device_type]);
+  (server, devices.remove(0))
 }
 
 #[allow(dead_code)]
