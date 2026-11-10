@@ -33,6 +33,10 @@ device_commands:
             write_with_response: false
         - !Write
             endpoint: tx
+            data: [0x55, 0x03, 0x03, 0x00, 0x01, 0x08]
+            write_with_response: false
+        - !Write
+            endpoint: tx
             data: [0x55, 0x07, 0x00, 0x00, 0x03, 0x00]
             write_with_response: false
   - !Messages
@@ -46,7 +50,7 @@ device_commands:
       commands:
         - !Write
             endpoint: tx
-            data: [0x55, 0x03, 0x03, 0x00, 0x01, 0x00]
+            data: [0x55, 0x03, 0x03, 0x00, 0x00, 0x00]
             write_with_response: false
         - !Write
             endpoint: tx
@@ -59,6 +63,46 @@ device_commands:
   - !Commands
       device_index: 0
       commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x03, 0x03, 0x00, 0x00, 0x00]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+          - Index: 1
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x03, 0x03, 0x00, 0x01, 0x05]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x03, 0x03, 0x00, 0x01, 0x05]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x07, 0x00, 0x00, 0x03, 0x00]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 1
+            Speed: 0
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x03, 0x03, 0x00, 0x01, 0x05]
+            write_with_response: false
         - !Write
             endpoint: tx
             data: [0x55, 0x07, 0x00, 0x00, 0x00, 0x00]
