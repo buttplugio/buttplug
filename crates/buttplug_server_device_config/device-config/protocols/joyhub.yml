@@ -2841,6 +2841,32 @@ configurations:
             - 1
       index: 6
   id: 8dce2c37-d04d-47f1-aa35-3ff129e65f67
+- identifier:
+    - J-Paean
+  name: JoyHub Paean
+  features:
+    - id: e1549320-4427-48e1-a051-565d4472d33c
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: f3a5ed1a-498b-4ffd-ab1e-b40fb276b83e
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+    - id: 91643146-c411-4df6-a89c-c8a952bc6df1
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 2
+  id: e5519fb4-7f68-4c5c-8897-8af4772bcccf
 communication:
 - btle:
     names:
@@ -3008,6 +3034,7 @@ communication:
     - J-Pelor
     - J-VEGAR
     - J-Ping
+    - J-Paean
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb

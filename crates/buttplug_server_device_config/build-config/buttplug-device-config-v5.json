@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 75
+    "minor": 76
   },
   "protocols": {
     "activejoy": {
@@ -6479,7 +6479,8 @@
               "J-Eudora",
               "J-Pelor",
               "J-VEGAR",
-              "J-Ping"
+              "J-Ping",
+              "J-Paean"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -11368,6 +11369,51 @@
             "J-Ping"
           ],
           "name": "JoyHub Ping"
+        },
+        {
+          "features": [
+            {
+              "id": "e1549320-4427-48e1-a051-565d4472d33c",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "f3a5ed1a-498b-4ffd-ab1e-b40fb276b83e",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "91643146-c411-4df6-a89c-c8a952bc6df1",
+              "index": 2,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "e5519fb4-7f68-4c5c-8897-8af4772bcccf",
+          "identifier": [
+            "J-Paean"
+          ],
+          "name": "JoyHub Paean"
         }
       ],
       "defaults": {
