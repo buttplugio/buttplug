@@ -39,7 +39,7 @@ pub enum InputTypeReading {
   Battery(InputValue<u8>),
   Rssi(InputValue<i8>),
   Button(InputValue<u8>),
-  Pressure(InputValue<u32>),
+  Pressure(InputValue<i32>),
 }
 
 impl From<InputTypeReading> for InputType {
