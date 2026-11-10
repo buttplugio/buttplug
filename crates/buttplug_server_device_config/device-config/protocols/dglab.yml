@@ -31,8 +31,8 @@ configurations:
       input:
         pressure:
           value:
-            - - -2000
-              - 2000
+            - - -327670
+              - 327670
           command:
             - Subscribe
       index: 0

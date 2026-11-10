@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 76
+    "minor": 77
   },
   "protocols": {
     "activejoy": {
@@ -876,8 +876,8 @@
                   ],
                   "value": [
                     [
-                      -2000,
-                      2000
+                      -327670,
+                      327670
                     ]
                   ]
                 }
