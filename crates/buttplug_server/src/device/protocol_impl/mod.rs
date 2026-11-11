@@ -8,6 +8,7 @@
 use std::{collections::HashMap, sync::Arc};
 
 use crate::device::protocol::ProtocolIdentifierFactory;
+use crate::device::protocol_impl::svakom::mononii_skullman;
 
 // Utility mods
 pub mod fleshlight_launch_helper;
@@ -24,6 +25,7 @@ pub mod cowgirl;
 pub mod cowgirl_cone;
 pub mod cupido;
 pub mod deepsire;
+pub mod dglab;
 pub mod feelingso;
 pub mod fleshy_thrust;
 pub mod fluffer;
@@ -114,6 +116,7 @@ pub mod synchro;
 pub mod tcode_v03;
 pub mod thehandy;
 pub mod thehandy_v3;
+pub mod tingon;
 pub mod tryfun;
 pub mod tryfun_blackhole;
 pub mod tryfun_meta2;
@@ -182,6 +185,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     deepsire::setup::DeepSireIdentifierFactory::default(),
   );
+  add_to_protocol_map(&mut map, dglab::setup::DGLabIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     hismith::setup::HismithIdentifierFactory::default(),
@@ -365,6 +369,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     mizzzee_v3::setup::MizzZeeV3IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    mononii_skullman::setup::MononiiSkullmanIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
@@ -553,6 +561,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     synchro::setup::SynchroIdentifierFactory::default(),
   );
+  add_to_protocol_map(&mut map, tingon::setup::TingonIdentifierFactory::default());
   add_to_protocol_map(&mut map, tryfun::setup::TryFunIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,

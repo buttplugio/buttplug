@@ -26,6 +26,9 @@ pub struct ConfigBaseDeviceDefinition {
   protocol_variant: Option<String>,
   #[getset(get_copy = "pub")]
   message_gap_ms: Option<u32>,
+  #[getset(get_copy = "pub")]
+  #[serde(default, skip_serializing_if = "Option::is_none")]
+  min_command_interval_ms: Option<u32>,
   #[getset(get = "pub")]
   features: Option<Vec<ConfigBaseDeviceFeature>>,
 }
@@ -45,6 +48,9 @@ impl ConfigBaseDeviceDefinition {
       message_gap_ms: self
         .message_gap_ms
         .or_else(|| defaults.and_then(|d| d.message_gap_ms)),
+      min_command_interval_ms: self
+        .min_command_interval_ms
+        .or_else(|| defaults.and_then(|d| d.min_command_interval_ms)),
       features: self
         .features
         .or_else(|| defaults.and_then(|d| d.features.clone())),
@@ -60,6 +66,9 @@ impl From<ConfigBaseDeviceDefinition> for ServerDeviceDefinition {
     }
     if let Some(gap) = val.message_gap_ms {
       builder.message_gap_ms(Some(gap));
+    }
+    if let Some(interval) = val.min_command_interval_ms {
+      builder.min_command_interval_ms(Some(interval));
     }
     if let Some(features) = val.features {
       for feature in features {
@@ -86,6 +95,9 @@ pub struct ConfigUserDeviceCustomization {
   #[getset(get_copy = "pub")]
   #[serde(default, skip_serializing_if = "Option::is_none")]
   message_gap_ms: Option<u32>,
+  #[getset(get_copy = "pub")]
+  #[serde(default, skip_serializing_if = "Option::is_none")]
+  min_command_interval_ms: Option<u32>,
 }
 
 impl From<&ServerDeviceDefinition> for ConfigUserDeviceCustomization {
@@ -96,6 +108,7 @@ impl From<&ServerDeviceDefinition> for ConfigUserDeviceCustomization {
       deny: value.deny(),
       index: value.index(),
       message_gap_ms: value.message_gap_ms(),
+      min_command_interval_ms: value.min_command_interval_ms(),
     }
   }
 }
@@ -123,6 +136,7 @@ impl ConfigUserDeviceDefinition {
     let mut builder = ServerDeviceDefinitionBuilder::from_base(base, self.id, false);
     builder.display_name(&self.user_config.display_name);
     builder.message_gap_ms(self.user_config.message_gap_ms);
+    builder.min_command_interval_ms(self.user_config.min_command_interval_ms);
     self.user_config.allow.then(|| builder.allow(true));
     self.user_config.deny.then(|| builder.deny(true));
     builder.index(self.user_config.index);

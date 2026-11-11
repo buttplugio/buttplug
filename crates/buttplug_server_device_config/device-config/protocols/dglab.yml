@@ -1,0 +1,48 @@
+---
+defaults:
+  name: DG-Lab Device
+  id: 46378da0-625e-4614-a8cd-588234706945
+  features: []
+configurations:
+- identifier:
+  - 47L127000
+  name: DG-Lab Opossum
+  features:
+    - id: d32f15eb-0dbd-49a7-a05f-db6de40a83af
+      output:
+        vibrate:
+          value:
+            - 0
+            - 200
+      index: 0
+    - id: 9f48dd44-d326-4317-8c54-44a35ef98424
+      output:
+        vibrate:
+          value:
+            - 0
+            - 200
+      index: 1
+  id: ee9f0605-415e-4b07-8deb-c7252eff7053
+- identifier:
+    - 47L124000
+  name: DG-Lab Civet
+  features:
+    - id: 1eb39711-a3bd-4906-8a3e-17913fb8fb0a
+      input:
+        pressure:
+          value:
+            - - -327670
+              - 327670
+          command:
+            - Subscribe
+      index: 0
+  id: 42f853e0-1196-4583-87c1-b352cc577a22
+communication:
+- btle:
+    names:
+    - 47L127000
+    - 47L124000
+    services:
+      0000180c-0000-1000-8000-00805f9b34fb:
+        tx: 0000150a-0000-1000-8000-00805f9b34fb
+        rx: 0000150b-0000-1000-8000-00805f9b34fb

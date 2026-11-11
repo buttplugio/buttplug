@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+pub mod mononii_skullman;
 pub mod svakom_alex;
 pub mod svakom_alex_v2;
 pub mod svakom_avaneo;

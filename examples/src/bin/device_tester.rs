@@ -5,12 +5,18 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use tracing::Level;
+use tracing::{Level, info, warn};
 
 use buttplug_client::device::{ClientDeviceFeature, ClientDeviceOutputCommand};
-use buttplug_client::{ButtplugClient, ButtplugClientDevice, ButtplugClientEvent};
+use buttplug_client::{
+  ButtplugClient,
+  ButtplugClientDevice,
+  ButtplugClientDeviceEvent,
+  ButtplugClientEvent,
+};
 use buttplug_client_in_process::ButtplugInProcessClientConnectorBuilder;
-use buttplug_core::message::OutputType;
+use buttplug_core::message::InputType::Pressure;
+use buttplug_core::message::{ButtplugServerMessageV4, InputTypeReading, OutputType};
 use buttplug_server::ButtplugServerBuilder;
 use buttplug_server::device::ServerDeviceManagerBuilder;
 use buttplug_server_device_config::load_protocol_configs;
@@ -87,6 +93,85 @@ async fn device_tester() {
 
   let exercise_device = |dev: ButtplugClientDevice| async move {
     let mut backoff = 1;
+
+    // Set up per-device subscriber
+    let mut events = dev.event_stream();
+    let dev_name = dev.name().clone();
+    let dev_index = dev.index().clone();
+    tokio::spawn(async move {
+      while let Some(event) = events.next().await {
+        match event {
+          ButtplugClientDeviceEvent::Message(m) => match m {
+            ButtplugServerMessageV4::InputReading(ir) => match ir.reading() {
+              InputTypeReading::Pressure(i) => {
+                info!(
+                  "{} ({}) Pressure reading (feature {}): {}",
+                  dev_name,
+                  dev_index,
+                  ir.feature_index(),
+                  i.data()
+                )
+              }
+              InputTypeReading::Battery(b) => {
+                info!(
+                  "{} ({}) Battery reading (feature {}): {}",
+                  dev_name,
+                  dev_index,
+                  ir.feature_index(),
+                  b.data()
+                )
+              }
+              InputTypeReading::Rssi(b) => {
+                info!(
+                  "{} ({}) Rssi reading (feature {}): {}",
+                  dev_name,
+                  dev_index,
+                  ir.feature_index(),
+                  b.data()
+                )
+              }
+              InputTypeReading::Button(b) => {
+                info!(
+                  "{} ({}) Button reading (feature {}): {}",
+                  dev_name,
+                  dev_index,
+                  ir.feature_index(),
+                  b.data()
+                )
+              }
+            },
+            _ => {
+              warn!("[!] Unhandled message: {:?}", m);
+            }
+          },
+          _ => {
+            warn!("[!] Unhandled event: {:?}", event);
+          }
+        }
+      }
+    });
+
+    let mut cmds = vec![];
+    dev.device_features().iter().for_each(|(_, feature)| {
+      if let Some(_) = feature.feature().get_input(Pressure) {
+        cmds.push(feature.run_input_subscribe(Pressure));
+        println!(
+          "{} ({}) should start reporting pressure on feature {}!",
+          dev.name(),
+          dev.index(),
+          feature.feature_index()
+        );
+      }
+    });
+    futures::future::join_all(cmds)
+      .await
+      .iter()
+      .for_each(|cmd| {
+        if let Err(err) = cmd {
+          error!("{:?}", err);
+        }
+      });
+
     loop {
       let mut cmds = vec![];
       dev.device_features().iter().for_each(|(_, feature)| {
@@ -209,6 +294,86 @@ async fn device_tester() {
               error!("{:?}", err);
             }
           });
+
+        sleep(Duration::from_secs(2)).await;
+      }
+
+
+      let mut cmds = vec![];
+      dev.device_features().iter().for_each(|(_, feature)| {
+        if let Some(out) = feature.feature().get_output_limits(OutputType::Vibrate) {
+          cmds.push(feature.run_output(&ClientDeviceOutputCommand::Vibrate(
+            (out.step_count() as i32).into(),
+          )));
+          println!(
+            "{} ({}) should start vibrating on feature {}!",
+            dev.name(),
+            dev.index(),
+            feature.feature_index()
+          );
+        } else if let Some(out) = feature.feature().get_output_limits(OutputType::Rotate) {
+          cmds.push(feature.run_output(&ClientDeviceOutputCommand::Rotate(
+            out.step_limit().end().into(),
+          )));
+          println!(
+            "{} ({}) should start rotating on feature {}!",
+            dev.name(),
+            dev.index(),
+            feature.feature_index()
+          );
+        } else if let Some(out) = feature.feature().get_output_limits(OutputType::Oscillate) {
+          cmds.push(feature.run_output(&ClientDeviceOutputCommand::Oscillate(
+            out.step_count().into(),
+          )));
+          println!(
+            "{} ({}) should start oscillating on feature {}!",
+            dev.name(),
+            dev.index(),
+            feature.feature_index()
+          );
+        } else if let Some(out) = feature.feature().get_output_limits(OutputType::Constrict) {
+          cmds.push(feature.run_output(&ClientDeviceOutputCommand::Constrict(
+            out.step_count().into(),
+          )));
+          println!(
+            "{} ({}) should start constricting on feature {}!",
+            dev.name(),
+            dev.index(),
+            feature.feature_index()
+          );
+        } else if let Some(out) = feature.feature().get_output_limits(OutputType::Temperature) {
+          cmds.push(feature.run_output(&ClientDeviceOutputCommand::Temperature(
+            out.step_limit().end().into(),
+          )));
+          println!(
+            "{} ({}) should start heating on feature {}!",
+            dev.name(),
+            dev.index(),
+            feature.feature_index()
+          );
+        }
+      });
+      if !cmds.is_empty() {
+        // If the device had any features send what used to be scalar commands async,
+        // dispatch all commands now in parallel, then go back and stop them in parallel.
+        futures::future::join_all(cmds)
+            .await
+            .iter()
+            .for_each(|cmd| {
+              if let Err(err) = cmd {
+                error!("{:?}", err);
+              }
+            });
+
+        sleep(Duration::from_secs(1)).await;
+        if let Err(err) = dev.stop().await {
+          error!("{:?}", err);
+        };
+        println!(
+          "{} ({}) should have stopped all features!",
+          dev.name(),
+          dev.index(),
+        );
 
         sleep(Duration::from_secs(2)).await;
       }

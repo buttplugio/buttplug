@@ -367,6 +367,11 @@
         "message_gap_ms": {
           "type": "integer",
           "min": 0
+        },
+        "min_command_interval_ms": {
+          "description": "Minimum time in milliseconds between writes to the device hardware.",
+          "type": "integer",
+          "minimum": 0
         }
       },
       "additionalProperties": false,
@@ -387,6 +392,11 @@
         },
         "protocol_variant": {
           "type": "string"
+        },
+        "min_command_interval_ms": {
+          "description": "Minimum time in milliseconds between writes to the device hardware.",
+          "type": "integer",
+          "minimum": 0
         },
         "features": {
           "$ref": "#/components/features"
@@ -418,6 +428,11 @@
           },
           "protocol_variant": {
             "type": "string"
+          },
+          "min_command_interval_ms": {
+            "description": "Minimum time in milliseconds between writes to the device hardware.",
+            "type": "integer",
+            "minimum": 0
           },
           "features": {
             "$ref": "#/components/features"
