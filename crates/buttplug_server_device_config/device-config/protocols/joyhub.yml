@@ -2867,6 +2867,25 @@ configurations:
             - 255
       index: 2
   id: e5519fb4-7f68-4c5c-8897-8af4772bcccf
+- identifier:
+    - J-Mega
+  name: JoyHub Mega
+  features:
+    - id: 68ba6b4c-575c-4862-9391-9bf274b69eac
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: de36d8fa-60a5-4478-b635-941fd32da6a8
+      output:
+        constrict:
+          value:
+            - 0
+            - 7
+      index: 5
+  id: 16ca48e2-62d1-40be-a251-44a1b0118642
 communication:
 - btle:
     names:
@@ -3035,6 +3054,7 @@ communication:
     - J-VEGAR
     - J-Ping
     - J-Paean
+    - J-Mega
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb

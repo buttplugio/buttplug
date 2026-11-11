@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 77
+    "minor": 79
   },
   "protocols": {
     "activejoy": {
@@ -6480,7 +6480,8 @@
               "J-Pelor",
               "J-VEGAR",
               "J-Ping",
-              "J-Paean"
+              "J-Paean",
+              "J-Mega"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -11414,6 +11415,39 @@
             "J-Paean"
           ],
           "name": "JoyHub Paean"
+        },
+        {
+          "features": [
+            {
+              "id": "68ba6b4c-575c-4862-9391-9bf274b69eac",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "de36d8fa-60a5-4478-b635-941fd32da6a8",
+              "index": 5,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    7
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "16ca48e2-62d1-40be-a251-44a1b0118642",
+          "identifier": [
+            "J-Mega"
+          ],
+          "name": "JoyHub Mega"
         }
       ],
       "defaults": {
