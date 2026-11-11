@@ -14,7 +14,7 @@ use async_trait::async_trait;
 use uuid::{Uuid, uuid};
 
 use crate::device::{
-  hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+  hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
   protocol::{
     ProtocolHandler,
     ProtocolIdentifier,
@@ -22,13 +22,18 @@ use crate::device::{
     generic_protocol_initializer_setup,
   },
 };
-use buttplug_core::{errors::ButtplugDeviceError, message::OutputType};
+use buttplug_core::{
+    errors::ButtplugDeviceError,
+    message::{InputReadingV4, InputTypeReading, InputValue, OutputType}
+};
 use buttplug_server_device_config::{
   Endpoint,
   ProtocolCommunicationSpecifier,
   ServerDeviceDefinition,
   UserDeviceIdentifier,
 };
+
+use futures::{FutureExt, future::BoxFuture};
 
 generic_protocol_initializer_setup!(WeVibe8Bit, "wevibe-8bit");
 
@@ -97,5 +102,37 @@ impl ProtocolHandler for WeVibe8Bit {
     Ok(vec![
       HardwareWriteCmd::new(&[WEVIBE8BIT_PROTOCOL_UUID], Endpoint::Tx, data, true).into(),
     ])
+  }
+
+  fn handle_battery_level_cmd(
+    &self,
+    device_index: u32,
+    device: Arc<Hardware>,
+    feature_index: u32,
+    feature_id: Uuid,
+  ) -> BoxFuture<'_, Result<InputReadingV4, ButtplugDeviceError>> {
+    let msg = HardwareReadCmd::new(feature_id, Endpoint::Rx, 20, 0);
+    let fut = device.read_value(&msg);
+
+    async move {
+      let reading = fut.await?;
+      let data = reading.data();
+
+      if data.len() < 5 {
+        return Err(ButtplugDeviceError::DeviceCommunicationError(
+          "We-Vibe battery response is too short".to_owned(),
+        ));
+      }
+
+      let raw = u16::from_be_bytes([data[3], data[4]]);
+      let percent = ((u32::from(raw) * 100 + 32_767) / 65_535) as u8;
+
+      Ok(InputReadingV4::new(
+        device_index,
+        feature_index,
+        InputTypeReading::Battery(InputValue::new(percent)),
+      ))
+    }
+    .boxed()
   }
 }
