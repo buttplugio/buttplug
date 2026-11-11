@@ -70,6 +70,16 @@ configurations:
         - 0
         - 22
     index: 0
+  - description: Battery Level
+    id: 96b6dfbe-7e96-44e4-ada8-db40b3865465
+    input:
+      battery:
+        value:
+          - - 0
+            - 100
+        command:
+          -  Read
+    index: 1
   id: 3db74c3e-50e1-4dbf-a670-c7297ca52f62
 - identifier:
   - Bond

@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 57
+    "minor": 58
   },
   "protocols": {
     "activejoy": {
@@ -25370,6 +25370,24 @@
                   "value": [
                     0,
                     22
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "96b6dfbe-7e96-44e4-ada8-db40b3865465",
+              "index": 1,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
                   ]
                 }
               }
