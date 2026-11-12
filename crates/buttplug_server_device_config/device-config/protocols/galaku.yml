@@ -98,6 +98,7 @@ configurations:
   id: ca21391e-6aa2-4480-a1a5-c138318bf44c
 - identifier:
   - G335
+  - K335
   name: Galaku Unicorn Butt Plug
   id: d1a0cd58-1aa2-447c-bd7e-da471fdee5d8
 - identifier:
@@ -1638,6 +1639,7 @@ communication:
     - G331
     - G326
     - G335
+    - K335
     - G341
     - G355
     - G349
