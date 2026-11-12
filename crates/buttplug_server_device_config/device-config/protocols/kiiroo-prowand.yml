@@ -25,13 +25,44 @@ configurations:
   - Luxus
   name: Luxus
   id: a857e95b-3d5a-4034-92d2-7105c4febb8e
+- identifier:
+    - Julio
+  name: Kiiroo Julio
+  features:
+    - id: 781a1aa3-1b0a-46c4-afa1-4e1ee77930e4
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 2ff3e6ae-4156-476d-b6a6-e63f415c4195
+      output:
+        oscillate:
+          value:
+            - 0
+            - 5
+      index: 1
+    - description: battery Level
+      id: 0b51dfbc-424f-4bb7-9087-f9ec490693d0
+      input:
+        battery:
+          value:
+            - - 0
+              - 100
+          command:
+            - Read
+      index: 2
+  id: db9295b5-8cf5-481f-b00c-a88e1a8d02ff
 communication:
 - btle:
     names:
     - ProWand
     - Luxus
+    - Julio
     services:
       00001400-0000-1000-8000-00805f9b34fb:
         tx: 00001401-0000-1000-8000-00805f9b34fb
+        txmode: 00001402-0000-1000-8000-00805f9b34fb
       '0000180f-0000-1000-8000-00805f9b34fb':
         rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb

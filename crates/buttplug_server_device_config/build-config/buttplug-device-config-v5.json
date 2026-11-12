@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 57
+    "minor": 80
   },
   "protocols": {
     "activejoy": {
@@ -9,7 +9,8 @@
         {
           "btle": {
             "names": [
-              "SS-TD-YDTD-001"
+              "SS-TD-YDTD-001",
+              "TQ003-BLE-V1.0"
             ],
             "services": {
               "0000f0b0-0000-1000-8000-00805f9b34fb": {
@@ -18,6 +19,48 @@
               }
             }
           }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "62e7b76d-ab99-42ca-89ea-865a6072451e",
+          "identifier": [
+            "SS-TD-YDTD-001"
+          ],
+          "name": "IntoYou Vibrator"
+        },
+        {
+          "features": [
+            {
+              "id": "06e88333-a9da-4af2-a824-31ddcf81e648",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "023b796d-66e4-42b5-b0ce-be3e74ac07ad",
+              "index": 1,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "1f544a4c-62d5-4b71-9e4e-e168506241c2",
+          "identifier": [
+            "TQ003-BLE-V1.0"
+          ],
+          "name": "IntoYou Dual Feature Device"
         }
       ],
       "defaults": {
@@ -35,8 +78,8 @@
             }
           }
         ],
-        "id": "62e7b76d-ab99-42ca-89ea-865a6072451e",
-        "name": "IntoYou Remote Egg Vibrator"
+        "id": "a68856ef-ac5e-4082-9f53-eb110d498558",
+        "name": "IntoYou Device"
       }
     },
     "adrienlastic": {
@@ -770,6 +813,90 @@
         "name": "DeepSire Device"
       }
     },
+    "dglab": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "47L127000",
+              "47L124000"
+            ],
+            "services": {
+              "0000180c-0000-1000-8000-00805f9b34fb": {
+                "rx": "0000150b-0000-1000-8000-00805f9b34fb",
+                "tx": "0000150a-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "features": [
+            {
+              "id": "d32f15eb-0dbd-49a7-a05f-db6de40a83af",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    200
+                  ]
+                }
+              }
+            },
+            {
+              "id": "9f48dd44-d326-4317-8c54-44a35ef98424",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    200
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "ee9f0605-415e-4b07-8deb-c7252eff7053",
+          "identifier": [
+            "47L127000"
+          ],
+          "name": "DG-Lab Opossum"
+        },
+        {
+          "features": [
+            {
+              "id": "1eb39711-a3bd-4906-8a3e-17913fb8fb0a",
+              "index": 0,
+              "input": {
+                "pressure": {
+                  "command": [
+                    "Subscribe"
+                  ],
+                  "value": [
+                    [
+                      -327670,
+                      327670
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "42f853e0-1196-4583-87c1-b352cc577a22",
+          "identifier": [
+            "47L124000"
+          ],
+          "name": "DG-Lab Civet"
+        }
+      ],
+      "defaults": {
+        "features": [],
+        "id": "46378da0-625e-4614-a8cd-588234706945",
+        "name": "DG-Lab Device"
+      }
+    },
     "feelingso": {
       "communication": [
         {
@@ -1480,6 +1607,7 @@
               "G331",
               "G326",
               "G335",
+              "K335",
               "G341",
               "G355",
               "G349",
@@ -1712,7 +1840,8 @@
         {
           "id": "d1a0cd58-1aa2-447c-bd7e-da471fdee5d8",
           "identifier": [
-            "G335"
+            "G335",
+            "K335"
           ],
           "name": "Galaku Unicorn Butt Plug"
         },
@@ -4447,7 +4576,7 @@
         {
           "btle": {
             "names": [
-              "HISMITH",
+              "HISMITH*",
               "Wildolo",
               "\u0007HISMITH"
             ],
@@ -6348,7 +6477,13 @@
               "J-Prax",
               "J-Poptint",
               "J-Tauros",
-              "J-Daquan"
+              "J-Daquan",
+              "J-Eudora",
+              "J-Pelor",
+              "J-VEGAR",
+              "J-Ping",
+              "J-Paean",
+              "J-Mega"
             ],
             "services": {
               "0000ffa0-0000-1000-8000-00805f9b34fb": {
@@ -11105,6 +11240,216 @@
             "J-Daquan"
           ],
           "name": "JoyHub Daquan"
+        },
+        {
+          "id": "ed0545f9-c80e-4fbf-878f-afe6cb0f1c06",
+          "identifier": [
+            "J-Eudora"
+          ],
+          "name": "JoyHub Eudora"
+        },
+        {
+          "features": [
+            {
+              "id": "bfdb533a-f30d-4d4f-ae1d-d52f943c56e8",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "7f838789-9219-4bfd-809a-84e39c5505c5",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "32bdb5c1-ff98-43cf-8c18-b2d5e7b891ee",
+          "identifier": [
+            "J-Pelor"
+          ],
+          "name": "JoyHub Pelor"
+        },
+        {
+          "features": [
+            {
+              "description": "Insertable Handle Vibrator",
+              "id": "10bffc00-06b8-41b9-ab1a-d53e463179f6",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Wand Head Vibrator",
+              "id": "4986c4ff-1a79-49a0-a713-60719aafff50",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "3c6b6bc0-dbd3-4667-93ab-9a84e38cf266",
+          "identifier": [
+            "J-VEGAR"
+          ],
+          "name": "JoyHub Vegar"
+        },
+        {
+          "features": [
+            {
+              "id": "afc2dd16-2fb7-4b38-b148-73e444da4bb3",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "cd664b76-8001-4c2f-bd09-290940f2f8b3",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "cd664b76-8001-4c2f-bd09-290940f2f8b3",
+              "index": 2,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "7804b8aa-1912-4a66-ad2f-d40e6e4989fe",
+              "index": 6,
+              "output": {
+                "temperature": {
+                  "value": [
+                    0,
+                    1
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "8dce2c37-d04d-47f1-aa35-3ff129e65f67",
+          "identifier": [
+            "J-Ping"
+          ],
+          "name": "JoyHub Ping"
+        },
+        {
+          "features": [
+            {
+              "id": "e1549320-4427-48e1-a051-565d4472d33c",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "f3a5ed1a-498b-4ffd-ab1e-b40fb276b83e",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "91643146-c411-4df6-a89c-c8a952bc6df1",
+              "index": 2,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "e5519fb4-7f68-4c5c-8897-8af4772bcccf",
+          "identifier": [
+            "J-Paean"
+          ],
+          "name": "JoyHub Paean"
+        },
+        {
+          "features": [
+            {
+              "id": "68ba6b4c-575c-4862-9391-9bf274b69eac",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "de36d8fa-60a5-4478-b635-941fd32da6a8",
+              "index": 5,
+              "output": {
+                "constrict": {
+                  "value": [
+                    0,
+                    7
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "16ca48e2-62d1-40be-a251-44a1b0118642",
+          "identifier": [
+            "J-Mega"
+          ],
+          "name": "JoyHub Mega"
         }
       ],
       "defaults": {
@@ -11276,11 +11621,13 @@
           "btle": {
             "names": [
               "ProWand",
-              "Luxus"
+              "Luxus",
+              "Julio"
             ],
             "services": {
               "00001400-0000-1000-8000-00805f9b34fb": {
-                "tx": "00001401-0000-1000-8000-00805f9b34fb"
+                "tx": "00001401-0000-1000-8000-00805f9b34fb",
+                "txmode": "00001402-0000-1000-8000-00805f9b34fb"
               },
               "0000180f-0000-1000-8000-00805f9b34fb": {
                 "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
@@ -11296,6 +11643,57 @@
             "Luxus"
           ],
           "name": "Luxus"
+        },
+        {
+          "features": [
+            {
+              "id": "781a1aa3-1b0a-46c4-afa1-4e1ee77930e4",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    255
+                  ]
+                }
+              }
+            },
+            {
+              "id": "2ff3e6ae-4156-476d-b6a6-e63f415c4195",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    5
+                  ]
+                }
+              }
+            },
+            {
+              "description": "battery Level",
+              "id": "0b51dfbc-424f-4bb7-9087-f9ec490693d0",
+              "index": 2,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "db9295b5-8cf5-481f-b00c-a88e1a8d02ff",
+          "identifier": [
+            "Julio"
+          ],
+          "name": "Kiiroo Julio"
         }
       ],
       "defaults": {
@@ -16896,6 +17294,65 @@
         ],
         "id": "4d54f81c-e31f-469a-a17a-ea1d4058a037",
         "name": "Mizz Zee Device"
+      }
+    },
+    "mononii-skullman": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "MF414A"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "rx": "0000ffe2-0000-1000-8000-00805f9b34fb",
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "ae70b64d-ece2-4ac1-ab3d-c13674271d31",
+            "index": 0,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  10
+                ]
+              }
+            }
+          },
+          {
+            "id": "9771bd76-23bc-4108-81be-f0370eeea453",
+            "index": 1,
+            "output": {
+              "oscillate": {
+                "value": [
+                  0,
+                  2
+                ]
+              }
+            }
+          },
+          {
+            "id": "aa2e5f24-2560-4132-bd61-3998bd251c7e",
+            "index": 2,
+            "output": {
+              "temperature": {
+                "value": [
+                  0,
+                  1
+                ]
+              }
+            }
+          }
+        ],
+        "id": "e7f48792-d792-401e-8093-6a9c47617c77",
+        "name": "Momonii Skull Man"
       }
     },
     "monsterpub": {
@@ -23905,6 +24362,49 @@
         "id": "ccbbda59-cf58-477e-b1b2-e0897c4bb0ce",
         "message_gap_ms": 50,
         "name": "The Handy (FW4+)"
+      }
+    },
+    "tingon": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "XiYu"
+            ],
+            "services": {
+              "0000ee01-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ee02-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "fbc4014a-a72a-4bc4-bd94-e3692416260a",
+          "identifier": [
+            "XiYu"
+          ],
+          "name": "Tingon"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "8f39a485-1f3a-4138-a393-f04498df55e3",
+            "index": 0,
+            "output": {
+              "oscillate": {
+                "value": [
+                  0,
+                  10
+                ]
+              }
+            }
+          }
+        ],
+        "id": "3d883278-759f-423f-b81d-00fd6551bc8f",
+        "name": "Tingon Device"
       }
     },
     "tryfun": {

@@ -2764,6 +2764,128 @@ configurations:
             - 1
       index: 6
   id: bf16b20f-87cb-4b10-86a3-d4ca27539fe4
+- identifier:
+    - J-Eudora
+  name: JoyHub Eudora
+  id: ed0545f9-c80e-4fbf-878f-afe6cb0f1c06
+- identifier:
+    - J-Pelor
+  name: JoyHub Pelor
+  features:
+    - id: bfdb533a-f30d-4d4f-ae1d-d52f943c56e8
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 7f838789-9219-4bfd-809a-84e39c5505c5
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+  id: 32bdb5c1-ff98-43cf-8c18-b2d5e7b891ee
+- identifier:
+    - J-VEGAR
+  name: JoyHub Vegar
+  features:
+    - id: 10bffc00-06b8-41b9-ab1a-d53e463179f6
+      description: Insertable Handle Vibrator
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: 4986c4ff-1a79-49a0-a713-60719aafff50
+      description: Wand Head Vibrator
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+  id: 3c6b6bc0-dbd3-4667-93ab-9a84e38cf266
+- identifier:
+    - J-Ping
+  name: JoyHub Ping
+  features:
+    - id: afc2dd16-2fb7-4b38-b148-73e444da4bb3
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: cd664b76-8001-4c2f-bd09-290940f2f8b3
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 1
+    - id: cd664b76-8001-4c2f-bd09-290940f2f8b3
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 2
+    - id: 7804b8aa-1912-4a66-ad2f-d40e6e4989fe
+      output:
+        temperature:
+          value:
+            - 0
+            - 1
+      index: 6
+  id: 8dce2c37-d04d-47f1-aa35-3ff129e65f67
+- identifier:
+    - J-Paean
+  name: JoyHub Paean
+  features:
+    - id: e1549320-4427-48e1-a051-565d4472d33c
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: f3a5ed1a-498b-4ffd-ab1e-b40fb276b83e
+      output:
+        vibrate:
+          value:
+            - 0
+            - 255
+      index: 1
+    - id: 91643146-c411-4df6-a89c-c8a952bc6df1
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 2
+  id: e5519fb4-7f68-4c5c-8897-8af4772bcccf
+- identifier:
+    - J-Mega
+  name: JoyHub Mega
+  features:
+    - id: 68ba6b4c-575c-4862-9391-9bf274b69eac
+      output:
+        oscillate:
+          value:
+            - 0
+            - 255
+      index: 0
+    - id: de36d8fa-60a5-4478-b635-941fd32da6a8
+      output:
+        constrict:
+          value:
+            - 0
+            - 7
+      index: 5
+  id: 16ca48e2-62d1-40be-a251-44a1b0118642
 communication:
 - btle:
     names:
@@ -2927,6 +3049,12 @@ communication:
     - J-Poptint
     - J-Tauros
     - J-Daquan
+    - J-Eudora
+    - J-Pelor
+    - J-VEGAR
+    - J-Ping
+    - J-Paean
+    - J-Mega
     services:
       0000ffa0-0000-1000-8000-00805f9b34fb:
         tx: 0000ffa1-0000-1000-8000-00805f9b34fb

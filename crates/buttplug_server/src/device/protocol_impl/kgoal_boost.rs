@@ -91,7 +91,7 @@ impl ProtocolHandler for KGoalBoost {
         info!("Starting Kgoal subscription");
         // If we subscribe successfully, we need to set up our event handler.
         buttplug_core::spawn!("Kgoal subscription event handler", async move {
-          let mut cached_values = vec![0u32, 0u32];
+          let mut cached_values = vec![0i32, 0i32];
           loop {
             let info = match hardware_stream.recv().await {
               Ok(info) => info,
@@ -115,8 +115,8 @@ impl ProtocolHandler for KGoalBoost {
                 continue;
               }
               // Extract our two pressure values.
-              let normalized = (data[3] as u32) << 8 | data[4] as u32;
-              let unnormalized = (data[5] as u32) << 8 | data[6] as u32;
+              let normalized = (data[3] as i32) << 8 | data[4] as i32;
+              let unnormalized = (data[5] as i32) << 8 | data[6] as i32;
               info!(
                 "Kgoal Reading {} {} {}",
                 subscribed_sensors, normalized, unnormalized
