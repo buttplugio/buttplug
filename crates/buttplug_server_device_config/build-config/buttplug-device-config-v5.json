@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 79
+    "minor": 80
   },
   "protocols": {
     "activejoy": {
@@ -1607,6 +1607,7 @@
               "G331",
               "G326",
               "G335",
+              "K335",
               "G341",
               "G355",
               "G349",
@@ -1839,7 +1840,8 @@
         {
           "id": "d1a0cd58-1aa2-447c-bd7e-da471fdee5d8",
           "identifier": [
-            "G335"
+            "G335",
+            "K335"
           ],
           "name": "Galaku Unicorn Butt Plug"
         },
