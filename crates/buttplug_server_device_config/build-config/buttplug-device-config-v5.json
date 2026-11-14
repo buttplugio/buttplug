@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 84
+    "minor": 85
   },
   "protocols": {
     "activejoy": {
@@ -5087,6 +5087,7 @@
               "HPB-297",
               "HPB-376-1",
               "JXT001",
+              "HPB-134",
               "HPB-DDT003",
               "HPB-391",
               "HPB-472",
@@ -5701,7 +5702,8 @@
           ],
           "id": "58253ea4-01b9-4b00-a6cd-b92264f34eb2",
           "identifier": [
-            "JXT001"
+            "JXT001",
+            "HPB-134"
           ],
           "name": "Honey Play Box Vibrosa Mini"
         },
@@ -26017,6 +26019,24 @@
                   "value": [
                     0,
                     22
+                  ]
+                }
+              }
+            },
+            {
+              "description": "Battery Level",
+              "id": "96b6dfbe-7e96-44e4-ada8-db40b3865465",
+              "index": 1,
+              "input": {
+                "battery": {
+                  "command": [
+                    "Read"
+                  ],
+                  "value": [
+                    [
+                      0,
+                      100
+                    ]
                   ]
                 }
               }
