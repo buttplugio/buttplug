@@ -112,6 +112,8 @@ For more information on each crate, check the README in its directory in this re
 
 ## Compiling
 
+See [BUILDING-WINDOWS.md](BUILDING-WINDOWS.md) for a scripted PowerShell build and its prerequisites.
+
 On Windows and macOS, running `cargo build` should suffice for building the project. All
 dependencies are vendored in.
 
