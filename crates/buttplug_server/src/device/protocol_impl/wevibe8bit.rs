@@ -118,14 +118,14 @@ impl ProtocolHandler for WeVibe8Bit {
       let reading = fut.await?;
       let data = reading.data();
 
-      if data.len() < 5 {
+      if data.len() < 4 {
         return Err(ButtplugDeviceError::DeviceCommunicationError(
           "We-Vibe battery response is too short".to_owned(),
         ));
       }
 
-      let raw = u16::from_be_bytes([data[3], data[4]]);
-      let percent = ((u32::from(raw) * 100 + 32_767) / 65_535) as u8;
+      let raw = data[3];
+      let percent = ((u32::from(raw) * 100 + 127) / 255) as u8;
 
       Ok(InputReadingV4::new(
         device_index,
