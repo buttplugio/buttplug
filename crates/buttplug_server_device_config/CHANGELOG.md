@@ -1,3 +1,13 @@
+# Unreleased
+
+## Bugfixes
+
+- Remove duplicate device and feature ids from protocol configs (device config v5.82 and v5.83). Device ids are resolved globally when loading user configs, so a shared device id could attach a saved user config to the wrong device; a feature id repeated within a device resolved to the wrong feature. Saved user configs for these devices will lose their custom settings once and be rebuilt from the base definitions: DG-Lab Opossum, Duopeak Saphette, Honey Play Box Oly 2, Honey Play Box Puff, JoyHub Mecha, JoyHub Ping, The Handy (FW4+), Umove, Vibio.
+
+## Other
+
+- Fail the device config build when protocol files contain duplicate device or feature ids. SDL gamepad layouts are exempt from the cross-device feature rule, since they share channel feature ids so user settings survive a layout change.
+
 # 12.0.1 (2026-09-27)
 
 ## Bugfixes
