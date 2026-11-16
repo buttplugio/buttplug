@@ -17,13 +17,36 @@ use uuid::{Uuid, uuid};
 
 generic_protocol_setup!(SvakomIker, "svakom-iker");
 
-// Pulsator packets get their own command id so device task batching never collapses them into the
-// vibrator packet sent alongside.
+// Each motor's packets carry a fixed command id, whichever feature triggered them, so device task
+// batching collapses repeats of the same packet but never drops one motor's packet for the other's.
+const VIBRATOR_COMMAND_UUID: Uuid = uuid!("0c7e4a2d-9b31-4f68-a5d2-3e8f1b6c9a07");
 const PULSATOR_COMMAND_UUID: Uuid = uuid!("5b0f3c8e-2d4a-4e1b-9c6f-8a7d1e2b3c4d");
 
 #[derive(Default)]
 pub struct SvakomIker {
   last_speeds: Arc<[AtomicU8; 2]>,
+}
+
+// Vibrator speed 0 in mode 1 keeps it running; mode 0 stops it, and the pulsator with it.
+fn vibrator_packet(speed: u8) -> HardwareCommand {
+  HardwareWriteCmd::new(
+    &[VIBRATOR_COMMAND_UUID],
+    Endpoint::Tx,
+    vec![0x55, 0x03, 0x03, 0x00, (speed > 0) as u8, speed],
+    false,
+  )
+  .into()
+}
+
+// Pulsator speed 0 stops only the pulsator.
+fn pulsator_packet(speed: u8) -> HardwareCommand {
+  HardwareWriteCmd::new(
+    &[PULSATOR_COMMAND_UUID],
+    Endpoint::Tx,
+    vec![0x55, 0x07, 0x00, 0x00, speed, 0x00],
+    false,
+  )
+  .into()
 }
 
 impl ProtocolHandler for SvakomIker {
@@ -34,48 +57,26 @@ impl ProtocolHandler for SvakomIker {
   fn handle_output_vibrate_cmd(
     &self,
     feature_index: u32,
-    feature_id: uuid::Uuid,
+    _feature_id: uuid::Uuid,
     speed: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.last_speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
     let vibe0 = self.last_speeds[0].load(Ordering::Relaxed);
     let vibe1 = self.last_speeds[1].load(Ordering::Relaxed);
-    // Vibrator speed 0 in mode 1 keeps it running; mode 0 stops it, and the pulsator with it.
-    // Pulsator speed 0 stops only the pulsator.
     if vibe0 == 0 && vibe1 == 0 {
-      Ok(vec![
-        HardwareWriteCmd::new(
-          &[feature_id],
-          Endpoint::Tx,
-          [0x55, 0x03, 0x03, 0x00, 0x00, 0x00].to_vec(),
-          false,
-        )
-        .into(),
-      ])
-    } else {
-      let mut msgs = vec![];
-      msgs.push(
-        HardwareWriteCmd::new(
-          &[feature_id],
-          Endpoint::Tx,
-          [0x55, 0x03, 0x03, 0x00, (vibe0 > 0) as u8, vibe0].to_vec(),
-          false,
-        )
-        .into(),
-      );
-      if vibe1 > 0 || feature_index == 1 {
-        msgs.push(
-          HardwareWriteCmd::new(
-            &[PULSATOR_COMMAND_UUID],
-            Endpoint::Tx,
-            [0x55, 0x07, 0x00, 0x00, { vibe1 }, 0x00].to_vec(),
-            false,
-          )
-          .into(),
-        );
-      }
-      Ok(msgs)
+      return Ok(vec![vibrator_packet(0)]);
     }
+    if feature_index == 1 {
+      // Sending the vibrator packet here would stop and restart the pulsator on every pulsator
+      // change while the vibrator is off.
+      return Ok(vec![pulsator_packet(vibe1)]);
+    }
+    let mut packets = vec![vibrator_packet(vibe0)];
+    if vibe1 > 0 {
+      // Restarts the pulsator after a vibrator stop, and reasserts it otherwise.
+      packets.push(pulsator_packet(vibe1));
+    }
+    Ok(packets)
   }
 }
 
