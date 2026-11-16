@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 85
+    "minor": 86
   },
   "protocols": {
     "activejoy": {
@@ -23062,7 +23062,8 @@
               "QH-SX045A-B",
               "SWK-SX067-B",
               "QH-HX029A-B",
-              "HX013H"
+              "HX013H",
+              "Pulse Lite Neo"
             ],
             "services": {
               "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -23078,7 +23079,8 @@
           "id": "5b9918c8-af63-409f-9749-f5e6faf2dca0",
           "identifier": [
             "SWK-SX013A",
-            "HX013H"
+            "HX013H",
+            "Pulse Lite Neo"
           ],
           "name": "Svakom Pulse Lite Neo"
         },
@@ -23447,6 +23449,7 @@
               "118",
               "Viviana",
               "Ella NEO",
+              "Ella Neo",
               "S38A",
               "Vick NEO",
               "Vick Neo",
@@ -23482,7 +23485,8 @@
         {
           "id": "87419e85-5570-41f0-84f2-7f15b138326d",
           "identifier": [
-            "Ella NEO"
+            "Ella NEO",
+            "Ella Neo"
           ],
           "name": "Svakom Ella Neo"
         },

@@ -21,6 +21,7 @@ configurations:
   id: 4bbda06f-ca32-4d34-a11f-d91d8987dc6d
 - identifier:
   - Ella NEO
+  - Ella Neo
   name: Svakom Ella Neo
   id: 87419e85-5570-41f0-84f2-7f15b138326d
 - identifier:
@@ -66,6 +67,7 @@ communication:
     - '118'
     - Viviana
     - Ella NEO
+    - Ella Neo
     - S38A
     - Vick NEO
     - Vick Neo
