@@ -3,6 +3,7 @@
 ## Bugfixes
 
 - Remove duplicate device and feature ids from protocol configs (device config v5.82 and v5.83). Device ids are resolved globally when loading user configs, so a shared device id could attach a saved user config to the wrong device; a feature id repeated within a device resolved to the wrong feature. Saved user configs for these devices will lose their custom settings once and be rebuilt from the base definitions: DG-Lab Opossum, Duopeak Saphette, Honey Play Box Oly 2, Honey Play Box Puff, JoyHub Mecha, JoyHub Ping, The Handy (FW4+), Umove, Vibio.
+- Svakom Jordan thrust (oscillate) now has a 0–255 speed range instead of 0–5, matching the hardware (device config v5.84). Saved user configs with a custom oscillate range were limited on the old 0–5 scale and will only reach near-zero thrust until the range is reset.
 
 ## Other
 
