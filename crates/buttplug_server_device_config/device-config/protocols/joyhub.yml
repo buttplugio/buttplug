@@ -2826,7 +2826,7 @@ configurations:
             - 0
             - 255
       index: 1
-    - id: cd664b76-8001-4c2f-bd09-290940f2f8b3
+    - id: 6649085d-6397-45ef-ac69-71f6cc7468c2
       output:
         vibrate:
           value:
