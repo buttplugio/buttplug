@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 80
+    "minor": 81
   },
   "protocols": {
     "activejoy": {
@@ -24486,7 +24486,12 @@
           "btle": {
             "names": [
               "TF-BHPLUS",
-              "TF-ROCK"
+              "TF-BH2PRO",
+              "DK-BH2PRO",
+              "TF-BHSE",
+              "DK-BHSE",
+              "TF-BHMAX",
+              "DK-BHMAX"
             ],
             "services": {
               "0000ffac-0000-1000-8000-00805f9b34fb": {
@@ -24500,23 +24505,80 @@
         {
           "features": [
             {
-              "id": "e27b1f9c-8a34-4d12-b76e-9f8c2a5d176b",
-              "index": 1,
+              "id": "a7ea7ee3-f4dd-445a-8988-6f42f2787d28",
+              "index": 0,
               "output": {
                 "vibrate": {
                   "value": [
                     0,
-                    50
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "d45f9bc0-de4f-4be4-8e45-7d0883ad74ee",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    100
                   ]
                 }
               }
             }
           ],
-          "id": "d2e5f7a9-1b3c-4680-bf5d-7c9a2e4f6d8b",
+          "id": "560470d3-6a19-41ac-91f9-9a39b864a2ec",
           "identifier": [
-            "TF-ROCK"
+            "TF-BH2PRO",
+            "DK-BH2PRO"
           ],
-          "name": "TryFun Rock"
+          "name": "TryFun Black Hole 2 Pro"
+        },
+        {
+          "features": [
+            {
+              "id": "471e5592-0497-493b-81a2-844a44300d50",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "e684144e-7968-45dc-a5a2-c7bb1e797aaf",
+          "identifier": [
+            "TF-BHSE",
+            "DK-BHSE"
+          ],
+          "name": "TryFun BH SE"
+        },
+        {
+          "features": [
+            {
+              "id": "b0803d6d-1862-4aad-93ce-8e7a1b31dbf1",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "8b18a0c4-640b-4950-8264-fa2c1b3b5aba",
+          "identifier": [
+            "TF-BHMAX",
+            "DK-BHMAX"
+          ],
+          "name": "TryFun BH Max"
         }
       ],
       "defaults": {
@@ -24555,7 +24617,9 @@
         {
           "btle": {
             "names": [
-              "TF-META2"
+              "TF-META2",
+              "TF-META2SE",
+              "DK-META2SE"
             ],
             "services": {
               "0000ffac-0000-1000-8000-00805f9b34fb": {
@@ -24563,6 +24627,42 @@
               }
             }
           }
+        }
+      ],
+      "configurations": [
+        {
+          "features": [
+            {
+              "id": "958795d8-7c18-4318-aeae-0264677c6cdf",
+              "index": 0,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    100
+                  ]
+                }
+              }
+            },
+            {
+              "id": "edee0242-c1ec-4280-a280-a93fe631c72a",
+              "index": 1,
+              "output": {
+                "rotate": {
+                  "value": [
+                    -100,
+                    100
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "0d268453-cb8e-48be-8d2c-7db080c6b54c",
+          "identifier": [
+            "TF-META2SE",
+            "DK-META2SE"
+          ],
+          "name": "TryFun Meta 2 SE"
         }
       ],
       "defaults": {
@@ -24606,6 +24706,53 @@
         ],
         "id": "6b45e5f8-5b23-4c1d-a478-43c17a54cae3",
         "name": "TryFun Meta 2"
+      }
+    },
+    "tryfun-rock": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "TF-ROCK",
+              "DK-ROCK"
+            ],
+            "services": {
+              "0000ffac-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffb7-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "e27b1f9c-8a34-4d12-b76e-9f8c2a5d176b",
+            "index": 0,
+            "output": {
+              "vibrate": {
+                "value": [
+                  0,
+                  50
+                ]
+              }
+            }
+          },
+          {
+            "id": "2fc2446f-d292-493f-8596-573d687ccd23",
+            "index": 1,
+            "output": {
+              "temperature": {
+                "value": [
+                  0,
+                  1
+                ]
+              }
+            }
+          }
+        ],
+        "id": "d2e5f7a9-1b3c-4680-bf5d-7c9a2e4f6d8b",
+        "name": "TryFun Rock"
       }
     },
     "twerkingbutt": {

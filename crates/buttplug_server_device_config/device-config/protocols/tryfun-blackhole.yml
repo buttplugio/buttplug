@@ -68,6 +68,12 @@ communication:
 - btle:
     names:
     - TF-BHPLUS
+    - TF-BH2PRO
+    - DK-BH2PRO
+    - TF-BHSE
+    - DK-BHSE
+    - TF-BHMAX
+    - DK-BHMAX
     services:
       0000ffac-0000-1000-8000-00805f9b34fb:
         tx: 0000ffb7-0000-1000-8000-00805f9b34fb

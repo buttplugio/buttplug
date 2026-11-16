@@ -49,6 +49,8 @@ communication:
 - btle:
     names:
     - TF-META2
+    - TF-META2SE
+    - DK-META2SE
     services:
       0000ffac-0000-1000-8000-00805f9b34fb:
         tx: 0000ffb7-0000-1000-8000-00805f9b34fb
