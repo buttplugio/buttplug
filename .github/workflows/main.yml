@@ -10,18 +10,19 @@ on:
 concurrency:
   group: ${{ github.head_ref ||  github.ref }}
   cancel-in-progress: true
-      
+
 jobs:
   build-stable:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v7
     - name: Fix ~/.cargo directory permissions
       if: startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos')
-      run: sudo chown -R $(whoami):$(id -ng) ~/.cargo/
+      run: if [ -d ~/.cargo ]; then sudo chown -R $(whoami):$(id -ng) ~/.cargo/; fi
     - name: Update package list
       if: startsWith(matrix.os, 'ubuntu')
       run: sudo apt-get -y update
@@ -29,29 +30,22 @@ jobs:
       if: startsWith(matrix.os, 'ubuntu')
       run: sudo apt-get -y install libudev-dev libusb-1.0-0-dev libdbus-1-dev
     - name: Cache cargo registry
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ~/.cargo/registry
         key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('.github/workflows/cache_version') }}
     - name: Cache cargo build
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: target
         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('.github/workflows/cache_version') }}
     - name: Rust toolchain fetch
-      uses: actions-rs/toolchain@v1
+      uses: dtolnay/rust-toolchain@nightly
       with:
-        profile: minimal
-        toolchain: nightly
-        override: true
         components: rustfmt, clippy
     - name: Formatting check
       continue-on-error: true
-      uses: actions-rs/cargo@v1
-      with:
-        toolchain: nightly
-        command: fmt
-        args: --all -- --check
+      run: cargo fmt --all -- --check
     - name: Build Debug
       run: cargo build
     - name: Run tests
@@ -65,38 +59,36 @@ jobs:
   build-wasm:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v7
     - name: Fix ~/.cargo directory permissions
-      run: sudo chown -R $(whoami):$(id -ng) ~/.cargo/
+      run: if [ -d ~/.cargo ]; then sudo chown -R $(whoami):$(id -ng) ~/.cargo/; fi
     - name: Update package list
       run: sudo apt-get -y update
     - name: Install required packages
       run: sudo apt-get -y install libudev-dev libusb-1.0-0-dev libdbus-1-dev
     - name: Cache cargo registry
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ~/.cargo/registry
         key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('.github/workflows/cache_version') }}
     - name: Cache cargo build
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: target
         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('.github/workflows/cache_version') }}
     - name: Rust toolchain fetch
-      uses: actions-rs/toolchain@v1
+      uses: dtolnay/rust-toolchain@nightly
       with:
-        profile: minimal
-        toolchain: nightly
-        override: true
         components: rustfmt, clippy
     - name: WASM Toolchain fetch
       uses: jetli/wasm-pack-action@v0.4.0
       with:
         version: 'latest'
     - name: Set up Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v7
       with:
-        node-version: '20'
+        node-version: '24'
+        package-manager-cache: false
     - name: Build WASM crate
       run: wasm-pack build --dev crates/buttplug_wasm --target web
     - name: Install workspace dependencies
