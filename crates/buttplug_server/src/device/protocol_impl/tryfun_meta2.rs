@@ -87,7 +87,7 @@ impl ProtocolHandler for TryFunMeta2 {
       sum = sum.wrapping_sub(*item);
       count += 1;
     }
-    sum += count;
+    sum = sum.wrapping_add(count);
     data.push(sum);
     Ok(vec![
       HardwareWriteCmd::new(&[feature_id], Endpoint::Tx, data, false).into(),

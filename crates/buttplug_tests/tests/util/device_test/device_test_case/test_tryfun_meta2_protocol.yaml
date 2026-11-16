@@ -48,7 +48,7 @@ device_commands:
       commands:
         - !Write
             endpoint: tx
-            data: [0x02, 0x02, 0x00, 0x05, 0x21, 0x5, 0x0e, 0x9b, 0x31]
+            data: [0x02, 0x02, 0x00, 0x05, 0x21, 0x5, 0x0e, 0x64, 0x68]
             write_with_response: false
   - !Messages
       device_index: 0
@@ -62,7 +62,7 @@ device_commands:
       commands:
         - !Write
             endpoint: tx
-            data: [0x03, 0x02, 0x00, 0x05, 0x21, 0x5, 0x0e, 0x64, 0x68]
+            data: [0x03, 0x02, 0x00, 0x05, 0x21, 0x5, 0x0e, 0x9b, 0x31]
             write_with_response: false
   - !Messages
       device_index: 0
@@ -76,7 +76,7 @@ device_commands:
       commands:
         - !Write
             endpoint: tx
-            data: [0x04, 0x02, 0x00, 0x05, 0x21, 0x5, 0x0e, 0x32, 0x9a]
+            data: [0x04, 0x02, 0x00, 0x05, 0x21, 0x5, 0x0e, 0xcd, 0xff]
             write_with_response: false
   # Mixed Scalar+Rotate (v3+ only due to Scalar)
   - !VersionGated
@@ -120,5 +120,20 @@ device_commands:
             write_with_response: false
         - !Write
             endpoint: tx
-            data: [0x09, 0x02, 0x00, 0x05, 0x21, 0x5, 0x0e, 0xff, 0xcd]
+            data: [0x09, 0x02, 0x00, 0x05, 0x21, 0x5, 0x0e, 0x00, 0xcc]
+            write_with_response: false
+  # Reverse-band speed whose checksum wraps past 0xff when adding the byte count
+  - !Messages
+      device_index: 0
+      messages:
+        - !Rotate
+          - Index: 0
+            Speed: 0.55
+            Clockwise: false
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x0a, 0x02, 0x00, 0x05, 0x21, 0x5, 0x0e, 0xc7, 0x05]
             write_with_response: false
