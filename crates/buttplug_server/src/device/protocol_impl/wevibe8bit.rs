@@ -104,6 +104,8 @@ impl ProtocolHandler for WeVibe8Bit {
     ])
   }
 
+  // Info frame layout (battery at byte 3, 0-255) is only verified on the Wand 2. Check it on
+  // hardware before adding a battery feature to other 8-bit devices.
   fn handle_battery_level_cmd(
     &self,
     device_index: u32,

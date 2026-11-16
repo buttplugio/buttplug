@@ -1,0 +1,21 @@
+devices:
+  - identifier:
+      name: "Wand 2"
+    expected_name: "WeVibe Wand 2"
+device_commands:
+  - !VersionGated
+      min_spec_version: 2
+      commands:
+        # Info frame captured from a Wand 2; byte 3 (0xE7) is the battery level on a 0-255 scale.
+        - !Events
+            device_index: 0
+            events:
+              - !Reads
+                - endpoint: rx
+                  data: [0x04, 0x00, 0x00, 0xe7, 0x25, 0x01, 0x00, 0xd7, 0x01, 0x1c, 0x00, 0x01, 0x00, 0x10, 0x1e, 0x00, 0x00, 0x00, 0x5c, 0x31]
+        - !Messages
+            device_index: 0
+            messages:
+              - !Battery
+                expected_power: 0.91
+                run_async: false
