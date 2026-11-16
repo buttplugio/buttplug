@@ -1,0 +1,62 @@
+devices:
+  - identifier:
+      name: "TF-ROCK"
+    expected_name: "TryFun Rock"
+device_commands:
+  # All commands are Scalar-only (v3+); wrap entire command sequence
+  - !VersionGated
+      min_spec_version: 3
+      commands:
+        - !Messages
+            device_index: 0
+            messages:
+              - !Scalar
+                - Index: 0
+                  Scalar: 1.0
+                  ActuatorType: Vibrate
+        - !Commands
+            device_index: 0
+            commands:
+              - !Write
+                  endpoint: tx
+                  data: [0x00, 0x02, 0x00, 0x03, 0x09, 0x32, 0xc5]
+                  write_with_response: false
+        - !Messages
+            device_index: 0
+            messages:
+              - !Scalar
+                - Index: 1
+                  Scalar: 1.0
+                  ActuatorType: Temperature
+        - !Commands
+            device_index: 0
+            commands:
+              - !Write
+                  endpoint: tx
+                  data: [0x01, 0x02, 0x00, 0x03, 0x05, 0x01, 0xfa]
+                  write_with_response: false
+        - !Messages
+            device_index: 0
+            messages:
+              - !Scalar
+                - Index: 1
+                  Scalar: 0.0
+                  ActuatorType: Temperature
+        - !Commands
+            device_index: 0
+            commands:
+              - !Write
+                  endpoint: tx
+                  data: [0x02, 0x02, 0x00, 0x03, 0x05, 0x00, 0xfb]
+                  write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x03, 0x02, 0x00, 0x03, 0x09, 0x00, 0xf7]
+            write_with_response: false
