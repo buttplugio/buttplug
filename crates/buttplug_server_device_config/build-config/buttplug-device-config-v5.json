@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 87
+    "minor": 88
   },
   "protocols": {
     "activejoy": {
@@ -26157,6 +26157,7 @@
           "btle": {
             "names": [
               "Chorus",
+              "Chorus Pro",
               "skeena",
               "Sync 2",
               "Sync O",
@@ -26172,6 +26173,54 @@
         }
       ],
       "configurations": [
+        {
+          "features": [
+            {
+              "description": "Internal Vibrator",
+              "id": "6e51328e-0384-4e18-b1c9-004512670487",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    30
+                  ]
+                }
+              }
+            },
+            {
+              "description": "External Tip Vibrator",
+              "id": "68285a0d-1d85-4e45-a4f8-1ad969291d0a",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    30
+                  ]
+                }
+              }
+            },
+            {
+              "description": "External Base Vibrator",
+              "id": "81b86559-0495-4931-8dae-a10100678f76",
+              "index": 2,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    30
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "0efb42ee-2c70-4fb6-8636-4b4f452f7b93",
+          "identifier": [
+            "Chorus Pro"
+          ],
+          "name": "WeVibe Chorus Pro"
+        },
         {
           "features": [
             {
