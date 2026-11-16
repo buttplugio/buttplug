@@ -37,14 +37,16 @@ pub(crate) const WRITE_ACK_TIMEOUT: Duration = Duration::from_secs(1);
 /// A unit of work handed to the device io task.
 ///
 /// A message carrying an [`oneshot::Sender`] ack is *urgent*: the io task merges
-/// it into any pending batch, flushes everything to hardware immediately
-/// regardless of the batch deadline, then fires the ack. Messages without an ack
-/// keep the exact prior batching behaviour, so normal output is unchanged.
+/// it into any pending batch, skips the batching window, and fires the ack once
+/// everything pending has reached hardware. Urgent messages never bypass the
+/// device's minimum command interval, since devices that need write pacing may
+/// drop a stop that arrives too soon after another write. Messages without an
+/// ack keep the exact prior batching behaviour, so normal output is unchanged.
 pub struct DeviceTaskMessage {
   /// Hardware commands to write.
   pub commands: Vec<HardwareCommand>,
-  /// When set, the io task flushes immediately and signals once the write has
-  /// reached hardware.
+  /// When set, the io task flushes as soon as the device's rate limit allows and
+  /// signals once the write has reached hardware.
   pub write_ack: Option<oneshot::Sender<()>>,
 }
 
@@ -75,6 +77,8 @@ impl DeviceTaskMessage {
 pub struct DeviceTaskConfig {
   /// Duration to wait before flushing batched commands (None = no batching)
   pub message_gap: Option<Duration>,
+  /// Minimum time between two writes to hardware (None = no rate limiting).
+  pub min_command_interval: Option<Duration>,
   /// Whether the hardware requires keepalive packets
   pub requires_keepalive: bool,
   /// The keepalive strategy from the protocol handler
@@ -120,6 +124,7 @@ async fn run_device_task(
 ) {
   let mut hardware_events = hardware.event_stream();
   let device_wait_duration = config.message_gap;
+  let min_command_interval = config.min_command_interval;
   let requires_keepalive = config.requires_keepalive;
   let strategy = config.keepalive_strategy;
 
@@ -145,6 +150,10 @@ async fn run_device_task(
   // Batching state: pending commands and when to flush them
   let mut pending_commands: VecDeque<HardwareCommand> = VecDeque::new();
   let mut batch_deadline: Option<Instant> = None;
+  // When the last command (or keepalive) was written, for rate limiting
+  let mut last_send: Option<Instant> = None;
+  // Acks waiting for the pending queue to drain through the rate limiter
+  let mut pending_acks: Vec<oneshot::Sender<()>> = Vec::new();
 
   loop {
     // Calculate keepalive timeout
@@ -178,7 +187,25 @@ async fn run_device_task(
           // Best-effort flush so a stop sitting in the batch window still lands
           // when our command channel closes (e.g. during shutdown teardown).
           // We are about to break, so keepalive tracking is unnecessary here.
-          let _ = flush_pending(&hardware, &mut pending_commands, false).await;
+          // A rate limited device still gets its leftovers paced, since dropping
+          // a stop it could not accept back to back is worse than a slow teardown.
+          if let Some(interval) = min_command_interval {
+            while let Some(cmd) = pending_commands.pop_front() {
+              if let Some(last) = last_send {
+                async_manager::sleep(
+                  (last + interval).saturating_duration_since(Instant::now()),
+                )
+                .await;
+              }
+              let _ = hardware.parse_message(&cmd).await;
+              last_send = Some(Instant::now());
+            }
+          } else {
+            let _ = flush_pending(&hardware, &mut pending_commands, false).await;
+          }
+          for ack in pending_acks.drain(..) {
+            let _ = ack.send(());
+          }
           break;
         };
         let commands = message.commands;
@@ -186,36 +213,57 @@ async fn run_device_task(
 
         if let Some(ack) = write_ack {
           // An acknowledged message is urgent (stop path): merge it into any
-          // pending batch with the standard dedupe, flush everything to hardware
-          // now regardless of the batch deadline, then signal the caller. The
-          // dedupe must apply even with an empty pending queue: a multi-feature
+          // pending batch with the standard dedupe and skip the batching window.
+          // The dedupe must apply even with an empty pending queue: a multi-feature
           // stop accumulates one full-state write per feature in a single
           // message, and only the final state may reach hardware.
           for command in commands {
             pending_commands.retain(|existing| !command.overlaps(existing));
             pending_commands.push_back(command);
           }
-          if let Some(write) =
-            flush_pending(&hardware, &mut pending_commands, track_keepalive).await
-          {
-            keepalive_packet = Some(write);
+          if let Some(interval) = min_command_interval {
+            // The rate limit still applies: a device that cannot take writes back
+            // to back may drop a stop, which is dangerous. Schedule the earliest
+            // slot the limiter allows and ack once the queue has fully drained.
+            if pending_commands.is_empty() {
+              let _ = ack.send(());
+            } else {
+              pending_acks.push(ack);
+              let now = Instant::now();
+              batch_deadline = Some(match last_send {
+                Some(last) => (last + interval).max(now),
+                None => now,
+              });
+            }
+          } else {
+            if let Some(write) =
+              flush_pending(&hardware, &mut pending_commands, track_keepalive).await
+            {
+              keepalive_packet = Some(write);
+            }
+            batch_deadline = None;
+            // Acknowledgement is best-effort: a dropped receiver means the caller
+            // no longer cares (e.g. they raced ahead to disconnect).
+            let _ = ack.send(());
           }
-          batch_deadline = None;
-          // Acknowledgement is best-effort: a dropped receiver means the caller
-          // no longer cares (e.g. they raced ahead to disconnect).
-          let _ = ack.send(());
-        } else if let Some(device_wait_duration) = device_wait_duration {
-          // Batching enabled
+        } else if device_wait_duration.is_some() || min_command_interval.is_some() {
+          // Batching and/or rate limiting enabled
           if pending_commands.is_empty() {
             // First batch - add directly without deduplication (matches old behavior)
             pending_commands.extend(commands);
-            batch_deadline = Some(Instant::now() + device_wait_duration);
           } else {
             // Subsequent batches - deduplicate each command against existing
             for command in commands {
               pending_commands.retain(|existing| !command.overlaps(existing));
               pending_commands.push_back(command);
             }
+          }
+          if batch_deadline.is_none() && !pending_commands.is_empty() {
+            let mut deadline = Instant::now() + device_wait_duration.unwrap_or_default();
+            if let (Some(interval), Some(last)) = (min_command_interval, last_send) {
+              deadline = deadline.max(last + interval);
+            }
+            batch_deadline = Some(deadline);
           }
         } else {
           // No batching - send immediately
@@ -237,12 +285,34 @@ async fn run_device_task(
       // Priority 2: Batch deadline reached - flush pending commands
       _ = batch_fut => {
         trace!("Batch deadline reached, sending {} commands", pending_commands.len());
-        if let Some(write) =
-          flush_pending(&hardware, &mut pending_commands, track_keepalive).await
-        {
-          keepalive_packet = Some(write);
+        if let Some(interval) = min_command_interval {
+          // Rate limited: release a single command, then schedule the rest one interval out.
+          if let Some(cmd) = pending_commands.pop_front() {
+            let _ = hardware.parse_message(&cmd).await;
+            if track_keepalive
+              && let HardwareCommand::Write(ref write_cmd) = cmd
+            {
+              keepalive_packet = Some(write_cmd.clone());
+            }
+          }
+          let now = Instant::now();
+          last_send = Some(now);
+          batch_deadline = if pending_commands.is_empty() {
+            for ack in pending_acks.drain(..) {
+              let _ = ack.send(());
+            }
+            None
+          } else {
+            Some(now + interval)
+          };
+        } else {
+          if let Some(write) =
+            flush_pending(&hardware, &mut pending_commands, track_keepalive).await
+          {
+            keepalive_packet = Some(write);
+          }
+          batch_deadline = None;
         }
-        batch_deadline = None;
       }
 
       // Priority 3: Keepalive timer
@@ -274,6 +344,9 @@ async fn run_device_task(
         if let Err(e) = result {
           warn!("Error writing keepalive packet: {:?}", e);
           break;
+        }
+        if min_command_interval.is_some() {
+          last_send = Some(Instant::now());
         }
       }
 
@@ -310,6 +383,7 @@ mod tests {
 
   struct RecordingHardwareInternal {
     writes: Arc<StdMutex<Vec<HardwareWriteCmd>>>,
+    write_times: Arc<StdMutex<Vec<std::time::Instant>>>,
     event_sender: broadcast::Sender<HardwareEvent>,
   }
 
@@ -318,6 +392,7 @@ mod tests {
       let (event_sender, _) = broadcast::channel(256);
       Self {
         writes,
+        write_times: Arc::new(StdMutex::new(Vec::new())),
         event_sender,
       }
     }
@@ -351,6 +426,11 @@ mod tests {
         .lock()
         .expect("Test mutex poisoned")
         .push(msg.clone());
+      self
+        .write_times
+        .lock()
+        .expect("Test mutex poisoned")
+        .push(std::time::Instant::now());
       future::ready(Ok(())).boxed()
     }
 
@@ -405,6 +485,7 @@ mod tests {
     let (sender, mut receiver) = tokio::sync::mpsc::channel(16);
     let config = DeviceTaskConfig {
       message_gap: Some(Duration::from_millis(75)),
+      min_command_interval: None,
       requires_keepalive: false,
       keepalive_strategy: ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy,
     };
@@ -440,6 +521,205 @@ mod tests {
     assert_eq!(
       toggle_count, 2,
       "Both direction toggles must reach hardware"
+    );
+  }
+
+  type RecordedWrites = (
+    Arc<StdMutex<Vec<HardwareWriteCmd>>>,
+    Arc<StdMutex<Vec<std::time::Instant>>>,
+  );
+
+  fn spawn_rate_limited_task(
+    interval: Duration,
+  ) -> (
+    RecordedWrites,
+    tokio::sync::mpsc::Sender<DeviceTaskMessage>,
+    tokio::task::JoinHandle<()>,
+  ) {
+    let writes = Arc::new(StdMutex::new(Vec::new()));
+    let internal = RecordingHardwareInternal::new(writes.clone());
+    let times = internal.write_times.clone();
+    let hardware = Arc::new(Hardware::new(
+      "test",
+      "test-address",
+      &[Endpoint::Tx],
+      &None,
+      false,
+      Box::new(internal),
+    ));
+    let (sender, mut receiver) = tokio::sync::mpsc::channel(16);
+    let config = DeviceTaskConfig {
+      message_gap: None,
+      min_command_interval: Some(interval),
+      requires_keepalive: false,
+      keepalive_strategy: ProtocolKeepaliveStrategy::HardwareRequiredRepeatLastPacketStrategy,
+    };
+    let task = tokio::spawn(async move {
+      run_device_task(hardware, config, &mut receiver).await;
+    });
+    ((writes, times), sender, task)
+  }
+
+  #[tokio::test]
+  async fn rate_limit_sends_first_command_immediately_then_spaces_latest() {
+    let ((writes, times), sender, task) = spawn_rate_limited_task(Duration::from_millis(200));
+
+    sender
+      .send(DeviceTaskMessage::fire_and_forget(vec![
+        rotate_speed_write(1),
+      ]))
+      .await
+      .unwrap();
+    async_manager::sleep(Duration::from_millis(40)).await;
+    assert_eq!(
+      writes.lock().expect("Test mutex poisoned").len(),
+      1,
+      "First command after idle must not be delayed"
+    );
+
+    // These arrive inside the interval; only the newest should survive.
+    for speed in [2, 3, 4] {
+      sender
+        .send(DeviceTaskMessage::fire_and_forget(vec![
+          rotate_speed_write(speed),
+        ]))
+        .await
+        .unwrap();
+    }
+    async_manager::sleep(Duration::from_millis(40)).await;
+    assert_eq!(
+      writes.lock().expect("Test mutex poisoned").len(),
+      1,
+      "Commands inside the interval must be held"
+    );
+
+    async_manager::sleep(Duration::from_millis(300)).await;
+    drop(sender);
+    let _ = task.await;
+
+    let recorded = writes.lock().expect("Test mutex poisoned");
+    let datas: Vec<&[u8]> = recorded.iter().map(|w| w.data().as_slice()).collect();
+    assert_eq!(datas, vec![&b"Rotate:1;"[..], &b"Rotate:4;"[..]]);
+    let times = times.lock().expect("Test mutex poisoned");
+    assert!(
+      times[1].duration_since(times[0]) >= Duration::from_millis(190),
+      "Writes must be at least the interval apart"
+    );
+  }
+
+  #[tokio::test]
+  async fn rate_limit_releases_distinct_channels_one_per_interval() {
+    let ((writes, times), sender, task) = spawn_rate_limited_task(Duration::from_millis(100));
+
+    sender
+      .send(DeviceTaskMessage::fire_and_forget(vec![
+        rotate_direction_toggle_write(),
+        rotate_direction_toggle_write(),
+        rotate_speed_write(5),
+      ]))
+      .await
+      .unwrap();
+    async_manager::sleep(Duration::from_millis(450)).await;
+    drop(sender);
+    let _ = task.await;
+
+    assert_eq!(writes.lock().expect("Test mutex poisoned").len(), 3);
+    let times = times.lock().expect("Test mutex poisoned");
+    for pair in times.windows(2) {
+      assert!(pair[1].duration_since(pair[0]) >= Duration::from_millis(90));
+    }
+  }
+
+  #[tokio::test]
+  async fn rate_limit_applies_to_acknowledged_stop() {
+    let ((writes, times), sender, task) = spawn_rate_limited_task(Duration::from_millis(300));
+
+    sender
+      .send(DeviceTaskMessage::fire_and_forget(vec![
+        rotate_speed_write(1),
+      ]))
+      .await
+      .unwrap();
+    async_manager::sleep(Duration::from_millis(40)).await;
+    sender
+      .send(DeviceTaskMessage::fire_and_forget(vec![
+        rotate_speed_write(2),
+      ]))
+      .await
+      .unwrap();
+
+    let (stop, ack) = DeviceTaskMessage::acknowledged(vec![rotate_speed_write(0)]);
+    sender.send(stop).await.unwrap();
+
+    // The stop replaces the pending write for the same channel but must still
+    // wait for the interval to elapse; it must not be acked early.
+    assert!(
+      tokio::time::timeout(Duration::from_millis(100), ack)
+        .await
+        .is_err(),
+      "Stop must not be acknowledged before the rate limit allows the write"
+    );
+
+    async_manager::sleep(Duration::from_millis(400)).await;
+    drop(sender);
+    let _ = task.await;
+
+    let recorded = writes.lock().expect("Test mutex poisoned");
+    let datas: Vec<&[u8]> = recorded.iter().map(|w| w.data().as_slice()).collect();
+    assert_eq!(datas, vec![&b"Rotate:1;"[..], &b"Rotate:0;"[..]]);
+    let times = times.lock().expect("Test mutex poisoned");
+    assert!(
+      times[1].duration_since(times[0]) >= Duration::from_millis(290),
+      "Stop must respect the minimum interval"
+    );
+  }
+
+  #[tokio::test]
+  async fn rate_limit_acks_stop_only_after_all_writes_sent() {
+    let ((writes, times), sender, task) = spawn_rate_limited_task(Duration::from_millis(100));
+
+    // Two distinct channels in one stop: each must land, spaced apart, and the
+    // ack must only fire once both are written.
+    let (stop, ack) =
+      DeviceTaskMessage::acknowledged(vec![rotate_direction_toggle_write(), rotate_speed_write(0)]);
+    sender.send(stop).await.unwrap();
+    tokio::time::timeout(Duration::from_millis(500), ack)
+      .await
+      .expect("Stop must be acknowledged once the limiter drains")
+      .expect("Ack must be sent");
+
+    assert_eq!(
+      writes.lock().expect("Test mutex poisoned").len(),
+      2,
+      "Ack must not fire before every stop write reached hardware"
+    );
+    drop(sender);
+    let _ = task.await;
+
+    let times = times.lock().expect("Test mutex poisoned");
+    assert!(times[1].duration_since(times[0]) >= Duration::from_millis(90));
+  }
+
+  #[tokio::test]
+  async fn rate_limit_paces_pending_writes_when_channel_closes() {
+    let ((writes, times), sender, task) = spawn_rate_limited_task(Duration::from_millis(100));
+
+    sender
+      .send(DeviceTaskMessage::fire_and_forget(vec![
+        rotate_direction_toggle_write(),
+        rotate_speed_write(0),
+      ]))
+      .await
+      .unwrap();
+    async_manager::sleep(Duration::from_millis(20)).await;
+    drop(sender);
+    let _ = task.await;
+
+    assert_eq!(writes.lock().expect("Test mutex poisoned").len(), 2);
+    let times = times.lock().expect("Test mutex poisoned");
+    assert!(
+      times[1].duration_since(times[0]) >= Duration::from_millis(90),
+      "Teardown flush must stay paced"
     );
   }
 }
