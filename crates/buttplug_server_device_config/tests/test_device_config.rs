@@ -98,4 +98,27 @@ fn test_tcode_device_creation() {
     .device_definition(&UserDeviceIdentifier::new("COM1", "tcode-v03", &None))
     .unwrap();
   assert_eq!(device.name(), "TCode v0.3 (Single Linear Axis)");
+  assert_eq!(device.min_command_interval_ms(), None);
+}
+
+#[test]
+fn test_min_command_interval_from_protocol_defaults() {
+  let dcm = load_protocol_configs(
+    &Some(
+      str::from_utf8(
+        &std::fs::read("tests/test_configs/base_tcode_rate_limited_protocol.json").unwrap(),
+      )
+      .unwrap()
+      .to_owned(),
+    ),
+    &None,
+    false,
+  )
+  .unwrap()
+  .finish()
+  .unwrap();
+  let device = dcm
+    .device_definition(&UserDeviceIdentifier::new("COM1", "tcode-v03", &None))
+    .unwrap();
+  assert_eq!(device.min_command_interval_ms(), Some(60));
 }

@@ -643,6 +643,9 @@ pub(super) async fn build_device_handle(
   let task_handler = handler.clone();
   let task_config = DeviceTaskConfig {
     message_gap: device_wait_duration,
+    min_command_interval: definition
+      .min_command_interval_ms()
+      .map(|interval| Duration::from_millis(interval as u64)),
     requires_keepalive: hardware.requires_keepalive(),
     keepalive_strategy: handler.keepalive_strategy(),
   };
